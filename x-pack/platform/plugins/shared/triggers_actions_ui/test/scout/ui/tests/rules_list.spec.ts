@@ -695,7 +695,7 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
             frequency: {
               summary: false,
               notify_when: 'onActionGroupChange',
-              throttle: null,
+              throttle: undefined,
             },
           },
         ],
