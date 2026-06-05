@@ -63,11 +63,15 @@ export class KubernetesV2Page {
   }
 
   existingCollectorTitle() {
-    return this.page.getByRole('heading', { name: 'Add an OTLP exporter' });
+    return this.page.getByRole('heading', {
+      name: /Add a managed OTLP exporter|Use a gateway collector configuration/,
+    });
   }
 
   existingCollectorDescription() {
-    return this.page.getByText('Add the following exporter to your collector config.');
+    return this.page.getByText(
+      /already gathers the Kubernetes logs, metrics, and traces|Managed OTLP is not available for this deployment/
+    );
   }
 
   otelInstrumentationSwitch() {

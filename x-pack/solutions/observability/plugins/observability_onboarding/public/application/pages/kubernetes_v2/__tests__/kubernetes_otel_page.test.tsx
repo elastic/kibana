@@ -10,10 +10,30 @@ import React from 'react';
 import { KubernetesOtelPage } from '../kubernetes_otel_page';
 import { buildFetchError, renderWithHostPageProviders } from '../../host/__tests__/test_helpers';
 
+interface MockOtelCollectorSetupStepProps {
+  ingestionMode: string;
+  isManagedOtlpServiceAvailable: boolean;
+  onboardingId?: string;
+}
+
+const mockOtelCollectorSetupStep = jest.fn(
+  ({
+    ingestionMode,
+    isManagedOtlpServiceAvailable,
+    onboardingId,
+  }: MockOtelCollectorSetupStepProps) => (
+    <div
+      data-test-subj="otelCollectorSetupStep"
+      data-ingestion-mode={ingestionMode}
+      data-managed-otlp-service-available={String(isManagedOtlpServiceAvailable)}
+      data-onboarding-id={onboardingId}
+    />
+  )
+);
+
 jest.mock('../otel_collector_setup_step', () => ({
-  OtelCollectorSetupStep: ({ ingestionMode }: { ingestionMode: string }) => (
-    <div data-test-subj="otelCollectorSetupStep" data-ingestion-mode={ingestionMode} />
-  ),
+  OtelCollectorSetupStep: (props: MockOtelCollectorSetupStepProps) =>
+    mockOtelCollectorSetupStep(props),
 }));
 
 jest.mock('../otel_instrumentation_step', () => ({
@@ -65,8 +85,9 @@ jest.mock('../../../shared/use_flow_breadcrumbs', () => ({
   useFlowBreadcrumb: jest.fn(),
 }));
 
+const mockUseManagedOtlpServiceAvailability = jest.fn().mockReturnValue(false);
 jest.mock('../../../shared/use_managed_otlp_service_availability', () => ({
-  useManagedOtlpServiceAvailability: () => false,
+  useManagedOtlpServiceAvailability: () => mockUseManagedOtlpServiceAvailability(),
 }));
 
 jest.mock('../../../../hooks/use_wired_streams_status', () => ({
@@ -109,6 +130,8 @@ const renderPage = (initialEntries: string[] = ['/kubernetes']) =>
 
 describe('KubernetesOtelPage', () => {
   beforeEach(() => {
+    mockOtelCollectorSetupStep.mockClear();
+    mockUseManagedOtlpServiceAvailability.mockReturnValue(false);
     mockUsePricingFeature.mockReturnValue(true);
     useKubernetesFlowMock.mockReturnValue({
       data: mockKubernetesFlowData,
@@ -141,6 +164,24 @@ describe('KubernetesOtelPage', () => {
     renderPage(['/kubernetes?ingestion=wired']);
     const collectorSetupStep = screen.getByTestId('otelCollectorSetupStep');
     expect(collectorSetupStep.getAttribute('data-ingestion-mode')).toBe('wired');
+  });
+
+  it('passes managed OTLP availability into the collector setup step', () => {
+    mockUseManagedOtlpServiceAvailability.mockReturnValue(true);
+
+    renderPage();
+
+    const collectorSetupStep = screen.getByTestId('otelCollectorSetupStep');
+    expect(collectorSetupStep.getAttribute('data-managed-otlp-service-available')).toBe('true');
+  });
+
+  it('passes the active onboarding ID into the collector setup step', () => {
+    renderPage();
+
+    const collectorSetupStep = screen.getByTestId('otelCollectorSetupStep');
+    expect(collectorSetupStep.getAttribute('data-onboarding-id')).toBe(
+      mockKubernetesFlowData.onboardingId
+    );
   });
 
   it('wires the pre-existing-data probe with the kubernetes flow id and wired-streams flag', () => {

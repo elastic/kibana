@@ -210,6 +210,8 @@ export const KubernetesOtelPage: React.FC = () => {
               ingestionMode={ingestionMode}
               onIngestionModeChange={setIngestionMode}
               streamsDocLink={docLinks?.links.observability.logsStreams}
+              isManagedOtlpServiceAvailable={isManagedOtlpServiceAvailable}
+              onboardingId={data?.onboardingId}
               wiredStreamsStatus={wiredStreamsStatus}
             />
           ),
@@ -263,6 +265,7 @@ export const KubernetesOtelPage: React.FC = () => {
     ingestionMode,
     setIngestionMode,
     docLinks?.links.observability.logsStreams,
+    isManagedOtlpServiceAvailable,
     wiredStreamsStatus,
     isMetricsOnboardingEnabled,
     dataReceived,
