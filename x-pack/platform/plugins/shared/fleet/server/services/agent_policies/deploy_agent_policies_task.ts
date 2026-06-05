@@ -95,13 +95,14 @@ export async function scheduleDeployAgentPoliciesTask(
   const sorted = sortBy(agentPolicyIdsWithSpace, (p) => p.spaceId ?? '');
   const batches = chunk(sorted, DEPLOY_AGENT_POLICIES_BATCH_SIZE);
   await Promise.all(
-    batches.map((batch) =>
+    batches.map((batch, index) =>
       taskManagerStart.schedule({
         id: `${TASK_TYPE}:${uuidv4()}`,
         scope: ['fleet'],
         params: { agentPolicyIdsWithSpace: batch },
         taskType: TASK_TYPE,
-        runAt: new Date(Date.now() + 3 * 1000),
+        // Stagger batches 10s apart so concurrent deploys don't spike memory
+        runAt: new Date(Date.now() + 3 * 1000 + index * 10 * 1000),
         state: {},
       })
     )
