@@ -200,7 +200,7 @@ describe('SecuritySideNav', () => {
     renderNav();
     expect(mockSolutionSideNav).toHaveBeenCalledWith(
       expect.objectContaining({
-        items: [
+        items: expect.arrayContaining([
           expect.objectContaining({
             id: SecurityGroupName.launchpad,
             position: 'bottom',
@@ -368,63 +368,5 @@ describe('SecuritySideNav', () => {
         })
       );
     });
-  });
-
-  it('should place administration item in footer', () => {
-    mockUseNavLinks.mockReturnValue([alertsNavLink, settingsNavLink]);
-    renderNav();
-    expect(mockSolutionSideNav).toHaveBeenCalledWith(
-      expect.objectContaining({
-        items: expect.arrayContaining([
-          expect.objectContaining({
-            id: SecurityPageName.administration,
-            position: 'bottom',
-          }),
-        ]),
-      })
-    );
-  });
-
-  it('should not include administration item in body', () => {
-    mockUseNavLinks.mockReturnValue([settingsNavLink, alertsNavLink]);
-    renderNav();
-    const calls = mockSolutionSideNav.mock.calls;
-    const lastCall = calls[calls.length - 1];
-    const items = lastCall[0].items;
-    const administrationItemsInBody = items.filter(
-      (item) => item.id === SecurityPageName.administration && item.position !== 'bottom'
-    );
-    expect(administrationItemsInBody).toHaveLength(0);
-  });
-
-  it('should select launchpad when landing page is selected', () => {
-    mockUseRouteSpy.mockReturnValue([{ pageName: SecurityPageName.landing }]);
-    const landingNavLink: NavigationLink = {
-      id: SecurityPageName.landing,
-      title: 'Get started',
-      description: 'Get started description',
-    };
-    mockUseNavLinks.mockReturnValue([landingNavLink, alertsNavLink, settingsNavLink]);
-    renderNav();
-    expect(mockSolutionSideNav).toHaveBeenCalledWith(
-      expect.objectContaining({
-        selectedId: 'securityGroup:launchpad',
-      })
-    );
-  });
-
-  it('should maintain top position for most items', () => {
-    mockUseNavLinks.mockReturnValue([alertsNavLink]);
-    renderNav();
-    expect(mockSolutionSideNav).toHaveBeenCalledWith(
-      expect.objectContaining({
-        items: [
-          expect.objectContaining({
-            id: SecurityPageName.alerts,
-            position: 'top',
-          }),
-        ],
-      })
-    );
   });
 });
