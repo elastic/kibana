@@ -444,16 +444,16 @@ export const ExperimentDetailPage: React.FC = () => {
           <h3>{i18n.SECTION_DATASETS}</h3>
         </EuiText>
         <EuiSpacer size="m" />
-        {datasetStatsGroups.map(({ datasetId, datasetName, exampleCount, stats }) => (
+        {datasetStatsGroups.map((group) => (
           <DatasetStatsAccordion
-            key={datasetId}
+            key={group.datasetId}
             experimentId={experimentId}
             executionId={executionId}
-            group={{ datasetId, datasetName, exampleCount, stats }}
+            group={group}
             statsColumns={statsColumns}
             experimentLoading={experimentLoading}
-            isOpen={openDatasetId === datasetId}
-            selectedExampleId={openDatasetId === datasetId ? selectedExampleId : null}
+            isOpen={openDatasetId === group.datasetId}
+            selectedExampleId={openDatasetId === group.datasetId ? selectedExampleId : null}
             onTraceClick={(traceId, exampleId) => setSelectedTrace(traceId, exampleId)}
             onDatasetClick={(targetDatasetId) => history.push(`/datasets/${targetDatasetId}`)}
             onDatasetToggle={(targetDatasetId, nextIsOpen) =>
