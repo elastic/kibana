@@ -8,9 +8,9 @@
 import { i18n } from '@kbn/i18n';
 import {
   EuiBasicTable,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonIcon,
   RIGHT_ALIGNMENT,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
@@ -133,6 +133,7 @@ function ActionsCell<T extends object>({
       actions={resolvedActions}
       dataTestSubjPrefix="apmManagedTableActionsMenu"
       button={
+        // eslint-disable-next-line @elastic/eui/tooltip-button-icon-wrap -- ActionsContextMenu uses React.cloneElement to inject onClick on the button; wrapping with EuiToolTip would put onClick on the tooltip wrapper and break the popover trigger
         <EuiButtonIcon
           data-test-subj="apmManagedTableActionsCellButton"
           aria-label={i18n.translate('xpack.apm.managedTable.actionsAriaLabel', {
