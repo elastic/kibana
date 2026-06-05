@@ -51,7 +51,7 @@ export const TIMELINE_AVATAR_ARIA = i18n.translate(
 export const TIMELINE_DISPLAY_NAME = i18n.translate(
   'xpack.securitySolution.cases.timelineAttachment.displayName',
   {
-    defaultMessage: 'Timeline',
+    defaultMessage: 'Timelines',
   }
 );
 

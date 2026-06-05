@@ -23,15 +23,17 @@ import { buildFrameworkRequest } from '../../../utils/common';
 import { getAllTimelineByIds } from '../../../saved_object/timelines';
 
 export const MAX_IDS_PER_REQUEST = 100;
+const MAX_ID_LENGTH = 100;
+const MAX_SEARCH_LENGTH = 256;
 
 /**
  * Body schema for `POST /internal/timeline/_by_ids`. Internal-only
  */
 export const GetTimelinesByIdsRequestBody = z.object({
-  ids: z.array(z.string().min(1)).min(1).max(MAX_IDS_PER_REQUEST),
+  ids: z.array(z.string().min(1).max(MAX_ID_LENGTH)).min(1).max(MAX_IDS_PER_REQUEST),
   pageSize: z.number().int().positive().optional(),
   pageIndex: z.number().int().positive().optional(),
-  search: z.string().optional(),
+  search: z.string().max(MAX_SEARCH_LENGTH).optional(),
   sortField: SortFieldTimeline.optional(),
   sortOrder: SortDirection.optional(),
   status: TimelineStatus.optional(),

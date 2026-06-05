@@ -28,16 +28,19 @@ const DEFAULT_SORT_FIELD: SortFieldTimeline = 'updated';
 const DEFAULT_SORT_ORDER: 'asc' | 'desc' = 'desc';
 
 const extractTimelineIds = (caseData: CommonAttachmentTabViewProps['caseData']): string[] => {
-  const ids = new Set<string>();
+  const ids: string[] = [];
   for (const comment of caseData.comments) {
     // `attachmentId` may be a string or array of strings on unified reference attachments,
     // but for timeline attachments we narrow to a single string in the schema.
+    // Duplicates (same timeline attached twice) are tolerated here and deduped server-side.
     if (comment.type === SECURITY_TIMELINE_ATTACHMENT_TYPE && 'attachmentId' in comment) {
       const id = (comment as { attachmentId?: string | string[] }).attachmentId;
-      if (typeof id === 'string' && id.length > 0) ids.add(id);
+      if (typeof id === 'string' && id.length > 0) {
+        ids.push(id);
+      }
     }
   }
-  return Array.from(ids);
+  return ids;
 };
 
 export const CaseViewTimelines: React.FC<CommonAttachmentTabViewProps> = ({

@@ -53,7 +53,7 @@ describe('CaseViewTimelines', () => {
     expect(mockedUseGetTimelinesByIds).toHaveBeenCalledWith(expect.objectContaining({ ids: [] }));
   });
 
-  it('passes deduplicated savedObjectIds from timeline attachments to the hook', () => {
+  it('passes savedObjectIds from timeline attachments to the hook (dedupe happens server-side)', () => {
     render(
       <TestProviders>
         <CaseViewTimelines
@@ -68,7 +68,7 @@ describe('CaseViewTimelines', () => {
     );
 
     const args = mockedUseGetTimelinesByIds.mock.calls[0][0];
-    expect(args.ids).toEqual(['timeline-1', 'timeline-2']);
+    expect(args.ids).toEqual(['timeline-1', 'timeline-1', 'timeline-2']);
   });
 
   it('renders the timelines table when ids are present', () => {
