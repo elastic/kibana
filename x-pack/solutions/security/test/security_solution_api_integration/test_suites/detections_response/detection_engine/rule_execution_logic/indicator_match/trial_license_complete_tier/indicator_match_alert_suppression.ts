@@ -2519,7 +2519,6 @@ export default ({ getService }: FtrProviderContext) => {
               users: [
                 {
                   user: { name: 'alice' },
-                  host: { id: TEST_HOST_ID },
                   entity: {
                     id: `user:alice@${TEST_HOST_ID}@local`,
                     type: 'user',
@@ -2610,7 +2609,6 @@ export default ({ getService }: FtrProviderContext) => {
               users: [
                 {
                   user: { name: 'alice' },
-                  host: { id: TEST_CRITICALITY_HOST_ID },
                   entity: {
                     id: `user:alice@${TEST_CRITICALITY_HOST_ID}@local`,
                     type: 'user',
