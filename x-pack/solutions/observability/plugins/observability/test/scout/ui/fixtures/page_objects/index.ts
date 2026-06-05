@@ -10,11 +10,17 @@ import { createLazyPageObject } from '@kbn/scout-oblt';
 import { RulesPage } from './rules_page';
 import { RuleDetailsPage } from './rule_details_page';
 import { AlertPage } from './alert_page';
+import { AlertsTablePage } from './alerts_table';
+import { AlertControls } from './alert_controls';
+import { OverviewPage } from './overview_page';
 
 export interface TriggersActionsPageObjects extends ObltPageObjects {
   rulesPage: RulesPage;
   ruleDetailsPage: RuleDetailsPage;
   alertPage: AlertPage;
+  alertsTablePage: AlertsTablePage;
+  alertControls: AlertControls;
+  overviewPage: OverviewPage;
 }
 
 export function extendPageObjects(
@@ -26,5 +32,8 @@ export function extendPageObjects(
     rulesPage: createLazyPageObject(RulesPage, page),
     ruleDetailsPage: createLazyPageObject(RuleDetailsPage, page),
     alertPage: createLazyPageObject(AlertPage, page),
+    alertsTablePage: createLazyPageObject(AlertsTablePage, page),
+    alertControls: createLazyPageObject(AlertControls, page),
+    overviewPage: createLazyPageObject(OverviewPage, page),
   };
 }

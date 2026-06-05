@@ -19,6 +19,7 @@ export type {
   SmlIndexAttachmentParams,
   SmlIndexAttachmentOriginParams,
   SmlIndexAttachmentContentParams,
+  SmlDeleteAttachmentParams,
 } from './types';
 
 export type {
@@ -33,6 +34,7 @@ export type {
   SmlDocument,
   SmlIndexAction,
   SmlIngestionMethod,
+  SmlDeleteScope,
   SmlIndexAttachmentOriginMode,
   SmlIndexAttachmentContentMode,
 } from './services/sml/types';
