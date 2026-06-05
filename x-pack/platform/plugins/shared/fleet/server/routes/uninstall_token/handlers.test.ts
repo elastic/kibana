@@ -153,13 +153,10 @@ describe('uninstall token handlers', () => {
           kuery: expect.stringContaining('supports_agentless:true'),
         })
       );
-      expect(getTokenMetadataMock).toHaveBeenCalledWith(
-        undefined,
-        undefined,
-        1,
-        20,
-        ['managed-policy-id', 'agentless-policy-id']
-      );
+      expect(getTokenMetadataMock).toHaveBeenCalledWith(undefined, undefined, 1, 20, [
+        'managed-policy-id',
+        'agentless-policy-id',
+      ]);
     });
 
     it('should return internal error when uninstallTokenService throws error', async () => {
