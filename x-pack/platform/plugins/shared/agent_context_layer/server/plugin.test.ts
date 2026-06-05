@@ -74,6 +74,7 @@ describe('AgentContextLayerPlugin', () => {
         getDocuments: getDocumentsImpl,
         getTypeDefinition: jest.fn(),
         indexAttachment: jest.fn(),
+        deleteAttachment: jest.fn(),
         getCrawler: jest.fn(),
         listTypeDefinitions: jest.fn().mockReturnValue([]),
       });

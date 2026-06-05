@@ -10,7 +10,12 @@ import { schema } from '@kbn/config-schema';
 const ecsMappingItemSchema = schema.object(
   {
     field: schema.maybe(schema.string()),
-    value: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
+    value: schema.maybe(
+      schema.oneOf([
+        schema.string({ maxLength: 1024 }),
+        schema.arrayOf(schema.string({ maxLength: 1024 }), { maxSize: 1000 }),
+      ])
+    ),
   },
   { unknowns: 'allow' }
 );
@@ -30,7 +35,7 @@ const savedQueryDataSchema = schema.object(
       schema.nullable(
         schema.oneOf([
           schema.recordOf(schema.string(), ecsMappingItemSchema),
-          schema.arrayOf(schema.any()),
+          schema.arrayOf(schema.any(), { maxSize: 1000 }),
         ])
       )
     ),
@@ -58,7 +63,7 @@ export const findSavedQueryResponseSchema = schema.object({
   page: schema.number(),
   per_page: schema.number(),
   total: schema.number(),
-  data: schema.arrayOf(savedQueryDataSchema),
+  data: schema.arrayOf(savedQueryDataSchema, { maxSize: 10000 }),
 });
 
 export const updateSavedQueryResponseSchema = schema.object({

@@ -267,17 +267,31 @@ export interface SmlUpsertResult {
 export type { SmlSearchFilters } from '../../../common/http_api/sml';
 
 /**
+ * Scope selector for `deleteAttachment` and the `deleteAttachment` start
+ * contract method.
+ *
+ * - `'crawled'` (default) — remove crawler output only; preserve curated manual
+ *   entries. This matches the historical behavior of
+ *   `indexAttachment({ action: 'delete' })` and the crawler's own semantic.
+ * - `'manual'` — remove curated manual entries; preserve crawled output.
+ * - `'all'` — remove every chunk for the `origin_id` regardless of how it was
+ *   produced. Use when the caller "owns" the origin and is fully retiring it
+ *   (e.g. a workflow that wrote chunks and is now cleaning up).
+ */
+export type SmlDeleteScope = SmlIngestionMethod | 'all';
+
+/**
  * Mode discriminator for `indexAttachment`.
  *
- * The two mixins below define the discriminated half of the parameter object. They are
- * combined with a layer-specific "base" (public vs internal) to form the full unions:
- * `SmlIndexAttachmentParams` (public, in `server/types.ts`) and `SmlIndexerParams`
- * (internal, below).
+ * The two mixins below define the discriminated half of the parameter object.
+ * They are combined with a layer-specific "base" (public vs internal) to form
+ * the full unions: `SmlIndexAttachmentParams` (public, in `server/types.ts`)
+ * and `SmlIndexerParams` (internal, below).
  *
- * Origin mode — content is produced by the registered type's `getSmlData` hook.
- * Resulting chunks are tagged `ingestion_method: 'crawled'`. If the target `origin_id`
- * already has any `ingestion_method: 'manual'` chunks, the call is a no-op unless
- * `force: true` is provided.
+ * Origin mode — content is produced by the registered type's `getSmlData`
+ * hook. Resulting chunks are tagged `ingestion_method: 'crawled'`. If the
+ * target `origin_id` already has any `ingestion_method: 'manual'` chunks, the
+ * call is a no-op unless `force: true` is provided.
  */
 export interface SmlIndexAttachmentOriginMode {
   /** Override existing manual entries. Default: false. */
@@ -286,9 +300,9 @@ export interface SmlIndexAttachmentOriginMode {
 }
 
 /**
- * Content mode — caller supplies pre-built chunks directly; `getSmlData` is not called.
- * Resulting chunks are tagged `ingestion_method: 'manual'`. Always overwrites existing
- * chunks for the `origin_id`.
+ * Content mode — caller supplies pre-built chunks directly; `getSmlData` is
+ * not called. Resulting chunks are tagged `ingestion_method: 'manual'`. Always
+ * overwrites existing chunks for the `origin_id`.
  */
 export interface SmlIndexAttachmentContentMode {
   /** Pre-built chunks; skips getSmlData; marks `ingestion_method='manual'`. */
@@ -323,6 +337,23 @@ export type SmlIndexerContentParams = SmlIndexerBaseParams & SmlIndexAttachmentC
  * `SmlService.indexAttachment` and `SmlIndexer.indexAttachment`.
  */
 export type SmlIndexerParams = SmlIndexerOriginParams | SmlIndexerContentParams;
+
+/**
+ * Internal params for `SmlIndexer.deleteAttachment` and
+ * `SmlService.deleteAttachment`. Shape mirrors `SmlIndexerBaseParams` minus
+ * `action` (the method itself implies delete) and adds the `ingestionMethod`
+ * scope selector that lets callers wipe more than just crawled chunks.
+ */
+export interface SmlIndexerDeleteAttachmentParams {
+  originId: string;
+  attachmentType: string;
+  spaces: string[];
+  esClient: ElasticsearchClient;
+  savedObjectsClient: SavedObjectsClientContract | ISavedObjectsRepository;
+  logger: Logger;
+  /** Defaults to `'crawled'`. Pass `'all'` to fully retire the origin. */
+  ingestionMethod?: SmlDeleteScope;
+}
 
 /**
  * SML service interface — exposed on the plugin start contract.
@@ -362,6 +393,18 @@ export interface SmlService {
 
   /** Index a single attachment (event-driven or manual). See {@link SmlIndexerParams}. */
   indexAttachment: (params: SmlIndexerParams) => Promise<void>;
+
+  /**
+   * Delete chunks for an origin, with explicit control over which ingestion
+   * method(s) are removed. See {@link SmlIndexerDeleteAttachmentParams}.
+   *
+   * Distinct from `indexAttachment({ action: 'delete' })` only in that
+   * callers can choose to wipe `'manual'` or `'all'` chunks. Without this
+   * method, the action: 'delete' path defaults to `'crawled'` to preserve
+   * the historical crawler/event-driven semantics (delete crawled output,
+   * keep curated manuals).
+   */
+  deleteAttachment: (params: SmlIndexerDeleteAttachmentParams) => Promise<void>;
 
   /**
    * Fetch SML documents by their chunk IDs, scoped to a space.
