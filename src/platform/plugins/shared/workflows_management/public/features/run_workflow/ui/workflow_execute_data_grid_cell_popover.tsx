@@ -11,7 +11,7 @@ import type { EuiDataGridCellPopoverElementProps } from '@elastic/eui';
 import { useEuiTheme } from '@elastic/eui';
 import React, { useEffect } from 'react';
 
-export const WorkflowTriggerEventDataGridCellPopover = (
+export const WorkflowExecuteDataGridCellPopover = (
   props: EuiDataGridCellPopoverElementProps
 ): React.JSX.Element => {
   const { euiTheme } = useEuiTheme();
@@ -26,4 +26,4 @@ export const WorkflowTriggerEventDataGridCellPopover = (
   return <DefaultCellPopover {...props} />;
 };
 
-WorkflowTriggerEventDataGridCellPopover.displayName = 'WorkflowTriggerEventDataGridCellPopover';
+WorkflowExecuteDataGridCellPopover.displayName = 'WorkflowExecuteDataGridCellPopover';
