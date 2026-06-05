@@ -47,6 +47,7 @@ import {
   EntitiesTableSection,
   DataViewContext,
   useEntityURLState,
+  DEFAULT_ENTITIES_TABLE_SORT,
   type EntitiesBaseURLQuery,
   type URLQuery,
 } from '../components/home/entities_table';
@@ -74,7 +75,7 @@ const getDefaultQuery = ({ query, filters }: EntitiesBaseURLQuery): URLQuery => 
   query,
   filters,
   pageFilters: [],
-  sort: [['@timestamp', 'desc']],
+  sort: DEFAULT_ENTITIES_TABLE_SORT,
   pageIndex: 0,
 });
 
