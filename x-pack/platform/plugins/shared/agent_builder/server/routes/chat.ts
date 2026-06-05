@@ -389,8 +389,6 @@ export function registerChatRoutes({
         await validateConfigurationOverrides({ payload, request });
         validateAction(payload);
 
-        // A dropped request must not abort the execution: it runs to completion and persists,
-        // and can be aborted explicitly via the executions abort endpoint.
         const chatEvents$ = await executeAgent({
           payload,
           request,
@@ -458,10 +456,6 @@ export function registerChatRoutes({
         await validateConfigurationOverrides({ payload, request });
         validateAction(payload);
 
-        // The request-aborted signal tears down the SSE stream only (so we stop writing to a
-        // dead socket). It is intentionally NOT passed to executeAgent: a dropped request — page
-        // refresh, navigation, proxy drop — must leave the execution running. Stopping happens
-        // explicitly via the executions abort endpoint.
         const abortController = new AbortController();
         request.events.aborted$.subscribe(() => {
           abortController.abort();
