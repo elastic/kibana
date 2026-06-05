@@ -6,6 +6,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiPage,
   EuiPageBody,
@@ -29,6 +30,10 @@ interface RetraceViewProps {
   core: CoreStart;
 }
 
+const loadingContainerStyles = css({
+  minHeight: 200,
+});
+
 export function RetraceView({ core }: RetraceViewProps) {
   const [result, setResult] = useState<RetraceResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -40,7 +45,11 @@ export function RetraceView({ core }: RetraceViewProps) {
 
   useEffect(() => {
     if (!docId) {
-      setError('No doc_id provided in URL parameters.');
+      setError(
+        i18n.translate('xpack.clientApps.android.retrace.missingDocIdErrorMessage', {
+          defaultMessage: 'No doc_id provided in URL parameters.',
+        })
+      );
       setLoading(false);
       return;
     }
@@ -64,7 +73,9 @@ export function RetraceView({ core }: RetraceViewProps) {
         const message =
           err instanceof Error
             ? (err as { body?: { message?: string } }).body?.message ?? err.message
-            : 'Retrace failed';
+            : i18n.translate('xpack.clientApps.android.retrace.genericErrorMessage', {
+                defaultMessage: 'Retrace failed',
+              });
         setError(message);
       } finally {
         setLoading(false);
@@ -88,14 +99,20 @@ export function RetraceView({ core }: RetraceViewProps) {
             <p>
               {i18n.translate('xpack.clientApps.android.retrace.documentLabel', {
                 defaultMessage: 'Document: {docId}',
-                values: { docId: docId ?? 'none' },
+                values: {
+                  docId:
+                    docId ??
+                    i18n.translate('xpack.clientApps.android.retrace.noDocumentIdLabel', {
+                      defaultMessage: 'none',
+                    }),
+                },
               })}
             </p>
           </EuiText>
           <EuiSpacer size="l" />
 
           {loading && (
-            <EuiFlexGroup justifyContent="center" style={{ height: 200 }}>
+            <EuiFlexGroup justifyContent="center" css={loadingContainerStyles}>
               <EuiFlexItem grow={false}>
                 <EuiLoadingSpinner size="xl" />
               </EuiFlexItem>

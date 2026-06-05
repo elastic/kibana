@@ -6,6 +6,7 @@
  */
 
 import type { AppMountParameters, CoreSetup, Plugin } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import { PLUGIN_ID } from '../common';
 
 export type ClientAppsPluginSetup = void;
@@ -15,7 +16,9 @@ export class ClientAppsPlugin implements Plugin<ClientAppsPluginSetup, ClientApp
   public setup(core: CoreSetup) {
     core.application.register({
       id: PLUGIN_ID,
-      title: 'Client Apps',
+      title: i18n.translate('xpack.clientApps.appTitle', {
+        defaultMessage: 'Client Apps',
+      }),
       appRoute: `/app/${PLUGIN_ID}`,
       visibleIn: [],
       async mount(params: AppMountParameters) {
