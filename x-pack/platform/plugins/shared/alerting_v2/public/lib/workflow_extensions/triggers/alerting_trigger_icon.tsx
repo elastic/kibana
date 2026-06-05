@@ -11,7 +11,7 @@ import React from 'react';
  * Shared icon for all alerting-category triggers. Lazily imports the EUI Bell
  * icon so it stays out of the plugin's page-load bundle.
  */
-export const AlertingTriggerIcon = React.lazy(() =>
+export const AlertingTriggerIcon: React.ComponentType = React.lazy(() =>
   import('@elastic/eui/es/components/icon/assets/bell').then(({ icon }) => ({
     default: icon,
   }))
