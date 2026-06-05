@@ -13,7 +13,7 @@ import { STREAMS_KIS_ONBOARDING_IN_PROGRESS_STATUSES } from '@kbn/streams-schema
 import React, { useCallback, useState } from 'react';
 import type { TableRow } from './utils';
 import { useAIFeatures } from '../../../../../hooks/use_ai_features';
-import { useSignificantEventsDiscovery } from '../../../../../hooks/sig_events/use_significant_events_discovery';
+import { useSignificantEventsDiscoveryContext } from '../../context/significant_events_discovery_context';
 import { StreamsAppSearchBar } from '../../../../streams_app_search_bar';
 import { useKiGeneration } from '../knowledge_indicators_table/ki_generation_context';
 import { GenerateSplitButton } from '../shared/generate_split_button';
@@ -55,7 +55,8 @@ export function StreamsView() {
   const isConnectorCatalogUnavailable =
     !allConnectors.length || !!aiFeatures?.genAiConnectors?.loading || !!connectorError;
 
-  const { isRunning, handleRun, handleCancel } = useSignificantEventsDiscovery();
+  const { isRunning, isCanceling, handleRun, handleCancel } =
+    useSignificantEventsDiscoveryContext();
 
   const isStreamActionable = useCallback(
     (streamName: string) => {
@@ -109,8 +110,8 @@ export function StreamsView() {
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiFlexItem>
+        <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
+          <EuiFlexItem style={{ minWidth: 200 }}>
             <EuiSearchBar
               query={searchQuery}
               onChange={handleQueryChange}
@@ -150,6 +151,7 @@ export function StreamsView() {
               onRun={handleRun}
               onCancel={handleCancel}
               isRunning={isRunning}
+              isCanceling={isCanceling}
               isDisabled={isConnectorCatalogUnavailable}
             />
           </EuiFlexItem>

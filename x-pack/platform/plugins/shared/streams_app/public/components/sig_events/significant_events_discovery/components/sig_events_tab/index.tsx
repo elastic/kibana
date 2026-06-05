@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useMemo, useState } from 'react';
 import { useDebouncedValue } from '@kbn/react-hooks';
 import {
   EuiBasicTable,
@@ -25,20 +25,20 @@ import { i18n } from '@kbn/i18n';
 import { SIG_EVENT_STATUS_OPTIONS } from '@kbn/streams-schema';
 import type { SigEvent } from '@kbn/streams-schema';
 import useInterval from 'react-use/lib/useInterval';
+import { useTabTimeRange } from '../../../../../hooks/sig_events/use_tab_time_range';
 import { RUNNING_POLL_INTERVAL_MS } from '../../../constants';
 import { useFetchSigEvents } from '../../../../../hooks/sig_events/use_fetch_sig_events';
-import { useTimefilter } from '../../../../../hooks/use_timefilter';
-import { useTimeRange } from '../../../../../hooks/use_time_range';
-import { useTimeRangeUpdate } from '../../../../../hooks/use_time_range_update';
 import { useKiGeneration } from '../knowledge_indicators_table/ki_generation_context';
-import { useSignificantEventsDiscovery } from '../../../../../hooks/sig_events/use_significant_events_discovery';
+import { useSignificantEventsDiscoveryContext } from '../../context/significant_events_discovery_context';
 import { SigEventFlyout } from './sig_event_flyout';
-import { SignificantEventsDiscoveryEmptyPrompt } from '../shared/significant_events_discovery_empty_prompt';
+import { FindSignificantEventsButton } from '../streams_view/find_significant_events_button';
 import { formatTimestamp } from '../../../../../util/formatters';
 import { FilterPopover } from './filter_popover';
 import { getStatusColor } from './filter_constants';
 
 const MAX_VISIBLE_STREAMS = 3;
+
+const DEFAULT_SIG_EVENTS_RANGE = { from: 'now-7d', to: 'now' };
 
 const clickableRowCss = css`
   cursor: pointer;
@@ -159,9 +159,9 @@ const buildSelectableOptions = <T extends string>({
   }));
 
 export const SigEventsTab = () => {
-  const { timeState } = useTimefilter();
-  const { rangeFrom, rangeTo } = useTimeRange();
-  const { updateTimeRange } = useTimeRangeUpdate();
+  const { pickerRange, absoluteRange, handleTimeChange, refreshAbsoluteRange } =
+    useTabTimeRange(DEFAULT_SIG_EVENTS_RANGE);
+
   const { filteredStreams } = useKiGeneration();
   const [statusFilter, setStatusFilter] = useState<string[]>([]);
   const [streamFilter, setStreamFilter] = useState<string[]>([]);
@@ -173,11 +173,20 @@ export const SigEventsTab = () => {
     [filteredStreams]
   );
 
-  const { isRunning, handleRun } = useSignificantEventsDiscovery();
+  const { isRunning, isCanceling, handleRun, handleCancel } =
+    useSignificantEventsDiscoveryContext();
+
+  const wasRunningRef = useRef(isRunning);
+  useEffect(() => {
+    if (wasRunningRef.current && !isRunning) {
+      refreshAbsoluteRange();
+    }
+    wasRunningRef.current = isRunning;
+  }, [isRunning, refreshAbsoluteRange]);
 
   const { data, isLoading, isError, refetch, pagination, setPagination } = useFetchSigEvents({
-    from: timeState.start,
-    to: timeState.end,
+    from: absoluteRange.from,
+    to: absoluteRange.to,
     status: statusFilter.length > 0 ? statusFilter : undefined,
     stream: streamFilter.length > 0 ? streamFilter : undefined,
     search: debouncedSearch || undefined,
@@ -240,20 +249,21 @@ export const SigEventsTab = () => {
   };
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="m">
+    <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="m" alignItems="center">
-          <EuiFlexItem grow>
+        <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
+          <EuiFlexItem grow style={{ minWidth: 160 }}>
             <EuiFieldSearch
               placeholder={SEARCH_PLACEHOLDER}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               isClearable
               fullWidth
+              compressed
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFilterGroup>
+            <EuiFilterGroup compressed>
               {filters.map((f) => (
                 <FilterPopover
                   key={f.label}
@@ -267,13 +277,33 @@ export const SigEventsTab = () => {
               ))}
             </EuiFilterGroup>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup gutterSize="s" alignItems="center" wrap={false}>
+          <EuiFlexItem>
             <EuiSuperDatePicker
-              start={rangeFrom}
-              end={rangeTo}
-              onTimeChange={({ start: s, end: e }) => updateTimeRange({ from: s, to: e })}
-              onRefresh={() => refetch()}
+              start={pickerRange.from}
+              end={pickerRange.to}
+              onTimeChange={handleTimeChange}
+              onRefresh={() => {
+                refreshAbsoluteRange();
+                refetch();
+              }}
               showUpdateButton="iconOnly"
+              updateButtonProps={{ size: 's', fill: false }}
+              compressed
+              width="full"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <FindSignificantEventsButton
+              onRun={handleRun}
+              onCancel={handleCancel}
+              isRunning={isRunning}
+              isCanceling={isCanceling}
+              isDisabled={isRunning}
+              size="s"
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -289,40 +319,26 @@ export const SigEventsTab = () => {
           />
         </EuiFlexItem>
       )}
-      {!isLoading &&
-      data?.total === 0 &&
-      !statusFilter.length &&
-      !streamFilter.length &&
-      !debouncedSearch ? (
-        <EuiFlexItem>
-          <SignificantEventsDiscoveryEmptyPrompt
-            onRun={handleRun}
-            isRunning={isRunning}
-            runTestSubj="sig_events_run_discovery_empty_button"
-          />
-        </EuiFlexItem>
-      ) : (
-        <EuiFlexItem grow={false}>
-          <EuiBasicTable<SigEvent>
-            tableCaption={TABLE_CAPTION}
-            items={data?.hits ?? []}
-            columns={columns}
-            pagination={{
-              pageIndex: pagination.page - 1,
-              pageSize: pagination.perPage,
-              totalItemCount: data?.total ?? 0,
-              pageSizeOptions: [10, 25, 50],
-            }}
-            onChange={onTableChange}
-            loading={isLoading}
-            rowProps={(item) => ({
-              onClick: () => setSelectedEvent(item),
-              css: clickableRowCss,
-            })}
-            noItemsMessage={isLoading ? LOADING_MESSAGE : EMPTY_MESSAGE}
-          />
-        </EuiFlexItem>
-      )}
+      <EuiFlexItem grow={false}>
+        <EuiBasicTable<SigEvent>
+          tableCaption={TABLE_CAPTION}
+          items={data?.hits ?? []}
+          columns={columns}
+          pagination={{
+            pageIndex: pagination.page - 1,
+            pageSize: pagination.perPage,
+            totalItemCount: data?.total ?? 0,
+            pageSizeOptions: [10, 25, 50],
+          }}
+          onChange={onTableChange}
+          loading={isLoading}
+          rowProps={(item) => ({
+            onClick: () => setSelectedEvent(item),
+            css: clickableRowCss,
+          })}
+          noItemsMessage={isLoading ? LOADING_MESSAGE : EMPTY_MESSAGE}
+        />
+      </EuiFlexItem>
       {selectedEvent && (
         <SigEventFlyout event={selectedEvent} onClose={() => setSelectedEvent(undefined)} />
       )}

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import useInterval from 'react-use/lib/useInterval';
 import {
   EuiBasicTable,
@@ -21,15 +21,11 @@ import type { Detection } from '@kbn/streams-schema';
 import { RUNNING_POLL_INTERVAL_MS } from '../../../constants';
 import { useFetchDetections } from '../../../../../hooks/sig_events/use_fetch_detections';
 import { useTabTimeRange } from '../../../../../hooks/sig_events/use_tab_time_range';
-import { useSignificantEventsDiscovery } from '../../../../../hooks/sig_events/use_significant_events_discovery';
+import { useSignificantEventsDiscoveryContext } from '../../context/significant_events_discovery_context';
 import { DetectionFlyout } from './detection_flyout';
-import { SignificantEventsDiscoveryEmptyPrompt } from '../shared/significant_events_discovery_empty_prompt';
+import { FindSignificantEventsButton } from '../streams_view/find_significant_events_button';
 import { formatTimestamp } from '../../../../../util/formatters';
-import {
-  CHANGE_TYPE_LABELS,
-  DETECTION_KIND_LABELS,
-  DETECTIONS_EMPTY_PROMPT_TITLE,
-} from '../shared/translations';
+import { CHANGE_TYPE_LABELS, DETECTION_KIND_LABELS } from '../shared/translations';
 import { DETECTION_KIND_COLORS } from '../shared/constants';
 
 const DISCOVERY_STATUS_LABELS = {
@@ -118,9 +114,19 @@ export const DetectionsTab = () => {
   const { pickerRange, absoluteRange, handleTimeChange, refreshAbsoluteRange } =
     useTabTimeRange(DEFAULT_DETECTIONS_RANGE);
 
-  const { isRunning, handleRun } = useSignificantEventsDiscovery({
-    onComplete: refreshAbsoluteRange,
-  });
+  const { isRunning, isCanceling, handleRun, handleCancel } =
+    useSignificantEventsDiscoveryContext();
+
+  // Discovery state is shared at the provider level, so re-resolve this tab's
+  // locked time range locally when a run finishes (isRunning true -> false) to
+  // surface documents generated after the range was frozen.
+  const wasRunningRef = useRef(isRunning);
+  useEffect(() => {
+    if (wasRunningRef.current && !isRunning) {
+      refreshAbsoluteRange();
+    }
+    wasRunningRef.current = isRunning;
+  }, [isRunning, refreshAbsoluteRange]);
 
   const { data, isLoading, refetch, pagination, setPagination } = useFetchDetections({
     from: absoluteRange.from,
@@ -146,8 +152,8 @@ export const DetectionsTab = () => {
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup justifyContent="flexEnd">
-          <EuiFlexItem grow={false}>
+        <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
+          <EuiFlexItem>
             <EuiSuperDatePicker
               start={pickerRange.from}
               end={pickerRange.to}
@@ -157,44 +163,44 @@ export const DetectionsTab = () => {
                 refetch();
               }}
               compressed
+              width="full"
               showUpdateButton="iconOnly"
               updateButtonProps={{ size: 's', fill: false }}
             />
           </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <FindSignificantEventsButton
+              onRun={handleRun}
+              onCancel={handleCancel}
+              isRunning={isRunning}
+              isCanceling={isCanceling}
+              isDisabled={isRunning}
+              size="s"
+            />
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
-      {!isLoading && data?.total === 0 ? (
-        <EuiFlexItem>
-          <SignificantEventsDiscoveryEmptyPrompt
-            title={DETECTIONS_EMPTY_PROMPT_TITLE}
-            onRun={handleRun}
-            isRunning={isRunning}
-            runTestSubj="detections_run_discovery_empty_button"
-          />
-        </EuiFlexItem>
-      ) : (
-        <EuiFlexItem grow={false}>
-          <EuiBasicTable
-            tableCaption={i18n.translate('xpack.streams.detectionsTab.tableCaption', {
-              defaultMessage: 'Detections',
-            })}
-            items={data?.hits ?? []}
-            columns={columns}
-            pagination={euiPagination}
-            onChange={onTableChange}
-            loading={isLoading}
-            noItemsMessage={i18n.translate('xpack.streams.detectionsTab.emptyBody', {
-              defaultMessage: 'No detections found.',
-            })}
-            rowProps={(item) => ({
-              onClick: () => setSelectedDetection(item),
-              css: css`
-                cursor: pointer;
-              `,
-            })}
-          />
-        </EuiFlexItem>
-      )}
+      <EuiFlexItem grow={false}>
+        <EuiBasicTable
+          tableCaption={i18n.translate('xpack.streams.detectionsTab.tableCaption', {
+            defaultMessage: 'Detections',
+          })}
+          items={data?.hits ?? []}
+          columns={columns}
+          pagination={euiPagination}
+          onChange={onTableChange}
+          loading={isLoading}
+          noItemsMessage={i18n.translate('xpack.streams.detectionsTab.emptyBody', {
+            defaultMessage: 'No detections found.',
+          })}
+          rowProps={(item) => ({
+            onClick: () => setSelectedDetection(item),
+            css: css`
+              cursor: pointer;
+            `,
+          })}
+        />
+      </EuiFlexItem>
       {selectedDetection && (
         <DetectionFlyout
           detection={selectedDetection}

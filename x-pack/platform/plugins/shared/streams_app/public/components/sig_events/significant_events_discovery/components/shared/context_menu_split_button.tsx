@@ -24,7 +24,7 @@ export interface MenuHelpers {
   closeMenu: () => void;
 }
 
-interface ContextMenuSplitButtonProps {
+export interface ContextMenuSplitButtonProps {
   primaryLabel: React.ReactNode;
   primaryIconType?: string;
   onPrimaryClick: () => void;
@@ -42,6 +42,7 @@ interface ContextMenuSplitButtonProps {
   errorTitle?: string;
 
   color?: ComponentProps<typeof EuiSplitButton>['color'];
+  size?: ComponentProps<typeof EuiSplitButton>['size'];
   isLoading?: boolean;
   hideModelSettings?: boolean;
   'data-test-subj'?: string;
@@ -61,6 +62,7 @@ export const ContextMenuSplitButton = ({
   error,
   errorTitle,
   color,
+  size,
   isLoading,
   hideModelSettings,
   'data-test-subj': dataTestSubj,
@@ -117,7 +119,12 @@ export const ContextMenuSplitButton = ({
   );
 
   return (
-    <EuiSplitButton size="m" color={color} isLoading={isLoading} data-test-subj={dataTestSubj}>
+    <EuiSplitButton
+      size={size ?? 'm'}
+      color={color}
+      isLoading={isLoading}
+      data-test-subj={dataTestSubj}
+    >
       <EuiSplitButton.ActionPrimary
         onClick={onPrimaryClick}
         isDisabled={isPrimaryDisabled}
