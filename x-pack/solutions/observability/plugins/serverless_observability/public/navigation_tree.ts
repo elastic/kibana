@@ -572,43 +572,49 @@ export const createNavigationTree = ({
             },
             overviewAvailable
           ),
-          {
-            id: 'model_management',
-            title: i18n.translate(
-              'xpack.serverlessObservability.nav.projectSettings.modelManagement',
-              {
-                defaultMessage: 'Model Management',
-              }
-            ),
-            children: [
-              { link: 'management:elastic_inference_service' },
-              { link: 'management:inference_endpoints' },
-              { link: 'management:model_settings' },
-            ],
-          },
-          {
-            title: i18n.translate('xpack.serverlessObservability.nav.projectSettings.ai', {
-              defaultMessage: 'AI',
-            }),
-            children: [
-              {
-                link: 'management:genAiSettings' as const,
-                breadcrumbStatus: 'hidden' as const,
-              },
-              {
-                link: 'management:evals' as const,
-                breadcrumbStatus: 'hidden' as const,
-              },
-              ...(showAiAssistant
-                ? [
-                    {
-                      link: 'management:observabilityAiAssistantManagement' as const,
-                      breadcrumbStatus: 'hidden' as const,
-                    },
-                  ]
-                : []),
-            ],
-          },
+          ...filterForFeatureAvailability(
+            {
+              id: 'model_management',
+              title: i18n.translate(
+                'xpack.serverlessObservability.nav.projectSettings.modelManagement',
+                {
+                  defaultMessage: 'Model Management',
+                }
+              ),
+              children: [
+                { link: 'management:elastic_inference_service' },
+                { link: 'management:inference_endpoints' },
+                { link: 'management:model_settings' },
+              ],
+            },
+            genAiSettingsAvailable
+          ),
+          ...filterForFeatureAvailability(
+            {
+              title: i18n.translate('xpack.serverlessObservability.nav.projectSettings.ai', {
+                defaultMessage: 'AI',
+              }),
+              children: [
+                {
+                  link: 'management:genAiSettings' as const,
+                  breadcrumbStatus: 'hidden' as const,
+                },
+                {
+                  link: 'management:evals' as const,
+                  breadcrumbStatus: 'hidden' as const,
+                },
+                ...(showAiAssistant
+                  ? [
+                      {
+                        link: 'management:observabilityAiAssistantManagement' as const,
+                        breadcrumbStatus: 'hidden' as const,
+                      },
+                    ]
+                  : []),
+              ],
+            },
+            genAiSettingsAvailable
+          ),
           {
             id: 'content',
             title: i18n.translate('xpack.serverlessObservability.nav.projectSettings.content', {

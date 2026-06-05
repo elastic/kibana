@@ -526,7 +526,6 @@ export class Plugin implements ISecuritySolutionPlugin {
       cloud: plugins.cloud,
       loggerFactory: this.pluginContext.logger,
       telemetry: core.analytics,
-      httpServiceSetup: core.http,
     });
 
     initUsageCollectors({
@@ -909,7 +908,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins.elasticAssistant.registerFeatures('management', features);
 
     const manifestManager = new ManifestManager({
-      savedObjectsClientFactory: new SavedObjectsClientFactory(core.savedObjects, core.http),
+      savedObjectsClientFactory: new SavedObjectsClientFactory(core.savedObjects),
       savedObjectsClient,
       exceptionListClient,
       artifactClient: new EndpointArtifactClient(
