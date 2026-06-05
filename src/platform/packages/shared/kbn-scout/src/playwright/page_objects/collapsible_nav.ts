@@ -21,11 +21,10 @@ export class CollapsibleNav {
   }
 
   async expandNav() {
-    if (await this.toggleNavButton.isVisible()) {
-      const isExpanded = await this.toggleNavButton.getAttribute('aria-expanded');
-      if (isExpanded === 'false') {
-        await this.toggleNavButton.click();
-      }
+    await this.toggleNavButton.waitFor({ state: 'visible' });
+    const isExpanded = await this.toggleNavButton.getAttribute('aria-expanded');
+    if (isExpanded === 'false') {
+      await this.toggleNavButton.click();
     }
   }
 
@@ -39,6 +38,9 @@ export class CollapsibleNav {
   async getNavLinks(): Promise<string[]> {
     await this.expandNav();
     const links = this.page.testSubj.locator('collapsibleNavAppLink');
+    // allInnerTexts() is non-waiting; wait for at least one link to be attached
+    // after the nav expands to handle async observable-driven rendering.
+    await links.waitFor({ state: 'attached' }).catch(() => {});
     return links.allInnerTexts();
   }
 }
