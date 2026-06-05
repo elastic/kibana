@@ -536,10 +536,14 @@ class AgentPolicyService {
         )
       );
 
-    await appContextService
-      .getUninstallTokenService()
-      ?.scoped(soClient.getCurrentNamespace())
-      ?.generateTokenForPolicyId(newSo.id);
+    if (!agentPolicy.supports_agentless) {
+      await appContextService
+        .getUninstallTokenService()
+        ?.scoped(soClient.getCurrentNamespace())
+        ?.generateTokenForPolicyId(newSo.id);
+    } else {
+      logger.debug('Skipping uninstall token generation for agentless policy');
+    }
     await this.triggerAgentPolicyUpdatedEvent(esClient, 'created', newSo.id, {
       skipDeploy: options.skipDeploy,
       spaceId: soClient.getCurrentNamespace(),
