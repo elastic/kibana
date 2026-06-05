@@ -10,6 +10,7 @@ export interface WorkflowItem {
   enabled?: boolean;
   id: string;
   isDefault?: boolean;
+  managed?: boolean;
   name: string;
   tags?: string[];
 }
