@@ -1410,8 +1410,6 @@ export class WorkflowsExecutionEnginePlugin
       // gets a fresh `createIndexes` invocation.
       const attempt = createIndexes({
         esClient: coreStart.elasticsearch.client.asInternalUser,
-        rolloverMaxAge: this.config.rolloverMaxAge,
-        rolloverMaxDocs: this.config.rolloverMaxDocs,
         logger: this.logger,
       });
       this.initializePromise = attempt;

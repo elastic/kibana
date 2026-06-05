@@ -22,10 +22,7 @@ interface SetupRolloverIndexOptions {
   aliasName: string;
   indexPattern: string;
   initialIndex: string;
-  ilmPolicyName: string;
   mappings: MappingTypeMapping;
-  rolloverMaxAge: string;
-  rolloverMaxDocs?: number;
   logger?: Logger;
 }
 
@@ -106,13 +103,13 @@ export const createOrUpdateIndex = async ({
 };
 
 /**
- * Sets up a rollover-managed index with ILM policy, index template, and
- * bootstraps the initial write index if it doesn't already exist.
+ * Registers an index template (index pattern + mappings) and bootstraps the
+ * initial write index if the alias does not already exist.
  *
  * After setup:
+ * - New indexes matching `indexPattern` receive `mappings` from the template
  * - `aliasName` points to one or more backing indexes (e.g. -000001, -000002, …)
  * - The latest backing index is the write index
- * - ILM automatically rolls over based on `rolloverMaxAge`
  * - Reads via `aliasName` fan out across all backing indexes
  */
 export const setupRolloverIndex = async ({
@@ -120,76 +117,29 @@ export const setupRolloverIndex = async ({
   aliasName,
   indexPattern,
   initialIndex,
-  ilmPolicyName,
   mappings,
-  rolloverMaxAge,
-  rolloverMaxDocs,
   logger,
 }: SetupRolloverIndexOptions): Promise<void> => {
-  await ensureIlmPolicy({ esClient, ilmPolicyName, rolloverMaxAge, rolloverMaxDocs, logger });
   await ensureIndexTemplate({
     esClient,
     aliasName,
     indexPattern,
-    ilmPolicyName,
     mappings,
     logger,
   });
   await bootstrapWriteIndex({ esClient, aliasName, initialIndex, mappings, logger });
 };
 
-const ensureIlmPolicy = async ({
-  esClient,
-  ilmPolicyName,
-  rolloverMaxAge,
-  rolloverMaxDocs,
-  logger,
-}: {
-  esClient: ElasticsearchClient;
-  ilmPolicyName: string;
-  rolloverMaxAge: string;
-  rolloverMaxDocs?: number;
-  logger?: Logger;
-}): Promise<void> => {
-  try {
-    await esClient.ilm.putLifecycle({
-      name: ilmPolicyName,
-      policy: {
-        phases: {
-          hot: {
-            actions: {
-              rollover: {
-                max_age: rolloverMaxAge,
-                ...(rolloverMaxDocs != null ? { max_docs: rolloverMaxDocs } : {}),
-              },
-            },
-          },
-        },
-      },
-    });
-    logger?.debug(
-      `ILM policy ${ilmPolicyName} created/updated (max_age: ${rolloverMaxAge}${
-        rolloverMaxDocs != null ? `, max_docs: ${rolloverMaxDocs}` : ''
-      })`
-    );
-  } catch (error) {
-    logger?.error(`Failed to create ILM policy ${ilmPolicyName}: ${error}`);
-    throw error;
-  }
-};
-
 const ensureIndexTemplate = async ({
   esClient,
   aliasName,
   indexPattern,
-  ilmPolicyName,
   mappings,
   logger,
 }: {
   esClient: ElasticsearchClient;
   aliasName: string;
   indexPattern: string;
-  ilmPolicyName: string;
   mappings: MappingTypeMapping;
   logger?: Logger;
 }): Promise<void> => {
@@ -198,14 +148,6 @@ const ensureIndexTemplate = async ({
       name: aliasName,
       index_patterns: [indexPattern],
       template: {
-        settings: {
-          index: {
-            lifecycle: {
-              name: ilmPolicyName,
-              rollover_alias: aliasName,
-            },
-          },
-        },
         mappings,
       },
     });

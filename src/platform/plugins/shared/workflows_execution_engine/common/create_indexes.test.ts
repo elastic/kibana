@@ -30,7 +30,7 @@ describe('createIndexes', () => {
   });
 
   it('sets up rollover for both workflow indices', async () => {
-    await createIndexes({ esClient, rolloverMaxAge: '1h', logger });
+    await createIndexes({ esClient, logger });
 
     expect(setupRolloverIndex).toHaveBeenCalledTimes(2);
     expect(setupRolloverIndex).toHaveBeenCalledWith(
@@ -42,14 +42,14 @@ describe('createIndexes', () => {
   });
 
   it('passes esClient and logger to both calls', async () => {
-    await createIndexes({ esClient, rolloverMaxAge: '1h', logger });
+    await createIndexes({ esClient, logger });
 
     expect(setupRolloverIndex).toHaveBeenCalledWith(expect.objectContaining({ esClient, logger }));
     expect(setupRolloverIndex).toHaveBeenCalledWith(expect.objectContaining({ esClient, logger }));
   });
 
   it('forwards WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS to the step-executions index unchanged', async () => {
-    await createIndexes({ esClient, rolloverMaxAge: '1h', logger });
+    await createIndexes({ esClient, logger });
 
     const stepCall = setupRolloverIndex.mock.calls.find(
       ([arg]: [{ aliasName: string }]) => arg.aliasName === WORKFLOWS_STEP_EXECUTIONS_INDEX

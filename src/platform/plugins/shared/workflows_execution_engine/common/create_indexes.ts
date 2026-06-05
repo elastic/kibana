@@ -22,27 +22,20 @@ import {
   WORKFLOWS_EXECUTIONS_INITIAL_INDEX,
 } from './workflow_executions_index';
 
-export const WORKFLOWS_ILM_POLICY = '.workflows-ilm-policy';
-
 interface CreateIndexesOptions {
   esClient: ElasticsearchClient;
-  rolloverMaxAge: string;
-  rolloverMaxDocs?: number;
   logger?: Logger;
 }
 
 export async function createIndexes(options: CreateIndexesOptions): Promise<void> {
-  const { esClient, rolloverMaxAge, rolloverMaxDocs, logger } = options;
+  const { esClient, logger } = options;
   await Promise.all([
     setupRolloverIndex({
       esClient,
       aliasName: WORKFLOWS_EXECUTIONS_INDEX,
       indexPattern: WORKFLOWS_EXECUTIONS_INDEX_PATTERN,
       initialIndex: WORKFLOWS_EXECUTIONS_INITIAL_INDEX,
-      ilmPolicyName: WORKFLOWS_ILM_POLICY,
       mappings: WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
-      rolloverMaxAge,
-      rolloverMaxDocs,
       logger,
     }),
     setupRolloverIndex({
@@ -50,10 +43,7 @@ export async function createIndexes(options: CreateIndexesOptions): Promise<void
       aliasName: WORKFLOWS_STEP_EXECUTIONS_INDEX,
       indexPattern: WORKFLOWS_STEP_EXECUTIONS_INDEX_PATTERN,
       initialIndex: WORKFLOWS_STEP_EXECUTIONS_INITIAL_INDEX,
-      ilmPolicyName: WORKFLOWS_ILM_POLICY,
       mappings: WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
-      rolloverMaxAge,
-      rolloverMaxDocs,
       logger,
     }),
   ]);
