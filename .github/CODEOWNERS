@@ -366,6 +366,7 @@ src/platform/kbn-ui/chrome-layout @elastic/appex-sharedux
 src/platform/kbn-ui/chrome-layout-constants @elastic/appex-sharedux
 src/platform/kbn-ui/chrome-layout-utils @elastic/appex-sharedux
 src/platform/kbn-ui/side-navigation @elastic/appex-sharedux
+src/platform/kbn-ui/storybook-config @elastic/appex-sharedux
 src/platform/packages/private/analytics/utils/analytics_collection_utils @elastic/kibana-core
 src/platform/packages/private/dashboard/dashboard-navigation-options-common @elastic/kibana-presentation
 src/platform/packages/private/dashboard/dashboard-navigation-options-components @elastic/kibana-presentation

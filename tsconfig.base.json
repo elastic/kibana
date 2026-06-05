@@ -2636,6 +2636,8 @@
       "@kbn/ui-shared-deps-src/*": ["src/platform/packages/private/kbn-ui-shared-deps-src/*"],
       "@kbn/ui-side-navigation": ["src/platform/kbn-ui/side-navigation"],
       "@kbn/ui-side-navigation/*": ["src/platform/kbn-ui/side-navigation/*"],
+      "@kbn/ui-storybook-config": ["src/platform/kbn-ui/storybook-config"],
+      "@kbn/ui-storybook-config/*": ["src/platform/kbn-ui/storybook-config/*"],
       "@kbn/ui-theme": ["src/platform/packages/shared/kbn-ui-theme"],
       "@kbn/ui-theme/*": ["src/platform/packages/shared/kbn-ui-theme/*"],
       "@kbn/uiam-api-keys-provisioning-status": ["x-pack/platform/packages/shared/kbn-uiam-api-keys-provisioning-status"],

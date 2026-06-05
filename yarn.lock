@@ -9757,6 +9757,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ui-storybook-config@link:src/platform/kbn-ui/storybook-config":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ui-theme@link:src/platform/packages/shared/kbn-ui-theme":
   version "0.0.0"
   uid ""
