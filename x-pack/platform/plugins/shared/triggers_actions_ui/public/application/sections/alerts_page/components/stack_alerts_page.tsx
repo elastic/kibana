@@ -276,10 +276,10 @@ const PageContentComponent: React.FC<PageContentProps> = ({
               initialPageSize={20}
               showInspectButton
               renderActionsCell={AlertActionsCell}
-            services={{
-              data,
-              http,
-              notifications,
+              services={{
+                data,
+                http,
+                notifications,
                 fieldFormats,
                 application,
                 licensing,
