@@ -14,7 +14,7 @@ import type {
 } from '@kbn/core/server';
 import { flatMap, uniqWith, xorWith } from 'lodash';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
-import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 import type { LensEmbeddableStateWithType } from '@kbn/lens-plugin/server/embeddable/types';
 import type {
   ActionsAttachmentPayload,

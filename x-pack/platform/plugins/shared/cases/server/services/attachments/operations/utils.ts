@@ -14,7 +14,10 @@ import type {
   AttachmentMode,
 } from '../../../../common/types/domain/attachment/v2';
 import { UnifiedAttachmentAttributesSchema } from '../../../../common/types/domain/attachment/v2';
-import { isMigratedAttachmentType } from '../../../../common/utils/attachments';
+import {
+  isMigratedAttachmentType,
+  isUnifiedOnlyAttachmentType,
+} from '../../../../common/utils/attachments';
 import {
   getAttachmentTypeFromAttributes,
   getAttachmentTypeTransformers,
@@ -37,8 +40,9 @@ export function transformAttributesForMode({
   const attachmentType = getAttachmentTypeFromAttributes(attributes);
   const owner = attributes?.owner ?? '';
   const transformer = getAttachmentTypeTransformers(attachmentType, owner);
+  const isUnifiedOnly = isUnifiedOnlyAttachmentType(attachmentType);
 
-  if (mode === 'unified' && isMigratedAttachmentType(attachmentType, owner)) {
+  if ((mode === 'unified' || isUnifiedOnly) && isMigratedAttachmentType(attachmentType, owner)) {
     const unifiedAttrs = transformer.toUnifiedSchema(attributes);
     const validatedAttributes = decodeOrThrowZod(UnifiedAttachmentAttributesSchema)(
       unifiedAttrs

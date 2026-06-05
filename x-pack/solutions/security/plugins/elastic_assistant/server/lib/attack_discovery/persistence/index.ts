@@ -73,10 +73,12 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
     if (this.adhocAttackDiscoveryDataClient === undefined) {
       throw new Error('`adhocAttackDiscoveryDataClient` is required');
     }
+    const esClient = await this.options.elasticsearchClientPromise;
     return createAttackDiscoveryAlerts({
       adhocAttackDiscoveryDataClient: this.adhocAttackDiscoveryDataClient,
       authenticatedUser,
       createAttackDiscoveryAlertsParams,
+      esClient,
       logger: this.options.logger,
       spaceId: this.spaceId,
     });
@@ -101,6 +103,7 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
       executionUuid,
       includeUniqueAlertIds,
       ids,
+      includeAllAuthors,
       search,
       shared,
       sortField = '@timestamp',
@@ -138,6 +141,7 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
       authenticatedUser,
       filter,
       shared,
+      includeAllAuthors,
     });
 
     const result = await findDocuments<AttackDiscoveryAlertDocument>({
