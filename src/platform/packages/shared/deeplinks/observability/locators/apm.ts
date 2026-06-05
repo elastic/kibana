@@ -46,3 +46,14 @@ export interface ServiceTransactionsLocatorParams extends SerializableRecord {
   rangeTo?: string;
   latencyAggregationType?: string;
 }
+
+export const SERVICE_ALERTS_LOCATOR_ID = 'serviceAlertsLocator';
+
+export interface ServiceAlertsLocatorParams extends SerializableRecord {
+  serviceName: string;
+  transactionName?: string;
+  transactionType?: string;
+  kuery?: string;
+  rangeFrom?: string;
+  rangeTo?: string;
+}
