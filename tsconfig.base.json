@@ -2180,6 +2180,8 @@
       "@kbn/security-authorization-core-common/*": ["x-pack/platform/packages/private/security/authorization_core_common/*"],
       "@kbn/security-evals-alerts-snapshot": ["x-pack/solutions/security/packages/kbn-security-evals-alerts-snapshot"],
       "@kbn/security-evals-alerts-snapshot/*": ["x-pack/solutions/security/packages/kbn-security-evals-alerts-snapshot/*"],
+      "@kbn/security-evals-rule-data-snapshot": ["x-pack/solutions/security/packages/kbn-security-evals-rule-data-snapshot"],
+      "@kbn/security-evals-rule-data-snapshot/*": ["x-pack/solutions/security/packages/kbn-security-evals-rule-data-snapshot/*"],
       "@kbn/security-form-components": ["x-pack/platform/packages/shared/security/form_components"],
       "@kbn/security-form-components/*": ["x-pack/platform/packages/shared/security/form_components/*"],
       "@kbn/security-hardening": ["src/platform/packages/shared/kbn-security-hardening"],
