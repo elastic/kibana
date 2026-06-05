@@ -75,8 +75,10 @@ config that Kibana automatically merges on top of `config/kibana.yml` when start
 
 ```yaml
 # Elastic APM and OpenTelemetry tracing can't both be enabled. APM defaults to on in dev,
-# so turn it off — otherwise Kibana refuses to boot with telemetry.tracing enabled.
+# so turn it fully off — otherwise Kibana refuses to boot with telemetry.tracing enabled.
+# Both lines are needed: `active: false` alone leaves context propagation on, which also errors.
 elastic.apm.active: false
+elastic.apm.contextPropagationOnly: false
 
 telemetry.metrics:
   enabled: true
@@ -93,9 +95,11 @@ telemetry.tracing:
         url: 'http://localhost:4317'
 ```
 
-> ⚠️ **`elastic.apm.active: false` is required.** With `telemetry.tracing.enabled: true` but
-> APM still active, Kibana errors out at start-up:
-> *"Elastic APM and OpenTelemetry tracing cannot be enabled simultaneously."*
+> ⚠️ **Both `elastic.apm` lines are required.** APM defaults to on in dev and conflicts with
+> `telemetry.tracing` at start-up — you'll hit these errors in sequence if you miss them:
+> - with neither → *"Elastic APM and OpenTelemetry tracing cannot be enabled simultaneously."*
+> - with only `active: false` → *"APM is disabled, but context propagation is enabled. Please
+>   disable context propagation with contextPropagationOnly:false"*
 
 ### 3. Start Elasticsearch
 
