@@ -68,7 +68,7 @@ export const AttachmentTypeFilter = React.memo<AttachmentTypeFilterProps>(
         isObservablesFeatureEnabled &&
         caseData.observables.length > 0 &&
         !excluded.has(OBSERVABLES_FILTER_ID)
-          ? [{ key: OBSERVABLES_FILTER_ID, label: i18n.OBSERVABLE }]
+          ? [{ key: OBSERVABLES_FILTER_ID, label: i18n.OBSERVABLES }]
           : [];
       return [...registryOptions, ...observablesOption].sort((a, b) =>
         a.label.localeCompare(b.label)

@@ -27,8 +27,8 @@ export const TYPE = i18n.translate('xpack.cases.attachmentTypeFilter.type', {
   defaultMessage: 'Type',
 });
 
-export const OBSERVABLE = i18n.translate('xpack.cases.attachmentTypeFilter.observable', {
-  defaultMessage: 'Observable',
+export const OBSERVABLES = i18n.translate('xpack.cases.attachmentTypeFilter.observables', {
+  defaultMessage: 'Observables',
 });
 
 export const AUTHOR = i18n.translate('xpack.cases.authorFilter.buttonLabel', {

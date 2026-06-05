@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const COMMENT = i18n.translate('xpack.cases.attachments.comment.label', {
-  defaultMessage: 'Comment',
+  defaultMessage: 'comment',
 });
 
 export const ADDED_COMMENT = i18n.translate('xpack.cases.attachments.comment.addedComment', {

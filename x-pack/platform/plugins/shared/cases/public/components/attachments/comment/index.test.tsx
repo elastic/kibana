@@ -50,7 +50,7 @@ describe('getCommentAttachmentType', () => {
     expect(commentType).toStrictEqual({
       id: COMMENT_ATTACHMENT_TYPE,
       icon: 'editorComment',
-      displayName: 'Comment',
+      displayName: 'comment',
       getAttachmentViewObject: expect.any(Function),
       getAttachmentRemovalObject: expect.any(Function),
       schema: expect.any(Object),
