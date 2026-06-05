@@ -11,5 +11,5 @@ export { createAutomaticTroubleshootingSkill } from './automatic_troubleshooting
 export { pciComplianceSkill } from './pci_compliance';
 export { getDetectionRuleEditSkill } from './detection_rule_edit';
 export { createFindRulesSkill } from './find_rules';
+export { createEndpointResponseActionsSkill } from './endpoint_response_actions';
 export { registerSkills } from './register_skills';
-export { endpointResponseActionsSkill } from './endpoint_response_actions/endpoint_response_actions_skill';
