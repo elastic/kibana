@@ -29,8 +29,8 @@ import {
   parseRuleFromAttachment,
   getRuleTypeLabel,
   getQueryLabel,
-  getRuleIdFromAttachment,
   getRuleAttachmentIntent,
+  getRuleIdFromAttachment,
 } from './helpers';
 import type { RuleAttachment } from './helpers';
 import { INDEX_FIELD_LABEL, RULE_TYPE_FIELD_LABEL } from './translations';
@@ -111,14 +111,15 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
   aiRuleCreation,
 }) => {
   const isSaving = useObservable(aiRuleCreation.saving$, false);
+  const savedRuleId = useObservable(aiRuleCreation.savedRuleId$, undefined);
 
   const rule = useMemo(() => parseRuleFromAttachment(attachment), [attachment]);
 
+  // Warn on the (frozen) create card once its rule is saved — server id survives refresh,
+  // savedRuleId$ covers the immediate in-session case — since saving again duplicates the rule.
   const intent = getRuleAttachmentIntent(attachment);
-  // aiRuleCreation.savedRuleId is set synchronously before clearSaving(), so this read
-  // on the saving$ re-render always sees the current value without an extra observable.
-  const savedRuleId = aiRuleCreation.savedRuleId ?? getRuleIdFromAttachment(attachment);
-  const willDuplicateOnSave = intent === 'create' && savedRuleId !== undefined;
+  const ruleId = getRuleIdFromAttachment(attachment) ?? savedRuleId ?? undefined;
+  const willDuplicateOnSave = intent === 'create' && ruleId !== undefined;
 
   if (!rule) {
     return null;

@@ -20,13 +20,15 @@ export class AiRuleCreationService {
   private readonly savingSubject = new BehaviorSubject<boolean>(false);
   private readonly aiRuleSubject = new BehaviorSubject<RuleResponse | null>(null);
   private readonly formSyncSubject = new BehaviorSubject<boolean>(false);
+  private readonly savedRuleIdSubject = new BehaviorSubject<string | undefined>(undefined);
   private session: AiRuleCreationSession | null = null;
-  public savedRuleId: string | undefined = undefined;
 
   public readonly saveRuleRequest$ = this.saveRuleSubject.asObservable();
   public readonly saving$ = this.savingSubject.pipe(distinctUntilChanged());
   public readonly aiCreatedRule$ = this.aiRuleSubject.asObservable();
   public readonly formSyncActive$ = this.formSyncSubject.pipe(distinctUntilChanged());
+  /** Id saved this session; drives the create card's duplicate-save warning until refresh. */
+  public readonly savedRuleId$ = this.savedRuleIdSubject.pipe(distinctUntilChanged());
 
   public startSession = (): AiRuleCreationSession => {
     this.session = {
@@ -50,6 +52,14 @@ export class AiRuleCreationService {
   public requestSaveRule = (rule: RuleResponse): void => {
     this.savingSubject.next(true);
     this.saveRuleSubject.next(rule);
+  };
+
+  public setSavedRuleId = (ruleId: string | undefined): void => {
+    this.savedRuleIdSubject.next(ruleId);
+  };
+
+  public getSavedRuleId = (): string | undefined => {
+    return this.savedRuleIdSubject.getValue();
   };
 
   public clearSaving = (): void => {
@@ -80,7 +90,7 @@ export class AiRuleCreationService {
     this.savingSubject.next(false);
     this.aiRuleSubject.next(null);
     this.formSyncSubject.next(false);
-    this.savedRuleId = undefined;
+    this.savedRuleIdSubject.next(undefined);
     this.session = null;
   };
 }

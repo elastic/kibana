@@ -120,26 +120,41 @@ export const createAiRuleCreationHandler = ({
       }
 
       if (!isUpdate) {
-        aiRuleCreation.savedRuleId = saved.id;
+        aiRuleCreation.setSavedRuleId(saved.id);
       }
       aiRuleCreation.clearSaving();
 
       const convId = activeConversationId;
       if (convId) {
+        // Persist the saved rule id (shallow-merge PUT) so later versions render as 'update' and it
+        // survives refreshes. Surface failures: the local addAttachment keeps the current view right,
+        // but a refresh would reload stale state.
         agentBuilder
           ?.updateAttachment(convId, SECURITY_RULE_ATTACHMENT_ID, {
-            data: isUpdate
-              ? { ruleId: saved.id, intent: 'update' }
-              : { ruleId: saved.id, intent: 'create' },
+            data: { ruleId: saved.id },
           })
           .catch(() => {
-            // Non-fatal: the addAttachment call below keeps the UI consistent locally.
+            notifications.toasts.addWarning({
+              title: i18n.translate(
+                'xpack.securitySolution.saveRuleHandler.syncConversationFailedTitle',
+                {
+                  defaultMessage: 'Rule saved, but the assistant view could not be synced',
+                }
+              ),
+              text: i18n.translate(
+                'xpack.securitySolution.saveRuleHandler.syncConversationFailedText',
+                {
+                  defaultMessage:
+                    'The rule was saved successfully. Refreshing the page may show the rule as not yet saved in the assistant.',
+                }
+              ),
+            });
           });
         if (!isUpdate) {
           agentBuilder
             ?.updateAttachmentOrigin(convId, SECURITY_RULE_ATTACHMENT_ID, saved.id)
             .catch(() => {
-              // Non-fatal.
+              // Non-fatal: origin is a secondary link used for navigation, not the button state.
             });
         }
       }
@@ -169,9 +184,6 @@ export const createAiRuleCreationHandler = ({
           text: JSON.stringify(saved),
           attachmentLabel: saved.name,
           ruleId: saved.id,
-          // Preserve 'create' intent on first save so the duplicate-save warning appears.
-          // Only flip to 'update' when this was already an update-intent rule.
-          intent: isUpdate ? 'update' : 'create',
         },
       });
     } catch (err) {

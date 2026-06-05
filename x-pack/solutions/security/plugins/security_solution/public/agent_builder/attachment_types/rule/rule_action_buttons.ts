@@ -47,7 +47,6 @@ export const buildRuleActionButtons = ({
     return [];
   }
 
-  // 'create' always creates a new rule, even if one was already saved from this attachment.
   const isUpdate = intent === 'update';
   const isEsql = rule.type === 'esql';
   const disabledReason = isEsql

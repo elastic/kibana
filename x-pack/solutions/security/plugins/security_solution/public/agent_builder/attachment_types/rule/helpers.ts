@@ -29,13 +29,9 @@ export type RuleAttachment = Attachment<
   {
     text: string;
     attachmentLabel?: string;
-    /** Saved-rule id — persisted by the browser save handler and survives agent shallow merges. */
+    /** Saved-rule id. Its per-version presence drives the button label (see getRuleAttachmentIntent). */
     ruleId?: string;
-    /**
-     * Per-version intent, frozen at write time. 'create' stays 'create' forever (even after the
-     * rule is saved) so the button label never flips; a duplicate-save warning is shown instead.
-     * Absent on legacy attachments — falls back to ruleId/origin presence.
-     */
+    /** Legacy fallback intent for attachments written before `ruleId`. */
     intent?: RuleAttachmentIntent;
   }
 >;
@@ -89,20 +85,20 @@ export const getRuleIdFromAttachment = (attachment: RuleAttachment): string | un
   attachment.data?.ruleId ?? (attachment as { origin?: string }).origin ?? undefined;
 
 /**
- * Effective intent: 'create' for a new rule, 'update' for a saved one.
- * `data.intent` is authoritative (frozen at write time).
- * Legacy fallback: only `data.ruleId` (not `origin`) signals a prior save — `origin` is a
- * server-side linkage that persists across sessions and must not flip the label to "Update rule"
- * when the user is asking to create a fresh rule in an existing conversation.
+ * Effective intent, gated on *save* and frozen per version: a version written before the rule is
+ * saved has no `ruleId` ('create'); one written after carries it forward ('update'). The create
+ * card never gains a `ruleId`, so it stays 'create'. `origin` is excluded (it's attachment-level,
+ * not per-version); `data.intent` is a legacy fallback.
  */
 export const getRuleAttachmentIntent = (attachment: RuleAttachment): RuleAttachmentIntent => {
+  if (attachment.data?.ruleId) {
+    return 'update';
+  }
   const dataIntent = attachment.data?.intent;
   if (dataIntent === 'create' || dataIntent === 'update') {
     return dataIntent;
   }
-  // Use only data.ruleId (not origin) so that an old conversation's origin from a previous save
-  // does not incorrectly show "Update rule" when the user intends to create a new rule.
-  return attachment.data?.ruleId ? 'update' : 'create';
+  return 'create';
 };
 
 export const parseRuleFromAttachment = (attachment: RuleAttachment): RuleResponse | null => {
