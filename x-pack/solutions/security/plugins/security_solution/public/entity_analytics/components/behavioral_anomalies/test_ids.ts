@@ -19,6 +19,12 @@ export const BEHAVIORAL_ANOMALIES_V2_OVERVIEW_TIMEFRAME_TEST_ID =
 export const BEHAVIORAL_ANOMALIES_OVERVIEW_TEST_ID = `${PREFIX}BehavioralAnomaliesOverview` as const;
 export const BEHAVIORAL_ANOMALIES_COUNT_TEST_ID = `${PREFIX}BehavioralAnomaliesCount` as const;
 export const BEHAVIORAL_ANOMALIES_HEATMAP_TEST_ID = `${PREFIX}BehavioralAnomaliesHeatmap` as const;
+// Prototype-only count + chain for the MITRE ATT&CK tactics row in the v.2
+// overview. Remove with the v.2 overview / `mitre/` folder.
+export const BEHAVIORAL_ANOMALIES_V2_TACTICS_COUNT_TEST_ID =
+  `${PREFIX}BehavioralAnomaliesV2TacticsCount` as const;
+export const BEHAVIORAL_ANOMALIES_V2_TACTICS_CHAIN_TEST_ID =
+  `${PREFIX}BehavioralAnomaliesV2TacticsChain` as const;
 export const BEHAVIORAL_ANOMALIES_TAB_CONTENT_TEST_ID =
   `${PREFIX}BehavioralAnomaliesTabContent` as const;
 export const BEHAVIORAL_ANOMALIES_TIMELINE_SECTION_TEST_ID =

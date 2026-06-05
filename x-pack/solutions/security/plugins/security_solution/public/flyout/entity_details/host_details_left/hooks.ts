@@ -105,16 +105,16 @@ export const useTabs = ({
           ]
         : [];
 
-    const behavioralAnomaliesTab = [getBehavioralAnomaliesTab()];
-    // Prototype: BA-v.2 is a second design version of the behavioral anomalies
-    // tab shown alongside the original. Remove this line (and the import) to
-    // drop v2.
+    // Prototype: v.2 (renamed "Behavioral anomalies-v.2") leads, the
+    // original v.1 (renamed "BA-v.1") follows. Drop either entry + its
+    // import to remove that version.
     const behavioralAnomaliesV2Tab = [getBehavioralAnomaliesV2Tab()];
+    const behavioralAnomaliesTab = [getBehavioralAnomaliesTab()];
 
     return [
       ...riskScoreTab,
-      ...behavioralAnomaliesTab,
       ...behavioralAnomaliesV2Tab,
+      ...behavioralAnomaliesTab,
       ...insightsTab,
       ...graphViewTab,
       ...resolutionTab,

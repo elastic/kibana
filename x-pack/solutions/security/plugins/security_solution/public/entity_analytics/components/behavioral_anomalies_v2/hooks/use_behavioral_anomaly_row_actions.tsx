@@ -8,24 +8,17 @@
 import { useCallback, useMemo } from 'react';
 import type { IconType } from '@elastic/eui';
 import { encode } from '@kbn/rison';
-import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
-import { APP_ID } from '../../../../../common';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useInvestigateInTimeline } from '../../../../common/hooks/timeline/use_investigate_in_timeline';
-import { generateEventAttachmentWithoutOwner } from '../../../../cases/attachments/event/utils';
 import { BEHAVIORAL_ANOMALIES_V2_TIME_RANGE } from '../constants';
 import type { BehavioralAnomalyV2TableRow } from '../types';
 import {
-  ANOMALIES_TABLE_V2_ROW_ACTION_ADD_TO_CASE,
-  ANOMALIES_TABLE_V2_ROW_ACTION_ADD_TO_CHAT,
   ANOMALIES_TABLE_V2_ROW_ACTION_ADD_TO_TIMELINE,
   ANOMALIES_TABLE_V2_ROW_ACTION_VIEW_IN_DISCOVER,
   ANOMALIES_TABLE_V2_ROW_ACTION_VIEW_IN_SMV,
 } from '../translations';
 import {
-  BEHAVIORAL_ANOMALIES_V2_TABLE_ROW_ACTION_ADD_TO_CASE_TEST_ID,
-  BEHAVIORAL_ANOMALIES_V2_TABLE_ROW_ACTION_ADD_TO_CHAT_TEST_ID,
   BEHAVIORAL_ANOMALIES_V2_TABLE_ROW_ACTION_ADD_TO_TIMELINE_TEST_ID,
   BEHAVIORAL_ANOMALIES_V2_TABLE_ROW_ACTION_VIEW_IN_DISCOVER_TEST_ID,
   BEHAVIORAL_ANOMALIES_V2_TABLE_ROW_ACTION_VIEW_IN_SMV_TEST_ID,
@@ -40,15 +33,8 @@ export interface BehavioralAnomalyV2RowAction {
   dataTestSubj: string;
 }
 
-export interface BehavioralAnomalyV2AddToChat {
-  label: string;
-  onClick: () => void;
-  dataTestSubj: string;
-}
-
 export interface BehavioralAnomalyV2RowActionsResult {
   actions: BehavioralAnomalyV2RowAction[];
-  addToChat: BehavioralAnomalyV2AddToChat;
 }
 
 interface UseBehavioralAnomalyV2RowActionsArgs {
@@ -65,50 +51,24 @@ const buildEventIdsKql = (row: BehavioralAnomalyV2TableRow): string => {
 /**
  * BA-v.2 per-row action handlers for the Behavioral anomalies table.
  *
- * Returns the standard panel `actions` (case / timeline / discover / SMV) and a
- * separate `addToChat` descriptor so the popover can render the AI assistant
- * affordance with its own visual treatment.
+ * Returns the panel `actions` (timeline / discover / Single metric viewer).
+ *
+ * "Add to case" and "Add to chat" were intentionally removed from this menu
+ * for BA-v.2 per design direction — case attachments are surfaced elsewhere
+ * in the prototype and the chat affordance is owned by the global AI button.
  *
  * Prototype only: handlers wire to existing Security Solution flows
- * (cases modal, timeline, Discover, ML Single metric viewer). Attachments succeed
- * only when the underlying mock event documents exist in the user's cluster.
+ * (timeline, Discover, ML Single metric viewer).
  */
 export const useBehavioralAnomalyV2RowActions = ({
   row,
   closePopover,
 }: UseBehavioralAnomalyV2RowActionsArgs): BehavioralAnomalyV2RowActionsResult => {
   const { services } = useKibana();
-  const { cases: casesUi, application, ml } = services;
+  const { application, ml } = services;
   const {
     timelinePrivileges: { read: canReadTimeline },
   } = useUserPrivileges();
-
-  const casesPermissions = casesUi.helpers.canUseCases([APP_ID]);
-  const canAddToCase = casesPermissions.createComment && casesPermissions.read;
-
-  const caseAttachments = useMemo<CaseAttachmentsWithoutOwner>(
-    () =>
-      row.underlyingEvents
-        .map((event) =>
-          generateEventAttachmentWithoutOwner({
-            attachmentId: event._id,
-            index: event._index,
-          })
-        )
-        .filter((attachment): attachment is NonNullable<typeof attachment> => attachment != null),
-    [row.underlyingEvents]
-  );
-
-  const selectCaseModal = casesUi.hooks.useCasesAddToExistingCaseModal({
-    onClose: closePopover,
-  });
-
-  const handleAddToCase = useCallback(() => {
-    closePopover();
-    selectCaseModal.open({
-      getAttachments: () => caseAttachments,
-    });
-  }, [caseAttachments, closePopover, selectCaseModal]);
 
   const { investigateInTimeline } = useInvestigateInTimeline();
 
@@ -154,22 +114,8 @@ export const useBehavioralAnomalyV2RowActions = ({
     }
   }, [closePopover, singleMetricViewerUrl]);
 
-  const handleAddToChat = useCallback(() => {
-    closePopover();
-  }, [closePopover]);
-
   const actions = useMemo(() => {
     const items: BehavioralAnomalyV2RowAction[] = [];
-
-    if (canAddToCase) {
-      items.push({
-        key: 'add-to-case',
-        label: ANOMALIES_TABLE_V2_ROW_ACTION_ADD_TO_CASE,
-        icon: 'briefcase',
-        onClick: handleAddToCase,
-        dataTestSubj: BEHAVIORAL_ANOMALIES_V2_TABLE_ROW_ACTION_ADD_TO_CASE_TEST_ID,
-      });
-    }
 
     if (canReadTimeline) {
       items.push({
@@ -201,9 +147,7 @@ export const useBehavioralAnomalyV2RowActions = ({
 
     return items;
   }, [
-    canAddToCase,
     canReadTimeline,
-    handleAddToCase,
     handleAddToTimeline,
     handleViewInDiscover,
     handleViewInSingleMetricViewer,
@@ -211,14 +155,5 @@ export const useBehavioralAnomalyV2RowActions = ({
     singleMetricViewerUrl,
   ]);
 
-  const addToChat = useMemo<BehavioralAnomalyV2AddToChat>(
-    () => ({
-      label: ANOMALIES_TABLE_V2_ROW_ACTION_ADD_TO_CHAT,
-      onClick: handleAddToChat,
-      dataTestSubj: BEHAVIORAL_ANOMALIES_V2_TABLE_ROW_ACTION_ADD_TO_CHAT_TEST_ID,
-    }),
-    [handleAddToChat]
-  );
-
-  return useMemo(() => ({ actions, addToChat }), [actions, addToChat]);
+  return useMemo(() => ({ actions }), [actions]);
 };

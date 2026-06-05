@@ -61,11 +61,11 @@ export const useTabs = (
       );
     }
 
-    tabs.push(getBehavioralAnomaliesTab());
-    // Prototype: BA-v.2 is a second design version of the behavioral anomalies
-    // tab shown alongside the original. Remove this line (and the import) to
-    // drop v2.
+    // Prototype: v.2 (renamed "Behavioral anomalies-v.2") leads, the
+    // original v.1 (renamed "BA-v.1") follows. Drop either line + its
+    // import to remove that version.
     tabs.push(getBehavioralAnomaliesV2Tab());
+    tabs.push(getBehavioralAnomaliesTab());
 
     if (oktaManagedUser) {
       tabs.push(getOktaTab(oktaManagedUser));

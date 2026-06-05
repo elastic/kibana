@@ -6,26 +6,15 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiTitle,
-  EuiTablePagination,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useAnomalyBands } from '../../recent_anomalies/anomaly_bands';
 import { BehavioralAnomaliesV2Swimlane } from '../behavioral_anomalies_swimlane';
 import { SeverityLegendControlV2 } from './severity_legend_control';
 import type { SeverityOptionV2 } from '../hooks/use_severity_options';
 import { useSeverityOptionsV2 } from '../hooks/use_severity_options';
-import {
-  DEFAULT_PAGE_SIZE_V2,
-  getJobDisplayNameV2,
-  getTimelineHeatmapRecordsV2,
-  getTimelineRowKeysV2,
-  PAGE_SIZE_OPTIONS_V2,
-} from '../mock_tab_data';
+import { getTimelineHeatmapRecordsV2, getTimelineRowKeysV2 } from '../mock_tab_data';
+import { MITRE_TACTIC_NAMES } from '../../behavioral_anomalies/mitre/tactics';
 import type { ViewByFieldV2 } from '../types';
 import { ANOMALY_TIMELINE_V2_TITLE } from '../translations';
 import {
@@ -34,8 +23,32 @@ import {
 } from '../test_ids';
 import { TimelineRowLabelsV2 } from './timeline_row_labels';
 
-/** Swim lane rows are always grouped by ML job in v.2 (no "View by" control). */
-const FIXED_VIEW_BY: ViewByFieldV2 = 'job_id';
+/**
+ * Swim lane rows are always grouped by MITRE ATT&CK tactic in v.2 — fixed at
+ * 15 tactic rows (no "View by" control, no pagination because the row count
+ * is bounded).
+ */
+const FIXED_VIEW_BY: ViewByFieldV2 = 'mitre_tactic';
+
+/**
+ * Precomputed kill-chain index for each tactic. Used by the heatmap's custom
+ * `ySortPredicate` to preserve canonical order top-to-bottom regardless of
+ * the order records arrive in.
+ */
+const TACTIC_INDEX_BY_NAME: ReadonlyMap<string, number> = new Map(
+  MITRE_TACTIC_NAMES.map((name, index) => [name, index])
+);
+
+/**
+ * Heatmap renders the first sorted value at the top of the Y-axis, so an
+ * ascending sort by kill-chain index places "Reconnaissance" at the top and
+ * "Impact" at the bottom — the order called for by the design.
+ */
+const tacticOrderComparator = (a: string | number, b: string | number): number => {
+  const ai = TACTIC_INDEX_BY_NAME.get(String(a)) ?? Number.MAX_SAFE_INTEGER;
+  const bi = TACTIC_INDEX_BY_NAME.get(String(b)) ?? Number.MAX_SAFE_INTEGER;
+  return ai - bi;
+};
 
 interface AnomalyTimelineSectionV2Props {
   /**
@@ -44,10 +57,16 @@ interface AnomalyTimelineSectionV2Props {
    * section.
    */
   timeRangeMs: { from: number; to: number };
+  /**
+   * Tab-level tactic filter. When set, the swim lane collapses to a single
+   * row for that tactic; when null/undefined, all 15 tactic rows render.
+   */
+  selectedTactic?: string | null;
 }
 
 export const AnomalyTimelineSectionV2: React.FC<AnomalyTimelineSectionV2Props> = ({
   timeRangeMs,
+  selectedTactic,
 }) => {
   const { bands } = useAnomalyBands();
   const severityOptions = useSeverityOptionsV2();
@@ -56,23 +75,25 @@ export const AnomalyTimelineSectionV2: React.FC<AnomalyTimelineSectionV2Props> =
   const handleSeverityChange = useCallback((next: SeverityOptionV2[]) => {
     setSelectedSeverities(next);
   }, []);
-  const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE_V2);
 
-  const allRowKeys = useMemo(() => getTimelineRowKeysV2(FIXED_VIEW_BY), []);
-  const pagedRowKeys = useMemo(() => {
-    const startIdx = pageIndex * pageSize;
-    return allRowKeys.slice(startIdx, startIdx + pageSize);
-  }, [allRowKeys, pageIndex, pageSize]);
-
+  // 15 MITRE tactics rendered as Y-axis rows by default. When the tab-level
+  // tactic filter is set, collapse to the single matching row so the swim
+  // lane reads as a focused per-tactic timeline.
+  const rowKeys = useMemo(() => {
+    const allKeys = getTimelineRowKeysV2(FIXED_VIEW_BY);
+    if (selectedTactic && allKeys.includes(selectedTactic)) {
+      return [selectedTactic];
+    }
+    return allKeys;
+  }, [selectedTactic]);
   const rowLabels = useMemo(
-    () => pagedRowKeys.map((rowKey) => ({ id: rowKey, label: getJobDisplayNameV2(rowKey) })),
-    [pagedRowKeys]
+    () => rowKeys.map((rowKey) => ({ id: rowKey, label: rowKey })),
+    [rowKeys]
   );
 
   const heatmapRecords = useMemo(
-    () => getTimelineHeatmapRecordsV2(pagedRowKeys, FIXED_VIEW_BY, timeRangeMs),
-    [pagedRowKeys, timeRangeMs]
+    () => getTimelineHeatmapRecordsV2(rowKeys, FIXED_VIEW_BY, timeRangeMs),
+    [rowKeys, timeRangeMs]
   );
 
   return (
@@ -96,24 +117,13 @@ export const AnomalyTimelineSectionV2: React.FC<AnomalyTimelineSectionV2Props> =
         <BehavioralAnomaliesV2Swimlane
           records={heatmapRecords}
           anomalyBands={bands}
-          entityNames={pagedRowKeys}
+          entityNames={rowKeys}
           entityAccessor={FIXED_VIEW_BY}
           heatmapId="entity-flyout-behavioral-anomalies-v2-detail-heatmap"
           timeRangeMs={timeRangeMs}
+          ySortPredicate={tacticOrderComparator}
         />
       </EuiFlexGroup>
-      <EuiSpacer size="s" />
-      <EuiTablePagination
-        pageCount={Math.max(1, Math.ceil(allRowKeys.length / pageSize))}
-        activePage={pageIndex}
-        itemsPerPage={pageSize}
-        itemsPerPageOptions={PAGE_SIZE_OPTIONS_V2}
-        onChangePage={(page) => setPageIndex(page)}
-        onChangeItemsPerPage={(size) => {
-          setPageSize(size);
-          setPageIndex(0);
-        }}
-      />
     </div>
   );
 };

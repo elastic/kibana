@@ -15,7 +15,17 @@ import { i18n } from '@kbn/i18n';
 
 export const BEHAVIORAL_ANOMALIES_V2_TAB_LABEL = i18n.translate(
   'xpack.securitySolution.entityAnalytics.behavioralAnomaliesV2.tabLabel',
-  { defaultMessage: 'BA-v.2' }
+  { defaultMessage: 'Behavioral anomalies-v.2' }
+);
+
+export const ATTACK_CHAIN_V2_TITLE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.behavioralAnomaliesV2.attackChainTitle',
+  { defaultMessage: 'Attack chain' }
+);
+
+export const TACTIC_FILTER_V2_CLEAR_LABEL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.behavioralAnomaliesV2.tab.clearTacticFilterAria',
+  { defaultMessage: 'Clear tactic filter' }
 );
 
 export const ANOMALY_TIMELINE_V2_TITLE = i18n.translate(
@@ -53,9 +63,29 @@ export const ANOMALIES_TABLE_V2_ANOMALY_COLUMN = i18n.translate(
   { defaultMessage: 'Anomaly' }
 );
 
-export const ANOMALIES_TABLE_V2_SPIKE_COLUMN = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.behavioralAnomaliesV2.table.spikeColumn',
-  { defaultMessage: 'Spike' }
+export const ANOMALIES_TABLE_V2_TACTIC_COLUMN = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.behavioralAnomaliesV2.table.tacticColumn',
+  { defaultMessage: 'Tactic' }
+);
+
+export const ANOMALIES_TABLE_V2_TACTIC_POPOVER_TITLE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.behavioralAnomaliesV2.table.tacticPopoverTitle',
+  { defaultMessage: 'Tactics' }
+);
+
+export const ANOMALIES_TABLE_V2_EXPAND_ROW_ARIA = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.behavioralAnomaliesV2.table.expandRowAria',
+  { defaultMessage: 'Expand anomaly description' }
+);
+
+export const ANOMALIES_TABLE_V2_COLLAPSE_ROW_ARIA = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.behavioralAnomaliesV2.table.collapseRowAria',
+  { defaultMessage: 'Collapse anomaly description' }
+);
+
+export const ANOMALIES_TABLE_V2_DESCRIPTION_HEADING = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.behavioralAnomaliesV2.table.descriptionHeading',
+  { defaultMessage: 'Explainer' }
 );
 
 export const ANOMALIES_TABLE_V2_SCORE_COLUMN = i18n.translate(
@@ -73,11 +103,6 @@ export const ANOMALIES_TABLE_V2_ROW_ACTIONS_ARIA_LABEL = i18n.translate(
   { defaultMessage: 'Row actions' }
 );
 
-export const ANOMALIES_TABLE_V2_ROW_ACTION_ADD_TO_CASE = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.behavioralAnomaliesV2.table.rowActions.addToCase',
-  { defaultMessage: 'Add to case' }
-);
-
 export const ANOMALIES_TABLE_V2_ROW_ACTION_ADD_TO_TIMELINE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.behavioralAnomaliesV2.table.rowActions.addToTimeline',
   { defaultMessage: 'Add to timeline' }
@@ -91,9 +116,4 @@ export const ANOMALIES_TABLE_V2_ROW_ACTION_VIEW_IN_DISCOVER = i18n.translate(
 export const ANOMALIES_TABLE_V2_ROW_ACTION_VIEW_IN_SMV = i18n.translate(
   'xpack.securitySolution.entityAnalytics.behavioralAnomaliesV2.table.rowActions.viewInSingleMetricViewer',
   { defaultMessage: 'View in Single metric viewer' }
-);
-
-export const ANOMALIES_TABLE_V2_ROW_ACTION_ADD_TO_CHAT = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.behavioralAnomaliesV2.table.rowActions.addToChat',
-  { defaultMessage: 'Add to chat' }
 );

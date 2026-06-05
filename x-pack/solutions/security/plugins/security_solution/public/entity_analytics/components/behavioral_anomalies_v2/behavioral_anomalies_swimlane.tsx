@@ -8,6 +8,7 @@
 import {
   Chart,
   Heatmap,
+  type HeatmapSpec,
   type HeatmapStyle,
   type RecursivePartial,
   ScaleType,
@@ -97,6 +98,12 @@ interface BehavioralAnomaliesV2SwimlaneProps {
    * selection changes.
    */
   timeRangeMs: { from: number; to: number };
+  /**
+   * Optional Y-axis sort predicate. Defaults to `numDesc` to preserve previous
+   * behavior; pass a custom comparator when rows have a meaningful order that
+   * isn't alphabetic or numeric (e.g. MITRE tactics in kill-chain order).
+   */
+  ySortPredicate?: HeatmapSpec['ySortPredicate'];
 }
 
 /**
@@ -111,6 +118,7 @@ export const BehavioralAnomaliesV2Swimlane: React.FC<BehavioralAnomaliesV2Swimla
   entityAccessor,
   heatmapId,
   timeRangeMs,
+  ySortPredicate = 'numDesc',
 }) => {
   const xDomain = useMemo(
     () => ({ min: timeRangeMs.from, max: timeRangeMs.to }),
@@ -163,7 +171,7 @@ export const BehavioralAnomaliesV2Swimlane: React.FC<BehavioralAnomaliesV2Swimla
           xAxisLabelFormatter={formatDateTick}
           yAccessor={entityAccessor}
           yAxisLabelName={entityAccessor}
-          ySortPredicate="numDesc"
+          ySortPredicate={ySortPredicate}
           valueAccessor="record_score"
         />
       </Chart>

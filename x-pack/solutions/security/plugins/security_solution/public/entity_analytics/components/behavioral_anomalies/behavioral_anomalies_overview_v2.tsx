@@ -8,21 +8,28 @@
 /*
  * Prototype "v.2" of the Behavioral anomalies right-panel overview.
  *
- * Renders a year-at-a-glance swim lane (last 1 year, weekly buckets, date
- * x-axis) and is toggled at runtime via the temporary version selector inside
+ * Layout (top → bottom):
+ *  - "All anomalies" link in the ExpandablePanel header.
+ *  - Tactics row: "<N> Tactics" stat on the left, MITRE ATT&CK dots-only
+ *    chain on the right (no labels).
+ *  - Anomalies row: "<N> Anomalies" stat on the left, year-at-a-glance swim
+ *    lane on the right (last 1 year, weekly buckets, date x-axis).
+ *
+ * Toggled at runtime via the temporary version selector in
  * `behavioral_anomalies_section.tsx`. The matching "Last 1 year" indicator on
  * the section title is also rendered conditionally from that file.
  *
  * Cleanup before hand-off (pick ONE of the two paths):
- *  - Keep v.1: delete this file, `behavioral_anomalies_swimlane_v2.tsx`, and
- *    `mock_data_v2.ts`. Then drop the v.2 import / state / button group /
- *    extraAction / conditional in `behavioral_anomalies_section.tsx`.
- *  - Keep v.2: delete `behavioral_anomalies_overview.tsx` (v.1). Then drop the
- *    v.1 import / state / button group / conditional in
+ *  - Keep v.1: delete this file, `behavioral_anomalies_swimlane_v2.tsx`,
+ *    `mock_data_v2.ts`, and the entire `mitre/` folder. Then drop the v.2
+ *    import / state / button group / extraAction / conditional in
+ *    `behavioral_anomalies_section.tsx`.
+ *  - Keep v.2: delete `behavioral_anomalies_overview.tsx` (v.1). Then drop
+ *    the v.1 import / state / button group / conditional in
  *    `behavioral_anomalies_section.tsx`, and unconditionally render the
  *    "Last 1 year" extraAction.
- * v.2-specific helpers (swimlane_v2, mock_data_v2) are only referenced from
- * this file, so removing them with this file is enough.
+ * v.2-specific helpers (swimlane_v2, mock_data_v2, mitre/) are only
+ * referenced from this file + the BA-v.2 left tab.
  */
 
 import React, { useCallback, useMemo } from 'react';
@@ -43,15 +50,20 @@ import { useAnomalyBands } from '../recent_anomalies/anomaly_bands';
 import { BEHAVIORAL_ANOMALIES_PROTOTYPE_ENTITY_ID } from './constants';
 import { BehavioralAnomaliesSwimlaneV2 } from './behavioral_anomalies_swimlane_v2';
 import { getMockBehavioralAnomaliesV2Summary } from './mock_data_v2';
+import { MOCK_ANOMALY_COUNT_BY_TACTIC_V2 } from './mitre/mock_anomaly_tactics';
+import { MitreAttackChain } from './mitre/components/mitre_attack_chain';
 import {
   BEHAVIORAL_ANOMALIES_ALL_LINK_TITLE,
   BEHAVIORAL_ANOMALIES_ALL_LINK_TOOLTIP,
   BEHAVIORAL_ANOMALIES_COUNT_LABEL,
+  BEHAVIORAL_ANOMALIES_V2_TACTICS_COUNT_LABEL,
 } from './translations';
 import {
   BEHAVIORAL_ANOMALIES_COUNT_TEST_ID,
   BEHAVIORAL_ANOMALIES_HEATMAP_TEST_ID,
   BEHAVIORAL_ANOMALIES_OVERVIEW_TEST_ID,
+  BEHAVIORAL_ANOMALIES_V2_TACTICS_CHAIN_TEST_ID,
+  BEHAVIORAL_ANOMALIES_V2_TACTICS_COUNT_TEST_ID,
 } from './test_ids';
 
 interface BehavioralAnomaliesOverviewV2Props {
@@ -60,31 +72,34 @@ interface BehavioralAnomaliesOverviewV2Props {
   openDetailsPanel: (path: EntityDetailsPath) => void;
 }
 
-const AnomaliesCount = ({ total }: { total: number }) => {
+/**
+ * Compact stat block: large number stacked above a small label, used as the
+ * left "cell" of both the Tactics row and the Anomalies row.
+ */
+const StatBlock: React.FC<{
+  total: number;
+  label: string;
+  countTestSubj: string;
+}> = ({ total, label, countTestSubj }) => {
   const { euiTheme } = useEuiTheme();
-
   return (
-    <EuiFlexItem grow={false}>
-      <EuiFlexGroup direction="column" gutterSize="none">
-        <EuiFlexItem>
-          <EuiTitle size="s">
-            <h3 data-test-subj={BEHAVIORAL_ANOMALIES_COUNT_TEST_ID}>
-              {getAbbreviatedNumber(total)}
-            </h3>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiText
-            size="xs"
-            css={css`
-              font-weight: ${euiTheme.font.weight.semiBold};
-            `}
-          >
-            {BEHAVIORAL_ANOMALIES_COUNT_LABEL}
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFlexItem>
+    <EuiFlexGroup direction="column" gutterSize="none">
+      <EuiFlexItem>
+        <EuiTitle size="s">
+          <h3 data-test-subj={countTestSubj}>{getAbbreviatedNumber(total)}</h3>
+        </EuiTitle>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiText
+          size="xs"
+          css={css`
+            font-weight: ${euiTheme.font.weight.semiBold};
+          `}
+        >
+          {label}
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 
@@ -114,6 +129,17 @@ export const BehavioralAnomaliesOverviewV2: React.FC<BehavioralAnomaliesOverview
     [goToBehavioralAnomaliesTab]
   );
 
+  // Both rows use the same template: stat block on the left (`grow={false}`,
+  // fixed minimum width so the two stat blocks line up vertically) and the
+  // visualization on the right (stretches to fill remaining width).
+  const statCellCss = css`
+    min-width: 72px;
+  `;
+  const vizCellCss = css`
+    flex: 1;
+    min-width: 0;
+  `;
+
   return (
     <ExpandablePanel
       data-test-subj={BEHAVIORAL_ANOMALIES_OVERVIEW_TEST_ID}
@@ -132,21 +158,47 @@ export const BehavioralAnomaliesOverviewV2: React.FC<BehavioralAnomaliesOverview
         link,
       }}
     >
+      {/* Row 1: tactics */}
+      <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false} css={statCellCss}>
+          <StatBlock
+            total={summary.triggeredTacticsCount}
+            label={BEHAVIORAL_ANOMALIES_V2_TACTICS_COUNT_LABEL}
+            countTestSubj={BEHAVIORAL_ANOMALIES_V2_TACTICS_COUNT_TEST_ID}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem css={vizCellCss}>
+          <MitreAttackChain
+            triggeredTactics={summary.triggeredTactics}
+            anomalyCountByTactic={MOCK_ANOMALY_COUNT_BY_TACTIC_V2}
+            showLabels={false}
+            data-test-subj={BEHAVIORAL_ANOMALIES_V2_TACTICS_CHAIN_TEST_ID}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      {/* 32px gap between Tactics row and Anomalies row per design spec. */}
+      <EuiSpacer size="xl" />
+      {/* Row 2: anomalies (swim lane). The swim lane renders its own
+          EuiFlexItem, so we use a child selector to size it to fill the row. */}
       <EuiFlexGroup
         gutterSize="m"
         alignItems="center"
         responsive={false}
         data-test-subj={BEHAVIORAL_ANOMALIES_HEATMAP_TEST_ID}
         css={css`
-          width: 100%;
-
           & > .euiFlexItem:last-child {
             flex: 1;
             min-width: 180px;
           }
         `}
       >
-        <AnomaliesCount total={summary.totalCount} />
+        <EuiFlexItem grow={false} css={statCellCss}>
+          <StatBlock
+            total={summary.totalCount}
+            label={BEHAVIORAL_ANOMALIES_COUNT_LABEL}
+            countTestSubj={BEHAVIORAL_ANOMALIES_COUNT_TEST_ID}
+          />
+        </EuiFlexItem>
         <BehavioralAnomaliesSwimlaneV2
           records={summary.heatmapRecords}
           anomalyBands={bands}

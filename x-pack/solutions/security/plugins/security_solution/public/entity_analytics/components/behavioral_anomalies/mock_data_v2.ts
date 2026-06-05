@@ -16,6 +16,7 @@
 
 import dateMath from '@kbn/datemath';
 import { BEHAVIORAL_ANOMALIES_PROTOTYPE_ENTITY_ID } from './constants';
+import { MOCK_TRIGGERED_TACTICS_V2 } from './mitre/mock_anomaly_tactics';
 import type { EntityBehavioralAnomaliesSummary, HeatmapRecord } from './types';
 
 /** Time window for the v.2 overview swim lane. */
@@ -73,8 +74,21 @@ export const getPrototypeHeatmapRecordsV2 = (): HeatmapRecord[] => {
   }));
 };
 
-/** Prototype summary for the v.2 overview header + swim lane. */
-export const getMockBehavioralAnomaliesV2Summary = (): EntityBehavioralAnomaliesSummary => ({
+/**
+ * Returned shape extends the canonical summary with the MITRE tactics row.
+ * Inline-extended rather than added to `types.ts` so v.1 stays untouched.
+ */
+export interface BehavioralAnomaliesV2OverviewSummary extends EntityBehavioralAnomaliesSummary {
+  /** MITRE ATT&CK tactics triggered for the entity across all mock anomalies. */
+  triggeredTactics: readonly string[];
+  /** Distinct count of triggered tactics — shown as the "X Tactics" stat. */
+  triggeredTacticsCount: number;
+}
+
+/** Prototype summary for the v.2 overview header + swim lane + tactics row. */
+export const getMockBehavioralAnomaliesV2Summary = (): BehavioralAnomaliesV2OverviewSummary => ({
   totalCount: MOCK_ANOMALY_V2_TOTAL_COUNT,
   heatmapRecords: getPrototypeHeatmapRecordsV2(),
+  triggeredTactics: MOCK_TRIGGERED_TACTICS_V2,
+  triggeredTacticsCount: MOCK_TRIGGERED_TACTICS_V2.length,
 });

@@ -54,10 +54,13 @@ import {
  *      `./test_ids.ts` and the matching i18n strings below.
  */
 type OverviewVersion = 'v1' | 'v2';
-const DEFAULT_OVERVIEW_VERSION: OverviewVersion = 'v1';
+// v.2 is the active prototype design, so it leads the switcher and is
+// selected by default. When we drop one of the versions (per the cleanup
+// notes above), this constant + array go away with the EuiButtonGroup.
+const DEFAULT_OVERVIEW_VERSION: OverviewVersion = 'v2';
 const VERSION_OPTIONS: Array<{ id: OverviewVersion; label: string }> = [
-  { id: 'v1', label: 'v.1' },
   { id: 'v2', label: 'v.2' },
+  { id: 'v1', label: 'v.1' },
 ];
 
 interface BehavioralAnomaliesSectionProps {

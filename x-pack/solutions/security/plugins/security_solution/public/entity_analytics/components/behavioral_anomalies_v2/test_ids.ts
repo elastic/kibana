@@ -15,6 +15,12 @@ import { PREFIX } from '../../../flyout/shared/test_ids';
 
 export const BEHAVIORAL_ANOMALIES_V2_TAB_CONTENT_TEST_ID =
   `${PREFIX}BehavioralAnomaliesV2TabContent` as const;
+export const BEHAVIORAL_ANOMALIES_V2_ATTACK_CHAIN_SECTION_TEST_ID =
+  `${PREFIX}BehavioralAnomaliesV2AttackChainSection` as const;
+export const BEHAVIORAL_ANOMALIES_V2_ATTACK_CHAIN_TEST_ID =
+  `${PREFIX}BehavioralAnomaliesV2AttackChain` as const;
+export const BEHAVIORAL_ANOMALIES_V2_TACTIC_FILTER_PILL_TEST_ID =
+  `${PREFIX}BehavioralAnomaliesV2TacticFilterPill` as const;
 export const BEHAVIORAL_ANOMALIES_V2_TIMELINE_SECTION_TEST_ID =
   `${PREFIX}BehavioralAnomaliesV2TimelineSection` as const;
 export const BEHAVIORAL_ANOMALIES_V2_TIMELINE_SWIMLANE_TEST_ID =
@@ -33,17 +39,23 @@ export const BEHAVIORAL_ANOMALIES_V2_TABLE_TEST_ID =
   `${PREFIX}BehavioralAnomaliesV2Table` as const;
 export const BEHAVIORAL_ANOMALIES_V2_TABLE_JOB_NAME_LINK_TEST_ID =
   `${PREFIX}BehavioralAnomaliesV2TableJobNameLink` as const;
+export const BEHAVIORAL_ANOMALIES_V2_TABLE_TACTIC_BADGE_TEST_ID =
+  `${PREFIX}BehavioralAnomaliesV2TableTacticBadge` as const;
+export const BEHAVIORAL_ANOMALIES_V2_TABLE_TACTIC_OVERFLOW_TEST_ID =
+  `${PREFIX}BehavioralAnomaliesV2TableTacticOverflow` as const;
+export const BEHAVIORAL_ANOMALIES_V2_TABLE_TACTIC_POPOVER_TEST_ID =
+  `${PREFIX}BehavioralAnomaliesV2TableTacticPopover` as const;
+export const BEHAVIORAL_ANOMALIES_V2_TABLE_ROW_EXPANDER_TEST_ID =
+  `${PREFIX}BehavioralAnomaliesV2TableRowExpander` as const;
+export const BEHAVIORAL_ANOMALIES_V2_TABLE_ROW_DESCRIPTION_TEST_ID =
+  `${PREFIX}BehavioralAnomaliesV2TableRowDescription` as const;
 export const BEHAVIORAL_ANOMALIES_V2_TABLE_ROW_ACTIONS_BUTTON_TEST_ID =
   `${PREFIX}BehavioralAnomaliesV2TableRowActionsButton` as const;
 export const BEHAVIORAL_ANOMALIES_V2_TABLE_ROW_ACTIONS_MENU_TEST_ID =
   `${PREFIX}BehavioralAnomaliesV2TableRowActionsMenu` as const;
-export const BEHAVIORAL_ANOMALIES_V2_TABLE_ROW_ACTION_ADD_TO_CASE_TEST_ID =
-  `${PREFIX}BehavioralAnomaliesV2TableRowActionAddToCase` as const;
 export const BEHAVIORAL_ANOMALIES_V2_TABLE_ROW_ACTION_ADD_TO_TIMELINE_TEST_ID =
   `${PREFIX}BehavioralAnomaliesV2TableRowActionAddToTimeline` as const;
 export const BEHAVIORAL_ANOMALIES_V2_TABLE_ROW_ACTION_VIEW_IN_DISCOVER_TEST_ID =
   `${PREFIX}BehavioralAnomaliesV2TableRowActionViewInDiscover` as const;
 export const BEHAVIORAL_ANOMALIES_V2_TABLE_ROW_ACTION_VIEW_IN_SMV_TEST_ID =
   `${PREFIX}BehavioralAnomaliesV2TableRowActionViewInSingleMetricViewer` as const;
-export const BEHAVIORAL_ANOMALIES_V2_TABLE_ROW_ACTION_ADD_TO_CHAT_TEST_ID =
-  `${PREFIX}BehavioralAnomaliesV2TableRowActionAddToChat` as const;

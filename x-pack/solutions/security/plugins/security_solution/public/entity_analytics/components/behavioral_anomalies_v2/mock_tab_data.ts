@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+import {
+  getTriggeredTacticsForJobs,
+  MOCK_JOB_TO_TACTICS,
+} from '../behavioral_anomalies/mitre/mock_anomaly_tactics';
+import { MITRE_TACTIC_NAMES } from '../behavioral_anomalies/mitre/tactics';
 import { MOCK_ANOMALY_V2_TOTAL_COUNT } from './mock_data';
 import type {
   BehavioralAnomalyV2TableRow,
@@ -89,6 +94,9 @@ export const getTimelineRowKeysV2 = (viewBy: ViewByFieldV2): string[] => {
   if (viewBy === 'job_id') {
     return MOCK_ML_JOBS_V2.map((job) => job.id);
   }
+  if (viewBy === 'mitre_tactic') {
+    return [...MITRE_TACTIC_NAMES];
+  }
   return ['john.doe', 'server-01', '10.0.0.12', '192.168.1.44', 'winlogon.exe', 'sshd'];
 };
 
@@ -96,7 +104,10 @@ export const getJobDisplayNameV2 = (jobId: string): string =>
   MOCK_ML_JOBS_V2.find((job) => job.id === jobId)?.displayName ?? jobId;
 
 interface TableRowTemplate
-  extends Omit<BehavioralAnomalyV2TableRow, 'id' | 'timestamp' | 'underlyingEvents'> {
+  extends Omit<
+    BehavioralAnomalyV2TableRow,
+    'id' | 'timestamp' | 'underlyingEvents' | 'mitreTactics'
+  > {
   daysAgo: number;
   hour: number;
   /** Mock event ids (1-3 per template) used to scope Add to case / timeline / Discover. */
@@ -116,6 +127,8 @@ const TABLE_ROWS_TEMPLATE: TableRowTemplate[] = [
     anomalyScore: 80.09,
     detectorIndex: 0,
     entities: { 'user.name': 'john.doe' },
+    description:
+      'Detects rare values for destination.geo.country_name — the user signed in from a country never seen for this account in the last 30 days. First sign-in from Italy in the last 90 days; 2 prior new-country sign-ins (Spain, Germany) in the last 30 days.',
     eventIds: ['evt-rare-country-1'],
   },
   {
@@ -129,6 +142,8 @@ const TABLE_ROWS_TEMPLATE: TableRowTemplate[] = [
     anomalyScore: 92,
     detectorIndex: 0,
     entities: { 'user.name': 'john.doe' },
+    description:
+      'Detects unusual spikes in failed authentication events — 42× the typical hourly rate for this user. 4th failed-auth spike for this account in the last 14 days; previous spikes peaked at 12–18×.',
     eventIds: ['evt-auth-spike-1', 'evt-auth-spike-2', 'evt-auth-spike-3'],
   },
   {
@@ -141,6 +156,8 @@ const TABLE_ROWS_TEMPLATE: TableRowTemplate[] = [
     anomalyScore: 64.3,
     detectorIndex: 0,
     entities: { 'user.name': 'john.doe' },
+    description:
+      "Detects login activity outside the user's typical 09:00–18:00 working hours. First off-hours sign-in for this account in the last 30 days.",
     eventIds: ['evt-login-hour-1'],
   },
   {
@@ -153,6 +170,8 @@ const TABLE_ROWS_TEMPLATE: TableRowTemplate[] = [
     anomalyScore: 78.5,
     detectorIndex: 0,
     entities: { 'host.name': 'server-01' },
+    description:
+      'Detects rarely-used binaries executing on the host — certutil.exe deviates from the baseline parent/child relationship. First execution of certutil.exe on this host in the last 60 days; 2 other rare-binary anomalies on this host in the last 30 days.',
     eventIds: ['evt-process-1', 'evt-process-2'],
   },
   {
@@ -166,6 +185,8 @@ const TABLE_ROWS_TEMPLATE: TableRowTemplate[] = [
     anomalyScore: 71.2,
     detectorIndex: 0,
     entities: { 'source.ip': '10.0.0.12' },
+    description:
+      'Detects a sharp increase in distinct source IPs targeting the entity — 3.9× the typical hourly distinct-IP count. 3rd surge above 30 unique IPs in the last 14 days for this destination.',
     eventIds: ['evt-ip-count-1', 'evt-ip-count-2'],
   },
   {
@@ -179,6 +200,8 @@ const TABLE_ROWS_TEMPLATE: TableRowTemplate[] = [
     anomalyScore: 88.1,
     detectorIndex: 0,
     entities: { 'host.name': 'server-01' },
+    description:
+      'Detects unusually large outbound transfer volume — 7.4× the typical hourly egress for the host. First transfer above 500 MB/hour for this host in the last 30 days.',
     eventIds: ['evt-exfil-1', 'evt-exfil-2', 'evt-exfil-3'],
   },
   {
@@ -192,6 +215,8 @@ const TABLE_ROWS_TEMPLATE: TableRowTemplate[] = [
     anomalyScore: 85.6,
     detectorIndex: 0,
     entities: { 'host.name': 'server-01' },
+    description:
+      'Detects an unusually broad set of internal hosts reached from the entity — 4.5× the typical fan-out. 2nd fan-out above 5 hosts for this entity in the last 30 days; 4 of the 9 hosts are new contacts.',
     eventIds: ['evt-lateral-1', 'evt-lateral-2'],
   },
   {
@@ -205,9 +230,17 @@ const TABLE_ROWS_TEMPLATE: TableRowTemplate[] = [
     anomalyScore: 76.4,
     detectorIndex: 0,
     entities: { 'destination.ip': '192.168.1.44' },
+    description:
+      'Detects DNS query patterns consistent with tunneling — sustained 7× query-rate spike to a single destination. First sustained tunneling-pattern spike to 192.168.1.44 in the last 30 days.',
     eventIds: ['evt-dns-1'],
   },
 ];
+
+/** Returns the MITRE tactics mapped to the supplied job id (defensive copy). */
+const tacticsForJob = (jobId: string): string[] => {
+  const tactics = MOCK_JOB_TO_TACTICS[jobId];
+  return tactics ? [...tactics] : [];
+};
 
 const buildUnderlyingEvents = (eventIds: string[], suffix: string): UnderlyingEventRefV2[] =>
   eventIds.map((eventId) => ({ _id: `${eventId}-${suffix}`, _index: MOCK_EVENT_INDEX }));
@@ -225,6 +258,8 @@ const buildTableRows = (): BehavioralAnomalyV2TableRow[] => {
     anomalyScore: template.anomalyScore,
     detectorIndex: template.detectorIndex,
     entities: template.entities,
+    description: template.description,
+    mitreTactics: tacticsForJob(template.jobId),
     underlyingEvents: buildUnderlyingEvents(template.eventIds, `v2-${index}`),
   }));
 
@@ -242,6 +277,8 @@ const buildTableRows = (): BehavioralAnomalyV2TableRow[] => {
       anomalyScore: Math.max(15, template.anomalyScore - (counter % 7) * 3),
       detectorIndex: template.detectorIndex,
       entities: template.entities,
+      description: template.description,
+      mitreTactics: tacticsForJob(template.jobId),
       underlyingEvents: buildUnderlyingEvents(template.eventIds, `v2-${counter}`),
     });
     counter += 1;
@@ -255,3 +292,25 @@ export const MOCK_ANOMALY_V2_TABLE_ROWS = buildTableRows();
 export const DEFAULT_PAGE_SIZE_V2 = 10;
 
 export const PAGE_SIZE_OPTIONS_V2 = [10, 25, 50];
+
+/**
+ * Time-range-aware lookup used by the BA-v.2 "Attack chain" section. Walks
+ * the mock anomaly rows that fall within the selected window, collects each
+ * row's mapped MITRE tactics, and returns them in canonical kill-chain order.
+ *
+ * Note: `MOCK_ANOMALY_V2_TABLE_ROWS` and `MOCK_JOB_TO_TACTICS` are the same
+ * mock sources used by the anomalies table and the right-panel chain, so the
+ * "triggered" set the user sees here lines up with the rest of the prototype.
+ */
+export const getTriggeredTacticsForRangeV2 = (timeRangeMs: {
+  from: number;
+  to: number;
+}): string[] => {
+  const jobIdsInRange = new Set<string>();
+  for (const row of MOCK_ANOMALY_V2_TABLE_ROWS) {
+    if (row.timestamp >= timeRangeMs.from && row.timestamp <= timeRangeMs.to) {
+      jobIdsInRange.add(row.jobId);
+    }
+  }
+  return getTriggeredTacticsForJobs([...jobIdsInRange]);
+};
