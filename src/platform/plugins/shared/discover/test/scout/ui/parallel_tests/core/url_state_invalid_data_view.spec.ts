@@ -50,6 +50,11 @@ spaceTest.describe('Discover URL state - invalid data view', { tag: tags.statefu
       const dataViewId = await pageObjects.discover.getCurrentDataViewId();
       const originalUrl = page.url();
       const invalidUrl = originalUrl.replaceAll(dataViewId, INVALID_ID);
+      // Sanity-check: if the data view id isn't actually present in
+      // `page.url()` (e.g. URL state uses `index:` instead of `dataViewId:`
+      // in this Kibana version) the navigation below is a no-op and the
+      // toast assertion would silently mask the bug.
+      expect(invalidUrl).not.toBe(originalUrl);
 
       await page.goto(invalidUrl);
       // Toasts auto-dismiss after ~10s, and `waitUntilSearchingHasFinished`
