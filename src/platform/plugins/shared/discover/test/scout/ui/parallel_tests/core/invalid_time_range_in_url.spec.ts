@@ -37,12 +37,22 @@ spaceTest.describe('Discover - invalid time range in URL', { tag: tags.stateful.
     await scoutSpace.savedObjects.cleanStandardList();
   });
 
-  spaceTest('falls back to the default time range', async ({ page, pageObjects, kbnUrl }) => {
+  spaceTest('falls back to the default time range', async ({ page, pageObjects }) => {
+    // Land on Discover the normal way first so the `defaultIndex` UI
+    // setting is actually applied and a valid data view is selected
+    // (otherwise Discover can pick an unrelated auto-created data view
+    // like "Beats Monitoring" when the URL state is incomplete).
+    await pageObjects.discover.setQueryMode('classic');
+    await pageObjects.discover.goto();
+    await pageObjects.discover.waitUntilSearchingHasFinished();
+
     // `to:null` is invalid — Discover should silently swap it for the
     // 15-minute default rather than rendering nothing or erroring.
-    await page.goto(
-      kbnUrl.app('discover', { pathOptions: { hash: '/?_g=(time:(from:now-15m,to:null))' } })
-    );
+    // Mutate `_g` via the hash so we stay on the same Discover instance
+    // (avoids losing the resolved data view to a full reload).
+    await page.evaluate(() => {
+      window.location.hash = '/?_g=(time:(from:now-15m,to:null))';
+    });
     await pageObjects.discover.waitUntilSearchingHasFinished();
 
     const time = await pageObjects.datePicker.getTimeConfig();

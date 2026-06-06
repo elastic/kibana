@@ -46,6 +46,13 @@ spaceTest.describe(
       await pageObjects.discover.setQueryMode('classic');
       await pageObjects.discover.goto();
       await pageObjects.discover.waitUntilSearchingHasFinished();
+      // Explicitly switch to the long-window data view: relying on the
+      // `defaultIndex` UI setting alone is racey — Discover can land on
+      // an unrelated auto-created data view ("Beats Monitoring") before
+      // the setting is read, leaving the histogram unmounted because the
+      // selected view has no documents in range.
+      await pageObjects.discover.selectIndexPattern(LONG_WINDOW_LOGSTASH_DATA_VIEW);
+      await pageObjects.discover.waitUntilSearchingHasFinished();
     });
 
     spaceTest.afterAll(async ({ scoutSpace }) => {
