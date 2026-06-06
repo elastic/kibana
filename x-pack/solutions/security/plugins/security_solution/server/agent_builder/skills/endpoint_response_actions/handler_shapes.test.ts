@@ -7,7 +7,10 @@
 
 /* eslint-disable require-atomic-updates */
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
-import { isToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
+import {
+  isToolHandlerStandardReturn,
+  type ToolHandlerReturn,
+} from '@kbn/agent-builder-server/tools';
 import { createMockEndpointAppContext } from '../../../endpoint/mocks';
 import {
   createEndpointResponseActionsSkill,
