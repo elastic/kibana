@@ -1,6 +1,123 @@
 {
-  "sha1": "737b645da3f4f0eeddaaabb4083d14a512395a71",
+  "sha1": "bd4c1d0063ce1f0a9860b990f0c7d3083f5ed43f",
   "tests": [
+    {
+      "id": "0e89de24e8ff3a8-faf07b914e53ca6",
+      "title": "AddNewMonitorsUI permissions and warnings can create monitor with API key with proper permissions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/add_monitor_permissions.spec.ts",
+        "line": 83,
+        "column": 12
+      }
+    },
+    {
+      "id": "0e89de24e8ff3a8-bc269a730934bbb",
+      "title": "AddNewMonitorsUI permissions and warnings can not create monitor with API key without proper permissions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/add_monitor_permissions.spec.ts",
+        "line": 94,
+        "column": 12
+      }
+    },
+    {
+      "id": "0e89de24e8ff3a8-655c23ebb4d8e65",
+      "title": "AddNewMonitorsUI permissions and warnings rejects a monitor pointing at a missing private location and leaves no orphan",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/add_monitor_permissions.spec.ts",
+        "line": 109,
+        "column": 12
+      }
+    },
+    {
+      "id": "0e89de24e8ff3a8-70c325f9208dc63",
+      "title": "AddNewMonitorsUI permissions and warnings returns warning for browser timeout with public locations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/add_monitor_permissions.spec.ts",
+        "line": 138,
+        "column": 12
+      }
+    },
+    {
+      "id": "0e89de24e8ff3a8-af5320c7b437299",
+      "title": "AddNewMonitorsUI permissions and warnings allows lightweight monitor timeout below 30s",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/add_monitor_permissions.spec.ts",
+        "line": 162,
+        "column": 12
+      }
+    },
+    {
+      "id": "67df6b1fbdd31a1-18c2dd00dd61551",
+      "title": "PrivateLocationAddMonitor lists the added private location as a valid service location",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/add_monitor_private_location.spec.ts",
+        "line": 69,
+        "column": 10
+      }
+    },
+    {
+      "id": "67df6b1fbdd31a1-78a0c980e32dfdf",
+      "title": "PrivateLocationAddMonitor rejects browser timeout below 30s in private locations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/add_monitor_private_location.spec.ts",
+        "line": 88,
+        "column": 10
+      }
+    },
+    {
+      "id": "67df6b1fbdd31a1-60a8e53468d1fd5",
+      "title": "PrivateLocationAddMonitor allows browser timeout at 30s in private locations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/add_monitor_private_location.spec.ts",
+        "line": 106,
+        "column": 10
+      }
+    },
+    {
+      "id": "67df6b1fbdd31a1-98f03cbcecf9393",
+      "title": "PrivateLocationAddMonitor handles spaces",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/add_monitor_private_location.spec.ts",
+        "line": 122,
+        "column": 10
+      }
+    },
     {
       "id": "8ac308de9d7a2bf-019801460b8f6ef",
       "title": "ApiKeys [POST] internal/security/api_key allows an API key to be created with kibana privileges",
@@ -12,6 +129,20 @@
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/api_keys.spec.ts",
         "line": 50,
         "column": 10
+      }
+    },
+    {
+      "id": "03a33c4f86ec4a9-7a831ee3ac2ae98",
+      "title": "AutoUpgradePolicies handles auto upgrading policies",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/auto_upgrade_policies.spec.ts",
+        "line": 81,
+        "column": 12
       }
     },
     {
@@ -29,16 +160,16 @@
       }
     },
     {
-      "id": "b9570544b70d243-4576830b598d946",
-      "title": "PrivateLocationCreateMonitor pending Scout port (blocked by #258046) — see file header",
-      "expectedStatus": "skipped",
+      "id": "b9570544b70d243-dcb58efc3190b29",
+      "title": "PrivateLocationCreateMonitor handles auto upgrading policies",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/create_monitor_private_location.spec.ts",
-        "line": 50,
+        "line": 94,
         "column": 12
       }
     },
@@ -2983,6 +3114,62 @@
       }
     },
     {
+      "id": "544f6e3cff80956-1710193b46d6489",
+      "title": "ListMonitorsAPI useLogicalAndFor parameter returns both monitors when searching both tags without useLogicalAndFor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/list_monitors.spec.ts",
+        "line": 80,
+        "column": 12
+      }
+    },
+    {
+      "id": "544f6e3cff80956-48f982ee378aeee",
+      "title": "ListMonitorsAPI useLogicalAndFor parameter returns only the monitor matching all tags when useLogicalAndFor includes tags",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/list_monitors.spec.ts",
+        "line": 88,
+        "column": 12
+      }
+    },
+    {
+      "id": "544f6e3cff80956-099419176223f41",
+      "title": "ListMonitorsAPI useLogicalAndFor parameter returns both monitors when searching both locations without useLogicalAndFor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/list_monitors.spec.ts",
+        "line": 99,
+        "column": 12
+      }
+    },
+    {
+      "id": "544f6e3cff80956-c192a3214102c78",
+      "title": "ListMonitorsAPI useLogicalAndFor parameter returns only the monitor matching all locations when useLogicalAndFor includes locations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/list_monitors.spec.ts",
+        "line": 110,
+        "column": 12
+      }
+    },
+    {
       "id": "d113e14c496e717-09989aaa3089140",
       "title": "SyncMaintenanceWindows applies the maintenance window to a private-location package policy",
       "expectedStatus": "passed",
@@ -3106,6 +3293,149 @@
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/migrate_legacy_policies.spec.ts",
         "line": 280,
         "column": 12
+      }
+    },
+    {
+      "id": "46dcd8194641d95-932aa7702808a94",
+      "title": "PrivateLocationAPI adds a test private location",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/private_location_apis.spec.ts",
+        "line": 178,
+        "column": 10
+      }
+    },
+    {
+      "id": "46dcd8194641d95-704fa61e30dc844",
+      "title": "PrivateLocationAPI lists all locations and migrates the legacy singleton to the new saved object type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/private_location_apis.spec.ts",
+        "line": 186,
+        "column": 10
+      }
+    },
+    {
+      "id": "46dcd8194641d95-294a4f16ed590b0",
+      "title": "PrivateLocationAPI cannot create private location if privileges are missing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/private_location_apis.spec.ts",
+        "line": 205,
+        "column": 10
+      }
+    },
+    {
+      "id": "46dcd8194641d95-b965e92881063c2",
+      "title": "PrivateLocationAPI can create private location if privileges are added",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/private_location_apis.spec.ts",
+        "line": 220,
+        "column": 10
+      }
+    },
+    {
+      "id": "46dcd8194641d95-15abfe3133ee616",
+      "title": "PrivateLocationAPI can delete private location if privileges are added",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/private_location_apis.spec.ts",
+        "line": 235,
+        "column": 10
+      }
+    },
+    {
+      "id": "46dcd8194641d95-11189e4220ea213",
+      "title": "PrivateLocationAPI can create private location in multiple spaces",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/private_location_apis.spec.ts",
+        "line": 246,
+        "column": 10
+      }
+    },
+    {
+      "id": "46dcd8194641d95-05f2ef726486406",
+      "title": "PrivateLocationAPI creates private location in agent policy spaces if no spaces are defined for the location",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/private_location_apis.spec.ts",
+        "line": 263,
+        "column": 10
+      }
+    },
+    {
+      "id": "46dcd8194641d95-66ce325bb79d787",
+      "title": "PrivateLocationAPI creates private location in agent policy spaces if locations spaces is an empty array",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/private_location_apis.spec.ts",
+        "line": 277,
+        "column": 10
+      }
+    },
+    {
+      "id": "46dcd8194641d95-bc8e9a016226cbc",
+      "title": "PrivateLocationAPI validation errors works in multiple spaces as well",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/private_location_apis.spec.ts",
+        "line": 295,
+        "column": 10
+      }
+    },
+    {
+      "id": "46dcd8194641d95-259211799f44323",
+      "title": "PrivateLocationAPI cannot create private location in multiple spaces if the agent policy does not belong to those spaces",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/private_location_apis.spec.ts",
+        "line": 315,
+        "column": 10
+      }
+    },
+    {
+      "id": "46dcd8194641d95-714a766f78fe874",
+      "title": "PrivateLocationAPI can create private location in any space if agent policy has \"*\" space id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/private_location_apis.spec.ts",
+        "line": 334,
+        "column": 10
       }
     },
     {
@@ -3501,6 +3831,32 @@
       }
     },
     {
+      "id": "960a83b5c4657f7-30c675c4d8c37fd",
+      "title": "SyntheticsAPISecurity throws permissions errors for un-auth user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/synthetics_api_security.spec.ts",
+        "line": 144,
+        "column": 10
+      }
+    },
+    {
+      "id": "960a83b5c4657f7-98b293be62579d2",
+      "title": "SyntheticsAPISecurity throws permissions errors for read user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/synthetics_api_security.spec.ts",
+        "line": 157,
+        "column": 10
+      }
+    },
+    {
       "id": "f141f731703b909-4dc9108e39d9fc1",
       "title": "SyntheticsEnablement [PUT] returns response when user cannot manage api keys",
       "expectedStatus": "passed",
@@ -3510,7 +3866,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/synthetics_enablement.spec.ts",
-        "line": 174,
+        "line": 187,
         "column": 12
       }
     },
@@ -3524,7 +3880,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/synthetics_enablement.spec.ts",
-        "line": 180,
+        "line": 193,
         "column": 12
       }
     },
@@ -3538,7 +3894,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/synthetics_enablement.spec.ts",
-        "line": 189,
+        "line": 202,
         "column": 12
       }
     },
@@ -3552,7 +3908,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/synthetics_enablement.spec.ts",
-        "line": 203,
+        "line": 216,
         "column": 12
       }
     },
@@ -3566,7 +3922,77 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/synthetics_enablement.spec.ts",
-        "line": 230,
+        "line": 243,
+        "column": 12
+      }
+    },
+    {
+      "id": "f141f731703b909-0ad8b56a88cc9cc",
+      "title": "SyntheticsEnablement [PUT] returns response when user can manage api keys via manage_security",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/synthetics_enablement.spec.ts",
+        "line": 258,
+        "column": 14
+      }
+    },
+    {
+      "id": "f141f731703b909-a088cf70566c5a0",
+      "title": "SyntheticsEnablement [PUT] returns response when user can manage api keys via manage_api_key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/synthetics_enablement.spec.ts",
+        "line": 258,
+        "column": 14
+      }
+    },
+    {
+      "id": "f141f731703b909-9068556897c1c6b",
+      "title": "SyntheticsEnablement [PUT] returns response when user can manage api keys via manage_own_api_key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/synthetics_enablement.spec.ts",
+        "line": 258,
+        "column": 14
+      }
+    },
+    {
+      "id": "f141f731703b909-cd9f48ef8ccd89c",
+      "title": "SyntheticsEnablement [PUT] enables synthetics for a writer user without api-key management privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/synthetics_enablement.spec.ts",
+        "line": 288,
+        "column": 12
+      }
+    },
+    {
+      "id": "f141f731703b909-775d431a8453662",
+      "title": "SyntheticsEnablement [PUT] auto re-enables the api key when the existing key has invalid permissions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/synthetics_enablement.spec.ts",
+        "line": 319,
         "column": 12
       }
     },
@@ -3580,7 +4006,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/synthetics_enablement.spec.ts",
-        "line": 239,
+        "line": 372,
         "column": 12
       }
     },
@@ -3594,7 +4020,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/synthetics_enablement.spec.ts",
-        "line": 244,
+        "line": 377,
         "column": 12
       }
     },
@@ -3608,7 +4034,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/synthetics_enablement.spec.ts",
-        "line": 252,
+        "line": 385,
         "column": 12
       }
     },
@@ -3622,7 +4048,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/synthetics_enablement.spec.ts",
-        "line": 261,
+        "line": 394,
         "column": 12
       }
     },
@@ -3636,7 +4062,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/api/tests/synthetics_enablement.spec.ts",
-        "line": 270,
+        "line": 403,
         "column": 12
       }
     },
