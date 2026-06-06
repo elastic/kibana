@@ -79,7 +79,6 @@ steps:
         with:
           method: POST
           path: /api/threat_intelligence/extract_iocs
-          use_server_info: true
           headers:
             # Versioned Kibana route — `registerExtractIocsRoute` registers
             # `version: '2023-10-31'` on a `router.versioned.post` handler,
@@ -108,7 +107,6 @@ steps:
         with:
           method: POST
           path: /api/threat_intelligence/hunt_behavior
-          use_server_info: true
           headers:
             elastic-api-version: "2023-10-31"
             x-elastic-internal-origin: "kibana"
