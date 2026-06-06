@@ -98,12 +98,22 @@ export const scoutSpaceParallelFixture = coreWorkerFixtures.extend<
         });
       };
       const setDefaultTime = async ({ from, to }: { from: string; to: string }) => {
+        // Pass relative-time keywords through unchanged so callers can use
+        // the same `now` / `now-15m` style values they would in FTR.
+        // `formatTime('now')` parses through moment.utc with a fixed display
+        // format and returns the literal string "Invalid date".
+        const isRelativeTimeKeyword = (value: string): boolean =>
+          /^now(?:[+-]\d+[smhdwMy](?:\/[smhdwMy])?)?$/.test(value);
+        const normalize = (value: string): string => {
+          if (isValidUTCDate(value) || isRelativeTimeKeyword(value)) return value;
+          return formatTime(value);
+        };
         return measurePerformanceAsync(
           log,
           `uiSettings.setDefaultTime({spaceId:'${spaceId}')`,
           async () => {
-            const utcFrom = isValidUTCDate(from) ? from : formatTime(from);
-            const utcTo = isValidUTCDate(to) ? to : formatTime(to);
+            const utcFrom = normalize(from);
+            const utcTo = normalize(to);
             return kbnClient.uiSettings.update(
               {
                 'timepicker:timeDefaults': `{ "from": "${utcFrom}", "to": "${utcTo}"}`,

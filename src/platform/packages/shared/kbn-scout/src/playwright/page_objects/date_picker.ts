@@ -306,10 +306,24 @@ export class DatePicker {
       // tests assert on the rendered display format (e.g. `Sep 19, 2015 @
       // 06:31:44.000`). Parse the ISO and format using the picker's display
       // format so callers get a consistent string regardless of picker state.
-      const dateRange =
-        (await this.page.testSubj
-          .locator('dateRangePickerControlButton')
-          .getAttribute('data-date-range')) ?? '';
+      //
+      // Mirror FTR's `getStableDateRange`: retry until two consecutive
+      // reads return the same non-empty value, so a transient empty
+      // attribute (component still mounting / first paint) doesn't
+      // surface as `start: ''` to the caller.
+      const button = this.page.testSubj.locator('dateRangePickerControlButton');
+      let previous: string | undefined;
+      let dateRange = '';
+      const deadline = Date.now() + 15_000;
+      while (Date.now() < deadline) {
+        const current = (await button.getAttribute('data-date-range')) ?? '';
+        if (current && current === previous) {
+          dateRange = current;
+          break;
+        }
+        previous = current;
+        await this.page.waitForTimeout(200);
+      }
       const [start, end] = dateRange.split(' to ');
       const format = 'MMM D, YYYY @ HH:mm:ss.SSS';
       const toDisplay = (raw: string | undefined): string => {
