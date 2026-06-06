@@ -7,7 +7,7 @@
 
 import type { AwaitedProperties } from '@kbn/utility-types';
 import sinon from 'sinon';
-import { CANVAS_TYPE } from '../../../common/lib/constants';
+import { CANVAS_TYPE, API_ROUTE_WORKPAD_STRUCTURES } from '../../../common/lib/constants';
 import { initializeUpdateWorkpadRoute, initializeUpdateWorkpadAssetsRoute } from './update';
 import type { RequestHandler } from '@kbn/core/server';
 import { kibanaResponseFactory, SavedObjectsErrorHelpers } from '@kbn/core/server';
@@ -88,9 +88,14 @@ describe('PUT workpad', () => {
   it(`returns the server @timestamp from the workpad-structures route`, async () => {
     const routerDeps = getMockedRouterDeps();
     initializeUpdateWorkpadRoute(routerDeps);
-    // The structures route is the second PUT registered by initializeUpdateWorkpadRoute.
+    // Find the structures route handler by matching the registered path.
+    const putCalls = routerDeps.router.versioned.put.mock.calls;
+    const putResults = routerDeps.router.versioned.put.mock.results;
+    const structuresIndex = putCalls.findIndex(
+      (call: any) => call[0].path === `${API_ROUTE_WORKPAD_STRUCTURES}/{id}`
+    );
     const structuresHandler =
-      routerDeps.router.versioned.put.mock.results[1].value.addVersion.mock.calls[0][1];
+      putResults[structuresIndex].value.addVersion.mock.calls[0][1];
 
     const { id } = workpad;
     const timestamp = '2021-02-02T00:00:00.000Z';
