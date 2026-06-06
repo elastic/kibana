@@ -9,7 +9,7 @@ import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { z } from '@kbn/zod/v4';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { HostStatus } from '../../../../../../common/endpoint/types';
 
 import type { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
@@ -53,19 +53,20 @@ export const getEndpointStatusTool = (
     schema: getEndpointStatusSchema,
     handler: async (params, { logger }) => {
       try {
-        const { hostName } = params;
+        const hostName = params.hostName as string;
         const spaceId = DEFAULT_SPACE_ID;
 
         // Resolve hostname to endpoint IDs via fleet agent service
         const fleetServices = endpointAppContextService.getInternalFleetServices(spaceId);
-        const agentService = fleetServices.agentService.asInternalUser;
-        const agents = await agentService.list({
+        const agentClient = fleetServices.agent;
+        const agents = await agentClient.listAgents({
+          showInactive: true,
           kuery: `host.name: ${hostName}`,
           page: 1,
           perPage: 1,
         });
 
-        if (!agents?.items?.length) {
+        if (!agents?.agents?.length) {
           return {
             results: [
               {
@@ -77,7 +78,7 @@ export const getEndpointStatusTool = (
           };
         }
 
-        const agent = agents.items[0];
+        const agent = agents.agents[0];
         const agentId = agent.id;
 
         // Get detailed status from endpoint metadata service
