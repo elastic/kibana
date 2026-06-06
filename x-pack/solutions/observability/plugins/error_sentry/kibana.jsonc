@@ -1,0 +1,16 @@
+{
+  "type": "plugin",
+  "id": "@kbn/error-sentry-plugin",
+  "owner": ["@elastic/obs-ai-team"],
+  "group": "observability",
+  "visibility": "private",
+  "description": "Kibana Error Sentry: detects recurring log error patterns and tracks them as GitHub issues, orchestrated with Workflows (and, later, Agent Builder agents).",
+  "plugin": {
+    "id": "errorSentry",
+    "server": true,
+    "browser": true,
+    "requiredPlugins": ["workflowsExtensions", "workflowsManagement"],
+    "optionalPlugins": ["agentBuilder"],
+    "requiredBundles": []
+  }
+}

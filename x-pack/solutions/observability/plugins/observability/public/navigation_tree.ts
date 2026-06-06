@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
+import type { AppDeepLinkId, NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { AddSolutionNavigationArg } from '@kbn/navigation-plugin/public';
@@ -98,6 +98,16 @@ function createNavTree({
       {
         link: 'slo',
         icon: 'visGauge',
+      },
+      {
+        // Error Sentry app (registered by the error_sentry plugin). Cast because the app id is not
+        // part of the typed AppDeepLinkId union; chrome resolves it from the registered deep link
+        // at runtime and hides the entry if the app is unavailable.
+        link: 'errorSentry' as AppDeepLinkId,
+        title: i18n.translate('xpack.observability.obltNav.errorSentry', {
+          defaultMessage: 'Error Sentry',
+        }),
+        icon: 'inspect',
       },
       ...(streamsAvailable
         ? [

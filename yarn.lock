@@ -6735,6 +6735,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/error-sentry-plugin@link:x-pack/solutions/observability/plugins/error_sentry":
+  version "0.0.0"
+  uid ""
+
 "@kbn/es-archiver@link:src/platform/packages/shared/kbn-es-archiver":
   version "0.0.0"
   uid ""
