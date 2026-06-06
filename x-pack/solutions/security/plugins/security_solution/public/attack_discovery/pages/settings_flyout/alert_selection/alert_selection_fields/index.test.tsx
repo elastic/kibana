@@ -12,7 +12,7 @@ import React from 'react';
 import { AlertSelectionFields } from '.';
 import { TestProviders } from '../../../../../common/mock';
 import { useKibana } from '../../../../../common/lib/kibana';
-import { useSourcererDataView } from '../../../../../sourcerer/containers';
+import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 import { CUSTOMIZE_THE_CONNECTOR_AND_ALERTS } from '../translations';
 
 jest.mock('react-router', () => ({
@@ -23,7 +23,7 @@ jest.mock('react-router', () => ({
   withRouter: jest.fn(),
 }));
 jest.mock('../../../../../common/lib/kibana');
-jest.mock('../../../../../sourcerer/containers');
+jest.mock('../../../../../data_view_manager/hooks/use_data_view');
 jest.mock('../../../../../common/hooks/use_space_id', () => ({
   useSpaceId: jest.fn().mockReturnValue('default'),
 }));
@@ -44,9 +44,7 @@ const defaultProps = {
 };
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
-const mockUseSourcererDataView = useSourcererDataView as jest.MockedFunction<
-  typeof useSourcererDataView
->;
+const mockUseDataView = useDataView as jest.MockedFunction<typeof useDataView>;
 
 describe('AlertSelectionFields', () => {
   beforeEach(() => {
@@ -65,10 +63,10 @@ describe('AlertSelectionFields', () => {
       },
     } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
 
-    mockUseSourcererDataView.mockReturnValue({
-      sourcererDataView: {},
-      loading: false,
-    } as unknown as jest.Mocked<ReturnType<typeof useSourcererDataView>>);
+    mockUseDataView.mockReturnValue({
+      dataView: { id: 'security', title: 'security' },
+      status: 'ready',
+    } as unknown as jest.Mocked<ReturnType<typeof useDataView>>);
   });
 
   it('renders the alertSelectionFields form', () => {
