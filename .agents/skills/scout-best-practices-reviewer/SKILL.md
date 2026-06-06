@@ -59,6 +59,12 @@ Open only the docs relevant to the test type(s) under review.
 - **[general]** **Cost**: avoid repeating expensive setup; consider a global setup hook for shared one-time operations.
 - **[general]** **Global teardown** (when `global.teardown.ts` is present): cleanup must use `esClient`/`kbnClient`/`apiServices`. `esArchiver` isn't on the teardown fixture surface — Scout intentionally never exposed archive-unloading (slow and unnecessary; leftover indexes don't break tests with idempotent `loadIfNeeded`). Flag teardowns that try to use `esArchiver` at all, that **load** new data (teardown is for state reset only), or that duplicate work belonging in `afterAll`/per-test cleanup.
 - **[general]** **Tags / environment**: validate deployment tags and avoid assumptions that only hold in specific environments.
+- **[general]** **Plain string test titles**: template-literal titles (e.g. `` test(`creates connector (${TYPE})`) ``) look opaque in stack traces and CI failure reports. Flag as `nit` and suggest a plain string.
+- **[general]** **No duplicate tests after migration**: Playwright auto-waiting subsumes FTR's explicit "wait for spinner" steps. If two migrated tests end up asserting the same condition, flag as `minor` and recommend merging or removing the redundant one.
+- **[general]** **No raw EUI CSS class selectors**: selectors such as `.euiFieldSearch` or `:not(.euiBasicTable-loading)` are fragile — EUI class names change across upgrades. Flag as `major` if duplicated across files, `minor` if isolated. Prefer `data-test-subj` or role-based locators; if no `data-test-subj` exists, suggest adding one to the source component.
+- **[general]** **Shared constants between related spec pairs**: if two spec files share many duplicated constants, helpers, or cleanup logic, flag as `minor` and recommend extracting to a shared module in `fixtures/`.
+- **[general]** **Global settings reset in afterEach**: if a test mutates shared global state (e.g. flapping settings, query-delay, feature flags via `apiServices.core.settings()`), `afterEach` must restore defaults. Failure to do so leaks state into subsequent tests. Flag as `major`.
+- **[general]** **Action frequency payload is snake_case**: `apiServices.alerting.rules.create` passes `actions` as-is to the REST API without camelCase→snake_case conversion. Inside `frequency`, flag `notifyWhen` as `blocker` (should be `notify_when`) and `throttle: null` as `blocker` (should be `undefined`).
 
 ### Files to skip
 

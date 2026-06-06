@@ -109,6 +109,152 @@ test('create and edit entity', async () => {
 - Use the correct Scout package for the test location (`@kbn/scout` vs `@kbn/scout-<solution>`), and import `expect` from `/ui` or `/api`.
 - If the test needs rison-encoded query params, use `@kbn/rison` and add it to `test/scout*/ui/tsconfig.json` `kbn_references`.
 
+#### Always lint before committing
+
+Run ESLint on every changed spec file before committing:
+
+```bash
+node scripts/eslint <changed-file>
+```
+
+Fix **all errors** (not just warnings) before pushing. Common Scout-specific lint errors:
+
+- `playwright/no-nth-methods` — replace `.first()` / `.last()` / `.nth()` with `.filter()`, `allInnerTexts()[0]`, or CSS `:nth-child()` selectors
+- `playwright/no-force-option` — do not pass `{ force: true }` to clicks; use `.focus()` for plain textareas or the Monaco API for Monaco editors (see Monaco section below)
+- `playwright/no-wait-for-timeout` — replace `waitForTimeout` with `toBeVisible({ timeout })` or `toBeHidden({ timeout })`
+- `playwright/no-conditional-in-test` — replace `if (await locator.isVisible())` guards with `locator.click().catch(() => {})` or equivalent non-conditional patterns
+- `playwright/expect-expect` — if all assertions are inside a helper function, add at least one direct `expect()` call visible to ESLint in the test body
+
+#### EUI ComboBox (index / data-view selector)
+
+EUI's async ComboBox debounces `onSearchChange` by 250 ms. `fill()` sends a programmatic value change that does **not** trigger this handler — the listbox never opens.
+
+```ts
+// ✅ correct
+await indexCombo.locator('[data-test-subj="comboBoxInput"]').click();   // open the box
+await indexCombo
+  .locator('[data-test-subj="comboBoxSearchInput"]')
+  .pressSequentially('my-index-prefix', { delay: 50 });                // fires keyboard events
+const option = page.locator('.euiComboBoxOption[title="my-index-name"]');
+await option.waitFor({ state: 'visible', timeout: 30_000 });
+await option.click();
+
+// ❌ wrong — fill() bypasses the debounce; listbox never appears
+await indexInput.fill('my-index-name');
+await page.locator('[role="listbox"] [role="option"]:first-child').click(); // also banned: no-nth-methods
+```
+
+**Why a partial prefix?** `getIndexOptions()` always appends a "Choose…" entry whose title equals the exact typed text. If you type the full index name, both the "Based on your data views" result and the "Choose…" entry get the same `title` attribute → Playwright strict-mode violation. Type a prefix short enough that the two entries have distinct titles.
+
+**`<select>` time-field options:** `<option>` elements inside a `<select>` are never "visible" in Playwright — use `{ state: 'attached' }`:
+
+```ts
+await timeFieldSelect.locator('option:nth-child(2)').waitFor({ state: 'attached' });
+await timeFieldSelect.selectOption({ index: 1 });
+```
+
+#### Monaco editors
+
+`fill()` and `focus()` on the hidden Monaco textarea do **not** reliably trigger React re-renders. The textarea is obscured by Monaco's own view layers, so `{ force: true }` is both fragile and banned by `playwright/no-force-option`.
+
+Use the Monaco JS API instead:
+
+```ts
+// Single editor on the page (e.g. queryJsonEditor)
+await page.locator('[data-test-subj="queryJsonEditor"]').waitFor({ state: 'visible' });
+await page.evaluate((v) => {
+  const editor = (window as any).MonacoEnvironment?.monaco?.editor;
+  if (editor) editor.getModels().forEach((m) => m.setValue(v));
+}, newValue);
+
+// Multiple editors on the page (e.g. DSL filter popover + main editor)
+// target the most recently created instance
+await page.evaluate((v) => {
+  const monaco = (window as any).MonacoEnvironment?.monaco?.editor;
+  if (monaco) {
+    const editors = monaco.getEditors();
+    editors[editors.length - 1]?.getModel()?.setValue(v);
+  }
+}, dslFilterValue);
+```
+
+After setting a Monaco value, buttons that depend on it (e.g. "Save filter") may be below the viewport — call `.scrollIntoViewIfNeeded()` before clicking.
+
+#### Tokenized / OR-based search results
+
+Some Kibana list UIs use token-based OR search. A search for `my-rule-1234` may also return `other-rule-1234` because they share the `1234` token. This causes:
+- `toHaveCount(1)` failures when extra rows appear
+- Wrong-row actions when an unscoped `collapsedItemActions` click targets the first matching element
+
+Scope action locators to the specific row using `.filter()`:
+
+```ts
+const row = page
+  .locator('[data-test-subj^="rule-row"]')
+  .filter({ has: page.locator(`[title="${ruleName}"]`) });
+
+await row.locator('[data-test-subj="collapsedItemActions"]').click(); // targets only this row
+```
+
+When two test entities are created simultaneously and their names must not share tokens, use UUID-based names:
+
+```ts
+import { randomUUID } from 'node:crypto';
+const r1Name = `clearfind-${randomUUID()}`;
+const r2Name = `clearcheck-${randomUUID()}`;
+```
+
+#### EUI filter dropdowns stay open between clicks
+
+EUI multiselect filter dropdowns stay open after an option click. `.euiBasicTable:not(.euiBasicTable-loading)` waitFor resolves too early and causes stale count assertions. Use `toHaveCount` (which auto-retries) directly after each click instead:
+
+```ts
+// ✅ correct
+await page.testSubj.click('ruleStatusFilterButton');          // open once
+await page.testSubj.click('ruleStatusFilterOption-enabled');
+await expect(getTableRows(page)).toHaveCount(2);              // auto-retries
+await page.testSubj.click('ruleStatusFilterOption-disabled');
+await expect(getTableRows(page)).toHaveCount(4);              // dropdown still open
+await page.testSubj.click('ruleStatusFilterButton');          // close at end
+```
+
+After a full page refresh (navigate away and back), dropdowns reset — re-open before clicking options.
+
+#### Client-side-filtered list pages
+
+Some Kibana list pages (connectors, saved objects) load all items once at page load and filter client-side. Create API resources **before** navigating to the page:
+
+```ts
+// ✅ connector is in the initial snapshot
+const created = await apiServices.alerting.connectors.create({ ... });
+await page.goto(kbnUrl.get(CONNECTORS_APP_PATH));
+
+// ❌ connector created after page load is invisible until reload
+await page.goto(kbnUrl.get(CONNECTORS_APP_PATH));
+const created = await apiServices.alerting.connectors.create({ ... });
+```
+
+#### Form dirty-state detection
+
+When a test fills a form field and immediately clicks Cancel expecting a "discard changes?" confirmation modal, use `pressSequentially()` instead of `fill()`. `fill()` may not fire the synthetic events that mark the form as dirty before the cancel click lands:
+
+```ts
+const nameInput = page.testSubj.locator('ruleDetailsNameInput');
+await nameInput.click();
+await nameInput.pressSequentially('any-change');
+await page.testSubj.click('rulePageFooterCancelButton');
+await expect(page.testSubj.locator('confirmRuleCloseModal')).toBeVisible();
+```
+
+#### Modal overlay race between sequential tests
+
+Some Kibana modals use an EUI overlay mask that can persist long enough to block the next test's first click. When a test only needs to verify the re-enable/re-enable path (not the disable modal itself), trigger the state change via API to avoid the modal entirely:
+
+```ts
+await kbnClient.request({ method: 'POST', path: `/api/alerting/rule/${id}/_disable`, ... });
+// now test the UI re-enable flow without an overlay race
+```
+
 #### Scout API auth (`cookieHeader` vs API key)
 
 For general Scout API auth patterns (`requestAuth`, `samlAuth`, common headers, code examples), see [Authentication in Scout API tests](../../../../docs/extend/scout/api-auth.md).
@@ -206,6 +352,9 @@ Once the new specs typecheck and run, control returns to the parent skill. Step 
 
 ## Common mistakes
 
+- **Not running ESLint before committing** — Scout spec files have strict lint rules (`no-force-option`, `no-nth-methods`, `no-wait-for-timeout`, `no-conditional-in-test`). Run `node scripts/eslint <changed-file>` and fix all errors before pushing.
+- **Using `fill()` for EUI ComboBox or Monaco editor inputs** — `fill()` does not trigger debounced React `onSearchChange` handlers or Monaco model updates. Use `pressSequentially({ delay: 50 })` for comboboxes and the Monaco JS API (`window.MonacoEnvironment?.monaco?.editor`) for code editors.
+- **Using `{ force: true }` on Monaco textareas** — banned by `playwright/no-force-option`; use the Monaco API instead.
 - Migrating data validation UI tests instead of converting to API tests.
 - Forgetting to split `loadTestFile` suites into separate Scout specs.
 - Forgetting UI tags (required; Scout validates UI tags at runtime). API tests should also be tagged so CI/discovery can select the right deployment target.

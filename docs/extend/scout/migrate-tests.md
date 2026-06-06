@@ -56,6 +56,30 @@ Some helpful questions to ask while reviewing:
 
 :::::::::
 
+## Common UI interaction pitfalls [common-ui-pitfalls]
+
+Knowing these before you start saves a round-trip through CI.
+
+### `fill()` does not trigger debounced React handlers
+
+EUI's async ComboBox and Monaco code editors both use debounced change handlers. `fill()` bypasses them, so the UI never reacts. Use `pressSequentially({ delay: 50 })` for comboboxes, and the Monaco JS API (`window.MonacoEnvironment?.monaco?.editor`) for code editors. See [`execute-plan.md`](https://github.com/elastic/kibana/blob/main/.agents/skills/scout-migrate-from-ftr/references/execute-plan.md) for code examples.
+
+### Hidden `<option>` elements
+
+`<option>` elements inside a `<select>` are always "hidden" in Playwright. Use `{ state: 'attached' }` when waiting for them, not `{ state: 'visible' }`.
+
+### Client-side-filtered list pages
+
+Some Kibana pages (connectors list, saved objects) load all items once at page load and filter client-side. Create API resources **before** calling `page.goto()`. Resources created after navigation are invisible until the page reloads.
+
+### Tokenized / OR-based search in list UIs
+
+Some list UIs use token-based OR search. Searching for `my-rule-1234` may also return `other-rule-1234` because they share the token `1234`. If a test creates multiple items and then searches by name, scope action locators to a specific row using `.filter({ has: page.locator('[title="..."]') })` rather than relying on `toHaveCount(1)`.
+
+### Always lint before committing
+
+Scout spec files have strict ESLint rules. Run `node scripts/eslint <changed-file>` after every change and fix all errors before pushing. Common rules: `no-force-option`, `no-nth-methods`, `no-wait-for-timeout`, `no-conditional-in-test`.
+
 ## Let your AI agent help [ai-assist]
 
 Agentic skills in Kibana can take most of the toil out of migration. Your coding agent should pick up the skills below automatically. As always, **review the AI-generated output manually**.
