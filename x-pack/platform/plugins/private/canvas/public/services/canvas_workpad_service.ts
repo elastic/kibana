@@ -84,7 +84,7 @@ class CanvasWorkpadService {
       }
     );
 
-    return { css: DEFAULT_WORKPAD_CSS, variables: [], ...workpad };
+    return { ...workpad, css: workpad.css ?? DEFAULT_WORKPAD_CSS, variables: workpad.variables ?? [] };
   }
 
   public async export(id: string) {
