@@ -748,48 +748,33 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
     await searchRules(page, uniqueTag);
     await expect(getTableRows(page)).toHaveCount(4);
 
+    // The dropdown stays open between clicks; use toHaveCount (auto-retry) instead
+    // of waitFor (unreliable with fast table reloads).
+
     // Select only enabled → 2 rules (enabled + snoozed)
     await page.testSubj.click('ruleStatusFilterButton');
     await page.testSubj.click('ruleStatusFilterOption-enabled');
-    await page
-      .locator('.euiBasicTable[data-test-subj="rulesList"]:not(.euiBasicTable-loading)')
-      .waitFor();
     await expect(getTableRows(page)).toHaveCount(2);
 
     // Add disabled → all 4
     await page.testSubj.click('ruleStatusFilterOption-disabled');
-    await page
-      .locator('.euiBasicTable[data-test-subj="rulesList"]:not(.euiBasicTable-loading)')
-      .waitFor();
     await expect(getTableRows(page)).toHaveCount(4);
 
-    // Deselect enabled → only disabled
+    // Deselect enabled → only disabled (2)
     await page.testSubj.click('ruleStatusFilterOption-enabled');
-    await page
-      .locator('.euiBasicTable[data-test-subj="rulesList"]:not(.euiBasicTable-loading)')
-      .waitFor();
     await expect(getTableRows(page)).toHaveCount(2);
 
-    // Deselect disabled, select snoozed → only snoozed
+    // Deselect disabled, select snoozed → only snoozed (2)
     await page.testSubj.click('ruleStatusFilterOption-disabled');
     await page.testSubj.click('ruleStatusFilterOption-snoozed');
-    await page
-      .locator('.euiBasicTable[data-test-subj="rulesList"]:not(.euiBasicTable-loading)')
-      .waitFor();
     await expect(getTableRows(page)).toHaveCount(2);
 
-    // Add disabled → disabled + snoozed (3 rules)
+    // Add disabled → disabled + snoozed (3)
     await page.testSubj.click('ruleStatusFilterOption-disabled');
-    await page
-      .locator('.euiBasicTable[data-test-subj="rulesList"]:not(.euiBasicTable-loading)')
-      .waitFor();
     await expect(getTableRows(page)).toHaveCount(3);
 
     // Add enabled → all 4
     await page.testSubj.click('ruleStatusFilterOption-enabled');
-    await page
-      .locator('.euiBasicTable[data-test-subj="rulesList"]:not(.euiBasicTable-loading)')
-      .waitFor();
     await expect(getTableRows(page)).toHaveCount(4);
 
     // Close filter panel
