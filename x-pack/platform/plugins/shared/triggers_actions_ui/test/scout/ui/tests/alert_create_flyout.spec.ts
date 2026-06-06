@@ -205,11 +205,16 @@ test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
     );
 
     try {
-      // Navigate to rules list and open edit flyout
+      // Navigate to rules list and open edit flyout. Scope the action menu to
+      // the row for *this* rule — clicking a bare `selectActionButton` would hit
+      // the first row in the DOM, which can be a different rule if the search
+      // filter hasn't fully applied yet.
       await page.gotoApp('rules');
       await page.testSubj.click('rulesTab');
       await searchRules(page, ruleName);
-      await page.testSubj.click('selectActionButton');
+      const ruleRow = page.locator('[data-test-subj="rulesList"] tr').filter({ hasText: ruleName });
+      await expect(ruleRow).toHaveCount(1);
+      await ruleRow.locator('[data-test-subj="selectActionButton"]').click();
       await page.testSubj.click('editRule');
 
       // Add a second Slack action
@@ -220,14 +225,16 @@ test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
       const allTextAreas = await page.testSubj.locator('messageTextArea').all();
       await allTextAreas[allTextAreas.length - 1].fill('myUniqueKey1');
 
-      // Delete the FIRST action item
-      await page
-        .locator(
-          '[data-test-subj="ruleActionsItem"]:first-child [data-test-subj="ruleActionsItemDeleteButton"]'
-        )
-        .click();
+      await expect(page.testSubj.locator('ruleActionsItem')).toHaveCount(2);
+
+      // Delete the FIRST action item (the 'myUniqueKey' one). Each action item
+      // is the first child of its own wrapper, so a `:first-child` CSS selector
+      // matches every delete button — positional `.first()` is the correct tool.
+      // eslint-disable-next-line playwright/no-nth-methods
+      await page.testSubj.locator('ruleActionsItemDeleteButton').first().click();
 
       // Only one action remains; it should be 'myUniqueKey1' (the second action)
+      await expect(page.testSubj.locator('ruleActionsItem')).toHaveCount(1);
       await expect(page.testSubj.locator('messageTextArea')).toHaveCount(1);
       await expect(page.testSubj.locator('messageTextArea')).toHaveValue('myUniqueKey1');
     } finally {
@@ -416,30 +423,19 @@ test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
     await page.testSubj.click('addFilter');
     await page.testSubj.click('editQueryDSL');
     await page.testSubj.locator('addFilterPopover').waitFor({ state: 'visible' });
-    // Target the most recently created Monaco editor (the filter DSL editor)
-    // via getEditors() so we don't overwrite the main query editor.
-    await page.evaluate((v) => {
-      const monaco = (
-        window as {
-          MonacoEnvironment?: {
-            monaco?: {
-              editor?: {
-                getEditors(): Array<{ getModel(): { setValue(s: string): void } | null }>;
-              };
-            };
-          };
-        }
-      ).MonacoEnvironment?.monaco?.editor;
-      if (monaco) {
-        const editors = monaco.getEditors();
-        const last = editors[editors.length - 1];
-        last?.getModel()?.setValue(v);
-      }
-    }, dslFilter);
+    // The DSL filter popover hosts the only Monaco editor in the index-threshold
+    // rule form, so setEditorValue (which sets every model and retries until the
+    // value sticks) reliably populates it and fires the React onChange that
+    // enables "Add filter". A one-shot getEditors() setValue can race the
+    // editor's mount and silently leave the editor empty.
+    await setEditorValue(page, 'addFilterPopover', dslFilter);
     await page.testSubj.locator('saveFilter').scrollIntoViewIfNeeded();
+    await expect(page.testSubj.locator('saveFilter')).toBeEnabled({ timeout: 10_000 });
     await page.testSubj.click('saveFilter');
-    // A filter badge should now be present
-    await expect(page.locator('[data-test-subj="filter"]')).toHaveCount(1, { timeout: 5_000 });
+    // A filter badge should now be present in the filter pills group
+    await expect(page.locator('[data-test-subj="filter-items-group"] > *')).toHaveCount(1, {
+      timeout: 5_000,
+    });
 
     try {
       await page.testSubj.click('rulePageFooterSaveButton');
@@ -448,15 +444,23 @@ test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
         { timeout: 15_000 }
       );
 
-      // Re-open rule for editing and verify the DSL filter persists
+      // Re-open rule for editing and verify the DSL filter persists. Scope the
+      // action menu to this rule's row so we don't edit a different row that is
+      // still visible before the search filter applies.
       await page.gotoApp('rules');
       await page.testSubj.click('rulesTab');
       await searchRules(page, alertName);
-      await page.testSubj.click('selectActionButton');
+      const ruleRow = page
+        .locator('[data-test-subj="rulesList"] tr')
+        .filter({ hasText: alertName });
+      await expect(ruleRow).toHaveCount(1);
+      await ruleRow.locator('[data-test-subj="selectActionButton"]').click();
       await page.testSubj.click('editRule');
       await page.testSubj.locator('globalQueryBar').scrollIntoViewIfNeeded();
-      // DSL filter badge should still be present
-      await expect(page.locator('[data-test-subj="filter"]')).toHaveCount(1, { timeout: 5_000 });
+      // DSL filter badge should still be present in the filter pills group
+      await expect(page.locator('[data-test-subj="filter-items-group"] > *')).toHaveCount(1, {
+        timeout: 5_000,
+      });
     } finally {
       await deleteRuleByName(kbnClient, alertName);
     }
@@ -667,8 +671,10 @@ test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
       .catch(() => {});
   });
 
-  test('should add filter', async ({ page }) => {
-    await page.gotoApp('triggersActionsAlerts');
+  test('should add filter', async ({ page, kbnUrl }) => {
+    // The Stack Alerts page is a management sub-route, not a standalone app, so
+    // navigate by URL (mirrors the FTR `triggersActionsAlerts` tab click).
+    await page.goto(kbnUrl.get('/app/management/insightsAndAlerting/triggersActionsAlerts'));
     await page.testSubj.locator('addFilter').waitFor({ state: 'visible', timeout: 15_000 });
 
     const filter = JSON.stringify({
@@ -677,13 +683,16 @@ test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
 
     await page.testSubj.click('addFilter');
     await page.testSubj.click('editQueryDSL');
-    const dslTextarea = page.testSubj.locator('addFilterPopover').locator('textarea');
-    await dslTextarea.waitFor({ state: 'attached' });
-    await dslTextarea.click();
-    await page.keyboard.press('Control+a');
-    await page.keyboard.type(filter);
+    await page.testSubj.locator('addFilterPopover').waitFor({ state: 'visible' });
+    // The DSL popover hosts the only Monaco editor on the alerts page; clicking
+    // its hidden textarea is intercepted by Monaco's view layer, so set the
+    // value through the Monaco model (which fires the React onChange).
+    await setEditorValue(page, 'addFilterPopover', filter);
+    await expect(page.testSubj.locator('saveFilter')).toBeEnabled({ timeout: 10_000 });
     await page.testSubj.click('saveFilter');
 
-    await expect(page.locator('[data-test-subj="filter"]')).toHaveCount(1, { timeout: 5_000 });
+    await expect(page.locator('[data-test-subj="filter-items-group"] > *')).toHaveCount(1, {
+      timeout: 5_000,
+    });
   });
 });
