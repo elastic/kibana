@@ -112,9 +112,11 @@ export class FilterBar {
       'Filter popover should close after saving'
     ).toBeHidden();
 
+    // Verify the just-added filter badge appears. Scope by field key so the
+    // assertion stays strict-mode-safe when the bar already has other filters.
     await expect(
-      this.page.testSubj.locator('^filter-badge'),
-      'New filter badge should be displayed'
+      this.page.testSubj.locator(`~filter-key-${options.field}`),
+      `New filter badge for "${options.field}" should be displayed`
     ).toBeVisible();
   }
 
