@@ -721,15 +721,14 @@ export class DiscoverApp {
       // Without this, a stray `extension.raw` autocomplete or stale
       // search response is invisible in the assertion error.
       const requests = await dumpMatchingRequests();
-      // eslint-disable-next-line no-console
-      console.error(
-        `[expectSearchRequestCount] expected ${expectedCount} got ${lastCount}; entries:\n${JSON.stringify(
+      const original = err instanceof Error ? err.message : String(err);
+      throw new Error(
+        `${original}\n[expectSearchRequestCount] expected ${expectedCount} got ${lastCount}; entries:\n${JSON.stringify(
           requests,
           null,
           2
         )}`
       );
-      throw err;
     }
   }
 
