@@ -1,5 +1,5 @@
 {
-  "sha1": "1198d846efb2e4afdd26ee6d18d1facfa45977e8",
+  "sha1": "97f6ee77c236a21290b20802b865b8024e255f6c",
   "tests": [
     {
       "id": "5e91b4cbd08e25e-f2cd2d3cdc77643",
@@ -974,6 +974,22 @@
       }
     },
     {
+      "id": "6ab0e55ecb54392-1c6000de23b1820",
+      "title": "Service map embeddable adds a Service map panel with filters + sync toggle and saves the dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_embeddable.spec.ts",
+        "line": 244,
+        "column": 9
+      }
+    },
+    {
       "id": "431bbf1927933f1-820ffa8139e87c1",
       "title": "Service map renders page with selected date range",
       "expectedStatus": "passed",
@@ -1387,6 +1403,54 @@
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
         "line": 217,
         "column": 11
+      }
+    },
+    {
+      "id": "fb951fb128dda84-c5d46582a2eba63",
+      "title": "Metrics Tab - Instrumentation Switching narrows sequential migration ranges from the mixed instrumentation callout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_instrumentation_switching.spec.ts",
+        "line": 26,
+        "column": 9
+      }
+    },
+    {
+      "id": "fb951fb128dda84-f23c65b841b8134",
+      "title": "Metrics Tab - Instrumentation Switching swaps chart sets for single-instrumentation ranges and shows no-data state",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_instrumentation_switching.spec.ts",
+        "line": 84,
+        "column": 9
+      }
+    },
+    {
+      "id": "fb951fb128dda84-dee252a0579642b",
+      "title": "Metrics Tab - Instrumentation Switching shows overlap warning when classic APM and OpenTelemetry metrics overlap",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_instrumentation_switching.spec.ts",
+        "line": 133,
+        "column": 9
       }
     },
     {
@@ -2639,7 +2703,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/trace_waterfall_flyout.spec.ts",
-        "line": 81,
+        "line": 89,
         "column": 9
       }
     },
@@ -2655,7 +2719,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/trace_waterfall_flyout.spec.ts",
-        "line": 93,
+        "line": 101,
         "column": 9
       }
     },
