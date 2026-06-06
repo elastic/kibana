@@ -69,13 +69,20 @@ spaceTest.describe('Discover - histogram chart state', { tag: tags.stateful.all 
       await pageObjects.discover.saveSearch(savedSearch);
       await pageObjects.discover.waitUntilSearchingHasFinished();
 
+      // Scout's `scoutSpace.savedObjects.load` imports with `createNewCopies:
+      // true`, so the imported data view's id is a regenerated UUID, not the
+      // archive's literal `long-window-logstash-*`. Read the current id off
+      // the chart's `data-request-data` (or via the Discover PO) and assert
+      // against that.
+      const expectedDataViewId = await pageObjects.discover.getCurrentDataViewId();
+
       await pageObjects.discover.chooseBreakdownField('extension.keyword');
       await pageObjects.discover.setChartInterval('Second');
 
       await expect
         .poll(() => readHistogramRequestData(page))
         .toMatchObject({
-          dataViewId: LONG_WINDOW_LOGSTASH_DATA_VIEW,
+          dataViewId: expectedDataViewId,
           timeField: '@timestamp',
           timeInterval: 's',
           breakdownField: 'extension.keyword',
@@ -89,7 +96,7 @@ spaceTest.describe('Discover - histogram chart state', { tag: tags.stateful.all 
       await expect
         .poll(() => readHistogramRequestData(page))
         .toMatchObject({
-          dataViewId: LONG_WINDOW_LOGSTASH_DATA_VIEW,
+          dataViewId: expectedDataViewId,
           timeField: '@timestamp',
           timeInterval: 'auto',
         });
