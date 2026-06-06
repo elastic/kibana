@@ -73,6 +73,27 @@ const computeCumulativeRefs = (
   return values.length > 0 ? values : undefined;
 };
 
+const getAttachmentRefsKey = (attachmentRefs: AttachmentVersionRef[] | undefined): string =>
+  attachmentRefs
+    ?.map(
+      ({ attachment_id: attachmentId, version }) => `${encodeURIComponent(attachmentId)}:${version}`
+    )
+    .join('|') ?? '';
+
+const parseAttachmentRefsKey = (attachmentRefsKey: string): AttachmentVersionRef[] | undefined => {
+  if (!attachmentRefsKey) {
+    return undefined;
+  }
+
+  return attachmentRefsKey.split('|').map((refKey) => {
+    const [encodedAttachmentId, version] = refKey.split(':');
+    return {
+      attachment_id: decodeURIComponent(encodedAttachmentId),
+      version: Number(version),
+    };
+  });
+};
+
 export const RoundLayout: React.FC<RoundLayoutProps> = ({
   isCurrentRound,
   scrollContainerHeight,
@@ -109,10 +130,17 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
     pendingPrompts.length > 0 &&
     !isResuming;
 
-  const cumulativeAttachmentRefs = useMemo(() => {
-    if (!response?.message) return undefined;
-    return computeCumulativeRefs(allRounds, roundIndex);
+  const cumulativeAttachmentRefsKey = useMemo(() => {
+    if (!response?.message) {
+      return '';
+    }
+    return getAttachmentRefsKey(computeCumulativeRefs(allRounds, roundIndex));
   }, [allRounds, roundIndex, response?.message]);
+
+  const attachmentRefs = useMemo(
+    () => parseAttachmentRefsKey(cumulativeAttachmentRefsKey),
+    [cumulativeAttachmentRefsKey]
+  );
 
   const confirmationPrompts = useMemo(
     () => (pendingPrompts ?? []).filter(isConfirmationPrompt),
@@ -192,7 +220,7 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
           <RoundEvents
             steps={steps}
             conversationAttachments={conversationAttachments}
-            attachmentRefs={cumulativeAttachmentRefs}
+            attachmentRefs={attachmentRefs}
             conversationId={conversationId}
           />
         </EuiFlexItem>
@@ -261,7 +289,7 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
               isLoading={isLoadingCurrentRound}
               isLastRound={isCurrentRound}
               conversationAttachments={conversationAttachments}
-              attachmentRefs={cumulativeAttachmentRefs}
+              attachmentRefs={attachmentRefs}
               conversationId={conversationId}
               rawRound={rawRound}
             />
