@@ -130,19 +130,22 @@ export function SignificantEventsDiscoveryProvider({
 
   // On first mount, treat an already-terminal cached status as already notified,
   // so a completion that happened before this session (or in a prior mount) does
-  // not fire a toast now. Runs once.
+  // not fire a toast now. Runs once per data arrival.
+  // Exception: skip executions we triggered ourselves (trackedExecutionId match) —
+  // those must fire the toast even if InProgress+Completed arrive in a single batch.
   const didSeedNotifiedRef = useRef(false);
   useEffect(() => {
     if (didSeedNotifiedRef.current) return;
-    // Don't mark as seeded until data is available — if we set the ref on the
-    // first render (when data is undefined), the seed is skipped when real data
-    // arrives and the toast effect fires a spurious completion toast.
     if (!data?.status) return;
     didSeedNotifiedRef.current = true;
-    if (isTerminalStatus(data.status) && data.executionId) {
+    if (
+      isTerminalStatus(data.status) &&
+      data.executionId &&
+      data.executionId !== trackedExecutionId
+    ) {
       queryClient.setQueryData(SIGNIFICANT_EVENT_DISCOVERY_NOTIFIED, data.executionId);
     }
-  }, [data?.status, data?.executionId, queryClient]);
+  }, [data?.status, data?.executionId, queryClient, trackedExecutionId]);
 
   // Clear the optimistic bridge once the poll reports a status for the run we
   // triggered — from then on the server status alone drives isRunning.
