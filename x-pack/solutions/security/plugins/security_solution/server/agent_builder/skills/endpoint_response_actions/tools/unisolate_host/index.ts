@@ -69,7 +69,7 @@ export const unisolateHostTool = (
           };
         }
 
-        const endpointIds = agents.agents.map((a: Record<string, string>) => a.id);
+        const endpointIds = agents.agents.map((a) => a.id);
 
         // Note: the ResponseActionsClient method is called `release`, not `unisolate`
         const actionDetails = await responseActionsClient.release(
