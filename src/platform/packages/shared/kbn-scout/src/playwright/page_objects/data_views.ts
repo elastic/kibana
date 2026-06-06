@@ -84,11 +84,27 @@ export class DataViews {
     await this.page.testSubj.click('dataview-create-new');
     await expect(this.editorFlyout).toBeVisible();
 
-    // Fill the title and wait for async pattern-validation to settle. The
-    // input flips `data-is-validating` 0↔1 while the request is in flight.
-    await this.titleInput.fill(name);
-    await expect(this.titleInput).toHaveAttribute('data-is-validating', '0', { timeout: 30_000 });
-    await expect(this.titleInput).not.toHaveAttribute('aria-invalid', 'true');
+    // Mirror FTR's retry loop: re-fill, wait for the async pattern
+    // validation to settle, then re-check `aria-invalid`. A single
+    // "fill once and check" race-loses to the editor's debounced
+    // validator (which can leave `data-is-validating` at "0" briefly
+    // before flipping to "1" while it queries indices, then back to
+    // "0" with the result). Retrying defensively also matches what
+    // tests need when the request to /api/index_patterns/_fields_for_wildcard
+    // is slow on a cold cluster.
+    await expect(async () => {
+      await this.titleInput.click();
+      await this.titleInput.press('ControlOrMeta+a');
+      await this.titleInput.pressSequentially(name);
+      // Give the debounced validator a chance to start.
+      await this.page.waitForTimeout(150);
+      await expect(this.titleInput).toHaveAttribute('data-is-validating', '0', {
+        timeout: 10_000,
+      });
+      await expect(this.titleInput).not.toHaveAttribute('aria-invalid', 'true', {
+        timeout: 1_000,
+      });
+    }).toPass({ timeout: 30_000 });
 
     // Wait until the timestamp combobox finishes loading (it queries the
     // index for date fields). Then either pick the matching field, force

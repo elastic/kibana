@@ -52,6 +52,12 @@ spaceTest.describe('Discover - URL state Lens sync', { tag: tags.stateful.all },
       await page.goto(kbnUrl.app('lens'));
       await pageObjects.lens.waitForLensApp();
 
+      // Lens can boot with an unrelated default data view (e.g. "Beats
+      // Monitoring") even when `defaultIndex` is set, because the Lens
+      // editor caches its last-used view. Force `logstash-*` so the
+      // `extension.raw` field is available when we add the filter below.
+      await pageObjects.dataViews.switchTo(testData.DEFAULT_DATA_VIEW);
+
       await pageObjects.datePicker.setAbsoluteRange({
         from: DEFAULT_TIME_RANGE_DISPLAY.start,
         to: DEFAULT_TIME_RANGE_DISPLAY.end,
