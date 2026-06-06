@@ -653,6 +653,23 @@ export class DiscoverApp {
           ).length;
       }, endpointSuffix);
 
+    const dumpMatchingRequests = () =>
+      this.page.evaluate((suffix) => {
+        return performance
+          .getEntries()
+          .filter(
+            (entry) =>
+              ['fetch', 'xmlhttprequest'].includes(
+                (entry as PerformanceResourceTiming).initiatorType
+              ) && entry.name.endsWith(suffix)
+          )
+          .map((entry) => ({
+            name: entry.name,
+            startTime: Math.round(entry.startTime),
+            duration: Math.round(entry.duration),
+          }));
+      }, endpointSuffix);
+
     const settle = async () => {
       await this.waitUntilSearchingHasFinished();
       // Chart visibility is optional (e.g. tests that hide the chart);
@@ -683,19 +700,37 @@ export class DiscoverApp {
       await cb();
     }
 
-    await expect
-      .poll(
-        async () => {
-          await settle();
-          return countMatchingRequests();
-        },
-        {
-          message: `expected ${expectedCount} request(s) to ${endpointSuffix}`,
-          timeout: 10_000,
-          intervals: [500, 500, 500, 500, 500, 500, 500, 500, 500, 500],
-        }
-      )
-      .toBe(expectedCount);
+    let lastCount = -1;
+    try {
+      await expect
+        .poll(
+          async () => {
+            await settle();
+            lastCount = await countMatchingRequests();
+            return lastCount;
+          },
+          {
+            message: `expected ${expectedCount} request(s) to ${endpointSuffix}`,
+            timeout: 10_000,
+            intervals: [500, 500, 500, 500, 500, 500, 500, 500, 500, 500],
+          }
+        )
+        .toBe(expectedCount);
+    } catch (err) {
+      // Surface the actual request URLs to make the failure debuggable.
+      // Without this, a stray `extension.raw` autocomplete or stale
+      // search response is invisible in the assertion error.
+      const requests = await dumpMatchingRequests();
+      // eslint-disable-next-line no-console
+      console.error(
+        `[expectSearchRequestCount] expected ${expectedCount} got ${lastCount}; entries:\n${JSON.stringify(
+          requests,
+          null,
+          2
+        )}`
+      );
+      throw err;
+    }
   }
 
   /**
