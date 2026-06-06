@@ -44,19 +44,48 @@ const defineEsQueryAlert = async (page: ScoutPage, alertName: string) => {
   const indexOption = page.locator(`.euiComboBoxOption[title="${THRESHOLD_TEST_INDEX}"]`);
   await indexOption.waitFor({ state: 'visible', timeout: 30_000 });
   await indexOption.click();
+  // The time-field <select> is populated asynchronously after the index is
+  // chosen. Select the first real field by its value and assert it stuck, so a
+  // late field re-fetch can't silently reset the <select> to the placeholder —
+  // which would leave the form invalid and the Test query button disabled.
   const timeFieldSelect = page.testSubj.locator('thresholdAlertTimeFieldSelect');
-  await timeFieldSelect.locator('option:nth-child(2)').waitFor({ state: 'attached' });
-  await timeFieldSelect.selectOption({ index: 1 });
+  const firstFieldOption = timeFieldSelect.locator('option:nth-child(2)');
+  await firstFieldOption.waitFor({ state: 'attached' });
+  const firstFieldValue = await firstFieldOption.getAttribute('value');
+  if (!firstFieldValue) {
+    throw new Error('No time-field options available on thresholdAlertTimeFieldSelect');
+  }
+  await timeFieldSelect.selectOption(firstFieldValue);
+  await expect(timeFieldSelect).toHaveValue(firstFieldValue);
   await page.testSubj.click('closePopover');
   await page.testSubj.locator('ruleDetailsNameInput').click();
 };
 
 const setEditorValue = async (page: ScoutPage, testSubj: string, value: string) => {
-  const textarea = page.locator(`[data-test-subj="${testSubj}"] textarea`);
-  await textarea.waitFor({ state: 'attached' });
-  await textarea.focus();
-  await page.keyboard.press('Control+a');
-  await page.keyboard.type(value);
+  await page.locator(`[data-test-subj="${testSubj}"]`).waitFor({ state: 'visible' });
+  // Use the Monaco API directly — clicking or focusing the textarea does not
+  // reliably trigger Monaco's internal model update for React to re-render.
+  // Retry until at least one model exists and holds the value: setValue() can
+  // otherwise fire before the model is registered / React's onChange listener
+  // is attached, silently dropping the change and leaving stale form state.
+  await expect(async () => {
+    const applied = await page.evaluate((v) => {
+      const editor = (
+        window as {
+          MonacoEnvironment?: {
+            monaco?: {
+              editor?: { getModels(): Array<{ setValue(s: string): void; getValue(): string }> };
+            };
+          };
+        }
+      ).MonacoEnvironment?.monaco?.editor;
+      const models = editor?.getModels() ?? [];
+      if (models.length === 0) return false;
+      models.forEach((m) => m.setValue(v));
+      return models.some((m) => m.getValue() === v);
+    }, value);
+    expect(applied).toBe(true);
+  }).toPass({ timeout: 15_000 });
 };
 
 const cancelRuleCreation = async (page: ScoutPage) => {
@@ -244,11 +273,7 @@ test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
       'test message {{alert.actionGroup}} some additional text {{rule.id}}'
     );
 
-    // Action settings: set throttle
-    await page.testSubj
-      .locator('ruleActionsItem')
-      .getByRole('button', { name: 'Settings' })
-      .click();
+    // Action settings: set throttle (Settings section auto-expands in the new accordion UI)
     await page.testSubj.click('notifyWhenSelect');
     await page.testSubj.click('onThrottleInterval');
     await page.testSubj.locator('throttleInput').fill('10');
@@ -260,7 +285,7 @@ test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
     await page.locator('[role="listbox"] [role="option"]:first-child').click();
     await page.testSubj.locator('filterOperatorList').locator('input').fill('is not');
     await page.locator('[role="listbox"] [role="option"]:first-child').click();
-    await page.testSubj.locator('filterParams').fill('fake-rule-id');
+    await page.testSubj.locator('filterParams').locator('input').fill('fake-rule-id');
     await page.testSubj.click('saveFilter');
     await page.testSubj.locator('queryInput').fill('_id: *');
 
@@ -312,11 +337,7 @@ test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
     await page.testSubj.locator('messageVariablesSelectableSearch').fill('rule.id');
     await page.testSubj.click('variableMenuButton-rule.id');
 
-    // Action settings: throttle
-    await page.testSubj
-      .locator('ruleActionsItem')
-      .getByRole('button', { name: 'Settings' })
-      .click();
+    // Action settings: throttle (Settings section auto-expands in the new accordion UI)
     await page.testSubj.click('notifyWhenSelect');
     await page.testSubj.click('onThrottleInterval');
     await page.testSubj.locator('throttleInput').fill('10');
@@ -329,7 +350,7 @@ test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
     await page.locator('[role="listbox"] [role="option"]:first-child').click();
     await page.testSubj.locator('filterOperatorList').locator('input').fill('is not');
     await page.locator('[role="listbox"] [role="option"]:first-child').click();
-    await page.testSubj.locator('filterParams').fill('fake-rule-id');
+    await page.testSubj.locator('filterParams').locator('input').fill('fake-rule-id');
     // Add AND condition
     await page.testSubj.click('add-and-filter');
     // Second condition: kibana.alert.action_group exists
@@ -382,11 +403,7 @@ test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
     await page.testSubj.click('ruleActionsAddActionButton');
     await selectConnectorInModal(page, slackConnectorName);
 
-    // Action settings: throttle
-    await page.testSubj
-      .locator('ruleActionsItem')
-      .getByRole('button', { name: 'Settings' })
-      .click();
+    // Action settings: throttle (Settings section auto-expands in the new accordion UI)
     await page.testSubj.click('notifyWhenSelect');
     await page.testSubj.click('onThrottleInterval');
     await page.testSubj.locator('throttleInput').fill('10');
@@ -398,11 +415,28 @@ test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
     });
     await page.testSubj.click('addFilter');
     await page.testSubj.click('editQueryDSL');
-    const dslTextarea = page.testSubj.locator('addFilterPopover').locator('textarea');
-    await dslTextarea.waitFor({ state: 'attached' });
-    await dslTextarea.focus();
-    await page.keyboard.press('Control+a');
-    await page.keyboard.type(dslFilter);
+    await page.testSubj.locator('addFilterPopover').waitFor({ state: 'visible' });
+    // Target the most recently created Monaco editor (the filter DSL editor)
+    // via getEditors() so we don't overwrite the main query editor.
+    await page.evaluate((v) => {
+      const monaco = (
+        window as {
+          MonacoEnvironment?: {
+            monaco?: {
+              editor?: {
+                getEditors(): Array<{ getModel(): { setValue(s: string): void } | null }>;
+              };
+            };
+          };
+        }
+      ).MonacoEnvironment?.monaco?.editor;
+      if (monaco) {
+        const editors = monaco.getEditors();
+        const last = editors[editors.length - 1];
+        last?.getModel()?.setValue(v);
+      }
+    }, dslFilter);
+    await page.testSubj.locator('saveFilter').scrollIntoViewIfNeeded();
     await page.testSubj.click('saveFilter');
     // A filter badge should now be present
     await expect(page.locator('[data-test-subj="filter"]')).toHaveCount(1, { timeout: 5_000 });
@@ -420,10 +454,6 @@ test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
       await searchRules(page, alertName);
       await page.testSubj.click('selectActionButton');
       await page.testSubj.click('editRule');
-      await page.testSubj
-        .locator('ruleActionsItem')
-        .getByRole('button', { name: 'Settings' })
-        .click();
       await page.testSubj.locator('globalQueryBar').scrollIntoViewIfNeeded();
       // DSL filter badge should still be present
       await expect(page.locator('[data-test-subj="filter"]')).toHaveCount(1, { timeout: 5_000 });
@@ -441,11 +471,7 @@ test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
     await selectConnectorInModal(page, slackConnectorName);
     await page.testSubj.locator('messageTextArea').fill('test message');
 
-    // Switch to recovered group via settings
-    await page.testSubj
-      .locator('ruleActionsItem')
-      .getByRole('button', { name: 'Settings' })
-      .click();
+    // Switch to recovered group via settings (Settings section auto-expands in accordion)
     await page.testSubj.click('ruleActionsSettingsSelectActionGroup');
     await page.testSubj.click('addNewActionConnectorActionGroup-recovered');
 
@@ -547,6 +573,9 @@ test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
     await defineEsQueryAlert(page, alertName);
 
     await setEditorValue(page, 'queryJsonEditor', '{"query":{"foo":""}}');
+    // The button is disabled while the form has validation errors (e.g. the
+    // index/time-field still settling); wait for it to enable before clicking.
+    await expect(page.testSubj.locator('testQuery')).toBeEnabled({ timeout: 15_000 });
     await page.testSubj.click('testQuery');
     await expect(page.testSubj.locator('testQuerySuccess')).toBeHidden();
     await expect(page.testSubj.locator('testQueryError')).toBeVisible({ timeout: 15_000 });
@@ -623,6 +652,9 @@ test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
     await defineEsQueryAlert(page, alertName);
 
     await setEditorValue(page, 'queryJsonEditor', '{"query":{"match_all":{}}}');
+    // The button is disabled while the form has validation errors (e.g. the
+    // index/time-field still settling); wait for it to enable before clicking.
+    await expect(page.testSubj.locator('testQuery')).toBeEnabled({ timeout: 15_000 });
     await page.testSubj.click('testQuery');
     await expect(page.testSubj.locator('testQuerySuccess')).toBeVisible({ timeout: 15_000 });
     await expect(page.testSubj.locator('testQueryError')).toBeHidden();
@@ -647,7 +679,7 @@ test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
     await page.testSubj.click('editQueryDSL');
     const dslTextarea = page.testSubj.locator('addFilterPopover').locator('textarea');
     await dslTextarea.waitFor({ state: 'attached' });
-    await dslTextarea.focus();
+    await dslTextarea.click();
     await page.keyboard.press('Control+a');
     await page.keyboard.type(filter);
     await page.testSubj.click('saveFilter');
