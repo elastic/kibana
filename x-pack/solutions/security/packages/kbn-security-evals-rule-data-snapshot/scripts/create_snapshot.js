@@ -19,6 +19,8 @@
  */
 
 /* eslint-disable no-console */
+/* eslint-disable import/no-dynamic-require */
+/* eslint-disable no-process-exit */
 
 const { Client } = require('@elastic/elasticsearch');
 

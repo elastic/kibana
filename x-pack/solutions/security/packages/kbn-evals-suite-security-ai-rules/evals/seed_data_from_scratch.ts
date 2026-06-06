@@ -14,6 +14,12 @@
  * episode ndjson.gz files from the Kibana repo.
  */
 
+/* eslint-disable import/no-nodejs-modules */
+/* eslint-disable no-bitwise */
+/* eslint-disable no-continue */
+/* eslint-disable @kbn/eslint/require_kbn_fs */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import https from 'node:https';
@@ -153,11 +159,12 @@ export const shiftTimestamp = (iso: string, deltaMs: number): string => {
 export const detectWindowsOs = (doc: Record<string, unknown>): boolean => {
   const hostOs = (doc.host as Record<string, unknown>)?.os as Record<string, unknown>;
   const procPath = ((doc.process as Record<string, unknown>)?.executable as string) ?? '';
+  const hostOsExt = (hostOs as Record<string, unknown>)?.Ext as Record<string, unknown>;
   return !!(
     doc.winlog ||
     procPath.includes('.exe') ||
     procPath.includes('C:\\') ||
-    hostOs?.Ext?.variant?.toString().toLowerCase().includes('windows')
+    hostOsExt?.variant?.toString().toLowerCase().includes('windows')
   );
 };
 
