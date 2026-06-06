@@ -115,7 +115,24 @@ export class DataGrid {
     // those synthetic separators — matching what FTR's WebDriver
     // `getVisibleText()` produces here.
     const texts = await rows.evaluateAll((els) =>
-      els.map((el) => (el.textContent ?? '').replace(/[\r\n\t]/g, '').trim())
+      els.map((el) => {
+        const raw = el.textContent ?? '';
+        // Build the strip set from char codes so Babel/Playwright source
+        // serialization can't mangle escape sequences:
+        //   9  = \t,  10 = \n,  13 = \r,  21A6 = ↦ (EUI screen-reader tab),
+        //   21B5 = ↵ (EUI screen-reader newline).
+        let out = '';
+        for (let i = 0; i < raw.length; i++) {
+          const code = raw.charCodeAt(i);
+          if (code === 9 || code === 10 || code === 13 || code === 0x21a6 || code === 0x21b5) {
+            continue;
+          }
+          out += raw[i];
+        }
+        // EUI's per-cell screen-reader instruction string — not part of the
+        // visible cell value.
+        return out.split("Press the Enter key to interact with this cell's contents.").join('').trim();
+      })
     );
     return texts;
   }
