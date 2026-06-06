@@ -566,10 +566,15 @@ export class DiscoverApp {
 
   /**
    * Click the "New search" button in the Discover top nav menu. Mirrors
-   * FTR `discover.clickNewSearchButton()`.
+   * FTR `discover.clickNewSearchButton()`, including its handling of the
+   * overflow menu — in narrow viewports / certain chrome states the
+   * `discoverNewButton` is hidden behind an overflow popover and a bare
+   * `testSubj.click('discoverNewButton')` times out.
    */
-  async clickNewSearchButton(): Promise<void> {
-    await this.page.testSubj.click('discoverNewButton');
+  async clickNewSearchButton({
+    isInOverflowMenu,
+  }: { isInOverflowMenu?: boolean } = {}): Promise<void> {
+    await this.clickAppMenuItem('discoverNewButton', { isInOverflowMenu });
     await this.waitUntilSearchingHasFinished();
   }
 
