@@ -17,7 +17,7 @@ import {
 } from '.';
 
 function assertStandardReturn(result: unknown) {
-  if (!isToolHandlerStandardReturn(result)) {
+  if (!isToolHandlerStandardReturn(result as ToolHandlerReturn)) {
     throw new Error('Expected standard tool return');
   }
   return result.results;
@@ -101,7 +101,7 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
       const inlineTools = await skill.getInlineTools?.();
       const statusTool = inlineTools?.find((tool) => tool.id === GET_ENDPOINT_STATUS_TOOL_ID);
 
-      const handler = statusTool?.handler as Function;
+      const handler = (statusTool as unknown as { handler: Function }).handler;
       const mockLogger = { error: jest.fn(), warn: jest.fn() };
 
       // Mock the agent service to return an agent (so endpoint exists)
@@ -122,7 +122,7 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
         mockEndpointAppContextService.getInternalFleetServices;
       mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
         agent: innerMockAgentService,
-      }));
+      })) as unknown as typeof mockEndpointAppContextService.getInternalFleetServices;
 
       // Mock metadata service to return empty data (index not found)
       const mockMetadataService = {
@@ -178,7 +178,7 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
       const inlineTools = await skill.getInlineTools?.();
       const statusTool = inlineTools?.find((tool) => tool.id === GET_ENDPOINT_STATUS_TOOL_ID);
 
-      const handler = statusTool?.handler as Function;
+      const handler = (statusTool as unknown as { handler: Function }).handler;
       const mockLogger = { error: jest.fn(), warn: jest.fn() };
 
       // Mock the agent service to return an agent
@@ -200,7 +200,7 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
         mockEndpointAppContextService.getInternalFleetServices;
       mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
         agent: mockAgentServiceInner,
-      }));
+      })) as unknown as typeof mockEndpointAppContextService.getInternalFleetServices;
 
       // Mock metadata service to return valid data
       const mockMetadataService = {
