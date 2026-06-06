@@ -32,9 +32,12 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
     mockAgentService = {
       listAgents: jest.fn().mockResolvedValue({ agents: [] }),
     };
-    mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
-      agent: mockAgentService,
-    }) as any) as jest.Mock;
+    mockEndpointAppContextService.getInternalFleetServices = jest.fn(
+      () =>
+        ({
+          agent: mockAgentService,
+        } as any)
+    ) as jest.Mock;
   });
 
   describe('FR-020: endpoint-not-found returns distinguishable shape', () => {
@@ -120,9 +123,12 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
 
       const originalGetInternalFleetServices =
         mockEndpointAppContextService.getInternalFleetServices;
-      mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
-        agent: innerMockAgentService,
-      }) as any);
+      mockEndpointAppContextService.getInternalFleetServices = jest.fn(
+        () =>
+          ({
+            agent: innerMockAgentService,
+          } as any)
+      );
 
       // Mock metadata service to return empty data (index not found)
       const mockMetadataService = {
@@ -131,7 +137,9 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
 
       const originalGetEndpointMetadataService =
         mockEndpointAppContextService.getEndpointMetadataService;
-      mockEndpointAppContextService.getEndpointMetadataService = jest.fn(() => mockMetadataService as any);
+      mockEndpointAppContextService.getEndpointMetadataService = jest.fn(
+        () => mockMetadataService as any
+      );
 
       // Mock ES client to return index does not exist
       const mockEsClient = {
@@ -190,9 +198,12 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
 
       const originalGetInternalFleetServices =
         mockEndpointAppContextService.getInternalFleetServices;
-      mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
-        agent: mockAgentServiceInner,
-      }) as any);
+      mockEndpointAppContextService.getInternalFleetServices = jest.fn(
+        () =>
+          ({
+            agent: mockAgentServiceInner,
+          } as any)
+      );
 
       // Mock metadata service to return valid data
       const mockMetadataService = {
@@ -210,7 +221,9 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
 
       const originalGetEndpointMetadataService =
         mockEndpointAppContextService.getEndpointMetadataService;
-      mockEndpointAppContextService.getEndpointMetadataService = jest.fn(() => mockMetadataService as any);
+      mockEndpointAppContextService.getEndpointMetadataService = jest.fn(
+        () => mockMetadataService as any
+      );
 
       try {
         const result = await handler({ hostName: 'found-host' }, mockLogger);
