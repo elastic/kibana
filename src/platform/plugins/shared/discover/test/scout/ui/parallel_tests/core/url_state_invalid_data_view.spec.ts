@@ -52,14 +52,12 @@ spaceTest.describe('Discover URL state - invalid data view', { tag: tags.statefu
       const invalidUrl = originalUrl.replaceAll(dataViewId, INVALID_ID);
 
       await page.goto(invalidUrl);
-      await pageObjects.discover.waitUntilSearchingHasFinished();
-
-      // Discover should rewrite the URL back to the default data view *and*
-      // expose the "default fallback" warning toast. Toasts auto-dismiss
-      // after ~10s so check the toast first (while it's still on screen),
-      // then verify the URL settled. The toast assertion uses Playwright's
-      // auto-retry so we don't race the rewrite.
+      // Toasts auto-dismiss after ~10s, and `waitUntilSearchingHasFinished`
+      // can itself take several seconds, so check for the warning toast
+      // first — it is dispatched synchronously by the URL fallback and
+      // Playwright's auto-retry will catch it as soon as it mounts.
       await expect(page.testSubj.locator('dscDataViewNotFoundShowDefaultWarning')).toBeVisible();
+      await pageObjects.discover.waitUntilSearchingHasFinished();
       await expect.poll(() => page.url(), { timeout: 15_000 }).toBe(originalUrl);
     }
   );

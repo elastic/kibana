@@ -105,17 +105,21 @@ export class DiscoverApp {
     { isInOverflowMenu }: { isInOverflowMenu?: boolean } = {}
   ) {
     const item = this.page.testSubj.locator(testId);
-    if (!isInOverflowMenu && (await item.isVisible())) {
-      await item.click();
-      return;
-    }
     const overflowButton = this.page.testSubj.locator('app-menu-overflow-button');
     const popover = this.page.testSubj.locator('app-menu-popover');
 
-    // Dismiss any stale popovers
+    // If a stale overflow popover from a previous click is still on screen,
+    // dismiss it first — otherwise the visible `item` resolves to the menu
+    // entry inside the animating popover and `click()` times out on
+    // "element is not stable".
     if (await popover.isVisible()) {
       await overflowButton.click();
       await expect(popover).toBeHidden();
+    }
+
+    if (!isInOverflowMenu && (await item.isVisible())) {
+      await item.click();
+      return;
     }
 
     await expect(overflowButton).toBeVisible();
