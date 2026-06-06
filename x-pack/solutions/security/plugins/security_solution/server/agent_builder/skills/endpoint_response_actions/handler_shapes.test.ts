@@ -20,10 +20,11 @@ import {
 } from '.';
 
 function assertStandardReturn(result: unknown) {
-  if (!isToolHandlerStandardReturn(result as ToolHandlerReturn)) {
+  const r = result as ToolHandlerReturn;
+  if (!isToolHandlerStandardReturn(r)) {
     throw new Error('Expected standard tool return');
   }
-  return result.results;
+  return r.results;
 }
 
 describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
