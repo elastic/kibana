@@ -795,12 +795,17 @@ export class DiscoverApp {
   };
 
   async clickFieldSort(field: string, sortOption: string) {
-    const header = this.getColumnHeader(field);
-    await header.click();
-    await this.page.testSubj.waitForSelector(`dataGridHeaderCellActionGroup-${field}`, {
-      state: 'visible',
-    });
-    await this.page.locator(`button:has-text("${sortOption}")`).click();
+    // EUI's grid hides the header action button until the cell is hovered.
+    // Hover the cell, then click the action button (not the header itself —
+    // that opens the column-resize handle, not the menu). Mirrors FTR
+    // `dataGrid.openColMenuByField`.
+    const cell = this.page.testSubj.locator(`dataGridHeaderCell-${field}`);
+    await cell.hover();
+    const actionButton = this.page.testSubj.locator(`dataGridHeaderCellActionButton-${field}`);
+    await actionButton.click();
+    const actionGroup = this.page.testSubj.locator(`dataGridHeaderCellActionGroup-${field}`);
+    await expect(actionGroup).toBeVisible();
+    await actionGroup.locator(`button:has-text("${sortOption}")`).click();
   }
 
   async getDocHeader(): Promise<string> {

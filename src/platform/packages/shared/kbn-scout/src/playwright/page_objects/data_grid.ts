@@ -56,9 +56,12 @@ export class DataGrid {
    * have opened the display selector first via {@link clickGridSettings}.
    */
   async getCurrentSampleSizeValue(): Promise<number> {
-    const input = this.page.testSubj
-      .locator(SAMPLE_SIZE_INPUT_TEST_SUBJ)
-      .locator('input[type="number"]');
+    // EuiRange with showInput renders TWO elements with the same test-subj
+    // (a range slider and the editable number input). Combine the attribute
+    // selectors on a single element so we only match the number input.
+    const input = this.page.locator(
+      `input[type="number"][data-test-subj="${SAMPLE_SIZE_INPUT_TEST_SUBJ}"]`
+    );
     const value = await input.inputValue();
     return Number(value);
   }
@@ -68,9 +71,9 @@ export class DataGrid {
    * the display selector first.
    */
   async changeSampleSizeValue(newValue: number): Promise<void> {
-    const input = this.page.testSubj
-      .locator(SAMPLE_SIZE_INPUT_TEST_SUBJ)
-      .locator('input[type="number"]');
+    const input = this.page.locator(
+      `input[type="number"][data-test-subj="${SAMPLE_SIZE_INPUT_TEST_SUBJ}"]`
+    );
     await input.fill(String(newValue));
     // Press Enter so the controlled input commits its value to React state
     // (the FTR helper relies on a blur event; fill→Enter is the closest
@@ -105,11 +108,16 @@ export class DataGrid {
    */
   async getRowsText(): Promise<string[]> {
     const rows = this.page.locator('[data-test-subj="docTable"] .euiDataGridRow');
-    const texts = await rows.allInnerTexts();
-    // FTR `dataGrid.getRowsText()` collapses all whitespace (tabs between
-    // cells, trailing newlines). Match that contract so tests can compare
-    // against simple concatenated values.
-    return texts.map((t) => t.replace(/[\r\n\t]/gm, '').trim());
+    // Use `textContent` (via `evaluateAll`) instead of `allInnerTexts()`.
+    // `innerText` injects synthetic `\t` between flex/grid cells and `\n`
+    // between rows, which leaks into row text and breaks the FTR-parity
+    // assertions. `textContent` returns the concatenated cell text without
+    // those synthetic separators — matching what FTR's WebDriver
+    // `getVisibleText()` produces here.
+    const texts = await rows.evaluateAll((els) =>
+      els.map((el) => (el.textContent ?? '').replace(/[\r\n\t]/g, '').trim())
+    );
+    return texts;
   }
 
   /**
