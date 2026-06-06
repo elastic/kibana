@@ -6,7 +6,7 @@
  */
 
 /* eslint-disable require-atomic-updates */
-import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
+import { isToolHandlerStandardReturn, type ToolHandlerContext } from '@kbn/agent-builder-server/tools';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 
 import type { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
@@ -16,6 +16,13 @@ import { getEndpointStatusTool } from '.';
 
 const mockLogger = { error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() };
 const mockContext = { logger: mockLogger } as unknown as ToolHandlerContext;
+
+function assertStandardReturn(result: unknown) {
+  if (!isToolHandlerStandardReturn(result)) {
+    throw new Error('Expected standard tool return');
+  }
+  return result.results;
+}
 
 describe('getEndpointStatusTool', () => {
   let mockEndpointAppContextService: EndpointAppContextService;
@@ -48,23 +55,21 @@ describe('getEndpointStatusTool', () => {
 
     it('returns found: false with reason "endpoint_not_found" when no agent matches', async () => {
       const mockAgentService = {
-        asInternalUser: {
-          list: jest.fn().mockResolvedValue({ items: [] }),
-        },
+        listAgents: jest.fn().mockResolvedValue({ agents: [] }),
       };
 
       const originalGetInternalFleetServices =
         mockEndpointAppContextService.getInternalFleetServices;
       mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
-        agentService: mockAgentService,
+        agent: mockAgentService,
       }));
 
       try {
         const result = await tool.handler({ hostName: 'nonexistent-host' }, mockContext);
 
-        expect(result.results).toHaveLength(1);
-        expect(result.results[0].type).toBe(ToolResultType.other);
-        const data = result.results[0].data as Record<string, unknown>;
+        expect(assertStandardReturn(result)).toHaveLength(1);
+        expect(assertStandardReturn(result)[0].type).toBe(ToolResultType.other);
+        const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
         expect(data.found).toBe(false);
         expect(data.reason).toBe('endpoint_not_found');
         expect(data.hostName).toBe('nonexistent-host');
@@ -79,21 +84,20 @@ describe('getEndpointStatusTool', () => {
 
     it('calls agentService.list with the correct kuery filter', async () => {
       const mockAgentService = {
-        asInternalUser: {
-          list: jest.fn().mockResolvedValue({ items: [] }),
-        },
+        listAgents: jest.fn().mockResolvedValue({ agents: [] }),
       };
 
       const originalGetInternalFleetServices =
         mockEndpointAppContextService.getInternalFleetServices;
       mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
-        agentService: mockAgentService,
+        agent: mockAgentService,
       }));
 
       try {
         await tool.handler({ hostName: 'my-host' }, mockContext);
 
-        expect(mockAgentService.asInternalUser.list).toHaveBeenCalledWith({
+        expect(mockAgentService.listAgents).toHaveBeenCalledWith({
+          showInactive: true,
           kuery: 'host.name: my-host',
           page: 1,
           perPage: 1,
@@ -105,11 +109,9 @@ describe('getEndpointStatusTool', () => {
 
     it('returns found: true with correct data when agent and metadata lookups succeed', async () => {
       const mockAgentService = {
-        asInternalUser: {
-          list: jest.fn().mockResolvedValue({
-            items: [{ id: 'agent-123' }],
+        listAgents: jest.fn().mockResolvedValue({
+            agents: [{ id: 'agent-123' }],
           }),
-        },
       };
 
       const mockMetadataService = {
@@ -131,16 +133,16 @@ describe('getEndpointStatusTool', () => {
         mockEndpointAppContextService.getEndpointMetadataService;
 
       mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
-        agentService: mockAgentService,
+        agent: mockAgentService,
       }));
       mockEndpointAppContextService.getEndpointMetadataService = jest.fn(() => mockMetadataService);
 
       try {
         const result = await tool.handler({ hostName: 'my-host' }, mockContext);
 
-        expect(result.results).toHaveLength(1);
-        expect(result.results[0].type).toBe(ToolResultType.other);
-        const data = result.results[0].data as Record<string, unknown>;
+        expect(assertStandardReturn(result)).toHaveLength(1);
+        expect(assertStandardReturn(result)[0].type).toBe(ToolResultType.other);
+        const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
         expect(data.found).toBe(true);
         expect(data.hostName).toBe('my-host');
         expect(data.agentId).toBe('agent-123');
@@ -162,11 +164,9 @@ describe('getEndpointStatusTool', () => {
 
     it('returns found: true with non-isolated status when metadata shows isolation is false', async () => {
       const mockAgentService = {
-        asInternalUser: {
-          list: jest.fn().mockResolvedValue({
-            items: [{ id: 'agent-456' }],
+        listAgents: jest.fn().mockResolvedValue({
+            agents: [{ id: 'agent-456' }],
           }),
-        },
       };
 
       const mockMetadataService = {
@@ -188,15 +188,15 @@ describe('getEndpointStatusTool', () => {
         mockEndpointAppContextService.getEndpointMetadataService;
 
       mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
-        agentService: mockAgentService,
+        agent: mockAgentService,
       }));
       mockEndpointAppContextService.getEndpointMetadataService = jest.fn(() => mockMetadataService);
 
       try {
         const result = await tool.handler({ hostName: 'safe-host' }, mockContext);
 
-        expect(result.results).toHaveLength(1);
-        const data = result.results[0].data as Record<string, unknown>;
+        expect(assertStandardReturn(result)).toHaveLength(1);
+        const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
         expect(data.found).toBe(true);
         expect(data.isolated).toBe(false);
         expect(data.status).toBe('healthy');
@@ -210,9 +210,8 @@ describe('getEndpointStatusTool', () => {
 
     it('returns index_not_found when agent exists but metadata index does not exist', async () => {
       const mockAgentService = {
-        asInternalUser: {
-          list: jest.fn().mockResolvedValue({
-            items: [
+        listAgents: jest.fn().mockResolvedValue({
+            agents: [
               {
                 id: 'agent-789',
                 last_checkin: '2024-01-01T00:00:00Z',
@@ -221,7 +220,6 @@ describe('getEndpointStatusTool', () => {
               },
             ],
           }),
-        },
       };
 
       const mockMetadataService = {
@@ -241,7 +239,7 @@ describe('getEndpointStatusTool', () => {
       const originalGetInternalEsClient = mockEndpointAppContextService.getInternalEsClient;
 
       mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
-        agentService: mockAgentService,
+        agent: mockAgentService,
       }));
       mockEndpointAppContextService.getEndpointMetadataService = jest.fn(() => mockMetadataService);
       mockEndpointAppContextService.getInternalEsClient = jest.fn(() => mockEsClient);
@@ -249,8 +247,8 @@ describe('getEndpointStatusTool', () => {
       try {
         const result = await tool.handler({ hostName: 'found-host' }, mockContext);
 
-        expect(result.results).toHaveLength(1);
-        const data = result.results[0].data as Record<string, unknown>;
+        expect(assertStandardReturn(result)).toHaveLength(1);
+        const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
         expect(data.found).toBe(false);
         expect(data.reason).toBe('index_not_found');
         expect(data.hostName).toBe('found-host');
@@ -268,9 +266,8 @@ describe('getEndpointStatusTool', () => {
 
     it('returns agent-level fallback when metadata service throws', async () => {
       const mockAgentService = {
-        asInternalUser: {
-          list: jest.fn().mockResolvedValue({
-            items: [
+        listAgents: jest.fn().mockResolvedValue({
+            agents: [
               {
                 id: 'agent-fallback',
                 last_checkin: '2024-03-15T08:00:00Z',
@@ -279,7 +276,6 @@ describe('getEndpointStatusTool', () => {
               },
             ],
           }),
-        },
       };
 
       const mockMetadataService = {
@@ -292,15 +288,15 @@ describe('getEndpointStatusTool', () => {
         mockEndpointAppContextService.getEndpointMetadataService;
 
       mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
-        agentService: mockAgentService,
+        agent: mockAgentService,
       }));
       mockEndpointAppContextService.getEndpointMetadataService = jest.fn(() => mockMetadataService);
 
       try {
         const result = await tool.handler({ hostName: 'fallback-host' }, mockContext);
 
-        expect(result.results).toHaveLength(1);
-        const data = result.results[0].data as Record<string, unknown>;
+        expect(assertStandardReturn(result)).toHaveLength(1);
+        const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
         expect(data.found).toBe(true);
         expect(data.hostName).toBe('fallback-host');
         expect(data.agentId).toBe('agent-fallback');
@@ -318,23 +314,21 @@ describe('getEndpointStatusTool', () => {
 
     it('returns an error result when the agent service throws', async () => {
       const mockAgentService = {
-        asInternalUser: {
-          list: jest.fn().mockRejectedValue(new Error('fleet service unavailable')),
-        },
+        listAgents: jest.fn().mockRejectedValue(new Error('fleet service unavailable')),
       };
 
       const originalGetInternalFleetServices =
         mockEndpointAppContextService.getInternalFleetServices;
       mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
-        agentService: mockAgentService,
+        agent: mockAgentService,
       }));
 
       try {
         const result = await tool.handler({ hostName: 'my-host' }, mockContext);
 
-        expect(result.results).toHaveLength(1);
-        expect(result.results[0].type).toBe(ToolResultType.error);
-        expect(result.results[0].data).toHaveProperty('message');
+        expect(assertStandardReturn(result)).toHaveLength(1);
+        expect(assertStandardReturn(result)[0].type).toBe(ToolResultType.error);
+        expect(assertStandardReturn(result)[0].data).toHaveProperty('message');
         expect(mockLogger.error).toHaveBeenCalled();
       } finally {
         mockEndpointAppContextService.getInternalFleetServices = originalGetInternalFleetServices;
@@ -343,9 +337,8 @@ describe('getEndpointStatusTool', () => {
 
     it('falls back to agent-level data when metadata service throws, not an error type', async () => {
       const mockAgentService = {
-        asInternalUser: {
-          list: jest.fn().mockResolvedValue({
-            items: [
+        listAgents: jest.fn().mockResolvedValue({
+            agents: [
               {
                 id: 'agent-fallback2',
                 last_checkin: '2024-05-01T10:00:00Z',
@@ -354,7 +347,6 @@ describe('getEndpointStatusTool', () => {
               },
             ],
           }),
-        },
       };
 
       const mockMetadataService = {
@@ -367,16 +359,16 @@ describe('getEndpointStatusTool', () => {
         mockEndpointAppContextService.getEndpointMetadataService;
 
       mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
-        agentService: mockAgentService,
+        agent: mockAgentService,
       }));
       mockEndpointAppContextService.getEndpointMetadataService = jest.fn(() => mockMetadataService);
 
       try {
         const result = await tool.handler({ hostName: 'fallback2-host' }, mockContext);
 
-        expect(result.results).toHaveLength(1);
-        expect(result.results[0].type).toBe(ToolResultType.other);
-        const data = result.results[0].data as Record<string, unknown>;
+        expect(assertStandardReturn(result)).toHaveLength(1);
+        expect(assertStandardReturn(result)[0].type).toBe(ToolResultType.other);
+        const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
         expect(data.found).toBe(true);
         expect(data.isolated).toBe(false);
         expect(data.lastSeen).toBe('2024-05-01T10:00:00Z');
