@@ -56,6 +56,14 @@ spaceTest.describe('Discover URL state - invalid data view', { tag: tags.statefu
       // toast assertion would silently mask the bug.
       expect(invalidUrl).not.toBe(originalUrl);
 
+      // Force a fresh-page navigation: a same-origin `page.goto(invalidUrl)`
+      // is treated by browsers as a hash-only update and the existing
+      // Discover SPA keeps its in-memory data view. That makes Discover take
+      // the "saved data view" fallback branch (→ `dscDataViewNotFoundShow*
+      // SavedWarning`) instead of the "default data view" branch this test
+      // exercises. Navigating to about:blank first guarantees a full reload
+      // when we go to `invalidUrl`, matching FTR's `browser.navigateTo`.
+      await page.goto('about:blank');
       await page.goto(invalidUrl);
       // Toasts auto-dismiss after ~10s, and `waitUntilSearchingHasFinished`
       // can itself take several seconds, so check for the warning toast
