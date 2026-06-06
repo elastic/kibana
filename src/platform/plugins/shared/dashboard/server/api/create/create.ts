@@ -40,6 +40,7 @@ export async function create(
     soAttributes,
     {
       references: soReferences,
+      ...(id !== undefined && { id }),
       ...(accessControl?.access_mode &&
         supportsAccessControl && {
           accessControl: {
