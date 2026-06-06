@@ -353,7 +353,10 @@ test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
     await page.testSubj.click('alertsFilterQueryToggle');
     await page.testSubj.click('addFilter');
     // First condition: _id is not fake-rule-id
-    await page.testSubj.locator('filterFieldSuggestionList').locator('input').fill('_id');
+    // The field input is disabled while field suggestions load — wait for it to be enabled.
+    const fieldInput = page.testSubj.locator('filterFieldSuggestionList').locator('input');
+    await expect(fieldInput).toBeEnabled({ timeout: 15_000 });
+    await fieldInput.fill('_id');
     await page.locator('[role="listbox"] [role="option"]:first-child').click();
     await page.testSubj.locator('filterOperatorList').locator('input').fill('is not');
     await page.locator('[role="listbox"] [role="option"]:first-child').click();
