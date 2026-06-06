@@ -27,6 +27,7 @@ export type {
   AppHeaderTitle,
   AppHeaderTitleSaveResult,
   ChromeNext,
+  GlobalHeaderAiButton,
 } from './chrome_next';
 export type { ChromeSetup, ChromeStart } from './contracts';
 export type { ChromeDocTitle } from './doc_title';
