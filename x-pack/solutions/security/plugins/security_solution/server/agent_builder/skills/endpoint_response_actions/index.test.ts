@@ -45,9 +45,9 @@ describe('createEndpointResponseActionsSkill', () => {
   });
 
   describe('getInlineTools', () => {
-    it('returns exactly 3 inline tools (isolate_host, unisolate_host, get_endpoint_status)', () => {
+    it('returns exactly 3 inline tools (isolate_host, unisolate_host, get_endpoint_status)', async () => {
       const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService);
-      const inlineTools = skill.getInlineTools?.();
+      const inlineTools = await skill.getInlineTools?.();
       expect(inlineTools).toHaveLength(3);
       const toolIds = (inlineTools ?? []).map((t) => t.id);
       expect(toolIds).toContain(ISOLATE_TOOL_ID);
