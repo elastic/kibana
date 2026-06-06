@@ -72,8 +72,12 @@ spaceTest.describe('Discover - URL state Lens sync', { tag: tags.stateful.all },
 
       // Navigate to Discover via the chrome nav (the same path the FTR
       // exercises). The pinned filter, time, and resulting hit count must
-      // all round-trip.
-      await pageObjects.collapsibleNav.clickNavItemByDeepLinkId('discover');
+      // all round-trip. Use the id-based locator: in the project-style
+      // side nav (now used for classic too), `deepLinkId` is rendered as
+      // "undefined" on most items and the stable test-subj is
+      // `nav-item-id-discover`.
+      await pageObjects.collapsibleNav.expandNav();
+      await page.testSubj.click('~nav-item-id-discover');
       await pageObjects.discover.waitUntilSearchingHasFinished();
 
       expect(
