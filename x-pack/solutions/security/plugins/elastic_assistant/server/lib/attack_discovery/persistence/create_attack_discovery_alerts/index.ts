@@ -24,7 +24,7 @@ import { getCreatedDocumentIds } from './get_created_document_ids';
 import { getCreatedAttackDiscoveryAlerts } from './get_created_attack_discovery_alerts';
 import { validateAlertDocuments } from './validate_alert_documents';
 
-import { updateAlertsWithAttackIds } from '../../schedules/register_schedule/updateAlertsWithAttackIds';
+import { updateAlertsWithAttackIds } from '../../schedules/register_schedule/update_alerts_with_attack_ids';
 
 interface CreateAttackDiscoveryAlerts {
   adhocAttackDiscoveryDataClient: IRuleDataClient;

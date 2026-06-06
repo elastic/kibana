@@ -98,7 +98,6 @@ describe('convertFormDataInBaseSchedule', () => {
       },
       '.alert-*',
       {} as AIConnector,
-      {} as DataViewSpec,
       { get: jest.fn() } as unknown as IUiSettingsClient,
       createStubDataView({ spec: {} })
     );
@@ -131,7 +130,6 @@ describe('convertFormDataInBaseSchedule', () => {
       },
       '.alert-*',
       {} as AIConnector,
-      {} as DataViewSpec,
       { get: jest.fn() } as unknown as IUiSettingsClient,
       createStubDataView({ spec: {} })
     );
@@ -157,7 +155,6 @@ describe('convertFormDataInBaseSchedule', () => {
       },
       '.alert-*',
       {} as AIConnector,
-      {} as DataViewSpec,
       { get: jest.fn() } as unknown as IUiSettingsClient,
       createStubDataView({ spec: {} })
     );
@@ -186,7 +183,6 @@ describe('convertFormDataInBaseSchedule', () => {
       },
       '.alert-*',
       {} as AIConnector,
-      {} as DataViewSpec,
       { get: jest.fn() } as unknown as IUiSettingsClient,
       createStubDataView({ spec: {} })
     );
@@ -217,7 +213,6 @@ describe('convertFormDataInBaseSchedule', () => {
       },
       '.alert-*',
       {} as AIConnector,
-      {} as DataViewSpec,
       { get: jest.fn() } as unknown as IUiSettingsClient,
       createStubDataView({ spec: {} })
     );
@@ -232,6 +227,37 @@ describe('convertFormDataInBaseSchedule', () => {
         },
       })
     );
+  });
+
+  it('omits model and provider from apiConfig when the connector has neither', () => {
+    (getGenAiConfig as jest.Mock).mockReturnValue({ defaultModel: null });
+
+    const baseSchedule = convertFormDataInBaseSchedule(
+      {
+        name: 'no model or provider',
+        connectorId: 'connector-1',
+        alertsSelectionSettings: {
+          end: 'now',
+          filters: [],
+          query: { query: '', language: 'kuery' },
+          size: 100,
+          start: 'now-24h',
+        },
+        interval: '10m',
+        actions: [],
+      },
+      '.alert-*',
+      {
+        actionTypeId: '.inference',
+        id: 'connector-1',
+        name: 'connector-1',
+      } as unknown as AIConnector,
+      { get: jest.fn() } as unknown as IUiSettingsClient,
+      createStubDataView({ spec: {} })
+    );
+
+    expect(baseSchedule.params.apiConfig).not.toHaveProperty('model');
+    expect(baseSchedule.params.apiConfig).not.toHaveProperty('provider');
   });
 
   it('does NOT include type or workflowConfig in params when both are absent (pre-workflow form data)', () => {
@@ -251,7 +277,6 @@ describe('convertFormDataInBaseSchedule', () => {
       },
       '.alerts-security.alerts-default',
       {} as AIConnector,
-      {} as DataViewSpec,
       { get: jest.fn() } as unknown as IUiSettingsClient,
       createStubDataView({ spec: {} })
     );
@@ -392,7 +417,6 @@ describe('convertFormDataToWorkflowSchedule', () => {
       },
       '.alert-*',
       { actionTypeId: '.gen-ai', id: 'c1', apiProvider: 'openai' } as unknown as AIConnector,
-      {} as DataViewSpec,
       { get: jest.fn() } as unknown as IUiSettingsClient,
       createStubDataView({ spec: {} })
     );
@@ -429,7 +453,6 @@ describe('convertFormDataToWorkflowSchedule', () => {
       },
       '.alert-*',
       { actionTypeId: '.gen-ai', id: 'c1', apiProvider: 'openai' } as unknown as AIConnector,
-      {} as DataViewSpec,
       { get: jest.fn() } as unknown as IUiSettingsClient,
       createStubDataView({ spec: {} })
     );
@@ -440,5 +463,62 @@ describe('convertFormDataToWorkflowSchedule', () => {
     expect(result.params).not.toHaveProperty('alertsIndexPattern');
     expect(result.params).not.toHaveProperty('apiConfig');
     expect(result.params).not.toHaveProperty('combinedFilter');
+  });
+
+  it('omits model from api_config when the connector has no model', () => {
+    (getGenAiConfig as jest.Mock).mockReturnValue({ defaultModel: null });
+
+    const result = convertFormDataToWorkflowSchedule(
+      {
+        name: 'no model',
+        connectorId: 'c1',
+        alertsSelectionSettings: {
+          end: 'now',
+          filters: [],
+          query: { query: '', language: 'kuery' },
+          size: 50,
+          start: 'now-1h',
+        },
+        interval: '1h',
+        actions: [],
+      },
+      '.alert-*',
+      { actionTypeId: '.inference', id: 'c1', name: 'c1' } as unknown as AIConnector,
+      { get: jest.fn() } as unknown as IUiSettingsClient,
+      createStubDataView({ spec: {} })
+    );
+
+    expect(result.params.api_config).not.toHaveProperty('model');
+  });
+
+  it('omits provider from api_config when the connector has no provider', () => {
+    (getGenAiConfig as jest.Mock).mockReturnValue({ defaultModel: null });
+
+    const result = convertFormDataToWorkflowSchedule(
+      {
+        name: 'no provider',
+        connectorId: 'c1',
+        alertsSelectionSettings: {
+          end: 'now',
+          filters: [],
+          query: { query: '', language: 'kuery' },
+          size: 50,
+          start: 'now-1h',
+        },
+        interval: '1h',
+        actions: [],
+      },
+      '.alert-*',
+      {
+        actionTypeId: '.inference',
+        id: 'c1',
+        name: 'c1',
+        apiProvider: null,
+      } as unknown as AIConnector,
+      { get: jest.fn() } as unknown as IUiSettingsClient,
+      createStubDataView({ spec: {} })
+    );
+
+    expect(result.params.api_config).not.toHaveProperty('provider');
   });
 });

@@ -76,9 +76,9 @@ export const convertFormDataInBaseSchedule = (
   const apiConfig = {
     actionTypeId: connector.actionTypeId,
     connectorId: connector.id,
-    model: genAiConfig?.defaultModel,
+    ...(genAiConfig?.defaultModel != null ? { model: genAiConfig.defaultModel } : {}),
     name: connector.name,
-    provider: connector.apiProvider,
+    ...(connector.apiProvider != null ? { provider: connector.apiProvider } : {}),
   };
 
   const { workflowConfig } = scheduleData;
@@ -120,7 +120,6 @@ export const convertFormDataToWorkflowSchedule = (
   scheduleData: AttackDiscoveryScheduleSchema,
   alertsIndexPattern: string,
   connector: AIConnector,
-  dataViewSpec: DataViewSpec,
   uiSettings: IUiSettingsClient,
   dataView: DataView
 ) => {
@@ -128,7 +127,6 @@ export const convertFormDataToWorkflowSchedule = (
 
   const [filterQuery, kqlError] = convertToBuildEsQuery({
     config: getEsQueryConfig(uiSettings),
-    dataViewSpec,
     dataView,
     queries: [alertsSelectionSettings.query],
     filters: alertsSelectionSettings.filters,
@@ -157,9 +155,9 @@ export const convertFormDataToWorkflowSchedule = (
       api_config: {
         action_type_id: connector.actionTypeId,
         connector_id: connector.id,
-        model: genAiConfig?.defaultModel,
+        ...(genAiConfig?.defaultModel != null ? { model: genAiConfig.defaultModel } : {}),
         name: connector.name,
-        provider: connector.apiProvider,
+        ...(connector.apiProvider != null ? { provider: connector.apiProvider } : {}),
       },
       combined_filter: combinedFilter,
       end: alertsSelectionSettings.end,
