@@ -9,6 +9,8 @@
 import {
   isToolHandlerStandardReturn,
   type ToolHandlerContext,
+  type ToolHandlerReturn,
+  type ToolHandlerStandardReturn,
 } from '@kbn/agent-builder-server/tools';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 
