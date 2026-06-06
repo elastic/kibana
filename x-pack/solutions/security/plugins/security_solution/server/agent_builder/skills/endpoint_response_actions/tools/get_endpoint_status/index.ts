@@ -138,9 +138,10 @@ export const getEndpointStatusTool = (
         } catch (metadataError) {
           logger.warn(`Could not retrieve metadata for host ${hostName}: ${metadataError.message}`);
           // Fallback to agent-level info
-          isolated = Boolean(agent.isolation);
+          isolated = Boolean((agent as unknown as { isolation?: string }).isolation);
           lastSeen = agent.last_checkin ?? null;
-          status = agent.host_status || HostStatus.OFFLINE;
+          status =
+            (agent as unknown as { host_status?: HostStatus }).host_status || HostStatus.OFFLINE;
         }
 
         return {

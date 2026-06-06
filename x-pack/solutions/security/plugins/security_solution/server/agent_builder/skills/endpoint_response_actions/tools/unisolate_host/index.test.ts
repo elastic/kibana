@@ -21,10 +21,10 @@ const mockLogger = { error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: 
 const mockContext = { logger: mockLogger } as unknown as ToolHandlerContext;
 
 function assertStandardReturn(result: unknown) {
-  if (!isToolHandlerStandardReturn(result)) {
+  if (!isToolHandlerStandardReturn(result as ToolHandlerReturn)) {
     throw new Error('Expected standard tool return');
   }
-  return result.results;
+  return (result as ToolHandlerStandardReturn).results;
 }
 
 describe('unisolateHostTool', () => {
@@ -65,7 +65,7 @@ describe('unisolateHostTool', () => {
         mockEndpointAppContextService.getInternalFleetServices;
       mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
         agent: mockAgentService,
-      }));
+      })) as unknown as EndpointAppContextService['getInternalFleetServices'];
 
       try {
         const result = await tool.handler({ hostName: 'nonexistent-host' }, mockContext);
@@ -91,7 +91,7 @@ describe('unisolateHostTool', () => {
         mockEndpointAppContextService.getInternalFleetServices;
       mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
         agent: mockAgentService,
-      }));
+      })) as unknown as EndpointAppContextService['getInternalFleetServices'];
 
       try {
         await tool.handler({ hostName: 'my-host', comment: 'test comment' }, mockContext);
@@ -145,10 +145,10 @@ describe('unisolateHostTool', () => {
 
       mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
         agent: mockAgentService,
-      }));
+      })) as unknown as EndpointAppContextService['getInternalFleetServices'];
       mockEndpointAppContextService.getInternalResponseActionsClient = jest.fn(
         () => mockResponseActionsClient
-      );
+      ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
 
       try {
         const result = await tool.handler(
@@ -219,10 +219,10 @@ describe('unisolateHostTool', () => {
 
       mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
         agent: mockAgentService,
-      }));
+      })) as unknown as EndpointAppContextService['getInternalFleetServices'];
       mockEndpointAppContextService.getInternalResponseActionsClient = jest.fn(
         () => mockResponseActionsClient
-      );
+      ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
 
       try {
         await tool.handler({ hostName: 'test-host' }, mockContext);
@@ -250,7 +250,7 @@ describe('unisolateHostTool', () => {
         mockEndpointAppContextService.getInternalFleetServices;
       mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
         agent: mockAgentService,
-      }));
+      })) as unknown as EndpointAppContextService['getInternalFleetServices'];
 
       try {
         const result = await tool.handler({ hostName: 'my-host' }, mockContext);
@@ -297,10 +297,10 @@ describe('unisolateHostTool', () => {
 
       mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
         agent: mockAgentService,
-      }));
+      })) as unknown as EndpointAppContextService['getInternalFleetServices'];
       mockEndpointAppContextService.getInternalResponseActionsClient = jest.fn(
         () => mockResponseActionsClient
-      );
+      ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
 
       try {
         const result = await tool.handler({ hostName: 'my-host' }, mockContext);
