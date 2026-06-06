@@ -58,6 +58,7 @@ Guidelines for ES|QL query generation:
 - Never include bucket aggregation limited by time (like this example COUNT(*) BY bucket = BUCKET(@timestamp, 10 minutes)), to avoid clash with scheduling of the detection rule.
 - If you use KEEP command, after METADATA operator, make sure to include _id field.${refusalInstruction}
 - Keep queries concise. Do not include unnecessary fields in KEEP or METADATA. Only select fields that are actually used in WHERE, EVAL, STATS, or SORT. If a query would require selecting a large number of fields, use KEEP with explicit field names rather than METADATA _id, _index, _version on aggregations.
+- If there is no relevant data in provided index patterns context to fulfil user request, use the best effort to create query based on your knowledge of ES|QL and security detection use cases.
 - Ensure the query is syntactically correct and adheres to ES|QL standards.
 - Do not include any explanations outside of ES|QL code blocks, only provide the ES|QL query string inside a single triple-backtick block.
 - When referring to fields take into account their data types as well. For example, do not use text field in arithmetic operations.
@@ -102,7 +103,7 @@ Optimize for Elastic Security: Suggest additional filters, aggregations, or enha
       let esqlResponse = esqlResponseFirst;
 
       // If first attempt failed without refusal, retry up to 3 times for syntax corrections
-      if (!esqlResponse.query && !esqlResponse.error) {
+      if (!esqlResponse.query || esqlResponse.error) {
         esqlResponse = await generateEsql({
           nlQuery: state.userQuery,
           additionalInstructions,
