@@ -73,7 +73,13 @@ export class CloudConnectedPlugin
   ): CloudConnectedPluginSetup {
     this.logger.debug('cloudConnected: Setup');
 
-    // Skip plugin registration if running on ESS.
+    // Always register the SO type and its encryption params so that migrations never fail
+    // on clusters that accumulated cloud-connect-api-key documents (e.g. ESS 9.3.x clusters
+    // upgrading to 9.4.0+ where the type would otherwise not be registered). See INC-3152.
+    core.savedObjects.registerType(CloudConnectApiKeyType);
+    plugins.encryptedSavedObjects.registerType(CloudConnectApiKeyEncryptionParams);
+
+    // Skip the rest of plugin registration if running on ESS.
     // CCM is enabled for ECE deployments and self-managed clusters.
     if (plugins.cloud?.isCloudEnabled && !plugins.cloud?.isEce) {
       this.logger.debug('cloudConnected: Skipping setup - running on ESS');
@@ -83,12 +89,6 @@ export class CloudConnectedPlugin
 
     // Register the feature with privileges
     plugins.features.registerKibanaFeature(cloudConnectedFeature);
-
-    // Register the saved object type for API key storage
-    core.savedObjects.registerType(CloudConnectApiKeyType);
-
-    // Register encryption for the API key saved object
-    plugins.encryptedSavedObjects.registerType(CloudConnectApiKeyEncryptionParams);
 
     // Register HTTP routes
     const router = core.http.createRouter();
