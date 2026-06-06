@@ -11,7 +11,7 @@ import { act, fireEvent, render, renderHook, screen, waitFor } from '@testing-li
 import { useScheduleView } from './use_schedule_view';
 import { useScheduleApi } from '../schedule/logic/use_schedule_api';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
+import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { TestProviders } from '../../../../common/mock';
 import { mockFindAttackDiscoverySchedules } from '../../mock/mock_find_attack_discovery_schedules';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
@@ -25,13 +25,11 @@ jest.mock('react-router', () => ({
   withRouter: jest.fn(),
 }));
 jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../../sourcerer/containers');
+jest.mock('../../../../data_view_manager/hooks/use_data_view');
 jest.mock('../schedule/logic/use_schedule_api');
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
-const mockUseSourcererDataView = useSourcererDataView as jest.MockedFunction<
-  typeof useSourcererDataView
->;
+const mockUseDataView = useDataView as jest.MockedFunction<typeof useDataView>;
 const mockUseScheduleApi = useScheduleApi as jest.MockedFunction<typeof useScheduleApi>;
 
 const mockUseFindSchedules = jest.fn();
@@ -81,10 +79,10 @@ describe('useScheduleView', () => {
 
     setupUseKibana();
 
-    mockUseSourcererDataView.mockReturnValue({
-      sourcererDataView: {},
-      loading: false,
-    } as unknown as jest.Mocked<ReturnType<typeof useSourcererDataView>>);
+    mockUseDataView.mockReturnValue({
+      dataView: { id: 'security', title: 'security' },
+      status: 'ready',
+    } as unknown as jest.Mocked<ReturnType<typeof useDataView>>);
 
     mockUseFindSchedules.mockReturnValue({
       data: mockFindAttackDiscoverySchedules,
