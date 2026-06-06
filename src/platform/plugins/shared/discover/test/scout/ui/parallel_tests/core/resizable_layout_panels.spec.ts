@@ -42,13 +42,16 @@ const dragBy = async (page: ScoutPage, handle: Locator, dx: number, dy: number) 
 const heightOf = async (locator: Locator): Promise<number> => {
   const box = await locator.boundingBox();
   if (!box) throw new Error('locator has no bounding box');
-  return box.height;
+  // `boundingBox()` returns sub-pixel floats (e.g. 291.984375). The drag
+  // assertions compare `before ± RESIZE_DISTANCE` with `.toBe()`, so round
+  // to integer pixels for a stable comparison.
+  return Math.round(box.height);
 };
 
 const widthOf = async (locator: Locator): Promise<number> => {
   const box = await locator.boundingBox();
   if (!box) throw new Error('locator has no bounding box');
-  return box.width;
+  return Math.round(box.width);
 };
 
 spaceTest.describe('Discover - resizable layout panels', { tag: tags.stateful.all }, () => {
