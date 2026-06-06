@@ -46,13 +46,19 @@ spaceTest.describe('Discover - invalid time range in URL', { tag: tags.stateful.
     await pageObjects.discover.goto();
     await pageObjects.discover.waitUntilSearchingHasFinished();
 
-    // `to:null` is invalid — Discover should silently swap it for the
-    // 15-minute default rather than rendering nothing or erroring.
-    // Mutate `_g` via the hash so we stay on the same Discover instance
-    // (avoids losing the resolved data view to a full reload).
-    await page.evaluate(() => {
-      window.location.hash = '/?_g=(time:(from:now-15m,to:null))';
-    });
+    // Re-navigate to the same URL but with `_g.time.to = null`. Keep
+    // `_a` (the resolved data view) on the URL so we don't lose it on
+    // reload, and use a full `page.goto` so Discover re-runs its
+    // boot-time URL-state cleanup which is what surfaces the time
+    // fallback. (A hash-only mutation does not re-run that path.)
+    const baselineUrl = page.url();
+    const url = new URL(baselineUrl);
+    const hash = url.hash.replace(/^#/, '');
+    const [hashPath, hashQuery = ''] = hash.split('?');
+    const params = new URLSearchParams(hashQuery);
+    params.set('_g', '(time:(from:now-15m,to:null))');
+    url.hash = `#${hashPath}?${params.toString()}`;
+    await page.goto(url.toString());
     await pageObjects.discover.waitUntilSearchingHasFinished();
 
     const time = await pageObjects.datePicker.getTimeConfig();
