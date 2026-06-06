@@ -157,7 +157,7 @@ describe('registerMCPRoutes', () => {
       tools: { getRegistry: jest.fn().mockResolvedValue(mockRegistry) },
     });
 
-    const captureRoute = (method: string) =>
+    const captureVersioned = (method: string) =>
       jest.fn().mockImplementation((routeConfig: { path: string }) => {
         const versionedRoute = { addVersion: jest.fn() };
         versionedRoute.addVersion = jest
@@ -174,9 +174,12 @@ describe('registerMCPRoutes', () => {
       });
 
     const mockRouter = {
+      // The GET fallback is a non-versioned route registered directly on the router.
+      get: jest.fn().mockImplementation((routeConfig: { path: string }, handler: Function) => {
+        routeHandlers[`GET:${routeConfig.path}`] = { routeConfig, config: undefined, handler };
+      }),
       versioned: {
-        post: captureRoute('POST'),
-        get: captureRoute('GET'),
+        post: captureVersioned('POST'),
       },
     } as unknown as jest.Mocked<IRouter>;
 
@@ -197,16 +200,18 @@ describe('registerMCPRoutes', () => {
   });
 
   describe('GET (unsupported method)', () => {
-    it('registers a GET handler on the MCP path to shadow the SPA catch-all', () => {
+    it('registers a non-versioned GET handler on the MCP path to shadow the SPA catch-all', () => {
       expect(routeHandlers[getRouteKey]).toBeDefined();
     });
 
-    it('is public and skips authn/authz so the UIAM OAuth token is not challenged', () => {
-      // The token must NOT be authenticated here: an authenticated GET on an untagged
-      // route is rejected with a 401, which MCP clients treat as an auth failure and
-      // retry the OAuth flow instead of issuing POST requests.
+    it('is public, skips authn/authz, and is excluded from the OAS', () => {
+      // public: an internal route would 400 for external clients (serverless internal-API
+      // restriction); the MCP client only treats 405 as benign, so it must reach the handler.
+      // No auth: an authenticated GET on an untagged route is rejected with a 401, which MCP
+      // clients treat as an auth failure and retry the OAuth flow instead of issuing POST.
+      // excludeFromOAS: it is a protocol-level stub, not a documented API.
       const { routeConfig } = routeHandlers[getRouteKey];
-      expect(routeConfig.access).toBe('public');
+      expect(routeConfig.options.access).toBe('public');
       expect(routeConfig.security.authc.enabled).toBe(false);
       expect(routeConfig.security.authz.enabled).toBe(false);
       expect(routeConfig.options.excludeFromOAS).toBe(true);

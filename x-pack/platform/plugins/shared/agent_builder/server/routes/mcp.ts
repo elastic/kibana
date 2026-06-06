@@ -193,17 +193,20 @@ To learn more about the Agent Builder MCP server, refer to the [MCP documentatio
   // requests. A 405, by contrast, is ignored. Shadow the catch-all with an
   // unauthenticated 405 so clients fall back to POST. (Kibana intentionally does not
   // support server-initiated SSE -- see KibanaMcpHttpTransport.)
-  router.versioned
-    .get({
+  //
+  // Non-versioned and excluded from the OAS: this is a protocol-level stub, not a
+  // documented API.
+  router.get(
+    {
       path: MCP_SERVER_PATH,
-      access: 'public',
       security: {
         authz: { enabled: false, reason: 'Returns a static 405; nothing to authorize.' },
         authc: { enabled: false, reason: 'Returns a static 405; no identity required.' },
       },
-      options: { excludeFromOAS: true },
-    })
-    .addVersion({ version: '2023-10-31', validate: false }, async (ctx, request, response) =>
+      options: { access: 'public', excludeFromOAS: true },
+      validate: false,
+    },
+    async (ctx, request, response) =>
       response.customError({ statusCode: 405, body: { message: 'Method Not Allowed' } })
-    );
+  );
 }
