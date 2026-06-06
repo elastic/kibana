@@ -18,38 +18,25 @@ import { tryForTime } from '../fixtures/retry';
 import { httpMonitorFixture } from '../fixtures/data/http_monitor';
 
 /**
- * Ported from FTR `apis/synthetics/create_monitor_private_location.ts` (the
- * deployment-agnostic suite), which was `describe.skip` per
- * https://github.com/elastic/kibana/issues/258046.
+ * Scout port of the FTR `apis/synthetics/auto_upgrade_policies.ts` suite.
  *
- * Only the `handles auto upgrading policies` case is ported here and active: it
- * asserts the monitor's Fleet *package-policy version* before/after a package
- * upgrade and does **not** depend on the `comparePolicies` /
- * `getTestSyntheticsPolicy` sample-data helpers that block the rest of the FTR
- * suite. The Scout `${monitorId}-${locationId}` package-policy id format is
- * already handled by `getPackagePolicyForMonitor`.
- *
- * Still pending (blocked by #258046 — they assert the full generated package
- * policy via the sample-data comparison, not yet ported to Scout):
- *   - adds a monitor in private location / added an integration for it
- *   - edits a monitor with additional private location (+ second-location policy)
- *   - deletes integration for a removed location / a deleted monitor
- *   - handles spaces / is_tls_enabled true|false
- *   - returns bad request (invalid payload / invalid monitor type)
- *   - can create valid monitors without all defaults / retries variants
- *   - omits unknown keys / namespace preservation cases
+ * It downgrades the *global* synthetics Fleet package to an older version,
+ * creates a monitor (whose package policy is pinned to that version),
+ * reinstalls the latest package, and asserts the monitor's package policy is
+ * auto-upgraded. Kept in its own file (separate from
+ * `create_monitor_private_location.spec.ts`) because the global downgrade must
+ * not interfere with sibling specs.
  *
  * The synthetics Scout API config runs serially (`workers: 1`,
- * `fullyParallel: false`), so this test can safely downgrade the *global*
- * synthetics Fleet package and restore it without racing sibling specs.
+ * `fullyParallel: false`), so the global package downgrade/restore is safe.
+ *
+ * Forcing a downgrade + upgrade and waiting out Fleet's policy auto-upgrade
+ * sweep can take a few minutes, so the default 60s per-test timeout is raised.
  */
-// Forcing a package downgrade + upgrade and waiting out Fleet's policy
-// auto-upgrade sweep can take a few minutes; the default 60s per-test timeout
-// is not enough.
 const TEST_TIMEOUT = 5 * 60 * 1000;
 
 apiTest.describe(
-  'PrivateLocationCreateMonitor',
+  'AutoUpgradePolicies',
   { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
   () => {
     const LOWER_VERSION = '1.1.1';
@@ -132,8 +119,7 @@ apiTest.describe(
         // (`setupUpgradeManagedPackagePolicies`) sees the old version and is a
         // no-op. An explicit setup *after* the upgrade detects the now-outdated
         // policy and schedules its upgrade — without it the test passively
-        // waits on a ~5-minute scheduled task that never fires within 120s
-        // (see PR #264487, which fixed the same flake in the FTR suite).
+        // waits on a ~5-minute scheduled task that never fires within 120s.
         await apiServices.syntheticsPrivateLocations.installSyntheticsPackage();
         await apiServices.fleet.internal.setup();
 
