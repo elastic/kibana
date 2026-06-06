@@ -294,12 +294,23 @@ export class DatePicker {
 
   async getTimeConfig(): Promise<{ start: string; end: string }> {
     if (await this.isNewDateRangePicker()) {
+      // The button's `data-date-range` attribute holds raw ISO strings, but
+      // tests assert on the rendered display format (e.g. `Sep 19, 2015 @
+      // 06:31:44.000`). Parse the ISO and format using the picker's display
+      // format so callers get a consistent string regardless of picker state.
       const dateRange =
         (await this.page.testSubj
           .locator('dateRangePickerControlButton')
           .getAttribute('data-date-range')) ?? '';
       const [start, end] = dateRange.split(' to ');
-      return { start: start?.trim() ?? '', end: end?.trim() ?? '' };
+      const format = 'MMM D, YYYY @ HH:mm:ss.SSS';
+      const toDisplay = (raw: string | undefined): string => {
+        if (!raw) return '';
+        const trimmed = raw.trim();
+        const m = moment(trimmed, moment.ISO_8601);
+        return m.isValid() ? m.utc().format(format) : trimmed;
+      };
+      return { start: toDisplay(start), end: toDisplay(end) };
     }
     await this.showStartEndTimes();
     const start = await this.page.testSubj.innerText('superDatePickerstartDatePopoverButton');
