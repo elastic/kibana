@@ -11,7 +11,6 @@ import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { ScopedModel, ToolEventEmitter } from '@kbn/agent-builder-server';
 import { generateEsql } from '@kbn/agent-builder-genai-utils';
 import type { RuleCreationState } from '../../../state';
-import { detectDataSourceMismatch } from './gate_data_source_mismatch';
 
 interface GenerateEsqlQueryParams {
   model: InferenceChatModel;
@@ -43,9 +42,9 @@ export const generateEsqlQueryNode = async ({
       const connector = await inferenceClient.getConnectorById(connectorId);
 
       // Build security-specific instructions for ES|QL query generation
-      const detectedMismatch = detectDataSourceMismatch(state.userQuery);
-      const refusalInstruction = detectedMismatch
-        ? `\n- CRITICAL: The requested detection cannot be supported by the available data source (${detectedMismatch}). You MUST refuse to generate a query. Do NOT wrap any explanation or partial code in ES|QL triple-backtick blocks (\`\`\`esql). Instead, respond with exactly: ERROR: UNSUPPORTED_DETECTION — <brief explanation>.`
+      const hasExplicitQualifier = /\busing\s+only\b/i.test(state.userQuery);
+      const refusalInstruction = hasExplicitQualifier
+        ? `\n- CRITICAL: The user has explicitly restricted this detection request to a specific data source using "using only". If that data source does not support the requested detection type, you MUST refuse to generate a query. Respond with exactly: ERROR: UNSUPPORTED_DETECTION — <brief explanation>. Do NOT wrap the refusal in ES|QL triple-backtick blocks.`
         : '';
 
       const additionalInstructions = `
