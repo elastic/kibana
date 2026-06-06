@@ -54,19 +54,23 @@ export const getRunStepDefinition = ({
     ...RunStepCommonDefinition,
     handler: async (context) => {
       try {
+        // The workflow engine does NOT apply the step schema's zod `.default()`
+        // values to `context.input`, so defaulted fields arrive `undefined` when
+        // the caller omits them. Mirror the `RunStepInputSchema` defaults here so
+        // the documented "all inputs optional" contract holds for every path.
         const {
           additional_context: additionalContext,
-          alert_retrieval_mode: alertRetrievalMode,
-          alert_retrieval_workflow_ids: alertRetrievalWorkflowIds,
+          alert_retrieval_mode: alertRetrievalMode = 'custom_query',
+          alert_retrieval_workflow_ids: alertRetrievalWorkflowIds = [],
           alerts,
           connector_id: connectorId,
           end,
           esql_query: esqlQuery,
           filter,
-          mode,
-          size,
+          mode = 'sync',
+          size = 100,
           start,
-          validation_workflow_id: validationWorkflowId,
+          validation_workflow_id: validationWorkflowId = '',
         } = context.input;
 
         const executionUuid = uuidv4();
@@ -222,7 +226,9 @@ export const getRunStepDefinition = ({
           return {
             output: {
               alerts_context_count: alertRetrievalResult.alertsContextCount,
-              attack_discoveries: generationResult.attackDiscoveries as Array<{
+              // R3: the run step persists via the persist step and returns exactly the
+              // discoveries it was handed (`[]` when the persist step did not run).
+              attack_discoveries: (validationResult.discoveriesToPersist ?? []) as Array<{
                 alert_ids: string[];
                 details_markdown: string;
                 entity_summary_markdown?: string;
