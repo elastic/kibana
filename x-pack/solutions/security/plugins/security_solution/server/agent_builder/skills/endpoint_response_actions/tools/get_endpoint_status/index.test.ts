@@ -21,10 +21,10 @@ const mockLogger = { error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: 
 const mockContext = { logger: mockLogger } as unknown as ToolHandlerContext;
 
 function assertStandardReturn(result: unknown) {
-  if (!isToolHandlerStandardReturn(result)) {
+  if (!isToolHandlerStandardReturn(result as ToolHandlerReturn)) {
     throw new Error('Expected standard tool return');
   }
-  return result.results;
+  return (result as ToolHandlerStandardReturn).results;
 }
 
 describe('getEndpointStatusTool', () => {
@@ -65,7 +65,7 @@ describe('getEndpointStatusTool', () => {
         mockEndpointAppContextService.getInternalFleetServices;
       mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
         agent: mockAgentService,
-      }));
+      })) as unknown as EndpointAppContextService['getInternalFleetServices'];
 
       try {
         const result = await tool.handler({ hostName: 'nonexistent-host' }, mockContext);
@@ -94,7 +94,7 @@ describe('getEndpointStatusTool', () => {
         mockEndpointAppContextService.getInternalFleetServices;
       mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
         agent: mockAgentService,
-      }));
+      })) as unknown as EndpointAppContextService['getInternalFleetServices'];
 
       try {
         await tool.handler({ hostName: 'my-host' }, mockContext);
@@ -137,8 +137,10 @@ describe('getEndpointStatusTool', () => {
 
       mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
         agent: mockAgentService,
-      }));
-      mockEndpointAppContextService.getEndpointMetadataService = jest.fn(() => mockMetadataService);
+      })) as unknown as EndpointAppContextService['getInternalFleetServices'];
+      mockEndpointAppContextService.getEndpointMetadataService = jest.fn(
+        () => mockMetadataService
+      ) as unknown as EndpointAppContextService['getEndpointMetadataService'];
 
       try {
         const result = await tool.handler({ hostName: 'my-host' }, mockContext);
@@ -192,8 +194,10 @@ describe('getEndpointStatusTool', () => {
 
       mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
         agent: mockAgentService,
-      }));
-      mockEndpointAppContextService.getEndpointMetadataService = jest.fn(() => mockMetadataService);
+      })) as unknown as EndpointAppContextService['getInternalFleetServices'];
+      mockEndpointAppContextService.getEndpointMetadataService = jest.fn(
+        () => mockMetadataService
+      ) as unknown as EndpointAppContextService['getEndpointMetadataService'];
 
       try {
         const result = await tool.handler({ hostName: 'safe-host' }, mockContext);
@@ -243,9 +247,13 @@ describe('getEndpointStatusTool', () => {
 
       mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
         agent: mockAgentService,
-      }));
-      mockEndpointAppContextService.getEndpointMetadataService = jest.fn(() => mockMetadataService);
-      mockEndpointAppContextService.getInternalEsClient = jest.fn(() => mockEsClient);
+      })) as unknown as EndpointAppContextService['getInternalFleetServices'];
+      mockEndpointAppContextService.getEndpointMetadataService = jest.fn(
+        () => mockMetadataService
+      ) as unknown as EndpointAppContextService['getEndpointMetadataService'];
+      mockEndpointAppContextService.getInternalEsClient = jest.fn(
+        () => mockEsClient
+      ) as unknown as EndpointAppContextService['getInternalEsClient'];
 
       try {
         const result = await tool.handler({ hostName: 'found-host' }, mockContext);
@@ -292,8 +300,10 @@ describe('getEndpointStatusTool', () => {
 
       mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
         agent: mockAgentService,
-      }));
-      mockEndpointAppContextService.getEndpointMetadataService = jest.fn(() => mockMetadataService);
+      })) as unknown as EndpointAppContextService['getInternalFleetServices'];
+      mockEndpointAppContextService.getEndpointMetadataService = jest.fn(
+        () => mockMetadataService
+      ) as unknown as EndpointAppContextService['getEndpointMetadataService'];
 
       try {
         const result = await tool.handler({ hostName: 'fallback-host' }, mockContext);
@@ -324,7 +334,7 @@ describe('getEndpointStatusTool', () => {
         mockEndpointAppContextService.getInternalFleetServices;
       mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
         agent: mockAgentService,
-      }));
+      })) as unknown as EndpointAppContextService['getInternalFleetServices'];
 
       try {
         const result = await tool.handler({ hostName: 'my-host' }, mockContext);
@@ -363,8 +373,10 @@ describe('getEndpointStatusTool', () => {
 
       mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
         agent: mockAgentService,
-      }));
-      mockEndpointAppContextService.getEndpointMetadataService = jest.fn(() => mockMetadataService);
+      })) as unknown as EndpointAppContextService['getInternalFleetServices'];
+      mockEndpointAppContextService.getEndpointMetadataService = jest.fn(
+        () => mockMetadataService
+      ) as unknown as EndpointAppContextService['getEndpointMetadataService'];
 
       try {
         const result = await tool.handler({ hostName: 'fallback2-host' }, mockContext);

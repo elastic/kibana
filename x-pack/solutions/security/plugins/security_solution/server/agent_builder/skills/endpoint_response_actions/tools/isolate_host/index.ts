@@ -69,7 +69,7 @@ export const isolateHostTool = (
           };
         }
 
-        const endpointIds = agents.agents.map((a: Record<string, string>) => a.id);
+        const endpointIds = agents.agents.map((a) => a.id);
 
         const actionDetails = await responseActionsClient.isolate(
           {

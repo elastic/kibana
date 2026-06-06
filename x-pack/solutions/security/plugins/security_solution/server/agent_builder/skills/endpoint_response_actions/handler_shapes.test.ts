@@ -32,12 +32,9 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
     mockAgentService = {
       listAgents: jest.fn().mockResolvedValue({ agents: [] }),
     };
-    mockEndpointAppContextService.getInternalFleetServices = jest.fn(
-      () =>
-        ({
-          agent: mockAgentService,
-        } as any)
-    ) as jest.Mock;
+    mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
+      agent: mockAgentService,
+    })) as jest.Mock;
   });
 
   describe('FR-020: endpoint-not-found returns distinguishable shape', () => {
@@ -46,7 +43,7 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
       const inlineTools = await skill.getInlineTools?.();
       const isolateTool = inlineTools?.find((tool) => tool.id === ISOLATE_TOOL_ID);
 
-      const result = await ((isolateTool as any).handler as Function)(
+      const result = await (isolateTool as unknown as { handler: Function }).handler(
         { hostName: 'nonexistent-host', comment: 'test' },
         { logger: { error: jest.fn() } }
       );
@@ -64,7 +61,7 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
       const inlineTools = await skill.getInlineTools?.();
       const unisolateTool = inlineTools?.find((tool) => tool.id === UNISOLATE_TOOL_ID);
 
-      const result = await ((unisolateTool as any).handler as Function)(
+      const result = await (unisolateTool as unknown as { handler: Function }).handler(
         { hostName: 'nonexistent-host', comment: 'test' },
         { logger: { error: jest.fn() } }
       );
@@ -82,7 +79,7 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
       const inlineTools = await skill.getInlineTools?.();
       const statusTool = inlineTools?.find((tool) => tool.id === GET_ENDPOINT_STATUS_TOOL_ID);
 
-      const result = await ((statusTool as any).handler as Function)(
+      const result = await (statusTool as unknown as { handler: Function }).handler(
         { hostName: 'nonexistent-host' },
         { logger: { error: jest.fn(), warn: jest.fn() } }
       );
@@ -123,12 +120,9 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
 
       const originalGetInternalFleetServices =
         mockEndpointAppContextService.getInternalFleetServices;
-      mockEndpointAppContextService.getInternalFleetServices = jest.fn(
-        () =>
-          ({
-            agent: innerMockAgentService,
-          } as any)
-      );
+      mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
+        agent: innerMockAgentService,
+      }));
 
       // Mock metadata service to return empty data (index not found)
       const mockMetadataService = {
@@ -138,7 +132,10 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
       const originalGetEndpointMetadataService =
         mockEndpointAppContextService.getEndpointMetadataService;
       mockEndpointAppContextService.getEndpointMetadataService = jest.fn(
-        () => mockMetadataService as any
+        () =>
+          mockMetadataService as unknown as ReturnType<
+            EndpointAppContextService['getEndpointMetadataService']
+          >
       );
 
       // Mock ES client to return index does not exist
@@ -149,7 +146,10 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
       };
 
       const originalGetInternalEsClient = mockEndpointAppContextService.getInternalEsClient;
-      mockEndpointAppContextService.getInternalEsClient = jest.fn(() => mockEsClient as any);
+      mockEndpointAppContextService.getInternalEsClient = jest.fn(
+        () =>
+          mockEsClient as unknown as ReturnType<EndpointAppContextService['getInternalEsClient']>
+      );
 
       try {
         const result = await handler({ hostName: 'found-host' }, mockLogger);
@@ -198,12 +198,9 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
 
       const originalGetInternalFleetServices =
         mockEndpointAppContextService.getInternalFleetServices;
-      mockEndpointAppContextService.getInternalFleetServices = jest.fn(
-        () =>
-          ({
-            agent: mockAgentServiceInner,
-          } as any)
-      );
+      mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
+        agent: mockAgentServiceInner,
+      }));
 
       // Mock metadata service to return valid data
       const mockMetadataService = {
@@ -222,7 +219,10 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
       const originalGetEndpointMetadataService =
         mockEndpointAppContextService.getEndpointMetadataService;
       mockEndpointAppContextService.getEndpointMetadataService = jest.fn(
-        () => mockMetadataService as any
+        () =>
+          mockMetadataService as unknown as ReturnType<
+            EndpointAppContextService['getEndpointMetadataService']
+          >
       );
 
       try {
@@ -253,7 +253,7 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
       const inlineTools = await skill.getInlineTools?.();
 
       for (const tool of inlineTools ?? []) {
-        const result = await ((tool as any).handler as Function)(
+        const result = await (tool as unknown as { handler: Function }).handler(
           { hostName: 'nonexistent-host' },
           { logger: { error: jest.fn() } }
         );
@@ -271,7 +271,7 @@ describe('Handler return shapes are distinguishable (FR-020, FR-021)', () => {
 
       for (const tool of inlineTools ?? []) {
         // Endpoint not found should NOT be an error type
-        const notFoundResult = await ((tool as any).handler as Function)(
+        const notFoundResult = await (tool as unknown as { handler: Function }).handler(
           { hostName: 'nonexistent-host' },
           { logger: { error: jest.fn() } }
         );
