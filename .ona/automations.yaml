@@ -1,0 +1,19 @@
+tasks:
+  install-deps:
+    name: Bootstrap the project
+    triggeredBy:
+      - prebuild
+    command: yarn kbn bootstrap && node scripts/es snapshot --download-only && node scripts/build_kibana_platform_plugins
+services:
+  elasticsearch:
+    name: Elasticsearch
+    commands:
+      start: yarn es snapshot
+    triggeredBy:
+      - postDevcontainerStart
+  kibana:
+    name: Kibana
+    commands:
+      start: yarn start --no-base-path
+    triggeredBy:
+      - postDevcontainerStart
