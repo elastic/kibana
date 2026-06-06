@@ -38,7 +38,8 @@ export class DataGrid {
     const cells = this.page.locator(
       '[data-test-subj^="dataGridHeaderCell-"] .euiDataGridHeaderCell__content'
     );
-    return cells.allInnerTexts();
+    const texts = await cells.allInnerTexts();
+    return texts.map((t) => t.trim());
   }
 
   /**
@@ -101,7 +102,10 @@ export class DataGrid {
   async getRowsText(): Promise<string[]> {
     const rows = this.page.locator('[data-test-subj="docTable"] .euiDataGridRow');
     const texts = await rows.allInnerTexts();
-    return texts.map((t) => t.replace(/[\r\n]/gm, ''));
+    // FTR `dataGrid.getRowsText()` collapses all whitespace (tabs between
+    // cells, trailing newlines). Match that contract so tests can compare
+    // against simple concatenated values.
+    return texts.map((t) => t.replace(/[\r\n\t]/gm, '').trim());
   }
 
   /**
