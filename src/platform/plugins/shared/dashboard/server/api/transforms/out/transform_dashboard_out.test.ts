@@ -7,14 +7,32 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
+import { timeSliderControlSchema } from '@kbn/controls-schemas';
+
 import { DEFAULT_DASHBOARD_STATE } from '../../../../common/default_dashboard_state';
 import type {
   DashboardSavedObjectAttributes,
   SavedDashboardPanel,
 } from '../../../dashboard_saved_object';
-import { setStubKibanaServices } from '../../../mocks';
-import { transformDashboardOut } from './transform_dashboard_out';
 import { getDashboardStateSchema } from '../../dashboard_state_schemas';
+import { transformDashboardOut } from './transform_dashboard_out';
+import { createEmbeddableSetupMock } from '@kbn/embeddable-plugin/server/mocks';
+import { setStubKibanaServices } from '../../../mocks';
+
+const embeddable = createEmbeddableSetupMock();
+embeddable.registerEmbeddableServerDefinition(TIME_SLIDER_CONTROL, {
+  title: 'Time slider control',
+  getSchema: () => {
+    return timeSliderControlSchema;
+  },
+  getTransforms: () => {
+    return {
+      transformOut: jest.fn().mockImplementation((val) => val),
+      schema: timeSliderControlSchema,
+    };
+  },
+});
 
 describe('transformDashboardOut', () => {
   beforeAll(() => {
@@ -22,8 +40,8 @@ describe('transformDashboardOut', () => {
   });
 
   const pinnedPanelSo = {
-    config: { anyKey: 'some value' },
-    type: 'type1',
+    config: {},
+    type: 'time_slider_control',
     order: 0,
   };
 
@@ -143,11 +161,13 @@ ${JSON.stringify(DEFAULT_DASHBOARD_STATE.options, null, '.')
           "pinned_panels": Array [
             Object {
               "config": Object {
-                "anyKey": "some value",
+                "end_percentage_of_time_range": 1,
+                "is_anchored": false,
+                "start_percentage_of_time_range": 0,
               },
               "grow": false,
               "id": "foo",
-              "type": "type1",
+              "type": "time_slider_control",
               "width": "small",
             },
           ],
@@ -243,11 +263,13 @@ ${JSON.stringify(DEFAULT_DASHBOARD_STATE.options, null, '.')
           "pinned_panels": Array [
             Object {
               "config": Object {
-                "anyKey": "some value",
+                "end_percentage_of_time_range": 1,
+                "is_anchored": false,
+                "start_percentage_of_time_range": 0,
               },
               "grow": false,
               "id": "foo",
-              "type": "type1",
+              "type": "time_slider_control",
               "width": "small",
             },
           ],

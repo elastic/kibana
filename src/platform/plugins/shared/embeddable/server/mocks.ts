@@ -33,8 +33,20 @@ export const createEmbeddableSetupMock = (): jest.Mocked<EmbeddableSetup> => {
 
 export const createEmbeddableStartMock = (): jest.Mocked<EmbeddableStart> => ({
   ...createEmbeddablePersistableStateServiceMock(),
-  getAllEmbeddableSchemas: jest.fn().mockReturnValue([]),
-  getTransforms: jest.fn(),
+  getAllEmbeddableSchemas: jest.fn().mockReturnValue(
+    Object.entries(mockEmbeddableServerDefinitionRegistry).map(([type, definition]) => ({
+      type,
+      schema: definition.getSchema?.(mockGetDrilldownsSchema),
+    }))
+  ),
+  getTransforms: jest.fn().mockImplementation((type) => {
+    const registration = mockEmbeddableServerDefinitionRegistry[type];
+    const transforms = registration?.getTransforms?.({
+      transformIn: jest.fn(),
+      transformOut: jest.fn(),
+    });
+    return { ...transforms, schema: registration?.getSchema?.(mockGetDrilldownsSchema) };
+  }),
 });
 
 export function mockGetDrilldownsSchema(triggers: string[]) {
