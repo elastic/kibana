@@ -94,8 +94,7 @@ describe('PUT workpad', () => {
     const structuresIndex = putCalls.findIndex(
       (call: any) => call[0].path === `${API_ROUTE_WORKPAD_STRUCTURES}/{id}`
     );
-    const structuresHandler =
-      putResults[structuresIndex].value.addVersion.mock.calls[0][1];
+    const structuresHandler = putResults[structuresIndex].value.addVersion.mock.calls[0][1];
 
     const { id } = workpad;
     const timestamp = '2021-02-02T00:00:00.000Z';
