@@ -40,6 +40,12 @@ import type {
  * Result returned from the validation workflow.
  */
 export interface ValidationResult {
+  /**
+   * The discoveries the persist step was handed (its `discoveries_to_persist`
+   * output). Defaults to `[]` when the persist step did not run. Scheduled rules
+   * report this handover; ad-hoc and the run step own their own I/O via the step.
+   */
+  discoveriesToPersist?: unknown[];
   duplicatesDroppedCount?: number;
   generatedCount: number;
   success: boolean;
@@ -337,14 +343,54 @@ const extractPersistedDiscoveries = ({
 };
 
 /**
+ * Extracts discoveries_to_persist (the persist step handover) from the persist
+ * step output or workflow context. This is the echo of the discoveries handed to
+ * the persist step for ALL sources; scheduled rules report exactly this handover.
+ */
+const extractDiscoveriesToPersist = ({
+  execution,
+}: {
+  execution: WorkflowExecutionDto;
+}): unknown[] | undefined => {
+  const context = execution.context as { discoveries_to_persist?: unknown } | undefined;
+
+  if (Array.isArray(context?.discoveries_to_persist)) {
+    return context.discoveries_to_persist;
+  }
+
+  const persistStep = execution.stepExecutions.find((step) => step.stepType === PERSIST_STEP_TYPE);
+
+  if (persistStep?.output == null) {
+    return undefined;
+  }
+
+  const output = persistStep.output as { discoveries_to_persist?: unknown };
+
+  if (Array.isArray(output.discoveries_to_persist)) {
+    return output.discoveries_to_persist;
+  }
+
+  return undefined;
+};
+
+/**
+ * Whether the validation workflow invoked the persist step. R1: validation
+ * workflows MUST call the persist step, otherwise nothing is persisted.
+ */
+const hasPersistStep = ({ execution }: { execution: WorkflowExecutionDto }): boolean =>
+  execution.stepExecutions.some((step) => step.stepType === PERSIST_STEP_TYPE);
+
+/**
  * Extracts the validation result from the workflow execution.
  */
 const extractValidationResult = ({
   generatedCount,
   execution,
+  logger,
 }: {
   generatedCount: number;
   execution: WorkflowExecutionDto;
+  logger: Logger;
 }): ExtractedValidationResult => {
   if (execution.status === 'failed') {
     const errorMessage = execution.error?.message ?? 'Unknown error';
@@ -355,16 +401,37 @@ const extractValidationResult = ({
     });
   }
 
+  const persistStepInvoked = hasPersistStep({ execution });
+
+  if (!persistStepInvoked) {
+    // R1: a validation workflow that does not invoke the persist step persists
+    // nothing (noop). Surface this so misconfigured custom workflows are visible.
+    logger.warn(
+      `Validation workflow '${execution.workflowId}' (run: ${execution.id}) completed but did not invoke the persist step; nothing was persisted.`
+    );
+  }
+
+  const discoveriesToPersist = extractDiscoveriesToPersist({ execution }) ?? [];
   const duplicatesDroppedCount = extractDuplicatesDroppedCount({ execution });
   const filterReason = extractFilterReason({ execution });
   const hallucinationsFilteredCount = extractHallucinationsFilteredCount({ execution });
   const persistedDiscoveries = extractPersistedDiscoveries({ execution });
-  // When persisted_discoveries is present it contains ALL discoveries in the index (existing +
-  // newly created), so we subtract the pre-existing duplicates to get the actual new count.
-  // When it is absent we fall back to generatedCount minus both counters.
+  // persistedCount prefers the ad-hoc persistence result: when persisted_discoveries is
+  // non-empty it contains ALL discoveries in the index (existing + newly created), so we
+  // subtract the pre-existing duplicates to get the actual new count. When ad-hoc persistence
+  // wrote nothing (scheduled), we report the handover (discoveries_to_persist) length. When
+  // there is no persist output at all but the persist step ran, we fall back to generatedCount
+  // minus both counters. When the persist step never ran (R1 noop) and there is no evidence of
+  // persistence, persistedCount is 0 — reporting generatedCount would be misleading.
   const persistedCount =
-    persistedDiscoveries != null
+    persistedDiscoveries != null && persistedDiscoveries.length > 0
       ? Math.max(0, persistedDiscoveries.length - (duplicatesDroppedCount ?? 0))
+      : discoveriesToPersist.length > 0
+      ? discoveriesToPersist.length
+      : persistedDiscoveries != null
+      ? Math.max(0, persistedDiscoveries.length - (duplicatesDroppedCount ?? 0))
+      : !persistStepInvoked
+      ? 0
       : Math.max(
           0,
           generatedCount - (duplicatesDroppedCount ?? 0) - (hallucinationsFilteredCount ?? 0)
@@ -379,6 +446,7 @@ const extractValidationResult = ({
   };
 
   return {
+    discoveriesToPersist,
     duplicatesDroppedCount,
     generatedCount,
     success: execution.status === 'completed',
@@ -714,7 +782,7 @@ export const invokeValidationWorkflow = async ({
     }
 
     // Step 6: Extract results
-    const extractedResult = extractValidationResult({ generatedCount, execution });
+    const extractedResult = extractValidationResult({ generatedCount, execution, logger });
     const endTime = new Date();
 
     logger.info(
@@ -740,6 +808,7 @@ export const invokeValidationWorkflow = async ({
     });
 
     return {
+      discoveriesToPersist: extractedResult.discoveriesToPersist,
       duplicatesDroppedCount: extractedResult.duplicatesDroppedCount,
       generatedCount: extractedResult.generatedCount,
       success: extractedResult.success,

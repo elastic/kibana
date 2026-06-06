@@ -54,6 +54,7 @@ const mockGenerationResult = {
 };
 
 const mockValidationResult = {
+  discoveriesToPersist: [{ alert_ids: ['a1'], title: 'Handover 1' }],
   duplicatesDroppedCount: 0,
   generatedCount: 1,
   success: true,
@@ -109,6 +110,14 @@ describe('runValidationStep', () => {
       outcome: 'validation_succeeded',
       validationResult: mockValidationResult,
     });
+  });
+
+  it('passes discoveriesToPersist through onto the outcome', async () => {
+    const result = await runValidationStep(baseParams);
+
+    expect(result.validationResult.discoveriesToPersist).toEqual(
+      mockValidationResult.discoveriesToPersist
+    );
   });
 
   it('logs the discovery count on success', async () => {
