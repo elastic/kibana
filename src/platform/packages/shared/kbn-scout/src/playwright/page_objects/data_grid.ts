@@ -108,6 +108,10 @@ export class DataGrid {
    */
   async getRowsText(): Promise<string[]> {
     const rows = this.page.locator('[data-test-subj="docTable"] .euiDataGridRow');
+    // Grid rows render asynchronously after a search resolves; wait for at
+    // least one row to be attached so callers don't see a transient empty
+    // array when called immediately after `waitUntilSearchingHasFinished()`.
+    await rows.first().waitFor({ state: 'attached' });
     // Use `textContent` (via `evaluateAll`) instead of `allInnerTexts()`.
     // `innerText` injects synthetic `\t` between flex/grid cells and `\n`
     // between rows, which leaks into row text and breaks the FTR-parity
