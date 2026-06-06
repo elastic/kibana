@@ -195,8 +195,21 @@ export const workflowExecutor = async ({
     tracedLogger.info('Workflow executor completed successfully');
 
     if (orchestrationOutcome.outcome === 'validation_succeeded') {
-      const { alertRetrievalResult, generationResult } = orchestrationOutcome;
-      const attackDiscoveries = generationResult.attackDiscoveries.map(normalizeAttackDiscovery);
+      const { alertRetrievalResult, generationResult, validationResult } = orchestrationOutcome;
+      const discoveriesToPersist = validationResult.discoveriesToPersist ?? [];
+
+      // R1/R4: scheduled rules report exactly the discoveries handed to the persist step.
+      // An empty/absent handover (e.g. a custom validation workflow that never invoked the
+      // persist step) is a noop — nothing is reported to the alerting framework.
+      if (discoveriesToPersist.length === 0) {
+        tracedLogger.warn(
+          'Validation workflow completed with no discoveries to persist; skipping alertsClient reporting'
+        );
+
+        return { state: {} };
+      }
+
+      const attackDiscoveries = discoveriesToPersist.map(normalizeAttackDiscovery);
       const replacements: Replacements = generationResult.replacements;
 
       const alertsParams = {

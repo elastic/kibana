@@ -63,6 +63,7 @@ export const getPersistDiscoveriesStepDefinition = ({
 
           return {
             output: {
+              discoveries_to_persist: attackDiscoveries,
               duplicates_dropped_count: 0,
               persisted_discoveries: [],
             },
@@ -74,6 +75,7 @@ export const getPersistDiscoveriesStepDefinition = ({
 
           return {
             output: {
+              discoveries_to_persist: attackDiscoveries,
               duplicates_dropped_count: 0,
               persisted_discoveries: [],
             },
@@ -149,6 +151,7 @@ export const getPersistDiscoveriesStepDefinition = ({
 
         return {
           output: {
+            discoveries_to_persist: attackDiscoveries,
             duplicates_dropped_count: result.duplicates_dropped_count,
             persisted_discoveries: result.validated_discoveries,
           },

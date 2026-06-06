@@ -24,10 +24,11 @@ This README is the architecture reference for AD 2.0. Read top-to-bottom for the
 11. [Event Logging](#event-logging)
 12. [Observability & Debugging](#observability--debugging)
 13. [Scheduling](#scheduling)
-14. [Dependencies](#dependencies)
-15. [Testing](#testing)
-16. [Architecture Decision Records (appendix)](#architecture-decision-records-appendix)
-17. [Glossary](#glossary)
+14. [Schedules & the feature flag](#schedules--the-feature-flag)
+15. [Dependencies](#dependencies)
+16. [Testing](#testing)
+17. [Architecture Decision Records (appendix)](#architecture-decision-records-appendix)
+18. [Glossary](#glossary)
 
 ## Status & Feature Flag
 
@@ -92,7 +93,7 @@ More invocation patterns are documented in [Using the `security.attack-discovery
 Attack Discovery 2.0 has three entry paths, all of which converge on the same generation function (`executeGenerationWorkflow`):
 
 1. **Ad hoc (UI)** — the user clicks **Run** in the Attack Discovery UI. The frontend posts to `POST /internal/attack_discovery/_generate`.
-2. **Scheduled** — an Alerting Framework rule fires on its configured cadence. The registered `workflowExecutor` rule executor invokes `executeGenerationWorkflow` directly.
+2. **Scheduled** — an Alerting Framework rule fires on its configured cadence. The registered `workflowExecutor` rule executor invokes `executeGenerationWorkflow` directly. (New to AD 2.0 and easy to misread — see [What `Alerting Framework workflowExecutor` means](#what-alerting-framework-workflowexecutor-means).)
 3. **User-authored workflow** — a workflow includes `security.attack-discovery.run` as a step. The step handler calls `executeGenerationWorkflow` internally.
 
 `executeGenerationWorkflow` (in [`@kbn/discoveries`](../../packages/kbn-discoveries/impl/attack_discovery/generation/execute_generation_workflow.ts)) is the single shared entry point. It runs **pre-execution validation** and a **managed-workflow integrity check**, then delegates to [`runManualOrchestration`](../../packages/kbn-discoveries/impl/attack_discovery/generation/run_manual_orchestration/index.ts), which chains the three phases with timeout budgets.
@@ -173,6 +174,10 @@ The current Attack Discovery 1.0 pipeline is a monolithic public-API route ([POS
 - Steps are **composable** as reusable building blocks in user-authored workflows.
 - The ad-hoc, scheduled, and user-workflow execution paths share the **same code path**.
 
+### Persistence model: the persist step is the single authority
+
+The `security.attack-discovery.persistDiscoveries` step is the single persistence authority across all three paths. It echoes the discoveries it was handed into a `discoveries_to_persist` output. **Ad-hoc and the `run` step own their own I/O via the step** (the step writes to the ad-hoc index). **Scheduled rules invoke the step only for that handover** — the step does no I/O for scheduled runs; it hands the discoveries up via `discoveries_to_persist`, and the scheduled executor reports exactly that handover to the Alerting Framework (which owns scheduled persistence). If a validation workflow never invokes the persist step — or hands it an empty array — nothing is persisted (a noop, logged at WARN). Details: [Persist-step handover](#persist-step-handover-legacy-reporting-vs-workflow-handover) and the [requirement-to-test map](#requirement-to-test-map-persist-step-handover).
+
 ## System workflow definitions
 
 The pipeline executes five system-managed workflows. All five are declared as **inline YAML strings** in a single TS file ([`kbn-workflows/managed/definitions/discoveries.ts`](../../../../../src/platform/packages/shared/kbn-workflows/managed/definitions/discoveries.ts)) — that file is the **live source-of-truth**. Do not edit the `server/workflows/definitions/*.workflow.yaml` files in this plugin; they are legacy artifacts and are not loaded at runtime.
@@ -235,7 +240,7 @@ The plugin registers five workflow step handlers (see [`server/workflows/registe
 | `security.attack-discovery.defaultAlertRetrieval` | Retrieves and anonymizes alerts (DSL or ES\|QL) | `alertsIndexPattern`, `anonymizationFields`, `apiConfig`, `filter`, `size`, `start`/`end` | `alerts`, `anonymizedAlerts`, `replacements`, `apiConfig`, `connectorName`, `alertsContextCount` |
 | `security.attack-discovery.generate` | Generates attack discoveries from anonymized alerts via LangGraph | `alerts` (string[]), `apiConfig`, `replacements`, `size` | `attack_discoveries`, `execution_uuid`, `replacements` |
 | `security.attack-discovery.defaultValidation` | Hallucination detection + deduplication | `attackDiscoveries`, `anonymizedAlerts`, `apiConfig`, `connectorName`, `generationUuid`, `alertsContextCount`, `replacements` | `validated_discoveries`, `filtered_count`, `filter_reason` |
-| `security.attack-discovery.persistDiscoveries` | Persists validated discoveries to the AD data store | (as above) | `persisted_discoveries`, `duplicates_dropped_count` |
+| `security.attack-discovery.persistDiscoveries` | Persists validated discoveries to the AD data store | (as above) | `persisted_discoveries`, `duplicates_dropped_count`, `discoveries_to_persist` (echo of input — the handover) |
 | `security.attack-discovery.run` | Runs the full pipeline (retrieve → generate → validate → persist) as a single step | `connector_id` (optional — defaults to `genAiSettings:defaultAIConnector` → inference fallback), `alert_retrieval_mode`, `mode`, `alerts` (optional), `size`, `start`/`end`, `filter`, `esql_query` | `attack_discoveries`, `execution_uuid`, `alerts_context_count`, `discovery_count` |
 
 Common (cross-runtime) step definitions live in [`common/step_types/`](common/step_types/); server-side handlers live in [`server/workflows/steps/`](server/workflows/steps/).
@@ -1077,6 +1082,104 @@ Disables a workflow-tagged schedule without deleting it. The schedule remains in
 
 **Response:** `{ id: string }`
 
+## Schedules & the feature flag
+
+The [Scheduling](#scheduling) section above describes the moving parts (schedule SO, `workflow_executor`, data client, tag-based isolation). This section answers the questions that come up when the `securitySolution.attackDiscoveryWorkflowsEnabled` feature flag (FF) is toggled on a running system: **what is shared with AD 1.0, what AD 2.0 adds, how the Alerting Framework chooses an executor, and the exact visibility/execution guarantees** (with the Jest tests that lock them in).
+
+> **One sentence to anchor everything below:** scheduling is *always* Alerting-Framework-backed; the FF and the workflow path change only **how a schedule generates discoveries** and **which CRUD surface manages it** — never the rule type, the saved object, or who owns cadence/persistence/throttling.
+
+### What `Alerting Framework workflowExecutor` means
+
+This term appears early in the [Overview](#overview) and is easy to misread by anyone familiar with AD 1.0 schedules. It does **not** mean "the Workflows engine runs the schedule." Three facts disambiguate it:
+
+1. **There is exactly one alerting rule type** — `attack-discovery-schedules`, registered by `elastic_assistant` ([`register_schedule/definition.ts`](../elastic_assistant/server/lib/attack_discovery/schedules/register_schedule/definition.ts)). AD 2.0 did **not** add a second rule type or saved-object type.
+2. **There is exactly one rule executor** — `attackDiscoveryScheduleExecutor` ([`register_schedule/executor.ts`](../elastic_assistant/server/lib/attack_discovery/schedules/register_schedule/executor.ts)). When the rule fires, this function decides — at runtime, from the rule's own params — which generation path to take.
+3. **The `workflowExecutor` is the AD 2.0 branch of that executor**, not a Workflows-engine primitive. It is a factory the **discoveries** plugin hands to `elastic_assistant` during setup ([`discoveries/server/plugin.ts`](server/plugin.ts) → `registerAttackDiscoveryWorkflowExecutor`). The factory runs [`workflowExecutor`](server/lib/schedules/workflow_executor/index.ts), which calls the same `executeGenerationWorkflow` shared by the UI and the `run` step. Only the **generation pipeline** runs as workflow steps; the **Alerting Framework still owns scheduling, persistence, and action throttling**.
+
+```mermaid
+flowchart TB
+  RULE["attack-discovery-schedules rule fires<br/>(one rule type, one SO type)"]
+  EXEC["attackDiscoveryScheduleExecutor<br/>(one executor — elastic_assistant)"]
+  Q{"params.workflowConfig<br/>present?"}
+  WF["workflowExecutor (discoveries)<br/>→ executeGenerationWorkflow<br/>(AD 2.0, workflow steps)"]
+  LEG["generateAttackDiscoveries<br/>(AD 1.0, inline)"]
+  RULE --> EXEC --> Q
+  Q -->|yes| WF
+  Q -->|no| LEG
+```
+
+### What stays the same vs. what's new
+
+| Concern | AD 1.0 (untagged / legacy) | AD 2.0 (workflow-tagged) | Where |
+|---|---|---|---|
+| Alerting rule type & saved object | `attack-discovery-schedules` | **same** (no migration; `workflowConfig` is additive) | [`register_schedule/definition.ts`](../elastic_assistant/server/lib/attack_discovery/schedules/register_schedule/definition.ts) |
+| Owner of cadence, persistence, action throttling/frequency | Alerting Framework | **same** | [Scheduling → Action throttling](#action-throttling-and-frequency) |
+| Rule executor entry point | `attackDiscoveryScheduleExecutor` | **same** function, different branch | [`register_schedule/executor.ts`](../elastic_assistant/server/lib/attack_discovery/schedules/register_schedule/executor.ts) |
+| Generation engine | inline `generateAttackDiscoveries` | `executeGenerationWorkflow` (workflow steps) | [`workflow_executor/index.ts`](server/lib/schedules/workflow_executor/index.ts) |
+| `params.workflowConfig` | absent | **new, additive** — the dispatch key | [`workflow_executor/index.ts`](server/lib/schedules/workflow_executor/index.ts) |
+| `attack-discovery-schedule` tag | never present | **new** — applied on every internal-API write | [`create_schedule_data_client/index.ts`](server/lib/schedules/create_schedule_data_client/index.ts) |
+| CRUD surface | public `elastic_assistant` API | **new** FF-gated internal routes | [Schedule-related internal APIs](#schedule-related-internal-apis) |
+| Read visibility filter | excludes tagged schedules | **no include filter** (surfaces all) | [`create_schedule_data_client/index.ts`](server/lib/schedules/create_schedule_data_client/index.ts) |
+
+**New concepts introduced for AD 2.0** (none of which existed in the AD 1.0 schedules implementation):
+
+- **`workflowConfig` rule param** — an additive field on the existing rule SO that both (a) selects retrieval/validation workflows and (b) acts as the executor's dispatch key.
+- **Executor-factory handshake** — `discoveries` registers a `workflowExecutor` factory with `elastic_assistant` at setup; `elastic_assistant` owns the rule type and calls back into `discoveries` only for workflow-configured schedules.
+- **Tag-based isolation** — the `attack-discovery-schedule` tag plus asymmetric read filters (legacy excludes it; internal includes everything). See [ADR-014](#adr-014--tag-based-schedule-isolation).
+
+### How the Alerting Framework branches (FF vs. non-FF)
+
+The branch is keyed on the **data** (`params.workflowConfig`), **not** on the feature flag:
+
+```mermaid
+flowchart LR
+  P{"params.workflowConfig != null"}
+  P -->|yes| F{"workflow executor<br/>factory registered?"}
+  P -->|no| L["AD 1.0: generateAttackDiscoveries<br/>(inline LLM call)"]
+  F -->|yes| W["AD 2.0: executeGenerationWorkflow<br/>(workflow steps)"]
+  F -->|no| ERR["TaskRunError (USER source)<br/>— no retry"]
+```
+
+Two consequences that surprise people:
+
+- **The FF does not gate execution.** `securitySolution.attackDiscoveryWorkflowsEnabled` gates the **internal CRUD routes** (via `assertWorkflowsEnabled` — [`server/lib/assert_workflows_enabled/index.ts`](server/lib/assert_workflows_enabled/index.ts)) and the UI. The `workflowExecutor` factory is registered during the discoveries plugin's `setup()` **gated by `elasticAssistant` presence, not the FF** ([`discoveries/server/plugin.ts`](server/plugin.ts)). So a schedule that already carries `workflowConfig` runs through the workflow path **even if the FF is later turned off** — the rule simply keeps firing on its Alerting-Framework cadence.
+- **This is exactly what makes mutation a one-way street.** Once a schedule is edited under the internal API it gains both the `workflowConfig` param (→ workflow execution) and the `attack-discovery-schedule` tag (→ hidden from the legacy view). It cannot silently fall back to AD 1.0 behavior, which is the desired guarantee (see C3 below).
+
+### Persist-step handover: legacy reporting vs. workflow handover
+
+Both branches end at the Alerting Framework's `alertsClient.report`, but they differ in **what** is reported and **how** the discoveries travel there. The legacy branch reports the raw generation output inline; the workflow branch reports the persist-step **handover** (`discoveries_to_persist`) — the transformed/validated discoveries the persist step was handed. The branch point is the same line for both; the dispatch key is `workflowConfig` (not the FF — see above).
+
+| Stage | Legacy branch (`workflowConfig` absent) | Workflow branch (`workflowConfig` present) |
+|---|---|---|
+| Branch point | [`register_schedule/executor.ts`](../elastic_assistant/server/lib/attack_discovery/schedules/register_schedule/executor.ts) L76 `if (workflowConfig != null)` — falls through to the inline path | same line → `workflowExecutorFactory(options)` (L87) |
+| Generation engine | inline `generateAttackDiscoveries` ([`executor.ts`](../elastic_assistant/server/lib/attack_discovery/schedules/register_schedule/executor.ts) L132) | `executeGenerationWorkflow` (workflow steps), driven by [`workflow_executor/index.ts`](server/lib/schedules/workflow_executor/index.ts) |
+| What is reported | the **raw** generated `attackDiscoveries` | the persist-step **handover** `discoveries_to_persist` (transformed/validated, not raw) |
+| Handover carrier | n/a (in-memory generation output) | persist output `discoveries_to_persist` ([`get_persist_discoveries_step_definition.ts`](server/workflows/steps/persist_discoveries_step/get_persist_discoveries_step_definition.ts) L66/L78/L154) → `extractDiscoveriesToPersist` ([`invoke_validation_workflow.ts`](../../packages/kbn-discoveries/impl/attack_discovery/generation/invoke_validation_workflow.ts) L350) → `ValidationResult.discoveriesToPersist` → [`workflow_executor/index.ts`](server/lib/schedules/workflow_executor/index.ts) L199 |
+| Write to Alerting Framework | `alertsClient.report` ([`executor.ts`](../elastic_assistant/server/lib/attack_discovery/schedules/register_schedule/executor.ts) L233) | `alertsClient.report` ([`workflow_executor/index.ts`](server/lib/schedules/workflow_executor/index.ts) L242) |
+| Empty / absent handover | n/a | **noop + WARN** ([`workflow_executor/index.ts`](server/lib/schedules/workflow_executor/index.ts) L204-210) — nothing reported, no `setAlertData`, no `updateAlertsWithAttackIds` |
+
+### Gotchas (persist-step handover)
+
+- **Scheduled + a custom validation workflow that omits the persist step now persists nothing.** This is a behavioral change from AD 1.0, where the scheduled path always reported the raw generation output. Intended: noop + WARN ([`workflow_executor/index.ts`](server/lib/schedules/workflow_executor/index.ts) L204-210). A custom validation workflow **MUST** invoke `security.attack-discovery.persistDiscoveries` for its discoveries to reach the Alerting Framework.
+- **Destructive custom transforms can corrupt anonymized placeholders.** The handover markdown still carries anonymized `{{ field value }}` placeholder tokens, and `replacements` is keyed to those exact tokens. A custom transform that rewrites `details_markdown` / `summary_markdown` can break the token↔replacement match, so de-anonymization on display silently fails. (The scheduled executor still sources `replacements` from the generation result, not from the transformed handover.)
+- **`alert_ids` must be preserved by custom transforms.** Source-alert linkage and `updateAlertsWithAttackIds` ([`workflow_executor/index.ts`](server/lib/schedules/workflow_executor/index.ts) L293) depend on each discovery's `alert_ids`. A transform that drops or rewrites them breaks the alert→attack back-reference.
+- **Dedup identity is content-derived.** `generateAttackDiscoveryAlertHash` hashes discovery content, so a transformed discovery gets a **new** identity (expected). The default validation workflow leaves surviving discoveries unchanged, so there is no dedup regression on the default path.
+- **The pipeline-data UI stays consistent.** The Execution Details flyout reads the persist step **input** (`attack_discoveries`) for scheduled runs ([`get_scheduled_input_discoveries`](server/routes/get/pipeline_data/helpers/extract_pipeline_validation_data/helpers/get_scheduled_input_discoveries/index.ts)), which equals the handover — so what the UI shows and what the Alerting Framework persists stay in agreement.
+
+### Visibility & execution rules (constraints)
+
+The table encodes the guarantees a user can rely on as the FF is toggled. "Legacy view" = the public `elastic_assistant` find API (and the UI when the FF is OFF); "internal view" = the FF-gated internal find API (and the UI when the FF is ON).
+
+| # | Scenario | Expected result | Covered by (Jest) |
+|---|---|---|---|
+| **C1** | A schedule **created while the FF was OFF** (untagged) is viewed in the **legacy** view | Visible — and stays visible forever. The legacy data client only ever *excludes* tagged schedules; it never hides untagged ones. | legacy client wiring: [`request_context_factory.ts`](../elastic_assistant/server/routes/request_context_factory.ts); exclude-filter behavior: [`data_client/index.test.ts`](../../packages/kbn-attack-discovery-schedules-common/impl/data_client/index.test.ts) (`"...exclude tag filter when filterTags.excludeTags is set"`); route: [`public/get/find.test.ts`](../elastic_assistant/server/routes/attack_discovery/schedules/public/get/find.test.ts) |
+| **C2** | That same untagged schedule is viewed in the **internal** view (FF ON) | Visible. The internal client sets **no** `includeTags` filter, so it surfaces both its own tagged rules **and** untagged legacy rules. | [`create_schedule_data_client/index.test.ts`](server/lib/schedules/create_schedule_data_client/index.test.ts) (`"does not set a filterTags include filter so the internal API surfaces both its own and legacy (untagged) schedules"`); route: [`find_schedules.test.ts`](server/routes/get/schedules/find_schedules.test.ts) |
+| **C3 (visibility)** | An untagged schedule is **mutated under the internal API (FF ON)** | It **adopts** the `attack-discovery-schedule` tag (existing tags preserved + merged + de-duplicated) and therefore **leaves** the legacy view — a one-way street. | tag merge: [`data_client/index.test.ts`](../../packages/kbn-attack-discovery-schedules-common/impl/data_client/index.test.ts) (`"merges existing tags with applyTags additively"`, `"deduplicates tags..."`); route: [`update_schedule.test.ts`](server/routes/put/schedules/update_schedule.test.ts) |
+| **C3 (execution)** | The same mutation persists `workflowConfig` (existing config used as baseline) | The schedule now **executes via the workflow path** regardless of FF state, because the executor dispatches on `workflowConfig` presence. It "behaves" exactly like an FF-ON-created schedule. | baseline merge: [`transform_update_props_from_api/index.test.ts`](../../packages/kbn-discoveries/impl/lib/schedules/transforms/transform_update_props_from_api/index.test.ts); dispatch: [`executor.test.ts`](../elastic_assistant/server/lib/attack_discovery/schedules/register_schedule/executor.test.ts) (`"...when workflowConfig is present but executor factory returns undefined"`); factory registration: [`plugin.test.ts`](server/plugin.test.ts) |
+| **Invariant** | Legacy/public-API code path must **never** write the `attack-discovery-schedule` tag | If it ever did, C1 would break (legacy schedules would hide themselves). Enforced in `elastic_assistant` and verified end-to-end. | Scout API tests: [test/scout/api/](test/scout/api/README.md) |
+
+The net effect across C1–C3: **a schedule created with the FF off never disappears on its own** (C1 + C2), but **the moment a user edits it under the FF, it becomes a workflow schedule for good** (C3) — visibility and execution move together, so the running schedule always reflects the user's most recent intent.
+
 ## Dependencies
 
 - `@kbn/workflows-plugin` — Workflow engine (required)
@@ -1108,6 +1211,19 @@ node scripts/type_check --project x-pack/solutions/security/plugins/discoveries/
 ```
 
 Scout API tests for internal schedule routes are documented in [test/scout/api/README.md](test/scout/api/README.md).
+
+### Requirement-to-test map (persist-step handover)
+
+The persist-step handover model (epic `kibana-j4y`) encodes requirements R1–R4 plus the empty/no-persist cases as unit tests:
+
+| Requirement / scenario | Behavior | Locked in by (Jest) |
+|---|---|---|
+| **R1** — no persist step ⇒ noop + WARN | A validation workflow that never invokes the persist step persists nothing; the handover defaults to `[]` and a WARN is logged. | [`invoke_validation_workflow.test.ts`](../../packages/kbn-discoveries/impl/attack_discovery/generation/invoke_validation_workflow.test.ts) (`defaults discoveriesToPersist to an empty array when no persist step ran (R1)`, `logs a warning when no persist step ran (R1)`); [`workflow_executor/index.test.ts`](server/lib/schedules/workflow_executor/index.test.ts) (`does not call alertsClient.report when the handover is empty`/`absent`, `logs a warning when the handover is empty`/`absent`) |
+| **R2** — only the handed discoveries are persisted (persist input == handover) | The persist step echoes exactly its input `attack_discoveries` as `discoveries_to_persist`. | [`get_persist_discoveries_step_definition.test.ts`](server/workflows/steps/persist_discoveries_step/get_persist_discoveries_step_definition.test.ts) (`echoes the input attack_discoveries as discoveries_to_persist`, `echoes the input attack_discoveries as discoveries_to_persist for scheduled executions`) |
+| **R3** — ad-hoc & run step persist via the step; run step inline output == handover | The `run` step's sync output sets `attack_discoveries` to the handover (`discoveriesToPersist`), not the raw generation output. | [`get_run_step_definition.test.ts`](server/workflows/steps/run_step/get_run_step_definition.test.ts) (`returns the persist handover discoveries instead of raw generation output`) |
+| **R4** — scheduled reports the handover (not raw generation) | The scheduled executor reports the transformed handover to `alertsClient`, never raw generation discoveries absent from the handover. | [`workflow_executor/index.test.ts`](server/lib/schedules/workflow_executor/index.test.ts) (`reports the persist handover discoveries instead of raw generation output`, `does not report raw generation discoveries that are absent from the handover`) |
+| **Empty input** — empty array handed to persist ⇒ empty handover / noop | An empty input echoes `[]`; the run step returns `[]`; the scheduled executor reports nothing. | [`get_persist_discoveries_step_definition.test.ts`](server/workflows/steps/persist_discoveries_step/get_persist_discoveries_step_definition.test.ts) (`echoes the empty input as discoveries_to_persist`); [`get_run_step_definition.test.ts`](server/workflows/steps/run_step/get_run_step_definition.test.ts) (`returns an empty array when the handover is empty`/`absent`); [`workflow_executor/index.test.ts`](server/lib/schedules/workflow_executor/index.test.ts) (`does not call alertsClient.report when the handover is empty`/`absent`) |
+| **Passthrough** — handover rides `ValidationResult` onto the orchestration outcome | The validation step surfaces `discoveriesToPersist` on the outcome consumed by the scheduled executor and the run step. | [`validation_step/index.test.ts`](../../packages/kbn-discoveries/impl/attack_discovery/generation/run_manual_orchestration/steps/validation_step/index.test.ts) (`passes discoveriesToPersist through onto the outcome`) |
 
 ## Architecture Decision Records (appendix)
 

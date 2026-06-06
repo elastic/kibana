@@ -183,9 +183,24 @@ describe('getPersistDiscoveriesStepDefinition', () => {
       const output = getOutputOrThrow(result);
 
       expect(output).toEqual({
+        discoveries_to_persist: mockContext.input.attack_discoveries,
         duplicates_dropped_count: 0,
         persisted_discoveries: persistedDiscoveries,
       });
+    });
+
+    it('echoes the input attack_discoveries as discoveries_to_persist', async () => {
+      const stepDefinition = getPersistDiscoveriesStepDefinition({
+        adhocAttackDiscoveryDataClient: mockAdhocAttackDiscoveryDataClient,
+        getStartServices: mockGetStartServices,
+        logger: mockLogger,
+      });
+
+      const result = await stepDefinition.handler(mockContext as never);
+
+      const output = getOutputOrThrow(result);
+
+      expect(output.discoveries_to_persist).toEqual(mockContext.input.attack_discoveries);
     });
 
     it('calls validateAttackDiscoveries with the correct arguments', async () => {
@@ -262,10 +277,33 @@ describe('getPersistDiscoveriesStepDefinition', () => {
       const output = getOutputOrThrow(result);
 
       expect(output).toEqual({
+        discoveries_to_persist: scheduledContext.input.attack_discoveries,
         duplicates_dropped_count: 0,
         persisted_discoveries: [],
       });
       expect(mockValidateAttackDiscoveries).not.toHaveBeenCalled();
+    });
+
+    it('echoes the input attack_discoveries as discoveries_to_persist for scheduled executions', async () => {
+      const scheduledContext = {
+        ...mockContext,
+        input: {
+          ...mockContext.input,
+          source: 'scheduled',
+        },
+      };
+
+      const stepDefinition = getPersistDiscoveriesStepDefinition({
+        adhocAttackDiscoveryDataClient: mockAdhocAttackDiscoveryDataClient,
+        getStartServices: mockGetStartServices,
+        logger: mockLogger,
+      });
+
+      const result = await stepDefinition.handler(scheduledContext as never);
+
+      const output = getOutputOrThrow(result);
+
+      expect(output.discoveries_to_persist).toEqual(scheduledContext.input.attack_discoveries);
     });
 
     it('does not call getStartServices for scheduled executions', async () => {
@@ -310,10 +348,33 @@ describe('getPersistDiscoveriesStepDefinition', () => {
       const output = getOutputOrThrow(result);
 
       expect(output).toEqual({
+        discoveries_to_persist: [],
         duplicates_dropped_count: 0,
         persisted_discoveries: [],
       });
       expect(mockValidateAttackDiscoveries).not.toHaveBeenCalled();
+    });
+
+    it('echoes the empty input as discoveries_to_persist', async () => {
+      const contextWithNoDiscoveries = {
+        ...mockContext,
+        input: {
+          ...mockContext.input,
+          attack_discoveries: [],
+        },
+      };
+
+      const stepDefinition = getPersistDiscoveriesStepDefinition({
+        adhocAttackDiscoveryDataClient: mockAdhocAttackDiscoveryDataClient,
+        getStartServices: mockGetStartServices,
+        logger: mockLogger,
+      });
+
+      const result = await stepDefinition.handler(contextWithNoDiscoveries as never);
+
+      const output = getOutputOrThrow(result);
+
+      expect(output.discoveries_to_persist).toEqual([]);
     });
   });
 

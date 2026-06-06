@@ -247,7 +247,7 @@ export const ATTACK_DISCOVERY_VALIDATE_WORKFLOW = {
   id: ATTACK_DISCOVERY_VALIDATE_WORKFLOW_ID,
   management: MANAGEMENT,
   pluginId: 'discoveries',
-  version: 1,
+  version: 2,
   yaml: `version: '1'
 name: Security - Attack discovery - Default validation
 description: >
@@ -359,6 +359,7 @@ steps:
       enable_field_rendering: \${{ inputs.enable_field_rendering }}
       generation_uuid: \${{ inputs.generation_uuid }}
       replacements: \${{ inputs.replacements }}
+      source: \${{ inputs.source }}
       with_replacements: \${{ inputs.with_replacements }}`,
 } as const satisfies ManagedWorkflowDefinition;
 
