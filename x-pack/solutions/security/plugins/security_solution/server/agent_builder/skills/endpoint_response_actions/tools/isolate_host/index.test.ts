@@ -6,7 +6,10 @@
  */
 
 /* eslint-disable require-atomic-updates */
-import { isToolHandlerStandardReturn, type ToolHandlerContext } from '@kbn/agent-builder-server/tools';
+import {
+  isToolHandlerStandardReturn,
+  type ToolHandlerContext,
+} from '@kbn/agent-builder-server/tools';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 
 import type { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
@@ -107,8 +110,8 @@ describe('isolateHostTool', () => {
     it('calls responseActionsClient.isolate with endpoint_ids and comment when agent found', async () => {
       const mockAgentService = {
         listAgents: jest.fn().mockResolvedValue({
-            agents: [{ id: 'agent-123' }],
-          }),
+          agents: [{ id: 'agent-123' }],
+        }),
       };
 
       const mockResponseActionsClient = {
@@ -178,8 +181,8 @@ describe('isolateHostTool', () => {
     it('uses a default comment when none is provided', async () => {
       const mockAgentService = {
         listAgents: jest.fn().mockResolvedValue({
-            agents: [{ id: 'agent-123' }],
-          }),
+          agents: [{ id: 'agent-123' }],
+        }),
       };
 
       const mockResponseActionsClient = {
@@ -261,8 +264,8 @@ describe('isolateHostTool', () => {
     it('returns an error result when the response actions client throws', async () => {
       const mockAgentService = {
         listAgents: jest.fn().mockResolvedValue({
-            agents: [{ id: 'agent-123' }],
-          }),
+          agents: [{ id: 'agent-123' }],
+        }),
       };
 
       const mockResponseActionsClient = {

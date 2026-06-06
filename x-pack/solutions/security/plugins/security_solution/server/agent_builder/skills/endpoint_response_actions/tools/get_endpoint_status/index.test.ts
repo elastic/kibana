@@ -6,7 +6,10 @@
  */
 
 /* eslint-disable require-atomic-updates */
-import { isToolHandlerStandardReturn, type ToolHandlerContext } from '@kbn/agent-builder-server/tools';
+import {
+  isToolHandlerStandardReturn,
+  type ToolHandlerContext,
+} from '@kbn/agent-builder-server/tools';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 
 import type { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
@@ -110,8 +113,8 @@ describe('getEndpointStatusTool', () => {
     it('returns found: true with correct data when agent and metadata lookups succeed', async () => {
       const mockAgentService = {
         listAgents: jest.fn().mockResolvedValue({
-            agents: [{ id: 'agent-123' }],
-          }),
+          agents: [{ id: 'agent-123' }],
+        }),
       };
 
       const mockMetadataService = {
@@ -165,8 +168,8 @@ describe('getEndpointStatusTool', () => {
     it('returns found: true with non-isolated status when metadata shows isolation is false', async () => {
       const mockAgentService = {
         listAgents: jest.fn().mockResolvedValue({
-            agents: [{ id: 'agent-456' }],
-          }),
+          agents: [{ id: 'agent-456' }],
+        }),
       };
 
       const mockMetadataService = {
@@ -211,15 +214,15 @@ describe('getEndpointStatusTool', () => {
     it('returns index_not_found when agent exists but metadata index does not exist', async () => {
       const mockAgentService = {
         listAgents: jest.fn().mockResolvedValue({
-            agents: [
-              {
-                id: 'agent-789',
-                last_checkin: '2024-01-01T00:00:00Z',
-                isolation: false,
-                host_status: 'healthy',
-              },
-            ],
-          }),
+          agents: [
+            {
+              id: 'agent-789',
+              last_checkin: '2024-01-01T00:00:00Z',
+              isolation: false,
+              host_status: 'healthy',
+            },
+          ],
+        }),
       };
 
       const mockMetadataService = {
@@ -267,15 +270,15 @@ describe('getEndpointStatusTool', () => {
     it('returns agent-level fallback when metadata service throws', async () => {
       const mockAgentService = {
         listAgents: jest.fn().mockResolvedValue({
-            agents: [
-              {
-                id: 'agent-fallback',
-                last_checkin: '2024-03-15T08:00:00Z',
-                isolation: true,
-                host_status: 'unhealthy',
-              },
-            ],
-          }),
+          agents: [
+            {
+              id: 'agent-fallback',
+              last_checkin: '2024-03-15T08:00:00Z',
+              isolation: true,
+              host_status: 'unhealthy',
+            },
+          ],
+        }),
       };
 
       const mockMetadataService = {
@@ -338,15 +341,15 @@ describe('getEndpointStatusTool', () => {
     it('falls back to agent-level data when metadata service throws, not an error type', async () => {
       const mockAgentService = {
         listAgents: jest.fn().mockResolvedValue({
-            agents: [
-              {
-                id: 'agent-fallback2',
-                last_checkin: '2024-05-01T10:00:00Z',
-                isolation: false,
-                host_status: 'unhealthy',
-              },
-            ],
-          }),
+          agents: [
+            {
+              id: 'agent-fallback2',
+              last_checkin: '2024-05-01T10:00:00Z',
+              isolation: false,
+              host_status: 'unhealthy',
+            },
+          ],
+        }),
       };
 
       const mockMetadataService = {
