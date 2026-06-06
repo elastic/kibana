@@ -19,14 +19,17 @@ import { test } from '../fixtures';
 // These distinct actions let us assert both the aggregated and per-integration views.
 const VIEWER = 'awsPermissionsViewer';
 
-const selectPermissionBearingServices = async (page: ScoutPage) => {
+// Sets services in session storage then navigates fresh to the deploy-settings step
+// so the component mounts with the correct selectedServiceIds from the start.
+const navigateWithPermissionBearingServices = async (page: ScoutPage) => {
+  // Must be on the app origin before setting session storage
   await page.evaluate(() => {
     sessionStorage.setItem(
       'onboarding.aws.servicesStep',
       JSON.stringify({ selectedServiceIds: ['ec2_metrics', 'guardduty'] })
     );
   });
-  await page.reload();
+  await page.gotoApp('onboarding/aws#deploy-settings');
 };
 
 test.describe(
@@ -55,9 +58,7 @@ test.describe(
     }) => {
       await browserAuth.loginAsAdmin();
       await page.gotoApp('onboarding/aws#deploy-settings');
-      await expect(page.testSubj.locator('onboardingStep-deploy-settings')).toBeVisible();
-
-      await selectPermissionBearingServices(page);
+      await navigateWithPermissionBearingServices(page);
       await expect(page.testSubj.locator('onboardingStep-deploy-settings')).toBeVisible();
 
       await test.step('viewer is rendered above the static keys form', async () => {
@@ -86,9 +87,7 @@ test.describe(
     }) => {
       await browserAuth.loginAsAdmin();
       await page.gotoApp('onboarding/aws#deploy-settings');
-      await expect(page.testSubj.locator('onboardingStep-deploy-settings')).toBeVisible();
-
-      await selectPermissionBearingServices(page);
+      await navigateWithPermissionBearingServices(page);
       await expect(page.testSubj.locator('onboardingStep-deploy-settings')).toBeVisible();
 
       await page.testSubj.locator('awsAuthTypeSelector').selectOption('static_keys');

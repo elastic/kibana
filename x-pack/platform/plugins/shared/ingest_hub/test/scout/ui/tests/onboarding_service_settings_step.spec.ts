@@ -161,7 +161,10 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
 
     // Region override is shown and pre-populated with the global region
     await expect(page.getByText('AWS Region (override)')).toBeVisible();
-    await expect(page.getByText('us-east-1')).toBeVisible();
+    // singleSelection asPlainText renders the selected value into the combobox input
+    await expect(page.locator('.euiFlyout').getByLabel('AWS Region (override)')).toHaveValue(
+      'us-east-1'
+    );
 
     // Close via Close button
     await page.getByRole('button', { name: 'Close' }).click();
