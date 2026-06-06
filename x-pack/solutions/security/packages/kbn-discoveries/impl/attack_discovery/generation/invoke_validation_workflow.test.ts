@@ -1529,7 +1529,7 @@ describe('invokeValidationWorkflow', () => {
       expect(result.validationSummary.persistedCount).toBe(3);
     });
 
-    it('falls back to generatedCount when persisted_discoveries is absent and no counters are available', async () => {
+    it('falls back to generatedCount when the persist step ran but persisted_discoveries is absent and no counters are available', async () => {
       (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
       (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
       (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue({
@@ -1537,7 +1537,7 @@ describe('invokeValidationWorkflow', () => {
         stepExecutions: [
           {
             output: {},
-            stepType: 'custom.some_step',
+            stepType: 'security.attack-discovery.persistDiscoveries',
           },
         ],
       });
@@ -1843,13 +1843,13 @@ describe('invokeValidationWorkflow', () => {
       expect(result.validationSummary.persistedCount).toBe(1);
     });
 
-    it('falls back to generatedCount when persist step has no persisted_discoveries', async () => {
+    it('falls back to generatedCount when persist step ran but has no persisted_discoveries', async () => {
       (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue({
         ...mockCompletedExecution,
         stepExecutions: [
           {
             output: {},
-            stepType: 'custom.some_step',
+            stepType: 'security.attack-discovery.persistDiscoveries',
           },
         ],
       });
@@ -1891,6 +1891,179 @@ describe('invokeValidationWorkflow', () => {
 
       // Falls back to generatedCount = 2
       expect(result.validationSummary.persistedCount).toBe(2);
+    });
+  });
+
+  describe('extractDiscoveriesToPersist (persist step handover)', () => {
+    beforeEach(() => {
+      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
+    });
+
+    it('extracts discoveriesToPersist from the persist step discoveries_to_persist output', async () => {
+      const handover = [{ alert_ids: ['a1'], title: 'Handover 1' }];
+
+      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue({
+        ...mockCompletedExecution,
+        stepExecutions: [
+          {
+            output: {
+              discoveries_to_persist: handover,
+              duplicates_dropped_count: 0,
+              persisted_discoveries: [],
+            },
+            stepType: 'security.attack-discovery.persistDiscoveries',
+          },
+        ],
+      });
+
+      const result = await invokeValidationWorkflow(defaultProps);
+
+      expect(result.discoveriesToPersist).toEqual(handover);
+    });
+
+    it('defaults discoveriesToPersist to an empty array when the persist step omits the field', async () => {
+      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue({
+        ...mockCompletedExecution,
+        stepExecutions: [
+          {
+            output: {
+              duplicates_dropped_count: 0,
+              persisted_discoveries: [],
+            },
+            stepType: 'security.attack-discovery.persistDiscoveries',
+          },
+        ],
+      });
+
+      const result = await invokeValidationWorkflow(defaultProps);
+
+      expect(result.discoveriesToPersist).toEqual([]);
+    });
+
+    it('defaults discoveriesToPersist to an empty array when no persist step ran (R1)', async () => {
+      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue({
+        ...mockCompletedExecution,
+        stepExecutions: [
+          {
+            output: {},
+            stepType: 'custom.some_step',
+          },
+        ],
+      });
+
+      const result = await invokeValidationWorkflow(defaultProps);
+
+      expect(result.discoveriesToPersist).toEqual([]);
+    });
+
+    it('logs a warning when no persist step ran (R1)', async () => {
+      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue({
+        ...mockCompletedExecution,
+        stepExecutions: [
+          {
+            output: {},
+            stepType: 'custom.some_step',
+          },
+        ],
+      });
+
+      await invokeValidationWorkflow(defaultProps);
+
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('did not invoke the persist step')
+      );
+    });
+
+    it('does not log a warning when the persist step ran', async () => {
+      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue({
+        ...mockCompletedExecution,
+        stepExecutions: [
+          {
+            output: {
+              discoveries_to_persist: [{ alert_ids: ['a1'], title: 'Handover 1' }],
+              duplicates_dropped_count: 0,
+              persisted_discoveries: [],
+            },
+            stepType: 'security.attack-discovery.persistDiscoveries',
+          },
+        ],
+      });
+
+      await invokeValidationWorkflow(defaultProps);
+
+      expect(mockLogger.warn).not.toHaveBeenCalled();
+    });
+
+    it('reports persistedCount from the handover for scheduled (no ad-hoc persistence)', async () => {
+      const handover = [
+        { alert_ids: ['a1'], title: 'Handover 1' },
+        { alert_ids: ['a2'], title: 'Handover 2' },
+      ];
+
+      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue({
+        ...mockCompletedExecution,
+        stepExecutions: [
+          {
+            // Scheduled: ad-hoc persistence is skipped (persisted_discoveries is empty),
+            // but the handover rides discoveries_to_persist.
+            output: {
+              discoveries_to_persist: handover,
+              duplicates_dropped_count: 0,
+              persisted_discoveries: [],
+            },
+            stepType: 'security.attack-discovery.persistDiscoveries',
+          },
+        ],
+      });
+
+      const result = await invokeValidationWorkflow(defaultProps);
+
+      expect(result.validationSummary.persistedCount).toBe(2);
+    });
+  });
+
+  describe('R1 no-persist (noop) reports persistedCount of 0 (kibana-az5 fix)', () => {
+    beforeEach(() => {
+      (mockWorkflowsManagementApi.getWorkflow as jest.Mock).mockResolvedValue(mockWorkflow);
+      (mockWorkflowsManagementApi.runWorkflow as jest.Mock).mockResolvedValue('workflow-run-id');
+      // A validation workflow that completed but never invoked the persist step and
+      // produced no persisted output or handover: nothing was persisted (noop).
+      (mockWorkflowsManagementApi.getWorkflowExecution as jest.Mock).mockResolvedValue({
+        ...mockCompletedExecution,
+        context: {},
+        stepExecutions: [
+          {
+            output: {},
+            stepType: 'custom.some_step',
+          },
+        ],
+      });
+    });
+
+    it('reports persistedCount of 0 (not the generated count) in validationSummary', async () => {
+      const result = await invokeValidationWorkflow(defaultProps);
+
+      expect(result.validationSummary.persistedCount).toBe(0);
+    });
+
+    it('passes newAlerts of 0 to the success event log', async () => {
+      await invokeValidationWorkflow(defaultProps);
+
+      expect(mockWriteAttackDiscoveryEvent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          action: 'validation-succeeded',
+          newAlerts: 0,
+        })
+      );
+    });
+
+    it('logs completion with 0 discoveries stored', async () => {
+      await invokeValidationWorkflow(defaultProps);
+
+      expect(mockLogger.info).toHaveBeenCalledWith(
+        'Validation workflow completed: 0 discoveries stored'
+      );
     });
   });
 
