@@ -79,7 +79,11 @@ export class DataViewsFieldEditor {
    */
   async typeScript(script: string): Promise<void> {
     const editor = this.valueRow.locator('.react-monaco-editor-container .monaco-editor textarea');
-    await editor.click();
+    // Monaco's hidden <textarea> can be intercepted by an overlay
+    // (cursor / scroll layer) on the first paint; force-click bypasses
+    // the actionability check, which mirrors what FTR's WebDriver-based
+    // click does — it dispatches the event regardless of overlap.
+    await editor.click({ force: true });
     await this.page.keyboard.type(script);
   }
 

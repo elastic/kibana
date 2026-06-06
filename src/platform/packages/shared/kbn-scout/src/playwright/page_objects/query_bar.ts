@@ -41,6 +41,17 @@ export class QueryBar {
   }
 
   /**
+   * Click the unified-search refresh / update button. Mirrors FTR
+   * `queryBar.clickQuerySubmitButton()`. Use this in request-count tests
+   * where the precise number of triggered fetches matters — a single
+   * click is the cleanest possible refresh action and avoids ambiguity
+   * around keyboard event chains.
+   */
+  async clickQuerySubmitButton(): Promise<void> {
+    await this.page.testSubj.click('querySubmitButton');
+  }
+
+  /**
    * Read the current value of the query input (mirrors FTR
    * `queryBar.getQueryString`).
    */

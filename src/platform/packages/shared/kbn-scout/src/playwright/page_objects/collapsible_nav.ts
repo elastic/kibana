@@ -61,6 +61,9 @@ export class CollapsibleNav {
   }
 
   async clickNavItemByDeepLinkId(deepLinkId: string) {
+    // Side nav can be collapsed (only the hamburger toggle visible);
+    // expand first so the deep-link target is rendered & clickable.
+    await this.expandNav();
     await this.page.testSubj.click(`~nav-item-deepLinkId-${deepLinkId}`);
   }
 

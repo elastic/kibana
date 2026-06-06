@@ -53,7 +53,7 @@ spaceTest.describe('Discover - request counts (data view mode)', { tag: tags.sta
     async ({ pageObjects }) => {
       await spaceTest.step('refresh', async () => {
         await pageObjects.discover.expectSearchRequestCount('ese', 2, async () => {
-          await pageObjects.queryBar.submitQuery();
+          await pageObjects.queryBar.clickQuerySubmitButton();
         });
       });
 
