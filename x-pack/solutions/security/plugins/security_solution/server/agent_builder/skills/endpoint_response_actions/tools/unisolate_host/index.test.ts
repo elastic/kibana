@@ -6,7 +6,7 @@
  */
 
 /* eslint-disable require-atomic-updates */
-import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
+import { isToolHandlerStandardReturn, type ToolHandlerContext } from '@kbn/agent-builder-server/tools';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 
 import type { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
@@ -16,6 +16,13 @@ import { unisolateHostTool } from '.';
 
 const mockLogger = { error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() };
 const mockContext = { logger: mockLogger } as unknown as ToolHandlerContext;
+
+function assertStandardReturn(result: unknown) {
+  if (!isToolHandlerStandardReturn(result)) {
+    throw new Error('Expected standard tool return');
+  }
+  return result.results;
+}
 
 describe('unisolateHostTool', () => {
   let mockEndpointAppContextService: EndpointAppContextService;
@@ -48,23 +55,21 @@ describe('unisolateHostTool', () => {
 
     it('returns found: false with reason endpoint_not_found when no agent matches', async () => {
       const mockAgentService = {
-        asInternalUser: {
-          list: jest.fn().mockResolvedValue({ items: [] }),
-        },
+        listAgents: jest.fn().mockResolvedValue({ agents: [] }),
       };
 
       const originalGetInternalFleetServices =
         mockEndpointAppContextService.getInternalFleetServices;
       mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
-        agentService: mockAgentService,
+        agent: mockAgentService,
       }));
 
       try {
         const result = await tool.handler({ hostName: 'nonexistent-host' }, mockContext);
 
-        expect(result.results).toHaveLength(1);
-        expect(result.results[0].type).toBe(ToolResultType.other);
-        const data = result.results[0].data as Record<string, unknown>;
+        expect(assertStandardReturn(result)).toHaveLength(1);
+        expect(assertStandardReturn(result)[0].type).toBe(ToolResultType.other);
+        const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
         expect(data.found).toBe(false);
         expect(data.reason).toBe('endpoint_not_found');
         expect(data.hostName).toBe('nonexistent-host');
@@ -76,21 +81,20 @@ describe('unisolateHostTool', () => {
 
     it('calls agentService.list with the correct kuery filter', async () => {
       const mockAgentService = {
-        asInternalUser: {
-          list: jest.fn().mockResolvedValue({ items: [] }),
-        },
+        listAgents: jest.fn().mockResolvedValue({ agents: [] }),
       };
 
       const originalGetInternalFleetServices =
         mockEndpointAppContextService.getInternalFleetServices;
       mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
-        agentService: mockAgentService,
+        agent: mockAgentService,
       }));
 
       try {
         await tool.handler({ hostName: 'my-host', comment: 'test comment' }, mockContext);
 
-        expect(mockAgentService.asInternalUser.list).toHaveBeenCalledWith({
+        expect(mockAgentService.listAgents).toHaveBeenCalledWith({
+          showInactive: true,
           kuery: 'host.name: my-host',
           page: 1,
           perPage: 1,
@@ -102,11 +106,9 @@ describe('unisolateHostTool', () => {
 
     it('calls responseActionsClient.release with endpoint_ids and comment when agent found', async () => {
       const mockAgentService = {
-        asInternalUser: {
-          list: jest.fn().mockResolvedValue({
-            items: [{ id: 'agent-123' }],
+        listAgents: jest.fn().mockResolvedValue({
+            agents: [{ id: 'agent-123' }],
           }),
-        },
       };
 
       const mockResponseActionsClient = {
@@ -139,7 +141,7 @@ describe('unisolateHostTool', () => {
         mockEndpointAppContextService.getInternalResponseActionsClient;
 
       mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
-        agentService: mockAgentService,
+        agent: mockAgentService,
       }));
       mockEndpointAppContextService.getInternalResponseActionsClient = jest.fn(
         () => mockResponseActionsClient
@@ -162,9 +164,9 @@ describe('unisolateHostTool', () => {
         // Ensure isolate was NOT called — unisolate tool calls release, not isolate
         expect(mockResponseActionsClient.isolate).not.toHaveBeenCalled();
 
-        expect(result.results).toHaveLength(1);
-        expect(result.results[0].type).toBe(ToolResultType.other);
-        const data = result.results[0].data as Record<string, unknown>;
+        expect(assertStandardReturn(result)).toHaveLength(1);
+        expect(assertStandardReturn(result)[0].type).toBe(ToolResultType.other);
+        const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
         expect(data.actionId).toBe('action-456');
         expect(data.status).toBe('accepted');
         expect(data.wasSuccessful).toBe(true);
@@ -178,11 +180,9 @@ describe('unisolateHostTool', () => {
 
     it('uses a default comment when none is provided', async () => {
       const mockAgentService = {
-        asInternalUser: {
-          list: jest.fn().mockResolvedValue({
-            items: [{ id: 'agent-123' }],
+        listAgents: jest.fn().mockResolvedValue({
+            agents: [{ id: 'agent-123' }],
           }),
-        },
       };
 
       const mockResponseActionsClient = {
@@ -215,7 +215,7 @@ describe('unisolateHostTool', () => {
         mockEndpointAppContextService.getInternalResponseActionsClient;
 
       mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
-        agentService: mockAgentService,
+        agent: mockAgentService,
       }));
       mockEndpointAppContextService.getInternalResponseActionsClient = jest.fn(
         () => mockResponseActionsClient
@@ -240,23 +240,21 @@ describe('unisolateHostTool', () => {
 
     it('returns an error result when the agent service throws', async () => {
       const mockAgentService = {
-        asInternalUser: {
-          list: jest.fn().mockRejectedValue(new Error('fleet service unavailable')),
-        },
+        listAgents: jest.fn().mockRejectedValue(new Error('fleet service unavailable')),
       };
 
       const originalGetInternalFleetServices =
         mockEndpointAppContextService.getInternalFleetServices;
       mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
-        agentService: mockAgentService,
+        agent: mockAgentService,
       }));
 
       try {
         const result = await tool.handler({ hostName: 'my-host' }, mockContext);
 
-        expect(result.results).toHaveLength(1);
-        expect(result.results[0].type).toBe(ToolResultType.error);
-        expect(result.results[0].data).toHaveProperty('message');
+        expect(assertStandardReturn(result)).toHaveLength(1);
+        expect(assertStandardReturn(result)[0].type).toBe(ToolResultType.error);
+        expect(assertStandardReturn(result)[0].data).toHaveProperty('message');
         expect(mockLogger.error).toHaveBeenCalled();
       } finally {
         mockEndpointAppContextService.getInternalFleetServices = originalGetInternalFleetServices;
@@ -265,11 +263,9 @@ describe('unisolateHostTool', () => {
 
     it('returns an error result when the response actions client throws', async () => {
       const mockAgentService = {
-        asInternalUser: {
-          list: jest.fn().mockResolvedValue({
-            items: [{ id: 'agent-123' }],
+        listAgents: jest.fn().mockResolvedValue({
+            agents: [{ id: 'agent-123' }],
           }),
-        },
       };
 
       const mockResponseActionsClient = {
@@ -297,7 +293,7 @@ describe('unisolateHostTool', () => {
         mockEndpointAppContextService.getInternalResponseActionsClient;
 
       mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
-        agentService: mockAgentService,
+        agent: mockAgentService,
       }));
       mockEndpointAppContextService.getInternalResponseActionsClient = jest.fn(
         () => mockResponseActionsClient
@@ -306,9 +302,9 @@ describe('unisolateHostTool', () => {
       try {
         const result = await tool.handler({ hostName: 'my-host' }, mockContext);
 
-        expect(result.results).toHaveLength(1);
-        expect(result.results[0].type).toBe(ToolResultType.error);
-        expect((result.results[0].data as Record<string, unknown>).message).toContain(
+        expect(assertStandardReturn(result)).toHaveLength(1);
+        expect(assertStandardReturn(result)[0].type).toBe(ToolResultType.error);
+        expect((assertStandardReturn(result)[0].data as Record<string, unknown>).message).toContain(
           'Error un-isolating host'
         );
         expect(mockLogger.error).toHaveBeenCalled();

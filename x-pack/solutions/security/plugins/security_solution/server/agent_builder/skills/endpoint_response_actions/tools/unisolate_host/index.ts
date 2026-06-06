@@ -9,7 +9,7 @@ import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { z } from '@kbn/zod/v4';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import type { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
 import { UNISOLATE_TOOL_ID } from '../..';
@@ -33,7 +33,8 @@ export const unisolateHostTool = (
     schema: unisolateHostSchema,
     handler: async (params, { logger }) => {
       try {
-        const { hostName, comment } = params;
+        const hostName = params.hostName as string;
+        const comment = params.comment as string | undefined;
         const spaceId = DEFAULT_SPACE_ID;
         const responseActionsClient = endpointAppContextService.getInternalResponseActionsClient({
           spaceId,
@@ -43,14 +44,15 @@ export const unisolateHostTool = (
         // The response actions API needs endpoint_ids, not host names.
         // We resolve hostName -> endpoint_ids via the fleet agent service.
         const fleetServices = endpointAppContextService.getInternalFleetServices(spaceId);
-        const agentService = fleetServices.agentService.asInternalUser;
-        const agents = await agentService.list({
+        const agent = fleetServices.agent;
+        const agents = await agent.listAgents({
+          showInactive: true,
           kuery: `host.name: ${hostName}`,
           page: 1,
           perPage: 1,
         });
 
-        if (!agents?.items?.length) {
+        if (!agents?.agents?.length) {
           return {
             results: [
               {
@@ -67,7 +69,7 @@ export const unisolateHostTool = (
           };
         }
 
-        const endpointIds = agents.items.map((a: Record<string, string>) => a.id);
+        const endpointIds = agents.agents.map((a: Record<string, string>) => a.id);
 
         // Note: the ResponseActionsClient method is called `release`, not `unisolate`
         const actionDetails = await responseActionsClient.release(
