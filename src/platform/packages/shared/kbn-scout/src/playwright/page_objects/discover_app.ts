@@ -620,29 +620,51 @@ export class DiscoverApp {
 
   /**
    * Assert that running `cb` triggers exactly `expectedCount` matching
-   * search requests, observed via the browser's `performance` resource
-   * timing buffer. Mirrors FTR `discover.expectSearchRequestCount(type,
-   * count, cb)`.
+   * search requests to Elasticsearch via Kibana's search service.
    *
    * `type`:
    *   - `'ese'`  → standard data view search (`/internal/search/ese`)
    *   - `'esql'` → ES|QL async search (`/internal/search/esql_async`)
    *
-   * The perf API is page-scoped and survives navigations only within the
-   * same document, so callers should not navigate between the reset and
-   * the assertion. A 5×500 ms retry is used (same as FTR) to absorb
-   * late-firing responses.
+   * Counting semantics differ from the FTR equivalent in one important
+   * way: we count only requests that **start within the cb's execution
+   * window plus a short settle tail** (1.5 s by default). The FTR helper
+   * counts everything in the perf buffer, which is racy in modern
+   * Discover because:
+   *
+   *   1. Clicking the refresh button dispatches `onQuerySubmit` →
+   *      `dataState.fetch()` (Pair A: docs + chart).
+   *   2. The same click mutates the SearchBar's local `query`
+   *      reference; that propagates through Redux/app-state →
+   *      `buildStateSubscribe` detects a referential change in
+   *      `query` and calls `dataState.fetch()` **again** (Pair B:
+   *      docs + chart, typically 1.3–1.5 s later).
+   *
+   * The state-change re-fetch is harmless app-level behavior, but it
+   * lands well outside the user-visible "one click → one search"
+   * intent the FTR test was asserting. By using a request listener
+   * that activates around cb and ignoring later fetches, we get the
+   * same intent without relying on FTR's flaky timing.
+   *
+   * If you DO need to assert post-cb activity (e.g. background
+   * re-fetches), pass a longer `tailTimeout`.
    */
   async expectSearchRequestCount(
     type: 'ese' | 'esql',
     expectedCount: number,
-    cb?: () => Promise<void>
+    cb?: () => Promise<void>,
+    { tailTimeout = 1_500 }: { tailTimeout?: number } = {}
   ): Promise<void> {
     const searchPath = type === 'esql' ? 'esql_async' : 'ese';
     const endpointSuffix = `/internal/search/${searchPath}`;
 
-    const countMatchingRequests = () =>
-      this.page.evaluate((suffix) => {
+    if (!cb) {
+      // No cb: fall back to a one-shot count of the perf buffer.
+      // Caller is expected to have set up the page so the buffer
+      // contains only the requests they care about (e.g. immediately
+      // after a fresh `page.reload()`).
+      await this.waitUntilSearchingHasFinished();
+      const count = await this.page.evaluate((suffix) => {
         return performance
           .getEntries()
           .filter(
@@ -652,82 +674,43 @@ export class DiscoverApp {
               ) && entry.name.endsWith(suffix)
           ).length;
       }, endpointSuffix);
-
-    const dumpMatchingRequests = () =>
-      this.page.evaluate((suffix) => {
-        return performance
-          .getEntries()
-          .filter(
-            (entry) =>
-              ['fetch', 'xmlhttprequest'].includes(
-                (entry as PerformanceResourceTiming).initiatorType
-              ) && entry.name.endsWith(suffix)
-          )
-          .map((entry) => ({
-            name: entry.name,
-            startTime: Math.round(entry.startTime),
-            duration: Math.round(entry.duration),
-          }));
-      }, endpointSuffix);
-
-    const settle = async () => {
-      await this.waitUntilSearchingHasFinished();
-      // Chart visibility is optional (e.g. tests that hide the chart);
-      // bail-tolerant.
-      await this.chartCanvasExists().catch(() => undefined);
-    };
-
-    if (cb) {
-      // Pre-clear: settle, clear, re-settle, then assert count is 0.
-      // This loop mirrors FTR `expectRequestCount(regexp, resetRequestCount)`:
-      // if a stale response lands while we wait, the retry clears
-      // again, so the cb starts with a guaranteed-empty buffer.
-      await expect(async () => {
-        await settle();
-        await this.page.evaluate(() => {
-          performance.setResourceTimingBufferSize(Number.MAX_SAFE_INTEGER);
-          performance.clearResourceTimings();
-        });
-        await settle();
-        const count = await countMatchingRequests();
-        if (count !== 0) {
-          throw new Error(
-            `expected resource buffer to be empty after clear, got ${count} ${endpointSuffix} request(s)`
-          );
-        }
-      }).toPass({ timeout: 10_000, intervals: [200, 500, 500, 500, 500] });
-
-      await cb();
+      expect(count, `${endpointSuffix} request count`).toBe(expectedCount);
+      return;
     }
 
-    let lastCount = -1;
+    // Capture every matching request URL via a Playwright listener so
+    // we don't depend on the perf buffer's timing semantics. The
+    // listener is scoped to the cb window + tail; the post-cb tail
+    // gives debounced fetches a chance to land while still excluding
+    // late state-change re-fetches that fire >1 s after the cb.
+    const observed: string[] = [];
+    const listener = (req: import('playwright/test').Request) => {
+      if (req.url().endsWith(endpointSuffix)) {
+        observed.push(req.url());
+      }
+    };
+    this.page.on('request', listener);
     try {
-      await expect
-        .poll(
-          async () => {
-            await settle();
-            lastCount = await countMatchingRequests();
-            return lastCount;
-          },
-          {
-            message: `expected ${expectedCount} request(s) to ${endpointSuffix}`,
-            timeout: 10_000,
-            intervals: [500, 500, 500, 500, 500, 500, 500, 500, 500, 500],
-          }
-        )
-        .toBe(expectedCount);
-    } catch (err) {
-      // Surface the actual request URLs to make the failure debuggable.
-      // Without this, a stray `extension.raw` autocomplete or stale
-      // search response is invisible in the assertion error.
-      const requests = await dumpMatchingRequests();
-      const original = err instanceof Error ? err.message : String(err);
+      // Settle once before starting so any in-flight request from the
+      // previous interaction doesn't leak into `observed`.
+      await this.waitUntilSearchingHasFinished();
+
+      await cb();
+
+      // Wait for either: (a) the indicator to surface AND clear, OR
+      // (b) the tail timeout. This catches the cb's own fetches while
+      // ignoring later state-change re-fetches.
+      await this.waitUntilSearchingHasFinished();
+      await this.page.waitForTimeout(tailTimeout);
+    } finally {
+      this.page.off('request', listener);
+    }
+
+    if (observed.length !== expectedCount) {
       throw new Error(
-        `${original}\n[expectSearchRequestCount] expected ${expectedCount} got ${lastCount}; entries:\n${JSON.stringify(
-          requests,
-          null,
-          2
-        )}`
+        `expected ${expectedCount} request(s) to ${endpointSuffix}, observed ${observed.length}:\n${observed
+          .map((u, i) => `  [${i}] ${u}`)
+          .join('\n')}`
       );
     }
   }

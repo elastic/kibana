@@ -201,6 +201,12 @@ export class DatePicker {
     // Dialog elements render as a portal at the page root
     await this.setDatePart('Start', from);
     await this.setDatePart('End', to);
+    // The Apply button submits the range form which calls
+    // `timefilter.setTime(...)` directly. That alone fires a fetch via
+    // the timefilter `fetch$` observable; clicking `querySubmitButton`
+    // afterwards would dispatch a SECOND, redundant fetch through
+    // `onQuerySubmit`, doubling the request count for callers asserting
+    // on it (see Discover request_counts spec).
     await this.page.testSubj.locator('dateRangePickerCustomRangeApplyButton').click();
 
     if (validateDates) {
@@ -216,8 +222,6 @@ export class DatePicker {
         `Date picker should reflect the updated time range`
       ).toBeVisible();
     }
-
-    await this.getTestSubjLocator('querySubmitButton', containerLocator).click();
   }
 
   // ---------------------------------------------------------------------------
