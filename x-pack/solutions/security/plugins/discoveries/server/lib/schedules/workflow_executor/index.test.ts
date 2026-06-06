@@ -80,6 +80,7 @@ const mockGenerationResult = {
 };
 
 const mockValidationResult = {
+  discoveriesToPersist: [mockAttackDiscovery],
   discoveryCount: 1,
   validatedDiscoveries: [mockAttackDiscovery],
   success: true,
@@ -529,12 +530,12 @@ describe('workflowExecutor', () => {
 
       (executeGenerationWorkflow as jest.Mock).mockResolvedValueOnce({
         alertRetrievalResult: mockAlertRetrievalResult,
-        generationResult: {
-          ...mockGenerationResult,
-          attackDiscoveries: [mockAttackDiscovery, secondDiscovery],
-        },
+        generationResult: mockGenerationResult,
         outcome: 'validation_succeeded',
-        validationResult: mockValidationResult,
+        validationResult: {
+          ...mockValidationResult,
+          discoveriesToPersist: [mockAttackDiscovery, secondDiscovery],
+        },
       });
 
       mockGenerateHash.mockReturnValueOnce('hash-1').mockReturnValueOnce('hash-2');
@@ -589,12 +590,12 @@ describe('workflowExecutor', () => {
 
       (executeGenerationWorkflow as jest.Mock).mockResolvedValueOnce({
         alertRetrievalResult: mockAlertRetrievalResult,
-        generationResult: {
-          ...mockGenerationResult,
-          attackDiscoveries: [mockAttackDiscovery, secondDiscovery],
-        },
+        generationResult: mockGenerationResult,
         outcome: 'validation_succeeded',
-        validationResult: mockValidationResult,
+        validationResult: {
+          ...mockValidationResult,
+          discoveriesToPersist: [mockAttackDiscovery, secondDiscovery],
+        },
       });
 
       mockGenerateHash.mockReturnValueOnce('hash-1').mockReturnValueOnce('hash-2');
@@ -645,12 +646,12 @@ describe('workflowExecutor', () => {
 
       (executeGenerationWorkflow as jest.Mock).mockResolvedValueOnce({
         alertRetrievalResult: mockAlertRetrievalResult,
-        generationResult: {
-          ...mockGenerationResult,
-          attackDiscoveries: [snakeCaseDiscovery],
-        },
+        generationResult: mockGenerationResult,
         outcome: 'validation_succeeded',
-        validationResult: mockValidationResult,
+        validationResult: {
+          ...mockValidationResult,
+          discoveriesToPersist: [snakeCaseDiscovery],
+        },
       });
 
       const options = { ...executorOptions } as unknown as RuleExecutorOptions;
@@ -668,6 +669,145 @@ describe('workflowExecutor', () => {
             title: 'snake title',
           }),
         })
+      );
+    });
+
+    it('reports the persist handover discoveries instead of raw generation output', async () => {
+      const handoverDiscovery = {
+        alertIds: ['alert-9'],
+        detailsMarkdown: 'transformed details',
+        entitySummaryMarkdown: 'transformed entity',
+        mitreAttackTactics: ['Execution'],
+        summaryMarkdown: 'transformed summary',
+        timestamp: '2026-02-24T02:00:00Z',
+        title: 'transformed title',
+      };
+
+      (executeGenerationWorkflow as jest.Mock).mockResolvedValueOnce({
+        alertRetrievalResult: mockAlertRetrievalResult,
+        generationResult: mockGenerationResult,
+        outcome: 'validation_succeeded',
+        validationResult: {
+          ...mockValidationResult,
+          discoveriesToPersist: [handoverDiscovery],
+        },
+      });
+
+      const options = { ...executorOptions } as unknown as RuleExecutorOptions;
+
+      await workflowExecutor({ deps, options });
+
+      expect(mockGenerateHash).toHaveBeenCalledWith(
+        expect.objectContaining({ attackDiscovery: handoverDiscovery })
+      );
+    });
+
+    it('does not report raw generation discoveries that are absent from the handover', async () => {
+      const handoverDiscovery = {
+        alertIds: ['alert-9'],
+        detailsMarkdown: 'transformed details',
+        entitySummaryMarkdown: 'transformed entity',
+        mitreAttackTactics: ['Execution'],
+        summaryMarkdown: 'transformed summary',
+        timestamp: '2026-02-24T02:00:00Z',
+        title: 'transformed title',
+      };
+
+      (executeGenerationWorkflow as jest.Mock).mockResolvedValueOnce({
+        alertRetrievalResult: mockAlertRetrievalResult,
+        generationResult: mockGenerationResult,
+        outcome: 'validation_succeeded',
+        validationResult: {
+          ...mockValidationResult,
+          discoveriesToPersist: [handoverDiscovery],
+        },
+      });
+
+      const options = { ...executorOptions } as unknown as RuleExecutorOptions;
+
+      await workflowExecutor({ deps, options });
+
+      expect(mockGenerateHash).not.toHaveBeenCalledWith(
+        expect.objectContaining({ attackDiscovery: mockAttackDiscovery })
+      );
+    });
+
+    it('does not call alertsClient.report when the handover is empty', async () => {
+      (executeGenerationWorkflow as jest.Mock).mockResolvedValueOnce({
+        alertRetrievalResult: mockAlertRetrievalResult,
+        generationResult: mockGenerationResult,
+        outcome: 'validation_succeeded',
+        validationResult: { ...mockValidationResult, discoveriesToPersist: [] },
+      });
+
+      const options = { ...executorOptions } as unknown as RuleExecutorOptions;
+
+      await workflowExecutor({ deps, options });
+
+      expect(ruleExecutorServices.alertsClient.report).not.toHaveBeenCalled();
+    });
+
+    it('logs a warning when the handover is empty', async () => {
+      (executeGenerationWorkflow as jest.Mock).mockResolvedValueOnce({
+        alertRetrievalResult: mockAlertRetrievalResult,
+        generationResult: mockGenerationResult,
+        outcome: 'validation_succeeded',
+        validationResult: { ...mockValidationResult, discoveriesToPersist: [] },
+      });
+
+      const options = { ...executorOptions } as unknown as RuleExecutorOptions;
+
+      await workflowExecutor({ deps, options });
+
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('no discoveries to persist')
+      );
+    });
+
+    it('does not call updateAlertsWithAttackIds when the handover is empty', async () => {
+      (executeGenerationWorkflow as jest.Mock).mockResolvedValueOnce({
+        alertRetrievalResult: mockAlertRetrievalResult,
+        generationResult: mockGenerationResult,
+        outcome: 'validation_succeeded',
+        validationResult: { ...mockValidationResult, discoveriesToPersist: [] },
+      });
+
+      const options = { ...executorOptions } as unknown as RuleExecutorOptions;
+
+      await workflowExecutor({ deps, options });
+
+      expect(mockUpdateAlertsWithAttackIds).not.toHaveBeenCalled();
+    });
+
+    it('does not call alertsClient.report when the handover is absent', async () => {
+      (executeGenerationWorkflow as jest.Mock).mockResolvedValueOnce({
+        alertRetrievalResult: mockAlertRetrievalResult,
+        generationResult: mockGenerationResult,
+        outcome: 'validation_succeeded',
+        validationResult: { ...mockValidationResult, discoveriesToPersist: undefined },
+      });
+
+      const options = { ...executorOptions } as unknown as RuleExecutorOptions;
+
+      await workflowExecutor({ deps, options });
+
+      expect(ruleExecutorServices.alertsClient.report).not.toHaveBeenCalled();
+    });
+
+    it('logs a warning when the handover is absent', async () => {
+      (executeGenerationWorkflow as jest.Mock).mockResolvedValueOnce({
+        alertRetrievalResult: mockAlertRetrievalResult,
+        generationResult: mockGenerationResult,
+        outcome: 'validation_succeeded',
+        validationResult: { ...mockValidationResult, discoveriesToPersist: undefined },
+      });
+
+      const options = { ...executorOptions } as unknown as RuleExecutorOptions;
+
+      await workflowExecutor({ deps, options });
+
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('no discoveries to persist')
       );
     });
   });
