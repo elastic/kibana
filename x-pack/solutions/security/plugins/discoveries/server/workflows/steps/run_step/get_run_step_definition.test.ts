@@ -154,6 +154,16 @@ describe('getRunStepDefinition', () => {
     },
     outcome: 'validation_succeeded' as const,
     validationResult: {
+      discoveriesToPersist: [
+        {
+          alert_ids: ['alert-1'],
+          details_markdown: 'Validated details',
+          entity_summary_markdown: 'Validated entity summary',
+          mitre_attack_tactics: ['Execution'],
+          summary_markdown: 'A validated summary',
+          title: 'Validated Discovery',
+        },
+      ],
       duplicatesDroppedCount: 0,
       generatedCount: 1,
       success: true,
@@ -161,6 +171,17 @@ describe('getRunStepDefinition', () => {
       workflowRunId: 'val-run-1',
     },
   };
+
+  const handoverDiscoveries = [
+    {
+      alert_ids: ['alert-1'],
+      details_markdown: 'Validated details',
+      entity_summary_markdown: 'Validated entity summary',
+      mitre_attack_tactics: ['Execution'],
+      summary_markdown: 'A validated summary',
+      title: 'Validated Discovery',
+    },
+  ];
 
   const getStepDefinition = () =>
     getRunStepDefinition({
@@ -294,19 +315,47 @@ describe('getRunStepDefinition', () => {
 
       expect(result.output).toEqual({
         alerts_context_count: 5,
-        attack_discoveries: [
-          {
-            alert_ids: ['alert-1'],
-            details_markdown: 'Details about the attack',
-            entity_summary_markdown: 'Entity summary',
-            mitre_attack_tactics: ['Initial Access'],
-            summary_markdown: 'A summary',
-            title: 'Test Discovery',
-          },
-        ],
+        attack_discoveries: handoverDiscoveries,
         discovery_count: 1,
         execution_uuid: 'test-execution-uuid',
       });
+    });
+
+    it('returns the persist handover discoveries instead of raw generation output', async () => {
+      const stepDefinition = getStepDefinition();
+
+      const result = await stepDefinition.handler(syncMockContext as never);
+
+      expect(result.output?.attack_discoveries).toEqual(handoverDiscoveries);
+    });
+
+    it('returns an empty array when the handover is empty', async () => {
+      mockExecuteGenerationWorkflow.mockResolvedValue({
+        ...mockSuccessOutcome,
+        validationResult: { ...mockSuccessOutcome.validationResult, discoveriesToPersist: [] },
+      });
+
+      const stepDefinition = getStepDefinition();
+
+      const result = await stepDefinition.handler(syncMockContext as never);
+
+      expect(result.output?.attack_discoveries).toEqual([]);
+    });
+
+    it('returns an empty array when the handover is absent', async () => {
+      mockExecuteGenerationWorkflow.mockResolvedValue({
+        ...mockSuccessOutcome,
+        validationResult: {
+          ...mockSuccessOutcome.validationResult,
+          discoveriesToPersist: undefined,
+        },
+      });
+
+      const stepDefinition = getStepDefinition();
+
+      const result = await stepDefinition.handler(syncMockContext as never);
+
+      expect(result.output?.attack_discoveries).toEqual([]);
     });
 
     it('returns execution_uuid from the generation result', async () => {
@@ -379,16 +428,7 @@ describe('getRunStepDefinition', () => {
 
       const result = await stepDefinition.handler(syncMockContext as never);
 
-      expect(result.output?.attack_discoveries).toEqual([
-        {
-          alert_ids: ['alert-1'],
-          details_markdown: 'Details about the attack',
-          entity_summary_markdown: 'Entity summary',
-          mitre_attack_tactics: ['Initial Access'],
-          summary_markdown: 'A summary',
-          title: 'Test Discovery',
-        },
-      ]);
+      expect(result.output?.attack_discoveries).toEqual(handoverDiscoveries);
     });
   });
 
@@ -567,6 +607,75 @@ describe('getRunStepDefinition', () => {
       const callArgs = mockExecuteGenerationWorkflow.mock.calls[0][0];
 
       expect(callArgs).not.toHaveProperty('alerts');
+    });
+  });
+
+  describe('input defaults (workflow engine omits zod defaults)', () => {
+    // The workflow engine does NOT apply the step schema's zod `.default()`
+    // values to `context.input`, so defaulted fields arrive `undefined` when
+    // the caller omits them. The handler must apply the defaults itself.
+    const minimalInputContext = {
+      ...baseMockContext,
+      input: {
+        connector_id: 'test-connector',
+      },
+    };
+
+    it('does not return an error when alert_retrieval_workflow_ids is omitted', async () => {
+      const stepDefinition = getStepDefinition();
+
+      const result = await stepDefinition.handler(minimalInputContext as never);
+
+      expect(result.error).toBeUndefined();
+    });
+
+    it('defaults alert_retrieval_workflow_ids to an empty array', async () => {
+      const stepDefinition = getStepDefinition();
+
+      await stepDefinition.handler(minimalInputContext as never);
+
+      expect(mockExecuteGenerationWorkflow).toHaveBeenCalledWith(
+        expect.objectContaining({
+          workflowConfig: expect.objectContaining({ alert_retrieval_workflow_ids: [] }),
+        })
+      );
+    });
+
+    it('defaults alert_retrieval_mode to custom_query', async () => {
+      const stepDefinition = getStepDefinition();
+
+      await stepDefinition.handler(minimalInputContext as never);
+
+      expect(mockExecuteGenerationWorkflow).toHaveBeenCalledWith(
+        expect.objectContaining({
+          workflowConfig: expect.objectContaining({ alert_retrieval_mode: 'custom_query' }),
+        })
+      );
+    });
+
+    it('defaults validation_workflow_id to an empty string', async () => {
+      const stepDefinition = getStepDefinition();
+
+      await stepDefinition.handler(minimalInputContext as never);
+
+      expect(mockExecuteGenerationWorkflow).toHaveBeenCalledWith(
+        expect.objectContaining({
+          workflowConfig: expect.objectContaining({ validation_workflow_id: '' }),
+        })
+      );
+    });
+
+    it('defaults mode to sync when omitted', async () => {
+      const stepDefinition = getStepDefinition();
+
+      const result = await stepDefinition.handler(minimalInputContext as never);
+
+      expect(result.output).toEqual({
+        alerts_context_count: 5,
+        attack_discoveries: handoverDiscoveries,
+        discovery_count: 1,
+        execution_uuid: 'test-execution-uuid',
+      });
     });
   });
 
