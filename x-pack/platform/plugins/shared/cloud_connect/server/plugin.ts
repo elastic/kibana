@@ -75,7 +75,7 @@ export class CloudConnectedPlugin
 
     // Always register the SO type and its encryption params so that migrations never fail
     // on clusters that accumulated cloud-connect-api-key documents (e.g. ESS 9.3.x clusters
-    // upgrading to 9.4.0+ where the type would otherwise not be registered). See INC-3152.
+    // upgrading to 9.4.0+ where the type would otherwise not be registered).
     core.savedObjects.registerType(CloudConnectApiKeyType);
     plugins.encryptedSavedObjects.registerType(CloudConnectApiKeyEncryptionParams);
 
