@@ -134,9 +134,15 @@ export function messagesToOpenAI({
 
     switch (role) {
       case MessageRole.Assistant:
+        // When an assistant message has tool calls but no meaningful content, send null
+        // rather than an empty string. Some providers (e.g. OpenAI GPT-5.x) reject
+        // assistant messages where content is an empty string: "field [Content] must be
+        // present and not empty".
+        const hasToolCalls = !!message.toolCalls?.length;
+        const resolvedContent = message.content || null;
         const assistantMessage: ChatCompletionAssistantMessageParam = {
           role: 'assistant',
-          content: message.content ?? '',
+          content: hasToolCalls ? resolvedContent : (resolvedContent ?? ''),
           tool_calls: message.toolCalls?.map((toolCall) => {
             return {
               function: {
