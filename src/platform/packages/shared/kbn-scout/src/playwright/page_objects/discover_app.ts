@@ -258,8 +258,14 @@ export class DiscoverApp {
   }
 
   async getChartTimespan(): Promise<string> {
-    // Wait until the attribute no longer contains "Loading"
+    // The histogram container is mounted asynchronously after Discover
+    // resolves a data view, so wait for the element to attach before we
+    // probe its `data-time-range`. A bare `expect(...).not.toHaveAttribute`
+    // fails with "element(s) not found" if the chart hasn't mounted within
+    // the default 5s, even though the chart will appear shortly after.
     const element = this.page.testSubj.locator('unifiedHistogramChart');
+    await element.waitFor({ state: 'visible', timeout: 30_000 });
+    // Wait until the attribute no longer contains "Loading"
     await expect(element).not.toHaveAttribute('data-time-range', /Loading/);
 
     return (await element.getAttribute('data-time-range')) ?? '';
@@ -545,12 +551,17 @@ export class DiscoverApp {
     await canvas.waitFor({ state: 'visible' });
     const box = await canvas.boundingBox();
     if (!box) throw new Error('histogram canvas has no bounding box');
-    // FTR uses canvas-element relative offsets: start at (-300, 20) from the
-    // canvas right edge, end at (-100, 30). Translate that to viewport coords.
-    const startX = box.x + box.width - 300;
-    const startY = box.y + box.height / 2 + 20;
-    const endX = box.x + box.width - 100;
-    const endY = box.y + box.height / 2 + 30;
+    // FTR's `browser.dragAndDrop({ location: el, offset: { x, y } })` uses
+    // Selenium offsets which are measured from the element's CENTER, not
+    // the top-left. Convert to viewport coords accordingly so the brushed
+    // pixel range (and therefore the resulting time-range / hit count)
+    // matches the FTR baseline.
+    const centerX = box.x + box.width / 2;
+    const centerY = box.y + box.height / 2;
+    const startX = centerX - 300;
+    const startY = centerY + 20;
+    const endX = centerX - 100;
+    const endY = centerY + 30;
     await this.page.mouse.move(startX, startY);
     await this.page.mouse.down();
     await this.page.mouse.move(startX + (endX - startX) / 2, startY + (endY - startY) / 2, {

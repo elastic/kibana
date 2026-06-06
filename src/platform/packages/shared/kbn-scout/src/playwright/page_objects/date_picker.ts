@@ -42,14 +42,22 @@ export class DatePicker {
    * container (useful when the only DateRangePicker lives inside a panel).
    */
   private async isNewDateRangePicker(containerLocator?: Locator): Promise<boolean> {
-    try {
-      await this.getTestSubjLocator('dateRangePickerControlButton', containerLocator).waitFor({
-        timeout: 5000,
-      });
-      return true;
-    } catch {
-      return false;
-    }
+    // Race the new + legacy picker control test-subjs: whichever appears
+    // first within 15s wins. The previous 5s wait + try/catch on the new
+    // picker only mis-classified the picker on slow loads (e.g. Discover
+    // recovering from an invalid `_g.time` URL) where the new picker takes
+    // longer than 5s to mount, falling back to the legacy branch even when
+    // no legacy picker is on the page.
+    const newPicker = this.getTestSubjLocator('dateRangePickerControlButton', containerLocator);
+    const legacyPicker = this.getTestSubjLocator(
+      'superDatePickerToggleQuickMenuButton',
+      containerLocator
+    );
+    const winner = await Promise.race([
+      newPicker.waitFor({ timeout: 15000 }).then(() => 'new' as const).catch(() => null),
+      legacyPicker.waitFor({ timeout: 15000 }).then(() => 'legacy' as const).catch(() => null),
+    ]);
+    return winner === 'new';
   }
 
   private getTestSubjLocator(selector: string, containerLocator?: Locator) {
