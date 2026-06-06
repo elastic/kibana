@@ -11,7 +11,11 @@ import { parse } from 'yaml';
 import { z } from '@kbn/zod/v4';
 import { managedWorkflowDefinitions } from '.';
 import type { ManagedWorkflowTemplateValuesById, TemplatedManagedWorkflowId } from '.';
-import { EXAMPLE_MANAGED_WORKFLOW_ID } from './definitions';
+import {
+  ATTACK_DISCOVERY_CUSTOM_VALIDATION_EXAMPLE_WORKFLOW_ID,
+  ATTACK_DISCOVERY_VALIDATE_WORKFLOW_ID,
+  EXAMPLE_MANAGED_WORKFLOW_ID,
+} from './definitions';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from './types';
 import { WorkflowSchemaBase } from '../spec/schema';
 
@@ -166,4 +170,39 @@ describe('managedWorkflowDefinitions', () => {
       assertWorkflowYamlIsValid(id, renderedYaml);
     }
   );
+
+  // The persist step (`security.attack-discovery.persistDiscoveries`) skips ad-hoc
+  // index I/O when `source === 'scheduled'` so scheduled discoveries are written
+  // only to the scheduled alerts index by the alerting-framework executor. That
+  // skip relies on each validation workflow forwarding its `source` input into the
+  // persist step. A workflow that omits it makes scheduled runs leak discoveries
+  // into the ad-hoc index (where they wrongly appear on the main Attack Discovery
+  // page), so lock the wiring in for every validation workflow that persists.
+  describe('validation workflows forward source into the persist step', () => {
+    const getPersistStepSourceInput = (workflowId: string): unknown => {
+      const definition = managedWorkflowDefinitions.find(({ id }) => id === workflowId);
+      if (!definition) {
+        throw new Error(`Managed workflow '${workflowId}' not found`);
+      }
+
+      const parsedYaml = parse(renderWorkflowYaml(definition)) as {
+        steps?: Array<{ type?: string; with?: Record<string, unknown> }>;
+      };
+      const persistStep = parsedYaml.steps?.find(
+        ({ type }) => type === 'security.attack-discovery.persistDiscoveries'
+      );
+      if (!persistStep) {
+        throw new Error(`Managed workflow '${workflowId}' has no persistDiscoveries step`);
+      }
+
+      return persistStep.with?.source;
+    };
+
+    it.each([
+      ['default validation', ATTACK_DISCOVERY_VALIDATE_WORKFLOW_ID],
+      ['custom validation example', ATTACK_DISCOVERY_CUSTOM_VALIDATION_EXAMPLE_WORKFLOW_ID],
+    ])('%s wires source into the persist step', (_label, workflowId) => {
+      expect(getPersistStepSourceInput(workflowId)).toBe('${{ inputs.source }}');
+    });
+  });
 });

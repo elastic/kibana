@@ -35,6 +35,13 @@ export const PersistDiscoveriesInputSchema = z.object({
 });
 
 export const PersistDiscoveriesOutputSchema = z.object({
+  /**
+   * Echo of the discoveries handed to this step (its `attack_discoveries` input)
+   * for ALL sources. Scheduled rules read this handover to persist exactly what
+   * the step was given via the alerting framework, since the step itself does no
+   * I/O for scheduled executions.
+   */
+  discoveries_to_persist: z.array(z.unknown()),
   duplicates_dropped_count: z.number().int(),
   persisted_discoveries: z.array(z.unknown()),
 });
