@@ -85,19 +85,21 @@ export class DataViews {
     await expect(this.editorFlyout).toBeVisible();
 
     // Mirror FTR's retry loop: re-fill, wait for the async pattern
-    // validation to settle, then re-check `aria-invalid`. A single
-    // "fill once and check" race-loses to the editor's debounced
-    // validator (which can leave `data-is-validating` at "0" briefly
-    // before flipping to "1" while it queries indices, then back to
-    // "0" with the result). Retrying defensively also matches what
-    // tests need when the request to /api/index_patterns/_fields_for_wildcard
-    // is slow on a cold cluster.
+    // validation to settle, then re-check `aria-invalid`. The data view
+    // editor relies on a per-keystroke React onChange to auto-append
+    // `*` after the first character (via `canAppendWildcard`), so we
+    // MUST type char-by-char with real keyboard events — `fill()`
+    // sets the value via JS and bypasses the wildcard helper.
     await expect(async () => {
-      await this.titleInput.click();
-      await this.titleInput.press('ControlOrMeta+a');
-      await this.titleInput.pressSequentially(name);
-      // Give the debounced validator a chance to start.
-      await this.page.waitForTimeout(150);
+      // Click into the input, select any prior value, and type the new
+      // value via the keyboard so each keystroke fires the editor's
+      // onChange (which appends `*` after the first char).
+      await this.titleInput.click({ delay: 50 });
+      await this.page.keyboard.press('ControlOrMeta+A');
+      await this.page.keyboard.press('Delete');
+      await this.page.keyboard.type(name, { delay: 30 });
+      // Give the debounced async validator a chance to fire.
+      await this.page.waitForTimeout(200);
       await expect(this.titleInput).toHaveAttribute('data-is-validating', '0', {
         timeout: 10_000,
       });

@@ -641,56 +641,61 @@ export class DiscoverApp {
     const searchPath = type === 'esql' ? 'esql_async' : 'ese';
     const endpointSuffix = `/internal/search/${searchPath}`;
 
-    // Mirrors FTR `expectRequestCount`: poll until the running query is
-    // fully settled (chart rendered, searching done) AND the perf buffer
-    // matches the expected count. We use a single helper for both the
-    // pre-clear (`expected = 0`) and post-cb assertion phases so a stray
-    // late-arriving request can't leak across phases.
-    const pollForCount = async (expected: number) => {
-      await expect
-        .poll(
-          async () => {
-            await this.waitUntilSearchingHasFinished();
-            // Bail-tolerant: chart visibility is optional (e.g. when the
-            // chart is collapsed by the test), so swallow errors.
-            await this.chartCanvasExists().catch(() => undefined);
-            return this.page.evaluate((suffix) => {
-              return performance
-                .getEntries()
-                .filter(
-                  (entry) =>
-                    ['fetch', 'xmlhttprequest'].includes(
-                      (entry as PerformanceResourceTiming).initiatorType
-                    ) && entry.name.endsWith(suffix)
-                ).length;
-            }, endpointSuffix);
-          },
-          {
-            message: `expected ${expected} request(s) to ${endpointSuffix}`,
-            timeout: 5_000,
-            intervals: [500, 500, 500, 500, 500, 500, 500, 500, 500, 500],
-          }
-        )
-        .toBe(expected);
+    const countMatchingRequests = () =>
+      this.page.evaluate((suffix) => {
+        return performance
+          .getEntries()
+          .filter(
+            (entry) =>
+              ['fetch', 'xmlhttprequest'].includes(
+                (entry as PerformanceResourceTiming).initiatorType
+              ) && entry.name.endsWith(suffix)
+          ).length;
+      }, endpointSuffix);
+
+    const settle = async () => {
+      await this.waitUntilSearchingHasFinished();
+      // Chart visibility is optional (e.g. tests that hide the chart);
+      // bail-tolerant.
+      await this.chartCanvasExists().catch(() => undefined);
     };
 
     if (cb) {
-      // Wait for any in-flight request from the previous interaction to
-      // be recorded, THEN clear and assert the buffer is empty before
-      // running the callback. This is the FTR `resetRequestCount`
-      // pattern — without it, a stale response can land post-clear and
-      // be miscounted.
-      await this.waitUntilSearchingHasFinished();
-      await this.chartCanvasExists().catch(() => undefined);
-      await this.page.evaluate(() => {
-        performance.setResourceTimingBufferSize(Number.MAX_SAFE_INTEGER);
-        performance.clearResourceTimings();
-      });
-      await pollForCount(0);
+      // Pre-clear: settle, clear, re-settle, then assert count is 0.
+      // This loop mirrors FTR `expectRequestCount(regexp, resetRequestCount)`:
+      // if a stale response lands while we wait, the retry clears
+      // again, so the cb starts with a guaranteed-empty buffer.
+      await expect(async () => {
+        await settle();
+        await this.page.evaluate(() => {
+          performance.setResourceTimingBufferSize(Number.MAX_SAFE_INTEGER);
+          performance.clearResourceTimings();
+        });
+        await settle();
+        const count = await countMatchingRequests();
+        if (count !== 0) {
+          throw new Error(
+            `expected resource buffer to be empty after clear, got ${count} ${endpointSuffix} request(s)`
+          );
+        }
+      }).toPass({ timeout: 10_000, intervals: [200, 500, 500, 500, 500] });
+
       await cb();
     }
 
-    await pollForCount(expectedCount);
+    await expect
+      .poll(
+        async () => {
+          await settle();
+          return countMatchingRequests();
+        },
+        {
+          message: `expected ${expectedCount} request(s) to ${endpointSuffix}`,
+          timeout: 10_000,
+          intervals: [500, 500, 500, 500, 500, 500, 500, 500, 500, 500],
+        }
+      )
+      .toBe(expectedCount);
   }
 
   /**

@@ -46,16 +46,17 @@ spaceTest.describe('Discover - URL state Lens sync', { tag: tags.stateful.all },
 
   spaceTest(
     'pinned filter + time set in Lens carries over to Discover',
-    async ({ kbnUrl, page, pageObjects }) => {
+    async ({ page, pageObjects }) => {
       // Open Lens first; the filter and time set here go into the global
-      // state that the chrome's Discover deep link picks up.
-      await page.goto(kbnUrl.app('lens'));
+      // state that the chrome's Discover deep link picks up. Use
+      // `gotoApp` so the URL is space-aware — a bare
+      // `kbnUrl.app('lens')` lands on the default space, where
+      // "logstash-*" is not loaded as a data view.
+      await page.gotoApp('lens');
       await pageObjects.lens.waitForLensApp();
 
-      // Lens can boot with an unrelated default data view (e.g. "Beats
-      // Monitoring") even when `defaultIndex` is set, because the Lens
-      // editor caches its last-used view. Force `logstash-*` so the
-      // `extension.raw` field is available when we add the filter below.
+      // Lens's editor caches its last-used view; force `logstash-*` so
+      // `extension.raw` is available below.
       await pageObjects.dataViews.switchTo(testData.DEFAULT_DATA_VIEW);
 
       await pageObjects.datePicker.setAbsoluteRange({
