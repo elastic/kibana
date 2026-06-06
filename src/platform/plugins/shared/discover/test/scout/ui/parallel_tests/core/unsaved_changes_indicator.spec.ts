@@ -22,7 +22,8 @@
 import { spaceTest, tags } from '@kbn/scout';
 import { testData } from '../../fixtures/common';
 
-const SAVED_SEARCH_NAME = 'test saved search';
+const SAVED_SEARCH_NAME_PERSISTED = 'test saved search persisted';
+const SAVED_SEARCH_NAME_LOAD = 'test saved search load';
 
 spaceTest.describe('Discover - unsaved changes indicator', { tag: tags.stateful.all }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
@@ -62,7 +63,7 @@ spaceTest.describe('Discover - unsaved changes indicator', { tag: tags.stateful.
   spaceTest(
     'shows the indicator only after editing a persisted saved search and clears on save',
     async ({ pageObjects }) => {
-      await pageObjects.discover.saveSearch(SAVED_SEARCH_NAME);
+      await pageObjects.discover.saveSearch(SAVED_SEARCH_NAME_PERSISTED);
       await pageObjects.discover.waitUntilSearchingHasFinished();
       await pageObjects.discover.ensureNoUnsavedChangesIndicator();
 
@@ -81,7 +82,7 @@ spaceTest.describe('Discover - unsaved changes indicator', { tag: tags.stateful.
     'loading a saved search starts clean and only flips after edits',
     async ({ pageObjects }) => {
       // Pre-create the saved search this test loads.
-      await pageObjects.discover.saveSearch(SAVED_SEARCH_NAME);
+      await pageObjects.discover.saveSearch(SAVED_SEARCH_NAME_LOAD);
       await pageObjects.discover.waitUntilSearchingHasFinished();
 
       // Reset to a fresh page so the load path is exercised, not the
@@ -89,7 +90,7 @@ spaceTest.describe('Discover - unsaved changes indicator', { tag: tags.stateful.
       await pageObjects.discover.goto();
       await pageObjects.discover.waitUntilSearchingHasFinished();
 
-      await pageObjects.discover.loadSavedSearch(SAVED_SEARCH_NAME);
+      await pageObjects.discover.loadSavedSearch(SAVED_SEARCH_NAME_LOAD);
       await pageObjects.discover.waitUntilSearchingHasFinished();
       await pageObjects.discover.ensureNoUnsavedChangesIndicator();
 

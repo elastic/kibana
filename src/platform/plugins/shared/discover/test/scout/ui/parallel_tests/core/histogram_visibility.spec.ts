@@ -50,7 +50,9 @@ spaceTest.describe('Discover - histogram visibility', { tag: tags.stateful.all }
   spaceTest(
     'persists chart hide/show in URL, across navigations, and in saved searches',
     async ({ page, pageObjects }) => {
-      expect(await pageObjects.discover.chartCanvasExists()).toBe(true);
+      // Initial canvas render is async after `waitUntilSearchingHasFinished`
+      // resolves — poll until echarts mounts the renderer.
+      await expect.poll(() => pageObjects.discover.chartCanvasExists()).toBe(true);
 
       await spaceTest.step('hidden state persists across reload', async () => {
         await pageObjects.discover.toggleChartVisibility();
@@ -95,7 +97,7 @@ spaceTest.describe('Discover - histogram visibility', { tag: tags.stateful.all }
           await pageObjects.discover.clickNewSearchButton();
           await pageObjects.discover.loadSavedSearch(SAVED_SEARCH);
           await pageObjects.discover.waitUntilSearchingHasFinished();
-          expect(await pageObjects.discover.chartCanvasExists()).toBe(true);
+          await expect.poll(() => pageObjects.discover.chartCanvasExists()).toBe(true);
         }
       );
     }
