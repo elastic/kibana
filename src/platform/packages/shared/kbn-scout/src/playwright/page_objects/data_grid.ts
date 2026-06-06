@@ -56,7 +56,9 @@ export class DataGrid {
    * have opened the display selector first via {@link clickGridSettings}.
    */
   async getCurrentSampleSizeValue(): Promise<number> {
-    const input = this.page.testSubj.locator(SAMPLE_SIZE_INPUT_TEST_SUBJ);
+    const input = this.page.testSubj
+      .locator(SAMPLE_SIZE_INPUT_TEST_SUBJ)
+      .locator('input[type="number"]');
     const value = await input.inputValue();
     return Number(value);
   }
@@ -66,7 +68,9 @@ export class DataGrid {
    * the display selector first.
    */
   async changeSampleSizeValue(newValue: number): Promise<void> {
-    const input = this.page.testSubj.locator(SAMPLE_SIZE_INPUT_TEST_SUBJ);
+    const input = this.page.testSubj
+      .locator(SAMPLE_SIZE_INPUT_TEST_SUBJ)
+      .locator('input[type="number"]');
     await input.fill(String(newValue));
     // Press Enter so the controlled input commits its value to React state
     // (the FTR helper relies on a blur event; fill→Enter is the closest

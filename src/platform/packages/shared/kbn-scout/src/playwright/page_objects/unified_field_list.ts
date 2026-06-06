@@ -47,20 +47,22 @@ export class UnifiedFieldList {
   }
 
   private async toggleMetaSection(): Promise<void> {
-    // The "Meta" accordion holds `_score`, `_id`, `_index`. It is collapsed by
-    // default; expand it if needed before clicking the per-field toggle.
+    // The "Meta" accordion holds `_score`, `_id`, `_index`, `_ignored`. It is
+    // collapsed by default; expand it if needed before clicking the per-field
+    // toggle.
     //
-    // EuiAccordion renders two `button[aria-expanded]` inside the section:
-    // a visually-hidden arrow button (`aria-hidden="true"`) and the labelled
-    // accordion button. We target the labelled one by excluding the hidden
-    // arrow so the locator resolves to exactly one element.
-    const sectionContainer = this.page.testSubj.locator('fieldListGroupedMetaFields');
-    const toggleButton = sectionContainer.locator(
-      'button[aria-expanded]:not([aria-hidden="true"])'
+    // The accordion section renders two `button[aria-expanded]` controls (a
+    // visually-hidden arrow with `aria-hidden="true"` plus the labelled
+    // accordion button) AND once expanded the per-field drag-and-drop
+    // keyboard handlers also expose `aria-expanded`. Target the accordion
+    // button specifically via its `aria-controls="fieldListGroupedMetaFields"`
+    // relationship, excluding the hidden arrow.
+    const accordionButton = this.page.locator(
+      'button[aria-controls="fieldListGroupedMetaFields"]:not([aria-hidden="true"])'
     );
-    if ((await toggleButton.getAttribute('aria-expanded')) === 'false') {
-      await toggleButton.click();
-      await expect(toggleButton).toHaveAttribute('aria-expanded', 'true');
+    if ((await accordionButton.getAttribute('aria-expanded')) === 'false') {
+      await accordionButton.click();
+      await expect(accordionButton).toHaveAttribute('aria-expanded', 'true');
     }
   }
 
