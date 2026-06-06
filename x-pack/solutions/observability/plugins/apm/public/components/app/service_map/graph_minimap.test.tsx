@@ -75,10 +75,15 @@ jest.mock('@xyflow/react', () => {
     },
     useNodesState: jest.fn((initialNodes: unknown) => [initialNodes, jest.fn()]),
     useEdgesState: jest.fn((initialEdges: unknown) => [initialEdges, jest.fn()]),
+    useStore: jest.fn((selector: (state: { width: number; height: number }) => unknown) =>
+      selector({ width: 1200, height: 600 })
+    ),
     useReactFlow: jest.fn(() => ({
       fitView: jest.fn(),
       zoomIn: jest.fn(),
       zoomOut: jest.fn(),
+      setCenter: jest.fn(),
+      getNodes: jest.fn(() => []),
     })),
   };
 });

@@ -13,6 +13,7 @@ import {
   useNodesState,
   useEdgesState,
   useReactFlow,
+  useStore,
   ReactFlowProvider,
   type NodeTypes,
   type EdgeTypes,
@@ -38,7 +39,8 @@ import { css } from '@emotion/react';
 import type { ApmPluginStartDeps, ApmServices } from '../../../plugin';
 import { getDagreLayoutFailureDiagnostics } from './dagre_layout_failure_diagnostics';
 import { applyServiceMapLayout } from '../../shared/service_map/layout';
-import { FIT_VIEW_PADDING, FIT_VIEW_DURATION, FIT_VIEW_DEFER_MS } from './constants';
+import { FIT_VIEW_PADDING, FIT_VIEW_DURATION, FIT_VIEW_DEFER_MS, MIN_ZOOM } from './constants';
+import { getServiceMapViewTarget } from './get_service_map_view_target';
 import { ServiceNode } from '../../shared/service_map/service_node';
 import { DependencyNode } from '../../shared/service_map/dependency_node';
 import { GroupedResourcesNode } from '../../shared/service_map/grouped_resources_node';
@@ -162,7 +164,9 @@ function GraphInner({
   const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
   const { telemetry } = services;
   const { euiTheme } = useEuiTheme();
-  const { fitView, zoomIn, zoomOut } = useReactFlow<ServiceMapNode>();
+  const { fitView, zoomIn, zoomOut, setCenter, getNodes } = useReactFlow<ServiceMapNode>();
+  const viewportWidth = useStore((state) => state.width);
+  const viewportHeight = useStore((state) => state.height);
   const makeAlertsNavigateHandler = useServiceMapAlertsNavigateFactory();
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [selectedNodeForPopover, setSelectedNodeForPopover] = useState<ServiceMapNode | null>(null);
@@ -242,9 +246,40 @@ function GraphInner({
     [getAnimationDuration]
   );
 
-  // The first time nodes appear we fit the viewport once, without animation, to avoid the
-  // visible "hunt for center" caused by multiple animated fits on mount. Subsequent fits
-  // (filter/data updates, the user "Fit view" button) animate.
+  // Camera placement used for both initial load and the "fit view" control. Most maps use fitView;
+  // very large, sprawling maps center on the median node so the user lands on content rather than the
+  // empty middle of the bounding box.
+  const fitOrCenterView = useCallback(
+    (animate = true) => {
+      const target = getServiceMapViewTarget({
+        nodes: getNodes(),
+        viewportWidth,
+        viewportHeight,
+      });
+
+      if (target.kind === 'center') {
+        setCenter(target.x, target.y, {
+          zoom: target.zoom,
+          duration: animate ? getAnimationDuration(FIT_VIEW_DURATION) : 0,
+        });
+        return;
+      }
+
+      fitView(getFitViewOptions(animate));
+    },
+    [
+      getNodes,
+      viewportWidth,
+      viewportHeight,
+      setCenter,
+      getAnimationDuration,
+      fitView,
+      getFitViewOptions,
+    ]
+  );
+
+  // The first time nodes appear we place the viewport without animation to avoid the visible
+  // "hunt for center" caused by multiple animated fits on mount. Subsequent fits animate.
   const hasPerformedInitialFitRef = useRef(false);
 
   // EBT + console fire once per failed layout computation (each useMemo re-run that throws),
@@ -318,7 +353,7 @@ function GraphInner({
     if (nodesAfterFilters.length > 0) {
       const isInitialFit = !hasPerformedInitialFitRef.current;
       hasPerformedInitialFitRef.current = true;
-      const timer = setTimeout(() => fitView(getFitViewOptions(!isInitialFit)), FIT_VIEW_DEFER_MS);
+      const timer = setTimeout(() => fitOrCenterView(!isInitialFit), FIT_VIEW_DEFER_MS);
       return () => clearTimeout(timer);
     }
   }, [
@@ -326,8 +361,7 @@ function GraphInner({
     edgesAfterFilters,
     setNodes,
     setEdges,
-    fitView,
-    getFitViewOptions,
+    fitOrCenterView,
     applyEdgeHighlighting,
     nodesAfterFilters.length,
     highlightedServiceName,
@@ -632,7 +666,7 @@ function GraphInner({
             onPaneClick={handlePaneClick}
             onMoveStart={handleDragStart}
             onNodeDragStart={handleDragStart}
-            minZoom={0.2}
+            minZoom={MIN_ZOOM}
             maxZoom={3}
             proOptions={{ hideAttribution: true }}
             nodesDraggable
@@ -697,7 +731,7 @@ function GraphInner({
                         color="text"
                         size="s"
                         iconType="crosshair"
-                        onClick={() => fitView(getFitViewOptions())}
+                        onClick={() => fitOrCenterView()}
                         aria-label={fitViewLabel}
                         data-test-subj="serviceMapFitViewButton"
                         css={mapToolbarControlIconCss}
