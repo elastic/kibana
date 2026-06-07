@@ -39,6 +39,5 @@ export const aiValueLinks: LinkItem = {
       defaultMessage: 'Value report',
     }),
   ],
-  globalNavPosition: 12,
   hideTimeline: true,
 };

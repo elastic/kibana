@@ -10,8 +10,17 @@ import { parseLineForCompletion } from '@kbn/workflows-yaml';
 import type { PayloadVariable } from '../registry';
 import { DISPATCH_PAYLOAD_VARIABLES, ALERT_EPISODE_FIELDS } from '../registry';
 
-// All dispatcher payload variables are nested under `context.inputs` at render time.
-const TOP_LEVEL_PREFIX = 'inputs.';
+// All dispatcher payload variables are nested under `context.inputs.payload` at render time.
+const TOP_LEVEL_PREFIX = 'inputs.payload.';
+
+// The single wrapper key exposed directly under `inputs`.
+const PAYLOAD_WRAPPER: readonly PayloadVariable[] = [
+  {
+    path: 'payload',
+    detail: 'object',
+    documentation: 'Dispatcher payload for the action group.',
+  },
+];
 
 const buildItem = (
   variable: PayloadVariable,
@@ -34,10 +43,14 @@ const getParentPath = (pathSegments: string[] | null, lastPathSegment: string | 
 };
 
 const isEpisodeContext = (parent: string[]): boolean =>
-  parent.length >= 3 &&
+  parent.length >= 4 &&
   parent[0] === 'inputs' &&
-  parent[1] === 'episodes' &&
-  /^\d+$/.test(parent[2]);
+  parent[1] === 'payload' &&
+  parent[2] === 'episodes' &&
+  /^\d+$/.test(parent[3]);
+
+const isPayloadContext = (parent: string[]): boolean =>
+  parent.length === 2 && parent[0] === 'inputs' && parent[1] === 'payload';
 
 const isInputsContext = (parent: string[]): boolean =>
   parent.length === 1 && parent[0] === 'inputs';
@@ -72,8 +85,10 @@ export const createPayloadCompletionProvider = (): monaco.languages.CompletionIt
     let prefix = '';
     if (isEpisodeContext(parent)) {
       candidates = ALERT_EPISODE_FIELDS;
-    } else if (isInputsContext(parent)) {
+    } else if (isPayloadContext(parent)) {
       candidates = DISPATCH_PAYLOAD_VARIABLES;
+    } else if (isInputsContext(parent)) {
+      candidates = PAYLOAD_WRAPPER;
     } else if (parent.length === 0) {
       candidates = DISPATCH_PAYLOAD_VARIABLES;
       prefix = TOP_LEVEL_PREFIX;
