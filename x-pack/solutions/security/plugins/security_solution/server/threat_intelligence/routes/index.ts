@@ -13,6 +13,7 @@ import { registerCoverageGapRoute } from './coverage_gap';
 import { registerDashboardOverviewRoute } from './dashboard_overview';
 import { registerExtractIocsRoute } from './extract_iocs';
 import { registerExtractDiamondRoute } from './extract_diamond';
+import { registerEnrichTaxonomyRoute } from './enrich_taxonomy';
 import { registerFlyoutInsightsRoute } from './flyout_insights';
 import { registerGeneralizeFromTelemetryRoute } from './generalize_from_telemetry';
 import { registerHuntBehaviorRoute } from './hunt_behavior';
@@ -61,6 +62,7 @@ export const registerRoutes = (deps: RouteRegistrationDeps): void => {
   registerGeneralizeFromTelemetryRoute(deps);
   registerExtractIocsRoute(deps);
   registerExtractDiamondRoute(deps);
+  registerEnrichTaxonomyRoute(deps);
   registerAnalyseEnvironmentRoute(deps);
   registerSynthesizeAdvisoryRoute(deps);
   registerSubscriptionRoutes(deps);

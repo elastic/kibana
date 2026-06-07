@@ -72,15 +72,23 @@ export type ResolveScopedModelOutcome =
  * Returns a structured failure (no throw) when the inference plugin is
  * absent or no GenAI connector is configured so the caller can surface a
  * 400 / 503 with a helpful message.
+ *
+ * @param connectorIdOverride - When non-empty, bypass the settings-lookup chain
+ *   and use this connector ID directly. Pass the value read from a per-stage
+ *   advanced setting (e.g. `DIAMOND_GATE_CONNECTOR_SETTING_KEY`) to pin a stage
+ *   to a specific model. Falls through to the default `genAi:defaultAIConnector`
+ *   when the override is absent or an empty string.
  */
 export const resolveScopedModel = async ({
   inference,
   request,
   uiSettingsClient,
+  connectorIdOverride,
 }: {
   inference: InferenceServerStart | undefined;
   request: KibanaRequest;
   uiSettingsClient: IUiSettingsClient;
+  connectorIdOverride?: string;
 }): Promise<ResolveScopedModelOutcome> => {
   if (!inference) {
     return {
@@ -92,7 +100,8 @@ export const resolveScopedModel = async ({
     };
   }
 
-  const connectorId = await resolveConnectorId({ inference, request, uiSettingsClient });
+  const connectorId =
+    connectorIdOverride || (await resolveConnectorId({ inference, request, uiSettingsClient }));
   if (!connectorId) {
     return {
       ok: false,

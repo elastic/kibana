@@ -129,86 +129,29 @@ steps:
       # the "Affects You" geo filter, AND the tradecraft-style multiplicative
       # rank_score (severity × relevance) used by `search_reports` when
       # `sort_by='rank'`. The LLM is constrained to the THREAT_CATEGORIES /
-      # THREAT_REGIONS / DETECTION_ACTIONABILITY_LEVELS enums (see
-      # common/constants.ts) so downstream consumers don't have to handle
-      # long-tail free-text labels. Hallucinations outside the enums are
-      # dropped by `capture_ranking_signals` below via `| default:`.
+      # THREAT_REGIONS / DETECTION_ACTIONABILITY_LEVELS enums so downstream
+      # consumers don't have to handle long-tail free-text labels.
+      #
+      # Backed by `services/enrich_taxonomy.ts` via `kibana.request` (NOT
+      # `ai.agent`) so the per-stage connector is operator-configurable via
+      # the `securitySolution:threatIntelligence:diamondGateConnector` advanced
+      # setting — pin it to a cheap model (Haiku/Sonnet) to reduce per-report
+      # cost. The route falls through to `genAi:defaultAIConnector` when the
+      # setting is blank.
+      #
+      # NEVER set use_server_info: true (resolves to https://0.0.0.0:5601 on Cloud).
       - name: enrich_taxonomy
-        type: ai.agent
-        # Omit `agent-id` so the step routes to `elastic-ai-agent`
-        # rather than failing the literal-string lookup for `default`.
-        #
-        # `body_text` is sliced to 30 000 characters for the same reason as
-        # `extract_behaviors` above (connector response-size limits on long
-        # syndicated feeds). Taxonomy classification only
-        # needs the report's gist (the agent picks a handful of closed-set
-        # labels) so the loss from truncation is negligible compared with
-        # the cost of an entire `enrich_taxonomy` step failing on a
-        # multi-megabyte vendor report.
+        type: kibana.request
         with:
-          message: >-
-            You are a threat intel taxonomist. Categorize the following report
-            AND score how actionable it is for detection-rule authors.
-
-            Return a strict JSON object with exactly four keys:
-
-              categories: array of zero or more values from this closed set:
-                ["ransomware", "phishing", "malware", "data-breach", "vulnerability",
-                 "nation-state", "supply-chain", "insider-threat", "financial",
-                 "regulatory", "cloud-security", "iot-ot", "zero-day", "apt",
-                 "general"]
-
-              regions: array of zero or more values from this closed set:
-                ["north-america", "south-america", "europe", "middle-east",
-                 "africa", "south-asia", "east-asia", "southeast-asia",
-                 "oceania", "global"]
-
-              relevance: float in [0, 1] expressing how useful this report
-                is for *writing a detection rule*. Anchor points:
-                  0.0  - opinion piece, policy commentary, vendor PR.
-                  0.25 - news of a breach with no technical detail.
-                  0.5  - IOCs listed but no behavior described.
-                  0.75 - TTPs / ATT&CK techniques described.
-                  1.0  - concrete behavior (commands, registry keys,
-                         process patterns) suitable for a durable rule.
-
-              detection_actionability: exactly one value from this closed set:
-                ["informational", "iocs_only", "ttps_present", "rule_candidate"]
-                Use the same anchors as `relevance` — "rule_candidate" only
-                when the report names concrete behaviors a rule author
-                could lift directly.
-
-            Pick only categories actively described in the text (not background
-            mentions). Pick "global" for regions only when the activity
-            genuinely targets multiple continents. Do not invent values
-            outside the closed sets.
-
-            Report id: {{ foreach.item._id }}
-            Report title: {{ foreach.item._source.content.title }}
-            Report text:
-            {{ foreach.item._source.content.body_text | slice: 0, 30000 }}
-          schema:
-            type: object
-            properties:
-              categories:
-                type: array
-                items:
-                  type: string
-              regions:
-                type: array
-                items:
-                  type: string
-              relevance:
-                type: number
-                description: 0..1 detection actionability score
-              detection_actionability:
-                type: string
-                description: Closed-set DETECTION_ACTIONABILITY_LEVELS classifier
-            required:
-              - categories
-              - regions
-              - relevance
-              - detection_actionability
+          method: POST
+          path: /api/threat_intelligence/enrich_taxonomy
+          headers:
+            elastic-api-version: "2023-10-31"
+            x-elastic-internal-origin: "kibana"
+          body:
+            text: "{{ foreach.item._source.content.body_text | slice: 0, 30000 }}"
+            report_id: "{{ foreach.item._id }}"
+            title: "{{ foreach.item._source.content.title }}"
         on-failure:
           # Enrichment is best-effort — a stale connector or an over-quota
           # LLM should not block the rest of the extraction pipeline.
@@ -235,8 +178,12 @@ steps:
       - name: capture_ranking_signals
         type: data.set
         with:
-          relevance: "${{ steps.enrich_taxonomy.output.structured_output.relevance | default: 0.5 }}"
-          detection_actionability: "{{ steps.enrich_taxonomy.output.structured_output.detection_actionability | default: 'informational' }}"
+          relevance: "${{ steps.enrich_taxonomy.output.relevance | default: 0.5 }}"
+          detection_actionability: "{{ steps.enrich_taxonomy.output.detection_actionability | default: 'informational' }}"
+          # Failure-default false: enrich_taxonomy on-failure:continue means the field may be
+          # absent. False is also Liquid-falsy so `default:` fires correctly for both absent
+          # and explicit-false, giving the correct gate behaviour in both cases.
+          diamond_suitable: "${{ steps.enrich_taxonomy.output.diamond_suitable | default: false }}"
           severity_score: "${{ foreach.item._source.severity.score | default: 0 }}"
           # Hoist the technique-id list with a sentinel fallback so the
           # `find_related_reports` `terms` clause downstream never receives
@@ -270,6 +217,51 @@ steps:
           # `${{ … }}` (dollar-prefixed) preserves the JS array via
           # `evaluateExpression` rather than coercing to a string.
           technique_ids: "${{ steps.extract_behaviors.output.indexed_behaviors | map: 'technique_id' | join: ',' | default: '__no_techniques__' | split: ',' }}"
+
+      # Diamond Model extraction — heavy single-call with per-vertex fallback.
+      # Only runs for threat-positive reports (`diamond_suitable == true`).
+      # NEVER set use_server_info: true — on Cloud that resolves the URL to
+      # https://0.0.0.0:5601 (root cause: config.host == 0.0.0.0). Default
+      # URL resolution uses cloudSetup.kibanaUrl and works correctly.
+      - name: extract_diamond
+        type: kibana.request
+        if: "variables.diamond_suitable == true"
+        with:
+          method: POST
+          path: /api/threat_intelligence/extract_diamond
+          headers:
+            elastic-api-version: "2023-10-31"
+            x-elastic-internal-origin: "kibana"
+          body:
+            text: "{{ foreach.item._source.content.body_text | slice: 0, 30000 }}"
+            report_id: "{{ foreach.item._id }}"
+        on-failure:
+          continue: true
+
+      # Write extracted diamond fields to the backing index. Separate from
+      # persist_extractions so a diamond write failure never blocks the main
+      # extraction fields and vice versa. Gated on the same signal so a
+      # skipped extract_diamond step (diamond_suitable == false) doesn't
+      # produce a partial update with null vertex fields.
+      - name: persist_diamond_fields
+        type: elasticsearch.update
+        if: "variables.diamond_suitable == true"
+        with:
+          index: "{{ foreach.item._index }}"
+          id: "{{ foreach.item._id }}"
+          doc:
+            extracted:
+              diamond:
+                adversary: "${{ steps.extract_diamond.output.adversary }}"
+                capability: "${{ steps.extract_diamond.output.capability }}"
+                infrastructure: "${{ steps.extract_diamond.output.infrastructure }}"
+                victim: "${{ steps.extract_diamond.output.victim }}"
+                signal_count: "${{ steps.extract_diamond.output.signal_count }}"
+                model_id: "{{ steps.extract_diamond.output.model_id }}"
+                extracted_at: "{{ steps.extract_diamond.output.extracted_at }}"
+                extraction_mode: "{{ steps.extract_diamond.output.extraction_mode }}"
+        on-failure:
+          continue: true
 
       # Cross-report correlation: find OTHER reports related to this one via a
       # three-tier scoring. Higher boost = stronger confidence the two reports
@@ -408,7 +400,7 @@ steps:
               # Nested `extracted.behaviors` remains the source of truth for hunts.
               ttps:
                 techniques: "${{ steps.extract_behaviors.output.indexed_behaviors | map: 'technique_id' }}"
-              categories: "${{ steps.enrich_taxonomy.output.structured_output.categories }}"
+              categories: "${{ steps.enrich_taxonomy.output.categories }}"
               # Hoisted from `capture_ranking_signals` so the neutral
               # defaults (0.5 / 'informational') apply uniformly whether
               # `enrich_taxonomy` succeeded or hit `on-failure: continue: true`.
@@ -416,7 +408,7 @@ steps:
               relevance: "${{ variables.relevance }}"
               detection_actionability: "{{ variables.detection_actionability }}"
             geography:
-              regions: "${{ steps.enrich_taxonomy.output.structured_output.regions }}"
+              regions: "${{ steps.enrich_taxonomy.output.regions }}"
             # Top-level multiplicative composite (`severity.score *
             # extracted.relevance`) — the tradecraft-style ranking signal.
             # Consumed by `search_reports` when `sort_by: 'rank'` and by

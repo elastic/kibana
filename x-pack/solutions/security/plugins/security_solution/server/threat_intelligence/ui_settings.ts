@@ -8,7 +8,12 @@
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
-import { DEFAULT_REGIONS_SETTING_KEY, THREAT_REGIONS } from '../../common/threat_intelligence/hub';
+import {
+  DEFAULT_REGIONS_SETTING_KEY,
+  DIAMOND_CONNECTOR_SETTING_KEY,
+  DIAMOND_GATE_CONNECTOR_SETTING_KEY,
+  THREAT_REGIONS,
+} from '../../common/threat_intelligence/hub';
 
 /**
  * Per-space advanced setting for the dashboard's location-aware default
@@ -22,7 +27,7 @@ import { DEFAULT_REGIONS_SETTING_KEY, THREAT_REGIONS } from '../../common/threat
  * rejects unknown regions so the dashboard never has to handle long-tail
  * free-text input.
  */
-export const threatIntelligenceUiSettings: Record<string, UiSettingsParams<string[]>> = {
+export const threatIntelligenceUiSettings: Record<string, UiSettingsParams> = {
   [DEFAULT_REGIONS_SETTING_KEY]: {
     category: ['securitySolution'],
     name: i18n.translate(
@@ -50,6 +55,56 @@ export const threatIntelligenceUiSettings: Record<string, UiSettingsParams<strin
             : `unknown region: ${value}`,
       })
     ),
+    requiresPageReload: false,
+  },
+
+  [DIAMOND_GATE_CONNECTOR_SETTING_KEY]: {
+    category: ['securitySolution'],
+    name: i18n.translate(
+      'xpack.securitySolution.threatIntelligence.uiSettings.diamondGateConnector.name',
+      {
+        defaultMessage: 'Threat Intelligence — taxonomy gate connector',
+      }
+    ),
+    description: i18n.translate(
+      'xpack.securitySolution.threatIntelligence.uiSettings.diamondGateConnector.description',
+      {
+        defaultMessage:
+          'GenAI connector ID used for the per-report taxonomy enrichment step ' +
+          '(enrich_taxonomy — categories, regions, relevance, detection_actionability, ' +
+          'diamond_suitable). Leave blank to use the space-wide default GenAI connector. ' +
+          'Set to a cheap model connector (e.g. Haiku) to reduce per-report cost; ' +
+          'taxonomy quality degradation is acceptable for the gate classification.',
+      }
+    ),
+    type: 'string',
+    value: '',
+    schema: schema.string(),
+    requiresPageReload: false,
+  },
+
+  [DIAMOND_CONNECTOR_SETTING_KEY]: {
+    category: ['securitySolution'],
+    name: i18n.translate(
+      'xpack.securitySolution.threatIntelligence.uiSettings.diamondConnector.name',
+      {
+        defaultMessage: 'Threat Intelligence — Diamond extraction connector',
+      }
+    ),
+    description: i18n.translate(
+      'xpack.securitySolution.threatIntelligence.uiSettings.diamondConnector.description',
+      {
+        defaultMessage:
+          'GenAI connector ID used for the heavy Diamond Model extraction step ' +
+          '(extract_diamond — adversary/capability/infrastructure/victim summaries). ' +
+          'Only called for threat-positive reports (diamond_suitable == true). ' +
+          'Leave blank to use the space-wide default GenAI connector. ' +
+          'Set to a capable model connector (e.g. Sonnet/Opus) for best extraction quality.',
+      }
+    ),
+    type: 'string',
+    value: '',
+    schema: schema.string(),
     requiresPageReload: false,
   },
 };

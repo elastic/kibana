@@ -8,6 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import { z } from '@kbn/zod/v4';
+import { logStageUsage, extractUsageFromMetadata } from '../routes/lib/cost_tracker';
 
 /**
  * Character limit applied to report text before the LLM call. Matches the
@@ -132,11 +133,27 @@ export const extractDiamond = async (
   const modelId = model.connector.connectorId;
   const extractedAt = new Date().toISOString();
 
+  interface RawResult<T> {
+    raw: { response_metadata: Record<string, unknown> };
+    parsed: T;
+  }
+
   // Single heavy call — the normal path.
   try {
-    const structured = model.chatModel.withStructuredOutput(extractDiamondLlmOutputSchema);
-    const output = (await structured.invoke(buildSingleCallPrompt(truncated))) as DiamondLlmOutput;
+    const structured = model.chatModel.withStructuredOutput(extractDiamondLlmOutputSchema, {
+      includeRaw: true,
+    });
+    const result = (await structured.invoke(
+      buildSingleCallPrompt(truncated)
+    )) as RawResult<DiamondLlmOutput>;
+    const output = result.parsed;
 
+    logStageUsage(
+      logger,
+      'extract_diamond/single_call',
+      modelId,
+      result.raw.response_metadata ?? {}
+    );
     logger.debug(
       `extract_diamond single_call ok signal_count=${countNonNone(output)} report_id=${reportId}`
     );
@@ -163,7 +180,9 @@ export const extractDiamond = async (
   // parse errors on the structured schema. Each vertex is attempted
   // independently; a per-vertex failure defaults to NONE rather than
   // aborting the whole extraction.
-  const vertexStructured = model.chatModel.withStructuredOutput(diamondVertexSchema);
+  const vertexStructured = model.chatModel.withStructuredOutput(diamondVertexSchema, {
+    includeRaw: true,
+  });
   const vertices: Record<DiamondVertex, DiamondVertexResult> = {
     adversary: NONE_VERTEX,
     capability: NONE_VERTEX,
@@ -171,12 +190,17 @@ export const extractDiamond = async (
     victim: NONE_VERTEX,
   };
 
+  let fallbackInputTokens = 0;
+  let fallbackOutputTokens = 0;
   for (const vertex of VERTICES) {
     try {
-      const vertexOutput = (await vertexStructured.invoke(
+      const vertexResult = (await vertexStructured.invoke(
         buildVertexPrompt(vertex, truncated)
-      )) as DiamondVertexResult;
-      vertices[vertex] = vertexOutput;
+      )) as RawResult<DiamondVertexResult>;
+      vertices[vertex] = vertexResult.parsed;
+      const usage = extractUsageFromMetadata(vertexResult.raw.response_metadata ?? {});
+      fallbackInputTokens += usage.inputTokens;
+      fallbackOutputTokens += usage.outputTokens;
     } catch (vertexErr) {
       logger.debug(
         `extract_diamond per-vertex ${vertex} failed: ` +
@@ -184,6 +208,10 @@ export const extractDiamond = async (
       );
     }
   }
+
+  logStageUsage(logger, 'extract_diamond/per_vertex_fallback', modelId, {
+    usage: { input_tokens: fallbackInputTokens, output_tokens: fallbackOutputTokens },
+  });
 
   const fallbackOutput: DiamondLlmOutput = vertices;
   logger.debug(

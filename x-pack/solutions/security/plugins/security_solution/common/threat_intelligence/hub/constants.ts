@@ -214,6 +214,16 @@ export const ANALYSE_ENVIRONMENT_API_PATH =
 export const EXTRACT_DIAMOND_API_PATH = `${THREAT_INTELLIGENCE_API_BASE}/extract_diamond` as const;
 
 /**
+ * Stage-2 taxonomy enrichment route — POST /api/threat_intelligence/enrich_taxonomy.
+ * Invoked by `nl_extraction_behavioral` for every pending report. Produces
+ * categories / regions / relevance / detection_actionability / diamond_suitable.
+ * Backed by `services/enrich_taxonomy.ts`; uses the gate connector setting so
+ * operators can pin a cheap model (Haiku/Sonnet) without affecting the heavy
+ * extract_diamond step.
+ */
+export const ENRICH_TAXONOMY_API_PATH = `${THREAT_INTELLIGENCE_API_BASE}/enrich_taxonomy` as const;
+
+/**
  * Backfill route — POST /api/threat_intelligence/backfill_diamond.
  * Two-call API: `{ dry_run: true }` → `{ run_id, estimate }`; `{ run_id }` → 202.
  * Gated by `manageSources` privilege.
@@ -284,6 +294,26 @@ export const SAVED_VIEW_SO_TYPE = 'threat-intelligence-saved-view' as const;
  */
 export const DEFAULT_REGIONS_SETTING_KEY =
   'securitySolution:threatIntelligence:defaultRegions' as const;
+
+/**
+ * Advanced setting keys for per-stage GenAI connector overrides.
+ *
+ * Both default to the empty string, which causes the stage to fall through
+ * to the space-wide `genAi:defaultAIConnector` setting. Set either key to a
+ * specific connector ID to pin that stage to a particular model — e.g. pin
+ * `diamondGateConnector` to a Haiku connector to reduce per-report cost on
+ * the taxonomy gate, while leaving the heavy `diamondConnector` on the
+ * default (typically Sonnet or Opus).
+ *
+ * Defined in `common/` (not server-only `ui_settings.ts`) because future
+ * cost-dashboard UI components on the browser side may display the active
+ * connector without duplicating the key constants.
+ */
+export const DIAMOND_GATE_CONNECTOR_SETTING_KEY =
+  'securitySolution:threatIntelligence:diamondGateConnector' as const;
+
+export const DIAMOND_CONNECTOR_SETTING_KEY =
+  'securitySolution:threatIntelligence:diamondConnector' as const;
 
 /**
  * Sentinel value written to `space_id` to denote "visible from every space".

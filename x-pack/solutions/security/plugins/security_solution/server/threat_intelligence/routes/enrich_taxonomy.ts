@@ -7,45 +7,42 @@
 
 import { schema } from '@kbn/config-schema';
 import {
-  EXTRACT_DIAMOND_API_PATH,
+  ENRICH_TAXONOMY_API_PATH,
   THREAT_INTELLIGENCE_API_PRIVILEGES,
-  DIAMOND_CONNECTOR_SETTING_KEY,
+  DIAMOND_GATE_CONNECTOR_SETTING_KEY,
 } from '../../../common/threat_intelligence/hub';
-import { extractDiamond } from '../services';
+import { enrichTaxonomy } from '../services';
 import { resolveScopedModel } from './lib/scoped_model';
 import type { RouteRegistrationDeps } from '.';
 
-const extractDiamondBodySchema = schema.object({
+const enrichTaxonomyBodySchema = schema.object({
   text: schema.string({ minLength: 1 }),
   report_id: schema.maybe(schema.string({ minLength: 1 })),
+  title: schema.maybe(schema.string()),
 });
 
-// Feeds the full report body in from the workflow — ceiling matches extract_iocs
-// and hunt_behavior so oversized RSS/STIX bodies don't 413 before the route runs.
-// The service truncates to DIAMOND_BODY_CHAR_LIMIT before the LLM call.
-const EXTRACT_DIAMOND_MAX_BODY_BYTES = 10 * 1024 * 1024;
+const ENRICH_TAXONOMY_MAX_BODY_BYTES = 10 * 1024 * 1024;
 
 /**
- * Public route for the `extract_diamond` domain action.
+ * Route for the `enrich_taxonomy` stage of `nl_extraction_behavioral`.
  *
- * Performs a single heavy LLM call to extract all four Diamond Model vertices
- * (adversary / capability / infrastructure / victim) from a threat report. On
- * context-overflow or parse failure the service falls back to per-vertex calls
- * on the same model and stamps `extraction_mode: 'per_vertex_fallback'`.
+ * Reads `DIAMOND_GATE_CONNECTOR_SETTING_KEY` so operators can pin the taxonomy
+ * gate to a cheap model (Haiku/Sonnet) independently of the heavy
+ * `extract_diamond` connector. When the setting is blank the route falls
+ * through to the space-wide `genAi:defaultAIConnector`.
  *
- * Invoked by `nl_extraction_behavioral` via `kibana.request` for threat-positive
- * reports (gated on `enrich_taxonomy`'s detection_actionability signal) and by
- * the `backfill_diamond_fields` Task Manager job. `.correlate` privilege is
- * deferred to Phase 2 — mirrors the `extract_iocs` / `hunt_behavior` pattern.
+ * Returns five fields: categories / regions / relevance /
+ * detection_actionability / diamond_suitable. The workflow step reads them
+ * as `steps.enrich_taxonomy.output.{field}`.
  */
-export const registerExtractDiamondRoute = ({
+export const registerEnrichTaxonomyRoute = ({
   router,
   logger,
   getInference,
 }: RouteRegistrationDeps): void => {
   router.versioned
     .post({
-      path: EXTRACT_DIAMOND_API_PATH,
+      path: ENRICH_TAXONOMY_API_PATH,
       access: 'public',
       security: {
         authz: {
@@ -55,21 +52,23 @@ export const registerExtractDiamondRoute = ({
       options: {
         body: {
           accepts: ['application/json'],
-          maxBytes: EXTRACT_DIAMOND_MAX_BODY_BYTES,
+          maxBytes: ENRICH_TAXONOMY_MAX_BODY_BYTES,
         },
       },
     })
     .addVersion(
       {
         version: '2023-10-31',
-        validate: { request: { body: extractDiamondBodySchema } },
+        validate: { request: { body: enrichTaxonomyBodySchema } },
       },
       async (context, request, response) => {
         const core = await context.core;
 
         let connectorIdOverride: string | undefined;
         try {
-          const setting = await core.uiSettings.client.get<string>(DIAMOND_CONNECTOR_SETTING_KEY);
+          const setting = await core.uiSettings.client.get<string>(
+            DIAMOND_GATE_CONNECTOR_SETTING_KEY
+          );
           if (setting) connectorIdOverride = setting;
         } catch {
           // Setting not registered in this context — fall through to default.
@@ -89,18 +88,19 @@ export const registerExtractDiamondRoute = ({
         }
 
         try {
-          const result = await extractDiamond(modelOutcome.model, logger, {
+          const result = await enrichTaxonomy(modelOutcome.model, logger, {
             text: request.body.text,
             report_id: request.body.report_id,
+            title: request.body.title,
           });
           return response.ok({ body: result });
         } catch (err) {
-          logger.warn(`extract_diamond failed: ${(err as Error).message}`);
+          logger.warn(`enrich_taxonomy failed: ${(err as Error).message}`);
           return response.customError({
             statusCode: 500,
             body: {
               message:
-                `Diamond extraction failed: ${(err as Error).message}. ` +
+                `Taxonomy enrichment failed: ${(err as Error).message}. ` +
                 `Verify a default GenAI connector is configured.`,
             },
           });

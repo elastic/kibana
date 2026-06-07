@@ -123,7 +123,14 @@ export type {
 export { extractIocs } from './extract_iocs';
 export type { ExtractIocsParams, ExtractIocsResult, ExtractedIoc } from './extract_iocs';
 
-export { extractDiamond, extractDiamondLlmOutputSchema, DIAMOND_BODY_CHAR_LIMIT } from './extract_diamond';
+export {
+  extractDiamond,
+  extractDiamondLlmOutputSchema,
+  DIAMOND_BODY_CHAR_LIMIT,
+} from './extract_diamond';
+
+export { enrichTaxonomy, taxonomyOutputSchema } from './enrich_taxonomy';
+export type { EnrichTaxonomyParams, TaxonomyOutput } from './enrich_taxonomy';
 export type {
   ExtractDiamondParams,
   ExtractDiamondResult,
