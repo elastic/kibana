@@ -1,0 +1,23 @@
+{
+  "slug": "graph-viz",
+  "name": "Graph Visualization",
+  "owners": ["@elastic/contextual-security-apps"],
+  "paths": [
+    "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/**",
+    "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/types/graph/**",
+    "x-pack/solutions/security/packages/kbn-cloud-security-posture/common/schema/graph/**",
+    "x-pack/solutions/security/plugins/cloud_security_posture/server/routes/graph/**",
+    "x-pack/solutions/security/plugins/cloud_security_posture/server/routes/graph_entities/**",
+    "x-pack/solutions/security/plugins/cloud_security_posture/server/routes/graph_events/**",
+    "x-pack/solutions/security/plugins/security_solution/public/flyout/entity_details/**",
+    "x-pack/solutions/security/plugins/security_solution/public/flyout/shared/components/**",
+    "x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/main/**",
+    "x-pack/solutions/security/test/cloud_security_posture_api/routes/graph*"
+  ],
+  "files": [
+    {
+      "path": "graph-viz.md",
+      "description": "Primary domain knowledge"
+    }
+  ]
+}
