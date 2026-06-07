@@ -198,6 +198,7 @@ async function runIntegration(
     logger.info(`[${config.id}] Found ${buckets.length} user buckets`);
     totalBuckets += buckets.length;
     if (buckets.length === 0) break;
+
     const esqlResult = await fetchTargetsForActors(
       config,
       esClient,
@@ -208,6 +209,7 @@ async function runIntegration(
       abortController
     );
     if (esqlResult === null) break;
+
     const { columns, values } = esqlResult;
     const pageRecords = parseTargetsPerActorRows(columns, values, config, logger);
     records.push(...pageRecords);
@@ -220,6 +222,7 @@ async function runIntegration(
     // filters that drop bucket candidates).
     afterKey = newAfterKey;
   } while (afterKey);
+
   // Stream per-integration: write this integration's records before
   // returning so memory does not accumulate across the outer loop.
   const write = await writeEntityIds(crudClient, logger, records);
