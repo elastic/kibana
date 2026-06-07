@@ -44,7 +44,12 @@ export class SavedObjectsListingPage {
 
   getItemLinks(appName: AppName): Locator {
     const testSubjPrefix = APP_TEST_SUBJECT_PREFIX[appName];
-    return this.page.locator(`[data-test-subj^="${testSubjPrefix}ListingTitleLink-"]`);
+    // Match the legacy `TableListView` per-app link or the framework-agnostic
+    // Content List item link, so this keeps working whether or not `appName`'s
+    // listing has migrated to `@kbn/content-list`.
+    return this.page.locator(
+      `[data-test-subj^="${testSubjPrefix}ListingTitleLink-"], [data-test-subj="content-list-table-item-link"]`
+    );
   }
 
   async getAllItemNames(appName: AppName): Promise<string[]> {
@@ -52,9 +57,11 @@ export class SavedObjectsListingPage {
   }
 
   async clickItemLink(appName: AppName, name: string) {
-    const testSubjPrefix = APP_TEST_SUBJECT_PREFIX[appName];
-    await this.page.testSubj.click(
-      `${testSubjPrefix}ListingTitleLink-${name.split(' ').join('-')}`
-    );
+    // Content List item links carry no per-item subject, so match on exact link
+    // text — which equals the title in both frameworks.
+    const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    await this.getItemLinks(appName)
+      .filter({ hasText: new RegExp(`^${escaped}$`) })
+      .click();
   }
 }
