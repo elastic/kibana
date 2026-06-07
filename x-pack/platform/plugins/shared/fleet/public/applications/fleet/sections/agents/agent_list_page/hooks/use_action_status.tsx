@@ -98,9 +98,44 @@ export function useActionStatus(
     [loadActions, notifications.toasts, overlays, onAbortSuccess]
   );
 
+  const abortUnenroll = useCallback(
+    async (action: ActionStatus) => {
+      try {
+        const confirmRes = await overlays.openConfirm(
+          i18n.translate('xpack.fleet.currentUnenroll.confirmDescription', {
+            defaultMessage:
+              'This action will cancel the scheduled unenrollment of {nbAgents, plural, one {# agent} other {# agents}} and disable the automatic unenrollment setting on the agent policy.',
+            values: {
+              nbAgents: action.nbAgentsActioned - action.nbAgentsAck,
+            },
+          }),
+          {
+            title: i18n.translate('xpack.fleet.currentUnenroll.confirmTitle', {
+              defaultMessage: 'Cancel unenrollment?',
+            }),
+          }
+        );
+
+        if (!confirmRes) {
+          return;
+        }
+        await sendPostCancelAction(action.actionId);
+        await Promise.all([loadActions(), onAbortSuccess()]);
+      } catch (err) {
+        notifications.toasts.addError(err, {
+          title: i18n.translate('xpack.fleet.currentUnenroll.abortRequestError', {
+            defaultMessage: 'An error happened while cancelling unenrollment',
+          }),
+        });
+      }
+    },
+    [loadActions, notifications.toasts, overlays, onAbortSuccess]
+  );
+
   return {
     currentActions,
     abortUpgrade,
+    abortUnenroll,
     isFirstLoading,
     areActionsFullyLoaded,
   };
