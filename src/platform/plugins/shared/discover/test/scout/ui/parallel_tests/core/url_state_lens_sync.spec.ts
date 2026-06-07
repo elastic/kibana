@@ -72,17 +72,12 @@ spaceTest.describe('Discover - URL state Lens sync', { tag: tags.stateful.all },
 
       // Navigate to Discover via the chrome nav (the same path the FTR
       // exercises). The pinned filter, time, and resulting hit count must
-      // all round-trip. Expand the side nav, then click the Discover
-      // entry. The project-style sidenav exposes \`nav-item-id-discover\`
-      // as one of the space-separated test-subj tokens, but the entry
-      // can render lazily as a sub-item of the "Analytics" group; click
-      // by accessible name as a more robust fallback.
-      await pageObjects.collapsibleNav.expandNav();
-      const discoverLink = page
-        .getByRole('link', { name: 'Discover', exact: true })
-        .first();
-      await discoverLink.waitFor({ state: 'visible', timeout: 15_000 });
-      await discoverLink.click();
+      // all round-trip. `clickItem('Discover')` targets the side-nav
+      // entry directly (`[title="Discover"]` on stateful classic, the
+      // `nav-item-id-discover` test subject on serverless), so it does
+      // not collide with the Recently Viewed "Discover" link that the
+      // generic `getByRole('link')` query previously matched.
+      await pageObjects.collapsibleNav.clickItem('Discover', { lowercase: false });
       await pageObjects.discover.waitUntilSearchingHasFinished();
 
       expect(

@@ -131,9 +131,7 @@ describe('Discover flyout', function () {
     const { props, user } = await renderComponent({ dataView: dataViewWithTimefieldMock });
 
     const singleDoc = screen.getByTestId(/(^|\s)docTableRowAction-singleDocument(\s|$)/);
-    const surroundingDoc = screen.getByTestId(
-      /(^|\s)docTableRowAction-surroundingDocument(\s|$)/
-    );
+    const surroundingDoc = screen.getByTestId(/(^|\s)docTableRowAction-surroundingDocument(\s|$)/);
     expect(singleDoc).toHaveAttribute('href', 'mock-doc-redirect-url');
     expect(surroundingDoc).toHaveAttribute('href', 'mock-context-redirect-url');
 

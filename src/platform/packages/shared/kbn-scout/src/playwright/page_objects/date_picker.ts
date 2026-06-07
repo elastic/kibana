@@ -54,8 +54,14 @@ export class DatePicker {
       containerLocator
     );
     const winner = await Promise.race([
-      newPicker.waitFor({ timeout: 15000 }).then(() => 'new' as const).catch(() => null),
-      legacyPicker.waitFor({ timeout: 15000 }).then(() => 'legacy' as const).catch(() => null),
+      newPicker
+        .waitFor({ timeout: 15000 })
+        .then(() => 'new' as const)
+        .catch(() => null),
+      legacyPicker
+        .waitFor({ timeout: 15000 })
+        .then(() => 'legacy' as const)
+        .catch(() => null),
     ]);
     return winner === 'new';
   }

@@ -111,7 +111,9 @@ export class DataGrid {
     // Grid rows render asynchronously after a search resolves; wait for at
     // least one row to be attached so callers don't see a transient empty
     // array when called immediately after `waitUntilSearchingHasFinished()`.
-    await rows.first().waitFor({ state: 'attached' });
+    // Locator.waitFor() resolves on the first matching element by default,
+    // which is what we want here.
+    await rows.waitFor({ state: 'attached' });
     // Use `textContent` (via `evaluateAll`) instead of `allInnerTexts()`.
     // `innerText` injects synthetic `\t` between flex/grid cells and `\n`
     // between rows, which leaks into row text and breaks the FTR-parity
@@ -135,7 +137,10 @@ export class DataGrid {
         }
         // EUI's per-cell screen-reader instruction string — not part of the
         // visible cell value.
-        return out.split("Press the Enter key to interact with this cell's contents.").join('').trim();
+        return out
+          .split("Press the Enter key to interact with this cell's contents.")
+          .join('')
+          .trim();
       })
     );
     return texts;

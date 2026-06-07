@@ -708,9 +708,9 @@ export class DiscoverApp {
 
     if (observed.length !== expectedCount) {
       throw new Error(
-        `expected ${expectedCount} request(s) to ${endpointSuffix}, observed ${observed.length}:\n${observed
-          .map((u, i) => `  [${i}] ${u}`)
-          .join('\n')}`
+        `expected ${expectedCount} request(s) to ${endpointSuffix}, observed ${
+          observed.length
+        }:\n${observed.map((u, i) => `  [${i}] ${u}`).join('\n')}`
       );
     }
   }
