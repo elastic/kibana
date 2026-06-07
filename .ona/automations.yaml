@@ -7,9 +7,10 @@ tasks:
   add-fork-remote:
     name: Add fork remote
     command: |
-      GITHUB_USER=$(gh api user --jq '.login' 2>/dev/null) &&
-      git remote get-url fork >/dev/null 2>&1 ||
-      git remote add fork "https://github.com/${GITHUB_USER}/kibana.git"
+      GITHUB_USER=$(gh api user --jq '.login' 2>/dev/null)
+      if [ -n "$GITHUB_USER" ] && ! git remote get-url fork >/dev/null 2>&1; then
+        git remote add fork "https://github.com/${GITHUB_USER}/kibana.git"
+      fi
     triggeredBy:
       - postDevcontainerStart
 services:

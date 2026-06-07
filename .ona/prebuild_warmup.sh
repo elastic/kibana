@@ -28,7 +28,7 @@ echo "=== Bootstrapping ==="
 yarn kbn bootstrap
 
 echo "=== Starting Elasticsearch ==="
-yarn kbn es snapshot &
+yarn es snapshot &
 
 echo "Waiting for Elasticsearch to be ready..."
 for i in $(seq 1 60); do
@@ -44,7 +44,7 @@ for i in $(seq 1 60); do
 done
 
 echo "=== Starting Kibana ==="
-yarn kbn start --no-base-path --server.host=0.0.0.0 &
+yarn start --no-base-path --server.host=0.0.0.0 &
 
 echo "Waiting for Kibana to be available..."
 for i in $(seq 1 120); do
