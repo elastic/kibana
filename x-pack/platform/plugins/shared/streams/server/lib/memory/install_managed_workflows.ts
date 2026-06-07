@@ -10,7 +10,7 @@ import {
   STREAMS_MEMORY_CONSOLIDATION_WORKFLOW_ID,
   STREAMS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
-import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 
 const MEMORY_WORKFLOW_IDS = [
@@ -25,6 +25,6 @@ export const installMemoryWorkflows = async ({
   client: PluginScopedManagedWorkflowsApi;
 }): Promise<void> => {
   for (const id of MEMORY_WORKFLOW_IDS) {
-    await client.install(id, { spaceId: GLOBAL_WORKFLOW_SPACE_ID });
+    await client.install(id, { spaceId: DEFAULT_SPACE_ID });
   }
 };

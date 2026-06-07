@@ -4,7 +4,7 @@ name: Conversation Scraper
 description: >
   Extracts durable knowledge from recent AI chat conversations and persists it as
   memory wiki pages in .significant_events-memories. Runs on a 4h schedule.
-enabled: true
+enabled: false
 settings:
   timeout: "30m"
   concurrency:

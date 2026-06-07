@@ -5,7 +5,7 @@ description: >
   Synthesizes significant events knowledge indicators into wiki pages using the
   streams-memory-synthesis skill. The default Agent Builder agent loads the skill,
   reads existing pages and insights via skill tools, and writes updates via memory_write.
-enabled: true
+enabled: false
 settings:
   timeout: "30m"
   concurrency:

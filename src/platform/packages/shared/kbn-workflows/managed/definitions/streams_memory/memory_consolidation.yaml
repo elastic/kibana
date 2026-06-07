@@ -5,7 +5,7 @@ description: >
   Curates the memory wiki by merging duplicates, removing stale entries,
   improving categorization, and adding cross-references via the streams-memory-consolidation
   skill. Runs on a 24h schedule.
-enabled: true
+enabled: false
 settings:
   timeout: "30m"
   concurrency:
