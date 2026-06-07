@@ -64,19 +64,30 @@ describe('ADMINISTERS_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
   );
 
   it.each(ADMINISTERS_INTEGRATION_RELATIONSHIP_CONFIGS)(
-    '$id: override query constructs host EUIDs from FQDN via CONCAT',
+    '$id: override query constructs host EUIDs from host.name via type-prefixed CONCAT',
     (config) => {
       const query = buildTargetsPerActorQuery(config, 'default');
-      expect(query).toContain('CONCAT("host:", rawHostnames)');
+      expect(query).toContain(
+        'CONCAT("host:", entity.relationships.administers.raw_identifiers.host.name)'
+      );
     }
   );
 
   it.each(ADMINISTERS_INTEGRATION_RELATIONSHIP_CONFIGS)(
-    '$id: override query expands raw_identifiers.host.name via MV_EXPAND',
+    '$id: override query expands the unioned target column via MV_EXPAND',
     (config) => {
       const query = buildTargetsPerActorQuery(config, 'default');
       expect(query).toContain('raw_identifiers.host.name');
-      expect(query).toContain('MV_EXPAND');
+      expect(query).toContain('MV_EXPAND targetEntityId');
+    }
+  );
+
+  it.each(ADMINISTERS_INTEGRATION_RELATIONSHIP_CONFIGS)(
+    '$id: override query guards against non-EUID target values via RLIKE',
+    (config) => {
+      const query = buildTargetsPerActorQuery(config, 'default');
+      // Rejects empty/prefix-only values like "host:" produced by a blank raw field.
+      expect(query).toContain('targetEntityId RLIKE ".+:.+"');
     }
   );
 

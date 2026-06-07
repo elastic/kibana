@@ -3,12 +3,12 @@
 exports[`ADMINISTERS_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots entityanalytics_ad: targets-per-actor ES|QL is locked (no watermark) 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM .entities.v2.latest.security___namespace__-*
-| WHERE entity.relationships.administers.raw_identifiers.host.name IS NOT NULL
+| WHERE (entity.relationships.administers.raw_identifiers.host.name IS NOT NULL)
 | EVAL actorUserId = entity.id
-| EVAL rawHostnames = entity.relationships.administers.raw_identifiers.host.name
-| MV_EXPAND rawHostnames
-| WHERE COALESCE(rawHostnames, \\"\\") != \\"\\"
-| EVAL targetEntityId = CONCAT(\\"host:\\", rawHostnames)
+| EVAL t0 = CONCAT(\\"host:\\", entity.relationships.administers.raw_identifiers.host.name)
+| EVAL targetEntityId = t0
+| MV_EXPAND targetEntityId
+| WHERE COALESCE(targetEntityId, \\"\\") != \\"\\" AND targetEntityId RLIKE \\".+:.+\\"
 | STATS administers = VALUES(targetEntityId) BY actorUserId
 | WHERE COALESCE(actorUserId, \\"\\") != \\"\\"
 | LIMIT 3500"
@@ -16,13 +16,13 @@ FROM .entities.v2.latest.security___namespace__-*
 
 exports[`ADMINISTERS_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots entityanalytics_ad: targets-per-actor ES|QL with watermark is locked 1`] = `
 "FROM .entities.v2.latest.security___namespace__-*
-| WHERE entity.relationships.administers.raw_identifiers.host.name IS NOT NULL
+| WHERE (entity.relationships.administers.raw_identifiers.host.name IS NOT NULL)
     AND entity.lifecycle.last_seen > \\"2026-06-01T00:00:00.000Z\\"
 | EVAL actorUserId = entity.id
-| EVAL rawHostnames = entity.relationships.administers.raw_identifiers.host.name
-| MV_EXPAND rawHostnames
-| WHERE COALESCE(rawHostnames, \\"\\") != \\"\\"
-| EVAL targetEntityId = CONCAT(\\"host:\\", rawHostnames)
+| EVAL t0 = CONCAT(\\"host:\\", entity.relationships.administers.raw_identifiers.host.name)
+| EVAL targetEntityId = t0
+| MV_EXPAND targetEntityId
+| WHERE COALESCE(targetEntityId, \\"\\") != \\"\\" AND targetEntityId RLIKE \\".+:.+\\"
 | STATS administers = VALUES(targetEntityId) BY actorUserId
 | WHERE COALESCE(actorUserId, \\"\\") != \\"\\"
 | LIMIT 3500"

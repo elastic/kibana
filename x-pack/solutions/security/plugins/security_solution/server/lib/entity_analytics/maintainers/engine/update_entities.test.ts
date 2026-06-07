@@ -246,9 +246,7 @@ describe('writeEntityIds', () => {
 
 describe('entityTypeFromEuid (via writeEntityIds)', () => {
   it('routes host EUID writes to type "host"', async () => {
-    const mockCrudClient = {
-      bulkUpdateEntity: jest.fn().mockResolvedValue([]),
-    };
+    const crudClient = makeCrudClient();
     const records: EntityRelationshipRecord[] = [
       {
         entityId: 'host:workstation-01.corp.com',
@@ -256,15 +254,13 @@ describe('entityTypeFromEuid (via writeEntityIds)', () => {
         relationships: { administers: ['host:server-01.corp.com'] },
       },
     ];
-    await writeEntityIds(mockCrudClient as any, loggerMock.create(), records);
-    const call = mockCrudClient.bulkUpdateEntity.mock.calls[0][0];
+    await writeEntityIds(crudClient, loggerMock.create(), records);
+    const call = (crudClient.bulkUpdateEntity as jest.Mock).mock.calls[0][0];
     expect(call.objects[0].type).toBe('host');
   });
 
   it('routes user EUID writes to type "user" (backward compatibility)', async () => {
-    const mockCrudClient = {
-      bulkUpdateEntity: jest.fn().mockResolvedValue([]),
-    };
+    const crudClient = makeCrudClient();
     const records: EntityRelationshipRecord[] = [
       {
         entityId: 'user:alice@corp.com',
@@ -272,8 +268,8 @@ describe('entityTypeFromEuid (via writeEntityIds)', () => {
         relationships: { administers: ['host:workstation-01.corp.com'] },
       },
     ];
-    await writeEntityIds(mockCrudClient as any, loggerMock.create(), records);
-    const call = mockCrudClient.bulkUpdateEntity.mock.calls[0][0];
+    await writeEntityIds(crudClient, loggerMock.create(), records);
+    const call = (crudClient.bulkUpdateEntity as jest.Mock).mock.calls[0][0];
     expect(call.objects[0].type).toBe('user');
   });
 });

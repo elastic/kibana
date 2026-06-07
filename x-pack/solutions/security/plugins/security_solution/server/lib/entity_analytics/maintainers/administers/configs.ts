@@ -6,41 +6,24 @@
  */
 
 import { getLatestEntityIndexPattern } from '@kbn/entity-store/common/domain/entity_index';
-import { COMPOSITE_PAGE_SIZE } from '../engine/constants';
 import type { RelationshipIntegrationConfig } from '../engine/types';
+import {
+  buildRawIdentifiersEsqlQuery,
+  buildRawIdentifiersExistenceGate,
+  type DirectEuidRule,
+} from '../engine/build_raw_identifiers_query';
+
+const RELATIONSHIP_KEY = 'administers';
 
 /**
- * Step 2 ES|QL override for the administers maintainer.
+ * Active Directory's directly-constructible administers identifiers.
  *
- * Assumes raw_identifiers.host.name is the FQDN, so the target EUID is built
- * inline as CONCAT("host:", fqdn) with no cross-entity lookup. actorUserId =
- * entity.id (already type-prefixed), so user and host actors are handled in one
- * pass without filtering by entity.type.
- *
- * Required output columns (see parseTargetsPerActorRows): actorUserId, administers.
- *
- * Future: when raw_identifiers.host.name is a bare CN, replace the CONCAT with a
- * LOOKUP JOIN against host.hostname.
+ * AD populates raw_identifiers.host.name with the FQDN (a host EUID basis) and
+ * raw_identifiers.host.id with the LDAP DN. Only host.name is listed here —
+ * host.id (a DN) is NOT a valid host EUID and would resolve to a dangling
+ * `host:CN=…` (it needs a LOOKUP JOIN, tracked as future work).
  */
-function buildAdministersEsqlQuery(namespace: string, lastProcessedTimestamp?: string): string {
-  const entityIndex = getLatestEntityIndexPattern(namespace);
-  // Watermark on entity.lifecycle.last_seen (advances only on real activity), not
-  // @timestamp (the entity index's transform write time, which churns unrelatedly).
-  const watermarkClause = lastProcessedTimestamp
-    ? `\n    AND entity.lifecycle.last_seen > "${lastProcessedTimestamp}"`
-    : '';
-
-  return `FROM ${entityIndex}
-| WHERE entity.relationships.administers.raw_identifiers.host.name IS NOT NULL${watermarkClause}
-| EVAL actorUserId = entity.id
-| EVAL rawHostnames = entity.relationships.administers.raw_identifiers.host.name
-| MV_EXPAND rawHostnames
-| WHERE COALESCE(rawHostnames, "") != ""
-| EVAL targetEntityId = CONCAT("host:", rawHostnames)
-| STATS administers = VALUES(targetEntityId) BY actorUserId
-| WHERE COALESCE(actorUserId, "") != ""
-| LIMIT ${COMPOSITE_PAGE_SIZE}`;
-}
+const AD_ADMINISTERS_RULES: DirectEuidRule[] = [{ field: 'host.name', euidType: 'host' }];
 
 export function buildAdministersConfigs(
   lastProcessedTimestamp?: string
@@ -54,7 +37,7 @@ export function buildAdministersConfigs(
       // users or hosts), not raw logs.
       indexPattern: getLatestEntityIndexPattern,
       targetEntityType: 'host',
-      relationshipKey: 'administers',
+      relationshipKey: RELATIONSHIP_KEY,
       // Discover actors by entity.id (present on every entity). Without this the
       // engine defaults to USER_IDENTITY_FIELDS, which host entities lack → 0 buckets.
       customActor: {
@@ -67,21 +50,22 @@ export function buildAdministersConfigs(
         // Gate to entities with administers raw_identifiers. Match host.name OR
         // host.id so an actor whose DN parsed an id but no CN is still surfaced
         // (Step 2 resolves from host.name only).
-        {
-          bool: {
-            should: [
-              { exists: { field: 'entity.relationships.administers.raw_identifiers.host.name' } },
-              { exists: { field: 'entity.relationships.administers.raw_identifiers.host.id' } },
-            ],
-            minimum_should_match: 1,
-          },
-        },
-        // Watermark gate (last_seen, not @timestamp — see buildAdministersEsqlQuery).
+        buildRawIdentifiersExistenceGate({
+          relationshipKey: RELATIONSHIP_KEY,
+          fields: ['host.name', 'host.id'],
+        }),
+        // Watermark gate (last_seen, not @timestamp — see buildRawIdentifiersEsqlQuery).
         ...(lastProcessedTimestamp
           ? [{ range: { 'entity.lifecycle.last_seen': { gt: lastProcessedTimestamp } } }]
           : []),
       ],
-      esqlQueryOverride: (ns) => buildAdministersEsqlQuery(ns, lastProcessedTimestamp),
+      esqlQueryOverride: (ns) =>
+        buildRawIdentifiersEsqlQuery({
+          relationshipKey: RELATIONSHIP_KEY,
+          rules: AD_ADMINISTERS_RULES,
+          namespace: ns,
+          lastProcessedTimestamp,
+        }),
     },
   ];
 }
