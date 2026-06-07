@@ -246,6 +246,7 @@ async function runIntegration(
  */
 export const runRelationshipMaintainer = async ({
   esClient,
+  cpsEsClient,
   logger,
   namespace,
   crudClient,
@@ -253,6 +254,7 @@ export const runRelationshipMaintainer = async ({
   abortController,
 }: {
   esClient: ElasticsearchClient;
+  cpsEsClient?: ElasticsearchClient;
   logger: Logger;
   namespace: string;
   crudClient: EntityUpdateClient;
@@ -279,6 +281,8 @@ export const runRelationshipMaintainer = async ({
   // is cheaper and stronger than trusting all callers.
   assertValidNamespace(namespace);
 
+  const readClient = cpsEsClient ?? esClient;
+
   let totalBuckets = 0;
   let totalRecords = 0;
   let totalWritten = 0;
@@ -293,7 +297,7 @@ export const runRelationshipMaintainer = async ({
     logger.info(`[${config.id}] Processing integration: ${config.name}`);
     const { buckets, recordsCount, write } = await runIntegration(
       config,
-      esClient,
+      readClient,
       logger,
       namespace,
       crudClient,

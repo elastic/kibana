@@ -73,7 +73,7 @@ export const RULE_KIND_SIGNAL = i18n.translate('xpack.alertingV2.episodeDetails.
 export const RULE_KIND_ALERTING = i18n.translate(
   'xpack.alertingV2.episodeDetails.ruleKindAlerting',
   {
-    defaultMessage: 'Alerting',
+    defaultMessage: 'Alert',
   }
 );
 
