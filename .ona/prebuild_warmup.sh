@@ -32,7 +32,7 @@ yarn es snapshot &
 
 echo "Waiting for Elasticsearch to be ready..."
 for i in $(seq 1 60); do
-  if curl -sf http://localhost:9200/_cluster/health >/dev/null 2>&1; then
+  if curl -sf -u elastic:changeme http://localhost:9200/_cluster/health >/dev/null 2>&1; then
     echo "Elasticsearch ready"
     break
   fi
