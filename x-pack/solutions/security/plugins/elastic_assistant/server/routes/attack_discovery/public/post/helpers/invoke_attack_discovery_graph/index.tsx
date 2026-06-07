@@ -11,7 +11,8 @@ import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { ApiConfig, AttackDiscovery, Replacements } from '@kbn/elastic-assistant-common';
 import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 import type { InferenceClient, InferenceConnectorType } from '@kbn/inference-common';
-import { ActionsClientLlm } from '@kbn/langchain/server';
+import { ActionsClientLlm, InferenceClientLlm } from '@kbn/langchain/server';
+import type { BaseLLM } from '@langchain/core/language_models/llms';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import type { Document } from '@langchain/core/documents';
@@ -71,8 +72,17 @@ export const invokeAttackDiscoveryGraph = async ({
 
   const llmType = getLlmType(apiConfig.actionTypeId);
   const isInferenceEndpoint =
-    apiConfig.actionTypeId === ('.inference' as InferenceConnectorType.Inference) &&
-    inferenceClient != null;
+    apiConfig.actionTypeId === ('.inference' as InferenceConnectorType.Inference);
+
+  // Guard: inference endpoint connectors must always have an inferenceClient.
+  // Fail loudly here rather than silently routing to the legacy Actions path.
+  if (isInferenceEndpoint && inferenceClient == null) {
+    throw new Error(
+      `inferenceClient is required for connector "${apiConfig.connectorId}" ` +
+        `(actionTypeId: ${apiConfig.actionTypeId}) but was not provided`
+    );
+  }
+
   const model = apiConfig.model;
   const tags = [ATTACK_DISCOVERY_TAG, llmType, model].flatMap((tag) => tag ?? []);
 
@@ -87,21 +97,30 @@ export const invokeAttackDiscoveryGraph = async ({
     ],
   };
 
-  const llm = new ActionsClientLlm({
-    actionsClient,
-    connectorId: apiConfig.connectorId,
-    inferenceClient: isInferenceEndpoint ? inferenceClient : undefined,
-    isInferenceEndpoint,
-    llmType,
-    logger,
-    model,
-    temperature: 0, // zero temperature for attack discovery, because we want structured JSON output
-    timeout: connectorTimeout,
-    traceOptions,
-    telemetryMetadata: {
-      pluginId: 'security_attack_discovery',
-    },
-  });
+  const llm: BaseLLM =
+    isInferenceEndpoint && inferenceClient != null
+      ? new InferenceClientLlm({
+          connectorId: apiConfig.connectorId,
+          inferenceClient,
+          llmType,
+          logger,
+          model,
+          temperature: 0,
+          timeout: connectorTimeout,
+        })
+      : new ActionsClientLlm({
+          actionsClient,
+          connectorId: apiConfig.connectorId,
+          llmType,
+          logger,
+          model,
+          temperature: 0, // zero temperature for attack discovery, because we want structured JSON output
+          timeout: connectorTimeout,
+          traceOptions,
+          telemetryMetadata: {
+            pluginId: 'security_attack_discovery',
+          },
+        });
 
   if (llm == null) {
     throw new Error('LLM is required for attack discoveries');

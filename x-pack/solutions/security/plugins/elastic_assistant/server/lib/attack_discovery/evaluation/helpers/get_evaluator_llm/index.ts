@@ -8,10 +8,11 @@
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { Logger } from '@kbn/core/server';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
-import { ActionsClientLlm } from '@kbn/langchain/server';
+import { ActionsClientLlm, InferenceClientLlm } from '@kbn/langchain/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { InferenceConnector } from '@kbn/inference-common';
+import type { InferenceClient, InferenceConnector } from '@kbn/inference-common';
 import { getConnectorDefaultModel } from '@kbn/inference-common';
+import type { BaseLLM } from '@langchain/core/language_models/llms';
 
 import { getLlmType } from '../../../../../routes/utils';
 
@@ -21,6 +22,7 @@ export const getEvaluatorLlm = async ({
   evaluatorConnectorId,
   experimentConnector,
   getInferenceConnectorById,
+  inferenceClient,
   langSmithApiKey,
   logger,
 }: {
@@ -29,9 +31,10 @@ export const getEvaluatorLlm = async ({
   evaluatorConnectorId: string | undefined;
   experimentConnector: InferenceConnector;
   getInferenceConnectorById: (id: string) => Promise<InferenceConnector>;
+  inferenceClient: InferenceClient;
   langSmithApiKey: string | undefined;
   logger: Logger;
-}): Promise<ActionsClientLlm> => {
+}): Promise<BaseLLM> => {
   let evaluatorConnector: InferenceConnector;
   try {
     evaluatorConnector = await getInferenceConnectorById(
@@ -59,17 +62,28 @@ export const getEvaluatorLlm = async ({
     ],
   };
 
-  return new ActionsClientLlm({
-    actionsClient,
-    connectorId: evaluatorConnector.connectorId,
-    llmType: evaluatorLlmType,
-    logger,
-    model: getConnectorDefaultModel(evaluatorConnector),
-    temperature: 0, // zero temperature for evaluation
-    timeout: connectorTimeout,
-    traceOptions,
-    telemetryMetadata: {
-      pluginId: 'security_attack_discovery',
-    },
-  });
+  const isInferenceConnector = evaluatorConnector.type === '.inference';
+  return isInferenceConnector
+    ? new InferenceClientLlm({
+        connectorId: evaluatorConnector.connectorId,
+        inferenceClient,
+        llmType: evaluatorLlmType,
+        logger,
+        model: getConnectorDefaultModel(evaluatorConnector),
+        temperature: 0,
+        timeout: connectorTimeout,
+      })
+    : new ActionsClientLlm({
+        actionsClient,
+        connectorId: evaluatorConnector.connectorId,
+        llmType: evaluatorLlmType,
+        logger,
+        model: getConnectorDefaultModel(evaluatorConnector),
+        temperature: 0, // zero temperature for evaluation
+        timeout: connectorTimeout,
+        traceOptions,
+        telemetryMetadata: {
+          pluginId: 'security_attack_discovery',
+        },
+      });
 };

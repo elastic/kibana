@@ -14,7 +14,7 @@ import { ActionsClientLlm } from '@kbn/langchain/server';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { asyncForEach } from '@kbn/std';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { InferenceConnector } from '@kbn/inference-common';
+import type { InferenceClient, InferenceConnector } from '@kbn/inference-common';
 import { getConnectorDefaultModel } from '@kbn/inference-common';
 
 import type { CombinedPrompts } from '../graphs/default_attack_discovery_graph/prompts';
@@ -41,6 +41,7 @@ export const evaluateAttackDiscovery = async ({
   evaluationId,
   evaluatorConnectorId,
   getInferenceConnectorById,
+  inferenceClient,
   langSmithApiKey,
   langSmithProject,
   logger,
@@ -59,6 +60,7 @@ export const evaluateAttackDiscovery = async ({
   evaluationId: string;
   evaluatorConnectorId: string | undefined;
   getInferenceConnectorById: (id: string) => Promise<InferenceConnector>;
+  inferenceClient: InferenceClient;
   langSmithApiKey: string | undefined;
   langSmithProject: string | undefined;
   logger: Logger;
@@ -130,6 +132,7 @@ export const evaluateAttackDiscovery = async ({
       evaluatorConnectorId,
       datasetName,
       getInferenceConnectorById,
+      inferenceClient,
       graphs,
       langSmithApiKey,
       logger,

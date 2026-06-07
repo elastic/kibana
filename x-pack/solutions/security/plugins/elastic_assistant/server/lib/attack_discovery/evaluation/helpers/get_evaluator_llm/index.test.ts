@@ -8,7 +8,7 @@
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { ActionsClientLlm } from '@kbn/langchain/server';
 import { loggerMock } from '@kbn/logging-mocks';
-import type { InferenceConnector } from '@kbn/inference-common';
+import type { InferenceClient, InferenceConnector } from '@kbn/inference-common';
 import { InferenceConnectorType } from '@kbn/inference-common';
 
 import { getEvaluatorLlm } from '.';
@@ -63,6 +63,7 @@ describe('getEvaluatorLlm', () => {
         evaluatorConnectorId,
         experimentConnector,
         getInferenceConnectorById,
+        inferenceClient: {} as InferenceClient,
         langSmithApiKey: undefined,
         logger,
       });
@@ -80,6 +81,7 @@ describe('getEvaluatorLlm', () => {
         evaluatorConnectorId: undefined,
         experimentConnector,
         getInferenceConnectorById,
+        inferenceClient: {} as InferenceClient,
         langSmithApiKey: undefined,
         logger,
       });
@@ -97,6 +99,7 @@ describe('getEvaluatorLlm', () => {
         evaluatorConnectorId,
         experimentConnector,
         getInferenceConnectorById,
+        inferenceClient: {} as InferenceClient,
         langSmithApiKey: undefined,
         logger,
       });
@@ -119,6 +122,7 @@ describe('getEvaluatorLlm', () => {
       evaluatorConnectorId,
       experimentConnector,
       getInferenceConnectorById,
+      inferenceClient: {} as InferenceClient,
       langSmithApiKey: undefined,
       logger,
     });
@@ -138,6 +142,7 @@ describe('getEvaluatorLlm', () => {
       evaluatorConnectorId,
       experimentConnector,
       getInferenceConnectorById,
+      inferenceClient: {} as InferenceClient,
       langSmithApiKey: 'test-api-key',
       logger,
     });
