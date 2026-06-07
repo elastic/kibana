@@ -40,6 +40,9 @@ const CONNECTOR_FILTER_BUTTON_TEST_ID = 'connectorFilterButton';
 const CONNECTOR_FILTER_SELECTABLE_TEST_ID = 'connectorFilterSelectable';
 const TYPE_FILTER_BUTTON_TEST_ID = 'typeFilterButton';
 const TYPE_FILTER_SELECTABLE_TEST_ID = 'typeFilterSelectable';
+const TYPE_FILTER_OPTION_SCHEDULED_TEST_ID = 'typeFilterOption-scheduled';
+const TYPE_FILTER_OPTION_MANUALLY_GENERATED_TEST_ID = 'typeFilterOption-manually_generated';
+const EMPTY_RESULTS_PROMPT_TEST_ID = 'emptyResultsPrompt';
 const EXPAND_ATTACK_BUTTON_TEST_ID = 'expand-attack-button';
 const SCHEDULE_BUTTON_TEST_ID_TABLE = 'scheduleButton';
 const SCHEDULE_DETAILS_FLYOUT_TEST_ID = 'scheduleDetailsFlyout';
@@ -75,6 +78,9 @@ export class DetectionsAttackDiscoveryPage {
   public readonly connectorFilterSelectable: Locator;
   public readonly typeFilterButton: Locator;
   public readonly typeFilterSelectable: Locator;
+  public readonly typeFilterOptionScheduled: Locator;
+  public readonly typeFilterOptionManuallyGenerated: Locator;
+  public readonly emptyResultsPrompt: Locator;
   public readonly tableExpandAttackDetailsButtons: Locator;
   public readonly tableScheduleButtons: Locator;
   public readonly settingsButton: Locator;
@@ -114,6 +120,13 @@ export class DetectionsAttackDiscoveryPage {
     );
     this.typeFilterButton = this.page.testSubj.locator(TYPE_FILTER_BUTTON_TEST_ID);
     this.typeFilterSelectable = this.page.testSubj.locator(TYPE_FILTER_SELECTABLE_TEST_ID);
+    this.typeFilterOptionScheduled = this.page.testSubj.locator(
+      TYPE_FILTER_OPTION_SCHEDULED_TEST_ID
+    );
+    this.typeFilterOptionManuallyGenerated = this.page.testSubj.locator(
+      TYPE_FILTER_OPTION_MANUALLY_GENERATED_TEST_ID
+    );
+    this.emptyResultsPrompt = this.page.testSubj.locator(EMPTY_RESULTS_PROMPT_TEST_ID);
     this.tableExpandAttackDetailsButtons = this.attacksTableSection.getByTestId(
       EXPAND_ATTACK_BUTTON_TEST_ID
     );
@@ -217,5 +230,9 @@ export class DetectionsAttackDiscoveryPage {
 
     await firstScheduleButton.click();
     await this.scheduleDetailsFlyout.waitFor({ state: 'visible' });
+  }
+
+  getActiveTypeFilterOption(label: string): Locator {
+    return this.page.locator('[role="option"][aria-checked="true"]', { hasText: label });
   }
 }
