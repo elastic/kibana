@@ -63,9 +63,9 @@ export const SUMMARIES_PAGE_SIZE = 5000;
 
 // A monitor/location whose most recent run inside a *live* date-range window
 // (one that ends at ~now) is older than ~2 schedule intervals — with a
-// 15-minute floor — is surfaced as `no_data` rather than its last-known
+// 15-minute floor — is surfaced as `stale` rather than its last-known
 // up/down. Without this, a monitor that stopped reporting would keep showing a
-// stale, falsely-healthy status until it aged out of the window. `no_data`
+// stale, falsely-healthy status until it aged out of the window. `stale`
 // (had a run, stopped reporting) is deliberately distinct from `pending` (no
 // run found in the window at all, e.g. a brand-new first-run monitor). This
 // only applies to the windowed overview view; the default (no-range) view
@@ -96,7 +96,7 @@ export class OverviewStatusService {
     // Every configured monitor is always returned rather than dropped, so the
     // overview never silently hides one. Monitors with no run in the queried
     // window surface as `pending`; in a live window, monitors whose latest run
-    // went stale surface as `no_data` (see `processOverviewStatus`).
+    // went stale surface as `stale` (see `processOverviewStatus`).
     return this.buildOverviewStatusResult(rawConfigs, statusResult);
   }
 
@@ -124,11 +124,11 @@ export class OverviewStatusService {
       up,
       down,
       pending,
-      noData,
+      stale,
       upConfigs,
       downConfigs,
       pendingConfigs,
-      noDataConfigs,
+      staleConfigs,
       disabledConfigs,
     } = this.processOverviewStatus(allConfigs, statusResult);
 
@@ -152,11 +152,11 @@ export class OverviewStatusService {
       up,
       down,
       pending,
-      noData,
+      stale,
       upConfigs,
       downConfigs,
       pendingConfigs,
-      noDataConfigs,
+      staleConfigs,
       disabledConfigs,
     };
   }
@@ -608,7 +608,7 @@ export class OverviewStatusService {
     const upConfigs: Record<string, OverviewStatusMetaData> = {};
     const downConfigs: Record<string, OverviewStatusMetaData> = {};
     const pendingConfigs: Record<string, OverviewStatusMetaData> = {};
-    const noDataConfigs: Record<string, OverviewStatusMetaData> = {};
+    const staleConfigs: Record<string, OverviewStatusMetaData> = {};
     const disabledConfigs: Record<string, OverviewStatusMetaData> = {};
 
     const enabledMonitors = monitors.filter((monitor) => monitor.attributes[ConfigKey.ENABLED]);
@@ -617,7 +617,7 @@ export class OverviewStatusService {
     const queryLocIds = this.filterData?.locationIds;
 
     // In a live windowed view, demote monitors that stopped reporting to
-    // `no_data` so a stale last-known status can't look falsely healthy.
+    // `stale` so a stale last-known status can't look falsely healthy.
     const applyFreshnessGuard = this.shouldApplyFreshnessGuard();
 
     // Track which monitor IDs have been processed via local saved objects
@@ -672,23 +672,23 @@ export class OverviewStatusService {
         const scheduleMinutes = Number(monitor.attributes[ConfigKey.SCHEDULE]?.number) || 0;
         const status =
           applyFreshnessGuard && this.isStaleRun(locData?.timestamp, scheduleMinutes)
-            ? MONITOR_STATUS_ENUM.NO_DATA
+            ? MONITOR_STATUS_ENUM.STALE
             : locData?.status || MONITOR_STATUS_ENUM.PENDING;
         // Only attach `error` / `downSince` when this location is currently
         // down — otherwise we'd carry stale error text from the previous
         // failure which is misleading on the overview row.
         const isDown = status === MONITOR_STATUS_ENUM.DOWN;
-        // When the freshness guard demotes this location to `no_data`, keep the
+        // When the freshness guard demotes this location to `stale`, keep the
         // stale last-known up/down so the UI can optionally surface the last run
         // without a refetch.
-        const isNoData = status === MONITOR_STATUS_ENUM.NO_DATA;
+        const isStale = status === MONITOR_STATUS_ENUM.STALE;
         const location = {
           status,
           id: monLocation.id,
           label: monLocation.label,
           ...(isDown && locData?.error ? { error: locData.error } : {}),
           ...(isDown && locData?.downSince ? { downSince: locData.downSince } : {}),
-          ...(isNoData && locData?.status ? { lastStatus: locData.status } : {}),
+          ...(isStale && locData?.status ? { lastStatus: locData.status } : {}),
         };
         const meta = {
           ...metaInfo,
@@ -776,17 +776,17 @@ export class OverviewStatusService {
 
     // Split the "no status in window" catch-all. At this point pendingConfigs
     // holds only monitors with no up/down location, so each location is either
-    // `pending` (never ran in the window) or `no_data` (ran, then went stale).
+    // `pending` (never ran in the window) or `stale` (ran, then went stale).
     // A monitor with at least one stale location stopped reporting → surface it
-    // as `no_data`; monitors that are purely first-run stay `pending`. Inspect
+    // as `stale`; monitors that are purely first-run stay `pending`. Inspect
     // the locations directly (rather than the incrementally-built
     // `overallStatus`) so classification is deterministic regardless of the
     // order ES returned the buckets in.
     for (const [id, meta] of Object.entries(pendingConfigs)) {
-      if (meta.locations.some((loc) => loc.status === MONITOR_STATUS_ENUM.NO_DATA)) {
-        meta.overallStatus = MONITOR_STATUS_ENUM.NO_DATA;
+      if (meta.locations.some((loc) => loc.status === MONITOR_STATUS_ENUM.STALE)) {
+        meta.overallStatus = MONITOR_STATUS_ENUM.STALE;
         meta.locations = movePendingToEnd(meta.locations);
-        noDataConfigs[id] = meta;
+        staleConfigs[id] = meta;
         delete pendingConfigs[id];
       }
     }
@@ -819,22 +819,22 @@ export class OverviewStatusService {
             : 0;
           const status =
             applyFreshnessGuard && this.isStaleRun(locData.timestamp, scheduleMinutes)
-              ? MONITOR_STATUS_ENUM.NO_DATA
+              ? MONITOR_STATUS_ENUM.STALE
               : locData.status;
           // Mirror local-monitor handling: only attach `error` / `downSince`
           // for currently-down locations to avoid surfacing stale failure
           // text from a previous run.
           const isDown = status === MONITOR_STATUS_ENUM.DOWN;
-          // Keep the stale last-known status when demoted to `no_data` so the
+          // Keep the stale last-known status when demoted to `stale` so the
           // "show last run" toggle can render it without a refetch.
-          const isNoData = status === MONITOR_STATUS_ENUM.NO_DATA;
+          const isStale = status === MONITOR_STATUS_ENUM.STALE;
           const location = {
             id: locData.locationId,
             label: locData.locationLabel || locData.locationId,
             status,
             ...(isDown && locData.error ? { error: locData.error } : {}),
             ...(isDown && locData.downSince ? { downSince: locData.downSince } : {}),
-            ...(isNoData && locData.status ? { lastStatus: locData.status } : {}),
+            ...(isStale && locData.status ? { lastStatus: locData.status } : {}),
           };
           const meta: OverviewStatusMetaData = {
             monitorQueryId: monitorId,
@@ -865,8 +865,8 @@ export class OverviewStatusService {
           } else if (status === MONITOR_STATUS_ENUM.UP) {
             up += 1;
             upConfigs[monLocId] = meta;
-          } else if (status === MONITOR_STATUS_ENUM.NO_DATA) {
-            noDataConfigs[monLocId] = { ...meta, overallStatus: MONITOR_STATUS_ENUM.NO_DATA };
+          } else if (status === MONITOR_STATUS_ENUM.STALE) {
+            staleConfigs[monLocId] = { ...meta, overallStatus: MONITOR_STATUS_ENUM.STALE };
           } else {
             pendingConfigs[monLocId] = { ...meta, overallStatus: MONITOR_STATUS_ENUM.PENDING };
           }
@@ -878,11 +878,11 @@ export class OverviewStatusService {
       up,
       down,
       pending: Object.values(pendingConfigs).length,
-      noData: Object.values(noDataConfigs).length,
+      stale: Object.values(staleConfigs).length,
       upConfigs,
       downConfigs,
       pendingConfigs,
-      noDataConfigs,
+      staleConfigs,
       disabledConfigs,
     };
   }

@@ -46,10 +46,10 @@ export const MonitorStatusCol = ({
   const absoluteTimestamps = options.absoluteTimestamps;
 
   const showLastRun = useSelector(selectOverviewShowLastRun);
-  // Keep the monitor in its `no_data` bucket; only surface the last-known
+  // Keep the monitor in its `stale` bucket; only surface the last-known
   // up/down on the badge when "Show last run" is on, with a stale marker so the
   // row is still identifiable as a monitor that stopped reporting.
-  const isStaleLastRun = monitor.overallStatus === MONITOR_STATUS_ENUM.NO_DATA && showLastRun;
+  const isStaleLastRun = monitor.overallStatus === MONITOR_STATUS_ENUM.STALE && showLastRun;
   const displayStatus = resolveDisplayStatus(monitor, showLastRun);
 
   // The most recent down-since across this monitor's currently-down locations.
@@ -185,7 +185,7 @@ const STALE_LAST_RUN_TOOLTIP = i18n.translate(
   'xpack.synthetics.monitorList.statusColumn.staleLastRunTooltip',
   {
     defaultMessage:
-      'This monitor stopped reporting (No data); showing its last known status, which may be stale.',
+      'This monitor stopped reporting; showing its last known status, which may be stale.',
   }
 );
 

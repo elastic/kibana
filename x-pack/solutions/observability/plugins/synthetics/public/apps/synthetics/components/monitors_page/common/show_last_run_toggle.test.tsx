@@ -25,19 +25,19 @@ describe('ShowLastRunToggle', () => {
   });
 
   it('does not render when there are no stale monitors and the toggle is off', () => {
-    mockUseOverviewStatusState.mockReturnValue({ status: { noData: 0 } });
+    mockUseOverviewStatusState.mockReturnValue({ status: { stale: 0 } });
     const { queryByTestId } = render(<ShowLastRunToggle />);
     expect(queryByTestId('syntheticsShowLastRunToggle')).toBeNull();
   });
 
-  it('renders when there are stale (no_data) monitors', () => {
-    mockUseOverviewStatusState.mockReturnValue({ status: { noData: 2 } });
+  it('renders when there are stale monitors', () => {
+    mockUseOverviewStatusState.mockReturnValue({ status: { stale: 2 } });
     const { getByTestId } = render(<ShowLastRunToggle />);
     expect(getByTestId('syntheticsShowLastRunToggle')).toBeInTheDocument();
   });
 
   it('persists the preference to localStorage when toggled on', () => {
-    mockUseOverviewStatusState.mockReturnValue({ status: { noData: 2 } });
+    mockUseOverviewStatusState.mockReturnValue({ status: { stale: 2 } });
     const { getByTestId } = render(<ShowLastRunToggle />, { useRealStore: true });
 
     fireEvent.click(getByTestId('syntheticsShowLastRunToggle'));

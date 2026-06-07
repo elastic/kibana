@@ -95,7 +95,7 @@ export function OverviewStatus({
     up: status?.up,
     down: status?.down,
     pending: status?.pending,
-    noData: status?.noData,
+    stale: status?.stale,
     disabledCount: status?.disabledCount,
   });
 
@@ -118,7 +118,7 @@ export function OverviewStatus({
             down: 0,
             disabledCount: 0,
             pending: 0,
-            noData: 0,
+            stale: 0,
           });
           break;
         case 'down':
@@ -127,7 +127,7 @@ export function OverviewStatus({
             down: status?.down || 0,
             disabledCount: 0,
             pending: 0,
-            noData: 0,
+            stale: 0,
           });
           break;
         case 'disabled':
@@ -136,7 +136,7 @@ export function OverviewStatus({
             down: 0,
             disabledCount: status?.disabledCount || 0,
             pending: 0,
-            noData: 0,
+            stale: 0,
           });
           break;
         case 'pending':
@@ -145,16 +145,16 @@ export function OverviewStatus({
             down: 0,
             disabledCount: 0,
             pending: status?.pending || 0,
-            noData: 0,
+            stale: 0,
           });
           break;
-        case 'no_data':
+        case 'stale':
           setStatusConfig({
             up: 0,
             down: 0,
             disabledCount: 0,
             pending: 0,
-            noData: status?.noData || 0,
+            stale: status?.stale || 0,
           });
           break;
       }
@@ -164,7 +164,7 @@ export function OverviewStatus({
         down: status.down,
         disabledCount: status.disabledCount,
         pending: status?.pending,
-        noData: status?.noData,
+        stale: status?.stale,
       });
     }
   }, [status, statusFilter]);
@@ -220,15 +220,15 @@ export function OverviewStatus({
       });
     }
 
-    if (statusConfig?.noData) {
+    if (statusConfig?.stale) {
       stats.push({
-        dataTestSubj: 'xpack.uptime.synthetics.overview.status.noData',
-        statName: noDataDescription,
-        statNo: title(statusConfig.noData),
+        dataTestSubj: 'xpack.uptime.synthetics.overview.status.stale',
+        statName: staleDescription,
+        statNo: title(statusConfig.stale),
         numberColor: 'warning',
         isClickable: areStatsClickable,
-        onClickStat: getOnClickStat('no_data'),
-        tooltipContent: noDataTooltip,
+        onClickStat: getOnClickStat('stale'),
+        tooltipContent: staleTooltip,
       });
     }
     return stats;
@@ -269,8 +269,8 @@ const pendingDescription = i18n.translate('xpack.synthetics.overview.status.pend
   defaultMessage: 'Pending',
 });
 
-const noDataDescription = i18n.translate('xpack.synthetics.overview.status.noData.description', {
-  defaultMessage: 'No data',
+const staleDescription = i18n.translate('xpack.synthetics.overview.status.stale.description', {
+  defaultMessage: 'Stale',
 });
 
 const pendingTooltip = i18n.translate('xpack.synthetics.overview.status.pending.tooltip', {
@@ -278,7 +278,7 @@ const pendingTooltip = i18n.translate('xpack.synthetics.overview.status.pending.
     'No checks have run yet in the selected time range — typically a newly created monitor awaiting its first run.',
 });
 
-const noDataTooltip = i18n.translate('xpack.synthetics.overview.status.noData.tooltip', {
+const staleTooltip = i18n.translate('xpack.synthetics.overview.status.stale.tooltip', {
   defaultMessage:
     'The monitor reported earlier but has stopped reporting in the selected time range. Its last known status may be stale and is worth investigating.',
 });

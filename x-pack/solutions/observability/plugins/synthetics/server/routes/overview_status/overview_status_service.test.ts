@@ -188,11 +188,11 @@ describe('current status route', () => {
             "id1",
             "id2",
           ],
-          "noData": 0,
-          "noDataConfigs": Object {},
           "pending": 0,
           "pendingConfigs": Object {},
           "projectMonitorsCount": 0,
+          "stale": 0,
+          "staleConfigs": Object {},
           "up": 2,
           "upConfigs": Object {
             "id1": Object {
@@ -352,11 +352,11 @@ describe('current status route', () => {
             "id1",
             "id2",
           ],
-          "noData": 0,
-          "noDataConfigs": Object {},
           "pending": 0,
           "pendingConfigs": Object {},
           "projectMonitorsCount": 0,
+          "stale": 0,
+          "staleConfigs": Object {},
           "up": 2,
           "upConfigs": Object {
             "id1": Object {
@@ -427,8 +427,6 @@ describe('current status route', () => {
             "id1",
             "id2",
           ],
-          "noData": 0,
-          "noDataConfigs": Object {},
           "pending": 2,
           "pendingConfigs": Object {
             "id1": Object {
@@ -492,6 +490,8 @@ describe('current status route', () => {
             },
           },
           "projectMonitorsCount": 0,
+          "stale": 0,
+          "staleConfigs": Object {},
           "up": 0,
           "upConfigs": Object {},
         }
@@ -561,7 +561,7 @@ describe('current status route', () => {
       expect(result.upConfigs.mon1.overallStatus).toBe('up');
     });
 
-    it('classifies a multi-location monitor with any stale location as no_data regardless of bucket order', async () => {
+    it('classifies a multi-location monitor with any stale location as stale regardless of bucket order', async () => {
       const { esClient, syntheticsEsClient } = getUptimeESMockClient();
       // Only the *second*-listed location (eu_west) has a run, and it's stale.
       // The first-listed location (us_east) never ran in the window → pending.
@@ -598,13 +598,13 @@ describe('current status route', () => {
       const result = await service.getOverviewStatus();
 
       expect(result.pendingConfigs.mon1).toBeUndefined();
-      expect(result.noDataConfigs.mon1).toBeDefined();
-      expect(result.noDataConfigs.mon1.overallStatus).toBe('no_data');
+      expect(result.staleConfigs.mon1).toBeDefined();
+      expect(result.staleConfigs.mon1.overallStatus).toBe('stale');
       // The stale location carries its last-known status for the "show last run" view.
-      const euLocation = result.noDataConfigs.mon1.locations.find((l: any) => l.id === euLoc.id);
-      expect(euLocation?.status).toBe('no_data');
+      const euLocation = result.staleConfigs.mon1.locations.find((l: any) => l.id === euLoc.id);
+      expect(euLocation?.status).toBe('stale');
       expect(euLocation?.lastStatus).toBe('up');
-      expect(result.noData).toBe(1);
+      expect(result.stale).toBe(1);
     });
 
     it('sets overallStatus to down when any location is down', async () => {
@@ -2181,7 +2181,7 @@ describe('current status route', () => {
           });
         });
 
-        it('demotes a monitor whose latest run is stale to no_data in a live window', async () => {
+        it('demotes a monitor whose latest run is stale to stale in a live window', async () => {
           const { esClient, syntheticsEsClient } = getUptimeESMockClient();
           // id1 last reported 3h ago — well past its 1m schedule — so in a live
           // "now" window its green status can no longer be trusted as current.
@@ -2202,19 +2202,19 @@ describe('current status route', () => {
 
           const result = await overviewStatusService.getOverviewStatus();
 
-          // id1 stopped reporting → no_data (distinct from its stale "up").
+          // id1 stopped reporting → stale (distinct from its stale "up").
           expect(result.upConfigs.id1).toBeUndefined();
           expect(result.pendingConfigs.id1).toBeUndefined();
-          expect(result.noDataConfigs.id1).toBeDefined();
-          expect(result.noDataConfigs.id1.overallStatus).toBe('no_data');
-          expect(result.noDataConfigs.id1.locations[0].status).toBe('no_data');
+          expect(result.staleConfigs.id1).toBeDefined();
+          expect(result.staleConfigs.id1.overallStatus).toBe('stale');
+          expect(result.staleConfigs.id1.locations[0].status).toBe('stale');
           // The stale last-known status is carried so the "show last run" toggle
           // can restore it client-side without a refetch.
-          expect(result.noDataConfigs.id1.locations[0].lastStatus).toBe('up');
-          expect(result.noData).toBe(1);
+          expect(result.staleConfigs.id1.locations[0].lastStatus).toBe('up');
+          expect(result.stale).toBe(1);
 
           // id2 never reported in the window at all → genuine first-run pending.
-          expect(result.noDataConfigs.id2).toBeUndefined();
+          expect(result.staleConfigs.id2).toBeUndefined();
           expect(result.pendingConfigs.id2).toBeDefined();
           expect(result.pendingConfigs.id2.locations[0].status).toBe('pending');
         });

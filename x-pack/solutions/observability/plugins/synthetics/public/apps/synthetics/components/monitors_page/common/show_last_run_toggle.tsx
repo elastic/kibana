@@ -15,8 +15,8 @@ import { persistShowLastRun } from '../../../state/utils/get_initial_show_last_r
 import { useOverviewStatusState } from '../hooks/use_overview_status';
 
 /**
- * Standalone toolbar toggle that flips monitors demoted to `No data` (stale,
- * stopped reporting) back to their last-known up/down. The transform happens in
+ * Standalone toolbar toggle that flips monitors demoted to `stale` (stopped
+ * reporting) back to their last-known up/down. The transform happens in
  * `selectOverviewStatus` using the `lastStatus` the server carries, so flipping
  * this never triggers a refetch.
  *
@@ -37,7 +37,7 @@ export const ShowLastRunToggle: React.FC = () => {
     [dispatch]
   );
 
-  const hasStaleMonitors = (status?.noData ?? 0) > 0;
+  const hasStaleMonitors = (status?.stale ?? 0) > 0;
   if (!hasStaleMonitors && !showLastRun) {
     return null;
   }
@@ -65,6 +65,5 @@ const SHOW_LAST_RUN_LABEL = i18n.translate('xpack.synthetics.overview.showLastRu
 });
 
 const SHOW_LAST_RUN_HINT = i18n.translate('xpack.synthetics.overview.showLastRun.hint', {
-  defaultMessage:
-    'For monitors that stopped reporting (No data), show their last known status instead.',
+  defaultMessage: 'For monitors that stopped reporting, show their last known status instead.',
 });

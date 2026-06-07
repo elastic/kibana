@@ -20,7 +20,7 @@ export const useMonitorHealthColor = () => {
           return isAmsterdam ? euiTheme.colors.vis.euiColorVis0 : euiTheme.colors.success;
         case 'down':
           return isAmsterdam ? euiTheme.colors.vis.euiColorVis9 : euiTheme.colors.vis.euiColorVis6;
-        case 'no_data':
+        case 'stale':
           // Stopped reporting → amber, so a stale location reads as "investigate"
           // rather than a neutral/disabled grey.
           return euiTheme.colors.warning;

@@ -39,10 +39,10 @@ export const QuickFilters = () => {
       label: PENDING_LABEL,
     });
   }
-  if (status?.noData && status?.noData > 0) {
+  if (status?.stale && status?.stale > 0) {
     statusButtons.push({
-      id: 'no_data',
-      label: NO_DATA_LABEL,
+      id: 'stale',
+      label: STALE_LABEL,
     });
   }
   return (
@@ -74,6 +74,6 @@ const PENDING_LABEL = i18n.translate('xpack.synthetics.overview.status.filters.p
   defaultMessage: 'Pending',
 });
 
-const NO_DATA_LABEL = i18n.translate('xpack.synthetics.overview.status.filters.noData', {
-  defaultMessage: 'No data',
+const STALE_LABEL = i18n.translate('xpack.synthetics.overview.status.filters.stale', {
+  defaultMessage: 'Stale',
 });

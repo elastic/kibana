@@ -295,13 +295,13 @@ describe('resolveDisplayStatus', () => {
   it('returns overallStatus unchanged when the toggle is off', () => {
     const monitor = makeMeta({
       configId: 'stale',
-      overallStatus: 'no_data',
-      locations: [{ id: 'loc1', label: 'Loc 1', status: 'no_data', lastStatus: 'up' }],
+      overallStatus: 'stale',
+      locations: [{ id: 'loc1', label: 'Loc 1', status: 'stale', lastStatus: 'up' }],
     });
-    expect(resolveDisplayStatus(monitor, false)).toBe('no_data');
+    expect(resolveDisplayStatus(monitor, false)).toBe('stale');
   });
 
-  it('returns overallStatus unchanged for non-no_data monitors even when toggle is on', () => {
+  it('returns overallStatus unchanged for non-stale monitors even when toggle is on', () => {
     const monitor = makeMeta({
       configId: 'up',
       overallStatus: 'up',
@@ -313,8 +313,8 @@ describe('resolveDisplayStatus', () => {
   it('surfaces an "up" last run when the toggle is on', () => {
     const monitor = makeMeta({
       configId: 'stale',
-      overallStatus: 'no_data',
-      locations: [{ id: 'loc1', label: 'Loc 1', status: 'no_data', lastStatus: 'up' }],
+      overallStatus: 'stale',
+      locations: [{ id: 'loc1', label: 'Loc 1', status: 'stale', lastStatus: 'up' }],
     });
     expect(resolveDisplayStatus(monitor, true)).toBe('up');
   });
@@ -322,21 +322,21 @@ describe('resolveDisplayStatus', () => {
   it('surfaces a "down" last run when any location was last down', () => {
     const monitor = makeMeta({
       configId: 'stale',
-      overallStatus: 'no_data',
+      overallStatus: 'stale',
       locations: [
-        { id: 'loc1', label: 'Loc 1', status: 'no_data', lastStatus: 'up' },
-        { id: 'loc2', label: 'Loc 2', status: 'no_data', lastStatus: 'down' },
+        { id: 'loc1', label: 'Loc 1', status: 'stale', lastStatus: 'up' },
+        { id: 'loc2', label: 'Loc 2', status: 'stale', lastStatus: 'down' },
       ],
     });
     expect(resolveDisplayStatus(monitor, true)).toBe('down');
   });
 
-  it('stays no_data when no last status was carried', () => {
+  it('stays stale when no last status was carried', () => {
     const monitor = makeMeta({
       configId: 'stale',
-      overallStatus: 'no_data',
-      locations: [{ id: 'loc1', label: 'Loc 1', status: 'no_data' }],
+      overallStatus: 'stale',
+      locations: [{ id: 'loc1', label: 'Loc 1', status: 'stale' }],
     });
-    expect(resolveDisplayStatus(monitor, true)).toBe('no_data');
+    expect(resolveDisplayStatus(monitor, true)).toBe('stale');
   });
 });

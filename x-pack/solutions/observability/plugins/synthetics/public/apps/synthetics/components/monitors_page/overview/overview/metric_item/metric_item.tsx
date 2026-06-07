@@ -55,7 +55,7 @@ export const getColor = (euiTheme: EuiThemeComputed, isEnabled: boolean, status?
       return euiTheme.colors.backgroundBasePlain;
     case 'pending':
       return euiTheme.colors.backgroundBasePlain;
-    case 'no_data':
+    case 'stale':
       // Amber, not neutral grey: a monitor that stopped reporting is a signal
       // worth investigating (it may be masking an incident).
       return euiTheme.colors.backgroundBaseWarning;
@@ -129,7 +129,7 @@ export const MetricItem = ({
 }) => {
   const status = monitor.overallStatus;
   const showLastRun = useSelector(selectOverviewShowLastRun);
-  // `no_data` monitors stay in their bucket (count + filter intact); when the
+  // `stale` monitors stay in their bucket (count + filter intact); when the
   // user enables "Show last run" we only change what colour the card paints
   // with — surfacing the last-known up/down instead of the neutral amber.
   const displayStatus = resolveDisplayStatus(monitor, showLastRun);
