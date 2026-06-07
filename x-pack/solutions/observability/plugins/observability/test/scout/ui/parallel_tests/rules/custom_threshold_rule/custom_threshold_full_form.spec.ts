@@ -54,9 +54,11 @@ test.describe(
       await pageObjects.rulesPage.goto();
     });
 
-    test.afterAll(async ({ esClient, apiServices }) => {
+    test.afterAll(async ({ esClient, apiServices, log }) => {
       await deleteRuleByName(apiServices, RULE_NAME);
-      await apiServices.dataViews.delete(CUSTOM_THRESHOLD_DATA_VIEW.id).catch(() => {});
+      await apiServices.dataViews
+        .delete(CUSTOM_THRESHOLD_DATA_VIEW.id)
+        .catch((err) => log.warning(`Failed to delete data view: ${err.message}`));
       await cleanupCustomThresholdMetrics(esClient);
     });
 

@@ -571,14 +571,17 @@ export class RulesPage {
 
   /**
    * Closes a shared triggers-actions expression popover (threshold / time
-   * window). These render a generic EUI "Close" button (no test-subj) inside the
-   * open popover panel.
+   * window). These render a generic EUI "Close" button (no test-subj) inside an
+   * accessible `dialog`. A previously opened expression popover can still be
+   * detaching when the next one opens, so scope the close to the dialog by its
+   * accessible name to avoid a Playwright strict-mode violation, then wait for
+   * it to close before continuing so the following step never sees two open
+   * panels.
    */
-  async closeExpressionPopover() {
-    await this.page
-      .locator('.euiPopover__panel')
-      .getByRole('button', { name: 'Close', exact: true })
-      .click();
+  async closeExpressionPopover(dialogName: string) {
+    const popover = this.page.getByRole('dialog', { name: dialogName });
+    await popover.getByRole('button', { name: 'Close', exact: true }).click();
+    await expect(popover).toBeHidden({ timeout: SHORTER_TIMEOUT });
   }
 
   /**
@@ -645,7 +648,7 @@ export class RulesPage {
         String(thresholds[1])
       );
     }
-    await this.closeExpressionPopover();
+    await this.closeExpressionPopover('Threshold');
   }
 
   /** Sets the rule's evaluation time window (size + unit). */
@@ -658,7 +661,7 @@ export class RulesPage {
     await this.page.testSubj
       .locator(CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.TIME_UNIT_SELECT)
       .selectOption(unit);
-    await this.closeExpressionPopover();
+    await this.closeExpressionPopover('For the last');
   }
 
   /** Adds a "group by" field via its EuiComboBox. */
