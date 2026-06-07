@@ -33,7 +33,10 @@ export const FULL_KIBANA_SECURITY_ROLE: KibanaRole = {
           '.lists*',
           '.items*',
         ],
-        privileges: ['read', 'write'],
+        // The Security alerts page checks for all four of these privileges and shows
+        // an "Insufficient privileges" callout if any are missing, preventing the
+        // alerts table from rendering.
+        privileges: ['read', 'write', 'view_index_metadata', 'manage'],
       },
     ],
   },
