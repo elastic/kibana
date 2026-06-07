@@ -1,0 +1,23 @@
+tasks:
+  install-deps:
+    name: Bootstrap the project
+    triggeredBy:
+      - prebuild
+    command: yarn kbn bootstrap && node scripts/es snapshot --download-only && node scripts/build_kibana_platform_plugins
+services:
+  elasticsearch:
+    name: Elasticsearch
+    commands:
+      start: yarn es snapshot
+    triggeredBy:
+      - postDevcontainerStart
+  kibana:
+    name: Kibana
+    commands:
+      start: yarn start --no-base-path --server.host=0.0.0.0
+      ready: |
+        until curl -sf -o /dev/null http://localhost:5601/api/status; do sleep 5; done
+        curl -sf -o /dev/null http://localhost:5601/login
+        ona environment port open 5601 --name Kibana --admission organization
+    triggeredBy:
+      - postDevcontainerStart

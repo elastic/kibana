@@ -11,7 +11,7 @@ import { ResponseActionTypesEnum } from '../../../../common/api/detection_engine
 import { ALERT_RULE_NAME, ALERT_RULE_UUID, SPACE_IDS } from '@kbn/rule-data-utils';
 import { createMockEndpointAppContextService } from '../../../endpoint/mocks';
 import { responseActionsClientMock } from '../../../endpoint/services/actions/clients/mocks';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { asSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { Logger } from '@kbn/logging';
 describe('ScheduleNotificationResponseActions', () => {
   const getSignals = () => [
@@ -482,7 +482,7 @@ describe('ScheduleNotificationResponseActions', () => {
     describe('and when space awareness is enabled', () => {
       it('should initialize a response action client with the alert space id when space awareness is enabled', async () => {
         const signals = getSignals();
-        signals[0][SPACE_IDS] = ['foo'];
+        signals[0][SPACE_IDS] = [asSpaceId('foo')];
         await scheduleNotificationResponseActions({
           signals,
           signalsCount: 2,
