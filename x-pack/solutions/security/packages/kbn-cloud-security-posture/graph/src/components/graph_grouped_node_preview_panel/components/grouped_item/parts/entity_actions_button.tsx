@@ -6,7 +6,13 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { EuiButtonIcon, EuiPopover, EuiListGroup, EuiHorizontalRule } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiPopover,
+  EuiListGroup,
+  EuiHorizontalRule,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { PopoverListItem } from '../../../../popovers/primitives/popover_list_item';
 import {
