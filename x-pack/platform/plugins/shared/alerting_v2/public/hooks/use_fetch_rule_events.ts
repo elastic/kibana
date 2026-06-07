@@ -17,6 +17,7 @@ import {
 import { ruleOverviewQueryKeys } from '../queries/alert_series_activity/query_keys';
 import {
   buildRuleEventsEsqlQuery,
+  PER_SERIES_EVENT_LIMIT,
   type RuleEventRow,
 } from '../queries/alert_series_activity/rule_events_query';
 import {
@@ -41,7 +42,7 @@ const EMPTY_SUMMARY: AlertTimelineSummary = {
 };
 
 /** Hard cap on raw events pulled for the rule overview alert timeline. */
-export const RULE_EVENTS_PAGE_SIZE = 5000;
+export const RULE_EVENTS_PAGE_SIZE = PER_SERIES_EVENT_LIMIT * ALERT_TIMELINE_TOP_N_DEFAULT;
 
 export interface UseFetchRuleEventsOptions {
   ruleId: string | undefined;

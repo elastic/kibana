@@ -32,6 +32,7 @@ import {
 import { AlertTimelineLegend } from '@kbn/alerting-v2-episodes-ui/alert_timeline';
 import { useRule } from '../../rule_context';
 import { useFetchRuleEvents } from '../../../../hooks/use_fetch_rule_events';
+import { PER_SERIES_EVENT_LIMIT } from '../../../../queries/alert_series_activity/rule_events_query';
 import { getDiscoverHrefForRuleQuery } from '../../../../utils/discover_href_for_episode';
 import { paths } from '../../../../constants';
 import { AlertTimelineChart } from './alert_timeline_chart';
@@ -82,13 +83,18 @@ export const AlertTimelineSection: React.FC = () => {
     return resolveGteLte(timeRange.from, timeRange.to);
   }, [timeRange.from, timeRange.to, refreshTick]);
 
-  const bufferMs = useMemo(() => {
-    const scheduleMs = parseDurationToMs(rule.schedule.every);
-    const fallback = 60_000;
-    const ms = Number.isFinite(scheduleMs) ? scheduleMs : fallback;
-    return Math.min(Math.max(2 * ms, fallback), 60 * 60_000);
+  const { bufferMs, scheduleMs } = useMemo(() => {
+    const raw = parseDurationToMs(rule.schedule.every);
+    const ms = Number.isFinite(raw) ? (raw as number) : 60_000;
+    return {
+      scheduleMs: ms,
+      bufferMs: Math.min(Math.max(2 * ms, 60_000), 60 * 60_000),
+    };
   }, [rule.schedule.every]);
-  const fetchGteMs = gteMs - bufferMs;
+
+  // Clamp the raw-events fetch window to at most PER_SERIES_EVENT_LIMIT schedule
+  // intervals so that ES scan cost is bounded regardless of the selected time range.
+  const fetchGteMs = Math.max(gteMs - bufferMs, lteMs - PER_SERIES_EVENT_LIMIT * scheduleMs);
 
   const { events, groupingValuesByHash, summary, totalSeriesCount, isLoading, isError } =
     useFetchRuleEvents({

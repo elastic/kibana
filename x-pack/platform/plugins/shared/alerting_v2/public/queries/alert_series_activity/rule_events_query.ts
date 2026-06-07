@@ -31,8 +31,12 @@ const RULE_EVENT_FIELDS = [
  * starve quieter lanes (including their pre-window lookback events, which the
  * timeline relies on to anchor each lane's left-edge status). The global
  * `pageSize` limit is retained as a hard ceiling.
+ *
+ * The caller is responsible for clamping the query window to at most
+ * `PER_SERIES_EVENT_LIMIT × scheduleInterval` so that scan cost scales with
+ * the limit rather than with the user-selected time range.
  */
-export const PER_SERIES_EVENT_LIMIT = 500;
+export const PER_SERIES_EVENT_LIMIT = 10000;
 
 export interface BuildRuleEventsEsqlQueryOptions {
   ruleId: string;
