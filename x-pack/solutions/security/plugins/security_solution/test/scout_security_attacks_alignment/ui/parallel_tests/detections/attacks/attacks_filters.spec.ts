@@ -37,23 +37,20 @@ spaceTest.describe(
 
       await expect(detectionsAttackDiscoveryPage.attacksPageSearchBar).toBeVisible();
       await expect(detectionsAttackDiscoveryPage.attacksPageStandardFilters).toBeVisible();
-      await expect(detectionsAttackDiscoveryPage.attacksPageAssigneeFilter).toBeVisible();
-      await expect(detectionsAttackDiscoveryPage.attacksPageConnectorFilter).toBeVisible();
-      await expect(detectionsAttackDiscoveryPage.attacksPageTypeFilter).toBeVisible();
       await expect(detectionsAttackDiscoveryPage.assigneesFilterButton).toBeVisible();
       await expect(detectionsAttackDiscoveryPage.connectorFilterButton).toBeVisible();
       await expect(detectionsAttackDiscoveryPage.typeFilterButton).toBeVisible();
 
       await detectionsAttackDiscoveryPage.assigneesFilterButton.click();
-      await expect(page.testSubj.locator('securitySolutionAssigneesSelectable')).toBeVisible();
+      await expect(detectionsAttackDiscoveryPage.assigneesFilterSelectable).toBeVisible();
       await page.keyboard.press('Escape');
 
       await detectionsAttackDiscoveryPage.connectorFilterButton.click();
-      await expect(page.testSubj.locator('connectorFilterSelectable')).toBeVisible();
+      await expect(detectionsAttackDiscoveryPage.connectorFilterSelectable).toBeVisible();
       await page.keyboard.press('Escape');
 
       await detectionsAttackDiscoveryPage.typeFilterButton.click();
-      await expect(page.testSubj.locator('typeFilterSelectable')).toBeVisible();
+      await expect(detectionsAttackDiscoveryPage.typeFilterSelectable).toBeVisible();
     });
   }
 );
