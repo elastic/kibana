@@ -207,6 +207,28 @@ export const ANALYSE_ENVIRONMENT_API_PATH =
   `${THREAT_INTELLIGENCE_API_BASE}/analyse_environment` as const;
 
 /**
+ * Diamond Model extraction route — POST /api/threat_intelligence/extract_diamond.
+ * Invoked by `nl_extraction_behavioral` for threat-positive reports (gated on
+ * `enrich_taxonomy`'s actionability signal) and by the backfill task.
+ */
+export const EXTRACT_DIAMOND_API_PATH = `${THREAT_INTELLIGENCE_API_BASE}/extract_diamond` as const;
+
+/**
+ * Backfill route — POST /api/threat_intelligence/backfill_diamond.
+ * Two-call API: `{ dry_run: true }` → `{ run_id, estimate }`; `{ run_id }` → 202.
+ * Gated by `manageSources` privilege.
+ */
+export const BACKFILL_DIAMOND_API_PATH =
+  `${THREAT_INTELLIGENCE_API_BASE}/backfill_diamond` as const;
+
+/**
+ * Inference endpoint id used to generate embeddings for `extracted.diamond.*.summary`
+ * fields (semantic_text with explicit inference_id). Confirmed present on the
+ * EIS cluster backing PR #272912. Advanced-setting override deferred to Phase 5.
+ */
+export const DIAMOND_INFERENCE_ENDPOINT_ID = '.jina-embeddings-v5-text-small' as const;
+
+/**
  * Subscription routes. The `submit` path is preserved for backwards
  * compatibility with the interactive subscription-confirmation attachment
  * (the form posts directly to it). The list / delete routes complete the
@@ -243,8 +265,7 @@ export const SAVED_VIEWS_API_PATH = `${THREAT_INTELLIGENCE_API_BASE}/saved_views
  * current alert to `.kibana-threat-reports*` via Layer 1 indicator reference
  * and/or Layer 2 MITRE technique overlap (see RFC 0002).
  */
-export const FLYOUT_INSIGHTS_API_PATH =
-  `${THREAT_INTELLIGENCE_API_BASE}/flyout_insights` as const;
+export const FLYOUT_INSIGHTS_API_PATH = `${THREAT_INTELLIGENCE_API_BASE}/flyout_insights` as const;
 
 /**
  * Saved-object type for `threat-intelligence-saved-view`. The

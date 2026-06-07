@@ -6,13 +6,16 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { THREAT_INTEL_SOURCES_INDEX } from '../../../common/threat_intelligence/hub';
+import {
+  THREAT_INTEL_SOURCES_INDEX,
+  DIAMOND_INFERENCE_ENDPOINT_ID,
+} from '../../../common/threat_intelligence/hub';
 import { installIndexTemplates } from './index_templates';
 import { seedDefaultSources, type SeedDefaultSourcesResult } from './seed_default_sources';
 
-export type BootstrapThreatIntelligenceResult = {
+export interface BootstrapThreatIntelligenceResult {
   seed: SeedDefaultSourcesResult;
-};
+}
 
 const BOOTSTRAP_RETRY_ATTEMPTS = 8;
 const BOOTSTRAP_RETRY_DELAY_MS = 2_000;
@@ -45,6 +48,44 @@ const withElasticsearchRetry = async <T>(
 };
 
 /**
+ * Checks that the diamond extraction inference endpoint is present. Non-fatal:
+ * ES validates inference_id at document-index time (not at template PUT or
+ * rollover), so a missing endpoint only surfaces when `extract_diamond` first
+ * tries to populate a `summary` field. Logging the gap at startup gives
+ * operators time to install the endpoint before data flows.
+ *
+ * Investigation confirmed (2026-06-06): template PUT and data-stream rollover
+ * succeed regardless of whether the endpoint exists. Hard-fail startup is
+ * therefore unwarranted — loud logging is the right level here.
+ */
+const checkDiamondInferenceEndpoint = async (
+  esClient: ElasticsearchClient,
+  log: Logger
+): Promise<void> => {
+  try {
+    await esClient.inference.get({ inference_id: DIAMOND_INFERENCE_ENDPOINT_ID });
+    log.debug(`Diamond inference endpoint ${DIAMOND_INFERENCE_ENDPOINT_ID} verified present`);
+  } catch (err) {
+    const status = (err as { statusCode?: number }).statusCode;
+    if (status === 404) {
+      log.error(
+        `Diamond Model extraction requires the inference endpoint ` +
+          `"${DIAMOND_INFERENCE_ENDPOINT_ID}" which is not installed. ` +
+          `Run: PUT _inference/text_embedding/${DIAMOND_INFERENCE_ENDPOINT_ID} ` +
+          `(or install via Kibana > Machine Learning > Trained Models). ` +
+          `The plugin will start normally but extracted.diamond.*.summary ` +
+          `fields will fail to index until the endpoint is present.`
+      );
+    } else {
+      log.warn(
+        `Could not verify diamond inference endpoint: ${(err as Error).message}. ` +
+          `This may be a transient error; re-check on next restart.`
+      );
+    }
+  }
+};
+
+/**
  * Installs plugin-owned index templates / indices, then seeds the default feed
  * catalog into `.kibana-threat-intel-sources`.
  *
@@ -69,6 +110,9 @@ export const bootstrapThreatIntelligence = async ({
     'Threat intelligence index template installation'
   );
 
+  // Non-blocking check — see `checkDiamondInferenceEndpoint` doc comment.
+  await checkDiamondInferenceEndpoint(esClient, log);
+
   const seed = await withElasticsearchRetry(
     () => seedDefaultSources({ esClient, logger }),
     log,
@@ -87,7 +131,10 @@ export const bootstrapThreatIntelligence = async ({
     );
   }
 
-  const catalogCount = await esClient.count({ index: THREAT_INTEL_SOURCES_INDEX }, { ignore: [404] });
+  const catalogCount = await esClient.count(
+    { index: THREAT_INTEL_SOURCES_INDEX },
+    { ignore: [404] }
+  );
   if (catalogCount.count === 0 && seed.created === 0) {
     log.error(
       'Threat intelligence bootstrap completed but `.kibana-threat-intel-sources` is still empty'

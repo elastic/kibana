@@ -14,6 +14,7 @@ import {
   THREAT_INTEL_DIGESTS_INDEX,
   THREAT_INTEL_INDICATORS_INDEX,
   THREAT_INTEL_ADVISORIES_INDEX,
+  DIAMOND_INFERENCE_ENDPOINT_ID,
 } from '../../../common/threat_intelligence/hub';
 
 /**
@@ -134,8 +135,25 @@ import {
  * without re-running the synthesis. Companion-index addition; the
  * mapping is `dynamic: 'strict'` so the field MUST be declared up-front
  * before any write attempts it.
+ *
+ * v14: adds Diamond Model extraction fields and source-snapshot fields to the
+ * threat-reports data stream. Diamond fields under `extracted.diamond.*`:
+ *   - Four vertices (adversary / capability / infrastructure / victim), each with:
+ *     * `signal`  (keyword)       — HIGH | PARTIAL | NONE
+ *     * `summary` (semantic_text, inference_id: DIAMOND_INFERENCE_ENDPOINT_ID) —
+ *       1-3 sentence factual summary; empty when signal is NONE.
+ *   - `signal_count`    (integer) — non-NONE vertex count (0..4).
+ *   - `model_id`        (keyword) — connector/model that produced the extraction.
+ *   - `extracted_at`    (date)    — wall-clock of the extraction run.
+ *   - `extraction_mode` (keyword) — 'single_call' | 'per_vertex_fallback'.
+ * Source-snapshot fields on `source.*`:
+ *   - `admiralty_rating` (keyword) — NATO-style source reliability rating (A–F).
+ *   - `tier`             (integer) — feed tier snapshot at ingest.
+ * ES validates the `summary` inference_id at document-index time (not at
+ * template PUT or rollover). `bootstrap_threat_intelligence` logs an error at
+ * startup if the endpoint is absent so operators catch the gap before data flows.
  */
-const TEMPLATE_VERSION = 13;
+const TEMPLATE_VERSION = 14;
 
 /** Keyword sentinel meaning "visible from every space". */
 export const SPACE_ID_GLOBAL = '*' as const;
@@ -187,6 +205,13 @@ const threatReportsTemplate = {
             name: { type: 'keyword' as const },
             url: { type: 'keyword' as const },
             adapter_id: { type: 'keyword' as const },
+            // Snapshot fields written at ingest time (not extracted by the LLM).
+            // `admiralty_rating` mirrors the NATO/military source reliability scale
+            // (A = completely reliable … F = reliability cannot be judged).
+            // `tier` is the feed tier snapshot so consumers can filter by source
+            // quality without joining back to `.kibana-threat-intel-sources`.
+            admiralty_rating: { type: 'keyword' as const },
+            tier: { type: 'integer' as const },
           },
         },
         content: {
@@ -280,6 +305,58 @@ const threatReportsTemplate = {
             // `THREAT_CATEGORIES` in `common/constants.ts` for the allowed
             // values.
             categories: { type: 'keyword' as const },
+            // Diamond Model extraction fields — populated by `extract_diamond`
+            // for threat-positive reports (gated on `enrich_taxonomy`'s
+            // `detection_actionability` signal). See Phase 1 design.
+            diamond: {
+              properties: {
+                adversary: {
+                  properties: {
+                    // HIGH = specific named actor; PARTIAL = vague/unattributed; NONE = absent.
+                    signal: { type: 'keyword' as const },
+                    summary: {
+                      type: 'semantic_text' as const,
+                      inference_id: DIAMOND_INFERENCE_ENDPOINT_ID,
+                    },
+                  },
+                },
+                capability: {
+                  properties: {
+                    signal: { type: 'keyword' as const },
+                    summary: {
+                      type: 'semantic_text' as const,
+                      inference_id: DIAMOND_INFERENCE_ENDPOINT_ID,
+                    },
+                  },
+                },
+                infrastructure: {
+                  properties: {
+                    signal: { type: 'keyword' as const },
+                    summary: {
+                      type: 'semantic_text' as const,
+                      inference_id: DIAMOND_INFERENCE_ENDPOINT_ID,
+                    },
+                  },
+                },
+                victim: {
+                  properties: {
+                    signal: { type: 'keyword' as const },
+                    summary: {
+                      type: 'semantic_text' as const,
+                      inference_id: DIAMOND_INFERENCE_ENDPOINT_ID,
+                    },
+                  },
+                },
+                // Count of vertices with signal != NONE (0..4). Cheap filter
+                // for "how much diamond structure did we extract from this report?"
+                signal_count: { type: 'integer' as const },
+                // Connector/model that produced the extraction — for provenance.
+                model_id: { type: 'keyword' as const },
+                extracted_at: { type: 'date' as const },
+                // 'single_call' (normal path) | 'per_vertex_fallback' (context-overflow fallback).
+                extraction_mode: { type: 'keyword' as const },
+              },
+            },
           },
         },
         // Closed-set geographic macro-region taxonomy. Populated by the

@@ -123,6 +123,14 @@ export type {
 export { extractIocs } from './extract_iocs';
 export type { ExtractIocsParams, ExtractIocsResult, ExtractedIoc } from './extract_iocs';
 
+export { extractDiamond, extractDiamondLlmOutputSchema, DIAMOND_BODY_CHAR_LIMIT } from './extract_diamond';
+export type {
+  ExtractDiamondParams,
+  ExtractDiamondResult,
+  DiamondExtractionMode,
+  DiamondSignal,
+} from './extract_diamond';
+
 export { analyseEnvironment } from './analyse_environment';
 export type { AnalyseEnvironmentParams, AnalyseEnvironmentResult } from './analyse_environment';
 
