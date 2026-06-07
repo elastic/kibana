@@ -30,11 +30,12 @@ import {
   selectActiveTab,
   selectWorkflowId,
   selectWorkflowName,
+  selectWorkflowTags,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
 import { loadConnectorsThunk } from '../../../entities/workflows/store/workflow_detail/thunks/load_connectors_thunk';
 import { loadWorkflowThunk } from '../../../entities/workflows/store/workflow_detail/thunks/load_workflow_thunk';
 import { loadWorkflowsThunk } from '../../../entities/workflows/store/workflow_detail/thunks/load_workflows_thunk';
-import { WorkflowExecutionDetail } from '../../../features/workflow_execution_detail';
+import { WorkflowExecutionFlyout } from '../../../features/workflow_execution_detail';
 import { WorkflowExecutionList } from '../../../features/workflow_execution_list/ui/workflow_execution_list_stateful';
 import { useAsyncThunkState } from '../../../hooks/use_async_thunk';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -64,6 +65,7 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
   const activeTabInStore = useSelector(selectActiveTab);
   const workflowId = useSelector(selectWorkflowId);
   const workflowName = useSelector(selectWorkflowName);
+  const workflowTags = useSelector(selectWorkflowTags);
 
   useWorkflowsBreadcrumbs(workflowName);
 
@@ -181,25 +183,25 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
         {!isReady ? (
           <WorkflowDetailLoadingState />
         ) : (
-          <WorkflowEditorLayout
-            editor={<WorkflowDetailEditor highlightDiff={highlightDiff} />}
-            executionList={
-              id &&
-              activeTab === 'executions' &&
-              !selectedExecutionId &&
-              canReadWorkflowExecution ? (
-                <WorkflowExecutionList workflowId={id} />
-              ) : null
-            }
-            executionDetail={
-              selectedExecutionId && canReadWorkflowExecution ? (
-                <WorkflowExecutionDetail
-                  executionId={selectedExecutionId}
-                  onClose={onCloseExecutionDetail}
-                />
-              ) : null
-            }
-          />
+          <>
+            <WorkflowEditorLayout
+              editor={<WorkflowDetailEditor highlightDiff={highlightDiff} />}
+              executionList={
+                id && activeTab === 'executions' && canReadWorkflowExecution ? (
+                  <WorkflowExecutionList workflowId={id} />
+                ) : null
+              }
+              executionDetail={null}
+            />
+            {selectedExecutionId && canReadWorkflowExecution && (
+              <WorkflowExecutionFlyout
+                executionId={selectedExecutionId}
+                workflowName={workflowName ?? ''}
+                workflowTags={workflowTags}
+                onClose={onCloseExecutionDetail}
+              />
+            )}
+          </>
         )}
         <WorkflowDetailTestModal />
         <WorkflowDetailTestStepModal />

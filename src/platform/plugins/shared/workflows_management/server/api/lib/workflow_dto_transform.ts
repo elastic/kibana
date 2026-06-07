@@ -28,6 +28,7 @@ export const transformStorageDocumentToWorkflowDto = (
     name: source.name,
     description: source.description,
     enabled: source.enabled,
+    tags: source.tags,
     managed: source.managed,
     managedBy: source.managedBy,
     definitionHash: source.definitionHash,
@@ -68,6 +69,7 @@ export const transformStoragePartialToWorkflowDto = (
   if ('name' in source) dto.name = source.name;
   if ('description' in source) dto.description = source.description;
   if ('enabled' in source) dto.enabled = source.enabled;
+  if ('tags' in source) dto.tags = source.tags;
   if ('managed' in source) dto.managed = source.managed;
   if ('managedBy' in source) dto.managedBy = source.managedBy;
   if ('definitionHash' in source) dto.definitionHash = source.definitionHash;
