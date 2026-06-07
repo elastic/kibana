@@ -1643,8 +1643,8 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
     .delete({
       path: EPM_API_ROUTES.PACKAGES_DATASTREAM_ASSETS,
       security: INSTALL_PACKAGES_SECURITY,
-      summary: `Delete assets for an input package`,
-      description: `Delete datastream assets for a specific input package, by data stream name.`,
+      summary: `Delete assets for a package`,
+      description: `Delete datastream assets for a specific package, by data stream name.`,
       options: {
         tags: ['oas-tag:Elastic Package Manager (EPM)'],
       },
