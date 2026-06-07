@@ -336,6 +336,8 @@
       "@kbn/content-list-provider/*": ["src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/*"],
       "@kbn/content-list-provider-client": ["src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client"],
       "@kbn/content-list-provider-client/*": ["src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/*"],
+      "@kbn/content-list-scout": ["src/platform/packages/shared/content-management/content_list/kbn-content-list-scout"],
+      "@kbn/content-list-scout/*": ["src/platform/packages/shared/content-management/content_list/kbn-content-list-scout/*"],
       "@kbn/content-list-table": ["src/platform/packages/shared/content-management/content_list/kbn-content-list-table"],
       "@kbn/content-list-table/*": ["src/platform/packages/shared/content-management/content_list/kbn-content-list-table/*"],
       "@kbn/content-list-toolbar": ["src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar"],
