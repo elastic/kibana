@@ -51,7 +51,6 @@ enabled:
   - x-pack/platform/test/serverless/functional/configs/security/config.group2.ts
   - x-pack/platform/test/serverless/functional/configs/security/config.group3.ts
   - x-pack/platform/test/serverless/functional/configs/security/config.group4.ts
-  - x-pack/platform/test/serverless/functional/configs/security/config.group5.ts
   - x-pack/platform/test/serverless/functional/configs/security/config.group6.ts
   - x-pack/platform/test/serverless/functional/configs/security/config.reporting.ts
   - x-pack/platform/test/serverless/functional/configs/security/config.group7.ts

@@ -13,8 +13,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     ...baseTestConfig.getAll(),
     testFiles: [
-      require.resolve('../../test_suites/discover/group3'),
-      require.resolve('../../test_suites/discover/group4'),
       require.resolve('../../test_suites/discover/group5'),
     ],
     junit: {

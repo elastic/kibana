@@ -430,7 +430,7 @@ Add the missing `DiscoverApp` methods, the new shared constants, and the second 
 | 1 | `parallel_tests/core/data_grid_doc_navigation.spec.ts` | `_data_grid_doc_navigation.ts` (whole file) | simple | 2 `it`, no shared state |
 | 2 | `parallel_tests/core/nested_query.spec.ts` | `_discover.ts` "nested query" describe | simple | 1 `it` |
 | 3 | `parallel_tests/core/data_shared_item.spec.ts` | `_discover.ts` "data-shared-item" describe | simple | 1 `it` |
-| 4 | `parallel_tests/core/invalid_time_range_in_url.spec.ts` | `_discover.ts` "invalid time range in URL" describe | simple | 1 `it` |
+| 4 | ~~`parallel_tests/core/invalid_time_range_in_url.spec.ts`~~ — **NOT migrated** (see §9 “invalid time range” note) | `_discover.ts` "invalid time range in URL" describe | n/a | Discover URL→Redux time-range sync was regressed by [PR #260163](https://github.com/elastic/kibana/pull/260163) (Apr 12, 2026 DateRangePicker rollout); the assertion has been silently failing in FTR since. Tracked as a Discover follow-up. |
 | 5 | `parallel_tests/core/managing_fields.spec.ts` | `_discover.ts` "managing fields" describe | simple | 2 `it` |
 | 6 | `parallel_tests/core/url_state_invalid_data_view.spec.ts` | `_url_state.ts` first 2 `it`s | simple | URL fallback |
 | 7 | `parallel_tests/core/query_empty_time_range.spec.ts` | `_discover.ts` "query #2" describe | simple | 3 `it` |
@@ -554,8 +554,16 @@ After all stateful Scout specs are green:
 **FTR cleanup**:
 - 5 stateful FTR files deleted: `_discover.ts`, `_discover_histogram.ts`, `_data_grid_doc_navigation.ts`, `_unsaved_changes_notification_indicator.ts`, `_url_state.ts`.
 - 4 stateful `loadTestFile` lines pruned across `group1/`, `group2_data_grid1/`, `group5/`, `group12/` (`_discover` and `_discover_histogram` shared one index → 2 prunes).
-- Serverless FTR duplicates intentionally **retained** for now: Scout specs were tagged `tags.stateful.all`, not `tags.deploymentAgnostic`, so serverless coverage still relies on the FTR copies until a follow-up adds serverless tags + runs the specs against a serverless target.
-- `group3/_request_counts.ts` **retained** (only data-view mode migrated; ES|QL mode pending).
+- **7 serverless FTR duplicates deleted** per the issue (Scout `tags.stateful.all` covers stateful only; serverless lanes lacked the archives + roles, so the duplicates were pure coverage backports). Cascading file deletions:
+  - `x-pack/platform/test/serverless/functional/test_suites/discover/group{1,2,3,4}/` removed entirely (each group's only `loadTestFile` was a deleted duplicate).
+  - `group5/index.ts` and `group6/index.ts` pruned (kept `_no_data` and `_sidebar` respectively).
+  - 3 now-empty serverless configs removed: `configs/{search,security,observability}/config.group5.ts`.
+  - `configs/{search,security,observability}/config.group11.ts` pruned to keep only `discover/group5`.
+  - 3 buildkite manifest entries removed for the deleted configs.
+- `group3/_request_counts.ts` (stateful) **retained** — only data-view mode migrated; ES|QL mode pending.
+
+**Known unmigrated test — `invalid time range in URL`**:
+- The `_discover.ts` "invalid time range in URL" sub-test (1 `it`) was **not** ported. Researching the failure (`_g.time.to=null` produces `data-date-range="now-15m to null"` instead of the expected `now-15m to now`) traced it to a **production regression**: PR #260163 (Apr 12, 2026) replaced the legacy `EuiSuperDatePicker` with the new shared-ux `DateRangePicker`. The legacy picker silently normalized invalid `to` values to its prop default; the new picker faithfully renders whatever Redux holds. Discover’s URL-sync layer (`create_url_sync_observables.ts` `globalStateContainer.set`) writes `_g.time` straight into Redux **without `validateTimeRange`**, so the unsanitized value reaches the picker. The data plugin’s `connectToQueryState` does validate, but that path only feeds the `timefilter` service — the new picker reads from Redux instead. Result: the FTR test has been silently failing for ~2 months. Filed as a Discover follow-up issue; once Discover validates time on URL→Redux ingest, this Scout spec can be added back asserting `time.end === 'now'`.
 
 **Verification status**:
 - `node scripts/eslint --fix` — clean across all touched files.

@@ -30,7 +30,6 @@ enabled:
   - x-pack/platform/test/serverless/functional/configs/observability/config.group2.ts
   - x-pack/platform/test/serverless/functional/configs/observability/config.group3.ts
   - x-pack/platform/test/serverless/functional/configs/observability/config.group4.ts
-  - x-pack/platform/test/serverless/functional/configs/observability/config.group5.ts
   - x-pack/platform/test/serverless/functional/configs/observability/config.group6.ts
   - x-pack/platform/test/serverless/functional/configs/observability/config.reporting.ts
   - x-pack/platform/test/serverless/functional/configs/observability/config.group7.ts
