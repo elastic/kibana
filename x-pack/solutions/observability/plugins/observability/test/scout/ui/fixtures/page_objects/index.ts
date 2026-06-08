@@ -12,6 +12,8 @@ import { RuleDetailsPage } from './rule_details_page';
 import { AlertPage } from './alert_page';
 import { AlertsTablePage } from './alerts_table';
 import { AlertControls } from './alert_controls';
+import { OverviewPage } from './overview_page';
+import { CasesPage } from './cases_page';
 
 export interface TriggersActionsPageObjects extends ObltPageObjects {
   rulesPage: RulesPage;
@@ -19,6 +21,8 @@ export interface TriggersActionsPageObjects extends ObltPageObjects {
   alertPage: AlertPage;
   alertsTablePage: AlertsTablePage;
   alertControls: AlertControls;
+  overviewPage: OverviewPage;
+  casesPage: CasesPage;
 }
 
 export function extendPageObjects(
@@ -32,5 +36,7 @@ export function extendPageObjects(
     alertPage: createLazyPageObject(AlertPage, page),
     alertsTablePage: createLazyPageObject(AlertsTablePage, page),
     alertControls: createLazyPageObject(AlertControls, page),
+    overviewPage: createLazyPageObject(OverviewPage, page),
+    casesPage: createLazyPageObject(CasesPage, page),
   };
 }

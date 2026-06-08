@@ -137,6 +137,7 @@ kibana_vars=(
     monitoring.ui.min_interval_seconds
     newsfeed.enabled
     node.roles
+    notifications.connectors.default.email
     ops.cGroupOverrides.cpuAcctPath
     ops.cGroupOverrides.cpuPath
     ops.interval
