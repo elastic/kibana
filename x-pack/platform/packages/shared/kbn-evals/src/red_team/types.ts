@@ -107,6 +107,8 @@ export interface RedTeamConfig {
   guardrails?: GuardrailConfig;
   severityThresholds?: Record<string, Severity>;
   targetContext?: TargetContext;
+  /** Label used in the report to identify the test suite (e.g. 'agent-builder'). Defaults to 'unknown'. */
+  suite?: string;
   /** Max number of adversarial examples to run in parallel for multi-turn strategies. Defaults to 3. */
   exampleConcurrency?: number;
   /**
@@ -133,6 +135,7 @@ export interface PassRateCheckResult {
 
 export interface ModuleReport {
   module: string;
+  strategy: string;
   total: number;
   passed: number;
   failed: number;

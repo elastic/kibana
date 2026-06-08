@@ -12,7 +12,6 @@ import {
   type RedTeamConfig,
   type Severity,
 } from '@kbn/evals';
-import { tags } from '@kbn/scout';
 import { evaluate } from '../src/evaluate';
 
 const DEFAULT_MIN_PASS_RATE = 50;
@@ -24,6 +23,7 @@ const readRedTeamConfig = (): RedTeamConfig => {
   const minPassRate = minPassRateEnv ? Number(minPassRateEnv) : DEFAULT_MIN_PASS_RATE;
 
   return {
+    suite: 'agent-builder',
     modules: modules && modules.length > 0 ? modules : undefined,
     strategies: strategy ? [strategy] : undefined,
     count: parseInt(process.env.RED_TEAM_COUNT ?? '10', 10),
@@ -51,7 +51,7 @@ const readRedTeamConfig = (): RedTeamConfig => {
   };
 };
 
-evaluate.describe('Red Team', { tag: tags.serverless.search }, () => {
+evaluate.describe('Red Team', () => {
   evaluate(
     'adversarial attack testing',
     async ({ chatClient, executorClient, inferenceClient, evaluationConnector, log }) => {
@@ -86,7 +86,6 @@ evaluate.describe('Red Team', { tag: tags.serverless.search }, () => {
       };
 
       const report = await orchestrator.run(task);
-      report.suite = 'agent-builder';
 
       formatRedTeamReport(report, log, severityThreshold);
       writeRedTeamReport(report, log);
