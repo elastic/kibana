@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import type { EsHitRecord } from '@kbn/discover-utils';
+import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { HeaderTitle } from './header_title';
 import { TestProviders } from '../../../common/mock';
@@ -16,6 +16,12 @@ import { useNavigateToAttackDetailsLeftPanel } from '../hooks/use_navigate_to_at
 
 jest.mock('../../../flyout_v2/attack/main/components/header_title', () => ({
   HeaderTitle: () => <div data-test-subj="v2-header-title" />,
+}));
+
+jest.mock('../../../flyout_v2/attack/main/components/alerts_count', () => ({
+  AlertsCount: ({ hit }: { hit: DataTableRecord }) => (
+    <div data-test-subj="alerts-count" data-hit-id={hit.id} />
+  ),
 }));
 
 jest.mock('../context', () => ({
@@ -98,6 +104,16 @@ describe('HeaderTitle (legacy wrapper)', () => {
     );
 
     expect(screen.getByTestId('assignees')).toBeInTheDocument();
+  });
+
+  it('renders the alerts count block', () => {
+    render(
+      <TestProviders>
+        <HeaderTitle />
+      </TestProviders>
+    );
+
+    expect(screen.getByTestId('alerts-count')).toBeInTheDocument();
   });
 
   it('renders the notes component with the attack id', () => {

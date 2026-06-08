@@ -11,6 +11,7 @@ import type { EsHitRecord } from '@kbn/discover-utils';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { flyoutHeaderBlockStyles } from '../../../flyout_v2/shared/components/flyout_header_block';
 import { Notes } from '../../../flyout_v2/shared/components/notes';
+import { AlertsCount } from '../../../flyout_v2/attack/main/components/alerts_count';
 import { HeaderTitle as V2HeaderTitle } from '../../../flyout_v2/attack/main/components/header_title';
 import { Status } from './status';
 import { Assignees } from './assignees';
@@ -19,10 +20,9 @@ import { useNavigateToAttackDetailsLeftPanel } from '../hooks/use_navigate_to_at
 
 /**
  * Header title for the legacy attack details flyout.
- * Bridges context → props for the v2 HeaderTitle, then renders
- * the status/assignees/notes blocks for legacy flyout compatibility.
- * The Assignees block is wrapped by the v2 Assignees component itself,
- * so this file does not add an outer FlyoutHeaderBlock around it.
+ * Bridges context → props for the v2 HeaderTitle, then renders the four
+ * summary blocks (status, alerts, assignees, notes) in the same 2-column
+ * layout as the v2 flyout so both flyouts stay visually identical.
  */
 export const HeaderTitle = memo(() => {
   const { searchHit, attackId } = useAttackDetailsContext();
@@ -38,6 +38,9 @@ export const HeaderTitle = memo(() => {
           <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
             <EuiFlexItem>
               <Status />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <AlertsCount hit={hit} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
