@@ -50,7 +50,10 @@ import type { DataVisualizerTableState } from '../../../../../common/types';
 import type { DataVisualizerPluginStart } from '../../../../plugin';
 import type { FieldStatisticsTableEmbeddableState } from '../grid_embeddable/types';
 import { FieldStatsInitializerViewType } from '../grid_embeddable/types';
-import { initializeFieldStatsControls } from './initialize_field_stats_controls';
+import {
+  initializeFieldStatsControls,
+  fieldStatsControlsComparators,
+} from './initialize_field_stats_controls';
 import type { DataVisualizerStartDependencies } from '../../../common/types/data_visualizer_plugin';
 import type { FieldStatisticsTableEmbeddableApi } from './types';
 import { isESQLQuery } from '../../search_strategy/requests/esql_utils';
@@ -133,16 +136,17 @@ export const getFieldStatsChartEmbeddableFactory = (
       const {
         fieldStatsControlsApi,
         dataLoadingApi,
-        fieldStatsControlsComparators,
         serializeFieldStatsChartState,
         onFieldStatsTableDestroy,
         resetData$,
-        fieldStatsStateManager,
+        anyStateChange$: fieldStatsAnyStateChange$,
+        getLatestState: getFieldStatsLatestState,
+        reinitializeState: reinitializeFieldStatsState,
       } = initializeFieldStatsControls(state, deps.uiSettings);
       const { onError, dataLoading$, blockingError$ } = dataLoadingApi;
 
       const validDataViewId: string | undefined =
-        isDefined(state.dataViewId) && state.dataViewId !== '' ? state.dataViewId : undefined;
+        isDefined(state.data_view_id) && state.data_view_id !== '' ? state.data_view_id : undefined;
       let initialDataView: DataView | undefined;
       try {
         const dataView = isESQLQuery(state.query)
@@ -156,8 +160,7 @@ export const getFieldStatsChartEmbeddableFactory = (
           : undefined;
         initialDataView = dataView;
       } catch (error) {
-        // Only need to publish blocking error if viewtype is data view, and no data view found
-        if (state.viewType === FieldStatsInitializerViewType.DATA_VIEW) {
+        if (state.view_type === FieldStatsInitializerViewType.DATA_VIEW) {
           onError(error);
         }
       }
@@ -202,17 +205,17 @@ export const getFieldStatsChartEmbeddableFactory = (
         anyStateChange$: merge(
           titleManager.anyStateChange$,
           timeRangeManager.anyStateChange$,
-          fieldStatsStateManager.anyStateChange$
+          fieldStatsAnyStateChange$
         ),
         getComparators: () => ({
           ...titleComparators,
-          ...fieldStatsControlsComparators,
           ...timeRangeComparators,
+          ...fieldStatsControlsComparators,
         }),
         applySerializedState: (nextState) => {
           titleManager.reinitializeState(nextState);
           timeRangeManager.reinitializeState(nextState);
-          fieldStatsStateManager.reinitializeState(nextState);
+          reinitializeFieldStatsState(nextState);
         },
       });
 
@@ -221,9 +224,7 @@ export const getFieldStatsChartEmbeddableFactory = (
         ...titleManager.api,
         ...fieldStatsControlsApi,
         ...stateApi,
-        // PublishesDataLoading
         dataLoading$,
-        // PublishesBlockingError
         blockingError$,
         getTypeDisplayName: () =>
           i18n.translate('xpack.dataVisualizer.fieldStats.typeDisplayName', {

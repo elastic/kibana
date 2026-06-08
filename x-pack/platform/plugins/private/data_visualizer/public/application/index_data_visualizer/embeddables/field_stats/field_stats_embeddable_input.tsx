@@ -10,10 +10,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { isDefined } from '@kbn/ml-is-defined';
 import { FieldStatisticsInitializer } from './field_stats_initializer';
 import type { DataVisualizerStartDependencies } from '../../../common/types/data_visualizer_plugin';
-import type {
-  FieldStatisticsTableEmbeddableState,
-  FieldStatsInitialState,
-} from '../grid_embeddable/types';
+import type { FieldStatsInitialState } from '../grid_embeddable/types';
 import type { FieldStatsControlsApi } from './types';
 import { getOrCreateDataViewByIndexPattern } from '../../search_strategy/requests/get_data_view_by_index_pattern';
 
@@ -29,14 +26,13 @@ export function EmbeddableFieldStatsUserInput({
   coreStart: CoreStart;
   pluginStart: DataVisualizerStartDependencies;
   isNewPanel: boolean;
-  initialState?: FieldStatisticsTableEmbeddableState;
+  initialState?: FieldStatsInitialState;
   fieldStatsControlsApi?: FieldStatsControlsApi;
   closeFlyout: () => void;
-  onUpdate: (newUpdate: FieldStatsInitialState) => void;
+  onUpdate: (newUpdate: Partial<FieldStatsInitialState>) => void;
 }) {
   const hasChanged = React.useRef(false);
   const cancelChanges = () => {
-    // Reset to initialState in case user has changed the preview state
     if (hasChanged.current && fieldStatsControlsApi && initialState) {
       fieldStatsControlsApi.updateUserInput(initialState);
     }
@@ -52,8 +48,8 @@ export function EmbeddableFieldStatsUserInput({
         undefined,
         coreStart.http
       );
-      if (dv?.id && nextUpdate.dataViewId !== dv.id) {
-        nextUpdate.dataViewId = dv.id;
+      if (dv?.id && nextUpdate.data_view_id !== dv.id) {
+        nextUpdate.data_view_id = dv.id;
       }
     }
     onUpdate(nextUpdate);

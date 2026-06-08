@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { AggregateQuery } from '@kbn/es-query';
-import type { SerializedTimeRange } from '@kbn/presentation-publishing';
-import type { SerializedTitles } from '@kbn/presentation-publishing-schemas';
+import type { FieldStatsEmbeddableState } from '@kbn/data-visualizer-server-schemas/embeddables/field_stats';
+
+export type { FieldStatsEmbeddableState, FieldStatsViewType } from '@kbn/data-visualizer-server-schemas/embeddables/field_stats';
 
 export enum FieldStatsInitializerViewType {
   DATA_VIEW = 'dataview',
@@ -15,16 +15,15 @@ export enum FieldStatsInitializerViewType {
 }
 
 export interface FieldStatsInitialState {
-  dataViewId?: string;
-  viewType?: FieldStatsInitializerViewType;
-  query?: AggregateQuery;
-  showDistributions?: boolean;
+  data_view_id?: string;
+  view_type?: FieldStatsEmbeddableState['view_type'];
+  query?: FieldStatsEmbeddableState['query'];
+  show_distributions?: boolean;
 }
-export type FieldStatisticsTableEmbeddableState = FieldStatsInitialState &
-  SerializedTitles &
-  SerializedTimeRange & {};
+
+export type FieldStatisticsTableEmbeddableState = FieldStatsEmbeddableState;
 
 export type StoredFieldStatisticsTableEmbeddableState = Omit<
-  FieldStatisticsTableEmbeddableState,
-  'dataViewId'
+  FieldStatsEmbeddableState,
+  'data_view_id'
 >;

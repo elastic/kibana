@@ -24,6 +24,7 @@ import type { FieldStatisticsTableEmbeddableState } from '../../../../../common/
 export { FieldStatsInitializerViewType } from '../../../../../common/embeddables/types';
 export type {
   FieldStatsInitialState,
+  FieldStatsEmbeddableState,
   FieldStatisticsTableEmbeddableState,
 } from '../../../../../common/embeddables/types';
 

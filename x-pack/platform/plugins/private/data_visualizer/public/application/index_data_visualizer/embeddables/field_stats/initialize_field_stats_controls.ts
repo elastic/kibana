@@ -4,61 +4,62 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
 
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { AggregateQuery } from '@kbn/es-query';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
-import {
-  initializeStateManager,
-  type WithAllKeys,
-  type StateComparators,
-} from '@kbn/presentation-publishing';
-import { BehaviorSubject } from 'rxjs';
+import type { StateComparators } from '@kbn/presentation-publishing';
+import { BehaviorSubject, map, merge, skip } from 'rxjs';
 import type { FieldStatsInitialState } from '../grid_embeddable/types';
 import { FieldStatsInitializerViewType } from '../grid_embeddable/types';
 import type { FieldStatsControlsApi } from './types';
+
+export const fieldStatsControlsComparators: StateComparators<FieldStatsInitialState> = {
+  view_type: 'referenceEquality',
+  data_view_id: 'referenceEquality',
+  query: 'deepEquality',
+  show_distributions: 'referenceEquality',
+};
 
 export const initializeFieldStatsControls = (
   initialState: FieldStatsInitialState,
   uiSettings: IUiSettingsClient
 ) => {
   const isEsqlEnabled = uiSettings.get(ENABLE_ESQL);
-  const defaultType = isEsqlEnabled
+  const defaultViewType = isEsqlEnabled
     ? FieldStatsInitializerViewType.ESQL
     : FieldStatsInitializerViewType.DATA_VIEW;
 
-  const defaults: WithAllKeys<FieldStatsInitialState> = {
-    showDistributions: false,
-    viewType: defaultType,
-    dataViewId: undefined,
-    query: undefined,
-  };
-  const fieldStatsStateManager = initializeStateManager(initialState, defaults);
+  const viewType$ = new BehaviorSubject<FieldStatsInitializerViewType>(
+    initialState.view_type ?? defaultViewType
+  );
+  const dataViewId$ = new BehaviorSubject<string>(initialState.data_view_id ?? '');
+  const query$ = new BehaviorSubject<AggregateQuery>(
+    initialState.query ?? ({ esql: '' } as AggregateQuery)
+  );
+  const showDistributions$ = new BehaviorSubject<boolean>(
+    initialState.show_distributions ?? false
+  );
 
   const resetData$ = new BehaviorSubject<number>(Date.now());
   const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
   const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
 
-  const updateUserInput = (update: FieldStatsInitialState, shouldResetData = false) => {
+  const updateUserInput = (update: Partial<FieldStatsInitialState>, shouldResetData = false) => {
     if (shouldResetData) {
       resetData$.next(Date.now());
     }
-    fieldStatsStateManager.api.setViewType(update.viewType);
-    fieldStatsStateManager.api.setDataViewId(update.dataViewId);
-    fieldStatsStateManager.api.setQuery(update.query);
+    if (update.view_type !== undefined) viewType$.next(update.view_type);
+    if (update.data_view_id !== undefined) dataViewId$.next(update.data_view_id);
+    if (update.query !== undefined) query$.next(update.query ?? ({ esql: '' } as AggregateQuery));
   };
 
-  const fieldStatsControlsComparators: StateComparators<FieldStatsInitialState> = {
-    viewType: 'referenceEquality',
-    dataViewId: 'referenceEquality',
-    query: 'deepEquality',
-    showDistributions: 'referenceEquality',
-  };
+  const getLatestState = (): FieldStatsInitialState => ({
+    view_type: viewType$.getValue(),
+    data_view_id: dataViewId$.getValue() || undefined,
+    query: query$.getValue()?.esql ? query$.getValue() : undefined,
+    show_distributions: showDistributions$.getValue(),
+  });
 
   const onRenderComplete = () => dataLoading$.next(false);
   const onLoading = (v: boolean) => dataLoading$.next(v);
@@ -67,10 +68,10 @@ export const initializeFieldStatsControls = (
   return {
     fieldStatsControlsApi: {
       updateUserInput,
-      query$: fieldStatsStateManager.api.query$,
-      viewType$: fieldStatsStateManager.api.viewType$,
-      dataViewId$: fieldStatsStateManager.api.dataViewId$,
-      showDistributions$: fieldStatsStateManager.api.showDistributions$,
+      query$,
+      viewType$,
+      dataViewId$,
+      showDistributions$,
     } as unknown as FieldStatsControlsApi,
     dataLoadingApi: {
       dataLoading$,
@@ -79,15 +80,39 @@ export const initializeFieldStatsControls = (
       onLoading,
       onError,
     },
-    fieldStatsStateManager,
-    // Reset data is internal state management, so no need to expose this in api
+    anyStateChange$: merge(
+      viewType$.pipe(
+        skip(1),
+        map(() => undefined)
+      ),
+      dataViewId$.pipe(
+        skip(1),
+        map(() => undefined)
+      ),
+      query$.pipe(
+        skip(1),
+        map(() => undefined)
+      ),
+      showDistributions$.pipe(
+        skip(1),
+        map(() => undefined)
+      )
+    ),
+    getLatestState,
+    reinitializeState: (nextState: FieldStatsInitialState) => {
+      if (nextState.view_type !== undefined) viewType$.next(nextState.view_type);
+      if (nextState.data_view_id !== undefined) dataViewId$.next(nextState.data_view_id);
+      if (nextState.query !== undefined) query$.next(nextState.query ?? ({ esql: '' } as AggregateQuery));
+      if (nextState.show_distributions !== undefined) showDistributions$.next(nextState.show_distributions);
+    },
     resetData$,
-    serializeFieldStatsChartState: () => fieldStatsStateManager.getLatestState(),
+    serializeFieldStatsChartState: getLatestState,
     fieldStatsControlsComparators,
     onFieldStatsTableDestroy: () => {
-      fieldStatsStateManager.api.viewType$.complete();
-      fieldStatsStateManager.api.dataViewId$.complete();
-      fieldStatsStateManager.api.query$.complete();
+      viewType$.complete();
+      dataViewId$.complete();
+      query$.complete();
+      showDistributions$.complete();
       resetData$.complete();
     },
   };
