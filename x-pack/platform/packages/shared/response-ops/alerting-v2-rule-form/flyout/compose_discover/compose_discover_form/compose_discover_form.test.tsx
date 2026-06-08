@@ -26,11 +26,11 @@ const createState = (overrides: Partial<ComposeDiscoverState> = {}): ComposeDisc
 });
 
 const BASE_COMPOSE_VALUES: ComposeFormValues = {
-  kind: 'signal',
+  kind: 'alert',
   metadata: { name: 'Test rule', enabled: true },
   timeField: '@timestamp',
   schedule: { every: '1m', lookback: '5m' },
-  query: { format: 'standalone', breach: '' },
+  query: { format: 'composed', base: '', blocks: { breach: '' } },
   stateTransitionAlertDelayMode: 'immediate',
   stateTransitionRecoveryDelayMode: 'immediate',
   artifacts: [],
@@ -95,7 +95,7 @@ const createComposeFormWrapper = (
 const renderComposeDiscoverDetailsStep = (defaultValues: ComposeFormValues = BASE_COMPOSE_VALUES) =>
   render(
     <ComposeDiscoverForm
-      state={createState({ step: 1 })}
+      state={createState({ step: 2 })}
       dispatch={jest.fn()}
       services={{ ...createMockServices(), uiActions: mockUiActions }}
       onRecoveryTypeChange={jest.fn()}
