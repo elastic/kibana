@@ -8,6 +8,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import type { ContextTestFixtures } from '../../../fixtures/surrounding_docs';
 import {
   spaceTest,
   testData,
@@ -23,6 +24,15 @@ const TEST_FILTER_COLUMN_NAMES: Array<[string, string]> = [
   ],
   ['extension', 'jpg'],
 ];
+
+const checkMainViewFilters = async (pageObjects: ContextTestFixtures['pageObjects']) => {
+  for (const [field, value] of TEST_FILTER_COLUMN_NAMES) {
+    expect(await pageObjects.filterBar.hasFilter({ field, value, enabled: true })).toBe(true);
+  }
+  const timeRange = await pageObjects.datePicker.getTimeConfig();
+  expect(timeRange.start).toContain('2015-09-19');
+  expect(timeRange.end).toContain('2015-09-23');
+};
 
 spaceTest.describe(
   'Discover context - back navigation',
@@ -70,14 +80,7 @@ spaceTest.describe(
 
     spaceTest('should go back via breadcrumbs with preserved state', async ({ pageObjects }) => {
       await pageObjects.contextPage.goBackToDiscover();
-
-      for (const [field, value] of TEST_FILTER_COLUMN_NAMES) {
-        expect(await pageObjects.filterBar.hasFilter({ field, value, enabled: true })).toBe(true);
-      }
-
-      const timeRange = await pageObjects.datePicker.getTimeConfig();
-      expect(timeRange.start).toContain('2015-09-19');
-      expect(timeRange.end).toContain('2015-09-23');
+      await checkMainViewFilters(pageObjects);
     });
 
     spaceTest(
@@ -87,14 +90,7 @@ spaceTest.describe(
         await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
 
         await pageObjects.contextPage.goBackToDiscover();
-
-        for (const [field, value] of TEST_FILTER_COLUMN_NAMES) {
-          expect(await pageObjects.filterBar.hasFilter({ field, value, enabled: true })).toBe(true);
-        }
-
-        const timeRange = await pageObjects.datePicker.getTimeConfig();
-        expect(timeRange.start).toContain('2015-09-19');
-        expect(timeRange.end).toContain('2015-09-23');
+        await checkMainViewFilters(pageObjects);
       }
     );
 
@@ -112,15 +108,7 @@ spaceTest.describe(
             await pageObjects.contextPage.goBackToDiscover();
 
             expect(await pageObjects.filterBar.getFilterCount()).toBe(2);
-            for (const [field, value] of TEST_FILTER_COLUMN_NAMES) {
-              expect(await pageObjects.filterBar.hasFilter({ field, value, enabled: true })).toBe(
-                true
-              );
-            }
-
-            const timeRange = await pageObjects.datePicker.getTimeConfig();
-            expect(timeRange.start).toContain('2015-09-19');
-            expect(timeRange.end).toContain('2015-09-23');
+            await checkMainViewFilters(pageObjects);
           }
         );
 
@@ -145,15 +133,7 @@ spaceTest.describe(
             await pageObjects.contextPage.goBackToDiscover();
 
             expect(await pageObjects.filterBar.getFilterCount()).toBe(2);
-            for (const [field, value] of TEST_FILTER_COLUMN_NAMES) {
-              expect(await pageObjects.filterBar.hasFilter({ field, value, enabled: true })).toBe(
-                true
-              );
-            }
-
-            const timeRange = await pageObjects.datePicker.getTimeConfig();
-            expect(timeRange.start).toContain('2015-09-19');
-            expect(timeRange.end).toContain('2015-09-23');
+            await checkMainViewFilters(pageObjects);
           }
         );
       }
