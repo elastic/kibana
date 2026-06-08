@@ -311,6 +311,53 @@ describe('RedTeamOrchestrator', () => {
     });
   });
 
+  describe('multi-strategy orchestration', () => {
+    it('runs all configured strategies and includes each in the report', async () => {
+      const executorClient = createMockExecutorClient();
+      const log = createMockLog();
+
+      const orchestrator = createRedTeamOrchestrator({
+        config: {
+          modules: ['prompt_injection'],
+          strategies: ['direct', 'base64'],
+          count: 1,
+          difficulty: 'basic',
+          templateOnly: true,
+        },
+        executorClient,
+        log: log as any,
+      });
+
+      const report = await orchestrator.run(jest.fn().mockResolvedValue('safe response'));
+
+      // Should have 2 module reports (one per strategy)
+      expect(report.modules).toHaveLength(2);
+      const strategyNames = report.modules.map((m) => m.results[0]?.strategy);
+      expect(strategyNames).toContain('direct');
+      expect(strategyNames).toContain('base64');
+      expect(report.strategies).toEqual(['direct', 'base64']);
+    });
+
+    it('defaults to ["direct"] when no strategies configured', async () => {
+      const executorClient = createMockExecutorClient();
+      const log = createMockLog();
+
+      const orchestrator = createRedTeamOrchestrator({
+        config: {
+          modules: ['prompt_injection'],
+          count: 1,
+          difficulty: 'basic',
+          templateOnly: true,
+        },
+        executorClient,
+        log: log as any,
+      });
+
+      const report = await orchestrator.run(jest.fn().mockResolvedValue('safe response'));
+      expect(report.strategies).toEqual(['direct']);
+    });
+  });
+
   describe('multi-turn strategy (crescendo)', () => {
     const multiTurnConfig: RedTeamConfig = {
       count: 1,
