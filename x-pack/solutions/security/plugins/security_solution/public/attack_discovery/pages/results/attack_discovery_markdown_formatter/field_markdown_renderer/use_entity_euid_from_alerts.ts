@@ -59,20 +59,11 @@ export const useEntityEuidFromAlerts = ({
               ignore_unavailable: true,
               body: {
                 query: { ids: { values: alertIds } },
-                _source: [
-                  'host.name',
-                  'host.id',
-                  'host.hostname',
-                  'user.name',
-                  'user.id',
-                  'user.email',
-                  'user.domain',
-                  'event.module',
-                  'event.kind',
-                  'event.category',
-                  'event.type',
-                  'data_stream.dataset',
-                ],
+                _source: [fieldName],
+                runtime_mappings: {
+                  entity_id: euidApi.euid.painless.getEuidRuntimeMapping(entityType),
+                },
+                fields: ['entity_id'],
                 size: alertIds.length,
               },
             },
@@ -84,6 +75,7 @@ export const useEntityEuidFromAlerts = ({
         const hits =
           (response?.rawResponse?.hits?.hits as Array<{
             _source?: Record<string, unknown>;
+            fields?: { entity_id?: string[] };
           }>) ?? [];
         // Find the first alert where the clicked field matches the badge value
         const matchingHit = hits.find((hit) => {
@@ -101,8 +93,8 @@ export const useEntityEuidFromAlerts = ({
         });
 
         if (matchingHit) {
-          const computed = euidApi.euid.getEuidFromObject(entityType, matchingHit._source);
-          if (!cancelled) setEuid(computed);
+          const computed = matchingHit.fields?.entity_id?.[0];
+          if (!cancelled && computed) setEuid(computed);
         }
       } catch {
         // Silently swallow — caller falls back to Observed flyout when euid is undefined
