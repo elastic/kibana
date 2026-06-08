@@ -42,8 +42,13 @@ Flattened field [alert.actions.params] contains one immense field whose keyed en
 
 **Workaround**
 
-If the upgrade has failed with this error, identify rules that use connectors with large content (particularly email, webhook, and Slack connectors) and shorten the action parameter values, such as message bodies or HTML templates. Then retry the upgrade.
+Upgrade to 9.3.5 or 9.4.2.
 
+If the upgrade to 9.3.0, 9.3.1, 9.3.2, 9.3.3, 9.3.4 failed with this error, identify rules that use connectors with large content (particularly email, webhook, and Slack connectors) and shorten the action parameter values, such as message bodies or HTML templates. Then retry the upgrade.
+
+**Resolved**
+
+This issue is resolved in {{stack}} 9.3.5 and 9.4.2.
 
 ::::
 

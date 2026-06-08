@@ -247,6 +247,7 @@ export const AgentResponseSchema = schema.object({
     )
   ),
   status: schema.maybe(AgentStatusSchema),
+  pipeline_config: schema.maybe(schema.string({ maxLength: 10000 })),
   last_known_status: schema.maybe(AgentStatusSchema),
   packages: schema.arrayOf(schema.string(), { maxSize: 10000 }),
   sort: schema.maybe(schema.arrayOf(schema.any(), { maxSize: 10 })), // ES can return many different types for `sort` array values, including unsafe numbers

@@ -99,7 +99,6 @@ export const getNavigationTreeDefinition = ({
                     { link: 'ml:dataDriftPage', sideNavStatus: 'hidden' },
                     { link: 'ml:fileUpload', sideNavStatus: 'hidden' },
                     { link: 'ml:indexDataVisualizer', sideNavStatus: 'hidden' },
-                    { link: 'ml:indexDataVisualizerPage', sideNavStatus: 'hidden' },
                   ],
                   id: 'ml_overview',
                   title: '',
@@ -275,7 +274,7 @@ export const getNavigationTreeDefinition = ({
                 {
                   children: [
                     { link: 'management:triggersActionsAlerts' },
-                    { link: 'rules' },
+                    { link: 'management:triggersActions' },
                     { link: 'management:triggersActionsConnectors' },
                     { link: 'management:reporting' },
                     { link: 'management:jobsListLink' },
