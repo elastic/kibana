@@ -210,13 +210,13 @@ export const readLinksOASOperationObject = {
       lang: 'cURL',
       label: 'Get a links library item - cURL',
       source:
-        'curl -X GET "${KIBANA_URL}/api/links/5e1f3a20-c4d6-11ef-be8b-3c7c2b9d1f4e" \\\n' +
+        'curl -X GET "${KIBANA_URL}/api/links/0ee9d0ea-06a0-4a30-bf4e-be4d3ca85bf3" \\\n' +
         '  -H "Authorization: ApiKey ${API_KEY}"\n',
     },
     {
       lang: 'Console',
       label: 'Get a links library item - Console',
-      source: 'GET kbn:/api/links/5e1f3a20-c4d6-11ef-be8b-3c7c2b9d1f4e\n',
+      source: 'GET kbn:/api/links/0ee9d0ea-06a0-4a30-bf4e-be4d3ca85bf3\n',
     },
   ],
   responses: {
