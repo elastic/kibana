@@ -7,18 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export type { StoredDashboardLink, StoredLinksState } from './links_saved_object';
+
 export type {
   DashboardLink,
   ExternalLink,
   ExternalLinkOptions,
   Link,
   LinkOptions,
+  LinksByReferenceState,
+  LinksByValueState,
+  LinksEmbeddableState,
   LinksState,
-  StoredDashboardLink,
-  StoredLinksState,
-} from './links_saved_object';
-
-export type { LinksByValueState, LinksByReferenceState, LinksEmbeddableState } from './types';
+} from './types';
 
 export const plugin = async () => {
   const { LinksServerPlugin } = await import('./plugin');

@@ -7,21 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-import type {
-  dashboardLinkSchema,
-  externalLinkOptionsSchema,
-  externalLinkSchema,
-  linksByValueSchema,
-} from '../api/schemas';
-
-export type DashboardLink = TypeOf<typeof dashboardLinkSchema>;
-export type ExternalLink = TypeOf<typeof externalLinkSchema>;
-export type ExternalLinkOptions = TypeOf<typeof externalLinkOptionsSchema>;
-export type Link = DashboardLink | ExternalLink;
-export type LinkOptions = DashboardLink['options'] | ExternalLinkOptions;
-
-export type LinksState = TypeOf<typeof linksByValueSchema>;
+import type { DashboardLink, ExternalLink, LinksState } from '../types';
 
 export type StoredLink = StoredDashboardLink | StoredExternalLink;
 export type StoredLinksState = Omit<LinksState, 'links'> & {

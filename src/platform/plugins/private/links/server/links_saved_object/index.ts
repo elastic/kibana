@@ -9,14 +9,4 @@
 
 export { linksSavedObjectType } from './links_saved_object';
 
-export type {
-  DashboardLink,
-  ExternalLink,
-  ExternalLinkOptions,
-  Link,
-  LinkOptions,
-  LinksState,
-  StoredDashboardLink,
-  StoredLink,
-  StoredLinksState,
-} from './types';
+export type { StoredDashboardLink, StoredLink, StoredLinksState } from './types';

@@ -14,9 +14,9 @@ import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { LINKS_EMBEDDABLE_TYPE } from '../common';
 import { transforms } from '../common/embeddable/transforms/transforms';
 import { registerRoutes } from './api';
-import { linksSavedObjectType } from './links_saved_object';
-import type { LinksState } from '.';
 import { linksEmbeddableSchema } from './api/schemas';
+import { linksSavedObjectType } from './links_saved_object';
+import type { LinksState } from './types';
 
 export class LinksServerPlugin implements Plugin<object, object> {
   constructor() {}

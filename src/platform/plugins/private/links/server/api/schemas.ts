@@ -98,7 +98,7 @@ export const linksByValueSchema = serializedTitlesSchema.extends(
     links: linksArraySchema,
     layout: layoutSchema,
   },
-  { unknowns: 'forbid', meta: BY_VALUE_SCHEMA_META }
+  { meta: BY_VALUE_SCHEMA_META }
 );
 
 export const linksByReferenceSchema = serializedTitlesSchema.extends(
@@ -110,7 +110,7 @@ export const linksByReferenceSchema = serializedTitlesSchema.extends(
       },
     }),
   },
-  { unknowns: 'forbid', meta: BY_REF_SCHEMA_META }
+  { meta: BY_REF_SCHEMA_META }
 );
 
 // Complete links embeddable schema (union of by-value and by-reference embeddables)

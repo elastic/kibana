@@ -9,6 +9,9 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import type {
+  dashboardLinkSchema,
+  externalLinkOptionsSchema,
+  externalLinkSchema,
   linksByReferenceSchema,
   linksByValueSchema,
   linksEmbeddableSchema,
@@ -17,3 +20,11 @@ import type {
 export type LinksByValueState = TypeOf<typeof linksByValueSchema>;
 export type LinksByReferenceState = TypeOf<typeof linksByReferenceSchema>;
 export type LinksEmbeddableState = TypeOf<typeof linksEmbeddableSchema>;
+
+export type DashboardLink = TypeOf<typeof dashboardLinkSchema>;
+export type ExternalLink = TypeOf<typeof externalLinkSchema>;
+export type ExternalLinkOptions = TypeOf<typeof externalLinkOptionsSchema>;
+export type Link = DashboardLink | ExternalLink;
+export type LinkOptions = DashboardLink['options'] | ExternalLinkOptions;
+
+export type LinksState = TypeOf<typeof linksByValueSchema>;
