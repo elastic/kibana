@@ -25,12 +25,15 @@ export const visualizationWrapperStyles = ({ euiTheme }: UseEuiTheme) =>
       marginInlineStart: 0,
     },
 
-    p: {
+    '.echMetricText__subtitle': {
       margin: 0,
     },
 
     '.expExpressionRenderer__expression': {
       padding: `${euiTheme.size.s} 0`,
+      '[class*="datatableContainerStyles"]': {
+        padding: `${euiTheme.size.s} ${euiTheme.size.s}`,
+      },
     },
   });
 

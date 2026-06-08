@@ -8,6 +8,7 @@
 import type { Logger } from '@kbn/logging';
 import type { RuleTypeParams } from '@kbn/alerting-types';
 import { getRuleDetailsRoute, triggersActionsRoute } from '@kbn/rule-data-utils';
+import { getSpaceUrlPrefix, type SpaceId } from '@kbn/core-spaces-common';
 import type { GetViewInAppRelativeUrlFn } from '../../../types';
 import type { ActionSchedulerRule } from '../types';
 
@@ -43,7 +44,8 @@ export const buildRuleUrl = <Params extends RuleTypeParams>(
   try {
     const basePathname = new URL(opts.kibanaBaseUrl).pathname;
     const basePathnamePrefix = basePathname !== '/' ? `${basePathname}` : '';
-    const spaceIdSegment = opts.spaceId !== 'default' ? `/s/${opts.spaceId}` : '';
+    // opts.spaceId originates from task params, written by validated request handlers — trusted boundary.
+    const spaceIdSegment = getSpaceUrlPrefix(opts.spaceId as SpaceId);
 
     const ruleUrl = new URL(
       [basePathnamePrefix, spaceIdSegment, relativePath].join(''),
