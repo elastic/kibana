@@ -8,22 +8,31 @@
 import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
 import {
-  ALL_ROLE,
+  ALERTING_V2_RULES_ALL_ROLE,
+  ALERTING_V2_RULES_READ_ROLE,
   apiTest,
   buildCreateRuleData,
   NO_ACCESS_ROLE,
-  READ_ROLE,
   testData,
 } from '../../../fixtures';
 
 const TAGS_URL = `${testData.RULE_API_PATH}/_tags`;
+
+const tagsUrl = (params: Record<string, string | undefined> = {}): string => {
+  const search = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (value !== undefined) search.set(key, value);
+  }
+  const qs = search.toString();
+  return qs ? `${TAGS_URL}?${qs}` : TAGS_URL;
+};
 
 apiTest.describe('Get rule tags API', { tag: '@local-stateful-classic' }, () => {
   let readerCredentials: RoleApiCredentials;
   let readerHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ requestAuth }) => {
-    readerCredentials = await requestAuth.getApiKeyForCustomRole(READ_ROLE);
+    readerCredentials = await requestAuth.getApiKeyForCustomRole(ALERTING_V2_RULES_READ_ROLE);
     readerHeaders = { ...readerCredentials.apiKeyHeader };
   });
 
@@ -98,6 +107,57 @@ apiTest.describe('Get rule tags API', { tag: '@local-stateful-classic' }, () => 
   );
 
   apiTest(
+    'filter: should only return tags from rules matching the filter',
+    async ({ apiClient, apiServices }) => {
+      // Seed an alert-kind rule and a signal-kind rule with disjoint tags so a
+      // `kind:alert` filter must exclude the signal rule's tags entirely.
+      await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          kind: 'alert',
+          metadata: { name: 'alert-rule', tags: ['alert-tag'] },
+        })
+      );
+      await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          kind: 'signal',
+          state_transition: undefined,
+          metadata: { name: 'signal-rule', tags: ['signal-tag'] },
+        })
+      );
+
+      const filtered = await apiClient.get(tagsUrl({ filter: 'kind:alert' }), {
+        headers: readerHeaders,
+      });
+
+      expect(filtered).toHaveStatusCode(200);
+      expect(filtered.body).toStrictEqual({ tags: ['alert-tag'] });
+
+      // Without a filter both rules' tags are returned.
+      const unfiltered = await apiClient.get(TAGS_URL, {
+        headers: readerHeaders,
+      });
+
+      expect(unfiltered).toHaveStatusCode(200);
+      expect(unfiltered.body).toStrictEqual({ tags: ['alert-tag', 'signal-tag'] });
+    }
+  );
+
+  apiTest(
+    'filter: should return 400 for an invalid filter field',
+    async ({ apiClient, apiServices }) => {
+      await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'alert-rule', tags: ['alert-tag'] } })
+      );
+
+      const response = await apiClient.get(tagsUrl({ filter: 'not_a_field:alert' }), {
+        headers: readerHeaders,
+      });
+
+      expect(response).toHaveStatusCode(400);
+    }
+  );
+
+  apiTest(
     'authorization: should return 200 for a user with read-only alerting_v2 privileges',
     async ({ apiClient, apiServices }) => {
       await apiServices.alertingV2.rules.create(
@@ -119,7 +179,9 @@ apiTest.describe('Get rule tags API', { tag: '@local-stateful-classic' }, () => 
       await apiServices.alertingV2.rules.create(
         buildCreateRuleData({ metadata: { name: 'visible-to-writers', tags: ['memory'] } })
       );
-      const writerCredentials = await requestAuth.getApiKeyForCustomRole(ALL_ROLE);
+      const writerCredentials = await requestAuth.getApiKeyForCustomRole(
+        ALERTING_V2_RULES_ALL_ROLE
+      );
 
       const response = await apiClient.get(TAGS_URL, {
         headers: writerCredentials.apiKeyHeader,

@@ -24,18 +24,17 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await privateLocationService.installSyntheticsPackage();
     });
 
-    loadTestFile(require.resolve('./synthetics_api_security'));
-    loadTestFile(require.resolve('./synthetics_enablement'));
-    loadTestFile(require.resolve('./add_monitor'));
-    loadTestFile(require.resolve('./add_monitor_project'));
+    // The remaining specs are blocked from Scout migration by
+    // https://github.com/elastic/kibana/issues/258046: they assert the full
+    // generated Fleet package-policy via the `comparePolicies` /
+    // `getTestSyntheticsPolicy` sample-data helpers and rely on the legacy
+    // `${monitorId}-${locationId}-${spaceId}` package-policy id format. Their
+    // Scout counterparts (`add_monitor_private_location.spec.ts`,
+    // `sync_global_params.spec.ts`, `create_monitor_private_location.spec.ts`)
+    // are partially ported / `describe.skip`; remove these once #258046 is
+    // resolved and the sample-data comparison is ported to Scout.
     loadTestFile(require.resolve('./add_monitor_private_location'));
-    loadTestFile(require.resolve('./edit_monitor'));
     loadTestFile(require.resolve('./sync_global_params'));
     loadTestFile(require.resolve('./sync_global_params_spaces'));
-    loadTestFile(require.resolve('./add_edit_params'));
-    loadTestFile(require.resolve('./private_location_apis'));
-    loadTestFile(require.resolve('./list_monitors'));
-    loadTestFile(require.resolve('./sync_maintenance_windows'));
-    loadTestFile(require.resolve('./sync_maintenance_windows_non_default_space'));
   });
 }

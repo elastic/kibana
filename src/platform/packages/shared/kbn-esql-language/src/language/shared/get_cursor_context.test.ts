@@ -8,7 +8,11 @@
  */
 
 import { EDITOR_MARKER } from '../../commands/definitions/constants';
-import { correctQuerySyntax, isMarkerNode } from '../../commands/definitions/utils/ast';
+import {
+  correctQuerySyntax,
+  isMarkerNode,
+  removeAutocompleteMarkers,
+} from '../../commands/definitions/utils/ast';
 import type { ESQLAstItem } from '@elastic/esql/types';
 import { Parser, Walker } from '@elastic/esql';
 import { getCursorContext } from './get_cursor_context';
@@ -20,7 +24,8 @@ const assertMarkerRemoved = (_query: string) => {
   }
 
   const { root } = Parser.parse(query);
-  const result = getCursorContext(query, root, _query.length);
+  const normalizedRoot = removeAutocompleteMarkers(root);
+  const result = getCursorContext(query, normalizedRoot, _query.length);
 
   if (!result.command) {
     throw new Error(`No command found in AST for query: ${query}`);
