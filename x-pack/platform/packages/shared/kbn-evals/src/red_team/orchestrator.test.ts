@@ -351,7 +351,7 @@ describe('RedTeamOrchestrator', () => {
     it('does not include evaluatorScores in AttackResult', () => {
       // AttackResult should only have namedScores, not evaluatorScores
       const result: AttackResult = {
-        example: { input: { value: 'x' }, output: 'y', expected: 'z' },
+        example: { input: { value: 'x' }, output: 'y' },
         namedScores: [],
         responseExcerpt: '',
         guardrailViolations: [],
