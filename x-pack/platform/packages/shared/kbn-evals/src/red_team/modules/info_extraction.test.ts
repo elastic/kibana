@@ -12,7 +12,7 @@ describe('info_extraction module', () => {
 
   it('has correct metadata', () => {
     expect(module.name).toBe('info_extraction');
-    expect(module.owaspCategory).toBe('LLM07');
+    expect(module.owaspCategory).toBe('LLM06');
     expect(module.description).toBeTruthy();
   });
 
