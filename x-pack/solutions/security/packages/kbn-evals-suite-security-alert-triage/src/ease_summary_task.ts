@@ -42,6 +42,7 @@ export const callEaseSummary = async ({
     {
       method: 'POST',
       version: '1',
+      headers: { 'elastic-api-version': '1' },
       query: { content_references_disabled: true },
       body: JSON.stringify({
         actionTypeId: '.gen-ai',
