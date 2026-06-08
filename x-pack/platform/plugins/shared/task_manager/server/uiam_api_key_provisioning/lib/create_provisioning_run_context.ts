@@ -24,15 +24,26 @@ export const createProvisioningRunContext = async (
   if (typeof uiamConvert !== 'function') {
     throw new Error('UIAM convert API is not available');
   }
+  // `task` and `api_key_to_invalidate` both register `uiamApiKey` as an ESO
+  // `attributesToEncrypt` (see `task_manager_dependencies/server/plugin.ts`).
+  // Writes that touch those attributes MUST go through a client that carries the
+  // ESO encryption extension, otherwise the secret is persisted unencrypted and
+  // every subsequent decrypt fails with "Unsupported state or unable to
+  // authenticate data". `getUnsafeInternalClient` applies that extension;
+  // `createInternalRepository` does not.
+  const unsafeSavedObjectsClient = coreStart.savedObjects.getUnsafeInternalClient({
+    includedHiddenTypes: [TASK_SO_NAME, INVALIDATE_API_KEY_SO_NAME],
+  });
+  // The provisioning status SO has no encrypted attributes, so a plain internal
+  // repository is sufficient for reads (exclude filter) and status writes.
   const savedObjectsClient = coreStart.savedObjects.createInternalRepository([
-    TASK_SO_NAME,
     UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE,
-    INVALIDATE_API_KEY_SO_NAME,
   ]);
   return {
     coreStart,
     taskManager,
     savedObjectsClient,
+    unsafeSavedObjectsClient,
     uiamConvert,
   };
 };

@@ -210,14 +210,16 @@ Run a suite on any branch without a PR:
 2. Click **New build**, select branch/commit
 3. Add environment variables:
 
-| Variable                  | Required           | Description                                              |
-| ------------------------- | ------------------ | -------------------------------------------------------- |
-| `EVAL_SUITE_ID`           | yes                | Suite id from `evals.suites.json`                        |
-| `EVAL_MODEL_GROUPS`       | yes                | Model group, e.g. `eis/openai-gpt-5.4`                   |
-| `EVAL_INCLUDE_EIS_MODELS` | for `eis/*` models | Set to `1` when using EIS models                         |
-| `EVALUATION_CONNECTOR_ID` | no                 | LLM-as-judge connector override                          |
-| `EVAL_SERVER_CONFIG_SET`  | some suites        | From `serverConfigSet` in `evals.suites.json`            |
-| `KIBANA_BUILD_ID`         | no                 | Reuse a Kibana build from another job (skips build step) |
+| Variable                  | Required           | Description                                                                 |
+| ------------------------- | ------------------ | --------------------------------------------------------------------------- |
+| `EVAL_SUITE_ID`           | yes                | Suite id from `evals.suites.json`                                           |
+| `EVAL_MODEL_GROUPS`       | yes                | Comma-separated model groups, e.g. `eis/openai-gpt-5.4,llm-gateway/gpt-5.2` |
+| `EVAL_INCLUDE_EIS_MODELS` | for `eis/*` models | Set to `1` when using EIS models or an EIS judge                            |
+| `EVALUATION_CONNECTOR_ID` | no                 | LLM-as-judge connector override                                             |
+| `EVAL_SERVER_CONFIG_SET`  | some suites        | From `serverConfigSet` in `evals.suites.json`                               |
+| `KIBANA_BUILD_ID`         | no                 | Reuse a Kibana build from another job (skips build step)                    |
+| `EVAL_GREP`               | no                 | Playwright test name filter (same as `node scripts/evals run --grep`)       |
+| `EVALUATION_REPETITIONS`  | no                 | Repeat each example N times (same as `--repetitions`)                       |
 
 Example:
 
