@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { createRedTeamOrchestrator } from './orchestrator';
+import { createRedTeamOrchestrator, runRedTeam } from './orchestrator';
 import type { EvalsExecutorClient, DatasetRunResult } from '../types';
-import type { RedTeamConfig } from './types';
+import type { AttackResult, RedTeamConfig } from './types';
+import { DEFAULT_GUARDRAIL_RULES } from './guardrails';
 
 const createMockLog = () => ({
   info: jest.fn(),
@@ -271,6 +272,43 @@ describe('RedTeamOrchestrator', () => {
     );
     expect(blockViolation).toBeDefined();
     expect(blockViolation?.action).toBe('block');
+  });
+
+  describe('AttackResult shape', () => {
+    it('does not include evaluatorScores in AttackResult', () => {
+      // AttackResult should only have namedScores, not evaluatorScores
+      const result: AttackResult = {
+        example: { input: 'x', output: 'y', expected: 'z' },
+        namedScores: [],
+        responseExcerpt: '',
+        guardrailViolations: [],
+        severity: 'low',
+        owaspCategory: 'LLM01',
+        attackModule: 'test',
+        strategy: 'direct',
+      };
+      // TypeScript compile-time check: the object above must not require evaluatorScores
+      expect(result).toBeDefined();
+      // evaluatorScores must NOT exist on the type
+      expect('evaluatorScores' in result).toBe(false);
+    });
+  });
+
+  describe('orchestrator does not mutate config guardrails', () => {
+    it('leaves the original rules array unchanged after runRedTeam', async () => {
+      const originalRules = [...DEFAULT_GUARDRAIL_RULES];
+      const config: RedTeamConfig = {
+        modules: ['jailbreaking'],
+        count: 1,
+        difficulty: 'basic',
+        templateOnly: true,
+        guardrails: { rules: [...DEFAULT_GUARDRAIL_RULES] },
+      };
+      const originalLength = config.guardrails!.rules.length;
+      await runRedTeam(config);
+      expect(config.guardrails!.rules.length).toBe(originalLength);
+      expect(config.guardrails!.rules).toEqual(originalRules);
+    });
   });
 
   describe('multi-turn strategy (crescendo)', () => {

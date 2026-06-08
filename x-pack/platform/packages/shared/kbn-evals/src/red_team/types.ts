@@ -89,7 +89,6 @@ export interface NamedScore {
 
 export interface AttackResult {
   example: Example;
-  evaluatorScores: EvaluationResult[];
   namedScores: NamedScore[];
   responseExcerpt: string;
   guardrailViolations: GuardrailViolation[];

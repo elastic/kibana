@@ -235,7 +235,6 @@ const processExperimentResults = (
 
     results.push({
       example: examples[taskRun.exampleIndex] ?? { input: taskRun.input },
-      evaluatorScores: evaluatorScores.map((es) => es.result),
       namedScores,
       responseExcerpt,
       guardrailViolations,
@@ -543,7 +542,6 @@ export const createRedTeamOrchestrator = (
 
       return {
         example: {},
-        evaluatorScores: [],
         namedScores: [],
         responseExcerpt: extractTextFromOutput(output, 500),
         guardrailViolations,
@@ -556,4 +554,66 @@ export const createRedTeamOrchestrator = (
   };
 
   return { run, scanExistingRun };
+};
+
+/**
+ * Convenience function for running a red-team evaluation with a minimal setup.
+ * Uses a no-op task and in-memory executor — suitable for template-only runs and tests.
+ */
+export const runRedTeam = async (config: RedTeamConfig): Promise<RedTeamReport> => {
+  const noopExecutorClient: import('../types').EvalsExecutorClient = {
+    runExperiment: async (options) => {
+      const { datasets, task } = options;
+      const [dataset] = datasets;
+      const runs: Record<string, import('../types').TaskRun<any>> = {};
+      for (let i = 0; i < dataset.examples.length; i++) {
+        const example = dataset.examples[i];
+        const runKey = `${i}-0-noop`;
+        const output = await task(example);
+        runs[runKey] = {
+          exampleIndex: i,
+          repetition: 0,
+          input: example.input,
+          expected: example.output,
+          metadata: example.metadata,
+          output,
+        };
+      }
+      return [
+        {
+          id: 'noop',
+          experimentName: dataset.name,
+          datasetId: 'noop-dataset',
+          datasetName: dataset.name,
+          runs,
+          evaluationRuns: [],
+          experimentMetadata: options.metadata,
+        },
+      ] as import('../types').DatasetRunResult[];
+    },
+    getDatasetRunResults: async () => [],
+  };
+
+  const log: import('@kbn/tooling-log').ToolingLog = {
+    info: () => {},
+    warning: () => {},
+    warn: () => {},
+    error: () => {},
+    debug: () => {},
+    verbose: () => {},
+    success: () => {},
+    write: () => {},
+    getWritten: () => ({ log: [], error: [] }),
+    indent: () => {},
+    get: () => ({} as any),
+  } as unknown as import('@kbn/tooling-log').ToolingLog;
+
+  const orchestrator = createRedTeamOrchestrator({
+    config,
+    executorClient: noopExecutorClient,
+    log,
+  });
+
+  const noopTask = async () => '';
+  return orchestrator.run(noopTask);
 };
