@@ -22,7 +22,6 @@ dependsOn:
   - '@kbn/kibana-react-plugin'
   - '@kbn/i18n'
   - '@kbn/i18n-react'
-  - '@kbn/spaces-utils'
   - '@kbn/spaces-plugin'
   - '@kbn/shared-ux-router'
   - '@kbn/config-schema'
@@ -44,7 +43,6 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/product-doc-base-plugin'
   - '@kbn/ai-assistant-common'
-  - '@kbn/ai-agent-confirmation-modal'
   - '@kbn/anonymization-common'
   - '@kbn/anonymization-ui'
   - '@kbn/product-doc-common'
@@ -53,8 +51,8 @@ dependsOn:
   - '@kbn/scout'
   - '@kbn/workflows'
   - '@kbn/agent-builder-browser'
-  - '@kbn/agent-builder-plugin'
   - '@kbn/zod'
+  - '@kbn/core-http-browser'
 tags:
   - plugin
   - prod

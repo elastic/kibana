@@ -9,8 +9,8 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import type { DataSourceTypeESQL } from '../data_source';
-import type { xyDataLayerSharedSchema, XYState } from './xy';
-import { statisticsOptionsSize, statisticsSchema, xyStateSchema } from './xy';
+import type { xyDataLayerSharedSchema, XYConfig } from './xy';
+import { statisticsOptionsSize, statisticsSchema, xyConfigSchema } from './xy';
 import {
   AS_CODE_DATA_VIEW_REFERENCE_TYPE,
   AS_CODE_DATA_VIEW_SPEC_TYPE,
@@ -62,14 +62,14 @@ describe('XY', () => {
               y: [{ operation: 'count', empty_as_null: false }],
             },
           ],
-        } satisfies XYState;
-        expect(() => xyStateSchema.validate(input)).not.toThrow();
+        } satisfies XYConfig;
+        expect(() => xyConfigSchema.validate(input)).not.toThrow();
       }
     );
 
     it.each(anyType)('should pass validation for %s with breakdown', (type) => {
       expect(() =>
-        xyStateSchema.validate({
+        xyConfigSchema.validate({
           type: 'xy',
           title: `${type} Chart`,
           layers: [
@@ -82,7 +82,7 @@ describe('XY', () => {
               breakdown_by: { operation: 'terms', fields: ['product'], limit: 5 },
             },
           ],
-        } satisfies XYState)
+        } satisfies XYConfig)
       ).not.toThrow();
     });
 
@@ -90,7 +90,7 @@ describe('XY', () => {
       'should pass validation for a date histogram %s with breakdown with multiple terms',
       (type) => {
         expect(() =>
-          xyStateSchema.validate({
+          xyConfigSchema.validate({
             type: 'xy',
             title: `${type} Chart`,
             layers: [
@@ -110,14 +110,14 @@ describe('XY', () => {
                 breakdown_by: { operation: 'terms', fields: ['product', 'category'], limit: 5 },
               },
             ],
-          } satisfies XYState)
+          } satisfies XYConfig)
         ).not.toThrow();
       }
     );
 
     it.each(anyType)('should pass validation in ES|QL mode as %s chart', (type) => {
       expect(() =>
-        xyStateSchema.validate({
+        xyConfigSchema.validate({
           type: 'xy',
           title: `${type} Chart`,
           layers: [
@@ -135,13 +135,13 @@ describe('XY', () => {
               breakdown_by: { column: 'product' },
             },
           ],
-        } satisfies XYState)
+        } satisfies XYConfig)
       ).not.toThrow();
     });
 
     it.each(anyType)('should support reference lines in %s charts', (type) => {
       expect(() =>
-        xyStateSchema.validate({
+        xyConfigSchema.validate({
           type: 'xy',
           title: `${type} Chart`,
           layers: [
@@ -180,13 +180,13 @@ describe('XY', () => {
               ],
             },
           ],
-        } satisfies XYState)
+        } satisfies XYConfig)
       ).not.toThrow();
     });
 
     it.each(anyType)('should support annotations in %s charts', (type) => {
       expect(() =>
-        xyStateSchema.validate({
+        xyConfigSchema.validate({
           type: 'xy',
           title: `${type} Chart`,
           layers: [
@@ -226,7 +226,7 @@ describe('XY', () => {
               ],
             },
           ],
-        } satisfies XYState)
+        } satisfies XYConfig)
       ).not.toThrow();
     });
   });
@@ -239,7 +239,7 @@ describe('XY', () => {
       'should handle multiple metric in multiple layers with %s + %s',
       (type1, type2) => {
         expect(() =>
-          xyStateSchema.validate({
+          xyConfigSchema.validate({
             type: 'xy',
             title: `Mixed Chart`,
             layers: [
@@ -280,7 +280,7 @@ describe('XY', () => {
                 breakdown_by: { operation: 'terms', fields: ['product', 'category'], limit: 5 },
               },
             ],
-          } satisfies XYState)
+          } satisfies XYConfig)
         ).not.toThrow();
       }
     );
@@ -289,7 +289,7 @@ describe('XY', () => {
       'should handle multiple metric in multiple layers %s + %s with reference lines and annotations',
       (type1, type2) => {
         expect(() =>
-          xyStateSchema.validate({
+          xyConfigSchema.validate({
             type: 'xy',
             title: `Mixed Chart`,
             layers: [
@@ -406,7 +406,7 @@ describe('XY', () => {
                 ],
               },
             ],
-          } satisfies XYState)
+          } satisfies XYConfig)
         ).not.toThrow();
       }
     );
@@ -415,7 +415,7 @@ describe('XY', () => {
       'should handle multiple metric in multiple layers %s + %s with reference lines and annotations (DSL layers only)',
       (type1, type2) => {
         expect(() =>
-          xyStateSchema.validate({
+          xyConfigSchema.validate({
             type: 'xy',
             title: `Mixed Chart`,
             layers: [
@@ -559,7 +559,7 @@ describe('XY', () => {
                 ],
               },
             ],
-          } satisfies XYState)
+          } satisfies XYConfig)
         ).not.toThrow();
       }
     );
@@ -568,17 +568,17 @@ describe('XY', () => {
   describe('invalid xy charts', () => {
     it('should throw for no layers', () => {
       expect(() =>
-        xyStateSchema.validate({
+        xyConfigSchema.validate({
           type: 'xy',
           title: `Faulty Chart`,
           layers: [],
-        } satisfies XYState)
+        } satisfies XYConfig)
       ).toThrow();
     });
 
     it('should not let mix esql data_source with dsl operations', () => {
       expect(() =>
-        xyStateSchema.validate({
+        xyConfigSchema.validate({
           type: 'xy',
           title: `Faulty Chart`,
           layers: [
@@ -602,13 +602,13 @@ describe('XY', () => {
               breakdown_by: { operation: 'terms', fields: ['product', 'category'], limit: 5 },
             },
           ],
-        } satisfies XYState)
+        } satisfies XYConfig)
       ).toThrow();
     });
 
     it('should not let esql annotations', () => {
       expect(() =>
-        xyStateSchema.validate({
+        xyConfigSchema.validate({
           type: 'xy',
           title: `Faulty Chart`,
           layers: [
@@ -649,13 +649,13 @@ describe('XY', () => {
               ],
             },
           ],
-        } satisfies XYState)
+        } satisfies XYConfig)
       ).toThrow();
     });
 
     it('should reject mixing ES|QL and DSL layers in one chart', () => {
       expect(() =>
-        xyStateSchema.validate({
+        xyConfigSchema.validate({
           type: 'xy',
           title: 'Mixed mode chart',
           layers: [
@@ -683,13 +683,13 @@ describe('XY', () => {
               y: [{ operation: 'value', column: 'value' }],
             },
           ],
-        } as XYState)
+        } as XYConfig)
       ).toThrow();
     });
 
     it('should reject list legend layout for left positions', () => {
       expect(() =>
-        xyStateSchema.validate({
+        xyConfigSchema.validate({
           type: 'xy',
           title: 'Invalid list legend position',
           legend: {
@@ -722,7 +722,7 @@ describe('XY', () => {
   describe('legend layout schema', () => {
     it('should allow list legend layout for top/bottom', () => {
       expect(() =>
-        xyStateSchema.validate({
+        xyConfigSchema.validate({
           type: 'xy',
           title: 'Valid list legend',
           legend: {

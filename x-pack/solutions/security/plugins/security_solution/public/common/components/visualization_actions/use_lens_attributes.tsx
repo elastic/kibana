@@ -10,20 +10,18 @@ import { useEuiTheme } from '@elastic/eui';
 import { PageScope } from '../../../data_view_manager/constants';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { SecurityPageName } from '../../../../common/constants';
-import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { inputsSelectors } from '../../store';
 import { useRouteSpy } from '../../utils/route/use_route_spy';
 import type { LensAttributes, UseLensAttributesProps } from './types';
 import {
+  buildIndexFilters,
   fieldNameExistsFilter,
   getDetailsPageFilter,
   getESQLGlobalFilters,
-  getIndexFilters,
   getNetworkDetailsPageFilter,
   sourceOrDestinationIpExistsFilter,
 } from './utils';
-import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
 import { useGlobalFilterQuery } from '../../hooks/use_global_filter_query';
 
@@ -38,38 +36,19 @@ export const useLensAttributes = ({
   title,
   esql,
   signalIndexName,
+  excludedPatterns,
 }: UseLensAttributesProps): LensAttributes | null => {
   const { euiTheme } = useEuiTheme();
-  const {
-    selectedPatterns: oldSelectedPatterns,
-    dataViewId: oldDataViewId,
-    indicesExist: oldIndicesExist,
-  } = useSourcererDataView(scopeId);
-
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-
-  const { dataView: experimentalDataView } = useDataView(scopeId);
-  const experimentalSelectedPatterns = useSelectedPatterns(scopeId);
-
-  const dataViewId = newDataViewPickerEnabled ? experimentalDataView.id ?? '' : oldDataViewId;
-  const indicesExist = newDataViewPickerEnabled
-    ? !!experimentalDataView.matchedIndices?.length
-    : oldIndicesExist;
-
+  const { dataView } = useDataView(scopeId);
+  const dataViewSelectedPatterns = useSelectedPatterns(scopeId);
+  const indicesExist = !!dataView.matchedIndices?.length;
   const selectedPatterns = useMemo(() => {
     if (signalIndexName) {
       return [signalIndexName];
-    } else if (newDataViewPickerEnabled) {
-      return experimentalSelectedPatterns;
     } else {
-      return oldSelectedPatterns;
+      return dataViewSelectedPatterns;
     }
-  }, [
-    experimentalSelectedPatterns,
-    newDataViewPickerEnabled,
-    oldSelectedPatterns,
-    signalIndexName,
-  ]);
+  }, [dataViewSelectedPatterns, signalIndexName]);
 
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
   const getGlobalFiltersQuerySelector = useMemo(
@@ -137,7 +116,12 @@ export const useLensAttributes = ({
       return null;
     }
 
-    const indexFilters = hasAdHocDataViews ? [] : getIndexFilters(selectedPatterns);
+    const indexFilters = buildIndexFilters({
+      hasAdHocDataViews,
+      selectedPatterns,
+      excludedPatterns,
+      signalIndexName,
+    });
     const query = esql ? { esql } : globalQuery;
 
     const queryFilters = (() => {
@@ -166,7 +150,7 @@ export const useLensAttributes = ({
       },
       references: attrs?.references?.map((ref: { id: string; name: string; type: string }) => ({
         ...ref,
-        id: dataViewId,
+        id: dataView.id ?? '',
       })),
     } as LensAttributes;
   }, [
@@ -175,6 +159,8 @@ export const useLensAttributes = ({
     stackByField,
     hasAdHocDataViews,
     selectedPatterns,
+    excludedPatterns,
+    signalIndexName,
     esql,
     globalQuery,
     globalFilterQuery,
@@ -185,7 +171,7 @@ export const useLensAttributes = ({
     pageFilters,
     tabsFilters,
     filters,
-    dataViewId,
+    dataView.id,
   ]);
   return hasAdHocDataViews || (!hasAdHocDataViews && indicesExist)
     ? lensAttrsWithInjectedData

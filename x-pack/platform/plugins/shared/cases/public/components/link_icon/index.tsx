@@ -100,7 +100,7 @@ export const LinkIcon = React.memo<LinkIconProps>(
         onClick={onClick}
         aria-label={aria}
       >
-        <EuiIcon size={iconSize} type={iconType} />
+        <EuiIcon size={iconSize} type={iconType} aria-hidden={true} />
         <span className="casesLinkIcon__label">{children}</span>
       </EuiLink>
     );

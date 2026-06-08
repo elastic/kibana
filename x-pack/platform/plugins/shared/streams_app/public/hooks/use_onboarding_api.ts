@@ -6,24 +6,20 @@
  */
 
 import { useAbortController } from '@kbn/react-hooks';
-import type { OnboardingStep } from '@kbn/streams-schema';
+import type { StreamsKIsOnboardingStep } from '@kbn/streams-schema';
 import { useMemo } from 'react';
 import { useKibana } from './use_kibana';
 import { getLast24HoursTimeRange } from '../util/time_range';
 
-export interface UseOnboardingApiOptions {
-  saveQueries?: boolean;
-}
-
 export interface ScheduleOnboardingOptions {
-  steps?: OnboardingStep[];
+  steps?: StreamsKIsOnboardingStep[];
   connectors?: {
     features?: string;
     queries?: string;
   };
 }
 
-export function useOnboardingApi({ saveQueries = true }: UseOnboardingApiOptions = {}) {
+export function useOnboardingApi() {
   const {
     dependencies: {
       start: {
@@ -36,16 +32,15 @@ export function useOnboardingApi({ saveQueries = true }: UseOnboardingApiOptions
 
   return useMemo(
     () => ({
-      scheduleOnboardingTask: async (streamName: string, options?: ScheduleOnboardingOptions) => {
+      scheduleOnboarding: async (streamName: string, options?: ScheduleOnboardingOptions) => {
         const { from, to } = getLast24HoursTimeRange();
 
         return streamsRepositoryClient.fetch(
-          'POST /internal/streams/{streamName}/onboarding/_task',
+          'POST /internal/streams/{streamName}/onboarding/_execute',
           {
             signal,
             params: {
               path: { streamName },
-              query: { saveQueries },
               body: {
                 action: 'schedule' as const,
                 from,
@@ -57,26 +52,24 @@ export function useOnboardingApi({ saveQueries = true }: UseOnboardingApiOptions
           }
         );
       },
-      getOnboardingTaskStatus: async (streamName: string) => {
+      getOnboardingStatus: async (streamName: string) => {
         return streamsRepositoryClient.fetch(
           'GET /internal/streams/{streamName}/onboarding/_status',
           {
             signal,
             params: {
               path: { streamName },
-              query: { saveQueries },
             },
           }
         );
       },
-      cancelOnboardingTask: async (streamName: string) => {
+      cancelOnboarding: async (streamName: string) => {
         await streamsRepositoryClient.fetch(
-          'POST /internal/streams/{streamName}/onboarding/_task',
+          'POST /internal/streams/{streamName}/onboarding/_execute',
           {
             signal,
             params: {
               path: { streamName },
-              query: { saveQueries },
               body: {
                 action: 'cancel' as const,
               },
@@ -84,22 +77,7 @@ export function useOnboardingApi({ saveQueries = true }: UseOnboardingApiOptions
           }
         );
       },
-      acknowledgeOnboardingTask: async (streamName: string) => {
-        await streamsRepositoryClient.fetch(
-          'POST /internal/streams/{streamName}/onboarding/_task',
-          {
-            signal,
-            params: {
-              path: { streamName },
-              query: { saveQueries },
-              body: {
-                action: 'acknowledge' as const,
-              },
-            },
-          }
-        );
-      },
     }),
-    [saveQueries, signal, streamsRepositoryClient]
+    [signal, streamsRepositoryClient]
   );
 }

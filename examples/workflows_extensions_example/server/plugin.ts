@@ -7,15 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
-import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
+import type {
+  CoreSetup,
+  CoreStart,
+  Logger,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/server';
+import type {
+  WorkflowsExtensionsRequestHandlerContext,
+  WorkflowsExtensionsServerPluginSetup,
+  WorkflowsExtensionsServerPluginStart,
+} from '@kbn/workflows-extensions/server';
+import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import { registerEmitEventRoute } from './routes/emit_event';
 import { registerEmitLoopRoute } from './routes/emit_loop';
-import type { ExampleRequestHandlerContext } from './request_context';
 import { registerStepDefinitions } from './step_types';
 import { registerTriggers } from './triggers';
-
-export type { ExampleRequestHandlerContext } from './request_context';
+import {
+  EXAMPLE_MANAGED_WORKFLOW_ID,
+  EXAMPLE_MANAGED_WORKFLOW_PLUGIN_ID,
+} from './managed_workflows';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WorkflowsExtensionsExamplePluginSetup {
@@ -29,9 +41,9 @@ export interface WorkflowsExtensionsExamplePluginStart {
 export interface WorkflowsExtensionsExamplePluginSetupDeps {
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
 }
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
+
 export interface WorkflowsExtensionsExamplePluginStartDeps {
-  // No dependencies needed
+  workflowsExtensions: WorkflowsExtensionsServerPluginStart;
 }
 
 export class WorkflowsExtensionsExamplePlugin
@@ -43,15 +55,22 @@ export class WorkflowsExtensionsExamplePlugin
       WorkflowsExtensionsExamplePluginStartDeps
     >
 {
+  private readonly logger: Logger;
+
+  constructor(initializerContext: PluginInitializerContext) {
+    this.logger = initializerContext.logger.get();
+  }
+
   public setup(
     core: CoreSetup,
     plugins: WorkflowsExtensionsExamplePluginSetupDeps
   ): WorkflowsExtensionsExamplePluginSetup {
-    // Register steps and triggers on setup phase
     registerStepDefinitions(plugins.workflowsExtensions);
     registerTriggers(plugins.workflowsExtensions);
 
-    const router = core.http.createRouter<ExampleRequestHandlerContext>();
+    plugins.workflowsExtensions.registerManagedWorkflowOwner(EXAMPLE_MANAGED_WORKFLOW_PLUGIN_ID);
+
+    const router = core.http.createRouter<WorkflowsExtensionsRequestHandlerContext>();
     registerEmitEventRoute(router);
     registerEmitLoopRoute(router);
 
@@ -60,10 +79,34 @@ export class WorkflowsExtensionsExamplePlugin
 
   public start(
     _core: CoreStart,
-    _plugins: WorkflowsExtensionsExamplePluginStartDeps
+    plugins: WorkflowsExtensionsExamplePluginStartDeps
   ): WorkflowsExtensionsExamplePluginStart {
+    void this.installManagedWorkflows(plugins);
     return {};
   }
 
   public stop() {}
+
+  private async installManagedWorkflows(
+    plugins: WorkflowsExtensionsExamplePluginStartDeps
+  ): Promise<void> {
+    try {
+      const client = await plugins.workflowsExtensions.initManagedWorkflowsClient(
+        EXAMPLE_MANAGED_WORKFLOW_PLUGIN_ID
+      );
+
+      await client.install(EXAMPLE_MANAGED_WORKFLOW_ID, {
+        spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+        values: { recipient: 'World' },
+      });
+
+      await client.ready();
+
+      this.logger.info('Workflows Extensions Example: Managed workflow installed successfully');
+    } catch (error) {
+      this.logger.warn('Workflows Extensions Example: Failed to install managed workflow', {
+        error,
+      });
+    }
+  }
 }

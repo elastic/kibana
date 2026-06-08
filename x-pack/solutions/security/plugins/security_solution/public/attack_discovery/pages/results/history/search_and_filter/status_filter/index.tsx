@@ -74,12 +74,13 @@ const StatusFilterComponent: React.FC<Props> = ({
   return (
     <EuiFilterGroup>
       <EuiPopover
+        aria-label={i18n.STATUS}
         button={button}
         closePopover={closePopover}
         data-test-subj="statusFilterPopover"
         id={filterGroupPopoverId}
         isOpen={isPopoverOpen}
-        panelPaddingSize="none"
+        panelPaddingSize="s"
       >
         <EuiSelectable
           aria-label={i18n.STATUS}

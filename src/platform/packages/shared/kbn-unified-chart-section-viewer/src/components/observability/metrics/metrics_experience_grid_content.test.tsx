@@ -62,7 +62,7 @@ const dimensions: Dimension[] = [{ name: 'foo' }, { name: 'qux' }];
 const metricItems: ParsedMetricItem[] = [
   {
     metricName: 'field1',
-    dataStream: 'metrics-*',
+    indexName: 'metrics-*',
     units: ['ms'],
     metricTypes: ['counter'],
     fieldTypes: [ES_FIELD_TYPES.LONG],
@@ -70,7 +70,7 @@ const metricItems: ParsedMetricItem[] = [
   },
   {
     metricName: 'field2',
-    dataStream: 'metrics-*',
+    indexName: 'metrics-*',
     units: ['ms'],
     metricTypes: ['counter'],
     fieldTypes: [ES_FIELD_TYPES.LONG],
@@ -110,6 +110,7 @@ describe('MetricsExperienceGridContent', () => {
         updateESQLQuery: jest.fn(),
       },
       histogramCss: { name: '', styles: '' },
+      isTabSelected: true,
     };
 
     useMetricsExperienceStateMock.mockReturnValue({
@@ -121,6 +122,10 @@ describe('MetricsExperienceGridContent', () => {
       searchTerm: '',
       onSearchTermChange: jest.fn(),
       onToggleFullscreen: jest.fn(),
+      flyoutState: undefined,
+      onFlyoutStateChange: jest.fn(),
+      onFlyoutSelectedTabChange: jest.fn(),
+      profileId: 'test-profile-id',
     });
 
     usePaginationMock.mockReturnValue({
@@ -165,7 +170,7 @@ describe('MetricsExperienceGridContent', () => {
     const allFieldsSomeWithCpu = Array.from({ length: 20 }, (_, i) => ({
       metricName: i % 2 === 0 ? `cpu_field_${i}` : `mem_field_${i}`,
       dimensionFields: [dimensions[0]],
-      dataStream: 'metrics-*',
+      indexName: 'metrics-*',
       units: ['ms'] as MetricUnit[],
       metricTypes: ['counter'] as MappingTimeSeriesMetricType[],
       fieldTypes: [ES_FIELD_TYPES.LONG] as ES_FIELD_TYPES[],
@@ -180,6 +185,10 @@ describe('MetricsExperienceGridContent', () => {
       searchTerm: 'cpu',
       onSearchTermChange: jest.fn(),
       onToggleFullscreen: jest.fn(),
+      flyoutState: undefined,
+      onFlyoutStateChange: jest.fn(),
+      onFlyoutSelectedTabChange: jest.fn(),
+      profileId: 'test-profile-id',
     });
 
     const cpuMetricItems = allFieldsSomeWithCpu.filter((f) => f.metricName.includes('cpu'));

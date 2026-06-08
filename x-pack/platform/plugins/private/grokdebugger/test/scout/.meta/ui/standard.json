@@ -1,0 +1,59 @@
+{
+  "sha1": "7967c419c1130973bdd480ccf57fb34a28f5b9f4",
+  "tests": [
+    {
+      "id": "0cae6b496fe9def-9b6d4b58dd229bb",
+      "title": "Grok Debugger loads the app",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/grokdebugger/test/scout/ui/tests/grok_debugger.spec.ts",
+        "line": 23,
+        "column": 7
+      }
+    },
+    {
+      "id": "0cae6b496fe9def-f21a272dd59726e",
+      "title": "Grok Debugger simulates a built-in grok pattern",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/grokdebugger/test/scout/ui/tests/grok_debugger.spec.ts",
+        "line": 27,
+        "column": 7
+      }
+    },
+    {
+      "id": "0cae6b496fe9def-6484acdc1f8f28c",
+      "title": "Grok Debugger simulates a custom grok pattern",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/grokdebugger/test/scout/ui/tests/grok_debugger.spec.ts",
+        "line": 36,
+        "column": 7
+      }
+    }
+  ]
+}

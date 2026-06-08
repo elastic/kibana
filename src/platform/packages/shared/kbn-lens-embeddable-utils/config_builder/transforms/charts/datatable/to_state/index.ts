@@ -12,7 +12,11 @@ import type {
   FormBasedPersistedState,
   PersistedIndexPatternLayer,
 } from '@kbn/lens-common';
-import type { DatatableState, DatatableStateESQL, DatatableStateNoESQL } from '../../../../schema';
+import type {
+  DatatableConfig,
+  DatatableConfigESQL,
+  DatatableConfigNoESQL,
+} from '../../../../schema';
 import { DEFAULT_LAYER_ID } from '../../../../constants';
 import { fromMetricAPItoLensState } from '../../../columns/metric';
 import { getValueColumn } from '../../../columns/esql_column';
@@ -29,7 +33,7 @@ import { buildStylingState } from './styling';
 import { processMetricColumnsWithReferences } from '../../utils';
 
 export function buildFormBasedLayer(
-  config: DatatableStateNoESQL
+  config: DatatableConfigNoESQL
 ): FormBasedPersistedState['layers'] {
   const layers: Record<string, PersistedIndexPatternLayer> = generateLayer(
     DEFAULT_LAYER_ID,
@@ -74,7 +78,7 @@ export function buildFormBasedLayer(
   return layers;
 }
 
-export function getValueColumns(config: DatatableStateESQL) {
+export function getValueColumns(config: DatatableConfigESQL) {
   return [
     ...(config.rows ?? []).map((row, index) =>
       getValueColumn(
@@ -97,7 +101,7 @@ export function getValueColumns(config: DatatableStateESQL) {
   ];
 }
 
-export function buildVisualizationState(config: DatatableState): DatatableVisualizationState {
+export function buildVisualizationState(config: DatatableConfig): DatatableVisualizationState {
   const metrics = buildMetricsState(config.metrics);
   const rows = buildRowsState(config.rows);
   const splitMetrics = buildSplitMetricsByState(config.split_metrics_by);

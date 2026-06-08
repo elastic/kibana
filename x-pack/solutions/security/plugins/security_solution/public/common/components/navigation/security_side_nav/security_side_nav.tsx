@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import {
   LinkCategoryType,
@@ -19,6 +20,7 @@ import {
   SolutionSideNavItemPosition,
 } from '@kbn/security-solution-side-nav';
 import useObservable from 'react-use/lib/useObservable';
+import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING } from '../../../../../common/constants';
 import { useRouteSpy } from '../../../utils/route/use_route_spy';
 import { type GetSecuritySolutionLinkProps, useGetSecuritySolutionLinkProps } from '../../links';
@@ -31,6 +33,7 @@ import { useKibana } from '../../../lib/kibana';
 import { getNavCategories } from './categories';
 import { useParentLinks } from '../../../links/links_hooks';
 import { CLASSIC_LAUNCHPAD_PANEL_LINK_ENTRIES } from '../../../../onboarding/links';
+import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 
 export const EUI_HEADER_HEIGHT = '93px';
 
@@ -91,9 +94,13 @@ const formatLink = (
   };
 };
 
-const useSolutionSideNavItems = (): SolutionSideNavItem<string>[] | undefined => {
+const useSolutionSideNavItems = (
+  chatExperience: AIChatExperience,
+  isClassicNavExternalLinksEnabled: boolean
+): SolutionSideNavItem<string>[] | undefined => {
   const navLinks = useNavLinks();
   const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps(); // adds href and onClick props
+  const { application } = useKibana().services;
 
   const classicFooterItems = useMemo((): SolutionSideNavItem[] | null => {
     const flatNavLinks = flattenNavigationLinks(navLinks);
@@ -204,7 +211,10 @@ const useSolutionSideNavItems = (): SolutionSideNavItem<string>[] | undefined =>
         return navItems;
       }
 
-      if (navLink.id === SecurityPageName.administration) {
+      if (
+        navLink.id === SecurityPageName.launchpad ||
+        navLink.id === SecurityPageName.administration
+      ) {
         return navItems;
       }
 
@@ -213,8 +223,59 @@ const useSolutionSideNavItems = (): SolutionSideNavItem<string>[] | undefined =>
       return navItems;
     }, []);
 
-    return [...bodyItems, ...(classicFooterItems ? classicFooterItems : [])];
-  }, [navLinks, getSecuritySolutionLinkProps, classicFooterItems]);
+    // External app links — hrefs are built via getUrlForApp so basePath and active
+    // space are automatically prepended (handles e.g. /s/my-space/app/discover).
+    const externalLinks: SolutionSideNavItem[] = [
+      // Agent builder for AI agent chat and not classic AI experience
+      ...(chatExperience === AIChatExperience.Agent
+        ? [
+            {
+              id: SecurityPageName.externalLinkAgentBuilder,
+              label: 'Agents',
+              href: application.getUrlForApp('agent_builder', { path: '/agents' }),
+              onClick: (e: React.MouseEvent) => {
+                e.preventDefault();
+                application.navigateToApp('agent_builder', { path: '/agents' });
+              },
+              position: SolutionSideNavItemPosition.top,
+            },
+          ]
+        : []),
+      {
+        id: SecurityPageName.externalLinkDiscover,
+        label: 'Discover',
+        href: application.getUrlForApp('discover'),
+        onClick: (e: React.MouseEvent) => {
+          e.preventDefault();
+          application.navigateToApp('discover');
+        },
+        position: SolutionSideNavItemPosition.top,
+      },
+      {
+        id: SecurityPageName.externalLinkWorkflows,
+        label: 'Workflows',
+        href: application.getUrlForApp('workflows'),
+        onClick: (e: React.MouseEvent) => {
+          e.preventDefault();
+          application.navigateToApp('workflows');
+        },
+        position: SolutionSideNavItemPosition.top,
+      },
+    ];
+
+    return [
+      ...(isClassicNavExternalLinksEnabled ? externalLinks : []),
+      ...bodyItems,
+      ...(classicFooterItems ? classicFooterItems : []),
+    ];
+  }, [
+    application,
+    chatExperience,
+    navLinks,
+    getSecuritySolutionLinkProps,
+    classicFooterItems,
+    isClassicNavExternalLinksEnabled,
+  ]);
 
   return sideNavItems;
 };
@@ -250,9 +311,19 @@ const usePanelBottomOffset = (): string | undefined => {
  * It takes the links to render from the generic application `links` configs.
  */
 export const SecuritySideNav: React.FC = () => {
-  const { uiSettings } = useKibana().services;
+  const {
+    uiSettings,
+    settings: { client },
+  } = useKibana().services;
 
-  const items = useSolutionSideNavItems();
+  const chatExperience = useObservable(client.get$(AI_CHAT_EXPERIENCE_TYPE));
+  const isNewEAHomePageEnabled = useIsExperimentalFeatureEnabled(
+    'entityAnalyticsNewHomePageEnabled'
+  );
+  const isClassicNavExternalLinksEnabled = useIsExperimentalFeatureEnabled(
+    'securityClassicNavExternalLinks'
+  );
+  const items = useSolutionSideNavItems(chatExperience, isClassicNavExternalLinksEnabled);
   const selectedId = useSelectedId();
   const panelTopOffset = usePanelTopOffset();
   const panelBottomOffset = usePanelBottomOffset();
@@ -262,8 +333,13 @@ export const SecuritySideNav: React.FC = () => {
       ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
       false
     );
-    return getNavCategories(enableAlertsAndAttacksAlignment);
-  }, [uiSettings]);
+    return getNavCategories(
+      chatExperience,
+      enableAlertsAndAttacksAlignment,
+      isNewEAHomePageEnabled,
+      isClassicNavExternalLinksEnabled
+    );
+  }, [uiSettings, isNewEAHomePageEnabled, chatExperience, isClassicNavExternalLinksEnabled]);
 
   if (!items) {
     return <EuiLoadingSpinner size="m" data-test-subj="sideNavLoader" />;

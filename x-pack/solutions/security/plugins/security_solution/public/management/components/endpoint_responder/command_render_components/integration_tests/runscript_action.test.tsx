@@ -24,12 +24,14 @@ import React from 'react';
 import type { EndpointPrivileges } from '../../../../../../common/endpoint/types';
 import { enterConsoleCommand, getConsoleSelectorsAndActionMock } from '../../../console/mocks';
 import { SCRIPTS_LIBRARY_ITEM_DOWNLOAD_ROUTE } from '../../../../../../common/endpoint/constants';
+import type { GetEndpointConsoleCommandsOptions } from '../../lib/console_commands_definition';
 
 describe('When using runscript action from response console', () => {
   let mockedContext: AppContextTestRender;
   let user: UserEvent;
   let render: (
-    agentType?: ResponseActionAgentType
+    agentType?: ResponseActionAgentType,
+    endpointCapabilities?: GetEndpointConsoleCommandsOptions['endpointCapabilities']
   ) => Promise<ReturnType<AppContextTestRender['render']>>;
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let apiMocks: ReturnType<typeof responseActionsHttpMocks>;
@@ -53,7 +55,12 @@ describe('When using runscript action from response console', () => {
     mockedContext = createAppRootMockRenderer();
     apiMocks = responseActionsHttpMocks(mockedContext.coreStart.http);
     endpointPrivileges = { ...getEndpointAuthzInitialStateMock(), loading: false };
-    render = async (agentType: ResponseActionAgentType = 'endpoint') => {
+    render = async (
+      agentType: ResponseActionAgentType = 'endpoint',
+      endpointCapabilities: GetEndpointConsoleCommandsOptions['endpointCapabilities'] = [
+        ...ENDPOINT_CAPABILITIES,
+      ]
+    ) => {
       renderResult = mockedContext.render(
         <ConsoleManagerTestComponent
           registerConsoleProps={() => {
@@ -63,7 +70,7 @@ describe('When using runscript action from response console', () => {
                 commands: getEndpointConsoleCommands({
                   agentType,
                   endpointAgentId: 'a.b.c',
-                  endpointCapabilities: [...ENDPOINT_CAPABILITIES],
+                  endpointCapabilities,
                   endpointPrivileges,
                   platform: 'linux',
                 }),
@@ -230,7 +237,7 @@ describe('When using runscript action from response console', () => {
     beforeEach(async () => {
       const _render = render;
 
-      render = () => _render('endpoint');
+      render = (_, capabilities) => _render('endpoint', capabilities);
 
       mockedContext.setExperimentalFlag({
         responseActionsEndpointRunScript: true,
@@ -303,6 +310,22 @@ describe('When using runscript action from response console', () => {
       expect(renderResult.getByTestId('test-unknownCommandError').textContent).toEqual(
         'Unsupported text/commandThe text you entered runscript is unsupported! Click  Help or type help for assistance.'
       );
+    });
+
+    it('should display help panel "+" button disabled if Endpoint does not support runscript', async () => {
+      await render(
+        'endpoint',
+        ENDPOINT_CAPABILITIES.filter((capability) => capability !== 'runscript')
+      );
+      consoleMockUtils.openHelpPanel();
+
+      expect(
+        (
+          renderResult.getByTestId(
+            'test-commandList-Responseactions-runscript-addToInput'
+          ) as HTMLButtonElement
+        ).disabled
+      ).toBe(true);
     });
 
     it('should retrieve and display list of scripts for OS type', async () => {

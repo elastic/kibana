@@ -21,14 +21,13 @@ import {
   EuiOutsideClickDetector,
   EuiForm,
 } from '@elastic/eui';
-import type { FC } from 'react';
+import type { FC, ReactNode } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SecurityPageName } from '@kbn/deeplinks-security';
 import { ConnectorSelector } from '@kbn/security-solution-connectors';
 import { useLoadConnectors } from '@kbn/inference-connectors';
-import type { ReactNode } from 'react-markdown';
 import { SIEM_MIGRATION_INFERENCE_FEATURE_ID } from '../../../../../common/siem_migrations/constants';
 import { useKibana } from '../../../../common/lib/kibana';
 import { OnboardingCardId, OnboardingTopicId } from '../../../../onboarding/constants';
@@ -155,7 +154,6 @@ export const StartMigrationModal: FC<StartMigrationModalProps> = React.memo(
                     defaultMessage={'To set up other LLM connectors, visit {link}.'}
                     values={{
                       link: (
-                        /* eslint-disable-next-line @elastic/eui/href-or-on-click */
                         <EuiLink href={setupAIConnectorLink} onClick={onClickSetupAIConnector}>
                           {i18n.START_MIGRATION_MODAL_SETUP_NEW_AI_CONNECTOR_HELP_TEXT}
                         </EuiLink>

@@ -24,11 +24,11 @@ import type { BehaviorSubject } from 'rxjs';
 import { filter, skip } from 'rxjs';
 import type { ProfileProviderServices } from '../../../profile_provider_services';
 import type { LogOverviewContext } from '../../logs_data_source_profile/profile';
-import type { LogDocumentProfileProvider } from '../profile';
+import { OBSERVABILITY_LOG_DOCUMENT_PROFILE_ID, type LogDocumentProfileProvider } from '../profile';
 
 export const createGetDocViewer =
   (services: ProfileProviderServices): LogDocumentProfileProvider['profile']['getDocViewer'] =>
-  (prev, { context }) =>
+  (prev, { context, toolkit }) =>
   (params) => {
     const prevDocViewer = prev(params);
 
@@ -69,7 +69,7 @@ export const createGetDocViewer =
                 streamsFeature={streamsFeature}
                 cpsHasLinkedProjects={cpsHasLinkedProjects}
                 indexes={indexes}
-                docViewActions={params.actions}
+                docViewActions={toolkit.actions}
                 {...props}
               />
             );
@@ -119,6 +119,7 @@ const LogOverviewTab = ({
       renderFlyoutStreamProcessingLink={streamsFeature?.renderFlyoutStreamProcessingLink}
       renderCpsWarning={renderCpsWarning}
       indexes={indexes}
+      profileId={OBSERVABILITY_LOG_DOCUMENT_PROFILE_ID}
     />
   );
 };

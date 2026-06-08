@@ -6,15 +6,21 @@
  */
 
 import { LinkCategoryType, type SeparatorLinkCategory } from '@kbn/security-solution-navigation';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { SecurityPageName } from '../../../../../common';
 
 export const getNavCategories = (
-  enableAlertsAndAttacksAlignment?: boolean
+  chatExperience: AIChatExperience,
+  enableAlertsAndAttacksAlignment?: boolean,
+  isNewEAHomePageEnabled?: boolean,
+  securityClassicNavExternalLinks?: boolean
 ): SeparatorLinkCategory[] => {
   const categories: SeparatorLinkCategory[] = [
     {
       type: LinkCategoryType.separator,
-      linkIds: [SecurityPageName.dashboards],
+      linkIds: securityClassicNavExternalLinks
+        ? [SecurityPageName.externalLinkDiscover, SecurityPageName.dashboards]
+        : [SecurityPageName.dashboards],
     },
     {
       type: LinkCategoryType.separator,
@@ -23,6 +29,15 @@ export const getNavCategories = (
         enableAlertsAndAttacksAlignment
           ? SecurityPageName.alertDetections
           : SecurityPageName.alerts,
+        ...(securityClassicNavExternalLinks
+          ? [
+              // Agent builder for AI agent chat and not classic AI experience
+              ...(chatExperience === AIChatExperience.Agent
+                ? [SecurityPageName.externalLinkAgentBuilder]
+                : []),
+              SecurityPageName.externalLinkWorkflows,
+            ]
+          : []),
         SecurityPageName.attackDiscovery,
         SecurityPageName.cloudSecurityPostureFindings,
         SecurityPageName.case,
@@ -31,7 +46,9 @@ export const getNavCategories = (
     {
       type: LinkCategoryType.separator,
       linkIds: [
-        SecurityPageName.entityAnalyticsLanding,
+        isNewEAHomePageEnabled
+          ? SecurityPageName.entityAnalyticsHomePage
+          : SecurityPageName.entityAnalyticsLanding,
         SecurityPageName.exploreLanding,
         SecurityPageName.timelines,
         SecurityPageName.threatIntelligence,

@@ -251,6 +251,10 @@ export const ADD_TO_EXISTING_CASE = i18n.translate(
   }
 );
 
+export const ADD_TO_CHAT = i18n.translate('xpack.responseOpsAlertsTable.actions.addChat', {
+  defaultMessage: 'Add to chat',
+});
+
 export const ADD_TO_NEW_CASE = i18n.translate('xpack.responseOpsAlertsTable.actions.addToNewCase', {
   defaultMessage: 'Add to new case',
 });
@@ -347,3 +351,10 @@ export const getAlertFlyoutAriaLabel = (alertDescription: string) =>
     defaultMessage: 'Details for alert "{alertDescription}"',
     values: { alertDescription },
   });
+
+export const BULK_ACTIONS_ARIA_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.alertsTable.bulkActionsAriaLabel',
+  {
+    defaultMessage: 'Bulk actions',
+  }
+);

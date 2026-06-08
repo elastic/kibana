@@ -19,6 +19,7 @@ import {
   KI_FEATURE_EXTRACTION_POLL_INTERVAL_MS,
   KI_FEATURE_EXTRACTION_TIMEOUT_MS,
   DEFAULT_LOGS_INDEX,
+  QUERIES_INDEX,
 } from './constants';
 import {
   getSigeventsSnapshotKIFeaturesIndex,
@@ -98,16 +99,17 @@ export async function triggerSigEventsKIFeatureExtraction(
   const { status, data } = await kibanaRequest(
     config,
     'POST',
-    `/internal/streams/${streamName}/features/_task`,
+    `/internal/streams/${streamName}/onboarding/_execute`,
     {
       action: 'schedule',
       from: new Date(now - 24 * 60 * 60 * 1000).toISOString(),
       to: new Date(now).toISOString(),
+      steps: ['features_identification'],
     }
   );
 
   if (status >= 200 && status < 300) {
-    log.info('Scheduled the feature extraction task successfully');
+    log.info('Scheduled the onboarding workflow for feature extraction successfully');
     return;
   }
 
@@ -119,14 +121,14 @@ export async function waitForSigEventsKIFeatureExtraction(
   log: ToolingLog,
   streamName: string = DEFAULT_LOGS_INDEX
 ): Promise<void> {
-  log.info('Polling feature extraction status...');
+  log.info('Polling onboarding status for feature extraction...');
   const deadline = Date.now() + KI_FEATURE_EXTRACTION_TIMEOUT_MS;
 
   while (Date.now() < deadline) {
     const { data } = await kibanaRequest(
       config,
       'GET',
-      `/internal/streams/${streamName}/features/_status`
+      `/internal/streams/${streamName}/onboarding/_status`
     );
 
     const taskStatus = (data as Record<string, unknown>)?.status;
@@ -277,4 +279,29 @@ export async function enableLogsNativeStream(
     }
     throw err;
   }
+}
+
+export async function promoteQueries(config: ConnectionConfig): Promise<void> {
+  const { status, data } = await kibanaRequest(
+    config,
+    'POST',
+    '/internal/streams/queries/_promote'
+  );
+  if (status < 200 || status >= 300) {
+    throw new Error(`Failed to promote queries: ${status} ${JSON.stringify(data)}`);
+  }
+}
+
+export async function resetQueriesPromotion({ esClient }: { esClient: Client }): Promise<void> {
+  await esClient.updateByQuery({
+    index: QUERIES_INDEX,
+    conflicts: 'proceed',
+    refresh: true,
+    query: { match_all: {} },
+    script: {
+      lang: 'painless',
+      source: `ctx._source['rule_backed'] = params.rb`,
+      params: { rb: false },
+    },
+  });
 }

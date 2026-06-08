@@ -57,7 +57,6 @@ export async function getServiceAgent({
   ] as const);
 
   const params = {
-    terminate_after: 1,
     apm: {
       events: [ProcessorEvent.error, ProcessorEvent.transaction, ProcessorEvent.metric],
     },
@@ -101,9 +100,7 @@ export async function getServiceAgent({
       },
     },
     fields,
-    sort: {
-      _score: { order: 'desc' as const },
-    },
+    sort: { '@timestamp': { order: 'desc' as const }, _score: { order: 'desc' as const } },
   };
 
   const response = await apmEventClient.search('get_service_agent_name', params);

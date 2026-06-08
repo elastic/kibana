@@ -160,6 +160,7 @@ const SavedSearchComponentTable: React.FC<
     dependencies: { dataViews },
     initialSerializedState,
     filters,
+    nonHighlightingFilters,
     query,
     timeRange,
     timestampField,
@@ -170,13 +171,15 @@ const SavedSearchComponentTable: React.FC<
   const embeddableApi = useRef<SearchEmbeddableApi | undefined>(undefined);
   const [isEmbeddableApiAvailable, setIsEmbeddableApiAvailable] = useState(false);
 
+  const { executionContext } = props;
   const parentApi = useMemo(() => {
     return {
+      ...(executionContext ? { executionContext } : {}),
       getSerializedStateForChild: () => {
         return initialSerializedState;
       },
     };
-  }, [initialSerializedState]);
+  }, [initialSerializedState, executionContext]);
 
   useEffect(
     function syncIndex() {
@@ -218,6 +221,26 @@ const SavedSearchComponentTable: React.FC<
       embeddableApi.current.setQuery(query);
     },
     [query]
+  );
+
+  useEffect(
+    function syncNonHighlightingFilters() {
+      if (!embeddableApi.current) return;
+
+      const applyNonHighlightingFilters = (savedSearch: SavedSearch) => {
+        savedSearch.searchSource.setField('nonHighlightingFilters', nonHighlightingFilters);
+      };
+
+      applyNonHighlightingFilters(embeddableApi.current.savedSearch$.getValue());
+      const subscription = embeddableApi.current.savedSearch$.subscribe(
+        applyNonHighlightingFilters
+      );
+
+      return () => {
+        subscription.unsubscribe();
+      };
+    },
+    [nonHighlightingFilters, isEmbeddableApiAvailable]
   );
 
   useEffect(

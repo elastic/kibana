@@ -12,7 +12,7 @@ import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
 import type { DeepPartial } from '@kbn/utility-types';
 import type { MlClient } from '../ml_client';
 import type { DatafeedsService } from '../../models/job_service/datafeeds';
-import type { FieldFormatsRegistryProvider } from '../../../common/types/kibana';
+import type { FieldFormatsRegistryProvider } from '@kbn/ml-common-types/kibana';
 import type { GetDataViewsService } from '../data_views_utils';
 import { alertingServiceProvider } from './alerting_service';
 import type { MlAnomalyDetectionAlertPreviewRequest } from '../../routes/schemas/alerting_schema';
@@ -125,7 +125,7 @@ const createService = () => {
       .mockImplementation(({ id }: { id: string } | DeepPartial<{ id: string }>) => {
         if (id === 'date') {
           return {
-            convert: jest
+            convertToText: jest
               .fn()
               .mockImplementation(
                 (value: number, _type?: string, options?: { timezone?: string }) =>
@@ -135,7 +135,7 @@ const createService = () => {
         }
 
         return {
-          convert: jest.fn().mockImplementation((value: number) => value.toString()),
+          convertToText: jest.fn().mockImplementation((value: number) => value.toString()),
         };
       }),
   }) as jest.Mocked<FieldFormatsRegistryProvider>;

@@ -1,0 +1,48 @@
+name: Prefetch PR context
+
+on:
+  workflow_call:
+    inputs:
+      pr_number:
+        description: Pull request number to fetch context for.
+        required: true
+        type: string
+      repo:
+        description: Repository in owner/repo form.
+        required: true
+        type: string
+      artifact_name:
+        description: Artifact name used to publish the prefetched context.
+        required: true
+        type: string
+
+jobs:
+  prefetch_pr_context:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: read
+      pull-requests: read
+    steps:
+      - name: Checkout workflow scripts
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: main
+          persist-credentials: false
+
+      - name: Fetch PR context
+        env:
+          PR_NUMBER: ${{ inputs.pr_number }}
+          REPO: ${{ inputs.repo }}
+        uses: actions/github-script@373c709c69115d41ff229c7e5df9f8788daa9553 # v9
+        with:
+          script: |
+            const { prefetchPrContext } = require('./.github/scripts/prefetch_pr_context');
+            await prefetchPrContext({ github, core });
+
+      - name: Upload PR context artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ${{ inputs.artifact_name }}
+          path: /tmp/pr-context
+          retention-days: 1

@@ -42,15 +42,24 @@ export interface RulesFindAllResultItem {
   namespaces?: string[];
 }
 
+interface RuleWriteResult {
+  id: string;
+  version?: string;
+}
+
 export interface RulesSavedObjectServiceContract {
-  create(params: { attrs: RuleSavedObjectAttributes; id?: string }): Promise<string>;
+  create(params: { attrs: RuleSavedObjectAttributes; id?: string }): Promise<RuleWriteResult>;
   get(
     id: string,
     spaceId?: string
   ): Promise<{ id: string; attributes: RuleSavedObjectAttributes; version?: string }>;
   bulkGetByIds(ids: string[], spaceId?: string): Promise<RulesSavedObjectsBulkGetResultItem[]>;
   findByIds(ruleIds: string[], spaceId?: string): Promise<RulesFindAllResultItem[]>;
-  update(params: { id: string; attrs: RuleSavedObjectAttributes; version?: string }): Promise<void>;
+  update(params: {
+    id: string;
+    attrs: RuleSavedObjectAttributes;
+    version?: string;
+  }): Promise<RuleWriteResult>;
   bulkUpdate(
     items: Array<{ id: string; attrs: RuleSavedObjectAttributes; version?: string }>
   ): Promise<BulkUpdateResultItem[]>;
@@ -60,13 +69,15 @@ export interface RulesSavedObjectServiceContract {
     page: number;
     perPage: number;
     filter?: string;
+    search?: string;
+    searchFields?: string[];
     sortField?: string;
     sortOrder?: 'asc' | 'desc';
   }): Promise<{
-    saved_objects: Array<{ id: string; attributes: RuleSavedObjectAttributes }>;
+    saved_objects: Array<{ id: string; attributes: RuleSavedObjectAttributes; version?: string }>;
     total: number;
   }>;
-  findTags(): Promise<string[]>;
+  findTags(params?: { filter?: string }): Promise<string[]>;
 }
 
 @injectable()
@@ -83,13 +94,17 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
   }: {
     attrs: RuleSavedObjectAttributes;
     id?: string;
-  }): Promise<string> {
+  }): Promise<RuleWriteResult> {
     const ruleId = id ?? SavedObjectsUtils.generateId();
-    await this.client.create<RuleSavedObjectAttributes>(RULE_SAVED_OBJECT_TYPE, attrs, {
-      id: ruleId,
-      overwrite: false,
-    });
-    return ruleId;
+    const result = await this.client.create<RuleSavedObjectAttributes>(
+      RULE_SAVED_OBJECT_TYPE,
+      attrs,
+      {
+        id: ruleId,
+        overwrite: false,
+      }
+    );
+    return { id: result.id, version: result.version };
   }
   public async get(
     id: string,
@@ -163,11 +178,17 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
     id: string;
     attrs: RuleSavedObjectAttributes;
     version?: string;
-  }): Promise<void> {
-    await this.client.update<RuleSavedObjectAttributes>(RULE_SAVED_OBJECT_TYPE, id, attrs, {
-      ...(version ? { version } : {}),
-      mergeAttributes: false,
-    });
+  }): Promise<RuleWriteResult> {
+    const result = await this.client.update<RuleSavedObjectAttributes>(
+      RULE_SAVED_OBJECT_TYPE,
+      id,
+      attrs,
+      {
+        ...(version ? { version } : {}),
+        mergeAttributes: false,
+      }
+    );
+    return { id: result.id, version: result.version };
   }
 
   public async bulkUpdate(
@@ -223,12 +244,16 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
     page,
     perPage,
     filter,
+    search,
+    searchFields,
     sortField = 'updatedAt',
     sortOrder = 'desc',
   }: {
     page: number;
     perPage: number;
     filter?: string;
+    search?: string;
+    searchFields?: string[];
     sortField?: string;
     sortOrder?: 'asc' | 'desc';
   }) {
@@ -239,13 +264,15 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
       sortField,
       sortOrder,
       ...(filter ? { filter } : {}),
+      ...(search ? { search, searchFields, defaultSearchOperator: 'AND' as const } : {}),
     });
   }
 
-  public async findTags(): Promise<string[]> {
+  public async findTags({ filter }: { filter?: string } = {}): Promise<string[]> {
     const result = await this.client.find<RuleSavedObjectAttributes>({
       type: RULE_SAVED_OBJECT_TYPE,
       perPage: 0,
+      ...(filter ? { filter } : {}),
       aggs: {
         tags: {
           terms: {

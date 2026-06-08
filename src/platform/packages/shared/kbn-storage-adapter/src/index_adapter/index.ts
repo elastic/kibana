@@ -10,6 +10,7 @@
 import type {
   BulkOperationContainer,
   BulkOperationType,
+  EsqlQueryRequest,
   IndexResponse,
   IndicesIndexState,
   IndicesIndexTemplate,
@@ -23,6 +24,8 @@ import { last, mapValues, padStart } from 'lodash';
 import type { DiagnosticResult } from '@elastic/elasticsearch';
 import { errors } from '@elastic/elasticsearch';
 import type { TransportRequestOptions } from '@elastic/transport';
+import { esql } from '@elastic/esql';
+import type { ESQLSearchResponse } from '@kbn/es-types';
 import type {
   IndexStorageSettings,
   StorageClientBulkResponse,
@@ -38,6 +41,7 @@ import type {
   StorageClientSearchResponse,
   StorageClientClean,
   StorageClientCleanResponse,
+  StorageClientEsql,
   InternalIStorageClient,
   StorageTransportOptions,
 } from '../..';
@@ -84,6 +88,29 @@ function isNotFoundError(error: Error): error is errors.ResponseError & { status
   return isResponseError(error) && error.statusCode === 404;
 }
 
+// ES|QL signals a missing index as a 400 `verification_exception` with
+// `"Unknown index [<name>]"` instead of 404 — match it explicitly so we
+// stay consistent with `search`/`get`'s missing-index handling.
+export function isEsqlUnknownIndexError(error: unknown): boolean {
+  if (!isResponseError(error as Error)) return false;
+  const responseError = error as errors.ResponseError;
+  if (responseError.statusCode !== 400) return false;
+  const body = responseError.body as { error?: { type?: string; reason?: string } } | undefined;
+  return (
+    body?.error?.type === 'verification_exception' &&
+    typeof body?.error?.reason === 'string' &&
+    body.error.reason.includes('Unknown index')
+  );
+}
+
+function isServerlessSettingsError(error: unknown): boolean {
+  if (!isResponseError(error as Error)) {
+    return false;
+  }
+  const reason: string = (error as errors.ResponseError).body?.error?.reason ?? '';
+  return reason.includes('not available when running in serverless mode');
+}
+
 /*
  * When calling into Elasticsearch, the stack trace is lost.
  * If we create an error before calling, and append it to
@@ -111,6 +138,18 @@ export interface StorageIndexAdapterOptions<TApplicationType> {
    * This should be used as rarely as possible - in most cases, new properties should be added as optional.
    */
   migrateSource?: (document: Record<string, unknown>) => TApplicationType;
+  /**
+   * When true, index settings (e.g. `number_of_shards`, `auto_expand_replicas`)
+   * are omitted from index templates because Serverless ES does not support them
+   * on user-visible indices.
+   *
+   * Detection is three-tiered:
+   * 1. Explicit - this option is used when provided.
+   * 2. Proactive - `esClient.info()` is called to check `build_flavor`.
+   * 3. Reactive - if both above are unavailable, the adapter catches
+   *    the `illegal_argument_exception` on the first write and retries.
+   */
+  isServerless?: boolean;
 }
 
 /**
@@ -136,8 +175,15 @@ export class StorageIndexAdapter<
   TStorageSettings extends IndexStorageSettings,
   TApplicationType extends Partial<StorageDocumentOf<TStorageSettings>>
 > {
+  private static readonly INDEX_SETTINGS = {
+    auto_expand_replicas: '0-1',
+    number_of_shards: 1,
+  } as const;
+
   private readonly logger: Logger;
   private updateMappingsPromise: Promise<void> | undefined;
+  private serverlessCheck: Promise<boolean | undefined> | undefined;
+  private isServerless: boolean | undefined;
 
   constructor(
     private readonly esClient: ElasticsearchClient,
@@ -146,6 +192,28 @@ export class StorageIndexAdapter<
     private readonly options: StorageIndexAdapterOptions<TApplicationType> = {}
   ) {
     this.logger = logger.get('storage').get(this.storage.name);
+    this.isServerless = options.isServerless;
+  }
+
+  /**
+   * Probes the ES cluster via `info()` to determine if we're running
+   * against Serverless ES. The result is cached for the lifetime of
+   * this adapter instance. Returns `undefined` when the check cannot
+   * be performed (e.g. missing method on a mock client, or
+   * insufficient privileges).
+   */
+  private detectServerless(): Promise<boolean | undefined> {
+    if (!this.serverlessCheck) {
+      this.serverlessCheck = (async () => {
+        try {
+          const info = await this.esClient.info();
+          return info.version.build_flavor === 'serverless';
+        } catch {
+          return undefined;
+        }
+      })();
+    }
+    return this.serverlessCheck;
   }
 
   private getSearchIndexPattern(): string {
@@ -159,35 +227,56 @@ export class StorageIndexAdapter<
   private async createOrUpdateIndexTemplate(): Promise<void> {
     const version = getSchemaVersion(this.storage);
 
-    const template: IndicesPutIndexTemplateIndexTemplateMapping = {
-      mappings: {
-        _meta: {
-          version,
-        },
-        dynamic: 'strict',
-        properties: {
-          ...mapValues(this.storage.schema.properties, toElasticsearchMappingProperty),
-        },
-      },
-      aliases: {
-        [getAliasName(this.storage.name)]: {
-          is_write_index: true,
-        },
+    const mappings: IndicesPutIndexTemplateIndexTemplateMapping['mappings'] = {
+      _meta: { version },
+      dynamic: 'strict',
+      properties: {
+        ...mapValues(this.storage.schema.properties, toElasticsearchMappingProperty),
       },
     };
 
-    await wrapEsCall(
-      this.esClient.indices.putIndexTemplate({
-        name: getIndexTemplateName(this.storage.name),
-        create: false,
-        allow_auto_create: false,
-        index_patterns: getIndexPattern(this.storage.name),
-        _meta: {
-          version,
-        },
-        template,
-      })
-    ).catch(catchConflictError);
+    const aliases: IndicesPutIndexTemplateIndexTemplateMapping['aliases'] = {
+      [getAliasName(this.storage.name)]: {
+        is_write_index: true,
+      },
+    };
+
+    const putTemplate = (includeSettings: boolean) =>
+      wrapEsCall(
+        this.esClient.indices.putIndexTemplate({
+          name: getIndexTemplateName(this.storage.name),
+          create: false,
+          allow_auto_create: false,
+          index_patterns: getIndexPattern(this.storage.name),
+          _meta: { version },
+          template: {
+            ...(includeSettings ? { settings: StorageIndexAdapter.INDEX_SETTINGS } : {}),
+            mappings,
+            aliases,
+          },
+        })
+      ).catch(catchConflictError);
+
+    const serverless = this.isServerless ?? (await this.detectServerless());
+    if (serverless !== undefined) {
+      await putTemplate(!serverless);
+      return;
+    }
+
+    try {
+      await putTemplate(true);
+      this.isServerless = false;
+    } catch (error) {
+      if (isServerlessSettingsError(error)) {
+        this.isServerless = true;
+        this.logger.debug(
+          'Index settings are unavailable (serverless ES); retrying template without settings'
+        );
+        await putTemplate(false);
+      } else {
+        throw error;
+      }
+    }
   }
 
   private async getExistingIndexTemplate(): Promise<IndicesIndexTemplate | undefined> {
@@ -319,11 +408,13 @@ export class StorageIndexAdapter<
     if (!writeIndex) {
       this.logger.debug(`Creating index`);
       await this.createIndex();
-    } else if (writeIndex?.state.mappings?._meta?.version !== expectedSchemaVersion) {
-      this.logger.debug(`Updating mappings of existing index due to schema version mismatch`);
-      await this.updateMappingsOfExistingIndex({
-        name: writeIndex.name,
-      });
+    } else {
+      if (writeIndex.state.mappings?._meta?.version !== expectedSchemaVersion) {
+        this.logger.debug(`Updating mappings of existing index due to schema version mismatch`);
+        await this.updateMappingsOfExistingIndex({
+          name: writeIndex.name,
+        });
+      }
     }
 
     return await cb();
@@ -643,6 +734,79 @@ export class StorageIndexAdapter<
     });
   };
 
+  /**
+   * @see {@link StorageClientEsql}
+   */
+
+  private esql: StorageClientEsql = (
+    { pipeline, metadata, filter, drop_null_columns = true, migrateSource = true, setOptions },
+    transportOptions
+  ) =>
+    this.ensureMappingsBeforeReading(async () => {
+      const emptyResponse: ESQLSearchResponse = { columns: [], values: [] };
+
+      // Build the adapter-owned FROM clause; callers supply only the pipeline.
+      const fromQuery =
+        metadata && metadata.length > 0
+          ? esql.from([this.getSearchIndexPattern()], metadata)
+          : esql.from([this.getSearchIndexPattern()]);
+
+      // Prepend any SET options (e.g. unmapped_fields="LOAD") before the FROM clause.
+      if (setOptions) {
+        for (const [key, value] of Object.entries(setOptions)) {
+          fromQuery.addSetCommand(key, value);
+        }
+      }
+
+      const { query: fromStr } = fromQuery.toRequest();
+      const { query: pipelineStr, params } = pipeline.toRequest();
+
+      // Reject pipelines that include their own FROM. The adapter owns the
+      // FROM clause; chaining `FROM <ours> | FROM <theirs>` is invalid ES|QL
+      // and would surface as an opaque 400 from ES.
+      if (/^\s*FROM\b/i.test(pipelineStr)) {
+        throw new Error(
+          `StorageClientEsql: pipeline must not start with a FROM clause; the storage adapter owns the FROM. Got: ${pipelineStr.slice(
+            0,
+            80
+          )}`
+        );
+      }
+
+      const query = `${fromStr} | ${pipelineStr}`;
+
+      try {
+        const esqlRequest = {
+          query,
+          ...(params && params.length > 0 ? { params } : {}),
+          ...(filter !== undefined ? { filter } : {}),
+          drop_null_columns,
+          format: 'json' as const,
+        } as unknown as EsqlQueryRequest;
+        const response = (await wrapEsCall(
+          this.esClient.esql.query(esqlRequest, ...optionalTransportArgs(transportOptions))
+        )) as unknown as ESQLSearchResponse;
+
+        if (migrateSource && this.options.migrateSource && metadata?.includes('_source')) {
+          const sourceIdx = response.columns.findIndex((c) => c.name === '_source');
+          if (sourceIdx >= 0) {
+            response.values = response.values.map((row) => {
+              const copy = [...row];
+              copy[sourceIdx] = this.options.migrateSource!(
+                copy[sourceIdx] as Record<string, unknown>
+              );
+              return copy;
+            });
+          }
+        }
+
+        return response;
+      } catch (error) {
+        if (isNotFoundError(error) || isEsqlUnknownIndexError(error)) return emptyResponse;
+        throw error;
+      }
+    });
+
   getClient(): InternalIStorageClient<TApplicationType> {
     return {
       bulk: this.bulk,
@@ -652,6 +816,7 @@ export class StorageIndexAdapter<
       search: this.search,
       get: this.get,
       existsIndex: this.existsIndex,
+      esql: this.esql,
     };
   }
 }

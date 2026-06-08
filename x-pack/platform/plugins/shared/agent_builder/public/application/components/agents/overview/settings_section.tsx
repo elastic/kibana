@@ -20,6 +20,8 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { labels } from '../../../utils/i18n';
 
 const { agentOverview: overviewLabels } = labels;
@@ -76,13 +78,20 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
           <EuiCard
             hasBorder
             display="plain"
-            paddingSize="l"
+            paddingSize="m"
             title={overviewLabels.customInstructionsTitle}
             titleElement="h3"
             titleSize="xs"
             description={overviewLabels.customInstructionsSubtitle}
             textAlign="left"
             onClick={canEditAgent ? onOpenEditFlyout : undefined}
+            {...(canEditAgent
+              ? getEbtProps({
+                  element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                  action: AGENT_BUILDER_UI_EBT.action.agentOverview.EDIT_DETAILS,
+                  detail: AGENT_BUILDER_UI_EBT.entity.AGENT,
+                })
+              : {})}
             footer={
               !currentInstructions && canEditAgent ? (
                 <EuiButtonEmpty
@@ -119,13 +128,20 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
           <EuiCard
             hasBorder
             display="plain"
-            paddingSize="l"
+            paddingSize="m"
             title={overviewLabels.agentSettingsCardTitle}
             titleElement="h3"
             titleSize="xs"
             description={overviewLabels.agentSettingsCardSubtitle}
             textAlign="left"
             onClick={canEditAgent ? onOpenEditFlyout : undefined}
+            {...(canEditAgent
+              ? getEbtProps({
+                  element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                  action: AGENT_BUILDER_UI_EBT.action.agentOverview.EDIT_DETAILS,
+                  detail: AGENT_BUILDER_UI_EBT.entity.AGENT,
+                })
+              : {})}
             css={css`
               height: 100%;
               .euiCard__content p {
@@ -147,7 +163,9 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
                     <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
                       <EuiFlexItem grow={false}>
                         <EuiText
-                          color={enableElasticCapabilities ? 'textPrimary' : 'subdued'}
+                          color={
+                            enableElasticCapabilities ? 'textPrimary' : euiTheme.colors.textDisabled
+                          }
                           size="s"
                         >
                           {overviewLabels.autoIncludeTitle}
@@ -185,7 +203,10 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
                       <EuiFlexItem grow>
                         <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
                           <EuiFlexItem grow={false}>
-                            <EuiText size="s" color={hasWorkflows ? 'textPrimary' : 'subdued'}>
+                            <EuiText
+                              size="s"
+                              color={hasWorkflows ? 'textPrimary' : euiTheme.colors.textDisabled}
+                            >
                               {overviewLabels.preExecutionWorkflowTitle}
                             </EuiText>
                           </EuiFlexItem>

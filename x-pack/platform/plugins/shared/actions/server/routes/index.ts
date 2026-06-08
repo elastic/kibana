@@ -10,8 +10,10 @@ import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { Logger, CoreSetup } from '@kbn/core/server';
 import { getAllConnectorsRoute } from './connector/get_all';
 import { getAllConnectorsIncludingSystemRoute } from './connector/get_all_system';
+import { connectorAuthStatusRoute } from './connector/auth_status';
 import { listTypesRoute } from './connector/list_types';
 import { listTypesWithSystemRoute } from './connector/list_types_system';
+import { getConnectorSpecRoute } from './connector/get_spec';
 import type { ILicenseState } from '../lib';
 import type { ActionsRequestHandlerContext } from '../types';
 import { createConnectorRoute } from './connector/create';
@@ -23,6 +25,7 @@ import { getOAuthAccessToken } from './get_oauth_access_token';
 import { oauthAuthorizeRoute } from './oauth_authorize';
 import { oauthCallbackRoute, oauthCallbackScriptRoute } from './oauth_callback';
 import { oauthDisconnectRoute } from './oauth_disconnect';
+import { oauthCancelRoute } from './oauth_cancel';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import { getGlobalExecutionLogRoute } from './get_global_execution_logs';
 import { getGlobalExecutionKPIRoute } from './get_global_execution_kpi';
@@ -57,6 +60,10 @@ export function defineRoutes(opts: RouteOptions) {
   oauthCallbackRoute(router, licenseState, actionsConfigUtils, logger, core, oauthRateLimiter);
   oauthCallbackScriptRoute(router);
   oauthDisconnectRoute(router, licenseState, logger, core);
+  oauthCancelRoute(router, licenseState, logger, core);
   getAllConnectorsIncludingSystemRoute(router, licenseState);
+  connectorAuthStatusRoute(router, licenseState);
   listTypesWithSystemRoute(router, licenseState);
+
+  getConnectorSpecRoute(router, licenseState, actionsConfigUtils);
 }

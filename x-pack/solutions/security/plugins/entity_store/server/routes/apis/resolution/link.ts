@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import path from 'node:path';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { z } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
@@ -23,8 +24,12 @@ import {
 } from '../../../domain/errors';
 
 const bodySchema = z.object({
-  target_id: z.string(),
-  entity_ids: z.array(z.string()).min(1).max(1000),
+  target_id: z.string().describe('The entity identifier to resolve the linked entities to.'),
+  entity_ids: z
+    .array(z.string())
+    .min(1)
+    .max(1000)
+    .describe('Entity identifiers to link to the target entity. Minimum 1, maximum 1000.'),
 });
 
 export function registerResolutionLink(router: EntityStorePluginRouter) {
@@ -32,6 +37,14 @@ export function registerResolutionLink(router: EntityStorePluginRouter) {
     .post({
       path: ENTITY_STORE_ROUTES.public.RESOLUTION_LINK,
       access: 'public',
+      summary: 'Link entities',
+      description:
+        'Link one or more entities to a target entity, creating a resolution group. ' +
+        'Changes become visible on subsequent reads after the next index refresh ' +
+        '(typically <1s). Requires an enterprise license.',
+      options: {
+        tags: ['oas-tag:Security entity store'],
+      },
       security: {
         authz: RESOLUTION_ENTITY_STORE_PERMISSIONS,
       },
@@ -45,6 +58,9 @@ export function registerResolutionLink(router: EntityStorePluginRouter) {
             body: buildRouteValidationWithZod(bodySchema),
           },
         },
+        options: {
+          oasOperationObject: () => path.join(__dirname, '../examples/resolution_link.yaml'),
+        },
       },
       wrapMiddlewares(
         async (ctx, req, res): Promise<IKibanaResponse> => {
@@ -55,7 +71,8 @@ export function registerResolutionLink(router: EntityStorePluginRouter) {
           try {
             const result = await resolutionClient.linkEntities(
               req.body.target_id,
-              req.body.entity_ids
+              req.body.entity_ids,
+              { awaitVisibility: true }
             );
 
             return res.ok({ body: result });

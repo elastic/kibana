@@ -9,9 +9,12 @@
 
 export const REGISTRY_EXTENSIONS_ROUTE = '/internal/esql_registry/extensions/';
 export const SOURCES_AUTOCOMPLETE_ROUTE = '/internal/esql/autocomplete/sources/';
-export const TIMEFIELD_ROUTE = '/internal/esql/get_timefield/';
+export const TIMEFIELD_ROUTE = '/internal/esql/get_timefield';
 export const VIEWS_ROUTE = '/internal/esql/views';
+export const DATASETS_ROUTE = '/internal/esql/datasets';
 export const NL_TO_ESQL_ROUTE = '/internal/esql/nl_to_esql';
+export const SUGGEST_FIX_ROUTE = '/internal/esql/suggest_fix';
+export const FIX_WITH_AI_COMMAND_ID = 'esql.fixWithAI';
 
 const LOOKUP_INDEX_ROUTE = '/internal/esql/lookup_index';
 export const LOOKUP_INDEX_CREATE_ROUTE = `${LOOKUP_INDEX_ROUTE}/create`;

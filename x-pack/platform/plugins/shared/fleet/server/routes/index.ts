@@ -28,9 +28,11 @@ import { registerRoutes as registerFleetProxiesRoutes } from './fleet_proxies';
 import { registerRoutes as registerMessageSigningServiceRoutes } from './message_signing_service';
 import { registerRoutes as registerUninstallTokenRoutes } from './uninstall_token';
 import { registerRoutes as registerStandaloneAgentApiKeyRoutes } from './standalone_agent_api_key';
+import { registerRoutes as registerManagedOtlpApiKeyRoutes } from './managed_otlp_api_key';
 import { registerRoutes as registerDebugRoutes } from './debug';
 import { registerRoutes as registerRemoteSyncedIntegrations } from './remote_synced_integrations';
 import { registerRoutes as registerCloudConnectorRoutes } from './cloud_connector';
+import { registerRoutes as registerCloudOnboardingDeploymentRoutes } from './cloud_onboarding_deployment';
 import { registerRoutes as registerAgentlessPoliciesRoutes } from './agentless_policy'; //
 
 export function registerRoutes(
@@ -62,9 +64,13 @@ export function registerRoutes(
   registerMessageSigningServiceRoutes(fleetAuthzRouter);
   registerUninstallTokenRoutes(fleetAuthzRouter, config);
   registerStandaloneAgentApiKeyRoutes(fleetAuthzRouter);
+  registerManagedOtlpApiKeyRoutes(fleetAuthzRouter);
   registerRemoteSyncedIntegrations(fleetAuthzRouter, isServerless);
   registerDebugRoutes(fleetAuthzRouter);
   registerCloudConnectorRoutes(fleetAuthzRouter);
+  if (experimentalFeatures.enableCloudOnboardingDeployments) {
+    registerCloudOnboardingDeploymentRoutes(fleetAuthzRouter);
+  }
 
   registerAgentlessPoliciesRoutes(fleetAuthzRouter);
 

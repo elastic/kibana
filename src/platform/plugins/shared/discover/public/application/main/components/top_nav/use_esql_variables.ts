@@ -99,6 +99,17 @@ export const useESQLVariables = ({
       }
     });
 
+    return () => {
+      inputSubscription.unsubscribe();
+    };
+  }, [controlGroupApi, dispatch, isEsqlMode, onUpdateESQLQuery, updateAttributes]);
+
+  useEffect(() => {
+    // Only proceed if in ESQL mode and controlGroupApi is available
+    if (!controlGroupApi || !isEsqlMode) {
+      return;
+    }
+
     const variablesSubscription = controlGroupApi.esqlVariables$.subscribe((newVariables) => {
       if (!isEqual(newVariables, currentEsqlVariables)) {
         // Update the ESQL variables in the internal state
@@ -108,19 +119,9 @@ export const useESQLVariables = ({
     });
 
     return () => {
-      inputSubscription.unsubscribe();
-      variablesSubscription?.unsubscribe();
+      variablesSubscription.unsubscribe();
     };
-  }, [
-    controlGroupApi,
-    currentEsqlVariables,
-    dispatch,
-    isEsqlMode,
-    onUpdateESQLQuery,
-    updateAttributes,
-    setEsqlVariables,
-    fetchData,
-  ]);
+  }, [controlGroupApi, currentEsqlVariables, dispatch, fetchData, isEsqlMode, setEsqlVariables]);
 
   const onSaveControl = useCallback(
     async (controlState: Record<string, unknown>, updatedQuery: string) => {

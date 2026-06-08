@@ -31,16 +31,12 @@ export const ActionsCellHost = typedMemo(
       pageSize,
       pageIndex,
       alerts,
-      oldAlertsData,
-      ecsAlertsData,
       bulkActionsStore,
       renderActionsCell: ActionsCell,
       visibleRowIndex,
     } = props;
     const idx = rowIndex - pageSize * pageIndex;
     const alert = alerts[idx];
-    const legacyAlert = oldAlertsData[idx];
-    const ecsAlert = ecsAlertsData[idx];
     const [, updateBulkActionsState] = bulkActionsStore;
 
     const setIsActionLoading = useCallback(
@@ -64,8 +60,6 @@ export const ActionsCellHost = typedMemo(
           <ActionsCell
             {...(props as ComponentProps<NonNullable<AlertsTableProps<AC>['renderActionsCell']>>)}
             alert={alert}
-            legacyAlert={legacyAlert}
-            ecsAlert={ecsAlert}
             setIsActionLoading={setIsActionLoading}
           />
         </ErrorBoundary>

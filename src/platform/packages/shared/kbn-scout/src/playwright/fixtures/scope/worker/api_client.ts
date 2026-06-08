@@ -54,7 +54,7 @@ export const apiClientFixture = coreWorkerFixtures.extend<{}, { apiClient: ApiCl
   apiClient: [
     async ({ config, log }, use) => {
       const kibanaServerUrl = formatUrl(config.hosts.kibana);
-      const testAgent = supertest(kibanaServerUrl);
+      const testAgent = supertest(kibanaServerUrl, config.http2 ? { http2: true } : {});
 
       // Map method names to agent functions
       const methodMap: Record<keyof ApiClientFixture, (url: string) => supertest.Test> = {

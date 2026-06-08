@@ -20,6 +20,7 @@ import {
   createReasoningEvent,
   createTextChunkEvent,
   createThinkingCompleteEvent,
+  createBackgroundAgentCompleteEvent,
   createToolCallEvent,
   createToolResultEvent,
   extractTextContent,
@@ -38,9 +39,9 @@ import type { StateType } from './state';
 import { BROWSER_TOOL_PREFIX, steps, tags } from './constants';
 import type { ToolCallResult } from './actions';
 import {
-  isAnswerAction,
+  isBackgroundExecutionCompleteAction,
   isExecuteToolAction,
-  isStructuredAnswerAction,
+  isHandoverAction,
   isToolCallAction,
   isToolPromptAction,
 } from './actions';
@@ -55,12 +56,14 @@ export const convertGraphEvents = ({
   pendingRound,
   logger,
   startTime,
+  structuredOutput,
 }: {
   graphName: string;
   toolManager: ToolManager;
   pendingRound: ConversationRound | undefined;
   logger: Logger;
   startTime: Date;
+  structuredOutput: boolean;
 }): OperatorFunction<LangchainStreamEvent, ConvertedEvents> => {
   return (streamEvents$) => {
     const toolCallIdToIdMap = new Map<string, string>();
@@ -72,9 +75,12 @@ export const convertGraphEvents = ({
       });
     }
 
-    const messageId = uuidv4();
+    // message identifier for emitted chunks
+    let messageId = uuidv4();
 
-    let isThinkingComplete = false;
+    // Tracks the timestamp of the first text chunk of the current research turn.
+    // Used to backdate `thinkingCompleteEvent` to the first chunk of the terminal turn
+    let currentTurnFirstChunkAt: number | undefined;
 
     return streamEvents$.pipe(
       mergeMap((event) => {
@@ -82,19 +88,31 @@ export const convertGraphEvents = ({
           return EMPTY;
         }
 
-        // stream answering text chunks for the UI
-        if (matchEvent(event, 'on_chat_model_stream') && hasTag(event, tags.answerAgent)) {
+        // reset per-turn first-chunk tracker at the start of each research turn
+        if (matchEvent(event, 'on_chain_start') && matchName(event, steps.researchAgent)) {
+          // reset per-turn first-chunk tracker at the start of each research turn
+          currentTurnFirstChunkAt = undefined;
+          // reset message id between research turns
+          messageId = uuidv4();
+          return EMPTY;
+        }
+
+        // streaming text chunks for the UI (answering + research)
+        if (
+          matchEvent(event, 'on_chat_model_stream') &&
+          (hasTag(event, tags.answerAgent) || hasTag(event, tags.researchAgent))
+        ) {
           const chunk: AIMessageChunk = event.data.chunk;
           const textContent = extractTextContent(chunk);
           if (textContent) {
-            const events: ConvertedEvents[] = [];
-            if (!isThinkingComplete) {
-              // Emit thinking complete event when first chunk arrives
-              events.push(createThinkingCompleteEvent(Date.now() - startTime.getTime()));
-              isThinkingComplete = true;
+            if (
+              !structuredOutput &&
+              hasTag(event, tags.researchAgent) &&
+              currentTurnFirstChunkAt === undefined
+            ) {
+              currentTurnFirstChunkAt = Date.now();
             }
-            events.push(createTextChunkEvent(textContent, { messageId }));
-            return of(...events);
+            return of(createTextChunkEvent(textContent, { messageId }));
           }
         }
 
@@ -105,10 +123,12 @@ export const convertGraphEvents = ({
           const nextAction = addedActions[addedActions.length - 1];
 
           if (isToolCallAction(nextAction)) {
-            const { tool_calls: toolCalls, message: messageText = '' } = nextAction;
+            const {
+              tool_calls: toolCalls,
+              tool_call_group_id: toolCallGroupId,
+              message: messageText = '',
+            } = nextAction;
             if (toolCalls.length > 0) {
-              const toolCallGroupId = uuidv4();
-
               if (messageText.trim().length > 0) {
                 events.push(createReasoningEvent(messageText, { toolCallGroupId }));
               }
@@ -133,12 +153,15 @@ export const convertGraphEvents = ({
                     })
                   );
                 } else {
+                  const { origin: toolOrigin, type: toolType } = toolManager.getToolMeta(toolId);
                   events.push(
                     createToolCallEvent({
                       toolId,
                       toolCallId,
                       params: toolCallArgs,
                       toolCallGroupId,
+                      toolOrigin,
+                      toolType,
                     })
                   );
                 }
@@ -146,30 +169,30 @@ export const convertGraphEvents = ({
             }
           }
 
-          return of(...events);
-        }
-
-        // emit messages for answering step
-        if (matchEvent(event, 'on_chain_end') && matchName(event, steps.answerAgent)) {
-          const events: ConvertedEvents[] = [];
-
-          // process last emitted message
-          const answerActions = (event.data.output as StateType).answerActions;
-          const lastAction = answerActions[answerActions.length - 1];
-
-          if (isStructuredAnswerAction(lastAction)) {
-            const messageEvent = createMessageEvent(lastAction.data, {
-              messageId,
-            });
-            events.push(messageEvent);
-          } else if (isAnswerAction(lastAction)) {
-            const messageEvent = createMessageEvent(lastAction.message, {
-              messageId,
-            });
-            events.push(messageEvent);
+          // Backdated thinking-complete: when the research agent's terminal turn
+          // produces a HandoverAction in non-structured mode, emit
+          // thinkingCompleteEvent with the timestamp of the first chunk of that
+          // turn. Falls back to "now" if no chunk timestamp was captured.
+          if (!structuredOutput && isHandoverAction(nextAction)) {
+            const firstChunkOffset =
+              currentTurnFirstChunkAt !== undefined
+                ? currentTurnFirstChunkAt - startTime.getTime()
+                : Date.now() - startTime.getTime();
+            events.push(createThinkingCompleteEvent(firstChunkOffset));
           }
 
           return of(...events);
+        }
+
+        // emit messageEvent at finalize: state.finalAnswer is the canonical answer
+        // (string for non-structured, object for structured)
+        if (matchEvent(event, 'on_chain_end') && matchName(event, steps.finalize)) {
+          const finalState = event.data.output as StateType;
+          const finalAnswer = finalState.finalAnswer;
+          if (finalAnswer !== undefined && finalAnswer !== null && finalAnswer !== '') {
+            return of(createMessageEvent(finalAnswer, { messageId }));
+          }
+          return EMPTY;
         }
 
         // emit tool result events and/or prompt request events
@@ -209,6 +232,22 @@ export const convertGraphEvents = ({
 
           if (resultEvents.length > 0) {
             return of(...resultEvents);
+          }
+        }
+
+        // emit background execution complete events
+        if (matchEvent(event, 'on_chain_end') && matchName(event, steps.checkBackgroundWork)) {
+          const addedActions = (event.data.output as Partial<StateType>).mainActions ?? [];
+          const bgEvents: ConvertedEvents[] = [];
+
+          for (const action of addedActions) {
+            if (isBackgroundExecutionCompleteAction(action)) {
+              bgEvents.push(createBackgroundAgentCompleteEvent(action.execution));
+            }
+          }
+
+          if (bgEvents.length > 0) {
+            return of(...bgEvents);
           }
         }
 

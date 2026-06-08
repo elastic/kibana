@@ -567,6 +567,101 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    describe('shards propagation', () => {
+      let shardPackId: string | undefined;
+
+      afterEach(async () => {
+        if (shardPackId) {
+          await withOsqueryHeaders(supertest.delete(`/api/osquery/packs/${shardPackId}`)).ok(
+            () => true
+          );
+          shardPackId = undefined;
+        }
+      });
+
+      it('propagates pack shards to Fleet policy packs config', async () => {
+        const shardPackName = `ShardPack-${Date.now()}`;
+        const shardValue = 25;
+
+        const createResponse = await withOsqueryHeaders(supertest.post('/api/osquery/packs'))
+          .send({
+            name: shardPackName,
+            description: 'Test pack shards propagation',
+            enabled: true,
+            policy_ids: [hostedPolicy.id],
+            shards: { [hostedPolicy.id]: shardValue },
+            queries: { q1: { query: 'select 1;', interval: 3600 } },
+          })
+          .expect(200);
+
+        shardPackId = createResponse.body.data.saved_object_id;
+        expect(shardPackId).to.be.ok();
+
+        const readResponse = await withOsqueryHeaders(
+          supertest.get(`/api/osquery/packs/${shardPackId}`)
+        ).expect(200);
+        expect(readResponse.body.data.shards).to.be.an('object');
+        expect(readResponse.body.data.shards[hostedPolicy.id]).to.be(shardValue);
+
+        const {
+          body: {
+            item: { inputs },
+          },
+        } = await supertest
+          .get(`/api/fleet/package_policies/${packagePolicyId}`)
+          .set('kbn-xsrf', 'true')
+          .set(ELASTIC_HTTP_VERSION_HEADER, fleetApiVersion);
+
+        expect(inputs[0].config.osquery.value.packs[`default--${shardPackName}`]).to.have.property(
+          'shard',
+          shardValue
+        );
+      });
+
+      // Exclusion semantics: shards[policyId] = 0 means the pack runs on 0% of the
+      // policy's agents. The Fleet policy config preserves `shard: 0` (not omitted,
+      // not defaulted to 100 — see `policyShards[id] ?? 100` in create_pack_route).
+      // Replaces coverage from the retired packs_integration.cy.ts describe that
+      // exercised a 0% shard field on OSQUERY_POLICY.
+      it('persists a 0% shard value for policy exclusion', async () => {
+        const shardPackName = `ShardPackZero-${Date.now()}`;
+
+        const createResponse = await withOsqueryHeaders(supertest.post('/api/osquery/packs'))
+          .send({
+            name: shardPackName,
+            description: 'Test pack with 0% shard (policy exclusion)',
+            enabled: true,
+            policy_ids: [hostedPolicy.id],
+            shards: { [hostedPolicy.id]: 0 },
+            queries: { q1: { query: 'select 1;', interval: 3600 } },
+          })
+          .expect(200);
+
+        shardPackId = createResponse.body.data.saved_object_id;
+        expect(shardPackId).to.be.ok();
+
+        const readResponse = await withOsqueryHeaders(
+          supertest.get(`/api/osquery/packs/${shardPackId}`)
+        ).expect(200);
+        expect(readResponse.body.data.shards).to.be.an('object');
+        expect(readResponse.body.data.shards[hostedPolicy.id]).to.be(0);
+
+        const {
+          body: {
+            item: { inputs },
+          },
+        } = await supertest
+          .get(`/api/fleet/package_policies/${packagePolicyId}`)
+          .set('kbn-xsrf', 'true')
+          .set(ELASTIC_HTTP_VERSION_HEADER, fleetApiVersion);
+
+        expect(inputs[0].config.osquery.value.packs[`default--${shardPackName}`]).to.have.property(
+          'shard',
+          0
+        );
+      });
+    });
+
     describe('404 for non-existent resources', () => {
       it('returns 404 when reading a non-existent pack', async () => {
         await withOsqueryHeaders(supertest.get('/api/osquery/packs/non-existent-id')).expect(404);

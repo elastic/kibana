@@ -260,8 +260,11 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = memo
           <EuiDescriptionList
             compressed={true}
             type="column"
+            columnWidths={[1, 3]}
             listItems={ruleDefinitionList}
             css={{ alignItems: 'start' }}
+            titleProps={{ css: { minWidth: 0 } }}
+            descriptionProps={{ css: { minWidth: 0, overflowWrap: 'break-word' } }}
           />
         </EuiPanel>
       </EuiFlexItem>

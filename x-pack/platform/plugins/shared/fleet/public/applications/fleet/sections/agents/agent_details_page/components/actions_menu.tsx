@@ -12,6 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { Agent, AgentPolicy } from '../../../../types';
 import {
   AgentUnenrollAgentModal,
+  AgentRemoveCollectorModal,
   AgentReassignAgentPolicyModal,
   AgentUpgradeAgentModal,
   HierarchicalActionsMenu,
@@ -58,6 +59,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
     const [isChangePrivilegeLevelFlyoutOpen, setIsChangePrivilegeLevelFlyoutOpen] = useState(false);
     const [isUninstallCommandFlyoutOpen, setIsUninstallCommandFlyoutOpen] = useState(false);
     const [isRollbackModalOpen, setIsRollbackModalOpen] = useState(false);
+    const [isRemoveCollectorModalOpen, setIsRemoveCollectorModalOpen] = useState(false);
 
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const onMenuToggle = useCallback((open: boolean) => {
@@ -90,6 +92,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
         onUnenrollClick: () => setIsUnenrollModalOpen(true),
         onUninstallClick: () => setIsUninstallCommandFlyoutOpen(true),
         onRollbackClick: () => setIsRollbackModalOpen(true),
+        onRemoveCollectorClick: () => setIsRemoveCollectorModalOpen(true),
       }),
       [onAddRemoveTagsClick]
     );
@@ -209,6 +212,18 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
               agents={[agent]}
               agentCount={1}
               onClose={() => setIsRollbackModalOpen(false)}
+            />
+          </EuiPortal>
+        )}
+        {isRemoveCollectorModalOpen && (
+          <EuiPortal>
+            <AgentRemoveCollectorModal
+              agents={[agent]}
+              agentCount={1}
+              onClose={() => {
+                setIsRemoveCollectorModalOpen(false);
+                refreshAgent();
+              }}
             />
           </EuiPortal>
         )}

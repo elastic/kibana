@@ -14,3 +14,6 @@ export const GET_INDEX_RESULTS_LATEST_API_PATH =
   '/internal/ecs_data_quality_dashboard/results_latest';
 export const CATEGORY_ORDER = ['Endpoint', 'Identity', 'Network', 'Cloud', 'Application/SaaS'];
 export const ALL_CATEGORIES = CATEGORY_ORDER as MainCategories[];
+export const GET_SIEM_READINESS_MITRE_DATA_INDICES_DOCS_COUNT_API_PATH =
+  '/api/siem_readiness/mitre_data_indices_docs_count';
+export const CRITICAL_FAILURE_RATE_THRESHOLD = 1; // 1%

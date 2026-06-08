@@ -8,14 +8,12 @@
 import type { Subscription } from 'rxjs';
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import type { ManagementApp, ManagementAppMountParams } from '@kbn/management-plugin/public';
 import {
   ELASTIC_INFERENCE_SERVICE_APP_ID,
-  ELASTIC_INFERENCE_SERVICE_TITLE,
-  EXTERNAL_INFERENCE_TITLE,
   INFERENCE_ENDPOINTS_APP_ID,
   MODEL_SETTINGS_APP_ID,
-  MODEL_SETTINGS_SECTION_TITLE,
 } from '../common/constants';
 import { docLinks } from '../common/doc_links';
 import type {
@@ -50,14 +48,17 @@ export class SearchInferenceEndpointsPlugin
     this.registerInferenceEndpoints =
       plugins.management.sections.section.modelManagement.registerApp({
         id: INFERENCE_ENDPOINTS_APP_ID,
-        title: EXTERNAL_INFERENCE_TITLE,
+        title: i18n.translate('xpack.searchInferenceEndpoints.externalInferenceTitle', {
+          defaultMessage: 'External Inference',
+        }),
         order: 2,
-        async mount({ element, history }: ManagementAppMountParams) {
+        async mount({ element, history, setBreadcrumbs }: ManagementAppMountParams) {
           const { renderInferenceEndpointsMgmtApp } = await import('./application');
           const [coreStart, depsStart] = await core.getStartServices();
           const startDeps: AppPluginStartDependencies = {
             ...depsStart,
             history,
+            setBreadcrumbs,
           };
 
           return renderInferenceEndpointsMgmtApp(coreStart, startDeps, element);
@@ -66,14 +67,17 @@ export class SearchInferenceEndpointsPlugin
 
     this.registerModelSettings = plugins.management.sections.section.modelManagement.registerApp({
       id: MODEL_SETTINGS_APP_ID,
-      title: MODEL_SETTINGS_SECTION_TITLE,
+      title: i18n.translate('xpack.searchInferenceEndpoints.modelSettingsTitle', {
+        defaultMessage: 'Feature Settings',
+      }),
       order: 3,
-      async mount({ element, history }: ManagementAppMountParams) {
+      async mount({ element, history, setBreadcrumbs }: ManagementAppMountParams) {
         const { renderSettingsMgmtApp } = await import('./application');
         const [coreStart, depsStart] = await core.getStartServices();
         const startDeps: AppPluginStartDependencies = {
           ...depsStart,
           history,
+          setBreadcrumbs,
         };
 
         return renderSettingsMgmtApp(coreStart, startDeps, element);
@@ -83,9 +87,11 @@ export class SearchInferenceEndpointsPlugin
     this.registerElasticInferenceService =
       plugins.management.sections.section.modelManagement.registerApp({
         id: ELASTIC_INFERENCE_SERVICE_APP_ID,
-        title: ELASTIC_INFERENCE_SERVICE_TITLE,
+        title: i18n.translate('xpack.searchInferenceEndpoints.elasticInferenceServiceTitle', {
+          defaultMessage: 'Elastic Inference',
+        }),
         order: 1,
-        async mount({ element, history }: ManagementAppMountParams) {
+        async mount({ element, history, setBreadcrumbs }: ManagementAppMountParams) {
           const { renderElasticInferenceServiceApp } = await import(
             './elastic_inference_service_application'
           );
@@ -93,15 +99,12 @@ export class SearchInferenceEndpointsPlugin
           const startDeps: AppPluginStartDependencies = {
             ...depsStart,
             history,
+            setBreadcrumbs,
           };
 
           return renderElasticInferenceServiceApp(coreStart, startDeps, element);
         },
       });
-
-    this.registerInferenceEndpoints.disable();
-    this.registerModelSettings.disable();
-    this.registerElasticInferenceService.disable();
 
     return {};
   }

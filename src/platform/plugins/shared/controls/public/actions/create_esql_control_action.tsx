@@ -30,15 +30,13 @@ import {
 import { ADD_PANEL_CONTROL_GROUP } from './constants';
 import { uiActionsService } from '../services/kibana_services';
 
-export const createESQLControlAction = (): ActionDefinition<
-  EmbeddableApiContext & { isPinned: boolean }
-> => ({
+export const createESQLControlAction = (): ActionDefinition<EmbeddableApiContext> => ({
   id: ACTION_CREATE_ESQL_CONTROL,
   order: 1,
   grouping: [ADD_PANEL_CONTROL_GROUP],
   getIconType: () => 'controls',
   isCompatible: async ({ embeddable }) => apiCanAddNewPanel(embeddable),
-  execute: async ({ embeddable, isPinned }) => {
+  execute: async ({ embeddable }) => {
     if (!apiCanAddNewPanel(embeddable)) throw new IncompatibleActionError();
     const variablesInParent = apiPublishesESQLVariables(embeddable)
       ? embeddable.esqlVariables$.value
@@ -59,10 +57,11 @@ export const createESQLControlAction = (): ActionDefinition<
             },
           };
 
-          // add a new control as either pinned or not depending on provided context
-          (isPinned && apiCanPinPanels(embeddable)
-            ? embeddable.addPinnedPanel
-            : embeddable.addNewPanel)(newControl, { displaySuccessMessage: true });
+          // add a new control as either pinned or not depending on whether the parent allows it
+          (apiCanPinPanels(embeddable) ? embeddable.addPinnedPanel : embeddable.addNewPanel)(
+            newControl,
+            { displaySuccessMessage: true }
+          );
         },
         triggerSource: ControlTriggerSource.ADD_CONTROL_BTN,
       });

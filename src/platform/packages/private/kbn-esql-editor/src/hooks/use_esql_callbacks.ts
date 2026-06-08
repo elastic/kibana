@@ -7,14 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useCallback, useMemo, useRef, type MutableRefObject } from 'react';
+import { useCallback, useEffect, useMemo, useRef, type MutableRefObject } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import type { TimeRange } from '@kbn/es-query';
 import type { ESQLCallbacks, ESQLControlVariable, ESQLRegistrySolutionId } from '@kbn/esql-types';
 import { KQL_TYPE_TO_KIND_MAP } from '@kbn/esql-types';
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { ILicense } from '@kbn/licensing-types';
-import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type { MapCache } from 'lodash';
 import type { FavoritesClient } from '@kbn/content-management-favorites-public';
 import {
@@ -24,6 +23,7 @@ import {
   getInferenceEndpoints,
   getTimeseriesIndices,
   getViews,
+  getDatasets,
 } from '@kbn/esql-utils';
 import type { getEsqlColumns, getESQLSources } from '@kbn/esql-utils';
 import type { ESQLSourceResult } from '@kbn/esql-types';
@@ -33,6 +33,7 @@ import type { ESQLEditorDeps } from '../types';
 import type { StarredQueryMetadata } from '../editor_footer/esql_starred_queries_service';
 import { useCanCreateLookupIndex } from '../lookup_join';
 import { useCanSuggestResourceBrowser } from '../resource_browser/use_can_suggest_resource_browser';
+import { DATA_SOURCES_CACHE_KEY, HISTORY_STARRED_ITEMS_CACHE_KEY } from '../helpers';
 
 type MemoizedFn<TArgs extends unknown[], TResult> = (...args: TArgs) => {
   timestamp: number;
@@ -110,12 +111,12 @@ export const useEsqlCallbacks = ({
   const previousColumnsQueryRef = useRef<string | undefined>(undefined);
 
   const getSources = useCallback(async () => {
-    clearCacheWhenOld(dataSourcesCache, minimalQueryRef.current);
+    clearCacheWhenOld(dataSourcesCache, DATA_SOURCES_CACHE_KEY);
     const getLicense = esqlService?.getLicense;
     const enrichSources = esqlService?.enrichSources;
     const sources = await memoizedSources(core, getLicense, enrichSources).result;
     return sources;
-  }, [dataSourcesCache, minimalQueryRef, memoizedSources, core, esqlService]);
+  }, [dataSourcesCache, memoizedSources, core, esqlService]);
 
   const getColumnsFor = useCallback(
     async ({ query: queryToExecute }: { query?: string } | undefined = {}) => {
@@ -158,8 +159,10 @@ export const useEsqlCallbacks = ({
           dropNullColumns: true,
         }).result;
 
+        // Bail out without touching the cache — cache cleanup for the aborted query
+        // already happened at abort time. Deleting here would race with a fresh re-request that may
+        // have repopulated the same key.
         if (currentController.signal.aborted) {
-          esqlFieldsCache.delete(queryToExecute);
           return [];
         }
 
@@ -177,6 +180,17 @@ export const useEsqlCallbacks = ({
       esqlService,
     ]
   );
+
+  // Abort any in-flight getColumnsFor request when the editor unmounts. Without this, navigating away
+  // from a long-running query leaves it polling in the browser and running on ES.
+  useEffect(() => {
+    return () => {
+      columnsAbortControllerRef.current?.abort();
+      if (previousColumnsQueryRef.current) {
+        esqlFieldsCache.delete(previousColumnsQueryRef.current);
+      }
+    };
+  }, [esqlFieldsCache]);
 
   const getPolicies = useCallback(async () => getEsqlPolicies(core.http), [core.http]);
 
@@ -207,6 +221,10 @@ export const useEsqlCallbacks = ({
     return await getViews(core.http);
   }, [core.http]);
 
+  const getDatasetsCallback = useCallback(async () => {
+    return await getDatasets(core.http);
+  }, [core.http]);
+
   const getEditorExtensionsCallback = useCallback(
     async (queryString: string) => {
       // Only fetch recommendations if there's an active solutionId and a non-empty query
@@ -223,7 +241,7 @@ export const useEsqlCallbacks = ({
   );
 
   const getInferenceEndpointsCallback = useCallback(
-    async (taskType: InferenceTaskType) => {
+    async (taskType: string) => {
       return (await getInferenceEndpoints(core.http, taskType)) || [];
     },
     [core.http]
@@ -245,7 +263,7 @@ export const useEsqlCallbacks = ({
   const getActiveProduct = useCallback(() => core.pricing.getActiveProduct(), [core.pricing]);
 
   const getHistoryStarredItems = useCallback(async () => {
-    clearCacheWhenOld(historyStarredItemsCache, 'historyStarredItems');
+    clearCacheWhenOld(historyStarredItemsCache, HISTORY_STARRED_ITEMS_CACHE_KEY);
     return await memoizedHistoryStarredItems(getHistoryItems, favoritesClient).result;
   }, [historyStarredItemsCache, memoizedHistoryStarredItems, favoritesClient]);
 
@@ -298,6 +316,7 @@ export const useEsqlCallbacks = ({
       getJoinIndices: getJoinIndicesCallback,
       getTimeseriesIndices: getTimeseriesIndicesCallback,
       getViews: getViewsCallback,
+      getDatasets: getDatasetsCallback,
       getEditorExtensions: getEditorExtensionsCallback,
       getInferenceEndpoints: getInferenceEndpointsCallback,
       getLicense,
@@ -319,6 +338,7 @@ export const useEsqlCallbacks = ({
       getJoinIndicesCallback,
       getTimeseriesIndicesCallback,
       getViewsCallback,
+      getDatasetsCallback,
       getEditorExtensionsCallback,
       getInferenceEndpointsCallback,
       getLicense,

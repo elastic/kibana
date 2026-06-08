@@ -95,6 +95,29 @@ describe('WorkflowTemplatingEngine', () => {
     });
   });
 
+  describe('extractGlobalVariableSegments', () => {
+    it('should collect nested references inside Liquid control-flow tags', () => {
+      const extractedSegments = templatingEngine.extractGlobalVariableSegments(
+        '{% if inputs.enabled %}{{ steps.fetchData.output.case.title }}{% endif %}'
+      );
+
+      expect(extractedSegments).toEqual(
+        expect.arrayContaining([
+          ['inputs', 'enabled'],
+          ['steps', 'fetchData', 'output', 'case', 'title'],
+        ])
+      );
+    });
+
+    it('should return null for dynamic bracket paths', () => {
+      const extractedSegments = templatingEngine.extractGlobalVariableSegments(
+        '{{ steps.load_comment_sync_state.output._source[steps.note_sync_space_comment.output].id }}'
+      );
+
+      expect(extractedSegments).toBeNull();
+    });
+  });
+
   describe('built-in filters', () => {
     it('should use built-in json filter for stringification', () => {
       const template = '{{ data | json }}';
@@ -155,7 +178,42 @@ describe('WorkflowTemplatingEngine', () => {
     });
   });
 
-  describe('base64_encode filter with Buffer support', () => {
+  describe('sha256 filter', () => {
+    it('should return the SHA-256 hex digest (Shopify reference vector)', () => {
+      const template = '{{ text | sha256 }}';
+      const context = { text: 'Polyjuice' };
+      const result = templatingEngine.render(template, context);
+      expect(result).toBe('44ac1d7a2936e30a5de07082fd65d6fe9b1fb658a1a98bfe65bc5959beac5dd0');
+    });
+
+    it('should coerce null and undefined to empty string', () => {
+      const template = '{{ value | sha256 }}';
+      expect(templatingEngine.render(template, { value: null })).toBe(
+        'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'
+      );
+      expect(templatingEngine.render(template, { value: undefined })).toBe(
+        'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'
+      );
+    });
+  });
+
+  describe('hmac_sha256 filter', () => {
+    it('should return the HMAC-SHA256 hex digest (Shopify reference vector)', () => {
+      const template = '{{ text | hmac_sha256: key }}';
+      const context = { text: 'Polyjuice', key: 'Polina' };
+      const result = templatingEngine.render(template, context);
+      expect(result).toBe('8e0d5d65cff1242a4af66c8f4a32854fd5fb80edcc8aabe9b302b29c7c71dc20');
+    });
+
+    it('should stringify numeric secret keys', () => {
+      const template = '{{ text | hmac_sha256: key }}';
+      const context = { text: 'test', key: 12345 };
+      const result = templatingEngine.render(template, context);
+      expect(result).toMatch(/^[0-9a-f]{64}$/);
+    });
+  });
+
+  describe('base64_encode filter', () => {
     it('should base64 encode a plain string', () => {
       const template = '{{ text | base64_encode }}';
       const context = { text: 'Hello World' };

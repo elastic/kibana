@@ -177,8 +177,8 @@ function getNodeStatus(
   },
   { cloudLinks }: { cloudLinks: CloudLinks }
 ): SideNavNodeStatus | 'remove' {
-  if (link && !deepLink) {
-    // If a link is provided, but no deepLink is found, don't render anything
+  if (link && (!deepLink || !deepLink.visibleIn.includes('projectSideNav'))) {
+    // If a link is provided but no deepLink found, or the app excluded projectSideNav
     return 'remove';
   }
 
@@ -187,7 +187,8 @@ function getNodeStatus(
       // Invalid cloudLinkId or link url has not been set in kibana.yml
       return 'remove';
     }
-    // TODO: Add cloud link permission check once Cloud provides an API
+    // Cloud link permission checks are handled by the Cloud plugin's `getPrivilegedUrls()` method,
+    // which gates URLs based on user privileges before they are set via `setCloudUrls()`.
   }
 
   return sideNavStatus ?? 'visible';

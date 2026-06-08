@@ -14,6 +14,7 @@ paths:
       x-state: Technical Preview
       operationId: GetWatchlist
       summary: Get a watchlist by ID
+      description: Retrieves the details of an entity analytics watchlist by its unique identifier.
       parameters:
         - name: id
           in: path

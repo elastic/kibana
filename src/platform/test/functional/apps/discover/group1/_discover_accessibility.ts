@@ -15,7 +15,6 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const log = getService('log');
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const find = getService('find');
   const testSubjects = getService('testSubjects');
@@ -37,10 +36,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug('load kibana index with default index pattern');
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
-      );
-      // and load a set of makelogs data
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
       );
       await kibanaServer.uiSettings.replace(defaultSettings);
       await common.navigateToApp('discover');
@@ -102,18 +97,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.existOrFail('discoverCreateAlertButton');
         await testSubjects.click('discoverCreateAlertButton');
         await testSubjects.existOrFail('addRuleFlyoutTitle');
+        await testSubjects.existOrFail('euiFlyoutCloseButton');
+        await testSubjects.click('euiFlyoutCloseButton');
+        await testSubjects.missingOrFail('euiFlyoutCloseButton');
+        await testSubjects.existOrFail('app-menu-overflow-button');
+
         await retry.try(async () => {
-          await browser.pressKeys(browser.keys.ESCAPE);
-          // A bug exists with the create rule flyout where sometimes the confirm modal
-          // shows even though the form hasn't been touched, so this works around it
-          if (await testSubjects.exists('confirmRuleCloseModal', { timeout: 0 })) {
-            await focusAndPressButton(
-              await testSubjects.findDescendant(
-                'confirmModalConfirmButton',
-                await testSubjects.find('confirmRuleCloseModal')
-              )
-            );
-          }
           expect(await hasFocus('app-menu-overflow-button')).to.be(true);
         });
       });

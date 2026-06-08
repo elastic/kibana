@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiModal, EuiModalBody, EuiSpacer } from '@elastic/eui';
 
 import { useKibana } from '../../../../common/lib/kibana';
@@ -84,7 +85,14 @@ export const RuleSnoozeModal: React.FunctionComponent<RuleSnoozeModalProps> = ({
   );
 
   return (
-    <EuiModal onClose={onClose} data-test-subj="ruleSnoozeModal">
+    <EuiModal
+      onClose={onClose}
+      data-test-subj="ruleSnoozeModal"
+      aria-label={i18n.translate(
+        'xpack.triggersActionsUI.sections.rulesList.ruleSnoozeModal.ariaLabel',
+        { defaultMessage: 'Snooze rule notifications' }
+      )}
+    >
       <EuiModalBody>
         <EuiSpacer size="s" />
         <SnoozePanel

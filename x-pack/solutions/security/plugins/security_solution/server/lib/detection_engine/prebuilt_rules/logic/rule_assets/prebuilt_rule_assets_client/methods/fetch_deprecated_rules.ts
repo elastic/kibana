@@ -6,7 +6,7 @@
  */
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import { validateDeprecatedRuleAsset } from '../../prebuilt_rule_assets_validation';
+import { validateDeprecatedRuleAssets } from '../../prebuilt_rule_assets_validation';
 import { MAX_DEPRECATED_RULES_TO_RETURN } from '../../../../../../../../common/api/detection_engine/prebuilt_rules';
 import { PREBUILT_RULE_ASSETS_SO_TYPE } from '../../prebuilt_rule_assets_type';
 import { getPrebuiltRuleAssetsSearchNamespace } from '../utils';
@@ -41,5 +41,5 @@ export const fetchDeprecatedRules = async (
     filter: filterParts.join(' AND '),
   });
 
-  return searchResult.saved_objects.map((so) => validateDeprecatedRuleAsset(so.attributes));
+  return validateDeprecatedRuleAssets(searchResult.saved_objects.map((so) => so.attributes));
 };

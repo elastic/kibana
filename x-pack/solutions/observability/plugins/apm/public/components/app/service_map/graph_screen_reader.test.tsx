@@ -19,6 +19,22 @@ jest.mock('@elastic/eui', () => {
     useEuiTheme: () => ({ euiTheme: MOCK_EUI_THEME_FOR_USE_THEME }),
   };
 });
+
+jest.mock('../../../context/apm_plugin/use_apm_plugin_context', () => ({
+  useApmPluginContext: () => ({
+    core: {
+      docLinks: {
+        links: {
+          apm: {
+            supportedServiceMaps: 'https://example.com/docs',
+            supportedServiceMapsLegend: 'https://example.com/docs#service-maps-legend',
+          },
+        },
+      },
+    },
+  }),
+}));
+
 let mockScreenReaderAnnouncementValue = '';
 const mockSetScreenReaderAnnouncement = jest.fn();
 
@@ -30,6 +46,11 @@ jest.mock('./use_keyboard_navigation', () => ({
     setScreenReaderAnnouncement: mockSetScreenReaderAnnouncement,
   })),
 }));
+
+jest.mock('./use_service_map_alerts_tab_href', () =>
+  jest.requireActual('./use_service_map_alerts_tab_href.test_mock')
+);
+
 jest.mock('@xyflow/react', () => {
   const original = jest.requireActual('@xyflow/react');
   return {
@@ -43,20 +64,6 @@ jest.mock('@xyflow/react', () => {
     ),
     Controls: ({ children }: { children?: React.ReactNode }) => (
       <div data-testid="react-flow-controls">{children}</div>
-    ),
-    ControlButton: ({
-      children,
-      onClick,
-      'data-test-subj': dataTestSubj,
-      ...rest
-    }: {
-      children?: React.ReactNode;
-      onClick?: () => void;
-      'data-test-subj'?: string;
-    }) => (
-      <button type="button" onClick={onClick} data-test-subj={dataTestSubj} {...rest}>
-        {children}
-      </button>
     ),
     useNodesState: jest.fn((initialNodes) => [initialNodes, jest.fn()]),
     useEdgesState: jest.fn((initialEdges) => [initialEdges, jest.fn()]),
@@ -87,7 +94,7 @@ jest.mock('./popover', () => ({
   MapPopover: () => <div data-testid="service-map-popover" />,
 }));
 
-jest.mock('./layout', () => ({
+jest.mock('../../shared/service_map/layout', () => ({
   applyDagreLayout: jest.fn((nodes) => nodes),
 }));
 

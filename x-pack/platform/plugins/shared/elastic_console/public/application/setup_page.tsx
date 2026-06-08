@@ -7,9 +7,10 @@
 
 import React, { useCallback, useRef, useState } from 'react';
 import {
-  EuiBetaBadge,
+  EuiAccordion,
   EuiButton,
   EuiCallOut,
+  EuiCode,
   EuiCodeBlock,
   EuiFieldText,
   EuiFlexGroup,
@@ -30,14 +31,12 @@ interface SetupResponse {
   apiKeyEncoded: string;
 }
 
-
-
 export const SetupPage: React.FC = () => {
   const { services } = useKibana<CoreStart>();
   const [setupData, setSetupData] = useState<SetupResponse | null>(null);
-   const [isLoading, setIsLoading] = useState(false);
-   const [error, setError] = useState<string | null>(null);
-   const formRef = useRef<HTMLFormElement>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const formRef = useRef<HTMLFormElement>(null);
 
   const handleSetup = useCallback(async () => {
     setIsLoading(true);
@@ -53,108 +52,136 @@ export const SetupPage: React.FC = () => {
     }
   }, [services.http]);
 
+  return (
+    <>
+      <EuiCallOut
+        title="Experimental feature — proceed with caution"
+        color="warning"
+        iconType="beaker"
+      >
+        <p>
+          Elastic Ramen is an <strong>experimental</strong> feature under active development. It may
+          change, break, or be removed without notice. Use at your own risk — it can expose AI
+          connectors to external tools and may produce unexpected behavior. Do not rely on it for
+          production workloads.
+        </p>
+      </EuiCallOut>
 
+      <EuiSpacer />
 
-   return (
-     <>
-       <EuiCallOut
-         title="Experimental feature — proceed with caution"
-         color="warning"
-         iconType="beaker"
-       >
-         <p>
-           Elastic Ramen is an <strong>experimental</strong> feature under active development. It
-           may change, break, or be removed without notice. Use at your own risk — it can expose AI
-           connectors to external tools and may produce unexpected behavior. Do not rely on it for
-           production workloads.
-         </p>
-       </EuiCallOut>
+      <EuiText>
+        <p>
+          Generate connection credentials for external tools to use Kibana-configured AI connectors
+          via an OpenAI-compatible API.
+        </p>
+      </EuiText>
 
-       <EuiSpacer />
+      <EuiSpacer />
 
-       <EuiText>
-          <p>
-            Generate credentials for the local <code>elastic-console</code> agent or any
-            MCP-compatible tool.
-          </p>
-        </EuiText>
-         <EuiSpacer />
+      {!setupData && (
+        <EuiButton fill onClick={handleSetup} isLoading={isLoading}>
+          Generate credentials
+        </EuiButton>
+      )}
 
-         <EuiFlexGroup gutterSize="m" alignItems="center">
-           <EuiFlexItem grow={false}>
-             <EuiButton fill onClick={handleSetup} isLoading={isLoading}>
-               Generate credentials
-             </EuiButton>
-           </EuiFlexItem>
-           {setupData && (
-             <EuiFlexItem grow={false}>
-               <EuiButton onClick={() => formRef.current?.submit()} iconType="popout">
-                 Connect local agent
-               </EuiButton>
-             </EuiFlexItem>
-           )}
-         </EuiFlexGroup>
+      {setupData && (
+        <>
+          <EuiCallOut title="Credentials generated" color="success" iconType="check">
+            <p>
+              Your API key and connection details are ready. Click{' '}
+              <strong>Connect local agent</strong> to send them automatically to your local agent,
+              or copy them manually below.
+            </p>
+          </EuiCallOut>
 
-         <EuiSpacer />
+          <EuiSpacer />
 
-         {error && (
-           <>
-             <EuiCallOut announceOnMount title="Setup failed" color="danger" iconType="error">
-               <p>{error}</p>
-             </EuiCallOut>
-             <EuiSpacer />
-           </>
-         )}
+          <EuiFlexGroup alignItems="center" gutterSize="m">
+            <EuiFlexItem grow={false}>
+              <EuiButton fill onClick={() => formRef.current?.submit()} iconType="popout">
+                Connect local agent
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
 
-         {setupData && (
-          <>
-            {/* Hidden form for POST-based navigation — keeps credentials out of browser history */}
-            <form
-              ref={formRef}
-              method="POST"
-              action={`${LOCAL_AGENT_URL}/config`}
-              target="_blank"
-              style={{ display: 'none' }}
-            >
-              <input type="hidden" name="elasticsearch_url" value={setupData.elasticsearchUrl} />
-              <input type="hidden" name="kibana_url" value={setupData.kibanaUrl} />
-              <input type="hidden" name="api_key" value={setupData.apiKeyEncoded} />
-              <input
-                type="hidden"
-                name="provider"
-                value={JSON.stringify({
-                  kibana: {
-                    name: 'Kibana LLM Gateway',
-                    id: 'kibana',
-                    npm: '@ai-sdk/openai-compatible',
-                    env: [],
-                    models: {
-                      default: {
-                        id: 'default',
-                        name: 'Default Connector',
-                        attachment: false,
-                        reasoning: false,
-                        temperature: true,
-                        tool_call: true,
-                        release_date: '2025-01-01',
-                        cost: { input: 0, output: 0 },
-                        limit: { context: 128000, output: 8192 },
-                      },
-                    },
-                    options: {
-                      baseURL: `${setupData.kibanaUrl}/internal/elastic_ramen/v1`,
-                      apiKey: 'ignored',
-                      headers: {
-                        Authorization: `ApiKey ${setupData.apiKeyEncoded}`,
-                        'x-elastic-internal-origin': 'kibana',
-                        'kbn-xsrf': 'true',
-                      },
+          <EuiSpacer size="s" />
+
+          <EuiText size="s" color="subdued">
+            <p>
+              The <strong>Connect local agent</strong> button will POST your credentials to{' '}
+              <EuiCode>{LOCAL_AGENT_URL}</EuiCode>. Make sure your agent is running.
+            </p>
+          </EuiText>
+
+          <EuiSpacer size="l" />
+        </>
+      )}
+
+      {error && (
+        <>
+          <EuiCallOut announceOnMount title="Setup failed" color="danger" iconType="error">
+            <p>{error}</p>
+          </EuiCallOut>
+          <EuiSpacer />
+        </>
+      )}
+
+      {setupData && (
+        <>
+          {/* Hidden form for POST-based navigation — keeps credentials out of browser history */}
+          <form
+            ref={formRef}
+            method="POST"
+            action={`${LOCAL_AGENT_URL}/config`}
+            target="_blank"
+            style={{ display: 'none' }}
+          >
+            <input type="hidden" name="elasticsearch_url" value={setupData.elasticsearchUrl} />
+            <input type="hidden" name="kibana_url" value={setupData.kibanaUrl} />
+            <input type="hidden" name="api_key" value={setupData.apiKeyEncoded} />
+            <input
+              type="hidden"
+              name="provider"
+              value={JSON.stringify({
+                kibana: {
+                  name: 'Kibana LLM Gateway',
+                  id: 'kibana',
+                  npm: '@ai-sdk/openai-compatible',
+                  env: [],
+                  models: {
+                    default: {
+                      id: 'default',
+                      name: 'Default Connector',
+                      attachment: false,
+                      reasoning: false,
+                      temperature: true,
+                      tool_call: true,
+                      release_date: '2025-01-01',
+                      cost: { input: 0, output: 0 },
+                      limit: { context: 128000, output: 8192 },
                     },
                   },
-                })}
-              />
-              <input type="hidden" name="model" value="kibana/default" />
-            </form>
+                  options: {
+                    baseURL: `${setupData.kibanaUrl}/internal/elastic_ramen/v1`,
+                    apiKey: 'ignored',
+                    headers: {
+                      Authorization: `ApiKey ${setupData.apiKeyEncoded}`,
+                      'x-elastic-internal-origin': 'kibana',
+                      'kbn-xsrf': 'true',
+                    },
+                  },
+                },
+              })}
+            />
+            <input type="hidden" name="model" value="kibana/default" />
+          </form>
+
+          <EuiAccordion
+            id="connectionCredentials"
+            buttonContent="Connection credentials"
+            initialIsOpen={false}
+          >
+            <EuiSpacer />
             <EuiFlexGroup direction="column" gutterSize="m">
               <EuiFlexItem>
                 <EuiFormRow label="Kibana URL" fullWidth>
@@ -193,8 +220,9 @@ export const SetupPage: React.FC = () => {
                 </EuiCopy>
               </EuiFlexItem>
             </EuiFlexGroup>
-           </>
-         )}
-     </>
-   );
+          </EuiAccordion>
+        </>
+      )}
+    </>
+  );
 };

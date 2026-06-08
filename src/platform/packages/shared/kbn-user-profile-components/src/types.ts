@@ -9,47 +9,23 @@
 
 import type { Observable } from 'rxjs';
 
-/**
- * Avatar stored in user profile.
- */
-export interface UserProfileAvatarData {
-  /**
-   * Optional initials (two letters) of the user to use as avatar if avatar picture isn't specified.
-   */
-  initials?: string;
-  /**
-   * Background color of the avatar when initials are used.
-   */
-  color?: string;
-  /**
-   * Base64 data URL for the user avatar image.
-   */
-  imageUrl?: string | null;
-}
+import type { UserProfileData } from '@kbn/core-user-profile-common';
+import type {
+  ContrastModeValue,
+  DarkModeValue,
+  LocaleValue,
+  UserProfileAvatarData,
+  UserSettingsData,
+} from '@kbn/core-user-settings-types';
 
-export type DarkModeValue = 'system' | 'dark' | 'light' | 'space_default';
-
-export type ContrastModeValue = 'system' | 'standard' | 'high';
-
-/**
- * User settings stored in the data object of the User Profile
- */
-export interface UserSettingsData {
-  darkMode?: DarkModeValue;
-  contrastMode?: ContrastModeValue;
-  solutionNavOptOut?: boolean;
-  /**
-   * Stringified JSON map of space id → whether the Agent Builder announcement modal was dismissed
-   * for that space (`true` = dismissed). Used for per-user, per-space dismissal.
-   */
-  agentBuilderAnnouncementModalSeenBySpaceJson?: string;
-}
-
-export interface UserProfileData {
-  avatar?: UserProfileAvatarData;
-  userSettings?: UserSettingsData;
-  [key: string]: unknown;
-}
+export type {
+  UserProfileAvatarData,
+  DarkModeValue,
+  ContrastModeValue,
+  LocaleValue,
+  UserSettingsData,
+  UserProfileData,
+};
 
 export interface UserProfileAPIClient {
   userProfile$: Observable<UserProfileData | null>;

@@ -6,27 +6,28 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { BooleanFromString } from '@kbn/zod-helpers/v4';
-import type { OnboardingResult, TaskResult } from '@kbn/streams-schema';
-import { OnboardingStep } from '@kbn/streams-schema';
-import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import {
-  getOnboardingTaskId,
-  STREAMS_ONBOARDING_TASK_TYPE,
-  type OnboardingTaskParams,
-} from '../../../../lib/tasks/task_definitions/onboarding';
+  StreamsKIsOnboardingStep,
+  StreamsKIsOnboardingStatus,
+  type StreamsKIsOnboardingStatusResult,
+} from '@kbn/streams-schema';
+import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
-import { handleTaskAction } from '../../../utils/task_helpers';
-import { taskActionSchema } from '../../../../lib/tasks/task_action_schema';
+import { FeatureNotEnabledError } from '../../../../lib/streams/errors/feature_not_enabled_error';
+import type { StreamsKIsOnboardingInputs } from '../../../../lib/workflows/onboarding_workflow_client';
 
 const timestampFromString = z.string().transform((input) => new Date(input).getTime());
-const saveQueriesSchema = BooleanFromString.optional().default(true);
 
-export type OnboardingTaskResult = TaskResult<OnboardingResult>;
+const mapStepsToSkipFlags = (
+  steps: StreamsKIsOnboardingStep[]
+): { skipFeatures: boolean; skipQueries: boolean } => ({
+  skipFeatures: !steps.includes(StreamsKIsOnboardingStep.FeaturesIdentification),
+  skipQueries: !steps.includes(StreamsKIsOnboardingStep.QueriesGeneration),
+});
 
-export const onboardingTaskRoute = createServerRoute({
-  endpoint: 'POST /internal/streams/{streamName}/onboarding/_task',
+export const onboardingExecuteRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/{streamName}/onboarding/_execute',
   options: {
     access: 'internal',
     summary: 'Onboard stream',
@@ -40,72 +41,94 @@ export const onboardingTaskRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({ streamName: z.string() }),
-    query: z.object({
-      saveQueries: saveQueriesSchema,
-    }),
-    body: taskActionSchema({
-      from: timestampFromString,
-      to: timestampFromString,
-      steps: z
-        .array(z.nativeEnum(OnboardingStep))
-        .optional()
-        .default([OnboardingStep.FeaturesIdentification, OnboardingStep.QueriesGeneration])
-        .describe(
-          'Optional list of steps to perform as part of stream onboarding in the specified sequence. By default it will execute all steps.'
-        ),
-      connectors: z
-        .object({
-          features: z.string().optional().describe('Connector ID for features identification.'),
-          queries: z.string().optional().describe('Connector ID for queries generation.'),
-        })
-        .optional()
-        .describe(
-          'Optional per-step connector overrides. When omitted the server resolves connectors from the inference feature registry.'
-        ),
-    }),
+    body: z.discriminatedUnion('action', [
+      z.object({
+        action: z.literal('schedule').describe('Schedule a new onboarding workflow run'),
+        from: timestampFromString,
+        to: timestampFromString,
+        steps: z
+          .array(z.enum(StreamsKIsOnboardingStep))
+          .optional()
+          .default([
+            StreamsKIsOnboardingStep.FeaturesIdentification,
+            StreamsKIsOnboardingStep.QueriesGeneration,
+          ])
+          .describe(
+            'Optional list of steps to perform as part of stream onboarding in the specified sequence. By default it will execute all steps.'
+          ),
+        connectors: z
+          .object({
+            features: z
+              .string()
+              .max(255)
+              .optional()
+              .describe('Connector ID for features identification.'),
+            queries: z
+              .string()
+              .max(255)
+              .optional()
+              .describe('Connector ID for queries generation.'),
+          })
+          .optional()
+          .describe(
+            'Optional per-step connector overrides. When omitted the server resolves connectors from the inference feature registry.'
+          ),
+      }),
+      z.object({
+        action: z.literal('cancel').describe('Cancel an in-progress onboarding workflow'),
+      }),
+    ]),
   }),
-  handler: async ({ params, request, getScopedClients, server }): Promise<OnboardingTaskResult> => {
-    const { licensing, uiSettingsClient, taskClient } = await getScopedClients({
-      request,
-    });
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+    streamsKIsOnboardingClient,
+  }): Promise<StreamsKIsOnboardingStatusResult> => {
+    if (!streamsKIsOnboardingClient) {
+      throw new FeatureNotEnabledError('Workflows management is not available');
+    }
 
+    const { licensing, uiSettingsClient } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const {
       path: { streamName },
-      query,
       body,
     } = params;
 
-    const { saveQueries } = query;
+    if (body.action === 'schedule') {
+      const { skipFeatures, skipQueries } = mapStepsToSkipFlags(body.steps);
 
-    const onboardingTaskId = getOnboardingTaskId(streamName, saveQueries);
+      const inputs: StreamsKIsOnboardingInputs = {
+        streamName,
+        features: {
+          skip: skipFeatures,
+          start: body.from,
+          end: body.to,
+          ...(body.connectors?.features && { connectorId: body.connectors.features }),
+        },
+        queries: {
+          skip: skipQueries,
+          ...(body.connectors?.queries && { connectorId: body.connectors.queries }),
+        },
+      };
 
-    const actionParams =
-      body.action === 'schedule'
-        ? ({
-            action: body.action,
-            scheduleConfig: {
-              taskType: STREAMS_ONBOARDING_TASK_TYPE,
-              taskId: onboardingTaskId,
-              params: {
-                streamName,
-                from: body.from,
-                to: body.to,
-                steps: body.steps,
-                saveQueries,
-                connectors: body.connectors,
-              },
-              request,
-            },
-          } as const)
-        : ({ action: body.action } as const);
+      await streamsKIsOnboardingClient.run({ inputs, request });
 
-    return handleTaskAction<OnboardingTaskParams, OnboardingResult>({
-      taskClient,
-      taskId: onboardingTaskId,
-      ...actionParams,
-    });
+      return { status: StreamsKIsOnboardingStatus.InProgress };
+    }
+
+    // action === 'cancel'
+    // Cancellation may be a no-op (nothing running, or already terminal), so we
+    // return the real post-cancel status rather than assuming `canceled`.
+    await streamsKIsOnboardingClient.cancel({ streamName, request });
+
+    const { executionId: _executionId, ...statusResult } =
+      await streamsKIsOnboardingClient.getStatus({ streamName });
+
+    return statusResult;
   },
 });
 
@@ -123,27 +146,32 @@ export const onboardingStatusRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({ streamName: z.string() }),
-    query: z.object({
-      saveQueries: saveQueriesSchema,
-    }),
   }),
-  handler: async ({ params, request, getScopedClients, server }): Promise<OnboardingTaskResult> => {
-    const { licensing, uiSettingsClient, taskClient } = await getScopedClients({
-      request,
-    });
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+    streamsKIsOnboardingClient,
+  }): Promise<StreamsKIsOnboardingStatusResult> => {
+    if (!streamsKIsOnboardingClient) {
+      throw new FeatureNotEnabledError('Workflows management is not available');
+    }
+
+    const { licensing, uiSettingsClient } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const {
       path: { streamName },
-      query: { saveQueries },
     } = params;
-    const taskId = getOnboardingTaskId(streamName, saveQueries);
 
-    return taskClient.getStatus<OnboardingTaskParams, OnboardingResult>(taskId);
+    const { executionId: _executionId, ...statusResult } =
+      await streamsKIsOnboardingClient.getStatus({ streamName });
+    return statusResult;
   },
 });
 
 export const internalOnboardingRoutes = {
-  ...onboardingTaskRoute,
+  ...onboardingExecuteRoute,
   ...onboardingStatusRoute,
 };

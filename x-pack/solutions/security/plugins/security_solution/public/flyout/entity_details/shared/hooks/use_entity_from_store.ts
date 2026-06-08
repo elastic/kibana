@@ -146,7 +146,7 @@ export function useEntityFromStore(
   const { entityId, identityFields, entityType, skip } = params;
   const euidApi = useEntityStoreEuidApi();
   const { fetchEntitiesList, fetchEntitiesListV2 } = useEntityAnalyticsRoutes();
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
 
   const identityDocument = useMemo(() => {
     if (identityFields == null || Object.keys(identityFields).length === 0) {
@@ -251,7 +251,8 @@ export function useEntityFromStore(
   const entityField = record?.entity;
 
   const firstSeen = entityField?.lifecycle?.first_seen ?? null;
-  const lastSeen = entityField?.lifecycle?.last_activity ?? null;
+  const lastSeen =
+    entityField?.lifecycle?.last_activity ?? entityField?.lifecycle?.last_seen ?? null;
 
   const mappedDetails = useMemo((): HostItem | UserItem | null => {
     if (!record) {

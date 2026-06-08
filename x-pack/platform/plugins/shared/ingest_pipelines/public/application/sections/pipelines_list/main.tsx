@@ -167,6 +167,10 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({ hi
       key="createPipelinePopover"
       isOpen={showPopover}
       closePopover={() => setShowPopover(false)}
+      aria-label={i18n.translate(
+        'xpack.ingestPipelines.list.table.createPipelinePopoverAriaLabel',
+        { defaultMessage: 'Create pipeline options' }
+      )}
       button={
         <EuiButton
           fill

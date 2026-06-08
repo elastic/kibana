@@ -8,7 +8,6 @@
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
   describe('index based actions panel on trial license', function () {
@@ -32,7 +31,6 @@ export default function ({ getService }: FtrProviderContext) {
     // Note query is not currently passed to the wizard
 
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
       await ml.testResources.createDataViewIfNeeded(esIndexName, '@timestamp');
       await ml.testResources.createSavedSearchFarequoteKueryIfNeeded();
       await ml.testResources.setKibanaTimeZoneToUTC();
@@ -87,7 +85,7 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.dataVisualizer.navigateToDataViewSelection();
 
         await ml.testExecution.logTestStep('loads the index data visualizer page');
-        await ml.jobSourceSelection.selectSourceForIndexBasedDataVisualizer(savedSearch);
+        await ml.jobSourceSelection.selectSourceForIndexBasedDataVisualizer(savedSearch, true);
 
         await ml.testExecution.logTestStep(`loads data for full time range`);
         await ml.dataVisualizerIndexBased.assertTimeRangeSelectorSectionExists();

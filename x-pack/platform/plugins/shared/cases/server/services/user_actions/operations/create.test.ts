@@ -6,7 +6,6 @@
  */
 
 import { CASE_USER_ACTION_SAVED_OBJECT } from '../../../../common/constants';
-import { PersistableStateAttachmentTypeRegistry } from '../../../attachment_framework/persistable_state_registry';
 import { createSavedObjectsSerializerMock } from '../../../client/mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -47,6 +46,9 @@ import {
   patchExtendedFieldsCasesRequest,
   patchUpdateExtendedFieldsCasesRequest,
   getExtendedFieldsUserActions,
+  patchTemplateCasesRequest,
+  patchRemoveTemplateCasesRequest,
+  getTemplateUserActions,
 } from '../mocks';
 import { AttachmentType, UserActionTypes } from '../../../../common/types/domain';
 
@@ -54,7 +56,6 @@ describe('UserActionPersister', () => {
   const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
   const mockLogger = loggerMock.create();
   const auditMockLocker = auditLoggerMock.create();
-  const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
   const savedObjectsSerializer = createSavedObjectsSerializerMock();
 
   let persister: UserActionPersister;
@@ -69,7 +70,6 @@ describe('UserActionPersister', () => {
     persister = new UserActionPersister({
       log: mockLogger,
       unsecuredSavedObjectsClient,
-      persistableStateAttachmentTypeRegistry,
       savedObjectsSerializer,
       auditLogger: auditMockLocker,
     });
@@ -352,6 +352,26 @@ describe('UserActionPersister', () => {
             user: testUser,
           })
         ).toEqual({ '1': [] });
+      });
+    });
+
+    describe('template', () => {
+      it('creates a user action when a template is applied', () => {
+        expect(
+          persister.buildUserActions({
+            updatedCases: patchTemplateCasesRequest,
+            user: testUser,
+          })
+        ).toEqual(getTemplateUserActions({ isMock: false, payload: { id: 'tmpl-1', version: 3 } }));
+      });
+
+      it('creates a user action when a template is removed (null)', () => {
+        expect(
+          persister.buildUserActions({
+            updatedCases: patchRemoveTemplateCasesRequest,
+            user: testUser,
+          })
+        ).toEqual(getTemplateUserActions({ isMock: false, payload: null }));
       });
     });
 

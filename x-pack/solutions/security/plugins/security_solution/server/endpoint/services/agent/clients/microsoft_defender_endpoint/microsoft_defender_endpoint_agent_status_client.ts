@@ -9,7 +9,7 @@ import {
   CONNECTOR_ID as MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID,
   SUB_ACTION as MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION,
 } from '@kbn/connector-schemas/microsoft_defender_endpoint/constants';
-import { keyBy } from 'lodash';
+import { keyBy, once } from 'lodash';
 import type {
   MicrosoftDefenderEndpointAgentListResponse,
   MicrosoftDefenderEndpointGetActionsParams,
@@ -28,23 +28,28 @@ import { HostStatus } from '../../../../../../common/endpoint/types';
 
 export class MicrosoftDefenderEndpointAgentStatusClient extends AgentStatusClient {
   protected readonly agentType: ResponseActionAgentType = 'microsoft_defender_endpoint';
-
-  protected readonly connectorActions: NormalizedExternalConnectorClient;
+  protected readonly getConnectorActions: () => NormalizedExternalConnectorClient;
 
   constructor(options: AgentStatusClientOptions) {
     super(options);
+    const connectorActionsClient = options.connectorActionsClient;
 
-    if (!options.connectorActionsClient) {
+    if (!connectorActionsClient) {
       throw new AgentStatusClientError(
         'connectorActionsClient is required to create an instance of MicrosoftDefenderEndpointAgentStatusClient'
       );
     }
 
-    this.connectorActions = new NormalizedExternalConnectorClient(
-      options.connectorActionsClient,
-      this.log
-    );
-    this.connectorActions.setup(MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID);
+    this.getConnectorActions = once(() => {
+      const connectorInstance = new NormalizedExternalConnectorClient(
+        connectorActionsClient,
+        this.log
+      );
+
+      connectorInstance.setup(MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID);
+
+      return connectorInstance;
+    });
   }
 
   protected getAgentStatusFromMachineHealthStatus(
@@ -83,22 +88,23 @@ export class MicrosoftDefenderEndpointAgentStatusClient extends AgentStatusClien
           // Microsoft's does not seem to have a public API that enables us to get the Isolation state for a machine. To
           // get around this, we query the list of machine actions for each host and look at the last successful
           // Isolate or Unisolate action to determine if host is isolated or not.
-          const { data: hostLastSuccessfulMachineAction } = await this.connectorActions.execute<
-            MicrosoftDefenderEndpointGetActionsResponse,
-            MicrosoftDefenderEndpointGetActionsParams
-          >({
-            params: {
-              subAction: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_ACTIONS,
-              subActionParams: {
-                status: 'Succeeded',
-                type: ['Isolate', 'Unisolate'],
-                machineId: agentId,
-                pageSize: 1,
-                sortField: 'lastUpdateDateTimeUtc',
-                sortDirection: 'desc',
+          const { data: hostLastSuccessfulMachineAction } =
+            await this.getConnectorActions().execute<
+              MicrosoftDefenderEndpointGetActionsResponse,
+              MicrosoftDefenderEndpointGetActionsParams
+            >({
+              params: {
+                subAction: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_ACTIONS,
+                subActionParams: {
+                  status: 'Succeeded',
+                  type: ['Isolate', 'Unisolate'],
+                  machineId: agentId,
+                  pageSize: 1,
+                  sortField: 'lastUpdateDateTimeUtc',
+                  sortDirection: 'desc',
+                },
               },
-            },
-          });
+            });
 
           // Only check the first action if the array is not empty
           const [firstAction] = hostLastSuccessfulMachineAction?.value || [];
@@ -129,7 +135,7 @@ export class MicrosoftDefenderEndpointAgentStatusClient extends AgentStatusClien
     try {
       const [{ data: msMachineListResponse }, agentIsolationState, allPendingActions] =
         await Promise.all([
-          this.connectorActions.execute<MicrosoftDefenderEndpointAgentListResponse>({
+          this.getConnectorActions().execute<MicrosoftDefenderEndpointAgentListResponse>({
             params: {
               subAction: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_AGENT_LIST,
               subActionParams: { id: agentIds },
@@ -163,13 +169,7 @@ export class MicrosoftDefenderEndpointAgentStatusClient extends AgentStatusClien
         return acc;
       }, {});
     } catch (err) {
-      const error = new AgentStatusClientError(
-        `Failed to fetch Microsoft Defender for Endpoint agent status for agentIds: [${agentIds}], failed with: ${err.message}`,
-        500,
-        err
-      );
-      this.log.error(error);
-      throw error;
+      return this.handleUnexpectedFailureAndReturnDefaultResponse(agentIds, err);
     }
   }
 }

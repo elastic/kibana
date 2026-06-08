@@ -25,6 +25,14 @@ export const COMPUTED_FEATURE_TYPES = [
   ERROR_LOGS_FEATURE_TYPE,
 ] as const;
 
+export const INFERRED_FEATURE_TYPES = [
+  'entity',
+  'infrastructure',
+  'technology',
+  'dependency',
+  'schema',
+] as const;
+
 export const baseFeatureSchema = z.object({
   id: z.string(),
   stream_name: z.string(),
@@ -73,6 +81,9 @@ export const featureSchema = baseFeatureSchema.and(
     last_seen: z.string(),
     expires_at: z.string().optional(),
     excluded_at: z.string().optional(),
+    run_id: z.string().optional(),
+    excluded: z.boolean().optional(),
+    updated_at: z.iso.datetime().optional(),
   })
 );
 

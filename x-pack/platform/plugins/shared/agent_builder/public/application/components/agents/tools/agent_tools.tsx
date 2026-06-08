@@ -20,7 +20,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import type { ToolDefinition } from '@kbn/agent-builder-common';
-import { defaultAgentToolIds } from '@kbn/agent-builder-common';
+import { defaultAgentToolIds, AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { useQueryState } from '../../../hooks/use_query_state';
 import { searchParamNames } from '../../../search_param_names';
 import { labels } from '../../../utils/i18n';
@@ -92,11 +93,19 @@ const ActiveToolsList: React.FC<{
                 <EuiBadge color="hollow">
                   {labels.agentTools.elasticCapabilitiesReadOnlyBadge}
                 </EuiBadge>
-              ) : isBuiltIn ? (
-                <EuiBadge color="hollow">{labels.agentTools.readOnlyBadge}</EuiBadge>
               ) : undefined
             }
             canEditAgent={canEditAgent}
+            ebtProps={getEbtProps({
+              element: AGENT_BUILDER_UI_EBT.element.pageContent,
+              action: AGENT_BUILDER_UI_EBT.action.agentCustomization.ENTITY_DETAIL_VIEW,
+              detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
+            })}
+            removeEbtProps={getEbtProps({
+              element: AGENT_BUILDER_UI_EBT.element.pageContent,
+              action: AGENT_BUILDER_UI_EBT.action.agentCustomization.ENTITY_REMOVE,
+              detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
+            })}
           />
         );
       })}
@@ -122,9 +131,13 @@ export const AgentTools: React.FC = () => {
   const [selectedToolId, setSelectedToolId] = useQueryState<string>(searchParamNames.toolId);
   const {
     isOpen: isLibraryOpen,
-    openFlyout: openLibrary,
+    openFlyout: openLibraryFlyout,
     closeFlyout: closeLibrary,
   } = useFlyoutState();
+
+  const openLibrary = useCallback(() => {
+    openLibraryFlyout();
+  }, [openLibraryFlyout]);
 
   const agentToolSelections = useMemo(
     () => agent?.configuration?.tools ?? [],
@@ -185,12 +198,21 @@ export const AgentTools: React.FC = () => {
     [handleAddTool, handleRemoveTool, enableElasticCapabilities, defaultToolIdSet]
   );
 
+  const handleSelectTool = useCallback(
+    (toolId: string) => {
+      setSelectedToolId(toolId);
+    },
+    [setSelectedToolId]
+  );
+
   const handleRemoveToolWithDeselect = useCallback(
     (tool: ToolDefinition) => {
       handleRemoveTool(tool);
-      setSelectedToolId(null);
+      if (tool.id === selectedToolId) {
+        setSelectedToolId(null);
+      }
     },
-    [handleRemoveTool, setSelectedToolId]
+    [handleRemoveTool, selectedToolId, setSelectedToolId]
   );
 
   /** Guarded removal: only prevents removing auto-included tools from the agent. */
@@ -248,7 +270,18 @@ export const AgentTools: React.FC = () => {
                   </EuiFlexItem>
                   {canEditAgent && (
                     <EuiFlexItem grow={false}>
-                      <EuiButton fill iconType="plusInCircle" iconSide="left" onClick={openLibrary}>
+                      <EuiButton
+                        fill
+                        iconType="plusInCircle"
+                        iconSide="left"
+                        onClick={openLibrary}
+                        {...getEbtProps({
+                          element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                          action:
+                            AGENT_BUILDER_UI_EBT.action.agentCustomization.ENTITY_ADD_FROM_LIBRARY,
+                          detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
+                        })}
+                      >
                         {labels.agentTools.addToolButton}
                       </EuiButton>
                     </EuiFlexItem>
@@ -283,7 +316,7 @@ export const AgentTools: React.FC = () => {
                   enableElasticCapabilities={enableElasticCapabilities}
                   defaultToolIdSet={defaultToolIdSet}
                   isRemoving={false}
-                  onSelect={setSelectedToolId}
+                  onSelect={handleSelectTool}
                   onRemove={handleRemoveToolWithDeselect}
                   canEditAgent={canEditAgent}
                 />
