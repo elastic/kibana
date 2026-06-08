@@ -24,6 +24,7 @@ import type {
   ConversationTurn,
   GuardrailRule,
   ModuleReport,
+  PassRateCheckResult,
   RedTeamConfig,
   RedTeamReport,
   Severity,
@@ -55,6 +56,7 @@ interface RedTeamOrchestrator {
   scanExistingRun: (
     outputs: Array<{ output: TaskOutput; module: string; strategy: string }>
   ) => AttackResult[];
+  checkPassRates: (report: RedTeamReport) => PassRateCheckResult;
 }
 
 const buildDefaultEvaluators = (
@@ -557,7 +559,38 @@ export const createRedTeamOrchestrator = (
     });
   };
 
-  return { run, scanExistingRun };
+  const checkPassRates = (report: RedTeamReport): PassRateCheckResult => {
+    const failures: PassRateCheckResult['failures'] = [];
+
+    // Check per-module thresholds
+    if (config.moduleMinPassRates) {
+      for (const moduleReport of report.modules) {
+        const required = config.moduleMinPassRates[moduleReport.module];
+        if (required !== undefined) {
+          const passRate =
+            moduleReport.total > 0 ? (moduleReport.passed / moduleReport.total) * 100 : 100;
+          if (passRate < required) {
+            failures.push({ module: moduleReport.module, passRate, required });
+          }
+        }
+      }
+    }
+
+    // Check overall threshold
+    if (config.minPassRate !== undefined) {
+      if (report.overallPassRate < config.minPassRate) {
+        failures.push({
+          module: 'overall',
+          passRate: report.overallPassRate,
+          required: config.minPassRate,
+        });
+      }
+    }
+
+    return { passed: failures.length === 0, failures };
+  };
+
+  return { run, scanExistingRun, checkPassRates };
 };
 
 /**

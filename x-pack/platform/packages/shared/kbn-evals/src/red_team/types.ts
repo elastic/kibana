@@ -115,6 +115,20 @@ export interface RedTeamConfig {
    * regresses below the agreed security baseline.
    */
   minPassRate?: number;
+  /**
+   * Per-module minimum pass rates. Keys are module names, values are percentages (0-100).
+   * When set, each named module is checked against its threshold independently.
+   */
+  moduleMinPassRates?: Record<string, number>;
+}
+
+export interface PassRateCheckResult {
+  passed: boolean;
+  failures: Array<{
+    module: string;
+    passRate: number;
+    required: number;
+  }>;
 }
 
 export interface ModuleReport {

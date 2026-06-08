@@ -7,7 +7,7 @@
 
 import { createRedTeamOrchestrator, runRedTeam } from './orchestrator';
 import type { EvalsExecutorClient, DatasetRunResult } from '../types';
-import type { AttackResult, RedTeamConfig } from './types';
+import type { AttackResult, RedTeamConfig, RedTeamReport } from './types';
 import { DEFAULT_GUARDRAIL_RULES } from './guardrails';
 
 const createMockLog = () => ({
@@ -355,6 +355,89 @@ describe('RedTeamOrchestrator', () => {
 
       const report = await orchestrator.run(jest.fn().mockResolvedValue('safe response'));
       expect(report.strategies).toEqual(['direct']);
+    });
+  });
+
+  describe('checkPassRates', () => {
+    const makeReport = (modules: Array<{ name: string; passed: number; total: number }>): RedTeamReport => ({
+      runId: 'test',
+      suite: 'test',
+      strategies: ['direct'],
+      strategy: 'direct',
+      difficulty: 'basic',
+      templateOnly: true,
+      modules: modules.map(({ name, passed, total }) => ({
+        module: name,
+        passed,
+        failed: total - passed,
+        total,
+        results: [],
+        bySeverity: { critical: 0, high: 0, medium: 0, low: 0 },
+      })),
+      overallPassRate: modules.reduce((s, m) => s + m.passed, 0) / modules.reduce((s, m) => s + m.total, 0) * 100,
+    });
+
+    it('returns passed=true when all module rates meet their thresholds', () => {
+      const orchestrator = createRedTeamOrchestrator({
+        config: {
+          modules: ['prompt_injection'],
+          count: 1,
+          difficulty: 'basic',
+          templateOnly: true,
+          moduleMinPassRates: { prompt_injection: 80 },
+        },
+        executorClient: createMockExecutorClient(),
+        log: createMockLog() as any,
+      });
+
+      const report = makeReport([{ name: 'prompt_injection', passed: 9, total: 10 }]);
+      const result = orchestrator.checkPassRates(report);
+      expect(result.passed).toBe(true);
+      expect(result.failures).toHaveLength(0);
+    });
+
+    it('returns failure when a module falls below its threshold', () => {
+      const orchestrator = createRedTeamOrchestrator({
+        config: {
+          modules: ['prompt_injection'],
+          count: 1,
+          difficulty: 'basic',
+          templateOnly: true,
+          moduleMinPassRates: { prompt_injection: 95 },
+        },
+        executorClient: createMockExecutorClient(),
+        log: createMockLog() as any,
+      });
+
+      const report = makeReport([{ name: 'prompt_injection', passed: 7, total: 10 }]);
+      const result = orchestrator.checkPassRates(report);
+      expect(result.passed).toBe(false);
+      expect(result.failures).toHaveLength(1);
+      expect(result.failures[0].module).toBe('prompt_injection');
+      expect(result.failures[0].passRate).toBe(70);
+      expect(result.failures[0].required).toBe(95);
+    });
+
+    it('checks overall minPassRate against overallPassRate', () => {
+      const orchestrator = createRedTeamOrchestrator({
+        config: {
+          modules: ['prompt_injection'],
+          count: 1,
+          difficulty: 'basic',
+          templateOnly: true,
+          minPassRate: 90,
+        },
+        executorClient: createMockExecutorClient(),
+        log: createMockLog() as any,
+      });
+
+      const report = makeReport([{ name: 'prompt_injection', passed: 8, total: 10 }]);
+      // overallPassRate = 80, required = 90 → should fail
+      const result = orchestrator.checkPassRates(report);
+      expect(result.passed).toBe(false);
+      expect(result.failures[0].module).toBe('overall');
+      expect(result.failures[0].passRate).toBe(80);
+      expect(result.failures[0].required).toBe(90);
     });
   });
 
