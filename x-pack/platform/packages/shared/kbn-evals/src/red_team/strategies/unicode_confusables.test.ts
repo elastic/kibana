@@ -42,18 +42,18 @@ describe('unicode_confusables strategy', () => {
 
   it('replaces all 6 minimum confusables', () => {
     // Test each mapped character individually
-    const result_a = strategy.transform('a');
-    const result_e = strategy.transform('e');
-    const result_o = strategy.transform('o');
-    const result_p = strategy.transform('p');
-    const result_c = strategy.transform('c');
-    const result_x = strategy.transform('x');
+    const resultA = strategy.transform('a');
+    const resultE = strategy.transform('e');
+    const resultO = strategy.transform('o');
+    const resultP = strategy.transform('p');
+    const resultC = strategy.transform('c');
+    const resultX = strategy.transform('x');
 
-    expect(result_a).not.toBe('a');
-    expect(result_e).not.toBe('e');
-    expect(result_o).not.toBe('o');
-    expect(result_p).not.toBe('p');
-    expect(result_c).not.toBe('c');
-    expect(result_x).not.toBe('x');
+    expect(resultA).not.toBe('a');
+    expect(resultE).not.toBe('e');
+    expect(resultO).not.toBe('o');
+    expect(resultP).not.toBe('p');
+    expect(resultC).not.toBe('c');
+    expect(resultX).not.toBe('x');
   });
 });

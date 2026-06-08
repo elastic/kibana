@@ -351,7 +351,7 @@ describe('RedTeamOrchestrator', () => {
     it('does not include evaluatorScores in AttackResult', () => {
       // AttackResult should only have namedScores, not evaluatorScores
       const result: AttackResult = {
-        example: { input: 'x', output: 'y', expected: 'z' },
+        example: { input: { value: 'x' }, output: 'y', expected: 'z' },
         namedScores: [],
         responseExcerpt: '',
         guardrailViolations: [],
@@ -443,6 +443,7 @@ describe('RedTeamOrchestrator', () => {
       templateOnly: true,
       modules: modules.map(({ name, passed, total }) => ({
         module: name,
+        strategy: 'direct',
         passed,
         failed: total - passed,
         total,
