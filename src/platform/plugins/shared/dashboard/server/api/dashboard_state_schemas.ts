@@ -12,11 +12,7 @@ import { schema } from '@kbn/config-schema';
 import { refreshIntervalSchema } from '@kbn/data-service-server';
 import { asCodeFilterSchema } from '@kbn/as-code-filters-schema';
 import { asCodeQuerySchema } from '@kbn/as-code-shared-schemas';
-/**
- * Currently, controls are the only pinnable panels. However, if we intend to make this extendable, we should instead
- * get the pinned panel schema from a pinned panel registry **independent** from controls
- */
-import { getControlsGroupSchema as getPinnedPanelsSchema } from '@kbn/controls-schemas';
+import { getControlsGroupSchema } from '@kbn/controls-schemas';
 import { timeRangeSchema } from '@kbn/es-query-server';
 import { embeddableService } from '../kibana_services';
 import { DASHBOARD_GRID_COLUMN_COUNT } from '../../common/page_bundle_constants';
@@ -58,7 +54,7 @@ export const panelGridSchema = schema.object(
   }
 );
 
-export function getPanelSchema(isDashboardAppRequest: boolean) {
+export function getPanelSchema() {
   const basePanelProps = {
     grid: panelGridSchema,
     id: schema.maybe(
@@ -68,22 +64,8 @@ export function getPanelSchema(isDashboardAppRequest: boolean) {
     ),
   };
 
-  // looser route validation for dashboard application requests
-  // TODO remove when all embeddables register schemas
-  if (isDashboardAppRequest) {
-    return schema.object({
-      ...basePanelProps,
-      type: schema.string(),
-      config: schema.object(
-        {},
-        {
-          unknowns: 'allow',
-        }
-      ),
-    });
-  }
-
   const embeddableSchemas = embeddableService ? embeddableService.getAllEmbeddableSchemas() : {};
+
   const panelSchemas = Object.entries(embeddableSchemas)
     // sort to ensure consistent order in OAS documenation
     .sort(([aType, { title: aTitle }], [bType, { title: bTitle }]) => aTitle.localeCompare(bTitle))
@@ -121,7 +103,7 @@ const sectionGridSchema = schema.object({
   y: schema.number({ meta: { description: 'The y coordinate of the section in grid units.' } }),
 });
 
-export function getSectionSchema(isDashboardAppRequest: boolean, isReadRequest: boolean = false) {
+export function getSectionSchema() {
   return schema.object(
     {
       title: schema.string({
@@ -135,10 +117,10 @@ export function getSectionSchema(isDashboardAppRequest: boolean, isReadRequest: 
         defaultValue: false,
       }),
       grid: sectionGridSchema,
-      panels: schema.arrayOf(getPanelSchema(isDashboardAppRequest), {
+      panels: schema.arrayOf(getPanelSchema(), {
         meta: { description: 'The panels that belong to the section.' },
         defaultValue: [],
-        maxSize: isDashboardAppRequest && isReadRequest ? Number.MAX_SAFE_INTEGER : MAX_PANELS,
+        maxSize: MAX_PANELS,
       }),
       id: schema.maybe(
         schema.string({
@@ -154,6 +136,23 @@ export function getSectionSchema(isDashboardAppRequest: boolean, isReadRequest: 
       },
     }
   );
+}
+
+export function getPinnedPanelsSchema(
+  isDashboardAppRequest: boolean = false,
+  isReadRequest: boolean = false
+) {
+  return isDashboardAppRequest && isReadRequest // looser route validation for dashboard application read requests
+    ? (schema.arrayOf(
+        schema.object(
+          {},
+          {
+            unknowns: 'allow',
+          }
+        ),
+        { maxSize: Number.MAX_SAFE_INTEGER }
+      ) as unknown as ReturnType<typeof getControlsGroupSchema>) // keeps derived types happy
+    : getControlsGroupSchema();
 }
 
 export const optionsSchema = schema.object(
@@ -236,7 +235,7 @@ export function getDashboardStateSchema(
 ) {
   return schema.object(
     {
-      pinned_panels: getPinnedPanelsSchema(isDashboardAppRequest && isReadRequest),
+      pinned_panels: getPinnedPanelsSchema(isDashboardAppRequest, isReadRequest),
       description: schema.maybe(
         schema.string({ meta: { description: 'A short description of the dashboard.' } })
       ),
@@ -250,10 +249,14 @@ export function getDashboardStateSchema(
       ),
       options: optionsSchema,
       panels: schema.arrayOf(
-        schema.oneOf([
-          getPanelSchema(isDashboardAppRequest),
-          getSectionSchema(isDashboardAppRequest, isReadRequest),
-        ]),
+        isDashboardAppRequest // looser route validation for dashboard application requests
+          ? (schema.object(
+              {},
+              {
+                unknowns: 'allow',
+              }
+            ) as unknown as ReturnType<typeof getPanelSchema>) // keeps derived types happy
+          : schema.oneOf([getPanelSchema(), getSectionSchema()]),
         {
           defaultValue: [],
           maxSize: isDashboardAppRequest && isReadRequest ? Number.MAX_SAFE_INTEGER : MAX_PANELS,

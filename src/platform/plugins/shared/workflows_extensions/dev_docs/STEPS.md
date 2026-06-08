@@ -871,10 +871,40 @@ The `context` parameter provides access to runtime services and step information
   - `getScopedEsClient()`: Scoped Elasticsearch client
   - `renderInputTemplate()`: Evaluate template strings
   - `getFakeRequest()`: Fake KibanaRequest for other services
+  - `callKibanaApi(params)`: Call a Kibana API route on this Kibana instance (see [Calling Kibana APIs](#calling-kibana-apis-callkibanaapi))
 - **`context.logger`**: Scoped logger (`debug`, `info`, `warn`, `error`)
 - **`context.abortSignal`**: AbortSignal for cancellation support
 - **`context.stepId`**: Current step instance identifier
 - **`context.stepType`**: Step type identifier (e.g., `'my-namespace.myCustomStep'`)
+
+### Calling Kibana APIs (`callKibanaApi`)
+
+`context.contextManager.callKibanaApi(params)` lets a custom step invoke any registered Kibana HTTP route, authenticated as the workflow's fake request. Use this when the step needs to consume a Kibana API for which the owning plugin does not (yet) expose a request-scoped client on its start contract — instead of reinventing URL building, auth, and event-chain header propagation.
+
+```typescript
+const result = await context.contextManager.callKibanaApi<{ id: string }>({
+  method: 'POST',
+  path: '/api/cases',
+  body: { title: context.input.title, owner: 'cases' },
+});
+// result = { status: 200, headers: {...}, body: { id: 'case-1' } }
+```
+
+**Contract (stable):**
+
+- Throws `Error('HTTP <status>: <body>')` on any non-2xx response (except 304, treated like 204).
+- Returns `{ status, headers, body }`. `body` is parsed JSON for JSON content types, a `string` for non-JSON text bodies, a `Buffer` for binary content types, and `{}` for 204/304.
+- Cross-cutting headers (`Authorization`, `Content-Type`, `kbn-xsrf`, `x-elastic-internal-origin`, event-chain headers) are managed by the engine and cannot be overridden by caller-supplied `headers`.
+- The implementation may evolve (for example, moving from network `fetch` to an in-process Kibana HTTP API). The API surface above will not change.
+
+**Not supported (use the `kibana.request` YAML step instead):**
+
+- Multipart / `form_data` uploads
+- Custom fetcher options (TLS, redirects, keep-alive, undici Agent options)
+- Streaming / SSE responses
+- Overriding URL resolution (the request always targets this Kibana instance)
+
+If you already have a request-scoped client from another plugin's start contract (for example `alerting.getRulesClientWithRequest`, `cases.getCasesClientWithRequest`), prefer that — it is strongly typed and skips the HTTP layer entirely. `callKibanaApi` exists for the general case where such a client does not exist.
 
 ### Cancellation Cleanup (`onCancel`)
 

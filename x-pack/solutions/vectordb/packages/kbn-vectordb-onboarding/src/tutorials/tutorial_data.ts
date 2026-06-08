@@ -6,77 +6,142 @@
  */
 
 import type { IconType } from '@elastic/eui';
-import type { ApplicationStart, DocLinksStart } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import type { DocLinksStart } from '@kbn/core/public';
 
-export interface Tutorial {
+export interface TutorialContent {
   /** Stable id used for localStorage progress tracking. */
   id: string;
   title: string;
   description: string;
+  /** Topic category label (e.g. Documentation, Article, Notebook). */
+  topic: string;
+  /** EUI icon shown inside the topic badge. */
   icon: IconType;
-  /** Navigation target — in-app sub-route or absolute external URL. */
   href: string;
   /** Set to `'_blank'` for external URLs; omit for in-app routes. */
   target?: '_blank';
-  /** Estimated effort, shown as a small badge. */
-  duration: string;
-  /** Free-form tag chips. */
-  tags: readonly string[];
 }
 
-/** ID of the onboarding-wizard tutorial. The wizard's Done button marks this complete. */
-export const ONBOARDING_TUTORIAL_ID = 'onboarding-wizard';
+const DOCUMENTATION_LABEL = i18n.translate(
+  'vectordbOnboarding.tutorials.topic.documentation.label',
+  {
+    defaultMessage: 'Documentation',
+  }
+);
 
-/**
- * Tutorials are produced from `docLinks` so external hrefs always match
- * Kibana's source of truth for Elastic documentation URLs (no hard-coded
- * paths that can rot).
- */
-export const getTutorials = (
-  docLinks: DocLinksStart,
-  application: ApplicationStart
-): readonly Tutorial[] => [
+const ARTICLE_LABEL = i18n.translate('vectordbOnboarding.tutorials.topic.article.label', {
+  defaultMessage: 'Article',
+});
+
+const NOTEBOOK_LABEL = i18n.translate('vectordbOnboarding.tutorials.topic.notebook.label', {
+  defaultMessage: 'Notebook',
+});
+
+export const getTutorialContent = (docLinks: DocLinksStart): TutorialContent[] => [
   {
-    id: ONBOARDING_TUTORIAL_ID,
-    title: 'Onboarding: ingest and search vectors',
-    description:
-      'A 2-step walkthrough that creates an index, loads a few documents, and runs your first vector query.',
-    icon: 'rocket',
-    href: application.getUrlForApp('vectordb', { path: '/onboarding' }),
-    duration: '5 min',
-    tags: ['Beginner', 'Wizard'],
-  },
-  {
-    id: 'hybrid-search',
-    title: 'Hybrid search: combine kNN with BM25',
-    description:
-      'Boost recall by combining lexical and vector retrieval into a single ranked result set.',
-    icon: 'visBarHorizontalStacked',
+    id: 'hybrid-search-semantic_text-documentation',
+    topic: DOCUMENTATION_LABEL,
+    icon: 'documents',
     href: docLinks.links.enterpriseSearch.knnSearchCombine,
     target: '_blank',
-    duration: '15 min',
-    tags: ['Intermediate', 'Hybrid'],
+    title: i18n.translate('vectordbOnboarding.tutorials.hybridSearchSemanticText.title', {
+      defaultMessage: 'Hybrid search with semantic_text',
+    }),
+    description: i18n.translate(
+      'vectordbOnboarding.tutorials.hybridSearchSemanticText.description',
+      {
+        defaultMessage:
+          'This tutorial walks you through hybrid search using the semantic_text field type together with a text field for lexical search.',
+      }
+    ),
   },
   {
-    id: 'rag-playground',
-    title: 'Try the chat Playground',
-    description:
-      'Wire vector search into a retrieval-augmented generation flow with the in-Kibana Playground.',
-    icon: 'sparkles',
-    href: docLinks.links.playground.chatPlayground,
+    id: 'bring-your-own-dense-vectors-article',
+    topic: ARTICLE_LABEL,
+    icon: 'globe',
+    href: docLinks.links.enterpriseSearch.knnSearchCombine,
     target: '_blank',
-    duration: '15 min',
-    tags: ['RAG', 'Playground'],
+    title: i18n.translate('vectordbOnboarding.tutorials.bringYourOwnDenseVectorsArticle.title', {
+      defaultMessage: 'Bring your own dense vectors to Elasticsearch',
+    }),
+    description: i18n.translate(
+      'vectordbOnboarding.tutorials.bringYourOwnDenseVectorsArticle.description',
+      {
+        defaultMessage:
+          'Store and search dense vectors in Elasticsearch and then run k-nearest neighbor (kNN) queries.',
+      }
+    ),
   },
   {
-    id: 'semantic-search',
-    title: 'Auto-embed with semantic_text',
-    description:
-      'Skip the embedding step and let Elasticsearch generate vectors for you on ingest and at query time.',
-    icon: 'tokenSemanticText',
-    href: docLinks.links.enterpriseSearch.semanticSearch,
+    id: 'auto-embed-semantic-text-article',
+    topic: ARTICLE_LABEL,
+    icon: 'globe',
+    href: docLinks.links.enterpriseSearch.knnSearchCombine,
     target: '_blank',
-    duration: '10 min',
-    tags: ['Beginner', 'semantic_text'],
+    title: i18n.translate('vectordbOnboarding.tutorials.autoEmbedSemanticTextArticle.title', {
+      defaultMessage: 'Auto-embed with semantic_text',
+    }),
+    description: i18n.translate(
+      'vectordbOnboarding.tutorials.autoEmbedSemanticTextArticle.description',
+      {
+        defaultMessage:
+          'Skip the embedding step and let Elasticsearch generate vectors for you on ingest and at query time.',
+      }
+    ),
+  },
+  {
+    id: 'hybrid-search-semantic_text-notebook',
+    topic: NOTEBOOK_LABEL,
+    icon: 'training',
+    href: docLinks.links.enterpriseSearch.knnSearchCombine,
+    target: '_blank',
+    title: i18n.translate('vectordbOnboarding.tutorials.hybridSearchSemanticTextNotebook.title', {
+      defaultMessage: 'Hybrid search with semantic_text',
+    }),
+    description: i18n.translate(
+      'vectordbOnboarding.tutorials.hybridSearchSemanticTextNotebook.description',
+      {
+        defaultMessage:
+          'This tutorial walks you through hybrid search using the semantic_text field type together with a text field for lexical search.',
+      }
+    ),
+  },
+  {
+    id: 'bring-your-own-dense-vectors-documentation',
+    topic: DOCUMENTATION_LABEL,
+    icon: 'documents',
+    href: docLinks.links.enterpriseSearch.knnSearchCombine,
+    target: '_blank',
+    title: i18n.translate(
+      'vectordbOnboarding.tutorials.bringYourOwnDenseVectorsDocumentation.title',
+      {
+        defaultMessage: 'Bring your own dense vectors to Elasticsearch',
+      }
+    ),
+    description: i18n.translate(
+      'vectordbOnboarding.tutorials.bringYourOwnDenseVectorsDocumentation.description',
+      {
+        defaultMessage:
+          'Store and search dense vectors in Elasticsearch and then run k-nearest neighbor (kNN) queries.',
+      }
+    ),
+  },
+  {
+    id: 'auto-embed-semantic-text-notebook',
+    topic: NOTEBOOK_LABEL,
+    icon: 'training',
+    href: docLinks.links.enterpriseSearch.knnSearchCombine,
+    target: '_blank',
+    title: i18n.translate('vectordbOnboarding.tutorials.autoEmbedSemanticTextNotebook.title', {
+      defaultMessage: 'Auto-embed with semantic_text',
+    }),
+    description: i18n.translate(
+      'vectordbOnboarding.tutorials.autoEmbedSemanticTextNotebook.description',
+      {
+        defaultMessage:
+          'Skip the embedding step and let Elasticsearch generate vectors for you on ingest and at query time.',
+      }
+    ),
   },
 ];
