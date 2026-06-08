@@ -19,6 +19,7 @@ export enum AgentActionType {
   HandOver = 'hand_over',
   StructuredAnswer = 'structured_answer',
   BackgroundExecutionComplete = 'background_execution_complete',
+  ProactiveContext = 'proactive_context',
 }
 
 export interface ToolCallResult {
@@ -71,13 +72,20 @@ export interface BackgroundExecutionCompleteAction {
   execution: BackgroundExecutionState;
 }
 
+export interface ProactiveContextAction {
+  type: AgentActionType.ProactiveContext;
+  contextId: string;
+  content: string;
+}
+
 export type ResearchAgentAction =
   | ToolCallAction
   | ExecuteToolAction
   | ToolPromptAction
   | HandoverAction
   | AgentErrorAction
-  | BackgroundExecutionCompleteAction;
+  | BackgroundExecutionCompleteAction
+  | ProactiveContextAction;
 
 // answer phase actions
 
@@ -122,6 +130,12 @@ export function isBackgroundExecutionCompleteAction(
   action: AgentAction
 ): action is BackgroundExecutionCompleteAction {
   return action.type === AgentActionType.BackgroundExecutionComplete;
+}
+
+export function isProactiveContextAction(
+  action: AgentAction
+): action is ProactiveContextAction {
+  return action.type === AgentActionType.ProactiveContext;
 }
 
 // creation helpers
@@ -193,5 +207,16 @@ export function backgroundExecutionCompleteAction(
   return {
     type: AgentActionType.BackgroundExecutionComplete,
     execution,
+  };
+}
+
+export function proactiveContextAction(
+  contextId: string,
+  content: string
+): ProactiveContextAction {
+  return {
+    type: AgentActionType.ProactiveContext,
+    contextId,
+    content,
   };
 }

@@ -43,6 +43,11 @@ export const StateAnnotation = Annotation.Root({
     default: () => [],
   }),
   finalAnswer: Annotation<string>(),
+  // IDs of proactive contexts that have been injected
+  injectedProactiveContextIds: Annotation<string[]>({
+    reducer: (a, b) => [...new Set([...(a ?? []), ...(b ?? [])])],
+    default: () => [],
+  }),
 });
 
 export type StateType = typeof StateAnnotation.State;

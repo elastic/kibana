@@ -30,6 +30,7 @@ import {
   isHandoverAction,
   isToolCallAction,
   isExecuteToolAction,
+  isProactiveContextAction,
 } from '../../actions';
 
 export const formatResearcherActionHistory = ({
@@ -75,6 +76,9 @@ export const formatResearcherActionHistory = ({
     }
     if (isBackgroundExecutionCompleteAction(action)) {
       formatted.push(createUserMessage(formatSystemNotice(action.execution)));
+    }
+    if (isProactiveContextAction(action)) {
+      formatted.push(createUserMessage(action.content));
     }
   }
 

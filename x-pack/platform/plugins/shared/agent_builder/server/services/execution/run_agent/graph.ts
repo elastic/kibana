@@ -33,6 +33,7 @@ import {
   errorAction,
   handoverAction,
   backgroundExecutionCompleteAction,
+  proactiveContextAction,
   isAgentErrorAction,
   isHandoverAction,
   isStructuredAnswerAction,
@@ -40,6 +41,8 @@ import {
   isToolPromptAction,
 } from './actions';
 import type { ProcessedConversation } from './utils/prepare_conversation';
+import type { ProactiveRagSession } from './proactive_rag';
+import { formatProactiveContext } from './proactive_rag';
 
 // number of successive recoverable errors we try to recover from before throwing
 const MAX_ERROR_COUNT = 2;
@@ -57,6 +60,7 @@ export const createAgentGraph = ({
   promptFactory,
   backgroundExecutionService,
   roundId,
+  proactiveRagSession,
 }: {
   chatModel: InferenceChatModel;
   toolManager: ToolManager;
@@ -70,6 +74,7 @@ export const createAgentGraph = ({
   promptFactory: PromptFactory;
   backgroundExecutionService?: BackgroundExecutionService;
   roundId: string;
+  proactiveRagSession?: ProactiveRagSession;
 }) => {
   const init = async () => {
     return {};
@@ -105,6 +110,49 @@ export const createAgentGraph = ({
     };
   };
 
+  const injectProactiveContext = async (state: StateType) => {
+    logger.info(`[ProactiveRAG:Graph] injectProactiveContext step called`);
+    logger.info(`[ProactiveRAG:Graph]   hasSession=${!!proactiveRagSession}`);
+
+    if (!proactiveRagSession) {
+      logger.info(`[ProactiveRAG:Graph]   No session, returning empty`);
+      return {};
+    }
+
+    // Only inject proactive context once per conversation
+    if (state.injectedProactiveContextIds && state.injectedProactiveContextIds.length > 0) {
+      logger.info(
+        `[ProactiveRAG:Graph]   Already injected ${state.injectedProactiveContextIds.length} context(s), skipping`
+      );
+      return {};
+    }
+
+    const readyContext = proactiveRagSession.getReadyContext();
+    logger.info(`[ProactiveRAG:Graph]   readyContext=${!!readyContext}`);
+
+    if (!readyContext) {
+      logger.info(`[ProactiveRAG:Graph]   No ready context, returning empty`);
+      return {};
+    }
+
+    logger.info(
+      `[ProactiveRAG:Graph]   Context id=${readyContext.id}, findings=${readyContext.findings.length}`
+    );
+
+    proactiveRagSession.markInjected(readyContext.id);
+
+    const formattedContent = formatProactiveContext(readyContext);
+
+    logger.info(
+      `[ProactiveRAG:Graph]   INJECTING context ${readyContext.id} with ${readyContext.findings.length} findings as action!`
+    );
+
+    return {
+      mainActions: [proactiveContextAction(readyContext.id, formattedContent)],
+      injectedProactiveContextIds: [readyContext.id],
+    };
+  };
+
   const researchAgent = async (state: StateType) => {
     const researcherModel = chatModel.bindTools(toolManager.list()).withConfig({
       tags: [tags.agent, tags.researchAgent],
@@ -114,12 +162,12 @@ export const createAgentGraph = ({
       events.emit(createReasoningEvent(getRandomThinkingMessage(), { transient: true }));
     }
     try {
-      const response = await researcherModel.invoke(
-        await promptFactory.getMainPrompt({
-          cycleLimit: state.cycleLimit,
-          actions: state.mainActions,
-        })
-      );
+      const mainPrompt = await promptFactory.getMainPrompt({
+        cycleLimit: state.cycleLimit,
+        actions: state.mainActions,
+      });
+
+      const response = await researcherModel.invoke(mainPrompt);
 
       const currentCycle = state.currentCycle + 1;
       const action = processResearchResponse(response, { cycle: currentCycle });
@@ -185,9 +233,57 @@ export const createAgentGraph = ({
 
     lastAction.tool_calls.forEach((toolCall) => toolManager.recordToolUse(toolCall.toolName));
 
+    if (proactiveRagSession) {
+      const delayMs = proactiveRagSession.getConfig().toolCallDelayMs;
+      if (delayMs > 0) {
+        logger.info(
+          `[ProactiveRAG:Graph] executeTool - waiting ${delayMs}ms for proactive RAG to search`
+        );
+        await new Promise((resolve) => setTimeout(resolve, delayMs));
+        logger.info(`[ProactiveRAG:Graph] executeTool - delay complete, proceeding with tool call`);
+      }
+    }
+
     const toolCallMessage = createToolCallMessage(lastAction.tool_calls, lastAction.message);
     const toolNodeResult = await toolNode.invoke([toolCallMessage], {});
     const actions = processToolNodeResponse(toolNodeResult, { cycle: state.currentCycle });
+
+    if (proactiveRagSession) {
+      logger.info(`[ProactiveRAG:Graph] executeTool - updating session with tool results`);
+
+      const toolResultTexts = toolNodeResult
+        .filter((msg): msg is BaseMessage & { content: string } => typeof msg.content === 'string')
+        .map((msg) => msg.content)
+        .filter((content) => content.length > 0);
+
+      logger.info(
+        `[ProactiveRAG:Graph] executeTool - found ${toolResultTexts.length} text results`
+      );
+
+      if (toolResultTexts.length > 0) {
+        logger.info(
+          `[ProactiveRAG:Graph] executeTool - result preview: ${toolResultTexts[0]?.substring(
+            0,
+            300
+          )}...`
+        );
+
+        const emptyConversation = {
+          id: '',
+          agent_id: '',
+          user: { username: '' },
+          title: '',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          rounds: [],
+        };
+        proactiveRagSession.updateWithActions(emptyConversation, toolResultTexts);
+      } else {
+        logger.info(`[ProactiveRAG:Graph] executeTool - no text results to update with`);
+      }
+    } else {
+      logger.info(`[ProactiveRAG:Graph] executeTool - no proactiveRagSession available`);
+    }
 
     return {
       mainActions: actions,
@@ -276,13 +372,15 @@ export const createAgentGraph = ({
   const graphBuilder = new StateGraph(StateAnnotation)
     .addNode(steps.init, init)
     .addNode(steps.checkBackgroundWork, checkBackgroundWork)
+    .addNode(steps.injectProactiveContext, injectProactiveContext)
     .addNode(steps.researchAgent, researchAgent)
     .addNode(steps.executeTool, executeTool)
     .addNode(steps.handleToolInterrupt, handleToolInterrupt)
     .addNode(steps.finalize, finalize)
     .addEdge(_START_, steps.init)
     .addEdge(steps.init, steps.checkBackgroundWork)
-    .addEdge(steps.checkBackgroundWork, steps.researchAgent)
+    .addEdge(steps.checkBackgroundWork, steps.injectProactiveContext)
+    .addEdge(steps.injectProactiveContext, steps.researchAgent)
     .addConditionalEdges(steps.executeTool, executeToolEdge, {
       [steps.checkBackgroundWork]: steps.checkBackgroundWork,
       [steps.handleToolInterrupt]: steps.handleToolInterrupt,

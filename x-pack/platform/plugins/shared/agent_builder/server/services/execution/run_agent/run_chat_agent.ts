@@ -46,6 +46,7 @@ import { steps } from './constants';
 import { createPromptFactory } from './prompts';
 import { BackgroundExecutionService } from './background_execution_service';
 import type { StateType } from './state';
+import { createProactiveRagService } from './proactive_rag';
 
 const chatAgentGraphName = 'default-agent-builder-agent';
 
@@ -253,6 +254,28 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     experimentalFeatures,
   });
 
+  logger.info(`[ProactiveRAG] Creating proactive RAG service and session...`);
+  const proactiveRagService = createProactiveRagService({ logger });
+  const proactiveRagSession = proactiveRagService.startSession({
+    conversation: conversation ?? {
+      id: '',
+      agent_id: agentId ?? '',
+      user: { username: '' },
+      title: '',
+      created_at: conversationTimestamp,
+      updated_at: conversationTimestamp,
+      rounds: [],
+    },
+    esClient: context.esClient.asCurrentUser,
+    chatModel: model.chatModel,
+    onContextReady: (ctx) => {
+      logger.info(
+        `[ProactiveRAG] Context ready callback: ${ctx.id} with ${ctx.findings.length} findings`
+      );
+    },
+  });
+  logger.info(`[ProactiveRAG] Session created and started`);
+
   const agentGraph = createAgentGraph({
     logger,
     events: { emit: eventEmitter },
@@ -266,6 +289,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     promptFactory,
     backgroundExecutionService,
     roundId,
+    proactiveRagSession,
   });
 
   logger.debug(`Running chat agent with graph: ${chatAgentGraphName}, runId: ${runId}`);
@@ -349,6 +373,9 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   });
 
   const round = await extractRound(events$);
+
+  proactiveRagSession.stop();
+
   return {
     round,
   };

@@ -11,6 +11,7 @@ export const BACKGROUND_CHECK_CYCLE_INTERVAL = 3;
 export const steps = {
   init: 'init',
   checkBackgroundWork: 'checkBackgroundWork',
+  injectProactiveContext: 'injectProactiveContext',
   researchAgent: 'researchAgent',
   executeTool: 'executeTool',
   handleToolInterrupt: 'handleToolInterrupt',
