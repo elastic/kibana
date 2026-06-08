@@ -259,7 +259,6 @@ enabled:
   - x-pack/platform/test/functional/apps/discover/group2/config.ts
   - x-pack/platform/test/functional/apps/discover/group3/config.ts
   - x-pack/platform/test/functional/apps/grok_debugger/config.ts
-  - x-pack/platform/test/functional/apps/home/config.ts
   - x-pack/platform/test/functional/apps/index_management/config.ts
   - x-pack/platform/test/functional/apps/ingest_pipelines/config.ts
   - x-pack/platform/test/functional/apps/lens/group1/config.ts
@@ -318,14 +317,6 @@ enabled:
   - x-pack/platform/test/functional/apps/remote_clusters/config.ts
   - x-pack/platform/test/functional/apps/reporting_management/config.ts
   - x-pack/platform/test/functional/apps/rollup_job/config.ts
-  - x-pack/platform/test/functional/apps/saved_query_management/config.discover.ts
-  - x-pack/platform/test/functional/apps/saved_query_management/config.dashboard.ts
-  - x-pack/platform/test/functional/apps/saved_query_management/config.maps.ts
-  - x-pack/platform/test/functional/apps/saved_query_management/config.visualize.ts
-  - x-pack/platform/test/functional/apps/saved_query_management/config.v2.discover.ts
-  - x-pack/platform/test/functional/apps/saved_query_management/config.v2.dashboard.ts
-  - x-pack/platform/test/functional/apps/saved_query_management/config.v2.maps.ts
-  - x-pack/platform/test/functional/apps/saved_query_management/config.v2.visualize.ts
   - x-pack/platform/test/functional/apps/security/config.ts
   - x-pack/platform/test/functional/apps/snapshot_restore/config.ts
   - x-pack/platform/test/functional/apps/spaces/config.ts
@@ -338,7 +329,6 @@ enabled:
   - x-pack/platform/test/functional/apps/upgrade_assistant/config.ts
   - x-pack/platform/test/functional/apps/user_profiles/config.ts
   - x-pack/platform/test/functional/apps/visualize/config.ts
-  - x-pack/platform/test/functional/apps/watcher/config.ts
   - x-pack/platform/test/functional/config_security_basic.ts
   - x-pack/platform/test/functional/config.ccs.ts
   - x-pack/platform/test/functional/config.firefox.ts
@@ -469,7 +459,6 @@ enabled:
   - x-pack/platform/test/api_integration/apis/status/config.ts
   - x-pack/platform/test/api_integration/apis/telemetry/config.ts
   - x-pack/platform/test/api_integration/apis/upgrade_assistant/config.ts
-  - x-pack/platform/test/api_integration/apis/watcher/config.ts
   - x-pack/platform/test/api_integration_basic/apis/aiops/config.ts
   - x-pack/platform/test/api_integration_basic/apis/security/config.ts
   - x-pack/platform/test/automatic_import_api_integration/configs/config.stateful.ts

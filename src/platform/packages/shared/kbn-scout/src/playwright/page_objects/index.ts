@@ -18,10 +18,13 @@ import { DashboardLinks } from './dashboard_links';
 import { DataViewEditorPage } from './data_view_editor_page';
 import { DatePicker } from './date_picker';
 import { DiscoverApp } from './discover_app';
+import { HomePage } from './home_page';
 import { FilterBar } from './filter_bar';
 import { MapsPage } from './maps_page';
+import { QueryBar } from './query_bar';
 import { RenderablePage } from './renderable_page';
 import { SavedObjectsManagementPage } from './saved_objects_management_page';
+import { SavedQueryManagementMenu } from './saved_query_management_menu';
 import { Toasts } from './toasts';
 import { createLazyPageObject } from './utils';
 import { Inspector } from './inspector';
@@ -48,10 +51,13 @@ export interface PageObjects {
   dashboardLinks: DashboardLinks;
   dataViewEditor: DataViewEditorPage;
   filterBar: FilterBar;
+  home: HomePage;
   maps: MapsPage;
+  queryBar: QueryBar;
   renderable: RenderablePage;
   savedObjectsManagement: SavedObjectsManagementPage;
   copySavedObjectsToSpaceFlyout: CopySavedObjectsToSpaceFlyout;
+  savedQueryManagementMenu: SavedQueryManagementMenu;
   collapsibleNav: CollapsibleNav;
   toasts: Toasts;
   inspector: Inspector;
@@ -76,7 +82,9 @@ export function createCorePageObjects(fixtures: PageObjectsFixtures): PageObject
     dashboardLinks: createLazyPageObject(DashboardLinks, fixtures.page),
     discover: createLazyPageObject(DiscoverApp, fixtures.page),
     filterBar: createLazyPageObject(FilterBar, fixtures.page),
+    home: createLazyPageObject(HomePage, fixtures.page),
     maps: createLazyPageObject(MapsPage, fixtures.page),
+    queryBar: createLazyPageObject(QueryBar, fixtures.page),
     renderable: createLazyPageObject(RenderablePage, fixtures.page),
     savedObjectsManagement: createLazyPageObject(
       SavedObjectsManagementPage,
@@ -87,6 +95,7 @@ export function createCorePageObjects(fixtures: PageObjectsFixtures): PageObject
       CopySavedObjectsToSpaceFlyout,
       fixtures.page
     ),
+    savedQueryManagementMenu: createLazyPageObject(SavedQueryManagementMenu, fixtures.page),
     collapsibleNav: createLazyPageObject(CollapsibleNav, fixtures.page, fixtures.config),
     toasts: createLazyPageObject(Toasts, fixtures.page),
     inspector: createLazyPageObject(Inspector, fixtures.page),

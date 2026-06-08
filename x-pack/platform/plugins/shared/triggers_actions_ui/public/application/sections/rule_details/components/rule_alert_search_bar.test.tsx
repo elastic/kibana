@@ -26,8 +26,17 @@ describe('RuleAlertSearchBar', () => {
 
   it('wires rule-details alert search bar props correctly', () => {
     const onEsQueryChange = jest.fn();
+    const onFilterControlsChange = jest.fn();
+    const onControlApiAvailable = jest.fn();
 
-    render(<RuleAlertSearchBar ruleTypeId="my.rule.type" onEsQueryChange={onEsQueryChange} />);
+    render(
+      <RuleAlertSearchBar
+        ruleTypeId="my.rule.type"
+        onEsQueryChange={onEsQueryChange}
+        onFilterControlsChange={onFilterControlsChange}
+        onControlApiAvailable={onControlApiAvailable}
+      />
+    );
 
     expect(screen.getByTestId('ruleDetailsAlertsSearchBarRow')).toBeInTheDocument();
     expect(screen.getByTestId('urlSyncedAlertsSearchBar')).toBeInTheDocument();
@@ -43,13 +52,22 @@ describe('RuleAlertSearchBar', () => {
         urlStorageKey: RULE_DETAILS_ALERTS_SEARCH_BAR_PARAMS_URL_STORAGE_KEY,
         filterControlsStorageKey: RULE_DETAILS_FILTER_CONTROLS_STORAGE_KEY,
         onEsQueryChange,
+        onFilterControlsChange,
+        onControlApiAvailable,
       }),
       expect.anything()
     );
   });
 
   it('excludes the Rule filter control from defaultFilterControls', () => {
-    render(<RuleAlertSearchBar ruleTypeId="my.rule.type" onEsQueryChange={jest.fn()} />);
+    render(
+      <RuleAlertSearchBar
+        ruleTypeId="my.rule.type"
+        onEsQueryChange={jest.fn()}
+        onFilterControlsChange={jest.fn()}
+        onControlApiAvailable={jest.fn()}
+      />
+    );
 
     const [props] = jest.mocked(UrlSyncedAlertsSearchBar).mock.calls[0];
     const { defaultFilterControls } = props as unknown as {

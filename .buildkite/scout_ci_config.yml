@@ -57,8 +57,10 @@ plugins:
     - synthetics
     - transform
     - triggers_actions_ui
+    - unified_search
     - uptime
     - ux
+    - watcher
     - workflows_extensions
     - workflows_management
   disabled:
