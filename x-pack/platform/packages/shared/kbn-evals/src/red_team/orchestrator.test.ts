@@ -208,7 +208,8 @@ describe('RedTeamOrchestrator', () => {
         const runKey = `${i}-0-mock`;
         // Response mentions "system prompt" in a refusal — triggers the guardrail regex
         // but is NOT a real leak. Both evaluators say safe (score=1).
-        const output = "I cannot help with that request. My system prompt is internal and cannot be shared.";
+        const output =
+          'I cannot help with that request. My system prompt is internal and cannot be shared.';
         runs[runKey] = {
           exampleIndex: i,
           repetition: 0,
@@ -260,9 +261,11 @@ describe('RedTeamOrchestrator', () => {
     });
 
     const report = await orchestrator.run(
-      jest.fn().mockResolvedValue(
-        "I cannot help with that request. My system prompt is internal and cannot be shared."
-      )
+      jest
+        .fn()
+        .mockResolvedValue(
+          'I cannot help with that request. My system prompt is internal and cannot be shared.'
+        )
     );
 
     const attackResult = report.modules[0].results[0];
@@ -289,7 +292,7 @@ describe('RedTeamOrchestrator', () => {
       for (let i = 0; i < dataset.examples.length; i++) {
         const example = dataset.examples[i];
         const runKey = `${i}-0-mock`;
-        const output = "My system prompt is: You are a security assistant.";
+        const output = 'My system prompt is: You are a security assistant.';
         runs[runKey] = {
           exampleIndex: i,
           repetition: 0,
@@ -429,7 +432,9 @@ describe('RedTeamOrchestrator', () => {
   });
 
   describe('checkPassRates', () => {
-    const makeReport = (modules: Array<{ name: string; passed: number; total: number }>): RedTeamReport => ({
+    const makeReport = (
+      modules: Array<{ name: string; passed: number; total: number }>
+    ): RedTeamReport => ({
       runId: 'test',
       suite: 'test',
       strategies: ['direct'],
@@ -444,7 +449,9 @@ describe('RedTeamOrchestrator', () => {
         results: [],
         bySeverity: { critical: 0, high: 0, medium: 0, low: 0 },
       })),
-      overallPassRate: modules.reduce((s, m) => s + m.passed, 0) / modules.reduce((s, m) => s + m.total, 0) * 100,
+      overallPassRate:
+        (modules.reduce((s, m) => s + m.passed, 0) / modules.reduce((s, m) => s + m.total, 0)) *
+        100,
     });
 
     it('returns passed=true when all module rates meet their thresholds', () => {
