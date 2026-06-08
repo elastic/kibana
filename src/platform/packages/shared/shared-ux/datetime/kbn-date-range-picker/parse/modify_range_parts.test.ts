@@ -191,4 +191,24 @@ describe('applyPartModification', () => {
       expect(applyPartModification('May 5, 2026, 00:00', part, 'increase', [part])).toBeUndefined();
     });
   });
+
+  describe('RFC 2822 dates', () => {
+    const RFC = 'Tue, 05 May 26 14:30:59 +0000';
+
+    it('modifies numeric parts even when day-of-week and timezone are present', () => {
+      expect(modify(RFC, 'hour', 'increase')).toBe('Tue, 05 May 26 15:30:59 +0000');
+      expect(modify(RFC, 'minute', 'decrease')).toBe('Tue, 05 May 26 14:29:59 +0000');
+      expect(modify(RFC, 'day', 'increase')).toBe('Wed, 06 May 26 14:30:59 +0000');
+    });
+
+    it('steps the day-of-week part by whole days', () => {
+      expect(modify(RFC, 'weekday', 'increase')).toBe('Wed, 06 May 26 14:30:59 +0000');
+      expect(modify(RFC, 'weekday', 'decrease')).toBe('Mon, 04 May 26 14:30:59 +0000');
+    });
+
+    it('steps the timezone offset by one hour and preserves wall-clock time', () => {
+      expect(modify(RFC, 'timezone', 'increase')).toBe('Tue, 05 May 26 14:30:59 +0100');
+      expect(modify(RFC, 'timezone', 'decrease')).toBe('Tue, 05 May 26 14:30:59 -0100');
+    });
+  });
 });

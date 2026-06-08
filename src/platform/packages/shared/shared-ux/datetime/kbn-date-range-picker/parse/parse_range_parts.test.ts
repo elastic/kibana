@@ -96,18 +96,20 @@ describe('parse range parts', () => {
       expect(parts.every((part) => part.format === 'MMM D, YYYY, HH:mm:ss.SSS')).toBe(true);
     });
 
-    it('classifies RFC 2822 input without making day-of-week or timezone navigable', () => {
+    it('classifies RFC 2822 input including navigable day-of-week and timezone parts', () => {
       const parts = parseInputParts('Tue, 05 May 26 14:30:59 +0000');
 
       expect(parts).toEqual([
+        expect.objectContaining({ text: 'Tue', kind: 'weekday' }),
         expect.objectContaining({ text: '05', kind: 'day' }),
         expect.objectContaining({ text: 'May', kind: 'month' }),
         expect.objectContaining({ text: '26', kind: 'year' }),
         expect.objectContaining({ text: '14', kind: 'hour' }),
         expect.objectContaining({ text: '30', kind: 'minute' }),
         expect.objectContaining({ text: '59', kind: 'second' }),
+        expect.objectContaining({ text: '+0000', kind: 'timezone' }),
       ]);
-      expect(parts.some((part) => part.text === 'Tue' || part.text === '+0000')).toBe(false);
+      expect(parts.every((part) => part.navigable)).toBe(true);
       expect(parts.every((part) => part.format === 'ddd, DD MMM YY HH:mm:ss ZZ')).toBe(true);
     });
 

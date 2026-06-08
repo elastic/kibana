@@ -9,7 +9,7 @@
 
 import moment from 'moment';
 
-import type { DateUnit, RangePart } from './parse_range_parts';
+import type { PartKind, RangePart } from './parse_range_parts';
 
 type ModificationAction = 'increase' | 'decrease';
 type RelativeUnit = (typeof RELATIVE_UNIT_CYCLE)[number];
@@ -67,15 +67,24 @@ const RELATIVE_UNIT_WORDS: Readonly<Record<RelativeUnit, { singular: string; plu
   M: { singular: 'month', plural: 'months' },
   y: { singular: 'year', plural: 'years' },
 };
-const ABSOLUTE_DATE_UNITS: Readonly<Record<DateUnit, moment.unitOfTime.DurationConstructor>> = {
+// Maps a step-able absolute date part to the moment duration unit it advances.
+// `weekday` steps by whole days so that arrow keys move the date forward/back.
+const ABSOLUTE_STEP_UNITS: Readonly<
+  Partial<Record<PartKind, moment.unitOfTime.DurationConstructor>>
+> = {
   year: 'years',
   month: 'months',
   day: 'days',
+  weekday: 'days',
   hour: 'hours',
   minute: 'minutes',
   second: 'seconds',
   millisecond: 'milliseconds',
 };
+
+const TIMEZONE_STEP_MINUTES = 60;
+const MIN_UTC_OFFSET_MINUTES = -12 * 60;
+const MAX_UTC_OFFSET_MINUTES = 14 * 60;
 
 const splicePart = (text: string, part: RangePart, replacement: string): string | undefined => {
   if (part.text === replacement) return undefined;
@@ -185,16 +194,27 @@ const modifyRoundingUnit = (
   return splicePart(text, part, nextUnit);
 };
 
-const isAbsoluteDateKind = (kind: RangePart['kind']): kind is DateUnit =>
-  kind in ABSOLUTE_DATE_UNITS;
+interface AbsoluteSide {
+  start: number;
+  end: number;
+  text: string;
+  format: string;
+  parsed: moment.Moment;
+}
 
-const modifyAbsoluteDate = (
+/**
+ * Reconstructs the full text and parsed value for the absolute-date side that
+ * `part` belongs to. The span covers every date token on that side — including
+ * day-of-week and timezone parts — so strict parsing against `part.format`
+ * succeeds even for formats like RFC 2822. `parseZone` preserves any explicit
+ * UTC offset present in the input.
+ */
+const getAbsoluteSide = (
   text: string,
   part: RangePart,
-  action: ModificationAction,
   parts: RangePart[]
-): string | undefined => {
-  if (!isAbsoluteDateKind(part.kind) || !part.format) return undefined;
+): AbsoluteSide | undefined => {
+  if (!part.format) return undefined;
 
   const sideParts = parts.filter(
     (candidate) =>
@@ -204,17 +224,53 @@ const modifyAbsoluteDate = (
   );
   if (sideParts.length === 0) return undefined;
 
-  const sideStart = Math.min(...sideParts.map((candidate) => candidate.start));
-  const sideEnd = Math.max(...sideParts.map((candidate) => candidate.end));
-  const sideText = text.slice(sideStart, sideEnd);
-  const parsed = moment(sideText, part.format, true);
+  const start = Math.min(...sideParts.map((candidate) => candidate.start));
+  const end = Math.max(...sideParts.map((candidate) => candidate.end));
+  const sideText = text.slice(start, end);
+  const parsed = moment.parseZone(sideText, part.format, true);
   if (!parsed.isValid()) return undefined;
 
-  const amount = action === 'increase' ? 1 : -1;
-  const nextSideText = parsed.add(amount, ABSOLUTE_DATE_UNITS[part.kind]).format(part.format);
-  if (nextSideText === sideText) return undefined;
+  return { start, end, text: sideText, format: part.format, parsed };
+};
 
-  return `${text.slice(0, sideStart)}${nextSideText}${text.slice(sideEnd)}`;
+const spliceSide = (text: string, side: AbsoluteSide, nextSideText: string): string | undefined => {
+  if (nextSideText === side.text) return undefined;
+  return `${text.slice(0, side.start)}${nextSideText}${text.slice(side.end)}`;
+};
+
+const modifyAbsoluteDate = (
+  text: string,
+  part: RangePart,
+  action: ModificationAction,
+  parts: RangePart[]
+): string | undefined => {
+  const unit = ABSOLUTE_STEP_UNITS[part.kind];
+  if (!unit) return undefined;
+
+  const side = getAbsoluteSide(text, part, parts);
+  if (!side) return undefined;
+
+  const amount = action === 'increase' ? 1 : -1;
+  const nextSideText = side.parsed.add(amount, unit).format(side.format);
+  return spliceSide(text, side, nextSideText);
+};
+
+const modifyAbsoluteTimezone = (
+  text: string,
+  part: RangePart,
+  action: ModificationAction,
+  parts: RangePart[]
+): string | undefined => {
+  const side = getAbsoluteSide(text, part, parts);
+  if (!side) return undefined;
+
+  const amount = action === 'increase' ? TIMEZONE_STEP_MINUTES : -TIMEZONE_STEP_MINUTES;
+  const nextOffset = side.parsed.utcOffset() + amount;
+  if (nextOffset < MIN_UTC_OFFSET_MINUTES || nextOffset > MAX_UTC_OFFSET_MINUTES) return undefined;
+
+  // Passing `true` keeps the wall-clock time and only rewrites the offset.
+  const nextSideText = side.parsed.utcOffset(nextOffset, true).format(side.format);
+  return spliceSide(text, side, nextSideText);
 };
 
 /**
@@ -242,7 +298,10 @@ export function applyPartModification(
     case 'minute':
     case 'second':
     case 'millisecond':
+    case 'weekday':
       return modifyAbsoluteDate(text, part, action, parts);
+    case 'timezone':
+      return modifyAbsoluteTimezone(text, part, action, parts);
     default:
       return undefined;
   }

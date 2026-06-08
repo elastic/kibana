@@ -16,6 +16,8 @@ export type DateUnit = 'month' | 'day' | 'year' | 'hour' | 'minute' | 'second' |
 
 export type PartKind =
   | DateUnit
+  | 'weekday'
+  | 'timezone'
   | 'relative-direction'
   | 'relative-value'
   | 'relative-unit'
@@ -385,7 +387,7 @@ const getFormatTokenPattern = (token: FormatToken): string => {
   }
 };
 
-const getFormatTokenKind = (token: FormatToken): DateUnit | null => {
+const getFormatTokenKind = (token: FormatToken): PartKind => {
   switch (token) {
     case 'MMMM':
     case 'MMM':
@@ -409,9 +411,10 @@ const getFormatTokenKind = (token: FormatToken): DateUnit | null => {
       return 'millisecond';
     case 'dddd':
     case 'ddd':
+      return 'weekday';
     case 'ZZ':
     case 'Z':
-      return null;
+      return 'timezone';
   }
 };
 
@@ -451,9 +454,7 @@ const parseAbsoluteDateWithFormat = (
     if (tokenStart === -1) return [];
 
     const kind = getFormatTokenKind(segment.token);
-    if (kind) {
-      addPart(parts, tokenText, offset + tokenStart, kind, true, rangeIndex, format);
-    }
+    addPart(parts, tokenText, offset + tokenStart, kind, true, rangeIndex, format);
 
     cursor = tokenStart + tokenText.length;
   }
