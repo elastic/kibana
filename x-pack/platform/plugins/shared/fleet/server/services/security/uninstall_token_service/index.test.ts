@@ -769,7 +769,9 @@ describe('UninstallTokenService', () => {
 
           expect(agentPolicyService.fetchAllAgentPolicyIds).toHaveBeenCalledWith(
             expect.anything(),
-            expect.objectContaining({ kuery: 'NOT supports_agentless:true' })
+            expect.objectContaining({
+              kuery: expect.stringContaining('NOT ingest-agent-policies.supports_agentless:true'),
+            })
           );
         });
       });
