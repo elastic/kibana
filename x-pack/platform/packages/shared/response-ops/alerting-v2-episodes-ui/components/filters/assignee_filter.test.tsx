@@ -28,15 +28,18 @@ jest.mock('../../hooks/use_bulk_get_profiles', () => ({
 const mockUseBulkGetProfiles = jest.mocked(useBulkGetProfilesModule.useBulkGetProfiles);
 const InlineFilterPopoverSpy = jest.spyOn(inlineFilterPopoverModule, 'InlineFilterPopover');
 
+const mockProfiles = [
+  {
+    uid: 'uid-alice',
+    user: { full_name: 'Alice Smith', email: 'alice@example.com', username: 'alice' },
+  },
+  { uid: 'uid-bob', user: { full_name: '', email: 'bob@example.com', username: 'bob' } },
+  { uid: 'uid-charlie', user: { full_name: '', email: '', username: 'charlie' } },
+];
+
 mockUseBulkGetProfiles.mockReturnValue({
-  data: [
-    {
-      uid: 'uid-alice',
-      user: { full_name: 'Alice Smith', email: 'alice@example.com', username: 'alice' },
-    },
-    { uid: 'uid-bob', user: { full_name: '', email: 'bob@example.com', username: 'bob' } },
-    { uid: 'uid-charlie', user: { full_name: '', email: '', username: 'charlie' } },
-  ],
+  data: mockProfiles,
+  isFetching: false,
   isLoading: false,
 } as unknown as ReturnType<typeof useBulkGetProfilesModule.useBulkGetProfiles>);
 
@@ -125,6 +128,27 @@ describe('AlertEpisodesAssigneeFilter', () => {
     expect(InlineFilterPopoverSpy).toHaveBeenLastCalledWith(
       expect.objectContaining({
         options: [{ label: 'Alice Smith', value: 'uid-alice' }],
+      }),
+      {}
+    );
+  });
+
+  it('does not show a loading state when the query is disabled (isFetching is false even if isLoading is true)', async () => {
+    // When assigneeUids is empty, react-query disables the query: isLoading is true
+    // (never fetched) but isFetching is false (nothing is actively fetching).
+    // The component must use isFetching, not isLoading, to avoid an infinite loading state.
+    mockUseBulkGetProfiles.mockReturnValueOnce({
+      data: [],
+      isFetching: false,
+      isLoading: true,
+    } as unknown as ReturnType<typeof useBulkGetProfilesModule.useBulkGetProfiles>);
+
+    render(<AlertEpisodesAssigneeFilter {...defaultProps} assigneeUids={[]} />);
+    await openPopover();
+
+    expect(InlineFilterPopoverSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        isLoading: false,
       }),
       {}
     );
