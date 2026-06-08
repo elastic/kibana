@@ -5,20 +5,22 @@
  * 2.0.
  */
 
+import type { Rect } from '@xyflow/react';
 import type { ServiceMapNode } from '../../../../common/service_map';
-import { FIT_VIEW_PADDING, MIN_ZOOM, LARGE_MAP_OVERVIEW_ZOOM } from './constants';
-import { getNodeWidth, getNodeHeight, getNodesBounds } from './get_node_dimensions';
+import { FIT_VIEW_PADDING, MIN_ZOOM } from './constants';
+import { getNodeWidth, getNodeHeight } from './get_node_dimensions';
 
 /**
- * The view to apply on initial load: either fit the whole graph, or center on a world point at a
- * given zoom when the graph is too large to fit without clamping to {@link MIN_ZOOM}.
+ * The view to apply on initial load: either fit the whole graph, or center on a world point when the
+ * graph is too large to fit without clamping to {@link MIN_ZOOM}.
  */
-export type ServiceMapViewTarget =
-  | { kind: 'fit' }
-  | { kind: 'center'; x: number; y: number; zoom: number };
+export type ServiceMapViewTarget = { kind: 'fit' } | { kind: 'center'; x: number; y: number };
 
 interface GetServiceMapViewTargetParams {
+  /** Visible nodes; callers are expected to filter out hidden nodes. */
   nodes: ServiceMapNode[];
+  /** Bounding box of `nodes`, from React Flow's `getNodesBounds`. */
+  bounds: Rect;
   /** Pixel width of the React Flow pane. */
   viewportWidth: number;
   /** Pixel height of the React Flow pane. */
@@ -38,23 +40,21 @@ const median = (values: number[]): number => {
  * `fitView` centers on the bounding-box center and clamps to {@link MIN_ZOOM}. For large, sprawling
  * graphs (for example many disconnected dependencies spread far apart) the bounding-box center can
  * be empty space, so the user lands on nothing. In that case, center on the median node position at
- * {@link LARGE_MAP_OVERVIEW_ZOOM}. Normal-sized graphs that fit within {@link MIN_ZOOM} keep using
- * `fitView`.
+ * {@link MIN_ZOOM} so the user lands on content while still fitting as much of the map as possible.
+ * Normal-sized graphs that fit within {@link MIN_ZOOM} keep using `fitView`.
  */
 export function getServiceMapViewTarget({
   nodes,
+  bounds,
   viewportWidth,
   viewportHeight,
 }: GetServiceMapViewTargetParams): ServiceMapViewTarget {
-  const visibleNodes = nodes.filter((node) => !node.hidden);
-  const bounds = getNodesBounds(visibleNodes);
-
-  if (!bounds || viewportWidth <= 0 || viewportHeight <= 0) {
+  if (nodes.length === 0 || viewportWidth <= 0 || viewportHeight <= 0) {
     return { kind: 'fit' };
   }
 
-  const graphWidth = Math.max(bounds.maxX - bounds.minX, 1);
-  const graphHeight = Math.max(bounds.maxY - bounds.minY, 1);
+  const graphWidth = Math.max(bounds.width, 1);
+  const graphHeight = Math.max(bounds.height, 1);
 
   const fitZoom =
     Math.min(viewportWidth / graphWidth, viewportHeight / graphHeight) * (1 - FIT_VIEW_PADDING);
@@ -63,8 +63,8 @@ export function getServiceMapViewTarget({
     return { kind: 'fit' };
   }
 
-  const centerX = median(visibleNodes.map((node) => node.position.x + getNodeWidth(node) / 2));
-  const centerY = median(visibleNodes.map((node) => node.position.y + getNodeHeight(node) / 2));
+  const centerX = median(nodes.map((node) => node.position.x + getNodeWidth(node) / 2));
+  const centerY = median(nodes.map((node) => node.position.y + getNodeHeight(node) / 2));
 
-  return { kind: 'center', x: centerX, y: centerY, zoom: LARGE_MAP_OVERVIEW_ZOOM };
+  return { kind: 'center', x: centerX, y: centerY };
 }

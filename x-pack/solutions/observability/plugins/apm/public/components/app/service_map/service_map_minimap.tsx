@@ -47,6 +47,7 @@ export function ServiceMapMinimap() {
       nodeBorderRadius={2}
       maskColor={`${euiTheme.colors.lightShade}80`}
       bgColor={euiTheme.colors.backgroundBasePlain}
+      position="bottom-right"
       pannable
       zoomable
       ariaLabel={i18n.translate('xpack.apm.serviceMap.minimap.ariaLabel', {

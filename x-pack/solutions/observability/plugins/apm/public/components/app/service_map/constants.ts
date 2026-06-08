@@ -30,12 +30,8 @@ export const FIT_VIEW_PADDING = 0.2;
 /** Minimum zoom level the user can pan/zoom to (also the floor fitView clamps to) */
 export const MIN_ZOOM = 0.2;
 
-/**
- * Zoom level used when a map is too large to fit within {@link MIN_ZOOM}. Instead of fitView
- * centering on the bounding-box center — often empty space for sprawling graphs — we center on the
- * median node position at this zoom so the user lands on the dense cluster of services.
- */
-export const LARGE_MAP_OVERVIEW_ZOOM = 0.5;
+/** Maximum zoom level the user can pan/zoom to */
+export const MAX_ZOOM = 3;
 
 /** Duration of the fit view animation in milliseconds */
 export const FIT_VIEW_DURATION = 200;
