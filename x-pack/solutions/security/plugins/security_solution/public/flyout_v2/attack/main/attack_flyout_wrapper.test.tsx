@@ -6,15 +6,22 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
+import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import { useAttackDetails } from '../../../flyout/attack_details/hooks/use_attack_details';
 import { AttackFlyoutWrapper } from './attack_flyout_wrapper';
 
 jest.mock('../../../flyout/attack_details/hooks/use_attack_details');
 
-const mockAttackFlyout = jest.fn((_props: unknown) => <div data-test-subj="attackFlyoutStub" />);
+const mockAttackFlyout = jest.fn((props: { onAttackUpdated?: () => void }) => (
+  <button
+    type="button"
+    data-test-subj="attackFlyoutStub"
+    onClick={() => props.onAttackUpdated?.()}
+  />
+));
 jest.mock('.', () => ({
-  AttackFlyout: (props: unknown) => mockAttackFlyout(props),
+  AttackFlyout: (props: unknown) => mockAttackFlyout(props as { onAttackUpdated?: () => void }),
 }));
 
 const mockSearchHit = {
@@ -23,6 +30,8 @@ const mockSearchHit = {
   _source: {},
   fields: {},
 };
+
+const mockAttack = { id: 'attack-1' } as AttackDiscoveryAlert;
 
 const renderWrapper = (props: Partial<React.ComponentProps<typeof AttackFlyoutWrapper>> = {}) =>
   render(
@@ -39,53 +48,110 @@ describe('<AttackFlyoutWrapper />', () => {
     jest.clearAllMocks();
   });
 
-  it('renders FlyoutLoading while useAttackDetails is loading', () => {
-    (useAttackDetails as jest.Mock).mockReturnValue({ loading: true, searchHit: undefined });
+  it('renders FlyoutLoading on the initial fetch when there is no hit yet', () => {
+    (useAttackDetails as jest.Mock).mockReturnValue({
+      loading: true,
+      searchHit: undefined,
+      attack: null,
+      refetch: jest.fn(),
+    });
 
     const { getByTestId } = renderWrapper();
 
     expect(getByTestId('attack-flyout-wrapper-loading')).toBeInTheDocument();
   });
 
+  it('keeps the flyout visible during a refetch (loading=true while hit is already available)', () => {
+    (useAttackDetails as jest.Mock).mockReturnValue({
+      loading: true,
+      searchHit: mockSearchHit,
+      attack: mockAttack,
+      refetch: jest.fn(),
+    });
+
+    const { getByTestId, queryByTestId } = renderWrapper();
+
+    expect(getByTestId('attackFlyoutStub')).toBeInTheDocument();
+    expect(queryByTestId('attack-flyout-wrapper-loading')).not.toBeInTheDocument();
+  });
+
   it('renders error callout when useAttackDetails returns no searchHit after loading', () => {
-    (useAttackDetails as jest.Mock).mockReturnValue({ loading: false, searchHit: undefined });
+    (useAttackDetails as jest.Mock).mockReturnValue({
+      loading: false,
+      searchHit: undefined,
+      attack: null,
+      refetch: jest.fn(),
+    });
 
     const { getByTestId } = renderWrapper();
 
     expect(getByTestId('attack-flyout-wrapper-error')).toBeInTheDocument();
   });
 
-  it('renders AttackFlyout when searchHit is available', () => {
-    (useAttackDetails as jest.Mock).mockReturnValue({ loading: false, searchHit: mockSearchHit });
+  it('renders error callout when attack cannot be resolved from searchHit', () => {
+    (useAttackDetails as jest.Mock).mockReturnValue({
+      loading: false,
+      searchHit: mockSearchHit,
+      attack: null,
+      refetch: jest.fn(),
+    });
+
+    const { getByTestId } = renderWrapper();
+
+    expect(getByTestId('attack-flyout-wrapper-error')).toBeInTheDocument();
+  });
+
+  it('renders AttackFlyout when both searchHit and attack are available', () => {
+    (useAttackDetails as jest.Mock).mockReturnValue({
+      loading: false,
+      searchHit: mockSearchHit,
+      attack: mockAttack,
+      refetch: jest.fn(),
+    });
 
     const { getByTestId } = renderWrapper();
 
     expect(getByTestId('attackFlyoutStub')).toBeInTheDocument();
   });
 
-  it('passes a wrapped onAttackUpdated handler to AttackFlyout that calls refetch then the callback', async () => {
-    const onAttackUpdated = jest.fn();
-    const refetch = jest.fn().mockResolvedValue(undefined);
+  it('passes the resolved attack to AttackFlyout', () => {
     (useAttackDetails as jest.Mock).mockReturnValue({
       loading: false,
       searchHit: mockSearchHit,
+      attack: mockAttack,
+      refetch: jest.fn(),
+    });
+
+    renderWrapper();
+
+    expect(mockAttackFlyout).toHaveBeenCalledWith(expect.objectContaining({ attack: mockAttack }));
+  });
+
+  it('invokes the consumer onAttackUpdated AND refetches when AttackFlyout reports an update', () => {
+    const refetch = jest.fn();
+    const onAttackUpdated = jest.fn();
+    (useAttackDetails as jest.Mock).mockReturnValue({
+      loading: false,
+      searchHit: mockSearchHit,
+      attack: mockAttack,
       refetch,
     });
 
-    renderWrapper({ onAttackUpdated });
+    const { getByTestId } = renderWrapper({ onAttackUpdated });
 
-    const [receivedProps] = mockAttackFlyout.mock.calls[0] as [
-      { onAttackUpdated: () => Promise<void> }
-    ];
-    expect(typeof receivedProps.onAttackUpdated).toBe('function');
+    fireEvent.click(getByTestId('attackFlyoutStub'));
 
-    await receivedProps.onAttackUpdated();
-    expect(refetch).toHaveBeenCalled();
-    expect(onAttackUpdated).toHaveBeenCalled();
+    expect(onAttackUpdated).toHaveBeenCalledTimes(1);
+    expect(refetch).toHaveBeenCalledTimes(1);
   });
 
   it('calls useAttackDetails with the provided attackId and indexName', () => {
-    (useAttackDetails as jest.Mock).mockReturnValue({ loading: true, searchHit: undefined });
+    (useAttackDetails as jest.Mock).mockReturnValue({
+      loading: true,
+      searchHit: undefined,
+      attack: null,
+      refetch: jest.fn(),
+    });
 
     renderWrapper({ attackId: 'my-attack', indexName: 'my-index' });
 

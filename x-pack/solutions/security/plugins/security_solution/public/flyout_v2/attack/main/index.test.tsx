@@ -8,6 +8,7 @@
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
+import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import { AttackFlyout } from '.';
 import { TestProviders } from '../../../common/mock';
 import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
@@ -33,10 +34,12 @@ jest.mock('../../shared/tools/notes', () => ({
   NotesDetails: () => <div data-test-subj="mock-notes-details" />,
 }));
 
+const mockAttack = {} as AttackDiscoveryAlert;
+
 const createAttackHit = (extra: DataTableRecord['flattened'] = {}): DataTableRecord =>
   ({
     id: 'attack-1',
-    raw: {},
+    raw: { _id: 'attack-1', _index: '.alerts-security.attack-discovery.alerts-default' },
     flattened: {
       _id: 'attack-1',
       _index: '.alerts-security.attack-discovery.alerts-default',
@@ -57,7 +60,7 @@ describe('<AttackFlyout />', () => {
   it('renders the header, body, and footer', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <AttackFlyout hit={createAttackHit()} onAttackUpdated={jest.fn()} />
+        <AttackFlyout hit={createAttackHit()} attack={mockAttack} onAttackUpdated={jest.fn()} />
       </TestProviders>
     );
 
@@ -76,7 +79,7 @@ describe('<AttackFlyout />', () => {
 
     const { getByTestId } = render(
       <TestProviders>
-        <AttackFlyout hit={minimalHit} onAttackUpdated={jest.fn()} />
+        <AttackFlyout hit={minimalHit} attack={mockAttack} onAttackUpdated={jest.fn()} />
       </TestProviders>
     );
 
@@ -94,7 +97,7 @@ describe('<AttackFlyout />', () => {
 
     const { getByTestId } = render(
       <TestProviders startServices={startServices}>
-        <AttackFlyout hit={createAttackHit()} onAttackUpdated={jest.fn()} />
+        <AttackFlyout hit={createAttackHit()} attack={mockAttack} onAttackUpdated={jest.fn()} />
       </TestProviders>
     );
 
@@ -112,9 +115,14 @@ describe('<AttackFlyout />', () => {
   });
 
   it('passes onAttackUpdated callback to the header', () => {
+    const onAttackUpdated = jest.fn();
     const { getByTestId } = render(
       <TestProviders>
-        <AttackFlyout hit={createAttackHit()} onAttackUpdated={jest.fn()} />
+        <AttackFlyout
+          hit={createAttackHit()}
+          attack={mockAttack}
+          onAttackUpdated={onAttackUpdated}
+        />
       </TestProviders>
     );
 

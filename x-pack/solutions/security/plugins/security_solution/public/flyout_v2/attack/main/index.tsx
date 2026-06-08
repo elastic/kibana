@@ -9,6 +9,7 @@ import React, { memo, useCallback } from 'react';
 import { EuiFlyoutBody, EuiFlyoutFooter, EuiFlyoutHeader, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
+import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import { useStore } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { defaultToolsFlyoutProperties } from '../../shared/hooks/use_default_flyout_properties';
@@ -32,17 +33,26 @@ export interface AttackFlyoutProps {
    */
   hit: DataTableRecord;
   /**
-   * Callback invoked after attack mutations (status change, assignee update, etc.) to refresh related views.
+   * The attack discovery alert object resolved from the same fetch as `hit`.
+   * Owned by `AttackFlyoutWrapper` so the flyout has a single source of truth.
+   */
+  attack: AttackDiscoveryAlert;
+  /**
+   * Callback invoked after attack mutations (status change, assignee update, etc.).
+   * Provided by `AttackFlyoutWrapper`; it refetches the attack document so the
+   * flyout UI reflects the mutation without the user having to close and re-open it,
+   * and notifies the surface that opened the flyout to refresh as well.
    */
   onAttackUpdated: () => void;
 }
 
 /**
- * Content for the attack flyout v2. Renders the header with all sub-components
- * (title, status, assignees, notes, share action). Body and footer are wired in
- * subsequent PRs; they currently render placeholders.
+ * Content for the v2 attack flyout. Receives a fully-resolved `hit` and `attack`
+ * from `AttackFlyoutWrapper` (which owns the single data fetch) and renders the
+ * header. Body and footer are wired in subsequent PRs; they currently render
+ * placeholders.
  */
-export const AttackFlyout = memo(({ hit, onAttackUpdated }: AttackFlyoutProps) => {
+export const AttackFlyout = memo(({ hit, attack, onAttackUpdated }: AttackFlyoutProps) => {
   const { services } = useKibana();
   const { overlays } = services;
   const store = useStore();
