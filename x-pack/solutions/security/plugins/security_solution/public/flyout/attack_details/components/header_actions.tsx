@@ -16,7 +16,11 @@ import { useGetAttackFlyoutLink } from '../hooks/use_get_attack_flyout_link';
 import { HEADER_SHARE_BUTTON_TEST_ID } from '../constants/test_ids';
 
 /**
- * Actions displayed in the navigation header of the attack details flyout
+ * Share-attack action displayed in the legacy attack details flyout's
+ * `FlyoutNavigation` bar (rendered above the flyout header). The button is
+ * intentionally NOT used in flyout v2: the system flyout renders its own
+ * close button in the same area, and v2 follows the document flyout pattern
+ * which has no share action in the header.
  */
 export const AttackHeaderActions: VFC = memo(() => {
   const { attackId, indexName } = useAttackDetailsContext();
