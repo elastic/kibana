@@ -102,9 +102,9 @@ const resolveModules = (config: RedTeamConfig): AttackModule[] => {
   return moduleNames.map(getAttackModule);
 };
 
-const resolveStrategy = (config: RedTeamConfig): Strategy => {
-  const strategyName = config.strategies?.[0] ?? 'direct';
-  return getStrategy(strategyName);
+const resolveStrategies = (config: RedTeamConfig): Strategy[] => {
+  const names = config.strategies ?? ['direct'];
+  return names.map(getStrategy);
 };
 
 /**
@@ -273,10 +273,11 @@ export const createRedTeamOrchestrator = (
   const run = async (task: ExperimentTask<any, any>): Promise<RedTeamReport> => {
     const runId = uuidv4();
     const modules = resolveModules(config);
-    const strategy = resolveStrategy(config);
+    const strategies = resolveStrategies(config);
     const moduleReports: ModuleReport[] = [];
 
     for (const module of modules) {
+      for (const strategy of strategies) {
       log.info(`Running attack module: ${module.name} (strategy: ${strategy.name})`);
 
       const examples = await module.generate(moduleConfig);
@@ -517,15 +518,18 @@ export const createRedTeamOrchestrator = (
         results,
         bySeverity,
       });
-    }
+      } // end for strategy
+    } // end for module
 
     const totalAll = moduleReports.reduce((sum, m) => sum + m.total, 0);
     const passAll = moduleReports.reduce((sum, m) => sum + m.passed, 0);
 
+    const strategyNames = strategies.map((s) => s.name);
     return {
       runId,
       suite: config.modules?.join(', ') ?? 'all',
-      strategy: strategy.name,
+      strategies: strategyNames,
+      strategy: strategyNames.join(', '),
       difficulty: moduleConfig.difficulty,
       templateOnly: moduleConfig.templateOnly ?? false,
       modules: moduleReports,

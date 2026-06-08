@@ -129,6 +129,9 @@ export interface ModuleReport {
 export interface RedTeamReport {
   runId: string;
   suite: string;
+  /** All strategies that were run in this report. */
+  strategies: string[];
+  /** Comma-joined strategy names for backward compatibility. */
   strategy: string;
   difficulty: string;
   templateOnly: boolean;
