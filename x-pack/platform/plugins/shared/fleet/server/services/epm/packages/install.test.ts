@@ -6,7 +6,7 @@
  */
 
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { ElasticsearchClient, SavedObject } from '@kbn/core/server';
 
 import type { InstallablePackage, Installation } from '../../../../common';
