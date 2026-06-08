@@ -91,21 +91,10 @@ export class ActionPolicyExecutionHistoryClient {
 
     const searchIds = await this.resolveSearchIds(search);
 
-
     if (search !== undefined && !searchIds.hasMatches) {
       return { items: [], page, perPage, totalEvents: 0 };
     }
 
-    console.log({
-      request,
-      spaceId,
-      startDate,
-      page,
-      perPage,
-      outcome: toOutcomeForService(outcome),
-      policyIds: searchIds.policyIds,
-      ruleIds: searchIds.ruleIds,
-    });
     const result = await this.eventLogService.findActionPolicyExecutionEvents({
       request,
       spaceId,
