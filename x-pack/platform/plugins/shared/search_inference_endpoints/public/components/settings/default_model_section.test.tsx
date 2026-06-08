@@ -146,4 +146,86 @@ describe('DefaultModelSection', () => {
 
     expect(screen.getByTestId('globalModelComboBox')).toBeInTheDocument();
   });
+
+  describe('disabled prop', () => {
+    it('all controls are enabled by default', () => {
+      render(
+        <Wrapper>
+          <DefaultModelSection
+            defaultModelSettings={createMockSettings()}
+            validation={validResult}
+          />
+        </Wrapper>
+      );
+
+      expect(screen.getByTestId('enableAiSwitch')).not.toBeDisabled();
+      expect(screen.getByTestId('featureSpecificModelsSwitch')).not.toBeDisabled();
+    });
+
+    it('disables AI toggle, global model combobox, and feature models toggle when disabled={true}', () => {
+      render(
+        <Wrapper>
+          <DefaultModelSection
+            defaultModelSettings={createMockSettings()}
+            validation={validResult}
+            disabled={true}
+          />
+        </Wrapper>
+      );
+
+      expect(screen.getByTestId('enableAiSwitch')).toBeDisabled();
+      expect(screen.getByTestId('featureSpecificModelsSwitch')).toBeDisabled();
+      const comboBoxInput = screen.getByTestId('globalModelComboBox').querySelector('input');
+      expect(comboBoxInput).toBeDisabled();
+    });
+
+    it('does not call setEnableAi when the AI toggle is disabled', () => {
+      const setEnableAi = jest.fn();
+      render(
+        <Wrapper>
+          <DefaultModelSection
+            defaultModelSettings={createMockSettings({ setEnableAi })}
+            validation={validResult}
+            disabled={true}
+          />
+        </Wrapper>
+      );
+
+      fireEvent.click(screen.getByTestId('enableAiSwitch'));
+      expect(setEnableAi).not.toHaveBeenCalled();
+    });
+
+    it('does not call setFeatureSpecificModels when the feature models toggle is disabled', () => {
+      const setFeatureSpecificModels = jest.fn();
+      render(
+        <Wrapper>
+          <DefaultModelSection
+            defaultModelSettings={createMockSettings({ setFeatureSpecificModels })}
+            validation={validResult}
+            disabled={true}
+          />
+        </Wrapper>
+      );
+
+      fireEvent.click(screen.getByTestId('featureSpecificModelsSwitch'));
+      expect(setFeatureSpecificModels).not.toHaveBeenCalled();
+    });
+
+    it('does not call setDefaultModelId when the global model combobox is disabled', () => {
+      const setDefaultModelId = jest.fn();
+      render(
+        <Wrapper>
+          <DefaultModelSection
+            defaultModelSettings={createMockSettings({ setDefaultModelId })}
+            validation={validResult}
+            disabled={true}
+          />
+        </Wrapper>
+      );
+
+      const input = screen.getByTestId('globalModelComboBox').querySelector('input');
+      fireEvent.change(input!, { target: { value: 'some-model' } });
+      expect(setDefaultModelId).not.toHaveBeenCalled();
+    });
+  });
 });

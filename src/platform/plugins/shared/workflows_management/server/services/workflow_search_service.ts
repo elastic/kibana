@@ -28,7 +28,7 @@ import {
   buildConditionalTermsFilters,
   buildWorkflowTextSearchClause,
 } from '../api/lib/workflow_query_filters';
-import type { GetWorkflowsParams } from '../api/workflows_management_api';
+import type { GetWorkflowAggsOptions, GetWorkflowsParams } from '../api/workflows_management_api';
 import type { WorkflowProperties } from '../storage/workflow_storage';
 import { workflowIndexName } from '../storage/workflow_storage';
 
@@ -253,7 +253,11 @@ export class WorkflowSearchService {
     return workflowsStats;
   }
 
-  async getWorkflowAggs(fields: string[], spaceId: string): Promise<WorkflowAggsDto> {
+  async getWorkflowAggs(
+    fields: string[],
+    spaceId: string,
+    options?: GetWorkflowAggsOptions
+  ): Promise<WorkflowAggsDto> {
     const aggs: Record<string, estypes.AggregationsAggregationContainer> = {};
 
     fields.forEach((field) => {
@@ -269,7 +273,7 @@ export class WorkflowSearchService {
       const aggsFilter = buildWorkflowFilters({
         space: { id: spaceId, includeGlobal: true },
         deleted: 'not_deleted',
-        managed: 'unmanaged',
+        managed: options?.managedFilter ?? 'unmanaged',
       });
       const aggsResponse = await this.deps.workflowStorage.getClient().search({
         size: 0,

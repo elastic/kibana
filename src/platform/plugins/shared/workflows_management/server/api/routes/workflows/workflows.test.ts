@@ -769,6 +769,23 @@ describe('Workflow routes', () => {
       expect(mockApi.getWorkflowAggs).toHaveBeenCalledWith(['tags'], 'default-space');
       expect(response.ok).toHaveBeenCalledWith({ body: aggs });
     });
+
+    it('should pass the managed filter to api.getWorkflowAggs', async () => {
+      const aggs = { tags: {} };
+      mockApi.getWorkflowAggs.mockResolvedValue(aggs);
+      const request = httpServerMock.createKibanaRequest({
+        query: { fields: ['tags'], managed: 'all' },
+      });
+      const response = mockResponse();
+      const context = createLicensingContext() as any;
+
+      await routeHandlers[key].handler(context, request, response);
+
+      expect(mockApi.getWorkflowAggs).toHaveBeenCalledWith(['tags'], 'default-space', {
+        managedFilter: 'all',
+      });
+      expect(response.ok).toHaveBeenCalledWith({ body: aggs });
+    });
   });
 
   describe('GET:/api/workflows/connectors', () => {
