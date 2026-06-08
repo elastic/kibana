@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { ExperimentalBadge } from '../../components/experimental_badge';
 import { ActionPolicyDetailsFlyoutContainer } from '../../components/action_policy/details_flyout/action_policy_details_flyout_container';
 import { RuleSummaryFlyoutContainer } from '../../components/rule/flyouts/rule_summary_flyout_container';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
@@ -75,6 +76,9 @@ export const ExecutionHistoryPage = () => {
                   )}
                 />
               </span>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <ExperimentalBadge />
             </EuiFlexItem>
           </EuiFlexGroup>
         }
