@@ -13,7 +13,10 @@ import {
   type AppUpdater,
 } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
-import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import type {
+  AttachmentInput,
+  ConversationAttachment,
+} from '@kbn/agent-builder-common/attachments';
 import { BehaviorSubject, distinctUntilChanged, type Subscription } from 'rxjs';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import React from 'react';
@@ -89,7 +92,7 @@ export class AgentBuilderPlugin
   private sidebarCallbacks: {
     updateProps: (props: EmbeddableConversationProps) => void;
     resetBrowserApiTools: () => void;
-    addAttachment: (attachment: AttachmentInput) => void;
+    addAttachment: (attachment: ConversationAttachment) => void;
   } | null = null;
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private isEarsEnabled = false;
@@ -187,7 +190,17 @@ export class AgentBuilderPlugin
 
       // If already open, update props instead of creating new
       if (this.activeSidebarRef && this.sidebarCallbacks) {
-        this.sidebarCallbacks.updateProps(config);
+        // When the sidebar is visible and the caller wants to add attachments
+        // (e.g. bulk-add alerts), add them to whatever conversation is active
+        // instead of forcing a new one. The user can see the sidebar and may
+        // have an ongoing exchange they want to augment.
+        if (config.newConversation && config.attachments?.length) {
+          for (const attachment of config.attachments) {
+            this.sidebarCallbacks.addAttachment(attachment);
+          }
+        } else {
+          this.sidebarCallbacks.updateProps(config);
+        }
         return { chatRef: this.activeSidebarRef };
       }
 
