@@ -34,6 +34,7 @@ import { registerDeprecatedThreatIntelligenceFeature } from './threat_intelligen
 import {
   registerIocIndicatorSyncTask,
   scheduleIocIndicatorSyncTask,
+  registerBackfillDiamondFieldsTask,
 } from './threat_intelligence/tasks';
 import { migrateEndpointDataToSupportSpaces } from './endpoint/migrations/space_awareness_migration';
 import { SavedObjectsClientFactory } from './endpoint/services/saved_objects';
@@ -228,6 +229,14 @@ export class Plugin implements ISecuritySolutionPlugin {
   private threatIntelligenceSpacesService: SpacesServiceStart | undefined;
   private threatIntelligenceInference: InferenceServerStart | undefined;
   private threatIntelligenceWorkflowsManagement: WorkflowsServerPluginSetup | undefined;
+  // Actions start contract stored for the backfill task runner's connector resolution.
+  private threatIntelligenceActions:
+    | import('@kbn/actions-plugin/server').PluginStartContract
+    | undefined;
+  // Task Manager start contract stored so the backfill route can schedule tasks.
+  private threatIntelligenceTaskManager:
+    | import('@kbn/task-manager-plugin/server').TaskManagerStartContract
+    | undefined;
 
   private isServerless: boolean;
 
@@ -352,6 +361,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         logger: this.logger.get('threatIntelligence'),
         getSpacesService: () => this.threatIntelligenceSpacesService,
         getInference: () => this.threatIntelligenceInference,
+        getTaskManager: () => this.threatIntelligenceTaskManager,
       });
       this.logger.info(
         'Threat Intelligence routes registered (threatIntelligenceSkillEnabled is on)'
@@ -419,6 +429,17 @@ export class Plugin implements ISecuritySolutionPlugin {
         );
       }
     }
+
+    if (experimentalFeatures.threatIntelligenceSkillEnabled && plugins.taskManager) {
+      registerBackfillDiamondFieldsTask({
+        taskManager: plugins.taskManager,
+        coreSetup: core,
+        logger: this.logger.get('threatIntelligence', 'backfillDiamond'),
+        getInference: () => this.threatIntelligenceInference,
+        getActions: () => this.threatIntelligenceActions,
+      });
+      this.logger.debug('Threat Intelligence backfill_diamond_fields task registered');
+    }
   }
 
   /**
@@ -440,11 +461,13 @@ export class Plugin implements ISecuritySolutionPlugin {
   ): void {
     const experimentalFeatures = this.config.experimentalFeatures;
 
-    // Always capture spaces / inference references so they're available to
-    // any threat-intelligence handler that already started (e.g. routes
+    // Always capture spaces / inference / actions / taskManager references so they're
+    // available to any threat-intelligence handler that already started (e.g. routes
     // registered earlier in setup). Cheap, no side effects.
     this.threatIntelligenceSpacesService = plugins.spaces?.spacesService;
     this.threatIntelligenceInference = plugins.inference;
+    this.threatIntelligenceActions = plugins.actions;
+    this.threatIntelligenceTaskManager = plugins.taskManager;
 
     if (experimentalFeatures.threatIntelligenceSkillEnabled) {
       const esClient = core.elasticsearch.client.asInternalUser;

@@ -355,6 +355,10 @@ const threatReportsTemplate = {
                 extracted_at: { type: 'date' as const },
                 // 'single_call' (normal path) | 'per_vertex_fallback' (context-overflow fallback).
                 extraction_mode: { type: 'keyword' as const },
+                // Gate result written for EVERY report (true+false) by persist_extractions and
+                // backfill_diamond_fields. Queryable for observability + future dry_run estimation
+                // using real measured fraction rather than the documented constant estimate.
+                suitable: { type: 'boolean' as const },
               },
             },
           },

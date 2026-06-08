@@ -407,6 +407,13 @@ steps:
               # Mapped as `float` / `keyword` by the v8 index template.
               relevance: "${{ variables.relevance }}"
               detection_actionability: "{{ variables.detection_actionability }}"
+              # Gate result persisted for EVERY report (true+false) so the backfill
+              # task can filter already-gated candidates and future dry_runs can
+              # count the real fraction. Written here (all-reports persist) not in
+              # persist_diamond_fields (KEEP-only). variables.diamond_suitable is
+              # guaranteed non-null by capture_ranking_signals's `default: false`.
+              diamond:
+                suitable: "${{ variables.diamond_suitable }}"
             geography:
               regions: "${{ steps.enrich_taxonomy.output.regions }}"
             # Top-level multiplicative composite (`severity.score *

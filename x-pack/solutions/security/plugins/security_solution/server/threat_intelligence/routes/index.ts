@@ -8,7 +8,9 @@
 import type { IRouter, Logger } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { registerAnalyseEnvironmentRoute } from './analyse_environment';
+import { registerBackfillDiamondRoute } from './backfill_diamond';
 import { registerCoverageGapRoute } from './coverage_gap';
 import { registerDashboardOverviewRoute } from './dashboard_overview';
 import { registerExtractIocsRoute } from './extract_iocs';
@@ -41,6 +43,12 @@ export interface RouteRegistrationDeps {
    * with a structured message and the agent falls back to the IOC path.
    */
   getInference: () => InferenceServerStart | undefined;
+  /**
+   * Resolved during plugin start. Optional because the `taskManager` plugin
+   * is optional. Required by `backfill_diamond` to schedule the one-shot
+   * backfill task; route returns 503 when missing.
+   */
+  getTaskManager?: () => TaskManagerStartContract | undefined;
 }
 
 /**
@@ -54,6 +62,7 @@ export interface RouteRegistrationDeps {
 export const registerRoutes = (deps: RouteRegistrationDeps): void => {
   // Domain-action routes — canonical execution surface.
   registerSearchReportsRoute(deps);
+  registerBackfillDiamondRoute(deps);
   registerIngestReportRoute(deps);
   registerHuntBehaviorRoute(deps);
   registerHuntForThreatRoute(deps);
