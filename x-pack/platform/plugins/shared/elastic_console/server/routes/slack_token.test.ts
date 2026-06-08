@@ -138,9 +138,7 @@ describe('registerSlackTokenRoute — reconnect flow', () => {
 
     const response = await callHandler(handler);
 
-    expect(response.customError).toHaveBeenCalledWith(
-      expect.objectContaining({ statusCode: 500 })
-    );
+    expect(response.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 500 }));
   });
 
   it('registers a POST route at the correct path', () => {

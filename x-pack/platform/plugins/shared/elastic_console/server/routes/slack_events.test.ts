@@ -51,12 +51,10 @@ describe('registerSlackEventsRoute', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     capturedImmediateCallback = null;
-    setImmediateSpy = jest
-      .spyOn(global, 'setImmediate')
-      .mockImplementation((fn: TimerHandler) => {
-        capturedImmediateCallback = fn as () => Promise<void>;
-        return 0 as unknown as NodeJS.Immediate;
-      });
+    setImmediateSpy = jest.spyOn(global, 'setImmediate').mockImplementation((fn: TimerHandler) => {
+      capturedImmediateCallback = fn as () => Promise<void>;
+      return 0 as unknown as NodeJS.Immediate;
+    });
   });
 
   afterEach(() => {
@@ -151,9 +149,7 @@ describe('registerSlackEventsRoute', () => {
 
       await runImmediateCallback();
 
-      expect(mockLogger.error).toHaveBeenCalledWith(
-        expect.stringContaining('invalid_auth')
-      );
+      expect(mockLogger.error).toHaveBeenCalledWith(expect.stringContaining('invalid_auth'));
     });
 
     it('still returns 200 to Slack even when event processing fails', async () => {

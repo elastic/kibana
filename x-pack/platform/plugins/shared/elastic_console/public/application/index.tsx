@@ -9,7 +9,7 @@ import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { EuiTabbedContent, EuiPageTemplate } from '@elastic/eui';
+import { EuiTabbedContent, EuiPageTemplate, type EuiTabbedContentTab } from '@elastic/eui';
 import { SetupPage } from './setup_page';
 import { SlackOnboardingPage } from './slack_onboarding_page';
 
@@ -19,21 +19,21 @@ interface AppProps {
   coreStart: CoreStart;
 }
 
-const App: React.FC<AppProps> = ({ coreStart }) => {
-  const [selectedTab, setSelectedTab] = useState<'ramen' | 'slack'>('ramen');
+const tabs: EuiTabbedContentTab[] = [
+  {
+    id: 'ramen',
+    name: '🍜 Elastic Ramen',
+    content: <SetupPage />,
+  },
+  {
+    id: 'slack',
+    name: 'Slack Integration',
+    content: <SlackOnboardingPage />,
+  },
+];
 
-  const tabs = [
-    {
-      id: 'ramen',
-      name: '🍜 Elastic Ramen',
-      content: <SetupPage />,
-    },
-    {
-      id: 'slack',
-      name: 'Slack Integration',
-      content: <SlackOnboardingPage />,
-    },
-  ];
+const App: React.FC<AppProps> = ({ coreStart }) => {
+  const [selectedTab, setSelectedTab] = useState(tabs[0]);
 
   return (
     <EuiPageTemplate>
@@ -41,7 +41,7 @@ const App: React.FC<AppProps> = ({ coreStart }) => {
         <EuiTabbedContent
           tabs={tabs}
           selectedTab={selectedTab}
-          onTabClick={(tab) => setSelectedTab(tab.id as 'ramen' | 'slack')}
+          onTabClick={(tab) => setSelectedTab(tab)}
         />
       </EuiPageTemplate.Section>
     </EuiPageTemplate>

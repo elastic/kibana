@@ -9,6 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { MessageRole, ChatCompletionEventType, type Message } from '@kbn/inference-common';
+import { ConversationRoundStatus, type ConversationRound } from '@kbn/agent-builder-common';
 import { createConversationStorage } from './conversation_storage';
 import { resolveConnector } from './resolve_connector';
 import {
@@ -48,6 +49,33 @@ const inFlightEvents = new Set<string>();
 // Helpers
 // ---------------------------------------------------------------------------
 
+const createCompletedRound = ({
+  text,
+  responseText,
+  resolvedConnectorId,
+  now,
+}: {
+  text: string;
+  responseText: string;
+  resolvedConnectorId: string;
+  now: string;
+}): ConversationRound => ({
+  id: `round-${uuidv4()}`,
+  status: ConversationRoundStatus.completed,
+  input: { message: text },
+  steps: [],
+  response: { message: responseText },
+  started_at: now,
+  time_to_first_token: 0,
+  time_to_last_token: 0,
+  model_usage: {
+    connector_id: resolvedConnectorId,
+    llm_calls: 1,
+    input_tokens: 0,
+    output_tokens: 0,
+  },
+});
+
 const getSpace = (basePath: string): string => {
   const spaceMatch = basePath.match(/(?:^|\/)s\/([^/]+)/);
   return spaceMatch ? spaceMatch[1] : 'default';
@@ -81,7 +109,9 @@ const findSessionByOriginRef = async (
   } catch (err) {
     // A failure here means the thread will be treated as a new conversation — data continuity loss.
     logger.error(
-      `Session lookup failed for ${originRef} — thread will start a new conversation: ${(err as Error).message}`
+      `Session lookup failed for ${originRef} — thread will start a new conversation: ${
+        (err as Error).message
+      }`
     );
     return null;
   }
@@ -197,7 +227,7 @@ export const handleSlackEvent = async ({
       if (existing) {
         const { conversationId, session } = existing;
         const fullConv = await storage.get({ id: conversationId });
-        if (fullConv.found) {
+        if (fullConv.found && fullConv._source) {
           await storage.index({
             id: conversationId,
             document: {
@@ -243,8 +273,17 @@ export const handleSlackEvent = async ({
         return;
       }
 
-      const rounds =
-        (fullConv._source?.conversation_rounds as Array<Record<string, unknown>>) ?? [];
+      const parentSource = fullConv._source;
+      if (!parentSource) {
+        await postMessage(botToken, {
+          channel,
+          thread_ts: threadTs,
+          text: 'Cannot fork: session not found.',
+        });
+        return;
+      }
+
+      const rounds = parentSource.conversation_rounds ?? [];
       if (rounds.length === 0) {
         await postMessage(botToken, {
           channel,
@@ -263,11 +302,11 @@ export const handleSlackEvent = async ({
       await storage.index({
         id: forkId,
         document: {
-          agent_id: fullConv._source?.agent_id,
-          title: `[Investigation] ${(fullConv._source?.title as string) ?? conversationId}`,
+          agent_id: parentSource.agent_id,
+          title: `[Investigation] ${parentSource.title ?? conversationId}`,
           conversation_rounds: rounds,
-          user_id: fullConv._source?.user_id,
-          user_name: fullConv._source?.user_name,
+          user_id: parentSource.user_id,
+          user_name: parentSource.user_name,
           space,
           created_at: now,
           updated_at: now,
@@ -314,7 +353,7 @@ export const handleSlackEvent = async ({
 
     const existingSession = await findSessionByOriginRef(coreStart, originRef, logger);
     let existingConvId: string | null = null;
-    let existingRounds: Array<Record<string, unknown>> = [];
+    let existingRounds: ConversationRound[] = [];
 
     // First message in a new thread from an unmapped Slack user — prompt them to link
     // their Kibana account so the conversation shows up in Agent Builder.
@@ -337,8 +376,7 @@ export const handleSlackEvent = async ({
       const fullConv = await storage.get({ id: existingSession.conversationId });
       if (fullConv.found) {
         existingConvId = existingSession.conversationId;
-        existingRounds =
-          (fullConv._source?.conversation_rounds as Array<Record<string, unknown>>) ?? [];
+        existingRounds = fullConv._source?.conversation_rounds ?? [];
       }
     }
 
@@ -355,7 +393,8 @@ export const handleSlackEvent = async ({
       streamTs,
       threadTs,
       (err) => logger.warn(`Stream update failed: ${err.message}`),
-      (err) => logger.warn(`Stream finalize fell back to new message (original deleted?): ${err.message}`)
+      (err) =>
+        logger.warn(`Stream finalize fell back to new message (original deleted?): ${err.message}`)
     );
 
     const statusLines: string[] = [];
@@ -394,12 +433,8 @@ export const handleSlackEvent = async ({
     // The inference plugin is a raw LLM interface — it doesn't load conversation
     // history itself, so we pass all prior rounds as messages.
     const historyMessages = existingRounds.flatMap((round) => {
-      const input = (round.input as Record<string, unknown> | undefined)?.message as
-        | string
-        | undefined;
-      const responseMsg = (round.response as Record<string, unknown> | undefined)?.message as
-        | string
-        | undefined;
+      const input = round.input?.message;
+      const responseMsg = round.response?.message;
       const msgs: Message[] = [];
       if (input) msgs.push({ role: MessageRole.User, content: input });
       if (responseMsg) msgs.push({ role: MessageRole.Assistant, content: responseMsg } as Message);
@@ -474,31 +509,20 @@ export const handleSlackEvent = async ({
     try {
       if (existingConvId) {
         const existing = await storage.get({ id: existingConvId });
-        if (existing.found) {
-          const rounds =
-            (existing._source?.conversation_rounds as Array<Record<string, unknown>>) ?? [];
+        if (existing.found && existing._source) {
+          const rounds = existing._source.conversation_rounds ?? [];
           await storage.index({
             id: existingConvId,
             document: {
               ...existing._source,
               conversation_rounds: [
                 ...rounds,
-                {
-                  id: `round-${uuidv4()}`,
-                  status: 'completed',
-                  input: { message: text },
-                  steps: [],
-                  response: { message: responseText },
-                  started_at: now,
-                  time_to_first_token: 0,
-                  time_to_last_token: 0,
-                  model_usage: {
-                    connector_id: resolvedConnectorId,
-                    llm_calls: 1,
-                    input_tokens: 0,
-                    output_tokens: 0,
-                  },
-                },
+                createCompletedRound({
+                  text,
+                  responseText,
+                  resolvedConnectorId,
+                  now,
+                }),
               ],
               updated_at: now,
             },
@@ -520,25 +544,15 @@ export const handleSlackEvent = async ({
             agent_id: 'elastic-ai-agent',
             title: text.slice(0, 100),
             conversation_rounds: [
-              {
-                id: `round-${uuidv4()}`,
-                status: 'completed',
-                input: { message: text },
-                steps: [],
-                response: { message: responseText },
-                started_at: now,
-                time_to_first_token: 0,
-                time_to_last_token: 0,
-                model_usage: {
-                  connector_id: resolvedConnectorId,
-                  llm_calls: 1,
-                  input_tokens: 0,
-                  output_tokens: 0,
-                },
-              },
+              createCompletedRound({
+                text,
+                responseText,
+                resolvedConnectorId,
+                now,
+              }),
             ],
             user_id: kibanaUser?.userId,
-            user_name: kibanaUser?.username,
+            user_name: kibanaUser?.username ?? event.user ?? 'slack-user',
             space,
             created_at: now,
             updated_at: now,
@@ -562,7 +576,9 @@ export const handleSlackEvent = async ({
     } catch (persistErr) {
       // Response was already sent to Slack — this is a data loss scenario.
       logger.error(
-        `Failed to persist conversation round for thread ${originRef}: ${(persistErr as Error).message}`
+        `Failed to persist conversation round for thread ${originRef}: ${
+          (persistErr as Error).message
+        }`
       );
     }
   } catch (error) {

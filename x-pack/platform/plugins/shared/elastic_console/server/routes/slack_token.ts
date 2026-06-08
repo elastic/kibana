@@ -45,7 +45,7 @@ export const registerSlackTokenRoute = ({
             'The key is the authorization — no Kibana RBAC roles needed.',
         },
       },
-      options: { access: 'public', authRequired: true, xsrfRequired: false },
+      options: { access: 'public', xsrfRequired: false },
       validate: {
         body: schema.object({
           bot_token: schema.string({ minLength: 1 }),

@@ -176,9 +176,7 @@ describe('registerSlackConnectRoute — reconnect flow', () => {
 
     const response = await callHandler(handler);
 
-    expect(response.customError).toHaveBeenCalledWith(
-      expect.objectContaining({ statusCode: 500 })
-    );
+    expect(response.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 500 }));
   });
 
   it('uses the configured redirect_uri when provided', async () => {

@@ -91,138 +91,138 @@ export const SlackOnboardingPage: React.FC = () => {
     }
   }, [services.http]);
 
-    return (
-      <>
-        {/* Slack connection status badge */}
-        {slackStatusBadge && (
-          <>
-            {slackStatusBadge}
-            <EuiSpacer size="m" />
-          </>
-        )}
+  return (
+    <>
+      {/* Slack connection status badge */}
+      {slackStatusBadge && (
+        <>
+          {slackStatusBadge}
+          <EuiSpacer size="m" />
+        </>
+      )}
 
-        {/* ── Connect Slack ── */}
-        <EuiTitle size="s">
-          <h2>Connect Slack</h2>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiText size="s">
-          <p>Authorise the Slack bot so your team can interact with the AI assistant from Slack.</p>
-        </EuiText>
-        <EuiSpacer />
+      {/* ── Connect Slack ── */}
+      <EuiTitle size="s">
+        <h2>Connect Slack</h2>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiText size="s">
+        <p>Authorise the Slack bot so your team can interact with the AI assistant from Slack.</p>
+      </EuiText>
+      <EuiSpacer />
 
-        {slackStatusLoading ? (
-          <EuiLoadingSpinner size="m" />
-        ) : slackStatus?.status === 'connected' ? (
-          <>
-            <EuiCallOut title="Slack is connected" color="success" iconType="check">
-              {slackStatus.connected_at && (
-                <p>Connected since {new Date(slackStatus.connected_at).toLocaleString()}.</p>
-              )}
-            </EuiCallOut>
-            <EuiSpacer size="s" />
-            <EuiFlexGroup gutterSize="s" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty iconType="logoSlack" size="s" onClick={handleConnectSlack}>
-                  Reconnect
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  iconType="unlink"
-                  size="s"
-                  color="danger"
-                  onClick={handleDisconnectSlack}
-                >
-                  Disconnect
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </>
-        ) : slackStatus?.status === 'disconnected' ? (
-          <>
-            <EuiCallOut
-              title="Slack connection lost — API key revoked or expired"
-              color="danger"
-              iconType="warning"
-            >
-              <p>
-                Slack events can no longer be forwarded to Kibana. Reconnect to generate a new API
-                key.
-                {slackStatus.connected_at && (
-                  <> Last connected: {new Date(slackStatus.connected_at).toLocaleString()}.</>
-                )}
-              </p>
-            </EuiCallOut>
-            <EuiSpacer />
-            <EuiButton iconType="logoSlack" color="danger" onClick={handleConnectSlack}>
-              Reconnect Slack
-            </EuiButton>
-          </>
-        ) : (
-          <EuiButton iconType="logoSlack" fill onClick={handleConnectSlack}>
-            Connect Slack
-          </EuiButton>
-        )}
-
-        <EuiHorizontalRule />
-
-        {/* ── Link Slack Account ── */}
-        <EuiTitle size="s">
-          <h2>Link Slack Account</h2>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiText size="s">
-          <p>
-            Link your Slack user ID to this Kibana account so conversations started in Slack appear
-            in Agent Builder. Your Slack user ID is shown in the bot&apos;s first message when you
-            chat with it.
-          </p>
-        </EuiText>
-        <EuiSpacer />
-
-        {linkStatus === 'success' && (
-          <>
-            <EuiCallOut title="Slack account linked" color="success" iconType="check">
-              <p>
-                Slack user <strong>{slackUserId}</strong> is now linked to your Kibana account.
-                Future conversations from Slack will appear in Agent Builder.
-              </p>
-            </EuiCallOut>
-            <EuiSpacer />
-          </>
-        )}
-        {linkStatus === 'error' && (
-          <>
-            <EuiCallOut title="Link failed" color="danger" iconType="error">
-              <p>{linkError}</p>
-            </EuiCallOut>
-            <EuiSpacer />
-          </>
-        )}
-
-        <EuiFlexGroup alignItems="flexEnd" gutterSize="m">
-          <EuiFlexItem>
-            <EuiFormRow label="Slack User ID" fullWidth>
-              <EuiFieldText
-                placeholder="e.g. U0123456789"
-                value={slackUserId}
-                onChange={(e) => setSlackUserId(e.target.value)}
-                fullWidth
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFormRow hasEmptyLabelSpace>
-              <EuiButton
-                onClick={handleLinkSlack}
-                isDisabled={!slackUserId.trim() || linkStatus === 'success'}
+      {slackStatusLoading ? (
+        <EuiLoadingSpinner size="m" />
+      ) : slackStatus?.status === 'connected' ? (
+        <>
+          <EuiCallOut title="Slack is connected" color="success" iconType="check">
+            {slackStatus.connected_at && (
+              <p>Connected since {new Date(slackStatus.connected_at).toLocaleString()}.</p>
+            )}
+          </EuiCallOut>
+          <EuiSpacer size="s" />
+          <EuiFlexGroup gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty iconType="logoSlack" size="s" onClick={handleConnectSlack}>
+                Reconnect
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                iconType="unlink"
+                size="s"
+                color="danger"
+                onClick={handleDisconnectSlack}
               >
-                Link account
-              </EuiButton>
-            </EuiFormRow>
-         </EuiFlexItem>
-         </EuiFlexGroup>
-     </>
-   );
+                Disconnect
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      ) : slackStatus?.status === 'disconnected' ? (
+        <>
+          <EuiCallOut
+            title="Slack connection lost — API key revoked or expired"
+            color="danger"
+            iconType="warning"
+          >
+            <p>
+              Slack events can no longer be forwarded to Kibana. Reconnect to generate a new API
+              key.
+              {slackStatus.connected_at && (
+                <> Last connected: {new Date(slackStatus.connected_at).toLocaleString()}.</>
+              )}
+            </p>
+          </EuiCallOut>
+          <EuiSpacer />
+          <EuiButton iconType="logoSlack" color="danger" onClick={handleConnectSlack}>
+            Reconnect Slack
+          </EuiButton>
+        </>
+      ) : (
+        <EuiButton iconType="logoSlack" fill onClick={handleConnectSlack}>
+          Connect Slack
+        </EuiButton>
+      )}
+
+      <EuiHorizontalRule />
+
+      {/* ── Link Slack Account ── */}
+      <EuiTitle size="s">
+        <h2>Link Slack Account</h2>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiText size="s">
+        <p>
+          Link your Slack user ID to this Kibana account so conversations started in Slack appear in
+          Agent Builder. Your Slack user ID is shown in the bot&apos;s first message when you chat
+          with it.
+        </p>
+      </EuiText>
+      <EuiSpacer />
+
+      {linkStatus === 'success' && (
+        <>
+          <EuiCallOut title="Slack account linked" color="success" iconType="check">
+            <p>
+              Slack user <strong>{slackUserId}</strong> is now linked to your Kibana account. Future
+              conversations from Slack will appear in Agent Builder.
+            </p>
+          </EuiCallOut>
+          <EuiSpacer />
+        </>
+      )}
+      {linkStatus === 'error' && (
+        <>
+          <EuiCallOut title="Link failed" color="danger" iconType="error">
+            <p>{linkError}</p>
+          </EuiCallOut>
+          <EuiSpacer />
+        </>
+      )}
+
+      <EuiFlexGroup alignItems="flexEnd" gutterSize="m">
+        <EuiFlexItem>
+          <EuiFormRow label="Slack User ID" fullWidth>
+            <EuiFieldText
+              placeholder="e.g. U0123456789"
+              value={slackUserId}
+              onChange={(e) => setSlackUserId(e.target.value)}
+              fullWidth
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFormRow hasEmptyLabelSpace>
+            <EuiButton
+              onClick={handleLinkSlack}
+              isDisabled={!slackUserId.trim() || linkStatus === 'success'}
+            >
+              Link account
+            </EuiButton>
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
+  );
 };

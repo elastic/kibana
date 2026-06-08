@@ -67,7 +67,10 @@ describe('sendHandoffNotification', () => {
 
   it('filters out [Investigation complete] synthetic rounds', async () => {
     const rounds = [
-      { input: { message: '[Investigation complete]' }, response: { message: 'Hello! I am Claude' } },
+      {
+        input: { message: '[Investigation complete]' },
+        response: { message: 'Hello! I am Claude' },
+      },
       { input: { message: 'real question' }, response: { message: 'real answer' } },
     ];
 

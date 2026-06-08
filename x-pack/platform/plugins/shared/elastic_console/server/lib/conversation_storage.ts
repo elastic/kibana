@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { ConversationRound, VersionedAttachment } from '@kbn/agent-builder-common';
 import { chatSystemIndex } from '@kbn/agent-builder-server';
@@ -64,3 +64,30 @@ export const createConversationClient = (esClient: ElasticsearchClient) => ({
 });
 
 export type ConversationClient = ReturnType<typeof createConversationClient>;
+
+export const createConversationStorage = ({
+  esClient,
+}: {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+}) => {
+  const client = createConversationClient(esClient);
+
+  return {
+    get: async ({
+      id,
+    }: {
+      id: string;
+    }): Promise<{ found: boolean; _source?: ConversationDocument }> => {
+      const result = await client.get({ id });
+      const hit = result.hits.hits[0];
+
+      if (!hit?._source) {
+        return { found: false };
+      }
+
+      return { found: true, _source: hit._source };
+    },
+    index: client.index,
+  };
+};

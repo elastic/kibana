@@ -66,12 +66,18 @@ export const registerSlackDisconnectRoute = ({
           }
         }
       } catch (credErr) {
-        logger.debug(`Slack credentials not found during disconnect — skipping key invalidation: ${(credErr as Error).message}`);
+        logger.debug(
+          `Slack credentials not found during disconnect — skipping key invalidation: ${
+            (credErr as Error).message
+          }`
+        );
       }
 
       // Step 2 — delete the credentials SO
       try {
-        const soClient = coreStart.savedObjects.createInternalRepository([SLACK_CREDENTIALS_SO_TYPE]);
+        const soClient = coreStart.savedObjects.createInternalRepository([
+          SLACK_CREDENTIALS_SO_TYPE,
+        ]);
         await soClient.delete(SLACK_CREDENTIALS_SO_TYPE, SLACK_CREDENTIALS_SO_ID);
         logger.info('Slack credentials saved object deleted');
       } catch (deleteErr) {

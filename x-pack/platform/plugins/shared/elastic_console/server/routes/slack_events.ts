@@ -47,7 +47,7 @@ export const registerSlackEventsRoute = ({
       // authRequired: true — only the elastic-console-connect router (which holds
       // the scoped API key from /slack/connect) can POST here. Direct calls from
       // the internet without a valid API key are rejected.
-      options: { access: 'public', authRequired: true, xsrfRequired: false },
+      options: { access: 'public', xsrfRequired: false },
       validate: {
         body: schema.object({}, { unknowns: 'allow' }),
       },
