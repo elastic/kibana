@@ -20,7 +20,7 @@ import { v4 as uuidV4 } from 'uuid';
 
 const mockedUuidV4 = uuidV4 as jest.MockedFunction<() => string>;
 
-type MemoryDocument = MemoryEntry & { '@timestamp'?: string };
+type MemoryDocument = MemoryEntry & { '@timestamp'?: string; _id?: string };
 
 const sortByLatest = (a: MemoryDocument, b: MemoryDocument) => {
   if (b.version !== a.version) {
@@ -30,7 +30,11 @@ const sortByLatest = (a: MemoryDocument, b: MemoryDocument) => {
 };
 
 const matchesFilter = (doc: MemoryDocument, filter: Record<string, unknown>): boolean =>
-  Object.entries(filter).every(([field, value]) => doc[field as keyof MemoryDocument] === value);
+  Object.entries(filter).every(([field, value]) => {
+    const docValue = doc[field as keyof MemoryDocument];
+    // Array fields (categories/tags/references) match if the term is one of their values.
+    return Array.isArray(docValue) ? docValue.some((item) => item === value) : docValue === value;
+  });
 
 const filterByQuery = (
   docs: MemoryDocument[],
@@ -56,6 +60,10 @@ const filterByQuery = (
         const [[field, values]] = Object.entries(terms);
         const fieldValues = values as unknown[];
         return fieldValues.includes(doc[field as keyof MemoryDocument]);
+      }
+      if ('ids' in clause) {
+        const ids = clause.ids as { values?: unknown[] };
+        return (ids.values ?? []).includes(doc._id);
       }
       return true;
     })
@@ -83,13 +91,25 @@ const collapseDocuments = (
 
 const createInMemoryEsClient = () => {
   const memoryDocs: MemoryDocument[] = [];
+  let docCounter = 0;
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
 
-  esClient.index.mockImplementation(async ({ index, document }) => {
-    if (index === MEMORIES_DATA_STREAM) {
-      memoryDocs.push(document as MemoryDocument);
+  // Memory page writes go through DataStreamClient.create, which issues a bulk request.
+  esClient.bulk.mockImplementation(async (params) => {
+    const request = params as { index?: string; operations?: unknown[] };
+    const operations = request.operations ?? [];
+    const items: unknown[] = [];
+    // Operations alternate [actionMetadata, document]; documents sit at odd indices.
+    for (let i = 1; i < operations.length; i += 2) {
+      if (request.index === MEMORIES_DATA_STREAM) {
+        const doc = operations[i] as MemoryDocument;
+        // Each appended document gets a unique _id, mirroring an append-only data stream.
+        doc._id = `doc-${docCounter++}`;
+        memoryDocs.push(doc);
+      }
+      items.push({ create: { status: 201, _id: 'doc', _index: String(request.index) } });
     }
-    return { result: 'created', _id: 'doc', _index: String(index), _shards: {} } as never;
+    return { errors: false, took: 0, items } as never;
   });
 
   esClient.search.mockImplementation(async (params) => {
@@ -98,6 +118,8 @@ const createInMemoryEsClient = () => {
       query?: Record<string, unknown>;
       collapse?: { field?: string };
       size?: number;
+      _source?: boolean;
+      fields?: string[];
     };
 
     if (request.index !== MEMORIES_DATA_STREAM || !request.query) {
@@ -114,7 +136,24 @@ const createInMemoryEsClient = () => {
 
     return {
       hits: {
-        hits: winners.map((source) => ({ _source: source })),
+        hits: winners.map((source) => {
+          const hit: {
+            _id?: string;
+            _source?: MemoryDocument;
+            fields?: Record<string, unknown[]>;
+          } = { _id: source._id };
+          if (request._source !== false) {
+            hit._source = source;
+          }
+          if (request.fields?.length) {
+            hit.fields = {};
+            for (const field of request.fields) {
+              const value = source[field as keyof MemoryDocument];
+              hit.fields[field] = Array.isArray(value) ? value : [value];
+            }
+          }
+          return hit;
+        }),
         total: { value: winners.length },
       },
     } as never;
@@ -347,5 +386,90 @@ describe('MemoryServiceImpl', () => {
 
     expect(results).toHaveLength(1);
     expect(results[0]).toMatchObject({ id: live.id, name: 'live-page' });
+  });
+
+  it('search returns a live result even when a deleted page also matched the query', async () => {
+    mockedUuidV4
+      .mockReturnValueOnce('live-uuid')
+      .mockReturnValueOnce('history-uuid-1')
+      .mockReturnValueOnce('deleted-uuid')
+      .mockReturnValueOnce('history-uuid-2')
+      .mockReturnValueOnce('history-uuid-3');
+    const { service } = createService();
+
+    await service.create({ name: 'b-live', title: 'Live', content: 'searchable', user });
+    const doomed = await service.create({
+      name: 'a-deleted',
+      title: 'Deleted',
+      content: 'searchable',
+      user,
+    });
+    await service.delete({ id: doomed.id, user });
+
+    // Only the live page's latest version is matched; the tombstone is never a candidate.
+    await expect(service.search({ query: 'searchable', size: 1 })).resolves.toEqual([
+      expect.objectContaining({ name: 'b-live' }),
+    ]);
+  });
+
+  it('listByCategory does not return a page whose latest version dropped the category', async () => {
+    mockedUuidV4
+      .mockReturnValueOnce('entry-uuid-1')
+      .mockReturnValueOnce('history-uuid-1')
+      .mockReturnValueOnce('history-uuid-2');
+    const { service } = createService();
+
+    const created = await service.create({
+      name: 'categorized',
+      title: 'Categorized',
+      content: 'content',
+      categories: ['services'],
+      user,
+    });
+
+    // Page is initially listed under the category.
+    await expect(service.listByCategory({ category: 'services' })).resolves.toEqual([
+      expect.objectContaining({ id: created.id, version: 1 }),
+    ]);
+
+    // Latest version drops the category — an older (v1) document still carries it in the stream.
+    await service.update({ id: created.id, categories: [], user });
+
+    // Two-phase read must resolve the latest version and exclude the stale match.
+    await expect(service.listByCategory({ category: 'services' })).resolves.toEqual([]);
+  });
+
+  it('getBacklinks does not return a page whose latest version dropped the reference', async () => {
+    mockedUuidV4
+      .mockReturnValueOnce('target-uuid')
+      .mockReturnValueOnce('history-uuid-1')
+      .mockReturnValueOnce('source-uuid')
+      .mockReturnValueOnce('history-uuid-2')
+      .mockReturnValueOnce('history-uuid-3');
+    const { service } = createService();
+
+    const target = await service.create({
+      name: 'target',
+      title: 'Target',
+      content: 'target content',
+      user,
+    });
+
+    const source = await service.create({
+      name: 'source',
+      title: 'Source',
+      content: 'links to target',
+      references: [target.id],
+      user,
+    });
+
+    await expect(service.getBacklinks({ id: target.id })).resolves.toEqual([
+      expect.objectContaining({ id: source.id, version: 1 }),
+    ]);
+
+    // Latest version of source removes the reference; v1 still references target in the stream.
+    await service.update({ id: source.id, references: [], user });
+
+    await expect(service.getBacklinks({ id: target.id })).resolves.toEqual([]);
   });
 });

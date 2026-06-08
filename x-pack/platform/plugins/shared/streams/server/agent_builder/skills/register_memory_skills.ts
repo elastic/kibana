@@ -9,17 +9,9 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
 import type { MemoryToolsOptions } from '../tools/memory';
 import { createSigEventsMemorySkill } from './sig_events_memory_skill';
-import {
-  createMemorySynthesisSkill,
-  createMemoryConsolidationSkill,
-  createConversationScraperSkill,
-} from './memory';
 
 const MEMORY_SKILL_FACTORIES = [
   { id: 'significant-events-memory', create: createSigEventsMemorySkill },
-  { id: 'streams-memory-synthesis', create: createMemorySynthesisSkill },
-  { id: 'streams-memory-consolidation', create: createMemoryConsolidationSkill },
-  { id: 'streams-conversation-scraper', create: createConversationScraperSkill },
 ] as const;
 
 export const registerStreamsMemoryAgentBuilder = async ({
@@ -70,7 +62,7 @@ export const registerStreamsMemoryAgentBuilder = async ({
     if (registered.length === MEMORY_SKILL_FACTORIES.length) {
       memorySkillsRegistered = true;
       logger.info(
-        'Streams memory skills registered (observability:streamsEnableMemory is enabled)'
+        'Streams memory skills registered (streams.significantEventsMemoryEnabled is enabled)'
       );
     } else {
       logger.warn(

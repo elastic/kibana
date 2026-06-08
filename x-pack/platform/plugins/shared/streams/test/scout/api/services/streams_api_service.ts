@@ -19,9 +19,10 @@ import {
   OBSERVABILITY_STREAMS_ENABLE_DRAFT_STREAMS,
   OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS,
 } from '@kbn/management-settings-ids';
-import { STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG } from '../../../../common/feature_flags';
 import type { KbnClient, ScoutLogger } from '@kbn/scout/src/common';
 import { measurePerformanceAsync } from '@kbn/scout/src/common';
+import { STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG } from '../../../../common/feature_flags';
+import { COMMON_API_HEADERS } from '../fixtures/constants';
 
 export type { Insight };
 
@@ -342,6 +343,7 @@ export function getStreamsTestApiService({
         await kbnClient.request({
           path: '/internal/core/_settings',
           method: 'PUT',
+          headers: COMMON_API_HEADERS,
           body: {
             'feature_flags.overrides': {
               [STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG]: true,
@@ -356,6 +358,7 @@ export function getStreamsTestApiService({
         await kbnClient.request({
           path: '/internal/core/_settings',
           method: 'PUT',
+          headers: COMMON_API_HEADERS,
           body: {
             'feature_flags.overrides': {
               [STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG]: false,

@@ -35,8 +35,6 @@ export const memoriesMappings = {
 } satisfies MappingsDefinition;
 
 export type StoredMemoryPage = GetFieldsOf<typeof memoriesMappings>;
-// MemoryEntry mapped to the data stream document shape
-export type MemoryPageDocument = Omit<StoredMemoryPage, '@timestamp'> & { '@timestamp': string };
 
 export const memoriesDataStream: DataStreamDefinition<typeof memoriesMappings, StoredMemoryPage> = {
   name: MEMORIES_DATA_STREAM,

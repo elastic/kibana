@@ -47,7 +47,6 @@ import {
   useScrapeConversations,
   useConsolidateMemory,
   useSynthesizeMemory,
-  useDetectGaps,
 } from './use_memory';
 import type { MemoryCategoryNode, MemoryVersionRecord } from './types';
 
@@ -68,7 +67,6 @@ export function MemoryTab() {
   const scrapeConversations = useScrapeConversations();
   const consolidateMemory = useConsolidateMemory();
   const synthesizeMemory = useSynthesizeMemory();
-  const detectGaps = useDetectGaps();
 
   const isSearchActive = searchQuery.length >= 2;
 
@@ -113,6 +111,10 @@ export function MemoryTab() {
                 isDisabled={!canManage}
                 onClick={() => scrapeConversations.mutate()}
                 data-test-subj="streamsMemoryScrapeButton"
+                title={i18n.translate('xpack.streams.memory.scrapeButtonTitle', {
+                  defaultMessage:
+                    'Scrape agent conversations and extract durable knowledge into memory pages.',
+                })}
               >
                 {i18n.translate('xpack.streams.memory.scrapeButton', {
                   defaultMessage: 'Scrape Conversations',
@@ -152,19 +154,6 @@ export function MemoryTab() {
               >
                 {i18n.translate('xpack.streams.memory.synthesizeButton', {
                   defaultMessage: 'Synthesize Memory',
-                })}
-              </EuiButton>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                size="s"
-                iconType="inspect"
-                isLoading={detectGaps.isLoading}
-                onClick={() => detectGaps.mutate()}
-                data-test-subj="streamsMemoryDetectGapsButton"
-              >
-                {i18n.translate('xpack.streams.memory.detectGapsButton', {
-                  defaultMessage: 'Detect Gaps',
                 })}
               </EuiButton>
             </EuiFlexItem>

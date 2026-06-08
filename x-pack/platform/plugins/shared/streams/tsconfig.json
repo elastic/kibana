@@ -100,7 +100,7 @@
     "@kbn/connector-specs",
     "@kbn/data-streams",
     "@kbn/es-mappings",
-    "@kbn/workflows-extensions",
+    "@kbn/core-spaces-common",
     "@kbn/elastic-agent-utils",
     "@kbn/sample-log-parser"
   ]

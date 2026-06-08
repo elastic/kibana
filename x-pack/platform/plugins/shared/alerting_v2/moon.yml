@@ -90,6 +90,7 @@ dependsOn:
   - '@kbn/field-formats-plugin'
   - '@kbn/charts-plugin'
   - '@kbn/unified-data-table'
+  - '@kbn/unified-histogram'
   - '@kbn/cell-actions'
   - '@kbn/discover-utils'
   - '@kbn/shared-ux-page-kibana-template'
@@ -100,6 +101,9 @@ dependsOn:
   - '@kbn/deeplinks-analytics'
   - '@kbn/deeplinks-agent-builder'
   - '@kbn/unified-doc-viewer-plugin'
+  - '@kbn/core-user-profile-browser'
+  - '@kbn/datemath'
+  - '@kbn/rison'
   - '@kbn/maintenance-windows-plugin'
   - '@kbn/esql-types'
   - '@kbn/agent-builder-plugin'
@@ -113,7 +117,10 @@ dependsOn:
   - '@kbn/code-editor'
   - '@kbn/workflows-yaml'
   - '@kbn/workflows-ui'
+  - '@kbn/core-spaces-common'
+  - '@kbn/datemath'
   - '@kbn/triggers-actions-ui-plugin'
+  - '@kbn/css-utils'
 tags:
   - plugin
   - prod

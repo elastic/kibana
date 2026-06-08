@@ -9,7 +9,10 @@ import { v4 as uuidV4 } from 'uuid';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { badRequest, notFound } from '@hapi/boom';
+import { DataStreamClient } from '@kbn/data-streams';
+import type { IDataStreamClient } from '@kbn/data-streams';
 import { createMemoryHistoryStorage } from './history_storage';
+import { memoriesDataStream, type memoriesMappings, type StoredMemoryPage } from './data_stream';
 import { MEMORIES_DATA_STREAM } from '../../../common/constants';
 import type {
   MemoryEntry,
@@ -32,6 +35,9 @@ const isIndexNotFoundError = (err: unknown): boolean => {
 
 type MemoryCollapseField = 'name' | 'id';
 
+/** Upper bound on distinct pages resolved in a single search (Elasticsearch's default max result window). */
+const MAX_PAGES = 10000;
+
 /**
  * MemoryServiceImpl backed by two append-only data streams:
  *   - .significant_events-memories  (pages, latest version resolved via field collapse)
@@ -43,37 +49,88 @@ type MemoryCollapseField = 'name' | 'id';
  */
 export class MemoryServiceImpl implements MemoryService {
   private readonly esClient: ElasticsearchClient;
+  private readonly dataStreamClient: IDataStreamClient<typeof memoriesMappings, StoredMemoryPage>;
   private readonly historyStorage: ReturnType<typeof createMemoryHistoryStorage>;
   private readonly logger: Logger;
 
   constructor({ logger, esClient }: { logger: Logger; esClient: ElasticsearchClient }) {
     this.logger = logger;
     this.esClient = esClient;
+    this.dataStreamClient = DataStreamClient.fromDefinition<
+      typeof memoriesMappings,
+      StoredMemoryPage
+    >({
+      dataStream: memoriesDataStream,
+      elasticsearchClient: esClient,
+    });
     this.historyStorage = createMemoryHistoryStorage({ esClient });
   }
 
   // ── Write helpers ──
 
+  /**
+   * Append a page document to the memory data stream.
+   *
+   * Writes go through the shared {@link DataStreamClient} (space-agnostic — memory is global)
+   * with `refresh: 'wait_for'` so the document is searchable as soon as this resolves. This
+   * gives read-your-writes consistency for the interactive CRUD flows that read straight back.
+   *
+   * Used for both live pages and tombstones: the only difference is the `is_deleted` flag on the
+   * entry, defaulting to `false` for live writes.
+   */
   private async _indexPage(entry: MemoryEntry): Promise<void> {
-    await this.esClient.index({
-      index: MEMORIES_DATA_STREAM,
-      document: {
-        '@timestamp': entry.updated_at,
-        is_deleted: false,
-        ...entry,
-      },
+    const document: StoredMemoryPage = {
+      '@timestamp': entry.updated_at,
+      id: entry.id,
+      name: entry.name,
+      title: entry.title,
+      content: entry.content,
+      categories: entry.categories,
+      tags: entry.tags,
+      references: entry.references,
+      version: entry.version,
+      created_at: entry.created_at,
+      updated_at: entry.updated_at,
+      created_by: entry.created_by,
+      updated_by: entry.updated_by,
+      is_deleted: entry.is_deleted ?? false,
+    };
+
+    const response = await this.dataStreamClient.create({
+      documents: [document],
+      refresh: 'wait_for',
     });
+
+    if (response.errors) {
+      const failure = response.items.find((item) => item.create?.error)?.create?.error;
+      throw new Error(
+        `Failed to index memory page '${entry.id}': ${failure?.reason ?? 'unknown bulk error'}`
+      );
+    }
   }
 
   // ── Reads: field collapse to resolve latest version ──
 
-  private async _searchLatest(
-    query: QueryDslQueryContainer,
-    collapseField: MemoryCollapseField,
-    size = 1
-  ): Promise<Array<{ _source: MemoryEntry }>> {
+  /**
+   * Resolve the latest document per `collapseField` group for the docs matching `query`.
+   *
+   * IMPORTANT: field collapse is applied AFTER the query, so this only returns the latest version
+   * *among the documents that match the filter*. It is therefore only safe to filter on INVARIANT
+   * fields (`id`, `name`). Filtering on a mutable field (e.g. `categories`, `references`) can return
+   * a stale older version whose current latest no longer matches — callers that need to filter on
+   * mutable fields must resolve the true latest separately (see {@link _resolveLatestByIds}).
+   */
+  private async _searchLatest({
+    query,
+    collapseField,
+    size = 1,
+  }: {
+    query: QueryDslQueryContainer;
+    collapseField: MemoryCollapseField;
+    size?: number;
+  }): Promise<Array<{ _id: string; _source: MemoryEntry }>> {
     try {
-      const response = await this.esClient.search({
+      const response = await this.esClient.search<MemoryEntry>({
         index: MEMORIES_DATA_STREAM,
         track_total_hits: false,
         size,
@@ -81,38 +138,40 @@ export class MemoryServiceImpl implements MemoryService {
         collapse: { field: collapseField },
         sort: [{ version: { order: 'desc' } }, { updated_at: { order: 'desc' } }],
       });
-      return response.hits.hits as Array<{ _source: MemoryEntry }>;
+      return response.hits.hits.flatMap((hit) =>
+        typeof hit._id === 'string' && hit._source ? [{ _id: hit._id, _source: hit._source }] : []
+      );
     } catch (err) {
       if (isIndexNotFoundError(err)) return [];
       throw err;
     }
   }
 
-  private async _indexNameTombstone(
+  /**
+   * Append a soft-delete tombstone for an entry: a copy with `is_deleted: true` and a bumped
+   * version so field collapse resolves it as the latest document over the live one. Returns the
+   * tombstone that was written.
+   */
+  private async _indexTombstone(
     entry: MemoryEntry,
-    name: string,
-    user: string,
-    now: string
-  ): Promise<void> {
+    { user, now }: { user: string; now: string }
+  ): Promise<MemoryEntry> {
     const tombstone: MemoryEntry = {
       ...entry,
-      name,
       version: entry.version + 1,
       updated_at: now,
       updated_by: user,
       is_deleted: true,
     };
-    await this.esClient.index({
-      index: MEMORIES_DATA_STREAM,
-      document: {
-        '@timestamp': now,
-        ...tombstone,
-      },
-    });
+    await this._indexPage(tombstone);
+    return tombstone;
   }
 
   private async _getCollapsedByName(name: string): Promise<MemoryEntry | undefined> {
-    const hits = await this._searchLatest({ bool: { filter: [{ term: { name } }] } }, 'name');
+    const hits = await this._searchLatest({
+      query: { bool: { filter: [{ term: { name } }] } },
+      collapseField: 'name',
+    });
     return hits[0]?._source;
   }
 
@@ -122,9 +181,54 @@ export class MemoryServiceImpl implements MemoryService {
   }
 
   private async _getById(id: string): Promise<MemoryEntry | undefined> {
-    const hits = await this._searchLatest({ bool: { filter: [{ term: { id } }] } }, 'id');
+    const hits = await this._searchLatest({
+      query: { bool: { filter: [{ term: { id } }] } },
+      collapseField: 'id',
+    });
     const entry = hits[0]?._source;
     return entry?.is_deleted !== true ? entry : undefined;
+  }
+
+  /**
+   * Phase one of a mutable-field read: collect the distinct page ids of documents matching `query`,
+   * without fetching `_source` (only the `id` field). The matched versions may be stale, so callers
+   * must re-resolve the current latest via {@link _resolveLatestByIds}.
+   */
+  private async _collectCandidateIds(query: QueryDslQueryContainer): Promise<string[]> {
+    try {
+      const response = await this.esClient.search({
+        index: MEMORIES_DATA_STREAM,
+        track_total_hits: false,
+        size: MAX_PAGES,
+        query,
+        collapse: { field: 'id' },
+        _source: false,
+        fields: ['id'],
+      });
+      return response.hits.hits
+        .map((hit) => hit.fields?.id?.[0])
+        .filter((id): id is string => typeof id === 'string');
+    } catch (err) {
+      if (isIndexNotFoundError(err)) return [];
+      throw err;
+    }
+  }
+
+  /**
+   * Resolve the current latest version of each given page id (filtering on `id` is safe — it is
+   * invariant), dropping any that are tombstoned. Used as phase two of reads that match on mutable
+   * fields, so callers see each page's true latest state rather than the version that matched.
+   */
+  private async _resolveLatestByIds(
+    ids: string[]
+  ): Promise<Array<{ _id: string; _source: MemoryEntry }>> {
+    if (ids.length === 0) return [];
+    const hits = await this._searchLatest({
+      query: { bool: { filter: [{ terms: { id: ids } }] } },
+      collapseField: 'id',
+      size: ids.length,
+    });
+    return hits.filter((hit) => hit._source.is_deleted !== true);
   }
 
   // ── Public API ──
@@ -207,7 +311,8 @@ export class MemoryServiceImpl implements MemoryService {
     let nextVersion = current.version + 1;
 
     if (isRename) {
-      await this._indexNameTombstone(current, current.name, user, now);
+      // Tombstone the old name (sharing `now` with the new version below — one rename operation).
+      await this._indexTombstone(current, { user, now });
       nextVersion = current.version + 2;
     }
 
@@ -241,21 +346,7 @@ export class MemoryServiceImpl implements MemoryService {
     if (!current) throw notFound(`Memory entry with id '${id}' not found`);
 
     const now = new Date().toISOString();
-    const tombstone: MemoryEntry = {
-      ...current,
-      version: current.version + 1,
-      updated_at: now,
-      updated_by: user,
-      is_deleted: true,
-    };
-    // Append a soft-delete tombstone (version must increase so collapse picks it over the live doc).
-    await this.esClient.index({
-      index: MEMORIES_DATA_STREAM,
-      document: {
-        '@timestamp': now,
-        ...tombstone,
-      },
-    });
+    const tombstone = await this._indexTombstone(current, { user, now });
     await this._writeHistory(tombstone, 'delete', `Deleted entry "${current.name}"`, user);
   }
 
@@ -365,11 +456,14 @@ export class MemoryServiceImpl implements MemoryService {
   // ── References ──
 
   async getBacklinks({ id }: { id: string }): Promise<MemoryEntry[]> {
-    return (
-      await this._searchLatest({ bool: { filter: [{ term: { references: id } }] } }, 'id', 1000)
-    )
-      .map((h) => h._source)
-      .filter((entry) => entry.is_deleted !== true);
+    // `references` is mutable, so a one-shot collapsed search can surface a stale version that
+    // referenced `id`. Phase 1: gather candidate page ids. Phase 2: resolve their current latest
+    // versions and keep only those that STILL reference `id`.
+    const candidateIds = await this._collectCandidateIds({
+      bool: { filter: [{ term: { references: id } }] },
+    });
+    const latest = await this._resolveLatestByIds(candidateIds);
+    return latest.map((hit) => hit._source).filter((entry) => entry.references.includes(id));
   }
 
   // ── Search & browse ──
@@ -378,43 +472,75 @@ export class MemoryServiceImpl implements MemoryService {
     const { query, tags, categories, references, size = 10 } = params;
     const escapedQuery = query.toLowerCase().replace(/[\\*?]/g, '\\$&');
 
-    const filters: QueryDslQueryContainer[] = [];
-    if (tags?.length) filters.push({ terms: { tags } });
-    if (categories?.length) filters.push({ terms: { categories } });
-    if (references?.length) filters.push({ terms: { references } });
+    const structuredFilters: QueryDslQueryContainer[] = [];
+    if (tags?.length) structuredFilters.push({ terms: { tags } });
+    if (categories?.length) structuredFilters.push({ terms: { categories } });
+    if (references?.length) structuredFilters.push({ terms: { references } });
 
-    let response;
+    const fuzzyMatch: QueryDslQueryContainer = {
+      bool: {
+        should: [
+          {
+            multi_match: {
+              query,
+              fields: ['title^3', 'content'],
+              type: 'best_fields',
+              fuzziness: 'AUTO',
+            },
+          },
+          { wildcard: { name: { value: `*${escapedQuery}*`, boost: 2 } } },
+          { wildcard: { categories: { value: `*${escapedQuery}*`, boost: 2 } } },
+          { wildcard: { tags: { value: `*${escapedQuery}*`, boost: 2 } } },
+        ],
+        minimum_should_match: 1,
+      },
+    };
+
+    // Phase 1: collect the id of every page that has ANY version matching the query (ids only, so
+    // this stays cheap even when widened). The matched version may be stale; we only keep the page
+    // ids here and re-validate each page's latest version in phases 2-3. Fetching all matching pages
+    // (up to MAX_PAGES) — rather than a relevance-capped window — means a page whose latest matches
+    // can never be dropped before it reaches the authoritative phase 3 ranking.
+    let candidateIds: string[];
     try {
-      response = await this.esClient.search({
+      const candidateResponse = await this.esClient.search({
         index: MEMORIES_DATA_STREAM,
         track_total_hits: false,
         collapse: { field: 'id' },
-        sort: [{ version: { order: 'desc' } }, { updated_at: { order: 'desc' } }],
+        query: { bool: { filter: structuredFilters, must: [fuzzyMatch] } },
+        size: MAX_PAGES,
+        _source: false,
+        fields: ['id'],
+      });
+      candidateIds = candidateResponse.hits.hits
+        .map((hit) => hit.fields?.id?.[0])
+        .filter((id): id is string => typeof id === 'string');
+    } catch (err) {
+      if (isIndexNotFoundError(err)) return [];
+      throw err;
+    }
+    if (candidateIds.length === 0) return [];
+
+    // Phase 2: resolve each candidate page's current latest version (filtering on `id` is
+    // invariant-safe) and keep the Elasticsearch `_id` of those that are still live.
+    const latestLiveIds = (await this._resolveLatestByIds(candidateIds)).map((hit) => hit._id);
+    if (latestLiveIds.length === 0) return [];
+
+    // Phase 3: re-run the query against ONLY those latest documents (via an `ids` filter), so a
+    // result can come only from a page whose LATEST version satisfies the filters and the text
+    // query — a stale older version that once matched, or a soft-deleted page, can never surface.
+    let response;
+    try {
+      response = await this.esClient.search<MemoryEntry>({
+        index: MEMORIES_DATA_STREAM,
+        track_total_hits: false,
         query: {
           bool: {
-            filter: filters,
-            must: [
-              {
-                bool: {
-                  should: [
-                    {
-                      multi_match: {
-                        query,
-                        fields: ['title^3', 'content'],
-                        type: 'best_fields',
-                        fuzziness: 'AUTO',
-                      },
-                    },
-                    { wildcard: { name: { value: `*${escapedQuery}*`, boost: 2 } } },
-                    { wildcard: { categories: { value: `*${escapedQuery}*`, boost: 2 } } },
-                    { wildcard: { tags: { value: `*${escapedQuery}*`, boost: 2 } } },
-                  ],
-                  minimum_should_match: 1,
-                },
-              },
-            ],
+            filter: [{ ids: { values: latestLiveIds } }, ...structuredFilters],
+            must: [fuzzyMatch],
           },
         },
+        sort: [{ _score: { order: 'desc' } }],
         size,
         highlight: {
           fields: { content: { fragment_size: 200, number_of_fragments: 1 }, title: {} },
@@ -425,48 +551,56 @@ export class MemoryServiceImpl implements MemoryService {
       throw err;
     }
 
-    return response.hits.hits
-      .map((hit) => {
-        const source = hit._source as MemoryEntry;
-        if (source.is_deleted === true) {
-          return undefined;
-        }
-        const highlight = (hit as { highlight?: Record<string, string[]> }).highlight;
-        return {
+    return response.hits.hits.flatMap((hit) => {
+      const source = hit._source;
+      if (!source) return [];
+      return [
+        {
           id: source.id,
           name: source.name,
           title: source.title,
-          snippet: highlight?.content?.[0] ?? source.content.substring(0, 200),
+          snippet: hit.highlight?.content?.[0] ?? source.content.substring(0, 200),
           score: hit._score ?? 0,
           updated_at: source.updated_at,
           updated_by: source.updated_by,
           tags: source.tags ?? [],
           categories: source.categories ?? [],
-        };
-      })
-      .filter((result): result is MemorySearchResult => result !== undefined);
+        },
+      ];
+    });
   }
 
   async listAll(): Promise<MemoryEntry[]> {
     try {
-      const response = await this.esClient.search({
+      // `hits.total` counts pre-collapse documents (every version of every page), so it can't tell
+      // us how many distinct pages exist. Instead, detect truncation from the number of collapsed
+      // hits returned: hitting `MAX_PAGES` distinct pages means there may be more we didn't fetch.
+      const response = await this.esClient.search<MemoryEntry>({
         index: MEMORIES_DATA_STREAM,
-        track_total_hits: true,
+        track_total_hits: false,
         query: { match_all: {} },
         collapse: { field: 'id' },
         sort: [{ version: { order: 'desc' } }, { updated_at: { order: 'desc' } }],
-        size: 10000,
+        size: MAX_PAGES,
       });
 
-      const total = response.hits.total as { value: number } | undefined;
-      if (total && total.value > 10000) {
+      const hits = response.hits.hits;
+      const entries = hits
+        .map((hit) => hit._source)
+        .filter(
+          (source): source is MemoryEntry => source !== undefined && source.is_deleted !== true
+        );
+
+      // We only hit a wall if the search filled the entire window — then distinct pages beyond
+      // `MAX_PAGES` were silently dropped. Tombstoned pages count toward the window too, so report
+      // both the fetched and live counts to make the truncation actionable.
+      if (hits.length === MAX_PAGES) {
         this.logger.warn(
-          `Memory listAll: total ${total.value} exceeds 10000, some entries may be missing`
+          `Memory listAll: hit the ${MAX_PAGES}-page fetch limit (${entries.length} live); pages beyond the limit are not returned`
         );
       }
-      return response.hits.hits
-        .map((h) => h._source as MemoryEntry)
-        .filter((entry) => entry.is_deleted !== true);
+
+      return entries;
     } catch (err) {
       if (isIndexNotFoundError(err)) return [];
       throw err;
@@ -474,24 +608,14 @@ export class MemoryServiceImpl implements MemoryService {
   }
 
   async listByCategory({ category }: { category: string }): Promise<MemoryEntry[]> {
-    try {
-      const response = await this.esClient.search({
-        index: MEMORIES_DATA_STREAM,
-        track_total_hits: false,
-        query: {
-          bool: { filter: [{ term: { categories: category } }] },
-        },
-        collapse: { field: 'id' },
-        sort: [{ version: { order: 'desc' } }, { updated_at: { order: 'desc' } }],
-        size: 1000,
-      });
-      return response.hits.hits
-        .map((h) => h._source as MemoryEntry)
-        .filter((entry) => entry.is_deleted !== true);
-    } catch (err) {
-      if (isIndexNotFoundError(err)) return [];
-      throw err;
-    }
+    // `categories` is mutable, so a one-shot collapsed search can surface a stale version that had
+    // the category. Phase 1: gather candidate page ids. Phase 2: resolve their current latest
+    // versions and keep only those that STILL belong to `category`.
+    const candidateIds = await this._collectCandidateIds({
+      bool: { filter: [{ term: { categories: category } }] },
+    });
+    const latest = await this._resolveLatestByIds(candidateIds);
+    return latest.map((hit) => hit._source).filter((entry) => entry.categories.includes(category));
   }
 
   // ── History ──

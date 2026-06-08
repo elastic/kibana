@@ -6,7 +6,8 @@
  */
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
-import type { Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { AgentContextLayerPluginSetup } from '@kbn/agent-context-layer-plugin/server';
 import type { StreamsServer } from '../types';
 import type { GetScopedClients } from '../routes/types';
 import type { EbtTelemetryClient } from '../lib/telemetry/ebt';
@@ -17,6 +18,9 @@ import { registerAgentBuilderTools } from './tools/register_tools';
 import { createSigEventsMemorySkill } from './skills/sig_events_memory_skill';
 import { createSigEventsOnboardingSkill } from './skills/sigevents_onboarding_skill';
 import { registerAgentBuilderSkills } from './skills/register_skills';
+import { registerAgentBuilderAttachments } from './attachments/register_attachments';
+import { registerAgentBuilderSmlTypes } from './sml/register_sml_types';
+import { registerSignificantEventsDiscoveryAgents } from './agents/discovery';
 
 type AgentDefinition = Parameters<AgentBuilderPluginSetup['agents']['register']>[0];
 
@@ -51,9 +55,7 @@ export const createMemoryToolsOptions = ({
   server: StreamsServer;
   logger: Logger;
 }): MemoryToolsOptions => {
-  const getMemoryService = (
-    esClient: import('@kbn/core-elasticsearch-server').ElasticsearchClient
-  ) =>
+  const getMemoryService = (esClient: ElasticsearchClient) =>
     new MemoryServiceImpl({
       logger: logger.get('memory'),
       esClient,
@@ -70,6 +72,7 @@ export const createMemoryToolsOptions = ({
 
 export const registerStreamsAgentBuilder = async ({
   agentBuilder,
+  agentContextLayer,
   getScopedClients,
   server,
   logger,
@@ -78,6 +81,7 @@ export const registerStreamsAgentBuilder = async ({
   streamsKIsOnboardingClient,
 }: {
   agentBuilder: AgentBuilderPluginSetup;
+  agentContextLayer?: AgentContextLayerPluginSetup;
   getScopedClients: GetScopedClients;
   server: StreamsServer;
   logger: Logger;
@@ -87,6 +91,8 @@ export const registerStreamsAgentBuilder = async ({
 }) => {
   const memoryToolsOptions = createMemoryToolsOptions({ getScopedClients, server, logger });
 
+  registerAgentBuilderAttachments({ agentBuilder, getScopedClients, logger });
+  registerAgentBuilderSmlTypes({ agentContextLayer, getScopedClients });
   await registerAgentBuilderTools({
     agentBuilder,
     getScopedClients,
@@ -100,6 +106,7 @@ export const registerStreamsAgentBuilder = async ({
     memoryToolsOptions,
     streamsKIsOnboardingClient,
   });
+  registerSignificantEventsDiscoveryAgents(agentBuilder);
 
   agentBuilder.agents.register(systemOnboardingAgent);
   agentBuilder.agents.register(gapDetectorAgent);
@@ -122,6 +129,8 @@ export const registerStreamsAgentBuilder = async ({
   if (await isMemoryEnabled()) {
     ensureMemorySkillRegistered();
   }
+
+  server.ensureMemorySkillRegistered = ensureMemorySkillRegistered;
 
   return {
     ensureMemorySkillRegistered,

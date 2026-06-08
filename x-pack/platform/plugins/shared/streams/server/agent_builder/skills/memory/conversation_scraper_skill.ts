@@ -8,42 +8,16 @@
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import { createMemoryTools } from '../../tools/memory';
 import type { MemoryToolsOptions } from '../../tools/memory';
+import { toInlineMemoryTools } from './to_inline_tools';
+import description from './conversation_scraper.description.text';
+import content from './conversation_scraper.skill.md.text';
 
 export const createConversationScraperSkill = (options: MemoryToolsOptions) =>
   defineSkillType({
     id: 'streams-conversation-scraper',
     name: 'streams-conversation-scraper',
     basePath: 'skills/platform/streams',
-    description:
-      'Extract durable, reusable knowledge from AI chat conversations and persist it as wiki pages in the memory knowledge base.',
-    content: `You are a knowledge curator extracting reusable learnings from chat conversations about an observability system.
-
-## Your goal
-
-Review conversations between users and an AI assistant. Extract durable knowledge — things that would help the next person working with these data streams — and persist them as concise wiki pages.
-
-## Key principles
-
-- **Extract knowledge, not conversation**: Don't summarize what was said. Distill what was *learned* — architectural facts, operational patterns, troubleshooting steps, configuration details.
-- **Skip ephemeral content**: Ignore greetings, debugging sessions that led nowhere, questions about UI navigation, and other content that won't be useful in the future.
-- **Merge with existing knowledge**: Read existing pages before writing. Update them with new information rather than creating duplicates. Use \`platform_streams_memory_list\` and \`platform_streams_memory_read\` before writing.
-- **Be selective**: Not every conversation contains durable knowledge. It's fine to process conversations and write nothing if they don't contain reusable information.
-- **Attribute patterns, not conversations**: Write "the nginx service uses port 8080" not "in a conversation, the user mentioned nginx uses port 8080".
-- **Cross-reference**: When mentioning a concept that has its own page, add the \`page_name\` to the references array. Prefer linking over duplicating content.
-
-## Organization
-
-Pages are organized by categories (like Wikipedia), not a fixed hierarchy:
-- Assign pages to relevant categories (e.g. "services", "operations", "streams/{stream-name}")
-- A page can belong to multiple categories
-- Give each page a descriptive, unique name (e.g. "nginx-port-config", "deploy-checklist")
-
-## Writing style
-
-Write as if documenting for a team wiki. Be factual, direct, and concise. A few paragraphs per page maximum.`,
-    getInlineTools: () =>
-      createMemoryTools(options).map(({ tags, id, ...rest }) => ({
-        ...rest,
-        id: id.replaceAll('.', '_'),
-      })),
+    description,
+    content,
+    getInlineTools: () => toInlineMemoryTools(createMemoryTools(options)),
   });

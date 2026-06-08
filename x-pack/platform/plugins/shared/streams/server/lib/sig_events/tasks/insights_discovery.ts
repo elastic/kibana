@@ -11,17 +11,14 @@ import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import { isInferenceProviderError } from '@kbn/inference-common';
 import { type Insight, getImpactLevel } from '@kbn/streams-schema';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { isSignificantEventsMemoryEnabled } from '../../memory/is_significant_events_memory_enabled';
 import type { TaskContext } from '../../tasks/task_definitions';
 import { cancellableTask } from '../../tasks/cancellable_task';
 import type { TaskParams } from '../../tasks/types';
 import { generateInsights } from '../insights/generate_insights';
-import { loadInsightsDiscoveryAgentContext } from '../insights/insights_discovery_agent_context';
 import { getErrorMessage, parseError } from '../../streams/errors/parse_error';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
 import { resolveConnectorForSignificantEventsDiscovery } from '../../../routes/utils/resolve_connector_for_feature';
-import { MemoryServiceImpl } from '../../memory';
 import { triggerMemorySynthesisWorkflow } from '../../memory/trigger_memory_synthesis_workflow';
 
 export interface InsightsDiscoveryTaskResult {
@@ -62,8 +59,6 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
                 inferenceClient,
                 getQueryClient,
                 insightClient,
-                uiSettingsClient,
-                soClient,
               } = await taskContext.getScopedClients({
                 request: runContext.fakeRequest,
               });
@@ -85,29 +80,6 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
               );
 
               try {
-                const memory = useMemory
-                  ? new MemoryServiceImpl({
-                      logger: taskLogger.get('memory'),
-                      esClient: scopedClusterClient.asCurrentUser,
-                    })
-                  : undefined;
-
-                const spaceId =
-                  taskContext.server.spaces?.spacesService.getSpaceId(fakeRequest) ??
-                  DEFAULT_SPACE_ID;
-
-                const discoveryContext = await loadInsightsDiscoveryAgentContext({
-                  memory,
-                  agentContextLayer: taskContext.server.agentContextLayer,
-                  actions: taskContext.server.actions,
-                  esClient: scopedClusterClient,
-                  request: fakeRequest,
-                  spaceId,
-                  savedObjectsClient: soClient,
-                  uiSettingsClient,
-                  logger: taskLogger,
-                });
-
                 const result = await generateInsights({
                   streamsClient,
                   queryClient,
@@ -116,7 +88,6 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
                   signal: runContext.abortController.signal,
                   logger: taskLogger,
                   streamNames,
-                  discoveryContext,
                 });
 
                 taskContext.telemetry.trackInsightsGenerated({
