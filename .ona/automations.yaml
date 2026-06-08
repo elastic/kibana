@@ -1,20 +1,39 @@
 tasks:
   install-deps:
     name: Bootstrap the project
+    # Run during prebuild (so the snapshot includes a bootstrapped tree) and on
+    # a cold devcontainer rebuild (when there is no snapshot to restore from).
     triggeredBy:
       - prebuild
+      - postDevcontainerStart
+    # Fail the prebuild if bootstrap doesn't succeed, so we never snapshot a
+    # broken tree that makes the first real start fail.
+    prebuildRequiresSuccess: true
     command: bash .ona/prebuild_warmup.sh
 services:
   elasticsearch:
     name: Elasticsearch
     commands:
-      start: yarn es snapshot
+      # Services can't declare `dependsOn`, so wait for bootstrap to link the
+      # @kbn/* workspaces before starting; otherwise `yarn es` fails with
+      # "Cannot find module '@kbn/setup-node-env'".
+      start: |
+        until node -e "require.resolve('@kbn/setup-node-env')" 2>/dev/null; do
+          echo "Waiting for bootstrap to finish before starting Elasticsearch..."
+          sleep 5
+        done
+        yarn es snapshot
     triggeredBy:
       - postDevcontainerStart
   kibana:
     name: Kibana
     commands:
-      start: yarn start --no-base-path --server.host=0.0.0.0
+      start: |
+        until node -e "require.resolve('@kbn/setup-node-env')" 2>/dev/null; do
+          echo "Waiting for bootstrap to finish before starting Kibana..."
+          sleep 5
+        done
+        yarn start --no-base-path --server.host=0.0.0.0
       ready: |
         until curl -sf -o /dev/null http://localhost:5601/api/status; do sleep 5; done
         curl -sf -o /dev/null http://localhost:5601/login
