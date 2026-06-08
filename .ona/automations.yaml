@@ -1,0 +1,32 @@
+tasks:
+  install-deps:
+    name: Bootstrap the project
+    triggeredBy:
+      - prebuild
+    command: bash .ona/prebuild_warmup.sh
+  add-fork-remote:
+    name: Add fork remote
+    command: |
+      GITHUB_USER=$(gh api user --jq '.login' 2>/dev/null)
+      if [ -n "$GITHUB_USER" ] && ! git remote get-url fork >/dev/null 2>&1; then
+        git remote add fork "https://github.com/${GITHUB_USER}/kibana.git"
+      fi
+    triggeredBy:
+      - postDevcontainerStart
+services:
+  elasticsearch:
+    name: Elasticsearch
+    commands:
+      start: yarn es snapshot
+    triggeredBy:
+      - postDevcontainerStart
+  kibana:
+    name: Kibana
+    commands:
+      start: yarn start --no-base-path --server.host=0.0.0.0
+      ready: |
+        until curl -sf -o /dev/null http://localhost:5601/api/status; do sleep 5; done
+        curl -sf -o /dev/null http://localhost:5601/login
+        ona environment port open 5601 --name Kibana --admission organization
+    triggeredBy:
+      - postDevcontainerStart

@@ -512,7 +512,7 @@ describe('PackagePolicyInputStreamConfig', () => {
       });
     });
 
-    it('calls updatePackagePolicyInputStream with undefined when field is cleared', async () => {
+    it('calls updatePackagePolicyInputStream with null when field is cleared', async () => {
       renderCondition({ condition: "${host.os.type} == 'linux'" });
       fireEvent.click(renderResult.getByText('Advanced options'));
       await waitFor(() => {
@@ -521,7 +521,7 @@ describe('PackagePolicyInputStreamConfig', () => {
       fireEvent.change(renderResult.getByTestId('packagePolicyStreamConditionInput'), {
         target: { value: '' },
       });
-      expect(mockUpdatePackagePolicyInputStream).toHaveBeenCalledWith({ condition: undefined });
+      expect(mockUpdatePackagePolicyInputStream).toHaveBeenCalledWith({ condition: null });
     });
   });
 
