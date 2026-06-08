@@ -1,5 +1,4 @@
 {
-  "apiKeyHelper": "ona idp token --audience elastic-access-broker",
   "hooks": {
     "PreToolUse": [
       {

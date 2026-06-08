@@ -4,19 +4,6 @@ tasks:
     triggeredBy:
       - prebuild
     command: bash .ona/prebuild_warmup.sh
-  add-fork-remote:
-    name: Add fork remote
-    command: |
-      if git remote get-url fork >/dev/null 2>&1; then exit 0; fi
-      CRED=$(printf 'host=github.com\nprotocol=https\n' | git credential fill 2>/dev/null) || exit 0
-      TOKEN=$(echo "$CRED" | awk -F= '/^password=/{print $2}')
-      if [ -z "$TOKEN" ]; then exit 0; fi
-      # Pass token via stdin to avoid exposing it in the process list
-      GITHUB_USER=$(printf 'header = "Authorization: token %s"' "$TOKEN" | curl -sf --config - https://api.github.com/user | awk -F'"' '/"login"/{print $4}') || exit 0
-      if [ -z "$GITHUB_USER" ]; then exit 0; fi
-      git remote add fork "https://github.com/${GITHUB_USER}/kibana.git"
-    triggeredBy:
-      - postDevcontainerStart
 services:
   elasticsearch:
     name: Elasticsearch

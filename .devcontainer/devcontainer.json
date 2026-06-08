@@ -29,7 +29,7 @@
     9231,
     9001
   ],
-  "postStartCommand": "${containerWorkspaceFolder}/.devcontainer/scripts/post_start.sh",
+  "postStartCommand": "${containerWorkspaceFolder}/.ona/post_start.sh",
   "mounts": [
     "source=kibana-node-modules,target=${containerWorkspaceFolder}/node_modules,type=volume",
     "source=kibana-es-data,target=${containerWorkspaceFolder}/.es,type=volume",
