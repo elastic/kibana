@@ -125,6 +125,25 @@ spaceTest.describe(
     );
 
     spaceTest(
+      'should update data grid when a pinned filter is modified',
+      async ({ pageObjects }) => {
+        await addPinnedFilter(pageObjects);
+        await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
+
+        expect(
+          await everyFieldMatches(pageObjects, (row) => row[2] === TEST_ANCHOR_FILTER_VALUE)
+        ).toBe(true);
+
+        await pageObjects.filterBar.toggleFilterNegated(TEST_ANCHOR_FILTER_FIELD);
+        await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
+
+        expect(
+          await everyFieldMatches(pageObjects, (row) => row[2] === TEST_ANCHOR_FILTER_VALUE)
+        ).toBe(false);
+      }
+    );
+
+    spaceTest(
       'should preserve filters when the page is refreshed',
       async ({ page, pageObjects }) => {
         await addPinnedFilter(pageObjects);

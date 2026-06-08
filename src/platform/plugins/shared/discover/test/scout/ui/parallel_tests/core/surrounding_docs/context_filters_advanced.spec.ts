@@ -8,16 +8,8 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import {
-  spaceTest,
-  testData,
-  addPinnedFilter,
-  everyFieldMatches,
-  resolveDataViewId,
-} from '../../../fixtures/surrounding_docs';
+import { spaceTest, testData, resolveDataViewId } from '../../../fixtures/surrounding_docs';
 
-const TEST_ANCHOR_FILTER_FIELD = testData.FILTER_FIELD_GEO_SRC;
-const TEST_ANCHOR_FILTER_VALUE = testData.FILTER_VALUE_GEO_SRC_IN;
 const TEST_COLUMN_NAMES = testData.FILTER_COLUMNS;
 
 spaceTest.describe(
@@ -44,25 +36,6 @@ spaceTest.describe(
       await scoutSpace.uiSettings.unset('defaultIndex', 'discover:rowHeightOption');
       await scoutSpace.savedObjects.cleanStandardList();
     });
-
-    spaceTest(
-      'should update data grid when a pinned filter is modified',
-      async ({ pageObjects }) => {
-        await addPinnedFilter(pageObjects);
-        await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
-
-        expect(
-          await everyFieldMatches(pageObjects, (row) => row[2] === TEST_ANCHOR_FILTER_VALUE)
-        ).toBe(true);
-
-        await pageObjects.filterBar.toggleFilterNegated(TEST_ANCHOR_FILTER_FIELD);
-        await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
-
-        expect(
-          await everyFieldMatches(pageObjects, (row) => row[2] === TEST_ANCHOR_FILTER_VALUE)
-        ).toBe(false);
-      }
-    );
 
     spaceTest('should add OR filter', async ({ pageObjects }) => {
       await pageObjects.filterBar.openFilterBuilder();
@@ -150,6 +123,27 @@ spaceTest.describe(
       });
     });
 
+    spaceTest('should add comma delimiter values for is one of', async ({ pageObjects }) => {
+      await pageObjects.filterBar.openFilterBuilder();
+      await pageObjects.filterBar.fillFilterForm('0', {
+        field: 'extension',
+        operator: 'is one of',
+        value: 'png, jpeg',
+      });
+      await pageObjects.filterBar.saveAndCloseFilterBuilder();
+      await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
+
+      expect(await pageObjects.filterBar.getFilterCount()).toBe(1);
+      expect(await pageObjects.filterBar.hasFilterWithId('0')).toBe(true);
+
+      await spaceTest.step('verify filter preview text', async () => {
+        await pageObjects.filterBar.clickEditFilterById('0');
+        expect(await pageObjects.filterBar.getFilterEditorPreview()).toBe(
+          'extension: is one of png, jpeg'
+        );
+      });
+    });
+
     spaceTest('should display negated values correctly', async ({ pageObjects }) => {
       await pageObjects.filterBar.addFilter({
         field: 'extension',
@@ -175,27 +169,6 @@ spaceTest.describe(
 
       const updatedLabels = await pageObjects.filterBar.getFiltersLabel();
       expect(updatedLabels[0]).toBe('NOT extension: png AND extension: jpeg');
-    });
-
-    spaceTest('should add comma delimiter values for is one of', async ({ pageObjects }) => {
-      await pageObjects.filterBar.openFilterBuilder();
-      await pageObjects.filterBar.fillFilterForm('0', {
-        field: 'extension',
-        operator: 'is one of',
-        value: 'png, jpeg',
-      });
-      await pageObjects.filterBar.saveAndCloseFilterBuilder();
-      await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
-
-      expect(await pageObjects.filterBar.getFilterCount()).toBe(1);
-      expect(await pageObjects.filterBar.hasFilterWithId('0')).toBe(true);
-
-      await spaceTest.step('verify filter preview text', async () => {
-        await pageObjects.filterBar.clickEditFilterById('0');
-        expect(await pageObjects.filterBar.getFilterEditorPreview()).toBe(
-          'extension: is one of png, jpeg'
-        );
-      });
     });
   }
 );
