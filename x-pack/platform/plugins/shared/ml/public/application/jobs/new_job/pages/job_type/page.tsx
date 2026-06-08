@@ -22,7 +22,11 @@ import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { ML_APP_LOCATOR } from '@kbn/ml-common-types/locator_app_locator';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { PageTitle } from '../../../../components/page_title';
-import { useMlKibana, useMlManagementLocator } from '../../../../contexts/kibana';
+import {
+  useMlKibana,
+  useMlManagementLocator,
+  useNavigateToPath,
+} from '../../../../contexts/kibana';
 
 import { useDataSource } from '../../../../contexts/ml';
 import { DataRecognizer } from '../../../../components/data_recognizer';
@@ -51,6 +55,7 @@ export const Page: FC = () => {
 
   const isTimeBasedIndex: boolean = selectedDataView.isTimeBased();
 
+  const navigateToPath = useNavigateToPath();
   const mlManagementLocator = useMlManagementLocator();
 
   const navigateToManagementPath = async (path: string) => {
@@ -156,7 +161,7 @@ export const Page: FC = () => {
       dataVisualizerLink,
       recentlyAccessed
     );
-    navigateToManagementPath(`/jobs/new_job/datavisualizer${getUrlParams()}`);
+    navigateToPath(`/${ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER}${getUrlParams()}`);
   };
 
   const jobTypes = [

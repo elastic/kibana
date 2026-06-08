@@ -77,15 +77,33 @@ export const DataSourceContextProvider: FC<PropsWithChildren<unknown>> = ({ chil
       );
     }
 
-    let dataViewAndSavedSearch: DataViewAndSavedSearch = {
-      savedSearch: null,
-      dataView: null,
-    };
+    let dataViewAndSavedSearch: DataViewAndSavedSearch = { savedSearch: null, dataView: null };
 
-    if (savedSearchId !== undefined) {
+    const hasSavedSearchId = savedSearchId !== undefined;
+    const hasDataViewId = dataViewId !== undefined;
+    const shouldUseDefaultDataView = !hasSavedSearchId && !hasDataViewId;
+
+    if (hasSavedSearchId) {
       dataViewAndSavedSearch = await getDataViewAndSavedSearchCb(savedSearchId);
-    } else if (dataViewId !== undefined) {
+    }
+
+    if (!hasSavedSearchId && hasDataViewId) {
       dataViewAndSavedSearch.dataView = await dataViews.get(dataViewId);
+    }
+
+    if (shouldUseDefaultDataView) {
+      const defaultId = await dataViews.getDefaultId().catch(() => null);
+      if (defaultId) {
+        dataViewAndSavedSearch.dataView = await dataViews.get(defaultId).catch(() => null);
+      }
+    }
+
+    if (shouldUseDefaultDataView && !dataViewAndSavedSearch.dataView) {
+      const patterns = await dataViews.getIdsWithTitle();
+      const fallbackId = patterns[0]?.id;
+      if (fallbackId) {
+        dataViewAndSavedSearch.dataView = await dataViews.get(fallbackId).catch(() => null);
+      }
     }
 
     const { savedSearch, dataView } = dataViewAndSavedSearch;
