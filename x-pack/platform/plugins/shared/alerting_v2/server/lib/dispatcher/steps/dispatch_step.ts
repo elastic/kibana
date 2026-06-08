@@ -124,7 +124,6 @@ export class DispatchStep implements DispatcherStep {
 
     const fakeRawRequest: FakeRawRequest = {
       headers: requestHeaders,
-      path: '/',
     };
 
     return kibanaRequestFactory(fakeRawRequest);

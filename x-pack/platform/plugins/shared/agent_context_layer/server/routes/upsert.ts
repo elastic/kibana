@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import type { CoreSetup, IRouter, Logger } from '@kbn/core/server';
 import type { SmlUpsertHttpResponse } from '../../common/http_api/sml';
 import { smlByIdPath } from '../../common/constants';
-import type { SmlService } from '../services/sml/types';
+import type { SmlDocumentInput, SmlService } from '../services/sml/types';
 import type { AgentContextLayerStartDependencies, AgentContextLayerPluginStart } from '../types';
 import { WRITE_SECURITY, toSmlHttpItem, withSmlFeatureFlag } from './common';
 
@@ -39,7 +39,24 @@ export const registerUpsertRoute = ({
           origin_id: schema.string({ minLength: 1 }),
           content: schema.string(),
           permissions: schema.maybe(
-            schema.arrayOf(schema.string({ minLength: 1 }), { maxSize: 100 })
+            schema.object({
+              kibana: schema.maybe(
+                schema.object({
+                  privileges: schema.arrayOf(
+                    schema.object({ name: schema.string({ minLength: 1, maxLength: 255 }) }),
+                    { maxSize: 100 }
+                  ),
+                })
+              ),
+              elasticsearch: schema.maybe(
+                schema.object({
+                  indices: schema.arrayOf(
+                    schema.object({ name: schema.string({ minLength: 1, maxLength: 255 }) }),
+                    { maxSize: 100 }
+                  ),
+                })
+              ),
+            })
           ),
         }),
       },
@@ -59,13 +76,7 @@ export const registerUpsertRoute = ({
         const result = await sml.upsertDocument({
           id,
           spaceId,
-          document: request.body as {
-            type: string;
-            title: string;
-            origin_id: string;
-            content: string;
-            permissions?: string[];
-          },
+          document: request.body as SmlDocumentInput,
           esClient,
         });
         if (!result) {

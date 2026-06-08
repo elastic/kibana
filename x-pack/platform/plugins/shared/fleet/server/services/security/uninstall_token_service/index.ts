@@ -29,7 +29,7 @@ import type {
   AggregationsTermsExclude,
 } from '@elastic/elasticsearch/lib/api/types';
 import { isResponseError } from '@kbn/es-errors';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 
 import type { Logger } from '@kbn/logging';
