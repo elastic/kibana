@@ -24,10 +24,12 @@ import { useAttackWorkflowStatusContextMenuItems } from '../../../hooks/attacks/
 import type { AttackWithWorkflowStatus } from '../../../hooks/attacks/bulk_actions/types';
 import { useAttackTagsContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_tags_context_menu_items';
 import { useAttackInvestigateInTimelineContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_investigate_in_timeline_context_menu_items';
+import { useAttackExploreInAttacksContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_explore_in_attacks_context_menu_items';
 import { useAttackCaseContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_case_context_menu_items';
 import { useAttackViewInAiAssistantContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_view_in_ai_assistant_context_menu_items';
 import type { AttacksActionTelemetrySource } from '../../../../common/lib/telemetry/events/attacks/types';
 import { useAttackRunWorkflowContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_run_workflow_context_menu_items';
+import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
 
 interface AttacksGroupTakeActionItemsProps {
   attack: AttackDiscoveryAlert;
@@ -134,6 +136,14 @@ export function AttacksGroupTakeActionItems({
     telemetrySource,
   });
 
+  const { items: exploreInAttacksItems } = useAttackExploreInAttacksContextMenuItems({
+    attack,
+    closePopover,
+  });
+
+  const isInSecurityApp = useIsInSecurityApp();
+  const navigationItems = isInSecurityApp ? investigateInTimelineItems : exploreInAttacksItems;
+
   const attacksWithCase = useMemo(
     () => [
       {
@@ -207,7 +217,7 @@ export function AttacksGroupTakeActionItems({
     () => ({
       id: 0,
       items: isRemoteDocument
-        ? [...investigateInTimelineItems]
+        ? [...navigationItems]
         : [
             ...casesItems,
             ...workflowItems,
@@ -216,7 +226,7 @@ export function AttacksGroupTakeActionItems({
             ...runWorkflowItems,
             ...(showAiAssistantAction ? viewInAiAssistantItems : []),
             ...datasetItems,
-            ...investigateInTimelineItems,
+            ...navigationItems,
           ],
     }),
     [
@@ -225,7 +235,7 @@ export function AttacksGroupTakeActionItems({
       workflowItems,
       assignItems,
       tagsItems,
-      investigateInTimelineItems,
+      navigationItems,
       casesItems,
       showAiAssistantAction,
       viewInAiAssistantItems,
