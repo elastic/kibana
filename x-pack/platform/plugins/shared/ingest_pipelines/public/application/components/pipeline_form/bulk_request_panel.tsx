@@ -7,8 +7,17 @@
 
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import type { EuiSwitchEvent } from '@elastic/eui';
-import { EuiSpacer, EuiPanel, EuiCodeBlock, EuiText, EuiSwitch } from '@elastic/eui';
+import {
+  EuiSpacer,
+  EuiPanel,
+  EuiCodeBlock,
+  EuiText,
+  EuiSwitch,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 
 const bulkRequestExample = `PUT books/_bulk?pipeline=my-pipeline
 { "create":{ } }
@@ -29,28 +38,33 @@ export const BulkRequestPanel = () => {
 
   return (
     <EuiPanel hasShadow={false} hasBorder grow={false}>
-      <EuiText size="s">
-        <strong>
-          <FormattedMessage
-            id="xpack.ingestPipelines.form.bulkCardTitle"
-            defaultMessage="How to use this pipeline during data ingestion"
+      <EuiFlexGroup
+        alignItems="center"
+        justifyContent="spaceBetween"
+        gutterSize="m"
+        responsive={false}
+      >
+        <EuiFlexItem>
+          <EuiText size="s">
+            <strong>
+              <FormattedMessage
+                id="xpack.ingestPipelines.form.bulkCardTitle"
+                defaultMessage="Bulk request this pipeline during data ingestion"
+              />
+            </strong>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiSwitch
+            showLabel={false}
+            label={i18n.translate('xpack.ingestPipelines.form.bulkRequestToggle', {
+              defaultMessage: 'Bulk request this pipeline during data ingestion',
+            })}
+            checked={showBulkToggle}
+            onChange={(e: EuiSwitchEvent) => setShowBulkToggle(e.target.checked)}
           />
-        </strong>
-      </EuiText>
-
-      <EuiSpacer size="m" />
-
-      <EuiSwitch
-        compressed
-        label={
-          <FormattedMessage
-            id="xpack.ingestPipelines.form.bulkRequestToggle"
-            defaultMessage="Bulk request"
-          />
-        }
-        checked={showBulkToggle}
-        onChange={(e: EuiSwitchEvent) => setShowBulkToggle(e.target.checked)}
-      />
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
       <EuiSpacer size="m" />
 

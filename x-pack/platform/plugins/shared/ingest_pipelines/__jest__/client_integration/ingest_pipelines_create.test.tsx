@@ -80,6 +80,45 @@ describe.skip('<PipelinesCreate />', () => {
     expect(await screen.findByTestId('metaEditor')).toBeInTheDocument();
   });
 
+  test('should toggle the field access pattern', async () => {
+    await renderPipelinesCreate(httpSetup);
+
+    expect(screen.getByTestId('fieldAccessPatternToggle')).toHaveAttribute('aria-checked', 'false');
+    fireEvent.click(screen.getByTestId('fieldAccessPatternToggle'));
+    expect(screen.getByTestId('fieldAccessPatternToggle')).toHaveAttribute('aria-checked', 'true');
+  });
+
+  test('should send the flexible field access pattern when enabled', async () => {
+    const user = userEvent.setup();
+    await renderPipelinesCreate(httpSetup);
+
+    await user.type(getInput('nameField'), 'my_pipeline');
+
+    fireEvent.click(screen.getByTestId('fieldAccessPatternToggle'));
+
+    const postCallsBefore = httpSetup.post.mock.calls.length;
+    fireEvent.click(screen.getByTestId('submitButton'));
+
+    await waitFor(() => expect(httpSetup.post.mock.calls.length).toBeGreaterThan(postCallsBefore));
+    const createRequest = httpSetup.post.mock.results[postCallsBefore]?.value as
+      | Promise<unknown>
+      | undefined;
+    await waitFor(async () => {
+      await createRequest;
+    });
+
+    expect(httpSetup.post).toHaveBeenLastCalledWith(
+      API_BASE_PATH,
+      expect.objectContaining({
+        body: JSON.stringify({
+          name: 'my_pipeline',
+          field_access_pattern: 'flexible',
+          processors: [],
+        }),
+      })
+    );
+  });
+
   test('should show the request flyout', async () => {
     await renderPipelinesCreate(httpSetup);
 
@@ -140,6 +179,7 @@ describe.skip('<PipelinesCreate />', () => {
         body: JSON.stringify({
           name: 'my_pipeline',
           description: 'pipeline description',
+          field_access_pattern: 'classic',
           _meta: metaData,
           processors: [],
         }),

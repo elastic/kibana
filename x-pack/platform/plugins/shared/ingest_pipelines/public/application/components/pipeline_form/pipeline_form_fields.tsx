@@ -12,6 +12,7 @@ import {
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPanel,
   EuiText,
   useIsWithinBreakpoints,
 } from '@elastic/eui';
@@ -22,7 +23,13 @@ import type { CollapsiblePanelRenderProps } from './collapsible_panel';
 import { CollapsiblePanel } from './collapsible_panel';
 import type { Processor } from '../../../../common/types';
 
-import { getFormRow, getUseField, Field, JsonEditorField } from '../../../shared_imports';
+import {
+  getFormRow,
+  getUseField,
+  Field,
+  JsonEditorField,
+  ToggleField,
+} from '../../../shared_imports';
 
 import type { OnUpdateHandler, OnDoneLoadJsonHandler } from '../pipeline_editor';
 import { ProcessorsEditorContextProvider, PipelineEditor } from '../pipeline_editor';
@@ -224,6 +231,49 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
               </>
             )}
           </CollapsiblePanel>
+
+          <EuiSpacer size="l" />
+
+          <EuiPanel hasShadow={false} hasBorder grow={false}>
+            <EuiFlexGroup
+              alignItems="center"
+              justifyContent="spaceBetween"
+              gutterSize="m"
+              responsive={false}
+            >
+              <EuiFlexItem>
+                <EuiText size="s">
+                  <strong>
+                    <FormattedMessage
+                      id="xpack.ingestPipelines.form.fieldAccessPatternCardTitle"
+                      defaultMessage="Use the flexible field access pattern"
+                    />
+                  </strong>
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <UseField
+                  path="field_access_pattern"
+                  component={ToggleField}
+                  componentProps={{
+                    euiFieldProps: {
+                      'data-test-subj': 'fieldAccessPatternToggle',
+                      showLabel: false,
+                    },
+                  }}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+
+            <EuiSpacer size="m" />
+
+            <EuiText size="s" color="subdued">
+              <FormattedMessage
+                id="xpack.ingestPipelines.form.fieldAccessPatternDescription"
+                defaultMessage="Determines how all processors in this pipeline read and write ingest document fields. When disabled, the classic field access pattern is used."
+              />
+            </EuiText>
+          </EuiPanel>
 
           <EuiSpacer size="l" />
 
