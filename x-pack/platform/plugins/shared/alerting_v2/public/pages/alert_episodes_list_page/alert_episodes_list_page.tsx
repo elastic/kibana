@@ -156,19 +156,22 @@ export const AlertEpisodesListPage = () => {
     [sortState.sortField, sortState.sortDirection]
   );
 
-  const onSort = useCallback((nextSort: string[][]) => {
-    if (!nextSort.length) {
-      setSortState(DEFAULT_SORT);
-      return;
-    }
-    const [field, dir] = nextSort[nextSort.length - 1];
-    if (field != null && dir != null) {
-      setSortState({
-        sortField: String(field),
-        sortDirection: dir === 'asc' ? 'asc' : 'desc',
-      });
-    }
-  }, []);
+  const onSort = useCallback(
+    (nextSort: string[][]) => {
+      if (!nextSort.length) {
+        setSortState(DEFAULT_SORT);
+        return;
+      }
+      const [field, dir] = nextSort[nextSort.length - 1];
+      if (field != null && dir != null) {
+        setSortState({
+          sortField: String(field),
+          sortDirection: dir === 'asc' ? 'asc' : 'desc',
+        });
+      }
+    },
+    [setSortState]
+  );
 
   const ruleIds = useMemo(
     () => [...new Set(episodesData?.map((row) => row['rule.id']) ?? [])],
