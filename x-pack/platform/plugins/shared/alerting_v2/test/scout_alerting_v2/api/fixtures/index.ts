@@ -92,6 +92,8 @@ export {
   ALERTING_V2_ACTION_POLICIES_ALL_ROLE,
   ALERTING_V2_ACTION_POLICIES_READ_ROLE,
   ALERTING_V2_ACTION_POLICIES_ALL_AND_RULES_READ_ROLE,
+  ALERTING_V2_EXECUTION_HISTORY_ALL_ROLE,
+  ALERTING_V2_EXECUTION_HISTORY_READ_ROLE,
 } from '../../common/roles';
 export {
   buildAlertEvent,
@@ -118,6 +120,8 @@ export {
   getSnoozeActionPolicyUrl,
   getUnsnoozeActionPolicyUrl,
   getUpdateActionPolicyApiKeyUrl,
+  getListExecutionHistoryUrl,
+  getCountNewExecutionHistoryEventsUrl,
 } from '../../common/urls';
 export { expectNoBulkTruncationMetadata } from '../../common/assertions';
 export {
