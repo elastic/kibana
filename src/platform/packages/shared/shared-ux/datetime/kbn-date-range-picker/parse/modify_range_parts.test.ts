@@ -30,6 +30,20 @@ const modify = (
   return applyPartModification(text, part, action, parts);
 };
 
+const modifyOnSide = (
+  text: string,
+  rangeIndex: 0 | 1,
+  kind: PartKind,
+  action: 'increase' | 'decrease'
+) => {
+  const parts = parseInputParts(text);
+  const part = parts.find(
+    (candidate) => candidate.rangeIndex === rangeIndex && candidate.kind === kind
+  );
+  if (!part) throw new Error(`Part not found on side ${rangeIndex}: ${kind}`);
+  return applyPartModification(text, part, action, parts);
+};
+
 const absolutePart = (
   text: string,
   start: number,
@@ -189,6 +203,28 @@ describe('applyPartModification', () => {
       };
 
       expect(applyPartModification('May 5, 2026, 00:00', part, 'increase', [part])).toBeUndefined();
+    });
+  });
+
+  describe('two-sided ranges', () => {
+    it('modifies each relative side independently', () => {
+      const text = 'last 5 minutes to last 3 hours';
+      expect(modifyOnSide(text, 1, 'relative-value', 'increase')).toBe(
+        'last 5 minutes to last 4 hours'
+      );
+      expect(modifyOnSide(text, 0, 'relative-value', 'decrease')).toBe(
+        'last 4 minutes to last 3 hours'
+      );
+    });
+
+    it('modifies each absolute side independently', () => {
+      const text = 'May 5, 2026, 00:00 to May 6, 2026, 23:59';
+      expect(modifyOnSide(text, 1, 'day', 'increase')).toBe(
+        'May 5, 2026, 00:00 to May 7, 2026, 23:59'
+      );
+      expect(modifyOnSide(text, 0, 'day', 'increase')).toBe(
+        'May 6, 2026, 00:00 to May 6, 2026, 23:59'
+      );
     });
   });
 
