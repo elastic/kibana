@@ -14,7 +14,8 @@
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "common/**/*.json",
     "public/**/*.json",
-    "server/**/*.json"
+    "server/**/*.json",
+    "test/scout/**/*"
   ],
   "exclude": ["target/**/*"],
   "kbn_references": [
@@ -117,6 +118,7 @@
     "@kbn/std",
     "@kbn/task-manager-plugin",
     "@kbn/test-jest-helpers",
+    "@kbn/scout",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/ui-actions-plugin",
     "@kbn/unified-field-list",
