@@ -10,7 +10,8 @@
 import { useEffect, useRef, type RefObject } from 'react';
 import { keys } from '@elastic/eui';
 
-import type { DateType } from '../types';
+import { MODIFICATION_INCREASE, MODIFICATION_DECREASE } from '../constants';
+import type { DateType, ModificationAction } from '../types';
 import { parseInputParts, type RangePart } from '../parse/parse_range_parts';
 import { getInputScrollLeftToCenter } from '../utils';
 
@@ -37,7 +38,7 @@ interface UseSelectTextPartsOptions {
     text: string;
     part: RangePart;
     parts: RangePart[];
-    action: 'increase' | 'decrease';
+    action: ModificationAction;
   }) => string | undefined;
 }
 
@@ -105,7 +106,7 @@ export function useSelectTextPartsWithArrowKeys({
       inputEl.scrollLeft = getInputScrollLeftToCenter(inputEl, part.start);
     };
 
-    const modifyPart = (action: 'increase' | 'decrease') => {
+    const modifyPart = (action: ModificationAction) => {
       if (!onModifyPartRef.current) return;
 
       const inputEl = inputRef.current;
@@ -167,14 +168,14 @@ export function useSelectTextPartsWithArrowKeys({
           case keys.ARROW_UP: {
             if (currentIndex < 0) return;
             event.preventDefault();
-            modifyPart('increase');
+            modifyPart(MODIFICATION_INCREASE);
             event.stopImmediatePropagation();
             return;
           }
           case keys.ARROW_DOWN: {
             if (currentIndex < 0) return;
             event.preventDefault();
-            modifyPart('decrease');
+            modifyPart(MODIFICATION_DECREASE);
             event.stopImmediatePropagation();
             return;
           }

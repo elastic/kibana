@@ -9,9 +9,10 @@
 
 import moment from 'moment';
 
+import { MODIFICATION_INCREASE, MODIFICATION_DECREASE } from '../constants';
+import type { ModificationAction } from '../types';
 import type { PartKind, RangePart } from './parse_range_parts';
 
-type ModificationAction = 'increase' | 'decrease';
 type RelativeUnit = (typeof RELATIVE_UNIT_CYCLE)[number];
 
 const RELATIVE_UNIT_CYCLE = ['ms', 's', 'm', 'h', 'd', 'w', 'M', 'y'] as const;
@@ -101,7 +102,7 @@ const getNextCycleValue = <T extends string>(
 ): T | undefined => {
   const currentIndex = cycle.indexOf(current);
   if (currentIndex === -1) return undefined;
-  const nextIndex = action === 'increase' ? currentIndex + 1 : currentIndex - 1;
+  const nextIndex = action === MODIFICATION_INCREASE ? currentIndex + 1 : currentIndex - 1;
   return cycle[nextIndex];
 };
 
@@ -135,7 +136,7 @@ const modifyRelativeValue = (
 ): string | undefined => {
   if (!/^\d+$/.test(part.text)) return undefined;
   const currentValue = parseInt(part.text, 10);
-  const nextValue = action === 'increase' ? currentValue + 1 : currentValue - 1;
+  const nextValue = action === MODIFICATION_INCREASE ? currentValue + 1 : currentValue - 1;
   if (nextValue < 1) return undefined;
   return splicePart(text, part, String(nextValue));
 };
@@ -145,14 +146,16 @@ const modifyRelativeDirection = (
   part: RangePart,
   action: ModificationAction
 ): string | undefined => {
-  if (part.text === '-') return action === 'increase' ? splicePart(text, part, '+') : undefined;
-  if (part.text === '+') return action === 'decrease' ? splicePart(text, part, '-') : undefined;
+  if (part.text === '-')
+    return action === MODIFICATION_INCREASE ? splicePart(text, part, '+') : undefined;
+  if (part.text === '+')
+    return action === MODIFICATION_DECREASE ? splicePart(text, part, '-') : undefined;
 
   const direction = part.text.toLowerCase();
-  if ((direction === 'last' || direction === 'past') && action === 'increase') {
+  if ((direction === 'last' || direction === 'past') && action === MODIFICATION_INCREASE) {
     return splicePart(text, part, matchCasing(part.text, 'next'));
   }
-  if (direction === 'next' && action === 'decrease') {
+  if (direction === 'next' && action === MODIFICATION_DECREASE) {
     return splicePart(text, part, matchCasing(part.text, 'last'));
   }
 
@@ -250,7 +253,7 @@ const modifyAbsoluteDate = (
   const side = getAbsoluteSide(text, part, parts);
   if (!side) return undefined;
 
-  const amount = action === 'increase' ? 1 : -1;
+  const amount = action === MODIFICATION_INCREASE ? 1 : -1;
   const nextSideText = side.parsed.add(amount, unit).format(side.format);
   return spliceSide(text, side, nextSideText);
 };
@@ -264,7 +267,7 @@ const modifyAbsoluteTimezone = (
   const side = getAbsoluteSide(text, part, parts);
   if (!side) return undefined;
 
-  const amount = action === 'increase' ? TIMEZONE_STEP_MINUTES : -TIMEZONE_STEP_MINUTES;
+  const amount = action === MODIFICATION_INCREASE ? TIMEZONE_STEP_MINUTES : -TIMEZONE_STEP_MINUTES;
   const nextOffset = side.parsed.utcOffset() + amount;
   if (nextOffset < MIN_UTC_OFFSET_MINUTES || nextOffset > MAX_UTC_OFFSET_MINUTES) return undefined;
 
