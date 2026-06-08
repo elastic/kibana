@@ -9,187 +9,71 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { Status } from './status';
 import { TestProviders } from '../../../common/mock';
-import { HEADER_STATUS_BLOCK_TEST_ID } from '../constants/test_ids';
 import { useAttackDetailsContext } from '../context';
-import { getEnrichedFieldInfo } from '../../document_details/right/utils/enriched_field_info';
 
 jest.mock('../context');
 
-jest.mock('../../../common/hooks/use_space_id', () => ({
-  useSpaceId: () => 'default',
-}));
-
-jest.mock('./status_popover_button', () => ({
-  StatusPopoverButton: ({
-    enrichedFieldInfo,
-    disabled,
+jest.mock('../../../flyout_v2/attack/main/components/status', () => ({
+  Status: ({
+    hit,
+    onAttackUpdated,
   }: {
-    enrichedFieldInfo: unknown;
-    disabled?: boolean;
+    hit: { id: string; raw: { _id?: string } };
+    onAttackUpdated: () => void;
   }) => (
-    <div data-test-subj="status-popover" data-disabled={String(disabled ?? false)}>
-      {JSON.stringify(enrichedFieldInfo)}
+    <div data-test-subj="v2-status">
+      <span data-test-subj="v2-status-hit-id">{String(hit.id)}</span>
+      <button type="button" data-test-subj="v2-status-update-btn" onClick={onAttackUpdated}>
+        {'update'}
+      </button>
     </div>
   ),
 }));
 
-jest.mock('../../../common/components/empty_value', () => ({
-  getEmptyTagValue: jest.fn(() => <div data-test-subj="empty-tag">{'-'}</div>),
-}));
+const mockSearchHit = {
+  _id: 'attack-id',
+  _index: '.alerts-security.alerts-default',
+  fields: {
+    'kibana.alert.workflow_status': ['open'],
+  },
+};
 
-jest.mock('../../document_details/right/utils/enriched_field_info', () => ({
-  getEnrichedFieldInfo: jest.fn(),
-}));
+const mockRefetch = jest.fn();
 
-describe('<Status />', () => {
+describe('<Status /> (legacy context bridge)', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (useAttackDetailsContext as jest.Mock).mockReturnValue({
+      searchHit: mockSearchHit,
+      refetch: mockRefetch,
+    });
   });
 
-  test('renders empty tag when status data is not available', () => {
-    (useAttackDetailsContext as jest.Mock).mockReturnValue({
-      attackId: 'attack-id',
-      indexName: '.alerts-security.alerts-default',
-      browserFields: {},
-      dataFormattedForFieldBrowser: [],
-    });
-
+  test('renders the v2 Status component', () => {
     render(
       <TestProviders>
         <Status />
       </TestProviders>
     );
-
-    expect(screen.getByTestId(HEADER_STATUS_BLOCK_TEST_ID)).toBeInTheDocument();
-    expect(screen.getByTestId('empty-tag')).toBeInTheDocument();
+    expect(screen.getByTestId('v2-status')).toBeInTheDocument();
   });
 
-  test('renders empty tag in preview mode', () => {
-    (useAttackDetailsContext as jest.Mock).mockReturnValue({
-      attackId: 'attack-id',
-      indexName: '.alerts-security.alerts-default',
-      browserFields: {},
-      dataFormattedForFieldBrowser: [{}],
-      isPreview: true,
-    });
-
+  test('passes attackId from searchHit to v2 Status via hit', () => {
     render(
       <TestProviders>
         <Status />
       </TestProviders>
     );
-
-    expect(screen.getByTestId('empty-tag')).toBeInTheDocument();
+    expect(screen.getByTestId('v2-status-hit-id')).toHaveTextContent('attack-id');
   });
 
-  test('renders StatusPopoverButton when status data is available with values', () => {
-    // Ensure the memo finds the correct item (field + category).
-    (useAttackDetailsContext as jest.Mock).mockReturnValue({
-      attackId: 'attack-id',
-      indexName: '.alerts-security.alerts-default',
-      browserFields: {},
-      dataFormattedForFieldBrowser: [{ field: 'kibana.alert.workflow_status', category: 'kibana' }],
-    });
-
-    (getEnrichedFieldInfo as jest.Mock).mockReturnValue({
-      data: {
-        field: 'kibana.alert.workflow_status',
-        format: 'string',
-        type: 'string',
-        isObjectArray: false,
-      },
-      eventId: 'attack-id',
-      values: ['open'], // <-- required by hasData()
-    });
-
+  test('passes refetch as onAttackUpdated to v2 Status', async () => {
     render(
       <TestProviders>
         <Status />
       </TestProviders>
     );
-
-    expect(screen.getByTestId(HEADER_STATUS_BLOCK_TEST_ID)).toBeInTheDocument();
-
-    // Should show popover instead of empty tag
-    expect(screen.getByTestId('status-popover')).toBeInTheDocument();
-    expect(screen.queryByTestId('empty-tag')).not.toBeInTheDocument();
-
-    // Sanity-check we passed through enriched info
-    expect(screen.getByTestId('status-popover')).toHaveTextContent('"eventId":"attack-id"');
-    expect(screen.getByTestId('status-popover')).toHaveTextContent('"values":["open"]');
-
-    // And ensure getEnrichedFieldInfo was called (optional but helpful)
-    expect(getEnrichedFieldInfo).toHaveBeenCalled();
-  });
-
-  test('renders empty tag when getEnrichedFieldInfo returns no values array', () => {
-    (useAttackDetailsContext as jest.Mock).mockReturnValue({
-      attackId: 'attack-id',
-      indexName: '.alerts-security.alerts-default',
-      browserFields: {},
-      dataFormattedForFieldBrowser: [{ field: 'kibana.alert.workflow_status', category: 'kibana' }],
-    });
-
-    // values missing -> hasData() should fail -> empty tag
-    (getEnrichedFieldInfo as jest.Mock).mockReturnValue({
-      data: { field: 'kibana.alert.workflow_status' },
-      eventId: 'attack-id',
-      values: undefined,
-    });
-
-    render(
-      <TestProviders>
-        <Status />
-      </TestProviders>
-    );
-
-    expect(screen.getByTestId('empty-tag')).toBeInTheDocument();
-    expect(screen.queryByTestId('status-popover')).not.toBeInTheDocument();
-  });
-
-  test('passes disabled=false to StatusPopoverButton for a local index', () => {
-    (useAttackDetailsContext as jest.Mock).mockReturnValue({
-      attackId: 'attack-id',
-      indexName: '.alerts-security.alerts-default',
-      browserFields: {},
-      dataFormattedForFieldBrowser: [{ field: 'kibana.alert.workflow_status', category: 'kibana' }],
-    });
-
-    (getEnrichedFieldInfo as jest.Mock).mockReturnValue({
-      data: { field: 'kibana.alert.workflow_status', type: 'string' },
-      eventId: 'attack-id',
-      values: ['open'],
-    });
-
-    render(
-      <TestProviders>
-        <Status />
-      </TestProviders>
-    );
-
-    expect(screen.getByTestId('status-popover')).toHaveAttribute('data-disabled', 'false');
-  });
-
-  test('passes disabled=true to StatusPopoverButton for a remote/CCS index', () => {
-    (useAttackDetailsContext as jest.Mock).mockReturnValue({
-      attackId: 'attack-id',
-      indexName: 'remote-cluster:.alerts-security.alerts-default',
-      browserFields: {},
-      dataFormattedForFieldBrowser: [{ field: 'kibana.alert.workflow_status', category: 'kibana' }],
-    });
-
-    (getEnrichedFieldInfo as jest.Mock).mockReturnValue({
-      data: { field: 'kibana.alert.workflow_status', type: 'string' },
-      eventId: 'attack-id',
-      values: ['open'],
-    });
-
-    render(
-      <TestProviders>
-        <Status />
-      </TestProviders>
-    );
-
-    expect(screen.getByTestId('status-popover')).toHaveAttribute('data-disabled', 'true');
+    screen.getByTestId('v2-status-update-btn').click();
+    expect(mockRefetch).toHaveBeenCalledTimes(1);
   });
 });

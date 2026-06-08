@@ -11,36 +11,39 @@ import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import userEvent from '@testing-library/user-event';
 
 import { StatusPopoverButton } from './status_popover_button';
-import { TestProviders } from '../../../common/mock';
+import { TestProviders } from '../../../../common/mock';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { useAttackWorkflowStatusContextMenuItems } from '../../../detections/hooks/attacks/bulk_actions/context_menu_items/use_attack_workflow_status_context_menu_items';
+import { useAttackWorkflowStatusContextMenuItems } from '../../../../detections/hooks/attacks/bulk_actions/context_menu_items/use_attack_workflow_status_context_menu_items';
 
-jest.mock('../../../common/hooks/use_space_id', () => ({
+jest.mock('../../../../common/hooks/use_space_id', () => ({
   useSpaceId: () => 'default',
 }));
 
 jest.mock(
-  '../../../detections/hooks/attacks/bulk_actions/context_menu_items/use_attack_workflow_status_context_menu_items',
+  '../../../../detections/hooks/attacks/bulk_actions/context_menu_items/use_attack_workflow_status_context_menu_items',
   () => ({
     useAttackWorkflowStatusContextMenuItems: jest.fn(),
   })
 );
 
-jest.mock('../../../attack_discovery/pages/use_find_attack_discoveries', () => ({
+jest.mock('../../../../attack_discovery/pages/use_find_attack_discoveries', () => ({
   useInvalidateFindAttackDiscoveries: () => jest.fn(),
 }));
 
-jest.mock('../../../attack_discovery/pages/use_attack_discovery_bulk', () => ({
+jest.mock('../../../../attack_discovery/pages/use_attack_discovery_bulk', () => ({
   useAttackDiscoveryBulk: () => ({
     mutateAsync: jest.fn().mockResolvedValue(undefined),
   }),
 }));
 
-jest.mock('../../../attack_discovery/pages/results/take_action/use_update_alerts_status', () => ({
-  useUpdateAlertsStatus: () => ({
-    mutateAsync: jest.fn().mockResolvedValue(undefined),
-  }),
-}));
+jest.mock(
+  '../../../../attack_discovery/pages/results/take_action/use_update_alerts_status',
+  () => ({
+    useUpdateAlertsStatus: () => ({
+      mutateAsync: jest.fn().mockResolvedValue(undefined),
+    }),
+  })
+);
 
 const buildHit = (overrides: Record<string, unknown> = {}): DataTableRecord =>
   ({
@@ -55,7 +58,7 @@ const buildHit = (overrides: Record<string, unknown> = {}): DataTableRecord =>
     },
   } as unknown as DataTableRecord);
 
-describe('StatusPopoverButton (legacy re-export of v2)', () => {
+describe('StatusPopoverButton (attack flyout v2)', () => {
   const onAttackUpdated = jest.fn();
 
   beforeEach(() => {
@@ -87,7 +90,7 @@ describe('StatusPopoverButton (legacy re-export of v2)', () => {
     expect(screen.getByText('open')).toBeInTheDocument();
   });
 
-  test('passes the correct telemetry source', () => {
+  test('passes correct telemetry source', () => {
     render(
       <TestProviders>
         <StatusPopoverButton hit={buildHit()} disabled={false} onAttackUpdated={onAttackUpdated} />
@@ -100,7 +103,26 @@ describe('StatusPopoverButton (legacy re-export of v2)', () => {
     );
   });
 
-  test('shows the correct options when clicked', async () => {
+  test('passes attackId and alertIds from hit', () => {
+    render(
+      <TestProviders>
+        <StatusPopoverButton hit={buildHit()} disabled={false} onAttackUpdated={onAttackUpdated} />
+      </TestProviders>
+    );
+    expect(useAttackWorkflowStatusContextMenuItems).toHaveBeenCalledWith(
+      expect.objectContaining({
+        attacksWithWorkflowStatus: [
+          expect.objectContaining({
+            attackId: 'attack-id',
+            relatedAlertIds: ['alert-1', 'alert-2'],
+            workflowStatus: 'open',
+          }),
+        ],
+      })
+    );
+  });
+
+  test('shows the change status popover when clicked', async () => {
     const user = userEvent.setup();
 
     render(
@@ -117,7 +139,7 @@ describe('StatusPopoverButton (legacy re-export of v2)', () => {
     expect(screen.getByText('Mark as closed')).toBeInTheDocument();
   });
 
-  test('calls onAttackUpdated on successful status change', async () => {
+  test('calls onAttackUpdated after a status change', async () => {
     const user = userEvent.setup();
 
     render(
@@ -128,7 +150,6 @@ describe('StatusPopoverButton (legacy re-export of v2)', () => {
 
     await user.click(screen.getByText('open'));
     await waitForEuiPopoverOpen();
-
     await user.click(screen.getByText('Mark as acknowledged'));
 
     expect(onAttackUpdated).toHaveBeenCalledTimes(1);
@@ -167,5 +188,31 @@ describe('StatusPopoverButton (legacy re-export of v2)', () => {
 
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     expect(screen.queryByText('Change attack status')).not.toBeInTheDocument();
+  });
+
+  test('deduplicates alert ids from hit', () => {
+    const hitWithDuplicates = buildHit({
+      'kibana.alert.attack_discovery.alert_ids': ['alert-1', 'alert-1', 'alert-2'],
+    });
+
+    render(
+      <TestProviders>
+        <StatusPopoverButton
+          hit={hitWithDuplicates}
+          disabled={false}
+          onAttackUpdated={onAttackUpdated}
+        />
+      </TestProviders>
+    );
+
+    expect(useAttackWorkflowStatusContextMenuItems).toHaveBeenCalledWith(
+      expect.objectContaining({
+        attacksWithWorkflowStatus: [
+          expect.objectContaining({
+            relatedAlertIds: ['alert-1', 'alert-2'],
+          }),
+        ],
+      })
+    );
   });
 });

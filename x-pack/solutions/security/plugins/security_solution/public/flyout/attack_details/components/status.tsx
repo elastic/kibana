@@ -6,70 +6,20 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { find } from 'lodash/fp';
-import { isNonLocalIndexName } from '@kbn/es-query';
-import { useSpaceId } from '../../../common/hooks/use_space_id';
-import { SIGNAL_STATUS_FIELD_NAME } from '../../../timelines/components/timeline/body/renderers/constants';
-import { getEnrichedFieldInfo } from '../../document_details/right/utils/enriched_field_info';
-
-import { FlyoutHeaderBlock } from '../../../flyout_v2/shared/components/flyout_header_block';
-import { getEmptyTagValue } from '../../../common/components/empty_value';
-import type {
-  EnrichedFieldInfo,
-  EnrichedFieldInfoWithValues,
-} from '../../document_details/right/utils/enriched_field_info';
-import { StatusPopoverButton } from './status_popover_button';
+import type { EsHitRecord } from '@kbn/discover-utils';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import { Status as V2Status } from '../../../flyout_v2/attack/main/components/status';
 import { useAttackDetailsContext } from '../context';
-import { HEADER_STATUS_BLOCK_TEST_ID } from '../constants/test_ids';
 
 /**
- * Checks if the field info has data to convert EnrichedFieldInfo into EnrichedFieldInfoWithValues
+ * Context bridge: wraps the v2 Status component for the legacy attack details flyout.
+ * Reads searchHit and refetch from context, builds a DataTableRecord, then delegates to v2.
  */
-function hasData(fieldInfo?: EnrichedFieldInfo): fieldInfo is EnrichedFieldInfoWithValues {
-  return !!fieldInfo && Array.isArray(fieldInfo.values);
-}
-
 export const Status = memo(() => {
-  const { attackId, indexName, browserFields, dataFormattedForFieldBrowser } =
-    useAttackDetailsContext();
-  const currentSpaceId = useSpaceId();
-  const isRemoteDocument = useMemo(() => isNonLocalIndexName(indexName), [indexName]);
-  const statusData = useMemo(() => {
-    const item = find(
-      { field: SIGNAL_STATUS_FIELD_NAME, category: 'kibana' },
-      dataFormattedForFieldBrowser
-    );
-    return (
-      item &&
-      getEnrichedFieldInfo({
-        eventId: attackId,
-        contextId: `${currentSpaceId}-attack-details-flyout-status`,
-        scopeId: currentSpaceId || '',
-        browserFields,
-        item,
-      })
-    );
-  }, [dataFormattedForFieldBrowser, attackId, currentSpaceId, browserFields]);
+  const { searchHit, refetch } = useAttackDetailsContext();
+  const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
 
-  return (
-    <FlyoutHeaderBlock
-      hasBorder
-      title={
-        <FormattedMessage
-          id="xpack.securitySolution.attackDetailsFlyout.header.statusTitle"
-          defaultMessage="Status"
-        />
-      }
-      data-test-subj={HEADER_STATUS_BLOCK_TEST_ID}
-    >
-      {!statusData || !hasData(statusData) ? (
-        getEmptyTagValue()
-      ) : (
-        <StatusPopoverButton enrichedFieldInfo={statusData} disabled={isRemoteDocument} />
-      )}
-    </FlyoutHeaderBlock>
-  );
+  return <V2Status hit={hit} onAttackUpdated={refetch} />;
 });
 
 Status.displayName = 'Status';
