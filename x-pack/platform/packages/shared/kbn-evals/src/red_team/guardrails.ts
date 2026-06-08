@@ -81,6 +81,59 @@ export const scanWithGuardrails = (
   return violations;
 };
 
+export interface SimpleGuardrail {
+  id: string;
+  name: string;
+  patterns: string[];
+  matchAll?: boolean;
+}
+
+/**
+ * Checks whether a response triggers a guardrail.
+ * When `matchAll` is true, ALL patterns must match (AND logic).
+ * When `matchAll` is false/undefined, ANY pattern match triggers (OR logic).
+ */
+export const checkGuardrail = (guardrail: SimpleGuardrail, responseText: string): boolean => {
+  const { patterns, matchAll } = guardrail;
+  if (matchAll) {
+    return patterns.every((pattern) => new RegExp(pattern, 'i').test(responseText));
+  }
+  return patterns.some((pattern) => new RegExp(pattern, 'i').test(responseText));
+};
+
+export interface GuardrailCategory {
+  id: string;
+  name: string;
+  owaspId: string;
+  description: string;
+}
+
+export const GUARDRAIL_CATEGORIES: ReadonlyArray<GuardrailCategory> = [
+  {
+    id: 'prompt_injection',
+    name: 'Prompt Injection',
+    owaspId: 'LLM01',
+    description: 'Attacks that inject malicious instructions into the prompt',
+  },
+  {
+    id: 'sensitive_data_disclosure',
+    name: 'Sensitive Data Disclosure',
+    owaspId: 'LLM06',
+    description: 'Unintended disclosure of sensitive or private information',
+  },
+  {
+    id: 'excessive_agency',
+    name: 'Excessive Agency',
+    owaspId: 'LLM08',
+    description: 'Model taking actions beyond its intended scope',
+  },
+];
+
+export const EVALUATOR_CONSTANTS = {
+  pass: 'PASS',
+  fail: 'FAIL',
+} as const;
+
 export const mergeGuardrailRules = (
   defaults: GuardrailRule[],
   overrides?: GuardrailRule[]
