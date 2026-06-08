@@ -10,12 +10,14 @@ import { createPromptInjectionModule } from './prompt_injection';
 import { createInfoExtractionModule } from './info_extraction';
 import { createJailbreakingModule } from './jailbreaking';
 import { createPrivilegeEscalationModule } from './privilege_escalation';
+import { createIndirectInjectionModule } from './indirect_injection';
 
 const ATTACK_MODULES: Record<string, () => AttackModule> = {
   prompt_injection: createPromptInjectionModule,
   info_extraction: createInfoExtractionModule,
   jailbreaking: createJailbreakingModule,
   privilege_escalation: createPrivilegeEscalationModule,
+  indirect_injection: createIndirectInjectionModule,
 };
 
 export const getAttackModule = (name: string): AttackModule => {
