@@ -85,6 +85,50 @@ export function parseAssignRhs(args: string): string | null {
   return trimmed.slice(eqIndex + 1).trim() || null;
 }
 
+/** Matches a single Liquid identifier (not a dotted workflow path). */
+const SINGLE_IDENTIFIER_REGEX = /^[a-zA-Z_$][a-zA-Z0-9_$]*$/;
+
+/** Liquid for-loop range literal, e.g. `(1..3)`. */
+export const LIQUID_RANGE_LITERAL_REGEX = /^\(\s*\d+\s*\.\.\s*\d+\s*\)$/;
+
+const QUOTED_OR_PIPE = /"[^"]*"|'[^']*'|(\|)/g;
+
+function stripAssignRhsFilters(rhs: string): string {
+  const firstPipe = Array.from(rhs.matchAll(QUOTED_OR_PIPE)).find((m) => m[1] !== undefined);
+  return firstPipe ? rhs.slice(0, firstPipe.index).trim() : rhs.trim();
+}
+
+export function isLiquidRangeLiteral(collectionPath: string): boolean {
+  return LIQUID_RANGE_LITERAL_REGEX.test(collectionPath.trim());
+}
+
+/**
+ * Follows assign aliases until a dotted path or unknown identifier is reached.
+ * Used to validate `{% for item in rows %}` when `rows` was assigned from `consts.items`.
+ */
+export function resolveAssignChain(
+  collectionPath: string,
+  assignVars: readonly AssignVariable[]
+): string {
+  let path = collectionPath.trim();
+  const seen = new Set<string>();
+
+  while (SINGLE_IDENTIFIER_REGEX.test(path) && !seen.has(path)) {
+    seen.add(path);
+    const assign = assignVars.find((a) => a.name === path);
+    if (!assign) {
+      break;
+    }
+    const rhs = stripAssignRhsFilters(assign.rhs);
+    if (!rhs) {
+      break;
+    }
+    path = rhs;
+  }
+
+  return path;
+}
+
 // ---------------------------------------------------------------------------
 // Scope boundary helpers
 // ---------------------------------------------------------------------------

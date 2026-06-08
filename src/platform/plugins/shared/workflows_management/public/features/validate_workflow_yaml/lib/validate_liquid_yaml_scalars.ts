@@ -18,9 +18,13 @@ import type { WorkflowGraph } from '@kbn/workflows/graph';
 import { extractLiquidErrorPosition, parseTemplateString } from '@kbn/workflows-yaml';
 import { parseVariablePath } from '../../../../common/lib/parse_variable_path';
 import { InvalidForeachParameterError } from '../../workflow_context/lib/errors';
+import { getContextSchemaWithTemplateLocals } from '../../workflow_context/lib/extend_context_with_template_locals';
 import {
   type ForLoopScope,
   getAllForLoopScopes,
+  getTemplateLocalContext,
+  isLiquidRangeLiteral,
+  resolveAssignChain,
 } from '../../workflow_context/lib/extract_template_local_context';
 import { getContextSchemaForStep } from '../../workflow_context/lib/get_context_for_path';
 import {
@@ -208,26 +212,41 @@ function collectForLoopCollectionResults(
 
   const forLoopScopes = getAllForLoopScopes(templateString);
   for (const scope of forLoopScopes) {
-    if (scope.collectionPath) {
-      const diagnostic = validateCollectionPath(scope.collectionPath, stepSchema);
-      const absRange = diagnostic ? resolveCollectionRange(ctx.yamlString, node, scope) : null;
+    if (!scope.collectionPath || isLiquidRangeLiteral(scope.collectionPath)) {
+      continue;
+    }
 
-      if (diagnostic && absRange) {
-        const startPos = ctx.model.getPositionAt(absRange.start);
-        const endPos = ctx.model.getPositionAt(absRange.end);
+    const { assignVars } = getTemplateLocalContext(templateString, scope.bodyStart);
+    const resolvedCollectionPath = resolveAssignChain(scope.collectionPath, assignVars);
+    const absRange = resolveCollectionRange(ctx.yamlString, node, scope);
 
-        results.push({
-          id: `for-collection-${nearestStep.name}-${scope.collectionPath}-${absRange.start}`,
-          owner: 'variable-validation',
-          message: diagnostic.message,
-          severity: diagnostic.severity,
-          startLineNumber: startPos.lineNumber,
-          startColumn: startPos.column,
-          endLineNumber: endPos.lineNumber,
-          endColumn: endPos.column,
-          hoverMessage: null,
-        });
-      }
+    let schemaAtCollection = stepSchema;
+    if (absRange) {
+      schemaAtCollection = getContextSchemaWithTemplateLocals(
+        ctx.yamlDocument,
+        absRange.start,
+        stepSchema,
+        ctx.yamlString
+      );
+    }
+
+    const diagnostic = validateCollectionPath(resolvedCollectionPath, schemaAtCollection);
+
+    if (diagnostic && absRange) {
+      const startPos = ctx.model.getPositionAt(absRange.start);
+      const endPos = ctx.model.getPositionAt(absRange.end);
+
+      results.push({
+        id: `for-collection-${nearestStep.name}-${scope.collectionPath}-${absRange.start}`,
+        owner: 'variable-validation',
+        message: diagnostic.message,
+        severity: diagnostic.severity,
+        startLineNumber: startPos.lineNumber,
+        startColumn: startPos.column,
+        endLineNumber: endPos.lineNumber,
+        endColumn: endPos.column,
+        hoverMessage: null,
+      });
     }
   }
 

@@ -11,6 +11,8 @@ import {
   forLoopScopesContainingOffset,
   getAllForLoopScopes,
   getTemplateLocalContext,
+  isLiquidRangeLiteral,
+  resolveAssignChain,
 } from './extract_template_local_context';
 
 describe('getTemplateLocalContext', () => {
@@ -300,5 +302,45 @@ describe('getTemplateLocalContext', () => {
       expect(ctx.captureNames).toEqual([]);
       expect(ctx.forLoopScopes).toEqual([]);
     });
+  });
+});
+
+describe('resolveAssignChain', () => {
+  it('resolves a single assign alias to a workflow path', () => {
+    const template =
+      '{% assign rows = consts.items %}{% for row in rows %}{{ row.name }}{% endfor %}';
+    const forBodyStart = template.indexOf('{{ row.name }}');
+    const { assignVars } = getTemplateLocalContext(template, forBodyStart);
+    expect(resolveAssignChain('rows', assignVars)).toBe('consts.items');
+  });
+
+  it('resolves nested assign alias inside an outer for-loop body', () => {
+    const template =
+      '{% for group in consts.groups %}{% assign users = group.users %}{% for user in users %}{{ user.name }}{% endfor %}{% endfor %}';
+    const innerForBodyStart = template.indexOf('{{ user.name }}');
+    const { assignVars } = getTemplateLocalContext(template, innerForBodyStart);
+    expect(resolveAssignChain('users', assignVars)).toBe('group.users');
+  });
+
+  it('stops at unknown identifiers', () => {
+    expect(resolveAssignChain('missing', [])).toBe('missing');
+  });
+
+  it('guards against assign cycles', () => {
+    const assignVars = [
+      { name: 'a', rhs: 'b' },
+      { name: 'b', rhs: 'a' },
+    ];
+    expect(resolveAssignChain('a', assignVars)).toBe('a');
+  });
+});
+
+describe('isLiquidRangeLiteral', () => {
+  it.each(['(1..3)', '( 1 .. 3 )', '(10..20)'])('returns true for %s', (value) => {
+    expect(isLiquidRangeLiteral(value)).toBe(true);
+  });
+
+  it.each(['consts.items', 'rows', '(1..n)'])('returns false for %s', (value) => {
+    expect(isLiquidRangeLiteral(value)).toBe(false);
   });
 });
