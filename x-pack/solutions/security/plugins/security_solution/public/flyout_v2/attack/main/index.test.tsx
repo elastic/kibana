@@ -30,6 +30,15 @@ jest.mock('./header', () => ({
   ),
 }));
 
+jest.mock('./tabs/overview_tab', () => ({
+  OverviewTab: ({ onAttackUpdated }: { onAttackUpdated: () => void }) => (
+    <div
+      data-test-subj="mock-overview-tab"
+      data-has-on-attack-updated={String(onAttackUpdated != null)}
+    />
+  ),
+}));
+
 jest.mock('../../shared/tools/notes', () => ({
   NotesDetails: () => <div data-test-subj="mock-notes-details" />,
 }));
@@ -127,5 +136,20 @@ describe('<AttackFlyout />', () => {
     );
 
     expect(getByTestId('mock-header')).toHaveAttribute('data-has-on-attack-updated', 'true');
+  });
+
+  it('passes onAttackUpdated callback to the overview tab', () => {
+    const onAttackUpdated = jest.fn();
+    const { getByTestId } = render(
+      <TestProviders>
+        <AttackFlyout
+          hit={createAttackHit()}
+          attack={mockAttack}
+          onAttackUpdated={onAttackUpdated}
+        />
+      </TestProviders>
+    );
+
+    expect(getByTestId('mock-overview-tab')).toHaveAttribute('data-has-on-attack-updated', 'true');
   });
 });

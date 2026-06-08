@@ -17,10 +17,7 @@ import { flyoutProviders } from '../../shared/components/flyout_provider';
 import { NotesDetails } from '../../shared/tools/notes';
 import { useKibana } from '../../../common/lib/kibana';
 import { Header } from './header';
-
-const BODY_PLACEHOLDER = i18n.translate('xpack.securitySolution.flyoutV2.attack.body.placeholder', {
-  defaultMessage: 'Attack details body',
-});
+import { OverviewTab } from './tabs/overview_tab';
 
 const FOOTER_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.flyoutV2.attack.footer.placeholder',
@@ -49,8 +46,8 @@ export interface AttackFlyoutProps {
 /**
  * Content for the v2 attack flyout. Receives a fully-resolved `hit` and `attack`
  * from `AttackFlyoutWrapper` (which owns the single data fetch) and renders the
- * header. Body and footer are wired in subsequent PRs; they currently render
- * placeholders.
+ * header and overview tab. The footer is wired in a subsequent PR; it currently
+ * renders a placeholder.
  */
 export const AttackFlyout = memo(({ hit, attack, onAttackUpdated }: AttackFlyoutProps) => {
   const { services } = useKibana();
@@ -76,9 +73,7 @@ export const AttackFlyout = memo(({ hit, attack, onAttackUpdated }: AttackFlyout
         <Header hit={hit} onAttackUpdated={onAttackUpdated} onShowNotes={onShowNotes} />
       </EuiFlyoutHeader>
       <EuiFlyoutBody data-test-subj="attack-flyout-body">
-        <EuiText>
-          <p>{BODY_PLACEHOLDER}</p>
-        </EuiText>
+        <OverviewTab hit={hit} attack={attack} onAttackUpdated={onAttackUpdated} />
       </EuiFlyoutBody>
       <EuiFlyoutFooter data-test-subj="attack-flyout-footer">
         <EuiText>
