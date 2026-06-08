@@ -7,12 +7,12 @@
 
 import type { Streams } from '@kbn/streams-schema';
 import {
+  ecsBaseFields,
   LOGS_ECS_STREAM_NAME,
   LOGS_ROOT_STREAM_NAME,
   ROOT_STREAM_NAMES,
 } from '@kbn/streams-schema';
 import { baseFields } from './component_templates/logs_layer';
-import { ecsBaseFields } from './component_templates/logs_ecs_layer';
 
 export const createRootStreamDefinition = (
   streamName: string = LOGS_ROOT_STREAM_NAME

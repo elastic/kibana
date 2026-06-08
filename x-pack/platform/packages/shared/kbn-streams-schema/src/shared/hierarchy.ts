@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ECS_BASE_FIELD_NAMES, OTEL_BASE_FIELD_NAMES } from '../helpers/root_stream_base_fields';
+import { ecsBaseFields, otelBaseFields } from '../fields';
 
 export const LOGS_ROOT_STREAM_NAME = 'logs';
 export const LOGS_OTEL_STREAM_NAME = 'logs.otel' as const;
@@ -23,13 +23,16 @@ const SORTED_ROOT_STREAM_NAMES: readonly RootStreamName[] = [...ROOT_STREAM_NAME
   (a, b) => b.length - a.length
 );
 
+const ecsBaseFieldNames = Object.keys(ecsBaseFields);
+const otelBaseFieldNames = Object.keys(otelBaseFields);
+
 export const isRootStreamBaseField = (streamName: string, fieldName: string): boolean => {
   switch (streamName) {
     case LOGS_ECS_STREAM_NAME:
-      return ECS_BASE_FIELD_NAMES.has(fieldName);
+      return ecsBaseFieldNames.includes(fieldName);
     case LOGS_OTEL_STREAM_NAME:
     case LOGS_ROOT_STREAM_NAME:
-      return OTEL_BASE_FIELD_NAMES.has(fieldName);
+      return otelBaseFieldNames.includes(fieldName);
     default:
       return false;
   }

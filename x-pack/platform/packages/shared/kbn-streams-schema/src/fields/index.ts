@@ -216,3 +216,82 @@ export const namedFieldDefinitionConfigSchema: z.Schema<NamedFieldDefinitionConf
       name: NonEmptyString,
     })
   );
+
+export const ecsBaseFields: FieldDefinition = {
+  '@timestamp': {
+    type: 'date',
+  },
+  'stream.name': {
+    type: 'system',
+  },
+  'scope.name': {
+    type: 'keyword',
+    ignore_above: 1024,
+  },
+  'host.name': {
+    type: 'keyword',
+    ignore_above: 1024,
+  },
+  'trace.id': {
+    type: 'keyword',
+    ignore_above: 1024,
+  },
+  'span.id': {
+    type: 'keyword',
+    ignore_above: 1024,
+  },
+  'service.name': {
+    type: 'keyword',
+    ignore_above: 1024,
+  },
+  message: {
+    type: 'match_only_text',
+  },
+  'log.level': {
+    type: 'keyword',
+    ignore_above: 1024,
+  },
+};
+
+export const otelBaseFields: FieldDefinition = {
+  '@timestamp': {
+    type: 'date',
+  },
+  'stream.name': {
+    type: 'system',
+  },
+  'scope.name': {
+    type: 'keyword',
+    ignore_above: 1024,
+  },
+  trace_id: {
+    type: 'keyword',
+    ignore_above: 1024,
+  },
+  span_id: {
+    type: 'keyword',
+    ignore_above: 1024,
+  },
+  event_name: {
+    type: 'keyword',
+    ignore_above: 1024,
+  },
+  severity_text: {
+    type: 'keyword',
+    ignore_above: 1024,
+  },
+  'body.text': {
+    type: 'match_only_text',
+  },
+  severity_number: {
+    type: 'long',
+  },
+  'resource.attributes.host.name': {
+    type: 'keyword',
+    ignore_above: 1024,
+  },
+  'resource.attributes.service.name': {
+    type: 'keyword',
+    ignore_above: 1024,
+  },
+};
