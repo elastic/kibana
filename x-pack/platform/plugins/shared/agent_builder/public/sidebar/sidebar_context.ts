@@ -39,6 +39,7 @@ export interface SidebarRuntimeContext {
     updateProps: (props: EmbeddableConversationProps) => void;
     resetBrowserApiTools: () => void;
     addAttachment: (attachment: ConversationAttachment) => void;
+    setInputMessage: (message: string) => void;
   }) => void;
 }
 

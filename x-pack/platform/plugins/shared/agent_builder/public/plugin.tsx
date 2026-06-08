@@ -93,6 +93,7 @@ export class AgentBuilderPlugin
     updateProps: (props: EmbeddableConversationProps) => void;
     resetBrowserApiTools: () => void;
     addAttachment: (attachment: ConversationAttachment) => void;
+    setInputMessage: (message: string) => void;
   } | null = null;
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private isEarsEnabled = false;
@@ -188,18 +189,15 @@ export class AgentBuilderPlugin
         window?.localStorage?.setItem(storageKey, JSON.stringify(conversationId));
       }
 
-      // If already open, update props instead of creating new
+      // If already open, append to the current conversation instead of
+      // replacing it. Attachments are added individually and initialMessage
+      // (if any) pre-populates the input so the user can edit before sending.
       if (this.activeSidebarRef && this.sidebarCallbacks) {
-        // When the sidebar is visible and the caller wants to add attachments
-        // (e.g. bulk-add alerts), add them to whatever conversation is active
-        // instead of forcing a new one. The user can see the sidebar and may
-        // have an ongoing exchange they want to augment.
-        if (config.newConversation && config.attachments?.length) {
-          for (const attachment of config.attachments) {
-            this.sidebarCallbacks.addAttachment(attachment);
-          }
-        } else {
-          this.sidebarCallbacks.updateProps(config);
+        for (const attachment of config.attachments ?? []) {
+          this.sidebarCallbacks.addAttachment(attachment);
+        }
+        if (config.initialMessage) {
+          this.sidebarCallbacks.setInputMessage(config.initialMessage);
         }
         return { chatRef: this.activeSidebarRef };
       }

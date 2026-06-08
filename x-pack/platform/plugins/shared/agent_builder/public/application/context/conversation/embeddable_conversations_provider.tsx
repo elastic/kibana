@@ -52,6 +52,12 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
             ...prevProps,
             attachments: upsertAttachmentsIntoList(prevProps.attachments, [attachment]),
           })),
+        setInputMessage: (message) =>
+          setCurrentProps((prevProps) => ({
+            ...prevProps,
+            initialMessage: message,
+            autoSendInitialMessage: false,
+          })),
       });
     }
   }, [onRegisterCallbacks]);
