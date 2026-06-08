@@ -16,3 +16,10 @@ export const HEADER_STATUS_BLOCK_TEST_ID =
 export const STATUS_POPOVER_BUTTON_TEST_ID =
   `${ATTACK_FLYOUT_V2_PREFIX}-status-popover-button` as const;
 export const STATUS_POPOVER_TEST_ID = `${ATTACK_FLYOUT_V2_PREFIX}-status-popover` as const;
+export const HEADER_ASSIGNEES_BLOCK_TEST_ID =
+  `${ATTACK_FLYOUT_V2_PREFIX}-header-assignees-block` as const;
+export const HEADER_ASSIGNEES_TEST_ID = `${ATTACK_FLYOUT_V2_PREFIX}-header-assignees` as const;
+export const HEADER_ASSIGNEES_EMPTY_TEST_ID =
+  `${ATTACK_FLYOUT_V2_PREFIX}-header-assignees-empty` as const;
+export const HEADER_ASSIGNEES_ADD_BUTTON_TEST_ID =
+  `${ATTACK_FLYOUT_V2_PREFIX}-header-assignees-add-button` as const;

@@ -13,7 +13,6 @@ import { HeaderTitle } from './header_title';
 import { TestProviders } from '../../../common/mock';
 import { useAttackDetailsContext } from '../context';
 import { useNavigateToAttackDetailsLeftPanel } from '../hooks/use_navigate_to_attack_details_left_panel';
-import { HEADER_ASSIGNEES_BLOCK_TEST_ID } from '../constants/test_ids';
 
 jest.mock('../../../flyout_v2/attack/main/components/header_title', () => ({
   HeaderTitle: () => <div data-test-subj="v2-header-title" />,
@@ -42,19 +41,11 @@ jest.mock('../../../flyout_v2/shared/components/notes', () => ({
 }));
 
 jest.mock('../../../flyout_v2/shared/components/flyout_header_block', () => ({
-  FlyoutHeaderBlock: ({
-    children,
-    'data-test-subj': dataTestSubj,
-  }: {
-    children: React.ReactNode;
-    'data-test-subj'?: string;
-  }) => <div data-test-subj={dataTestSubj}>{children}</div>,
   flyoutHeaderBlockStyles: {},
 }));
 
 const mockedUseAttackDetailsContext = useAttackDetailsContext as jest.Mock;
-const mockedUseNavigateToAttackDetailsLeftPanel =
-  useNavigateToAttackDetailsLeftPanel as jest.Mock;
+const mockedUseNavigateToAttackDetailsLeftPanel = useNavigateToAttackDetailsLeftPanel as jest.Mock;
 
 const mockSearchHit = {
   _id: 'attack-1',
@@ -106,7 +97,6 @@ describe('HeaderTitle (legacy wrapper)', () => {
       </TestProviders>
     );
 
-    expect(screen.getByTestId(HEADER_ASSIGNEES_BLOCK_TEST_ID)).toBeInTheDocument();
     expect(screen.getByTestId('assignees')).toBeInTheDocument();
   });
 

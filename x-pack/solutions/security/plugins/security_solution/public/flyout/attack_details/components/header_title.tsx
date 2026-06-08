@@ -7,18 +7,13 @@
 
 import React, { memo, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { EsHitRecord } from '@kbn/discover-utils';
 import { buildDataTableRecord } from '@kbn/discover-utils';
-import {
-  FlyoutHeaderBlock,
-  flyoutHeaderBlockStyles,
-} from '../../../flyout_v2/shared/components/flyout_header_block';
+import { flyoutHeaderBlockStyles } from '../../../flyout_v2/shared/components/flyout_header_block';
 import { Notes } from '../../../flyout_v2/shared/components/notes';
 import { HeaderTitle as V2HeaderTitle } from '../../../flyout_v2/attack/main/components/header_title';
 import { Status } from './status';
 import { Assignees } from './assignees';
-import { HEADER_ASSIGNEES_BLOCK_TEST_ID } from '../constants/test_ids';
 import { useAttackDetailsContext } from '../context';
 import { useNavigateToAttackDetailsLeftPanel } from '../hooks/use_navigate_to_attack_details_left_panel';
 
@@ -26,6 +21,8 @@ import { useNavigateToAttackDetailsLeftPanel } from '../hooks/use_navigate_to_at
  * Header title for the legacy attack details flyout.
  * Bridges context → props for the v2 HeaderTitle, then renders
  * the status/assignees/notes blocks for legacy flyout compatibility.
+ * The Assignees block is wrapped by the v2 Assignees component itself,
+ * so this file does not add an outer FlyoutHeaderBlock around it.
  */
 export const HeaderTitle = memo(() => {
   const { searchHit, attackId } = useAttackDetailsContext();
@@ -47,18 +44,7 @@ export const HeaderTitle = memo(() => {
         <EuiFlexItem css={flyoutHeaderBlockStyles}>
           <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
             <EuiFlexItem>
-              <FlyoutHeaderBlock
-                hasBorder
-                title={
-                  <FormattedMessage
-                    id="xpack.securitySolution.attackDetailsFlyout.header.assigneesTitle"
-                    defaultMessage="Assignees"
-                  />
-                }
-                data-test-subj={HEADER_ASSIGNEES_BLOCK_TEST_ID}
-              >
-                <Assignees />
-              </FlyoutHeaderBlock>
+              <Assignees />
             </EuiFlexItem>
             <EuiFlexItem>
               <Notes documentId={attackId} onShowNotes={openNotesTab} />
