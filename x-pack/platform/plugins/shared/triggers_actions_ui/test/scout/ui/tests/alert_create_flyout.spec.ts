@@ -349,28 +349,26 @@ test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
     await page.testSubj.click('onThrottleInterval');
     await page.testSubj.locator('throttleInput').fill('10');
 
-    // Conditional action filter: AND composite filter
+    // Conditional action filter: use DSL mode to combine both conditions in one filter.
+    // The structured field selector stays disabled until the alerts index has field mappings
+    // (which requires alerts to have fired first), so DSL mode is more reliable here.
     await page.testSubj.click('alertsFilterQueryToggle');
     await page.testSubj.click('addFilter');
-    // First condition: _id is not fake-rule-id
-    // The field input is disabled while field suggestions load — wait for it to be enabled.
-    const fieldInput = page.testSubj.locator('filterFieldSuggestionList').locator('input');
-    await expect(fieldInput).toBeEnabled({ timeout: 15_000 });
-    await fieldInput.fill('_id');
-    await page.locator('[role="listbox"] [role="option"]:first-child').click();
-    await page.testSubj.locator('filterOperatorList').locator('input').fill('is not');
-    await page.locator('[role="listbox"] [role="option"]:first-child').click();
-    await page.testSubj.locator('filterParams').locator('input').fill('fake-rule-id');
-    // Add AND condition
-    await page.testSubj.click('add-and-filter');
-    // Second condition: kibana.alert.action_group exists
-    const filter01 = page.testSubj.locator('filter-0.1');
-    await filter01
-      .locator('[data-test-subj="filterFieldSuggestionList"] input')
-      .fill('kibana.alert.action_group');
-    await page.locator('[role="listbox"] [role="option"]:first-child').click();
-    await filter01.locator('[data-test-subj="filterOperatorList"] input').fill('exists');
-    await page.locator('[role="listbox"] [role="option"]:first-child').click();
+    await page.testSubj.click('editQueryDSL');
+    await page.testSubj.locator('addFilterPopover').waitFor({ state: 'visible' });
+    const compositeFilter = JSON.stringify({
+      bool: {
+        must_not: [{ term: { _id: 'fake-rule-id' } }],
+        filter: [{ exists: { field: 'kibana.alert.action_group' } }],
+      },
+    });
+    // Click the visible Monaco container, select all existing content, delete it, then type
+    await page.testSubj.locator('addFilterPopover').locator('.monaco-editor').click();
+    await page.keyboard.press('Control+a');
+    await page.keyboard.press('Delete');
+    await page.keyboard.type(compositeFilter);
+    // data-test-subj="saveFilter" — the button text says "Add filter" but the testSubj is saveFilter
+    await page.testSubj.locator('saveFilter').scrollIntoViewIfNeeded();
     await page.testSubj.click('saveFilter');
     await page.testSubj.locator('queryInput').fill('_id: *');
 
