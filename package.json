@@ -310,6 +310,7 @@
     "@kbn/content-connectors-plugin": "link:x-pack/platform/plugins/shared/content_connectors",
     "@kbn/content-list": "link:src/platform/packages/shared/content-management/content_list/kbn-content-list",
     "@kbn/content-list-assembly": "link:src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly",
+    "@kbn/content-list-common": "link:src/platform/packages/shared/content-management/content_list/kbn-content-list-common",
     "@kbn/content-list-footer": "link:src/platform/packages/shared/content-management/content_list/kbn-content-list-footer",
     "@kbn/content-list-page": "link:src/platform/packages/shared/content-management/content_list/kbn-content-list-page",
     "@kbn/content-list-provider": "link:src/platform/packages/shared/content-management/content_list/kbn-content-list-provider",
