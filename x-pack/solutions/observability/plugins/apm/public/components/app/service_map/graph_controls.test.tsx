@@ -56,6 +56,7 @@ jest.mock('@xyflow/react', () => {
       zoomOut: jest.fn(),
       setCenter: jest.fn(),
       getNodes: jest.fn(() => []),
+      getNodesBounds: jest.fn(() => ({ x: 0, y: 0, width: 0, height: 0 })),
     })),
   };
 });

@@ -84,6 +84,7 @@ jest.mock('@xyflow/react', () => {
       zoomOut: jest.fn(),
       setCenter: jest.fn(),
       getNodes: jest.fn(() => []),
+      getNodesBounds: jest.fn(() => ({ x: 0, y: 0, width: 0, height: 0 })),
     })),
   };
 });
@@ -162,14 +163,14 @@ describe('ServiceMapGraph - MiniMap', () => {
     expect(screen.getByTestId('serviceMapMinimap')).toBeInTheDocument();
   });
 
-  it('uses React Flow default position', () => {
+  it('positions the minimap in the bottom-right', () => {
     render(
       <ReactFlowProvider>
         <ServiceMapGraph {...defaultProps} />
       </ReactFlowProvider>
     );
 
-    expect(mockMinimapProps.position).toBeUndefined();
+    expect(mockMinimapProps.position).toBe('bottom-right');
   });
 
   it('is pannable and zoomable', () => {

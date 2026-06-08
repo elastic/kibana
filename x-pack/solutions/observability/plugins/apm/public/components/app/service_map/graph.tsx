@@ -260,7 +260,7 @@ function GraphInner({
     (animate = true) => {
       const visibleNodes = getNodes().filter((node) => !node.hidden);
       const target = getServiceMapViewTarget({
-        nodes: visibleNodes,
+        visibleNodes,
         bounds: getNodesBounds(visibleNodes),
         viewportWidth,
         viewportHeight,

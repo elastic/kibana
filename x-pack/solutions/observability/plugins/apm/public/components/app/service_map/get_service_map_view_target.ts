@@ -17,9 +17,9 @@ import { getNodeWidth, getNodeHeight } from './get_node_dimensions';
 export type ServiceMapViewTarget = { kind: 'fit' } | { kind: 'center'; x: number; y: number };
 
 interface GetServiceMapViewTargetParams {
-  /** Visible nodes; callers are expected to filter out hidden nodes. */
-  nodes: ServiceMapNode[];
-  /** Bounding box of `nodes`, from React Flow's `getNodesBounds`. */
+  /** Visible (non-hidden) nodes. */
+  visibleNodes: ServiceMapNode[];
+  /** Bounding box of {@link visibleNodes}, from React Flow's `getNodesBounds`. */
   bounds: Rect;
   /** Pixel width of the React Flow pane. */
   viewportWidth: number;
@@ -44,12 +44,12 @@ const median = (values: number[]): number => {
  * Normal-sized graphs that fit within {@link MIN_ZOOM} keep using `fitView`.
  */
 export function getServiceMapViewTarget({
-  nodes,
+  visibleNodes,
   bounds,
   viewportWidth,
   viewportHeight,
 }: GetServiceMapViewTargetParams): ServiceMapViewTarget {
-  if (nodes.length === 0 || viewportWidth <= 0 || viewportHeight <= 0) {
+  if (visibleNodes.length === 0 || viewportWidth <= 0 || viewportHeight <= 0) {
     return { kind: 'fit' };
   }
 
@@ -63,8 +63,8 @@ export function getServiceMapViewTarget({
     return { kind: 'fit' };
   }
 
-  const centerX = median(nodes.map((node) => node.position.x + getNodeWidth(node) / 2));
-  const centerY = median(nodes.map((node) => node.position.y + getNodeHeight(node) / 2));
+  const centerX = median(visibleNodes.map((node) => node.position.x + getNodeWidth(node) / 2));
+  const centerY = median(visibleNodes.map((node) => node.position.y + getNodeHeight(node) / 2));
 
   return { kind: 'center', x: centerX, y: centerY };
 }
