@@ -13,30 +13,48 @@ import type { ServiceNodeData } from '../../../../common/service_map';
 import { SloStatusBadge } from '../../shared/slo_status_badge';
 import { useServiceMapSloFlyout } from '../../shared/service_map/service_map_slo_flyout_context';
 import { useServiceMapAlertsTabNavigate } from './use_service_map_alerts_tab_href';
+import { AnomaliesBadge } from '../service_inventory/service_list/anomalies_badge';
+import { useApmRouter } from '../../../hooks/use_apm_router';
+import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 
 interface Props {
   nodeData: ServiceNodeData;
 }
 
 /**
- * Alert and SLO badges next to the service map popover title — same behaviour as
- * {@link ServiceNode} badges on the map.
+ * Alert, SLO and anomaly badges next to the service map popover title — same
+ * behaviour as {@link ServiceNode} badges on the map.
  */
 export function ServiceMapPopoverTitleBadges({ nodeData }: Props) {
   const { core } = useApmPluginContext();
   const canReadSlos = !!core.application?.capabilities?.slo?.read;
   const { onSloBadgeClick } = useServiceMapSloFlyout();
 
+  const apmRouter = useApmRouter();
+  const { query } = useAnyOfApmParams(
+    '/service-map',
+    '/services/{serviceName}/service-map',
+    '/mobile-services/{serviceName}/service-map'
+  );
+
   const serviceName = nodeData.label;
   const navigateToAlertsTab = useServiceMapAlertsTabNavigate(serviceName);
+
+  const { serviceAnomalyStats } = nodeData;
 
   const showAlertsBadge = nodeData.alertsCount !== undefined && nodeData.alertsCount > 0;
   const showSloBadge =
     canReadSlos && (nodeData.sloStatus === 'violated' || nodeData.sloStatus === 'degrading');
+  const showAnomaliesBadge = serviceAnomalyStats !== undefined;
 
-  if (!showAlertsBadge && !showSloBadge) {
+  if (!showAlertsBadge && !showSloBadge && !showAnomaliesBadge) {
     return null;
   }
+
+  const anomaliesOverviewHref = apmRouter.link('/services/{serviceName}/overview', {
+    path: { serviceName },
+    query: { ...query },
+  });
 
   const alertsTooltip = i18n.translate('xpack.apm.serviceHeader.alertsBadge.tooltip', {
     defaultMessage: '{count, plural, one {# active alert} other {# active alerts}}. Click to view.',
@@ -80,6 +98,17 @@ export function ServiceMapPopoverTitleBadges({ nodeData }: Props) {
                     },
                   }
                 : { hideTooltip: true })}
+            />
+          </span>
+        </EuiFlexItem>
+      )}
+      {serviceAnomalyStats && (
+        <EuiFlexItem grow={false}>
+          <span onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
+            <AnomaliesBadge
+              score={serviceAnomalyStats.anomalyScore}
+              detectorType={serviceAnomalyStats.detectorType}
+              href={anomaliesOverviewHref}
             />
           </span>
         </EuiFlexItem>
