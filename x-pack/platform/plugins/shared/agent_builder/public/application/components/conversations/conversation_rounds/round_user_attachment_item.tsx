@@ -113,9 +113,9 @@ export const RoundUserAttachmentItem: React.FC<RoundUserAttachmentItemProps> = (
     min-width: 0;
     /*
      * Selected pill draws an inset primary ring so the affordance
-     * remains visible even on the deeper background — outside
-     * (`outline`) would clip against neighbour pills on the same
-     * row, inset ring keeps the layout intact.
+     * remains visible even on the deeper background — an outside
+     * 'outline' would clip against neighbour pills on the same row,
+     * so the inset ring keeps the layout intact.
      */
     box-shadow: ${isSelected
       ? `inset 0 0 0 1px ${euiTheme.colors.primary}`

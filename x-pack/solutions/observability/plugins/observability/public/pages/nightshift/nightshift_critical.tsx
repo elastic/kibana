@@ -97,8 +97,7 @@ const FILTER_OPTIONS = [
 const REMEDIATE_PROMPT = i18n.translate(
   'xpack.observability.nightshift.critical.remediatePrompt',
   {
-    defaultMessage:
-      'Remediate all the significant events currently in a critical state and walk me through the steps you take.',
+    defaultMessage: 'Investigate all significant events.',
   }
 );
 

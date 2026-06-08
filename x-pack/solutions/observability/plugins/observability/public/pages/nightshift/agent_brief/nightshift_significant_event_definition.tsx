@@ -210,6 +210,16 @@ export const createNightshiftSignificantEventDefinition = (): AttachmentUIDefini
   getIcon: () => 'sun',
   canvasWidth: '40vw',
 
+  /*
+   * Auto-render every staged significant event under each agent
+   * response so the Critical / Morning conversation always shows
+   * the events the user handed off, not only above the prompt. The
+   * framework picks these up in
+   * `round_layout.tsx` (`responseAttachments` memo) — see the
+   * `showInResponse` flag on `AttachmentUIDefinition`.
+   */
+  showInResponse: true,
+
   renderCanvasContent: ({ attachment }) => <CanvasContent data={attachment.data} />,
 
   getActionButtons: ({ isCanvas, openCanvas }) => {
