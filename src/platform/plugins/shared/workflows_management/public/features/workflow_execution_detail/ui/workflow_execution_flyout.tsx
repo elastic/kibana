@@ -38,6 +38,7 @@ import { formatDuration } from '../../../shared/lib/format_duration';
 import { getStatusLabel } from '../../../shared/translations/status_translations';
 import { FormattedRelativeEnhanced } from '../../../shared/ui/formatted_relative_enhanced/formatted_relative_enhanced';
 import { getExecutionStatusIcon } from '../../../shared/ui/status_badge';
+import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
 import { WorkflowStepExecutionTree } from './workflow_step_execution_tree';
 
 export interface WorkflowExecutionFlyoutProps {
@@ -165,20 +166,6 @@ const StepDataSection = ({ label, data }: { label: string; data: unknown }) => {
             />
           </>
         )}
-
-        {effectiveView === 'code' && (
-          <EuiButtonIcon
-            iconType="copyClipboard"
-            size="s"
-            color="text"
-            aria-label={i18n.translate('workflows.executionFlyout.stepDetail.copy', {
-              defaultMessage: 'Copy to clipboard',
-            })}
-            onClick={() => {
-              void navigator.clipboard.writeText(JSON.stringify(data, null, 2));
-            }}
-          />
-        )}
       </div>
 
       {/* Section content */}
@@ -189,6 +176,7 @@ const StepDataSection = ({ label, data }: { label: string; data: unknown }) => {
           transparentBackground
           paddingSize="m"
           overflowHeight={300}
+          isCopyable
         >
           {JSON.stringify(data ?? null, null, 2)}
         </EuiCodeBlock>
@@ -392,6 +380,14 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                     flexShrink: 0,
                   }}
                 >
+                  {selectedLightStep?.stepType && (
+                    <StepIcon
+                      stepType={selectedLightStep.stepType}
+                      executionStatus={selectedLightStep.status}
+                      size="m"
+                      css={{ flexShrink: 0 }}
+                    />
+                  )}
                   <span
                     css={{
                       flex: 1,

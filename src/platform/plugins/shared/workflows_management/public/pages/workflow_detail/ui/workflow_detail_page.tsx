@@ -36,7 +36,7 @@ import { loadConnectorsThunk } from '../../../entities/workflows/store/workflow_
 import { loadWorkflowThunk } from '../../../entities/workflows/store/workflow_detail/thunks/load_workflow_thunk';
 import { loadWorkflowsThunk } from '../../../entities/workflows/store/workflow_detail/thunks/load_workflows_thunk';
 import { WorkflowExecutionFlyout } from '../../../features/workflow_execution_detail';
-import { WorkflowExecutionList } from '../../../features/workflow_execution_list/ui/workflow_execution_list_stateful';
+import { WorkflowExecutionListFlyout } from '../../../features/workflow_execution_list/ui/workflow_execution_list_flyout';
 import { useAsyncThunkState } from '../../../hooks/use_async_thunk';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useTelemetry } from '../../../hooks/use_telemetry';
@@ -131,8 +131,29 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
 
   // TODO: manage it in a workflow state context
   const [highlightDiff, setHighlightDiff] = useState(false);
+  const [isExecutionListOpen, setIsExecutionListOpen] = useState(false);
+
+  // If the page loads with an execution already selected (e.g. direct URL), open the list too
+  // so that closing the detail navigates back to the list rather than closing everything.
+  useEffect(() => {
+    if (selectedExecutionId) {
+      setIsExecutionListOpen(true);
+    }
+    // intentionally runs only on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const onOpenExecutionList = useCallback(() => {
+    setIsExecutionListOpen(true);
+  }, []);
+
+  const onCloseExecutionList = useCallback(() => {
+    setIsExecutionListOpen(false);
+    setSelectedExecution(null);
+  }, [setSelectedExecution]);
 
   const onCloseExecutionDetail = useCallback(() => {
+    // Clear the selected execution but keep the list open so the user goes back to the list.
     setSelectedExecution(null);
   }, [setSelectedExecution]);
 
@@ -177,6 +198,7 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
           isLoading={isLoadingWorkflow}
           highlightDiff={highlightDiff}
           setHighlightDiff={setHighlightDiff}
+          onOpenExecutionList={id && canReadWorkflowExecution ? onOpenExecutionList : undefined}
         />
       </EuiFlexItem>
       <EuiFlexItem css={css({ overflow: 'hidden', minHeight: 0 })}>
@@ -186,13 +208,15 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
           <>
             <WorkflowEditorLayout
               editor={<WorkflowDetailEditor highlightDiff={highlightDiff} />}
-              executionList={
-                id && activeTab === 'executions' && canReadWorkflowExecution ? (
-                  <WorkflowExecutionList workflowId={id} />
-                ) : null
-              }
+              executionList={null}
               executionDetail={null}
             />
+            {id && isExecutionListOpen && !selectedExecutionId && canReadWorkflowExecution && (
+              <WorkflowExecutionListFlyout
+                workflowId={id}
+                onClose={onCloseExecutionList}
+              />
+            )}
             {selectedExecutionId && canReadWorkflowExecution && (
               <WorkflowExecutionFlyout
                 executionId={selectedExecutionId}
