@@ -60,7 +60,8 @@
     "@kbn/charts-theme",
     "@kbn/shared-ux-error-boundary",
     "@kbn/licensing-types",
-    "@kbn/kql"
+    "@kbn/kql",
+    "@kbn/core-spaces-common"
     // add references to other TypeScript projects the plugin depends on
 
     // requiredPlugins from ./kibana.json
