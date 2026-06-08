@@ -9,7 +9,11 @@
 
 import { schema } from '@kbn/config-schema';
 import { dashboardNavigationOptionsSchema } from '@kbn/dashboard-navigation-options-schema';
-import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
+import {
+  BY_REF_SCHEMA_META,
+  BY_VALUE_SCHEMA_META,
+  serializedTitlesSchema,
+} from '@kbn/presentation-publishing-schemas';
 import { DEFAULT_EXTERNAL_LINK_OPTIONS } from '../../common/constants';
 import {
   DASHBOARD_LINK_TYPE,
@@ -89,10 +93,41 @@ export const layoutSchema = schema.maybe(
   })
 );
 
-export const linksSchema = serializedTitlesSchema.extends(
+export const linksByValueSchema = serializedTitlesSchema.extends(
   {
     links: linksArraySchema,
     layout: layoutSchema,
   },
-  { unknowns: 'forbid' }
+  { unknowns: 'forbid', meta: BY_VALUE_SCHEMA_META }
+);
+
+export const linksByReferenceSchema = serializedTitlesSchema.extends(
+  {
+    ref_id: schema.string({
+      meta: {
+        title: 'Reference ID',
+        description: 'The unique identifier of the Links library item',
+      },
+    }),
+  },
+  { unknowns: 'forbid', meta: BY_REF_SCHEMA_META }
+);
+
+// Complete links embeddable schema (union of by-value and by-reference embeddables)
+export const linksEmbeddableSchema = schema.oneOf(
+  [
+    // Links by-value embeddable schema (by-value state + titles)
+    schema.allOf([linksByValueSchema, serializedTitlesSchema], {
+      meta: BY_VALUE_SCHEMA_META,
+    }),
+    // Links by-reference embeddable schema (by-reference state + titles)
+    schema.allOf([linksByReferenceSchema, serializedTitlesSchema], {
+      meta: BY_REF_SCHEMA_META,
+    }),
+  ],
+  {
+    meta: {
+      description: 'Links embeddable schema',
+    },
+  }
 );

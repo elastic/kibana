@@ -8,6 +8,12 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { linksSchema } from './api/schemas';
+import type {
+  linksByReferenceSchema,
+  linksByValueSchema,
+  linksEmbeddableSchema,
+} from './api/schemas';
 
-export type LinksAttributes = TypeOf<typeof linksSchema>;
+export type LinksByValueState = TypeOf<typeof linksByValueSchema>;
+export type LinksByReferenceState = TypeOf<typeof linksByReferenceSchema>;
+export type LinksEmbeddableState = TypeOf<typeof linksEmbeddableSchema>;

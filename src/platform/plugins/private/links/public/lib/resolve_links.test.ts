@@ -48,10 +48,9 @@ describe('resolveLinkInfo', () => {
   });
 
   it('resolves a dashboard link with a label', async () => {
-    const newLocal = '001';
     const link: Link = {
       type: DASHBOARD_LINK_TYPE,
-      destination: newLocal,
+      destination: '001',
       label: 'My Dashboard',
       options: DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
     };

@@ -13,7 +13,7 @@ import type { ContentManagementPublicStart } from '@kbn/content-management-plugi
 import type { CoreStart } from '@kbn/core/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import { LINKS_SAVED_OBJECT_TYPE } from '../../common';
+import { LINKS_LIBRARY_TYPE } from '../../common';
 import type { LinksStartDependencies } from '../plugin';
 
 export let coreServices: CoreStart;
@@ -48,7 +48,7 @@ export const setKibanaServices = (kibanaCore: CoreStart, deps: LinksStartDepende
   if (deps.usageCollection)
     trackUiMetric = deps.usageCollection.reportUiCounter.bind(
       deps.usageCollection,
-      LINKS_SAVED_OBJECT_TYPE
+      LINKS_LIBRARY_TYPE
     );
 
   servicesReady$.next(true);

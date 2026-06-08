@@ -12,7 +12,7 @@ import type {
   dashboardLinkSchema,
   externalLinkOptionsSchema,
   externalLinkSchema,
-  linksSchema,
+  linksByValueSchema,
 } from '../api/schemas';
 
 export type DashboardLink = TypeOf<typeof dashboardLinkSchema>;
@@ -21,7 +21,7 @@ export type ExternalLinkOptions = TypeOf<typeof externalLinkOptionsSchema>;
 export type Link = DashboardLink | ExternalLink;
 export type LinkOptions = DashboardLink['options'] | ExternalLinkOptions;
 
-export type LinksState = TypeOf<typeof linksSchema>;
+export type LinksState = TypeOf<typeof linksByValueSchema>;
 
 export type StoredLink = StoredDashboardLink | StoredExternalLink;
 export type StoredLinksState = Omit<LinksState, 'links'> & {

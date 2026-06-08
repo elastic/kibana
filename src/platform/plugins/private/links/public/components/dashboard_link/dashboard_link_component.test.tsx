@@ -10,12 +10,11 @@
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 
-import { createEvent, fireEvent, render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-
 import { EuiThemeProvider } from '@elastic/eui';
 import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '@kbn/dashboard-navigation-options-common';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import { createEvent, fireEvent, render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import { LINKS_VERTICAL_LAYOUT } from '../../../common/constants';
 import { getMockLinksParentApi } from '../../mocks';

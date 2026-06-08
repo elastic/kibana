@@ -8,7 +8,7 @@
  */
 
 import type { RequestHandlerContext } from '@kbn/core/server';
-import { LINKS_SAVED_OBJECT_TYPE } from '../../../common';
+import { LINKS_LIBRARY_TYPE } from '../../../common';
 import { transformIn } from '../../../common/embeddable/transforms/transform_in';
 import type { StoredLinksState } from '../../links_saved_object';
 import { getLinksCRUResponseBody } from '../get_cru_response_body';
@@ -23,7 +23,7 @@ export async function update(
 
   const { state: soState, references } = transformIn(updateBody);
   const savedObject = await core.savedObjects.client.update<StoredLinksState>(
-    LINKS_SAVED_OBJECT_TYPE,
+    LINKS_LIBRARY_TYPE,
     id,
     soState,
     {

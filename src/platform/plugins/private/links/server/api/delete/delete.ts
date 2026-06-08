@@ -8,9 +8,9 @@
  */
 
 import type { RequestHandlerContext } from '@kbn/core/server';
-import { LINKS_SAVED_OBJECT_TYPE } from '../../../common';
+import { LINKS_LIBRARY_TYPE } from '../../../common';
 
 export async function deleteLinks(requestCtx: RequestHandlerContext, id: string): Promise<void> {
   const { core } = await requestCtx.resolve(['core']);
-  await core.savedObjects.client.delete(LINKS_SAVED_OBJECT_TYPE, id);
+  await core.savedObjects.client.delete(LINKS_LIBRARY_TYPE, id);
 }

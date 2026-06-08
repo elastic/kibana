@@ -7,12 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { linksEmbeddableSchema } from './embeddable_schemas';
-export type {
-  LinksByReferenceState,
-  LinksByValueState,
-  LinksEmbeddableState,
-} from './embeddable_schemas';
 export { linksSavedObjectType } from './links_saved_object';
 
 export type {

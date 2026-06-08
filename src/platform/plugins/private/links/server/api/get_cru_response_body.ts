@@ -9,7 +9,7 @@
 
 import type { SavedObject, SavedObjectsUpdateResponse } from '@kbn/core/server';
 import { getMeta } from '@kbn/as-code-shared-schemas';
-import { linksSchema } from './schemas';
+import { linksByValueSchema } from './schemas';
 import type { StoredLinksState } from '../links_saved_object';
 import { transformOut } from '../../common/embeddable/transforms/transform_out';
 
@@ -22,7 +22,7 @@ export function getLinksCRUResponseBody(
     id: savedObject.id,
     // Route does not apply defaults to response
     // Instead, call validate to ensure defaults are applied to response
-    data: linksSchema.validate(state),
+    data: linksByValueSchema.validate(state),
     meta: getMeta(savedObject),
   };
 }

@@ -9,10 +9,10 @@
 
 import type { SavedObjectsType } from '@kbn/core/server';
 import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { APP_ICON, LINKS_SAVED_OBJECT_TYPE } from '../../common';
+import { APP_ICON, LINKS_LIBRARY_TYPE } from '../../common';
 
 export const linksSavedObjectType: SavedObjectsType = {
-  name: LINKS_SAVED_OBJECT_TYPE,
+  name: LINKS_LIBRARY_TYPE,
   indexPattern: ANALYTICS_SAVED_OBJECT_INDEX,
   hidden: false,
   namespaceType: 'multiple-isolated',

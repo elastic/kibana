@@ -9,9 +9,9 @@
 
 import { schema } from '@kbn/config-schema';
 import { asCodeMetaSchema } from '@kbn/as-code-shared-schemas';
-import { linksSchema } from '../schemas';
+import { linksByValueSchema } from '../schemas';
 
-export const updateRequestBodySchema = linksSchema;
+export const updateRequestBodySchema = linksByValueSchema;
 
 export const updateResponseBodySchema = schema.object(
   {
@@ -21,7 +21,7 @@ export const updateResponseBodySchema = schema.object(
           'The unique ID of the links library item, as returned by the create or search endpoints.',
       },
     }),
-    data: linksSchema,
+    data: linksByValueSchema,
     meta: asCodeMetaSchema,
   },
   {

@@ -10,8 +10,7 @@
 import classNames from 'classnames';
 import React, { useMemo } from 'react';
 
-import type { UseEuiTheme } from '@elastic/eui';
-import { EuiListGroupItem } from '@elastic/eui';
+import { type UseEuiTheme, EuiListGroupItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '@kbn/dashboard-navigation-options-common';

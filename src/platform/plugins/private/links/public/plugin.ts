@@ -23,7 +23,7 @@ import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 
 import type { LinksEmbeddableState } from '../common';
-import { APP_ICON, APP_NAME, LINKS_EMBEDDABLE_TYPE, LINKS_SAVED_OBJECT_TYPE } from '../common';
+import { APP_ICON, APP_NAME, LINKS_EMBEDDABLE_TYPE, LINKS_LIBRARY_TYPE } from '../common';
 import type { LinksState } from '../server';
 import { ADD_LINKS_PANEL_ACTION_ID } from './actions/constants';
 import { setKibanaServices } from './services/kibana_services';
@@ -63,7 +63,7 @@ export class LinksPlugin
           }
         );
       },
-      savedObjectType: LINKS_SAVED_OBJECT_TYPE,
+      savedObjectType: LINKS_LIBRARY_TYPE,
       savedObjectName: APP_NAME,
       getIconForSavedObject: () => APP_ICON,
     });
@@ -81,7 +81,7 @@ export class LinksPlugin
     import('./links_client/links_client').then(({ getLinksClient }) =>
       plugins.visualizations.registerAlias({
         disableCreate: true, // do not allow creation through visualization listing page
-        name: LINKS_SAVED_OBJECT_TYPE,
+        name: LINKS_LIBRARY_TYPE,
         title: APP_NAME,
         icon: APP_ICON,
         description: i18n.translate('links.description', {
@@ -90,7 +90,7 @@ export class LinksPlugin
         stage: 'production',
         appExtensions: {
           visualizations: {
-            docTypes: [LINKS_SAVED_OBJECT_TYPE],
+            docTypes: [LINKS_LIBRARY_TYPE],
             searchFields: ['title^3'],
             client: getLinksClient,
             toListItem(
