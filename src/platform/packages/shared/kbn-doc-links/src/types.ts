@@ -163,6 +163,7 @@ export interface DocLinks {
     readonly e5Model: string;
     readonly elasticInferenceService: string;
     readonly elasticInferenceServicePricing: string;
+    readonly elasticInferenceServiceSupportedModels: string;
     readonly elser: string;
     readonly engines: string;
     readonly indexApi: string;

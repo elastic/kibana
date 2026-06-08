@@ -13,7 +13,7 @@ test.describe('Onboarding connect step', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ apiServices }) => {
     await apiServices.core.settings({
       'feature_flags.overrides': {
-        'ingestHub.onboardingEnabled': true,
+        'ingestHub.onboardingEnabled': 'true',
       },
     });
   });
@@ -21,7 +21,7 @@ test.describe('Onboarding connect step', { tag: tags.stateful.classic }, () => {
   test.afterAll(async ({ apiServices }) => {
     await apiServices.core.settings({
       'feature_flags.overrides': {
-        'ingestHub.onboardingEnabled': false,
+        'ingestHub.onboardingEnabled': 'false',
       },
     });
   });
@@ -37,7 +37,6 @@ test.describe('Onboarding connect step', { tag: tags.stateful.classic }, () => {
     await page.testSubj.locator('awsAuthTypeSelector').selectOption('static_keys');
 
     await expect(page.testSubj.locator('awsStaticKeysForm')).toBeVisible();
-    await expect(page.testSubj.locator('awsStaticKeysForm-launchCloudFormation')).toBeVisible();
     await expect(page.testSubj.locator('awsConnectSetup-nextButton')).toBeDisabled();
 
     await page.testSubj.locator('awsStaticKeysForm-accessKeyId').fill('AKIAIOSFODNN7EXAMPLE');
@@ -54,9 +53,18 @@ test.describe('Onboarding connect step', { tag: tags.stateful.classic }, () => {
   }) => {
     await browserAuth.loginAsAdmin();
     await page.gotoApp('onboarding/aws#connect');
+
+    // Clear all selections so selectedServiceIds is empty → showIdentityFederation = true
+    await page.evaluate(() => {
+      sessionStorage.setItem(
+        'onboarding.aws.servicesStep',
+        JSON.stringify({ selectedServiceIds: [] })
+      );
+    });
+    await page.reload();
     await expect(page.testSubj.locator('onboardingStep-connect')).toBeVisible();
 
-    // Identity federation is the default auth type; with no connectors the New Identity tab is shown
+    // Identity federation is shown when no services are selected; with no connectors the New Identity tab is shown
     await expect(page.testSubj.locator('awsIdentityFederationSetup-roleArn')).toBeVisible();
     await expect(
       page.testSubj.locator('awsIdentityFederationSetup-launchCloudFormation')
@@ -86,9 +94,9 @@ test.describe('Onboarding connect step', { tag: tags.stateful.classic }, () => {
 
     await page.testSubj.locator('awsAuthTypeSelector').selectOption('temporary_keys');
 
-    // Temporary keys form has no CloudFormation button
+    // Temporary keys form is visible; static keys form is hidden
     await expect(page.testSubj.locator('awsTemporaryKeysForm')).toBeVisible();
-    await expect(page.testSubj.locator('awsStaticKeysForm-launchCloudFormation')).toBeHidden();
+    await expect(page.testSubj.locator('awsStaticKeysForm')).toBeHidden();
     await expect(page.testSubj.locator('awsConnectSetup-nextButton')).toBeDisabled();
 
     await expect(page.testSubj.locator('awsTemporaryKeysForm-sessionToken')).toBeVisible();
@@ -128,6 +136,15 @@ test.describe('Onboarding connect step', { tag: tags.stateful.classic }, () => {
 
       await browserAuth.loginAsAdmin();
       await page.gotoApp('onboarding/aws#connect');
+
+      // Clear all selections so selectedServiceIds is empty → showIdentityFederation = true
+      await page.evaluate(() => {
+        sessionStorage.setItem(
+          'onboarding.aws.servicesStep',
+          JSON.stringify({ selectedServiceIds: [] })
+        );
+      });
+      await page.reload();
       await expect(page.testSubj.locator('onboardingStep-connect')).toBeVisible();
 
       // When at least one connector exists, the Existing Identity tab is pre-selected
