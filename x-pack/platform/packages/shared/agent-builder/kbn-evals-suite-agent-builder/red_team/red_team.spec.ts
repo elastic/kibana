@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout';
 import {
   createRedTeamOrchestrator,
   formatRedTeamReport,
@@ -51,7 +52,7 @@ const readRedTeamConfig = (): RedTeamConfig => {
   };
 };
 
-evaluate.describe('Red Team', () => {
+evaluate.describe('Red Team', { tag: tags.serverless.search }, () => {
   evaluate(
     'adversarial attack testing',
     async ({ chatClient, executorClient, inferenceClient, evaluationConnector, log }) => {
