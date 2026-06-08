@@ -84,8 +84,11 @@ const formatConnectorAttachmentForLlm = (data: {
   connector_name: string;
   connector_type: string;
 }): string => {
-  const { connector_id: connectorId, connector_name: connectorName, connector_type: connectorType } =
-    data;
+  const {
+    connector_id: connectorId,
+    connector_name: connectorName,
+    connector_type: connectorType,
+  } = data;
   const spec = getConnectorSpec(connectorType);
   const subActionEntries = spec
     ? Object.entries(spec.actions).filter(([, action]) => action.isTool)
@@ -157,11 +160,10 @@ export const createInsightsDiscoveryConnectorContext = (
             total: connectorHits.length,
             items: connectorHits.map((hit) => ({
               chunk_id: hit.id,
-              attachment_id: hit.origin_id,
+              attachment_id: hit.origin.uri,
               attachment_type: hit.type,
               title: hit.title,
               content: hit.content,
-              score: hit.score,
             })),
           },
         };
