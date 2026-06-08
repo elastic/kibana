@@ -44,6 +44,7 @@ jest.mock('../../../alerts_table/actions', () => ({
 }));
 
 jest.mock('../../../../../attack_discovery/helpers', () => ({
+  ...jest.requireActual('../../../../../attack_discovery/helpers'),
   getTacticMetadata: jest.fn(() => []),
 }));
 

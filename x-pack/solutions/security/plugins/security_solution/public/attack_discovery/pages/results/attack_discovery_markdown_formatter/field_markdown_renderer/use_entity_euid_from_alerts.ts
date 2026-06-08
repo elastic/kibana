@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { lastValueFrom } from 'rxjs';
 import { useEffect, useState } from 'react';
 import type { EntityType } from '@kbn/entity-store/public';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 
+import { DEFAULT_ALERTS_INDEX } from '../../../../../../common/constants';
 import { useKibana } from '../../../../../common/lib/kibana';
 
 interface Params {
@@ -23,7 +25,7 @@ interface Result {
   isLoading: boolean;
 }
 
-const ENTITY_TYPE_BY_FIELD: Record<string, EntityType> = {
+export const ENTITY_TYPE_BY_FIELD: Record<string, EntityType> = {
   'host.name': 'host',
   'host.hostname': 'host',
   'user.name': 'user',
@@ -37,13 +39,14 @@ export const useEntityEuidFromAlerts = ({
 }: Params): Result => {
   const { data } = useKibana().services;
   const euidApi = useEntityStoreEuidApi();
+  const getEuidRuntimeMapping = euidApi?.euid.painless.getEuidRuntimeMapping;
   const [euid, setEuid] = useState<string | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(false);
 
   const entityType = ENTITY_TYPE_BY_FIELD[fieldName];
 
   useEffect(() => {
-    if (!enabled || !entityType || alertIds.length === 0 || !euidApi?.euid) {
+    if (!enabled || !entityType || alertIds.length === 0 || !getEuidRuntimeMapping) {
       return;
     }
 
@@ -52,43 +55,33 @@ export const useEntityEuidFromAlerts = ({
 
     const fetchEuid = async () => {
       try {
-        const response = await data.search
-          .search({
+        const response = await lastValueFrom(
+          data.search.search({
             params: {
-              index: '.alerts-security.alerts-*',
+              index: `${DEFAULT_ALERTS_INDEX}-*`,
               ignore_unavailable: true,
               body: {
                 query: { ids: { values: alertIds } },
-                _source: [fieldName],
+                _source: false,
                 runtime_mappings: {
-                  entity_id: euidApi.euid.painless.getEuidRuntimeMapping(entityType),
+                  entity_id: getEuidRuntimeMapping(entityType),
                 },
-                fields: ['entity_id'],
+                fields: ['entity_id', fieldName],
                 size: alertIds.length,
               },
             },
           })
-          .toPromise();
+        );
 
         if (cancelled) return;
 
         const hits =
           (response?.rawResponse?.hits?.hits as Array<{
-            _source?: Record<string, unknown>;
-            fields?: { entity_id?: string[] };
+            fields?: { entity_id?: string[]; [key: string]: unknown };
           }>) ?? [];
         // Find the first alert where the clicked field matches the badge value
         const matchingHit = hits.find((hit) => {
-          const src = hit._source ?? {};
-          const fieldParts = fieldName.split('.');
-          // Support flattened keys (e.g. 'host.name') and nested objects
-          const flatValue = src[fieldName];
-          const nestedValue = fieldParts.reduce(
-            (obj: Record<string, unknown> | undefined, key: string) =>
-              (obj?.[key] as Record<string, unknown> | undefined) ?? undefined,
-            src
-          );
-          const val = flatValue ?? nestedValue;
+          const val = hit.fields?.[fieldName];
           return val === fieldValue || (Array.isArray(val) && val.includes(fieldValue));
         });
 
@@ -107,7 +100,7 @@ export const useEntityEuidFromAlerts = ({
     return () => {
       cancelled = true;
     };
-  }, [alertIds, data.search, euidApi, entityType, fieldName, fieldValue, enabled]);
+  }, [alertIds, data.search, getEuidRuntimeMapping, entityType, fieldName, fieldValue, enabled]);
 
   return { euid, isLoading };
 };

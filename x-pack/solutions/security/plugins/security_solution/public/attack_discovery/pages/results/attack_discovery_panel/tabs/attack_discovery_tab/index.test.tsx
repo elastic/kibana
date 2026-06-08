@@ -18,6 +18,18 @@ import { useKibana } from '../../../../../../common/lib/kibana';
 
 jest.mock('../../../../../../common/lib/kibana');
 
+jest.mock(
+  '../../../attack_discovery_markdown_formatter/field_markdown_renderer/use_entity_euid_from_alerts',
+  () => ({
+    useEntityEuidFromAlerts: jest.fn(() => ({ euid: undefined, isLoading: false })),
+    ENTITY_TYPE_BY_FIELD: {
+      'host.name': 'host',
+      'host.hostname': 'host',
+      'user.name': 'user',
+    },
+  })
+);
+
 describe('AttackDiscoveryTab', () => {
   const mockReplacements: Replacements = {
     '5e454c38-439c-4096-8478-0a55511c76e3': 'foo.hostname',

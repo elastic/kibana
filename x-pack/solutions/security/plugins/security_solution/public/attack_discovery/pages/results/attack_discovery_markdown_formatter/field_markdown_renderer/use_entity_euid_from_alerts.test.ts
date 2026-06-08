@@ -6,6 +6,7 @@
  */
 
 import { renderHook, waitFor } from '@testing-library/react';
+import { of, throwError, from } from 'rxjs';
 import { useEntityEuidFromAlerts } from './use_entity_euid_from_alerts';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
@@ -16,16 +17,11 @@ jest.mock('@kbn/entity-store/public', () => ({
 }));
 
 describe('useEntityEuidFromAlerts', () => {
-  let searchMock: jest.Mock;
-  let toPromiseMock: jest.Mock;
-  let getEuidRuntimeMappingMock: jest.Mock;
+  const searchMock: jest.Mock = jest.fn();
+  const getEuidRuntimeMappingMock: jest.Mock = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
-
-    toPromiseMock = jest.fn();
-    searchMock = jest.fn().mockReturnValue({ toPromise: toPromiseMock });
-    getEuidRuntimeMappingMock = jest.fn().mockReturnValue('mock-painless-script');
 
     (useKibana as jest.Mock).mockReturnValue({
       services: {
@@ -67,23 +63,32 @@ describe('useEntityEuidFromAlerts', () => {
     expect(searchMock).not.toHaveBeenCalled();
   });
 
+  it('returns undefined euid and false isLoading when euidApi is null or undefined', () => {
+    (useEntityStoreEuidApi as jest.Mock).mockReturnValueOnce(null);
+
+    const { result } = renderHook(() => useEntityEuidFromAlerts(defaultProps));
+
+    expect(result.current).toEqual({ euid: undefined, isLoading: false });
+    expect(searchMock).not.toHaveBeenCalled();
+  });
+
   it('fetches and returns the correct EUID when a matching alert is found', async () => {
-    toPromiseMock.mockResolvedValueOnce({
-      rawResponse: {
-        hits: {
-          hits: [
-            {
-              _source: { host: { name: 'other-host' } },
-              fields: { entity_id: ['host:other-id'] },
-            },
-            {
-              _source: { host: { name: 'test-host' } },
-              fields: { entity_id: ['host:test-id'] },
-            },
-          ],
+    searchMock.mockReturnValueOnce(
+      of({
+        rawResponse: {
+          hits: {
+            hits: [
+              {
+                fields: { 'host.name': ['other-host'], entity_id: ['host:other-id'] },
+              },
+              {
+                fields: { 'host.name': ['test-host'], entity_id: ['host:test-id'] },
+              },
+            ],
+          },
         },
-      },
-    });
+      })
+    );
 
     const { result } = renderHook(() => useEntityEuidFromAlerts(defaultProps));
 
@@ -99,22 +104,22 @@ describe('useEntityEuidFromAlerts', () => {
   });
 
   it('returns undefined EUID when no alert matches the field value', async () => {
-    toPromiseMock.mockResolvedValueOnce({
-      rawResponse: {
-        hits: {
-          hits: [
-            {
-              _source: { host: { name: 'other-host-1' } },
-              fields: { entity_id: ['host:other-id-1'] },
-            },
-            {
-              _source: { host: { name: 'other-host-2' } },
-              fields: { entity_id: ['host:other-id-2'] },
-            },
-          ],
+    searchMock.mockReturnValueOnce(
+      of({
+        rawResponse: {
+          hits: {
+            hits: [
+              {
+                fields: { 'host.name': ['other-host-1'], entity_id: ['host:other-id-1'] },
+              },
+              {
+                fields: { 'host.name': ['other-host-2'], entity_id: ['host:other-id-2'] },
+              },
+            ],
+          },
         },
-      },
-    });
+      })
+    );
 
     const { result } = renderHook(() => useEntityEuidFromAlerts(defaultProps));
 
@@ -125,19 +130,20 @@ describe('useEntityEuidFromAlerts', () => {
     expect(result.current.euid).toBeUndefined();
   });
 
-  it('handles flat field names in elasticsearch response correctly', async () => {
-    toPromiseMock.mockResolvedValueOnce({
-      rawResponse: {
-        hits: {
-          hits: [
-            {
-              _source: { 'host.name': 'test-host' },
-              fields: { entity_id: ['host:test-id'] },
-            },
-          ],
+  it('handles field values as single string correctly', async () => {
+    searchMock.mockReturnValueOnce(
+      of({
+        rawResponse: {
+          hits: {
+            hits: [
+              {
+                fields: { 'host.name': 'test-host', entity_id: ['host:test-id'] },
+              },
+            ],
+          },
         },
-      },
-    });
+      })
+    );
 
     const { result } = renderHook(() => useEntityEuidFromAlerts(defaultProps));
 
@@ -149,7 +155,7 @@ describe('useEntityEuidFromAlerts', () => {
   });
 
   it('returns undefined when the ES query throws and swallows the error', async () => {
-    toPromiseMock.mockRejectedValueOnce(new Error('ES failure'));
+    searchMock.mockReturnValueOnce(throwError(() => new Error('ES failure')));
 
     const { result } = renderHook(() => useEntityEuidFromAlerts(defaultProps));
 
@@ -165,7 +171,8 @@ describe('useEntityEuidFromAlerts', () => {
     const promise = new Promise((resolve) => {
       resolvePromise = resolve;
     });
-    toPromiseMock.mockReturnValue(promise);
+    // Use an observable that resolves when the promise resolves
+    searchMock.mockReturnValueOnce(from(promise));
 
     const { result, unmount } = renderHook(() => useEntityEuidFromAlerts(defaultProps));
 

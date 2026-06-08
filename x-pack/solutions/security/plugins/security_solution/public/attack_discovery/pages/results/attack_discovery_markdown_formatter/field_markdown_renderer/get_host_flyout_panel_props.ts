@@ -29,16 +29,18 @@ export const getHostFlyoutPanelProps = ({
   contextId,
   hostName,
   entityId,
+  scopeId = TableId.alertsOnAlertsPage,
 }: {
   contextId: string;
   hostName: string;
   entityId?: string;
+  scopeId?: string;
 }): FlyoutPanelProps => ({
   id: HostPanelKey,
   params: {
     hostName,
     contextID: contextId,
-    scopeId: TableId.alertsOnAlertsPage,
+    scopeId,
     entityId,
   },
 });

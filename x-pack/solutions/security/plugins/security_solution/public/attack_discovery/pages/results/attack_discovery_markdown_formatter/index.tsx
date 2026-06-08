@@ -13,7 +13,8 @@ import {
 import React, { useMemo } from 'react';
 
 import { AttackDiscoveryMarkdownParser } from './attack_discovery_markdown_parser';
-import { getFieldMarkdownRenderer } from './field_markdown_renderer';
+import { MarkdownFormatterContext } from './context';
+import { FieldMarkdownRenderer } from './field_markdown_renderer';
 
 interface Props {
   scopeId?: string;
@@ -35,25 +36,28 @@ const AttackDiscoveryMarkdownFormatterComponent: React.FC<Props> = ({
 
   const attackDiscoveryProcessingPluginList = useMemo(() => {
     const processingPluginList = getDefaultEuiMarkdownProcessingPlugins();
-    processingPluginList[1][1].components.fieldPlugin = getFieldMarkdownRenderer(
-      disableActions,
-      scopeId,
-      alertIds
-    );
+    processingPluginList[1][1].components.fieldPlugin = FieldMarkdownRenderer;
 
     return processingPluginList;
-  }, [alertIds, disableActions, scopeId]);
+  }, []);
+
+  const contextValue = useMemo(
+    () => ({ disableActions, scopeId, alertIds }),
+    [alertIds, disableActions, scopeId]
+  );
 
   return (
-    <EuiMarkdownFormat
-      color="subdued"
-      data-test-subj="attackDiscoveryMarkdownFormatter"
-      parsingPluginList={attackDiscoveryParsingPluginList}
-      processingPluginList={attackDiscoveryProcessingPluginList}
-      textSize="xs"
-    >
-      {markdown}
-    </EuiMarkdownFormat>
+    <MarkdownFormatterContext.Provider value={contextValue}>
+      <EuiMarkdownFormat
+        color="subdued"
+        data-test-subj="attackDiscoveryMarkdownFormatter"
+        parsingPluginList={attackDiscoveryParsingPluginList}
+        processingPluginList={attackDiscoveryProcessingPluginList}
+        textSize="xs"
+      >
+        {markdown}
+      </EuiMarkdownFormat>
+    </MarkdownFormatterContext.Provider>
   );
 };
 AttackDiscoveryMarkdownFormatterComponent.displayName = 'AttackDiscoveryMarkdownFormatter';

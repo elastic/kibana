@@ -80,8 +80,25 @@ jest.mock('../../../../common/lib/kibana', () => ({
   })),
 }));
 
+jest.mock(
+  '../attack_discovery_markdown_formatter/field_markdown_renderer/use_entity_euid_from_alerts',
+  () => ({
+    useEntityEuidFromAlerts: jest.fn(() => ({ euid: undefined, isLoading: false })),
+    ENTITY_TYPE_BY_FIELD: {
+      'host.name': 'host',
+      'host.hostname': 'host',
+      'user.name': 'user',
+    },
+  })
+);
+
 (mockUseKibana as jest.Mock).mockReturnValue({
   services: {
+    data: {
+      search: {
+        search: jest.fn().mockReturnValue({ toPromise: jest.fn().mockResolvedValue({}) }),
+      },
+    },
     application: {
       capabilities: {
         [SECURITY_FEATURE_ID]: { crud_alerts: true, read_alerts: true, configurations: true },

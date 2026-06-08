@@ -12,84 +12,84 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
 import { DraggableBadge } from '../../../../../common/components/draggables';
 import { getFlyoutPanelProps } from './helpers';
-import { useEntityEuidFromAlerts } from './use_entity_euid_from_alerts';
+import { useEntityEuidFromAlerts, ENTITY_TYPE_BY_FIELD } from './use_entity_euid_from_alerts';
+import { useMarkdownFormatterContext } from '../context';
 import type { ParsedField } from '../types';
 
 const contextId = 'FieldMarkdownRenderer';
 
-export const getFieldMarkdownRenderer = (
-  disableActions: boolean,
-  scopeId?: string,
-  alertIds?: string[]
-) => {
-  const FieldMarkdownRenderer = ({ icon, name, value }: ParsedField) => {
-    const { openRightPanel } = useExpandableFlyoutApi();
-    const { euiTheme } = useEuiTheme();
+export const FieldMarkdownRenderer = ({ icon, name, value }: ParsedField) => {
+  const { disableActions, scopeId, alertIds } = useMarkdownFormatterContext();
+  const { openRightPanel } = useExpandableFlyoutApi();
+  const { euiTheme } = useEuiTheme();
 
-    const isEntityField =
-      (name === 'host.name' || name === 'host.hostname' || name === 'user.name') &&
-      typeof value === 'string';
+  const isEntityField = name in ENTITY_TYPE_BY_FIELD && typeof value === 'string';
 
-    const { euid, isLoading } = useEntityEuidFromAlerts({
-      alertIds: alertIds ?? [],
-      fieldName: name,
-      fieldValue: typeof value === 'string' ? value : '',
-      enabled: !disableActions && isEntityField,
-    });
+  const { euid, isLoading } = useEntityEuidFromAlerts({
+    alertIds: alertIds ?? [],
+    fieldName: name,
+    fieldValue: typeof value === 'string' ? value : '',
+    enabled: !disableActions && isEntityField,
+  });
 
-    const flyoutPanelProps = useMemo(
-      () => getFlyoutPanelProps({ contextId, fieldName: name, value, entityId: euid }),
-      [euid, name, value]
-    );
+  const flyoutPanelProps = useMemo(
+    () => getFlyoutPanelProps({ contextId, fieldName: name, value, entityId: euid, scopeId }),
+    [euid, name, value, scopeId]
+  );
 
-    const onEntityClick = useCallback(() => {
-      if (flyoutPanelProps != null) {
-        openRightPanel(flyoutPanelProps);
-      }
-    }, [flyoutPanelProps, openRightPanel]);
+  const onEntityClick = useCallback(() => {
+    if (flyoutPanelProps != null) {
+      openRightPanel(flyoutPanelProps);
+    }
+  }, [flyoutPanelProps, openRightPanel]);
 
-    const entityButton: React.ReactElement | null = useMemo(
-      () =>
-        flyoutPanelProps != null ? (
-          <EuiButtonEmpty
-            css={css`
-              font-size: ${euiTheme.font.scale.s}rem;
-            `}
-            data-test-subj="entityButton"
-            flush="both"
-            isDisabled={isLoading}
-            onClick={onEntityClick}
-            size="xs"
-          >
-            {isLoading ? <EuiLoadingSpinner size="s" /> : value}
-          </EuiButtonEmpty>
-        ) : null,
+  const entityButton: React.ReactElement | null = useMemo(
+    () =>
+      flyoutPanelProps != null ? (
+        <EuiButtonEmpty
+          css={css`
+            font-size: ${euiTheme.font.scale.s}rem;
+          `}
+          data-test-subj="entityButton"
+          flush="both"
+          isDisabled={isLoading}
+          onClick={onEntityClick}
+          size="xs"
+        >
+          {value}
+          {isLoading && (
+            <EuiLoadingSpinner
+              size="s"
+              css={css`
+                margin-left: ${euiTheme.size.xs};
+              `}
+            />
+          )}
+        </EuiButtonEmpty>
+      ) : null,
 
-      [euiTheme.font.scale.s, flyoutPanelProps, isLoading, onEntityClick, value]
-    );
+    [euiTheme.font.scale.s, euiTheme.size.xs, flyoutPanelProps, isLoading, onEntityClick, value]
+  );
 
-    return (
-      <EuiToolTip content={name} data-test-subj="fieldMarkdownRendererToolTip" position="top">
-        {disableActions ? (
-          <EuiBadge color="hollow" data-test-subj="disabledActionsBadge" iconType={icon}>
-            {value}
-          </EuiBadge>
-        ) : (
-          <DraggableBadge
-            contextId="fieldMarkdownRenderer"
-            scopeId={scopeId}
-            eventId=""
-            iconType={icon}
-            isAggregatable={false}
-            field={name}
-            value={value}
-          >
-            {entityButton}
-          </DraggableBadge>
-        )}
-      </EuiToolTip>
-    );
-  };
-
-  return FieldMarkdownRenderer;
+  return (
+    <EuiToolTip content={name} data-test-subj="fieldMarkdownRendererToolTip" position="top">
+      {disableActions ? (
+        <EuiBadge color="hollow" data-test-subj="disabledActionsBadge" iconType={icon}>
+          {value}
+        </EuiBadge>
+      ) : (
+        <DraggableBadge
+          contextId="fieldMarkdownRenderer"
+          scopeId={scopeId}
+          eventId=""
+          iconType={icon}
+          isAggregatable={false}
+          field={name}
+          value={value}
+        >
+          {entityButton}
+        </DraggableBadge>
+      )}
+    </EuiToolTip>
+  );
 };

@@ -8,6 +8,7 @@
 import { useMemo } from 'react';
 import { useAttackDetailsContext } from '../context';
 import { getField } from '../../document_details/shared/utils';
+import { getOriginalAlertIds } from '../../../attack_discovery/helpers';
 
 const FIELD_SUMMARY_MARKDOWN = 'kibana.alert.attack_discovery.summary_markdown' as const;
 const FIELD_SUMMARY_MARKDOWN_WITH_REPLACEMENTS =
@@ -16,9 +17,6 @@ const FIELD_DETAILS_MARKDOWN = 'kibana.alert.attack_discovery.details_markdown' 
 const FIELD_DETAILS_MARKDOWN_WITH_REPLACEMENTS =
   'kibana.alert.attack_discovery.details_markdown_with_replacements' as const;
 
-/**
- * Centralized hook for Attack overview tab only
- */
 export const useOverviewTabData = () => {
   const { getFieldsData, attack } = useAttackDetailsContext();
 
@@ -40,7 +38,7 @@ export const useOverviewTabData = () => {
   );
 
   const originalAlertIds = useMemo(
-    () => attack?.alertIds.map((id) => attack.replacements?.[id] ?? id) ?? [],
+    () => (attack ? getOriginalAlertIds(attack.alertIds, attack.replacements) : []),
     [attack]
   );
 
