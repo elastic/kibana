@@ -112,15 +112,16 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
 
   const setConversationId = useCallback(
     (id?: string) => {
-      if (currentProps.newConversation && id) {
-        // reset new conversation flag when there is a valid id
-        setCurrentProps({ ...currentProps, newConversation: undefined });
-      }
       if (id !== persistedConversationId) {
         updatePersistedConversationId(id);
       }
+      setCurrentProps((prevProps) => ({
+        ...prevProps,
+        // reset new conversation flag when a valid id is assigned
+        ...(prevProps.newConversation && id ? { newConversation: undefined } : {}),
+      }));
     },
-    [currentProps, persistedConversationId, updatePersistedConversationId]
+    [persistedConversationId, updatePersistedConversationId]
   );
 
   const validateAndSetConversationId = useCallback(
