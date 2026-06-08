@@ -7,180 +7,59 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import { buildDataTableRecord } from '@kbn/discover-utils';
 import { AISummarySection } from './ai_summary_section';
-import { useOverviewTabData } from '../hooks/use_overview_tab_data';
-import { useExpandSection } from '../../../flyout_v2/shared/hooks/use_expand_section';
+import { useAttackDetailsContext } from '../context';
 
-jest.mock('@kbn/i18n-react', () => ({
-  FormattedMessage: ({ defaultMessage }: { defaultMessage: string }) => <>{defaultMessage}</>,
+jest.mock('../context', () => ({
+  useAttackDetailsContext: jest.fn(),
 }));
 
-jest.mock('../hooks/use_overview_tab_data', () => ({
-  useOverviewTabData: jest.fn(),
+jest.mock('@kbn/discover-utils', () => ({
+  buildDataTableRecord: jest.fn(),
 }));
 
-jest.mock('../../../flyout_v2/shared/hooks/use_expand_section', () => ({
-  useExpandSection: jest.fn(),
-}));
-
-jest.mock('../../../flyout_v2/shared/components/expandable_section', () => ({
-  ExpandableSection: ({
-    title,
-    children,
-    extraAction,
-    'data-test-subj': dataTestSubj,
-  }: {
-    title: React.ReactNode;
-    children: React.ReactNode;
-    extraAction?: React.ReactNode;
-    'data-test-subj'?: string;
-  }) => (
-    <section data-test-subj={dataTestSubj}>
-      <div>{title}</div>
-      {extraAction}
-      {children}
-    </section>
+jest.mock('../../../flyout_v2/attack/main/components/ai_summary_section', () => ({
+  AISummarySection: ({ hit }: { hit: DataTableRecord }) => (
+    <div data-test-subj="v2-ai-summary-section" data-hit-id={(hit as DataTableRecord).id} />
   ),
 }));
 
-jest.mock('../../../attack_discovery/pages/results/attack_discovery_markdown_formatter', () => ({
-  AttackDiscoveryMarkdownFormatter: ({
-    markdown,
-    alertIds,
-  }: {
-    markdown: string;
-    alertIds?: string[];
-  }) => <div data-alert-ids={JSON.stringify(alertIds)}>{markdown}</div>,
-}));
+const mockedUseAttackDetailsContext = jest.mocked(useAttackDetailsContext);
+const mockedBuildDataTableRecord = jest.mocked(buildDataTableRecord);
 
-const mockedUseOverviewTabData = jest.mocked(useOverviewTabData);
-const mockedUseExpandSection = jest.mocked(useExpandSection);
+const mockSearchHit = { _id: 'attack-1', _index: '.alerts-test', _source: {} };
+const mockHit = {
+  id: 'attack-1',
+  raw: mockSearchHit,
+  flattened: {},
+} as unknown as DataTableRecord;
 
-const KEY = `aisummary`;
-
-describe('AISummarySection', () => {
+describe('AISummarySection (legacy bridge)', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-
-    mockedUseExpandSection.mockReturnValue(true);
-
-    mockedUseOverviewTabData.mockReturnValue({
-      summaryMarkdown: 'SUMMARY (ANONYMIZED)',
-      summaryMarkdownWithReplacements: 'SUMMARY (WITH REPLACEMENTS)',
-      detailsMarkdown: 'DETAILS (ANONYMIZED)',
-      detailsMarkdownWithReplacements: 'DETAILS (WITH REPLACEMENTS)',
-      originalAlertIds: [],
-    });
+    mockedUseAttackDetailsContext.mockReturnValue({
+      searchHit: mockSearchHit,
+    } as ReturnType<typeof useAttackDetailsContext>);
+    mockedBuildDataTableRecord.mockReturnValue(mockHit);
   });
 
-  it('renders the section title, settings menu, and background title', async () => {
-    const user = userEvent.setup();
+  it('renders the v2 AISummarySection', () => {
     render(<AISummarySection />);
-
-    expect(screen.getByText('Attack Summary')).toBeInTheDocument();
-    expect(screen.getByText('Background')).toBeInTheDocument();
-    expect(screen.getByTestId('overview-tab-ai-summary-settings-menu')).toBeInTheDocument();
-
-    expect(document.querySelector(`[data-test-subj="${KEY}"]`)).toBeTruthy();
-
-    await user.click(screen.getByTestId('overview-tab-ai-summary-settings-menu'));
-    expect(screen.getByText('Show anonymized values')).toBeInTheDocument();
+    expect(screen.getByTestId('v2-ai-summary-section')).toBeInTheDocument();
   });
 
-  it('renders the panel wrapper', () => {
+  it('builds a DataTableRecord from the context searchHit', () => {
     render(<AISummarySection />);
-    expect(document.querySelector('[data-test-subj="overview-tab-ai-summary-panel"]')).toBeTruthy();
+    expect(mockedBuildDataTableRecord).toHaveBeenCalledWith(mockSearchHit);
   });
 
-  it('shows non-anonymized (with replacements) markdown by default', () => {
+  it('passes the built hit to the v2 component', () => {
     render(<AISummarySection />);
-
-    const summary = document.querySelector('[data-test-subj="overview-tab-ai-summary-content"]');
-    const background = document.querySelector(
-      '[data-test-subj="overview-tab-ai-background-content"]'
+    expect(screen.getByTestId('v2-ai-summary-section')).toHaveAttribute(
+      'data-hit-id',
+      'attack-1'
     );
-
-    expect(summary).toHaveTextContent('SUMMARY (WITH REPLACEMENTS)');
-    expect(background).toHaveTextContent('DETAILS (WITH REPLACEMENTS)');
-  });
-
-  it('toggles to anonymized markdown when the switch is clicked', async () => {
-    const user = userEvent.setup({ pointerEventsCheck: 0 });
-    render(<AISummarySection />);
-
-    await user.click(screen.getByTestId('overview-tab-ai-summary-settings-menu'));
-
-    const toggleSwitch = await screen.findByTestId('overview-tab-toggle-anonymized');
-
-    // ON -> anonymized
-    await user.click(toggleSwitch);
-
-    expect(
-      document.querySelector('[data-test-subj="overview-tab-ai-summary-content"]')
-    ).toHaveTextContent('SUMMARY (ANONYMIZED)');
-    expect(
-      document.querySelector('[data-test-subj="overview-tab-ai-background-content"]')
-    ).toHaveTextContent('DETAILS (ANONYMIZED)');
-
-    await user.click(screen.getByTestId('overview-tab-ai-summary-settings-menu'));
-    await user.click(await screen.findByTestId('overview-tab-toggle-anonymized'));
-
-    expect(
-      document.querySelector('[data-test-subj="overview-tab-ai-summary-content"]')
-    ).toHaveTextContent('SUMMARY (WITH REPLACEMENTS)');
-    expect(
-      document.querySelector('[data-test-subj="overview-tab-ai-background-content"]')
-    ).toHaveTextContent('DETAILS (WITH REPLACEMENTS)');
-  });
-
-  it('renders the anonymized switch with the expected data-test-subj when the menu is open', async () => {
-    const user = userEvent.setup();
-    render(<AISummarySection />);
-
-    await user.click(screen.getByTestId('overview-tab-ai-summary-settings-menu'));
-
-    expect(
-      document.querySelector('[data-test-subj="overview-tab-toggle-anonymized"]')
-    ).toBeTruthy();
-  });
-
-  it('disables the anonymized switch when there is no anonymized markdown', async () => {
-    const user = userEvent.setup();
-    mockedUseOverviewTabData.mockReturnValue({
-      summaryMarkdown: '',
-      summaryMarkdownWithReplacements: 'SUMMARY (WITH REPLACEMENTS)',
-      detailsMarkdown: '',
-      detailsMarkdownWithReplacements: 'DETAILS (WITH REPLACEMENTS)',
-      originalAlertIds: [],
-    });
-
-    render(<AISummarySection />);
-    await user.click(screen.getByTestId('overview-tab-ai-summary-settings-menu'));
-
-    const toggle = document.querySelector(
-      '[data-test-subj="overview-tab-toggle-anonymized"]'
-    ) as HTMLInputElement;
-
-    expect(toggle).toBeTruthy();
-    expect(toggle.disabled).toBe(true);
-  });
-
-  it('passes originalAlertIds to AttackDiscoveryMarkdownFormatter', () => {
-    mockedUseOverviewTabData.mockReturnValue({
-      summaryMarkdown: 'SUMMARY (ANONYMIZED)',
-      summaryMarkdownWithReplacements: 'SUMMARY (WITH REPLACEMENTS)',
-      detailsMarkdown: 'DETAILS (ANONYMIZED)',
-      detailsMarkdownWithReplacements: 'DETAILS (WITH REPLACEMENTS)',
-      originalAlertIds: ['alert-1', 'alert-2'],
-    });
-
-    render(<AISummarySection />);
-
-    const formatters = document.querySelectorAll('[data-alert-ids]');
-    expect(formatters.length).toBeGreaterThan(0);
-    formatters.forEach((formatter) => {
-      expect(formatter).toHaveAttribute('data-alert-ids', JSON.stringify(['alert-1', 'alert-2']));
-    });
   });
 });
