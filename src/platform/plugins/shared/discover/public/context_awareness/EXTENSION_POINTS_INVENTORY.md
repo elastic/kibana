@@ -14,11 +14,11 @@ A concise, non-technical map of the Discover Profile extension points (what they
 
 ## Default app state — `getDefaultAppState`
 
-**Changes:** Initial columns, row height, breakdown field, chart visibility.
+**Changes:** Initial columns, row height, breakdown field, chart visibility, table visibility.
 
 **Use when:** Preconfigure defaults per team/use case.
 
-**Returns:** `{ columns?, rowHeight?, breakdownField?, hideChart? }`
+**Returns:** `{ columns?, rowHeight?, breakdownField?, hideChart?, hideTable? }`
 
 **Screenshot:**
 ![Default app state example](./docs/extension_points/get_default_app_state.png)
@@ -45,6 +45,21 @@ A concise, non-technical map of the Discover Profile extension points (what they
 
 - [Observability root profile](profile_providers/observability/observability_root_profile/accessors/get_default_ad_hoc_data_views.ts)
 - [Classic nav root profile](profile_providers/common/classic_nav_root_profile/accessors/get_default_ad_hoc_data_views.ts)
+
+---
+
+## Default ES|QL query — `getDefaultEsqlQuery`
+
+**Changes:** Initial ES|QL query when Discover starts in ES|QL mode.
+
+**Use when:** Provide a solution-specific starting query for users entering Discover.
+
+**Returns:** `{ query: string } | undefined`
+
+**Implementation examples:**
+
+- [Observability root profile](profile_providers/observability/observability_root_profile/accessors/get_default_esql_query.ts)
+- [Example root profile](profile_providers/example/example_root_profile/profile.tsx)
 
 ---
 
@@ -78,7 +93,7 @@ A concise, non-technical map of the Discover Profile extension points (what they
 **Implementation examples:**
 
 - [Metrics data source profile](profile_providers/common/metrics_data_source_profile/accessor/chart_section.tsx)
-- [Traces data source profile](profile_providers/observability/traces_data_source_profile/accessors/chart_session.tsx)
+- [Traces data source profile](profile_providers/observability/traces_data_source_profile/accessors/get_chart_section_configuration.tsx)
 
 ---
 
@@ -191,6 +206,24 @@ A concise, non-technical map of the Discover Profile extension points (what they
 - [Observability document profile](profile_providers/observability/observability_document_profile/document_profile/accessors/doc_viewer.tsx)
 - [Observability root profile](profile_providers/observability/observability_root_profile/accessors/get_doc_viewer.tsx)
 - [Example data source profile with custom header](profile_providers/example/example_data_source_profile/profile.tsx)
+
+---
+
+## Deep analysis
+
+### Deep analysis playbook — `getDeepAnalysisPlaybook`
+
+**Changes:** Shape-specific guidance attached to ES|QL query results for the Discover deep-analysis agent-builder flow.
+
+**Use when:** Guide analysis for logs, traces, metrics, or another recognizable result shape.
+
+**Returns:** `DeepAnalysisPlaybookExtension | undefined` (`shapeId`, `shapeLabel`, `characteristicFields`, `guidance`, `interestingSignals?`)
+
+**Implementation examples:**
+
+- [Logs data source profile](profile_providers/observability/logs_data_source_profile/accessors/get_deep_analysis_playbook.ts)
+- [Traces data source profile](profile_providers/observability/traces_data_source_profile/accessors/get_deep_analysis_playbook.ts)
+- [Metrics data source profile](profile_providers/common/metrics_data_source_profile/accessor/get_deep_analysis_playbook.ts)
 
 ---
 
