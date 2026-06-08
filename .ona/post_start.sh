@@ -6,11 +6,15 @@
 # Run the shared devcontainer post-start script.
 "${KBN_DIR}/.devcontainer/scripts/post_start.sh"
 
-# Add the user's fork as a git remote.
-if ! git remote get-url fork >/dev/null 2>&1; then
-  CRED=$(printf 'host=github.com\nprotocol=https\n' | git credential fill 2>/dev/null) || true
-  TOKEN=$(echo "$CRED" | awk -F= '/^password=/{print $2}')
-  if [ -n "$TOKEN" ]; then
+# Authenticate gh CLI and add the user's fork as a git remote using the
+# platform-provided Git credential.
+CRED=$(printf 'host=github.com\nprotocol=https\n' | git credential fill 2>/dev/null) || true
+TOKEN=$(echo "$CRED" | awk -F= '/^password=/{print $2}')
+if [ -n "$TOKEN" ]; then
+  # Auth gh CLI so it can be used without a browser login flow.
+  echo "$TOKEN" | gh auth login --hostname github.com --git-protocol https --with-token 2>/dev/null || true
+
+  if ! git remote get-url fork >/dev/null 2>&1; then
     # Pass token via stdin to avoid exposing it in the process list
     GITHUB_USER=$(printf 'header = "Authorization: token %s"' "$TOKEN" | curl -sf --config - https://api.github.com/user | awk -F'"' '/"login"/{print $4}') || true
     if [ -n "$GITHUB_USER" ]; then
