@@ -106,7 +106,7 @@ const resolveModules = (config: RedTeamConfig): AttackModule[] => {
 
 const resolveStrategies = (config: RedTeamConfig): Strategy[] => {
   const names = config.strategies ?? ['direct'];
-  return names.map(getStrategy);
+  return names.map((name) => getStrategy(name));
 };
 
 /**
@@ -280,129 +280,166 @@ export const createRedTeamOrchestrator = (
 
     for (const module of modules) {
       for (const strategy of strategies) {
-      log.info(`Running attack module: ${module.name} (strategy: ${strategy.name})`);
+        log.info(`Running attack module: ${module.name} (strategy: ${strategy.name})`);
 
-      const examples = await module.generate(moduleConfig);
-      log.info(`  Generated ${examples.length} adversarial examples`);
+        const examples = await module.generate(moduleConfig);
+        log.info(`  Generated ${examples.length} adversarial examples`);
 
-      const results: AttackResult[] = [];
-      const bySeverity: Record<Severity, number> = { critical: 0, high: 0, medium: 0, low: 0 };
-      let passed = 0;
-      let failed = 0;
+        const results: AttackResult[] = [];
+        const bySeverity: Record<Severity, number> = { critical: 0, high: 0, medium: 0, low: 0 };
+        let passed = 0;
+        let failed = 0;
 
-      const baseMetadata = {
-        'run.type': 'red-team' as const,
-        'redTeam.module': module.name,
-        'redTeam.strategy': strategy.name,
-        'redTeam.difficulty': moduleConfig.difficulty,
-        'redTeam.runId': runId,
-      };
-
-      if (strategy.kind === 'single-turn') {
-        // Apply strategy transform for single-turn strategies
-        const transformedExamples = examples.map((example) => ({
-          ...example,
-          input: {
-            ...example.input,
-            prompt: strategy.transform(
-              ((example.input as Record<string, unknown>)?.prompt as string) ?? ''
-            ),
-          },
-        }));
-
-        const dataset: EvaluationDataset = {
-          name: `red-team-${module.name}-${strategy.name}`,
-          description: `Red team attack: ${module.description}`,
-          examples: transformedExamples,
+        const baseMetadata = {
+          'run.type': 'red-team' as const,
+          'redTeam.module': module.name,
+          'redTeam.strategy': strategy.name,
+          'redTeam.difficulty': moduleConfig.difficulty,
+          'redTeam.runId': runId,
         };
 
-        const [experiment] = await executorClient.runExperiment(
-          { datasets: [dataset], task, metadata: baseMetadata },
-          allEvaluators
-        );
+        if (strategy.kind === 'single-turn') {
+          // Apply strategy transform for single-turn strategies
+          const transformedExamples = examples.map((example) => ({
+            ...example,
+            input: {
+              ...example.input,
+              prompt: strategy.transform(
+                ((example.input as Record<string, unknown>)?.prompt as string) ?? ''
+              ),
+            },
+          }));
 
-        const counts = processExperimentResults({
-          experiment,
-          examples: transformedExamples,
-          module,
-          strategy,
-          guardrailRules,
-          severityThresholds: config.severityThresholds,
-          results,
-          bySeverity,
-        });
-        passed += counts.passed;
-        failed += counts.failed;
-      } else {
-        // Multi-turn strategy: run example conversations in parallel
-        const exConcurrency = config.exampleConcurrency ?? 3;
-
-        const processExample = async (
-          exIdx: number
-        ): Promise<{
-          passed: number;
-          failed: number;
-          results: AttackResult[];
-          bySeverity: Record<Severity, number>;
-        }> => {
-          const exResults: AttackResult[] = [];
-          const exBySeverity: Record<Severity, number> = {
-            critical: 0,
-            high: 0,
-            medium: 0,
-            low: 0,
+          const dataset: EvaluationDataset = {
+            name: `red-team-${module.name}-${strategy.name}`,
+            description: `Red team attack: ${module.description}`,
+            examples: transformedExamples,
           };
-          let exPassed = 0;
-          let exFailed = 0;
 
-          const example = examples[exIdx];
-          const attackPrompt = ((example.input as Record<string, unknown>)?.prompt as string) ?? '';
-          const conversationHistory: ConversationTurn[] = [];
+          const [experiment] = await executorClient.runExperiment(
+            { datasets: [dataset], task, metadata: baseMetadata },
+            allEvaluators
+          );
 
-          let currentPrompt: string | null = strategy.generateFirstTurn(attackPrompt);
-          let turnNumber = 0;
-          let finalEvaluated = false;
-          let lastTurnExample: { input: Record<string, unknown> } | null = null;
-          let lastTargetOutput: TaskOutput = '';
+          const counts = processExperimentResults({
+            experiment,
+            examples: transformedExamples,
+            module,
+            strategy,
+            guardrailRules,
+            severityThresholds: config.severityThresholds,
+            results,
+            bySeverity,
+          });
+          passed += counts.passed;
+          failed += counts.failed;
+        } else {
+          // Multi-turn strategy: run example conversations in parallel
+          const exConcurrency = config.exampleConcurrency ?? 3;
 
-          while (currentPrompt !== null && turnNumber < strategy.maxTurns) {
-            conversationHistory.push({ role: 'attacker', content: currentPrompt });
-
-            const turnExample = {
-              ...example,
-              input: { ...example.input, prompt: currentPrompt },
+          const processExample = async (
+            exIdx: number
+          ): Promise<{
+            passed: number;
+            failed: number;
+            results: AttackResult[];
+            bySeverity: Record<Severity, number>;
+          }> => {
+            const exResults: AttackResult[] = [];
+            const exBySeverity: Record<Severity, number> = {
+              critical: 0,
+              high: 0,
+              medium: 0,
+              low: 0,
             };
-            lastTurnExample = turnExample;
+            let exPassed = 0;
+            let exFailed = 0;
 
-            const turnDataset: EvaluationDataset = {
-              name: `red-team-${module.name}-${strategy.name}-ex${exIdx}-turn${turnNumber}`,
-              description: `Red team attack: ${module.description} (turn ${turnNumber})`,
-              examples: [turnExample],
-            };
+            const example = examples[exIdx];
+            const attackPrompt =
+              ((example.input as Record<string, unknown>)?.prompt as string) ?? '';
+            const conversationHistory: ConversationTurn[] = [];
 
-            const [turnExperiment] = await executorClient.runExperiment(
-              { datasets: [turnDataset], task, metadata: baseMetadata },
-              []
-            );
+            let currentPrompt: string | null = strategy.generateFirstTurn(attackPrompt);
+            let turnNumber = 0;
+            let finalEvaluated = false;
+            let lastTurnExample: { input: Record<string, unknown> } | null = null;
+            let lastTargetOutput: TaskOutput = '';
 
-            const turnRuns = Object.values(turnExperiment.runs);
-            const targetOutput = turnRuns.length > 0 ? turnRuns[0].output : '';
-            lastTargetOutput = targetOutput;
-            const targetText = extractTextFromOutput(targetOutput);
-            conversationHistory.push({ role: 'target', content: targetText });
+            while (currentPrompt !== null && turnNumber < strategy.maxTurns) {
+              conversationHistory.push({ role: 'attacker', content: currentPrompt });
 
-            const nextTurn = strategy.generateNextTurn(attackPrompt, conversationHistory);
+              const turnExample = {
+                ...example,
+                input: { ...example.input, prompt: currentPrompt },
+              };
+              lastTurnExample = turnExample;
 
-            if (nextTurn === null) {
-              const finalDataset: EvaluationDataset = {
-                name: `red-team-${module.name}-${strategy.name}-ex${exIdx}-final`,
-                description: `Red team attack: ${module.description} (final evaluation)`,
+              const turnDataset: EvaluationDataset = {
+                name: `red-team-${module.name}-${strategy.name}-ex${exIdx}-turn${turnNumber}`,
+                description: `Red team attack: ${module.description} (turn ${turnNumber})`,
                 examples: [turnExample],
               };
 
-              // Use cached output to avoid re-running the task (LLM responses are
-              // non-deterministic, so re-running would evaluate a different output
-              // than the one that drove the conversation).
+              const [turnExperiment] = await executorClient.runExperiment(
+                { datasets: [turnDataset], task, metadata: baseMetadata },
+                []
+              );
+
+              const turnRuns = Object.values(turnExperiment.runs);
+              const targetOutput = turnRuns.length > 0 ? turnRuns[0].output : '';
+              lastTargetOutput = targetOutput;
+              const targetText = extractTextFromOutput(targetOutput);
+              conversationHistory.push({ role: 'target', content: targetText });
+
+              const nextTurn = strategy.generateNextTurn(attackPrompt, conversationHistory);
+
+              if (nextTurn === null) {
+                const finalDataset: EvaluationDataset = {
+                  name: `red-team-${module.name}-${strategy.name}-ex${exIdx}-final`,
+                  description: `Red team attack: ${module.description} (final evaluation)`,
+                  examples: [turnExample],
+                };
+
+                // Use cached output to avoid re-running the task (LLM responses are
+                // non-deterministic, so re-running would evaluate a different output
+                // than the one that drove the conversation).
+                const cachedOutput = lastTargetOutput;
+                const cachedTask: ExperimentTask<Example, TaskOutput> = () =>
+                  Promise.resolve(cachedOutput);
+
+                const [finalExperiment] = await executorClient.runExperiment(
+                  { datasets: [finalDataset], task: cachedTask, metadata: baseMetadata },
+                  allEvaluators
+                );
+
+                const counts = processExperimentResults({
+                  experiment: finalExperiment,
+                  examples: [turnExample],
+                  module,
+                  strategy,
+                  guardrailRules,
+                  severityThresholds: config.severityThresholds,
+                  results: exResults,
+                  bySeverity: exBySeverity,
+                });
+                exPassed += counts.passed;
+                exFailed += counts.failed;
+                finalEvaluated = true;
+              }
+
+              currentPrompt = nextTurn;
+              turnNumber++;
+            }
+
+            if (!finalEvaluated && lastTurnExample !== null) {
+              const finalDataset: EvaluationDataset = {
+                name: `red-team-${module.name}-${strategy.name}-ex${exIdx}-final`,
+                description: `Red team attack: ${module.description} (final evaluation)`,
+                examples: [lastTurnExample],
+              };
+
+              // Use cached output — same rationale as the in-loop evaluation above.
               const cachedOutput = lastTargetOutput;
               const cachedTask: ExperimentTask<Example, TaskOutput> = () =>
                 Promise.resolve(cachedOutput);
@@ -414,7 +451,7 @@ export const createRedTeamOrchestrator = (
 
               const counts = processExperimentResults({
                 experiment: finalExperiment,
-                examples: [turnExample],
+                examples: [lastTurnExample],
                 module,
                 strategy,
                 guardrailRules,
@@ -424,102 +461,66 @@ export const createRedTeamOrchestrator = (
               });
               exPassed += counts.passed;
               exFailed += counts.failed;
-              finalEvaluated = true;
             }
 
-            currentPrompt = nextTurn;
-            turnNumber++;
-          }
-
-          if (!finalEvaluated && lastTurnExample !== null) {
-            const finalDataset: EvaluationDataset = {
-              name: `red-team-${module.name}-${strategy.name}-ex${exIdx}-final`,
-              description: `Red team attack: ${module.description} (final evaluation)`,
-              examples: [lastTurnExample],
-            };
-
-            // Use cached output — same rationale as the in-loop evaluation above.
-            const cachedOutput = lastTargetOutput;
-            const cachedTask: ExperimentTask<Example, TaskOutput> = () =>
-              Promise.resolve(cachedOutput);
-
-            const [finalExperiment] = await executorClient.runExperiment(
-              { datasets: [finalDataset], task: cachedTask, metadata: baseMetadata },
-              allEvaluators
-            );
-
-            const counts = processExperimentResults({
-              experiment: finalExperiment,
-              examples: [lastTurnExample],
-              module,
-              strategy,
-              guardrailRules,
-              severityThresholds: config.severityThresholds,
+            return {
+              passed: exPassed,
+              failed: exFailed,
               results: exResults,
               bySeverity: exBySeverity,
-            });
-            exPassed += counts.passed;
-            exFailed += counts.failed;
-          }
-
-          return {
-            passed: exPassed,
-            failed: exFailed,
-            results: exResults,
-            bySeverity: exBySeverity,
+            };
           };
-        };
 
-        // Run examples with bounded concurrency
-        const executing = new Set<Promise<void>>();
-        const exampleOutcomes: Array<{
-          passed: number;
-          failed: number;
-          results: AttackResult[];
-          bySeverity: Record<Severity, number>;
-        }> = [];
+          // Run examples with bounded concurrency
+          const executing = new Set<Promise<void>>();
+          const exampleOutcomes: Array<{
+            passed: number;
+            failed: number;
+            results: AttackResult[];
+            bySeverity: Record<Severity, number>;
+          }> = [];
 
-        for (let exIdx = 0; exIdx < examples.length; exIdx++) {
-          const p = processExample(exIdx)
-            .then((outcome) => {
-              exampleOutcomes.push(outcome);
-            })
-            .finally(() => {
-              executing.delete(p);
-            });
-          executing.add(p);
-          if (executing.size >= exConcurrency) {
-            await Promise.race(executing);
+          for (let exIdx = 0; exIdx < examples.length; exIdx++) {
+            const p = processExample(exIdx)
+              .then((outcome) => {
+                exampleOutcomes.push(outcome);
+              })
+              .finally(() => {
+                executing.delete(p);
+              });
+            executing.add(p);
+            if (executing.size >= exConcurrency) {
+              await Promise.race(executing);
+            }
+          }
+          await Promise.all(executing);
+
+          // Aggregate results from all examples
+          for (const outcome of exampleOutcomes) {
+            passed += outcome.passed;
+            failed += outcome.failed;
+            results.push(...outcome.results);
+            for (const sev of Object.keys(outcome.bySeverity) as Severity[]) {
+              bySeverity[sev] += outcome.bySeverity[sev];
+            }
           }
         }
-        await Promise.all(executing);
 
-        // Aggregate results from all examples
-        for (const outcome of exampleOutcomes) {
-          passed += outcome.passed;
-          failed += outcome.failed;
-          results.push(...outcome.results);
-          for (const sev of Object.keys(outcome.bySeverity) as Severity[]) {
-            bySeverity[sev] += outcome.bySeverity[sev];
-          }
-        }
-      }
+        const total = passed + failed;
+        log.info(
+          `  Results: ${passed}/${total} passed (${
+            total > 0 ? ((passed / total) * 100).toFixed(1) : 0
+          }%)`
+        );
 
-      const total = passed + failed;
-      log.info(
-        `  Results: ${passed}/${total} passed (${
-          total > 0 ? ((passed / total) * 100).toFixed(1) : 0
-        }%)`
-      );
-
-      moduleReports.push({
-        module: module.name,
-        total,
-        passed,
-        failed,
-        results,
-        bySeverity,
-      });
+        moduleReports.push({
+          module: module.name,
+          total,
+          passed,
+          failed,
+          results,
+          bySeverity,
+        });
       } // end for strategy
     } // end for module
 
@@ -602,7 +603,7 @@ export const runRedTeam = async (config: RedTeamConfig): Promise<RedTeamReport> 
     runExperiment: async (options) => {
       const { datasets, task } = options;
       const [dataset] = datasets;
-      const runs: Record<string, import('../types').TaskRun<any>> = {};
+      const runs: Record<string, import('../types').TaskRun> = {};
       for (let i = 0; i < dataset.examples.length; i++) {
         const example = dataset.examples[i];
         const runKey = `${i}-0-noop`;

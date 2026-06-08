@@ -6,7 +6,7 @@
  */
 
 import type { BoundInferenceClient } from '@kbn/inference-common';
-import type { Example, EvaluationResult } from '../types';
+import type { Example } from '../types';
 
 export type Severity = 'critical' | 'high' | 'medium' | 'low';
 

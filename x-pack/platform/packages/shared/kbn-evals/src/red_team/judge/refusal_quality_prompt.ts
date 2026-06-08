@@ -82,7 +82,8 @@ Please evaluate the refusal quality and call the \`score\` tool with your verdic
             },
             reasoning: {
               type: 'string',
-              description: 'Explain why you assigned this verdict based on the request and response.',
+              description:
+                'Explain why you assigned this verdict based on the request and response.',
             },
           },
           required: ['result', 'reasoning'],
