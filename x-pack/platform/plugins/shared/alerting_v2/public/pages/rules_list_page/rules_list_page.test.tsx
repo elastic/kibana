@@ -270,7 +270,7 @@ describe('RulesListPage', () => {
     renderPage();
 
     expect(
-      screen.getByRole('heading', { level: 2, name: /welcome to the new alerting experience/i })
+      screen.getByRole('heading', { level: 2, name: /no rules yet\. let's get started!/i })
     ).toBeInTheDocument();
     expect(screen.queryByRole('table')).not.toBeInTheDocument();
   });
@@ -285,7 +285,7 @@ describe('RulesListPage', () => {
 
     renderPage();
 
-    fireEvent.click(screen.getByRole('button', { name: /create es\|ql rule/i }));
+    fireEvent.click(screen.getByTestId('createEsqlRuleCard'));
 
     expect(screen.getByTestId('composeDiscoverFlyout')).toBeInTheDocument();
   });

@@ -111,7 +111,7 @@ dependsOn:
   - '@kbn/core-di'
   - '@kbn/licensing-types'
   - '@kbn/alerting-plugin'
-  - '@kbn/spaces-utils'
+  - '@kbn/core-spaces-common'
   - '@kbn/setup-node-env'
   - '@kbn/react-query'
   - '@kbn/fs'

@@ -1198,4 +1198,66 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
       expect(result.error!.type).toBe('StepSizeLimitExceeded');
     });
   });
+
+  describe('JSON-body path integration', () => {
+    it('propagates x-kibana-workflow-execution-id header on the JSON-body path', async () => {
+      (mockStepExecutionRuntime as any).workflowExecution = { id: 'workflow-run-helper' };
+
+      const stepWith = {
+        request: { method: 'GET', path: '/api/status' },
+      };
+      const step = {
+        id: 'status_step',
+        type: 'kibana.request',
+        stepId: 'status_step',
+        stepType: 'kibana.request',
+        configuration: { name: 'status_step', type: 'kibana.request', with: stepWith },
+      } as unknown as KibanaGraphNode;
+
+      const kibanaStep = new KibanaActionStepImpl(
+        step,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        mockWorkflowLogger
+      );
+
+      await runStep(kibanaStep, stepWith);
+
+      const fetchCall = mockedFetch.mock.calls[0];
+      const fetchOptions = fetchCall[1] as RequestInit;
+      const headers = fetchOptions.headers as Record<string, string>;
+      expect(headers['x-kibana-workflow-execution-id']).toBe('workflow-run-helper');
+      expect(headers.Authorization).toBe('ApiKey test-key');
+      expect(headers['x-elastic-internal-origin']).toBe('Kibana');
+      expect(headers['kbn-xsrf']).toBe('true');
+    });
+
+    it('preserves the raw body return shape on the JSON-body path (no envelope leak)', async () => {
+      mockedFetch.mockResolvedValue(createMockResponse({ id: 'case-1', title: 'Helper Test' }));
+
+      const stepWith = {
+        request: { method: 'POST', path: '/api/cases', body: { title: 'Helper Test' } },
+      };
+      const step = {
+        id: 'create_case',
+        type: 'kibana.request',
+        stepId: 'create_case',
+        stepType: 'kibana.request',
+        configuration: { name: 'create_case', type: 'kibana.request', with: stepWith },
+      } as unknown as KibanaGraphNode;
+
+      const kibanaStep = new KibanaActionStepImpl(
+        step,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        mockWorkflowLogger
+      );
+
+      const result = await runStep(kibanaStep, stepWith);
+
+      expect(result.error).toBeUndefined();
+      // Body returned directly, not as { status, headers, body }.
+      expect(result.output).toEqual({ id: 'case-1', title: 'Helper Test' });
+    });
+  });
 });
