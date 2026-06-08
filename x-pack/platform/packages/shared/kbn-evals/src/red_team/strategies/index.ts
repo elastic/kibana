@@ -12,6 +12,8 @@ import { createLeetspeakStrategy } from './leetspeak';
 import { createJailbreakWrapperStrategy } from './jailbreak_wrapper';
 import { createCrescendoStrategy } from './crescendo';
 import { createPersistenceStrategy } from './persistence';
+import { createRot13Strategy } from './rot13';
+import { createUnicodeConfusablesStrategy } from './unicode_confusables';
 
 const STRATEGIES: Record<string, StrategyFactory> = {
   direct: createDirectStrategy,
@@ -20,6 +22,8 @@ const STRATEGIES: Record<string, StrategyFactory> = {
   jailbreak_wrapper: createJailbreakWrapperStrategy,
   crescendo: createCrescendoStrategy,
   persistence: createPersistenceStrategy,
+  rot13: createRot13Strategy,
+  unicode_confusables: createUnicodeConfusablesStrategy,
 };
 
 export const getStrategy = (name: string, config?: Record<string, unknown>): Strategy => {
