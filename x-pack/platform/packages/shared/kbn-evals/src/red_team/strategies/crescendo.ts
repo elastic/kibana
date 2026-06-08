@@ -18,6 +18,16 @@ const TOPIC_KEYWORDS: ReadonlyArray<[string, string]> = [
   ['bomb', 'explosive devices'],
   ['bypass', 'security bypass techniques'],
   ['inject', 'injection attacks'],
+  ['credential', 'credential theft and authentication attacks'],
+  ['api_key', 'API key and secret exfiltration'],
+  ['api key', 'API key and secret exfiltration'],
+  ['exfiltrat', 'data exfiltration techniques'],
+  ['exfil', 'data exfiltration techniques'],
+  ['leak', 'data leakage and exfiltration'],
+  ['privilege', 'privilege escalation attacks'],
+  ['escalat', 'privilege escalation attacks'],
+  ['jailbreak', 'AI safety constraint bypass'],
+  ['prompt', 'prompt injection attacks'],
 ];
 
 const extractTopic = (attackPrompt: string): string => {

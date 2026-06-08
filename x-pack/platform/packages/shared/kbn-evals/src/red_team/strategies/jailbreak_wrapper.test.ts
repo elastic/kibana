@@ -22,12 +22,14 @@ describe('jailbreak_wrapper strategy', () => {
     expect(result.length).toBeGreaterThan(input.length);
   });
 
-  it('uses the same template for all calls on the same instance', () => {
+  it('uses different wrapper templates across multiple transform calls', () => {
     const strategy = createJailbreakWrapperStrategy();
-    const input = 'do something dangerous';
-    const result1 = strategy.transform(input);
-    const result2 = strategy.transform(input);
-    expect(result1).toBe(result2);
+    const results = new Set<string>();
+    for (let i = 0; i < 20; i++) {
+      results.add(strategy.transform('test prompt'));
+    }
+    // 20 calls with multiple templates — near-certain to get >1 distinct result
+    expect(results.size).toBeGreaterThan(1);
   });
 
   it('handles empty string', () => {
