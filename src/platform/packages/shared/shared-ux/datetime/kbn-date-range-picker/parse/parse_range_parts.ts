@@ -429,14 +429,28 @@ const buildFormatRegex = (segments: FormatSegment[]): RegExp =>
       .join('')}$`
   );
 
+interface CompiledFormat {
+  format: string;
+  segments: FormatSegment[];
+  regex: RegExp;
+}
+
+// `INPUT_ABSOLUTE_FORMATS` is fixed, so the segments and matching regex for each
+// format only need to be compiled once at module load rather than on every parse.
+const COMPILED_ABSOLUTE_FORMATS: readonly CompiledFormat[] = INPUT_ABSOLUTE_FORMATS.map(
+  (format) => {
+    const segments = compileFormatTokens(format);
+    return { format, segments, regex: buildFormatRegex(segments) };
+  }
+);
+
 const parseAbsoluteDateWithFormat = (
   side: string,
   offset: number,
   rangeIndex: RangePart['rangeIndex'],
-  format: string
+  { format, segments, regex }: CompiledFormat
 ): RangePart[] => {
-  const segments = compileFormatTokens(format);
-  const match = side.match(buildFormatRegex(segments));
+  const match = side.match(regex);
   if (!match) return [];
 
   const parts: RangePart[] = [];
@@ -467,9 +481,9 @@ const parseAbsoluteDate = (
   offset: number,
   rangeIndex: RangePart['rangeIndex']
 ): RangePart[] => {
-  for (const format of INPUT_ABSOLUTE_FORMATS) {
-    if (moment(side, format, true).isValid()) {
-      return parseAbsoluteDateWithFormat(side, offset, rangeIndex, format);
+  for (const compiled of COMPILED_ABSOLUTE_FORMATS) {
+    if (moment(side, compiled.format, true).isValid()) {
+      return parseAbsoluteDateWithFormat(side, offset, rangeIndex, compiled);
     }
   }
 
