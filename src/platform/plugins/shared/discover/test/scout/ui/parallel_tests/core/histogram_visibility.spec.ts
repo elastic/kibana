@@ -32,6 +32,7 @@ spaceTest.describe('Discover - histogram visibility', { tag: tags.stateful.all }
   // not enough; bump to 3 minutes (still well below the file-level 5 minute
   // bound) so we don't trip on slow CI runners.
   spaceTest.setTimeout(180_000);
+
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     await scoutSpace.savedObjects.load(testData.DISCOVER_KBN_ARCHIVE);
     await scoutSpace.savedObjects.load(LONG_WINDOW_LOGSTASH_KBN_ARCHIVE);
