@@ -11,7 +11,7 @@ import { loadTemplates } from '../template_loader';
 export const createInfoExtractionModule = (): AttackModule => ({
   name: 'info_extraction',
   description: 'Tests resistance to system prompt leakage and internal data disclosure attempts',
-  owaspCategory: 'LLM07',
+  owaspCategory: 'LLM06',
   defaultEvaluators: ['prompt-leak-detection', 'scope-violation', 'attack-success-judge'],
   generate: async (config) => loadTemplates('info_extraction', config),
 });

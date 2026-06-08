@@ -515,6 +515,7 @@ export const createRedTeamOrchestrator = (
 
         moduleReports.push({
           module: module.name,
+          strategy: strategy.name,
           total,
           passed,
           failed,
@@ -530,7 +531,7 @@ export const createRedTeamOrchestrator = (
     const strategyNames = strategies.map((s) => s.name);
     return {
       runId,
-      suite: config.modules?.join(', ') ?? 'all',
+      suite: config.suite ?? 'unknown',
       strategies: strategyNames,
       strategy: strategyNames.join(', '),
       difficulty: moduleConfig.difficulty,
