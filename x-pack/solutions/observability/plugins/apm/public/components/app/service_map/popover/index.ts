@@ -16,4 +16,3 @@ export { DependencyContents } from './dependency_contents';
 export { EdgeContents } from './edge_contents';
 export { ExternalsListContents } from './externals_list_contents';
 export { ResourceContents } from './resource_contents';
-export { AnomalyDetection } from './anomaly_detection';
