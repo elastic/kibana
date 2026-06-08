@@ -77,12 +77,17 @@ test.describe(
         await expect(pageObjects.composeDiscover.sandboxApplyButton).toBeHidden();
       });
 
+      await test.step('alert is the default mode (base + alert condition split shown)', async () => {
+        await expect(pageObjects.composeDiscover.editQueriesButton).toBeVisible();
+      });
+
       await test.step('Next is enabled after query is committed', async () => {
         await expect(pageObjects.composeDiscover.nextButton).toBeEnabled();
       });
 
-      await test.step('advance to Details step', async () => {
-        await pageObjects.composeDiscover.clickNext();
+      await test.step('advance through Recovery Condition to the Details step', async () => {
+        await pageObjects.composeDiscover.clickNext(); // Recovery Condition
+        await pageObjects.composeDiscover.clickNext(); // Details
         await expect(page.testSubj.locator('ruleNameInput')).toBeVisible();
       });
 
@@ -98,6 +103,10 @@ test.describe(
         await pageObjects.composeDiscover.addRunbook(RUNBOOK_TEXT);
         await expect(pageObjects.composeDiscover.addRunbookButton).toBeHidden();
         await expect(pageObjects.composeDiscover.flyout.getByText(RUNBOOK_TEXT)).toBeVisible();
+      });
+
+      await test.step('advance to the Actions step (final step shows Submit)', async () => {
+        await pageObjects.composeDiscover.clickNext(); // Actions
         await expect(pageObjects.composeDiscover.submitButton).toBeVisible();
       });
 
@@ -206,37 +215,40 @@ test.describe(
         await pageObjects.composeDiscover.clickApply();
       });
 
-      await test.step('Next is now enabled; advance to Details step', async () => {
+      await test.step('Next is now enabled; advance through Recovery to the Details step', async () => {
         await expect(pageObjects.composeDiscover.nextButton).toBeEnabled();
-        await pageObjects.composeDiscover.clickNext();
+        await pageObjects.composeDiscover.clickNext(); // Recovery Condition
+        await pageObjects.composeDiscover.clickNext(); // Details
       });
 
-      await test.step('Submit does not create without a name', async () => {
+      // Details is no longer the final step in the default (alert) flow, so name
+      // validation gates Next rather than Submit — but the effect is the same:
+      // you can't leave the Details step until a valid name is provided.
+      await test.step('an empty name blocks advancing past Details', async () => {
         await expect(page.testSubj.locator('ruleNameInput')).toBeVisible();
-        await pageObjects.composeDiscover.clickSubmit();
-        await expect(pageObjects.composeDiscover.flyout).toBeVisible();
+        await pageObjects.composeDiscover.clickNext();
         await expect(page.testSubj.locator('ruleNameInput')).toBeVisible();
       });
 
       await test.step('clearing a name after typing it blocks advancement', async () => {
         await pageObjects.composeDiscover.setRuleName('Temporary name');
         await pageObjects.composeDiscover.ruleNameInput.clear();
-        await pageObjects.composeDiscover.clickSubmit();
-        await expect(pageObjects.composeDiscover.flyout).toBeVisible();
+        await pageObjects.composeDiscover.clickNext();
         await expect(page.testSubj.locator('ruleNameInput')).toBeVisible();
       });
 
       await test.step('"Untitled rule" placeholder text is rejected as a name', async () => {
         await pageObjects.composeDiscover.setRuleName(DEFAULT_RULE_NAME);
-        await pageObjects.composeDiscover.clickSubmit();
-        await expect(pageObjects.composeDiscover.flyout).toBeVisible();
+        await pageObjects.composeDiscover.clickNext();
         await expect(page.testSubj.locator('ruleNameInput')).toBeVisible();
       });
 
-      await test.step('Back returns to Alert Condition step', async () => {
-        await pageObjects.composeDiscover.backButton.click();
-        // Query was committed in signal mode above, so "Edit query" is shown.
-        await expect(pageObjects.composeDiscover.editQueryButton).toBeVisible();
+      await test.step('Back returns through Recovery to the Alert Condition step', async () => {
+        await pageObjects.composeDiscover.backButton.click(); // Recovery Condition
+        await pageObjects.composeDiscover.backButton.click(); // Alert Condition
+        // Query was committed in alert mode (default), so the base + alert split
+        // summary with "Edit queries" is shown.
+        await expect(pageObjects.composeDiscover.editQueriesButton).toBeVisible();
         await expect(page.testSubj.locator('ruleNameInput')).toBeHidden();
       });
     });
