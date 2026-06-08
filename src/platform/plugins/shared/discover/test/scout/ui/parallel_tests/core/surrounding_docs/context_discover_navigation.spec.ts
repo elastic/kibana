@@ -50,7 +50,7 @@ spaceTest.describe(
         await navigateToFirstDocContext(pageObjects);
 
         const headerColumns = await pageObjects.discover.getDocHeader();
-        expect(headerColumns).toEqual(['@timestamp', ...TEST_COLUMN_NAMES]);
+        expect(headerColumns).toStrictEqual(['@timestamp', ...TEST_COLUMN_NAMES]);
       }
     );
 
@@ -99,12 +99,13 @@ spaceTest.describe(
 
     spaceTest(
       'should navigate to doc view and back to discover',
-      async ({ pageObjects, browserAuth }) => {
+      async ({ page, pageObjects, browserAuth }) => {
         await loginAndGoToDiscover({ browserAuth, pageObjects });
         await navigateToFirstDocContext(pageObjects);
 
         await pageObjects.contextPage.viewSingleDocument(0);
         await pageObjects.contextPage.goBackToDiscover();
+        await expect(page).toHaveURL(/app\/discover#/);
       }
     );
 
@@ -126,10 +127,10 @@ spaceTest.describe(
         await pageObjects.contextPage.clickRowAction(0);
 
         // dashboard may prompt "unsaved changes" confirmation on navigation
-        const confirmBtn = page.testSubj.locator('confirmModalConfirmButton');
-        if (await confirmBtn.isVisible({ timeout: 3_000 }).catch(() => false)) {
-          await confirmBtn.click();
-        }
+        await page.testSubj
+          .locator('confirmModalConfirmButton')
+          .click({ timeout: 3_000 })
+          .catch(() => {});
 
         await expect(page).toHaveURL(/#\/doc/, { timeout: 30_000 });
         expect(await pageObjects.discover.isShowingDocViewer()).toBe(true);

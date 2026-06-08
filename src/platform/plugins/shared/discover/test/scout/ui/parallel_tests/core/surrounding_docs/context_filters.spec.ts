@@ -12,6 +12,9 @@ import {
   spaceTest,
   testData,
   addFilterWithoutStrictCheck,
+  addPinnedFilter,
+  everyFieldMatches,
+  expectFiltersToExist,
   resolveDataViewId,
 } from '../../../fixtures/surrounding_docs';
 
@@ -67,8 +70,9 @@ spaceTest.describe(
 
         await pageObjects.discover.closeDocViewerFlyout();
 
-        const fields = await pageObjects.discover.getDataGridRows();
-        expect(fields.map((row) => row[2]).every((v) => v === TEST_ANCHOR_FILTER_VALUE)).toBe(true);
+        expect(
+          await everyFieldMatches(pageObjects, (row) => row[2] === TEST_ANCHOR_FILTER_VALUE)
+        ).toBe(true);
       }
     );
 
@@ -93,10 +97,9 @@ spaceTest.describe(
           })
         ).toBe(true);
 
-        const fields = await pageObjects.discover.getDataGridRows();
-        expect(fields.map((row) => row[2]).every((v) => v === TEST_ANCHOR_FILTER_VALUE)).toBe(
-          false
-        );
+        expect(
+          await everyFieldMatches(pageObjects, (row) => row[2] === TEST_ANCHOR_FILTER_VALUE)
+        ).toBe(false);
       }
     );
 
@@ -124,56 +127,14 @@ spaceTest.describe(
     spaceTest(
       'should preserve filters when the page is refreshed',
       async ({ page, pageObjects }) => {
-        await pageObjects.filterBar.addFilter({
-          field: TEST_ANCHOR_FILTER_FIELD,
-          operator: 'is',
-          value: TEST_ANCHOR_FILTER_VALUE,
-        });
-        await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
-
-        await pageObjects.filterBar.toggleFilterPinned(TEST_ANCHOR_FILTER_FIELD);
-
+        await addPinnedFilter(pageObjects);
         await addFilterWithoutStrictCheck(page, 'extension', 'png');
         await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
-
-        expect(await pageObjects.filterBar.getFilterCount()).toBe(2);
-        expect(
-          await pageObjects.filterBar.hasFilter({
-            field: TEST_ANCHOR_FILTER_FIELD,
-            value: TEST_ANCHOR_FILTER_VALUE,
-            enabled: true,
-            pinned: true,
-          })
-        ).toBe(true);
-        expect(
-          await pageObjects.filterBar.hasFilter({ field: 'extension', value: 'png', enabled: true })
-        ).toBe(true);
-
-        const fields = await pageObjects.discover.getDataGridRows();
-        expect(fields.every((row) => row[1] === 'png' && row[2] === TEST_ANCHOR_FILTER_VALUE)).toBe(
-          true
-        );
+        await expectFiltersToExist(pageObjects);
 
         await page.reload();
         await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
-
-        expect(await pageObjects.filterBar.getFilterCount()).toBe(2);
-        expect(
-          await pageObjects.filterBar.hasFilter({
-            field: TEST_ANCHOR_FILTER_FIELD,
-            value: TEST_ANCHOR_FILTER_VALUE,
-            enabled: true,
-            pinned: true,
-          })
-        ).toBe(true);
-        expect(
-          await pageObjects.filterBar.hasFilter({ field: 'extension', value: 'png', enabled: true })
-        ).toBe(true);
-
-        const fieldsAfterRefresh = await pageObjects.discover.getDataGridRows();
-        expect(
-          fieldsAfterRefresh.every((row) => row[1] === 'png' && row[2] === TEST_ANCHOR_FILTER_VALUE)
-        ).toBe(true);
+        await expectFiltersToExist(pageObjects);
       }
     );
 
@@ -191,27 +152,20 @@ spaceTest.describe(
         expect(
           await pageObjects.filterBar.hasFilter({ field: 'extension', value: 'png', enabled: true })
         ).toBe(true);
-
-        const fieldsWithFilter = await pageObjects.discover.getDataGridRows();
-        expect(fieldsWithFilter.every((row) => row[1] === 'png')).toBe(true);
+        expect(await everyFieldMatches(pageObjects, (row) => row[1] === 'png')).toBe(true);
 
         await page.goBack();
         await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
         expect(await pageObjects.filterBar.getFilterCount()).toBe(0);
-
-        const fieldsWithoutFilter = await pageObjects.discover.getDataGridRows();
-        expect(fieldsWithoutFilter.every((row) => row[1] === 'png')).toBe(false);
+        expect(await everyFieldMatches(pageObjects, (row) => row[1] === 'png')).toBe(false);
 
         await page.goForward();
         await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
         expect(await pageObjects.filterBar.getFilterCount()).toBe(1);
-
         expect(
           await pageObjects.filterBar.hasFilter({ field: 'extension', value: 'png', enabled: true })
         ).toBe(true);
-
-        const fieldsRestored = await pageObjects.discover.getDataGridRows();
-        expect(fieldsRestored.every((row) => row[1] === 'png')).toBe(true);
+        expect(await everyFieldMatches(pageObjects, (row) => row[1] === 'png')).toBe(true);
       }
     );
   }

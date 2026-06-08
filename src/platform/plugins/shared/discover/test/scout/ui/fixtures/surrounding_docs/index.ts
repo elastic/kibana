@@ -44,6 +44,9 @@ export { ContextPage } from './page_objects';
 export {
   addFilterWithoutStrictCheck,
   addFilters,
+  addPinnedFilter,
+  everyFieldMatches,
+  expectFiltersToExist,
   loginAndGoToDiscover,
   navigateToFirstDocContext,
   resolveDataViewId,

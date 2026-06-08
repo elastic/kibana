@@ -8,7 +8,13 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { spaceTest, testData, resolveDataViewId } from '../../../fixtures/surrounding_docs';
+import {
+  spaceTest,
+  testData,
+  addPinnedFilter,
+  everyFieldMatches,
+  resolveDataViewId,
+} from '../../../fixtures/surrounding_docs';
 
 const TEST_ANCHOR_FILTER_FIELD = testData.FILTER_FIELD_GEO_SRC;
 const TEST_ANCHOR_FILTER_VALUE = testData.FILTER_VALUE_GEO_SRC_IN;
@@ -42,22 +48,19 @@ spaceTest.describe(
     spaceTest(
       'should update data grid when a pinned filter is modified',
       async ({ pageObjects }) => {
-        await pageObjects.filterBar.addFilter({
-          field: TEST_ANCHOR_FILTER_FIELD,
-          operator: 'is',
-          value: TEST_ANCHOR_FILTER_VALUE,
-        });
+        await addPinnedFilter(pageObjects);
         await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
 
-        const fieldsBefore = await pageObjects.discover.getDataGridRows();
-        expect(fieldsBefore.every((row) => row[2] === TEST_ANCHOR_FILTER_VALUE)).toBe(true);
+        expect(
+          await everyFieldMatches(pageObjects, (row) => row[2] === TEST_ANCHOR_FILTER_VALUE)
+        ).toBe(true);
 
-        await pageObjects.filterBar.toggleFilterPinned(TEST_ANCHOR_FILTER_FIELD);
         await pageObjects.filterBar.toggleFilterNegated(TEST_ANCHOR_FILTER_FIELD);
         await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
 
-        const fieldsAfter = await pageObjects.discover.getDataGridRows();
-        expect(fieldsAfter.every((row) => row[2] === TEST_ANCHOR_FILTER_VALUE)).toBe(false);
+        expect(
+          await everyFieldMatches(pageObjects, (row) => row[2] === TEST_ANCHOR_FILTER_VALUE)
+        ).toBe(false);
       }
     );
 

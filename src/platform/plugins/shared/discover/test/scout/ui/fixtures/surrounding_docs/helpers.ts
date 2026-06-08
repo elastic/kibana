@@ -10,6 +10,9 @@
 import type { ScoutPage, ScoutParallelTestFixtures, PageObjects } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import type { ContextPage } from './page_objects';
+import { FILTER_FIELD_GEO_SRC, FILTER_VALUE_GEO_SRC_IN } from './constants';
+
+type ContextPageObjects = PageObjects & { contextPage: ContextPage };
 
 /**
  * Adds a filter via the filter bar popover without asserting a single filter badge exists afterward.
@@ -23,12 +26,12 @@ export async function addFilterWithoutStrictCheck(
   await page.testSubj.click('addFilter');
   await page.testSubj.waitForSelector('addFilterPopover');
   await page.testSubj.typeWithDelay('filterFieldSuggestionList > comboBoxSearchInput', field);
-  await page.click(`.euiComboBoxOption[title="${field}"]`);
+  await page.locator(`.euiComboBoxOption[title="${field}"]`).click();
   await expect(page.testSubj.locator('filterOperatorList')).not.toHaveClass(
     /euiComboBox-isDisabled/
   );
   await page.testSubj.typeWithDelay('filterOperatorList > comboBoxSearchInput', 'is');
-  await page.click('.euiComboBoxOption[title="is"]');
+  await page.locator('.euiComboBoxOption[title="is"]').click();
   const filterParamsInput = page.locator('[data-test-subj="filterParams"] input');
   await expect(filterParamsInput).toBeEditable();
   await filterParamsInput.focus();
@@ -45,6 +48,57 @@ export async function addFilters(page: ScoutPage, filters: Array<[string, string
     await addFilterWithoutStrictCheck(page, field, value);
   }
 }
+
+/**
+ * Adds the standard geo.src=IN filter and pins it (mirrors FTR's addPinnedFilter closure).
+ */
+export const addPinnedFilter = async (pageObjects: ContextPageObjects): Promise<void> => {
+  await pageObjects.filterBar.addFilter({
+    field: FILTER_FIELD_GEO_SRC,
+    operator: 'is',
+    value: FILTER_VALUE_GEO_SRC_IN,
+  });
+  await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
+  await pageObjects.filterBar.toggleFilterPinned(FILTER_FIELD_GEO_SRC);
+  await pageObjects.contextPage.waitUntilContextLoadingHasFinished();
+};
+
+/**
+ * Returns whether every data grid row satisfies the given predicate
+ * (mirrors FTR's everyFieldMatches closure).
+ */
+export const everyFieldMatches = async (
+  pageObjects: ContextPageObjects,
+  matches: (row: string[]) => boolean
+): Promise<boolean> => {
+  const fields = await pageObjects.discover.getDataGridRows();
+  return fields.every(matches);
+};
+
+/**
+ * Asserts that both the pinned geo.src filter and the extension=png filter are present,
+ * and that every data grid row matches both (mirrors FTR's expectFiltersToExist closure).
+ */
+export const expectFiltersToExist = async (pageObjects: ContextPageObjects): Promise<void> => {
+  expect(await pageObjects.filterBar.getFilterCount()).toBe(2);
+  expect(
+    await pageObjects.filterBar.hasFilter({
+      field: FILTER_FIELD_GEO_SRC,
+      value: FILTER_VALUE_GEO_SRC_IN,
+      enabled: true,
+      pinned: true,
+    })
+  ).toBe(true);
+  expect(
+    await pageObjects.filterBar.hasFilter({ field: 'extension', value: 'png', enabled: true })
+  ).toBe(true);
+  expect(
+    await everyFieldMatches(
+      pageObjects,
+      (row) => row[1] === 'png' && row[2] === FILTER_VALUE_GEO_SRC_IN
+    )
+  ).toBe(true);
+};
 
 /**
  * Finds the data view ID from an array of imported saved objects by matching the title.

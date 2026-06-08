@@ -468,11 +468,13 @@ export class DiscoverApp {
     await this.page.locator(`button:has-text("${sortOption}")`).click();
   }
 
-  async getDocHeader(): Promise<string> {
+  async getDocHeader(): Promise<string[]> {
     const headers = await this.page
-      .locator('[data-test-subj^="dataGridHeaderCell-"]')
+      .locator(
+        '.euiDataGridHeaderCell:not(.euiDataGridHeaderCell--controlColumn) .euiDataGridHeaderCell__content'
+      )
       .allInnerTexts();
-    return headers.join(',');
+    return headers.map((h) => h.trim());
   }
 
   /**
