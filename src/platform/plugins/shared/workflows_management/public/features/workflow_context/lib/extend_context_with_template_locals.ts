@@ -14,6 +14,9 @@ import { z } from '@kbn/zod/v4';
 import {
   forLoopScopesContainingOffset,
   getTemplateLocalContext,
+  isLiquidRangeLiteral,
+  resolveAssignChain,
+  stripAssignRhsFilters,
 } from './extract_template_local_context';
 import { getForeachItemSchema } from './get_foreach_state_schema';
 import { getScalarValueAtOffset } from '../../../../common/lib/yaml/get_scalar_value_at_offset';
@@ -206,22 +209,6 @@ function isExpressionString(expression: string): boolean {
 }
 
 /**
- * Matches quoted strings (to skip them) or an unquoted pipe character.
- * The first two alternatives consume entire quoted strings so the pipe
- * in the capturing group can only match outside quotes.
- */
-const QUOTED_OR_PIPE = /"[^"]*"|'[^']*'|(\|)/g;
-
-/**
- * Strips Liquid filters from a RHS expression by finding the first `|` that is
- * not inside a quoted string. For example, `"a | b" | upcase` returns `"a | b"`.
- */
-function stripFilters(rhs: string): string {
-  const firstPipe = Array.from(rhs.matchAll(QUOTED_OR_PIPE)).find((m) => m[1] !== undefined);
-  return firstPipe ? rhs.slice(0, firstPipe.index).trim() : rhs.trim();
-}
-
-/**
  * Infers a Zod schema for an assign RHS when possible. Uses path resolution,
  * number/string literals, or falls back to z.unknown().
  *
@@ -234,7 +221,7 @@ function inferSchemaFromAssignRhs(
   baseSchema: typeof DynamicStepContextSchema,
   rhs: string
 ): z.ZodType {
-  const expression = stripFilters(rhs);
+  const expression = stripAssignRhsFilters(rhs);
   if (!expression) {
     return z.unknown();
   }
@@ -285,9 +272,10 @@ export function extendContextWithTemplateLocals(
   const activeScopes = forLoopScopesContainingOffset(forLoopScopes, offsetInTemplate);
   for (const { variableName, collectionPath } of activeScopes) {
     let itemSchema: z.ZodType = z.any();
-    if (collectionPath) {
+    if (collectionPath && !isLiquidRangeLiteral(collectionPath)) {
       try {
-        const resolved = getForeachItemSchema(baseSchema, collectionPath);
+        const resolvedCollectionPath = resolveAssignChain(collectionPath, assignVars);
+        const resolved = getForeachItemSchema(baseSchema, resolvedCollectionPath);
         if (!(resolved instanceof z.ZodUnknown)) {
           itemSchema = resolved;
         }

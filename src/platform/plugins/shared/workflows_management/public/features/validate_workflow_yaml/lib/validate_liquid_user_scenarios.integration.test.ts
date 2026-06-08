@@ -57,13 +57,7 @@ function assertScenarioPassesValidation(scenario: ScenarioDefinition): void {
     };
   });
 
-  const variableResults = validateVariables(
-    variableItems,
-    graph,
-    scenario.definition,
-    doc,
-    model
-  );
+  const variableResults = validateVariables(variableItems, graph, scenario.definition, doc, model);
   const variableErrors = variableResults.filter((r) => r.severity === 'error');
   expect(variableErrors).toEqual([]);
 }
@@ -123,6 +117,72 @@ steps:
       },
       variableKeys: ['i'],
     });
+  });
+
+  it('reports variable error for invalid property on assign-aliased loop variable', () => {
+    const yaml = `name: Local assigned collection typo
+enabled: false
+triggers:
+  - type: manual
+consts:
+  items:
+    - name: Alice
+    - name: Bob
+steps:
+  - name: summarize
+    type: console
+    with:
+      message: >-
+        {% assign rows = consts.items %}
+        {% for row in rows %}
+        - {{ row.typo }}
+        {% endfor %}`;
+    const definition = {
+      version: '1',
+      name: 'Local assigned collection typo',
+      enabled: false,
+      triggers: [{ type: 'manual' }],
+      consts: { items: [{ name: 'Alice' }, { name: 'Bob' }] },
+      steps: [{ name: 'summarize', type: 'console', with: { message: 'x' } }],
+    } satisfies WorkflowYaml;
+    const doc = parseDocument(yaml);
+    const model = createFakeMonacoModel(yaml);
+    const graph = WorkflowGraph.fromWorkflowDefinition(definition);
+
+    const collectionResults = validateLiquidForLoopCollections(yaml, doc, model, graph, definition);
+    expect(collectionResults.filter((r) => r.severity === 'error')).toEqual([]);
+
+    const match = [...yaml.matchAll(VARIABLE_REGEX_GLOBAL)].find(
+      (m) => m.groups?.key === 'row.typo'
+    );
+    expect(match).toBeDefined();
+    const offset = match!.index ?? 0;
+    const start = model.getPositionAt(offset);
+    const end = model.getPositionAt(offset + match![0].length);
+
+    const variableResults = validateVariables(
+      [
+        {
+          id: 'row.typo-var',
+          type: 'regexp',
+          key: 'row.typo',
+          startLineNumber: start.lineNumber,
+          startColumn: start.column,
+          endLineNumber: end.lineNumber,
+          endColumn: end.column,
+          yamlPath: ['steps', 0, 'with', 'message'],
+          offset,
+        },
+      ],
+      graph,
+      definition,
+      doc,
+      model
+    );
+
+    const rowTypoResult = variableResults.find((r) => r.id === 'row.typo-var');
+    expect(rowTypoResult?.severity).toBe('error');
+    expect(rowTypoResult?.message).toBe('Variable row.typo is invalid');
   });
 
   it('passes validation for nested assign-aliased collection in block folded scalar', () => {

@@ -93,7 +93,8 @@ export const LIQUID_RANGE_LITERAL_REGEX = /^\(\s*\d+\s*\.\.\s*\d+\s*\)$/;
 
 const QUOTED_OR_PIPE = /"[^"]*"|'[^']*'|(\|)/g;
 
-function stripAssignRhsFilters(rhs: string): string {
+/** Strips Liquid filters from an expression by finding the first `|` outside quoted strings. */
+export function stripAssignRhsFilters(rhs: string): string {
   const firstPipe = Array.from(rhs.matchAll(QUOTED_OR_PIPE)).find((m) => m[1] !== undefined);
   return firstPipe ? rhs.slice(0, firstPipe.index).trim() : rhs.trim();
 }
