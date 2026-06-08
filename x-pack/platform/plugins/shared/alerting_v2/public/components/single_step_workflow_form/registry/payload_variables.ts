@@ -8,8 +8,8 @@
 import type { PayloadVariable } from './types';
 
 // Mirrors `ActionPolicyWorkflowPayload` from server/lib/dispatcher/types.ts.
-// These are the children of `context.inputs` at workflow render time — scheduleWorkflow
-// wraps non-`event` payload fields under `inputs`, so templates use `{{ inputs.policyId }}`, etc.
+// These are the children of `context.inputs.payload` at workflow render time — the dispatcher
+// schedules the workflow with `{ payload }`, so templates use `{{ inputs.payload.policyId }}`, etc.
 // Keep in sync when the dispatcher payload changes.
 export const DISPATCH_PAYLOAD_VARIABLES: readonly PayloadVariable[] = [
   {
@@ -31,6 +31,12 @@ export const DISPATCH_PAYLOAD_VARIABLES: readonly PayloadVariable[] = [
     path: 'episodes',
     detail: 'AlertEpisode[]',
     documentation: 'Alert episodes included in this dispatch.',
+  },
+  {
+    path: 'rules',
+    detail: 'Record<string, { name: string }>',
+    documentation:
+      'Rule metadata keyed by rule id. Covers all rules present in `episodes`. Access via `rules[episode.rule_id].name`.',
   },
 ];
 

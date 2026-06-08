@@ -7,57 +7,72 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import '@testing-library/jest-dom';
 import '@kbn/code-editor-mock/jest_helper';
-import * as hooks from '../../../../hooks/use_es_doc_search';
-import { EuiLoadingSpinner } from '@elastic/eui';
-import { buildDataTableRecord } from '@kbn/discover-utils';
+import React from 'react';
 import { ApmStacktrace } from './apm_stacktrace';
-import { EuiThemeProvider } from '@elastic/eui';
-import { ExceptionStacktrace, PlaintextStacktrace, Stacktrace } from '@kbn/event-stacktrace';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import { ElasticRequestState } from '@kbn/unified-doc-viewer';
+import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
+import { screen } from '@testing-library/react';
+import { useEsDocSearch } from '../../../../hooks/use_es_doc_search';
 
-const mockDataView = {
-  getComputedFields: () => [],
-} as never;
+jest.mock('../../../../hooks/use_es_doc_search', () => ({
+  useEsDocSearch: jest.fn(),
+}));
+
+const mockUseEsDocSearch = jest.mocked(useEsDocSearch);
+
+const defaultHit = {
+  flattened: {},
+  id: '',
+  raw: { _id: '1', _index: 'index1' },
+};
+
+const getMockHit = (error: Record<string, unknown>) => {
+  return buildDataTableRecord({
+    _index: '.ds-logs-apm.error-default-2024.12.31-000001',
+    _id: 'id123',
+    _score: 1,
+    _source: {
+      data_stream: {
+        type: 'logs',
+        dataset: 'apm.error',
+        namespace: 'default',
+      },
+      '@timestamp': '2024-12-31T00:00:00.000Z',
+      message: 'Log stacktrace',
+      error,
+    },
+  });
+};
+
+const renderApmStacktrace = () =>
+  renderWithKibanaRenderContext(<ApmStacktrace hit={defaultHit} dataView={dataViewMock} />);
 
 describe('APM Stacktrace component', () => {
-  test('renders loading state', () => {
-    jest.spyOn(hooks, 'useEsDocSearch').mockImplementation(() => [0, null, () => {}]);
-
-    const comp = mountWithIntl(
-      <ApmStacktrace
-        hit={{
-          raw: { _id: '1', _index: 'index1' },
-          flattened: {},
-          id: '',
-        }}
-        dataView={mockDataView}
-      />
-    );
-
-    const loadingSpinner = comp.find(EuiLoadingSpinner);
-    expect(loadingSpinner).toHaveLength(1);
+  beforeEach(() => {
+    mockUseEsDocSearch.mockReset();
   });
 
-  test('renders error state', () => {
-    jest.spyOn(hooks, 'useEsDocSearch').mockImplementation(() => [3, null, () => {}]);
+  it('renders loading state', () => {
+    mockUseEsDocSearch.mockReturnValue([ElasticRequestState.Loading, null, () => {}]);
 
-    const comp = mountWithIntl(
-      <ApmStacktrace
-        hit={{
-          raw: { _id: '1', _index: 'index1' },
-          flattened: {},
-          id: '',
-        }}
-        dataView={mockDataView}
-      />
-    );
-    const errorComponent = comp.find('[data-test-subj="unifiedDocViewerApmStacktraceErrorMsg"]');
-    expect(errorComponent).toHaveLength(1);
+    renderApmStacktrace();
+
+    expect(screen.getByRole('progressbar')).toBeVisible();
   });
 
-  test('renders log stacktrace', () => {
+  it('renders error state', () => {
+    mockUseEsDocSearch.mockReturnValue([ElasticRequestState.Error, null, () => {}]);
+
+    renderApmStacktrace();
+
+    expect(screen.getByText('Failed to load stacktrace')).toBeVisible();
+  });
+
+  it('renders log stacktrace', async () => {
     const mockHit = getMockHit({
       id: '1',
       grouping_key: '1',
@@ -94,26 +109,16 @@ describe('APM Stacktrace component', () => {
       },
     });
 
-    jest.spyOn(hooks, 'useEsDocSearch').mockImplementation(() => [2, mockHit, () => {}]);
+    mockUseEsDocSearch.mockReturnValue([ElasticRequestState.Found, mockHit, () => {}]);
 
-    const comp = mountWithIntl(
-      <EuiThemeProvider>
-        <ApmStacktrace
-          hit={{
-            raw: { _id: '1', _index: 'index1' },
-            flattened: {},
-            id: '',
-          }}
-          dataView={mockDataView}
-        />
-      </EuiThemeProvider>
-    );
+    renderApmStacktrace();
 
-    const stacktraceComponent = comp.find(Stacktrace);
-    expect(stacktraceComponent).toHaveLength(1);
+    expect(await screen.findByText('<anonymous>')).toBeVisible();
+    expect(screen.getAllByText('test.js')[0]).toBeVisible();
+    expect(screen.getByText('1 library frame')).toBeVisible();
   });
 
-  test('renders exception stacktrace', () => {
+  it('renders exception stacktrace', async () => {
     const mockHit = getMockHit({
       id: '1',
       grouping_key: '1',
@@ -161,26 +166,16 @@ describe('APM Stacktrace component', () => {
       ],
     });
 
-    jest.spyOn(hooks, 'useEsDocSearch').mockImplementation(() => [2, mockHit, () => {}]);
+    mockUseEsDocSearch.mockReturnValue([ElasticRequestState.Found, mockHit, () => {}]);
 
-    const comp = mountWithIntl(
-      <EuiThemeProvider>
-        <ApmStacktrace
-          hit={{
-            raw: { _id: '1', _index: 'index1' },
-            flattened: {},
-            id: '',
-          }}
-          dataView={mockDataView}
-        />
-      </EuiThemeProvider>
-    );
+    renderApmStacktrace();
 
-    const stacktraceComponent = comp.find(ExceptionStacktrace);
-    expect(stacktraceComponent).toHaveLength(1);
+    expect(await screen.findByText('Exception stacktrace')).toBeVisible();
+    expect(screen.getByText('<anonymous>')).toBeVisible();
+    expect(screen.getByText('1 library frame')).toBeVisible();
   });
 
-  test('renders plain text stacktrace', () => {
+  it('renders plain text stacktrace', async () => {
     const mockHit = getMockHit({
       id: '1',
       grouping_key: '1',
@@ -194,40 +189,11 @@ describe('APM Stacktrace component', () => {
       stack_trace: 'test',
     });
 
-    jest.spyOn(hooks, 'useEsDocSearch').mockImplementation(() => [2, mockHit, () => {}]);
+    mockUseEsDocSearch.mockReturnValue([ElasticRequestState.Found, mockHit, () => {}]);
 
-    const comp = mountWithIntl(
-      <EuiThemeProvider>
-        <ApmStacktrace
-          hit={{
-            raw: { _id: '1', _index: 'index1' },
-            flattened: {},
-            id: '',
-          }}
-          dataView={mockDataView}
-        />
-      </EuiThemeProvider>
-    );
+    renderApmStacktrace();
 
-    const stacktraceComponent = comp.find(PlaintextStacktrace);
-    expect(stacktraceComponent).toHaveLength(1);
+    expect(await screen.findByText('message')).toBeVisible();
+    expect(screen.getByText('test')).toBeVisible();
   });
 });
-
-function getMockHit(error: Record<string, unknown>) {
-  return buildDataTableRecord({
-    _index: '.ds-logs-apm.error-default-2024.12.31-000001',
-    _id: 'id123',
-    _score: 1,
-    _source: {
-      data_stream: {
-        type: 'logs',
-        dataset: 'apm.error',
-        namespace: 'default',
-      },
-      '@timestamp': '2024-12-31T00:00:00.000Z',
-      message: 'Log stacktrace',
-      error,
-    },
-  });
-}
