@@ -22,7 +22,6 @@ describe('CasesClientFactory', () => {
 
   const rawRequest: FakeRawRequest = {
     headers: {},
-    path: '/',
   };
 
   const fakeRequest = kibanaRequestFactory(rawRequest);
