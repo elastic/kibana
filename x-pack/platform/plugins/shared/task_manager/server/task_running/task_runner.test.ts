@@ -34,7 +34,7 @@ import { throwRetryableError, throwUnrecoverableError } from './errors';
 import apm from 'elastic-apm-node';
 import { SpanStatusCode, trace } from '@opentelemetry/api';
 import { tracing } from '@elastic/opentelemetry-node/sdk';
-import { executionContextServiceMock, httpServiceMock } from '@kbn/core/server/mocks';
+import { executionContextServiceMock } from '@kbn/core/server/mocks';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import { bufferedTaskStoreMock } from '../buffered_task_store.mock';
 import {
@@ -3742,7 +3742,6 @@ describe('TaskManagerRunner', () => {
     }
 
     const runner = new TaskManagerRunner({
-      basePathService: httpServiceMock.createBasePath(),
       defaultMaxAttempts: 5,
       beforeRun: (context) => Promise.resolve(context),
       beforeMarkRunning: (context) => Promise.resolve(context),
