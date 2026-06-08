@@ -53,6 +53,17 @@ const bodySchema = schema.object({
  *   202 both times (ensureScheduled semantics). The route passes `{ request }`
  *   to ensureScheduled so Task Manager stores an API key for the task runner's
  *   `fakeRequest` (used for LLM inference calls).
+ *
+ * **Connector requirement (confirm path):**
+ *   The backfill task's `fakeRequest` context resolves connectors via the same
+ *   chain as `resolveScopedModel`: explicit override → `genAi:defaultAIConnector`.
+ *   If neither is configured the task fails unrecoverably on start. The confirm
+ *   path pre-validates connector availability and returns 400 early so the
+ *   operator gets immediate feedback instead of a silent task failure.
+ *   To fix: set Advanced Settings →
+ *     "Threat Intelligence — taxonomy gate connector"
+ *     (`securitySolution:threatIntelligence:diamondGateConnector`) to a cheap
+ *     GenAI connector (e.g. Haiku), **or** configure `genAi:defaultAIConnector`.
  */
 export const registerBackfillDiamondRoute = ({
   router,
@@ -215,7 +226,7 @@ export const registerBackfillDiamondRoute = ({
             );
             if (gateSetting) gateConnectorId = gateSetting;
           } catch {
-            // leave empty — task runner will resolve the default connector via fakeRequest
+            // Setting not registered in this context — fall through.
           }
           try {
             const diamondSetting = await core.uiSettings.client.get<string>(
@@ -223,7 +234,39 @@ export const registerBackfillDiamondRoute = ({
             );
             if (diamondSetting) diamondConnectorId = diamondSetting;
           } catch {
-            // leave empty
+            // fall through
+          }
+
+          // Pre-flight: verify a connector is reachable before scheduling the
+          // task. The task runner uses `fakeRequest` whose connector resolution
+          // chain is: explicit gate_connector_id → genAi:defaultAIConnector →
+          // inference.getDefaultConnector. If none resolves the task fails
+          // unrecoverably with no visible progress. Check at schedule time so
+          // the operator gets an actionable 400 instead of a silent task failure.
+          if (!gateConnectorId) {
+            const inference = getInference();
+            if (inference) {
+              let hasDefault = false;
+              try {
+                const defaultConnector = await inference.getDefaultConnector(request);
+                hasDefault = !!defaultConnector?.connectorId;
+              } catch {
+                // getDefaultConnector throws when no connector is configured.
+              }
+              if (!hasDefault) {
+                return response.badRequest({
+                  body: {
+                    message:
+                      'No GenAI connector is configured for the Diamond Model backfill gate. ' +
+                      'The backfill task cannot resolve a connector and will fail immediately. ' +
+                      'Fix: set Advanced Settings → "Threat Intelligence — taxonomy gate connector" ' +
+                      '(securitySolution:threatIntelligence:diamondGateConnector) to a GenAI connector ' +
+                      'ID (e.g. a Haiku-class connector for cost efficiency), ' +
+                      'or configure a space-wide default via genAi:defaultAIConnector.',
+                  },
+                });
+              }
+            }
           }
 
           try {

@@ -170,7 +170,14 @@ export const registerBackfillDiamondFieldsTask = ({
           });
           if (!gateModelOutcome.ok) {
             throwUnrecoverableError(
-              new Error(`Gate connector unavailable: ${gateModelOutcome.message}`)
+              new Error(
+                `Diamond backfill gate connector unavailable: ${gateModelOutcome.message}. ` +
+                  `Fix: set Advanced Settings → "Threat Intelligence — taxonomy gate connector" ` +
+                  `(securitySolution:threatIntelligence:diamondGateConnector) to a valid GenAI ` +
+                  `connector ID, or configure a default via genAi:defaultAIConnector. ` +
+                  `Then re-run via POST /api/threat_intelligence/backfill_diamond with a fresh ` +
+                  `run_id from a new dry_run call.`
+              )
             );
             return { state: previousState };
           }
@@ -183,7 +190,12 @@ export const registerBackfillDiamondFieldsTask = ({
           });
           if (!diamondModelOutcome.ok) {
             throwUnrecoverableError(
-              new Error(`Diamond connector unavailable: ${diamondModelOutcome.message}`)
+              new Error(
+                `Diamond backfill extraction connector unavailable: ${diamondModelOutcome.message}. ` +
+                  `Fix: set Advanced Settings → "Threat Intelligence — Diamond extraction connector" ` +
+                  `(securitySolution:threatIntelligence:diamondConnector) to a valid GenAI connector, ` +
+                  `or configure a default via genAi:defaultAIConnector.`
+              )
             );
             return { state: previousState };
           }

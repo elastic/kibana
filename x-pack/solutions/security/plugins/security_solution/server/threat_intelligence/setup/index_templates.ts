@@ -669,6 +669,122 @@ const COMPANION_INDEX_TEMPLATES: Array<{
   },
 ];
 
+/**
+ * Patches the `extracted.diamond.*` field mappings onto any existing
+ * `.ds-.kibana-threat-reports-*` backing indices that were created before the
+ * v14 template deployed. The v14 template adds these fields automatically to
+ * new rollovers, but pre-existing backing indices keep their original (v13)
+ * mapping until explicitly updated.
+ *
+ * Safe to re-run on every plugin start: if `extracted.diamond.suitable`
+ * already exists the backing index is skipped; ES PUT-mapping for additive
+ * fields is otherwise a no-op for fields that already match.
+ *
+ * Without this migration the `backfill_diamond_fields` task would silently
+ * fail all ES updates with `strict_dynamic_mapping_exception` because
+ * `dynamic: 'strict'` rejects unknown fields.
+ */
+const migrateExistingDiamondMappings = async (
+  esClient: ElasticsearchClient,
+  logger: Logger
+): Promise<void> => {
+  const log = logger.get('diamond-mapping-migration');
+
+  let backingIndices: string[];
+  try {
+    const streamInfo = await esClient.indices.getDataStream(
+      { name: THREAT_REPORTS_DATA_STREAM },
+      { ignore: [404] }
+    );
+    backingIndices = (streamInfo.data_streams ?? []).flatMap((ds) =>
+      (ds.indices ?? []).map((i) => i.index_name)
+    );
+  } catch (err) {
+    log.debug(
+      `diamond-mapping-migration: data stream not found — skipping (${(err as Error).message})`
+    );
+    return;
+  }
+
+  for (const indexName of backingIndices) {
+    try {
+      const { [indexName]: indexMappings } = await esClient.indices.getMapping({
+        index: indexName,
+      });
+      const extractedProps = (
+        indexMappings?.mappings?.properties as
+          | Record<string, { properties?: Record<string, unknown> }>
+          | undefined
+      )?.extracted?.properties;
+
+      if (!extractedProps?.diamond) {
+        await esClient.indices.putMapping({
+          index: indexName,
+          properties: {
+            extracted: {
+              properties: {
+                diamond: {
+                  properties: {
+                    suitable: { type: 'boolean' },
+                    signal_count: { type: 'integer' },
+                    model_id: { type: 'keyword' },
+                    extracted_at: { type: 'date' },
+                    extraction_mode: { type: 'keyword' },
+                    adversary: {
+                      properties: {
+                        signal: { type: 'keyword' },
+                        summary: {
+                          type: 'semantic_text',
+                          inference_id: DIAMOND_INFERENCE_ENDPOINT_ID,
+                        },
+                      },
+                    },
+                    capability: {
+                      properties: {
+                        signal: { type: 'keyword' },
+                        summary: {
+                          type: 'semantic_text',
+                          inference_id: DIAMOND_INFERENCE_ENDPOINT_ID,
+                        },
+                      },
+                    },
+                    infrastructure: {
+                      properties: {
+                        signal: { type: 'keyword' },
+                        summary: {
+                          type: 'semantic_text',
+                          inference_id: DIAMOND_INFERENCE_ENDPOINT_ID,
+                        },
+                      },
+                    },
+                    victim: {
+                      properties: {
+                        signal: { type: 'keyword' },
+                        summary: {
+                          type: 'semantic_text',
+                          inference_id: DIAMOND_INFERENCE_ENDPOINT_ID,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        });
+        log.info(`Migrated diamond mappings on ${indexName} (v14 backfill)`);
+      }
+    } catch (err) {
+      log.error(
+        `Failed to migrate diamond mappings on ${indexName}: ${(err as Error).message}. ` +
+          `The backfill_diamond_fields task will be unable to write diamond fields to ` +
+          `documents in this index until the mapping is updated manually: ` +
+          `PUT ${indexName}/_mapping { "properties": { "extracted": { "properties": { "diamond": { ... } } } } }`
+      );
+    }
+  }
+};
+
 const ensureCompanionIndex = async (
   esClient: ElasticsearchClient,
   indexName: string,
@@ -740,6 +856,9 @@ export const installIndexTemplates = async ({
   await ensureCompanionIndex(esClient, THREAT_INTEL_DIGESTS_INDEX, log);
   await ensureCompanionIndex(esClient, THREAT_INTEL_INDICATORS_INDEX, log);
   await ensureCompanionIndex(esClient, THREAT_INTEL_ADVISORIES_INDEX, log);
+
+  // Patch diamond fields onto any pre-v14 backing indices. Safe to re-run.
+  await migrateExistingDiamondMappings(esClient, log);
 
   log.info('Threat intelligence index templates installed');
 };
