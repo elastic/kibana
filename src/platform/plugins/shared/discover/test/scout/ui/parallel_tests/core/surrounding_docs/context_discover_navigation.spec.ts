@@ -50,10 +50,7 @@ spaceTest.describe(
         await navigateToFirstDocContext(pageObjects);
 
         const headerColumns = await pageObjects.discover.getDocHeader();
-        expect(headerColumns).toContain('@timestamp');
-        for (const col of TEST_COLUMN_NAMES) {
-          expect(headerColumns).toContain(col);
-        }
+        expect(headerColumns).toEqual(['@timestamp', ...TEST_COLUMN_NAMES]);
       }
     );
 

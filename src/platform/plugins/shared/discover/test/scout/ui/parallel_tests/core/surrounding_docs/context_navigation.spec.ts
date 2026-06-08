@@ -91,6 +91,10 @@ spaceTest.describe(
         for (const [field, value] of TEST_FILTER_COLUMN_NAMES) {
           expect(await pageObjects.filterBar.hasFilter({ field, value, enabled: true })).toBe(true);
         }
+
+        const timeRange = await pageObjects.datePicker.getTimeConfig();
+        expect(timeRange.start).toContain('2015-09-19');
+        expect(timeRange.end).toContain('2015-09-23');
       }
     );
 
@@ -107,11 +111,16 @@ spaceTest.describe(
           async () => {
             await pageObjects.contextPage.goBackToDiscover();
 
+            expect(await pageObjects.filterBar.getFilterCount()).toBe(2);
             for (const [field, value] of TEST_FILTER_COLUMN_NAMES) {
               expect(await pageObjects.filterBar.hasFilter({ field, value, enabled: true })).toBe(
                 true
               );
             }
+
+            const timeRange = await pageObjects.datePicker.getTimeConfig();
+            expect(timeRange.start).toContain('2015-09-19');
+            expect(timeRange.end).toContain('2015-09-23');
           }
         );
 
@@ -135,11 +144,16 @@ spaceTest.describe(
           async () => {
             await pageObjects.contextPage.goBackToDiscover();
 
+            expect(await pageObjects.filterBar.getFilterCount()).toBe(2);
             for (const [field, value] of TEST_FILTER_COLUMN_NAMES) {
               expect(await pageObjects.filterBar.hasFilter({ field, value, enabled: true })).toBe(
                 true
               );
             }
+
+            const timeRange = await pageObjects.datePicker.getTimeConfig();
+            expect(timeRange.start).toContain('2015-09-19');
+            expect(timeRange.end).toContain('2015-09-23');
           }
         );
       }
