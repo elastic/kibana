@@ -114,20 +114,8 @@ export const linksByReferenceSchema = serializedTitlesSchema.extends(
 );
 
 // Complete links embeddable schema (union of by-value and by-reference embeddables)
-export const linksEmbeddableSchema = schema.oneOf(
-  [
-    // Links by-value embeddable schema (by-value state + titles)
-    schema.allOf([linksByValueSchema, serializedTitlesSchema], {
-      meta: BY_VALUE_SCHEMA_META,
-    }),
-    // Links by-reference embeddable schema (by-reference state + titles)
-    schema.allOf([linksByReferenceSchema, serializedTitlesSchema], {
-      meta: BY_REF_SCHEMA_META,
-    }),
-  ],
-  {
-    meta: {
-      description: 'Links embeddable schema',
-    },
-  }
-);
+export const linksEmbeddableSchema = schema.oneOf([linksByValueSchema, linksByReferenceSchema], {
+  meta: {
+    description: 'Links embeddable schema',
+  },
+});
