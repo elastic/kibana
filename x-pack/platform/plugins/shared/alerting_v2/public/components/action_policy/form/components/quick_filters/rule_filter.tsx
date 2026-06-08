@@ -27,7 +27,12 @@ import { useDebouncedValue } from '@kbn/react-hooks';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import { useFetchRules } from '../../../../../hooks/use_fetch_rules';
 import { mergeRuleIdsIntoMatcher, parseRuleIdsFromMatcher } from '../../matcher_quick_filter_utils';
-import { POPOVER_PANEL_STYLE, SELECTABLE_LIST_PROPS, type QuickFiltersProps } from './constants';
+import {
+  ALERT_KIND_FILTER,
+  POPOVER_PANEL_STYLE,
+  SELECTABLE_LIST_PROPS,
+  type QuickFiltersProps,
+} from './constants';
 
 interface RuleSelectableMeta {
   value: string;
@@ -54,6 +59,7 @@ export const RuleFilter = ({ matcher, onChange }: QuickFiltersProps) => {
     perPage: 50,
     search: debouncedSearch || undefined,
     enabled: isOpen,
+    filter: ALERT_KIND_FILTER,
   });
   const items = data?.items;
 
