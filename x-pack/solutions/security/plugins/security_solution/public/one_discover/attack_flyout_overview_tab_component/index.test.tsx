@@ -9,6 +9,7 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { createStore } from 'redux';
+import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import { AttackFlyoutOverviewTab } from '.';
 import type { StartServices } from '../../types';
 
@@ -20,9 +21,27 @@ jest.mock('../../flyout_v2/shared/components/flyout_provider', () => ({
   flyoutProviders: (props: unknown) => mockFlyoutProviders(props as { children: React.ReactNode }),
 }));
 
+const mockAttack = { id: 'attack-1' } as unknown as AttackDiscoveryAlert;
+const mockGetAttackFromHit = jest.fn<AttackDiscoveryAlert | null, [DataTableRecord]>(
+  () => mockAttack
+);
+jest.mock('../../flyout_v2/attack/main/utils/get_attack_from_hit', () => ({
+  getAttackFromHit: (hit: DataTableRecord) => mockGetAttackFromHit(hit),
+}));
+
+jest.mock('../../flyout_v2/attack/main/tabs/overview_tab', () => ({
+  OverviewTab: ({ onAttackUpdated }: { onAttackUpdated: () => void }) => (
+    <button type="button" data-test-subj="attackOverviewTabMock" onClick={onAttackUpdated}>
+      {'overview'}
+    </button>
+  ),
+}));
+
 describe('AttackFlyoutOverviewTab', () => {
   beforeEach(() => {
     mockFlyoutProviders.mockClear();
+    mockGetAttackFromHit.mockClear();
+    mockGetAttackFromHit.mockReturnValue(mockAttack);
   });
 
   const servicesMock = {
@@ -32,9 +51,13 @@ describe('AttackFlyoutOverviewTab', () => {
     },
   } as unknown as StartServices;
 
-  it('does not render before promises resolve', () => {
-    const hit = { id: '1', raw: {}, flattened: {} } as unknown as DataTableRecord;
+  const hit = {
+    id: '1',
+    raw: { _id: 'attack-1', _index: 'test-index' },
+    flattened: { _id: 'attack-1', _index: 'test-index' },
+  } as unknown as DataTableRecord;
 
+  it('does not render before promises resolve', () => {
     render(
       <AttackFlyoutOverviewTab
         hit={hit}
@@ -47,8 +70,7 @@ describe('AttackFlyoutOverviewTab', () => {
     expect(mockFlyoutProviders).not.toHaveBeenCalled();
   });
 
-  it('renders placeholder through flyoutProviders when dependencies resolve', async () => {
-    const hit = { id: '1', raw: {}, flattened: {} } as unknown as DataTableRecord;
+  it('renders overview tab through flyoutProviders when dependencies resolve', async () => {
     const store = createStore(() => ({}));
 
     render(
@@ -69,11 +91,91 @@ describe('AttackFlyoutOverviewTab', () => {
       );
     });
 
-    expect(screen.getByTestId('attackFlyoutOverviewTabPlaceholder')).toBeInTheDocument();
+    expect(screen.getByTestId('attackOverviewTabMock')).toBeInTheDocument();
+  });
+
+  it('renders nothing when the hit cannot be transformed into an attack', async () => {
+    mockGetAttackFromHit.mockReturnValue(null as unknown as AttackDiscoveryAlert);
+    const store = createStore(() => ({}));
+
+    render(
+      <AttackFlyoutOverviewTab
+        hit={hit}
+        servicesPromise={Promise.resolve(servicesMock)}
+        storePromise={Promise.resolve(store as never)}
+        onAttackUpdated={jest.fn()}
+      />
+    );
+
+    await waitFor(() => {
+      expect(mockFlyoutProviders).toHaveBeenCalled();
+    });
+
+    expect(screen.queryByTestId('attackOverviewTabMock')).not.toBeInTheDocument();
+  });
+
+  it('forwards onAttackUpdated unchanged so Discover refresh stays the single source of truth', async () => {
+    const onAttackUpdated = jest.fn();
+    const store = createStore(() => ({}));
+
+    render(
+      <AttackFlyoutOverviewTab
+        hit={hit}
+        servicesPromise={Promise.resolve(servicesMock)}
+        storePromise={Promise.resolve(store as never)}
+        onAttackUpdated={onAttackUpdated}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('attackOverviewTabMock')).toBeInTheDocument();
+    });
+
+    screen.getByTestId('attackOverviewTabMock').click();
+
+    expect(onAttackUpdated).toHaveBeenCalledTimes(1);
+  });
+
+  it('re-derives attack from the latest hit so a header-triggered status change reaches the overview tab', async () => {
+    const updatedHit = {
+      id: '1',
+      raw: {
+        _id: 'attack-1',
+        _index: 'test-index',
+        _source: { 'kibana.alert.workflow_status': 'closed' },
+      },
+      flattened: { _id: 'attack-1', _index: 'test-index' },
+    } as unknown as DataTableRecord;
+    const store = createStore(() => ({}));
+
+    const { rerender } = render(
+      <AttackFlyoutOverviewTab
+        hit={hit}
+        servicesPromise={Promise.resolve(servicesMock)}
+        storePromise={Promise.resolve(store as never)}
+        onAttackUpdated={jest.fn()}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('attackOverviewTabMock')).toBeInTheDocument();
+    });
+
+    expect(mockGetAttackFromHit).toHaveBeenLastCalledWith(hit);
+
+    rerender(
+      <AttackFlyoutOverviewTab
+        hit={updatedHit}
+        servicesPromise={Promise.resolve(servicesMock)}
+        storePromise={Promise.resolve(store as never)}
+        onAttackUpdated={jest.fn()}
+      />
+    );
+
+    expect(mockGetAttackFromHit).toHaveBeenLastCalledWith(updatedHit);
   });
 
   it('does not render when resolving dependencies fails', async () => {
-    const hit = { id: '1', raw: {}, flattened: {} } as unknown as DataTableRecord;
     const store = createStore(() => ({}));
 
     render(
