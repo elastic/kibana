@@ -29,6 +29,20 @@ const bodySchema = schema.object({
   dry_run: schema.maybe(schema.boolean()),
   sample_size: schema.maybe(schema.number({ min: 1, max: MAX_SAMPLE_SIZE })),
   run_id: schema.maybe(schema.string({ minLength: 1 })),
+  /**
+   * When true (confirm path only), re-processes ALL reports that have been
+   * through the extraction pipeline rather than only those without
+   * `extracted.diamond.suitable`. Use to regenerate diamond fields after a
+   * prompt change.
+   *
+   * WARNING: if the same documents are also being re-processed by the
+   * workflow (via a `provenance.extraction_method` reset to `pending`),
+   * diamond extraction will run twice on the same docs — double-paying
+   * the heavy Opus connector. Use ONE path per run:
+   *   • workflow reset  → re-runs IOCs + related_reports + diamond
+   *   • force_reextract → re-runs diamond only
+   */
+  force_reextract: schema.maybe(schema.boolean()),
 });
 
 /**
@@ -87,7 +101,12 @@ export const registerBackfillDiamondRoute = ({
         validate: { request: { body: bodySchema } },
       },
       async (context, request, response) => {
-        const { dry_run: dryRun, sample_size: sampleSize, run_id: runId } = request.body;
+        const {
+          dry_run: dryRun,
+          sample_size: sampleSize,
+          run_id: runId,
+          force_reextract: forceReextract,
+        } = request.body;
 
         // ── Dry-run path ──────────────────────────────────────────────────────
         if (dryRun === true) {
@@ -276,6 +295,7 @@ export const registerBackfillDiamondRoute = ({
               runId,
               gateConnectorId,
               diamondConnectorId,
+              forceReextract: forceReextract ?? false,
             });
           } catch (err) {
             logger.error(`backfill schedule failed for run_id=${runId}: ${(err as Error).message}`);

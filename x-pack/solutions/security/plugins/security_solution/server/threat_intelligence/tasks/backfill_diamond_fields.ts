@@ -58,6 +58,21 @@ const CANDIDATE_FILTER: estypes.QueryDslQueryContainer = {
   },
 };
 
+/**
+ * Force-reextract candidate filter: re-processes ALL reports that have been
+ * through the extraction pipeline, ignoring the idempotency guard on
+ * `extracted.diamond.suitable`. Used when the extraction prompt or gate logic
+ * has changed and existing results need to be regenerated.
+ *
+ * See the WARNING in BackfillParams.force_reextract about the double-pay risk
+ * if the workflow reset path is also active on the same documents.
+ */
+const FORCE_REEXTRACT_CANDIDATE_FILTER: estypes.QueryDslQueryContainer = {
+  bool: {
+    filter: [{ exists: { field: 'provenance.extracted_at' } }],
+  },
+};
+
 const stateSchemaV1 = schema.object({
   lastProcessedAt: schema.maybe(schema.string()),
   gateTotal: schema.maybe(schema.number()),
@@ -77,6 +92,19 @@ interface BackfillParams {
   run_id: string;
   gate_connector_id: string;
   diamond_connector_id: string;
+  /**
+   * When true, re-processes ALL reports that have `provenance.extracted_at`
+   * (i.e. have been through the extraction pipeline), regardless of whether
+   * `extracted.diamond.suitable` is already set.
+   *
+   * WARNING — double-pay risk: if you also reset `provenance.extraction_method`
+   * to `pending` for the same documents, the workflow will re-fire
+   * `extract_diamond` on suitable reports AND this backfill will run again on
+   * the same docs, paying Opus twice. Use ONE path, not both:
+   *   • workflow reset path  → re-runs IOCs + related_reports + diamond
+   *   • backfill force_reextract → re-runs diamond only, skips the rest
+   */
+  force_reextract?: boolean;
 }
 
 interface CandidateHit {
@@ -212,6 +240,13 @@ export const registerBackfillDiamondFieldsTask = ({
           // Cursor filter: skip already-processed extracted_at values from prior runs.
           const lower = previousState.lastProcessedAt ?? '1970-01-01T00:00:00.000Z';
 
+          // When force_reextract is true, re-processes ALL extracted docs regardless of
+          // whether extracted.diamond.suitable is already set. See the WARNING on
+          // BackfillParams.force_reextract about the double-pay risk.
+          const activeFilter = params.force_reextract
+            ? FORCE_REEXTRACT_CANDIDATE_FILTER
+            : CANDIDATE_FILTER;
+
           while (!abortController.signal.aborted) {
             let searchResponse;
             try {
@@ -222,13 +257,14 @@ export const registerBackfillDiamondFieldsTask = ({
                 query: {
                   bool: {
                     filter: [
-                      ...((CANDIDATE_FILTER.bool?.filter as estypes.QueryDslQueryContainer[]) ??
-                        []),
+                      ...((activeFilter.bool?.filter as estypes.QueryDslQueryContainer[]) ?? []),
                       { range: { 'provenance.extracted_at': { gte: lower } } },
                     ],
-                    must_not: CANDIDATE_FILTER.bool?.must_not as
-                      | estypes.QueryDslQueryContainer[]
-                      | undefined,
+                    ...(activeFilter.bool?.must_not
+                      ? {
+                          must_not: activeFilter.bool.must_not as estypes.QueryDslQueryContainer[],
+                        }
+                      : {}),
                   },
                 },
                 sort: REPORT_SCAN_SORT,
@@ -376,12 +412,14 @@ export const scheduleBackfillDiamondFieldsTask = async ({
   runId,
   gateConnectorId,
   diamondConnectorId,
+  forceReextract,
 }: {
   taskManager: TaskManagerStartContract;
   request: KibanaRequest;
   runId: string;
   gateConnectorId: string;
   diamondConnectorId: string;
+  forceReextract?: boolean;
 }): Promise<void> => {
   await taskManager.ensureScheduled(
     {
@@ -391,6 +429,7 @@ export const scheduleBackfillDiamondFieldsTask = async ({
         run_id: runId,
         gate_connector_id: gateConnectorId,
         diamond_connector_id: diamondConnectorId,
+        ...(forceReextract ? { force_reextract: true } : {}),
       } satisfies BackfillParams,
       state: {} satisfies BackfillState,
     },

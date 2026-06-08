@@ -272,41 +272,44 @@ steps:
       #     in practice (two reports rarely list identical IOC sets).
       #  2. **Partial IOC value overlap** (boost 2, score_mode=sum) —
       #     `nested terms` over `extracted.iocs.value`. Each shared IOC
-      #     contributes 1.0 × boost to `_score`, so a report sharing 5
-      #     of this report's IOCs ranks above one that shares 1. The
-      #     `extract_iocs` service already filters private IPs and the
-      #     common-noise domains (`example.com`, `github.com`, …), so a
-      #     single accidental overlap on `8.8.8.8` won't poison the
-      #     ranking.
-      #  3. **Partial technique overlap** (boost 1, score_mode=sum) —
-      #     `nested terms` over `extracted.behaviors.technique_id` (the
-      #     field this workflow writes; `hit_provenance_backfill` reads the
-      #     same path for Layer-2 env-hit attribution). Catches "same
-      #     tradecraft, different IOCs"
-      #     relations.
+      #     contributes ~1.0 × IDF × boost to `_score`. After the #3
+      #     extract_iocs precision fix, the IOC list contains only real
+      #     indicators; IDF naturally weights rare C2 domains and hashes
+      #     higher than shared CDN hostnames, so promiscuous low-IDF
+      #     noise is already penalised without structural changes.
+      #  3. **Partial technique overlap** (boost 0.3, score_mode=sum) —
+      #     `nested terms` over `extracted.behaviors.technique_id`.
+      #     Intentionally low boost: common ATT&CK techniques (T1059,
+      #     T1566, …) appear in dozens of reports and their IDF is low;
+      #     even 10 shared techniques rarely exceed min_score alone.
+      #     Provides additive signal when combined with IOC overlap.
       #
-      # `minimum_should_match: 1` means at least one signal must match;
-      # the resulting `_score` ranking gives the persisted
-      # `related_reports[]` a meaningful order without an explicit sort
-      # clause. `size: 50` caps the candidate pool; downstream consumers
-      # cap their own render count.
+      # `min_score: 4` — conservative starting threshold; calibrate
+      # against the phase0_test_corpus in Dev Tools after the #3
+      # re-extraction pass completes. Requires at least one strong
+      # signal (ioc_set_hash, a high-IDF hash, or several clean IOCs)
+      # before a pair is considered "related." Single shared common
+      # domains fall below the floor. Fall back to the structural
+      # discriminating-clause split (must: ioc_set_hash OR hash-IOC)
+      # if min_score proves fragile after calibration.
       #
-      # Skipped when no IOCs were extracted from this report: with no
-      # IOC values to seed signals (1) and (2), the partial-overlap
-      # query would still return technique-only matches via signal (3)
-      # — but a report with zero IOCs is by construction also a poor
-      # *target* for relatedness scoring (no anchor for downstream
-      # corroboration). An IOC-light + behavior-rich report still
-      # triggers cross-report correlation via the `hunt_for_threat`
-      # orchestrator path, which has its own (more expensive,
-      # LLM-grounded) recall mechanism.
+      # `size: 15` — was 50. Phase0 evidence: one doc had
+      # related_reports_count 49 (≈ entire corpus), confirming the
+      # old size cap was not a meaningful bound. 15 is a tighter ceiling
+      # post-cleanup; adjust after calibration if needed.
+      #
+      # Skipped when no IOCs were extracted from this report: same
+      # rationale as before — zero-IOC reports lack the anchor for
+      # signals 1 and 2, and technique-only matching via signal 3 is
+      # now below min_score by design.
       - name: find_related_reports
         type: elasticsearch.search
         if: "steps.extract_iocs.output.ioc_set_hash : *"
         with:
           index: .kibana-threat-reports
-          size: 50
+          size: 15
           _source: false
+          min_score: 4
           query:
             bool:
               minimum_should_match: 1
@@ -326,7 +329,7 @@ steps:
                 # passed through verbatim; the `terms` clause then handles
                 # the array natively. `score_mode: sum` makes _score grow
                 # linearly with the overlap count (each matched IOC adds
-                # 1.0 × boost to the parent score) so reports sharing many
+                # ~IDF × boost to the parent score) so reports sharing many
                 # IOCs outrank reports sharing one.
                 - nested:
                     path: extracted.iocs
@@ -336,8 +339,9 @@ steps:
                       terms:
                         extracted.iocs.value: "${{ steps.extract_iocs.output.iocs | map: 'value' }}"
                 # Signal 3 — partial technique overlap. Same `score_mode: sum`
-                # rationale as signal 2 — more shared techniques means
-                # higher score. An empty `terms` clause causes
+                # rationale as signal 2. boost reduced from 1 → 0.3 so
+                # common ATT&CK techniques (low IDF) cannot by themselves
+                # exceed min_score. An empty `terms` clause causes
                 # Elasticsearch to reject the whole search with
                 # `parsing_exception: No value specified for terms query`,
                 # so `variables.technique_ids` is sourced from
@@ -350,7 +354,7 @@ steps:
                 - nested:
                     path: extracted.behaviors
                     score_mode: sum
-                    boost: 1
+                    boost: 0.3
                     query:
                       terms:
                         extracted.behaviors.technique_id: "${{ variables.technique_ids }}"
