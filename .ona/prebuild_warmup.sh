@@ -24,18 +24,7 @@ trap cleanup EXIT
 
 cd "$KIBANA_ROOT"
 
-echo "=== Bootstrapping ==="
-yarn kbn bootstrap
-
-# Fail fast if bootstrap did not actually populate node_modules / link the
-# @kbn/* workspaces. Otherwise the prebuild would snapshot a broken tree and
-# the first real start fails with "Cannot find module '@kbn/setup-node-env'".
-echo "=== Verifying bootstrap linked workspaces ==="
-if ! node -e "require.resolve('@kbn/setup-node-env')" 2>/dev/null; then
-  echo "ERROR: bootstrap did not link workspaces (@kbn/setup-node-env unresolved)"
-  exit 1
-fi
-echo "Workspaces linked"
+bash "$KIBANA_ROOT/.ona/bootstrap.sh"
 
 echo "=== Starting Elasticsearch ==="
 yarn es snapshot &

@@ -1,13 +1,17 @@
 tasks:
   install-deps:
     name: Bootstrap the project
-    # Run during prebuild (so the snapshot includes a bootstrapped tree) and on
-    # a cold devcontainer rebuild (when there is no snapshot to restore from).
+    # Run on cold devcontainer start (when there is no prebuild snapshot).
+    # Bootstrap only - the full ES/Kibana warmup is handled by prebuild-warmup.
+    triggeredBy:
+      - postDevcontainerStart
+    command: bash .ona/bootstrap.sh
+  prebuild-warmup:
+    name: Prebuild warmup
+    # Bootstrap + start ES/Kibana so optimizer bundles, ES indices, and fleet
+    # setup are cached in the snapshot.
     triggeredBy:
       - prebuild
-      - postDevcontainerStart
-    # Fail the prebuild if bootstrap doesn't succeed, so we never snapshot a
-    # broken tree that makes the first real start fail.
     prebuildRequiresSuccess: true
     command: bash .ona/prebuild_warmup.sh
 services:
