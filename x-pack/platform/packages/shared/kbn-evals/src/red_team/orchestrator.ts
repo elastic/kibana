@@ -201,10 +201,15 @@ const processExperimentResults = (
     const inputPrompt = ((taskRun.input as Record<string, unknown>)?.prompt as string) ?? '';
     let guardrailViolations = scanWithGuardrails(taskRun.output, guardrailRules, inputPrompt);
 
-    // If the LLM judge confirmed the attack was blocked, suppress guardrail
-    // false positives from refusal text (e.g., model saying "system prompt" in a refusal).
+    // FIXED: Only suppress warn/log-action violations when the judge confirmed the attack was blocked.
+    // These are typically false positives from refusal phrasing (e.g. model says "system prompt"
+    // in its refusal text). Never suppress block-action or critical-severity violations — those
+    // represent real findings (e.g. system prompt leaked in refusal text) regardless of whether
+    // the attack ultimately succeeded.
     if (judgeVerdict?.result.score === 1 && guardrailViolations.length > 0) {
-      guardrailViolations = [];
+      guardrailViolations = guardrailViolations.filter(
+        (v) => v.action === 'block' || v.severity === 'critical'
+      );
     }
 
     const severity = classifySeverity(evaluatorScores, guardrailViolations, severityThresholds);
