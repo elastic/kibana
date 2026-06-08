@@ -26,12 +26,13 @@ const WRAPPER_TEMPLATES: ReadonlyArray<(prompt: string) => string> = [
 ];
 
 export const createJailbreakWrapperStrategy = (): SingleTurnStrategy => {
-  const templateIndex = Math.floor(Math.random() * WRAPPER_TEMPLATES.length);
-
   return {
     name: 'jailbreak_wrapper',
     description: 'Wraps the prompt in DAN/roleplay/hypothetical framing to bypass safety filters',
     kind: 'single-turn',
-    transform: (prompt) => WRAPPER_TEMPLATES[templateIndex](prompt),
+    transform: (prompt) => {
+      const idx = Math.floor(Math.random() * WRAPPER_TEMPLATES.length);
+      return WRAPPER_TEMPLATES[idx](prompt);
+    },
   };
 };
