@@ -119,14 +119,6 @@ export const createAgentGraph = ({
       return {};
     }
 
-    // Only inject proactive context once per conversation
-    if (state.injectedProactiveContextIds && state.injectedProactiveContextIds.length > 0) {
-      logger.info(
-        `[ProactiveRAG:Graph]   Already injected ${state.injectedProactiveContextIds.length} context(s), skipping`
-      );
-      return {};
-    }
-
     const readyContext = proactiveRagSession.getReadyContext();
     logger.info(`[ProactiveRAG:Graph]   readyContext=${!!readyContext}`);
 
@@ -138,6 +130,17 @@ export const createAgentGraph = ({
     logger.info(
       `[ProactiveRAG:Graph]   Context id=${readyContext.id}, findings=${readyContext.findings.length}`
     );
+    logger.info(
+      `[ProactiveRAG:Graph]   Already injected IDs: [${
+        state.injectedProactiveContextIds?.join(', ') ?? 'none'
+      }]`
+    );
+
+    // Only inject each unique context once (dedupe by ID)
+    if (state.injectedProactiveContextIds?.includes(readyContext.id)) {
+      logger.info(`[ProactiveRAG:Graph]   Context ${readyContext.id} already injected, skipping`);
+      return {};
+    }
 
     proactiveRagSession.markInjected(readyContext.id);
 
