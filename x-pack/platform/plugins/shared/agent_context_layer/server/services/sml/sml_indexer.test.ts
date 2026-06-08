@@ -40,7 +40,6 @@ jest.mock('uuid', () => ({ v4: () => `mock-uuid-${++mockUuidCounter}` }));
 const createMockEsClient = (): jest.Mocked<ElasticsearchClient> =>
   ({
     deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
-    // Default: no existing manual entries for any origin_id.
     count: jest.fn().mockResolvedValue({ count: 0 }),
   } as unknown as jest.Mocked<ElasticsearchClient>);
 
@@ -138,7 +137,10 @@ describe('createSmlIndexer', () => {
         allow_no_indices: true,
         query: {
           bool: {
-            filter: [{ term: { origin_id: 'att-1' } }, { term: { ingestion_method: 'crawled' } }],
+            filter: [
+              { term: { 'origin.uri': 'lens://att-1' } },
+              { term: { ingestion_method: 'crawled' } },
+            ],
           },
         },
         refresh: false,
@@ -152,7 +154,17 @@ describe('createSmlIndexer', () => {
       (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
 
       const smlData = {
-        chunks: [{ type: 'lens', title: 'My Viz', content: 'content', permissions: ['perm1'] }],
+        chunks: [
+          {
+            type: 'lens',
+            title: 'My Viz',
+            content: 'content',
+            permissions: {
+              kibana: { privileges: [{ name: 'perm1' }] },
+              elasticsearch: { indices: [] },
+            },
+          },
+        ],
       };
       const getSmlData = jest.fn().mockResolvedValue(smlData);
       const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens', getSmlData }));
@@ -183,7 +195,7 @@ describe('createSmlIndexer', () => {
         index: smlIndexName,
         ignore_unavailable: true,
         allow_no_indices: true,
-        query: { bool: { filter: [{ term: { origin_id: 'att-2' } }] } },
+        query: { bool: { filter: [{ term: { 'origin.uri': 'lens://att-2' } }] } },
         refresh: false,
       });
       expect(bulkMock).toHaveBeenCalledTimes(1);
@@ -198,12 +210,100 @@ describe('createSmlIndexer', () => {
         id: 'mock-uuid-1',
         type: 'lens',
         title: 'My Viz',
-        origin_id: 'att-2',
+        origin: { uri: 'lens://att-2' },
         content: 'content',
         created_at: expect.any(String),
         updated_at: expect.any(String),
         spaces: ['default', 'space-2'],
-        permissions: ['perm1'],
+        permissions: {
+          kibana: { privileges: [{ name: 'perm1' }] },
+          elasticsearch: { indices: [] },
+        },
+        ingestion_method: 'crawled',
+        discovery_labels: [
+          { value: 'My Viz', kind: 'title' },
+          { value: 'lens', kind: 'type' },
+        ],
+      });
+    });
+
+    it('create action: round-trips all new schema fields (tags, discovery_labels, extended_attrs, references, description, user_id)', async () => {
+      const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
+      const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+      (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+
+      const smlData = {
+        chunks: [
+          {
+            type: 'dashboard',
+            title: 'Sales Q3',
+            content: 'sales dashboard for Q3 with revenue and conversion metrics',
+            description: 'Quarterly sales overview, executive audience',
+            tags: ['sales', 'executive', 'quarterly'],
+            discovery_labels: [
+              { value: 'q3 sales', kind: 'tagline' },
+              { value: 'sales q3 dashboard', kind: 'nickname' },
+            ],
+            extended_attrs: {
+              owner_team: 'sales-ops',
+              fields: [{ name: 'revenue', type: 'currency' }],
+            },
+            user_id: 'user-7',
+            references: [{ uri: 'category://sales' }, { uri: 'dashboard://parent-1' }],
+            permissions: {
+              kibana: { privileges: [{ name: 'saved_object:dashboard/get' }] },
+              elasticsearch: { indices: [] },
+            },
+          },
+        ],
+      };
+      const getSmlData = jest.fn().mockResolvedValue(smlData);
+      const registry = createMockRegistry(
+        createMockSmlTypeDefinition({ id: 'dashboard', getSmlData })
+      );
+      const logger = createMockLogger();
+      const esClient = createMockEsClient();
+      const indexer = createSmlIndexer({ registry, logger });
+
+      await indexer.indexAttachment(
+        createIndexerParams({
+          originId: 'dash-100',
+          attachmentType: 'dashboard',
+          action: 'create',
+          spaces: ['default'],
+          esClient,
+        })
+      );
+
+      expect(bulkMock).toHaveBeenCalledTimes(1);
+      const bulkCall = bulkMock.mock.calls[0][0];
+      expect(bulkCall.operations[0].index.document).toEqual({
+        id: 'mock-uuid-1',
+        type: 'dashboard',
+        title: 'Sales Q3',
+        origin: { uri: 'dashboard://dash-100' },
+        content: 'sales dashboard for Q3 with revenue and conversion metrics',
+        description: 'Quarterly sales overview, executive audience',
+        tags: ['sales', 'executive', 'quarterly'],
+        discovery_labels: [
+          { value: 'Sales Q3', kind: 'title' },
+          { value: 'dashboard', kind: 'type' },
+          { value: 'q3 sales', kind: 'tagline' },
+          { value: 'sales q3 dashboard', kind: 'nickname' },
+        ],
+        extended_attrs: {
+          owner_team: 'sales-ops',
+          fields: [{ name: 'revenue', type: 'currency' }],
+        },
+        user_id: 'user-7',
+        references: [{ uri: 'category://sales' }, { uri: 'dashboard://parent-1' }],
+        created_at: expect.any(String),
+        updated_at: expect.any(String),
+        spaces: ['default'],
+        permissions: {
+          kibana: { privileges: [{ name: 'saved_object:dashboard/get' }] },
+          elasticsearch: { indices: [] },
+        },
         ingestion_method: 'crawled',
       });
     });
@@ -424,7 +524,7 @@ describe('createSmlIndexer', () => {
       );
     });
 
-    it('permissions default to empty array when not provided', async () => {
+    it('permissions default to fully-shaped empty object when not provided', async () => {
       const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
       const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
       (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
@@ -448,7 +548,10 @@ describe('createSmlIndexer', () => {
       );
 
       const bulkCall = bulkMock.mock.calls[0][0];
-      expect(bulkCall.operations[0].index.document.permissions).toEqual([]);
+      expect(bulkCall.operations[0].index.document.permissions).toEqual({
+        kibana: { privileges: [] },
+        elasticsearch: { indices: [] },
+      });
     });
 
     describe('manual-entry protection (origin mode)', () => {
@@ -482,7 +585,7 @@ describe('createSmlIndexer', () => {
             query: expect.objectContaining({
               bool: expect.objectContaining({
                 filter: expect.arrayContaining([
-                  { term: { origin_id: 'att-protected' } },
+                  { term: { 'origin.uri': 'lens://att-protected' } },
                   { term: { ingestion_method: 'manual' } },
                 ]),
               }),
@@ -617,8 +720,21 @@ describe('createSmlIndexer', () => {
             spaces: ['default'],
             esClient,
             content: [
-              { type: 'lens', title: 'First', content: 'one', permissions: ['p1'] },
-              { type: 'lens', title: 'Second', content: 'two' },
+              {
+                type: 'lens',
+                title: 'First',
+                content: 'one',
+                permissions: {
+                  kibana: { privileges: [{ name: 'p1' }] },
+                  elasticsearch: { indices: [] },
+                },
+              },
+              {
+                type: 'lens',
+                title: 'Second',
+                content: 'two',
+                permissions: { kibana: { privileges: [] }, elasticsearch: { indices: [] } },
+              },
             ],
           })
         );
@@ -644,15 +760,20 @@ describe('createSmlIndexer', () => {
           expect.objectContaining({
             id: 'mock-uuid-1',
             title: 'First',
-            origin_id: 'att-manual',
             content: 'one',
-            permissions: ['p1'],
+            permissions: {
+              kibana: { privileges: [{ name: 'p1' }] },
+              elasticsearch: { indices: [] },
+            },
             ingestion_method: 'manual',
           })
         );
         expect(ops[1].index.document.id).toBe('mock-uuid-2');
         expect(ops[1].index.document.ingestion_method).toBe('manual');
-        expect(ops[1].index.document.permissions).toEqual([]);
+        expect(ops[1].index.document.permissions).toEqual({
+          kibana: { privileges: [] },
+          elasticsearch: { indices: [] },
+        });
       });
 
       it('content mode does not require a registered type definition', async () => {
@@ -673,7 +794,14 @@ describe('createSmlIndexer', () => {
             action: 'create',
             esClient,
             logger,
-            content: [{ type: 'unregistered', title: 'T', content: 'c' }],
+            content: [
+              {
+                type: 'unregistered',
+                title: 'T',
+                content: 'c',
+                permissions: { kibana: { privileges: [] }, elasticsearch: { indices: [] } },
+              },
+            ],
           })
         );
 
@@ -723,14 +851,21 @@ describe('createSmlIndexer', () => {
             esClient,
             // `content` is ignored in delete mode — the early `action === 'delete'`
             // check fires before the content-mode branch.
-            content: [{ type: 'lens', title: 'ignored', content: 'ignored' }],
+            content: [
+              {
+                type: 'lens',
+                title: 'ignored',
+                content: 'ignored',
+                permissions: { kibana: { privileges: [] }, elasticsearch: { indices: [] } },
+              },
+            ],
           })
         );
 
         expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
         const callArgs = (esClient.deleteByQuery as jest.Mock).mock.calls[0][0];
         expect(callArgs.query.bool.filter).toEqual([
-          { term: { origin_id: 'att-delete-with-content' } },
+          { term: { 'origin.uri': 'lens://att-delete-with-content' } },
           { term: { ingestion_method: 'crawled' } },
         ]);
       });
@@ -773,7 +908,9 @@ describe('createSmlIndexer', () => {
       const callArgs = (esClient.deleteByQuery as jest.Mock).mock.calls[0][0];
       // Filter must contain ONLY the origin_id term — no ingestion_method
       // term means deleteByQuery removes manual + crawled.
-      expect(callArgs.query.bool.filter).toEqual([{ term: { origin_id: 'att-wipe-all' } }]);
+      expect(callArgs.query.bool.filter).toEqual([
+        { term: { 'origin.uri': 'lens://att-wipe-all' } },
+      ]);
     });
 
     it('filters on ingestion_method=manual when ingestionMethod is "manual"', async () => {
@@ -789,7 +926,7 @@ describe('createSmlIndexer', () => {
       expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
       const callArgs = (esClient.deleteByQuery as jest.Mock).mock.calls[0][0];
       expect(callArgs.query.bool.filter).toEqual([
-        { term: { origin_id: 'att-wipe-manual' } },
+        { term: { 'origin.uri': 'lens://att-wipe-manual' } },
         { term: { ingestion_method: 'manual' } },
       ]);
     });
@@ -810,7 +947,7 @@ describe('createSmlIndexer', () => {
       expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
       const callArgs = (esClient.deleteByQuery as jest.Mock).mock.calls[0][0];
       expect(callArgs.query.bool.filter).toEqual([
-        { term: { origin_id: 'att-default-scope' } },
+        { term: { 'origin.uri': 'lens://att-default-scope' } },
         { term: { ingestion_method: 'crawled' } },
       ]);
     });

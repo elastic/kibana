@@ -5,6 +5,11 @@ sudo chown vscode:vscode "${KBN_DIR}/node_modules"
 sudo chown vscode:vscode "${KBN_DIR}/.es"
 sudo chown vscode:vscode "${KBN_DIR}/target"
 
+
+# Pre-seed Claude Code user settings to skip the first-run theme prompt.
+mkdir -p "$HOME/.claude"
+[ -f "$HOME/.claude/settings.json" ] || echo '{"theme":"auto"}' > "$HOME/.claude/settings.json"
+
 # nvm isn't available in the postStartCommand shell, so source it explicitly.
 . "$NVM_DIR/nvm.sh"
 

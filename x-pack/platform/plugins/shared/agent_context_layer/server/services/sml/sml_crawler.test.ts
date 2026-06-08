@@ -512,10 +512,10 @@ describe('SmlCrawlerImpl', () => {
         })
         .mockResolvedValue({ hits: { hits: [] } });
 
-      // findManualOriginIds returns one of the candidates as manual
+      // findManualOriginUris returns one of the candidates as manual
       (esClient.search as jest.Mock).mockResolvedValue({
         hits: {
-          hits: [{ _source: { origin_id: 'manual-origin' } }],
+          hits: [{ _source: { origin: { uri: 'test-type://manual-origin' } } }],
         },
       });
 
