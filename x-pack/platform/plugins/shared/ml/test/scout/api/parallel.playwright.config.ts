@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-export { MemoryTriggerRegistry } from './registry';
-export type { MemoryUpdateTrigger, MemoryUpdateContext, OutputFunction } from './types';
+import { createPlaywrightConfig } from '@kbn/scout';
 
-export {
-  discoveryCompletedTrigger,
-  DISCOVERY_COMPLETED_TRIGGER_ID,
-} from './discovery_completed_trigger';
+export default createPlaywrightConfig({
+  testDir: './parallel_tests',
+  workers: 2,
+});
