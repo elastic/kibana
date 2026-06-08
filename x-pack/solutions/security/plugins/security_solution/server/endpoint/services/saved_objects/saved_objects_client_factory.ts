@@ -9,9 +9,9 @@
 
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import { SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
-import type { IBasePath, KibanaRequest } from '@kbn/core-http-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
-import { DEFAULT_SPACE_ID, addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import { asSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { REFERENCE_DATA_SAVED_OBJECT_TYPE } from '../../lib/reference_data';
 import { EndpointError } from '../../../../common/endpoint/errors';
@@ -37,11 +37,7 @@ export class InternalReadonlySoClientMethodNotAllowedError extends EndpointError
 export class SavedObjectsClientFactory {
   private static includedHiddenTypes = new Set<string>([REFERENCE_DATA_SAVED_OBJECT_TYPE]);
 
-  constructor(
-    private readonly savedObjectsServiceStart: SavedObjectsServiceStart,
-    /** Can either be the  `HttpServiceSetup` or  `HttpServiceStart` or just an interface that hs a `basePath` implementation from core */
-    private readonly httpServiceSetup: { basePath: IBasePath }
-  ) {}
+  constructor(private readonly savedObjectsServiceStart: SavedObjectsServiceStart) {}
 
   /**
    * Add a hidden Saved Object type to the list of types that should be given access by the SO clients created by the SavedObjectsClientFactory.
@@ -52,19 +48,13 @@ export class SavedObjectsClientFactory {
   }
 
   protected createFakeHttpRequest(spaceId: string = DEFAULT_SPACE_ID): KibanaRequest {
-    const fakeRequest = kibanaRequestFactory({
+    return kibanaRequestFactory({
       headers: {},
-      path: '/',
       route: { settings: {} },
       url: { href: {}, hash: '' } as URL,
       raw: { req: { url: '/' } } as any,
+      spaceId: asSpaceId(spaceId),
     });
-
-    if (spaceId && spaceId !== DEFAULT_SPACE_ID) {
-      this.httpServiceSetup.basePath.set(fakeRequest, addSpaceIdToPath('/', spaceId));
-    }
-
-    return fakeRequest;
   }
 
   protected getHiddenTypes(): string[] {
