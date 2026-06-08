@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { DEFAULT_GUARDRAIL_RULES, scanWithGuardrails, mergeGuardrailRules } from './guardrails';
+import {
+  DEFAULT_GUARDRAIL_RULES,
+  scanWithGuardrails,
+  mergeGuardrailRules,
+  checkGuardrail,
+  GUARDRAIL_CATEGORIES,
+  EVALUATOR_CONSTANTS,
+} from './guardrails';
 import type { GuardrailRule } from './types';
 
 describe('guardrails', () => {
@@ -124,6 +131,40 @@ describe('guardrails', () => {
       };
       const merged = mergeGuardrailRules(DEFAULT_GUARDRAIL_RULES, [newRule]);
       expect(merged.length).toBe(DEFAULT_GUARDRAIL_RULES.length + 1);
+    });
+  });
+
+  describe('guardrail matchAll (AND logic)', () => {
+    it('returns true only when ALL patterns match', () => {
+      const result = checkGuardrail(
+        { id: 'test', name: 'test', patterns: ['error', 'critical'], matchAll: true },
+        'this is a critical error message'
+      );
+      expect(result).toBe(true);
+    });
+
+    it('returns false when only ONE of the patterns matches', () => {
+      const result = checkGuardrail(
+        { id: 'test', name: 'test', patterns: ['error', 'critical'], matchAll: true },
+        'this is just an error message'
+      );
+      expect(result).toBe(false);
+    });
+  });
+
+  describe('OWASP taxonomy IDs', () => {
+    it('prompt_injection maps to LLM01', () => {
+      const category = GUARDRAIL_CATEGORIES.find((c) => c.id === 'prompt_injection');
+      expect(category?.owaspId).toBe('LLM01');
+    });
+  });
+
+  describe('EVALUATOR_CONSTANTS', () => {
+    it('pass label is PASS', () => {
+      expect(EVALUATOR_CONSTANTS.pass).toBe('PASS');
+    });
+    it('fail label is FAIL', () => {
+      expect(EVALUATOR_CONSTANTS.fail).toBe('FAIL');
     });
   });
 });
