@@ -99,29 +99,35 @@ export class KibanaCodeEditorWrapper {
    *   When omitted, all models are updated (matching the FTR behavior).
    */
   async setCodeEditorValue(value: string, nthIndex?: number): Promise<string> {
-    await this.page.evaluate(
-      ({ editorIndex, codeEditorValue }) => {
-        const monacoEnv = (window as any).MonacoEnvironment;
+    // The Monaco editor (and `MonacoEnvironment`) initialises asynchronously
+    // after navigation / reload. Poll until at least one model is available
+    // so callers don't have to remember to call `waitCodeEditorReady`
+    // beforehand — matches the FTR helper's behaviour.
+    await expect(async () => {
+      await this.page.evaluate(
+        ({ editorIndex, codeEditorValue }) => {
+          const monacoEnv = (window as any).MonacoEnvironment;
 
-        if (!monacoEnv?.monaco?.editor) {
-          throw new Error('MonacoEnvironment.monaco.editor is not available');
-        }
+          if (!monacoEnv?.monaco?.editor) {
+            throw new Error('MonacoEnvironment.monaco.editor is not available');
+          }
 
-        const textModels = monacoEnv.monaco.editor.getModels() as MonacoModel[];
+          const textModels = monacoEnv.monaco.editor.getModels() as MonacoModel[];
 
-        if (!textModels.length) {
-          throw new Error('No Monaco editor models found');
-        }
+          if (!textModels.length) {
+            throw new Error('No Monaco editor models found');
+          }
 
-        if (typeof editorIndex === 'number' && textModels[editorIndex]) {
-          textModels[editorIndex].setValue(codeEditorValue);
-        } else {
-          // When the specific model instance is unknown, update all models
-          textModels.forEach((model) => model.setValue(codeEditorValue));
-        }
-      },
-      { editorIndex: nthIndex, codeEditorValue: value }
-    );
+          if (typeof editorIndex === 'number' && textModels[editorIndex]) {
+            textModels[editorIndex].setValue(codeEditorValue);
+          } else {
+            // When the specific model instance is unknown, update all models
+            textModels.forEach((model) => model.setValue(codeEditorValue));
+          }
+        },
+        { editorIndex: nthIndex, codeEditorValue: value }
+      );
+    }).toPass({ timeout: 30_000 });
 
     // Return the new value for later assertions
     return await this.getCodeEditorValue(nthIndex ?? 0);

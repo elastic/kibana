@@ -53,7 +53,16 @@ export class Toasts {
   async getAllText(): Promise<string[]> {
     const wrappers = await this.toast.getWrapper().all();
     const texts = await Promise.all(
-      wrappers.map(async (wrapper) => ((await wrapper.textContent()) ?? '').trim())
+      wrappers.map(async (wrapper) => {
+        // Use scoped EUI selectors so the screen-reader-only "A new
+        // notification appears" announcement (a sibling of `.euiToast`)
+        // and the close-button glyph are excluded. Join title + body
+        // paragraphs with `\n` to mirror FTR `getVisibleText()`.
+        const title =
+          (await wrapper.getByTestId('euiToastHeader__title').textContent())?.trim() ?? '';
+        const body = ((await wrapper.getByTestId('euiToastBody').textContent()) ?? '').trim();
+        return [title, body].filter(Boolean).join('\n');
+      })
     );
     return texts;
   }

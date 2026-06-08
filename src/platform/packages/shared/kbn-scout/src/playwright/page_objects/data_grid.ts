@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Locator } from '@playwright/test';
 import type { ScoutPage } from '..';
 import { expect } from '..';
 
@@ -111,9 +112,12 @@ export class DataGrid {
     // Grid rows render asynchronously after a search resolves; wait for at
     // least one row to be attached so callers don't see a transient empty
     // array when called immediately after `waitUntilSearchingHasFinished()`.
-    // Locator.waitFor() resolves on the first matching element by default,
-    // which is what we want here.
-    await rows.waitFor({ state: 'attached' });
+    // Use a row-index-scoped selector so this resolves to a single element
+    // (Locator.waitFor enforces strict mode and the bare `.euiDataGridRow`
+    // locator typically matches multiple rows once the grid has rendered).
+    await this.page
+      .locator('[data-test-subj="docTable"] .euiDataGridRow[data-grid-row-index="0"]')
+      .waitFor({ state: 'attached' });
     // Use `textContent` (via `evaluateAll`) instead of `allInnerTexts()`.
     // `innerText` injects synthetic `\t` between flex/grid cells and `\n`
     // between rows, which leaks into row text and breaks the FTR-parity
@@ -169,9 +173,18 @@ export class DataGrid {
    * `dataGrid.clickRowToggle({ rowIndex })`. The expand toggle is scoped to
    * the matching `.euiDataGridRow[data-grid-visible-row-index=...]` so it
    * targets exactly one row even when the grid has many.
+   *
+   * Pass `container` to scope the toggle lookup to a specific data grid —
+   * required when multiple grids are visible (e.g. a dashboard with two
+   * embedded saved searches), where the bare selector would resolve to
+   * multiple elements and trip Playwright's strict-mode check.
    */
-  async clickRowToggle({ rowIndex = 0 }: { rowIndex?: number } = {}): Promise<void> {
-    const toggle = this.page.locator(
+  async clickRowToggle({
+    rowIndex = 0,
+    container,
+  }: { rowIndex?: number; container?: Locator } = {}): Promise<void> {
+    const scope = container ?? this.page;
+    const toggle = scope.locator(
       `.euiDataGridRow[data-grid-visible-row-index="${rowIndex}"] [data-test-subj="docTableExpandToggleColumn"]`
     );
     await toggle.scrollIntoViewIfNeeded();

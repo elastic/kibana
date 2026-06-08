@@ -79,6 +79,12 @@ async function clickSingleDocument(page: ScoutPage): Promise<void> {
 }
 
 spaceTest.describe('Discover - ad-hoc data views', { tag: tags.stateful.all }, () => {
+  // The journey runs eight sequential steps including data-view creation,
+  // saved searches, runtime-field redefine, and dashboard authoring.
+  // The default 60s test timeout is too tight on shared CI runners; bump
+  // to three minutes (still well below the file-level five-minute bound).
+  spaceTest.setTimeout(180_000);
+
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     await scoutSpace.savedObjects.load(testData.DISCOVER_KBN_ARCHIVE);
     await scoutSpace.uiSettings.setDefaultIndex(testData.DEFAULT_DATA_VIEW);
@@ -252,7 +258,13 @@ spaceTest.describe('Discover - ad-hoc data views', { tag: tags.stateful.all }, (
           void dialog.accept();
         });
 
-        await pageObjects.dataGrid.clickRowToggle({ rowIndex: 0 });
+        // The dashboard now has two saved-search panels; scope the row
+        // toggle to the first one (the panel for `logst*-ss-${RUNTIME_FIELD}`)
+        // so the bare `.euiDataGridRow` selector doesn't trip strict mode.
+        const firstPanel = page.testSubj.locator(
+          `embeddablePanelHoverActions-logst*-ss-${RUNTIME_FIELD}`
+        );
+        await pageObjects.dataGrid.clickRowToggle({ rowIndex: 0, container: firstPanel });
         await clickSurroundingDocuments(page);
         // Some flows raise an in-app confirm modal as well.
         const confirmButton = page.testSubj.locator('confirmModalConfirmButton');

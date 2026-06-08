@@ -8,6 +8,7 @@
  */
 
 import type { ScoutPage } from '..';
+import { expect } from '../../../ui';
 
 /**
  * Page object for the global query text input (`queryInput`) shared by
@@ -19,7 +20,13 @@ export class QueryBar {
   constructor(private readonly page: ScoutPage) {}
 
   async setQuery(query: string): Promise<void> {
-    await this.page.testSubj.fill('queryInput', query);
+    const input = this.page.testSubj.locator('queryInput');
+    await input.fill(query);
+    // Confirm React state has flushed before the caller submits. Without
+    // this, a fast `submitQuery()` race can run with the previous (empty)
+    // query because the unified-search bar reads its value from controlled
+    // state on the keydown handler.
+    await expect(input).toHaveValue(query);
   }
 
   async clearQuery(): Promise<void> {
@@ -35,9 +42,15 @@ export class QueryBar {
    * "wait until search has finished" helper.
    */
   async submitQuery(): Promise<void> {
-    const input = this.page.testSubj.locator('queryInput');
-    await input.focus();
-    await input.press('Enter');
+    // Mirrors FTR `queryBar.submitQuery()` exactly: click the input to give
+    // it focus (stronger than `.focus()` for some EUI inputs that gate
+    // their submit handler on `mousedown`/`click` events) then press
+    // Enter at the page level so the event dispatches against the active
+    // element. This combination is more robust than a locator-scoped
+    // `press('Enter')` against `.focus()`, which races the unified-search
+    // bar's controlled state on fast `setQuery()` → `submitQuery()` paths.
+    await this.page.testSubj.click('queryInput');
+    await this.page.keyboard.press('Enter');
   }
 
   /**
