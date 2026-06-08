@@ -29,10 +29,15 @@
     9231,
     9001
   ],
-  "postStartCommand": "${containerWorkspaceFolder}/.devcontainer/scripts/post_start.sh",
+  "postStartCommand": "${containerWorkspaceFolder}/.ona/post_start.sh",
   "remoteUser": "vscode",
   "containerEnv": {
-    "KBN_DIR": "${containerWorkspaceFolder}"
+    "KBN_DIR": "${containerWorkspaceFolder}",
+    "ANTHROPIC_BASE_URL": "https://access-broker.kibana.dev/proxy/kibana.litellm",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "llm-gateway/claude-opus-4-8",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL": "llm-gateway/claude-sonnet-4-6",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "llm-gateway/claude-haiku-4-5",
+    "CLAUDE_CODE_SUBAGENT_MODEL": "llm-gateway/claude-opus-4-8"
   },
   "features": {
     "ghcr.io/devcontainers/features/docker-in-docker:2": {
@@ -42,6 +47,7 @@
     "ghcr.io/devcontainers/features/github-cli:1": {
       "installDirectlyFromGitHubRelease": true,
       "version": "latest"
-    }
+    },
+    "ghcr.io/anthropics/devcontainer-features/claude-code:1": {}
   }
 }
