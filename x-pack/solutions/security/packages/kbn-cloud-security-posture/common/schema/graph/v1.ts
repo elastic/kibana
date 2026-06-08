@@ -9,12 +9,11 @@ import { schema } from '@kbn/config-schema';
 
 export const INDEX_PATTERN_REGEX = /^[^A-Z^\\/?"<>|\s#,]+$/;
 
-const PINNED_IDS_MAX_SIZE = 1024;
-
 // maxSize is set to 100 to match Security Solution resolver index pattern limits
 export const INDEX_PATTERNS_MAX_SIZE = 100;
 
 // maxSize is set to 5000 to align with graph events/entities ID batch limits
+const PINNED_IDS_MAX_SIZE = 5000;
 export const ORIGIN_EVENT_IDS_MAX_SIZE = 5000;
 export const ENTITY_IDS_MAX_SIZE = 5000;
 
