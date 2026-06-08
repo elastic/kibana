@@ -7,16 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  asCodeIdSchema,
-  asCodeMetaSchema,
-  getMeta,
-  asCodeQuerySchema,
-  asCodePaginationParamsSchema,
-  asCodePaginationResponseMetaSchema,
-  asCodeSearchRequestQuerySchema,
-  type AsCodeMeta,
-  type AsCodeQuery,
-} from './src/schemas';
-
-export { PAGINATION_DEFAULT_PER_PAGE, PAGINATION_MAX_SIZE } from './src/constants';
+export { asCodeSearchRequestQuerySchema } from './schema';

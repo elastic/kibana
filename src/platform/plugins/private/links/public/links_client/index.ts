@@ -45,14 +45,13 @@ export const linksClient = {
     });
   },
   update: async (id: string, request: LinksUpdateRequestBody) => {
-    const updateResponse = await coreServices.http.put<LinksUpdateResponseBody>(
+    return coreServices.http.put<LinksUpdateResponseBody>(
       buildPath(`${LINKS_API_PATH}/{id}`, { id }),
       {
         version: PUBLIC_API_VERSION,
         body: JSON.stringify(request),
       }
     );
-    return updateResponse;
   },
   delete: async (id: string): Promise<DeleteResult> => {
     return coreServices.http.delete(buildPath(`${LINKS_API_PATH}/{id}`, { id }), {

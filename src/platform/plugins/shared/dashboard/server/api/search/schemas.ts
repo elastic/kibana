@@ -9,32 +9,11 @@
 
 import { schema } from '@kbn/config-schema';
 import { timeRangeSchema } from '@kbn/es-query-server';
-import { asCodeMetaSchema } from '@kbn/as-code-shared-schemas';
+import { asCodeMetaSchema, asCodeSearchRequestQuerySchema } from '@kbn/as-code-shared-schemas';
 import { accessControlSchema } from '../dashboard_state_schemas';
 
 export const searchRequestParamsSchema = schema.object({
-  page: schema.maybe(
-    schema.number({
-      meta: {
-        description: 'The page of results to return. Defaults to `1`.',
-      },
-    })
-  ),
-  per_page: schema.maybe(
-    schema.number({
-      meta: {
-        description: 'The number of results to return per page. Defaults to `20`.',
-      },
-    })
-  ),
-  query: schema.maybe(
-    schema.string({
-      meta: {
-        description:
-          'Filters results by `title` and `description` using Elasticsearch [`simple_query_string`](https://www.elastic.co/docs/reference/query-languages/query-dsl/simple-query-string-query) syntax. Multi-word terms require all words to match.',
-      },
-    })
-  ),
+  ...asCodeSearchRequestQuerySchema.getPropSchemas(),
   tags: schema.maybe(
     schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 })], {
       meta: {

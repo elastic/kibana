@@ -9,34 +9,13 @@
 
 import {
   asCodeMetaSchema,
-  asCodePaginationParamsSchema,
   asCodePaginationResponseMetaSchema,
+  asCodeSearchRequestQuerySchema,
   PAGINATION_MAX_SIZE,
 } from '@kbn/as-code-shared-schemas';
-import { schema, type Type, type TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 
-type PaginationParamsSchema = ReturnType<typeof asCodePaginationParamsSchema.getPropSchemas>;
-type PartialPaginationParamsSchema = {
-  [K in keyof PaginationParamsSchema]: Type<TypeOf<PaginationParamsSchema[K]> | undefined>;
-};
-
-export const searchRequestQuerySchema = schema.object({
-  query: schema.maybe(
-    schema.string({
-      meta: {
-        description:
-          'Filters results by `name` and `description` using Elasticsearch [`simple_query_string`](https://www.elastic.co/docs/reference/query-languages/query-dsl/simple-query-string-query) syntax. Multi-word terms require all words to match.',
-      },
-    })
-  ),
-  ...(Object.entries(asCodePaginationParamsSchema.getPropSchemas()).reduce(
-    (prev, [key, prop]) => ({
-      ...prev,
-      [key]: schema.maybe(prop),
-    }),
-    {}
-  ) as PartialPaginationParamsSchema),
-});
+export const searchRequestQuerySchema = asCodeSearchRequestQuerySchema;
 
 export const searchResponseBodySchema = schema.object({
   data: schema.arrayOf(
