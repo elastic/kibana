@@ -20,6 +20,7 @@ import { buildWorkflowFilters } from '@kbn/workflows/server';
 import type { WorkflowPartialDetailDto } from '@kbn/workflows/types/v1';
 
 import { WorkflowConflictError } from '@kbn/workflows-yaml';
+import type { z } from '@kbn/zod/v4';
 import type { WorkflowCrudDeps } from './types';
 import { getWorkflowZodSchema } from '../../common/schema';
 import { extractBulkItemError } from '../api/lib/bulk_response_helpers';
@@ -145,6 +146,7 @@ export class WorkflowCrudService {
   async prepareWorkflowDocumentForStorage(params: {
     actor: string;
     id?: string;
+    lightweightValidation?: boolean;
     now: Date;
     spaceId: string;
     request?: KibanaRequest;
@@ -152,14 +154,21 @@ export class WorkflowCrudService {
   }): Promise<{ id: string; workflowData: WorkflowProperties; definition?: WorkflowYaml }> {
     const registeredTriggerIds =
       this.deps.workflowsExtensions?.getAllTriggerDefinitions().map((t) => t.id) ?? [];
-    const zodSchema = params.request
-      ? await this.deps.validationService.getWorkflowZodSchema(
-          { loose: false },
-          params.spaceId,
-          params.request
-        )
-      : getWorkflowZodSchema({}, registeredTriggerIds);
-    const triggerDefinitions = this.deps.workflowsExtensions?.getAllTriggerDefinitions() ?? [];
+    let zodSchema: z.ZodType;
+    if (params.lightweightValidation) {
+      zodSchema = getWorkflowZodSchema({}, registeredTriggerIds, { lightweight: true });
+    } else if (params.request) {
+      zodSchema = await this.deps.validationService.getWorkflowZodSchema(
+        { loose: false },
+        params.spaceId,
+        params.request
+      );
+    } else {
+      zodSchema = getWorkflowZodSchema({}, registeredTriggerIds);
+    }
+    const triggerDefinitions = params.lightweightValidation
+      ? undefined
+      : this.deps.workflowsExtensions?.getAllTriggerDefinitions() ?? [];
 
     return prepareWorkflowDocumentFromYaml({
       id: params.id,
