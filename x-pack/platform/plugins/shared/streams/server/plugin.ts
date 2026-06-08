@@ -85,7 +85,6 @@ import {
   type ContinuousKiOnboardingWorkflowService,
 } from './lib/workflows/continuous_onboarding_workflow';
 import { installMemoryWorkflows } from './lib/memory/install_managed_workflows';
-import { MemoryTriggerRegistry, discoveryCompletedTrigger } from './lib/memory/triggers';
 import { StreamsKIsOnboardingClient } from './lib/workflows/onboarding_workflow_client';
 import { STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG } from '../common/feature_flags';
 
@@ -587,10 +586,6 @@ export class StreamsPlugin
       this.server.searchInferenceEndpoints = plugins.searchInferenceEndpoints;
       this.server.spaces = plugins.spaces;
       this.server.agentContextLayer = plugins.agentContextLayer;
-
-      const memoryTriggerRegistry = new MemoryTriggerRegistry({ logger: this.logger });
-      memoryTriggerRegistry.register(discoveryCompletedTrigger);
-      this.server.memoryTriggerRegistry = memoryTriggerRegistry;
     }
 
     initializeSignificantEventsTemplates({
