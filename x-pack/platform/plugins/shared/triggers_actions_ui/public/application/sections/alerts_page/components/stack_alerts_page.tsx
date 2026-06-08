@@ -28,6 +28,7 @@ import type {
   AlertsTableSupportedConsumers,
 } from '@kbn/response-ops-alerts-table/types';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
+import type { FilterGroupHandler } from '@kbn/alerts-ui-shared/src/alert_filter_controls/types';
 import { ALERTS_PAGE_ID } from '../../../../common/constants';
 import type { QuickFiltersMenuItem } from '../../alerts_search_bar/quick_filters';
 import { NoPermissionPrompt } from '../../../components/prompts/no_permission_prompt';
@@ -141,6 +142,12 @@ const PageContentComponent: React.FC<PageContentProps> = ({
   );
 
   const [consumers, setConsumers] = useState<string[]>(NON_SIEM_CONSUMERS);
+  const [filterControls, setFilterControls] = useState<Filter[]>();
+  const [controlApi, setControlApi] = useState<FilterGroupHandler | undefined>();
+  const hasInitialControlLoadingFinished = useMemo(
+    () => Boolean(controlApi) && Array.isArray(filterControls),
+    [controlApi, filterControls]
+  );
 
   const [selectedFilters, setSelectedFilters] = useState<AlertsFeatureIdsFilter[]>([]);
   const ruleStats = useRuleStats({ ruleTypeIds });
@@ -283,36 +290,41 @@ const PageContentComponent: React.FC<PageContentProps> = ({
             showFilterControls
             showFilterBar
             quickFilters={quickFilters}
+            filterControls={filterControls}
+            onFilterControlsChange={setFilterControls}
+            onControlApiAvailable={setControlApi}
             onEsQueryChange={setEsQuery}
             onFilterSelected={onFilterSelected}
           />
-          <AlertsTable
-            // Here we force a rerender when switching feature ids to prevent the data grid
-            // columns alignment from breaking after a change in the number of columns
-            key={ruleTypeIds.join()}
-            id="stack-alerts-page-table"
-            ruleTypeIds={ruleTypeIds}
-            consumers={consumers}
-            query={esQuery}
-            sort={defaultAlertsTableSort}
-            showAlertStatusWithFlapping
-            pageSize={20}
-            showInspectButton
-            renderActionsCell={RuleAlertActionsCell}
-            actionsColumnWidth={120}
-            getAlertFormatter={getAlertFormatter}
-            alertDetailsNavigation={alertDetailsNavigation}
-            services={{
-              data,
-              http,
-              notifications,
-              rendering,
-              fieldFormats,
-              application,
-              licensing,
-              settings,
-            }}
-          />
+          {hasInitialControlLoadingFinished && (
+            <AlertsTable
+              // Here we force a rerender when switching feature ids to prevent the data grid
+              // columns alignment from breaking after a change in the number of columns
+              key={ruleTypeIds.join()}
+              id="stack-alerts-page-table"
+              ruleTypeIds={ruleTypeIds}
+              consumers={consumers}
+              query={esQuery}
+              sort={defaultAlertsTableSort}
+              showAlertStatusWithFlapping
+              pageSize={20}
+              showInspectButton
+              renderActionsCell={RuleAlertActionsCell}
+              actionsColumnWidth={120}
+              getAlertFormatter={getAlertFormatter}
+              alertDetailsNavigation={alertDetailsNavigation}
+              services={{
+                data,
+                http,
+                notifications,
+                rendering,
+                fieldFormats,
+                application,
+                licensing,
+                settings,
+              }}
+            />
+          )}
         </EuiFlexGroup>
       )}
     </>

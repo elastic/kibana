@@ -41,6 +41,7 @@
     "@kbn/shared-ux-ai-components",
     "@kbn/agent-builder-plugin",
     "@kbn/spaces-plugin",
+    "@kbn/core-spaces-common",
     "@kbn/deeplinks-agent-builder",
     "@kbn/agent-builder-common"
   ],
