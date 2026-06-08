@@ -11,7 +11,7 @@ import type { SavedObjectsType } from '@kbn/core/server';
 import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { APP_ICON, LINKS_LIBRARY_TYPE } from '../../common';
 
-export const linksSavedObjectType: SavedObjectsType = {
+export const linksSavedObjectDefinition: SavedObjectsType = {
   name: LINKS_LIBRARY_TYPE,
   indexPattern: ANALYTICS_SAVED_OBJECT_INDEX,
   hidden: false,

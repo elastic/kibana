@@ -24,7 +24,7 @@ export function registerSearchRoute(router: VersionedRouter<RequestHandlerContex
     path: LINKS_API_PATH,
     summary: `List links library items`,
     ...commonRouteConfig,
-    description: `Returns a paginated list of links library items. Each result includes title, description, and metadata, but not the content. Use \`GET ${LINKS_API_PATH}/{id}\` to retrieve the complete state.`,
+    description: LINKS_SEARCH_DESCRIPTION,
   });
 
   searchRoute.addVersion(

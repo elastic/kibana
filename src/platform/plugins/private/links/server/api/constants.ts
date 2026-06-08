@@ -26,3 +26,6 @@ export const commonRouteConfig = {
     },
   },
 } as const;
+
+export const LINKS_ID_DESCRIPTION =
+  'The unique ID of the links library item, as returned by the create or search endpoints.' as const;

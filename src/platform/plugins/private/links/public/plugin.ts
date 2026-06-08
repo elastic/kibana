@@ -78,7 +78,7 @@ export class LinksPlugin
       return transformOut;
     });
 
-    import('./links_client/links_client').then(({ getLinksClient }) =>
+    import('./links_client').then(({ getLinksClient }) =>
       plugins.visualizations.registerAlias({
         disableCreate: true, // do not allow creation through visualization listing page
         name: LINKS_LIBRARY_TYPE,

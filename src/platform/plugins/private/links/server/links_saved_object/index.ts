@@ -7,6 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { linksSavedObjectType } from './links_saved_object';
+export { linksSavedObjectDefinition } from './links_saved_object';
 
 export type { StoredDashboardLink, StoredLink, StoredLinksState } from './types';

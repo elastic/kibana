@@ -7,35 +7,35 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema } from '@kbn/config-schema';
-import { asCodeMetaSchema, asCodePaginationResponseMetaSchema } from '@kbn/as-code-shared-schemas';
+import {
+  asCodeMetaSchema,
+  asCodePaginationParamsSchema,
+  asCodePaginationResponseMetaSchema,
+  PAGINATION_MAX_SIZE,
+} from '@kbn/as-code-shared-schemas';
+import { schema, type Type, type TypeOf } from '@kbn/config-schema';
 
-const MAX_PER_PAGE = 10000;
+type PaginationParamsSchema = ReturnType<typeof asCodePaginationParamsSchema.getPropSchemas>;
+type PartialPaginationParamsSchema = {
+  [K in keyof PaginationParamsSchema]: Type<TypeOf<PaginationParamsSchema[K]> | undefined>;
+};
 
 export const searchRequestQuerySchema = schema.object({
   query: schema.maybe(
     schema.string({
       meta: {
         description:
-          'An Elasticsearch simple_query_string query that filters links library items by "title" and "description"',
+          'Filters results by `name` and `description` using Elasticsearch [`simple_query_string`](https://www.elastic.co/docs/reference/query-languages/query-dsl/simple-query-string-query) syntax. Multi-word terms require all words to match.',
       },
     })
   ),
-  page: schema.maybe(
-    schema.number({
-      meta: {
-        description: 'The search page to return',
-      },
-    })
-  ),
-  per_page: schema.maybe(
-    schema.number({
-      meta: {
-        description: 'The number of items to return per page',
-      },
-      max: MAX_PER_PAGE,
-    })
-  ),
+  ...(Object.entries(asCodePaginationParamsSchema.getPropSchemas()).reduce(
+    (prev, [key, prop]) => ({
+      ...prev,
+      [key]: schema.maybe(prop),
+    }),
+    {}
+  ) as PartialPaginationParamsSchema),
 });
 
 export const searchResponseBodySchema = schema.object({
@@ -48,13 +48,13 @@ export const searchResponseBodySchema = schema.object({
             meta: { description: 'A short description of the links library item.' },
           })
         ),
-        title: schema.string({ meta: { description: 'The markdown library item title.' } }),
+        title: schema.string({ meta: { description: 'The links library item title.' } }),
       }),
       meta: asCodeMetaSchema,
     }),
     {
       minSize: 0,
-      maxSize: MAX_PER_PAGE,
+      maxSize: PAGINATION_MAX_SIZE,
       meta: {
         description: 'List of links library items matching the query.',
       },

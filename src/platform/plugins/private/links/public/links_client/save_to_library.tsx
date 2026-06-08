@@ -8,17 +8,19 @@
  */
 
 import React from 'react';
+
 import { i18n } from '@kbn/i18n';
 import type { OnSaveProps, SaveResult } from '@kbn/saved-objects-plugin/public';
 import {
-  showSaveModal,
   SavedObjectSaveModalWithSaveResult,
+  showSaveModal,
 } from '@kbn/saved-objects-plugin/public';
+
+import { linksClient } from '.';
 import { LINKS_EMBEDDABLE_TYPE, LINKS_LIBRARY_TYPE } from '../../common';
-import { hasLibraryItemWithTitle } from './has_library_item_with_title';
-import { linksClient } from './links_client';
-import { serializeResolvedLinks } from '../lib/resolve_links';
 import type { EditorState } from '../editor/get_editor_flyout';
+import { serializeResolvedLinks } from '../lib/resolve_links';
+import { hasLibraryItemWithTitle } from './has_library_item_with_title';
 
 const modalTitle = i18n.translate('links.contentManagement.saveModalTitle', {
   defaultMessage: `Save {contentId} panel to library`,

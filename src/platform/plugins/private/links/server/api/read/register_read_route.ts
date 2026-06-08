@@ -10,7 +10,7 @@
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { commonRouteConfig } from '../constants';
+import { commonRouteConfig, LINKS_ID_DESCRIPTION } from '../constants';
 import { readResponseBodySchema } from './schemas';
 import { read } from './read';
 import { LINKS_API_PATH, PUBLIC_API_VERSION } from '../../../common/constants';
@@ -38,8 +38,7 @@ export function registerReadRoute(router: VersionedRouter<RequestHandlerContext>
           params: schema.object({
             id: schema.string({
               meta: {
-                description:
-                  'The links library item ID, as returned by the create or search endpoints.',
+                description: LINKS_ID_DESCRIPTION,
               },
             }),
           }),

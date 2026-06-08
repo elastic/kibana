@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { linksClient } from './links_client';
+import { linksClient } from '.';
 
 export const hasLibraryItemWithTitle = async (title: string) => {
   const { data } = await linksClient.search({

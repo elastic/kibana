@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { linksClient } from './links_client';
+import { linksClient } from '.';
 
 export async function loadFromLibrary(libraryId: string) {
   const response = await linksClient.get(libraryId);

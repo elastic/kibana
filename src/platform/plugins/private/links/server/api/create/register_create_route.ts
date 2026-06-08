@@ -24,7 +24,7 @@ export function registerCreateRoute(router: VersionedRouter<RequestHandlerContex
     path: LINKS_API_PATH,
     summary: 'Create a links library item',
     ...commonRouteConfig,
-    description: 'Creates a new links library item and returns its ID, full state, and metadata.',
+    description: LINKS_CREATE_DESCRIPTION,
   });
 
   createRoute.addVersion(
