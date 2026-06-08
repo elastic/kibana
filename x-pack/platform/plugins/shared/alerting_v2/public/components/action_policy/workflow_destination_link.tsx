@@ -5,20 +5,54 @@
  * 2.0.
  */
 
-import { EuiLink } from '@elastic/eui';
+import { EuiBadge, EuiLink } from '@elastic/eui';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useFetchWorkflow } from '../../hooks/use_fetch_workflow';
 
 interface WorkflowDestinationLinkProps {
   id: string;
+  /** When provided, renders immediately without fetching. */
+  name?: string;
+  isDraft?: boolean;
+  /** Controls whether the DI-based fetch is enabled (only relevant when `name` is omitted). */
   isEnabled?: boolean;
 }
 
-export const WorkflowDestinationLink = ({ id, isEnabled = true }: WorkflowDestinationLinkProps) => {
+/**
+ * Renders a workflow destination as a clickable link or a "Draft" badge.
+ * Requires DI context — gets `application` via `useService`.
+ * When `name` is omitted, fetches the workflow name via `useFetchWorkflow`.
+ */
+export const WorkflowDestinationLink = ({
+  id,
+  name,
+  isDraft = false,
+  isEnabled = true,
+}: WorkflowDestinationLinkProps) => {
+  if (name !== undefined) {
+    return <WorkflowLink id={id} name={name} isDraft={isDraft} />;
+  }
+  return <FetchingWorkflowLink id={id} isEnabled={isEnabled} />;
+};
+
+const WorkflowLink = ({ id, name, isDraft }: { id: string; name: string; isDraft?: boolean }) => {
   const application = useService(CoreStart('application'));
-  const { data: workflow } = useFetchWorkflow(id, isEnabled);
+
+  if (isDraft) {
+    return (
+      <>
+        {name}{' '}
+        <EuiBadge color="hollow">
+          {i18n.translate('xpack.alertingV2.workflowDestinationLink.draft', {
+            defaultMessage: 'Draft',
+          })}
+        </EuiBadge>
+      </>
+    );
+  }
 
   return (
     <EuiLink
@@ -26,7 +60,12 @@ export const WorkflowDestinationLink = ({ id, isEnabled = true }: WorkflowDestin
       target="_blank"
       rel="noopener noreferrer"
     >
-      {workflow?.name ?? id}
+      {name}
     </EuiLink>
   );
+};
+
+const FetchingWorkflowLink = ({ id, isEnabled }: { id: string; isEnabled: boolean }) => {
+  const { data: workflow } = useFetchWorkflow(id, isEnabled);
+  return <WorkflowLink id={id} name={workflow?.name ?? id} />;
 };

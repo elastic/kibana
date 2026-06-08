@@ -7,27 +7,42 @@
 
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { startKiIdentificationToolHandler } from './handler';
-import { OnboardingStep } from '@kbn/streams-schema';
+import { StreamsKIsOnboardingStep } from '@kbn/streams-schema';
+import { StreamsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
 
 describe('startKiIdentificationToolHandler', () => {
   const setup = () => {
-    const taskClient = {
-      schedule: jest.fn().mockResolvedValue(undefined),
+    const managementApi = {
+      getWorkflow: jest.fn().mockResolvedValue({
+        id: 'system-streams-ki-onboarding',
+        name: 'onboarding',
+        enabled: true,
+        definition: {},
+        yaml: '',
+      }),
+      runWorkflow: jest.fn().mockResolvedValue('execution-id-123'),
     };
+    const streamsKIsOnboardingClient = new StreamsKIsOnboardingClient({
+      managementApi: managementApi as never,
+    });
 
     return {
-      taskClient,
+      managementApi,
+      streamsKIsOnboardingClient,
       request: httpServerMock.createKibanaRequest(),
     };
   };
 
-  it('schedules task and returns tracking Kibana path', async () => {
-    const { taskClient, request } = setup();
+  it('triggers onboarding workflow and returns tracking Kibana path', async () => {
+    const { managementApi, streamsKIsOnboardingClient, request } = setup();
 
     const result = await startKiIdentificationToolHandler({
       streamName: 'logs.nginx',
-      steps: [OnboardingStep.FeaturesIdentification, OnboardingStep.QueriesGeneration],
-      taskClient: taskClient as never,
+      steps: [
+        StreamsKIsOnboardingStep.FeaturesIdentification,
+        StreamsKIsOnboardingStep.QueriesGeneration,
+      ],
+      streamsKIsOnboardingClient,
       request,
     });
 
@@ -35,14 +50,30 @@ describe('startKiIdentificationToolHandler', () => {
       kibanaPath: '/app/streams/logs.nginx/management/significantEvents',
     });
 
-    expect(taskClient.schedule).toHaveBeenCalledWith(
+    expect(managementApi.getWorkflow).toHaveBeenCalledWith('system-streams-ki-onboarding', '*');
+    expect(managementApi.runWorkflow).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'system-streams-ki-onboarding' }),
+      'default',
       expect.objectContaining({
-        task: {
-          type: 'streams_onboarding',
-          id: 'streams_onboarding_logs.nginx',
-          space: '*',
-        },
-      })
+        streamName: 'logs.nginx',
+        skipFeatures: false,
+        skipQueries: false,
+      }),
+      request
     );
+  });
+
+  it('throws when workflow is not found', async () => {
+    const { managementApi, streamsKIsOnboardingClient, request } = setup();
+    managementApi.getWorkflow.mockResolvedValue(null);
+
+    await expect(
+      startKiIdentificationToolHandler({
+        streamName: 'logs.nginx',
+        steps: [StreamsKIsOnboardingStep.FeaturesIdentification],
+        streamsKIsOnboardingClient,
+        request,
+      })
+    ).rejects.toThrow(/Onboarding workflow .+ not found/);
   });
 });

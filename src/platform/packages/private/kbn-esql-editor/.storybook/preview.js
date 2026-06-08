@@ -13,3 +13,18 @@ export const parameters = {
     canvas: { hidden: true },
   },
 };
+
+// Monaco sets z-index inline via JS; injecting a stylesheet with !important overrides it.
+// The overflow widgets container must sit above EUI's flyout level (1000).
+export const decorators = [
+  (story) => {
+    if (typeof document !== 'undefined' && !document.getElementById('esql-monaco-zindex-fix')) {
+      const style = document.createElement('style');
+      style.id = 'esql-monaco-zindex-fix';
+      style.textContent =
+        '.monaco-editor.monaco-editor-overflowing-widgets-container { z-index: 1100 !important; }';
+      document.head.appendChild(style);
+    }
+    return story();
+  },
+];

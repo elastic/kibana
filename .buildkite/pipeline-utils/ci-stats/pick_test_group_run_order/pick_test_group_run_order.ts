@@ -9,6 +9,7 @@
 
 import * as Fs from 'fs';
 
+import { listChangedFiles } from '../../affected-packages';
 import type { BuildkiteStep } from '../../buildkite';
 import { BuildkiteClient } from '../../buildkite';
 import { getTrackedBranch } from '../../utils';
@@ -20,6 +21,7 @@ import { loadRunOrderConfig } from './env_config';
 import { getEnabledFtrConfigs } from './ftr_manifests';
 import { discoverJestIntegrationConfigs, discoverJestUnitConfigs } from './jest_configs';
 import { getRunGroup, getRunGroups, labelJestSubgroups } from './run_groups';
+import { isScoutTestsOnlyDiff } from './selective_scout';
 import {
   filterJestIntegrationConfigsByAffected,
   filterJestUnitConfigsByAffected,
@@ -41,6 +43,26 @@ export async function pickTestGroupRunOrder() {
   const ciStats = new CiStatsClient();
   const config = loadRunOrderConfig();
 
+  // Holds the merge base only when selective testing is enabled; the two
+  // `if` blocks below both use it (Scout skip check, then Jest filter).
+  const selectiveTestingMergeBase = config.useSelectiveTesting ? config.prMergeBase : undefined;
+
+  // Fast path: a PR whose diff is exclusively Scout test files cannot affect
+  // any Jest unit/integration or FTR config — skip emitting them entirely.
+  // The Scout pipeline still runs its own selective testing in parallel.
+  if (selectiveTestingMergeBase) {
+    const changedFiles = listChangedFiles({ mergeBase: selectiveTestingMergeBase, commit: 'HEAD' });
+    if (isScoutTestsOnlyDiff(changedFiles)) {
+      console.log('Scout-tests-only diff detected — skipping Jest/FTR test steps');
+      bk.setAnnotation(
+        'selective-testing-scout-tests-only',
+        'info',
+        'Selective testing: Scout-tests-only diff — Jest/FTR test steps were skipped.'
+      );
+      return;
+    }
+  }
+
   const unitIncluded = config.limitConfigType.includes('unit');
   const integrationIncluded = config.limitConfigType.includes('integration');
   const ftrConfigsIncluded = config.limitConfigType.includes('functional');
@@ -55,8 +77,8 @@ export async function pickTestGroupRunOrder() {
   );
   if (!ftrConfigsIncluded) ftrConfigsByQueue.clear();
 
-  if (config.useSelectiveTesting && config.prMergeBase) {
-    const selectiveCtx = await resolveSelectiveTestingContext(config.prMergeBase);
+  if (selectiveTestingMergeBase) {
+    const selectiveCtx = await resolveSelectiveTestingContext(selectiveTestingMergeBase);
     if (selectiveCtx !== null) {
       jestUnitConfigs = filterJestUnitConfigsByAffected(jestUnitConfigs, selectiveCtx);
       jestIntegrationConfigs = filterJestIntegrationConfigsByAffected(

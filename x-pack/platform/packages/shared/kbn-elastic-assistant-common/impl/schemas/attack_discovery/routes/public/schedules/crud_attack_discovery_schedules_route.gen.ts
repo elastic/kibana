@@ -16,12 +16,12 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
+import { NonEmptyString } from '../../../../common_attributes.gen';
 import {
   AttackDiscoveryApiScheduleCreateProps,
   AttackDiscoveryApiSchedule,
   AttackDiscoveryApiScheduleUpdateProps,
 } from './schedules_api.gen';
-import { NonEmptyString } from '../../../../common_attributes.gen';
 
 /**
  * Response body shape for Attack discovery schedule create, read, update, enable, and disable operations. Fields vary by endpoint; refer to each operation’s schema and examples.
@@ -49,6 +49,112 @@ export const AttackDiscoveryGenericError = lazySchema(() =>
   })
 );
 export type AttackDiscoveryGenericError = z.infer<typeof AttackDiscoveryGenericError>;
+
+export const BulkActionAttackDiscoverySchedulesRequestBody = lazySchema(() =>
+  z.object({
+    /**
+     * The unique identifiers of the Attack Discovery schedules to update.
+     */
+    ids: z.array(NonEmptyString).min(1),
+  })
+);
+export type BulkActionAttackDiscoverySchedulesRequestBody = z.infer<
+  typeof BulkActionAttackDiscoverySchedulesRequestBody
+>;
+
+export const BulkActionAttackDiscoverySchedulesError = lazySchema(() =>
+  z.object({
+    /**
+     * The error message returned for the failed schedule.
+     */
+    message: z.string(),
+    /**
+     * Optional HTTP status associated with the failed schedule operation.
+     */
+    status: z.number().optional(),
+    rule: z.object({
+      /**
+       * The unique identifier of the failed schedule.
+       */
+      id: NonEmptyString,
+      /**
+       * The name of the failed schedule.
+       */
+      name: z.string(),
+    }),
+  })
+);
+export type BulkActionAttackDiscoverySchedulesError = z.infer<
+  typeof BulkActionAttackDiscoverySchedulesError
+>;
+
+export const BulkActionAttackDiscoverySchedulesResponse = lazySchema(() =>
+  z.object({
+    /**
+     * The unique identifiers of the schedules successfully affected by the bulk action.
+     */
+    ids: z.array(NonEmptyString),
+    errors: z.array(BulkActionAttackDiscoverySchedulesError),
+    /**
+     * The total number of schedules matched by the bulk action.
+     */
+    total: z.number(),
+  })
+);
+export type BulkActionAttackDiscoverySchedulesResponse = z.infer<
+  typeof BulkActionAttackDiscoverySchedulesResponse
+>;
+
+export const BulkDeleteAttackDiscoverySchedulesRequestBody = lazySchema(
+  () => BulkActionAttackDiscoverySchedulesRequestBody
+);
+export type BulkDeleteAttackDiscoverySchedulesRequestBody = z.infer<
+  typeof BulkDeleteAttackDiscoverySchedulesRequestBody
+>;
+export type BulkDeleteAttackDiscoverySchedulesRequestBodyInput = z.input<
+  typeof BulkDeleteAttackDiscoverySchedulesRequestBody
+>;
+
+export const BulkDeleteAttackDiscoverySchedulesResponse = lazySchema(
+  () => BulkActionAttackDiscoverySchedulesResponse
+);
+export type BulkDeleteAttackDiscoverySchedulesResponse = z.infer<
+  typeof BulkDeleteAttackDiscoverySchedulesResponse
+>;
+
+export const BulkDisableAttackDiscoverySchedulesRequestBody = lazySchema(
+  () => BulkActionAttackDiscoverySchedulesRequestBody
+);
+export type BulkDisableAttackDiscoverySchedulesRequestBody = z.infer<
+  typeof BulkDisableAttackDiscoverySchedulesRequestBody
+>;
+export type BulkDisableAttackDiscoverySchedulesRequestBodyInput = z.input<
+  typeof BulkDisableAttackDiscoverySchedulesRequestBody
+>;
+
+export const BulkDisableAttackDiscoverySchedulesResponse = lazySchema(
+  () => BulkActionAttackDiscoverySchedulesResponse
+);
+export type BulkDisableAttackDiscoverySchedulesResponse = z.infer<
+  typeof BulkDisableAttackDiscoverySchedulesResponse
+>;
+
+export const BulkEnableAttackDiscoverySchedulesRequestBody = lazySchema(
+  () => BulkActionAttackDiscoverySchedulesRequestBody
+);
+export type BulkEnableAttackDiscoverySchedulesRequestBody = z.infer<
+  typeof BulkEnableAttackDiscoverySchedulesRequestBody
+>;
+export type BulkEnableAttackDiscoverySchedulesRequestBodyInput = z.input<
+  typeof BulkEnableAttackDiscoverySchedulesRequestBody
+>;
+
+export const BulkEnableAttackDiscoverySchedulesResponse = lazySchema(
+  () => BulkActionAttackDiscoverySchedulesResponse
+);
+export type BulkEnableAttackDiscoverySchedulesResponse = z.infer<
+  typeof BulkEnableAttackDiscoverySchedulesResponse
+>;
 
 export const CreateAttackDiscoverySchedulesRequestBody = lazySchema(
   () => AttackDiscoveryApiScheduleCreateProps

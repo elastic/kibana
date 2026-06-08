@@ -16,7 +16,7 @@ This page lists the fastest ways to debug Scout tests locally and in CI.
 After a run, Playwright generates an HTML report. The console output includes the report path. To open the latest report:
 
 ```bash
-npx playwright show-report <plugin-path>/test/scout/ui/output/reports
+node scripts/playwright show-report <plugin-path>/test/scout/ui/output/reports
 ```
 
 ::::::{note}
@@ -28,7 +28,7 @@ npx playwright show-report <plugin-path>/test/scout/ui/output/reports
 [UI Mode](https://playwright.dev/docs/test-ui-mode) lets you run and debug tests interactively.
 
 ```bash
-npx playwright test \
+node scripts/playwright test \
   --config <plugin-path>/test/scout/ui/playwright.config.ts \
   --project local \
   --ui \
@@ -68,7 +68,7 @@ If you need more control (for example, targeting a specific spec file), you can 
 Example (repeat a single spec 30 times):
 
 ```bash
-npx playwright test dashboard_search_by_value.spec.ts \
+node scripts/playwright test dashboard_search_by_value.spec.ts \
   --project mki \
   --grep @cloud-serverless-search \
   --config src/platform/plugins/shared/dashboard/test/scout/ui/parallel.playwright.config.ts \

@@ -63,10 +63,7 @@ export async function suggest(
   offset: number,
   resourceRetriever?: ESQLCallbacks
 ): Promise<ISuggestionItem[]> {
-  const { innerText, correctedQuery, root, astContext } = getAutocompleteCursorContext(
-    fullText,
-    offset
-  );
+  const { innerText, root, astContext } = getAutocompleteCursorContext(fullText, offset);
 
   if (astContext.type === 'comment') {
     return [];
@@ -77,7 +74,7 @@ export async function suggest(
   const astForFields = astContext.astForContext;
 
   const { getColumnsByType, getColumnMap } = getColumnsByTypeRetriever(
-    getQueryForFields(correctedQuery, astForFields),
+    getQueryForFields(innerText, astForFields),
     innerText,
     resourceRetriever
   );
@@ -326,6 +323,7 @@ async function getSuggestionsWithinCommandExpression(
     isCursorInSubquery: astContext.isCursorInSubquery,
     isFieldsBrowserEnabled: canSuggestResourceBrowser && !isInsideSubquery,
     unmappedFieldsStrategy,
+    isTimeseriesSource: isTimeseriesSourceCommand(commands.filter((cmd) => cmd.type === 'command')),
   };
 
   // Wrap getColumnsByType so the fields browser option is injected from context;

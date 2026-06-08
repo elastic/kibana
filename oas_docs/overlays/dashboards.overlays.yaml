@@ -385,7 +385,7 @@ actions:
                       updated_at: '2026-04-13T10:00:00.000Z'
                       version: WzEwMiwxXQ==
       x-codeSamples:
-        - lang: cURL
+        - lang: cURL_simple
           label: Create a dashboard (simple) - cURL
           source: |
             curl -X POST "${KIBANA_URL}/api/dashboards" \
@@ -494,7 +494,7 @@ actions:
                 }
               ]
             }'
-        - lang: Console
+        - lang: Console_simple
           label: Create a dashboard (simple) - Console
           source: |
             POST kbn:/api/dashboards
@@ -599,7 +599,7 @@ actions:
                 }
               ]
             }
-        - lang: cURL
+        - lang: cURL_Sections
           label: Create a dashboard (with sections and controls) - cURL
           source: |
             curl -X POST "${KIBANA_URL}/api/dashboards" \
@@ -768,7 +768,7 @@ actions:
                 }
               ]
             }'
-        - lang: Console
+        - lang: Console_sections
           label: Create a dashboard (with sections and controls) - Console
           source: |
             POST kbn:/api/dashboards
@@ -1946,13 +1946,3 @@ actions:
           label: Delete a dashboard - Console
           source: |
             DELETE kbn:/api/dashboards/3c4b8e10-d57a-11ef-9a52-4f3c2a8d0e1b
-
-  # ──────────────────────────────────────────────
-  # Fix required fields incorrectly promoted by schema.maybe()
-  # ──────────────────────────────────────────────
-  - target: "$.components.schemas['Kibana_HTTP_APIs_kbn-dashboard-data']"
-    description: 'Remove x-oas-optional fields from required: query, refresh_interval, time_range'
-    update:
-      required:
-        - options
-        - title

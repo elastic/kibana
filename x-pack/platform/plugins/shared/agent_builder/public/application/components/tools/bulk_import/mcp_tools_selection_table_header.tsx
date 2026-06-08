@@ -18,6 +18,8 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { memo, useCallback } from 'react';
 import useToggle from 'react-use/lib/useToggle';
@@ -124,6 +126,10 @@ export const McpToolsSelectionTableHeader = memo<McpToolsSelectionTableHeaderPro
                             icon="pagesSelect"
                             onClick={handleSelectAll}
                             data-test-subj="bulkImportMcpToolsSelectAllButton"
+                            {...getEbtProps({
+                              element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                              action: AGENT_BUILDER_UI_EBT.action.globalManagement.SELECT_ALL,
+                            })}
                           >
                             {labels.tools.selectAllToolsButtonLabel}
                           </EuiContextMenuItem>,
@@ -140,6 +146,10 @@ export const McpToolsSelectionTableHeader = memo<McpToolsSelectionTableHeaderPro
                       onClick={onClearSelection}
                       data-test-subj="bulkImportMcpToolsClearSelectionButton"
                       css={tableHeaderButtonStyles}
+                      {...getEbtProps({
+                        element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                        action: AGENT_BUILDER_UI_EBT.action.globalManagement.CLEAR_SELECTION,
+                      })}
                     >
                       {labels.tools.bulkImportMcp.sourceSection.clearSelection}
                     </EuiButtonEmpty>

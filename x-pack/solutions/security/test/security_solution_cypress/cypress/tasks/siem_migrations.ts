@@ -186,6 +186,11 @@ export const selectQRadarMigrationSource = () => {
   cy.get(SELECTORS.MIGRATION_SOURCE_QRADAR_OPTION).click();
 };
 
+export const selectSentinelMigrationSource = () => {
+  cy.get(SELECTORS.MIGRATION_SOURCE_DROPDOWN).click();
+  cy.get(SELECTORS.MIGRATION_SOURCE_SENTINEL_OPTION).click();
+};
+
 export const uploadQRadarRules = (xmlContent: string) => {
   cy.get(SELECTORS.UPLOAD_RULES_FILE_PICKER).selectFile({
     contents: Cypress.Buffer.from(xmlContent),
@@ -193,6 +198,32 @@ export const uploadQRadarRules = (xmlContent: string) => {
     mimeType: 'text/xml',
   });
   cy.get(SELECTORS.UPLOAD_FILE_BTN).should('not.be.disabled').click();
+};
+
+export const uploadSentinelRules = (jsonContent: object) => {
+  cy.get(SELECTORS.UPLOAD_RULES_FILE_PICKER).selectFile({
+    contents: Cypress.Buffer.from(JSON.stringify(jsonContent)),
+    fileName: 'sentinel_rules.arm.json',
+    mimeType: 'text/plain',
+  });
+  cy.get(SELECTORS.UPLOAD_FILE_BTN).should('not.be.disabled').click();
+};
+
+export const uploadSentinelWatchlist = (jsonContent: object) => {
+  cy.get(SELECTORS.WATCHLISTS_FILE_PICKER).selectFile({
+    contents: Cypress.Buffer.from(JSON.stringify(jsonContent)),
+    fileName: 'sentinel_watchlist.arm.json',
+    mimeType: 'text/plain',
+  });
+  cy.get(SELECTORS.UPLOAD_FILE_BTN).should('not.be.disabled').click();
+};
+
+export const selectSentinelWatchlistFile = (fileContent: string) => {
+  cy.get(SELECTORS.WATCHLISTS_FILE_PICKER).selectFile({
+    contents: Cypress.Buffer.from(fileContent),
+    fileName: 'sentinel_watchlist.arm.json',
+    mimeType: 'text/plain',
+  });
 };
 
 export const renameMigration = (newName: string) => {

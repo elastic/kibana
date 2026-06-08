@@ -7,10 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { z } from '@kbn/zod/v4';
-import type { ConfigSchema, SecretsSchema, HTTP_METHODS, ParamsSchema } from '../schemas/v1';
+import type {
+  ConfigSchema,
+  SecretsSchema,
+  HTTP_METHODS,
+  ParamsSchema,
+  HttpFormDataFieldSchema,
+} from '../schemas/v1';
 
 // http method definition
 export type HttpMethod = (typeof HTTP_METHODS)[number];
+
+// form data definition
+export type HttpFormDataField = z.infer<typeof HttpFormDataFieldSchema>;
 
 // config definition
 export type ConnectorTypeConfigType = z.infer<typeof ConfigSchema>;

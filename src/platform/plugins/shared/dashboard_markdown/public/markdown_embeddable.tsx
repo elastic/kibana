@@ -14,14 +14,14 @@ import {
   apiCanAddNewPanel,
   apiCanFocusPanel,
   apiIsPresentationContainer,
-  initializeUnsavedChanges,
+  initializeStateApi,
   getViewModeSubject,
   initializeTitleManager,
   titleComparators,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import React from 'react';
-import { BehaviorSubject, map, merge } from 'rxjs';
+import { BehaviorSubject, map, merge, skip } from 'rxjs';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type {
   MarkdownEmbeddableState,
@@ -90,9 +90,6 @@ export const markdownEmbeddableFactory: EmbeddablePublicDefinition<
       };
     };
 
-    const serializeState = () =>
-      isByReference ? serializeByReference(libraryId) : serializeByValue();
-
     const resetEditingState = () => {
       isEditing$.next(false);
       overrideHoverActions$.next(false);
@@ -102,15 +99,21 @@ export const markdownEmbeddableFactory: EmbeddablePublicDefinition<
       }
     };
 
-    const unsavedChangesApi = initializeUnsavedChanges<MarkdownEmbeddableState>({
+    const stateApi = initializeStateApi<MarkdownEmbeddableState>({
       uuid,
       parentApi,
-      serializeState,
+      serializeState: () => (isByReference ? serializeByReference(libraryId) : serializeByValue()),
       anyStateChange$: merge(
         titleManager.anyStateChange$,
-        content$.pipe(map(() => undefined)),
-        settings$.pipe(map(() => undefined))
-      ).pipe(map(() => undefined)),
+        content$.pipe(
+          skip(1),
+          map(() => undefined)
+        ),
+        settings$.pipe(
+          skip(1),
+          map(() => undefined)
+        )
+      ),
       getComparators: () => {
         return {
           ...titleComparators,
@@ -119,23 +122,22 @@ export const markdownEmbeddableFactory: EmbeddablePublicDefinition<
           ref_id: 'skip',
         };
       },
-      onReset: (lastSaved) => {
-        titleManager.reinitializeState(lastSaved);
+      applySerializedState: (nextState) => {
+        titleManager.reinitializeState(nextState);
         // There are no unsaved changes to reset for
         // by reference 'content' or 'settings' since they are saved on apply.
         if (!isByReference) {
-          content$.next((initialState as MarkdownByValueState).content);
-          settings$.next((initialState as MarkdownByValueState).settings);
+          content$.next((nextState as MarkdownByValueState).content);
+          settings$.next((nextState as MarkdownByValueState).settings);
         }
       },
     });
 
     const api = finalizeApi({
-      ...unsavedChangesApi,
+      ...stateApi,
       ...titleManager.api,
       defaultTitle$,
       defaultDescription$,
-      serializeState,
       onEdit: async ({ isNewPanel = false } = {}) => {
         if (!apiCanAddNewPanel(parentApi)) throw new IncompatibleActionError();
         isEditing$.next(true);

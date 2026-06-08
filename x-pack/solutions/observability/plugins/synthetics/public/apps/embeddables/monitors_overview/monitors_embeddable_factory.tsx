@@ -23,8 +23,8 @@ import {
   fetch$,
   titleComparators,
 } from '@kbn/presentation-publishing';
-import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
-import { BehaviorSubject, Subject, map, merge } from 'rxjs';
+import { initializeStateApi } from '@kbn/presentation-publishing';
+import { BehaviorSubject, Subject, map, merge, skip } from 'rxjs';
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
 import { StatusGridComponent } from './monitors_grid_component';
 import { SYNTHETICS_MONITORS_EMBEDDABLE } from '../../../../common/embeddables/monitors_overview/constants';
@@ -78,20 +78,24 @@ export const getMonitorsEmbeddableFactory = (
       });
       const view$ = new BehaviorSubject(initialState.view);
 
-      function serializeState() {
-        return {
+      const stateApi = initializeStateApi<OverviewMonitorsEmbeddableState>({
+        parentApi,
+        uuid,
+        serializeState: () => ({
           ...titleManager.getLatestState(),
           filters: filters$.getValue(),
           view: view$.getValue(),
-        };
-      }
-
-      const unsavedChangesApi = initializeUnsavedChanges<OverviewMonitorsEmbeddableState>({
-        parentApi,
-        uuid,
-        serializeState,
-        anyStateChange$: merge(titleManager.anyStateChange$, filters$, view$).pipe(
-          map(() => undefined)
+        }),
+        anyStateChange$: merge(
+          titleManager.anyStateChange$,
+          filters$.pipe(
+            skip(1),
+            map(() => undefined)
+          ),
+          view$.pipe(
+            skip(1),
+            map(() => undefined)
+          )
         ),
         getComparators: () => ({
           ...titleComparators,
@@ -101,23 +105,22 @@ export const getMonitorsEmbeddableFactory = (
         defaultState: {
           filters: DEFAULT_FILTERS,
         },
-        onReset: (lastSaved) => {
-          titleManager.reinitializeState(lastSaved);
-          filters$.next(lastSaved?.filters ?? DEFAULT_FILTERS);
-          if (lastSaved) view$.next(lastSaved?.view);
+        applySerializedState: (nextState) => {
+          titleManager.reinitializeState(nextState);
+          filters$.next(nextState.filters ?? DEFAULT_FILTERS);
+          view$.next(nextState.view);
         },
       });
 
       const api = finalizeApi({
         ...titleManager.api,
-        ...unsavedChangesApi,
+        ...stateApi,
         defaultTitle$,
         getTypeDisplayName: () =>
           i18n.translate('xpack.synthetics.editSloOverviewEmbeddableTitle.typeDisplayName', {
             defaultMessage: 'filters',
           }),
         isEditingEnabled: () => true,
-        serializeState,
         onEdit: async () => {
           try {
             const result = await openMonitorConfiguration({

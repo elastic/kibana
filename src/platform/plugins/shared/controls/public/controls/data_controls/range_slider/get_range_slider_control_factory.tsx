@@ -15,7 +15,7 @@ import {
   apiHasSections,
   apiPublishesViewMode,
   fetch$,
-  initializeUnsavedChanges,
+  initializeStateApi,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { DEFAULT_RANGE_SLIDER_STATE, RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
@@ -71,23 +71,22 @@ export const getRangesliderControlFactory = (): EmbeddablePublicDefinition<
         dataControlManager.internalApi.onSelectionChange
       );
 
-      function serializeState() {
-        return {
+      const stateApi = initializeStateApi<RangeSliderControlState>({
+        uuid,
+        parentApi,
+        serializeState: () => ({
           ...dataControlManager.getLatestState(),
           ...editorStateManager.getLatestState(),
           value: selections.value$.getValue(),
-        };
-      }
-
-      const unsavedChangesApi = initializeUnsavedChanges<RangeSliderControlState>({
-        uuid,
-        parentApi,
-        serializeState,
+        }),
         anyStateChange$: merge(
           dataControlManager.anyStateChange$,
-          selections.value$,
+          selections.value$.pipe(
+            skip(1),
+            map(() => undefined)
+          ),
           editorStateManager.anyStateChange$
-        ).pipe(map(() => undefined)),
+        ),
         getComparators: () => {
           return {
             ...editorComparators,
@@ -95,18 +94,17 @@ export const getRangesliderControlFactory = (): EmbeddablePublicDefinition<
             value: 'deepEquality',
           };
         },
-        onReset: (lastSaved) => {
-          dataControlManager.reinitializeState(lastSaved);
-          editorStateManager.reinitializeState(lastSaved);
-          selections.setValue(lastSaved?.value);
+        applySerializedState: (nextState) => {
+          dataControlManager.reinitializeState(nextState);
+          editorStateManager.reinitializeState(nextState);
+          selections.setValue(nextState.value);
         },
       });
 
       const api = finalizeApi({
-        ...unsavedChangesApi,
+        ...stateApi,
         ...dataControlManager.api,
         dataLoading$,
-        serializeState,
         clearSelections: () => {
           selections.setValue(undefined);
         },

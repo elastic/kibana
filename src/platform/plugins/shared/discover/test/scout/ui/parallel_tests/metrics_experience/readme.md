@@ -26,7 +26,7 @@ node scripts/scout start-server --arch serverless --domain security_complete
 ```
 
 ```bash
-npx playwright test \
+node scripts/playwright test \
   src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/ \
   --config src/platform/plugins/shared/discover/test/scout/ui/parallel.playwright.config.ts \
   --project local --trace on

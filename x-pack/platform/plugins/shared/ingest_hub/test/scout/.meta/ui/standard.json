@@ -1,0 +1,187 @@
+{
+  "sha1": "f25e37e867c001ea88db158df1eb8e241db6c893",
+  "tests": [
+    {
+      "id": "2f88d785c412e06-9e9bcc234fbcf5f",
+      "title": "Onboarding connect step static keys path — form enables Next when credentials are filled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_connect_step.spec.ts",
+        "line": 29,
+        "column": 7
+      }
+    },
+    {
+      "id": "2f88d785c412e06-6f25f6af6aac93b",
+      "title": "Onboarding connect step identity federation create — New Identity tab active when no connectors exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_connect_step.spec.ts",
+        "line": 50,
+        "column": 7
+      }
+    },
+    {
+      "id": "2f88d785c412e06-252523a854117d9",
+      "title": "Onboarding connect step temporary keys path — form enables Next when access key and secret are filled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_connect_step.spec.ts",
+        "line": 87,
+        "column": 7
+      }
+    },
+    {
+      "id": "2f88d785c412e06-71f5ed0a35a0c8f",
+      "title": "Onboarding connect step identity federation reuse — shows connector selector on Existing Identity tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_connect_step.spec.ts",
+        "line": 115,
+        "column": 7
+      }
+    },
+    {
+      "id": "8b1c88bbca05585-cc5ebedbcad32a7",
+      "title": "Onboarding app — FF enabled renders the onboarding shell and navigates between steps",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_ff_enabled.spec.ts",
+        "line": 29,
+        "column": 7
+      }
+    },
+    {
+      "id": "b0669359ac1acfc-0e3d67be95f42a3",
+      "title": "Onboarding connect step IAM permissions viewer shows the aggregated IAM policy for the selected services",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_permissions_viewer.spec.ts",
+        "line": 52,
+        "column": 9
+      }
+    },
+    {
+      "id": "b0669359ac1acfc-de90b35ab9eb820",
+      "title": "Onboarding connect step IAM permissions viewer narrows the policy when a single integration is selected",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_permissions_viewer.spec.ts",
+        "line": 83,
+        "column": 9
+      }
+    },
+    {
+      "id": "240d7a094dcfd2b-345f674a3ce3ecd",
+      "title": "Onboarding services step renders step header and default category view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_services_step.spec.ts",
+        "line": 34,
+        "column": 7
+      }
+    },
+    {
+      "id": "240d7a094dcfd2b-7495eeb4b6af77d",
+      "title": "Onboarding services step deselect and reselect a service",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_services_step.spec.ts",
+        "line": 52,
+        "column": 7
+      }
+    },
+    {
+      "id": "240d7a094dcfd2b-34b2946ab4f92b6",
+      "title": "Onboarding services step per-category select all and deselect all",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_services_step.spec.ts",
+        "line": 65,
+        "column": 7
+      }
+    },
+    {
+      "id": "240d7a094dcfd2b-215fb10fa4ca864",
+      "title": "Onboarding services step Next is disabled when no services are selected",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_services_step.spec.ts",
+        "line": 88,
+        "column": 7
+      }
+    },
+    {
+      "id": "240d7a094dcfd2b-d189ec3bbd08bf3",
+      "title": "Onboarding services step signal-type filter hides categories with no matching services",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_services_step.spec.ts",
+        "line": 114,
+        "column": 7
+      }
+    },
+    {
+      "id": "0836a168fb1781f-96980b8d0419b2c",
+      "title": "Onboarding app — FF disabled (default) redirects away when onboarding feature flag is disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding.spec.ts",
+        "line": 13,
+        "column": 7
+      }
+    }
+  ]
+}

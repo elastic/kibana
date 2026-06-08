@@ -19,7 +19,7 @@ All three child components read their state from the provider via context, so th
 
 The JSX-shaped tree on the left mirrors the component hierarchy you are building. Each node has inline controls:
 
-- **Provider props** — toggle features like sorting, pagination, and search; set entity labels; enable item-level navigation (`getHref`) and action handlers (`actions.edit`, `actions.delete`, `actions.inspect`).
+- **Provider props** — toggle features like sorting, pagination, search, and the content editor flyout (`features.contentEditor.open`); set entity labels; enable item-level navigation (`getHref`) and action handlers (`actions.edit`, `actions.delete`).
 - **Columns** — drag to reorder, click the arrow to edit props (`width`, `columnTitle`, etc.), or press ✕ to remove.
 - **Actions** — nested inside `Column.Actions`; drag to reorder or remove.
 - **Filters** — toolbar filter components like `Filters.Sort`.
@@ -44,6 +44,7 @@ Actions are children of `Column.Actions`:
 | Component | Description |
 |---|---|
 | `Action.Edit` | Opens the item for editing (requires `actions.edit.onItemAction`). |
+| `Action.ContentEditor` | Opens the Kibana content editor flyout (requires `features.contentEditor.open`). The action self-skips when the open callback isn't wired. |
 | `Action.Delete` | Triggers a delete-confirmation modal (requires `actions.delete.onBulkAction`). |
 | `Action (Export)` | Custom action example — demonstrates the base `Action` API. Behavior is supplied via `actions.export.onItemAction` on the provider's item config. |
 
