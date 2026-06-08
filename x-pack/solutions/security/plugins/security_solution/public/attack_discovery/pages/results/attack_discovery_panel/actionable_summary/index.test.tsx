@@ -127,11 +127,6 @@ describe('ActionableSummary', () => {
     beforeEach(() => {
       (useKibana as jest.Mock).mockReturnValue({
         services: {
-          data: {
-            search: {
-              search: jest.fn().mockReturnValue({ toPromise: jest.fn().mockResolvedValue({}) }),
-            },
-          },
           application: {
             capabilities: {
               [SECURITY_FEATURE_ID]: {

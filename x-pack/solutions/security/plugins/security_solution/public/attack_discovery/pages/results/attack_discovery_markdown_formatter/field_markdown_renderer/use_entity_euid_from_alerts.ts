@@ -39,7 +39,7 @@ export const useEntityEuidFromAlerts = ({
 }: Params): Result => {
   const { data } = useKibana().services;
   const euidApi = useEntityStoreEuidApi();
-  const getEuidRuntimeMapping = euidApi?.euid.painless.getEuidRuntimeMapping;
+  const getEuidRuntimeMapping = euidApi?.euid?.painless?.getEuidRuntimeMapping;
   const [euid, setEuid] = useState<string | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(false);
 

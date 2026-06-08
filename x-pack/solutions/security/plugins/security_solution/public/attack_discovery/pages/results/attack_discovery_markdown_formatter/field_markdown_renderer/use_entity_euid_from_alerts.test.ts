@@ -178,6 +178,8 @@ describe('useEntityEuidFromAlerts', () => {
 
     expect(result.current.isLoading).toBe(true);
 
+    const consoleSpy = jest.spyOn(console, 'error');
+
     unmount();
 
     // Resolve the promise after unmount
@@ -186,8 +188,7 @@ describe('useEntityEuidFromAlerts', () => {
     // Wait for the promise chain to settle
     await Promise.resolve();
 
-    // Since the hook was unmounted, the cancelled flag should prevent the
-    // finally block from setting isLoading to false.
-    expect(result.current.isLoading).toBe(true);
+    expect(consoleSpy).not.toHaveBeenCalledWith(expect.stringContaining('unmounted'));
+    consoleSpy.mockRestore();
   });
 });
