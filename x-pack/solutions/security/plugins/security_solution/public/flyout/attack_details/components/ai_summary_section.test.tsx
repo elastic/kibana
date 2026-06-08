@@ -64,6 +64,7 @@ describe('AISummarySection', () => {
       summaryMarkdownWithReplacements: 'SUMMARY (WITH REPLACEMENTS)',
       detailsMarkdown: 'DETAILS (ANONYMIZED)',
       detailsMarkdownWithReplacements: 'DETAILS (WITH REPLACEMENTS)',
+      originalAlertIds: [],
     });
   });
 
@@ -145,6 +146,7 @@ describe('AISummarySection', () => {
       summaryMarkdownWithReplacements: 'SUMMARY (WITH REPLACEMENTS)',
       detailsMarkdown: '',
       detailsMarkdownWithReplacements: 'DETAILS (WITH REPLACEMENTS)',
+      originalAlertIds: [],
     });
 
     render(<AISummarySection />);

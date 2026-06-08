@@ -58,7 +58,6 @@ export const getFieldMarkdownRenderer = (
             data-test-subj="entityButton"
             flush="both"
             isDisabled={isLoading}
-            // iconType={isLoading ? undefined : icon}
             onClick={onEntityClick}
             size="xs"
           >
@@ -66,7 +65,7 @@ export const getFieldMarkdownRenderer = (
           </EuiButtonEmpty>
         ) : null,
 
-      [euiTheme.font.scale.s, flyoutPanelProps, isLoading, onEntityClick, value, icon]
+      [euiTheme.font.scale.s, flyoutPanelProps, isLoading, onEntityClick, value]
     );
 
     return (
