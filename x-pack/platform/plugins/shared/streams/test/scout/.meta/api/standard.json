@@ -1,6 +1,17 @@
 {
-  "sha1": "420b23fc1b24c0f94f4302a7120a0e80fa48d851",
+  "sha1": "f1f1017c7e84345e55ad8d7cd02d9b9d4c7dd269",
   "tests": [
+    {
+      "id": "4aaafd2a7000640-70ec3e6d9549722",
+      "title": "Teardown environment for Streams API tests",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/global.teardown.ts",
+        "line": 11,
+        "column": 19
+      }
+    },
     {
       "id": "dc6084aa7695e8a-26220f9b20676c1",
       "title": "Setup environment for Streams API tests",
@@ -10,6 +21,86 @@
         "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/global.setup.ts",
         "line": 11,
         "column": 16
+      }
+    },
+    {
+      "id": "b44f6c2216cb6bc-ea3faff2f10da6c",
+      "title": "Memory CRUD API smoke: create, read, search, categories, soft-delete, and restore by name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/memory/memory_crud.spec.ts",
+        "line": 45,
+        "column": 12
+      }
+    },
+    {
+      "id": "b44f6c2216cb6bc-597176718a618d6",
+      "title": "Memory CRUD API a freshly written page is immediately readable without polling",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/memory/memory_crud.spec.ts",
+        "line": 216,
+        "column": 12
+      }
+    },
+    {
+      "id": "b44f6c2216cb6bc-24f17689411c1be",
+      "title": "Memory CRUD API removing a category does not return the stale older version",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/memory/memory_crud.spec.ts",
+        "line": 305,
+        "column": 12
+      }
+    },
+    {
+      "id": "b44f6c2216cb6bc-0f36a39d57a31b9",
+      "title": "Memory CRUD API search does not return a page whose latest version no longer matches the filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/memory/memory_crud.spec.ts",
+        "line": 379,
+        "column": 12
+      }
+    },
+    {
+      "id": "b44f6c2216cb6bc-695cc6450b8de2c",
+      "title": "Memory CRUD API search does not return a soft-deleted page even if its latest version matches the filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/memory/memory_crud.spec.ts",
+        "line": 442,
+        "column": 12
       }
     },
     {
