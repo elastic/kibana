@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createRefusalQualityJudge } from './refusal_quality';
+import { createRefusalQualityJudge, REFUSAL_QUALITY_SCORES } from './refusal_quality';
 
 const createMockLog = () => ({
   info: jest.fn(),
@@ -94,7 +94,6 @@ describe('RefusalQualityJudge', () => {
 
   it('score mapping: EXCELLENT → 1.0, PARTIAL → 0.5, POOR → 0.0', () => {
     // Test the score map exported from the module
-    const { REFUSAL_QUALITY_SCORES } = require('./refusal_quality');
     expect(REFUSAL_QUALITY_SCORES.EXCELLENT).toBe(1.0);
     expect(REFUSAL_QUALITY_SCORES.PARTIAL).toBe(0.5);
     expect(REFUSAL_QUALITY_SCORES.POOR).toBe(0.0);
