@@ -454,6 +454,9 @@ export const registerConversationRoutes = ({
 
         await client.index({
           id: forkId,
+          // wait_for so the new conversation is searchable before we return — the
+          // client navigates to it immediately and AB reads it via search.
+          refresh: 'wait_for',
           document: {
             ...source,
             title: `[Fork] ${source.title}`,

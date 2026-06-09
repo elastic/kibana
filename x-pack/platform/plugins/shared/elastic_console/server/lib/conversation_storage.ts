@@ -46,12 +46,13 @@ export const createConversationClient = (esClient: ElasticsearchClient) => ({
   search: (params: Omit<SearchRequest, 'index'>) =>
     esClient.search<ConversationDocument>({ ...params, index: CONVERSATION_INDEX_ALIAS }),
 
-  index: (params: { id: string; document: ConversationDocument }) =>
+  index: (params: { id: string; document: ConversationDocument; refresh?: boolean | 'wait_for' }) =>
     esClient.index({
       index: CONVERSATION_INDEX_ALIAS,
       id: params.id,
       document: params.document,
       require_alias: true,
+      refresh: params.refresh,
     }),
 
   get: (params: { id: string }) =>

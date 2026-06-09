@@ -7,11 +7,8 @@
 
 import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import React, { useCallback, useState } from 'react';
-import { useAgentId } from '../../hooks/use_conversation';
-import { useNavigation } from '../../hooks/use_navigation';
-import { appPaths } from '../../utils/app_paths';
+import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
 
 interface SlackOriginPanelProps {
   /** Duplicates the conversation without the Slack link and returns the new id. */
@@ -21,24 +18,22 @@ interface SlackOriginPanelProps {
 /**
  * Read-only banner shown in place of the message input for conversations that
  * originated from Slack. Offers a "Fork" action that duplicates the conversation
- * into a standalone, editable Agent Builder conversation.
+ * into a standalone, editable Agent Builder conversation and opens it in the
+ * chat sidebar/flyout.
  */
 export const SlackOriginPanel: React.FC<SlackOriginPanelProps> = ({ onFork }) => {
-  const agentId = useAgentId() ?? agentBuilderDefaultAgentId;
-  const { navigateToAgentBuilderUrl } = useNavigation();
+  const { openSidebarConversation } = useAgentBuilderServices();
   const [isForking, setIsForking] = useState(false);
 
   const handleFork = useCallback(async () => {
     setIsForking(true);
     try {
       const forkId = await onFork();
-      navigateToAgentBuilderUrl(
-        appPaths.agent.conversations.byId({ agentId, conversationId: forkId })
-      );
+      openSidebarConversation({ conversationId: forkId });
     } finally {
       setIsForking(false);
     }
-  }, [agentId, navigateToAgentBuilderUrl, onFork]);
+  }, [openSidebarConversation, onFork]);
 
   return (
     <EuiCallOut
