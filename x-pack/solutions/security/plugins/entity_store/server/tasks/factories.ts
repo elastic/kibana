@@ -16,6 +16,7 @@ import {
   EngineDescriptorClient,
   EntityStoreGlobalStateClient,
 } from '../domain/saved_objects';
+import { createKnowledgeIndicatorsReaderFromStreamsStart } from '../domain/streams_features';
 import type { TelemetryReporter } from '../telemetry/events';
 
 export interface LogsExtractionClientFactoryResult {
@@ -58,6 +59,15 @@ export async function createLogsExtractionClient({
     new CcsLogExtractionStateClient(soClient, namespace, logger)
   );
 
+  // Request-scoped Knowledge Indicators reader. Returns a no-op reader when the
+  // (optional) streams plugin is not enabled, so the extraction client works
+  // unchanged in deployments without streams.
+  const knowledgeIndicatorsReader = await createKnowledgeIndicatorsReaderFromStreamsStart({
+    streams: pluginsStart.streams,
+    request: fakeRequest,
+    logger,
+  });
+
   const logsExtractionClient = new LogsExtractionClient({
     logger,
     namespace,
@@ -66,6 +76,7 @@ export async function createLogsExtractionClient({
     engineDescriptorClient: new EngineDescriptorClient(soClient, namespace, logger),
     globalStateClient: new EntityStoreGlobalStateClient(soClient, namespace, logger),
     ccsLogsExtractionClient,
+    knowledgeIndicatorsReader,
   });
 
   return {
