@@ -49,6 +49,8 @@ import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
 import { useConversationContext } from '../../context/conversation/conversation_context';
 import { StaleAttachmentsPanel } from './stale_attachments_panel';
 import { useStaleAttachments } from '../../hooks/use_stale_attachments_check';
+import { SlackOriginPanel } from './slack_origin_panel';
+import { useSlackConversation } from '../../hooks/use_slack_conversation';
 
 export const Conversation: React.FC<{}> = () => {
   const { euiTheme } = useEuiTheme();
@@ -67,6 +69,7 @@ export const Conversation: React.FC<{}> = () => {
   const { attachments: stagedAttachments = [], upsertAttachments } = useConversationContext();
   const { staleAttachments, scheduleStaleCheck } = useStaleAttachments(conversationId);
   const [dismissStaleAttachments, setDismissStaleAttachments] = useState(false);
+  const { fromSlack, forkConversation } = useSlackConversation(conversationId);
   useSendPredefinedInitialMessage();
 
   // Page-leave guard fires for any in-flight stream, not just this conversation's.
@@ -191,17 +194,23 @@ export const Conversation: React.FC<{}> = () => {
           ]}
           grow={false}
         >
-          {!dismissStaleAttachments && (
-            <StaleAttachmentsPanel
-              attachmentInputs={staleAttachmentInputs}
-              onAddToInput={handleStageStaleAttachments}
-              onDismiss={() => setDismissStaleAttachments(true)}
-            />
+          {fromSlack ? (
+            <SlackOriginPanel onFork={forkConversation} />
+          ) : (
+            <>
+              {!dismissStaleAttachments && (
+                <StaleAttachmentsPanel
+                  attachmentInputs={staleAttachmentInputs}
+                  onAddToInput={handleStageStaleAttachments}
+                  onDismiss={() => setDismissStaleAttachments(true)}
+                />
+              )}
+              <ConversationInput
+                onSubmit={scrollToMostRecentRoundTop}
+                onEditorFocus={scheduleStaleCheck}
+              />
+            </>
           )}
-          <ConversationInput
-            onSubmit={scrollToMostRecentRoundTop}
-            onEditorFocus={scheduleStaleCheck}
-          />
         </EuiFlexItem>
       </EuiFlexGroup>
       <CanvasFlyout attachmentsService={attachmentsService} />

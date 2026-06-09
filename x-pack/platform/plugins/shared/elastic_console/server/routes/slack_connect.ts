@@ -66,21 +66,10 @@ export const registerSlackConnectRoute = ({
             description: 'Authenticates the elastic-console-connect router to forward Slack events',
           },
           // No expiration — key lives until manually revoked (re-connect regenerates).
-          role_descriptors: {
-            'elastic-console-slack': {
-              // manage_own_api_key lets /slack/token create a scoped inference key
-              // on behalf of this principal without needing a superuser.
-              cluster: ['manage_own_api_key'],
-              indices: [],
-              applications: [
-                {
-                  application: 'kibana-.kibana',
-                  privileges: ['api:elastic_console/slack/events'],
-                  resources: ['*'],
-                },
-              ],
-            },
-          },
+          // DEMO: omitting role_descriptors makes the key inherit the connecting
+          // user's full privileges, so Slack-triggered Agent Builder runs execute
+          // with the user's RBAC (actions/connectors + agentBuilder). Tighten this
+          // before any non-demo use.
         });
         kibanaApiKey = Buffer.from(`${apiKeyResult.id}:${apiKeyResult.api_key}`).toString('base64');
       } catch (err) {

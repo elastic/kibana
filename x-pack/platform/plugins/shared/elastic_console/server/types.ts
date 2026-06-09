@@ -12,6 +12,7 @@ import type {
   EncryptedSavedObjectsPluginStart,
 } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 
 export interface ElasticConsoleSetupDependencies {
   cloud?: CloudSetup;
@@ -22,6 +23,7 @@ export interface ElasticConsoleStartDependencies {
   inference: InferenceServerStart;
   actions: ActionsPluginStart;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
+  agentBuilder: AgentBuilderPluginStart;
 }
 
 export type ElasticConsolePluginSetup = Record<string, never>;

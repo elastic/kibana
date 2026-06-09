@@ -8,8 +8,16 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import { MessageRole, ChatCompletionEventType, type Message } from '@kbn/inference-common';
-import { ConversationRoundStatus, type ConversationRound } from '@kbn/agent-builder-common';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import {
+  agentBuilderDefaultAgentId,
+  AgentExecutionMode,
+  isMessageChunkEvent,
+  isToolCallEvent,
+  isToolResultEvent,
+  isConversationCreatedEvent,
+  isConversationUpdatedEvent,
+} from '@kbn/agent-builder-common';
 import { createConversationStorage } from './conversation_storage';
 import { resolveConnector } from './resolve_connector';
 import {
@@ -48,33 +56,6 @@ const inFlightEvents = new Set<string>();
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
-
-const createCompletedRound = ({
-  text,
-  responseText,
-  resolvedConnectorId,
-  now,
-}: {
-  text: string;
-  responseText: string;
-  resolvedConnectorId: string;
-  now: string;
-}): ConversationRound => ({
-  id: `round-${uuidv4()}`,
-  status: ConversationRoundStatus.completed,
-  input: { message: text },
-  steps: [],
-  response: { message: responseText },
-  started_at: now,
-  time_to_first_token: 0,
-  time_to_last_token: 0,
-  model_usage: {
-    connector_id: resolvedConnectorId,
-    llm_calls: 1,
-    input_tokens: 0,
-    output_tokens: 0,
-  },
-});
 
 const getSpace = (basePath: string): string => {
   const spaceMatch = basePath.match(/(?:^|\/)s\/([^/]+)/);
@@ -151,6 +132,7 @@ export const handleSlackEvent = async ({
   botToken,
   coreStart,
   inference,
+  agentBuilder,
   request,
   logger,
 }: {
@@ -158,6 +140,7 @@ export const handleSlackEvent = async ({
   botToken: string;
   coreStart: CoreStart;
   inference: InferenceServerStart;
+  agentBuilder: AgentBuilderPluginStart;
   request: KibanaRequest;
   logger: Logger;
 }): Promise<void> => {
@@ -349,11 +332,13 @@ export const handleSlackEvent = async ({
       return;
     }
 
-    // --- Regular question — find or create conversation, call inference ---
+    // --- Regular question — route through Agent Builder ---
 
     const existingSession = await findSessionByOriginRef(coreStart, originRef, logger);
-    let existingConvId: string | null = null;
-    let existingRounds: ConversationRound[] = [];
+    const existingConvId: string | null =
+      existingSession && (await storage.get({ id: existingSession.conversationId })).found
+        ? existingSession.conversationId
+        : null;
 
     // First message in a new thread from an unmapped Slack user — prompt them to link
     // their Kibana account so the conversation shows up in Agent Builder.
@@ -370,14 +355,6 @@ export const handleSlackEvent = async ({
           `I'll still answer your question, but the conversation won't appear in Kibana Agent Builder until you link.`,
         ].join('\n'),
       });
-    }
-
-    if (existingSession) {
-      const fullConv = await storage.get({ id: existingSession.conversationId });
-      if (fullConv.found) {
-        existingConvId = existingSession.conversationId;
-        existingRounds = fullConv._source?.conversation_rounds ?? [];
-      }
     }
 
     // Post a placeholder and start streaming
@@ -429,72 +406,70 @@ export const handleSlackEvent = async ({
       existingSession?.session.connector_id ?? 'default'
     );
 
-    // Build full message history so the LLM has conversation context.
-    // The inference plugin is a raw LLM interface — it doesn't load conversation
-    // history itself, so we pass all prior rounds as messages.
-    const historyMessages = existingRounds.flatMap((round) => {
-      const input = round.input?.message;
-      const responseMsg = round.response?.message;
-      const msgs: Message[] = [];
-      if (input) msgs.push({ role: MessageRole.User, content: input });
-      if (responseMsg) msgs.push({ role: MessageRole.Assistant, content: responseMsg } as Message);
-      return msgs;
-    });
-
-    // Call inference plugin directly via Observable
-    const inferenceClient = inference.getClient({ request });
     const abortController = new AbortController();
+    const handoffSummary = existingSession?.session.handoff_summary;
 
-    let responseText = '';
-
+    // Route the message through Agent Builder's execution service. Unlike a raw
+    // LLM completion, this gives the agent access to its tools and persists the
+    // exchange as a real Agent Builder conversation (with tool-call steps).
+    // We capture the conversation id from the stream so the Slack thread can be
+    // mapped back to the AB conversation.
+    let conversationId: string | null = existingConvId;
     try {
-      await new Promise<void>((resolve, reject) => {
-        const handoffSummary = existingSession?.session.handoff_summary;
-        const systemPrompt =
-          'You are a helpful Elastic AI assistant embedded in Slack. ' +
-          'Use the full conversation history when answering questions.' +
-          (handoffSummary
-            ? ` A previous investigation was completed with this summary: "${handoffSummary}". Reference it when relevant.`
-            : '');
-
-        const events$ = inferenceClient.chatComplete({
+      const { events$ } = await agentBuilder.execution.executeAgent({
+        mode: AgentExecutionMode.conversation,
+        request,
+        abortSignal: abortController.signal,
+        // Run locally so we can stream events straight to Slack instead of polling.
+        useTaskManager: false,
+        params: {
+          agentId: agentBuilderDefaultAgentId,
           connectorId: resolvedConnectorId,
-          system: systemPrompt,
-          messages: [...historyMessages, { role: MessageRole.User, content: text }],
-          stream: true,
-          abortSignal: abortController.signal,
-        });
+          ...(existingConvId ? { conversationId: existingConvId } : {}),
+          ...(handoffSummary
+            ? {
+                configurationOverrides: {
+                  instructions: `A previous investigation was completed with this summary: "${handoffSummary}". Reference it when relevant.`,
+                },
+              }
+            : {}),
+          nextInput: { message: text },
+        },
+      });
 
+      await new Promise<void>((resolve, reject) => {
         events$.subscribe({
-          next: (chunk) => {
-            if (chunk.type === ChatCompletionEventType.ChatCompletionChunk) {
-              const content = (chunk as { type: string; content: string }).content ?? '';
-              if (content) {
-                responseChunks.push(content);
+          next: (chatEvent) => {
+            if (isMessageChunkEvent(chatEvent)) {
+              const chunk = chatEvent.data.text_chunk;
+              if (chunk) {
+                responseChunks.push(chunk);
                 updater.schedule(buildStreamText());
               }
-              const toolCalls = (
-                chunk as { type: string; tool_calls?: Array<{ function?: { name: string } }> }
-              ).tool_calls;
-              if (toolCalls?.length) {
-                const toolName = toolCalls[0]?.function?.name ?? 'tool';
-                statusLines.push(`🛠️ _Calling \`${toolName}\`_`);
-                updater.schedule(buildStreamText());
-              }
+            } else if (isToolCallEvent(chatEvent)) {
+              statusLines.push(`🛠️ _Calling \`${chatEvent.data.tool_id}\`_`);
+              updater.schedule(buildStreamText());
+            } else if (isToolResultEvent(chatEvent)) {
+              statusLines.push(`✅ _\`${chatEvent.data.tool_id}\` finished_`);
+              updater.schedule(buildStreamText());
+            } else if (
+              isConversationCreatedEvent(chatEvent) ||
+              isConversationUpdatedEvent(chatEvent)
+            ) {
+              conversationId = chatEvent.data.conversation_id;
             }
           },
           error: reject,
           complete: resolve,
         });
       });
-    } catch (inferenceError) {
-      logger.error(`Inference error in Slack handler: ${(inferenceError as Error).message}`);
-      await updater.finalize(`⚠️ Error: ${(inferenceError as Error).message}`);
+    } catch (agentError) {
+      logger.error(`Agent Builder error in Slack handler: ${(agentError as Error).message}`);
+      await updater.finalize(`⚠️ Error: ${(agentError as Error).message}`);
       return;
     }
 
-    responseText = responseChunks.join('');
-
+    const responseText = responseChunks.join('');
     const formatted = markdownToMrkdwn(responseText);
     const parts = splitAtParagraph(formatted, MAX_SLACK_MSG_LEN);
 
@@ -503,61 +478,24 @@ export const handleSlackEvent = async ({
       await postMessage(botToken, { channel, thread_ts: threadTs, text: part });
     }
 
-    // Persist the conversation round and update session SO.
-    // Failure here means the user received a response but the round was not saved — log as error.
+    // Agent Builder owns conversation persistence now. We only maintain the Slack
+    // session SO mapping the thread to the AB conversation — its existence is also
+    // what marks the conversation as "from Slack" in the UI.
+    if (!conversationId) {
+      logger.error(
+        `Agent Builder returned no conversation id for thread ${originRef}; session not linked.`
+      );
+      return;
+    }
     const now = new Date().toISOString();
     try {
       if (existingConvId) {
-        const existing = await storage.get({ id: existingConvId });
-        if (existing.found && existing._source) {
-          const rounds = existing._source.conversation_rounds ?? [];
-          await storage.index({
-            id: existingConvId,
-            document: {
-              ...existing._source,
-              conversation_rounds: [
-                ...rounds,
-                createCompletedRound({
-                  text,
-                  responseText,
-                  resolvedConnectorId,
-                  now,
-                }),
-              ],
-              updated_at: now,
-            },
-          });
-          // Update session SO location — stored outside the conversation doc so agentBuilder
-          // full-document replaces can't overwrite it.
-          await soClient.update<SlackSessionAttributes>(
-            SLACK_SESSION_SO_TYPE,
-            slackSessionSoId(existingConvId),
-            { location: originRef, located_at: now, updated_at: now }
-          );
-        }
+        await soClient.update<SlackSessionAttributes>(
+          SLACK_SESSION_SO_TYPE,
+          slackSessionSoId(existingConvId),
+          { location: originRef, located_at: now, updated_at: now }
+        );
       } else {
-        // Create new conversation document and session SO
-        const newConvId = uuidv4();
-        await storage.index({
-          id: newConvId,
-          document: {
-            agent_id: 'elastic-ai-agent',
-            title: text.slice(0, 100),
-            conversation_rounds: [
-              createCompletedRound({
-                text,
-                responseText,
-                resolvedConnectorId,
-                now,
-              }),
-            ],
-            user_id: kibanaUser?.userId,
-            user_name: kibanaUser?.username ?? event.user ?? 'slack-user',
-            space,
-            created_at: now,
-            updated_at: now,
-          },
-        });
         await soClient.create<SlackSessionAttributes>(
           SLACK_SESSION_SO_TYPE,
           {
@@ -570,15 +508,12 @@ export const handleSlackEvent = async ({
             located_at: now,
             updated_at: now,
           },
-          { id: slackSessionSoId(newConvId), overwrite: true }
+          { id: slackSessionSoId(conversationId), overwrite: true }
         );
       }
     } catch (persistErr) {
-      // Response was already sent to Slack — this is a data loss scenario.
       logger.error(
-        `Failed to persist conversation round for thread ${originRef}: ${
-          (persistErr as Error).message
-        }`
+        `Failed to persist Slack session for thread ${originRef}: ${(persistErr as Error).message}`
       );
     }
   } catch (error) {

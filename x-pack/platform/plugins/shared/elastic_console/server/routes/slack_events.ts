@@ -118,6 +118,7 @@ export const registerSlackEventsRoute = ({
             botToken,
             coreStart,
             inference: pluginsStart.inference,
+            agentBuilder: pluginsStart.agentBuilder,
             request: inferenceRequest,
             logger,
           });

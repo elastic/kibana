@@ -9,7 +9,7 @@
     "server": true,
     "browser": true,
     "configPath": ["xpack", "elastic_console"],
-    "requiredPlugins": ["inference", "actions", "encryptedSavedObjects"],
+    "requiredPlugins": ["inference", "actions", "encryptedSavedObjects", "agentBuilder"],
     "requiredBundles": ["kibanaReact"],
     "optionalPlugins": ["cloud"]
   }

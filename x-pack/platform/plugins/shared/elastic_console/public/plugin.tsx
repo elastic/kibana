@@ -43,6 +43,21 @@ export class ElasticConsolePlugin implements Plugin {
       },
     });
 
+    // BWC redirect /app/elasticConsole to /app/elasticRamen
+    core.application.register({
+      id: 'elasticConsole',
+      title: 'Elastic Console',
+      visibleIn: [],
+      async mount(params: AppMountParameters) {
+        const [coreStart] = await core.getStartServices();
+        const { pathname, search, hash } = params.history.location;
+        coreStart.application.navigateToApp('elasticRamen', {
+          path: `${pathname}${search}${hash}`,
+        });
+        return () => {};
+      },
+    });
+
     return {};
   }
 

@@ -11,6 +11,11 @@ import type { CoreSetup, CoreStart, IRouter, KibanaRequest, Logger } from '@kbn/
 import { type ConversationRound, isToolCallStep } from '@kbn/agent-builder-common';
 import type { ElasticConsolePluginStart, ElasticConsoleStartDependencies } from '../types';
 import { createConversationClient } from '../lib/conversation_storage';
+import {
+  SLACK_SESSION_SO_TYPE,
+  slackSessionSoId,
+  type SlackSessionAttributes,
+} from '../lib/slack_session_so';
 import { isElasticConsoleEnabled } from './is_enabled';
 
 /**
@@ -343,6 +348,128 @@ export const registerConversationRoutes = ({
         });
       } catch (error) {
         logger.error(`Update conversation error: ${error.message}`);
+        return response.customError({
+          statusCode: error.statusCode || 500,
+          body: { message: error.message },
+        });
+      }
+    }
+  );
+
+  // Slack origin status — used by the Agent Builder UI to flag a conversation as
+  // read-only and offer a fork. A conversation is "from Slack" iff a Slack session
+  // SO exists for it (the SO is the source of truth, written by the Slack handler).
+  router.get(
+    {
+      path: '/internal/elastic_ramen/conversations/{id}/slack',
+      security: {
+        authz: { requiredPrivileges: ['agentBuilder:write'] },
+      },
+      options: { access: 'internal' },
+      validate: {
+        params: schema.object({ id: schema.string() }),
+      },
+    },
+    async (ctx, request, response) => {
+      try {
+        const [coreStart] = await coreSetup.getStartServices();
+
+        if (!(await isElasticConsoleEnabled(coreStart, request))) {
+          return response.notFound();
+        }
+
+        const soClient = coreStart.savedObjects.createInternalRepository([SLACK_SESSION_SO_TYPE]);
+
+        try {
+          const so = await soClient.get<SlackSessionAttributes>(
+            SLACK_SESSION_SO_TYPE,
+            slackSessionSoId(request.params.id)
+          );
+          return response.ok({
+            body: { from_slack: true, origin_ref: so.attributes.origin_ref ?? null },
+          });
+        } catch (soErr) {
+          const statusCode = (soErr as { statusCode?: number; output?: { statusCode?: number } })
+            ?.output?.statusCode;
+          if (statusCode === 404 || (soErr as { statusCode?: number })?.statusCode === 404) {
+            return response.ok({ body: { from_slack: false, origin_ref: null } });
+          }
+          throw soErr;
+        }
+      } catch (error) {
+        logger.error(`Slack status error: ${error.message}`);
+        return response.customError({
+          statusCode: error.statusCode || 500,
+          body: { message: error.message },
+        });
+      }
+    }
+  );
+
+  // Fork a conversation — duplicates the conversation document under a new id with
+  // no Slack session SO, so the copy is a normal, editable Agent Builder conversation.
+  router.post(
+    {
+      path: '/internal/elastic_ramen/conversations/{id}/fork',
+      security: {
+        authz: { requiredPrivileges: ['agentBuilder:write'] },
+      },
+      options: { access: 'internal' },
+      validate: {
+        params: schema.object({ id: schema.string() }),
+      },
+    },
+    async (ctx, request, response) => {
+      try {
+        const [coreStart] = await coreSetup.getStartServices();
+
+        if (!(await isElasticConsoleEnabled(coreStart, request))) {
+          return response.notFound();
+        }
+
+        const esClient = coreStart.elasticsearch.client.asScoped(request).asInternalUser;
+        const client = createConversationClient(esClient);
+
+        if (!(await client.indexExists())) {
+          return response.notFound();
+        }
+
+        const basePath = coreStart.http.basePath.get(request);
+        const space = getSpace(basePath);
+        const user = await getCurrentUser(coreStart, request);
+
+        const existing = await client.get({ id: request.params.id });
+        const hit = existing.hits.hits[0];
+        if (
+          !hit?._source ||
+          hit._source.space !== space ||
+          hit._source.user_name !== user.username
+        ) {
+          return response.notFound();
+        }
+
+        const source = hit._source;
+        const forkId = uuidv4();
+        const now = new Date().toISOString();
+
+        await client.index({
+          id: forkId,
+          document: {
+            ...source,
+            title: `[Fork] ${source.title}`,
+            user_id: user.userId,
+            user_name: user.username,
+            space,
+            created_at: now,
+            updated_at: now,
+            // The fork is a standalone conversation: drop any Slack routing state.
+            slack_state: undefined,
+          },
+        });
+
+        return response.ok({ body: { id: forkId } });
+      } catch (error) {
+        logger.error(`Fork conversation error: ${error.message}`);
         return response.customError({
           statusCode: error.statusCode || 500,
           body: { message: error.message },

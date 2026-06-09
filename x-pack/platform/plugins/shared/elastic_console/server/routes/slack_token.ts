@@ -56,29 +56,26 @@ export const registerSlackTokenRoute = ({
       try {
         const [coreStart] = await coreSetup.getStartServices();
 
-        const esClient = coreStart.elasticsearch.client.asInternalUser;
+        // DEMO: reuse the connecting user's key (forwarded by the router as
+        // `Authorization: ApiKey <key>`) for event handling, so Slack-triggered
+        // inference and Agent Builder runs execute with the user's full RBAC
+        // privileges. An internal-user key would lack Kibana feature privileges
+        // (actions/agentBuilder) and AB would fail with "Unauthorized to get actions".
+        const authHeader = request.headers.authorization;
+        const kibanaApiKey =
+          typeof authHeader === 'string' && authHeader.toLowerCase().startsWith('apikey ')
+            ? authHeader.slice('apikey '.length).trim()
+            : undefined;
 
-        // Invalidate previous inference keys before creating a new one.
-        try {
-          await esClient.security.invalidateApiKey({ name: 'elastic-console-slack-inference-*' });
-        } catch (err) {
-          logger.warn(`Failed to invalidate stale Slack inference keys: ${(err as Error).message}`);
+        if (!kibanaApiKey) {
+          logger.error(
+            'Slack token request missing the connect API key in the Authorization header'
+          );
+          return response.customError({
+            statusCode: 400,
+            body: { message: 'Missing Slack integration credentials' },
+          });
         }
-
-        // Must use asInternalUser — the connect API key is a derived key and ES
-        // requires derived keys to have explicit (empty) role descriptors.
-        const apiKeyResult = await esClient.security.createApiKey({
-          name: `elastic-console-slack-inference-${Date.now()}`,
-          expiration: '365d',
-          metadata: {
-            managed_by: 'elastic_console',
-            purpose: 'slack_inference_auth',
-            description: 'Authenticates Slack event handler inference and saved-object calls',
-          },
-        });
-        const kibanaApiKey = Buffer.from(`${apiKeyResult.id}:${apiKeyResult.api_key}`).toString(
-          'base64'
-        );
 
         // getUnsafeInternalClient applies all SO extensions (including ESO encryption)
         // without requiring a request or Kibana RBAC on the connect API key.
