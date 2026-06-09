@@ -208,9 +208,9 @@ export class ToolsControl extends Component<Props, State> {
             defaultMessage: 'Tools',
           })}
           disableScreenReaderOutput
+          anchorClassName="mapToolbarOverlay__buttonIcon-empty"
         >
           <EuiButtonIcon
-            className="mapToolbarOverlay__buttonIcon-empty"
             size="s"
             color="text"
             iconType="wrench"

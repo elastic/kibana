@@ -35,11 +35,14 @@ export function TimesliderToggleButton(props: Props) {
 
   return (
     <EuiPanel paddingSize="none" className="mapToolbarOverlay__button">
-      <EuiToolTip content={label} disableScreenReaderOutput>
+      <EuiToolTip
+        content={label}
+        disableScreenReaderOutput
+        anchorClassName={classNames({
+          'mapToolbarOverlay__buttonIcon-empty': !props.isTimesliderOpen,
+        })}
+      >
         <EuiButtonIcon
-          className={classNames({
-            'mapToolbarOverlay__buttonIcon-empty': !props.isTimesliderOpen,
-          })}
           size="s"
           onClick={onClick}
           data-test-subj="timesliderToggleButton"

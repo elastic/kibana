@@ -55,10 +55,10 @@ export class SetViewControl extends Component<Props, State> {
               content={i18n.translate('xpack.maps.setViewControl.goToButtonLabel', {
                 defaultMessage: 'Go to',
               })}
+              anchorClassName="mapToolbarOverlay__buttonIcon-empty"
               disableScreenReaderOutput
             >
               <EuiButtonIcon
-                className="mapToolbarOverlay__buttonIcon-empty"
                 size="s"
                 onClick={this._togglePopover}
                 data-test-subj="toggleSetViewVisibilityButton"

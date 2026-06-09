@@ -30,11 +30,14 @@ export function FitToData(props: Props) {
   }
   return (
     <EuiPanel paddingSize="none" className="mapToolbarOverlay__button">
-      <EuiToolTip content={title} disableScreenReaderOutput>
+      <EuiToolTip
+        content={title}
+        disableScreenReaderOutput
+        anchorClassName={classNames({
+          'mapToolbarOverlay__buttonIcon-empty': !props.autoFitToDataBounds,
+        })}
+      >
         <EuiButtonIcon
-          className={classNames({
-            'mapToolbarOverlay__buttonIcon-empty': !props.autoFitToDataBounds,
-          })}
           size="s"
           onClick={props.fitToBounds}
           data-test-subj="fitToData"
