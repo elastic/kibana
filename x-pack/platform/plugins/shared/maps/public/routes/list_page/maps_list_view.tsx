@@ -5,40 +5,28 @@
  * 2.0.
  */
 
-import React, { memo, useEffect, useMemo } from 'react';
-import { EuiButton } from '@elastic/eui';
-import type { ScopedHistory } from '@kbn/core/public';
+import React, { useCallback, memo, useEffect } from 'react';
+import type { SavedObjectsFindOptionsReference, ScopedHistory } from '@kbn/core/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { TableListView } from '@kbn/content-management-table-list-view';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
-import type { ContentListItem, ContentListItemConfig } from '@kbn/content-list';
-import { KibanaContentListPage } from '@kbn/content-list-page';
-import {
-  ContentListClientProvider,
-  createTagsService,
-  type ContentEditorConfig,
-  type ContentListClientFeatures,
-  type ContentListClientServices,
-  type TableListViewFindItemsFn,
-} from '@kbn/content-list-provider-client';
 
 import type { MapItem } from '../../../common/content_management';
 import { APP_ID, APP_NAME, getEditPath, MAP_PATH } from '../../../common/constants';
 import {
-  getCore,
+  getMapsCapabilities,
   getCoreChrome,
   getExecutionContextService,
-  getMapsCapabilities,
   getNavigateToApp,
-  getSavedObjectsTagging,
-  getServerless,
+  getUiSettings,
   getUsageCollection,
+  getServerless,
 } from '../../kibana_services';
-import { MapList } from '../../components/map_list';
 import { getMapClient } from '../../content_management';
 
-const PAGE_DATA_TEST_SUBJ = 'mapLandingPage';
+const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';
+const SAVED_OBJECTS_PER_PAGE_SETTING = 'savedObjects:perPage';
 
 interface MapUserContent extends UserContentCommonSchema {
   type: string;
@@ -47,7 +35,15 @@ interface MapUserContent extends UserContentCommonSchema {
   };
 }
 
-const toContentListItem = (mapItem: MapItem): MapUserContent => {
+function navigateToNewMap() {
+  const navigateToApp = getNavigateToApp();
+  getUsageCollection()?.reportUiCounter(APP_ID, METRIC_TYPE.CLICK, 'create_maps_vis_editor');
+  navigateToApp(APP_ID, {
+    path: MAP_PATH,
+  });
+}
+
+const toTableListViewSavedObject = (mapItem: MapItem): MapUserContent => {
   return {
     ...mapItem,
     updatedAt: mapItem.updatedAt!,
@@ -58,80 +54,15 @@ const toContentListItem = (mapItem: MapItem): MapUserContent => {
   };
 };
 
-const navigateToNewMap = () => {
-  getUsageCollection()?.reportUiCounter(APP_ID, METRIC_TYPE.CLICK, 'create_maps_vis_editor');
-  getNavigateToApp()(APP_ID, { path: MAP_PATH });
-};
-
-const deleteMap = async (item: ContentListItem) => {
-  await getMapClient().delete(item.id);
-};
-
-const deleteMaps = async (items: ContentListItem[]) => {
-  await Promise.all(items.map(deleteMap));
-};
-
-const onSave: ContentEditorConfig['onSave'] = async ({ id, title, description, tags }) => {
-  const { item } = await getMapClient().get(id);
-  const tagging = getSavedObjectsTagging();
-  const references = tagging
-    ? tagging.ui.updateTagsReferences(item.references ?? [], tags)
-    : item.references ?? [];
-  await getMapClient().update({
-    id,
-    data: { ...item.attributes, title, description },
-    options: { references },
-  });
-};
-
-const findItems: TableListViewFindItemsFn = async (searchTerm, { listingLimit: limit } = {}) => {
-  try {
-    const {
-      hits,
-      pagination: { total },
-    } = await getMapClient().search({
-      text: searchTerm ? `${searchTerm}*` : undefined,
-      limit,
-    });
-
-    return {
-      hits: hits.map(toContentListItem),
-      total,
-    };
-  } catch {
-    return { total: 0, hits: [] };
-  }
-};
-
-const labels = {
-  entity: i18n.translate('xpack.maps.mapListing.entityName', {
-    defaultMessage: 'map',
-  }),
-  entityPlural: i18n.translate('xpack.maps.mapListing.entityNamePlural', {
-    defaultMessage: 'maps',
-  }),
-};
-
-const CreateMapButton = ({ isReadOnly }: { isReadOnly: boolean }) =>
-  isReadOnly ? null : (
-    <EuiButton
-      fill
-      iconType="plusInCircle"
-      onClick={navigateToNewMap}
-      data-test-subj="newItemButton"
-    >
-      <FormattedMessage
-        id="xpack.maps.mapListing.createMapButtonLabel"
-        defaultMessage="Create map"
-      />
-    </EuiButton>
-  );
+async function deleteMaps(items: Array<{ id: string }>) {
+  await Promise.all(items.map(({ id }) => getMapClient().delete(id)));
+}
 
 interface Props {
   history: ScopedHistory;
 }
 
-const MapsListViewComp = ({ history }: Props) => {
+function MapsListViewComp({ history }: Props) {
   getExecutionContextService().set({
     type: 'application',
     name: APP_ID,
@@ -139,61 +70,78 @@ const MapsListViewComp = ({ history }: Props) => {
   });
 
   const isReadOnly = !getMapsCapabilities().save;
+  const initialPageSize = getUiSettings().get(SAVED_OBJECTS_PER_PAGE_SETTING);
 
-  // `setBreadcrumbs` triggers observables that change state in adjacent
-  // components (e.g. `ScreenReaderRouteAnnouncements`); run the chrome side
-  // effects after render so we never trigger a state change during render.
+  // TLDR; render should be side effect free
+  //
+  // setBreadcrumbs fires observables which cause state changes in ScreenReaderRouteAnnouncements.
+  // wrap chrome updates in useEffect to avoid potentially causing state changes in other component during render phase.
   useEffect(() => {
     getCoreChrome().docTitle.change(APP_NAME);
-    const serverless = getServerless();
-
-    if (serverless) {
-      serverless.setBreadcrumbs({ text: APP_NAME });
+    if (getServerless()) {
+      getServerless()!.setBreadcrumbs({ text: APP_NAME });
     } else {
       getCoreChrome().setBreadcrumbs([{ text: APP_NAME }]);
     }
   }, []);
 
-  const services: ContentListClientServices = useMemo(() => {
-    const savedObjectsTagging = getSavedObjectsTagging();
-    return {
-      tags: createTagsService(savedObjectsTagging?.ui),
-      savedObjectsTagging,
-    };
-  }, []);
-
-  const item: ContentListItemConfig = useMemo(
-    () => ({
-      getHref: ({ id }: ContentListItem) => history.createHref({ pathname: getEditPath(id) }),
-      actions: {
-        delete: { onBulkAction: deleteMaps, onItemAction: deleteMap },
-      },
-    }),
-    [history]
-  );
-
-  const features: ContentListClientFeatures = useMemo(
-    () => ({ contentEditor: { isReadonly: isReadOnly, onSave } }),
-    [isReadOnly]
+  const findMaps = useCallback(
+    async (
+      searchTerm: string,
+      {
+        references = [],
+        referencesToExclude = [],
+      }: {
+        references?: SavedObjectsFindOptionsReference[];
+        referencesToExclude?: SavedObjectsFindOptionsReference[];
+      } = {}
+    ) => {
+      return getMapClient()
+        .search({
+          text: searchTerm ? `${searchTerm}*` : undefined,
+          limit: getUiSettings().get(SAVED_OBJECTS_LIMIT_SETTING),
+          tags: {
+            included: references.map(({ id }) => id),
+            excluded: referencesToExclude.map(({ id }) => id),
+          },
+        })
+        .then(({ hits, pagination: { total } }) => {
+          return {
+            total,
+            hits: hits.map(toTableListViewSavedObject),
+          };
+        })
+        .catch((e) => {
+          return {
+            total: 0,
+            hits: [],
+          };
+        });
+    },
+    []
   );
 
   return (
-    <ContentListClientProvider
+    <TableListView<MapUserContent>
       id="map"
-      core={getCore()}
-      {...{ labels, isReadOnly, findItems, services, features, item }}
-    >
-      <KibanaContentListPage data-test-subj={PAGE_DATA_TEST_SUBJ}>
-        <KibanaContentListPage.Header
-          title={APP_NAME}
-          actions={<CreateMapButton isReadOnly={isReadOnly} />}
-        />
-        <KibanaContentListPage.Section>
-          <MapList />
-        </KibanaContentListPage.Section>
-      </KibanaContentListPage>
-    </ContentListClientProvider>
+      headingId="mapsListingPage"
+      createItem={isReadOnly ? undefined : navigateToNewMap}
+      findItems={findMaps}
+      deleteItems={isReadOnly ? undefined : deleteMaps}
+      initialFilter={''}
+      initialPageSize={initialPageSize}
+      entityName={i18n.translate('xpack.maps.mapListing.entityName', {
+        defaultMessage: 'map',
+      })}
+      entityNamePlural={i18n.translate('xpack.maps.mapListing.entityNamePlural', {
+        defaultMessage: 'maps',
+      })}
+      title={APP_NAME}
+      getOnClickTitle={({ id }) =>
+        () =>
+          history.push(getEditPath(id))}
+    />
   );
-};
+}
 
 export const MapsListView = memo(MapsListViewComp);
