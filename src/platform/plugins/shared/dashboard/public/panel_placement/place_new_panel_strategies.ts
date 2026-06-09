@@ -53,7 +53,7 @@ export const runPanelPlacementStrategy = (
         panels: {
           ...otherPanels,
           [newPanel.uuid]: {
-            ...newPanel,
+            type: newPanel.type,
             grid: targetPanel
               ? {
                   ...newPanel.grid,
@@ -83,7 +83,7 @@ export const runPanelPlacementStrategy = (
         return {
           ...currentLayout,
           panels: {
-            [newPanel.uuid]: { ...newPanel, grid: { x: 0, y: 0, w: width, h: height } },
+            [newPanel.uuid]: { type: newPanel.type, grid: { x: 0, y: 0, w: width, h: height } },
           },
         };
       }
@@ -132,7 +132,7 @@ export const runPanelPlacementStrategy = (
                     ...currentLayout,
                     panels: {
                       ...currentPanels,
-                      [newPanel.uuid]: { ...newPanel, grid: { x, y, w: width, h: height } },
+                      [newPanel.uuid]: { type: newPanel.type, grid: { x, y, w: width, h: height } },
                     },
                   };
                 } else if (grid[h][w] === 1) {
@@ -148,7 +148,7 @@ export const runPanelPlacementStrategy = (
         ...currentLayout,
         panels: {
           ...currentPanels,
-          [newPanel.uuid]: { ...newPanel, grid: { x: 0, y: maxY, w: width, h: height } },
+          [newPanel.uuid]: { type: newPanel.type, grid: { x: 0, y: maxY, w: width, h: height } },
         },
       };
     default:
