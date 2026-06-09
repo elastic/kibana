@@ -224,7 +224,6 @@ components:
         - dataset_id
         - dataset_name
         - evaluator_name
-        - example_count
         - stats
 
     TraceSpan:
