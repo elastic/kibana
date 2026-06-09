@@ -113,6 +113,22 @@ class Stack:
     def delete_by_query(self, index, body):
         return self.es_req("POST", f"/{index}/_delete_by_query", data=body, query={"refresh": "true"})
 
+    def invoke_llm(self, messages, connector_id="openai-connector"):
+        # .inference connectors use unified_completion; .gen-ai use invokeAI
+        if connector_id.startswith("."):
+            params = {"subAction": "unified_completion",
+                      "subActionParams": {"body": {"messages": messages}}}
+        else:
+            params = {"subAction": "invokeAI", "subActionParams": {"messages": messages}}
+        _, body = self.kbn("POST", f"/api/actions/connector/{connector_id}/_execute",
+                           data={"params": params})
+        if isinstance(body, dict) and body.get("status") == "ok":
+            data = body.get("data") or {}
+            if "choices" in data:  # unified_completion
+                return (((data["choices"] or [{}])[0]).get("message") or {}).get("content", "")
+            return data.get("message", "")  # invokeAI
+        raise RuntimeError(f"connector '{connector_id}' execute failed: {body}")
+
     def infer(self, inputs, inference_id=DEFAULT_INFERENCE_ID):
         _, body = self.es_req("POST", f"/_inference/text_embedding/{urllib.parse.quote(inference_id)}",
                               data={"input": inputs})
@@ -183,9 +199,7 @@ def seed_entities(stack, entities, log, ts=None):
 
 
 def reset_resolution(stack, entity_ids, log):
-    # Clear any auto-resolution (e.g. from the 5-min scheduled rule run) so manual
-    # links apply to a clean slate. Without this, a target may already be an alias
-    # and the link is rejected.
+    # clear any auto-resolution so manual links apply to a clean slate
     if not entity_ids:
         return
     try:

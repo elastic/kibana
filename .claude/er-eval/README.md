@@ -30,6 +30,23 @@ scores it **per test case**.
 | `maintainer` | Seeds fixtures, triggers the **real** rule/embedding maintainers in Kibana, reads the result back, and scores it. | Measuring the shipped engines. |
 | `experiment` | Embeds the embedding test cases **itself** (via EIS) under field/threshold settings you choose, runs ES kNN, and scores — without touching the live engine or restarting. | Trying new fields / thresholds. |
 
+### Experiment variants
+
+`experiment` runs one of three variants depending on the flags; each writes a
+report named after the variant (e.g. `output/weighted-knn-<ts>.json`):
+
+- **`knn`** (default) — embeds each entity as **one** string built from
+  `--embed-fields` (mirrors the maintainer), runs ES kNN, links the single best
+  neighbour above `--threshold`. The baseline.
+- **`weighted-knn`** (`--embed-group`) — embeds fields as **separate** weighted
+  vectors and combines them with a weighted multi-clause kNN (score =
+  Σ weightᵢ·cosᵢ, normalised). Lets a discriminating field carry more weight
+  than the name. Tests whether per-field weighting beats one blended vector.
+- **`llm-gate`** (`--llm-gate`) — after kNN proposes a link, an LLM is asked
+  "same person?" and the link is kept only if it says yes. A precision filter:
+  it can veto a proposed link but never add one. Composable with the other two
+  (`knn-llm-gate`, `weighted-knn-llm-gate`).
+
 ## Running the script
 
 **Maintainer (real engines):**
@@ -54,6 +71,25 @@ python3 .claude/er-eval/scripts/er_eval.py experiment \
 
 **Common flags:** `--kibana`, `--es`, `--auth user:pass`, `--fixtures PATH`, `--out PATH`.
 **Experiment flags:** `--embed-fields` (repeatable), `--threshold`, `--thresholds` (multiple thresholds to test), `--k`, `--inference-id`.
+
+**Experiment add-ons (optional, opt-in):**
+- `--embed-group "FIELDS:WEIGHT"` (repeatable) — embed fields as *separate*
+  weighted vectors and combine via weighted kNN, instead of one concatenated
+  string. Overrides `--embed-fields` when present. Example:
+  ```bash
+  python3 .claude/er-eval/scripts/er_eval.py experiment \
+    --embed-group "user.name,user.full_name:1.0" \
+    --embed-group "user.email:3.0"
+  ```
+- `--llm-gate` — ask the LLM connector "are these the same person?" before
+  linking each above-threshold pair; links only on `yes`. `--llm-connector`
+  (default `openai-connector`), `--llm-band "LOW,HIGH"` (only consult the LLM in
+  that score band; default = gate every above-threshold link). Composable with
+  `--embed-group`.
+  ```bash
+  python3 .claude/er-eval/scripts/er_eval.py experiment \
+    --embed-fields "user.name,user.full_name,user.email" --llm-gate
+  ```
 
 Use a different test set with `--fixtures`:
 ```bash

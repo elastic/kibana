@@ -13,6 +13,7 @@ from itertools import combinations
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import stack as stack_mod
 import embedding as emb
+import llm
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DEFAULT_FIXTURES = os.path.join(BASE_DIR, "fixtures.json")
@@ -226,18 +227,25 @@ def print_maintainer_report(report):
 def print_experiment_report(report):
     log()
     log("=" * 72)
-    log(f"EXPERIMENT EVAL — fixtures={report['fixtures']}  inferenceId={report['inferenceId']}")
+    log(f"EXPERIMENT EVAL [{report.get('variant', 'knn')}] — "
+        f"fixtures={report['fixtures']}  inferenceId={report['inferenceId']}")
     log("=" * 72)
     log("  (embedding test cases only; rule/manual fixtures excluded)")
-    log(f"  {'recipe':38} {'thr':>5} {'k':>3}  {'cases':>6}  {'TPR':>5} {'FNR':>5} {'TNR':>5} {'FPR':>5}")
+    if report.get("llmGate"):
+        log("  llm-gate: ON")
+    log(f"  {'recipe':42} {'thr':>5} {'k':>3}  {'cases':>6}  {'TPR':>5} {'FNR':>5} {'TNR':>5} {'FPR':>5}")
     for row in report["results"]:
         c = row["confusion"]
         tc = row["testCases"]
-        recipe = ",".join(row["embedFields"])
-        recipe_s = (recipe[:36] + "..") if len(recipe) > 38 else recipe
-        log(f"  {recipe_s:38} {row['threshold']:>5.2f} {row['k']:>3}  "
+        recipe = row["recipe"]
+        recipe_s = (recipe[:40] + "..") if len(recipe) > 42 else recipe
+        log(f"  {recipe_s:42} {row['threshold']:>5.2f} {row['k']:>3}  "
             f"{tc['passed']}/{tc['total']:<3}  "
             f"{_rate(c['TPR']):>5} {_rate(c['FNR']):>5} {_rate(c['TNR']):>5} {_rate(c['FPR']):>5}")
+        llm = row.get("llm")
+        if llm:
+            log(f"      llm: {llm['calls']} calls, {llm['accepted']} accepted, {llm['rejected']} rejected"
+                + (f"; rejected {llm['rejectedPairs']}" if llm.get("rejectedPairs") else ""))
     if report.get("unknownFields"):
         log(f"  ! recipe referenced unknown fields: {report['unknownFields']}")
 
@@ -355,51 +363,108 @@ def _parse_thresholds(threshold, thresholds):
     return [threshold]
 
 
+def _parse_groups(embed_group_args):
+    groups = []
+    for raw in embed_group_args:
+        spec, weight = (raw.rsplit(":", 1) if ":" in raw else (raw, "1.0"))
+        fields = [f.strip() for f in spec.split(",") if f.strip()]
+        if fields:
+            groups.append((fields, float(weight)))
+    return groups
+
+
+def _experiment_row(fx, predicted_pairs, resolved_by, recipe_label, thr, k, stats=None):
+    case_results = per_test_case(fx, predicted_pairs, resolved_by, engines={"embedding"})
+    summary = case_summary(case_results)
+    summary.pop("na", None)
+    row = {"recipe": recipe_label, "threshold": thr, "k": k, "testCases": summary,
+           "confusion": confusion(fx, predicted_pairs, resolved_by, engine="embedding"),
+           "testCaseDetail": [r for r in case_results if r["status"] != "na"]}
+    if stats is not None:
+        row["llm"] = stats
+    return row
+
+
 def run_experiment(args):
     stack = stack_mod.Stack(args.kibana, args.es, args.auth)
     fx = load_fixtures(args.fixtures)
-    recipes = _parse_recipes(args.embed_fields) or [["user.name", "user.full_name", "user.email"]]
     thresholds = _parse_thresholds(args.threshold, args.thresholds)
     embedding_ids = fx.embedding_entity_ids()
+    groups = _parse_groups(args.embed_group)
+    band = tuple(float(x) for x in args.llm_band.split(",")) if args.llm_band else None
+
+    def new_gate():
+        # fresh gate per row so stats are per-row
+        if not args.llm_gate:
+            return None, None
+        return llm.make_gate(stack, args.llm_connector, fx, log, band=band)
 
     results = []
     all_unknown = set()
     try:
-        for recipe in recipes:
-            strings, unknown = emb.build_identity_strings(fx, recipe, include_ids=embedding_ids)
+        if groups:
+            # weighted multi-vector path (Experiment 1)
+            group_strings, unknown = emb.build_group_strings(fx, groups, include_ids=embedding_ids)
             all_unknown.update(unknown)
             if unknown:
-                log(f"[warn] recipe {recipe} unknown fields: {unknown}")
-            if not strings:
-                log(f"[warn] recipe {recipe} produced no embeddable entities; skipping")
-                continue
-            log(f"[embed] recipe={recipe} -> {len(strings)} embedding-case entities ...")
-            vectors = emb.embed_strings(stack, strings, args.inference_id)
-            types = {eid: (fx.entity(eid) or {}).get("type", "user") for eid in vectors}
-            role_ids = {eid for eid in vectors if emb.is_role_account(fx.fields(eid))}
-            emb.reset_vector_index(stack, len(next(iter(vectors.values()))))
-            emb.index_vectors(stack, vectors, types)
-            resolved_by = {eid: "embedding" for eid in vectors}
-            log(f"[knn] linking at thresholds={thresholds} k={args.k} ...")
+                log(f"[warn] groups reference unknown fields: {unknown}")
+            log(f"[embed] {len(groups)} groups -> embedding-case entities ...")
+            group_vectors = emb.embed_groups(stack, group_strings, args.inference_id)
+            present = {e for gv in group_vectors for e in gv}
+            types = {eid: (fx.entity(eid) or {}).get("type", "user") for eid in present}
+            role_ids = {eid for eid in present if emb.is_role_account(fx.fields(eid))}
+            dims = next(len(next(iter(gv.values()))) for gv in group_vectors if gv)
+            field_names = emb.group_field_names(groups)
+            emb.reset_vector_index_multi(stack, dims, field_names)
+            emb.index_vectors_multi(stack, group_vectors, field_names, types)
+            resolved_by = {eid: "embedding" for eid in present}
+            weights = [w for _f, w in groups]
+            label = "|".join(f"{n}:{w:g}" for n, (_f, w) in zip(field_names, groups))
+            log(f"[knn] weighted linking ({field_names}) at thresholds={thresholds} k={args.k} ...")
             for thr in thresholds:
-                predicted_pairs = emb.cluster_via_knn(stack, vectors, role_ids, thr, args.k)
-                case_results = per_test_case(fx, predicted_pairs, resolved_by, engines={"embedding"})
-                summary = case_summary(case_results)
-                summary.pop("na", None)
-                results.append({"embedFields": recipe, "threshold": thr, "k": args.k,
-                                "testCases": summary,
-                                "confusion": confusion(fx, predicted_pairs, resolved_by, engine="embedding"),
-                                "testCaseDetail": [r for r in case_results if r["status"] != "na"]})
+                accept, stats = new_gate()
+                predicted = emb.cluster_via_weighted_knn(stack, group_vectors, field_names, weights,
+                                                         role_ids, thr, args.k, accept=accept)
+                results.append(_experiment_row(fx, predicted, resolved_by, label, thr, args.k, stats))
+        else:
+            # single-string path (unchanged baseline)
+            recipes = _parse_recipes(args.embed_fields) or [["user.name", "user.full_name", "user.email"]]
+            for recipe in recipes:
+                strings, unknown = emb.build_identity_strings(fx, recipe, include_ids=embedding_ids)
+                all_unknown.update(unknown)
+                if unknown:
+                    log(f"[warn] recipe {recipe} unknown fields: {unknown}")
+                if not strings:
+                    log(f"[warn] recipe {recipe} produced no embeddable entities; skipping")
+                    continue
+                log(f"[embed] recipe={recipe} -> {len(strings)} embedding-case entities ...")
+                vectors = emb.embed_strings(stack, strings, args.inference_id)
+                types = {eid: (fx.entity(eid) or {}).get("type", "user") for eid in vectors}
+                role_ids = {eid for eid in vectors if emb.is_role_account(fx.fields(eid))}
+                emb.reset_vector_index(stack, len(next(iter(vectors.values()))))
+                emb.index_vectors(stack, vectors, types)
+                resolved_by = {eid: "embedding" for eid in vectors}
+                log(f"[knn] linking at thresholds={thresholds} k={args.k} ...")
+                for thr in thresholds:
+                    accept, stats = new_gate()
+                    predicted = emb.cluster_via_knn(stack, vectors, role_ids, thr, args.k, accept=accept)
+                    results.append(_experiment_row(fx, predicted, resolved_by, ",".join(recipe),
+                                                   thr, args.k, stats))
     finally:
         try:
             stack.es_req("DELETE", f"/{emb.EXPERIMENT_INDEX}")
         except Exception:
             pass
 
-    report = {"mode": "experiment", "fixtures": os.path.basename(args.fixtures or DEFAULT_FIXTURES),
-              "inferenceId": args.inference_id, "unknownFields": sorted(all_unknown), "results": results}
+    variant = "weighted-knn" if groups else "knn"
+    if args.llm_gate:
+        variant += "-llm-gate"
+    report = {"mode": "experiment", "variant": variant,
+              "fixtures": os.path.basename(args.fixtures or DEFAULT_FIXTURES),
+              "inferenceId": args.inference_id, "llmGate": bool(args.llm_gate),
+              "unknownFields": sorted(all_unknown), "results": results}
     print_experiment_report(report)
-    write_json(args.out or default_out_path("experiment"), report)
+    write_json(args.out or default_out_path(variant), report)
     return 0
 
 
@@ -424,10 +489,15 @@ def build_parser():
     s = sub.add_parser("experiment")
     common(s)
     s.add_argument("--embed-fields", action="append", default=[])
+    s.add_argument("--embed-group", action="append", default=[],
+                   help='weighted multi-vector group "fields:weight" (repeatable)')
     s.add_argument("--threshold", type=float, default=0.85)
     s.add_argument("--thresholds", default=None)
     s.add_argument("--k", type=int, default=10)
     s.add_argument("--inference-id", default=stack_mod.DEFAULT_INFERENCE_ID)
+    s.add_argument("--llm-gate", action="store_true", help="gate links through the LLM decision layer")
+    s.add_argument("--llm-connector", default="openai-connector")
+    s.add_argument("--llm-band", default=None, help='only consult LLM when LOW<=score<HIGH, e.g. "0.85,0.95"')
     return p
 
 
