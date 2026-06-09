@@ -44,10 +44,21 @@ const runRulePreviewSchema = z.object({
   command: z.string().describe(
     `CLI-style command for previewing a detection rule. The first word is the rule type subcommand.
 
-Pass --help to see all rule types and options.
-Pass <rule_type> --help for type-specific options and examples.
+Supported types: esql, eql, query, saved_query, threshold, threat_match, machine_learning, new_terms
 
-Quick start: esql --query "FROM logs-* | LIMIT 10"`
+Examples:
+  esql --query "FROM logs-* | LIMIT 10"
+  eql --query "process where process.name == \\"cmd.exe\\""
+  query --query "event.outcome:failure" --language kuery
+  threshold --query "event.outcome:failure" --threshold-value 10 --threshold-field host.name
+  machine_learning --job-id my-ml-job --anomaly-threshold 75
+
+Schedule flags (optional, all commands):
+  --interval 5m --timeframe-start now-24h --timeframe-end now
+
+Help:
+  --help                   list all rule types
+  <rule_type> --help       type-specific options and examples`
   ),
 });
 

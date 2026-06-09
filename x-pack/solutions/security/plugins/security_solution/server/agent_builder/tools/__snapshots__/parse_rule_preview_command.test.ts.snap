@@ -115,17 +115,17 @@ Object {
 exports[`parseRulePreviewCommand — snapshots: help output -h shorthand 1`] = `
 Object {
   "kind": "help",
-  "text": "jest <command>
+  "text": "  <command>
 
 Commands:
-  jest esql              ES|QL detection rule
-  jest eql               EQL (event query language) detection rule
-  jest query             Custom query detection rule (KQL / Lucene)
-  jest saved_query       Saved query detection rule
-  jest threshold         Threshold-based detection rule
-  jest threat_match      Threat indicator match detection rule
-  jest machine_learning  Machine learning anomaly detection rule
-  jest new_terms         New terms detection rule
+   esql             ES|QL detection rule
+   eql              EQL (event query language) detection rule
+   query            Custom query detection rule (KQL / Lucene)
+   saved_query      Saved query detection rule
+   threshold        Threshold-based detection rule
+   threat_match     Threat indicator match detection rule
+   machine_learning  Machine learning anomaly detection rule
+   new_terms        New terms detection rule
 
 Options:
   --interval         Rule run frequency, e.g. \\"5m\\", \\"1h\\"  [string] [default: \\"1h\\"]
@@ -138,7 +138,7 @@ Options:
 exports[`parseRulePreviewCommand — snapshots: help output eql --help 1`] = `
 Object {
   "kind": "help",
-  "text": "jest eql
+  "text": "  eql
 
 EQL (event query language) detection rule
 
@@ -152,14 +152,14 @@ Options:
   -h, --help         Show help  [boolean]
 
 Examples:
-  jest eql --query \\"process where process.name == \\\\\\"cmd.exe\\\\\\"\\"",
+   eql --query \\"process where process.name == \\\\\\"cmd.exe\\\\\\"\\"",
 }
 `;
 
 exports[`parseRulePreviewCommand — snapshots: help output esql --help 1`] = `
 Object {
   "kind": "help",
-  "text": "jest esql
+  "text": "  esql
 
 ES|QL detection rule
 
@@ -171,25 +171,25 @@ Options:
   -h, --help         Show help  [boolean]
 
 Examples:
-  jest esql --query \\"FROM logs-* | LIMIT 10\\"
-  jest esql --query \\"FROM logs-* | STATS count() BY host.name\\" --timeframe-start now-24h",
+   esql --query \\"FROM logs-* | LIMIT 10\\"
+   esql --query \\"FROM logs-* | STATS count() BY host.name\\" --timeframe-start now-24h",
 }
 `;
 
 exports[`parseRulePreviewCommand — snapshots: help output global --help 1`] = `
 Object {
   "kind": "help",
-  "text": "jest <command>
+  "text": "  <command>
 
 Commands:
-  jest esql              ES|QL detection rule
-  jest eql               EQL (event query language) detection rule
-  jest query             Custom query detection rule (KQL / Lucene)
-  jest saved_query       Saved query detection rule
-  jest threshold         Threshold-based detection rule
-  jest threat_match      Threat indicator match detection rule
-  jest machine_learning  Machine learning anomaly detection rule
-  jest new_terms         New terms detection rule
+   esql             ES|QL detection rule
+   eql              EQL (event query language) detection rule
+   query            Custom query detection rule (KQL / Lucene)
+   saved_query      Saved query detection rule
+   threshold        Threshold-based detection rule
+   threat_match     Threat indicator match detection rule
+   machine_learning  Machine learning anomaly detection rule
+   new_terms        New terms detection rule
 
 Options:
   --interval         Rule run frequency, e.g. \\"5m\\", \\"1h\\"  [string] [default: \\"1h\\"]
@@ -202,7 +202,7 @@ Options:
 exports[`parseRulePreviewCommand — snapshots: help output machine_learning --help 1`] = `
 Object {
   "kind": "help",
-  "text": "jest machine_learning
+  "text": "  machine_learning
 
 Machine learning anomaly detection rule
 
@@ -215,15 +215,15 @@ Options:
   -h, --help           Show help  [boolean]
 
 Examples:
-  jest machine_learning --job-id my-ml-job --anomaly-threshold 75
-  jest machine_learning --job-id job-a --job-id job-b --anomaly-threshold 50",
+   machine_learning --job-id my-ml-job --anomaly-threshold 75
+   machine_learning --job-id job-a --job-id job-b --anomaly-threshold 50",
 }
 `;
 
 exports[`parseRulePreviewCommand — snapshots: help output new_terms --help 1`] = `
 Object {
   "kind": "help",
-  "text": "jest new_terms
+  "text": "  new_terms
 
 New terms detection rule
 
@@ -240,14 +240,14 @@ Options:
   -h, --help              Show help  [boolean]
 
 Examples:
-  jest new_terms --query \\"*:*\\" --new-terms-fields source.ip --history-window-start now-30d",
+   new_terms --query \\"*:*\\" --new-terms-fields source.ip --history-window-start now-30d",
 }
 `;
 
 exports[`parseRulePreviewCommand — snapshots: help output query --help 1`] = `
 Object {
   "kind": "help",
-  "text": "jest query
+  "text": "  query
 
 Custom query detection rule (KQL / Lucene)
 
@@ -262,14 +262,14 @@ Options:
   -h, --help         Show help  [boolean]
 
 Examples:
-  jest query --query \\"event.category:authentication AND event.outcome:failure\\"",
+   query --query \\"event.category:authentication AND event.outcome:failure\\"",
 }
 `;
 
 exports[`parseRulePreviewCommand — snapshots: help output saved_query --help 1`] = `
 Object {
   "kind": "help",
-  "text": "jest saved_query
+  "text": "  saved_query
 
 Saved query detection rule
 
@@ -285,14 +285,14 @@ Options:
   -h, --help         Show help  [boolean]
 
 Examples:
-  jest saved_query --saved-id my-saved-query-id",
+   saved_query --saved-id my-saved-query-id",
 }
 `;
 
 exports[`parseRulePreviewCommand — snapshots: help output threat_match --help 1`] = `
 Object {
   "kind": "help",
-  "text": "jest threat_match
+  "text": "  threat_match
 
 Threat indicator match detection rule
 
@@ -312,14 +312,14 @@ Options:
   -h, --help               Show help  [boolean]
 
 Examples:
-  jest threat_match --query \\"*:*\\" --threat-query \\"*:*\\" --threat-index logs-ti_* --threat-mapping '[{\\"entries\\":[{\\"field\\":\\"source.ip\\",\\"type\\":\\"mapping\\",\\"value\\":\\"threat.indicator.ip\\"}]}]'",
+   threat_match --query \\"*:*\\" --threat-query \\"*:*\\" --threat-index logs-ti_* --threat-mapping '[{\\"entries\\":[{\\"field\\":\\"source.ip\\",\\"type\\":\\"mapping\\",\\"value\\":\\"threat.indicator.ip\\"}]}]'",
 }
 `;
 
 exports[`parseRulePreviewCommand — snapshots: help output threshold --help 1`] = `
 Object {
   "kind": "help",
-  "text": "jest threshold
+  "text": "  threshold
 
 Threshold-based detection rule
 
@@ -336,6 +336,6 @@ Options:
   -h, --help         Show help  [boolean]
 
 Examples:
-  jest threshold --query \\"event.category:auth\\" --threshold-value 10 --threshold-field host.name",
+   threshold --query \\"event.category:auth\\" --threshold-value 10 --threshold-field host.name",
 }
 `;

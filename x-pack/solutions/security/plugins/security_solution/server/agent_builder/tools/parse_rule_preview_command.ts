@@ -281,6 +281,7 @@ export const parseRulePreviewCommand = (command: string): ParsedPreviewCommand =
 
     .demandCommand(1, 'Specify a rule type. Run --help to see all types and examples.')
     .alias('h', 'help')
+    .scriptName('')
     .strict()
     .exitProcess(false)
     .version(false)
