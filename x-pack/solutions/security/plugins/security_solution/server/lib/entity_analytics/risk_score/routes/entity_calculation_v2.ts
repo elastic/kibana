@@ -128,12 +128,7 @@ const handler: (logger: Logger) => Handler = (logger) => async (context, request
   const esClient = coreContext.elasticsearch.client.asCurrentUser;
   const namespace = securityContext.getSpaceId();
 
-  const {
-    identifier_type: identifierType,
-    identifier,
-    entity_id: entityId,
-    refresh,
-  } = request.body;
+  const { identifier_type: identifierType, identifier, entity_id: entityId } = request.body;
 
   try {
     const engineConfig = await getConfiguration({
@@ -188,7 +183,7 @@ const handler: (logger: Logger) => Handler = (logger) => async (context, request
       calculationRunId,
       writer,
       idBasedRiskScoringEnabled,
-      refresh,
+      refresh: 'wait_for',
     });
 
     if (resolutionTargetIds.length > 0) {
@@ -207,7 +202,7 @@ const handler: (logger: Logger) => Handler = (logger) => async (context, request
         idBasedRiskScoringEnabled,
         writer,
         targetEntityIds: resolutionTargetIds,
-        refresh,
+        refresh: 'wait_for',
       });
     }
 
