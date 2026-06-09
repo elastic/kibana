@@ -24,8 +24,7 @@ trap cleanup EXIT
 
 cd "$KIBANA_ROOT"
 
-echo "=== Bootstrapping ==="
-yarn kbn bootstrap
+bash "$KIBANA_ROOT/.ona/bootstrap.sh"
 
 echo "=== Starting Elasticsearch ==="
 yarn es snapshot &
