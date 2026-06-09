@@ -1,6 +1,7 @@
 # Kibana
 
 ## Setup
+- Use the Node version pinned in `.nvmrc` (matches `engines.node` in `package.json`); a mismatched version fails fast with `Kibana does not support the current Node.js version`. Select it with your version manager (e.g. `nvm use`) before running any `node`/`yarn` command.
 - Run `yarn kbn bootstrap` for initial setup, after switching branches, or when encountering dependency errors
 
 ## Overview
@@ -34,6 +35,7 @@ Run `node scripts/check.js --scope=local|staged|branch` to validate changes (Jes
 
 ### Scout (UI/API with Playwright)
 `node scripts/scout run-tests --arch stateful --domain classic --config <scoutConfigPath>` (or `--testFiles <specPath1,specPath2>`)
+- When iterating, start the stack once with `node scripts/scout start-server --stateful` and run `run-tests` against it, instead of rebooting ES+Kibana on every run.
 
 ## Code Style Guidelines
 Follow existing patterns in the target area first; below are common defaults.
@@ -93,5 +95,6 @@ Follow existing patterns in the target area first; below are common defaults.
 - Unsure: read more code; if still stuck, ask w/ short options. Never guess.
 - Fix root cause (not band-aid).
 - Make focused changes; avoid unrelated refactors.
+- Before committing, review `git status`/diff and stage only intended files. Never commit generated artifacts (`*.d.ts`, build output), scratch/planning notes, or debug scripts. Keep PRs minimal — unrelated changes trigger extra reviewer churn.
 - Update docs and tests when behavior or usage changes.
 - Never remove, skip, or comment out tests to make them pass; fix the underlying code.
