@@ -572,11 +572,10 @@ export const Tabs: React.FC<TabsProps> = ({
               <EuiSpacer size="m" />
               <RelationshipsTable
                 basePath={http.basePath}
-                id={indexPattern.id!}
                 capabilities={application.capabilities}
+                navigateToUrl={application.navigateToUrl}
                 relationships={relationships}
                 allowedTypes={allowedTypes}
-                navigateToUrl={application.navigateToUrl}
                 getDefaultTitle={savedObjectsManagement.getDefaultTitle}
                 getSavedObjectLabel={savedObjectsManagement.getSavedObjectLabel}
                 savedObjectsTagging={savedObjectsTagging}

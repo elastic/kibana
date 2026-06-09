@@ -22,9 +22,9 @@ export const getColumns: GetColumnsFn = ({
   onBackgroundSearchOpened,
 }) => [
   columns.nameColumn({
-    core,
     kibanaVersion,
     searchUsageCollector,
+    navigateToUrl: core.application.navigateToUrl,
     onBackgroundSearchOpened,
   }),
   columns.statusColumn(timezone),

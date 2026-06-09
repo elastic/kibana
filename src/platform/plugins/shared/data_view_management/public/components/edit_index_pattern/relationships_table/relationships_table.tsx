@@ -18,8 +18,8 @@ import {
   EuiFlexGroup,
 } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
+import { hasActiveModifierKey } from '@kbn/shared-ux-utility';
 import { get } from 'lodash';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 
@@ -31,7 +31,6 @@ import type {
 
 import type { SearchFilterConfig } from '@elastic/eui';
 import { EuiIconTip } from '@elastic/eui';
-import { IPM_APP_ID } from '../../../constants';
 import {
   typeFieldName,
   typeFieldDescription,
@@ -55,22 +54,20 @@ const canGoInApp = (
 export const RelationshipsTable = ({
   basePath,
   capabilities,
-  id,
-  navigateToUrl,
   getDefaultTitle,
   getSavedObjectLabel,
   relationships,
   allowedTypes,
+  navigateToUrl,
   savedObjectsTagging,
 }: {
   basePath: CoreStart['http']['basePath'];
   capabilities: CoreStart['application']['capabilities'];
-  navigateToUrl: CoreStart['application']['navigateToUrl'];
-  id: string;
   getDefaultTitle: SavedObjectsManagementPluginStart['getDefaultTitle'];
   getSavedObjectLabel: SavedObjectsManagementPluginStart['getSavedObjectLabel'];
   relationships: SavedObjectRelation[];
   allowedTypes: SavedObjectManagementTypeInfo[];
+  navigateToUrl: CoreStart['application']['navigateToUrl'];
   savedObjectsTagging?: SavedObjectsTaggingApi;
 }) => {
   const columns = [
@@ -105,6 +102,7 @@ export const RelationshipsTable = ({
       sortable: false,
       render: (title: string, object: SavedObjectRelation) => {
         const path = object.meta.inAppUrl?.path || '';
+        const href = basePath.prepend(path);
         const showUrl = canGoInApp(object, capabilities);
         const titleDisplayed = title || getDefaultTitle(object);
 
@@ -119,7 +117,16 @@ export const RelationshipsTable = ({
         return (
           <EuiFlexGroup gutterSize="xs" alignItems="center">
             {showUrl ? (
-              <EuiLink href={basePath.prepend(path)} data-test-subj="relationshipsTitle">
+              // eslint-disable-next-line @elastic/eui/href-or-on-click
+              <EuiLink
+                href={href}
+                data-test-subj="relationshipsTitle"
+                onClick={(event) => {
+                  if (hasActiveModifierKey(event)) return;
+                  event.preventDefault();
+                  navigateToUrl(href);
+                }}
+              >
                 {titleDisplayed}
               </EuiLink>
             ) : (
@@ -180,20 +187,18 @@ export const RelationshipsTable = ({
   });
 
   return (
-    <RedirectAppLinks currentAppId={IPM_APP_ID} navigateToUrl={navigateToUrl}>
-      <EuiInMemoryTable<SavedObjectRelation>
-        items={relationships}
-        columns={columns}
-        tableCaption={relationshipsTableCaption}
-        pagination={{
-          pageSize,
-        }}
-        onTableChange={onTableChange}
-        search={search}
-        rowProps={() => ({
-          'data-test-subj': `relationshipsTableRow`,
-        })}
-      />
-    </RedirectAppLinks>
+    <EuiInMemoryTable<SavedObjectRelation>
+      items={relationships}
+      columns={columns}
+      tableCaption={relationshipsTableCaption}
+      pagination={{
+        pageSize,
+      }}
+      onTableChange={onTableChange}
+      search={search}
+      rowProps={() => ({
+        'data-test-subj': `relationshipsTableRow`,
+      })}
+    />
   );
 };

@@ -14,7 +14,6 @@ import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import type { AppPluginStartDependencies } from './types';
 import type { ExampleLink } from './common/example_page';
 import { SearchExamplePage } from './common/example_page';
@@ -42,51 +41,49 @@ const LINKS: ExampleLink[] = [
 ];
 
 export const renderApp = (
-  { notifications, http, application, ...startServices }: CoreStart,
+  { notifications, http, application: _application, ...startServices }: CoreStart,
   { data, navigation, unifiedSearch }: AppPluginStartDependencies,
   { element, history }: AppMountParameters
 ) => {
   ReactDOM.render(
     <KibanaRenderContextProvider {...startServices}>
       <I18nProvider>
-        <RedirectAppLinks
-          coreStart={{
-            application,
-          }}
+        <SearchExamplePage
+          exampleLinks={LINKS}
+          basePath={http.basePath}
+          navigateToPath={(path) => history.push(path)}
         >
-          <SearchExamplePage exampleLinks={LINKS} basePath={http.basePath}>
-            <Router history={history}>
-              <Routes>
-                <Route path={LINKS[0].path}>
-                  <SearchExamplesApp
-                    notifications={notifications}
-                    navigation={navigation}
-                    data={data}
-                    http={http}
-                    unifiedSearch={unifiedSearch}
-                    {...startServices}
-                  />
-                </Route>
-                <Route path={LINKS[1].path}>
-                  <SqlSearchExampleApp notifications={notifications} data={data} />
-                </Route>
-                <Route path={LINKS[2].path}>
-                  <SearchSessionsExampleApp
-                    navigation={navigation}
-                    notifications={notifications}
-                    data={data}
-                    unifiedSearch={unifiedSearch}
-                    {...startServices}
-                  />
-                </Route>
+          <Router history={history}>
+            <Routes>
+              <Route path={LINKS[0].path}>
+                <SearchExamplesApp
+                  notifications={notifications}
+                  navigation={navigation}
+                  data={data}
+                  http={http}
+                  unifiedSearch={unifiedSearch}
+                  {...startServices}
+                />
+              </Route>
+              <Route path={LINKS[1].path}>
+                <SqlSearchExampleApp notifications={notifications} data={data} />
+              </Route>
+              <Route path={LINKS[2].path}>
+                <SearchSessionsExampleApp
+                  navigation={navigation}
+                  notifications={notifications}
+                  data={data}
+                  unifiedSearch={unifiedSearch}
+                  {...startServices}
+                />
+              </Route>
 
-                <Route path="/" exact={true}>
-                  <Redirect to={LINKS[0].path} />
-                </Route>
-              </Routes>
-            </Router>
-          </SearchExamplePage>
-        </RedirectAppLinks>
+              <Route path="/" exact={true}>
+                <Redirect to={LINKS[0].path} />
+              </Route>
+            </Routes>
+          </Router>
+        </SearchExamplePage>
       </I18nProvider>
     </KibanaRenderContextProvider>,
     element

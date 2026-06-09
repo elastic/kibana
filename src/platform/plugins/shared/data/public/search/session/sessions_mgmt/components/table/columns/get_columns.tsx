@@ -48,9 +48,9 @@ export const getColumns = ({
     // Name, links to app and displays the search session data
     {
       ...nameColumn({
-        core,
         searchUsageCollector,
         kibanaVersion,
+        navigateToUrl: core.application.navigateToUrl,
       }),
       width: '20%',
     },
