@@ -75,32 +75,21 @@ export function ClustersTable({ clusters }: Props) {
         defaultMessage: 'Name',
       }),
       render: (name: string) => {
+        const label =
+          name in expandedRows
+            ? i18n.translate('inspector.requests.clusters.table.collapseRow', {
+                defaultMessage: 'Collapse table row to hide cluster details',
+              })
+            : i18n.translate('inspector.requests.clusters.table.expandRow', {
+                defaultMessage: 'Expand table row to view cluster details',
+              });
         return (
           <>
-            <EuiToolTip
-              content={
-                name in expandedRows
-                  ? i18n.translate('inspector.requests.clusters.table.collapseRow', {
-                      defaultMessage: 'Collapse table row to hide cluster details',
-                    })
-                  : i18n.translate('inspector.requests.clusters.table.expandRow', {
-                      defaultMessage: 'Expand table row to view cluster details',
-                    })
-              }
-              disableScreenReaderOutput
-            >
+            <EuiToolTip content={label} disableScreenReaderOutput>
               <EuiButtonIcon
                 data-test-subj={`inspectorRequestToggleClusterDetails${name}`}
                 onClick={() => toggleDetails(name)}
-                aria-label={
-                  name in expandedRows
-                    ? i18n.translate('inspector.requests.clusters.table.collapseRow', {
-                        defaultMessage: 'Collapse table row to hide cluster details',
-                      })
-                    : i18n.translate('inspector.requests.clusters.table.expandRow', {
-                        defaultMessage: 'Expand table row to view cluster details',
-                      })
-                }
+                aria-label={label}
                 iconType={name in expandedRows ? 'chevronSingleDown' : 'chevronSingleRight'}
               />
             </EuiToolTip>
