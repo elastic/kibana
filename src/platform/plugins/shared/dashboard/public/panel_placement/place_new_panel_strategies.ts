@@ -16,16 +16,26 @@ import type { DashboardLayoutPanel } from '../dashboard_api/layout_manager';
 
 export const runPanelPlacementStrategy = (
   strategy: PlacementStrategy,
-  { width, height, currentPanels, sectionId, beside }: PanelPlacementProps
+  { panel: newPanel, currentLayout, beside }: PanelPlacementProps
 ): PanelPlacementReturn => {
   let targetPanel: DashboardLayoutPanel | undefined;
+  const { panels: currentPanels, sections: currentSections } = currentLayout;
+  const { w: width, h: height, sectionId } = newPanel.grid;
   if (beside) {
     targetPanel = currentPanels[beside];
   }
   switch (strategy) {
     case PlacementStrategy.placeAtTop:
       const otherPanels = { ...currentPanels };
-      for (const [id, panel] of Object.entries(currentPanels)) {
+      const otherSections = { ...currentSections };
+
+      // push all sections down
+      for (const [id, section] of Object.entries({ ...currentSections })) {
+        otherSections[id] = { ...section, grid: { y: section.grid.y + height } };
+      }
+
+      // push relative panels down
+      for (const [id, panel] of Object.entries({ ...currentPanels })) {
         // only consider collisions with panels in the same section
         if (!sectionId || panel.grid.sectionId === sectionId) {
           const { grid, ...currentPanel } = cloneDeep(panel);
@@ -36,11 +46,25 @@ export const runPanelPlacementStrategy = (
           }
         }
       }
+
       return {
-        newPanelPlacement: targetPanel
-          ? { x: targetPanel.grid.x, y: targetPanel.grid.y, w: width, h: height }
-          : { x: 0, y: 0, w: width, h: height },
-        otherPanels,
+        ...currentLayout,
+        sections: otherSections,
+        panels: {
+          ...otherPanels,
+          [newPanel.uuid]: {
+            ...newPanel,
+            grid: targetPanel
+              ? {
+                  ...newPanel.grid,
+                  x: targetPanel.grid.x,
+                  y: targetPanel.grid.y,
+                  w: width,
+                  h: height,
+                }
+              : { ...newPanel.grid, x: 0, y: 0, w: width, h: height },
+          },
+        },
       };
 
     case PlacementStrategy.findTopLeftMostOpenSpace:
@@ -57,8 +81,10 @@ export const runPanelPlacementStrategy = (
       // Handle case of empty grid.
       if (maxY < 0) {
         return {
-          newPanelPlacement: { x: 0, y: 0, w: width, h: height },
-          otherPanels: currentPanels,
+          ...currentLayout,
+          panels: {
+            [newPanel.uuid]: { ...newPanel, grid: { x: 0, y: 0, w: width, h: height } },
+          },
         };
       }
 
@@ -101,9 +127,13 @@ export const runPanelPlacementStrategy = (
 
                 if (spaceIsEmpty && fitsPanelWidth && fitsPanelHeight) {
                   // Found space
+
                   return {
-                    newPanelPlacement: { x, y, w: width, h: height },
-                    otherPanels: currentPanels,
+                    ...currentLayout,
+                    panels: {
+                      ...currentPanels,
+                      [newPanel.uuid]: { ...newPanel, grid: { x, y, w: width, h: height } },
+                    },
                   };
                 } else if (grid[h][w] === 1) {
                   // x, y spot doesn't work, break.
@@ -115,13 +145,11 @@ export const runPanelPlacementStrategy = (
         }
       }
       return {
-        newPanelPlacement: {
-          x: 0,
-          y: maxY,
-          w: width,
-          h: height,
+        ...currentLayout,
+        panels: {
+          ...currentPanels,
+          [newPanel.uuid]: { ...newPanel, grid: { x: 0, y: maxY, w: width, h: height } },
         },
-        otherPanels: currentPanels,
       };
     default:
       throw new Error(
