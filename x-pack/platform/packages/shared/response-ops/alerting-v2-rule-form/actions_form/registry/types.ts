@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { SingleStepWorkflowTypeId } from '../types';
+import type { InlineActionStepType } from '../types';
 
-export interface SingleStepWorkflowType {
-  id: SingleStepWorkflowTypeId;
+export interface InlineActionStepDefinition {
+  id: InlineActionStepType;
   label: string;
   description?: string;
   iconType?: string;
