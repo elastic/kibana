@@ -1,0 +1,205 @@
+{
+  "sha1": "51d439c4e41a57fc1c85ba871ed683ae0a8e0aef",
+  "tests": [
+    {
+      "id": "d607d4fe3c41551-1c64dea267a5865",
+      "title": "tabs - legacy Discover sessions should load a legacy Discover session into a single untitled tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/tests/tabs/save_and_load_legacy.spec.ts",
+        "line": 52,
+        "column": 7
+      }
+    },
+    {
+      "id": "d607d4fe3c41551-7def69f73c6068f",
+      "title": "tabs - legacy Discover sessions should allow adding tabs to a legacy session and saving as new",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/tests/tabs/save_and_load_legacy.spec.ts",
+        "line": 66,
+        "column": 7
+      }
+    },
+    {
+      "id": "6df55cf80b8f70f-883c31183526331",
+      "title": "tabs - multi-tab Discover sessions should support saving a multi-tab Discover session",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/tests/tabs/save_and_load_multi_tab.spec.ts",
+        "line": 101,
+        "column": 7
+      }
+    },
+    {
+      "id": "6df55cf80b8f70f-4ca0c2ab139004c",
+      "title": "tabs - multi-tab Discover sessions should support loading a multi-tab Discover session",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/tests/tabs/save_and_load_multi_tab.spec.ts",
+        "line": 244,
+        "column": 7
+      }
+    },
+    {
+      "id": "6df55cf80b8f70f-3fa3802b6ab6d82",
+      "title": "tabs - multi-tab Discover sessions should locally persist unsaved changes to a multi-tab session",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/tests/tabs/save_and_load_multi_tab.spec.ts",
+        "line": 296,
+        "column": 7
+      }
+    },
+    {
+      "id": "6df55cf80b8f70f-e3b4abc1dad4c79",
+      "title": "tabs - multi-tab Discover sessions should clear all tabs when starting a new session",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/tests/tabs/save_and_load_multi_tab.spec.ts",
+        "line": 409,
+        "column": 7
+      }
+    },
+    {
+      "id": "6df55cf80b8f70f-6e87947fc4332fd",
+      "title": "tabs - multi-tab Discover sessions should restore correct data view or ES|QL query for uninitialized tabs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/tests/tabs/save_and_load_multi_tab.spec.ts",
+        "line": 442,
+        "column": 7
+      }
+    },
+    {
+      "id": "08b5e8544d8d2ca-c7810e10a977936",
+      "title": "tabs - time based save behavior setup: create persisted data view without time field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/tests/tabs/save_and_load_time_based.spec.ts",
+        "line": 57,
+        "column": 7
+      }
+    },
+    {
+      "id": "08b5e8544d8d2ca-a0499d5097c2687",
+      "title": "tabs - time based save behavior should show time range switch when saving if any tab is time based",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/tests/tabs/save_and_load_time_based.spec.ts",
+        "line": 66,
+        "column": 7
+      }
+    },
+    {
+      "id": "08b5e8544d8d2ca-1013beae3ac5c44",
+      "title": "tabs - time based save behavior should not show time range switch when no tab is time based",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/tests/tabs/save_and_load_time_based.spec.ts",
+        "line": 184,
+        "column": 7
+      }
+    }
+  ]
+}
