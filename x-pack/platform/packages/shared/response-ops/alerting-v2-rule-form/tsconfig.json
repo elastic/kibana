@@ -32,6 +32,7 @@
     "@kbn/code-editor",
     "@kbn/esql-language",
     "@kbn/core-http-browser",
-    "@kbn/ui-actions-plugin"
+    "@kbn/ui-actions-plugin",
+    "@kbn/dashboard-plugin"
   ]
 }
