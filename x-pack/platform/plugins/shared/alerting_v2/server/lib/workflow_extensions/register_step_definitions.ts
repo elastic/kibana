@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import type { CoreStart } from '@kbn/core/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
+import { createAlertEventStepDefinition } from './steps/create_alert_event_step';
 
 type ServerStepDefinitionOrLoader = Parameters<
   WorkflowsExtensionsServerPluginSetup['registerStepDefinition']
@@ -16,10 +18,11 @@ type ServerStepDefinitionOrLoader = Parameters<
  * Called once during plugin setup.
  */
 export function registerStepDefinitions(
-  workflowsExtensions: WorkflowsExtensionsServerPluginSetup
+  workflowsExtensions: WorkflowsExtensionsServerPluginSetup,
+  getStartServices: () => Promise<[CoreStart, unknown, unknown]>
 ): void {
   const stepDefinitions: ServerStepDefinitionOrLoader[] = [
-    // Add ServerStepDefinition or loader entries here.
+    createAlertEventStepDefinition(getStartServices),
   ];
 
   for (const definition of stepDefinitions) {

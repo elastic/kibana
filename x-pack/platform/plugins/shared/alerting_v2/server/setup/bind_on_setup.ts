@@ -70,7 +70,10 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
       PluginSetup<AlertingServerSetupDependencies['workflowsExtensions']>('workflowsExtensions')
     );
     registerTriggerDefinitions(workflowsExtensionsSetup);
-    registerStepDefinitions(workflowsExtensionsSetup);
+    registerStepDefinitions(
+      workflowsExtensionsSetup,
+      container.get(CoreSetup('getStartServices'))
+    );
 
     // Usage collection is optional. The telemetry task that feeds this collector
     // is registered unconditionally via the `TaskDefinition` registry in

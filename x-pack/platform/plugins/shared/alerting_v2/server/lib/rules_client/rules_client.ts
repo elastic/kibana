@@ -28,6 +28,7 @@ import { ALERTING_V2_ERROR_CODES } from '../errors/error_codes';
 import { ALERTING_RULE_EXECUTOR_TASK_TYPE } from '../rule_executor';
 import { ensureRuleExecutorTaskScheduled, getRuleExecutorTaskId } from '../rule_executor/schedule';
 import type { RuleExecutorTaskParams } from '../rule_executor/types';
+import { RuleEventPublisher } from '../events/rule_event_publisher/rule_event_publisher';
 import type { RulesSavedObjectServiceContract } from '../services/rules_saved_object_service/rules_saved_object_service';
 import { RulesSavedObjectServiceScopedToken } from '../services/rules_saved_object_service/tokens';
 import { RequestSpaceIdToken } from '../services/spaces_service/tokens';
@@ -91,7 +92,8 @@ export class RulesClient {
     private readonly taskManager: TaskManagerStartContract,
     @inject(UserService) private readonly userService: UserServiceContract,
     @inject(ActionPolicyClient) private readonly actionPolicyClient: ActionPolicyClient,
-    @inject(RequestSpaceIdToken) private readonly spaceId: string
+    @inject(RequestSpaceIdToken) private readonly spaceId: string,
+    @inject(RuleEventPublisher) private readonly ruleEventPublisher: RuleEventPublisher
   ) {}
 
   private getSpaceContext(): { spaceId: string } {
@@ -222,7 +224,9 @@ export class RulesClient {
       throw e;
     }
 
-    return transformRuleSoAttributesToRuleApiResponse(id, ruleAttributes, version);
+    const rule = transformRuleSoAttributesToRuleApiResponse(id, ruleAttributes, version);
+    this.ruleEventPublisher.emitRuleCreated(this.request, rule, this.spaceId);
+    return rule;
   }
 
   @withApm
@@ -264,7 +268,15 @@ export class RulesClient {
       version: options?.version ?? existingVersion,
     });
 
-    return transformRuleSoAttributesToRuleApiResponse(id, nextAttrs, newVersion);
+    const rule = transformRuleSoAttributesToRuleApiResponse(id, nextAttrs, newVersion);
+    this.ruleEventPublisher.emitAfterRuleUpdate(
+      this.request,
+      parsed,
+      existingAttrs,
+      rule,
+      this.spaceId
+    );
+    return rule;
   }
 
   @withApm
@@ -306,12 +318,8 @@ export class RulesClient {
   public async deleteRule({ id }: { id: string }): Promise<void> {
     const { spaceId } = this.getSpaceContext();
 
-    if (!(await this.ruleExists({ id }))) {
-      throw Boom.notFound(`Rule with id "${id}" not found`, {
-        code: ALERTING_V2_ERROR_CODES.RULE_NOT_FOUND,
-        details: { rule_id: id },
-      });
-    }
+    const { attrs, version } = await this.getExistingRule(id);
+    const deletedRule = transformRuleSoAttributesToRuleApiResponse(id, attrs, version);
 
     const taskId = getRuleExecutorTaskId({ ruleId: id, spaceId });
     await this.taskManager.removeIfExists(taskId);
@@ -322,6 +330,8 @@ export class RulesClient {
       type: 'single_rule',
       ruleId: id,
     });
+
+    this.ruleEventPublisher.emitRuleDeleted(this.request, [deletedRule], this.spaceId);
   }
 
   @withApm
@@ -332,6 +342,10 @@ export class RulesClient {
     const nowIso = new Date().toISOString();
 
     const { attrs: existingAttrs, version: existingVersion } = await this.getExistingRule(id);
+
+    if (existingAttrs.enabled) {
+      return transformRuleSoAttributesToRuleApiResponse(id, existingAttrs, existingVersion);
+    }
 
     const nextAttrs: RuleSavedObjectAttributes = {
       ...existingAttrs,
@@ -352,7 +366,9 @@ export class RulesClient {
       version: existingVersion,
     });
 
-    return transformRuleSoAttributesToRuleApiResponse(id, nextAttrs, newVersion);
+    const rule = transformRuleSoAttributesToRuleApiResponse(id, nextAttrs, newVersion);
+    this.ruleEventPublisher.emitRuleEnabled(this.request, [rule], this.spaceId);
+    return rule;
   }
 
   @withApm
@@ -363,6 +379,10 @@ export class RulesClient {
     const nowIso = new Date().toISOString();
 
     const { attrs: existingAttrs, version: existingVersion } = await this.getExistingRule(id);
+
+    if (!existingAttrs.enabled) {
+      return transformRuleSoAttributesToRuleApiResponse(id, existingAttrs, existingVersion);
+    }
 
     const nextAttrs: RuleSavedObjectAttributes = {
       ...existingAttrs,
@@ -380,7 +400,9 @@ export class RulesClient {
       version: existingVersion,
     });
 
-    return transformRuleSoAttributesToRuleApiResponse(id, nextAttrs, newVersion);
+    const rule = transformRuleSoAttributesToRuleApiResponse(id, nextAttrs, newVersion);
+    this.ruleEventPublisher.emitRuleDisabled(this.request, [rule], this.spaceId);
+    return rule;
   }
 
   @withApm
@@ -500,6 +522,18 @@ export class RulesClient {
       return { rules: [], errors: [] };
     }
 
+    const fetchResults = await this.rulesSavedObjectService.bulkGetByIds(ids);
+    const rulesBeforeDelete = new Map<string, RuleResponse>();
+    for (const doc of fetchResults) {
+      if ('error' in doc) {
+        continue;
+      }
+      rulesBeforeDelete.set(
+        doc.id,
+        transformRuleSoAttributesToRuleApiResponse(doc.id, doc.attributes, doc.version)
+      );
+    }
+
     // Remove associated task manager tasks (best-effort)
     const taskIds = ids.map((id) => getRuleExecutorTaskId({ ruleId: id, spaceId }));
     try {
@@ -509,6 +543,7 @@ export class RulesClient {
     }
 
     const deleteResults = await this.rulesSavedObjectService.bulkDelete(ids);
+    const deletedRules: RuleResponse[] = [];
     for (const result of deleteResults) {
       if (!result.success) {
         errors.push({
@@ -518,8 +553,15 @@ export class RulesClient {
             statusCode: result.error.statusCode,
           },
         });
+        continue;
+      }
+      const rule = rulesBeforeDelete.get(result.id);
+      if (rule) {
+        deletedRules.push(rule);
       }
     }
+
+    this.ruleEventPublisher.emitRuleDeleted(this.request, deletedRules, this.spaceId);
 
     return { rules: [], errors, ...this.bulkFilterResponseFields(resolution) };
   }
@@ -622,6 +664,11 @@ export class RulesClient {
           // Task scheduling failure is non-fatal for bulk operations
         }
       }
+
+      const enabledRules = itemsToUpdate
+        .filter((item) => !errors.some((e) => e.id === item.id))
+        .map((item) => transformRuleSoAttributesToRuleApiResponse(item.id, item.attrs));
+      this.ruleEventPublisher.emitRuleEnabled(this.request, enabledRules, this.spaceId);
     }
 
     return { rules, errors, ...this.bulkFilterResponseFields(resolution) };
@@ -710,6 +757,14 @@ export class RulesClient {
       }
     }
 
+    const disabledRules = itemsToUpdate
+      .filter((item) => !errors.some((e) => e.id === item.id))
+      .map((item) => transformRuleSoAttributesToRuleApiResponse(item.id, item.attrs));
+
+    if (disabledRules.length > 0) {
+      this.ruleEventPublisher.emitRuleDisabled(this.request, disabledRules, this.spaceId);
+    }
+
     return { rules, errors, ...this.bulkFilterResponseFields(resolution) };
   }
 
@@ -758,9 +813,8 @@ export class RulesClient {
       version: existingVersion,
     });
 
-    return {
-      rule: transformRuleSoAttributesToRuleApiResponse(id, nextAttrs, newVersion),
-      created: false,
-    };
+    const rule = transformRuleSoAttributesToRuleApiResponse(id, nextAttrs, newVersion);
+    this.ruleEventPublisher.emitRuleUpdated(this.request, [rule], this.spaceId);
+    return { rule, created: false };
   }
 }
