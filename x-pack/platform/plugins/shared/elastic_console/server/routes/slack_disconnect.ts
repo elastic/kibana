@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreSetup, IRouter, Logger } from '@kbn/core/server';
+import type { CoreSetup, IRouter, KibanaRequest, Logger } from '@kbn/core/server';
 import type { ElasticConsolePluginStart, ElasticConsoleStartDependencies } from '../types';
 import { SLACK_CREDENTIALS_SO_TYPE, SLACK_CREDENTIALS_SO_ID } from '../lib/slack_credentials_so';
 
@@ -47,16 +47,26 @@ export const registerSlackDisconnectRoute = ({
           kibana_api_key: string;
         }>(SLACK_CREDENTIALS_SO_TYPE, SLACK_CREDENTIALS_SO_ID);
 
-        const decoded = Buffer.from(creds.attributes.kibana_api_key, 'base64').toString('utf8');
+        const kibanaApiKey = creds.attributes.kibana_api_key;
+        const decoded = Buffer.from(kibanaApiKey, 'base64').toString('utf8');
         const colonIdx = decoded.indexOf(':');
         const keyId = colonIdx !== -1 ? decoded.slice(0, colonIdx) : null;
 
         if (keyId) {
           try {
-            await coreStart.elasticsearch.client.asInternalUser.security.invalidateApiKey({
-              ids: [keyId],
-              owner: true,
-            });
+            // The key is owned by the connecting user (not kibana_system), so we
+            // invalidate it by authenticating AS the key — a key can always
+            // invalidate its own record with owner: true.
+            const keyRequest = {
+              ...request,
+              headers: { ...request.headers, authorization: `ApiKey ${kibanaApiKey}` },
+            } as unknown as KibanaRequest;
+            await coreStart.elasticsearch.client
+              .asScoped(keyRequest)
+              .asCurrentUser.security.invalidateApiKey({
+                ids: [keyId],
+                owner: true,
+              });
             logger.info(`Slack inference API key ${keyId} invalidated`);
           } catch (invalidateErr) {
             // Key may already be gone — log and continue with SO deletion

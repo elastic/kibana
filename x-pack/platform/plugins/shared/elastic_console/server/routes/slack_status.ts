@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreSetup, IRouter, Logger } from '@kbn/core/server';
+import type { CoreSetup, IRouter, KibanaRequest, Logger } from '@kbn/core/server';
 import type { ElasticConsolePluginStart, ElasticConsoleStartDependencies } from '../types';
 import { SLACK_CREDENTIALS_SO_TYPE, SLACK_CREDENTIALS_SO_ID } from '../lib/slack_credentials_so';
 
@@ -70,19 +70,26 @@ export const registerSlackStatusRoute = ({
         });
       }
 
-      // Step 2 — validate the API key is still active by calling /_security/api_key
-      // A 401 (InvalidApiKey / ApiKeyNotFound) means the key was revoked or expired.
+      // Step 2 — validate the API key is still active by authenticating AS the key
+      // and looking up its own record. A 401 (InvalidApiKey / ApiKeyNotFound) means
+      // the key was revoked or expired.
+      //
+      // The stored key is owned by the connecting user (not kibana_system), so an
+      // asInternalUser `owner: true` lookup would never find it. Authenticating as
+      // the key sidesteps ownership entirely: a key can always read itself, and a
+      // revoked key simply fails auth.
       try {
-        const esClient = coreStart.elasticsearch.client.asInternalUser;
         // Decode base64 id:api_key to extract the key id for lookup
         const decoded = Buffer.from(kibanaApiKey, 'base64').toString('utf8');
         const colonIdx = decoded.indexOf(':');
         const keyId = colonIdx !== -1 ? decoded.slice(0, colonIdx) : null;
 
         if (keyId) {
-          // owner: true restricts the lookup to keys owned by asInternalUser (kibana_system).
-          // This only requires manage_own_api_key — no need for the broader manage_api_key.
-          // The inference key is created via asInternalUser in /slack/token, so ownership matches.
+          const keyRequest = {
+            ...request,
+            headers: { ...request.headers, authorization: `ApiKey ${kibanaApiKey}` },
+          } as unknown as KibanaRequest;
+          const esClient = coreStart.elasticsearch.client.asScoped(keyRequest).asCurrentUser;
           const result = await esClient.security.getApiKey({ id: keyId, owner: true });
           const keyInfo = result.api_keys?.[0];
 
