@@ -6,12 +6,10 @@
  */
 
 import React, { memo, useCallback } from 'react';
-import type { EuiMarkdownEditorUiPlugin, EuiSelectableOption } from '@elastic/eui';
+import type { EuiMarkdownEditorUiPlugin } from '@elastic/eui';
 import { EuiCodeBlock, EuiModalBody, EuiModalHeader } from '@elastic/eui';
 
-import { TimelineTypeEnum } from '../../../../../../common/api/timeline';
-import { SelectableTimeline } from '../../../../../timelines/components/timeline/selectable_timeline';
-import type { OpenTimelineResult } from '../../../../../timelines/components/open_timeline/types';
+import { SelectTimelineModalBody } from '../../../../../cases/attachments/timeline/select_timeline_modal_body';
 import { getTimelineUrl, useFormatUrl } from '../../../link_to';
 
 import { ID } from './constants';
@@ -25,24 +23,6 @@ interface TimelineEditorProps {
 
 const TimelineEditorComponent: React.FC<TimelineEditorProps> = ({ onClosePopover, onInsert }) => {
   const { formatUrl } = useFormatUrl(SecurityPageName.timelines);
-
-  const handleGetSelectableOptions = useCallback(
-    ({ timelines }: { timelines: OpenTimelineResult[] }) => [
-      ...timelines.map(
-        (t: OpenTimelineResult, index: number) =>
-          ({
-            description: t.description,
-            favorite: t.favorite,
-            label: t.title,
-            id: t.savedObjectId,
-            key: `${t.title}-${index}`,
-            title: t.title,
-            checked: undefined,
-          } as EuiSelectableOption)
-      ),
-    ],
-    []
-  );
 
   const handleTimelineChange = useCallback(
     (timelineTitle: string, timelineId: string | null) => {
@@ -61,13 +41,7 @@ const TimelineEditorComponent: React.FC<TimelineEditorProps> = ({ onClosePopover
     <>
       <EuiModalHeader />
       <EuiModalBody>
-        <SelectableTimeline
-          hideUntitled={true}
-          getSelectableOptions={handleGetSelectableOptions}
-          onTimelineChange={handleTimelineChange}
-          onClosePopover={onClosePopover}
-          timelineType={TimelineTypeEnum.default}
-        />
+        <SelectTimelineModalBody onTimelineChange={handleTimelineChange} onClose={onClosePopover} />
       </EuiModalBody>
     </>
   );
