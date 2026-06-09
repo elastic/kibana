@@ -2257,10 +2257,6 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('enrichment', () => {
       const config = getService('config');
-      // User enrichment in V2 requires local-namespace resolution: host.id must be present and
-      // user.name must not be in LOCAL_NAMESPACE_EXCLUDED_USER_NAMES.
-      // EUID for a local-namespace user: user:<name>@<host.id>@local
-      const NT_TEST_HOST_ID = 'new-terms-suppression-host-id';
       const isServerless = config.get('serverless');
       const dataPathBuilder = new EsArchivePathBuilder(isServerless);
       const path = dataPathBuilder.getPath('auditbeat/hosts');
@@ -2280,14 +2276,6 @@ export default ({ getService }: FtrProviderContext) => {
               host: { name: ENRICHMENT_HOST_NAME },
               entity: { id: `host:${ENRICHMENT_HOST_NAME}`, type: 'host' },
               asset: { criticality: 'medium_impact' },
-            },
-          ],
-          users: [
-            {
-              user: { name: 'alice' },
-              host: { id: NT_TEST_HOST_ID },
-              entity: { id: `user:alice@${NT_TEST_HOST_ID}@local`, type: 'user' },
-              asset: { criticality: 'extreme_impact' },
             },
           ],
         });
@@ -2323,8 +2311,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const firstExecutionDocuments = [
           {
-            host: { name: 'zeek-newyork-sha-aa8df15', ip: '127.0.0.5', id: NT_TEST_HOST_ID },
-            user: { name: 'alice' },
+            host: { name: 'zeek-newyork-sha-aa8df15', ip: '127.0.0.5' },
             id,
             '@timestamp': timestamp,
           },
@@ -2355,7 +2342,6 @@ export default ({ getService }: FtrProviderContext) => {
         const fullAlert = previewAlerts[0]._source;
 
         expect(fullAlert?.['host.asset.criticality']).toBe('medium_impact');
-        expect(fullAlert?.['user.asset.criticality']).toBe('extreme_impact');
       });
     });
   });

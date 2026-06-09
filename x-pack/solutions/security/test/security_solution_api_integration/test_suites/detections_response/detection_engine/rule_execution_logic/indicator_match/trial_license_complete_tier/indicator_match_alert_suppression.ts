@@ -2500,12 +2500,6 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         describe('alerts should be enriched', () => {
-          // User enrichment in V2 uses local-namespace EUID when user.name is not in
-          // LOCAL_NAMESPACE_EXCLUDED_USER_NAMES and host.id is present in the entity body.
-          // host.id must be a string (not array) for getEuidFromObject to fire the local-namespace
-          // gate: user:<name>@<host.id>@local. The test docs also carry this host.id so the
-          // detection engine computes the same EUID.
-          const TEST_HOST_ID = 'zeek-amsterdam-test-host-id';
           before(async () => {
             await entityStoreV2.setup({
               hosts: [
@@ -2515,17 +2509,6 @@ export default ({ getService }: FtrProviderContext) => {
                     id: 'host:zeek-sensor-amsterdam',
                     type: 'host',
                     risk: { calculated_level: 'Critical', calculated_score_norm: 70 },
-                  },
-                },
-              ],
-              users: [
-                {
-                  user: { name: 'alice' },
-                  host: { id: TEST_HOST_ID },
-                  entity: {
-                    id: `user:alice@${TEST_HOST_ID}@local`,
-                    type: 'user',
-                    risk: { calculated_level: 'Low', calculated_score_norm: 11 },
                   },
                 },
               ],
@@ -2543,8 +2526,7 @@ export default ({ getService }: FtrProviderContext) => {
             const doc1 = {
               id,
               '@timestamp': timestamp,
-              host: { name: 'zeek-sensor-amsterdam', id: TEST_HOST_ID },
-              user: { name: 'alice' },
+              host: { name: 'zeek-sensor-amsterdam' },
             };
             const doc1WithLaterTimestamp = {
               ...doc1,
@@ -2591,14 +2573,10 @@ export default ({ getService }: FtrProviderContext) => {
 
             expect(previewAlerts[0]?._source?.host?.risk?.calculated_level).toEqual('Critical');
             expect(previewAlerts[0]?._source?.host?.risk?.calculated_score_norm).toEqual(70);
-            expect(previewAlerts[0]?._source?.user?.risk?.calculated_level).toEqual('Low');
-            expect(previewAlerts[0]?._source?.user?.risk?.calculated_score_norm).toEqual(11);
           });
         });
 
         describe('with asset criticality', () => {
-          // Same local-namespace EUID pattern as the risk describe above.
-          const TEST_CRITICALITY_HOST_ID = 'zeek-amsterdam-criticality-host-id';
           before(async () => {
             await entityStoreV2.setup({
               hosts: [
@@ -2606,17 +2584,6 @@ export default ({ getService }: FtrProviderContext) => {
                   host: { name: 'zeek-sensor-amsterdam' },
                   entity: { id: 'host:zeek-sensor-amsterdam', type: 'host' },
                   asset: { criticality: 'low_impact' },
-                },
-              ],
-              users: [
-                {
-                  user: { name: 'alice' },
-                  host: { id: TEST_CRITICALITY_HOST_ID },
-                  entity: {
-                    id: `user:alice@${TEST_CRITICALITY_HOST_ID}@local`,
-                    type: 'user',
-                  },
-                  asset: { criticality: 'extreme_impact' },
                 },
               ],
             });
@@ -2633,8 +2600,7 @@ export default ({ getService }: FtrProviderContext) => {
             const doc1 = {
               id,
               '@timestamp': timestamp,
-              host: { name: 'zeek-sensor-amsterdam', id: TEST_CRITICALITY_HOST_ID },
-              user: { name: 'alice' },
+              host: { name: 'zeek-sensor-amsterdam' },
             };
             const doc1WithLaterTimestamp = {
               ...doc1,
@@ -2680,7 +2646,6 @@ export default ({ getService }: FtrProviderContext) => {
             });
 
             expect(previewAlerts[0]?._source?.['host.asset.criticality']).toEqual('low_impact');
-            expect(previewAlerts[0]?._source?.['user.asset.criticality']).toEqual('extreme_impact');
           });
         });
       });

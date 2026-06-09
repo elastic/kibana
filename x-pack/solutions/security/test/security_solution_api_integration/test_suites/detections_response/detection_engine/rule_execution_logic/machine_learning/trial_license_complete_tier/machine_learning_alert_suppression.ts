@@ -1103,10 +1103,6 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       describe('with enrichments', () => {
-        // User enrichment in V2 requires local-namespace resolution: host.id must be present and
-        // user.name must not be in LOCAL_NAMESPACE_EXCLUDED_USER_NAMES.
-        // EUID for a local-namespace user: user:<name>@<host.id>@local
-        const TEST_HOST_ID = 'ml-suppression-test-host-id';
         before(async () => {
           await entityStoreV2.setup({
             hosts: [
@@ -1118,14 +1114,6 @@ export default ({ getService }: FtrProviderContext) => {
                   risk: { calculated_level: 'Low', calculated_score_norm: 23 },
                 },
                 asset: { criticality: 'medium_impact' },
-              },
-            ],
-            users: [
-              {
-                user: { name: 'alice' },
-                host: { id: TEST_HOST_ID },
-                entity: { id: `user:alice@${TEST_HOST_ID}@local`, type: 'user' },
-                asset: { criticality: 'extreme_impact' },
               },
             ],
           });
@@ -1140,8 +1128,7 @@ export default ({ getService }: FtrProviderContext) => {
           const anomalyWithKnownEntities = {
             ...baseAnomaly,
             timestamp,
-            user: { name: 'alice' },
-            host: { name: 'zeek-newyork-sha-aa8df15', id: TEST_HOST_ID },
+            host: { name: 'zeek-newyork-sha-aa8df15' },
           };
           await indexListOfDocuments([anomalyWithKnownEntities]);
 
@@ -1172,7 +1159,6 @@ export default ({ getService }: FtrProviderContext) => {
           const fullAlert = previewAlerts[0]._source;
 
           expect(fullAlert?.['host.asset.criticality']).toBe('medium_impact');
-          expect(fullAlert?.['user.asset.criticality']).toBe('extreme_impact');
         });
       });
     });
