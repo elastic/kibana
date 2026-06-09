@@ -2665,6 +2665,8 @@
       "@kbn/ui-chrome-layout-constants/*": ["./src/platform/kbn-ui/chrome-layout-constants/*"],
       "@kbn/ui-chrome-layout-utils": ["./src/platform/kbn-ui/chrome-layout-utils"],
       "@kbn/ui-chrome-layout-utils/*": ["./src/platform/kbn-ui/chrome-layout-utils/*"],
+      "@kbn/ui-callout": ["./src/platform/kbn-ui/callout"],
+      "@kbn/ui-callout/*": ["./src/platform/kbn-ui/callout/*"],
       "@kbn/ui-feedback": ["./src/platform/kbn-ui/feedback"],
       "@kbn/ui-feedback/*": ["./src/platform/kbn-ui/feedback/*"],
       "@kbn/ui-settings-plugin": ["./src/platform/test/plugin_functional/plugins/ui_settings_plugin"],

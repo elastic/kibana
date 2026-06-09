@@ -23,6 +23,9 @@ subs:
 
 toc:
   - file: index.md
+  - folder: callout
+    children:
+      - file: callout.md
   - folder: feedback
     children:
       - file: feedback.md
