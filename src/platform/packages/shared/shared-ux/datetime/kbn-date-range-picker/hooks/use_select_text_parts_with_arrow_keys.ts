@@ -183,15 +183,24 @@ export function useSelectTextPartsWithArrowKeys({
       }
     };
 
-    const mouseDownHandler = () => {
+    const pointerDownHandler = () => {
       inCaretMode = true;
       currentIndex = -1;
+    };
+
+    const selectionChangeHandler = () => {
+      if (document.activeElement !== inputEl) return;
+      const parts = getPartsAndSyncIndex();
+      if (currentIndex >= 0 && currentIndex < parts.length) {
+        inCaretMode = false;
+      }
     };
 
     const inputEl = inputRef.current;
 
     inputEl?.addEventListener('keydown', keydownHandler);
-    inputEl?.addEventListener('mousedown', mouseDownHandler);
+    inputEl?.addEventListener('pointerdown', pointerDownHandler);
+    document.addEventListener('selectionchange', selectionChangeHandler);
 
     if (inputEl) {
       switch (initialSelection) {
@@ -211,7 +220,8 @@ export function useSelectTextPartsWithArrowKeys({
 
     return () => {
       inputEl?.removeEventListener('keydown', keydownHandler);
-      inputEl?.removeEventListener('mousedown', mouseDownHandler);
+      inputEl?.removeEventListener('pointerdown', pointerDownHandler);
+      document.removeEventListener('selectionchange', selectionChangeHandler);
     };
   }, [inputRef, isActive, initialSelection, rangeType]);
 }

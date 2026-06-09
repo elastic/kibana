@@ -203,7 +203,49 @@ describe('useSelectTextPartsWithArrowKeys', () => {
       expect(selection(input)).toEqual([11, 11]);
     });
 
-    it('stays in native caret mode after input mouse down', () => {
+    it('re-enables smart navigation after selectionchange lands on a navigable part', () => {
+      const input = createInput('Jan 1, 2026');
+      const ref = { current: input };
+      renderHook(() =>
+        useSelectTextPartsWithArrowKeys({
+          inputRef: ref,
+          isActive: true,
+          initialSelection: 'first',
+        })
+      );
+
+      // Enter caret mode, then simulate a word selection on "2026" [7, 11]
+      input.dispatchEvent(new Event('pointerdown', { bubbles: true }));
+      input.focus();
+      input.setSelectionRange(7, 11);
+      document.dispatchEvent(new Event('selectionchange'));
+
+      pressKey(input, 'ArrowLeft');
+      // Smart navigation resumes from "2026" → moves to "1"
+      expect(selection(input)).toEqual([4, 5]);
+    });
+
+    it('stays in caret mode after selectionchange on a non-navigable position', () => {
+      const input = createInput('Jan 1, 2026');
+      const ref = { current: input };
+      renderHook(() =>
+        useSelectTextPartsWithArrowKeys({
+          inputRef: ref,
+          isActive: true,
+          initialSelection: 'first',
+        })
+      );
+
+      input.dispatchEvent(new Event('pointerdown', { bubbles: true }));
+      input.focus();
+      input.setSelectionRange(5, 5); // caret in separator ", "
+      document.dispatchEvent(new Event('selectionchange'));
+
+      pressKey(input, 'ArrowLeft');
+      expect(selection(input)).toEqual([5, 5]); // unchanged — still in caret mode
+    });
+
+    it('stays in native caret mode after input pointerdown', () => {
       const input = createInput('Jan 1, 2026');
       const ref = { current: input };
       renderHook(() =>
@@ -215,7 +257,7 @@ describe('useSelectTextPartsWithArrowKeys', () => {
       );
 
       input.setSelectionRange(5, 5);
-      input.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+      input.dispatchEvent(new Event('pointerdown', { bubbles: true }));
       pressKey(input, 'ArrowLeft');
 
       expect(selection(input)).toEqual([5, 5]);
