@@ -19,6 +19,9 @@ if [ -n "$TOKEN" ]; then
   fi
 fi
 
+# Install and configure Codex CLI for access-broker/OpenRouter.
+"${KBN_DIR}/.ona/setup_codex.sh"
+
 # Configure Claude Code user settings for Ona environments:
 # - theme: skip the first-run prompt
 # - apiKeyHelper: fetch OIDC tokens for the Elastic access broker
