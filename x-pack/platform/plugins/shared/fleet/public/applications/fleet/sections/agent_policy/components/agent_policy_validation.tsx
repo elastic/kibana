@@ -107,7 +107,7 @@ export const agentPolicyFormValidation = (
   const durationErrorMessage = (
     <FormattedMessage
       id="xpack.fleet.agentPolicyForm.invalidDurationFormatErrorMessage"
-      defaultMessage="Must be a duration with a time unit, e.g. 30s, 5m, 2h"
+      defaultMessage="Must be a duration with a time unit, for example, 30s, 5m, 2h"
     />
   );
 
