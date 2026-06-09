@@ -17,11 +17,13 @@ export const isManagedJob = (job: MlSummaryJob | MlJob) => {
 };
 
 /**
- * When the jobs summary API includes `cpsMigrated: false`, show a legacy CPS indicator in the UI.
+ * When the jobs summary API includes `projectRouting: null`, show a legacy CPS indicator in the UI.
  */
 export const showCPSLegacyBadge = (job: MlSummaryJob | MlJob): boolean => {
-  if (!('cpsMigrated' in job)) {
+  // disabled for now while we decide if we want a badge
+  return false;
+  if (!('projectRouting' in job)) {
     return false;
   }
-  return job.cpsMigrated === false;
+  return (job as MlSummaryJob).projectRouting === null;
 };

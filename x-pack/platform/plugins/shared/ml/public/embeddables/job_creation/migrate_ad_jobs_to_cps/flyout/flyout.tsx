@@ -227,7 +227,7 @@ export const MigrateADJobsToCpsFlyout: FC<Props> = ({
           <p>
             <FormattedMessage
               id="xpack.ml.embeddables.migrateADJobsToCpsFlyout.jobListIntro"
-              defaultMessage="The following jobs can be migrated to cross-project search."
+              defaultMessage="The following jobs can be migrated to use cross-project search."
             />
           </p>
         </EuiText>

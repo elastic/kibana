@@ -289,7 +289,7 @@ export function jobsProvider(
       };
 
       if (serverless.cpsEnabled && hasDatafeed) {
-        tempJob.cpsMigrated = job.datafeed_config?.project_routing !== undefined;
+        tempJob.projectRouting = job.datafeed_config.project_routing ?? null;
       }
 
       if (jobIds.find((j) => j === tempJob.id)) {

@@ -153,11 +153,11 @@ export interface MlSummaryJob {
   bucketSpanSeconds: number;
 
   /**
-   * When the deployment has CPS (Cross-Project Search) features enabled, indicates whether
-   * the datafeed is configured for CPS project routing. Omitted when CPS is disabled or
-   * when the datafeed has no `project_routing` field.
+   * When CPS (Cross-Project Search) is enabled, the datafeed `project_routing` value.
+   * `null` when CPS is enabled but the datafeed has no `project_routing`.
+   * Omitted when CPS is disabled.
    */
-  cpsMigrated?: boolean;
+  projectRouting?: string | null;
 
   /**
    * Advanced configuration option. Contains custom meta data about the job. For example, it can contain custom URL information.

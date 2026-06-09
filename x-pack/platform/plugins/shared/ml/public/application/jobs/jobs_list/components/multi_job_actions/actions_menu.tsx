@@ -58,10 +58,9 @@ export const MultiJobActionsMenu: FC<Props> = ({
   const mlApi = useMlApi();
 
   /**
-   * Jobs that still need CPS project routing (`cpsMigrated === false` from jobs summary).
-   * When `cpsMigrated` is true, the datafeed is already configured for CPS.
+   * Jobs that still need CPS project routing (`projectRouting === null` from jobs summary).
    */
-  const jobsToCPSMigrate = useMemo(() => jobs.filter((j) => j.cpsMigrated === false), [jobs]);
+  const jobsToCPSMigrate = useMemo(() => jobs.filter((j) => j.projectRouting === null), [jobs]);
 
   const canMigrateToCps = useMemo(() => {
     return jobsToCPSMigrate.length > 0 && checkPermission('canUpdateDatafeed') === true;
