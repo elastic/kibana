@@ -188,111 +188,6 @@ export const UpdateADJobsProjectRoutingFlyout: FC<Props> = ({
     [updateResults, jobIds]
   );
 
-  const renderBody = () => {
-    if (loading) {
-      return (
-        <EuiFlexGroup alignItems="center" justifyContent="spaceAround" style={{ minHeight: 120 }}>
-          <EuiLoadingSpinner size="l" data-test-subj="mlUpdateAdJobsProjectRoutingLoading" />
-        </EuiFlexGroup>
-      );
-    }
-    if (loadError) {
-      return (
-        <EuiCallOut
-          announceOnMount
-          color="danger"
-          title={i18n.translate(
-            'xpack.ml.embeddables.updateADJobsProjectRoutingFlyout.loadErrorTitle',
-            {
-              defaultMessage: 'Could not load jobs for project routing update',
-            }
-          )}
-        >
-          {loadError.message}
-        </EuiCallOut>
-      );
-    }
-    if (jobIds.length === 0) {
-      return (
-        <EuiEmptyPrompt
-          data-test-subj="mlUpdateAdJobsProjectRoutingNoJobs"
-          body={
-            <p>
-              <FormattedMessage
-                id="xpack.ml.embeddables.updateADJobsProjectRoutingFlyout.noJobs"
-                defaultMessage="No anomaly detection jobs are available to update right now."
-              />
-            </p>
-          }
-        />
-      );
-    }
-    return (
-      <>
-        <EuiText size="s" color="subdued">
-          <p>
-            <FormattedMessage
-              id="xpack.ml.embeddables.updateADJobsProjectRoutingFlyout.jobListIntro"
-              defaultMessage="The following jobs can have their project routing updated."
-            />
-          </p>
-        </EuiText>
-
-        <EuiListGroup maxWidth={true} data-test-subj="mlUpdateAdJobsProjectRoutingJobList">
-          {jobIds.map((id) => {
-            const result = updateResults?.[id];
-            const label = (
-              <EuiFlexGroup
-                alignItems="center"
-                gutterSize="s"
-                responsive={false}
-                data-test-subj={`mlUpdateAdJobsProjectRoutingJob-${id}`}
-              >
-                {result !== undefined ? (
-                  <EuiIcon
-                    type={result.success ? 'check' : 'cross'}
-                    color={result.success ? 'success' : 'danger'}
-                    data-test-subj={
-                      result.success
-                        ? 'mlUpdateAdJobsProjectRoutingJobSuccess'
-                        : 'mlUpdateAdJobsProjectRoutingJobFailed'
-                    }
-                    aria-hidden
-                  />
-                ) : null}
-                <EuiText size="s">{id}</EuiText>
-              </EuiFlexGroup>
-            );
-            return <EuiListGroupItem key={id} label={label} wrapText />;
-          })}
-        </EuiListGroup>
-      </>
-    );
-  };
-
-  const scopePicker =
-    allowScopeSelection && totalProjectCount > 1 && projects ? (
-      <>
-        <EuiFormRow
-          label={
-            <FormattedMessage
-              id="xpack.ml.embeddables.updateADJobsProjectRoutingFlyout.projectRoutingLabel"
-              defaultMessage="Project routing"
-            />
-          }
-        >
-          <MlProjectPickerPanel
-            projectRouting={selectedProjectRouting}
-            onProjectRoutingChange={onProjectRoutingChange}
-            projects={projects}
-            totalProjectCount={totalProjectCount}
-            projectRoutingValueTestSubj="mlUpdateAdJobsProjectRoutingValue"
-          />
-        </EuiFormRow>
-        <EuiSpacer size="m" />
-      </>
-    ) : null;
-
   return (
     <>
       <EuiFlyoutHeader hasBorder>
@@ -307,8 +202,119 @@ export const UpdateADJobsProjectRoutingFlyout: FC<Props> = ({
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        {scopePicker}
-        {renderBody()}
+        {allowScopeSelection && totalProjectCount > 1 && projects ? (
+          <>
+            <EuiFormRow
+              label={
+                <FormattedMessage
+                  id="xpack.ml.embeddables.updateADJobsProjectRoutingFlyout.projectRoutingLabel"
+                  defaultMessage="Project routing"
+                />
+              }
+            >
+              <MlProjectPickerPanel
+                projectRouting={selectedProjectRouting}
+                onProjectRoutingChange={onProjectRoutingChange}
+                projects={projects}
+                totalProjectCount={totalProjectCount}
+                projectRoutingValueTestSubj="mlUpdateAdJobsProjectRoutingValue"
+              />
+            </EuiFormRow>
+            {selectedProjectRouting !== DEFAULT_PROJECT_ROUTING ? (
+              <>
+                <EuiSpacer size="s" />
+                <EuiCallOut
+                  announceOnMount
+                  color="warning"
+                  title={i18n.translate(
+                    'xpack.ml.embeddables.updateADJobsProjectRoutingFlyout.nonDefaultScopeWarningTitle',
+                    {
+                      defaultMessage: 'Non-default project scope selected',
+                    }
+                  )}
+                  data-test-subj="mlUpdateAdJobsProjectRoutingScopeWarning"
+                >
+                  <FormattedMessage
+                    id="xpack.ml.embeddables.updateADJobsProjectRoutingFlyout.nonDefaultScopeWarning"
+                    defaultMessage="Using a project routing scope other than {defaultScope} may negatively affect the job's anomaly detection results."
+                    values={{ defaultScope: DEFAULT_PROJECT_ROUTING }}
+                  />
+                </EuiCallOut>
+              </>
+            ) : null}
+            <EuiSpacer size="m" />
+          </>
+        ) : null}
+        {loading ? (
+          <EuiFlexGroup alignItems="center" justifyContent="spaceAround" style={{ minHeight: 120 }}>
+            <EuiLoadingSpinner size="l" data-test-subj="mlUpdateAdJobsProjectRoutingLoading" />
+          </EuiFlexGroup>
+        ) : loadError ? (
+          <EuiCallOut
+            announceOnMount
+            color="danger"
+            title={i18n.translate(
+              'xpack.ml.embeddables.updateADJobsProjectRoutingFlyout.loadErrorTitle',
+              {
+                defaultMessage: 'Could not load jobs for project routing update',
+              }
+            )}
+          >
+            {loadError.message}
+          </EuiCallOut>
+        ) : jobIds.length === 0 ? (
+          <EuiEmptyPrompt
+            data-test-subj="mlUpdateAdJobsProjectRoutingNoJobs"
+            body={
+              <p>
+                <FormattedMessage
+                  id="xpack.ml.embeddables.updateADJobsProjectRoutingFlyout.noJobs"
+                  defaultMessage="No anomaly detection jobs are available to update right now."
+                />
+              </p>
+            }
+          />
+        ) : (
+          <>
+            <EuiText size="s" color="subdued">
+              <p>
+                <FormattedMessage
+                  id="xpack.ml.embeddables.updateADJobsProjectRoutingFlyout.jobListIntro"
+                  defaultMessage="The following jobs can have their project routing updated."
+                />
+              </p>
+            </EuiText>
+
+            <EuiListGroup maxWidth={true} data-test-subj="mlUpdateAdJobsProjectRoutingJobList">
+              {jobIds.map((id) => {
+                const result = updateResults?.[id];
+                const label = (
+                  <EuiFlexGroup
+                    alignItems="center"
+                    gutterSize="s"
+                    responsive={false}
+                    data-test-subj={`mlUpdateAdJobsProjectRoutingJob-${id}`}
+                  >
+                    {result !== undefined ? (
+                      <EuiIcon
+                        type={result.success ? 'check' : 'cross'}
+                        color={result.success ? 'success' : 'danger'}
+                        data-test-subj={
+                          result.success
+                            ? 'mlUpdateAdJobsProjectRoutingJobSuccess'
+                            : 'mlUpdateAdJobsProjectRoutingJobFailed'
+                        }
+                        aria-hidden
+                      />
+                    ) : null}
+                    <EuiText size="s">{id}</EuiText>
+                  </EuiFlexGroup>
+                );
+                return <EuiListGroupItem key={id} label={label} wrapText />;
+              })}
+            </EuiListGroup>
+          </>
+        )}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
