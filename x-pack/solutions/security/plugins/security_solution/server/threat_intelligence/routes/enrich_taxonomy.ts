@@ -79,6 +79,7 @@ export const registerEnrichTaxonomyRoute = ({
           request,
           uiSettingsClient: core.uiSettings.client,
           connectorIdOverride,
+          logger,
         });
         if (!modelOutcome.ok) {
           return response.customError({

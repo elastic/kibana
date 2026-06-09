@@ -109,6 +109,7 @@ export const registerSynthesizeAdvisoryRoute = ({
           inference: getInference(),
           request,
           uiSettingsClient: core.uiSettings.client,
+          logger,
         });
         const model = modelOutcome.ok ? modelOutcome.model : undefined;
 

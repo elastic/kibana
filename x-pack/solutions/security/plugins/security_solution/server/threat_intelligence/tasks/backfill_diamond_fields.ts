@@ -195,6 +195,7 @@ export const registerBackfillDiamondFieldsTask = ({
             request: fakeRequest as KibanaRequest,
             uiSettingsClient,
             connectorIdOverride: params.gate_connector_id || undefined,
+            logger,
           });
           if (!gateModelOutcome.ok) {
             throwUnrecoverableError(
@@ -215,6 +216,7 @@ export const registerBackfillDiamondFieldsTask = ({
             request: fakeRequest as KibanaRequest,
             uiSettingsClient,
             connectorIdOverride: params.diamond_connector_id || undefined,
+            logger,
           });
           if (!diamondModelOutcome.ok) {
             throwUnrecoverableError(

@@ -152,6 +152,7 @@ export const registerBackfillDiamondRoute = ({
                 request,
                 uiSettingsClient: core.uiSettings.client,
                 connectorIdOverride: gateConnectorId,
+                logger,
               });
 
               if (modelOutcome.ok) {

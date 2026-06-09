@@ -65,6 +65,7 @@ export const registerHuntBehaviorRoute = ({
           inference: getInference(),
           request,
           uiSettingsClient: core.uiSettings.client,
+          logger,
         });
         if (!modelOutcome.ok) {
           return response.customError({

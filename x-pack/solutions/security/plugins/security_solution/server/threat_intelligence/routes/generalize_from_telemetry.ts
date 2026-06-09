@@ -70,6 +70,7 @@ export const registerGeneralizeFromTelemetryRoute = ({
           inference: getInference(),
           request,
           uiSettingsClient: core.uiSettings.client,
+          logger,
         });
         if (!modelOutcome.ok) {
           return response.customError({

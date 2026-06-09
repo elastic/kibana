@@ -72,13 +72,15 @@ export const threatIntelligenceUiSettings: Record<string, UiSettingsParams> = {
         defaultMessage:
           'GenAI connector ID used for the per-report taxonomy enrichment step ' +
           '(enrich_taxonomy — categories, regions, relevance, detection_actionability, ' +
-          'diamond_suitable). Leave blank to use the space-wide default GenAI connector. ' +
-          'Set to a cheap model connector (e.g. Haiku) to reduce per-report cost; ' +
-          'taxonomy quality degradation is acceptable for the gate classification.',
+          'diamond_suitable). Defaults to the EIS-platform Haiku connector; override to ' +
+          'pin a different connector for this space. Falls back to genAi:defaultAIConnector ' +
+          'if the configured connector is unavailable on this deployment.',
       }
     ),
     type: 'string',
-    value: '',
+    // EIS-platform connector — non-UUID id = platform-provisioned, survives ci:cloud-deploy rebuilds.
+    // resolveScopedModel falls back to genAi:defaultAIConnector if this id is absent.
+    value: 'Anthropic-Claude-Haiku-4-5',
     schema: schema.string(),
     requiresPageReload: false,
   },
@@ -98,12 +100,15 @@ export const threatIntelligenceUiSettings: Record<string, UiSettingsParams> = {
           'GenAI connector ID used for the heavy Diamond Model extraction step ' +
           '(extract_diamond — adversary/capability/infrastructure/victim summaries). ' +
           'Only called for threat-positive reports (diamond_suitable == true). ' +
-          'Leave blank to use the space-wide default GenAI connector. ' +
-          'Set to a capable model connector (e.g. Sonnet/Opus) for best extraction quality.',
+          'Defaults to the EIS-platform Opus 4.7 connector; override to pin a different ' +
+          'connector. Falls back to genAi:defaultAIConnector if the configured connector ' +
+          'is unavailable on this deployment.',
       }
     ),
     type: 'string',
-    value: '',
+    // EIS-platform inference-endpoint-as-connector — dotted id = preconfigured, survives rebuilds.
+    // resolveScopedModel falls back to genAi:defaultAIConnector if this id is absent.
+    value: '.anthropic-claude-4.7-opus-chat_completion',
     schema: schema.string(),
     requiresPageReload: false,
   },
