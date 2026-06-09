@@ -90,6 +90,7 @@ export class AgentBuilderPlugin
     updateProps: (props: EmbeddableConversationProps) => void;
     resetBrowserApiTools: () => void;
     addAttachment: (attachment: AttachmentInput) => void;
+    setConversationId: (id?: string) => void;
   } | null = null;
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private isEarsEnabled = false;
@@ -185,9 +186,14 @@ export class AgentBuilderPlugin
         window?.localStorage?.setItem(storageKey, JSON.stringify(conversationId));
       }
 
-      // If already open, update props instead of creating new
+      // If already open, update props instead of creating new. A fresh provider is
+      // not mounted in this case, so the seeded localStorage id above is not read —
+      // switch the active conversation explicitly when a conversationId is given.
       if (this.activeSidebarRef && this.sidebarCallbacks) {
         this.sidebarCallbacks.updateProps(config);
+        if (conversationId) {
+          this.sidebarCallbacks.setConversationId(conversationId);
+        }
         return { chatRef: this.activeSidebarRef };
       }
 

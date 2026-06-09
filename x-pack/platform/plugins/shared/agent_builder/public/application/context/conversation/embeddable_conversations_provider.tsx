@@ -39,6 +39,10 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
   // Track current props, starting with initial props
   const [currentProps, setCurrentProps] = useState<EmbeddableConversationProps>(contextProps);
 
+  // Always points at the latest setConversationId so the registered callback below
+  // never switches to a stale conversation (setConversationId is recreated per render).
+  const setConversationIdRef = useRef<(id?: string) => void>(() => {});
+
   // Register callbacks to allow parent to update props and clear browserApiTools
   const onRegisterCallbacks = contextProps.onRegisterCallbacks;
   useEffect(() => {
@@ -52,6 +56,7 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
             ...prevProps,
             attachments: upsertAttachmentsIntoList(prevProps.attachments, [attachment]),
           })),
+        setConversationId: (id) => setConversationIdRef.current(id),
       });
     }
   }, [onRegisterCallbacks]);
@@ -122,6 +127,7 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     },
     [currentProps, persistedConversationId, updatePersistedConversationId]
   );
+  setConversationIdRef.current = setConversationId;
 
   const validateAndSetConversationId = useCallback(
     async (id: string) => {

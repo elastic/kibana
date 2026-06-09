@@ -29,6 +29,7 @@ export interface EmbeddableConversationSidebarProps {
     updateProps: (props: EmbeddableConversationProps) => void;
     resetBrowserApiTools: () => void;
     addAttachment: (attachment: ConversationAttachment) => void;
+    setConversationId: (id?: string) => void;
   }) => void;
 }
 
