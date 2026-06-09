@@ -7,14 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { MAX_ID_LENGTH } from '@kbn/as-code-shared-schemas';
+import { schema } from '@kbn/config-schema';
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
-import { commonRouteConfig, LINKS_ID_DESCRIPTION } from '../constants';
-import { readResponseBodySchema } from './schemas';
-import { read } from './read';
 import { LINKS_API_PATH, PUBLIC_API_VERSION } from '../../../common/constants';
+import { commonRouteConfig, LINKS_ID_DESCRIPTION } from '../constants';
 import { readLinksOASOperationObject } from '../oas_examples';
+import { read } from './read';
+import { readResponseBodySchema } from './schemas';
 
 export const LINKS_READ_DESCRIPTION =
   'Returns the complete state of a links library item by ID.' as const;
@@ -37,6 +38,7 @@ export function registerReadRoute(router: VersionedRouter<RequestHandlerContext>
         request: {
           params: schema.object({
             id: schema.string({
+              maxLength: MAX_ID_LENGTH,
               meta: {
                 description: LINKS_ID_DESCRIPTION,
               },

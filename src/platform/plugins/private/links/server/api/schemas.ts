@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { MAX_ID_LENGTH, MAX_TITLE_LENGTH } from '@kbn/as-code-shared-schemas';
 import { schema } from '@kbn/config-schema';
 import { dashboardNavigationOptionsSchema } from '@kbn/dashboard-navigation-options-schema';
 import {
@@ -14,9 +15,9 @@ import {
   BY_VALUE_SCHEMA_META,
   serializedTitlesSchema,
 } from '@kbn/presentation-publishing-schemas';
-import { DEFAULT_EXTERNAL_LINK_OPTIONS } from '../../common/constants';
 import {
   DASHBOARD_LINK_TYPE,
+  DEFAULT_EXTERNAL_LINK_OPTIONS,
   EXTERNAL_LINK_TYPE,
   LINKS_HORIZONTAL_LAYOUT,
   LINKS_VERTICAL_LAYOUT,
@@ -24,7 +25,10 @@ import {
 
 const baseLinkSchema = {
   label: schema.maybe(
-    schema.string({ meta: { description: 'The label of the link to be displayed in the UI' } })
+    schema.string({
+      maxLength: MAX_TITLE_LENGTH,
+      meta: { description: 'The label of the link to be displayed in the UI' },
+    })
   ),
 };
 
@@ -33,6 +37,7 @@ export const dashboardLinkSchema = schema.object(
     ...baseLinkSchema,
     type: schema.literal(DASHBOARD_LINK_TYPE),
     destination: schema.string({
+      maxLength: MAX_ID_LENGTH,
       meta: { description: 'Linked dashboard saved object id' },
     }),
     options: dashboardNavigationOptionsSchema,
@@ -66,7 +71,10 @@ export const externalLinkSchema = schema.object(
   {
     ...baseLinkSchema,
     type: schema.literal(EXTERNAL_LINK_TYPE),
-    destination: schema.string({ meta: { description: 'The external URL to link to' } }),
+    destination: schema.string({
+      maxLength: 250,
+      meta: { description: 'The external URL to link to' },
+    }),
     options: externalLinkOptionsSchema,
   },
   {
@@ -104,6 +112,7 @@ export const linksByValueSchema = serializedTitlesSchema.extends(
 export const linksByReferenceSchema = serializedTitlesSchema.extends(
   {
     ref_id: schema.string({
+      maxLength: MAX_ID_LENGTH + 50, // accounts for prefix
       meta: {
         title: 'Reference ID',
         description: 'The unique identifier of the Links library item',

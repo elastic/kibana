@@ -18,6 +18,7 @@ type PartialPaginationParamsSchema = {
 export const asCodeSearchRequestQuerySchema = schema.object({
   query: schema.maybe(
     schema.string({
+      maxLength: 500,
       meta: {
         description:
           'Filters results by `title` and `description` using Elasticsearch [`simple_query_string`](https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-simple-query-string-query) syntax. Multi-word terms require all words to match.',

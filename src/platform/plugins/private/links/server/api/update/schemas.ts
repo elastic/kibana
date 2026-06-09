@@ -8,7 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { asCodeMetaSchema } from '@kbn/as-code-shared-schemas';
+import { asCodeMetaSchema, MAX_ID_LENGTH } from '@kbn/as-code-shared-schemas';
 import { linksByValueSchema } from '../schemas';
 import { LINKS_ID_DESCRIPTION } from '../constants';
 
@@ -17,6 +17,7 @@ export const updateRequestBodySchema = linksByValueSchema;
 export const updateResponseBodySchema = schema.object(
   {
     id: schema.string({
+      maxLength: MAX_ID_LENGTH,
       meta: {
         description: LINKS_ID_DESCRIPTION,
       },

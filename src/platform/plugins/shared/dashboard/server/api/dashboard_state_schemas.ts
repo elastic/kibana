@@ -7,20 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { asCodeFilterSchema } from '@kbn/as-code-filters-schema';
+import {
+  asCodeQuerySchema,
+  MAX_DESCRIPTION_LENGTH,
+  MAX_ID_LENGTH,
+  MAX_TITLE_LENGTH,
+} from '@kbn/as-code-shared-schemas';
 import type { ObjectType, Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { refreshIntervalSchema } from '@kbn/data-service-server';
-import { asCodeFilterSchema } from '@kbn/as-code-filters-schema';
-import { asCodeQuerySchema } from '@kbn/as-code-shared-schemas';
 import { getControlsGroupSchema } from '@kbn/controls-schemas';
+import { refreshIntervalSchema } from '@kbn/data-service-server';
 import { timeRangeSchema } from '@kbn/es-query-server';
-import { embeddableService } from '../kibana_services';
-import { DASHBOARD_GRID_COLUMN_COUNT } from '../../common/page_bundle_constants';
 import {
+  DEFAULT_DASHBOARD_OPTIONS,
   DEFAULT_PANEL_HEIGHT,
   DEFAULT_PANEL_WIDTH,
-  DEFAULT_DASHBOARD_OPTIONS,
 } from '../../common/constants';
+import { DASHBOARD_GRID_COLUMN_COUNT } from '../../common/page_bundle_constants';
+import { embeddableService } from '../kibana_services';
 
 const MAX_PANELS = 100;
 
@@ -59,6 +64,7 @@ export function getPanelSchema() {
     grid: panelGridSchema,
     id: schema.maybe(
       schema.string({
+        maxLength: MAX_ID_LENGTH,
         meta: { description: 'The unique ID of the panel.' },
       })
     ),
@@ -107,6 +113,7 @@ export function getSectionSchema() {
   return schema.object(
     {
       title: schema.string({
+        maxLength: MAX_TITLE_LENGTH,
         meta: { description: 'The title of the section.' },
       }),
       collapsed: schema.boolean({
@@ -124,6 +131,7 @@ export function getSectionSchema() {
       }),
       id: schema.maybe(
         schema.string({
+          maxLength: MAX_ID_LENGTH,
           meta: { description: 'The unique ID of the section.' },
         })
       ),
@@ -237,7 +245,10 @@ export function getDashboardStateSchema(
     {
       pinned_panels: getPinnedPanelsSchema(isDashboardAppRequest, isReadRequest),
       description: schema.maybe(
-        schema.string({ meta: { description: 'A short description of the dashboard.' } })
+        schema.string({
+          maxLength: MAX_DESCRIPTION_LENGTH,
+          meta: { description: 'A short description of the dashboard.' },
+        })
       ),
       filters: schema.maybe(
         schema.arrayOf(asCodeFilterSchema, {
@@ -268,6 +279,7 @@ export function getDashboardStateSchema(
       ),
       project_routing: schema.maybe(
         schema.string({
+          maxLength: 100,
           meta: {
             description:
               'Controls [cross-project search](https://www.elastic.co/docs/explore-analyze/cross-project-search/cross-project-search-project-routing) behavior for this dashboard (Serverless only). Set to `_alias:_origin` to scope data to the current project, or `_alias:*` to search across all projects. When omitted, the space default applies.',
@@ -277,7 +289,7 @@ export function getDashboardStateSchema(
       query: schema.maybe(asCodeQuerySchema),
       refresh_interval: schema.maybe(refreshIntervalSchema),
       tags: schema.maybe(
-        schema.arrayOf(schema.string(), {
+        schema.arrayOf(schema.string({ maxLength: 100 }), {
           maxSize: isDashboardAppRequest && isReadRequest ? Number.MAX_SAFE_INTEGER : 100,
           meta: { description: 'Tag IDs to associate with this dashboard.' },
         })
@@ -285,6 +297,7 @@ export function getDashboardStateSchema(
       time_range: schema.maybe(timeRangeSchema),
       title: schema.string({
         minLength: 1,
+        maxLength: MAX_TITLE_LENGTH,
         meta: { description: 'A human-readable title for the dashboard.' },
       }),
       access_control: accessControlSchema,

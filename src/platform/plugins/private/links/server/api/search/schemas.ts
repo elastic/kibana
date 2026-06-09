@@ -11,6 +11,9 @@ import {
   asCodeMetaSchema,
   asCodePaginationResponseMetaSchema,
   asCodeSearchRequestQuerySchema,
+  MAX_DESCRIPTION_LENGTH,
+  MAX_ID_LENGTH,
+  MAX_TITLE_LENGTH,
   PAGINATION_MAX_SIZE,
 } from '@kbn/as-code-shared-schemas';
 import { schema } from '@kbn/config-schema';
@@ -20,14 +23,18 @@ export const searchRequestQuerySchema = asCodeSearchRequestQuerySchema;
 export const searchResponseBodySchema = schema.object({
   data: schema.arrayOf(
     schema.object({
-      id: schema.string(),
+      id: schema.string({ maxLength: MAX_ID_LENGTH }),
       data: schema.object({
         description: schema.maybe(
           schema.string({
+            maxLength: MAX_DESCRIPTION_LENGTH,
             meta: { description: 'A short description of the links library item.' },
           })
         ),
-        title: schema.string({ meta: { description: 'The links library item title.' } }),
+        title: schema.string({
+          maxLength: MAX_TITLE_LENGTH,
+          meta: { description: 'The links library item title.' },
+        }),
       }),
       meta: asCodeMetaSchema,
     }),
