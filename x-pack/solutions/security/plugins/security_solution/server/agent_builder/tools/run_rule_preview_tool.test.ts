@@ -74,7 +74,7 @@ describe('runRulePreviewTool', () => {
 
   it('schema accepts a command string', () => {
     const parsed = tool.schema.safeParse({
-      command: '--type esql --query "FROM logs-* | LIMIT 10"',
+      command: 'esql --query "FROM logs-* | LIMIT 10"',
     });
     expect(parsed.success).toBe(true);
   });
@@ -96,12 +96,12 @@ describe('runRulePreviewTool', () => {
     const [firstResult] = getResults(result);
     expect(firstResult.type).toBe(ToolResultType.other);
     const data = (firstResult as { type: string; data: { help: string } }).data;
-    expect(data.help).toContain('USAGE');
+    expect(data.help).toContain('Commands:');
   });
 
-  it('returns type-specific help for --type esql --help', async () => {
+  it('returns type-specific help for esql --help', async () => {
     const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
-    const result = await tool.handler({ command: '--type esql --help' }, context);
+    const result = await tool.handler({ command: 'esql --help' }, context);
 
     expect(runRulePreviewMock).not.toHaveBeenCalled();
     const [firstResult] = getResults(result);
@@ -126,7 +126,7 @@ describe('runRulePreviewTool', () => {
   it('returns an error result for an unknown flag', async () => {
     const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
     const result = await tool.handler(
-      { command: '--type esql --query "x" --bogus value' },
+      { command: 'esql --query "x" --bogus value' },
       context
     );
 
@@ -134,7 +134,7 @@ describe('runRulePreviewTool', () => {
     const [firstResult] = getResults(result);
     expect(firstResult.type).toBe(ToolResultType.error);
     const data = (firstResult as { type: string; data: { message: string } }).data;
-    expect(data.message).toContain('--bogus');
+    expect(data.message).toContain('bogus');
   });
 
   // ---------------------------------------------------------------------------
@@ -155,7 +155,7 @@ describe('runRulePreviewTool', () => {
     const result = await tool.handler(
       {
         command:
-          '--type esql --query "FROM logs-* | LIMIT 10" --timeframe-start 2024-01-01T00:00:00.000Z --timeframe-end 2024-01-01T01:00:00.000Z --interval 5m',
+          'esql --query "FROM logs-* | LIMIT 10" --timeframe-start 2024-01-01T00:00:00.000Z --timeframe-end 2024-01-01T01:00:00.000Z --interval 5m',
       },
       context
     );
@@ -213,7 +213,7 @@ describe('runRulePreviewTool', () => {
     await tool.handler(
       {
         command:
-          '--type esql --query "FROM logs-* | LIMIT 10" --timeframe-start 2024-01-01T00:00:00.000Z --timeframe-end 2024-01-01T01:00:00.000Z --interval 5m',
+          'esql --query "FROM logs-* | LIMIT 10" --timeframe-start 2024-01-01T00:00:00.000Z --timeframe-end 2024-01-01T01:00:00.000Z --interval 5m',
       },
       context
     );
@@ -242,7 +242,7 @@ describe('runRulePreviewTool', () => {
     await tool.handler(
       {
         command:
-          '--type machine_learning --job-id my-ml-job --anomaly-threshold 75 --timeframe-start 2024-01-01T00:00:00.000Z --timeframe-end 2024-01-01T01:00:00.000Z',
+          'machine_learning --job-id my-ml-job --anomaly-threshold 75 --timeframe-start 2024-01-01T00:00:00.000Z --timeframe-end 2024-01-01T01:00:00.000Z',
       },
       context
     );
@@ -265,7 +265,7 @@ describe('runRulePreviewTool', () => {
   describe('HITL confirmation for large previews', () => {
     // 1h window at 5m interval = 12 invocations > threshold of 10
     const highInvocationCommand =
-      '--type esql --query "FROM logs-* | LIMIT 10" --interval 5m --timeframe-start 2024-01-01T00:00:00.000Z --timeframe-end 2024-01-01T01:00:00.000Z';
+      'esql --query "FROM logs-* | LIMIT 10" --interval 5m --timeframe-start 2024-01-01T00:00:00.000Z --timeframe-end 2024-01-01T01:00:00.000Z';
 
     it('returns a confirmation prompt when invocationCount exceeds the threshold', async () => {
       const mockPrompt = { prompt: { type: 'confirmation', id: 'test-prompt' } };
@@ -333,7 +333,7 @@ describe('runRulePreviewTool', () => {
       await tool.handler(
         {
           command:
-            '--type esql --query "FROM logs-* | LIMIT 10" --interval 1h --timeframe-start 2024-01-01T00:00:00.000Z --timeframe-end 2024-01-01T09:00:00.000Z',
+            'esql --query "FROM logs-* | LIMIT 10" --interval 1h --timeframe-start 2024-01-01T00:00:00.000Z --timeframe-end 2024-01-01T09:00:00.000Z',
         },
         context
       );
@@ -361,7 +361,7 @@ describe('runRulePreviewTool', () => {
       const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
 
       const result = await esqlDisabledTool.handler(
-        { command: '--type esql --query "FROM logs-* | LIMIT 10"' },
+        { command: 'esql --query "FROM logs-* | LIMIT 10"' },
         context
       );
 
@@ -386,7 +386,7 @@ describe('runRulePreviewTool', () => {
       await esqlDisabledTool.handler(
         {
           command:
-            '--type eql --query "process where process.name == \\"cmd.exe\\"" --timeframe-start 2024-01-01T00:00:00.000Z --timeframe-end 2024-01-01T01:00:00.000Z',
+            'eql --query "process where process.name == \\"cmd.exe\\"" --timeframe-start 2024-01-01T00:00:00.000Z --timeframe-end 2024-01-01T01:00:00.000Z',
         },
         context
       );
@@ -407,7 +407,7 @@ describe('runRulePreviewTool', () => {
     const result = await tool.handler(
       {
         command:
-          '--type esql --query "FROM logs-* | LIMIT 10" --timeframe-start not-a-date --timeframe-end now',
+          'esql --query "FROM logs-* | LIMIT 10" --timeframe-start not-a-date --timeframe-end now',
       },
       context
     );
