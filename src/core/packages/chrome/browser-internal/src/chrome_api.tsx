@@ -244,20 +244,6 @@ export function createChromeApi({
     },
     registerAppDocumentationLink: state.appDocumentationLink.set,
     getAppDocumentationLink$: () => state.appDocumentationLink.$,
-    registerFeedbackHandler: (handler: () => void) => {
-      state.feedbackHandler.set(handler);
-      return () => {
-        state.feedbackHandler.update((current) => (current === handler ? undefined : current));
-      };
-    },
-    getFeedbackHandler$: () => state.feedbackHandler.$,
-    registerNewsfeedHandler: (handler: { open: () => void; hasNew$: Observable<boolean> }) => {
-      state.newsfeedHandler.set(handler);
-      return () => {
-        state.newsfeedHandler.update((current) => (current === handler ? undefined : current));
-      };
-    },
-    getNewsfeedHandler$: () => state.newsfeedHandler.$,
     sidebar,
   };
 
