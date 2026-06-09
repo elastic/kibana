@@ -852,3 +852,74 @@ describe('parseRulePreviewCommand — unknown flags', () => {
     expect(result.kind).toBe('error');
   });
 });
+
+// ---------------------------------------------------------------------------
+// Snapshots — help output
+//
+// Locks down the exact text returned for every help path so regressions in
+// option descriptions, examples, or structure are caught immediately.
+// ---------------------------------------------------------------------------
+
+describe('parseRulePreviewCommand — snapshots: help output', () => {
+  it.each([
+    ['global --help', '--help'],
+    ['-h shorthand', '-h'],
+    ['esql --help', 'esql --help'],
+    ['eql --help', 'eql --help'],
+    ['query --help', 'query --help'],
+    ['saved_query --help', 'saved_query --help'],
+    ['threshold --help', 'threshold --help'],
+    ['threat_match --help', 'threat_match --help'],
+    ['machine_learning --help', 'machine_learning --help'],
+    ['new_terms --help', 'new_terms --help'],
+  ])('%s', (_label, command) => {
+    const result = parseRulePreviewCommand(command);
+    expect(result).toMatchSnapshot();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Snapshots — error messages
+//
+// Locks down the exact message returned for every error path so that error
+// wording stays useful and accurate as the parser evolves.
+// ---------------------------------------------------------------------------
+
+describe('parseRulePreviewCommand — snapshots: error messages', () => {
+  it.each([
+    ['empty command', ''],
+    ['no subcommand given', '--interval 5m'],
+    ['unknown subcommand', 'invalid_type'],
+    ['unknown flag on known subcommand', 'esql --query "x" --bogus value'],
+    ['esql missing --query', 'esql'],
+    ['eql missing --query', 'eql'],
+    ['saved_query missing --saved-id', 'saved_query'],
+    ['threshold missing --query', 'threshold --threshold-value 5'],
+    ['threshold missing --threshold-value', 'threshold --query "process.name: *"'],
+    ['machine_learning missing --job-id', 'machine_learning --anomaly-threshold 50'],
+    ['machine_learning missing --anomaly-threshold', 'machine_learning --job-id my-job'],
+    [
+      'threat_match missing --threat-mapping',
+      'threat_match --query "*:*" --threat-query "*:*" --threat-index idx',
+    ],
+    [
+      'new_terms missing --history-window-start',
+      'new_terms --query "*:*" --new-terms-fields source.ip',
+    ],
+    [
+      '--threshold-value is NaN',
+      'threshold --query "process.name: *" --threshold-value not-a-number',
+    ],
+    [
+      '--threat-mapping is invalid JSON',
+      'threat_match --query "*:*" --threat-query "*:*" --threat-index idx --threat-mapping not-json',
+    ],
+    [
+      '--threat-mapping is a JSON object (not an array)',
+      'threat_match --query "*:*" --threat-query "*:*" --threat-index idx --threat-mapping "{}"',
+    ],
+  ])('%s', (_label, command) => {
+    const result = parseRulePreviewCommand(command);
+    expect(result).toMatchSnapshot();
+  });
+});
