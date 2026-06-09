@@ -8,7 +8,7 @@
 import { ToolResultType } from '@kbn/agent-builder-common';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
-import type { z } from '@kbn/zod/v4';
+import { z } from '@kbn/zod/v4';
 import { coreMock } from '@kbn/core/server/mocks';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
 import { createToolHandlerContext, createToolTestMocks } from '../__mocks__/test_helpers';
@@ -34,9 +34,6 @@ const validEsqlRule = {
   type: 'esql' as const,
   language: 'esql' as const,
   query: 'FROM logs-* | LIMIT 10',
-  interval: '5m',
-  from: 'now-6m',
-  to: 'now',
 };
 
 // Keep the old name as an alias so existing tests don't need to be rewritten
@@ -84,15 +81,21 @@ describe('runRulePreviewTool', () => {
     expect(tool.id).toBe(SECURITY_RUN_RULE_PREVIEW_TOOL_ID);
   });
 
-  it('applies timeframe defaults in the schema', () => {
+  it('applies schedule and timeframe defaults in the schema', () => {
     const parsed = tool.schema.safeParse({ rule: validRule });
     expect(parsed.success).toBe(true);
     if (parsed.success) {
       const data = parsed.data as {
+        interval: string;
+        from: string;
+        to: string;
         timeframeStart: string;
         timeframeEnd: string;
         enableLoggedRequests: boolean;
       };
+      expect(data.interval).toBe('1h');
+      expect(data.from).toBe('now-1h');
+      expect(data.to).toBe('now');
       expect(data.timeframeStart).toBe('now-1h');
       expect(data.timeframeEnd).toBe('now');
       expect(data.enableLoggedRequests).toBe(false);
@@ -210,7 +213,8 @@ describe('runRulePreviewTool', () => {
 
     await tool.handler(
       {
-        rule: { type: 'esql', language: 'esql', query: 'FROM logs-* | LIMIT 10', interval: '5m' },
+        rule: { type: 'esql', language: 'esql', query: 'FROM logs-* | LIMIT 10' },
+        interval: '5m',
         timeframeStart: '2024-01-01T00:00:00.000Z',
         timeframeEnd: '2024-01-01T01:00:00.000Z',
         enableLoggedRequests: false,
@@ -224,6 +228,7 @@ describe('runRulePreviewTool', () => {
         type: 'esql',
         language: 'esql',
         query: 'FROM logs-* | LIMIT 10',
+        interval: '5m',
         severity: 'low',
         risk_score: 21,
         invocationCount: 12,
@@ -245,6 +250,7 @@ describe('runRulePreviewTool', () => {
     const result = await tool.handler(
       {
         rule: validRule,
+        interval: '5m',
         timeframeStart: '2024-01-01T00:00:00.000Z',
         timeframeEnd: '2024-01-01T01:00:00.000Z',
         enableLoggedRequests: false,
@@ -308,8 +314,8 @@ describe('runRulePreviewTool', () => {
           type: 'eql',
           language: 'eql',
           query: 'process where process.name == "cmd.exe"',
-          interval: '5m',
         },
+        interval: '5m',
         timeframeStart: '2024-01-01T00:00:00.000Z',
         timeframeEnd: '2024-01-01T01:00:00.000Z',
         enableLoggedRequests: false,
@@ -344,8 +350,8 @@ describe('runRulePreviewTool', () => {
           type: 'machine_learning',
           anomaly_threshold: 75,
           machine_learning_job_id: 'my-ml-job',
-          interval: '1h',
         },
+        interval: '1h',
         timeframeStart: '2024-01-01T00:00:00.000Z',
         timeframeEnd: '2024-01-01T01:00:00.000Z',
         enableLoggedRequests: false,
@@ -366,6 +372,7 @@ describe('runRulePreviewTool', () => {
   describe('HITL confirmation for large previews', () => {
     const highInvocationParams = {
       rule: validEsqlRule,
+      interval: '5m',
       timeframeStart: '2024-01-01T00:00:00.000Z',
       timeframeEnd: '2024-01-01T01:00:00.000Z',
       enableLoggedRequests: false,
@@ -438,8 +445,8 @@ describe('runRulePreviewTool', () => {
             type: 'machine_learning',
             anomaly_threshold: 75,
             machine_learning_job_id: 'my-ml-job',
-            interval: '5m',
           },
+          interval: '5m',
           timeframeStart: '2024-01-01T00:00:00.000Z',
           timeframeEnd: '2024-01-01T01:00:00.000Z',
           enableLoggedRequests: false,
@@ -464,7 +471,8 @@ describe('runRulePreviewTool', () => {
 
       await tool.handler(
         {
-          rule: { ...validRule, interval: '1h' },
+          rule: validRule,
+          interval: '1h',
           timeframeStart: '2024-01-01T00:00:00.000Z',
           timeframeEnd: '2024-01-01T09:00:00.000Z',
           enableLoggedRequests: false,
@@ -508,6 +516,7 @@ describe('runRulePreviewTool', () => {
     const result = await tool.handler(
       {
         rule: validRule,
+        interval: '1h',
         timeframeStart: 'now-1h',
         timeframeEnd: 'now',
         enableLoggedRequests: false,
@@ -517,6 +526,68 @@ describe('runRulePreviewTool', () => {
 
     expect(context.attachments.add).not.toHaveBeenCalled();
     expect(getResults(result)[0].type).toBe(ToolResultType.error);
+  });
+
+  describe('JSON schema sent to LLM API', () => {
+    // Minimal typed representation of the JSON schema structure we care about
+    interface JsonSchemaNode {
+      type?: string;
+      const?: string;
+      default?: unknown;
+      description?: string;
+      properties?: Record<string, JsonSchemaNode>;
+      oneOf?: JsonSchemaNode[];
+      required?: string[];
+    }
+
+    const getLlmSchema = (): JsonSchemaNode => {
+      const raw = z.toJSONSchema(tool.schema, {
+        unrepresentable: 'any',
+        io: 'input',
+      }) as JsonSchemaNode & { $schema?: string };
+      const { $schema: _, ...rest } = raw;
+      return rest;
+    };
+
+    it('places interval, from, and to at the top level (not inside the rule union arms)', () => {
+      const jsonSchema = getLlmSchema();
+      const { properties } = jsonSchema;
+
+      expect(properties).toHaveProperty('interval');
+      expect(properties).toHaveProperty('from');
+      expect(properties).toHaveProperty('to');
+
+      const ruleArms = properties?.rule?.oneOf ?? [];
+      for (const arm of ruleArms) {
+        expect(arm.properties).not.toHaveProperty('interval');
+        expect(arm.properties).not.toHaveProperty('from');
+        expect(arm.properties).not.toHaveProperty('to');
+      }
+    });
+
+    it('exposes all 8 rule types via oneOf under the rule field', () => {
+      const jsonSchema = getLlmSchema();
+      const ruleArms = jsonSchema.properties?.rule?.oneOf ?? [];
+
+      expect(ruleArms).toHaveLength(8);
+      const types = ruleArms.map((arm) => arm.properties?.type?.const);
+      expect(types).toEqual(
+        expect.arrayContaining([
+          'esql',
+          'eql',
+          'query',
+          'saved_query',
+          'threshold',
+          'threat_match',
+          'machine_learning',
+          'new_terms',
+        ])
+      );
+    });
+
+    it('matches the full JSON schema snapshot', () => {
+      expect(getLlmSchema()).toMatchSnapshot();
+    });
   });
 
   describe('esqlRulesDisabled feature flag', () => {
@@ -569,8 +640,8 @@ describe('runRulePreviewTool', () => {
             type: 'eql',
             language: 'eql',
             query: 'process where process.name == "cmd.exe"',
-            interval: '1h',
           },
+          interval: '1h',
           timeframeStart: 'now-1h',
           timeframeEnd: 'now',
           enableLoggedRequests: false,

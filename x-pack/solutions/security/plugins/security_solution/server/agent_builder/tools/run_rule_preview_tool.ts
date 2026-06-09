@@ -72,9 +72,6 @@ const esqlPreviewBase = EsqlRuleCreateProps.pick({
   type: true,
   query: true,
   language: true,
-  interval: true,
-  from: true,
-  to: true,
 });
 
 const esqlRulePreviewSchema = esqlPreviewBase.extend({
@@ -83,9 +80,6 @@ const esqlRulePreviewSchema = esqlPreviewBase.extend({
     'The ES|QL query for the rule (e.g. the query produced by the create_detection_rule tool).'
   ),
   language: z.literal('esql').default('esql'),
-  interval: esqlPreviewBase.shape.interval.default(DEFAULT_INTERVAL).describe(INTERVAL_DESC),
-  from: esqlPreviewBase.shape.from.default(DEFAULT_RULE_FROM).describe(FROM_DESC),
-  to: esqlPreviewBase.shape.to.default(DEFAULT_RULE_TO).describe(TO_DESC),
 });
 
 // ── EQL ────────────────────────────────────────────────────────────────────────
@@ -94,9 +88,6 @@ const eqlPreviewBase = EqlRuleCreateProps.pick({
   type: true,
   query: true,
   language: true,
-  interval: true,
-  from: true,
-  to: true,
   index: true,
   data_view_id: true,
   filters: true,
@@ -109,9 +100,6 @@ const eqlRulePreviewSchema = eqlPreviewBase.extend({
   type: z.literal('eql').describe('Rule type.'),
   query: eqlPreviewBase.shape.query.describe('The EQL query for the rule.'),
   language: z.literal('eql').default('eql'),
-  interval: eqlPreviewBase.shape.interval.default(DEFAULT_INTERVAL).describe(INTERVAL_DESC),
-  from: eqlPreviewBase.shape.from.default(DEFAULT_RULE_FROM).describe(FROM_DESC),
-  to: eqlPreviewBase.shape.to.default(DEFAULT_RULE_TO).describe(TO_DESC),
   index: eqlPreviewBase.shape.index.describe(INDEX_DESC),
   data_view_id: eqlPreviewBase.shape.data_view_id.describe(DATA_VIEW_DESC),
   filters: eqlPreviewBase.shape.filters.describe(FILTERS_DESC),
@@ -123,9 +111,6 @@ const queryPreviewBase = QueryRuleCreateProps.pick({
   type: true,
   query: true,
   language: true,
-  interval: true,
-  from: true,
-  to: true,
   index: true,
   data_view_id: true,
   filters: true,
@@ -137,9 +122,6 @@ const queryRulePreviewSchema = queryPreviewBase.extend({
     'KQL or Lucene query. Leave empty to match all documents.'
   ),
   language: queryPreviewBase.shape.language.describe(LANGUAGE_KQL_DESC),
-  interval: queryPreviewBase.shape.interval.default(DEFAULT_INTERVAL).describe(INTERVAL_DESC),
-  from: queryPreviewBase.shape.from.default(DEFAULT_RULE_FROM).describe(FROM_DESC),
-  to: queryPreviewBase.shape.to.default(DEFAULT_RULE_TO).describe(TO_DESC),
   index: queryPreviewBase.shape.index.describe(INDEX_DESC),
   data_view_id: queryPreviewBase.shape.data_view_id.describe(DATA_VIEW_DESC),
   filters: queryPreviewBase.shape.filters.describe(FILTERS_DESC),
@@ -152,9 +134,6 @@ const savedQueryPreviewBase = SavedQueryRuleCreateProps.pick({
   saved_id: true,
   query: true,
   language: true,
-  interval: true,
-  from: true,
-  to: true,
   index: true,
   data_view_id: true,
   filters: true,
@@ -169,9 +148,6 @@ const savedQueryRulePreviewSchema = savedQueryPreviewBase.extend({
     'Optional KQL or Lucene override for the saved query.'
   ),
   language: savedQueryPreviewBase.shape.language.describe(LANGUAGE_KQL_DESC),
-  interval: savedQueryPreviewBase.shape.interval.default(DEFAULT_INTERVAL).describe(INTERVAL_DESC),
-  from: savedQueryPreviewBase.shape.from.default(DEFAULT_RULE_FROM).describe(FROM_DESC),
-  to: savedQueryPreviewBase.shape.to.default(DEFAULT_RULE_TO).describe(TO_DESC),
   index: savedQueryPreviewBase.shape.index.describe(INDEX_DESC),
   data_view_id: savedQueryPreviewBase.shape.data_view_id.describe(DATA_VIEW_DESC),
   filters: savedQueryPreviewBase.shape.filters.describe(FILTERS_DESC),
@@ -184,9 +160,6 @@ const thresholdPreviewBase = ThresholdRuleCreateProps.pick({
   query: true,
   threshold: true,
   language: true,
-  interval: true,
-  from: true,
-  to: true,
   index: true,
   data_view_id: true,
   filters: true,
@@ -201,9 +174,6 @@ const thresholdRulePreviewSchema = thresholdPreviewBase.extend({
     '`field`: field(s) to group by (empty array = no grouping). `value`: minimum event count to generate an alert. `cardinality`: optional unique-value condition.'
   ),
   language: thresholdPreviewBase.shape.language.describe(LANGUAGE_KQL_DESC),
-  interval: thresholdPreviewBase.shape.interval.default(DEFAULT_INTERVAL).describe(INTERVAL_DESC),
-  from: thresholdPreviewBase.shape.from.default(DEFAULT_RULE_FROM).describe(FROM_DESC),
-  to: thresholdPreviewBase.shape.to.default(DEFAULT_RULE_TO).describe(TO_DESC),
   index: thresholdPreviewBase.shape.index.describe(INDEX_DESC),
   data_view_id: thresholdPreviewBase.shape.data_view_id.describe(DATA_VIEW_DESC),
   filters: thresholdPreviewBase.shape.filters.describe(FILTERS_DESC),
@@ -218,9 +188,6 @@ const threatMatchPreviewBase = ThreatMatchRuleCreateProps.pick({
   threat_mapping: true,
   threat_index: true,
   language: true,
-  interval: true,
-  from: true,
-  to: true,
   index: true,
   data_view_id: true,
   filters: true,
@@ -243,9 +210,6 @@ const threatMatchRulePreviewSchema = threatMatchPreviewBase.extend({
     'Index patterns for the threat intelligence source (e.g. ["logs-ti_*"]).'
   ),
   language: threatMatchPreviewBase.shape.language.describe(LANGUAGE_KQL_DESC),
-  interval: threatMatchPreviewBase.shape.interval.default(DEFAULT_INTERVAL).describe(INTERVAL_DESC),
-  from: threatMatchPreviewBase.shape.from.default(DEFAULT_RULE_FROM).describe(FROM_DESC),
-  to: threatMatchPreviewBase.shape.to.default(DEFAULT_RULE_TO).describe(TO_DESC),
   index: threatMatchPreviewBase.shape.index.describe(INDEX_DESC),
   data_view_id: threatMatchPreviewBase.shape.data_view_id.describe(DATA_VIEW_DESC),
   filters: threatMatchPreviewBase.shape.filters.describe(FILTERS_DESC),
@@ -263,9 +227,6 @@ const mlPreviewBase = MachineLearningRuleCreateProps.pick({
   type: true,
   anomaly_threshold: true,
   machine_learning_job_id: true,
-  interval: true,
-  from: true,
-  to: true,
 });
 
 const mlRulePreviewSchema = mlPreviewBase.extend({
@@ -276,9 +237,6 @@ const mlRulePreviewSchema = mlPreviewBase.extend({
   machine_learning_job_id: mlPreviewBase.shape.machine_learning_job_id.describe(
     'ID or array of IDs of the Machine Learning job(s) whose anomalies to monitor.'
   ),
-  interval: mlPreviewBase.shape.interval.default(DEFAULT_INTERVAL).describe(INTERVAL_DESC),
-  from: mlPreviewBase.shape.from.default(DEFAULT_RULE_FROM).describe(FROM_DESC),
-  to: mlPreviewBase.shape.to.default(DEFAULT_RULE_TO).describe(TO_DESC),
 });
 
 // ── New terms ──────────────────────────────────────────────────────────────────
@@ -289,9 +247,6 @@ const newTermsPreviewBase = NewTermsRuleCreateProps.pick({
   new_terms_fields: true,
   history_window_start: true,
   language: true,
-  interval: true,
-  from: true,
-  to: true,
   index: true,
   data_view_id: true,
   filters: true,
@@ -309,9 +264,6 @@ const newTermsRulePreviewSchema = newTermsPreviewBase.extend({
     'Start of the historical baseline window as datemath (e.g. "now-30d"). Values seen before this point are considered known.'
   ),
   language: newTermsPreviewBase.shape.language.describe(LANGUAGE_KQL_DESC),
-  interval: newTermsPreviewBase.shape.interval.default(DEFAULT_INTERVAL).describe(INTERVAL_DESC),
-  from: newTermsPreviewBase.shape.from.default(DEFAULT_RULE_FROM).describe(FROM_DESC),
-  to: newTermsPreviewBase.shape.to.default(DEFAULT_RULE_TO).describe(TO_DESC),
   index: newTermsPreviewBase.shape.index.describe(INDEX_DESC),
   data_view_id: newTermsPreviewBase.shape.data_view_id.describe(DATA_VIEW_DESC),
   filters: newTermsPreviewBase.shape.filters.describe(FILTERS_DESC),
@@ -338,8 +290,11 @@ const previewRuleSchema = z.discriminatedUnion('type', [
 
 const runRulePreviewSchema = z.object({
   rule: previewRuleSchema.describe(
-    'The detection rule to preview. Set `type` to select the rule type — each type has its own required fields. The rule is evaluated but never saved.'
+    'The detection rule to preview. Set `rule.type` to select the rule type — each type has its own required fields. The rule is evaluated but never saved.'
   ),
+  interval: z.string().default(DEFAULT_INTERVAL).describe(INTERVAL_DESC),
+  from: z.string().default(DEFAULT_RULE_FROM).describe(FROM_DESC),
+  to: z.string().default(DEFAULT_RULE_TO).describe(TO_DESC),
   timeframeStart: z
     .string()
     .default(DEFAULT_TIMEFRAME_START)
@@ -372,7 +327,7 @@ The tool returns the generated previewId and the attachment metadata. Use the re
     schema: runRulePreviewSchema,
     tags: ['security', 'detection', 'rule-preview', 'attachment'],
     handler: async (
-      { rule, timeframeStart, timeframeEnd, enableLoggedRequests },
+      { rule, interval, from, to, timeframeStart, timeframeEnd, enableLoggedRequests },
       { request, spaceId, savedObjectsClient, attachments, prompts, callContext }
     ) => {
       const start = dateMath.parse(timeframeStart);
@@ -415,13 +370,13 @@ The tool returns the generated previewId and the attachment metadata. Use the re
         };
       }
 
-      const intervalMs = parseDuration(rule.interval ?? DEFAULT_INTERVAL);
+      const intervalMs = parseDuration(interval);
       if (!intervalMs) {
         return {
           results: [
             {
               type: ToolResultType.error,
-              data: { message: `Invalid rule interval "${rule.interval ?? DEFAULT_INTERVAL}".` },
+              data: { message: `Invalid rule interval "${interval}".` },
             },
           ],
         };
@@ -440,9 +395,7 @@ The tool returns the generated previewId and the attachment metadata. Use the re
           return prompts.askForConfirmation({
             id: promptId,
             title: 'Large rule preview',
-            message: `This preview will run the rule **${invocationCount}** times (${timeframeStart} → ${timeframeEnd} at \`${
-              rule.interval ?? DEFAULT_INTERVAL
-            }\` intervals). Large previews can take a while. Do you want to continue?`,
+            message: `This preview will run the rule **${invocationCount}** times (${timeframeStart} → ${timeframeEnd} at \`${interval}\` intervals). Large previews can take a while. Do you want to continue?`,
             confirm_text: 'Run preview',
             cancel_text: 'Cancel',
             color: 'warning',
@@ -464,7 +417,7 @@ The tool returns the generated previewId and the attachment metadata. Use the re
                     'If they still want to run it, they can confirm the preview with:',
                     `  timeframeStart: ${timeframeStart}`,
                     `  timeframeEnd: ${timeframeEnd}`,
-                    `  interval: ${rule.interval ?? DEFAULT_INTERVAL}`,
+                    `  interval: ${interval}`,
                     ...(queryLine ? [queryLine] : []),
                   ].join('\n'),
                 },
@@ -477,6 +430,9 @@ The tool returns the generated previewId and the attachment metadata. Use the re
       const body = {
         ...RULE_PREVIEW_SHARED_DEFAULTS,
         ...rule,
+        interval,
+        from,
+        to,
         invocationCount,
         timeframeEnd: end.toISOString(),
       } as RulePreviewRequestBody;
