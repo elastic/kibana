@@ -293,7 +293,10 @@ class SmlIndexerImpl implements SmlIndexer {
       created_at: now,
       updated_at: now,
       spaces,
-      permissions: chunk.permissions ?? [],
+      permissions: {
+        kibana: { privileges: chunk.permissions?.kibana?.privileges ?? [] },
+        elasticsearch: { indices: chunk.permissions?.elasticsearch?.indices ?? [] },
+      },
       ingestion_method: ingestionMethod,
     };
     if (chunk.description !== undefined) {

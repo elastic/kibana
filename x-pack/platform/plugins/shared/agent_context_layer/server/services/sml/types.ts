@@ -31,6 +31,34 @@ export interface DiscoveryLabel {
 }
 
 /**
+ * A single Kibana feature privilege required to access a chunk
+ * (e.g., `saved_object:lens/get`, `action:execute`).
+ */
+export interface SmlKibanaPrivilege {
+  name: string;
+}
+
+/**
+ * A single concrete Elasticsearch index / alias / data stream name whose
+ * data a chunk's content depends on. Used by the search-time post-filter
+ * to gate chunks behind the user's ES `read` privilege on each name.
+ */
+export interface SmlElasticsearchIndex {
+  name: string;
+}
+
+/**
+ * Permissions required to access a chunk, split by access boundary.
+ *
+ * Both sub-objects are always present (with possibly-empty arrays) on
+ * stored documents to keep the schema rigid and predictable.
+ */
+export interface SmlPermissions {
+  kibana: { privileges: SmlKibanaPrivilege[] };
+  elasticsearch: { indices: SmlElasticsearchIndex[] };
+}
+
+/**
  * A single SML chunk to be indexed.
  */
 export interface SmlChunk {
@@ -70,8 +98,8 @@ export interface SmlChunk {
   user_id?: string;
   /** Other SML entries this item references. Each entry carries a `uri` field; the object shape allows sub-fields (e.g. relationship kind) without a future migration. */
   references?: Array<{ uri: string }>;
-  /** Permissions required to access the underlying element (e.g., 'saved_object:lens/get') */
-  permissions?: string[];
+  /** Permissions required to access the underlying element. */
+  permissions: SmlPermissions;
 }
 
 /**
@@ -199,8 +227,11 @@ export interface SmlDocument {
   updated_at: string;
   /** Space IDs this item belongs to */
   spaces: string[];
-  /** Permissions required to access the underlying element */
-  permissions: string[];
+  /**
+   * Permissions required to access the underlying element. Always present
+   * on stored documents; inner arrays may be empty.
+   */
+  permissions: SmlPermissions;
   /** How this chunk was produced. */
   ingestion_method: SmlIngestionMethod;
 }
@@ -228,7 +259,7 @@ export interface SmlSearchResult {
   references?: Array<{ uri: string }>;
   tags?: string[];
   spaces?: string[];
-  permissions?: string[];
+  permissions?: SmlPermissions;
 }
 
 /**
@@ -257,7 +288,7 @@ export interface SmlAutocompleteResult {
   title: string;
   origin: { uri: string };
   /** Used server-side for permission filtering; not exposed in the HTTP response. */
-  permissions: string[];
+  permissions: SmlPermissions;
   /** Used server-side for space filtering; not exposed in the HTTP response. */
   spaces: string[];
   /**
@@ -318,7 +349,12 @@ export interface SmlDocumentInput {
   title: string;
   origin_id: string;
   content: string;
-  permissions?: string[];
+  /**
+   * Permissions required to access the underlying element. Optional on
+   * input — when omitted, the upsert handler normalizes to an empty
+   * `{ kibana: { privileges: [] }, elasticsearch: { indices: [] } }`.
+   */
+  permissions?: SmlPermissions;
 }
 
 /**

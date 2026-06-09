@@ -53,6 +53,7 @@ dependsOn:
   - '@kbn/core-di'
   - '@kbn/announcement-banner'
   - '@kbn/kibana-react-plugin'
+  - '@kbn/dashboard-plugin'
 tags:
   - shared-browser
   - package
