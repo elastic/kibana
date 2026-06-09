@@ -153,6 +153,14 @@ Goal: prove the same skill works on real merged PRs. Slide-driven; two PRs, ~75s
 
 https://github.com/elastic/kibana/pull/271722
 
+**Generic** (`route.ts`):
+
+![Generic review comment on route.ts flagging routeLimitedConcurrencyTag(1) as too aggressive](demo-pr-271722-comment-1-generic.png)
+
+**Domain-aware** (`constants.ts`):
+
+![Domain-aware review comment on constants.ts citing the heavy-endpoints rate-limit invariant and MSSP 300-spaces scale](demo-pr-271722-comment-1-domain.png)
+
 > "PR #271722. Bulk rule creation in the alerting layer. Both reviewers flagged the **same architectural decision** - the import endpoint sets `routeLimitedConcurrencyTag(1)`, which serializes all imports cluster-wide.
 >
 > Look at the difference in framing.
@@ -168,6 +176,16 @@ https://github.com/elastic/kibana/pull/271722
 #### Slide 1b - PR #272038 (Move install/upgrade/revert into `DetectionRulesClient`) (~80s)
 
 https://github.com/elastic/kibana/pull/272038
+
+**Top row — parity (both reviewers caught the DRC bypass on `legacy_create_prepackaged_rules.ts`):**
+
+![Generic review comment flagging the inconsistency: upgrade step bypasses DetectionRulesClient](demo-pr-272038-comment-1-generic.png)
+
+![Domain-aware review comment with the same parity catch: install goes through DRC, upgrade bypasses it](demo-pr-272038-comment-1-domain.png)
+
+**Bottom row — only domain-aware caught the abstraction-boundary leak on `detection_rules_client_interface.ts`:**
+
+![Domain-aware review comment citing the abstraction-boundary leakage invariant: RuleUpgradeContext leaking through IDetectionRulesClient](demo-pr-272038-comment-2-domain.png)
 
 > "Second PR. This one is a refactor - pulling install, upgrade, and revert operations into a central `DetectionRulesClient` abstraction.
 >

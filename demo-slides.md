@@ -50,6 +50,11 @@ The planted-PR walkthrough at Section 2.1 (~0:04–0:09) does not use slides —
 
   - **Footer (small)**: "*Same architectural decision. Generic: 'aggressive, consider raising.' Domain-aware: 'this disables bulk imports for MSSP — here's why, here's the lower bound, here's the upper bound.'*"
 - **Speaker punchline** (notes, not on slide): "*Generic gives you the one-liner. Domain-aware gives you the bounds.*"
+- **Reference screenshots** (the actual GitHub comments — source content for the slide):
+
+  ![Generic review comment on route.ts flagging routeLimitedConcurrencyTag(1) as too aggressive](demo-pr-271722-comment-1-generic.png)
+
+  ![Domain-aware review comment on constants.ts citing the heavy-endpoints rate-limit invariant and MSSP 300-spaces scale](demo-pr-271722-comment-1-domain.png)
 
 ---
 
@@ -68,6 +73,17 @@ The planted-PR walkthrough at Section 2.1 (~0:04–0:09) does not use slides —
 
   - **Footer (small)**: "*Both caught the obvious DRC-bypass. Only the domain-aware reviewer noticed the new public interface is leaking a sibling-domain handler-level type.*"
 - **Speaker punchline** (notes): "*Parity at the surface, delta beneath. The domain-aware reviewer sees what an owner of the abstraction would see.*"
+- **Reference screenshots** (the actual GitHub comments — source content for the slide):
+
+  Top row — parity on `legacy_create_prepackaged_rules.ts`:
+
+  ![Generic review comment flagging the inconsistency: upgrade step bypasses DetectionRulesClient](demo-pr-272038-comment-1-generic.png)
+
+  ![Domain-aware review comment with the same parity catch: install goes through DRC, upgrade bypasses it](demo-pr-272038-comment-1-domain.png)
+
+  Bottom row — unpaired domain catch on `detection_rules_client_interface.ts`:
+
+  ![Domain-aware review comment citing the abstraction-boundary leakage invariant: RuleUpgradeContext leaking through IDetectionRulesClient](demo-pr-272038-comment-2-domain.png)
 
 ---
 
