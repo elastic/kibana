@@ -6,12 +6,7 @@
  */
 import pMap from 'p-map';
 import semverGt from 'semver/functions/gt';
-import type {
-  CoreSetup,
-  ElasticsearchClient,
-  Logger,
-  LoggerFactory,
-} from '@kbn/core/server';
+import type { CoreSetup, ElasticsearchClient, Logger, LoggerFactory } from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
