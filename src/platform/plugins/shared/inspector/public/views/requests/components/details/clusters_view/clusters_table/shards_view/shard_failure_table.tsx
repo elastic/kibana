@@ -58,31 +58,20 @@ export function ShardFailureTable({ failures }: Props) {
         defaultMessage: 'Shard',
       }),
       render: (shard: number, item: ShardRow) => {
+        const label =
+          item.rowId in expandedRows
+            ? i18n.translate('inspector.requests.clusters.shards.table.collapseRow', {
+                defaultMessage: 'Collapse table row to hide shard details',
+              })
+            : i18n.translate('inspector.requests.clusters.shards.table.expandRow', {
+                defaultMessage: 'Expand table row to view shard details',
+              });
         return (
           <>
-            <EuiToolTip
-              content={
-                item.rowId in expandedRows
-                  ? i18n.translate('inspector.requests.clusters.shards.table.collapseRow', {
-                      defaultMessage: 'Collapse table row to hide shard details',
-                    })
-                  : i18n.translate('inspector.requests.clusters.shards.table.expandRow', {
-                      defaultMessage: 'Expand table row to view shard details',
-                    })
-              }
-              disableScreenReaderOutput
-            >
+            <EuiToolTip content={label} disableScreenReaderOutput>
               <EuiButtonIcon
                 onClick={() => toggleDetails(item.rowId)}
-                aria-label={
-                  item.rowId in expandedRows
-                    ? i18n.translate('inspector.requests.clusters.shards.table.collapseRow', {
-                        defaultMessage: 'Collapse table row to hide shard details',
-                      })
-                    : i18n.translate('inspector.requests.clusters.shards.table.expandRow', {
-                        defaultMessage: 'Expand table row to view shard details',
-                      })
-                }
+                aria-label={label}
                 iconType={item.rowId in expandedRows ? 'chevronSingleDown' : 'chevronSingleRight'}
               />
             </EuiToolTip>
