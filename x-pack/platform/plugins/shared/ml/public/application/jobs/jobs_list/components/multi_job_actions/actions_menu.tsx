@@ -6,15 +6,21 @@
  */
 
 import type { FC } from 'react';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 
-import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiPopover,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { MlSummaryJob } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
 import { MIGRATE_AD_JOBS_TO_CPS_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 
-import { checkPermission } from '../../../../capabilities/check_capabilities';
+import { usePermissionCheck } from '../../../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../../../ml_nodes_check/check_ml_nodes';
 import { useMlApi, useMlKibana } from '../../../../contexts/kibana';
 import { isManagedJob } from '../../../jobs_utils';
@@ -57,22 +63,22 @@ export const MultiJobActionsMenu: FC<Props> = ({
   } = useMlKibana();
   const mlApi = useMlApi();
 
-  /**
-   * Jobs that still need CPS project routing (`projectRouting === null` from jobs summary).
-   */
-  const jobsToCPSMigrate = useMemo(() => jobs.filter((j) => j.projectRouting === null), [jobs]);
+  const [
+    canUpdateDatafeed,
+    canDeleteJob,
+    canStartStopDatafeedCap,
+    canCloseJobCap,
+    canCreateMlAlerts,
+  ] = usePermissionCheck([
+    'canUpdateDatafeed',
+    'canDeleteJob',
+    'canStartStopDatafeed',
+    'canCloseJob',
+    'canCreateMlAlerts',
+  ]);
 
-  const canMigrateToCps = useMemo(() => {
-    return jobsToCPSMigrate.length > 0 && checkPermission('canUpdateDatafeed') === true;
-  }, [jobsToCPSMigrate]);
-
-  const canDeleteJob = useMemo(() => checkPermission('canDeleteJob'), []);
-  const canStartStopDatafeed = useMemo(
-    () => checkPermission('canStartStopDatafeed') && mlNodesAvailable(),
-    []
-  );
-  const canCloseJob = useMemo(() => checkPermission('canCloseJob') && mlNodesAvailable(), []);
-  const canCreateMlAlerts = useMemo(() => checkPermission('canCreateMlAlerts'), []);
+  const canStartStopDatafeed = canStartStopDatafeedCap && mlNodesAvailable();
+  const canCloseJob = canCloseJobCap && mlNodesAvailable();
 
   const onButtonClick = useCallback(() => {
     setIsOpen((prev) => !prev);
@@ -85,23 +91,29 @@ export const MultiJobActionsMenu: FC<Props> = ({
   const anyJobsBlocked = jobs.some((j) => j.blocked !== undefined);
 
   const button = (
-    <EuiButtonIcon
-      size="s"
-      onClick={onButtonClick}
-      iconType="gear"
-      aria-label={i18n.translate(
-        'xpack.ml.jobsList.multiJobActionsMenu.managementActionsAriaLabel',
-        {
-          defaultMessage: 'Management actions',
+    <EuiToolTip
+      content={i18n.translate('xpack.ml.jobsList.multiJobActionsMenu.managementActionsAriaLabel', {
+        defaultMessage: 'Management actions',
+      })}
+    >
+      <EuiButtonIcon
+        size="s"
+        onClick={onButtonClick}
+        iconType="gear"
+        aria-label={i18n.translate(
+          'xpack.ml.jobsList.multiJobActionsMenu.managementActionsAriaLabel',
+          {
+            defaultMessage: 'Management actions',
+          }
+        )}
+        color="text"
+        disabled={
+          anyJobsBlocked ||
+          (canDeleteJob === false && canStartStopDatafeed === false && canUpdateDatafeed === false)
         }
-      )}
-      color="text"
-      disabled={
-        anyJobsBlocked ||
-        (canDeleteJob === false && canStartStopDatafeed === false && canMigrateToCps === false)
-      }
-      data-test-subj="mlADJobListMultiSelectManagementActionsButton"
-    />
+        data-test-subj="mlADJobListMultiSelectManagementActionsButton"
+      />
+    </EuiToolTip>
   );
 
   const items: React.ReactElement[] = [
@@ -216,7 +228,7 @@ export const MultiJobActionsMenu: FC<Props> = ({
     );
   }
 
-  if (canMigrateToCps) {
+  if (canUpdateDatafeed) {
     items.push(
       <EuiContextMenuItem
         key="migrate to cps"
@@ -224,7 +236,7 @@ export const MultiJobActionsMenu: FC<Props> = ({
         disabled={false}
         onClick={() => {
           void uiActions.executeTriggerActions(MIGRATE_AD_JOBS_TO_CPS_TRIGGER, {
-            initialJobIds: jobsToCPSMigrate.map((j) => j.id),
+            initialJobIds: jobs.map((j) => j.id),
             allowScopeSelection: true,
           });
           closePopover();
@@ -233,7 +245,7 @@ export const MultiJobActionsMenu: FC<Props> = ({
       >
         <FormattedMessage
           id="xpack.ml.jobsList.multiJobsActions.migrateToCpsLabel"
-          defaultMessage="Migrate to CPS"
+          defaultMessage="Update project routing"
         />
       </EuiContextMenuItem>
     );
