@@ -41,19 +41,19 @@ function comparePanels(a: GridData, b: GridData): number {
 }
 
 export function placeClonePanel({
-  width,
-  height,
   sectionId,
-  currentPanels,
+  currentLayout,
+  panel: newPanel,
   placeBesideId,
 }: PanelPlacementProps & { placeBesideId: string }): PanelPlacementReturn {
-  const panelToPlaceBeside = currentPanels[placeBesideId];
+  const panelToPlaceBeside = currentLayout.panels[placeBesideId];
   if (!panelToPlaceBeside) {
     throw new PanelNotFoundError();
   }
+  const { w: width, h: height } = newPanel.grid;
   const beside = { ...panelToPlaceBeside.grid, panelId: placeBesideId };
   const otherPanelGridData: Array<GridData & { panelId: string }> = [];
-  forOwn(currentPanels, (panel: DashboardLayoutPanel, panelId: string) => {
+  forOwn(currentLayout.panels, (panel: DashboardLayoutPanel, panelId: string) => {
     if (panel.grid.sectionId === sectionId) {
       // only check against panels that are in the same section as the cloned panel
       otherPanelGridData.push({ ...panel.grid, panelId });
@@ -82,7 +82,13 @@ export function placeClonePanel({
         );
       });
       if (!intersection) {
-        return { newPanelPlacement: direction.grid, otherPanels: currentPanels };
+        return {
+          ...currentLayout,
+          panels: {
+            ...currentLayout.panels,
+            [newPanel.uuid]: { ...newPanel, grid: direction.grid },
+          },
+        };
       }
     } else {
       direction.fits = false;
@@ -94,7 +100,7 @@ export function placeClonePanel({
    * 2. place the cloned panel to the bottom
    * 3. reposition the panels after the cloned panel in the grid
    */
-  const otherPanels = { ...currentPanels };
+  const otherPanels = { ...currentLayout.panels };
   const sortedGrid = otherPanelGridData.sort(comparePanels);
 
   let position = 0;
@@ -118,5 +124,11 @@ export function placeClonePanel({
       otherPanels[originalPositionInTheGrid] = { ...movedPanel, grid: newGridData };
     }
   }
-  return { newPanelPlacement: bottomPlacement.grid, otherPanels };
+  return {
+    ...currentLayout,
+    panels: {
+      ...currentLayout.panels,
+      [newPanel.uuid]: { ...newPanel, grid: bottomPlacement.grid },
+    },
+  };
 }
