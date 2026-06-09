@@ -3,8 +3,10 @@
 # Ona-specific post-start: runs the general devcontainer post-start,
 # then applies Ona-only configuration.
 
-# Run the shared devcontainer post-start script.
-"${KBN_DIR}/.devcontainer/scripts/post_start.sh"
+# Run the shared devcontainer post-start script. Bootstrap is owned by the
+# `install-deps` automation in Ona (the ES/Kibana services depend on it), so
+# skip it here to avoid a second concurrent `yarn kbn bootstrap`.
+SKIP_BOOTSTRAP=true "${KBN_DIR}/.devcontainer/scripts/post_start.sh"
 
 # Authenticate gh CLI and add the user's fork as a git remote using the
 # platform-provided Git credential.
