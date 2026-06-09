@@ -33,11 +33,7 @@ export const getActionTemplateKey = (template: ActionTemplate): string =>
 
 export type ActionFormValue = ActionDraft[];
 
-const HAS_FILLED_VALUE_RE = /"[^"]+"/;
-
 export const isActionValid = (action: ActionDraft): boolean =>
   action.source === 'existing'
     ? Boolean(action.workflowId)
-    : action.connectorId !== null &&
-      action.params.trim() !== '' &&
-      HAS_FILLED_VALUE_RE.test(action.params);
+    : action.connectorId !== null && action.params.trim() !== '';
