@@ -11,14 +11,12 @@ import { registerDisableAllWorkflowsRoute } from './disable';
 import { registerExecutionFieldsRoute } from './execution_fields';
 import { registerExecutionOptionsListRoute } from './execution_options_list';
 import { registerGetConfigRoute } from './get_config';
-import { registerSearchExecutionsRoute } from './search_executions';
 import { registerTriggerEventsLogRoutes } from './trigger_events_log';
 import type { RouteDependencies } from '../types';
 
 export function registerInternalRoutes(deps: RouteDependencies) {
   registerGetConfigRoute(deps);
   registerDisableAllWorkflowsRoute(deps);
-  registerSearchExecutionsRoute(deps);
   registerExecutionOptionsListRoute(deps);
   registerExecutionFieldsRoute(deps);
   registerTriggerEventsLogRoutes(deps);

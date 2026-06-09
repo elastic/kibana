@@ -34,10 +34,10 @@ describe('WorkflowExecutionsTable', () => {
     jest.clearAllMocks();
   });
 
-  it('calls internal executions search API', async () => {
+  it('calls public executions search API', async () => {
     const services = createStartServicesMock();
     const dataView = createWorkflowExecutionsDataView(services.fieldFormats);
-    jest.mocked(services.http.post).mockResolvedValue({
+    jest.mocked(services.http.get).mockResolvedValue({
       hits: {
         hits: [],
         total: { value: 0, relation: 'eq' },
@@ -59,27 +59,25 @@ describe('WorkflowExecutionsTable', () => {
       expect(screen.getByTestId('workflowExecutionsTableEmpty')).toBeInTheDocument();
     });
 
-    expect(services.http.post).toHaveBeenCalledWith(
-      '/internal/workflows/executions/_search',
+    expect(services.http.get).toHaveBeenCalledWith(
+      '/api/workflows/executions',
       expect.objectContaining({
-        version: '1',
-        body: expect.any(String),
+        version: '2023-10-31',
+        query: expect.objectContaining({
+          from: 0,
+          size: 25,
+          trackTotalHits: true,
+          query: expect.any(String),
+          sort: expect.any(String),
+        }),
       })
     );
-
-    const { body } = jest.mocked(services.http.post).mock.calls[0][1] as unknown as {
-      body: string;
-    };
-    const requestBody = JSON.parse(body);
-    expect(requestBody.from).toBe(0);
-    expect(requestBody.size).toBe(25);
-    expect(requestBody.trackTotalHits).toBe(true);
   });
 
   it('shows empty state when search returns no executions', async () => {
     const services = createStartServicesMock();
     const dataView = createWorkflowExecutionsDataView(services.fieldFormats);
-    jest.mocked(services.http.post).mockResolvedValue({
+    jest.mocked(services.http.get).mockResolvedValue({
       hits: {
         hits: [],
         total: { value: 0, relation: 'eq' },
@@ -107,7 +105,7 @@ describe('WorkflowExecutionsTable', () => {
     const services = createStartServicesMock();
     const dataView = createWorkflowExecutionsDataView(services.fieldFormats);
 
-    jest.mocked(services.http.post).mockRejectedValue(new Error('cluster unavailable'));
+    jest.mocked(services.http.get).mockRejectedValue(new Error('cluster unavailable'));
 
     render(
       <WorkflowExecutionsTable

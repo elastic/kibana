@@ -172,13 +172,6 @@ describe('Internal Routes', () => {
     expect(routeHandlers[`POST:/internal/workflows/disable`].handler).toEqual(expect.any(Function));
   });
 
-  it('should register the executions search route handler', () => {
-    expect(routeHandlers[`POST:/internal/workflows/executions/_search`]).toBeDefined();
-    expect(routeHandlers[`POST:/internal/workflows/executions/_search`].handler).toEqual(
-      expect.any(Function)
-    );
-  });
-
   it('should register the executions options list route handler', () => {
     expect(routeHandlers[`POST:/internal/workflows/executions/options_list`]).toBeDefined();
     expect(routeHandlers[`POST:/internal/workflows/executions/options_list`].handler).toEqual(
@@ -281,57 +274,6 @@ describe('Internal Routes', () => {
     expect(mockApi.disableAllWorkflows).toHaveBeenCalledWith('default');
     expect(response.ok).toHaveBeenCalledWith({
       body: { total: 3, disabled: 3, failures: [] },
-    });
-  });
-
-  it('should execute scoped executions search with enforced filters', async () => {
-    const response = httpServerMock.createResponseFactory();
-    const request = httpServerMock.createKibanaRequest({
-      method: 'post',
-      path: '/internal/workflows/executions/_search',
-      body: {
-        query: { term: { workflowId: 'wf-1' } },
-        from: 25,
-        size: 25,
-        sort: [{ startedAt: { order: 'desc' } }],
-        trackTotalHits: true,
-      },
-    });
-
-    await routeHandlers[`POST:/internal/workflows/executions/_search`].handler(
-      mockContext,
-      request,
-      response
-    );
-
-    expect(mockSearch).toHaveBeenCalledWith(
-      expect.objectContaining({
-        index: WORKFLOWS_EXECUTIONS_INDEX,
-        from: 25,
-        size: 25,
-        sort: [{ startedAt: { order: 'desc' } }],
-        track_total_hits: true,
-        query: {
-          bool: {
-            must: [
-              { term: { workflowId: 'wf-1' } },
-              {
-                bool: {
-                  should: [
-                    { term: { spaceId: 'default' } },
-                    { bool: { must_not: { exists: { field: 'spaceId' } } } },
-                  ],
-                  minimum_should_match: 1,
-                },
-              },
-            ],
-            must_not: [{ exists: { field: 'stepId' } }],
-          },
-        },
-      })
-    );
-    expect(response.ok).toHaveBeenCalledWith({
-      body: { hits: { hits: [], total: { value: 0, relation: 'eq' } } },
     });
   });
 

@@ -37,7 +37,7 @@ describe('WorkflowExecutionsPage', () => {
     services.spaces.getActiveSpace = jest.fn().mockResolvedValue({ id: 'default' });
     const SearchBarStub = () => <div data-test-subj="searchBarStub" />;
     services.unifiedSearch.ui.SearchBar = SearchBarStub;
-    jest.mocked(services.http.post).mockResolvedValue({
+    jest.mocked(services.http.get).mockResolvedValue({
       hits: { hits: [], total: { value: 0, relation: 'eq' } },
     });
 

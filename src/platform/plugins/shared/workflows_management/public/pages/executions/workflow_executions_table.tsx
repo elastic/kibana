@@ -18,13 +18,10 @@ import {
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { CellActionsProvider } from '@kbn/cell-actions';
-import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { buildDataTableRecordList } from '@kbn/discover-utils';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
-import { buildEsQuery } from '@kbn/es-query';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
-import type { ESSearchResponse } from '@kbn/es-types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -33,12 +30,9 @@ import {
   UnifiedDataTable,
   type UnifiedDataTableSettings,
 } from '@kbn/unified-data-table';
-import type { EsWorkflowExecution } from '@kbn/workflows';
+import { useWorkflowExecutionsSearch } from './use_workflow_executions_search';
 import { WorkflowExecutionDetailFlyout } from './workflow_execution_detail_flyout';
-import {
-  buildWorkflowExecutionsSearchFilters,
-  getWorkflowExecutionsFetchErrorMessage,
-} from './workflow_executions_search_query';
+import { getWorkflowExecutionsFetchErrorMessage } from './workflow_executions_search_query';
 import { useKibana } from '../../hooks/use_kibana';
 
 const DEFAULT_COLUMNS = ['workflowId', 'status', 'id', 'triggeredBy', 'executedBy'] as const;
@@ -76,7 +70,6 @@ export const WorkflowExecutionsTable = React.memo<WorkflowExecutionsTableProps>(
     const {
       data: dataService,
       fieldFormats,
-      http,
       notifications: { toasts },
       storage,
       theme,
@@ -84,106 +77,49 @@ export const WorkflowExecutionsTable = React.memo<WorkflowExecutionsTableProps>(
       uiSettings,
     } = useKibana().services;
 
-    const [hits, setHits] = useState<EsHitRecord[]>([]);
-    const [total, setTotal] = useState(0);
-    const [loadingState, setLoadingState] = useState<DataLoadingState>(DataLoadingState.loading);
-    const [error, setError] = useState<string | null>(null);
-
     const [pageIndex, setPageIndex] = useState(0);
     const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
     const [sort, setSort] = useState<SortOrder[]>(DEFAULT_SORT);
     const [visibleColumns, setVisibleColumns] = useState<string[]>(Array.from(DEFAULT_COLUMNS));
     const [gridSettings, setGridSettings] = useState<UnifiedDataTableSettings>({});
     const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>();
-    const [retryToken, setRetryToken] = useState(0);
 
-    useEffect(() => {
-      let cancelled = false;
-
-      const fetchExecutions = async () => {
-        setLoadingState(DataLoadingState.loading);
-        setError(null);
-
-        try {
-          const timeField = dataView.timeFieldName ?? 'startedAt';
-          const searchFilters = buildWorkflowExecutionsSearchFilters({
-            spaceId,
-            timeRange,
-            timeField,
-            userFilters: filters,
-          });
-          const rawResponse = await http.post<ESSearchResponse<EsWorkflowExecution>>(
-            '/internal/workflows/executions/_search',
-            {
-              version: '1',
-              body: JSON.stringify({
-                query: buildEsQuery(
-                  dataView,
-                  query?.query ? [query] : [],
-                  searchFilters,
-                  getEsQueryConfig(uiSettings)
-                ),
-                from: pageIndex * pageSize,
-                size: pageSize,
-                sort: sort.map(([field, direction]) => ({ [field]: { order: direction } })),
-                trackTotalHits: true,
-              }),
-            }
-          );
-
-          if (cancelled) {
-            return;
-          }
-
-          const responseHits = (rawResponse.hits?.hits ?? []).filter(
-            (hit) => hit._source != null
-          ) as unknown as EsHitRecord[];
-          const totalHits = rawResponse.hits?.total;
-          const totalCount =
-            typeof totalHits === 'number' ? totalHits : totalHits?.value ?? responseHits.length;
-
-          setHits(responseHits);
-          setTotal(totalCount);
-          setLoadingState(DataLoadingState.loaded);
-        } catch {
-          if (cancelled) {
-            return;
-          }
-
-          setError(getWorkflowExecutionsFetchErrorMessage());
-          setHits([]);
-          setTotal(0);
-          setLoadingState(DataLoadingState.loaded);
-        }
-      };
-
-      fetchExecutions();
-
-      return () => {
-        cancelled = true;
-      };
-    }, [
+    const {
+      data: rawResponse,
+      error,
+      isFetching,
+      isLoading,
+      refetch,
+    } = useWorkflowExecutionsSearch({
       dataView,
+      query,
       filters,
-      http,
+      timeRange,
+      spaceId,
       pageIndex,
       pageSize,
-      query,
-      retryToken,
       sort,
-      spaceId,
-      timeRange,
-      uiSettings,
-    ]);
+    });
+
+    const { hits, total } = useMemo(() => {
+      const responseHits = (rawResponse?.hits?.hits ?? []).filter(
+        (hit) => hit._source != null
+      ) as unknown as EsHitRecord[];
+      const totalHits = rawResponse?.hits?.total;
+      const totalCount =
+        typeof totalHits === 'number' ? totalHits : totalHits?.value ?? responseHits.length;
+
+      return { hits: responseHits, total: totalCount };
+    }, [rawResponse]);
+
+    const loadingState =
+      isLoading || isFetching ? DataLoadingState.loading : DataLoadingState.loaded;
+    const errorMessage = error ? getWorkflowExecutionsFetchErrorMessage() : null;
 
     useEffect(() => {
       setPageIndex(0);
       setExpandedDoc(undefined);
     }, [query, filters, spaceId, timeRange]);
-
-    const handleRetry = useCallback(() => {
-      setRetryToken((n) => n + 1);
-    }, []);
 
     const rows = useMemo<DataTableRecord[]>(
       () => buildDataTableRecordList({ records: hits, dataView }),
@@ -237,6 +173,10 @@ export const WorkflowExecutionsTable = React.memo<WorkflowExecutionsTableProps>(
       setExpandedDoc(undefined);
     }, []);
 
+    const handleRetry = useCallback(() => {
+      void refetch();
+    }, [refetch]);
+
     const renderDocumentView = useCallback(
       (hit: DataTableRecord) => (
         <WorkflowExecutionDetailFlyout hit={hit} onClose={handleCloseFlyout} />
@@ -246,7 +186,7 @@ export const WorkflowExecutionsTable = React.memo<WorkflowExecutionsTableProps>(
 
     const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
-    if (error) {
+    if (errorMessage) {
       return (
         <EuiEmptyPrompt
           color="danger"
@@ -260,7 +200,7 @@ export const WorkflowExecutionsTable = React.memo<WorkflowExecutionsTableProps>(
               />
             </h3>
           }
-          body={<p>{error}</p>}
+          body={<p>{errorMessage}</p>}
           actions={
             <EuiButtonEmpty onClick={handleRetry} data-test-subj="workflowExecutionsTableRetry">
               <FormattedMessage

@@ -295,6 +295,15 @@ const ROUTE_REQUEST_FIXTURES: Record<string, { params?: any; body?: any; query?:
   'GET:/api/workflows/workflow/{workflowId}/executions': {
     params: { workflowId: 'test-workflow-id' },
   },
+  'GET:/api/workflows/executions': {
+    query: {
+      query: JSON.stringify({ match_all: {} }),
+      from: 0,
+      size: 25,
+      sort: JSON.stringify([{ startedAt: { order: 'desc' } }]),
+      trackTotalHits: true,
+    },
+  },
   'GET:/api/workflows/workflow/{workflowId}/executions/steps': {
     params: { workflowId: 'test-workflow-id' },
   },
