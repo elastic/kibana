@@ -11,6 +11,7 @@
   ],
   "kbn_references": [
     "@kbn/babel-register",
+    "@kbn/repo-info",
     "@kbn/security-hardening",
   ],
   "exclude": [

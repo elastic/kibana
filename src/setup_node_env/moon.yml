@@ -18,6 +18,7 @@ project:
   sourceRoot: src/setup_node_env
 dependsOn:
   - '@kbn/babel-register'
+  - '@kbn/repo-info'
   - '@kbn/security-hardening'
 tags:
   - shared-common
