@@ -30,10 +30,10 @@ interface ParamsEditorProps {
 
 export const ParamsEditor = ({ value, onChange, height = 200 }: ParamsEditorProps) => (
   <EuiFormRow
-    label={i18n.translate('xpack.alertingV2.singleStepWorkflow.params.label', {
+    label={i18n.translate('xpack.responseOps.alertingV2RuleForm.actionForm.params.label', {
       defaultMessage: 'Parameters',
     })}
-    helpText={i18n.translate('xpack.alertingV2.singleStepWorkflow.params.helpText', {
+    helpText={i18n.translate('xpack.responseOps.alertingV2RuleForm.actionForm.params.helpText', {
       defaultMessage:
         'Use {syntax} to reference dispatcher payload values such as {policyId}, {groupKey}, or {episodes}.',
       values: {
@@ -54,9 +54,12 @@ export const ParamsEditor = ({ value, onChange, height = 200 }: ParamsEditorProp
       suggestionProvider={PAYLOAD_COMPLETION_PROVIDER}
       options={EDITOR_OPTIONS}
       dataTestSubj="singleStepWorkflowParamsEditor"
-      aria-label={i18n.translate('xpack.alertingV2.singleStepWorkflow.params.ariaLabel', {
-        defaultMessage: 'Workflow parameters editor',
-      })}
+      aria-label={i18n.translate(
+        'xpack.responseOps.alertingV2RuleForm.actionForm.params.ariaLabel',
+        {
+          defaultMessage: 'Workflow parameters editor',
+        }
+      )}
     />
   </EuiFormRow>
 );
