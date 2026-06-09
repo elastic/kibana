@@ -446,8 +446,14 @@ export class WorkflowsExecutionEnginePlugin
 
               const workflow = await workflowRepository.getWorkflow(workflowId, spaceId);
               if (!workflow) {
-                logger.error(`Workflow ${workflowId} not found`);
-                return;
+                // Keep this as error for a while to ensure that such message appears only once per workflow
+                logger.error(
+                  `Workflow ${workflowId} not found in space ${spaceId}; removing orphaned scheduled task`
+                );
+                return {
+                  state: taskInstance.state,
+                  shouldDeleteTask: true,
+                };
               }
               logger.debug(`Running scheduled workflow task for workflow ${workflow.id}`);
 
