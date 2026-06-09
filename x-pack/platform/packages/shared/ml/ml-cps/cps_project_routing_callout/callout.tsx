@@ -13,19 +13,19 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { MIGRATE_AD_JOBS_TO_CPS_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { UPDATE_AD_JOBS_PROJECT_ROUTING_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 
-/** Matches the migrate flyout dry-run. */
+/** Matches the update project routing flyout dry-run. */
 const BULK_UPDATE_PROJECT_ROUTING_PATH = '/internal/ml/jobs/bulk_update_project_routing' as const;
 
-export interface CpsMigrationCalloutProps {
+export interface CpsProjectRoutingCalloutProps {
   http: HttpStart;
   uiActions: UiActionsStart;
   options?: {
     filterJobGroups?: string[];
   };
-  /** Called when the migrate flyout is closed (optional context on the trigger). */
-  onMigrateFlyoutClose?: () => void;
+  /** Called when the update project routing flyout is closed (optional context on the trigger). */
+  onUpdateFlyoutClose?: () => void;
 }
 
 /**
@@ -40,11 +40,11 @@ export interface BulkUpdateProjectRoutingResult {
   >;
 }
 
-export const CpsMigrationCallout: FC<CpsMigrationCalloutProps> = ({
+export const CpsProjectRoutingCallout: FC<CpsProjectRoutingCalloutProps> = ({
   http,
   uiActions,
   options,
-  onMigrateFlyoutClose,
+  onUpdateFlyoutClose,
 }) => {
   const [jobIds, setJobIds] = useState<string[]>([]);
 
@@ -79,13 +79,13 @@ export const CpsMigrationCallout: FC<CpsMigrationCalloutProps> = ({
     };
   }, [http, options]);
 
-  const onMigrate = useCallback(() => {
-    void uiActions.executeTriggerActions(MIGRATE_AD_JOBS_TO_CPS_TRIGGER, {
+  const onUpdateProjectRouting = useCallback(() => {
+    void uiActions.executeTriggerActions(UPDATE_AD_JOBS_PROJECT_ROUTING_TRIGGER, {
       initialJobIds: jobIds,
       allowScopeSelection: false,
-      onClose: onMigrateFlyoutClose,
+      onClose: onUpdateFlyoutClose,
     });
-  }, [uiActions, onMigrateFlyoutClose, jobIds]);
+  }, [uiActions, onUpdateFlyoutClose, jobIds]);
 
   if (jobIds.length === 0) {
     return null;
@@ -94,27 +94,28 @@ export const CpsMigrationCallout: FC<CpsMigrationCalloutProps> = ({
   return (
     <>
       <EuiCallOut
-        title={i18n.translate('xpack.ml.cpsMigrationCallout.title', {
-          defaultMessage: 'Migrate legacy jobs to use cross-project search',
+        title={i18n.translate('xpack.ml.cpsProjectRoutingCallout.title', {
+          defaultMessage: 'Update project routing for legacy jobs',
         })}
         color="primary"
-        data-test-subj="mlCpsMigrationCallout"
+        data-test-subj="mlCpsProjectRoutingCallout"
       >
-        <EuiText size="s" data-test-subj="mlCpsMigrationCalloutJobCount">
+        <EuiText size="s" data-test-subj="mlCpsProjectRoutingCalloutJobCount">
           <FormattedMessage
-            id="xpack.ml.cpsMigrationCallout.jobCount"
-            defaultMessage="Some jobs are legacy. Migrate them to cross-project search."
+            id="xpack.ml.cpsProjectRoutingCallout.jobCount"
+            defaultMessage="Some jobs are not using project routing. Update their project routing to use cross-project search."
           />
         </EuiText>
         <EuiSpacer size="m" />
         <EuiButton
-          data-test-subj="mlCpsMigrationCalloutMigrate"
-          onClick={onMigrate}
+          data-test-subj="mlCpsProjectRoutingCalloutUpdate"
+          onClick={onUpdateProjectRouting}
           color="primary"
           size="s"
         >
-          {i18n.translate('xpack.ml.cpsMigrationCallout.migrateButton', {
-            defaultMessage: 'Migrate {count, plural, one {# job} other {# jobs}}',
+          {i18n.translate('xpack.ml.cpsProjectRoutingCallout.updateButton', {
+            defaultMessage:
+              'Update project routing for {count, plural, one {# job} other {# jobs}}',
             values: { count: jobIds.length },
           })}
         </EuiButton>

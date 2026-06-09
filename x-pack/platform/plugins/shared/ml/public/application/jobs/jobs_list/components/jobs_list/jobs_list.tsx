@@ -193,7 +193,7 @@ export const JobsList: FC<JobsListProps> = ({
               <EuiToolTip
                 content={i18n.translate('xpack.ml.jobsList.cpsLegacyBadgeTooltip', {
                   defaultMessage:
-                    'This job is not using CPS project routing. Consider migrating the datafeed to use project routing.',
+                    'This job is not using CPS project routing. Consider updating the datafeed project routing.',
                 })}
               >
                 <EuiBadge tabIndex={0} color="hollow" data-test-subj="mlJobListRowCpsLegacyLabel">

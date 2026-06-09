@@ -10,32 +10,37 @@ import type {
   ActionExecutionContext,
   UiActionsActionDefinition,
 } from '@kbn/ui-actions-plugin/public';
-import { MIGRATE_AD_JOBS_TO_CPS_ACTION, type MigrateADJobsToCpsContext } from '@kbn/ml-ui-actions';
+import {
+  UPDATE_AD_JOBS_PROJECT_ROUTING_ACTION,
+  type UpdateADJobsProjectRoutingContext,
+} from '@kbn/ml-ui-actions';
 import type { MlCoreSetup } from '../plugin';
 
-export function migrateADJobsToCps(
+export function updateADJobsProjectRouting(
   getStartServices: MlCoreSetup['getStartServices']
-): UiActionsActionDefinition<MigrateADJobsToCpsContext> {
+): UiActionsActionDefinition<UpdateADJobsProjectRoutingContext> {
   return {
-    id: 'migrate-ad-jobs-to-cps-action',
-    type: MIGRATE_AD_JOBS_TO_CPS_ACTION,
+    id: 'update-ad-jobs-project-routing-action',
+    type: UPDATE_AD_JOBS_PROJECT_ROUTING_ACTION,
     getIconType(): string {
       return 'machineLearningApp';
     },
     getDisplayName: () =>
-      i18n.translate('xpack.ml.actions.migrateADJobsToCps', {
-        defaultMessage: 'Migrate anomaly detection jobs to cross-project search',
+      i18n.translate('xpack.ml.actions.updateADJobsProjectRouting', {
+        defaultMessage: 'Update anomaly detection job project routing',
       }),
-    async execute(context: ActionExecutionContext<MigrateADJobsToCpsContext>) {
+    async execute(context: ActionExecutionContext<UpdateADJobsProjectRoutingContext>) {
       try {
-        const [{ showMigrateADJobsToCpsFlyout }, [coreStart, { share, data, dashboard, cps }]] =
-          await Promise.all([
-            import('../embeddables/job_creation/migrate_ad_jobs_to_cps'),
-            getStartServices(),
-          ]);
+        const [
+          { showUpdateADJobsProjectRoutingFlyout },
+          [coreStart, { share, data, dashboard, cps }],
+        ] = await Promise.all([
+          import('../embeddables/job_creation/update_ad_jobs_project_routing'),
+          getStartServices(),
+        ]);
 
         const { onClose, initialJobIds, allowScopeSelection } = context;
-        await showMigrateADJobsToCpsFlyout(
+        await showUpdateADJobsProjectRoutingFlyout(
           coreStart,
           share,
           data,

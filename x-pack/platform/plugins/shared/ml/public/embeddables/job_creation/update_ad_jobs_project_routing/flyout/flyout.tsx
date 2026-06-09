@@ -43,7 +43,7 @@ interface Props {
 
 const DEFAULT_PROJECT_ROUTING = '_alias:_origin';
 
-export const MigrateADJobsToCpsFlyout: FC<Props> = ({
+export const UpdateADJobsProjectRoutingFlyout: FC<Props> = ({
   onClose,
   initialJobIds,
   allowScopeSelection,
@@ -57,12 +57,11 @@ export const MigrateADJobsToCpsFlyout: FC<Props> = ({
 
   const [loadError, setLoadError] = useState<Error | null>(null);
   const [loading, setLoading] = useState(true);
-  const [migrating, setMigrating] = useState(false);
+  const [updating, setUpdating] = useState(false);
   const [jobIds, setJobIds] = useState<string[]>([]);
-  const [migrationResults, setMigrationResults] = useState<Record<
-    string,
-    { success: boolean }
-  > | null>(null);
+  const [updateResults, setUpdateResults] = useState<Record<string, { success: boolean }> | null>(
+    null
+  );
   const [selectedProjectRouting, setSelectedProjectRouting] =
     useState<string>(DEFAULT_PROJECT_ROUTING);
 
@@ -126,11 +125,11 @@ export const MigrateADJobsToCpsFlyout: FC<Props> = ({
     };
   }, [cps, jobsApi, initialJobIds, selectedProjectRouting]);
 
-  const onMigrate = useCallback(async () => {
+  const onUpdateProjectRouting = useCallback(async () => {
     if (jobIds.length === 0) {
       return;
     }
-    setMigrating(true);
+    setUpdating(true);
     try {
       const response = await jobsApi.bulkUpdateProjectRouting({
         projectRouting: selectedProjectRouting,
@@ -141,55 +140,59 @@ export const MigrateADJobsToCpsFlyout: FC<Props> = ({
         const r = response.results[id];
         next[id] = { success: r?.success === true };
       }
-      setMigrationResults(next);
+      setUpdateResults(next);
       const successCount = jobIds.filter((id) => next[id]?.success).length;
       const failCount = jobIds.length - successCount;
       if (failCount === 0) {
         toasts.addSuccess(
-          i18n.translate('xpack.ml.embeddables.migrateADJobsToCpsFlyout.migrateSuccess', {
+          i18n.translate('xpack.ml.embeddables.updateADJobsProjectRoutingFlyout.updateSuccess', {
             defaultMessage:
-              'Successfully migrated {count, plural, one {# job} other {# jobs}} to cross-project search.',
+              'Successfully updated project routing for {count, plural, one {# job} other {# jobs}}.',
             values: { count: successCount },
           })
         );
       } else if (successCount === 0) {
         toasts.addDanger(
-          i18n.translate('xpack.ml.embeddables.migrateADJobsToCpsFlyout.migrateAllFailed', {
-            defaultMessage: 'The migration did not complete for any job.',
+          i18n.translate('xpack.ml.embeddables.updateADJobsProjectRoutingFlyout.updateAllFailed', {
+            defaultMessage: 'Project routing was not updated for any job.',
           })
         );
       } else {
         toasts.addWarning(
-          i18n.translate('xpack.ml.embeddables.migrateADJobsToCpsFlyout.migratePartial', {
-            defaultMessage: '{success} of {total} jobs were migrated. See the list for details.',
+          i18n.translate('xpack.ml.embeddables.updateADJobsProjectRoutingFlyout.updatePartial', {
+            defaultMessage:
+              'Project routing was updated for {success} of {total} jobs. See the list for details.',
             values: { success: successCount, total: jobIds.length },
           })
         );
       }
     } catch (e) {
       toasts.addError(e instanceof Error ? e : new Error(String(e)), {
-        title: i18n.translate('xpack.ml.embeddables.migrateADJobsToCpsFlyout.migrateErrorTitle', {
-          defaultMessage: 'Job migration failed',
-        }),
+        title: i18n.translate(
+          'xpack.ml.embeddables.updateADJobsProjectRoutingFlyout.updateErrorTitle',
+          {
+            defaultMessage: 'Project routing update failed',
+          }
+        ),
       });
     } finally {
-      setMigrating(false);
+      setUpdating(false);
     }
   }, [jobIds, jobsApi, selectedProjectRouting, toasts]);
 
-  const allMigrationsSucceeded = useMemo(
+  const allUpdatesSucceeded = useMemo(
     () =>
-      migrationResults !== null &&
+      updateResults !== null &&
       jobIds.length > 0 &&
-      jobIds.every((id) => migrationResults[id]?.success === true),
-    [migrationResults, jobIds]
+      jobIds.every((id) => updateResults[id]?.success === true),
+    [updateResults, jobIds]
   );
 
   const renderBody = () => {
     if (loading) {
       return (
         <EuiFlexGroup alignItems="center" justifyContent="spaceAround" style={{ minHeight: 120 }}>
-          <EuiLoadingSpinner size="l" data-test-subj="mlMigrateAdJobsToCpsLoading" />
+          <EuiLoadingSpinner size="l" data-test-subj="mlUpdateAdJobsProjectRoutingLoading" />
         </EuiFlexGroup>
       );
     }
@@ -198,9 +201,12 @@ export const MigrateADJobsToCpsFlyout: FC<Props> = ({
         <EuiCallOut
           announceOnMount
           color="danger"
-          title={i18n.translate('xpack.ml.embeddables.migrateADJobsToCpsFlyout.loadErrorTitle', {
-            defaultMessage: 'Could not load jobs for migration',
-          })}
+          title={i18n.translate(
+            'xpack.ml.embeddables.updateADJobsProjectRoutingFlyout.loadErrorTitle',
+            {
+              defaultMessage: 'Could not load jobs for project routing update',
+            }
+          )}
         >
           {loadError.message}
         </EuiCallOut>
@@ -209,12 +215,12 @@ export const MigrateADJobsToCpsFlyout: FC<Props> = ({
     if (jobIds.length === 0) {
       return (
         <EuiEmptyPrompt
-          data-test-subj="mlMigrateAdJobsToCpsNoJobs"
+          data-test-subj="mlUpdateAdJobsProjectRoutingNoJobs"
           body={
             <p>
               <FormattedMessage
-                id="xpack.ml.embeddables.migrateADJobsToCpsFlyout.noJobs"
-                defaultMessage="No anomaly detection jobs are available to migrate right now."
+                id="xpack.ml.embeddables.updateADJobsProjectRoutingFlyout.noJobs"
+                defaultMessage="No anomaly detection jobs are available to update right now."
               />
             </p>
           }
@@ -226,21 +232,21 @@ export const MigrateADJobsToCpsFlyout: FC<Props> = ({
         <EuiText size="s" color="subdued">
           <p>
             <FormattedMessage
-              id="xpack.ml.embeddables.migrateADJobsToCpsFlyout.jobListIntro"
-              defaultMessage="The following jobs can be migrated to use cross-project search."
+              id="xpack.ml.embeddables.updateADJobsProjectRoutingFlyout.jobListIntro"
+              defaultMessage="The following jobs can have their project routing updated."
             />
           </p>
         </EuiText>
 
-        <EuiListGroup maxWidth={true} data-test-subj="mlMigrateAdJobsToCpsJobList">
+        <EuiListGroup maxWidth={true} data-test-subj="mlUpdateAdJobsProjectRoutingJobList">
           {jobIds.map((id) => {
-            const result = migrationResults?.[id];
+            const result = updateResults?.[id];
             const label = (
               <EuiFlexGroup
                 alignItems="center"
                 gutterSize="s"
                 responsive={false}
-                data-test-subj={`mlMigrateAdJobsToCpsJob-${id}`}
+                data-test-subj={`mlUpdateAdJobsProjectRoutingJob-${id}`}
               >
                 {result !== undefined ? (
                   <EuiIcon
@@ -248,8 +254,8 @@ export const MigrateADJobsToCpsFlyout: FC<Props> = ({
                     color={result.success ? 'success' : 'danger'}
                     data-test-subj={
                       result.success
-                        ? 'mlMigrateAdJobsToCpsJobSuccess'
-                        : 'mlMigrateAdJobsToCpsJobFailed'
+                        ? 'mlUpdateAdJobsProjectRoutingJobSuccess'
+                        : 'mlUpdateAdJobsProjectRoutingJobFailed'
                     }
                     aria-hidden
                   />
@@ -270,7 +276,7 @@ export const MigrateADJobsToCpsFlyout: FC<Props> = ({
         <EuiFormRow
           label={
             <FormattedMessage
-              id="xpack.ml.embeddables.migrateADJobsToCpsFlyout.projectRoutingLabel"
+              id="xpack.ml.embeddables.updateADJobsProjectRoutingFlyout.projectRoutingLabel"
               defaultMessage="Project routing"
             />
           }
@@ -280,7 +286,7 @@ export const MigrateADJobsToCpsFlyout: FC<Props> = ({
             onProjectRoutingChange={onProjectRoutingChange}
             projects={projects}
             totalProjectCount={totalProjectCount}
-            projectRoutingValueTestSubj="mlMigrateAdJobsToCpsProjectRoutingValue"
+            projectRoutingValueTestSubj="mlUpdateAdJobsProjectRoutingValue"
           />
         </EuiFormRow>
         <EuiSpacer size="m" />
@@ -293,8 +299,8 @@ export const MigrateADJobsToCpsFlyout: FC<Props> = ({
         <EuiTitle size="s">
           <h3 id="ml-flyout-layer-title">
             <FormattedMessage
-              id="xpack.ml.embeddables.migrateADJobsToCpsFlyout.title"
-              defaultMessage="Migrate {count, plural, one {# legacy anomaly detection job} other {# legacy anomaly detection jobs}}"
+              id="xpack.ml.embeddables.updateADJobsProjectRoutingFlyout.title"
+              defaultMessage="Update project routing for {count, plural, one {# anomaly detection job} other {# anomaly detection jobs}}"
               values={{ count: jobIds.length }}
             />
           </h3>
@@ -311,11 +317,11 @@ export const MigrateADJobsToCpsFlyout: FC<Props> = ({
               iconType="cross"
               onClick={onClose}
               flush="left"
-              isDisabled={migrating}
-              data-test-subj="mlMigrateAdJobsToCpsClose"
+              isDisabled={updating}
+              data-test-subj="mlUpdateAdJobsProjectRoutingClose"
             >
               <FormattedMessage
-                id="xpack.ml.embeddables.migrateADJobsToCpsFlyout.closeButton"
+                id="xpack.ml.embeddables.updateADJobsProjectRoutingFlyout.closeButton"
                 defaultMessage="Close"
               />
             </EuiButtonEmpty>
@@ -323,16 +329,16 @@ export const MigrateADJobsToCpsFlyout: FC<Props> = ({
           <EuiFlexItem grow={false}>
             <EuiButton
               fill
-              onClick={onMigrate}
-              isLoading={migrating}
+              onClick={onUpdateProjectRouting}
+              isLoading={updating}
               isDisabled={
-                loading || loadError !== null || jobIds.length === 0 || allMigrationsSucceeded
+                loading || loadError !== null || jobIds.length === 0 || allUpdatesSucceeded
               }
-              data-test-subj="mlMigrateAdJobsToCpsSubmit"
+              data-test-subj="mlUpdateAdJobsProjectRoutingSubmit"
             >
               <FormattedMessage
-                id="xpack.ml.embeddables.migrateADJobsToCpsFlyout.migrateButton"
-                defaultMessage="Migrate {count, plural, one {# job} other {# jobs}}"
+                id="xpack.ml.embeddables.updateADJobsProjectRoutingFlyout.updateButton"
+                defaultMessage="Update {count, plural, one {# job} other {# jobs}}"
                 values={{ count: jobIds.length }}
               />
             </EuiButton>

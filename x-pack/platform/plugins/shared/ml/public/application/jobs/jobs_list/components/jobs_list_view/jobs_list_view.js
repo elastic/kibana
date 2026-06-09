@@ -10,7 +10,7 @@ import React, { Component } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import { withKibana, context } from '@kbn/kibana-react-plugin/public';
-// import { CpsMigrationCallout } from '@kbn/ml-cps';
+// import { CpsProjectRoutingCallout } from '@kbn/ml-cps';
 
 import { filterJobs, loadFullJob } from '../utils';
 import { JobsList } from '../jobs_list';
@@ -453,10 +453,10 @@ export class JobsListViewUI extends Component {
 
         <UpgradeWarning />
 
-        {/* <CpsMigrationCallout
+        {/* <CpsProjectRoutingCallout
           http={this.context.services.http}
           uiActions={this.context.services.uiActions}
-          onMigrateFlyoutClose={() => this.refreshJobSummaryList()}
+          onUpdateFlyoutClose={() => this.refreshJobSummaryList()}
         /> */}
 
         <>

@@ -19,15 +19,15 @@ export interface CreateCategorizationADJobContext {
 export const CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_ACTION = 'createMLADCategorizationJobAction';
 
 /**
- * Context for the migrate AD jobs to CPS action; extend when a caller provides job selection.
+ * Context for the update AD jobs project routing action; extend when a caller provides job selection.
  */
-export interface MigrateADJobsToCpsContext {
+export interface UpdateADJobsProjectRoutingContext {
   /**
-   * Invoked after the migrate flyout is closed, when the trigger is executed with this in context.
+   * Invoked after the update project routing flyout is closed, when the trigger is executed with this in context.
    */
   onClose?: () => void;
   initialJobIds?: string[];
   allowScopeSelection?: boolean;
 }
 
-export const MIGRATE_AD_JOBS_TO_CPS_ACTION = 'migrateADJobsToCpsAction';
+export const UPDATE_AD_JOBS_PROJECT_ROUTING_ACTION = 'updateADJobsProjectRoutingAction';

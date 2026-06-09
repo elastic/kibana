@@ -18,7 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { MlSummaryJob } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
-import { MIGRATE_AD_JOBS_TO_CPS_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { UPDATE_AD_JOBS_PROJECT_ROUTING_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 
 import { usePermissionCheck } from '../../../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../../../ml_nodes_check/check_ml_nodes';
@@ -135,6 +135,29 @@ export const MultiJobActionsMenu: FC<Props> = ({
     </EuiContextMenuItem>,
   ];
 
+  if (canUpdateDatafeed) {
+    items.push(
+      <EuiContextMenuItem
+        key="update project routing"
+        icon="crossProjectSearch"
+        disabled={false}
+        onClick={() => {
+          void uiActions.executeTriggerActions(UPDATE_AD_JOBS_PROJECT_ROUTING_TRIGGER, {
+            initialJobIds: jobs.map((j) => j.id),
+            allowScopeSelection: true,
+          });
+          closePopover();
+        }}
+        data-test-subj="mlADJobListMultiSelectUpdateProjectRoutingActionButton"
+      >
+        <FormattedMessage
+          id="xpack.ml.jobsList.multiJobsActions.updateProjectRoutingLabel"
+          defaultMessage="Update project routing"
+        />
+      </EuiContextMenuItem>
+    );
+  }
+
   if (isClosable(jobs)) {
     items.push(
       <EuiContextMenuItem
@@ -223,29 +246,6 @@ export const MultiJobActionsMenu: FC<Props> = ({
           id="xpack.ml.jobsList.multiJobsActions.startDatafeedsLabel"
           defaultMessage="Start {jobsCount, plural, one {datafeed} other {datafeeds}}"
           values={{ jobsCount: jobs.length }}
-        />
-      </EuiContextMenuItem>
-    );
-  }
-
-  if (canUpdateDatafeed) {
-    items.push(
-      <EuiContextMenuItem
-        key="migrate to cps"
-        icon="crossProjectSearch"
-        disabled={false}
-        onClick={() => {
-          void uiActions.executeTriggerActions(MIGRATE_AD_JOBS_TO_CPS_TRIGGER, {
-            initialJobIds: jobs.map((j) => j.id),
-            allowScopeSelection: true,
-          });
-          closePopover();
-        }}
-        data-test-subj="mlADJobListMultiSelectMigrateToCpsActionButton"
-      >
-        <FormattedMessage
-          id="xpack.ml.jobsList.multiJobsActions.migrateToCpsLabel"
-          defaultMessage="Update project routing"
         />
       </EuiContextMenuItem>
     );

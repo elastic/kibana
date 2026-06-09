@@ -13,9 +13,9 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public/types';
 import { createFlyout, type FlyoutComponentProps } from '../common/create_flyout';
-import { MigrateADJobsToCpsFlyout } from './flyout/flyout';
+import { UpdateADJobsProjectRoutingFlyout } from './flyout/flyout';
 
-export async function showMigrateADJobsToCpsFlyout(
+export async function showUpdateADJobsProjectRoutingFlyout(
   coreStart: CoreStart,
   share: SharePluginStart,
   data: DataPublicPluginStart,
@@ -26,7 +26,7 @@ export async function showMigrateADJobsToCpsFlyout(
   onFlyoutClose?: () => void
 ): Promise<void> {
   const Comp: FC<FlyoutComponentProps> = ({ onClose }) => (
-    <MigrateADJobsToCpsFlyout
+    <UpdateADJobsProjectRoutingFlyout
       initialJobIds={initialJobIds}
       allowScopeSelection={allowScopeSelection}
       onClose={() => {
