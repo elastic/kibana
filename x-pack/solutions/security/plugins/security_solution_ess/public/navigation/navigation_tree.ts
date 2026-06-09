@@ -87,6 +87,10 @@ export const createNavigationTree = (
       },
       defaultNavigationTree.assets(services),
       defaultNavigationTree.ml(),
+      {
+        link: 'onboarding' as AppDeepLinkId,
+        sideNavStatus: 'hidden',
+      },
     ],
     footer: [
       {
@@ -212,6 +216,7 @@ export const createNavigationTree = (
                     { link: 'management:rules' as const },
                     { link: 'management:episodes' as const },
                     { link: 'management:action_policies' as const },
+                    { link: 'management:execution_history' as const },
                   ],
                 },
               ]
@@ -219,7 +224,7 @@ export const createNavigationTree = (
           {
             title: i18nStrings.stackManagementV2.alertsAndInsights.title,
             children: [
-              { id: 'stackRules', link: 'rules' },
+              { id: 'stackRules', link: 'management:triggersActions' },
               { link: 'management:cases' },
               { link: 'management:triggersActionsConnectors' },
               { link: 'management:reporting' },

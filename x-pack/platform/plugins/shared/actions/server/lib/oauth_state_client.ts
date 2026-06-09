@@ -9,7 +9,7 @@ import crypto from 'crypto';
 import { omitBy, isUndefined } from 'lodash';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import { SavedObjectsUtils } from '@kbn/core/server';
+import { SavedObjectsUtils, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { escapeQuotes } from '@kbn/es-query';
 import { OAUTH_STATE_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
 
@@ -174,12 +174,18 @@ export class OAuthStateClient {
   }
 
   /**
-   * Delete OAuth state (should be called after a successful token exchange)
+   * Delete OAuth state (should be called after a successful token exchange).
+   * Idempotent: if the state is already gone, this is a no-op.
    */
   public async delete(id: string): Promise<void> {
     try {
       await this.unsecuredSavedObjectsClient.delete(OAUTH_STATE_SAVED_OBJECT_TYPE, id);
     } catch (err) {
+      // The callback may have completed and deleted the state concurrently — treat as success.
+      if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+        this.logger.debug(`OAuth state "${id}" was already deleted.`);
+        return;
+      }
       this.logger.error(`Failed to delete OAuth state "${id}". Error: ${err.message}`);
       throw err;
     }

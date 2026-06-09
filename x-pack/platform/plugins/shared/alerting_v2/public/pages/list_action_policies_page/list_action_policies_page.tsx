@@ -13,6 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
+  EuiLoadingSpinner,
   EuiPageHeader,
   EuiSpacer,
   EuiText,
@@ -30,7 +31,7 @@ import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { ActionPolicyDestinationsSummary } from '../../components/action_policy/action_policy_destinations_summary';
 import { ActionPolicySnoozePopover } from '../../components/action_policy/action_policy_snooze_popover';
 import { ActionPolicyStateBadge } from '../../components/action_policy/action_policy_state_badge';
@@ -39,6 +40,7 @@ import { ActionPolicyDetailsFlyout } from '../../components/action_policy/detail
 import { paths } from '../../constants';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useBulkActionActionPolicies } from '../../hooks/use_bulk_action_action_policies';
+import { useBulkGetUserProfiles } from '../../hooks/use_bulk_get_user_profiles';
 import { useCreateActionPolicy } from '../../hooks/use_create_action_policy';
 import { useDeleteActionPolicy } from '../../hooks/use_delete_action_policy';
 import { useDisableActionPolicy } from '../../hooks/use_disable_action_policy';
@@ -47,6 +49,7 @@ import { useFetchActionPolicies } from '../../hooks/use_fetch_action_policies';
 import { useSnoozeActionPolicy } from '../../hooks/use_snooze_action_policy';
 import { useUnsnoozeActionPolicy } from '../../hooks/use_unsnooze_action_policy';
 import { useUpdateActionPolicyApiKey } from '../../hooks/use_update_action_policy_api_key';
+import { resolveDisplayName } from '../../utils/resolve_display_name';
 import { ActionPoliciesBulkActions } from './components/action_policies_bulk_actions';
 import { ActionPoliciesSearchBar } from './components/action_policies_search_bar';
 import { ActionPolicyActionsCell } from './components/action_policy_actions_cell';
@@ -69,7 +72,7 @@ export const ListActionPoliciesPage = () => {
   const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
   const [search, setSearch] = useState('');
   const [enabled, setEnabled] = useState('');
-  const [sortField, setSortField] = useState<'name' | 'updatedAt' | 'updatedByUsername'>('name');
+  const [sortField, setSortField] = useState<'name' | 'updatedAt'>('name');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [policyToDelete, setPolicyToDelete] = useState<ActionPolicyResponse | null>(null);
@@ -127,6 +130,7 @@ export const ListActionPoliciesPage = () => {
     const data: CreateActionPolicyData = {
       name: `${name} [clone]`,
       description,
+      type: 'global',
       destinations,
       groupingMode: groupingMode ?? 'per_episode',
       ...(tags != null && { tags }),
@@ -162,9 +166,17 @@ export const ListActionPoliciesPage = () => {
     setPage(0);
   }, []);
 
-  const items = data?.items ?? [];
+  const items = useMemo(() => data?.items ?? [], [data?.items]);
   const total = data?.total ?? 0;
   const policyToView = policyToViewId ? items.find((p) => p.id === policyToViewId) ?? null : null;
+
+  const updatedByUids = useMemo(
+    () => items.map((policy) => policy.updatedBy).filter((uid): uid is string => Boolean(uid)),
+    [items]
+  );
+
+  const { data: updatedByProfileByUid, isLoading: isLoadingUpdatedByProfiles } =
+    useBulkGetUserProfiles({ uids: updatedByUids });
 
   const onTableChange = ({
     page: tablePage,
@@ -176,7 +188,7 @@ export const ListActionPoliciesPage = () => {
     }
 
     if (sort) {
-      setSortField(sort.field as 'name' | 'updatedAt' | 'updatedByUsername');
+      setSortField(sort.field as 'name' | 'updatedAt');
       setSortDirection(sort.direction);
     }
   };
@@ -300,8 +312,7 @@ export const ListActionPoliciesPage = () => {
       render: (updatedAt: string) => moment(updatedAt).format(dateTimeFormat),
     },
     {
-      field: 'updatedByUsername',
-      sortable: true,
+      field: 'updatedBy',
       width: '200px',
       name: (
         <FormattedMessage
@@ -309,6 +320,15 @@ export const ListActionPoliciesPage = () => {
           defaultMessage="Updated by"
         />
       ),
+      render: (updatedBy: string | null) => {
+        if (!updatedBy) {
+          return null;
+        }
+        if (isLoadingUpdatedByProfiles) {
+          return <EuiLoadingSpinner size="s" />;
+        }
+        return resolveDisplayName(updatedBy, updatedByProfileByUid, updatedBy);
+      },
     },
     {
       field: 'enabled',
@@ -534,14 +554,26 @@ export const ListActionPoliciesPage = () => {
         <ActionPolicyDetailsFlyout
           policy={policyToView}
           onClose={() => setPolicyToViewId(null)}
-          onEdit={navigateToEdit}
-          onClone={clonePolicy}
-          onDelete={setPolicyToDelete}
+          onEdit={(id) => {
+            setPolicyToViewId(null);
+            navigateToEdit(id);
+          }}
+          onClone={(p) => {
+            setPolicyToViewId(null);
+            clonePolicy(p);
+          }}
+          onDelete={(p) => {
+            setPolicyToViewId(null);
+            setPolicyToDelete(p);
+          }}
           onEnable={(id) => enablePolicy(id)}
           onDisable={(id) => disablePolicy(id)}
           onSnooze={(id, until) => snoozePolicy({ id, snoozedUntil: until })}
           onCancelSnooze={(id) => unsnoozePolicy(id)}
-          onUpdateApiKey={(id) => setPolicyToUpdateApiKey(id)}
+          onUpdateApiKey={(id) => {
+            setPolicyToViewId(null);
+            setPolicyToUpdateApiKey(id);
+          }}
           isStateLoading={
             (isEnabling && enableVariables === policyToView.id) ||
             (isDisabling && disableVariables === policyToView.id)

@@ -10,6 +10,7 @@ import type { UserProfileServiceStart } from '@kbn/core-user-profile-server';
 import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { BulkCreateAlertActionItemBody } from '@kbn/alerting-v2-schemas';
 import { ALERT_EPISODE_ACTION_TYPE, type CreateAlertActionBody } from '@kbn/alerting-v2-schemas';
+import type { AlertActionEventPublisher } from '../events/alert_action_event_publisher/alert_action_event_publisher';
 import type { AlertActionsClient } from './alert_actions_client';
 import { createAlertActionsClient } from './alert_actions_client.mock';
 import {
@@ -24,6 +25,8 @@ describe('AlertActionsClient', () => {
   let queryServiceEsClient: DeeplyMockedApi<ElasticsearchClient>;
   let storageServiceEsClient: jest.Mocked<ElasticsearchClient>;
   let userProfileService: jest.Mocked<UserProfileServiceStart>;
+  let alertActionEventPublisher: AlertActionEventPublisher;
+  let emitEpisodeActionsSpy: jest.SpyInstance;
 
   beforeEach(() => {
     ({
@@ -31,7 +34,9 @@ describe('AlertActionsClient', () => {
       queryServiceEsClient,
       storageServiceEsClient,
       userProfileService,
+      alertActionEventPublisher,
     } = createAlertActionsClient());
+    emitEpisodeActionsSpy = jest.spyOn(alertActionEventPublisher, 'emitEpisodeActions');
     storageServiceEsClient.bulk.mockResolvedValueOnce({ items: [], errors: false, took: 1 });
   });
 
@@ -70,21 +75,6 @@ describe('AlertActionsClient', () => {
         space_id: 'default',
       });
       expect(docs[0]).toHaveProperty('@timestamp');
-    });
-
-    it('should throw when alert event is not found', async () => {
-      queryServiceEsClient.esql.query.mockResolvedValueOnce(getEmptyESQLResponse());
-
-      await expect(
-        client.createAction({
-          groupHash: 'unknown-group-hash',
-          action: actionData,
-        })
-      ).rejects.toThrow(
-        'Alert event with group_hash [unknown-group-hash] and episode_id [episode-1] not found'
-      );
-
-      expect(storageServiceEsClient.bulk).not.toHaveBeenCalled();
     });
 
     it('should handle action with episode_id', async () => {
@@ -227,6 +217,110 @@ describe('AlertActionsClient', () => {
       const result = await client.createBulkActions(actions);
 
       expect(result).toEqual({ processed: 0, total: 2 });
+      expect(storageServiceEsClient.bulk).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('episode action domain events', () => {
+    it('calls emitEpisodeActions with the persisted assign action document', async () => {
+      queryServiceEsClient.esql.query.mockResolvedValueOnce(getAlertEventESQLResponse());
+
+      await client.createAction({
+        groupHash: 'test-group-hash',
+        action: {
+          action_type: ALERT_EPISODE_ACTION_TYPE.ASSIGN,
+          episode_id: 'episode-1',
+          assignee_uid: 'assignee-uid-1',
+        },
+      });
+
+      expect(emitEpisodeActionsSpy).toHaveBeenCalledTimes(1);
+      expect(emitEpisodeActionsSpy).toHaveBeenCalledWith(expect.anything(), [
+        expect.objectContaining({
+          action_type: ALERT_EPISODE_ACTION_TYPE.ASSIGN,
+          assignee_uid: 'assignee-uid-1',
+          episode_id: 'episode-1',
+          group_hash: 'test-group-hash',
+          actor: 'test-uid',
+        }),
+      ]);
+    });
+
+    it('does not call emitEpisodeActions when persistence fails', async () => {
+      queryServiceEsClient.esql.query.mockResolvedValueOnce(getEmptyESQLResponse());
+
+      await expect(
+        client.createAction({
+          groupHash: 'unknown-group-hash',
+          action: {
+            action_type: ALERT_EPISODE_ACTION_TYPE.ASSIGN,
+            episode_id: 'episode-1',
+            assignee_uid: 'assignee-uid-1',
+          },
+        })
+      ).rejects.toThrow();
+
+      expect(emitEpisodeActionsSpy).not.toHaveBeenCalled();
+    });
+
+    it('calls emitEpisodeActions for bulk assign actions only among persisted docs', async () => {
+      const actions: BulkCreateAlertActionItemBody[] = [
+        {
+          group_hash: 'group-hash-1',
+          action_type: ALERT_EPISODE_ACTION_TYPE.ASSIGN,
+          episode_id: 'episode-1',
+          assignee_uid: 'assignee-uid-1',
+        },
+        {
+          group_hash: 'group-hash-2',
+          action_type: ALERT_EPISODE_ACTION_TYPE.ACK,
+          episode_id: 'episode-2',
+        },
+      ];
+
+      queryServiceEsClient.esql.query.mockResolvedValueOnce(
+        getBulkAlertEventsESQLResponse([
+          { group_hash: 'group-hash-1', episode_id: 'episode-1' },
+          { group_hash: 'group-hash-2', episode_id: 'episode-2' },
+        ])
+      );
+
+      await client.createBulkActions(actions);
+
+      expect(emitEpisodeActionsSpy).toHaveBeenCalledTimes(1);
+      expect(emitEpisodeActionsSpy.mock.calls[0][1]).toHaveLength(2);
+      expect(emitEpisodeActionsSpy.mock.calls[0][1][0]).toMatchObject({
+        action_type: ALERT_EPISODE_ACTION_TYPE.ASSIGN,
+      });
+      expect(emitEpisodeActionsSpy.mock.calls[0][1][1]).toMatchObject({
+        action_type: ALERT_EPISODE_ACTION_TYPE.ACK,
+      });
+    });
+  });
+
+  describe('error codes and details', () => {
+    it('attaches ALERT_EVENT_NOT_FOUND code with group_hash and episode_id details on createAction', async () => {
+      queryServiceEsClient.esql.query.mockResolvedValueOnce(getEmptyESQLResponse());
+
+      await expect(
+        client.createAction({
+          groupHash: 'unknown-group-hash',
+          action: {
+            action_type: ALERT_EPISODE_ACTION_TYPE.ACK,
+            episode_id: 'episode-1',
+          },
+        })
+      ).rejects.toMatchObject({
+        output: { statusCode: 404 },
+        data: {
+          code: 'ALERT_EVENT_NOT_FOUND',
+          details: {
+            group_hash: 'unknown-group-hash',
+            episode_id: 'episode-1',
+          },
+        },
+      });
+
       expect(storageServiceEsClient.bulk).not.toHaveBeenCalled();
     });
   });

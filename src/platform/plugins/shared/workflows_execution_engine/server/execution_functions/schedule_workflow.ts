@@ -11,9 +11,10 @@ import { v4 as generateUuid } from 'uuid';
 import type { Logger } from '@kbn/core/server';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import type { EsWorkflowExecution, WorkflowExecutionEngineModel } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
+import { ExecutionStatus, pickManagedWorkflowFields } from '@kbn/workflows';
 
 import { markExecutionFailedTaskRecovery, taskRecoveryMessages } from '../lib/task_recovery';
+import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 
 /**
@@ -46,6 +47,7 @@ export async function checkAndSkipIfExistingScheduledExecution(
   workflow: WorkflowExecutionEngineModel,
   spaceId: string,
   workflowExecutionRepository: WorkflowExecutionRepository,
+  stepExecutionRepository: StepExecutionRepository,
   currentTaskInstance: ConcreteTaskInstance,
   logger: Logger
 ): Promise<boolean> {
@@ -91,9 +93,14 @@ export async function checkAndSkipIfExistingScheduledExecution(
       logger.warn(
         `Found stale execution ${existingExecution.id} from current scheduled run (taskRunAt: ${executionTaskRunAt}, current taskRunAt: ${currentTaskRunAt}, attempts: ${currentTaskInstance.attempts}) - marking as failed and proceeding`
       );
-      await markExecutionFailedTaskRecovery(workflowExecutionRepository, existingExecution.id, {
-        message: taskRecoveryMessages.scheduledStale,
-      });
+      await markExecutionFailedTaskRecovery(
+        workflowExecutionRepository,
+        stepExecutionRepository,
+        existingExecution.id,
+        {
+          message: taskRecoveryMessages.scheduledStale,
+        }
+      );
       return false;
     }
 
@@ -105,6 +112,7 @@ export async function checkAndSkipIfExistingScheduledExecution(
       id: generateUuid(),
       spaceId,
       workflowId: workflow.id,
+      ...pickManagedWorkflowFields(workflow),
       isTestRun: workflow.isTestRun,
       workflowDefinition: workflow.definition,
       yaml: workflow.yaml,

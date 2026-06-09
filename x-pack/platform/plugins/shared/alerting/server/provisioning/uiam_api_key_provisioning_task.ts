@@ -369,7 +369,7 @@ export class UiamApiKeyProvisioningTask {
         await bulkMarkApiKeysForInvalidation(
           { apiKeys: orphanedUiamApiKeys },
           this.logger,
-          context.savedObjectsClient
+          context.unsafeSavedObjectsClient
         );
       }
 

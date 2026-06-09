@@ -203,4 +203,77 @@ describe('Partition', () => {
       expect(apiOutput.metrics[0].color).toEqual(AUTO_COLOR);
     });
   });
+
+  describe('waffle legend values', () => {
+    const baseDataSource = {
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+      index_pattern: 'test-index',
+      time_field: '@timestamp',
+    } as const;
+
+    const baseWaffleConfig = {
+      type: 'waffle',
+      title: 'Waffle legend test',
+      data_source: baseDataSource,
+      metrics: [{ operation: 'count', empty_as_null: false }],
+      group_by: [
+        {
+          operation: 'terms',
+          fields: ['tags.keyword'],
+          limit: 3,
+        },
+      ],
+      sampling: 1,
+      ignore_global_filters: false,
+    } satisfies WaffleConfig;
+
+    it('should map legend.values: ["absolute"] to legendStats: ["value"] in state', () => {
+      const config = {
+        ...baseWaffleConfig,
+        legend: { values: ['absolute'] as ['absolute'] },
+      } satisfies WaffleConfig;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const vizState = lensState.state.visualization as LensPartitionVisualizationState;
+
+      expect(vizState.layers[0].legendStats).toEqual(['value']);
+    });
+
+    it('should map omitted legend.values to legendStats: [] in state', () => {
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(baseWaffleConfig);
+      const vizState = lensState.state.visualization as LensPartitionVisualizationState;
+
+      expect(vizState.layers[0].legendStats).toEqual([]);
+    });
+
+    it('should roundtrip legend.values: ["absolute"] correctly', () => {
+      const config = {
+        ...baseWaffleConfig,
+        legend: { values: ['absolute'] as ['absolute'] },
+      } satisfies WaffleConfig;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const apiOutput = builder.toAPIFormat(lensState) as WaffleConfig;
+
+      expect(apiOutput.legend?.values).toEqual(['absolute']);
+    });
+
+    it('should roundtrip omitted legend.values correctly', () => {
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(baseWaffleConfig);
+      const apiOutput = builder.toAPIFormat(lensState) as WaffleConfig;
+
+      expect(apiOutput.legend?.values).toBeUndefined();
+    });
+
+    it('should serialize existing waffle state without legendStats as legend.values: ["absolute"]', () => {
+      const builder = new LensConfigBuilder(undefined, true);
+      const apiOutput = builder.toAPIFormat(waffleLegacyBasicState) as WaffleConfig;
+
+      expect(apiOutput.legend?.values).toEqual(['absolute']);
+    });
+  });
 });

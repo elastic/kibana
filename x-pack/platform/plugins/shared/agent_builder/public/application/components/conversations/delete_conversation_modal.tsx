@@ -8,9 +8,11 @@
 import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { AGENT_BUILDER_EVENT_TYPES, AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { useConversationContext } from '../../context/conversation/conversation_context';
 import { useConversationId } from '../../context/conversation/use_conversation_id';
 import { useConversationTitle } from '../../hooks/use_conversation';
+import { useKibana } from '../../hooks/use_kibana';
 
 export interface BaseDeleteConversationModalProps {
   onClose: () => void;
@@ -27,11 +29,19 @@ export const BaseDeleteConversationModal: React.FC<BaseDeleteConversationModalPr
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const confirmModalTitleId = useGeneratedHtmlId({ prefix: 'deleteConversationModal' });
+  const {
+    services: { analytics },
+  } = useKibana();
 
   const handleDelete = useCallback(async () => {
     if (!conversationId) {
       return;
     }
+    analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.UiClick, {
+      ebt_element: AGENT_BUILDER_UI_EBT.element.pageContent,
+      ebt_action: AGENT_BUILDER_UI_EBT.action.conversation.DELETE_CONFIRM,
+      element_kind: 'button',
+    });
     setIsLoading(true);
     try {
       await onDelete(conversationId);
@@ -39,7 +49,16 @@ export const BaseDeleteConversationModal: React.FC<BaseDeleteConversationModalPr
     } catch {
       setIsLoading(false);
     }
-  }, [conversationId, onDelete, onClose]);
+  }, [analytics, conversationId, onDelete, onClose]);
+
+  const handleCancel = useCallback(() => {
+    analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.UiClick, {
+      ebt_element: AGENT_BUILDER_UI_EBT.element.pageContent,
+      ebt_action: AGENT_BUILDER_UI_EBT.action.conversation.DELETE_CANCEL,
+      element_kind: 'button',
+    });
+    onClose();
+  }, [analytics, onClose]);
 
   if (!conversationId) {
     return null;
@@ -56,7 +75,7 @@ export const BaseDeleteConversationModal: React.FC<BaseDeleteConversationModalPr
         />
       }
       titleProps={{ id: confirmModalTitleId }}
-      onCancel={onClose}
+      onCancel={handleCancel}
       onConfirm={handleDelete}
       cancelButtonText={
         <FormattedMessage

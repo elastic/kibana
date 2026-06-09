@@ -41,6 +41,11 @@ dependsOn:
   - '@kbn/lens-plugin'
   - '@kbn/visualization-utils'
   - '@kbn/expressions-plugin'
+  - '@kbn/code-editor'
+  - '@kbn/esql-language'
+  - '@kbn/core-http-browser'
+  - '@kbn/ui-actions-plugin'
+  - '@kbn/dashboard-plugin'
 tags:
   - shared-browser
   - package

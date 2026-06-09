@@ -77,6 +77,7 @@ export const RequestCodeViewer = ({ value, actions }: RequestCodeViewerProps) =>
         <CodeEditor
           languageId={XJsonLang.ID}
           value={value}
+          enableFindAction
           options={{
             readOnly: true,
             lineNumbers: 'off',

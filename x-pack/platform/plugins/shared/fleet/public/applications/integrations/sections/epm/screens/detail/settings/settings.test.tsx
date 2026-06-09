@@ -27,6 +27,13 @@ jest.mock('../../../../../hooks', () => {
           addSuccess: jest.fn(),
         },
       },
+      docLinks: {
+        links: {
+          fleet: {
+            datastreams: 'https://www.elastic.co/docs/reference/fleet/data-streams',
+          },
+        },
+      },
     }),
     useUpgradePackagePolicyDryRunQuery: jest.fn().mockReturnValue({ data: null }),
     useUpdatePackageMutation: jest.fn().mockReturnValue({ mutate: jest.fn() }),
@@ -289,6 +296,59 @@ describe('SettingsPage', () => {
 
       const rollbackButton = result.getByTestId('rollbackButton');
       expect(rollbackButton).toBeDisabled();
+    });
+  });
+
+  describe('namespace customization section', () => {
+    const installedPackageInfo: PackageInfo = {
+      ...basePackageInfo,
+      status: 'installed',
+      installationInfo: {
+        version: '1.3.0',
+        previous_version: '1.2.0',
+        install_source: 'registry',
+        install_status: 'installed',
+        verification_status: 'verified',
+        verification_key_id: null,
+        installed_kibana: [],
+        installed_es: [],
+        type: 'epm-package',
+        name: 'nginx',
+        namespace_customization_enabled_for: ['production'],
+      },
+    } as PackageInfo;
+
+    beforeEach(() => {
+      mockUseGetPackageInstallStatus.mockReturnValue(() => ({
+        status: InstallStatus.installed,
+        version: '1.3.0',
+      }));
+      mockUseAuthz.mockReturnValue({
+        fleet: { readSettings: true },
+        integrations: {
+          installPackages: true,
+          writePackageSettings: true,
+        },
+      });
+    });
+
+    it('renders the section title and existing opted-in namespaces', () => {
+      const result = renderComponent(installedPackageInfo);
+
+      expect(result.getByText('Namespace index templates')).toBeInTheDocument();
+      const input = result.getByTestId('epmSettings.namespaceCustomizationInput');
+      expect(input).toBeInTheDocument();
+      expect(result.getByText('production')).toBeInTheDocument();
+    });
+
+    it('does not render the section when the package is not installed', () => {
+      mockUseGetPackageInstallStatus.mockReturnValue(() => ({
+        status: InstallStatus.notInstalled,
+        version: null,
+      }));
+
+      const result = renderComponent(basePackageInfo);
+      expect(result.queryByText('Namespace index templates')).not.toBeInTheDocument();
     });
   });
 });

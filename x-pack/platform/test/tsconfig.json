@@ -6,7 +6,8 @@
       "node",
       "cheerio",
       "@kbn/ambient-ui-types",
-      "@kbn/ambient-ftr-types"
+      "@kbn/ambient-ftr-types",
+      "@kbn/core-user-settings-types"
     ],
     // there is still a decent amount of JS in this plugin and we are taking
     // advantage of the fact that TS doesn't know the types of that code and
@@ -21,7 +22,8 @@
     "../../../src/platform/packages/shared/kbn-test/types/ftr_globals/**/*",
     "../../*.json",
     "./api_integration/apis/telemetry/fixtures/*.json",
-    "./monitoring_api_integration/fixtures/**/*.json"
+    "./monitoring_api_integration/fixtures/**/*.json",
+    "./plugin_api_integration/test_suites/event_log/fixtures/*.json"
   ],
   "exclude": ["target/**/*", "*/plugins/**/*", "*/packages/**/*", "*/*/packages/**/*"],
   "kbn_references": [
@@ -136,8 +138,6 @@
     "@kbn/data-visualizer-plugin",
     "@kbn/cloud-integration-saml-provider-plugin",
     "@kbn/ci-stats-reporter",
-    "@kbn/usage-collection-plugin",
-    "@kbn/core-deprecations-common",
     "@kbn/gen-ai-functional-testing",
     "@kbn/sse-utils-server",
     "@kbn/inference-common",
@@ -157,18 +157,13 @@
     "@kbn/core-saved-objects-import-export-server-internal",
     "@kbn/core-chrome-browser",
     "@kbn/licensing-types",
-    "@kbn/product-intercept-plugin",
-    "@kbn/agent-builder-common",
     "@kbn/reindex-service-plugin",
-    "@kbn/agent-builder-plugin",
     "@kbn/field-formats-common",
     "@kbn/reporting-test-routes",
     "@kbn/ml-common-types",
     "@kbn/access-control-test-plugin",
     "@kbn/alerting-types",
     "@kbn/visualizations-common",
-    "@kbn/test-subj-selector",
-    "@kbn/agent-builder-server",
     "@kbn/setup-node-env",
     "@kbn/connector-schemas",
     "@kbn/es-types",
@@ -177,11 +172,12 @@
     "@kbn/automatic-import-plugin",
     "@kbn/connector-specs",
     "@kbn/alerting-v2-plugin",
-    "@kbn/ftr-llm-proxy",
-    "@kbn/dev-cli-runner",
     "@kbn/ui-actions-plugin",
     "@kbn/product-doc-common",
     "@kbn/alerting-v2-episodes-ui",
-    "@kbn/agent-context-layer-plugin"
+    "@kbn/inbox-common",
+    "@kbn/core-spaces-common",
+    "@kbn/deeplinks-analytics",
+    "@kbn/core-user-profile-common",
   ]
 }

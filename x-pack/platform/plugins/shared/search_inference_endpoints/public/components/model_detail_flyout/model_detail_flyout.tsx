@@ -8,6 +8,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiBadge,
+  EuiBadgeGroup,
   EuiButtonEmpty,
   EuiDescriptionList,
   EuiFlexGroup,
@@ -29,6 +30,7 @@ import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import { TASK_TYPE_DESCRIPTIONS } from '@kbn/inference-endpoint-ui-common';
 import { docLinks } from '../../../common/doc_links';
 import {
+  isInferenceEndpointWithMetadata,
   isInferenceEndpointWithDisplayNameMetadata,
   isInferenceEndpointWithDisplayCreatorMetadata,
 } from '../../../common/type_guards';
@@ -37,6 +39,9 @@ import { AddEndpointModal } from './add_endpoint_modal';
 import { ModelEndpointRow } from './model_endpoint_row';
 import { useUsageTracker } from '../../contexts/usage_tracker_context';
 import { EventType } from '../../analytics/constants';
+import { getModelEOLDate, getModelReleaseDate, getModelStatus } from '../../utils/eis_utils';
+import { EisModelStatus } from '../../types';
+import { ModelStatusBadge } from '../model_status/model_status_badge';
 
 export interface ModelDetailFlyoutProps {
   modelId: string;
@@ -64,13 +69,20 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
     usageTracker.load([EventType.EIS_MODEL_VIEWED, `${EventType.EIS_MODEL_VIEWED}_${modelId}`]);
   }, [usageTracker, modelId]);
 
-  const { endpoints, displayName, modelAuthor } = useMemo(() => {
+  const {
+    endpoints,
+    displayName,
+    modelAuthor,
+    modelStatus,
+    modelMetadata,
+    modelReleaseDate,
+    modelEOLDate,
+  } = useMemo(() => {
     const filtered = allEndpoints.filter((ep) => getModelId(ep) === modelId);
 
-    const endpointWithName = filtered.find((ep) => isInferenceEndpointWithDisplayNameMetadata(ep));
-    const endpointWithCreator = filtered.find((ep) =>
-      isInferenceEndpointWithDisplayCreatorMetadata(ep)
-    );
+    const endpointWithName = filtered.find(isInferenceEndpointWithDisplayNameMetadata);
+    const endpointWithCreator = filtered.find(isInferenceEndpointWithDisplayCreatorMetadata);
+    const endpointModelMetadata = filtered.find(isInferenceEndpointWithMetadata)?.metadata;
 
     return {
       endpoints: filtered,
@@ -80,6 +92,10 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
         : i18n.translate('xpack.searchInferenceEndpoints.modelDetailFlyout.unknownAuthor', {
             defaultMessage: 'Unknown',
           }),
+      modelStatus: getModelStatus(endpointModelMetadata),
+      modelMetadata: endpointModelMetadata,
+      modelReleaseDate: getModelReleaseDate(endpointModelMetadata)?.format('l') ?? '--',
+      modelEOLDate: getModelEOLDate(endpointModelMetadata)?.format('l') ?? '--',
     };
   }, [allEndpoints, modelId]);
 
@@ -125,6 +141,18 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
       description: modelAuthor,
     },
     {
+      title: i18n.translate('xpack.searchInferenceEndpoints.modelDetailFlyout.modelReleaseDate', {
+        defaultMessage: 'Release date',
+      }),
+      description: modelReleaseDate,
+    },
+    {
+      title: i18n.translate('xpack.searchInferenceEndpoints.modelDetailFlyout.modelEndOfLifeDate', {
+        defaultMessage: 'End-of-life date',
+      }),
+      description: modelEOLDate,
+    },
+    {
       title: i18n.translate('xpack.searchInferenceEndpoints.modelDetailFlyout.documentationLabel', {
         defaultMessage: 'Documentation',
       }),
@@ -156,11 +184,12 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
           <h2 id={flyoutTitleId}>{displayName}</h2>
         </EuiTitle>
         <EuiSpacer size="xs" />
-        <span data-test-subj="flyoutTaskBadges">
+        <EuiBadgeGroup data-test-subj="flyoutTaskBadges">
+          <ModelStatusBadge id={modelId} status={modelStatus} metadata={modelMetadata} />
           {uniqueTaskTypes.map((taskType) => (
             <EuiBadge key={taskType}>{taskType}</EuiBadge>
           ))}
-        </span>
+        </EuiBadgeGroup>
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
@@ -193,6 +222,7 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
                   iconType="plusInCircle"
                   color="text"
                   onClick={handleOpenAddModal}
+                  disabled={modelStatus === EisModelStatus.DeprecatedEOL}
                   data-test-subj="modelDetailFlyoutAddEndpointButton"
                 >
                   {i18n.translate(

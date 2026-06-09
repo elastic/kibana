@@ -25,6 +25,7 @@ const mockSnoozeActionPolicy = jest.fn();
 const mockUnsnoozeActionPolicy = jest.fn();
 const mockSettingsClientGet = jest.fn();
 const mockUseFetchWorkflow = jest.fn();
+const mockBulkGet = jest.fn();
 
 jest.mock('../../application/breadcrumb_context', () => ({
   useSetBreadcrumbs: () => jest.fn(),
@@ -47,6 +48,9 @@ jest.mock('@kbn/core-di-browser', () => ({
           get: mockSettingsClientGet,
         },
       };
+    }
+    if (token === 'userProfile') {
+      return { bulkGet: mockBulkGet };
     }
 
     return {};
@@ -156,23 +160,23 @@ const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPoli
   version: 'WzEsMV0=',
   name: 'Policy One',
   description: 'Policy description',
+  type: 'global',
+  ruleId: null,
   enabled: true,
   destinations: [{ type: 'workflow', id: 'workflow-1' }],
   matcher: null,
   groupBy: null,
   tags: null,
   groupingMode: null,
-  throttle: { strategy: undefined, interval: undefined },
+  throttle: { strategy: undefined, interval: null },
   snoozedUntil: null,
   auth: {
     owner: 'elastic',
     createdByUser: false,
   },
   createdBy: 'elastic_profile_uid',
-  createdByUsername: 'elastic',
   createdAt: '2026-01-01T00:00:00.000Z',
   updatedBy: 'elastic_profile_uid',
-  updatedByUsername: 'elastic',
   updatedAt: '2026-01-02T03:04:05.000Z',
   ...overrides,
 });
@@ -192,6 +196,7 @@ describe('ListActionPoliciesPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
+    mockBulkGet.mockResolvedValue([]);
     mockSettingsClientGet.mockReturnValue('[mock formatted date]');
     mockGetUrlForApp.mockImplementation((_appId: string, { path }: { path: string }) => {
       return `/app/workflows${path}`;

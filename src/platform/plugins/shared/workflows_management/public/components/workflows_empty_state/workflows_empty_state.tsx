@@ -67,7 +67,7 @@ export function WorkflowsEmptyState({
               <EuiButton color="primary" fill onClick={onCreateWorkflow} iconType="plusCircle">
                 <FormattedMessage
                   id="workflows.emptyState.createButton"
-                  defaultMessage="Create a new workflow"
+                  defaultMessage="Create workflow"
                 />
               </EuiButton>
             </EuiFlexItem>

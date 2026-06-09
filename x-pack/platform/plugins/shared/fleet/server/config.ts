@@ -258,6 +258,15 @@ export const config: PluginConfigDescriptor = {
           packageUpgradeBatchSize: schema.number({ defaultValue: 50, min: 10, max: 200 }),
         })
       ),
+      /**
+       * Package installation settings to tune ES operation concurrency and error handling.
+       */
+      packageInstallation: schema.maybe(
+        schema.object({
+          /** Maximum data stream operations to run concurrently per Kibana node during package installation */
+          maxConcurrentDatastreamOperations: schema.number({ defaultValue: 50, min: 1, max: 50 }),
+        })
+      ),
       developer: schema.object({
         maxAgentPoliciesWithInactivityTimeout: schema.maybe(schema.number()),
         disableRegistryVersionCheck: schema.boolean({ defaultValue: false }),
@@ -425,6 +434,7 @@ export const config: PluginConfigDescriptor = {
       unenrollInactiveAgents: schema.maybe(
         schema.object({
           taskInterval: schema.maybe(schema.string()),
+          gracePeriodMs: schema.maybe(schema.number()),
         })
       ),
       integrationsHomeOverride: schema.maybe(schema.string()),

@@ -1,0 +1,24 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx"
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/aiops-change-point-detection",
+    "@kbn/aiops-log-pattern-analysis",
+    "@kbn/config-schema",
+    "@kbn/ml-random-sampler-utils",
+    "@kbn/presentation-publishing-schemas"
+  ]
+}

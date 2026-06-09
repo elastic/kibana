@@ -80,7 +80,7 @@ export const StepNav = ({ stepIndex, totalSteps, handleStepHref }: Props) => {
       panelPaddingSize="none"
       anchorPosition="downLeft"
     >
-      <EuiContextMenuPanel size="s" items={items} />
+      <EuiContextMenuPanel items={items} />
     </EuiPopover>
   );
 };

@@ -11,11 +11,11 @@ import { schema } from '@kbn/config-schema';
 import path from 'node:path';
 import { createToolIdMappings } from '@kbn/agent-builder-genai-utils/langchain';
 import type { InternalToolDefinition } from '@kbn/agent-builder-server';
+import { MCP_SERVER_PATH } from '@kbn/agent-builder-common';
 import { apiPrivileges } from '../../common/features';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { KibanaMcpHttpTransport } from '../utils/mcp/kibana_mcp_http_transport';
-import { MCP_SERVER_PATH } from '../../common/mcp';
 
 const MCP_SERVER_NAME = 'elastic-mcp-server';
 const MCP_SERVER_VERSION = '0.0.1';
@@ -62,7 +62,7 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
       summary: 'MCP server',
       description: `> warn
 > This endpoint is designed for MCP clients (Claude Desktop, Cursor, VS Code, etc.) and should not be used directly via REST APIs. Use MCP Inspector or native MCP clients instead.
-To learn more, refer to the [MCP documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/mcp-server).`,
+To learn more about the Agent Builder MCP server, refer to the [MCP documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/mcp-server).`,
       options: {
         tags: ['mcp', 'oas-tag:agent builder', 'security:acceptUiamOAuth'],
         xsrfRequired: false,

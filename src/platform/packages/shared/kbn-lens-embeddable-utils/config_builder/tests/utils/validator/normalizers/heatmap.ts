@@ -49,7 +49,6 @@ const alignLegacyTypes: NormalizerConfig<HeatmapAttributes> = {
 
     // Remove transform-added column properties not in the original
     for (const layer of Object.values(attributes.state.datasourceStates.formBased?.layers ?? {})) {
-      layer.columnOrder = [...layer.columnOrder].sort();
       for (const col of Object.values(layer.columns)) {
         delete (col as any).params?.parentFormat;
         if (col.operationType === 'count') {

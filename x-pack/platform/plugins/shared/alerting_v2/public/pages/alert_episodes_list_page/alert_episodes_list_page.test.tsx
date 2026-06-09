@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { render, waitFor } from '@testing-library/react';
+import { act, render, waitFor } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { AlertEpisodesListPage } from './alert_episodes_list_page';
 import type { CustomBulkActions } from '@kbn/unified-data-table';
@@ -14,7 +15,12 @@ import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { UnifiedDataTable } from '@kbn/unified-data-table';
 import { fetchAlertingEpisodes } from '@kbn/alerting-v2-episodes-ui/apis/fetch_alerting_episodes';
 import { useAlertingEpisodesDataView } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_episodes_data_view';
-import { createEpisodeActions } from '@kbn/alerting-v2-episodes-ui/actions';
+import { queryKeys } from '@kbn/alerting-v2-episodes-ui/query_keys';
+import { createMockSpaces } from '../../../common/utils/test_utils';
+import {
+  createEpisodeActions,
+  type EpisodeActionContext,
+} from '@kbn/alerting-v2-episodes-ui/actions';
 
 jest.mock('@kbn/unified-data-table', () => ({
   DataLoadingState: { loading: 'loading', loaded: 'loaded' },
@@ -33,13 +39,36 @@ jest.mock('@kbn/alerting-v2-episodes-ui/actions', () => ({
   createEpisodeActions: jest.fn(() => []),
 }));
 
+jest.mock('@kbn/alerting-v2-episodes-ui/components/details/details_flyout', () => ({
+  AlertEpisodeDetailsFlyout: jest.fn(() => <div data-test-subj="alertEpisodeFlyoutStub" />),
+}));
+
 jest.mock('../../hooks/use_breadcrumbs', () => ({ useBreadcrumbs: jest.fn() }));
+
+jest.mock('./components/episodes_kpis', () => ({
+  EpisodesKpis: () => null,
+}));
+
+// Capture the onRefresh prop from EpisodesFilterBar so tests can invoke it directly.
+// Typed as returning unknown so tests can await the result (invalidateEpisodeQueries returns a Promise).
+let capturedFilterBarOnRefresh: (() => unknown) | undefined;
+jest.mock('./components/episodes_filter_bar', () => ({
+  EpisodesFilterBar: jest.fn(({ onRefresh }: { onRefresh?: () => unknown }) => {
+    capturedFilterBarOnRefresh = onRefresh;
+    return null;
+  }),
+}));
+
+jest.mock('./components/episodes_histogram', () => ({
+  EpisodesHistogram: () => null,
+}));
 
 jest.mock('react-use/lib/useObservable', () =>
   jest.fn().mockReturnValue({ from: 'now-24h', to: 'now' })
 );
 
 const mockHttp = httpServiceMock.createStartContract();
+const mockSpaces = createMockSpaces();
 
 const mockServices = {
   http: mockHttp,
@@ -63,7 +92,11 @@ const mockServices = {
   expressions: {},
   share: {},
   uiSettings: {},
+  unifiedDocViewer: {},
+  dataViews: {},
+  userProfile: {},
   uiActions: { getTriggerCompatibleActions: jest.fn().mockResolvedValue([]) },
+  spaces: mockSpaces,
 };
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
@@ -105,7 +138,7 @@ const mockEpisodes = [
 // return values are set once at module scope and persist across all tests.
 jest.mocked(useAlertingEpisodesDataView).mockReturnValue(mockDataView as any);
 jest.mocked(fetchAlertingEpisodes).mockResolvedValue(mockEpisodes as any);
-mockHttp.get.mockResolvedValue({ items: [] });
+mockHttp.post.mockResolvedValue({ rules: [] });
 
 const mockCreateEpisodeActions = jest.mocked(createEpisodeActions);
 
@@ -118,9 +151,11 @@ const getCapturedBulkActions = (): CustomBulkActions => {
 const renderPage = () => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
-    <QueryClientProvider client={queryClient}>
-      <AlertEpisodesListPage />
-    </QueryClientProvider>
+    <MemoryRouter>
+      <QueryClientProvider client={queryClient}>
+        <AlertEpisodesListPage />
+      </QueryClientProvider>
+    </MemoryRouter>
   );
 };
 
@@ -130,7 +165,7 @@ describe('AlertEpisodesListPage', () => {
     mockCreateEpisodeActions.mockReturnValue([]);
     jest.mocked(useAlertingEpisodesDataView).mockReturnValue(mockDataView as any);
     jest.mocked(fetchAlertingEpisodes).mockResolvedValue(mockEpisodes as any);
-    mockHttp.get.mockResolvedValue({ items: [] });
+    mockHttp.post.mockResolvedValue({ rules: [] });
     renderPage();
     // Wait for episodes to load so bulk action handlers have access to episode data
     await waitFor(() => {
@@ -178,5 +213,94 @@ describe('AlertEpisodesListPage', () => {
         expressions: mockServices.expressions,
       })
     );
+  });
+
+  it('passes expandedDoc, setExpandedDoc and renderDocumentView to UnifiedDataTable', () => {
+    const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
+    expect(lastCall).toHaveProperty('expandedDoc');
+    expect(typeof lastCall?.setExpandedDoc).toBe('function');
+    expect(typeof lastCall?.renderDocumentView).toBe('function');
+  });
+
+  it('renderDocumentView returns a node when invoked with a hit containing episode.id', () => {
+    const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
+    const renderDocumentView = lastCall?.renderDocumentView as (hit: {
+      flattened: Record<string, unknown>;
+    }) => React.ReactNode;
+    const node = renderDocumentView({ flattened: { 'episode.id': 'ep-1' } });
+    expect(node).toBeTruthy();
+  });
+});
+
+describe('query invalidation', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    capturedFilterBarOnRefresh = undefined;
+    mockCreateEpisodeActions.mockReturnValue([]);
+    jest.mocked(useAlertingEpisodesDataView).mockReturnValue(mockDataView as any);
+    jest.mocked(fetchAlertingEpisodes).mockResolvedValue(mockEpisodes as any);
+    mockHttp.post.mockResolvedValue({ rules: [] });
+  });
+
+  it('invalidates episodesKpis when the refresh button is clicked', async () => {
+    renderPage();
+
+    await waitFor(() => {
+      expect(capturedFilterBarOnRefresh).toBeDefined();
+    });
+
+    // Set up the spy after rendering so it does not interfere with React Query's query execution
+    const mockInvalidateQueries = jest
+      .spyOn(QueryClient.prototype, 'invalidateQueries')
+      .mockResolvedValue(undefined);
+
+    await act(() => capturedFilterBarOnRefresh!());
+
+    expect(mockInvalidateQueries).toHaveBeenCalledWith({ queryKey: queryKeys.kpisAll() });
+    mockInvalidateQueries.mockRestore();
+  });
+
+  it('invalidates episodesKpis when an episode action succeeds', async () => {
+    let capturedOnSuccess: (() => unknown) | undefined;
+    const mockAction = {
+      id: 'test-action',
+      order: 1,
+      displayName: 'Test Action',
+      iconType: 'star',
+      isCompatible: jest.fn(() => true),
+      execute: jest.fn(async ({ onSuccess }: EpisodeActionContext) => {
+        capturedOnSuccess = onSuccess;
+      }),
+    };
+    mockCreateEpisodeActions.mockReturnValue([mockAction]);
+
+    renderPage();
+
+    // Wait for episodes to load so that bulk action handlers have access to episode data
+    await waitFor(() => {
+      const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
+      expect(lastCall?.rows?.length).toBeGreaterThan(0);
+    });
+
+    const bulkActions = getCapturedBulkActions();
+    const firstAction = bulkActions[0];
+
+    // Set up the spy after rendering so it does not interfere with React Query's query execution
+    const mockInvalidateQueries = jest
+      .spyOn(QueryClient.prototype, 'invalidateQueries')
+      .mockResolvedValue(undefined);
+
+    // Trigger the bulk action — this calls action.execute with an onSuccess callback
+    await act(() => {
+      firstAction.onClick({ selectedDocIds: ['ep1'] });
+    });
+
+    expect(capturedOnSuccess).toBeDefined();
+
+    // Simulate success — verify the KPIs query is invalidated
+    await act(() => capturedOnSuccess!());
+
+    expect(mockInvalidateQueries).toHaveBeenCalledWith({ queryKey: queryKeys.kpisAll() });
+    mockInvalidateQueries.mockRestore();
   });
 });

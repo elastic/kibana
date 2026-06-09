@@ -40,7 +40,6 @@ export function RuleActionsCell({
       anchorPosition="downRight"
     >
       <EuiContextMenuPanel
-        size="s"
         items={[
           <EuiContextMenuItem
             key="query-delete"

@@ -31,6 +31,7 @@ interface TemplateEditorLayoutProps {
   previewWidth: number;
   onPreviewWidthChange: (width: number) => void;
   currentTemplateId?: string;
+  savedValue?: string;
 }
 
 export const TemplateEditorLayout: React.FC<TemplateEditorLayoutProps> = ({
@@ -43,6 +44,7 @@ export const TemplateEditorLayout: React.FC<TemplateEditorLayoutProps> = ({
   previewWidth,
   onPreviewWidthChange,
   currentTemplateId,
+  savedValue,
 }) => {
   const styles = useMemoCss(componentStyles);
 
@@ -64,6 +66,7 @@ export const TemplateEditorLayout: React.FC<TemplateEditorLayoutProps> = ({
             onChange={onYamlChange}
             isSaving={isYamlSaving}
             isSaved={isYamlSaved}
+            savedValue={savedValue}
           />
         </div>
       }

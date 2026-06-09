@@ -50,7 +50,6 @@ import {
   createErrorSO,
 } from '../test_utils';
 import { AttachmentService } from '../attachments';
-import { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 import type {
   CaseSavedObjectTransformed,
   CasePersistedAttributes,
@@ -169,10 +168,8 @@ const createCasePatchParams = ({
 describe('CasesService', () => {
   const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
   const mockLogger = loggerMock.create();
-  const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
   const attachmentService = new AttachmentService({
     log: mockLogger,
-    persistableStateAttachmentTypeRegistry,
     unsecuredSavedObjectsClient,
     config: {} as ConfigType,
   });
@@ -2359,6 +2356,63 @@ describe('CasesService', () => {
         unsecuredSavedObjectsClient.find.mockResolvedValue(findMockReturn);
 
         await expect(service.getCaseIdsByAlertId({ alertId: '1' })).resolves.not.toThrow();
+      });
+
+      describe('unified attachments', () => {
+        const buildAggsResponse = (caseIds: string[]) => ({
+          ...createSOFindResponse([]),
+          aggregations: {
+            references: {
+              doc_count: caseIds.length,
+              caseIds: { buckets: caseIds.map((key) => ({ key })) },
+            },
+          },
+        });
+
+        it('does not query cases-attachments when the unified attachments flag is off', async () => {
+          jest
+            .spyOn(attachmentService, 'isUnifiedAttachmentsEnabled', 'get')
+            .mockReturnValue(false);
+
+          unsecuredSavedObjectsClient.find.mockResolvedValueOnce(buildAggsResponse(['legacy-1']));
+
+          const res = await service.getCaseIdsByAlertId({ alertId: '1' });
+
+          expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(1);
+          expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith(
+            expect.objectContaining({ type: 'cases-comments' })
+          );
+          expect(CasesService.getCaseIDsFromAlertAggs(res)).toEqual(['legacy-1']);
+        });
+
+        it('runs an additional cases-attachments find when the flag is on and merges deduped case ids', async () => {
+          jest.spyOn(attachmentService, 'isUnifiedAttachmentsEnabled', 'get').mockReturnValue(true);
+
+          unsecuredSavedObjectsClient.find
+            .mockResolvedValueOnce(buildAggsResponse(['shared-case', 'legacy-only']))
+            .mockResolvedValueOnce(buildAggsResponse(['shared-case', 'unified-only']));
+
+          const res = await service.getCaseIdsByAlertId({
+            alertId: 'alert-1',
+            unifiedFilter: undefined,
+          });
+
+          expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(2);
+          expect(unsecuredSavedObjectsClient.find).toHaveBeenNthCalledWith(
+            1,
+            expect.objectContaining({ type: 'cases-comments' })
+          );
+          expect(unsecuredSavedObjectsClient.find).toHaveBeenNthCalledWith(
+            2,
+            expect.objectContaining({ type: 'cases-attachments' })
+          );
+
+          expect(CasesService.getCaseIDsFromAlertAggs(res)).toEqual([
+            'shared-case',
+            'legacy-only',
+            'unified-only',
+          ]);
+        });
       });
     });
 

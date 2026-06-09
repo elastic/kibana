@@ -18,6 +18,7 @@ import {
 } from '../../../common/domain/definitions/entity_schema';
 import {
   ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
+  type LogSlicePaginationParams,
   type PaginationParams,
 } from './query_builder_commons';
 import {
@@ -34,7 +35,12 @@ import { executeEsqlQuery } from '../../infra/elasticsearch/esql';
 import { ingestEntities } from '../../infra/elasticsearch/ingest';
 import { getUpdatesEntitiesDataStreamName } from '../asset_manager/updates_data_stream';
 import type { CcsLogExtractionStateClient } from '../saved_objects/ccs_log_extraction_state';
-import { capExtractionWindowEnd, resolveCcsExtractionWindow } from './extraction_window';
+import {
+  applyMaxLagCutoff,
+  capExtractionWindowEnd,
+  resolveCcsExtractionWindow,
+} from './extraction_window';
+import { capAtMaxLogsPerWindow } from './effective_page_limits';
 
 interface CcsExtractToUpdatesParams {
   type: EntityType;
@@ -43,18 +49,25 @@ interface CcsExtractToUpdatesParams {
   maxLogsPerPage: number;
   lookbackPeriod: string;
   delay: string;
+  frequency: string;
   entityDefinition: ManagedEntityDefinition;
   abortController?: AbortController;
   /** Explicit time window override (API calls). When set, the internal checkpoint is not updated. */
   windowOverride?: { fromDateISO: string; toDateISO: string };
   /** Cap each scheduled sub-window to this duration to bound probe cost in lagging environments. */
   maxTimeWindowSize: string;
+  /** Total raw log documents allowed per run. 0 = disabled. */
+  maxLogsPerWindow: number;
+  /** What to do when the cap fires: preserve cursor (defer) or advance to window end (drop). */
+  maxLogsPerWindowCapBehavior: 'defer' | 'drop';
 }
 
 export interface CcsExtractToUpdatesResult {
   count: number;
   pages: number;
+  logsProcessed?: number;
   error?: Error;
+  logsCapApplied?: boolean;
 }
 
 export class CcsLogsExtractionClient {
@@ -86,23 +99,40 @@ export class CcsLogsExtractionClient {
     maxLogsPerPage,
     lookbackPeriod,
     delay,
+    frequency,
     entityDefinition,
     abortController,
     windowOverride,
     maxTimeWindowSize,
+    maxLogsPerWindow,
+    maxLogsPerWindowCapBehavior,
   }: CcsExtractToUpdatesParams): Promise<CcsExtractToUpdatesResult> {
     const ccsState =
       windowOverride != null
         ? { checkpointTimestamp: null, paginationRecoveryId: null }
         : await this.ccsStateClient.findOrInit(type);
 
-    const { effectiveFromDateISO, effectiveWindowEnd, recoveryId, isWindowOverride } =
-      resolveCcsExtractionWindow({
-        config: { lookbackPeriod, delay },
-        ccsState,
-        windowOverride,
-        logger: this.logger,
-      });
+    const {
+      effectiveFromDateISO: resolvedFromDateISO,
+      effectiveWindowEnd,
+      recoveryId,
+      isWindowOverride,
+    } = resolveCcsExtractionWindow({
+      config: { lookbackPeriod, delay },
+      ccsState,
+      windowOverride,
+      logger: this.logger,
+    });
+
+    const effectiveFromDateISO = isWindowOverride
+      ? resolvedFromDateISO
+      : applyMaxLagCutoff({
+          fromDateISO: resolvedFromDateISO,
+          effectiveWindowEnd,
+          lookbackPeriod,
+          frequency,
+          logger: this.logger,
+        });
 
     if (effectiveFromDateISO >= effectiveWindowEnd) {
       this.logger.error(
@@ -112,24 +142,31 @@ export class CcsLogsExtractionClient {
     }
 
     if (isWindowOverride) {
-      // Manual `windowOverride` runs bypass the cap and run as a single pass.
+      // Manual windowOverride runs as a single pass without persisting checkpoint.
       const result = await this.runLogsPaginationOuterLoop({
         type,
         remoteIndexPatterns,
         toDateISO: effectiveWindowEnd,
         docsLimit,
         maxLogsPerPage,
+        maxLogsPerWindow,
         entityDefinition,
         abortController,
         effectiveFromDateISO,
         recoveryId,
         skipStateUpdates: true,
       });
+      if (result.logsCapApplied) {
+        this.logger.warn(
+          `CCS extraction volume cap reached for entity type "${type}" (manual run): processed ${result.logsProcessed} logs (limit: ${maxLogsPerWindow}). Cap behavior: "${maxLogsPerWindowCapBehavior}". Cursor is not persisted.`
+        );
+      }
       return result;
     }
 
     let totalCount = 0;
     let totalPages = 0;
+    let totalLogs = 0;
     let currentFromDateISO = effectiveFromDateISO;
     // Recovery applies only to the first sub-window. The inner outer-loop persists
     // `checkpointTimestamp` after every slice, so a crash mid-run resumes from the last
@@ -152,12 +189,15 @@ export class CcsLogsExtractionClient {
         logger: this.logger,
       });
 
+      // Pass remaining budget so the cap is tracked correctly across sub-windows.
+      const remainingCap = maxLogsPerWindow > 0 ? maxLogsPerWindow - totalLogs : 0;
       const subResult = await this.runLogsPaginationOuterLoop({
         type,
         remoteIndexPatterns,
         toDateISO: subWindowEnd,
         docsLimit,
         maxLogsPerPage,
+        maxLogsPerWindow: remainingCap,
         entityDefinition,
         abortController,
         effectiveFromDateISO: currentFromDateISO,
@@ -168,6 +208,28 @@ export class CcsLogsExtractionClient {
 
       totalCount += subResult.count;
       totalPages += subResult.pages;
+      totalLogs += subResult.logsProcessed ?? 0;
+
+      if (subResult.logsCapApplied) {
+        this.logger.warn(
+          `CCS extraction volume cap reached for entity type "${type}": processed ${totalLogs} logs (limit: ${maxLogsPerWindow}). Cap behavior: "${maxLogsPerWindowCapBehavior}".`
+        );
+        if (maxLogsPerWindowCapBehavior === 'drop') {
+          this.logger.warn(
+            `Dropping remaining CCS logs. Advancing checkpoint to end of window: ${effectiveWindowEnd}.`
+          );
+          await this.ccsStateClient.update(type, {
+            checkpointTimestamp: effectiveWindowEnd,
+            paginationRecoveryId: null,
+          });
+        }
+        return {
+          count: totalCount,
+          pages: totalPages,
+          logsProcessed: totalLogs,
+          logsCapApplied: true,
+        };
+      }
 
       // if the window was capped we consider we have a next page
       hasNextPage = isCapped;
@@ -193,6 +255,7 @@ export class CcsLogsExtractionClient {
     toDateISO,
     docsLimit,
     maxLogsPerPage,
+    maxLogsPerWindow,
     entityDefinition,
     abortController,
     effectiveFromDateISO: initialFromDateISO,
@@ -204,14 +267,18 @@ export class CcsLogsExtractionClient {
     toDateISO: string;
     docsLimit: number;
     maxLogsPerPage: number;
+    maxLogsPerWindow: number;
     entityDefinition: ManagedEntityDefinition;
     abortController?: AbortController;
     effectiveFromDateISO: string;
     recoveryId: string | undefined;
     skipStateUpdates: boolean;
   }): Promise<CcsExtractToUpdatesResult> {
+    const effectiveMaxLogsPerPage = capAtMaxLogsPerWindow(maxLogsPerPage, maxLogsPerWindow);
+    const effectiveDocsLimit = capAtMaxLogsPerWindow(docsLimit, maxLogsPerWindow);
     let totalCount = 0;
     let totalPages = 0;
+    let totalLogs = 0;
 
     const onAbort = () => {
       this.logger.info(
@@ -222,7 +289,7 @@ export class CcsLogsExtractionClient {
 
     let effectiveFromDateISO = initialFromDateISO;
     let recoveryId = initialRecoveryId;
-    let sliceStart: PaginationParams | undefined;
+    let sliceStart: LogSlicePaginationParams | undefined;
 
     let isLastLogsPage = false;
 
@@ -233,7 +300,7 @@ export class CcsLogsExtractionClient {
         fromDateISO: effectiveFromDateISO,
         toDateISO,
         sliceStart,
-        maxLogsPerPage,
+        maxLogsPerPage: effectiveMaxLogsPerPage,
         abortController,
       });
 
@@ -241,29 +308,41 @@ export class CcsLogsExtractionClient {
         break;
       }
 
-      const { logsPaginationCursor: sliceEnd } = logPaginationCursor;
+      let { logsPaginationCursor: sliceEnd } = logPaginationCursor;
       isLastLogsPage = logPaginationCursor.isLastLogsPage;
 
-      // Recovery cursor is only used in the first slice; clear it after consumption
-      const recoveryIdForThisSlice = recoveryId;
-      recoveryId = undefined;
-
-      const { count, pages } = await this.runEntitiesPaginationInnerLoop({
-        type,
-        remoteIndexPatterns,
-        fromDateISO: effectiveFromDateISO,
-        toDateISO,
-        docsLimit,
-        entityDefinition,
-        abortController,
+      const bumpedSliceEnd = this.detectLogSliceStall(
         sliceStart,
         sliceEnd,
-        recoveryId: recoveryIdForThisSlice,
-        skipStateUpdates,
-      });
+        logPaginationCursor.sliceLogCount,
+        effectiveMaxLogsPerPage
+      );
+      if (bumpedSliceEnd) {
+        sliceEnd = bumpedSliceEnd;
+      } else {
+        totalLogs += logPaginationCursor.sliceLogCount;
 
-      totalCount += count;
-      totalPages += pages;
+        // Recovery cursor is only used in the first slice; clear it after consumption
+        const recoveryIdForThisSlice = recoveryId;
+        recoveryId = undefined;
+
+        const { count, pages } = await this.runEntitiesPaginationInnerLoop({
+          type,
+          remoteIndexPatterns,
+          fromDateISO: effectiveFromDateISO,
+          toDateISO,
+          docsLimit: effectiveDocsLimit,
+          entityDefinition,
+          abortController,
+          sliceStart,
+          sliceEnd,
+          recoveryId: recoveryIdForThisSlice,
+          skipStateUpdates,
+        });
+
+        totalCount += count;
+        totalPages += pages;
+      }
 
       // Advance the window: the completed slice end becomes the next slice start
       sliceStart = sliceEnd;
@@ -274,11 +353,30 @@ export class CcsLogsExtractionClient {
           paginationRecoveryId: null,
         });
       }
+
+      if (!bumpedSliceEnd && maxLogsPerWindow > 0 && totalLogs >= maxLogsPerWindow) {
+        this.logger.info(
+          `CCS entities extracted: ${totalCount}, logs processed: ${totalLogs}, in ${totalPages} pages`
+        );
+        return {
+          count: totalCount,
+          pages: totalPages,
+          logsProcessed: totalLogs,
+          logsCapApplied: true,
+        };
+      }
     } while (!isLastLogsPage);
 
-    this.logger.info(`CCS entities extracted: ${totalCount}, in ${totalPages} pages`);
+    this.logger.info(
+      `CCS entities extracted: ${totalCount}, logs processed: ${totalLogs}, in ${totalPages} pages`
+    );
 
-    return { count: totalCount, pages: totalPages };
+    return {
+      count: totalCount,
+      pages: totalPages,
+      logsProcessed: totalLogs,
+      logsCapApplied: false,
+    };
   }
 
   /**
@@ -299,20 +397,18 @@ export class CcsLogsExtractionClient {
     type: EntityType;
     fromDateISO: string;
     toDateISO: string;
-    sliceStart: PaginationParams | undefined;
+    sliceStart: LogSlicePaginationParams | undefined;
     maxLogsPerPage: number;
     abortController?: AbortController;
   }): Promise<LogPaginationCursor> {
-    const probeQuery =
-      `SET unmapped_fields="nullify";\n` +
-      buildLogPaginationCursorProbeEsql({
-        indexPatterns: remoteIndexPatterns,
-        type,
-        fromDateISO,
-        toDateISO,
-        logsPageCursorStart: sliceStart,
-        maxLogsPerPage,
-      });
+    const probeQuery = buildLogPaginationCursorProbeEsql({
+      indexPatterns: remoteIndexPatterns,
+      type,
+      fromDateISO,
+      toDateISO,
+      logsPageCursorStart: sliceStart,
+      maxLogsPerPage,
+    });
 
     this.logger.info(
       `CCS probe: from=${fromDateISO} to=${toDateISO}${
@@ -364,8 +460,8 @@ export class CcsLogsExtractionClient {
     docsLimit: number;
     entityDefinition: ManagedEntityDefinition;
     abortController?: AbortController;
-    sliceStart: PaginationParams | undefined;
-    sliceEnd: PaginationParams;
+    sliceStart: LogSlicePaginationParams | undefined;
+    sliceEnd: LogSlicePaginationParams;
     recoveryId: string | undefined;
     skipStateUpdates: boolean;
   }): Promise<{ count: number; pages: number }> {
@@ -420,6 +516,7 @@ export class CcsLogsExtractionClient {
           abortController,
           fieldsToIgnore: [ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD],
           transformDocument: this.buildTransformDocument(type),
+          refresh: false,
         });
       }
 
@@ -432,6 +529,27 @@ export class CcsLogsExtractionClient {
     } while (entityPagination);
 
     return { count, pages };
+  }
+
+  /** Returns the bumped slice-end cursor when a stall is detected, null otherwise. Logs a warning on stall. */
+  private detectLogSliceStall(
+    sliceStart: LogSlicePaginationParams | undefined,
+    sliceEnd: LogSlicePaginationParams,
+    sliceLogCount: number,
+    maxLogsPerPage: number
+  ): LogSlicePaginationParams | null {
+    if (
+      sliceStart &&
+      sliceStart.timestampCursor === sliceEnd.timestampCursor &&
+      sliceLogCount >= maxLogsPerPage
+    ) {
+      const bumpedTs = moment(sliceEnd.timestampCursor).add(1, 'ms').toISOString();
+      this.logger.warn(
+        `CCS log-slice probe stalled at ${sliceEnd.timestampCursor} with a full page (${sliceLogCount} docs); advancing cursor by 1ms. Docs sharing this timestamp beyond maxLogsPerPage will be dropped.`
+      );
+      return { timestampCursor: bumpedTs };
+    }
+    return null;
   }
 
   /**

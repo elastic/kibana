@@ -1734,7 +1734,7 @@ export default ({ getService }: FtrProviderContext) => {
           );
         });
 
-        it('suppressed alerts are enriched with host risk score', async () => {
+        it('@skipInServerlessMKI suppressed alerts are enriched with host risk score', async () => {
           const eventId = uuidv4();
           await indexGeneratedSourceDocuments({
             docsCount: 1,
@@ -1763,7 +1763,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(previewAlerts[0]?._source?.host?.risk?.calculated_score_norm).toBe(96);
         });
 
-        it('suppressed alerts are enriched with criticality_level', async () => {
+        it('@skipInServerlessMKI suppressed alerts are enriched with criticality_level', async () => {
           const id = uuidv4();
           const timestamp = '2020-10-28T06:45:00.000Z';
 

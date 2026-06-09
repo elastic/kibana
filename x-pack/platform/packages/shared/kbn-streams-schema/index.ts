@@ -87,6 +87,7 @@ export {
   hasSameEsql,
   replaceFromSources,
   rewriteFromSources,
+  stripMetadata,
 } from './src/helpers/esql_helpers';
 
 export * from './src/ingest_pipeline_processors';
@@ -137,6 +138,8 @@ export {
 export {
   type EsqlQuery,
   esqlQuerySchema,
+  type QueryFeature,
+  queryFeatureSchema,
   type StreamQuery,
   type QueryLink,
   type QueryType,
@@ -204,11 +207,11 @@ export {
 export type {
   SignificantEventsResponse,
   SignificantEventsGetResponse,
-  SignificantEventsPreviewResponse,
-  SignificantEventsGenerateResponse,
   GeneratedSignificantEventQuery,
   SignificantEventsQueriesGenerationResult,
   SignificantEventsQueriesGenerationTaskResult,
+  LifecycleDetection,
+  EventLifecycleResponse,
 } from './src/api/significant_events';
 export { generatedSignificantEventQuerySchema } from './src/api/significant_events';
 
@@ -290,8 +293,32 @@ export {
   INSIGHT_IMPACT_LEVEL_MAP,
   getImpactLevel,
 } from './src/insights';
-export type { OnboardingResult } from './src/onboarding';
-export { OnboardingStep } from './src/onboarding';
+export {
+  SIG_EVENT_STATUS_OPTIONS,
+  SIG_EVENT_IMPACT_OPTIONS,
+  detectionSchema,
+  type Detection,
+  discoverySchema,
+  type Discovery,
+  sigEventSchema,
+  sigEventStatusSchema,
+  sigEventImpactSchema,
+  type SigEvent,
+  type KnowledgeIndicator,
+  type SigEventStatus,
+  type SigEventImpact,
+} from './src/sig_events';
+export type {
+  StreamsKIsOnboardingResult,
+  StreamsKIsOnboardingFeaturesResult,
+  StreamsKIsOnboardingQueriesResult,
+  StreamsKIsOnboardingStatusResult,
+} from './src/onboarding';
+export {
+  StreamsKIsOnboardingStep,
+  StreamsKIsOnboardingStatus,
+  STREAMS_KIS_ONBOARDING_IN_PROGRESS_STATUSES,
+} from './src/onboarding';
 export { streamsOasDefinitions } from './src/oas_definitions';
 export type { StreamsOasDefinitions } from './src/oas_definitions';
 

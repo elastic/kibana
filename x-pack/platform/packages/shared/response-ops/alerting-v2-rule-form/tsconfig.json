@@ -2,20 +2,10 @@
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": [
-      "jest",
-      "node",
-      "react",
-      "@testing-library/jest-dom"
-    ]
+    "types": ["jest", "node", "react", "@testing-library/jest-dom", "@kbn/ambient-ui-types"]
   },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx"
-  ],
-  "exclude": [
-    "target/**/*"
-  ],
+  "include": ["**/*.ts", "**/*.tsx"],
+  "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/i18n",
     "@kbn/i18n-react",
@@ -38,7 +28,11 @@
     "@kbn/field-types",
     "@kbn/lens-plugin",
     "@kbn/visualization-utils",
-    "@kbn/expressions-plugin"
+    "@kbn/expressions-plugin",
+    "@kbn/code-editor",
+    "@kbn/esql-language",
+    "@kbn/core-http-browser",
+    "@kbn/ui-actions-plugin",
+    "@kbn/dashboard-plugin"
   ]
 }
-

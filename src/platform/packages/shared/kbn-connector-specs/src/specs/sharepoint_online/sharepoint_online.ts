@@ -16,12 +16,18 @@
  * - Page listing within sites
  * - Cross-site search functionality
  *
- * Requires OAuth2 client credentials authentication with Microsoft Entra ID.
+ * Supports three Microsoft Entra ID auth flows:
+ * - Delegated: OAuth 2.0 Authorization Code (per-user access)
+ * - App-only:
+ *    - certificate-based OAuth 2.0 client credentials, signed with a
+ *   JWT assertion (PS256 + x5t#S256), per Microsoft's recommendation for
+ *   production app-only access to Graph/SharePoint
+ *   - secret-based OAuth 2.0 client credentials
  */
 
 import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
-import type { ConnectorSpec } from '../../connector_spec';
+import type { ActionContext, ConnectorSpec } from '../../connector_spec';
 /**
  * Common output schema for Microsoft Graph API responses that return a collection.
  * Uses z.any() for the array items to avoid over-specifying the response structure.
@@ -32,6 +38,16 @@ const GraphCollectionOutputSchema = lazySchema(() =>
     '@odata.nextLink': z.string().optional().describe('URL to fetch next page of results'),
   })
 );
+
+const APP_ONLY_AUTH_TYPES = new Set([
+  'oauth_client_credentials',
+  'oauth_client_credentials_private_key_jwt',
+]);
+
+const isAppOnlyAuth = (ctx: ActionContext): boolean => {
+  const authType = ctx.secrets?.authType;
+  return typeof authType === 'string' && APP_ONLY_AUTH_TYPES.has(authType);
+};
 
 export const SharepointOnline: ConnectorSpec = {
   metadata: {
@@ -68,6 +84,68 @@ export const SharepointOnline: ConnectorSpec = {
                   defaultMessage:
                     "Replace '{tenantId}' with your Azure AD tenant ID. For example: https://login.microsoftonline.com/your-tenant-id/oauth2/v2.0/token",
                   values: { tenantId: '{tenant-id}' },
+                }
+              ),
+            },
+          },
+        },
+      },
+      {
+        type: 'oauth_client_credentials_private_key_jwt',
+        defaults: {
+          scope: 'https://graph.microsoft.com/.default',
+          algorithm: 'PS256',
+          certificateBinding: 'x5t#S256',
+        },
+        overrides: {
+          meta: {
+            scope: { hidden: true },
+            algorithm: { hidden: true },
+            certificateBinding: { hidden: true },
+            keyId: { hidden: true },
+            tokenUrl: {
+              placeholder: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token',
+              helpText: i18n.translate(
+                'core.kibanaConnectorSpecs.sharepointOnline.auth.oauthCert.tokenUrl.helpText',
+                {
+                  defaultMessage:
+                    "Replace '{tenant-id}' with your Microsoft Entra tenant ID. Before using this auth method, register an application in Microsoft Entra ID, grant it Microsoft Graph application permissions (Sites.Selected, Files.Read.All), and upload a self-signed or CA-issued X.509 certificate under Certificates & secrets > Certificates.",
+                }
+              ),
+            },
+            clientId: {
+              helpText: i18n.translate(
+                'core.kibanaConnectorSpecs.sharepointOnline.auth.oauthCert.clientId.helpText',
+                {
+                  defaultMessage:
+                    'The Application (client) ID of the Entra app registration (Azure Portal > Entra ID > App registrations > your app > Overview).',
+                }
+              ),
+            },
+            certificate: {
+              helpText: i18n.translate(
+                'core.kibanaConnectorSpecs.sharepointOnline.auth.oauthCert.certificate.helpText',
+                {
+                  defaultMessage:
+                    'Upload the PEM-encoded public certificate you uploaded to the Entra app registration. Must begin with -----BEGIN CERTIFICATE-----.',
+                }
+              ),
+            },
+            privateKey: {
+              helpText: i18n.translate(
+                'core.kibanaConnectorSpecs.sharepointOnline.auth.oauthCert.privateKey.helpText',
+                {
+                  defaultMessage:
+                    'Upload the PEM-encoded private key that matches the uploaded certificate. Must begin with -----BEGIN PRIVATE KEY-----, -----BEGIN RSA PRIVATE KEY-----, or -----BEGIN ENCRYPTED PRIVATE KEY-----.',
+                }
+              ),
+            },
+            passphrase: {
+              helpText: i18n.translate(
+                'core.kibanaConnectorSpecs.sharepointOnline.auth.oauthCert.passphrase.helpText',
+                {
+                  defaultMessage:
+                    'Only required if the private key is encrypted (ENCRYPTED PRIVATE KEY).',
                 }
               ),
             },
@@ -134,9 +212,8 @@ export const SharepointOnline: ConnectorSpec = {
       output: GraphCollectionOutputSchema,
       handler: async (ctx, input) => {
         const typedInput = input as { search?: string } | undefined;
-        const isAppOnly = ctx.secrets?.authType === 'oauth_client_credentials';
 
-        if (isAppOnly) {
+        if (isAppOnlyAuth(ctx)) {
           ctx.log.debug('SharePoint listing all sites (app-only auth)');
           const response = await ctx.client.get(
             'https://graph.microsoft.com/v1.0/sites/getAllSites/',
@@ -673,8 +750,6 @@ export const SharepointOnline: ConnectorSpec = {
 
         // region is only required for app-only (client credentials) auth.
         // Sending region with delegated auth can cause a 400 error.
-        const isAppOnly = ctx.secrets?.authType === 'oauth_client_credentials';
-
         const searchRequest = {
           requests: [
             {
@@ -682,7 +757,7 @@ export const SharepointOnline: ConnectorSpec = {
               query: {
                 queryString: typedInput.query,
               },
-              ...(isAppOnly && { region: typedInput.region ?? 'NAM' }),
+              ...(isAppOnlyAuth(ctx) && { region: typedInput.region ?? 'NAM' }),
               ...(typedInput.from !== undefined && { from: typedInput.from }),
               ...(typedInput.size !== undefined && { size: typedInput.size }),
             },
@@ -736,7 +811,7 @@ export const SharepointOnline: ConnectorSpec = {
     '- **Use browse** (`getAllSites` → `getSiteDrives` → `getDriveItems`) when you need structured navigation — e.g., listing everything in a specific folder or enumerating all items in a library.',
     '',
     '### Auth Mode Differences',
-    '- **App-only auth (`oauth_client_credentials`)**: `getAllSites` calls `/sites/getAllSites` and returns all sites the app has access to. The `search` parameter is ignored. The `search` action requires a `region` parameter (defaults to `NAM`).',
+    '- **App-only auth (`oauth_client_credentials` or `oauth_client_credentials_private_key_jwt`)**: `getAllSites` calls `/sites/getAllSites` and returns all sites the app has access to. The `search` parameter is ignored. The `search` action requires a `region` parameter (defaults to `NAM`).',
     '- **Delegated auth (`oauth_authorization_code` or `ears`)**: `getAllSites` falls back to `/sites?search=` — provide a keyword or omit for wildcard (`*`). The `search` action does not use `region` (omit it to avoid 400 errors).',
     '',
     '### Escape Hatch',
