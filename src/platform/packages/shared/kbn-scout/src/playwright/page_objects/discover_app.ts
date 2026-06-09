@@ -27,6 +27,7 @@ export interface DiscoverGotoOptions {
 const UNIFIED_TABS_TEST_SUBJ = {
   selectTabBtnPrefix: 'unifiedTabs_selectTabBtn_',
   tabMenuBtnPrefix: 'unifiedTabs_tabMenuBtn_',
+  editTabLabelInputPrefix: 'unifiedTabs_editTabLabelInput_',
   newTabBtn: 'unifiedTabs_tabsBar_newTabBtn',
   tabsBar: 'unifiedTabs_tabsBar',
   duplicateMenuItem: 'unifiedTabs_tabMenuItem_duplicate',
@@ -644,6 +645,80 @@ export class DiscoverApp {
         `[data-test-subj^="${UNIFIED_TABS_TEST_SUBJ.selectTabBtnPrefix}"][aria-selected="true"]:not([data-test-subj="${originalTestSubj}"])`
       )
       .waitFor({ state: 'visible' });
+  }
+
+  /**
+   * Returns the label text for every tab in the Discover tab bar,
+   * in DOM order (left to right).
+   */
+  async getTabLabels(): Promise<string[]> {
+    const tabsBar = this.page.testSubj.locator(UNIFIED_TABS_TEST_SUBJ.tabsBar);
+    await expect(tabsBar).toBeVisible();
+    const tabSelector = `[data-test-subj^="${UNIFIED_TABS_TEST_SUBJ.selectTabBtnPrefix}"]`;
+    const tabs = await tabsBar.locator(tabSelector).all();
+    const labels: string[] = [];
+    for (const tab of tabs) {
+      // The tab label is rendered by EuiTextTruncate which always includes
+      // a span[data-test-subj="fullText"] containing the complete label.
+      // Use evaluate to reliably read the text even when visually truncated.
+      const text = await tab.evaluate((el) => {
+        const fullTextEl = el.querySelector('[data-test-subj="fullText"]');
+        return fullTextEl?.textContent?.trim() ?? '';
+      });
+      labels.push(text);
+    }
+    return labels;
+  }
+
+  /**
+   * Resolves the tab element at the given zero-based index.
+   * Waits for the tab bar to contain at least `index + 1` tabs.
+   */
+  private async getTabAtIndex(index: number) {
+    const tabsBar = this.page.testSubj.locator(UNIFIED_TABS_TEST_SUBJ.tabsBar);
+    await expect(tabsBar).toBeVisible();
+    const tabLocator = tabsBar.locator(
+      `[data-test-subj^="${UNIFIED_TABS_TEST_SUBJ.selectTabBtnPrefix}"]`
+    );
+    // Wait until enough tabs are present
+    await expect
+      .poll(async () => tabLocator.count(), { timeout: 10_000 })
+      .toBeGreaterThanOrEqual(index + 1);
+    const tabs = await tabLocator.all();
+    return tabs[index];
+  }
+
+  /**
+   * Switches to the Discover tab at the given zero-based index and waits
+   * for it to become the active tab. Moves the mouse away from the tab bar
+   * afterwards to dismiss any tab preview tooltip.
+   */
+  async selectTabByIndex(index: number) {
+    const tab = await this.getTabAtIndex(index);
+    await tab.click();
+    await expect(tab).toHaveAttribute('aria-selected', 'true');
+    // Move mouse away from the tab bar to dismiss the tab preview popup
+    await this.page.testSubj.hover('breadcrumbs');
+  }
+
+  /**
+   * Renames the tab at the given zero-based index by double-clicking its
+   * label, clearing the input, typing the new label, and pressing Enter.
+   */
+  async editTabLabel(index: number, newLabel: string) {
+    const tab = await this.getTabAtIndex(index);
+    await tab.dblclick();
+
+    const labelInput = this.page.locator(
+      `[data-test-subj^="${UNIFIED_TABS_TEST_SUBJ.editTabLabelInputPrefix}"]`
+    );
+    await labelInput.waitFor({ state: 'visible' });
+    await labelInput.fill(newLabel);
+    await this.page.keyboard.press('Enter');
+
+    // Wait for the label to update
+    const fullText = tab.getByTestId('fullText');
+    await expect(fullText).toHaveText(newLabel);
   }
 
   async waitForDataGridRowWithRefresh(rowLocator: Locator, timeout = 30_000) {
