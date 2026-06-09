@@ -22,9 +22,12 @@ export function getCalculateAutoTimeExpression(getConfig: (key: string) => unkno
       return value;
     }
     if (typeof value === 'string') {
-      return Number(value);
+      const parsed = Number(value);
+      if (Number.isFinite(parsed)) {
+        return parsed;
+      }
     }
-    return Number.NaN;
+    throw new Error(`Expected a numeric value for config key "${key}", got ${typeof value}`);
   };
   const getStringConfig = (key: string): string => {
     const value = getConfig(key);

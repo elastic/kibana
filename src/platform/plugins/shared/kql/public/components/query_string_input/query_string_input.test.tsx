@@ -22,6 +22,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { stubIndexPattern } from '@kbn/data-plugin/public/stubs';
 import { QueryStringInput, type QueryStringInputProps } from './query_string_input';
+import type { DataViewByIdOrTitle } from './fetch_index_patterns';
 import { autocompleteStartMock } from '../../autocomplete/mocks';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 
@@ -349,7 +350,7 @@ describe('QueryStringInput', () => {
         onSubmit: noop,
         indexPatterns: [stubIndexPattern],
         disableAutoFocus: true,
-        persistedLog: mockPersistedLog,
+        persistedLog: mockPersistedLog as unknown as QueryStringInputProps['persistedLog'],
       })
     );
 
@@ -387,7 +388,7 @@ describe('QueryStringInput', () => {
   });
 
   it('Should accept index pattern ids and fetch the full object', async () => {
-    const idStrings = [{ type: 'id', value: '1' }];
+    const idStrings: DataViewByIdOrTitle[] = [{ type: 'id', value: '1' }];
     mockFetchIndexPatterns.mockClear();
 
     render(
@@ -405,7 +406,7 @@ describe('QueryStringInput', () => {
   });
 
   it('Should accept a mix of full objects, title and ids and fetch only missing index pattern objects', async () => {
-    const patternStrings = [
+    const patternStrings: QueryStringInputProps['indexPatterns'] = [
       'logstash-*',
       { type: 'id', value: '1' },
       { type: 'title', value: 'my-fake-index-pattern' },

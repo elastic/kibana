@@ -13,7 +13,7 @@ import { MISSING_TOKEN } from '@kbn/field-formats-common';
 import type { IBucketAggConfig } from '../bucket_agg_type';
 
 interface CreateFilterTermsParams {
-  terms?: string[];
+  terms?: Array<string | number | boolean>;
 }
 
 export const createFilterTerms = (
@@ -32,7 +32,7 @@ export const createFilterTerms = (
 
     const filters: Filter[] = [phraseFilter];
 
-    if (terms.some((term: string) => term === MISSING_TOKEN)) {
+    if (terms.some((term) => term === MISSING_TOKEN)) {
       filters.push(buildExistsFilter(field, indexPattern));
     }
 
