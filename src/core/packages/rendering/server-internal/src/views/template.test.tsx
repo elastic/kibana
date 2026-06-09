@@ -65,8 +65,8 @@ describe('Template (boot splash)', () => {
     const defaultSvg = $default('#kbn_loading_message .kbnLoaderWrap > svg');
     const customImg = $custom('#kbn_loading_message .kbnLoaderWrap > img');
 
-    expect(defaultSvg.attr('width')).toBe('32'); // SVG viewBox is 32; CSS scales it.
-    expect(defaultSvg.attr('viewBox')).toBe('0 0 32 32');
+    expect(defaultSvg.attr('width')).toBe('144'); // SVG viewBox is 144; CSS scales it.
+    expect(defaultSvg.attr('viewBox')).toBe('0 0 144 144');
     expect(customImg.attr('width')).toBe('40');
     expect(customImg.attr('height')).toBe('40');
   });

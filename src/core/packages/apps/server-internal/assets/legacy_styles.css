@@ -109,13 +109,13 @@ body, html {
   100% { transform: scale3d(.98, .98, 2); }
 }
 
-.kbnLoaderWrap .kbnLoader path {
+.kbnLoaderWrap .kbnLoader > g {
   transform-style: preserve-3d;
   transform-origin: 50% 50%;
 }
 
 @media not (prefers-reduced-motion: reduce) {
-  .kbnLoaderWrap .kbnLoader path {
+  .kbnLoaderWrap .kbnLoader > g {
     animation-name: kbnLoadingElastic;
     animation-fill-mode: forwards;
     animation-direction: alternate;
@@ -124,12 +124,12 @@ body, html {
     animation-iteration-count: infinite;
   }
 
-  .kbnLoaderWrap .kbnLoader path:nth-of-type(1) { animation-delay: 0s; }
-  .kbnLoaderWrap .kbnLoader path:nth-of-type(2) { animation-delay: 0.035s; }
-  .kbnLoaderWrap .kbnLoader path:nth-of-type(3) { animation-delay: 0.125s; }
-  .kbnLoaderWrap .kbnLoader path:nth-of-type(4) { animation-delay: 0.155s; }
-  .kbnLoaderWrap .kbnLoader path:nth-of-type(5) { animation-delay: 0.075s; }
-  .kbnLoaderWrap .kbnLoader path:nth-of-type(6) { animation-delay: 0.06s; }
+  .kbnLoaderWrap .kbnLoader > g:nth-of-type(1) { animation-delay: 0s; }
+  .kbnLoaderWrap .kbnLoader > g:nth-of-type(2) { animation-delay: 0.035s; }
+  .kbnLoaderWrap .kbnLoader > g:nth-of-type(3) { animation-delay: 0.125s; }
+  .kbnLoaderWrap .kbnLoader > g:nth-of-type(4) { animation-delay: 0.155s; }
+  .kbnLoaderWrap .kbnLoader > g:nth-of-type(5) { animation-delay: 0.075s; }
+  .kbnLoaderWrap .kbnLoader > g:nth-of-type(6) { animation-delay: 0.06s; }
 }
 
 .kbnProgress {
