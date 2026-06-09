@@ -8,7 +8,7 @@
 import { DASHBOARD_ARTIFACT_TYPE, RUNBOOK_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { QueryClientProvider } from '@kbn/react-query';
-import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import type { UseFormReturn } from 'react-hook-form';
@@ -38,40 +38,31 @@ const BASE_COMPOSE_VALUES: ComposeFormValues = {
   dashboardArtifacts: [],
 };
 
-interface Dashboard {
-  id: string;
-  title: string;
-}
-
-interface GetDashboardsByIdContext {
-  ids: string[];
-  onResults: (dashboards: Dashboard[]) => void;
-}
-
 const DASHBOARD_ID = 'dashboard-123';
 const DASHBOARD_TITLE = 'Dashboard 123';
 
-const mockGetByIdExecute = jest.fn((context: GetDashboardsByIdContext) => {
-  context.onResults(
-    context.ids
-      .map((id) => (id === DASHBOARD_ID ? { id: DASHBOARD_ID, title: DASHBOARD_TITLE } : null))
-      .filter((dashboard): dashboard is Dashboard => Boolean(dashboard))
-  );
-});
+const mockFindByIds = jest.fn(async (ids: string[]) =>
+  ids.map((id) =>
+    id === DASHBOARD_ID
+      ? { id, status: 'success', attributes: { title: DASHBOARD_TITLE } }
+      : { id, status: 'error', notFound: true, error: new Error('not found') }
+  )
+);
 
-const mockUiActions = {
-  getAction: jest.fn((actionId: string) => {
-    if (actionId === 'getDashboardsByIdsAction') {
-      return Promise.resolve({ execute: mockGetByIdExecute });
-    }
+const mockFindDashboardsService = jest.fn(async () => ({
+  search: jest.fn(async () => ({ total: 0, dashboards: [] })),
+  findById: jest.fn(),
+  findByIds: mockFindByIds,
+  findByTitle: jest.fn(),
+}));
 
-    return Promise.resolve({ execute: jest.fn() });
-  }),
-} as unknown as UiActionsStart;
+const mockDashboard = {
+  findDashboardsService: mockFindDashboardsService,
+} as unknown as DashboardStart;
 
 const createComposeFormWrapper = (
   defaultValues: ComposeFormValues = BASE_COMPOSE_VALUES,
-  services: RuleFormServices = { ...createMockServices(), uiActions: mockUiActions }
+  services: RuleFormServices = { ...createMockServices(), dashboard: mockDashboard }
 ) => {
   const queryClient = createTestQueryClient();
 
@@ -97,7 +88,7 @@ const renderComposeDiscoverDetailsStep = (defaultValues: ComposeFormValues = BAS
     <ComposeDiscoverForm
       state={createState({ step: 2 })}
       dispatch={jest.fn()}
-      services={{ ...createMockServices(), uiActions: mockUiActions }}
+      services={{ ...createMockServices(), dashboard: mockDashboard }}
       onRecoveryTypeChange={jest.fn()}
       onKindChange={jest.fn()}
       isEditing={false}
@@ -188,7 +179,7 @@ describe('step validation', () => {
       await waitFor(() => {
         expect(screen.getByText(DASHBOARD_TITLE)).toBeTruthy();
       });
-      expect(mockUiActions.getAction).toHaveBeenCalledWith('getDashboardsByIdsAction');
+      expect(mockFindByIds).toHaveBeenCalledWith([DASHBOARD_ID]);
     });
   });
 
