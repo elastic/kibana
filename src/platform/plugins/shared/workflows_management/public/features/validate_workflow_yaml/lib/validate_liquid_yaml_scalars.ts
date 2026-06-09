@@ -213,6 +213,7 @@ function collectForLoopCollectionResults(
   const forLoopScopes = getAllForLoopScopes(templateString);
   for (const scope of forLoopScopes) {
     if (!scope.collectionPath || isLiquidRangeLiteral(scope.collectionPath)) {
+      // eslint-disable-next-line no-continue
       continue;
     }
 
