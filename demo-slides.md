@@ -1,19 +1,19 @@
 # Demo slides - AI-Assisted PR Review with Domain Knowledge
 
-> Companion to `demo-script.md`. Per-slide outlines for the 20-min slot. Slide text is what the audience sees; speaker notes are what you say. Screenshot capture and deck assembly are out of scope here — this is the spec, not the build.
+> Companion to `demo-script.md`. Per-slide outlines for the 21-min slot. Slide text is what the audience sees; speaker notes are what you say. Screenshot capture and deck assembly are out of scope here — this is the spec, not the build.
 
 ## Slide deck overview
 
 | # | Slide | When | Block |
 |---|---|---|---|
-| 0 | Real-PR proof — two from our backlog | ~0:03:00 | Real-PR comparisons opener |
-| 1a | #271722 — `rulesClient.bulkCreate()` | ~0:03:30 | Real-PR comparisons (1st PR) |
-| 1b | #272038 — Move install/upgrade/revert into `DetectionRulesClient` | ~0:05:30 | Real-PR comparisons (2nd PR) |
-| 2 | How domain discovery works | ~0:08:00 | How it works |
-| 3 | Anatomy of a domain knowledge file | ~0:10:30 | How it works (recap) |
-| 4 | Smart is not the same as informed | ~0:11:00 | Why AI needs specific info |
+| 0 | Real-PR proof — two from our backlog | ~0:09:00 | Section 2.2 opener |
+| 1a | #271722 — `rulesClient.bulkCreate()` | ~0:09:20 | Section 2.2 (PR #271722) |
+| 1b | #272038 — Move install/upgrade/revert into `DetectionRulesClient` | ~0:10:30 | Section 2.2 (PR #272038) |
+| 3 | Anatomy of a domain knowledge file | ~0:13:00 | Section 3.1 (anatomy) |
+| 2 | How domain discovery works | ~0:14:30 | Section 3.1 (discovery) |
+| 4 | Smart is not the same as informed | ~0:18:00 | Section 4.2 (synthesis) |
 
-The planted-PR walkthrough at 0:15–0:19 does not use slides — it is a live browser walkthrough of GitHub comments. Specific comments to walk are listed at the end of this doc under "Comment IDs for the planted-PR walkthrough".
+The planted-PR walkthrough at Section 2.1 (~0:04–0:09) does not use slides — it is a live browser walkthrough of GitHub comments on PR #272773. Specific comments to walk are listed at the end of this doc under "Comment IDs for the planted-PR walkthrough".
 
 ---
 
@@ -38,37 +38,36 @@ The planted-PR walkthrough at 0:15–0:19 does not use slides — it is a live b
 
 ## Slide 1a — PR #271722 (`rulesClient.bulkCreate()`)
 
-- **Purpose**: Show that the domain reviewer *cites the seed PR (#262307) by name* on a real-world catch. The strongest narrative beat in the deck.
-- **Layout**: PR title + number at top; two columns *WITHOUT (left) | WITH (right)*; two quote pairs stacked vertically; small footer.
+- **Purpose**: Show that on the *same architectural decision*, generic gives a one-liner ("aggressive, raise it") while domain gives the reasoning, the scale constraint, and the bounded fix.
+- **Layout**: PR title + number at top; two columns *WITHOUT (left) | WITH (right)*; single quote pair with breathing room; small footer.
 - **Slide text**:
-  - **Title**: "#271722 — `rulesClient.bulkCreate()` *(Steven)*"
-  - **Subtitle**: Bulk rule creation in the alerting layer + Security Solution wiring
+  - **Title**: "#271722 — `rulesClient.bulkCreate()`"
+  - **Subtitle**: Bulk rule creation in the alerting layer
 
   | WITHOUT domain | WITH domain |
   |---|---|
-  | **Quote 1**: *"KQL injection via `rule_id` — `escapeKql` only escapes `\` and `\"` but not other KQL special characters; a `rule_id` containing `)` or `*` distorts the generated filter…"* | **Quote 1**: *"**Domain catch: data-model leakage.** The KQL filter string `alert.attributes.params.ruleId` in `bulk_import_rules.ts` hardcodes the SO internal attribute path. … the exact pattern called out in **PR #262307 Historical Catch**."* |
-  | **Quote 2**: *"Unbounded `perPage: ruleIds.length` — at 10,000 rules this silently hits ES's `max_result_window`…"* + *"`routeLimitedConcurrencyTag(1)` limits all users to a single concurrent import request cluster-wide, which is a significant throughput regression."* | **Quote 2**: *"**Domain invariant: heavy endpoints must rate-limit.** `RULE_MANAGEMENT_IMPORT_CONCURRENCY = 1` … completely serializes import requests across all spaces on a node. At MSSP scale (300 spaces), this could produce request queuing far exceeding the 1-hour socket timeout."* |
+  | *(`route.ts`)* *"`routeLimitedConcurrencyTag(1)` limits the entire import endpoint to one concurrent request cluster-wide. … limiting to 1 globally is extremely aggressive — consider raising it."* | *(`constants.ts`)* *"**Domain invariant: heavy endpoints must rate-limit.** The domain knowledge documents the import route as one of four hot paths, and MSSP customers run 300 spaces per cluster. With concurrency 1, a single long-running import on any space blocks all other concurrent imports on that node. Consider whether a limit higher than 1 (e.g. 3–5) would still bound memory without completely serializing multi-space import workloads."* |
 
-  - **Footer (small)**: "*Same code. Without domain: 'fix the escape, raise the concurrency'. With domain: 'this is the pattern that bit us in PR #262307'.*"
-- **Speaker punchline** (notes, not on slide): "*The AI tells you which PR you got bitten by.*"
+  - **Footer (small)**: "*Same architectural decision. Without domain: 'aggressive, consider raising.' With domain: 'this disables bulk imports for MSSP — here's why, here's the lower bound, here's the upper bound.'*"
+- **Speaker punchline** (notes, not on slide): "*Generic gives you the one-liner. Domain gives you the bounds.*"
 
 ---
 
 ## Slide 1b — PR #272038 (Refactor into `DetectionRulesClient`)
 
-- **Purpose**: Show domain finds *architectural* issues — abstraction-boundary leakage and scale anti-patterns getting frozen into the interface — that generic doesn't even know to look for.
-- **Layout**: same two-column quote-pair as Slide 1a.
+- **Purpose**: Show *parity at the surface* (both reviewers catch the obvious DRC-bypass) AND a *domain-only catch beneath it* (an abstraction-boundary leak in the public interface that generic has no vocabulary for).
+- **Layout**: same two-column structure as Slide 1a; two rows — top = parity (both caught it); bottom = unpaired domain catch (left cell empty).
 - **Slide text**:
-  - **Title**: "#272038 — Move prebuilt rule install/upgrade/revert into `DetectionRulesClient` *(Maxim)*"
+  - **Title**: "#272038 — Move prebuilt rule install/upgrade/revert into `DetectionRulesClient`"
   - **Subtitle**: Refactor pulling code into the central abstraction
 
   | WITHOUT domain | WITH domain |
   |---|---|
-  | **Quote 1**: *"Type coercion without compile-time safety: `upgradableRules as unknown as RuleUpgradeSpecifier[]` in `upgrade_all_prebuilt_rules.ts` silently reinterprets `RuleVersionSpecifier[]`."* | **Quote 1**: *"**Domain invariant: abstraction-boundary leakage in public interface.** `UpgradePrebuiltRulesResult.ruleUpgradeContexts` exposes `Map<string, RuleUpgradeContext>` where `RuleUpgradeContext` is an internal implementation type from a sibling domain's handler-level module. The `IDetectionRulesClient` interface is the abstraction boundary — leaking an internal handler type through it couples the abstraction to its own implementation."* |
-  | **Quote 2**: *"Missing `ruleUpgrade` action in change-tracking: `upgrade_prebuilt_rules.ts` omits `action: SecurityRuleChangeTrackingAction.ruleUpgrade` from the `changeTracking` object."* | **Quote 2**: *"**Domain catch: batched-loop pattern persists in new bulk methods.** Both `installPrebuiltRules` and `upgradePrebuiltRules` use `while (queue.length > 0) + initPromisePool` instead of true-bulk AF primitives. The pattern is now officially part of the `IDetectionRulesClient` contract."* |
+  | *(`legacy_create_prepackaged_rules.ts`)* *"Inconsistency with PR goal: the upgrade step calls `applyPrebuiltRuleAssets` directly, bypassing `DetectionRulesClient`."* | *(`legacy_create_prepackaged_rules.ts`)* *"Inconsistency: install goes through DRC, upgrade bypasses it."* |
+  | *(no analog)* | *(`detection_rules_client_interface.ts`)* *"**Domain invariant: abstraction-boundary leakage in public interface.** `UpgradePrebuiltRulesResult.ruleUpgradeContexts` exposes `Map<string, RuleUpgradeContext>` — an internal implementation type from a sibling domain's handler-level module — through the `IDetectionRulesClient` interface."* |
 
-  - **Footer (small)**: "*Generic finds the bugs. Domain finds the bugs PLUS the design issues that travel with the refactor.*"
-- **Speaker punchline** (notes): "*The architectural smells the engineer who owns this code would catch — that's what domain knowledge gives the AI.*"
+  - **Footer (small)**: "*Both caught the obvious DRC-bypass. Only the domain reviewer noticed the new public interface is leaking a sibling-domain handler-level type.*"
+- **Speaker punchline** (notes): "*Parity at the surface, delta beneath. The domain reviewer sees what an owner of the abstraction would see.*"
 
 ---
 
@@ -125,20 +124,20 @@ The planted-PR walkthrough at 0:15–0:19 does not use slides — it is a live b
 
 ## Slide 4 — Smart is not the same as informed
 
-- **Purpose**: The take-home line. Drive the underrated point.
-- **Layout**: big centered headline + three indented bullets + small closing line.
+- **Purpose**: The take-home line. The synthesizing close of the demo — what the audience leaves repeating.
+- **Layout**: big centered headline + three indented bullets + small supporting line.
 - **Slide text**:
   - **Headline**: **"Smart is not the same as informed."**
   - **Three bullets**:
     - **The abstraction** — The model doesn't know that `IDetectionRulesClient` is **the** boundary in our domain.
     - **The history** — It doesn't know we got burned by an `as`-cast on `lastRunStatus` in PR #262307.
     - **The scale** — It doesn't know MSSP customers run 300 spaces × 10,000 rules per space.
-  - **Closing line (smaller, bottom)**: "*Review quality scales with the quality of what you tell it. `dex-dev-skills` is the library where these reviews live.*"
-- **Speaker note**: "*This is the part I think is underrated. LLMs are smart. They are. But smart is not the same as informed. The three things on this slide — the abstraction, the history, the scale — none of them are derivable from the code. We had to tell the AI. And once we did, it caught things it never could have caught before.*"
+  - **Supporting line (smaller, bottom)**: "*AI dev automation is as good as the quality and accuracy of the information you put in the context window.*"
+- **Speaker note**: "*This is the part I think is underrated. LLMs are smart. They are. But smart is not the same as informed. The three things on this slide — the abstraction, the history, the scale — none of them are derivable from the code. We had to tell the AI. And once we did, it caught things it never could have caught before. The supporting line at the bottom is the broader principle: this isn't just about code review. Any agentic AI workflow your team builds — review, refactoring, generation, planning — its quality is bounded by what you put in the context window. `dex-dev-skills` is the library where these skills live; you'll extend it in the hands-on.*"
 
 ---
 
-## Comment IDs for the planted-PR walkthrough (0:15–0:19)
+## Comment IDs for the planted-PR walkthrough (Section 2.1, ~0:04–0:09)
 
 Reference card for the GitHub walkthrough. Open PR #272773; expand each review; find each comment by file path + line. Read the **bold** sentence aloud, paraphrase the rest.
 
@@ -179,7 +178,7 @@ Reference card for the GitHub walkthrough. Open PR #272773; expand each review; 
 
 ### Closing line (after all 6)
 
-*"Generic catches real bugs — `Math.random()` in production, missing validation, silent truncation. Those are all worth fixing. But none of them name an architectural invariant. None of them cite the abstraction, the canonical converter, or the historical catch. That's the gap domain knowledge closes."*
+*"Generic catches real bugs — `Math.random()` in production, missing validation, silent truncation. Those are all worth fixing. But none of them name an architectural invariant. None cite the abstraction, the canonical contract, or the historical catch. That's the gap domain knowledge closes."*
 
 ---
 
