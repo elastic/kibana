@@ -7,6 +7,11 @@ tasks:
       - prebuild
     prebuildRequiresSuccess: true
     command: bash .ona/prebuild_warmup.sh
+  post-start-extras:
+    name: Post-start setup
+    triggeredBy:
+      - postDevcontainerStart
+    command: bash .ona/post_start_extras.sh
 services:
   elasticsearch:
     name: Elasticsearch
