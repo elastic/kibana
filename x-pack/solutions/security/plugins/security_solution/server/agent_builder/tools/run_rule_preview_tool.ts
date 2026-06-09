@@ -42,12 +42,12 @@ const RULE_PREVIEW_SHARED_DEFAULTS = {
 
 const runRulePreviewSchema = z.object({
   command: z.string().describe(
-    `CLI-style command string for previewing a detection rule.
+    `CLI-style command for previewing a detection rule. The first word is the rule type subcommand.
 
-Pass --help to see all options and supported rule types.
-Pass --type <rule_type> --help for type-specific options and examples.
+Pass --help to see all rule types and options.
+Pass <rule_type> --help for type-specific options and examples.
 
-Quick start: --type esql --query "FROM logs-* | LIMIT 10"`
+Quick start: esql --query "FROM logs-* | LIMIT 10"`
   ),
 });
 

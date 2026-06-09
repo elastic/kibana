@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  tokenizeCommand,
-  parseRulePreviewCommand,
-  GLOBAL_HELP,
-} from './parse_rule_preview_command';
+import { tokenizeCommand, parseRulePreviewCommand } from './parse_rule_preview_command';
 
 // ---------------------------------------------------------------------------
 // tokenizeCommand
@@ -17,12 +13,7 @@ import {
 
 describe('tokenizeCommand', () => {
   it('splits unquoted tokens on whitespace', () => {
-    expect(tokenizeCommand('--type esql --query foo')).toEqual([
-      '--type',
-      'esql',
-      '--query',
-      'foo',
-    ]);
+    expect(tokenizeCommand('esql --query foo')).toEqual(['esql', '--query', 'foo']);
   });
 
   it('handles double-quoted values with spaces', () => {
@@ -40,14 +31,9 @@ describe('tokenizeCommand', () => {
   });
 
   it('handles mixed quoted and unquoted tokens', () => {
-    expect(tokenizeCommand('--type esql --query "FROM logs-* | LIMIT 10" --interval 5m')).toEqual([
-      '--type',
-      'esql',
-      '--query',
-      'FROM logs-* | LIMIT 10',
-      '--interval',
-      '5m',
-    ]);
+    expect(
+      tokenizeCommand('esql --query "FROM logs-* | LIMIT 10" --interval 5m')
+    ).toEqual(['esql', '--query', 'FROM logs-* | LIMIT 10', '--interval', '5m']);
   });
 
   it('returns empty array for empty string', () => {
@@ -55,7 +41,7 @@ describe('tokenizeCommand', () => {
   });
 
   it('strips surrounding whitespace', () => {
-    expect(tokenizeCommand('  --type  esql  ')).toEqual(['--type', 'esql']);
+    expect(tokenizeCommand('  esql  --query  foo  ')).toEqual(['esql', '--query', 'foo']);
   });
 });
 
@@ -64,13 +50,9 @@ describe('tokenizeCommand', () => {
 // ---------------------------------------------------------------------------
 
 describe('parseRulePreviewCommand — help', () => {
-  it('returns kind:help with GLOBAL_HELP text when --help is passed alone', () => {
+  it('returns kind:help when --help is passed alone', () => {
     const result = parseRulePreviewCommand('--help');
     expect(result.kind).toBe('help');
-    if (result.kind === 'help') {
-      expect(result.text).toContain('USAGE');
-      expect(result.text).toBe(GLOBAL_HELP);
-    }
   });
 
   it('returns kind:help with -h shorthand', () => {
@@ -78,19 +60,19 @@ describe('parseRulePreviewCommand — help', () => {
     expect(result.kind).toBe('help');
   });
 
-  it('returns type-specific help for --type esql --help', () => {
-    const result = parseRulePreviewCommand('--type esql --help');
+  it('returns type-specific help for esql --help', () => {
+    const result = parseRulePreviewCommand('esql --help');
     expect(result.kind).toBe('help');
     if (result.kind === 'help') {
-      expect(result.text).toContain('ES|QL');
+      expect(result.text).toContain('--query');
     }
   });
 
-  it('returns type-specific help for --help --type machine_learning', () => {
-    const result = parseRulePreviewCommand('--help --type machine_learning');
+  it('returns type-specific help for machine_learning --help', () => {
+    const result = parseRulePreviewCommand('machine_learning --help');
     expect(result.kind).toBe('help');
     if (result.kind === 'help') {
-      expect(result.text).toContain('Machine Learning');
+      expect(result.text).toContain('--job-id');
     }
   });
 });
@@ -100,16 +82,13 @@ describe('parseRulePreviewCommand — help', () => {
 // ---------------------------------------------------------------------------
 
 describe('parseRulePreviewCommand — type errors', () => {
-  it('returns kind:error when --type is not provided', () => {
+  it('returns kind:error when no subcommand is provided', () => {
     const result = parseRulePreviewCommand('--query "FROM logs-*"');
     expect(result.kind).toBe('error');
-    if (result.kind === 'error') {
-      expect(result.message).toContain('--type');
-    }
   });
 
-  it('returns kind:error for an unknown rule type', () => {
-    const result = parseRulePreviewCommand('--type invalid_type');
+  it('returns kind:error for an unknown rule type subcommand', () => {
+    const result = parseRulePreviewCommand('invalid_type');
     expect(result.kind).toBe('error');
     if (result.kind === 'error') {
       expect(result.message).toContain('invalid_type');
@@ -117,10 +96,10 @@ describe('parseRulePreviewCommand — type errors', () => {
   });
 
   it('returns kind:error for an unknown flag', () => {
-    const result = parseRulePreviewCommand('--type esql --query "x" --bogus value');
+    const result = parseRulePreviewCommand('esql --query "x" --bogus value');
     expect(result.kind).toBe('error');
     if (result.kind === 'error') {
-      expect(result.message).toContain('--bogus');
+      expect(result.message).toContain('bogus');
     }
   });
 
@@ -129,12 +108,10 @@ describe('parseRulePreviewCommand — type errors', () => {
     expect(result.kind).toBe('error');
   });
 
-  it('returns kind:error with help text for --help with invalid type', () => {
-    const result = parseRulePreviewCommand('--type not_a_type --help');
-    expect(result.kind).toBe('error');
-    if (result.kind === 'error') {
-      expect(result.message).toContain('not_a_type');
-    }
+  it('returns kind:help when an unknown subcommand is passed with --help (help takes priority)', () => {
+    // yargs shows global help when --help is present, even for unknown subcommands
+    const result = parseRulePreviewCommand('not_a_type --help');
+    expect(result.kind).toBe('help');
   });
 });
 
@@ -144,7 +121,7 @@ describe('parseRulePreviewCommand — type errors', () => {
 
 describe('parseRulePreviewCommand — valid esql rule', () => {
   it('parses minimum valid esql command', () => {
-    const result = parseRulePreviewCommand('--type esql --query "FROM logs-* | LIMIT 10"');
+    const result = parseRulePreviewCommand('esql --query "FROM logs-* | LIMIT 10"');
     expect(result.kind).toBe('preview');
     if (result.kind === 'preview') {
       expect(result.rule.type).toBe('esql');
@@ -157,7 +134,7 @@ describe('parseRulePreviewCommand — valid esql rule', () => {
 describe('parseRulePreviewCommand — valid eql rule', () => {
   it('parses minimum valid eql command', () => {
     const result = parseRulePreviewCommand(
-      '--type eql --query "process where process.name == \\"cmd.exe\\""'
+      'eql --query "process where process.name == \\"cmd.exe\\""'
     );
     expect(result.kind).toBe('preview');
     if (result.kind === 'preview') {
@@ -169,7 +146,7 @@ describe('parseRulePreviewCommand — valid eql rule', () => {
 
 describe('parseRulePreviewCommand — valid query rule', () => {
   it('parses minimum valid query command (no required args)', () => {
-    const result = parseRulePreviewCommand('--type query');
+    const result = parseRulePreviewCommand('query');
     expect(result.kind).toBe('preview');
     if (result.kind === 'preview') {
       expect(result.rule.type).toBe('query');
@@ -177,7 +154,7 @@ describe('parseRulePreviewCommand — valid query rule', () => {
   });
 
   it('includes optional query when provided', () => {
-    const result = parseRulePreviewCommand('--type query --query "user.name: admin"');
+    const result = parseRulePreviewCommand('query --query "user.name: admin"');
     expect(result.kind).toBe('preview');
     if (result.kind === 'preview') {
       expect(result.rule.query).toBe('user.name: admin');
@@ -187,7 +164,7 @@ describe('parseRulePreviewCommand — valid query rule', () => {
 
 describe('parseRulePreviewCommand — valid saved_query rule', () => {
   it('parses minimum valid saved_query command', () => {
-    const result = parseRulePreviewCommand('--type saved_query --saved-id my-query-id');
+    const result = parseRulePreviewCommand('saved_query --saved-id my-query-id');
     expect(result.kind).toBe('preview');
     if (result.kind === 'preview') {
       expect(result.rule.type).toBe('saved_query');
@@ -199,7 +176,7 @@ describe('parseRulePreviewCommand — valid saved_query rule', () => {
 describe('parseRulePreviewCommand — valid threshold rule', () => {
   it('parses minimum valid threshold command', () => {
     const result = parseRulePreviewCommand(
-      '--type threshold --query "process.name: *" --threshold-value 5'
+      'threshold --query "process.name: *" --threshold-value 5'
     );
     expect(result.kind).toBe('preview');
     if (result.kind === 'preview') {
@@ -211,7 +188,7 @@ describe('parseRulePreviewCommand — valid threshold rule', () => {
 
 describe('parseRulePreviewCommand — valid threat_match rule', () => {
   const validThreatMatchCmd =
-    '--type threat_match --query "*:*" --threat-query "*:*" --threat-index threat-intel ' +
+    'threat_match --query "*:*" --threat-query "*:*" --threat-index threat-intel ' +
     '--threat-mapping \'[{"entries":[{"field":"source.ip","type":"mapping","value":"destination.ip"}]}]\'';
 
   it('parses minimum valid threat_match command', () => {
@@ -229,7 +206,7 @@ describe('parseRulePreviewCommand — valid threat_match rule', () => {
 describe('parseRulePreviewCommand — valid machine_learning rule', () => {
   it('parses minimum valid machine_learning command', () => {
     const result = parseRulePreviewCommand(
-      '--type machine_learning --job-id my-ml-job --anomaly-threshold 75'
+      'machine_learning --job-id my-ml-job --anomaly-threshold 75'
     );
     expect(result.kind).toBe('preview');
     if (result.kind === 'preview') {
@@ -241,7 +218,7 @@ describe('parseRulePreviewCommand — valid machine_learning rule', () => {
 
   it('stores multiple job-ids as an array', () => {
     const result = parseRulePreviewCommand(
-      '--type machine_learning --job-id job-a --job-id job-b --anomaly-threshold 50'
+      'machine_learning --job-id job-a --job-id job-b --anomaly-threshold 50'
     );
     expect(result.kind).toBe('preview');
     if (result.kind === 'preview') {
@@ -253,7 +230,7 @@ describe('parseRulePreviewCommand — valid machine_learning rule', () => {
 describe('parseRulePreviewCommand — valid new_terms rule', () => {
   it('parses minimum valid new_terms command', () => {
     const result = parseRulePreviewCommand(
-      '--type new_terms --query "*:*" --new-terms-fields source.ip --history-window-start now-30d'
+      'new_terms --query "*:*" --new-terms-fields source.ip --history-window-start now-30d'
     );
     expect(result.kind).toBe('preview');
     if (result.kind === 'preview') {
@@ -270,54 +247,54 @@ describe('parseRulePreviewCommand — valid new_terms rule', () => {
 
 describe('parseRulePreviewCommand — missing required args', () => {
   it('returns kind:error when esql rule is missing --query', () => {
-    const result = parseRulePreviewCommand('--type esql');
+    const result = parseRulePreviewCommand('esql');
     expect(result.kind).toBe('error');
     if (result.kind === 'error') {
-      expect(result.message).toContain('--query');
+      expect(result.message).toContain('query');
     }
   });
 
   it('returns kind:error when threshold rule is missing --threshold-value', () => {
-    const result = parseRulePreviewCommand('--type threshold --query "process.name: *"');
+    const result = parseRulePreviewCommand('threshold --query "process.name: *"');
     expect(result.kind).toBe('error');
     if (result.kind === 'error') {
-      expect(result.message).toContain('--threshold-value');
+      expect(result.message).toContain('threshold-value');
     }
   });
 
   it('returns kind:error when saved_query rule is missing --saved-id', () => {
-    const result = parseRulePreviewCommand('--type saved_query');
+    const result = parseRulePreviewCommand('saved_query');
     expect(result.kind).toBe('error');
     if (result.kind === 'error') {
-      expect(result.message).toContain('--saved-id');
+      expect(result.message).toContain('saved-id');
     }
   });
 
   it('returns kind:error when machine_learning rule is missing --job-id', () => {
-    const result = parseRulePreviewCommand('--type machine_learning --anomaly-threshold 50');
+    const result = parseRulePreviewCommand('machine_learning --anomaly-threshold 50');
     expect(result.kind).toBe('error');
     if (result.kind === 'error') {
-      expect(result.message).toContain('--job-id');
+      expect(result.message).toContain('job-id');
     }
   });
 
   it('returns kind:error when threat_match rule is missing --threat-mapping', () => {
     const result = parseRulePreviewCommand(
-      '--type threat_match --query "*:*" --threat-query "*:*" --threat-index idx'
+      'threat_match --query "*:*" --threat-query "*:*" --threat-index idx'
     );
     expect(result.kind).toBe('error');
     if (result.kind === 'error') {
-      expect(result.message).toContain('--threat-mapping');
+      expect(result.message).toContain('threat-mapping');
     }
   });
 
   it('returns kind:error when new_terms rule is missing --history-window-start', () => {
     const result = parseRulePreviewCommand(
-      '--type new_terms --query "*:*" --new-terms-fields source.ip'
+      'new_terms --query "*:*" --new-terms-fields source.ip'
     );
     expect(result.kind).toBe('error');
     if (result.kind === 'error') {
-      expect(result.message).toContain('--history-window-start');
+      expect(result.message).toContain('history-window-start');
     }
   });
 });
@@ -329,31 +306,28 @@ describe('parseRulePreviewCommand — missing required args', () => {
 describe('parseRulePreviewCommand — numeric / JSON validation', () => {
   it('returns kind:error when --threshold-value is NaN', () => {
     const result = parseRulePreviewCommand(
-      '--type threshold --query "process.name: *" --threshold-value not-a-number'
+      'threshold --query "process.name: *" --threshold-value not-a-number'
     );
     expect(result.kind).toBe('error');
-    if (result.kind === 'error') {
-      expect(result.message).toContain('--threshold-value');
-    }
   });
 
   it('returns kind:error for invalid JSON in --threat-mapping', () => {
     const result = parseRulePreviewCommand(
-      '--type threat_match --query "*:*" --threat-query "*:*" --threat-index idx --threat-mapping not-json'
+      'threat_match --query "*:*" --threat-query "*:*" --threat-index idx --threat-mapping not-json'
     );
     expect(result.kind).toBe('error');
     if (result.kind === 'error') {
-      expect(result.message).toContain('--threat-mapping');
+      expect(result.message).toContain('threat-mapping');
     }
   });
 
   it('returns kind:error when --threat-mapping is a JSON object (not an array)', () => {
     const result = parseRulePreviewCommand(
-      '--type threat_match --query "*:*" --threat-query "*:*" --threat-index idx --threat-mapping "{}"'
+      'threat_match --query "*:*" --threat-query "*:*" --threat-index idx --threat-mapping "{}"'
     );
     expect(result.kind).toBe('error');
     if (result.kind === 'error') {
-      expect(result.message).toContain('--threat-mapping');
+      expect(result.message).toContain('threat-mapping');
     }
   });
 });
@@ -364,7 +338,7 @@ describe('parseRulePreviewCommand — numeric / JSON validation', () => {
 
 describe('parseRulePreviewCommand — schedule defaults', () => {
   it('uses default interval, timeframeStart, timeframeEnd when not provided', () => {
-    const result = parseRulePreviewCommand('--type query');
+    const result = parseRulePreviewCommand('query');
     expect(result.kind).toBe('preview');
     if (result.kind === 'preview') {
       expect(result.interval).toBe('1h');
@@ -374,7 +348,7 @@ describe('parseRulePreviewCommand — schedule defaults', () => {
   });
 
   it('applies --interval override', () => {
-    const result = parseRulePreviewCommand('--type query --interval 5m');
+    const result = parseRulePreviewCommand('query --interval 5m');
     expect(result.kind).toBe('preview');
     if (result.kind === 'preview') {
       expect(result.interval).toBe('5m');
@@ -383,7 +357,7 @@ describe('parseRulePreviewCommand — schedule defaults', () => {
 
   it('applies --timeframe-start and --timeframe-end overrides', () => {
     const result = parseRulePreviewCommand(
-      '--type query --interval 5m --timeframe-start now-6h --timeframe-end now-1h'
+      'query --interval 5m --timeframe-start now-6h --timeframe-end now-1h'
     );
     expect(result.kind).toBe('preview');
     if (result.kind === 'preview') {
@@ -424,25 +398,17 @@ describe('parseRulePreviewCommand — global --help', () => {
     }
   });
 
-  it('global help includes USAGE section', () => {
+  it('global help includes Commands section', () => {
     const result = parseRulePreviewCommand('--help');
     if (result.kind === 'help') {
-      expect(result.text).toContain('USAGE');
+      expect(result.text).toContain('Commands');
     }
   });
 
-  it('global help includes QUICK EXAMPLES', () => {
+  it('global help includes Options section', () => {
     const result = parseRulePreviewCommand('--help');
     if (result.kind === 'help') {
-      expect(result.text).toContain('QUICK EXAMPLES');
-    }
-  });
-
-  it('global help explains how to get type-specific help', () => {
-    const result = parseRulePreviewCommand('--help');
-    if (result.kind === 'help') {
-      expect(result.text).toContain('--type');
-      expect(result.text).toContain('--help');
+      expect(result.text).toContain('Options');
     }
   });
 });
@@ -451,44 +417,35 @@ describe('parseRulePreviewCommand — global --help', () => {
 // Progressive --help discovery — esql
 //
 // Step 1 (global): --help
-// Step 2 (type):   --type esql --help
-// Step 3 (pre-run): --type esql --query "FROM logs-*" --help  →  still help, not preview
+// Step 2 (type):   esql --help
+// Step 3 (pre-run): esql --query "FROM logs-*" --help  →  still help, not preview
 // ---------------------------------------------------------------------------
 
 describe('parseRulePreviewCommand — progressive help: esql', () => {
-  it('step 2 — --type esql --help returns kind:help', () => {
-    expect(parseRulePreviewCommand('--type esql --help').kind).toBe('help');
+  it('step 2 — esql --help returns kind:help', () => {
+    expect(parseRulePreviewCommand('esql --help').kind).toBe('help');
   });
 
-  it('step 2 — esql help mentions ES|QL', () => {
-    const result = parseRulePreviewCommand('--type esql --help');
-    if (result.kind === 'help') expect(result.text).toContain('ES|QL');
+  it('step 2 — esql help mentions --query', () => {
+    const result = parseRulePreviewCommand('esql --help');
+    if (result.kind === 'help') expect(result.text).toContain('--query');
   });
 
-  it('step 2 — esql help documents --query as required', () => {
-    const result = parseRulePreviewCommand('--type esql --help');
+  it('step 2 — esql help documents --query', () => {
+    const result = parseRulePreviewCommand('esql --help');
     if (result.kind === 'help') {
       expect(result.text).toContain('--query');
-      expect(result.text).toContain('REQUIRED');
     }
   });
 
-  it('step 2 — esql help contains a runnable EXAMPLE command', () => {
-    const result = parseRulePreviewCommand('--type esql --help');
-    if (result.kind === 'help') expect(result.text).toContain('EXAMPLE');
+  it('step 2 — esql help contains an example command', () => {
+    const result = parseRulePreviewCommand('esql --help');
+    if (result.kind === 'help') expect(result.text).toContain('Examples');
   });
 
-  it('step 3 — --type esql --query "..." --help returns kind:help (help wins over args)', () => {
-    const result = parseRulePreviewCommand(
-      '--type esql --query "FROM logs-* | LIMIT 10" --help'
-    );
+  it('step 3 — esql --query "..." --help returns kind:help (help wins over args)', () => {
+    const result = parseRulePreviewCommand('esql --query "FROM logs-* | LIMIT 10" --help');
     expect(result.kind).toBe('help');
-  });
-
-  it('step 2 (reversed order) — -h --type esql returns esql-specific help', () => {
-    const result = parseRulePreviewCommand('-h --type esql');
-    expect(result.kind).toBe('help');
-    if (result.kind === 'help') expect(result.text).toContain('ES|QL');
   });
 });
 
@@ -497,31 +454,23 @@ describe('parseRulePreviewCommand — progressive help: esql', () => {
 // ---------------------------------------------------------------------------
 
 describe('parseRulePreviewCommand — progressive help: eql', () => {
-  it('step 2 — --type eql --help returns kind:help', () => {
-    expect(parseRulePreviewCommand('--type eql --help').kind).toBe('help');
+  it('step 2 — eql --help returns kind:help', () => {
+    expect(parseRulePreviewCommand('eql --help').kind).toBe('help');
   });
 
-  it('step 2 — eql help mentions EQL', () => {
-    const result = parseRulePreviewCommand('--type eql --help');
-    if (result.kind === 'help') expect(result.text).toContain('EQL');
-  });
-
-  it('step 2 — eql help documents --query as required', () => {
-    const result = parseRulePreviewCommand('--type eql --help');
-    if (result.kind === 'help') {
-      expect(result.text).toContain('--query');
-      expect(result.text).toContain('REQUIRED');
-    }
+  it('step 2 — eql help mentions --query', () => {
+    const result = parseRulePreviewCommand('eql --help');
+    if (result.kind === 'help') expect(result.text).toContain('--query');
   });
 
   it('step 2 — eql help documents optional index flags', () => {
-    const result = parseRulePreviewCommand('--type eql --help');
+    const result = parseRulePreviewCommand('eql --help');
     if (result.kind === 'help') expect(result.text).toContain('--index');
   });
 
-  it('step 3 — --type eql --query "..." --help returns kind:help (help wins)', () => {
+  it('step 3 — eql --query "..." --help returns kind:help (help wins)', () => {
     const result = parseRulePreviewCommand(
-      '--type eql --query "process where process.name == \\"cmd.exe\\"" --help'
+      'eql --query "process where process.name == \\"cmd.exe\\"" --help'
     );
     expect(result.kind).toBe('help');
   });
@@ -532,23 +481,18 @@ describe('parseRulePreviewCommand — progressive help: eql', () => {
 // ---------------------------------------------------------------------------
 
 describe('parseRulePreviewCommand — progressive help: query', () => {
-  it('step 2 — --type query --help returns kind:help', () => {
-    expect(parseRulePreviewCommand('--type query --help').kind).toBe('help');
+  it('step 2 — query --help returns kind:help', () => {
+    expect(parseRulePreviewCommand('query --help').kind).toBe('help');
   });
 
-  it('step 2 — query help mentions KQL / Lucene', () => {
-    const result = parseRulePreviewCommand('--type query --help');
-    if (result.kind === 'help') expect(result.text).toContain('KQL');
+  it('step 2 — query help mentions --query option', () => {
+    const result = parseRulePreviewCommand('query --help');
+    if (result.kind === 'help') expect(result.text).toContain('--query');
   });
 
-  it('step 2 — query help notes that all fields are optional', () => {
-    const result = parseRulePreviewCommand('--type query --help');
-    if (result.kind === 'help') expect(result.text).toContain('OPTIONAL');
-  });
-
-  it('step 3 — --type query --query "..." --help returns kind:help (help wins)', () => {
+  it('step 3 — query --query "..." --help returns kind:help (help wins)', () => {
     const result = parseRulePreviewCommand(
-      '--type query --query "event.category:authentication" --help'
+      'query --query "event.category:authentication" --help'
     );
     expect(result.kind).toBe('help');
   });
@@ -559,20 +503,19 @@ describe('parseRulePreviewCommand — progressive help: query', () => {
 // ---------------------------------------------------------------------------
 
 describe('parseRulePreviewCommand — progressive help: saved_query', () => {
-  it('step 2 — --type saved_query --help returns kind:help', () => {
-    expect(parseRulePreviewCommand('--type saved_query --help').kind).toBe('help');
+  it('step 2 — saved_query --help returns kind:help', () => {
+    expect(parseRulePreviewCommand('saved_query --help').kind).toBe('help');
   });
 
-  it('step 2 — saved_query help documents --saved-id as required', () => {
-    const result = parseRulePreviewCommand('--type saved_query --help');
+  it('step 2 — saved_query help documents --saved-id', () => {
+    const result = parseRulePreviewCommand('saved_query --help');
     if (result.kind === 'help') {
       expect(result.text).toContain('--saved-id');
-      expect(result.text).toContain('REQUIRED');
     }
   });
 
-  it('step 3 — --type saved_query --saved-id "..." --help returns kind:help (help wins)', () => {
-    const result = parseRulePreviewCommand('--type saved_query --saved-id my-id --help');
+  it('step 3 — saved_query --saved-id "..." --help returns kind:help (help wins)', () => {
+    const result = parseRulePreviewCommand('saved_query --saved-id my-id --help');
     expect(result.kind).toBe('help');
   });
 });
@@ -582,26 +525,25 @@ describe('parseRulePreviewCommand — progressive help: saved_query', () => {
 // ---------------------------------------------------------------------------
 
 describe('parseRulePreviewCommand — progressive help: threshold', () => {
-  it('step 2 — --type threshold --help returns kind:help', () => {
-    expect(parseRulePreviewCommand('--type threshold --help').kind).toBe('help');
+  it('step 2 — threshold --help returns kind:help', () => {
+    expect(parseRulePreviewCommand('threshold --help').kind).toBe('help');
   });
 
-  it('step 2 — threshold help documents --threshold-value as required', () => {
-    const result = parseRulePreviewCommand('--type threshold --help');
+  it('step 2 — threshold help documents --threshold-value', () => {
+    const result = parseRulePreviewCommand('threshold --help');
     if (result.kind === 'help') {
       expect(result.text).toContain('--threshold-value');
-      expect(result.text).toContain('REQUIRED');
     }
   });
 
   it('step 2 — threshold help documents optional --threshold-field', () => {
-    const result = parseRulePreviewCommand('--type threshold --help');
+    const result = parseRulePreviewCommand('threshold --help');
     if (result.kind === 'help') expect(result.text).toContain('--threshold-field');
   });
 
-  it('step 3 — --type threshold --query "..." --threshold-value 5 --help returns kind:help (help wins)', () => {
+  it('step 3 — threshold --query "..." --threshold-value 5 --help returns kind:help (help wins)', () => {
     const result = parseRulePreviewCommand(
-      '--type threshold --query "process.name: *" --threshold-value 5 --help'
+      'threshold --query "process.name: *" --threshold-value 5 --help'
     );
     expect(result.kind).toBe('help');
   });
@@ -612,27 +554,21 @@ describe('parseRulePreviewCommand — progressive help: threshold', () => {
 // ---------------------------------------------------------------------------
 
 describe('parseRulePreviewCommand — progressive help: threat_match', () => {
-  it('step 2 — --type threat_match --help returns kind:help', () => {
-    expect(parseRulePreviewCommand('--type threat_match --help').kind).toBe('help');
+  it('step 2 — threat_match --help returns kind:help', () => {
+    expect(parseRulePreviewCommand('threat_match --help').kind).toBe('help');
   });
 
-  it('step 2 — threat_match help documents --threat-mapping as required', () => {
-    const result = parseRulePreviewCommand('--type threat_match --help');
+  it('step 2 — threat_match help documents --threat-mapping', () => {
+    const result = parseRulePreviewCommand('threat_match --help');
     if (result.kind === 'help') {
       expect(result.text).toContain('--threat-mapping');
-      expect(result.text).toContain('REQUIRED');
     }
-  });
-
-  it('step 2 — threat_match help shows the expected JSON mapping format', () => {
-    const result = parseRulePreviewCommand('--type threat_match --help');
-    if (result.kind === 'help') expect(result.text).toContain('entries');
   });
 
   it('step 3 — full threat_match command with --help returns kind:help (help wins)', () => {
     const result = parseRulePreviewCommand(
-      '--type threat_match --query "*:*" --threat-query "*:*" ' +
-        '--threat-index ti-* --threat-mapping \'[]\' --help'
+      "threat_match --query \"*:*\" --threat-query \"*:*\" " +
+        "--threat-index ti-* --threat-mapping '[]' --help"
     );
     expect(result.kind).toBe('help');
   });
@@ -643,26 +579,25 @@ describe('parseRulePreviewCommand — progressive help: threat_match', () => {
 // ---------------------------------------------------------------------------
 
 describe('parseRulePreviewCommand — progressive help: machine_learning', () => {
-  it('step 2 — --type machine_learning --help returns kind:help', () => {
-    expect(parseRulePreviewCommand('--type machine_learning --help').kind).toBe('help');
+  it('step 2 — machine_learning --help returns kind:help', () => {
+    expect(parseRulePreviewCommand('machine_learning --help').kind).toBe('help');
   });
 
-  it('step 2 — machine_learning help documents --job-id as required', () => {
-    const result = parseRulePreviewCommand('--type machine_learning --help');
+  it('step 2 — machine_learning help documents --job-id', () => {
+    const result = parseRulePreviewCommand('machine_learning --help');
     if (result.kind === 'help') {
       expect(result.text).toContain('--job-id');
-      expect(result.text).toContain('REQUIRED');
     }
   });
 
-  it('step 2 — machine_learning help documents --anomaly-threshold as required', () => {
-    const result = parseRulePreviewCommand('--type machine_learning --help');
+  it('step 2 — machine_learning help documents --anomaly-threshold', () => {
+    const result = parseRulePreviewCommand('machine_learning --help');
     if (result.kind === 'help') expect(result.text).toContain('--anomaly-threshold');
   });
 
-  it('step 3 — --type machine_learning --job-id "..." --anomaly-threshold 50 --help returns kind:help (help wins)', () => {
+  it('step 3 — machine_learning --job-id "..." --anomaly-threshold 50 --help returns kind:help (help wins)', () => {
     const result = parseRulePreviewCommand(
-      '--type machine_learning --job-id my-job --anomaly-threshold 50 --help'
+      'machine_learning --job-id my-job --anomaly-threshold 50 --help'
     );
     expect(result.kind).toBe('help');
   });
@@ -673,26 +608,25 @@ describe('parseRulePreviewCommand — progressive help: machine_learning', () =>
 // ---------------------------------------------------------------------------
 
 describe('parseRulePreviewCommand — progressive help: new_terms', () => {
-  it('step 2 — --type new_terms --help returns kind:help', () => {
-    expect(parseRulePreviewCommand('--type new_terms --help').kind).toBe('help');
+  it('step 2 — new_terms --help returns kind:help', () => {
+    expect(parseRulePreviewCommand('new_terms --help').kind).toBe('help');
   });
 
-  it('step 2 — new_terms help documents --new-terms-fields as required', () => {
-    const result = parseRulePreviewCommand('--type new_terms --help');
+  it('step 2 — new_terms help documents --new-terms-fields', () => {
+    const result = parseRulePreviewCommand('new_terms --help');
     if (result.kind === 'help') {
       expect(result.text).toContain('--new-terms-fields');
-      expect(result.text).toContain('REQUIRED');
     }
   });
 
-  it('step 2 — new_terms help documents --history-window-start as required', () => {
-    const result = parseRulePreviewCommand('--type new_terms --help');
+  it('step 2 — new_terms help documents --history-window-start', () => {
+    const result = parseRulePreviewCommand('new_terms --help');
     if (result.kind === 'help') expect(result.text).toContain('--history-window-start');
   });
 
   it('step 3 — full new_terms command with --help returns kind:help (help wins)', () => {
     const result = parseRulePreviewCommand(
-      '--type new_terms --query "*:*" --new-terms-fields source.ip --history-window-start now-30d --help'
+      'new_terms --query "*:*" --new-terms-fields source.ip --history-window-start now-30d --help'
     );
     expect(result.kind).toBe('help');
   });
@@ -707,7 +641,7 @@ describe('parseRulePreviewCommand — progressive help: new_terms', () => {
 describe('parseRulePreviewCommand — realistic commands', () => {
   it('esql: aggregation query with 24-hour timeframe and 30m interval', () => {
     const result = parseRulePreviewCommand(
-      '--type esql' +
+      'esql' +
         ' --query "FROM logs-* | STATS count() BY host.name | WHERE count() > 100"' +
         ' --timeframe-start now-24h' +
         ' --timeframe-end now' +
@@ -724,7 +658,7 @@ describe('parseRulePreviewCommand — realistic commands', () => {
 
   it('eql: sequence rule with multiple index patterns', () => {
     const result = parseRulePreviewCommand(
-      '--type eql' +
+      'eql' +
         ' --query "sequence by host.id [process where process.name == \\"powershell.exe\\"] [network where true]"' +
         ' --index logs-endpoint.events.process-*' +
         ' --index logs-endpoint.events.network-*' +
@@ -742,7 +676,7 @@ describe('parseRulePreviewCommand — realistic commands', () => {
 
   it('eql: with data-view-id instead of index patterns', () => {
     const result = parseRulePreviewCommand(
-      '--type eql --query "process where process.name == \\"cmd.exe\\"" --data-view-id my-data-view'
+      'eql --query "process where process.name == \\"cmd.exe\\"" --data-view-id my-data-view'
     );
     expect(result.kind).toBe('preview');
     if (result.kind === 'preview') {
@@ -751,9 +685,9 @@ describe('parseRulePreviewCommand — realistic commands', () => {
     }
   });
 
-  it('query: lucene query with multiple index patterns and 15m interval', () => {
+  it('query: kuery query with multiple index patterns and 15m interval', () => {
     const result = parseRulePreviewCommand(
-      '--type query' +
+      'query' +
         ' --query "event.category:authentication AND event.outcome:failure"' +
         ' --language kuery' +
         ' --index logs-*' +
@@ -772,7 +706,7 @@ describe('parseRulePreviewCommand — realistic commands', () => {
 
   it('query: lucene language variant', () => {
     const result = parseRulePreviewCommand(
-      '--type query --query "event.category:authentication" --language lucene'
+      'query --query "event.category:authentication" --language lucene'
     );
     expect(result.kind).toBe('preview');
     if (result.kind === 'preview') {
@@ -782,7 +716,7 @@ describe('parseRulePreviewCommand — realistic commands', () => {
 
   it('saved_query: with query override, language, and custom timeframe', () => {
     const result = parseRulePreviewCommand(
-      '--type saved_query' +
+      'saved_query' +
         ' --saved-id 3a4b5c6d-auth-failures' +
         ' --query "event.outcome:failure"' +
         ' --language kuery' +
@@ -801,7 +735,7 @@ describe('parseRulePreviewCommand — realistic commands', () => {
 
   it('threshold: group-by multiple fields with custom interval', () => {
     const result = parseRulePreviewCommand(
-      '--type threshold' +
+      'threshold' +
         ' --query "event.category:authentication AND event.outcome:failure"' +
         ' --threshold-value 10' +
         ' --threshold-field host.name' +
@@ -824,7 +758,7 @@ describe('parseRulePreviewCommand — realistic commands', () => {
 
   it('threshold: no group-by (empty threshold field array)', () => {
     const result = parseRulePreviewCommand(
-      '--type threshold --query "process.name: *" --threshold-value 100'
+      'threshold --query "process.name: *" --threshold-value 100'
     );
     expect(result.kind).toBe('preview');
     if (result.kind === 'preview') {
@@ -839,7 +773,7 @@ describe('parseRulePreviewCommand — realistic commands', () => {
       { entries: [{ field: 'source.ip', type: 'mapping', value: 'threat.indicator.ip' }] },
     ]);
     const result = parseRulePreviewCommand(
-      `--type threat_match` +
+      `threat_match` +
         ` --query "event.category:network"` +
         ` --threat-query "*:*"` +
         ` --threat-index logs-ti_abusech.url-*` +
@@ -863,7 +797,7 @@ describe('parseRulePreviewCommand — realistic commands', () => {
 
   it('machine_learning: multiple job IDs with 7-day preview window', () => {
     const result = parseRulePreviewCommand(
-      '--type machine_learning' +
+      'machine_learning' +
         ' --job-id rare-process-linux' +
         ' --job-id suspicious-network-activity' +
         ' --job-id unusual-login-activity' +
@@ -885,7 +819,7 @@ describe('parseRulePreviewCommand — realistic commands', () => {
 
   it('new_terms: monitor multiple fields over a 30-day baseline', () => {
     const result = parseRulePreviewCommand(
-      '--type new_terms' +
+      'new_terms' +
         ' --query "event.category:network"' +
         ' --new-terms-fields source.ip' +
         ' --new-terms-fields destination.port' +
@@ -904,31 +838,17 @@ describe('parseRulePreviewCommand — realistic commands', () => {
 });
 
 // ---------------------------------------------------------------------------
-// "Did you mean?" typo suggestions
+// Unknown flags
 // ---------------------------------------------------------------------------
 
-describe('parseRulePreviewCommand — typo suggestions', () => {
-  it('suggests --query for --qury', () => {
-    const result = parseRulePreviewCommand('--type esql --qury "FROM logs-*"');
+describe('parseRulePreviewCommand — unknown flags', () => {
+  it('unknown flag returns error', () => {
+    const result = parseRulePreviewCommand('esql --query "x" --bogus value');
     expect(result.kind).toBe('error');
-    if (result.kind === 'error') {
-      expect(result.message).toContain('--query');
-    }
   });
 
-  it('suggests --interval for --intervel', () => {
-    const result = parseRulePreviewCommand('--type esql --query "FROM logs-*" --intervel 5m');
+  it('completely unknown flag returns error', () => {
+    const result = parseRulePreviewCommand('esql --query "x" --xyz unknown-flag');
     expect(result.kind).toBe('error');
-    if (result.kind === 'error') {
-      expect(result.message).toContain('--interval');
-    }
-  });
-
-  it('completely unknown flag returns error pointing to --help', () => {
-    const result = parseRulePreviewCommand('--xyz unknown-flag');
-    expect(result.kind).toBe('error');
-    if (result.kind === 'error') {
-      expect(result.message).toContain('--help');
-    }
   });
 });
