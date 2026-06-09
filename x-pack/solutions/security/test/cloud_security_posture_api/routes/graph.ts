@@ -3508,7 +3508,7 @@ export default function (providerContext: FtrProviderContext) {
               //   - relationship-target-server: single target entity node
               //   - 3 relationship nodes (communicates_with):
               //       one for origin-pinned-server alone (pinned),
-              //       one for the grouped-actor-server-1/3 merged group,
+              //       one for the grouped-actor-server-1/2 merged group,
               //       one for different-subtype-actor-server (different subtype)
               await retry.tryForTime(enrichmentRetryTimeout, async () => {
                 const response = await postGraph(

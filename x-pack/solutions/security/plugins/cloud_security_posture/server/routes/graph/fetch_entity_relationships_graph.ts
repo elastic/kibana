@@ -419,14 +419,14 @@ export const regroupRelationships = (
   }
 
   return Array.from(groups.values()).map((group): RelationshipEdge => {
-    const actorIds = [...group.actorIds];
+    const actorIds = [...group.actorIds].sort((a, b) => a.localeCompare(b));
     // Single actor: use raw entity ID (preserves rel(entity.id-relationship) format).
     // Multiple actors: hash of sorted IDs — consistent with actorNodeId/targetNodeId
     // grouping pattern in fetch_events_graph.ts.
     const actorKey = actorIds.length === 1 ? actorIds[0] : hashIds(actorIds);
     const actorNodeId = actorKey;
 
-    const targetIds = [...group.targetIds];
+    const targetIds = [...group.targetIds].sort((a, b) => a.localeCompare(b));
     const targetNodeId =
       targetIds.length === 0 ? '' : targetIds.length === 1 ? targetIds[0] : hashIds(targetIds);
 
