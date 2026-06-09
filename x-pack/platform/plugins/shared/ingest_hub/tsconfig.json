@@ -22,6 +22,7 @@
     "@kbn/scout",
     "@kbn/kibana-react-plugin",
     "@kbn/react-query",
-    "@kbn/fleet-plugin"
+    "@kbn/fleet-plugin",
+    "@kbn/i18n-react"
   ]
 }
