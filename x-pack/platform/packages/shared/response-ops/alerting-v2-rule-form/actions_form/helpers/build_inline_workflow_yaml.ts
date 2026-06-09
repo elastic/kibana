@@ -7,14 +7,14 @@
 
 import { stringifyWorkflowDefinition } from '@kbn/workflows-yaml';
 import { parse } from 'yaml';
-import { SINGLE_STEP_WORKFLOW_TAG } from '../constants';
-import { getSingleStepWorkflowType } from '../registry';
-import type { CreateWorkflowFormValue } from '../types';
+import { INLINE_WORKFLOW_TAG } from '../constants';
+import { getInlineActionStepDefinition } from '../registry';
+import type { InlineWorkflowActionDraft } from '../types';
 
-export class InvalidSingleStepWorkflowError extends Error {
+export class InvalidInlineWorkflowError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'InvalidSingleStepWorkflowError';
+    this.name = 'InvalidInlineWorkflowError';
   }
 }
 
@@ -26,7 +26,7 @@ const parseParams = (params: string): Record<string, unknown> => {
   try {
     parsed = parse(params);
   } catch (err) {
-    throw new InvalidSingleStepWorkflowError(
+    throw new InvalidInlineWorkflowError(
       `Workflow params YAML is invalid: ${err instanceof Error ? err.message : String(err)}`
     );
   }
@@ -36,7 +36,7 @@ const parseParams = (params: string): Record<string, unknown> => {
   }
 
   if (typeof parsed !== 'object' || Array.isArray(parsed)) {
-    throw new InvalidSingleStepWorkflowError(
+    throw new InvalidInlineWorkflowError(
       'Workflow params YAML must define an object at the top level.'
     );
   }
@@ -44,26 +44,26 @@ const parseParams = (params: string): Record<string, unknown> => {
   return parsed as Record<string, unknown>;
 };
 
-export const buildSingleStepWorkflowYaml = (value: CreateWorkflowFormValue): string => {
-  const type = getSingleStepWorkflowType(value.typeId);
-  if (!type) {
-    throw new InvalidSingleStepWorkflowError(`Unknown single-step workflow type: ${value.typeId}`);
+export const buildInlineWorkflowYaml = (action: InlineWorkflowActionDraft): string => {
+  const definition = getInlineActionStepDefinition(action.stepType);
+  if (!definition) {
+    throw new InvalidInlineWorkflowError(`Unknown inline action step type: ${action.stepType}`);
   }
-  if (!value.connectorId) {
-    throw new InvalidSingleStepWorkflowError('A connector must be selected.');
+  if (!action.connectorId) {
+    throw new InvalidInlineWorkflowError('A connector must be selected.');
   }
 
   const workflow = {
-    name: value.name?.trim() || `${type.label} notification`,
+    name: `${definition.label} notification`,
     enabled: true,
-    tags: [SINGLE_STEP_WORKFLOW_TAG],
+    tags: [INLINE_WORKFLOW_TAG],
     triggers: [{ type: 'manual' }],
     steps: [
       {
         name: 'notify',
-        type: stepTypeFromConnectorType(type.connectorTypeId),
-        'connector-id': value.connectorId,
-        with: parseParams(value.params),
+        type: stepTypeFromConnectorType(definition.connectorTypeId),
+        'connector-id': action.connectorId,
+        with: parseParams(action.params),
       },
     ],
   };
