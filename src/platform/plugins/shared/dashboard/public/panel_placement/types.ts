@@ -7,16 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DashboardLayout, DashboardLayoutPanel } from '../dashboard_api/layout_manager';
+import type { GridData } from '../../server';
+import type { DashboardLayout } from '../dashboard_api/layout_manager';
 
-export type PanelPlacementReturn = DashboardLayout;
+export interface PanelPlacementReturn {
+  newPanelPlacement: GridData;
+  otherPanels: DashboardLayout['panels'];
+}
 
 export interface PanelPlacementProps {
-  panel: Omit<DashboardLayoutPanel, 'grid'> & {
-    uuid: string;
-    grid: Pick<DashboardLayoutPanel['grid'], 'sectionId' | 'w' | 'h'>;
-  };
-  currentLayout: DashboardLayout;
+  width: number;
+  height: number;
+  currentPanels: DashboardLayout['panels'];
   sectionId?: string; // section where panel is being placed
   beside?: string; // the ID of the panel to place the new panel relative to
 }

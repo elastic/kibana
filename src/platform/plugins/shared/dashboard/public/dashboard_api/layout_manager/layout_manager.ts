@@ -205,21 +205,19 @@ export function initializeLayoutManager(
       };
     }
     const placementHints = await getPlacementHints(type, serializedState);
-    const updatedLayout = runPanelPlacementStrategy(placementHints.strategy, {
-      currentLayout: layout$.value,
-      panel: {
-        type,
-        uuid,
-        grid: {
-          w: placementHints.width,
-          h: placementHints.height,
-        },
-      },
+    const { newPanelPlacement, otherPanels } = runPanelPlacementStrategy(placementHints.strategy, {
+      currentPanels: layout$.value.panels,
+      height: placementHints.height,
+      width: placementHints.width,
       beside,
     });
 
     return {
-      ...updatedLayout,
+      ...layout$.value,
+      panels: {
+        ...otherPanels,
+        [uuid]: { grid: newPanelPlacement, type },
+      },
     };
   };
 
@@ -237,36 +235,30 @@ export function initializeLayoutManager(
       const existingPanel: DashboardLayoutPanel | undefined = layout$.value.panels[uuid];
       const sameType = existingPanel?.type === type;
 
-      const updatedLayout = existingPanel
-        ? {
-            ...layout$.value,
-            panels: {
-              ...layout$.value.panels,
-              [uuid]: { grid: existingPanel.grid, type },
-            },
-          }
+      const grid = existingPanel
+        ? existingPanel.grid
         : runPanelPlacementStrategy(PlacementStrategy.findTopLeftMostOpenSpace, {
-            currentLayout: layout$.value,
-            panel: {
-              uuid,
-              type,
-              grid: {
-                w: size?.width ?? DEFAULT_PANEL_WIDTH,
-                h: size?.height ?? DEFAULT_PANEL_HEIGHT,
-              },
-            },
+            width: size?.width ?? DEFAULT_PANEL_WIDTH,
+            height: size?.height ?? DEFAULT_PANEL_HEIGHT,
+            currentPanels: layout$.value.panels,
             /**
              * We can assume that all panels being sent as a single package are related; so,
              * place them close together by grouping them around the first embeddable.
              */
             beside: uuid === first.embeddableId ? undefined : first.embeddableId,
-          });
+          }).newPanelPlacement;
       currentChildState[uuid] = {
         ...(sameType && currentChildState[uuid] ? currentChildState[uuid] : {}),
         ...serializedState,
       };
 
-      layout$.next(updatedLayout);
+      layout$.next({
+        ...layout$.value,
+        panels: {
+          ...layout$.value.panels,
+          [uuid]: { grid, type },
+        },
+      });
     }
     trackPanel.setScrollToPanelId(first.embeddableId);
     trackPanel.setHighlightPanelId(first.embeddableId);
@@ -410,20 +402,26 @@ export function initializeLayoutManager(
 
     currentChildState[uuidOfDuplicate] = serializedState;
 
-    const updatedLayout = placeClonePanel({
-      currentLayout: layout$.value,
-      panel: {
-        uuid: uuidOfDuplicate,
-        type: layoutItemToDuplicate.type,
-        grid: {
-          w: layoutItemToDuplicate.grid.w,
-          h: layoutItemToDuplicate.grid.h,
-          sectionId: layoutItemToDuplicate.grid.sectionId,
-        },
-      },
+    const { newPanelPlacement, otherPanels } = placeClonePanel({
+      width: layoutItemToDuplicate.grid.w,
+      height: layoutItemToDuplicate.grid.h,
+      sectionId: layoutItemToDuplicate.grid.sectionId,
+      currentPanels: layout$.value.panels,
       placeBesideId: uuidToDuplicate,
     });
-    layout$.next(updatedLayout);
+    layout$.next({
+      ...layout$.value,
+      panels: {
+        ...otherPanels,
+        [uuidOfDuplicate]: {
+          grid: {
+            ...newPanelPlacement,
+            sectionId: layoutItemToDuplicate.grid.sectionId,
+          },
+          type: layoutItemToDuplicate.type,
+        },
+      },
+    });
 
     coreServices.notifications.toasts.addSuccess({
       title: dashboardClonePanelActionStrings.getSuccessMessage(),
@@ -628,22 +626,27 @@ export function initializeLayoutManager(
         for (const panelId of Object.keys(newPinnedPanels)) {
           if (newPinnedPanels[panelId].order > originalOrder) newPinnedPanels[panelId].order--;
         }
+
         // place the new control panel in the top left corner, bumping other panels down as necessary
-        const updatedLayout = runPanelPlacementStrategy(PlacementStrategy.placeAtTop, {
-          currentLayout: layout$.value,
-          panel: {
-            uuid,
-            type: panelToUnpin.type,
-            grid: {
-              w: 12,
-              h: 2,
-            },
-          },
-        });
+        const { newPanelPlacement, otherPanels } = runPanelPlacementStrategy(
+          PlacementStrategy.placeAtTop,
+          {
+            currentPanels: layout$.value.panels,
+            height: 2,
+            width: 12,
+          }
+        );
 
         // update the layout with the pinned control removed and added as a panel
         layout$.next({
-          ...updatedLayout,
+          ...layout$.getValue(),
+          panels: {
+            ...otherPanels,
+            [uuid]: {
+              type: panelToUnpin.type,
+              grid: { ...newPanelPlacement },
+            },
+          },
           pinnedPanels: newPinnedPanels,
         });
       },
