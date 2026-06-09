@@ -28,7 +28,7 @@ Goal: thank attendees, state the demo claim, frame the structure, set an honesty
 >
 > Here's the concept, or claim we want to make: **a code-review agent that knows your domain (rules of your codebase area) finds different - and often more important - issues than a generic one.** Same PR, same model. The only difference is whether the agent has a domain knowledge file loaded. My goal is to prove this concept by the end of the demo.
 >
-> We'll prove it using a few PRs and a code review skill. I have one fake feature PR with intentionally introduced mistakes. I also have a couple real draft PRs opened by my team recently. We'll run the code review skill live and will see how it works. While it's running in the backgroung, we'll go through some pre-posted code reviews and compare a generic review vs a domain-aware review, per each PR.
+> We'll prove it using a few PRs and a code review skill. I have one fake feature PR with intentionally introduced mistakes. I also have a couple real draft PRs opened by my team recently. We'll run the code review skill live and will see how it works. While it's running in the background, we'll go through some pre-posted code reviews and compare a generic review vs a domain-aware review, per each PR.
 
 ### 1.2: Rule Birthdays 🎂 (1m)
 
@@ -135,7 +135,7 @@ Goal: walk through **3 GENERIC comments** + **3 DOMAIN-AWARE comments** live on 
 
 #### Closing (~30s)
 
-> "Generic catches real bugs - `Math.random()` in production, missing validation, silent truncation. Those are all worth fixing. But none of them called out a major architectural issue, an issue with performance, or a violated invariant. That's the gap domain knowledge closes."
+> "Generic catches real bugs - `Math.random()` in production, missing validation, silent truncation. Those are all worth fixing. But none of them named an architectural invariant, called out an abstraction being bypassed, or connected to a domain-specific scale concern. That's the gap domain knowledge closes."
 
 ### 2.2: Real PRs review comparisons (3m)
 
@@ -151,27 +151,31 @@ Goal: prove the same skill works on real merged PRs. Slide-driven; two PRs, ~75s
 
 #### Slide 1a - PR #271722 (`rulesClient.bulkCreate()`) (~70s)
 
+https://github.com/elastic/kibana/pull/271722
+
 > "PR #271722. Bulk rule creation in the alerting layer. Both reviewers flagged the **same architectural decision** - the import endpoint sets `routeLimitedConcurrencyTag(1)`, which serializes all imports cluster-wide.
 >
 > Look at the difference in framing.
 >
 > The **generic review** on the left says: 'limiting to 1 globally is extremely aggressive - consider raising it.' That's a valid concern. It's also a one-liner: 'this is too low, bump it up.'
 >
-> The **domain review** on the right says: 'Domain invariant - heavy endpoints must rate-limit. The import route is one of four hot paths. MSSP customers run 300 spaces per cluster. With concurrency 1, a single long-running import on any space blocks all other concurrent imports on that node.' And it goes one step further: 'consider whether a limit of 3 to 5 would still bound memory without completely serializing multi-space imports.'
+> The **domain-aware review** on the right says: 'Domain invariant - heavy endpoints must rate-limit. The import route is one of four hot paths. MSSP customers run 300 spaces per cluster. With concurrency 1, a single long-running import on any space blocks all other concurrent imports on that node.' And it goes one step further: 'consider whether a limit of 3 to 5 would still bound memory without completely serializing multi-space imports.'
 >
-> Same code. Generic says 'aggressive, raise it.' Domain says 'this disables bulk imports for MSSP customers - here's why, here's the lower bound, here's the upper bound.'"
+> Same code. Generic says 'aggressive, raise it.' Domain-aware says 'this disables bulk imports for MSSP customers - here's why, here's the lower bound, here's the upper bound.'"
 
 [Action: switch to **Slide 1b**.]
 
 #### Slide 1b - PR #272038 (Move install/upgrade/revert into `DetectionRulesClient`) (~80s)
 
+https://github.com/elastic/kibana/pull/272038
+
 > "Second PR. This one is a refactor - pulling install, upgrade, and revert operations into a central `DetectionRulesClient` abstraction.
 >
-> **Top row** - both reviewers caught the **same issue**: the install step goes through `DetectionRulesClient`, but the upgrade step bypasses it and calls `applyPrebuiltRuleAssets` directly. Generic catches it. Domain catches it. Parity at the surface.
+> **Top row** - both reviewers caught the **same issue**: the install step goes through `DetectionRulesClient`, but the upgrade step bypasses it and calls `applyPrebuiltRuleAssets` directly. Generic catches it. Domain-aware catches it. Parity at the surface.
 >
-> **Bottom row** - only the domain reviewer caught this one. The new public `IDetectionRulesClient` interface is leaking a type called `RuleUpgradeContext` - an internal implementation type from a sibling domain's handler-level module. That's an abstraction-boundary leak. Generic has no analog - it doesn't know `IDetectionRulesClient` is the boundary.
+> **Bottom row** - only the domain-aware reviewer caught this one. The new public `IDetectionRulesClient` interface is leaking a type called `RuleUpgradeContext` - an internal implementation type from a sibling domain's handler-level module. That's an abstraction-boundary leak. Generic has no analog - it doesn't know `IDetectionRulesClient` is the boundary.
 >
-> Both reviewers caught the obvious DRC-bypass. Only the domain reviewer noticed the public interface is leaking a sibling-domain handler-level type. That's the kind of catch only an owner of this code would make."
+> Both reviewers caught the obvious DRC-bypass. Only the domain-aware reviewer noticed the public interface is leaking a sibling-domain handler-level type. That's the kind of catch only an owner of this code would make."
 
 ## Section 3: How it works
 
@@ -211,7 +215,7 @@ Goal: four sub-blocks at high level. Attendees should leave able to draw the dis
 >
 > That's the whole mechanism. No special model, no fine-tuning. Same model in both terminals - only the loaded context differs.
 >
-> One thing worth saying: `/dex-review-code` is not one big monolithic agent. It runs in phases - a diff phase, a domain-match phase, then a multi-agent review dispatch where each matched domain gets its own reviewer subagent with its own loaded knowledge file. That's why the domain reviewer sounds different - different subagent, different system prompt loaded from the markdown."
+> One thing worth saying: `/dex-review-code` is not one big monolithic agent. It runs in phases - a diff phase, a domain-match phase, then a multi-agent review dispatch where each matched domain gets its own reviewer subagent with its own loaded knowledge file. That's why the domain-aware reviewer sounds different - different subagent, different system prompt loaded from the markdown."
 
 #### (d) Where these files came from (~1:00)
 
@@ -233,7 +237,7 @@ Goal: quick callback to the runs we kicked off at 1.3. Reinforces "this is repro
 
 [Action: glance at both terminals. **If both are at `Code review complete. Artifacts in: ...`** - show the output:]
 
-[Action: in WITH DOMAIN terminal:]
+[Action: in DOMAIN-AWARE terminal:]
 
 ```bash
 cat ~/.dex-dev-skills/work/.../review-comments.md | head -40
@@ -241,7 +245,7 @@ cat ~/.dex-dev-skills/work/.../review-comments.md | head -40
 
 > "~10 comments. Mostly tagged `Domain invariant` or `Domain catch`. Each maps back to a section in the knowledge file."
 
-[Action: in WITHOUT DOMAIN terminal, same command.]
+[Action: in GENERIC terminal, same command.]
 
 > "Fewer comments - mostly style, nullability, and a couple real bugs. None of them name an architectural invariant.
 >
@@ -307,14 +311,14 @@ Goal: two takeaways, thanks, hand off to Nir.
 
 - Defer to the hands-on. Canned response: "*Great question - let's hold that for the hands-on, where you can try it on your own PR.*"
 
-### "An intentionally introduced violation doesn't get caught by the (live) domain reviewer"
+### "An intentionally introduced violation doesn't get caught by the (live) domain-aware reviewer"
 
-- The pre-posted reviews on PR #272773 carry the proof; the live runs are atmosphere, not evidence. If the live WITH-domain run misses something at 4.1, don't call out the miss - focus on what was caught.
+- The pre-posted reviews on PR #272773 carry the proof; the live runs are atmosphere, not evidence. If the live DOMAIN-AWARE run misses something at 4.1, don't call out the miss - focus on what was caught.
 
 ### "Audience asks: did the AI hallucinate or get things wrong?"
 
-- Answer honestly. The candidate domain reviewer on PR #271722 had ~2 of 7 comments that were misleading - it invented a data-model leakage that didn't exist (the code is encapsulated inside `DetectionRulesClient`), and it referenced a `params` argument on `RulesClient.find` that doesn't exist. The 5 right ones were genuinely better than generic. The right framing: "*The AI is not always right. But when it's right, domain knowledge changes the **kind** of right.*"
+- Answer honestly. The candidate domain-aware reviewer on PR #271722 had ~2 of 7 comments that were misleading - it invented a data-model leakage that didn't exist (the code is encapsulated inside `DetectionRulesClient`), and it referenced a `params` argument on `RulesClient.find` that doesn't exist. The 5 right ones were genuinely better than generic. The right framing: "*The AI is not always right. But when it's right, domain knowledge changes the **kind** of right.*"
 
 ### "PR has unexpected new comments at demo time"
 
-- Refresh PR #272773 once before the demo and once during the WITH-DOMAIN expansion at 2.1. Don't refresh aggressively. If the line numbers in Comments A–F have drifted from a rebase, the comment text still resolves to the right code via GitHub's line-anchor fallback.
+- Refresh PR #272773 once before the demo and once during the DOMAIN-AWARE expansion at 2.1. Don't refresh aggressively. If the line numbers in Comments A–F have drifted from a rebase, the comment text still resolves to the right code via GitHub's line-anchor fallback.

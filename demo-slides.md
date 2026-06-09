@@ -44,12 +44,12 @@ The planted-PR walkthrough at Section 2.1 (~0:04–0:09) does not use slides —
   - **Title**: "#271722 — `rulesClient.bulkCreate()`"
   - **Subtitle**: Bulk rule creation in the alerting layer
 
-  | WITHOUT domain | WITH domain |
+  | GENERIC | DOMAIN-AWARE |
   |---|---|
   | *(`route.ts`)* *"`routeLimitedConcurrencyTag(1)` limits the entire import endpoint to one concurrent request cluster-wide. … limiting to 1 globally is extremely aggressive — consider raising it."* | *(`constants.ts`)* *"**Domain invariant: heavy endpoints must rate-limit.** The domain knowledge documents the import route as one of four hot paths, and MSSP customers run 300 spaces per cluster. With concurrency 1, a single long-running import on any space blocks all other concurrent imports on that node. Consider whether a limit higher than 1 (e.g. 3–5) would still bound memory without completely serializing multi-space import workloads."* |
 
-  - **Footer (small)**: "*Same architectural decision. Without domain: 'aggressive, consider raising.' With domain: 'this disables bulk imports for MSSP — here's why, here's the lower bound, here's the upper bound.'*"
-- **Speaker punchline** (notes, not on slide): "*Generic gives you the one-liner. Domain gives you the bounds.*"
+  - **Footer (small)**: "*Same architectural decision. Generic: 'aggressive, consider raising.' Domain-aware: 'this disables bulk imports for MSSP — here's why, here's the lower bound, here's the upper bound.'*"
+- **Speaker punchline** (notes, not on slide): "*Generic gives you the one-liner. Domain-aware gives you the bounds.*"
 
 ---
 
@@ -61,13 +61,13 @@ The planted-PR walkthrough at Section 2.1 (~0:04–0:09) does not use slides —
   - **Title**: "#272038 — Move prebuilt rule install/upgrade/revert into `DetectionRulesClient`"
   - **Subtitle**: Refactor pulling code into the central abstraction
 
-  | WITHOUT domain | WITH domain |
+  | GENERIC | DOMAIN-AWARE |
   |---|---|
   | *(`legacy_create_prepackaged_rules.ts`)* *"Inconsistency with PR goal: the upgrade step calls `applyPrebuiltRuleAssets` directly, bypassing `DetectionRulesClient`."* | *(`legacy_create_prepackaged_rules.ts`)* *"Inconsistency: install goes through DRC, upgrade bypasses it."* |
   | *(no analog)* | *(`detection_rules_client_interface.ts`)* *"**Domain invariant: abstraction-boundary leakage in public interface.** `UpgradePrebuiltRulesResult.ruleUpgradeContexts` exposes `Map<string, RuleUpgradeContext>` — an internal implementation type from a sibling domain's handler-level module — through the `IDetectionRulesClient` interface."* |
 
-  - **Footer (small)**: "*Both caught the obvious DRC-bypass. Only the domain reviewer noticed the new public interface is leaking a sibling-domain handler-level type.*"
-- **Speaker punchline** (notes): "*Parity at the surface, delta beneath. The domain reviewer sees what an owner of the abstraction would see.*"
+  - **Footer (small)**: "*Both caught the obvious DRC-bypass. Only the domain-aware reviewer noticed the new public interface is leaking a sibling-domain handler-level type.*"
+- **Speaker punchline** (notes): "*Parity at the surface, delta beneath. The domain-aware reviewer sees what an owner of the abstraction would see.*"
 
 ---
 
@@ -141,44 +141,44 @@ The planted-PR walkthrough at Section 2.1 (~0:04–0:09) does not use slides —
 
 Reference card for the GitHub walkthrough. Open PR #272773; expand each review; find each comment by file path + line. Read the **bold** sentence aloud, paraphrase the rest.
 
-### WITH DOMAIN review — 3 comments to walk
+### GENERIC review — 3 comments to walk
 
-**Comment A — API contract leakage** (~40 sec)
+**Comment A — `Math.random()` in production data path** (~30 sec)
+- **File / line**: `x-pack/.../server/lib/detection_engine/rule_management/api/rules/birthdays_today/utils/birthday_helper.ts:100`
+- **Read aloud**: *"`computeAgeYears` adds a random number of extra years (`Math.floor(Math.random() * 5) + 1`) to make the age 'more festive'. This means the same rule returns a different age on every request, every API call will be non-deterministic, and there is no way to write a deterministic test for this function."*
+- **Note**: a real bug. Worth fixing. But this is the kind of thing a careful engineer would also notice in 30 sec — no domain expertise required.
+
+**Comment B — Missing date validation** (~30 sec)
+- **File / line**: `x-pack/.../server/lib/detection_engine/rule_management/api/rules/birthdays_today/route.ts:53`
+- **Read aloud**: *"`birthdayDate` from the query string is accepted as any string and then split on `-` with no format validation. If a caller sends `birthdayDate=not-a-date` the `parts` array will contain `NaN` values that silently propagate into `month` and `day`, causing the query to match nothing. Add a regex constraint like `z.string().regex(/^\\d{4}-\\d{2}-\\d{2}$/)`."*
+- **Note**: a real bug. Worth fixing. Generic AI tooling catches this just fine.
+
+**Comment C — Silent truncation at 1000 rules** (~30 sec)
+- **File / line**: `x-pack/.../server/lib/detection_engine/rule_management/api/rules/birthdays_today/utils/birthday_helper.ts:50`
+- **Read aloud**: *"`findCelebratingRules` issues an uncapped `size: 1000` query against `.kibana_alerting_cases` and then filters birthday matches in memory. As the number of SIEM rules grows this will return at most 1000 rules regardless of actual count (silent truncation), and impose a fixed 1000-doc memory/network overhead on every page load."*
+- **Note**: a real bug. Notice what's *not* in this comment: no mention of `RulesClient`, no mention of why `.kibana_alerting_cases` is the wrong index to talk to directly, no MSSP-scale framing. It's a perf/correctness comment, not a domain comment.
+
+### DOMAIN-AWARE review — 3 comments to walk
+
+**Comment D — API contract leakage** (~40 sec)
 - **File / line**: `x-pack/.../common/api/detection_engine/rule_management/birthdays_today/birthdays_today_route.gen.ts:43`
   - Alt: `birthdays_today_route.schema.yaml:56` (same comment, different file)
 - **Read aloud**: *"**Domain invariant: API contract must never expose SO/AF storage shape.** The response fields `alertTypeId`, `createdBy`, `createdAt`, and `lastRun` are AF/SavedObject internal attribute names in camelCase. The canonical `RuleResponse` contract uses snake_case and domain names: `rule_type_id`, `created_by`, `created_at`. Shipping these camelCase AF internals as a public API contract leaks the storage layer and freezes it — once shipped, callers depend on these names."*
 - **Punchline**: "*This is the canonical contract. The AI knows it because we told it.*"
 
-**Comment B — `RulesClient` bypass** (~40 sec)
+**Comment E — `RulesClient` bypass** (~40 sec)
 - **File / line**: `x-pack/.../server/lib/detection_engine/rule_management/api/rules/birthdays_today/utils/birthday_helper.ts:60`
 - **Read aloud**: *"**Domain invariant: never bypass the abstraction.** `findCelebratingRules` calls `esClient.search()` directly against `.kibana_alerting_cases`, bypassing AF's `RulesClient` entirely. The invariant is explicit: 'Detection rules are read/written **only** through AF's `RulesClient`'. Direct ES access is the most severe form of abstraction bypass in this domain — it skips RBAC enforcement, space isolation, SO model versioning, and any hook that `RulesClient.find` applies."*
 - **Punchline**: "*'The single hardest rule in the domain.' That's a phrase a senior engineer on my team would actually use.*"
 
-**Comment C — Bulk anti-pattern** (~40 sec)
+**Comment F — Bulk anti-pattern** (~40 sec)
 - **File / line**: `x-pack/.../server/lib/detection_engine/rule_management/api/rules/bulk_actions/route.ts:493`
 - **Read aloud**: *"**Domain invariant: bulk endpoints must do true bulk under the hood.** The `birthday_celebrate` action wraps `rulesClient.bulkEdit` inside `initPromisePool`, calling it once per rule with `ids: [rule.id]` — that is N individual `bulkEdit` calls, not one true-bulk call. The domain knowledge is explicit: 'New bulk endpoints must call true-bulk primitives (`RulesClient.bulkEdit`, etc.), not loop with `p-map` / promise-pool / async-batching.'"*
 - **Punchline**: "*This is what doesn't work for MSSP customers. The AI knows the scale constraint because we told it.*"
 
-### WITHOUT DOMAIN review — 3 comments to walk
-
-**Comment D — `Math.random()` in production data path** (~30 sec)
-- **File / line**: `x-pack/.../server/lib/detection_engine/rule_management/api/rules/birthdays_today/utils/birthday_helper.ts:100`
-- **Read aloud**: *"`computeAgeYears` adds a random number of extra years (`Math.floor(Math.random() * 5) + 1`) to make the age 'more festive'. This means the same rule returns a different age on every request, every API call will be non-deterministic, and there is no way to write a deterministic test for this function."*
-- **Note**: a real bug. Worth fixing. But this is the kind of thing a careful engineer would also notice in 30 sec — no domain expertise required.
-
-**Comment E — Missing date validation** (~30 sec)
-- **File / line**: `x-pack/.../server/lib/detection_engine/rule_management/api/rules/birthdays_today/route.ts:53`
-- **Read aloud**: *"`birthdayDate` from the query string is accepted as any string and then split on `-` with no format validation. If a caller sends `birthdayDate=not-a-date` the `parts` array will contain `NaN` values that silently propagate into `month` and `day`, causing the query to match nothing. Add a regex constraint like `z.string().regex(/^\\d{4}-\\d{2}-\\d{2}$/)`."*
-- **Note**: a real bug. Worth fixing. Generic AI tooling catches this just fine.
-
-**Comment F — Silent truncation at 1000 rules** (~30 sec)
-- **File / line**: `x-pack/.../server/lib/detection_engine/rule_management/api/rules/birthdays_today/utils/birthday_helper.ts:50`
-- **Read aloud**: *"`findCelebratingRules` issues an uncapped `size: 1000` query against `.kibana_alerting_cases` and then filters birthday matches in memory. As the number of SIEM rules grows this will return at most 1000 rules regardless of actual count (silent truncation), and impose a fixed 1000-doc memory/network overhead on every page load."*
-- **Note**: a real bug. Notice what's *not* in this comment: no mention of `RulesClient`, no mention of why `.kibana_alerting_cases` is the wrong index to talk to directly, no MSSP-scale framing. It's a perf/correctness comment, not a domain comment.
-
 ### Closing line (after all 6)
 
-*"Generic catches real bugs — `Math.random()` in production, missing validation, silent truncation. Those are all worth fixing. But none of them name an architectural invariant. None cite the abstraction, the canonical contract, or the historical catch. That's the gap domain knowledge closes."*
+*"Generic catches real bugs — `Math.random()` in production, missing validation, silent truncation. Those are all worth fixing. But none of them named an architectural invariant, called out an abstraction being bypassed, or connected to a domain-specific scale concern. That's the gap domain knowledge closes."*
 
 ---
 
@@ -190,9 +190,9 @@ Use only if time allows.
 
 If you want a 3rd PR data point in the elastic block, mention #268165 verbally (no slide): *"On #268165, the same comparison — generic flagged the dropped per-item length cap; domain additionally flagged the `Record<string, unknown>` + `as` cast on the aggregation result. That cast is the exact pattern from PR #262307's `lastRunStatus` thread. Three out of four PRs, same shape of result."*
 
-### Optional 4th GitHub comment (after Comment C)
+### Optional 4th GitHub comment (after Comment F)
 
-If you've banked ~30 sec extra, walk one more WITH DOMAIN comment to drive the abstraction point harder:
+If you've banked ~30 sec extra, walk one more DOMAIN-AWARE comment to drive the abstraction point harder:
 
 - **File / line**: `x-pack/.../server/lib/detection_engine/rule_management/api/rules/birthdays_today/utils/birthday_helper.ts:94`
 - **Read aloud**: *"**Domain invariant: business logic lives in clients, never in route handlers or `utils/`.** `findCelebratingRules`, `computeAgeYears`, and `buildBirthdayMessage` implement the feature's core logic but are placed in a `utils/birthday_helper.ts` file beneath the route. This is the *utils anti-pattern* that the domain knowledge explicitly names as something to refuse on review. Business logic belongs behind `IDetectionRulesClient`, not in a `utils/` helper that only the route handler calls."*
