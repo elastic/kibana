@@ -45,6 +45,7 @@ dependsOn:
   - '@kbn/esql-language'
   - '@kbn/core-http-browser'
   - '@kbn/ui-actions-plugin'
+  - '@kbn/dashboard-plugin'
 tags:
   - shared-browser
   - package

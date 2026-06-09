@@ -43,7 +43,7 @@ describe('WorkflowsEmptyState', () => {
       <WorkflowsEmptyState canCreateWorkflow={true} onCreateWorkflow={onCreateWorkflow} />
     );
 
-    const createButton = screen.getByText('Create a new workflow');
+    const createButton = screen.getByText('Create workflow');
     expect(createButton).toBeInTheDocument();
 
     fireEvent.click(createButton);
@@ -53,13 +53,13 @@ describe('WorkflowsEmptyState', () => {
   it('does not render the create button when user cannot create workflows', () => {
     renderWithIntl(<WorkflowsEmptyState canCreateWorkflow={false} />);
 
-    expect(screen.queryByText('Create a new workflow')).not.toBeInTheDocument();
+    expect(screen.queryByText('Create workflow')).not.toBeInTheDocument();
   });
 
   it('does not render the create button when onCreateWorkflow is not provided', () => {
     renderWithIntl(<WorkflowsEmptyState canCreateWorkflow={true} />);
 
-    expect(screen.queryByText('Create a new workflow')).not.toBeInTheDocument();
+    expect(screen.queryByText('Create workflow')).not.toBeInTheDocument();
   });
 
   it('renders the footer with documentation link', () => {
