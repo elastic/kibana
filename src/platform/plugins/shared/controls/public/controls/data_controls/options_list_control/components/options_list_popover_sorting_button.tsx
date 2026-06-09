@@ -106,8 +106,12 @@ export const OptionsListPopoverSortingButton = ({
 
   const SortButton = () => (
     <EuiToolTip
-      content={OptionsListStrings.popover.getSortPopoverDescription()}
-      disableScreenReaderOutput
+      position="top"
+      content={
+        showOnlySelected
+          ? OptionsListStrings.popover.getSortDisabledTooltip()
+          : OptionsListStrings.popover.getSortPopoverTitle()
+      }
     >
       <EuiButtonIcon
         size="xs"
@@ -125,18 +129,7 @@ export const OptionsListPopoverSortingButton = ({
 
   return (
     <EuiPopover
-      button={
-        <EuiToolTip
-          position="top"
-          content={
-            showOnlySelected
-              ? OptionsListStrings.popover.getSortDisabledTooltip()
-              : OptionsListStrings.popover.getSortPopoverTitle()
-          }
-        >
-          <SortButton />
-        </EuiToolTip>
-      }
+      button={<SortButton />}
       panelPaddingSize="none"
       isOpen={isSortingPopoverOpen}
       aria-labelledby="optionsList_sortingOptions"
