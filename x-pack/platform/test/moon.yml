@@ -113,7 +113,6 @@ dependsOn:
   - '@kbn/ml-category-validator'
   - '@kbn/response-ops-alerts-filters-form'
   - '@kbn/embeddable-alerts-table-plugin'
-  - '@kbn/synthtrace-client'
   - '@kbn/synthtrace'
   - '@kbn/streams-schema'
   - '@kbn/streams-plugin'

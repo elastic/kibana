@@ -743,14 +743,16 @@ export const getAlertingApiHelper = (
 
             const connectorsData = connectors.data as any;
             await Promise.all(
-              connectorsData.map(async (connector: any) => {
-                await kbnClient.request({
-                  method: 'DELETE',
-                  path: `${buildSpacePath(spaceId)}/api/actions/connector/${connector.id}`,
-                  retries: 3,
-                  ignoreErrors: [404],
-                });
-              })
+              connectorsData
+                .filter((connector: any) => !connector.is_preconfigured)
+                .map(async (connector: any) => {
+                  await kbnClient.request({
+                    method: 'DELETE',
+                    path: `${buildSpacePath(spaceId)}/api/actions/connector/${connector.id}`,
+                    retries: 3,
+                    ignoreErrors: [404],
+                  });
+                })
             );
           }
         );

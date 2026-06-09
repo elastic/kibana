@@ -140,7 +140,7 @@ export const makeEsQueryRule = (namePrefix: string) => ({
     excludeHitsFromPreviousRun: false,
     sourceFields: [],
     index: ['.kibana'],
-    timeField: '@timestamp',
+    timeField: 'updated_at',
   },
   schedule: { interval: '1m' },
   tags: [namePrefix],
