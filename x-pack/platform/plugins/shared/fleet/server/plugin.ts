@@ -761,8 +761,6 @@ export class FleetPlugin
       logFactory: this.initializerContext.logger,
       config: {
         taskInterval: config.autoInstallContentPackages?.taskInterval,
-        recentInstallTaskInterval: config.autoInstallContentPackages?.recentInstallTaskInterval,
-        recentInstallWindow: config.autoInstallContentPackages?.recentInstallWindow,
       },
     });
     this.agentStatusChangeTask = new AgentStatusChangeTask({

@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
-import { coreMock, loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
@@ -26,7 +26,6 @@ import {
   AutoInstallContentPackagesTask,
   TYPE,
   VERSION,
-  parseWindowToMs,
 } from './auto_install_content_packages_task';
 
 jest.mock('../services');
@@ -65,7 +64,6 @@ describe('AutoInstallContentPackagesTask', () => {
   let mockCore: CoreSetup;
   let mockTaskManagerSetup: jest.Mocked<TaskManagerSetupContract>;
   let packageClientMock: jest.Mocked<PackageClient>;
-  let mockSoClient: ReturnType<typeof savedObjectsClientMock.create>;
 
   beforeEach(async () => {
     mockContract = createAppContextStartContractMock();
@@ -87,18 +85,6 @@ describe('AutoInstallContentPackagesTask', () => {
       },
     });
     mockGetInstalledPackages.mockResolvedValue({ items: [] });
-
-    // Mock the SO client used by hasRecentInstalls — default: no recent installs
-    mockSoClient = savedObjectsClientMock.create();
-    mockSoClient.find.mockResolvedValue({
-      total: 0,
-      saved_objects: [],
-      page: 1,
-      per_page: 0,
-    });
-    jest
-      .spyOn(appContextService, 'getInternalUserSOClientWithoutSpaceExtension')
-      .mockReturnValue(mockSoClient);
   });
 
   afterEach(() => {
@@ -313,81 +299,5 @@ describe('AutoInstallContentPackagesTask', () => {
         expect.objectContaining({ pkgName: 'kubernetes_otel' })
       );
     });
-
-    describe('Adaptive schedule (recentInstall interval)', () => {
-      it('should return the fast recentInstallTaskInterval when there are recent installs', async () => {
-        mockSoClient.find.mockResolvedValue({
-          total: 1,
-          saved_objects: [],
-          page: 1,
-          per_page: 0,
-        });
-
-        const taskManagerStart = taskManagerMock.createStart();
-        await mockTask.start({ taskManager: taskManagerStart });
-        const result = await mockTask.runTask(MOCK_TASK_INSTANCE, mockCore);
-
-        // default recentInstallTaskInterval is '1m'
-        expect(result).toMatchObject({ schedule: { interval: '1m' } });
-      });
-
-      it('should return the steady-state taskInterval when there are no recent installs', async () => {
-        // mockSoClient.find already returns total: 0 (set in beforeEach)
-        const taskManagerStart = taskManagerMock.createStart();
-        await mockTask.start({ taskManager: taskManagerStart });
-        const result = await mockTask.runTask(MOCK_TASK_INSTANCE, mockCore);
-
-        expect(result).toMatchObject({ schedule: { interval: '10m' } });
-      });
-
-      it('should honour custom recentInstallTaskInterval and recentInstallWindow from config', async () => {
-        const customTask = new AutoInstallContentPackagesTask({
-          core: mockCore,
-          taskManager: tmSetupMock(),
-          logFactory: loggingSystemMock.create(),
-          config: {
-            taskInterval: '15m',
-            recentInstallTaskInterval: '2m',
-            recentInstallWindow: '60m',
-          },
-        });
-        const taskManagerStart = taskManagerMock.createStart();
-        await customTask.start({ taskManager: taskManagerStart });
-
-        // With recent installs → fast interval
-        mockSoClient.find.mockResolvedValue({ total: 1, saved_objects: [], page: 1, per_page: 0 });
-        const fastResult = await customTask.runTask(MOCK_TASK_INSTANCE, mockCore);
-        expect(fastResult).toMatchObject({ schedule: { interval: '2m' } });
-
-        // Without recent installs → steady-state interval
-        mockSoClient.find.mockResolvedValue({ total: 0, saved_objects: [], page: 1, per_page: 0 });
-        const slowResult = await customTask.runTask(MOCK_TASK_INSTANCE, mockCore);
-        expect(slowResult).toMatchObject({ schedule: { interval: '15m' } });
-      });
-    });
-  });
-});
-
-describe('parseWindowToMs', () => {
-  it('parses seconds correctly', () => {
-    expect(parseWindowToMs('90s')).toBe(90_000);
-    expect(parseWindowToMs('1s')).toBe(1_000);
-  });
-
-  it('parses minutes correctly', () => {
-    expect(parseWindowToMs('30m')).toBe(30 * 60 * 1_000);
-    expect(parseWindowToMs('1m')).toBe(60_000);
-  });
-
-  it('parses hours correctly', () => {
-    expect(parseWindowToMs('1h')).toBe(60 * 60 * 1_000);
-    expect(parseWindowToMs('2h')).toBe(2 * 60 * 60 * 1_000);
-  });
-
-  it('throws on invalid format', () => {
-    expect(() => parseWindowToMs('30')).toThrow();
-    expect(() => parseWindowToMs('30d')).toThrow();
-    expect(() => parseWindowToMs('')).toThrow();
-    expect(() => parseWindowToMs('abc')).toThrow();
   });
 });

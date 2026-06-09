@@ -417,8 +417,6 @@ export const config: PluginConfigDescriptor = {
       autoInstallContentPackages: schema.maybe(
         schema.object({
           taskInterval: schema.maybe(schema.string()),
-          recentInstallTaskInterval: schema.maybe(schema.string()),
-          recentInstallWindow: schema.maybe(schema.string()),
         })
       ),
       fleetPolicyRevisionsCleanup: schema.maybe(

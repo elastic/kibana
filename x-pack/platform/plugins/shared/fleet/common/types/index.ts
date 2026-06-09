@@ -112,8 +112,6 @@ export interface FleetConfigType {
   };
   autoInstallContentPackages?: {
     taskInterval?: string;
-    recentInstallTaskInterval?: string;
-    recentInstallWindow?: string;
   };
   agentStatusChange?: {
     taskInterval?: string;
