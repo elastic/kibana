@@ -224,7 +224,6 @@ describe('EsAndUiamApiKeyStrategy', () => {
       const request = httpServerMock.createKibanaRequest({
         headers: { authorization: 'ApiKey essu_uiam-credential' },
       });
-      const basePath = coreStart.http.basePath;
 
       const esKeyMap = new Map();
       esKeyMap.set('task-1', {
@@ -244,7 +243,7 @@ describe('EsAndUiamApiKeyStrategy', () => {
       });
 
       const tasks = [{ id: 'task-1', taskType: 'report', params: {}, state: {} }];
-      const result = await strategy.grantApiKeys(tasks, request, coreStart.security, basePath);
+      const result = await strategy.grantApiKeys(tasks, request, coreStart.security);
 
       const fields = result.get('task-1');
       expect(fields?.apiKey).toBe(Buffer.from('esId:esSecret').toString('base64'));
@@ -258,7 +257,6 @@ describe('EsAndUiamApiKeyStrategy', () => {
       const request = httpServerMock.createKibanaRequest({
         headers: { authorization: 'ApiKey essu_uiam-credential' },
       });
-      const basePath = coreStart.http.basePath;
 
       const esKeyMap = new Map();
       esKeyMap.set('task-1', {
@@ -272,7 +270,7 @@ describe('EsAndUiamApiKeyStrategy', () => {
       });
 
       const tasks = [{ id: 'task-1', taskType: 'report', params: {}, state: {} }];
-      const result = await strategy.grantApiKeys(tasks, request, coreStart.security, basePath, {
+      const result = await strategy.grantApiKeys(tasks, request, coreStart.security, {
         onEsKey: true,
       });
 
@@ -288,7 +286,6 @@ describe('EsAndUiamApiKeyStrategy', () => {
       const request = httpServerMock.createKibanaRequest({
         headers: { authorization: 'Basic dXNlcjpwYXNz' },
       });
-      const basePath = coreStart.http.basePath;
 
       const esKeyMap = new Map();
       esKeyMap.set('task-1', {
@@ -299,7 +296,7 @@ describe('EsAndUiamApiKeyStrategy', () => {
       requestHasApiKeyMock.mockReturnValue(false);
 
       const tasks = [{ id: 'task-1', taskType: 'report', params: {}, state: {} }];
-      const result = await strategy.grantApiKeys(tasks, request, coreStart.security, basePath);
+      const result = await strategy.grantApiKeys(tasks, request, coreStart.security);
 
       const fields = result.get('task-1');
       expect(fields?.apiKey).toBe(Buffer.from('esId:esSecret').toString('base64'));
@@ -315,7 +312,6 @@ describe('EsAndUiamApiKeyStrategy', () => {
     test('extracts UIAM key from request when user provides UIAM credential', async () => {
       const { strategy, coreStart } = createStrategy();
       const request = httpServerMock.createKibanaRequest();
-      const basePath = coreStart.http.basePath;
 
       const esKeyMap = new Map();
       esKeyMap.set('task-1', {
@@ -330,7 +326,7 @@ describe('EsAndUiamApiKeyStrategy', () => {
       });
 
       const tasks = [{ id: 'task-1', taskType: 'report', params: {}, state: {} }];
-      const result = await strategy.grantApiKeys(tasks, request, coreStart.security, basePath);
+      const result = await strategy.grantApiKeys(tasks, request, coreStart.security);
 
       const fields = result.get('task-1');
       expect(fields?.uiamApiKey).toBe('essu_from-request');
@@ -340,7 +336,6 @@ describe('EsAndUiamApiKeyStrategy', () => {
     test('does not set uiamApiKey when request has non-UIAM api key', async () => {
       const { strategy, coreStart } = createStrategy();
       const request = httpServerMock.createKibanaRequest();
-      const basePath = coreStart.http.basePath;
 
       const esKeyMap = new Map();
       esKeyMap.set('task-1', {
@@ -355,7 +350,7 @@ describe('EsAndUiamApiKeyStrategy', () => {
       });
 
       const tasks = [{ id: 'task-1', taskType: 'report', params: {}, state: {} }];
-      const result = await strategy.grantApiKeys(tasks, request, coreStart.security, basePath);
+      const result = await strategy.grantApiKeys(tasks, request, coreStart.security);
 
       const fields = result.get('task-1');
       expect(fields?.uiamApiKey).toBeUndefined();
