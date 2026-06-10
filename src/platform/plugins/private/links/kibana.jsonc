@@ -17,9 +17,10 @@
       "kibanaUtils",
       "presentationUtil",
       "uiActions",
-      "visualizations"
+      "visualizations",
+      "share"
     ],
-    "optionalPlugins": ["triggersActionsUi", "usageCollection", "share"],
+    "optionalPlugins": ["triggersActionsUi", "usageCollection"],
     "requiredBundles": ["savedObjects"]
   }
 }

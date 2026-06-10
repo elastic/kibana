@@ -7,27 +7,40 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { exporters } from '@kbn/data-plugin/public';
-import type { Datatable } from '@kbn/expressions-plugin/public';
-import type { FormatFactory } from '@kbn/field-formats-plugin/common';
-import { downloadMultipleAs } from '@kbn/share-plugin/public';
+import { i18n } from '@kbn/i18n';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { i18n } from '@kbn/i18n';
 
-import type { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
-import { apiHasInspectorAdapters, type Adapters } from '@kbn/inspector-plugin/public';
-import type { EmbeddableApiContext, HasType, PublishesTitle } from '@kbn/presentation-publishing';
-import { apiHasType, getTitle } from '@kbn/presentation-publishing';
-import { coreServices, fieldFormatService, shareService } from '../services/kibana_services';
-import { dashboardExportCsvActionStrings } from './_dashboard_actions_strings';
-import { ACTION_EXPORT_CSV, ACTION_EXPORT_JSON } from './constants';
-import type { ShareActionIntents } from '../../../share/public/types';
+import type {
+  EmbeddableApiContext,
+  HasLibraryTransforms,
+  HasType,
+  HasTypeDisplayName,
+  HasUniqueId,
+  PublishesTitle,
+} from '@kbn/presentation-publishing';
+import {
+  apiHasLibraryTransforms,
+  apiHasType,
+  apiHasUniqueId,
+  apiPublishesTitle,
+  apiPublishesUnsavedChanges,
+} from '@kbn/presentation-publishing';
+import type { ShareActionIntents, ShareIntegration } from '@kbn/share-plugin/public/types';
+import { shareService } from '../services/kibana_services';
+import { ACTION_EXPORT_JSON } from './constants';
+import { getLocatorParams } from '../../../../../../../x-pack/platform/plugins/shared/lens/public/app_plugin/share_action';
 
-export type ExportJSONActionApi = HasType;
+export type ExportJSONActionApi = HasLibraryTransforms &
+  HasUniqueId &
+  HasType &
+  PublishesTitle &
+  Partial<HasTypeDisplayName>;
 
 const isApiCompatible = (api: unknown | null): api is ExportJSONActionApi =>
-  Boolean(apiHasType(api));
+  Boolean(
+    apiHasLibraryTransforms(api) && apiHasUniqueId(api) && apiHasType(api) && apiPublishesTitle(api)
+  );
 
 export class ExportJSONAction implements Action<EmbeddableApiContext> {
   public readonly id = ACTION_EXPORT_JSON;
@@ -45,6 +58,7 @@ export class ExportJSONAction implements Action<EmbeddableApiContext> {
         }),
     },
   ];
+  private exportJsonIntent: ShareIntegration | undefined;
 
   public getIconType() {
     return 'code';
@@ -56,18 +70,47 @@ export class ExportJSONAction implements Action<EmbeddableApiContext> {
     });
 
   public async isCompatible({ embeddable }: EmbeddableApiContext): Promise<boolean> {
-    if (!isApiCompatible(embeddable)) return false;
-    const exportDerivatives: ShareActionIntents[] =
-      shareService?.availableIntegrations(embeddable.type, 'exportDerivatives') ?? [];
-    return (
-      exportDerivatives.filter(
-        (element) => element.shareType === 'integration' && element.id === 'exportJson'
-      ).length > 0
-    );
+    if (!isApiCompatible(embeddable) || !(await embeddable.canUnlinkFromLibrary())) return false;
+
+    const exportDerivatives: ShareActionIntents[] = (
+      shareService?.availableIntegrations(embeddable.type, 'exportDerivatives') ?? []
+    ).filter((element) => element.shareType === 'integration' && element.id === 'exportJson');
+    if (exportDerivatives.length < 1) return false;
+
+    this.exportJsonIntent = exportDerivatives[0] as ShareIntegration;
+    return true;
   }
 
   public async execute({ embeddable }: EmbeddableApiContext): Promise<void> {
-    if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
-    // return await this.exportCSV(embeddable, asString);
+    if (!isApiCompatible(embeddable) || !this.exportJsonIntent) throw new IncompatibleActionError();
+    console.log({ test: this.exportJsonIntent });
+
+    const baseOptions = {
+      objectType: embeddable.type,
+      objectId: embeddable.uuid,
+      isDirty: apiPublishesUnsavedChanges(embeddable) && embeddable.hasUnsavedChanges$.value,
+      allowShortUrl: false,
+      objectTypeMeta: {
+        title: i18n.translate('dashboard.share.shareModal.title', {
+          defaultMessage: `Share ${embeddable.getTypeDisplayName?.() ?? embeddable.type}`,
+        }),
+        config: {},
+      },
+      sharingData: {
+        title: embeddable.title$.value ?? '',
+        locatorParams: { id: '', params: {} },
+        exportJson: () => {
+          const state = embeddable.getSerializedStateByReference(embeddable.uuid).attributes;
+          // const state = embeddable.getSerializedStateByReference().attributes;
+          return state;
+        },
+      },
+    };
+
+    const handler = await shareService?.getExportDerivativeHandler(
+      baseOptions,
+      this.exportJsonIntent.id
+    );
+    await handler?.();
   }
 }

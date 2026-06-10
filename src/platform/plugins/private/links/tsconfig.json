@@ -3,13 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": [
-    "*.ts",
-    "public/**/*",
-    "common/**/*",
-    "server/**/*",
-    "public/**/*.json"
-  ],
+  "include": ["*.ts", "public/**/*", "common/**/*", "server/**/*", "public/**/*.json"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/i18n",
@@ -40,7 +34,8 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/dashboard-navigation-options-common",
     "@kbn/dashboard-navigation-options-components",
-    "@kbn/dashboard-navigation-options-schema"
+    "@kbn/dashboard-navigation-options-schema",
+    "@kbn/as-code-export-utils"
   ],
   "exclude": ["target/**/*"]
 }

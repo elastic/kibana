@@ -10,7 +10,9 @@
 import React from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ExportJsonFlyout } from '@kbn/as-code-export-utils';
 import type { ExportShareParameters } from '@kbn/share-plugin/public';
+import type { LinksState } from '../../server';
 
 export const exportJsonConfig: ExportShareParameters = {
   label: ({ openFlyout }) => (
@@ -20,7 +22,7 @@ export const exportJsonConfig: ExportShareParameters = {
       onClick={openFlyout}
       data-test-subj="exportMenuItem-JSON"
     >
-      {i18n.translate('dashboard.exportJson.label', {
+      {i18n.translate('links.exportJson.label', {
         defaultMessage: 'JSON',
       })}
     </EuiButtonEmpty>
@@ -30,5 +32,14 @@ export const exportJsonConfig: ExportShareParameters = {
     size: 'm',
     maxWidth: 1000,
   },
-  flyoutContent: ({ closeFlyout }) => <>Test</>,
+  flyoutContent: ({ closeFlyout }) => {
+    return (
+      <ExportJsonFlyout<LinksState, LinksState>
+        closeFlyout={closeFlyout}
+        sanitizeState={async (state: LinksState) => {
+          return state;
+        }}
+      />
+    );
+  },
 };
