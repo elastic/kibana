@@ -12,7 +12,7 @@ import { episodeActionEnvelopeSchema } from './episode_action_envelope';
 
 export const EPISODE_ACKED_TRIGGER_ID = 'alerting.episodeAcked' as const;
 
-export const episodeAckedPayloadSchema = episodeActionEnvelopeSchema;
+export const episodeAckedPayloadSchema = episodeActionEnvelopeSchema.extend({});
 
 export type EpisodeAckedPayload = z.infer<typeof episodeAckedPayloadSchema>;
 

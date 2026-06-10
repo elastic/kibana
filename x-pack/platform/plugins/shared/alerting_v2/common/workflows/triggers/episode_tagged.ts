@@ -13,7 +13,7 @@ import { episodeActionEnvelopeSchema } from './episode_action_envelope';
 export const EPISODE_TAGGED_TRIGGER_ID = 'alerting.episodeTagged' as const;
 
 export const episodeTaggedPayloadSchema = episodeActionEnvelopeSchema.extend({
-  tags: z.array(z.string()).describe(
+  tags: z.array(z.string().min(1).max(128)).max(20).describe(
     i18n.translate('xpack.alertingVTwo.triggers.episodeTagged.schema.tags', {
       defaultMessage: 'Tags added to the alerting episode.',
     })

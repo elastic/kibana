@@ -16,6 +16,7 @@ export const episodeActivatedPayloadSchema = episodeActionEnvelopeSchema.extend(
   reason: z
     .string()
     .min(1)
+    .max(1024)
     .describe(
       i18n.translate('xpack.alertingVTwo.triggers.episodeActivated.schema.reason', {
         defaultMessage: 'Reason the alerting episode was activated.',
