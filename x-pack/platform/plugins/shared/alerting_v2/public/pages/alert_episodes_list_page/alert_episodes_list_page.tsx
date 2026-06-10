@@ -320,9 +320,11 @@ export const AlertEpisodesListPage = () => {
       <EuiPageHeader
         bottomBorder
         pageTitle={
-          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-            <EuiFlexItem grow={false}>{i18n.EPISODES_LIST_PAGE_TITLE}</EuiFlexItem>
-            <EuiFlexItem grow={false}>
+          <EuiFlexGroup component="span" alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false} component="span">
+              {i18n.EPISODES_LIST_PAGE_TITLE}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false} component="span">
               <ExperimentalBadge />
             </EuiFlexItem>
           </EuiFlexGroup>

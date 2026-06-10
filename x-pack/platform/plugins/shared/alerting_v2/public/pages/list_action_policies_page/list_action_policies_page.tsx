@@ -410,14 +410,14 @@ export const ListActionPoliciesPage = () => {
     <>
       <EuiPageHeader
         pageTitle={
-          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-            <EuiFlexItem grow={false}>
+          <EuiFlexGroup component="span" alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false} component="span">
               <FormattedMessage
                 id="xpack.alertingV2.actionPoliciesList.pageTitle"
                 defaultMessage="Action Policies"
               />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={false} component="span">
               <ExperimentalBadge />
             </EuiFlexItem>
           </EuiFlexGroup>

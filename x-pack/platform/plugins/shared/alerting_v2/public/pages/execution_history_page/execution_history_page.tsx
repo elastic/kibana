@@ -56,14 +56,14 @@ export const ExecutionHistoryPage = () => {
     <>
       <EuiPageHeader
         pageTitle={
-          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-            <EuiFlexItem grow={false}>
+          <EuiFlexGroup component="span" alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false} component="span">
               <FormattedMessage
                 id="xpack.alertingV2.executionHistory.pageTitle"
                 defaultMessage="Execution history"
               />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={false} component="span">
               <span data-test-subj="executionHistoryDenormalizationTip">
                 <EuiIconTip
                   type="info"
@@ -77,7 +77,7 @@ export const ExecutionHistoryPage = () => {
                 />
               </span>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={false} component="span">
               <ExperimentalBadge />
             </EuiFlexItem>
           </EuiFlexGroup>

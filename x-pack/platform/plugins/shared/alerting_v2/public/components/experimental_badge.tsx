@@ -20,6 +20,7 @@ const EXPERIMENTAL_TOOLTIP = i18n.translate('xpack.alertingV2.experimentalBadge.
 
 export const ExperimentalBadge = () => (
   <EuiBetaBadge
+    alignment="middle"
     label={EXPERIMENTAL_LABEL}
     tooltipContent={EXPERIMENTAL_TOOLTIP}
     tooltipPosition="bottom"

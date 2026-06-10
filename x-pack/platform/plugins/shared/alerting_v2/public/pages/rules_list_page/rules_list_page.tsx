@@ -148,14 +148,11 @@ export const RulesListPage = () => {
     <div>
       <EuiPageHeader
         pageTitle={
-          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <FormattedMessage
-                id="xpack.alertingV2.rulesList.pageTitle"
-                defaultMessage="Rules"
-              />
+          <EuiFlexGroup component="span" alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false} component="span">
+              <FormattedMessage id="xpack.alertingV2.rulesList.pageTitle" defaultMessage="Rules" />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={false} component="span">
               <ExperimentalBadge />
             </EuiFlexItem>
           </EuiFlexGroup>
