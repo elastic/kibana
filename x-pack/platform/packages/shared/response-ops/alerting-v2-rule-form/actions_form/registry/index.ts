@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-export type { SingleStepWorkflowType, PayloadVariable } from './types';
+export type { InlineActionStepDefinition, PayloadVariable } from './types';
 export {
-  SINGLE_STEP_WORKFLOW_TYPES,
-  getSingleStepWorkflowType,
-  getDefaultSingleStepWorkflowType,
+  INLINE_ACTION_STEP_DEFINITIONS,
+  getInlineActionStepDefinition,
+  getDefaultInlineActionStepDefinition,
 } from './registry';
 export { DISPATCH_PAYLOAD_VARIABLES, ALERT_EPISODE_FIELDS } from './payload_variables';

@@ -43,7 +43,13 @@ jest.mock('@kbn/core-di-browser', () => ({
     if (token === 'notifications') {
       return { toasts: { addSuccess: jest.fn(), addError: jest.fn() } };
     }
-    if (token === 'data' || token === 'dataViews' || token === 'lens' || token === 'uiActions') {
+    if (
+      token === 'data' ||
+      token === 'dataViews' ||
+      token === 'lens' ||
+      token === 'uiActions' ||
+      token === 'dashboard'
+    ) {
       return {};
     }
     if (typeof token === 'function') {
