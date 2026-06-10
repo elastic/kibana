@@ -361,8 +361,14 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
           selectedOptions={
             thresholdValues.indexPattern ? [{ label: thresholdValues.indexPattern }] : []
           }
-          onCreateOption={(val) => update('indexPattern', val)}
+          onCreateOption={(val) => {
+            update('indexPattern', val);
+            return true;
+          }}
           onChange={(opts) => update('indexPattern', opts[0]?.label ?? '')}
+          customOptionText={i18n.translate('xpack.alertingV2.ruleBuilder.indexCustomOption', {
+            defaultMessage: 'Use {searchValue} as an index pattern',
+          })}
           placeholder={i18n.translate('xpack.alertingV2.ruleBuilder.indexPlaceholder', {
             defaultMessage: 'Enter index pattern (e.g. logs-*)',
           })}
