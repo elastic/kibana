@@ -81,7 +81,6 @@ export const module = new ContainerModule(({ bind }) => {
         lens: diContainer.get(PluginStart('lens')) as LensPublicStart,
         expressions: diContainer.get(PluginStart('expressions')) as ExpressionsStart,
         uiActions: diContainer.get(PluginStart('uiActions')) as UiActionsStart,
-        workflowForm: { Component: () => null, defaultValue: () => ({}), supported: false },
       });
 
       const experimentalEnabled = coreStart.settings.globalClient.get<boolean>(
