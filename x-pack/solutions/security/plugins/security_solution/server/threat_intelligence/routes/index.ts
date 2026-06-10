@@ -25,6 +25,7 @@ import { registerIngestReportRoute } from './ingest_report';
 import { registerSavedViewsRoutes } from './saved_views';
 import { registerSearchReportsRoute } from './search_reports';
 import { registerSubscriptionRoutes } from './subscriptions';
+import { registerSearchByAnchorsRoute } from './search_by_anchors';
 import { registerSynthesizeAdvisoryRoute } from './synthesize_advisory';
 
 export interface RouteRegistrationDeps {
@@ -74,6 +75,7 @@ export const registerRoutes = (deps: RouteRegistrationDeps): void => {
   registerEnrichTaxonomyRoute(deps);
   registerAnalyseEnvironmentRoute(deps);
   registerSynthesizeAdvisoryRoute(deps);
+  registerSearchByAnchorsRoute(deps);
   registerSubscriptionRoutes(deps);
 
   // UI-facing routes (dashboard + saved views + flyout).

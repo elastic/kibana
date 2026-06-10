@@ -258,6 +258,22 @@ export const threatIntelligenceSubFeature = (): SubFeatureConfig => ({
         },
       ],
     },
+    {
+      groupType: 'independent',
+      privileges: [
+        {
+          api: ['threatIntelligence_correlate'],
+          id: 'threat_intelligence_correlate',
+          includeIn: 'none',
+          name: i18n.translate(
+            'securitySolutionPackages.features.featureRegistry.subFeatures.threatIntelligence.correlatePrivilegeName',
+            { defaultMessage: 'Correlate threats' }
+          ),
+          savedObject: { all: [], read: [] },
+          ui: ['threat-intelligence:correlate'],
+        },
+      ],
+    },
   ],
 });
 

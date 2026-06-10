@@ -30,6 +30,17 @@ export const THREAT_INTELLIGENCE_API_PRIVILEGES = {
   read: `${THREAT_INTELLIGENCE_FEATURE_ID}_read`,
   writeSubscriptions: `${THREAT_INTELLIGENCE_FEATURE_ID}_write_subscriptions`,
   manageSources: `${THREAT_INTELLIGENCE_FEATURE_ID}_manage_sources`,
+  /**
+   * Phase 2 retrieval/correlation privilege. Required by `search_by_anchors`
+   * and future `search_by_diamond` / `correlate_threat` routes.
+   *
+   * Grantable via the `threat_intelligence_correlate` sub-feature on the
+   * Security v5 feature (see
+   * `packages/features/src/security/kibana_sub_features.ts`). Not present
+   * in the deprecated `threatIntelligence` feature — it is net-new and has
+   * no migration path from the old standalone feature.
+   */
+  correlate: `${THREAT_INTELLIGENCE_FEATURE_ID}_correlate`,
 } as const;
 
 /**
@@ -212,6 +223,20 @@ export const ANALYSE_ENVIRONMENT_API_PATH =
  * `enrich_taxonomy`'s actionability signal) and by the backfill task.
  */
 export const EXTRACT_DIAMOND_API_PATH = `${THREAT_INTELLIGENCE_API_BASE}/extract_diamond` as const;
+
+/**
+ * Exact-anchor correlation search — POST /api/threat_intelligence/search_by_anchors.
+ *
+ * Two input modes:
+ *   1. `{ anchors: AnchorSet }` — caller supplies pre-extracted anchors.
+ *   2. `{ source_report_id: string }` — service fetches the report's stored
+ *      anchor fields and searches for other reports that share discriminating
+ *      anchors (hash IOCs, ioc_set_hash, or threat actors).
+ *
+ * Gated on `.correlate` privilege (see `THREAT_INTELLIGENCE_API_PRIVILEGES.correlate`).
+ */
+export const SEARCH_BY_ANCHORS_API_PATH =
+  `${THREAT_INTELLIGENCE_API_BASE}/search_by_anchors` as const;
 
 /**
  * Stage-2 taxonomy enrichment route — POST /api/threat_intelligence/enrich_taxonomy.

@@ -143,3 +143,13 @@ export type { AnalyseEnvironmentParams, AnalyseEnvironmentResult } from './analy
 
 export { flyoutInsights, parseReportIdFromIndicatorReference } from './flyout_insights';
 export type { FlyoutInsightsRequest, FlyoutInsightsResponse } from './flyout_insights';
+
+export { searchByAnchors } from './search_by_anchors';
+export type {
+  AnchorIoc,
+  AnchorSet,
+  SearchByAnchorsParams,
+  AnchorMatchBreakdown,
+  AnchorHit,
+  SearchByAnchorsResult,
+} from './search_by_anchors';
