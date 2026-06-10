@@ -6,21 +6,22 @@
  */
 
 import { parse } from 'yaml';
-import { SINGLE_STEP_WORKFLOW_TAG } from '../constants';
-import { buildSingleStepWorkflowYaml, InvalidSingleStepWorkflowError } from './build_workflow_yaml';
+import { INLINE_WORKFLOW_TAG } from '../constants';
+import { buildInlineWorkflowYaml, InvalidInlineWorkflowError } from './build_inline_workflow_yaml';
 
-describe('buildSingleStepWorkflowYaml', () => {
+describe('buildInlineWorkflowYaml', () => {
   it('builds a valid email workflow YAML', () => {
-    const yaml = buildSingleStepWorkflowYaml({
-      mode: 'create',
-      typeId: 'email',
+    const yaml = buildInlineWorkflowYaml({
+      id: 't1',
+      source: 'inline',
+      stepType: 'email',
       connectorId: 'my-email-connector',
       params: 'to: "ops@example.com"\nsubject: "Alert"\nmessage: "Body"',
     });
 
     const parsed = parse(yaml);
     expect(parsed.enabled).toBe(true);
-    expect(parsed.tags).toEqual([SINGLE_STEP_WORKFLOW_TAG]);
+    expect(parsed.tags).toEqual([INLINE_WORKFLOW_TAG]);
     expect(parsed.triggers).toEqual([{ type: 'manual' }]);
     expect(parsed.steps).toHaveLength(1);
     expect(parsed.steps[0]).toMatchObject({
@@ -32,9 +33,10 @@ describe('buildSingleStepWorkflowYaml', () => {
   });
 
   it('builds a valid slack workflow YAML', () => {
-    const yaml = buildSingleStepWorkflowYaml({
-      mode: 'create',
-      typeId: 'slack',
+    const yaml = buildInlineWorkflowYaml({
+      id: 't2',
+      source: 'inline',
+      stepType: 'slack',
       connectorId: 'my-slack-connector',
       params: 'message: "Hello {{ policyId }}"',
     });
@@ -47,21 +49,11 @@ describe('buildSingleStepWorkflowYaml', () => {
     });
   });
 
-  it('uses the provided name when present', () => {
-    const yaml = buildSingleStepWorkflowYaml({
-      mode: 'create',
-      typeId: 'email',
-      connectorId: 'c1',
-      params: 'to: ""\nsubject: ""\nmessage: ""',
-      name: 'On-call escalation',
-    });
-    expect(parse(yaml).name).toBe('On-call escalation');
-  });
-
-  it('falls back to a default name when none is provided', () => {
-    const yaml = buildSingleStepWorkflowYaml({
-      mode: 'create',
-      typeId: 'email',
+  it('uses the step definition label as the workflow name', () => {
+    const yaml = buildInlineWorkflowYaml({
+      id: 't3',
+      source: 'inline',
+      stepType: 'email',
       connectorId: 'c1',
       params: 'to: ""\nsubject: ""\nmessage: ""',
     });
@@ -69,9 +61,10 @@ describe('buildSingleStepWorkflowYaml', () => {
   });
 
   it('treats empty params as an empty `with` block', () => {
-    const yaml = buildSingleStepWorkflowYaml({
-      mode: 'create',
-      typeId: 'email',
+    const yaml = buildInlineWorkflowYaml({
+      id: 't4',
+      source: 'inline',
+      stepType: 'email',
       connectorId: 'c1',
       params: '',
     });
@@ -80,46 +73,37 @@ describe('buildSingleStepWorkflowYaml', () => {
 
   it('throws when the params YAML is malformed', () => {
     expect(() =>
-      buildSingleStepWorkflowYaml({
-        mode: 'create',
-        typeId: 'email',
+      buildInlineWorkflowYaml({
+        id: 't5',
+        source: 'inline',
+        stepType: 'email',
         connectorId: 'c1',
         params: 'to: [unclosed',
       })
-    ).toThrow(InvalidSingleStepWorkflowError);
+    ).toThrow(InvalidInlineWorkflowError);
   });
 
   it('throws when params is not an object', () => {
     expect(() =>
-      buildSingleStepWorkflowYaml({
-        mode: 'create',
-        typeId: 'email',
+      buildInlineWorkflowYaml({
+        id: 't6',
+        source: 'inline',
+        stepType: 'email',
         connectorId: 'c1',
         params: '- one\n- two',
       })
-    ).toThrow(InvalidSingleStepWorkflowError);
+    ).toThrow(InvalidInlineWorkflowError);
   });
 
   it('throws when no connector is selected', () => {
     expect(() =>
-      buildSingleStepWorkflowYaml({
-        mode: 'create',
-        typeId: 'email',
+      buildInlineWorkflowYaml({
+        id: 't7',
+        source: 'inline',
+        stepType: 'email',
         connectorId: null,
         params: 'to: ""',
       })
-    ).toThrow(InvalidSingleStepWorkflowError);
-  });
-
-  it('throws on an unknown type id', () => {
-    expect(() =>
-      buildSingleStepWorkflowYaml({
-        mode: 'create',
-        // @ts-expect-error intentionally invalid type id to test runtime guard
-        typeId: 'pager-duty',
-        connectorId: 'c1',
-        params: '',
-      })
-    ).toThrow(InvalidSingleStepWorkflowError);
+    ).toThrow(InvalidInlineWorkflowError);
   });
 });
