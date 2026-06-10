@@ -285,14 +285,21 @@ test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
     await page.testSubj.click('onThrottleInterval');
     await page.testSubj.locator('throttleInput').fill('10');
 
-    // Conditional action filter: toggle, add structured filter, add KQL query
+    // Conditional action filter: toggle, add DSL filter, add KQL query.
+    // The structured field selector stays disabled until the alerts index has field mappings,
+    // so DSL mode is used here for reliability.
     await page.testSubj.click('alertsFilterQueryToggle');
     await page.testSubj.click('addFilter');
-    await page.testSubj.locator('filterFieldSuggestionList').locator('input').fill('_id');
-    await page.locator('[role="listbox"] [role="option"]:first-child').click();
-    await page.testSubj.locator('filterOperatorList').locator('input').fill('is not');
-    await page.locator('[role="listbox"] [role="option"]:first-child').click();
-    await page.testSubj.locator('filterParams').locator('input').fill('fake-rule-id');
+    await page.testSubj.click('editQueryDSL');
+    await page.testSubj.locator('addFilterPopover').waitFor({ state: 'visible' });
+    const simpleFilter = JSON.stringify({
+      bool: { must_not: [{ term: { _id: 'fake-rule-id' } }] },
+    });
+    await page.testSubj.locator('addFilterPopover').locator('.monaco-editor').click();
+    await page.keyboard.press('Control+a');
+    await page.keyboard.press('Delete');
+    await page.keyboard.type(simpleFilter);
+    await page.testSubj.locator('saveFilter').scrollIntoViewIfNeeded();
     await page.testSubj.click('saveFilter');
     await page.testSubj.locator('queryInput').fill('_id: *');
 
