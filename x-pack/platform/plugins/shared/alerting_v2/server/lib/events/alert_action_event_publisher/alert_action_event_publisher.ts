@@ -118,7 +118,7 @@ export class AlertActionEventPublisher implements AlertActionEventPublisherContr
         return {
           type: EPISODE_SNOOZED_EVENT_TYPE,
           ...envelope,
-          payload: { expiry: action.expiry! },
+          payload: { expiry: action.expiry ?? null },
         };
       case ALERT_EPISODE_ACTION_TYPE.UNSNOOZE:
         return { type: EPISODE_UNSNOOZED_EVENT_TYPE, ...envelope, payload: {} };
