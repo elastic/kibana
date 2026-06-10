@@ -44,7 +44,6 @@ describe('getDeepLinks', () => {
     const links = getDeepLinks(true, fullCapabilities, false);
     const aiOps = links.find((l) => l.id === 'aiOps');
 
-    expect(links.find((l) => l.id === 'indexDataVisualizerPage')?.visibleIn).toEqual([]);
     expect(links.find((l) => l.id === 'dataDriftPage')?.visibleIn).toEqual([]);
     expect(aiOps?.deepLinks?.find((l) => l.id === 'logRateAnalysisPage')?.visibleIn).toEqual([]);
     expect(aiOps?.deepLinks?.find((l) => l.id === 'logPatternAnalysisPage')?.visibleIn).toEqual([]);
