@@ -21,6 +21,11 @@ export {
   ClassicStream,
   ClassicIngestUpsertRequest,
 } from './src/models/ingest/classic';
+export {
+  GraphIngest,
+  GraphStream,
+  GraphIngestUpsertRequest,
+} from './src/models/ingest/graph';
 export { Query, QueryStream } from './src/models/query';
 export {
   ESQL_VIEW_PREFIX,

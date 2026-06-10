@@ -8,7 +8,11 @@
 import { badData, badRequest } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
 import { Streams } from '@kbn/streams-schema';
-import { WiredIngestUpsertRequest, IngestUpsertRequest } from '@kbn/streams-schema';
+import {
+  WiredIngestUpsertRequest,
+  IngestUpsertRequest,
+  ClassicIngestUpsertRequest,
+} from '@kbn/streams-schema';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
 import { getWiredIngestResponse, upsertWiredIngestRequest } from '../../../oas_examples';
@@ -148,6 +152,10 @@ const upsertIngestRoute = createServerRoute({
         name,
         ingest,
       });
+    }
+
+    if (!ClassicIngestUpsertRequest.is(ingest)) {
+      throw badData(`_ingest endpoint is not supported for this stream type`);
     }
 
     return await updateClassicIngest({

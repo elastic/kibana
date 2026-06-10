@@ -18,6 +18,11 @@ import { StreamDetailRoot } from '../components/stream_root';
 import { StreamDetailManagement } from '../components/stream_management/data_management/stream_detail_management';
 import { SignificantEventsDiscoveryPage } from '../components/sig_events/significant_events_discovery/page';
 
+// Lazy-loaded to keep it out of the main app chunk (avoids circular-dep in chunk init order)
+const GraphStreamsDemoPage = React.lazy(() =>
+  import('../components/graph_streams_demo').then((m) => ({ default: m.GraphStreamsDemoPage }))
+);
+
 /**
  * Optional time range query params.
  * DateRangeRedirect ensures these are present at runtime.
@@ -67,6 +72,13 @@ const streamsAppRoutes = {
         params: t.partial({
           query: timeRangeQueryParams,
         }),
+      },
+      '/_graph': {
+        element: (
+          <React.Suspense fallback={null}>
+            <GraphStreamsDemoPage />
+          </React.Suspense>
+        ),
       },
       '/_discovery': {
         element: <Outlet />,

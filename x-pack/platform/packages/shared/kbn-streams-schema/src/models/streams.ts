@@ -12,6 +12,7 @@ import type { BaseStream } from './base';
 import { IngestStream } from './ingest';
 import { ClassicStream as nClassicStream } from './ingest/classic';
 import { WiredStream as nWiredStream } from './ingest/wired';
+import { GraphStream as nGraphStream } from './ingest/graph';
 import { QueryStream as nQueryStream } from './query';
 
 /* eslint-disable @typescript-eslint/no-namespace */
@@ -21,6 +22,7 @@ export namespace Streams {
 
   export import WiredStream = nWiredStream;
   export import ClassicStream = nClassicStream;
+  export import GraphStream = nGraphStream;
   export import QueryStream = nQueryStream;
 
   export namespace all {
@@ -34,17 +36,20 @@ export namespace Streams {
   const allDefinitionSchema = z.union([
     nWiredStream.Definition.right,
     nClassicStream.Definition.right,
+    nGraphStream.Definition.right,
     nQueryStream.Definition.right,
   ]);
   const allSourceSchema = z.union([
     nWiredStream.Source.right,
     nClassicStream.Source.right,
+    nGraphStream.Source.right,
     nQueryStream.Source.right,
   ]);
   const allGetResponseSchema = z
     .union([
       nWiredStream.GetResponse.right,
       nClassicStream.GetResponse.right,
+      nGraphStream.GetResponse.right,
       nQueryStream.GetResponse.right,
     ])
     .meta({ id: 'StreamGetResponse' });
@@ -52,6 +57,7 @@ export namespace Streams {
     .union([
       nWiredStream.UpsertRequest.right,
       nClassicStream.UpsertRequest.right,
+      nGraphStream.UpsertRequest.right,
       nQueryStream.UpsertRequest.right,
     ])
     .meta({ id: 'StreamUpsertRequest' });
@@ -84,6 +90,7 @@ export namespace Streams {
 Streams.ingest = IngestStream;
 Streams.WiredStream = nWiredStream;
 Streams.ClassicStream = nClassicStream;
+Streams.GraphStream = nGraphStream;
 Streams.QueryStream = nQueryStream;
 
 /**
@@ -96,6 +103,7 @@ export const streamDefinitionSchema = z
   .union([
     nWiredStream.Definition.right,
     nClassicStream.Definition.right,
+    nGraphStream.Definition.right,
     nQueryStream.Definition.right,
   ])
   .meta({
@@ -106,6 +114,7 @@ export const streamDefinitionSchema = z
         mapping: {
           wired: '#/components/schemas/WiredStreamDefinition',
           classic: '#/components/schemas/ClassicStreamDefinition',
+          graph: '#/components/schemas/GraphStreamDefinition',
           query: '#/components/schemas/QueryStreamDefinition',
         },
       },

@@ -14,7 +14,7 @@ import type {
   AllowedMappingProperty,
   StreamsMappingProperties,
 } from '@kbn/streams-schema/src/fields';
-import type { Streams } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import {
   getAdvancedParameters,
   isRoot,
@@ -162,12 +162,16 @@ function buildPassthroughProperties(
 
 export function generateLayer(
   name: string,
-  definition: Streams.WiredStream.Definition,
+  definition: Streams.WiredStream.Definition | Streams.GraphStream.Definition,
   isServerless: boolean
 ): ClusterPutComponentTemplateRequest {
+  const fields = Streams.WiredStream.Definition.is(definition)
+    ? definition.ingest.wired.fields
+    : definition.ingest.graph.fields;
+
   const properties: StreamsMappingProperties = {};
 
-  Object.entries(definition.ingest.wired.fields).forEach(([field, props]) => {
+  Object.entries(fields).forEach(([field, props]) => {
     // Skip doc-only fields: they have no ES mapping, so `type` is missing.
     // Also skip non-mapping field kinds (system).
     if (!props.type || props.type === 'system') {
@@ -194,9 +198,14 @@ export function generateLayer(
     properties[field] = property;
   });
 
+  // Graph-stream nodes are flat standalone nodes — isRoot() is meaningless for them
+  // (a single-segment name like "nginx_es" would otherwise trigger root treatment).
+  // Always treat graph nodes as non-root, non-ECS: standalone with no baseMappings.
+  const isGraphNode = Streams.GraphStream.Definition.is(definition);
+
   // Determine if this is an OTel-based stream or ECS stream
   const rootStream = getRoot(name);
-  const isEcsStream = rootStream === LOGS_ECS_STREAM_NAME;
+  const isEcsStream = !isGraphNode && rootStream === LOGS_ECS_STREAM_NAME;
 
   let mappingProperties: MappingTypeMapping['properties'];
 
@@ -208,12 +217,12 @@ export function generateLayer(
     const passthroughProperties = buildPassthroughProperties(properties);
     const otelAliases = buildOtelEquivalentAliases(properties);
 
-    // For root streams, include baseMappings (passthrough definitions + static aliases)
-    // For child streams, just use the built passthrough properties
-    // OTel aliases are added to both
-    mappingProperties = isRoot(name)
-      ? { ...baseMappings, ...passthroughProperties, ...otelAliases }
-      : { ...passthroughProperties, ...otelAliases };
+    // For root wired streams, include baseMappings (passthrough definitions + static aliases).
+    // Graph nodes are always standalone — skip baseMappings regardless of isRoot().
+    mappingProperties =
+      !isGraphNode && isRoot(name)
+        ? { ...baseMappings, ...passthroughProperties, ...otelAliases }
+        : { ...passthroughProperties, ...otelAliases };
   }
 
   const result = {
@@ -236,8 +245,12 @@ export function generateLayer(
   return result;
 }
 
-function getTemplateSettings(definition: Streams.WiredStream.Definition, isServerless: boolean) {
-  if (!isRoot(definition.name)) {
+function getTemplateSettings(
+  definition: Streams.WiredStream.Definition | Streams.GraphStream.Definition,
+  isServerless: boolean
+) {
+  // Graph nodes are standalone — never apply OTel/ECS root sort settings.
+  if (Streams.GraphStream.Definition.is(definition) || !isRoot(definition.name)) {
     return {};
   }
 

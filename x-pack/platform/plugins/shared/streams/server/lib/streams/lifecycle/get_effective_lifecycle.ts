@@ -23,9 +23,14 @@ export async function getEffectiveLifecycle({
     return getDataStreamLifecycle(dataStream);
   }
 
+  // Graph streams have explicit per-node lifecycle (no inheritance)
+  if (Streams.GraphStream.Definition.is(definition)) {
+    return definition.ingest.lifecycle;
+  }
+
   if (isInheritLifecycle(definition.ingest.lifecycle)) {
     const ancestors = await streamsClient.getAncestors(definition.name);
-    return findInheritedLifecycle(definition, ancestors);
+    return findInheritedLifecycle(definition as Streams.WiredStream.Definition, ancestors as Streams.WiredStream.Definition[]);
   }
 
   return definition.ingest.lifecycle;

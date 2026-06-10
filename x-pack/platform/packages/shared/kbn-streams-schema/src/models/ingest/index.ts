@@ -11,31 +11,48 @@ import type { Validation } from '../validation/validation';
 import { validation } from '../validation/validation';
 import { ClassicIngest, ClassicIngestUpsertRequest, ClassicStream } from './classic';
 import { WiredIngest, WiredIngestUpsertRequest, WiredStream } from './wired';
+import { GraphIngest, GraphIngestUpsertRequest, GraphStream } from './graph';
 
 /* eslint-disable @typescript-eslint/no-namespace */
 export namespace IngestStream {
   export namespace all {
-    export type UpsertRequest = WiredStream.UpsertRequest | ClassicStream.UpsertRequest;
+    export type UpsertRequest =
+      | WiredStream.UpsertRequest
+      | ClassicStream.UpsertRequest
+      | GraphStream.UpsertRequest;
 
-    export type Source = WiredStream.Source | ClassicStream.Source;
-    export type Definition = WiredStream.Definition | ClassicStream.Definition;
-    export type GetResponse = WiredStream.GetResponse | ClassicStream.GetResponse;
+    export type Source = WiredStream.Source | ClassicStream.Source | GraphStream.Source;
+    export type Definition =
+      | WiredStream.Definition
+      | ClassicStream.Definition
+      | GraphStream.Definition;
+    export type GetResponse =
+      | WiredStream.GetResponse
+      | ClassicStream.GetResponse
+      | GraphStream.GetResponse;
 
-    export type Model = WiredStream.Model | ClassicStream.Model;
+    export type Model = WiredStream.Model | ClassicStream.Model | GraphStream.Model;
   }
 
   const allDefinitionSchema = z.union([
     WiredStream.Definition.right,
     ClassicStream.Definition.right,
+    GraphStream.Definition.right,
   ]);
-  const allSourceSchema = z.union([WiredStream.Source.right, ClassicStream.Source.right]);
+  const allSourceSchema = z.union([
+    WiredStream.Source.right,
+    ClassicStream.Source.right,
+    GraphStream.Source.right,
+  ]);
   const allGetResponseSchema = z.union([
     WiredStream.GetResponse.right,
     ClassicStream.GetResponse.right,
+    GraphStream.GetResponse.right,
   ]);
   const allUpsertRequestSchema = z.union([
     WiredStream.UpsertRequest.right,
     ClassicStream.UpsertRequest.right,
+    GraphStream.UpsertRequest.right,
   ]);
 
   export const all: {
@@ -79,15 +96,20 @@ export namespace IngestStream {
     'manage_failure_store' in response.privileges;
 }
 
-export type Ingest = WiredIngest | ClassicIngest;
+export type Ingest = WiredIngest | ClassicIngest | GraphIngest;
 export const Ingest: Validation<IngestBase, Ingest> = validation(
   IngestBase.right,
-  z.union([WiredIngest.right, ClassicIngest.right])
+  z.union([WiredIngest.right, ClassicIngest.right, GraphIngest.right])
 );
 
-export type IngestUpsertRequest = WiredIngestUpsertRequest | ClassicIngestUpsertRequest;
+export type IngestUpsertRequest =
+  | WiredIngestUpsertRequest
+  | ClassicIngestUpsertRequest
+  | GraphIngestUpsertRequest;
 export const IngestUpsertRequest: Validation<IngestBaseUpsertRequest, IngestUpsertRequest> =
   validation(
     IngestBaseUpsertRequest.right,
-    z.union([WiredIngestUpsertRequest.right, ClassicIngestUpsertRequest.right])
+    z.union([WiredIngestUpsertRequest.right, ClassicIngestUpsertRequest.right, GraphIngestUpsertRequest.right])
   );
+
+export { GraphIngest, GraphIngestUpsertRequest, GraphStream };
