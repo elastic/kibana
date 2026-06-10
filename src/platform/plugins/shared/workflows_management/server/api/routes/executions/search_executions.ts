@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import path from 'path';
 import { schema } from '@kbn/config-schema';
 import type { SearchExecutionsViewParams } from '../../workflows_management_service';
 import type { RouteDependencies } from '../types';
@@ -78,6 +79,9 @@ export function registerSearchExecutionsRoute({ router, api, spaces }: RouteDepe
     .addVersion(
       {
         version: API_VERSION,
+        options: {
+          oasOperationObject: () => path.join(__dirname, '../examples/search_executions.yaml'),
+        },
         validate: {
           request: {
             query: querySchema,

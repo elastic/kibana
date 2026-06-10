@@ -1,0 +1,67 @@
+responses:
+  200:
+    description: 'Indicates a successful response'
+    content:
+      application/json:
+        examples:
+          searchExecutionsResponseExample:
+            description: 'Example response returning workflow-level executions from an Elasticsearch search'
+            value:
+              took: 5
+              timed_out: false
+              _shards:
+                total: 1
+                successful: 1
+                skipped: 0
+                failed: 0
+              hits:
+                total:
+                  value: 2
+                  relation: eq
+                max_score: 1.0
+                hits:
+                  - _index: .workflows-executions
+                    _id: exec-001
+                    _score: 1.0
+                    _source:
+                      id: exec-001
+                      spaceId: default
+                      workflowId: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                      status: completed
+                      isTestRun: false
+                      startedAt: '2025-11-20T12:00:00.000Z'
+                      finishedAt: '2025-11-20T12:00:03.000Z'
+                      duration: 3000
+                      executedBy: elastic
+                      triggeredBy: manual
+                      error: null
+                  - _index: .workflows-executions
+                    _id: exec-002
+                    _score: 1.0
+                    _source:
+                      id: exec-002
+                      spaceId: default
+                      workflowId: workflow-b2c3d4e5-f6a7-8901-bcde-f12345678901
+                      status: failed
+                      isTestRun: false
+                      startedAt: '2025-11-20T13:00:00.000Z'
+                      finishedAt: '2025-11-20T13:00:02.000Z'
+                      duration: 2000
+                      executedBy: elastic
+                      triggeredBy: manual
+                      error:
+                        message: "Step 'hello_world_step' failed"
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -G "${KIBANA_URL}/api/workflows/executions" \
+        -H "Authorization: ApiKey ${API_KEY}" \
+        --data-urlencode 'query={"term":{"status":"completed"}}' \
+        --data-urlencode 'sort=[{"startedAt":{"order":"desc"}}]' \
+        --data-urlencode 'from=0' \
+        --data-urlencode 'size=20' \
+        --data-urlencode 'trackTotalHits=true'
+  - lang: Console
+    source: |
+      GET kbn://api/workflows/executions?query={"term":{"status":"completed"}}&sort=[{"startedAt":{"order":"desc"}}]&from=0&size=20&trackTotalHits=true
