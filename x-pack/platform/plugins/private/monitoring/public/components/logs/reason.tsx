@@ -121,12 +121,12 @@ export const Reason = ({ reason }: { reason?: IReason }) => {
     );
   } else if (false === reason?.clusterExists) {
     title = i18n.translate('xpack.monitoring.logs.reason.noClusterTitle', {
-      defaultMessage: 'No logs for this cluster',
+      defaultMessage: 'No logs for this cluster in the selected time period',
     });
     message = (
       <FormattedMessage
         id="xpack.monitoring.logs.reason.noClusterMessage"
-        defaultMessage="Check that your {link} is correct."
+        defaultMessage="No events logged for this cluster in the selected time period. You may wish to double-check that your {link} is correct if you are expecting to see log events during the selected time period."
         values={{
           link: (
             <EuiLink target="_blank" href={elasticsearchUrl}>

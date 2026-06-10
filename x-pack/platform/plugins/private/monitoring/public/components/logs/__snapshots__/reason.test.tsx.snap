@@ -57,11 +57,11 @@ exports[`Logs should render with a no cluster found reason 1`] = `
 <EuiCallOut
   color="warning"
   iconType="question"
-  title="No logs for this cluster"
+  title="No logs for this cluster in the selected time period"
 >
   <p>
     <MemoizedFormattedMessage
-      defaultMessage="Check that your {link} is correct."
+      defaultMessage="No events logged for this cluster in the selected time period. You may wish to double-check that your {link} is correct if you are expecting to see log events during the selected time period."
       id="xpack.monitoring.logs.reason.noClusterMessage"
       values={
         Object {
