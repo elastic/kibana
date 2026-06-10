@@ -207,6 +207,14 @@ export class FeatureFlagsService {
           evaluationFn.bind(this.featureFlagsClient)(flagName, fallbackValue);
     apm.addLabels({ [`flag_${flagName.replaceAll('.', '_')}`]: value });
     // TODO: increment usage counter
+    // Main challenge: we'd like to increment an OTel Metric Counter so we have visibility about which flags have been evaluated and which variation is returned.
+    //
+    // Potential idea:
+    // - Server side already has a counter (this same PR adds it).
+    // - UI is not hooked with OTel yet, and we don't want to ship it via an alternative way.
+    // - UI can hit an HTTP endpoint to increment the counter server side, where the server side increments the counter.
+    // - When UI has OTel instrumented, we can increment the counter in the browser directly.
+
     return value;
   }
 

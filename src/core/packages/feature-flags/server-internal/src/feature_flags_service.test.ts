@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { mockFlagEvaluationCounterAdd } from './feature_flags_service.test.mocks';
+
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import apm from 'elastic-apm-node';
 import { type Client, OpenFeature, type Provider } from '@openfeature/server-sdk';
@@ -155,8 +157,10 @@ describe('FeatureFlagsService Server', () => {
     let startContract: FeatureFlagsStart;
     let apmSpy: jest.SpyInstance;
     let addHandlerSpy: jest.SpyInstance;
+    let flagEvaluationCounterAddSpy: jest.SpyInstance;
 
     beforeEach(() => {
+      mockFlagEvaluationCounterAdd.mockClear();
       addHandlerSpy = jest.spyOn(featureFlagsClient, 'addHandler');
       featureFlagsService.setup();
       startContract = featureFlagsService.start();
@@ -168,18 +172,30 @@ describe('FeatureFlagsService Server', () => {
       const value = false;
       await expect(startContract.getBooleanValue('my-flag', value)).resolves.toEqual(value);
       expect(apmSpy).toHaveBeenCalledWith({ 'flag_my-flag': value }, undefined);
+      expect(mockFlagEvaluationCounterAdd).toHaveBeenCalledWith(1, {
+        'feature_flag.key': 'my-flag',
+        'feature_flag.value': value,
+      });
     });
 
     test('get string flag', async () => {
       const value = 'my-default';
       await expect(startContract.getStringValue('my-flag', value)).resolves.toEqual(value);
       expect(apmSpy).toHaveBeenCalledWith({ 'flag_my-flag': value }, undefined);
+      expect(mockFlagEvaluationCounterAdd).toHaveBeenCalledWith(1, {
+        'feature_flag.key': 'my-flag',
+        'feature_flag.value': value,
+      });
     });
 
     test('get number flag', async () => {
       const value = 42;
       await expect(startContract.getNumberValue('my-flag', value)).resolves.toEqual(value);
       expect(apmSpy).toHaveBeenCalledWith({ 'flag_my-flag': value }, undefined);
+      expect(mockFlagEvaluationCounterAdd).toHaveBeenCalledWith(1, {
+        'feature_flag.key': 'my-flag',
+        'feature_flag.value': value,
+      });
     });
 
     test('observe a boolean flag', async () => {
@@ -190,6 +206,10 @@ describe('FeatureFlagsService Server', () => {
       // Initial emission
       await expect(firstValueFrom(flag$)).resolves.toEqual(value);
       expect(apmSpy).toHaveBeenCalledWith({ 'flag_my-flag': value }, undefined);
+      expect(mockFlagEvaluationCounterAdd).toHaveBeenCalledWith(1, {
+        'feature_flag.key': 'my-flag',
+        'feature_flag.value': value,
+      });
       expect(observedValues).toHaveLength(1);
 
       // Does not reevaluate and emit if the other flags are changed
@@ -266,6 +286,10 @@ describe('FeatureFlagsService Server', () => {
         true
       );
       expect(apmSpy).toHaveBeenCalledWith({ 'flag_my-overridden-flag': true }, undefined);
+      expect(mockFlagEvaluationCounterAdd).toHaveBeenCalledWith(1, {
+        'feature_flag.key': 'my-overridden-flag',
+        'feature_flag.value': true,
+      });
       expect(getBooleanValueSpy).not.toHaveBeenCalled();
 
       // Only to prove the spy works
@@ -281,6 +305,10 @@ describe('FeatureFlagsService Server', () => {
       // Initial emission
       await expect(firstValueFrom(flag$)).resolves.toEqual(true);
       expect(apmSpy).toHaveBeenCalledWith({ 'flag_my-overridden-flag': true }, undefined);
+      expect(mockFlagEvaluationCounterAdd).toHaveBeenCalledWith(1, {
+        'feature_flag.key': 'my-overridden-flag',
+        'feature_flag.value': true,
+      });
       expect(observedValues).toHaveLength(1);
 
       // Does not reevaluate and emit if the other flags are changed

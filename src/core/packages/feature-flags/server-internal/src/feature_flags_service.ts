@@ -37,9 +37,18 @@ import {
 } from 'rxjs';
 import { get } from 'lodash';
 import type { InitialFeatureFlagsGetter } from '@kbn/core-feature-flags-server/src/contracts';
+import { metrics, ValueType } from '@opentelemetry/api';
 import { createOpenFeatureLogger } from './create_open_feature_logger';
 import { setProviderWithRetries } from './set_provider_with_retries';
 import { type FeatureFlagsConfig, featureFlagsConfig } from './feature_flags_config';
+
+const flagEvaluationCounter = metrics
+  .getMeter('kibana.feature-flags')
+  .createCounter('flag.evaluation.count', {
+    description: 'Count of feature flag evaluations',
+    unit: '1',
+    valueType: ValueType.INT,
+  });
 
 /**
  * Core-internal contract for the setup lifecycle step.
@@ -216,7 +225,11 @@ export class FeatureFlagsService {
         : // We have to bind the evaluation or the client will lose its internal context
           await evaluationFn.bind(this.featureFlagsClient)(flagName, fallbackValue);
     addSpanLabels({ [`flag_${flagName.replaceAll('.', '_')}`]: value });
-    // TODO: increment usage counter
+
+    // Report the counter for the flag evaluation.
+    // Attribute names follow the convention defined in https://opentelemetry.io/docs/specs/semconv/feature-flags/feature-flags-events/
+    flagEvaluationCounter.add(1, { 'feature_flag.key': flagName, 'feature_flag.value': value });
+
     return value;
   }
 
