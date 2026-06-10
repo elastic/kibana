@@ -11,30 +11,29 @@ import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useDebouncedValue } from '@kbn/react-hooks';
+import { useQuery } from '@kbn/react-query';
+import type { WorkflowListDto } from '@kbn/workflows';
 import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows';
-import React, { useState } from 'react';
-import { useFetchWorkflows } from '../../../hooks/use_fetch_workflows';
-import { SINGLE_STEP_WORKFLOW_TAG } from '../constants';
+import { WorkflowApi } from '@kbn/workflows-ui';
+import React, { useEffect, useMemo, useState } from 'react';
 
-const CREATE_NEW_OPTION_VALUE = '__create_new_workflow__';
-
-interface ExistingWorkflowSelectorProps {
+interface WorkflowReferenceSelectorProps {
   value: string | null;
   onSelect: (workflowId: string | null) => void;
-  onCreateNew: () => void;
   isInvalid?: boolean;
   errorMessage?: string;
 }
 
-export const ExistingWorkflowSelector = ({
+export const WorkflowReferenceSelector = ({
   value,
   onSelect,
-  onCreateNew,
   isInvalid,
   errorMessage,
-}: ExistingWorkflowSelectorProps) => {
+}: WorkflowReferenceSelectorProps) => {
   const application = useService(CoreStart('application'));
   const uiSettings = useService(CoreStart('uiSettings'));
+  const { toasts } = useService(CoreStart('notifications'));
+  const workflowsApi = useService(WorkflowApi);
   const isWorkflowsEnabled = uiSettings.get<boolean>(WORKFLOWS_UI_SETTING_ID);
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -43,23 +42,36 @@ export const ExistingWorkflowSelector = ({
     null
   );
 
-  const { data: workflowsData, isLoading } = useFetchWorkflows({
-    query: debouncedQuery,
-    tags: [SINGLE_STEP_WORKFLOW_TAG],
-    isEnabled: isWorkflowsEnabled,
+  const { data: workflowsData, isLoading } = useQuery<WorkflowListDto, Error>({
+    queryKey: ['alertingV2RuleForm', 'workflows', { query: debouncedQuery }],
+    queryFn: () => workflowsApi.getWorkflows({ query: debouncedQuery, size: 100, page: 1 }),
+    enabled: isWorkflowsEnabled,
+    refetchOnWindowFocus: false,
+    keepPreviousData: true,
+    onError: (error: Error) => {
+      toasts.addError(error, {
+        title: i18n.translate(
+          'xpack.responseOps.alertingV2RuleForm.actionForm.workflows.fetchError',
+          { defaultMessage: 'Failed to load workflows' }
+        ),
+      });
+    },
   });
 
-  const results = workflowsData?.results ?? [];
-  const workflowOptions: Array<EuiComboBoxOptionOption<string>> = [
-    ...results.map((w) => ({ label: w.name, value: w.id })),
-    {
-      label: i18n.translate(
-        'xpack.alertingV2.singleStepWorkflow.existing.createNewWorkflowOption',
-        { defaultMessage: '+ Create new workflow' }
-      ),
-      value: CREATE_NEW_OPTION_VALUE,
-    },
-  ];
+  const results = useMemo(() => workflowsData?.results ?? [], [workflowsData?.results]);
+
+  useEffect(() => {
+    if (!value) {
+      setSelectedWorkflow(null);
+      return;
+    }
+    const found = results.find((w) => w.id === value);
+    if (found) setSelectedWorkflow({ id: found.id, name: found.name });
+  }, [results, value]);
+  const workflowOptions: Array<EuiComboBoxOptionOption<string>> = results.map((w) => ({
+    label: w.name,
+    value: w.id,
+  }));
 
   const selectedOptions: Array<EuiComboBoxOptionOption<string>> = value
     ? [
@@ -77,21 +89,24 @@ export const ExistingWorkflowSelector = ({
     return (
       <EuiCallOut
         announceOnMount={false}
-        title={i18n.translate('xpack.alertingV2.singleStepWorkflow.workflowsDisabled.title', {
-          defaultMessage: 'Workflows are not enabled',
-        })}
+        title={i18n.translate(
+          'xpack.responseOps.alertingV2RuleForm.actionForm.workflowsDisabled.title',
+          {
+            defaultMessage: 'Workflows are not enabled',
+          }
+        )}
         color="warning"
         iconType="warning"
         data-test-subj="singleStepWorkflowsDisabledCallout"
       >
         <FormattedMessage
-          id="xpack.alertingV2.singleStepWorkflow.workflowsDisabled.description"
+          id="xpack.responseOps.alertingV2RuleForm.actionForm.workflowsDisabled.description"
           defaultMessage="Single-step workflows require the Workflows feature. Enable it in {advancedSettingsLink}, then refresh this page."
           values={{
             advancedSettingsLink: (
               <EuiLink href={settingsUrl} data-test-subj="singleStepWorkflowsDisabledSettingsLink">
                 <FormattedMessage
-                  id="xpack.alertingV2.singleStepWorkflow.workflowsDisabled.advancedSettingsLink"
+                  id="xpack.responseOps.alertingV2RuleForm.actionForm.workflowsDisabled.advancedSettingsLink"
                   defaultMessage="Advanced Settings"
                 />
               </EuiLink>
@@ -104,9 +119,12 @@ export const ExistingWorkflowSelector = ({
 
   return (
     <EuiFormRow
-      label={i18n.translate('xpack.alertingV2.singleStepWorkflow.existing.label', {
-        defaultMessage: 'Workflow',
-      })}
+      label={i18n.translate(
+        'xpack.responseOps.alertingV2RuleForm.actionForm.workflowReference.label',
+        {
+          defaultMessage: 'Workflow',
+        }
+      )}
       fullWidth
       isInvalid={!!isInvalid}
       error={errorMessage}
@@ -117,10 +135,13 @@ export const ExistingWorkflowSelector = ({
         singleSelection={{ asPlainText: true }}
         isLoading={isLoading}
         isInvalid={!!isInvalid}
-        data-test-subj="singleStepWorkflowSelector"
-        placeholder={i18n.translate('xpack.alertingV2.singleStepWorkflow.existing.placeholder', {
-          defaultMessage: 'Search or create a workflow',
-        })}
+        data-test-subj="workflowReferenceSelector"
+        placeholder={i18n.translate(
+          'xpack.responseOps.alertingV2RuleForm.actionForm.workflowReference.placeholder',
+          {
+            defaultMessage: 'Search for a workflow',
+          }
+        )}
         selectedOptions={selectedOptions}
         onSearchChange={setSearchQuery}
         onChange={(options) => {
@@ -130,10 +151,6 @@ export const ExistingWorkflowSelector = ({
             return;
           }
           const next = options[0];
-          if (next.value === CREATE_NEW_OPTION_VALUE) {
-            onCreateNew();
-            return;
-          }
           if (next.value) {
             const workflow = results.find((w) => w.id === next.value);
             if (workflow) setSelectedWorkflow({ id: workflow.id, name: workflow.name });
