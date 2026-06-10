@@ -1,0 +1,64 @@
+## Managed OTLP Endpoint Setup
+
+The fastest way to get application data into Elastic on serverless is the **managed OTLP endpoint** — a hosted, fully-managed OpenTelemetry collector. There is nothing to deploy or operate: Elastic provisions the endpoint URL and an API key for you.
+
+---
+
+## Step 1 — Open the OpenTelemetry onboarding flow
+
+Direct the user to navigate to:
+
+**APM → Add data → OpenTelemetry** (or go directly via the main nav: **Observability → Add data**, then choose the "OpenTelemetry" card).
+
+Alternatively, tell the user to type `/otel-apm` after the Kibana base URL + `#` in the Observability Onboarding app.
+
+Once the page loads it automatically:
+- Creates an API key scoped to `apm:event:write`
+- Displays the managed OTLP endpoint URL specific to their serverless project
+
+---
+
+## Step 2 — Configure the OpenTelemetry SDK
+
+The page shows the three environment variables needed. The user copies them and sets them in their application's environment (or Dockerfile / Kubernetes manifest / CI pipeline):
+
+| Variable | What to set |
+|---|---|
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | The managed OTLP URL shown on the page (e.g. `https://my-project.apm.us-east-1.aws.elastic.cloud:443`) |
+| `OTEL_EXPORTER_OTLP_HEADERS` | `Authorization=ApiKey <base64-key-from-page>` |
+| `OTEL_RESOURCE_ATTRIBUTES` | `service.name=<your-app-name>,service.version=1.0.0,deployment.environment.name=production` |
+
+**Important:** Use the values shown on the onboarding page — they are unique to the user's project and session. Do not invent or guess the endpoint URL or API key.
+
+---
+
+## Step 3 — Install the Elastic Distribution of OpenTelemetry (EDOT) SDK
+
+Use the Elastic-maintained EDOT SDK for the application's language — it comes pre-configured for the Elastic managed endpoint and requires less boilerplate than the upstream OTel SDK.
+
+Available for: **.NET · Java · Node.js · PHP · Python · Android · iOS**
+
+Full SDK guides: https://ela.st/edot-sdks
+
+If the user already has an upstream OTel SDK configured, they only need to point its exporter at the managed OTLP endpoint with the variables above — no migration is required.
+
+---
+
+## Step 4 — Verify data is flowing
+
+After the application restarts with the new configuration, the onboarding page polls for incoming data. Once traces, logs, or metrics arrive the page shows a confirmation and offers a direct link to the APM Service Inventory.
+
+If the user does not see data after a few minutes:
+1. Confirm the three env vars are set in the running process (not just the shell)
+2. Check the application logs for OTLP exporter errors (connection refused, auth errors)
+3. Verify the service is actually generating traffic (send a test request)
+4. Check the managed OTLP docs for further troubleshooting: https://www.elastic.co/docs/reference/opentelemetry/motlp
+
+---
+
+## Notes
+
+- On **serverless**, the managed OTLP endpoint is generally available (GA). No feature flag is required.
+- On **Elastic Cloud Hosted (ECH)**, the endpoint is in Tech Preview and requires the `observability.managedOtlpServiceEnabled` feature flag.
+- The API key created by the onboarding flow has minimal scope (`apm:event:write`) and is safe to embed in application configuration.
+- If the user asks about a specific language, offer to walk them through that language's SDK configuration in detail.

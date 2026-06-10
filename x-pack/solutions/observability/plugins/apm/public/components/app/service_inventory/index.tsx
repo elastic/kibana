@@ -28,6 +28,7 @@ import type { SortFunction } from '../../shared/managed_table';
 import { MLCallout, shouldDisplayMlCallout } from '../../shared/ml_callout';
 import { isTimeComparison } from '../../shared/time_comparison/get_comparison_options';
 import { ApmServicesTable } from './service_list/apm_services_table';
+import { MissingDataCallout } from './missing_data_callout';
 import { getAvailableFields, orderServiceItems } from './service_list/order_service_items';
 import type { ApmPluginStartDeps, ApmServices } from '../../../plugin';
 
@@ -302,6 +303,10 @@ export function ServiceInventory() {
   return (
     <>
       <EuiFlexGroup direction="column" gutterSize="m">
+        {/* Prototype: always shown for now (no data-gap detection yet) */}
+        <EuiFlexItem>
+          <MissingDataCallout />
+        </EuiFlexItem>
         {displayMlCallout && mlCallout}
         <EuiFlexItem style={{ minWidth: 0 }}>
           <ApmServicesTable
