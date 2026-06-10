@@ -17,6 +17,10 @@ import { getAllLocations } from '../synthetics_service/get_all_locations';
 import type { PrivateLocation, ServiceLocation } from '../../common/runtime_types';
 import { syntheticsMonitorAttributes } from '../../common/types/saved_objects';
 
+// A datemath expression or ISO-8601 timestamp is well under this; the cap only
+// exists to keep the date-range query params from being unbounded strings.
+const MAX_DATE_RANGE_PARAM_LENGTH = 256;
+
 const StringOrArraySchema = schema.maybe(
   schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
 );
@@ -43,8 +47,11 @@ const CommonQuerySchema = {
   // Date-range window for the overview list (see runtime type docs). The
   // overview page always sends these; their presence scopes each monitor's
   // status to the window instead of the default "current status" look-back.
-  dateRangeStart: schema.maybe(schema.string()),
-  dateRangeEnd: schema.maybe(schema.string()),
+  // Bounded length: these only ever carry a short datemath expression
+  // (`now-15m`) or an ISO-8601 timestamp, so cap the input to avoid unbounded
+  // strings reaching `datemath.parse` (CodeQL: unbounded string DoS).
+  dateRangeStart: schema.maybe(schema.string({ maxLength: MAX_DATE_RANGE_PARAM_LENGTH })),
+  dateRangeEnd: schema.maybe(schema.string({ maxLength: MAX_DATE_RANGE_PARAM_LENGTH })),
 };
 
 export const QuerySchema = schema.object({
