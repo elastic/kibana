@@ -1,8 +1,8 @@
 {
   "name": "Kibana",
   "build": {
-    "dockerfile": "../Dockerfile",
-    "context": "../..",
+    "dockerfile": "../.devcontainer/Dockerfile",
+    "context": "..",
     "args": {
       "KBN_DIR": "${containerWorkspaceFolder}"
     }
