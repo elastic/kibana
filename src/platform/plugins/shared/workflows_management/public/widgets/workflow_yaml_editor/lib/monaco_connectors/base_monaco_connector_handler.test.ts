@@ -366,14 +366,18 @@ describe('BaseMonacoConnectorHandler', () => {
     });
 
     it('should separate additional info with blank lines for markdown rendering', () => {
-      const result = handler.exposedCreateConnectorOverview('ai.agent', 'Run an AI agent', [
-        '**Type**: AI/ML connector for inference and analysis',
-        '**Usage**: Configure parameters in the `with` block to customize the connector behavior.',
-        '**Documentation**: Configure model parameters and input data',
-      ]);
+      const result = handler.exposedCreateConnectorOverview(
+        'waitForInput',
+        'Wait For Input connector for workflow automation',
+        [
+          '**Type**: Pause execution until external input is provided (human-in-the-loop)',
+          '**Usage**: Configure parameters in the `with` block to customize the connector behavior.',
+          '**Documentation**: Configure the message displayed to the user when waiting for input',
+        ]
+      );
 
       expect(result).toContain(
-        '**Type**: AI/ML connector for inference and analysis\n\n**Usage**: Configure parameters in the `with` block to customize the connector behavior.\n\n**Documentation**: Configure model parameters and input data'
+        '**Type**: Pause execution until external input is provided (human-in-the-loop)\n\n**Usage**: Configure parameters in the `with` block to customize the connector behavior.\n\n**Documentation**: Configure the message displayed to the user when waiting for input'
       );
     });
 
