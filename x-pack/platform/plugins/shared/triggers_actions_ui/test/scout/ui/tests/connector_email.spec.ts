@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-// Migrated from: x-pack/platform/test/functional_with_es_ssl/apps/triggers_actions_ui/email.ts
-//
-// Test 1 (ses defaults) uses EuiSelect (native <select>) — selectOption() works.
-// Tests 2-6 (recipient validation) create a connector via API and exercise the
-// test tab's To/Cc/Bcc validation logic.
-
 import type { ApiServicesFixture, ScoutPage } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
@@ -75,8 +69,6 @@ test.describe('Email connector', { tag: tags.stateful.classic }, () => {
       'aria-checked',
       'true'
     );
-
-    await page.testSubj.click('euiFlyoutCloseButton');
   });
 
   test('disables Run and shows recipients-required error when To/Cc/Bcc are all empty', async ({
@@ -183,6 +175,7 @@ test.describe('Email connector', { tag: tags.stateful.classic }, () => {
     // Trigger the recipients-required error
     await page.testSubj.locator('toEmailAddressInput').locator('input').click();
     await page.testSubj.click('edit-connector-flyout-header');
+
     await expect(
       page.testSubj.locator('test-connector-form').locator('.euiFormErrorText')
     ).toContainText('At least one recipient is required.');
