@@ -16,6 +16,12 @@ import {
   discoverSessionApiRequestBodySchema,
   discoverSessionApiResponseSchema,
   discoverSessionDataSchema,
+  MAX_BREAKDOWN_FIELD_LENGTH,
+  MAX_CHART_INTERVAL_LENGTH,
+  MAX_SESSION_DESCRIPTION_LENGTH,
+  MAX_SESSION_TITLE_LENGTH,
+  MAX_TAB_LABEL_LENGTH,
+  MAX_VIS_CONTEXT_ATTRIBUTE_KEY_LENGTH,
   type DiscoverSessionApiClassicTab,
   type DiscoverSessionApiEsqlTab,
 } from './schema';
@@ -312,6 +318,120 @@ describe('discoverSessionDataSchema', () => {
         tabs: [],
       })
     ).toThrow();
+  });
+
+  describe('size limits', () => {
+    const repeat = (char: string, count: number) => char.repeat(count);
+
+    it('rejects an empty title', () => {
+      expect(() =>
+        discoverSessionDataSchema.validate({
+          title: '',
+          tabs: [classicTab],
+        })
+      ).toThrow();
+    });
+
+    it('rejects a title that exceeds the max length', () => {
+      expect(() =>
+        discoverSessionDataSchema.validate({
+          title: repeat('a', MAX_SESSION_TITLE_LENGTH + 1),
+          tabs: [classicTab],
+        })
+      ).toThrow();
+    });
+
+    it('accepts a title at the max length', () => {
+      const validated = discoverSessionDataSchema.validate({
+        title: repeat('a', MAX_SESSION_TITLE_LENGTH),
+        tabs: [classicTab],
+      });
+
+      expect(validated.title).toHaveLength(MAX_SESSION_TITLE_LENGTH);
+    });
+
+    it('rejects a description that exceeds the max length', () => {
+      expect(() =>
+        discoverSessionDataSchema.validate({
+          title: 'Valid title',
+          description: repeat('a', MAX_SESSION_DESCRIPTION_LENGTH + 1),
+          tabs: [classicTab],
+        })
+      ).toThrow();
+    });
+
+    it('accepts a description at the max length', () => {
+      const validated = discoverSessionDataSchema.validate({
+        title: 'Valid title',
+        description: repeat('a', MAX_SESSION_DESCRIPTION_LENGTH),
+        tabs: [classicTab],
+      });
+
+      expect(validated.description).toHaveLength(MAX_SESSION_DESCRIPTION_LENGTH);
+    });
+
+    it('rejects a tab label that exceeds the max length', () => {
+      expect(() =>
+        discoverSessionDataSchema.validate({
+          title: 'Valid title',
+          tabs: [
+            {
+              ...classicTab,
+              label: repeat('a', MAX_TAB_LABEL_LENGTH + 1),
+            },
+          ],
+        })
+      ).toThrow();
+    });
+
+    it('rejects a chart_interval that exceeds the max length', () => {
+      expect(() =>
+        discoverSessionDataSchema.validate({
+          title: 'Valid title',
+          tabs: [
+            {
+              ...classicTab,
+              chart_interval: repeat('a', MAX_CHART_INTERVAL_LENGTH + 1),
+            },
+          ],
+        })
+      ).toThrow();
+    });
+
+    it('rejects a breakdown_field that exceeds the max length', () => {
+      expect(() =>
+        discoverSessionDataSchema.validate({
+          title: 'Valid title',
+          tabs: [
+            {
+              ...classicTab,
+              breakdown_field: repeat('a', MAX_BREAKDOWN_FIELD_LENGTH + 1),
+            },
+          ],
+        })
+      ).toThrow();
+    });
+
+    it('rejects a vis_context attribute key that exceeds the max length', () => {
+      expect(() =>
+        discoverSessionDataSchema.validate({
+          title: 'Valid title',
+          tabs: [
+            {
+              ...classicTab,
+              vis_context: {
+                suggestion_type: UnifiedHistogramSuggestionType.histogramForDataView,
+                attributes: {
+                  [repeat('a', MAX_VIS_CONTEXT_ATTRIBUTE_KEY_LENGTH + 1)]: {
+                    foo: 'bar',
+                  },
+                },
+              },
+            },
+          ],
+        })
+      ).toThrow();
+    });
   });
 });
 

@@ -17,12 +17,12 @@ import { MAX_DISCOVER_SESSION_TABS } from '@kbn/saved-search-plugin/common';
 import { UnifiedHistogramSuggestionType } from '@kbn/discover-utils';
 import { classicTabSchema, esqlTabSchema } from '../embeddable/schema';
 
-const MAX_SESSION_TITLE_LENGTH = 256;
-const MAX_SESSION_DESCRIPTION_LENGTH = 2000;
-const MAX_TAB_LABEL_LENGTH = 120;
-const MAX_CHART_INTERVAL_LENGTH = 64;
-const MAX_BREAKDOWN_FIELD_LENGTH = 1000;
-const MAX_VIS_CONTEXT_ATTRIBUTE_KEY_LENGTH = 256;
+export const MAX_SESSION_TITLE_LENGTH = 256;
+export const MAX_SESSION_DESCRIPTION_LENGTH = 1000;
+export const MAX_TAB_LABEL_LENGTH = 120;
+export const MAX_CHART_INTERVAL_LENGTH = 64;
+export const MAX_BREAKDOWN_FIELD_LENGTH = 1000;
+export const MAX_VIS_CONTEXT_ATTRIBUTE_KEY_LENGTH = 256;
 
 const visContextSchema = schema.object({
   suggestion_type: schema.oneOf(
