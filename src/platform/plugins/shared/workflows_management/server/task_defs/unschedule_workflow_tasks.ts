@@ -7,12 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AppDeepLinkLocations } from '@kbn/core-application-browser/src/application';
+import type { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
 
-export const DEFAULT_APP_VISIBILITY: AppDeepLinkLocations[] = [
-  'globalSearch',
-  'classicSideNav',
-  'projectSideNav',
-];
+/**
+ * Unschedules tasks for deleted or disabled workflows.
+ * Shared by soft delete, hard delete, and disableAllWorkflows.
+ */
+export const unscheduleWorkflowTasks = async (
+  ids: string[],
+  taskScheduler: WorkflowTaskScheduler | null
+): Promise<void> => {
+  if (!taskScheduler || ids.length === 0) {
+    return;
+  }
 
-export const DEFAULT_LINK_VISIBILITY: AppDeepLinkLocations[] = ['globalSearch'];
+  await taskScheduler.bulkUnscheduleWorkflowTasks(ids);
+};
