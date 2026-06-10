@@ -10,6 +10,7 @@ import type { Streams } from '@kbn/streams-schema';
 import { EuiBadgeGroup, EuiFlexGroup } from '@elastic/eui';
 import { useStreamsAppParams } from '../../../../hooks/use_streams_app_params';
 import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';
+import { useKibana } from '../../../../hooks/use_kibana';
 import { RedirectTo } from '../../../redirect_to';
 import type { ManagementTabs } from './wrapper';
 import { Wrapper } from './wrapper';
@@ -24,6 +25,7 @@ import { StreamDetailSchemaEditor } from '../stream_detail_schema_editor';
 import { StreamDetailAttachments } from '../../../stream_detail_attachments';
 import { ClassicAdvancedView } from './advanced_view/classic_advanced_view';
 import { ClassicStreamPartitioning } from '../stream_detail_routing/classic_stream_partitioning';
+import { LifecycleTabLabel } from './lifecycle_tab_label_with_actions';
 
 const classicStreamManagementSubTabs = [
   'overview',
@@ -57,6 +59,12 @@ export function ClassicStreamDetailManagement({
   definition: Streams.ClassicStream.GetResponse;
   refreshDefinition: () => void;
 }) {
+  const {
+    core: { notifications },
+    dependencies: {
+      start: { share },
+    },
+  } = useKibana();
   const {
     path: { key, tab },
   } = useStreamsAppParams('/{key}/management/{tab}');
@@ -106,14 +114,22 @@ export function ClassicStreamDetailManagement({
     }),
   };
 
-  const lifecycleTabLabel = i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
-    defaultMessage: 'Data lifecycle',
-  });
   tabs.lifecycle = {
     content: (
       <StreamDetailLifecycle definition={definition} refreshDefinition={refreshDefinition} />
     ),
-    label: lifecycleTabLabel,
+    // TBD hack: the new app header types `AppHeaderTab.label` as `string`, but we need a
+    // ReactNode here to render the lifecycle tab actions. Force-cast for now until app
+    // header tabs support ReactNode labels.
+    label: (
+      <LifecycleTabLabel
+        definition={definition}
+        showActions={tab === 'lifecycle'}
+        indexTemplateName={definition.elasticsearch_assets?.indexTemplate}
+        notifications={notifications}
+        share={share}
+      />
+    ) as unknown as string,
   };
 
   if (queryStreams.enabled) {

@@ -23,6 +23,8 @@ import { StreamDetailDataQuality } from '../../../stream_data_quality';
 import { StreamsAppPageTemplate } from '../../../streams_app_page_template';
 import { WiredStreamBadge } from '../../../stream_badges';
 import { StreamDetailAttachments } from '../../../stream_detail_attachments';
+import { useKibana } from '../../../../hooks/use_kibana';
+import { LifecycleTabLabel } from './lifecycle_tab_label_with_actions';
 
 const wiredStreamManagementSubTabs = [
   'overview',
@@ -55,6 +57,12 @@ export function WiredStreamDetailManagement({
   definition: Streams.WiredStream.GetResponse;
   refreshDefinition: () => void;
 }) {
+  const {
+    core: { notifications },
+    dependencies: {
+      start: { share },
+    },
+  } = useKibana();
   const {
     path: { key, tab },
   } = useStreamsAppParams('/{key}/management/{tab}');
@@ -157,9 +165,6 @@ export function WiredStreamDetailManagement({
     );
   }
 
-  const lifecycleTabLabel = i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
-    defaultMessage: 'Data lifecycle',
-  });
   const dataQualityTabLabel = i18n.translate('xpack.streams.streamDetailView.qualityTab', {
     defaultMessage: 'Data quality',
   });
@@ -180,7 +185,18 @@ export function WiredStreamDetailManagement({
                 refreshDefinition={refreshDefinition}
               />
             ),
-            label: lifecycleTabLabel,
+            // TBD hack: the new app header types `AppHeaderTab.label` as `string`, but we need a
+            // ReactNode here to render the lifecycle tab actions. Force-cast for now until app
+            // header tabs support ReactNode labels.
+            label: (
+              <LifecycleTabLabel
+                definition={definition}
+                showActions={tab === 'lifecycle'}
+                indexTemplateName={`${definition.stream.name}@stream`}
+                notifications={notifications}
+                share={share}
+              />
+            ) as unknown as string,
           },
         }
       : {}),
