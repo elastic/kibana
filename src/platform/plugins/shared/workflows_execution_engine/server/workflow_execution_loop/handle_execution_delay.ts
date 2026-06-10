@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EsWorkflowExecution } from '@kbn/workflows';
+import type { EsWorkflowExecution, StackFrame } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import { isEnterStepTimeoutZone } from '@kbn/workflows/graph';
 import { flushState } from './persistence_loop';
@@ -19,7 +19,8 @@ const SHORT_DURATION_THRESHOLD = 1000 * 5; // 5 seconds
 
 function getIdleTimeoutResumeDeadlineMs(
   params: WorkflowExecutionLoopParams,
-  workflowExecution: EsWorkflowExecution
+  workflowExecution: EsWorkflowExecution,
+  scopeStackFrames: StackFrame[]
 ): number | undefined {
   const deadlineMs: number[] = [];
 
@@ -30,7 +31,6 @@ function getIdleTimeoutResumeDeadlineMs(
     );
   }
 
-  const scopeStackFrames = workflowExecution.scopeStack ?? [];
   for (const frame of scopeStackFrames) {
     for (const scope of frame.nestedScopes) {
       const graphNode = params.workflowExecutionGraph.getNode(scope.nodeId);
@@ -65,7 +65,11 @@ export async function handleExecutionDelay(
       status: stepStatus,
     });
 
-    const deadlineMs = getIdleTimeoutResumeDeadlineMs(params, workflowExecution);
+    const deadlineMs = getIdleTimeoutResumeDeadlineMs(
+      params,
+      workflowExecution,
+      params.workflowExecutionCursor.currentStackFrames
+    );
     if (deadlineMs !== undefined) {
       const resumeAtMs = Math.max(deadlineMs, new Date().getTime() + 500);
 

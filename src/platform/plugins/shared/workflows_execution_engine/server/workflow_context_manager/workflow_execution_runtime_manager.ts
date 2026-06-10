@@ -189,9 +189,12 @@ export class WorkflowExecutionRuntimeManager {
   }
 
   /**
-   * Pops scopes from the scope stack, finishing each one, until {@link shouldStop}
-   * returns true for the current scope (or the stack is exhausted when no predicate
-   * is provided).
+   * Finishes ancestor enter-node step executions by walking a local copy of the scope
+   * stack. Does **not** mutate the execution cursor stack; scope position is reconciled
+   * by navigation and {@link WorkflowExecutionCursor.commitPendingNavigation}.
+   *
+   * The local {@link WorkflowScopeStack.exitScope} calls exist only to compute the
+   * correct `stackFrames` when creating each ancestor's `StepExecutionRuntime`.
    *
    * @param inclusive — when true the scope that matches {@link shouldStop} is also
    *   popped and finished. Defaults to false (stop *before* the matching scope).
@@ -199,7 +202,6 @@ export class WorkflowExecutionRuntimeManager {
    * Used by:
    * - loop.break — stop at and *include* the enclosing loop enter node (inclusive)
    * - loop.continue — stop *before* the enclosing loop enter node (exclusive)
-   * - workflow.output / workflow.fail — unwind the entire stack (no predicate)
    */
   public unwindScopes(
     stepExecutionRuntimeFactory: StepExecutionRuntimeFactory,

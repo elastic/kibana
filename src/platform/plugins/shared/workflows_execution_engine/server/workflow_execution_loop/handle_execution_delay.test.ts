@@ -14,9 +14,14 @@ import {
 } from '@kbn/workflows';
 import { handleExecutionDelay } from './handle_execution_delay';
 import type { WorkflowExecutionLoopParams } from './types';
-import { createMockWorkflowExecutionCursor } from '../workflow_context_manager/mocks/workflow_execution_cursor.mock';
+import {
+  createMockWorkflowExecutionCursor,
+  type MockWorkflowExecutionCursorOptions,
+} from '../workflow_context_manager/mocks/workflow_execution_cursor.mock';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
-const makeParams = (): jest.Mocked<WorkflowExecutionLoopParams> =>
+const makeParams = (
+  cursorOptions: MockWorkflowExecutionCursorOptions = {}
+): jest.Mocked<WorkflowExecutionLoopParams> =>
   ({
     workflowRuntime: {
       getWorkflowExecution: jest.fn().mockReturnValue({
@@ -25,7 +30,7 @@ const makeParams = (): jest.Mocked<WorkflowExecutionLoopParams> =>
         scopeStack: [],
       }),
     },
-    workflowExecutionCursor: createMockWorkflowExecutionCursor(),
+    workflowExecutionCursor: createMockWorkflowExecutionCursor(cursorOptions),
     workflowExecutionState: {
       updateWorkflowExecution: jest.fn(),
       getLatestStepExecution: jest.fn().mockReturnValue(undefined),
@@ -136,14 +141,8 @@ describe('handleExecutionDelay', () => {
         jest.useFakeTimers();
         try {
           jest.setSystemTime(new Date(nowIso));
-          const params = makeParams();
-          (params.workflowExecutionGraph.getWorkflowLevelTimeout as jest.Mock).mockReturnValue(
-            workflowLevelTimeout
-          );
-          (params.workflowRuntime.getWorkflowExecution as jest.Mock).mockReturnValue({
-            id: 'exec-parent',
-            startedAt: '2025-06-01T12:00:00.000Z',
-            scopeStack: [
+          const params = makeParams({
+            currentStackFrames: [
               {
                 stepId: 'timedParent',
                 nestedScopes: [
@@ -155,6 +154,9 @@ describe('handleExecutionDelay', () => {
               },
             ],
           });
+          (params.workflowExecutionGraph.getWorkflowLevelTimeout as jest.Mock).mockReturnValue(
+            workflowLevelTimeout
+          );
           (params.workflowExecutionGraph.getNode as jest.Mock).mockImplementation(
             (nodeId: string) => {
               if (nodeId === 'enterTimeoutZone_timedParent') {
