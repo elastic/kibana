@@ -52,6 +52,23 @@ export const PresentationPanelTitle = ({
     });
   }, [api]);
 
+  /**
+   * EuiLink renders as an <a> element without an href. Some browsers (e.g. Safari) do not fire
+   * click events when Enter is pressed on <a> elements without an href, making the title
+   * inaccessible via keyboard. The explicit onKeyDown handler ensures the flyout opens on Enter
+   * across all browsers. preventDefault() is called to prevent any browser-synthesised click
+   * event from also firing (which would open the flyout twice in browsers that do support it).
+   */
+  const onKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        onClick();
+      }
+    },
+    [onClick]
+  );
+
   const panelTitleElement = useMemo(() => {
     if (hideTitle) return null;
 
@@ -85,6 +102,7 @@ export const PresentationPanelTitle = ({
       <EuiLink
         color="text"
         onClick={onClick}
+        onKeyDown={onKeyDown}
         css={titleStyles}
         aria-label={i18n.translate('embeddableApi.header.titleAriaLabel', {
           defaultMessage: 'Click to edit title: {title}',
@@ -97,6 +115,7 @@ export const PresentationPanelTitle = ({
     );
   }, [
     onClick,
+    onKeyDown,
     hideTitle,
     panelTitle,
     isEditableTitle,
