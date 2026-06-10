@@ -432,7 +432,7 @@ describe('useTopNavLinks', () => {
       expect(alertsItem?.items).toBeUndefined();
     });
 
-    it('should show the v2 selector flyout in both ES|QL and classic modes', async () => {
+    it('should show the v2 selector flyout only in ES|QL mode and fall back to v1 popover in classic mode', async () => {
       const esqlConfig = await setupWithAlertingV2({ isEsqlMode: true }, true);
       const classicConfig = await setupWithAlertingV2({ isEsqlMode: false }, true);
 
@@ -442,7 +442,8 @@ describe('useTopNavLinks', () => {
       expect(esqlAlerts).toBeDefined();
       expect(esqlAlerts?.items).toBeUndefined();
       expect(classicAlerts).toBeDefined();
-      expect(classicAlerts?.items).toBeUndefined();
+      expect(classicAlerts?.items).toBeDefined();
+      expect(classicAlerts?.items!.length).toBeGreaterThan(0);
     });
 
     it('should fall back to v1 popover items when alerting v2 is disabled', async () => {
