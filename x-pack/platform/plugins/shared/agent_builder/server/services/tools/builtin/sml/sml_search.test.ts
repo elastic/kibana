@@ -105,7 +105,7 @@ describe('createSmlSearchTool', () => {
         tags: ['perf'],
         references: [{ uri: 'dashboard://abc' }],
         spaces: ['default'],
-        permissions: [],
+        permissions: { kibana: { privileges: [] }, elasticsearch: { indices: [] } },
       },
     ];
     mockSearch.mockResolvedValue({ results: hits });

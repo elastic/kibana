@@ -1,6 +1,17 @@
 {
-  "sha1": "60aa0d694a3d18c30df9b297e94e774e0a184f2d",
+  "sha1": "e00a17814c0e119c917018f60e0676b1341d9a74",
   "tests": [
+    {
+      "id": "5f3825f308b4d12-d89fd2ade65d14f",
+      "title": "Teardown Discover tests data",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/global.teardown.ts",
+        "line": 16,
+        "column": 19
+      }
+    },
     {
       "id": "71242d88739937b-70753e6cedbcd4d",
       "title": "Setup Discover tests data",
