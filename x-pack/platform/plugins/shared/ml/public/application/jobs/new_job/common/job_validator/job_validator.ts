@@ -20,7 +20,7 @@ import type { JobCreator, JobCreatorType } from '../job_creator';
 import { isCategorizationJobCreator } from '../job_creator';
 import { populateValidationMessages } from './util';
 import type { CardinalityValidatorResult, JobExistsResult, GroupsExistResult } from './validators';
-import { jobIdValidator, groupIdsValidator } from './validators';
+import { cardinalityValidator, jobIdValidator, groupIdsValidator } from './validators';
 
 import { JOB_TYPE } from '../../../../../../common/constants/new_job';
 
@@ -114,7 +114,7 @@ export class JobValidator {
     };
 
     this._asyncValidators$ = [
-      // cardinalityValidator(this._jobCreatorSubject$), disabled for now as datafeed fails !!!!!!!!!!!!!!!!!!!!!!!!!
+      cardinalityValidator(this._jobCreatorSubject$),
       jobIdValidator(this._jobCreatorSubject$),
       groupIdsValidator(this._jobCreatorSubject$),
     ];

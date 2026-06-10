@@ -168,43 +168,41 @@ export const JobsList: FC<JobsListProps> = ({
 
     return (
       <>
-        <span>
-          {id}
-          {showManaged && (
-            <>
-              {' '}
-              <EuiToolTip
-                content={i18n.translate('xpack.ml.jobsList.managedBadgeTooltip', {
-                  defaultMessage:
-                    'This job is preconfigured and managed by Elastic; other parts of the product might have might have dependencies on its behavior.',
+        {id}
+        {showManaged && (
+          <>
+            {' '}
+            <EuiToolTip
+              content={i18n.translate('xpack.ml.jobsList.managedBadgeTooltip', {
+                defaultMessage:
+                  'This job is preconfigured and managed by Elastic; other parts of the product might have might have dependencies on its behavior.',
+              })}
+            >
+              <EuiBadge tabIndex={0} color="hollow" data-test-subj="mlJobListRowManagedLabel">
+                {i18n.translate('xpack.ml.jobsList.managedBadgeLabel', {
+                  defaultMessage: 'Managed',
                 })}
-              >
-                <EuiBadge tabIndex={0} color="hollow" data-test-subj="mlJobListRowManagedLabel">
-                  {i18n.translate('xpack.ml.jobsList.managedBadgeLabel', {
-                    defaultMessage: 'Managed',
-                  })}
-                </EuiBadge>
-              </EuiToolTip>
-            </>
-          )}
-          {showCpsLegacy && (
-            <>
-              {' '}
-              <EuiToolTip
-                content={i18n.translate('xpack.ml.jobsList.cpsLegacyBadgeTooltip', {
-                  defaultMessage:
-                    'This job is not using CPS project routing. Consider updating the datafeed project routing.',
+              </EuiBadge>
+            </EuiToolTip>
+          </>
+        )}
+        {showCpsLegacy && (
+          <>
+            {' '}
+            <EuiToolTip
+              content={i18n.translate('xpack.ml.jobsList.cpsLegacyBadgeTooltip', {
+                defaultMessage:
+                  'This job is not using CPS project routing. Consider updating the datafeed project routing.',
+              })}
+            >
+              <EuiBadge tabIndex={0} color="hollow" data-test-subj="mlJobListRowCpsLegacyLabel">
+                {i18n.translate('xpack.ml.jobsList.cpsLegacyBadgeLabel', {
+                  defaultMessage: 'Legacy',
                 })}
-              >
-                <EuiBadge tabIndex={0} color="hollow" data-test-subj="mlJobListRowCpsLegacyLabel">
-                  {i18n.translate('xpack.ml.jobsList.cpsLegacyBadgeLabel', {
-                    defaultMessage: 'Legacy',
-                  })}
-                </EuiBadge>
-              </EuiToolTip>
-            </>
-          )}
-        </span>
+              </EuiBadge>
+            </EuiToolTip>
+          </>
+        )}
       </>
     );
   }, []);

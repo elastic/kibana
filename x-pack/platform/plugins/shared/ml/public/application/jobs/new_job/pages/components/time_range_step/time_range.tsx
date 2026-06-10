@@ -31,7 +31,6 @@ import { JOB_TYPE } from '../../../../../../../common/constants/new_job';
 import type { TimeRange } from '../../../common/components';
 import { TimeRangePicker } from '../../../common/components';
 import { useMlKibana } from '../../../../../contexts/kibana';
-// import { ProjectRoutingSelect } from '../common/project_routing/project_routing';
 
 export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
   const timefilter = useTimefilter();
@@ -57,21 +56,15 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
     FROZEN_TIER_PREFERENCE.EXCLUDE
   );
 
-  const [projectRouting, setProjectRouting] = useState<string | null>(
-    jobCreator.projectRouting ?? null
-  );
-
   async function loadChart() {
     setLoadingData(true);
     try {
-      // TODO loadEventRateChart should refresh if projectRouting changes
       const resp = await chartLoader.loadEventRateChart(
         jobCreator.start,
         jobCreator.end,
         chartInterval.getInterval().asMilliseconds(),
         jobCreator.runtimeMappings ?? undefined,
-        jobCreator.datafeedConfig.indices_options,
-        jobCreator.projectRouting ?? undefined
+        jobCreator.datafeedConfig.indices_options
       );
       setEventRateChartData(resp);
     } catch (error) {
@@ -111,13 +104,7 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
       start: jobCreator.start,
       end: jobCreator.end,
     });
-
-    if (jobCreator.projectRouting !== projectRouting) {
-      setProjectRouting(jobCreator.projectRouting ?? null);
-      loadChart();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [jobCreator, jobCreatorUpdated, projectRouting]);
+  }, [jobCreator, jobCreatorUpdated]);
 
   function fullTimeRangeCallback(range: GetTimeFieldRangeResponse) {
     if (range.start !== null && range.end !== null) {
@@ -166,18 +153,6 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
             showAxis={true}
             loading={loadingData}
           />
-          {/*
-          {services.cps?.cpsManager ? (
-            <>
-              <EuiSpacer />
-              <EuiFlexGroup>
-                <EuiFlexItem>
-                  <ProjectRoutingSelect />
-                </EuiFlexItem>
-                <EuiFlexItem />
-              </EuiFlexGroup>
-            </>
-          ) : null} */}
 
           <WizardNav
             next={() =>

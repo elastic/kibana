@@ -697,6 +697,7 @@ export function mlApiProvider(httpService: HttpService) {
       timeFieldName,
       earliestMs,
       latestMs,
+      datafeed,
     }: {
       index: string;
       fieldNames: string[];
@@ -704,6 +705,7 @@ export function mlApiProvider(httpService: HttpService) {
       timeFieldName: string;
       earliestMs: number;
       latestMs: number;
+      datafeed?: Datafeed;
     }) {
       const body = JSON.stringify({
         index,
@@ -712,6 +714,7 @@ export function mlApiProvider(httpService: HttpService) {
         timeFieldName,
         earliestMs,
         latestMs,
+        datafeed,
       });
 
       return httpService.http<any>({

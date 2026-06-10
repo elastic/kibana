@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { runtimeMappingsSchema } from './runtime_mappings_schema';
-import { indicesOptionsSchema } from './datafeeds_schema';
+import { datafeedConfigSchema, indicesOptionsSchema } from './datafeeds_schema';
 
 const indexPatternSchema = {
   index: schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 10000 })], {
@@ -38,15 +38,12 @@ export const getCardinalityOfFieldsSchema = schema.object({
   ...querySchema,
   ...timeFieldNameSchema,
   earliestMs: schema.maybe(
-    schema.oneOf([schema.number(), schema.string()], {
-      meta: { description: 'Earliest timestamp for search, as epoch ms' },
-    })
+    schema.number({ meta: { description: 'Earliest timestamp for search, as epoch ms' } })
   ),
   latestMs: schema.maybe(
-    schema.oneOf([schema.number(), schema.string()], {
-      meta: { description: 'Latest timestamp for search, as epoch ms' },
-    })
+    schema.number({ meta: { description: 'Latest timestamp for search, as epoch ms' } })
   ),
+  datafeed: schema.maybe(datafeedConfigSchema),
 });
 
 export const getTimeFieldRangeSchema = schema.object({

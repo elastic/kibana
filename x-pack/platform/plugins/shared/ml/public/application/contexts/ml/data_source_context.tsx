@@ -23,9 +23,6 @@ export interface DataSourceContextValue {
   combinedQuery: any;
   selectedDataView: DataView;
   selectedSavedSearch: SavedSearch | null;
-  /**
-   * `project_routing` query string on the new job wizard URL, when present.
-   */
   projectRouting?: string;
 }
 

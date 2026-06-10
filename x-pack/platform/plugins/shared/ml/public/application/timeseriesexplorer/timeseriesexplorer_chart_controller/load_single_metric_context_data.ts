@@ -12,6 +12,7 @@ import { lastValueFrom } from 'rxjs';
 import type { CriteriaField } from '@kbn/ml-common-types/results';
 
 import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
 import {
   isModelPlotEnabled,
   isModelPlotChartableForDetector,
@@ -110,11 +111,11 @@ export interface LoadSingleMetricContextDataDeps {
     ) => import('rxjs').Observable<{ results: Record<string, unknown> }>;
     getChartDetails: (
       job: CombinedJob,
+      datafeed: Datafeed,
       detectorIndex: number,
       entityFields: LoadSingleMetricContextDataEntityControl[],
       earliestMs: number,
-      latestMs: number,
-      metricFunctionDescription?: string
+      latestMs: number
     ) => Promise<{ success: boolean; results: SmvChartDetails }>;
   };
   mlResultsService: {
@@ -302,11 +303,11 @@ async function executeLoadSingleMetricContextData(
 
   const chartDetailsPromise = deps.mlTimeSeriesSearchService.getChartDetails(
     selectedJob,
+    selectedJob.datafeed_config,
     detectorIndex,
     entityControls,
     earliestMs,
-    latestMs,
-    functionDescription
+    latestMs
   );
 
   const forecastPromise =
