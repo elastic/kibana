@@ -6,6 +6,7 @@
  */
 
 import * as t from 'io-ts';
+import { privilegesTypeRt } from '@kbn/apm-types';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import type { AgentKeysResponse } from './get_agent_keys';
 import { getAgentKeys } from './get_agent_keys';
@@ -15,7 +16,6 @@ import type { InvalidateAgentKeyResponse } from './invalidate_agent_key';
 import { invalidateAgentKey } from './invalidate_agent_key';
 import type { CreateAgentKeyResponse } from './create_agent_key';
 import { createAgentKey } from './create_agent_key';
-import { privilegesTypeRt } from '../../../common/privilege_type';
 
 const agentKeysRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/agent_keys',

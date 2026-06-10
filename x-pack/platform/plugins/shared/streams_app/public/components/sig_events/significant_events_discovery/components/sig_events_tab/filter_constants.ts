@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-export const STATUS_OPTIONS = ['promoted', 'acknowledged', 'demoted'] as const;
-export type StatusOption = (typeof STATUS_OPTIONS)[number];
+import { SIG_EVENT_STATUS_OPTIONS, type SigEventStatus } from '@kbn/streams-schema';
 
-export const STATUS_COLORS: Record<StatusOption, string> = {
+export const STATUS_COLORS: Record<SigEventStatus, string> = {
   promoted: 'success',
   acknowledged: 'warning',
   demoted: 'default',
 };
 
-const isStatusOption = (v: string): v is StatusOption =>
-  (STATUS_OPTIONS as ReadonlyArray<string>).includes(v);
+const isStatusOption = (v: string): v is SigEventStatus =>
+  (SIG_EVENT_STATUS_OPTIONS as ReadonlyArray<string>).includes(v);
 
 export const getStatusColor = (status: string): string =>
   isStatusOption(status) ? STATUS_COLORS[status] : 'default';

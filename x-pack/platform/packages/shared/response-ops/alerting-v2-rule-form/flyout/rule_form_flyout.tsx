@@ -101,7 +101,11 @@ export const RuleFormFlyout = ({
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={onClose} isLoading={isLoading}>
+              <EuiButtonEmpty
+                onClick={onClose}
+                isLoading={isLoading}
+                data-test-subj="ruleV2FlyoutCancelButton"
+              >
                 <FormattedMessage
                   id="xpack.alertingV2.ruleForm.cancelButtonLabel"
                   defaultMessage="Cancel"
