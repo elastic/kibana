@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { buildStrictRouteValidationWithZod } from './utils/build_strict_route_validation';
 import { z } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../common';
@@ -41,8 +41,8 @@ export function registerForceLogExtraction(router: EntityStorePluginRouter) {
         version: API_VERSIONS.internal.v2,
         validate: {
           request: {
-            params: buildRouteValidationWithZod(paramsSchema),
-            body: buildRouteValidationWithZod(bodySchema),
+            params: buildStrictRouteValidationWithZod(paramsSchema),
+            body: buildStrictRouteValidationWithZod(bodySchema),
           },
         },
       },

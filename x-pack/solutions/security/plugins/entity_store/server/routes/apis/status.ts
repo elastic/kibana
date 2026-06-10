@@ -6,7 +6,8 @@
  */
 
 import path from 'node:path';
-import { buildRouteValidationWithZod, BooleanFromString } from '@kbn/zod-helpers/v4';
+import { BooleanFromString } from '@kbn/zod-helpers/v4';
+import { buildStrictRouteValidationWithZod } from './utils/build_strict_route_validation';
 import { z } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../common';
@@ -118,7 +119,7 @@ export function registerStatus(router: EntityStorePluginRouter) {
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            query: buildRouteValidationWithZod(querySchema),
+            query: buildStrictRouteValidationWithZod(querySchema),
           },
         },
         options: {

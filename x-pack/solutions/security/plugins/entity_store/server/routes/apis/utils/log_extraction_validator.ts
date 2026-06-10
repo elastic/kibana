@@ -103,10 +103,10 @@ export function validateLogExtractionParams(
   validateDelayVsLookbackPeriod(data, ctx);
 }
 
-export const LogExtractionInstallSchema = LogExtractionInstallParams.strict()
-  .superRefine(validateLogExtractionParams)
-  .optional();
+export const LogExtractionInstallSchema = LogExtractionInstallParams.superRefine(
+  validateLogExtractionParams
+).optional();
 
-export const LogExtractionUpdadeSchema = LogExtractionUpdateParams.strict().superRefine(
+export const LogExtractionUpdadeSchema = LogExtractionUpdateParams.superRefine(
   validateLogExtractionParams
 );

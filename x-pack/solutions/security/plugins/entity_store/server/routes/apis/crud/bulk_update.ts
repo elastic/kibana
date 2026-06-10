@@ -6,7 +6,8 @@
  */
 
 import path from 'node:path';
-import { BooleanFromString, buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { BooleanFromString } from '@kbn/zod-helpers/v4';
+import { buildStrictRouteValidationWithZod } from '../utils/build_strict_route_validation';
 import { z } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { unflattenObject } from '@kbn/object-utils';
@@ -54,8 +55,8 @@ export function registerCRUDBulkUpdate(router: EntityStorePluginRouter) {
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            body: buildRouteValidationWithZod(bodySchema),
-            query: buildRouteValidationWithZod(querySchema),
+            body: buildStrictRouteValidationWithZod(bodySchema),
+            query: buildStrictRouteValidationWithZod(querySchema),
           },
         },
         options: {

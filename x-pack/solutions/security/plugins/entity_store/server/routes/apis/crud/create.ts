@@ -6,7 +6,7 @@
  */
 
 import path from 'node:path';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { buildStrictRouteValidationWithZod } from '../utils/build_strict_route_validation';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { z } from '@kbn/zod/v4';
 import { unflattenObject } from '@kbn/object-utils';
@@ -45,10 +45,10 @@ export function registerCRUDCreate(router: EntityStorePluginRouter) {
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            body: buildRouteValidationWithZod(
+            body: buildStrictRouteValidationWithZod(
               z.preprocess((val) => unflattenObject(val as Record<string, unknown>), Entity)
             ),
-            params: buildRouteValidationWithZod(paramsSchema),
+            params: buildStrictRouteValidationWithZod(paramsSchema),
           },
         },
         options: {

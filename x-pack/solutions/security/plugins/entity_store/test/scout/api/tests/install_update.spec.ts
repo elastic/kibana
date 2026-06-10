@@ -205,6 +205,19 @@ apiTest.describe('Entity Store install / update API tests', { tag: ENTITY_STORE_
     expect(update.statusCode).toBe(400);
   });
 
+  apiTest('uninstall rejects unknown body keys', async ({ apiClient, kbnClient }) => {
+    await kbnClient.uiSettings.update({
+      [FF_ENABLE_ENTITY_STORE_V2]: true,
+    });
+
+    const uninstall = await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
+      headers: defaultHeaders,
+      responseType: 'json',
+      body: { non_valid_property: 1 },
+    });
+    expect(uninstall.statusCode).toBe(400);
+  });
+
   apiTest(
     'Update should not change logExtraction properties that were not included in the update',
     async ({ apiClient, kbnClient }) => {
