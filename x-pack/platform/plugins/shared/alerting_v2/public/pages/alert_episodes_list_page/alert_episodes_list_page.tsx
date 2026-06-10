@@ -45,6 +45,7 @@ import {
   EpisodeRuleCell,
 } from '@kbn/alerting-v2-episodes-ui/components/episodes_table_cell_renderers';
 import { AlertEpisodeAssigneeCell } from '@kbn/alerting-v2-episodes-ui/components/assignee_cell';
+import { ExperimentalBadge } from '../../components/experimental_badge';
 import { paths } from '../../constants';
 import type { AlertEpisodesKibanaServices } from '../../episodes_kibana_services';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
@@ -318,7 +319,16 @@ export const AlertEpisodesListPage = () => {
     >
       <EuiPageHeader
         bottomBorder
-        pageTitle={i18n.EPISODES_LIST_PAGE_TITLE}
+        pageTitle={
+          <EuiFlexGroup component="span" alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false} component="span">
+              {i18n.EPISODES_LIST_PAGE_TITLE}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false} component="span">
+              <ExperimentalBadge />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
         rightSideItems={[
           <EuiButton
             key="manage-rules"
