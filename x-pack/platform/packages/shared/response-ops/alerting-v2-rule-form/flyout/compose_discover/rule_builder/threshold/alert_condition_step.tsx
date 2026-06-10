@@ -101,9 +101,15 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
       .filter((f) => f.type === 'date')
       .map((f) => f.name)
       .sort();
-    if (!dates.includes('@timestamp')) dates.unshift('@timestamp');
+    if (dates.length === 0) return ['@timestamp'];
     return dates;
   }, [fieldMap]);
+
+  useEffect(() => {
+    if (dateFields.length > 0 && !dateFields.includes(thresholdValues.timeField)) {
+      onThresholdValuesChange({ ...thresholdValues, timeField: dateFields[0] });
+    }
+  }, [dateFields, thresholdValues, onThresholdValuesChange]);
 
   const esqlQuery = useMemo(() => buildThresholdEsql(thresholdValues), [thresholdValues]);
   const recoveryBlock = useMemo(() => buildRecoveryBlock(thresholdValues), [thresholdValues]);
