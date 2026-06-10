@@ -37,12 +37,6 @@ const mockProfiles = [
   { uid: 'uid-charlie', user: { full_name: '', email: '', username: 'charlie' } },
 ];
 
-mockUseBulkGetProfiles.mockReturnValue({
-  data: mockProfiles,
-  isFetching: false,
-  isLoading: false,
-} as unknown as ReturnType<typeof useBulkGetProfilesModule.useBulkGetProfiles>);
-
 describe('AlertEpisodesAssigneeFilter', () => {
   const defaultProps = {
     selectedAssigneeUid: undefined,
@@ -55,6 +49,11 @@ describe('AlertEpisodesAssigneeFilter', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseBulkGetProfiles.mockReturnValue({
+      data: mockProfiles,
+      isFetching: false,
+      isLoading: false,
+    } as unknown as ReturnType<typeof useBulkGetProfilesModule.useBulkGetProfiles>);
   });
 
   const openPopover = () => user.click(screen.getByTestId('test-assignee-filter-button'));
@@ -137,7 +136,7 @@ describe('AlertEpisodesAssigneeFilter', () => {
     // When assigneeUids is empty, react-query disables the query: isLoading is true
     // (never fetched) but isFetching is false (nothing is actively fetching).
     // The component must use isFetching, not isLoading, to avoid an infinite loading state.
-    mockUseBulkGetProfiles.mockReturnValueOnce({
+    mockUseBulkGetProfiles.mockReturnValue({
       data: [],
       isFetching: false,
       isLoading: true,
@@ -146,11 +145,6 @@ describe('AlertEpisodesAssigneeFilter', () => {
     render(<AlertEpisodesAssigneeFilter {...defaultProps} assigneeUids={[]} />);
     await openPopover();
 
-    expect(InlineFilterPopoverSpy).toHaveBeenCalledWith(
-      expect.objectContaining({
-        isLoading: false,
-      }),
-      {}
-    );
+    expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
   });
 });
