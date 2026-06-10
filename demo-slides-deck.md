@@ -2,7 +2,6 @@
 marp: true
 size: 16:9
 paginate: true
-footer: 'AI-Assisted PR Review with Domain Knowledge · Madrid 2026 · Georgii Gorbachev'
 ---
 
 <style>
@@ -251,7 +250,7 @@ section.headline-slide h1 { display: none; }
 }
 .takeaway b { color: var(--elastic-teal); }
 .principle {
-  margin-top: 36px;
+  margin: 36px;
   font-size: 19px;
   color: var(--muted);
   font-style: italic;
@@ -271,28 +270,28 @@ section.headline-slide h1 { display: none; }
 }
 </style>
 
-# Real-PR proof
-## Two from our backlog
+# Real PR reviews
 
 - Same skill: `/dex-review-code`
-- Same code, two clones — the only difference is the `.agents/domains/` folder
-- Four PRs reviewed; we'll walk two
+- Review 1: _GENERIC review (NO domain knowledge)_
+- Review 2: _DOMAIN-AWARE review (WITH domain knowledge)_
+- Four PRs reviewed; we'll check two of them
 
 <div class="cards">
   <div class="card card-highlight">
-    <span class="card-star">⭐</span><strong>#271722</strong><br/>
-    <code>rulesClient.bulkCreate()</code>
-  </div>
-  <div class="card card-highlight">
-    <span class="card-star">⭐</span><strong>#272038</strong><br/>
+    <strong><a href="https://github.com/elastic/kibana/pull/272038" target="_blank">#272038</a></strong><br/>
     Move install/upgrade/revert into <code>DetectionRulesClient</code>
   </div>
+  <div class="card card-highlight">
+    <strong><a href="https://github.com/elastic/kibana/pull/271722" target="_blank">#271722</a></strong><br/>
+    <code>rulesClient.bulkCreate()</code>
+  </div>
   <div class="card card-muted">
-    <strong>#268165</strong><br/>
+    <strong><a href="https://github.com/elastic/kibana/pull/268165" target="_blank">#268165</a></strong><br/>
     Refine rules <code>_search</code>, <code>_review</code> API contracts
   </div>
   <div class="card card-muted">
-    <strong>#269617</strong><br/>
+    <strong><a href="https://github.com/elastic/kibana/pull/269617" target="_blank">#269617</a></strong><br/>
     MVP UI for rule changes history
   </div>
 </div>
@@ -301,58 +300,68 @@ section.headline-slide h1 { display: none; }
 
 <!-- _class: pr-row -->
 
-# #271722 — `rulesClient.bulkCreate()`
-## Bulk rule creation in the alerting layer
+# [#272038](https://github.com/elastic/kibana/pull/272038) - Move install/upgrade/revert into `DetectionRulesClient`
+
+<div class="two-col">
+  <div class="col-generic">
+    <div class="col-label">🤨 Generic</div>
+    <div class="col-file">legacy_create_prepackaged_rules.ts</div>
+    <a href="https://github.com/elastic/kibana/pull/272038#discussion_r3364709819" target="_blank">
+      <img src="demo-pr-272038-comment-1-generic.png" alt="Generic review comment flagging DRC bypass on upgrade step" />
+    </a>
+  </div>
+  <div class="col-domain">
+    <div class="col-label">🎯 Domain-aware</div>
+    <div class="col-file">legacy_create_prepackaged_rules.ts</div>
+    <a href="https://github.com/elastic/kibana/pull/272038#discussion_r3364773139" target="_blank">
+      <img src="demo-pr-272038-comment-1-domain.png" alt="Domain-aware review with same parity catch: install through DRC, upgrade bypasses it" />
+    </a>
+  </div>
+</div>
+
+---
+
+<!-- _class: pr-row -->
+
+# [#272038](https://github.com/elastic/kibana/pull/272038) - Move install/upgrade/revert into `DetectionRulesClient`
+
+<div class="two-col">
+  <div class="col-generic col-empty">(no analog - generic review didn't find this issue)</div>
+  <div class="col-domain">
+    <div class="col-label">🎯 Domain-aware</div>
+    <div class="col-file">detection_rules_client_interface.ts</div>
+    <a href="https://github.com/elastic/kibana/pull/272038#discussion_r3364773129" target="_blank">
+      <img src="demo-pr-272038-comment-2-domain.png" alt="Domain-aware comment on abstraction-boundary leakage of RuleUpgradeContext through IDetectionRulesClient" />
+    </a>
+  </div>
+</div>
+
+---
+
+<!-- _class: pr-row -->
+
+# [#271722](https://github.com/elastic/kibana/pull/271722) - `rulesClient.bulkCreate()`
 
 <div class="two-col">
   <div class="col-generic">
     <div class="col-label">🤨 Generic</div>
     <div class="col-file">route.ts</div>
-    <img src="demo-pr-271722-comment-1-generic.png" alt="Generic review comment flagging routeLimitedConcurrencyTag(1) as too aggressive" />
+    <a href="https://github.com/elastic/kibana/pull/271722#discussion_r3364307489" target="_blank">
+      <img src="demo-pr-271722-comment-1-generic.png" alt="Generic review comment flagging routeLimitedConcurrencyTag(1) as too aggressive" />
+    </a>
   </div>
   <div class="col-domain">
     <div class="col-label">🎯 Domain-aware</div>
     <div class="col-file">constants.ts</div>
-    <img src="demo-pr-271722-comment-1-domain.png" alt="Domain-aware review comment citing heavy-endpoints rate-limit invariant and MSSP 300-spaces scale" />
+    <a href="https://github.com/elastic/kibana/pull/271722#discussion_r3364397972" target="_blank">
+      <img src="demo-pr-271722-comment-1-domain.png" alt="Domain-aware review comment citing heavy-endpoints rate-limit invariant and MSSP 300-spaces scale" />
+    </a>
   </div>
 </div>
-
-<div class="footer-note">Same architectural decision. Generic: <em>"aggressive, raise it."</em>  Domain-aware: <em>scale constraint + bounded fix (3–5, not 1).</em></div>
 
 ---
 
-<!-- _class: pr-row-stacked -->
-
-# #272038 — Move install/upgrade/revert into `DetectionRulesClient`
-## Parity at the surface, delta beneath
-
-<div class="two-col">
-  <div class="col-generic">
-    <div class="col-label">🤨 Generic</div>
-    <div class="col-file">legacy_create_prepackaged_rules.ts</div>
-    <img src="demo-pr-272038-comment-1-generic.png" alt="Generic review comment flagging DRC bypass on upgrade step" />
-  </div>
-  <div class="col-domain">
-    <div class="col-label">🎯 Domain-aware</div>
-    <div class="col-file">legacy_create_prepackaged_rules.ts</div>
-    <img src="demo-pr-272038-comment-1-domain.png" alt="Domain-aware review with same parity catch: install through DRC, upgrade bypasses it" />
-  </div>
-</div>
-
-<div class="two-col">
-  <div class="col-generic col-empty">(no analog — generic has no vocabulary for this)</div>
-  <div class="col-domain">
-    <div class="col-label">🎯 Domain-aware</div>
-    <div class="col-file">detection_rules_client_interface.ts</div>
-    <img src="demo-pr-272038-comment-2-domain.png" alt="Domain-aware comment on abstraction-boundary leakage of RuleUpgradeContext through IDetectionRulesClient" />
-  </div>
-</div>
-
-<div class="footer-note">Both caught the obvious DRC bypass. Only domain-aware noticed the public interface leaking a sibling-domain handler-level type.</div>
-
----
-
-# How domain discovery works
+# How domain knowledge discovery works
 
 <div class="flow">
   <div class="flow-step">
@@ -361,12 +370,12 @@ section.headline-slide h1 { display: none; }
   </div>
   <div class="flow-arrow">▶</div>
   <div class="flow-step">
-    <div class="flow-box"><strong>matched paths</strong><br/>∩ registered domains</div>
+    <div class="flow-box"><strong>matched paths</strong><br/>changed paths ∩ paths of registered domains</div>
     <div class="flow-caption">Intersect with registered domains</div>
   </div>
   <div class="flow-arrow">▶</div>
   <div class="flow-step">
-    <div class="flow-box"><strong>loaded domain</strong><br/><code>domain.json</code><br/>+ <code>.md</code> files</div>
+    <div class="flow-box"><strong>loaded domain</strong><br/><code>domain.json</code>+ .md files</div>
     <div class="flow-caption">Load the matching knowledge</div>
   </div>
   <div class="flow-arrow">▶</div>
@@ -376,8 +385,6 @@ section.headline-slide h1 { display: none; }
   </div>
 </div>
 
-<div class="footer-note">Same model in both terminals. No fine-tuning. <strong>Only the loaded context differs.</strong></div>
-
 ---
 
 # Anatomy of a domain knowledge file
@@ -386,14 +393,14 @@ section.headline-slide h1 { display: none; }
   <div>
     <div class="col-label">📄 domain.json</div>
 <pre><code>{
-  "slug": "detection-...",
-  "name": "Rule Management",
-  "owners": [...],
+  "slug": "detection-rule-management",
+  "name": "Detection Rule Management",
+  "owners": ["@elastic/security-detection-rule-management"],
   "paths": [
     "x-pack/.../rule_management/**"
   ],
-  "knowledge_files": [
-    "detection-rule-management.md"
+  "files": [
+    { "path": "detection-rule-management.md" }
   ]
 }</code></pre>
   </div>
@@ -414,7 +421,7 @@ section.headline-slide h1 { display: none; }
   </div>
 </div>
 
-<div class="footer-note">Captured with <code>/dex-domain-capture</code> — 30–60 min one-time, then it pays off on every review.</div>
+<div class="footer-note">Captured with <code>/dex-domain-capture</code>.</div>
 
 ---
 
@@ -422,12 +429,26 @@ section.headline-slide h1 { display: none; }
 
 # (hidden)
 
-<div class="headline">Smart is not the same as <em>informed</em>.</div>
+<div class="headline">Smart is not the same as <em>informed</em></div>
 
 <div class="takeaways">
-  <div class="takeaway"><b>The abstraction</b> — The model doesn't know that <code>IDetectionRulesClient</code> is <strong>the</strong> boundary in our domain.</div>
-  <div class="takeaway"><b>The history</b> — It doesn't know we got burned by an <code>as</code>-cast on <code>lastRunStatus</code> in PR #262307.</div>
-  <div class="takeaway"><b>The scale</b> — It doesn't know MSSP customers run 300 spaces × 10,000 rules per space.</div>
+  <div class="takeaway"><b>The rules</b>: The model doesn't know that <code>IDetectionRulesClient</code> is <strong>the</strong> business logic abstraction in our domain.</div>
+  <div class="takeaway"><b>The history</b>: It doesn't know we got burned in the past by exposing the data model via the API endpoints.</div>
+  <div class="takeaway"><b>The scale</b>: It doesn't know that largest MSSP customers run 300 spaces × 3,000 rules per space, and need concurrent bulk actions across spaces.</div>
 </div>
 
-<div class="principle">AI dev automation is as good as the quality and accuracy of the information you put in the context window.</div>
+---
+
+<!-- _class: headline-slide -->
+
+# (hidden)
+
+<div class="headline">What's in the context window is key</div>
+
+<div class="principle">An AI agent is as good as the quality and accuracy of the information you put in its context window.</div>
+
+<div class="takeaways">
+  <div class="takeaway"><b>Domain knowledge</b>: today - missing, tomorrow - sufficient, eventually - comprehensive and accurate.</div>
+  <div class="takeaway"><b>Team standards</b>: cross-domain rules and guidelines.</div>
+  <div class="takeaway"><b>Decision log</b>: why certain decisions were made.</div>
+</div>
