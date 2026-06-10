@@ -100,7 +100,7 @@ export const parseRulePreviewCommand = (command: string): ParsedPreviewCommand =
 
     .command(
       'esql',
-      'ES|QL detection rule',
+      'Preview an ES|QL detection rule',
       (y) => y
         .option('query', { type: 'string', demandOption: true, desc: 'ES|QL query string' })
         .example('$0 esql --query "FROM logs-* | LIMIT 10"', '')
@@ -113,7 +113,7 @@ export const parseRulePreviewCommand = (command: string): ParsedPreviewCommand =
 
     .command(
       'eql',
-      'EQL (event query language) detection rule',
+      'Preview an EQL (event query language) detection rule',
       (y) => y
         .option('query', { type: 'string', demandOption: true, desc: 'EQL query string' })
         .options(INDEX_OPTIONS)
@@ -130,7 +130,7 @@ export const parseRulePreviewCommand = (command: string): ParsedPreviewCommand =
 
     .command(
       'query',
-      'Custom query detection rule (KQL / Lucene)',
+      'Preview a custom query detection rule (KQL / Lucene)',
       (y) => y
         .option('query', { type: 'string', desc: 'KQL / Lucene query (omit to match all documents)' })
         .options(QUERY_LANGUAGE_OPTIONS)
@@ -150,7 +150,7 @@ export const parseRulePreviewCommand = (command: string): ParsedPreviewCommand =
 
     .command(
       'saved_query',
-      'Saved query detection rule',
+      'Preview a saved query detection rule',
       (y) => y
         .option('saved-id', { type: 'string', demandOption: true, desc: 'Saved query ID (Kibana saved object)' })
         .option('query', { type: 'string', desc: 'KQL / Lucene query override' })
@@ -171,7 +171,7 @@ export const parseRulePreviewCommand = (command: string): ParsedPreviewCommand =
 
     .command(
       'threshold',
-      'Threshold-based detection rule',
+      'Preview a threshold-based detection rule',
       (y) => y
         .option('query', { type: 'string', demandOption: true, desc: 'KQL / Lucene query' })
         .option('threshold-value', { type: 'number', demandOption: true, desc: 'Minimum event count to alert (integer ≥ 1)' })
@@ -197,7 +197,7 @@ export const parseRulePreviewCommand = (command: string): ParsedPreviewCommand =
 
     .command(
       'threat_match',
-      'Threat indicator match detection rule',
+      'Preview a threat indicator match detection rule',
       (y) => y
         .option('query', { type: 'string', demandOption: true, desc: 'Source events query' })
         .option('threat-query', { type: 'string', demandOption: true, desc: 'Query against the threat index' })
@@ -240,7 +240,7 @@ export const parseRulePreviewCommand = (command: string): ParsedPreviewCommand =
 
     .command(
       'machine_learning',
-      'Machine learning anomaly detection rule',
+      'Preview a machine learning anomaly detection rule',
       (y) => y
         .option('job-id', { type: 'string', array: true, demandOption: true, desc: 'ML job ID (repeat for multiple jobs)' })
         .option('anomaly-threshold', { type: 'number', demandOption: true, desc: 'Minimum anomaly score to alert (0–100)' })
@@ -258,7 +258,7 @@ export const parseRulePreviewCommand = (command: string): ParsedPreviewCommand =
 
     .command(
       'new_terms',
-      'New terms detection rule',
+      'Preview a new terms detection rule',
       (y) => y
         .option('query', { type: 'string', demandOption: true, desc: 'KQL / Lucene query for events to analyse' })
         .option('new-terms-fields', { type: 'string', array: true, demandOption: true, desc: 'Field(s) to monitor for new values (repeat for multiple, max 3)' })

@@ -118,14 +118,14 @@ Object {
   "text": "  <command>
 
 Commands:
-   esql             ES|QL detection rule
-   eql              EQL (event query language) detection rule
-   query            Custom query detection rule (KQL / Lucene)
-   saved_query      Saved query detection rule
-   threshold        Threshold-based detection rule
-   threat_match     Threat indicator match detection rule
-   machine_learning  Machine learning anomaly detection rule
-   new_terms        New terms detection rule
+   esql             Preview an ES|QL detection rule
+   eql              Preview an EQL (event query language) detection rule
+   query            Preview a custom query detection rule (KQL / Lucene)
+   saved_query      Preview a saved query detection rule
+   threshold        Preview a threshold-based detection rule
+   threat_match     Preview a threat indicator match detection rule
+   machine_learning  Preview a machine learning anomaly detection rule
+   new_terms        Preview a new terms detection rule
 
 Options:
   --interval         Rule run frequency, e.g. \\"5m\\", \\"1h\\"  [string] [default: \\"1h\\"]
@@ -140,7 +140,7 @@ Object {
   "kind": "help",
   "text": "  eql
 
-EQL (event query language) detection rule
+Preview an EQL (event query language) detection rule
 
 Options:
   --interval         Rule run frequency, e.g. \\"5m\\", \\"1h\\"  [string] [default: \\"1h\\"]
@@ -161,7 +161,7 @@ Object {
   "kind": "help",
   "text": "  esql
 
-ES|QL detection rule
+Preview an ES|QL detection rule
 
 Options:
   --interval         Rule run frequency, e.g. \\"5m\\", \\"1h\\"  [string] [default: \\"1h\\"]
@@ -182,14 +182,14 @@ Object {
   "text": "  <command>
 
 Commands:
-   esql             ES|QL detection rule
-   eql              EQL (event query language) detection rule
-   query            Custom query detection rule (KQL / Lucene)
-   saved_query      Saved query detection rule
-   threshold        Threshold-based detection rule
-   threat_match     Threat indicator match detection rule
-   machine_learning  Machine learning anomaly detection rule
-   new_terms        New terms detection rule
+   esql             Preview an ES|QL detection rule
+   eql              Preview an EQL (event query language) detection rule
+   query            Preview a custom query detection rule (KQL / Lucene)
+   saved_query      Preview a saved query detection rule
+   threshold        Preview a threshold-based detection rule
+   threat_match     Preview a threat indicator match detection rule
+   machine_learning  Preview a machine learning anomaly detection rule
+   new_terms        Preview a new terms detection rule
 
 Options:
   --interval         Rule run frequency, e.g. \\"5m\\", \\"1h\\"  [string] [default: \\"1h\\"]
@@ -204,7 +204,7 @@ Object {
   "kind": "help",
   "text": "  machine_learning
 
-Machine learning anomaly detection rule
+Preview a machine learning anomaly detection rule
 
 Options:
   --interval           Rule run frequency, e.g. \\"5m\\", \\"1h\\"  [string] [default: \\"1h\\"]
@@ -225,7 +225,7 @@ Object {
   "kind": "help",
   "text": "  new_terms
 
-New terms detection rule
+Preview a new terms detection rule
 
 Options:
   --interval              Rule run frequency, e.g. \\"5m\\", \\"1h\\"  [string] [default: \\"1h\\"]
@@ -249,7 +249,7 @@ Object {
   "kind": "help",
   "text": "  query
 
-Custom query detection rule (KQL / Lucene)
+Preview a custom query detection rule (KQL / Lucene)
 
 Options:
   --interval         Rule run frequency, e.g. \\"5m\\", \\"1h\\"  [string] [default: \\"1h\\"]
@@ -271,7 +271,7 @@ Object {
   "kind": "help",
   "text": "  saved_query
 
-Saved query detection rule
+Preview a saved query detection rule
 
 Options:
   --interval         Rule run frequency, e.g. \\"5m\\", \\"1h\\"  [string] [default: \\"1h\\"]
@@ -294,7 +294,7 @@ Object {
   "kind": "help",
   "text": "  threat_match
 
-Threat indicator match detection rule
+Preview a threat indicator match detection rule
 
 Options:
   --interval               Rule run frequency, e.g. \\"5m\\", \\"1h\\"  [string] [default: \\"1h\\"]
@@ -321,7 +321,7 @@ Object {
   "kind": "help",
   "text": "  threshold
 
-Threshold-based detection rule
+Preview a threshold-based detection rule
 
 Options:
   --interval         Rule run frequency, e.g. \\"5m\\", \\"1h\\"  [string] [default: \\"1h\\"]
