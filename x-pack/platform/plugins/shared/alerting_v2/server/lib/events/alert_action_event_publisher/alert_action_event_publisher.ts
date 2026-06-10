@@ -118,7 +118,7 @@ export class AlertActionEventPublisher implements AlertActionEventPublisherContr
         return {
           type: EPISODE_SNOOZED_EVENT_TYPE,
           ...envelope,
-          payload: { expiry: action.expiry ?? null },
+          payload: { expiry: action.expiry! },
         };
       case ALERT_EPISODE_ACTION_TYPE.UNSNOOZE:
         return { type: EPISODE_UNSNOOZED_EVENT_TYPE, ...envelope, payload: {} };
@@ -126,13 +126,13 @@ export class AlertActionEventPublisher implements AlertActionEventPublisherContr
         return {
           type: EPISODE_ACTIVATED_EVENT_TYPE,
           ...envelope,
-          payload: { reason: action.reason },
+          payload: { reason: action.reason! },
         };
       case ALERT_EPISODE_ACTION_TYPE.DEACTIVATE:
         return {
           type: EPISODE_DEACTIVATED_EVENT_TYPE,
           ...envelope,
-          payload: { reason: action.reason },
+          payload: { reason: action.reason! },
         };
       default:
         return undefined;
