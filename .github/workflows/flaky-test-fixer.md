@@ -65,6 +65,7 @@ tools:
       'gh:*',
       'bk:*',
       'node',
+      'yarn',
       'curl',
     ]
 
