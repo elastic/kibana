@@ -93,6 +93,110 @@ describe('buildLogsExtractionEsqlQuery', () => {
   });
 });
 
+describe('buildLogsExtractionEsqlQuery with KI identity classification', () => {
+  const userDefinition = getEntityDefinition('user', 'default');
+  const classification = [
+    { indexPatterns: ['logs-okta.system-default'], namespace: 'okta', tier: 'high' },
+    { indexPatterns: ['logs-endpoint.events.process-default'], namespace: 'local', tier: 'medium' },
+  ];
+
+  it('generates a valid user query with the classification prelude', async () => {
+    const query = buildLogsExtractionEsqlQuery({
+      indexPatterns: ['logs-okta.system-default', 'logs-endpoint.events.process-default'],
+      latestIndex: 'latest-index',
+      entityDefinition: userDefinition,
+      docsLimit: 10000,
+      fromDateISO: '2022-01-01T00:00:00.000Z',
+      toDateISO: '2022-01-01T23:59:59.999Z',
+      identityClassification: classification,
+    });
+    expect(query).toMatchSnapshot();
+    await expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
+  });
+
+  it('requests _index metadata and stamps namespace/confidence per source', () => {
+    const query = buildLogsExtractionEsqlQuery({
+      indexPatterns: ['logs-okta.system-default', 'logs-endpoint.events.process-default'],
+      latestIndex: 'latest-index',
+      entityDefinition: userDefinition,
+      docsLimit: 10000,
+      fromDateISO: '2022-01-01T00:00:00.000Z',
+      toDateISO: '2022-01-01T23:59:59.999Z',
+      identityClassification: classification,
+    });
+    expect(query).toContain('METADATA _index');
+    expect(query).toContain('entity.namespace = CASE(');
+    expect(query).toContain('_index LIKE "*logs-okta.system-default*"');
+    expect(query).toContain('"okta"');
+    expect(query).toContain('entity.confidence = CASE(');
+    expect(query).toContain('"high"');
+    expect(query).toContain('"medium"');
+  });
+
+  it('drops the rule-based idpGate / namespace allowlist / confidence rules', () => {
+    const ruleBased = buildLogsExtractionEsqlQuery({
+      indexPatterns: ['test-index-*'],
+      latestIndex: 'latest-index',
+      entityDefinition: userDefinition,
+      docsLimit: 10000,
+      fromDateISO: '2022-01-01T00:00:00.000Z',
+      toDateISO: '2022-01-01T23:59:59.999Z',
+    });
+    // The rule-based query maps source modules (okta/azure/...) to a namespace via sourceMatchesAny,
+    // and stamps confidence post-STATS from the namespace.
+    expect(ruleBased).toContain('entityanalytics_okta');
+    expect(ruleBased).toContain('recent.entity.confidence = CASE(');
+
+    const classified = buildLogsExtractionEsqlQuery({
+      indexPatterns: ['logs-okta.system-default'],
+      latestIndex: 'latest-index',
+      entityDefinition: userDefinition,
+      docsLimit: 10000,
+      fromDateISO: '2022-01-01T00:00:00.000Z',
+      toDateISO: '2022-01-01T23:59:59.999Z',
+      identityClassification: [classification[0]],
+    });
+    // The hardcoded allowlist token and the namespace-derived confidence rule must be gone.
+    expect(classified).not.toContain('entityanalytics_okta');
+    expect(classified).not.toContain('recent.entity.confidence = CASE(');
+  });
+
+  it('defaults to unknown/null (preserving the updates stream) when the classification list is empty', async () => {
+    const query = buildLogsExtractionEsqlQuery({
+      indexPatterns: ['test-index-*'],
+      latestIndex: 'latest-index',
+      entityDefinition: userDefinition,
+      docsLimit: 10000,
+      fromDateISO: '2022-01-01T00:00:00.000Z',
+      toDateISO: '2022-01-01T23:59:59.999Z',
+      identityClassification: [],
+    });
+    // even with nothing classified, re-extracted entities (updates stream) keep
+    // their stored values and every other source falls to the unclassified default
+    expect(query).toContain('entity.namespace = CASE(');
+    expect(query).toContain('_index LIKE "*.entities.v2.updates*", entity.namespace');
+    expect(query).toContain(', "unknown")');
+    expect(query).toContain('_index LIKE "*.entities.v2.updates*", entity.confidence');
+    expect(query).toContain(', NULL)');
+    await expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
+  });
+
+  it('drops unclassified rows but retains already-stored entities in the creation gate', () => {
+    const query = buildLogsExtractionEsqlQuery({
+      indexPatterns: ['logs-okta.system-default'],
+      latestIndex: 'latest-index',
+      entityDefinition: userDefinition,
+      docsLimit: 10000,
+      fromDateISO: '2022-01-01T00:00:00.000Z',
+      toDateISO: '2022-01-01T23:59:59.999Z',
+      identityClassification: [classification[0]],
+    });
+    // post-agg gate excludes the unclassified default namespace yet keeps stored entities
+    expect(query).toContain('TO_STRING(recent.entity.namespace) != "unknown"');
+    expect(query).toContain('TO_STRING(entity.id) IS NOT NULL');
+  });
+});
+
 describe('buildRemainingLogsCountQuery', () => {
   ALL_ENTITY_TYPES.forEach((type) => {
     it(`generates the expected query for ${type} entity type`, () => {

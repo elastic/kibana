@@ -54,6 +54,15 @@ Schema features describe the **log schema family** evident from field names and 
 - **Evidence**: Field names and log structure (e.g. ECS: `@timestamp`, `ecs.version`, `event.*`, `log.*`, `service.name`; OTel: `resource.attributes.*`, `severity_text`, `body.text`). Use only evidence from sample_documents.
 - **Short properties**: For `type: "schema"`, `properties` must be minimal: include `schema_family` (`"ecs"` | `"otel"` | `"custom"`) and optionally `ecs_version` when ECS is detected and version is evident. Do not list all fields or paste long analysis.
 - **Multiple schemas**: If evidence supports more than one schema family (e.g. ECS and OTel both present), emit one schema feature per detected family; list all of them. Each feature keeps short `properties`.
+- **Identity classification** (`properties.identity_classification`): Emit this on a schema feature **only** when the stream carries user identity (at least one of `user.email`, `user.id`, `user.name`, `user.domain`, or a clear alias to one of those). It tells downstream consumers how authoritative the stream is for *user* identity. It is an object with exactly two keys:
+  - `confidence_tier`: closed enum, one of `"high"` or `"medium"`.
+    - `"high"` — **only** for authoritative identity provider / directory / IGA streams: events such as account provisioning, lifecycle (create/modify/delete), group membership changes, MFA enrollment, sign-in/session establishment, or directory reads from an identity system. Examples of qualifying vendors: Okta, Microsoft Entra ID / Azure AD, Microsoft 365, Active Directory, Google Workspace, Ping, JumpCloud, Auth0.
+    - `"medium"` — for endpoint / host-agent observations of a user that are **not** authoritative directory records: Elastic Defend, third-party EDR (CrowdStrike, SentinelOne, Microsoft Defender for Endpoint), and non-EDR host agents (Sysmon, Auditbeat, osquery, auditd). These describe a host-local user, not a directory identity.
+  - `namespace`: the identity-system token.
+    - For `"high"`: the authoritative system, e.g. `"okta"`, `"entra_id"`, `"microsoft_365"`, `"active_directory"`, `"google_workspace"`, or another stable vendor token. Do not invent a value when unsure — omit `identity_classification` entirely instead.
+    - For `"medium"`: always use `"local"` (host-local user namespace).
+  - **Disqualifiers** — never emit `confidence_tier: "high"` for: firewalls, proxies/VPN traffic, threat-intelligence feeds, vulnerability scanners, network metrics, or any stream where the only user signal is an observed/related user rather than an authoritative directory record. When in doubt between high and medium, choose `"medium"`. When a stream carries no user identity at all, omit `identity_classification` entirely.
+  - Example: `"identity_classification": { "confidence_tier": "high", "namespace": "okta" }` for an Okta system stream; `"identity_classification": { "confidence_tier": "medium", "namespace": "local" }` for an Elastic Defend endpoint stream.
 
 ## Entity Extraction Guidelines
 
@@ -357,6 +366,62 @@ Version formatting rules (important for vulnerability analysis):
     "endpoints": ["/users", "/users/:id", "/users/:id/profile", "/users/search"],
     "methods": ["GET", "POST", "PUT"],
     "note": "Aggregate endpoints under one dependency; cap the list (e.g., max 10) and summarize additional entries"
+  }
+}
+```
+
+**Example 8 — Schema: identity classification on an authoritative IdP stream**
+```
+{
+  "type": "schema",
+  "subtype": "custom",
+  "id": "okta-system-schema",
+  "title": "Okta System Schema",
+  "description": "Okta system log stream carrying authoritative directory identity for users (sign-in, lifecycle, and MFA events).",
+  "properties": {
+    "schema_family": "custom",
+    "identity_classification": {
+      "confidence_tier": "high",
+      "namespace": "okta"
+    }
+  },
+  "confidence": 90,
+  "evidence": [
+    "okta.actor.id and okta.actor.alternate_id present with stable user.email",
+    "event.category=iam event.type=user with successful user.session.start"
+  ],
+  "evidence_doc_ids": ["f31ab90"],
+  "tags": ["schema", "identity", "idp"],
+  "meta": {
+    "note": "Authoritative identity provider; high-confidence user identity source"
+  }
+}
+```
+
+**Example 9 — Schema: identity classification on a host-agent (medium) stream**
+```
+{
+  "type": "schema",
+  "subtype": "ecs",
+  "id": "elastic-defend-schema",
+  "title": "Elastic Defend Endpoint Schema",
+  "description": "Elastic Defend endpoint stream observing host-local users; not an authoritative directory record.",
+  "properties": {
+    "schema_family": "ecs",
+    "identity_classification": {
+      "confidence_tier": "medium",
+      "namespace": "local"
+    }
+  },
+  "confidence": 88,
+  "evidence": [
+    "user.name and host.id present on process events from endpoint agent",
+    "agent.type=endpoint with event.category=process"
+  ],
+  "evidence_doc_ids": ["7c0d12e"],
+  "tags": ["schema", "identity", "endpoint"],
+  "meta": {
+    "note": "Host-local user observation; medium-confidence user identity source"
   }
 }
 ```

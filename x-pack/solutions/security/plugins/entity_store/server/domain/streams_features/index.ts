@@ -20,3 +20,10 @@ export type {
   PerTypeSourceIndices,
   PerTypeSourceProvenance,
 } from './load_per_type_source_indices';
+export { loadSourceIdentityClassification } from './load_source_identity_classification';
+export type {
+  IdentityClassificationProvenance,
+  LoadedIdentityClassification,
+  LoadSourceIdentityClassificationOptions,
+  SourceIdentityClassification,
+} from './load_source_identity_classification';

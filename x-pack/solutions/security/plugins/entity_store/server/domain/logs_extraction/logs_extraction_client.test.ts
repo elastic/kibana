@@ -1835,6 +1835,7 @@ describe('LogsExtractionClient — KI-discovered index source', () => {
     reader?: StreamsKnowledgeIndicatorsReader,
     configOverrides?: Partial<{
       useDiscoveredIndexSource: boolean;
+      useDiscoveredConfidenceClassification: boolean;
       discoveredIndexSourceMinConfidence: number;
       additionalIndexPatterns: string[];
     }>
@@ -1978,6 +1979,164 @@ describe('LogsExtractionClient — KI-discovered index source', () => {
       expect(result.sources.service).toEqual(['logs.apm']);
       expect(reader.listSchemaFeatures).toHaveBeenCalledWith({ minConfidence: 50 });
       expect(result.provenance.length).toBeGreaterThan(0);
+    });
+
+    it('surfaces identity classification provenance and the confidence flag', async () => {
+      const reader = readerWith([
+        {
+          stream_name: 'logs.okta',
+          properties: {
+            entity_field_presence: { user: ['user.name'] },
+            identity_classification: { confidence_tier: 'high', namespace: 'okta' },
+          },
+        },
+        {
+          stream_name: 'logs.defend',
+          properties: {
+            entity_field_presence: { user: ['user.name'] },
+            identity_classification: { confidence_tier: 'medium', namespace: 'local' },
+          },
+        },
+      ]);
+      const { client } = buildClient(reader, {
+        useDiscoveredConfidenceClassification: true,
+      });
+
+      const result = await client.getDiscoveredSources();
+
+      expect(result.confidenceClassificationEnabled).toBe(true);
+      expect(result.identityClassification).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ streamName: 'logs.okta', namespace: 'okta', tier: 'high' }),
+          expect.objectContaining({
+            streamName: 'logs.defend',
+            namespace: 'local',
+            tier: 'medium',
+          }),
+        ])
+      );
+    });
+
+    it('reports classification for visibility even when the confidence flag is OFF', async () => {
+      const reader = readerWith([
+        {
+          stream_name: 'logs.okta',
+          properties: {
+            entity_field_presence: { user: ['user.name'] },
+            identity_classification: { confidence_tier: 'high', namespace: 'okta' },
+          },
+        },
+      ]);
+      const { client } = buildClient(reader, {
+        useDiscoveredConfidenceClassification: false,
+      });
+
+      const result = await client.getDiscoveredSources();
+
+      expect(result.confidenceClassificationEnabled).toBe(false);
+      expect(result.identityClassification).toHaveLength(1);
+    });
+  });
+
+  describe('user FROM scoped to KI-classified streams', () => {
+    const buildStartedClient = (
+      reader: StreamsKnowledgeIndicatorsReader,
+      configOverrides?: Partial<{
+        useDiscoveredIndexSource: boolean;
+        useDiscoveredConfidenceClassification: boolean;
+        additionalIndexPatterns: string[];
+      }>
+    ) => {
+      const logsExtraction = LogExtractionConfig.parse({ docsLimit: 10000, ...configOverrides });
+      const state = { logsExtraction } as EntityStoreGlobalState;
+      const globalStateClient = {
+        find: jest.fn().mockResolvedValue(state),
+        findOrThrow: jest.fn().mockResolvedValue(state),
+        update: jest.fn().mockResolvedValue({}),
+      };
+      const dataViewsService = {
+        get: jest.fn().mockResolvedValue({
+          getIndexPattern: jest.fn().mockReturnValue('logs-*,filebeat-*'),
+        }),
+      } as unknown as jest.Mocked<DataViewsService>;
+      const engineDescriptorClient = {
+        findOrThrow: jest.fn().mockResolvedValue(createMockEngineDescriptor('user')),
+        update: jest.fn(),
+      } as unknown as EngineDescriptorClient;
+      const client = new LogsExtractionClient({
+        logger: loggerMock.create(),
+        namespace: 'default',
+        esClient: {} as ElasticsearchClient,
+        dataViewsService,
+        engineDescriptorClient,
+        globalStateClient: globalStateClient as unknown as EntityStoreGlobalStateClient,
+        ccsLogsExtractionClient:
+          createMockCcsLogsExtractionClient() as unknown as CcsLogsExtractionClient,
+        knowledgeIndicatorsReader: reader,
+      });
+      return { client, dataViewsService };
+    };
+
+    const lastCountQuery = (): string =>
+      (mockExecuteEsqlQuery.mock.calls.at(-1)?.[0] as { query: string }).query;
+
+    it('scopes the count FROM to classified streams (+ updates) and excludes unclassified sources', async () => {
+      const reader = readerWith([
+        {
+          stream_name: 'logs.okta',
+          properties: {
+            entity_field_presence: { user: ['user.name'] },
+            identity_classification: { confidence_tier: 'high', namespace: 'okta' },
+          },
+        },
+        // discovered (user identity present) but NOT classified by KI
+        {
+          stream_name: 'logs.workday',
+          properties: { entity_field_presence: { user: ['user.name'] } },
+        },
+      ]);
+      const { client, dataViewsService } = buildStartedClient(reader, {
+        useDiscoveredConfidenceClassification: true,
+        useDiscoveredIndexSource: false,
+      });
+      mockExecuteEsqlQuery.mockResolvedValue({
+        columns: [{ name: 'document_count', type: 'long' }],
+        values: [[0]],
+      });
+
+      await client.getRemainingLogsCount('user');
+
+      const query = lastCountQuery();
+      expect(query).toContain('logs.okta');
+      expect(query).not.toContain('logs.workday');
+      // data view is NOT consulted; its patterns are absent
+      expect(query).not.toContain('logs-*');
+      expect(dataViewsService.get).not.toHaveBeenCalled();
+      // updates stream remains a hard union so re-extracted entities are still counted
+      expect(query).toContain('.entities.v2.updates');
+    });
+
+    it('falls back to the data-view FROM when nothing is classified (no-op)', async () => {
+      const reader = readerWith([
+        {
+          stream_name: 'logs.workday',
+          properties: { entity_field_presence: { user: ['user.name'] } },
+        },
+      ]);
+      const { client, dataViewsService } = buildStartedClient(reader, {
+        useDiscoveredConfidenceClassification: true,
+        useDiscoveredIndexSource: false,
+      });
+      mockExecuteEsqlQuery.mockResolvedValue({
+        columns: [{ name: 'document_count', type: 'long' }],
+        values: [[0]],
+      });
+
+      await client.getRemainingLogsCount('user');
+
+      const query = lastCountQuery();
+      expect(query).toContain('logs-*');
+      expect(dataViewsService.get).toHaveBeenCalled();
     });
   });
 });

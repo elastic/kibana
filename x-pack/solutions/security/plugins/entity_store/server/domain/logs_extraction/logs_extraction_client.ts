@@ -13,9 +13,12 @@ import { isNonLocalIndexName } from '@kbn/es-query';
 import type { StreamsKnowledgeIndicatorsReader } from '@kbn/streams-plugin/server';
 import {
   loadPerTypeSourceIndices,
+  loadSourceIdentityClassification,
+  type IdentityClassificationProvenance,
   type PerTypeSourceIndices,
   type PerTypeSourceProvenance,
 } from '../streams_features';
+import type { QueryIdentityClassification } from './ki_identity_classification';
 import type {
   EntityType,
   ManagedEntityDefinition,
@@ -176,6 +179,67 @@ export class LogsExtractionClient {
   }
 
   /**
+   * Resolves the per-source KI identity classification for a run, or `undefined`
+   * when the feature does not apply (flag off, streams absent, or non-user
+   * engine — the high/medium gate only exists for the user engine).
+   *
+   * `undefined` signals the query builder to keep the rule-based namespace /
+   * idpGate / confidence logic. A defined array (the classified sources)
+   * activates the classification prelude. When the flag is on but no source is
+   * classified yet, this returns `undefined` so enabling the flag with no KI
+   * data is a no-op rather than wiping confidence off every user.
+   */
+  private async resolveIdentityClassification(
+    type: EntityType,
+    config: LogExtractionConfig
+  ): Promise<QueryIdentityClassification[] | undefined> {
+    if (
+      type !== 'user' ||
+      !config.useDiscoveredConfidenceClassification ||
+      !this.knowledgeIndicatorsReader
+    ) {
+      return undefined;
+    }
+    const { classifications } = await loadSourceIdentityClassification(
+      this.knowledgeIndicatorsReader,
+      { minConfidence: config.discoveredIndexSourceMinConfidence },
+      this.logger
+    );
+    if (classifications.length === 0) {
+      this.logger.debug(
+        '[entity_store] KI confidence classification enabled but no source classified; keeping rule-based behavior this run'
+      );
+      return undefined;
+    }
+    this.logger.debug(
+      `[entity_store] KI identity classification for user engine: ${classifications.length} classified source(s)`
+    );
+    return classifications.map(({ indexPatterns, namespace, tier }) => ({
+      indexPatterns,
+      namespace,
+      tier,
+    }));
+  }
+
+  /**
+   * Picks the effective source index patterns for a run. When the user-engine
+   * KI confidence classification is active (`identityClassification` defined),
+   * the `FROM` is scoped to the classified streams only — so unclassified
+   * sources never enter extraction and no `unknown`-namespace entities are
+   * produced. Otherwise the discovered-source patterns (or `undefined` for the
+   * legacy data-view source) are used unchanged.
+   */
+  private selectSourcePatterns(
+    discoveredSourcePatterns: string[] | undefined,
+    identityClassification: QueryIdentityClassification[] | undefined
+  ): string[] | undefined {
+    if (identityClassification !== undefined) {
+      return [...new Set(identityClassification.flatMap(({ indexPatterns }) => indexPatterns))];
+    }
+    return discoveredSourcePatterns;
+  }
+
+  /**
    * Read-only visibility into what the entity store auto-derives from KI schema
    * features for each entity type, plus provenance (which stream/feature
    * contributed and on which identity fields). Reflects the configured
@@ -188,10 +252,17 @@ export class LogsExtractionClient {
     minConfidence: number;
     sources: PerTypeSourceIndices;
     provenance: PerTypeSourceProvenance[];
+    /** Whether the KI confidence-classification feature (high/medium gate) is enabled. */
+    confidenceClassificationEnabled: boolean;
+    /** Per-source user identity classification (tier + namespace) the user engine would apply. */
+    identityClassification: IdentityClassificationProvenance[];
   }> {
     const globalState = await this.globalStateClient.findOrThrow();
-    const { useDiscoveredIndexSource, discoveredIndexSourceMinConfidence } =
-      globalState.logsExtraction;
+    const {
+      useDiscoveredIndexSource,
+      useDiscoveredConfidenceClassification,
+      discoveredIndexSourceMinConfidence,
+    } = globalState.logsExtraction;
 
     if (!this.knowledgeIndicatorsReader) {
       return {
@@ -199,19 +270,30 @@ export class LogsExtractionClient {
         minConfidence: discoveredIndexSourceMinConfidence,
         sources: { user: [], host: [], service: [], generic: [] },
         provenance: [],
+        confidenceClassificationEnabled: useDiscoveredConfidenceClassification,
+        identityClassification: [],
       };
     }
 
-    const { sources, provenance } = await loadPerTypeSourceIndices(
-      this.knowledgeIndicatorsReader,
-      { minConfidence: discoveredIndexSourceMinConfidence },
-      this.logger
-    );
+    const [{ sources, provenance }, { classifications }] = await Promise.all([
+      loadPerTypeSourceIndices(
+        this.knowledgeIndicatorsReader,
+        { minConfidence: discoveredIndexSourceMinConfidence },
+        this.logger
+      ),
+      loadSourceIdentityClassification(
+        this.knowledgeIndicatorsReader,
+        { minConfidence: discoveredIndexSourceMinConfidence },
+        this.logger
+      ),
+    ]);
     return {
       enabled: useDiscoveredIndexSource,
       minConfidence: discoveredIndexSourceMinConfidence,
       sources,
       provenance,
+      confidenceClassificationEnabled: useDiscoveredConfidenceClassification,
+      identityClassification: classifications,
     };
   }
 
@@ -302,11 +384,18 @@ export class LogsExtractionClient {
   public async getRemainingLogsCount(type: EntityType): Promise<number> {
     try {
       const { config, engineState } = await this.getLogExtractionConfigAndState(type);
-      const discoveredSourcePatterns = await this.resolveDiscoveredSourcePatterns(type, config);
+      const [discoveredSourcePatterns, identityClassification] = await Promise.all([
+        this.resolveDiscoveredSourcePatterns(type, config),
+        this.resolveIdentityClassification(type, config),
+      ]);
+      const sourcePatterns = this.selectSourcePatterns(
+        discoveredSourcePatterns,
+        identityClassification
+      );
       const indexPatterns = await this.getLocalIndexPatterns(
         config.additionalIndexPatterns,
         config.excludedIndexPatterns,
-        discoveredSourcePatterns
+        sourcePatterns
       );
       const { fromDateISO } = resolveMainExtractionWindow({ config, engineState });
       const toDateISO = moment().utc().toISOString();
@@ -358,11 +447,18 @@ export class LogsExtractionClient {
     logsCapApplied: boolean;
     logsProcessed: number;
   }> {
-    const discoveredSourcePatterns = await this.resolveDiscoveredSourcePatterns(type, config);
+    const [discoveredSourcePatterns, identityClassification] = await Promise.all([
+      this.resolveDiscoveredSourcePatterns(type, config),
+      this.resolveIdentityClassification(type, config),
+    ]);
+    const sourcePatterns = this.selectSourcePatterns(
+      discoveredSourcePatterns,
+      identityClassification
+    );
     const { localIndexPatterns, remoteIndexPatterns } = await this.getLocalAndRemoteIndexPatterns(
       config.additionalIndexPatterns,
       config.excludedIndexPatterns,
-      discoveredSourcePatterns
+      sourcePatterns
     );
     const latestIndex = getLatestEntitiesIndexName(this.namespace);
 
@@ -372,6 +468,7 @@ export class LogsExtractionClient {
       engineState,
       opts,
       entityDefinition,
+      identityClassification,
       indexPatterns: localIndexPatterns,
       latestIndex,
     });
@@ -420,6 +517,7 @@ export class LogsExtractionClient {
     engineState,
     opts,
     entityDefinition,
+    identityClassification,
     indexPatterns,
     latestIndex,
   }: {
@@ -428,6 +526,7 @@ export class LogsExtractionClient {
     engineState: EngineLogExtractionState;
     opts?: LogsExtractionOptions;
     entityDefinition: ManagedEntityDefinition;
+    identityClassification?: QueryIdentityClassification[];
     indexPatterns: string[];
     latestIndex: string;
   }): Promise<{
@@ -456,6 +555,7 @@ export class LogsExtractionClient {
         maxLogsPerPage,
         maxLogsPerWindow,
         entityDefinition,
+        identityClassification,
       });
       let { lastSearchTimestamp } = result;
       if (result.logsCapApplied) {
@@ -531,6 +631,7 @@ export class LogsExtractionClient {
         maxLogsPerPage,
         maxLogsPerWindow: remainingCap,
         entityDefinition,
+        identityClassification,
       });
 
       totalCount += subResult.count;
@@ -595,6 +696,7 @@ export class LogsExtractionClient {
     maxLogsPerPage,
     maxLogsPerWindow,
     entityDefinition,
+    identityClassification,
   }: {
     type: EntityType;
     engineState: EngineLogExtractionState;
@@ -607,6 +709,7 @@ export class LogsExtractionClient {
     maxLogsPerPage: number;
     maxLogsPerWindow: number;
     entityDefinition: ManagedEntityDefinition;
+    identityClassification?: QueryIdentityClassification[];
   }) {
     const effectiveMaxLogsPerPage = capAtMaxLogsPerWindow(maxLogsPerPage, maxLogsPerWindow);
     const effectiveDocsLimit = capAtMaxLogsPerWindow(docsLimit, maxLogsPerWindow);
@@ -678,6 +781,7 @@ export class LogsExtractionClient {
             indexPatterns,
             latestIndex,
             entityDefinition,
+            identityClassification,
             docsLimit: effectiveDocsLimit,
             fromDateISO,
             toDateISO,
@@ -792,6 +896,7 @@ export class LogsExtractionClient {
     indexPatterns,
     latestIndex,
     entityDefinition,
+    identityClassification,
     docsLimit,
     fromDateISO,
     toDateISO,
@@ -806,6 +911,7 @@ export class LogsExtractionClient {
     indexPatterns: string[];
     latestIndex: string;
     entityDefinition: ManagedEntityDefinition;
+    identityClassification?: QueryIdentityClassification[];
     docsLimit: number;
     fromDateISO: string;
     toDateISO: string;
@@ -831,6 +937,7 @@ export class LogsExtractionClient {
         indexPatterns,
         latestIndex,
         entityDefinition,
+        identityClassification,
         docsLimit,
         fromDateISO,
         toDateISO,

@@ -39,8 +39,19 @@ export const LogExtractionConfig = z.object({
    */
   useDiscoveredIndexSource: z.boolean().default(false),
   /**
+   * POC feature flag (idea 02 re-scope / POC 5): when true, the user engine
+   * derives `entity.namespace` and `entity.confidence` (high=IdP / medium=non-IdP)
+   * from KI `schema`-feature `identity_classification` instead of the hardcoded
+   * `idpGate` / namespace allowlist / confidence rules in `user.ts`. Composes
+   * with `useDiscoveredIndexSource` but is independent of it. Default `false`
+   * keeps behavior byte-identical. Only affects the `user` engine; when enabled
+   * but no source is classified, behavior stays rule-based for that run.
+   */
+  useDiscoveredConfidenceClassification: z.boolean().default(false),
+  /**
    * Confidence floor (0–100) pushed into the schema-feature query when
-   * `useDiscoveredIndexSource` is enabled. Only effective while the flag is on.
+   * `useDiscoveredIndexSource` or `useDiscoveredConfidenceClassification` is
+   * enabled. Only effective while one of those flags is on.
    */
   discoveredIndexSourceMinConfidence: z
     .number()

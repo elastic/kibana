@@ -10,7 +10,11 @@ import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../common';
 import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
 import { wrapMiddlewares } from '../middleware';
-import type { PerTypeSourceIndices, PerTypeSourceProvenance } from '../../domain/streams_features';
+import type {
+  IdentityClassificationProvenance,
+  PerTypeSourceIndices,
+  PerTypeSourceProvenance,
+} from '../../domain/streams_features';
 
 export interface DiscoveredSourcesResponseBody {
   /** Whether KI-discovered sources are actually used for extraction (the flag). */
@@ -21,6 +25,10 @@ export interface DiscoveredSourcesResponseBody {
   sources: PerTypeSourceIndices;
   /** Which stream/feature contributed each pattern, and on which identity fields. */
   provenance: PerTypeSourceProvenance[];
+  /** Whether the KI confidence-classification feature (high/medium gate) is enabled. */
+  confidenceClassificationEnabled: boolean;
+  /** Per-source user identity classification (tier + namespace) the user engine would apply. */
+  identityClassification: IdentityClassificationProvenance[];
 }
 
 /**

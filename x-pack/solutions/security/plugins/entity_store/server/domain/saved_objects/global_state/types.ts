@@ -151,11 +151,38 @@ const version4: SavedObjectsFullModelVersion = {
   },
 };
 
+const logExtractionSchemaV5 = logExtractionSchemaV4.extends({
+  useDiscoveredConfidenceClassification: schema.maybe(schema.boolean()),
+});
+
+const globalStateSchemaV5 = globalStateSchemaV4.extends({
+  logsExtraction: logExtractionSchemaV5,
+});
+
+const version5: SavedObjectsFullModelVersion = {
+  changes: [
+    {
+      type: 'data_backfill',
+      backfillFn: () => ({
+        attributes: {
+          logsExtraction: {
+            useDiscoveredConfidenceClassification: false,
+          },
+        },
+      }),
+    },
+  ],
+  schemas: {
+    create: globalStateSchemaV5,
+    forwardCompatibility: globalStateSchemaV5.extends({}, { unknowns: 'ignore' }),
+  },
+};
+
 export const EntityStoreGlobalStateType: SavedObjectsType = {
   name: EntityStoreGlobalStateTypeName,
   hidden: false,
   namespaceType: 'multiple-isolated',
   mappings: EntityStoreGlobalStateTypeMappings,
-  modelVersions: { 1: version1, 2: version2, 3: version3, 4: version4 },
+  modelVersions: { 1: version1, 2: version2, 3: version3, 4: version4, 5: version5 },
   hiddenFromHttpApis: true,
 };

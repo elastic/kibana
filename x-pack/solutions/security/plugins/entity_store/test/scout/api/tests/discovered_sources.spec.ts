@@ -55,6 +55,23 @@ apiTest.describe('Entity Store KI-discovered index source', { tag: ENTITY_STORE_
     expect(response.statusCode).toBe(200);
   };
 
+  const setConfidenceFlag = async (
+    apiClient: Parameters<Parameters<typeof apiTest>[2]>[0]['apiClient'],
+    enabled: boolean
+  ) => {
+    const response = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+      headers: defaultHeaders,
+      responseType: 'json',
+      body: {
+        logExtraction: {
+          useDiscoveredConfidenceClassification: enabled,
+          discoveredIndexSourceMinConfidence: 0,
+        },
+      },
+    });
+    expect(response.statusCode).toBe(200);
+  };
+
   apiTest.beforeAll(async ({ samlAuth, apiClient, kbnClient }) => {
     const credentials = await samlAuth.asInteractiveUser('admin');
     defaultHeaders = { ...credentials.cookieHeader, ...PUBLIC_HEADERS };
@@ -124,6 +141,31 @@ apiTest.describe('Entity Store KI-discovered index source', { tag: ENTITY_STORE_
       expect(on.statusCode).toBe(200);
       expect(on.body.enabled).toBe(true);
       expect(on.body.minConfidence).toBe(0);
+      // KI confidence-classification provenance is always present in the shape.
+      expect(typeof on.body.confidenceClassificationEnabled).toBe('boolean');
+      expect(Array.isArray(on.body.identityClassification)).toBe(true);
+    }
+  );
+
+  apiTest(
+    'discovered_sources route reflects the confidence-classification flag',
+    async ({ apiClient }) => {
+      await setConfidenceFlag(apiClient, true);
+      const on = await apiClient.get(ENTITY_STORE_ROUTES.internal.DISCOVERED_SOURCES, {
+        headers: internalHeaders,
+        responseType: 'json',
+      });
+      expect(on.statusCode).toBe(200);
+      expect(on.body.confidenceClassificationEnabled).toBe(true);
+      expect(Array.isArray(on.body.identityClassification)).toBe(true);
+
+      await setConfidenceFlag(apiClient, false);
+      const off = await apiClient.get(ENTITY_STORE_ROUTES.internal.DISCOVERED_SOURCES, {
+        headers: internalHeaders,
+        responseType: 'json',
+      });
+      expect(off.statusCode).toBe(200);
+      expect(off.body.confidenceClassificationEnabled).toBe(false);
     }
   );
 
@@ -145,9 +187,9 @@ apiTest.describe('Entity Store KI-discovered index source', { tag: ENTITY_STORE_
         '2026-05-10T09:00:00Z',
         '2026-05-10T11:00:00Z'
       );
-        expect(extraction.statusCode).toBe(200);
-        expect(extraction.body).toMatchObject({ success: true });
-        expect((extraction.body as { count: number }).count).toBeGreaterThanOrEqual(1);
+      expect(extraction.statusCode).toBe(200);
+      expect(extraction.body).toMatchObject({ success: true });
+      expect((extraction.body as { count: number }).count).toBeGreaterThanOrEqual(1);
 
       const hit = await searchDocById(esClient, 'host:ki-src-host-1');
       expect(hit.hits.hits).toHaveLength(1);

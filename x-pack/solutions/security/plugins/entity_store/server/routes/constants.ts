@@ -25,6 +25,7 @@ export const LogExtractionInstallParams = LogExtractionConfig.pick({
   additionalIndexPatterns: true,
   excludedIndexPatterns: true,
   useDiscoveredIndexSource: true,
+  useDiscoveredConfidenceClassification: true,
   discoveredIndexSourceMinConfidence: true,
   lookbackPeriod: true,
   frequency: true,
@@ -43,6 +44,7 @@ export const LogExtractionUpdateParams = z.object({
   additionalIndexPatterns: z.array(z.string()).optional(),
   excludedIndexPatterns: z.array(z.string()).optional(),
   useDiscoveredIndexSource: z.boolean().optional(),
+  useDiscoveredConfidenceClassification: z.boolean().optional(),
   discoveredIndexSourceMinConfidence: z.number().int().min(0).max(100).optional(),
   lookbackPeriod: z
     .string()
