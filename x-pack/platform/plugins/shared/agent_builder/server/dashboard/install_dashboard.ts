@@ -19,7 +19,8 @@ import {
   AGENT_BUILDER_OVERVIEW_DASHBOARD_ID,
   AGENT_BUILDER_TRACES_NAMESPACE_PLACEHOLDER,
 } from './constants';
-import overviewDashboardAsset from './assets/overview_dashboard.json';
+import { overviewDashboard } from './assets/overview_dashboard';
+import { AGENT_BUILDER_OVERVIEW_DASHBOARD_VERSION } from './constants';
 
 const SYNC_CONCURRENCY = 5;
 
@@ -30,10 +31,10 @@ interface DashboardSavedObjectAsset {
   coreMigrationVersion: string;
   typeMigrationVersion: string;
   references: unknown[];
-  attributes: { panelsJSON: string } & Record<string, unknown>;
+  attributes: { panelsJSON: string; version?: number } & Record<string, unknown>;
 }
 
-const sourceOverviewDashboard = overviewDashboardAsset as DashboardSavedObjectAsset;
+const sourceOverviewDashboard = overviewDashboard as DashboardSavedObjectAsset;
 
 /**
  * return the id of the dashboard in the given space
@@ -46,11 +47,24 @@ export function overviewDashboardId(spaceId: string): string {
  * install the dashboard in the given space using the saved objects importer
  */
 async function installAgentBuilderOverviewDashboard(
+  client: SavedObjectsClientContract,
   importer: ISavedObjectsImporter,
   logger: Logger,
   spaceId: string,
   namespace: string | undefined
 ): Promise<void> {
+  // Skip the import when the installed dashboard is already at the bundled version.
+  const installedVersion = await getInstalledDashboardVersion(client, spaceId, namespace);
+  if (
+    installedVersion !== undefined &&
+    installedVersion === AGENT_BUILDER_OVERVIEW_DASHBOARD_VERSION
+  ) {
+    logger.debug(
+      `Agent Builder overview dashboard already at version ${AGENT_BUILDER_OVERVIEW_DASHBOARD_VERSION} in space "${spaceId}", skipping install`
+    );
+    return;
+  }
+
   // Substitute the namespace placeholder everywhere it appears in the saved object
   const dashboard = JSON.parse(
     JSON.stringify(sourceOverviewDashboard).replaceAll(
@@ -82,6 +96,30 @@ async function installAgentBuilderOverviewDashboard(
   }
 
   logger.debug(`Agent Builder overview dashboard installed in space "${spaceId}"`);
+}
+
+/**
+ * read the content version of the dashboard already installed in the given
+ * space, or undefined when it isn't installed yet.
+ */
+async function getInstalledDashboardVersion(
+  client: SavedObjectsClientContract,
+  spaceId: string,
+  namespace: string | undefined
+): Promise<number | undefined> {
+  try {
+    const existing = await client.get<{ version?: number }>(
+      'dashboard',
+      overviewDashboardId(spaceId),
+      { namespace }
+    );
+    return existing?.attributes?.version;
+  } catch (error) {
+    if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+      return undefined;
+    }
+    throw error;
+  }
 }
 
 /**
@@ -131,7 +169,7 @@ export async function syncAgentBuilderOverviewDashboard(
       const namespace = spaceId === 'default' ? undefined : spaceId;
       try {
         if (sendToSelf) {
-          await installAgentBuilderOverviewDashboard(importer, logger, spaceId, namespace);
+          await installAgentBuilderOverviewDashboard(client, importer, logger, spaceId, namespace);
         } else {
           await removeAgentBuilderOverviewDashboard(client, logger, spaceId, namespace);
         }
