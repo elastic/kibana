@@ -47,10 +47,6 @@ interface AlertSearchBarContainerState {
    */
   savedQueryId?: string;
   /**
-   * Filters applied from the controls bar
-   */
-  controlFilters: Filter[];
-  /**
    * Filter controls bar configuration
    */
   filterControls: FilterControlConfig[];
@@ -69,9 +65,6 @@ interface AlertSearchBarStateTransitions {
   setFilters: (
     state: AlertSearchBarContainerState
   ) => (filters: Filter[]) => AlertSearchBarContainerState;
-  setControlFilters: (
-    state: AlertSearchBarContainerState
-  ) => (controlFilters: Filter[]) => AlertSearchBarContainerState;
   setSavedQueryId: (
     state: AlertSearchBarContainerState
   ) => (savedQueryId?: string) => AlertSearchBarContainerState;
@@ -85,7 +78,6 @@ const defaultState: AlertSearchBarContainerState = {
   rangeTo: 'now',
   kuery: '',
   filters: [],
-  controlFilters: [],
   filterControls: [],
 };
 
@@ -94,7 +86,6 @@ const transitions: AlertSearchBarStateTransitions = {
   setRangeTo: (state) => (rangeTo) => ({ ...state, rangeTo }),
   setKuery: (state) => (kuery) => ({ ...state, kuery }),
   setFilters: (state) => (filters) => ({ ...state, filters }),
-  setControlFilters: (state) => (controlFilters) => ({ ...state, controlFilters }),
   setSavedQueryId: (state) => (savedQueryId) => ({ ...state, savedQueryId }),
   setFilterControls: (state) => (filterControls) => ({ ...state, filterControls }),
 };
@@ -115,17 +106,12 @@ export function useAlertSearchBarStateContainer(
 
   useUrlStateSyncEffect(stateContainer, urlStorageKey, replace);
 
-  const {
-    setRangeFrom,
-    setRangeTo,
-    setKuery,
-    setFilters,
-    setSavedQueryId,
-    setControlFilters,
-    setFilterControls,
-  } = stateContainer.transitions;
-  const { rangeFrom, rangeTo, kuery, filters, savedQueryId, controlFilters, filterControls } =
-    useContainerSelector(stateContainer, (state) => state);
+  const { setRangeFrom, setRangeTo, setKuery, setFilters, setSavedQueryId, setFilterControls } =
+    stateContainer.transitions;
+  const { rangeFrom, rangeTo, kuery, filters, savedQueryId, filterControls } = useContainerSelector(
+    stateContainer,
+    (state) => state
+  );
 
   useEffect(() => {
     if (!savedQuery) {
@@ -162,8 +148,6 @@ export function useAlertSearchBarStateContainer(
     onKueryChange: setKuery,
     filters,
     onFiltersChange: setFilters,
-    controlFilters,
-    onControlFiltersChange: setControlFilters,
     filterControls,
     onFilterControlsChange: setFilterControls,
     rangeFrom,
