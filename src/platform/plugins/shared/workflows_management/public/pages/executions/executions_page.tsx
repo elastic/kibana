@@ -35,7 +35,7 @@ export function WorkflowExecutionsPage() {
       css={{ backgroundColor: euiTheme.colors.backgroundBasePlain }}
       data-test-subj="workflowExecutionsPage"
     >
-      <EuiPageTemplate.Header bottomBorder pageTitle={executionsPageTitle}>
+      <EuiPageTemplate.Header bottomBorder pageTitle={executionsPageTitle} restrictWidth={false}>
         <EuiScreenReaderOnly>
           <h2 id="workflowExecutionsTableLabel">{executionsPageTitle}</h2>
         </EuiScreenReaderOnly>
@@ -43,7 +43,7 @@ export function WorkflowExecutionsPage() {
           <p>{executionsPageDescription}</p>
         </EuiText>
       </EuiPageTemplate.Header>
-      <EuiPageTemplate.Section paddingSize="m" grow>
+      <EuiPageTemplate.Section paddingSize="m" grow restrictWidth={false}>
         <WorkflowExecutionsPageContent />
       </EuiPageTemplate.Section>
     </EuiPageTemplate>

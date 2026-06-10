@@ -8,100 +8,79 @@
  */
 
 import {
-  EuiCodeBlock,
-  EuiDescriptionList,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
+  EuiFlyoutFooter,
+  euiFullHeight,
+  EuiScreenReaderOnly,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import React, { useMemo } from 'react';
-import type { DataTableRecord } from '@kbn/discover-utils/types';
+import { css } from '@emotion/react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { WorkflowExecutionActionsMenu } from './workflow_executions_table_actions';
+import { useWorkflowExecutionPolling } from '../../entities/workflows/model/use_workflow_execution_polling';
+import { WorkflowDetailStoreProvider } from '../../entities/workflows/store/provider';
+import { WorkflowExecutionDetail } from '../../features/workflow_execution_detail';
 
 export interface WorkflowExecutionDetailFlyoutProps {
-  hit: DataTableRecord;
+  executionId: string;
   onClose: () => void;
+  onViewAllExecutionsForWorkflow?: (workflowId: string) => void;
 }
 
-const formatValue = (value: unknown): string => {
-  if (value == null) {
-    return '\u2014';
+const flyoutBodyCss = css`
+  ${euiFullHeight()}
+  .euiFlyoutBody__overflow {
+    ${euiFullHeight()}
+    min-height: 0;
   }
-  if (Array.isArray(value)) {
-    return value.length === 1 ? formatValue(value[0]) : value.map(formatValue).join(', ');
+
+  .euiFlyoutBody__overflowContent {
+    ${euiFullHeight()}
+    min-height: 0;
   }
-  if (typeof value === 'object') {
-    return JSON.stringify(value);
-  }
-  return String(value);
+`;
+
+const WorkflowExecutionDetailFlyoutContent = ({
+  executionId,
+  onClose,
+  onViewAllExecutionsForWorkflow,
+}: WorkflowExecutionDetailFlyoutProps) => {
+  const { workflowExecution } = useWorkflowExecutionPolling(executionId);
+
+  return (
+    <>
+      <EuiFlyoutBody css={flyoutBodyCss}>
+        <WorkflowExecutionDetail
+          executionId={executionId}
+          onClose={onClose}
+          showBackButton={false}
+        />
+      </EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <WorkflowExecutionActionsMenu
+              actionContext={{
+                executionId,
+                workflowId: workflowExecution?.workflowId,
+              }}
+              onViewAllExecutionsForWorkflow={onViewAllExecutionsForWorkflow}
+              variant="takeAction"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutFooter>
+    </>
+  );
 };
 
-const SUMMARY_FIELDS: ReadonlyArray<{ field: string; label: string }> = [
-  {
-    field: 'id',
-    label: i18n.translate('workflowsManagement.executionsPage.flyoutFieldId', {
-      defaultMessage: 'Execution ID',
-    }),
-  },
-  {
-    field: 'workflowId',
-    label: i18n.translate('workflowsManagement.executionsPage.flyoutFieldWorkflow', {
-      defaultMessage: 'Workflow',
-    }),
-  },
-  {
-    field: 'status',
-    label: i18n.translate('workflowsManagement.executionsPage.flyoutFieldStatus', {
-      defaultMessage: 'Status',
-    }),
-  },
-  {
-    field: 'startedAt',
-    label: i18n.translate('workflowsManagement.executionsPage.flyoutFieldStarted', {
-      defaultMessage: 'Started at',
-    }),
-  },
-  {
-    field: 'finishedAt',
-    label: i18n.translate('workflowsManagement.executionsPage.flyoutFieldFinished', {
-      defaultMessage: 'Finished at',
-    }),
-  },
-  {
-    field: 'triggeredBy',
-    label: i18n.translate('workflowsManagement.executionsPage.flyoutFieldTriggeredBy', {
-      defaultMessage: 'Triggered by',
-    }),
-  },
-  {
-    field: 'executedBy',
-    label: i18n.translate('workflowsManagement.executionsPage.flyoutFieldExecutedBy', {
-      defaultMessage: 'Executed by',
-    }),
-  },
-];
-
 export const WorkflowExecutionDetailFlyout = React.memo<WorkflowExecutionDetailFlyoutProps>(
-  ({ hit, onClose }) => {
+  ({ executionId, onClose, onViewAllExecutionsForWorkflow }) => {
     const flyoutTitleId = useGeneratedHtmlId({ prefix: 'workflowExecutionDetailFlyoutTitle' });
-
-    const summary = useMemo(
-      () =>
-        SUMMARY_FIELDS.map(({ field, label }) => ({
-          title: label,
-          description: formatValue(hit.flattened[field]),
-        })),
-      [hit.flattened]
-    );
-
-    const rawJson = useMemo(
-      () => JSON.stringify(hit.raw?._source ?? hit.flattened, null, 2),
-      [hit.flattened, hit.raw]
-    );
 
     return (
       <EuiFlyout
@@ -109,42 +88,22 @@ export const WorkflowExecutionDetailFlyout = React.memo<WorkflowExecutionDetailF
         data-test-subj="workflowExecutionDetailFlyout"
         onClose={onClose}
         ownFocus
-        size="m"
+        size="l"
       >
-        <EuiFlyoutHeader hasBorder>
-          <EuiTitle size="m">
-            <h2 id={flyoutTitleId}>
-              {i18n.translate('workflowsManagement.executionsPage.flyoutTitle', {
-                defaultMessage: 'Execution details',
-              })}
-            </h2>
-          </EuiTitle>
-          <EuiSpacer size="xs" />
-          <EuiText color="subdued" size="xs">
-            <code>{hit.flattened.id ? formatValue(hit.flattened.id) : hit.id}</code>
-          </EuiText>
-        </EuiFlyoutHeader>
-        <EuiFlyoutBody>
-          <EuiDescriptionList compressed listItems={summary} type="column" />
-          <EuiSpacer size="m" />
-          <EuiTitle size="xs">
-            <h3>
-              {i18n.translate('workflowsManagement.executionsPage.flyoutRawJsonTitle', {
-                defaultMessage: 'Raw document',
-              })}
-            </h3>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiCodeBlock
-            fontSize="s"
-            isCopyable
-            language="json"
-            overflowHeight={400}
-            paddingSize="s"
-          >
-            {rawJson}
-          </EuiCodeBlock>
-        </EuiFlyoutBody>
+        <EuiScreenReaderOnly>
+          <h2 id={flyoutTitleId}>
+            {i18n.translate('workflowsManagement.executionsPage.flyoutTitle', {
+              defaultMessage: 'Execution details',
+            })}
+          </h2>
+        </EuiScreenReaderOnly>
+        <WorkflowDetailStoreProvider>
+          <WorkflowExecutionDetailFlyoutContent
+            executionId={executionId}
+            onClose={onClose}
+            onViewAllExecutionsForWorkflow={onViewAllExecutionsForWorkflow}
+          />
+        </WorkflowDetailStoreProvider>
       </EuiFlyout>
     );
   }

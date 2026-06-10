@@ -16,6 +16,7 @@ import type {
 import type { OptionsListSelection } from '@kbn/controls-schemas';
 import { WORKFLOWS_EXECUTIONS_INDEX } from '../../../../common';
 import { buildWorkflowExecutionsSpaceFilter } from '../../lib/build_workflow_executions_search_query';
+import { isIndexNotFoundError } from '../../lib/es_error_helpers';
 import type { RouteDependencies } from '../types';
 import { INTERNAL_API_VERSION, MAX_EXECUTION_FIELD_NAME_LENGTH } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
@@ -60,6 +61,12 @@ const parseInvalidSelections = (
 
   return selectedOptions.filter((selection) => (buckets[String(selection)]?.doc_count ?? 0) === 0);
 };
+
+const emptyOptionsListResponse = (): OptionsListSuccessResponse => ({
+  suggestions: [],
+  totalCardinality: 0,
+  invalidSelections: [],
+});
 
 export function registerExecutionOptionsListRoute({ router, service, spaces }: RouteDependencies) {
   router.versioned
@@ -110,7 +117,9 @@ export function registerExecutionOptionsListRoute({ router, service, spaces }: R
 
           const searchFilter = getSearchFilter(optionsListRequest);
           const optionsListFilters = optionsListRequest.filters ?? [];
-          const selectedOptions = optionsListRequest.selectedOptions;
+          const selectedOptions = optionsListRequest.selectedOptions ?? [];
+          const shouldValidateSelections =
+            !optionsListRequest.ignoreValidations && selectedOptions.length > 0;
 
           const esResponse = await esClient.search({
             index: WORKFLOWS_EXECUTIONS_INDEX,
@@ -144,12 +153,11 @@ export function registerExecutionOptionsListRoute({ router, service, spaces }: R
                   field: optionsListRequest.fieldName,
                 },
               },
-              ...(optionsListRequest.ignoreValidations
-                ? {}
-                : {
+              ...(shouldValidateSelections
+                ? {
                     validation: {
                       filters: {
-                        filters: (selectedOptions ?? []).reduce<
+                        filters: selectedOptions.reduce<
                           Record<string, { match: Record<string, OptionsListSelection> }>
                         >((acc, option) => {
                           acc[String(option)] = {
@@ -161,7 +169,8 @@ export function registerExecutionOptionsListRoute({ router, service, spaces }: R
                         }, {}),
                       },
                     },
-                  }),
+                  }
+                : {}),
             },
           });
 
@@ -179,6 +188,10 @@ export function registerExecutionOptionsListRoute({ router, service, spaces }: R
 
           return response.ok({ body });
         } catch (error) {
+          if (isIndexNotFoundError(error)) {
+            return response.ok({ body: emptyOptionsListResponse() });
+          }
+
           return handleRouteError(response, error);
         }
       })

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { errors } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { KQLSyntaxError } from '@kbn/es-query';
@@ -340,5 +341,94 @@ describe('Internal Routes', () => {
         invalidSelections: [],
       },
     });
+  });
+
+  it('should skip validation aggregation when selected options are empty', async () => {
+    mockSearch.mockResolvedValue({
+      aggregations: {
+        suggestions: {
+          buckets: [{ key: 'completed', doc_count: 4 }],
+        },
+        totalCardinality: { value: 1 },
+      },
+    });
+
+    const response = httpServerMock.createResponseFactory();
+    const request = httpServerMock.createKibanaRequest({
+      method: 'post',
+      path: '/internal/workflows/executions/options_list',
+      body: {
+        size: 10,
+        fieldName: 'status',
+        filters: [],
+        selectedOptions: [],
+      },
+    });
+
+    await routeHandlers[`POST:/internal/workflows/executions/options_list`].handler(
+      mockContext,
+      request,
+      response
+    );
+
+    expect(mockSearch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        aggs: expect.not.objectContaining({
+          validation: expect.anything(),
+        }),
+      })
+    );
+
+    expect(response.ok).toHaveBeenCalledWith({
+      body: {
+        suggestions: [{ value: 'completed', docCount: 4 }],
+        totalCardinality: 1,
+        invalidSelections: [],
+      },
+    });
+  });
+
+  it('should return empty options list when executions index does not exist', async () => {
+    mockSearch.mockRejectedValue(
+      new errors.ResponseError({
+        statusCode: 404,
+        body: {
+          error: {
+            type: 'index_not_found_exception',
+            reason: 'no such index [.workflows-executions]',
+          },
+        },
+        headers: {},
+        meta: {} as any,
+        warnings: [],
+      })
+    );
+
+    const response = httpServerMock.createResponseFactory();
+    const request = httpServerMock.createKibanaRequest({
+      method: 'post',
+      path: '/internal/workflows/executions/options_list',
+      body: {
+        size: 10,
+        fieldName: 'status',
+        filters: [],
+        selectedOptions: ['completed'],
+      },
+    });
+
+    await routeHandlers[`POST:/internal/workflows/executions/options_list`].handler(
+      mockContext,
+      request,
+      response
+    );
+
+    expect(response.ok).toHaveBeenCalledWith({
+      body: {
+        suggestions: [],
+        totalCardinality: 0,
+        invalidSelections: [],
+      },
+    });
+    expect(response.customError).not.toHaveBeenCalled();
   });
 });

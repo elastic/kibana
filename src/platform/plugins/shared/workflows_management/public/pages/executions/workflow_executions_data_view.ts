@@ -50,7 +50,25 @@ const booleanField = (name: string): FieldSpec => ({
   scripted: false,
 });
 
+const numberField = (name: string): FieldSpec => ({
+  name,
+  type: 'number',
+  esTypes: ['long'],
+  searchable: true,
+  aggregatable: true,
+  readFromDocValues: true,
+  scripted: false,
+});
+
+/** Virtual table columns backed by `_source` and custom cell renderers. */
+export const WORKFLOW_EXECUTIONS_VIRTUAL_COLUMN_FIELD_SPECS: Record<string, FieldSpec> = {
+  workflow: keywordField('workflow'),
+  tags: keywordField('tags'),
+  triggers: keywordField('triggers'),
+};
+
 export const WORKFLOW_EXECUTIONS_FIELD_SPECS: Record<string, FieldSpec> = {
+  ...WORKFLOW_EXECUTIONS_VIRTUAL_COLUMN_FIELD_SPECS,
   startedAt: dateField('startedAt'),
   createdAt: dateField('createdAt'),
   finishedAt: dateField('finishedAt'),
@@ -61,7 +79,9 @@ export const WORKFLOW_EXECUTIONS_FIELD_SPECS: Record<string, FieldSpec> = {
   executedBy: keywordField('executedBy'),
   createdBy: keywordField('createdBy'),
   isTestRun: booleanField('isTestRun'),
+  managed: booleanField('managed'),
   spaceId: keywordField('spaceId'),
+  duration: numberField('duration'),
 };
 
 export const WORKFLOW_EXECUTIONS_DATA_VIEW_CREATE_SPEC: DataViewSpec = {
