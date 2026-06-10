@@ -207,8 +207,6 @@ export {
 export type {
   SignificantEventsResponse,
   SignificantEventsGetResponse,
-  SignificantEventsPreviewResponse,
-  SignificantEventsGenerateResponse,
   GeneratedSignificantEventQuery,
   SignificantEventsQueriesGenerationResult,
   SignificantEventsQueriesGenerationTaskResult,
@@ -306,6 +304,7 @@ export {
   sigEventStatusSchema,
   sigEventImpactSchema,
   type SigEvent,
+  type KnowledgeIndicator,
   type SigEventStatus,
   type SigEventImpact,
 } from './src/sig_events';
