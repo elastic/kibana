@@ -1388,7 +1388,7 @@
     "chrome-remote-interface": "0.33.3",
     "classnames": "2.5.1",
     "commander": "4.1.1",
-    "constate": "3.3.3",
+    "constate": "4.0.0",
     "copy-to-clipboard": "3.3.3",
     "core-js": "3.45.1",
     "cronstrue": "3.9.0",
