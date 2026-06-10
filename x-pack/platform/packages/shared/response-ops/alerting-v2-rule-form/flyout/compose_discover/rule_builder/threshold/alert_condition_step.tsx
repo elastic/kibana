@@ -28,6 +28,7 @@ import {
 } from '@elastic/eui';
 import type { ComposeFormValues } from '../../compose_form_types';
 import { useDataFields } from '../../../../form/hooks/use_data_fields';
+import { useIndexSources } from '../../../../form/hooks/use_index_sources';
 import { ScheduleField } from '../../../../form/fields/schedule_field';
 import { LookbackWindowField } from '../../../../form/fields/lookback_window_field';
 import { ModeSelect } from '../../../../form/fields/mode_select';
@@ -66,6 +67,11 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
     useBuilderState<ThresholdFormValues>();
   const { setValue, watch } = useFormContext<ComposeFormValues>();
   const isAlert = watch('kind') === 'alert';
+
+  const { data: indexOptions, isLoading: isLoadingIndices } = useIndexSources({
+    http: services.http,
+    application: services.application,
+  });
 
   const fromQuery = thresholdValues.indexPattern ? `FROM ${thresholdValues.indexPattern}` : '';
 
@@ -350,6 +356,8 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
           fullWidth
           compressed
           singleSelection={{ asPlainText: true }}
+          isLoading={isLoadingIndices}
+          options={indexOptions}
           selectedOptions={
             thresholdValues.indexPattern ? [{ label: thresholdValues.indexPattern }] : []
           }
