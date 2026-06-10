@@ -789,7 +789,7 @@ describe('Package policy service', () => {
         expect.anything(),
         expect.anything(),
         'test',
-        expect.anything()
+        expect.not.objectContaining({ hasAgentVersionConditions: expect.anything() })
       );
     });
 
@@ -875,7 +875,7 @@ describe('Package policy service', () => {
         expect.anything(),
         expect.anything(),
         'test',
-        expect.anything()
+        expect.not.objectContaining({ hasAgentVersionConditions: expect.anything() })
       );
     });
 
