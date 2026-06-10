@@ -88,7 +88,11 @@ export const THRESHOLD_TEST_INDEX = 'scout-threshold-rule-test';
 // name + THRESHOLD_TEST_INDEX + time field (first non-placeholder option).
 // Callers must create THRESHOLD_TEST_INDEX (with @timestamp mapping) in beforeAll.
 // Used in both rules_create_flow.spec.ts and connector_slack.spec.ts.
-export const defineIndexThresholdRule = async (page: ScoutPage, name: string) => {
+export const defineIndexThresholdRule = async (
+  page: ScoutPage,
+  name: string,
+  indexName: string = THRESHOLD_TEST_INDEX
+) => {
   await page.testSubj.click('createRuleButton');
   await page.testSubj.locator('ruleTypeModal').waitFor({ state: 'visible' });
   await page.testSubj.click('.index-threshold-SelectOption');
@@ -104,8 +108,8 @@ export const defineIndexThresholdRule = async (page: ScoutPage, name: string) =>
 
   await indexCombo
     .locator('[data-test-subj="comboBoxSearchInput"]')
-    .pressSequentially('scout-threshold-rule', { delay: 50 });
-  const indexOption = page.locator(`.euiComboBoxOption[title="${THRESHOLD_TEST_INDEX}"]`);
+    .pressSequentially(indexName, { delay: 50 });
+  const indexOption = page.locator(`.euiComboBoxOption[title="${indexName}"]`);
   await indexOption.waitFor({ state: 'visible', timeout: 30000 });
   await indexOption.click();
 

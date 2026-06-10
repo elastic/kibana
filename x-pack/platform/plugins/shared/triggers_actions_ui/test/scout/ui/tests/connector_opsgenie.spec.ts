@@ -18,51 +18,20 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
   test,
-  CONNECTORS_APP_PATH,
-  CONNECTORS_LIST_SELECTORS,
+  CONNECTORS_ROLE,
   defineIndexThresholdRule,
   THRESHOLD_TEST_INDEX,
+  setMonacoValue,
+  getMonacoValue,
+  navigateToConnectors,
+  searchConnectors,
+  searchAndOpenConnector,
+  closeFlyoutIfOpen,
+  cancelRuleCreation,
 } from '../fixtures';
 
-interface MonacoBridge {
-  MonacoEnvironment?: {
-    monaco?: {
-      editor?: {
-        getModels: () => Array<{ getValue: () => string; setValue: (s: string) => void }>;
-      };
-    };
-  };
-}
-
-const setMonacoValue = async (page: ScoutPage, value: string) => {
-  await page.testSubj.locator('kibanaCodeEditor').waitFor({ state: 'visible' });
-  await page.evaluate((v) => {
-    const editor = (window as unknown as MonacoBridge).MonacoEnvironment?.monaco?.editor;
-    if (!editor) throw new Error('MonacoEnvironment.monaco.editor not available');
-    editor.getModels().forEach((m) => m.setValue(v));
-  }, value);
-};
-
-const getMonacoValue = async (page: ScoutPage): Promise<string> => {
-  await page.testSubj.locator('kibanaCodeEditor').waitFor({ state: 'visible' });
-  return page.evaluate(() => {
-    const editor = (window as unknown as MonacoBridge).MonacoEnvironment?.monaco?.editor;
-    return editor?.getModels()?.[0]?.getValue() ?? '';
-  });
-};
-
-const navigateToConnectors = async (page: ScoutPage, kbnUrl: { get: (p: string) => string }) => {
-  await page.goto(kbnUrl.get(CONNECTORS_APP_PATH));
-  await page.locator(CONNECTORS_LIST_SELECTORS.TABLE_LOADED).waitFor();
-};
-
-const searchAndOpenConnector = async (page: ScoutPage, name: string) => {
-  const searchBox = page.locator(CONNECTORS_LIST_SELECTORS.SEARCH_INPUT);
-  await searchBox.fill(name);
-  await searchBox.press('Enter');
-  await page.locator(CONNECTORS_LIST_SELECTORS.TABLE_LOADED).waitFor();
-  await page.locator('[data-test-subj="connectorsTableCell-name"] button').click();
-};
+// Per-spec index so opsgenie and jsm never share/delete the same ES index.
+const THRESHOLD_INDEX = `${THRESHOLD_TEST_INDEX}-opsgenie`;
 
 const openOpsgenieTestTab = async (page: ScoutPage, connectorId: string) => {
   await page.testSubj.click(`edit${connectorId}`);
@@ -70,30 +39,6 @@ const openOpsgenieTestTab = async (page: ScoutPage, connectorId: string) => {
   await page.testSubj
     .locator('opsgenie-subActionSelect')
     .waitFor({ state: 'visible', timeout: 10_000 });
-};
-
-const closeFlyoutIfOpen = async (page: ScoutPage) => {
-  const closeBtn = page.testSubj.locator('edit-connector-flyout-close-btn');
-  if (await closeBtn.isVisible({ timeout: 1_000 }).catch(() => false)) {
-    await closeBtn.click();
-    const confirmBtn = page.testSubj.locator('confirmModalConfirmButton');
-    if (await confirmBtn.isVisible({ timeout: 1_000 }).catch(() => false)) {
-      await confirmBtn.click();
-    }
-  }
-};
-
-const cancelRuleCreation = async (page: ScoutPage) => {
-  const cancelBtn = page.testSubj.locator('rulePageFooterCancelButton');
-  if (await cancelBtn.isVisible({ timeout: 2_000 }).catch(() => false)) {
-    await cancelBtn.click();
-    const confirmBtn = page.testSubj
-      .locator('confirmRuleCloseModal')
-      .locator('[data-test-subj="confirmModalConfirmButton"]');
-    if (await confirmBtn.isVisible({ timeout: 1_000 }).catch(() => false)) {
-      await confirmBtn.click();
-    }
-  }
 };
 
 test.describe('Opsgenie connector', { tag: tags.stateful.classic }, () => {
@@ -104,16 +49,16 @@ test.describe('Opsgenie connector', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ apiServices, esClient }) => {
     await esClient.indices.create(
       {
-        index: THRESHOLD_TEST_INDEX,
+        index: THRESHOLD_INDEX,
         mappings: { properties: { '@timestamp': { type: 'date' } } },
       },
       { ignore: [400] }
     );
     await esClient.index({
-      index: THRESHOLD_TEST_INDEX,
+      index: THRESHOLD_INDEX,
       document: { '@timestamp': new Date().toISOString() },
     });
-    await esClient.indices.refresh({ index: THRESHOLD_TEST_INDEX });
+    await esClient.indices.refresh({ index: THRESHOLD_INDEX });
 
     // Connector for test-page tests
     const testConnector = await apiServices.alerting.connectors.create({
@@ -137,7 +82,7 @@ test.describe('Opsgenie connector', { tag: tags.stateful.classic }, () => {
   });
 
   test.beforeEach(async ({ browserAuth }) => {
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginWithCustomRole(CONNECTORS_ROLE);
   });
 
   test.afterEach(async ({ page }) => {
@@ -150,7 +95,7 @@ test.describe('Opsgenie connector', { tag: tags.stateful.classic }, () => {
       createdConnectorIds.map((id) => apiServices.alerting.connectors.delete(id))
     );
     createdConnectorIds.length = 0;
-    await esClient.indices.delete({ index: THRESHOLD_TEST_INDEX }, { ignore: [404] });
+    await esClient.indices.delete({ index: THRESHOLD_INDEX }, { ignore: [404] });
   });
 
   // ── connector page ────────────────────────────────────────────────────────
@@ -172,14 +117,11 @@ test.describe('Opsgenie connector', { tag: tags.stateful.classic }, () => {
       `Created '${connectorName}'`
     );
 
-    await page.locator(CONNECTORS_LIST_SELECTORS.SEARCH_INPUT).fill(connectorName);
-    await page.locator(CONNECTORS_LIST_SELECTORS.SEARCH_INPUT).press('Enter');
-    await page.locator(CONNECTORS_LIST_SELECTORS.TABLE_LOADED).waitFor();
+    await searchConnectors(page, connectorName);
 
     const row = page.testSubj.locator('connectors-row');
     await expect(row.getByTestId('connectorsTableCell-actionType')).toContainText('Opsgenie');
 
-    // Find and track created connector for cleanup
     const all = await apiServices.alerting.connectors.getAll();
     const created = (all as Array<{ id: string; name: string }>).find(
       (c) => c.name === connectorName
@@ -211,9 +153,7 @@ test.describe('Opsgenie connector', { tag: tags.stateful.classic }, () => {
 
     await page.testSubj.click('euiFlyoutCloseButton');
 
-    await page.locator(CONNECTORS_LIST_SELECTORS.SEARCH_INPUT).fill(updatedName);
-    await page.locator(CONNECTORS_LIST_SELECTORS.SEARCH_INPUT).press('Enter');
-    await page.locator(CONNECTORS_LIST_SELECTORS.TABLE_LOADED).waitFor();
+    await searchConnectors(page, updatedName);
     await expect(page.testSubj.locator('connectors-row')).toHaveCount(1);
   });
 
@@ -433,7 +373,7 @@ test.describe('Opsgenie connector', { tag: tags.stateful.classic }, () => {
 
   test('alerts page - should default to the create alert action', async ({ page }) => {
     await page.gotoApp('rules');
-    await defineIndexThresholdRule(page, `opsgenie-alert-${Date.now()}`);
+    await defineIndexThresholdRule(page, `opsgenie-alert-${Date.now()}`, THRESHOLD_INDEX);
 
     await page.testSubj.click('ruleActionsAddActionButton');
     await page.testSubj.locator('ruleActionsConnectorsModal').waitFor({ state: 'visible' });
@@ -451,7 +391,7 @@ test.describe('Opsgenie connector', { tag: tags.stateful.classic }, () => {
     page,
   }) => {
     await page.gotoApp('rules');
-    await defineIndexThresholdRule(page, `opsgenie-alert-${Date.now()}`);
+    await defineIndexThresholdRule(page, `opsgenie-alert-${Date.now()}`, THRESHOLD_INDEX);
 
     await page.testSubj.click('ruleActionsAddActionButton');
     await page.testSubj.locator('ruleActionsConnectorsModal').waitFor({ state: 'visible' });
@@ -473,7 +413,7 @@ test.describe('Opsgenie connector', { tag: tags.stateful.classic }, () => {
     page,
   }) => {
     await page.gotoApp('rules');
-    await defineIndexThresholdRule(page, `opsgenie-alert-${Date.now()}`);
+    await defineIndexThresholdRule(page, `opsgenie-alert-${Date.now()}`, THRESHOLD_INDEX);
 
     await page.testSubj.click('ruleActionsAddActionButton');
     await page.testSubj.locator('ruleActionsConnectorsModal').waitFor({ state: 'visible' });
@@ -496,7 +436,7 @@ test.describe('Opsgenie connector', { tag: tags.stateful.classic }, () => {
     page,
   }) => {
     await page.gotoApp('rules');
-    await defineIndexThresholdRule(page, `opsgenie-alert-${Date.now()}`);
+    await defineIndexThresholdRule(page, `opsgenie-alert-${Date.now()}`, THRESHOLD_INDEX);
 
     await page.testSubj.click('ruleActionsAddActionButton');
     await page.testSubj.locator('ruleActionsConnectorsModal').waitFor({ state: 'visible' });
@@ -523,7 +463,7 @@ test.describe('Opsgenie connector', { tag: tags.stateful.classic }, () => {
     page,
   }) => {
     await page.gotoApp('rules');
-    await defineIndexThresholdRule(page, `opsgenie-alert-${Date.now()}`);
+    await defineIndexThresholdRule(page, `opsgenie-alert-${Date.now()}`, THRESHOLD_INDEX);
 
     await page.testSubj.click('ruleActionsAddActionButton');
     await page.testSubj.locator('ruleActionsConnectorsModal').waitFor({ state: 'visible' });

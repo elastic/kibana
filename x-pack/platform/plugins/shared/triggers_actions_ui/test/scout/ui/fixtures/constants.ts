@@ -5,8 +5,32 @@
  * 2.0.
  */
 
+import type { KibanaRole } from '@kbn/scout';
+
 export const BIGGER_TIMEOUT = 20000 as const;
 export const SHORTER_TIMEOUT = 5000 as const;
+
+// Minimal role for the connector suites: manage connectors (`actions`) and
+// rules/stack alerts (`stackAlerts`), plus ES read on the alerts indices and the
+// index-threshold test index so the rule form can list its time fields.
+export const CONNECTORS_ROLE: KibanaRole = {
+  elasticsearch: {
+    cluster: [],
+    indices: [
+      {
+        names: ['.alerts-*', 'scout-threshold-rule-test*'],
+        privileges: ['read', 'view_index_metadata'],
+      },
+    ],
+  },
+  kibana: [
+    {
+      base: [],
+      feature: { actions: ['all'], stackAlerts: ['all'] },
+      spaces: ['*'],
+    },
+  ],
+};
 
 export const RULE_DETAILS_APP_PATH = 'management/insightsAndAlerting/triggersActions';
 export const CONNECTORS_APP_PATH = '/app/management/insightsAndAlerting/triggersActionsConnectors';
