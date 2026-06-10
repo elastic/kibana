@@ -3,7 +3,7 @@ steps:
     label: 'Code Quality Analysis'
     env:
       KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'true'
-      SLACK_NOTIFICATIONS_CHANNEL: '#search-code-quality-check-test'
+      SLACK_NOTIFICATIONS_CHANNEL: '#search-kibana'
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod

@@ -8,7 +8,6 @@ FALLOW_VERSION="2.76.0"
 FALLOW_OWNERS="@elastic/search-kibana @elastic/workchat-eng"
 FALLOW_JSON=".fallow/fallow-results.json"
 REPORT_SCRIPT=".buildkite/scripts/steps/code_quality/fallow_report.mjs"
-SLACK_SCRIPT=".buildkite/scripts/steps/code_quality/fallow_slack_notify.mjs"
 OWNER_SNAPSHOT=".fallow/owner-snapshot.json"
 OWNER_SNAPSHOT_PREV=".fallow/owner-snapshot-prev.json"
 GCS_SNAPSHOT="gs://ci-artifacts.kibana.dev/code-quality/fallow-owner-snapshot.json"
@@ -59,47 +58,58 @@ echo "$SECTIONS"
 echo "--- Post Buildkite annotation"
 buildkite-agent annotate --style info --context fallow-report "$ANNOTATION"
 
-echo "--- Save owner snapshot for next run"
-.buildkite/scripts/common/activate_service_account.sh gs://ci-artifacts.kibana.dev
-gsutil cp "$OWNER_SNAPSHOT" "$GCS_SNAPSHOT"
-.buildkite/scripts/common/activate_service_account.sh --unset-impersonation
+if [ "${FALLOW_SAVE_SNAPSHOT:-}" = "true" ]; then
+  SNAPSHOT_DATE="$(date -u +%Y-%m-%d)"
+  GCS_SNAPSHOT_HISTORY="gs://ci-artifacts.kibana.dev/code-quality/history/fallow-owner-snapshot-${SNAPSHOT_DATE}.json"
+  echo "--- Save owner snapshot for next run (+ history)"
+  .buildkite/scripts/common/activate_service_account.sh gs://ci-artifacts.kibana.dev
+  gsutil cp "$OWNER_SNAPSHOT" "$GCS_SNAPSHOT"
+  gsutil cp "$OWNER_SNAPSHOT" "$GCS_SNAPSHOT_HISTORY"
+  .buildkite/scripts/common/activate_service_account.sh --unset-impersonation
+else
+  echo "--- Skip saving snapshot (FALLOW_SAVE_SNAPSHOT not set to 'true')"
+fi
 
 if [ "${KIBANA_SLACK_NOTIFICATIONS_ENABLED:-}" = "true" ]; then
   echo "--- Send Slack notification"
-  CHANNEL="${SLACK_NOTIFICATIONS_CHANNEL:-#search-code-quality-check-test}"
-  BUILD_URL="${BUILDKITE_BUILD_URL:-}"
+  CHANNEL="${SLACK_NOTIFICATIONS_CHANNEL:-}"
+  if [ -z "$CHANNEL" ]; then
+    echo "SLACK_NOTIFICATIONS_CHANNEL is not set — skipping Slack notification"
+  else
+    BUILD_URL="${BUILDKITE_BUILD_URL:-}"
 
-  # Build plain-text message from annotation (strip markdown **)
-  SLACK_TEXT=$(printf '%s' "$ANNOTATION" | sed 's/\*\*//g; /^$/d')
-  if [ -n "$BUILD_URL" ]; then
-    SLACK_TEXT="${SLACK_TEXT}
+    # Build plain-text message from annotation (strip markdown **)
+    SLACK_TEXT=$(printf '%s' "$ANNOTATION" | sed 's/\*\*//g; /^$/d')
+    if [ -n "$BUILD_URL" ]; then
+      SLACK_TEXT="${SLACK_TEXT}
 Build: ${BUILD_URL}"
+    fi
+
+    # Upload a step with step-level notify — Buildkite delivers via org-level Slack integration.
+    # Step-level notify (not top-level) fires when the step itself completes.
+    NOTIFY_YML="$(mktemp /tmp/fallow_notify_XXXXXX.yml)"
+    {
+      echo "steps:"
+      echo "  - label: \":slack: Code Quality Notify\""
+      echo "    command: \"echo 'Code Quality report sent to Slack'\""
+      echo "    agents:"
+      echo "      image: family/kibana-ubuntu-2404"
+      echo "      imageProject: elastic-images-prod"
+      echo "      provider: gcp"
+      echo "      machineType: n2-standard-2"
+      echo "      preemptible: true"
+      echo "    notify:"
+      echo "      - slack:"
+      echo "          channels:"
+      echo "            - \"${CHANNEL}\""
+      echo "          message: |"
+      while IFS= read -r line; do
+        echo "            ${line}"
+      done <<< "$SLACK_TEXT"
+      echo "        if: step.outcome == \"passed\""
+    } > "$NOTIFY_YML"
+
+    buildkite-agent pipeline upload "$NOTIFY_YML"
+    rm -f "$NOTIFY_YML"
   fi
-
-  # Upload a step with step-level notify — Buildkite delivers via org-level Slack integration.
-  # Step-level notify (not top-level) fires when the step itself completes.
-  NOTIFY_YML="$(mktemp /tmp/fallow_notify_XXXXXX.yml)"
-  {
-    echo "steps:"
-    echo "  - label: \":slack: Code Quality Notify\""
-    echo "    command: \"echo 'Code Quality report sent to Slack'\""
-    echo "    agents:"
-    echo "      image: family/kibana-ubuntu-2404"
-    echo "      imageProject: elastic-images-prod"
-    echo "      provider: gcp"
-    echo "      machineType: n2-standard-2"
-    echo "      preemptible: true"
-    echo "    notify:"
-    echo "      - slack:"
-    echo "          channels:"
-    echo "            - \"${CHANNEL}\""
-    echo "          message: |"
-    while IFS= read -r line; do
-      echo "            ${line}"
-    done <<< "$SLACK_TEXT"
-    echo "        if: step.outcome == \"passed\""
-  } > "$NOTIFY_YML"
-
-  buildkite-agent pipeline upload "$NOTIFY_YML"
-  rm -f "$NOTIFY_YML"
 fi

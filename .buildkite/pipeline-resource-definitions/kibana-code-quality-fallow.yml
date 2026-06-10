@@ -19,8 +19,14 @@ spec:
       description: Weekly code quality analysis for search-kibana and workchat-eng using fallow
     spec:
       env:
-        SLACK_NOTIFICATIONS_CHANNEL: '#search-code-quality-check-test'
+        SLACK_NOTIFICATIONS_CHANNEL: '#search-kibana'
         KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'true'
+        FALLOW_SAVE_SNAPSHOT: 'true'
+      schedules:
+        Weekly code quality:
+          cronline: 0 9 * * 1 Europe/Berlin
+          message: Weekly code quality analysis
+          branch: main
       allow_rebuilds: true
       branch_configuration: main
       default_branch: main
