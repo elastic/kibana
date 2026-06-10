@@ -6,7 +6,10 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { LogExtractionInstallSchema } from './log_extraction_validator';
+import {
+  LogExtractionInstallSchema,
+  LogExtractionUpdadeSchema,
+} from './log_extraction_validator';
 
 const TestSchema = z.object({ logExtraction: LogExtractionInstallSchema });
 
@@ -57,6 +60,26 @@ describe('LogExtractionInstallParams additionalIndexPatterns', () => {
     if (!result.success) {
       const issue = result.error.issues.find((i) => Array.isArray(i.path) && i.path[2] === 1);
       expect(issue).toBeDefined();
+    }
+  });
+});
+
+describe('LogExtractionInstallSchema strict / unknown keys', () => {
+  it('rejects unknown keys', () => {
+    const result = LogExtractionInstallSchema.safeParse({ asasa: 123 });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues.some((i) => i.code === 'unrecognized_keys')).toBe(true);
+    }
+  });
+});
+
+describe('LogExtractionUpdadeSchema strict / unknown keys', () => {
+  it('rejects unknown keys', () => {
+    const result = LogExtractionUpdadeSchema.safeParse({ asasa: 123 });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues.some((i) => i.code === 'unrecognized_keys')).toBe(true);
     }
   });
 });

@@ -16,9 +16,11 @@ import type { EntityStorePluginRouter } from '../../types';
 import { wrapMiddlewares } from '../middleware';
 import { LogExtractionUpdadeSchema } from './utils/log_extraction_validator';
 
-const bodySchema = z.object({
-  logExtraction: LogExtractionUpdadeSchema,
-});
+export const UpdateBodySchema = z
+  .object({
+    logExtraction: LogExtractionUpdadeSchema,
+  })
+  .strict();
 
 export function registerUpdate(router: EntityStorePluginRouter) {
   router.versioned
@@ -40,7 +42,7 @@ export function registerUpdate(router: EntityStorePluginRouter) {
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            body: buildRouteValidationWithZod(bodySchema),
+            body: buildRouteValidationWithZod(UpdateBodySchema),
           },
         },
         options: {
