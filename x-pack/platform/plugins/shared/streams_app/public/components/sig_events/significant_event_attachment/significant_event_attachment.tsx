@@ -26,7 +26,6 @@ import type { FocusedSignificantEventService } from '../../../services/significa
 import sigEventIcon from '../../asset_image/sig_event_icon.svg';
 import { registerSignificantEventAutoAttach } from '../lib/significant_event_auto_attach';
 import { getStatusColor } from '../significant_events_discovery/components/sig_events_tab/filter_constants';
-import type { AGENT_BUILDER_SIDEBAR_APP_ID } from '../lib/constants';
 
 const labels = {
   fallback: i18n.translate('xpack.streams.significantEventAttachment.fallbackLabel', {
@@ -185,7 +184,7 @@ export const registerSignificantEventAttachment = ({
   chrome,
   focusedSignificantEventService,
 }: {
-  agentBuilder: NonNullable<StreamsAppStartDependencies[typeof AGENT_BUILDER_SIDEBAR_APP_ID]>;
+  agentBuilder: NonNullable<StreamsAppStartDependencies['agentBuilder']>;
   chrome: ChromeStart;
   focusedSignificantEventService: FocusedSignificantEventService;
 }): (() => void) => {

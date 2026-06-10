@@ -18,7 +18,7 @@ import {
   registerSignificantEventAutoAttach,
   type IdGenerator,
 } from './significant_event_auto_attach';
-import { AGENT_BUILDER_SIDEBAR_APP_ID } from './constants';
+import { AGENTBUILDER_FEATURE_ID } from '@kbn/agent-builder-plugin/public';
 
 const createEvent = (overrides?: Partial<SigEvent>): SigEvent => ({
   '@timestamp': '2026-01-01T00:00:00.000Z',
@@ -139,7 +139,7 @@ describe('registerSignificantEventAutoAttach', () => {
     const event = createEvent();
 
     focusedSignificantEventService.setFocusedEvent(event);
-    currentAppId$.next(AGENT_BUILDER_SIDEBAR_APP_ID);
+    currentAppId$.next(AGENTBUILDER_FEATURE_ID);
     activeConversation$.next({ id: undefined });
     jest.runOnlyPendingTimers();
 
@@ -153,7 +153,7 @@ describe('registerSignificantEventAutoAttach', () => {
 
   it('does not attach to an existing conversation', () => {
     focusedSignificantEventService.setFocusedEvent(createEvent());
-    currentAppId$.next(AGENT_BUILDER_SIDEBAR_APP_ID);
+    currentAppId$.next(AGENTBUILDER_FEATURE_ID);
     activeConversation$.next({ id: 'conversation-1', conversation: undefined });
     jest.runOnlyPendingTimers();
 
@@ -161,7 +161,7 @@ describe('registerSignificantEventAutoAttach', () => {
   });
 
   it('updates the same draft attachment when the focused event changes before send', () => {
-    currentAppId$.next(AGENT_BUILDER_SIDEBAR_APP_ID);
+    currentAppId$.next(AGENTBUILDER_FEATURE_ID);
     activeConversation$.next({ id: undefined });
 
     focusedSignificantEventService.setFocusedEvent(createEvent({ discovery_slug: 'first-event' }));
