@@ -365,6 +365,18 @@ describe('BaseMonacoConnectorHandler', () => {
       expect(result).toContain('Returns up to 10,000 hits');
     });
 
+    it('should separate additional info with blank lines for markdown rendering', () => {
+      const result = handler.exposedCreateConnectorOverview('ai.agent', 'Run an AI agent', [
+        '**Type**: AI/ML connector for inference and analysis',
+        '**Usage**: Configure parameters in the `with` block to customize the connector behavior.',
+        '**Documentation**: Configure model parameters and input data',
+      ]);
+
+      expect(result).toContain(
+        '**Type**: AI/ML connector for inference and analysis\n\n**Usage**: Configure parameters in the `with` block to customize the connector behavior.\n\n**Documentation**: Configure model parameters and input data'
+      );
+    });
+
     it('should handle no additional info', () => {
       const result = handler.exposedCreateConnectorOverview(
         'elasticsearch.search',

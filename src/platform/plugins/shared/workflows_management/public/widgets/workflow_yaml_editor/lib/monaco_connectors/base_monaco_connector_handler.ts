@@ -178,7 +178,10 @@ export abstract class BaseMonacoConnectorHandler implements MonacoConnectorHandl
     const lines = [`**Connector**: \`${connectorType}\``, '', description];
 
     if (additionalInfo && additionalInfo.length > 0) {
-      lines.push('', ...additionalInfo);
+      // Markdown renderers (including Monaco hover/docs) treat single newlines as spaces;
+      // separate overview fields with blank lines so labels like Type/Usage/Documentation
+      // each appear on their own line.
+      lines.push('', additionalInfo.join('\n\n'));
     }
 
     return lines.join('\n');
