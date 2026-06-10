@@ -125,10 +125,7 @@ describe('runRulePreviewTool', () => {
 
   it('returns an error result for an unknown flag', async () => {
     const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
-    const result = await tool.handler(
-      { command: 'esql --query "x" --bogus value' },
-      context
-    );
+    const result = await tool.handler({ command: 'esql --query "x" --bogus value' }, context);
 
     expect(runRulePreviewMock).not.toHaveBeenCalled();
     const [firstResult] = getResults(result);

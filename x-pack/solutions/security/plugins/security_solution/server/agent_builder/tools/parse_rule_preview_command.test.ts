@@ -31,9 +31,13 @@ describe('tokenizeCommand', () => {
   });
 
   it('handles mixed quoted and unquoted tokens', () => {
-    expect(
-      tokenizeCommand('esql --query "FROM logs-* | LIMIT 10" --interval 5m')
-    ).toEqual(['esql', '--query', 'FROM logs-* | LIMIT 10', '--interval', '5m']);
+    expect(tokenizeCommand('esql --query "FROM logs-* | LIMIT 10" --interval 5m')).toEqual([
+      'esql',
+      '--query',
+      'FROM logs-* | LIMIT 10',
+      '--interval',
+      '5m',
+    ]);
   });
 
   it('returns empty array for empty string', () => {
@@ -289,9 +293,7 @@ describe('parseRulePreviewCommand — missing required args', () => {
   });
 
   it('returns kind:error when new_terms rule is missing --history-window-start', () => {
-    const result = parseRulePreviewCommand(
-      'new_terms --query "*:*" --new-terms-fields source.ip'
-    );
+    const result = parseRulePreviewCommand('new_terms --query "*:*" --new-terms-fields source.ip');
     expect(result.kind).toBe('error');
     if (result.kind === 'error') {
       expect(result.message).toContain('history-window-start');
@@ -491,9 +493,7 @@ describe('parseRulePreviewCommand — progressive help: query', () => {
   });
 
   it('step 3 — query --query "..." --help returns kind:help (help wins)', () => {
-    const result = parseRulePreviewCommand(
-      'query --query "event.category:authentication" --help'
-    );
+    const result = parseRulePreviewCommand('query --query "event.category:authentication" --help');
     expect(result.kind).toBe('help');
   });
 });
@@ -567,7 +567,7 @@ describe('parseRulePreviewCommand — progressive help: threat_match', () => {
 
   it('step 3 — full threat_match command with --help returns kind:help (help wins)', () => {
     const result = parseRulePreviewCommand(
-      "threat_match --query \"*:*\" --threat-query \"*:*\" " +
+      'threat_match --query "*:*" --threat-query "*:*" ' +
         "--threat-index ti-* --threat-mapping '[]' --help"
     );
     expect(result.kind).toBe('help');
