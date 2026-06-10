@@ -201,6 +201,7 @@ describe('Agent policy', () => {
       .mocked(getPackagePolicySavedObjectType)
       .mockResolvedValue(PACKAGE_POLICY_SAVED_OBJECT_TYPE);
     jest.spyOn(apm, 'startTransaction').mockReturnValue({ end: jest.fn() } as any);
+    mockedPackagePolicyService.findAllForAgentPolicy.mockResolvedValue([]);
   });
 
   afterEach(() => {
