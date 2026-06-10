@@ -104,6 +104,7 @@ export const AddPrebuiltRulesHeaderButtons = () => {
               closePopover={closeOverflowPopover}
               panelPaddingSize="s"
               anchorPosition="downRight"
+              aria-label={i18n.INSTALL_RULES_OVERFLOW_BUTTON_ARIA_LABEL}
             >
               <EuiContextMenuPanel size="s" items={overflowItems} />
             </EuiPopover>

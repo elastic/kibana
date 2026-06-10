@@ -1208,6 +1208,13 @@ export const REFRESH_RULE_POPOVER_DESCRIPTION = i18n.translate(
   }
 );
 
+export const AUTO_REFRESH_POPOVER_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.autoRefreshPopoverAriaLabel',
+  {
+    defaultMessage: 'Auto refresh settings',
+  }
+);
+
 export const CLEAR_RULES_TABLE_FILTERS = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.clearRulesTableFilters',
   {
