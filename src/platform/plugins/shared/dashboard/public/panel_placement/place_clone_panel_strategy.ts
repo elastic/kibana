@@ -49,11 +49,11 @@ export function placeClonePanel({
   if (!panelToPlaceBeside) {
     throw new PanelNotFoundError();
   }
-  const { w: width, h: height } = newPanel.grid;
+  const { w: width, h: height, sectionId: newPanelSection } = newPanel.grid;
   const beside = { ...panelToPlaceBeside.grid, panelId: placeBesideId };
   const otherPanelGridData: Array<GridData & { panelId: string }> = [];
   forOwn(currentLayout.panels, (panel: DashboardLayoutPanel, panelId: string) => {
-    if (panel.grid.sectionId === newPanel.grid.sectionId) {
+    if (panel.grid.sectionId === newPanelSection) {
       // only check against panels that are in the same section as the cloned panel
       otherPanelGridData.push({ ...panel.grid, panelId });
     }
@@ -117,13 +117,13 @@ export function placeClonePanel({
   for (let j = position + 1; j < sortedGrid.length; j++) {
     originalPositionInTheGrid = sortedGrid[j].panelId;
     const { grid, ...movedPanel } = cloneDeep(otherPanels[originalPositionInTheGrid]);
-    if (grid.sectionId === sectionId) {
+    if (grid.sectionId === newPanelSection) {
       // only move panels in the cloned panel's section
       const newGridData = { ...grid, y: grid.y + diff };
       otherPanels[originalPositionInTheGrid] = { ...movedPanel, grid: newGridData };
     }
   }
-  console.log({ bottomPlacement });
+
   return {
     ...currentLayout,
     panels: {
