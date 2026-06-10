@@ -83,7 +83,7 @@ export const dashboardExpandPanelActionStrings = {
 export const dashboardExportCsvActionStrings = {
   getDisplayName: () =>
     i18n.translate('dashboard.actions.DownloadCreateDrilldownAction.displayName', {
-      defaultMessage: 'Download CSV',
+      defaultMessage: 'Export CSV',
     }),
   getUntitledFilename: () =>
     i18n.translate('dashboard.actions.downloadOptionsUnsavedFilename', {

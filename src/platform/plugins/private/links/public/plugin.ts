@@ -18,9 +18,10 @@ import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/pu
 import type { PresentationUtilPluginSetup } from '@kbn/presentation-util-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
-
+import type { ExportShareDerivatives, SharePluginSetup } from '@kbn/share-plugin/public';
 import type { UiActionsPublicSetup } from '@kbn/ui-actions-plugin/public/plugin';
 import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
+
 import type { LinksEmbeddableState } from '../common';
 import {
   APP_ICON,
@@ -41,6 +42,7 @@ export interface LinksSetupDependencies {
   contentManagement: ContentManagementPublicSetup;
   presentationUtil: PresentationUtilPluginSetup;
   uiActions: UiActionsPublicSetup;
+  share?: SharePluginSetup;
 }
 
 export interface LinksStartDependencies {
@@ -144,6 +146,19 @@ export class LinksPlugin
         return addLinksPanelAction;
       }
     );
+
+    if (plugins.share) {
+      console.log('SHARE');
+      plugins.share.registerShareIntegration<ExportShareDerivatives>(LINKS_EMBEDDABLE_TYPE, {
+        id: 'exportJson',
+        groupId: 'exportDerivatives',
+        getShareIntegrationConfig: async () => {
+          console.log('GET CONFIG');
+          const { exportJsonConfig } = await import('./share/export_json_config');
+          return exportJsonConfig;
+        },
+      });
+    }
   }
 
   public start(core: CoreStart, plugins: LinksStartDependencies) {

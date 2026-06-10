@@ -13,6 +13,7 @@ import type { FormatFactory } from '@kbn/field-formats-plugin/common';
 import { downloadMultipleAs } from '@kbn/share-plugin/public';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { i18n } from '@kbn/i18n';
 
 import type { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
 import { apiHasInspectorAdapters, type Adapters } from '@kbn/inspector-plugin/public';
@@ -36,9 +37,21 @@ export class ExportCSVAction implements Action<ExportContext> {
   public readonly id = ACTION_EXPORT_CSV;
   public readonly type = ACTION_EXPORT_CSV;
   public readonly order = 18;
+  public grouping = [
+    {
+      id: 'export_actions',
+      order: 100,
+      asContextMenu: true,
+      getIconType: () => 'upload',
+      getDisplayName: () =>
+        i18n.translate('dashboard.actions.exportDisplayName', {
+          defaultMessage: 'Export',
+        }),
+    },
+  ];
 
   public getIconType() {
-    return 'upload';
+    return 'document';
   }
 
   public readonly getDisplayName = (context: ExportContext): string =>

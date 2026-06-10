@@ -156,6 +156,7 @@ export async function buildContextMenuForActions({
             _level: i,
             _order: group.order || 0,
             _icon: group.getIconType ? group.getIconType(context) : 'empty',
+            _subMenu: group.asContextMenu,
           };
           if (parentPanel) {
             panels[parentPanel].items!.push({
@@ -211,7 +212,7 @@ export async function buildContextMenuForActions({
           key: panel.id + '__separator',
         });
       }
-      if (panel.items.length > 4) {
+      if ((panel._subMenu && panel.items.length > 1) || panel.items.length > 4) {
         panels.mainMenu.items.push({
           name: panel.title || panel.id,
           icon: panel._icon || 'empty',

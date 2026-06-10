@@ -547,6 +547,6 @@ export const useDashboardMenuItems = ({
     hasExportMenuItems,
     isLabsEnabled,
   ]);
-
+  console.log({ editModeTopNavConfig });
   return { viewModeTopNavConfig, editModeTopNavConfig };
 };
