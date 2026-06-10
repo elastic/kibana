@@ -45,9 +45,9 @@ export async function setupDependencies(
   fakeRequest?: KibanaRequest,
   workflowsExecutionEngine?: WorkflowsExecutionEnginePluginStart
 ) {
-  const { coreStart, actions, taskManager } = dependencies;
+  const { coreStart, actions, taskManager, workflowsExtensions } = dependencies;
 
-  await dependencies.workflowsExtensions.isReady();
+  await workflowsExtensions.isReady();
 
   // Get ES client from core services (guaranteed to be available at task execution time)
   const internalEsClient = coreStart.elasticsearch.client.asInternalUser;

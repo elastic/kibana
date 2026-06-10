@@ -77,7 +77,6 @@ export const createMockWorkflowExecutionCursor = (
     stop: jest.fn(() => {
       isExecuting = false;
     }),
-    handleStartOfCycle: jest.fn(),
     commitPendingNavigation: jest.fn(),
     navigateToNode: jest.fn(),
     navigateToNextNode: jest.fn(),

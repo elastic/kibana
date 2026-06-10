@@ -25,7 +25,6 @@ export interface WorkflowExecutionCursorApi {
   clearError(): void;
   start(): void;
   stop(): void;
-  handleStartOfCycle(): void;
   commitPendingNavigation(): void;
   readonly currentNode: GraphNodeUnion | null;
   readonly nextNode: GraphNodeUnion | null;
@@ -97,10 +96,6 @@ export class WorkflowExecutionCursor implements WorkflowExecutionCursorApi {
    */
   public stop(): void {
     this.executing = false;
-  }
-
-  handleStartOfCycle(): void {
-    // this.syncScopeStack();
   }
 
   /**
