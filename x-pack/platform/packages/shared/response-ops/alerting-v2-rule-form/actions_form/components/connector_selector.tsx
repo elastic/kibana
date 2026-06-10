@@ -34,12 +34,26 @@ export const ConnectorSelector = ({ connectorTypeId, value, onChange }: Connecto
   const triggersActionsUi = useService(
     PluginStart('triggersActionsUi')
   ) as TriggersAndActionsUIPublicPluginStart;
-  const http = useService(CoreStart('http'));
-  const notifications = useService(CoreStart('notifications'));
   const application = useService(CoreStart('application'));
+  const http = useService(CoreStart('http'));
+  const uiSettings = useService(CoreStart('uiSettings'));
+  const settings = useService(CoreStart('settings'));
+  const notifications = useService(CoreStart('notifications'));
   const docLinks = useService(CoreStart('docLinks'));
   const queryClient = useQueryClient();
   const [isCreateFlyoutOpen, setIsCreateFlyoutOpen] = useState(false);
+
+  // The connector flyout from triggers_actions_ui resolves core services via the kibana-react
+  // context (useKibana().services), which the alerting_v2 app does not provide because it mounts
+  // through core-di. Bridge the required services here so the flyout can render.
+  const connectorFlyoutServices = {
+    application,
+    http,
+    uiSettings,
+    settings,
+    notifications,
+    docLinks,
+  };
 
   const handleConnectorCreated = (connector: ActionConnector) => {
     queryClient.setQueryData<SingleStepConnector[]>(ALL_CONNECTORS_KEY, (old = []) => [
@@ -48,7 +62,7 @@ export const ConnectorSelector = ({ connectorTypeId, value, onChange }: Connecto
         id: connector.id,
         name: connector.name,
         connectorTypeId,
-        isMissingSecrets: false,
+        isMissingSecrets: connector.isMissingSecrets ?? false,
         isDeprecated: false,
       },
     ]);
@@ -59,7 +73,7 @@ export const ConnectorSelector = ({ connectorTypeId, value, onChange }: Connecto
   const options: Array<EuiComboBoxOptionOption<string>> = connectors.map((connector) => ({
     label: connector.name,
     value: connector.id,
-    disabled: connector.isMissingSecrets,
+    disabled: connector.isMissingSecrets || connector.isDeprecated,
   }));
 
   const selected: Array<EuiComboBoxOptionOption<string>> = value
@@ -69,7 +83,7 @@ export const ConnectorSelector = ({ connectorTypeId, value, onChange }: Connecto
   return (
     <>
       <EuiFormRow
-        label={i18n.translate('xpack.alertingV2.singleStepWorkflow.connector.label', {
+        label={i18n.translate('xpack.responseOps.alertingV2RuleForm.actionForm.connector.label', {
           defaultMessage: 'Connector',
         })}
         labelAppend={
@@ -77,7 +91,7 @@ export const ConnectorSelector = ({ connectorTypeId, value, onChange }: Connecto
             data-test-subj="singleStepWorkflowCreateConnectorLink"
             onClick={() => setIsCreateFlyoutOpen(true)}
           >
-            {i18n.translate('xpack.alertingV2.singleStepWorkflow.connector.createNew', {
+            {i18n.translate('xpack.responseOps.alertingV2RuleForm.actionForm.connector.createNew', {
               defaultMessage: '+ Create new connector',
             })}
           </EuiLink>
@@ -86,21 +100,23 @@ export const ConnectorSelector = ({ connectorTypeId, value, onChange }: Connecto
       >
         <EuiComboBox
           fullWidth
+          compressed
           singleSelection={{ asPlainText: true }}
           data-test-subj="singleStepWorkflowConnectorSelect"
           isLoading={isLoading}
-          placeholder={i18n.translate('xpack.alertingV2.singleStepWorkflow.connector.placeholder', {
-            defaultMessage: 'Select a connector',
-          })}
+          placeholder={i18n.translate(
+            'xpack.responseOps.alertingV2RuleForm.actionForm.connector.placeholder',
+            {
+              defaultMessage: 'Select a connector',
+            }
+          )}
           selectedOptions={selected}
           onChange={(next) => onChange(next[0]?.value ?? null)}
           options={options}
         />
       </EuiFormRow>
       {isCreateFlyoutOpen && (
-        <KibanaContextProvider
-          services={{ http, notifications, application, docLinks, isCloud: false }}
-        >
+        <KibanaContextProvider services={connectorFlyoutServices}>
           {triggersActionsUi.getAddConnectorFlyout({
             initialConnector: { actionTypeId: connectorTypeId },
             onClose: () => setIsCreateFlyoutOpen(false),
