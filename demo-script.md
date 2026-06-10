@@ -15,8 +15,9 @@
   - (5m) 3.1: How code review with domain knowledge actually works
 - (4m) **Section 4: Synthesis & closing**
   - (1m) 4.1: Check live code review results
-  - (2m) 4.2: Smart is not the same as informed
-  - (1m) 4.3: Thanks and outro
+  - (1m) 4.2: Smart is not the same as informed
+  - (1m) 4.3: What's in the context window is key
+  - (1m) 4.4: Thanks and outro
 
 ## Section 1: Opening
 
@@ -141,59 +142,51 @@ Goal: walk through **3 GENERIC comments** + **3 DOMAIN-AWARE comments** live on 
 
 Goal: prove the same skill works on real merged PRs. Slide-driven; two PRs, ~75s each.
 
-[Action: switch to slides → **Slide 0**.]
+[Action: switch to slides → **"Real PR reviews" framing slide**.]
 
 > "That was a fake PR. So how does the same skill perform on real engineering work? Let me show you two PRs my team has opened recently."
 
-(~20s on Slide 0 framing - "*Same skill, same code, two clones - the only difference is the `.agents/domains/` folder. Four PRs reviewed; we'll walk two.*")
+(~20s on framing slide)
 
-[Action: switch to **Slide 1a**.]
+[Action: switch to **#272038 parity-catch slide**.]
 
-#### Slide 1a - PR #271722 (`rulesClient.bulkCreate()`) (~70s)
-
-https://github.com/elastic/kibana/pull/271722
-
-**Generic** (`route.ts`):
-
-![Generic review comment on route.ts flagging routeLimitedConcurrencyTag(1) as too aggressive](demo-pr-271722-comment-1-generic.png)
-
-**Domain-aware** (`constants.ts`):
-
-![Domain-aware review comment on constants.ts citing the heavy-endpoints rate-limit invariant and MSSP 300-spaces scale](demo-pr-271722-comment-1-domain.png)
-
-> "PR #271722. Bulk rule creation in the alerting layer. Both reviewers flagged the **same architectural decision** - the import endpoint sets `routeLimitedConcurrencyTag(1)`, which serializes all imports cluster-wide.
->
-> Look at the difference in framing.
->
-> The **generic review** on the left says: 'limiting to 1 globally is extremely aggressive - consider raising it.' That's a valid concern. It's also a one-liner: 'this is too low, bump it up.'
->
-> The **domain-aware review** on the right says: 'Domain invariant - heavy endpoints must rate-limit. The import route is one of four hot paths. MSSP customers run 300 spaces per cluster. With concurrency 1, a single long-running import on any space blocks all other concurrent imports on that node.' And it goes one step further: 'consider whether a limit of 3 to 5 would still bound memory without completely serializing multi-space imports.'
->
-> Same code. Generic says 'aggressive, raise it.' Domain-aware says 'this disables bulk imports for MSSP customers - here's why, here's the lower bound, here's the upper bound.'"
-
-[Action: switch to **Slide 1b**.]
-
-#### Slide 1b - PR #272038 (Move install/upgrade/revert into `DetectionRulesClient`) (~80s)
+#### #272038 — parity catch (~50s)
 
 https://github.com/elastic/kibana/pull/272038
 
-**Top row — parity (both reviewers caught the DRC bypass on `legacy_create_prepackaged_rules.ts`):**
-
-![Generic review comment flagging the inconsistency: upgrade step bypasses DetectionRulesClient](demo-pr-272038-comment-1-generic.png)
-
-![Domain-aware review comment with the same parity catch: install goes through DRC, upgrade bypasses it](demo-pr-272038-comment-1-domain.png)
-
-**Bottom row — only domain-aware caught the abstraction-boundary leak on `detection_rules_client_interface.ts`:**
-
-![Domain-aware review comment citing the abstraction-boundary leakage invariant: RuleUpgradeContext leaking through IDetectionRulesClient](demo-pr-272038-comment-2-domain.png)
-
-> "Second PR. This one is a refactor - pulling install, upgrade, and revert operations into a central `DetectionRulesClient` abstraction.
+> "First PR — #272038. This is a refactor: pulling install, upgrade, and revert into the central `DetectionRulesClient` abstraction.
 >
-> **Top row** - both reviewers caught the **same issue**: the install step goes through `DetectionRulesClient`, but the upgrade step bypasses it and calls `applyPrebuiltRuleAssets` directly. Generic catches it. Domain-aware catches it. Parity at the surface.
+> Both reviewers caught **the same issue**. The install step goes through `DetectionRulesClient`. The upgrade step bypasses it and calls `applyPrebuiltRuleAssets` directly. Inconsistent with the PR's own goal.
 >
-> **Bottom row** - only the domain-aware reviewer caught this one. The new public `IDetectionRulesClient` interface is leaking a type called `RuleUpgradeContext` - an internal implementation type from a sibling domain's handler-level module. That's an abstraction-boundary leak. Generic has no analog - it doesn't know `IDetectionRulesClient` is the boundary.
+> Generic catches it. Domain-aware catches it. **Parity at the surface.**"
+
+[Action: switch to **#272038 unpaired-catch slide**.]
+
+#### #272038 — unpaired catch (~50s)
+
+> "Same PR, different file. **Only the domain-aware reviewer caught this one.**
 >
-> Both reviewers caught the obvious DRC-bypass. Only the domain-aware reviewer noticed the public interface is leaking a sibling-domain handler-level type. That's the kind of catch only an owner of this code would make."
+> The new public `IDetectionRulesClient` interface is leaking a type called `RuleUpgradeContext` — an internal implementation type from a sibling domain's handler-level module. That's an abstraction-boundary leak.
+>
+> Generic has no analog. It doesn't know `IDetectionRulesClient` is the boundary. It doesn't recognize `RuleUpgradeContext` as a sibling-domain handler-level type.
+>
+> **The kind of catch only an owner of this code would make** — and the domain-aware reviewer behaves like one because we told it where the boundary is."
+
+[Action: switch to **#271722 slide**.]
+
+#### #271722 (`rulesClient.bulkCreate()`) (~70s)
+
+https://github.com/elastic/kibana/pull/271722
+
+> "Second PR — #271722. Bulk rule creation in the alerting layer. Both reviewers flagged the **same architectural decision** — the import endpoint sets `routeLimitedConcurrencyTag(1)`, which serializes all imports cluster-wide.
+>
+> Look at the difference in framing.
+>
+> The **generic review** says: 'limiting to 1 globally is extremely aggressive — consider raising it.' Valid concern. Also a one-liner: 'this is too low, bump it up.'
+>
+> The **domain-aware review** says: 'Domain invariant — heavy endpoints must rate-limit. The import route is one of four hot paths. MSSP customers run 300 spaces per cluster. With concurrency 1, a single long-running import on any space blocks all other concurrent imports on that node.' And it goes one step further: 'consider whether a limit of 3 to 5 would still bound memory without completely serializing multi-space imports.'
+>
+> Same code. Generic: 'aggressive, raise it.' Domain-aware: 'this disables bulk imports for MSSP — here's why, here's the lower bound, here's the upper bound.'"
 
 ## Section 3: How it works
 
@@ -213,27 +206,27 @@ Goal: four sub-blocks at high level. Attendees should leave able to draw the dis
 
 > "The discovery mechanism - which paths in the repo this domain applies to, which knowledge files to load - lives in two places. The repo-checked catalog is `dex-dev-skills/skills/knowledge/domains/domain-catalog.json`. You can also override per-developer with a local file at `~/.dex-dev-skills/assets/domains/domain-catalog.json`. Both supported."
 
-#### (b) Anatomy of a knowledge file (~1:00)
+#### (b) Discovery flow + `/dex-review-code` internals (~2:00)
 
-[Action: switch to **Slide 3** - the anatomy side-by-side.]
+[Action: switch to the **"How domain knowledge discovery works"** slide (4-box flow).]
 
-> "Two files, that's the whole format. The `.json` is the entry-point - where in the repo it applies, who owns it, which markdown files to load. The `.md` is what the reviewer agent reads."
+> "When you run `/dex-review-code`, here's what happens. Step 1 - diff your branch against `origin/main`. Step 2 - intersect the changed paths with the registered domains in the catalog. Step 3 - load the matching domain's knowledge - `domain.json` plus its `.md` files - into the reviewer subagent's context. Step 4 - the subagent emits comments, each tagged with the invariant it's flagging.
+>
+> That's the whole mechanism. No special model, no fine-tuning. Same model in both terminals - only the loaded context differs.
+>
+> One thing worth saying: `/dex-review-code` is not one big monolithic agent. It runs in phases - a diff phase, a domain-match phase, then a multi-agent review dispatch where each matched domain gets its own reviewer subagent with its own loaded knowledge file. That's why the domain-aware reviewer sounds different - different subagent, different system prompt loaded from the markdown."
+
+#### (c) Anatomy of a knowledge file (~1:00)
+
+[Action: switch to the **"Anatomy of a domain knowledge file"** slide (two-panel side-by-side).]
+
+> "Two files, that's the whole format. The `.json` is the entry-point - the domain's slug and name, who owns it, which paths in the repo it applies to, and which knowledge files to load. The `.md` is what the reviewer agent actually reads."
 
 [Action: switch back to editor, open `detection-rule-management.md`, scroll the section headers.]
 
 > "The markdown isn't free-form prose. It has structured sections: Overview, Architectural invariants, Common review patterns, Security considerations, Performance constraints, Historical catches. That structure is what makes the reviewer subagent's output useful - each comment maps back to a section.
 >
 > Anyone on your team can write these. Same format across every domain."
-
-#### (c) Discovery flow + `/dex-review-code` internals (~2:00)
-
-[Action: switch to **Slide 2** - the discovery flow diagram.]
-
-> "When you run `/dex-review-code`, here's what happens. Step 1 - diff your branch against `origin/main`. Step 2 - intersect the changed paths with the registered domains in the catalog. Step 3 - load that domain's `.md` files into the reviewer subagent's context. Step 4 - the subagent emits comments, each tagged with the invariant it's flagging.
->
-> That's the whole mechanism. No special model, no fine-tuning. Same model in both terminals - only the loaded context differs.
->
-> One thing worth saying: `/dex-review-code` is not one big monolithic agent. It runs in phases - a diff phase, a domain-match phase, then a multi-agent review dispatch where each matched domain gets its own reviewer subagent with its own loaded knowledge file. That's why the domain-aware reviewer sounds different - different subagent, different system prompt loaded from the markdown."
 
 #### (d) Where these files came from (~1:00)
 
@@ -269,31 +262,49 @@ cat ~/.dex-dev-skills/work/.../review-comments.md | head -40
 >
 > Same pattern you saw on GitHub. These can be posted via `/dex-review-post` - exactly what you'll do in the hands-on right after this."
 
-### 4.2: Smart is not the same as informed (2m)
+### 4.2: Smart is not the same as informed (1m30s)
 
-Goal: land the principle. The synthesizing close.
+Goal: land the headline. Walk the three things the model could not derive from code alone.
 
-[Action: switch to **Slide 4**.]
+[Action: switch to the **"Smart is not the same as informed"** slide.]
 
-> "Here's the principle I want you to leave with. Three words on the slide:
+> "Here's the headline I want you to leave with:
 >
 > **Smart is not the same as informed.**
 >
 > LLMs are smart. They are. But smart is not the same as informed. There are three specific things - pulled from this domain - that the model could not derive from the code alone, no matter how smart it was. We had to tell it."
 
-[Action: walk the three bullets on Slide 4.]
+[Action: walk the three takeaways on the slide.]
 
-> **"One - the abstraction.** The model has no way to know that `IDetectionRulesClient` is **the** boundary in our domain. It's not commented in the code. It's just an interface. We had to tell it.
+> **"One - the rules.** The model has no way to know that `IDetectionRulesClient` is **the** business logic abstraction in our domain. It's not commented in the code. It's just an interface. We had to tell it.
 >
-> **Two - the history.** The model has no way to know we got burned by an `as`-cast on `lastRunStatus` in PR #262307 six months ago. That's not in the code. It's in our heads, in PR history, in design discussions on Slack. We had to mine that and write it down.
+> **Two - the history.** The model has no way to know we got burned in the past by exposing the data model directly via API endpoints - a pattern that froze our storage shape into a public contract. That's not in the code. It's in PR history, in Slack threads, in post-mortems. We had to mine that and write it down.
 >
-> **Three - the scale.** The model has no way to know MSSP customers run 300 Kibana spaces with up to 10,000 rules per space. The code looks fine at 100 rules. It only fails at 300 × 10,000. We had to tell it."
+> **Three - the scale.** The model has no way to know our largest MSSP customers run 300 Kibana spaces with up to 3,000 rules per space, and need concurrent bulk actions across those spaces. The code looks fine at 100 rules. It only fails at 300 × 3,000. We had to tell it."
 
-[Action: point at the supporting line on Slide 4.]
+### 4.3: What's in the context window is key (1m15s)
 
-> "This is the take-away: **AI dev automation is as good as the quality and accuracy of the information you put in the context window.** That principle goes well beyond code review - it applies to any agentic AI development workflow your team builds. Domain knowledge is what makes the AI's smart actually become informed."
+Goal: zoom out from "domain knowledge" to the broader principle, then name the three context categories the team should be filling in over time.
 
-### 4.3: Thanks and outro (1m)
+[Action: switch to the **"What's in the context window is key"** slide.]
+
+> "Zoom out one level. The take-away isn't just 'write domain knowledge files.' It's this:
+>
+> **An AI agent is as good as the quality and accuracy of the information you put in its context window.**
+>
+> That goes well beyond code review. It applies to any agentic AI development workflow your team builds - review, refactoring, generation, planning, on-call triage. The ceiling on quality is what you've made *available* to the agent in context. Domain knowledge is one slice of that. There are at least three categories worth building up over time:"
+
+[Action: walk the three takeaways on the slide.]
+
+> **"Domain knowledge** - today, mostly missing. Tomorrow, sufficient for the highest-impact areas. Eventually, comprehensive and accurate across every team.
+>
+> **Team standards** - the cross-domain rules and guidelines that apply regardless of which file you're touching: testing discipline, error handling conventions, security defaults.
+>
+> **Decision log** - *why* certain decisions were made. Not what the code does - the code shows that. The reasoning behind it. Why we picked approach A over B. Why this constraint exists. What we tried and abandoned.
+>
+> Build all three over time, and your AI tooling stops being 'a smart assistant that doesn't know your codebase' and starts being 'an informed collaborator.'"
+
+### 4.4: Thanks and outro (1m)
 
 Goal: two takeaways, thanks, hand off to Nir.
 
@@ -307,36 +318,3 @@ Goal: two takeaways, thanks, hand off to Nir.
 
 [Action: hand microphone / clicker to Nir.]
 
-## Risk mitigations & contingencies
-
-### "A terminal hangs or fails mid-run"
-
-- Don't debug live. The pre-posted reviews on PR #272773 are the primary evidence - they're shown at 2.1 (around minute 5–10), well before the live runs even need to be done. At 4.1, narrate plainly ("*looks like we hit a rate limit live*") and move on. The principle (4.2) doesn't depend on the live runs at all.
-
-### "Both reviews take much longer than expected"
-
-- Hard limit: if reviews are not done by 4.1 (~minute 18), skip the artifact previews entirely. Pivot directly to "*you'll see this same output in your own terminal in the hands-on*" and roll into 4.2.
-
-### "Pre-posted review URLs on PR #272773 have drifted"
-
-- Verify the two pre-posted review IDs the night before. The Comment-ID references in `demo-slides.md` map to specific GitHub anchor URLs; if anything drifted from a rebase, update the references.
-
-### "Real-PR review links (#271722 / #272038) are mis-linked or stale"
-
-- Both slide pairs link to GitHub via comment-IDs. Spot-check during prep; the curated IDs are stable as long as the underlying reviews aren't re-run.
-
-### "An audience question lands in the middle of the demo"
-
-- Defer to the hands-on. Canned response: "*Great question - let's hold that for the hands-on, where you can try it on your own PR.*"
-
-### "An intentionally introduced violation doesn't get caught by the (live) domain-aware reviewer"
-
-- The pre-posted reviews on PR #272773 carry the proof; the live runs are atmosphere, not evidence. If the live DOMAIN-AWARE run misses something at 4.1, don't call out the miss - focus on what was caught.
-
-### "Audience asks: did the AI hallucinate or get things wrong?"
-
-- Answer honestly. The candidate domain-aware reviewer on PR #271722 had ~2 of 7 comments that were misleading - it invented a data-model leakage that didn't exist (the code is encapsulated inside `DetectionRulesClient`), and it referenced a `params` argument on `RulesClient.find` that doesn't exist. The 5 right ones were genuinely better than generic. The right framing: "*The AI is not always right. But when it's right, domain knowledge changes the **kind** of right.*"
-
-### "PR has unexpected new comments at demo time"
-
-- Refresh PR #272773 once before the demo and once during the DOMAIN-AWARE expansion at 2.1. Don't refresh aggressively. If the line numbers in Comments A–F have drifted from a rebase, the comment text still resolves to the right code via GitHub's line-anchor fallback.
