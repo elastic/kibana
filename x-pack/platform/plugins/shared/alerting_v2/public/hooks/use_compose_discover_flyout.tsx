@@ -50,6 +50,11 @@ export const useComposeDiscoverFlyout = ({
   const dataViews = useService(PluginStart('dataViews')) as DataViewsPublicPluginStart;
   const lens = useService(PluginStart('lens')) as LensPublicStart;
   const uiActions = useService(PluginStart('uiActions')) as UiActionsStart;
+  // `dashboard` is an optional plugin dependency; resolve it leniently so the
+  // flyout still mounts in environments where the dashboard plugin is disabled.
+  const dashboard = useService(PluginStart('dashboard'), { optional: true }) as
+    | DashboardStart
+    | undefined;
 
   const [flyoutOpen, setFlyoutOpen] = useState(false);
   const [flyoutMode, setFlyoutMode] = useState<ComposeDiscoverMode>('create');
@@ -69,8 +74,9 @@ export const useComposeDiscoverFlyout = ({
       application,
       lens,
       uiActions,
+      dashboard,
     }),
-    [http, data, dataViews, notifications, application, lens, uiActions]
+    [http, data, dataViews, notifications, application, lens, uiActions, dashboard]
   );
 
   const closeFlyout = useCallback(() => {
