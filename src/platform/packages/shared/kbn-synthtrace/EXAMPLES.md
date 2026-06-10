@@ -385,6 +385,7 @@ Services generated:
 - `synth-anomaly-detectors` — critical failure-rate anomaly plus a minor latency bump in production (so the badge surfaces failure rate, not latency), and a major failure-rate anomaly in development.
 - `synth-anomaly-environments` — critical latency spike in production, major in development.
 - `synth-anomaly-throughput` — large throughput spike in production, smaller one in development.
+- `synth-anomaly-all-metrics` — trips all three detectors (latency, failure rate, throughput) on one service in both environments, each in its own sub-window at a different time but with intentional overlaps (failure rate ramps from major to critical). The two environments use shifted windows, so some anomalous times line up across environments and others do not, and some buckets are anomalous on two or three detectors at once (so the badge surfaces the highest-scoring detector).
 
 **Options:**
 

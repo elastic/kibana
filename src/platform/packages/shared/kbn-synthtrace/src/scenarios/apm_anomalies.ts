@@ -32,6 +32,15 @@
  *      a dedicated service trips each detector (latency, throughput, failure
  *      rate) in both environments, critical in prod and major in dev.
  *
+ *   4. All three detectors on ONE service, in BOTH environments, overlapping in
+ *      time: `synth-anomaly-all-metrics` (production + development) trips latency,
+ *      failure rate and throughput, each in its own sub-window at a DIFFERENT time
+ *      but with intentional OVERLAPS and different intensities (failure rate ramps
+ *      from major to critical). The two environments use shifted windows, so some
+ *      anomalous times line up across environments and others do not. Some buckets
+ *      are anomalous on two or three detectors at once, so the badge must surface
+ *      the highest-scoring detector.
+ *
  * ANOMALY WINDOWS
  * ---------------
  * The trailing `anomalyWindowHours` span is split into two non-overlapping
@@ -60,6 +69,8 @@
  *       -> synth-anomaly-environments / production (critical) + development (major)
  *   - detector 1 (throughput)
  *       -> synth-anomaly-throughput / production (critical) + development (major)
+ *   - detectors 0 + 1 + 2 (all three, overlapping in time)
+ *       -> synth-anomaly-all-metrics / production + development (shifted windows)
  *
  * DATA SHAPE
  * ----------
@@ -122,6 +133,15 @@ const DEFAULT_SCENARIO_OPTS = {
 
 type AnomalyPredicate = (timestamp: number) => boolean;
 
+interface AllMetricsWindows {
+  isLatencyAnomaly: AnomalyPredicate;
+  latencyDuration: number;
+  isFailureMajor: AnomalyPredicate;
+  isFailureCritical: AnomalyPredicate;
+  isThroughputAnomaly: AnomalyPredicate;
+  throughputBurst: number;
+}
+
 const scenario: Scenario<ApmFields> = async (runOptions) => {
   const { anomalyWindowHours, baselineRate } = {
     ...DEFAULT_SCENARIO_OPTS,
@@ -141,6 +161,44 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
   const isProductionAnomaly: AnomalyPredicate = (timestamp) =>
     timestamp >= productionWindowStart && timestamp < developmentWindowStart;
   const isDevelopmentAnomaly: AnomalyPredicate = (timestamp) => timestamp >= developmentWindowStart;
+
+  // OVERLAPPING sub-windows over the anomaly span, used by the
+  // `synth-anomaly-all-metrics` service so a single service trips ALL THREE
+  // detectors (latency, failure rate, throughput) at different times but with
+  // intentional overlaps. The service runs in BOTH environments with shifted
+  // windows, so some anomalous buckets line up across `production` and
+  // `development` (e.g. latency in [40%,60%)) while others do not. Boundaries are
+  // fractions of the full span:
+  //
+  //   production            development
+  //   --------------------  --------------------
+  //   latency    [ 0%,60%)  latency    [40%,100%]
+  //   failure    [30%,80%)  failure    [ 0%, 60%)
+  //   throughput [50%,100%] throughput [20%, 70%)
+  //
+  // Within production: latency+failure overlap in [30%,60%), failure+throughput
+  // in [50%,80%), all three in [50%,60%). Across environments the latency windows
+  // overlap in [40%,60%), failure in [30%,60%), throughput in [50%,70%).
+  const at = (fraction: number) => productionWindowStart + totalWindowMs * fraction;
+
+  const allMetricsWindows: Record<string, AllMetricsWindows> = {
+    [PRODUCTION]: {
+      isLatencyAnomaly: (timestamp: number) => timestamp >= at(0) && timestamp < at(0.6),
+      latencyDuration: 5000,
+      isFailureMajor: (timestamp: number) => timestamp >= at(0.3) && timestamp < at(0.55),
+      isFailureCritical: (timestamp: number) => timestamp >= at(0.55) && timestamp < at(0.8),
+      isThroughputAnomaly: (timestamp: number) => timestamp >= at(0.5),
+      throughputBurst: 15,
+    },
+    [DEVELOPMENT]: {
+      isLatencyAnomaly: (timestamp: number) => timestamp >= at(0.4),
+      latencyDuration: 1500,
+      isFailureMajor: (timestamp: number) => timestamp >= at(0) && timestamp < at(0.3),
+      isFailureCritical: (timestamp: number) => timestamp >= at(0.3) && timestamp < at(0.6),
+      isThroughputAnomaly: (timestamp: number) => timestamp >= at(0.2) && timestamp < at(0.7),
+      throughputBurst: 8,
+    },
+  };
 
   return {
     generate: ({ range, clients: { apmEsClient } }) => {
@@ -260,10 +318,58 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
         ),
       ];
 
+      // 4) A single service, in BOTH environments, that trips ALL THREE
+      //    detectors at different (but partially overlapping) times with
+      //    different intensities per metric. Each environment uses its own set of
+      //    overlapping windows (see `allMetricsWindows`), so some anomalous
+      //    buckets line up across environments and others do not. Within an
+      //    environment, overlapping windows make some buckets anomalous on two or
+      //    three detectors at once, exercising the highest-score-across-detectors
+      //    behaviour, while the combined chart shows matching and non-matching
+      //    anomaly times across environments.
+      const allMetricsEvents = (instance: Instance, windows: AllMetricsWindows) =>
+        range
+          .interval('1m')
+          .rate(baselineRate)
+          .generator((timestamp) => {
+            const duration = windows.isLatencyAnomaly(timestamp)
+              ? windows.latencyDuration
+              : BASELINE_DURATION;
+
+            let failProbability = BASELINE_FAIL_PROBABILITY;
+            if (windows.isFailureCritical(timestamp)) {
+              failProbability = 0.9;
+            } else if (windows.isFailureMajor(timestamp)) {
+              failProbability = 0.6;
+            }
+
+            const burst = windows.isThroughputAnomaly(timestamp) ? windows.throughputBurst : 1;
+
+            return Array.from({ length: burst }, () => {
+              const tx = instance
+                .transaction({ transactionName: TRANSACTION_NAME })
+                .timestamp(timestamp)
+                .duration(duration);
+              return Math.random() < failProbability ? tx.failure() : tx.success();
+            });
+          });
+
+      const allMetricsEventsByEnv = [
+        allMetricsEvents(
+          instanceFor('synth-anomaly-all-metrics', PRODUCTION),
+          allMetricsWindows[PRODUCTION]
+        ),
+        allMetricsEvents(
+          instanceFor('synth-anomaly-all-metrics', DEVELOPMENT),
+          allMetricsWindows[DEVELOPMENT]
+        ),
+      ];
+
       return withClient(apmEsClient, [
         ...detectorsEvents,
         ...environmentsEvents,
         ...throughputEventsByEnv,
+        ...allMetricsEventsByEnv,
       ]);
     },
   };
