@@ -15,10 +15,7 @@ import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-
 import type { Logger } from '@kbn/logging';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { MemoryService } from '../../memory';
-import {
-  createReadMemoryPageCallback,
-  formatExistingPages,
-} from '../../memory/tool_callbacks';
+import { createReadMemoryPageCallback, formatExistingPages } from '../../memory/tool_callbacks';
 import { INSIGHTS_DISCOVERY_MEMORY_TOOLS } from './prompts/shared/insights_memory_tools';
 import { createInsightsDiscoveryConnectorContext } from './prompts/shared/insights_discovery_connector_tools';
 

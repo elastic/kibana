@@ -17,7 +17,8 @@ export const INSIGHTS_DISCOVERY_MEMORY_TOOLS = {
       properties: {
         name: {
           type: 'string' as const,
-          description: 'The wiki page name (e.g. "payment-api-service", "streams/logs-otel-overview")',
+          description:
+            'The wiki page name (e.g. "payment-api-service", "streams/logs-otel-overview")',
         },
       },
       required: ['name'] as const,

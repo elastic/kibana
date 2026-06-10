@@ -78,8 +78,7 @@ export const formatEntityDetailChatMessage = ({
 
   return [
     i18n.translate('xpack.streams.sigEventAgentChat.entityPromptIntro', {
-      defaultMessage:
-        'Help me investigate this item from Streams Significant Events discovery.',
+      defaultMessage: 'Help me investigate this item from Streams Significant Events discovery.',
     }),
     '',
     `## ${title}`,
