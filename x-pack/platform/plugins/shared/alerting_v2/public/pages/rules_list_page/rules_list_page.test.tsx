@@ -168,6 +168,19 @@ describe('RulesListPage', () => {
     jest.useRealTimers();
   });
 
+  it('renders the experimental badge in the page header', () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    expect(screen.getByTestId('alertingV2ExperimentalBadge')).toBeInTheDocument();
+  });
+
   it('renders loading state', () => {
     mockUseFetchRules.mockReturnValue({
       data: undefined,

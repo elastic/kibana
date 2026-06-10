@@ -7,6 +7,12 @@ set -euo pipefail
 KIBANA_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$KIBANA_ROOT"
 
+# Devcontainer features can run npm as root while HOME points at /home/vscode,
+# leaving root-owned entries in the default npm cache. Use a workspace-local
+# cache for bootstrap so prebuilds do not depend on ~/.npm ownership.
+export npm_config_cache="${KIBANA_ROOT}/target/npm-cache"
+mkdir -p "$npm_config_cache"
+
 echo "=== Bootstrapping ==="
 yarn kbn bootstrap
 
