@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { z } from '@kbn/zod/v4';
 import { CustomStepImpl } from './custom_step_impl';
 import { OneShotStepDefinitionHandler, PollPolicyStepHandler } from './step_definition_handlers';
 
@@ -74,6 +75,7 @@ interface TestNode {
   configuration: {
     with?: Record<string, unknown>;
     'max-step-size'?: undefined;
+    [key: string]: unknown;
   };
 }
 
@@ -175,7 +177,7 @@ describe('CustomStepImpl', () => {
       expect(mockOneShotRun).toHaveBeenCalledWith(
         { key: 'value' },
         defaultNode.configuration.with,
-        defaultNode.configuration
+        {}
       );
       expect(result).toBe(runResult);
       expect(mockPollRun).not.toHaveBeenCalled();
@@ -192,11 +194,7 @@ describe('CustomStepImpl', () => {
       const result = await (impl as any)._run({});
 
       expect(mockPollRun).toHaveBeenCalledTimes(1);
-      expect(mockPollRun).toHaveBeenCalledWith(
-        {},
-        defaultNode.configuration.with,
-        defaultNode.configuration
-      );
+      expect(mockPollRun).toHaveBeenCalledWith({}, defaultNode.configuration.with, {});
       expect(result).toBe(runResult);
       expect(mockOneShotRun).not.toHaveBeenCalled();
     });
@@ -231,7 +229,7 @@ describe('CustomStepImpl', () => {
       expect(mockOneShotOnCancel).toHaveBeenCalledWith(
         { rendered: true },
         defaultNode.configuration.with,
-        defaultNode.configuration
+        {}
       );
       expect(mockPollOnCancel).not.toHaveBeenCalled();
     });
@@ -249,9 +247,108 @@ describe('CustomStepImpl', () => {
       expect(mockPollOnCancel).toHaveBeenCalledWith(
         { key: 'value' },
         defaultNode.configuration.with,
-        defaultNode.configuration
+        {}
       );
       expect(mockOneShotOnCancel).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('getRenderedConfig', () => {
+    it('passes rendered schema-defined config to the handler', async () => {
+      const mocks = createMocks();
+      const renderedConfig = {
+        'agent-id': 'elastic-ai-agent',
+        'connector-id': 'my-connector',
+        'create-conversation': true,
+      };
+      (
+        mocks.stepExecutionRuntime.contextManager.renderValueAccordingToContext as jest.Mock
+      ).mockReturnValueOnce(renderedConfig);
+
+      mockOneShotRun.mockResolvedValue({ input: {}, output: { result: 42 }, error: undefined });
+
+      const stepDefinition = {
+        configSchema: z.object({
+          'agent-id': z.string().optional(),
+          'connector-id': z.string().optional(),
+          'create-conversation': z.boolean().optional(),
+        }),
+        handler: jest.fn(),
+      };
+
+      const node: TestNode = {
+        stepId: 'custom-step',
+        stepType: 'ai.agent',
+        configuration: {
+          with: { message: 'hello' },
+          'max-step-size': undefined,
+          'agent-id': '{{ consts.agent_id }}',
+          'connector-id': '{{ inputs.connector_id }}',
+          'create-conversation': true,
+          name: 'custom-step',
+          type: 'ai.agent',
+          unexpected: '{{ consts.unexpected }}',
+        },
+      };
+
+      const impl = buildImpl(stepDefinition, mocks, node);
+      await (impl as any)._run({ message: 'hello' });
+
+      expect(
+        mocks.stepExecutionRuntime.contextManager.renderValueAccordingToContext
+      ).toHaveBeenCalledWith({
+        'agent-id': '{{ consts.agent_id }}',
+        'connector-id': '{{ inputs.connector_id }}',
+        'create-conversation': true,
+      });
+      expect(mockOneShotRun).toHaveBeenCalledWith(
+        { message: 'hello' },
+        { message: 'hello' },
+        renderedConfig
+      );
+    });
+
+    it('filters config to keys declared by the config schema', async () => {
+      const mocks = createMocks();
+      mockOneShotRun.mockResolvedValue({ input: {}, output: { result: 42 }, error: undefined });
+
+      const stepDefinition = {
+        configSchema: z.object({
+          source: z.unknown(),
+        }),
+        handler: jest.fn(),
+      };
+
+      const node: TestNode = {
+        stepId: 'custom-step',
+        stepType: 'data.parse_json',
+        configuration: {
+          with: { foo: 'bar' },
+          'max-step-size': undefined,
+          name: 'custom-step',
+          type: 'data.parse_json',
+          source: '{{ steps.previous.output }}',
+          if: '{{ condition }}',
+          timeout: '1m',
+          'on-failure': { continue: true },
+        },
+      };
+
+      const impl = buildImpl(stepDefinition, mocks, node);
+      await (impl as any)._run({ foo: 'bar' });
+
+      expect(
+        mocks.stepExecutionRuntime.contextManager.renderValueAccordingToContext
+      ).toHaveBeenCalledWith({
+        source: '{{ steps.previous.output }}',
+      });
+      expect(mockOneShotRun).toHaveBeenCalledWith(
+        { foo: 'bar' },
+        { foo: 'bar' },
+        {
+          source: '{{ steps.previous.output }}',
+        }
+      );
     });
   });
 

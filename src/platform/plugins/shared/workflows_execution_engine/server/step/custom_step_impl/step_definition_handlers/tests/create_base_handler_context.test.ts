@@ -63,4 +63,34 @@ describe('createBaseHandlerContext', () => {
     expect(context.rawInput).toEqual({});
     expect(context.config).toEqual({});
   });
+
+  it('forwards callKibanaApi to the execution runtime with abort signal', async () => {
+    const mocks = createHandlerTestMocks();
+    mocks.stepExecutionRuntime.contextManager.callKibanaApi.mockResolvedValue({
+      status: 200,
+      headers: {},
+      body: { ok: true },
+    });
+
+    const context = createBaseHandlerContext(
+      {},
+      {},
+      {},
+      defaultTestNode as any,
+      mocks.stepExecutionRuntime as any,
+      mocks.workflowLogger as any
+    );
+
+    const result = await context.contextManager.callKibanaApi({
+      method: 'GET',
+      path: '/api/status',
+    });
+
+    expect(mocks.stepExecutionRuntime.contextManager.callKibanaApi).toHaveBeenCalledWith({
+      method: 'GET',
+      path: '/api/status',
+      signal: mocks.stepExecutionRuntime.abortController.signal,
+    });
+    expect(result).toEqual({ status: 200, headers: {}, body: { ok: true } });
+  });
 });

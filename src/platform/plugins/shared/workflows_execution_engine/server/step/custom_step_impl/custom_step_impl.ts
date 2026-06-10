@@ -68,7 +68,7 @@ export class CustomStepImpl
     await this.stepHandler.onCancel(
       this.getInput(),
       this.node.configuration.with,
-      this.node.configuration || {}
+      this.getRenderedConfig()
     );
   }
 
@@ -92,12 +92,27 @@ export class CustomStepImpl
       return await this.stepHandler.run(
         input,
         this.node.configuration.with,
-        this.node.configuration || {}
+        this.getRenderedConfig()
       );
     } catch (err) {
       const error = ExecutionError.fromError(err).toSerializableObject();
       return { input, output: undefined, error };
     }
+  }
+
+  private getRenderedConfig(): Record<string, unknown> {
+    const configShape = this.stepDefinition.configSchema?.shape;
+    if (!configShape) {
+      return {};
+    }
+
+    const config = Object.fromEntries(
+      Object.keys(configShape)
+        .filter((key) => Object.hasOwn(this.node.configuration, key))
+        .map((key) => [key, this.node.configuration[key]])
+    );
+
+    return this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(config);
   }
 
   private resolveStepHandler(): CustomStepDefinitionHandler {

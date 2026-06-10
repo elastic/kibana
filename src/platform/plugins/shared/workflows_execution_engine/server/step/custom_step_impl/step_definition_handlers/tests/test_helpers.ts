@@ -45,6 +45,7 @@ export const createHandlerTestMocks = (initialPersistedState?: Record<string, un
       getContext: jest.fn(() => ({})),
       getEsClientAsUser: jest.fn(() => ({})),
       getFakeRequest: jest.fn(() => null),
+      callKibanaApi: jest.fn(),
     },
     abortController: new AbortController(),
     node: { configuration: { with: { key: 'value' } } },

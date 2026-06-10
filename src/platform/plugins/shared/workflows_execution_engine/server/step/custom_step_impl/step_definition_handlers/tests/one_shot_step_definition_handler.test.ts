@@ -29,11 +29,7 @@ describe('OneShotStepDefinitionHandler', () => {
       const handler = jest.fn().mockResolvedValue({ output: { result: 42 } });
       const stepHandler = buildHandler({ handler });
 
-      const result = await stepHandler.run(
-        { key: 'value' },
-        { key: 'value' },
-        defaultTestNode.configuration
-      );
+      const result = await stepHandler.run({ key: 'value' }, { key: 'value' }, {});
 
       expect(result.output).toEqual({ result: 42 });
       expect(result.error).toBeUndefined();
@@ -41,11 +37,41 @@ describe('OneShotStepDefinitionHandler', () => {
         expect.objectContaining({
           input: { key: 'value' },
           rawInput: { key: 'value' },
-          config: defaultTestNode.configuration,
+          config: {},
           stepId: 'custom-step',
           stepType: 'my-custom-type',
         })
       );
+    });
+
+    it('exposes callKibanaApi on the handler contextManager and forwards calls', async () => {
+      const mocks = createHandlerTestMocks();
+      mocks.stepExecutionRuntime.contextManager.callKibanaApi.mockResolvedValue({
+        status: 200,
+        headers: {},
+        body: { ok: true },
+      });
+
+      let observedCallKibanaApi: unknown;
+      const handler = jest.fn(async (ctx: { contextManager: { callKibanaApi: jest.Mock } }) => {
+        observedCallKibanaApi = ctx.contextManager.callKibanaApi;
+        const apiResult = await ctx.contextManager.callKibanaApi({
+          method: 'GET',
+          path: '/api/status',
+        });
+        return { output: apiResult };
+      });
+      const stepHandler = buildHandler({ handler }, mocks);
+
+      const result = await stepHandler.run({}, {}, {});
+
+      expect(typeof observedCallKibanaApi).toBe('function');
+      expect(mocks.stepExecutionRuntime.contextManager.callKibanaApi).toHaveBeenCalledWith({
+        method: 'GET',
+        path: '/api/status',
+        signal: mocks.stepExecutionRuntime.abortController.signal,
+      });
+      expect(result.output).toEqual({ status: 200, headers: {}, body: { ok: true } });
     });
 
     it('serializes handler errors into the run result', async () => {
@@ -54,7 +80,7 @@ describe('OneShotStepDefinitionHandler', () => {
         .mockResolvedValue({ output: undefined, error: new Error('handler error') });
       const stepHandler = buildHandler({ handler });
 
-      const result = await stepHandler.run({}, {}, defaultTestNode.configuration);
+      const result = await stepHandler.run({}, {}, {});
 
       expect(result.error).toBeDefined();
       expect(result.output).toBeUndefined();
@@ -63,7 +89,7 @@ describe('OneShotStepDefinitionHandler', () => {
     it('throws when the step definition has no handler', async () => {
       const stepHandler = buildHandler({ handler: undefined as unknown as jest.Mock });
 
-      await expect(stepHandler.run({}, {}, defaultTestNode.configuration)).rejects.toThrow(
+      await expect(stepHandler.run({}, {}, {})).rejects.toThrow(
         /has no "handler"/
       );
     });
@@ -76,7 +102,7 @@ describe('OneShotStepDefinitionHandler', () => {
       const handler = jest.fn().mockResolvedValue({ output: {} });
       const stepHandler = buildHandler({ handler });
 
-      await asHandler(stepHandler).onCancel({}, {}, defaultTestNode.configuration);
+      await asHandler(stepHandler).onCancel({}, {}, {});
     });
 
     it('invokes onCancel with context from the last run', async () => {
@@ -84,14 +110,14 @@ describe('OneShotStepDefinitionHandler', () => {
       const onCancel = jest.fn();
       const stepHandler = buildHandler({ handler, onCancel });
 
-      await stepHandler.run({ ran: true }, { ran: true }, defaultTestNode.configuration);
-      await asHandler(stepHandler).onCancel({}, {}, defaultTestNode.configuration);
+      await stepHandler.run({ ran: true }, { ran: true }, {});
+      await asHandler(stepHandler).onCancel({}, {}, {});
 
       expect(onCancel).toHaveBeenCalledWith(
         expect.objectContaining({
           input: { ran: true },
           rawInput: { ran: true },
-          config: defaultTestNode.configuration,
+          config: {},
         })
       );
     });
@@ -109,7 +135,7 @@ describe('OneShotStepDefinitionHandler', () => {
         node
       );
 
-      await asHandler(stepHandler).onCancel({}, {}, node.configuration);
+      await asHandler(stepHandler).onCancel({}, {}, {});
 
       expect(onCancel).toHaveBeenCalledWith(
         expect.objectContaining({
