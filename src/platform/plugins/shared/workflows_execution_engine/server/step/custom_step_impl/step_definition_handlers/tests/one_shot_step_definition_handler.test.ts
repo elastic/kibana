@@ -89,9 +89,7 @@ describe('OneShotStepDefinitionHandler', () => {
     it('throws when the step definition has no handler', async () => {
       const stepHandler = buildHandler({ handler: undefined as unknown as jest.Mock });
 
-      await expect(stepHandler.run({}, {}, {})).rejects.toThrow(
-        /has no "handler"/
-      );
+      await expect(stepHandler.run({}, {}, {})).rejects.toThrow(/has no "handler"/);
     });
   });
 
