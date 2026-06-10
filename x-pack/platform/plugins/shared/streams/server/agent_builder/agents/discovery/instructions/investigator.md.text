@@ -123,6 +123,8 @@ Rules where your initial hypothesis is "noise / normal volume / rule returned to
 
 Read ALL returned KIs and form ranked hypotheses per rule: claim (specific mechanism), supporting KIs, confidence (from `severity_score`), and the ES|QL query that would confirm or refute it.
 
+**5 Whys.** Deepen each hypothesis by repeatedly asking "why?" from the observed symptom toward the underlying cause — one step at a time, each step backed by the evidence sources you already have. Stop at the deepest cause the evidence supports rather than inferring further.
+
 **Scan for Dependency-type KIs first.** Identify `kind: "feature"`, `feature.type: "dependency"` results — these map the causal topology. Keep this map throughout Steps 2–5.
 
 **Cascade scan.** For each non-`stationary` rule, check whether a Dependency-type KI connects its service to another non-`stationary` rule's service. Record any such pair as a cascade candidate (upstream rule, downstream rule, KI name) — used in Step 5.
@@ -255,7 +257,7 @@ Translate your investigation findings into this structured format. Output discip
   - When multiple discoveries in the batch share a symptom class: use `alert_count` to differentiate severity.
   - **Grounding**: every factual claim must come from one of these inputs — `alert_count` from the detection doc, onset from the first elevated `rules_activity` window, recurrence only if `## Continuation Candidates` has a matching slug. Never estimate or infer.
 - `root_cause`:
-  - Your best mechanism hypothesis. Not a symptom restatement — answer: what code path, config defect, infrastructure condition, or volume driver is causing this?
+  - A **probable-cause hypothesis**, not a confirmed diagnosis (true root cause is established only once remediation proves the fix). Use the 5 Whys strategy (Step 2) to reason from symptom to cause, then state the deepest evidence-supported cause as a natural, technical explanation an SRE can use as a starting point — name the component, error type, field path, count, and onset timing.
   - **A weak hypothesis stated as uncertain is correct. A confident-sounding fabricated mechanism is a critical error.** When evidence is thin, write: "Most likely: [mechanism] — not yet confirmed by queries." Do not invent specificity you don't have.
   - Sources 1–3 require `execute_esql` ≥1 row; otherwise use only 4–5:
     1. `execute_esql` results — cite KI name + row count (e.g., `"svc: 412 errors/30m"`)

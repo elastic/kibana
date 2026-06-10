@@ -1,6 +1,6 @@
-version: "1"
-name: ".significant-events-triage"
-description: "Analyses unreviewed discoveries with a judge agent and creates significant events."
+version: '1'
+name: '.significant-events-triage'
+description: 'Analyses unreviewed discoveries with a judge agent and creates significant events.'
 enabled: true
 tags:
   - observability
@@ -8,7 +8,7 @@ tags:
   - significant-events
   - triage
 settings:
-  timeout: "30m"
+  timeout: '30m'
   concurrency:
     key: significant-events-triage
     strategy: drop
@@ -18,14 +18,9 @@ triggers:
     inputs:
       - name: discoveryLookback
         type: string
-        default: "now-7d"
+        default: 'now-7d'
         required: false
-        description: "Lookback window for active discoveries and reviewed discovery IDs. Should match .significant_events-discoveries retention."
-      - name: knowledgeBaseLookback
-        type: string
-        default: "now-7d"
-        required: false
-        description: "Lookback window for knowledge base calibration examples (promoted + demoted significant events). Wider = more examples, larger context."
+        description: 'Lookback window for active discoveries and reviewed discovery IDs. Should match .significant_events-discoveries retention.'
       - name: discoveryBatchMax
         type: number
         default: 5
@@ -45,7 +40,7 @@ steps:
   - name: set_space_vars
     type: data.set
     with:
-      spaceId: "{{ workflow.spaceId }}"
+      spaceId: '{{ workflow.spaceId }}'
 
   # -----------------------------------------------------------------------
   # Step 1: Collect reviewed discovery IDs from the events index.
@@ -61,15 +56,15 @@ steps:
           bool:
             filter:
               - term:
-                  kibana.space_ids: "{{ variables.spaceId }}"
+                  kibana.space_ids: '{{ variables.spaceId }}'
               - range:
-                  "@timestamp":
+                  '@timestamp':
                     gte: '{{ inputs.discoveryLookback }}'
         aggs:
           reviewed_ids:
             terms:
               field: discovery_id
-              size: "${{ consts.REVIEWED_IDS_MAX }}"
+              size: '${{ consts.REVIEWED_IDS_MAX }}'
     on-failure:
       continue: true
 
@@ -92,7 +87,7 @@ steps:
             sort:
               - criticality:
                   order: desc
-                  missing: "_last"
+                  missing: '_last'
                   unmapped_type: integer
               - '@timestamp':
                   order: desc
@@ -119,11 +114,11 @@ steps:
               bool:
                 filter:
                   - term:
-                      kibana.space_ids: "{{ variables.spaceId }}"
+                      kibana.space_ids: '{{ variables.spaceId }}'
                   - term:
                       kind: '{{ consts.KIND_FINDING }}'
                   - range:
-                      "@timestamp":
+                      '@timestamp':
                         gte: '{{ inputs.discoveryLookback }}'
                 must_not:
                   - terms:
@@ -141,7 +136,7 @@ steps:
             sort:
               - criticality:
                   order: desc
-                  missing: "_last"
+                  missing: '_last'
                   unmapped_type: integer
               - '@timestamp':
                   order: desc
@@ -168,11 +163,11 @@ steps:
               bool:
                 filter:
                   - term:
-                      kibana.space_ids: "{{ variables.spaceId }}"
+                      kibana.space_ids: '{{ variables.spaceId }}'
                   - term:
                       kind: '{{ consts.KIND_FINDING }}'
                   - range:
-                      "@timestamp":
+                      '@timestamp':
                         gte: '{{ inputs.discoveryLookback }}'
         on-failure:
           continue: true
@@ -201,9 +196,9 @@ steps:
       method: POST
       path: '/{{ consts.DISCOVERIES_INDEX }}/_search?ignore_unavailable=true'
       body:
-        size: "${{ consts.LOOKUP_BATCH_SIZE }}"
+        size: '${{ consts.LOOKUP_BATCH_SIZE }}'
         sort:
-          - "@timestamp":
+          - '@timestamp':
               order: desc
         collapse:
           field: discovery_slug
@@ -239,71 +234,25 @@ steps:
       reason: 'No unreviewed findings or cleared discoveries — nothing to triage'
 
   # -----------------------------------------------------------------------
-  # Step 7: Knowledge base — promoted + demoted events for judge calibration.
-  # -----------------------------------------------------------------------
-  - name: get_knowledge_base
-    # acknowledged/grouped events excluded — promoted/demoted pattern data is
-    # what calibrates the judge; older promoted/demoted events for a slug are
-    # exactly the desired signal even if the latest status is acknowledged.
-    # evidences excluded from KB — the judge calibrates from status/criticality/title;
-    # full evidence payloads add ~50KB per entry for no calibration gain.
-    # Slug-scoped should omitted — terms with an empty array causes an ES parse error.
-    type: elasticsearch.request
-    with:
-      method: POST
-      path: '/{{ consts.EVENTS_INDEX }}/_search?ignore_unavailable=true'
-      body:
-        size: '${{ consts.KB_BATCH_MAX }}'
-        sort:
-          - "@timestamp":
-              order: desc
-        collapse:
-          field: discovery_slug
-        _source:
-          includes:
-            - "@timestamp"
-            - discovery_slug
-            - status
-            - criticality
-            - title
-            - analysis_summary
-        query:
-          bool:
-            filter:
-              - term:
-                  kibana.space_ids: "{{ variables.spaceId }}"
-              - terms:
-                  status: ["promoted", "demoted"]
-              - range:
-                  "@timestamp":
-                    gte: '{{ inputs.knowledgeBaseLookback }}'
-    on-failure:
-      continue: true
-
-  # -----------------------------------------------------------------------
-  # Step 8: Judge — evaluate unreviewed discoveries.
+  # Step 7: Judge — evaluate unreviewed discoveries.
   # -----------------------------------------------------------------------
   - name: run_judge_agent
     # TODO: agent-id and connector-id are config fields and are NOT rendered through Liquid by the
     # workflow engine (CustomStepImpl passes context.config raw). Use static values until the engine
     # supports template rendering for config fields.
     type: ai.agent
-    agent-id: "platform.streams.significant-events.discovery.judge"
-    connector-id: ".anthropic-claude-4.6-sonnet-chat_completion"
+    agent-id: 'platform.streams.significant-events.discovery.judge'
+    connector-id: '.anthropic-claude-4.6-sonnet-chat_completion'
     # Keep plugin-id/aggregate-by in sync with @kbn/streams-schema inference_feature_ids.ts
     # (STREAMS_SIG_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID / STREAMS_SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID).
-    plugin-id: "streams_sig_events_discovery"
-    aggregate-by: "streams_significant_events"
+    plugin-id: 'streams_sig_events_discovery'
+    aggregate-by: 'streams_significant_events'
     create-conversation: true
     with:
       message: |
         ## Unreviewed Discoveries
 
         {{ steps.collect_findings.output.findings | json }}
-
-        ## Knowledge Base (recent promoted + demoted events)
-
-        {{ steps.get_knowledge_base.output.hits.hits | map: '_source' | json }}
 
         ## Discoveries with Detections Cleared
 
@@ -326,7 +275,7 @@ steps:
                   type: array
                   items:
                     type: string
-                  description: "For new group events: populate with the discovery_ids of all grouped discoveries. For re-reviewed group events: echo verbatim from the group discovery — do not add or modify entries."
+                  description: 'For new group events: populate with the discovery_ids of all grouped discoveries. For re-reviewed group events: echo verbatim from the group discovery — do not add or modify entries.'
                 status:
                   type: string
                   enum: [acknowledged, demoted, promoted]
@@ -350,7 +299,7 @@ steps:
                   type: array
                   items:
                     type: string
-                  description: "Top 3 operator action items. Required for promoted and acknowledged events."
+                  description: 'Top 3 operator action items. Required for promoted and acknowledged events.'
                 analysis_summary:
                   type: string
                 assessment_note:
@@ -428,7 +377,7 @@ steps:
                       esql_query:
                         anyOf:
                           - type: string
-                          - type: "null"
+                          - type: 'null'
                       confirmed:
                         type: boolean
                         enum: [true]
@@ -458,20 +407,20 @@ steps:
   # Eviction-safe snapshot — ai.agent outputs are evictable; data.set outputs are not.
   - name: check_judge_agent_output
     type: if
-    condition: "${{ steps.run_judge_agent.error == null and steps.run_judge_agent.output.structured_output.significant_events != null }}"
+    condition: '${{ steps.run_judge_agent.error == null and steps.run_judge_agent.output.structured_output.significant_events != null }}'
     steps:
       - name: store_significant_events
         type: data.set
         with:
-          significant_events: "${{ steps.run_judge_agent.output.structured_output.significant_events }}"
-          conversation_id: "{{ steps.run_judge_agent.output.conversation_id }}"
+          significant_events: '${{ steps.run_judge_agent.output.structured_output.significant_events }}'
+          conversation_id: '{{ steps.run_judge_agent.output.conversation_id }}'
 
   - name: foreach_significant_event
     type: foreach
     if: >-
       ${{ steps.store_significant_events.output != null
       and steps.store_significant_events.output.significant_events != null }}
-    foreach: "${{ steps.store_significant_events.output.significant_events }}"
+    foreach: '${{ steps.store_significant_events.output.significant_events }}'
     steps:
       - name: check_existing_event
         type: elasticsearch.request
@@ -481,7 +430,7 @@ steps:
           body:
             size: 1
             sort:
-              - "@timestamp":
+              - '@timestamp':
                   order: desc
             _source:
               includes:
@@ -493,9 +442,9 @@ steps:
               bool:
                 filter:
                   - term:
-                      kibana.space_ids: "{{ variables.spaceId }}"
+                      kibana.space_ids: '{{ variables.spaceId }}'
                   - term:
-                      discovery_slug: "${{ foreach.item.discovery_slug }}"
+                      discovery_slug: '${{ foreach.item.discovery_slug }}'
         on-failure:
           continue: true
 
@@ -517,7 +466,7 @@ steps:
           method: POST
           path: '/{{ consts.EVENTS_INDEX }}/_doc'
           body:
-            "@timestamp": '{{ "now" | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
+            '@timestamp': '{{ "now" | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
             kibana:
               space_ids:
                 - '{{ variables.spaceId }}'

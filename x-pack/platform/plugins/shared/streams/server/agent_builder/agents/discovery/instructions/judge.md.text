@@ -229,6 +229,7 @@ Emit only fields defined in this schema. Output discipline applies to all narrat
   - Remove tech KI claims for streams with empty/error evidence.
   - Never add mechanism claims or statistical notation.
 - `root_cause`:
+  - `root_cause` is a probable-cause hypothesis expressed as a causal chain. Do not re-derive it — apply the rules below, and when trimming or rewriting a link keep the remaining chain coherent (no dangling "because …").
   - Echo verbatim; update only when ≥1 confirmed evidence exists.
   - Update when evidence contradicts mechanism → rewrite citing KI + row_count.
   - Update when evidence confirms a KI stream and deepens the mechanism at greater depth.
