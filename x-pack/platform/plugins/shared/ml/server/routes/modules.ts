@@ -22,15 +22,14 @@ import {
   dataRecognizerConfigResponse,
   jobExistsResponse,
 } from './schemas/modules';
-import type { RouteInitialization, ServerlessInfo } from '../types';
+import type { RouteInitialization } from '../types';
 
 /**
  * Recognizer routes.
  */
 export function dataRecognizer(
   { router, routeGuard }: RouteInitialization,
-  compatibleModuleType: CompatibleModule | null,
-  serverless: ServerlessInfo
+  compatibleModuleType: CompatibleModule | null
 ) {
   router.versioned
     .get({
@@ -69,6 +68,7 @@ export function dataRecognizer(
           context,
           mlSavedObjectService,
           getDataViewsService,
+          serverless,
         }) => {
           try {
             const { indexPatternTitle } = request.params;
@@ -128,6 +128,7 @@ export function dataRecognizer(
           context,
           mlSavedObjectService,
           getDataViewsService,
+          serverless,
         }) => {
           try {
             const { moduleId } = request.params;
@@ -194,6 +195,7 @@ export function dataRecognizer(
           context,
           mlSavedObjectService,
           getDataViewsService,
+          serverless,
         }) => {
           try {
             let { moduleId } = request.params;
@@ -269,6 +271,7 @@ export function dataRecognizer(
           context,
           mlSavedObjectService,
           getDataViewsService,
+          serverless,
         }) => {
           try {
             const { moduleId } = request.params;
@@ -371,6 +374,7 @@ export function dataRecognizer(
           context,
           mlSavedObjectService,
           getDataViewsService,
+          serverless,
         }) => {
           try {
             const { moduleId } = request.params;

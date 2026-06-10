@@ -7,7 +7,7 @@
 
 import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
-import type { RouteInitialization, ServerlessInfo } from '../types';
+import type { RouteInitialization } from '../types';
 import { jobAuditMessagesProvider } from '../models/job_audit_messages';
 import {
   jobAuditMessagesQuerySchema,
@@ -18,10 +18,7 @@ import {
 /**
  * Routes for job audit message routes
  */
-export function jobAuditMessagesRoutes(
-  { router, routeGuard }: RouteInitialization,
-  serverless: ServerlessInfo
-) {
+export function jobAuditMessagesRoutes({ router, routeGuard }: RouteInitialization) {
   router.versioned
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/job_audit_messages/messages/{jobId}`,
@@ -45,7 +42,7 @@ export function jobAuditMessagesRoutes(
         },
       },
       routeGuard.fullLicenseAPIGuard(
-        async ({ client, mlClient, request, response, mlSavedObjectService }) => {
+        async ({ client, mlClient, request, response, mlSavedObjectService, serverless }) => {
           try {
             const { getJobAuditMessages } = jobAuditMessagesProvider(client, mlClient, serverless);
             const { jobId } = request.params;
@@ -89,7 +86,7 @@ export function jobAuditMessagesRoutes(
         },
       },
       routeGuard.fullLicenseAPIGuard(
-        async ({ client, mlClient, request, response, mlSavedObjectService }) => {
+        async ({ client, mlClient, request, response, mlSavedObjectService, serverless }) => {
           try {
             const { getJobAuditMessages } = jobAuditMessagesProvider(client, mlClient, serverless);
             const { from } = request.query;
@@ -127,7 +124,7 @@ export function jobAuditMessagesRoutes(
         },
       },
       routeGuard.fullLicenseAPIGuard(
-        async ({ client, mlClient, request, response, mlSavedObjectService }) => {
+        async ({ client, mlClient, request, response, serverless }) => {
           try {
             const { clearJobAuditMessages } = jobAuditMessagesProvider(
               client,

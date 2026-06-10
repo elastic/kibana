@@ -7,7 +7,7 @@
 
 import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
-import type { RouteInitialization, ServerlessInfo } from '../types';
+import type { RouteInitialization } from '../types';
 import {
   anomaliesTableDataSchema,
   categoryDefinitionSchema,
@@ -116,10 +116,7 @@ function getCategoryStoppedPartitions(mlClient: MlClient, payload: any) {
 /**
  * Routes for results service
  */
-export function resultsServiceRoutes(
-  { router, routeGuard }: RouteInitialization,
-  serverless: ServerlessInfo
-) {
+export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization) {
   router.versioned
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/results/top_influencers`,
@@ -445,22 +442,24 @@ export function resultsServiceRoutes(
           },
         },
       },
-      routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
-        try {
-          const { getDatafeedResultsChartData } = resultsServiceProvider(
-            mlClient,
-            client,
-            serverless
-          );
-          const resp = await getDatafeedResultsChartData(request.body);
+      routeGuard.fullLicenseAPIGuard(
+        async ({ client, mlClient, request, response, serverless }) => {
+          try {
+            const { getDatafeedResultsChartData } = resultsServiceProvider(
+              mlClient,
+              client,
+              serverless
+            );
+            const resp = await getDatafeedResultsChartData(request.body);
 
-          return response.ok({
-            body: resp,
-          });
-        } catch (e) {
-          return response.customError(wrapError(e));
+            return response.ok({
+              body: resp,
+            });
+          } catch (e) {
+            return response.customError(wrapError(e));
+          }
         }
-      })
+      )
     );
 
   router.versioned

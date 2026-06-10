@@ -12,12 +12,13 @@ import {
   getNotificationsQuerySchema,
 } from './schemas/notifications_schema';
 import { wrapError } from '../client/error_wrapper';
-import type { RouteInitialization, ServerlessInfo } from '../types';
+import type { RouteInitialization } from '../types';
 
-export function notificationsRoutes(
-  { router, routeGuard, getEnabledFeatures }: RouteInitialization,
-  serverless: ServerlessInfo
-) {
+export function notificationsRoutes({
+  router,
+  routeGuard,
+  getEnabledFeatures,
+}: RouteInitialization) {
   router.versioned
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/notifications`,
@@ -44,7 +45,7 @@ export function notificationsRoutes(
         },
       },
       routeGuard.fullLicenseAPIGuard(
-        async ({ client, request, response, mlSavedObjectService }) => {
+        async ({ client, request, response, mlSavedObjectService, serverless }) => {
           try {
             const notificationsService = new NotificationsService(
               client,
@@ -91,7 +92,7 @@ export function notificationsRoutes(
         },
       },
       routeGuard.fullLicenseAPIGuard(
-        async ({ client, mlSavedObjectService, request, response }) => {
+        async ({ client, mlSavedObjectService, request, response, serverless }) => {
           try {
             const notificationsService = new NotificationsService(
               client,
