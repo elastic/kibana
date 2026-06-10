@@ -7,9 +7,7 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import {
-  MockApmPluginContextWrapper,
-} from '../../../../context/apm_plugin/mock_apm_plugin_context';
+import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
 import type { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';
 import { MissingDataCallout } from '.';
 
