@@ -2,7 +2,6 @@ steps:
   - command: .buildkite/scripts/steps/code_quality/fallow_analysis.sh
     label: 'Code Quality Analysis'
     env:
-      KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'true'
       SLACK_NOTIFICATIONS_CHANNEL: '#search-kibana'
     agents:
       image: family/kibana-ubuntu-2404
