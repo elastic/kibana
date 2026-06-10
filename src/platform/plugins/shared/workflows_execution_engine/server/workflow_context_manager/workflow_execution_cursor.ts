@@ -21,7 +21,7 @@ export interface WorkflowExecutionCursorInit {
 export interface WorkflowExecutionCursorApi {
   readonly isExecuting: boolean;
   readonly error: Error | undefined;
-  captureError(caught: unknown): void;
+  captureError(caught: Error): void;
   clearError(): void;
   start(): void;
   stop(): void;

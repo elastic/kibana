@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import apm from 'elastic-apm-node';
 import { runNode } from './run_node';
 import type { WorkflowExecutionLoopParams } from './types';
 
@@ -27,7 +28,9 @@ export async function executionFlowLoop(params: WorkflowExecutionLoopParams) {
   while (params.workflowExecutionCursor.isExecuting) {
     await runNode(params);
     params.workflowExecutionCursor.commitPendingNavigation();
+    const saveStateSpan = apm.startSpan('save state', 'workflow', 'persistence');
     await params.workflowRuntime.saveState();
+    saveStateSpan?.end();
     if (!params.workflowExecutionCursor.currentNode) {
       params.workflowExecutionCursor.stop();
     }

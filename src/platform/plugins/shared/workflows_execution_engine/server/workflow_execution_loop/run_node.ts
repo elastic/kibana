@@ -190,9 +190,6 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
       catchErrorSpan?.end();
     }
 
-    const saveStateSpan = apm.startSpan('save state', 'workflow', 'persistence');
-    saveStateSpan?.end();
-
     // Note: predecessor outputs that `prepareForRead` rehydrated for this
     // step are released by the *next* step's `prepareForRead` (deferred
     // release) so that consecutive consumers of the same predecessor reuse

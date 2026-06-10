@@ -437,11 +437,6 @@ export class WorkflowExecutionRuntimeManager {
       workflowExecutionUpdate.error = ExecutionError.fromError(
         this.workflowExecutionCursor.error
       ).toSerializableObject();
-    } else if (isTerminalStatus(workflowExecution.status)) {
-      workflowExecutionUpdate.status = workflowExecution.status;
-      workflowExecutionUpdate.error = this.workflowExecutionCursor.error
-        ? ExecutionError.fromError(this.workflowExecutionCursor.error).toSerializableObject()
-        : undefined;
     } else if (!this.workflowExecutionCursor.currentNode) {
       workflowExecutionUpdate.status = ExecutionStatus.COMPLETED;
     }
