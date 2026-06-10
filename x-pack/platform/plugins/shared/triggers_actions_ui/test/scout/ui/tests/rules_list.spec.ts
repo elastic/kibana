@@ -182,7 +182,7 @@ const ensureRuleStatus = async (
     // matching the tokenized OR search don't cause a strict-mode violation.
     const ruleRow = page
       .locator('[data-test-subj^="rule-row"]')
-      .filter({ has: page.locator(`[title="${ruleName}"]`) });
+      .filter({ has: page.testSubj.locator(`rulesListTableRowName-${ruleName}`) });
     await expect(ruleRow.locator('[data-test-subj="statusDropdown"]')).toHaveAttribute(
       'title',
       new RegExp(status, 'i'),
@@ -202,6 +202,9 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
     await Promise.all([
       deleteRulesByPrefix(kbnClient, 'delete-'),
       deleteRulesByPrefix(kbnClient, 'percentile-test-'),
+      deleteRulesByPrefix(kbnClient, 'search-test-'),
+      deleteRulesByPrefix(kbnClient, 'tags-test-'),
+      deleteRulesByPrefix(kbnClient, 'reenable-single-'),
     ]);
   });
 
@@ -235,12 +238,12 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
 
     const nameLinks = page.testSubj
       .locator('rulesList')
-      .locator('[data-test-subj="rulesTableCell-name"] [title]');
+      .locator('[data-test-subj^="rulesListTableRowName-"]');
     await expect(nameLinks).toHaveCount(3);
     const all = await nameLinks.all();
-    await expect(all[0]).toHaveAttribute('title', /^a-/);
-    await expect(all[1]).toHaveAttribute('title', /^b-/);
-    await expect(all[2]).toHaveAttribute('title', /^c-/);
+    await expect(all[0]).toHaveAttribute('data-test-subj', /^rulesListTableRowName-a-/);
+    await expect(all[1]).toHaveAttribute('data-test-subj', /^rulesListTableRowName-b-/);
+    await expect(all[2]).toHaveAttribute('data-test-subj', /^rulesListTableRowName-c-/);
   });
 
   test('should search for alert', async ({ page, apiServices }) => {
@@ -252,9 +255,7 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
 
     const rows = getTableRows(page);
     await expect(rows).toHaveCount(1);
-    await expect(
-      page.testSubj.locator('rulesList').locator(`[title="${rule.data.name}"]`)
-    ).toBeVisible();
+    await expect(page.testSubj.locator(`rulesListTableRowName-${rule.data.name}`)).toBeVisible();
     await expect(page.testSubj.locator('rulesTableCell-interval')).toContainText('1 min');
     await expect(page.testSubj.locator('rulesTableCell-tagsPopover')).toContainText('1');
   });
@@ -282,21 +283,18 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
     await refreshRulesList(page);
     await searchRules(page, r1.data.name as string);
     await expect(getTableRows(page)).toHaveCount(1);
-    await expect(
-      page.testSubj.locator('rulesList').locator(`[title="${r1.data.name}"]`)
-    ).toBeVisible();
+    await expect(page.testSubj.locator(`rulesListTableRowName-${r1.data.name}`)).toBeVisible();
 
     await page.locator('.euiFormControlLayoutClearButton').click();
     await page
       .locator('.euiBasicTable[data-test-subj="rulesList"]:not(.euiBasicTable-loading)')
       .waitFor();
 
-    await expect(
-      page.testSubj.locator('rulesList').locator(`[title="${r1.data.name}"]`)
-    ).toBeVisible();
-    await expect(
-      page.testSubj.locator('rulesList').locator(`[title="${r2.data.name}"]`)
-    ).toBeVisible();
+    // After clearing, r2 (hidden while r1 was searched) must now be findable.
+    // We search explicitly because with many rules in the system both may not
+    // land on the same page of the unfiltered list.
+    await searchRules(page, r2.data.name as string);
+    await expect(page.testSubj.locator(`rulesListTableRowName-${r2.data.name}`)).toBeVisible();
   });
 
   test('should search for tags', async ({ page, apiServices }) => {
@@ -310,9 +308,7 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
     await searchRules(page, `${rule.data.name} tag`);
 
     await expect(getTableRows(page)).toHaveCount(1);
-    await expect(
-      page.testSubj.locator('rulesList').locator(`[title="${rule.data.name}"]`)
-    ).toBeVisible();
+    await expect(page.testSubj.locator(`rulesListTableRowName-${rule.data.name}`)).toBeVisible();
     await expect(page.testSubj.locator('rulesTableCell-tagsPopover')).toContainText('3');
   });
 
@@ -362,6 +358,7 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
     await page.testSubj.click('disableButton');
 
     await ensureRuleStatus(page, rule.data.name as string, 'enabled');
+    await expect(page.testSubj.locator(`rulesListTableRowName-${rule.data.name}`)).toBeVisible();
   });
 
   test('should delete single alert', async ({ page, apiServices }) => {
@@ -376,7 +373,7 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
     // OR-tokenized search (e.g. r1) don't intercept the click.
     const r2Row = page
       .locator('[data-test-subj^="rule-row"]')
-      .filter({ has: page.locator(`[title="${r2.data.name}"]`) });
+      .filter({ has: page.testSubj.locator(`rulesListTableRowName-${r2.data.name}`) });
     await r2Row.locator('[data-test-subj="collapsedItemActions"]').click();
     await page.testSubj.click('deleteRule');
     await expect(page.testSubj.locator('rulesDeleteConfirmation')).toBeVisible();
@@ -384,13 +381,8 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
 
     await expect(page.testSubj.locator('euiToastHeader__title')).toContainText('Deleted 1 rule');
 
-    // Remove from cleanup list since the rule was deleted via UI
-    const idx = createdRuleIds.indexOf(r2.data.id);
-    if (idx !== -1) createdRuleIds.splice(idx, 1);
-
-    await expect(
-      page.testSubj.locator('rulesList').locator(`[title="${r2.data.name}"]`)
-    ).toBeHidden();
+    // r2 is deleted via UI; afterEach will 404 on it but allSettled absorbs the error.
+    await expect(page.testSubj.locator(`rulesListTableRowName-${r2.data.name}`)).toBeHidden();
   });
 
   test('should disable all selection', async ({ page, apiServices }) => {
@@ -423,6 +415,7 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
     await page.testSubj.click('bulkEnable');
 
     await ensureRuleStatus(page, rule.data.name as string, 'enabled');
+    await expect(page.testSubj.locator(`rulesListTableRowName-${rule.data.name}`)).toBeVisible();
   });
 
   test('should render percentile column and cells correctly', async ({ page, apiServices }) => {
@@ -493,9 +486,7 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
 
     await expect(page.testSubj.locator('euiToastHeader__title')).toContainText('Deleted 1 rule');
 
-    const idx = createdRuleIds.indexOf(rule.data.id);
-    if (idx !== -1) createdRuleIds.splice(idx, 1);
-
+    // Rule deleted via UI; afterEach will 404 on it but allSettled absorbs the error.
     await searchRules(page, namePrefix);
     await expect(getTableRows(page)).toHaveCount(0);
   });
@@ -670,7 +661,7 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
 
     await expect(getTableRows(page)).toHaveCount(1);
     await expect(
-      page.testSubj.locator('rulesList').locator(`[title="${rEsQuery.data.name}"]`)
+      page.testSubj.locator(`rulesListTableRowName-${rEsQuery.data.name}`)
     ).toBeVisible();
   });
 
@@ -709,7 +700,7 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
 
     await expect(getTableRows(page)).toHaveCount(1);
     await expect(
-      page.testSubj.locator('rulesList').locator(`[title="${rWithSlack.data.name}"]`)
+      page.testSubj.locator(`rulesListTableRowName-${rWithSlack.data.name}`)
     ).toBeVisible();
 
     // Navigate away and back (matching FTR pattern) so the dropdown re-opens fresh.
@@ -990,7 +981,7 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
 
     const ruleRow = page
       .locator('[data-test-subj^="rule-row"]')
-      .filter({ has: page.locator(`[title="${rule.data.name}"]`) });
+      .filter({ has: page.testSubj.locator(`rulesListTableRowName-${rule.data.name}`) });
     await ruleRow.locator('[data-test-subj="collapsedItemActions"]').click();
     await page.testSubj.click('snoozeButton');
     await page.testSubj.click('ruleSnoozeCancel');
