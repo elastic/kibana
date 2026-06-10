@@ -180,7 +180,7 @@ print(cs.get('${diamond_id}', 'NOT FOUND'))
 
 check_workflow_task_key() {
   echo ""
-  echo "CHECK 2 — Workflow task API key (Elasticsearch)"
+  echo "CHECK 2 — nl_extraction_behavioral task API key (Elasticsearch)"
 
   local result
   result=$(es_post '/.kibana_task_manager*/_search?pretty' '{
@@ -189,7 +189,8 @@ check_workflow_task_key() {
       "bool": {
         "filter": [
           { "term": { "type": "task" } },
-          { "term": { "task.taskType": "workflow:scheduled" } }
+          { "term": { "task.taskType": "workflow:scheduled" } },
+          { "match": { "task.params": "nl_extraction_behavioral" } }
         ]
       }
     },
@@ -206,7 +207,7 @@ print(json.load(sys.stdin)['hits']['total']['value'])
 " 2>/dev/null || echo "0")
 
   if [[ "$total" == "0" ]]; then
-    fail "No workflow:scheduled tasks found in .kibana_task_manager* → runbook Step 2"
+    fail "nl_extraction_behavioral task not found in .kibana_task_manager* → runbook Step 2"
     return
   fi
 
@@ -223,11 +224,11 @@ print(sum(1 for h in hits if not h['_source'].get('task', {}).get('apiKey')))
 " 2>/dev/null || echo "0")
 
   if [[ "$with_key" -gt 0 && "$without_key" -eq 0 ]]; then
-    pass "All ${total} workflow:scheduled task(s) have apiKey"
+    pass "nl_extraction_behavioral task has apiKey"
   elif [[ "$without_key" -gt 0 && "$with_key" -gt 0 ]]; then
-    fail "${without_key}/${total} task(s) missing apiKey → re-save those workflows in Kibana UI (runbook Step 2)"
+    fail "nl_extraction_behavioral task missing apiKey → re-save workflow in Kibana UI (runbook Step 2)"
   else
-    fail "All ${total} workflow:scheduled task(s) missing apiKey → runbook Step 2 (re-save workflows in Kibana UI)"
+    fail "nl_extraction_behavioral task missing apiKey → runbook Step 2 (re-save workflow in Kibana UI)"
   fi
 }
 

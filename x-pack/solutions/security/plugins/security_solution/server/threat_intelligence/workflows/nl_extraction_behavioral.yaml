@@ -219,13 +219,13 @@ steps:
           technique_ids: "${{ steps.extract_behaviors.output.indexed_behaviors | map: 'technique_id' | join: ',' | default: '__no_techniques__' | split: ',' }}"
 
       # Diamond Model extraction — heavy single-call with per-vertex fallback.
-      # Only runs for threat-positive reports (`diamond_suitable == true`).
+      # Only runs for threat-positive reports (`diamond_suitable: true`).
       # NEVER set use_server_info: true — on Cloud that resolves the URL to
       # https://0.0.0.0:5601 (root cause: config.host == 0.0.0.0). Default
       # URL resolution uses cloudSetup.kibanaUrl and works correctly.
       - name: extract_diamond
         type: kibana.request
-        if: "variables.diamond_suitable == true"
+        if: "variables.diamond_suitable: true"
         with:
           method: POST
           path: /api/threat_intelligence/extract_diamond
@@ -245,7 +245,7 @@ steps:
       # produce a partial update with null vertex fields.
       - name: persist_diamond_fields
         type: elasticsearch.update
-        if: "variables.diamond_suitable == true"
+        if: "variables.diamond_suitable: true"
         with:
           index: "{{ foreach.item._index }}"
           id: "{{ foreach.item._id }}"
