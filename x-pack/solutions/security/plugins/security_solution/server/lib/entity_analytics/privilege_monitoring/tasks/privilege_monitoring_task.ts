@@ -20,6 +20,8 @@ import type {
 
 import moment from 'moment';
 import type { RunSoonResult } from '@kbn/task-manager-plugin/server/task_scheduling';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import type { ExperimentalFeatures } from '../../../../../common';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import type { ConfigType } from '../../../../config';
@@ -33,7 +35,6 @@ import {
 import { getApiKeyManager } from '../auth/api_key';
 import { PrivilegeMonitoringDataClient } from '../engine/data_client';
 import { createDataSourcesService } from '../data_sources/data_sources_service';
-import { buildFakeScopedRequest } from '../../risk_score/tasks/helpers';
 import { PrivilegeMonitoringApiKeyType } from '../auth/saved_object';
 import { monitoringEntitySourceType } from '../saved_objects';
 
@@ -236,9 +237,9 @@ const runPrivilegeMonitoringTask = async ({
     }
     const maxUsersAllowed =
       config.entityAnalytics.monitoring.privileges.users.maxPrivilegedUsersAllowed;
-    const request = buildFakeScopedRequest({
-      namespace: state.namespace,
-      coreStart: core,
+    const request = kibanaRequestFactory({
+      headers: {},
+      spaceId: asSpaceId(state.namespace),
     });
     const soClient = core.savedObjects.getScopedClient(request, {
       includedHiddenTypes: [PrivilegeMonitoringApiKeyType.name, monitoringEntitySourceType.name],
