@@ -6,15 +6,7 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { css } from '@emotion/react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiShowFor,
-  EuiTitle,
-  type UseEuiTheme,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiShowFor, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { KibanaVersionBadge } from '@kbn/search-shared-ui';
@@ -26,11 +18,7 @@ import { ConnectToElasticsearch } from './connect_to_elasticsearch';
 import { SearchHomepageBody } from './search_homepage_body';
 import { LicenseBadge } from './license_badge';
 import { docLinks } from '../../../common/doc_links';
-
-const VerticalSeparatorStyle = ({ euiTheme }: UseEuiTheme) => css`
-  border-left: ${euiTheme.border.thin};
-  height: ${euiTheme.size.l};
-`;
+import { verticalSeparatorStyle } from './search_homepage_styles';
 
 export const SearchHomepagePage = () => {
   const {
@@ -94,7 +82,7 @@ export const SearchHomepagePage = () => {
               </EuiFlexItem>
               <EuiShowFor sizes={['m', 'l', 'xl']}>
                 <EuiFlexItem grow={false}>
-                  <span css={VerticalSeparatorStyle} />
+                  <span css={verticalSeparatorStyle} />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <CloudLinks cloud={cloud} />
