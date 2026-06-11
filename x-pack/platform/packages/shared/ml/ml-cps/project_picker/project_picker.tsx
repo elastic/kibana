@@ -10,6 +10,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import type { ProjectRouting } from '@kbn/es-query';
 import { ProjectPicker, DisabledProjectPicker, type UseFetchProjectsResult } from '@kbn/cps-utils';
+import { css } from '@emotion/react';
 
 export interface MlProjectPickerPanelProps {
   projectRouting?: ProjectRouting;
@@ -61,7 +62,14 @@ export const MlProjectPickerPanel: FC<MlProjectPickerPanelProps> = ({
         </EuiFlexItem>
         {projectRouting ? (
           <EuiFlexItem grow={false}>
-            <EuiText size="s" color="subdued" data-test-subj={projectRoutingValueTestSubj}>
+            <EuiText
+              size="s"
+              color="subdued"
+              data-test-subj={projectRoutingValueTestSubj}
+              css={css`
+                word-break: break-word;
+              `}
+            >
               {projectRouting}
             </EuiText>
           </EuiFlexItem>
