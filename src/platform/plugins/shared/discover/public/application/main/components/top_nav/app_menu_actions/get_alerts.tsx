@@ -123,6 +123,7 @@ export const getAlertsAppMenuItem = ({
   getState,
   dispatch,
   showCreateRuleV2,
+  subscribe,
 }: {
   discoverParams: AppMenuDiscoverParams;
   services: DiscoverServices;
@@ -130,6 +131,7 @@ export const getAlertsAppMenuItem = ({
   getState: () => DiscoverInternalState;
   dispatch: InternalStateDispatch;
   showCreateRuleV2?: boolean;
+  subscribe?: (listener: () => void) => () => void;
 }): DiscoverAppMenuItemType => {
   const { dataView, isEsqlMode } = discoverParams;
   const timeField = getTimeField(dataView);
@@ -175,12 +177,22 @@ export const getAlertsAppMenuItem = ({
         const esqlQuery = isOfAggregateQueryType(query) ? query.esql : undefined;
         const esqlVariables = tab.esqlVariables;
         const V2Flyout = services.alertingVTwo!.CreateRuleOptionsFlyout;
+
+        const getQuerySnapshot = () => {
+          const { query: q } = selectTab(getState(), tabId).appState;
+          return isOfAggregateQueryType(q) ? q.esql : undefined;
+        };
+        const getEsqlVariablesSnapshot = () => selectTab(getState(), tabId).esqlVariables;
+
         return (
           <V2Flyout
             onClose={onFinishAction}
             initialQuery={esqlQuery}
             esqlVariables={esqlVariables}
             legacyRuleTypes={legacyRuleTypes}
+            subscribe={subscribe}
+            getQuery={getQuerySnapshot}
+            getEsqlVariables={getEsqlVariablesSnapshot}
           />
         );
       },

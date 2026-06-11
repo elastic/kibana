@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState, useSyncExternalStore } from 'react';
 import { EuiFlyout, EuiFlyoutBody, EuiLoadingSpinner } from '@elastic/eui';
 import useAsync from 'react-use/lib/useAsync';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -34,6 +34,14 @@ export interface CreateRuleOptionsFlyoutProps {
   initialQuery?: string;
   esqlVariables?: ESQLControlVariable[];
   legacyRuleTypes?: CreateRuleOptionsFlyoutLegacyItem[];
+  /**
+   * When provided, the flyout reactively tracks the current ES|QL query
+   * via `useSyncExternalStore`. This keeps the rule form in sync when
+   * the user edits and submits the Discover query while the flyout is open.
+   */
+  subscribe?: (listener: () => void) => () => void;
+  getQuery?: () => string | undefined;
+  getEsqlVariables?: () => ESQLControlVariable[] | undefined;
 }
 
 type Step =
@@ -48,14 +56,31 @@ interface LoadedModules {
   ComposeDiscoverFlyout: React.ComponentType<ComposeDiscoverFlyoutProps>;
 }
 
+const noopSubscribe = () => () => {};
+
 const CreateRuleOptionsFlyoutInner = ({
   onClose,
   initialQuery,
-  esqlVariables,
+  esqlVariables: staticEsqlVariables,
   legacyRuleTypes,
+  subscribe,
+  getQuery,
+  getEsqlVariables,
 }: CreateRuleOptionsFlyoutProps) => {
   const [step, setStep] = useState<Step>({ type: 'selector' });
   const [isSaving, setIsSaving] = useState(false);
+
+  const reactiveQuery = useSyncExternalStore(
+    subscribe ?? noopSubscribe,
+    getQuery ?? (() => initialQuery)
+  );
+  const reactiveVariables = useSyncExternalStore(
+    subscribe ?? noopSubscribe,
+    getEsqlVariables ?? (() => staticEsqlVariables)
+  );
+
+  const query = reactiveQuery ?? initialQuery;
+  const esqlVariables = reactiveVariables ?? staticEsqlVariables;
 
   const { loading, value } = useAsync(async (): Promise<LoadedModules> => {
     const [services, mod] = await Promise.all([
@@ -143,7 +168,7 @@ const CreateRuleOptionsFlyoutInner = ({
   if (step.type === 'esql') {
     return (
       <DynamicRuleFormFlyout
-        query={initialQuery ?? ''}
+        query={query ?? ''}
         onClose={onClose}
         services={services}
         esqlVariables={esqlVariables}
