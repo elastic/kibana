@@ -32,7 +32,7 @@ import { useKiGeneration } from '../knowledge_indicators_table/ki_generation_con
 import { SigEventFlyout } from './sig_event_flyout';
 import { formatTimestamp } from '../../../../../util/formatters';
 import { FilterPopover } from './filter_popover';
-import { getStatusColor } from './filter_constants';
+import { getStatusColor } from '../../utils/event_status_color';
 
 const MAX_VISIBLE_STREAMS = 3;
 
