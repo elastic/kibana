@@ -55,10 +55,11 @@ export const ExportJsonFlyout = <State extends object, SanitizedState extends ob
     'integration',
     'exportDerivatives'
   );
+  console.log({ objectType, objectTypeAlias, sharingData });
   const typedSharingData = sharingData as unknown as ReturnType<typeof buildExportSharingData>;
   const { title, exportJson } = typedSharingData;
-
   const state = useMemo(() => exportJson(), [exportJson]);
+  console.log({ state });
   const { status, data, warnings, error, retry } = useSanitizedState<State, SanitizedState>({
     state,
     sanitizeState,
