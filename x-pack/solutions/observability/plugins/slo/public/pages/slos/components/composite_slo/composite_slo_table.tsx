@@ -206,7 +206,6 @@ export function CompositeSloTable({
       name: i18n.translate('xpack.slo.compositeSloList.columns.name', {
         defaultMessage: 'Name',
       }),
-      width: '200px',
       truncateText: true,
       sortable: true,
     },
@@ -215,7 +214,6 @@ export function CompositeSloTable({
       name: i18n.translate('xpack.slo.compositeSloList.columns.tags', {
         defaultMessage: 'Tags',
       }),
-      width: '130px',
       render: (tags: string[]) => (
         <EuiFlexGroup gutterSize="xs" responsive={false} css={{ overflow: 'hidden' }}>
           {tags.map((tag) => (
