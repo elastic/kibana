@@ -36,7 +36,6 @@ dependsOn:
   - '@kbn/std'
   - '@kbn/streamlang'
   - '@kbn/streams-plugin'
-  - '@kbn/management-settings-ids'
 tags:
   - functional-tests
   - package
