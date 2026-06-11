@@ -17,15 +17,13 @@ import type { SummaryClient } from '../summary_client';
 import { buildCompositeSloSummaryDocId } from './composite_slo_summary_index';
 import { computeCompositeSummary, type MemberSummaryData } from './compute_composite_summary';
 
-export type CompositeSummaryDoc = CompositeSLOSummaryDocument;
-
 export function buildCompositeSummaryDoc(
   compositeSlo: CompositeSLODefinition,
   summary: ReturnType<typeof computeCompositeSummary>['compositeSummary'],
   members: CompositeSLOMemberWithSummary[],
   spaceId: string,
   unresolvedMemberIds: string[]
-): CompositeSummaryDoc {
+): CompositeSLOSummaryDocument {
   return {
     spaceId,
     summaryUpdatedAt: new Date().toISOString(),

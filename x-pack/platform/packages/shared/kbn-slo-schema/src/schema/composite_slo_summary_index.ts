@@ -6,7 +6,11 @@
  */
 
 import { z } from '@kbn/zod';
-import { compositeSloMemberWithSummarySchema, compositeSloSummarySchema } from './composite_slo';
+import {
+  compositeSloBaseDefinitionSchema,
+  compositeSloMemberWithSummarySchema,
+  compositeSloSummarySchema,
+} from './composite_slo';
 
 /**
  * Canonical shape of a composite summary index document. This single schema is the source of
@@ -16,16 +20,16 @@ import { compositeSloMemberWithSummarySchema, compositeSloSummarySchema } from '
 const compositeSloSummaryDocumentSchema = z.object({
   spaceId: z.string(),
   summaryUpdatedAt: z.string(),
-  compositeSlo: z.object({
-    id: z.string(),
-    name: z.string(),
-    description: z.string(),
-    tags: z.array(z.string()),
-    objective: z.object({ target: z.number() }),
-    timeWindow: z.object({ duration: z.string(), type: z.string() }),
-    budgetingMethod: z.string(),
-    createdAt: z.string(),
-    updatedAt: z.string(),
+  compositeSlo: compositeSloBaseDefinitionSchema.pick({
+    id: true,
+    name: true,
+    description: true,
+    tags: true,
+    objective: true,
+    timeWindow: true,
+    budgetingMethod: true,
+    createdAt: true,
+    updatedAt: true,
   }),
   summary: compositeSloSummarySchema,
   unresolvedMemberIds: z.array(z.string()),
