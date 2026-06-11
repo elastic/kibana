@@ -246,7 +246,12 @@ export function registerFeatureFlags(
                 'Experimental. JSON object mapping stream names (or glob patterns such as "logs.checkout.*") to the Semantic Code Search index that holds their source code (e.g. \'{"logs.checkout": "code-acme_checkout-service"}\'). When set and code grounding is enabled, Significant Events query generation can consult the linked source code to verify queries.',
             }),
             type: 'json',
-            schema: schema.recordOf(schema.string(), schema.string()),
+            // Bounded to avoid unbounded-input DoS: keys are stream names / glob
+            // patterns, values are Elasticsearch index names (capped at 255 bytes).
+            schema: schema.recordOf(
+              schema.string({ maxLength: 1024 }),
+              schema.string({ maxLength: 255 })
+            ),
             scope: 'global',
             solutionViews: ['classic', 'oblt'],
             technicalPreview: true,
