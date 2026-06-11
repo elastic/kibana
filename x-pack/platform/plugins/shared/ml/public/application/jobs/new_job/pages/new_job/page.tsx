@@ -246,6 +246,13 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
               values={{ dataViewName: jobCreator.indexPatternDisplayName }}
             />
           )}
+          {dataSourceContext.projectRouting !== undefined && (
+            <FormattedMessage
+              id="xpack.ml.newJob.page.createJob.projectScope"
+              defaultMessage=", project scope: {projectScope}"
+              values={{ projectScope: dataSourceContext.projectRouting }}
+            />
+          )}
         </EuiText>
 
         <Wizard
