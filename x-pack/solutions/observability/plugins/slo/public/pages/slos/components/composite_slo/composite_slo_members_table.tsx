@@ -9,7 +9,7 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiBasicTable, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
-import type { CompositeSLOMemberSummary } from '@kbn/slo-schema';
+import type { CompositeSLOMemberWithSummary } from '@kbn/slo-schema';
 import React, { lazy, Suspense, useState } from 'react';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import {
@@ -23,7 +23,7 @@ const SLODetailsFlyout = lazy(
 );
 
 function getMemberBurnRateValue(
-  item: CompositeSLOMemberSummary,
+  item: CompositeSLOMemberWithSummary,
   window: SloBurnRateWindow
 ): number | undefined {
   const map = {
@@ -40,7 +40,7 @@ const getMemberColumns = (
   setBurnRateWindow: (w: SloBurnRateWindow) => void,
   isBurnRatePopoverOpen: boolean,
   setIsBurnRatePopoverOpen: React.Dispatch<React.SetStateAction<boolean>>
-): Array<EuiBasicTableColumn<CompositeSLOMemberSummary>> => [
+): Array<EuiBasicTableColumn<CompositeSLOMemberWithSummary>> => [
   {
     field: 'name',
     name: i18n.translate('xpack.slo.compositeSloList.members.name', {
@@ -55,7 +55,9 @@ const getMemberColumns = (
       defaultMessage: 'Status',
     }),
     width: '110px',
-    render: (status: CompositeSLOMemberSummary['status']) => <MemberStatusBadge status={status} />,
+    render: (status: CompositeSLOMemberWithSummary['status']) => (
+      <MemberStatusBadge status={status} />
+    ),
   },
   {
     field: 'instanceId',
@@ -96,7 +98,7 @@ const getMemberColumns = (
       defaultMessage: 'Budget remaining',
     }),
     width: '130px',
-    render: (_: unknown, item: CompositeSLOMemberSummary) => {
+    render: (_: unknown, item: CompositeSLOMemberWithSummary) => {
       if (item.status === 'NO_DATA') {
         return NOT_AVAILABLE_LABEL;
       }
@@ -126,7 +128,7 @@ const getMemberColumns = (
       />
     ),
     width: '130px',
-    render: (item: CompositeSLOMemberSummary) => {
+    render: (item: CompositeSLOMemberWithSummary) => {
       if (item.status === 'NO_DATA') {
         return NOT_AVAILABLE_LABEL;
       }
@@ -143,12 +145,12 @@ export function CompositeSloMembersTable({
   members,
   percentFormat,
 }: {
-  members: CompositeSLOMemberSummary[];
+  members: CompositeSLOMemberWithSummary[];
   percentFormat: string;
 }) {
   const [burnRateWindow, setBurnRateWindow] = useState<SloBurnRateWindow>('5m');
   const [isBurnRatePopoverOpen, setIsBurnRatePopoverOpen] = useState(false);
-  const [selectedMember, setSelectedMember] = useState<CompositeSLOMemberSummary | null>(null);
+  const [selectedMember, setSelectedMember] = useState<CompositeSLOMemberWithSummary | null>(null);
 
   const columns = getMemberColumns(
     percentFormat,
@@ -167,9 +169,9 @@ export function CompositeSloMembersTable({
         data-test-subj="compositeSloMembersTable"
         items={members}
         columns={columns}
-        itemId="id"
+        itemId="sloId"
         compressed
-        rowProps={(item: CompositeSLOMemberSummary) => ({
+        rowProps={(item: CompositeSLOMemberWithSummary) => ({
           onClick: () => setSelectedMember(item),
           style: { cursor: 'pointer' },
         })}
@@ -177,7 +179,7 @@ export function CompositeSloMembersTable({
       {selectedMember && (
         <Suspense fallback={<EuiLoadingSpinner size="m" />}>
           <SLODetailsFlyout
-            sloId={selectedMember.id}
+            sloId={selectedMember.sloId}
             sloInstanceId={selectedMember.instanceId}
             onClose={() => setSelectedMember(null)}
           />

@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { CompositeSLOMemberSummary } from '@kbn/slo-schema';
+import type { CompositeSLOMemberWithSummary } from '@kbn/slo-schema';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { COMPOSITE_SUMMARY_INDEX_NAME } from '../../../common/constants';
 import type { CompositeSLODefinition } from '../../domain/models';
@@ -41,13 +41,13 @@ export interface CompositeSummaryDoc {
   oneHourBurnRate: number;
   oneDayBurnRate: number;
   unresolvedMemberIds: string[];
-  members: CompositeSLOMemberSummary[];
+  members: CompositeSLOMemberWithSummary[];
 }
 
 export function buildCompositeSummaryDoc(
   compositeSlo: CompositeSLODefinition,
   summary: ReturnType<typeof computeCompositeSummary>['compositeSummary'],
-  members: CompositeSLOMemberSummary[],
+  members: CompositeSLOMemberWithSummary[],
   spaceId: string,
   unresolvedMemberIds: string[]
 ): CompositeSummaryDoc {

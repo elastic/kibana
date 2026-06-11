@@ -67,7 +67,7 @@ export const COMPOSITE_SUMMARY_MAPPINGS_TEMPLATE: ClusterPutComponentTemplateReq
         unresolvedMemberIds: { type: 'keyword' },
         members: {
           properties: {
-            id: { type: 'keyword' },
+            sloId: { type: 'keyword' },
             name: {
               type: 'text',
               fields: {

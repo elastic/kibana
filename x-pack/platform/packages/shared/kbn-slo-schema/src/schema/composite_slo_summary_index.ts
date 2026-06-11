@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { compositeSloMemberSummarySchema, compositeStatusSchema } from './composite_slo';
+import { compositeSloMemberWithSummarySchema, compositeStatusSchema } from './composite_slo';
 
 /**
  * Flat summary fields persisted on composite summary index documents (see task `buildSummaryDoc`).
@@ -22,7 +22,7 @@ const storedCompositeSloSummarySchema = z.object({
   fiveMinuteBurnRate: z.number(),
   oneHourBurnRate: z.number(),
   oneDayBurnRate: z.number(),
-  members: z.array(compositeSloMemberSummarySchema).optional(),
+  members: z.array(compositeSloMemberWithSummarySchema).optional(),
 });
 
 export { storedCompositeSloSummarySchema };

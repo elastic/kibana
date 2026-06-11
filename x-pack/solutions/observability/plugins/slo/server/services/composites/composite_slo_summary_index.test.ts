@@ -54,7 +54,7 @@ describe('composite_slo_summary_index', () => {
         oneDayBurnRate: 0.3,
         members: [
           {
-            id: 'slo-a',
+            sloId: 'slo-a-xxxxxxxx',
             name: 'Service A',
             weight: 6,
             normalisedWeight: 0.6,
@@ -67,8 +67,35 @@ describe('composite_slo_summary_index', () => {
         ],
       });
       expect(persisted?.members).toHaveLength(1);
-      expect(persisted?.members?.[0].id).toBe('slo-a');
+      expect(persisted?.members?.[0].sloId).toBe('slo-a-xxxxxxxx');
       expect(persisted?.members?.[0].fiveMinuteBurnRate).toBe(1.1);
+    });
+
+    it('normalises legacy member `id` field to `sloId`', () => {
+      const persisted = mapCompositeSummaryIndexSource({
+        sliValue: 0.99,
+        status: 'HEALTHY',
+        errorBudgetInitial: 0.01,
+        errorBudgetConsumed: 0.2,
+        errorBudgetRemaining: 0.8,
+        errorBudgetIsEstimated: false,
+        fiveMinuteBurnRate: 0.1,
+        oneHourBurnRate: 0.2,
+        oneDayBurnRate: 0.3,
+        members: [
+          {
+            id: 'slo-a-xxxxxxxx',
+            name: 'Service A',
+            weight: 6,
+            normalisedWeight: 0.6,
+            sliValue: 0.995,
+            status: 'HEALTHY',
+          },
+        ],
+      });
+      expect(persisted?.members).toHaveLength(1);
+      expect(persisted?.members?.[0].sloId).toBe('slo-a-xxxxxxxx');
+      expect(Object.prototype.hasOwnProperty.call(persisted?.members?.[0] ?? {}, 'id')).toBe(false);
     });
 
     it('parses members that omit per-member burn rates (legacy index documents)', () => {
@@ -84,7 +111,7 @@ describe('composite_slo_summary_index', () => {
         oneDayBurnRate: 0.3,
         members: [
           {
-            id: 'slo-a',
+            sloId: 'slo-a-xxxxxxxx',
             name: 'Service A',
             weight: 1,
             normalisedWeight: 1,
