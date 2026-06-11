@@ -189,22 +189,6 @@ describe('TaskManagerPlugin', () => {
       const pollingLifecycleOpts = (TaskPollingLifecycle as jest.Mock).mock.calls[0][0];
       expect(pollingLifecycleOpts.enrichFakeRequest).toBe(enricher);
     });
-
-    test('re-exposes the fake request enricher on the setup contract', async () => {
-      const pluginInitializerContext = coreMock.createPluginInitializerContext<TaskManagerConfig>(
-        pluginInitializerContextParams
-      );
-      pluginInitializerContext.node.roles.backgroundTasks = true;
-
-      const coreSetup = coreMock.createSetup();
-      const enricher = jest.fn();
-      (coreSetup.security.acquireFakeRequestEnricher as jest.Mock).mockReturnValue(enricher);
-
-      const taskManagerPlugin = new TaskManagerPlugin(pluginInitializerContext);
-      const setupContract = taskManagerPlugin.setup(coreSetup, { usageCollection: undefined });
-
-      expect(setupContract.enrichFakeRequest).toBe(enricher);
-    });
   });
 
   describe('stop', () => {

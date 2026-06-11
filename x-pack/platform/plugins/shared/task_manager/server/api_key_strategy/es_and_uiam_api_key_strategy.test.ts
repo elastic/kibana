@@ -12,11 +12,11 @@ import type { ConcreteTaskInstance } from '../task';
 import { TaskStatus } from '../task';
 import { EsAndUiamApiKeyStrategy } from './es_and_uiam_api_key_strategy';
 
-import { createApiKey, requestHasApiKey, getApiKeyFromRequest } from '../lib/api_key_utils';
+import { createApiKey, hasApiKey, getApiKeyFromRequest } from '../lib/api_key_utils';
 
 jest.mock('../lib/api_key_utils');
 const createApiKeyMock = createApiKey as jest.MockedFunction<typeof createApiKey>;
-const requestHasApiKeyMock = requestHasApiKey as jest.MockedFunction<typeof requestHasApiKey>;
+const hasApiKeyMock = hasApiKey as jest.MockedFunction<typeof hasApiKey>;
 const getApiKeyFromRequestMock = getApiKeyFromRequest as jest.MockedFunction<
   typeof getApiKeyFromRequest
 >;
@@ -231,7 +231,7 @@ describe('EsAndUiamApiKeyStrategy', () => {
         apiKeyId: 'esId',
       });
       createApiKeyMock.mockResolvedValueOnce(esKeyMap);
-      requestHasApiKeyMock.mockReturnValue(false);
+      hasApiKeyMock.mockReturnValue(false);
       (coreStart.security.authc.getCurrentUser as jest.Mock).mockReturnValue({
         username: 'testuser',
         profile_uid: 'u_profile_123',
@@ -265,7 +265,7 @@ describe('EsAndUiamApiKeyStrategy', () => {
         apiKeyId: 'esId',
       });
       createApiKeyMock.mockResolvedValueOnce(esKeyMap);
-      requestHasApiKeyMock.mockReturnValue(true);
+      hasApiKeyMock.mockReturnValue(true);
       getApiKeyFromRequestMock.mockReturnValue({
         id: 'uiam-req-id',
         api_key: 'essu_from-request',
@@ -292,7 +292,7 @@ describe('EsAndUiamApiKeyStrategy', () => {
         apiKeyId: 'esId',
       });
       createApiKeyMock.mockResolvedValueOnce(esKeyMap);
-      requestHasApiKeyMock.mockReturnValue(false);
+      hasApiKeyMock.mockReturnValue(false);
       (coreStart.security.authc.getCurrentUser as jest.Mock).mockReturnValue({
         username: 'testuser',
       });
@@ -315,7 +315,7 @@ describe('EsAndUiamApiKeyStrategy', () => {
         apiKeyId: 'esId',
       });
       createApiKeyMock.mockResolvedValueOnce(esKeyMap);
-      requestHasApiKeyMock.mockReturnValue(false);
+      hasApiKeyMock.mockReturnValue(false);
       (coreStart.security.authc.getCurrentUser as jest.Mock).mockReturnValue({
         username: 'testuser',
       });
@@ -344,7 +344,7 @@ describe('EsAndUiamApiKeyStrategy', () => {
         apiKeyId: 'esId',
       });
       createApiKeyMock.mockResolvedValueOnce(esKeyMap);
-      requestHasApiKeyMock.mockReturnValue(false);
+      hasApiKeyMock.mockReturnValue(false);
 
       const tasks = [{ id: 'task-1', taskType: 'report', params: {}, state: {} }];
       const result = await strategy.grantApiKeys(tasks, request, coreStart.security);
@@ -370,7 +370,7 @@ describe('EsAndUiamApiKeyStrategy', () => {
         apiKeyId: 'esId',
       });
       createApiKeyMock.mockResolvedValueOnce(esKeyMap);
-      requestHasApiKeyMock.mockReturnValue(true);
+      hasApiKeyMock.mockReturnValue(true);
       getApiKeyFromRequestMock.mockReturnValue({
         id: 'uiam-req-id',
         api_key: 'essu_from-request',
@@ -394,7 +394,7 @@ describe('EsAndUiamApiKeyStrategy', () => {
         apiKeyId: 'esId',
       });
       createApiKeyMock.mockResolvedValueOnce(esKeyMap);
-      requestHasApiKeyMock.mockReturnValue(true);
+      hasApiKeyMock.mockReturnValue(true);
       getApiKeyFromRequestMock.mockReturnValue({
         id: 'es-req-id',
         api_key: 'regular-es-secret',

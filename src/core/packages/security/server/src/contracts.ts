@@ -28,12 +28,12 @@ export interface SecurityServiceSetup {
    * Returns a function that binds a `profile_uid` to a fake request so that
    * `security.authc.getCurrentUser(request)` resolves to a synthetic
    * {@link AuthenticatedUser} exposing only that `profile_uid`. Reading any
-   * other identity field on the returned user throws.
+   * other identity field on the returned user yields `undefined`.
    *
    * One-shot: calling it more than once throws. Reserved for Task Manager,
-   * which re-exposes it as `TaskManagerSetupContract.enrichFakeRequest`.
-   * The returned enricher throws on non-fake requests; calling it twice on
-   * the same fake request is a no-op (first-wins) and emits a warning.
+   * the sole legitimate consumer. The returned enricher throws on non-fake
+   * requests; calling it twice on the same fake request is a no-op
+   * (first-wins) and emits a warning.
    *
    * @internal
    */

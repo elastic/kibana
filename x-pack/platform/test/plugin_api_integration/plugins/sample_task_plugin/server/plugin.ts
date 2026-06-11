@@ -8,7 +8,6 @@
 import { random } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import type { Plugin, CoreSetup, CoreStart, KibanaRequest } from '@kbn/core/server';
-import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { throwRetryableError } from '@kbn/task-manager-plugin/server/task_running';
 import { EventEmitter } from 'events';
 import { firstValueFrom, Subject } from 'rxjs';
@@ -32,7 +31,6 @@ export interface SampleTaskManagerFixtureSetupDeps {
   taskManager: TaskManagerSetupContract;
 }
 export interface SampleTaskManagerFixtureStartDeps {
-  security?: SecurityPluginStart;
   taskManager: TaskManagerStartContract;
 }
 
@@ -40,18 +38,12 @@ export class SampleTaskManagerFixturePlugin
   implements
     Plugin<void, void, SampleTaskManagerFixtureSetupDeps, SampleTaskManagerFixtureStartDeps>
 {
-  securityStart$: Subject<SecurityPluginStart | undefined> = new Subject<
-    SecurityPluginStart | undefined
-  >();
-  securityStart: Promise<SecurityPluginStart | undefined> = firstValueFrom(this.securityStart$);
   taskManagerStart$: Subject<TaskManagerStartContract> = new Subject<TaskManagerStartContract>();
   taskManagerStart: Promise<TaskManagerStartContract> = firstValueFrom(this.taskManagerStart$);
 
   public setup(core: CoreSetup, { taskManager }: SampleTaskManagerFixtureSetupDeps) {
     const taskTestingEvents = new EventEmitter();
     taskTestingEvents.setMaxListeners(DEFAULT_MAX_WORKERS * 2);
-
-    const fakeRequestEnricher = taskManager.enrichFakeRequest;
 
     const defaultSampleTaskConfig = {
       timeout: '1m',
@@ -654,17 +646,14 @@ export class SampleTaskManagerFixturePlugin
     initRoutes(
       core.http.createRouter(),
       this.taskManagerStart,
-      this.securityStart,
-      taskTestingEvents,
-      fakeRequestEnricher
+      core.getStartServices().then(([{ security }]) => security),
+      taskTestingEvents
     );
   }
 
-  public start(core: CoreStart, { security, taskManager }: SampleTaskManagerFixtureStartDeps) {
+  public start(core: CoreStart, { taskManager }: SampleTaskManagerFixtureStartDeps) {
     this.taskManagerStart$.next(taskManager);
     this.taskManagerStart$.complete();
-    this.securityStart$.next(security);
-    this.securityStart$.complete();
   }
   public stop() {}
 }

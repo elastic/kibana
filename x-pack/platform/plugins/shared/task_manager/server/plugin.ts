@@ -95,16 +95,6 @@ export interface TaskManagerSetupContract {
   registerTaskDefinitions: (taskDefinitions: TaskDefinitionRegistry) => void;
   registerCanEncryptedSavedObjects: (canEncrypt: boolean) => void;
   registerTaskEventLogger: (logger: TaskEventLogger) => void;
-  /**
-   * Re-exposes Core's one-shot `acquireFakeRequestEnricher()` for trusted
-   * Task Manager consumers (e.g. test fixtures) that build fake requests
-   * outside the normal scheduling flow. Throws on non-fake requests;
-   * calling twice on the same fake request is a no-op (first-wins) and
-   * emits a warning.
-   *
-   * @internal
-   */
-  enrichFakeRequest: FakeRequestEnricher;
 }
 
 export type TaskManagerStartContract = Pick<
@@ -365,7 +355,6 @@ export class TaskManagerPlugin
       registerTaskEventLogger: (logger: TaskEventLogger) => {
         this.taskEventLogger = logger;
       },
-      enrichFakeRequest: this.enrichFakeRequest,
     };
   }
 
