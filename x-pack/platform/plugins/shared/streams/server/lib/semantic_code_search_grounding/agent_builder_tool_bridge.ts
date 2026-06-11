@@ -15,11 +15,11 @@ import { ToolResultType, type ToolResult } from '@kbn/agent-builder-common/tools
  * Flat, LLM-friendly payload returned by every bridged tool callback. Mirrors
  * the shape the significant-events reasoning agent already consumes.
  */
-export type BridgedToolResponse = {
+export interface BridgedToolResponse {
   results: Array<{ type: string; data: unknown }>;
   count: number;
   error?: string;
-};
+}
 
 /**
  * Maps Agent Builder tool results into a plain, LLM-friendly payload.
@@ -110,7 +110,18 @@ export const createInferenceToolsFromAgentBuilder = async ({
   specs: BridgedToolSpec[];
   logger: Logger;
 }): Promise<{ tools: Record<string, ToolDefinition>; callbacks: Record<string, ToolCallback> }> => {
-  const registry = await tools.getRegistry({ request });
+  let registry: Awaited<ReturnType<ToolsStart['getRegistry']>>;
+  try {
+    registry = await tools.getRegistry({ request });
+  } catch (error) {
+    // The registry is unavailable (e.g. Agent Builder is in a bad state). Treat
+    // grounding as unavailable rather than failing the caller.
+    const message = error instanceof Error ? error.message : String(error);
+    logger.warn(
+      `Unable to access the Agent Builder tool registry; skipping bridged tools: ${message}`
+    );
+    return { tools: {}, callbacks: {} };
+  }
 
   const runTool = async (
     toolId: string,

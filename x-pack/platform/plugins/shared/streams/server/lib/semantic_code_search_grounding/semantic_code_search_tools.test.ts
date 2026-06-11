@@ -160,6 +160,12 @@ describe('createSemanticCodeSearchTools', () => {
     expect(result).toBeUndefined();
   });
 
+  it('returns undefined (without throwing) when the tool registry is unavailable', async () => {
+    (agentBuilderTools.getRegistry as jest.Mock).mockRejectedValue(new Error('registry down'));
+    await expect(buildUnlinked()).resolves.toBeUndefined();
+    expect(logger.warn).toHaveBeenCalled();
+  });
+
   it('skips individual tools that cannot be resolved', async () => {
     registryGet.mockImplementation(async (toolId: string) => {
       if (
