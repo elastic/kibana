@@ -37,6 +37,7 @@ import {
   fullWidthAndHeightStyles,
 } from './conversation.styles';
 import { ScrollButton } from './scroll_button';
+import { RoundPips } from './conversation_rounds/round_pips';
 import { useAppLeave } from '../../context/app_leave_context';
 import { useNavigationAbort } from '../../hooks/use_navigation_abort';
 import { ErrorPrompt } from '../common/prompt/error_prompt';
@@ -182,6 +183,7 @@ export const Conversation: React.FC<{}> = () => {
             </EuiFlexItem>
           </EuiFlexGroup>
           {showScrollButton && <ScrollButton onClick={smoothScrollToBottom} />}
+          <RoundPips scrollContainer={scrollContainerRef.current} rounds={conversationRounds} />
         </EuiFlexItem>
         <EuiFlexItem
           css={[
