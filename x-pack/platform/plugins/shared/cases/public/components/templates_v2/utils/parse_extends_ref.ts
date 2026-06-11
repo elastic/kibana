@@ -30,9 +30,10 @@ export const parseExtendsRef = (
   const suffix = ext.slice(atIndex + 1);
   const prefix = ext.slice(0, atIndex);
 
-  // Only treat the suffix as a version if it is a positive integer string.
-  // Anything else is considered part of the id (robust fallback).
-  if (/^\d+$/.test(suffix)) {
+  // Only treat the suffix as a version if the prefix is non-empty and the
+  // suffix is a positive integer string. Anything else (including `@3` with
+  // an empty prefix) is treated as part of the id (robust fallback).
+  if (prefix.length > 0 && /^\d+$/.test(suffix)) {
     const n = Number(suffix);
     if (n > 0) {
       return { templateId: prefix, version: n };

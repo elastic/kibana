@@ -74,6 +74,13 @@ describe('parseExtendsRef', () => {
       const ref = `${TEMPLATE_ID}@`;
       expect(parseExtendsRef(ref)).toEqual({ templateId: ref, version: undefined });
     });
+
+    it('treats a ref with an empty prefix (@3) as part of the id (no version parsed)', () => {
+      // Avoids silently producing { templateId: "", version: 3 } which would cause
+      // useGetTemplate to skip the fetch (empty string is falsy).
+      const ref = '@3';
+      expect(parseExtendsRef(ref)).toEqual({ templateId: ref, version: undefined });
+    });
   });
 
   describe('edge cases', () => {

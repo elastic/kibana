@@ -116,11 +116,15 @@ export const ParsedTemplateDefinitionSchema = z.object({
     .string()
     .refine(
       (val) => {
+        // Mirrors the @version parsing contract in
+        // public/components/templates_v2/utils/parse_extends_ref.ts.
+        // If the delimiter or validation rules change, update both places.
         const atIndex = val.lastIndexOf('@');
         if (atIndex === -1) return true;
+        const prefix = val.slice(0, atIndex);
         const suffix = val.slice(atIndex + 1);
-        // Suffix must be a positive integer when present.
-        return /^\d+$/.test(suffix) && Number(suffix) > 0;
+        // Prefix must be non-empty and suffix must be a positive integer.
+        return prefix.length > 0 && /^\d+$/.test(suffix) && Number(suffix) > 0;
       },
       { message: 'Extended template version must be a positive integer.' }
     )

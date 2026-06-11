@@ -220,7 +220,8 @@ describe('useExtendsValidation', () => {
         expect.arrayContaining([
           expect.objectContaining({
             severity: 8,
-            message: EXTENDS_VERSION_NOT_FOUND_ERROR(`${TEMPLATE_ID}@3`, 3),
+            // extendsTemplateId (stripped id, no @version) is passed as the name.
+            message: EXTENDS_VERSION_NOT_FOUND_ERROR(TEMPLATE_ID, 3),
             source: 'extends-validation',
           }),
         ])

@@ -100,7 +100,7 @@ export const useExtendsValidation = (
       // the user knows the template itself exists but that version does not.
       const message =
         extendsVersion != null
-          ? EXTENDS_VERSION_NOT_FOUND_ERROR(extendsValue, extendsVersion)
+          ? EXTENDS_VERSION_NOT_FOUND_ERROR(extendsTemplateId ?? extendsValue, extendsVersion)
           : EXTENDS_NOT_FOUND_ERROR(extendsValue);
       monaco.editor.setModelMarkers(model, EXTENDS_VALIDATION_OWNER, [
         {
