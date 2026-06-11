@@ -20,7 +20,6 @@ import {
   OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_EXCLUDED_STREAM_PATTERNS,
   OBSERVABILITY_STREAMS_SIG_EVENTS_INDEX_PATTERNS,
   OBSERVABILITY_STREAMS_SIG_EVENTS_TUNING_CONFIG,
-  OBSERVABILITY_STREAMS_SIG_EVENTS_LINKED_CODE_INDICES,
   OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_ALERTING_V2,
 } from '@kbn/management-settings-ids';
 import { DEFAULT_INDEX_PATTERNS } from '@kbn/streams-schema';
@@ -232,29 +231,6 @@ export function registerFeatureFlags(
             schema: sigEventsTuningConfigSchema,
             scope: 'global',
             solutionViews: ['classic', 'oblt'],
-            readonly: true,
-            readonlyMode: 'ui',
-          },
-          [OBSERVABILITY_STREAMS_SIG_EVENTS_LINKED_CODE_INDICES]: {
-            category: ['observability'],
-            name: i18n.translate('xpack.streams.sigEventsLinkedCodeIndicesName', {
-              defaultMessage: 'Significant Events linked code indices',
-            }),
-            value: '{}',
-            description: i18n.translate('xpack.streams.sigEventsLinkedCodeIndicesDescription', {
-              defaultMessage:
-                'Experimental. JSON object mapping stream names (or glob patterns such as "logs.checkout.*") to the Semantic Code Search index that holds their source code (e.g. \'{"logs.checkout": "code-acme_checkout-service"}\'). When set and code grounding is enabled, Significant Events query generation can consult the linked source code to verify queries.',
-            }),
-            type: 'json',
-            // Bounded to avoid unbounded-input DoS: keys are stream names / glob
-            // patterns, values are Elasticsearch index names (capped at 255 bytes).
-            schema: schema.recordOf(
-              schema.string({ maxLength: 1024 }),
-              schema.string({ maxLength: 255 })
-            ),
-            scope: 'global',
-            solutionViews: ['classic', 'oblt'],
-            technicalPreview: true,
             readonly: true,
             readonlyMode: 'ui',
           },

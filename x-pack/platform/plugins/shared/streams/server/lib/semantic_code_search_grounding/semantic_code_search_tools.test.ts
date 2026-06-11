@@ -108,10 +108,16 @@ describe('createSemanticCodeSearchTools', () => {
     });
   };
 
-  const buildLinked = () =>
-    createSemanticCodeSearchTools({ agentBuilderTools, request, esClient, codeIndex, logger });
-  const buildUnlinked = () =>
+  const build = () =>
     createSemanticCodeSearchTools({ agentBuilderTools, request, esClient, logger });
+
+  // Builds the tools and activates an index via select_code_index (the only way
+  // an index becomes active now that there is no pre-linking).
+  const buildWithSelectedIndex = async (index: string = codeIndex) => {
+    const tools = (await build())!;
+    await tools.callbacks.select_code_index(makeToolCall('select_code_index', { index }));
+    return tools;
+  };
 
   beforeEach(() => {
     logger = loggerMock.create();
@@ -136,14 +142,14 @@ describe('createSemanticCodeSearchTools', () => {
   });
 
   it('bridges the discovery, code, and git-history tools', async () => {
-    const result = await buildUnlinked();
+    const result = await build();
     expect(result).toBeDefined();
     expect(Object.keys(result!.tools).sort()).toEqual(ALL_TOOL_NAMES);
     expect(Object.keys(result!.callbacks).sort()).toEqual(ALL_TOOL_NAMES);
   });
 
   it('hides the injected index/repository params from the LLM-facing schema', async () => {
-    const { tools } = (await buildLinked())!;
+    const { tools } = (await build())!;
     expect(Object.keys(tools.code_search.schema?.properties ?? {})).not.toContain('index');
     expect(Object.keys(tools.git_search_commits.schema?.properties ?? {})).not.toContain(
       'repository'
@@ -156,13 +162,13 @@ describe('createSemanticCodeSearchTools', () => {
 
   it('returns undefined when no SCS tools can be resolved', async () => {
     registryGet.mockRejectedValue(new Error('not installed'));
-    const result = await buildUnlinked();
+    const result = await build();
     expect(result).toBeUndefined();
   });
 
   it('returns undefined (without throwing) when the tool registry is unavailable', async () => {
     (agentBuilderTools.getRegistry as jest.Mock).mockRejectedValue(new Error('registry down'));
-    await expect(buildUnlinked()).resolves.toBeUndefined();
+    await expect(build()).resolves.toBeUndefined();
     expect(logger.warn).toHaveBeenCalled();
   });
 
@@ -178,7 +184,7 @@ describe('createSemanticCodeSearchTools', () => {
       const schema = SCHEMA_MAP[toolId];
       return { id: toolId, description: toolId, getSchema: async () => schema };
     });
-    const { tools } = (await buildUnlinked())!;
+    const { tools } = (await build())!;
     expect(Object.keys(tools).sort()).toEqual([
       'analyze_symbol',
       'code_search',
@@ -188,21 +194,16 @@ describe('createSemanticCodeSearchTools', () => {
     ]);
   });
 
-  it('mentions the pre-selected index in the prompt snippet when linked', async () => {
-    const { promptSnippet } = (await buildLinked())!;
-    expect(promptSnippet).toContain(codeIndex);
-    expect(promptSnippet).toContain('pre-selected');
-  });
-
-  it('instructs the agent to discover an index when not linked', async () => {
-    const { promptSnippet } = (await buildUnlinked())!;
-    expect(promptSnippet).toContain('No code index is pre-linked');
+  it('instructs the agent to discover and select an index in the prompt snippet', async () => {
+    const { promptSnippet } = (await build())!;
     expect(promptSnippet).toContain('list_code_indices');
+    expect(promptSnippet).toContain('select_code_index');
+    expect(promptSnippet).toContain('never as a starting point');
   });
 
   it('list_code_indices executes the SCS list-indices tool with no params', async () => {
     execute.mockResolvedValue({ results: [] });
-    const { callbacks } = (await buildUnlinked())!;
+    const { callbacks } = (await build())!;
 
     await callbacks.list_code_indices(makeToolCall('list_code_indices', {}));
 
@@ -213,29 +214,8 @@ describe('createSemanticCodeSearchTools', () => {
     });
   });
 
-  it('code_search uses the pre-linked index without an explicit selection', async () => {
-    execute.mockResolvedValue({
-      results: [{ tool_result_id: 'r1', type: ToolResultType.other, data: { hit: 1 } }],
-    });
-    const { callbacks } = (await buildLinked())!;
-
-    const result = await callbacks.code_search(
-      makeToolCall('code_search', { query: 'connection refused', size: 10 })
-    );
-
-    expect(execute).toHaveBeenCalledWith({
-      toolId: SCS_SEMANTIC_SEARCH_TOOL_ID,
-      toolParams: { query: 'connection refused', size: 10, index: codeIndex },
-      request,
-    });
-    expect(result.response).toEqual({
-      results: [{ type: ToolResultType.other, data: { hit: 1 } }],
-      count: 1,
-    });
-  });
-
   it('code_search returns an error when no index is selected', async () => {
-    const { callbacks } = (await buildUnlinked())!;
+    const { callbacks } = (await build())!;
 
     const result = await callbacks.code_search(makeToolCall('code_search', { query: 'x' }));
 
@@ -245,7 +225,7 @@ describe('createSemanticCodeSearchTools', () => {
   });
 
   it('select_code_index activates an index and reports git history availability', async () => {
-    const { callbacks } = (await buildUnlinked())!;
+    const { callbacks } = (await build())!;
 
     const result = await callbacks.select_code_index(
       makeToolCall('select_code_index', { index: 'code-acme_payments' })
@@ -268,15 +248,36 @@ describe('createSemanticCodeSearchTools', () => {
   });
 
   it('select_code_index returns an error when index is missing', async () => {
-    const { callbacks } = (await buildUnlinked())!;
+    const { callbacks } = (await build())!;
     const result = await callbacks.select_code_index(makeToolCall('select_code_index', {}));
     expect(esClient.search).not.toHaveBeenCalled();
     expect(result.response).toEqual({ results: [], count: 0, error: '"index" is required.' });
   });
 
+  it('code_search uses the selected index', async () => {
+    execute.mockResolvedValue({
+      results: [{ tool_result_id: 'r1', type: ToolResultType.other, data: { hit: 1 } }],
+    });
+    const { callbacks } = await buildWithSelectedIndex();
+
+    const result = await callbacks.code_search(
+      makeToolCall('code_search', { query: 'connection refused', size: 10 })
+    );
+
+    expect(execute).toHaveBeenCalledWith({
+      toolId: SCS_SEMANTIC_SEARCH_TOOL_ID,
+      toolParams: { query: 'connection refused', size: 10, index: codeIndex },
+      request,
+    });
+    expect(result.response).toEqual({
+      results: [{ type: ToolResultType.other, data: { hit: 1 } }],
+      count: 1,
+    });
+  });
+
   it('read_code_file executes the SCS read-file tool with file_paths and the active index', async () => {
     execute.mockResolvedValue({ results: [] });
-    const { callbacks } = (await buildLinked())!;
+    const { callbacks } = await buildWithSelectedIndex();
 
     await callbacks.read_code_file(makeToolCall('read_code_file', { file_paths: 'a.go,b.go' }));
 
@@ -289,7 +290,7 @@ describe('createSemanticCodeSearchTools', () => {
 
   it('analyze_symbol executes the SCS symbol analysis tool with symbol_name and the active index', async () => {
     execute.mockResolvedValue({ results: [] });
-    const { callbacks } = (await buildLinked())!;
+    const { callbacks } = await buildWithSelectedIndex();
 
     await callbacks.analyze_symbol(
       makeToolCall('analyze_symbol', { symbol_name: 'ConnectionRefusedError' })
@@ -303,7 +304,7 @@ describe('createSemanticCodeSearchTools', () => {
   });
 
   it('returns a required-argument error (derived from the registry schema) when symbol_name is missing', async () => {
-    const { callbacks } = (await buildLinked())!;
+    const { callbacks } = await buildWithSelectedIndex();
     const result = await callbacks.analyze_symbol(makeToolCall('analyze_symbol', {}));
     expect(execute).not.toHaveBeenCalled();
     expect(result.response).toEqual({
@@ -314,7 +315,7 @@ describe('createSemanticCodeSearchTools', () => {
   });
 
   it('returns a required-argument error when file_paths is missing', async () => {
-    const { callbacks } = (await buildLinked())!;
+    const { callbacks } = await buildWithSelectedIndex();
     const result = await callbacks.read_code_file(makeToolCall('read_code_file', {}));
     expect(execute).not.toHaveBeenCalled();
     expect(result.response).toEqual({
@@ -326,7 +327,7 @@ describe('createSemanticCodeSearchTools', () => {
 
   it('surfaces tool execution errors as a response instead of throwing', async () => {
     execute.mockRejectedValue(new Error('workflow not found'));
-    const { callbacks } = (await buildLinked())!;
+    const { callbacks } = await buildWithSelectedIndex();
 
     const result = await callbacks.code_search(makeToolCall('code_search', { query: 'x' }));
 
@@ -341,7 +342,7 @@ describe('createSemanticCodeSearchTools', () => {
         { tool_result_id: 'r1', type: ToolResultType.other, data: { ok: true } },
       ],
     });
-    const { callbacks } = (await buildLinked())!;
+    const { callbacks } = await buildWithSelectedIndex();
 
     const result = await callbacks.code_search(makeToolCall('code_search', { query: 'x' }));
 
@@ -353,9 +354,9 @@ describe('createSemanticCodeSearchTools', () => {
   });
 
   describe('git-history tools', () => {
-    it('resolve the repository for the active index lazily and inject it', async () => {
+    it('inject the repository resolved for the active index', async () => {
       execute.mockResolvedValue({ results: [] });
-      const { callbacks } = (await buildLinked())!;
+      const { callbacks } = await buildWithSelectedIndex();
 
       await callbacks.git_search_commits(
         makeToolCall('git_search_commits', {
@@ -364,6 +365,7 @@ describe('createSemanticCodeSearchTools', () => {
         })
       );
 
+      // The repository was resolved once, when the index was selected.
       expect(esClient.search).toHaveBeenCalledTimes(1);
       expect(execute).toHaveBeenCalledWith({
         toolId: SCS_SEARCH_COMMIT_MESSAGES_TOOL_ID,
@@ -376,9 +378,9 @@ describe('createSemanticCodeSearchTools', () => {
       });
     });
 
-    it('memoize repository resolution across calls', async () => {
+    it('reuse the resolved repository across calls without re-querying', async () => {
       execute.mockResolvedValue({ results: [] });
-      const { callbacks } = (await buildLinked())!;
+      const { callbacks } = await buildWithSelectedIndex();
 
       await callbacks.git_find_introducing_commit(
         makeToolCall('git_find_introducing_commit', { symbol_pattern: 'connection refused' })
@@ -387,6 +389,7 @@ describe('createSemanticCodeSearchTools', () => {
         makeToolCall('git_find_introducing_commit', { symbol_pattern: 'timeout' })
       );
 
+      // Only the select_code_index call queried Elasticsearch for the repository.
       expect(esClient.search).toHaveBeenCalledTimes(1);
       expect(execute).toHaveBeenLastCalledWith({
         toolId: SCS_FIND_INTRODUCING_COMMIT_TOOL_ID,
@@ -396,7 +399,7 @@ describe('createSemanticCodeSearchTools', () => {
     });
 
     it('return an error when no index is selected', async () => {
-      const { callbacks } = (await buildUnlinked())!;
+      const { callbacks } = (await build())!;
       const result = await callbacks.git_search_commits(
         makeToolCall('git_search_commits', { query: 'x' })
       );
@@ -407,7 +410,7 @@ describe('createSemanticCodeSearchTools', () => {
 
     it('return an error when the active index has no git history', async () => {
       mockRepositoryResponse(undefined);
-      const { callbacks } = (await buildLinked())!;
+      const { callbacks } = await buildWithSelectedIndex();
 
       const result = await callbacks.git_search_commits(
         makeToolCall('git_search_commits', { query: 'x' })
@@ -419,9 +422,8 @@ describe('createSemanticCodeSearchTools', () => {
     });
 
     it('return a required-argument error when a required argument is missing', async () => {
-      const { callbacks } = (await buildLinked())!;
+      const { callbacks } = await buildWithSelectedIndex();
       const result = await callbacks.git_search_commits(makeToolCall('git_search_commits', {}));
-      expect(esClient.search).not.toHaveBeenCalled();
       expect(execute).not.toHaveBeenCalled();
       expect(result.response).toEqual({ results: [], count: 0, error: '"query" is required.' });
     });

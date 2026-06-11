@@ -161,8 +161,6 @@ export const OBSERVABILITY_STREAMS_SIG_EVENTS_INDEX_PATTERNS =
   'observability:streamsSigEventsIndexPatterns';
 export const OBSERVABILITY_STREAMS_SIG_EVENTS_TUNING_CONFIG =
   'observability:streamsSigEventsTuningConfig';
-export const OBSERVABILITY_STREAMS_SIG_EVENTS_LINKED_CODE_INDICES =
-  'observability:streamsSigEventsLinkedCodeIndices';
 export const OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_ALERTING_V2 =
   'observability:streamsEnableSignificantEventsAlertingV2';
 export const OBSERVABILITY_ENABLE_DIAGNOSTIC_MODE = 'observability:enableDiagnosticMode';

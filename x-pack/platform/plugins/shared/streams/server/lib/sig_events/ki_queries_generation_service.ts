@@ -8,7 +8,6 @@
 import type {
   ElasticsearchClient,
   FeatureFlagsStart,
-  IUiSettingsClient,
   KibanaRequest,
   Logger,
 } from '@kbn/core/server';
@@ -25,7 +24,6 @@ import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-
 import type { SignificantEventsToolUsage } from '@kbn/streams-ai';
 import { isSignificantEventsMemoryEnabled } from '../memory/is_significant_events_memory_enabled';
 import { isSignificantEventsSemanticCodeSearchGroundingEnabled } from '../semantic_code_search_grounding/is_significant_events_semantic_code_search_grounding_enabled';
-import { resolveCodeIndexForStream } from '../semantic_code_search_grounding/resolve_code_index';
 import { createSemanticCodeSearchTools } from '../semantic_code_search_grounding/semantic_code_search_tools';
 import type { StreamsClient } from '../streams/client';
 import type { FeatureClient } from '../streams/feature/feature_client';
@@ -57,7 +55,6 @@ export interface GenerateKIQueriesDependencies {
   logger: Logger;
   signal: AbortSignal;
   telemetry: EbtTelemetryClient;
-  globalUiSettingsClient: IUiSettingsClient;
   agentBuilderTools?: ToolsStart;
 }
 
@@ -84,7 +81,6 @@ export async function generateKIQueries(
     logger,
     signal,
     telemetry,
-    globalUiSettingsClient,
     agentBuilderTools,
   } = deps;
 
@@ -123,18 +119,10 @@ export async function generateKIQueries(
   const semanticCodeSearchLogger = logger.get('semantic_code_search_grounding');
 
   // Code grounding is active whenever the feature is enabled and Agent Builder
-  // is available. A pre-linked code index (if any) is passed as the default
-  // active index; otherwise the reasoning agent discovers and selects one at
-  // runtime via the list_code_indices / select_code_index tools.
+  // is available. The reasoning agent discovers and selects which code index to
+  // ground against at runtime via the list_code_indices / select_code_index
+  // tools.
   const isCodeGroundingActive = useSemanticCodeSearchGrounding && Boolean(agentBuilderTools);
-
-  const linkedCodeIndex = isCodeGroundingActive
-    ? await resolveCodeIndexForStream({
-        streamName,
-        globalUiSettingsClient,
-        logger: semanticCodeSearchLogger,
-      })
-    : undefined;
 
   const semanticCodeSearchTools =
     isCodeGroundingActive && agentBuilderTools
@@ -142,7 +130,6 @@ export async function generateKIQueries(
           agentBuilderTools,
           request,
           esClient,
-          codeIndex: linkedCodeIndex,
           logger: semanticCodeSearchLogger,
         })
       : undefined;

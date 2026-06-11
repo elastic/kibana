@@ -54,9 +54,7 @@ const NO_ACTIVE_INDEX_ERROR =
  * The reasoning agent selects which code index to ground against at runtime:
  * `list_code_indices` enumerates the available `code-*` indices and
  * `select_code_index` activates one (resolving its git repository so the
- * git-history tools can be used). When the stream is explicitly linked to a
- * code index (`codeIndex`), that index is pre-selected so the agent can search
- * immediately, but it may still switch to a different one.
+ * git-history tools can be used).
  *
  * Returns `undefined` when none of the SCS workflow tools can be resolved (e.g.
  * SCS is not installed), so grounding degrades gracefully.
@@ -67,24 +65,17 @@ export const createSemanticCodeSearchTools = async ({
   agentBuilderTools,
   request,
   esClient,
-  codeIndex,
   logger,
 }: {
   agentBuilderTools: ToolsStart;
   request: KibanaRequest;
   esClient: ElasticsearchClient;
-  /**
-   * Optional code index the stream is explicitly linked to. When provided it is
-   * pre-selected as the active index; otherwise the agent must discover and
-   * select one via list_code_indices / select_code_index.
-   */
-  codeIndex?: string;
   logger: Logger;
 }): Promise<SemanticCodeSearchTools | undefined> => {
   // Active index/repository are mutable across the reasoning agent's
-  // sequential tool calls. They start from the explicitly linked index (if any)
-  // and are updated when the agent calls select_code_index.
-  let activeIndex: string | undefined = codeIndex;
+  // sequential tool calls. They start unset and are populated when the agent
+  // calls select_code_index.
+  let activeIndex: string | undefined;
   let activeRepository: string | undefined;
 
   const repositoryCache = new Map<string, string | undefined>();
@@ -127,7 +118,7 @@ export const createSemanticCodeSearchTools = async ({
       sourceToolId: SCS_LIST_INDICES_TOOL_ID,
       name: 'list_code_indices',
       description:
-        'List the Semantic Code Search indices available in this cluster, with per-index stats (files, symbols, languages, content types). Use it to discover which codebase to ground against when this stream is not already linked to a code index.',
+        'List the Semantic Code Search indices available in this cluster, with per-index stats (files, symbols, languages, content types). Use it to discover which codebase to ground this stream against.',
     },
     {
       sourceToolId: SCS_SEMANTIC_SEARCH_TOOL_ID,
@@ -259,12 +250,8 @@ export const createSemanticCodeSearchTools = async ({
     select_code_index: selectCodeIndexCallback,
   };
 
-  const selectionSnippet = codeIndex
-    ? `This stream is linked to code index "${codeIndex}", which is pre-selected — you can search it immediately with code_search. To ground against a different codebase, call list_code_indices and then select_code_index.`
-    : `No code index is pre-linked to this stream. To ground queries in source code, first call list_code_indices to see the available indices, then call select_code_index with the one whose repository produces this stream — use the stream name, description, and dataset_analysis (service names, languages, dependency calls) to choose. If none clearly matches, do not select one and proceed without code grounding.`;
-
   const promptSnippet = `
-You can also consult the source code that produces this stream's logs to *verify* hypotheses — never as a starting point. ${selectionSnippet}
+You can also consult the source code that produces this stream's logs to *verify* hypotheses — never as a starting point. To ground queries in source code, first call list_code_indices to see the available indices, then call select_code_index with the one whose repository produces this stream — use the stream name, description, and dataset_analysis (service names, languages, dependency calls) to choose. If none clearly matches, do not select one and proceed without code grounding.
 
 Once a code index is selected:
 - **code_search** — semantically search the code for the exact log/error strings, error types, and dependency calls it emits.

@@ -65,7 +65,6 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                 getFeatureClient,
                 getQueryClient,
                 scopedClusterClient,
-                globalUiSettingsClient,
               } = await taskContext.getScopedClients({
                 request: fakeRequest,
               });
@@ -93,7 +92,6 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                     logger: taskLogger,
                     signal: runContext.abortController.signal,
                     telemetry: taskContext.telemetry,
-                    globalUiSettingsClient,
                     agentBuilderTools: taskContext.server.agentBuilder?.tools,
                   }
                 );

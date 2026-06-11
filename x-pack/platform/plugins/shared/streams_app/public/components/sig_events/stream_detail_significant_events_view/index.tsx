@@ -42,7 +42,6 @@ import { RulesTable } from './rules_table';
 import { LoadingPanel } from '../../loading_panel';
 import { getKnowledgeIndicatorItemId } from './utils/get_knowledge_indicator_item_id';
 import { getFeaturesFromKIs } from './utils/get_features_from_kis';
-import { LinkedCodeIndexControl } from './linked_code_index/linked_code_index_control';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
@@ -206,7 +205,6 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
   if (isEmpty) {
     return (
       <EmptyState
-        streamName={definition.stream.name}
         isGenerating={isKnowledgeIndicatorsGenerationPending}
         isCanceling={isKnowledgeIndicatorsGenerationCanceling}
         isGenerateDisabled={isGenerateButtonDisabled}
@@ -286,9 +284,6 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
                   />
                 </EuiFlexItem>
               ) : null}
-              <EuiFlexItem grow={false}>
-                <LinkedCodeIndexControl streamName={definition.stream.name} />
-              </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer size="m" />
             {isRulesSelected ? (

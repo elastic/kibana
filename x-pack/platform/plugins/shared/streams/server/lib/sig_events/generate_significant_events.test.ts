@@ -67,7 +67,7 @@ describe('generateSignificantEventDefinitions (semantic code search wiring)', ()
       ])
     ),
     callbacks: Object.fromEntries(SCS_TOOL_NAMES.map((name) => [name, jest.fn()])),
-    promptSnippet: 'Source code grounding linked to code-acme_checkout',
+    promptSnippet: 'SCS_GROUNDING_SNIPPET',
   });
 
   beforeEach(() => {
@@ -108,7 +108,7 @@ describe('generateSignificantEventDefinitions (semantic code search wiring)', ()
     expect(Object.keys(args.additionalTools ?? {}).sort()).toEqual(SCS_TOOL_NAMES);
     expect(Object.keys(args.additionalToolCallbacks ?? {}).sort()).toEqual(SCS_TOOL_NAMES);
     expect(args.systemPrompt).toContain('SYSTEM');
-    expect(args.systemPrompt).toContain('code-acme_checkout');
+    expect(args.systemPrompt).toContain('SCS_GROUNDING_SNIPPET');
     expect(args.maxSteps).toBe(10);
   });
 
@@ -132,6 +132,6 @@ describe('generateSignificantEventDefinitions (semantic code search wiring)', ()
       [...SCS_TOOL_NAMES, 'memory_search'].sort()
     );
     expect(args.systemPrompt).toContain('MEMORY_SNIPPET');
-    expect(args.systemPrompt).toContain('code-acme_checkout');
+    expect(args.systemPrompt).toContain('SCS_GROUNDING_SNIPPET');
   });
 });
