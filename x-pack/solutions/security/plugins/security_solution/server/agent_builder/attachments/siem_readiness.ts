@@ -303,10 +303,17 @@ The attachment contains:
 
 Each actionable finding includes:
 - category, severity (CRITICAL | WARNING | INFORMATIONAL), message, resource
+- type (optional): 'missingField' for Quality findings about unmapped required fields
 - affectedRules: detection rules impacted by this finding
 - affectedTactics: MITRE ATT&CK tactics with rule counts (total vs affected)
 - affectedPlatform: primary platform impacted (e.g., AWS, Endpoint, Azure)
 - recommendedActions: links to relevant Kibana pages and case creation
+
+Quality attachments include an additional missingFieldsByRule array:
+- Each entry: { ruleId, ruleName, missingFields: string[] }
+- A rule appears here when its required_fields (fields it declares it needs) are not mapped in the indices it queries
+- Effect: the rule runs without error but matches zero events — silently broken
+- Distinct from sparse fields: missing = not in the mapping at all; sparse = in the mapping but rarely populated in actual data
 
 Field mapping (tool output camelCase → attachment snake_case):
 - pipeline name: name → pipeline_name

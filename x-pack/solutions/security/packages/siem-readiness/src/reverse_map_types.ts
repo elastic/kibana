@@ -12,6 +12,12 @@ export interface RuleIndexEntry {
   enabled: boolean;
 }
 
+export interface RequiredField {
+  name: string;
+  type: string;
+  ecs: boolean;
+}
+
 export type IndexToRulesMap = Map<string, RuleIndexEntry[]>;
 export type PipelineToIndicesMap = Map<string, string[]>;
 export type CategoryToIndicesMap = Map<string, string[]>;
@@ -24,4 +30,6 @@ export interface ReverseMapResult {
   categoryToIndices: CategoryToIndicesMap;
   tacticTotals: TacticTotals;
   mlRules: MachineLearningRuleIndex;
+  /** Maps ruleId → the fields the rule declares it requires (from required_fields in rule params). */
+  ruleRequiredFields: Map<string, RequiredField[]>;
 }

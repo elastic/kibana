@@ -6,6 +6,8 @@
  */
 
 export { fetchPipelines } from './fetch_pipelines';
+export { fetchRuleFieldCaps } from './fetch_rule_field_caps';
+export type { MissingFieldsEntry } from './fetch_rule_field_caps';
 export { fetchCategories } from './fetch_categories';
 export { fetchRetention } from './fetch_retention';
 export { fetchIndicesDocCounts } from './fetch_indices_doc_counts';

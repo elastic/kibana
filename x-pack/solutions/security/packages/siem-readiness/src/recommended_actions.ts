@@ -59,6 +59,19 @@ export const buildRecommendedActions = (
   finding: ActionableFinding,
   dimension: string
 ): RecommendedAction[] => {
+  // Built-in type-specific playbooks take precedence over the registry
+  if (finding.type === 'missingField') {
+    const slug = createResourceSlug(finding.resource);
+    return [
+      { label: 'View affected rules', href: '/app/security/rules' },
+      { label: 'Open Data Quality', href: '/app/security/data_quality' },
+      {
+        label: 'Open case',
+        href: `/app/security/cases/create?tags=readiness:quality,missing-field,${slug}`,
+      },
+    ];
+  }
+
   const findingType: FindingType = `${dimension}:${finding.category ?? 'general'}`;
   const customBuilder = recommendedActionsRegistry.get(findingType);
 

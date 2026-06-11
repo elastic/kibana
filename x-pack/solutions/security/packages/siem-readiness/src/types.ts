@@ -137,6 +137,9 @@ export interface IndexDocCount {
 // Blast radius types for finding enrichment
 export type FindingSeverity = 'CRITICAL' | 'WARNING' | 'INFORMATIONAL';
 
+/** Finding sub-type across all SIEM readiness dimensions. Used to route recommended actions. */
+export type SiemReadinessFindingType = 'missingField';
+
 export interface AffectedRule {
   id: string;
   name: string;
@@ -154,11 +157,18 @@ export interface RecommendedAction {
   href: string;
 }
 
+export interface MissingFieldsEntry {
+  ruleId: string;
+  ruleName: string;
+  missingFields: string[];
+}
+
 export interface ActionableFinding {
   category?: MainCategories;
   severity: FindingSeverity;
   message: string;
   resource: string;
+  type?: SiemReadinessFindingType;
   affectedRules?: AffectedRule[];
   affectedTactics?: AffectedTactic[];
   affectedPlatform?: string;
@@ -177,6 +187,8 @@ export interface QualityPayload {
   summary: string;
   items: DataQualityResultDocument[];
   actionableFindings: ActionableFinding[];
+  /** Rules that declare required_fields not mapped in their queried indices. */
+  missingFieldsByRule: MissingFieldsEntry[];
 }
 
 export interface ContinuityPayload {
