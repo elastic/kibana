@@ -107,11 +107,16 @@ export function EmptyState({
               <EuiFlexGroup justifyContent="center" alignItems="center" responsive={false}>
                 {isGenerating ? (
                   <EuiFlexItem grow={false}>
-                    <EuiButtonIcon
-                      aria-label={CANCEL_GENERATION_BUTTON_ARIA_LABEL}
-                      iconType="stop"
-                      onClick={onCancelGenerationClick}
-                    />
+                    <EuiToolTip
+                      content={CANCEL_GENERATION_BUTTON_ARIA_LABEL}
+                      disableScreenReaderOutput
+                    >
+                      <EuiButtonIcon
+                        aria-label={CANCEL_GENERATION_BUTTON_ARIA_LABEL}
+                        iconType="stop"
+                        onClick={onCancelGenerationClick}
+                      />
+                    </EuiToolTip>
                   </EuiFlexItem>
                 ) : null}
                 <EuiFlexItem grow={false}>
