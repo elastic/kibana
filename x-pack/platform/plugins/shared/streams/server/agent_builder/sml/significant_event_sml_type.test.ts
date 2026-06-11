@@ -103,7 +103,10 @@ describe('createSignificantEventSmlType', () => {
         expect.objectContaining({
           type: SIGNIFICANT_EVENT_SML_TYPE,
           title: 'Payment outage',
-          permissions: ['api:read_stream'],
+          permissions: {
+            kibana: { privileges: [{ name: 'api:read_stream' }] },
+            elasticsearch: { indices: [] },
+          },
         }),
       ],
     });
@@ -123,11 +126,15 @@ describe('createSignificantEventSmlType', () => {
           type: SIGNIFICANT_EVENT_SML_TYPE,
           title: 'Payment outage',
           origin_id: 'payment-outage',
+          origin: { uri: `${SIGNIFICANT_EVENT_SML_TYPE}://payment-outage` },
           content: 'Payment outage',
           created_at: '2026-01-01T00:00:00.000Z',
           updated_at: '2026-01-01T00:00:00.000Z',
           spaces: ['default'],
-          permissions: ['api:read_stream'],
+          permissions: {
+            kibana: { privileges: [{ name: 'api:read_stream' }] },
+            elasticsearch: { indices: [] },
+          },
           ingestion_method: 'manual',
         },
         {

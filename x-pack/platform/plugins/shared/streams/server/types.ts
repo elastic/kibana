@@ -49,7 +49,6 @@ import type {
   SearchInferenceEndpointsPluginStart,
 } from '@kbn/search-inference-endpoints/server';
 import type { StreamsConfig } from '../common/config';
-import type { MemoryTriggerRegistry } from './lib/memory/triggers';
 
 export interface StreamsServer {
   core: CoreStart;
@@ -62,10 +61,9 @@ export interface StreamsServer {
   licensing: LicensingPluginStart;
   isServerless: boolean;
   taskManager: TaskManagerStartContract;
-  memoryTriggerRegistry?: MemoryTriggerRegistry;
-  ensureMemorySkillRegistered?: () => void;
-  ensureMemoryTasksScheduled?: () => Promise<void>;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
+  workflowsManagement?: WorkflowsServerPluginSetup;
+  spaces?: SpacesPluginStart;
 }
 
 export interface ElasticsearchAccessorOptions {

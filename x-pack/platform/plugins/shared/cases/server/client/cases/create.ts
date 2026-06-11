@@ -20,7 +20,7 @@ import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { Owner } from '../../../common/constants/types';
 import type { CasePostRequest } from '../../../common/types/api';
 import { CasePostRequestRt } from '../../../common/types/api';
-import { validateCustomFields } from './validators';
+import { validateCustomFields, resolveGlobalFieldKeys } from './validators';
 import { emptyCaseAssigneesSanitizer } from './sanitizers';
 import { normalizeCreateCaseRequest } from './utils';
 import { parseTemplate } from '../../routes/api/templates/parse_template';
@@ -42,6 +42,7 @@ export const create = async (
       licensingService,
       notificationService,
       templatesService,
+      fieldDefinitionsService,
     },
     user,
     logger,
@@ -75,28 +76,43 @@ export const create = async (
     }
 
     if (query.extended_fields) {
+      const globalKeys = await resolveGlobalFieldKeys(query.owner, fieldDefinitionsService);
+
       if (!query.template?.id) {
-        throw Boom.badRequest('extended_fields require a template to be specified');
-      }
-      const templateSO = await templatesService.getTemplate(
-        query.template.id,
-        String(query.template.version)
-      );
-      if (!templateSO) {
-        throw Boom.badRequest(`Template ${query.template.id} not found`);
-      }
-      let parsedTemplate;
-      try {
-        parsedTemplate = parseTemplate(templateSO.attributes);
-      } catch (err) {
-        throw Boom.badRequest(`Template ${query.template.id} has an invalid definition`);
-      }
-      const extendedFieldErrors = validateExtendedFields(
-        query.extended_fields,
-        parsedTemplate.definition.fields
-      );
-      if (extendedFieldErrors.length) {
-        throw Boom.badRequest(`Invalid extended_fields: ${extendedFieldErrors.join('; ')}`);
+        // No template — only global (isGlobal) field keys are permitted.
+        const invalidKeys = Object.keys(query.extended_fields).filter((k) => !globalKeys.has(k));
+        if (invalidKeys.length) {
+          throw Boom.badRequest(
+            `extended_fields keys [${invalidKeys.join(
+              ', '
+            )}] are not global (isGlobal) field definitions`
+          );
+        }
+      } else {
+        const templateSO = await templatesService.getTemplate(
+          query.template.id,
+          String(query.template.version)
+        );
+        if (!templateSO) {
+          throw Boom.badRequest(`Template ${query.template.id} not found`);
+        }
+        let parsedTemplate;
+        try {
+          parsedTemplate = parseTemplate(templateSO.attributes);
+        } catch (err) {
+          throw Boom.badRequest(`Template ${query.template.id} has an invalid definition`);
+        }
+        // Validate only template-specific keys; global keys are always valid.
+        const templateOnlyFields = Object.fromEntries(
+          Object.entries(query.extended_fields).filter(([k]) => !globalKeys.has(k))
+        );
+        const extendedFieldErrors = validateExtendedFields(
+          templateOnlyFields,
+          parsedTemplate.definition.fields
+        );
+        if (extendedFieldErrors.length) {
+          throw Boom.badRequest(`Invalid extended_fields: ${extendedFieldErrors.join('; ')}`);
+        }
       }
     }
 

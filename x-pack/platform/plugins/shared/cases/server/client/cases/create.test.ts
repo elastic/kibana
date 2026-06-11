@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import yaml from 'js-yaml';
 import {
   MAX_DESCRIPTION_LENGTH,
   MAX_TAGS_PER_CASE,
@@ -830,6 +831,98 @@ describe('create', () => {
       expect(clientArgs.logger.warn).toHaveBeenCalledWith(
         expect.stringContaining('Failed to update template usage stats')
       );
+    });
+  });
+
+  describe('extended_fields validation', () => {
+    const makeFieldDef = (name: string, type: string, isGlobal = true) => ({
+      fieldDefinitionId: `fd-${name}`,
+      name,
+      owner: SECURITY_SOLUTION_OWNER,
+      description: '',
+      isGlobal,
+      definition: yaml.dump({ name, type, control: 'INPUT_TEXT', label: name }),
+    });
+
+    const makeTemplateSO = (fields: object[]) => ({
+      id: 'so-tpl',
+      type: 'cases-templates',
+      references: [],
+      attributes: {
+        templateId: 'tmpl-ext',
+        name: 'Ext Template',
+        owner: SECURITY_SOLUTION_OWNER,
+        definition: yaml.dump({ name: 'Ext Template', fields }),
+        templateVersion: 1,
+        deletedAt: null,
+        isLatest: true,
+      },
+    });
+
+    const clientArgs = createCasesClientMockArgs();
+    clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+        fieldDefinitions: [],
+        total: 0,
+      });
+    });
+
+    it('creates a case with global extended_fields when no template is selected', async () => {
+      clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+        fieldDefinitions: [makeFieldDef('risk_score', 'keyword')],
+        total: 1,
+      });
+
+      await expect(
+        create(
+          { ...theCase, extended_fields: { risk_score_as_keyword: 'high' } },
+          clientArgs,
+          casesClientMock
+        )
+      ).resolves.not.toThrow();
+    });
+
+    it('throws when a non-global extended_fields key is provided with no template', async () => {
+      // fieldDefinitionsService returns empty — no global keys registered
+      await expect(
+        create(
+          { ...theCase, extended_fields: { risk_score_as_keyword: 'high' } },
+          clientArgs,
+          casesClientMock
+        )
+      ).rejects.toThrow(
+        'extended_fields keys [risk_score_as_keyword] are not global (isGlobal) field definitions'
+      );
+    });
+
+    it('creates a case with mixed global + template extended_fields when a template is set', async () => {
+      clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+        fieldDefinitions: [makeFieldDef('global_tag', 'keyword')],
+        total: 1,
+      });
+      clientArgs.services.templatesService.getTemplate.mockResolvedValue(
+        makeTemplateSO([
+          { control: 'INPUT_TEXT', name: 'summary', label: 'Summary', type: 'keyword' },
+        ])
+      );
+
+      await expect(
+        create(
+          {
+            ...theCase,
+            template: { id: 'tmpl-ext', version: 1 },
+            extended_fields: {
+              global_tag_as_keyword: 'security',
+              summary_as_keyword: 'hello',
+            },
+          },
+          clientArgs,
+          casesClientMock
+        )
+      ).resolves.not.toThrow();
     });
   });
 });
