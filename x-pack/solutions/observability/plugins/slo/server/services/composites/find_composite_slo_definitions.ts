@@ -80,7 +80,7 @@ export async function findCompositeSloDefinitions(
   }
 
   if (status.length > 0) {
-    filters.push({ terms: { status } });
+    filters.push({ terms: { 'summary.status': status } });
   }
 
   const sortField =

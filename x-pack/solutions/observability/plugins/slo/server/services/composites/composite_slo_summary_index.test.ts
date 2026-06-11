@@ -11,19 +11,44 @@ import {
   mapCompositeSummaryIndexSource,
 } from './composite_slo_summary_index';
 
+const baseDoc = {
+  spaceId: 'default',
+  summaryUpdatedAt: '2026-01-01T00:00:00.000Z',
+  compositeSlo: {
+    id: 'comp-a-xxxxxxxx',
+    name: 'Composite A',
+    description: '',
+    tags: [],
+    objective: { target: 0.99 },
+    timeWindow: { duration: '30d', type: 'rolling' },
+    budgetingMethod: 'occurrences',
+    createdAt: '2026-01-01T00:00:00.000Z',
+    updatedAt: '2026-01-01T00:00:00.000Z',
+  },
+  unresolvedMemberIds: [],
+  members: [],
+};
+
+const nestedSummary = {
+  sliValue: 0.99,
+  status: 'HEALTHY',
+  errorBudget: {
+    initial: 0.01,
+    consumed: 0.2,
+    remaining: 0.8,
+    isEstimated: false,
+  },
+  fiveMinuteBurnRate: 0.1,
+  oneHourBurnRate: 0.2,
+  oneDayBurnRate: 0.3,
+};
+
 describe('composite_slo_summary_index', () => {
   describe('mapCompositeSummaryIndexSource', () => {
-    it('maps stored summary fields to API summary shape', () => {
+    it('maps the stored nested summary to the API summary shape', () => {
       const persisted = mapCompositeSummaryIndexSource({
-        sliValue: 0.99,
-        status: 'HEALTHY',
-        errorBudgetInitial: 0.01,
-        errorBudgetConsumed: 0.2,
-        errorBudgetRemaining: 0.8,
-        errorBudgetIsEstimated: false,
-        fiveMinuteBurnRate: 0.1,
-        oneHourBurnRate: 0.2,
-        oneDayBurnRate: 0.3,
+        ...baseDoc,
+        summary: nestedSummary,
       });
       expect(persisted?.summary).toEqual({
         sliValue: 0.99,
@@ -38,11 +63,12 @@ describe('composite_slo_summary_index', () => {
         oneHourBurnRate: 0.2,
         oneDayBurnRate: 0.3,
       });
-      expect(persisted?.members).toBeUndefined();
+      expect(persisted?.members).toEqual([]);
     });
 
-    it('extracts members when present', () => {
+    it('returns undefined for legacy flat summary documents (healed by the background task)', () => {
       const persisted = mapCompositeSummaryIndexSource({
+        ...baseDoc,
         sliValue: 0.99,
         status: 'HEALTHY',
         errorBudgetInitial: 0.01,
@@ -52,6 +78,14 @@ describe('composite_slo_summary_index', () => {
         fiveMinuteBurnRate: 0.1,
         oneHourBurnRate: 0.2,
         oneDayBurnRate: 0.3,
+      });
+      expect(persisted).toBeUndefined();
+    });
+
+    it('extracts members when present', () => {
+      const persisted = mapCompositeSummaryIndexSource({
+        ...baseDoc,
+        summary: nestedSummary,
         members: [
           {
             sloId: 'slo-a-xxxxxxxx',
@@ -73,15 +107,8 @@ describe('composite_slo_summary_index', () => {
 
     it('normalises legacy member `id` field to `sloId`', () => {
       const persisted = mapCompositeSummaryIndexSource({
-        sliValue: 0.99,
-        status: 'HEALTHY',
-        errorBudgetInitial: 0.01,
-        errorBudgetConsumed: 0.2,
-        errorBudgetRemaining: 0.8,
-        errorBudgetIsEstimated: false,
-        fiveMinuteBurnRate: 0.1,
-        oneHourBurnRate: 0.2,
-        oneDayBurnRate: 0.3,
+        ...baseDoc,
+        summary: nestedSummary,
         members: [
           {
             id: 'slo-a-xxxxxxxx',
@@ -100,15 +127,8 @@ describe('composite_slo_summary_index', () => {
 
     it('parses members that omit per-member burn rates (legacy index documents)', () => {
       const persisted = mapCompositeSummaryIndexSource({
-        sliValue: 0.99,
-        status: 'HEALTHY',
-        errorBudgetInitial: 0.01,
-        errorBudgetConsumed: 0.2,
-        errorBudgetRemaining: 0.8,
-        errorBudgetIsEstimated: false,
-        fiveMinuteBurnRate: 0.1,
-        oneHourBurnRate: 0.2,
-        oneDayBurnRate: 0.3,
+        ...baseDoc,
+        summary: nestedSummary,
         members: [
           {
             sloId: 'slo-a-xxxxxxxx',
@@ -131,26 +151,21 @@ describe('composite_slo_summary_index', () => {
 
     it('ignores extra keys on the index document', () => {
       const persisted = mapCompositeSummaryIndexSource({
-        spaceId: 'default',
-        summaryUpdatedAt: '2026-01-01T00:00:00.000Z',
-        sliValue: 0.99,
-        status: 'HEALTHY',
-        errorBudgetInitial: 0.01,
-        errorBudgetConsumed: 0.2,
-        errorBudgetRemaining: 0.8,
-        errorBudgetIsEstimated: false,
-        fiveMinuteBurnRate: 0.1,
-        oneHourBurnRate: 0.2,
-        oneDayBurnRate: 0.3,
+        ...baseDoc,
+        summary: nestedSummary,
+        unexpectedTopLevelKey: 'ignored',
       });
       expect(persisted?.summary.sliValue).toBe(0.99);
     });
 
-    it('returns undefined when a field is missing', () => {
+    it('returns undefined when a summary field is missing', () => {
       expect(
         mapCompositeSummaryIndexSource({
-          sliValue: 0.99,
-          status: 'HEALTHY',
+          ...baseDoc,
+          summary: {
+            sliValue: 0.99,
+            status: 'HEALTHY',
+          },
         })
       ).toBeUndefined();
     });
@@ -158,15 +173,11 @@ describe('composite_slo_summary_index', () => {
     it('returns undefined for invalid status', () => {
       expect(
         mapCompositeSummaryIndexSource({
-          sliValue: 0.99,
-          status: 'UNKNOWN',
-          errorBudgetInitial: 0.01,
-          errorBudgetConsumed: 0.2,
-          errorBudgetRemaining: 0.8,
-          errorBudgetIsEstimated: false,
-          fiveMinuteBurnRate: 0.1,
-          oneHourBurnRate: 0.2,
-          oneDayBurnRate: 0.3,
+          ...baseDoc,
+          summary: {
+            ...nestedSummary,
+            status: 'UNKNOWN',
+          },
         })
       ).toBeUndefined();
     });
@@ -180,15 +191,15 @@ describe('composite_slo_summary_index', () => {
             {
               _id: 'default:comp-a',
               _source: {
-                sliValue: 0.99,
-                status: 'HEALTHY',
-                errorBudgetInitial: 0.01,
-                errorBudgetConsumed: 0,
-                errorBudgetRemaining: 1,
-                errorBudgetIsEstimated: false,
-                fiveMinuteBurnRate: 0,
-                oneHourBurnRate: 0,
-                oneDayBurnRate: 0,
+                ...baseDoc,
+                summary: {
+                  sliValue: 0.99,
+                  status: 'HEALTHY',
+                  errorBudget: { initial: 0.01, consumed: 0, remaining: 1, isEstimated: false },
+                  fiveMinuteBurnRate: 0,
+                  oneHourBurnRate: 0,
+                  oneDayBurnRate: 0,
+                },
               },
             },
           ],
