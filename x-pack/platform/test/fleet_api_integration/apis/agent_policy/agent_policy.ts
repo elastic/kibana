@@ -1771,6 +1771,9 @@ export default function (providerContext: FtrProviderContext) {
               },
             },
           },
+          has_agent_version_conditions: false,
+          min_agent_version: null,
+          package_agent_version_conditions: null,
         });
       });
 
@@ -1887,6 +1890,9 @@ export default function (providerContext: FtrProviderContext) {
               percentage: 10,
             },
           ],
+          has_agent_version_conditions: false,
+          min_agent_version: null,
+          package_agent_version_conditions: null,
         });
       });
 
