@@ -35,6 +35,7 @@ import type { CcsLogsExtractionClient, LogsExtractionClient } from './domain/log
 import type { HistorySnapshotClient } from './domain/history_snapshot';
 import type { CRUDClient } from './domain/crud';
 import type { ResolutionClient } from './domain/resolution';
+import type { ResolutionRuleOverridesClient } from './domain/saved_objects/resolution_rule_overrides';
 import type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainers/types';
 
 export interface EntityStoreSetupPlugins {
@@ -59,6 +60,7 @@ export interface EntityStoreApiRequestHandlerContext {
   entityMaintainersClient: EntityMaintainersClient;
   crudClient: CRUDClient;
   resolutionClient: ResolutionClient;
+  resolutionRulesClient: ResolutionRuleOverridesClient;
   ccsLogsExtractionClient: CcsLogsExtractionClient;
   featureFlags: FeatureFlags;
   logsExtractionClient: LogsExtractionClient;

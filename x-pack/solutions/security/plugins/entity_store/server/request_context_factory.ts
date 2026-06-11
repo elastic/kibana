@@ -24,6 +24,7 @@ import { CcsLogsExtractionClient, LogsExtractionClient } from './domain/logs_ext
 import { HistorySnapshotClient } from './domain/history_snapshot';
 import { CRUDClient } from './domain/crud';
 import { ResolutionClient } from './domain/resolution';
+import { ResolutionRuleOverridesClient } from './domain/saved_objects/resolution_rule_overrides';
 import type { TelemetryReporter } from './telemetry/events';
 
 interface EntityStoreApiRequestHandlerContextDeps {
@@ -131,6 +132,11 @@ export async function createRequestHandlerContext({
       esClient: core.elasticsearch.client.asCurrentUser,
       namespace,
     }),
+    resolutionRulesClient: new ResolutionRuleOverridesClient(
+      core.savedObjects.client,
+      namespace,
+      logger
+    ),
     ccsLogsExtractionClient,
     featureFlags: new FeatureFlags(core.uiSettings.client),
     logsExtractionClient,

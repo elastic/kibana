@@ -6,13 +6,24 @@
  */
 
 import type { EntityMaintainerState } from '../../tasks/entity_maintainers/types';
+import type { Stage0RuleId } from './rules_config';
 
-export interface AutomatedResolutionState extends EntityMaintainerState {
+export interface PerRuleState extends EntityMaintainerState {
   lastProcessedTimestamp: string | null;
   lastRun: {
     resolutionsCreated: number;
     skippedAmbiguousBuckets: number;
   } | null;
+}
+
+/**
+ * Stage-0 state shape — one watermark + lastRun stats per rule.
+ *
+ * 9.4 persisted `{ lastProcessedTimestamp, lastRun }` at top level (S1 only).
+ * `migrateAutomatedResolutionState` transparently upgrades that on first run.
+ */
+export interface AutomatedResolutionState extends EntityMaintainerState {
+  rules: Record<Stage0RuleId, PerRuleState>;
 }
 
 export interface EntityHit {
@@ -21,7 +32,7 @@ export interface EntityHit {
 }
 
 export interface MatchBucket {
-  emailValue: string;
+  matchValue: string;
   unresolvedEntities: EntityHit[];
   existingTargetIds: string[];
 }

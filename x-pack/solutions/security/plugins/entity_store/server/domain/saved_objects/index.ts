@@ -14,3 +14,4 @@ export * from './global_state';
 export * from './ccs_log_extraction_state/constants';
 export * from './ccs_log_extraction_state/types';
 export * from './ccs_log_extraction_state';
+export { ResolutionRuleOverridesClient, ResolutionRuleOverridesTypeName, ResolutionRuleOverridesType } from './resolution_rule_overrides';
