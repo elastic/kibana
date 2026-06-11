@@ -130,7 +130,7 @@ describe('config validation', () => {
             "enabled": true,
           },
           "templates": Object {
-            "enabled": true,
+            "enabled": false,
           },
         }
       `);
