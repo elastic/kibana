@@ -32,6 +32,15 @@ export const ruleOverviewQueryKeys = {
     ] as const,
   timelineSummary: (ruleId: string, gteMs: number, lteMs: number) =>
     [...ruleOverviewQueryKeys.all, 'timeline-summary', ruleId, gteMs, lteMs] as const,
+  timelineAnchors: (ruleId: string, gteMs: number, lteMs: number, groupHashes: readonly string[]) =>
+    [
+      ...ruleOverviewQueryKeys.all,
+      'timeline-anchors',
+      ruleId,
+      gteMs,
+      lteMs,
+      [...groupHashes].sort(),
+    ] as const,
   seriesGroupingValues: (
     ruleId: string,
     groupHashes: readonly string[],

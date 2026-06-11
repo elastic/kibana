@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { buildRuleEventsEsqlQuery, PER_SERIES_EVENT_LIMIT } from './rule_events_query';
+import { buildRuleEventsEsqlQuery, PER_EPISODE_EVENT_LIMIT } from './rule_events_query';
 
 describe('buildRuleEventsEsqlQuery', () => {
   it('scopes to rule id, time window, sorts descending and limits', () => {
@@ -26,7 +26,7 @@ describe('buildRuleEventsEsqlQuery', () => {
     expect(queryString).toContain('group_hash');
   });
 
-  it('caps events per series before the global ceiling', () => {
+  it('caps events per episode before the global ceiling', () => {
     const queryString = buildRuleEventsEsqlQuery({
       ruleId: 'rule-abc',
       gteMs: Date.parse('2026-04-01T00:00:00Z'),
@@ -34,26 +34,26 @@ describe('buildRuleEventsEsqlQuery', () => {
       pageSize: 5000,
     }).print('basic');
 
-    // Per-series cap is inlined as a literal integer (not a bound param).
-    expect(queryString).toContain(`LIMIT ${PER_SERIES_EVENT_LIMIT} BY group_hash`);
+    // Per-episode cap is inlined as a literal integer (not a bound param).
+    expect(queryString).toContain(`LIMIT ${PER_EPISODE_EVENT_LIMIT} BY episode.id`);
 
-    // The per-series LIMIT ... BY must precede the global ceiling so each
-    // series keeps its most-recent events before the overall cap is applied.
-    expect(queryString.indexOf(`LIMIT ${PER_SERIES_EVENT_LIMIT} BY group_hash`)).toBeLessThan(
+    // The per-episode LIMIT ... BY must precede the global ceiling so each
+    // episode keeps its most-recent events before the overall cap is applied.
+    expect(queryString.indexOf(`LIMIT ${PER_EPISODE_EVENT_LIMIT} BY episode.id`)).toBeLessThan(
       queryString.indexOf('LIMIT 5000')
     );
   });
 
-  it('threads an explicit per-series limit through', () => {
+  it('threads an explicit per-episode limit through', () => {
     const queryString = buildRuleEventsEsqlQuery({
       ruleId: 'rule-abc',
       gteMs: Date.parse('2026-04-01T00:00:00Z'),
       lteMs: Date.parse('2026-04-08T00:00:00Z'),
       pageSize: 5000,
-      perSeriesLimit: 123,
+      perEpisodeLimit: 123,
     }).print('basic');
 
-    expect(queryString).toContain('LIMIT 123 BY group_hash');
+    expect(queryString).toContain('LIMIT 123 BY episode.id');
   });
 
   it('scopes to the provided group hashes', () => {

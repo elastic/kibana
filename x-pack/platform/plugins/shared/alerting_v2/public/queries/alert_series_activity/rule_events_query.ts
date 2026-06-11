@@ -26,17 +26,16 @@ const RULE_EVENT_FIELDS = [
 ] as const;
 
 /**
- * Per-series (`group_hash`) cap on raw events. Applied via `LIMIT ... BY` so a
- * single overactive series cannot consume the whole `pageSize` budget and
- * starve quieter lanes (including their pre-window lookback events, which the
- * timeline relies on to anchor each lane's left-edge status). The global
- * `pageSize` limit is retained as a hard ceiling.
- *
- * The caller is responsible for clamping the query window to at most
- * `PER_SERIES_EVENT_LIMIT × scheduleInterval` so that scan cost scales with
- * the limit rather than with the user-selected time range.
+ * Per-episode (`episode.id`) cap on raw events. Applied via `LIMIT ... BY` so a
+ * single high-frequency episode cannot consume the whole `pageSize` budget and
+ * starve the other episodes in its series (lane) — in particular older,
+ * completed episodes that a busy active episode would otherwise evict entirely.
+ * The most-recent events per episode are kept (the query SORTs `@timestamp`
+ * DESC); each episode's true left edge is restored separately via the start
+ * anchors query (`buildAlertTimelineAnchorsQuery`). The global `pageSize` limit
+ * is retained as a hard ceiling.
  */
-export const PER_SERIES_EVENT_LIMIT = 10000;
+export const PER_EPISODE_EVENT_LIMIT = 200;
 
 export interface BuildRuleEventsEsqlQueryOptions {
   ruleId: string;
@@ -45,8 +44,8 @@ export interface BuildRuleEventsEsqlQueryOptions {
   pageSize: number;
   /** When provided, restricts results to these series only. */
   groupHashes?: string[];
-  /** Max events kept per `group_hash`. Defaults to {@link PER_SERIES_EVENT_LIMIT}. */
-  perSeriesLimit?: number;
+  /** Max events kept per `episode.id`. Defaults to {@link PER_EPISODE_EVENT_LIMIT}. */
+  perEpisodeLimit?: number;
 }
 
 const toIsoUtc = (ms: number) => new Date(ms).toISOString();
@@ -57,7 +56,7 @@ export const buildRuleEventsEsqlQuery = ({
   lteMs,
   pageSize,
   groupHashes,
-  perSeriesLimit = PER_SERIES_EVENT_LIMIT,
+  perEpisodeLimit = PER_EPISODE_EVENT_LIMIT,
 }: BuildRuleEventsEsqlQueryOptions) => {
   const fromIso = toIsoUtc(gteMs);
   const toIso = toIsoUtc(lteMs);
@@ -75,7 +74,7 @@ export const buildRuleEventsEsqlQuery = ({
   // prettier-ignore
   return query
     .sort([TIME_FIELD, 'DESC'])
-    .pipe`LIMIT ${perSeriesLimit} BY group_hash`
+    .pipe`LIMIT ${perEpisodeLimit} BY episode.id`
     .limit(pageSize)
     .keep(...RULE_EVENT_FIELDS);
 };

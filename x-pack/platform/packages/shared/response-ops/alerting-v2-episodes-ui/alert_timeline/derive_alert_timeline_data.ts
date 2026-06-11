@@ -56,6 +56,13 @@ interface ParsedEvent {
  * Summary stats and the total series count are supplied externally (computed
  * by a dedicated ES|QL aggregation) so this function no longer re-iterates
  * every event for episode-level metrics.
+ *
+ * `anchorByEpisode` maps `episode.id` to the episode's earliest event timestamp
+ * within the fetched window. The events query only returns the most-recent
+ * events per episode, so a long episode's earliest fetched event is mid-episode;
+ * the anchor lets us draw one flat segment from the true start to that first
+ * fetched event, restoring the truncated left edge without fetching every
+ * intermediate same-status event.
  */
 export const deriveAlertTimelineData = (
   eventRows: AlertTimelineEventRow[],
@@ -64,7 +71,8 @@ export const deriveAlertTimelineData = (
   gteMs: number,
   lteMs: number,
   summary: AlertTimelineSummary,
-  totalSeriesCount: number
+  totalSeriesCount: number,
+  anchorByEpisode: Map<string, number> = new Map()
 ): AlertTimelineData => {
   const eventsBySeries = new Map<string, ParsedEvent[]>();
 
@@ -131,7 +139,31 @@ export const deriveAlertTimelineData = (
         }
       }
 
-      let lastTransitionStatus: AlertEpisodeStatus | undefined;
+      // Restore the episode's truncated left edge. The events query only fetches
+      // the most-recent events per episode, so for a long episode the earliest
+      // fetched event is mid-episode. The anchor (the episode's true earliest
+      // timestamp in the fetched window) lets us prepend one flat segment from
+      // the start up to the first fetched event. It carries no transition dot —
+      // we have no event data in that range — so we also seed
+      // `lastTransitionStatus` so the first real event does not emit a spurious
+      // dot at the fetch boundary.
+      const anchorMs = anchorByEpisode.get(episodeId);
+      const firstEventMs = episodeEvents[0]?.tsMs;
+      const hasLeadingAnchor =
+        anchorMs !== undefined && firstEventMs !== undefined && anchorMs < firstEventMs;
+
+      if (hasLeadingAnchor) {
+        pushSegment({
+          episodeId,
+          status: episodeEvents[0].status,
+          x0Ms: anchorMs,
+          x1Ms: firstEventMs,
+        });
+      }
+
+      let lastTransitionStatus: AlertEpisodeStatus | undefined = hasLeadingAnchor
+        ? collapsedEvents[0]?.status
+        : undefined;
       for (const ev of collapsedEvents) {
         if (ev.status !== lastTransitionStatus) {
           transitions.push({ episodeId, status: ev.status, tsMs: ev.tsMs });

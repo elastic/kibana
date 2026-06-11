@@ -17,7 +17,7 @@ import {
 import { ruleOverviewQueryKeys } from '../queries/alert_series_activity/query_keys';
 import {
   buildRuleEventsEsqlQuery,
-  PER_SERIES_EVENT_LIMIT,
+  PER_EPISODE_EVENT_LIMIT,
   type RuleEventRow,
 } from '../queries/alert_series_activity/rule_events_query';
 import {
@@ -29,11 +29,17 @@ import {
   parseAlertTimelineSummaryRow,
   type AlertTimelineSummaryEsqlRow,
 } from '../queries/alert_series_activity/alert_timeline_summary_query';
+import {
+  buildAlertTimelineAnchorsQuery,
+  parseAnchorRows,
+  type AlertTimelineAnchorRow,
+} from '../queries/alert_series_activity/alert_timeline_anchors_query';
 import { useFetchSeriesGroupingValues } from './use_fetch_series_grouping_values';
 import type { SeriesGroupingValuesByHash } from '../queries/alert_series_activity/series_grouping_values_query';
 
 const EMPTY_EVENTS: RuleEventRow[] = [];
 const EMPTY_GROUPING_VALUES: SeriesGroupingValuesByHash = {};
+const EMPTY_ANCHORS: Map<string, number> = new Map();
 const EMPTY_SUMMARY: AlertTimelineSummary = {
   episodesStarted: 0,
   recovered: 0,
@@ -41,8 +47,19 @@ const EMPTY_SUMMARY: AlertTimelineSummary = {
   medianDurationMs: 0,
 };
 
-/** Hard cap on raw events pulled for the rule overview alert timeline. */
-export const RULE_EVENTS_PAGE_SIZE = PER_SERIES_EVENT_LIMIT * ALERT_TIMELINE_TOP_N_DEFAULT;
+/**
+ * Upper bound on distinct episodes (across all rendered lanes) whose tail events
+ * we keep. The per-episode cap is applied first; this only bounds pathological
+ * rules with a very large number of episodes in the window.
+ */
+const MAX_EPISODES_BUDGET = 400;
+
+/**
+ * Hard ceiling on raw events pulled for the rule overview alert timeline. Sized
+ * to accommodate the per-episode cap across many episodes, so the trailing
+ * global `LIMIT` does not clip an episode's most-recent events under normal use.
+ */
+export const RULE_EVENTS_PAGE_SIZE = PER_EPISODE_EVENT_LIMIT * MAX_EPISODES_BUDGET;
 
 export interface UseFetchRuleEventsOptions {
   ruleId: string | undefined;
@@ -156,22 +173,57 @@ export const useFetchRuleEvents = ({
     data,
   });
 
+  // --- 5. Start anchors (depends on top-N hashes; runs in parallel with the
+  // events query). One row per episode giving its earliest timestamp within the
+  // fetched window, so a long episode's truncated left edge can be drawn as a
+  // flat segment without fetching every intermediate same-status event. Scanned
+  // over the same buffered window as the events query so episodes that started
+  // before the visible window still anchor to the left of `gteMs`. ---
+  const anchorsQuery = useQuery({
+    queryKey: ruleOverviewQueryKeys.timelineAnchors(
+      ruleId ?? '',
+      rawEventsGteMs,
+      lteMs,
+      topNHashes
+    ),
+    enabled: eventsEnabled,
+    refetchOnWindowFocus: false,
+    queryFn: ({ signal }) =>
+      runEsqlAsyncSearch({
+        data,
+        params: {
+          query: buildAlertTimelineAnchorsQuery({
+            ruleId: ruleId!,
+            gteMs: rawEventsGteMs,
+            lteMs,
+            groupHashes: topNHashes,
+          }).print('basic'),
+          time_zone: 'UTC',
+        },
+        abortSignal: signal,
+      }),
+    select: (raw) => parseAnchorRows(esqlResponseToObjectRows<AlertTimelineAnchorRow>(raw)),
+  });
+
   const isLoading =
     (enabled && topNSeriesQuery.isLoading) ||
     (eventsEnabled && eventsQuery.isLoading) ||
     (enabled && summaryQuery.isLoading) ||
+    (eventsEnabled && anchorsQuery.isLoading) ||
     groupingValuesQuery.isLoading;
 
   const isError =
     topNSeriesQuery.isError ||
     eventsQuery.isError ||
     summaryQuery.isError ||
+    anchorsQuery.isError ||
     groupingValuesQuery.isError;
 
   return {
     events: eventsQuery.data ?? EMPTY_EVENTS,
     groupingValuesByHash: groupingValuesQuery.data ?? EMPTY_GROUPING_VALUES,
     summary: summaryQuery.data ?? EMPTY_SUMMARY,
+    anchorByEpisode: anchorsQuery.data ?? EMPTY_ANCHORS,
     totalSeriesCount,
     isLoading,
     isError,
@@ -179,6 +231,7 @@ export const useFetchRuleEvents = ({
       topNSeriesQuery.refetch();
       eventsQuery.refetch();
       summaryQuery.refetch();
+      anchorsQuery.refetch();
       groupingValuesQuery.refetch();
     },
   };

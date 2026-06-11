@@ -367,4 +367,167 @@ describe('deriveAlertTimelineData', () => {
       { status: ALERT_EPISODE_STATUS.INACTIVE, tsMs: T0 + 7 * HOUR_MS },
     ]);
   });
+
+  describe('start anchors', () => {
+    it('prepends a flat fill from an anchor before gteMs, clipped so the bar starts at gteMs', () => {
+      const events: AlertTimelineEventRow[] = [
+        event({ episodeId: 'ep-1', status: ALERT_EPISODE_STATUS.ACTIVE, tsMs: T0 + 3 * HOUR_MS }),
+        event({ episodeId: 'ep-1', status: ALERT_EPISODE_STATUS.INACTIVE, tsMs: T0 + 5 * HOUR_MS }),
+      ];
+      // Episode actually started 2h before the visible window.
+      const anchorByEpisode = new Map([['ep-1', T0 - 2 * HOUR_MS]]);
+
+      const result = deriveAlertTimelineData(
+        events,
+        {},
+        'started_asc',
+        T0,
+        NOW,
+        STUB_SUMMARY,
+        1,
+        anchorByEpisode
+      );
+      const row = result.rows[0];
+
+      // The flat fill (active) coalesces with the first real active segment and
+      // is clipped to gteMs — no gap at the left edge.
+      expect(row.segments).toEqual([
+        {
+          episodeId: 'ep-1',
+          status: ALERT_EPISODE_STATUS.ACTIVE,
+          x0Ms: T0,
+          x1Ms: T0 + 5 * HOUR_MS,
+        },
+      ]);
+      // The synthetic start carries no dot; only the real recovery remains.
+      expect(row.transitions.map((t) => t.status)).toEqual([ALERT_EPISODE_STATUS.INACTIVE]);
+    });
+
+    it('fills with the first fetched event status and emits no dot at the fetch boundary', () => {
+      const events: AlertTimelineEventRow[] = [
+        event({
+          episodeId: 'ep-1',
+          status: ALERT_EPISODE_STATUS.RECOVERING,
+          tsMs: T0 + 4 * HOUR_MS,
+        }),
+        event({ episodeId: 'ep-1', status: ALERT_EPISODE_STATUS.INACTIVE, tsMs: T0 + 5 * HOUR_MS }),
+      ];
+      const anchorByEpisode = new Map([['ep-1', T0 + 1 * HOUR_MS]]);
+
+      const result = deriveAlertTimelineData(
+        events,
+        {},
+        'started_asc',
+        T0,
+        NOW,
+        STUB_SUMMARY,
+        1,
+        anchorByEpisode
+      );
+      const row = result.rows[0];
+
+      expect(row.segments).toEqual([
+        {
+          episodeId: 'ep-1',
+          status: ALERT_EPISODE_STATUS.RECOVERING,
+          x0Ms: T0 + 1 * HOUR_MS,
+          x1Ms: T0 + 5 * HOUR_MS,
+        },
+      ]);
+      expect(row.transitions.map((t) => t.status)).toEqual([ALERT_EPISODE_STATUS.INACTIVE]);
+    });
+
+    it('does not prepend a flat segment when the anchor equals the first fetched event', () => {
+      const events: AlertTimelineEventRow[] = [
+        event({ episodeId: 'ep-1', status: ALERT_EPISODE_STATUS.ACTIVE, tsMs: T0 + 2 * HOUR_MS }),
+        event({ episodeId: 'ep-1', status: ALERT_EPISODE_STATUS.INACTIVE, tsMs: T0 + 4 * HOUR_MS }),
+      ];
+      const anchorByEpisode = new Map([['ep-1', T0 + 2 * HOUR_MS]]);
+
+      const result = deriveAlertTimelineData(
+        events,
+        {},
+        'started_asc',
+        T0,
+        NOW,
+        STUB_SUMMARY,
+        1,
+        anchorByEpisode
+      );
+      const row = result.rows[0];
+
+      // Bar starts at the first real event; its start dot is preserved.
+      expect(row.segments).toEqual([
+        {
+          episodeId: 'ep-1',
+          status: ALERT_EPISODE_STATUS.ACTIVE,
+          x0Ms: T0 + 2 * HOUR_MS,
+          x1Ms: T0 + 4 * HOUR_MS,
+        },
+      ]);
+      expect(row.transitions.map((t) => t.status)).toEqual([
+        ALERT_EPISODE_STATUS.ACTIVE,
+        ALERT_EPISODE_STATUS.INACTIVE,
+      ]);
+    });
+
+    it('anchors each episode independently within a single lane (#272984 regression)', () => {
+      const events: AlertTimelineEventRow[] = [
+        // Older completed episode.
+        event({
+          episodeId: 'ep-old',
+          groupHash: 'gh-A',
+          status: ALERT_EPISODE_STATUS.ACTIVE,
+          tsMs: T0 + 2 * HOUR_MS,
+        }),
+        event({
+          episodeId: 'ep-old',
+          groupHash: 'gh-A',
+          status: ALERT_EPISODE_STATUS.INACTIVE,
+          tsMs: T0 + 3 * HOUR_MS,
+        }),
+        // Busy active episode whose earlier events were truncated by the per-episode cap.
+        event({
+          episodeId: 'ep-new',
+          groupHash: 'gh-A',
+          status: ALERT_EPISODE_STATUS.ACTIVE,
+          tsMs: T0 + 20 * HOUR_MS,
+        }),
+      ];
+      const anchorByEpisode = new Map([
+        ['ep-old', T0 + 1 * HOUR_MS],
+        ['ep-new', T0 + 10 * HOUR_MS],
+      ]);
+
+      const result = deriveAlertTimelineData(
+        events,
+        {},
+        'started_asc',
+        T0,
+        NOW,
+        STUB_SUMMARY,
+        1,
+        anchorByEpisode
+      );
+      const row = result.rows[0];
+
+      // Both episodes render in the same lane — the busy one does not starve the old one.
+      expect(new Set(row.segments.map((s) => s.episodeId))).toEqual(new Set(['ep-old', 'ep-new']));
+
+      // ep-new's truncated left edge is restored back to its anchor and runs open to lteMs.
+      expect(row.segments.find((s) => s.episodeId === 'ep-new')).toEqual({
+        episodeId: 'ep-new',
+        status: ALERT_EPISODE_STATUS.ACTIVE,
+        x0Ms: T0 + 10 * HOUR_MS,
+        x1Ms: NOW,
+      });
+      // ep-old keeps its flat-filled start.
+      expect(row.segments.find((s) => s.episodeId === 'ep-old')).toEqual({
+        episodeId: 'ep-old',
+        status: ALERT_EPISODE_STATUS.ACTIVE,
+        x0Ms: T0 + 1 * HOUR_MS,
+        x1Ms: T0 + 3 * HOUR_MS,
+      });
+    });
+  });
 });

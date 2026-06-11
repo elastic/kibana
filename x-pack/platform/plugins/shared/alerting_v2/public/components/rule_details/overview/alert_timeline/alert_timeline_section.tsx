@@ -32,7 +32,6 @@ import {
 import { AlertTimelineLegend } from '@kbn/alerting-v2-episodes-ui/alert_timeline';
 import { useRule } from '../../rule_context';
 import { useFetchRuleEvents } from '../../../../hooks/use_fetch_rule_events';
-import { PER_SERIES_EVENT_LIMIT } from '../../../../queries/alert_series_activity/rule_events_query';
 import { getDiscoverHrefForRuleQuery } from '../../../../utils/discover_href_for_episode';
 import { paths } from '../../../../constants';
 import { AlertTimelineChart } from './alert_timeline_chart';
@@ -83,29 +82,35 @@ export const AlertTimelineSection: React.FC = () => {
     return resolveGteLte(timeRange.from, timeRange.to);
   }, [timeRange.from, timeRange.to, refreshTick]);
 
-  const { bufferMs, scheduleMs } = useMemo(() => {
+  // Small lookback buffer so each episode's status at the left edge is known.
+  // The events query keeps the most-recent events per episode, and the start
+  // anchors restore each episode's true left edge, so the fetch window tracks
+  // the visible window (per-episode capping bounds the payload, not the window).
+  const bufferMs = useMemo(() => {
     const raw = parseDurationToMs(rule.schedule.every);
     const ms = Number.isFinite(raw) ? (raw as number) : 60_000;
-    return {
-      scheduleMs: ms,
-      bufferMs: Math.min(Math.max(2 * ms, 60_000), 60 * 60_000),
-    };
+    return Math.min(Math.max(2 * ms, 60_000), 60 * 60_000);
   }, [rule.schedule.every]);
 
-  // Clamp the raw-events fetch window to at most PER_SERIES_EVENT_LIMIT schedule
-  // intervals so that ES scan cost is bounded regardless of the selected time range.
-  const fetchGteMs = Math.max(gteMs - bufferMs, lteMs - PER_SERIES_EVENT_LIMIT * scheduleMs);
+  const fetchGteMs = gteMs - bufferMs;
 
-  const { events, groupingValuesByHash, summary, totalSeriesCount, isLoading, isError } =
-    useFetchRuleEvents({
-      ruleId: rule.id,
-      gteMs,
-      lteMs,
-      eventGteMs: fetchGteMs,
-      groupingFields,
-      topN: ALERT_TIMELINE_TOP_N_DEFAULT,
-      data,
-    });
+  const {
+    events,
+    groupingValuesByHash,
+    summary,
+    anchorByEpisode,
+    totalSeriesCount,
+    isLoading,
+    isError,
+  } = useFetchRuleEvents({
+    ruleId: rule.id,
+    gteMs,
+    lteMs,
+    eventGteMs: fetchGteMs,
+    groupingFields,
+    topN: ALERT_TIMELINE_TOP_N_DEFAULT,
+    data,
+  });
 
   const timelineData = useMemo(
     () =>
@@ -116,9 +121,10 @@ export const AlertTimelineSection: React.FC = () => {
         gteMs,
         lteMs,
         summary,
-        totalSeriesCount
+        totalSeriesCount,
+        anchorByEpisode
       ),
-    [events, groupingValuesByHash, gteMs, lteMs, summary, totalSeriesCount]
+    [events, groupingValuesByHash, gteMs, lteMs, summary, totalSeriesCount, anchorByEpisode]
   );
 
   const discoverHref = useMemo(
