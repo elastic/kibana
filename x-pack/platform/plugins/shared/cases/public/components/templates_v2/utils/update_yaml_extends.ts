@@ -6,17 +6,19 @@
  */
 
 import { parseDocument, isMap, stringify } from 'yaml';
+import { formatExtendsRef } from './parse_extends_ref';
 
-export const setYamlExtends = (yaml: string, templateId: string): string => {
+export const setYamlExtends = (yaml: string, templateId: string, version?: number): string => {
+  const extendsRef = formatExtendsRef(templateId, version);
   if (!yaml || yaml.trim() === '') {
-    return stringify({ extends: templateId });
+    return stringify({ extends: extendsRef });
   }
   try {
     const doc = parseDocument(yaml);
     if (!isMap(doc.contents)) {
       return yaml;
     }
-    doc.set('extends', templateId);
+    doc.set('extends', extendsRef);
     return doc.toString();
   } catch {
     return yaml;

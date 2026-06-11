@@ -112,7 +112,19 @@ export const ParsedTemplateDefinitionSchema = z.object({
   tags: z.array(z.string()).optional(),
   severity: z.enum(['low', 'medium', 'high', 'critical']).optional(),
   category: z.string().nullable().optional(),
-  extends: z.string().optional(),
+  extends: z
+    .string()
+    .refine(
+      (val) => {
+        const atIndex = val.lastIndexOf('@');
+        if (atIndex === -1) return true;
+        const suffix = val.slice(atIndex + 1);
+        // Suffix must be a positive integer when present.
+        return /^\d+$/.test(suffix) && Number(suffix) > 0;
+      },
+      { message: 'Extended template version must be a positive integer.' }
+    )
+    .optional(),
   fields: z.array(FieldSchema).refine(
     (fields) => {
       const fieldNames = new Set(

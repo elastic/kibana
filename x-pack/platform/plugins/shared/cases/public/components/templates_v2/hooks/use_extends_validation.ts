@@ -8,8 +8,13 @@
 import { useEffect, useState } from 'react';
 import { parse as parseYaml } from 'yaml';
 import { monaco } from '@kbn/monaco';
+import { parseExtendsRef } from '../utils/parse_extends_ref';
 import { useGetTemplate } from './use_get_template';
-import { EXTENDS_CHAINING_ERROR, EXTENDS_NOT_FOUND_ERROR } from '../translations';
+import {
+  EXTENDS_CHAINING_ERROR,
+  EXTENDS_NOT_FOUND_ERROR,
+  EXTENDS_VERSION_NOT_FOUND_ERROR,
+} from '../translations';
 
 const EXTENDS_VALIDATION_OWNER = 'extends-validation';
 
@@ -17,6 +22,7 @@ export const useExtendsValidation = (
   editor: monaco.editor.IStandaloneCodeEditor | null,
   value: string
 ) => {
+  // The raw `extends` string from the YAML (may include `@version` suffix).
   const [extendsValue, setExtendsValue] = useState<string | undefined>(undefined);
 
   useEffect(() => {
@@ -35,11 +41,14 @@ export const useExtendsValidation = (
     return () => clearTimeout(timeout);
   }, [value]);
 
+  // Parse the raw ref into id + optional pinned version.
+  const { templateId: extendsTemplateId, version: extendsVersion } = parseExtendsRef(extendsValue);
+
   const {
     data: parentTemplate,
     isError,
     isFetched,
-  } = useGetTemplate(extendsValue, undefined, {
+  } = useGetTemplate(extendsTemplateId, extendsVersion, {
     silent: true,
     includeDeleted: true,
   });
@@ -87,11 +96,17 @@ export const useExtendsValidation = (
     }
 
     if (isError || !parentTemplate) {
+      // When a specific version was pinned, report a version-specific error so
+      // the user knows the template itself exists but that version does not.
+      const message =
+        extendsVersion != null
+          ? EXTENDS_VERSION_NOT_FOUND_ERROR(extendsValue, extendsVersion)
+          : EXTENDS_NOT_FOUND_ERROR(extendsValue);
       monaco.editor.setModelMarkers(model, EXTENDS_VALIDATION_OWNER, [
         {
           ...location,
           severity: 8,
-          message: EXTENDS_NOT_FOUND_ERROR(extendsValue),
+          message,
           source: EXTENDS_VALIDATION_OWNER,
         },
       ]);
@@ -111,7 +126,16 @@ export const useExtendsValidation = (
     }
 
     monaco.editor.setModelMarkers(model, EXTENDS_VALIDATION_OWNER, []);
-  }, [editor, value, extendsValue, parentTemplate, isError, isFetched]);
+  }, [
+    editor,
+    value,
+    extendsValue,
+    extendsTemplateId,
+    extendsVersion,
+    parentTemplate,
+    isError,
+    isFetched,
+  ]);
 };
 
 function findExtendsLocation(

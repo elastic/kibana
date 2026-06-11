@@ -698,6 +698,12 @@ export const EXTENDS_NOT_FOUND_ERROR = (name: string) =>
     values: { name },
   });
 
+export const EXTENDS_VERSION_NOT_FOUND_ERROR = (name: string, version: number) =>
+  i18n.translate('xpack.cases.templates.extendsVersionNotFoundError', {
+    defaultMessage: 'Version {version} of template "{name}" not found.',
+    values: { name, version },
+  });
+
 export const CONFIRM_FIELD_EDIT = i18n.translate('xpack.cases.templates.confirmFieldEdit', {
   defaultMessage: 'Save field',
 });

@@ -9,7 +9,11 @@ import { renderHook, act } from '@testing-library/react';
 import { monaco } from '@kbn/monaco';
 import type { ParsedTemplate } from '../../../../common/types/domain/template/v1';
 import { useExtendsValidation } from './use_extends_validation';
-import { EXTENDS_CHAINING_ERROR, EXTENDS_NOT_FOUND_ERROR } from '../translations';
+import {
+  EXTENDS_CHAINING_ERROR,
+  EXTENDS_NOT_FOUND_ERROR,
+  EXTENDS_VERSION_NOT_FOUND_ERROR,
+} from '../translations';
 
 jest.mock('@kbn/monaco', () => ({
   monaco: {
@@ -48,7 +52,9 @@ const makeEditor = () => {
   };
 };
 
-const YAML_WITH_EXTENDS = 'name: My Template\nextends: parent-id\n';
+const TEMPLATE_ID = 'parent-id';
+const YAML_WITH_EXTENDS = `name: My Template\nextends: ${TEMPLATE_ID}\n`;
+const YAML_WITH_PINNED_VERSION = `name: My Template\nextends: ${TEMPLATE_ID}@3\n`;
 
 describe('useExtendsValidation', () => {
   beforeEach(() => {
@@ -118,7 +124,7 @@ describe('useExtendsValidation', () => {
       expect.arrayContaining([
         expect.objectContaining({
           severity: 8,
-          message: EXTENDS_NOT_FOUND_ERROR('parent-id'),
+          message: EXTENDS_NOT_FOUND_ERROR(TEMPLATE_ID),
           source: 'extends-validation',
         }),
       ])
@@ -169,5 +175,123 @@ describe('useExtendsValidation', () => {
     const lastCall = mockSetModelMarkers.mock.calls.at(-1);
     expect(lastCall).toBeDefined();
     expect(lastCall![2]).toEqual([]);
+  });
+
+  describe('version-pinned extends (<id>@<version>)', () => {
+    it('passes the parsed version to useGetTemplate', () => {
+      mockUseGetTemplate.mockReturnValue({
+        data: makeTemplate(),
+        isError: false,
+        isFetched: true,
+      } as ReturnType<typeof useGetTemplate>);
+
+      const { editor } = makeEditor();
+      renderHook(() => useExtendsValidation(editor, YAML_WITH_PINNED_VERSION));
+
+      act(() => {
+        jest.advanceTimersByTime(300);
+      });
+
+      // Should be called with the parsed templateId and the pinned version (3).
+      expect(mockUseGetTemplate).toHaveBeenCalledWith(
+        TEMPLATE_ID,
+        3,
+        expect.objectContaining({ silent: true, includeDeleted: true })
+      );
+    });
+
+    it('sets a version-not-found error marker when the pinned version does not exist', () => {
+      const { editor, model } = makeEditor();
+      mockUseGetTemplate.mockReturnValue({
+        data: undefined,
+        isError: true,
+        isFetched: true,
+      } as ReturnType<typeof useGetTemplate>);
+
+      renderHook(() => useExtendsValidation(editor, YAML_WITH_PINNED_VERSION));
+
+      act(() => {
+        jest.advanceTimersByTime(300);
+      });
+
+      expect(mockSetModelMarkers).toHaveBeenCalledWith(
+        model,
+        'extends-validation',
+        expect.arrayContaining([
+          expect.objectContaining({
+            severity: 8,
+            message: EXTENDS_VERSION_NOT_FOUND_ERROR(`${TEMPLATE_ID}@3`, 3),
+            source: 'extends-validation',
+          }),
+        ])
+      );
+    });
+
+    it('does NOT use the plain not-found error when a version is pinned', () => {
+      const { editor } = makeEditor();
+      mockUseGetTemplate.mockReturnValue({
+        data: undefined,
+        isError: true,
+        isFetched: true,
+      } as ReturnType<typeof useGetTemplate>);
+
+      renderHook(() => useExtendsValidation(editor, YAML_WITH_PINNED_VERSION));
+
+      act(() => {
+        jest.advanceTimersByTime(300);
+      });
+
+      const allMessages = mockSetModelMarkers.mock.calls
+        .flatMap(([, , markers]) => markers)
+        .map((m: { message: string }) => m.message);
+
+      expect(allMessages).not.toContain(EXTENDS_NOT_FOUND_ERROR(TEMPLATE_ID));
+    });
+
+    it('still emits chaining error when a pinned parent version itself has extends', () => {
+      const { editor, model } = makeEditor();
+      mockUseGetTemplate.mockReturnValue({
+        data: makeTemplate({ extends: 'grandparent-id' }),
+        isError: false,
+        isFetched: true,
+      } as ReturnType<typeof useGetTemplate>);
+
+      renderHook(() => useExtendsValidation(editor, YAML_WITH_PINNED_VERSION));
+
+      act(() => {
+        jest.advanceTimersByTime(300);
+      });
+
+      expect(mockSetModelMarkers).toHaveBeenCalledWith(
+        model,
+        'extends-validation',
+        expect.arrayContaining([
+          expect.objectContaining({
+            severity: 8,
+            message: EXTENDS_CHAINING_ERROR,
+            source: 'extends-validation',
+          }),
+        ])
+      );
+    });
+
+    it('clears markers when the pinned parent version is valid and does not chain', () => {
+      const { editor } = makeEditor();
+      mockUseGetTemplate.mockReturnValue({
+        data: makeTemplate(),
+        isError: false,
+        isFetched: true,
+      } as ReturnType<typeof useGetTemplate>);
+
+      renderHook(() => useExtendsValidation(editor, YAML_WITH_PINNED_VERSION));
+
+      act(() => {
+        jest.advanceTimersByTime(300);
+      });
+
+      const lastCall = mockSetModelMarkers.mock.calls.at(-1);
+      expect(lastCall).toBeDefined();
+      expect(lastCall![2]).toEqual([]);
+    });
   });
 });

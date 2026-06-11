@@ -40,6 +40,41 @@ describe('setYamlExtends', () => {
     expect(result).toBe(`extends: ${TEMPLATE_ID}\n`);
   });
 
+  describe('with a pinned version', () => {
+    it('writes the version-pinned ref (id@version)', () => {
+      const yaml = `name: My Template\n`;
+
+      const result = setYamlExtends(yaml, TEMPLATE_ID, 3);
+
+      expect(result).toContain(`extends: ${TEMPLATE_ID}@3`);
+    });
+
+    it('creates a minimal document with a version-pinned ref when yaml is empty', () => {
+      const result = setYamlExtends('', TEMPLATE_ID, 2);
+
+      expect(result).toBe(`extends: ${TEMPLATE_ID}@2\n`);
+    });
+
+    it('overwrites a previously pinned version when a new version is given', () => {
+      const yaml = `name: My Template\nextends: ${TEMPLATE_ID}@1\n`;
+
+      const result = setYamlExtends(yaml, TEMPLATE_ID, 5);
+
+      expect(result).toContain(`extends: ${TEMPLATE_ID}@5`);
+      expect(result).not.toContain(`@1`);
+    });
+
+    it('resets to a bare id (latest) when version is omitted', () => {
+      const yaml = `name: My Template\nextends: ${TEMPLATE_ID}@2\n`;
+
+      const result = setYamlExtends(yaml, TEMPLATE_ID);
+
+      // Bare id — no @version suffix
+      expect(result).toContain(`extends: ${TEMPLATE_ID}`);
+      expect(result).not.toContain('@2');
+    });
+  });
+
   it('returns original yaml when parsing fails', () => {
     const invalidYaml = 'invalid: yaml: [broken';
 

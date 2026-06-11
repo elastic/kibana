@@ -23,6 +23,11 @@ jest.mock('../hooks/use_parent_template_definition', () => ({
   useParentTemplateDefinition: jest.fn(() => ({ definition: undefined, isFetched: true })),
 }));
 
+import { useParentTemplateDefinition } from '../hooks/use_parent_template_definition';
+const mockUseParentTemplateDefinition = useParentTemplateDefinition as jest.MockedFunction<
+  typeof useParentTemplateDefinition
+>;
+
 describe('CreateTemplatePreview', () => {
   const renderPreview = (definition: string) => {
     const Wrapper = () => {
@@ -73,5 +78,16 @@ describe('CreateTemplatePreview', () => {
     // Component returns null when there's no valid template
     expect(screen.queryByTestId('template-field-renderer')).not.toBeInTheDocument();
     expect(TemplateFieldRenderer).not.toHaveBeenCalled();
+  });
+
+  it('passes the full extends ref string to useParentTemplateDefinition (includes @version)', () => {
+    // template_preview.tsx passes parsedTemplateData?.extends (the raw string) to the hook.
+    // The hook is responsible for parsing the @version suffix via parseExtendsRef.
+    const extendsRef = 'parent-id@3';
+    renderPreview(
+      `name: Child\nextends: ${extendsRef}\nfields:\n  - control: INPUT_TEXT\n    name: child_field\n    type: keyword`
+    );
+
+    expect(mockUseParentTemplateDefinition).toHaveBeenCalledWith(extendsRef);
   });
 });

@@ -21,6 +21,7 @@ import { useCasesEditTemplateNavigation } from '../../../common/navigation/hooks
 import { useGetTemplates } from '../hooks/use_get_templates';
 import { useGetTemplate } from '../hooks/use_get_template';
 import { setYamlExtends, removeYamlExtends } from '../utils/update_yaml_extends';
+import { parseExtendsRef } from '../utils/parse_extends_ref';
 import { EXTENDS_LABEL, EXTENDS_SELECTOR_PLACEHOLDER, VIEW_PARENT_TEMPLATE } from '../translations';
 
 interface ExtendsSelectorProps {
@@ -56,16 +57,20 @@ export const ExtendsSelector: React.FC<ExtendsSelectorProps> = ({
     }, []);
   }, [templatesData, currentTemplateId]);
 
-  const currentExtendsId = useMemo(() => {
+  const { currentExtendsId, currentExtendsVersion } = useMemo(() => {
     try {
       const parsed = parse(yamlValue);
       const ext =
         parsed && typeof parsed === 'object'
           ? (parsed as Record<string, unknown>).extends
           : undefined;
-      return typeof ext === 'string' ? ext : undefined;
+      if (typeof ext !== 'string') {
+        return { currentExtendsId: undefined, currentExtendsVersion: undefined };
+      }
+      const { templateId, version } = parseExtendsRef(ext);
+      return { currentExtendsId: templateId, currentExtendsVersion: version };
     } catch {
-      return undefined;
+      return { currentExtendsId: undefined, currentExtendsVersion: undefined };
     }
   }, [yamlValue]);
 
@@ -78,7 +83,7 @@ export const ExtendsSelector: React.FC<ExtendsSelectorProps> = ({
 
   const { data: deletedParent } = useGetTemplate(
     isExtendsMissingFromOptions ? currentExtendsId : undefined,
-    undefined,
+    currentExtendsVersion,
     { silent: true, includeDeleted: true }
   );
 

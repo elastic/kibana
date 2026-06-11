@@ -7,6 +7,7 @@
 
 import type { z } from '@kbn/zod/v4';
 import type { ParsedTemplateDefinitionSchema } from '../../../../common/types/domain/template/v1';
+import { parseExtendsRef } from '../utils/parse_extends_ref';
 import { useGetTemplate } from './use_get_template';
 
 type ParsedTemplateDefinition = z.infer<typeof ParsedTemplateDefinitionSchema>;
@@ -16,10 +17,17 @@ export interface UseParentTemplateDefinitionResult {
   isFetched: boolean;
 }
 
+/**
+ * Resolve the parent template for a given `extends` ref string.
+ *
+ * The ref may be a bare templateId (`"<id>"`) or a version-pinned ref
+ * (`"<id>@<version>"`). When no version is given the latest version is used.
+ */
 export const useParentTemplateDefinition = (
-  parentId: string | undefined
+  extendsRef: string | undefined
 ): UseParentTemplateDefinitionResult => {
-  const { data: template, isFetched } = useGetTemplate(parentId, undefined, {
+  const { templateId, version } = parseExtendsRef(extendsRef);
+  const { data: template, isFetched } = useGetTemplate(templateId, version, {
     silent: true,
     includeDeleted: true,
   });
