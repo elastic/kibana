@@ -12,7 +12,7 @@ import type { ConversationsService } from '../../services/conversations/conversa
 import { queryKeys } from '../query_keys';
 import {
   insertSidebarConversationListRow,
-  patchSidebarConversationListTitle,
+  patchConversationList,
   removeSidebarConversationListRow,
 } from './conversation_sidebar_list_cache';
 
@@ -132,7 +132,7 @@ describe('conversation_sidebar_list_cache', () => {
     });
   });
 
-  describe('patchSidebarConversationListTitle', () => {
+  describe('patchConversationList', () => {
     it('updates the title of the matching row, leaves other rows alone', () => {
       const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
       queryClient.setQueryData<ConversationWithoutRounds[]>(listKey, [
@@ -140,11 +140,11 @@ describe('conversation_sidebar_list_cache', () => {
         buildRow('B', agentId, 'unrelated'),
       ]);
 
-      patchSidebarConversationListTitle({
+      patchConversationList({
         queryClient,
         agentId,
         conversationId: 'A',
-        title: 'Real title from server',
+        values: { title: 'Real title from server' },
       });
 
       const result = queryClient.getQueryData<ConversationWithoutRounds[]>(listKey);
@@ -157,28 +157,28 @@ describe('conversation_sidebar_list_cache', () => {
       queryClient.setQueryData<ConversationWithoutRounds[]>(listKey, [buildRow('A')]);
       const before = queryClient.getQueryData<ConversationWithoutRounds[]>(listKey);
 
-      patchSidebarConversationListTitle({
+      patchConversationList({
         queryClient,
         agentId,
         conversationId: 'C',
-        title: 'whatever',
+        values: { title: 'whatever' },
       });
 
       expect(queryClient.getQueryData<ConversationWithoutRounds[]>(listKey)).toBe(before);
     });
 
-    it('is a no-op when the title is already up to date (preserves reference)', () => {
+    it('is a no-op when the props are already up to date (preserves reference)', () => {
       const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
       queryClient.setQueryData<ConversationWithoutRounds[]>(listKey, [
         buildRow('A', agentId, 'already-final'),
       ]);
       const before = queryClient.getQueryData<ConversationWithoutRounds[]>(listKey);
 
-      patchSidebarConversationListTitle({
+      patchConversationList({
         queryClient,
         agentId,
         conversationId: 'A',
-        title: 'already-final',
+        values: { title: 'already-final' },
       });
 
       expect(queryClient.getQueryData<ConversationWithoutRounds[]>(listKey)).toBe(before);
@@ -186,11 +186,11 @@ describe('conversation_sidebar_list_cache', () => {
 
     it('is a no-op when the list cache is empty / undefined', () => {
       const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-      patchSidebarConversationListTitle({
+      patchConversationList({
         queryClient,
         agentId,
         conversationId: 'A',
-        title: 'whatever',
+        values: { title: 'whatever' },
       });
       expect(queryClient.getQueryData<ConversationWithoutRounds[]>(listKey)).toBeUndefined();
     });

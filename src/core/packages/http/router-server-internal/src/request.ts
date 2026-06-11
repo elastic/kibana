@@ -36,6 +36,7 @@ import type {
   RouteSecurity,
   RequestTiming,
 } from '@kbn/core-http-server';
+import { type SpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import {
   ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
@@ -152,10 +153,12 @@ export class CoreKibanaRequest<
   public readonly protocol: HttpProtocol;
   /** {@inheritDoc KibanaRequest.authzResult} */
   public readonly authzResult?: Record<string, boolean>;
+  /** {@inheritDoc KibanaRequest.spaceId} */
+  public readonly spaceId: SpaceId;
+  /** {@inheritDoc KibanaRequest.basePath} */
+  public readonly basePath: string;
   /** {@inheritDoc KibanaRequest.timing} */
   public readonly serverTiming: RequestTiming;
-  /** {@inheritDoc KibanaRequest.spaceId} */
-  public readonly spaceId: string;
 
   /** @internal */
   protected readonly [requestSymbol]!: Request;
@@ -182,9 +185,12 @@ export class CoreKibanaRequest<
 
     this.id = appState?.requestId ?? uuidv4();
     this.uuid = appState?.requestUuid ?? uuidv4();
+    // Real Hapi requests carry spaceId on app state (set by Core's onRequest handler).
+    // FakeRawRequests carry it as a top-level field.
+    this.spaceId = (request as FakeRawRequest).spaceId ?? appState?.spaceId ?? DEFAULT_SPACE_ID;
+    this.basePath = appState?.basePath ?? '';
     this.rewrittenUrl = appState?.rewrittenUrl;
     this.authzResult = appState?.authzResult;
-    this.spaceId = appState?.spaceId ?? 'default';
     this.serverTiming = new RequestTimingImpl(appState?.timingState ?? { events: [] });
     this.injectHostInfo(request);
 
