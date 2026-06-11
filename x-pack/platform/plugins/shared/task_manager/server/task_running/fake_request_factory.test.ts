@@ -18,9 +18,7 @@ describe('buildTaskFakeRequest', () => {
   });
 
   it('returns undefined when no API key is provided', () => {
-    expect(
-      buildTaskFakeRequest({ basePathService, enrichFakeRequest: jest.fn() })
-    ).toBeUndefined();
+    expect(buildTaskFakeRequest({ basePathService, enrichFakeRequest: jest.fn() })).toBeUndefined();
   });
 
   it('builds a fake request with the ApiKey authorization header', () => {
