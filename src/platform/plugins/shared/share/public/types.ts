@@ -449,18 +449,18 @@ export interface ShowShareMenuOptions<
   onSave?: () => Promise<void>;
 }
 
-type ShareIntegrationOptions = Partial<ShowShareMenuOptions> &
-  Omit<
-    ShowShareMenuOptions,
-    | 'asExport'
-    | 'anchorElement'
-    | 'allowShortUrl'
-    | 'isDirty'
-    | 'sharingData'
-    | 'shareableUrl'
-    | 'shareableUrlForSavedObject'
-    | 'shareableUrlLocatorParams'
-  >;
+type ShareIntegrationOptions = Omit<
+  ShowShareMenuOptions,
+  | 'asExport'
+  | 'anchorElement'
+  | 'allowShortUrl'
+  | 'isDirty'
+  | 'sharingData'
+  | 'shareableUrl'
+  | 'shareableUrlForSavedObject'
+  | 'shareableUrlLocatorParams'
+  | 'sharingData'
+> & { sharingData: object };
 
 export type ConditionallyTypedShareOptions<
   ExportType extends ShareActionIntents = ShareActionIntents

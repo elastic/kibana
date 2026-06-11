@@ -79,7 +79,6 @@ export class ExportJSONAction implements Action<EmbeddableApiContext> {
     const exportDerivatives: ShareActionIntents[] = (
       shareService?.availableIntegrations(embeddable.type, 'exportDerivatives') ?? []
     ).filter((element) => element.shareType === 'integration' && element.id === 'exportJson');
-    console.log({ exportDerivatives });
     if (exportDerivatives.length < 1) return false;
 
     this.exportJsonIntent = exportDerivatives[0] as ShareIntegration;
@@ -88,7 +87,6 @@ export class ExportJSONAction implements Action<EmbeddableApiContext> {
 
   public async execute({ embeddable }: EmbeddableApiContext): Promise<void> {
     if (!isApiCompatible(embeddable) || !this.exportJsonIntent) throw new IncompatibleActionError();
-    console.log({ test: this.exportJsonIntent });
 
     const baseOptions = {
       objectType: embeddable.type,

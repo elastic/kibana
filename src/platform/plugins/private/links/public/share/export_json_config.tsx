@@ -37,7 +37,8 @@ export const exportJsonConfig: ExportShareParameters = {
       <ExportJsonFlyout<LinksState, LinksState>
         closeFlyout={closeFlyout}
         sanitizeState={async (state: LinksState) => {
-          return state;
+          console.log(state);
+          return { data: state, warnings: [] };
         }}
       />
     );

@@ -28,6 +28,7 @@ import { downloadFileAs, useShareTypeContext } from '@kbn/share-plugin/public';
 
 import { buildExportJsonFilename } from './export_json_share_utils';
 import { useSanitizedState } from './use_sanitized_state';
+import { ExportJsonPanel } from './export_json_panel';
 
 const flyoutBodyCss = css`
   ${euiFullHeight()}
@@ -107,7 +108,13 @@ export const ExportJsonFlyout = <State extends object, SanitizedState extends ob
 
       <EuiFlyoutBody data-test-subj="exportItemDetailsFlyoutBody" css={flyoutBodyCss}>
         <EuiFlexGroup css={{ height: '100%' }} direction="column">
-          // TODO
+          <ExportJsonPanel
+            status={status}
+            data={data}
+            warnings={warnings}
+            error={error}
+            onRetry={retry}
+          />
         </EuiFlexGroup>
       </EuiFlyoutBody>
 
