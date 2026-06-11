@@ -169,3 +169,10 @@ export type {
   DiamondHit,
   SearchByDiamondResult,
 } from './search_by_diamond';
+
+export { correlateThreat } from './correlate_threat';
+export type {
+  CorrelateThreatInput,
+  CorrelateThreatResult,
+  CorrelateThreatRetrievalOnlyResult,
+} from './correlate_threat';

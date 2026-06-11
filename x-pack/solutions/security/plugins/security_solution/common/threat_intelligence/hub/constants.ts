@@ -254,6 +254,19 @@ export const SEARCH_BY_DIAMOND_API_PATH =
   `${THREAT_INTELLIGENCE_API_BASE}/search_by_diamond` as const;
 
 /**
+ * Correlation pipeline — POST /api/threat_intelligence/correlate_threat.
+ *
+ * Accepts raw text or a stored report id, runs `search_by_anchors` +
+ * `search_by_diamond` in parallel, then pipes the merged candidate pool
+ * through keyword gap-fill → triage → synthesize to produce a structured
+ * `CorrelationFindings` artifact.
+ *
+ * Gated on `.correlate` privilege (see `THREAT_INTELLIGENCE_API_PRIVILEGES.correlate`).
+ */
+export const CORRELATE_THREAT_API_PATH =
+  `${THREAT_INTELLIGENCE_API_BASE}/correlate_threat` as const;
+
+/**
  * Stage-2 taxonomy enrichment route — POST /api/threat_intelligence/enrich_taxonomy.
  * Invoked by `nl_extraction_behavioral` for every pending report. Produces
  * categories / regions / relevance / detection_actionability / diamond_suitable.
