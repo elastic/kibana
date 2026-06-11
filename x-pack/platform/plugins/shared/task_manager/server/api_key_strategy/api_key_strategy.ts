@@ -27,6 +27,11 @@ export interface ApiKeySOFields {
 export interface GrantApiKeysOpts {
   /** When true, grant only the Elasticsearch API key (skip UIAM). */
   onEsKey?: boolean;
+  /**
+   * When true, clone the caller's API key credentials instead of reusing them directly.
+   * See {@link ApiKeyOptions.cloneApiKey}.
+   */
+  cloneApiKey?: boolean;
 }
 
 export interface InvalidationTarget {

@@ -20,6 +20,7 @@ import { getErrorMessage, parseError } from '../../streams/errors/parse_error';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
 import { resolveConnectorForSignificantEventsDiscovery } from '../../../routes/utils/resolve_connector_for_feature';
 import { triggerMemorySynthesisWorkflow } from '../../memory/trigger_memory_synthesis_workflow';
+import { resolveAlertsSource } from '../../../routes/utils/resolve_alerts_source';
 
 export interface InsightsDiscoveryTaskResult {
   insights: Insight[];
@@ -59,13 +60,19 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
                 inferenceClient,
                 getQueryClient,
                 insightClient,
+                getAlertingV2RulesClient,
+                uiSettingsClient,
               } = await taskContext.getScopedClients({
                 request: runContext.fakeRequest,
               });
 
-              const queryClient = await getQueryClient();
-
               const taskLogger = taskContext.logger.get('insights_discovery');
+              const queryClient = await getQueryClient();
+              const alertsSource = await resolveAlertsSource({
+                uiSettingsClient,
+                alertingV2RulesClient: await getAlertingV2RulesClient(),
+                logger: taskLogger,
+              });
               const connectorId =
                 connectorIdOverride ??
                 (await resolveConnectorForSignificantEventsDiscovery({
@@ -88,6 +95,7 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
                   signal: runContext.abortController.signal,
                   logger: taskLogger,
                   streamNames,
+                  alertsSource,
                 });
 
                 taskContext.telemetry.trackInsightsGenerated({

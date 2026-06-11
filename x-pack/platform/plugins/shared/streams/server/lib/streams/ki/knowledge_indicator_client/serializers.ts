@@ -6,7 +6,7 @@
  */
 
 import type { Feature, QueryLink, StreamQuery } from '@kbn/streams-schema';
-import { QUERY_TYPE_STATS, deriveQueryType } from '@kbn/streams-schema';
+import { deriveQueryType } from '@kbn/streams-schema';
 import type {
   StoredFeatureKnowledgeIndicator,
   StoredKnowledgeIndicator,
@@ -80,8 +80,7 @@ export function toStoredQuery(
 ): StoredQueryKnowledgeIndicator {
   const embedding = buildSearchEmbeddingQuery(query, streamName);
   const derivedType = deriveQueryType(query.esql.query);
-  // STATS queries are never rule-backed.
-  const ruleBacked = derivedType === QUERY_TYPE_STATS ? false : Boolean(query.rule_backed);
+  const ruleBacked = Boolean(query.rule_backed);
   const ruleId = query.rule_id ?? computeRuleId(streamName, query.id, query.esql.query);
   const timestamp = new Date().toISOString();
   return {
@@ -153,7 +152,7 @@ export function fromStoredQuery(doc: StoredQueryKnowledgeIndicator): QueryLink {
     severity_score,
     features,
   } = doc.query;
-  const ruleBacked = type === QUERY_TYPE_STATS ? false : rule_backed;
+  const ruleBacked = rule_backed;
 
   return {
     'asset.uuid': doc.id,

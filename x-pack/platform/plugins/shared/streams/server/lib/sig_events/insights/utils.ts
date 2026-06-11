@@ -17,7 +17,14 @@ import { parseError } from '../../streams/errors/parse_error';
 import { SecurityError } from '../../streams/errors/security_error';
 import { getColumnIndex, getSourceColumnIndex, toEsqlRequest } from '../../streams/helpers/esql';
 import { ALERTS_DATA_STREAM } from '../alerts_data_stream';
+import {
+  type AlertsSource,
+  V1_ALERTS_SOURCE,
+  V2_ALERTS_SOURCE,
+} from '../read_significant_events_from_alerts_indices';
 import { SUBMIT_INSIGHTS_TOOL_NAME, parseInsightsWithErrors } from './client/insight_tool';
+
+const RULE_EVENTS_DATA_STREAM = '.rule-events';
 
 export interface QueryData {
   title: string;
@@ -63,42 +70,70 @@ export function extractInsightsFromResponse(
 export async function collectQueryData({
   query,
   esClient,
+  alertsSource = V1_ALERTS_SOURCE,
 }: {
   query: Query;
   esClient: ElasticsearchClient;
+  alertsSource?: AlertsSource;
 }): Promise<QueryData | undefined> {
   const { rule_id: ruleId } = query;
 
   const now = new Date();
   const nowMinus15m = new Date(now.getTime() - CURRENT_WINDOW_MINUTES * 60 * 1000);
-  const timestampCol = esql.col('@timestamp');
-  const ruleUuidCol = esql.col(ALERT_RULE_UUID.split('.'));
   const fromLit = esql.str(nowMinus15m.toISOString());
   const toLit = esql.str(now.toISOString());
-  const ruleIdLit = esql.str(ruleId);
-  const whereCondition = esql.exp`${timestampCol} >= ${fromLit} AND ${timestampCol} <= ${toLit} AND ${ruleUuidCol} == ${ruleIdLit}`;
+  const timestampCol = esql.col('@timestamp');
 
   let q1Response: ESQLSearchResponse;
   let q2Response: ESQLSearchResponse;
   try {
-    [q1Response, q2Response] = await Promise.all([
-      esClient.esql.query({
-        ...toEsqlRequest(
-          esql.from([ALERTS_DATA_STREAM], ['_source']).where`${whereCondition}`.limit(
-            SAMPLE_EVENTS_COUNT
-          )
-        ),
-        drop_null_columns: true,
-        format: 'json',
-      }) as unknown as ESQLSearchResponse,
-      esClient.esql.query({
-        ...toEsqlRequest(
-          esql.from([ALERTS_DATA_STREAM]).where`${whereCondition}`
-            .pipe`STATS currentCount = COUNT(*)`
-        ),
-        format: 'json',
-      }) as unknown as ESQLSearchResponse,
-    ]);
+    if (alertsSource === V2_ALERTS_SOURCE) {
+      const ruleIdCol = esql.col(['rule', 'id']);
+      const ruleIdLit = esql.str(ruleId);
+      const whereCondition = esql.exp`${timestampCol} >= ${fromLit} AND ${timestampCol} <= ${toLit} AND ${ruleIdCol} == ${ruleIdLit} AND type == ${esql.str(
+        'signal'
+      )}`;
+
+      [q1Response, q2Response] = await Promise.all([
+        esClient.esql.query({
+          ...toEsqlRequest(
+            esql.from([RULE_EVENTS_DATA_STREAM]).where`${whereCondition}`.limit(SAMPLE_EVENTS_COUNT)
+          ),
+          drop_null_columns: true,
+          format: 'json',
+        }) as unknown as ESQLSearchResponse,
+        esClient.esql.query({
+          ...toEsqlRequest(
+            esql.from([RULE_EVENTS_DATA_STREAM]).where`${whereCondition}`
+              .pipe`STATS currentCount = COUNT_DISTINCT(group_hash)`
+          ),
+          format: 'json',
+        }) as unknown as ESQLSearchResponse,
+      ]);
+    } else {
+      const ruleUuidCol = esql.col(ALERT_RULE_UUID.split('.'));
+      const ruleIdLit = esql.str(ruleId);
+      const whereCondition = esql.exp`${timestampCol} >= ${fromLit} AND ${timestampCol} <= ${toLit} AND ${ruleUuidCol} == ${ruleIdLit}`;
+
+      [q1Response, q2Response] = await Promise.all([
+        esClient.esql.query({
+          ...toEsqlRequest(
+            esql.from([ALERTS_DATA_STREAM], ['_source']).where`${whereCondition}`.limit(
+              SAMPLE_EVENTS_COUNT
+            )
+          ),
+          drop_null_columns: true,
+          format: 'json',
+        }) as unknown as ESQLSearchResponse,
+        esClient.esql.query({
+          ...toEsqlRequest(
+            esql.from([ALERTS_DATA_STREAM]).where`${whereCondition}`
+              .pipe`STATS currentCount = COUNT(*)`
+          ),
+          format: 'json',
+        }) as unknown as ESQLSearchResponse,
+      ]);
+    }
   } catch (err) {
     const { type, message } = parseError(err);
     if (type === 'security_exception') {
@@ -124,8 +159,17 @@ export async function collectQueryData({
     return undefined;
   }
 
-  const sourceIdx = getSourceColumnIndex(q1Response);
   const sampleEvents = q1Response.values.map((row) => {
+    if (alertsSource === V2_ALERTS_SOURCE) {
+      const dataIdx = getColumnIndex(q1Response, 'data');
+      const data = dataIdx >= 0 ? (row[dataIdx] as Record<string, unknown>) ?? {} : {};
+      const stringified = JSON.stringify(data);
+      return stringified.length > SAMPLE_EVENT_MAX_CHARS
+        ? `${stringified.slice(0, SAMPLE_EVENT_MAX_CHARS)}…(truncated)`
+        : stringified;
+    }
+
+    const sourceIdx = getSourceColumnIndex(q1Response);
     const source = sourceIdx >= 0 ? (row[sourceIdx] as Record<string, unknown>) ?? {} : {};
     const originalSource = (source.original_source as Record<string, unknown>) ?? {};
     const stringified = JSON.stringify(omit(originalSource, '_id'));

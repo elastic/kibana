@@ -10,7 +10,7 @@
 import { isBoom } from '@hapi/boom';
 import type { Logger } from '@kbn/core/server';
 import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
-import { stripMetadata } from '@kbn/streams-schema';
+import { QUERY_TYPE_STATS, deriveQueryType, stripMetadata } from '@kbn/streams-schema';
 import { MATCH_LOOKBACK_MINUTES } from '../../../../sig_events/rules/esql/common';
 import {
   STREAMS_RULE_CONSUMER,
@@ -131,7 +131,16 @@ function toV2Tags(v1Tags: string[]): string[] {
  */
 const V2_MATCH_GROUPING_FIELDS = ['_id'] as const;
 
+/** STATS aggregation rows are keyed by time bucket in flattened `data.bucket`. */
+const V2_STATS_GROUPING_FIELDS = ['data.bucket'] as const;
+
 const V2_QUERY_METADATA_TO_STRIP = ['_source'];
+
+function resolveV2GroupingFields(esqlQuery: string): readonly string[] {
+  return deriveQueryType(esqlQuery) === QUERY_TYPE_STATS
+    ? V2_STATS_GROUPING_FIELDS
+    : V2_MATCH_GROUPING_FIELDS;
+}
 
 /**
  * `body.enabled` is intentionally not forwarded: the v2 create schema doesn't accept it
@@ -139,6 +148,8 @@ const V2_QUERY_METADATA_TO_STRIP = ['_source'];
  * disabled rule must call `disableRule` after creation.
  */
 function toV2CreateBody(body: CreateRuleBody) {
+  const esqlQuery = body.params.query;
+  const isStats = deriveQueryType(esqlQuery) === QUERY_TYPE_STATS;
   return {
     kind: 'signal' as const,
     metadata: {
@@ -147,14 +158,18 @@ function toV2CreateBody(body: CreateRuleBody) {
     },
     time_field: body.params.timestampField,
     schedule: { every: body.schedule.interval, lookback: V2_MATCH_LOOKBACK },
-    grouping: { fields: [...V2_MATCH_GROUPING_FIELDS] },
+    grouping: { fields: [...resolveV2GroupingFields(esqlQuery)] },
     evaluation: {
-      query: { base: stripMetadata(body.params.query, V2_QUERY_METADATA_TO_STRIP) },
+      query: {
+        base: isStats ? esqlQuery : stripMetadata(esqlQuery, V2_QUERY_METADATA_TO_STRIP),
+      },
     },
   };
 }
 
 function toV2UpdateBody(body: UpdateRuleBody) {
+  const esqlQuery = body.params.query;
+  const isStats = deriveQueryType(esqlQuery) === QUERY_TYPE_STATS;
   return {
     metadata: {
       name: body.name,
@@ -162,9 +177,11 @@ function toV2UpdateBody(body: UpdateRuleBody) {
     },
     time_field: body.params.timestampField,
     schedule: { every: body.schedule.interval, lookback: V2_MATCH_LOOKBACK },
-    grouping: { fields: [...V2_MATCH_GROUPING_FIELDS] },
+    grouping: { fields: [...resolveV2GroupingFields(esqlQuery)] },
     evaluation: {
-      query: { base: stripMetadata(body.params.query, V2_QUERY_METADATA_TO_STRIP) },
+      query: {
+        base: isStats ? esqlQuery : stripMetadata(esqlQuery, V2_QUERY_METADATA_TO_STRIP),
+      },
     },
   };
 }

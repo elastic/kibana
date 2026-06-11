@@ -88,6 +88,7 @@ export const AGENT_BUILDER_BUILTIN_AGENTS = [
   `${internalNamespaces.security}.agent`,
   `${internalNamespaces.streams}.significant-events.discovery.investigator`,
   `${internalNamespaces.streams}.significant-events.discovery.judge`,
+  `${internalNamespaces.streams}.significant-events.rule-on-rule.planner`,
 ] as const;
 
 export type AgentBuilderBuiltinAgent = (typeof AGENT_BUILDER_BUILTIN_AGENTS)[number];

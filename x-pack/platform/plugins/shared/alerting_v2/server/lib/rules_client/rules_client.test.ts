@@ -17,6 +17,7 @@ import type { ActionPolicyClient } from '../action_policy_client';
 import { createRulesSavedObjectService } from '../services/rules_saved_object_service/rules_saved_object_service.mock';
 import type { UserService } from '../services/user_service/user_service';
 import { createUserService } from '../services/user_service/user_service.mock';
+import type { QueryServiceContract } from '../services/query_service/query_service';
 import { createRuleSoAttributes } from '../test_utils';
 import type { RuleEventPublisher } from '../events/rule_event_publisher/rule_event_publisher';
 import { RulesClient } from './rules_client';
@@ -114,6 +115,10 @@ describe('RulesClient', () => {
     emitAfterRuleUpdate: jest.fn(),
   } as unknown as jest.Mocked<RuleEventPublisher>;
 
+  const queryService = {
+    validateQueryExecutable: jest.fn().mockResolvedValue(undefined),
+  } as unknown as jest.Mocked<QueryServiceContract>;
+
   function createClient() {
     const actionPolicyClient = {
       deleteActionPoliciesByFilter: jest
@@ -128,7 +133,8 @@ describe('RulesClient', () => {
       userService,
       actionPolicyClient,
       'space-1',
-      ruleEventPublisher
+      ruleEventPublisher,
+      queryService
     );
   }
 
@@ -268,6 +274,36 @@ describe('RulesClient', () => {
       ).rejects.toMatchObject({
         output: { statusCode: 400 },
       });
+
+      expect(queryService.validateQueryExecutable).not.toHaveBeenCalled();
+    });
+
+    it('throws 400 when ES|QL fails Arrow execution validation', async () => {
+      const client = createClient();
+      queryService.validateQueryExecutable.mockRejectedValueOnce(
+        new Error(
+          'illegal_argument_exception: ES|QL type [flattened] is not supported by the Arrow format'
+        )
+      );
+
+      await expect(
+        client.createRule({
+          data: baseCreateData,
+          options: { id: 'rule-id-arrow' },
+        })
+      ).rejects.toMatchObject({
+        output: {
+          statusCode: 400,
+          payload: {
+            message: expect.stringContaining('Invalid ES|QL query'),
+          },
+        },
+      });
+
+      expect(queryService.validateQueryExecutable).toHaveBeenCalledWith({
+        query: baseCreateData.evaluation.query.base,
+      });
+      expect(mockSavedObjectsClient.create).not.toHaveBeenCalled();
     });
   });
 
@@ -1766,7 +1802,7 @@ describe('RulesClient', () => {
             enabled: true,
           }),
         ],
-        expect.objectContaining({ request })
+        expect.objectContaining({ request, cloneApiKey: true })
       );
 
       expect(res.rules).toHaveLength(1);

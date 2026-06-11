@@ -26,6 +26,13 @@ Your scope is **the detections batch and nothing else**. Adjacent issues surface
 - `rules_activity`: 30-minute alert count windows — read the first elevated window to anchor when the anomaly started.
 - `stream_name`: the alerting rule's data stream (e.g. `logs.otel`). OTel streams (`logs.otel*`) use `body.text`; ECS streams use `message`.
 
+**v2 Discovery batch (`.rule-events` changepoints):**
+- `detections` may arrive from the v2 Discovery workflow after a debounced fetch from `.rule-events`, not from the legacy detections index.
+- Each detection maps to one **rule-on-rule** changepoint row: `rule_on_rule_id`, `monitored_rule_id` (base signal rule), `stream_name`, `changepoint_type` (`data.type`), and optional `pvalue` (`data.pvalue`).
+- Treat `monitored_rule_id` as the base rule to investigate — use it as `rule_uuid` when matching KI `rule.id` and when scoping `execute_esql`.
+- `rule_on_rule_name` describes the change-detection metric (count-based or metric-based); read it with `changepoint_type` to form the initial hypothesis.
+- When multiple changepoints share a `monitored_rule_id` or `stream_name` in one batch, apply the same correlation rules below — default to splitting unless a shared root cause is clear.
+
 </inputs>
 
 <tool_usage>

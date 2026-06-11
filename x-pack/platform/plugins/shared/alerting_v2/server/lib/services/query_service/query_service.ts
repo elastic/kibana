@@ -13,6 +13,7 @@ import type { LoggerServiceContract } from '../logger_service/logger_service';
 import { LoggerServiceToken } from '../logger_service/logger_service';
 import type { ExecutionContext } from '../../execution_context';
 import { createExecutionContext, isRuleExecutionCancellationError } from '../../execution_context';
+import { validateEsqlQueryExecutable } from './validate_esql_query_executable';
 
 export interface ExecuteQueryParams {
   query: EsqlQueryRequest['query'];
@@ -21,10 +22,15 @@ export interface ExecuteQueryParams {
   abortSignal?: AbortSignal;
 }
 
+export interface ValidateQueryParams {
+  query: EsqlQueryRequest['query'];
+}
+
 export interface QueryServiceContract {
   executeQuery(params: ExecuteQueryParams): Promise<EsqlQueryResponse>;
   executeQueryRows<T = Record<string, unknown>>(params: ExecuteQueryParams): Promise<T[]>;
   executeQueryStream<T = Record<string, unknown>>(params: ExecuteQueryParams): AsyncIterable<T[]>;
+  validateQueryExecutable(params: ValidateQueryParams): Promise<void>;
 }
 
 @injectable()
@@ -74,6 +80,24 @@ export class QueryService implements QueryServiceContract {
   async executeQueryRows<T = Record<string, unknown>>(params: ExecuteQueryParams): Promise<T[]> {
     const response = await this.executeQuery(params);
     return this.toRows<T>(response);
+  }
+
+  async validateQueryExecutable({ query }: ValidateQueryParams): Promise<void> {
+    this.logger.debug({
+      message: () => `QueryService: Validating ES|QL query for rule execution`,
+    });
+
+    try {
+      await validateEsqlQueryExecutable(this.esClient, query);
+    } catch (error) {
+      this.logger.error({
+        error,
+        code: 'ESQL_QUERY_VALIDATION_ERROR',
+        type: 'QueryServiceError',
+      });
+
+      throw error;
+    }
   }
 
   async *executeQueryStream<T = Record<string, unknown>>({

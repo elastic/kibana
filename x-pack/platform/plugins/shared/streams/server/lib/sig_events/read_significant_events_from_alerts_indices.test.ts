@@ -11,7 +11,11 @@ import type { IScopedClusterClient } from '@kbn/core/server';
 import type { QueryLink } from '@kbn/streams-schema';
 import { SecurityError } from '../streams/errors/security_error';
 import type { QueryClient } from '../streams/assets/query/query_client';
-import { readSignificantEventsFromAlertsIndices } from './read_significant_events_from_alerts_indices';
+import {
+  readSignificantEventsFromAlertsIndices,
+  V1_ALERTS_SOURCE,
+  V2_ALERTS_SOURCE,
+} from './read_significant_events_from_alerts_indices';
 
 const makeQueryLink = (overrides: Partial<QueryLink> = {}): QueryLink => ({
   'asset.uuid': `uuid-${overrides['asset.id'] ?? 'q1'}`,
@@ -62,13 +66,16 @@ const makeEsError = (status: number, type: string, reason: string) =>
     body: { error: { type, reason } },
   } as TransportResult);
 
-const makeStatsResponse = (rows: Array<{ rule_uuid: string; bucket: string; count: number }>) => ({
+const makeStatsResponse = (
+  rows: Array<{ rule_id: string; bucket: string; count: number }>,
+  ruleIdColumn: 'rule_id' | 'rule_uuid' = 'rule_id'
+) => ({
   columns: [
     { name: 'count', type: 'long' as const },
-    { name: 'rule_uuid', type: 'keyword' as const },
+    { name: ruleIdColumn, type: 'keyword' as const },
     { name: 'bucket', type: 'date' as const },
   ],
-  values: rows.map((r) => [r.count, r.rule_uuid, r.bucket]),
+  values: rows.map((r) => [r.count, r.rule_id, r.bucket]),
   took: 0,
 });
 
@@ -76,36 +83,43 @@ const FROM = new Date('2026-01-01T00:00:00.000Z');
 const TO = new Date('2026-01-01T00:05:00.000Z'); // 5 minutes => 6 buckets at 1m incl. boundaries
 const BUCKET = '1m';
 
+const defaultV2Params = {
+  from: FROM,
+  to: TO,
+  bucketSize: BUCKET,
+  alertsSource: V2_ALERTS_SOURCE,
+};
+
 describe('readSignificantEventsFromAlertsIndices', () => {
   it('returns an empty response and skips ES|QL when there are no query links', async () => {
     const { queryClient, scopedClusterClient, esqlQuery } = createMocks([]);
 
-    const result = await readSignificantEventsFromAlertsIndices(
-      { from: FROM, to: TO, bucketSize: BUCKET },
-      { queryClient, scopedClusterClient }
-    );
+    const result = await readSignificantEventsFromAlertsIndices(defaultV2Params, {
+      queryClient,
+      scopedClusterClient,
+    });
 
     expect(result).toEqual({ significant_events: [], aggregated_occurrences: [] });
     expect(esqlQuery).not.toHaveBeenCalled();
   });
 
-  it('groups ES|QL rows into per-rule occurrences with gap filling', async () => {
+  it('groups ES|QL rows into per-rule occurrences with gap filling (v2)', async () => {
     const linkA = makeQueryLink({ 'asset.id': 'qa', rule_id: 'rule-a' });
     const linkB = makeQueryLink({ 'asset.id': 'qb', rule_id: 'rule-b' });
     const { queryClient, scopedClusterClient, esqlQuery } = createMocks([linkA, linkB]);
 
     esqlQuery.mockResolvedValueOnce(
       makeStatsResponse([
-        { rule_uuid: 'rule-a', bucket: '2026-01-01T00:00:00.000Z', count: 2 },
-        { rule_uuid: 'rule-a', bucket: '2026-01-01T00:02:00.000Z', count: 1 },
-        { rule_uuid: 'rule-b', bucket: '2026-01-01T00:04:00.000Z', count: 3 },
+        { rule_id: 'rule-a', bucket: '2026-01-01T00:00:00.000Z', count: 2 },
+        { rule_id: 'rule-a', bucket: '2026-01-01T00:02:00.000Z', count: 1 },
+        { rule_id: 'rule-b', bucket: '2026-01-01T00:04:00.000Z', count: 3 },
       ])
     );
 
-    const result = await readSignificantEventsFromAlertsIndices(
-      { from: FROM, to: TO, bucketSize: BUCKET },
-      { queryClient, scopedClusterClient }
-    );
+    const result = await readSignificantEventsFromAlertsIndices(defaultV2Params, {
+      queryClient,
+      scopedClusterClient,
+    });
 
     const ruleA = result.significant_events.find(
       (e) => e.stream_name === 'logs.test' && e.id === 'qa'
@@ -125,13 +139,13 @@ describe('readSignificantEventsFromAlertsIndices', () => {
     const { queryClient, scopedClusterClient, esqlQuery } = createMocks([linkFiring, linkSilent]);
 
     esqlQuery.mockResolvedValueOnce(
-      makeStatsResponse([{ rule_uuid: 'rule-a', bucket: '2026-01-01T00:01:00.000Z', count: 1 }])
+      makeStatsResponse([{ rule_id: 'rule-a', bucket: '2026-01-01T00:01:00.000Z', count: 1 }])
     );
 
-    const result = await readSignificantEventsFromAlertsIndices(
-      { from: FROM, to: TO, bucketSize: BUCKET },
-      { queryClient, scopedClusterClient }
-    );
+    const result = await readSignificantEventsFromAlertsIndices(defaultV2Params, {
+      queryClient,
+      scopedClusterClient,
+    });
 
     const ruleA = result.significant_events.find((e) => e.id === 'qa')!;
     const ruleB = result.significant_events.find((e) => e.id === 'qb')!;
@@ -140,39 +154,39 @@ describe('readSignificantEventsFromAlertsIndices', () => {
     expect(ruleB.occurrences).toEqual([]);
   });
 
-  it('produces aggregated_occurrences summing per-bucket counts across all rules', async () => {
+  it('produces aggregated_occurrences summing per-bucket counts across all rules (v2)', async () => {
     const linkA = makeQueryLink({ 'asset.id': 'qa', rule_id: 'rule-a' });
     const linkB = makeQueryLink({ 'asset.id': 'qb', rule_id: 'rule-b' });
     const { queryClient, scopedClusterClient, esqlQuery } = createMocks([linkA, linkB]);
 
     esqlQuery.mockResolvedValueOnce(
       makeStatsResponse([
-        { rule_uuid: 'rule-a', bucket: '2026-01-01T00:00:00.000Z', count: 2 },
-        { rule_uuid: 'rule-b', bucket: '2026-01-01T00:00:00.000Z', count: 3 },
-        { rule_uuid: 'rule-a', bucket: '2026-01-01T00:02:00.000Z', count: 1 },
+        { rule_id: 'rule-a', bucket: '2026-01-01T00:00:00.000Z', count: 2 },
+        { rule_id: 'rule-b', bucket: '2026-01-01T00:00:00.000Z', count: 3 },
+        { rule_id: 'rule-a', bucket: '2026-01-01T00:02:00.000Z', count: 1 },
       ])
     );
 
-    const result = await readSignificantEventsFromAlertsIndices(
-      { from: FROM, to: TO, bucketSize: BUCKET },
-      { queryClient, scopedClusterClient }
-    );
+    const result = await readSignificantEventsFromAlertsIndices(defaultV2Params, {
+      queryClient,
+      scopedClusterClient,
+    });
 
     expect(result.aggregated_occurrences.map((b) => b.count)).toEqual([5, 0, 1, 0, 0, 0]);
   });
 
-  it('returns an empty response when the alerts index is missing (verification_exception)', async () => {
+  it('returns an empty response when the v2 rule-events index is missing', async () => {
     const link = makeQueryLink({ 'asset.id': 'qa', rule_id: 'rule-a' });
     const { queryClient, scopedClusterClient, esqlQuery } = createMocks([link]);
 
     esqlQuery.mockRejectedValueOnce(
-      makeEsError(400, 'verification_exception', 'Unknown index [.alerts-streams.alerts-default]')
+      makeEsError(400, 'verification_exception', 'Unknown index [.rule-events]')
     );
 
-    const result = await readSignificantEventsFromAlertsIndices(
-      { from: FROM, to: TO, bucketSize: BUCKET },
-      { queryClient, scopedClusterClient }
-    );
+    const result = await readSignificantEventsFromAlertsIndices(defaultV2Params, {
+      queryClient,
+      scopedClusterClient,
+    });
 
     expect(result.significant_events).toHaveLength(1);
     expect(result.significant_events[0].occurrences).toEqual([]);
@@ -190,10 +204,10 @@ describe('readSignificantEventsFromAlertsIndices', () => {
     );
 
     await expect(
-      readSignificantEventsFromAlertsIndices(
-        { from: FROM, to: TO, bucketSize: BUCKET },
-        { queryClient, scopedClusterClient }
-      )
+      readSignificantEventsFromAlertsIndices(defaultV2Params, {
+        queryClient,
+        scopedClusterClient,
+      })
     ).rejects.toThrow(/verification_exception|Unknown column/);
   });
 
@@ -205,10 +219,10 @@ describe('readSignificantEventsFromAlertsIndices', () => {
     esqlQuery.mockRejectedValueOnce(cause);
 
     await expect(
-      readSignificantEventsFromAlertsIndices(
-        { from: FROM, to: TO, bucketSize: BUCKET },
-        { queryClient, scopedClusterClient }
-      )
+      readSignificantEventsFromAlertsIndices(defaultV2Params, {
+        queryClient,
+        scopedClusterClient,
+      })
     ).rejects.toBeInstanceOf(SecurityError);
   });
 
@@ -220,10 +234,10 @@ describe('readSignificantEventsFromAlertsIndices', () => {
     esqlQuery.mockRejectedValueOnce(boom);
 
     await expect(
-      readSignificantEventsFromAlertsIndices(
-        { from: FROM, to: TO, bucketSize: BUCKET },
-        { queryClient, scopedClusterClient }
-      )
+      readSignificantEventsFromAlertsIndices(defaultV2Params, {
+        queryClient,
+        scopedClusterClient,
+      })
     ).rejects.toThrow('cluster meltdown');
   });
 
@@ -231,7 +245,7 @@ describe('readSignificantEventsFromAlertsIndices', () => {
     const link = makeQueryLink({ 'asset.id': 'qa', rule_id: 'rule-a' });
     const { queryClient, scopedClusterClient, esqlQuery } = createMocks([link]);
 
-    // Simulate a future schema regression where `rule_uuid` is renamed/missing.
+    // Simulate a future schema regression where `rule_id` is renamed/missing.
     esqlQuery.mockResolvedValueOnce({
       columns: [
         { name: 'count', type: 'long' as const },
@@ -241,30 +255,93 @@ describe('readSignificantEventsFromAlertsIndices', () => {
       took: 0,
     });
 
-    const result = await readSignificantEventsFromAlertsIndices(
-      { from: FROM, to: TO, bucketSize: BUCKET },
-      { queryClient, scopedClusterClient }
-    );
+    const result = await readSignificantEventsFromAlertsIndices(defaultV2Params, {
+      queryClient,
+      scopedClusterClient,
+    });
 
     expect(result.significant_events).toHaveLength(1);
     expect(result.significant_events[0].occurrences).toEqual([]);
     expect(result.aggregated_occurrences).toEqual([]);
   });
 
-  it('converts route-style bucket sizes ("1m") into ES|QL units ("minutes") in the rendered query', async () => {
+  it('converts route-style bucket sizes ("1m") into ES|QL units ("minutes") in the v2 rendered query', async () => {
     const link = makeQueryLink({ 'asset.id': 'qa', rule_id: 'rule-a' });
     const { queryClient, scopedClusterClient, esqlQuery } = createMocks([link]);
 
     esqlQuery.mockResolvedValueOnce(makeStatsResponse([]));
 
     await readSignificantEventsFromAlertsIndices(
-      { from: FROM, to: TO, bucketSize: '1m' },
+      { ...defaultV2Params, bucketSize: '1m' },
       { queryClient, scopedClusterClient }
     );
 
     expect(esqlQuery).toHaveBeenCalledTimes(1);
     const calledWith = esqlQuery.mock.calls[0][0] as { query: string };
     expect(calledWith.query).toEqual(expect.stringContaining('minutes'));
+    expect(calledWith.query).toEqual(expect.stringContaining('.rule-events'));
     expect(calledWith.query).not.toMatch(/BUCKET\([^)]*1m\)/);
+  });
+
+  describe('v1 alerts source', () => {
+    const defaultV1Params = {
+      from: FROM,
+      to: TO,
+      bucketSize: BUCKET,
+      alertsSource: V1_ALERTS_SOURCE,
+    };
+
+    it('queries .alerts-streams.alerts-default with kibana.alert.rule.uuid', async () => {
+      const link = makeQueryLink({ 'asset.id': 'qa', rule_id: 'rule-a' });
+      const { queryClient, scopedClusterClient, esqlQuery } = createMocks([link]);
+
+      esqlQuery.mockResolvedValueOnce(
+        makeStatsResponse(
+          [{ rule_id: 'rule-a', bucket: '2026-01-01T00:00:00.000Z', count: 1 }],
+          'rule_uuid'
+        )
+      );
+
+      await readSignificantEventsFromAlertsIndices(defaultV1Params, {
+        queryClient,
+        scopedClusterClient,
+      });
+
+      const calledWith = esqlQuery.mock.calls[0][0] as { query: string };
+      expect(calledWith.query).toEqual(expect.stringContaining('.alerts-streams.alerts-default'));
+      expect(calledWith.query).toEqual(expect.stringContaining('COUNT(*)'));
+      expect(calledWith.query).not.toEqual(expect.stringContaining('COUNT_DISTINCT'));
+    });
+
+    it('returns an empty response when the v1 alerts index is missing', async () => {
+      const link = makeQueryLink({ 'asset.id': 'qa', rule_id: 'rule-a' });
+      const { queryClient, scopedClusterClient, esqlQuery } = createMocks([link]);
+
+      esqlQuery.mockRejectedValueOnce(
+        makeEsError(400, 'verification_exception', 'Unknown index [.alerts-streams.alerts-default]')
+      );
+
+      const result = await readSignificantEventsFromAlertsIndices(defaultV1Params, {
+        queryClient,
+        scopedClusterClient,
+      });
+
+      expect(result.significant_events[0].occurrences).toEqual([]);
+    });
+
+    it('defaults to v1 when alertsSource is omitted', async () => {
+      const link = makeQueryLink({ 'asset.id': 'qa', rule_id: 'rule-a' });
+      const { queryClient, scopedClusterClient, esqlQuery } = createMocks([link]);
+
+      esqlQuery.mockResolvedValueOnce(makeStatsResponse([]));
+
+      await readSignificantEventsFromAlertsIndices(
+        { from: FROM, to: TO, bucketSize: BUCKET },
+        { queryClient, scopedClusterClient }
+      );
+
+      const calledWith = esqlQuery.mock.calls[0][0] as { query: string };
+      expect(calledWith.query).toEqual(expect.stringContaining('.alerts-streams.alerts-default'));
+    });
   });
 });

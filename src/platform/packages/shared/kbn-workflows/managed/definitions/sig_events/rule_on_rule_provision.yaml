@@ -1,0 +1,80 @@
+version: "1"
+name: ".significant-events-rule-on-rule-provision"
+description: "Provisions rule-on-rule CHANGE_POINT signal rules when base signal rules are created or updated."
+enabled: true
+tags:
+  - observability
+  - streams
+  - significant-events
+  - rule-on-rule
+settings:
+  # Single-rule triggers today (LLM planner + provision). Bump if bulk create events are added;
+  # we may instead keep one-rule-per-trigger to avoid scaling timeout with batch size.
+  timeout: "2m"
+  # Concurrency is keyed per base rule so many rules promoted in a burst can provision in
+  # parallel. Overlapping triggers for the same rule cancel the in-flight run and start fresh
+  # so create+update bursts still end on the latest rule definition.
+  # TODO: Once https://github.com/elastic/kibana/pull/268596 lands, switch strategy to `queue`
+  # (with a suitable queue-size) so bursts are FIFO-queued instead of cancelled or dropped.
+  concurrency:
+    key: "sigevents-rule-on-rule-provision-{{ event.rules[0].ruleId }}-{{ event.rules[0].spaceId }}"
+    strategy: cancel-in-progress
+    max: 1
+triggers:
+  - type: alerting.ruleCreated
+    on:
+      condition: 'event.rules.kind: "signal" AND NOT event.rules.tags: "sigevents:rule-on-rule"'
+  - type: alerting.ruleUpdated
+    on:
+      condition: 'event.rules.kind: "signal" AND NOT event.rules.tags: "sigevents:rule-on-rule"'
+steps:
+  - name: provision_rule_on_rule_foreach
+    type: foreach
+    foreach: "{{ event.rules }}"
+    steps:
+      - name: plan_rule_on_rule
+        type: ai.agent
+        agent-id: "platform.streams.significant-events.rule-on-rule.planner"
+        connector-id: ".openai-gpt-5.2-chat_completion"
+        create-conversation: true
+        with:
+          message: |
+            Plan rule-on-rule ES|QL for this base signal rule:
+
+            {{ foreach.item | json }}
+          schema:
+            type: object
+            properties:
+              path:
+                type: string
+                enum: [count-based, metric-based, unsupported]
+              rules:
+                type: array
+                minItems: 1
+                items:
+                  type: object
+                  properties:
+                    esql:
+                      type: string
+                    metricName:
+                      type: string
+                  required: [esql]
+              reasoning:
+                type: string
+            required: [path, rules, reasoning]
+      - name: provision_rule_on_rule
+        type: kibana.request
+        with:
+          method: POST
+          path: "/internal/streams/sig_events/rule_on_rule/_provision"
+          headers:
+            x-elastic-internal-origin: "kibana"
+          body:
+            baseRule:
+              ruleId: "{{ foreach.item.ruleId }}"
+              spaceId: "{{ foreach.item.spaceId }}"
+              name: "{{ foreach.item.name }}"
+              kind: "{{ foreach.item.kind }}"
+              query: "{{ foreach.item.query }}"
+              tags: "${{ foreach.item.tags }}"
+            plan: "${{ steps.plan_rule_on_rule.output.structured_output }}"

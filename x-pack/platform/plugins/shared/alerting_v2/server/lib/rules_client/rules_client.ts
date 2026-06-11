@@ -27,6 +27,8 @@ import { withApm as withApmDecorator } from '../apm/with_apm_decorator';
 import { ALERTING_V2_ERROR_CODES } from '../errors/error_codes';
 import { ALERTING_RULE_EXECUTOR_TASK_TYPE } from '../rule_executor';
 import { ensureRuleExecutorTaskScheduled, getRuleExecutorTaskId } from '../rule_executor/schedule';
+import type { QueryServiceContract } from '../services/query_service/query_service';
+import { QueryServiceScopedToken } from '../services/query_service/tokens';
 import type { RuleExecutorTaskParams } from '../rule_executor/types';
 import { RuleEventPublisher } from '../events/rule_event_publisher/rule_event_publisher';
 import type { RulesSavedObjectServiceContract } from '../services/rules_saved_object_service/rules_saved_object_service';
@@ -93,7 +95,8 @@ export class RulesClient {
     @inject(UserService) private readonly userService: UserServiceContract,
     @inject(ActionPolicyClient) private readonly actionPolicyClient: ActionPolicyClient,
     @inject(RequestSpaceIdToken) private readonly spaceId: string,
-    @inject(RuleEventPublisher) private readonly ruleEventPublisher: RuleEventPublisher
+    @inject(RuleEventPublisher) private readonly ruleEventPublisher: RuleEventPublisher,
+    @inject(QueryServiceScopedToken) private readonly queryService: QueryServiceContract
   ) {}
 
   private getSpaceContext(): { spaceId: string } {
@@ -116,6 +119,21 @@ export class RulesClient {
       );
     }
     return parsed.data;
+  }
+
+  private async validateEvaluationQuery(
+    query: string,
+    context: 'create' | 'update' | 'upsert'
+  ): Promise<void> {
+    try {
+      await this.queryService.validateQueryExecutable({ query });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      throw Boom.badRequest(`Invalid ES|QL query: ${message}`, {
+        code: ALERTING_V2_ERROR_CODES.INVALID_RULE_DATA,
+        details: { context, field: 'evaluation.query.base' },
+      });
+    }
   }
 
   private async getExistingRule(
@@ -182,6 +200,8 @@ export class RulesClient {
     const { spaceId } = this.getSpaceContext();
     const parsed = this.parseRuleData(createRuleDataSchema, params.data, 'create');
 
+    await this.validateEvaluationQuery(parsed.evaluation.query.base, 'create');
+
     const userProfileUid = await this.userService.getCurrentUserProfileUid();
 
     const nowIso = new Date().toISOString();
@@ -233,6 +253,10 @@ export class RulesClient {
   public async updateRule({ id, data, options }: UpdateRuleParams): Promise<RuleResponse> {
     const { spaceId } = this.getSpaceContext();
     const parsed = this.parseRuleData(updateRuleDataSchema, data, 'update');
+
+    if (parsed.evaluation?.query?.base) {
+      await this.validateEvaluationQuery(parsed.evaluation.query.base, 'update');
+    }
 
     const userProfileUid = await this.userService.getCurrentUserProfileUid();
     const nowIso = new Date().toISOString();
@@ -659,6 +683,7 @@ export class RulesClient {
         try {
           await this.taskManager.bulkSchedule(tasksToSchedule, {
             request: this.request as unknown as CoreKibanaRequest,
+            cloneApiKey: true,
           });
         } catch {
           // Task scheduling failure is non-fatal for bulk operations
@@ -784,6 +809,8 @@ export class RulesClient {
       const rule = await this.createRule({ data, options: { id } });
       return { rule, created: true };
     }
+
+    await this.validateEvaluationQuery(parsed.evaluation.query.base, 'upsert');
 
     const { spaceId } = this.getSpaceContext();
     const userProfileUid = await this.userService.getCurrentUserProfileUid();

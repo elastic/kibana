@@ -6,7 +6,7 @@
  */
 
 import type {
-  CoreSetup,
+  CoreStart,
   ElasticsearchClient,
   Logger,
   SavedObjectsClientContract,
@@ -15,7 +15,6 @@ import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management
 import { DataStreamClient } from '@kbn/data-streams';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
-import type { StreamsPluginStartDependencies } from '../../../types';
 import {
   knowledgeIndicatorsDataStream,
   type StoredKnowledgeIndicator,
@@ -29,23 +28,13 @@ import {
   DEFAULT_SIG_EVENTS_TUNING_CONFIG,
   type SigEventsTuningConfig,
 } from '../../../../common/sig_events_tuning_config';
-import { V1RulesAdapter } from './knowledge_indicator_client/rules/v1_rules_adapter';
 import {
-  V2RulesAdapter,
-  V2RulesNotInstalledAdapter,
-} from './knowledge_indicator_client/rules/v2_rules_adapter';
-import { DualCleanupRulesAdapter } from './knowledge_indicator_client/rules/dual_cleanup_rules_adapter';
-import {
-  isSignificantEventsAlertingV2Active,
-  logAlertingV2PluginUnavailable,
-  readSignificantEventsAlertingV2UiEnabled,
-} from '../../sig_events/significant_events_alerting_v2';
+  createDualCleanupRulesClient,
+  readSignificantEventsAlertingV2ActiveFromClients,
+} from '../../sig_events/create_sig_events_rules_management_client';
 
 export class KnowledgeIndicatorService {
-  constructor(
-    private readonly coreSetup: CoreSetup<StreamsPluginStartDependencies>,
-    private readonly logger: Logger
-  ) {}
+  constructor(private readonly coreStart: CoreStart, private readonly logger: Logger) {}
 
   async getClient({
     esClient,
@@ -63,22 +52,15 @@ export class KnowledgeIndicatorService {
       'semantic_min_score' | 'rrf_rank_constant' | 'feature_ttl_days'
     >;
   }): Promise<KnowledgeIndicatorClient> {
-    const [core] = await this.coreSetup.getStartServices();
-
-    const uiSettings = core.uiSettings.asScopedToClient(soClient);
-    const [isSignificantEventsEnabled, alertingV2UiEnabled] = await Promise.all([
+    const uiSettings = this.coreStart.uiSettings.asScopedToClient(soClient);
+    const [isSignificantEventsEnabled, { alertingV2Active }] = await Promise.all([
       uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS).then((v) => v ?? false),
-      readSignificantEventsAlertingV2UiEnabled(uiSettings, this.logger),
+      readSignificantEventsAlertingV2ActiveFromClients({
+        uiSettingsClient: uiSettings,
+        alertingV2RulesClient,
+        logger: this.logger,
+      }),
     ]);
-
-    if (alertingV2UiEnabled && !alertingV2RulesClient) {
-      logAlertingV2PluginUnavailable(this.logger);
-    }
-
-    const alertingV2Enabled = isSignificantEventsAlertingV2Active(
-      alertingV2UiEnabled,
-      alertingV2RulesClient
-    );
 
     const dataStreamClient: KnowledgeIndicatorDataStreamClient = DataStreamClient.fromDefinition<
       typeof knowledgeIndicatorsMappings,
@@ -88,14 +70,12 @@ export class KnowledgeIndicatorService {
       elasticsearchClient: esClient,
     });
 
-    const v1Adapter = new V1RulesAdapter(alertingRulesClient);
-    const v2Client = alertingV2RulesClient
-      ? new V2RulesAdapter(alertingV2RulesClient)
-      : new V2RulesNotInstalledAdapter(this.logger);
-
-    const rulesManagementClient = alertingV2Enabled
-      ? new DualCleanupRulesAdapter(v2Client, v1Adapter, this.logger)
-      : new DualCleanupRulesAdapter(v1Adapter, v2Client, this.logger);
+    const rulesManagementClient = createDualCleanupRulesClient({
+      alertingV2Active,
+      alertingRulesClient,
+      alertingV2RulesClient,
+      logger: this.logger,
+    });
 
     return new KnowledgeIndicatorClient(
       {

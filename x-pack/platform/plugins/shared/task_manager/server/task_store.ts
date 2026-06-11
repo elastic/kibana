@@ -314,7 +314,10 @@ export class TaskStore {
         taskInstances,
         request,
         this.security,
-        options?.onEsKey === true ? { onEsKey: true } : undefined
+        {
+          ...(options?.onEsKey === true ? { onEsKey: true } : {}),
+          ...(options?.cloneApiKey === true ? { cloneApiKey: true } : {}),
+        }
       );
     } catch (e) {
       this.errors$.next(e);

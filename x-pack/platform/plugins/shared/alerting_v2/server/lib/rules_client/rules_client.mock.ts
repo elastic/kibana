@@ -12,6 +12,7 @@ import type { ActionPolicyClient } from '../action_policy_client';
 import type { RuleEventPublisher } from '../events/rule_event_publisher/rule_event_publisher';
 import { createRulesSavedObjectService } from '../services/rules_saved_object_service/rules_saved_object_service.mock';
 import { createUserService } from '../services/user_service/user_service.mock';
+import type { QueryServiceContract } from '../services/query_service/query_service';
 import { RulesClient } from './rules_client';
 
 export function createRulesClient(): {
@@ -37,6 +38,10 @@ export function createRulesClient(): {
     emitAfterRuleUpdate: jest.fn(),
   } as unknown as jest.Mocked<RuleEventPublisher>;
 
+  const queryService = {
+    validateQueryExecutable: jest.fn().mockResolvedValue(undefined),
+  } as unknown as jest.Mocked<QueryServiceContract>;
+
   const rulesClient = new RulesClient(
     request,
     rulesSavedObjectService,
@@ -44,7 +49,8 @@ export function createRulesClient(): {
     userService,
     actionPolicyClient,
     'default',
-    ruleEventPublisher
+    ruleEventPublisher,
+    queryService
   );
 
   return { rulesClient, mockSavedObjectsClient, ruleEventPublisher };

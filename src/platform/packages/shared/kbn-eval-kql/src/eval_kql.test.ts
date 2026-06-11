@@ -96,6 +96,79 @@ describe('evaluateKql', () => {
       expect(evaluateKql(kql, { users: [{ name: 'Charlie' }, { name: 'Bob' }] })).toBe(false);
     });
 
+    it('should resolve nested fields across arrays of objects (any-element semantics)', () => {
+      const event = {
+        rules: [
+          { kind: 'signal', tags: ['sigevents:stream:logs.ecs'] },
+          { kind: 'alert', tags: ['other'] },
+        ],
+      };
+
+      expect(evaluateKql('event.rules.kind: "signal"', { event })).toBe(true);
+      expect(evaluateKql('event.rules.kind: "alert"', { event })).toBe(true);
+      expect(evaluateKql('event.rules.kind: "missing"', { event })).toBe(false);
+      expect(evaluateKql('event.rules.tags: "sigevents:stream:logs.ecs"', { event })).toBe(true);
+      expect(
+        evaluateKql(
+          'event.rules.kind: "signal" AND NOT event.rules.tags: "sigevents:rule-on-rule"',
+          { event }
+        )
+      ).toBe(true);
+      expect(
+        evaluateKql(
+          'event.rules.kind: "signal" AND NOT event.rules.tags: "sigevents:rule-on-rule"',
+          {
+            event: {
+              rules: [{ kind: 'signal', tags: ['sigevents:rule-on-rule'] }],
+            },
+          }
+        )
+      ).toBe(false);
+    });
+
+    it('should evaluate ruleSignalsWritten discovery v2 trigger filter on singular event.rule', () => {
+      const discoveryV2Condition =
+        'event.rule.kind: "signal" AND event.rule.tags: "sigevents:rule-on-rule"';
+
+      expect(
+        evaluateKql(discoveryV2Condition, {
+          event: {
+            rule: {
+              kind: 'signal',
+              tags: [
+                'sigevents:rule-on-rule',
+                'sigevents:rule-on-rule:logs',
+                'sigevents:monitored:base-1',
+                'sigevents:system-managed',
+              ],
+            },
+          },
+        })
+      ).toBe(true);
+
+      expect(
+        evaluateKql(discoveryV2Condition, {
+          event: {
+            rule: {
+              kind: 'signal',
+              tags: ['sigevents:stream:logs'],
+            },
+          },
+        })
+      ).toBe(false);
+
+      expect(
+        evaluateKql(discoveryV2Condition, {
+          event: {
+            rule: {
+              kind: 'alert',
+              tags: ['sigevents:rule-on-rule'],
+            },
+          },
+        })
+      ).toBe(false);
+    });
+
     describe('range expressions', () => {
       it('should correctly evaluate a simple "range" KQL expression with number', () => {
         const kql = 'matchesCount >= 1000 and matchesCount <= 5000';

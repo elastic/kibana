@@ -11,7 +11,7 @@ import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import type { StreamQuery, SignificantEventsGetResponse } from '@kbn/streams-schema';
 import { MS_PER_UNIT } from '@kbn/streams-schema';
 import { isEsqlUnknownIndexError } from '@kbn/storage-adapter';
-import { isEmpty, keyBy } from 'lodash';
+import { isEmpty } from 'lodash';
 import type { QueryLink, SearchMode } from '../../../common/queries';
 import type { QueryClient, QueryLinkFilters } from '../streams/assets/query/query_client';
 import { parseError } from '../streams/errors/parse_error';
@@ -19,6 +19,8 @@ import { SecurityError } from '../streams/errors/security_error';
 import { getColumnIndex, toEsqlRequest } from '../streams/helpers/esql';
 import { ALERTS_DATA_STREAM } from './alerts_data_stream';
 import { ESQL_UNITS, fillBucketGaps, parseBucketSize } from './helpers/fill_bucket_gaps';
+
+const RULE_EVENTS_DATA_STREAM = '.rule-events';
 
 // `change_points` on the GET response is no longer populated by the server.
 // Kept as an empty stub until the consumer-side schema/usage is removed.
@@ -50,7 +52,16 @@ export async function readSignificantEventsFromAlertsIndices(
   }
 ): Promise<SignificantEventsGetResponse> {
   const { queryClient, scopedClusterClient } = dependencies;
-  const { streamNames = [], from, to, bucketSize, query, filters, searchMode } = params;
+  const {
+    streamNames = [],
+    from,
+    to,
+    bucketSize,
+    query,
+    filters,
+    searchMode,
+    alertsSource = V1_ALERTS_SOURCE,
+  } = params;
 
   const queryLinks = query
     ? await queryClient.findQueries(streamNames, query, filters, searchMode)
@@ -60,14 +71,31 @@ export async function readSignificantEventsFromAlertsIndices(
     return { significant_events: [], aggregated_occurrences: [] };
   }
 
-  const queryLinkByRuleId = keyBy(queryLinks, (queryLink) => queryLink.rule_id);
-  const ruleIds = Object.keys(queryLinkByRuleId);
+  if (alertsSource === V2_ALERTS_SOURCE) {
+    return readFromV2RuleEvents({ queryLinks, from, to, bucketSize, scopedClusterClient });
+  }
 
+  return readFromV1AlertsIndex({ queryLinks, from, to, bucketSize, scopedClusterClient });
+}
+
+async function readFromV1AlertsIndex({
+  queryLinks,
+  from,
+  to,
+  bucketSize,
+  scopedClusterClient,
+}: {
+  queryLinks: QueryLink[];
+  from: Date;
+  to: Date;
+  bucketSize: string;
+  scopedClusterClient: IScopedClusterClient;
+}): Promise<SignificantEventsGetResponse> {
+  const ruleIds = queryLinks.map((link) => link.rule_id);
   const { value, unit } = parseBucketSize(bucketSize);
   const esqlUnit = ESQL_UNITS[unit] ?? unit;
   const intervalMs = value * (MS_PER_UNIT[unit] ?? 1000);
 
-  // ES|QL `IN (?param)` does not expand array params — emit one literal per value.
   const ruleIdLiterals = ruleIds.map((id) => esql.str(id));
   const ruleUuidCol = esql.col(ALERT_RULE_UUID.split('.'));
 
@@ -88,25 +116,100 @@ export async function readSignificantEventsFromAlertsIndices(
       drop_null_columns: true,
     });
   } catch (err) {
-    const { type, message } = parseError(err);
-    if (type === 'security_exception') {
-      throw new SecurityError(
-        `Cannot read significant events, insufficient privileges: ${message}`,
-        { cause: err instanceof Error ? err : new Error(String(err)) }
-      );
-    }
-    // Alerts index missing (no rules have fired yet) → same empty shape as
-    // a per-rule "not found". Other verification_exception flavours (unknown
-    // column, malformed query, mapping regression) rethrow so they surface
-    // instead of silently producing empty sparklines.
-    if (isEsqlUnknownIndexError(err)) {
-      return buildEmptyResponse(queryLinks);
-    }
-    throw err;
+    return handleEsqlReadError(err, queryLinks);
   }
 
+  return buildOccurrencesResponse({
+    queryLinks,
+    response,
+    from,
+    to,
+    intervalMs,
+    ruleIdColumn: 'rule_uuid',
+  });
+}
+
+async function readFromV2RuleEvents({
+  queryLinks,
+  from,
+  to,
+  bucketSize,
+  scopedClusterClient,
+}: {
+  queryLinks: QueryLink[];
+  from: Date;
+  to: Date;
+  bucketSize: string;
+  scopedClusterClient: IScopedClusterClient;
+}): Promise<SignificantEventsGetResponse> {
+  const ruleIds = queryLinks.map((link) => link.rule_id);
+  const { value, unit } = parseBucketSize(bucketSize);
+  const esqlUnit = ESQL_UNITS[unit] ?? unit;
+  const intervalMs = value * (MS_PER_UNIT[unit] ?? 1000);
+
+  const ruleIdLiterals = ruleIds.map((id) => esql.str(id));
+  const ruleIdCol = esql.col(['rule', 'id']);
+
+  let response: Awaited<ReturnType<typeof scopedClusterClient.asCurrentUser.esql.query>>;
+  try {
+    response = await scopedClusterClient.asCurrentUser.esql.query({
+      ...toEsqlRequest(
+        esql.from([RULE_EVENTS_DATA_STREAM]).where`${ruleIdCol} IN (${ruleIdLiterals})`
+          .pipe`STATS count = COUNT_DISTINCT(group_hash) BY rule_id = ${ruleIdCol}, bucket = BUCKET(@timestamp, ${esql.num(
+          value
+        )} ${esql.kwd(esqlUnit)})`.pipe`SORT bucket ASC`
+      ),
+      filter: {
+        bool: {
+          filter: [{ range: { '@timestamp': { gte: from.toISOString(), lte: to.toISOString() } } }],
+        },
+      },
+      drop_null_columns: true,
+    });
+  } catch (err) {
+    return handleEsqlReadError(err, queryLinks);
+  }
+
+  return buildOccurrencesResponse({
+    queryLinks,
+    response,
+    from,
+    to,
+    intervalMs,
+    ruleIdColumn: 'rule_id',
+  });
+}
+
+function handleEsqlReadError(err: unknown, queryLinks: QueryLink[]): SignificantEventsGetResponse {
+  const { type, message } = parseError(err);
+  if (type === 'security_exception') {
+    throw new SecurityError(`Cannot read significant events, insufficient privileges: ${message}`, {
+      cause: err instanceof Error ? err : new Error(String(err)),
+    });
+  }
+  if (isEsqlUnknownIndexError(err)) {
+    return buildEmptyResponse(queryLinks);
+  }
+  throw err;
+}
+
+function buildOccurrencesResponse({
+  queryLinks,
+  response,
+  from,
+  to,
+  intervalMs,
+  ruleIdColumn,
+}: {
+  queryLinks: QueryLink[];
+  response: Awaited<ReturnType<IScopedClusterClient['asCurrentUser']['esql']['query']>>;
+  from: Date;
+  to: Date;
+  intervalMs: number;
+  ruleIdColumn: 'rule_uuid' | 'rule_id';
+}): SignificantEventsGetResponse {
   const countIdx = getColumnIndex(response, 'count');
-  const ruleIdx = getColumnIndex(response, 'rule_uuid');
+  const ruleIdx = getColumnIndex(response, ruleIdColumn);
   const bucketIdx = getColumnIndex(response, 'bucket');
 
   if (countIdx === -1 || ruleIdx === -1 || bucketIdx === -1) {
@@ -126,15 +229,12 @@ export async function readSignificantEventsFromAlertsIndices(
     }
   }
 
-  // Sum per-rule counts into a single epoch-aligned series for the overall sparkline.
   const dateToTotal = new Map<string, number>();
   for (const [, sparse] of sparseByRule) {
     for (const { date, count } of fillBucketGaps(sparse, from, to, intervalMs).buckets) {
       dateToTotal.set(date, (dateToTotal.get(date) ?? 0) + count);
     }
   }
-  // Outer fill covers the all-zero-firings case (empty `sparseByRule` → empty
-  // `dateToTotal`); without it the histogram would render empty instead of flat.
   const { buckets: aggregatedOccurrences } = fillBucketGaps(
     [...dateToTotal.entries()].map(([date, count]) => ({ date, count })),
     from,
@@ -142,7 +242,6 @@ export async function readSignificantEventsFromAlertsIndices(
     intervalMs
   );
 
-  // Rules with no firings get `[]`, not a zero-filled series — see EMPTY_OCCURRENCES.
   const significantEvents = queryLinks.map((queryLink) => {
     const sparse = sparseByRule.get(queryLink.rule_id);
     return {

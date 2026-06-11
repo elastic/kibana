@@ -788,7 +788,7 @@ describe('QueryClient backward compatibility', () => {
         expect(rangeFilter).toBeUndefined();
       });
 
-      it('excludes STATS queries via must_not so the set matches the count', async () => {
+      it('does not exclude STATS queries from the promotable set', async () => {
         const storageClient = createMockStorageClient();
         storageClient.esql.mockResolvedValue(toEsqlSourceResponse([]));
         const { client } = createQueryClient({ storageClient });
@@ -796,8 +796,8 @@ describe('QueryClient backward compatibility', () => {
         await client.getPromotableUnbackedQueries();
 
         const searchArgs = storageClient.esql.mock.calls[0][0];
-        const mustNot: unknown = searchArgs.filter.bool.must_not;
-        expect(mustNot).toContainEqual({ term: { [QUERY_TYPE]: QUERY_TYPE_STATS } });
+        const mustNot: unknown[] = searchArgs.filter.bool.must_not;
+        expect(mustNot).not.toContainEqual({ term: { [QUERY_TYPE]: QUERY_TYPE_STATS } });
       });
     });
 
@@ -891,7 +891,7 @@ describe('QueryClient backward compatibility', () => {
         );
       });
 
-      it('sums promoted and skipped_stats across streams', async () => {
+      it('sums promoted counts across streams', async () => {
         const storageClient = createMockStorageClient();
         storageClient.esql.mockResolvedValue(
           toEsqlSourceResponse([
@@ -903,7 +903,7 @@ describe('QueryClient backward compatibility', () => {
         jest
           .spyOn(client, 'promoteQueries')
           .mockResolvedValueOnce({ promoted: 2, skipped_stats: 0 })
-          .mockResolvedValueOnce({ promoted: 3, skipped_stats: 1 });
+          .mockResolvedValueOnce({ promoted: 3, skipped_stats: 0 });
 
         const result = await client.promoteUnbackedQueries({
           streamDefinitions: new Map([
@@ -912,7 +912,7 @@ describe('QueryClient backward compatibility', () => {
           ]),
         });
 
-        expect(result).toEqual({ promoted: 5, skipped_stats: 1 });
+        expect(result).toEqual({ promoted: 5, skipped_stats: 0 });
       });
 
       it('silently drops queryIds that are not in the promotable set', async () => {
@@ -1242,7 +1242,7 @@ describe('rule lifecycle — syncQueries', () => {
   });
 
   describe('STATS query', () => {
-    it('does not create a rule for a new STATS query', async () => {
+    it('creates a rule for a new STATS query', async () => {
       const rc = rulesManagementClientMock();
       const sc = createMockStorageClient();
       sc.esql.mockResolvedValue(toEsqlSourceResponse([]));
@@ -1257,29 +1257,29 @@ describe('rule lifecycle — syncQueries', () => {
       };
       await client.syncQueries(def, [statsQuery]);
 
-      expect(rc.createRule).not.toHaveBeenCalled();
+      expect(rc.createRule).toHaveBeenCalledTimes(1);
       expect(rc.updateRule).not.toHaveBeenCalled();
       expect(rc.bulkDeleteRules).not.toHaveBeenCalled();
     });
 
-    it('deletes the rule when a previously rule-backed query becomes STATS', async () => {
+    it('recreates the rule when a previously rule-backed query becomes STATS', async () => {
       const rc = rulesManagementClientMock();
       const sc = createMockStorageClient();
       sc.esql.mockResolvedValue(toEsqlSourceResponse([existingStoredDoc('q1', MATCH_ESQL)]));
       const { client } = makeClient(rc, sc);
 
-      const demotedQuery: StreamQuery = {
+      const statsQuery: StreamQuery = {
         id: 'q1',
         type: 'stats',
         title: 'Query q1',
         description: '',
         esql: { query: STATS_ESQL },
       };
-      await client.syncQueries(def, [demotedQuery]);
+      await client.syncQueries(def, [statsQuery]);
 
       const expectedRuleId = ruleIdFor('q1', MATCH_ESQL);
       expect(rc.bulkDeleteRules).toHaveBeenCalledWith([expectedRuleId]);
-      expect(rc.createRule).not.toHaveBeenCalled();
+      expect(rc.createRule).toHaveBeenCalledTimes(1);
     });
   });
 

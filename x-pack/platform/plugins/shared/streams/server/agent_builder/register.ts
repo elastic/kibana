@@ -19,6 +19,7 @@ import { registerAgentBuilderSkills } from './skills/register_skills';
 import { registerAgentBuilderAttachments } from './attachments/register_attachments';
 import { registerAgentBuilderSmlTypes } from './sml/register_sml_types';
 import { registerSignificantEventsDiscoveryAgents } from './agents/discovery';
+import { registerSignificantEventsRuleOnRuleAgents } from './agents/rule_on_rule';
 
 export const createMemoryToolsOptions = ({
   getScopedClients,
@@ -66,4 +67,5 @@ export const registerStreamsAgentBuilder = async ({
   registerAgentBuilderTools({ agentBuilder, getScopedClients, server, logger, telemetry });
   registerAgentBuilderSkills({ agentBuilder, telemetry, streamsKIsOnboardingClient });
   registerSignificantEventsDiscoveryAgents(agentBuilder);
+  registerSignificantEventsRuleOnRuleAgents(agentBuilder);
 };

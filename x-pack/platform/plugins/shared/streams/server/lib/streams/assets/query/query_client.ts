@@ -17,11 +17,7 @@ import type {
 import type { QueryFeature } from '@kbn/streams-schema';
 import { deriveQueryType, hasSameEsql } from '@kbn/streams-schema/src/helpers/esql_helpers';
 import type { Streams } from '@kbn/streams-schema/src/models/streams';
-import {
-  type QueryType,
-  type StreamQuery,
-  QUERY_TYPE_STATS,
-} from '@kbn/streams-schema/src/queries';
+import { type QueryType, type StreamQuery } from '@kbn/streams-schema/src/queries';
 import objectHash from 'object-hash';
 import pLimit from 'p-limit';
 import {
@@ -294,7 +290,7 @@ function fromStorage(link: StoredQueryLink): QueryLink {
   // Only derive from ES|QL for pre-migration docs that lack the field.
   const type: QueryType = storedType ?? deriveQueryType(esqlQuery);
 
-  const ruleBacked = type === QUERY_TYPE_STATS ? false : link[RULE_BACKED];
+  const ruleBacked = link[RULE_BACKED];
 
   return {
     [ASSET_UUID]: link[ASSET_UUID],
@@ -380,10 +376,7 @@ function toQueryLinkFromQuery({
   stream: string;
   ruleBacked?: boolean;
 }): QueryLink {
-  // Always derive type from the ES|QL source of truth to prevent stale
-  // query.type from causing rule_backed mismatches.
-  const derivedType = deriveQueryType(query.esql.query);
-  const effectiveRuleBacked = derivedType === QUERY_TYPE_STATS ? false : ruleBacked;
+  const effectiveRuleBacked = ruleBacked;
   const assetUuid = getQueryLinkUuid(stream, { 'asset.type': 'query', 'asset.id': query.id });
   return {
     'asset.uuid': assetUuid,
@@ -437,13 +430,10 @@ export class QueryClient {
     });
     const existingQueryLinks = mapSourceRows<StoredQueryLink, QueryLink>(response, fromStorage);
 
-    const nextQueryLinks = links.map((link) => {
-      const ql = { ...toQueryLink(definition, link), rule_backed: link.rule_backed };
-      if (deriveQueryType(ql.query.esql.query) === QUERY_TYPE_STATS) {
-        ql.rule_backed = false;
-      }
-      return ql;
-    });
+    const nextQueryLinks = links.map((link) => ({
+      ...toQueryLink(definition, link),
+      rule_backed: link.rule_backed,
+    }));
 
     const nextIds = new Set(nextQueryLinks.map((link) => link[ASSET_UUID]));
     const queryLinksDeleted = existingQueryLinks.filter((link) => !nextIds.has(link[ASSET_UUID]));
@@ -543,7 +533,7 @@ export class QueryClient {
 
   /**
    * Shared bool-query shape for the promotable-unbacked set: `rule_backed=false`
-   * AND `type != STATS`, with optional severity floor. Used by
+   * with optional severity floor. Used by
    * {@link getPromotableUnbackedQueries} and {@link promoteUnbackedQueries}.
    */
   private promotableUnbackedBoolQuery(filters?: { minSeverityScore?: number }) {
@@ -553,12 +543,12 @@ export class QueryClient {
         ...termQuery(RULE_BACKED, false),
         ...rangeGteQuery(QUERY_SEVERITY_SCORE, filters?.minSeverityScore),
       ],
-      must_not: termQuery(QUERY_TYPE, QUERY_TYPE_STATS),
+      must_not: [],
     };
   }
 
   /**
-   * Returns all unbacked, non-STATS queries across streams.
+   * Returns all unbacked queries across streams (MATCH and STATS).
    */
   async getPromotableUnbackedQueries(filters?: {
     minSeverityScore?: number;
@@ -900,21 +890,18 @@ export class QueryClient {
     const nextQueriesToCreate: QueryLink[] = [];
     const nextQueriesUpdatedWithBreakingChange: QueryLink[] = [];
     const nextQueriesUpdatedWithoutBreakingChange: QueryLink[] = [];
-    const demotedToStats: QueryLink[] = [];
     const allNextQueryLinks: QueryLink[] = [];
 
     for (const query of queries) {
       const currentLink = currentLinkByQueryId.get(query.id);
-      const isStats = deriveQueryType(query.esql.query) === QUERY_TYPE_STATS;
       if (!currentLink) {
         const link = toQueryLinkFromQuery({ query, stream });
         nextQueriesToCreate.push(link);
         allNextQueryLinks.push(link);
-      } else if (!currentLink.rule_backed || isStats) {
-        if (currentLink.rule_backed && isStats) {
-          demotedToStats.push(currentLink);
-        }
-        allNextQueryLinks.push({ ...currentLink, query, rule_backed: false });
+      } else if (!currentLink.rule_backed) {
+        const link = toQueryLinkFromQuery({ query, stream });
+        nextQueriesToCreate.push(link);
+        allNextQueryLinks.push(link);
       } else if (hasBreakingChange(currentLink.query, query)) {
         const link = toQueryLinkFromQuery({ query, stream });
         nextQueriesUpdatedWithBreakingChange.push(link);
@@ -944,7 +931,7 @@ export class QueryClient {
     // are removed — breaking-change rules have distinct rule_ids so both can coexist
     // briefly, avoiding a monitoring coverage gap.
     try {
-      await this.installQueries(toCreate, toUpdate, definition);
+      await this.installQueries(toCreate, toUpdate);
     } catch (installError) {
       this.dependencies.logger.error(
         `installQueries failed during syncQueries for stream "${definition.name}". ` +
@@ -963,11 +950,7 @@ export class QueryClient {
       throw installError;
     }
 
-    await this.uninstallQueries([
-      ...currentQueriesToDelete,
-      ...staleBreakingChangeRules,
-      ...demotedToStats,
-    ]);
+    await this.uninstallQueries([...currentQueriesToDelete, ...staleBreakingChangeRules]);
 
     try {
       await this.syncQueryList(
@@ -1120,22 +1103,15 @@ export class QueryClient {
     const idSet = new Set(queryIds);
     const candidates = unbacked.filter((link) => idSet.has(link.query.id));
 
-    const skippedStats = candidates.filter((link) => link.query.type === QUERY_TYPE_STATS);
-    if (skippedStats.length > 0) {
-      this.dependencies.logger.info(
-        `Skipping ${skippedStats.length} STATS queries from promotion for stream "${streamName}" (not yet supported as rules).`
-      );
-    }
-
-    const toPromote = candidates
-      .filter((link) => link.query.type !== QUERY_TYPE_STATS)
-      .map((link) => toQueryLinkFromQuery({ query: link.query, stream: streamName }));
+    const toPromote = candidates.map((link) =>
+      toQueryLinkFromQuery({ query: link.query, stream: streamName })
+    );
 
     if (toPromote.length === 0) {
-      return { promoted: 0, skipped_stats: skippedStats.length };
+      return { promoted: 0, skipped_stats: 0 };
     }
 
-    await this.installQueries(toPromote, [], definition);
+    await this.installQueries(toPromote, []);
 
     try {
       await this.bulkStorage(
@@ -1166,7 +1142,7 @@ export class QueryClient {
       throw storageError;
     }
 
-    return { promoted: toPromote.length, skipped_stats: skippedStats.length };
+    return { promoted: toPromote.length, skipped_stats: 0 };
   }
 
   /**
@@ -1217,23 +1193,19 @@ export class QueryClient {
     return { demoted: toDemote.length };
   }
 
-  private async installQueries(
-    queriesToCreate: QueryLink[],
-    queriesToUpdate: QueryLink[],
-    definition: Streams.all.Definition
-  ) {
+  private async installQueries(queriesToCreate: QueryLink[], queriesToUpdate: QueryLink[]) {
     const { rulesManagementClient } = this.dependencies;
     const limiter = pLimit(10);
 
     await Promise.all([
       ...queriesToCreate.map((query) =>
         limiter(() =>
-          rulesManagementClient.createRule(query.rule_id, this.toCreateRuleBody(query, definition))
+          rulesManagementClient.createRule(query.rule_id, this.toCreateRuleBody(query))
         )
       ),
       ...queriesToUpdate.map((query) =>
         limiter(() =>
-          rulesManagementClient.updateRule(query.rule_id, this.toUpdateRuleBody(query, definition))
+          rulesManagementClient.updateRule(query.rule_id, this.toUpdateRuleBody(query))
         )
       ),
     ]);
@@ -1249,7 +1221,7 @@ export class QueryClient {
     await rulesManagementClient.bulkDeleteRules(ruleIds);
   }
 
-  private toCreateRuleBody(queryLink: QueryLink, definition: Streams.all.Definition) {
+  private toCreateRuleBody(queryLink: QueryLink) {
     const { query } = queryLink;
 
     return {
@@ -1262,14 +1234,14 @@ export class QueryClient {
         query: query.esql.query,
       },
       enabled: true,
-      tags: ['streams', definition.name],
+      tags: ['streams', queryLink.stream_name],
       schedule: {
         interval: '1m',
       },
     };
   }
 
-  private toUpdateRuleBody(queryLink: QueryLink, definition: Streams.all.Definition) {
+  private toUpdateRuleBody(queryLink: QueryLink) {
     const { query } = queryLink;
 
     return {
@@ -1279,7 +1251,7 @@ export class QueryClient {
         timestampField: '@timestamp',
         query: query.esql.query,
       },
-      tags: ['streams', definition.name],
+      tags: ['streams', queryLink.stream_name],
       schedule: {
         interval: '1m',
       },

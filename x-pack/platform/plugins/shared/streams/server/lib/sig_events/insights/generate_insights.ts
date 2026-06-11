@@ -18,6 +18,7 @@ import { getErrorMessage } from '../../streams/errors/parse_error';
 import { createSummarizeQueriesPrompt } from './prompts/summarize_queries/prompt';
 import { createSummarizeStreamsPrompt } from './prompts/summarize_streams/prompt';
 import { SUBMIT_INSIGHTS_TOOL_NAME } from './client/insight_tool';
+import type { AlertsSource } from '../read_significant_events_from_alerts_indices';
 import { extractInsightsFromResponse, collectQueryData, type QueryData } from './utils';
 
 export async function generateInsights({
@@ -28,6 +29,7 @@ export async function generateInsights({
   signal,
   logger,
   streamNames,
+  alertsSource,
 }: {
   streamsClient: StreamsClient;
   queryClient: QueryClient;
@@ -37,6 +39,7 @@ export async function generateInsights({
   logger: Logger;
   /** When provided, only generate insights for these streams. Otherwise all streams are used. */
   streamNames?: string[];
+  alertsSource: AlertsSource;
 }): Promise<GenerateInsightsResult> {
   const allStreams = await streamsClient.listStreams();
   let streams = allStreams;
@@ -53,6 +56,7 @@ export async function generateInsights({
         inferenceClient,
         signal,
         logger,
+        alertsSource,
       });
       return {
         streamName: stream.name,
@@ -130,6 +134,7 @@ async function generateStreamInsights({
   inferenceClient,
   signal,
   logger,
+  alertsSource,
 }: {
   stream: Streams.all.Definition;
   queryClient: QueryClient;
@@ -137,6 +142,7 @@ async function generateStreamInsights({
   inferenceClient: BoundInferenceClient;
   signal: AbortSignal;
   logger: Logger;
+  alertsSource: AlertsSource;
 }): Promise<GenerateInsightsResult> {
   const queries = await queryClient.getAssets(stream.name);
 
@@ -145,6 +151,7 @@ async function generateStreamInsights({
       collectQueryData({
         query,
         esClient,
+        alertsSource,
       })
     )
   );

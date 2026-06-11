@@ -30,7 +30,7 @@ export async function readSignificantEventsAlertingV2UiEnabled(
 export function isSignificantEventsAlertingV2Active(
   alertingV2UiEnabled: boolean,
   alertingV2RulesClient?: RulesClientApi
-): boolean {
+): alertingV2RulesClient is RulesClientApi {
   return alertingV2UiEnabled && alertingV2RulesClient != null;
 }
 

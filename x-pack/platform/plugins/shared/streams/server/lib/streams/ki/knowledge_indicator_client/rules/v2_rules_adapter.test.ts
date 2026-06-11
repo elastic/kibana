@@ -105,6 +105,26 @@ describe('V2RulesAdapter', () => {
       expect(data.grouping).toEqual({ fields: ['_id'] });
     });
 
+    it('groups STATS queries by data.bucket and retains full ES|QL', async () => {
+      const mock = makeRulesClientMock();
+      mock.createRule.mockResolvedValue({} as never);
+      const adapter = makeAdapter(mock);
+      const statsQuery =
+        'FROM logs-* | STATS count = COUNT(*) BY bucket = BUCKET(@timestamp, 5 minutes) | WHERE count > 0';
+
+      await adapter.createRule('rule-stats', {
+        ...createBody,
+        params: { ...createBody.params, query: statsQuery },
+      });
+
+      const data = lastCreateCall(mock).data as {
+        grouping: { fields: string[] };
+        evaluation: { query: { base: string } };
+      };
+      expect(data.grouping).toEqual({ fields: ['data.bucket'] });
+      expect(data.evaluation.query.base).toBe(statsQuery);
+    });
+
     it('maps updateRule body to v2 partial shape (no kind)', async () => {
       const mock = makeRulesClientMock();
       mock.updateRule.mockResolvedValue({} as never);

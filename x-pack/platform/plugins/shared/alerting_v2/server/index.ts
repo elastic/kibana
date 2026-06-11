@@ -39,3 +39,7 @@ export const module = new ContainerModule((options) => {
 
 export type { PluginConfig as AlertingV2Config } from './config';
 export type { AlertingServerStart, RulesClientApi, ActionPolicyClientApi } from './types';
+export {
+  appendEsqlLimitZero,
+  validateEsqlQueryExecutable,
+} from './lib/services/query_service/validate_esql_query_executable';

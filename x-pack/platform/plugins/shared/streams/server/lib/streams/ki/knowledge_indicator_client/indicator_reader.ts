@@ -7,7 +7,6 @@
 
 import { esql, type ComposerSortShorthand } from '@elastic/esql';
 import type { Feature, QueryLink } from '@kbn/streams-schema';
-import { QUERY_TYPE_STATS } from '@kbn/streams-schema';
 import { isStoredFeatureKnowledgeIndicator, isStoredQueryKnowledgeIndicator } from '../data_stream';
 import {
   combineWhere,
@@ -206,6 +205,18 @@ export class IndicatorReader {
    * `query.query_type != stats` happens via the post-grouping WHERE so the
    * latest revision drives the decision.
    */
+  async getRuleBackedQueryLinks(): Promise<QueryLink[]> {
+    const where = inPredicate(TYPE, [KI_TYPE_QUERY]);
+
+    const postGroupingWhere = combineWhere(
+      IS_NOT_DELETED,
+      esql.exp`${esql.col(QUERY_RULE_BACKED)} == true`
+    );
+
+    const docs = await this.revisionReader.fetchLatestRevisions(where, postGroupingWhere);
+    return docs.filter(isStoredQueryKnowledgeIndicator).map(fromStoredQuery);
+  }
+
   async getPromotableUnbackedQueries(filters?: {
     minSeverityScore?: number;
   }): Promise<QueryLink[]> {
@@ -219,7 +230,6 @@ export class IndicatorReader {
     const postGroupingWhere = combineWhere(
       IS_NOT_DELETED,
       esql.exp`\`query.rule_backed\` == false`,
-      esql.exp`\`query.query_type\` != ${esql.str(QUERY_TYPE_STATS)}`,
       minSeverityFilter
     );
 

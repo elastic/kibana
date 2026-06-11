@@ -1,0 +1,33 @@
+version: "1"
+name: ".significant-events-rule-on-rule-deprovision"
+description: "Removes rule-on-rule children when a base signal rule is deleted."
+enabled: true
+tags:
+  - observability
+  - streams
+  - significant-events
+  - rule-on-rule
+settings:
+  timeout: "5m"
+  # Same per-rule concurrency as provision so bulk deletes are not dropped globally.
+  # TODO: Once https://github.com/elastic/kibana/pull/268596 lands, switch strategy to `queue`
+  # (with a suitable queue-size) so bursts are FIFO-queued instead of cancelled or dropped.
+  concurrency:
+    key: "sigevents-rule-on-rule-deprovision-{{ event.rules[0].ruleId }}-{{ event.rules[0].spaceId }}"
+    strategy: cancel-in-progress
+    max: 1
+triggers:
+  - type: alerting.ruleDeleted
+    on:
+      condition: 'event.rules.kind: "signal" AND NOT event.rules.tags: "sigevents:rule-on-rule"'
+steps:
+  - name: deprovision_foreach
+    type: kibana.request
+    foreach: "{{ event.rules }}"
+    with:
+      method: POST
+      path: "/internal/streams/sig_events/rule_on_rule/_deprovision"
+      headers:
+        x-elastic-internal-origin: "kibana"
+      body:
+        monitoredRuleId: "{{ foreach.item.ruleId }}"

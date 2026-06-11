@@ -40,6 +40,8 @@ import { internalMemoryRoutes } from './internal/memory/route';
 import { internalSigEventsDetectionsRoutes } from './internal/sig_events/detections/route';
 import { internalSigEventsDiscoveriesRoutes } from './internal/sig_events/discoveries/route';
 import { internalSigEventsEventsRoutes } from './internal/sig_events/events/route';
+import { internalSigEventsRuleOnRuleRoutes } from './internal/sig_events/rule_on_rule/route';
+import { internalSigEventsMigrationRoutes } from './internal/sig_events/migration/route';
 
 export const streamsRouteRepository = {
   // internal APIs
@@ -68,6 +70,8 @@ export const streamsRouteRepository = {
   ...internalSigEventsDetectionsRoutes,
   ...internalSigEventsDiscoveriesRoutes,
   ...internalSigEventsEventsRoutes,
+  ...internalSigEventsRuleOnRuleRoutes,
+  ...internalSigEventsMigrationRoutes,
   // public APIs
   ...docCountsRoutes,
   ...crudRoutes,

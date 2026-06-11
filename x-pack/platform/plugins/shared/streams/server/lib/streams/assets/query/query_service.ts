@@ -43,19 +43,15 @@ import {
 } from '../storage_settings';
 import { QueryClient, type StoredQueryLink } from './query_client';
 import { computeRuleId, buildEsqlQueryFromKql } from './helpers/query';
-import { V1RulesAdapter } from './v1_rules_adapter';
-import { V2RulesAdapter, V2RulesNotInstalledAdapter } from './v2_rules_adapter';
-import { DualCleanupRulesAdapter } from './dual_cleanup_rules_adapter';
+import { getInferenceIdFromIndex } from '../../helpers/get_inference_id_from_index';
 import {
   DEFAULT_SIG_EVENTS_TUNING_CONFIG,
   type SigEventsTuningConfig,
 } from '../../../../../common/sig_events_tuning_config';
-import { getInferenceIdFromIndex } from '../../helpers/get_inference_id_from_index';
 import {
-  isSignificantEventsAlertingV2Active,
-  logAlertingV2PluginUnavailable,
-  readSignificantEventsAlertingV2UiEnabled,
-} from '../../../sig_events/significant_events_alerting_v2';
+  createDualCleanupRulesClient,
+  readSignificantEventsAlertingV2ActiveFromClients,
+} from '../../../sig_events/create_sig_events_rules_management_client';
 
 export class QueryService {
   constructor(
@@ -79,19 +75,14 @@ export class QueryService {
     const [core] = await this.coreSetup.getStartServices();
 
     const uiSettings = core.uiSettings.asScopedToClient(soClient);
-    const [isSignificantEventsEnabled, alertingV2UiEnabled] = await Promise.all([
+    const [isSignificantEventsEnabled, { alertingV2Active }] = await Promise.all([
       uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS).then((v) => v ?? false),
-      readSignificantEventsAlertingV2UiEnabled(uiSettings, this.logger),
+      readSignificantEventsAlertingV2ActiveFromClients({
+        uiSettingsClient: uiSettings,
+        alertingV2RulesClient,
+        logger: this.logger,
+      }),
     ]);
-
-    if (alertingV2UiEnabled && !alertingV2RulesClient) {
-      logAlertingV2PluginUnavailable(this.logger);
-    }
-
-    const alertingV2Enabled = isSignificantEventsAlertingV2Active(
-      alertingV2UiEnabled,
-      alertingV2RulesClient
-    );
 
     const existingInferenceId = await getInferenceIdFromIndex(
       esClient,
@@ -185,14 +176,12 @@ export class QueryService {
           }
 
           // Pre-existing queries were all rule-backed; back-fill the flag.
-          // STATS queries (introduced alongside the type field) are never
-          // rule-backed, so force false to avoid orphaned rule state.
-          // Corrupt/empty ES|QL or failed metadata also gets rule_backed=false
-          // since the alerting rule can't function without metadata.
+          // Corrupt/empty ES|QL or failed metadata gets rule_backed=false since
+          // the alerting rule can't function without metadata (MATCH only).
           if (!(RULE_BACKED in migrated)) {
             migrated = {
               ...migrated,
-              [RULE_BACKED]: !isCorruptEsql && !metadataFailed && derivedType !== QUERY_TYPE_STATS,
+              [RULE_BACKED]: !isCorruptEsql && !metadataFailed,
             };
           }
 
@@ -206,14 +195,12 @@ export class QueryService {
       }
     );
 
-    const v1Adapter = new V1RulesAdapter(alertingRulesClient);
-    const v2Client = alertingV2RulesClient
-      ? new V2RulesAdapter(alertingV2RulesClient)
-      : new V2RulesNotInstalledAdapter(this.logger);
-
-    const rulesManagementClient = alertingV2Enabled
-      ? new DualCleanupRulesAdapter(v2Client, v1Adapter, this.logger)
-      : new DualCleanupRulesAdapter(v1Adapter, v2Client, this.logger);
+    const rulesManagementClient = createDualCleanupRulesClient({
+      alertingV2Active,
+      alertingRulesClient,
+      alertingV2RulesClient,
+      logger: this.logger,
+    });
 
     return new QueryClient(
       {

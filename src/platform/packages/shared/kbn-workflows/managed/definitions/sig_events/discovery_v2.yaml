@@ -1,0 +1,104 @@
+version: "1"
+name: ".significant-events-discovery-v2"
+description: "Event-driven Discovery for alerting v2 rule-on-rule changepoints with debounced batching."
+enabled: true
+tags:
+  - observability
+  - streams
+  - significant-events
+  - discovery
+  - v2
+settings:
+  timeout: "20m"
+  concurrency:
+    key: "sig-events-discovery-pipeline"
+    strategy: drop
+    max: 1
+triggers:
+  - type: alerting.ruleSignalsWritten
+    on:
+      condition: 'event.rule.kind: "signal" AND event.rule.tags: "sigevents:rule-on-rule"'
+steps:
+  - name: set_space_vars
+    type: data.set
+    with:
+      spaceId: "{{ workflow.spaceId }}"
+
+  - name: debounce_window
+    type: wait
+    with:
+      duration: "30s"
+
+  - name: fetch_changepoints_in_window
+    type: kibana.request
+    with:
+      method: POST
+      path: "/internal/streams/sig_events/discovery_v2/_fetch_changepoints"
+      headers:
+        x-elastic-internal-origin: "kibana"
+      body:
+        lookback: "now-35s"
+
+  - name: run_investigator
+    type: ai.agent
+    agent-id: "platform.streams.significant-events.discovery.investigator"
+    connector-id: ".openai-gpt-5.2-chat_completion"
+    create-conversation: true
+    with:
+      message: |
+        ## v2 changepoint batch (source of truth)
+
+        Investigate these rule-on-rule changepoint detections from `.rule-events` (post-debounce window).
+        Do not rely on the workflow trigger payload — this list is authoritative.
+
+        ## Active batch
+        {{ steps.fetch_changepoints_in_window.output.detections | json }}
+
+        Space: {{ variables.spaceId }}
+      schema:
+        type: object
+        properties:
+          discoveries:
+            type: array
+            items:
+              type: object
+              properties:
+                title:
+                  type: string
+                summary:
+                  type: string
+                root_cause:
+                  type: string
+                impact:
+                  type: string
+                confidence:
+                  type: number
+                stream_names:
+                  type: array
+                  items:
+                    type: string
+                rule_names:
+                  type: array
+                  items:
+                    type: string
+                monitored_rule_id:
+                  type: string
+              required: [title, summary, monitored_rule_id]
+        required: [discoveries]
+
+  - name: write_significant_events_foreach
+    type: alerting_v2.create_alert
+    foreach: "{{ steps.run_investigator.output.discoveries }}"
+    with:
+      source_id: "sigevents"
+      episode_id: "{{ execution.id }}-{{ foreach.index }}"
+      fingerprint: "{{ foreach.item.monitored_rule_id }}"
+      data:
+        title: "{{ foreach.item.title }}"
+        summary: "{{ foreach.item.summary }}"
+        root_cause: "{{ foreach.item.root_cause }}"
+        impact: "{{ foreach.item.impact }}"
+        confidence: "${{ foreach.item.confidence }}"
+        stream_names: "${{ foreach.item.stream_names }}"
+        rule_names: "${{ foreach.item.rule_names }}"
+        monitored_rule_id: "{{ foreach.item.monitored_rule_id }}"

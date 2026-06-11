@@ -130,6 +130,10 @@ export class KnowledgeIndicatorClient {
     return this.reader.getPromotableUnbackedQueries(filters);
   }
 
+  getRuleBackedQueryLinks(): Promise<QueryLink[]> {
+    return this.reader.getRuleBackedQueryLinks();
+  }
+
   findIndicators(
     streams: string | string[],
     query: string,

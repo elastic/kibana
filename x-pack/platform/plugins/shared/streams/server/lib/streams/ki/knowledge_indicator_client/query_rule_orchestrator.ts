@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { QueryLink, StreamQuery } from '@kbn/streams-schema';
-import { QUERY_TYPE_STATS, deriveQueryType, hasSameEsql } from '@kbn/streams-schema';
+import { deriveQueryType, hasSameEsql } from '@kbn/streams-schema';
 import type { Streams } from '@kbn/streams-schema';
 import { computeRuleId } from '../helpers/compute_rule_id';
 import { installQueries, uninstallQueries } from './rule_orchestration';
@@ -46,31 +46,32 @@ export class QueryRuleOrchestrator {
 
     const toCreate: QueryLink[] = [];
     const toUpdate: QueryLink[] = [];
-    const demotedToStats: QueryLink[] = [];
     const allNext: Array<{ query: StreamQuery; rule_backed: boolean; rule_id: string }> = [];
 
     for (const query of queries) {
       const current = currentByQueryId.get(query.id);
-      const isStats = deriveQueryType(query.esql.query) === QUERY_TYPE_STATS;
       const ruleId = computeRuleId(stream, query.id, query.esql.query);
       if (!current) {
-        const ruleBacked = !isStats;
         const link: QueryLink = {
           'asset.uuid': query.id,
           'asset.type': 'query',
           'asset.id': query.id,
           stream_name: stream,
-          rule_backed: ruleBacked,
+          rule_backed: true,
           rule_id: ruleId,
           query: { ...query, type: deriveQueryType(query.esql.query) },
         };
-        if (ruleBacked) toCreate.push(link);
-        allNext.push({ query: link.query, rule_backed: ruleBacked, rule_id: ruleId });
-      } else if (!current.rule_backed || isStats) {
-        if (current.rule_backed && isStats) {
-          demotedToStats.push(current);
-        }
-        allNext.push({ query, rule_backed: false, rule_id: current.rule_id });
+        toCreate.push(link);
+        allNext.push({ query: link.query, rule_backed: true, rule_id: ruleId });
+      } else if (!current.rule_backed) {
+        const link: QueryLink = {
+          ...current,
+          query: { ...query, type: deriveQueryType(query.esql.query) },
+          rule_backed: true,
+          rule_id: ruleId,
+        };
+        toCreate.push(link);
+        allNext.push({ query: link.query, rule_backed: true, rule_id: ruleId });
       } else if (!hasSameEsql(current.query.esql.query, query.esql.query)) {
         const link: QueryLink = {
           'asset.uuid': query.id,
@@ -93,12 +94,11 @@ export class QueryRuleOrchestrator {
     const toUninstall = currentLinks.filter(
       (link) =>
         (link.rule_backed && !nextIds.has(link.query.id)) ||
-        toCreate.some((c) => c.query.id === link.query.id && link.rule_backed) ||
-        demotedToStats.some((d) => d.query.id === link.query.id)
+        toCreate.some((c) => c.query.id === link.query.id && link.rule_backed)
     );
 
     try {
-      await installQueries(this.rulesManagementClient, toCreate, toUpdate, definition);
+      await installQueries(this.rulesManagementClient, toCreate, toUpdate);
     } catch (installError) {
       this.logger.error(
         `installQueries failed during syncQueries for stream "${stream}". Compensating by uninstalling created rules.`
@@ -242,26 +242,17 @@ export class QueryRuleOrchestrator {
     const idSet = new Set(queryIds);
     const candidates = links.filter((link) => idSet.has(link.query.id) && !link.rule_backed);
 
-    const skippedStats = candidates.filter((link) => link.query.type === QUERY_TYPE_STATS);
-    if (skippedStats.length > 0) {
-      this.logger.info(
-        `Skipping ${skippedStats.length} STATS queries from promotion for stream "${streamName}" (not yet supported as rules).`
-      );
-    }
-
-    const toPromote = candidates
-      .filter((link) => link.query.type !== QUERY_TYPE_STATS)
-      .map((link) => ({
-        ...link,
-        rule_backed: true,
-        rule_id: computeRuleId(streamName, link.query.id, link.query.esql.query),
-      }));
+    const toPromote = candidates.map((link) => ({
+      ...link,
+      rule_backed: true,
+      rule_id: computeRuleId(streamName, link.query.id, link.query.esql.query),
+    }));
 
     if (toPromote.length === 0) {
-      return { promoted: 0, skipped_stats: skippedStats.length };
+      return { promoted: 0, skipped_stats: 0 };
     }
 
-    await installQueries(this.rulesManagementClient, toPromote, [], definition);
+    await installQueries(this.rulesManagementClient, toPromote, []);
 
     try {
       await this.writer.bulk(
@@ -290,7 +281,7 @@ export class QueryRuleOrchestrator {
       throw storageError;
     }
 
-    return { promoted: toPromote.length, skipped_stats: skippedStats.length };
+    return { promoted: toPromote.length, skipped_stats: 0 };
   }
 
   async promoteUnbackedQueries({
