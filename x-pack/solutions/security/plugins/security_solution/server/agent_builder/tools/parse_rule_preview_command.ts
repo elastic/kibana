@@ -416,7 +416,7 @@ export const parseRulePreviewCommand = (command: string): ParsedPreviewCommand =
     .fail((msg: string | null) => {
       result = { kind: 'error', message: msg ?? 'Parse error. Run --help to see usage.' };
     })
-    .parse(tokens, {}, (_err: Error | null, _argv: unknown, output: string) => {
+    .parse(tokens, {}, (_err, _argv, output) => {
       if (!result && output) result = { kind: 'help', text: output };
     });
 
