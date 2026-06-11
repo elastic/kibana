@@ -133,6 +133,7 @@ export const AttacksTableSortSelect = React.memo(
 
     return (
       <EuiPopover
+        aria-label={i18n.SORT_BY}
         button={button}
         isOpen={isPopoverOpen}
         closePopover={closePopover}

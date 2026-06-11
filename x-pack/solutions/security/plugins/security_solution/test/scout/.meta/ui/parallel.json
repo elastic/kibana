@@ -1,5 +1,5 @@
 {
-  "sha1": "7c3e92258616790697b464785ec400a95a6acc86",
+  "sha1": "3ae144fc107fe96fd2299b4ff86b5e0aa109301b",
   "tests": [
     {
       "id": "4402bb6f4421c38-1054e603e578b92",
@@ -56,7 +56,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/entity_analytics/engine_status_management.spec.ts",
-        "line": 26,
+        "line": 24,
         "column": 14
       }
     },
@@ -72,7 +72,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/entity_analytics/engine_status_management.spec.ts",
-        "line": 39,
+        "line": 37,
         "column": 14
       }
     },
@@ -88,7 +88,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/entity_analytics/management_page.spec.ts",
-        "line": 43,
+        "line": 41,
         "column": 14
       }
     },
@@ -104,7 +104,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/entity_analytics/management_page.spec.ts",
-        "line": 50,
+        "line": 48,
         "column": 14
       }
     },
@@ -120,7 +120,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/entity_analytics/management_page.spec.ts",
-        "line": 59,
+        "line": 57,
         "column": 14
       }
     },
@@ -136,7 +136,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/entity_analytics/management_page.spec.ts",
-        "line": 96,
+        "line": 94,
         "column": 14
       }
     },
@@ -152,7 +152,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/entity_analytics/management_page.spec.ts",
-        "line": 107,
+        "line": 105,
         "column": 14
       }
     },
@@ -168,7 +168,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/entity_analytics/management_page.spec.ts",
-        "line": 118,
+        "line": 116,
         "column": 14
       }
     },
@@ -182,7 +182,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/entity_analytics/privileges_management.spec.ts",
-        "line": 38,
+        "line": 37,
         "column": 14
       }
     },
@@ -196,7 +196,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/entity_analytics/privileges_management.spec.ts",
-        "line": 51,
+        "line": 50,
         "column": 14
       }
     },
@@ -212,7 +212,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/entity_analytics/risk_score_management.spec.ts",
-        "line": 43,
+        "line": 41,
         "column": 14
       }
     },
@@ -228,7 +228,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/entity_analytics/risk_score_management.spec.ts",
-        "line": 51,
+        "line": 49,
         "column": 14
       }
     },
@@ -244,7 +244,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/entity_analytics/risk_score_management.spec.ts",
-        "line": 72,
+        "line": 70,
         "column": 14
       }
     },
@@ -260,7 +260,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/entity_analytics/risk_score_management.spec.ts",
-        "line": 89,
+        "line": 88,
         "column": 14
       }
     },
@@ -292,7 +292,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/entity_analytics/risk_score_management.spec.ts",
-        "line": 128,
+        "line": 129,
         "column": 14
       }
     },
@@ -313,6 +313,34 @@
       }
     },
     {
+      "id": "105a595b3d3179c-668900ccdf79d81",
+      "title": "Bulk add alerts to chat should disable the \"Add to chat\" bulk action when all alerts are selected via the query button",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/investigations/bulk_add_alerts_to_chat.spec.ts",
+        "line": 60,
+        "column": 14
+      }
+    },
+    {
+      "id": "105a595b3d3179c-236824c49e31bf1",
+      "title": "Bulk add alerts to chat should open agent builder conversation with attachment chip and pre-filled prompt, and send multiple alerts to the LLM",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/investigations/bulk_add_alerts_to_chat.spec.ts",
+        "line": 89,
+        "column": 14
+      }
+    },
+    {
       "id": "a1e93b8abddca76-5a5001b848eec67",
       "title": "Run workflow alert action should show success toast with workflow link and open workflows app in new tab after executing",
       "expectedStatus": "skipped",
@@ -322,7 +350,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/investigations/run_workflow_action.spec.ts",
-        "line": 81,
+        "line": 41,
         "column": 12
       }
     },
@@ -336,7 +364,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/investigations/run_workflow_action.spec.ts",
-        "line": 153,
+        "line": 113,
         "column": 12
       }
     },
@@ -350,7 +378,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/investigations/run_workflow_action.spec.ts",
-        "line": 171,
+        "line": 131,
         "column": 12
       }
     },

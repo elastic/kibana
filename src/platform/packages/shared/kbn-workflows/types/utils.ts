@@ -77,16 +77,6 @@ export function isFailedBeforeSteps(
   return status === ExecutionStatus.FAILED && stepExecutions.length === 0;
 }
 
-export function isCancelableStatus(status: ExecutionStatus) {
-  return (
-    status === ExecutionStatus.RUNNING ||
-    status === ExecutionStatus.WAITING ||
-    status === ExecutionStatus.WAITING_FOR_INPUT ||
-    status === ExecutionStatus.WAITING_FOR_CHILD ||
-    status === ExecutionStatus.PENDING
-  );
-}
-
 // Type guards for steps types
 export const isWaitStep = (step: Step): step is WaitStep => step.type === 'wait';
 export const isElasticsearchStep = (step: Step): step is ElasticsearchStep =>

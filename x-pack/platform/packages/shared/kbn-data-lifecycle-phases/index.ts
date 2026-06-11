@@ -13,4 +13,6 @@ export * from './src/edit_data_lifecycle_flyout';
 export * from './src/flyout_footer_with_retention_warning';
 export * from './src/enterprise_gating_modal';
 export * from './src/default_snapshot_repository_required_modal';
+export * from './src/edit_failed_data_lifecycle_flyout';
 export * from './src/phase_requirement_badges';
+export * from './src/searchable_snapshot_repository_info';

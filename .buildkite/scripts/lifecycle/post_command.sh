@@ -47,23 +47,6 @@ if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
     '.es/uiam*.log'
   )
 
-  if [[ "${BUILDKITE_PIPELINE_SLUG:-}" == "kibana-elasticsearch-snapshot-verify" ]]; then
-    # Rescue ES Docker container logs the in-process teardown may have missed.
-    if command -v docker >/dev/null 2>&1; then
-      for cname in es01 es02 es03 es01-linked es02-linked es03-linked; do
-        if ! docker container inspect "$cname" >/dev/null 2>&1; then
-          continue
-        fi
-        cid=$(docker inspect --format '{{.Id}}' "$cname" 2>/dev/null | cut -c1-12)
-        out=".es/${cname}-${cid}.log"
-        if [[ -n "$cid" && ! -s "$out" ]]; then
-          mkdir -p .es
-          docker logs "$cname" > "$out" 2>&1 || true
-        fi
-      done
-    fi
-  fi
-
   buildkite-agent artifact upload "$(printf '%s;' "${ARTIFACT_PATTERNS[@]}")"
 
   if [[ $BUILDKITE_COMMAND_EXIT_STATUS -ne 0 ]]; then
