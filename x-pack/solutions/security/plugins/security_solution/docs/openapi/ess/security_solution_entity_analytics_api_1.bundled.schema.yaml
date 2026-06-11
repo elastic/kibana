@@ -67,6 +67,16 @@ paths:
             maximum: 1000
             minimum: 1
             type: integer
+        - description: >-
+            When true, each entry also includes the contributions recorded for
+            that scoring run (`inputs`, `modifiers`, category 2 fields, and
+            `criticality_level`), when present on the underlying document.
+          in: query
+          name: include_contributions
+          required: false
+          schema:
+            default: false
+            type: boolean
       responses:
         '200':
           content:
@@ -95,6 +105,14 @@ paths:
         - Security Entity Analytics API
 components:
   schemas:
+    AssetCriticalityLevel:
+      description: The criticality level of the asset.
+      enum:
+        - low_impact
+        - medium_impact
+        - high_impact
+        - extreme_impact
+      type: string
     EntityRiskLevels:
       enum:
         - Unknown
@@ -132,6 +150,23 @@ components:
         category_1_score:
           format: double
           type: number
+        category_2_count:
+          type: integer
+        category_2_score:
+          format: double
+          type: number
+        criticality_level:
+          $ref: '#/components/schemas/AssetCriticalityLevel'
+        inputs:
+          description: Present only when requested with `include_contributions=true`.
+          items:
+            $ref: '#/components/schemas/RiskScoreInput'
+          type: array
+        modifiers:
+          description: Present only when requested with `include_contributions=true`.
+          items:
+            $ref: '#/components/schemas/RiskScoreModifier'
+          type: array
         score_type:
           enum:
             - base
@@ -158,6 +193,67 @@ components:
         - entity_id
         - entity_type
         - entries
+    RiskScoreInput:
+      description: A generic representation of a document contributing to a Risk Score.
+      type: object
+      properties:
+        category:
+          description: The risk category of the risk input document.
+          example: category_1
+          type: string
+        contribution_score:
+          format: double
+          type: number
+        description:
+          description: A human-readable description of the risk input document.
+          example: 'Generated from Detection Engine Rule: Malware Prevention Alert'
+          type: string
+        entity_id:
+          description: The EUID of the entity within the graph that generated this alert.
+          type: string
+        id:
+          description: The unique identifier (`_id`) of the original source document
+          example: 91a93376a507e86cfbf282166275b89f9dbdb1f0be6c8103c6ff2909ca8e1a1c
+          type: string
+        index:
+          description: The unique index (`_index`) of the original source document
+          example: .internal.alerts-security.alerts-default-000001
+          type: string
+        risk_score:
+          description: The weighted risk score of the risk input document.
+          format: double
+          maximum: 100
+          minimum: 0
+          type: number
+        timestamp:
+          description: The @timestamp of the risk input document.
+          example: '2017-07-21T17:32:28Z'
+          type: string
+      required:
+        - id
+        - index
+        - description
+        - category
+    RiskScoreModifier:
+      description: A modifier that was applied to the risk score calculation.
+      type: object
+      properties:
+        contribution:
+          format: double
+          type: number
+        metadata:
+          additionalProperties: true
+          type: object
+        modifier_value:
+          format: double
+          type: number
+        subtype:
+          type: string
+        type:
+          type: string
+      required:
+        - type
+        - contribution
   securitySchemes:
     BasicAuth:
       scheme: basic

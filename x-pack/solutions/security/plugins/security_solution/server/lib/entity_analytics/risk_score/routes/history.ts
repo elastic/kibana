@@ -47,8 +47,31 @@ export const riskScoreHistoryRoute = (
         async (context, request, response): Promise<IKibanaResponse<RiskScoreHistoryResponse>> => {
           const siemResponse = buildSiemResponse(response);
 
-          try {
-            const {
+        try {
+          const {
+            entity_type: entityType,
+            entity_id: entityId,
+            from,
+            to,
+            score_type: scoreType,
+            page_size: pageSize,
+            include_contributions: includeContributions,
+          } = request.query;
+
+          const riskScoreDataClient = (await context.securitySolution).getRiskScoreDataClient();
+
+          const entries = await riskScoreDataClient.getRiskScoreHistory({
+            entityType,
+            entityId,
+            range: { gte: from ?? DEFAULT_FROM, lte: to ?? DEFAULT_TO },
+            scoreType,
+            pageSize: pageSize ?? DEFAULT_PAGE_SIZE,
+            includeContributions: includeContributions ?? false,
+          });
+
+          return response.ok({
+            body: {
+              entity_id: entityId,
               entity_type: entityType,
               entity_id: entityId,
               from,

@@ -3188,24 +3188,7 @@ components:
         modifiers:
           description: A list of modifiers that were applied to the risk score calculation.
           items:
-            type: object
-            properties:
-              contribution:
-                format: double
-                type: number
-              metadata:
-                additionalProperties: true
-                type: object
-              modifier_value:
-                format: double
-                type: number
-              subtype:
-                type: string
-              type:
-                type: string
-            required:
-              - type
-              - contribution
+            $ref: '#/components/schemas/RiskScoreModifier'
           type: array
         notes:
           items:
@@ -3694,6 +3677,26 @@ components:
         - index
         - description
         - category
+    RiskScoreModifier:
+      description: A modifier that was applied to the risk score calculation.
+      type: object
+      properties:
+        contribution:
+          format: double
+          type: number
+        metadata:
+          additionalProperties: true
+          type: object
+        modifier_value:
+          format: double
+          type: number
+        subtype:
+          type: string
+        type:
+          type: string
+      required:
+        - type
+        - contribution
     ServiceEntity:
       additionalProperties: false
       description: An entity record representing a service, stored in the Entity Store
