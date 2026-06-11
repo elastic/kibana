@@ -47,7 +47,6 @@ const getMemberColumns = (
       defaultMessage: 'Member SLO',
     }),
     truncateText: true,
-    width: '220px',
   },
   {
     field: 'status',
@@ -62,7 +61,6 @@ const getMemberColumns = (
     name: i18n.translate('xpack.slo.compositeSloList.members.instanceId', {
       defaultMessage: 'Instance',
     }),
-    width: '220px',
     render: (instanceId?: string) => instanceId ?? NOT_AVAILABLE_LABEL,
   },
   {
@@ -161,6 +159,7 @@ export function CompositeSloMembersTable({
   return (
     <div css={{ padding: '16px' }}>
       <EuiBasicTable
+        css={{ overflowX: 'auto' }}
         tableCaption={i18n.translate('xpack.slo.compositeSloList.members.tableCaption', {
           defaultMessage: 'Member SLOs',
         })}
