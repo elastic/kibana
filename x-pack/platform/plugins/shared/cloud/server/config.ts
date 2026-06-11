@@ -90,9 +90,6 @@ const configSchema = schema.object({
     serverless: schema.string({ defaultValue: '/projects/create' }),
   }),
   trial_end_date: schema.maybe(schema.string()),
-  create_project_url: offeringBasedSchema({
-    serverless: schema.string({ defaultValue: '/projects/create' }),
-  }),
   is_elastic_staff_owned: schema.maybe(schema.boolean()),
   managed_otlp: schema.maybe(managedOtlpConfigSchema),
   onboarding: schema.maybe(

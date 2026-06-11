@@ -41,7 +41,7 @@ export type ManagementTabs = Record<
   string,
   {
     content: JSX.Element;
-    label: string;
+    label: ReactNode;
   }
 >;
 

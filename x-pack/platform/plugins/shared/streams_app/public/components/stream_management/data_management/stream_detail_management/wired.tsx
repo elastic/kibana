@@ -185,9 +185,6 @@ export function WiredStreamDetailManagement({
                 refreshDefinition={refreshDefinition}
               />
             ),
-            // TBD hack: the new app header types `AppHeaderTab.label` as `string`, but we need a
-            // ReactNode here to render the lifecycle tab actions. Force-cast for now until app
-            // header tabs support ReactNode labels.
             label: (
               <LifecycleTabLabel
                 definition={definition}
@@ -196,7 +193,7 @@ export function WiredStreamDetailManagement({
                 notifications={notifications}
                 share={share}
               />
-            ) as unknown as string,
+            ),
           },
         }
       : {}),
