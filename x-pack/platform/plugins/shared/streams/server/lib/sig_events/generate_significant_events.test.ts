@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { InferenceClient } from '@kbn/inference-common';
-import type { ToolsStart } from '@kbn/agent-builder-server';
 import type { Streams } from '@kbn/streams-schema';
 import { generateSignificantEvents } from '@kbn/streams-ai';
-import { createSemanticCodeSearchTools } from '../semantic_code_search_grounding/semantic_code_search_tools';
+import type { SemanticCodeSearchTools } from '../semantic_code_search_grounding/semantic_code_search_tools';
 import type { FeatureClient } from '../streams/feature/feature_client';
 import type { QueryClient } from '../streams/assets/query/query_client';
 import { generateSignificantEventDefinitions } from './generate_significant_events';
@@ -57,14 +56,19 @@ describe('generateSignificantEventDefinitions (semantic code search wiring)', ()
     'select_code_index',
   ];
 
-  const makeCodeTools = () =>
-    createSemanticCodeSearchTools({
-      agentBuilderTools: { execute: jest.fn() } as unknown as ToolsStart,
-      request: {} as KibanaRequest,
-      esClient: {} as ElasticsearchClient,
-      codeIndex: 'code-acme_checkout',
-      logger,
-    });
+  // Fake of the createSemanticCodeSearchTools output. The factory itself is
+  // covered by its own unit test; here we only assert how these tools are
+  // wired into generateSignificantEventDefinitions.
+  const makeCodeTools = (): SemanticCodeSearchTools => ({
+    tools: Object.fromEntries(
+      SCS_TOOL_NAMES.map((name) => [
+        name,
+        { description: name, schema: { type: 'object' as const, properties: {} } },
+      ])
+    ),
+    callbacks: Object.fromEntries(SCS_TOOL_NAMES.map((name) => [name, jest.fn()])),
+    promptSnippet: 'Source code grounding linked to code-acme_checkout',
+  });
 
   beforeEach(() => {
     logger = loggerMock.create();

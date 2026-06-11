@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { z } from '@kbn/zod/v4';
 import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ToolsStart } from '@kbn/agent-builder-server';
@@ -18,6 +19,10 @@ import {
   SCS_SEARCH_COMMIT_MESSAGES_TOOL_ID,
   SCS_SEMANTIC_SEARCH_TOOL_ID,
   SCS_SYMBOL_ANALYSIS_TOOL_ID,
+  SCS_GET_COMMIT_TOOL_ID,
+  SCS_FILE_HISTORY_TOOL_ID,
+  SCS_COCHANGES_TOOL_ID,
+  SCS_FILE_AUTHORS_TOOL_ID,
 } from './semantic_code_search_tools';
 
 const makeToolCall = (name: string, args: Record<string, unknown>): ToolCall => ({
@@ -39,9 +44,58 @@ const ALL_TOOL_NAMES = [
   'select_code_index',
 ];
 
+// Zod input schemas mirroring the SCS workflow tool inputs the bridge reads
+// from the Agent Builder registry (`index` / `repository` are required there
+// and hidden/injected by the factory).
+const SCHEMA_MAP: Record<string, z.ZodType> = {
+  [SCS_LIST_INDICES_TOOL_ID]: z.object({}),
+  [SCS_SEMANTIC_SEARCH_TOOL_ID]: z.object({
+    query: z.string().optional(),
+    kql: z.string().optional(),
+    size: z.number().optional(),
+    index: z.string(),
+  }),
+  [SCS_READ_FILE_TOOL_ID]: z.object({ file_paths: z.string(), index: z.string() }),
+  [SCS_SYMBOL_ANALYSIS_TOOL_ID]: z.object({ symbol_name: z.string(), index: z.string() }),
+  [SCS_SEARCH_COMMIT_MESSAGES_TOOL_ID]: z.object({
+    query: z.string(),
+    file_paths: z.string().optional(),
+    time_range_start: z.string().optional(),
+    time_range_end: z.string().optional(),
+    repository: z.string(),
+  }),
+  [SCS_FIND_INTRODUCING_COMMIT_TOOL_ID]: z.object({
+    symbol_pattern: z.string(),
+    file_path: z.string().optional(),
+    repository: z.string(),
+  }),
+  [SCS_FILE_HISTORY_TOOL_ID]: z.object({
+    file_path: z.string(),
+    after: z.string().optional(),
+    before: z.string().optional(),
+    repository: z.string(),
+  }),
+  [SCS_GET_COMMIT_TOOL_ID]: z.object({
+    commit_hash: z.string(),
+    include_diffs: z.boolean().optional(),
+    repository: z.string(),
+  }),
+  [SCS_COCHANGES_TOOL_ID]: z.object({
+    file_path: z.string(),
+    since: z.string().optional(),
+    repository: z.string(),
+  }),
+  [SCS_FILE_AUTHORS_TOOL_ID]: z.object({
+    file_paths: z.string(),
+    since: z.string().optional(),
+    repository: z.string(),
+  }),
+};
+
 describe('createSemanticCodeSearchTools', () => {
   let logger: jest.Mocked<Logger>;
   let execute: jest.Mock;
+  let registryGet: jest.Mock;
   let agentBuilderTools: ToolsStart;
   let esClient: jest.Mocked<ElasticsearchClient>;
   const request = {} as KibanaRequest;
@@ -54,43 +108,95 @@ describe('createSemanticCodeSearchTools', () => {
     });
   };
 
-  // Builds the tools with an explicitly linked (pre-selected) code index.
   const buildLinked = () =>
     createSemanticCodeSearchTools({ agentBuilderTools, request, esClient, codeIndex, logger });
-
-  // Builds the tools with no pre-linked index (agent must select one).
   const buildUnlinked = () =>
     createSemanticCodeSearchTools({ agentBuilderTools, request, esClient, logger });
 
   beforeEach(() => {
     logger = loggerMock.create();
     execute = jest.fn();
-    agentBuilderTools = { execute } as unknown as ToolsStart;
+    registryGet = jest.fn(async (toolId: string) => {
+      const schema = SCHEMA_MAP[toolId];
+      if (!schema) {
+        throw new Error(`tool ${toolId} not found`);
+      }
+      return {
+        id: toolId,
+        description: `description for ${toolId}`,
+        getSchema: async () => schema,
+      };
+    });
+    agentBuilderTools = {
+      execute,
+      getRegistry: jest.fn(async () => ({ get: registryGet })),
+    } as unknown as ToolsStart;
     esClient = { search: jest.fn() } as unknown as jest.Mocked<ElasticsearchClient>;
     mockRepositoryResponse(repository);
   });
 
-  it('always exposes the discovery, code, and git-history tools', () => {
-    const { tools, callbacks } = buildUnlinked();
-    expect(Object.keys(tools).sort()).toEqual(ALL_TOOL_NAMES);
-    expect(Object.keys(callbacks).sort()).toEqual(ALL_TOOL_NAMES);
+  it('bridges the discovery, code, and git-history tools', async () => {
+    const result = await buildUnlinked();
+    expect(result).toBeDefined();
+    expect(Object.keys(result!.tools).sort()).toEqual(ALL_TOOL_NAMES);
+    expect(Object.keys(result!.callbacks).sort()).toEqual(ALL_TOOL_NAMES);
   });
 
-  it('mentions the pre-selected index in the prompt snippet when linked', () => {
-    const { promptSnippet } = buildLinked();
+  it('hides the injected index/repository params from the LLM-facing schema', async () => {
+    const { tools } = (await buildLinked())!;
+    expect(Object.keys(tools.code_search.schema?.properties ?? {})).not.toContain('index');
+    expect(Object.keys(tools.git_search_commits.schema?.properties ?? {})).not.toContain(
+      'repository'
+    );
+    // Non-hidden params survive.
+    expect(Object.keys(tools.code_search.schema?.properties ?? {})).toEqual(
+      expect.arrayContaining(['query', 'kql', 'size'])
+    );
+  });
+
+  it('returns undefined when no SCS tools can be resolved', async () => {
+    registryGet.mockRejectedValue(new Error('not installed'));
+    const result = await buildUnlinked();
+    expect(result).toBeUndefined();
+  });
+
+  it('skips individual tools that cannot be resolved', async () => {
+    registryGet.mockImplementation(async (toolId: string) => {
+      if (
+        toolId.startsWith('scs.get_') ||
+        toolId.includes('commit') ||
+        toolId.includes('cochanges')
+      ) {
+        throw new Error('git history not installed');
+      }
+      const schema = SCHEMA_MAP[toolId];
+      return { id: toolId, description: toolId, getSchema: async () => schema };
+    });
+    const { tools } = (await buildUnlinked())!;
+    expect(Object.keys(tools).sort()).toEqual([
+      'analyze_symbol',
+      'code_search',
+      'list_code_indices',
+      'read_code_file',
+      'select_code_index',
+    ]);
+  });
+
+  it('mentions the pre-selected index in the prompt snippet when linked', async () => {
+    const { promptSnippet } = (await buildLinked())!;
     expect(promptSnippet).toContain(codeIndex);
     expect(promptSnippet).toContain('pre-selected');
   });
 
-  it('instructs the agent to discover an index when not linked', () => {
-    const { promptSnippet } = buildUnlinked();
+  it('instructs the agent to discover an index when not linked', async () => {
+    const { promptSnippet } = (await buildUnlinked())!;
     expect(promptSnippet).toContain('No code index is pre-linked');
     expect(promptSnippet).toContain('list_code_indices');
   });
 
   it('list_code_indices executes the SCS list-indices tool with no params', async () => {
     execute.mockResolvedValue({ results: [] });
-    const { callbacks } = buildUnlinked();
+    const { callbacks } = (await buildUnlinked())!;
 
     await callbacks.list_code_indices(makeToolCall('list_code_indices', {}));
 
@@ -105,7 +211,7 @@ describe('createSemanticCodeSearchTools', () => {
     execute.mockResolvedValue({
       results: [{ tool_result_id: 'r1', type: ToolResultType.other, data: { hit: 1 } }],
     });
-    const { callbacks } = buildLinked();
+    const { callbacks } = (await buildLinked())!;
 
     const result = await callbacks.code_search(
       makeToolCall('code_search', { query: 'connection refused', size: 10 })
@@ -123,7 +229,7 @@ describe('createSemanticCodeSearchTools', () => {
   });
 
   it('code_search returns an error when no index is selected', async () => {
-    const { callbacks } = buildUnlinked();
+    const { callbacks } = (await buildUnlinked())!;
 
     const result = await callbacks.code_search(makeToolCall('code_search', { query: 'x' }));
 
@@ -133,7 +239,7 @@ describe('createSemanticCodeSearchTools', () => {
   });
 
   it('select_code_index activates an index and reports git history availability', async () => {
-    const { callbacks } = buildUnlinked();
+    const { callbacks } = (await buildUnlinked())!;
 
     const result = await callbacks.select_code_index(
       makeToolCall('select_code_index', { index: 'code-acme_payments' })
@@ -146,7 +252,6 @@ describe('createSemanticCodeSearchTools', () => {
       repository,
     });
 
-    // Subsequent code_search now targets the selected index.
     execute.mockResolvedValue({ results: [] });
     await callbacks.code_search(makeToolCall('code_search', { query: 'x' }));
     expect(execute).toHaveBeenCalledWith({
@@ -157,7 +262,7 @@ describe('createSemanticCodeSearchTools', () => {
   });
 
   it('select_code_index returns an error when index is missing', async () => {
-    const { callbacks } = buildUnlinked();
+    const { callbacks } = (await buildUnlinked())!;
     const result = await callbacks.select_code_index(makeToolCall('select_code_index', {}));
     expect(esClient.search).not.toHaveBeenCalled();
     expect(result.response).toEqual({ results: [], count: 0, error: '"index" is required.' });
@@ -165,7 +270,7 @@ describe('createSemanticCodeSearchTools', () => {
 
   it('read_code_file executes the SCS read-file tool with file_paths and the active index', async () => {
     execute.mockResolvedValue({ results: [] });
-    const { callbacks } = buildLinked();
+    const { callbacks } = (await buildLinked())!;
 
     await callbacks.read_code_file(makeToolCall('read_code_file', { file_paths: 'a.go,b.go' }));
 
@@ -178,7 +283,7 @@ describe('createSemanticCodeSearchTools', () => {
 
   it('analyze_symbol executes the SCS symbol analysis tool with symbol_name and the active index', async () => {
     execute.mockResolvedValue({ results: [] });
-    const { callbacks } = buildLinked();
+    const { callbacks } = (await buildLinked())!;
 
     await callbacks.analyze_symbol(
       makeToolCall('analyze_symbol', { symbol_name: 'ConnectionRefusedError' })
@@ -191,8 +296,8 @@ describe('createSemanticCodeSearchTools', () => {
     });
   });
 
-  it('analyze_symbol returns an error response when symbol_name is missing', async () => {
-    const { callbacks } = buildLinked();
+  it('returns a required-argument error (derived from the registry schema) when symbol_name is missing', async () => {
+    const { callbacks } = (await buildLinked())!;
     const result = await callbacks.analyze_symbol(makeToolCall('analyze_symbol', {}));
     expect(execute).not.toHaveBeenCalled();
     expect(result.response).toEqual({
@@ -202,8 +307,8 @@ describe('createSemanticCodeSearchTools', () => {
     });
   });
 
-  it('read_code_file returns an error response when file_paths is missing', async () => {
-    const { callbacks } = buildLinked();
+  it('returns a required-argument error when file_paths is missing', async () => {
+    const { callbacks } = (await buildLinked())!;
     const result = await callbacks.read_code_file(makeToolCall('read_code_file', {}));
     expect(execute).not.toHaveBeenCalled();
     expect(result.response).toEqual({
@@ -215,7 +320,7 @@ describe('createSemanticCodeSearchTools', () => {
 
   it('surfaces tool execution errors as a response instead of throwing', async () => {
     execute.mockRejectedValue(new Error('workflow not found'));
-    const { callbacks } = buildLinked();
+    const { callbacks } = (await buildLinked())!;
 
     const result = await callbacks.code_search(makeToolCall('code_search', { query: 'x' }));
 
@@ -230,7 +335,7 @@ describe('createSemanticCodeSearchTools', () => {
         { tool_result_id: 'r1', type: ToolResultType.other, data: { ok: true } },
       ],
     });
-    const { callbacks } = buildLinked();
+    const { callbacks } = (await buildLinked())!;
 
     const result = await callbacks.code_search(makeToolCall('code_search', { query: 'x' }));
 
@@ -244,7 +349,7 @@ describe('createSemanticCodeSearchTools', () => {
   describe('git-history tools', () => {
     it('resolve the repository for the active index lazily and inject it', async () => {
       execute.mockResolvedValue({ results: [] });
-      const { callbacks } = buildLinked();
+      const { callbacks } = (await buildLinked())!;
 
       await callbacks.git_search_commits(
         makeToolCall('git_search_commits', {
@@ -267,7 +372,7 @@ describe('createSemanticCodeSearchTools', () => {
 
     it('memoize repository resolution across calls', async () => {
       execute.mockResolvedValue({ results: [] });
-      const { callbacks } = buildLinked();
+      const { callbacks } = (await buildLinked())!;
 
       await callbacks.git_find_introducing_commit(
         makeToolCall('git_find_introducing_commit', { symbol_pattern: 'connection refused' })
@@ -285,7 +390,7 @@ describe('createSemanticCodeSearchTools', () => {
     });
 
     it('return an error when no index is selected', async () => {
-      const { callbacks } = buildUnlinked();
+      const { callbacks } = (await buildUnlinked())!;
       const result = await callbacks.git_search_commits(
         makeToolCall('git_search_commits', { query: 'x' })
       );
@@ -296,7 +401,7 @@ describe('createSemanticCodeSearchTools', () => {
 
     it('return an error when the active index has no git history', async () => {
       mockRepositoryResponse(undefined);
-      const { callbacks } = buildLinked();
+      const { callbacks } = (await buildLinked())!;
 
       const result = await callbacks.git_search_commits(
         makeToolCall('git_search_commits', { query: 'x' })
@@ -307,8 +412,8 @@ describe('createSemanticCodeSearchTools', () => {
       expect(response.error).toContain('No git history is available');
     });
 
-    it('return an error when a required argument is missing', async () => {
-      const { callbacks } = buildLinked();
+    it('return a required-argument error when a required argument is missing', async () => {
+      const { callbacks } = (await buildLinked())!;
       const result = await callbacks.git_search_commits(makeToolCall('git_search_commits', {}));
       expect(esClient.search).not.toHaveBeenCalled();
       expect(execute).not.toHaveBeenCalled();

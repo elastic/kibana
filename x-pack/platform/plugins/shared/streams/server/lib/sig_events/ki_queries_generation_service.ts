@@ -138,7 +138,7 @@ export async function generateKIQueries(
 
   const semanticCodeSearchTools =
     isCodeGroundingActive && agentBuilderTools
-      ? createSemanticCodeSearchTools({
+      ? await createSemanticCodeSearchTools({
           agentBuilderTools,
           request,
           esClient,
@@ -149,7 +149,7 @@ export async function generateKIQueries(
 
   if (useSemanticCodeSearchGrounding && !semanticCodeSearchTools) {
     semanticCodeSearchLogger.debug(
-      `Semantic code search grounding enabled but inactive for stream "${streamName}" (agentBuilder unavailable).`
+      `Semantic code search grounding enabled but inactive for stream "${streamName}" (agentBuilder unavailable or SCS tools not installed).`
     );
   }
 
