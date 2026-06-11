@@ -9,7 +9,7 @@ components:
     GranularRulesSearchMode:
       type: string
       description: |
-        Search mode for free-text search combined with the KQL `filter`.
+        Search mode for free-text search combined with `filter`.
       enum:
         - legacy
       default: legacy
@@ -20,48 +20,47 @@ components:
       required:
         - term
       description: |
-        Free-text search combined with the KQL `filter`. Interpreted according to search mode.
+        Free-text search combined with `filter`. Interpreted according to search mode.
       properties:
         term:
           type: string
+          maxLength: 10000
         mode:
           $ref: '#/components/schemas/GranularRulesSearchMode'
+
+    GranularRulesFilterMode:
+      type: string
+      description: |
+        How `GranularRulesFilter.term` is interpreted. Defaults to KQL.
+      enum:
+        - KQL
+      default: KQL
+
+    GranularRulesFilter:
+      type: object
+      additionalProperties: false
+      required:
+        - term
+      description: |
+        String filter expression interpreted according to `mode`.
+      properties:
+        term:
+          type: string
+          maxLength: 10000
+        mode:
+          $ref: '#/components/schemas/GranularRulesFilterMode'
 
     GranularRulesFacetCategory:
       type: string
       enum:
         - tags
-        - type
         - enabled
         - updatedBy
         - createdBy
         - lastRunOutcome
+        - isCustomized
+        - type
 
-    SearchRulesField:
-      type: string
-      description: |
-        A rule attribute that can be requested via the `fields` parameter on `_search`.
-      enum:
-        - id
-        - name
-        - tags
-        - enabled
-        - alertTypeId
-        - params
-        - schedule
-        - actions
-        - createdBy
-        - updatedBy
-        - createdAt
-        - updatedAt
-        - revision
-        - executionStatus
-        - lastRun
-        - monitoring
-        - snoozeSchedule
-        - muteAll
-        - running
-        - nextRun
 
     SearchRulesAggregations:
       type: object

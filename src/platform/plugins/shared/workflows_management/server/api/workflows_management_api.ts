@@ -55,6 +55,8 @@ import {
 } from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
 import type { StepExecutionListResult } from './lib/search_step_executions';
+import { ManagedWorkflowDeleteForbiddenError } from './managed_workflow_delete_error';
+import { ManagedWorkflowUpdateForbiddenError } from './managed_workflow_errors';
 import type {
   SearchWorkflowExecutionsParams,
   WorkflowsService,
@@ -62,6 +64,11 @@ import type {
 import { connectorParamsSchemaResolver } from '../../common/lib/connector_params_schema_resolver';
 
 export type SmlIndexAttachmentFn = (params: SmlIndexAttachmentParams) => Promise<void>;
+
+const isEnablementOnlyUpdate = (workflow: Partial<EsWorkflow>): boolean => {
+  const fields = Object.keys(workflow);
+  return fields.length === 1 && fields[0] === 'enabled';
+};
 
 export interface GetWorkflowsParams {
   triggerType?: 'schedule' | 'event' | 'manual';
@@ -73,6 +80,10 @@ export interface GetWorkflowsParams {
   query?: string;
   managedFilter?: 'all' | 'managed' | 'unmanaged';
   _full?: boolean;
+}
+
+export interface GetWorkflowAggsOptions {
+  managedFilter?: GetWorkflowsParams['managedFilter'];
 }
 
 export interface DeleteWorkflowsResponse {
@@ -350,11 +361,20 @@ export class WorkflowsManagementApi {
     id: string,
     workflow: Partial<EsWorkflow>,
     spaceId: string,
-    request: KibanaRequest
+    request: KibanaRequest,
+    options?: { allowManagedWorkflowMutation?: boolean }
   ): Promise<UpdatedWorkflowResponseDto> {
     const originalWorkflow = await this.workflowsService.getWorkflow(id, spaceId);
     if (!originalWorkflow) {
       throw new WorkflowNotFoundError(id);
+    }
+
+    if (
+      originalWorkflow.managed === true &&
+      !isEnablementOnlyUpdate(workflow) &&
+      options?.allowManagedWorkflowMutation !== true
+    ) {
+      throw new ManagedWorkflowUpdateForbiddenError();
     }
     const result = await this.workflowsService.updateWorkflow(id, workflow, spaceId, request);
     this.notifySml(id, 'update', request);
@@ -367,6 +387,11 @@ export class WorkflowsManagementApi {
     request: KibanaRequest,
     options?: { force?: boolean }
   ): Promise<DeleteWorkflowsResponse> {
+    const workflows = await this.workflowsService.getWorkflowsByIds(workflowIds, spaceId);
+    if (workflows.some(({ managed }) => managed === true)) {
+      throw new ManagedWorkflowDeleteForbiddenError();
+    }
+
     const result = await this.workflowsService.deleteWorkflows(workflowIds, spaceId, options);
     if (result.successfulIds) {
       for (const id of result.successfulIds) {
@@ -845,8 +870,14 @@ export class WorkflowsManagementApi {
     return this.workflowsService.getWorkflowStats(spaceId, options);
   }
 
-  public async getWorkflowAggs(fields: string[] = [], spaceId: string) {
-    return this.workflowsService.getWorkflowAggs(fields, spaceId);
+  public async getWorkflowAggs(
+    fields: string[] = [],
+    spaceId: string,
+    options?: GetWorkflowAggsOptions
+  ) {
+    return options
+      ? this.workflowsService.getWorkflowAggs(fields, spaceId, options)
+      : this.workflowsService.getWorkflowAggs(fields, spaceId);
   }
 
   public async getAvailableConnectors(
