@@ -32,7 +32,7 @@ import {
   alertTimelineStatusColor,
   alertTimelineStatusLabel,
 } from './alert_timeline_status_palette';
-import { formatDuration, formatTimestamp } from './alert_timeline_format';
+import { describeSegmentSpan, formatDuration, formatTimestamp } from './alert_timeline_format';
 
 // Paint order: later entries paint on top.
 const STATUS_ORDER: readonly AlertEpisodeStatus[] = [
@@ -270,32 +270,52 @@ export const AlertTimelineRow: React.FC<AlertTimelineRowProps> = ({
               customTooltip={({ details }) => {
                 const d = details as SegmentDetails | undefined;
                 if (!d) return null;
+                const { startsBeforeWindow, isOngoing } = describeSegmentSpan({
+                  x0Ms: d.x0Ms,
+                  x1Ms: d.x1Ms,
+                  status: d.status,
+                  gteMs,
+                  lteMs,
+                });
+                const listItems = [
+                  {
+                    title: i18n.translate('xpack.alertingV2.alertTimeline.tooltip.fromLabel', {
+                      defaultMessage: 'From',
+                    }),
+                    description: startsBeforeWindow
+                      ? i18n.translate('xpack.alertingV2.alertTimeline.tooltip.outsideWindow', {
+                          defaultMessage: 'Outside of window',
+                        })
+                      : formatTimestamp(d.x0Ms, timeZone),
+                  },
+                  {
+                    title: i18n.translate('xpack.alertingV2.alertTimeline.tooltip.toLabel', {
+                      defaultMessage: 'To',
+                    }),
+                    description: isOngoing
+                      ? i18n.translate('xpack.alertingV2.alertTimeline.tooltip.ongoing', {
+                          defaultMessage: 'Ongoing',
+                        })
+                      : formatTimestamp(d.x1Ms, timeZone),
+                  },
+                ];
+                // Only show a duration when both edges are real; a clipped start
+                // or an open end would make `x1Ms - x0Ms` the in-view span, not
+                // the episode's true duration.
+                if (!startsBeforeWindow && !isOngoing) {
+                  listItems.push({
+                    title: i18n.translate('xpack.alertingV2.alertTimeline.tooltip.durationLabel', {
+                      defaultMessage: 'Duration',
+                    }),
+                    description: formatDuration(d.x1Ms - d.x0Ms),
+                  });
+                }
                 return (
                   <TooltipPanel
                     euiTheme={euiTheme}
                     status={d.status}
                     episodeId={d.episodeId}
-                    listItems={[
-                      {
-                        title: i18n.translate('xpack.alertingV2.alertTimeline.tooltip.fromLabel', {
-                          defaultMessage: 'From',
-                        }),
-                        description: formatTimestamp(d.x0Ms, timeZone),
-                      },
-                      {
-                        title: i18n.translate('xpack.alertingV2.alertTimeline.tooltip.toLabel', {
-                          defaultMessage: 'To',
-                        }),
-                        description: formatTimestamp(d.x1Ms, timeZone),
-                      },
-                      {
-                        title: i18n.translate(
-                          'xpack.alertingV2.alertTimeline.tooltip.durationLabel',
-                          { defaultMessage: 'Duration' }
-                        ),
-                        description: formatDuration(d.x1Ms - d.x0Ms),
-                      },
-                    ]}
+                    listItems={listItems}
                   />
                 );
               }}

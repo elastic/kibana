@@ -19,7 +19,8 @@ export { ALERT_TIMELINE_TOP_N_DEFAULT } from './types';
 export { deriveAlertTimelineData } from './derive_alert_timeline_data';
 export { AlertTimelineRow } from './alert_timeline_row';
 export type { AlertTimelineRowProps } from './alert_timeline_row';
-export { formatTimestamp, formatDuration } from './alert_timeline_format';
+export { formatTimestamp, formatDuration, describeSegmentSpan } from './alert_timeline_format';
+export type { SegmentSpanFlags } from './alert_timeline_format';
 export {
   alertTimelineStatusColor,
   alertTimelineStatusLabel,
