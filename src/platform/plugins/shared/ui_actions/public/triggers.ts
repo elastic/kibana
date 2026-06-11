@@ -311,21 +311,30 @@ export const triggers: { [key: string]: Trigger } = {
     // This is empty string to hide title of ui_actions context menu that appears
     // when this trigger is executed.
     title: '',
-    description: 'Swim lane selection triggered',
+    description: i18n.translate('uiActions.triggers.ml.swimLaneSelection.description', {
+      defaultMessage: 'Swim lane selection triggered',
+    }),
   },
   [EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER]: {
     id: EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER,
     // This is empty string to hide title of ui_actions context menu that appears
     // when this trigger is executed.
     title: '',
-    description: 'Entity field selection triggered',
+    description: i18n.translate('uiActions.triggers.ml.explorerEntityFieldSelection.description', {
+      defaultMessage: 'Entity field selection triggered',
+    }),
   },
   [SINGLE_METRIC_VIEWER_ENTITY_FIELD_SELECTION_TRIGGER]: {
     id: SINGLE_METRIC_VIEWER_ENTITY_FIELD_SELECTION_TRIGGER,
     // This is empty string to hide title of ui_actions context menu that appears
     // when this trigger is executed.
     title: '',
-    description: 'Single metric viewer entity field selection triggered',
+    description: i18n.translate(
+      'uiActions.triggers.ml.singleMetricViewerEntityFieldSelection.description',
+      {
+        defaultMessage: 'Single metric viewer entity field selection triggered',
+      }
+    ),
   },
   [DISCOVER_CELL_ACTIONS_TRIGGER_ID]: { id: DISCOVER_CELL_ACTIONS_TRIGGER_ID },
   [O11Y_APM_TRANSACTION_CONTEXT_MENU_TRIGGER]: { id: O11Y_APM_TRANSACTION_CONTEXT_MENU_TRIGGER },
