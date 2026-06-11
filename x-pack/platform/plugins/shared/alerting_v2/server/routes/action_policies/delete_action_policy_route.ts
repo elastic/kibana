@@ -8,16 +8,16 @@
 import { Request } from '@kbn/core-di-server';
 import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { z } from '@kbn/zod/v4';
+import { errorResponseSchema, ID_MAX_LENGTH } from '@kbn/alerting-v2-schemas';
 import { inject, injectable } from 'inversify';
 import { ActionPolicyClient } from '../../lib/action_policy_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
-import { buildRouteValidationWithZod } from '../route_validation';
 
 const deleteActionPolicyParamsSchema = z.object({
-  id: z.string().describe('The action policy identifier.'),
+  id: z.string().min(1).max(ID_MAX_LENGTH).describe('The action policy identifier.'),
 });
 
 @injectable()
@@ -33,15 +33,16 @@ export class DeleteActionPolicyRoute extends BaseAlertingRoute {
     summary: 'Delete an action policy',
     description: 'Delete an action policy by identifier.',
   } as const;
-  static validate = {
+  static schemas = {
     request: {
-      params: buildRouteValidationWithZod(deleteActionPolicyParamsSchema),
+      params: deleteActionPolicyParamsSchema,
     },
     response: {
       204: {
-        description: 'Indicates a successful call.',
+        description: 'The action policy was deleted successfully.',
       },
       404: {
+        body: () => errorResponseSchema,
         description: 'Indicates an action policy with the given ID does not exist.',
       },
     },

@@ -7,14 +7,14 @@
 
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import chalk from 'chalk';
-import type { Model } from '@kbn/inference-common';
-import type { EvaluationScoreRepository } from '../score_repository';
+import type { Model } from '@kbn/evals-common';
+import type { EvalsClient } from '../evals_client';
 import { createTable } from './report_table';
 import type { ReportDisplayOptions } from '../../types';
 
 export type EvaluationReporter = (
-  scoreRepository: EvaluationScoreRepository,
-  runId: string,
+  evalsClient: EvalsClient,
+  experimentId: string,
   log: SomeDevLog,
   options?: { taskModelId?: string; suiteId?: string }
 ) => Promise<void>;
@@ -30,34 +30,29 @@ function buildReportHeader(taskModel: Model, evaluatorModel: Model): string[] {
 export function createDefaultTerminalReporter(
   options: { reportDisplayOptions?: ReportDisplayOptions } = {}
 ): EvaluationReporter {
-  return async (
-    scoreRepository: EvaluationScoreRepository,
-    runId: string,
-    log: SomeDevLog,
-    filter
-  ) => {
-    const runStats = await scoreRepository.getStatsByRunId(runId, filter);
+  return async (evalsClient: EvalsClient, experimentId: string, log: SomeDevLog, filter) => {
+    const experimentStats = await evalsClient.getExperimentStats(experimentId, filter);
 
-    if (!runStats || runStats.stats.length === 0) {
+    if (!experimentStats || experimentStats.stats.length === 0) {
       const filterSuffix = [
         filter?.taskModelId ? `task.model.id=${filter.taskModelId}` : null,
-        filter?.suiteId ? `suite.id=${filter.suiteId}` : null,
+        filter?.suiteId ? `metadata.suite_id=${filter.suiteId}` : null,
       ]
         .filter(Boolean)
         .join(', ');
 
       log.error(
-        `No evaluation results found for run ID: ${runId}${
+        `No evaluation results found for experiment ID: ${experimentId}${
           filterSuffix ? ` (${filterSuffix})` : ''
         }`
       );
       return;
     }
 
-    const header = buildReportHeader(runStats.taskModel, runStats.evaluatorModel);
+    const header = buildReportHeader(experimentStats.taskModel, experimentStats.evaluatorModel);
     const summaryTable = createTable(
-      runStats.stats,
-      runStats.totalRepetitions,
+      experimentStats.stats,
+      experimentStats.totalRepetitions,
       options.reportDisplayOptions
     );
 

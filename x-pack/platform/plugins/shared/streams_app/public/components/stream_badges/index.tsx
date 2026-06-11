@@ -93,6 +93,21 @@ export function WiredStreamBadge() {
   );
 }
 
+export function DraftStreamBadge() {
+  return (
+    <EuiBadge
+      color="hollow"
+      iconType="editorCodeBlock"
+      iconSide="left"
+      data-test-subj="draftStreamBadge"
+    >
+      {i18n.translate('xpack.streams.entityDetailViewWithoutParams.draftBadgeLabel', {
+        defaultMessage: 'Draft',
+      })}
+    </EuiBadge>
+  );
+}
+
 export function QueryStreamBadge() {
   const { euiTheme } = useEuiTheme();
   return (

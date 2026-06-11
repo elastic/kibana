@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-export const DEFAULT_SPACE_ID = `default`;
-
 /**
  * The identifier in a saved object's `namespaces` array when it is shared globally to all spaces.
  */

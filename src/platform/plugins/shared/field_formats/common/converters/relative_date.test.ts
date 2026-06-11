@@ -10,7 +10,6 @@
 import React from 'react';
 import moment from 'moment-timezone';
 import { RelativeDateFormat } from './relative_date';
-import { HTML_CONTEXT_TYPE, TEXT_CONTEXT_TYPE } from '../content_types';
 import { expectReactElementWithNull } from '../test_utils';
 
 describe('Relative Date Format', () => {
@@ -18,62 +17,47 @@ describe('Relative Date Format', () => {
   const fixedDate = '2019-01-01T00:00:00.000Z';
 
   let convert: Function;
-  let reactConvert: RelativeDateFormat['reactConvert'];
+  let convertToReact: RelativeDateFormat['convertToReact'];
 
   beforeEach(() => {
     const relativeDate = new RelativeDateFormat({}, jest.fn());
-    convert = relativeDate.convert.bind(relativeDate);
-    reactConvert = relativeDate.reactConvert.bind(relativeDate);
+    convert = relativeDate.convertToText.bind(relativeDate);
+    convertToReact = relativeDate.convertToReact.bind(relativeDate);
   });
 
   test('decoding a missing value', () => {
-    expect(convert(null, TEXT_CONTEXT_TYPE)).toBe('(null)');
-    expect(convert(undefined, TEXT_CONTEXT_TYPE)).toBe('(null)');
-    expect(convert(null, HTML_CONTEXT_TYPE)).toBe(
-      '<span class="ffString__emptyValue">(null)</span>'
-    );
-    expect(convert(undefined, HTML_CONTEXT_TYPE)).toBe(
-      '<span class="ffString__emptyValue">(null)</span>'
-    );
-    expectReactElementWithNull(reactConvert(null));
-    expectReactElementWithNull(reactConvert(undefined));
+    expect(convert(null)).toBe('(null)');
+    expect(convert(undefined)).toBe('(null)');
+    expectReactElementWithNull(convertToReact(null));
+    expectReactElementWithNull(convertToReact(undefined));
   });
 
   test('decoding invalid date should echo invalid value', () => {
-    expect(convert('not a valid date', TEXT_CONTEXT_TYPE)).toBe('not a valid date');
-    expect(convert('not a valid date', HTML_CONTEXT_TYPE)).toBe('not a valid date');
-    expect(reactConvert('not a valid date')).toBe('not a valid date');
+    expect(convert('not a valid date')).toBe('not a valid date');
+    expect(convertToReact('not a valid date')).toBe('not a valid date');
   });
 
   test('should parse date values', () => {
     const val = '2017-08-13T20:24:09.904Z';
-    expect(convert(val, TEXT_CONTEXT_TYPE)).toBe(moment(val).fromNow());
-    expect(convert(val, HTML_CONTEXT_TYPE)).toBe(moment(val).fromNow());
-    expect(reactConvert(val)).toBe(moment(val).fromNow());
+    expect(convert(val)).toBe(moment(val).fromNow());
+    expect(convertToReact(val)).toBe(moment(val).fromNow());
   });
 
-  test('escapes HTML characters in html context via fallback', () => {
-    expect(convert('<script>alert("test")</script>', HTML_CONTEXT_TYPE)).toBe(
-      '&lt;script&gt;alert(&quot;test&quot;)&lt;/script&gt;'
-    );
-    expect(reactConvert('<script>alert("test")</script>')).toBe('<script>alert("test")</script>');
+  test('convertToReact returns raw string for unhighlighted content (React escapes at render)', () => {
+    expect(convertToReact('<script>alert("test")</script>')).toBe('<script>alert("test")</script>');
   });
 
   test('wraps a multi-value array with bracket notation', () => {
     const rel = moment(fixedDate).fromNow();
-    expect(convert([fixedDate, fixedDate], TEXT_CONTEXT_TYPE)).toBe(`["${rel}","${rel}"]`);
-    expect(convert([fixedDate, fixedDate], HTML_CONTEXT_TYPE)).toBe(
-      `<span class="ffArray__highlight">[</span>${rel}<span class="ffArray__highlight">,</span> ${rel}<span class="ffArray__highlight">]</span>`
-    );
+    expect(convert([fixedDate, fixedDate])).toBe(`["${rel}","${rel}"]`);
     // Use React.isValidElement to verify a React element is returned without
     // capturing the time-relative string value in the snapshot
-    expect(React.isValidElement(reactConvert([fixedDate, fixedDate]))).toBe(true);
+    expect(React.isValidElement(convertToReact([fixedDate, fixedDate]))).toBe(true);
   });
 
   test('returns the single element without brackets for a one-element array', () => {
     const rel = moment(fixedDate).fromNow();
-    expect(convert([fixedDate], TEXT_CONTEXT_TYPE)).toBe(`["${rel}"]`);
-    expect(convert([fixedDate], HTML_CONTEXT_TYPE)).toBe(rel);
-    expect(reactConvert([fixedDate])).toBe(rel);
+    expect(convert([fixedDate])).toBe(`["${rel}"]`);
+    expect(convertToReact([fixedDate])).toBe(rel);
   });
 });

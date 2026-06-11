@@ -18,13 +18,14 @@ import {
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useSiemReadinessApi, CATEGORY_ORDER } from '@kbn/siem-readiness';
 import type {
+  MainCategories,
   RetentionInfo,
   RetentionStatus,
   RetentionType,
-  MainCategories,
 } from '@kbn/siem-readiness';
+import { CATEGORY_ORDER, filterRetentionItemsByCategories } from '@kbn/siem-readiness';
+import { useSiemReadinessApi } from '../../../hooks/use_siem_readiness_api';
 import {
   CategoryAccordionTable,
   type CategoryData,
@@ -63,59 +64,48 @@ export const RetentionTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
 }) => {
   const basePath = useBasePath();
   const { openNewCaseFlyout } = useSiemReadinessCases();
-  const { getReadinessCategories, getReadinessRetention } = useSiemReadinessApi();
-  const {
-    data: categoriesData,
-    isLoading: categoriesLoading,
-    error: categoriesError,
-  } = getReadinessCategories;
+  const { getReadinessRetention, getReadinessCategories } = useSiemReadinessApi();
   const {
     data: retentionData,
     isLoading: retentionLoading,
     error: retentionError,
   } = getReadinessRetention;
+  const { data: categoriesData, isLoading: categoriesLoading } = getReadinessCategories;
 
-  const isLoading = categoriesLoading || retentionLoading;
-  const error = categoriesError || retentionError;
+  const isLoading = retentionLoading || categoriesLoading;
+  const error = retentionError;
 
-  // Match data streams to categories by checking if backing index contains data stream name
+  // Shared filter: same predicate used by the agent tool (contains-match).
+  // Produces the flat list of items that belong to at least one categorized SIEM index.
+  const filteredRetentionItems = useMemo(
+    () => filterRetentionItemsByCategories(retentionData?.items ?? [], categoriesData),
+    [retentionData?.items, categoriesData]
+  );
+
+  // Group filtered items by category (UI-only: respects activeCategories).
   const categories: Array<CategoryData<RetentionInfoWithStatus>> = useMemo(() => {
+    const categoryItemsMap = new Map<string, Set<RetentionInfoWithStatus>>();
+
+    for (const item of filteredRetentionItems) {
+      categoriesData?.mainCategoriesMap?.forEach((group) => {
+        if (!activeCategories.includes(group.category as MainCategories)) return;
+        if (group.indices.some((idx) => idx.indexName.includes(item.indexName))) {
+          const set = categoryItemsMap.get(group.category) ?? new Set<RetentionInfoWithStatus>();
+          set.add(item as RetentionInfoWithStatus);
+          categoryItemsMap.set(group.category, set);
+        }
+      });
+    }
+
     const result: Array<CategoryData<RetentionInfoWithStatus>> = [];
-
-    for (const category of categoriesData?.mainCategoriesMap ?? []) {
-      const isActive = activeCategories.includes(category.category as MainCategories);
-      if (isActive) {
-        const matchingRetention: RetentionInfoWithStatus[] = [];
-        for (const retention of retentionData?.items ?? []) {
-          const hasMatch = category.indices.some((idx) =>
-            idx.indexName.includes(retention.indexName)
-          );
-          if (hasMatch) {
-            matchingRetention.push(retention as RetentionInfoWithStatus);
-          }
-        }
-
-        if (matchingRetention.length > 0) {
-          result.push({ category: category.category, items: matchingRetention });
-        }
-      }
+    for (const category of activeCategories) {
+      const items = categoryItemsMap.get(category);
+      if (items?.size) result.push({ category, items: Array.from(items) });
     }
-
     return result;
-  }, [categoriesData?.mainCategoriesMap, retentionData?.items, activeCategories]);
+  }, [filteredRetentionItems, categoriesData?.mainCategoriesMap, activeCategories]);
 
-  // Check if any matched items exist ignoring activeCategories filter (for hasUnfilteredData prop)
-  const hasUnfilteredData = useMemo(() => {
-    for (const category of categoriesData?.mainCategoriesMap ?? []) {
-      for (const retention of retentionData?.items ?? []) {
-        const hasMatch = category.indices.some((idx) =>
-          idx.indexName.includes(retention.indexName)
-        );
-        if (hasMatch) return true;
-      }
-    }
-    return false;
-  }, [categoriesData?.mainCategoriesMap, retentionData?.items]);
+  const hasUnfilteredData = (retentionData?.items?.length ?? 0) > 0;
 
   // Count non-compliant items (deduplicated by indexName)
   const nonCompliantStats = useMemo(() => {

@@ -5,16 +5,23 @@
  * 2.0.
  */
 
-import type { WorkflowExtensionsServiceContract } from '../services/workflow_extensions_service/workflow_extensions_service';
+import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
+import { ALERT_ACTION_WORKFLOW_TRIGGERS } from '../events/alert_action_workflow_subscriber/triggers';
 
 /**
  * Registers all alerting-v2 server-side workflow trigger definitions.
- * Call once during plugin setup with the resolved {@link WorkflowExtensionsService}.
+ *
+ * Walks {@link ALERT_ACTION_WORKFLOW_TRIGGERS}, the same catalog the
+ * `AlertActionWorkflowSubscriber` walks at dispatch time, so the
+ * registered schema, the trigger id, and the runtime payload mapping
+ * cannot drift across the codebase.
+ *
+ * Call once during plugin setup.
  */
 export function registerTriggerDefinitions(
-  workflowExtensionsService: WorkflowExtensionsServiceContract
+  workflowsExtensions: WorkflowsExtensionsServerPluginSetup
 ): void {
-  workflowExtensionsService.registerTriggerDefinitions([
-    // Add CommonTriggerDefinition-backed entries here (import from common when added).
-  ]);
+  for (const trigger of ALERT_ACTION_WORKFLOW_TRIGGERS) {
+    workflowsExtensions.registerTriggerDefinition(trigger.definition);
+  }
 }

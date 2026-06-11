@@ -11,6 +11,7 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { TestProviders, createTestQueryClient } from '../../../common/mock';
 import { useGetTemplates } from './use_get_templates';
 import { casesQueriesKeys } from '../../../containers/constants';
+import { KibanaServices } from '../../../common/lib/kibana';
 import * as api from '../api/api';
 
 jest.mock('../api/api');
@@ -45,6 +46,11 @@ describe('useGetTemplates', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     apiMock.getTemplates.mockResolvedValue(mockTemplatesResponse);
+    jest
+      .spyOn(KibanaServices, 'getConfig')
+      .mockReturnValue({ templates: { enabled: true } } as ReturnType<
+        typeof KibanaServices.getConfig
+      >);
   });
 
   it('fetches templates successfully', async () => {

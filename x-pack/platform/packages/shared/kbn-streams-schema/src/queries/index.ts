@@ -9,6 +9,7 @@ import { z } from '@kbn/zod/v4';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { NonEmptyString } from '@kbn/zod-helpers/v4';
 import { primitive } from '../shared/record_types';
+import type { Feature } from '../feature';
 import type { SignificantEventsResponse } from '../api/significant_events';
 
 export interface EsqlQuery {
@@ -39,12 +40,20 @@ export const HIGH_SEVERITY_THRESHOLD = 60;
 
 export const queryTypeSchema = z.enum([QUERY_TYPE_MATCH, QUERY_TYPE_STATS]);
 
+export const queryFeatureSchema = z.object({
+  id: z.string(),
+  run_id: z.string().optional(),
+});
+
+export type QueryFeature = z.infer<typeof queryFeatureSchema>;
+
 export interface StreamQuery extends StreamQueryBase {
   type: QueryType;
   esql: EsqlQuery;
   // from 0 to 100. aligned with anomaly detection scoring
   severity_score?: number;
   evidence?: string[];
+  features?: QueryFeature[];
 }
 
 const streamQueryBaseSchema = z.object({
@@ -62,6 +71,7 @@ export const streamQuerySchema: z.Schema<StreamQuery> = streamQueryBaseSchema.ex
   type: queryTypeSchema.default(QUERY_TYPE_MATCH),
   severity_score: z.number().optional(),
   evidence: z.array(z.string()).optional(),
+  features: z.array(queryFeatureSchema).optional(),
   esql: esqlQuerySchema,
 });
 
@@ -116,4 +126,22 @@ export interface QueryLink {
   rule_backed: boolean;
   /** The deterministic ID of the Kibana rule associated with this query. */
   rule_id: string;
+  /**
+   * ISO timestamp of the latest revision in storage. Bumped by every write.
+   * Read-only at the domain layer.
+   */
+  updated_at?: string;
+  /**
+   * ISO timestamp after which this query is considered stale.
+   * Computed as `updated_at + ki_ttl_days` from the tuning config.
+   */
+  expires_at?: string;
 }
+
+/**
+ * Unified knowledge indicator on the wire. Discriminated by the root `type`
+ * field. Used by server callers that handle both feature and query KIs.
+ */
+export type KnowledgeIndicator =
+  | { type: 'feature'; feature: Feature }
+  | { type: 'query'; query: QueryLink };

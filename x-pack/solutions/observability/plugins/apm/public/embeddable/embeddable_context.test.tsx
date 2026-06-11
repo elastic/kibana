@@ -7,6 +7,9 @@
 
 import React, { useContext } from 'react';
 import { render, screen } from '@testing-library/react';
+import { createMemoryHistory } from 'history';
+import { Router } from '@kbn/shared-ux-router';
+import { useLocation } from 'react-router-dom-v5-compat';
 import { BehaviorSubject } from 'rxjs';
 import { License } from '@kbn/licensing-plugin/common/license';
 import { ApmEmbeddableContext } from './embeddable_context';
@@ -83,6 +86,18 @@ function ContextConsumer() {
       <span data-test-subj="has-config">{context.config ? 'true' : 'false'}</span>
       <span data-test-subj="has-core">{context.core ? 'true' : 'false'}</span>
     </div>
+  );
+}
+
+/** Probe that surfaces the in-memory router URL so we can assert what gets seeded. */
+function LocationProbe() {
+  const location = useLocation();
+  return (
+    <div
+      data-test-subj="location-probe"
+      data-path={location.pathname}
+      data-search={location.search}
+    />
   );
 }
 
@@ -254,6 +269,87 @@ describe('ApmEmbeddableContext', () => {
         rangeFrom: 'now-15m',
         rangeTo: 'now-5m',
       });
+    });
+  });
+
+  describe('environment seeding into the in-memory router URL', () => {
+    it('defaults to ENVIRONMENT_ALL when no environment prop is provided', () => {
+      render(
+        <ApmEmbeddableContext deps={mockDeps}>
+          <LocationProbe />
+        </ApmEmbeddableContext>
+      );
+
+      const search = screen.getByTestId('location-probe').getAttribute('data-search') ?? '';
+      const params = new URLSearchParams(search);
+      expect(params.get('environment')).toBeTruthy();
+    });
+
+    it('passes the provided environment through to the in-memory URL', () => {
+      render(
+        <ApmEmbeddableContext deps={mockDeps} environment="otel-demo">
+          <LocationProbe />
+        </ApmEmbeddableContext>
+      );
+
+      const search = screen.getByTestId('location-probe').getAttribute('data-search') ?? '';
+      const params = new URLSearchParams(search);
+      expect(params.get('environment')).toBe('otel-demo');
+    });
+
+    it('URL-encodes environment values that contain special characters', () => {
+      render(
+        <ApmEmbeddableContext deps={mockDeps} environment="my env / prod">
+          <LocationProbe />
+        </ApmEmbeddableContext>
+      );
+
+      const search = screen.getByTestId('location-probe').getAttribute('data-search') ?? '';
+      const params = new URLSearchParams(search);
+      expect(params.get('environment')).toBe('my env / prod');
+    });
+
+    it('updates the in-memory URL when the environment prop changes', () => {
+      const { rerender } = render(
+        <ApmEmbeddableContext deps={mockDeps} environment="staging">
+          <LocationProbe />
+        </ApmEmbeddableContext>
+      );
+
+      expect(
+        new URLSearchParams(
+          screen.getByTestId('location-probe').getAttribute('data-search') ?? ''
+        ).get('environment')
+      ).toBe('staging');
+
+      rerender(
+        <ApmEmbeddableContext deps={mockDeps} environment="production">
+          <LocationProbe />
+        </ApmEmbeddableContext>
+      );
+
+      expect(
+        new URLSearchParams(
+          screen.getByTestId('location-probe').getAttribute('data-search') ?? ''
+        ).get('environment')
+      ).toBe('production');
+    });
+  });
+
+  describe('nested v6 router context', () => {
+    it('renders without crashing when mounted inside a page that already has a v6 router context (CompatRouter)', () => {
+      const outerHistory = createMemoryHistory();
+
+      render(
+        <Router history={outerHistory}>
+          <ApmEmbeddableContext deps={mockDeps}>
+            <div data-test-subj="nested-child">Nested Content</div>
+          </ApmEmbeddableContext>
+        </Router>
+      );
+
+      expect(screen.getByTestId('nested-child')).toBeInTheDocument();
+      expect(screen.getByText('Nested Content')).toBeInTheDocument();
     });
   });
 });

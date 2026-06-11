@@ -17,7 +17,15 @@ export const fleetPackageRegistryDockerImage =
   'docker.elastic.co/kibana-ci/package-registry-distribution:lite';
 
 const packageRegistryConfig = join(__dirname, './package_registry_config.yml');
-const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/config.yml`];
+// EPR_REQUIRE_PACKAGE_SIGNATURES=false: opt out of upstream signature enforcement
+// added in elastic/package-registry#1646; the throwaway test registry serves the
+// `:lite` distribution which ships some packages without `.sig` files.
+const dockerArgs: string[] = [
+  '-v',
+  `${packageRegistryConfig}:/package-registry/config.yml`,
+  '-e',
+  'EPR_REQUIRE_PACKAGE_SIGNATURES=false',
+];
 
 /**
  * This is used by CI to set the docker registry port

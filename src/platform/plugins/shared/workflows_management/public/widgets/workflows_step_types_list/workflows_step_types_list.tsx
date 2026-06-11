@@ -36,7 +36,7 @@ const stepTypesListStyles = {
   }),
 };
 
-const getStepTypeLabel = (stepType: string): string => {
+export const getStepTypeLabel = (stepType: string): string => {
   const definition = getBuiltInStepDefinition(stepType);
   if (definition?.label) {
     return definition.label;
@@ -129,7 +129,7 @@ export const WorkflowsStepTypesList = ({ steps }: WorkflowsStepTypesListProps) =
         css={stepTypesListStyles.iconGroup}
       >
         {visibleItems.map((baseType) => (
-          <EuiFlexItem grow={false} key={baseType}>
+          <EuiFlexItem grow={false} key={baseType} css={{ backgroundColor: 'red' }}>
             <StepIcon
               stepType={baseType}
               executionStatus={undefined}

@@ -6,8 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { OnboardingResult, TaskResult } from '@kbn/streams-schema';
-import { OnboardingStep } from '@kbn/streams-schema';
+import {
+  StreamsKIsOnboardingStep,
+  type StreamsKIsOnboardingStatusResult,
+} from '@kbn/streams-schema';
 import pMap from 'p-map';
 import { useCallback, useState } from 'react';
 import type { ScheduleOnboardingOptions } from '../../../../hooks/use_onboarding_api';
@@ -19,7 +21,7 @@ import { useOnboardingStatusUpdateQueue } from './use_onboarding_status_update_q
 
 type StreamStatusUpdateCallback = (
   streamName: string,
-  result: TaskResult<OnboardingResult>
+  result: StreamsKIsOnboardingStatusResult
 ) => void;
 
 interface UseBulkOnboardingOptions {
@@ -37,13 +39,13 @@ export function useBulkOnboarding({
     },
   } = useKibana();
 
-  const { scheduleOnboardingTask, cancelOnboardingTask } = useOnboardingApi();
+  const { scheduleOnboarding, cancelOnboarding } = useOnboardingApi();
   const { onboardingStatusUpdateQueue, processStatusUpdateQueue } =
     useOnboardingStatusUpdateQueue(onStreamStatusUpdate);
 
   const [isScheduling, setIsScheduling] = useState(false);
 
-  const bulkScheduleOnboardingTask = useCallback(
+  const bulkScheduleOnboarding = useCallback(
     async (streamNames: string[], options?: ScheduleOnboardingOptions): Promise<string[]> => {
       setIsScheduling(true);
       const succeeded: string[] = [];
@@ -53,7 +55,7 @@ export function useBulkOnboarding({
           streamNames,
           async (streamName) => {
             try {
-              await scheduleOnboardingTask(streamName, options);
+              await scheduleOnboarding(streamName, options);
               succeeded.push(streamName);
             } catch (error) {
               failures.push({ streamName, error });
@@ -91,36 +93,36 @@ export function useBulkOnboarding({
 
       return succeeded;
     },
-    [scheduleOnboardingTask, toasts, onboardingStatusUpdateQueue, processStatusUpdateQueue]
+    [scheduleOnboarding, toasts, onboardingStatusUpdateQueue, processStatusUpdateQueue]
   );
 
   const bulkOnboardAll = useCallback(
-    (streamNames: string[]) => bulkScheduleOnboardingTask(streamNames, onboardingConfig),
-    [bulkScheduleOnboardingTask, onboardingConfig]
+    (streamNames: string[]) => bulkScheduleOnboarding(streamNames, onboardingConfig),
+    [bulkScheduleOnboarding, onboardingConfig]
   );
 
   const bulkOnboardFeaturesOnly = useCallback(
     (streamNames: string[]) =>
-      bulkScheduleOnboardingTask(streamNames, {
-        steps: [OnboardingStep.FeaturesIdentification],
+      bulkScheduleOnboarding(streamNames, {
+        steps: [StreamsKIsOnboardingStep.FeaturesIdentification],
         connectors: onboardingConfig.connectors,
       }),
-    [bulkScheduleOnboardingTask, onboardingConfig.connectors]
+    [bulkScheduleOnboarding, onboardingConfig.connectors]
   );
 
   const bulkOnboardQueriesOnly = useCallback(
     (streamNames: string[]) =>
-      bulkScheduleOnboardingTask(streamNames, {
-        steps: [OnboardingStep.QueriesGeneration],
+      bulkScheduleOnboarding(streamNames, {
+        steps: [StreamsKIsOnboardingStep.QueriesGeneration],
         connectors: onboardingConfig.connectors,
       }),
-    [bulkScheduleOnboardingTask, onboardingConfig.connectors]
+    [bulkScheduleOnboarding, onboardingConfig.connectors]
   );
 
   return {
     isScheduling,
-    cancelOnboardingTask,
-    bulkScheduleOnboardingTask,
+    cancelOnboarding,
+    bulkScheduleOnboarding,
     bulkOnboardAll,
     bulkOnboardFeaturesOnly,
     bulkOnboardQueriesOnly,

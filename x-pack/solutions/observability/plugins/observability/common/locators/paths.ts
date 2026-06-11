@@ -20,6 +20,7 @@ export const CREATE_RULE_FROM_TEMPLATE_PATH = '/alerts/rules/create/template/:te
 export const EDIT_RULE_PATH = '/alerts/rules/edit/:id' as const;
 export const CASES_PATH = '/cases' as const;
 export const ANNOTATIONS_PATH = '/annotations' as const;
+export const NIGHTSHIFT_PATH = '/nightshift' as const;
 export const SETTINGS_PATH = '/slos/settings' as const;
 
 // // SLOs have been moved to its own app (slo). Keeping around for redirecting purposes.

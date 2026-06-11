@@ -99,7 +99,7 @@ export const CloudBackup: React.FunctionComponent<Props> = ({
   const statusMessage = data!.isBackedUp ? (
     <EuiFlexGroup alignItems="center" gutterSize="s" data-test-subj="dataBackedUpStatus">
       <EuiFlexItem grow={false}>
-        <EuiIcon type="check" color="success" />
+        <EuiIcon type="check" color="success" aria-hidden={true} />
       </EuiFlexItem>
 
       <EuiFlexItem>
@@ -129,7 +129,7 @@ export const CloudBackup: React.FunctionComponent<Props> = ({
   ) : (
     <EuiFlexGroup alignItems="center" gutterSize="s" data-test-subj="dataNotBackedUpStatus">
       <EuiFlexItem grow={false}>
-        <EuiIcon type="warning" color="danger" />
+        <EuiIcon type="warning" color="danger" aria-hidden={true} />
       </EuiFlexItem>
 
       <EuiFlexItem>

@@ -32,6 +32,9 @@ export const TEST_SUBJ_EMPTY_STATE = 'entity-analytics-empty-state';
 export const TEST_SUBJ_GROUPING = 'entity-analytics-grouping';
 export const TEST_SUBJ_GROUPING_LOADING = 'entity-analytics-grouping-loading';
 export const TEST_SUBJ_GROUPING_COUNTER = 'entity-analytics-grouping-counter';
+/** Resolution group header control that opens the primary entity flyout */
+export const TEST_SUBJ_RESOLUTION_GROUP_OPEN_FLYOUT =
+  'entity-analytics-resolution-group-open-flyout';
 
 export const ENTITY_FIELDS = {
   ASSET_CRITICALITY: 'asset.criticality',

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { EuiProvider } from '@elastic/eui';
 import React, { type PropsWithChildren } from 'react';
 import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
@@ -33,17 +34,19 @@ export const TestProvider: React.FC<PropsWithChildren<TestProviderProps>> = ({
   const testQueryClient = queryClient ?? new QueryClient();
   const mockServices = services ?? createStartServicesMock();
   return (
-    <KibanaContextProvider services={mockServices}>
-      <QueryClientProvider client={testQueryClient}>
-        <WorkflowsContextProvider>
-          <MemoryRouter>
-            <I18nProviderMock>
-              <Provider store={testStore}>{children}</Provider>
-            </I18nProviderMock>
-          </MemoryRouter>
-        </WorkflowsContextProvider>
-      </QueryClientProvider>
-    </KibanaContextProvider>
+    <EuiProvider colorMode="light">
+      <KibanaContextProvider services={mockServices}>
+        <QueryClientProvider client={testQueryClient}>
+          <WorkflowsContextProvider>
+            <MemoryRouter>
+              <I18nProviderMock>
+                <Provider store={testStore}>{children}</Provider>
+              </I18nProviderMock>
+            </MemoryRouter>
+          </WorkflowsContextProvider>
+        </QueryClientProvider>
+      </KibanaContextProvider>
+    </EuiProvider>
   );
 };
 

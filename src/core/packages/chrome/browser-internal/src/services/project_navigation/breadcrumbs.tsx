@@ -121,7 +121,6 @@ function buildRootCrumb({
       style: { maxWidth: '320px' },
       popoverContent: (
         <EuiContextMenuPanel
-          size="s"
           items={[
             <EuiContextMenuItem key="project" href={cloudLinks.deployment?.href} icon={'gear'}>
               <FormattedMessage

@@ -11,6 +11,7 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiLoadingElastic,
   useEuiTheme,
 } from '@elastic/eui';
@@ -78,6 +79,7 @@ export function StreamListView() {
     },
     core,
   } = context;
+  const streamsDocsLink = core.docLinks.links.observability.logsStreams;
   const { onPageReady } = usePerformanceContext();
   const router = useStreamsAppRouter();
   const { viewMode } = useStreamsViewMode();
@@ -241,6 +243,19 @@ export function StreamListView() {
           isSelected: tab === activeTab,
           'data-test-subj': `streamsListTab-${tab}`,
         }))}
+        description={
+          <>
+            {i18n.translate('xpack.streams.streamsListView.pageHeaderDescription', {
+              defaultMessage:
+                'Manage how your data is ingested, structured, and retained across all your streams.',
+            })}{' '}
+            <EuiLink href={streamsDocsLink} target="_blank">
+              {i18n.translate('xpack.streams.streamsListView.pageHeaderDescriptionLearnMoreLink', {
+                defaultMessage: 'Learn more',
+              })}
+            </EuiLink>
+          </>
+        }
       />
       <StreamsAppPageTemplate.Body grow>
         {activeTab === 'canvas' && <StreamsCanvas />}

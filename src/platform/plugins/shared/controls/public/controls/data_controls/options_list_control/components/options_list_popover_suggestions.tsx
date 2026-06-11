@@ -210,7 +210,7 @@ export const OptionsListPopoverSuggestions = ({
         <EuiSelectable
           options={selectableOptions}
           renderOption={(option) => renderOption(option, searchString)}
-          listProps={{ onFocusBadge: false }}
+          listProps={{ onFocusBadge: false, paddingSize: 's' }}
           aria-label={OptionsListStrings.popover.getSuggestionsAriaLabel(
             label,
             selectableOptions.length

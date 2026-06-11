@@ -20,6 +20,7 @@ const mapOptionValues = (option: HTMLElement) => ({
   label: option.getAttribute('title'),
   value: option.getAttribute('value'),
   checked: option.getAttribute('aria-checked'),
+  selected: option.getAttribute('aria-selected'),
 });
 
 describe('BreakdownFieldSelector', () => {
@@ -56,18 +57,21 @@ describe('BreakdownFieldSelector', () => {
     expect(options.map(mapOptionValues)).toMatchInlineSnapshot(`
       Array [
         Object {
-          "checked": "true",
+          "checked": null,
           "label": "No breakdown",
+          "selected": "true",
           "value": "__EMPTY_SELECTOR_OPTION__",
         },
         Object {
-          "checked": "false",
+          "checked": null,
           "label": "bytes",
+          "selected": "false",
           "value": "bytes",
         },
         Object {
-          "checked": "false",
+          "checked": null,
           "label": "extension",
+          "selected": "false",
           "value": "extension",
         },
       ]
@@ -111,18 +115,21 @@ describe('BreakdownFieldSelector', () => {
     expect(options.map(mapOptionValues)).toMatchInlineSnapshot(`
       Array [
         Object {
-          "checked": "true",
+          "checked": null,
           "label": "No breakdown",
+          "selected": "true",
           "value": "__EMPTY_SELECTOR_OPTION__",
         },
         Object {
-          "checked": "false",
+          "checked": null,
           "label": "bytes",
+          "selected": "false",
           "value": "bytes",
         },
         Object {
-          "checked": "false",
+          "checked": null,
           "label": "extension",
+          "selected": "false",
           "value": "extension",
         },
       ]
@@ -153,18 +160,21 @@ describe('BreakdownFieldSelector', () => {
     expect(options.map(mapOptionValues)).toMatchInlineSnapshot(`
       Array [
         Object {
-          "checked": "false",
+          "checked": null,
           "label": "No breakdown",
+          "selected": "false",
           "value": "__EMPTY_SELECTOR_OPTION__",
         },
         Object {
-          "checked": "false",
+          "checked": null,
           "label": "bytes",
+          "selected": "false",
           "value": "bytes",
         },
         Object {
-          "checked": "true",
+          "checked": null,
           "label": "extension",
+          "selected": "true",
           "value": "extension",
         },
       ]
@@ -196,18 +206,21 @@ describe('BreakdownFieldSelector', () => {
     expect(options.map(mapOptionValues)).toMatchInlineSnapshot(`
       Array [
         Object {
-          "checked": "true",
+          "checked": null,
           "label": "No breakdown",
+          "selected": "true",
           "value": "__EMPTY_SELECTOR_OPTION__",
         },
         Object {
-          "checked": "false",
+          "checked": null,
           "label": "bytes",
+          "selected": "false",
           "value": "bytes",
         },
         Object {
-          "checked": "false",
+          "checked": null,
           "label": "extension",
+          "selected": "false",
           "value": "extension",
         },
       ]
@@ -223,14 +236,15 @@ describe('BreakdownFieldSelector', () => {
     await waitFor(() => {
       const filteredOptions = screen.getAllByRole('option');
       expect(filteredOptions.map(mapOptionValues)).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "checked": "false",
-          "label": "extension",
-          "value": "extension",
-        },
-      ]
-    `);
+        Array [
+          Object {
+            "checked": null,
+            "label": "extension",
+            "selected": "false",
+            "value": "extension",
+          },
+        ]
+      `);
     });
   });
 

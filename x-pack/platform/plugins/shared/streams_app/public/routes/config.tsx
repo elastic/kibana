@@ -93,7 +93,17 @@ const streamsAppRoutes = {
                 }),
               }),
               t.partial({
-                query: timeRangeQueryParams,
+                query: t.partial({
+                  rangeFrom: t.string,
+                  rangeTo: t.string,
+                  search: t.string,
+                  status: t.string,
+                  type: t.union([t.string, t.array(t.string)]),
+                  subtype: t.union([t.string, t.array(t.string)]),
+                  stream: t.union([t.string, t.array(t.string)]),
+                  showComputed: t.string,
+                  selectedItem: t.string,
+                }),
               }),
             ]),
           },

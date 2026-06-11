@@ -8,9 +8,6 @@
 import {
   EuiCallOut,
   EuiContextMenu,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
   EuiSplitButton,
   useEuiTheme,
   useGeneratedHtmlId,
@@ -21,15 +18,6 @@ import React, { useCallback, useMemo, useState } from 'react';
 import type { ComponentProps } from 'react';
 import { useModelSettingsUrl } from '../../../../../hooks/use_model_settings_url';
 import { MODEL_SETTINGS_LABEL } from './translations';
-
-const modelSettingsMenuName = (
-  <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-    <EuiFlexItem>{MODEL_SETTINGS_LABEL}</EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <EuiIcon type="popout" size="s" color="subdued" aria-hidden={true} />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
 
 export interface MenuHelpers {
   resetMenu: () => void;
@@ -93,7 +81,7 @@ export const ContextMenuSplitButton = ({
       ? [
           { isSeparator: true as const },
           {
-            name: modelSettingsMenuName,
+            name: MODEL_SETTINGS_LABEL,
             icon: 'gear' as const,
             href: managementUrl,
             target: '_blank',

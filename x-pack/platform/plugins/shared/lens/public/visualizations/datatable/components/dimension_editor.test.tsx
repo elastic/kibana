@@ -64,6 +64,7 @@ describe('data table dimension editor', () => {
   });
 
   afterAll(() => {
+    jest.runOnlyPendingTimers();
     jest.useRealTimers();
   });
 
@@ -179,7 +180,7 @@ describe('data table dimension editor', () => {
     ];
     renderTableDimensionEditor();
     await user.click(screen.getByRole('button', { name: 'Center' }));
-    jest.advanceTimersByTime(256);
+    await act(async () => jest.advanceTimersByTime(256));
     expect(props.setState).toHaveBeenCalledWith({
       ...state,
       columns: [
@@ -236,7 +237,7 @@ describe('data table dimension editor', () => {
     state.columns = [{ columnId: 'foo' }, { columnId: 'bar' }];
     renderTableDimensionEditor();
     await btnGroups.colorMode.select('Cell');
-    jest.advanceTimersByTime(256);
+    await act(async () => jest.advanceTimersByTime(256));
     expect(props.setState).toHaveBeenCalledWith({
       ...state,
       columns: [
@@ -256,7 +257,7 @@ describe('data table dimension editor', () => {
     state.columns = [{ columnId: 'foo' }, { columnId: 'bar' }];
     renderTableDimensionEditor();
     await btnGroups.colorMode.select('Badge');
-    jest.advanceTimersByTime(256);
+    await act(async () => jest.advanceTimersByTime(256));
     expect(props.setState).toHaveBeenCalledWith({
       ...state,
       columns: [
@@ -290,7 +291,7 @@ describe('data table dimension editor', () => {
     ];
     renderTableDimensionEditor();
     await btnGroups.colorMode.select('Text');
-    jest.advanceTimersByTime(256);
+    await act(async () => jest.advanceTimersByTime(256));
 
     expect(props.setState).toHaveBeenCalledWith({
       ...state,
@@ -317,7 +318,7 @@ describe('data table dimension editor', () => {
       renderTableDimensionEditor();
 
       await user.click(screen.getByLabelText('Edit colors'));
-      act(() => jest.advanceTimersByTime(256));
+      await act(async () => jest.advanceTimersByTime(256));
 
       expect(screen.getByTestId(`lns-palettePanel-${flyout}`)).toBeInTheDocument();
     }
@@ -339,7 +340,7 @@ describe('data table dimension editor', () => {
       renderTableDimensionEditor();
 
       await user.click(screen.getByLabelText('Edit colors'));
-      act(() => jest.advanceTimersByTime(256));
+      await act(async () => jest.advanceTimersByTime(256));
 
       expect(screen.getByTestId(`lns-palettePanel-${flyout}`)).toBeInTheDocument();
     }
@@ -361,10 +362,10 @@ describe('data table dimension editor', () => {
     renderTableDimensionEditor();
 
     await user.click(screen.getByLabelText('Edit colors'));
-    act(() => jest.advanceTimersByTime(256));
+    await act(async () => jest.advanceTimersByTime(256));
 
     await user.click(screen.getByTestId('lns_colorMappingOrLegacyPalette_switch'));
-    act(() => jest.advanceTimersByTime(256));
+    await act(async () => jest.advanceTimersByTime(256));
 
     expect(props.setState).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -392,7 +393,7 @@ describe('data table dimension editor', () => {
 
     await btnGroups.colorMode.select('None');
 
-    jest.advanceTimersByTime(256);
+    await act(async () => jest.advanceTimersByTime(256));
     expect(props.setState).toBeCalledWith({
       ...state,
       columns: [

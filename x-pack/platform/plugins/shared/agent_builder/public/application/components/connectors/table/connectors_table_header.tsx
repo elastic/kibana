@@ -13,6 +13,8 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback } from 'react';
 import type { ConnectorItem } from '../../../../../common/http_api/tools';
@@ -107,6 +109,10 @@ export const ConnectorsTableHeader = ({
                   css={({ euiTheme }) => ({
                     fontWeight: euiTheme.font.weight.semiBold,
                   })}
+                  {...getEbtProps({
+                    element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                    action: AGENT_BUILDER_UI_EBT.action.globalManagement.BULK_DELETE,
+                  })}
                 >
                   {labels.connectors.deleteSelectedConnectorsButtonLabel(selectedConnectors.length)}
                 </EuiButtonEmpty>
@@ -121,6 +127,10 @@ export const ConnectorsTableHeader = ({
                 css={({ euiTheme }) => ({
                   fontWeight: euiTheme.font.weight.semiBold,
                 })}
+                {...getEbtProps({
+                  element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                  action: AGENT_BUILDER_UI_EBT.action.globalManagement.SELECT_ALL,
+                })}
               >
                 {labels.connectors.selectAllConnectorsButtonLabel}
               </EuiButtonEmpty>
@@ -133,6 +143,10 @@ export const ConnectorsTableHeader = ({
                 onClick={clearSelection}
                 css={({ euiTheme }) => ({
                   fontWeight: euiTheme.font.weight.semiBold,
+                })}
+                {...getEbtProps({
+                  element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                  action: AGENT_BUILDER_UI_EBT.action.globalManagement.CLEAR_SELECTION,
                 })}
               >
                 {labels.connectors.clearSelectionButtonLabel}

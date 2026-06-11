@@ -191,12 +191,16 @@ export const ConfigurationStep = ({ onNext }: Props) => {
         component={SelectField}
         labelAppend={
           <EuiPopover
+            aria-label={i18n.translate(
+              'xpack.idxMgmt.enrichPolicyCreate.configurationStep.typePopoverAriaLabel',
+              { defaultMessage: 'Policy type information' }
+            )}
             button={
               <EuiLink
                 data-test-subj="typePopoverIcon"
                 onClick={() => setIsPopoverOpen((isOpen) => !isOpen)}
               >
-                <EuiIcon type="question" />
+                <EuiIcon type="question" aria-hidden={true} />
               </EuiLink>
             }
             isOpen={isPopoverOpen}

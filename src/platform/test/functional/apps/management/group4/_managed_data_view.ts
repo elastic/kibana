@@ -13,8 +13,12 @@ import type { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const testSubjects = getService('testSubjects');
   const flyout = getService('flyout');
   const PageObjects = getPageObjects(['settings', 'common', 'header']);
+
+  // Stable UUID from src/platform/test/functional/fixtures/kbn_archiver/managed_data_view.json
+  const MANAGED_DV_ID = '5f863f70-4728-4e8d-b441-db08f8c33b28';
 
   describe('managed data view', function describeIndexTests() {
     before(async function () {
@@ -23,8 +27,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'src/platform/test/functional/fixtures/kbn_archiver/managed_data_view'
       );
       await kibanaServer.uiSettings.replace({});
-      await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndexPatterns();
     });
 
     after(async function () {
@@ -36,8 +38,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('when viewing a managed data view', function () {
       it('can see managed badge in data view page', async function () {
-        await PageObjects.settings.clickKibanaIndexPatterns();
-        await PageObjects.settings.clickIndexPatternLogstash();
+        await PageObjects.settings.navigateToDataViewById(MANAGED_DV_ID);
 
         const patternName = await PageObjects.settings.getIndexPageHeading();
         expect(patternName).to.be('logstash-*');
@@ -47,8 +48,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('data view editor is disabled', async function () {
-        await PageObjects.settings.clickKibanaIndexPatterns();
-        await PageObjects.settings.clickIndexPatternLogstash();
+        await PageObjects.settings.navigateToDataViewById(MANAGED_DV_ID);
         await PageObjects.settings.clickEditIndexButton();
 
         await PageObjects.settings.expectDisabledDataViewEditor();
@@ -56,12 +56,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('field editor is disabled', async function () {
-        await PageObjects.settings.clickKibanaIndexPatterns();
-        await PageObjects.settings.clickIndexPatternLogstash();
+        await PageObjects.settings.navigateToDataViewById(MANAGED_DV_ID);
         await PageObjects.settings.clickAddField();
 
         await PageObjects.settings.expectDisabledFieldEditor();
         await flyout.closeFlyout();
+      });
+
+      it('delete option is not available on the detail page', async function () {
+        await PageObjects.settings.navigateToDataViewById(MANAGED_DV_ID);
+        await testSubjects.missingOrFail('moreActionsButton');
+        await testSubjects.missingOrFail('deleteIndexPatternButton');
+      });
+
+      it('delete action is disabled on the list page', async function () {
+        await PageObjects.settings.navigateToDataViews();
+        const isEnabled = await testSubjects.isEnabled('action-delete');
+        expect(isEnabled).to.be(false);
       });
     });
   });

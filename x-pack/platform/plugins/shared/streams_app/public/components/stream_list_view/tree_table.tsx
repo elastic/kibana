@@ -19,6 +19,7 @@ import {
   EuiButtonIcon,
   EuiTourStep,
   EuiBadge,
+  EuiBetaBadge,
   EuiToolTip,
   EuiText,
   EuiContextMenuPanel,
@@ -28,7 +29,14 @@ import {
 import { css } from '@emotion/css';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
 import type { QualityIndicators } from '@kbn/dataset-quality-plugin/common';
-import { Streams, LOGS_ROOT_STREAM_NAME } from '@kbn/streams-schema';
+import {
+  Streams,
+  type RootStreamName,
+  LOGS_ROOT_STREAM_NAME,
+  ROOT_STREAM_NAMES,
+  isRoot,
+  isDraftStream,
+} from '@kbn/streams-schema';
 import useAsync from 'react-use/lib/useAsync';
 import type { WiredStreamsStatus } from '@kbn/streams-plugin/public';
 import { useStreamsTour } from '../streams_tour';
@@ -75,7 +83,12 @@ import {
   EXTERNAL_BADGE_LABEL,
   MANAGED_BADGE_LABEL,
 } from './translations';
-import { DeprecatedLogsBadge, DiscoverBadgeButton, QueryStreamBadge } from '../stream_badges';
+import {
+  DeprecatedLogsBadge,
+  DiscoverBadgeButton,
+  DraftStreamBadge,
+  QueryStreamBadge,
+} from '../stream_badges';
 import { getDestinationMockMetadata } from './destination_mock_metadata';
 import { formatBytes } from '../stream_management/data_management/stream_detail_lifecycle/helpers/format_bytes';
 
@@ -189,6 +202,20 @@ const RowActions = ({
     </EuiFlexGroup>
   );
 };
+
+const TechnicalPreviewBadge = () => (
+  <EuiBetaBadge
+    tooltipContent={i18n.translate('xpack.streams.technicalPreviewTooltip', {
+      defaultMessage: 'This feature is in technical preview. We are working on it...',
+    })}
+    label={i18n.translate('xpack.streams.technicalPreviewLabel', {
+      defaultMessage: 'Technical preview',
+    })}
+    iconType="flask"
+    size="s"
+    css={{ display: 'block' }}
+  />
+);
 
 export function StreamsTreeTable({
   loading,
@@ -566,10 +593,14 @@ export function StreamsTreeTable({
                         min-width: 0;
                       `}
                     >
-                      <EuiToolTip position="top" content={item.stream.name} anchorClassName={css`
-                        min-width: 0;
-                        display: block;
-                      `}>
+                      <EuiToolTip
+                        position="top"
+                        content={item.stream.name}
+                        anchorClassName={css`
+                          min-width: 0;
+                          display: block;
+                        `}
+                      >
                         <EuiLink
                           data-test-subj={`streamsNameLink-${item.stream.name}`}
                           href={router.link('/{key}', {
@@ -602,9 +633,22 @@ export function StreamsTreeTable({
                         </EuiLink>
                       </EuiToolTip>
                     </EuiFlexItem>
+                    {(ROOT_STREAM_NAMES.includes(item.stream.name as RootStreamName) ||
+                      Streams.QueryStream.Definition.is(item.stream) ||
+                      (Streams.WiredStream.Definition.is(item.stream) &&
+                        isDraftStream(item.stream))) && (
+                      <EuiFlexItem grow={false}>
+                        <TechnicalPreviewBadge />
+                      </EuiFlexItem>
+                    )}
                     {Streams.QueryStream.Definition.is(item.stream) && (
                       <EuiFlexItem grow={false}>
                         <QueryStreamBadge />
+                      </EuiFlexItem>
+                    )}
+                    {isDraftStream(item.stream) && (
+                      <EuiFlexItem grow={false}>
+                        <DraftStreamBadge />
                       </EuiFlexItem>
                     )}
                     {item.stream.name === LOGS_ROOT_STREAM_NAME &&
@@ -614,6 +658,29 @@ export function StreamsTreeTable({
                             openFlyout={openFlyout}
                             hasNewStreams={getLegacyLogsStatus(wiredStreamsStatus).hasNewStreams}
                           />
+                        </EuiFlexItem>
+                      )}
+                    {isRoot(item.stream.name) &&
+                      item.stream.name !== LOGS_ROOT_STREAM_NAME &&
+                      !item.data_stream &&
+                      !Streams.QueryStream.Definition.is(item.stream) && (
+                        <EuiFlexItem grow={false}>
+                          <EuiToolTip
+                            position="right"
+                            content={i18n.translate(
+                              'xpack.streams.streamsTable.pendingDataStream.tooltip',
+                              {
+                                defaultMessage:
+                                  'This stream is configured but has no backing data stream yet. Start sending data and the data stream will be created automatically on first ingest.',
+                              }
+                            )}
+                          >
+                            <EuiBadge color="default">
+                              {i18n.translate('xpack.streams.streamsTable.pendingDataStream.label', {
+                                defaultMessage: 'Pending',
+                              })}
+                            </EuiBadge>
+                          </EuiToolTip>
                         </EuiFlexItem>
                       )}
                   </EuiFlexGroup>
@@ -751,17 +818,31 @@ export function StreamsTreeTable({
           dataType: 'number',
           width: '120px',
           truncateText: true,
-          render: (_: unknown, item: TableRow) => (
-            <RetentionColumn
-              lifecycle={item.effective_lifecycle!}
-              streamName={item.stream.name}
-              aria-label={i18n.translate('xpack.streams.streamsTreeTable.retentionCellAriaLabel', {
-                defaultMessage: 'Retention policy for {name}',
-                values: { name: item.stream.name },
-              })}
-              dataTestSubj={`retentionColumn-${item.stream.name}`}
-            />
-          ),
+          render: (_: unknown, item: TableRow) => {
+            if (isDraftStream(item.stream)) {
+              return (
+                <span>
+                  {i18n.translate('xpack.streams.streamsTreeTable.span.naLabel', {
+                    defaultMessage: 'N/A',
+                  })}
+                </span>
+              );
+            }
+            return (
+              <RetentionColumn
+                lifecycle={item.effective_lifecycle!}
+                streamName={item.stream.name}
+                aria-label={i18n.translate(
+                  'xpack.streams.streamsTreeTable.retentionCellAriaLabel',
+                  {
+                    defaultMessage: 'Retention policy for {name}',
+                    values: { name: item.stream.name },
+                  }
+                )}
+                dataTestSubj={`retentionColumn-${item.stream.name}`}
+              />
+            );
+          },
         },
         {
           field: 'definition',
