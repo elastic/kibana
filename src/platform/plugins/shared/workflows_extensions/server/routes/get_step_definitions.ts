@@ -9,9 +9,65 @@
 
 import type { IRouter } from '@kbn/core/server';
 import { createSHA256Hash } from '@kbn/crypto';
+import { stableStringify } from '@kbn/std';
+import { z } from '@kbn/zod/v4';
 import type { ServerStepRegistry } from '../step_registry';
+import type { ServerStepDefinition } from '../step_registry/types';
 
 const ROUTE_PATH = '/internal/workflows_extensions/step_definitions';
+
+/**
+ * Converts a zod schema to a stable JSON Schema representation for hashing.
+ * Falls back to a deterministic marker so an unconvertible schema still
+ * contributes to (and changes) the hash when it changes.
+ */
+function schemaToJson(schema?: z.ZodType): unknown {
+  if (!schema) {
+    return undefined;
+  }
+  try {
+    return z.toJSONSchema(schema);
+  } catch {
+    return { __unconvertible: String(schema) };
+  }
+}
+
+/**
+ * Computes a hash over the entire step definition so changes to the schemas
+ * (inputSchema/outputSchema/configSchema), handler/onCancel implementations, or
+ * metadata are all detected. `id` is excluded since it's the lookup key.
+ */
+function computeDefinitionHash(definition: ServerStepDefinition): string {
+  const {
+    label,
+    description,
+    category,
+    stability,
+    deprecation,
+    documentation,
+    inputSchema,
+    outputSchema,
+    configSchema,
+    handler,
+    onCancel,
+  } = definition;
+
+  const canonical = {
+    label,
+    description,
+    category,
+    stability,
+    deprecation,
+    documentation,
+    inputSchema: schemaToJson(inputSchema),
+    outputSchema: schemaToJson(outputSchema),
+    configSchema: schemaToJson(configSchema),
+    handler: handler?.toString(),
+    onCancel: onCancel?.toString(),
+  };
+
+  return createSHA256Hash(stableStringify(canonical));
+}
 
 /**
  * Registers the route to get all registered step definitions.
@@ -39,10 +95,10 @@ export function registerGetStepDefinitionsRoute(
     async (_context, _request, response) => {
       const allStepDefinitions = registry.getAll();
       const steps = allStepDefinitions
-        // create a hash of the handler function to detect changes in the implementation
-        .map(({ id, ...definition }) => ({
-          id,
-          definitionHash: createSHA256Hash(JSON.stringify(definition)),
+        // create a hash of the full definition to detect changes in schemas or implementation
+        .map((definition) => ({
+          id: definition.id,
+          definitionHash: computeDefinitionHash(definition),
         }))
         .sort((a, b) => a.id.localeCompare(b.id));
 

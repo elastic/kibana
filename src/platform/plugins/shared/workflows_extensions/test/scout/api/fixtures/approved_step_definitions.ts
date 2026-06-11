@@ -25,231 +25,175 @@
  */
 export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; definitionHash: string }> = [
   {
-    id: 'contextEngine.addEntry',
-    definitionHash: 'b4142fd4dab88d471f233d992a07a385a75175877fe49934de8be98ee4f95cd9',
-  },
-  {
-    id: 'ai.summarize',
-    definitionHash: '7a62bf4b082654ecc49385bc2bf77a22ee1e66962e3538344be0f0160c53a1df',
-  },
-  {
     id: 'ai.agent',
-    definitionHash: 'eba36bce77787187038a381f671566348b91f15a7db588c074afed9a83c14e25',
+    definitionHash: '61369039c2fe1fe7d1c32f9b378c3042d267200e6640a7a0f35de42fd2d98350',
   },
   {
     id: 'ai.classify',
-    definitionHash: '91a1522a8b78bd043ebebf794495e75b3214e8ff0fdcabd8ab67dab7599b8b5f',
+    definitionHash: '8407ff204c11e5a92e8abf80ef4107055fca368c0db955f1ca282ad1120f90b7',
   },
   {
     id: 'ai.prompt',
-    definitionHash: '6ff6b5e2b2e311068f1b18df31a21829d4db2a0420a38d5d3139a869e8ac7354',
+    definitionHash: '55e06b9c76f49b058af63146454d61f49b5c8f5055b34a2d2473825f67cfa95c',
   },
   {
-    id: 'contextEngine.addEntry',
-    definitionHash: 'b4142fd4dab88d471f233d992a07a385a75175877fe49934de8be98ee4f95cd9',
-  },
-  {
-    id: 'data.aggregate',
-    definitionHash: 'd41449cf88ea4e8887b156720a08148e317ad0c685eb5b3b4624f6dd6f164164',
-  },
-  {
-    id: 'data.concat',
-    definitionHash: 'b5ed2f5656bb62b3f59a35f8fdb7c1f813c299180f95efc227e28e0a67dd2583',
-  },
-  {
-    id: 'data.dedupe',
-    definitionHash: '692ad7052865f50bbbc05e0cd7554801f8049c1a0bb75ffd670955af87f74852',
-  },
-  {
-    id: 'data.filter',
-    definitionHash: '81b2f0de4d322fa7ae431c562e1ed476238fb64d23a3c8590aa86ebfc62d021f',
-  },
-  {
-    id: 'data.find',
-    definitionHash: '55de05515461383a76d75cb1ff2a66730d26e7ced22d549611511390733d17f1',
-  },
-  {
-    id: 'data.map',
-    definitionHash: '133d9f679704c1813a4afab63dbbaff501d022eb0d63d8b37490dad719b0f4a8',
-  },
-  {
-    id: 'data.parseJson',
-    definitionHash: 'f3a1a82c3f1f7a44376bdb329299758ee93cd910fc9d41e04d65e145af4be4d7',
-  },
-  {
-    id: 'data.regexExtract',
-    definitionHash: '0d74d9e0aabf958a9bcd332b41efcd916afe9d343030405df4f56c0644abb9ae',
-  },
-  {
-    id: 'data.regexReplace',
-    definitionHash: '425901910c3c7a231ce4aba7d560bd7bb362000998a32bd9cdc6a314790c933e',
-  },
-  {
-    id: 'data.stringifyJson',
-    definitionHash: '9b757bc004832849780d0292ce8bddebd4e2a1698b05cf6edaff99c49d6dc042',
-  },
-  {
-    id: 'search.rerank',
-    definitionHash: 'b0dec1d0037ac61d32d268bf5fdc7d645a7faed446cde9be1ada57f46a0fdd9c',
-  },
-  {
-    id: 'security.buildAlertEntityGraph',
-    definitionHash: '90e95df7b6deaa5b6ab908c1ff8f4a3606b6e8f7fce5d59e0411d3d577d0be44',
-  },
-  {
-    id: 'security.renderAlertNarrative',
-    definitionHash: '1719b8db582f3695a5bac6df5434285f101ebf4fa032702613f28dd33d978988',
+    id: 'ai.summarize',
+    definitionHash: 'e9e8f647b159477f7a86c66ad4360f99ecbe8e5a04a3dd890241c82e047f9f1c',
   },
   {
     id: 'cases.addAlerts',
-    definitionHash: '8f081af827e83cff7f6db5c8df2c4bbd521c429f36fe0e2e5f15600f906d1eb2',
+    definitionHash: 'e7af7342bb64c98d6f800d9bd087895b190665fafa62dec4bbe7a9011eccbe63',
   },
   {
     id: 'cases.addComment',
-    definitionHash: 'c77b18222f780bed5aa3ae3655fdb797a66549a55928d664805f6c1ef6382b18',
+    definitionHash: 'b23896df7ed1d1b822ecc1a13d4f3870b522b1fb0e9f0e8b00830586b48cf865',
   },
   {
     id: 'cases.addEvents',
-    definitionHash: 'd0820a46d9cefd3e5d82bc15b5bcd17fcb6ab9932ff92b512825ac42c0c23427',
+    definitionHash: '1ac93d32f2b9dbb846631d6a70a116eaf4aa5f63575fe266d3cc61e9c3e08cf3',
   },
   {
     id: 'cases.addObservables',
-    definitionHash: '65449e203fd5fd69cac4ca120830861370bfdf2656d40125e6d865dc3b193e43',
+    definitionHash: 'c48517c8bcd1bb522b3d2f26c548addccdf9380e053038ee461be01588870e10',
   },
   {
     id: 'cases.addTags',
-    definitionHash: '1677752a44d87d24c0de4d0edddf2ba971e5c3a839aed1c67aa4ccaed1921696',
+    definitionHash: '2712c32e51937cec6cd345d66199f2124552575cd62c82228e301e6e61556ee7',
   },
   {
     id: 'cases.assignCase',
-    definitionHash: '2f1014d986994ee9e5490331845b33d53f806e5709465c086fbb1672bac5be80',
+    definitionHash: 'ea0a58b6b67da252a03da3b98f4f8a623898df562fb9d457067dbbd06b61a3f8',
   },
   {
     id: 'cases.closeCase',
-    definitionHash: '0a72dccc6e76740bffdd6357a81cd1fb28cc6a702fb7327322f9744d129a7d20',
+    definitionHash: '14f14abe3112cc15825ea87ef3fbb4b83efd9c741a80470afabebac70fd22631',
   },
   {
     id: 'cases.createCase',
-    definitionHash: '7d31390fe896a479cb76931385bbd98bbcf5be084872126a23095de851e370d6',
+    definitionHash: '672366fbfea17a4cd1925cf670f54b88dff7fab1bc533310c82155a25c0633b1',
   },
   {
     id: 'cases.createCaseFromTemplate',
-    definitionHash: 'b5c8fd7660daf976b9c3501f5ddfd7625277d6e96fed61adc7aa94f15fb8260a',
+    definitionHash: '6d181f590abe24ed2bd90a96d9e9b550d69f91bf12483c6fe39131374a80f317',
   },
   {
     id: 'cases.deleteCases',
-    definitionHash: 'c9a72f13a08c6549631c2727a3452e796be944293f9236c14336f0ff624bfa36',
+    definitionHash: '965740f2f3404fe6f6c6bbc00aee286d953979efde71ef70e6af6bb40471be11',
   },
   {
     id: 'cases.deleteObservable',
-    definitionHash: '494285f9b07153849607d24467edf66e6a7b0c15353ed63f1e4c42942418dc1e',
+    definitionHash: '6f487f2ebdcdd64c744d9ee12f3b568be6aa02fc1bf0cefe659dd6bca8fc7e7e',
   },
   {
     id: 'cases.findCases',
-    definitionHash: '660d0814cd8796f06b8e5b085ac6aa2a1388e22697dbd46fc221eee436b9cb0e',
+    definitionHash: '965ebe10b4fa8a8eaf9b25a148d45f241f91641fc7a946e20828d86932d37faf',
   },
   {
     id: 'cases.findSimilarCases',
-    definitionHash: 'e05cb816e1e69ecadbc4920426cd7188821386ee6cf8c6fb1cb18d35745c1574',
+    definitionHash: '7726628309927cae609e46418b58a74b6b561fd2e8201e4e35e70c3dfcb502a5',
   },
   {
     id: 'cases.getAllAttachments',
-    definitionHash: '9e45466d24c36435e99a8f45dd7f9279c18ccaa47d7f3e2db2e395191ed87a18',
+    definitionHash: 'a0e3d2d3a13f7a7cbda809fbd229263a0eeb750d7d649eb413553d683b6dc4aa',
   },
   {
     id: 'cases.getCase',
-    definitionHash: '708d11de3598f2cc4eccefc2eb896ff8cc258d1f1e522e1117287921ae0e3dd6',
+    definitionHash: 'f9c74d3d87ae6f2831ee6683630dfc8c5941af57f8a199c6348a561d34b7c1ca',
   },
   {
     id: 'cases.getCases',
-    definitionHash: 'e63ff2befbf48d6ef116b6caa45d005b1b4926e3cbe822f9562386c863d6d4d5',
+    definitionHash: '5d82b91d9026a593bdd4feb217b6d95806e4767c95057f6632fb05c886abc20d',
   },
   {
     id: 'cases.getCasesByAlertId',
-    definitionHash: '8964d33b95ba40446121be3b8d13921dd7b04259b99ec9276ac59af3aa620e23',
+    definitionHash: 'bd5681887038f8f9f12925d5937e949b292249aa07e8c38ff3eb4853911a0fb6',
   },
   {
     id: 'cases.setCategory',
-    definitionHash: 'c3aa019733cb99c4026c55d290103ac5665f9bd7ee438772ef2a41baa391af17',
+    definitionHash: 'a78432b7b4396bb8ad9a6821ffbfdeef12135525e849ff48c70f5830ab6a18dc',
   },
   {
     id: 'cases.setCustomField',
-    definitionHash: '9a2720c93ce0620193ad38140f83373366852d1001be758638d3ee24dee050ec',
+    definitionHash: '4743e7ebb05a662caa089c2596edf6887b0665f67073dede6de28fc696e108e1',
   },
   {
     id: 'cases.setDescription',
-    definitionHash: 'bcee0efa60a7b202339dcc1f709a3bc2fba47f7b980213aa02e9ac5910abefd6',
+    definitionHash: '9a0c215cc18d148bb5adebaf05c0b5dccdfe19d2d23ce1e0a65ffad4319e1cc3',
   },
   {
     id: 'cases.setSeverity',
-    definitionHash: '5c96cf7244b62f4e6d8df7e3e613f736657f8914b4d10b0fe6bd01ea7f18dfa2',
+    definitionHash: 'fd56121168eb7a421ae1abb7df157c1fa4caaf580c3237d3a1c049d3279c3e4d',
   },
   {
     id: 'cases.setStatus',
-    definitionHash: '81559ae94b31d342cc1f65e22a6dd4b32070fae731273aee49234d83f15b2e29',
+    definitionHash: '4aca8036029f78ff80f03d570bee29b99d80c1fbb3a6f852faab173f1d1f5f0c',
   },
   {
     id: 'cases.setTitle',
-    definitionHash: '85e2254957b16ce436f7282c9e47050c9f02fb5238ed389339a1792c173a2e4d',
+    definitionHash: '8801e5a666bb602080902eb3dbeb7f1f3ac30b8ade25d9b8970bebe4dda9e686',
   },
   {
     id: 'cases.unassignCase',
-    definitionHash: 'dc88e43b956945a1507b58dcd01252a5561996e6c2d5699d9a0b922c514ce7ce',
+    definitionHash: '72528fca13e6d700b9f4b427f34fcd663de7544987d56b81f7c736ec29a0be9d',
   },
   {
     id: 'cases.updateCase',
-    definitionHash: '4085679b00ca2b261e2b244ab7cc5e0c67390092ae47c7904c4afd7bc6362a79',
+    definitionHash: '60b60a7c5297bed7eb972023b0d9c79473e4fd74a3884003b5699897f2e723e4',
   },
   {
     id: 'cases.updateCases',
-    definitionHash: '129f66ab82fde1510d1974be7cb325ddc62dcd97853b12f72b8353b9aa0b84a6',
+    definitionHash: '449a100444a79338810d35c980ffd7bea989994c2f0b985a93dac55055a88d46',
   },
   {
     id: 'cases.updateObservable',
-    definitionHash: '2b7a1a374aa9730f80e5b032e32b16c2da01eda472cb712277c5234cfcfd4d62',
+    definitionHash: 'f869b6ec966f20dea5849a5dc3704a260acf5adb2f405b2abd982220ac4d5cee',
+  },
+  {
+    id: 'contextEngine.addEntry',
+    definitionHash: 'fa99a999886acaf3f1d265deca68a061b6f3faff5a4660a51b53251d4034ba09',
   },
   {
     id: 'data.aggregate',
-    definitionHash: 'd41449cf88ea4e8887b156720a08148e317ad0c685eb5b3b4624f6dd6f164164',
+    definitionHash: '0bc378ad029c1bda64f5cccbf2eea1b49ab39d97edbc10e5c5eec738225d9fb6',
   },
   {
     id: 'data.concat',
-    definitionHash: 'b5ed2f5656bb62b3f59a35f8fdb7c1f813c299180f95efc227e28e0a67dd2583',
+    definitionHash: '1f0823873f56f116471918bba33ef23a0d74bd113e7622eebac379435bf75b89',
   },
   {
     id: 'data.dedupe',
-    definitionHash: '692ad7052865f50bbbc05e0cd7554801f8049c1a0bb75ffd670955af87f74852',
+    definitionHash: 'a38e8a91e37074ca26888c2e6031b6cea5074aa7d2b688145edc4a72a5882b92',
   },
   {
     id: 'data.filter',
-    definitionHash: '81b2f0de4d322fa7ae431c562e1ed476238fb64d23a3c8590aa86ebfc62d021f',
+    definitionHash: '3f0453765900a7bd9efb2caaab696a1407de1dc15e7746a95079d55c9b70fdac',
   },
   {
     id: 'data.find',
-    definitionHash: '55de05515461383a76d75cb1ff2a66730d26e7ced22d549611511390733d17f1',
+    definitionHash: '5ef06fe7654b638c6889ec96a7a646f78c3628378bede1564d2a8c612f4372ff',
   },
   {
     id: 'data.map',
-    definitionHash: '133d9f679704c1813a4afab63dbbaff501d022eb0d63d8b37490dad719b0f4a8',
+    definitionHash: '01a51fe7acf4f5cf427059440ec31598d68c0e46ef11d82e45e151150556cad8',
   },
   {
     id: 'data.parseJson',
-    definitionHash: 'f3a1a82c3f1f7a44376bdb329299758ee93cd910fc9d41e04d65e145af4be4d7',
+    definitionHash: 'f2354927ea46792aeeeff4fa1861af49656e0bffb4c09cbfa590431f29c9cd1f',
   },
   {
     id: 'data.regexExtract',
-    definitionHash: '0d74d9e0aabf958a9bcd332b41efcd916afe9d343030405df4f56c0644abb9ae',
+    definitionHash: '0312bd460e7ff8d2f7725d3e8f4c7d5d96ae606a9cc5901f02d09108466d596a',
   },
   {
     id: 'data.regexReplace',
-    definitionHash: '425901910c3c7a231ce4aba7d560bd7bb362000998a32bd9cdc6a314790c933e',
+    definitionHash: '7cd36dc8b3f4f37bc87f7d2ca8b3588c37ff538fdf6925804ae3ca60fc1f9f6e',
   },
   {
     id: 'data.stringifyJson',
-    definitionHash: '9b757bc004832849780d0292ce8bddebd4e2a1698b05cf6edaff99c49d6dc042',
+    definitionHash: '6773f5c609999c0e8da36397dc1243aa94c2392a1f00ca2f084fd4d1fd2235e2',
   },
   {
     id: 'search.rerank',
-    definitionHash: 'b0dec1d0037ac61d32d268bf5fdc7d645a7faed446cde9be1ada57f46a0fdd9c',
+    definitionHash: '9e032776f7f7342dd252eee237e17a89adf5185f515d4fa890560bb8a42d4601',
   },
 ];

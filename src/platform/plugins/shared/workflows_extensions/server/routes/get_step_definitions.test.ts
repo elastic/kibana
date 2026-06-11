@@ -9,6 +9,7 @@
 
 import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
+import { z } from '@kbn/zod/v4';
 import { registerGetStepDefinitionsRoute } from './get_step_definitions';
 import { ServerStepRegistry } from '../step_registry';
 
@@ -32,7 +33,7 @@ describe('registerGetStepDefinitionsRoute', () => {
     expect(routeConfig.validate).toBe(false);
   });
 
-  it('returns steps sorted alphabetically with handler hashes', async () => {
+  it('returns steps sorted alphabetically with definition hashes', async () => {
     const stepRegistry = new ServerStepRegistry(logger);
     const sharedHandler = async () => ({ output: {} });
     stepRegistry.register({ id: 'z.step', handler: sharedHandler } as any);
@@ -48,14 +49,14 @@ describe('registerGetStepDefinitionsRoute', () => {
 
     expect(response.ok).toHaveBeenCalledTimes(1);
     const { body } = response.ok.mock.calls[0][0]!;
-    const { steps } = body as { steps: Array<{ id: string; handlerHash: string }> };
+    const { steps } = body as { steps: Array<{ id: string; definitionHash: string }> };
 
     expect(steps.map((s) => s.id)).toEqual(['a.step', 'm.step', 'z.step']);
     // All share the same handler, so hashes must be identical
-    expect(steps[0].handlerHash).toBe(steps[1].handlerHash);
-    expect(steps[1].handlerHash).toBe(steps[2].handlerHash);
+    expect(steps[0].definitionHash).toBe(steps[1].definitionHash);
+    expect(steps[1].definitionHash).toBe(steps[2].definitionHash);
     // Hashes are non-empty hex strings
-    expect(steps[0].handlerHash).toMatch(/^[a-f0-9]+$/);
+    expect(steps[0].definitionHash).toMatch(/^[a-f0-9]+$/);
   });
 
   it('returns empty steps array when registry is empty', async () => {
@@ -84,7 +85,33 @@ describe('registerGetStepDefinitionsRoute', () => {
     await handler({} as any, httpServerMock.createKibanaRequest(), response);
 
     const { body } = response.ok.mock.calls[0][0]!;
-    const { steps } = body as { steps: Array<{ id: string; handlerHash: string }> };
-    expect(steps[0].handlerHash).not.toBe(steps[1].handlerHash);
+    const { steps } = body as { steps: Array<{ id: string; definitionHash: string }> };
+    expect(steps[0].definitionHash).not.toBe(steps[1].definitionHash);
+  });
+
+  it('produces different hashes when only the schema differs', async () => {
+    const sharedHandler = async () => ({ output: {} });
+    const stepRegistry = new ServerStepRegistry(logger);
+    stepRegistry.register({
+      id: 'a.step',
+      handler: sharedHandler,
+      inputSchema: z.object({ message: z.string() }),
+    } as any);
+    stepRegistry.register({
+      id: 'b.step',
+      handler: sharedHandler,
+      inputSchema: z.object({ count: z.number() }),
+    } as any);
+
+    const testRouter = httpServiceMock.createRouter();
+    registerGetStepDefinitionsRoute(testRouter, stepRegistry);
+
+    const [, handler] = testRouter.get.mock.calls[0];
+    const response = httpServerMock.createResponseFactory();
+    await handler({} as any, httpServerMock.createKibanaRequest(), response);
+
+    const { body } = response.ok.mock.calls[0][0]!;
+    const { steps } = body as { steps: Array<{ id: string; definitionHash: string }> };
+    expect(steps[0].definitionHash).not.toBe(steps[1].definitionHash);
   });
 });
