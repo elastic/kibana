@@ -1,0 +1,57 @@
+responses:
+  200:
+    description: 'Indicates a successful response'
+    content:
+      application/json:
+        examples:
+          searchExecutionsResponseExample:
+            description: 'Example Elasticsearch search response for workflow-level executions'
+            value:
+              took: 5
+              timed_out: false
+              _shards:
+                total: 1
+                successful: 1
+                skipped: 0
+                failed: 0
+              hits:
+                total:
+                  value: 1
+                  relation: eq
+                max_score: 1.0
+                hits:
+                  - _index: .workflows-executions
+                    _id: exec-a1b2c3d4-e5f6-7890
+                    _score: 1.0
+                    _source:
+                      id: exec-a1b2c3d4-e5f6-7890
+                      spaceId: default
+                      status: completed
+                      isTestRun: false
+                      startedAt: '2025-11-20T12:00:00.000Z'
+                      finishedAt: '2025-11-20T12:00:03.000Z'
+                      duration: 3000
+                      workflowId: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                      workflowName: Example Workflow
+                      executedBy: elastic
+                      triggeredBy: manual
+                      tags:
+                        - reporting
+  400:
+    description: 'Indicates a bad request, such as invalid JSON in query parameters'
+    content:
+      application/json:
+        examples:
+          searchExecutionsBadRequestExample:
+            description: 'Example response when query or sort JSON is invalid'
+            value:
+              message: 'Invalid JSON in query'
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -X GET "${KIBANA_URL}/api/workflows/executions?from=0&size=25&trackTotalHits=true" \
+        -H "Authorization: ApiKey ${API_KEY}"
+  - lang: Console
+    source: |
+      GET kbn://api/workflows/executions?from=0&size=25&trackTotalHits=true
