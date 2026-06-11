@@ -153,3 +153,19 @@ export type {
   AnchorHit,
   SearchByAnchorsResult,
 } from './search_by_anchors';
+
+export {
+  searchByDiamond,
+  STRONG_FLOOR,
+  MID_FLOOR,
+  BASE_FLOOR,
+  DIAMOND_VERTICES,
+} from './search_by_diamond';
+export type {
+  DiamondVertex,
+  DiamondVertexQueries,
+  SearchByDiamondParams,
+  DiamondVertexScore,
+  DiamondHit,
+  SearchByDiamondResult,
+} from './search_by_diamond';

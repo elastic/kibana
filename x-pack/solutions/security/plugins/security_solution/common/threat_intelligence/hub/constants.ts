@@ -239,6 +239,21 @@ export const SEARCH_BY_ANCHORS_API_PATH =
   `${THREAT_INTELLIGENCE_API_BASE}/search_by_anchors` as const;
 
 /**
+ * Semantic Diamond Model correlation search — POST /api/threat_intelligence/search_by_diamond.
+ *
+ * Two input modes:
+ *   1. `{ vertex_queries: DiamondVertexQueries }` — caller supplies free-text queries
+ *      per vertex (omit vertices they don't care about).
+ *   2. `{ source_report_id: string }` — service fetches the report's
+ *      extracted.diamond.{vertex}.summary values (non-NONE vertices only) and
+ *      uses them as the per-vertex queries (diamond-to-diamond correlation).
+ *
+ * Gated on `.correlate` privilege (see `THREAT_INTELLIGENCE_API_PRIVILEGES.correlate`).
+ */
+export const SEARCH_BY_DIAMOND_API_PATH =
+  `${THREAT_INTELLIGENCE_API_BASE}/search_by_diamond` as const;
+
+/**
  * Stage-2 taxonomy enrichment route — POST /api/threat_intelligence/enrich_taxonomy.
  * Invoked by `nl_extraction_behavioral` for every pending report. Produces
  * categories / regions / relevance / detection_actionability / diamond_suitable.
