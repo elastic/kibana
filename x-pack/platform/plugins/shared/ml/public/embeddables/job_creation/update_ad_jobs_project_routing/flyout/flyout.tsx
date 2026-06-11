@@ -208,7 +208,7 @@ export const UpdateADJobsProjectRoutingFlyout: FC<Props> = ({
               label={
                 <FormattedMessage
                   id="xpack.ml.embeddables.updateADJobsProjectRoutingFlyout.projectRoutingLabel"
-                  defaultMessage="Project routing"
+                  defaultMessage="Project scope"
                 />
               }
             >
