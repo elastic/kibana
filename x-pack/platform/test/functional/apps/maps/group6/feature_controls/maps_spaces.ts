@@ -22,7 +22,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'security',
     'header',
   ]);
-  const contentList = getService('contentList');
+  const listingTable = getService('listingTable');
   const appsMenu = getService('appsMenu');
 
   describe('spaces feature controls', () => {
@@ -76,11 +76,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         // Can not use maps.deleteSavedMaps because maps.deleteSavedMaps will
         // navigate to default space if on list page check fails
-        await contentList.search('my test map');
+        await listingTable.searchForItemWithName('my test map');
         await header.waitUntilLoadingHasFinished();
-        await contentList.selectAllAndDelete();
+        await listingTable.checkListingSelectAllCheckbox();
+        await listingTable.clickDeleteSelected();
+        await common.clickConfirmOnModal();
         await header.waitUntilLoadingHasFinished();
-        await contentList.expectItemCount(0);
+        await listingTable.expectItemsCount('map', 0);
       });
     });
 
