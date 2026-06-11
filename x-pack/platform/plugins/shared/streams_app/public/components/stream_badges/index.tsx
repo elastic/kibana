@@ -285,13 +285,20 @@ export function DiscoverBadgeButton({
       })}
     </EuiButton>
   ) : (
-    <EuiButtonIcon
-      data-test-subj={`streamsDiscoverActionButton-${stream.name}`}
-      href={discoverLink}
-      iconType="discoverApp"
-      size="xs"
-      aria-label={ariaLabel}
-    />
+    <EuiToolTip
+      position="top"
+      content={i18n.translate('xpack.streams.entityDetailViewWithoutParams.viewOnDiscoverTooltip', {
+        defaultMessage: 'View on Discover',
+      })}
+    >
+      <EuiButtonIcon
+        data-test-subj={`streamsDiscoverActionButton-${stream.name}`}
+        href={discoverLink}
+        iconType="discoverApp"
+        size="xs"
+        aria-label={ariaLabel}
+      />
+    </EuiToolTip>
   );
 }
 

@@ -17,11 +17,12 @@ import {
 import type { Logger } from '@kbn/logging';
 import { DataStreamsStatsService } from '@kbn/dataset-quality-plugin/public';
 import { dynamic } from '@kbn/shared-ux-utility';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { from, map, switchMap } from 'rxjs';
 import { css } from '@emotion/css';
 import ReactDOM from 'react-dom';
+import { StreamsViewModeSelect } from './components/streams_view_mode_select';
 import type {
   ConfigSchema,
   StreamsAppPublicSetup,
@@ -78,6 +79,28 @@ export const renderApp = ({
     appWrapperElement.classList.remove(APP_WRAPPER_CLASS);
   };
 };
+
+const STREAMS_APP_ID = 'streams';
+
+/**
+ * Renders the view-mode select in the global header, but only while the Streams
+ * app is the active app. The nav control is registered globally, so we gate its
+ * visibility on the current app id.
+ */
+function StreamsViewModeNavControl({ coreStart }: { coreStart: CoreStart }) {
+  const [currentAppId, setCurrentAppId] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    const subscription = coreStart.application.currentAppId$.subscribe(setCurrentAppId);
+    return () => subscription.unsubscribe();
+  }, [coreStart.application.currentAppId$]);
+
+  if (currentAppId !== STREAMS_APP_ID) {
+    return null;
+  }
+
+  return <StreamsViewModeSelect />;
+}
 
 export class StreamsAppPlugin
   implements
@@ -159,7 +182,18 @@ export class StreamsAppPlugin
     return {};
   }
 
-  start(_coreStart: CoreStart, pluginsStart: StreamsAppStartDependencies): StreamsAppPublicStart {
+  start(coreStart: CoreStart, pluginsStart: StreamsAppStartDependencies): StreamsAppPublicStart {
+    coreStart.chrome.navControls.registerRight({
+      order: 1000,
+      mount: (element) => {
+        ReactDOM.render(
+          coreStart.rendering.addContext(<StreamsViewModeNavControl coreStart={coreStart} />),
+          element
+        );
+        return () => ReactDOM.unmountComponentAtNode(element);
+      },
+    });
+
     const locator = pluginsStart.share.url.locators.create(new StreamsAppLocatorDefinition());
     pluginsStart.streams.navigationStatus$.subscribe((status) => {
       if (status.status !== 'enabled') return;
