@@ -25,7 +25,7 @@ const OTEL_APM_PATH = '/otel-apm';
 
 const ASK_AI_PROMPT = i18n.translate('xpack.apm.missingDataCallout.assistantPrompt', {
   defaultMessage:
-    'I have services missing from the APM Service Inventory. Help me instrument my applications using the managed OTLP endpoint on serverless so they start sending traces, metrics, and logs to Elastic.',
+    'My APM services are sending vanilla OpenTelemetry data which is not enriched for the full Kibana experience. Help me switch to the Elastic managed OTLP endpoint or an EDOT collector to unlock the complete APM view.',
 });
 
 export function MissingDataCallout() {
@@ -56,14 +56,14 @@ export function MissingDataCallout() {
       color="primary"
       iconType="info"
       title={i18n.translate('xpack.apm.missingDataCallout.title', {
-        defaultMessage: 'Do you miss some data?',
+        defaultMessage: 'Your OTel data is not fully enriched',
       })}
     >
       <EuiText size="s">
         <p>
           <FormattedMessage
             id="xpack.apm.missingDataCallout.description"
-            defaultMessage="If some of your services are missing, they may not be instrumented yet. Send your logs, metrics, and traces to Elastic through the {managedOtlpLink} — no collector to host or manage."
+            defaultMessage="You ingested vanilla OTel data, which is not enriched for the full Kibana experience. Use the {managedOtlpLink} or send data via your EDOT collector to unlock the complete APM view."
             values={{
               managedOtlpLink: (
                 <EuiLink
@@ -73,7 +73,7 @@ export function MissingDataCallout() {
                   external
                 >
                   {i18n.translate('xpack.apm.missingDataCallout.docsLinkLabel', {
-                    defaultMessage: 'managed OTLP endpoint',
+                    defaultMessage: 'Elastic managed OTLP endpoint',
                   })}
                 </EuiLink>
               ),
@@ -102,11 +102,11 @@ export function MissingDataCallout() {
           <EuiButtonEmpty
             data-test-subj="apmMissingDataCalloutSetup"
             size="s"
-            iconType="plusInCircle"
+            iconType="refresh"
             onClick={onSetupClick}
           >
             {i18n.translate('xpack.apm.missingDataCallout.setupButton', {
-              defaultMessage: 'Set up OpenTelemetry',
+              defaultMessage: 'Switch to managed OTLP',
             })}
           </EuiButtonEmpty>
         </EuiFlexItem>
