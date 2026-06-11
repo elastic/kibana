@@ -432,6 +432,7 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
                   class="euiFlexItem ee8xehw2 emotion-euiFlexItem-growZero-FlexItem"
                 >
                   <span
+                    aria-hidden="true"
                     color="#EE72A6"
                     data-euiicon-type="waypoint"
                     data-test-subj="stat-icon"
@@ -470,6 +471,7 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
                   class="euiFlexItem ee8xehw2 emotion-euiFlexItem-growZero-FlexItem"
                 >
                   <span
+                    aria-hidden="true"
                     color="#61A2FF"
                     data-euiicon-type="waypoint"
                     data-test-subj="stat-icon"

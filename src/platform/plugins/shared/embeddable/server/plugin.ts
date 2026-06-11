@@ -9,6 +9,8 @@
 
 import type { CoreSetup, CoreStart, Plugin, RequestHandlerContext } from '@kbn/core/server';
 import { identity } from 'lodash';
+import { distinctUntilChanged, skip } from 'rxjs';
+
 import type {
   PersistableStateService,
   PersistableStateMigrateFn,
@@ -96,6 +98,16 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
   }
 
   public start(core: CoreStart): EmbeddableStart {
+    // Changing lens.apiFormat feature flag changes output of lens getSchema, so
+    // we cannot use the cached value.
+    // TODO: remove when lens.apiFormat feature flag is removed.
+    core.featureFlags
+      .getBooleanValue$('lens.apiFormat', false)
+      .pipe(skip(1), distinctUntilChanged())
+      .subscribe((lensApiFormatFlag) => {
+        this.transformsRegistry.resetCache();
+      });
+
     return {
       getAllEmbeddableSchemas: this.transformsRegistry.getAllEmbeddableSchemas,
       getTransforms: this.transformsRegistry.getEmbeddableTransforms,
