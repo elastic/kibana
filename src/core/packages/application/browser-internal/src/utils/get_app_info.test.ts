@@ -41,7 +41,7 @@ describe('getAppInfo', () => {
       id: 'some-id',
       title: 'some-title',
       status: AppStatus.accessible,
-      visibleIn: ['globalSearch', 'sideNav'],
+      visibleIn: ['globalSearch', 'classicSideNav', 'projectSideNav'],
       appRoute: `/app/some-id`,
       keywords: [],
       deepLinks: [],
@@ -70,7 +70,7 @@ describe('getAppInfo', () => {
       id: 'some-id',
       title: 'some-title',
       status: AppStatus.accessible,
-      visibleIn: ['globalSearch', 'sideNav'],
+      visibleIn: ['globalSearch', 'classicSideNav', 'projectSideNav'],
       appRoute: `/app/some-id`,
       keywords: [],
       deepLinks: [
@@ -98,7 +98,7 @@ describe('getAppInfo', () => {
     expect(
       getAppInfo(
         createApp({
-          visibleIn: ['globalSearch', 'sideNav'],
+          visibleIn: ['globalSearch', 'classicSideNav', 'projectSideNav'],
           status: AppStatus.inaccessible,
         })
       )
@@ -110,25 +110,25 @@ describe('getAppInfo', () => {
     expect(
       getAppInfo(
         createApp({
-          visibleIn: ['globalSearch', 'sideNav'],
+          visibleIn: ['globalSearch', 'classicSideNav', 'projectSideNav'],
           status: AppStatus.accessible,
         })
       )
     ).toEqual(
       expect.objectContaining({
-        visibleIn: ['globalSearch', 'sideNav'],
+        visibleIn: ['globalSearch', 'classicSideNav', 'projectSideNav'],
       })
     );
     expect(
       getAppInfo(
         createApp({
           // status is not set, default to accessible
-          visibleIn: ['globalSearch', 'sideNav'],
+          visibleIn: ['globalSearch', 'classicSideNav', 'projectSideNav'],
         })
       )
     ).toEqual(
       expect.objectContaining({
-        visibleIn: ['globalSearch', 'sideNav'],
+        visibleIn: ['globalSearch', 'classicSideNav', 'projectSideNav'],
       })
     );
   });
@@ -159,7 +159,7 @@ describe('getAppInfo', () => {
       id: 'some-id',
       title: 'some-title',
       status: AppStatus.accessible,
-      visibleIn: ['globalSearch', 'sideNav'],
+      visibleIn: ['globalSearch', 'classicSideNav', 'projectSideNav'],
       appRoute: `/app/some-id`,
       keywords: [],
       order: 3,
@@ -192,7 +192,7 @@ describe('getAppInfo', () => {
         createApp({
           deepLinks: [
             createDeepLink({
-              visibleIn: ['globalSearch', 'sideNav'],
+              visibleIn: ['globalSearch', 'classicSideNav', 'projectSideNav'],
             }),
           ],
         })
@@ -201,7 +201,7 @@ describe('getAppInfo', () => {
       expect.objectContaining({
         deepLinks: [
           expect.objectContaining({
-            visibleIn: ['globalSearch', 'sideNav'],
+            visibleIn: ['globalSearch', 'classicSideNav', 'projectSideNav'],
           }),
         ],
       })

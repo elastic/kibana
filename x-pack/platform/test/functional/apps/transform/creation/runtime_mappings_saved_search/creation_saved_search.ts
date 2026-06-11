@@ -12,12 +12,10 @@ import type { GroupByEntry, LatestTransformTestData, PivotTransformTestData } fr
 import { isLatestTransformTestData, isPivotTransformTestData } from '../../helpers';
 
 export default function ({ getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const transform = getService('transform');
 
   describe('creation_saved_search', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
       await transform.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
       await transform.testResources.createSavedSearchFarequoteFilterIfNeeded();
       await transform.testResources.setKibanaTimeZoneToUTC();

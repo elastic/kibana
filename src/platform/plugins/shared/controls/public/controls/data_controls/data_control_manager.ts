@@ -164,7 +164,8 @@ export const initializeDataControlManager = async <EditorState extends object = 
       if (field) defaultFieldLabel$.next(field.displayName);
       const spec = field?.toSpec();
       if (spec) {
-        fieldFormatter.next(dataView.getFormatterForField(spec).getConverterFor('text'));
+        const formatter = dataView.getFormatterForField(spec);
+        fieldFormatter.next((v: unknown) => formatter.convertToText(v));
       }
     });
 

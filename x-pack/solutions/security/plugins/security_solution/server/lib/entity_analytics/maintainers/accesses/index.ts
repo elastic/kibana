@@ -16,11 +16,12 @@ export const accessesFrequentlyMaintainer: RegisterEntityMaintainerConfig = {
     'Computes accesses_frequently and accesses_infrequently relationships from authentication events',
   interval: '1d',
   initialState: {},
-  run: async ({ esClient, logger, status, crudClient, abortController }) => {
+  run: async ({ esClient, cpsEsClient, logger, status, crudClient, abortController }) => {
     const namespace = status.metadata.namespace;
     logger.info('Starting accesses maintainer run');
     const result = await runRelationshipMaintainer({
       esClient,
+      cpsEsClient,
       logger,
       namespace,
       crudClient,

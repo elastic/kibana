@@ -12,6 +12,7 @@ import {
   type SignificantEventsQueriesGenerationTaskResult,
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod/v4';
+import { BUCKET_SIZE_PATTERN } from '../../../../lib/sig_events/helpers/fill_bucket_gaps';
 import { readSignificantEventsFromAlertsIndices } from '../../../../lib/sig_events/read_significant_events_from_alerts_indices';
 import { resolveAlertsSource } from '../../../utils/resolve_alerts_source';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
@@ -53,6 +54,7 @@ const sanitizeTaskResult = (
   return result;
 };
 
+/** @deprecated Use GET /internal/streams/{name}/onboarding/_status instead. Will be removed in a follow-up. */
 const significantEventsQueriesGenerationStatusRoute = createServerRoute({
   endpoint: 'GET /internal/streams/{name}/significant_events/_status',
   params: z.object({
@@ -92,6 +94,7 @@ const significantEventsQueriesGenerationStatusRoute = createServerRoute({
   },
 });
 
+/** @deprecated Use POST /internal/streams/{name}/onboarding/_execute instead. Will be removed in a follow-up. */
 const significantEventsQueriesGenerationTaskRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{name}/significant_events/_task',
   params: z.object({
@@ -165,7 +168,10 @@ const readAllSignificantEventsRoute = createServerRoute({
     query: z.object({
       from: dateFromString.describe('Start of the time range'),
       to: dateFromString.describe('End of the time range'),
-      bucketSize: z.string().describe('Size of time buckets for aggregation'),
+      bucketSize: z
+        .string()
+        .regex(BUCKET_SIZE_PATTERN)
+        .describe('Size of time buckets for aggregation'),
       query: z.string().optional().describe('Query string to filter significant events queries'),
       streamNames: z
         .union([z.string().transform((val) => [val]), z.array(z.string())])

@@ -1,0 +1,25 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": ["**/*.ts", "**/*.tsx"],
+  "exclude": ["target/**/*"],
+  "kbn_references": [
+    "@kbn/data-plugin",
+    "@kbn/es-query",
+    "@kbn/esql-utils",
+    "@kbn/expressions-plugin",
+    "@kbn/i18n",
+    "@kbn/lens-embeddable-utils",
+    "@kbn/lens-plugin",
+    "@kbn/react-hooks",
+    "@kbn/shared-ux-error-boundary",
+    "@kbn/shared-ux-utility",
+    "@kbn/ui-actions-plugin",
+    "@kbn/unified-histogram",
+    "@kbn/embeddable-plugin",
+    "@kbn/esql-types",
+    "@kbn/esql-language"
+  ]
+}

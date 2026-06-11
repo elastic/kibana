@@ -51,6 +51,7 @@ export function validateProcessorValues(
     }
     case 'grok':
     case 'dissect':
+    case 'uri_parts':
     case 'date':
     case 'set':
     case 'rename':
@@ -70,6 +71,7 @@ export function validateProcessorValues(
     case 'sort':
     case 'network_direction':
     case 'enrich':
+    case 'user_agent':
     case 'registered_domain':
     case 'manual_ingest_pipeline':
       break;
