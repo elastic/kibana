@@ -37,18 +37,12 @@ import {
 } from 'rxjs';
 import { get } from 'lodash';
 import type { InitialFeatureFlagsGetter } from '@kbn/core-feature-flags-server/src/contracts';
-import { metrics, ValueType } from '@opentelemetry/api';
+import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
+import { schema } from '@kbn/config-schema';
 import { createOpenFeatureLogger } from './create_open_feature_logger';
 import { setProviderWithRetries } from './set_provider_with_retries';
 import { type FeatureFlagsConfig, featureFlagsConfig } from './feature_flags_config';
-
-const flagEvaluationCounter = metrics
-  .getMeter('kibana.feature-flags')
-  .createCounter('flag.evaluation.count', {
-    description: 'Count of feature flag evaluations',
-    unit: '1',
-    valueType: ValueType.INT,
-  });
+import { incrementCounter } from './increment_counter';
 
 /**
  * Core-internal contract for the setup lifecycle step.
@@ -64,6 +58,10 @@ export interface InternalFeatureFlagsSetup extends FeatureFlagsSetup {
    * and to work-around air-gapped environments.
    */
   getInitialFeatureFlags: () => Promise<Record<string, unknown>>;
+}
+
+export interface FeatureFlagsSetupDeps {
+  http: InternalHttpServiceSetup;
 }
 
 /**
@@ -92,7 +90,7 @@ export class FeatureFlagsService {
   /**
    * Setup lifecycle method
    */
-  public setup(): InternalFeatureFlagsSetup {
+  public setup({ http }: FeatureFlagsSetupDeps): InternalFeatureFlagsSetup {
     // Register "overrides" to be changed via the dynamic config endpoint (enabled in test environments only)
     this.core.configService.addDynamicConfigPaths(featureFlagsConfig.path, ['overrides']);
 
@@ -101,6 +99,8 @@ export class FeatureFlagsService {
       .subscribe(({ overrides = {} }) => {
         this.overrides$.next(getFlattenedObject(overrides));
       });
+
+    this.registerCounterRoute(http);
 
     return {
       getOverrides: () => this.overrides$.value,
@@ -227,8 +227,7 @@ export class FeatureFlagsService {
     addSpanLabels({ [`flag_${flagName.replaceAll('.', '_')}`]: value });
 
     // Report the counter for the flag evaluation.
-    // Attribute names follow the convention defined in https://opentelemetry.io/docs/specs/semconv/feature-flags/feature-flags-events/
-    flagEvaluationCounter.add(1, { 'feature_flag.key': flagName, 'feature_flag.value': value });
+    incrementCounter(flagName, value);
 
     return value;
   }
@@ -251,5 +250,39 @@ export class FeatureFlagsService {
     this.context = deepMerge(this.context, formattedContextToAppend);
     OpenFeature.setContext(this.context);
     this.contextChanged$.next();
+  }
+
+  private registerCounterRoute(http: InternalHttpServiceSetup): void {
+    http.createRouter('').post(
+      {
+        path: '/internal/feature-flags/{flagName}/counter',
+        validate: {
+          params: schema.object({
+            flagName: schema.string(),
+          }),
+          body: schema.object({
+            value: schema.oneOf([schema.boolean(), schema.number(), schema.string()]),
+          }),
+        },
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'Any authenticated user should have access to the configuration',
+          },
+          authc: {
+            enabled: true,
+          },
+        },
+        options: {
+          access: 'internal',
+        },
+      },
+      (context, request, response) => {
+        const { flagName } = request.params;
+        const { value } = request.body;
+        incrementCounter(flagName, value);
+        return response.accepted();
+      }
+    );
   }
 }
