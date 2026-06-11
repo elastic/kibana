@@ -159,18 +159,35 @@ const BM25_QUERY_FIELDS = ['content.title_bm25^2', 'content.body_text_bm25'] as 
  * per-vertex query input for source-report mode. Only vertices with a non-NONE
  * signal and a non-empty summary are returned — mirrors run_knn's guard in
  * mustard.py (`signal != "NONE" and summary != ""`).
+ *
+ * Uses esClient.search (term query on _id) rather than esClient.get because the
+ * index target is a data stream pattern (.kibana-threat-reports*) and ES rejects
+ * wildcard expressions on the GET-by-id action.
  */
 const fetchSourceVertexQueries = async (
   esClient: ElasticsearchClient,
   sourceReportId: string
 ): Promise<DiamondVertexQueries | null> => {
-  const response = await esClient.get<StoredDiamondSource>(
-    { index: THREAT_REPORTS_INDEX_PATTERN, id: sourceReportId },
-    { ignore: [404] }
-  );
-  if (!response.found || !response._source) return null;
+  const response = await esClient.search<StoredDiamondSource>({
+    index: THREAT_REPORTS_INDEX_PATTERN,
+    size: 1,
+    query: { term: { _id: sourceReportId } },
+    _source: [
+      'extracted.diamond.adversary.summary',
+      'extracted.diamond.adversary.signal',
+      'extracted.diamond.capability.summary',
+      'extracted.diamond.capability.signal',
+      'extracted.diamond.infrastructure.summary',
+      'extracted.diamond.infrastructure.signal',
+      'extracted.diamond.victim.summary',
+      'extracted.diamond.victim.signal',
+    ],
+  });
 
-  const diamond = response._source.extracted?.diamond ?? {};
+  const hit = response.hits.hits[0];
+  if (!hit?._source) return null;
+
+  const diamond = hit._source.extracted?.diamond ?? {};
   const queries: DiamondVertexQueries = {};
   for (const v of DIAMOND_VERTICES) {
     const vd = diamond[v];
@@ -288,40 +305,61 @@ const runSemanticSearch = async (
     });
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const msearchResponse = await (esClient.msearch as any)({ searches });
-
-  // Build score matrix: reportId → { source, scores: { vertex → score } }
-  const scoreMatrix = new Map<
+  type ScoreMatrix = Map<
     string,
     { source: StoredHitSource; scores: Partial<Record<DiamondVertex, number>> }
-  >();
+  >;
 
-  for (let i = 0; i < queriedVertices.length; i++) {
-    const vertex = queriedVertices[i];
-    const resp = msearchResponse.responses[i];
+  // Executes the msearch and builds the score matrix from the responses.
+  // Inference-unavailable errors are thrown so the caller's try/catch can degrade to BM25.
+  const runMsearchAndBuildMatrix = async (): Promise<ScoreMatrix> => {
+    const msearchResponse = await esClient.msearch(
+      { searches } as Parameters<typeof esClient.msearch>[0]
+    );
 
-    if ('error' in resp) {
-      const errMsg = JSON.stringify(resp.error).toLowerCase();
-      if (errMsg.includes('inference') || errMsg.includes('service_unavailable')) {
-        throw new Error(`inference_unavailable: ${JSON.stringify(resp.error)}`);
-      }
-      logger.warn(
-        `search_by_diamond: vertex="${vertex}" sub-query error: ${JSON.stringify(resp.error)}`
-      );
-    } else {
-      const hits = (resp.hits?.hits ?? []) as MsearchHit[];
-      for (const hit of hits) {
-        const id = hit._id;
-        if (!scoreMatrix.has(id)) {
-          scoreMatrix.set(id, { source: hit._source ?? {}, scores: {} });
+    const matrix: ScoreMatrix = new Map();
+
+    for (let i = 0; i < queriedVertices.length; i++) {
+      const vertex = queriedVertices[i];
+      const resp = msearchResponse.responses[i];
+
+      if ('error' in resp) {
+        const errMsg = JSON.stringify(resp.error).toLowerCase();
+        if (errMsg.includes('inference') || errMsg.includes('service_unavailable')) {
+          throw new Error(`inference_unavailable: ${JSON.stringify(resp.error)}`);
         }
-        const entry = scoreMatrix.get(id);
-        if (entry) {
-          entry.scores[vertex] = hit._score ?? 0;
+        logger.warn(
+          `search_by_diamond: vertex="${vertex}" sub-query error: ${JSON.stringify(resp.error)}`
+        );
+      } else {
+        const hits = (resp.hits?.hits ?? []) as MsearchHit[];
+        for (const hit of hits) {
+          const id = hit._id;
+          if (!matrix.has(id)) {
+            matrix.set(id, { source: hit._source ?? {}, scores: {} });
+          }
+          const entry = matrix.get(id);
+          if (entry) {
+            entry.scores[vertex] = hit._score ?? 0;
+          }
         }
       }
     }
+    return matrix;
+  };
+
+  // Build score matrix: reportId → { source, scores: { vertex → score } }
+  let scoreMatrix = await runMsearchAndBuildMatrix();
+
+  // Cold-start guard: if the inference endpoint just started it may return 0 hits
+  // for all vertices on the first request. Retry once — a second call typically
+  // succeeds once the endpoint is warm. An empty result after the retry is accepted
+  // as-is (the source report may genuinely have no near-neighbours).
+  if (scoreMatrix.size === 0) {
+    logger.debug(
+      `search_by_diamond: all vertices returned 0 hits (possible cold endpoint), retrying once in space="${spaceId}"`
+    );
+    scoreMatrix = await runMsearchAndBuildMatrix();
   }
 
   // Qualify, annotate, and rank candidates.

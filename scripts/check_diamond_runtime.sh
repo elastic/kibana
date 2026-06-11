@@ -12,8 +12,8 @@
 #   1. Connector pins  — diamondGateConnector (Haiku) + diamondConnector (Opus) are set and
 #                        resolve to real connectors; neither is the .gp-llm-v2 default.
 #                        FAIL → runbook Step 1.
-#   2. Workflow API key — .kibana_task_manager* task doc for workflow:scheduled tasks have
-#                        apiKey fields.  FAIL → runbook Step 2.
+#   2. Workflow API key — .kibana_task_manager* task doc for nl_extraction_behavioral has
+#                        a non-empty apiKey.  FAIL → runbook Step 2.
 #   3. Workflow executed — .workflows-executions* has a status:completed record in the last 5h.
 #                        FAIL → runbook Step 2 / wait for next tick.
 #   4. (bonus) Jina inference endpoint present; index template is v14+.
@@ -182,20 +182,16 @@ check_workflow_task_key() {
   echo ""
   echo "CHECK 2 — nl_extraction_behavioral task API key (Elasticsearch)"
 
+  # task.params is a non-indexed JSON string — match queries against it never fire.
+  # Scope by the deterministic document _id instead.
+  local task_doc_id="task:workflow:threat-intel.nl_extraction_behavioral:scheduled"
+
   local result
-  result=$(es_post '/.kibana_task_manager*/_search?pretty' '{
-    "size": 10,
-    "query": {
-      "bool": {
-        "filter": [
-          { "term": { "type": "task" } },
-          { "term": { "task.taskType": "workflow:scheduled" } },
-          { "match": { "task.params": "nl_extraction_behavioral" } }
-        ]
-      }
-    },
-    "_source": ["task.apiKey", "task.taskType", "task.enabled", "task.schedule"]
-  }') || {
+  result=$(es_post '/.kibana_task_manager*/_search?pretty' "{
+    \"size\": 1,
+    \"query\": { \"term\": { \"_id\": \"${task_doc_id}\" } },
+    \"_source\": [\"task.apiKey\", \"task.taskType\", \"task.enabled\", \"task.schedule\"]
+  }") || {
     fail "ES search on .kibana_task_manager* failed — check ES_URL / ES_AUTH"
     return
   }
@@ -207,28 +203,22 @@ print(json.load(sys.stdin)['hits']['total']['value'])
 " 2>/dev/null || echo "0")
 
   if [[ "$total" == "0" ]]; then
-    fail "nl_extraction_behavioral task not found in .kibana_task_manager* → runbook Step 2"
+    fail "Task doc not found (id='${task_doc_id}') → runbook Step 2 (re-save workflow in Kibana UI)"
     return
   fi
 
-  local with_key without_key
-  with_key=$(echo "$result" | python3 -c "
+  local has_key
+  has_key=$(echo "$result" | python3 -c "
 import sys, json
 hits = json.load(sys.stdin)['hits']['hits']
-print(sum(1 for h in hits if h['_source'].get('task', {}).get('apiKey')))
-" 2>/dev/null || echo "0")
-  without_key=$(echo "$result" | python3 -c "
-import sys, json
-hits = json.load(sys.stdin)['hits']['hits']
-print(sum(1 for h in hits if not h['_source'].get('task', {}).get('apiKey')))
-" 2>/dev/null || echo "0")
+has = bool(hits and hits[0]['_source'].get('task', {}).get('apiKey'))
+print('yes' if has else 'no')
+" 2>/dev/null || echo "no")
 
-  if [[ "$with_key" -gt 0 && "$without_key" -eq 0 ]]; then
-    pass "nl_extraction_behavioral task has apiKey"
-  elif [[ "$without_key" -gt 0 && "$with_key" -gt 0 ]]; then
-    fail "nl_extraction_behavioral task missing apiKey → re-save workflow in Kibana UI (runbook Step 2)"
+  if [[ "$has_key" == "yes" ]]; then
+    pass "nl_extraction_behavioral task has apiKey (id='${task_doc_id}')"
   else
-    fail "nl_extraction_behavioral task missing apiKey → runbook Step 2 (re-save workflow in Kibana UI)"
+    fail "Task doc found but apiKey is empty → re-save workflow in Kibana UI (runbook Step 2)"
   fi
 }
 

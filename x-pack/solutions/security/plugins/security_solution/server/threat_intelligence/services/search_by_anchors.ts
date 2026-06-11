@@ -146,19 +146,26 @@ const SOURCE_FIELDS = [
 /**
  * Fetches anchor fields from a stored report.
  * Returns null when the report is not found.
+ *
+ * Uses esClient.search (term query on _id) rather than esClient.get because the
+ * index target is a data stream pattern (.kibana-threat-reports*) and ES rejects
+ * wildcard expressions on the GET-by-id action.
  */
 const fetchSourceAnchors = async (
   esClient: ElasticsearchClient,
   sourceReportId: string
 ): Promise<AnchorSet | null> => {
-  const response = await esClient.get<StoredReportSource>(
-    { index: THREAT_REPORTS_INDEX_PATTERN, id: sourceReportId },
-    { ignore: [404] }
-  );
+  const response = await esClient.search<StoredReportSource>({
+    index: THREAT_REPORTS_INDEX_PATTERN,
+    size: 1,
+    query: { term: { _id: sourceReportId } },
+    _source: [...SOURCE_FIELDS],
+  });
 
-  if (!response.found || !response._source) return null;
+  const hit = response.hits.hits[0];
+  if (!hit?._source) return null;
 
-  const { extracted } = response._source;
+  const { extracted } = hit._source;
   return {
     iocs: (extracted?.iocs ?? []).filter(
       (ioc): ioc is { type: string; value: string } => !!ioc.type && !!ioc.value
