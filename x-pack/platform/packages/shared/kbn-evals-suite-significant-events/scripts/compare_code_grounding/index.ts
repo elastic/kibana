@@ -152,7 +152,9 @@ const toReports = async (
       severity: query.severity_score,
       esql: query.esql.query,
       hits,
-      hasCodeEvidence: (query.evidence ?? []).some((e) => e.trim().toLowerCase().startsWith('code:')),
+      hasCodeEvidence: (query.evidence ?? []).some((e) =>
+        e.trim().toLowerCase().startsWith('code:')
+      ),
     });
   }
   return { label, queries, tokens: result.tokensUsed, connectorId: result.connectorId };
@@ -163,7 +165,9 @@ const printVariant = (log: ToolingLog, report: VariantReport) => {
   const totalHits = report.queries.reduce((s, q) => s + (q.hits ?? 0), 0);
   const zeroHit = report.queries.filter((q) => q.hits === 0).length;
   const withCode = report.queries.filter((q) => q.hasCodeEvidence).length;
-  const avgSeverity = total ? Math.round(report.queries.reduce((s, q) => s + q.severity, 0) / total) : 0;
+  const avgSeverity = total
+    ? Math.round(report.queries.reduce((s, q) => s + q.severity, 0) / total)
+    : 0;
 
   log.info('='.repeat(72));
   log.info(`VARIANT: ${report.label}  (connector: ${report.connectorId})`);
@@ -175,7 +179,9 @@ const printVariant = (log: ToolingLog, report: VariantReport) => {
   );
   for (const q of report.queries) {
     log.info(
-      `  • [${q.type}] sev=${q.severity} hits=${q.hits ?? 'n/a'}${q.hasCodeEvidence ? ' [code]' : ''} — ${q.title}`
+      `  • [${q.type}] sev=${q.severity} hits=${q.hits ?? 'n/a'}${
+        q.hasCodeEvidence ? ' [code]' : ''
+      } — ${q.title}`
     );
     log.info(`      ${q.esql}`);
   }
@@ -218,7 +224,14 @@ run(
       await writeLinkedIndices(config, baselineLinks);
       log.info('Running BASELINE (stream unlinked)…');
       const baselineResult = await generate(config, streamName, connectorId);
-      baseline = await toReports(config, streamName, baselineResult, 'baseline (no grounding)', range, log);
+      baseline = await toReports(
+        config,
+        streamName,
+        baselineResult,
+        'baseline (no grounding)',
+        range,
+        log
+      );
 
       // Grounded: link this stream to the code index.
       await writeLinkedIndices(config, { ...originalLinks, [streamName]: codeIndex });
@@ -247,7 +260,9 @@ run(
     log.info(`queries: ${baseline!.queries.length} → ${grounded!.queries.length}`);
     log.info(`total hits: ${bHits} → ${gHits}`);
     log.info(`zero-hit queries: ${bZero} → ${gZero}`);
-    log.info(`code-evidence queries: 0 → ${grounded!.queries.filter((q) => q.hasCodeEvidence).length}`);
+    log.info(
+      `code-evidence queries: 0 → ${grounded!.queries.filter((q) => q.hasCodeEvidence).length}`
+    );
 
     const sameQueries =
       JSON.stringify(baseline!.queries.map((q) => q.esql).sort()) ===

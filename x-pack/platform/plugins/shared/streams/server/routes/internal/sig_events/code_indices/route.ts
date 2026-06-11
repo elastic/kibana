@@ -36,8 +36,15 @@ export const getCodeIndicesRoute = createServerRoute({
     },
   },
   params: z.object({}),
-  handler: async ({ request, getScopedClients, server, logger }): Promise<{ indices: string[] }> => {
-    const { scopedClusterClient, licensing, uiSettingsClient } = await getScopedClients({ request });
+  handler: async ({
+    request,
+    getScopedClients,
+    server,
+    logger,
+  }): Promise<{ indices: string[] }> => {
+    const { scopedClusterClient, licensing, uiSettingsClient } = await getScopedClients({
+      request,
+    });
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     try {
