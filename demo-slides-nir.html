@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Workflow Slides</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #0a0f1e;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px;
+  }
+
+  .deck {
+    width: 100%;
+    max-width: 1400px;
+  }
+
+  .slide {
+    display: none;
+    background: #13192e;
+    border-radius: 12px;
+    padding: 70px 90px;
+    min-height: 72vh;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.06);
+    box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+  }
+
+  .slide.active { display: flex; flex-direction: column; justify-content: center; }
+
+  /* Elastic accent bar */
+  .slide::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #07C 0%, #00BFB3 100%);
+  }
+
+  /* Background circle decoration */
+  .slide::after {
+    content: '';
+    position: absolute;
+    bottom: -80px; right: -80px;
+    width: 320px; height: 320px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,119,204,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .slide-number {
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #00BFB3;
+    font-weight: 600;
+    margin-bottom: 24px;
+  }
+
+  .headline {
+    font-size: 15px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: #0077CC;
+    font-weight: 700;
+    margin-bottom: 18px;
+  }
+
+  h2 {
+    font-size: 44px;
+    font-weight: 700;
+    color: #ffffff;
+    line-height: 1.2;
+    margin-bottom: 48px;
+  }
+
+  .points {
+    display: flex;
+    flex-direction: column;
+    gap: 26px;
+  }
+
+  .point {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+
+  .point-label {
+    flex-shrink: 0;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #00BFB3;
+    background: rgba(0,191,179,0.1);
+    border: 1px solid rgba(0,191,179,0.25);
+    border-radius: 4px;
+    padding: 4px 10px;
+    margin-top: 2px;
+    white-space: nowrap;
+  }
+
+  .point-text {
+    font-size: 21px;
+    color: #c8d3e8;
+    line-height: 1.55;
+  }
+
+  .point-text strong {
+    color: #ffffff;
+    font-weight: 600;
+  }
+
+  /* Quiz reveal */
+  .quiz-q {
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity 0.45s ease, transform 0.45s ease;
+    pointer-events: none;
+  }
+
+  .quiz-q.revealed {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  .quiz-hint {
+    margin-top: 32px;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    color: #5a6a8a;
+  }
+
+  .quiz-hint strong { color: #00BFB3; }
+
+  /* Nav */
+  .nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 28px;
+  }
+
+  .nav button {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: #c8d3e8;
+    padding: 10px 24px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s;
+  }
+
+  .nav button:hover { background: rgba(0,119,204,0.25); border-color: #0077CC; color: #fff; }
+  .nav button:disabled { opacity: 0.3; cursor: default; }
+
+  .nav .counter {
+    font-size: 13px;
+    color: #5a6a8a;
+    min-width: 60px;
+    text-align: center;
+    letter-spacing: 1px;
+  }
+
+  .dots {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 16px;
+  }
+
+  .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .dot.active { background: #0077CC; width: 18px; border-radius: 3px; }
+
+  /* Elastic logo wordmark area */
+  .logo-area {
+    position: absolute;
+    top: 24px; right: 32px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    opacity: 0.4;
+  }
+
+  .logo-area svg { width: 22px; height: 22px; }
+
+  .logo-text {
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 0.5px;
+  }
+
+  /* Flow slide styles */
+  .flow-title {
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #00BFB3;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+
+  .flow-heading {
+    font-size: 32px;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 28px;
+  }
+
+  .flow-chain {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .flow-step {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: rgba(0,119,204,0.10);
+    border: 1px solid rgba(0,119,204,0.3);
+    border-radius: 8px;
+    padding: 15px 22px;
+  }
+
+  .flow-step.highlight {
+    background: rgba(0,191,179,0.10);
+    border-color: rgba(0,191,179,0.4);
+  }
+
+  .flow-step.final {
+    background: linear-gradient(135deg, rgba(0,119,204,0.2), rgba(0,191,179,0.15));
+    border-color: #00BFB3;
+  }
+
+  .flow-step-num {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #5a6a8a;
+    text-transform: uppercase;
+    flex-shrink: 0;
+    width: 24px;
+  }
+
+  .flow-step-name {
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+    width: 250px;
+  }
+
+  .flow-step-desc {
+    font-size: 15px;
+    color: #8a9ab8;
+    line-height: 1.4;
+  }
+
+  .flow-arrow {
+    display: flex;
+    justify-content: flex-start;
+    padding-left: 24px;
+    color: #0077CC;
+    font-size: 16px;
+    line-height: 1;
+    margin: 3px 0;
+  }
+
+  /* Demo slide */
+  .demo-slide-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    gap: 16px;
+  }
+
+  .demo-word {
+    font-size: 110px;
+    font-weight: 900;
+    letter-spacing: -4px;
+    background: linear-gradient(135deg, #0077CC 0%, #00BFB3 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+  }
+
+  .demo-sub {
+    font-size: 14px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: #5a6a8a;
+    font-weight: 500;
+  }
+</style>
+</head>
+<body>
+
+<div class="deck">
+  <!-- Slide 0: Opening -->
+  <div class="slide active">
+    <div class="logo-area">
+      <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M20 8C17.8 8 15.8 9 14.5 10.6C13.7 10.2 12.9 10 12 10C8.7 10 6 12.7 6 16C6 16.6 6.1 17.2 6.3 17.7C5.5 18.5 5 19.7 5 21C5 23.8 7.2 26 10 26H22C25.3 26 28 23.3 28 20C28 17.6 26.6 15.5 24.5 14.5C24.8 13.7 25 12.9 25 12C25 9.8 23.2 8 21 8H20Z" fill="#07C"/>
+      </svg>
+      <span class="logo-text">elastic</span>
+    </div>
+    <div class="demo-slide-inner">
+      <div style="font-size:62px;font-weight:900;line-height:1.1;color:#fff;text-align:center;">Skills are the<br><span style="background:linear-gradient(135deg,#0077CC 0%,#00BFB3 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">new code</span> !?</div>
+      <div class="demo-sub" style="margin-top:12px;">01 / 08</div>
+    </div>
+  </div>
+
+  <!-- Slide: Quiz -->
+  <div class="slide" data-quiz="true">
+    <div class="logo-area">
+      <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M20 8C17.8 8 15.8 9 14.5 10.6C13.7 10.2 12.9 10 12 10C8.7 10 6 12.7 6 16C6 16.6 6.1 17.2 6.3 17.7C5.5 18.5 5 19.7 5 21C5 23.8 7.2 26 10 26H22C25.3 26 28 23.3 28 20C28 17.6 26.6 15.5 24.5 14.5C24.8 13.7 25 12.9 25 12C25 9.8 23.2 8 21 8H20Z" fill="#07C"/>
+      </svg>
+      <span class="logo-text">elastic</span>
+    </div>
+    <div class="slide-number">02 / 08</div>
+    <div class="headline">Show of Hands</div>
+    <h2>A Quick Quiz</h2>
+    <div class="points">
+      <div class="point quiz-q">
+        <span class="point-label">Q1</span>
+        <span class="point-text">Raise your hands if you are <strong>using AI to generate code or other content</strong>.</span>
+      </div>
+      <div class="point quiz-q">
+        <span class="point-label">Q2</span>
+        <span class="point-text">Keep your hand up if you are <strong>creating Skills, Agents or other artifacts</strong> to automate your workflow.</span>
+      </div>
+      <div class="point quiz-q">
+        <span class="point-label">Q3</span>
+        <span class="point-text">Keep your hands up if these artifacts were ever <strong>adopted by other team members</strong>.</span>
+      </div>
+    </div>
+    <div class="quiz-hint">Press <strong>Next →</strong> to reveal each question</div>
+  </div>
+
+  <!-- Slide 1 -->
+  <div class="slide">
+    <div class="logo-area">
+      <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M20 8C17.8 8 15.8 9 14.5 10.6C13.7 10.2 12.9 10 12 10C8.7 10 6 12.7 6 16C6 16.6 6.1 17.2 6.3 17.7C5.5 18.5 5 19.7 5 21C5 23.8 7.2 26 10 26H22C25.3 26 28 23.3 28 20C28 17.6 26.6 15.5 24.5 14.5C24.8 13.7 25 12.9 25 12C25 9.8 23.2 8 21 8H20Z" fill="#07C"/>
+      </svg>
+      <span class="logo-text">elastic</span>
+    </div>
+    <div class="slide-number">03 / 08</div>
+    <div class="headline">The AI Workflow Gap</div>
+    <h2>Moving Beyond Fragmented AI Adoption</h2>
+    <div class="points">
+      <div class="point">
+        <span class="point-label">Reality</span>
+        <span class="point-text">We all use AI, but our workflows are <strong>individualized and inconsistent</strong>.</span>
+      </div>
+      <div class="point">
+        <span class="point-label">Challenge</span>
+        <span class="point-text">Creating a meaningful standard is difficult — a simple "skills library" <strong>doesn't change daily habits</strong>.</span>
+      </div>
+      <div class="point">
+        <span class="point-label">Goal</span>
+        <span class="point-text">Moving from "everyone doing their own thing" to a <strong>formalized, structured workflow that actually sticks</strong>.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide 2 -->
+  <div class="slide">
+    <div class="logo-area">
+      <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M20 8C17.8 8 15.8 9 14.5 10.6C13.7 10.2 12.9 10 12 10C8.7 10 6 12.7 6 16C6 16.6 6.1 17.2 6.3 17.7C5.5 18.5 5 19.7 5 21C5 23.8 7.2 26 10 26H22C25.3 26 28 23.3 28 20C28 17.6 26.6 15.5 24.5 14.5C24.8 13.7 25 12.9 25 12C25 9.8 23.2 8 21 8H20Z" fill="#07C"/>
+      </svg>
+      <span class="logo-text">elastic</span>
+    </div>
+    <div class="slide-number">04 / 08</div>
+    <div class="headline">The Bottleneck – Trust vs. Velocity</div>
+    <h2>Why Code Review is the Perfect Use Case</h2>
+    <div class="points">
+      <div class="point">
+        <span class="point-label">Paradox</span>
+        <span class="point-text">AI makes generating code effortless, but <strong>signing off on that code is harder than ever</strong>.</span>
+      </div>
+      <div class="point">
+        <span class="point-label">Trust Gap</span>
+        <span class="point-text">Generic AI reviews lack the depth needed for a meaningful sign-off — <strong>too superficial to be fully trusted</strong>.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide 3 -->
+  <div class="slide">
+    <div class="logo-area">
+      <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M20 8C17.8 8 15.8 9 14.5 10.6C13.7 10.2 12.9 10 12 10C8.7 10 6 12.7 6 16C6 16.6 6.1 17.2 6.3 17.7C5.5 18.5 5 19.7 5 21C5 23.8 7.2 26 10 26H22C25.3 26 28 23.3 28 20C28 17.6 26.6 15.5 24.5 14.5C24.8 13.7 25 12.9 25 12C25 9.8 23.2 8 21 8H20Z" fill="#07C"/>
+      </svg>
+      <span class="logo-text">elastic</span>
+    </div>
+    <div class="slide-number">05 / 08</div>
+    <div class="headline">Bridging the Gap with Domain Expertise</div>
+    <h2>Capturing the "Expert in the Room"</h2>
+    <div class="points">
+      <div class="point">
+        <span class="point-label">Insight</span>
+        <span class="point-text">A Code Review skill needs more than generic logic — it needs <strong>Domain Expert Knowledge</strong>.</span>
+      </div>
+      <div class="point">
+        <span class="point-label">Solution</span>
+        <span class="point-text">We developed the <strong>Knowledge Capture Skill</strong> to bridge this gap.</span>
+      </div>
+      <div class="point">
+        <span class="point-label">Process</span>
+        <span class="point-text">This skill extracts domain-specific insights and packages them into a file that Code Review tools can use to provide <strong>high-value feedback</strong>.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide 4: Capture Domain Knowledge Flow -->
+  <div class="slide" style="padding: 36px 60px;">
+    <div class="logo-area">
+      <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M20 8C17.8 8 15.8 9 14.5 10.6C13.7 10.2 12.9 10 12 10C8.7 10 6 12.7 6 16C6 16.6 6.1 17.2 6.3 17.7C5.5 18.5 5 19.7 5 21C5 23.8 7.2 26 10 26H22C25.3 26 28 23.3 28 20C28 17.6 26.6 15.5 24.5 14.5C24.8 13.7 25 12.9 25 12C25 9.8 23.2 8 21 8H20Z" fill="#07C"/>
+      </svg>
+      <span class="logo-text">elastic</span>
+    </div>
+    <div class="flow-title">06 / 08 &nbsp;·&nbsp; Knowledge Capture Skill</div>
+    <div class="flow-heading">Capture Domain Knowledge Flow</div>
+    <div class="flow-chain">
+
+      <div class="flow-step">
+        <span class="flow-step-num">01</span>
+        <span class="flow-step-name">Configuration Extraction</span>
+        <span class="flow-step-desc">Domain expert, slug, repo &amp; context setup</span>
+      </div>
+
+      <div class="flow-arrow">↓</div>
+
+      <div class="flow-step">
+        <span class="flow-step-num">02</span>
+        <span class="flow-step-name">Code Scanning</span>
+        <span class="flow-step-desc">Approve or fix the code path</span>
+      </div>
+
+      <div class="flow-arrow">↓</div>
+
+      <div class="flow-step highlight" style="opacity:0.6;">
+        <span class="flow-step-num">03</span>
+        <span class="flow-step-name">Docs &amp; External Files</span>
+        <span class="flow-step-desc">Supply any contributing data</span>
+        <span style="margin-left:auto;flex-shrink:0;background:#e53e3e;color:#fff;font-size:10px;font-weight:700;letter-spacing:0.5px;padding:2px 8px;border-radius:4px;display:flex;align-items:center;gap:4px;">🐛 known bug — skip</span>
+      </div>
+
+      <div class="flow-arrow">↓</div>
+
+      <div class="flow-step highlight">
+        <span class="flow-step-num">04</span>
+        <span class="flow-step-name">Historical PR Scan</span>
+        <span class="flow-step-desc">Review PRs found + supply meaningful ones</span>
+      </div>
+
+      <div class="flow-arrow">↓</div>
+
+      <div class="flow-step">
+        <span class="flow-step-num">05</span>
+        <span class="flow-step-name">Mining PRs</span>
+        <span class="flow-step-desc">Agent mines PRs for domain patterns</span>
+      </div>
+
+      <div class="flow-arrow">↓</div>
+
+      <div class="flow-step">
+        <span class="flow-step-num">06</span>
+        <span class="flow-step-name">Review Draft</span>
+        <span class="flow-step-desc">Approve the generated knowledge draft</span>
+      </div>
+
+      <div class="flow-arrow">↓</div>
+
+      <div class="flow-step" style="background:rgba(245,158,11,0.12);border-color:rgba(245,158,11,0.5);border-style:dashed;">
+        <span class="flow-step-num" style="color:#f59e0b;">07</span>
+        <span class="flow-step-name" style="color:#fcd34d;">Code Review</span>
+        <span class="flow-step-desc">Expert-level AI feedback, ready to use</span>
+        <span style="margin-left:auto;flex-shrink:0;background:rgba(245,158,11,0.2);color:#f59e0b;font-size:10px;font-weight:700;letter-spacing:0.5px;padding:2px 8px;border-radius:4px;border:1px solid rgba(245,158,11,0.4);white-space:nowrap;">→ next skill</span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Slide 5: DEMO -->
+  <div class="slide">
+    <div class="logo-area">
+      <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M20 8C17.8 8 15.8 9 14.5 10.6C13.7 10.2 12.9 10 12 10C8.7 10 6 12.7 6 16C6 16.6 6.1 17.2 6.3 17.7C5.5 18.5 5 19.7 5 21C5 23.8 7.2 26 10 26H22C25.3 26 28 23.3 28 20C28 17.6 26.6 15.5 24.5 14.5C24.8 13.7 25 12.9 25 12C25 9.8 23.2 8 21 8H20Z" fill="#07C"/>
+      </svg>
+      <span class="logo-text">elastic</span>
+    </div>
+    <div class="demo-slide-inner">
+      <div class="demo-word">DEMO</div>
+      <div class="demo-sub">07 / 08</div>
+    </div>
+  </div>
+
+  <!-- Slide 7: Execution Instructions -->
+  <div class="slide" style="padding: 40px 60px;">
+    <div class="logo-area">
+      <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M20 8C17.8 8 15.8 9 14.5 10.6C13.7 10.2 12.9 10 12 10C8.7 10 6 12.7 6 16C6 16.6 6.1 17.2 6.3 17.7C5.5 18.5 5 19.7 5 21C5 23.8 7.2 26 10 26H22C25.3 26 28 23.3 28 20C28 17.6 26.6 15.5 24.5 14.5C24.8 13.7 25 12.9 25 12C25 9.8 23.2 8 21 8H20Z" fill="#07C"/>
+      </svg>
+      <span class="logo-text">elastic</span>
+    </div>
+    <div class="flow-title">08 / 08 &nbsp;·&nbsp; Let's Try It</div>
+    <div class="flow-heading">Execution Instructions</div>
+    <div style="display:flex;gap:40px;align-items:flex-start;">
+
+      <!-- Left: Setup -->
+      <div style="flex:1;display:flex;flex-direction:column;gap:8px;">
+        <div style="font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:#5a6a8a;font-weight:700;margin-bottom:4px;">Setup</div>
+        <div style="display:flex;gap:10px;align-items:baseline;">
+          <span style="color:#00BFB3;font-weight:700;font-size:15px;flex-shrink:0;width:18px;">1</span>
+          <span style="font-size:16px;color:#c8d3e8;">cd Kibana repo</span>
+        </div>
+        <div style="display:flex;gap:10px;align-items:baseline;">
+          <span style="color:#00BFB3;font-weight:700;font-size:15px;flex-shrink:0;width:18px;">2</span>
+          <span style="font-size:16px;color:#c8d3e8;">Open <strong style="color:#fff;">Claude Code</strong> (terminal or VSCode ext.)</span>
+        </div>
+        <div style="display:flex;gap:10px;align-items:baseline;">
+          <span style="color:#00BFB3;font-weight:700;font-size:15px;flex-shrink:0;width:18px;">3</span>
+          <span style="font-size:16px;color:#c8d3e8;">Preferred: <strong style="color:#fff;">auto mode</strong>, Opus / OpusPlan model</span>
+        </div>
+
+        <div style="margin-top:12px;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:#5a6a8a;font-weight:700;margin-bottom:4px;">Capture Domain Knowledge</div>
+        <div style="display:flex;gap:10px;align-items:baseline;">
+          <span style="color:#00BFB3;font-weight:700;font-size:15px;flex-shrink:0;width:18px;">4</span>
+          <div>
+            <div style="font-size:16px;color:#c8d3e8;">Run the capture command:</div>
+            <div style="margin-top:5px;background:#0a0f1e;border:1px solid rgba(0,119,204,0.3);border-radius:6px;padding:8px 12px;font-family:monospace;font-size:15px;color:#00BFB3;">❯ /dex-dev-skills:dex-domain-capture<br><span style="color:#8a9ab8;">&nbsp;&nbsp;slug: {Your domain knowledge}</span></div>
+            <div style="margin-top:5px;font-size:14px;color:#5a6a8a;">e.g. <em>Graph Investigation View, SIEM Readiness</em><br>⚠️ Recommended: don't pick a wide area</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Divider -->
+      <div style="width:1px;background:rgba(255,255,255,0.07);align-self:stretch;"></div>
+
+      <!-- Right: Code Review -->
+      <div style="flex:1;display:flex;flex-direction:column;gap:8px;">
+        <div style="font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:#5a6a8a;font-weight:700;margin-bottom:4px;">Code Review</div>
+        <div style="display:flex;gap:10px;align-items:baseline;">
+          <span style="color:#f59e0b;font-weight:700;font-size:15px;flex-shrink:0;width:18px;">5a</span>
+          <div>
+            <div style="font-size:16px;color:#c8d3e8;">Check out the candidate PR branch:</div>
+            <div style="margin-top:5px;background:#0a0f1e;border:1px solid rgba(245,158,11,0.25);border-radius:6px;padding:8px 12px;font-family:monospace;font-size:15px;color:#f59e0b;">❯ gh co {pr #}</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:baseline;">
+          <span style="color:#f59e0b;font-weight:700;font-size:15px;flex-shrink:0;width:18px;">5b</span>
+          <span style="font-size:16px;color:#c8d3e8;">Open a <strong style="color:#fff;">new Claude session</strong></span>
+        </div>
+        <div style="display:flex;gap:10px;align-items:baseline;">
+          <span style="color:#f59e0b;font-weight:700;font-size:15px;flex-shrink:0;width:18px;">5c</span>
+          <div>
+            <div style="font-size:16px;color:#c8d3e8;margin-bottom:5px;">Run the review skill:</div>
+            <div style="background:#0a0f1e;border:1px solid rgba(245,158,11,0.25);border-radius:6px;padding:8px 12px;font-family:monospace;font-size:15px;color:#f59e0b;">❯ /dex-review-code</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <div class="nav">
+    <button id="prev" onclick="go(-1)" disabled>← Prev</button>
+    <span class="counter" id="counter">1 / 8</span>
+    <button id="next" onclick="go(1)">Next →</button>
+  </div>
+  <div class="dots" id="dots"></div>
+</div>
+
+<script>
+  let current = 0;
+  const slides = document.querySelectorAll('.slide');
+  const dotsEl = document.getElementById('dots');
+
+  // Build dots
+  slides.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === 0 ? ' active' : '');
+    d.onclick = () => goTo(i);
+    dotsEl.appendChild(d);
+  });
+
+  function currentQuiz() {
+    return slides[current].dataset.quiz ? slides[current] : null;
+  }
+
+  function setQuizReveals(slide, count) {
+    const qs = slide.querySelectorAll('.quiz-q');
+    qs.forEach((q, i) => q.classList.toggle('revealed', i < count));
+    const hint = slide.querySelector('.quiz-hint');
+    if (hint) hint.style.visibility = count >= qs.length ? 'hidden' : 'visible';
+  }
+
+  function go(dir) {
+    const quiz = currentQuiz();
+    if (quiz) {
+      const qs = quiz.querySelectorAll('.quiz-q');
+      const shown = quiz.querySelectorAll('.quiz-q.revealed').length;
+      if (dir === 1 && shown < qs.length) { setQuizReveals(quiz, shown + 1); return; }
+      if (dir === -1 && shown > 0) { setQuizReveals(quiz, shown - 1); return; }
+    }
+    goTo(current + dir);
+  }
+
+  function goTo(n) {
+    if (n < 0 || n > slides.length - 1) return;
+    slides[current].classList.remove('active');
+    dotsEl.children[current].classList.remove('active');
+    current = n;
+    slides[current].classList.add('active');
+    dotsEl.children[current].classList.add('active');
+    document.getElementById('counter').textContent = `${current + 1} / ${slides.length}`;
+    document.getElementById('prev').disabled = current === 0;
+    document.getElementById('next').disabled = current === slides.length - 1;
+
+    // Reset quiz reveals when landing on the quiz slide
+    const quiz = currentQuiz();
+    if (quiz) setQuizReveals(quiz, 0);
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') go(1);
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') go(-1);
+  });
+</script>
+</body>
+</html>
