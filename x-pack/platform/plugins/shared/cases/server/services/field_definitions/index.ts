@@ -42,7 +42,8 @@ export class FieldDefinitionsService {
     owner: string | string[],
     { isGlobal }: { isGlobal?: boolean } = {}
   ): Promise<FieldDefinitionsFindResponse> {
-    const owners = castArray(owner);
+    // Dedupe to prevent duplicate owners from inflating the perPage multiplier.
+    const owners = [...new Set(castArray(owner))];
 
     if (owners.length === 0) {
       return { fieldDefinitions: [], total: 0 };

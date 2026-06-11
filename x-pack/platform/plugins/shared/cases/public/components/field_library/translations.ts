@@ -205,7 +205,3 @@ export const GLOBAL_FIELD_YES = i18n.translate('xpack.cases.fieldLibrary.globalF
 export const GLOBAL_FIELD_NO = i18n.translate('xpack.cases.fieldLibrary.globalFieldNo', {
   defaultMessage: 'No',
 });
-
-export const GLOBAL_FIELDS_TITLE = i18n.translate('xpack.cases.fieldLibrary.globalFieldsTitle', {
-  defaultMessage: 'Global fields',
-});

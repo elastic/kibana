@@ -136,6 +136,10 @@ export const TemplateFields = React.memo<TemplateFieldsProps>(({ caseData, onUpd
   const { data: globalFieldDefsData } = useGetFieldDefinitions({
     owner: caseData.owner,
     isGlobal: true,
+    // Prevent a background refetch from producing a new Set/array reference that would
+    // re-trigger memos and potentially reset an in-progress edit. Same rationale as the
+    // create form (create/template_fields.tsx).
+    staleTime: Infinity,
   });
 
   const globalFieldNames = useMemo<ReadonlySet<string>>(
@@ -198,6 +202,10 @@ export const GlobalCaseFields = React.memo<GlobalCaseFieldsProps>(({ caseData, o
   } = useGetFieldDefinitions({
     owner: caseData.owner,
     isGlobal: true,
+    // Prevent a background refetch from producing a new array reference that would
+    // re-trigger memos and potentially reset an in-progress edit. Same rationale as the
+    // create form (create/template_fields.tsx).
+    staleTime: Infinity,
   });
 
   // React Query deduplicates this fetch — TemplateFields makes the same call.

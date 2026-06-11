@@ -924,5 +924,90 @@ describe('create', () => {
         )
       ).resolves.not.toThrow();
     });
+
+    it('throws when a required global field value is empty (no template)', async () => {
+      // FAILURE SCENARIO: client stores an empty string under a required global field
+      // with no template. Previously this bypassed validateExtendedFields.
+      clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+        fieldDefinitions: [
+          makeFieldDef('risk_score', 'keyword'),
+          // Override definition to include required validation
+          {
+            ...makeFieldDef('risk_score', 'keyword'),
+            definition: yaml.dump({
+              name: 'risk_score',
+              type: 'keyword',
+              control: 'INPUT_TEXT',
+              label: 'Risk Score',
+              validation: { required: true },
+            }),
+          },
+        ].slice(1), // only the one with required
+        total: 1,
+      });
+
+      await expect(
+        create(
+          { ...theCase, extended_fields: { risk_score_as_keyword: '' } },
+          clientArgs,
+          casesClientMock
+        )
+      ).rejects.toThrow('Invalid extended_fields');
+    });
+
+    it('throws when the template is not found', async () => {
+      // FAILURE SCENARIO: create path with a template id that does not exist.
+      clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+        fieldDefinitions: [],
+        total: 0,
+      });
+      clientArgs.services.templatesService.getTemplate.mockResolvedValue(undefined);
+
+      await expect(
+        create(
+          {
+            ...theCase,
+            template: { id: 'missing-tmpl', version: 1 },
+            extended_fields: { summary_as_keyword: 'hello' },
+          },
+          clientArgs,
+          casesClientMock
+        )
+      ).rejects.toThrow('Template missing-tmpl not found');
+    });
+
+    it('throws when the template definition is invalid', async () => {
+      // FAILURE SCENARIO: template SO exists but its YAML definition is malformed.
+      clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+        fieldDefinitions: [],
+        total: 0,
+      });
+      clientArgs.services.templatesService.getTemplate.mockResolvedValue({
+        id: 'so-tpl',
+        type: 'cases-templates',
+        references: [],
+        attributes: {
+          templateId: 'tmpl-ext',
+          name: 'Bad Template',
+          owner: SECURITY_SOLUTION_OWNER,
+          definition: ': {not valid yaml',
+          templateVersion: 1,
+          deletedAt: null,
+          isLatest: true,
+        },
+      });
+
+      await expect(
+        create(
+          {
+            ...theCase,
+            template: { id: 'tmpl-ext', version: 1 },
+            extended_fields: { summary_as_keyword: 'hello' },
+          },
+          clientArgs,
+          casesClientMock
+        )
+      ).rejects.toThrow('Template tmpl-ext has an invalid definition');
+    });
   });
 });

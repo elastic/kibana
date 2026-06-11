@@ -19,7 +19,7 @@ import {
 } from './validators';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
 import type { TemplatesService } from '../../services/templates';
-import { getFieldSnakeKey } from '../../../common/utils';
+import type { InlineField } from '../../../common/types/domain/template/fields';
 
 describe('validators', () => {
   describe('validateCustomFieldTypesInRequest', () => {
@@ -722,8 +722,25 @@ describe('validators', () => {
       },
     });
 
-    const makeGlobalKeys = (defs: Array<{ name: string; type: string }> = []): Set<string> =>
-      new Set(defs.map(({ name, type }) => getFieldSnakeKey(name, type)));
+    /**
+     * Builds a minimal array of InlineField objects for the given name/type pairs,
+     * matching the shape that `resolveGlobalFields` returns.
+     */
+    const makeGlobalFields = (
+      defs: Array<{
+        name: string;
+        type?: string;
+        label?: string;
+        validation?: Record<string, unknown>;
+      }> = []
+    ): InlineField[] =>
+      defs.map(({ name, type = 'keyword', label = name, validation }) => ({
+        control: 'INPUT_TEXT' as const,
+        name,
+        type,
+        label,
+        ...(validation ? { validation } : {}),
+      })) as unknown as InlineField[];
 
     const simpleTemplateSO = makeTemplatesSO({
       fields: [{ control: 'INPUT_TEXT', name: 'summary', label: 'Summary', type: 'keyword' }],
@@ -743,7 +760,7 @@ describe('validators', () => {
           updateReq: { id: 'case-1', version: '1' },
           originalCase: makeOriginalCase('tpl-1'),
           templatesService: templatesService as unknown as TemplatesService,
-          globalKeys: makeGlobalKeys(),
+          globalFields: makeGlobalFields(),
         })
       ).resolves.toBeUndefined();
     });
@@ -754,7 +771,7 @@ describe('validators', () => {
           updateReq: { id: 'case-1', version: '1', extended_fields: { summary_as_keyword: 'hi' } },
           originalCase: makeOriginalCase(), // no template
           templatesService: templatesService as unknown as TemplatesService,
-          globalKeys: makeGlobalKeys([{ name: 'summary', type: 'keyword' }]),
+          globalFields: makeGlobalFields([{ name: 'summary', type: 'keyword' }]),
         })
       ).resolves.toBeUndefined();
     });
@@ -765,7 +782,7 @@ describe('validators', () => {
           updateReq: { id: 'case-1', version: '1', extended_fields: { summary_as_keyword: 'hi' } },
           originalCase: makeOriginalCase(), // no template, no global defs
           templatesService: templatesService as unknown as TemplatesService,
-          globalKeys: makeGlobalKeys(),
+          globalFields: makeGlobalFields(),
         })
       ).rejects.toThrow(
         'extended_fields keys [summary_as_keyword] are not global (isGlobal) field definitions'
@@ -785,7 +802,7 @@ describe('validators', () => {
           },
           originalCase: makeOriginalCase(),
           templatesService: templatesService as unknown as TemplatesService,
-          globalKeys: makeGlobalKeys(),
+          globalFields: makeGlobalFields(),
         })
       ).rejects.toThrow('Template missing-tpl not found');
     });
@@ -801,7 +818,7 @@ describe('validators', () => {
           },
           originalCase: makeOriginalCase(),
           templatesService: templatesService as unknown as TemplatesService,
-          globalKeys: makeGlobalKeys(),
+          globalFields: makeGlobalFields(),
         })
       ).resolves.toBeUndefined();
     });
@@ -833,7 +850,7 @@ describe('validators', () => {
           },
           originalCase: makeOriginalCase(),
           templatesService: templatesService as unknown as TemplatesService,
-          globalKeys: makeGlobalKeys(),
+          globalFields: makeGlobalFields(),
         })
       ).rejects.toThrow('Invalid extended_fields: Field "Summary" is required');
     });
@@ -862,7 +879,7 @@ describe('validators', () => {
           },
           originalCase: makeOriginalCase('tpl-1'),
           templatesService: templatesService as unknown as TemplatesService,
-          globalKeys: makeGlobalKeys([{ name: 'my_global_field', type: 'keyword' }]),
+          globalFields: makeGlobalFields([{ name: 'my_global_field', type: 'keyword' }]),
         })
       ).resolves.toBeUndefined();
     });
@@ -893,7 +910,7 @@ describe('validators', () => {
           },
           originalCase: makeOriginalCase(),
           templatesService: templatesService as unknown as TemplatesService,
-          globalKeys: makeGlobalKeys(),
+          globalFields: makeGlobalFields(),
         })
       ).rejects.toThrow('Template tpl-1 has an invalid definition');
     });
@@ -909,7 +926,7 @@ describe('validators', () => {
           },
           originalCase: makeOriginalCase('tpl-from-original'),
           templatesService: templatesService as unknown as TemplatesService,
-          globalKeys: makeGlobalKeys(),
+          globalFields: makeGlobalFields(),
         })
       ).rejects.toThrow(
         'extended_fields keys [summary_as_keyword] are not global (isGlobal) field definitions'
@@ -929,7 +946,7 @@ describe('validators', () => {
           },
           originalCase: makeOriginalCase('tpl-from-original'),
           templatesService: templatesService as unknown as TemplatesService,
-          globalKeys: makeGlobalKeys([{ name: 'summary', type: 'keyword' }]),
+          globalFields: makeGlobalFields([{ name: 'summary', type: 'keyword' }]),
         })
       ).resolves.toBeUndefined();
 
@@ -946,7 +963,7 @@ describe('validators', () => {
           },
           originalCase: makeOriginalCase('tpl-from-original'),
           templatesService: templatesService as unknown as TemplatesService,
-          globalKeys: makeGlobalKeys(),
+          globalFields: makeGlobalFields(),
         })
       ).resolves.toBeUndefined();
 
@@ -967,7 +984,70 @@ describe('validators', () => {
           },
           originalCase: makeOriginalCase(),
           templatesService: templatesService as unknown as TemplatesService,
-          globalKeys: makeGlobalKeys([{ name: 'global_tag', type: 'keyword' }]),
+          globalFields: makeGlobalFields([{ name: 'global_tag', type: 'keyword' }]),
+        })
+      ).resolves.toBeUndefined();
+    });
+
+    it('throws when a global field value violates its definition (required, no template)', async () => {
+      // FAILURE SCENARIO: a client sends an empty string for a required global field
+      // with no template active. Previously the value was stored without validation.
+      await expect(
+        validateExtendedFieldsInRequest({
+          updateReq: {
+            id: 'case-1',
+            version: '1',
+            extended_fields: { summary_as_keyword: '' },
+          },
+          originalCase: makeOriginalCase(), // no template
+          templatesService: templatesService as unknown as TemplatesService,
+          globalFields: makeGlobalFields([
+            { name: 'summary', type: 'keyword', label: 'Summary', validation: { required: true } },
+          ]),
+        })
+      ).rejects.toThrow('Invalid extended_fields');
+    });
+
+    it('throws when a global field value violates its definition (required, with template)', async () => {
+      // FAILURE SCENARIO: empty required global field sent alongside a valid template.
+      await expect(
+        validateExtendedFieldsInRequest({
+          updateReq: {
+            id: 'case-1',
+            version: '1',
+            template: { id: 'tpl-1', version: 1 },
+            extended_fields: {
+              summary_as_keyword: 'valid template value',
+              global_required_as_keyword: '',
+            },
+          },
+          originalCase: makeOriginalCase(),
+          templatesService: templatesService as unknown as TemplatesService,
+          globalFields: makeGlobalFields([
+            {
+              name: 'global_required',
+              type: 'keyword',
+              label: 'Global Required',
+              validation: { required: true },
+            },
+          ]),
+        })
+      ).rejects.toThrow('Invalid extended_fields');
+    });
+
+    it('accepts a valid global field value when definition has a required constraint', async () => {
+      await expect(
+        validateExtendedFieldsInRequest({
+          updateReq: {
+            id: 'case-1',
+            version: '1',
+            extended_fields: { summary_as_keyword: 'a valid value' },
+          },
+          originalCase: makeOriginalCase(), // no template
+          templatesService: templatesService as unknown as TemplatesService,
+          globalFields: makeGlobalFields([
+            { name: 'summary', type: 'keyword', label: 'Summary', validation: { required: true } },
+          ]),
         })
       ).resolves.toBeUndefined();
     });
