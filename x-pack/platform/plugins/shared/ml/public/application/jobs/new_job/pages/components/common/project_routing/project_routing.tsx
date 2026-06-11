@@ -9,7 +9,8 @@ import type { FC } from 'react';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { useGeneratedHtmlId } from '@elastic/eui';
 
-import { ProjectPicker, useFetchProjects } from '@kbn/cps-utils';
+import { useFetchProjects } from '@kbn/cps-utils';
+import { MlProjectPickerPanel } from '@kbn/ml-cps';
 import type { ProjectRouting } from '@kbn/es-query';
 import { useMlKibana } from '../../../../../../contexts/kibana';
 import { JobCreatorContext } from '../../job_creator_context';
@@ -42,7 +43,8 @@ export const ProjectRoutingSelect: FC = () => {
     [cpsManager]
   );
 
-  const projects = useFetchProjects(fetchProjects, jobCreator.projectRouting ?? undefined);
+  const projectsResult = useFetchProjects(fetchProjects, jobCreator.projectRouting ?? undefined);
+  const projects = projectsResult.isLoading ? undefined : projectsResult;
 
   useEffect(() => {
     setProjectRouting(jobCreator.projectRouting ?? null);
@@ -60,12 +62,13 @@ export const ProjectRoutingSelect: FC = () => {
 
   return (
     <Description titleId={titleId}>
-      <ProjectPicker
+      <MlProjectPickerPanel
         projectRouting={projectRouting ?? undefined}
         onProjectRoutingChange={onProjectRoutingChange}
         projects={projects}
         totalProjectCount={totalProjectCount}
         isReadonly={false}
+        disabled={projects === undefined}
       />
     </Description>
   );

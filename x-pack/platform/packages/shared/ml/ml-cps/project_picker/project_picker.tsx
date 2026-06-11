@@ -14,7 +14,7 @@ import { ProjectPicker, DisabledProjectPicker, type UseFetchProjectsResult } fro
 export interface MlProjectPickerPanelProps {
   projectRouting?: ProjectRouting;
   onProjectRoutingChange: (projectRouting: ProjectRouting) => void;
-  projects: UseFetchProjectsResult;
+  projects?: UseFetchProjectsResult;
   totalProjectCount: number;
   isReadonly?: boolean;
   disabled?: boolean;
@@ -32,6 +32,8 @@ export const MlProjectPickerPanel: FC<MlProjectPickerPanelProps> = ({
   displayDisabledTooltip = true,
   projectRoutingValueTestSubj,
 }) => {
+  const isDisabled = disabled || projects === undefined;
+
   return (
     <EuiPanel
       hasShadow={false}
@@ -42,7 +44,7 @@ export const MlProjectPickerPanel: FC<MlProjectPickerPanelProps> = ({
     >
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
-          {disabled ? (
+          {isDisabled ? (
             <DisabledProjectPicker
               totalProjectCount={totalProjectCount}
               displayTooltip={displayDisabledTooltip}
