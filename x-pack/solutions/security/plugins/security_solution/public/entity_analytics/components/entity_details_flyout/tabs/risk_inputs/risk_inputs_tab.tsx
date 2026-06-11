@@ -354,7 +354,9 @@ const RiskInputsTabContent = <T extends EntityType>({
 
   const onHistoryRangeChange = useCallback((from: string) => {
     setHistoryFrom(from);
-    setSelectedTimestamp((current) => (isTimestampWithinRange(current, from) ? current : undefined));
+    setSelectedTimestamp((current) =>
+      isTimestampWithinRange(current, from) ? current : undefined
+    );
   }, []);
 
   const latestRiskScore = isResolutionView ? resolutionRiskScore : entityRiskScore;

@@ -1032,9 +1032,7 @@ describe('RiskInputsTab', () => {
 
       expect(getByTestId('mockRiskScoreTimeline')).toBeInTheDocument();
       expect(queryByTestId('riskInputsTabPitIndicator')).not.toBeInTheDocument();
-      expect(mockUseRiskScoreHistory).toHaveBeenCalledWith(
-        expect.objectContaining({ skip: true })
-      );
+      expect(mockUseRiskScoreHistory).toHaveBeenCalledWith(expect.objectContaining({ skip: true }));
     });
 
     it('feeds the tables from the latest record when no point is selected', () => {

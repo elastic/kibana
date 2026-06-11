@@ -602,9 +602,7 @@ const toHistoryEntry = (
   };
 };
 
-const toContributionFields = (
-  risk: RiskScoreTimeSeriesRisk
-): Partial<RiskScoreHistoryEntry> => ({
+const toContributionFields = (risk: RiskScoreTimeSeriesRisk): Partial<RiskScoreHistoryEntry> => ({
   ...(risk.inputs !== undefined && { inputs: risk.inputs }),
   ...(risk.modifiers !== undefined && { modifiers: risk.modifiers }),
   ...(risk.category_2_score !== undefined && { category_2_score: risk.category_2_score }),

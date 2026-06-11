@@ -307,7 +307,9 @@ const TimelineChart: React.FC<TimelineChartProps> = ({
             </EuiText>
           }
           markerPosition={Position.Right}
-          style={{ line: { strokeWidth: 1, stroke: euiTheme.colors.borderBaseSubdued, dash: [4, 4] } }}
+          style={{
+            line: { strokeWidth: 1, stroke: euiTheme.colors.borderBaseSubdued, dash: [4, 4] },
+          }}
         />
       ))}
       {selectedMs !== undefined && (
@@ -322,9 +324,12 @@ const TimelineChart: React.FC<TimelineChartProps> = ({
       )}
       <LineSeries
         id="riskScoreTimelineSeries"
-        name={i18n.translate('xpack.securitySolution.entityAnalytics.riskScoreTimeline.seriesName', {
-          defaultMessage: 'Risk score',
-        })}
+        name={i18n.translate(
+          'xpack.securitySolution.entityAnalytics.riskScoreTimeline.seriesName',
+          {
+            defaultMessage: 'Risk score',
+          }
+        )}
         xScaleType={ScaleType.Time}
         yScaleType={ScaleType.Linear}
         xAccessor={0}
