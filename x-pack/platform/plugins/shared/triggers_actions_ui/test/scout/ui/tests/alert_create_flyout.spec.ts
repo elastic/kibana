@@ -633,7 +633,13 @@ test.describe('Alert create flyout', { tag: tags.stateful.classic }, () => {
     await page.gotoApp('rules');
     await page.testSubj.click('rulesTab');
     await searchRules(page, esQueryRuleName);
-    await page.testSubj.click('selectActionButton');
+    // Scope the action menu to this rule's row so we don't open a different row
+    // that may still be visible before the search filter fully applies.
+    const ruleRow = page
+      .locator('[data-test-subj="rulesList"] tr')
+      .filter({ hasText: esQueryRuleName });
+    await expect(ruleRow).toHaveCount(1);
+    await ruleRow.locator('[data-test-subj="selectActionButton"]').click();
     await page.testSubj.click('editRule');
 
     await page.testSubj.click('queryFormTypeChooserCancel');

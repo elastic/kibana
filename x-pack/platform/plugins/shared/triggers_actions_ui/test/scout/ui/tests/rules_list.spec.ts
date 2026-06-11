@@ -264,36 +264,47 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
     page,
     apiServices,
   }) => {
-    // Use UUID-based names so the two rules share no search tokens and the
-    // tokenized OR search for r1's name won't also match r2.
+    // Use UUID-based names so the two rules share no search tokens, plus a shared
+    // unique tag so we can scope assertions to exactly these two rules in a
+    // cluster that may contain many others.
+    const sharedTag = `clear-${randomUUID()}`;
     const [r1, r2] = await Promise.all([
       apiServices.alerting.rules.create({
         ...makeEsQueryRule('clearfind'),
         name: `clearfind-${randomUUID()}`,
-        tags: [],
+        tags: [sharedTag],
       }),
       apiServices.alerting.rules.create({
         ...makeEsQueryRule('clearcheck'),
         name: `clearcheck-${randomUUID()}`,
-        tags: [],
+        tags: [sharedTag],
       }),
     ]);
     createdRuleIds.push(r1.data.id, r2.data.id);
 
     await refreshRulesList(page);
+
+    // Both rules match the shared tag.
+    await searchRules(page, sharedTag);
+    await expect(getTableRows(page)).toHaveCount(2);
+
+    // Narrowing to r1's name filters down to a single rule.
     await searchRules(page, r1.data.name as string);
     await expect(getTableRows(page)).toHaveCount(1);
     await expect(page.testSubj.locator(`rulesListTableRowName-${r1.data.name}`)).toBeVisible();
 
+    // The clear button resets the search field itself...
     await page.locator('.euiFormControlLayoutClearButton').click();
     await page
       .locator('.euiBasicTable[data-test-subj="rulesList"]:not(.euiBasicTable-loading)')
       .waitFor();
+    await expect(page.testSubj.locator('ruleSearchField')).toHaveValue('');
 
-    // After clearing, r2 (hidden while r1 was searched) must now be findable.
-    // We search explicitly because with many rules in the system both may not
-    // land on the same page of the unfiltered list.
-    await searchRules(page, r2.data.name as string);
+    // ...and the previously-filtered-out rule is reachable again. Re-search by the
+    // shared tag (rather than relying on the unfiltered list, where the two rules
+    // may not share a page) to confirm both are restored.
+    await searchRules(page, sharedTag);
+    await expect(getTableRows(page)).toHaveCount(2);
     await expect(page.testSubj.locator(`rulesListTableRowName-${r2.data.name}`)).toBeVisible();
   });
 

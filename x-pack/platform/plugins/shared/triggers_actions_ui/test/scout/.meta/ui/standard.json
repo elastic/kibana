@@ -151,7 +151,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/alert_create_flyout.spec.ts",
-        "line": 650,
+        "line": 656,
         "column": 7
       }
     },
@@ -165,7 +165,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/alert_create_flyout.spec.ts",
-        "line": 662,
+        "line": 668,
         "column": 7
       }
     },
@@ -179,7 +179,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/alert_create_flyout.spec.ts",
-        "line": 682,
+        "line": 688,
         "column": 7
       }
     },
@@ -767,8 +767,22 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rule_details_alerts_tab.spec.ts",
-        "line": 80,
+        "line": 90,
         "column": 7
+      }
+    },
+    {
+      "id": "c2bd5f901e6f995-7916a9fdd07f72e",
+      "title": "Rule Details - Edit rule with deleted connector should show and update deleted connectors when there are existing connectors of the same type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rule_details_deleted_connector.spec.ts",
+        "line": 118,
+        "column": 9
       }
     },
     {
@@ -810,6 +824,20 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rule_details_edit.spec.ts",
         "line": 109,
+        "column": 7
+      }
+    },
+    {
+      "id": "93807fd363ed822-bec31cf3bdd5a22",
+      "title": "Rule Details - Execution log renders the event log list and can filter by status",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rule_details_execution_log.spec.ts",
+        "line": 52,
         "column": 7
       }
     },
@@ -1257,7 +1285,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
-        "line": 300,
+        "line": 311,
         "column": 7
       }
     },
@@ -1271,7 +1299,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
-        "line": 315,
+        "line": 326,
         "column": 7
       }
     },
@@ -1285,7 +1313,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
-        "line": 329,
+        "line": 340,
         "column": 7
       }
     },
@@ -1299,7 +1327,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
-        "line": 344,
+        "line": 355,
         "column": 7
       }
     },
@@ -1313,7 +1341,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
-        "line": 364,
+        "line": 375,
         "column": 7
       }
     },
@@ -1327,7 +1355,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
-        "line": 388,
+        "line": 399,
         "column": 7
       }
     },
@@ -1341,7 +1369,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
-        "line": 405,
+        "line": 416,
         "column": 7
       }
     },
@@ -1355,7 +1383,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
-        "line": 421,
+        "line": 432,
         "column": 7
       }
     },
@@ -1369,7 +1397,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
-        "line": 442,
+        "line": 453,
         "column": 7
       }
     },
@@ -1383,7 +1411,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
-        "line": 473,
+        "line": 484,
         "column": 7
       }
     },
@@ -1397,7 +1425,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
-        "line": 494,
+        "line": 505,
         "column": 7
       }
     },
@@ -1411,7 +1439,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
-        "line": 526,
+        "line": 537,
         "column": 7
       }
     },
@@ -1425,7 +1453,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
-        "line": 586,
+        "line": 597,
         "column": 7
       }
     },
@@ -1439,7 +1467,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
-        "line": 626,
+        "line": 637,
         "column": 7
       }
     },
@@ -1453,7 +1481,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
-        "line": 668,
+        "line": 679,
         "column": 7
       }
     },
@@ -1467,7 +1495,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
-        "line": 715,
+        "line": 726,
         "column": 7
       }
     },
@@ -1481,7 +1509,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
-        "line": 775,
+        "line": 786,
         "column": 7
       }
     },
@@ -1495,7 +1523,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
-        "line": 828,
+        "line": 839,
         "column": 7
       }
     },
@@ -1509,7 +1537,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
-        "line": 854,
+        "line": 865,
         "column": 7
       }
     },
@@ -1523,7 +1551,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
-        "line": 891,
+        "line": 902,
         "column": 7
       }
     },
@@ -1537,7 +1565,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
-        "line": 930,
+        "line": 941,
         "column": 7
       }
     },
@@ -1551,7 +1579,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
-        "line": 949,
+        "line": 960,
         "column": 7
       }
     },
@@ -1565,7 +1593,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_list.spec.ts",
-        "line": 970,
+        "line": 981,
         "column": 7
       }
     },
@@ -1691,7 +1719,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_redirect.spec.ts",
-        "line": 30,
+        "line": 47,
         "column": 7
       }
     },
@@ -1705,7 +1733,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_redirect.spec.ts",
-        "line": 38,
+        "line": 55,
         "column": 7
       }
     },
