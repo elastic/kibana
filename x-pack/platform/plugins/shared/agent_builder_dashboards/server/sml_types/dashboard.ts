@@ -100,7 +100,10 @@ export const createDashboardSmlType = ({
             type: DASHBOARD_SML_TYPE,
             title: dashboard.data.title ?? originId,
             content: toDashboardSearchContent(dashboard.data),
-            permissions: ['saved_object:dashboard/get'],
+            permissions: {
+              kibana: { privileges: [{ name: 'saved_object:dashboard/get' }] },
+              elasticsearch: { indices: [] },
+            },
           },
         ],
       };
@@ -115,7 +118,10 @@ export const createDashboardSmlType = ({
   toAttachment: async (item, context) => {
     try {
       const dashboardClient = await getDashboardClient();
-      const dashboard = await dashboardClient.read(context.savedObjectsClient, item.origin_id);
+      const dashboard = await dashboardClient.read(
+        context.savedObjectsClient,
+        item.origin_id ?? ''
+      );
 
       return {
         type: DASHBOARD_ATTACHMENT_TYPE,
