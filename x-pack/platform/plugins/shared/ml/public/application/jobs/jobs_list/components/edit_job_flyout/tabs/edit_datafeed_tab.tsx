@@ -191,7 +191,7 @@ export const EditDatafeedTab: FC<EditDatafeedTabProps> = ({
             label={
               <FormattedMessage
                 id="xpack.ml.jobsList.editJobFlyout.datafeed.projectRoutingLabel"
-                defaultMessage="Project routing"
+                defaultMessage="Project scope"
               />
             }
           >

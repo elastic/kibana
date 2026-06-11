@@ -16,7 +16,7 @@ interface Props {
 }
 export const Description: FC<PropsWithChildren<Props>> = memo(({ children, titleId }) => {
   const title = i18n.translate('xpack.ml.newJob.wizard.projectRouting.title', {
-    defaultMessage: 'Project routing',
+    defaultMessage: 'Project scope',
   });
   return (
     <EuiDescribedFormGroup

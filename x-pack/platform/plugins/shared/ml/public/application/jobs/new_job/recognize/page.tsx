@@ -24,8 +24,6 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { addExcludeFrozenToQuery } from '@kbn/ml-query-utils';
 import { TIME_FORMAT } from '@kbn/ml-date-utils';
 import { type RuntimeMappings } from '@kbn/ml-runtime-field-utils';
-import useObservable from 'react-use/lib/useObservable';
-import { EMPTY } from 'rxjs';
 import type { Module } from '@kbn/ml-common-types/modules';
 import type {
   DatafeedResponse,
@@ -79,12 +77,10 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
       mlServices: {
         mlApi: { getTimeFieldRange, setupDataRecognizerConfig, getDataRecognizerModule },
       },
-      cps,
     },
   } = useMlKibana();
   const locator = useMlLocator();
 
-  // #region State
   const [jobPrefix, setJobPrefix] = useState<string>('');
   const [jobs, setJobs] = useState<ModuleJobUI[]>([]);
   const [jobOverrides, setJobOverrides] = useState<JobOverrides>({});
@@ -93,9 +89,13 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
   const [resultsUrl, setResultsUrl] = useState<string>('');
   const [existingGroups, setExistingGroups] = useState(existingGroupIds);
   const [jobsAwaitingNodeCount, setJobsAwaitingNodeCount] = useState(0);
-  // #endregion
 
-  const { selectedSavedSearch, selectedDataView: dataView, combinedQuery } = useDataSource();
+  const {
+    selectedSavedSearch,
+    selectedDataView: dataView,
+    combinedQuery,
+    projectRouting,
+  } = useDataSource();
   const pageTitle = selectedSavedSearch
     ? i18n.translate('xpack.ml.newJob.recognize.savedSearchPageTitle', {
         defaultMessage: 'Discover session {savedSearchTitle}',
@@ -107,11 +107,6 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
       });
   const displayQueryWarning = selectedSavedSearch !== null;
   const tempQuery = selectedSavedSearch === null ? undefined : combinedQuery;
-
-  const projectRouting = useObservable(
-    cps?.cpsManager?.getProjectRouting$() ?? EMPTY,
-    cps?.cpsManager?.getProjectRouting()
-  );
 
   /**
    * Loads recognizer module configuration.
@@ -191,7 +186,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
           startDatafeed: startDatafeedAfterSave,
           ...(jobOverridesPayload !== null ? { jobOverrides: jobOverridesPayload } : {}),
           ...resultTimeRange,
-          projectRouting: cps?.cpsManager?.getProjectRouting(),
+          ...(projectRouting ? { projectRouting } : {}),
         });
         const {
           datafeeds: datafeedsResponse,
@@ -267,7 +262,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
       }
     },
     [
-      cps,
+      projectRouting,
       dataView,
       getTimeRange,
       jobOverrides,
@@ -313,7 +308,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
             <EuiText size="s">
               <FormattedMessage
                 id="xpack.ml.newJob.recognize.projectRouting"
-                defaultMessage="Project routing: {projectRouting}"
+                defaultMessage="Project scope: {projectRouting}"
                 values={{ projectRouting }}
               />
             </EuiText>

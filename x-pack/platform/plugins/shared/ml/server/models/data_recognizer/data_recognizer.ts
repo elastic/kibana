@@ -628,11 +628,15 @@ export class DataRecognizer {
       if (typeof query === 'object' && query !== null) {
         moduleConfig.datafeeds.forEach((df) => {
           df.config.query = query;
-          if (projectRouting !== undefined) {
-            df.config.project_routing = projectRouting;
-          }
         });
       }
+
+      if (projectRouting !== undefined) {
+        moduleConfig.datafeeds.forEach((df) => {
+          df.config.project_routing = projectRouting;
+        });
+      }
+
       saveResults.datafeeds = await this._saveDatafeeds(moduleConfig.datafeeds);
 
       if (startDatafeed) {

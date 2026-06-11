@@ -29,6 +29,7 @@ import {
 } from '../../../../contexts/kibana';
 
 import { useDataSource } from '../../../../contexts/ml';
+import { getUrlParams } from '../../utils/get_url_params';
 import { DataRecognizer } from '../../../../components/data_recognizer';
 import { addItemToRecentlyAccessed } from '../../../../util/recently_accessed';
 import { LinkCard } from '../../../../components/link_card';
@@ -43,15 +44,13 @@ export const Page: FC = () => {
       notifications: { toasts },
     },
   } = useMlKibana();
-
-  const dataSourceContext = useDataSource();
   const onSelectDifferentIndex = useCreateAndNavigateToMlLink(
     ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX
   );
 
   const [recognizerResultsCount, setRecognizerResultsCount] = useState(0);
 
-  const { selectedDataView, selectedSavedSearch, projectRouting } = dataSourceContext;
+  const { selectedDataView, selectedSavedSearch, projectRouting } = useDataSource();
 
   const isTimeBasedIndex: boolean = selectedDataView.isTimeBased();
 
@@ -124,18 +123,12 @@ export const Page: FC = () => {
     },
   };
 
-  const getUrlParams = () => {
-    const params = new URLSearchParams();
-    if (!selectedSavedSearch && selectedDataView.id) {
-      params.set('index', selectedDataView.id);
-    } else if (selectedSavedSearch?.id) {
-      params.set('savedSearchId', selectedSavedSearch.id);
-    }
-    if (projectRouting) {
-      params.set('project_routing', projectRouting);
-    }
-    return `?${params.toString()}`;
-  };
+  const getJobTypeUrlParams = () =>
+    getUrlParams({
+      dataView: selectedDataView,
+      savedSearch: selectedSavedSearch,
+      projectRouting,
+    });
 
   const addSelectionToRecentlyAccessed = async () => {
     const title = !selectedSavedSearch
@@ -161,12 +154,13 @@ export const Page: FC = () => {
       dataVisualizerLink,
       recentlyAccessed
     );
-    navigateToPath(`/${ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER}${getUrlParams()}`);
+    navigateToPath(`/${ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER}${getJobTypeUrlParams()}`);
   };
 
   const jobTypes = [
     {
-      onClick: () => navigateToManagementPath(`/jobs/new_job/single_metric${getUrlParams()}`),
+      onClick: () =>
+        navigateToManagementPath(`/jobs/new_job/single_metric${getJobTypeUrlParams()}`),
       icon: {
         type: 'createSingleMetricJob',
         ariaLabel: i18n.translate('xpack.ml.newJob.wizard.jobType.singleMetricAriaLabel', {
@@ -182,7 +176,7 @@ export const Page: FC = () => {
       id: 'mlJobTypeLinkSingleMetricJob',
     },
     {
-      onClick: () => navigateToManagementPath(`/jobs/new_job/multi_metric${getUrlParams()}`),
+      onClick: () => navigateToManagementPath(`/jobs/new_job/multi_metric${getJobTypeUrlParams()}`),
       icon: {
         type: 'createMultiMetricJob',
         ariaLabel: i18n.translate('xpack.ml.newJob.wizard.jobType.multiMetricAriaLabel', {
@@ -199,7 +193,7 @@ export const Page: FC = () => {
       id: 'mlJobTypeLinkMultiMetricJob',
     },
     {
-      onClick: () => navigateToManagementPath(`/jobs/new_job/population${getUrlParams()}`),
+      onClick: () => navigateToManagementPath(`/jobs/new_job/population${getJobTypeUrlParams()}`),
       icon: {
         type: 'createPopulationJob',
         ariaLabel: i18n.translate('xpack.ml.newJob.wizard.jobType.populationAriaLabel', {
@@ -216,7 +210,7 @@ export const Page: FC = () => {
       id: 'mlJobTypeLinkPopulationJob',
     },
     {
-      onClick: () => navigateToManagementPath(`/jobs/new_job/advanced${getUrlParams()}`),
+      onClick: () => navigateToManagementPath(`/jobs/new_job/advanced${getJobTypeUrlParams()}`),
       icon: {
         type: 'createAdvancedJob',
         ariaLabel: i18n.translate('xpack.ml.newJob.wizard.jobType.advancedAriaLabel', {
@@ -233,7 +227,8 @@ export const Page: FC = () => {
       id: 'mlJobTypeLinkAdvancedJob',
     },
     {
-      onClick: () => navigateToManagementPath(`/jobs/new_job/categorization${getUrlParams()}`),
+      onClick: () =>
+        navigateToManagementPath(`/jobs/new_job/categorization${getJobTypeUrlParams()}`),
       icon: {
         type: 'createGenericJob',
         ariaLabel: i18n.translate('xpack.ml.newJob.wizard.jobType.categorizationAriaLabel', {
@@ -249,7 +244,7 @@ export const Page: FC = () => {
       id: 'mlJobTypeLinkCategorizationJob',
     },
     {
-      onClick: () => navigateToManagementPath(`/jobs/new_job/rare${getUrlParams()}`),
+      onClick: () => navigateToManagementPath(`/jobs/new_job/rare${getJobTypeUrlParams()}`),
       icon: {
         type: 'createGenericJob',
         ariaLabel: i18n.translate('xpack.ml.newJob.wizard.jobType.rareAriaLabel', {
@@ -268,7 +263,7 @@ export const Page: FC = () => {
 
   if (hasGeoFields) {
     jobTypes.push({
-      onClick: () => navigateToManagementPath(`/jobs/new_job/geo${getUrlParams()}`),
+      onClick: () => navigateToManagementPath(`/jobs/new_job/geo${getJobTypeUrlParams()}`),
       icon: {
         type: 'createGeoJob',
         ariaLabel: i18n.translate('xpack.ml.newJob.wizard.jobType.geoAriaLabel', {

@@ -122,7 +122,7 @@ export const Page: FC<PageProps> = ({ nextStepPath, extraButtons }) => {
                 label={
                   <FormattedMessage
                     id="xpack.ml.newJob.wizard.indexOrSearch.projectRoutingLabel"
-                    defaultMessage="Project routing"
+                    defaultMessage="Project scope"
                   />
                 }
               >
