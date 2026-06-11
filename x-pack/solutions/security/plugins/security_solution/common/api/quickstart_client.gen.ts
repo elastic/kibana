@@ -2194,7 +2194,7 @@ Requires the **Timeline and Notes** read privilege (`notes_read`).
       .request<GetRiskScoreHistoryResponse>({
         path: '/api/risk_score/history',
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'GET',
 

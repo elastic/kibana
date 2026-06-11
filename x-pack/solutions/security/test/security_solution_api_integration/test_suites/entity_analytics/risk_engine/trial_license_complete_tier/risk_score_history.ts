@@ -87,7 +87,7 @@ export default ({ getService }: FtrProviderContext): void => {
       .get(RISK_SCORE_HISTORY_URL)
       .query(query)
       .set('kbn-xsrf', 'true')
-      .set('elastic-api-version', '1')
+      .set('elastic-api-version', '2023-10-31')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send();
     expect(response.status).to.eql(expectStatusCode, JSON.stringify(response.body));

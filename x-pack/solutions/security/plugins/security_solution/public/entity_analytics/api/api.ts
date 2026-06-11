@@ -196,7 +196,7 @@ export const useEntityAnalyticsRoutes = () => {
       params: FetchRiskScoreHistoryParams;
     }) =>
       http.fetch<RiskScoreHistoryResponse>(RISK_SCORE_HISTORY_URL, {
-        version: '1',
+        version: API_VERSIONS.public.v1,
         method: 'GET',
         query: {
           entity_type: params.entityType,

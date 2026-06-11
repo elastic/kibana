@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  version: '1'
+  version: '2023-10-31'
   title: Risk Score History API
   description: Retrieve historical risk score changes for an entity.
 paths:
