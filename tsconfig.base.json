@@ -2264,6 +2264,8 @@
       "@kbn/securitysolution-t-grid/*": ["x-pack/solutions/security/packages/kbn-securitysolution-t-grid/*"],
       "@kbn/securitysolution-utils": ["x-pack/solutions/security/packages/kbn-securitysolution-utils"],
       "@kbn/securitysolution-utils/*": ["x-pack/solutions/security/packages/kbn-securitysolution-utils/*"],
+      "@kbn/sequent-workflows-plugin": ["x-pack/solutions/security/plugins/sequent_workflows"],
+      "@kbn/sequent-workflows-plugin/*": ["x-pack/solutions/security/plugins/sequent_workflows/*"],
       "@kbn/server-http-tools": ["src/platform/packages/shared/kbn-server-http-tools"],
       "@kbn/server-http-tools/*": ["src/platform/packages/shared/kbn-server-http-tools/*"],
       "@kbn/server-route-repository": ["src/platform/packages/shared/kbn-server-route-repository"],

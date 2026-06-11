@@ -8979,6 +8979,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/sequent-workflows-plugin@link:x-pack/solutions/security/plugins/sequent_workflows":
+  version "0.0.0"
+  uid ""
+
 "@kbn/server-http-tools@link:src/platform/packages/shared/kbn-server-http-tools":
   version "0.0.0"
   uid ""

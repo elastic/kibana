@@ -1,0 +1,21 @@
+{
+  "type": "plugin",
+  "id": "@kbn/sequent-workflows-plugin",
+  "owner": [
+    "@elastic/security-engineering-productivity"
+  ],
+  "group": "security",
+  "visibility": "private",
+  "plugin": {
+    "id": "sequentWorkflows",
+    "configPath": ["sequentWorkflows"],
+    "browser": true,
+    "server": true,
+    "requiredPlugins": [
+      "features"
+    ],
+    "requiredBundles": [
+      "kibanaReact"
+    ]
+  }
+}
