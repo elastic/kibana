@@ -199,13 +199,14 @@ export function createRootWithCorePlugins(
     },
     server: { restrictInternalApis: true },
     // createRootWithSettings sets default value to "true", so undefined should be threatened as "true".
-    ...(cliArgs.oss === false
+    // In FIPS mode, createRootWithSettings forces oss=false internally, so we must also guard on getFips().
+    ...(cliArgs.oss === false || getFips() === 1
       ? {
           // reporting loads headless browser, that prevents nodejs process from exiting and causes test flakiness
+          // screenshotting has the same issue and uses non-FIPS-compatible algorithms during startup
           xpack: {
-            reporting: {
-              enabled: false,
-            },
+            reporting: { enabled: false },
+            screenshotting: { enabled: false },
           },
         }
       : {}),
