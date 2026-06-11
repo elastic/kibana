@@ -21,10 +21,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useDebounceFn } from '@kbn/react-hooks';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FormProvider, useForm, useWatch } from 'react-hook-form';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
 import { RuleFormProvider } from '../../form/contexts/rule_form_context';
+import { ConfirmRuleClose } from '../confirm_rule_close';
 import type { FormValues, RuleNotificationsValue } from '../../form/types';
 import { mergeArtifactsByType, splitArtifactsByType } from '../../form/utils/artifact_mappers';
 import { parseYamlToFormValues, serializeFormToYaml } from '../../form/utils/yaml_form_utils';
@@ -40,7 +41,7 @@ import {
 } from './compose_mappers';
 import { HorizontalMinimalStepper, type MinimalStep } from './horizontal_minimal_stepper';
 import { QuerySandboxFlyout } from './query_sandbox_flyout';
-import { RULE_BUILDER_REGISTRY } from './rule_builder';
+import { RULE_BUILDER_REGISTRY, BuilderStateProvider, type BuilderState } from './rule_builder';
 import type { ComposeDiscoverMode, QueryTab, RecoveryType } from './types';
 import { getSandboxTabs, useComposeDiscoverState } from './use_compose_discover_state';
 import { useEsqlAutocomplete } from './use_esql_providers';
@@ -149,7 +150,7 @@ export interface ComposeDiscoverFlyoutProps<TWorkflow extends object = object> {
   /** True while a create/update mutation is in flight. */
   isSaving?: boolean;
   builderType?: string;
-  initialBuilderState?: unknown;
+  initialBuilderState?: BuilderState;
 }
 
 const FLYOUT_TITLE_ID = 'composeDiscoverFlyoutTitle';
@@ -210,11 +211,11 @@ const composeFormValuesForYamlSerialize = (compose: ComposeFormValues): FormValu
 };
 
 const EMPTY_FORM_VALUES: ComposeFormValues = {
-  kind: 'signal',
+  kind: 'alert',
   metadata: { name: '', enabled: true, description: '', tags: [] },
   timeField: '@timestamp',
   schedule: { every: '1m', lookback: '5m' },
-  query: { format: 'standalone', breach: '' },
+  query: { format: 'composed', base: '', blocks: { breach: '' } },
   grouping: undefined,
   stateTransition: undefined,
   stateTransitionAlertDelayMode: 'immediate',
@@ -251,7 +252,7 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
 
   const initialMapped =
     (mode === 'edit' || mode === 'clone') && rule ? mapRuleToComposeFormValues(rule) : undefined;
-  const initialKind = initialMapped?.kind ?? 'signal';
+  const initialKind = initialMapped?.kind ?? 'alert';
   const hasInitialCustomRecovery =
     initialMapped?.query?.format === 'composed' && !!initialMapped.query.blocks.recover?.trim();
   const [uiState, dispatch] = useComposeDiscoverState({
@@ -264,7 +265,7 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
   // Registered once here so providers persist across Sandbox open/close cycles.
   useEsqlAutocomplete(baseServices);
 
-  const [builderState, setBuilderState] = useState<unknown>(() => {
+  const [builderState, setBuilderState] = useState<BuilderState>(() => {
     if (!builderType) return undefined;
     if (initialBuilderState !== undefined) return initialBuilderState;
     const definition = RULE_BUILDER_REGISTRY[builderType];
@@ -288,6 +289,72 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
   }, [rule, mode]);
 
   const methods = useForm<ComposeFormValues>({ mode: 'onBlur', defaultValues });
+  const [isConfirmCloseVisible, setIsConfirmCloseVisible] = useState(false);
+  // EuiFlyout with session="start" uses EUI's managed flyout system, which
+  // calls closeAllFlyouts() synchronously (via flushSync) *before* invoking
+  // our onClose callback for EUI-managed close paths (X, ESC, outside click).
+  // By the time handleRequestClose runs, the flyout is already unregistered
+  // from the manager. Incrementing the key forces React to re-mount the
+  // EuiFlyout, re-registering it with the manager. The Cancel button doesn't
+  // go through closeAllFlyouts(), so no remount is needed for that path.
+  // Form state is preserved because FormProvider sits above the flyout.
+  const [flyoutKey, setFlyoutKey] = useState(0);
+  const isDirtyRef = useRef(false);
+  isDirtyRef.current = methods.formState.isDirty;
+
+  // methods.reset() (used by YAML sync and mode-toggle) clears isDirty because
+  // it establishes new default values. Two extra refs compensate:
+  // - yamlBaselineRef/yamlTextRef: detect edits while in YAML mode.
+  // - hasBeenEditedRef: survives reset() calls so exiting YAML mode after
+  //   editing still shows the confirmation dialog. Intentionally sticky for the
+  //   flyout's lifetime — resets only on unmount (close/discard).
+  const yamlBaselineRef = useRef<string | null>(null);
+  const yamlTextRef = useRef('');
+  const hasBeenEditedRef = useRef(false);
+
+  // recoveryType lives in uiState (not RHF), so toggling it doesn't mark
+  // the form dirty. Track the initial value to detect user changes.
+  const initialRecoveryTypeRef = useRef(hasInitialCustomRecovery ? 'custom' : 'default');
+
+  // Tracks whether the close was triggered by the Cancel button ('button')
+  // or by EUI's managed paths — X, ESC, outside click ('eui'). Only the
+  // EUI path calls closeAllFlyouts() which unregisters the flyout and
+  // requires a flyoutKey remount.
+  const closeSourceRef = useRef<'button' | 'eui'>('eui');
+
+  // After "Continue editing" on the EUI-managed path, the flyoutKey remount
+  // cascade-closes the sandbox. This ref tells the subsequent effect whether
+  // to re-dispatch OPEN_CHILD to restore it.
+  const reopenChildRef = useRef(false);
+
+  const handleRequestClose = useCallback(() => {
+    const yamlDirty =
+      yamlBaselineRef.current !== null && yamlTextRef.current !== yamlBaselineRef.current;
+    const recoveryTypeDirty = uiState.recoveryType !== initialRecoveryTypeRef.current;
+    if (isDirtyRef.current || yamlDirty || hasBeenEditedRef.current || recoveryTypeDirty) {
+      setIsConfirmCloseVisible(true);
+    } else {
+      onClose();
+    }
+  }, [onClose, uiState.recoveryType]);
+
+  const handleConfirmDiscard = useCallback(() => {
+    setIsConfirmCloseVisible(false);
+    closeSourceRef.current = 'eui';
+    onClose();
+  }, [onClose]);
+
+  const handleCancelDiscard = useCallback(() => {
+    setIsConfirmCloseVisible(false);
+    if (closeSourceRef.current === 'eui') {
+      // EUI-managed close already called closeAllFlyouts() — remount to
+      // re-register the flyout with the manager, and reopen the sandbox
+      // if it was cascade-closed.
+      reopenChildRef.current = uiState.yamlMode || uiState.childOpen;
+      setFlyoutKey((k) => k + 1);
+    }
+    closeSourceRef.current = 'eui';
+  }, [uiState.yamlMode, uiState.childOpen]);
 
   const [sandboxQuery, setSandboxQuery] = useState<RuleQuery>(() => methods.getValues('query'));
   const [sandboxTimeField, setSandboxTimeField] = useState<string>(() =>
@@ -316,6 +383,19 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
   });
 
   const isAlert = useWatch({ control: methods.control, name: 'kind' }) === 'alert';
+  const isAlertRef = useRef(isAlert);
+  isAlertRef.current = isAlert;
+
+  // After "Continue editing" bumps flyoutKey and the EuiFlyout remounts,
+  // the sandbox (cascade-closed by closeAllFlyouts()) needs reopening.
+  // Read isAlert via ref so this effect only fires on flyoutKey changes,
+  // not on kind toggles (where reopenChildRef is always false anyway).
+  useEffect(() => {
+    if (reopenChildRef.current) {
+      reopenChildRef.current = false;
+      dispatch({ type: 'OPEN_CHILD', isAlert: isAlertRef.current });
+    }
+  }, [flyoutKey, dispatch]);
 
   const handleKindChange = useCallback(
     (kind: 'signal' | 'alert') => {
@@ -324,15 +404,15 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
         const { base, alertBlock } = splitQuery(full);
         const composed: RuleQuery = { format: 'composed', base, blocks: { breach: alertBlock } };
         setSandboxQuery(composed);
-        methods.setValue('query', composed);
+        methods.setValue('query', composed, { shouldDirty: true });
       } else {
         // Assemble from committed query — discards any unapplied sandbox edits cleanly.
         const assembled = getBreachQuery(methods.getValues('query'));
         const standalone: RuleQuery = { format: 'standalone', breach: assembled };
         setSandboxQuery(standalone);
-        methods.setValue('query', standalone);
+        methods.setValue('query', standalone, { shouldDirty: true });
       }
-      methods.setValue('kind', kind);
+      methods.setValue('kind', kind, { shouldDirty: true });
       dispatch({ type: 'KIND_CHANGE', kind });
     },
     [methods, dispatch]
@@ -353,11 +433,20 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
         setSandboxQuery((q) => {
           if (q.format !== 'composed') return q;
           const current = q.blocks.recover ?? '';
+          if (current.trim()) return q;
+          if (isBuilderMode) {
+            const formQuery = methods.getValues('query');
+            const builderRecover =
+              formQuery.format === 'composed' ? formQuery.blocks.recover ?? '' : '';
+            if (builderRecover.trim()) {
+              return { ...q, blocks: { ...q.blocks, recover: builderRecover } };
+            }
+          }
           return {
             ...q,
             blocks: {
               ...q.blocks,
-              recover: current.trim() ? current : guessRecoveryBlock(q.blocks.breach),
+              recover: guessRecoveryBlock(q.blocks.breach),
             },
           };
         });
@@ -373,10 +462,22 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
         if (uiState.queryCommitted) {
           const current = methods.getValues('query');
           if (current.format === 'composed' && current.blocks.recover) {
-            methods.setValue('query', { ...current, blocks: { breach: current.blocks.breach } });
+            methods.setValue(
+              'query',
+              { ...current, blocks: { breach: current.blocks.breach } },
+              { shouldDirty: true }
+            );
           } else if (current.format === 'standalone' && current.recover) {
-            methods.setValue('query', { format: 'standalone', breach: current.breach });
+            methods.setValue(
+              'query',
+              { format: 'standalone', breach: current.breach },
+              { shouldDirty: true }
+            );
           }
+        }
+        if (isBuilderMode && builderState) {
+          const { recovery: _, ...rest } = builderState as Record<string, unknown>;
+          setBuilderState(rest);
         }
         // (b) Close sandbox in non-YAML mode — prevents a pending Apply from
         // overwriting the recovery type change by writing the stale sandboxQuery back.
@@ -386,20 +487,30 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
           dispatch({ type: 'CLOSE_CHILD' });
         }
       }
-      dispatch({ type: 'SET_RECOVERY_TYPE', recoveryType: type });
+      dispatch({ type: 'SET_RECOVERY_TYPE', recoveryType: type, isBuilderMode });
     },
-    [dispatch, methods, uiState.queryCommitted, uiState.childOpen, uiState.yamlMode]
+    [
+      dispatch,
+      methods,
+      isBuilderMode,
+      builderState,
+      uiState.queryCommitted,
+      uiState.childOpen,
+      uiState.yamlMode,
+    ]
   );
 
   const isCreate = mode === 'create' || mode === 'clone';
+  const isEditing = mode === 'edit';
   const title = getFlyoutTitle(mode);
 
-  const steps = getSteps(isAlert, builderType);
+  const { steps } = getSteps(isAlert, builderType);
   const currentStep = steps[uiState.step];
   const isLastStep = uiState.step === steps.length - 1;
 
   // ── YAML mode state ──────────────────────────────────────────────────────
   const [yamlText, setYamlText] = useState('');
+  yamlTextRef.current = yamlText;
 
   // Debounced (~300 ms) lenient parse that pushes every YAML keystroke into RHF.
   // The Sandbox watches RHF via props, so it sees YAML edits live.
@@ -431,16 +542,26 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
   const handleToggleYamlMode = useCallback(
     (enabled: boolean) => {
       if (enabled) {
-        setYamlText(serializeFormToYaml(composeFormValuesForYamlSerialize(methods.getValues())));
+        const serialized = serializeFormToYaml(
+          composeFormValuesForYamlSerialize(methods.getValues())
+        );
+        setYamlText(serialized);
+        yamlBaselineRef.current = serialized;
       } else {
+        const yamlWasDirty =
+          yamlBaselineRef.current !== null && yamlTextRef.current !== yamlBaselineRef.current;
+        yamlBaselineRef.current = null;
         cancelYamlParse();
         const result = parseYamlToFormValues(yamlText);
         if (result.values) {
-          const compose = formValuesFromYamlToCompose(result.values);
-          methods.reset(compose);
+          const composed = formValuesFromYamlToCompose(result.values);
+          methods.reset(composed);
           syncSandbox();
-          if (getBreachQuery(compose.query).trim()) {
+          if (getBreachQuery(composed.query).trim()) {
             dispatch({ type: 'COMMIT_QUERY' });
+          }
+          if (yamlWasDirty) {
+            hasBeenEditedRef.current = true;
           }
         }
         // No syncSandbox() on parse-failure path: the debounced parse always calls
@@ -453,8 +574,8 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
   );
 
   const handleSandboxApply = useCallback(() => {
-    methods.setValue('query', sandboxQuery);
-    methods.setValue('timeField', sandboxTimeField);
+    methods.setValue('query', sandboxQuery, { shouldDirty: true });
+    methods.setValue('timeField', sandboxTimeField, { shouldDirty: true });
     if (uiState.yamlMode) {
       const current = { ...methods.getValues(), query: sandboxQuery, timeField: sandboxTimeField };
       setYamlText(serializeFormToYaml(composeFormValuesForYamlSerialize(current)));
@@ -489,9 +610,9 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
     const result = parseYamlToFormValues(yamlText);
     if (result.values) {
       methods.reset(formValuesFromYamlToCompose(result.values));
-      // No syncSandbox() here: sandbox is temporarily stale after methods.reset(), but
+      // No syncSandbox() here: draft is temporarily stale after methods.reset(), but
       // we're about to submit. On success the flyout closes; on failure the user is still
-      // in YAML mode and handleToggleYamlMode(false) will resync draft when they switch back.
+      // in YAML mode and handleToggleYamlMode(false) will resync when they switch back.
     }
     handleSubmit();
   }, [cancelYamlParse, yamlText, methods, handleSubmit]);
@@ -526,10 +647,11 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
     <RuleFormProvider services={services} meta={{ layout: 'flyout' }}>
       <FormProvider {...methods}>
         <EuiFlyout
+          key={flyoutKey}
           type="overlay"
           session="start"
           historyKey={historyKey}
-          onClose={onClose}
+          onClose={handleRequestClose}
           aria-labelledby={FLYOUT_TITLE_ID}
           size={480}
         >
@@ -590,17 +712,18 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
                 />
               </React.Suspense>
             ) : (
-              <ComposeDiscoverForm
-                state={uiState}
-                dispatch={dispatch}
-                services={baseServices}
-                onRecoveryTypeChange={handleRecoveryTypeChange}
-                onKindChange={handleKindChange}
-                ruleId={ruleId}
-                builderType={builderType}
-                builderState={builderState}
-                onBuilderStateChange={setBuilderState}
-              />
+              <BuilderStateProvider builderState={builderState} setBuilderState={setBuilderState}>
+                <ComposeDiscoverForm
+                  state={uiState}
+                  dispatch={dispatch}
+                  services={baseServices}
+                  onRecoveryTypeChange={handleRecoveryTypeChange}
+                  onKindChange={handleKindChange}
+                  isEditing={isEditing}
+                  ruleId={ruleId}
+                  builderType={builderType}
+                />
+              </BuilderStateProvider>
             )}
           </EuiFlyoutBody>
 
@@ -621,7 +744,13 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
             ) : (
               <EuiFlexGroup justifyContent="spaceBetween">
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty onClick={onClose} data-test-subj="composeDiscoverCancel">
+                  <EuiButtonEmpty
+                    onClick={() => {
+                      closeSourceRef.current = 'button';
+                      handleRequestClose();
+                    }}
+                    data-test-subj="composeDiscoverCancel"
+                  >
                     {CANCEL_BUTTON_LABEL}
                   </EuiButtonEmpty>
                 </EuiFlexItem>
@@ -704,6 +833,9 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
             />
           )}
         </EuiFlyout>
+        {isConfirmCloseVisible && (
+          <ConfirmRuleClose onCancel={handleCancelDiscard} onConfirm={handleConfirmDiscard} />
+        )}
       </FormProvider>
     </RuleFormProvider>
   );
