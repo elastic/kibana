@@ -161,7 +161,7 @@ export function CompositeSloMembersTable({
   );
 
   return (
-    <div css={{ padding: '16px' }}>
+    <>
       <EuiBasicTable
         tableCaption={i18n.translate('xpack.slo.compositeSloList.members.tableCaption', {
           defaultMessage: 'Member SLOs',
@@ -185,6 +185,6 @@ export function CompositeSloMembersTable({
           />
         </Suspense>
       )}
-    </div>
+    </>
   );
 }
