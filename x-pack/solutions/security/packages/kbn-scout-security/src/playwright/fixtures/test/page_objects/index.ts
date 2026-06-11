@@ -18,6 +18,8 @@ import { DetectionsAttackDiscoveryPage } from './detections_attack_discovery';
 import { ThreatMatchRuleCreatePage } from './threat_match_rule_create_page';
 import { AttackDetailsRightPanelPage } from './attack_details_right_panel';
 import { ServerlessProjectChromePage } from './serverless_project_chrome_page';
+import { CreateRulePage } from './create_rule_page';
+import { RuleDetailsPage } from './rule_details_page';
 
 export type { ThreatMatchRuleCreatePage } from './threat_match_rule_create_page';
 
@@ -34,6 +36,8 @@ export interface SecurityPageObjects extends PageObjects {
   threatMatchRuleCreatePage: ThreatMatchRuleCreatePage;
   attackDetailsRightPanelPage: AttackDetailsRightPanelPage;
   serverlessProjectChromePage: ServerlessProjectChromePage;
+  createRulePage: CreateRulePage;
+  ruleDetailsPage: RuleDetailsPage;
 }
 
 export function extendPageObjects(
@@ -58,5 +62,7 @@ export function extendPageObjects(
     threatMatchRuleCreatePage: createLazyPageObject(ThreatMatchRuleCreatePage, page),
     attackDetailsRightPanelPage: createLazyPageObject(AttackDetailsRightPanelPage, page),
     serverlessProjectChromePage: createLazyPageObject(ServerlessProjectChromePage, page),
+    createRulePage: createLazyPageObject(CreateRulePage, page),
+    ruleDetailsPage: createLazyPageObject(RuleDetailsPage, page),
   };
 }
