@@ -39,7 +39,6 @@ import {
   RuleExecutionFieldGroup,
   AlertConditionsFieldGroup,
   KindField,
-  NOOP_WORKFLOW_FORM,
   mapRuleResponseToFormValues,
   mapFormValuesToUpdateRequest,
 } from '@kbn/alerting-v2-rule-form';
@@ -70,7 +69,6 @@ export const QuickEditRuleFlyout = ({ rule, onClose }: QuickEditRuleFlyoutProps)
       notifications,
       application,
       lens,
-      workflowForm: NOOP_WORKFLOW_FORM,
     }),
     [http, data, dataViews, notifications, application, lens]
   );
