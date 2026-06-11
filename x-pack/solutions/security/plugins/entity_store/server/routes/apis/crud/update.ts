@@ -7,10 +7,10 @@
 
 import path from 'node:path';
 import { BooleanFromString } from '@kbn/zod-helpers/v4';
-import { buildStrictRouteValidationWithZod } from '../utils/build_strict_route_validation';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { z } from '@kbn/zod/v4';
 import { unflattenObject } from '@kbn/object-utils';
+import { buildStrictRouteValidationWithZod } from '../utils/build_strict_route_validation';
 import { ALL_ENTITY_TYPES, API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../../common';
 import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
 import type { EntityStorePluginRouter } from '../../../types';

@@ -6,8 +6,8 @@
  */
 
 import path from 'node:path';
-import { buildStrictRouteValidationWithZod } from '../utils/build_strict_route_validation';
 import type { IKibanaResponse } from '@kbn/core-http-server';
+import { buildStrictRouteValidationWithZod } from '../utils/build_strict_route_validation';
 import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
 import type { EntityStorePluginRouter } from '../../../types';
 import { wrapMiddlewares } from '../../middleware';
