@@ -7,7 +7,7 @@
 
 import type TestAgent from 'supertest/lib/agent';
 import { ensureSpaceIdExists } from '@kbn/security-solution-plugin/scripts/endpoint/common/spaces';
-import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 import expect from '@kbn/expect';
 import {
   AGENT_STATUS_ROUTE,
