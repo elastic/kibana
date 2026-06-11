@@ -19,6 +19,9 @@ export interface BridgedToolResponse {
   results: Array<{ type: string; data: unknown }>;
   count: number;
   error?: string;
+  // Index signature so the response satisfies the inference `ToolResponse`
+  // (a `Record<string, unknown>`) when returned from a typed callback.
+  [key: string]: unknown;
 }
 
 /**
