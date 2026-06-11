@@ -25,7 +25,10 @@ import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-
 import type { SignificantEventsToolUsage } from '@kbn/streams-ai';
 import { isSignificantEventsMemoryEnabled } from '../memory/is_significant_events_memory_enabled';
 import { isSignificantEventsSemanticCodeSearchGroundingEnabled } from '../semantic_code_search_grounding/is_significant_events_semantic_code_search_grounding_enabled';
-import { resolveCodeIndexForStream } from '../semantic_code_search_grounding/resolve_code_index';
+import {
+  resolveCodeIndexForStream,
+  resolveRepositoryForCodeIndex,
+} from '../semantic_code_search_grounding/resolve_code_index';
 import { createSemanticCodeSearchTools } from '../semantic_code_search_grounding/semantic_code_search_tools';
 import type { StreamsClient } from '../streams/client';
 import type { FeatureClient } from '../streams/feature/feature_client';
@@ -130,12 +133,21 @@ export async function generateKIQueries(
         })
       : undefined;
 
+  const repository = codeIndex
+    ? await resolveRepositoryForCodeIndex({
+        esClient,
+        codeIndex,
+        logger: semanticCodeSearchLogger,
+      })
+    : undefined;
+
   const semanticCodeSearchTools =
     agentBuilderTools && codeIndex
       ? createSemanticCodeSearchTools({
           agentBuilderTools,
           request,
           codeIndex,
+          repository,
           logger: semanticCodeSearchLogger,
         })
       : undefined;

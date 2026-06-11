@@ -12,7 +12,9 @@ import type { ToolCall } from '@kbn/inference-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import {
   createSemanticCodeSearchTools,
+  SCS_FIND_INTRODUCING_COMMIT_TOOL_ID,
   SCS_READ_FILE_TOOL_ID,
+  SCS_SEARCH_COMMIT_MESSAGES_TOOL_ID,
   SCS_SEMANTIC_SEARCH_TOOL_ID,
   SCS_SYMBOL_ANALYSIS_TOOL_ID,
 } from './semantic_code_search_tools';
@@ -47,6 +49,11 @@ describe('createSemanticCodeSearchTools', () => {
       'read_code_file',
     ]);
     expect(promptSnippet).toContain(codeIndex);
+  });
+
+  it('does not expose git-history tools when no repository is resolved', () => {
+    const { tools } = build();
+    expect(Object.keys(tools).some((name) => name.startsWith('git_'))).toBe(false);
   });
 
   it('code_search executes the SCS semantic search tool with the linked index injected', async () => {
@@ -145,6 +152,82 @@ describe('createSemanticCodeSearchTools', () => {
       results: [{ type: ToolResultType.other, data: { ok: true } }],
       count: 1,
       error: 'index missing',
+    });
+  });
+
+  describe('with a resolved repository', () => {
+    const repository = 'acme/checkout';
+    const buildWithRepo = () =>
+      createSemanticCodeSearchTools({
+        agentBuilderTools,
+        request,
+        codeIndex,
+        repository,
+        logger,
+      });
+
+    it('exposes git-history tools alongside the code search tools', () => {
+      const { tools, promptSnippet } = buildWithRepo();
+      expect(Object.keys(tools).sort()).toEqual([
+        'analyze_symbol',
+        'code_search',
+        'git_cochanges',
+        'git_file_authors',
+        'git_file_history',
+        'git_find_introducing_commit',
+        'git_search_commits',
+        'git_show_commit',
+        'read_code_file',
+      ]);
+      expect(promptSnippet).toContain(repository);
+    });
+
+    it('git_search_commits injects the repository and forwards optional args', async () => {
+      execute.mockResolvedValue({ results: [] });
+      const { callbacks } = buildWithRepo();
+
+      await callbacks.git_search_commits(
+        makeToolCall('git_search_commits', {
+          query: 'add retry on connection refused',
+          file_paths: 'src/a.ts,src/b.ts',
+        })
+      );
+
+      expect(execute).toHaveBeenCalledWith({
+        toolId: SCS_SEARCH_COMMIT_MESSAGES_TOOL_ID,
+        toolParams: {
+          query: 'add retry on connection refused',
+          file_paths: 'src/a.ts,src/b.ts',
+          repository,
+        },
+        request,
+      });
+    });
+
+    it('git_find_introducing_commit injects the repository', async () => {
+      execute.mockResolvedValue({ results: [] });
+      const { callbacks } = buildWithRepo();
+
+      await callbacks.git_find_introducing_commit(
+        makeToolCall('git_find_introducing_commit', { symbol_pattern: 'connection refused' })
+      );
+
+      expect(execute).toHaveBeenCalledWith({
+        toolId: SCS_FIND_INTRODUCING_COMMIT_TOOL_ID,
+        toolParams: { symbol_pattern: 'connection refused', repository },
+        request,
+      });
+    });
+
+    it('git_search_commits returns an error response when query is missing', async () => {
+      const { callbacks } = buildWithRepo();
+      const result = await callbacks.git_search_commits(makeToolCall('git_search_commits', {}));
+      expect(execute).not.toHaveBeenCalled();
+      expect(result.response).toEqual({
+        results: [],
+        count: 0,
+        error: '"query" is required.',
+      });
     });
   });
 });

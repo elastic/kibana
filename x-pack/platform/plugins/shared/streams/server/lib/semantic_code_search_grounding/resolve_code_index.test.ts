@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import type { IUiSettingsClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, IUiSettingsClient, Logger } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
   parseLinkedCodeIndices,
   resolveCodeIndexFromMap,
   resolveCodeIndexForStream,
+  resolveRepositoryForCodeIndex,
 } from './resolve_code_index';
 
 describe('resolve_code_index', () => {
@@ -53,7 +54,9 @@ describe('resolve_code_index', () => {
 
   describe('resolveCodeIndexFromMap', () => {
     it('resolves an exact stream-name match', () => {
-      expect(resolveCodeIndexFromMap('logs.checkout', { 'logs.checkout': 'code-x' })).toBe('code-x');
+      expect(resolveCodeIndexFromMap('logs.checkout', { 'logs.checkout': 'code-x' })).toBe(
+        'code-x'
+      );
     });
 
     it('prefers exact match over glob', () => {
@@ -68,7 +71,9 @@ describe('resolve_code_index', () => {
     });
 
     it('returns undefined when nothing matches', () => {
-      expect(resolveCodeIndexFromMap('logs.other', { 'logs.checkout.*': 'code-x' })).toBeUndefined();
+      expect(
+        resolveCodeIndexFromMap('logs.other', { 'logs.checkout.*': 'code-x' })
+      ).toBeUndefined();
     });
   });
 
@@ -98,6 +103,62 @@ describe('resolve_code_index', () => {
       } as unknown as IUiSettingsClient;
       await expect(
         resolveCodeIndexForStream({ streamName: 'logs.checkout', globalUiSettingsClient, logger })
+      ).resolves.toBeUndefined();
+      expect(logger.warn).toHaveBeenCalled();
+    });
+  });
+
+  describe('resolveRepositoryForCodeIndex', () => {
+    const makeEsClient = (search: jest.Mock) => ({ search } as unknown as ElasticsearchClient);
+
+    it('reads the repository keyword from a code index document', async () => {
+      const search = jest.fn().mockResolvedValue({
+        hits: { hits: [{ _source: { repository: 'acme/checkout' } }] },
+      });
+      await expect(
+        resolveRepositoryForCodeIndex({
+          esClient: makeEsClient(search),
+          codeIndex: 'code-acme_checkout',
+          logger,
+        })
+      ).resolves.toBe('acme/checkout');
+      expect(search).toHaveBeenCalledWith(
+        expect.objectContaining({ index: 'code-acme_checkout', size: 1 })
+      );
+    });
+
+    it('returns undefined when no document carries a repository field', async () => {
+      const search = jest.fn().mockResolvedValue({ hits: { hits: [] } });
+      await expect(
+        resolveRepositoryForCodeIndex({
+          esClient: makeEsClient(search),
+          codeIndex: 'code-acme_checkout',
+          logger,
+        })
+      ).resolves.toBeUndefined();
+    });
+
+    it('returns undefined when the repository field is empty', async () => {
+      const search = jest.fn().mockResolvedValue({
+        hits: { hits: [{ _source: { repository: '' } }] },
+      });
+      await expect(
+        resolveRepositoryForCodeIndex({
+          esClient: makeEsClient(search),
+          codeIndex: 'code-acme_checkout',
+          logger,
+        })
+      ).resolves.toBeUndefined();
+    });
+
+    it('returns undefined and warns when the search throws', async () => {
+      const search = jest.fn().mockRejectedValue(new Error('boom'));
+      await expect(
+        resolveRepositoryForCodeIndex({
+          esClient: makeEsClient(search),
+          codeIndex: 'code-acme_checkout',
+          logger,
+        })
       ).resolves.toBeUndefined();
       expect(logger.warn).toHaveBeenCalled();
     });

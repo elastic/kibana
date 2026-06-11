@@ -20,9 +20,10 @@ import type { SemanticCodeSearchTools } from '../semantic_code_search_grounding/
 /**
  * Step budget for the query-generation reasoning agent when semantic code
  * search grounding tools are active. Higher than the default (6 with memory
- * tools) because verifying queries against source code adds tool round-trips.
+ * tools) because verifying queries against source code — and, when a
+ * repository is linked, its git history — adds tool round-trips.
  */
-const MAX_STEPS_WITH_SEMANTIC_CODE_SEARCH_TOOLS = 8;
+const MAX_STEPS_WITH_SEMANTIC_CODE_SEARCH_TOOLS = 10;
 
 interface Params {
   definition: Streams.all.Definition;
