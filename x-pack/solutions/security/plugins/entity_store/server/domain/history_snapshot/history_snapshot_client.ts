@@ -74,7 +74,7 @@ export class HistorySnapshotClient {
       const reindexResult = await reindex(this.esClient, {
         source: { index: latestIndex },
         dest: { index: historySnapshotIndex },
-        signal: abortSignal
+        signal: abortSignal,
       });
       const docCount = reindexResult.total;
       if (docCount === 0) {
