@@ -43,10 +43,25 @@ describe('generateSignificantEventDefinitions (semantic code search wiring)', ()
     ...overrides,
   });
 
+  const SCS_TOOL_NAMES = [
+    'analyze_symbol',
+    'code_search',
+    'git_cochanges',
+    'git_file_authors',
+    'git_file_history',
+    'git_find_introducing_commit',
+    'git_search_commits',
+    'git_show_commit',
+    'list_code_indices',
+    'read_code_file',
+    'select_code_index',
+  ];
+
   const makeCodeTools = () =>
     createSemanticCodeSearchTools({
       agentBuilderTools: { execute: jest.fn() } as unknown as ToolsStart,
       request: {} as KibanaRequest,
+      esClient: {} as ElasticsearchClient,
       codeIndex: 'code-acme_checkout',
       logger,
     });
@@ -86,19 +101,11 @@ describe('generateSignificantEventDefinitions (semantic code search wiring)', ()
     );
 
     const args = generateSignificantEventsMock.mock.calls[0][0];
-    expect(Object.keys(args.additionalTools ?? {}).sort()).toEqual([
-      'analyze_symbol',
-      'code_search',
-      'read_code_file',
-    ]);
-    expect(Object.keys(args.additionalToolCallbacks ?? {}).sort()).toEqual([
-      'analyze_symbol',
-      'code_search',
-      'read_code_file',
-    ]);
+    expect(Object.keys(args.additionalTools ?? {}).sort()).toEqual(SCS_TOOL_NAMES);
+    expect(Object.keys(args.additionalToolCallbacks ?? {}).sort()).toEqual(SCS_TOOL_NAMES);
     expect(args.systemPrompt).toContain('SYSTEM');
     expect(args.systemPrompt).toContain('code-acme_checkout');
-    expect(args.maxSteps).toBe(8);
+    expect(args.maxSteps).toBe(10);
   });
 
   it('merges memory and SCS tools when both are provided', async () => {
@@ -117,12 +124,9 @@ describe('generateSignificantEventDefinitions (semantic code search wiring)', ()
     );
 
     const args = generateSignificantEventsMock.mock.calls[0][0];
-    expect(Object.keys(args.additionalTools ?? {}).sort()).toEqual([
-      'analyze_symbol',
-      'code_search',
-      'memory_search',
-      'read_code_file',
-    ]);
+    expect(Object.keys(args.additionalTools ?? {}).sort()).toEqual(
+      [...SCS_TOOL_NAMES, 'memory_search'].sort()
+    );
     expect(args.systemPrompt).toContain('MEMORY_SNIPPET');
     expect(args.systemPrompt).toContain('code-acme_checkout');
   });
