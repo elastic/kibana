@@ -52,11 +52,11 @@ export const ExportJsonFlyout = <State extends object, SanitizedState extends ob
     state: State
   ) => Promise<{ data: SanitizedState; warnings: Array<{ message: string }> }>;
 }) => {
-  const { objectType, objectTypeAlias, sharingData } = useShareTypeContext(
+  const { objectType, objectTypeAlias, sharingData, isDirty } = useShareTypeContext(
     'integration',
     'exportDerivatives'
   );
-  console.log({ objectType, objectTypeAlias, sharingData });
+  console.log({ objectType, objectTypeAlias, sharingData, isDirty });
   const typedSharingData = sharingData as unknown as ReturnType<typeof buildExportSharingData>;
   const { title, exportJson } = typedSharingData;
   const state = useMemo(() => exportJson(), [exportJson]);
@@ -81,11 +81,11 @@ export const ExportJsonFlyout = <State extends object, SanitizedState extends ob
         <EuiTitle>
           <h2>
             <FormattedMessage
-              id="dashboard.exportJson.flyoutTitle"
+              id="asCode.exportJson.flyoutTitle"
               defaultMessage="Export {objectType} as {type}"
               values={{
                 objectType: objectTypeAlias ?? objectType.toLocaleLowerCase(),
-                type: i18n.translate('dashboard.exportJson.label', { defaultMessage: 'JSON' }),
+                type: i18n.translate('asCode.exportJson.label', { defaultMessage: 'JSON' }),
               }}
             />
           </h2>
@@ -93,10 +93,10 @@ export const ExportJsonFlyout = <State extends object, SanitizedState extends ob
         <React.Fragment>
           <EuiSpacer size="s" />
           <EuiBetaBadge
-            label={i18n.translate('dashboard.exportJson.technicalPreviewBadgeLabel', {
+            label={i18n.translate('asCode.exportJson.technicalPreviewBadgeLabel', {
               defaultMessage: 'TECHNICAL PREVIEW',
             })}
-            tooltipContent={i18n.translate('dashboard.exportJson.technicalPreviewBadgeTooltip', {
+            tooltipContent={i18n.translate('asCode.exportJson.technicalPreviewBadgeTooltip', {
               defaultMessage:
                 'This functionality is experimental and not supported. It may change or be removed at any time.',
             })}
@@ -123,7 +123,7 @@ export const ExportJsonFlyout = <State extends object, SanitizedState extends ob
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty data-test-subj="exportFlyoutCloseButton" onClick={closeFlyout}>
               <FormattedMessage
-                id="dashboard.exportJson.closeFlyoutButtonLabel"
+                id="asCode.exportJson.closeFlyoutButtonLabel"
                 defaultMessage="Close"
               />
             </EuiButtonEmpty>
@@ -135,7 +135,7 @@ export const ExportJsonFlyout = <State extends object, SanitizedState extends ob
               data-test-subj="generateReportButton"
               disabled={status !== 'success' || data === undefined}
             >
-              {i18n.translate('dashboard.exportJson.downloadButtonLabel', {
+              {i18n.translate('asCode.exportJson.downloadButtonLabel', {
                 defaultMessage: 'Download JSON',
               })}
             </EuiButton>

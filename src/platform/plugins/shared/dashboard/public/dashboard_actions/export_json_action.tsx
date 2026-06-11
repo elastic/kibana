@@ -32,6 +32,7 @@ import type { ShareActionIntents, ShareIntegration } from '@kbn/share-plugin/pub
 import { shareService } from '../services/kibana_services';
 import { ACTION_EXPORT_JSON } from './constants';
 import { getLocatorParams } from '../../../../../../../x-pack/platform/plugins/shared/lens/public/app_plugin/share_action';
+import { firstValueFrom } from 'rxjs';
 
 export type ExportJSONActionApi = HasLibraryTransforms &
   HasUniqueId &
@@ -88,10 +89,14 @@ export class ExportJSONAction implements Action<EmbeddableApiContext> {
   public async execute({ embeddable }: EmbeddableApiContext): Promise<void> {
     if (!isApiCompatible(embeddable) || !this.exportJsonIntent) throw new IncompatibleActionError();
 
+    let isDirty = false;
+    if (apiPublishesUnsavedChanges(embeddable)) {
+      isDirty = await firstValueFrom(embeddable.hasUnsavedChanges$);
+    }
     const baseOptions = {
       objectType: embeddable.type,
       objectId: embeddable.uuid,
-      // isDirty: apiPublishesUnsavedChanges(embeddable) && embeddable.hasUnsavedChanges$.value,
+      isDirty,
       objectTypeMeta: {
         title: i18n.translate('dashboard.share.shareModal.title', {
           defaultMessage: `Share ${embeddable.getTypeDisplayName?.() ?? embeddable.type}`,

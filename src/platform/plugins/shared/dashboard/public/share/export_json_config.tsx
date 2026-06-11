@@ -11,7 +11,8 @@ import React from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ExportShareParameters } from '@kbn/share-plugin/public';
-import { ExportJsonFlyout } from './export_json_flyout';
+import { ExportJsonFlyout } from '@kbn/as-code-export-utils';
+import { sanitizeDashboard } from './sanitize_dashboard';
 
 export const exportJsonConfig: ExportShareParameters = {
   label: ({ openFlyout }) => (
@@ -31,5 +32,7 @@ export const exportJsonConfig: ExportShareParameters = {
     size: 'm',
     maxWidth: 1000,
   },
-  flyoutContent: ({ closeFlyout }) => <ExportJsonFlyout closeFlyout={closeFlyout} />,
+  flyoutContent: ({ closeFlyout }) => (
+    <ExportJsonFlyout closeFlyout={closeFlyout} sanitizeState={sanitizeDashboard} />
+  ),
 };
