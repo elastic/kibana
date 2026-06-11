@@ -172,7 +172,7 @@
     "@hapi/hapi": "21.4.9",
     "@hapi/hoek": "11.0.7",
     "@hapi/inert": "7.1.0",
-    "@hapi/wreck": "18.1.1",
+    "@hapi/wreck": "18.1.2",
     "@hello-pangea/dnd": "18.0.1",
     "@kbn/aad-fixtures-plugin": "link:x-pack/platform/test/alerting_api_integration/common/plugins/aad",
     "@kbn/access-control-test-plugin": "link:x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin",
