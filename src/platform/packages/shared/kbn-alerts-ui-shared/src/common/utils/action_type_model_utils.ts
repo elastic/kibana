@@ -8,7 +8,7 @@
  */
 
 import { lazy, useMemo } from 'react';
-import { ACTION_TYPE_SOURCES, type ActionType } from '@kbn/actions-types';
+import type { ActionType } from '@kbn/actions-types';
 import type { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import type { IconType } from '@elastic/eui';
 import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
@@ -84,7 +84,6 @@ export function transformSpecToActionTypeModel(
   return {
     id: spec.metadata.id,
     actionTypeTitle: spec.metadata.displayName,
-    source: ACTION_TYPE_SOURCES.spec,
     selectMessage: spec.metadata.description,
     iconClass: getIconFromSpec(spec),
     subtype: undefined,
@@ -115,9 +114,7 @@ export function transformSpecToActionTypeModel(
       }
       return { default: SpecConnectorFormFields };
     }),
-    // Spec-based connectors don't have custom action params UI
     actionParamsFields: lazy(async () => ({ default: () => null })),
-    // Validation is handled server-side via the Zod schema
     validateParams: async () => ({ errors: {} }),
     connectorForm: {
       serializer: createConnectorFormSerializer() as unknown as NonNullable<

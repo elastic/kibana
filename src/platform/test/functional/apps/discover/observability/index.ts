@@ -9,8 +9,9 @@
 
 import type { FtrProviderContext } from '../ftr_provider_context';
 
-export default function ({ getPageObjects, loadTestFile }: FtrProviderContext) {
+export default function ({ getService, getPageObjects, loadTestFile }: FtrProviderContext) {
   const { spaceSettings } = getPageObjects(['common', 'spaceSettings']);
+  const esArchiver = getService('esArchiver');
 
   describe('discover/observability', () => {
     before(async () => {
@@ -18,6 +19,9 @@ export default function ({ getPageObjects, loadTestFile }: FtrProviderContext) {
         spaceName: 'default',
         solution: 'oblt',
       });
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
     });
 
     after(async () => {
@@ -27,9 +31,7 @@ export default function ({ getPageObjects, loadTestFile }: FtrProviderContext) {
       });
     });
 
-    loadTestFile(require.resolve('./embeddable/_saved_search_embeddable'));
     loadTestFile(require.resolve('./logs/_get_pagination_config'));
-    loadTestFile(require.resolve('./embeddable/_get_doc_viewer'));
     loadTestFile(require.resolve('./logs/_get_doc_viewer'));
     loadTestFile(require.resolve('./logs/_get_recommended_fields'));
     loadTestFile(require.resolve('./logs/_summary_column'));

@@ -27,6 +27,7 @@ interface TemplateFormHeaderProps {
   isLoading?: boolean;
   isSaving?: boolean;
   hasChanges: boolean;
+  hasValidationErrors: boolean;
   isEdit: boolean;
   submitError: string | null;
   isEnabled: boolean;
@@ -41,6 +42,7 @@ export const TemplateFormHeader: React.FC<TemplateFormHeaderProps> = ({
   isLoading,
   isSaving,
   hasChanges,
+  hasValidationErrors,
   isEdit,
   submitError,
   isEnabled,
@@ -50,7 +52,8 @@ export const TemplateFormHeader: React.FC<TemplateFormHeaderProps> = ({
   onIsEnabledChange,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const saveTooltipContent = submitError ?? undefined;
+  const saveTooltipContent =
+    submitError ?? (hasValidationErrors ? i18n.FIX_VALIDATION_ERRORS : undefined);
 
   return (
     <header>
@@ -135,7 +138,7 @@ export const TemplateFormHeader: React.FC<TemplateFormHeaderProps> = ({
                   color="primary"
                   size="s"
                   onClick={onSave}
-                  disabled={isLoading || isSaving}
+                  disabled={isLoading || isSaving || hasValidationErrors}
                   isLoading={isSaving}
                   data-test-subj="saveTemplateHeaderButton"
                 >

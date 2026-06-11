@@ -5,7 +5,11 @@
  * 2.0.
  */
 
+import type { DiagnosticResult } from '@elastic/elasticsearch';
+import { errors } from '@elastic/elasticsearch';
 import { CreateRecoveryEventsStep } from './create_recovery_events_step';
+import { TaskErrorSource } from '@kbn/task-manager-plugin/server';
+import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import {
   collectStreamResults,
   createPipelineStream,
@@ -14,6 +18,7 @@ import {
   createAlertEvent,
   createRuleResponse,
   createEsqlResponse,
+  getStepError,
 } from '../test_utils';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import { createQueryService } from '../../services/query_service/query_service.mock';
@@ -330,6 +335,80 @@ describe('CreateRecoveryEventsStep', () => {
       expect(result.type).toBe('continue');
       expect(result.state.alertEventsBatch![0].status).toBe('breached');
       expect(result.state.alertEventsBatch![0].group_hash).toBe('hash-new');
+    });
+
+    it('marks ResponseError(400) recovery query errors as TaskErrorSource.USER', async () => {
+      const { step, internalEsClient, scopedEsClient } = createStep();
+
+      internalEsClient.esql.query.mockResolvedValue(createActiveGroupHashesResponse(['hash-1']));
+      scopedEsClient.esql.query.mockRejectedValue(
+        // @ts-expect-error: Not all params are needed for the test.
+        new errors.ResponseError({ statusCode: 400 })
+      );
+
+      const state = createRulePipelineState({
+        rule: createRuleResponse({
+          kind: 'alert',
+          recovery_policy: {
+            type: 'query',
+            query: { base: 'FROM logs-* | WHERE invalid syntax' },
+          },
+        }),
+        alertEventsBatch: [],
+      });
+
+      const error = await getStepError(step, state);
+
+      expect(error).toBeInstanceOf(Error);
+      expect(getErrorSource(error!)).toBe(TaskErrorSource.USER);
+    });
+
+    it('does not mark ResponseError(503) recovery query errors as TaskErrorSource.USER', async () => {
+      const { step, internalEsClient, scopedEsClient } = createStep();
+
+      internalEsClient.esql.query.mockResolvedValue(createActiveGroupHashesResponse(['hash-1']));
+      scopedEsClient.esql.query.mockRejectedValue(
+        new errors.ResponseError({ statusCode: 503 } as DiagnosticResult)
+      );
+
+      const state = createRulePipelineState({
+        rule: createRuleResponse({
+          kind: 'alert',
+          recovery_policy: {
+            type: 'query',
+            query: { base: 'FROM logs-*' },
+          },
+        }),
+        alertEventsBatch: [],
+      });
+
+      const error = await getStepError(step, state);
+
+      expect(error).toBeInstanceOf(Error);
+      expect(getErrorSource(error!)).toBeUndefined();
+    });
+
+    it('does not mark plain recovery query errors as TaskErrorSource.USER', async () => {
+      const { step, internalEsClient, scopedEsClient } = createStep();
+
+      internalEsClient.esql.query.mockResolvedValue(createActiveGroupHashesResponse(['hash-1']));
+      scopedEsClient.esql.query.mockRejectedValue(new Error('connection reset'));
+
+      const state = createRulePipelineState({
+        rule: createRuleResponse({
+          kind: 'alert',
+          recovery_policy: {
+            type: 'query',
+            query: { base: 'FROM logs-*' },
+          },
+        }),
+        alertEventsBatch: [],
+      });
+
+      const error = await getStepError(step, state);
+
+      expect(error).toBeInstanceOf(Error);
+      expect(getErrorSource(error!)).toBeUndefined();
     });
   });
 

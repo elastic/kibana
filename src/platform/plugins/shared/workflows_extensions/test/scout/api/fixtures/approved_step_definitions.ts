@@ -25,20 +25,80 @@
  */
 export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; definitionHash: string }> = [
   {
+    id: 'contextEngine.addEntry',
+    definitionHash: 'b4142fd4dab88d471f233d992a07a385a75175877fe49934de8be98ee4f95cd9',
+  },
+  {
+    id: 'ai.summarize',
+    definitionHash: '7a62bf4b082654ecc49385bc2bf77a22ee1e66962e3538344be0f0160c53a1df',
+  },
+  {
     id: 'ai.agent',
     definitionHash: 'eba36bce77787187038a381f671566348b91f15a7db588c074afed9a83c14e25',
   },
   {
     id: 'ai.classify',
-    definitionHash: '1182cf52957fa8699ca6099d46a118cd655ed0eee44e991d4b5e53ea07c0e2ce',
+    definitionHash: '91a1522a8b78bd043ebebf794495e75b3214e8ff0fdcabd8ab67dab7599b8b5f',
   },
   {
     id: 'ai.prompt',
-    definitionHash: 'e88d719b82352b53169b00cbba50ed875c4c2fd3a34d0f33056669c7956a3ffc',
+    definitionHash: '6ff6b5e2b2e311068f1b18df31a21829d4db2a0420a38d5d3139a869e8ac7354',
   },
   {
-    id: 'ai.summarize',
-    definitionHash: '7a62bf4b082654ecc49385bc2bf77a22ee1e66962e3538344be0f0160c53a1df',
+    id: 'contextEngine.addEntry',
+    definitionHash: 'b4142fd4dab88d471f233d992a07a385a75175877fe49934de8be98ee4f95cd9',
+  },
+  {
+    id: 'data.aggregate',
+    definitionHash: 'd41449cf88ea4e8887b156720a08148e317ad0c685eb5b3b4624f6dd6f164164',
+  },
+  {
+    id: 'data.concat',
+    definitionHash: 'b5ed2f5656bb62b3f59a35f8fdb7c1f813c299180f95efc227e28e0a67dd2583',
+  },
+  {
+    id: 'data.dedupe',
+    definitionHash: '692ad7052865f50bbbc05e0cd7554801f8049c1a0bb75ffd670955af87f74852',
+  },
+  {
+    id: 'data.filter',
+    definitionHash: '81b2f0de4d322fa7ae431c562e1ed476238fb64d23a3c8590aa86ebfc62d021f',
+  },
+  {
+    id: 'data.find',
+    definitionHash: '55de05515461383a76d75cb1ff2a66730d26e7ced22d549611511390733d17f1',
+  },
+  {
+    id: 'data.map',
+    definitionHash: '133d9f679704c1813a4afab63dbbaff501d022eb0d63d8b37490dad719b0f4a8',
+  },
+  {
+    id: 'data.parseJson',
+    definitionHash: 'f3a1a82c3f1f7a44376bdb329299758ee93cd910fc9d41e04d65e145af4be4d7',
+  },
+  {
+    id: 'data.regexExtract',
+    definitionHash: '0d74d9e0aabf958a9bcd332b41efcd916afe9d343030405df4f56c0644abb9ae',
+  },
+  {
+    id: 'data.regexReplace',
+    definitionHash: '425901910c3c7a231ce4aba7d560bd7bb362000998a32bd9cdc6a314790c933e',
+  },
+  {
+    id: 'data.stringifyJson',
+    definitionHash: '9b757bc004832849780d0292ce8bddebd4e2a1698b05cf6edaff99c49d6dc042',
+  },
+  {
+    id: 'search.rerank',
+    definitionHash: 'b0dec1d0037ac61d32d268bf5fdc7d645a7faed446cde9be1ada57f46a0fdd9c',
+  },
+  {
+    id: 'security.buildAlertEntityGraph',
+    definitionHash: '90e95df7b6deaa5b6ab908c1ff8f4a3606b6e8f7fce5d59e0411d3d577d0be44',
+  },
+  {
+    id: 'security.renderAlertNarrative',
+    definitionHash: '1719b8db582f3695a5bac6df5434285f101ebf4fa032702613f28dd33d978988',
   },
   {
     id: 'cases.addAlerts',

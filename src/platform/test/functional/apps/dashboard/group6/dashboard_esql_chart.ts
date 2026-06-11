@@ -45,8 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await timePicker.setDefaultDataRange();
       await dashboard.switchToEditMode();
       await header.waitUntilLoadingHasFinished();
-      await dashboardAddPanel.openAddPanelFlyout();
-      await dashboardAddPanel.clickAddNewPanelFromUIActionLink('ES|QL');
+      await dashboardAddPanel.clickAddEsqlPanel();
       await dashboardAddPanel.expectAddPanelFlyoutClosed();
       await dashboard.waitForRenderComplete();
 
@@ -68,8 +67,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should reset to the previous state on edit inline', async () => {
-      await dashboardAddPanel.openAddPanelFlyout();
-      await dashboardAddPanel.clickAddNewPanelFromUIActionLink('ES|QL');
+      await dashboardAddPanel.clickAddEsqlPanel();
       await dashboardAddPanel.expectAddPanelFlyoutClosed();
       await dashboard.waitForRenderComplete();
 
@@ -113,9 +111,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should be able to edit the query and render another chart', async () => {
-      await dashboardAddPanel.openAddPanelFlyout();
-      log.debug('After openAddPanelFlyout');
-      await dashboardAddPanel.clickAddNewPanelFromUIActionLink('ES|QL');
+      await dashboardAddPanel.clickAddEsqlPanel();
       await dashboardAddPanel.expectAddPanelFlyoutClosed();
       await dashboard.waitForRenderComplete();
       await header.waitUntilLoadingHasFinished();
@@ -139,7 +135,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should add a second panel and remove when hitting cancel', async () => {
       await dashboardAddPanel.openAddPanelFlyout();
-      await dashboardAddPanel.clickAddNewPanelFromUIActionLink('ES|QL');
+      await dashboardAddPanel.clickAddEsqlPanel();
       await dashboardAddPanel.expectAddPanelFlyoutClosed();
       await dashboard.waitForRenderComplete();
       // Cancel
@@ -154,8 +150,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should not remove the first panel of two when editing and cancelling', async () => {
       // add a second panel
-      await dashboardAddPanel.openAddPanelFlyout();
-      await dashboardAddPanel.clickAddNewPanelFromUIActionLink('ES|QL');
+      await dashboardAddPanel.clickAddEsqlPanel();
       await dashboardAddPanel.expectAddPanelFlyoutClosed();
       await dashboard.waitForRenderComplete();
       // save it

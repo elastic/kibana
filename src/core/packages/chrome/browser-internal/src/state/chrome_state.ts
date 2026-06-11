@@ -20,7 +20,9 @@ import type {
   ChromeHelpExtension,
   GlobalSearchConfig,
   ChromeNavLink,
+  GlobalHeaderAiButton,
   ChromeUserBanner,
+  AppHeaderConfig,
 } from '@kbn/core-chrome-browser';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 
@@ -63,9 +65,13 @@ export interface ChromeState {
   /** UI elements */
   headerBanner: State<ChromeUserBanner | undefined>;
   globalFooter: State<ReactNode>;
+  aiButton: State<ReadonlySet<GlobalHeaderAiButton>>;
   globalSearch: State<GlobalSearchConfig | undefined>;
   customNavLink: State<ChromeNavLink | undefined>;
   appMenu: State<AppMenuConfig | undefined>;
+  contextSwitcher: State<ReactNode>;
+  inlineAppHeader: State<boolean>;
+  appHeader: State<AppHeaderConfig | undefined>;
 
   /** Help system */
   help: {
@@ -73,6 +79,12 @@ export interface ChromeState {
     supportUrl: State<string>;
     globalMenuLinks: ArrayState<ChromeGlobalHelpExtensionMenuLink>;
   };
+
+  /** Feedback handler registered by the feedback plugin */
+  feedbackHandler: State<(() => void) | undefined>;
+
+  /** Newsfeed handler registered by the newsfeed plugin */
+  newsfeedHandler: State<{ open: () => void; hasNew$: Observable<boolean> } | undefined>;
 }
 
 export interface ChromeStateDeps {
@@ -109,13 +121,25 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
 
   // UI Elements (not reset on app change)
   const globalFooter = createState<ReactNode>(null);
+  const aiButton = createState<ReadonlySet<GlobalHeaderAiButton>>(new Set());
   const globalSearch = createState<GlobalSearchConfig | undefined>(undefined);
   const customNavLink = createState<ChromeNavLink | undefined>(undefined);
+  const contextSwitcher = createState<ReactNode>(null);
+  const inlineAppHeader = createState<boolean>(false);
+  const appHeader = createState<AppHeaderConfig | undefined>(undefined);
 
   // Help System
   const helpExtension = createState<ChromeHelpExtension | undefined>(undefined);
   const helpSupportUrl = createState<string>(docLinks.links.kibana.askElastic);
   const globalHelpMenuLinks = createArrayState<ChromeGlobalHelpExtensionMenuLink>();
+
+  // Feedback
+  const feedbackHandler = createState<(() => void) | undefined>(undefined);
+
+  // Newsfeed
+  const newsfeedHandler = createState<
+    { open: () => void; hasNew$: Observable<boolean> } | undefined
+  >(undefined);
 
   return {
     visibility,
@@ -133,13 +157,19 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
     },
     headerBanner,
     globalFooter,
+    aiButton,
     globalSearch,
     customNavLink,
     appMenu,
+    inlineAppHeader,
+    appHeader,
     help: {
       extension: helpExtension,
       supportUrl: helpSupportUrl,
       globalMenuLinks: globalHelpMenuLinks,
     },
+    contextSwitcher,
+    feedbackHandler,
+    newsfeedHandler,
   };
 }
