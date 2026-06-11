@@ -105,7 +105,10 @@ export const createWorkflowSmlType = (api: WorkflowsManagementApi): SmlTypeDefin
             type: WORKFLOW_SML_TYPE,
             title,
             content: buildSearchContent(source),
-            permissions: ['api:workflowsManagement:read'],
+            permissions: {
+              kibana: { privileges: [{ name: 'api:workflowsManagement:read' }] },
+              elasticsearch: { indices: [] },
+            },
           },
         ],
       };
