@@ -156,6 +156,7 @@
     "@kbn/expressions-plugin",
     "@kbn/ingest-hub-plugin",
     "@kbn/zod",
+    "@kbn/nightshift"
   ],
   "exclude": ["target/**/*"]
 }

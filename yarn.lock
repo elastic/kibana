@@ -6263,6 +6263,18 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-user-storage-browser-internal@link:src/core/packages/user-storage/browser-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-user-storage-browser-mocks@link:src/core/packages/user-storage/browser-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-user-storage-browser@link:src/core/packages/user-storage/browser":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-user-storage-common@link:src/core/packages/user-storage/common":
   version "0.0.0"
   uid ""
@@ -7960,6 +7972,10 @@
   uid ""
 
 "@kbn/newsfeed-test-plugin@link:src/platform/test/common/plugins/newsfeed":
+  version "0.0.0"
+  uid ""
+
+"@kbn/nightshift@link:x-pack/solutions/observability/packages/kbn-nightshift":
   version "0.0.0"
   uid ""
 
@@ -9783,7 +9799,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/user-storage-test-plugin@link:src/core/packages/user-storage/test/plugins/user_storage_test":
+"@kbn/user-storage-test-plugin@link:src/platform/test/user_storage/plugins/user_storage_test":
   version "0.0.0"
   uid ""
 

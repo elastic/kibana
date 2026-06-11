@@ -81,26 +81,30 @@ apiTest.describe('User Storage - Schema Validation', { tag: [...tags.stateful.cl
 
   apiTest('PUT preserves empty string', async ({ apiClient }) => {
     expect(await h.put(apiClient, 'test:string_key', '')).toHaveStatusCode(200);
-    const response = await h.get(apiClient);
-    expect(response.body['test:string_key']).toBe('');
+    const response = await h.getKey(apiClient, 'test:string_key');
+    expect(response).toHaveStatusCode(200);
+    expect(response.body.value).toBe('');
   });
 
   apiTest('PUT preserves zero', async ({ apiClient }) => {
     expect(await h.put(apiClient, 'test:number_key', 0)).toHaveStatusCode(200);
-    const response = await h.get(apiClient);
-    expect(response.body['test:number_key']).toBe(0);
+    const response = await h.getKey(apiClient, 'test:number_key');
+    expect(response).toHaveStatusCode(200);
+    expect(response.body.value).toBe(0);
   });
 
   apiTest('PUT preserves negative number', async ({ apiClient }) => {
     expect(await h.put(apiClient, 'test:number_key', -10)).toHaveStatusCode(200);
-    const response = await h.get(apiClient);
-    expect(response.body['test:number_key']).toBe(-10);
+    const response = await h.getKey(apiClient, 'test:number_key');
+    expect(response).toHaveStatusCode(200);
+    expect(response.body.value).toBe(-10);
   });
 
   apiTest('PUT preserves empty array', async ({ apiClient }) => {
     expect(await h.put(apiClient, 'test:array_key', [])).toHaveStatusCode(200);
-    const response = await h.get(apiClient);
-    expect(response.body['test:array_key']).toStrictEqual([]);
+    const response = await h.getKey(apiClient, 'test:array_key');
+    expect(response).toHaveStatusCode(200);
+    expect(response.body.value).toStrictEqual([]);
   });
 
   apiTest('DELETE on a key that was never set is a no-op', async ({ apiClient }) => {

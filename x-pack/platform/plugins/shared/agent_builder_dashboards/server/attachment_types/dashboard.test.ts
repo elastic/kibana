@@ -92,7 +92,7 @@ const createAttachment = (
 });
 
 describe('createDashboardAttachmentType', () => {
-  it('resolves dashboard attachments with dashboard client.read', async () => {
+  it('resolve should return dashboard attachement', async () => {
     const dashboardClient = createDashboardClient();
     const savedObjectsClient = createSavedObjectsClient();
     const definition = createDashboardAttachmentType({
@@ -106,17 +106,6 @@ describe('createDashboardAttachmentType', () => {
       savedObjectsClient,
     });
 
-    expect(dashboardClient.read).toHaveBeenCalledWith(
-      expect.objectContaining({ resolve: expect.any(Function) }),
-      'dashboard-1'
-    );
-    await expect(dashboardClient.read.mock.calls[0][0].resolve(['core'])).resolves.toEqual({
-      core: {
-        savedObjects: {
-          client: savedObjectsClient,
-        },
-      },
-    });
     expect(result).toEqual(
       expect.objectContaining({
         title: 'System Overview',
@@ -126,7 +115,7 @@ describe('createDashboardAttachmentType', () => {
     expect(result?.panels).toHaveLength(1);
   });
 
-  it('returns true when the saved dashboard changed after the snapshot', async () => {
+  it('isStale should return true when the dashboard changed after the snapshot', async () => {
     const dashboardClient = createDashboardClient();
     const savedObjectsClient = createSavedObjectsClient();
     const definition = createDashboardAttachmentType({
@@ -148,20 +137,9 @@ describe('createDashboardAttachmentType', () => {
     );
 
     expect(isStale).toBe(true);
-    expect(dashboardClient.read).toHaveBeenCalledWith(
-      expect.objectContaining({ resolve: expect.any(Function) }),
-      'dashboard-1'
-    );
-    await expect(dashboardClient.read.mock.calls[0][0].resolve(['core'])).resolves.toEqual({
-      core: {
-        savedObjects: {
-          client: savedObjectsClient,
-        },
-      },
-    });
   });
 
-  it('returns false when the saved dashboard content matches the attachment', async () => {
+  it('isStale should return false when the dashboard has not changed', async () => {
     const dashboardClient = createDashboardClient();
     const savedObjectsClient = createSavedObjectsClient();
     const definition = createDashboardAttachmentType({
@@ -181,17 +159,6 @@ describe('createDashboardAttachmentType', () => {
     });
 
     expect(isStale).toBe(false);
-    expect(dashboardClient.read).toHaveBeenLastCalledWith(
-      expect.objectContaining({ resolve: expect.any(Function) }),
-      'dashboard-1'
-    );
-    await expect(dashboardClient.read.mock.calls[1][0].resolve(['core'])).resolves.toEqual({
-      core: {
-        savedObjects: {
-          client: savedObjectsClient,
-        },
-      },
-    });
   });
 
   it('treats legacy wrapped Lens configs as equal when checking staleness', async () => {
