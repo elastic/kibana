@@ -20,184 +20,176 @@
  * Example of an approved step definition entry:
  * {
  *   id: 'example.setVariable',
- *   handlerHash: '3af06ca579302a96b18923de3ce7d04433519528e6eec309cb8a937be6514cda',
+ *   definitionHash: '3af06ca579302a96b18923de3ce7d04433519528e6eec309cb8a937be6514cda',
  * },
  */
-export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string }> = [
+export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; definitionHash: string }> = [
   {
     id: 'ai.agent',
-    handlerHash: 'ee8c280a01262305768e617ba97723d50c1c13fd01f620825bece394aaf48ee6',
+    definitionHash: 'eba36bce77787187038a381f671566348b91f15a7db588c074afed9a83c14e25',
   },
   {
     id: 'ai.classify',
-    handlerHash: 'c6aaf7022e4bb119ed9ce083913cf714093814fcdc670c7314ec326ec7dc7384',
+    definitionHash: '1182cf52957fa8699ca6099d46a118cd655ed0eee44e991d4b5e53ea07c0e2ce',
   },
   {
     id: 'ai.prompt',
-    handlerHash: '3b7be086fd3479a81113a1d1f0bcc37e3e7f008e8fa5eaa2c905bf4b4a3b5ca6',
+    definitionHash: 'e88d719b82352b53169b00cbba50ed875c4c2fd3a34d0f33056669c7956a3ffc',
   },
   {
     id: 'ai.summarize',
-    handlerHash: 'f4337c9b87598cd32c2b4a78494f4f015c655873b65f6e4ca981104ea432a2b0',
-  },
-  {
-    id: 'data.aggregate',
-    handlerHash: '0223bec699354d5878732a6ebcb99a2b4b43a28b4f01da293df1ab7165c33e00',
-  },
-  {
-    id: 'data.concat',
-    handlerHash: '611abd1e703d35528dd7dae76aa178aec0b02201a3a8cb26156ee9d9f03baa13',
-  },
-  {
-    id: 'data.dedupe',
-    handlerHash: '16c3b3d67e68e77e66ed68869790a4388423a5b4b5aa8a194035f3ff52192836',
-  },
-  {
-    id: 'data.filter',
-    handlerHash: '829a245561a33b2f8349755a4ff6b4a2953774b6f862a7a0228b93f517742c9a',
-  },
-  {
-    id: 'data.find',
-    handlerHash: 'b23058c153f427b8a8cb4a9ee1ed8c06881e3d2ed291ea7e78846e113aa0301d',
-  },
-  {
-    id: 'data.map',
-    handlerHash: '2eda52d265fc8683f625974f6909a5e0fb5ad6ee1eadd4ee89737ac5c8b4c8e1',
-  },
-  {
-    id: 'data.parseJson',
-    handlerHash: 'f1de4bd3d12fc65492d01d59dc63af5df68f23031376b9f78738ecda2fb2067c',
-  },
-  {
-    id: 'data.regexExtract',
-    handlerHash: 'ab7b47758fa93b773f537351149845c8b60c22ae10efd0e1c592406170bb3cb6',
-  },
-  {
-    id: 'data.regexReplace',
-    handlerHash: '95c4970a0154de57472d394bc05514c6dcc483b74abb008b2950a5816398aaae',
-  },
-  {
-    id: 'data.stringifyJson',
-    handlerHash: '827bdbb31e4e493bc7746809a6e32f9d9248a05e7d1810a39c5db9a0fe1970ca',
-  },
-  {
-    id: 'search.rerank',
-    handlerHash: '2bdde599ac1b8f38faecbd72a2d17a3d7b2740b874e047e92e9c30ba0ff01a4f',
-  },
-  {
-    id: 'security.buildAlertEntityGraph',
-    handlerHash: '90e95df7b6deaa5b6ab908c1ff8f4a3606b6e8f7fce5d59e0411d3d577d0be44',
-  },
-  {
-    id: 'security.renderAlertNarrative',
-    handlerHash: '1719b8db582f3695a5bac6df5434285f101ebf4fa032702613f28dd33d978988',
+    definitionHash: '7a62bf4b082654ecc49385bc2bf77a22ee1e66962e3538344be0f0160c53a1df',
   },
   {
     id: 'cases.addAlerts',
-    handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
+    definitionHash: '8f081af827e83cff7f6db5c8df2c4bbd521c429f36fe0e2e5f15600f906d1eb2',
   },
   {
     id: 'cases.addComment',
-    handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
+    definitionHash: 'c77b18222f780bed5aa3ae3655fdb797a66549a55928d664805f6c1ef6382b18',
   },
   {
     id: 'cases.addEvents',
-    handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
+    definitionHash: 'd0820a46d9cefd3e5d82bc15b5bcd17fcb6ab9932ff92b512825ac42c0c23427',
   },
   {
     id: 'cases.addObservables',
-    handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
+    definitionHash: '65449e203fd5fd69cac4ca120830861370bfdf2656d40125e6d865dc3b193e43',
   },
   {
     id: 'cases.addTags',
-    handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
+    definitionHash: '1677752a44d87d24c0de4d0edddf2ba971e5c3a839aed1c67aa4ccaed1921696',
   },
   {
     id: 'cases.assignCase',
-    handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
+    definitionHash: '2f1014d986994ee9e5490331845b33d53f806e5709465c086fbb1672bac5be80',
   },
   {
     id: 'cases.closeCase',
-    handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
+    definitionHash: '0a72dccc6e76740bffdd6357a81cd1fb28cc6a702fb7327322f9744d129a7d20',
   },
   {
     id: 'cases.createCase',
-    handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
+    definitionHash: '7d31390fe896a479cb76931385bbd98bbcf5be084872126a23095de851e370d6',
   },
   {
     id: 'cases.createCaseFromTemplate',
-    handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
+    definitionHash: 'b5c8fd7660daf976b9c3501f5ddfd7625277d6e96fed61adc7aa94f15fb8260a',
   },
   {
     id: 'cases.deleteCases',
-    handlerHash: '4fcd80128a7d6abe2da1645deae2823e4912271a49c0c9ba3e4121112ad0cd34',
+    definitionHash: 'c9a72f13a08c6549631c2727a3452e796be944293f9236c14336f0ff624bfa36',
   },
   {
     id: 'cases.deleteObservable',
-    handlerHash: '0222a4609fe11df28447a5e4637db381ffdc5818a47ae34b3ff54ec8c0ef56e5',
+    definitionHash: '494285f9b07153849607d24467edf66e6a7b0c15353ed63f1e4c42942418dc1e',
   },
   {
     id: 'cases.findCases',
-    handlerHash: 'e787e07fa01ca1f3f1ea070faeb78cd50447d1e02184aedcb2dd0d49aa9c6816',
+    definitionHash: '660d0814cd8796f06b8e5b085ac6aa2a1388e22697dbd46fc221eee436b9cb0e',
   },
   {
     id: 'cases.findSimilarCases',
-    handlerHash: 'bc0f49aff3be36fbea2f169aa9bdd082b2cee5240af16b2f54ee9b931dee8412',
+    definitionHash: 'e05cb816e1e69ecadbc4920426cd7188821386ee6cf8c6fb1cb18d35745c1574',
   },
   {
     id: 'cases.getAllAttachments',
-    handlerHash: '32dc3d6f6e918e1cd89b6864bf275bfee7eb6de81e8eb3434d6b8e2c5b9af9b1',
+    definitionHash: '9e45466d24c36435e99a8f45dd7f9279c18ccaa47d7f3e2db2e395191ed87a18',
   },
   {
     id: 'cases.getCase',
-    handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
+    definitionHash: '708d11de3598f2cc4eccefc2eb896ff8cc258d1f1e522e1117287921ae0e3dd6',
   },
   {
     id: 'cases.getCases',
-    handlerHash: 'f101c5ddc9e9f52611453c186a5ca1d33019e0ce4823c18c244deb7351928680',
+    definitionHash: 'e63ff2befbf48d6ef116b6caa45d005b1b4926e3cbe822f9562386c863d6d4d5',
   },
   {
     id: 'cases.getCasesByAlertId',
-    handlerHash: '0066f40a84dad03c0d745e43f342b72cc42a2d4ac3207533a9f7fe0695d79b78',
+    definitionHash: '8964d33b95ba40446121be3b8d13921dd7b04259b99ec9276ac59af3aa620e23',
   },
   {
     id: 'cases.setCategory',
-    handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
+    definitionHash: 'c3aa019733cb99c4026c55d290103ac5665f9bd7ee438772ef2a41baa391af17',
   },
   {
     id: 'cases.setCustomField',
-    handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
+    definitionHash: '9a2720c93ce0620193ad38140f83373366852d1001be758638d3ee24dee050ec',
   },
   {
     id: 'cases.setDescription',
-    handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
+    definitionHash: 'bcee0efa60a7b202339dcc1f709a3bc2fba47f7b980213aa02e9ac5910abefd6',
   },
   {
     id: 'cases.setSeverity',
-    handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
+    definitionHash: '5c96cf7244b62f4e6d8df7e3e613f736657f8914b4d10b0fe6bd01ea7f18dfa2',
   },
   {
     id: 'cases.setStatus',
-    handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
+    definitionHash: '81559ae94b31d342cc1f65e22a6dd4b32070fae731273aee49234d83f15b2e29',
   },
   {
     id: 'cases.setTitle',
-    handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
+    definitionHash: '85e2254957b16ce436f7282c9e47050c9f02fb5238ed389339a1792c173a2e4d',
   },
   {
     id: 'cases.unassignCase',
-    handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
+    definitionHash: 'dc88e43b956945a1507b58dcd01252a5561996e6c2d5699d9a0b922c514ce7ce',
   },
   {
     id: 'cases.updateCase',
-    handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
+    definitionHash: '4085679b00ca2b261e2b244ab7cc5e0c67390092ae47c7904c4afd7bc6362a79',
   },
   {
     id: 'cases.updateCases',
-    handlerHash: 'd5b3622761a1c9a654a26b50f3f3f74c2d784d4ba8267dd21667d2014c94141b',
+    definitionHash: '129f66ab82fde1510d1974be7cb325ddc62dcd97853b12f72b8353b9aa0b84a6',
   },
   {
     id: 'cases.updateObservable',
-    handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
+    definitionHash: '2b7a1a374aa9730f80e5b032e32b16c2da01eda472cb712277c5234cfcfd4d62',
+  },
+  {
+    id: 'data.aggregate',
+    definitionHash: 'd41449cf88ea4e8887b156720a08148e317ad0c685eb5b3b4624f6dd6f164164',
+  },
+  {
+    id: 'data.concat',
+    definitionHash: 'b5ed2f5656bb62b3f59a35f8fdb7c1f813c299180f95efc227e28e0a67dd2583',
+  },
+  {
+    id: 'data.dedupe',
+    definitionHash: '692ad7052865f50bbbc05e0cd7554801f8049c1a0bb75ffd670955af87f74852',
+  },
+  {
+    id: 'data.filter',
+    definitionHash: '81b2f0de4d322fa7ae431c562e1ed476238fb64d23a3c8590aa86ebfc62d021f',
+  },
+  {
+    id: 'data.find',
+    definitionHash: '55de05515461383a76d75cb1ff2a66730d26e7ced22d549611511390733d17f1',
+  },
+  {
+    id: 'data.map',
+    definitionHash: '133d9f679704c1813a4afab63dbbaff501d022eb0d63d8b37490dad719b0f4a8',
+  },
+  {
+    id: 'data.parseJson',
+    definitionHash: 'f3a1a82c3f1f7a44376bdb329299758ee93cd910fc9d41e04d65e145af4be4d7',
+  },
+  {
+    id: 'data.regexExtract',
+    definitionHash: '0d74d9e0aabf958a9bcd332b41efcd916afe9d343030405df4f56c0644abb9ae',
+  },
+  {
+    id: 'data.regexReplace',
+    definitionHash: '425901910c3c7a231ce4aba7d560bd7bb362000998a32bd9cdc6a314790c933e',
+  },
+  {
+    id: 'data.stringifyJson',
+    definitionHash: '9b757bc004832849780d0292ce8bddebd4e2a1698b05cf6edaff99c49d6dc042',
+  },
+  {
+    id: 'search.rerank',
+    definitionHash: 'b0dec1d0037ac61d32d268bf5fdc7d645a7faed446cde9be1ada57f46a0fdd9c',
   },
 ];

@@ -40,7 +40,10 @@ export function registerGetStepDefinitionsRoute(
       const allStepDefinitions = registry.getAll();
       const steps = allStepDefinitions
         // create a hash of the handler function to detect changes in the implementation
-        .map(({ id, handler }) => ({ id, handlerHash: createSHA256Hash(handler.toString()) }))
+        .map(({ id, ...definition }) => ({
+          id,
+          definitionHash: createSHA256Hash(JSON.stringify(definition)),
+        }))
         .sort((a, b) => a.id.localeCompare(b.id));
 
       return response.ok({ body: { steps } });
