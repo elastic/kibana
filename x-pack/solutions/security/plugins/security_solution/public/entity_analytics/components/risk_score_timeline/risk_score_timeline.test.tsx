@@ -83,7 +83,7 @@ describe('RiskScoreTimeline', () => {
     mockUseRiskScoreHistory.mockReturnValue({
       data: { entity_id: 'user:test-id', entity_type: 'user', entries },
       isLoading: false,
-      error: null,
+      error: undefined,
     });
   });
 
@@ -104,7 +104,7 @@ describe('RiskScoreTimeline', () => {
   });
 
   it('renders the loading state', () => {
-    mockUseRiskScoreHistory.mockReturnValue({ data: undefined, isLoading: true, error: null });
+    mockUseRiskScoreHistory.mockReturnValue({ data: undefined, isLoading: true, error: undefined });
 
     const { getByTestId, queryByTestId } = renderTimeline();
 
@@ -116,7 +116,7 @@ describe('RiskScoreTimeline', () => {
     mockUseRiskScoreHistory.mockReturnValue({
       data: { entity_id: 'user:test-id', entity_type: 'user', entries: [] },
       isLoading: false,
-      error: null,
+      error: undefined,
     });
 
     const { getByTestId } = renderTimeline();

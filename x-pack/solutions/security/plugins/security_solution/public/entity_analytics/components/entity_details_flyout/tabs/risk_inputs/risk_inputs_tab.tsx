@@ -334,7 +334,7 @@ const RiskInputsTabContent = <T extends EntityType>({
 
   const { data: pitHistoryData, isFetching: pitFetching } = useRiskScoreHistory({
     entityType,
-    entityId: entityId ?? '',
+    entityId,
     from: selectedTimestamp,
     to: selectedTimestamp,
     scoreType: 'base',
@@ -357,6 +357,11 @@ const RiskInputsTabContent = <T extends EntityType>({
     setSelectedTimestamp((current) =>
       isTimestampWithinRange(current, from) ? current : undefined
     );
+  }, []);
+
+  const onViewChange = useCallback((id: string) => {
+    setUserSelectedView(id as RiskScoreLeftPanelSubTab);
+    setSelectedTimestamp(undefined);
   }, []);
 
   const latestRiskScore = isResolutionView ? resolutionRiskScore : entityRiskScore;
@@ -571,10 +576,7 @@ const RiskInputsTabContent = <T extends EntityType>({
               },
             ]}
             idSelected={selectedView}
-            onChange={(id) => {
-              setUserSelectedView(id as RiskScoreLeftPanelSubTab);
-              setSelectedTimestamp(undefined);
-            }}
+            onChange={onViewChange}
             data-test-subj="risk-input-score-view-toggle"
           />
           <EuiSpacer size="m" />

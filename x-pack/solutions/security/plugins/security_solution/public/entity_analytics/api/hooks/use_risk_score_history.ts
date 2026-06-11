@@ -12,14 +12,15 @@ import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_exper
 import { useEntityAnalyticsRoutes } from '../api';
 import type { FetchRiskScoreHistoryParams } from '../api';
 
-export interface UseRiskScoreHistoryParams extends FetchRiskScoreHistoryParams {
+export interface UseRiskScoreHistoryParams extends Omit<FetchRiskScoreHistoryParams, 'entityId'> {
+  entityId: string | undefined;
   skip?: boolean;
 }
 
 /**
- * Fetches historical risk score entries for an entity from the risk score
- * time-series index. Serves both the timeline chart (light entries) and the
- * point-in-time contributions detail (includeContributions + pageSize 1).
+ * Reads the risk score time-series index. Serves both the timeline chart
+ * (light entries) and the point-in-time contributions detail
+ * (includeContributions + pageSize 1).
  */
 export const useRiskScoreHistory = ({
   entityType,
@@ -33,7 +34,7 @@ export const useRiskScoreHistory = ({
 }: UseRiskScoreHistoryParams) => {
   const { fetchRiskScoreHistory } = useEntityAnalyticsRoutes();
   const isRiskScoreHistoryEnabled = useIsExperimentalFeatureEnabled('riskScoreHistoryEnabled');
-  const enabled = isRiskScoreHistoryEnabled && !skip;
+  const enabled = isRiskScoreHistoryEnabled && !skip && entityId !== undefined;
 
   const { data, isLoading, isFetching, error, refetch } = useQuery({
     queryKey: [
@@ -47,11 +48,15 @@ export const useRiskScoreHistory = ({
       pageSize,
       includeContributions,
     ],
-    queryFn: ({ signal }) =>
-      fetchRiskScoreHistory({
+    queryFn: async ({ signal }) => {
+      if (entityId === undefined) {
+        throw new Error('useRiskScoreHistory: entityId is required when the query is enabled');
+      }
+      return fetchRiskScoreHistory({
         signal,
         params: { entityType, entityId, from, to, scoreType, pageSize, includeContributions },
-      }),
+      });
+    },
     enabled,
     refetchOnWindowFocus: false,
     keepPreviousData: true,
@@ -64,5 +69,5 @@ export const useRiskScoreHistory = ({
     enabled ? error : undefined
   );
 
-  return { data, isLoading, isFetching, error, refetch };
+  return { data, isLoading, isFetching, error: error ?? undefined, refetch };
 };

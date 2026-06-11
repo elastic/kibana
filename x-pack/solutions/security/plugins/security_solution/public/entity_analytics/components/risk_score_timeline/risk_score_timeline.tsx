@@ -133,6 +133,7 @@ export const RiskScoreTimeline: React.FC<RiskScoreTimelineProps> = ({
             )}
             options={RANGE_PRESETS}
             idSelected={from}
+            // EuiButtonGroup invokes onChange with (id, value); normalize arity for onRangeChange
             onChange={(id) => onRangeChange(id)}
             data-test-subj="riskScoreTimeline-RangeSelect"
           />
@@ -142,7 +143,7 @@ export const RiskScoreTimeline: React.FC<RiskScoreTimelineProps> = ({
       <TimelineBody
         entries={entries}
         isLoading={isLoading}
-        isError={error !== null && error !== undefined}
+        isError={error !== undefined}
         from={from}
         to={to}
         selectedTimestamp={selectedTimestamp}
