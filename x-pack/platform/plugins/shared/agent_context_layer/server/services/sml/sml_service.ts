@@ -22,6 +22,7 @@ import type {
   SmlSearchFilters,
   SmlSearchConstraints,
   MatchedDiscoveryLabel,
+  SmlPermissions,
 } from './types';
 import { createSmlTypeRegistry, type SmlTypeRegistry } from './sml_type_registry';
 import { createSmlIndexer, type SmlIndexer } from './sml_indexer';
@@ -199,6 +200,16 @@ export const isNotFoundError = (error: unknown): boolean => {
   return error instanceof errors.ResponseError && error.statusCode === 404;
 };
 
+/**
+ * Empty-but-fully-shaped permissions object. Used as a fallback when
+ * `_source.permissions` is somehow missing (legacy / test docs) and as
+ * the input default in `upsertDocument`.
+ */
+const emptyPermissions = (): SmlDocument['permissions'] => ({
+  kibana: { privileges: [] },
+  elasticsearch: { indices: [] },
+});
+
 const isResultWindowExceededError = (error: unknown): boolean => {
   if (!(error instanceof errors.ResponseError) || error.statusCode !== 400) return false;
   const body = error.body as
@@ -221,40 +232,92 @@ const isResultWindowExceededError = (error: unknown): boolean => {
 };
 
 /**
- * Batch-check which of the given Kibana privilege strings the current user holds.
- * Returns the set of authorized privilege strings.
+ * Combined privilege check for SML chunks. In a single ES `_has_privileges`
+ * call (via Kibana's `checkPrivileges` wrapper), batch-checks:
+ *
+ *   - Which of the given Kibana action strings are authorized for the user
+ *     in the current space.
+ *   - Which of the given concrete Elasticsearch index / alias / data stream
+ *     names the user has `read` on.
+ *
+ * Kibana's `checkPrivilegesDynamicallyWithRequest` packs both the
+ * `application:` (Kibana feature privs) and `index:` (raw ES grants)
+ * sections into the same `_has_privileges` POST, so this is one HTTP
+ * round-trip — not two.
+ *
+ * Per `IndicesPermission.checkResourcePrivileges`, ES evaluates each
+ * requested index name against the user's role grants by automaton
+ * subset check, so callers must pass **concrete names only** — not
+ * patterns. SML chunks store concrete names by construction.
+ *
+ * Fails closed (empty Sets) on error to avoid over-disclosure — a
+ * transient ES error must not silently bypass either check.
  */
-const getAuthorizedPermissions = async ({
+const getAuthorizedPrivileges = async ({
   permissions,
+  indices,
   request,
   securityAuthz,
   logger,
 }: {
   permissions: string[];
+  indices: string[];
   request: KibanaRequest;
   securityAuthz: AuthorizationServiceSetup;
   logger: Logger;
-}): Promise<Set<string>> => {
-  if (permissions.length === 0) {
-    return new Set();
+}): Promise<{ authorizedPerms: Set<string>; authorizedIndices: Set<string> }> => {
+  if (permissions.length === 0 && indices.length === 0) {
+    return { authorizedPerms: new Set(), authorizedIndices: new Set() };
   }
 
   try {
     const checkPrivileges = securityAuthz.checkPrivilegesDynamicallyWithRequest(request);
-    const response = await checkPrivileges({ kibana: permissions });
+    const response = await checkPrivileges({
+      ...(permissions.length > 0 ? { kibana: permissions } : {}),
+      ...(indices.length > 0
+        ? {
+            elasticsearch: {
+              cluster: [],
+              index: Object.fromEntries(indices.map((i) => [i, ['read']])),
+            },
+          }
+        : {}),
+    });
 
-    return new Set(response.privileges.kibana.filter((p) => p.authorized).map((p) => p.privilege));
+    const authorizedPerms = new Set(
+      response.privileges.kibana.filter((p) => p.authorized).map((p) => p.privilege)
+    );
+    const authorizedIndices = new Set<string>();
+    for (const [name, privs] of Object.entries(response.privileges.elasticsearch.index ?? {})) {
+      if (privs.some((p) => p.privilege === 'read' && p.authorized)) {
+        authorizedIndices.add(name);
+      }
+    }
+    return { authorizedPerms, authorizedIndices };
   } catch (error) {
-    logger.warn(`SML permission check failed: ${(error as Error).message}`);
-    return new Set();
+    logger.warn(`SML privilege check failed; failing closed: ${(error as Error).message}`);
+    return { authorizedPerms: new Set(), authorizedIndices: new Set() };
   }
 };
 
 /**
- * Filter a single page of results by the current user's Kibana RBAC permissions.
- * Used by the search loop (per page) and directly by autocomplete (single pass).
+ * Filter a single page of results by the current user's privileges. Applies
+ * two stacked all-of checks per chunk in a single `_has_privileges` call:
+ *
+ *   1. Kibana `permissions.kibana.privileges[].name` — every action
+ *      string a chunk lists must be authorized for the user.
+ *   2. ES `permissions.elasticsearch.indices[].name` — every concrete
+ *      index / alias / data stream a chunk depends on must be `read`-
+ *      authorized.
+ *
+ * Chunks with no `kibana.privileges` pass check 1 trivially; chunks with
+ * no `elasticsearch.indices` pass check 2 trivially.
+ *
+ * Used by the search loop (per page) and directly by autocomplete (single
+ * pass). When the security plugin is absent (dev / test), the function is
+ * a no-op — both checks are skipped — to preserve open-access semantics.
  */
-const filterPageByPermissions = async <T extends { permissions: string[] }>(
+const filterPageByPermissions = async <T extends { permissions: SmlPermissions }>(
   items: T[],
   {
     request,
@@ -268,26 +331,42 @@ const filterPageByPermissions = async <T extends { permissions: string[] }>(
 ): Promise<T[]> => {
   if (!securityAuthz || items.length === 0) return items;
 
-  const allPermissions = [...new Set(items.flatMap((hit) => hit.permissions))];
-  if (allPermissions.length === 0) return items;
+  const allPermissions = [
+    ...new Set(items.flatMap((hit) => hit.permissions.kibana.privileges.map((p) => p.name))),
+  ];
+  const allTargetIndices = [
+    ...new Set(items.flatMap((hit) => hit.permissions.elasticsearch.indices.map((i) => i.name))),
+  ];
 
-  const authorizedPerms = await getAuthorizedPermissions({
+  if (allPermissions.length === 0 && allTargetIndices.length === 0) {
+    return items;
+  }
+
+  const { authorizedPerms, authorizedIndices } = await getAuthorizedPrivileges({
     permissions: allPermissions,
+    indices: allTargetIndices,
     request,
     securityAuthz,
     logger,
   });
 
-  return items.filter(
-    (hit) => hit.permissions.length === 0 || hit.permissions.every((p) => authorizedPerms.has(p))
-  );
+  return items.filter((hit) => {
+    const kbnPrivs = hit.permissions.kibana.privileges.map((p) => p.name);
+    const esIdx = hit.permissions.elasticsearch.indices.map((i) => i.name);
+
+    const permsOk = kbnPrivs.length === 0 || kbnPrivs.every((p) => authorizedPerms.has(p));
+    if (!permsOk) return false;
+
+    const indicesOk = esIdx.length === 0 || esIdx.every((idx) => authorizedIndices.has(idx));
+    return indicesOk;
+  });
 };
 
 /**
  * Wrap filterPageByPermissions for callers that hold a `{ results }` object.
  * Used by the autocomplete path.
  */
-const filterResultsByPermissions = async <T extends { permissions: string[] }>({
+const filterResultsByPermissions = async <T extends { permissions: SmlPermissions }>({
   searchResult,
   request,
   securityAuthz,
@@ -308,7 +387,17 @@ const filterResultsByPermissions = async <T extends { permissions: string[] }>({
 
 /**
  * Check whether the current user has access to specific SML items.
- * Looks up each item's permissions from the index and batch-checks them.
+ * For each id, the access verdict is the AND of:
+ *
+ *   - Kibana `permissions.kibana.privileges[].name` — all listed action
+ *     strings are authorized.
+ *   - ES `permissions.elasticsearch.indices[].name` — all listed
+ *     concrete index/alias/data stream names are `read`-authorized via
+ *     `_has_privileges`.
+ *
+ * Chunks without any kibana privileges and without any elasticsearch
+ * indices are visible to anyone in the space. When the security plugin
+ * is absent, all ids resolve to `true` (open access).
  */
 const checkItemsAccess = async ({
   ids,
@@ -335,7 +424,12 @@ const checkItemsAccess = async ({
     return accessMap;
   }
 
-  let docPermissions: Map<string, string[]>;
+  interface DocAuthz {
+    kbnPrivs: string[];
+    esIdx: string[];
+  }
+
+  let docAuthz: Map<string, DocAuthz>;
   try {
     const response = await esClient.asInternalUser.search<Pick<SmlDocument, 'id' | 'permissions'>>({
       index: smlIndexName,
@@ -358,12 +452,18 @@ const checkItemsAccess = async ({
       _source: ['id', 'permissions'],
     });
 
-    docPermissions = new Map(
+    docAuthz = new Map(
       response.hits.hits
         .filter((hit) => hit._source != null)
         .map((hit) => {
           const source = hit._source!;
-          return [source.id ?? '', source.permissions ?? []] as [string, string[]];
+          return [
+            source.id ?? '',
+            {
+              kbnPrivs: source.permissions?.kibana?.privileges?.map((p) => p.name) ?? [],
+              esIdx: source.permissions?.elasticsearch?.indices?.map((i) => i.name) ?? [],
+            },
+          ] as [string, DocAuthz];
         })
     );
   } catch (error) {
@@ -380,29 +480,27 @@ const checkItemsAccess = async ({
     return accessMap;
   }
 
-  const allPermissions = [...new Set([...docPermissions.values()].flat())];
+  const allPermissions = [...new Set([...docAuthz.values()].flatMap((doc) => doc.kbnPrivs))];
+  const allTargetIndices = [...new Set([...docAuthz.values()].flatMap((doc) => doc.esIdx))];
 
-  const authorizedPerms = await getAuthorizedPermissions({
+  const { authorizedPerms, authorizedIndices } = await getAuthorizedPrivileges({
     permissions: allPermissions,
+    indices: allTargetIndices,
     request,
     securityAuthz,
     logger,
   });
 
   for (const id of ids) {
-    const perms = docPermissions.get(id);
-    if (!perms) {
+    const doc = docAuthz.get(id);
+    if (!doc) {
       accessMap.set(id, false);
       continue;
     }
-    if (perms.length === 0) {
-      accessMap.set(id, true);
-      continue;
-    }
-    accessMap.set(
-      id,
-      perms.every((p) => authorizedPerms.has(p))
-    );
+    const permsOk = doc.kbnPrivs.length === 0 || doc.kbnPrivs.every((p) => authorizedPerms.has(p));
+    const indicesOk =
+      doc.esIdx.length === 0 || doc.esIdx.every((idx) => authorizedIndices.has(idx));
+    accessMap.set(id, permsOk && indicesOk);
   }
 
   return accessMap;
@@ -538,8 +636,14 @@ const buildSmlEsqlQuery = ({
     lines.push('| EVAL ref_uris = references.uri');
   }
 
-  // permissions is always fetched for server-side RBAC filtering; included in
-  // the result only when explicitly requested. spaces is purely opt-in.
+  // permissions is a nested object; its leaf name fields are materialized into
+  // flat keyword columns (mirroring origin_uri / ref_uris) so they can be
+  // reconstructed into the nested shape client-side. Always fetched for
+  // server-side RBAC filtering; only surfaced in the result when requested.
+  lines.push('| EVAL perm_kibana = permissions.kibana.privileges.name');
+  lines.push('| EVAL perm_es_indices = permissions.elasticsearch.indices.name');
+
+  // spaces is purely opt-in.
   const keepCols = [
     'id',
     'type',
@@ -549,7 +653,8 @@ const buildSmlEsqlQuery = ({
     ...(shouldKeep('tags') ? ['tags'] : []),
     ...(shouldKeep('references') ? ['ref_uris'] : []),
     ...(shouldKeep('spaces') ? ['spaces'] : []),
-    'permissions',
+    'perm_kibana',
+    'perm_es_indices',
     ...(shouldKeep('content') ? ['content'] : []),
   ];
   lines.push(`| KEEP ${keepCols.join(', ')}`);
@@ -734,7 +839,7 @@ const searchSml = async ({
   };
 
   // permissions is always in the columns for RBAC filtering; spaces only when requested.
-  type SmlSearchResultInternal = SmlSearchResult & { permissions: string[] };
+  type SmlSearchResultInternal = SmlSearchResult & { permissions: SmlPermissions };
 
   const allResults: SmlSearchResultInternal[] = response.values.map((row) => {
     const result: SmlSearchResultInternal = {
@@ -742,7 +847,14 @@ const searchSml = async ({
       type: String(row[colIndex.get('type')!] ?? ''),
       title: String(row[colIndex.get('title')!] ?? ''),
       origin: { uri: String(row[colIndex.get('origin_uri')!] ?? '') },
-      permissions: toStringArray(row[colIndex.get('permissions')!]),
+      permissions: {
+        kibana: {
+          privileges: toStringArray(row[colIndex.get('perm_kibana')!]).map((name) => ({ name })),
+        },
+        elasticsearch: {
+          indices: toStringArray(row[colIndex.get('perm_es_indices')!]).map((name) => ({ name })),
+        },
+      },
     };
     const spacesIdx = colIndex.get('spaces');
     if (spacesIdx !== undefined) result.spaces = toStringArray(row[spacesIdx]);
@@ -936,7 +1048,7 @@ const autocompleteSml = async ({
           title: source.title ?? '',
           origin: { uri: source.origin?.uri ?? '' },
           spaces: source.spaces ?? [],
-          permissions: source.permissions ?? [],
+          permissions: source.permissions ?? emptyPermissions(),
         };
         // Inner hits from the nested discovery_labels query: the specific entries
         // that matched, with their ES-generated highlight snippet wrapping the
@@ -1043,7 +1155,7 @@ const getDocumentsByIds = async ({
         created_at: source.created_at ?? '',
         updated_at: source.updated_at ?? '',
         spaces: source.spaces ?? [],
-        permissions: source.permissions ?? [],
+        permissions: source.permissions ?? emptyPermissions(),
         ingestion_method: source.ingestion_method ?? 'crawled',
       };
       if (source.description !== undefined) {
@@ -1125,7 +1237,7 @@ const getDocumentById = async ({
       created_at: source.created_at ?? '',
       updated_at: source.updated_at ?? '',
       spaces: source.spaces ?? [],
-      permissions: source.permissions ?? [],
+      permissions: source.permissions ?? emptyPermissions(),
       ingestion_method: source.ingestion_method ?? 'crawled',
     };
   } catch (error) {
@@ -1211,7 +1323,7 @@ const listDocuments = async ({
           created_at: source.created_at ?? '',
           updated_at: source.updated_at ?? '',
           spaces: source.spaces ?? [],
-          permissions: source.permissions ?? [],
+          permissions: source.permissions ?? emptyPermissions(),
           ingestion_method: source.ingestion_method ?? 'crawled',
         };
       });
@@ -1300,7 +1412,12 @@ const upsertDocument = async ({
     created_at: existing?.created_at ?? now,
     updated_at: now,
     spaces: existing?.spaces ?? [spaceId],
-    permissions: document.permissions ?? [],
+    permissions: {
+      kibana: { privileges: document.permissions?.kibana?.privileges ?? [] },
+      elasticsearch: { indices: document.permissions?.elasticsearch?.indices ?? [] },
+    },
+    // HTTP upserts are by definition manual writes; tagging here lets the crawler
+    // (and origin-mode indexAttachment) skip these entries to avoid clobbering them.
     ingestion_method: 'manual',
   };
 
