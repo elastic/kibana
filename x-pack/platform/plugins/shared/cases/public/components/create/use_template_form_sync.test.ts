@@ -411,6 +411,100 @@ describe('useTemplateFormSync', () => {
     });
   });
 
+  describe('version-pinned extends (<id>@<version>)', () => {
+    afterEach(() => {
+      // Reset to the default implementation so mockReturnValue calls don't leak.
+      mockUseParentTemplateDefinition.mockImplementation((_id: string | undefined) => ({
+        definition: undefined,
+        isFetched: true,
+      }));
+    });
+
+    it('passes the raw extends ref (including @version) to useParentTemplateDefinition', () => {
+      const templateWithPinnedExtends = {
+        templateId: 'child-template',
+        templateVersion: 1,
+        definition: {
+          name: 'Child Template',
+          extends: 'parent-id@3',
+          fields: [],
+        },
+      };
+
+      mockUseFormData.mockReturnValue([{ templateId: 'child-template' }]);
+      mockUseGetTemplate.mockReturnValue({ data: templateWithPinnedExtends, isLoading: false });
+
+      renderHook(() => useTemplateFormSync(innerForm));
+
+      // The hook must receive the raw ref — it parses @version internally via parseExtendsRef.
+      expect(mockUseParentTemplateDefinition).toHaveBeenCalledWith('parent-id@3');
+    });
+
+    it('merges parent fields from the pinned version into the form when the parent resolves', () => {
+      const parentDefinition = {
+        name: 'Parent v3',
+        fields: [
+          {
+            name: 'parent_field',
+            type: 'keyword',
+            control: 'INPUT_TEXT',
+            metadata: { default: 'parent_default' },
+          },
+        ],
+      };
+
+      const templateWithPinnedExtends = {
+        templateId: 'child-template',
+        templateVersion: 1,
+        definition: {
+          name: 'Child Template',
+          extends: 'parent-id@3',
+          fields: [],
+        },
+      };
+
+      mockUseParentTemplateDefinition.mockReturnValue({
+        definition: parentDefinition,
+        isFetched: true,
+      });
+      mockUseFormData.mockReturnValue([{ templateId: 'child-template' }]);
+      mockUseGetTemplate.mockReturnValue({ data: templateWithPinnedExtends, isLoading: false });
+
+      renderHook(() => useTemplateFormSync(innerForm));
+
+      // The merged effective definition should include the parent's field default.
+      expect(innerForm.reset).toHaveBeenCalledWith({
+        [CASE_EXTENDED_FIELDS]: { parent_field_as_keyword: 'parent_default' },
+      });
+    });
+
+    it('re-applies when the pinned version changes (cache key includes full ref string)', () => {
+      const templateWithPinnedExtends = {
+        templateId: 'child-template',
+        templateVersion: 1,
+        definition: { name: 'Child Template', extends: 'parent-id@2', fields: [] },
+      };
+
+      mockUseFormData.mockReturnValue([{ templateId: 'child-template' }]);
+      mockUseGetTemplate.mockReturnValue({ data: templateWithPinnedExtends, isLoading: false });
+
+      const { rerender } = renderHook(() => useTemplateFormSync(innerForm));
+
+      mockSetFieldValue.mockClear();
+
+      // Bump the pinned version — cache key changes, effect should re-fire.
+      const updatedTemplate = {
+        ...templateWithPinnedExtends,
+        definition: { ...templateWithPinnedExtends.definition, extends: 'parent-id@3' },
+      };
+      mockUseGetTemplate.mockReturnValue({ data: updatedTemplate, isLoading: false });
+
+      rerender();
+
+      expect(mockSetFieldValue).toHaveBeenCalledWith('title', 'Child Template');
+    });
+  });
+
   describe('$ref field resolution', () => {
     const templateWithRef = {
       templateId: 'template-ref',
