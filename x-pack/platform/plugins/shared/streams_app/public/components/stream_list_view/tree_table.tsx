@@ -183,7 +183,6 @@ const RowActions = ({
           }
         >
           <EuiContextMenuPanel
-            size="s"
             items={[
               <EuiContextMenuItem
                 key="manage"

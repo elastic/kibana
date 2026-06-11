@@ -78,7 +78,6 @@ export function StreamsListTableTools({
           }
         >
           <EuiContextMenuPanel
-            size="s"
             items={FILTER_OPTIONS.map((option) => (
               <EuiContextMenuItem
                 key={option.value}

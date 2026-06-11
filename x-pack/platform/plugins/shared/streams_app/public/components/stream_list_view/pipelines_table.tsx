@@ -140,7 +140,6 @@ function PipelineRowActions({ row }: { row: PipelineRow }) {
       }
     >
       <EuiContextMenuPanel
-        size="s"
         items={[
           <EuiContextMenuItem key="manage" icon="gear" onClick={() => setIsMenuOpen(false)}>
             {i18n.translate('xpack.streams.pipelinesTable.rowActions.manage', {
