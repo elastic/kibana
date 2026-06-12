@@ -18,18 +18,23 @@ import {
   formatEvalCliCommand,
   flags as evalOrchestrationFlags,
 } from '@kbn/evals/src/cli/commands/start';
-import { runRedTeam, type RedTeamConfig } from '../../red_team';
+import {
+  runRedTeam,
+  type RedTeamConfig,
+  RED_TEAM_MODULE_IDS,
+  type RedTeamModuleId,
+} from '../../red_team';
 
 const redTeamFlags: FlagOptions = {
   ...evalOrchestrationFlags,
-  string: [...(evalOrchestrationFlags.string ?? []), 'modules'],
+  string: [...(evalOrchestrationFlags.string ?? []), 'modules', 'count'],
   alias: {
     ...evalOrchestrationFlags.alias,
     module: 'modules',
   },
 };
 
-const parseRedTeamModules = (flagsReader: FlagsReader) => {
+const parseRedTeamModules = (flagsReader: FlagsReader): RedTeamModuleId[] | undefined => {
   const modulesFlag = flagsReader.string('modules');
   if (!modulesFlag) {
     return undefined;
@@ -43,15 +48,33 @@ const parseRedTeamModules = (flagsReader: FlagsReader) => {
     throw createFlagError('--modules must list at least one module id.');
   }
 
-  return moduleIds;
+  for (const id of moduleIds) {
+    if (!(RED_TEAM_MODULE_IDS as readonly string[]).includes(id)) {
+      throw createFlagError(
+        `Unknown module "${id}". Valid modules: ${RED_TEAM_MODULE_IDS.join(', ')}`
+      );
+    }
+  }
+
+  return moduleIds as RedTeamModuleId[];
 };
 
-const resolveRedTeamConfig = (suiteId: string, flagsReader: FlagsReader): RedTeamConfig => ({
-  suite: suiteId,
-  modules: parseRedTeamModules(flagsReader) as RedTeamConfig['modules'],
-  // TODO: Implement count
-  count: 0,
-});
+const resolveRedTeamConfig = (suiteId: string, flagsReader: FlagsReader): RedTeamConfig => {
+  const countStr = flagsReader.string('count');
+  let count: number | undefined;
+  if (countStr !== undefined) {
+    const parsed = parseInt(countStr, 10);
+    if (isNaN(parsed) || parsed <= 0) {
+      throw createFlagError('--count must be a positive integer.');
+    }
+    count = parsed;
+  }
+  return {
+    suite: suiteId,
+    modules: parseRedTeamModules(flagsReader),
+    count,
+  };
+};
 
 export const redTeamCmd: Command<void> = {
   name: 'red-team',

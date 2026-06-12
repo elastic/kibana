@@ -13,7 +13,7 @@ export const RED_TEAM_MODULE_IDS = [
   'indirect_injection',
 ] as const;
 
-export type RedTeamModuleId = typeof RED_TEAM_MODULE_IDS;
+export type RedTeamModuleId = (typeof RED_TEAM_MODULE_IDS)[number];
 export interface RedTeamConfig {
   suite: string;
   modules?: RedTeamModuleId[];
