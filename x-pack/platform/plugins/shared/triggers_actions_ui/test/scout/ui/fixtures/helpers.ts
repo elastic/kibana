@@ -109,7 +109,7 @@ export const defineIndexThresholdRule = async (
   await indexCombo
     .locator('[data-test-subj="comboBoxSearchInput"]')
     .pressSequentially(indexName, { delay: 50 });
-  const indexOption = page.locator(`.euiComboBoxOption[title="${indexName}"]`);
+  const indexOption = page.locator(`.euiComboBoxOption[title="${indexName}"]`).first();
   await indexOption.waitFor({ state: 'visible', timeout: 30000 });
   await indexOption.click();
 

@@ -25,6 +25,7 @@ import {
   getMonacoValue,
   navigateToConnectors,
   searchConnectors,
+  openConnectorFlyout,
   searchAndOpenConnector,
   closeFlyoutIfOpen,
   cancelRuleCreation,
@@ -107,9 +108,8 @@ test.describe('Jira Service Management connector', { tag: tags.stateful.classic 
     await page.testSubj.locator('nameInput').fill(connectorName);
     await page.testSubj.locator('config\\.apiUrl-input').fill('https://test.atlassian.net');
     await page.testSubj.locator('secrets\\.apiKey-input').fill('apiKey');
-    await page
-      .locator('[data-test-subj="create-connector-flyout-save-btn"]:not([disabled])')
-      .click();
+    await expect(page.testSubj.locator('create-connector-flyout-save-btn')).toBeEnabled();
+    await page.testSubj.click('create-connector-flyout-save-btn');
 
     await expect(page.testSubj.locator('euiToastHeader__title')).toContainText(
       `Created '${connectorName}'`
@@ -142,10 +142,13 @@ test.describe('Jira Service Management connector', { tag: tags.stateful.classic 
     createdConnectorIds.push(created.id);
     await navigateToConnectors(page, kbnUrl);
 
-    await searchAndOpenConnector(page, connectorName);
+    await searchConnectors(page, connectorName);
+    await expect(page.testSubj.locator('connectors-row')).toHaveCount(1);
+    await openConnectorFlyout(page);
     await page.testSubj.locator('nameInput').fill(updatedName);
     await page.testSubj.locator('secrets\\.apiKey-input').fill('apiKey');
-    await page.locator('[data-test-subj="edit-connector-flyout-save-btn"]:not([disabled])').click();
+    await expect(page.testSubj.locator('edit-connector-flyout-save-btn')).toBeEnabled();
+    await page.testSubj.click('edit-connector-flyout-save-btn');
 
     await expect(page.testSubj.locator('euiToastHeader__title')).toContainText(
       `Updated '${updatedName}'`
@@ -172,7 +175,9 @@ test.describe('Jira Service Management connector', { tag: tags.stateful.classic 
     createdConnectorIds.push(created.id);
     await navigateToConnectors(page, kbnUrl);
 
-    await searchAndOpenConnector(page, connectorName);
+    await searchConnectors(page, connectorName);
+    await expect(page.testSubj.locator('connectors-row')).toHaveCount(1);
+    await openConnectorFlyout(page);
     await page.testSubj.locator('nameInput').fill('some test name to cancel');
     await page.testSubj.click('edit-connector-flyout-close-btn');
     await page.testSubj.click('confirmModalConfirmButton');
@@ -198,8 +203,10 @@ test.describe('Jira Service Management connector', { tag: tags.stateful.classic 
     createdConnectorIds.push(created.id);
     await navigateToConnectors(page, kbnUrl);
 
-    await searchAndOpenConnector(page, connectorName);
-    await page.locator('[data-test-subj="testConnectorTab"]').click();
+    await searchConnectors(page, connectorName);
+    await expect(page.testSubj.locator('connectors-row')).toHaveCount(1);
+    await openConnectorFlyout(page);
+    await page.testSubj.click('testConnectorTab');
 
     await expect(page.testSubj.locator('executeActionButton')).toBeDisabled();
   });
