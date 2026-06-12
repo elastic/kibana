@@ -25,6 +25,7 @@ import {
   getMonacoValue,
   navigateToConnectors,
   searchConnectors,
+  openConnectorFlyout,
   searchAndOpenConnector,
   closeFlyoutIfOpen,
   cancelRuleCreation,
@@ -109,9 +110,8 @@ test.describe('Opsgenie connector', { tag: tags.stateful.classic }, () => {
     await page.testSubj.locator('nameInput').fill(connectorName);
     await page.testSubj.locator('config\\.apiUrl-input').fill('https://test.opsgenie.com');
     await page.testSubj.locator('secrets\\.apiKey-input').fill('apiKey');
-    await page
-      .locator('[data-test-subj="create-connector-flyout-save-btn"]:not([disabled])')
-      .click();
+    await expect(page.testSubj.locator('create-connector-flyout-save-btn')).toBeEnabled();
+    await page.testSubj.click('create-connector-flyout-save-btn');
 
     await expect(page.testSubj.locator('euiToastHeader__title')).toContainText(
       `Created '${connectorName}'`
@@ -120,6 +120,8 @@ test.describe('Opsgenie connector', { tag: tags.stateful.classic }, () => {
     await searchConnectors(page, connectorName);
 
     const row = page.testSubj.locator('connectors-row');
+    await expect(row).toHaveCount(1);
+    await expect(row.getByTestId('connectorsTableCell-name')).toContainText(connectorName);
     await expect(row.getByTestId('connectorsTableCell-actionType')).toContainText('Opsgenie');
 
     const all = await apiServices.alerting.connectors.getAll();
@@ -142,11 +144,14 @@ test.describe('Opsgenie connector', { tag: tags.stateful.classic }, () => {
     createdConnectorIds.push(created.id);
     await navigateToConnectors(page, kbnUrl);
 
-    await searchAndOpenConnector(page, connectorName);
+    await searchConnectors(page, connectorName);
+    await expect(page.testSubj.locator('connectors-row')).toHaveCount(1);
+    await openConnectorFlyout(page);
     await page.testSubj.locator('nameInput').fill(updatedName);
     await page.testSubj.locator('config\\.apiUrl-input').fill('https://test.opsgenie.com');
     await page.testSubj.locator('secrets\\.apiKey-input').fill('apiKey');
-    await page.locator('[data-test-subj="edit-connector-flyout-save-btn"]:not([disabled])').click();
+    await expect(page.testSubj.locator('edit-connector-flyout-save-btn')).toBeEnabled();
+    await page.testSubj.click('edit-connector-flyout-save-btn');
 
     await expect(page.testSubj.locator('euiToastHeader__title')).toContainText(
       `Updated '${updatedName}'`
@@ -155,7 +160,10 @@ test.describe('Opsgenie connector', { tag: tags.stateful.classic }, () => {
     await page.testSubj.click('euiFlyoutCloseButton');
 
     await searchConnectors(page, updatedName);
-    await expect(page.testSubj.locator('connectors-row')).toHaveCount(1);
+    const editedRow = page.testSubj.locator('connectors-row');
+    await expect(editedRow).toHaveCount(1);
+    await expect(editedRow.getByTestId('connectorsTableCell-name')).toContainText(updatedName);
+    await expect(editedRow.getByTestId('connectorsTableCell-actionType')).toContainText('Opsgenie');
   });
 
   test('connector page - should reset connector when canceling an edit', async ({
@@ -173,7 +181,9 @@ test.describe('Opsgenie connector', { tag: tags.stateful.classic }, () => {
     createdConnectorIds.push(created.id);
     await navigateToConnectors(page, kbnUrl);
 
-    await searchAndOpenConnector(page, connectorName);
+    await searchConnectors(page, connectorName);
+    await expect(page.testSubj.locator('connectors-row')).toHaveCount(1);
+    await openConnectorFlyout(page);
     await page.testSubj.locator('nameInput').fill('some test name to cancel');
     await page.testSubj.click('edit-connector-flyout-close-btn');
     await page.testSubj.click('confirmModalConfirmButton');
@@ -199,9 +209,11 @@ test.describe('Opsgenie connector', { tag: tags.stateful.classic }, () => {
     createdConnectorIds.push(created.id);
     await navigateToConnectors(page, kbnUrl);
 
-    await searchAndOpenConnector(page, connectorName);
+    await searchConnectors(page, connectorName);
+    await expect(page.testSubj.locator('connectors-row')).toHaveCount(1);
+    await openConnectorFlyout(page);
     await expect(page.testSubj.locator('nameInput')).toBeVisible();
-    await page.locator('[data-test-subj="testConnectorTab"]').click();
+    await page.testSubj.click('testConnectorTab');
     await page.testSubj.locator('executeActionButton').waitFor({ state: 'visible' });
 
     await expect(page.testSubj.locator('executeActionButton')).toBeDisabled();
