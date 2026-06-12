@@ -317,6 +317,16 @@ describe('parseRulePreviewCommand — missing required args', () => {
       expect(result.message).toContain('history-window-start');
     }
   });
+
+  it('returns kind:error when new_terms rule has more than 3 --new-terms-fields (API max)', () => {
+    const result = parseRulePreviewCommand(
+      'new_terms --query "*:*" --new-terms-fields a b c d --history-window-start now-30d'
+    );
+    expect(result.kind).toBe('error');
+    if (result.kind === 'error') {
+      expect(result.message).toContain('new-terms-fields');
+    }
+  });
 });
 
 // ---------------------------------------------------------------------------

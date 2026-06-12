@@ -392,6 +392,11 @@ export const parseRulePreviewCommand = (command: string): ParsedPreviewCommand =
             demandOption: true,
             desc: 'Field(s) to monitor for new values (repeat for multiple, max 3)',
           })
+          .coerce('new-terms-fields', (v: string[]) => {
+            if (v.length > 3)
+              throw new Error(`--new-terms-fields accepts at most 3 fields, got ${v.length}`);
+            return v;
+          })
           .option('history-window-start', {
             type: 'string',
             demandOption: true,
