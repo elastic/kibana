@@ -127,7 +127,7 @@ Reference './available_indices' for the list of indices available for troublesho
         checkEndpointPackageFreshnessTool(endpointAppContextService),
         getPackageConfigurationsTool(endpointAppContextService),
         getEndpointArtifactsTool(endpointAppContextService),
-        generateInsightTool(),
+        generateInsightTool(endpointAppContextService),
       ];
     },
   });
