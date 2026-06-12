@@ -38,6 +38,7 @@ import {
   EuiCode,
   EuiCallOut,
   useEuiTheme,
+  useEuiMemoizedStyles,
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ServiceDeps } from '../../../kibana_services';
@@ -461,6 +462,8 @@ export function Footer({
   onCreateControl: () => void;
   onCancelControl?: () => void;
 }) {
+  const disabledTooltipAnchorStyle = useEuiMemoizedStyles(() => css({ cursor: 'not-allowed' }));
+
   const onCancel = useCallback(() => {
     closeFlyout();
     onCancelControl?.();
@@ -486,7 +489,7 @@ export function Footer({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiToolTip
-            anchorProps={{ css: isSaveDisabled ? css({ cursor: 'not-allowed' }) : undefined }}
+            anchorProps={{ css: isSaveDisabled ? disabledTooltipAnchorStyle : undefined }}
             content={
               !isSaveDisabled
                 ? undefined
