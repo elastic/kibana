@@ -141,7 +141,6 @@ toc:
       - file: i18n.md
       - file: logging-service.md
       - file: reporting-integration.md
-      - file: adding-performance-metrics.md
       - file: development-telemetry.md
       - folder: screenshotting
         children:
@@ -183,11 +182,6 @@ toc:
               - file: api-best-practices.md
               - file: api-auth.md
           - file: migrate-tests.md
-      - file: performance-journeys.md
-        children:
-          - file: write-single-user-performance-journey.md
-          - file: write-api-capacity-testing-journey.md
-          - file: running-performance-journey-in-cloud.md
       - file: ftr.md
       - file: writing-stable-functional-tests.md
   - file: plugin-list.md

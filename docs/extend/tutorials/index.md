@@ -39,7 +39,6 @@ Hands-on, task-focused guides for working with the {{kib}} platform from inside 
 - [Logging](./logging-service.md) — structured logging from the server
 - [Reporting integration](./reporting-integration.md) — integrate your plugin with the Reporting plugin
 - [Screenshotting service](./screenshotting/kibana-screenshotting-service.md) — generate screenshots programmatically
-- [Performance metrics](./adding-performance-metrics.md) — instrument your plugin with EBT-based performance events
 - [Development telemetry](./development-telemetry.md) — register telemetry events for usage analytics
 - [Internationalization (i18n)](./i18n.md) — add translatable strings and use the i18n tooling
 

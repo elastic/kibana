@@ -47,13 +47,6 @@ Use **Jest** for unit and integration tests:
 - [Skip tests](./skip-tests.md)
 - [Feature flags in tests](./feature-flags.md)
 
-## Performance Testing
-
-Tests to understand the scalability of API endpoints and user experiences can be created via journey tests.
-- [Write Single User Journeys](./write-single-user-performance-journey.md)
-- [Write API Capacity Journeys](./write-api-capacity-testing-journey.md)
-- [Running Performance Journeys in Cloud](./running-performance-journey-in-cloud.md)
-
 ## Legacy functional tests (FTR)
 
 The **Functional Test Runner (FTR)** is Kibana's legacy E2E framework. Existing FTR tests continue to run, and teams can migrate incrementally to Scout.
