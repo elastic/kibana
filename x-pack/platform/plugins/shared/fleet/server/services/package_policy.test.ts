@@ -750,7 +750,7 @@ describe('Package policy service', () => {
       expect(result.supports_cloud_connector).toBe(false);
     });
 
-    it('should set hasAgentVersionConditions in bumpRevision when package has agent version condition', async () => {
+    it('should call bumpRevision when package has agent version condition', async () => {
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       const soClient = createSavedObjectClientMock();
 
@@ -787,9 +787,7 @@ describe('Package policy service', () => {
         expect.anything(),
         expect.anything(),
         'test',
-        expect.objectContaining({
-          hasAgentVersionConditions: true,
-        })
+        expect.not.objectContaining({ hasAgentVersionConditions: expect.anything() })
       );
     });
 
@@ -834,7 +832,7 @@ describe('Package policy service', () => {
       );
     });
 
-    it('should set hasAgentVersionConditions in bumpRevision when package has agent version condition in hbs template', async () => {
+    it('should call bumpRevision when package has agent version condition in hbs template', async () => {
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       const soClient = createSavedObjectClientMock();
 
@@ -875,9 +873,7 @@ describe('Package policy service', () => {
         expect.anything(),
         expect.anything(),
         'test',
-        expect.objectContaining({
-          hasAgentVersionConditions: true,
-        })
+        expect.not.objectContaining({ hasAgentVersionConditions: expect.anything() })
       );
     });
 
