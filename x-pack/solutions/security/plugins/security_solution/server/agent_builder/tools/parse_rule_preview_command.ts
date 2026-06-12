@@ -113,9 +113,9 @@ type Argv = Record<string, any>;
 const toPreview = (rule: Record<string, unknown>, argv: Argv): ParsedPreviewCommand => ({
   kind: 'preview',
   rule,
-  interval: argv.interval ?? '1h',
-  timeframeStart: argv['timeframe-start'] ?? 'now-1h',
-  timeframeEnd: argv['timeframe-end'] ?? 'now',
+  interval: argv.interval,
+  timeframeStart: argv['timeframe-start'],
+  timeframeEnd: argv['timeframe-end'],
 });
 
 // ── Main parser ────────────────────────────────────────────────────────────────
@@ -134,7 +134,7 @@ export const parseRulePreviewCommand = (command: string): ParsedPreviewCommand =
 
   let result: ParsedPreviewCommand | undefined;
 
-  yargs(tokens)
+  yargs()
     .options(SCHEDULE_OPTIONS)
 
     .command(
@@ -198,7 +198,7 @@ export const parseRulePreviewCommand = (command: string): ParsedPreviewCommand =
           {
             type: 'query',
             ...(argv.query && { query: argv.query }),
-            ...(argv.language && { language: argv.language }),
+            language: argv.language,
             ...(argv.index?.length && { index: argv.index }),
             ...(argv.dataViewId && { data_view_id: argv.dataViewId }),
           },
@@ -228,7 +228,7 @@ export const parseRulePreviewCommand = (command: string): ParsedPreviewCommand =
             type: 'saved_query',
             saved_id: argv.savedId,
             ...(argv.query && { query: argv.query }),
-            ...(argv.language && { language: argv.language }),
+            language: argv.language,
             ...(argv.index?.length && { index: argv.index }),
             ...(argv.dataViewId && { data_view_id: argv.dataViewId }),
           },
@@ -271,7 +271,7 @@ export const parseRulePreviewCommand = (command: string): ParsedPreviewCommand =
             type: 'threshold',
             query: argv.query,
             threshold: { field: argv.thresholdField ?? [], value: argv.thresholdValue },
-            ...(argv.language && { language: argv.language }),
+            language: argv.language,
             ...(argv.index?.length && { index: argv.index }),
             ...(argv.dataViewId && { data_view_id: argv.dataViewId }),
           },
@@ -316,7 +316,15 @@ export const parseRulePreviewCommand = (command: string): ParsedPreviewCommand =
             type: 'string',
             desc: 'Additional threat index filters (JSON array)',
           })
-          .coerce('threat-filters', (v: string) => JSON.parse(v))
+          .coerce('threat-filters', (v: string) => {
+            let parsed: unknown;
+            try {
+              parsed = JSON.parse(v);
+            } catch {
+              throw new Error(`--threat-filters: invalid JSON — ${v}`);
+            }
+            return parsed;
+          })
           .option('threat-indicator-path', {
             type: 'string',
             desc: 'Nested path to indicator object (default: "threat.indicator")',
@@ -338,7 +346,7 @@ export const parseRulePreviewCommand = (command: string): ParsedPreviewCommand =
             threat_mapping: argv.threatMapping,
             ...(argv.threatFilters !== undefined && { threat_filters: argv.threatFilters }),
             ...(argv.threatIndicatorPath && { threat_indicator_path: argv.threatIndicatorPath }),
-            ...(argv.language && { language: argv.language }),
+            language: argv.language,
             ...(argv.index?.length && { index: argv.index }),
             ...(argv.dataViewId && { data_view_id: argv.dataViewId }),
           },
@@ -418,7 +426,7 @@ export const parseRulePreviewCommand = (command: string): ParsedPreviewCommand =
             query: argv.query,
             new_terms_fields: argv.newTermsFields,
             history_window_start: argv.historyWindowStart,
-            ...(argv.language && { language: argv.language }),
+            language: argv.language,
             ...(argv.index?.length && { index: argv.index }),
             ...(argv.dataViewId && { data_view_id: argv.dataViewId }),
           },
