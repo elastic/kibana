@@ -118,6 +118,8 @@ test.describe('Jira Service Management connector', { tag: tags.stateful.classic 
     await searchConnectors(page, connectorName);
 
     const row = page.testSubj.locator('connectors-row');
+    await expect(row).toHaveCount(1);
+    await expect(row.getByTestId('connectorsTableCell-name')).toContainText(connectorName);
     await expect(row.getByTestId('connectorsTableCell-actionType')).toContainText(
       'Jira Service Management'
     );
