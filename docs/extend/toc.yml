@@ -146,7 +146,6 @@ toc:
       - folder: screenshotting
         children:
           - file: kibana-screenshotting-service.md
-          - file: updating-puppeteer-and-chromium.md
       - file: external-plugin-development.md
         children:
           - file: plugin-tooling.md
