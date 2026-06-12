@@ -188,7 +188,9 @@ describe('UnifiedDataTableAdditionalDisplaySettings', () => {
       });
 
       expect(screen.getByTestId('unifiedDataTableRowHeightSettings')).toBeVisible();
-      expect(screen.getByTestId('unifiedDataTableRowHeightSettings_rowHeight_custom')).toBeVisible();
+      expect(
+        screen.getByTestId('unifiedDataTableRowHeightSettings_rowHeight_custom')
+      ).toBeVisible();
       expect(screen.getByTestId('unifiedDataTableRowHeightSettings_rowHeight_auto')).toBeVisible();
     });
 

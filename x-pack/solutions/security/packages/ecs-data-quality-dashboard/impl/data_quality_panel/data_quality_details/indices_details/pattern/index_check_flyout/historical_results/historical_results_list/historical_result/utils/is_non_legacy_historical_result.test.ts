@@ -6,7 +6,7 @@
  */
 
 import { getHistoricalResultStub } from '../../../../../../../../stub/get_historical_result_stub';
-
+// eslint-disable-next-line no-restricted-imports
 import { isNonLegacyHistoricalResult } from './is_non_legacy_historical_result';
 
 describe('isNonLegacyHistoricalResult', () => {
