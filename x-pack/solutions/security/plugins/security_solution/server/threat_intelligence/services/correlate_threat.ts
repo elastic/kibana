@@ -13,6 +13,8 @@ import { extractDiamond } from './extract_diamond';
 import { searchByAnchors } from './search_by_anchors';
 import { searchByDiamond } from './search_by_diamond';
 import { triageDiamondCandidates } from './triage_diamond_candidates';
+import { keywordGapFill } from './keyword_gap_fill';
+import { collapseCandidates } from './collapse_candidates';
 import type { AnchorSet, AnchorMatchBreakdown, SearchByAnchorsResult } from './search_by_anchors';
 import type { DiamondVertexQueries, SearchByDiamondResult } from './search_by_diamond';
 import type { ExtractDiamondResult } from './extract_diamond';
@@ -54,6 +56,10 @@ export interface CorrelateThreatTriagedResult {
   fallback_used: boolean;
   anchor_results: SearchByAnchorsResult;
   diamond_results: SearchByDiamondResult;
+  /** Candidates added by the keyword gap-fill pass (§3). */
+  gap_fill_added: number;
+  /** Candidates removed by the deterministic collapse pass (§4). */
+  collapsed_count: number;
 }
 
 export type CorrelateThreatResult = CorrelateThreatTriagedResult;
@@ -64,9 +70,28 @@ export type CorrelateThreatResult = CorrelateThreatTriagedResult;
 
 const RETRIEVAL_POOL_SIZE = 50;
 
+const DIAMOND_VERTICES_ORDERED = ['adversary', 'capability', 'infrastructure', 'victim'] as const;
+
+/**
+ * Builds the case-context string fed to keyword gap-fill.
+ * For raw_text mode the caller supplies the text directly.
+ * For report_id mode we concatenate non-NONE diamond vertex summaries so the
+ * gap-fill LLM has enough named-entity context without a second ES fetch.
+ */
+const buildCaseContextFromDiamond = (qd: QueryDiamond): string => {
+  const parts: string[] = [];
+  for (const v of DIAMOND_VERTICES_ORDERED) {
+    const vd = qd[v];
+    if (vd.signal !== 'NONE' && vd.summary) {
+      parts.push(`[${v.toUpperCase()}]\n${vd.summary}`);
+    }
+  }
+  return parts.join('\n\n');
+};
+
 const DIAMOND_VERTICES = ['adversary', 'capability', 'infrastructure', 'victim'] as const;
 
-type StoredQueryDiamondSource = {
+interface StoredQueryDiamondSource {
   extracted?: {
     diamond?: {
       adversary?: { signal?: string; summary?: string };
@@ -75,7 +100,7 @@ type StoredQueryDiamondSource = {
       victim?: { signal?: string; summary?: string };
     };
   };
-};
+}
 
 /**
  * Fetches a stored report's diamond (signal + summary per vertex) so the
@@ -107,9 +132,18 @@ const fetchQueryDiamond = async (
 
   const diamond = hit._source.extracted?.diamond ?? {};
   return {
-    adversary: { signal: diamond.adversary?.signal ?? 'NONE', summary: diamond.adversary?.summary ?? '' },
-    capability: { signal: diamond.capability?.signal ?? 'NONE', summary: diamond.capability?.summary ?? '' },
-    infrastructure: { signal: diamond.infrastructure?.signal ?? 'NONE', summary: diamond.infrastructure?.summary ?? '' },
+    adversary: {
+      signal: diamond.adversary?.signal ?? 'NONE',
+      summary: diamond.adversary?.summary ?? '',
+    },
+    capability: {
+      signal: diamond.capability?.signal ?? 'NONE',
+      summary: diamond.capability?.summary ?? '',
+    },
+    infrastructure: {
+      signal: diamond.infrastructure?.signal ?? 'NONE',
+      summary: diamond.infrastructure?.summary ?? '',
+    },
     victim: { signal: diamond.victim?.signal ?? 'NONE', summary: diamond.victim?.summary ?? '' },
   };
 };
@@ -260,14 +294,51 @@ export const correlateThreat = async ({
       `anchors=${anchorResults.hits.length} diamond=${diamondResults.hits.length}`
   );
 
-  const candidates = buildMergedCandidates(anchorResults, diamondResults);
+  const merged = buildMergedCandidates(anchorResults, diamondResults);
 
+  // §3 Keyword gap-fill — extend pool with candidates covering named entities
+  // not represented in the diamond/anchor retrieval results.
+  const caseContext =
+    input.mode === 'raw_text' ? input.text : buildCaseContextFromDiamond(queryDiamond);
+
+  const sourceReportId = input.mode === 'report_id' ? input.report_id : undefined;
+
+  const gapFillCandidates = await keywordGapFill({
+    model: triageModel,
+    esClient,
+    logger,
+    caseContext,
+    currentPool: merged,
+    sourceReportId,
+    spaceId,
+  });
+
+  const extended: TriageCandidateInput[] =
+    gapFillCandidates.length > 0 ? [...merged, ...gapFillCandidates] : merged;
+
+  logger.debug(
+    `[ti:correlate] gap-fill added ${gapFillCandidates.length} candidate(s), ` +
+      `pool=${extended.length}`
+  );
+
+  // §4 Dedup-collapse — collapse exact ioc_set_hash duplicates and bilingual
+  // sibling URL variants before spending the triage LLM.
+  const preCollapseCount = extended.length;
+  const collapsed = await collapseCandidates(esClient, extended);
+  const collapsedCount = preCollapseCount - collapsed.length;
+
+  logger.debug(
+    `[ti:correlate] collapse removed ${collapsedCount} candidate(s), pool=${collapsed.length}`
+  );
+
+  // §5 Triage — CollapsedCandidate extends TriageCandidateInput; triage
+  // ignores the extra collapsed_members field.
   const triageResult = await triageDiamondCandidates({
     model: triageModel,
     logger,
     esClient,
     queryDiamond,
-    candidates,
+    candidates: collapsed,
     confidenceFloor: triageFloor,
     topN: triageTopN,
   });
@@ -281,5 +352,7 @@ export const correlateThreat = async ({
     fallback_used: triageResult.fallback_used,
     anchor_results: anchorResults,
     diamond_results: diamondResults,
+    gap_fill_added: gapFillCandidates.length,
+    collapsed_count: collapsedCount,
   };
 };
