@@ -11,3 +11,10 @@ export {
   toWorkflowExecutionState,
   type WorkflowExecutionState,
 } from './get_execution_state';
+export {
+  executeWorkflow,
+  type ExecuteWorkflowParams,
+  type ExecuteSavedWorkflowParams,
+  type ExecuteInlineWorkflowParams,
+} from './execute_workflow';
+export type { WorkflowExecutionResult } from './execute_workflow_types';
