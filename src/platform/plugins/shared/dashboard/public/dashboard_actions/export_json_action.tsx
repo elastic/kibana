@@ -8,9 +8,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { Action } from '@kbn/ui-actions-plugin/public';
-import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-
 import type {
   EmbeddableApiContext,
   HasLibraryTransforms,
@@ -25,10 +22,11 @@ import {
   apiHasType,
   apiHasUniqueId,
   apiPublishesTitle,
-  apiPublishesUnsavedChanges,
 } from '@kbn/presentation-publishing';
 import type { ShareActionIntents, ShareIntegration } from '@kbn/share-plugin/public/types';
-import { firstValueFrom } from 'rxjs';
+import type { Action } from '@kbn/ui-actions-plugin/public';
+import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+
 import { shareService } from '../services/kibana_services';
 import { ACTION_EXPORT_JSON, DASHBOARD_EXPORT_GROUP } from './constants';
 
@@ -75,15 +73,9 @@ export class ExportJSONAction implements Action<EmbeddableApiContext> {
     if (!isApiCompatible(embeddable) || !this.exportJsonIntentId)
       throw new IncompatibleActionError();
 
-    let isDirty = false;
-    if (apiPublishesUnsavedChanges(embeddable)) {
-      isDirty = await firstValueFrom(embeddable.hasUnsavedChanges$);
-    }
-
     const baseOptions = {
       objectType: embeddable.type,
       objectId: embeddable.uuid,
-      isDirty,
       objectTypeMeta: {
         title: i18n.translate('dashboard.share.shareModal.title', {
           defaultMessage: `Share ${embeddable.getTypeDisplayName?.() ?? embeddable.type}`,

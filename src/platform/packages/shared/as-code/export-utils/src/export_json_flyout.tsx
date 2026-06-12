@@ -54,7 +54,7 @@ export const ExportJsonFlyout = <State extends object, SanitizedState extends ob
   closeFlyout: () => void;
   sanitizeState: SanitizeStateFunction<State, SanitizedState>;
 }) => {
-  const { objectType, objectTypeAlias, sharingData, isDirty } = useShareTypeContext(
+  const { objectType, objectTypeAlias, sharingData } = useShareTypeContext(
     'integration',
     'exportDerivatives'
   );
