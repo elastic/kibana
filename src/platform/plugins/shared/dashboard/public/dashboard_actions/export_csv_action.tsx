@@ -21,7 +21,7 @@ import type { EmbeddableApiContext, PublishesTitle } from '@kbn/presentation-pub
 import { getTitle } from '@kbn/presentation-publishing';
 import { coreServices, fieldFormatService } from '../services/kibana_services';
 import { dashboardExportCsvActionStrings } from './_dashboard_actions_strings';
-import { ACTION_EXPORT_CSV } from './constants';
+import { ACTION_EXPORT_CSV, DASHBOARD_ACTION_GROUP, DASHBOARD_EXPORT_GROUP } from './constants';
 
 export type ExportContext = EmbeddableApiContext & {
   // used for testing
@@ -36,19 +36,8 @@ const isApiCompatible = (api: unknown | null): api is ExportCsvActionApi =>
 export class ExportCSVAction implements Action<ExportContext> {
   public readonly id = ACTION_EXPORT_CSV;
   public readonly type = ACTION_EXPORT_CSV;
-  public readonly order = 18;
-  public grouping = [
-    {
-      id: 'export_actions',
-      order: 100,
-      asContextMenu: true,
-      getIconType: () => 'upload',
-      getDisplayName: () =>
-        i18n.translate('dashboard.actions.exportDisplayName', {
-          defaultMessage: 'Export',
-        }),
-    },
-  ];
+  public readonly order = 2;
+  public grouping = [DASHBOARD_EXPORT_GROUP];
 
   public getIconType() {
     return 'document';

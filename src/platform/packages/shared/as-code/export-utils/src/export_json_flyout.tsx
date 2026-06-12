@@ -24,11 +24,17 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { downloadFileAs, useShareTypeContext } from '@kbn/share-plugin/public';
+import {
+  downloadFileAs,
+  useShareTypeContext,
+  type SharePluginStart,
+} from '@kbn/share-plugin/public';
 
 import { buildExportJsonFilename } from './export_json_share_utils';
 import { useSanitizedState } from './use_sanitized_state';
 import { ExportJsonPanel } from './export_json_panel';
+import type { CoreStart } from '../../../../../../core/public';
+import { useExportJsonFlyoutContext } from './export_json_context_provider';
 
 const flyoutBodyCss = css`
   ${euiFullHeight()}
@@ -44,9 +50,11 @@ const flyoutBodyCss = css`
 `;
 
 export const ExportJsonFlyout = <State extends object, SanitizedState extends object>({
+  apiPath,
   closeFlyout,
   sanitizeState,
 }: {
+  apiPath: string;
   closeFlyout: () => void;
   sanitizeState: (
     state: State
@@ -56,11 +64,11 @@ export const ExportJsonFlyout = <State extends object, SanitizedState extends ob
     'integration',
     'exportDerivatives'
   );
-  console.log({ objectType, objectTypeAlias, sharingData, isDirty });
+  // console.log({ objectType, objectTypeAlias, sharingData, isDirty });
   const typedSharingData = sharingData as unknown as ReturnType<typeof buildExportSharingData>;
   const { title, exportJson } = typedSharingData;
   const state = useMemo(() => exportJson(), [exportJson]);
-  console.log({ state });
+
   const { status, data, warnings, error, retry } = useSanitizedState<State, SanitizedState>({
     state,
     sanitizeState,
@@ -75,6 +83,7 @@ export const ExportJsonFlyout = <State extends object, SanitizedState extends ob
     closeFlyout();
   }, [closeFlyout, data, status, title]);
 
+  console.log('!!!!!!!!!!!!!!', { status, data, warnings, error, retry });
   return (
     <React.Fragment>
       <EuiFlyoutHeader hasBorder>
@@ -109,6 +118,7 @@ export const ExportJsonFlyout = <State extends object, SanitizedState extends ob
       <EuiFlyoutBody data-test-subj="exportItemDetailsFlyoutBody" css={flyoutBodyCss}>
         <EuiFlexGroup css={{ height: '100%' }} direction="column">
           <ExportJsonPanel
+            apiPath={apiPath}
             status={status}
             data={data}
             warnings={warnings}

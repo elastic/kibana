@@ -8,3 +8,4 @@
  */
 
 export { ExportJsonFlyout } from './src/export_json_flyout';
+export { ExportJsonFlyoutContext } from './src/export_json_context_provider';

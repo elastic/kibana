@@ -76,7 +76,6 @@ export const useDashboardExportItems = ({
           },
         };
       });
-    console.log('dashboard', { exportDerivatives });
 
     const derivativeItems = exportDerivatives
       .filter(

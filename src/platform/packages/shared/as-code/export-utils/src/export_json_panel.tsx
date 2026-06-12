@@ -30,8 +30,14 @@ import { XJsonLang } from '@kbn/monaco';
 import { compressToEncodedURIComponent } from 'lz-string';
 import { CodeEditor } from '@kbn/code-editor';
 import type { ExportJsonSanitizedState } from './types';
+import { useExportJsonFlyoutContext } from './export_json_context_provider';
+import { buildCreateDashboardRequestForConsole } from './export_json_share_utils';
 
-export type ExportJsonPanelProps = ExportJsonSanitizedState & { onRetry: () => void };
+export type ExportJsonPanelProps<SanitizedState extends object> =
+  ExportJsonSanitizedState<SanitizedState> & {
+    apiPath: string;
+    onRetry: () => void;
+  };
 
 function WarningsCallout({
   warnings,
@@ -152,8 +158,9 @@ function SuccessState({
   openInConsoleRequest?: string;
   jsonValue: string;
 }) {
-  // const useUrl = shareService?.url.locators.useUrl;
-  const useUrl = undefined;
+  const { services } = useExportJsonFlyoutContext();
+
+  const useUrl = services.share?.url.locators.useUrl;
 
   const devToolsDataUri = openInConsoleRequest
     ? compressToEncodedURIComponent(openInConsoleRequest)
@@ -168,11 +175,11 @@ function SuccessState({
     [devToolsDataUri]
   );
 
-  // const canShowDevTools = Boolean(
-  //   coreServices.application?.capabilities?.dev_tools?.show && consoleHref !== undefined
-  // );
-  const canShowDevTools = false;
-  console.log({ jsonValue });
+  const canShowDevTools = Boolean(
+    services.core.application?.capabilities?.dev_tools?.show && consoleHref !== undefined
+  );
+
+  console.log('!!!!!!!!', { openInConsoleRequest, canShowDevTools, jsonValue });
   return (
     <EuiFlexGroup
       direction="column"
@@ -315,13 +322,14 @@ function ErrorState({ error, onRetry }: { error: Error | undefined; onRetry: () 
   );
 }
 
-export const ExportJsonPanel = ({
+export const ExportJsonPanel = <State extends object, SanitizedState extends object>({
+  apiPath,
   status,
   data,
   warnings,
   error,
   onRetry,
-}: ExportJsonPanelProps) => {
+}: ExportJsonPanelProps<SanitizedState>) => {
   const warningsAccordionId = useGeneratedHtmlId({ prefix: 'dashboardExportSourceWarnings' });
   const [isWarningsExpanded, setIsWarningsExpanded] = useState(false);
   const [showWarningsCallout, setShowWarningsCallout] = useState(true);
@@ -337,11 +345,11 @@ export const ExportJsonPanel = ({
     [data, status]
   );
 
-  // const openInConsoleRequest = useMemo(
-  //   () => buildCreateDashboardRequestForConsole(jsonValue),
-  //   [jsonValue]
-  // );
-  console.log({ status, data, warnings, error, onRetry });
+  const openInConsoleRequest = useMemo(
+    () => `POST kbn:${apiPath}\n${jsonValue}`,
+    [apiPath, jsonValue]
+  );
+  // console.log({ status, data, warnings, error, onRetry, openInConsoleRequest });
 
   return (
     <EuiFlexItem grow css={{ minHeight: 0 }}>
@@ -362,7 +370,7 @@ export const ExportJsonPanel = ({
           {status === 'loading' ? (
             <LoadingState />
           ) : status === 'success' ? (
-            <SuccessState openInConsoleRequest={undefined} jsonValue={jsonValue} />
+            <SuccessState openInConsoleRequest={openInConsoleRequest} jsonValue={jsonValue} />
           ) : (
             <ErrorState error={error} onRetry={onRetry} />
           )}

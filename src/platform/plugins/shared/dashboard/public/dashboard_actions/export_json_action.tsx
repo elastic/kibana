@@ -21,7 +21,6 @@ import type {
   PublishesTitle,
 } from '@kbn/presentation-publishing';
 import {
-  apiHasLibraryTransforms,
   apiHasSerializableState,
   apiHasType,
   apiHasUniqueId,
@@ -29,10 +28,10 @@ import {
   apiPublishesUnsavedChanges,
 } from '@kbn/presentation-publishing';
 import type { ShareActionIntents, ShareIntegration } from '@kbn/share-plugin/public/types';
-import { shareService } from '../services/kibana_services';
-import { ACTION_EXPORT_JSON } from './constants';
-import { getLocatorParams } from '../../../../../../../x-pack/platform/plugins/shared/lens/public/app_plugin/share_action';
 import { firstValueFrom } from 'rxjs';
+import { coreServices, embeddableService, shareService } from '../services/kibana_services';
+import { ACTION_EXPORT_JSON, DASHBOARD_EXPORT_GROUP } from './constants';
+import { compressToEncodedURIComponent } from 'lz-string';
 
 export type ExportJSONActionApi = HasLibraryTransforms &
   HasUniqueId &
@@ -49,19 +48,8 @@ const isApiCompatible = (api: unknown | null): api is ExportJSONActionApi =>
 export class ExportJSONAction implements Action<EmbeddableApiContext> {
   public readonly id = ACTION_EXPORT_JSON;
   public readonly type = ACTION_EXPORT_JSON;
-  public readonly order = 18;
-  public grouping = [
-    {
-      id: 'export_actions',
-      order: 100,
-      asContextMenu: true,
-      getIconType: () => 'upload',
-      getDisplayName: () =>
-        i18n.translate('dashboard.actions.exportDisplayName', {
-          defaultMessage: 'Export',
-        }),
-    },
-  ];
+  public readonly order = 1;
+  public grouping = [DASHBOARD_EXPORT_GROUP];
   private exportJsonIntent: ShareIntegration | undefined;
 
   public getIconType() {
@@ -93,6 +81,31 @@ export class ExportJSONAction implements Action<EmbeddableApiContext> {
     if (apiPublishesUnsavedChanges(embeddable)) {
       isDirty = await firstValueFrom(embeddable.hasUnsavedChanges$);
     }
+
+    // const test = await embeddableService.getEmbeddableDefinition(embeddable.type);
+    // console.log({ test });
+
+    // let apiExists = false;
+    // try {
+    //   const response = await fetch(`api/${embeddable.type}`, { method: 'HEAD' });
+    //   if (response.ok) apiExists = true;
+    // } catch (e) {
+    //   // ignore - API does not exist
+    // }
+
+    // if (apiExists) {
+    // const openInConsoleRequest = `api/${embeddable.type}`;
+    // const devToolsDataUri = openInConsoleRequest
+    //   ? compressToEncodedURIComponent(openInConsoleRequest)
+    //   : undefined;
+    // const consoleHref = await shareService?.url.locators.get('CONSOLE_APP_LOCATOR')?.getUrl({
+    //   loadFrom: `data:text/plain,${devToolsDataUri}`,
+    // });
+    // const canShowDevTools = Boolean(
+    //   coreServices.application?.capabilities?.dev_tools?.show && consoleHref !== undefined
+    // );
+    // }
+
     const baseOptions = {
       objectType: embeddable.type,
       objectId: embeddable.uuid,
