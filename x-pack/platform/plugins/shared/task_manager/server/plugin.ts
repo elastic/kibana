@@ -460,6 +460,10 @@ export class TaskManagerPlugin
         startingCapacity,
         apiKeyStrategy,
         eventLogger: this.taskEventLogger!,
+        // Forward Core's security authc service so task runners can hydrate
+        // scoped fake requests from opaque `requestState` bags persisted on
+        // tasks. See `opaque_request_state_spike.md`.
+        getCoreAuthc: () => security.authc,
       });
     }
 

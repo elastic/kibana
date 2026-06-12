@@ -24,6 +24,7 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { CoreAuthenticationService } from '@kbn/core-security-server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { asSpaceId } from '@kbn/core-spaces-common';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
@@ -138,6 +139,15 @@ type Opts = {
   getPollInterval: () => number;
   apiKeyStrategy: ApiKeyStrategy;
   eventLogger: TaskEventLogger;
+  /**
+   * Lazy accessor for Core's security authc service. Used at run time to
+   * hydrate a fake `KibanaRequest` from the task's opaque `requestState`
+   * (see `core.security.authc.hydrateRequest`). Optional: when not provided
+   * (e.g. very early bootstrap, or when no security implementation is
+   * registered), the runner falls back to the legacy api-key-based fake
+   * request path.
+   */
+  getCoreAuthc?: () => CoreAuthenticationService | undefined;
 } & Pick<Middleware, 'beforeRun' | 'beforeMarkRunning'>;
 
 export enum TaskRunResult {
@@ -194,6 +204,7 @@ export class TaskManagerRunner implements TaskRunner {
   private getPollInterval: () => number;
   private apiKeyStrategy: ApiKeyStrategy;
   private eventLogger: TaskEventLogger;
+  private getCoreAuthc?: () => CoreAuthenticationService | undefined;
   private isCancelled = false;
 
   /**
@@ -223,6 +234,7 @@ export class TaskManagerRunner implements TaskRunner {
     getPollInterval,
     apiKeyStrategy,
     eventLogger,
+    getCoreAuthc,
   }: Opts) {
     this.instance = asPending(sanitizeInstance(instance));
     this.definitions = definitions;
@@ -245,6 +257,7 @@ export class TaskManagerRunner implements TaskRunner {
     this.getPollInterval = getPollInterval;
     this.apiKeyStrategy = apiKeyStrategy;
     this.eventLogger = eventLogger;
+    this.getCoreAuthc = getCoreAuthc;
   }
 
   /**
@@ -432,14 +445,27 @@ export class TaskManagerRunner implements TaskRunner {
             'apiKey',
             'uiamApiKey',
             'userScope',
+            'requestState',
           ]);
-          const apiKeyForRequest = this.apiKeyStrategy.getApiKeyForFakeRequest(
-            modifiedContext.taskInstance
-          );
-          const fakeRequest = this.getFakeKibanaRequest(
-            apiKeyForRequest,
-            modifiedContext.taskInstance.userScope?.spaceId
-          );
+          // Prefer the Core/Security hydration path when the task carries an
+          // opaque `requestState` bag. This keeps identity hydration logic
+          // centralized in Core/Security and avoids Task-Manager-specific
+          // per-attribute knowledge (see opaque_request_state_spike.md).
+          let fakeRequest: KibanaRequest | undefined;
+          const requestState = modifiedContext.taskInstance.requestState;
+          if (requestState) {
+            const coreAuthc = this.getCoreAuthc?.();
+            fakeRequest = coreAuthc?.hydrateRequest(requestState);
+          }
+          if (!fakeRequest) {
+            const apiKeyForRequest = this.apiKeyStrategy.getApiKeyForFakeRequest(
+              modifiedContext.taskInstance
+            );
+            fakeRequest = this.getFakeKibanaRequest(
+              apiKeyForRequest,
+              modifiedContext.taskInstance.userScope?.spaceId
+            );
+          }
 
           const abortController = new AbortController();
 

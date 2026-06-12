@@ -17,6 +17,8 @@ export const getDefaultSecurityImplementation = (): CoreSecurityDelegateContract
     authc: {
       getCurrentUser: () => null,
       getRedactedSessionId: () => Promise.resolve(undefined),
+      serializeRequest: () => undefined,
+      hydrateRequest: () => undefined,
       apiKeys: {
         areAPIKeysEnabled: () => Promise.resolve(false),
         areCrossClusterAPIKeysEnabled: () => Promise.resolve(false),

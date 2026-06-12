@@ -17,6 +17,7 @@ import {
   taskSchemaV8,
   taskSchemaV9,
   taskSchemaV10,
+  taskSchemaV11,
 } from '../schemas/task';
 
 import { InstanceTaskCost } from '../../task';
@@ -159,6 +160,20 @@ export const taskModelVersions: SavedObjectsModelVersionMap = {
         };
       },
       create: taskSchemaV10,
+    },
+  },
+  '11': {
+    // Additive only: `requestState` is an opaque, not-indexed bag persisted by
+    // Task Manager and round-tripped to `core.security.authc.hydrateRequest()`
+    // at run time. No mappings change because the field is not indexed
+    // (taskMappings has `dynamic: false`).
+    changes: [],
+    schemas: {
+      // Permissive forward-compat: older nodes ignore unknown additive keys
+      // inside `requestState` rather than stripping or rejecting them, so the
+      // opaque bag round-trips safely during rolling upgrades.
+      forwardCompatibility: taskSchemaV11.extends({}, { unknowns: 'ignore' }),
+      create: taskSchemaV11,
     },
   },
 };
