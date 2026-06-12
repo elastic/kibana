@@ -202,7 +202,7 @@ The tool returns the generated previewId and the attachment metadata. Use the re
       const body = {
         ...RULE_PREVIEW_SHARED_DEFAULTS,
         ...rule,
-        from: 'now-1h',
+        from: `now-${interval}`,
         to: 'now',
         interval,
         invocationCount,

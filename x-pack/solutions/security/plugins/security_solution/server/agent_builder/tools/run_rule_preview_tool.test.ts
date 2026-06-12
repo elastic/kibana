@@ -196,7 +196,7 @@ describe('runRulePreviewTool', () => {
     });
   });
 
-  it('hardcodes from/to/enableLoggedRequests in the preview body', async () => {
+  it('sets from to now-{interval} so per-invocation ES query window matches the interval', async () => {
     const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
     (context.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
       status: ConfirmationStatus.accepted,
@@ -216,7 +216,8 @@ describe('runRulePreviewTool', () => {
     );
 
     const [, passedParams] = runRulePreviewMock.mock.calls[0];
-    expect(passedParams.body.from).toBe('now-1h');
+    // from must match the interval so getRuleRangeTuples produces the correct per-invocation window
+    expect(passedParams.body.from).toBe('now-5m');
     expect(passedParams.body.to).toBe('now');
     expect(passedParams.enableLoggedRequests).toBe(false);
   });
