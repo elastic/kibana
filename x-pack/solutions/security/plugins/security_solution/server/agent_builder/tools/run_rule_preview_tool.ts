@@ -148,13 +148,15 @@ The tool returns the generated previewId and the attachment metadata. Use the re
         };
       }
 
-      const intervalMs = parseDuration(interval);
-      if (!intervalMs) {
+      let intervalMs: number;
+      try {
+        intervalMs = parseDuration(interval);
+      } catch {
         return {
           results: [
             {
               type: ToolResultType.error,
-              data: { message: `Invalid --interval "${interval}".` },
+              data: { message: `Invalid --interval "${interval}". Use a duration like 5m, 1h, or 2d.` },
             },
           ],
         };

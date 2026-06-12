@@ -399,6 +399,24 @@ describe('runRulePreviewTool', () => {
   // Error paths — backend failures
   // ---------------------------------------------------------------------------
 
+  it('returns a clean error result for an invalid --interval (parseDuration throws)', async () => {
+    const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
+
+    const result = await tool.handler(
+      {
+        command:
+          'esql --query "FROM logs-* | LIMIT 10" --timeframe-start 2024-01-01T00:00:00.000Z --timeframe-end 2024-01-01T01:00:00.000Z --interval not-a-duration',
+      },
+      context
+    );
+
+    expect(runRulePreviewMock).not.toHaveBeenCalled();
+    const [firstResult] = getResults(result);
+    expect(firstResult.type).toBe(ToolResultType.error);
+    const data = (firstResult as { type: string; data: { message: string } }).data;
+    expect(data.message).toContain('not-a-duration');
+  });
+
   it('returns an error result for an invalid timeframe (unparseable datemath)', async () => {
     const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
 
