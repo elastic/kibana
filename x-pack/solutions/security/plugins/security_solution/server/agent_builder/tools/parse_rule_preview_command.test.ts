@@ -47,6 +47,24 @@ describe('tokenizeCommand', () => {
   it('strips surrounding whitespace', () => {
     expect(tokenizeCommand('  esql  --query  foo  ')).toEqual(['esql', '--query', 'foo']);
   });
+
+  it('preserves escaped double-quotes inside double-quoted strings', () => {
+    // \" inside a double-quoted string should become a literal " in the token
+    expect(tokenizeCommand('eql --query "process.name == \\"cmd.exe\\""')).toEqual([
+      'eql',
+      '--query',
+      'process.name == "cmd.exe"',
+    ]);
+  });
+
+  it('preserves escaped single-quotes inside single-quoted strings', () => {
+    // \' inside a single-quoted string should become a literal ' in the token
+    expect(tokenizeCommand("query --query 'it\\'s here'")).toEqual([
+      'query',
+      '--query',
+      "it's here",
+    ]);
+  });
 });
 
 // ---------------------------------------------------------------------------

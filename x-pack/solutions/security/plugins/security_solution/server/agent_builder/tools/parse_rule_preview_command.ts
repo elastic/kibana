@@ -36,8 +36,22 @@ export const tokenizeCommand = (command: string): string[] => {
   let current = '';
   let inDouble = false;
   let inSingle = false;
+  const chars = Array.from(command);
 
-  for (const ch of command) {
+  for (let i = 0; i < chars.length; i++) {
+    const ch = chars[i];
+
+    // Inside a quoted string, a backslash escapes the matching quote char or another backslash.
+    if (ch === '\\' && i + 1 < chars.length) {
+      const next = chars[i + 1];
+      if ((inDouble && (next === '"' || next === '\\')) ||
+          (inSingle && (next === "'" || next === '\\'))) {
+        current += next;
+        i++;
+        continue;
+      }
+    }
+
     if (ch === '"' && !inSingle) {
       inDouble = !inDouble;
     } else if (ch === "'" && !inDouble) {
