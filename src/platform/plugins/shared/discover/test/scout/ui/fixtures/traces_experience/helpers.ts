@@ -21,19 +21,21 @@ async function waitForTracesProfileApplied(
 ) {
   const { profileSpecificColumns } = pageObjects.tracesExperience.grid;
 
-  // Wait for every profile-specific column before checking render stability.
-  // Waiting for only the first column risks calling waitForDocTableRendered
-  // while the remaining columns are still being applied, which briefly resets
-  // data-render-complete and can cause the stability window to never be reached.
+  // Wait for every profile-specific column to be applied before asserting the
+  // grid has rendered. Waiting for only the first column risks moving on while
+  // the remaining columns are still being swapped in.
   for (const column of profileSpecificColumns) {
     await expect(pageObjects.discover.getColumnHeader(column)).toBeVisible({
       timeout: 30_000,
     });
   }
 
-  // Ensure the in-flight search / column swap finished
+  // The traces profile + APM init trigger more than one documents fetch, so
+  // data-render-complete legitimately flips back to false at unpredictable
+  // times. Wait for a functional end-state instead of a 2s-stable attribute
+  // (see #261438): search settled + the grid has rendered its first row.
   await pageObjects.discover.waitUntilSearchingHasFinished();
-  await pageObjects.discover.waitForDocTableRendered();
+  await expect(pageObjects.tracesExperience.grid.firstRow).toBeVisible({ timeout: 30_000 });
 }
 
 export async function expectTracesExperienceEnabled(

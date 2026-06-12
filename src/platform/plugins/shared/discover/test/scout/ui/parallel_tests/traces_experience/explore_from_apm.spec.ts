@@ -50,8 +50,7 @@ const APM_TIME_RANGE = {
   rangeTo: TRACES.DEFAULT_END_TIME,
 };
 
-// Failing: See https://github.com/elastic/kibana/issues/261438
-spaceTest.describe.skip(
+spaceTest.describe(
   'Traces in Discover - Explore from APM',
   {
     tag: [...tags.stateful.all, ...tags.serverless.observability.complete],
@@ -362,6 +361,7 @@ spaceTest.describe.skip(
 
         await spaceTest.step('verify traces experience loaded', async () => {
           await expectTracesExperienceEnabled(pageObjects);
+          await expect(page.testSubj.locator('discoverDocTable')).toBeVisible();
         });
       }
     );

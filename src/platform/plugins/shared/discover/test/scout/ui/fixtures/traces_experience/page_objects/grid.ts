@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Locator, ScoutPage } from '@kbn/scout';
+
 const TRACE_COLUMNS = [
   '@timestamp',
   'service.name',
@@ -20,11 +22,15 @@ const TRACE_COLUMNS = [
 export interface TracesGrid {
   readonly expectedColumns: readonly string[];
   readonly profileSpecificColumns: readonly string[];
+  readonly firstRow: Locator;
 }
 
-export function createTracesGrid(): TracesGrid {
+export function createTracesGrid(page: ScoutPage): TracesGrid {
   return {
     expectedColumns: TRACE_COLUMNS,
     profileSpecificColumns: TRACE_COLUMNS.filter((col) => col !== '@timestamp'),
+    firstRow: page.testSubj
+      .locator('discoverDocTable')
+      .locator('.euiDataGridRow[data-grid-visible-row-index="0"]'),
   };
 }
