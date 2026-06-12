@@ -71,7 +71,7 @@ describe('DocumentSummarySection', () => {
 
     const { getByTestId, container } = render(
       <TestProviders>
-        <DocumentSummarySection alertId="test-alert-id" getPromptContext={getPromptContext} />
+        <DocumentSummarySection documentId="test-document-id" getPromptContext={getPromptContext} />
       </TestProviders>
     );
 
@@ -92,7 +92,7 @@ describe('DocumentSummarySection', () => {
     const { getByTestId } = render(
       <TestProviders>
         <DocumentSummarySection
-          alertId="test-alert-id"
+          documentId="test-document-id"
           getPromptContext={getPromptContext}
           data-test-subj="custom-test-id"
         />

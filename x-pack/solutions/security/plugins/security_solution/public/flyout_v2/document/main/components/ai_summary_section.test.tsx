@@ -88,14 +88,14 @@ describe('AISummarySection', () => {
     expect(getByTestId(AI_SUMMARY_SECTION_TEST_ID)).toBeInTheDocument();
   });
 
-  it('forwards the alert id and prompt context derived from the document hit', async () => {
+  it('forwards the document id and prompt context derived from the document hit', async () => {
     const hit = createMockHit();
     render(<AISummarySection hit={hit} />);
 
     expect(mockDocumentSummarySection).toHaveBeenCalledTimes(1);
     const props = mockDocumentSummarySection.mock.calls[0][0];
 
-    expect(props.alertId).toBe(hit.raw._id);
+    expect(props.documentId).toBe(hit.raw._id);
     expect(props['data-test-subj']).toBe(AI_SUMMARY_SECTION_TEST_ID);
     expect(typeof props.getPromptContext).toBe('function');
 

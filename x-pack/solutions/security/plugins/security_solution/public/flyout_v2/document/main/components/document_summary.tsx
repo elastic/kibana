@@ -70,9 +70,9 @@ const generatedAtLabel = (timestamp: string) =>
 
 export interface DocumentSummaryProps {
   /**
-   * Id of the alert for which we will generate the summary
+   * Id of the document for which we will generate the summary
    */
-  alertId: string;
+  documentId: string;
   /**
    * Value of useKibana.services.application.capabilities.management.kibana.settings
    */
@@ -130,7 +130,7 @@ const formatTextToCopy = (summary: string, recommendedActions: string | undefine
  */
 export const DocumentSummary = memo(
   ({
-    alertId,
+    documentId,
     canSeeAdvancedSettings,
     defaultConnectorId,
     promptContext,
@@ -147,7 +147,7 @@ export const DocumentSummary = memo(
       isLoading,
       messageAndReplacements,
     } = useDocumentSummary({
-      alertId,
+      documentId,
       defaultConnectorId: defaultConnectorId || '',
       promptContext,
       showAnonymizedValues,

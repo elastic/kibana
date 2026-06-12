@@ -16,7 +16,7 @@ jest.mock('@kbn/elastic-assistant', () => ({
   useAssistantContext: jest.fn(),
 }));
 const args = {
-  alertId: '12345',
+  documentId: '12345',
   connectorId: '67890',
 };
 const createWrapper = () => {

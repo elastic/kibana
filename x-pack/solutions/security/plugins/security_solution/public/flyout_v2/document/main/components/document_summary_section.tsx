@@ -31,9 +31,9 @@ const AI_SUMMARY = i18n.translate('xpack.securitySolution.alertSummary.aiSummary
 
 export interface DocumentSummarySectionProps {
   /**
-   * Id of the alert the section is summarising.
+   * Id of the document the section is summarising.
    */
-  alertId: string;
+  documentId: string;
   /**
    * The Elastic AI Assistant invokes this function to retrieve the context
    * data, which is included in the prompt (e.g. the alert's fields).
@@ -61,7 +61,7 @@ export interface DocumentSummarySectionProps {
  */
 export const DocumentSummarySection = memo(
   ({
-    alertId,
+    documentId,
     getPromptContext,
     'data-test-subj': dataTestSubj = DOCUMENT_SUMMARY_SECTION_TEST_ID,
   }: DocumentSummarySectionProps) => {
@@ -82,10 +82,10 @@ export const DocumentSummarySection = memo(
         category: 'alert',
         description: 'Alert summary',
         getPromptContext,
-        id: `contextId-${alertId}`,
+        id: `contextId-${documentId}`,
         tooltip: '', // empty as tooltip is only used within Assistant, but in the flyout
       }),
-      [alertId, getPromptContext]
+      [documentId, getPromptContext]
     );
 
     const accordionId = useGeneratedHtmlId({ prefix: 'aiSummaryAccordion' });
@@ -102,7 +102,7 @@ export const DocumentSummarySection = memo(
       <EuiSkeletonText lines={3} size="s" />
     ) : (
       <DocumentSummary
-        alertId={alertId}
+        documentId={documentId}
         canSeeAdvancedSettings={canSeeAdvancedSettings}
         defaultConnectorId={defaultConnectorId}
         promptContext={promptContext}
