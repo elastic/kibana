@@ -6,6 +6,7 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
 import { EXTENDED_TIMEOUT } from '../constants';
 
 export interface TraceWaterfallFlyout {
@@ -57,16 +58,31 @@ export function createTraceWaterfallFlyout(page: ScoutPage): TraceWaterfallFlyou
         const valueCell = aboutTableGrid.locator(
           '[data-gridcell-column-id="value"][data-gridcell-row-index="0"]'
         );
-        await valueCell.scrollIntoViewIfNeeded();
-        await valueCell.hover();
-        await valueCell.click();
 
-        const expandButton = valueCell.getByTestId('euiDataGridCellExpandButton');
-        await expandButton.waitFor({ state: 'visible' });
-        await expandButton.scrollIntoViewIfNeeded();
-        await expandButton.hover();
-        await expandButton.click();
-        await cellPopover.waitFor({ state: 'visible' });
+        // The EuiDataGrid cell action buttons are hover-revealed and start as
+        // `aria-hidden`. On slow targets (e.g. serverless) the grid re-renders
+        // mid-interaction, detaching the expand button before the click lands or
+        // before the popover opens. Retry the whole reveal -> click -> open
+        // sequence, re-acquiring the button each attempt, mirroring the FTR
+        // `clickCellExpandButton` retry pattern.
+        await expect(async () => {
+          if (await cellPopover.isVisible()) {
+            return;
+          }
+
+          await valueCell.scrollIntoViewIfNeeded();
+          await valueCell.hover();
+          // Clicking focuses the cell so its action buttons stay visible
+          // (aria-hidden=false) instead of flickering during re-renders.
+          await valueCell.click();
+
+          const expandButton = valueCell.getByTestId('euiDataGridCellExpandButton');
+          await expandButton.scrollIntoViewIfNeeded();
+          await expandButton.hover();
+          await expandButton.click();
+
+          await cellPopover.waitFor({ state: 'visible', timeout: 5000 });
+        }).toPass({ timeout: EXTENDED_TIMEOUT });
       },
 
       async ensureCellPopoverOnTop() {
