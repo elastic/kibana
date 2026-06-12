@@ -440,7 +440,6 @@ export class TaskManagerRunner implements TaskRunner {
             apiKey: apiKeyForRequest,
             spaceId: modifiedContext.taskInstance.userScope?.spaceId,
             userProfileId,
-            basePathService: this.basePathService,
             enrichFakeRequest: this.enrichFakeRequest,
           });
 

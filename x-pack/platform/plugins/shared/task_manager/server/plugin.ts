@@ -362,7 +362,7 @@ export class TaskManagerPlugin
     core: CoreStart,
     { cloud, licensing }: TaskManagerPluginsStart
   ): TaskManagerStartContract {
-    const { http, savedObjects, elasticsearch, executionContext, security } = core;
+    const { savedObjects, elasticsearch, executionContext, security } = core;
     const enrichFakeRequest = this.enrichFakeRequest;
     this.licenseSubscriber = new LicenseSubscriber(licensing.license$);
 

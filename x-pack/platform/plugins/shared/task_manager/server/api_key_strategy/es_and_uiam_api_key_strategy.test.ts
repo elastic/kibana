@@ -257,7 +257,6 @@ describe('EsAndUiamApiKeyStrategy', () => {
     test('persists userProfileId resolved from the request on userScope', async () => {
       const { strategy, coreStart } = createStrategy();
       const request = httpServerMock.createKibanaRequest();
-      const basePath = coreStart.http.basePath;
 
       const esKeyMap = new Map();
       esKeyMap.set('task-1', {
@@ -276,7 +275,7 @@ describe('EsAndUiamApiKeyStrategy', () => {
       });
 
       const tasks = [{ id: 'task-1', taskType: 'report', params: {}, state: {} }];
-      const result = await strategy.grantApiKeys(tasks, request, coreStart.security, basePath);
+      const result = await strategy.grantApiKeys(tasks, request, coreStart.security);
 
       expect(result.get('task-1')?.userScope.userProfileId).toBe('u_profile_456');
     });
@@ -284,7 +283,6 @@ describe('EsAndUiamApiKeyStrategy', () => {
     test('leaves userProfileId undefined when the resolved user has no profile_uid', async () => {
       const { strategy, coreStart } = createStrategy();
       const request = httpServerMock.createKibanaRequest();
-      const basePath = coreStart.http.basePath;
 
       const esKeyMap = new Map();
       esKeyMap.set('task-1', {
@@ -298,7 +296,7 @@ describe('EsAndUiamApiKeyStrategy', () => {
       });
 
       const tasks = [{ id: 'task-1', taskType: 'report', params: {}, state: {} }];
-      const result = await strategy.grantApiKeys(tasks, request, coreStart.security, basePath);
+      const result = await strategy.grantApiKeys(tasks, request, coreStart.security);
 
       expect(result.get('task-1')?.userScope.userProfileId).toBeUndefined();
     });
