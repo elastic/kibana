@@ -417,6 +417,30 @@ describe('runRulePreviewTool', () => {
     expect(data.message).toContain('not-a-duration');
   });
 
+  it('returns a clean error for structurally invalid threat_mapping entries that bypass CLI validation', async () => {
+    // The CLI parser only checks Array.isArray(threatMapping). The route Zod schema
+    // also validates entry structure: type must be literal 'mapping'. This test proves
+    // the tool validates the body before calling runRulePreview.
+    const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
+    (context.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
+      status: ConfirmationStatus.accepted,
+    });
+
+    const result = await tool.handler(
+      {
+        command:
+          'threat_match --query "*:*" --threat-query "*:*" --threat-index ti-* ' +
+          "--threat-mapping '[{\"entries\":[{\"field\":\"src.ip\",\"type\":\"wrong\",\"value\":\"dst.ip\"}]}]' " +
+          '--timeframe-start 2024-01-01T00:00:00.000Z --timeframe-end 2024-01-01T01:00:00.000Z',
+      },
+      context
+    );
+
+    expect(runRulePreviewMock).not.toHaveBeenCalled();
+    const [firstResult] = getResults(result);
+    expect(firstResult.type).toBe(ToolResultType.error);
+  });
+
   it('returns an error result for an invalid timeframe (unparseable datemath)', async () => {
     const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
 

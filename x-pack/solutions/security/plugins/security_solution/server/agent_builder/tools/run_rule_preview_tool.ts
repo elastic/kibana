@@ -12,7 +12,7 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
-import type { RulePreviewRequestBody } from '../../../common/api/detection_engine';
+import { RulePreviewRequestBody } from '../../../common/api/detection_engine';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
 import { securityTool } from './constants';
 import type { RunRulePreviewDeps } from '../../lib/detection_engine/rule_preview/api/preview_rules/run_rule_preview';
@@ -201,7 +201,7 @@ The tool returns the generated previewId and the attachment metadata. Use the re
         }
       }
 
-      const body = {
+      const rawBody = {
         ...RULE_PREVIEW_SHARED_DEFAULTS,
         ...rule,
         from: `now-${interval}`,
@@ -209,7 +209,22 @@ The tool returns the generated previewId and the attachment metadata. Use the re
         interval,
         invocationCount,
         timeframeEnd: end.toISOString(),
-      } as RulePreviewRequestBody;
+      };
+
+      const validation = RulePreviewRequestBody.safeParse(rawBody);
+      if (!validation.success) {
+        const messages = validation.error.issues.map((i) => i.message).join('; ');
+        return {
+          results: [
+            {
+              type: ToolResultType.error,
+              data: { message: `Invalid rule parameters: ${messages}` },
+            },
+          ],
+        };
+      }
+
+      const body = rawBody as RulePreviewRequestBody;
 
       const [coreStart, startPlugins] = await deps.getStartServices();
       const uiSettingsClient = coreStart.uiSettings.asScopedToClient(savedObjectsClient);
