@@ -19,22 +19,30 @@ Significant Event promoted
 │  Each hypothesis has a prior confidence score           │
 └─────────────────┬───────────────────────────────────────┘
                   │  hypotheses[0..N-1]
-        ┌─────────┴───────────────────────────────────┐
-        │         parallel (up to 5 branches)          │
-        │                                              │
-   [h0] ai.agent  [h1] ai.agent  ...  [h4] ai.agent   │
-   (Haiku)        (Haiku)             (Haiku)          │
-   gather + judge  gather + judge      gather + judge  │
-        │                                              │
-        └─────────────────────┬────────────────────────┘
-                              │  merge
-                              ▼
-              ┌───────────────────────────────┐
-              │  Step 3: Synthesis  (Sonnet)   │
-              │  Rank hypotheses               │
-              │  Produce RCA + remediation     │
-              │  Write memory + write-back     │
-              └───────────────────────────────┘
+        ┌─────────┴────────────────────────────────────────────┐
+        │              parallel (up to 5 branches)              │
+        │                                                       │
+        │  [per branch]                                         │
+        │  ai.agent — gather (Haiku)                           │
+        │  Collects raw evidence: ES|QL, memory, KIs, MCP      │
+        │      ↓                                                │
+        │  ai.agent — review (Haiku)                           │
+        │  Judges evidence quality, verdicts the hypothesis     │
+        │      ↓                                                │
+        │  ◇ decision: forward | discard                       │
+        │    discard → branch produces discard record only      │
+        │    forward → branch produces full gather+review result│
+        │                                                       │
+        └──────────────────────────┬────────────────────────────┘
+                                   │  merge
+                                   ▼
+               ┌─────────────────────────────────────┐
+               │  Step 3: Synthesis  (Sonnet)         │
+               │  Receives forwarded results only      │
+               │  Ranks, produces RCA + remediation    │
+               │  Records discarded hypotheses         │
+               │  Writes memory + write-back           │
+               └─────────────────────────────────────┘
 ```
 
 ---
@@ -69,9 +77,10 @@ streams plugin server/
     investigation_service.ts              — trigger workflow after verdict promotion
   agent_builder/skills/investigation/
     investigation_context_skill.ts        — context + hypothesis generation prompt
-    hypothesis_investigation_skill.ts     — evidence gather + judge prompt
+    hypothesis_gather_skill.ts            — evidence gathering prompt (no verdict)
+    hypothesis_review_skill.ts            — evidence review + forward/discard gate
     investigation_synthesis_skill.ts      — rank + write-back prompt
-  agent_builder/register.ts              — register 3 new agents (gated on flag)
+  agent_builder/register.ts              — register 4 new agents (gated on flag)
   lib/memory/install_managed_workflows.ts — add investigation workflow to install list
 ```
 
@@ -82,12 +91,13 @@ streams plugin server/
 | Step | Agent ID | Model | Rationale |
 |------|----------|-------|-----------|
 | Build context | `sigevents.investigation.context` | **Sonnet** | Memory retrieval, reasoning, hypothesis quality |
-| Investigate hypothesis ×5 | `sigevents.investigation.hypothesis` | **Haiku** | Mechanical: run ES\|QL, read KIs, structured judgment — high volume |
-| Synthesis | `sigevents.investigation.synthesis` | **Sonnet** | Integrates all results, writes memory, final RCA — quality matters |
+| Gather evidence ×5 | `sigevents.investigation.gather` | **Haiku** | Mechanical tool-calling: ES\|QL, memory lookups, KI search |
+| Review evidence ×5 | `sigevents.investigation.review` | **Haiku** | Structured judgment against collected evidence — still in the hot path |
+| Synthesis | `sigevents.investigation.synthesis` | **Sonnet** | Integrates forwarded results, writes memory, final RCA — quality matters |
 
-The parallel hypothesis branches are where tokens concentrate (up to 5× Haiku, each
-doing multiple tool calls). Haiku keeps cost bounded; structured `schema:` output means
-quality doesn't degrade — the Sonnet synthesis step is the reasoning layer.
+The parallel branches (gather + review × up to 5) are where tokens concentrate. Both
+steps use Haiku; the structured `schema:` output keeps quality adequate — the Sonnet
+synthesis step is the reasoning layer for the final answer.
 
 ---
 
@@ -149,9 +159,9 @@ const hypothesisProposalSchema = z.object({
   // This is intentionally subjective; the evidence step will update it.
 
   suggested_queries: z.array(z.string()).max(4),
-  // Concrete leads for the hypothesis investigator: ES|QL fragments,
-  // service names to look up in memory, KI search terms, etc.
-  // The investigator is not bound to these but should start here.
+  // Concrete leads for the gather agent: ES|QL fragments, service names
+  // to look up in memory, KI search terms, MCP calls to try.
+  // The gather agent is not bound to these but should start here.
 });
 
 const contextOutputSchema = z.object({
@@ -179,70 +189,114 @@ export type ContextOutput = z.infer<typeof contextOutputSchema>;
 
 ---
 
-### 4.3 Step 2 — Hypothesis Investigator Output (per branch)
+### 4.3a Step 2a — Gather Agent Output (per branch)
 
-One instance runs per hypothesis in parallel. Combines evidence gathering and judgment
-in a single agent to avoid two round-trips per branch. The prompt instructs the agent
-to return `out_of_reach` rather than guess when the decisive signal is inaccessible —
-never a plausible-but-unsupported conclusion.
+The gather agent's only job is to collect raw evidence. It does not render a verdict —
+that belongs to the review step. The prompt should instruct it to be thorough and
+honest: record what it tried, what it found, and what it couldn't reach.
 
 ```typescript
 const evidenceItemSchema = z.object({
   source: z.enum(['esql', 'memory', 'ki', 'mcp', 'none']),
   description: z.string(),
   // What was queried or read, and what was found (or not found).
+  // Be specific: include query shape, row counts, or the exact absence message.
 
-  supports: z.enum(['supports', 'refutes', 'neutral']),
-  // How this piece of evidence relates to the hypothesis being tested.
-  // Use 'neutral' for context that doesn't directly confirm or deny.
+  relevance: z.enum(['supporting', 'refuting', 'neutral', 'unreachable']),
+  // supporting   — data is consistent with the hypothesis being true.
+  // refuting     — data contradicts the hypothesis.
+  // neutral      — context that doesn't confirm or deny.
+  // unreachable  — the source was attempted but access was blocked.
+  //                Include a description of the specific blocker.
 });
 
-const hypothesisResultSchema = z.object({
+const gatherOutputSchema = z.object({
   hypothesis_id: z.string(),
   // Must match the id from hypothesisProposalSchema.
+
+  evidence: z.array(evidenceItemSchema).max(12),
+  // Everything attempted, including failed lookups (mark as 'unreachable').
+  // Do not omit refuting evidence or dead ends — the review agent needs them.
+
+  gaps_found: z.array(z.string()),
+  // Specific access blockers: "no GitHub connector", "ES|QL returned no rows
+  // for stream foo.bar — stream may not exist in this space", etc.
+  // Populated whether or not the overall gather was productive.
+
+  gather_summary: z.string(),
+  // 2–4 sentence summary of what was tried and what the evidence shows so far.
+  // Written for the review agent, not the end user.
+});
+
+export type GatherOutput = z.infer<typeof gatherOutputSchema>;
+```
+
+---
+
+### 4.3b Step 2b — Review Agent Output (per branch)
+
+The review agent receives the hypothesis proposal and the gather output. It verdicts the
+hypothesis and decides whether the result is worth forwarding to synthesis. A discarded
+hypothesis does not appear in the synthesis context at all — the synthesis agent only
+sees forwarded results. Discarded entries are preserved in the final
+`InvestigationResult.discarded_hypotheses` field for auditability.
+
+```typescript
+const reviewOutputSchema = z.object({
+  hypothesis_id: z.string(),
+  // Must match the id from hypothesisProposalSchema.
+
+  decision: z.enum(['forward', 'discard']),
+  // forward — evidence is substantive enough to include in synthesis ranking.
+  // discard — cut this hypothesis; do not pass to synthesis.
+  //
+  // Discard when ALL of the following are true:
+  //   (a) no evidence source returned useful data (all 'unreachable' or 'none'), OR
+  //       the evidence so clearly refutes the hypothesis that ranking it adds no signal;
+  //   (b) including it would not help the synthesis agent understand the event better.
+  // Do NOT discard a clearly-refuted hypothesis if the refutation itself is informative
+  // (e.g. "we checked and it was NOT the deploy" is worth surfacing).
+
+  discard_reason: z.string().optional(),
+  // Required when decision === 'discard'. One sentence explaining the cut.
+  // Examples:
+  //   "All three data sources were unreachable — no GitHub connector, ES|QL
+  //    returned zero rows, memory has no pages for this service."
+  //   "Evidence strongly and unambiguously refutes the hypothesis with nothing
+  //    new to add beyond what the context agent already knew."
 
   verdict: z.enum(['supported', 'refuted', 'inconclusive', 'out_of_reach']),
   // supported     — evidence clearly confirms the hypothesis.
   // refuted       — evidence clearly contradicts it.
   // inconclusive  — evidence gathered but neither confirms nor denies.
-  // out_of_reach  — the decisive signal exists but the agent cannot access it
-  //                 (no connector, behind VPN, private repo, etc.).
-  //                 Never use this as a fallback when evidence is merely weak;
-  //                 it means a specific access boundary blocked the investigation.
+  // out_of_reach  — the decisive signal exists but was behind an access boundary.
+  //                 Use ONLY when a specific blocker prevented reaching the signal;
+  //                 not as a fallback when evidence is merely weak or sparse.
 
   posterior_confidence: z.number().min(0).max(1),
-  // Updated belief after gathering evidence. Reflects the strength of the
-  // collected evidence, not just the prior. For 'out_of_reach', set to the
-  // prior_confidence (unchanged — we learned nothing). For 'refuted', should
-  // be near 0. For 'supported' with strong evidence, near 1.
-
-  evidence: z.array(evidenceItemSchema).max(10),
-  // All evidence gathered, including refuting evidence. Do not cherry-pick.
-  // Empty only if no relevant data sources were reachable at all.
+  // Updated belief in the hypothesis being the root cause, after reviewing
+  // the gathered evidence. Should reflect both what was found and what wasn't:
+  //   refuted with strong evidence → near 0
+  //   supported with strong evidence → near 1
+  //   out_of_reach (nothing learned) → match the prior_confidence from the proposal
+  //   inconclusive (partial data) → somewhere in between
 
   reasoning: z.string(),
-  // Short explanation of how the evidence led to the verdict. Should make
-  // the posterior_confidence feel calibrated to a reader who sees both.
-  // If out_of_reach, name the specific blocker: "No GitHub connector is
-  // configured — cannot check commits around the incident window."
-
-  gaps_found: z.array(z.string()),
-  // Specific access blockers encountered. Populated when verdict is
-  // 'out_of_reach'; may also have entries for 'inconclusive' when the
-  // agent reached some sources but not others.
+  // How the evidence led to the verdict and the forward/discard decision.
+  // Must name the specific blocker when verdict is 'out_of_reach'.
+  // Should make posterior_confidence feel calibrated to a reader who sees both.
 });
 
-// The branch output is null when the branch was skipped (hypothesis index
-// out of bounds). The synthesis step filters these before ranking.
-export type HypothesisResult = z.infer<typeof hypothesisResultSchema> | null;
+export type ReviewOutput = z.infer<typeof reviewOutputSchema>;
 ```
 
 ---
 
 ### 4.4 Step 3 — Synthesis Agent Output
 
-Receives context output + all hypothesis results (nulls filtered). Produces the final
-investigation result that gets written back to the Discovery document and to memory.
+Receives the context output and **only the forwarded** branch results (gather + review
+pairs where `decision === 'forward'`). Discarded entries are excluded from the synthesis
+context entirely. The synthesis agent records them in the output for auditability.
 
 ```typescript
 const remediationOptionSchema = z.object({
@@ -257,7 +311,6 @@ const remediationOptionSchema = z.object({
   // the proposed fix. Must reference specific findings, not generic advice.
 
   risk_level: z.enum(['low', 'medium', 'high']),
-  // Rough assessment of how disruptive or reversible the action is.
   // low    — read-only, dry-run, or clearly non-destructive (e.g. view logs)
   // medium — restarts, config changes with rollback path
   // high   — rollbacks, scaling operations, data mutations
@@ -271,21 +324,27 @@ const rankedHypothesisSchema = z.object({
   rank: z.number().int().min(1),
   hypothesis_id: z.string(),
   statement: z.string(),
-  // Copied from the proposal; may be refined by the synthesis agent if
-  // the evidence revealed a more precise formulation.
+  // Copied from the proposal; may be refined if evidence warranted it.
 
   verdict: z.enum(['supported', 'refuted', 'inconclusive', 'out_of_reach']),
-  prior_confidence: z.number().min(0).max(1),   // from context agent
-  posterior_confidence: z.number().min(0).max(1), // from hypothesis investigator
+  prior_confidence: z.number().min(0).max(1),    // from context agent proposal
+  posterior_confidence: z.number().min(0).max(1), // from review agent
   evidence_summary: z.string(),
-  // One-paragraph digest of what was found. Referenced in the UI.
+  // One-paragraph digest of what was found. Surfaced in the UI.
+});
+
+const discardedHypothesisSchema = z.object({
+  hypothesis_id: z.string(),
+  statement: z.string(),
+  discard_reason: z.string(),
+  // Copied from the review agent's discard_reason.
 });
 
 const investigationResultSchema = z.object({
   root_cause: z.string(),
   // The top-supported hypothesis statement, refined if evidence warranted.
   // Set to "Undetermined — see gaps_found" if no hypothesis was supported
-  // or all hypotheses were out_of_reach.
+  // or all forwarded hypotheses were out_of_reach.
 
   confidence: z.number().min(0).max(1),
   // The synthesis agent's overall confidence in the root_cause field.
@@ -297,20 +356,25 @@ const investigationResultSchema = z.object({
   // Discovery Agent's original impact field.
 
   ranked_hypotheses: z.array(rankedHypothesisSchema),
-  // All non-null hypothesis results, ranked best-to-worst by
-  // posterior_confidence * (verdict === 'supported' ? 1 : 0.5).
+  // Forwarded hypotheses only, ranked best-to-worst by
+  // posterior_confidence weighted by verdict
+  // (supported > inconclusive > out_of_reach > refuted).
+
+  discarded_hypotheses: z.array(discardedHypothesisSchema),
+  // Hypotheses the review agent discarded. Not ranked; recorded for audit.
+  // Empty when all hypotheses were forwarded.
 
   remediation_options: z.array(remediationOptionSchema),
   // Only present if root_cause is not "Undetermined". Empty array otherwise.
   // Should be empty rather than generic advice when evidence is insufficient.
 
   gaps_found: z.array(z.string()),
-  // Union of all hypothesis gaps_found + context-level known_gaps.
+  // Union of all gather-step gaps_found + context-level known_gaps.
   // Surfaced in the UI so users know what to connect or provide access to.
 
   investigation_complete: z.boolean(),
-  // false when all hypotheses were out_of_reach — signals that access
-  // gaps blocked the full investigation, not that the agent gave up.
+  // false when all hypotheses were either discarded or out_of_reach — signals
+  // that access gaps blocked the full investigation, not that the agent gave up.
 
   memory_pages_written: z.array(z.string()),
   // page_name values written to memory in this run. For audit / debugging.
@@ -353,13 +417,18 @@ Body: InvestigationResult
 
 ## 6. Workflow YAML
 
+Each parallel branch runs two sequential agents: gather then review. The review
+agent's `decision` field acts as the gate — the synthesis prompt filters to
+`decision === 'forward'` entries; discarded entries populate `discarded_hypotheses`.
+
 ```yaml
 version: "1"
 name: Investigation
 description: >
   Root cause analysis for a promoted Significant Event. Runs a context agent to
-  generate hypotheses, investigates each in parallel with Haiku, then synthesises
-  results back to the Discovery document and memory.
+  generate hypotheses, then for each hypothesis: gathers evidence (Haiku) and
+  reviews it (Haiku). Reviewed results are merged and synthesised (Sonnet) back
+  to the Discovery document and memory.
 enabled: true
 settings:
   timeout: "45m"
@@ -411,114 +480,209 @@ steps:
     on-failure:
       continue: false
 
-  # ── Step 2: Parallel hypothesis investigation (Haiku) ────────────────────────
+  # ── Step 2: Parallel gather + review per hypothesis (Haiku × 2 per branch) ──
   - name: investigate_hypotheses
     type: parallel
     branches:
       - name: hypothesis_0
         steps:
-          - name: investigate
+          - name: gather
             type: ai.agent
             if: "{{ steps.build_context.output.hypotheses | size >= 1 }}"
-            agent-id: sigevents.investigation.hypothesis
+            agent-id: sigevents.investigation.gather
             connector-id: ".anthropic-claude-4.5-haiku-chat_completion"
             with:
-              timeout: 480s
+              timeout: 360s
               message: |
-                Gather evidence and judge whether this hypothesis explains the event.
-                Return 'out_of_reach' if the decisive signal is behind an access
-                boundary you cannot cross — do not guess. Include all evidence
-                gathered, both supporting and refuting.
+                Collect all available evidence for this hypothesis. Do not render a
+                verdict — that is the next step's job. Record everything you tried,
+                including failed lookups and access blockers. Be thorough and honest.
 
                 Hypothesis: {{ steps.build_context.output.hypotheses[0] | json }}
                 Event context: {{ steps.build_context.output.context_summary }}
                 Streams: {{ inputs.stream_names | json }}
               schema:
-                # → hypothesisResultSchema (see §4.3)
+                # → gatherOutputSchema (see §4.3a)
+
+          - name: review
+            type: ai.agent
+            if: "{{ steps.build_context.output.hypotheses | size >= 1 }}"
+            agent-id: sigevents.investigation.review
+            connector-id: ".anthropic-claude-4.5-haiku-chat_completion"
+            with:
+              timeout: 180s
+              message: |
+                Review the gathered evidence and verdict the hypothesis.
+                Decide whether to forward it to synthesis or discard it.
+                Discard only when the evidence is so thin or so clearly refuted
+                that including it would add no signal to the final ranking.
+                A clearly-refuted hypothesis is still worth forwarding if the
+                refutation itself is informative.
+
+                Hypothesis: {{ steps.build_context.output.hypotheses[0] | json }}
+                Gathered evidence: {{ steps.hypothesis_0.gather.output | json }}
+              schema:
+                # → reviewOutputSchema (see §4.3b)
 
       - name: hypothesis_1
         steps:
-          - name: investigate
+          - name: gather
             type: ai.agent
             if: "{{ steps.build_context.output.hypotheses | size >= 2 }}"
-            agent-id: sigevents.investigation.hypothesis
+            agent-id: sigevents.investigation.gather
             connector-id: ".anthropic-claude-4.5-haiku-chat_completion"
             with:
-              timeout: 480s
+              timeout: 360s
               message: |
-                Gather evidence and judge whether this hypothesis explains the event.
-                Return 'out_of_reach' if the decisive signal is behind an access
-                boundary you cannot cross — do not guess. Include all evidence
-                gathered, both supporting and refuting.
+                Collect all available evidence for this hypothesis. Do not render a
+                verdict — that is the next step's job. Record everything you tried,
+                including failed lookups and access blockers. Be thorough and honest.
 
                 Hypothesis: {{ steps.build_context.output.hypotheses[1] | json }}
                 Event context: {{ steps.build_context.output.context_summary }}
                 Streams: {{ inputs.stream_names | json }}
               schema:
-                # → hypothesisResultSchema
+                # → gatherOutputSchema
+
+          - name: review
+            type: ai.agent
+            if: "{{ steps.build_context.output.hypotheses | size >= 2 }}"
+            agent-id: sigevents.investigation.review
+            connector-id: ".anthropic-claude-4.5-haiku-chat_completion"
+            with:
+              timeout: 180s
+              message: |
+                Review the gathered evidence and verdict the hypothesis.
+                Decide whether to forward it to synthesis or discard it.
+                Discard only when the evidence is so thin or so clearly refuted
+                that including it would add no signal to the final ranking.
+                A clearly-refuted hypothesis is still worth forwarding if the
+                refutation itself is informative.
+
+                Hypothesis: {{ steps.build_context.output.hypotheses[1] | json }}
+                Gathered evidence: {{ steps.hypothesis_1.gather.output | json }}
+              schema:
+                # → reviewOutputSchema
 
       - name: hypothesis_2
         steps:
-          - name: investigate
+          - name: gather
             type: ai.agent
             if: "{{ steps.build_context.output.hypotheses | size >= 3 }}"
-            agent-id: sigevents.investigation.hypothesis
+            agent-id: sigevents.investigation.gather
             connector-id: ".anthropic-claude-4.5-haiku-chat_completion"
             with:
-              timeout: 480s
+              timeout: 360s
               message: |
-                Gather evidence and judge whether this hypothesis explains the event.
-                Return 'out_of_reach' if the decisive signal is behind an access
-                boundary you cannot cross — do not guess. Include all evidence
-                gathered, both supporting and refuting.
+                Collect all available evidence for this hypothesis. Do not render a
+                verdict — that is the next step's job. Record everything you tried,
+                including failed lookups and access blockers. Be thorough and honest.
 
                 Hypothesis: {{ steps.build_context.output.hypotheses[2] | json }}
                 Event context: {{ steps.build_context.output.context_summary }}
                 Streams: {{ inputs.stream_names | json }}
               schema:
-                # → hypothesisResultSchema
+                # → gatherOutputSchema
+
+          - name: review
+            type: ai.agent
+            if: "{{ steps.build_context.output.hypotheses | size >= 3 }}"
+            agent-id: sigevents.investigation.review
+            connector-id: ".anthropic-claude-4.5-haiku-chat_completion"
+            with:
+              timeout: 180s
+              message: |
+                Review the gathered evidence and verdict the hypothesis.
+                Decide whether to forward it to synthesis or discard it.
+                Discard only when the evidence is so thin or so clearly refuted
+                that including it would add no signal to the final ranking.
+                A clearly-refuted hypothesis is still worth forwarding if the
+                refutation itself is informative.
+
+                Hypothesis: {{ steps.build_context.output.hypotheses[2] | json }}
+                Gathered evidence: {{ steps.hypothesis_2.gather.output | json }}
+              schema:
+                # → reviewOutputSchema
 
       - name: hypothesis_3
         steps:
-          - name: investigate
+          - name: gather
             type: ai.agent
             if: "{{ steps.build_context.output.hypotheses | size >= 4 }}"
-            agent-id: sigevents.investigation.hypothesis
+            agent-id: sigevents.investigation.gather
             connector-id: ".anthropic-claude-4.5-haiku-chat_completion"
             with:
-              timeout: 480s
+              timeout: 360s
               message: |
-                Gather evidence and judge whether this hypothesis explains the event.
-                Return 'out_of_reach' if the decisive signal is behind an access
-                boundary you cannot cross — do not guess. Include all evidence
-                gathered, both supporting and refuting.
+                Collect all available evidence for this hypothesis. Do not render a
+                verdict — that is the next step's job. Record everything you tried,
+                including failed lookups and access blockers. Be thorough and honest.
 
                 Hypothesis: {{ steps.build_context.output.hypotheses[3] | json }}
                 Event context: {{ steps.build_context.output.context_summary }}
                 Streams: {{ inputs.stream_names | json }}
               schema:
-                # → hypothesisResultSchema
+                # → gatherOutputSchema
+
+          - name: review
+            type: ai.agent
+            if: "{{ steps.build_context.output.hypotheses | size >= 4 }}"
+            agent-id: sigevents.investigation.review
+            connector-id: ".anthropic-claude-4.5-haiku-chat_completion"
+            with:
+              timeout: 180s
+              message: |
+                Review the gathered evidence and verdict the hypothesis.
+                Decide whether to forward it to synthesis or discard it.
+                Discard only when the evidence is so thin or so clearly refuted
+                that including it would add no signal to the final ranking.
+                A clearly-refuted hypothesis is still worth forwarding if the
+                refutation itself is informative.
+
+                Hypothesis: {{ steps.build_context.output.hypotheses[3] | json }}
+                Gathered evidence: {{ steps.hypothesis_3.gather.output | json }}
+              schema:
+                # → reviewOutputSchema
 
       - name: hypothesis_4
         steps:
-          - name: investigate
+          - name: gather
             type: ai.agent
             if: "{{ steps.build_context.output.hypotheses | size >= 5 }}"
-            agent-id: sigevents.investigation.hypothesis
+            agent-id: sigevents.investigation.gather
             connector-id: ".anthropic-claude-4.5-haiku-chat_completion"
             with:
-              timeout: 480s
+              timeout: 360s
               message: |
-                Gather evidence and judge whether this hypothesis explains the event.
-                Return 'out_of_reach' if the decisive signal is behind an access
-                boundary you cannot cross — do not guess. Include all evidence
-                gathered, both supporting and refuting.
+                Collect all available evidence for this hypothesis. Do not render a
+                verdict — that is the next step's job. Record everything you tried,
+                including failed lookups and access blockers. Be thorough and honest.
 
                 Hypothesis: {{ steps.build_context.output.hypotheses[4] | json }}
                 Event context: {{ steps.build_context.output.context_summary }}
                 Streams: {{ inputs.stream_names | json }}
               schema:
-                # → hypothesisResultSchema
+                # → gatherOutputSchema
+
+          - name: review
+            type: ai.agent
+            if: "{{ steps.build_context.output.hypotheses | size >= 5 }}"
+            agent-id: sigevents.investigation.review
+            connector-id: ".anthropic-claude-4.5-haiku-chat_completion"
+            with:
+              timeout: 180s
+              message: |
+                Review the gathered evidence and verdict the hypothesis.
+                Decide whether to forward it to synthesis or discard it.
+                Discard only when the evidence is so thin or so clearly refuted
+                that including it would add no signal to the final ranking.
+                A clearly-refuted hypothesis is still worth forwarding if the
+                refutation itself is informative.
+
+                Hypothesis: {{ steps.build_context.output.hypotheses[4] | json }}
+                Gathered evidence: {{ steps.hypothesis_4.gather.output | json }}
+              schema:
+                # → reviewOutputSchema
 
   - name: collect_results
     type: merge
@@ -538,15 +702,19 @@ steps:
     with:
       timeout: 600s
       message: |
-        Synthesise the investigation results. Rank the hypotheses by posterior
-        confidence. Produce a root cause statement only if at least one hypothesis
-        was 'supported' — otherwise use "Undetermined". Only propose remediation
-        options grounded in the evidence; leave the array empty rather than offering
-        generic advice. Write lessons learned to memory. Set investigation_complete
-        to false if all hypotheses were out_of_reach.
+        Synthesise the investigation results.
+        The branch results contain both gather and review outputs per hypothesis.
+        For ranking and remediation, use ONLY entries where review.decision === 'forward'.
+        Record entries where review.decision === 'discard' in discarded_hypotheses
+        (copy their hypothesis_id, statement, and discard_reason — do not rank them).
+        Produce a root cause statement only if at least one forwarded hypothesis was
+        'supported' — otherwise use "Undetermined". Only propose remediation options
+        grounded in the evidence; leave the array empty rather than offering generic advice.
+        Write lessons learned to memory. Set investigation_complete to false if all
+        forwarded hypotheses were out_of_reach or no hypotheses were forwarded at all.
 
         Context: {{ steps.build_context.output | json }}
-        Hypothesis results: {{ steps.collect_results.output | json }}
+        Branch results: {{ steps.collect_results.output | json }}
         Event: event_id={{ inputs.event_id }}, discovery_id={{ inputs.discovery_id }}
       schema:
         # → investigationResultSchema (see §4.4)
@@ -568,7 +736,7 @@ steps:
 
 ## 7. Agent Registration
 
-Three agents in `register.ts`, all gated on `OBSERVABILITY_STREAMS_ENABLE_INVESTIGATION`:
+Four agents in `register.ts`, all gated on `OBSERVABILITY_STREAMS_ENABLE_INVESTIGATION`:
 
 ```typescript
 // Context agent — Sonnet, memory read access
@@ -580,24 +748,38 @@ agentBuilder.agents.register({
     'root cause hypotheses with prior confidence scores.',
   configuration: {
     skill_ids: [
-      'significant-events-memory',          // memory_search, memory_read, memory_list
+      'significant-events-memory',              // memory_search, memory_read, memory_list
       'significant-events-investigation-context',
     ],
     tools: [],
   },
 });
 
-// Hypothesis investigator — Haiku, evidence gathering
+// Gather agent — Haiku, evidence collection, no verdict
 agentBuilder.agents.register({
-  id: 'sigevents.investigation.hypothesis',
-  name: 'Hypothesis Investigator',
+  id: 'sigevents.investigation.gather',
+  name: 'Hypothesis Evidence Gatherer',
   description:
-    'Gathers telemetry evidence for a single hypothesis and judges whether it is ' +
-    'supported, refuted, inconclusive, or out_of_reach.',
+    'Collects raw evidence for a single hypothesis via ES|QL, memory, KIs, and MCP ' +
+    'tools. Does not render a verdict — records what was found and what was blocked.',
   configuration: {
-    skill_ids: ['significant-events-investigation-hypothesis'],
+    skill_ids: ['significant-events-investigation-gather'],
     tools: [],
     // Gets: esql_query, memory_search, memory_read, sml_search + attached MCP tools
+  },
+});
+
+// Review agent — Haiku, evidence judgment + discard gate
+agentBuilder.agents.register({
+  id: 'sigevents.investigation.review',
+  name: 'Hypothesis Evidence Reviewer',
+  description:
+    'Reviews gathered evidence for a single hypothesis. Verdicts it and decides ' +
+    'whether to forward to synthesis or discard as uninformative.',
+  configuration: {
+    skill_ids: ['significant-events-investigation-review'],
+    tools: [],
+    // Read-only: no tool calls needed — works from gather output in context
   },
 });
 
@@ -606,11 +788,11 @@ agentBuilder.agents.register({
   id: 'sigevents.investigation.synthesis',
   name: 'Investigation Synthesis',
   description:
-    'Ranks hypotheses, produces the final root cause and remediation options, ' +
-    'writes lessons learned to memory, returns structured InvestigationResult.',
+    'Ranks forwarded hypotheses, produces the final root cause and remediation options, ' +
+    'records discarded hypotheses, writes lessons to memory, returns InvestigationResult.',
   configuration: {
     skill_ids: [
-      'significant-events-memory',          // memory_write, memory_patch too
+      'significant-events-memory',              // memory_write, memory_patch too
       'significant-events-investigation-synthesis',
     ],
     tools: [],
@@ -675,6 +857,6 @@ rapid re-promotions of the same discovery automatically.
 1. **Schema** (`kbn-streams-schema` types + Discovery storage mappings) — zero runtime risk, unblocks all other steps
 2. **Feature flag** — trivial; enables conditional install downstream
 3. **Workflow definition** + managed workflow install — gives a runnable skeleton
-4. **Skills + agent registration** — the actual reasoning layer
+4. **Skills + agent registration** — the actual reasoning layer (4 agents: context, gather, review, synthesis)
 5. **Write-back route** (`POST /internal/.../investigation`) — closes the data loop
 6. **Trigger hookup** in verdict/sigevent creation path — wires everything together
