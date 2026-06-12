@@ -34,8 +34,8 @@ export interface TraceWaterfallFlyout {
 export function createTraceWaterfallFlyout(page: ScoutPage): TraceWaterfallFlyout {
   const dialog = page.getByRole('dialog', { name: 'Full trace waterfall flyout' });
   const spanDetailFlyout = page.getByTestId('apmTraceWaterfallSpanDetailFlyout');
-  const aboutTableGrid = spanDetailFlyout.locator('.kbnDocViewer__fieldsGrid');
-  const cellPopover = page.locator('.euiDataGridRowCell__popover');
+  const aboutTableGrid = spanDetailFlyout.getByTestId('UnifiedDocViewerTableGrid');
+  const cellPopover = page.getByTestId('euiDataGridExpansionPopover');
 
   return {
     dialog,
@@ -59,9 +59,14 @@ export function createTraceWaterfallFlyout(page: ScoutPage): TraceWaterfallFlyou
         );
         await valueCell.scrollIntoViewIfNeeded();
         await valueCell.hover();
+        await valueCell.click();
 
         const expandButton = valueCell.getByTestId('euiDataGridCellExpandButton');
+        await expandButton.waitFor({ state: 'visible' });
+        await expandButton.scrollIntoViewIfNeeded();
+        await expandButton.hover();
         await expandButton.click();
+        await cellPopover.waitFor({ state: 'visible' });
       },
 
       async ensureCellPopoverOnTop() {
