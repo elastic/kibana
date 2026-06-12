@@ -156,7 +156,9 @@ The tool returns the generated previewId and the attachment metadata. Use the re
           results: [
             {
               type: ToolResultType.error,
-              data: { message: `Invalid --interval "${interval}". Use a duration like 5m, 1h, or 2d.` },
+              data: {
+                message: `Invalid --interval "${interval}". Use a duration like 5m, 1h, or 2d.`,
+              },
             },
           ],
         };

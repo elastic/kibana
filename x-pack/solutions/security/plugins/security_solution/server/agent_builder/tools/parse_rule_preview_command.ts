@@ -44,8 +44,10 @@ export const tokenizeCommand = (command: string): string[] => {
     // Inside a quoted string, a backslash escapes the matching quote char or another backslash.
     if (ch === '\\' && i + 1 < chars.length) {
       const next = chars[i + 1];
-      if ((inDouble && (next === '"' || next === '\\')) ||
-          (inSingle && (next === "'" || next === '\\'))) {
+      if (
+        (inDouble && (next === '"' || next === '\\')) ||
+        (inSingle && (next === "'" || next === '\\'))
+      ) {
         current += next;
         i++;
         continue;

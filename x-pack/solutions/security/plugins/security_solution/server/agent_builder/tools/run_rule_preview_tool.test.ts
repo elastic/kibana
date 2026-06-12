@@ -430,7 +430,7 @@ describe('runRulePreviewTool', () => {
       {
         command:
           'threat_match --query "*:*" --threat-query "*:*" --threat-index ti-* ' +
-          "--threat-mapping '[{\"entries\":[{\"field\":\"src.ip\",\"type\":\"wrong\",\"value\":\"dst.ip\"}]}]' " +
+          '--threat-mapping \'[{"entries":[{"field":"src.ip","type":"wrong","value":"dst.ip"}]}]\' ' +
           '--timeframe-start 2024-01-01T00:00:00.000Z --timeframe-end 2024-01-01T01:00:00.000Z',
       },
       context
