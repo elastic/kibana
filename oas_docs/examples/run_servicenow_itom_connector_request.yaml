@@ -1,0 +1,8 @@
+summary: Run a ServiceNow ITOM connector to retrieve the list of choices.
+value:
+  params:
+    subAction: getChoices
+    subActionParams:
+      fields:
+        - severity
+        - urgency

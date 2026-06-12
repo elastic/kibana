@@ -1,0 +1,22 @@
+{
+  "security.clear_cached_realms": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "usernames": ""
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_security/realm/{realms}/_clear_cache"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-clear-cached-realms",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}

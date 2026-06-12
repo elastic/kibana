@@ -1,0 +1,79 @@
+{
+  "clusterStatus": {
+    "status": "yellow",
+    "indicesCount": 20,
+    "documentCount": 25927,
+    "dataSize": 106492436,
+    "nodesCount": 3,
+    "upTime": 1187008,
+    "version": [
+      "7.0.0-alpha1"
+    ],
+    "memUsed": 603241144,
+    "memMax": 2128871424,
+    "unassignedShards": 5,
+    "totalShards": 80
+  },
+  "indices": [
+    {
+      "name": "watermelon-tweets-2017.10.05",
+      "doc_count": 3,
+      "data_size": 232955,
+      "index_rate": 0,
+      "search_rate": 0,
+      "status": "yellow",
+      "status_sort": 2,
+      "unassigned_shards": 1
+    },
+    {
+      "name": "avocado-tweets-2017.10.02",
+      "doc_count": 628,
+      "data_size": 9202023,
+      "index_rate": 0,
+      "search_rate": 0,
+      "status": "green",
+      "status_sort": 1,
+      "unassigned_shards": 0
+    },
+    {
+      "name": "avocado-tweets-2017.10.03",
+      "doc_count": 1154,
+      "data_size": 14962115,
+      "index_rate": 0,
+      "search_rate": 0,
+      "status": "green",
+      "status_sort": 1,
+      "unassigned_shards": 0
+    },
+    {
+      "name": "relocation_test",
+      "doc_count": 1,
+      "data_size": 4870,
+      "index_rate": 0,
+      "search_rate": 0,
+      "status": "green",
+      "status_sort": 1,
+      "unassigned_shards": 0
+    },
+    {
+      "name": "avocado-tweets-2017.09.30",
+      "doc_count": 1991,
+      "data_size": 20947574,
+      "index_rate": 0,
+      "search_rate": 0,
+      "status": "green",
+      "status_sort": 1,
+      "unassigned_shards": 0
+    },
+    {
+      "name": "phone-home",
+      "doc_count": 10,
+      "data_size": 1278604,
+      "index_rate": 0,
+      "search_rate": 0,
+      "status": "yellow",
+      "status_sort": 2,
+      "unassigned_shards": 1
+    }
+  ]
+}

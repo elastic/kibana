@@ -1,0 +1,111 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+echo '--- Log out of gcloud'
+./.buildkite/scripts/common/activate_service_account.sh --unset-impersonation || echo "Failed to unset impersonation"
+./.buildkite/scripts/common/activate_service_account.sh --logout-gcloud || echo "Failed to log out of gcloud"
+
+IS_TEST_EXECUTION_STEP="$(buildkite-agent meta-data get "${BUILDKITE_JOB_ID}_is_test_execution_step" --default '')"
+
+if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
+  echo "--- Upload Artifacts"
+
+  ARTIFACT_PATTERNS=(
+    '{examples,packages,src,x-pack}/**/.scout/test-artifacts/**/*.png'
+    '.scout/reports/scout-playwright-test-failures-*/**/*'
+    '.scout/reports/scout-playwright-test-failures-*/scout-failures-*.ndjson'
+    'target/junit/**/*'
+    'target/kibana-coverage/jest/**/*'
+    'target/kibana-coverage/functional/**/*'
+    'target/kibana-*'
+    'target/kibana-security-solution/**/*.png'
+    'target/kibana-security-solution/**/management/**/*.mp4'
+    'target/kibana-osquery/**/*.png'
+    'target/kibana-osquery/**/*.mp4'
+    'target/kibana-fleet/**/*.png'
+    'target/test-metrics/*'
+    'target/test-suites-ci-plan.json'
+    'test/**/screenshots/diff/*.png'
+    'test/**/screenshots/failure/*.png'
+    'test/**/screenshots/session/*.png'
+    'src/platform/test/**/screenshots/diff/*.png'
+    'src/platform/test/**/screenshots/failure/*.png'
+    'src/platform/test/**/screenshots/session/*.png'
+    'src/platform/test/functional/failure_debug/html/*.html'
+    'x-pack/platform/test/**/screenshots/diff/*.png'
+    'x-pack/platform/test/**/screenshots/failure/*.png'
+    'x-pack/platform/test/**/screenshots/session/*.png'
+    'x-pack/platform/test/functional/failure_debug/html/*.html'
+    'x-pack/platform/test/serverless/**/screenshots/diff/*.png'
+    'x-pack/platform/test/serverless/**/screenshots/failure/*.png'
+    'x-pack/platform/test/serverless/**/screenshots/session/*.png'
+    'x-pack/platform/test/serverless/**/failure_debug/html/*.html'
+    '.es/**/*.hprof'
+    'data/es_debug_*.tar.gz'
+    '.es/es*.log'
+    '.es/uiam*.log'
+  )
+
+  buildkite-agent artifact upload "$(printf '%s;' "${ARTIFACT_PATTERNS[@]}")"
+
+  if [[ $BUILDKITE_COMMAND_EXIT_STATUS -ne 0 ]]; then
+    if [[ $BUILDKITE_TRIGGERED_FROM_BUILD_PIPELINE_SLUG == 'elasticsearch-serverless-intake' ]]; then
+      echo "--- Run Failed Test Reporter (only junit)"
+      node scripts/report_failed_tests --build-url="${BUILDKITE_BUILD_URL}#${BUILDKITE_JOB_ID}" 'target/junit/**/*.xml'\
+        --no-github-update --no-index-errors
+    else
+      echo "--- Run Failed Test Reporter (JUnit)"
+      node scripts/report_failed_tests --build-url="${BUILDKITE_BUILD_URL}#${BUILDKITE_JOB_ID}" \
+        'target/junit/**/*.xml'
+
+      # Scout: only update GitHub once a Scout lane has failed in at least 2 attempts
+      # of the current build. The counter is set by run_test_lane.sh on real test
+      # failures (exit 10) and is not incremented by agent-lost retries (exit -1).
+      # BK annotations are still produced because target/test_failures artifacts are
+      # generated regardless of --no-github-update.
+      SCOUT_FAILURE_COUNT=0
+      if [[ -n "${BUILDKITE_STEP_KEY:-}" ]]; then
+        SCOUT_FAILURE_COUNT=$(buildkite-agent meta-data get "${BUILDKITE_STEP_KEY}_scout_failure_count" --default "0" 2>/dev/null || echo 0)
+      fi
+      SCOUT_GH_FLAG="--no-github-update"
+      SCOUT_GH_UPDATE_STATUS="disabled"
+      if [[ "$SCOUT_FAILURE_COUNT" -ge 2 ]]; then
+        SCOUT_GH_FLAG=""
+        SCOUT_GH_UPDATE_STATUS="enabled"
+      fi
+      echo "--- Run Failed Test Reporter (Scout, failure_count=$SCOUT_FAILURE_COUNT, github_update=$SCOUT_GH_UPDATE_STATUS)"
+      node scripts/report_failed_tests --build-url="${BUILDKITE_BUILD_URL}#${BUILDKITE_JOB_ID}" $SCOUT_GH_FLAG \
+        '.scout/reports/scout-playwright-test-failures-*/scout-failures-*.ndjson'
+    fi
+  fi
+
+  if [[ -d 'target/test_failures' ]]; then
+    buildkite-agent artifact upload 'target/test_failures/**/*'
+    ts-node .buildkite/scripts/lifecycle/annotate_test_failures.ts
+  fi
+
+  if [[ -d 'target/agent_diagnostics' ]]; then
+    buildkite-agent artifact upload 'target/agent_diagnostics/**/*'
+  fi
+
+fi
+
+if [[ $BUILDKITE_COMMAND_EXIT_STATUS -ne 0 ]]; then
+  # If the slack team environment variable is set, ping the team in slack
+  if [ -n "${PING_SLACK_TEAM:-}" ]; then
+    buildkite-agent meta-data set 'slack:ping_team:body' "${PING_SLACK_TEAM}, can you please take a look at the test failures?"
+  fi
+
+  # Cancel steps registered for cancel-on-gate-failure when a check gate fails.
+  if [[ "${CHECK_GATE:-}" == "true" ]]; then
+    # Spot/preemptible retries use Buildkite's synthetic `-1` status. Do not
+    # poison the build until a non-retryable gate attempt actually fails.
+    if [[ $BUILDKITE_COMMAND_EXIT_STATUS -eq -1 ]]; then
+      echo '--- Gate step exited with retryable status -1; skipping cancel-on-gate-failure'
+    else
+      echo '--- Cancel steps on gate failure'
+      .buildkite/scripts/steps/gate_failure/cancel.sh || true
+    fi
+  fi
+fi

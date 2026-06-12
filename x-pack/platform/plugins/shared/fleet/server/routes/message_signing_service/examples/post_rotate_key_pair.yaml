@@ -1,0 +1,32 @@
+responses:
+  200:
+    description: 'Key pair rotated successfully'
+    content:
+      application/json:
+        examples:
+          rotateKeyPairSuccessExample:
+            description: 'The key pair was rotated. All agents must be re-enrolled to receive the new signing key.'
+            value:
+              message: 'Key pair rotated successfully.'
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          acknowledgeRequiredExample:
+            description: 'Request was rejected because the acknowledge query parameter was not set to true'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'Warning: this API will cause a key pair to rotate and should not be necessary in normal operation.  If you proceed, you may need to reinstall Agents in your network. You must acknowledge the risks of rotating the key pair with acknowledge=true in the request parameters.  For more information, reach out to your administrator.'
+  500:
+    description: 'Internal Server Error'
+    content:
+      application/json:
+        examples:
+          serviceUnavailableExample:
+            description: 'The message signing service is not available'
+            value:
+              statusCode: 500
+              error: 'Internal Server Error'
+              message: 'Failed to rotate key pair. Message signing service is unavailable!'

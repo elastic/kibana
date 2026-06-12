@@ -1,0 +1,29 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "index.ts",
+    "public/**/*.ts",
+    "public/**/*.tsx",
+    "server/**/*.ts",
+    "../../../typings/**/*"
+  ],
+  "exclude": [
+    "target/**/*",
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/data-plugin",
+    "@kbn/lens-plugin",
+    "@kbn/developer-examples-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/ui-actions-plugin",
+    "@kbn/core-ui-settings-browser",
+    "@kbn/code-editor",
+    "@kbn/react-kibana-context-render",
+    "@kbn/lens-common",
+    "@kbn/i18n",
+  ]
+}

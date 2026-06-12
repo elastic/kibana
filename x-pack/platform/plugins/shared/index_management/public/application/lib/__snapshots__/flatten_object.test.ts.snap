@@ -1,0 +1,19 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`flatten_object it flattens an object 1`] = `
+Object {
+  "bar": 3,
+  "foo.nested.field": 1,
+}
+`;
+
+exports[`flatten_object it flattens an object that contains an array in a field 1`] = `
+Object {
+  "bar": 3,
+  "foo.nested.field": Array [
+    1,
+    2,
+    3,
+  ],
+}
+`;

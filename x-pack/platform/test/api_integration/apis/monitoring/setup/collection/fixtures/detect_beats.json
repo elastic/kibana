@@ -1,0 +1,66 @@
+{
+  "kibana": {
+    "totalUniqueInstanceCount": 1,
+    "totalUniqueFullyMigratedCount": 1,
+    "totalUniquePartiallyMigratedCount": 0,
+    "totalUniqueInternallyCollectedCount": 0,
+    "detected": null,
+    "byUuid": {
+      "5b2de169-2785-441b-ae8c-186a1936b17d": {
+        "lastTimestamp": 1554841069921,
+        "isPrimary": true,
+        "isNetNewUser": false,
+        "isFullyMigrated": true
+      }
+    }
+  },
+  "beats": {
+    "totalUniqueInstanceCount": 0,
+    "totalUniqueFullyMigratedCount": 0,
+    "totalUniquePartiallyMigratedCount": 0,
+    "totalUniqueInternallyCollectedCount": 0,
+    "detected": {
+      "mightExist": true
+    },
+    "byUuid": {}
+  },
+  "logstash": {
+    "totalUniqueInstanceCount": 0,
+    "totalUniqueFullyMigratedCount": 0,
+    "totalUniquePartiallyMigratedCount": 0,
+    "totalUniqueInternallyCollectedCount": 0,
+    "detected": {
+      "mightExist": false
+    },
+    "byUuid": {}
+  },
+  "apm": {
+    "totalUniqueInstanceCount": 0,
+    "totalUniqueFullyMigratedCount": 0,
+    "totalUniquePartiallyMigratedCount": 0,
+    "totalUniqueInternallyCollectedCount": 0,
+    "detected": {
+      "mightExist": false
+    },
+    "byUuid": {}
+  },
+  "elasticsearch": {
+    "totalUniqueInstanceCount": 1,
+    "totalUniqueFullyMigratedCount": 0,
+    "totalUniquePartiallyMigratedCount": 1,
+    "totalUniqueInternallyCollectedCount": 0,
+    "detected": null,
+    "byUuid": {
+      "agI8JhXhShasvuDgq0VxRg": {
+        "isPartiallyMigrated": true,
+        "lastInternallyCollectedTimestamp": 1554841077638,
+        "isNetNewUser": false
+      }
+    }
+  },
+  "_meta": {
+    "secondsAgo": 30,
+    "liveClusterUuid": null,
+    "hasPermissions": true
+  }
+}

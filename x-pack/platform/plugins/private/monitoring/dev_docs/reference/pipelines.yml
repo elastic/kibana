@@ -1,0 +1,8 @@
+- pipeline.id: generator1
+  config.string: |
+    input { java_generator { eps => 1 } }
+    output { file { path => "/dev/null" } }
+- pipeline.id: generator5
+  config.string: |
+    input { java_generator { eps => 5 } }
+    output { file { path => "/dev/null" } }

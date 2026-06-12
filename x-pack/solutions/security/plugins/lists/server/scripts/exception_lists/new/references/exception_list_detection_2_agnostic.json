@@ -1,0 +1,8 @@
+{
+  "list_id": "detection_list_2",
+  "tags": ["user added string for a tag", "malware"],
+  "type": "detection",
+  "description": "This is a sample agnostic detection type exception list",
+  "name": "Detection Exception List (2)",
+  "namespace_type": "agnostic"
+}

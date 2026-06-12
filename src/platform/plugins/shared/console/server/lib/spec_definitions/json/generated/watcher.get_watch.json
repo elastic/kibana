@@ -1,0 +1,21 @@
+{
+  "watcher.get_watch": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_watcher/watch/{id}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-watcher-get-watch",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}

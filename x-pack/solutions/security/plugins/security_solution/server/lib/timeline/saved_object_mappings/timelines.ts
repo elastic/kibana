@@ -1,0 +1,350 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
+import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import type { SavedObjectsType } from '@kbn/core/server';
+import { timelinesMigrations } from './migrations/timelines';
+
+export const timelineSavedObjectType = 'siem-ui-timeline';
+
+export const timelineSavedObjectMappings: SavedObjectsType['mappings'] = {
+  properties: {
+    columns: {
+      properties: {
+        aggregatable: {
+          type: 'boolean',
+        },
+        category: {
+          type: 'keyword',
+        },
+        columnHeaderType: {
+          type: 'keyword',
+        },
+        description: {
+          type: 'text',
+        },
+        example: {
+          type: 'text',
+        },
+        indexes: {
+          type: 'keyword',
+        },
+        id: {
+          type: 'keyword',
+        },
+        name: {
+          type: 'text',
+        },
+        placeholder: {
+          type: 'text',
+        },
+        searchable: {
+          type: 'boolean',
+        },
+        type: {
+          type: 'keyword',
+        },
+      },
+    },
+    dataProviders: {
+      properties: {
+        id: {
+          type: 'keyword',
+        },
+        name: {
+          type: 'text',
+        },
+        enabled: {
+          type: 'boolean',
+        },
+        excluded: {
+          type: 'boolean',
+        },
+        kqlQuery: {
+          type: 'text',
+        },
+        type: {
+          type: 'text',
+        },
+        queryMatch: {
+          properties: {
+            field: {
+              type: 'text',
+            },
+            displayField: {
+              type: 'text',
+            },
+            value: {
+              type: 'text',
+            },
+            displayValue: {
+              type: 'text',
+            },
+            operator: {
+              type: 'text',
+            },
+          },
+        },
+        and: {
+          properties: {
+            id: {
+              type: 'keyword',
+            },
+            name: {
+              type: 'text',
+            },
+            enabled: {
+              type: 'boolean',
+            },
+            excluded: {
+              type: 'boolean',
+            },
+            kqlQuery: {
+              type: 'text',
+            },
+            type: {
+              type: 'text',
+            },
+            queryMatch: {
+              properties: {
+                field: {
+                  type: 'text',
+                },
+                displayField: {
+                  type: 'text',
+                },
+                value: {
+                  type: 'text',
+                },
+                displayValue: {
+                  type: 'text',
+                },
+                operator: {
+                  type: 'text',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    description: {
+      type: 'text',
+    },
+    eqlOptions: {
+      properties: {
+        eventCategoryField: {
+          type: 'text',
+        },
+        tiebreakerField: {
+          type: 'text',
+        },
+        timestampField: {
+          type: 'text',
+        },
+        query: {
+          type: 'text',
+        },
+        size: {
+          type: 'text',
+        },
+      },
+    },
+    eventType: {
+      type: 'keyword',
+    },
+    excludedRowRendererIds: {
+      type: 'text',
+    },
+    favorite: {
+      properties: {
+        keySearch: {
+          type: 'text',
+        },
+        fullName: {
+          type: 'text',
+        },
+        userName: {
+          type: 'text',
+        },
+        favoriteDate: {
+          type: 'date',
+        },
+      },
+    },
+    filters: {
+      properties: {
+        meta: {
+          properties: {
+            alias: {
+              type: 'text',
+            },
+            controlledBy: {
+              type: 'text',
+            },
+            disabled: {
+              type: 'boolean',
+            },
+            field: {
+              type: 'text',
+            },
+            formattedValue: {
+              type: 'text',
+            },
+            index: {
+              type: 'keyword',
+            },
+            key: {
+              type: 'keyword',
+            },
+            negate: {
+              type: 'boolean',
+            },
+            params: {
+              type: 'text',
+            },
+            type: {
+              type: 'keyword',
+            },
+            value: {
+              type: 'text',
+            },
+            relation: {
+              type: 'keyword',
+            },
+          },
+        },
+        exists: {
+          type: 'text',
+        },
+        match_all: {
+          type: 'text',
+        },
+        missing: {
+          type: 'text',
+        },
+        query: {
+          type: 'text',
+        },
+        range: {
+          type: 'text',
+        },
+        script: {
+          type: 'text',
+        },
+      },
+    },
+    indexNames: {
+      type: 'text',
+    },
+    kqlMode: {
+      type: 'keyword',
+    },
+    kqlQuery: {
+      properties: {
+        filterQuery: {
+          properties: {
+            kuery: {
+              properties: {
+                kind: {
+                  type: 'keyword',
+                },
+                expression: {
+                  type: 'text',
+                },
+              },
+            },
+            serializedQuery: {
+              type: 'text',
+            },
+          },
+        },
+      },
+    },
+    title: {
+      type: 'text',
+    },
+    templateTimelineId: {
+      type: 'text',
+    },
+    templateTimelineVersion: {
+      type: 'integer',
+    },
+    timelineType: {
+      type: 'keyword',
+    },
+    dateRange: {
+      properties: {
+        start: {
+          type: 'date',
+        },
+        end: {
+          type: 'date',
+        },
+      },
+    },
+    sort: {
+      dynamic: false,
+      properties: {
+        columnId: {
+          type: 'keyword',
+        },
+        columnType: {
+          type: 'keyword',
+        },
+        sortDirection: {
+          type: 'keyword',
+        },
+      },
+    },
+    status: {
+      type: 'keyword',
+    },
+    created: {
+      type: 'date',
+    },
+    createdBy: {
+      type: 'text',
+    },
+    updated: {
+      type: 'date',
+    },
+    updatedBy: {
+      type: 'text',
+    },
+    savedSearchId: {
+      type: 'text',
+    },
+  },
+};
+
+const timelineSOVersion1: SavedObjectsModelVersion = {
+  changes: [
+    {
+      type: 'mappings_addition',
+      addedMappings: {
+        savedSearchId: {
+          type: 'text',
+        },
+      },
+    },
+  ],
+};
+
+export const timelineType: SavedObjectsType = {
+  name: timelineSavedObjectType,
+  indexPattern: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
+  hidden: false,
+  namespaceType: 'multiple-isolated',
+  convertToMultiNamespaceTypeVersion: '8.0.0',
+  mappings: timelineSavedObjectMappings,
+  migrations: timelinesMigrations,
+  modelVersions: {
+    1: timelineSOVersion1,
+  },
+};

@@ -1,0 +1,5 @@
+{
+  "indices.get_field_mapping": {
+    "priority": 10
+  }
+}

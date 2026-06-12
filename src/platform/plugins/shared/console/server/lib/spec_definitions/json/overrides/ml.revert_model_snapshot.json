@@ -1,0 +1,7 @@
+{
+  "ml.revert_model_snapshot": {
+    "data_autocomplete_rules": {
+      "delete_intervening_results": { "__one_of": ["true", "false"] }
+    }
+  }
+}

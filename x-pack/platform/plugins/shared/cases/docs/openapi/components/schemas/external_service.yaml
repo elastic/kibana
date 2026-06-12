@@ -1,0 +1,21 @@
+type: object
+nullable: true
+properties:
+  connector_id:
+    type: string
+  connector_name:
+    type: string
+  external_id:
+    type: string
+  external_title:
+    type: string
+  external_url:
+    type: string
+  pushed_at:
+    type: string
+    format: date-time
+  pushed_by:
+    type: object
+    properties:
+      $ref: 'user_properties.yaml'
+    nullable: true

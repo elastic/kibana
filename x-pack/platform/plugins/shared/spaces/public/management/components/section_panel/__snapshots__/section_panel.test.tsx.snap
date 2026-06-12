@@ -1,0 +1,28 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`it renders without blowing up 1`] = `
+<EuiPanel
+  hasBorder={true}
+  hasShadow={false}
+>
+  <SectionPanelTitle
+    iconType="logoElasticsearch"
+    title="Elasticsearch"
+  />
+  <EuiSpacer />
+  <p>
+    child
+  </p>
+</EuiPanel>
+`;
+
+exports[`it renders without optional title 1`] = `
+<EuiPanel
+  hasBorder={true}
+  hasShadow={false}
+>
+  <p>
+    child
+  </p>
+</EuiPanel>
+`;

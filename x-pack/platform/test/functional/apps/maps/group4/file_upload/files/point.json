@@ -1,0 +1,13 @@
+{
+  "type": "Feature",
+  "geometry": {
+    "type": "Point",
+    "coordinates": [
+      30,
+      10
+    ]
+  },
+  "properties": {
+    "name": "Point island"
+  }
+}

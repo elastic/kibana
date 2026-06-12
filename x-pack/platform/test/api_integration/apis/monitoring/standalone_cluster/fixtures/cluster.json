@@ -1,0 +1,81 @@
+[
+  {
+    "cluster_uuid": "__standalone_cluster__",
+    "version": "",
+    "license": {},
+    "elasticsearch": {
+      "cluster_stats": {
+        "indices": {
+          "docs": {},
+          "shards": {},
+          "store": {}
+        },
+        "nodes": {
+          "fs": {},
+          "count": {
+            "total": {}
+          },
+          "jvm": {
+            "mem": {}
+          }
+        }
+      },
+      "logs": {
+        "enabled": false,
+        "types": [],
+        "reason": {
+          "indexPatternExists": false,
+          "indexPatternInTimeRangeExists": false,
+          "typeExistsAtAnyTime": false,
+          "typeExists": false,
+          "usingStructuredLogs": false,
+          "clusterExists": false,
+          "nodeExists": null,
+          "indexExists": null
+        }
+      }
+    },
+    "logstash": {},
+    "kibana": {},
+    "beats": {
+      "totalEvents": 348,
+      "bytesSent": 319913,
+      "beats": {
+        "total": 1,
+        "types": [
+          {
+            "type": "Packetbeat",
+            "count": 1
+          }
+        ]
+      }
+    },
+    "apm": {
+      "totalEvents": 0,
+      "memRss": 0,
+      "apms": {
+        "total": 0
+      },
+      "versions": [],
+      "config": {
+        "container": false
+      }
+    },
+    "enterpriseSearch": {
+      "clusterUuid": "__standalone_cluster__",
+      "stats": {
+        "appSearchEngines": 0,
+        "workplaceSearchOrgSources": 0,
+        "workplaceSearchPrivateSources": 0,
+        "totalInstances": 0,
+        "uptime": 0,
+        "memUsed": 0,
+        "memCommitted": 0,
+        "memTotal": 0,
+        "versions": []
+      }
+    },
+    "isPrimary": false,
+    "isCcrEnabled": false
+  }
+]

@@ -1,0 +1,21 @@
+# TO_GEOTILE
+
+Converts an input value to a `geotile` value. A string will only be successfully converted if it follows the `geotile` format, as described for the geotile grid aggregation.
+
+## Syntax
+
+`TO_GEOTILE(field)`
+
+### Parameters
+
+#### field
+
+Input value to be converted. The input can be a single- or multi-valued column or an expression.
+
+## Examples
+
+Converts the string "4/8/5" into a geotile value and stores it in a new column.
+```esql
+ROW string = "4/8/5"
+| EVAL geotile = TO_GEOTILE(string)
+```

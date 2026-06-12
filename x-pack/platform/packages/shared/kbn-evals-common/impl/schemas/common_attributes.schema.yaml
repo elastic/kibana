@@ -1,0 +1,266 @@
+openapi: 3.0.0
+info:
+  title: Evals Common Attributes
+  version: '1'
+paths: {}
+components:
+  schemas:
+    Model:
+      type: object
+      properties:
+        id:
+          type: string
+          maxLength: 256
+        family:
+          type: string
+          maxLength: 256
+        provider:
+          type: string
+          maxLength: 256
+      required:
+        - id
+
+    EvaluationScoreDocument:
+      type: object
+      properties:
+        '@timestamp':
+          type: string
+          maxLength: 64
+        experiment_id:
+          type: string
+          maxLength: 1024
+        experiment_name:
+          type: string
+          maxLength: 256
+        example:
+          $ref: '#/components/schemas/ExampleInfo'
+        task:
+          $ref: '#/components/schemas/TaskInfo'
+        evaluator:
+          $ref: '#/components/schemas/EvaluatorInfo'
+        metadata:
+          $ref: '#/components/schemas/ScoreMetadata'
+      required:
+        - '@timestamp'
+        - experiment_id
+        - example
+        - task
+        - evaluator
+        - metadata
+
+    BuildkiteMetadata:
+      type: object
+      properties:
+        build_id:
+          type: string
+          maxLength: 256
+        job_id:
+          type: string
+          maxLength: 256
+        build_url:
+          type: string
+          maxLength: 2048
+        pipeline_slug:
+          type: string
+          maxLength: 256
+        pull_request:
+          type: string
+          maxLength: 64
+        branch:
+          type: string
+          maxLength: 256
+        commit:
+          type: string
+          maxLength: 256
+
+    ExampleInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          maxLength: 1024
+        index:
+          type: integer
+        input:
+          type: object
+          additionalProperties: true
+          nullable: true
+        dataset:
+          type: object
+          properties:
+            id:
+              type: string
+              maxLength: 1024
+            name:
+              type: string
+              maxLength: 256
+          required:
+            - id
+            - name
+      required:
+        - id
+        - index
+        - dataset
+
+    TaskInfo:
+      type: object
+      properties:
+        trace_id:
+          type: string
+          maxLength: 256
+          nullable: true
+        repetition_index:
+          type: integer
+        output:
+          type: object
+          additionalProperties: true
+          nullable: true
+        model:
+          $ref: '#/components/schemas/Model'
+      required:
+        - repetition_index
+        - model
+
+    EvaluatorInfo:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 256
+        score:
+          type: number
+          nullable: true
+        label:
+          type: string
+          maxLength: 256
+          nullable: true
+        explanation:
+          type: string
+          maxLength: 4096
+          nullable: true
+        metadata:
+          type: object
+          additionalProperties: true
+          nullable: true
+        trace_id:
+          type: string
+          maxLength: 256
+          nullable: true
+        model:
+          $ref: '#/components/schemas/Model'
+      required:
+        - name
+        - model
+
+    ScoreMetadata:
+      type: object
+      properties:
+        execution_id:
+          type: string
+          maxLength: 1024
+        suite_id:
+          type: string
+          maxLength: 256
+        total_repetitions:
+          type: integer
+        hostname:
+          type: string
+          maxLength: 256
+        git:
+          type: object
+          properties:
+            branch:
+              type: string
+              maxLength: 256
+              nullable: true
+            commit_sha:
+              type: string
+              maxLength: 256
+              nullable: true
+        ci:
+          $ref: '#/components/schemas/BuildkiteMetadata'
+      required:
+        - total_repetitions
+
+    EvaluatorStats:
+      type: object
+      properties:
+        dataset_id:
+          type: string
+          maxLength: 1024
+        dataset_name:
+          type: string
+          maxLength: 256
+        evaluator_name:
+          type: string
+          maxLength: 256
+        example_count:
+          type: integer
+          minimum: 0
+          description: Number of unique examples evaluated in this dataset
+        stats:
+          type: object
+          properties:
+            mean:
+              type: number
+            median:
+              type: number
+            std_dev:
+              type: number
+            min:
+              type: number
+            max:
+              type: number
+            count:
+              type: integer
+          required:
+            - mean
+            - median
+            - std_dev
+            - min
+            - max
+            - count
+      required:
+        - dataset_id
+        - dataset_name
+        - evaluator_name
+        - stats
+
+    TraceSpan:
+      type: object
+      properties:
+        span_id:
+          type: string
+          maxLength: 256
+        trace_id:
+          type: string
+          maxLength: 256
+        parent_span_id:
+          type: string
+          maxLength: 256
+        name:
+          type: string
+          maxLength: 256
+        kind:
+          type: string
+          maxLength: 64
+        status:
+          type: string
+          maxLength: 64
+        start_time:
+          type: string
+          maxLength: 64
+        end_time:
+          type: string
+          maxLength: 64
+        duration_ms:
+          type: number
+        attributes:
+          type: object
+          additionalProperties: true
+      required:
+        - span_id
+        - trace_id
+        - name
+        - start_time
+        - duration_ms

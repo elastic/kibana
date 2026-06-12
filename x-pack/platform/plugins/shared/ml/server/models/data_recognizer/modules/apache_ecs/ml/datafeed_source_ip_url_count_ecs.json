@@ -1,0 +1,13 @@
+{
+    "job_id": "JOB_ID",
+    "indices": [
+      "INDEX_PATTERN_NAME"
+    ],
+    "query": {
+      "bool": {
+        "filter": [
+          { "term":  { "event.dataset": "apache.access" } }
+        ]
+      }
+    }
+}

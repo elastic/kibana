@@ -1,0 +1,77 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { i18n } from '@kbn/i18n';
+import type { ScopedHistory } from '@kbn/core/public';
+import type { EmbeddableEditorBreadcrumb } from '@kbn/embeddable-plugin/public';
+import { getCoreOverlays, getNavigateToApp } from '../../../kibana_services';
+import { APP_NAME } from '../../../../common/constants';
+
+export const unsavedChangesWarning = i18n.translate(
+  'xpack.maps.breadCrumbs.unsavedChangesWarning',
+  {
+    defaultMessage: 'Leave Maps with unsaved work?',
+  }
+);
+
+export const unsavedChangesTitle = i18n.translate('xpack.maps.breadCrumbs.unsavedChangesTitle', {
+  defaultMessage: 'Unsaved changes',
+});
+
+export function getBreadcrumbs({
+  pageTitle,
+  isByValue,
+  getHasUnsavedChanges,
+  originatingApp,
+  incomingBreadcrumbs,
+  getAppNameFromId,
+  history,
+}: {
+  pageTitle: string;
+  isByValue: boolean;
+  getHasUnsavedChanges: () => boolean;
+  originatingApp?: string;
+  incomingBreadcrumbs?: EmbeddableEditorBreadcrumb[];
+  getAppNameFromId?: (id: string) => string | undefined;
+  history: ScopedHistory;
+}) {
+  const breadcrumbs = [];
+
+  if (incomingBreadcrumbs?.length) {
+    breadcrumbs.push(...incomingBreadcrumbs);
+  } else if (originatingApp && getAppNameFromId) {
+    breadcrumbs.push({
+      onClick: () => {
+        getNavigateToApp()(originatingApp);
+      },
+      text: getAppNameFromId(originatingApp) ?? originatingApp,
+    });
+  }
+
+  if (!isByValue && !incomingBreadcrumbs?.length) {
+    breadcrumbs.push({
+      text: APP_NAME,
+      onClick: async () => {
+        if (getHasUnsavedChanges()) {
+          const confirmed = await getCoreOverlays().openConfirm(unsavedChangesWarning, {
+            title: unsavedChangesTitle,
+            'data-test-subj': 'appLeaveConfirmModal',
+          });
+          if (confirmed) {
+            history.push('/');
+          }
+        } else {
+          history.push('/');
+        }
+      },
+    });
+  }
+
+  breadcrumbs.push({ text: pageTitle });
+
+  return breadcrumbs;
+}

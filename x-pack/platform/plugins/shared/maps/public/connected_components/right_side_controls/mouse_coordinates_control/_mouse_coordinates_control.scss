@@ -1,0 +1,5 @@
+.mapViewControl__coordinates {
+  @include mapOverlayIsTextOnly;
+  justify-content: center;
+  pointer-events: none;
+}

@@ -1,0 +1,50 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { schema } from '@kbn/config-schema';
+
+const savedObjectReferenceSchema = schema.object({
+  type: schema.string(),
+  id: schema.string(),
+});
+
+const sortValueSchema = schema.oneOf([
+  schema.string(),
+  schema.number(),
+  schema.boolean(),
+  schema.literal(null),
+]);
+
+export const findRulesOptionsSchema = schema.object(
+  {
+    perPage: schema.maybe(schema.number()),
+    page: schema.maybe(schema.number()),
+    search: schema.maybe(schema.string()),
+    defaultSearchOperator: schema.maybe(
+      schema.oneOf([schema.literal('AND'), schema.literal('OR')])
+    ),
+    searchFields: schema.maybe(schema.arrayOf(schema.string())),
+    sortField: schema.maybe(schema.string()),
+    sortOrder: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
+    hasReference: schema.maybe(
+      schema.oneOf([savedObjectReferenceSchema, schema.arrayOf(savedObjectReferenceSchema)])
+    ),
+    fields: schema.maybe(schema.arrayOf(schema.string())),
+    filter: schema.maybe(
+      schema.oneOf([schema.string(), schema.recordOf(schema.string(), schema.any())])
+    ),
+    ruleTypeIds: schema.maybe(schema.arrayOf(schema.string())),
+    consumers: schema.maybe(schema.arrayOf(schema.string())),
+    searchAfter: schema.maybe(schema.arrayOf(sortValueSchema, { maxSize: 100 })),
+    aggs: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+  },
+  { unknowns: 'allow' }
+);
+
+export const findRulesParamsSchema = schema.object({
+  options: schema.maybe(findRulesOptionsSchema),
+});

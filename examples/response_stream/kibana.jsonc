@@ -1,0 +1,18 @@
+{
+  "type": "plugin",
+  "id": "@kbn/response-stream-plugin",
+  "owner": "@elastic/ml-ui",
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "responseStream",
+    "server": true,
+    "browser": true,
+    "requiredPlugins": [
+      "developerExamples"
+    ],
+    "requiredBundles": [
+      "kibanaReact"
+    ]
+  }
+}

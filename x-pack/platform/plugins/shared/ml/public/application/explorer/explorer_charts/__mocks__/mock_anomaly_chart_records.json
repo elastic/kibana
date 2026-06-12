@@ -1,0 +1,68 @@
+[
+  {
+    "job_id": "mock-job-id",
+    "result_type": "record",
+    "probability": 1.6552181439816634e-32,
+    "record_score": 98.56065708456248,
+    "initial_record_score": 98.56065708456248,
+    "bucket_span": 900,
+    "detector_index": 0,
+    "is_interim": false,
+    "timestamp": 1486656000000,
+    "partition_field_name": "airline",
+    "partition_field_value": "AAL",
+    "function": "mean",
+    "function_description": "mean",
+    "typical": [
+      99.81123207526203
+    ],
+    "actual": [
+      242.3568918440077
+    ],
+    "field_name": "responsetime",
+    "influencers": [
+      {
+        "influencer_field_name": "airline",
+        "influencer_field_values": [
+          "AAL"
+        ]
+      }
+    ],
+    "airline": [
+      "AAL"
+    ]
+  },
+  {
+    "job_id": "mock-job-id",
+    "result_type": "record",
+    "probability": 2.6276047868032343e-28,
+    "record_score": 96.93718,
+    "initial_record_score": 92.70812367638732,
+    "bucket_span": 900,
+    "detector_index": 0,
+    "is_interim": false,
+    "timestamp": 1486656900000,
+    "partition_field_name": "airline",
+    "partition_field_value": "AAL",
+    "function": "mean",
+    "function_description": "mean",
+    "typical": [
+      100.02884159032787
+    ],
+    "actual": [
+      282.02533259111306
+    ],
+    "field_name": "responsetime",
+    "influencers": [
+      {
+        "influencer_field_name": "airline",
+        "influencer_field_values": [
+          "AAL"
+        ]
+      }
+    ],
+    "airline": [
+      "AAL"
+    ]
+  }
+]

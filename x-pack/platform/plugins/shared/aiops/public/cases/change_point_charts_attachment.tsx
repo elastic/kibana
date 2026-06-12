@@ -1,0 +1,80 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { memoize } from 'lodash';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import React from 'react';
+import type { UnifiedValueAttachmentViewProps } from '@kbn/cases-plugin/public';
+import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
+import type { TimeRange } from '@kbn/es-query';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiDescriptionList } from '@elastic/eui';
+import deepEqual from 'fast-deep-equal';
+import type { ChangePointChartAttachmentData } from '../../common/utils';
+import {
+  normalizeChangePointChartLegacyFields,
+  type RawChangePointChartState,
+} from '../../common/embeddables/change_point_chart/normalize_legacy_state';
+import type {
+  ChangePointDetectionProps,
+  ChangePointDetectionSharedComponent,
+} from '../shared_components/change_point_detection';
+
+// Pre-9.5 case attachments stored time_range as timeRange.
+type RawAttachmentState = RawChangePointChartState & { timeRange?: TimeRange };
+
+type ChangePointChartViewProps = UnifiedValueAttachmentViewProps<ChangePointChartAttachmentData>;
+
+export const initComponent = memoize(
+  (
+    fieldFormats: FieldFormatsStart,
+    ChangePointDetectionComponent: ChangePointDetectionSharedComponent
+  ) => {
+    return React.memo(
+      (props: ChangePointChartViewProps) => {
+        const dataFormatter = fieldFormats.deserialize({
+          id: FIELD_FORMAT_IDS.DATE,
+        });
+
+        const rawState = props.data.state as RawAttachmentState;
+        const normalized = normalizeChangePointChartLegacyFields(rawState);
+        const inputProps = {
+          timeRange: rawState.time_range ?? rawState.timeRange,
+          viewType: normalized.view_type,
+          dataViewId: normalized.data_view_id,
+          fn: normalized.aggregation_function,
+          metricField: normalized.metric_field,
+          splitField: normalized.split_field,
+          partitions: normalized.partitions,
+          maxSeriesToPlot: normalized.max_series_to_plot,
+        } as ChangePointDetectionProps;
+
+        const listItems = [
+          {
+            title: (
+              <FormattedMessage
+                id="xpack.aiops.changePointDetection.cases.timeRangeLabel"
+                defaultMessage="Time range"
+              />
+            ),
+            description: `${dataFormatter.convertToText(
+              inputProps.timeRange.from
+            )} - ${dataFormatter.convertToText(inputProps.timeRange.to)}`,
+          },
+        ];
+
+        return (
+          <>
+            <EuiDescriptionList compressed type={'inline'} listItems={listItems} />
+            <ChangePointDetectionComponent {...inputProps} embeddingOrigin={'cases'} />
+          </>
+        );
+      },
+      (prevProps, nextProps) => deepEqual(prevProps.data.state, nextProps.data.state)
+    );
+  }
+);

@@ -1,0 +1,8 @@
+title: Case response properties for created_by
+type: object
+properties:
+  $ref: 'user_properties.yaml'
+required:
+  - email
+  - full_name
+  - username

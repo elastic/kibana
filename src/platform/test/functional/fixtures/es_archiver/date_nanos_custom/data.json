@@ -1,0 +1,37 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "1",
+    "index": "date_nanos_custom_timestamp",
+    "source": {
+      "test": "1",
+      "timestamp": "2019-10-21 00:30:04.828740"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "2",
+    "index": "date_nanos_custom_timestamp",
+    "source": {
+      "test": "1",
+      "timestamp": "2019-10-21 08:30:04.828733"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "3",
+    "index": "date_nanos_custom_timestamp",
+    "source": {
+      "test": "1",
+      "timestamp": "2019-10-21 00:30:04.828723"
+    }
+  }
+}
+
+

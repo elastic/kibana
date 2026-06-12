@@ -1,0 +1,5 @@
+foo: 1
+bar: "pre-${KBN_ENV_VAR1}-mid-${KBN_ENV_VAR2}-post"
+
+elasticsearch:
+  requestHeadersWhitelist: ["${KBN_ENV_VAR1}", "${KBN_ENV_VAR2}"]

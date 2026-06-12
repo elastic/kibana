@@ -1,0 +1,11 @@
+{
+  "attributes": {
+    "title": "Hidden Saved object type that is importable/exportable."
+  },
+  "coreMigrationVersion": "7.14.0",
+  "id": "ff3733a0-9fty-11e7-ahb3-3dcb94193fab",
+  "references": [],
+  "type": "test-hidden-importable-exportable",
+  "updated_at": "2021-02-11T18:51:23.794Z",
+  "version": "WzIsMV0="
+}

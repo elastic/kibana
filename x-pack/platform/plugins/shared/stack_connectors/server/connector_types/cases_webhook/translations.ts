@@ -1,0 +1,44 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { i18n } from '@kbn/i18n';
+
+export const INVALID_URL = (err: string, url: string) =>
+  i18n.translate('xpack.stackConnectors.casesWebhook.configurationErrorNoHostname', {
+    defaultMessage: 'error configuring cases webhook action: unable to parse {url}: {err}',
+    values: {
+      err: err.toString(),
+      url,
+    },
+  });
+
+export const CONFIG_ERR = (err: string) =>
+  i18n.translate('xpack.stackConnectors.casesWebhook.configurationError', {
+    defaultMessage: 'error configuring cases webhook action: {err}',
+    values: {
+      err: err.toString(),
+    },
+  });
+
+export const INVALID_AUTH = i18n.translate('xpack.stackConnectors.casesWebhook.invalidSecrets', {
+  defaultMessage: 'must specify a secrets configuration',
+});
+
+export const ALLOWED_HOSTS_ERROR = (message: string) =>
+  i18n.translate('xpack.stackConnectors.casesWebhook.configuration.apiAllowedHostsError', {
+    defaultMessage: 'error configuring connector action: {message}',
+    values: {
+      message,
+    },
+  });
+
+export const OAUTH2_NOT_SUPPORTED = i18n.translate(
+  'xpack.stackConnectors.casesWebhook.oauth2NotSupported',
+  {
+    defaultMessage: 'OAuth2 authentication is not supported for cases webhook connector',
+  }
+);

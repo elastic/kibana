@@ -1,0 +1,22 @@
+# TANH
+
+Returns the hyperbolic tangent of a number.
+
+## Syntax
+
+`TANH(number)`
+
+### Parameters
+
+#### number
+
+Numeric expression. If `null`, the function returns `null`.
+
+## Examples
+
+Calculates the hyperbolic tangent of the value in column `a` (which is set to 1.8).
+
+```esql
+ROW a=1.8
+| EVAL tanh=TANH(a)
+```

@@ -1,0 +1,202 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "l0voxhg902ed8f5fe5bskgyf",
+    "index": ".reporting-2022-03-13",
+    "source": {
+      "attempts": 1,
+      "completed_at": "2022-03-18T00:36:45.897Z",
+      "created_at": "2022-03-18T00:36:10.521Z",
+      "created_by": "elastic",
+      "jobtype": "printable_pdf_v2",
+      "kibana_id": "acf18950-a6a6-41cb-9808-b65c6d0aa241",
+      "kibana_name": "reporting-benchmark",
+      "max_attempts": 1,
+      "meta": {
+        "layout": "print",
+        "objectType": "dashboard"
+      },
+      "metrics": {
+        "pdf": {
+          "cpu": 0,
+          "cpuInPercentage": 0,
+          "memory": 123101184,
+          "memoryInMegabytes": 117.4,
+          "pages": 8
+        }
+      },
+      "migration_version": "7.14.0",
+      "output": {
+        "content_type": "application/pdf",
+        "size": 1610958
+      },
+      "payload": {
+        "browserTimezone": "America/Phoenix",
+        "forceNow": "2022-03-18T00:36:10.520Z",
+        "layout": {
+          "dimensions": {
+            "height": 2052,
+            "width": 2119.111083984375
+          },
+          "id": "print"
+        },
+        "locatorParams": [
+          {
+            "id": "DASHBOARD_APP_LOCATOR",
+            "params": {
+              "dashboardId": "722b74f0-b882-11e8-a6d9-e546fe2bba5f",
+              "preserveSavedFilters": true,
+              "timeRange": {
+                "from": "2022-01-13T19:00:00.000Z",
+                "to": "2022-01-20T19:00:00.000Z"
+              },
+              "useHash": false,
+              "viewMode": "view"
+            },
+            "version": "8.2.0-SNAPSHOT"
+          }
+        ],
+        "objectType": "dashboard",
+        "spaceId": "reporting-test-fixtures",
+        "title": "[eCommerce] Revenue Dashboard",
+        "version": "8.2.0-SNAPSHOT"
+      },
+      "process_expiration": "2022-03-18T00:38:13.528Z",
+      "started_at": "2022-03-18T00:36:13.528Z",
+      "status": "completed",
+      "timeout": 120000
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "l0vp0um102ed8f5fe5c6p49v",
+    "index": ".reporting-2022-03-13",
+    "source": {
+      "attempts": 1,
+      "completed_at": "2022-03-18T00:41:15.816Z",
+      "created_at": "2022-03-18T00:38:47.545Z",
+      "created_by": "elastic",
+      "jobtype": "printable_pdf_v2",
+      "kibana_id": "acf18950-a6a6-41cb-9808-b65c6d0aa241",
+      "kibana_name": "reporting-benchmark",
+      "max_attempts": 1,
+      "meta": {
+        "layout": "print",
+        "objectType": "dashboard"
+      },
+      "migration_version": "7.14.0",
+      "output": {
+        "content": "ReportingError(code: unknown_error) \"Max attempts (1) reached for job l0vp0um102ed8f5fe5c6p49v. Failed with: undefined\"",
+        "content_type": null,
+        "error_code": "unknown_error",
+        "warnings": [
+          "ReportingError(code: unknown_error) \"Max attempts (1) reached for job l0vp0um102ed8f5fe5c6p49v. Failed with: undefined\""
+        ]
+      },
+      "payload": {
+        "browserTimezone": "America/Phoenix",
+        "forceNow": "2022-03-18T00:38:47.537Z",
+        "layout": {
+          "dimensions": {
+            "height": 12356,
+            "width": 2071.111083984375
+          },
+          "id": "print"
+        },
+        "locatorParams": [
+          {
+            "id": "DASHBOARD_APP_LOCATOR",
+            "params": {
+              "dashboardId": "722b74f0-b882-11e8-a6d9-e546fe2bba5f",
+              "preserveSavedFilters": true,
+              "timeRange": {
+                "from": "2022-01-13T19:00:00.000Z",
+                "to": "2022-01-20T19:00:00.000Z"
+              },
+              "useHash": false,
+              "viewMode": "view"
+            },
+            "version": "8.2.0-SNAPSHOT"
+          }
+        ],
+        "objectType": "dashboard",
+        "spaceId": "reporting-test-fixtures",
+        "title": "[eCommerce] Revenue Dashboard",
+        "version": "8.2.0-SNAPSHOT"
+      },
+      "process_expiration": "2022-03-18T00:42:47.911Z",
+      "started_at": "2022-03-18T00:40:47.911Z",
+      "status": "failed",
+      "timeout": 120000
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "l0vp0rtu02ed8f5fe525941x",
+    "index": ".reporting-2022-03-13",
+    "source": {
+      "attempts": 1,
+      "completed_at": "2022-03-18T00:41:19.222Z",
+      "created_at": "2022-03-18T00:38:43.938Z",
+      "created_by": "elastic",
+      "jobtype": "printable_pdf_v2",
+      "kibana_id": "acf18950-a6a6-41cb-9808-b65c6d0aa241",
+      "kibana_name": "reporting-benchmark",
+      "max_attempts": 1,
+      "meta": {
+        "layout": "preserve_layout",
+        "objectType": "dashboard"
+      },
+      "migration_version": "7.14.0",
+      "output": {
+        "content": "ReportingError(code: queue_timeout_error) \"Max attempts reached (1). Queue timeout reached.\"",
+        "content_type": null,
+        "error_code": "queue_timeout_error",
+        "warnings": [
+          "ReportingError(code: queue_timeout_error) \"Max attempts reached (1). Queue timeout reached.\""
+        ]
+      },
+      "payload": {
+        "browserTimezone": "America/Phoenix",
+        "forceNow": "2022-03-18T00:38:43.928Z",
+        "layout": {
+          "dimensions": {
+            "height": 12356,
+            "width": 2071.111083984375
+          },
+          "id": "preserve_layout"
+        },
+        "locatorParams": [
+          {
+            "id": "DASHBOARD_APP_LOCATOR",
+            "params": {
+              "dashboardId": "722b74f0-b882-11e8-a6d9-e546fe2bba5f",
+              "preserveSavedFilters": true,
+              "timeRange": {
+                "from": "2022-01-13T19:00:00.000Z",
+                "to": "2022-01-20T19:00:00.000Z"
+              },
+              "useHash": false,
+              "viewMode": "view"
+            },
+            "version": "8.2.0-SNAPSHOT"
+          }
+        ],
+        "objectType": "dashboard",
+        "spaceId": "reporting-test-fixtures",
+        "title": "[eCommerce] Revenue Dashboard",
+        "version": "8.2.0-SNAPSHOT"
+      },
+      "process_expiration": null,
+      "started_at": "2022-03-18T00:38:44.816Z",
+      "status": "failed",
+      "timeout": 120000
+    }
+  }
+}

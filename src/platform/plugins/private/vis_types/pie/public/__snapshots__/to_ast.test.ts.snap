@@ -1,0 +1,114 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`vis type pie vis toExpressionAst function should match basic snapshot 1`] = `
+Object {
+  "chain": Array [
+    Object {
+      "arguments": Object {
+        "addTooltip": Array [
+          true,
+        ],
+        "buckets": Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "accessor": Array [
+                    1,
+                  ],
+                  "format": Array [
+                    "terms",
+                  ],
+                  "formatParams": Array [
+                    "{\\"id\\":\\"string\\",\\"otherBucketLabel\\":\\"Other\\",\\"missingBucketLabel\\":\\"Missing\\",\\"parsedUrl\\":{\\"origin\\":\\"http://localhost:5801\\",\\"pathname\\":\\"/app/visualize\\",\\"basePath\\":\\"\\"}}",
+                  ],
+                },
+                "function": "visdimension",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+        ],
+        "isDonut": Array [
+          true,
+        ],
+        "labels": Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "last_level": Array [
+                    true,
+                  ],
+                  "show": Array [
+                    true,
+                  ],
+                  "truncate": Array [
+                    100,
+                  ],
+                  "values": Array [
+                    true,
+                  ],
+                },
+                "function": "partitionLabels",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+        ],
+        "legendDisplay": Array [
+          "show",
+        ],
+        "legendPosition": Array [
+          "right",
+        ],
+        "legendSize": Array [
+          "large",
+        ],
+        "metrics": Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "accessor": Array [
+                    0,
+                  ],
+                  "format": Array [
+                    "number",
+                  ],
+                },
+                "function": "visdimension",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+        ],
+        "nestedLegend": Array [
+          false,
+        ],
+        "palette": Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {},
+                "function": "system_palette",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+        ],
+        "startFromSecondLargestSlice": Array [
+          false,
+        ],
+      },
+      "function": "pieVis",
+      "type": "function",
+    },
+  ],
+  "type": "expression",
+}
+`;

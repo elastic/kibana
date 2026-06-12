@@ -1,0 +1,66 @@
+{
+  "id": "security_packetbeat",
+  "title": "Security: Packetbeat",
+  "description": "Detect suspicious activity in Packetbeat data.",
+  "type": "Packetbeat data",
+  "logoFile": "logo.json",
+  "defaultIndexPattern": "packetbeat-*,logs-*",
+  "query": {
+    "bool": {
+      "filter": [{ "term": { "agent.type": "packetbeat" } }],
+      "must_not": { "terms": { "_tier": ["data_frozen", "data_cold"] } }
+    }
+  },
+  "jobs": [
+    {
+      "id": "packetbeat_dns_tunneling_ea",
+      "file": "packetbeat_dns_tunneling_ea.json"
+    },
+    {
+      "id": "packetbeat_rare_dns_question_ea",
+      "file": "packetbeat_rare_dns_question_ea.json"
+    },
+    {
+      "id": "packetbeat_rare_server_domain_ea",
+      "file": "packetbeat_rare_server_domain_ea.json"
+    },
+    {
+      "id": "packetbeat_rare_urls_ea",
+      "file": "packetbeat_rare_urls_ea.json"
+    },
+    {
+      "id": "packetbeat_rare_user_agent_ea",
+      "file": "packetbeat_rare_user_agent_ea.json"
+    }
+  ],
+  "datafeeds": [
+    {
+      "id": "datafeed-packetbeat_dns_tunneling_ea",
+      "file": "datafeed_packetbeat_dns_tunneling_ea.json",
+      "job_id": "packetbeat_dns_tunneling_ea"
+    },
+    {
+      "id": "datafeed-packetbeat_rare_dns_question_ea",
+      "file": "datafeed_packetbeat_rare_dns_question_ea.json",
+      "job_id": "packetbeat_rare_dns_question_ea"
+    },
+    {
+      "id": "datafeed-packetbeat_rare_server_domain_ea",
+      "file": "datafeed_packetbeat_rare_server_domain_ea.json",
+      "job_id": "packetbeat_rare_server_domain_ea"
+    },
+    {
+      "id": "datafeed-packetbeat_rare_urls_ea",
+      "file": "datafeed_packetbeat_rare_urls_ea.json",
+      "job_id": "packetbeat_rare_urls_ea"
+    },
+    {
+      "id": "datafeed-packetbeat_rare_user_agent_ea",
+      "file": "datafeed_packetbeat_rare_user_agent_ea.json",
+      "job_id": "packetbeat_rare_user_agent_ea"
+    }
+  ],
+  "tags": [
+    "security"
+  ]
+}

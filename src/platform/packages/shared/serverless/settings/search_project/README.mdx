@@ -1,0 +1,34 @@
+---
+id: serverless/packages/settings/search_project
+slug: /serverless/packages/settings/search_project
+title: Serverless Search Advanced Settings
+description: A package of settings for the Serverless Search project.
+tags: ['serverless', 'package']
+date: 2023-08-24
+---
+
+This package contains a list of UI settings that are only available in the Serverless Search project.
+This list is consumed by the `serverless_search` plugin, which sets up its project settings:
+
+```ts
+export class ServerlessSearchPlugin
+  implements
+    Plugin<
+      ServerlessSearchPluginSetup,
+      ServerlessSearchPluginStart,
+      SetupDependencies,
+      StartDependencies
+    >
+{
+  public setup(
+    { getStartServices, http }: CoreSetup<StartDependencies>,
+    pluginsSetup: SetupDependencies
+  ) {
+    pluginsSetup.serverless.setupProjectSettings(SEARCH_PROJECT_SETTINGS);
+    return {};
+  }
+}
+```
+
+If you need to register a setting that should be available in the Serverless Search project, make sure to add
+its Id to this list.

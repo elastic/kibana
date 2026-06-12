@@ -1,0 +1,51 @@
+{
+  "name": "Query Filter With UI Meta Data With Lucene as a language",
+  "description": "A Query Filter that has lots of UI meta data state in the filters which goes back by 24 hours",
+  "rule_id": "query-filter-ui-lucene",
+  "risk_score": 7,
+  "interval": "5m",
+  "severity": "high",
+  "type": "query",
+  "from": "now-24h",
+  "to": "now",
+  "query": "user.name: root or user.name: admin",
+  "language": "lucene",
+  "filters": [
+    {
+      "$state": {
+        "store": "appState"
+      },
+      "meta": {
+        "alias": "custom label here",
+        "disabled": false,
+        "key": "host.name",
+        "negate": false,
+        "params": {
+          "query": "siem-windows"
+        },
+        "type": "phrase"
+      },
+      "query": {
+        "match_phrase": {
+          "host.name": "siem-windows"
+        }
+      }
+    },
+    {
+      "exists": {
+        "field": "host.hostname"
+      },
+      "meta": {
+        "type": "exists",
+        "disabled": false,
+        "negate": false,
+        "alias": "has a hostname",
+        "key": "host.hostname",
+        "value": "exists"
+      },
+      "$state": {
+        "store": "appState"
+      }
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "indices.put_data_lifecycle": {
+    "patterns": [
+      "_data_stream/{data_stream}/_lifecycle"
+    ]
+  }
+}

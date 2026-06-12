@@ -1,0 +1,5767 @@
+{
+  "clusterStatus": {
+    "dataSize": 49427982936,
+    "documentCount": 33017,
+    "indicesCount": 22,
+    "memMax": 2075918336,
+    "memUsed": 619947992,
+    "nodesCount": 2,
+    "status": "green",
+    "totalShards": 108,
+    "unassignedShards": 0,
+    "upTime": 1787957,
+    "version": [
+      "7.0.0-alpha1"
+    ]
+  },
+  "metrics": {
+    "cluster_index_latency": [
+      {
+        "bucket_size": "30 seconds",
+        "data": [
+          [
+            1518543960000,
+            null
+          ],
+          [
+            1518543990000,
+            0.2683615819209039
+          ],
+          [
+            1518544020000,
+            0.24615384615384617
+          ],
+          [
+            1518544050000,
+            0.21502590673575128
+          ],
+          [
+            1518544080000,
+            0.21025641025641026
+          ],
+          [
+            1518544110000,
+            0.17447916666666666
+          ],
+          [
+            1518544140000,
+            0.2128205128205128
+          ],
+          [
+            1518544170000,
+            0.21354166666666666
+          ],
+          [
+            1518544200000,
+            1.9404761904761905
+          ],
+          [
+            1518544230000,
+            1.174013921113689
+          ],
+          [
+            1518544260000,
+            1.3867276887871853
+          ]
+        ],
+        "metric": {
+          "app": "elasticsearch",
+          "description": "Average latency for indexing documents, which is time it takes to index documents divided by number that were indexed. This only considers primary shards.",
+          "field": "indices_stats._all.primaries.indexing.index_total",
+          "format": "0,0.[00]",
+          "hasCalculation": true,
+          "isDerivative": false,
+          "label": "Indexing Latency",
+          "metricAgg": "sum",
+          "units": "ms"
+        },
+        "timeRange": {
+          "max": 1518544315000,
+          "min": 1518541490000
+        }
+      }
+    ],
+    "cluster_index_request_rate": [
+      {
+        "bucket_size": "30 seconds",
+        "data": [
+          [
+            1518543960000,
+            null
+          ],
+          [
+            1518543990000,
+            16
+          ],
+          [
+            1518544020000,
+            26
+          ],
+          [
+            1518544050000,
+            25.733333333333334
+          ],
+          [
+            1518544080000,
+            26
+          ],
+          [
+            1518544110000,
+            25.6
+          ],
+          [
+            1518544140000,
+            26
+          ],
+          [
+            1518544170000,
+            25.6
+          ],
+          [
+            1518544200000,
+            27.933333333333334
+          ],
+          [
+            1518544230000,
+            28.733333333333334
+          ],
+          [
+            1518544260000,
+            29.133333333333333
+          ]
+        ],
+        "metric": {
+          "app": "elasticsearch",
+          "description": "Number of documents being indexed for primary and replica shards.",
+          "field": "indices_stats._all.total.indexing.index_total",
+          "format": "0,0.[00]",
+          "hasCalculation": false,
+          "isDerivative": true,
+          "label": "Total Shards",
+          "metricAgg": "max",
+          "title": "Indexing Rate",
+          "units": "/s"
+        },
+        "timeRange": {
+          "max": 1518544315000,
+          "min": 1518541490000
+        }
+      },
+      {
+        "bucket_size": "30 seconds",
+        "data": [
+          [
+            1518543960000,
+            null
+          ],
+          [
+            1518543990000,
+            11.8
+          ],
+          [
+            1518544020000,
+            13
+          ],
+          [
+            1518544050000,
+            12.866666666666667
+          ],
+          [
+            1518544080000,
+            13
+          ],
+          [
+            1518544110000,
+            12.8
+          ],
+          [
+            1518544140000,
+            13
+          ],
+          [
+            1518544170000,
+            12.8
+          ],
+          [
+            1518544200000,
+            14
+          ],
+          [
+            1518544230000,
+            14.366666666666667
+          ],
+          [
+            1518544260000,
+            14.566666666666666
+          ]
+        ],
+        "metric": {
+          "app": "elasticsearch",
+          "description": "Number of documents being indexed for primary shards.",
+          "field": "indices_stats._all.primaries.indexing.index_total",
+          "format": "0,0.[00]",
+          "hasCalculation": false,
+          "isDerivative": true,
+          "label": "Primary Shards",
+          "metricAgg": "max",
+          "title": "Indexing Rate",
+          "units": "/s"
+        },
+        "timeRange": {
+          "max": 1518544315000,
+          "min": 1518541490000
+        }
+      }
+    ],
+    "cluster_query_latency": [
+      {
+        "bucket_size": "30 seconds",
+        "data": [
+          [
+            1518543960000,
+            null
+          ],
+          [
+            1518543990000,
+            2
+          ],
+          [
+            1518544020000,
+            1.5
+          ],
+          [
+            1518544050000,
+            1.142857142857143
+          ],
+          [
+            1518544080000,
+            0.30769230769230765
+          ],
+          [
+            1518544110000,
+            0.380952380952381
+          ],
+          [
+            1518544140000,
+            0.23333333333333334
+          ],
+          [
+            1518544170000,
+            1.8636363636363638
+          ],
+          [
+            1518544200000,
+            1.0746268656716418
+          ],
+          [
+            1518544230000,
+            0.8857142857142858
+          ],
+          [
+            1518544260000,
+            0.8857142857142858
+          ]
+        ],
+        "metric": {
+          "app": "elasticsearch",
+          "description": "Average latency for searching, which is time it takes to execute searches divided by number of searches submitted. This considers primary and replica shards.",
+          "field": "indices_stats._all.total.search.query_total",
+          "format": "0,0.[00]",
+          "hasCalculation": true,
+          "isDerivative": false,
+          "label": "Search Latency",
+          "metricAgg": "sum",
+          "units": "ms"
+        },
+        "timeRange": {
+          "max": 1518544315000,
+          "min": 1518541490000
+        }
+      }
+    ],
+    "cluster_search_request_rate": [
+      {
+        "bucket_size": "30 seconds",
+        "data": [
+          [
+            1518543960000,
+            null
+          ],
+          [
+            1518543990000,
+            0.7333333333333333
+          ],
+          [
+            1518544020000,
+            0.8666666666666667
+          ],
+          [
+            1518544050000,
+            0.7
+          ],
+          [
+            1518544080000,
+            0.8666666666666667
+          ],
+          [
+            1518544110000,
+            0.7
+          ],
+          [
+            1518544140000,
+            1
+          ],
+          [
+            1518544170000,
+            2.933333333333333
+          ],
+          [
+            1518544200000,
+            2.2333333333333334
+          ],
+          [
+            1518544230000,
+            1.1666666666666667
+          ],
+          [
+            1518544260000,
+            1.1666666666666667
+          ]
+        ],
+        "metric": {
+          "app": "elasticsearch",
+          "description": "Number of search requests being executed across primary and replica shards. A single search can run against multiple shards!",
+          "field": "indices_stats._all.total.search.query_total",
+          "format": "0,0.[00]",
+          "hasCalculation": false,
+          "isDerivative": true,
+          "label": "Total Shards",
+          "metricAgg": "max",
+          "title": "Search Rate",
+          "units": "/s"
+        },
+        "timeRange": {
+          "max": 1518544315000,
+          "min": 1518541490000
+        }
+      }
+    ]
+  },
+  "shardActivity": [
+    {
+      "id": 0,
+      "index": {
+        "files": {
+          "percent": "100.0%",
+          "recovered": 1,
+          "reused": 0,
+          "total": 1
+        },
+        "size": {
+          "percent": "100.0%",
+          "recovered_in_bytes": 230,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 230
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 7
+      },
+      "index_name": ".monitoring-beats-6-2018.02.13",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518544207791,
+      "stop_time_in_millis": 1518544207835,
+      "target": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "total_time_in_millis": 43,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 1,
+        "total": 1,
+        "total_on_start": 1,
+        "total_time_in_millis": 14
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 0,
+      "index": {
+        "files": {
+          "percent": "0.0%",
+          "recovered": 0,
+          "reused": 0,
+          "total": 0
+        },
+        "size": {
+          "percent": "0.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 0
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 0
+      },
+      "index_name": ".monitoring-beats-6-2018.02.13",
+      "primary": true,
+      "source": {},
+      "stage": "DONE",
+      "start_time_in_millis": 1518544207718,
+      "stop_time_in_millis": 1518544207729,
+      "target": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "total_time_in_millis": 10,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": 0,
+        "total_time_in_millis": 6
+      },
+      "type": "EMPTY_STORE",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 2,
+      "index": {
+        "files": {
+          "percent": "100.0%",
+          "recovered": 1,
+          "reused": 0,
+          "total": 1
+        },
+        "size": {
+          "percent": "100.0%",
+          "recovered_in_bytes": 230,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 230
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 12
+      },
+      "index_name": "filebeat-7.0.0-alpha1-2018.02.13",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518544200770,
+      "stop_time_in_millis": 1518544200807,
+      "target": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "total_time_in_millis": 37,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": 0,
+        "total_time_in_millis": 15
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 1,
+      "index": {
+        "files": {
+          "percent": "100.0%",
+          "recovered": 1,
+          "reused": 0,
+          "total": 1
+        },
+        "size": {
+          "percent": "100.0%",
+          "recovered_in_bytes": 230,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 230
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 9
+      },
+      "index_name": "filebeat-7.0.0-alpha1-2018.02.13",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518544200755,
+      "stop_time_in_millis": 1518544201525,
+      "target": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "total_time_in_millis": 769,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 1,
+        "total": 1,
+        "total_on_start": 1,
+        "total_time_in_millis": 173
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 0,
+      "index": {
+        "files": {
+          "percent": "100.0%",
+          "recovered": 1,
+          "reused": 0,
+          "total": 1
+        },
+        "size": {
+          "percent": "100.0%",
+          "recovered_in_bytes": 230,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 230
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 35
+      },
+      "index_name": "filebeat-7.0.0-alpha1-2018.02.13",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518544200743,
+      "stop_time_in_millis": 1518544200807,
+      "target": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "total_time_in_millis": 63,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": 0,
+        "total_time_in_millis": 20
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 1,
+      "index": {
+        "files": {
+          "percent": "0.0%",
+          "recovered": 0,
+          "reused": 0,
+          "total": 0
+        },
+        "size": {
+          "percent": "0.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 0
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 0
+      },
+      "index_name": "filebeat-7.0.0-alpha1-2018.02.13",
+      "primary": true,
+      "source": {},
+      "stage": "DONE",
+      "start_time_in_millis": 1518544200722,
+      "stop_time_in_millis": 1518544200733,
+      "target": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "total_time_in_millis": 10,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": 0,
+        "total_time_in_millis": 5
+      },
+      "type": "EMPTY_STORE",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 0,
+      "index": {
+        "files": {
+          "percent": "0.0%",
+          "recovered": 0,
+          "reused": 0,
+          "total": 0
+        },
+        "size": {
+          "percent": "0.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 0
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 0
+      },
+      "index_name": "filebeat-7.0.0-alpha1-2018.02.13",
+      "primary": true,
+      "source": {},
+      "stage": "DONE",
+      "start_time_in_millis": 1518544200705,
+      "stop_time_in_millis": 1518544200719,
+      "target": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "total_time_in_millis": 13,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": 0,
+        "total_time_in_millis": 8
+      },
+      "type": "EMPTY_STORE",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 2,
+      "index": {
+        "files": {
+          "percent": "0.0%",
+          "recovered": 0,
+          "reused": 0,
+          "total": 0
+        },
+        "size": {
+          "percent": "0.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 0
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 0
+      },
+      "index_name": "filebeat-7.0.0-alpha1-2018.02.13",
+      "primary": true,
+      "source": {},
+      "stage": "DONE",
+      "start_time_in_millis": 1518544200702,
+      "stop_time_in_millis": 1518544200719,
+      "target": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "total_time_in_millis": 17,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": 0,
+        "total_time_in_millis": 9
+      },
+      "type": "EMPTY_STORE",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 0,
+      "index": {
+        "files": {
+          "percent": "100.0%",
+          "recovered": 27,
+          "reused": 0,
+          "total": 27
+        },
+        "size": {
+          "percent": "100.0%",
+          "recovered_in_bytes": 2754971,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 2754971
+        },
+        "source_throttle_time_in_millis": 7,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 161
+      },
+      "index_name": ".watcher-history-7-2018.02.07",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518544008162,
+      "stop_time_in_millis": 1518544008857,
+      "target": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "total_time_in_millis": 694,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": 0,
+        "total_time_in_millis": 20
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 0,
+      "index": {
+        "files": {
+          "percent": "100.0%",
+          "recovered": 7,
+          "reused": 0,
+          "total": 7
+        },
+        "size": {
+          "percent": "100.0%",
+          "recovered_in_bytes": 22129,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 22129
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 28
+      },
+      "index_name": ".kibana",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518544007797,
+      "stop_time_in_millis": 1518544008349,
+      "target": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "total_time_in_millis": 551,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": 0,
+        "total_time_in_millis": 12
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 0,
+      "index": {
+        "files": {
+          "percent": "100.0%",
+          "recovered": 18,
+          "reused": 0,
+          "total": 18
+        },
+        "size": {
+          "percent": "100.0%",
+          "recovered_in_bytes": 3035244,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 3035244
+        },
+        "source_throttle_time_in_millis": 5,
+        "target_throttle_time_in_millis": 1,
+        "total_time_in_millis": 139
+      },
+      "index_name": ".watcher-history-7-2018.02.08",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518544007488,
+      "stop_time_in_millis": 1518544008152,
+      "target": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "total_time_in_millis": 664,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": 0,
+        "total_time_in_millis": 15
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 0,
+      "index": {
+        "files": {
+          "percent": "100.0%",
+          "recovered": 21,
+          "reused": 0,
+          "total": 21
+        },
+        "size": {
+          "percent": "100.0%",
+          "recovered_in_bytes": 2473533,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 2473533
+        },
+        "source_throttle_time_in_millis": 5,
+        "target_throttle_time_in_millis": 1,
+        "total_time_in_millis": 142
+      },
+      "index_name": ".watcher-history-7-2018.02.09",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518544007114,
+      "stop_time_in_millis": 1518544007791,
+      "target": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "total_time_in_millis": 676,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": 0,
+        "total_time_in_millis": 23
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 0,
+      "index": {
+        "files": {
+          "percent": "100.0%",
+          "recovered": 24,
+          "reused": 0,
+          "total": 24
+        },
+        "size": {
+          "percent": "100.0%",
+          "recovered_in_bytes": 3867758,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 3867758
+        },
+        "source_throttle_time_in_millis": 2,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 236
+      },
+      "index_name": ".watcher-history-7-2018.02.12",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518544006330,
+      "stop_time_in_millis": 1518544007102,
+      "target": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "total_time_in_millis": 772,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": 0,
+        "total_time_in_millis": 22
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 0,
+      "index": {
+        "files": {
+          "percent": "100.0%",
+          "recovered": 24,
+          "reused": 0,
+          "total": 24
+        },
+        "size": {
+          "percent": "100.0%",
+          "recovered_in_bytes": 1772502,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 1772502
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 130
+      },
+      "index_name": ".watcher-history-7-2018.02.13",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518544006104,
+      "stop_time_in_millis": 1518544007479,
+      "target": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "total_time_in_millis": 1375,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 1142,
+        "total": 1142,
+        "total_on_start": 1142,
+        "total_time_in_millis": 688
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 4,
+      "index": {
+        "files": {
+          "percent": "0.0%",
+          "recovered": 0,
+          "reused": 0,
+          "total": 0
+        },
+        "size": {
+          "percent": "0.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 0
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 1
+      },
+      "index_name": "test-index-02",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518544005789,
+      "stop_time_in_millis": 1518544006317,
+      "target": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "total_time_in_millis": 528,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": -1,
+        "total_time_in_millis": 15
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 3,
+      "index": {
+        "files": {
+          "percent": "0.0%",
+          "recovered": 0,
+          "reused": 0,
+          "total": 0
+        },
+        "size": {
+          "percent": "0.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 0
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 1
+      },
+      "index_name": "test-index-02",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518544005567,
+      "stop_time_in_millis": 1518544006091,
+      "target": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "total_time_in_millis": 524,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": -1,
+        "total_time_in_millis": 11
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 2,
+      "index": {
+        "files": {
+          "percent": "0.0%",
+          "recovered": 0,
+          "reused": 0,
+          "total": 0
+        },
+        "size": {
+          "percent": "0.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 0
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 1
+      },
+      "index_name": "test-index-02",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518544005256,
+      "stop_time_in_millis": 1518544005785,
+      "target": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "total_time_in_millis": 528,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": -1,
+        "total_time_in_millis": 15
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 0,
+      "index": {
+        "files": {
+          "percent": "0.0%",
+          "recovered": 0,
+          "reused": 0,
+          "total": 0
+        },
+        "size": {
+          "percent": "0.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 0
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 1
+      },
+      "index_name": "test-index-02",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518544005028,
+      "stop_time_in_millis": 1518544005563,
+      "target": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "total_time_in_millis": 534,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": -1,
+        "total_time_in_millis": 17
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 4,
+      "index": {
+        "files": {
+          "percent": "0.0%",
+          "recovered": 0,
+          "reused": 0,
+          "total": 0
+        },
+        "size": {
+          "percent": "0.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 0
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 2
+      },
+      "index_name": "test-index-03",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518544004724,
+      "stop_time_in_millis": 1518544005252,
+      "target": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "total_time_in_millis": 528,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": -1,
+        "total_time_in_millis": 15
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 3,
+      "index": {
+        "files": {
+          "percent": "0.0%",
+          "recovered": 0,
+          "reused": 0,
+          "total": 0
+        },
+        "size": {
+          "percent": "0.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 0
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 1
+      },
+      "index_name": "test-index-03",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518544004491,
+      "stop_time_in_millis": 1518544005024,
+      "target": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "total_time_in_millis": 532,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": -1,
+        "total_time_in_millis": 17
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 2,
+      "index": {
+        "files": {
+          "percent": "0.0%",
+          "recovered": 0,
+          "reused": 0,
+          "total": 0
+        },
+        "size": {
+          "percent": "0.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 0
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 1
+      },
+      "index_name": "test-index-03",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518544004190,
+      "stop_time_in_millis": 1518544004719,
+      "target": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "total_time_in_millis": 529,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": -1,
+        "total_time_in_millis": 16
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 1,
+      "index": {
+        "files": {
+          "percent": "0.0%",
+          "recovered": 0,
+          "reused": 0,
+          "total": 0
+        },
+        "size": {
+          "percent": "0.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 0
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 2
+      },
+      "index_name": "test-index-03",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518544003957,
+      "stop_time_in_millis": 1518544004486,
+      "target": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "total_time_in_millis": 529,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": -1,
+        "total_time_in_millis": 10
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 4,
+      "index": {
+        "files": {
+          "percent": "0.0%",
+          "recovered": 0,
+          "reused": 0,
+          "total": 0
+        },
+        "size": {
+          "percent": "0.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 0
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 2
+      },
+      "index_name": "test-index-04",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518544003657,
+      "stop_time_in_millis": 1518544004185,
+      "target": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "total_time_in_millis": 528,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": -1,
+        "total_time_in_millis": 13
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 3,
+      "index": {
+        "files": {
+          "percent": "0.0%",
+          "recovered": 0,
+          "reused": 0,
+          "total": 0
+        },
+        "size": {
+          "percent": "0.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 0
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 1
+      },
+      "index_name": "test-index-04",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518544003420,
+      "stop_time_in_millis": 1518544003952,
+      "target": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "total_time_in_millis": 531,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": -1,
+        "total_time_in_millis": 17
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 2,
+      "index": {
+        "files": {
+          "percent": "0.0%",
+          "recovered": 0,
+          "reused": 0,
+          "total": 0
+        },
+        "size": {
+          "percent": "0.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 0
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 2
+      },
+      "index_name": "test-index-04",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518544003120,
+      "stop_time_in_millis": 1518544003652,
+      "target": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "total_time_in_millis": 532,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": -1,
+        "total_time_in_millis": 16
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 1,
+      "index": {
+        "files": {
+          "percent": "0.0%",
+          "recovered": 0,
+          "reused": 0,
+          "total": 0
+        },
+        "size": {
+          "percent": "0.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 0
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 1
+      },
+      "index_name": "test-index-04",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518544002883,
+      "stop_time_in_millis": 1518544003416,
+      "target": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "total_time_in_millis": 533,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": -1,
+        "total_time_in_millis": 16
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 4,
+      "index": {
+        "files": {
+          "percent": "0.0%",
+          "recovered": 0,
+          "reused": 0,
+          "total": 0
+        },
+        "size": {
+          "percent": "0.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 0
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 1
+      },
+      "index_name": "test-index-05",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518544002584,
+      "stop_time_in_millis": 1518544003115,
+      "target": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "total_time_in_millis": 530,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": -1,
+        "total_time_in_millis": 15
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 3,
+      "index": {
+        "files": {
+          "percent": "0.0%",
+          "recovered": 0,
+          "reused": 0,
+          "total": 0
+        },
+        "size": {
+          "percent": "0.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 0
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 1
+      },
+      "index_name": "test-index-05",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518544002348,
+      "stop_time_in_millis": 1518544002878,
+      "target": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "total_time_in_millis": 530,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": -1,
+        "total_time_in_millis": 15
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 2,
+      "index": {
+        "files": {
+          "percent": "0.0%",
+          "recovered": 0,
+          "reused": 0,
+          "total": 0
+        },
+        "size": {
+          "percent": "0.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 0
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 2
+      },
+      "index_name": "test-index-05",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518544002046,
+      "stop_time_in_millis": 1518544002578,
+      "target": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "total_time_in_millis": 532,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": -1,
+        "total_time_in_millis": 16
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 0,
+      "index": {
+        "files": {
+          "percent": "0.0%",
+          "recovered": 0,
+          "reused": 0,
+          "total": 0
+        },
+        "size": {
+          "percent": "0.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 0
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 1
+      },
+      "index_name": "test-index-05",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518544001807,
+      "stop_time_in_millis": 1518544002343,
+      "target": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "total_time_in_millis": 536,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": -1,
+        "total_time_in_millis": 16
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 3,
+      "index": {
+        "files": {
+          "percent": "0.0%",
+          "recovered": 0,
+          "reused": 0,
+          "total": 0
+        },
+        "size": {
+          "percent": "0.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 0
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 2
+      },
+      "index_name": "test-index-06",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518544001729,
+      "stop_time_in_millis": 1518544001800,
+      "target": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "total_time_in_millis": 70,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": -1,
+        "total_time_in_millis": 43
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 2,
+      "index": {
+        "files": {
+          "percent": "0.0%",
+          "recovered": 0,
+          "reused": 0,
+          "total": 0
+        },
+        "size": {
+          "percent": "0.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 0
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 1
+      },
+      "index_name": "test-index-06",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518544001511,
+      "stop_time_in_millis": 1518544002042,
+      "target": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "total_time_in_millis": 531,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": -1,
+        "total_time_in_millis": 13
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 1,
+      "index": {
+        "files": {
+          "percent": "0.0%",
+          "recovered": 0,
+          "reused": 0,
+          "total": 0
+        },
+        "size": {
+          "percent": "0.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 0
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 2
+      },
+      "index_name": "test-index-06",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518544001473,
+      "stop_time_in_millis": 1518544001503,
+      "target": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "total_time_in_millis": 30,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": -1,
+        "total_time_in_millis": 14
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 0,
+      "index": {
+        "files": {
+          "percent": "0.0%",
+          "recovered": 0,
+          "reused": 0,
+          "total": 0
+        },
+        "size": {
+          "percent": "0.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 0
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 2
+      },
+      "index_name": "test-index-06",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518544001185,
+      "stop_time_in_millis": 1518544001719,
+      "target": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "total_time_in_millis": 534,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": -1,
+        "total_time_in_millis": 15
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 0,
+      "index": {
+        "files": {
+          "percent": "100.0%",
+          "recovered": 1,
+          "reused": 0,
+          "total": 1
+        },
+        "size": {
+          "percent": "100.0%",
+          "recovered_in_bytes": 230,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 230
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 12
+      },
+      "index_name": ".monitoring-es-6-2018.02.13",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518544000696,
+      "stop_time_in_millis": 1518544001465,
+      "target": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "total_time_in_millis": 769,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 219,
+        "total": 219,
+        "total_on_start": 219,
+        "total_time_in_millis": 137
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 0,
+      "index": {
+        "files": {
+          "percent": "100.0%",
+          "recovered": 1,
+          "reused": 0,
+          "total": 1
+        },
+        "size": {
+          "percent": "100.0%",
+          "recovered_in_bytes": 230,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 230
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 16
+      },
+      "index_name": ".monitoring-alerts-6",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518544000598,
+      "stop_time_in_millis": 1518544001177,
+      "target": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "total_time_in_millis": 579,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 1,
+        "total": 1,
+        "total_on_start": 1,
+        "total_time_in_millis": 21
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 0,
+      "index": {
+        "files": {
+          "percent": "100.0%",
+          "recovered": 1,
+          "reused": 0,
+          "total": 1
+        },
+        "size": {
+          "percent": "100.0%",
+          "recovered_in_bytes": 230,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 230
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 11
+      },
+      "index_name": ".monitoring-kibana-6-2018.02.13",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518544000038,
+      "stop_time_in_millis": 1518544000674,
+      "target": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "total_time_in_millis": 636,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 2,
+        "total": 2,
+        "total_on_start": 2,
+        "total_time_in_millis": 43
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 0,
+      "index": {
+        "files": {
+          "percent": "100.0%",
+          "recovered": 4,
+          "reused": 0,
+          "total": 4
+        },
+        "size": {
+          "percent": "100.0%",
+          "recovered_in_bytes": 18122,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 18122
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 16
+      },
+      "index_name": ".watches",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518543999055,
+      "stop_time_in_millis": 1518544000585,
+      "target": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "total_time_in_millis": 1530,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 2924,
+        "total": 2924,
+        "total_on_start": 2924,
+        "total_time_in_millis": 947
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 0,
+      "index": {
+        "files": {
+          "percent": "100.0%",
+          "recovered": 5,
+          "reused": 0,
+          "total": 5
+        },
+        "size": {
+          "percent": "100.0%",
+          "recovered_in_bytes": 355536,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 355536
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 48
+      },
+      "index_name": ".triggered_watches",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518543998914,
+      "stop_time_in_millis": 1518544000022,
+      "target": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "total_time_in_millis": 1108,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 5848,
+        "total": 5848,
+        "total_on_start": 5848,
+        "total_time_in_millis": 461
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 0,
+      "index": {
+        "files": {
+          "percent": "100.0%",
+          "recovered": 25,
+          "reused": 0,
+          "total": 25
+        },
+        "size": {
+          "percent": "100.0%",
+          "recovered_in_bytes": 20905,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 20905
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 81
+      },
+      "index_name": ".security-6",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518543998433,
+      "stop_time_in_millis": 1518543999046,
+      "target": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "total_time_in_millis": 613,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": 0,
+        "total_time_in_millis": 17
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 2,
+      "index": {
+        "files": {
+          "percent": "0.0%",
+          "recovered": 0,
+          "reused": 0,
+          "total": 0
+        },
+        "size": {
+          "percent": "0.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 0
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 2
+      },
+      "index_name": "filebeat-7.0.0-alpha1-2018.02.09",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518543998239,
+      "stop_time_in_millis": 1518543998907,
+      "target": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "total_time_in_millis": 667,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": -1,
+        "total_time_in_millis": 76
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 0,
+      "index": {
+        "files": {
+          "percent": "0.0%",
+          "recovered": 0,
+          "reused": 0,
+          "total": 0
+        },
+        "size": {
+          "percent": "0.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 0
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 3
+      },
+      "index_name": "filebeat-7.0.0-alpha1-2018.02.09",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518543998196,
+      "stop_time_in_millis": 1518543998399,
+      "target": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "total_time_in_millis": 202,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": -1,
+        "total_time_in_millis": 138
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 1,
+      "index": {
+        "files": {
+          "percent": "0.0%",
+          "recovered": 0,
+          "reused": 0,
+          "total": 0
+        },
+        "size": {
+          "percent": "0.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 0
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 3
+      },
+      "index_name": "filebeat-7.0.0-alpha1-2018.02.09",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518543998036,
+      "stop_time_in_millis": 1518543998207,
+      "target": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "total_time_in_millis": 171,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": -1,
+        "total_time_in_millis": 121
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 4,
+      "index": {
+        "files": {
+          "percent": "0.0%",
+          "recovered": 0,
+          "reused": 0,
+          "total": 0
+        },
+        "size": {
+          "percent": "0.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 0
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 2
+      },
+      "index_name": "metricbeat-7.0.0-alpha1-2018.02.09",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518543997927,
+      "stop_time_in_millis": 1518543998009,
+      "target": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "total_time_in_millis": 81,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": -1,
+        "total_time_in_millis": 37
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 0,
+      "index": {
+        "files": {
+          "percent": "0.0%",
+          "recovered": 0,
+          "reused": 0,
+          "total": 0
+        },
+        "size": {
+          "percent": "0.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 0
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 2
+      },
+      "index_name": "metricbeat-7.0.0-alpha1-2018.02.09",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518543997859,
+      "stop_time_in_millis": 1518543997918,
+      "target": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "total_time_in_millis": 58,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": -1,
+        "total_time_in_millis": 37
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 1,
+      "index": {
+        "files": {
+          "percent": "0.0%",
+          "recovered": 0,
+          "reused": 0,
+          "total": 0
+        },
+        "size": {
+          "percent": "0.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 0
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 2
+      },
+      "index_name": "metricbeat-7.0.0-alpha1-2018.02.09",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518543997806,
+      "stop_time_in_millis": 1518543997851,
+      "target": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "total_time_in_millis": 45,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": -1,
+        "total_time_in_millis": 26
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 2,
+      "index": {
+        "files": {
+          "percent": "0.0%",
+          "recovered": 0,
+          "reused": 0,
+          "total": 0
+        },
+        "size": {
+          "percent": "0.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 0
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 3
+      },
+      "index_name": "metricbeat-7.0.0-alpha1-2018.02.09",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518543997742,
+      "stop_time_in_millis": 1518543997799,
+      "target": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "total_time_in_millis": 56,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": -1,
+        "total_time_in_millis": 35
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 3,
+      "index": {
+        "files": {
+          "percent": "0.0%",
+          "recovered": 0,
+          "reused": 0,
+          "total": 0
+        },
+        "size": {
+          "percent": "0.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 0
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 2
+      },
+      "index_name": "metricbeat-7.0.0-alpha1-2018.02.09",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518543997690,
+      "stop_time_in_millis": 1518543997735,
+      "target": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "total_time_in_millis": 44,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": -1,
+        "total_time_in_millis": 27
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 3,
+      "index": {
+        "files": {
+          "percent": "0.0%",
+          "recovered": 0,
+          "reused": 0,
+          "total": 0
+        },
+        "size": {
+          "percent": "0.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 0
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 3
+      },
+      "index_name": "test-index-01",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518543997602,
+      "stop_time_in_millis": 1518543998163,
+      "target": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "total_time_in_millis": 561,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": -1,
+        "total_time_in_millis": 29
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 2,
+      "index": {
+        "files": {
+          "percent": "0.0%",
+          "recovered": 0,
+          "reused": 0,
+          "total": 0
+        },
+        "size": {
+          "percent": "0.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 0
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 1
+      },
+      "index_name": "test-index-01",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518543997123,
+      "stop_time_in_millis": 1518543997658,
+      "target": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "total_time_in_millis": 535,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": -1,
+        "total_time_in_millis": 13
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 4,
+      "index": {
+        "files": {
+          "percent": "0.0%",
+          "recovered": 0,
+          "reused": 0,
+          "total": 0
+        },
+        "size": {
+          "percent": "0.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 0
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 3
+      },
+      "index_name": "test-index-01",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518543997078,
+      "stop_time_in_millis": 1518543997117,
+      "target": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "total_time_in_millis": 39,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": -1,
+        "total_time_in_millis": 22
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 0,
+      "index": {
+        "files": {
+          "percent": "0.0%",
+          "recovered": 0,
+          "reused": 0,
+          "total": 0
+        },
+        "size": {
+          "percent": "0.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 0
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 2
+      },
+      "index_name": "test-index-01",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518543997054,
+      "stop_time_in_millis": 1518543997597,
+      "target": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "total_time_in_millis": 542,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": -1,
+        "total_time_in_millis": 23
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 1,
+      "index": {
+        "files": {
+          "percent": "0.0%",
+          "recovered": 0,
+          "reused": 0,
+          "total": 0
+        },
+        "size": {
+          "percent": "0.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 0
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 1
+      },
+      "index_name": "test-index-02",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518543996508,
+      "stop_time_in_millis": 1518543997045,
+      "target": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "total_time_in_millis": 536,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": -1,
+        "total_time_in_millis": 20
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 1,
+      "index": {
+        "files": {
+          "percent": "0.0%",
+          "recovered": 0,
+          "reused": 0,
+          "total": 0
+        },
+        "size": {
+          "percent": "0.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 0
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 2
+      },
+      "index_name": "test-index-01",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518543996504,
+      "stop_time_in_millis": 1518543997053,
+      "target": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "total_time_in_millis": 549,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": -1,
+        "total_time_in_millis": 26
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 0,
+      "index": {
+        "files": {
+          "percent": "0.0%",
+          "recovered": 0,
+          "reused": 0,
+          "total": 0
+        },
+        "size": {
+          "percent": "0.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 0
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 2
+      },
+      "index_name": "test-index-03",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518543995954,
+      "stop_time_in_millis": 1518543996490,
+      "target": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "total_time_in_millis": 536,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": -1,
+        "total_time_in_millis": 16
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 0,
+      "index": {
+        "files": {
+          "percent": "0.0%",
+          "recovered": 0,
+          "reused": 0,
+          "total": 0
+        },
+        "size": {
+          "percent": "0.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 0
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 2
+      },
+      "index_name": "test-index-04",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518543995951,
+      "stop_time_in_millis": 1518543996490,
+      "target": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "total_time_in_millis": 539,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": -1,
+        "total_time_in_millis": 17
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 1,
+      "index": {
+        "files": {
+          "percent": "0.0%",
+          "recovered": 0,
+          "reused": 0,
+          "total": 0
+        },
+        "size": {
+          "percent": "0.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 0
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 3
+      },
+      "index_name": "test-index-05",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518543995287,
+      "stop_time_in_millis": 1518543995937,
+      "target": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "total_time_in_millis": 650,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": -1,
+        "total_time_in_millis": 113
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 4,
+      "index": {
+        "files": {
+          "percent": "0.0%",
+          "recovered": 0,
+          "reused": 0,
+          "total": 0
+        },
+        "size": {
+          "percent": "0.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 0
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 2
+      },
+      "index_name": "test-index-06",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518543995260,
+      "stop_time_in_millis": 1518543995937,
+      "target": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "total_time_in_millis": 676,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": -1,
+        "total_time_in_millis": 113
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 0,
+      "index": {
+        "files": {
+          "percent": "0.0%",
+          "recovered": 0,
+          "reused": 0,
+          "total": 0
+        },
+        "size": {
+          "percent": "0.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 0
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 0
+      },
+      "index_name": ".monitoring-kibana-6-2018.02.13",
+      "primary": true,
+      "source": {},
+      "stage": "DONE",
+      "start_time_in_millis": 1518543986076,
+      "stop_time_in_millis": 1518543986085,
+      "target": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "total_time_in_millis": 9,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": 0,
+        "total_time_in_millis": 6
+      },
+      "type": "EMPTY_STORE",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 0,
+      "index": {
+        "files": {
+          "percent": "0.0%",
+          "recovered": 0,
+          "reused": 0,
+          "total": 0
+        },
+        "size": {
+          "percent": "0.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 0
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 0
+      },
+      "index_name": ".monitoring-alerts-6",
+      "primary": true,
+      "source": {},
+      "stage": "DONE",
+      "start_time_in_millis": 1518543982899,
+      "stop_time_in_millis": 1518543982908,
+      "target": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "total_time_in_millis": 8,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": 0,
+        "total_time_in_millis": 5
+      },
+      "type": "EMPTY_STORE",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 0,
+      "index": {
+        "files": {
+          "percent": "0.0%",
+          "recovered": 0,
+          "reused": 0,
+          "total": 0
+        },
+        "size": {
+          "percent": "0.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 0
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 0
+      },
+      "index_name": ".monitoring-es-6-2018.02.13",
+      "primary": true,
+      "source": {},
+      "stage": "DONE",
+      "start_time_in_millis": 1518543981600,
+      "stop_time_in_millis": 1518543981608,
+      "target": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "total_time_in_millis": 7,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": 0,
+        "total_time_in_millis": 4
+      },
+      "type": "EMPTY_STORE",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 4,
+      "index": {
+        "files": {
+          "percent": "100.0%",
+          "recovered": 1,
+          "reused": 0,
+          "total": 1
+        },
+        "size": {
+          "percent": "100.0%",
+          "recovered_in_bytes": 230,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 230
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 6
+      },
+      "index_name": "test-index-06",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518543532323,
+      "stop_time_in_millis": 1518543532344,
+      "target": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "total_time_in_millis": 20,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": 0,
+        "total_time_in_millis": 7
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 2,
+      "index": {
+        "files": {
+          "percent": "100.0%",
+          "recovered": 1,
+          "reused": 0,
+          "total": 1
+        },
+        "size": {
+          "percent": "100.0%",
+          "recovered_in_bytes": 230,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 230
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 5
+      },
+      "index_name": "test-index-06",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518543532307,
+      "stop_time_in_millis": 1518543532326,
+      "target": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "total_time_in_millis": 19,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": 0,
+        "total_time_in_millis": 8
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 0,
+      "index": {
+        "files": {
+          "percent": "100.0%",
+          "recovered": 1,
+          "reused": 0,
+          "total": 1
+        },
+        "size": {
+          "percent": "100.0%",
+          "recovered_in_bytes": 230,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 230
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 6
+      },
+      "index_name": "test-index-06",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518543532289,
+      "stop_time_in_millis": 1518543532310,
+      "target": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "total_time_in_millis": 20,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": 0,
+        "total_time_in_millis": 8
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 3,
+      "index": {
+        "files": {
+          "percent": "0.0%",
+          "recovered": 0,
+          "reused": 0,
+          "total": 0
+        },
+        "size": {
+          "percent": "0.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 0
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 0
+      },
+      "index_name": "test-index-06",
+      "primary": true,
+      "source": {},
+      "stage": "DONE",
+      "start_time_in_millis": 1518543532272,
+      "stop_time_in_millis": 1518543532279,
+      "target": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "total_time_in_millis": 7,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": 0,
+        "total_time_in_millis": 4
+      },
+      "type": "EMPTY_STORE",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 1,
+      "index": {
+        "files": {
+          "percent": "0.0%",
+          "recovered": 0,
+          "reused": 0,
+          "total": 0
+        },
+        "size": {
+          "percent": "0.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 0
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 0
+      },
+      "index_name": "test-index-06",
+      "primary": true,
+      "source": {},
+      "stage": "DONE",
+      "start_time_in_millis": 1518543532269,
+      "stop_time_in_millis": 1518543532277,
+      "target": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "total_time_in_millis": 7,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": 0,
+        "total_time_in_millis": 4
+      },
+      "type": "EMPTY_STORE",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 4,
+      "index": {
+        "files": {
+          "percent": "100.0%",
+          "recovered": 1,
+          "reused": 0,
+          "total": 1
+        },
+        "size": {
+          "percent": "100.0%",
+          "recovered_in_bytes": 230,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 230
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 5
+      },
+      "index_name": "test-index-05",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518543530191,
+      "stop_time_in_millis": 1518543530218,
+      "target": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "total_time_in_millis": 27,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": 0,
+        "total_time_in_millis": 16
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 2,
+      "index": {
+        "files": {
+          "percent": "100.0%",
+          "recovered": 1,
+          "reused": 0,
+          "total": 1
+        },
+        "size": {
+          "percent": "100.0%",
+          "recovered_in_bytes": 230,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 230
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 5
+      },
+      "index_name": "test-index-05",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518543530176,
+      "stop_time_in_millis": 1518543530194,
+      "target": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "total_time_in_millis": 17,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": 0,
+        "total_time_in_millis": 7
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 0,
+      "index": {
+        "files": {
+          "percent": "100.0%",
+          "recovered": 1,
+          "reused": 0,
+          "total": 1
+        },
+        "size": {
+          "percent": "100.0%",
+          "recovered_in_bytes": 230,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 230
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 6
+      },
+      "index_name": "test-index-05",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518543530158,
+      "stop_time_in_millis": 1518543530177,
+      "target": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "total_time_in_millis": 19,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": 0,
+        "total_time_in_millis": 8
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 3,
+      "index": {
+        "files": {
+          "percent": "0.0%",
+          "recovered": 0,
+          "reused": 0,
+          "total": 0
+        },
+        "size": {
+          "percent": "0.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 0
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 0
+      },
+      "index_name": "test-index-05",
+      "primary": true,
+      "source": {},
+      "stage": "DONE",
+      "start_time_in_millis": 1518543530140,
+      "stop_time_in_millis": 1518543530149,
+      "target": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "total_time_in_millis": 8,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": 0,
+        "total_time_in_millis": 5
+      },
+      "type": "EMPTY_STORE",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 1,
+      "index": {
+        "files": {
+          "percent": "0.0%",
+          "recovered": 0,
+          "reused": 0,
+          "total": 0
+        },
+        "size": {
+          "percent": "0.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 0
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 0
+      },
+      "index_name": "test-index-05",
+      "primary": true,
+      "source": {},
+      "stage": "DONE",
+      "start_time_in_millis": 1518543530137,
+      "stop_time_in_millis": 1518543530146,
+      "target": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "total_time_in_millis": 9,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": 0,
+        "total_time_in_millis": 5
+      },
+      "type": "EMPTY_STORE",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 4,
+      "index": {
+        "files": {
+          "percent": "100.0%",
+          "recovered": 1,
+          "reused": 0,
+          "total": 1
+        },
+        "size": {
+          "percent": "100.0%",
+          "recovered_in_bytes": 230,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 230
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 5
+      },
+      "index_name": "test-index-04",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518543527979,
+      "stop_time_in_millis": 1518543527999,
+      "target": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "total_time_in_millis": 20,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": 0,
+        "total_time_in_millis": 8
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 2,
+      "index": {
+        "files": {
+          "percent": "100.0%",
+          "recovered": 1,
+          "reused": 0,
+          "total": 1
+        },
+        "size": {
+          "percent": "100.0%",
+          "recovered_in_bytes": 230,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 230
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 6
+      },
+      "index_name": "test-index-04",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518543527960,
+      "stop_time_in_millis": 1518543527980,
+      "target": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "total_time_in_millis": 20,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": 0,
+        "total_time_in_millis": 8
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 0,
+      "index": {
+        "files": {
+          "percent": "100.0%",
+          "recovered": 1,
+          "reused": 0,
+          "total": 1
+        },
+        "size": {
+          "percent": "100.0%",
+          "recovered_in_bytes": 230,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 230
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 7
+      },
+      "index_name": "test-index-04",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518543527945,
+      "stop_time_in_millis": 1518543527966,
+      "target": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "total_time_in_millis": 20,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": 0,
+        "total_time_in_millis": 7
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 3,
+      "index": {
+        "files": {
+          "percent": "0.0%",
+          "recovered": 0,
+          "reused": 0,
+          "total": 0
+        },
+        "size": {
+          "percent": "0.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 0
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 0
+      },
+      "index_name": "test-index-04",
+      "primary": true,
+      "source": {},
+      "stage": "DONE",
+      "start_time_in_millis": 1518543527926,
+      "stop_time_in_millis": 1518543527933,
+      "target": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "total_time_in_millis": 6,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": 0,
+        "total_time_in_millis": 4
+      },
+      "type": "EMPTY_STORE",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 1,
+      "index": {
+        "files": {
+          "percent": "0.0%",
+          "recovered": 0,
+          "reused": 0,
+          "total": 0
+        },
+        "size": {
+          "percent": "0.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 0
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 0
+      },
+      "index_name": "test-index-04",
+      "primary": true,
+      "source": {},
+      "stage": "DONE",
+      "start_time_in_millis": 1518543527923,
+      "stop_time_in_millis": 1518543527931,
+      "target": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "total_time_in_millis": 7,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": 0,
+        "total_time_in_millis": 4
+      },
+      "type": "EMPTY_STORE",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 4,
+      "index": {
+        "files": {
+          "percent": "100.0%",
+          "recovered": 1,
+          "reused": 0,
+          "total": 1
+        },
+        "size": {
+          "percent": "100.0%",
+          "recovered_in_bytes": 230,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 230
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 9
+      },
+      "index_name": "test-index-03",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518543525277,
+      "stop_time_in_millis": 1518543525302,
+      "target": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "total_time_in_millis": 24,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": 0,
+        "total_time_in_millis": 7
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 2,
+      "index": {
+        "files": {
+          "percent": "100.0%",
+          "recovered": 1,
+          "reused": 0,
+          "total": 1
+        },
+        "size": {
+          "percent": "100.0%",
+          "recovered_in_bytes": 230,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 230
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 6
+      },
+      "index_name": "test-index-03",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518543525258,
+      "stop_time_in_millis": 1518543525280,
+      "target": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "total_time_in_millis": 22,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": 0,
+        "total_time_in_millis": 9
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 0,
+      "index": {
+        "files": {
+          "percent": "100.0%",
+          "recovered": 1,
+          "reused": 0,
+          "total": 1
+        },
+        "size": {
+          "percent": "100.0%",
+          "recovered_in_bytes": 230,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 230
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 5
+      },
+      "index_name": "test-index-03",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518543525245,
+      "stop_time_in_millis": 1518543525263,
+      "target": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "total_time_in_millis": 18,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": 0,
+        "total_time_in_millis": 8
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 3,
+      "index": {
+        "files": {
+          "percent": "0.0%",
+          "recovered": 0,
+          "reused": 0,
+          "total": 0
+        },
+        "size": {
+          "percent": "0.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 0
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 0
+      },
+      "index_name": "test-index-03",
+      "primary": true,
+      "source": {},
+      "stage": "DONE",
+      "start_time_in_millis": 1518543525225,
+      "stop_time_in_millis": 1518543525233,
+      "target": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "total_time_in_millis": 7,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": 0,
+        "total_time_in_millis": 4
+      },
+      "type": "EMPTY_STORE",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 1,
+      "index": {
+        "files": {
+          "percent": "0.0%",
+          "recovered": 0,
+          "reused": 0,
+          "total": 0
+        },
+        "size": {
+          "percent": "0.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 0
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 0
+      },
+      "index_name": "test-index-03",
+      "primary": true,
+      "source": {},
+      "stage": "DONE",
+      "start_time_in_millis": 1518543525223,
+      "stop_time_in_millis": 1518543525230,
+      "target": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "total_time_in_millis": 7,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": 0,
+        "total_time_in_millis": 4
+      },
+      "type": "EMPTY_STORE",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 4,
+      "index": {
+        "files": {
+          "percent": "100.0%",
+          "recovered": 1,
+          "reused": 0,
+          "total": 1
+        },
+        "size": {
+          "percent": "100.0%",
+          "recovered_in_bytes": 230,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 230
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 7
+      },
+      "index_name": "test-index-02",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518543514759,
+      "stop_time_in_millis": 1518543514782,
+      "target": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "total_time_in_millis": 23,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": 0,
+        "total_time_in_millis": 8
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 0,
+      "index": {
+        "files": {
+          "percent": "100.0%",
+          "recovered": 1,
+          "reused": 0,
+          "total": 1
+        },
+        "size": {
+          "percent": "100.0%",
+          "recovered_in_bytes": 230,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 230
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 9
+      },
+      "index_name": "test-index-02",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518543514716,
+      "stop_time_in_millis": 1518543514743,
+      "target": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "total_time_in_millis": 26,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": 0,
+        "total_time_in_millis": 11
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 2,
+      "index": {
+        "files": {
+          "percent": "100.0%",
+          "recovered": 1,
+          "reused": 0,
+          "total": 1
+        },
+        "size": {
+          "percent": "100.0%",
+          "recovered_in_bytes": 230,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 230
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 7
+      },
+      "index_name": "test-index-02",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518543514711,
+      "stop_time_in_millis": 1518543514738,
+      "target": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "total_time_in_millis": 27,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": 0,
+        "total_time_in_millis": 11
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 3,
+      "index": {
+        "files": {
+          "percent": "0.0%",
+          "recovered": 0,
+          "reused": 0,
+          "total": 0
+        },
+        "size": {
+          "percent": "0.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 0
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 0
+      },
+      "index_name": "test-index-02",
+      "primary": true,
+      "source": {},
+      "stage": "DONE",
+      "start_time_in_millis": 1518543514688,
+      "stop_time_in_millis": 1518543514696,
+      "target": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "total_time_in_millis": 8,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": 0,
+        "total_time_in_millis": 4
+      },
+      "type": "EMPTY_STORE",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 1,
+      "index": {
+        "files": {
+          "percent": "0.0%",
+          "recovered": 0,
+          "reused": 0,
+          "total": 0
+        },
+        "size": {
+          "percent": "0.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 0
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 0
+      },
+      "index_name": "test-index-02",
+      "primary": true,
+      "source": {},
+      "stage": "DONE",
+      "start_time_in_millis": 1518543514684,
+      "stop_time_in_millis": 1518543514694,
+      "target": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "total_time_in_millis": 9,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": 0,
+        "total_time_in_millis": 5
+      },
+      "type": "EMPTY_STORE",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 4,
+      "index": {
+        "files": {
+          "percent": "100.0%",
+          "recovered": 1,
+          "reused": 0,
+          "total": 1
+        },
+        "size": {
+          "percent": "100.0%",
+          "recovered_in_bytes": 230,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 230
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 8
+      },
+      "index_name": "test-index-01",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518543485412,
+      "stop_time_in_millis": 1518543485435,
+      "target": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "total_time_in_millis": 22,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": 0,
+        "total_time_in_millis": 8
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 0,
+      "index": {
+        "files": {
+          "percent": "100.0%",
+          "recovered": 1,
+          "reused": 0,
+          "total": 1
+        },
+        "size": {
+          "percent": "100.0%",
+          "recovered_in_bytes": 230,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 230
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 31
+      },
+      "index_name": "test-index-01",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518543485350,
+      "stop_time_in_millis": 1518543485405,
+      "target": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "total_time_in_millis": 54,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": 0,
+        "total_time_in_millis": 13
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 2,
+      "index": {
+        "files": {
+          "percent": "100.0%",
+          "recovered": 1,
+          "reused": 0,
+          "total": 1
+        },
+        "size": {
+          "percent": "100.0%",
+          "recovered_in_bytes": 230,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 230
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 34
+      },
+      "index_name": "test-index-01",
+      "primary": false,
+      "source": {
+        "host": "spicy.local",
+        "id": "t9J9jvHpQ2yDw9c1LJ0tHA",
+        "ip": "127.0.0.1",
+        "name": "node02",
+        "transport_address": "127.0.0.1:9301"
+      },
+      "stage": "DONE",
+      "start_time_in_millis": 1518543485344,
+      "stop_time_in_millis": 1518543485403,
+      "target": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "total_time_in_millis": 58,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": 0,
+        "total_time_in_millis": 13
+      },
+      "type": "PEER",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 3,
+      "index": {
+        "files": {
+          "percent": "0.0%",
+          "recovered": 0,
+          "reused": 0,
+          "total": 0
+        },
+        "size": {
+          "percent": "0.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 0
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 0
+      },
+      "index_name": "test-index-01",
+      "primary": true,
+      "source": {},
+      "stage": "DONE",
+      "start_time_in_millis": 1518543485317,
+      "stop_time_in_millis": 1518543485325,
+      "target": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "total_time_in_millis": 8,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": 0,
+        "total_time_in_millis": 4
+      },
+      "type": "EMPTY_STORE",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 1,
+      "index": {
+        "files": {
+          "percent": "0.0%",
+          "recovered": 0,
+          "reused": 0,
+          "total": 0
+        },
+        "size": {
+          "percent": "0.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 0,
+          "total_in_bytes": 0
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 0
+      },
+      "index_name": "test-index-01",
+      "primary": true,
+      "source": {},
+      "stage": "DONE",
+      "start_time_in_millis": 1518543485313,
+      "stop_time_in_millis": 1518543485322,
+      "target": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "total_time_in_millis": 9,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": 0,
+        "total_time_in_millis": 5
+      },
+      "type": "EMPTY_STORE",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 0,
+      "index": {
+        "files": {
+          "percent": "100.0%",
+          "recovered": 0,
+          "reused": 27,
+          "total": 27
+        },
+        "size": {
+          "percent": "100.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 2754971,
+          "total_in_bytes": 2754971
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 2
+      },
+      "index_name": ".watcher-history-7-2018.02.07",
+      "primary": true,
+      "source": {},
+      "stage": "DONE",
+      "start_time_in_millis": 1518542536124,
+      "stop_time_in_millis": 1518542536165,
+      "target": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "total_time_in_millis": 41,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": 0,
+        "total_time_in_millis": 33
+      },
+      "type": "EXISTING_STORE",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 0,
+      "index": {
+        "files": {
+          "percent": "100.0%",
+          "recovered": 0,
+          "reused": 7,
+          "total": 7
+        },
+        "size": {
+          "percent": "100.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 22129,
+          "total_in_bytes": 22129
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 0
+      },
+      "index_name": ".kibana",
+      "primary": true,
+      "source": {},
+      "stage": "DONE",
+      "start_time_in_millis": 1518542536119,
+      "stop_time_in_millis": 1518542536138,
+      "target": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "total_time_in_millis": 19,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": 0,
+        "total_time_in_millis": 14
+      },
+      "type": "EXISTING_STORE",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 0,
+      "index": {
+        "files": {
+          "percent": "100.0%",
+          "recovered": 0,
+          "reused": 18,
+          "total": 18
+        },
+        "size": {
+          "percent": "100.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 3035244,
+          "total_in_bytes": 3035244
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 1
+      },
+      "index_name": ".watcher-history-7-2018.02.08",
+      "primary": true,
+      "source": {},
+      "stage": "DONE",
+      "start_time_in_millis": 1518542536095,
+      "stop_time_in_millis": 1518542536121,
+      "target": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "total_time_in_millis": 26,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": 0,
+        "total_time_in_millis": 20
+      },
+      "type": "EXISTING_STORE",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 0,
+      "index": {
+        "files": {
+          "percent": "100.0%",
+          "recovered": 0,
+          "reused": 21,
+          "total": 21
+        },
+        "size": {
+          "percent": "100.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 2473533,
+          "total_in_bytes": 2473533
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 2
+      },
+      "index_name": ".watcher-history-7-2018.02.09",
+      "primary": true,
+      "source": {},
+      "stage": "DONE",
+      "start_time_in_millis": 1518542536050,
+      "stop_time_in_millis": 1518542536086,
+      "target": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "total_time_in_millis": 35,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": 0,
+        "total_time_in_millis": 27
+      },
+      "type": "EXISTING_STORE",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 1,
+      "index": {
+        "files": {
+          "percent": "100.0%",
+          "recovered": 0,
+          "reused": 109,
+          "total": 109
+        },
+        "size": {
+          "percent": "100.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 8095533048,
+          "total_in_bytes": 8095533048
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 6
+      },
+      "index_name": "filebeat-7.0.0-alpha1-2018.02.09",
+      "primary": true,
+      "source": {},
+      "stage": "DONE",
+      "start_time_in_millis": 1518542535935,
+      "stop_time_in_millis": 1518542536083,
+      "target": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "total_time_in_millis": 148,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": 0,
+        "total_time_in_millis": 121
+      },
+      "type": "EXISTING_STORE",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 2,
+      "index": {
+        "files": {
+          "percent": "100.0%",
+          "recovered": 0,
+          "reused": 133,
+          "total": 133
+        },
+        "size": {
+          "percent": "100.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 8336042038,
+          "total_in_bytes": 8336042038
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 10
+      },
+      "index_name": "filebeat-7.0.0-alpha1-2018.02.09",
+      "primary": true,
+      "source": {},
+      "stage": "DONE",
+      "start_time_in_millis": 1518542535917,
+      "stop_time_in_millis": 1518542536098,
+      "target": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "total_time_in_millis": 180,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": 0,
+        "total_time_in_millis": 151
+      },
+      "type": "EXISTING_STORE",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 0,
+      "index": {
+        "files": {
+          "percent": "100.0%",
+          "recovered": 0,
+          "reused": 100,
+          "total": 100
+        },
+        "size": {
+          "percent": "100.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 8116024139,
+          "total_in_bytes": 8116024139
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 11
+      },
+      "index_name": "filebeat-7.0.0-alpha1-2018.02.09",
+      "primary": true,
+      "source": {},
+      "stage": "DONE",
+      "start_time_in_millis": 1518542535850,
+      "stop_time_in_millis": 1518542536032,
+      "target": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "total_time_in_millis": 182,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": 0,
+        "total_time_in_millis": 155
+      },
+      "type": "EXISTING_STORE",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 2,
+      "index": {
+        "files": {
+          "percent": "100.0%",
+          "recovered": 0,
+          "reused": 33,
+          "total": 33
+        },
+        "size": {
+          "percent": "100.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 1119582,
+          "total_in_bytes": 1119582
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 2
+      },
+      "index_name": "metricbeat-7.0.0-alpha1-2018.02.09",
+      "primary": true,
+      "source": {},
+      "stage": "DONE",
+      "start_time_in_millis": 1518542535842,
+      "stop_time_in_millis": 1518542535919,
+      "target": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "total_time_in_millis": 76,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": 0,
+        "total_time_in_millis": 65
+      },
+      "type": "EXISTING_STORE",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 0,
+      "index": {
+        "files": {
+          "percent": "100.0%",
+          "recovered": 0,
+          "reused": 27,
+          "total": 27
+        },
+        "size": {
+          "percent": "100.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 1118742,
+          "total_in_bytes": 1118742
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 3
+      },
+      "index_name": "metricbeat-7.0.0-alpha1-2018.02.09",
+      "primary": true,
+      "source": {},
+      "stage": "DONE",
+      "start_time_in_millis": 1518542535793,
+      "stop_time_in_millis": 1518542535840,
+      "target": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "total_time_in_millis": 47,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": 0,
+        "total_time_in_millis": 35
+      },
+      "type": "EXISTING_STORE",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 4,
+      "index": {
+        "files": {
+          "percent": "100.0%",
+          "recovered": 0,
+          "reused": 33,
+          "total": 33
+        },
+        "size": {
+          "percent": "100.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 1105400,
+          "total_in_bytes": 1105400
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 2
+      },
+      "index_name": "metricbeat-7.0.0-alpha1-2018.02.09",
+      "primary": true,
+      "source": {},
+      "stage": "DONE",
+      "start_time_in_millis": 1518542535784,
+      "stop_time_in_millis": 1518542535843,
+      "target": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "total_time_in_millis": 59,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": 0,
+        "total_time_in_millis": 47
+      },
+      "type": "EXISTING_STORE",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 3,
+      "index": {
+        "files": {
+          "percent": "100.0%",
+          "recovered": 0,
+          "reused": 30,
+          "total": 30
+        },
+        "size": {
+          "percent": "100.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 1074106,
+          "total_in_bytes": 1074106
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 4
+      },
+      "index_name": "metricbeat-7.0.0-alpha1-2018.02.09",
+      "primary": true,
+      "source": {},
+      "stage": "DONE",
+      "start_time_in_millis": 1518542535700,
+      "stop_time_in_millis": 1518542535785,
+      "target": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "total_time_in_millis": 85,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": 0,
+        "total_time_in_millis": 72
+      },
+      "type": "EXISTING_STORE",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 1,
+      "index": {
+        "files": {
+          "percent": "100.0%",
+          "recovered": 0,
+          "reused": 24,
+          "total": 24
+        },
+        "size": {
+          "percent": "100.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 1074712,
+          "total_in_bytes": 1074712
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 1
+      },
+      "index_name": "metricbeat-7.0.0-alpha1-2018.02.09",
+      "primary": true,
+      "source": {},
+      "stage": "DONE",
+      "start_time_in_millis": 1518542535693,
+      "stop_time_in_millis": 1518542535764,
+      "target": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "total_time_in_millis": 70,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": 0,
+        "total_time_in_millis": 56
+      },
+      "type": "EXISTING_STORE",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 0,
+      "index": {
+        "files": {
+          "percent": "100.0%",
+          "recovered": 0,
+          "reused": 24,
+          "total": 24
+        },
+        "size": {
+          "percent": "100.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 3867758,
+          "total_in_bytes": 3867758
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 2
+      },
+      "index_name": ".watcher-history-7-2018.02.12",
+      "primary": true,
+      "source": {},
+      "stage": "DONE",
+      "start_time_in_millis": 1518542535414,
+      "stop_time_in_millis": 1518542535467,
+      "target": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "total_time_in_millis": 53,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": 0,
+        "total_time_in_millis": 45
+      },
+      "type": "EXISTING_STORE",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 0,
+      "index": {
+        "files": {
+          "percent": "100.0%",
+          "recovered": 0,
+          "reused": 24,
+          "total": 24
+        },
+        "size": {
+          "percent": "100.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 1772502,
+          "total_in_bytes": 1772502
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 6
+      },
+      "index_name": ".watcher-history-7-2018.02.13",
+      "primary": true,
+      "source": {},
+      "stage": "DONE",
+      "start_time_in_millis": 1518542535197,
+      "stop_time_in_millis": 1518542535406,
+      "target": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "total_time_in_millis": 208,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": 0,
+        "total_time_in_millis": 188
+      },
+      "type": "EXISTING_STORE",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 0,
+      "index": {
+        "files": {
+          "percent": "100.0%",
+          "recovered": 0,
+          "reused": 5,
+          "total": 5
+        },
+        "size": {
+          "percent": "100.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 355536,
+          "total_in_bytes": 355536
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 4
+      },
+      "index_name": ".triggered_watches",
+      "primary": true,
+      "source": {},
+      "stage": "DONE",
+      "start_time_in_millis": 1518542535192,
+      "stop_time_in_millis": 1518542535390,
+      "target": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "total_time_in_millis": 197,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": 0,
+        "total_time_in_millis": 187
+      },
+      "type": "EXISTING_STORE",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 0,
+      "index": {
+        "files": {
+          "percent": "100.0%",
+          "recovered": 0,
+          "reused": 25,
+          "total": 25
+        },
+        "size": {
+          "percent": "100.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 20905,
+          "total_in_bytes": 20905
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 7
+      },
+      "index_name": ".security-6",
+      "primary": true,
+      "source": {},
+      "stage": "DONE",
+      "start_time_in_millis": 1518542535181,
+      "stop_time_in_millis": 1518542535389,
+      "target": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "total_time_in_millis": 207,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": 0,
+        "total_time_in_millis": 189
+      },
+      "type": "EXISTING_STORE",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    },
+    {
+      "id": 0,
+      "index": {
+        "files": {
+          "percent": "100.0%",
+          "recovered": 0,
+          "reused": 4,
+          "total": 4
+        },
+        "size": {
+          "percent": "100.0%",
+          "recovered_in_bytes": 0,
+          "reused_in_bytes": 18122,
+          "total_in_bytes": 18122
+        },
+        "source_throttle_time_in_millis": 0,
+        "target_throttle_time_in_millis": 0,
+        "total_time_in_millis": 11
+      },
+      "index_name": ".watches",
+      "primary": true,
+      "source": {},
+      "stage": "DONE",
+      "start_time_in_millis": 1518542535148,
+      "stop_time_in_millis": 1518542535389,
+      "target": {
+        "host": "spicy.local",
+        "id": "ENVgDIKRSdCVJo-YqY4kUQ",
+        "ip": "127.0.0.1",
+        "name": "node01",
+        "transport_address": "127.0.0.1:9300"
+      },
+      "total_time_in_millis": 240,
+      "translog": {
+        "percent": "100.0%",
+        "recovered": 0,
+        "total": 0,
+        "total_on_start": 0,
+        "total_time_in_millis": 191
+      },
+      "type": "EXISTING_STORE",
+      "verify_index": {
+        "check_index_time_in_millis": 0,
+        "total_time_in_millis": 0
+      }
+    }
+  ],
+  "logs": {
+    "enabled": false,
+    "limit": 10,
+    "reason": {
+      "clusterExists": false,
+      "indexPatternExists": false,
+      "indexPatternInTimeRangeExists": false,
+      "typeExistsAtAnyTime": false,
+      "usingStructuredLogs": false,
+      "nodeExists": null,
+      "indexExists": null,
+      "typeExists": false
+    },
+    "logs": []
+  }
+}

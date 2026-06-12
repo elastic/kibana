@@ -1,0 +1,393 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getFetchEventAnnotations Manual annotations Sorts annotations by time, assigns correct timebuckets, filters out hidden and out of range annotations 1`] = `
+Array [
+  Object {
+    "color": "#F04E981A",
+    "endTime": "2022-08-05T00:01:00Z",
+    "id": "mann10",
+    "label": "Event range",
+    "outside": false,
+    "time": "2022-06-03T05:00:00Z",
+    "timebucket": "2022-06-03T05:00:00.000Z",
+    "type": "range",
+  },
+  Object {
+    "endTime": "2022-07-05T00:01:00Z",
+    "id": "mann3",
+    "time": "2022-07-03T05:00:00Z",
+    "timebucket": "2022-07-03T05:00:00.000Z",
+    "type": "range",
+  },
+  Object {
+    "id": "mann2",
+    "time": "2022-07-05T01:18:00Z",
+    "timebucket": "2022-07-05T01:00:00.000Z",
+    "type": "point",
+  },
+  Object {
+    "color": "#9170b8",
+    "icon": "triangle",
+    "id": "mann4",
+    "label": "custom",
+    "lineStyle": "dotted",
+    "lineWidth": 3,
+    "textVisibility": true,
+    "time": "2022-07-05T04:34:00Z",
+    "timebucket": "2022-07-05T04:30:00.000Z",
+    "type": "point",
+  },
+  Object {
+    "id": "mann5",
+    "isHidden": true,
+    "time": "2022-07-05T05:55:00Z",
+    "timebucket": "2022-07-05T05:30:00.000Z",
+    "type": "point",
+  },
+  Object {
+    "id": "mann1",
+    "time": "2022-07-05T11:12:00Z",
+    "timebucket": "2022-07-05T11:00:00.000Z",
+    "type": "point",
+  },
+]
+`;
+
+exports[`getFetchEventAnnotations Query annotations runs handleRequest only for query annotations when manual and query are defined 1`] = `
+Array [
+  Object {
+    "enabled": true,
+    "params": Object {
+      "filters": Array [
+        Object {
+          "input": Object {
+            "language": "kuery",
+            "query": "products.base_price < 7",
+            "type": "kibana_query",
+          },
+          "label": "ann1",
+        },
+        Object {
+          "input": Object {
+            "language": "kuery",
+            "query": "products.base_price > 700",
+            "type": "kibana_query",
+          },
+          "label": "ann2",
+        },
+      ],
+    },
+    "schema": "bucket",
+    "type": "filters",
+  },
+  Object {
+    "enabled": true,
+    "params": Object {
+      "field": "order_date",
+      "interval": "3d",
+      "useNormalizedEsInterval": true,
+    },
+    "schema": "bucket",
+    "type": "date_histogram",
+  },
+  Object {
+    "enabled": true,
+    "schema": "metric",
+    "type": "count",
+  },
+  Object {
+    "enabled": true,
+    "params": Object {
+      "field": "order_date",
+      "size": 10,
+      "sortField": "order_date",
+      "sortOrder": "asc",
+    },
+    "type": "top_metrics",
+  },
+  Object {
+    "enabled": true,
+    "params": Object {
+      "field": "price",
+      "size": 10,
+      "sortField": "order_date",
+      "sortOrder": "asc",
+    },
+    "type": "top_metrics",
+  },
+  Object {
+    "enabled": true,
+    "params": Object {
+      "field": "currency",
+      "size": 10,
+      "sortField": "order_date",
+      "sortOrder": "asc",
+    },
+    "type": "top_metrics",
+  },
+  Object {
+    "enabled": true,
+    "params": Object {
+      "field": "total_quantity",
+      "size": 10,
+      "sortField": "order_date",
+      "sortOrder": "asc",
+    },
+    "type": "top_metrics",
+  },
+]
+`;
+
+exports[`getFetchEventAnnotations Query annotations runs handleRequest only for query annotations when manual and query are defined 2`] = `
+Array [
+  Object {
+    "enabled": true,
+    "params": Object {
+      "filters": Array [
+        Object {
+          "input": Object {
+            "language": "kuery",
+            "query": "AvgTicketPrice > 900",
+            "type": "kibana_query",
+          },
+          "label": "ann4",
+        },
+        Object {
+          "input": Object {
+            "language": "kuery",
+            "query": "AvgTicketPrice = 800",
+            "type": "kibana_query",
+          },
+          "label": "ann5",
+        },
+      ],
+    },
+    "schema": "bucket",
+    "type": "filters",
+  },
+  Object {
+    "enabled": true,
+    "params": Object {
+      "field": "timestamp",
+      "interval": "3d",
+      "useNormalizedEsInterval": true,
+    },
+    "schema": "bucket",
+    "type": "date_histogram",
+  },
+  Object {
+    "enabled": true,
+    "schema": "metric",
+    "type": "count",
+  },
+  Object {
+    "enabled": true,
+    "params": Object {
+      "field": "timestamp",
+      "size": 10,
+      "sortField": "timestamp",
+      "sortOrder": "asc",
+    },
+    "type": "top_metrics",
+  },
+  Object {
+    "enabled": true,
+    "params": Object {
+      "field": "extraField",
+      "size": 10,
+      "sortField": "timestamp",
+      "sortOrder": "asc",
+    },
+    "type": "top_metrics",
+  },
+]
+`;
+
+exports[`getFetchEventAnnotations Query annotations runs single handleRequest for query annotations with the same data view and timeField and creates aggregation for each extraField 1`] = `
+Array [
+  Object {
+    "enabled": true,
+    "params": Object {
+      "filters": Array [
+        Object {
+          "input": Object {
+            "language": "kuery",
+            "query": "products.base_price > 700",
+            "type": "kibana_query",
+          },
+          "label": "ann2",
+        },
+        Object {
+          "input": Object {
+            "language": "kuery",
+            "query": "products.base_price < 7",
+            "type": "kibana_query",
+          },
+          "label": "ann1",
+        },
+      ],
+    },
+    "schema": "bucket",
+    "type": "filters",
+  },
+  Object {
+    "enabled": true,
+    "params": Object {
+      "field": "order_date",
+      "interval": "3d",
+      "useNormalizedEsInterval": true,
+    },
+    "schema": "bucket",
+    "type": "date_histogram",
+  },
+  Object {
+    "enabled": true,
+    "schema": "metric",
+    "type": "count",
+  },
+  Object {
+    "enabled": true,
+    "params": Object {
+      "field": "order_date",
+      "size": 10,
+      "sortField": "order_date",
+      "sortOrder": "asc",
+    },
+    "type": "top_metrics",
+  },
+  Object {
+    "enabled": true,
+    "params": Object {
+      "field": "price",
+      "size": 10,
+      "sortField": "order_date",
+      "sortOrder": "asc",
+    },
+    "type": "top_metrics",
+  },
+  Object {
+    "enabled": true,
+    "params": Object {
+      "field": "currency",
+      "size": 10,
+      "sortField": "order_date",
+      "sortOrder": "asc",
+    },
+    "type": "top_metrics",
+  },
+  Object {
+    "enabled": true,
+    "params": Object {
+      "field": "total_quantity",
+      "size": 10,
+      "sortField": "order_date",
+      "sortOrder": "asc",
+    },
+    "type": "top_metrics",
+  },
+]
+`;
+
+exports[`getFetchEventAnnotations Query annotations runs two separate handleRequests if timeField is different 1`] = `
+Array [
+  Object {
+    "enabled": true,
+    "params": Object {
+      "filters": Array [
+        Object {
+          "input": Object {
+            "language": "kuery",
+            "query": "products.base_price < 7",
+            "type": "kibana_query",
+          },
+          "label": "ann1",
+        },
+      ],
+    },
+    "schema": "bucket",
+    "type": "filters",
+  },
+  Object {
+    "enabled": true,
+    "params": Object {
+      "field": "order_date",
+      "interval": "3d",
+      "useNormalizedEsInterval": true,
+    },
+    "schema": "bucket",
+    "type": "date_histogram",
+  },
+  Object {
+    "enabled": true,
+    "schema": "metric",
+    "type": "count",
+  },
+  Object {
+    "enabled": true,
+    "params": Object {
+      "field": "order_date",
+      "size": 10,
+      "sortField": "order_date",
+      "sortOrder": "asc",
+    },
+    "type": "top_metrics",
+  },
+]
+`;
+
+exports[`getFetchEventAnnotations Query annotations runs two separate handleRequests if timeField is different 2`] = `
+Array [
+  Object {
+    "enabled": true,
+    "params": Object {
+      "filters": Array [
+        Object {
+          "input": Object {
+            "language": "kuery",
+            "query": "AvgTicketPrice > 900",
+            "type": "kibana_query",
+          },
+          "label": "ann4",
+        },
+      ],
+    },
+    "schema": "bucket",
+    "type": "filters",
+  },
+  Object {
+    "enabled": true,
+    "params": Object {
+      "field": "timestamp",
+      "interval": "3d",
+      "useNormalizedEsInterval": true,
+    },
+    "schema": "bucket",
+    "type": "date_histogram",
+  },
+  Object {
+    "enabled": true,
+    "schema": "metric",
+    "type": "count",
+  },
+  Object {
+    "enabled": true,
+    "params": Object {
+      "field": "timestamp",
+      "size": 10,
+      "sortField": "timestamp",
+      "sortOrder": "asc",
+    },
+    "type": "top_metrics",
+  },
+  Object {
+    "enabled": true,
+    "params": Object {
+      "field": "extraField",
+      "size": 10,
+      "sortField": "timestamp",
+      "sortOrder": "asc",
+    },
+    "type": "top_metrics",
+  },
+]
+`;

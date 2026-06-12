@@ -1,0 +1,17 @@
+title: Historical summary response
+type: object
+additionalProperties:
+    type: array
+    items:
+      type: object
+      properties:
+        date: 
+          type: string
+          example: "2022-01-01T00:00:00.000Z"
+        status:
+          $ref: './summary_status.yaml'
+        sliValue:
+          type: number
+          example: 0.9836
+        errorBudget:
+          $ref: 'error_budget.yaml'

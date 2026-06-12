@@ -1,0 +1,183 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import React from 'react';
+import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
+import {
+  initializeTitleManager,
+  titleComparators,
+  useBatchedPublishingSubjects,
+} from '@kbn/presentation-publishing';
+import { initializeStateApi } from '@kbn/presentation-publishing';
+import { BehaviorSubject, map, merge, skip } from 'rxjs';
+import { APM_ALERTING_FAILED_TRANSACTIONS_CHART_EMBEDDABLE } from '@kbn/apm-embeddable-common';
+import type { EmbeddableApmAlertingVizProps } from '../types';
+import type { EmbeddableDeps } from '../../types';
+import { ApmEmbeddableContext } from '../../embeddable_context';
+import { APMAlertingFailedTransactionsChart } from './chart';
+
+export const getApmAlertingFailedTransactionsChartEmbeddableFactory = (deps: EmbeddableDeps) => {
+  const factory: EmbeddablePublicDefinition<
+    EmbeddableApmAlertingVizProps,
+    DefaultEmbeddableApi<EmbeddableApmAlertingVizProps>
+  > = {
+    type: APM_ALERTING_FAILED_TRANSACTIONS_CHART_EMBEDDABLE,
+    buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
+      const state = initialState;
+      const titleManager = initializeTitleManager(state);
+      const serviceName$ = new BehaviorSubject(state.serviceName);
+      const transactionType$ = new BehaviorSubject(state.transactionType);
+      const transactionName$ = new BehaviorSubject(state.transactionName);
+      const environment$ = new BehaviorSubject(state.environment);
+      const rangeFrom$ = new BehaviorSubject(state.rangeFrom);
+      const rangeTo$ = new BehaviorSubject(state.rangeTo);
+      const rule$ = new BehaviorSubject(state.rule);
+      const alert$ = new BehaviorSubject(state.alert);
+      const kuery$ = new BehaviorSubject(state.kuery);
+      const filters$ = new BehaviorSubject(state.filters);
+
+      const stateApi = initializeStateApi<EmbeddableApmAlertingVizProps>({
+        parentApi,
+        uuid,
+        serializeState: () => ({
+          ...titleManager.getLatestState(),
+          serviceName: serviceName$.getValue(),
+          transactionType: transactionType$.getValue(),
+          transactionName: transactionName$.getValue(),
+          environment: environment$.getValue(),
+          rangeFrom: rangeFrom$.getValue(),
+          rangeTo: rangeTo$.getValue(),
+          rule: rule$.getValue(),
+          alert: alert$.getValue(),
+          kuery: kuery$.getValue(),
+          filters: filters$.getValue(),
+        }),
+        anyStateChange$: merge(
+          titleManager.anyStateChange$,
+          serviceName$.pipe(
+            skip(1),
+            map(() => undefined)
+          ),
+          transactionType$.pipe(
+            skip(1),
+            map(() => undefined)
+          ),
+          transactionName$.pipe(
+            skip(1),
+            map(() => undefined)
+          ),
+          environment$.pipe(
+            skip(1),
+            map(() => undefined)
+          ),
+          rangeFrom$.pipe(
+            skip(1),
+            map(() => undefined)
+          ),
+          rangeTo$.pipe(
+            skip(1),
+            map(() => undefined)
+          ),
+          rule$.pipe(
+            skip(1),
+            map(() => undefined)
+          ),
+          alert$.pipe(
+            skip(1),
+            map(() => undefined)
+          ),
+          kuery$.pipe(
+            skip(1),
+            map(() => undefined)
+          ),
+          filters$.pipe(
+            skip(1),
+            map(() => undefined)
+          )
+        ),
+        getComparators: () => ({
+          ...titleComparators,
+          serviceName: 'referenceEquality',
+          transactionType: 'referenceEquality',
+          transactionName: 'referenceEquality',
+          environment: 'referenceEquality',
+          rangeFrom: 'referenceEquality',
+          rangeTo: 'referenceEquality',
+          rule: 'referenceEquality',
+          alert: 'referenceEquality',
+          kuery: 'referenceEquality',
+          filters: 'referenceEquality',
+        }),
+        applySerializedState: (nextState) => {
+          titleManager.reinitializeState(nextState);
+          serviceName$.next(nextState.serviceName ?? '');
+          transactionType$.next(nextState.transactionType);
+          transactionName$.next(nextState.transactionName);
+          environment$.next(nextState.environment);
+          rangeFrom$.next(nextState.rangeFrom);
+          rangeTo$.next(nextState.rangeTo);
+          rule$.next(nextState.rule as EmbeddableApmAlertingVizProps['rule']);
+          alert$.next(nextState.alert as EmbeddableApmAlertingVizProps['alert']);
+          kuery$.next(nextState.kuery);
+          filters$.next(nextState.filters);
+        },
+      });
+
+      const api = finalizeApi({
+        ...titleManager.api,
+        ...stateApi,
+      });
+
+      return {
+        api,
+        Component: () => {
+          const [
+            serviceName,
+            transactionType,
+            transactionName,
+            environment,
+            rangeFrom,
+            rangeTo,
+            rule,
+            alert,
+            kuery,
+            filters,
+          ] = useBatchedPublishingSubjects(
+            serviceName$,
+            transactionType$,
+            transactionName$,
+            environment$,
+            rangeFrom$,
+            rangeTo$,
+            rule$,
+            alert$,
+            kuery$,
+            filters$
+          );
+
+          return (
+            <ApmEmbeddableContext deps={deps} rangeFrom={rangeFrom} rangeTo={rangeTo}>
+              <APMAlertingFailedTransactionsChart
+                rule={rule}
+                alert={alert}
+                serviceName={serviceName}
+                transactionType={transactionType}
+                environment={environment}
+                rangeFrom={rangeFrom}
+                rangeTo={rangeTo}
+                transactionName={transactionName}
+                kuery={kuery}
+                filters={filters}
+              />
+            </ApmEmbeddableContext>
+          );
+        },
+      };
+    },
+  };
+  return factory;
+};

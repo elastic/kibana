@@ -1,0 +1,43 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { FC, PropsWithChildren } from 'react';
+import React, { memo } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiCode, EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
+
+export const Description: FC<PropsWithChildren<unknown>> = memo(({ children }) => {
+  const title = i18n.translate(
+    'xpack.ml.newJob.wizard.jobDetailsStep.advancedSection.ignoreUnavailable.title',
+    {
+      defaultMessage: 'Ignore unavailable indices',
+    }
+  );
+  return (
+    <EuiDescribedFormGroup
+      title={<h3>{title}</h3>}
+      description={
+        <FormattedMessage
+          id="xpack.ml.newJob.wizard.jobDetailsStep.advancedSection.ignoreUnavailable.description"
+          defaultMessage="Sets the Elasticsearch {ignoreUnavailable} option on all searches done by the datafeed."
+          values={{
+            ignoreUnavailable: (
+              <EuiCode language="JSON" transparentBackground={true}>
+                ignore_unavailable
+              </EuiCode>
+            ),
+          }}
+        />
+      }
+    >
+      <EuiFormRow>
+        <>{children}</>
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  );
+});

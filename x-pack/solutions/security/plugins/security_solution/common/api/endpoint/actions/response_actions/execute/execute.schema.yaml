@@ -1,0 +1,85 @@
+openapi: 3.0.0
+info:
+  title: Execute Action Schema
+  version: '2023-10-31'
+paths:
+  /api/endpoint/action/execute:
+    post:
+      summary: Run a command
+      operationId: EndpointExecuteAction
+      description: Run a shell command on an endpoint.
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExecuteRouteRequestBody'
+            examples:
+              executeCommand:
+                summary: Execute a shell command on an endpoint
+                value:
+                  endpoint_ids:
+                    - "b3d6de74-36b0-4fa8-be46-c375bf1771bf"
+                  parameters:
+                    command: "ls -al"
+                    timeout: 600
+                  comment: "Get list of all files"
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                $ref: '../../../model/schema/common.schema.yaml#/components/schemas/ResponseActionCreateSuccessResponse'
+              examples:
+                ExecuteSuccess:
+                  summary: Execute action successfully created
+                  value:
+                    data:
+                      id: "9f934028-2300-4927-b531-b26376793dc4"
+                      agents:
+                        - "ed518850-681a-4d60-bb98-e22640cae2a8"
+                      command: "execute"
+                      agentType: "endpoint"
+                      isExpired: false
+                      isCompleted: false
+                      wasSuccessful: false
+                      status: "pending"
+                      startedAt: "2023-07-28T18:43:27.362Z"
+                      createdBy: "elastic"
+                      hosts:
+                        ed518850-681a-4d60-bb98-e22640cae2a8:
+                          name: "gke-node-1235412"
+                      agentState:
+                        ed518850-681a-4d60-bb98-e22640cae2a8:
+                          isCompleted: false
+                          wasSuccessful: false
+                      parameters:
+                        command: "ls -al"
+                        timeout: 600
+                      outputs: {}
+
+components:
+  schemas:
+    ExecuteRouteRequestBody:
+      allOf:
+        - $ref: '../../../model/schema/common.schema.yaml#/components/schemas/BaseActionSchema'
+        - type: object
+          required:
+            - parameters
+          properties:
+            parameters:
+              required:
+                - command
+              type: object
+              properties:
+                command:
+                  type: string
+                  description: The shell command to execute on the endpoint.
+                  minLength: 1
+                timeout:
+                  type: integer
+                  minimum: 1
+                  description: The maximum timeout value in seconds before the command is terminated.

@@ -1,0 +1,16 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`StatusMessage should render normally 1`] = `
+<div
+  class="euiPanel euiPanel--primary euiPanel--paddingSmall euiCallOut euiCallOut--primary emotion-euiPanel-none-s-primary-euiCallOut"
+  data-test-subj="createIndexPatternStatusMessage"
+>
+  <p
+    class="euiTitle euiCallOutHeader__title emotion-euiTitle-xxs-euiCallOutHeader-primary"
+  >
+    <span>
+      Your index pattern can match 2 sources.
+    </span>
+  </p>
+</div>
+`;

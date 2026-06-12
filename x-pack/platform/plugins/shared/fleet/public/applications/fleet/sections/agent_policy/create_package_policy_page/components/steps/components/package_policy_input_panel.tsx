@@ -1,0 +1,650 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { useState, memo, useMemo, useCallback, useEffect, useRef } from 'react';
+import ReactMarkdown from 'react-markdown';
+import styled from 'styled-components';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSwitch,
+  EuiText,
+  EuiTitle,
+  EuiHorizontalRule,
+  EuiSpacer,
+  EuiButtonEmpty,
+  EuiIconTip,
+  useEuiTheme,
+} from '@elastic/eui';
+
+import type {
+  NewPackagePolicyInput,
+  NewPackagePolicyInputStream,
+  PackageInfo,
+  PackagePolicyInputStream,
+  RegistryInput,
+  RegistryStream,
+  RegistryStreamWithDataStream,
+  RegistryVarsEntry,
+} from '../../../../../../types';
+import type { PackagePolicyInputValidationResults } from '../../../services';
+import type { YamlParseFn } from '../../../services';
+import { hasInvalidButRequiredVar, countValidationErrors, isAdvancedVar } from '../../../services';
+import { useAgentless } from '../../../single_page_layout/hooks/setup_technology';
+import { useYaml } from '../../../../../../../../services';
+import {
+  DATA_STREAM_USE_APM_VAR,
+  shouldIncludeUseAPMVar,
+  hasDynamicSignalTypes,
+  mapPackageReleaseToIntegrationCardRelease,
+} from '../../../../../../../../../common/services';
+import { InlineReleaseBadge } from '../../../../../../components';
+import {
+  DATA_STREAM_TYPE_VAR_NAME,
+  USE_APM_VAR_NAME,
+} from '../../../../../../../../../common/constants';
+import { OTEL_COLLECTOR_INPUT_TYPE } from '../../../../../../../../../common/constants/epm';
+
+import type { StreamAdvancedVarsConfig } from './package_policy_input_config';
+import { PackagePolicyInputConfig } from './package_policy_input_config';
+import { PackagePolicyInputStreamConfig } from './package_policy_input_stream';
+import { useDataStreamId, useVarGroupSelections } from './hooks';
+
+const ShortenedHorizontalRule = styled(EuiHorizontalRule)`
+  &&& {
+    width: ${(11 / 12) * 100}%;
+    margin-left: auto;
+  }
+`;
+
+export const shouldShowStreamsByDefault = (
+  parse: YamlParseFn,
+  packageInput: RegistryInput,
+  packageInputStreams: Array<RegistryStream & { data_stream: { dataset: string; type: string } }>,
+  packagePolicyInput: NewPackagePolicyInput,
+  defaultDataStreamId?: string
+): boolean => {
+  if (!packagePolicyInput.enabled) {
+    return false;
+  }
+
+  return (
+    hasInvalidButRequiredVar(parse, packageInput.vars, packagePolicyInput.vars) ||
+    packageInputStreams.some(
+      (stream) =>
+        stream.enabled &&
+        hasInvalidButRequiredVar(
+          parse,
+          stream.vars,
+          packagePolicyInput.streams.find(
+            (pkgStream) => stream.data_stream.dataset === pkgStream.data_stream.dataset
+          )?.vars
+        )
+    ) ||
+    packagePolicyInput.streams.some((stream) => {
+      return defaultDataStreamId && stream.id && stream.id === defaultDataStreamId;
+    })
+  );
+};
+
+export const MigrationTooltip = ({
+  migrateFrom,
+  isStream = false,
+}: {
+  migrateFrom: string;
+  isStream?: boolean;
+}) => (
+  <EuiFlexItem grow={false}>
+    <EuiIconTip
+      type="info"
+      color="subdued"
+      content={i18n.translate(
+        isStream
+          ? 'xpack.fleet.createPackagePolicy.stepConfigure.streamMigratedTooltip'
+          : 'xpack.fleet.createPackagePolicy.stepConfigure.inputMigratedTooltip',
+        {
+          defaultMessage: isStream
+            ? 'This data stream was automatically migrated from {migrateFrom}.'
+            : 'This input was automatically migrated from {migrateFrom}.',
+          values: { migrateFrom },
+        }
+      )}
+    />
+  </EuiFlexItem>
+);
+
+/**
+ * Automatically apply the use_apm var to the stream state
+ *  if it is not already defined in the package schema and it qualifies for use.
+ * This helps make sure its included when data stream type is changed.
+ */
+const applyUseAPMVar = (
+  streamState: NewPackagePolicyInputStream,
+  packageInputStream: RegistryStreamWithDataStream,
+  dynamicSignalTypes: boolean
+): NewPackagePolicyInputStream => {
+  const dataStreamType = streamState.vars?.[DATA_STREAM_TYPE_VAR_NAME]?.value;
+  const isUseAPMVarInSchema = (packageInputStream.vars ?? []).some(
+    (v) => v.name === USE_APM_VAR_NAME
+  );
+  if (!dataStreamType || isUseAPMVarInSchema) {
+    return streamState;
+  }
+  const shouldHaveUseAPM = shouldIncludeUseAPMVar(
+    packageInputStream.input,
+    dataStreamType,
+    dynamicSignalTypes
+  );
+  if (shouldHaveUseAPM && !streamState.vars?.[USE_APM_VAR_NAME]) {
+    return {
+      ...streamState,
+      vars: {
+        ...streamState.vars,
+        [USE_APM_VAR_NAME]: { type: 'bool', value: DATA_STREAM_USE_APM_VAR.default },
+      },
+    };
+  }
+  if (!shouldHaveUseAPM && streamState.vars?.[USE_APM_VAR_NAME]) {
+    const { [USE_APM_VAR_NAME]: _removed, ...remainingVars } = streamState.vars ?? {};
+    return { ...streamState, vars: remainingVars };
+  }
+  return streamState;
+};
+
+export const PackagePolicyInputPanel: React.FunctionComponent<{
+  packageInput: RegistryInput;
+  packageInfo: PackageInfo;
+  packageInputStreams: RegistryStreamWithDataStream[];
+  packagePolicyInput: NewPackagePolicyInput;
+  updatePackagePolicyInput: (updatedInput: Partial<NewPackagePolicyInput>) => void;
+  inputValidationResults: PackagePolicyInputValidationResults;
+  forceShowErrors?: boolean;
+  isSingleInputAndStreams?: boolean;
+  isEditPage?: boolean;
+  isUpgrade?: boolean;
+  isAgentless?: boolean;
+  varGroupSelections?: Record<string, string>;
+}> = memo(
+  ({
+    packageInput,
+    packageInfo,
+    packageInputStreams,
+    packagePolicyInput,
+    updatePackagePolicyInput,
+    inputValidationResults,
+    forceShowErrors,
+    isSingleInputAndStreams = false,
+    isEditPage = false,
+    isUpgrade = false,
+    isAgentless = false,
+    varGroupSelections = {},
+  }) => {
+    const theme = useEuiTheme();
+    const defaultDataStreamId = useDataStreamId();
+    const { isAgentlessEnabled } = useAgentless();
+
+    const conditionFieldAllowed =
+      !isAgentless && packagePolicyInput.type !== OTEL_COLLECTOR_INPUT_TYPE;
+
+    const showConditionField = packagePolicyInput.enabled && conditionFieldAllowed;
+
+    const inputVarGroups = packageInput.var_groups?.length ? packageInput.var_groups : undefined;
+
+    const {
+      selections: inputVarGroupSelections,
+      handleSelectionChange: handleInputVarGroupSelectionChange,
+    } = useVarGroupSelections({
+      varGroups: inputVarGroups,
+      savedSelections: packagePolicyInput.var_group_selections,
+      isAgentlessEnabled,
+      onSelectionsChange: (update) => updatePackagePolicyInput(update),
+    });
+    const yaml = useYaml();
+    // Showing streams toggle state (initialized once when yaml loads so we can validate)
+    const [isShowingStreams, setIsShowingStreams] = useState<boolean>(false);
+    const isShowingStreamsInitialized = useRef(false);
+    useEffect(() => {
+      // Only initialize once — we must not re-evaluate after the user fills in required
+      // fields, or the streams section would collapse as each field becomes valid.
+      if (yaml && !isShowingStreamsInitialized.current) {
+        isShowingStreamsInitialized.current = true;
+        setIsShowingStreams(
+          (isSingleInputAndStreams && packageInfo.type !== 'input') ||
+            shouldShowStreamsByDefault(
+              yaml.parse,
+              packageInput,
+              packageInputStreams,
+              packagePolicyInput,
+              defaultDataStreamId
+            )
+        );
+      }
+    }, [
+      yaml,
+      packageInput,
+      packageInputStreams,
+      packagePolicyInput,
+      defaultDataStreamId,
+      isSingleInputAndStreams,
+      packageInfo.type,
+    ]);
+
+    // Hide registry variables based on `hide_in_deployment_modes` value
+    const hideRegistryVars = useCallback(
+      (registryVar: RegistryVarsEntry) => {
+        if (!registryVar.hide_in_deployment_modes) return false;
+        return (
+          (isAgentlessEnabled &&
+            !!registryVar.hide_in_deployment_modes?.find((mode) => mode === 'agentless')) ||
+          (!isAgentlessEnabled &&
+            !!registryVar.hide_in_deployment_modes?.find((mode) => mode === 'default'))
+        );
+      },
+      [isAgentlessEnabled]
+    );
+
+    const packageInputStreamShouldBeVisible = useCallback(
+      (packageInputStream: RegistryStreamWithDataStream) => {
+        return (
+          !!packageInputStream.vars &&
+          packageInputStream.vars.length > 0 &&
+          !!packageInputStream.vars.find(
+            (registryVar: RegistryVarsEntry) => !hideRegistryVars(registryVar)
+          )
+        );
+      },
+      [hideRegistryVars]
+    );
+
+    // Errors state
+    const errorCount = inputValidationResults && countValidationErrors(inputValidationResults);
+    const hasErrors = forceShowErrors && errorCount;
+
+    const inputStreams = useMemo(
+      () =>
+        packageInputStreams
+          .filter((packageInputStream) => packageInputStreamShouldBeVisible(packageInputStream))
+          .map((packageInputStream) => {
+            return {
+              packageInputStream,
+              packagePolicyInputStream: packagePolicyInput.streams.find(
+                (stream) => stream.data_stream.dataset === packageInputStream.data_stream.dataset
+              ),
+            };
+          })
+          .filter((stream) => Boolean(stream.packagePolicyInputStream)),
+      [packageInputStreamShouldBeVisible, packageInputStreams, packagePolicyInput.streams]
+    );
+    const hasInputStreams = useMemo(() => inputStreams.length > 0, [inputStreams.length]);
+    const showTopLevelDescription = inputStreams.length === 1;
+
+    const dynamicSignalTypes = useMemo(
+      () =>
+        hasDynamicSignalTypes(packageInfo, {
+          policyTemplateName: packagePolicyInput.policy_template,
+          inputType: packageInput.type,
+        }),
+      [packageInfo, packagePolicyInput.policy_template, packageInput.type]
+    );
+
+    // When isSingleInputAndStreams, check if all stream vars are advanced so we can
+    // consolidate them into the input-level advanced section.
+    const shouldConsolidateAdvancedSections = useMemo(() => {
+      if (!isSingleInputAndStreams || inputStreams.length !== 1) {
+        return false;
+      }
+      const stream = inputStreams[0].packageInputStream;
+      if (!stream.vars || stream.vars.length === 0) {
+        return false;
+      }
+      return stream.vars.every((varDef) => isAdvancedVar(varDef));
+    }, [isSingleInputAndStreams, inputStreams]);
+
+    const consolidatedStreamAdvancedVars: StreamAdvancedVarsConfig | undefined = useMemo(() => {
+      if (!shouldConsolidateAdvancedSections) {
+        return undefined;
+      }
+      const { packageInputStream, packagePolicyInputStream } = inputStreams[0];
+      return {
+        vars: packageInputStream.vars || [],
+        packagePolicyInputStream: packagePolicyInputStream!,
+        updatePackagePolicyInputStream: (updatedStream: Partial<PackagePolicyInputStream>) => {
+          const indexOfUpdatedStream = packagePolicyInput.streams.findIndex(
+            (stream) => stream.data_stream.dataset === packageInputStream.data_stream.dataset
+          );
+          const newStreams = [...packagePolicyInput.streams];
+          newStreams[indexOfUpdatedStream] = {
+            ...newStreams[indexOfUpdatedStream],
+            ...updatedStream,
+          };
+          const updatedInput: Partial<NewPackagePolicyInput> = { streams: newStreams };
+          if (!packagePolicyInput.enabled && updatedStream.enabled) {
+            updatedInput.enabled = true;
+          } else if (packagePolicyInput.enabled && !newStreams.find((s) => s.enabled)) {
+            updatedInput.enabled = false;
+          }
+          updatePackagePolicyInput(updatedInput);
+        },
+        validationResults:
+          inputValidationResults?.streams?.[packagePolicyInputStream!.data_stream!.dataset] ?? {},
+      };
+    }, [
+      shouldConsolidateAdvancedSections,
+      inputStreams,
+      packagePolicyInput,
+      updatePackagePolicyInput,
+      inputValidationResults,
+    ]);
+
+    // Render the input config section only when there is actual content to show:
+    // input-level vars, the condition field, or consolidated stream advanced vars.
+    const showInputConfig =
+      Boolean(packageInput.vars?.length) || showConditionField || shouldConsolidateAdvancedSections;
+
+    const topLevelDescription = showTopLevelDescription && (
+      <EuiText size="s" color="subdued">
+        <ReactMarkdown>{String(inputStreams[0]?.packageInputStream?.description)}</ReactMarkdown>
+      </EuiText>
+    );
+
+    const allStreamsDeprecated = useMemo(
+      () => inputStreams.length > 0 && inputStreams.every((s) => !!s.packageInputStream.deprecated),
+      [inputStreams]
+    );
+    const deprecationInfo =
+      packagePolicyInput.deprecated ||
+      (allStreamsDeprecated ? inputStreams[0].packageInputStream.deprecated : undefined);
+    const isDeprecatedInput = !!deprecationInfo;
+    const deprecatedInputTooltip = deprecationInfo
+      ? deprecationInfo.replaced_by
+        ? i18n.translate(
+            'xpack.fleet.createPackagePolicy.stepConfigure.deprecatedInputReplacedByTooltip',
+            {
+              defaultMessage: '{description} Replaced by: {replacedBy}',
+              values: {
+                description: deprecationInfo.description,
+                replacedBy: Object.values(deprecationInfo.replaced_by).join(', '),
+              },
+            }
+          )
+        : deprecationInfo.description
+      : i18n.translate('xpack.fleet.createPackagePolicy.stepConfigure.deprecatedInputTooltip', {
+          defaultMessage: 'This input is deprecated.',
+        });
+
+    // Whether the individual stream rows will render their own toggle switch.
+    // When they won't (input-type package or single visible stream), we hoist
+    // the non-GA release badge up to the input header so it doesn't float alone.
+    const hasStreamToggle = packageInfo.type !== 'input' && inputStreams.length > 1;
+
+    const inputReleaseBadge = useMemo(() => {
+      if (hasStreamToggle) return null;
+      const preReleaseStream = inputStreams.find(
+        ({ packageInputStream }) =>
+          packageInputStream.data_stream.release && packageInputStream.data_stream.release !== 'ga'
+      );
+      if (!preReleaseStream?.packageInputStream.data_stream.release) return null;
+      return (
+        <InlineReleaseBadge
+          release={mapPackageReleaseToIntegrationCardRelease(
+            preReleaseStream.packageInputStream.data_stream.release
+          )}
+        />
+      );
+    }, [hasStreamToggle, inputStreams]);
+
+    // Check if any vars or streams in this input are deprecated
+    const hasDeprecatedFeatures = useMemo(() => {
+      const inputVarsDeprecated = (packageInput.vars || []).some((v) => !!v.deprecated);
+      const streamVarsDeprecated = packageInputStreams.some(
+        (stream) => stream.vars && stream.vars.some((v) => !!v.deprecated)
+      );
+      const someStreamsDeprecated = packageInputStreams.some((s) => !!s.deprecated);
+      return inputVarsDeprecated || streamVarsDeprecated || someStreamsDeprecated;
+    }, [packageInput.vars, packageInputStreams]);
+
+    // On new installations, hide deprecated inputs or inputs that have all streams deprecated
+    if (!isEditPage && (isDeprecatedInput || allStreamsDeprecated)) {
+      return null;
+    }
+    const migrationTooltip = isUpgrade && packagePolicyInput.migrate_from && !isDeprecatedInput && (
+      <MigrationTooltip migrateFrom={packagePolicyInput.migrate_from} />
+    );
+
+    return (
+      <>
+        {/* Header / input-level toggle */}
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+          {
+            <EuiFlexItem grow={false}>
+              <EuiSwitch
+                data-test-subj="PackagePolicy.InputStreamConfig.Switch"
+                label={
+                  <EuiFlexGroup alignItems="center" gutterSize="s">
+                    <EuiFlexItem grow={false}>
+                      <EuiTitle size="xs">
+                        <h3
+                          data-test-subj="PackagePolicy.InputStreamConfig.title"
+                          style={
+                            isDeprecatedInput
+                              ? { color: theme.euiTheme.colors.textSubdued }
+                              : undefined
+                          }
+                        >
+                          {packageInput.title || packageInput.type}
+                        </h3>
+                      </EuiTitle>
+                    </EuiFlexItem>
+                    {inputReleaseBadge && (
+                      <EuiFlexItem grow={false}>{inputReleaseBadge}</EuiFlexItem>
+                    )}
+                    {migrationTooltip}
+                    {isDeprecatedInput && (
+                      <EuiFlexItem grow={false}>
+                        <span data-test-subj="PackagePolicy.InputStreamConfig.deprecatedIcon">
+                          <EuiIconTip
+                            type="warning"
+                            color="warning"
+                            position="top"
+                            content={deprecatedInputTooltip}
+                          />
+                        </span>
+                      </EuiFlexItem>
+                    )}
+                  </EuiFlexGroup>
+                }
+                checked={packagePolicyInput.enabled}
+                disabled={packagePolicyInput.keep_enabled}
+                onChange={(e) => {
+                  const enabled = e.target.checked;
+                  updatePackagePolicyInput({
+                    enabled,
+                    streams: packagePolicyInput.streams.map((stream) => ({
+                      ...stream,
+                      enabled,
+                    })),
+                  });
+                  if (!enabled && isShowingStreams) {
+                    setIsShowingStreams(false);
+                  }
+                }}
+              />
+              <EuiSpacer size="s" />
+              {showTopLevelDescription && topLevelDescription}
+            </EuiFlexItem>
+          }
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="s" alignItems="center">
+              {/* Bubble up deprecation warning when collapsed and input has deprecated features */}
+              {!isShowingStreams && !isDeprecatedInput && hasDeprecatedFeatures ? (
+                <EuiFlexItem grow={false}>
+                  <span data-test-subj="PackagePolicy.InputStreamConfig.deprecatedFeaturesIcon">
+                    <EuiIconTip
+                      type="warning"
+                      color="warning"
+                      position="top"
+                      content={i18n.translate(
+                        'xpack.fleet.createPackagePolicy.stepConfigure.deprecatedFeaturesWarning',
+                        {
+                          defaultMessage:
+                            'This input contains deprecated features. Expand to show details.',
+                        }
+                      )}
+                    />
+                  </span>
+                </EuiFlexItem>
+              ) : null}
+              {hasErrors ? (
+                <EuiFlexItem grow={false}>
+                  <EuiText color="danger" size="s">
+                    <FormattedMessage
+                      id="xpack.fleet.createPackagePolicy.stepConfigure.errorCountText"
+                      defaultMessage="{count, plural, one {# error} other {# errors}}"
+                      values={{ count: errorCount }}
+                    />
+                  </EuiText>
+                </EuiFlexItem>
+              ) : null}
+              {
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    color={hasErrors ? 'danger' : 'primary'}
+                    onClick={() => setIsShowingStreams(!isShowingStreams)}
+                    iconType={isShowingStreams ? 'chevronSingleUp' : 'chevronSingleDown'}
+                    iconSide="right"
+                    aria-expanded={isShowingStreams}
+                    aria-label={i18n.translate(
+                      'xpack.fleet.createPackagePolicy.stepConfigure.expandAriaLabel',
+                      {
+                        defaultMessage: 'Change default settings for {title}',
+                        values: {
+                          title: packageInput.title || packageInput.type,
+                        },
+                      }
+                    )}
+                  >
+                    {
+                      <FormattedMessage
+                        id="xpack.fleet.createPackagePolicy.stepConfigure.expandLabel"
+                        defaultMessage="Change defaults"
+                      />
+                    }
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              }
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
+        {/* Spacing if we are showing rest of content */}
+        {isShowingStreams && hasInputStreams && showInputConfig ? <EuiSpacer size="m" /> : null}
+
+        {/* Input level policy */}
+        {isShowingStreams && showInputConfig ? (
+          <>
+            <PackagePolicyInputConfig
+              data-test-subj="PackagePolicy.InputConfig"
+              hasInputStreams={hasInputStreams}
+              packageInputVars={packageInput.vars}
+              packagePolicyInput={packagePolicyInput}
+              updatePackagePolicyInput={updatePackagePolicyInput}
+              inputValidationResults={inputValidationResults}
+              forceShowErrors={forceShowErrors}
+              isEditPage={isEditPage}
+              showConditionField={showConditionField}
+              varGroups={inputVarGroups}
+              varGroupSelections={inputVarGroupSelections}
+              onVarGroupSelectionChange={handleInputVarGroupSelectionChange}
+              streamAdvancedVars={consolidatedStreamAdvancedVars}
+              sections={packageInput.sections}
+              isUpgrade={isUpgrade}
+            />
+            {hasInputStreams &&
+            !shouldConsolidateAdvancedSections &&
+            packageInput.show_divider !== false ? (
+              <ShortenedHorizontalRule margin="m" />
+            ) : (
+              <EuiSpacer size="m" />
+            )}
+          </>
+        ) : null}
+
+        {/* Per-stream policy */}
+        {isShowingStreams && hasInputStreams && !shouldConsolidateAdvancedSections ? (
+          <EuiFlexGroup direction="column" data-test-subj="PackagePolicy.InputConfig.streams">
+            {inputStreams.map(({ packageInputStream, packagePolicyInputStream }, index) => {
+              return (
+                <EuiFlexItem key={index}>
+                  <PackagePolicyInputStreamConfig
+                    data-test-subj="PackagePolicy.InputStreamConfig"
+                    packageInfo={packageInfo}
+                    packageInputStream={packageInputStream}
+                    hasStreamToggle={hasStreamToggle}
+                    packagePolicyInputStream={packagePolicyInputStream!}
+                    inputPolicyTemplate={packagePolicyInput.policy_template}
+                    isUpgrade={isUpgrade}
+                    updatePackagePolicyInputStream={(
+                      updatedStream: Partial<PackagePolicyInputStream>
+                    ) => {
+                      const indexOfUpdatedStream = packagePolicyInput.streams.findIndex(
+                        (stream) =>
+                          stream.data_stream.dataset === packageInputStream.data_stream.dataset
+                      );
+                      const newStreams = [...packagePolicyInput.streams];
+                      const mergedStream = {
+                        ...newStreams[indexOfUpdatedStream],
+                        ...updatedStream,
+                      };
+                      newStreams[indexOfUpdatedStream] = applyUseAPMVar(
+                        mergedStream,
+                        packageInputStream,
+                        dynamicSignalTypes
+                      );
+
+                      const updatedInput: Partial<NewPackagePolicyInput> = {
+                        streams: newStreams,
+                      };
+
+                      // Update input enabled state if needed
+                      if (!packagePolicyInput.enabled && updatedStream.enabled) {
+                        updatedInput.enabled = true;
+                      } else if (
+                        packagePolicyInput.enabled &&
+                        !newStreams.find((stream) => stream.enabled)
+                      ) {
+                        updatedInput.enabled = false;
+                      }
+
+                      updatePackagePolicyInput(updatedInput);
+                    }}
+                    inputStreamValidationResults={
+                      inputValidationResults?.streams?.[
+                        packagePolicyInputStream!.data_stream!.dataset
+                      ] ?? {}
+                    }
+                    forceShowErrors={forceShowErrors}
+                    isEditPage={isEditPage}
+                    showConditionField={packagePolicyInputStream!.enabled && conditionFieldAllowed}
+                    varGroupSelections={varGroupSelections}
+                  />
+                  {index !== inputStreams.length - 1 ? (
+                    <>
+                      <EuiSpacer size="m" />
+                      <ShortenedHorizontalRule margin="none" />
+                    </>
+                  ) : null}
+                </EuiFlexItem>
+              );
+            })}
+          </EuiFlexGroup>
+        ) : null}
+      </>
+    );
+  }
+);

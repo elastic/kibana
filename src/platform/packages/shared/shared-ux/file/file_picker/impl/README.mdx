@@ -1,0 +1,27 @@
+---
+id: sharedUX/Components/FilePicker
+slug: /shared-ux/components/file-picker
+title: File picker
+description: Pick or upload files from Kibana.
+tags: ['shared-ux', 'component', 'files']
+date: 2022-11-22
+---
+
+## Description
+
+A component designed to capture the UX of picking files. Use cases include:
+
+* A dashboard user wanting to upload an image to their dashboard
+* A user picking a new avatar
+* A cases user selecting from a set of text files they want to attach to a case
+* ...and many more
+
+## Usage
+
+Must be wrapped in the `FilesContext`.
+
+```tsx
+<FilesContext ...>
+  <FilePicker ... />
+</FilesContext>
+```

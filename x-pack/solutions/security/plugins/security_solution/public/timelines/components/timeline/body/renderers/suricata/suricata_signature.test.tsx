@@ -1,0 +1,95 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { shallow } from 'enzyme';
+import React from 'react';
+
+import { TestProviders } from '../../../../../../common/mock';
+import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
+import {
+  SuricataSignature,
+  Tokens,
+  SignatureId,
+  SURICATA_SIGNATURE_ID_FIELD_NAME,
+} from './suricata_signature';
+
+jest.mock('../../../../../../common/lib/kibana');
+
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+  return {
+    ...original,
+    EuiScreenReaderOnly: () => <></>,
+  };
+});
+
+describe('SuricataSignature', () => {
+  const mount = useMountAppended();
+
+  describe('rendering', () => {
+    test('it renders the default SuricataSignature', () => {
+      const wrapper = shallow(
+        <SuricataSignature
+          scopeId="test"
+          id="doc-id-123"
+          signatureId={123}
+          signature="ET SCAN ATTACK Hello"
+        />
+      );
+      expect(wrapper).toMatchSnapshot();
+    });
+  });
+
+  describe('Tokens', () => {
+    test('should render empty if tokens are empty', () => {
+      const wrapper = shallow(<Tokens tokens={[]} />);
+      expect(wrapper.children().length).toEqual(0);
+    });
+
+    test('should render a single if it is present', () => {
+      const wrapper = mount(
+        <div>
+          <Tokens tokens={['ET']} />
+        </div>
+      );
+      expect(wrapper.text()).toEqual('ET');
+    });
+
+    test('should render the multiple tokens if they are present', () => {
+      const wrapper = mount(
+        <div>
+          <Tokens tokens={['ET', 'SCAN']} />
+        </div>
+      );
+      expect(wrapper.text()).toEqual('ETSCAN');
+    });
+  });
+
+  describe('SignatureId', () => {
+    test('it renders the default SuricataSignature', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <SignatureId signatureId={123} scopeId="test" />
+        </TestProviders>
+      );
+      expect(wrapper.text()).toEqual('123');
+    });
+
+    test('it renders a tooltip for the signature field', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <SignatureId signatureId={123} scopeId="test" />
+        </TestProviders>
+      );
+
+      expect(
+        wrapper.find('[data-test-subj="suricata.eve.alert.signature_id-tooltip"]').first().props()
+          .content
+      ).toEqual(SURICATA_SIGNATURE_ID_FIELD_NAME);
+    });
+  });
+});

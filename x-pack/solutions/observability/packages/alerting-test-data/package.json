@@ -1,0 +1,8 @@
+{
+  "name": "@kbn/observability-alerting-test-data",
+  "descriptio": "Utils to generate observability alerting test data",
+  "author": "Actionable Observability",
+  "private": true,
+  "version": "1.0.0",
+  "license": "Elastic License 2.0"
+}

@@ -1,0 +1,116 @@
+{
+  "type": "plugin",
+  "id": "@kbn/security-solution-plugin",
+  "owner": [
+    "@elastic/security-solution"
+  ],
+  "group": "security",
+  "visibility": "private",
+  "plugin": {
+    "id": "securitySolution",
+    "browser": true,
+    "server": true,
+    "configPath": [
+      "xpack",
+      "securitySolution"
+    ],
+    "requiredPlugins": [
+      "actions",
+      "alerting",
+      "anonymization",
+      "cases",
+      "cloud",
+      "cloudDefend",
+      "cloudSecurityPosture",
+      "contentManagement",
+      "dashboard",
+      "data",
+      "dataViews",
+      "ecsDataQualityDashboard",
+      "elasticAssistant",
+      "embeddable",
+      "entityStore",
+      "eventLog",
+      "features",
+      "fieldFormats",
+      "inference",
+      "inspector",
+      "kubernetesSecurity",
+      "lens",
+      "licensing",
+      "maps",
+      "navigation",
+      "ruleRegistry",
+      "sessionView",
+      "spaces",
+      "taskManager",
+      "timelines",
+      "triggersActionsUi",
+      "uiActions",
+      "unifiedSearch",
+      "kql",
+      "files",
+      "controls",
+      "dataViewEditor",
+      "savedObjectsManagement",
+      "expressions",
+      "stackConnectors",
+      "discover",
+      "notifications",
+      "savedSearch",
+      "unifiedDocViewer",
+      "charts",
+      "entityManager",
+      "inference",
+      "discoverShared",
+      "productDocBase",
+      "telemetry",
+      "elasticAssistantSharedState",
+      "share",
+    ],
+    "optionalPlugins": [
+      "encryptedSavedObjects",
+      "evals",
+      "fleet",
+      "ml",
+      "newsfeed",
+      "security",
+      "usageCollection",
+      "lists",
+      "home",
+      "management",
+      "dataViewFieldEditor",
+      "osquery",
+      "savedObjectsTaggingOss",
+      "automaticImport",
+      "serverless",
+      "agentBuilder",
+      "llmTasks",
+      "workflowsExtensions",
+      "cps",
+      "searchInferenceEndpoints"
+    ],
+    "requiredBundles": [
+      "esUiShared",
+      "fleet",
+      "kibanaUtils",
+      "kibanaReact",
+      "usageCollection",
+      "lists",
+      "ml",
+      "unifiedSearch",
+      "esql",
+      "agentBuilder"
+    ],
+    "extraPublicDirs": [
+      "common"
+    ]
+  },
+  "build": {
+    "extraExcludes": [
+      // Data generator episode fixtures are large vendored artifacts intended for dev/testing only.
+      // Keep them out of distributable builds.
+      "**/scripts/data/episodes/**"
+    ]
+  }
+}

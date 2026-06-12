@@ -1,0 +1,25 @@
+{
+  "size": 0,
+    "query": {
+    "bool": {
+      "filter": {
+        "range": {
+          "@timestamp": {
+            "gte": "now-30d",
+            "lte": "now"
+          }
+        }
+      }
+    }
+  },
+  "aggs": {
+    "dateAgg": {
+      "date_histogram": {
+        "field": "@timestamp",
+        "interval": "12h",
+        "time_zone": "America/Chicago",
+        "min_doc_count": 1
+      }
+    }
+  }
+}

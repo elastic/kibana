@@ -1,0 +1,12 @@
+{
+  "id": "item_id_everything",
+  "list_id": "ip_list",
+  "value": "127.0.0.2",
+  "meta": {
+    "level_1_meta": {
+      "level_2_meta": {
+        "level_3_key": "some_value_ui"
+      }
+    }
+  }
+}

@@ -1,0 +1,28 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { PostTransformsPreviewRequestSchema } from '../../../server/routes/api_schemas/transforms';
+
+import type { TransformConfigQuery } from './request';
+
+export const INIT_MAX_COLUMNS = 20;
+
+export const getTransformPreviewDevConsoleStatement = (
+  request: PostTransformsPreviewRequestSchema
+) => {
+  return `POST _transform/_preview\n${JSON.stringify(request, null, 2)}\n`;
+};
+
+export const getIndexDevConsoleStatement = (query: TransformConfigQuery, dataViewTitle: string) => {
+  return `GET ${dataViewTitle}/_search\n${JSON.stringify(
+    {
+      query,
+    },
+    null,
+    2
+  )}\n`;
+};

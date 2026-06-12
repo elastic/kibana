@@ -1,0 +1,83 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import React, { useEffect } from 'react';
+import { useParams, useLocation } from 'react-router-dom';
+import { parse } from 'query-string';
+import { i18n } from '@kbn/i18n';
+import type { CoreStart, ChromeBreadcrumb, ScopedHistory } from '@kbn/core/public';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import { css } from '@emotion/react';
+import { SavedObjectEdition } from './object_view';
+
+const SavedObjectsEditionPage = ({
+  coreStart,
+  setBreadcrumbs,
+  history,
+}: {
+  coreStart: CoreStart;
+  setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
+  history: ScopedHistory;
+}) => {
+  const { type, id } = useParams<{ type: string; id: string }>();
+  const capabilities = coreStart.application.capabilities;
+  const docLinks = coreStart.docLinks.links;
+
+  const { search } = useLocation();
+  const query = parse(search);
+
+  useEffect(() => {
+    setBreadcrumbs([
+      {
+        text: i18n.translate('savedObjectsManagement.breadcrumb.index', {
+          defaultMessage: 'Saved objects',
+        }),
+        href: '/',
+      },
+      {
+        text: i18n.translate('savedObjectsManagement.breadcrumb.inspect', {
+          defaultMessage: 'Inspect {savedObjectType}',
+          values: { savedObjectType: type },
+        }),
+      },
+    ]);
+  }, [setBreadcrumbs, type]);
+
+  return (
+    <div css={styles}>
+      <RedirectAppLinks
+        coreStart={{
+          application: coreStart.application,
+        }}
+      >
+        <SavedObjectEdition
+          id={id}
+          savedObjectType={type}
+          http={coreStart.http}
+          overlays={coreStart.overlays}
+          notifications={coreStart.notifications}
+          capabilities={capabilities}
+          notFoundType={query.notFound as string}
+          uiSettings={coreStart.uiSettings}
+          history={history}
+          docLinks={docLinks}
+          settings={coreStart.settings}
+          theme={coreStart.theme}
+        />
+      </RedirectAppLinks>
+    </div>
+  );
+};
+
+const styles = css({
+  height: '100%',
+});
+
+// eslint-disable-next-line import/no-default-export
+export { SavedObjectsEditionPage as default };

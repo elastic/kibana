@@ -1,0 +1,60 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "1",
+    "index": "test-index-unmapped-fields",
+    "source": {
+      "timestamp": "2021-01-21T12:00:00.000Z",
+      "message": "Something bad is coming",
+      "address": "Elm Street 1"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "2",
+    "index": "test-index-unmapped-fields",
+    "source": {
+      "timestamp": "2021-01-22T12:00:00.000Z",
+      "message": "We have a new case",
+      "address": "221b Baker Street"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "3",
+    "index": "test-index-unmapped-fields",
+    "source": {
+      "timestamp": "2021-01-23T12:00:00.000Z",
+      "message": "We have a new case",
+      "address": "221b Baker Street",
+      "sender": "John Doe",
+      "receiver": "Sherlock Holmes"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "4",
+    "index": "test-index-unmapped-fields",
+    "source": {
+      "timestamp": "2021-01-24T12:00:00.000Z",
+      "message": "I am coming for you",
+      "address": "13 Elm Street",
+      "sender": "Freddy Krueger",
+      "receiver": "Nancy Thompson"
+    },
+    "type": "_doc"
+  }
+}
+

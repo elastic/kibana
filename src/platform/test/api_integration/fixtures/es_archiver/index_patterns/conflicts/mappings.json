@@ -1,0 +1,57 @@
+{
+  "type": "index",
+  "value": {
+    "index": "logs-2017.01.02",
+    "settings": {
+      "index": {
+        "number_of_shards": "1",
+        "number_of_replicas": "1"
+      }
+    },
+    "mappings": {
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "number_conflict": {
+          "type": "float"
+        },
+        "string_conflict": {
+          "type": "keyword"
+        },
+        "success": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "index",
+  "value": {
+    "index": "logs-2017.01.01",
+    "settings": {
+      "index": {
+        "number_of_shards": "1",
+        "number_of_replicas": "1"
+      }
+    },
+    "mappings": {
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "number_conflict": {
+          "type": "integer"
+        },
+        "string_conflict": {
+          "type": "text"
+        },
+        "success": {
+          "type": "keyword"
+        }
+      }
+    }
+  }
+}

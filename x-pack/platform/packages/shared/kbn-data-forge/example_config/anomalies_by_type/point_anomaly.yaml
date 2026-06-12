@@ -1,0 +1,40 @@
+---
+# Define the connection to Elasticsearch
+elasticsearch:
+  installKibanaUser: false
+
+# Define the connection to Kibana
+kibana:
+  installAssets: false
+
+# Define the indexing options
+indexing:
+  dataset: "fake_logs"
+  eventsPerCycle: 5000
+
+# Define the schedule
+schedule:
+  # Normal logs
+  - template: "good"
+    eventsPerCycle: 5000
+    start: "now-5m"
+    end: "now+5m"
+    randomness: 0.1
+  # Spike in logs
+  - template: "bad"
+    eventsPerCycle: 10000
+    start: "now+1m"
+    end: "now+2m"
+    randomness: 0.1
+  # Drop in logs, stop normal logs and send few logs
+  - template: "bad"
+    eventsPerCycle: 500
+    start: "now+5m"
+    end: "now+7m"
+    randomness: 0.1
+  # Return to normal logs
+  - template: "good"
+    eventsPerCycle: 5000
+    start: "now+7m"
+    end: "now+17m"
+    randomness: 0.1

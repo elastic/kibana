@@ -1,0 +1,19 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`draggables rendering it renders the default Badge 1`] = `
+<CellActionsRenderer
+  field="some-field"
+  queryValue="some-query-value"
+  value="some-value"
+>
+  <Badge
+    color="hollow"
+    iconType="number"
+    title=""
+  >
+    <span>
+      A child of this
+    </span>
+  </Badge>
+</CellActionsRenderer>
+`;

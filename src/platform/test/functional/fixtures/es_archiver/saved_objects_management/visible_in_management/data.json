@@ -1,0 +1,19 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "test-not-visible-in-management:vim-1",
+    "index": ".kibana",
+    "source": {
+      "coreMigrationVersion": "7.14.0",
+      "references": [],
+      "test-not-visible-in-management": {
+        "enabled": true,
+        "title": "vim-1"
+      },
+      "type": "test-not-visible-in-management",
+      "updated_at": "2018-12-21T00:43:07.096Z"
+    },
+    "type": "_doc"
+  }
+}
+

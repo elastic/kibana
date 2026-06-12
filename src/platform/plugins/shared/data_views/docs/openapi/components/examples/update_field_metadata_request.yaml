@@ -1,0 +1,15 @@
+summary: Update metadata for multiple fields.
+description: Update the popularity count, custom label, and custom description for specific fields in a data view.
+value:
+  {
+    "fields": {
+        "field1": {
+            "count": 123,
+            "customLabel": "Field 1 label"
+        },
+        "field2": {
+            "customLabel": "Field 2 label",
+            "customDescription": "Field 2 description"
+        }
+    }
+}

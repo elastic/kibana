@@ -1,0 +1,23 @@
+name: Assign issues to project by label
+
+on:
+  issues:
+    types: [labeled, unlabeled]
+
+jobs:
+  assign_to_project:
+    runs-on: ubuntu-latest
+    name: Assign issue or PR to project based on label
+    steps:
+      - name: Assign to project
+        uses: elastic/github-actions/project-assigner@v2.1.1
+        id: project_assigner
+        with:
+          issue-mappings: |
+            [
+              {"label": "Feature:Canvas", "projectNumber": 38, "columnName": "Inbox"},
+              {"label": "Feature:Dashboard", "projectNumber": 68, "columnName": "Inbox"},
+              {"label": "Feature:Drilldowns", "projectNumber": 68, "columnName": "Inbox"},
+              {"label": "Feature:Input Controls", "projectNumber": 72, "columnName": "Inbox"}
+            ]
+          ghToken: ${{ secrets.PROJECT_ASSIGNER_TOKEN }}

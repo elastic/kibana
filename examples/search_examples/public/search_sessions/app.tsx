@@ -1,0 +1,815 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import useObservable from 'react-use/lib/useObservable';
+import {
+  EuiAccordion,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiCallOut,
+  EuiCode,
+  EuiCodeBlock,
+  EuiComboBox,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormLabel,
+  EuiLoadingSpinner,
+  EuiPageTemplate,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
+import { catchError, map, tap } from 'rxjs';
+import { lastValueFrom, of } from 'rxjs';
+
+import type { CoreStart } from '@kbn/core/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import type { TimeRange } from '@kbn/es-query';
+import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+
+import type { IEsSearchRequest, IEsSearchResponse } from '@kbn/search-types';
+
+import type { DataPublicPluginStart, QueryState } from '@kbn/data-plugin/public';
+import {
+  connectToQueryState,
+  isRunningResponse,
+  SearchSessionState,
+} from '@kbn/data-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { createStateContainer, useContainerState } from '@kbn/kibana-utils-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { PLUGIN_ID } from '../../common';
+import { getInitialStateFromUrl, SEARCH_SESSIONS_EXAMPLES_APP_LOCATOR } from './app_locator';
+
+interface SearchSessionsExampleAppDeps {
+  notifications: CoreStart['notifications'];
+  analytics: CoreStart['analytics'];
+  i18n: CoreStart['i18n'];
+  theme: CoreStart['theme'];
+  userProfile: CoreStart['userProfile'];
+  navigation: NavigationPublicPluginStart;
+  data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
+}
+
+/**
+ * This example is an app with a step by step guide
+ * walking through background searches lifecycle
+ * These enum represents all important steps in this demo
+ */
+enum DemoStep {
+  ConfigureQuery,
+  RunSession,
+  SaveSession,
+  RestoreSessionOnScreen,
+  RestoreSessionViaManagement,
+}
+
+interface State extends QueryState {
+  dataViewId?: string;
+  numericFieldName?: string;
+
+  /**
+   * If landed into the app with restore URL
+   */
+  restoreSessionId?: string;
+}
+
+export const SearchSessionsExampleApp = ({
+  navigation,
+  data,
+  unifiedSearch,
+  ...startServices
+}: SearchSessionsExampleAppDeps) => {
+  const { IndexPatternSelect } = unifiedSearch.ui;
+
+  const [isSearching, setIsSearching] = useState<boolean>(false);
+  const [request, setRequest] = useState<IEsSearchRequest | null>(null);
+  const [response, setResponse] = useState<IEsSearchResponse | null>(null);
+  const [tookMs, setTookMs] = useState<number | null>(null);
+  const nextRequestIdRef = useRef<number>(0);
+
+  const [restoreRequest, setRestoreRequest] = useState<IEsSearchRequest | null>(null);
+  const [restoreResponse, setRestoreResponse] = useState<IEsSearchResponse | null>(null);
+  const [restoreTookMs, setRestoreTookMs] = useState<number | null>(null);
+
+  const sessionState = useObservable(data.search.session.state$) || SearchSessionState.None;
+
+  const demoStep: DemoStep = (() => {
+    switch (sessionState) {
+      case SearchSessionState.None:
+      case SearchSessionState.Canceled:
+        return DemoStep.ConfigureQuery;
+      case SearchSessionState.Loading:
+      case SearchSessionState.Completed:
+        return DemoStep.RunSession;
+      case SearchSessionState.BackgroundCompleted:
+      case SearchSessionState.BackgroundLoading:
+        return DemoStep.SaveSession;
+      case SearchSessionState.Restored:
+        return DemoStep.RestoreSessionOnScreen;
+    }
+  })();
+
+  const {
+    numericFieldName,
+    dataView,
+    selectedField,
+    fields,
+    setDataView,
+    setNumericFieldName,
+    state,
+  } = useAppState({ data });
+
+  const isRestoring = !!state.restoreSessionId;
+
+  const enableSessionStorage = useCallback(() => {
+    data.search.session.enableStorage({
+      getName: async () => 'Background searches example',
+      getLocatorData: async () => ({
+        initialState: {
+          time: data.query.timefilter.timefilter.getTime(),
+          filters: data.query.filterManager.getFilters(),
+          query: data.query.queryString.getQuery(),
+          dataViewId: dataView?.id,
+          numericFieldName,
+        },
+        restoreState: {
+          time: data.query.timefilter.timefilter.getAbsoluteTime(),
+          filters: data.query.filterManager.getFilters(),
+          query: data.query.queryString.getQuery(),
+          dataViewId: dataView?.id,
+          numericFieldName,
+          searchSessionId: data.search.session.getSessionId(),
+        },
+        id: SEARCH_SESSIONS_EXAMPLES_APP_LOCATOR,
+      }),
+    });
+  }, [
+    data.query.filterManager,
+    data.query.queryString,
+    data.query.timefilter.timefilter,
+    data.search.session,
+    dataView?.id,
+    numericFieldName,
+  ]);
+
+  const reset = useCallback(() => {
+    setRequest(null);
+    setResponse(null);
+    setRestoreRequest(null);
+    setRestoreResponse(null);
+    setTookMs(null);
+    setRestoreTookMs(null);
+    setIsSearching(false);
+    data.search.session.clear();
+    enableSessionStorage();
+    nextRequestIdRef.current = 0;
+  }, [
+    setRequest,
+    setResponse,
+    setRestoreRequest,
+    setRestoreResponse,
+    setIsSearching,
+    data.search.session,
+    enableSessionStorage,
+  ]);
+
+  useEffect(() => {
+    enableSessionStorage();
+    return () => {
+      data.search.session.clear();
+    };
+  }, [data.search.session, enableSessionStorage]);
+
+  useEffect(() => {
+    reset();
+  }, [reset, state]);
+
+  const search = useCallback(
+    (restoreSearchSessionId?: string) => {
+      if (!dataView) return;
+      if (!numericFieldName) return;
+      setIsSearching(true);
+      const requestId = ++nextRequestIdRef.current;
+      doSearch({ dataView, numericFieldName, restoreSearchSessionId }, { data, ...startServices })
+        .then(({ response: res, request: req, tookMs: _tookMs }) => {
+          if (requestId !== nextRequestIdRef.current) return; // no longer interested in this result
+          if (restoreSearchSessionId) {
+            setRestoreRequest(req);
+            setRestoreResponse(res);
+            setRestoreTookMs(_tookMs ?? null);
+          } else {
+            setRequest(req);
+            setResponse(res);
+            setTookMs(_tookMs ?? null);
+          }
+        })
+        .finally(() => {
+          if (requestId !== nextRequestIdRef.current) return; // no longer interested in this result
+          setIsSearching(false);
+        });
+    },
+    [data, dataView, numericFieldName, startServices]
+  );
+
+  useEffect(() => {
+    if (state.restoreSessionId) {
+      search(state.restoreSessionId);
+    }
+  }, [search, state.restoreSessionId]);
+
+  return (
+    <>
+      <EuiPageTemplate.Header pageTitle="Background search example" />
+      <EuiPageTemplate.Section grow={false}>
+        {!isShardDelayEnabled(data) && (
+          <>
+            <NoShardDelayCallout />
+            <EuiSpacer />
+          </>
+        )}
+        {!dataView && (
+          <>
+            <NoDataViewsCallout />
+            <EuiSpacer />
+          </>
+        )}
+        <EuiText>
+          <p>
+            This example shows how you can use <EuiCode>data.search.session</EuiCode> service to
+            group your searches into a background search and allow user to save search results for
+            later. <br />
+            Start a long-running search, save the session and then restore it. See how fast search
+            is completed when restoring the session comparing to when doing initial search. <br />
+            <br />
+            Follow this demo step-by-step:{' '}
+            <b>configure the query, start the search and then save your session.</b> You can save
+            your session both when search is still in progress. After you save the session and when
+            initial search is completed you can <b>restore the session</b>: the search will re-run
+            reusing previous results. It will finish a lot faster then the initial search. You can
+            also <b>go to background search management</b> and <b>get back to the stored results</b>{' '}
+            from there.
+          </p>
+        </EuiText>
+      </EuiPageTemplate.Section>
+      <>
+        {!isRestoring && (
+          <>
+            <EuiPageTemplate.Section grow={false}>
+              <EuiTitle size="s">
+                <h2>1. Configure the search query (OK to leave defaults)</h2>
+              </EuiTitle>
+              <navigation.ui.TopNavMenu
+                appName={PLUGIN_ID}
+                showSearchBar={true}
+                useDefaultBehaviors={true}
+                indexPatterns={dataView ? [dataView] : undefined}
+                onQuerySubmit={reset}
+                onCancel={reset}
+                isLoading={isSearching}
+                useBackgroundSearchButton
+              />
+              <EuiFlexGroup justifyContent={'flexStart'}>
+                <EuiFlexItem grow={false}>
+                  <EuiFormLabel>Data view</EuiFormLabel>
+                  <IndexPatternSelect
+                    placeholder={i18n.translate('searchSessionExample.selectDataViewPlaceholder', {
+                      defaultMessage: 'Select data view',
+                    })}
+                    indexPatternId={dataView?.id ?? ''}
+                    onChange={(id) => {
+                      if (!id) return;
+                      setDataView(id);
+                    }}
+                    isClearable={false}
+                    data-test-subj="dataViewSelector"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiFormLabel id="numericFieldLabel">Numeric Field to Aggregate</EuiFormLabel>
+                  <EuiComboBox
+                    aria-labelledby="numericFieldLabel"
+                    options={formatFieldsToComboBox(getNumeric(fields))}
+                    selectedOptions={formatFieldToComboBox(selectedField)}
+                    singleSelection={true}
+                    onChange={(option) => {
+                      const fld = dataView?.getFieldByName(option[0].label);
+                      if (!fld) return;
+                      setNumericFieldName(fld?.name);
+                    }}
+                    sortMatchesBy="startsWith"
+                    data-test-subj="searchMetricField"
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPageTemplate.Section>
+
+            <EuiPageTemplate.Section grow={false}>
+              <EuiTitle size="s">
+                <h2>
+                  2. Start the search using <EuiCode>data.search</EuiCode> service
+                </h2>
+              </EuiTitle>
+              <EuiSpacer size="s" />
+              <EuiText>
+                In this example each search creates a new session by calling{' '}
+                <EuiCode>data.search.session.start()</EuiCode> that returns a{' '}
+                <EuiCode>searchSessionId</EuiCode>. Then this <EuiCode>searchSessionId</EuiCode> is
+                passed into a search request.
+                <div>
+                  {demoStep === DemoStep.ConfigureQuery && (
+                    <EuiButtonEmpty
+                      flush="both"
+                      onClick={() => search()}
+                      iconType="play"
+                      disabled={isSearching || !dataView || !numericFieldName}
+                      data-test-subj={'startSearch'}
+                    >
+                      Start the search from low-level client (data.search.search)
+                    </EuiButtonEmpty>
+                  )}
+
+                  {isSearching && (
+                    <>
+                      <EuiSpacer />
+                      <EuiLoadingSpinner />
+                    </>
+                  )}
+
+                  {response && request && (
+                    <>
+                      <EuiSpacer />
+                      <SearchInspector
+                        accordionId={'1'}
+                        request={request}
+                        response={response}
+                        tookMs={tookMs}
+                      />
+                    </>
+                  )}
+                </div>
+              </EuiText>
+            </EuiPageTemplate.Section>
+
+            {(demoStep === DemoStep.RunSession ||
+              demoStep === DemoStep.RestoreSessionOnScreen ||
+              demoStep === DemoStep.SaveSession) && (
+              <EuiPageTemplate.Section grow={false}>
+                <EuiTitle size="s">
+                  <h2>3. Save your session</h2>
+                </EuiTitle>
+                <EuiSpacer size="s" />
+                <EuiText>
+                  Use the secondary button in the search button to save the background search.
+                  <div>
+                    <EuiButtonEmpty
+                      flush="both"
+                      iconType="save"
+                      onClick={() => {
+                        // hack for demo purposes:
+                        document
+                          .querySelector('[data-test-subj="searchSessionIndicator"]')
+                          ?.querySelector('button')
+                          ?.click();
+                      }}
+                      isDisabled={
+                        demoStep === DemoStep.RestoreSessionOnScreen ||
+                        demoStep === DemoStep.SaveSession
+                      }
+                    >
+                      Try saving the session using the secondary button in the search button.
+                    </EuiButtonEmpty>
+                  </div>
+                </EuiText>
+              </EuiPageTemplate.Section>
+            )}
+
+            {(demoStep === DemoStep.RestoreSessionOnScreen ||
+              demoStep === DemoStep.SaveSession) && (
+              <EuiPageTemplate.Section grow={false}>
+                <EuiTitle size="s">
+                  <h2>4. Restore the session</h2>
+                </EuiTitle>
+                <EuiSpacer size="s" />
+                <EuiText>
+                  Now you can restore your saved session. The same search request completes
+                  significantly faster because it reuses stored results.
+                  <div>
+                    {!isSearching && !restoreResponse && (
+                      <EuiButtonEmpty
+                        flush="both"
+                        iconType="refresh"
+                        onClick={() => {
+                          search(data.search.session.getSessionId());
+                        }}
+                        data-test-subj={'restoreSearch'}
+                      >
+                        Restore the background search
+                      </EuiButtonEmpty>
+                    )}
+
+                    {isSearching && (
+                      <>
+                        <EuiSpacer />
+                        <EuiLoadingSpinner />
+                      </>
+                    )}
+
+                    {restoreRequest && restoreResponse && (
+                      <>
+                        <EuiSpacer />
+                        <SearchInspector
+                          accordionId={'2'}
+                          request={restoreRequest}
+                          response={restoreResponse}
+                          tookMs={restoreTookMs}
+                        />
+                      </>
+                    )}
+                  </div>
+                </EuiText>
+              </EuiPageTemplate.Section>
+            )}
+
+            {demoStep === DemoStep.RestoreSessionOnScreen && (
+              <EuiPageTemplate.Section grow={false}>
+                <EuiTitle size="s">
+                  <h2>5. Restore from Management</h2>
+                </EuiTitle>
+                <EuiSpacer size="s" />
+                <EuiText>
+                  You can also get back to your session from the Background Search Management.
+                  <div>
+                    <EuiButtonEmpty
+                      flush="both"
+                      iconType="refresh"
+                      onClick={() => {
+                        // hack for demo purposes:
+                        document
+                          .querySelector('[data-test-subj="searchSessionIndicator"]')
+                          ?.querySelector('button')
+                          ?.click();
+                      }}
+                    >
+                      Use Background Search indicator to navigate to management
+                    </EuiButtonEmpty>
+                  </div>
+                </EuiText>
+              </EuiPageTemplate.Section>
+            )}
+          </>
+        )}
+
+        {isRestoring && (
+          <EuiPageTemplate.Section grow={false}>
+            <EuiTitle size="s">
+              <h2>You restored the background search!</h2>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            <EuiText>
+              {isSearching && <EuiLoadingSpinner />}
+
+              {restoreRequest && restoreResponse && (
+                <SearchInspector
+                  accordionId={'2'}
+                  request={restoreRequest}
+                  response={restoreResponse}
+                  tookMs={restoreTookMs}
+                />
+              )}
+            </EuiText>
+          </EuiPageTemplate.Section>
+        )}
+        <EuiPageTemplate.Section>
+          <EuiButton
+            onClick={() => {
+              // hack to quickly reset all the state and remove state stuff from the URL
+              window.location.assign(window.location.href.split('?')[0]);
+            }}
+          >
+            Start again
+          </EuiButton>
+        </EuiPageTemplate.Section>
+      </>
+    </>
+  );
+};
+
+function SearchInspector({
+  accordionId,
+  response,
+  request,
+  tookMs,
+}: {
+  accordionId: string;
+  response: IEsSearchResponse;
+  request: IEsSearchRequest;
+  tookMs: number | null;
+}) {
+  return (
+    <div data-test-subj={`searchResults-${accordionId}`}>
+      The search took: {tookMs ? Math.round(tookMs) : 'unknown'}ms
+      <EuiAccordion id={accordionId} buttonContent="Request / response">
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiTitle size="xs">
+              <h4>Request</h4>
+            </EuiTitle>
+            <EuiText size="xs">Search body sent to ES</EuiText>
+            <EuiCodeBlock
+              language="json"
+              fontSize="s"
+              paddingSize="s"
+              overflowHeight={450}
+              isCopyable
+            >
+              {JSON.stringify(request, null, 2)}
+            </EuiCodeBlock>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiTitle size="xs">
+              <h4>Response</h4>
+            </EuiTitle>
+            <EuiCodeBlock
+              language="json"
+              fontSize="s"
+              paddingSize="s"
+              overflowHeight={450}
+              isCopyable
+            >
+              {JSON.stringify(response, null, 2)}
+            </EuiCodeBlock>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiAccordion>
+    </div>
+  );
+}
+
+function useAppState({ data }: { data: DataPublicPluginStart }) {
+  const stateContainer = useMemo(() => {
+    const { filters, time, searchSessionId, numericFieldName, dataViewId, query } =
+      getInitialStateFromUrl();
+
+    if (filters) {
+      data.query.filterManager.setFilters(filters);
+    }
+
+    if (query) {
+      data.query.queryString.setQuery(query);
+    }
+
+    if (time) {
+      data.query.timefilter.timefilter.setTime(time);
+    }
+
+    return createStateContainer<State>({
+      restoreSessionId: searchSessionId,
+      numericFieldName,
+      dataViewId,
+    });
+  }, [data.query.filterManager, data.query.queryString, data.query.timefilter.timefilter]);
+  const setState = useCallback(
+    (state: Partial<State>) => stateContainer.set({ ...stateContainer.get(), ...state }),
+    [stateContainer]
+  );
+  const state = useContainerState(stateContainer);
+  useEffect(() => {
+    return connectToQueryState(data.query, stateContainer, {
+      time: true,
+      query: true,
+      filters: true,
+      refreshInterval: false,
+    });
+  }, [stateContainer, data.query]);
+
+  const [fields, setFields] = useState<DataViewField[]>();
+  const [dataView, setDataView] = useState<DataView | null>();
+
+  // Fetch the default data view using the `data.dataViews` service, as the component is mounted.
+  useEffect(() => {
+    let canceled = false;
+    const loadDataView = async () => {
+      // eslint-disable-next-line no-console
+      console.warn('Loading default data view');
+      let loadedDataView = state.dataViewId
+        ? await data.dataViews.get(state.dataViewId)
+        : await data.dataViews.getDefault();
+      if (!loadedDataView) {
+        // try to find any available data view
+        const [id] = await data.dataViews.getIds(true);
+        if (id) {
+          loadedDataView = await data.dataViews.get(id);
+        }
+      }
+      if (canceled) return;
+      if (!loadedDataView) {
+        // eslint-disable-next-line no-console
+        console.warn('No data view to pick from');
+        return;
+      }
+      if (!state.dataViewId) {
+        setState({
+          dataViewId: loadedDataView.id,
+        });
+      }
+
+      setDataView(loadedDataView);
+    };
+
+    loadDataView();
+    return () => {
+      canceled = true;
+    };
+  }, [data, setState, state.dataViewId]);
+
+  // Update the fields list every time the data view is modified.
+  useEffect(() => {
+    setFields(dataView?.fields);
+  }, [dataView]);
+  useEffect(() => {
+    if (state.numericFieldName) return;
+    setState({ numericFieldName: fields?.length ? getNumeric(fields)[0]?.name : undefined });
+  }, [setState, fields, state.numericFieldName]);
+
+  const selectedField: DataViewField | undefined = useMemo(
+    () => dataView?.fields.find((field) => field.name === state.numericFieldName),
+    [dataView?.fields, state.numericFieldName]
+  );
+
+  return {
+    selectedField,
+    dataView,
+    numericFieldName: state.numericFieldName,
+    fields,
+    setNumericFieldName: (field: string) => setState({ numericFieldName: field }),
+    setDataView: (dataViewId: string) => setState({ dataViewId }),
+    state,
+  };
+}
+
+function doSearch(
+  {
+    dataView,
+    numericFieldName,
+    restoreSearchSessionId,
+  }: {
+    dataView: DataView;
+    numericFieldName: string;
+    restoreSearchSessionId?: string;
+  },
+  {
+    data,
+    notifications,
+    ...startServices
+  }: {
+    data: DataPublicPluginStart;
+    notifications: CoreStart['notifications'];
+    analytics: CoreStart['analytics'];
+    i18n: CoreStart['i18n'];
+    theme: CoreStart['theme'];
+    userProfile: CoreStart['userProfile'];
+  }
+): Promise<{ request: IEsSearchRequest; response: IEsSearchResponse; tookMs?: number }> {
+  if (!dataView) return Promise.reject('Select a data view');
+  if (!numericFieldName) return Promise.reject('Select a field to aggregate on');
+
+  // start a new session or restore an existing one
+  let restoreTimeRange: TimeRange | undefined;
+  if (restoreSearchSessionId) {
+    // when restoring need to make sure we are forcing absolute time range
+    restoreTimeRange = data.query.timefilter.timefilter.getAbsoluteTime();
+    data.search.session.restore(restoreSearchSessionId);
+  }
+  const sessionId = restoreSearchSessionId ? restoreSearchSessionId : data.search.session.start();
+
+  // Construct the query portion of the search request
+  const query = data.query.getEsQuery(dataView, restoreTimeRange);
+
+  // Construct the aggregations portion of the search request by using the `data.search.aggs` service.
+
+  const aggs = isShardDelayEnabled(data)
+    ? [
+        { type: 'avg', params: { field: numericFieldName } },
+        { type: 'shard_delay', params: { delay: '5s' } },
+      ]
+    : [{ type: 'avg', params: { field: numericFieldName } }];
+
+  const aggsDsl = data.search.aggs.createAggConfigs(dataView, aggs).toDsl();
+
+  const req = {
+    params: {
+      index: dataView.title,
+      aggs: aggsDsl,
+      query,
+    },
+  };
+
+  const startTs = performance.now();
+
+  // Submit the search request using the `data.search` service.
+  return lastValueFrom(
+    data.search.search(req, { sessionId }).pipe(
+      tap((res) => {
+        if (!isRunningResponse(res)) {
+          const avgResult: number | undefined = res.rawResponse.aggregations
+            ? // @ts-expect-error @elastic/elasticsearch no way to declare a type for aggregation in the search response
+              res.rawResponse.aggregations[1]?.value ?? res.rawResponse.aggregations[2]?.value
+            : undefined;
+          const message = (
+            <KibanaRenderContextProvider {...startServices}>
+              <EuiText>
+                Searched {res.rawResponse.hits.total as number} documents. <br />
+                The average of {numericFieldName} is {avgResult ? Math.floor(avgResult) : 0}
+                .
+                <br />
+              </EuiText>
+            </KibanaRenderContextProvider>
+          );
+          notifications.toasts.addSuccess({
+            title: 'Query result',
+            text: toMountPoint(message, startServices),
+          });
+        }
+      }),
+      map((res) => ({ response: res, request: req, tookMs: performance.now() - startTs })),
+      catchError((e) => {
+        notifications.toasts.addDanger('Failed to run search');
+        return of({ request: req, response: e });
+      })
+    )
+  );
+}
+
+function getNumeric(fields?: DataViewField[]) {
+  if (!fields) return [];
+  return fields?.filter((f) => f.type === 'number' && f.aggregatable);
+}
+
+function formatFieldToComboBox(field?: DataViewField | null) {
+  if (!field) return [];
+  return formatFieldsToComboBox([field]);
+}
+
+function formatFieldsToComboBox(fields?: DataViewField[]) {
+  if (!fields) return [];
+
+  return fields?.map((field) => {
+    return {
+      label: field.displayName || field.name,
+    };
+  });
+}
+
+/**
+ * To make this demo more convincing it uses `shardDelay` agg which adds artificial delay to a search request,
+ * to enable `shardDelay` make sure to set `data.search.aggs.shardDelay.enabled: true` in your kibana.dev.yml
+ */
+function isShardDelayEnabled(data: DataPublicPluginStart): boolean {
+  try {
+    return !!data.search.aggs.types.get('shard_delay');
+  } catch (e) {
+    return false;
+  }
+}
+
+function NoShardDelayCallout() {
+  return (
+    <EuiCallOut
+      title={
+        <>
+          <EuiCode>shardDelay</EuiCode> is missing!
+        </>
+      }
+      color="warning"
+      iconType="question"
+    >
+      <p>
+        This demo works best with <EuiCode>shardDelay</EuiCode> aggregation which simulates slow
+        queries. <br />
+        We recommend to enable it in your <EuiCode>kibana.dev.yml</EuiCode>:
+      </p>
+      <EuiCodeBlock isCopyable={true} language="yaml">
+        data.search.aggs.shardDelay.enabled: true
+      </EuiCodeBlock>
+    </EuiCallOut>
+  );
+}
+
+function NoDataViewsCallout() {
+  return (
+    <EuiCallOut title={<>Missing data views!</>} color="warning" iconType="question">
+      <p>This demo requires at least one data view.</p>
+    </EuiCallOut>
+  );
+}

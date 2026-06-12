@@ -1,0 +1,15 @@
+type: object
+description: A map of runtime field definitions by field name.
+required:
+  - script
+  - type
+properties:
+  script:
+    type: object
+    properties:
+      source:
+        type: string
+        description: Script for the runtime field.
+  type:
+    type: string
+    description: Mapping type of the runtime field.

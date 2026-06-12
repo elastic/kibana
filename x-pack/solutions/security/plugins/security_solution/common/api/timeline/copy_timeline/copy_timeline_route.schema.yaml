@@ -1,0 +1,53 @@
+openapi: 3.0.0
+info:
+  title: Elastic Security - Timeline - Copy Timeline API
+  version: '2023-10-31'
+paths:
+  /api/timeline/_copy:
+    post:
+      x-labels: [serverless, ess]
+      x-codegen-enabled: true
+      operationId: CopyTimeline
+      summary: Copies timeline or timeline template
+      description: |
+        Copies and returns a timeline or timeline template.
+      tags:
+        - access:securitySolution
+      requestBody:
+        description: Source timeline id to copy plus timeline fields for the new saved object.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [timeline, timelineIdToCopy]
+              properties:
+                timeline:
+                  $ref: '../model/components.schema.yaml#/components/schemas/SavedTimeline'
+                timelineIdToCopy:
+                  type: string
+                  description: The `savedObjectId` of the timeline or template to duplicate.
+            examples:
+              copyWithTitle:
+                summary: Copy with a new title
+                value:
+                  timelineIdToCopy: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+                  timeline:
+                    title: Copy of investigation
+                    timelineType: default
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                $ref: '../model/components.schema.yaml#/components/schemas/PersistTimelineResponse'
+              examples:
+                copied:
+                  summary: Newly saved timeline
+                  value:
+                    savedObjectId: 6ce1b592-84e3-4b4a-9552-f189d4b82075
+                    version: WzE1LDFd
+                    title: Copy of investigation
+                    timelineType: default
+                    status: active

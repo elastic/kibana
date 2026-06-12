@@ -1,0 +1,115 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import React from 'react';
+import { render, screen } from '@testing-library/react';
+import { userEvent } from '@testing-library/user-event';
+import { TableFieldValue, DOC_VIEWER_DEFAULT_TRUNCATE_MAX_HEIGHT } from './table_cell_value';
+import { setUnifiedDocViewerServices } from '../../plugin';
+import { mockUnifiedDocViewerServices } from '../../__mocks__';
+
+setUnifiedDocViewerServices(mockUnifiedDocViewerServices);
+
+const truncationStyles = {
+  overflow: 'hidden',
+  maxHeight: `${DOC_VIEWER_DEFAULT_TRUNCATE_MAX_HEIGHT}px`,
+};
+
+let mockScrollHeight = 0;
+jest.spyOn(HTMLElement.prototype, 'scrollHeight', 'get').mockImplementation(() => mockScrollHeight);
+
+describe('TableFieldValue', () => {
+  afterEach(() => {
+    mockScrollHeight = 0;
+  });
+
+  it('should render correctly', async () => {
+    mockScrollHeight = 10;
+
+    render(
+      <TableFieldValue
+        formattedValue="100,000"
+        rawValue={10000}
+        field="bytes"
+        ignoreReason={undefined}
+        isDetails={false}
+      />
+    );
+
+    expect(screen.getByText('100,000')).toBeInTheDocument();
+    expect(screen.queryByTestId('toggleLongFieldValue-bytes')).toBeNull();
+  });
+
+  it('should truncate a long value correctly', async () => {
+    mockScrollHeight = 1000;
+
+    const value = 'long value'.repeat(300);
+    render(
+      <TableFieldValue
+        formattedValue={value}
+        rawValue={value}
+        field="message"
+        ignoreReason={undefined}
+        isDetails={false}
+      />
+    );
+
+    expect(screen.getByText(value)).toBeInTheDocument();
+
+    let toggleButton = screen.getByTestId('toggleLongFieldValue-message');
+    expect(toggleButton).toBeInTheDocument();
+    expect(toggleButton.getAttribute('aria-expanded')).toBe('false');
+
+    let valueElement = screen.getByTestId('tableDocViewRow-message-value');
+
+    expect(valueElement).toHaveStyle(truncationStyles);
+
+    await userEvent.click(toggleButton);
+
+    toggleButton = screen.getByTestId('toggleLongFieldValue-message');
+    expect(toggleButton).toBeInTheDocument();
+    expect(toggleButton.getAttribute('aria-expanded')).toBe('true');
+
+    valueElement = screen.getByTestId('tableDocViewRow-message-value');
+
+    expect(valueElement).not.toHaveStyle(truncationStyles);
+
+    await userEvent.click(toggleButton);
+
+    toggleButton = screen.getByTestId('toggleLongFieldValue-message');
+    expect(toggleButton).toBeInTheDocument();
+    expect(toggleButton.getAttribute('aria-expanded')).toBe('false');
+
+    valueElement = screen.getByTestId('tableDocViewRow-message-value');
+
+    expect(valueElement).toHaveStyle(truncationStyles);
+  });
+
+  it('should not truncate a long value when inside a popover', async () => {
+    mockScrollHeight = 1000;
+
+    const value = 'long value'.repeat(300);
+    render(
+      <TableFieldValue
+        formattedValue={value}
+        rawValue={value}
+        field="message"
+        ignoreReason={undefined}
+        isDetails={true}
+      />
+    );
+
+    expect(screen.getByText(value)).toBeInTheDocument();
+    expect(screen.queryByTestId('toggleLongFieldValue-message')).toBeNull();
+
+    const valueElement = screen.getByTestId('tableDocViewRow-message-value');
+
+    expect(valueElement).not.toHaveStyle(truncationStyles);
+  });
+});

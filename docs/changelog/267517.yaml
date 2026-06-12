@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/267517
+issues:
+- https://github.com/elastic/kibana/issues/259295
+type: deprecation
+products:
+- product: cloud-serverless
+  target: 2026-05-14
+areas:
+- Discover and ES|QL
+title: Remove HTML converter/bridge from field formatters plugin and clean up
+impact: Field formatters now return React elements instead of HTML strings, eliminating the use of dangerouslySetInnerHTML and removing a class of potential XSS vulnerabilities.

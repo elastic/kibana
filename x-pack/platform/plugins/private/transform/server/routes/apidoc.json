@@ -1,0 +1,21 @@
+{
+  "name": "transform_kibana_api",
+  "version": "7.10.0",
+  "description": "This is the documentation of the REST API provided by the Transform Kibana plugin. Each API is experimental and can include breaking changes in any version.",
+  "title": "Transform Kibana API",
+  "order": [
+    "GetTransforms",
+    "GetTransform",
+    "GetTransformsStats",
+    "GetTransformStats",
+    "PutTransform",
+    "PostTransformUpdate",
+    "DeleteTransforms",
+    "PreviewTransform",
+    "PostStartTransforms",
+    "PostStopTransforms",
+    "PostTransformEsSearchProxy",
+    "DeleteDataFrameAnalytics",
+    "GetTransformsMessages"
+  ]
+}

@@ -1,0 +1,38 @@
+---
+# Define the connection to Elasticsearch
+elasticsearch:
+  installKibanaUser: false
+
+# Define the connection to Kibana
+kibana:
+  host: "http://localhost:5601"
+  username: "elastic"
+  password: "changeme"
+  installAssets: false
+
+# Define the indexing options
+indexing:
+  dataset: "fake_logs"
+  eventsPerCycle: 2000
+  interval: 6000
+
+# Define the schedule
+schedule:
+  - template: "bad"
+    start: "now-5m"
+    end: "now+1m"
+    eventsPerCycle:
+      start: 5000
+      end: 3000
+      method: "sine"
+  - template: "good"
+    start: "now+1m"
+    end: "now+2m"
+    eventsPerCycle: 3000
+  - template: "bad"
+    start: "now+2m"
+    end: "now+10m"
+    eventsPerCycle:
+      start: 5000
+      end: 3000
+      method: "sine"

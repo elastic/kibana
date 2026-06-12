@@ -1,0 +1,75 @@
+{
+  "formattedLeader": "leader",
+  "metrics": {
+    "ccr_sync_lag_time": [{
+      "bucket_size": "10 mins",
+      "timeRange": {
+        "min": 1537315200000,
+        "max": 1537401599000
+      },
+      "metric": {
+        "app": "elasticsearch",
+        "field": "ccr_stats.time_since_last_read_millis",
+        "metricAgg": "max",
+        "label": "Fetch delay",
+        "title": "Fetch delay",
+        "description": "The amount of time the follower index is lagging behind the leader.",
+        "units": "s",
+        "format": "0.[00]",
+        "hasCalculation": true,
+        "isDerivative": false
+      },
+      "data": []
+    }],
+    "ccr_sync_lag_ops": [{
+      "bucket_size": "10 mins",
+      "timeRange": {
+        "min": 1537315200000,
+        "max": 1537401599000
+      },
+      "metric": {
+        "app": "elasticsearch",
+        "field": "",
+        "metricAgg": "sum",
+        "label": "Ops delay",
+        "title": "Ops delay",
+        "description": "The number of operations the follower index is lagging behind the leader.",
+        "units": "",
+        "format": "0,0.[00]",
+        "hasCalculation": true,
+        "isDerivative": false
+      },
+      "data": []
+    }]
+  },
+  "stat": {
+    "leader_index": "leader",
+    "follower_index": "follower",
+    "shard_id": 0,
+    "leader_global_checkpoint": 85,
+    "leader_max_seq_no": 85,
+    "follower_global_checkpoint": 85,
+    "follower_max_seq_no": 85,
+    "last_requested_seq_no": 85,
+    "number_of_concurrent_reads": 1,
+    "number_of_concurrent_writes": 0,
+    "number_of_queued_writes": 0,
+    "mapping_version": 2,
+    "total_fetch_time_millis": 1265908,
+    "number_of_successful_fetches": 86,
+    "failed_read_requests": 0,
+    "operations_received": 86,
+    "total_transferred_bytes": 6602,
+    "total_index_time_millis": 1096,
+    "number_of_successful_bulk_operations": 86,
+    "number_of_failed_bulk_operations": 0,
+    "operations_written": 86,
+    "read_exceptions": [],
+    "time_since_last_read_millis": 19886
+  },
+  "timestamp": "2018-09-19T20:01:00.440Z",
+  "oldestStat": {
+    "failed_read_requests": 0,
+    "operations_written": 1
+  }
+}

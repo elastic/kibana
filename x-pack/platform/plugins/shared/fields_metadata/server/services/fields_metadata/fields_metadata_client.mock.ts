@@ -1,0 +1,16 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { IFieldsMetadataClient } from './types';
+
+export const createFieldsMetadataClientMock = (): jest.Mocked<IFieldsMetadataClient> => ({
+  getByName: jest.fn(),
+  find: jest.fn(),
+  getFieldChildren: jest.fn(),
+  getECSFieldsets: jest.fn(),
+  matchesAnyTypeForEventCategory: jest.fn(),
+});

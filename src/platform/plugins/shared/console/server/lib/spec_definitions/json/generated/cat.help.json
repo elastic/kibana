@@ -1,0 +1,16 @@
+{
+  "cat.help": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_cat"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/group/endpoint-cat",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch/group/endpoint-cat",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
+  }
+}

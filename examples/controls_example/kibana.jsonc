@@ -1,0 +1,22 @@
+{
+  "type": "plugin",
+  "id": "@kbn/controls-example-plugin",
+  "owner": "@elastic/kibana-presentation",
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "controlsExample",
+    "server": false,
+    "browser": true,
+    "requiredPlugins": [
+      "data",
+      "developerExamples",
+      "embeddable",
+      "navigation",
+      "presentationUtil",
+      "uiActions",
+      "dataViews"
+    ],
+    "requiredBundles": ["kibanaReact"]
+  }
+}

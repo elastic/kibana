@@ -1,0 +1,451 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { cloneDeep } from 'lodash';
+import { applyDeprecations, configDeprecationFactory } from '@kbn/config';
+import { cspConfig } from './config';
+
+const deprecationContext = {
+  branch: 'main',
+  version: '9.0.0',
+  docLinks: {} as any,
+};
+
+const applyConfigDeprecations = (settings: Record<string, any> = {}) => {
+  const deprecations = cspConfig.deprecations!(configDeprecationFactory);
+  const deprecationMessages: string[] = [];
+  const configPaths: string[] = [];
+  const { config: migrated } = applyDeprecations(
+    settings,
+    deprecations.map((deprecation) => ({
+      deprecation,
+      path: cspConfig.path,
+      context: deprecationContext,
+    })),
+    () =>
+      ({ message, configPath }) => {
+        deprecationMessages.push(message);
+        configPaths.push(configPath);
+      }
+  );
+  return {
+    configPaths,
+    messages: deprecationMessages,
+    migrated,
+  };
+};
+
+describe('config.validate()', () => {
+  it(`does not allow "disableEmbedding" to be set to true`, () => {
+    // This is intentionally not editable in the raw CSP config.
+    // Users should set `server.securityResponseHeaders.disableEmbedding` to control this config property.
+    expect(() => cspConfig.schema.validate({ disableEmbedding: true })).toThrowError(
+      '[disableEmbedding]: expected value to equal [false]'
+    );
+  });
+
+  describe(`"script_src"`, () => {
+    it(`throws if containing 'unsafe-inline' when 'strict' is true`, () => {
+      expect(() =>
+        cspConfig.schema.validate({
+          strict: true,
+          warnLegacyBrowsers: false,
+          script_src: [`'self'`, `unsafe-inline`],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"cannot use \`unsafe-inline\` for \`script_src\` when \`csp.strict\` is true"`
+      );
+
+      expect(() =>
+        cspConfig.schema.validate({
+          strict: true,
+          warnLegacyBrowsers: false,
+          script_src: [`'self'`, `'unsafe-inline'`],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"cannot use \`unsafe-inline\` for \`script_src\` when \`csp.strict\` is true"`
+      );
+    });
+
+    it(`throws if containing 'unsafe-inline' when 'warnLegacyBrowsers' is true`, () => {
+      expect(() =>
+        cspConfig.schema.validate({
+          strict: false,
+          warnLegacyBrowsers: true,
+          script_src: [`'self'`, `unsafe-inline`],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"cannot use \`unsafe-inline\` for \`script_src\` when \`csp.warnLegacyBrowsers\` is true"`
+      );
+
+      expect(() =>
+        cspConfig.schema.validate({
+          strict: false,
+          warnLegacyBrowsers: true,
+          script_src: [`'self'`, `'unsafe-inline'`],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"cannot use \`unsafe-inline\` for \`script_src\` when \`csp.warnLegacyBrowsers\` is true"`
+      );
+    });
+
+    it(`does not throw if containing 'unsafe-inline' when 'strict' and 'warnLegacyBrowsers' are false`, () => {
+      expect(() =>
+        cspConfig.schema.validate({
+          strict: false,
+          warnLegacyBrowsers: false,
+          script_src: [`'self'`, `unsafe-inline`],
+        })
+      ).not.toThrow();
+
+      expect(() =>
+        cspConfig.schema.validate({
+          strict: false,
+          warnLegacyBrowsers: false,
+          script_src: [`'self'`, `'unsafe-inline'`],
+        })
+      ).not.toThrow();
+    });
+
+    it('throws if using an `nonce-*` value', () => {
+      expect(() =>
+        cspConfig.schema.validate({
+          script_src: [`hello`, `nonce-foo`],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[script_src]: using \\"nonce-*\\" is considered insecure and is not allowed"`
+      );
+    });
+
+    it("throws if using `none` or `'none'`", () => {
+      expect(() =>
+        cspConfig.schema.validate({
+          script_src: [`hello`, `none`],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[script_src]: using \\"none\\" would conflict with Kibana's default csp configuration and is not allowed"`
+      );
+
+      expect(() =>
+        cspConfig.schema.validate({
+          script_src: [`hello`, `'none'`],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[script_src]: using \\"none\\" would conflict with Kibana's default csp configuration and is not allowed"`
+      );
+    });
+  });
+
+  describe(`"worker_src"`, () => {
+    it('throws if using an `nonce-*` value', () => {
+      expect(() =>
+        cspConfig.schema.validate({
+          worker_src: [`hello`, `nonce-foo`],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[worker_src]: using \\"nonce-*\\" is considered insecure and is not allowed"`
+      );
+    });
+
+    it("throws if using `none` or `'none'`", () => {
+      expect(() =>
+        cspConfig.schema.validate({
+          worker_src: [`hello`, `none`],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[worker_src]: using \\"none\\" would conflict with Kibana's default csp configuration and is not allowed"`
+      );
+
+      expect(() =>
+        cspConfig.schema.validate({
+          worker_src: [`hello`, `'none'`],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[worker_src]: using \\"none\\" would conflict with Kibana's default csp configuration and is not allowed"`
+      );
+    });
+  });
+
+  describe(`"style_src"`, () => {
+    it('throws if using an `nonce-*` value', () => {
+      expect(() =>
+        cspConfig.schema.validate({
+          style_src: [`hello`, `nonce-foo`],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[style_src]: using \\"nonce-*\\" is considered insecure and is not allowed"`
+      );
+    });
+
+    it("throws if using `none` or `'none'`", () => {
+      expect(() =>
+        cspConfig.schema.validate({
+          style_src: [`hello`, `none`],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[style_src]: using \\"none\\" would conflict with Kibana's default csp configuration and is not allowed"`
+      );
+
+      expect(() =>
+        cspConfig.schema.validate({
+          style_src: [`hello`, `'none'`],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[style_src]: using \\"none\\" would conflict with Kibana's default csp configuration and is not allowed"`
+      );
+    });
+  });
+
+  describe(`"connect_src"`, () => {
+    it('throws if using an `nonce-*` value', () => {
+      expect(() =>
+        cspConfig.schema.validate({
+          connect_src: [`hello`, `nonce-foo`],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[connect_src]: using \\"nonce-*\\" is considered insecure and is not allowed"`
+      );
+    });
+
+    it("throws if using `none` or `'none'`", () => {
+      expect(() =>
+        cspConfig.schema.validate({
+          connect_src: [`hello`, `none`],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[connect_src]: using \\"none\\" would conflict with Kibana's default csp configuration and is not allowed"`
+      );
+
+      expect(() =>
+        cspConfig.schema.validate({
+          connect_src: [`hello`, `'none'`],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[connect_src]: using \\"none\\" would conflict with Kibana's default csp configuration and is not allowed"`
+      );
+    });
+  });
+
+  describe(`"default_src"`, () => {
+    it('throws if using an `nonce-*` value', () => {
+      expect(() =>
+        cspConfig.schema.validate({
+          default_src: [`hello`, `nonce-foo`],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[default_src]: using \\"nonce-*\\" is considered insecure and is not allowed"`
+      );
+    });
+
+    it("throws if using `none` or `'none'`", () => {
+      expect(() =>
+        cspConfig.schema.validate({
+          default_src: [`hello`, `none`],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[default_src]: using \\"none\\" would conflict with Kibana's default csp configuration and is not allowed"`
+      );
+
+      expect(() =>
+        cspConfig.schema.validate({
+          default_src: [`hello`, `'none'`],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[default_src]: using \\"none\\" would conflict with Kibana's default csp configuration and is not allowed"`
+      );
+    });
+  });
+
+  describe(`"font_src"`, () => {
+    it('throws if using an `nonce-*` value', () => {
+      expect(() =>
+        cspConfig.schema.validate({
+          font_src: [`hello`, `nonce-foo`],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[font_src]: using \\"nonce-*\\" is considered insecure and is not allowed"`
+      );
+    });
+
+    it("throws if using `none` or `'none'`", () => {
+      expect(() =>
+        cspConfig.schema.validate({
+          font_src: [`hello`, `none`],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[font_src]: using \\"none\\" would conflict with Kibana's default csp configuration and is not allowed"`
+      );
+
+      expect(() =>
+        cspConfig.schema.validate({
+          font_src: [`hello`, `'none'`],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[font_src]: using \\"none\\" would conflict with Kibana's default csp configuration and is not allowed"`
+      );
+    });
+  });
+
+  describe(`"frame_src"`, () => {
+    it('throws if using an `nonce-*` value', () => {
+      expect(() =>
+        cspConfig.schema.validate({
+          frame_src: [`hello`, `nonce-foo`],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[frame_src]: using \\"nonce-*\\" is considered insecure and is not allowed"`
+      );
+    });
+
+    it("throws if using `none` or `'none'`", () => {
+      expect(() =>
+        cspConfig.schema.validate({
+          frame_src: [`hello`, `none`],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[frame_src]: using \\"none\\" would conflict with Kibana's default csp configuration and is not allowed"`
+      );
+
+      expect(() =>
+        cspConfig.schema.validate({
+          frame_src: [`hello`, `'none'`],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[frame_src]: using \\"none\\" would conflict with Kibana's default csp configuration and is not allowed"`
+      );
+    });
+  });
+
+  describe(`"img_src"`, () => {
+    it('throws if using an `nonce-*` value', () => {
+      expect(() =>
+        cspConfig.schema.validate({
+          img_src: [`hello`, `nonce-foo`],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[img_src]: using \\"nonce-*\\" is considered insecure and is not allowed"`
+      );
+    });
+
+    it("throws if using `none` or `'none'`", () => {
+      expect(() =>
+        cspConfig.schema.validate({
+          img_src: [`hello`, `none`],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[img_src]: using \\"none\\" would conflict with Kibana's default csp configuration and is not allowed"`
+      );
+
+      expect(() =>
+        cspConfig.schema.validate({
+          img_src: [`hello`, `'none'`],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[img_src]: using \\"none\\" would conflict with Kibana's default csp configuration and is not allowed"`
+      );
+    });
+  });
+
+  describe(`"object_src"`, () => {
+    it('throws if using an `nonce-*` value', () => {
+      expect(() =>
+        cspConfig.schema.validate({
+          object_src: [`hello`, `nonce-foo`],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[object_src]: using \\"nonce-*\\" is considered insecure and is not allowed"`
+      );
+    });
+
+    it("throws if using `none` or `'none'`", () => {
+      expect(() =>
+        cspConfig.schema.validate({
+          object_src: [`hello`, `none`],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[object_src]: using \\"none\\" would conflict with Kibana's default csp configuration and is not allowed"`
+      );
+
+      expect(() =>
+        cspConfig.schema.validate({
+          object_src: [`hello`, `'none'`],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[object_src]: using \\"none\\" would conflict with Kibana's default csp configuration and is not allowed"`
+      );
+    });
+  });
+
+  describe(`"frame_ancestors"`, () => {
+    it('throws if using an `nonce-*` value', () => {
+      expect(() =>
+        cspConfig.schema.validate({
+          frame_ancestors: [`hello`, `nonce-foo`],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[frame_ancestors]: using \\"nonce-*\\" is considered insecure and is not allowed"`
+      );
+    });
+
+    it("throws if using `none` or `'none'`", () => {
+      expect(() =>
+        cspConfig.schema.validate({
+          frame_ancestors: [`hello`, `none`],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[frame_ancestors]: using \\"none\\" would conflict with Kibana's default csp configuration and is not allowed"`
+      );
+
+      expect(() =>
+        cspConfig.schema.validate({
+          frame_ancestors: [`hello`, `'none'`],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[frame_ancestors]: using \\"none\\" would conflict with Kibana's default csp configuration and is not allowed"`
+      );
+    });
+  });
+});
+
+describe('config deprecations', () => {
+  it('does not report deprecations for default configuration', () => {
+    const defaultConfig = { csp: {} };
+    const { messages, migrated } = applyConfigDeprecations(cloneDeep(defaultConfig));
+    expect(migrated).toEqual(defaultConfig);
+    expect(messages).toHaveLength(0);
+  });
+
+  it('warns when configuring csp.disableUnsafeEval', () => {
+    const userConfig = {
+      csp: {
+        disableUnsafeEval: false,
+      },
+    };
+    const { messages, configPaths, migrated } = applyConfigDeprecations(cloneDeep(userConfig));
+    expect(migrated).toEqual(userConfig);
+    expect(configPaths).toEqual(['csp.disableUnsafeEval']);
+    expect(messages).toEqual([
+      '`csp.disableUnsafeEval` has been replaced by the `csp.script_src` setting.',
+    ]);
+  });
+
+  it('warns when configuring the unused csp.report_only.object_src', () => {
+    const userConfig = {
+      csp: {
+        report_only: {
+          object_src: "'self'",
+        },
+      },
+    };
+    const { messages, configPaths, migrated } = applyConfigDeprecations(cloneDeep(userConfig));
+    expect(migrated).toEqual({}); // the setting should be removed from config
+    expect(configPaths).toEqual(['csp.report_only.object_src']);
+    expect(messages).toEqual(['You no longer need to configure "csp.report_only.object_src".']);
+  });
+});

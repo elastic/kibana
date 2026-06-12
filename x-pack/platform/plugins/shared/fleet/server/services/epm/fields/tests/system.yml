@@ -1,0 +1,1625 @@
+- name: system.core
+  type: group
+  description: >
+    `system-core` contains CPU metrics for a single core of a multi-core system.
+  fields:
+    - name: id
+      type: long
+      description: >
+        CPU Core number.
+
+    # Percentages
+    - name: user.pct
+      type: scaled_float
+      format: percent
+      description: >
+        The percentage of CPU time spent in user space.
+
+    - name: user.ticks
+      type: long
+      description: >
+        The amount of CPU time spent in user space.
+
+    - name: system.pct
+      type: scaled_float
+      format: percent
+      description: >
+        The percentage of CPU time spent in kernel space.
+
+    - name: system.ticks
+      type: long
+      description: >
+        The amount of CPU time spent in kernel space.
+
+    - name: nice.pct
+      type: scaled_float
+      format: percent
+      description: >
+        The percentage of CPU time spent on low-priority processes.
+
+    - name: nice.ticks
+      type: long
+      description: >
+        The amount of CPU time spent on low-priority processes.
+
+    - name: idle.pct
+      type: scaled_float
+      format: percent
+      description: >
+        The percentage of CPU time spent idle.
+
+    - name: idle.ticks
+      type: long
+      description: >
+        The amount of CPU time spent idle.
+
+    - name: iowait.pct
+      type: scaled_float
+      format: percent
+      description: >
+        The percentage of CPU time spent in wait (on disk).
+
+    - name: iowait.ticks
+      type: long
+      description: >
+        The amount of CPU time spent in wait (on disk).
+
+    - name: irq.pct
+      type: scaled_float
+      format: percent
+      description: >
+        The percentage of CPU time spent servicing and handling hardware interrupts.
+
+    - name: irq.ticks
+      type: long
+      description: >
+        The amount of CPU time spent servicing and handling hardware interrupts.
+
+    - name: softirq.pct
+      type: scaled_float
+      format: percent
+      description: >
+        The percentage of CPU time spent servicing and handling software interrupts.
+
+    - name: softirq.ticks
+      type: long
+      description: >
+        The amount of CPU time spent servicing and handling software interrupts.
+
+    - name: steal.pct
+      type: scaled_float
+      format: percent
+      description: >
+        The percentage of CPU time spent in involuntary wait by the virtual CPU while the hypervisor
+        was servicing another processor.
+        Available only on Unix.
+
+    - name: steal.ticks
+      type: long
+      description: >
+        The amount of CPU time spent in involuntary wait by the virtual CPU while the hypervisor
+        was servicing another processor.
+        Available only on Unix.
+- name: system.cpu
+  type: group
+  description: >
+    `cpu` contains local CPU stats.
+  release: ga
+  fields:
+    - name: cores
+      type: long
+      description: >
+        The number of CPU cores present on the host. The non-normalized
+        percentages will have a maximum value of `100% * cores`. The
+        normalized percentages already take this value into account and have
+        a maximum value of 100%.
+
+    # Percentages
+    - name: user.pct
+      type: scaled_float
+      format: percent
+      description: >
+        The percentage of CPU time spent in user space. On multi-core systems,
+        you can have percentages that are greater than 100%. For example, if 3
+        cores are at 60% use, then the `system.cpu.user.pct` will be 180%.
+
+    - name: system.pct
+      type: scaled_float
+      format: percent
+      description: >
+        The percentage of CPU time spent in kernel space.
+
+    - name: nice.pct
+      type: scaled_float
+      format: percent
+      description: >
+        The percentage of CPU time spent on low-priority processes.
+
+    - name: idle.pct
+      type: scaled_float
+      format: percent
+      description: >
+        The percentage of CPU time spent idle.
+
+    - name: iowait.pct
+      type: scaled_float
+      format: percent
+      description: >
+        The percentage of CPU time spent in wait (on disk).
+
+    - name: irq.pct
+      type: scaled_float
+      format: percent
+      description: >
+        The percentage of CPU time spent servicing and handling hardware interrupts.
+
+    - name: softirq.pct
+      type: scaled_float
+      format: percent
+      description: >
+        The percentage of CPU time spent servicing and handling software interrupts.
+
+    - name: steal.pct
+      type: scaled_float
+      format: percent
+      description: >
+        The percentage of CPU time spent in involuntary wait by the virtual CPU while the hypervisor
+        was servicing another processor.
+        Available only on Unix.
+
+    - name: total.pct
+      type: scaled_float
+      format: percent
+      description: >
+        The percentage of CPU time spent in states other than Idle and IOWait.
+
+    # Normalized Percentages
+    - name: user.norm.pct
+      type: scaled_float
+      format: percent
+      description: >
+        The percentage of CPU time spent in user space.
+
+    - name: system.norm.pct
+      type: scaled_float
+      format: percent
+      description: >
+        The percentage of CPU time spent in kernel space.
+
+    - name: nice.norm.pct
+      type: scaled_float
+      format: percent
+      description: >
+        The percentage of CPU time spent on low-priority processes.
+
+    - name: idle.norm.pct
+      type: scaled_float
+      format: percent
+      description: >
+        The percentage of CPU time spent idle.
+
+    - name: iowait.norm.pct
+      type: scaled_float
+      format: percent
+      description: >
+        The percentage of CPU time spent in wait (on disk).
+
+    - name: irq.norm.pct
+      type: scaled_float
+      format: percent
+      description: >
+        The percentage of CPU time spent servicing and handling hardware interrupts.
+
+    - name: softirq.norm.pct
+      type: scaled_float
+      format: percent
+      description: >
+        The percentage of CPU time spent servicing and handling software interrupts.
+
+    - name: steal.norm.pct
+      type: scaled_float
+      format: percent
+      description: >
+        The percentage of CPU time spent in involuntary wait by the virtual CPU while the hypervisor
+        was servicing another processor.
+        Available only on Unix.
+
+    - name: total.norm.pct
+      type: scaled_float
+      format: percent
+      description: >
+        The percentage of CPU time in states other than Idle and IOWait, normalised by the number of cores.
+
+
+    # Ticks
+    - name: user.ticks
+      type: long
+      description: >
+        The amount of CPU time spent in user space.
+
+    - name: system.ticks
+      type: long
+      description: >
+        The amount of CPU time spent in kernel space.
+
+    - name: nice.ticks
+      type: long
+      description: >
+        The amount of CPU time spent on low-priority processes.
+
+    - name: idle.ticks
+      type: long
+      description: >
+        The amount of CPU time spent idle.
+
+    - name: iowait.ticks
+      type: long
+      description: >
+        The amount of CPU time spent in wait (on disk).
+
+    - name: irq.ticks
+      type: long
+      description: >
+        The amount of CPU time spent servicing and handling hardware interrupts.
+
+    - name: softirq.ticks
+      type: long
+      description: >
+        The amount of CPU time spent servicing and handling software interrupts.
+
+    - name: steal.ticks
+      type: long
+      description: >
+        The amount of CPU time spent in involuntary wait by the virtual CPU while the hypervisor
+        was servicing another processor.
+        Available only on Unix.
+- name: system.diskio
+  type: group
+  description: >
+    `disk` contains disk IO metrics collected from the operating system.
+  release: ga
+  fields:
+    - name: name
+      type: keyword
+      example: sda1
+      description: >
+        The disk name.
+
+    - name: serial_number
+      type: keyword
+      description: >
+        The disk's serial number. This may not be provided by all operating
+        systems.
+
+    - name: read.count
+      type: long
+      description: >
+        The total number of reads completed successfully.
+
+    - name: write.count
+      type: long
+      description: >
+        The total number of writes completed successfully.
+
+    - name: read.bytes
+      type: long
+      format: bytes
+      description: >
+        The total number of bytes read successfully. On Linux this is
+        the number of sectors read multiplied by an assumed sector size of 512.
+
+    - name: write.bytes
+      type: long
+      format: bytes
+      description: >
+        The total number of bytes written successfully. On Linux this is
+        the number of sectors written multiplied by an assumed sector size of
+        512.
+
+    - name: read.time
+      type: long
+      description: >
+        The total number of milliseconds spent by all reads.
+
+    - name: write.time
+      type: long
+      description: >
+        The total number of milliseconds spent by all writes.
+
+    - name: io.time
+      type: long
+      description: >
+        The total number of of milliseconds spent doing I/Os.
+
+    - name: iostat.read.request.merges_per_sec
+      type: float
+      description: >
+        The number of read requests merged per second that were queued to the device.
+
+    - name: iostat.write.request.merges_per_sec
+      type: float
+      description: >
+        The number of write requests merged per second that were queued to the device.
+
+    - name: iostat.read.request.per_sec
+      type: float
+      description: >
+        The number of read requests that were issued to the device per second
+
+    - name: iostat.write.request.per_sec
+      type: float
+      description: >
+        The number of write requests that were issued to the device per second
+
+    - name: iostat.read.per_sec.bytes
+      type: float
+      description: >
+        The number of Bytes read from the device per second.
+      format: bytes
+
+    - name: iostat.read.await
+      type: float
+      description: >
+        The average time spent for read requests issued to the device to be served.
+
+    - name: iostat.write.per_sec.bytes
+      type: float
+      description: >
+        The number of Bytes write from the device per second.
+      format: bytes
+
+    - name: iostat.write.await
+      type: float
+      description: >
+        The average time spent for write requests issued to the device to be served.
+
+    - name: iostat.request.avg_size
+      type: float
+      description: >
+        The average size (in bytes) of the requests that were issued to the device.
+
+    - name: iostat.queue.avg_size
+      type: float
+      description: >
+        The average queue length of the requests that were issued to the device.
+
+    - name: iostat.await
+      type: float
+      description: >
+        The average time spent for requests issued to the device to be served.
+
+    - name: iostat.service_time
+      type: float
+      description: >
+        The average service time (in milliseconds) for I/O requests that were issued to the device.
+
+    - name: iostat.busy
+      type: float
+      description: >
+        Percentage of CPU time during which I/O requests were issued to the device (bandwidth utilization for the device). Device saturation occurs when this value is close to 100%.
+- name: system.entropy
+  type: group
+  description: >
+    Available system entropy
+  release: ga
+  fields:
+    - name: available_bits
+      type: long
+      description: >
+        The available bits of entropy
+    - name: pct
+      type: scaled_float
+      format: percent
+      description: >
+        The percentage of available entropy, relative to the pool size of 4096
+- name: system.filesystem
+  type: group
+  description: >
+    `filesystem` contains local filesystem stats.
+  release: ga
+  fields:
+    - name: available
+      type: long
+      format: bytes
+      description: >
+        The disk space available to an unprivileged user in bytes.
+    - name: device_name
+      type: keyword
+      description: >
+        The disk name. For example: `/dev/disk1`
+    - name: type
+      type: keyword
+      description: >
+        The disk type. For example: `ext4`
+    - name: mount_point
+      type: keyword
+      description: >
+        The mounting point. For example: `/`
+    - name: files
+      type: long
+      description: >
+        The total number of file nodes in the file system.
+    - name: free
+      type: long
+      format: bytes
+      description: >
+        The disk space available in bytes.
+    - name: free_files
+      type: long
+      description: >
+        The number of free file nodes in the file system.
+    - name: total
+      type: long
+      format: bytes
+      description: >
+        The total disk space in bytes.
+    - name: used.bytes
+      type: long
+      format: bytes
+      description: >
+        The used disk space in bytes.
+    - name: used.pct
+      type: scaled_float
+      format: percent
+      description: >
+        The percentage of used disk space.
+- name: system.fsstat
+  type: group
+  description: >
+    `system.fsstat` contains filesystem metrics aggregated from all mounted
+    filesystems.
+  release: ga
+  fields:
+    - name: count
+      type: long
+      description: Number of file systems found.
+    - name: total_files
+      type: long
+      description: Total number of files.
+    - name: total_size
+      format: bytes
+      type: group
+      description: Nested file system docs.
+      fields:
+        - name: free
+          type: long
+          format: bytes
+          description: >
+            Total free space.
+        - name: used
+          type: long
+          format: bytes
+          description: >
+            Total used space.
+        - name: total
+          type: long
+          format: bytes
+          description: >
+            Total space (used plus free).
+- name: system.load
+  type: group
+  description: >
+    CPU load averages.
+  release: ga
+  fields:
+    - name: "1"
+      type: scaled_float
+      scaling_factor: 100
+      description: >
+        Load average for the last minute.
+    - name: "5"
+      type: scaled_float
+      scaling_factor: 100
+      description: >
+        Load average for the last 5 minutes.
+    - name: "15"
+      type: scaled_float
+      scaling_factor: 100
+      description: >
+        Load average for the last 15 minutes.
+
+    - name: "norm.1"
+      type: scaled_float
+      scaling_factor: 100
+      description: >
+        Load for the last minute divided by the number of cores.
+
+    - name: "norm.5"
+      type: scaled_float
+      scaling_factor: 100
+      description: >
+        Load for the last 5 minutes divided by the number of cores.
+
+    - name: "norm.15"
+      type: scaled_float
+      scaling_factor: 100
+      description: >
+        Load for the last 15 minutes divided by the number of cores.
+
+    - name: "cores"
+      type: long
+      description: >
+        The number of CPU cores present on the host.
+- name: system.memory
+  type: group
+  description: >
+    `memory` contains local memory stats.
+  release: ga
+  fields:
+    - name: total
+      type: long
+      format: bytes
+      description: >
+        Total memory.
+
+    - name: used.bytes
+      type: long
+      format: bytes
+      description: >
+        Used memory.
+
+    - name: free
+      type: long
+      format: bytes
+      description: >
+        The total amount of free memory in bytes. This value does not include memory consumed by system caches and
+        buffers (see system.memory.actual.free).
+
+    - name: used.pct
+      type: scaled_float
+      format: percent
+      description: >
+        The percentage of used memory.
+
+    - name: actual
+      type: group
+      description: >
+        Actual memory used and free.
+      fields:
+
+        - name: used.bytes
+          type: long
+          format: bytes
+          description: >
+            Actual used memory in bytes. It represents the difference between the total and the available memory. The
+            available memory depends on the OS. For more details, please check `system.actual.free`.
+
+        - name: free
+          type: long
+          format: bytes
+          description: >
+            Actual free memory in bytes. It is calculated based on the OS. On Linux it consists of the free memory
+            plus caches and buffers. On OSX it is a sum of free memory and the inactive memory. On Windows, it is equal
+            to `system.memory.free`.
+
+        - name: used.pct
+          type: scaled_float
+          format: percent
+          description: >
+            The percentage of actual used memory.
+
+    - name: swap
+      type: group
+      prefix: "[float]"
+      description: This group contains statistics related to the swap memory usage on the system.
+      fields:
+        - name: total
+          type: long
+          format: bytes
+          description: >
+            Total swap memory.
+
+        - name: used.bytes
+          type: long
+          format: bytes
+          description: >
+            Used swap memory.
+
+        - name: free
+          type: long
+          format: bytes
+          description: >
+            Available swap memory.
+
+        - name: out.pages
+          type: long
+          description: count of pages swapped out
+
+        - name: in.pages
+          type: long
+          description: count of pages swapped in
+
+        - name: readahead.pages
+          type: long
+          description: swap readahead pages
+
+        - name: readahead.cached
+          type: long
+          description: swap readahead cache hits
+
+        - name: used.pct
+          type: scaled_float
+          format: percent
+          description: >
+            The percentage of used swap memory.
+
+    - name: hugepages
+      type: group
+      prefix: "[float]"
+      description: This group contains statistics related to huge pages usage on the system.
+      fields:
+        - name: total
+          type: long
+          format: number
+          description: >
+            Number of huge pages in the pool.
+
+        - name: used.bytes
+          type: long
+          format: bytes
+          description: >
+            Memory used in allocated huge pages.
+
+        - name: used.pct
+          type: long
+          format: percent
+          description: >
+            Percentage of huge pages used.
+
+        - name: free
+          type: long
+          format: number
+          description: >
+            Number of available huge pages in the pool.
+
+        - name: reserved
+          type: long
+          format: number
+          description: >
+            Number of reserved but not allocated huge pages in the pool.
+
+        - name: surplus
+          type: long
+          format: number
+          description: >
+            Number of overcommited huge pages.
+
+        - name: default_size
+          type: long
+          format: bytes
+          description: >
+            Default size for huge pages.
+
+        - name: swap.out
+          type: group
+          description: huge pages swapped out
+          fields:
+            - name: pages
+              type: long
+              description: pages swapped out
+            - name: fallback
+              type: long
+              description: Count of huge pages that must be split before swapout
+- name: system.network
+  type: group
+  description: >
+    `network` contains network IO metrics for a single network interface.
+  release: ga
+  fields:
+    - name: name
+      type: keyword
+      example: eth0
+      description: >
+        The network interface name.
+
+    - name: out.bytes
+      type: long
+      format: bytes
+      description: >
+        The number of bytes sent.
+
+    - name: in.bytes
+      type: long
+      format: bytes
+      description: >
+        The number of bytes received.
+
+    - name: out.packets
+      type: long
+      description: >
+        The number of packets sent.
+
+    - name: in.packets
+      type: long
+      description: >
+        The number or packets received.
+
+    - name: in.errors
+      type: long
+      description: >
+        The number of errors while receiving.
+
+    - name: out.errors
+      type: long
+      description: >
+        The number of errors while sending.
+
+    - name: in.dropped
+      type: long
+      description: >
+        The number of incoming packets that were dropped.
+
+    - name: out.dropped
+      type: long
+      description: >
+        The number of outgoing packets that were dropped. This value is always
+        0 on Darwin and BSD because it is not reported by the operating system.
+- name: system.network_summary
+  type: group
+  release: beta
+  description: >
+    Metrics relating to global network activity
+  fields:
+    - name: ip.*
+      type: object
+      description: >
+        IP counters
+    - name: tcp.*
+      type: object
+      description: >
+        TCP counters
+    - name: udp.*
+      type: object
+      description: >
+        UDP counters
+    - name: udp_lite.*
+      type: object
+      description: >
+        UDP Lite counters
+    - name: icmp.*
+      type: object
+      description: >
+        ICMP counters
+- name: system.process
+  type: group
+  description: >
+    `process` contains process metadata, CPU metrics, and memory metrics.
+  release: ga
+  fields:
+    - name: name
+      type: alias
+      path: process.name
+      migration: true
+    - name: state
+      type: keyword
+      description: >
+        The process state. For example: "running".
+    - name: pid
+      type: alias
+      path: process.pid
+      migration: true
+    - name: ppid
+      type: alias
+      path: process.ppid
+      migration: true
+    - name: pgid
+      type: alias
+      path: process.pgid
+      migration: true
+    - name: cmdline
+      type: keyword
+      description: >
+        The full command-line used to start the process, including the
+        arguments separated by space.
+      ignore_above: 2048
+    - name: username
+      type: alias
+      path: user.name
+      migration: true
+    - name: cwd
+      type: alias
+      path: process.working_directory
+      migration: true
+    - name: env
+      type: object
+      object_type: keyword
+      description: >
+        The environment variables used to start the process. The data is
+        available on FreeBSD, Linux, and OS X.
+    - name: cpu
+      type: group
+      prefix: "[float]"
+      description: CPU-specific statistics per process.
+      fields:
+        - name: user.ticks
+          type: long
+          description: >
+            The amount of CPU time the process spent in user space.
+        - name: total.value
+          type: long
+          description: >
+            The value of CPU usage since starting the process.
+        - name: total.pct
+          type: scaled_float
+          format: percent
+          description: >
+            The percentage of CPU time spent by the process since the last update. Its value is similar to the
+            %CPU value of the process displayed by the top command on Unix systems.
+        - name: total.norm.pct
+          type: scaled_float
+          format: percent
+          description: >
+            The percentage of CPU time spent by the process since the last event.
+            This value is normalized by the number of CPU cores and it ranges
+            from 0 to 100%.
+        - name: system.ticks
+          type: long
+          description: >
+            The amount of CPU time the process spent in kernel space.
+        - name: total.ticks
+          type: long
+          description: >
+            The total CPU time spent by the process.
+        - name: start_time
+          type: date
+          description: >
+            The time when the process was started.
+    - name: memory
+      type: group
+      description: Memory-specific statistics per process.
+      prefix: "[float]"
+      fields:
+        - name: size
+          type: long
+          format: bytes
+          description: >
+            The total virtual memory the process has.
+        - name: rss.bytes
+          type: long
+          format: bytes
+          description: >
+            The Resident Set Size. The amount of memory the process occupied in main memory (RAM).
+        - name: rss.pct
+          type: scaled_float
+          format: percent
+          description: >
+            The percentage of memory the process occupied in main memory (RAM).
+        - name: share
+          type: long
+          format: bytes
+          description: >
+            The shared memory the process uses.
+    - name: fd
+      type: group
+      description: >
+        File descriptor usage metrics. This set of metrics is available for
+        Linux and FreeBSD.
+      prefix: "[float]"
+      fields:
+        - name: open
+          type: long
+          description: The number of file descriptors open by the process.
+        - name: limit.soft
+          type: long
+          description: >
+            The soft limit on the number of file descriptors opened by the
+            process. The soft limit can be changed by the process at any time.
+        - name: limit.hard
+          type: long
+          description: >
+            The hard limit on the number of file descriptors opened by the
+            process. The hard limit can only be raised by root.
+    - name: cgroup
+      type: group
+      description: >
+        Metrics and limits from the cgroup of which the task is a member.
+        cgroup metrics are reported when the process has membership in a
+        non-root cgroup. These metrics are only available on Linux.
+      fields:
+        - name: id
+          type: keyword
+          description: >
+            The ID common to all cgroups associated with this task.
+            If there isn't a common ID used by all cgroups this field will be
+            absent.
+
+        - name: path
+          type: keyword
+          description: >
+            The path to the cgroup relative to the cgroup subsystem's mountpoint.
+            If there isn't a common path used by all cgroups this field will be
+            absent.
+
+        - name: cpu
+          type: group
+          description: >
+            The cpu subsystem schedules CPU access for tasks in the cgroup.
+            Access can be controlled by two separate schedulers, CFS and RT.
+            CFS stands for completely fair scheduler which proportionally
+            divides the CPU time between cgroups based on weight. RT stands for
+            real time scheduler which sets a maximum amount of CPU time that
+            processes in the cgroup can consume during a given period.
+
+          fields:
+            - name: id
+              type: keyword
+              description: ID of the cgroup.
+
+            - name: path
+              type: keyword
+              description: >
+                Path to the cgroup relative to the cgroup subsystem's
+                mountpoint.
+
+            - name: cfs.period.us
+              type: long
+              description: >
+                Period of time in microseconds for how regularly a
+                cgroup's access to CPU resources should be reallocated.
+
+            - name: cfs.quota.us
+              type: long
+              description: >
+                Total amount of time in microseconds for which all
+                tasks in a cgroup can run during one period (as defined by
+                cfs.period.us).
+
+            - name: cfs.shares
+              type: long
+              description: >
+                An integer value that specifies a relative share of CPU time
+                available to the tasks in a cgroup. The value specified in the
+                cpu.shares file must be 2 or higher.
+
+            - name: rt.period.us
+              type: long
+              description: >
+                Period of time in microseconds for how regularly a cgroup's
+                access to CPU resources is reallocated.
+
+            - name: rt.runtime.us
+              type: long
+              description: >
+                Period of time in microseconds for the longest continuous period
+                in which the tasks in a cgroup have access to CPU resources.
+
+            - name: stats.periods
+              type: long
+              description: >
+                Number of period intervals (as specified in cpu.cfs.period.us)
+                that have elapsed.
+
+            - name: stats.throttled.periods
+              type: long
+              description: >
+                Number of times tasks in a cgroup have been throttled (that is,
+                not allowed to run because they have exhausted all of the
+                available time as specified by their quota).
+
+            - name: stats.throttled.ns
+              type: long
+              description: >
+                The total time duration (in nanoseconds) for which tasks in a
+                cgroup have been throttled.
+
+        - name: cpuacct
+          type: group
+          description: CPU accounting metrics.
+          fields:
+            - name: id
+              type: keyword
+              description: ID of the cgroup.
+
+            - name: path
+              type: keyword
+              description: >
+                Path to the cgroup relative to the cgroup subsystem's
+                mountpoint.
+
+            - name: total.ns
+              type: long
+              description: >
+                Total CPU time in nanoseconds consumed by all tasks in the
+                cgroup.
+
+            - name: stats.user.ns
+              type: long
+              description: CPU time consumed by tasks in user mode.
+
+            - name: stats.system.ns
+              type: long
+              description: CPU time consumed by tasks in user (kernel) mode.
+
+            - name: percpu
+              type: object
+              object_type: long
+              description: >
+                CPU time (in nanoseconds) consumed on each CPU by all tasks in
+                this cgroup.
+
+        - name: memory
+          type: group
+          description: Memory limits and metrics.
+          fields:
+            - name: id
+              type: keyword
+              description: ID of the cgroup.
+
+            - name: path
+              type: keyword
+              description: >
+                Path to the cgroup relative to the cgroup subsystem's mountpoint.
+
+            - name: mem.usage.bytes
+              type: long
+              format: bytes
+              description: >
+                Total memory usage by processes in the cgroup (in bytes).
+
+            - name: mem.usage.max.bytes
+              type: long
+              format: bytes
+              description: >
+                The maximum memory used by processes in the cgroup (in bytes).
+
+            - name: mem.limit.bytes
+              type: long
+              format: bytes
+              description: >
+                The maximum amount of user memory in bytes (including file
+                cache) that tasks in the cgroup are allowed to use.
+
+            - name: mem.failures
+              type: long
+              description: >
+                The number of times that the memory limit (mem.limit.bytes) was
+                reached.
+
+            - name: memsw.usage.bytes
+              type: long
+              format: bytes
+              description: >
+                The sum of current memory usage plus swap space used by
+                processes in the cgroup (in bytes).
+
+            - name: memsw.usage.max.bytes
+              type: long
+              format: bytes
+              description: >
+                The maximum amount of memory and swap space used by processes in
+                the cgroup (in bytes).
+
+            - name: memsw.limit.bytes
+              type: long
+              format: bytes
+              description: >
+                The maximum amount for the sum of memory and swap usage
+                that tasks in the cgroup are allowed to use.
+
+            - name: memsw.failures
+              type: long
+              description: >
+                The number of times that the memory plus swap space limit
+                (memsw.limit.bytes) was reached.
+
+            - name: kmem.usage.bytes
+              type: long
+              format: bytes
+              description: >
+                Total kernel memory usage by processes in the cgroup (in bytes).
+
+            - name: kmem.usage.max.bytes
+              type: long
+              format: bytes
+              description: >
+                The maximum kernel memory used by processes in the cgroup (in
+                bytes).
+
+            - name: kmem.limit.bytes
+              type: long
+              format: bytes
+              description: >
+                The maximum amount of kernel memory that tasks in the cgroup are
+                allowed to use.
+
+            - name: kmem.failures
+              type: long
+              description: >
+                The number of times that the memory limit (kmem.limit.bytes) was
+                reached.
+
+            - name: kmem_tcp.usage.bytes
+              type: long
+              format: bytes
+              description: >
+                Total memory usage for TCP buffers in bytes.
+
+            - name: kmem_tcp.usage.max.bytes
+              type: long
+              format: bytes
+              description: >
+                The maximum memory used for TCP buffers by processes in the
+                cgroup (in bytes).
+
+            - name: kmem_tcp.limit.bytes
+              type: long
+              format: bytes
+              description: >
+                The maximum amount of memory for TCP buffers that tasks in the
+                cgroup are allowed to use.
+
+            - name: kmem_tcp.failures
+              type: long
+              description: >
+                The number of times that the memory limit (kmem_tcp.limit.bytes)
+                was reached.
+
+            - name: stats.active_anon.bytes
+              type: long
+              format: bytes
+              description: >
+                Anonymous and swap cache on active least-recently-used (LRU)
+                list, including tmpfs (shmem), in bytes.
+
+            - name: stats.active_file.bytes
+              type: long
+              format: bytes
+              description: File-backed memory on active LRU list, in bytes.
+
+            - name: stats.cache.bytes
+              type: long
+              format: bytes
+              description: Page cache, including tmpfs (shmem), in bytes.
+
+            - name: stats.hierarchical_memory_limit.bytes
+              type: long
+              format: bytes
+              description: >
+                Memory limit for the hierarchy that contains the memory cgroup,
+                in bytes.
+
+            - name: stats.hierarchical_memsw_limit.bytes
+              type: long
+              format: bytes
+              description: >
+                Memory plus swap limit for the hierarchy that contains the
+                memory cgroup, in bytes.
+
+            - name: stats.inactive_anon.bytes
+              type: long
+              format: bytes
+              description: >
+                Anonymous and swap cache on inactive LRU list, including tmpfs
+                (shmem), in bytes
+
+            - name: stats.inactive_file.bytes
+              type: long
+              format: bytes
+              description: >
+                File-backed memory on inactive LRU list, in bytes.
+
+            - name: stats.mapped_file.bytes
+              type: long
+              format: bytes
+              description: >
+                Size of memory-mapped mapped files, including tmpfs (shmem),
+                in bytes.
+
+            - name: stats.page_faults
+              type: long
+              description: >
+                Number of times that a process in the cgroup triggered a page
+                fault.
+
+            - name: stats.major_page_faults
+              type: long
+              description: >
+                Number of times that a process in the cgroup triggered a major
+                fault. "Major" faults happen when the kernel actually has to
+                read the data from disk.
+
+            - name: stats.pages_in
+              type: long
+              description: >
+                Number of pages paged into memory. This is a counter.
+
+            - name: stats.pages_out
+              type: long
+              description: >
+                Number of pages paged out of memory. This is a counter.
+
+            - name: stats.rss.bytes
+              type: long
+              format: bytes
+              description: >
+                Anonymous and swap cache (includes transparent hugepages), not
+                including tmpfs (shmem), in bytes.
+
+            - name: stats.rss_huge.bytes
+              type: long
+              format: bytes
+              description: >
+                Number of bytes of anonymous transparent hugepages.
+
+            - name: stats.swap.bytes
+              type: long
+              format: bytes
+              description: >
+                Swap usage, in bytes.
+
+            - name: stats.unevictable.bytes
+              type: long
+              format: bytes
+              description: >
+                Memory that cannot be reclaimed, in bytes.
+
+        - name: blkio
+          type: group
+          description: Block IO metrics.
+          fields:
+            - name: id
+              type: keyword
+              description: ID of the cgroup.
+
+            - name: path
+              type: keyword
+              description: >
+                Path to the cgroup relative to the cgroup subsystems mountpoint.
+
+            - name: total.bytes
+              type: long
+              format: bytes
+              description: >
+                Total number of bytes transferred to and from all block devices
+                by processes in the cgroup.
+
+            - name: total.ios
+              type: long
+              description: >
+                Total number of I/O operations performed on all devices
+                by processes in the cgroup as seen by the throttling policy.
+- name: system.process.summary
+  title: Process Summary
+  type: group
+  description: >
+    Summary metrics for the processes running on the host.
+  release: ga
+  fields:
+    - name: total
+      type: long
+      description: >
+        Total number of processes on this host.
+    - name: running
+      type: long
+      description: >
+        Number of running processes on this host.
+    - name: idle
+      type: long
+      description: >
+        Number of idle processes on this host.
+    - name: sleeping
+      type: long
+      description: >
+        Number of sleeping processes on this host.
+    - name: stopped
+      type: long
+      description: >
+        Number of stopped processes on this host.
+    - name: zombie
+      type: long
+      description: >
+        Number of zombie processes on this host.
+    - name: dead
+      type: long
+      description: >
+        Number of dead processes on this host. It's very unlikely that it will appear but in some special situations it may happen.
+    - name: unknown
+      type: long
+      description: >
+        Number of processes for which the state couldn't be retrieved or is unknown.
+- name: system.raid
+  type: group
+  description: >
+    raid
+  release: ga
+  fields:
+    - name: name
+      type: keyword
+      description: >
+        Name of the device.
+    - name: status
+      type: keyword
+      description: >
+        activity-state of the device.
+    - name: level
+      type: keyword
+      description: >
+        The raid level of the device
+    - name: sync_action
+      type: keyword
+      description: >
+        Current sync action, if the RAID array is redundant
+    - name: disks.active
+      type: long
+      description: >
+        Number of active disks.
+    - name: disks.total
+      type: long
+      description: >
+        Total number of disks the device consists of.
+    - name: disks.spare
+      type: long
+      description: >
+        Number of spared disks.
+    - name: disks.failed
+      type: long
+      description: >
+        Number of failed disks.
+    - name: disks.states.*
+      type: object
+      object_type: keyword
+      description: >
+        map of raw disk states
+    - name: blocks.total
+      type: long
+      description: >
+        Number of blocks the device holds, in 1024-byte blocks.
+    - name: blocks.synced
+      type: long
+      description: >
+        Number of blocks on the device that are in sync, in 1024-byte blocks.
+- name: system.socket
+  type: group
+  description: >
+    TCP sockets that are active.
+  release: ga
+  fields:
+    - name: direction
+      type: alias
+      path: network.direction
+      migration: true
+
+    - name: family
+      type: alias
+      path: network.type
+      migration: true
+
+    - name: local.ip
+      type: ip
+      example: 192.0.2.1 or 2001:0DB8:ABED:8536::1
+      description: >
+        Local IP address. This can be an IPv4 or IPv6 address.
+
+    - name: local.port
+      type: long
+      example: 22
+      description: >
+        Local port.
+
+    - name: remote.ip
+      type: ip
+      example: 192.0.2.1 or 2001:0DB8:ABED:8536::1
+      description: >
+        Remote IP address. This can be an IPv4 or IPv6 address.
+
+    - name: remote.port
+      type: long
+      example: 22
+      description: >
+        Remote port.
+
+    - name: remote.host
+      type: keyword
+      example: 76-211-117-36.nw.example.com.
+      description: >
+        PTR record associated with the remote IP. It is obtained via reverse
+        IP lookup.
+
+    - name: remote.etld_plus_one
+      type: keyword
+      example: example.com.
+      description: >
+        The effective top-level domain (eTLD) of the remote host plus one more
+        label. For example, the eTLD+1 for "foo.bar.golang.org." is "golang.org.".
+        The data for determining the eTLD comes from an embedded copy of the data
+        from http://publicsuffix.org.
+
+    - name: remote.host_error
+      type: keyword
+      description: >
+        Error describing the cause of the reverse lookup failure.
+
+    - name: process.pid
+      type: alias
+      path: process.pid
+      migration: true
+
+    - name: process.command
+      type: alias
+      path: process.name
+      migration: true
+
+    - name: process.cmdline
+      type: keyword
+      description: >
+        Full command line
+
+    - name: process.exe
+      type: alias
+      path: process.executable
+      migration: true
+
+    - name: user.id
+      type: alias
+      path: user.id
+      migration: true
+
+    - name: user.name
+      type: alias
+      path: user.full_name
+      migration: true
+- name: system.socket.summary
+  title: Socket summary
+  type: group
+  description: >
+    Summary metrics of open sockets in the host system
+  release: ga
+  fields:
+    - name: all
+      type: group
+      description: >
+        All connections
+      fields:
+        - name: count
+          type: integer
+          description: >
+            All open connections
+        - name: listening
+          type: integer
+          description: >
+            All listening ports
+    - name: tcp
+      type: group
+      description: >
+        All TCP connections
+      fields:
+        - name: memory
+          type: integer
+          format: bytes
+          description: >
+            Memory used by TCP sockets in bytes, based on number of allocated pages and system page size. Corresponds to limits set in /proc/sys/net/ipv4/tcp_mem. Only available on Linux.
+        - name: all
+          type: group
+          description: >
+            All TCP connections
+          fields:
+            - name: orphan
+              type: integer
+              description: >
+                A count of all orphaned tcp sockets. Only available on Linux.
+            - name: count
+              type: integer
+              description: >
+                All open TCP connections
+            - name: listening
+              type: integer
+              description: >
+                All TCP listening ports
+            - name: established
+              type: integer
+              description: >
+                Number of established TCP connections
+            - name: close_wait
+              type: integer
+              description: >
+                Number of TCP connections in _close_wait_ state
+            - name: time_wait
+              type: integer
+              description: >
+                Number of TCP connections in _time_wait_ state
+            - name: syn_sent
+              type: integer
+              description: >
+                Number of TCP connections in _syn_sent_ state
+            - name: syn_recv
+              type: integer
+              description: >
+                Number of TCP connections in _syn_recv_ state
+            - name: fin_wait1
+              type: integer
+              description: >
+                Number of TCP connections in _fin_wait1_ state
+            - name: fin_wait2
+              type: integer
+              description: >
+                Number of TCP connections in _fin_wait2_ state
+            - name: last_ack
+              type: integer
+              description: >
+                Number of TCP connections in _last_ack_ state
+            - name: closing
+              type: integer
+              description: >
+                Number of TCP connections in _closing_ state
+    - name: udp
+      type: group
+      description: >
+        All UDP connections
+      fields:
+        - name: memory
+          type: integer
+          format: bytes
+          description: >
+            Memory used by UDP sockets in bytes, based on number of allocated pages and system page size. Corresponds to limits set in /proc/sys/net/ipv4/udp_mem. Only available on Linux.
+        - name: all
+          type: group
+          description: >
+            All UDP connections
+          fields:
+            - name: count
+              type: integer
+              description: >
+                All open UDP connections
+- name: system.uptime
+  type: group
+  description: >
+    `uptime` contains the operating system uptime metric.
+  release: ga
+  fields:
+    - name: duration.ms
+      type: long
+      format: duration
+      input_format: milliseconds
+      description: >
+        The OS uptime in milliseconds.
+- name: system.users
+  type: group
+  release: beta
+  description: >
+    Logged-in user session data
+  fields:
+    - name: id
+      type: keyword
+      description: >
+        The ID of the session
+    - name: seat
+      type: keyword
+      description: >
+        An associated logind seat
+    - name: path
+      type: keyword
+      description: >
+        The DBus object path of the session
+    - name: type
+      type: keyword
+      description: >
+        The type of the user session
+    - name: service
+      type: keyword
+      description: >
+        A session associated with the service
+    - name: remote
+      type: boolean
+      description: >
+        A bool indicating a remote session
+    - name: state
+      type: keyword
+      description: >
+        The current state of the session
+    - name: scope
+      type: keyword
+      description: >
+        The associated systemd scope
+    - name: leader
+      type: long
+      description: >
+        The root PID of the session
+    - name: remote_host
+      type: keyword
+      description: >
+        A remote host address for the session
+
+
+
+
+

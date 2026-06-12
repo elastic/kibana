@@ -1,0 +1,39 @@
+---
+# Define the connection to Elasticsearch
+elasticsearch:
+  installKibanaUser: false
+
+# Define the connection to Kibana
+kibana:
+  host: "http://localhost:5601"
+  username: "elastic"
+  password: "changeme"
+  installAssets: false
+
+indexing:
+  eventsPerCycle: 100
+  dataset: "fake_logs"
+  scenario: "log_drop"
+
+schedule:
+  # Start with good events at 100 rate
+  - template: "good"
+    start: "now-30m"
+    end: "now-5m"
+    eventsPerCycle: 50
+    randomness: 0.1
+  # Create a ramp-up of bad events
+  - template: "good"
+    start: "now-5m"
+    end: "now+5m"
+    eventsPerCycle:
+      start: 50
+      end: 100
+      method: "linear"
+    randomness: 0.1
+  # Drop to very little good events
+  - template: "good"
+    start: "now+5m"
+    end: false
+    eventsPerCycle: 10
+    randomness: 0.1

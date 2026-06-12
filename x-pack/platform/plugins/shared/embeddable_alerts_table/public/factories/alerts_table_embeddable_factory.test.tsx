@@ -1,0 +1,215 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+// Write a test that verifies that the `AlertsTableEmbeddable` component renders the `AlertsTable` component with the correct props.
+
+import React from 'react';
+import { Subject } from 'rxjs';
+import { act, render, waitFor } from '@testing-library/react';
+import type { EmbeddableAlertsTablePublicStartDependencies } from '../types';
+import { coreMock } from '@kbn/core/public/mocks';
+import { getMockPresentationContainer } from '@kbn/presentation-publishing/interfaces/containers/mocks';
+import { EmbeddableAlertsTable } from '../components/embeddable_alerts_table';
+import { getAlertsTableEmbeddableFactory } from './alerts_table_embeddable_factory';
+import { PERSISTED_TABLE_CONFIG_KEY_PREFIX } from '../constants';
+import type { InternalRuleType } from '@kbn/response-ops-rules-apis/apis/get_internal_rule_types';
+import { getInternalRuleTypes } from '@kbn/response-ops-rules-apis/apis/get_internal_rule_types';
+
+const core = coreMock.createStart();
+const mockPresentationContainer = getMockPresentationContainer();
+jest.mock('../components/embeddable_alerts_table');
+const mockEmbeddableAlertsTable = jest.mocked(EmbeddableAlertsTable).mockReturnValue(<div />);
+const mockGetInternalRuleTypes = jest.mocked(getInternalRuleTypes);
+jest.mock('@kbn/response-ops-rules-apis/apis/get_internal_rule_types');
+mockGetInternalRuleTypes.mockResolvedValue([
+  { solution: 'observability' } as unknown as InternalRuleType,
+]);
+const mockRemoveLocalStorageItem = jest.fn();
+Object.defineProperty(window, 'localStorage', {
+  value: {
+    removeItem: mockRemoveLocalStorageItem,
+  },
+  writable: true,
+});
+
+const UUID = 'test-uuid';
+const TABLE_ID = `${PERSISTED_TABLE_CONFIG_KEY_PREFIX}-${UUID}`;
+
+describe('getEmbeddableAlertsTableFactory', () => {
+  const factory = getAlertsTableEmbeddableFactory(
+    core,
+    {} as EmbeddableAlertsTablePublicStartDependencies
+  );
+  const embeddableParams: Parameters<typeof factory.buildEmbeddable>[0] = {
+    initializeDrilldownsManager: jest.fn(),
+    initialState: {
+      time_range: {
+        from: '2025-01-01T00:00:00.000Z',
+        to: '2025-01-01T01:00:00.000Z',
+      },
+      title: 'Test embeddable alerts table',
+      tableConfig: {
+        solution: 'observability',
+        query: {
+          type: 'alertsFilters',
+          filters: [{ filter: {} }],
+        },
+      },
+    },
+    finalizeApi: (apiRegistration) => ({
+      ...(apiRegistration as any),
+      parentApi: mockPresentationContainer,
+    }),
+    uuid: UUID,
+    parentApi: {} as any,
+  };
+
+  beforeEach(() => {
+    mockEmbeddableAlertsTable.mockClear();
+  });
+
+  it('should render AlertsTable with the correct props', async () => {
+    const { Component, api } = await factory.buildEmbeddable(embeddableParams);
+
+    expect(api.isEditingEnabled()).toBeTruthy();
+    render(<Component />);
+    expect(mockEmbeddableAlertsTable).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: TABLE_ID,
+        timeRange: {
+          from: '2025-01-01T00:00:00.000Z',
+          to: '2025-01-01T01:00:00.000Z',
+        },
+        solution: 'observability',
+        query: { type: 'alertsFilters', filters: [{ filter: {} }] },
+      }),
+      {}
+    );
+  });
+
+  it("should disable editing when the user cannot access any rule type from the panel's solution", async () => {
+    mockGetInternalRuleTypes.mockResolvedValueOnce([]);
+    const { api } = await factory.buildEmbeddable(embeddableParams);
+
+    expect(api.isEditingEnabled()).toBeFalsy();
+  });
+
+  it('should restore the saved query after a user edits the panel config and resets changes', async () => {
+    const { Component, api } = await factory.buildEmbeddable(embeddableParams);
+    const updatedQuery = {
+      type: 'alertsFilters' as const,
+      filters: [{ filter: { field: 'kibana.alert.rule.name', value: 'updated' } }],
+    };
+
+    render(<Component />);
+
+    // simulate the user applying a new query to the panel
+    await act(async () => {
+      await api.applySerializedState({
+        ...embeddableParams.initialState,
+        tableConfig: {
+          solution: 'observability',
+          query: updatedQuery,
+        },
+      });
+    });
+
+    await waitFor(() => {
+      expect(mockEmbeddableAlertsTable).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          query: updatedQuery,
+        }),
+        {}
+      );
+    });
+
+    // simulate the user resetting the changes
+    await act(async () => {
+      await api.applySerializedState(embeddableParams.initialState);
+    });
+
+    await waitFor(() => {
+      expect(mockEmbeddableAlertsTable).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          query: embeddableParams.initialState.tableConfig.query,
+        }),
+        {}
+      );
+    });
+  });
+
+  it('should set `lastReloadRequestTime` when the dashboard triggers a reload', async () => {
+    const reload$ = new Subject<void>();
+    const parentApi = { ...getMockPresentationContainer(), reload$ };
+    const dateNowSpy = jest.spyOn(Date, 'now').mockReturnValue(987654321);
+
+    const { Component } = await factory.buildEmbeddable({
+      ...embeddableParams,
+      finalizeApi: (apiRegistration) => ({
+        ...(apiRegistration as any),
+        parentApi,
+      }),
+    });
+
+    // Render and flush the initial async fetch-context emission within `act`
+    await act(async () => {
+      render(<Component />);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    expect(mockEmbeddableAlertsTable).toHaveBeenCalled();
+    // No reload has been requested yet, so the table should not have a reload timestamp
+    expect(mockEmbeddableAlertsTable.mock.calls.at(-1)?.[0].lastReloadRequestTime).toBeUndefined();
+
+    // The fetch context pipeline resolves the reload asynchronously, so flush microtasks
+    // within `act` to apply the resulting state update without React warnings.
+    await act(async () => {
+      reload$.next();
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    await waitFor(() => {
+      expect(mockEmbeddableAlertsTable.mock.calls.at(-1)?.[0].lastReloadRequestTime).toBe(
+        987654321
+      );
+    });
+
+    dateNowSpy.mockRestore();
+  });
+
+  it('should propagate the table loading state to the `dataLoading$` panel observable', async () => {
+    const { Component, api } = await factory.buildEmbeddable(embeddableParams);
+
+    // Render and flush the initial async fetch-context emission within `act`
+    await act(async () => {
+      render(<Component />);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    expect(mockEmbeddableAlertsTable).toHaveBeenCalled();
+
+    const props = mockEmbeddableAlertsTable.mock.calls.at(-1)?.[0];
+    expect(props?.onLoadingChange).toBeDefined();
+
+    let latestLoading: boolean | undefined;
+    const subscription = api.dataLoading$.subscribe((value) => {
+      latestLoading = value;
+    });
+
+    act(() => {
+      props?.onLoadingChange?.(false);
+    });
+    expect(latestLoading).toBe(false);
+
+    act(() => {
+      props?.onLoadingChange?.(true);
+    });
+    expect(latestLoading).toBe(true);
+
+    subscription.unsubscribe();
+  });
+});

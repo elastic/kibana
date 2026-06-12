@@ -1,0 +1,16 @@
+{
+  "attributes": {
+    "fieldAttrs": "{\"referer\":{\"customLabel\":\"Referer custom\"}}",
+    "fields": "[]",
+    "timeFieldName": "@timestamp",
+    "title": "ff959d40-b880-11e8-a6d9-e546fe2bba5f"
+  },
+  "coreMigrationVersion": "8.4.0",
+  "id": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+  "migrationVersion": {
+    "index-pattern": "8.0.0"
+  },
+  "references": [],
+  "type": "index-pattern",
+  "version": "WzQsMV0="
+}

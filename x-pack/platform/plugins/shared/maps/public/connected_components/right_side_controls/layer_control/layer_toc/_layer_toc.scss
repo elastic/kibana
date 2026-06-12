@@ -1,0 +1,15 @@
+.mapLayerToc-droppable-dropNotAllowed * {
+  cursor: not-allowed !important;
+}
+
+.mapLayerToc-droppable-isCombining * {
+  cursor: alias !important;
+}
+
+.mapLayerToc-droppable-isCombining {
+  background-color: $euiColorEmptyShade !important;
+}
+
+.mapLayerToc-droppable-isDragging * {
+  cursor: ns-resize !important;
+}

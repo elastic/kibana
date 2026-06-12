@@ -1,0 +1,38 @@
+{
+  "ml.explain_data_frame_analytics": {
+    "data_autocomplete_rules": {
+      "data_frame_analytics_config": {
+        "source": {
+          "index": { "__one_of": ["SOURCE_INDEX_NAME", []] },
+          "query": {}
+        },
+        "dest": {
+          "index": "",
+          "results_field": ""
+        },
+        "analysis": {
+          "outlier_detection": {
+            "n_neighbors": 1,
+            "method": {"__one_of": ["lof", "ldof", "distance_knn_nn", "distance_knn"]},
+            "feature_influence_threshold": 1.0
+          }
+        },
+        "analyzed_fields": {
+          "__one_of": [
+            "FIELD_NAME",
+            [],
+            {
+              "includes": {
+                "__one_of": ["FIELD_NAME", []]
+              },
+              "excludes": {
+                "__one_of": ["FIELD_NAME", []]
+              }
+            }
+          ]
+        },
+        "model_memory_limit": ""
+      }
+    }
+  }
+}

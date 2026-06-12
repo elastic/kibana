@@ -1,0 +1,23 @@
+{
+  "security.suggest_user_profiles": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "data": []
+    },
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "patterns": [
+      "_security/profile/_suggest"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-suggest-user-profiles",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}

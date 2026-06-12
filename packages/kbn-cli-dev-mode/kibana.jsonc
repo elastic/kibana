@@ -1,0 +1,8 @@
+{
+  "type": "shared-server",
+  "id": "@kbn/cli-dev-mode",
+  "owner": "@elastic/kibana-operations",
+  "group": "platform",
+  "visibility": "private",
+  "devOnly": true
+}

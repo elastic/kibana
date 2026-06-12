@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`validateNodeConnections rejects numbers larger than MaxValue 1`] = `
+<Memo(MemoizedFormattedMessage)
+  defaultMessage="This number must be equal or less than {maxValue}."
+  id="xpack.remoteClusters.form.errors.maxValue"
+  values={
+    Object {
+      "maxValue": 2147483647,
+    }
+  }
+/>
+`;

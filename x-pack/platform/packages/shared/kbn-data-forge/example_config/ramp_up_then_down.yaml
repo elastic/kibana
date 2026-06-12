@@ -1,0 +1,59 @@
+---
+elasticsearch:
+  installKibanaUser: false
+
+kibana:
+  installAssets: false
+
+indexing:
+  dataset: "fake_stack"
+  eventsPerCycle: 100
+
+schedule:
+  # Ramp up
+  - template: "good"
+    start: "now"
+    end: "now+60m"
+    eventsPerCycle:
+      start: 100
+      end: 1
+      method: 'linear'
+    randomness: 0.1
+  - template: "bad"
+    start: "now"
+    end: "now+60m"
+    eventsPerCycle:
+      start: 1
+      end: 100
+      method: 'linear'
+    randomness: 0.1
+  # Level off
+  - template: "bad"
+    start: "now+60m"
+    end: "now+90m"
+    eventsPerCycle: 100
+    randomness: 0.1
+  # Ramp down
+  - template: "good"
+    start: "now+90m"
+    end: "now+150m"
+    eventsPerCycle:
+      start: 1
+      end: 100
+      method: 'linear'
+    randomness: 0.1
+  - template: "bad"
+    start: "now+90m"
+    end: "now+150m"
+    eventsPerCycle:
+      start: 100
+      end: 1
+      method: 'linear'
+    randomness: 0.1
+  # Back to normal
+  - template: "good"
+    start: "now+150m"
+    end: "now+210m"
+    eventsPerCycle: 100
+    randomness: 0.1
+

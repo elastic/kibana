@@ -1,0 +1,118 @@
+# Shared UX Packages
+
+This directory contains directories of packages of shared components and other code for use in Kibana solutions.
+
+## How to use these components
+
+Each package exports one or more components that can be consumed.
+
+### Lazy by default
+
+All components are exported to be lazily-loaded with a default `React.Suspense` default most appropriate to its nature.
+
+If a solution needs to alter the `React.Suspense` behavior, (e.g. a different "loading" component), one can import the `Lazy[ComponentName]` version and surround it with a custom `React.Suspense` component.
+
+### "Pure" and "Connected" components
+
+If a package contains a component with functionality that relies on a Kibana core or plugin dependency, there are two components exported: a `pure` component and a `connected` component.
+
+__Pure__ components:
+- are focused on how a component looks and behaves;
+- have their props and handlers exposed as simple types;
+- have no logic specific to Kibana.
+
+__Connected__ components, by contrast:
+- *compose* their pure counterparts;
+- rely on Kibana core and plugin dependencies to provide Kibana-specific logic;
+- require a `ContextProvider` packaged with the component to provide stateful services from a start contract.
+
+For example, the `ExitFullScreenButton` "pure" component is a button that is styled with the appropriate translated text.  It is simple and without dependency.
+
+The "connected" component *composes* that pure component and:
+- applies EUI theme state;
+- uses the `coreStart.chrome.setIsVisible` API to change the full screen state `onClick`;
+- applies `emotion` styles to position the button in the window.
+
+### Connected component providers
+
+Connected components are accompanied by a `Provider` which is intended to provide their external services.  We typically provide two: one that abstracts away the dependency into a simplified set of functions, and one that maps to the intended dependency directly.
+
+For example, the `ExitFullScreenButton` relies on the `coreStart.chrome.setIsVisible` API to interact with the full screen state.  The package contains two providers.
+
+The `ExitFullScreenButtonProvider` simply expects a single function, `setIsFullScreen`.  This pattern is useful for more complicated components that may rely on a number of dependencies:
+
+```
+<ExitFullScreenButtonProvider setIsFullScreen={...}>
+  <ExitFullScreenButton />
+</ExitFullScreenButtonProvider>
+```
+
+The `ExitFullScreenButtonKibanaProvider` creates a facsimile of the `coreStart` contract type, containing only the portions it expects to use.  This is a kind of "syntactic-sugar-workaround" to the fact plugin start contracts are not typically available to packages:
+
+```
+<ExitFullScreenButtonKibanaProvider coreStart={...}>
+  <ExitFullScreenButton />
+</ExitFullScreenButtonProvider>
+```
+
+Plugins can use either of these providers in their plugin at either the root of their plugin application or at any level of their React tree, wherever it makes sense.  Component compositions can do the same.  Either Provider can be used, depending on the situation.
+
+## How can I contribute a component?
+
+*__Yes, please!__ :elasticheart:*
+
+The easiest way to contribute a shared component to Kibana is to follow our pattern and create a single package containing that contribution.  You can use the `generate` script to create a new boilerplate package.
+
+> More detail on this is coming soon.  Contact the Shared UX team for more information.
+
+## How this collection is organized
+
+Typically, the `/packages` directory contains a flat list of packages, where each directory matches the name of the package.  Given that we expect to create a large number of packages, we're going to organize them into a loose tree structure:
+
+```
+- packages
+  - shared-ux
+    - button
+      - exit_full_screen
+    - [component type]
+      - baz
+      - qux
+    - [subject matter]
+      - foo
+      - bar
+```
+
+This structure should then map to the name of the package:
+
+```
+- @kbn/shared-ux-button-exit-full-screen
+- @kbn/shared-ux-[subject matter]-[foo]
+- @kbn/shared-ux-[subject matter]-[bar]
+- @kbn/shared-ux-[component-type]-[baz]
+- @kbn/shared-ux-[component-type]-[qux]
+```
+
+## Why?
+
+When we started exploring how to effectively share code between Kibana solutions, we realized-- admittedly through some trial and error-- that the usual ways in which we share code between plugins wasn't going to work.
+
+### Why not a plugin?
+
+First, with each component that we create, those components inevitably begin to depend on other plugins.  Once our plugin depends on another, that plugin then becomes unable to use Shared UX components without creating a circular dependency.
+
+Second, the components, while useful to a plugin, are not actually dependent on the *plugin lifecycle*.  They are stateless.  Containing-- restricting-- them to a plugin lifecycle adds unnecessary complexity.
+
+So we opted to organize our code in packages.
+
+### Why not a single package of components?
+
+We started that way, and quickly ran into the "`lodash` bundle problem": containing all of our components in one package (and all of our services in another) meant that any plugin using even one component would inherit *all* of them... even if they weren't used.  Bundle sizes would increase dramatically, as well as build times: any minor change would cascade through the entire monorepo.
+
+Therefore we've opted to create a package for each component.
+
+### How do your components share code?
+
+At present, *they don't*.  Some utility code is shared, but this is code that should change very rarely, at most.
+
+But that doesn't mean they cannot be *composed* together.  `ComponentA` can certainly compose `ComponentB` and `ComponentC`.  What's great is the dependencies become very clear, top-down, and reflect the granular nature of each component.
+

@@ -1,0 +1,276 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { Readable } from 'stream';
+import { ActionsResponseContentLengthLimitError } from './actions_response_content_length_limit_error';
+import { formatBytes, parseByteSize, ResponseSizeLimitError, safeOutputSize } from './errors';
+
+describe('formatBytes', () => {
+  it('should format 0 bytes', () => {
+    expect(formatBytes(0)).toBe('0 B');
+  });
+
+  it('should format bytes', () => {
+    expect(formatBytes(512)).toBe('512 B');
+  });
+
+  it('should format kilobytes', () => {
+    expect(formatBytes(1024)).toBe('1 KB');
+    expect(formatBytes(1536)).toBe('1.5 KB');
+  });
+
+  it('should format megabytes', () => {
+    expect(formatBytes(10 * 1024 * 1024)).toBe('10 MB');
+    expect(formatBytes(15.5 * 1024 * 1024)).toBe('15.5 MB');
+  });
+
+  it('should format gigabytes', () => {
+    expect(formatBytes(1024 * 1024 * 1024)).toBe('1 GB');
+  });
+});
+
+describe('parseByteSize', () => {
+  it('should parse bytes', () => {
+    expect(parseByteSize('100b')).toBe(100);
+    expect(parseByteSize('100B')).toBe(100);
+  });
+
+  it('should parse kilobytes', () => {
+    expect(parseByteSize('500kb')).toBe(500 * 1024);
+    expect(parseByteSize('500KB')).toBe(500 * 1024);
+  });
+
+  it('should parse megabytes', () => {
+    expect(parseByteSize('10mb')).toBe(10 * 1024 * 1024);
+    expect(parseByteSize('15MB')).toBe(15 * 1024 * 1024);
+  });
+
+  it('should parse gigabytes', () => {
+    expect(parseByteSize('1gb')).toBe(1024 * 1024 * 1024);
+  });
+
+  it('should accept raw numbers', () => {
+    expect(parseByteSize(12345)).toBe(12345);
+  });
+
+  it('should throw on invalid strings', () => {
+    expect(() => parseByteSize('invalid')).toThrow('Invalid byte size string');
+    expect(() => parseByteSize('10')).toThrow('Invalid byte size string');
+    expect(() => parseByteSize('10tb')).toThrow('Invalid byte size string');
+    expect(() => parseByteSize('')).toThrow('Invalid byte size string');
+  });
+});
+
+describe('safeOutputSize', () => {
+  it('should return size for a normal object', () => {
+    const obj = { key: 'value', nested: { num: 42 } };
+    const expected = Buffer.byteLength(JSON.stringify(obj), 'utf8');
+    expect(safeOutputSize(obj)).toBe(expected);
+  });
+
+  it('should return size for a string', () => {
+    expect(safeOutputSize('hello')).toBe(7); // includes quotes: "hello"
+  });
+
+  it('should return a positive value for a Readable stream (serializable as object)', () => {
+    // Note: Readable streams are technically JSON-serializable (they have enumerable properties).
+    // The base class size check still catches these if they exceed the limit.
+    // Non-serializable values (circular refs, BigInt) are the ones that return -1.
+    const stream = new Readable({ read() {} });
+    expect(safeOutputSize(stream)).toBeGreaterThan(0);
+  });
+
+  it('should return null for circular references', () => {
+    const obj: any = { a: 1 };
+    obj.self = obj;
+    expect(safeOutputSize(obj)).toBeNull();
+  });
+
+  it('should return null for BigInt (non-serializable)', () => {
+    expect(safeOutputSize({ big: BigInt(1) })).toBeNull();
+  });
+
+  it('should return size for null', () => {
+    expect(safeOutputSize(null)).toBe(4); // "null"
+  });
+
+  it('should return size for arrays', () => {
+    const arr = [1, 2, 3];
+    expect(safeOutputSize(arr)).toBe(Buffer.byteLength('[1,2,3]', 'utf8'));
+  });
+
+  it('should return raw byteLength for Buffer without JSON amplification', () => {
+    const buf = Buffer.alloc(3000);
+    buf.fill(0xff);
+    expect(safeOutputSize(buf)).toBe(3000);
+    // JSON.stringify would produce ~12KB+ for a 3KB buffer; ensure we don't use that
+    const jsonSize = Buffer.byteLength(JSON.stringify(buf), 'utf8');
+    expect(jsonSize).toBeGreaterThan(3000);
+    expect(safeOutputSize(buf)).toBeLessThan(jsonSize);
+  });
+
+  it('should return 0 for an empty Buffer', () => {
+    expect(safeOutputSize(Buffer.alloc(0))).toBe(0);
+  });
+});
+
+describe('ResponseSizeLimitError', () => {
+  it('should create an error with the correct type and message', () => {
+    const error = new ResponseSizeLimitError(1024, 'my_step');
+    expect(error.type).toBe('StepSizeLimitExceeded');
+    expect(error.message).toContain('my_step');
+    expect(error.message).toContain('1 KB');
+    expect(error.details?.limitBytes).toBe(1024);
+  });
+
+  it('should include limit in message', () => {
+    const error = new ResponseSizeLimitError(10 * 1024 * 1024, 'es_step');
+    expect(error.message).toContain('10 MB');
+    expect(error.message).toContain('exceeded the');
+    expect(error.details?.limitBytes).toBe(10 * 1024 * 1024);
+  });
+
+  it('should include actual output size', () => {
+    const error = new ResponseSizeLimitError(10 * 1024 * 1024, 'download_file', {
+      actualBytes: 12 * 1024 * 1024,
+    });
+
+    expect(error.message).toContain('Actual serialized output size was 12 MB');
+    expect(error.message).toContain("Set 'max-step-size' to at least 12 MB");
+    expect(error.details).toEqual({
+      limitBytes: 10 * 1024 * 1024,
+      actualBytes: 12 * 1024 * 1024,
+      suggestedLimitBytes: 12 * 1024 * 1024,
+    });
+  });
+
+  it('should include advertised response content length when available', () => {
+    const error = new ResponseSizeLimitError(10 * 1024 * 1024, 'download_file', {
+      contentLengthBytes: 12 * 1024 * 1024,
+    });
+
+    expect(error.message).toContain('advertised a content length of 12 MB');
+    expect(error.message).toContain("Set 'max-step-size' to at least 12 MB");
+    expect(error.details).toEqual({
+      limitBytes: 10 * 1024 * 1024,
+      contentLengthBytes: 12 * 1024 * 1024,
+      suggestedLimitBytes: 12 * 1024 * 1024,
+    });
+  });
+
+  it('should prefer estimated output size for max-step-size suggestions', () => {
+    const error = new ResponseSizeLimitError(10 * 1024 * 1024, 'download_file', {
+      contentLengthBytes: 12 * 1024 * 1024,
+      estimatedOutputBytes: 16 * 1024 * 1024,
+    });
+
+    expect(error.message).toContain('advertised a content length of 12 MB');
+    expect(error.message).toContain('Estimated step output size is 16 MB');
+    expect(error.message).toContain("Set 'max-step-size' to at least 16 MB");
+    expect(error.details).toEqual({
+      limitBytes: 10 * 1024 * 1024,
+      contentLengthBytes: 12 * 1024 * 1024,
+      estimatedOutputBytes: 16 * 1024 * 1024,
+      suggestedLimitBytes: 16 * 1024 * 1024,
+    });
+  });
+});
+
+describe('ActionsResponseContentLengthLimitError', () => {
+  it('should identify the actions response content length config as the source', () => {
+    const error = new ActionsResponseContentLengthLimitError('download_file', {
+      limitBytes: 1024 * 1024,
+    });
+
+    expect(error.type).toBe('ActionsResponseContentLengthExceeded');
+    expect(error.message).toContain('download_file');
+    expect(error.message).toContain('1 MB');
+    expect(error.message).toContain('xpack.actions.maxResponseContentLength');
+    expect(error.message).toContain('max-step-size');
+    expect(error.message).not.toContain('administrator');
+    expect(error.details).toEqual({
+      configKey: 'xpack.actions.maxResponseContentLength',
+      limitBytes: 1024 * 1024,
+    });
+  });
+
+  it('should include advertised response content length when available', () => {
+    const error = new ActionsResponseContentLengthLimitError('download_file', {
+      limitBytes: 1024 * 1024,
+      contentLengthBytes: 10 * 1024 * 1024,
+    });
+
+    expect(error.message).toContain('advertised a content length of 10 MB');
+    expect(error.message).toContain(
+      'Increase "xpack.actions.maxResponseContentLength" to at least 10 MB'
+    );
+    expect(error.message).toContain('Increasing "max-step-size" will not change this limit');
+    expect(error.details).toEqual({
+      configKey: 'xpack.actions.maxResponseContentLength',
+      limitBytes: 1024 * 1024,
+      contentLengthBytes: 10 * 1024 * 1024,
+      suggestedLimitBytes: 10 * 1024 * 1024,
+    });
+  });
+
+  it('should suggest max-step-size when the connector can override the Actions limit', () => {
+    const error = new ActionsResponseContentLengthLimitError('download_file', {
+      limitBytes: 1024 * 1024,
+      canOverrideWithMaxStepSize: true,
+    });
+
+    expect(error.message).toContain('exceeded the current Actions HTTP response limit');
+    expect(error.message).toContain("Set a larger 'max-step-size' on this step");
+    expect(error.message).toContain('to raise both the workflow output limit');
+    expect(error.message).not.toContain('Increasing "max-step-size" will not change this limit');
+    expect(error.details).toEqual({
+      configKey: 'xpack.actions.maxResponseContentLength',
+      limitBytes: 1024 * 1024,
+    });
+  });
+
+  it('should suggest an exact max-step-size when response content length is available', () => {
+    const error = new ActionsResponseContentLengthLimitError('download_file', {
+      limitBytes: 1024 * 1024,
+      contentLengthBytes: 10 * 1024 * 1024,
+      canOverrideWithMaxStepSize: true,
+    });
+
+    expect(error.message).toContain("Set 'max-step-size' to at least 10 MB on this step");
+    expect(error.message).toContain('to raise both the workflow output limit');
+    expect(error.message).not.toContain('Increasing "max-step-size" will not change this limit');
+    expect(error.details).toEqual({
+      configKey: 'xpack.actions.maxResponseContentLength',
+      limitBytes: 1024 * 1024,
+      contentLengthBytes: 10 * 1024 * 1024,
+      suggestedLimitBytes: 10 * 1024 * 1024,
+    });
+  });
+
+  it('should prefer estimated output size for max-step-size suggestions', () => {
+    const error = new ActionsResponseContentLengthLimitError('download_file', {
+      limitBytes: 1024 * 1024,
+      contentLengthBytes: 10 * 1024 * 1024,
+      estimatedOutputBytes: 14 * 1024 * 1024,
+      canOverrideWithMaxStepSize: true,
+    });
+
+    expect(error.message).toContain('advertised a content length of 10 MB');
+    expect(error.message).toContain('Estimated stored step output size is 14 MB');
+    expect(error.message).toContain("Set 'max-step-size' to at least 14 MB on this step");
+    expect(error.message).toContain('to raise both the workflow output limit');
+    expect(error.details).toEqual({
+      configKey: 'xpack.actions.maxResponseContentLength',
+      limitBytes: 1024 * 1024,
+      contentLengthBytes: 10 * 1024 * 1024,
+      estimatedOutputBytes: 14 * 1024 * 1024,
+      suggestedLimitBytes: 14 * 1024 * 1024,
+    });
+  });
+});

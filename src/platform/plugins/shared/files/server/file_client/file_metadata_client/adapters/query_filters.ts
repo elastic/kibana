@@ -1,0 +1,91 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { pipe, forEach } from 'lodash/fp';
+import type { KueryNode } from '@kbn/es-query';
+import { nodeBuilder, nodeTypes } from '@kbn/es-query';
+
+import { getFlattenedObject } from '@kbn/std';
+
+import type { FileMetadata, FileStatus } from '../../../../common/types';
+import type { FindFileArgs } from '../../../file_service';
+
+const deletedStatus: FileStatus = 'DELETED';
+
+export function filterDeletedFiles({ attrPrefix }: { attrPrefix: string }): KueryNode {
+  return nodeTypes.function.buildNode('not', nodeBuilder.is(`${attrPrefix}.Status`, deletedStatus));
+}
+
+export function filterArgsToKuery({
+  extension,
+  mimeType,
+  kind,
+  kindToExclude,
+  meta,
+  name,
+  status,
+  user,
+  attrPrefix = '',
+}: Omit<FindFileArgs, 'page' | 'perPage'> & { attrPrefix?: string }): KueryNode {
+  const kueryExpressions: KueryNode[] = [filterDeletedFiles({ attrPrefix })];
+
+  const addFilters = (
+    fieldName: keyof FileMetadata | string,
+    values: string[] = [],
+    isWildcard = false
+  ): void => {
+    if (values.length) {
+      const orExpressions = values
+        .filter(Boolean)
+        .map((value) =>
+          nodeBuilder.is(
+            `${attrPrefix}.${fieldName}`,
+            isWildcard ? nodeTypes.wildcard.buildNode(value) : value
+          )
+        );
+      kueryExpressions.push(nodeBuilder.or(orExpressions));
+    }
+  };
+
+  const addExcludeFilters = (fieldName: keyof FileMetadata | string, values: string[] = []) => {
+    if (values.length) {
+      const andExpressions = values
+        .filter(Boolean)
+        .map((value) =>
+          nodeTypes.function.buildNode('not', nodeBuilder.is(`${attrPrefix}.${fieldName}`, value))
+        );
+      kueryExpressions.push(nodeBuilder.and(andExpressions));
+    }
+  };
+
+  addFilters('name', name, true);
+  addFilters('FileKind', kind);
+  addFilters('Status', status);
+  addFilters('extension', extension);
+  addFilters('mime_type', mimeType);
+  addFilters('user.id', user);
+  addExcludeFilters('FileKind', kindToExclude);
+
+  if (meta) {
+    const addMetaFilters = pipe(
+      getFlattenedObject,
+      Object.entries,
+      forEach(([fieldName, value]) => {
+        addFilters(
+          `Meta.${fieldName}` as keyof FileMetadata,
+          Array.isArray(value) ? value : [value],
+          true
+        );
+      })
+    );
+    addMetaFilters(meta);
+  }
+
+  return nodeBuilder.and(kueryExpressions);
+}

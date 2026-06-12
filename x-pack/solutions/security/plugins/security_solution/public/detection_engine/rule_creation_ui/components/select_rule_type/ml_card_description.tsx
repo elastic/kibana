@@ -1,0 +1,75 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiBadge, EuiLink, EuiSpacer } from '@elastic/eui';
+import styled from 'styled-components';
+import React, { useMemo } from 'react';
+
+import { useKibana } from '../../../../common/lib/kibana/use_kibana';
+import { ML_CPS_SUPPORT_COMING_SOON, ML_TYPE_DESCRIPTION } from './translations';
+
+interface MlCardDescriptionProps {
+  hasValidLicense?: boolean;
+}
+
+const SmallText = styled.span`
+  font-size: ${({ theme }) => theme.eui.euiFontSizeS};
+`;
+
+const MlCardDescriptionComponent: React.FC<MlCardDescriptionProps> = ({
+  hasValidLicense = false,
+}) => {
+  const {
+    services: { cps },
+  } = useKibana();
+  const isCpsEnabled = Boolean(cps?.cpsManager && cps.cpsManager.getTotalProjectCount() > 1);
+
+  const description = useMemo(
+    () => (
+      <>
+        {isCpsEnabled ? (
+          <>
+            <EuiBadge color="primary">{ML_CPS_SUPPORT_COMING_SOON}</EuiBadge>
+            <EuiSpacer size="s" />
+          </>
+        ) : null}
+        {ML_TYPE_DESCRIPTION}
+      </>
+    ),
+    [isCpsEnabled]
+  );
+
+  return (
+    <SmallText>
+      {hasValidLicense ? (
+        description
+      ) : (
+        <FormattedMessage
+          id="xpack.securitySolution.detectionEngine.createRule.stepDefineRule.ruleTypeField.mlTypeDisabledDescription"
+          defaultMessage="Access to ML requires a {subscriptionsLink}."
+          values={{
+            subscriptionsLink: (
+              <EuiLink href="https://www.elastic.co/subscriptions" target="_blank">
+                <FormattedMessage
+                  id="xpack.securitySolution.components.stepDefineRule.ruleTypeField.subscriptionsLink"
+                  defaultMessage="Platinum subscription"
+                />
+              </EuiLink>
+            ),
+          }}
+        />
+      )}
+    </SmallText>
+  );
+};
+
+MlCardDescriptionComponent.displayName = 'MlCardDescriptionComponent';
+
+export const MlCardDescription = React.memo(MlCardDescriptionComponent);
+
+MlCardDescription.displayName = 'MlCardDescription';

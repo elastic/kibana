@@ -1,0 +1,155 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`interpreter/functions#tagcloud logs correct datatable to inspector 1`] = `
+Object {
+  "columns": Array [
+    Object {
+      "id": "Count",
+      "meta": Object {
+        "dimensionName": "Tag size",
+      },
+      "name": "Count",
+    },
+    Object {
+      "id": "country",
+      "meta": Object {
+        "dimensionName": "Tags",
+      },
+      "name": "country",
+    },
+  ],
+  "rows": Array [
+    Object {
+      "Count": 0,
+      "country": "US",
+    },
+    Object {
+      "Count": 10,
+      "country": "UK",
+    },
+  ],
+  "type": "datatable",
+}
+`;
+
+exports[`interpreter/functions#tagcloud returns an object with the correct structure for number accessors 1`] = `
+Object {
+  "as": "tagcloud",
+  "type": "render",
+  "value": Object {
+    "syncColors": false,
+    "visData": Object {
+      "columns": Array [
+        Object {
+          "id": "Count",
+          "name": "Count",
+        },
+        Object {
+          "id": "country",
+          "name": "country",
+        },
+      ],
+      "rows": Array [
+        Object {
+          "Count": 0,
+          "country": "US",
+        },
+        Object {
+          "Count": 10,
+          "country": "UK",
+        },
+      ],
+      "type": "datatable",
+    },
+    "visParams": Object {
+      "ariaLabel": undefined,
+      "bucket": Object {
+        "accessor": 1,
+      },
+      "colorMapping": undefined,
+      "isPreview": false,
+      "maxFontSize": 72,
+      "metric": Object {
+        "accessor": 0,
+      },
+      "minFontSize": 18,
+      "orientation": "single",
+      "palette": "{palette}",
+      "scale": "linear",
+      "showLabel": true,
+    },
+    "visType": "tagcloud",
+  },
+}
+`;
+
+exports[`interpreter/functions#tagcloud returns an object with the correct structure for string accessors 1`] = `
+Object {
+  "as": "tagcloud",
+  "type": "render",
+  "value": Object {
+    "syncColors": false,
+    "visData": Object {
+      "columns": Array [
+        Object {
+          "id": "Count",
+          "name": "Count",
+        },
+        Object {
+          "id": "country",
+          "name": "country",
+        },
+      ],
+      "rows": Array [
+        Object {
+          "Count": 0,
+          "country": "US",
+        },
+        Object {
+          "Count": 10,
+          "country": "UK",
+        },
+      ],
+      "type": "datatable",
+    },
+    "visParams": Object {
+      "ariaLabel": undefined,
+      "bucket": Object {
+        "accessor": Object {
+          "id": "country",
+          "meta": Object {
+            "type": "string",
+          },
+          "name": "country",
+        },
+        "format": Object {
+          "params": Object {},
+        },
+        "type": "vis_dimension",
+      },
+      "colorMapping": undefined,
+      "isPreview": false,
+      "maxFontSize": 72,
+      "metric": Object {
+        "accessor": Object {
+          "id": "Count",
+          "meta": Object {
+            "type": "number",
+          },
+          "name": "Count",
+        },
+        "format": Object {
+          "params": Object {},
+        },
+        "type": "vis_dimension",
+      },
+      "minFontSize": 18,
+      "orientation": "single",
+      "palette": "{palette}",
+      "scale": "linear",
+      "showLabel": true,
+    },
+    "visType": "tagcloud",
+  },
+}
+`;

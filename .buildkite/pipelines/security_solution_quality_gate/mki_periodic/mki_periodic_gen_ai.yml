@@ -1,0 +1,164 @@
+steps:
+  - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:ai_assistant
+    label: "Cypress MKI - AI Assistant"
+    key: test_ai_assistant
+    env:
+      BK_TEST_SUITE_KEY: "serverless-cypress-gen-ai"
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-4
+    # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
+    timeout_in_minutes: 300
+    parallelism: 1
+    soft_fail:
+      - exit_status: 101
+
+  - group: "API MKI - AI Assistant"
+    key: api_test_ai_assistant
+    steps:
+      - label: 'API MKI - genai_ad_privileges:qa:serverless'
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh genai_ad_privileges:qa:serverless
+        key: genai_ad_privileges:qa:serverless
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        timeout_in_minutes: 120
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 2
+        soft_fail:
+          - exit_status: 101
+
+
+      - label: 'API MKI - genai_ad_privileges:essentials:qa:serverless'
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh genai_ad_privileges:essentials:qa:serverless
+        key: genai_ad_privileges:essentials:qa:serverless
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        timeout_in_minutes: 120
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 2
+        soft_fail:
+          - exit_status: 101
+
+      - label: 'API MKI - genai_ad_schedules:qa:serverless'
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh genai_ad_schedules:qa:serverless
+        key: genai_ad_schedules:qa:serverless
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        timeout_in_minutes: 120
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 2
+        soft_fail:
+          - exit_status: 101
+
+      - label: 'API MKI - genai_ad_schedules:essentials:qa:serverless'
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh genai_ad_schedules:essentials:qa:serverless
+        key: genai_ad_schedules:essentials:qa:serverless
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        timeout_in_minutes: 120
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 2
+        soft_fail:
+          - exit_status: 101
+
+      - label: 'API MKI - genai_conversations:qa:serverless'
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh genai_conversations:qa:serverless
+        key: genai_conversations:qa:serverless
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        timeout_in_minutes: 120
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 2
+        soft_fail:
+          - exit_status: 101
+
+      - label: 'API MKI - genai_kb_entries:qa:serverless'
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh genai_kb_entries:qa:serverless
+        key: genai_kb_entries:qa:serverless
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        timeout_in_minutes: 120
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 2
+        soft_fail:
+          - exit_status: 101
+
+      - label: 'API MKI - genai_startup:qa:serverless'
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh genai_startup:qa:serverless
+        key: genai_startup:qa:serverless
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        timeout_in_minutes: 120
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 2
+        soft_fail:
+          - exit_status: 101
+
+      - label: 'API MKI - nlp_cleanup_task:complete:qa:serverless'
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh nlp_cleanup_task:complete:qa:serverless
+        key: nlp_cleanup_task:complete:qa:serverless
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        timeout_in_minutes: 120
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 2
+        soft_fail:
+          - exit_status: 101
+
+      - label: 'API MKI - nlp_cleanup_task:essentials:qa:serverless'
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh nlp_cleanup_task:essentials:qa:serverless
+        key: nlp_cleanup_task:essentials:qa:serverless
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        timeout_in_minutes: 120
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 2
+        soft_fail:
+          - exit_status: 101

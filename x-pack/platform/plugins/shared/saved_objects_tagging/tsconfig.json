@@ -1,0 +1,32 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+  },
+  "include": ["common/**/*", "public/**/*", "server/**/*", "test/scout/**/*"],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/scout",
+    "@kbn/usage-collection-plugin",
+    "@kbn/management-plugin",
+    "@kbn/saved-objects-tagging-oss-plugin",
+    "@kbn/usage-collection-plugin",
+    "@kbn/features-plugin",
+    "@kbn/security-plugin",
+    "@kbn/i18n",
+    "@kbn/utility-types",
+    "@kbn/i18n-react",
+    "@kbn/config-schema",
+    "@kbn/ebt-tools",
+    "@kbn/core-notifications-browser",
+    "@kbn/react-kibana-mount",
+    "@kbn/core-lifecycle-browser",
+    "@kbn/as-code-shared-schemas",
+    "@kbn/core-http-server",
+    "@kbn/core-http-browser",
+    "@kbn/as-code-shared-telemetry"
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

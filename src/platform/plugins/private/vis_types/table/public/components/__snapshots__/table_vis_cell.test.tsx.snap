@@ -1,0 +1,10 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`table vis cell should return a cell component with data in scope 1`] = `
+<div
+  className="tbvChartCellContent eui-textTruncate"
+  data-test-subj="tbvChartCellContent"
+>
+  formatted value
+</div>
+`;

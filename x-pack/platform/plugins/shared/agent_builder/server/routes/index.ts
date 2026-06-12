@@ -1,0 +1,47 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { RouteDependencies } from './types';
+import { registerToolsRoutes } from './tools';
+import { registerInternalToolsRoutes } from './internal/tools';
+import { registerInternalSkillsRoutes } from './internal/skills';
+import { registerInternalConversationRoutes } from './internal/conversations';
+import { registerConsumptionRoutes } from './consumption';
+import { registerInternalUserPromptsRoutes } from './internal/user_prompts';
+import { registerInternalSmlRoutes } from './internal/sml';
+import { registerInternalInferenceEndpointsRoute } from './internal/inference_endpoints';
+import { registerAgentRoutes } from './agents';
+import { registerChatRoutes } from './chat';
+import { registerConversationRoutes } from './conversations';
+import { registerAttachmentRoutes } from './attachments';
+import { registerMCPRoutes } from './mcp';
+import { registerA2ARoutes } from './a2a';
+import { registerSkillsRoutes } from './skills';
+import { registerPluginsRoutes } from './plugins';
+import { registerInternalExecutionRoutes } from './internal/executions';
+import { registerAccessPrincipalsRoutes } from './internal/access_principals';
+
+export const registerRoutes = (dependencies: RouteDependencies) => {
+  registerToolsRoutes(dependencies);
+  registerInternalToolsRoutes(dependencies);
+  registerInternalSkillsRoutes(dependencies);
+  registerInternalConversationRoutes(dependencies);
+  registerConsumptionRoutes(dependencies);
+  registerInternalUserPromptsRoutes(dependencies);
+  registerInternalSmlRoutes(dependencies);
+  registerInternalInferenceEndpointsRoute(dependencies);
+  registerAgentRoutes(dependencies);
+  registerChatRoutes(dependencies);
+  registerConversationRoutes(dependencies);
+  registerAttachmentRoutes(dependencies);
+  registerMCPRoutes(dependencies);
+  registerA2ARoutes(dependencies);
+  registerSkillsRoutes(dependencies);
+  registerPluginsRoutes(dependencies);
+  registerInternalExecutionRoutes(dependencies);
+  registerAccessPrincipalsRoutes(dependencies);
+};

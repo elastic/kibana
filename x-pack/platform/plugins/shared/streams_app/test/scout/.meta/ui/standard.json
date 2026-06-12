@@ -1,0 +1,2059 @@
+{
+  "sha1": "8d319a8855d2f4e921bc024614a1ef3565494c92",
+  "tests": [
+    {
+      "id": "8fdb537796db270-7132d4e40af07dc",
+      "title": "Teardown environment for streams tests",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/global.teardown.ts",
+        "line": 10,
+        "column": 19
+      }
+    },
+    {
+      "id": "3cc9409cebf2cef-744ce32675c025c",
+      "title": "Setup environment for streams tests",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/global.setup.ts",
+        "line": 10,
+        "column": 16
+      }
+    },
+    {
+      "id": "facb589480c8306-56341b35415c7bd",
+      "title": "Stream data mapping - schema editor - Classic Streams read-only user cannot add/edit fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_mapping/classic_streams_schema.spec.ts",
+        "line": 39,
+        "column": 9
+      }
+    },
+    {
+      "id": "facb589480c8306-6c0fa76d26f4840",
+      "title": "Stream data mapping - schema editor - Classic Streams copy_to advanced parameter works",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_mapping/classic_streams_schema.spec.ts",
+        "line": 50,
+        "column": 9
+      }
+    },
+    {
+      "id": "facb589480c8306-dd5db3aa2061b62",
+      "title": "Stream data mapping - schema editor - Classic Streams allows mapping a field as geo_point",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_mapping/classic_streams_schema.spec.ts",
+        "line": 128,
+        "column": 9
+      }
+    },
+    {
+      "id": "79cdee9afb4efe9-44ed3bb5d07afc9",
+      "title": "Stream data mapping - schema editor should display a list of stream mappings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_mapping/data_mapping.spec.ts",
+        "line": 47,
+        "column": 9
+      }
+    },
+    {
+      "id": "79cdee9afb4efe9-01d6d0b9fd4e284",
+      "title": "Stream data mapping - schema editor should allow searching by field name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_mapping/data_mapping.spec.ts",
+        "line": 69,
+        "column": 9
+      }
+    },
+    {
+      "id": "79cdee9afb4efe9-35a0efa77620063",
+      "title": "Stream data mapping - schema editor should allow filtering by field type and status",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_mapping/data_mapping.spec.ts",
+        "line": 106,
+        "column": 9
+      }
+    },
+    {
+      "id": "79cdee9afb4efe9-2375016ad4b94bd",
+      "title": "Stream data mapping - schema editor should allow mapping a field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_mapping/data_mapping.spec.ts",
+        "line": 141,
+        "column": 9
+      }
+    },
+    {
+      "id": "79cdee9afb4efe9-2974d45367725fa",
+      "title": "Stream data mapping - schema editor should allow unmapping a field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_mapping/data_mapping.spec.ts",
+        "line": 183,
+        "column": 9
+      }
+    },
+    {
+      "id": "79cdee9afb4efe9-fc62d688b507d95",
+      "title": "Stream data mapping - schema editor should allow manually adding a new field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_mapping/data_mapping.spec.ts",
+        "line": 244,
+        "column": 9
+      }
+    },
+    {
+      "id": "79cdee9afb4efe9-e190254dffb4011",
+      "title": "Stream data mapping - schema editor should allow adding a description when mapping a field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_mapping/data_mapping.spec.ts",
+        "line": 297,
+        "column": 9
+      }
+    },
+    {
+      "id": "f86f3e79121acd3-cda4d2c8654359b",
+      "title": "Stream data mapping - schema editor - Wired Streams inherited fields display with parent links",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_mapping/wired_streams_schema.spec.ts",
+        "line": 53,
+        "column": 9
+      }
+    },
+    {
+      "id": "f86f3e79121acd3-7e8867ed1b7384f",
+      "title": "Stream data mapping - schema editor - Wired Streams ECS/Otel type pre-selection for known fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_mapping/wired_streams_schema.spec.ts",
+        "line": 96,
+        "column": 9
+      }
+    },
+    {
+      "id": "f86f3e79121acd3-d2dd8bcdf8af73c",
+      "title": "Stream data mapping - schema editor - Wired Streams shows alias relationship in table",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_mapping/wired_streams_schema.spec.ts",
+        "line": 140,
+        "column": 9
+      }
+    },
+    {
+      "id": "f86f3e79121acd3-8e2255657ecd48c",
+      "title": "Stream data mapping - schema editor - Wired Streams validates field names for wired streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_mapping/wired_streams_schema.spec.ts",
+        "line": 194,
+        "column": 9
+      }
+    },
+    {
+      "id": "32c69b10dd6903f-1908a67631697ac",
+      "title": "Draft stream simulation - processing preview should display sample documents from the parent stream for a draft",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/draft_stream_simulation.spec.ts",
+        "line": 96,
+        "column": 9
+      }
+    },
+    {
+      "id": "32c69b10dd6903f-8961cf973c704ab",
+      "title": "Draft stream simulation - processing preview should simulate a Set processor and show processed results in preview",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/draft_stream_simulation.spec.ts",
+        "line": 103,
+        "column": 9
+      }
+    },
+    {
+      "id": "32c69b10dd6903f-334e103d179bed7",
+      "title": "Draft stream simulation - processing preview should simulate a Rename processor on a draft stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/draft_stream_simulation.spec.ts",
+        "line": 127,
+        "column": 9
+      }
+    },
+    {
+      "id": "32c69b10dd6903f-71493f3cff0bcd9",
+      "title": "Draft stream simulation - processing preview should update simulation preview reactively when configuring a new processor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/draft_stream_simulation.spec.ts",
+        "line": 146,
+        "column": 9
+      }
+    },
+    {
+      "id": "32c69b10dd6903f-2e643d3f9a21477",
+      "title": "Draft stream simulation - processing preview should simulate multiple sequential processors on a draft stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/draft_stream_simulation.spec.ts",
+        "line": 170,
+        "column": 9
+      }
+    },
+    {
+      "id": "72321f7b67c15f4-083706ce01b6201",
+      "title": "Stream data processing - fetch more matching samples should show fetch more button when condition match rate is below threshold, clicking it should fetch more documents until the threshold is reached",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/fetch_more_matching_samples.spec.ts",
+        "line": 49,
+        "column": 9
+      }
+    },
+    {
+      "id": "3fffa783271190b-673bfeac807f871",
+      "title": "Stream data quality should show data quality metrics",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_quality.spec.ts",
+        "line": 84,
+        "column": 9
+      }
+    },
+    {
+      "id": "3fffa783271190b-ccd2761d79f84f2",
+      "title": "Stream data quality date picker should show same time range as Streams Main page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_quality.spec.ts",
+        "line": 101,
+        "column": 9
+      }
+    },
+    {
+      "id": "3fffa783271190b-690079b58151ce0",
+      "title": "Stream data quality changing time range should also update date picker on Streams Main page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_quality.spec.ts",
+        "line": 119,
+        "column": 9
+      }
+    },
+    {
+      "id": "3fffa783271190b-f71d78d4ae9a924",
+      "title": "Stream data quality time range should persist after page refresh on Data Quality tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_quality.spec.ts",
+        "line": 133,
+        "column": 9
+      }
+    },
+    {
+      "id": "3fffa783271190b-4469d65a10929c8",
+      "title": "Stream data quality time range should persist after page refresh on Retention tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_quality.spec.ts",
+        "line": 151,
+        "column": 9
+      }
+    },
+    {
+      "id": "3fffa783271190b-ee97b0d5664f74d",
+      "title": "Stream data quality time range should be globally synced across all tabs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_quality.spec.ts",
+        "line": 184,
+        "column": 9
+      }
+    },
+    {
+      "id": "3fffa783271190b-4775d23430ce410",
+      "title": "Stream data quality should toggle between degraded and failed docs quality issues charts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_quality.spec.ts",
+        "line": 207,
+        "column": 9
+      }
+    },
+    {
+      "id": "3fffa783271190b-d433732b148e845",
+      "title": "Stream data quality should show degraded fields table with data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_quality.spec.ts",
+        "line": 217,
+        "column": 9
+      }
+    },
+    {
+      "id": "3fffa783271190b-dd8fbacadb48e67",
+      "title": "Stream data quality should open and close degraded field flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_quality.spec.ts",
+        "line": 242,
+        "column": 9
+      }
+    },
+    {
+      "id": "3fffa783271190b-20b23641495bf7b",
+      "title": "Stream data quality should navigate to Discover from degraded field flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_quality.spec.ts",
+        "line": 269,
+        "column": 9
+      }
+    },
+    {
+      "id": "3fffa783271190b-27ee667d7063050",
+      "title": "Stream data quality should edit failure store for wired streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_quality.spec.ts",
+        "line": 294,
+        "column": 9
+      }
+    },
+    {
+      "id": "1590b4af49c6b0b-6b8296211e38431",
+      "title": "Stream data retention - custom retention periods should set and reset retention policy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/data_retention.spec.ts",
+        "line": 128,
+        "column": 9
+      }
+    },
+    {
+      "id": "1590b4af49c6b0b-814b247f30e495c",
+      "title": "Stream data retention - custom retention periods should persist retention value across page refresh",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/data_retention.spec.ts",
+        "line": 144,
+        "column": 9
+      }
+    },
+    {
+      "id": "1590b4af49c6b0b-37ff27f069ce66d",
+      "title": "Stream data retention - custom retention periods should set retention on classic stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/data_retention.spec.ts",
+        "line": 159,
+        "column": 9
+      }
+    },
+    {
+      "id": "1590b4af49c6b0b-29694936ba9e48b",
+      "title": "Stream data retention - custom retention periods should open DSL lifecycle phase popup and display phase details",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/data_retention.spec.ts",
+        "line": 176,
+        "column": 9
+      }
+    },
+    {
+      "id": "1590b4af49c6b0b-0d15fda96bab415",
+      "title": "Stream data retention - custom retention periods should delete a downsampling step from a DSL lifecycle",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/data_retention.spec.ts",
+        "line": 208,
+        "column": 9
+      }
+    },
+    {
+      "id": "1590b4af49c6b0b-8c94049dc36ed87",
+      "title": "Stream data retention - custom retention periods should edit a downsampling step in a DSL lifecycle",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/data_retention.spec.ts",
+        "line": 274,
+        "column": 9
+      }
+    },
+    {
+      "id": "fdca40135eb0f87-90187f54e2e3a3a",
+      "title": "Stream data retention - updating failure store should edit failure store successfully for classic streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
+        "line": 76,
+        "column": 9
+      }
+    },
+    {
+      "id": "fdca40135eb0f87-e067c96dd606e40",
+      "title": "Stream data retention - updating failure store should disable failure store for classic streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
+        "line": 90,
+        "column": 9
+      }
+    },
+    {
+      "id": "fdca40135eb0f87-af8c6198fedd7c4",
+      "title": "Stream data retention - updating failure store should enable failure store for classic streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
+        "line": 103,
+        "column": 9
+      }
+    },
+    {
+      "id": "fdca40135eb0f87-70fb60c8301b17f",
+      "title": "Stream data retention - updating failure store should be able to disable lifecycle for classic streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
+        "line": 119,
+        "column": 9
+      }
+    },
+    {
+      "id": "fdca40135eb0f87-eb9876f48853485",
+      "title": "Stream data retention - updating failure store should inherit failure store for classic streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
+        "line": 148,
+        "column": 9
+      }
+    },
+    {
+      "id": "fdca40135eb0f87-62f745668288e26",
+      "title": "Stream data retention - updating failure store should edit failure store successfully for wired streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
+        "line": 76,
+        "column": 9
+      }
+    },
+    {
+      "id": "fdca40135eb0f87-88fc42e9ab1cf7f",
+      "title": "Stream data retention - updating failure store should disable failure store for wired streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
+        "line": 90,
+        "column": 9
+      }
+    },
+    {
+      "id": "fdca40135eb0f87-0a9a4ab8715dfb6",
+      "title": "Stream data retention - updating failure store should enable failure store for wired streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
+        "line": 103,
+        "column": 9
+      }
+    },
+    {
+      "id": "fdca40135eb0f87-13767b8d7cf5a21",
+      "title": "Stream data retention - updating failure store should be able to disable lifecycle for wired streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
+        "line": 119,
+        "column": 9
+      }
+    },
+    {
+      "id": "fdca40135eb0f87-385a4f5d5583d54",
+      "title": "Stream data retention - updating failure store should inherit failure store for wired streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
+        "line": 148,
+        "column": 9
+      }
+    },
+    {
+      "id": "fdca40135eb0f87-b153942a7c6716b",
+      "title": "Stream data retention - updating failure store should not inherit failure store for root wired streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
+        "line": 168,
+        "column": 7
+      }
+    },
+    {
+      "id": "fdca40135eb0f87-47ea8018ad86f69",
+      "title": "Stream data retention - updating failure store should set failure store retention to different value than main retention",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
+        "line": 180,
+        "column": 7
+      }
+    },
+    {
+      "id": "fdca40135eb0f87-4c350e9a6f29374",
+      "title": "Stream data retention - updating failure store should persist failure store retention across page reload",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
+        "line": 202,
+        "column": 7
+      }
+    },
+    {
+      "id": "fdca40135eb0f87-32738bf14fc677a",
+      "title": "Stream data retention - updating failure store should cancel failure store retention edit",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
+        "line": 218,
+        "column": 7
+      }
+    },
+    {
+      "id": "fdca40135eb0f87-6a00929c70c16fe",
+      "title": "Stream data retention - updating failure store should show failure store disabled state",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
+        "line": 241,
+        "column": 7
+      }
+    },
+    {
+      "id": "6ff035a70002742-8526805a8b3a237",
+      "title": "Stream data retention - ILM policy should show ILM policy button",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/ilm_policy_retention.spec.ts",
+        "line": 61,
+        "column": 7
+      }
+    },
+    {
+      "id": "6ff035a70002742-1ad0be072cb4802",
+      "title": "Stream data retention - ILM policy should select and save ILM policy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/ilm_policy_retention.spec.ts",
+        "line": 67,
+        "column": 7
+      }
+    },
+    {
+      "id": "6ff035a70002742-4ea166585fe5924",
+      "title": "Stream data retention - ILM policy should display selected ILM policy name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/ilm_policy_retention.spec.ts",
+        "line": 87,
+        "column": 7
+      }
+    },
+    {
+      "id": "6ff035a70002742-86cc39213ea2a61",
+      "title": "Stream data retention - ILM policy should persist ILM policy selection across page reload",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/ilm_policy_retention.spec.ts",
+        "line": 105,
+        "column": 7
+      }
+    },
+    {
+      "id": "6ff035a70002742-c7552f1e2810c15",
+      "title": "Stream data retention - ILM policy should open ILM lifecycle phase popup and display phase details",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/ilm_policy_retention.spec.ts",
+        "line": 127,
+        "column": 7
+      }
+    },
+    {
+      "id": "6ff035a70002742-c330aabf85a2798",
+      "title": "Stream data retention - ILM policy downsampling tests should delete a downsampling step from an ILM policy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/ilm_policy_retention.spec.ts",
+        "line": 214,
+        "column": 9
+      }
+    },
+    {
+      "id": "6ff035a70002742-a40d09b0e25f037",
+      "title": "Stream data retention - ILM policy downsampling tests should create a new policy when deleting a downsampling step",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/ilm_policy_retention.spec.ts",
+        "line": 286,
+        "column": 9
+      }
+    },
+    {
+      "id": "6ff035a70002742-3e569221432d192",
+      "title": "Stream data retention - ILM policy downsampling tests should edit a policy phase, add downsampling, and save",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/ilm_policy_retention.spec.ts",
+        "line": 367,
+        "column": 9
+      }
+    },
+    {
+      "id": "0ed00376f219437-253ccda6796062a",
+      "title": "Stream data retention - display values should show data phase count subtitle when custom retention is set",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_display_values.spec.ts",
+        "line": 63,
+        "column": 9
+      }
+    },
+    {
+      "id": "0ed00376f219437-bc04bd4267a6a8a",
+      "title": "Stream data retention - display values should display retention metric prominently",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_display_values.spec.ts",
+        "line": 71,
+        "column": 9
+      }
+    },
+    {
+      "id": "e2be9a73b184a96-2e15a2858773682",
+      "title": "Stream data retention - inheritance should show inherit toggle and inherit by default",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_inheritance.spec.ts",
+        "line": 52,
+        "column": 9
+      }
+    },
+    {
+      "id": "e2be9a73b184a96-201847ff03b1cf2",
+      "title": "Stream data retention - inheritance should toggle inherit mode on and off",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_inheritance.spec.ts",
+        "line": 73,
+        "column": 9
+      }
+    },
+    {
+      "id": "e2be9a73b184a96-ded761a5a78160c",
+      "title": "Stream data retention - inheritance should handle inherit for nested child streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_inheritance.spec.ts",
+        "line": 94,
+        "column": 9
+      }
+    },
+    {
+      "id": "e2be9a73b184a96-c171d6ecff0d273",
+      "title": "Stream data retention - inheritance should allow override on nested child stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_inheritance.spec.ts",
+        "line": 119,
+        "column": 9
+      }
+    },
+    {
+      "id": "e2be9a73b184a96-875b4d30ce1cdc6",
+      "title": "Stream data retention - inheritance should handle multiple child streams inheriting from same parent",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_inheritance.spec.ts",
+        "line": 143,
+        "column": 9
+      }
+    },
+    {
+      "id": "e2be9a73b184a96-ad9a9e20f2d1c27",
+      "title": "Stream data retention - inheritance should reflect parent retention changes in child when inheriting",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_inheritance.spec.ts",
+        "line": 165,
+        "column": 9
+      }
+    },
+    {
+      "id": "bfaa6b699422ff5-4558427c86af828",
+      "title": "Stream data retention - modal interactions should open and close modal",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_modal_interactions.spec.ts",
+        "line": 65,
+        "column": 9
+      }
+    },
+    {
+      "id": "bfaa6b699422ff5-0ebc6e2fb77c302",
+      "title": "Stream data retention - modal interactions should preserve values on cancel and update on save",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_modal_interactions.spec.ts",
+        "line": 74,
+        "column": 9
+      }
+    },
+    {
+      "id": "7b9f1bc0367bdf5-60ee9f9e1af5c8c",
+      "title": "Stream data retention - storage metrics integration should update retention without affecting storage display",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_storage_metrics.spec.ts",
+        "line": 63,
+        "column": 9
+      }
+    },
+    {
+      "id": "7b9f1bc0367bdf5-e3d1efa7ce953e7",
+      "title": "Stream data retention - storage metrics integration should maintain retention display after page navigation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_storage_metrics.spec.ts",
+        "line": 76,
+        "column": 9
+      }
+    },
+    {
+      "id": "9349667e5bca40e-4c30a41802efe9b",
+      "title": "Stream data routing - AI suggestions button should show button when AI features are enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_button.spec.ts",
+        "line": 42,
+        "column": 7
+      }
+    },
+    {
+      "id": "9349667e5bca40e-2cd846c5324c829",
+      "title": "Stream data routing - AI suggestions button should disable button when no connector is selected",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_button.spec.ts",
+        "line": 48,
+        "column": 7
+      }
+    },
+    {
+      "id": "9349667e5bca40e-8238485c9b8c08f",
+      "title": "Stream data routing - AI suggestions button should show connector dropdown when multiple connectors exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_button.spec.ts",
+        "line": 62,
+        "column": 7
+      }
+    },
+    {
+      "id": "954b6fa16b3e83e-098e105b5880d71",
+      "title": "Stream data routing - AI suggestions editing validation should show error when editing suggestion with empty name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_editing_validation.spec.ts",
+        "line": 62,
+        "column": 9
+      }
+    },
+    {
+      "id": "954b6fa16b3e83e-c9fb9d27893c2ba",
+      "title": "Stream data routing - AI suggestions editing validation should show error when editing suggestion with name containing dots",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_editing_validation.spec.ts",
+        "line": 74,
+        "column": 9
+      }
+    },
+    {
+      "id": "954b6fa16b3e83e-fe89c36564d8512",
+      "title": "Stream data routing - AI suggestions editing validation should show error when editing suggestion with name exceeding max length",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_editing_validation.spec.ts",
+        "line": 92,
+        "column": 9
+      }
+    },
+    {
+      "id": "954b6fa16b3e83e-c0db288e902915d",
+      "title": "Stream data routing - AI suggestions editing validation should show error when editing suggestion with duplicate name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_editing_validation.spec.ts",
+        "line": 109,
+        "column": 9
+      }
+    },
+    {
+      "id": "954b6fa16b3e83e-255ea6600fc8ce1",
+      "title": "Stream data routing - AI suggestions editing validation should allow editing suggestion with valid condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_editing_validation.spec.ts",
+        "line": 145,
+        "column": 9
+      }
+    },
+    {
+      "id": "41f986dc7d507af-177423f5f28279b",
+      "title": "Stream data routing - AI suggestions generation should successfully generate and display suggestions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_generation.spec.ts",
+        "line": 49,
+        "column": 9
+      }
+    },
+    {
+      "id": "41f986dc7d507af-6a6bd738cf29b44",
+      "title": "Stream data routing - AI suggestions generation should handle empty suggestions response",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_generation.spec.ts",
+        "line": 59,
+        "column": 9
+      }
+    },
+    {
+      "id": "bc6ace18083cf6a-0033ff890a80016",
+      "title": "Stream data routing - AI suggestions interactions should preview suggestion",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_interactions.spec.ts",
+        "line": 54,
+        "column": 9
+      }
+    },
+    {
+      "id": "bc6ace18083cf6a-59031b3e126feaa",
+      "title": "Stream data routing - AI suggestions interactions should edit suggestion",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_interactions.spec.ts",
+        "line": 61,
+        "column": 9
+      }
+    },
+    {
+      "id": "bc6ace18083cf6a-481f21a0ac903d1",
+      "title": "Stream data routing - AI suggestions interactions should reject suggestion",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_interactions.spec.ts",
+        "line": 70,
+        "column": 9
+      }
+    },
+    {
+      "id": "bc6ace18083cf6a-25b391c252a342c",
+      "title": "Stream data routing - AI suggestions interactions should regenerate suggestions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_interactions.spec.ts",
+        "line": 79,
+        "column": 9
+      }
+    },
+    {
+      "id": "bc6ace18083cf6a-599c1773006248e",
+      "title": "Stream data routing - AI suggestions interactions should update suggestion name when editing and accepting",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_interactions.spec.ts",
+        "line": 108,
+        "column": 9
+      }
+    },
+    {
+      "id": "bc6ace18083cf6a-8a8b94aca37cb16",
+      "title": "Stream data routing - AI suggestions interactions should update suggestion condition when editing and accepting",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_interactions.spec.ts",
+        "line": 138,
+        "column": 9
+      }
+    },
+    {
+      "id": "bc6ace18083cf6a-b1112374737687d",
+      "title": "Stream data routing - AI suggestions interactions should cancel editing and revert to original suggestion",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_interactions.spec.ts",
+        "line": 172,
+        "column": 9
+      }
+    },
+    {
+      "id": "92d7bc6cddf5121-d6a33115c877fb0",
+      "title": "Stream data routing - creating routing rules should create a new routing rule successfully",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/create_routing_rules.spec.ts",
+        "line": 31,
+        "column": 9
+      }
+    },
+    {
+      "id": "92d7bc6cddf5121-0c3ef633653b792",
+      "title": "Stream data routing - creating routing rules should cancel creating new routing rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/create_routing_rules.spec.ts",
+        "line": 68,
+        "column": 9
+      }
+    },
+    {
+      "id": "92d7bc6cddf5121-82d35404a0a3a9b",
+      "title": "Stream data routing - creating routing rules should not let creating new routing rule while one is in progress",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/create_routing_rules.spec.ts",
+        "line": 81,
+        "column": 9
+      }
+    },
+    {
+      "id": "92d7bc6cddf5121-d8dbc074e0c1e71",
+      "title": "Stream data routing - creating routing rules should show validation errors for invalid stream names verified on the client",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/create_routing_rules.spec.ts",
+        "line": 99,
+        "column": 9
+      }
+    },
+    {
+      "id": "92d7bc6cddf5121-fd9312e87fee662",
+      "title": "Stream data routing - creating routing rules should handle insufficient privileges gracefully",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/create_routing_rules.spec.ts",
+        "line": 131,
+        "column": 9
+      }
+    },
+    {
+      "id": "92d7bc6cddf5121-e923f38f4a41c9e",
+      "title": "Stream data routing - creating routing rules should not allow creating a routing rule that is not a child of the current stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/create_routing_rules.spec.ts",
+        "line": 145,
+        "column": 9
+      }
+    },
+    {
+      "id": "92d7bc6cddf5121-3e6f87ceb325a39",
+      "title": "Stream data routing - creating routing rules should navigate to child stream when clicking on stream name link",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/create_routing_rules.spec.ts",
+        "line": 158,
+        "column": 9
+      }
+    },
+    {
+      "id": "92d7bc6cddf5121-b9aa65a4bbda14a",
+      "title": "Stream data routing - creating routing rules should show \"Open stream in new tab\" button in success toast",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/create_routing_rules.spec.ts",
+        "line": 183,
+        "column": 9
+      }
+    },
+    {
+      "id": "92d7bc6cddf5121-e8a7dfb80f49956",
+      "title": "Stream data routing - creating routing rules should attempt to create stream with duplicate name and fail",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/create_routing_rules.spec.ts",
+        "line": 208,
+        "column": 9
+      }
+    },
+    {
+      "id": "8b3ac79cea06244-33d0da79e3f24c6",
+      "title": "Stream data routing - editing routing rules should edit an existing routing rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/edit_routing_rules.spec.ts",
+        "line": 40,
+        "column": 9
+      }
+    },
+    {
+      "id": "8b3ac79cea06244-156c984e137b875",
+      "title": "Stream data routing - editing routing rules should disable update when syntax editor YAML is invalid",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/edit_routing_rules.spec.ts",
+        "line": 61,
+        "column": 9
+      }
+    },
+    {
+      "id": "8b3ac79cea06244-57a411e3e4bc68c",
+      "title": "Stream data routing - editing routing rules should cancel editing routing rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/edit_routing_rules.spec.ts",
+        "line": 84,
+        "column": 9
+      }
+    },
+    {
+      "id": "8b3ac79cea06244-cf44e6676b24845",
+      "title": "Stream data routing - editing routing rules should switch between editing different rules",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/edit_routing_rules.spec.ts",
+        "line": 105,
+        "column": 9
+      }
+    },
+    {
+      "id": "8b3ac79cea06244-e53492f854a942f",
+      "title": "Stream data routing - editing routing rules should disable Update button when syntax editor has empty condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/edit_routing_rules.spec.ts",
+        "line": 131,
+        "column": 9
+      }
+    },
+    {
+      "id": "8b3ac79cea06244-e5a4787b8056970",
+      "title": "Stream data routing - editing routing rules should disable Update button when syntax editor has invalid YAML",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/edit_routing_rules.spec.ts",
+        "line": 153,
+        "column": 9
+      }
+    },
+    {
+      "id": "8b3ac79cea06244-ef063896abf455b",
+      "title": "Stream data routing - editing routing rules should disable Update button when no changes have been made",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/edit_routing_rules.spec.ts",
+        "line": 175,
+        "column": 9
+      }
+    },
+    {
+      "id": "8b3ac79cea06244-771dc75d68b0d17",
+      "title": "Stream data routing - editing routing rules should remove routing rule with confirmation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/edit_routing_rules.spec.ts",
+        "line": 199,
+        "column": 9
+      }
+    },
+    {
+      "id": "8b3ac79cea06244-cba3626ffb6d749",
+      "title": "Stream data routing - editing routing rules should cancel rule removal",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/edit_routing_rules.spec.ts",
+        "line": 211,
+        "column": 9
+      }
+    },
+    {
+      "id": "5d93a0b19f57b3a-ac51baef7d2cf31",
+      "title": "Stream data routing - error handling and recovery should handle network failures during rule creation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/error_handling.spec.ts",
+        "line": 26,
+        "column": 9
+      }
+    },
+    {
+      "id": "5d93a0b19f57b3a-334158f6dc990bc",
+      "title": "Stream data routing - error handling and recovery should recover from API errors during rule updates",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/error_handling.spec.ts",
+        "line": 53,
+        "column": 9
+      }
+    },
+    {
+      "id": "5d93a0b19f57b3a-f43dbdd08046736",
+      "title": "Stream data routing - error handling and recovery should show server error message in Full error modal",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/error_handling.spec.ts",
+        "line": 90,
+        "column": 9
+      }
+    },
+    {
+      "id": "3a7b6b834964a95-ab28fcdb550305f",
+      "title": "Stream data routing - reordering routing rules should reorder routing rules via drag and drop",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/reorder_routing_rules.spec.ts",
+        "line": 43,
+        "column": 9
+      }
+    },
+    {
+      "id": "3a7b6b834964a95-cde215023713a6f",
+      "title": "Stream data routing - reordering routing rules should cancel reordering",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/reorder_routing_rules.spec.ts",
+        "line": 62,
+        "column": 9
+      }
+    },
+    {
+      "id": "3a7b6b834964a95-e9352d9c400a8bd",
+      "title": "Stream data routing - reordering routing rules should handle multiple reorder operations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/reorder_routing_rules.spec.ts",
+        "line": 80,
+        "column": 9
+      }
+    },
+    {
+      "id": "3a7b6b834964a95-2669d197625bc9c",
+      "title": "Stream data routing - reordering routing rules should not allow editing while reordering is in progress",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/reorder_routing_rules.spec.ts",
+        "line": 100,
+        "column": 9
+      }
+    },
+    {
+      "id": "3a7b6b834964a95-2d74d9fca7b147f",
+      "title": "Stream data routing - reordering routing rules should persist order after page refresh",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/reorder_routing_rules.spec.ts",
+        "line": 118,
+        "column": 9
+      }
+    },
+    {
+      "id": "3a7b6b834964a95-db6790c00519821",
+      "title": "Stream data routing - reordering routing rules should allow reordering only when multiple rules exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/reorder_routing_rules.spec.ts",
+        "line": 135,
+        "column": 9
+      }
+    },
+    {
+      "id": "643cc1fa64531d4-49d9709df875b65",
+      "title": "Stream data routing - previewing data should show preview during rule creation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/routing_data_preview.spec.ts",
+        "line": 38,
+        "column": 9
+      }
+    },
+    {
+      "id": "643cc1fa64531d4-62ad3f359fa395f",
+      "title": "Stream data routing - previewing data should update preview when condition changes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/routing_data_preview.spec.ts",
+        "line": 61,
+        "column": 9
+      }
+    },
+    {
+      "id": "643cc1fa64531d4-139dd7ff9652bca",
+      "title": "Stream data routing - previewing data should show no matches when condition matches nothing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/routing_data_preview.spec.ts",
+        "line": 102,
+        "column": 9
+      }
+    },
+    {
+      "id": "643cc1fa64531d4-38d51486b946c3d",
+      "title": "Stream data routing - previewing data should hide document filter controls until condition is set",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/routing_data_preview.spec.ts",
+        "line": 117,
+        "column": 9
+      }
+    },
+    {
+      "id": "643cc1fa64531d4-d43cfd4a66c1632",
+      "title": "Stream data routing - previewing data should select matched filter by default when condition is set",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/routing_data_preview.spec.ts",
+        "line": 139,
+        "column": 9
+      }
+    },
+    {
+      "id": "643cc1fa64531d4-7cef89995c1f2da",
+      "title": "Stream data routing - previewing data should maintain filter state when condition changes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/routing_data_preview.spec.ts",
+        "line": 171,
+        "column": 9
+      }
+    },
+    {
+      "id": "643cc1fa64531d4-f1f288a666d7e38",
+      "title": "Stream data routing - previewing data should handle \"no data\" when date range has no documents",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/routing_data_preview.spec.ts",
+        "line": 208,
+        "column": 9
+      }
+    },
+    {
+      "id": "643cc1fa64531d4-88492370b51e126",
+      "title": "Stream data routing - previewing data should display child stream count badge for nested routing rules",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/routing_data_preview.spec.ts",
+        "line": 231,
+        "column": 9
+      }
+    },
+    {
+      "id": "a089b2dd43cb47d-15fd0e803c090f9",
+      "title": "Enable Wired Streams - Permissions should prevent editor users from enabling wired streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/enable_wired_streams_flow_permissions.spec.ts",
+        "line": 47,
+        "column": 9
+      }
+    },
+    {
+      "id": "a089b2dd43cb47d-79afd6053c91090",
+      "title": "Enable Wired Streams - Permissions should prevent viewer users from enabling wired streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/enable_wired_streams_flow_permissions.spec.ts",
+        "line": 63,
+        "column": 9
+      }
+    },
+    {
+      "id": "a089b2dd43cb47d-587db47b0f5e38e",
+      "title": "Enable Wired Streams - Permissions should prevent editor from disabling wired streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/enable_wired_streams_flow_permissions.spec.ts",
+        "line": 79,
+        "column": 9
+      }
+    },
+    {
+      "id": "a089b2dd43cb47d-d65044e52c0ad5a",
+      "title": "Enable Wired Streams - Permissions should prevent viewer from disabling wired streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/enable_wired_streams_flow_permissions.spec.ts",
+        "line": 107,
+        "column": 9
+      }
+    },
+    {
+      "id": "214bf545ba8b394-bde4a25bf2ac4be",
+      "title": "Enable Wired Streams - Success flow should enable wired streams and show logs.otel and logs.ecs streams in the UI",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/enable_wired_streams_flow.spec.ts",
+        "line": 54,
+        "column": 9
+      }
+    },
+    {
+      "id": "214bf545ba8b394-71ecd6caba85171",
+      "title": "Enable Wired Streams - Success flow should show the root logs.otel and logs.ecs streams after enabling wired streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/enable_wired_streams_flow.spec.ts",
+        "line": 100,
+        "column": 9
+      }
+    },
+    {
+      "id": "214bf545ba8b394-3616ba4d9924e34",
+      "title": "Enable Wired Streams - Success flow should disable wired streams and show empty state",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/enable_wired_streams_flow.spec.ts",
+        "line": 126,
+        "column": 9
+      }
+    }
+  ]
+}

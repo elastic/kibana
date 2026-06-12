@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+source .buildkite/scripts/common/util.sh
+
+BUILD_SUCCESSFUL=$(ts-node "$(dirname "${0}")/build_status.ts")
+export BUILD_SUCCESSFUL
+
+if [[ "${KIBANA_GITHUB_BUILD_COMMIT_STATUS_ENABLED:-}" != "true" ]] && [[ "${ELASTIC_GITHUB_BUILD_COMMIT_STATUS_ENABLED:-}" != "true" ]]; then
+  "$(dirname "${0}")/commit_status_complete.sh"
+fi
+
+# Skip indexing the same metrics twice
+if [[ "${BUILDKITE_RETRY_COUNT:-0}" == "0" ]]; then
+  ts-node "$(dirname "${0}")/ci_stats_complete.ts"
+fi
+
+# Publish a build duration summary as pr_comment metadata so the PR comment
+# bot includes it in the build status comment. Best-effort; never fail the
+# post-build step on an API hiccup.
+ts-node "$(dirname "${0}")/build_timing.ts" || true
+
+if is_pr_with_label "ci:collect-ftr-timing"; then
+  ts-node "$(dirname "${0}")/aggregate_ftr_timing.ts"
+fi
+
+if [[ "${GITHUB_PR_NUMBER:-}" ]]; then
+  DOCS_CHANGES_URL="https://kibana_bk_$GITHUB_PR_NUMBER}.docs-preview.app.elstc.co/diff"
+  DOCS_CHANGES=$(curl --connect-timeout 10 -m 10 -sf "$DOCS_CHANGES_URL" || echo '')
+
+  if [[ "$DOCS_CHANGES" && "$DOCS_CHANGES" != "There aren't any differences!" ]]; then
+    buildkite-agent meta-data set pr_comment:docs_changes:head "* [Documentation Changes](${DOCS_CHANGES_URL})"
+  fi
+fi

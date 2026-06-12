@@ -1,0 +1,24 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import React, { lazy } from 'react';
+
+import type { VisParams } from '../../../types';
+import type { ValidationVisOptionsProps } from '../common';
+
+const PointSeriesOptionsLazy = lazy(() => import('./point_series'));
+const MetricsAxisOptionsLazy = lazy(() => import('./metrics_axes'));
+
+export const PointSeriesOptions = (props: ValidationVisOptionsProps<VisParams>) => (
+  <PointSeriesOptionsLazy {...props} />
+);
+
+export const MetricsAxisOptions = (props: ValidationVisOptionsProps<VisParams>) => (
+  <MetricsAxisOptionsLazy {...props} />
+);

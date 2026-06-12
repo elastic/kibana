@@ -1,0 +1,25 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "1",
+    "index": "nanos",
+    "source": {
+      "date": "2015-01-01T12:10:30",
+      "message": "Hello 1"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "2",
+    "index": "nanos",
+    "source": {
+      "date": "2015-01-01T12:10:30.123456789Z",
+      "message": "Hello 2"
+    },
+    "type": "_doc"
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "type": "index",
+  "value": {
+    "index": "myfakeindex-2",
+    "mappings": {
+      "dynamic": "strict",
+      "properties": {
+        "message": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "event": {
+          "properties": {
+            "ingested": {
+              "type": "date"
+            }
+          }
+        }
+      }
+    }
+  }
+}

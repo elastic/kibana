@@ -1,0 +1,208 @@
+{
+  "properties": {
+    "timestamp": {
+      "type": "date"
+    },
+    "cluster_uuid": {
+      "type": "keyword"
+    },
+    "cluster_name": {
+      "type": "keyword"
+    },
+    "version": {
+      "type": "keyword"
+    },
+    "collection": {
+      "type": "keyword"
+    },
+    "collectionSource": {
+      "type": "keyword"
+    },
+    "cacheDetails": {
+      "properties": {
+        "updatedAt": {
+          "type": "date",
+          "_meta": {
+            "description": "The timestamp the payload was last cached."
+          }
+        },
+        "fetchedAt": {
+          "type": "date",
+          "_meta": {
+            "description": "The timestamp the payload was grabbed from cache."
+          }
+        }
+      }
+    },
+    "stack_stats": {
+      "properties": {
+        "data": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "data_stream": {
+                "properties": {
+                  "dataset": {
+                    "type": "keyword"
+                  },
+                  "type": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "package": {
+                "properties": {
+                  "name": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "shipper": {
+                "type": "keyword"
+              },
+              "pattern_name": {
+                "type": "keyword"
+              },
+              "index_count": {
+                "type": "long"
+              },
+              "ecs_index_count": {
+                "type": "long"
+              },
+              "doc_count": {
+                "type": "long"
+              },
+              "size_in_bytes": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "kibana": {
+          "properties": {
+            "visualization": {
+              "properties": {
+                "total": {
+                  "type": "long"
+                }
+              }
+            },
+            "search": {
+              "properties": {
+                "total": {
+                  "type": "long"
+                }
+              }
+            },
+            "index_pattern": {
+              "properties": {
+                "total": {
+                  "type": "long"
+                }
+              }
+            },
+            "dashboard": {
+              "properties": {
+                "total": {
+                  "type": "long"
+                }
+              }
+            },
+            "graph_workspace": {
+              "properties": {
+                "total": {
+                  "type": "long"
+                }
+              }
+            },
+            "count": {
+              "type": "short"
+            },
+            "indices": {
+              "type": "short"
+            },
+            "os": {
+              "properties": {
+                "platforms": {
+                  "type": "array",
+                  "items": {
+                    "properties": {
+                      "platform": {
+                        "type": "keyword"
+                      },
+                      "count": {
+                        "type": "short"
+                      }
+                    }
+                  }
+                },
+                "platformReleases": {
+                  "type": "array",
+                  "items": {
+                    "properties": {
+                      "platformRelease": {
+                        "type": "keyword"
+                      },
+                      "count": {
+                        "type": "short"
+                      }
+                    }
+                  }
+                },
+                "distros": {
+                  "type": "array",
+                  "items": {
+                    "properties": {
+                      "distro": {
+                        "type": "keyword"
+                      },
+                      "count": {
+                        "type": "short"
+                      }
+                    }
+                  }
+                },
+                "distroReleases": {
+                  "type": "array",
+                  "items": {
+                    "properties": {
+                      "distroRelease": {
+                        "type": "keyword"
+                      },
+                      "count": {
+                        "type": "short"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "versions": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "version": {
+                    "type": "keyword"
+                  },
+                  "count": {
+                    "type": "short"
+                  }
+                }
+              }
+            },
+            "plugins": {
+              "properties": {
+                "kibana_config_usage": {
+                  "type": "pass_through"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "cluster_stats": {
+      "type": "pass_through"
+    }
+  }
+}

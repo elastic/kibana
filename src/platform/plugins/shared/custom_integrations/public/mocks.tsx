@@ -1,0 +1,41 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { PropsWithChildren } from 'react';
+import React from 'react';
+import { coreMock } from '@kbn/core/public/mocks';
+import type { CustomIntegrationsSetup, CustomIntegrationsStart } from './types';
+import { CustomIntegrationsServicesProvider } from './services';
+import { servicesFactory } from './services/stub';
+
+function createCustomIntegrationsSetup(): jest.Mocked<CustomIntegrationsSetup> {
+  const mock: jest.Mocked<CustomIntegrationsSetup> = {
+    getAppendCustomIntegrations: jest.fn(),
+    getReplacementCustomIntegrations: jest.fn(),
+  };
+  return mock;
+}
+
+function createCustomIntegrationsStart(): jest.Mocked<CustomIntegrationsStart> {
+  const services = servicesFactory({ startPlugins: {}, coreStart: coreMock.createStart() });
+
+  return {
+    languageClientsUiComponents: {},
+    ContextProvider: jest.fn(({ children }: PropsWithChildren<unknown>) => (
+      <CustomIntegrationsServicesProvider {...services}>
+        {children}
+      </CustomIntegrationsServicesProvider>
+    )),
+  };
+}
+
+export const customIntegrationsMock = {
+  createSetup: createCustomIntegrationsSetup,
+  createStart: createCustomIntegrationsStart,
+};

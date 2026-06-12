@@ -1,0 +1,30 @@
+title: The closeAlert subaction
+type: object
+required:
+  - subAction
+  - subActionParams
+description: The `closeAlert` subaction for Opsgenie connectors.
+properties:
+  subAction:
+    type: string
+    description: The action to test.
+    enum:
+      - closeAlert
+  subActionParams:
+    type: object
+    required:
+      - alias
+    properties:
+      alias:
+        type: string
+        description: The unique identifier used for alert deduplication in Opsgenie. The alias must match the value used when creating the alert.
+      note:
+        type: string
+        description: Additional information for the alert.
+      source:
+        type: string
+        description: The display name for the source of the alert.
+      user:
+        type: string
+        description: The display name for the owner.
+ 

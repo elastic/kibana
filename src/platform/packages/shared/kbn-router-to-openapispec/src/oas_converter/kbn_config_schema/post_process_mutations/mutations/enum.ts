@@ -1,0 +1,96 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { OpenAPIV3 } from 'openapi-types';
+import { isReferenceObject } from '../../../common';
+import { ensureNullableEnumIncludesNull } from './utils';
+
+/** Identify special case output of schema.nullable() */
+const isNullableOutput = (schema: OpenAPIV3.ReferenceObject | OpenAPIV3.SchemaObject) => {
+  if (isReferenceObject(schema) || schema.nullable !== true || schema.type !== undefined) {
+    return false;
+  }
+
+  if (schema.enum?.length === 1 && schema.enum[0] === null) {
+    return true;
+  }
+
+  return Object.keys(schema).length === 3 && schema.enum?.length === 0;
+};
+
+const replaceNullableOutputWithNullable = (schema: OpenAPIV3.SchemaObject) => {
+  const remaining = schema.anyOf!.filter((item) => !isNullableOutput(item));
+  if (remaining.length === schema.anyOf!.length) return false;
+
+  schema.anyOf = remaining;
+  schema.nullable = true;
+  return true;
+};
+
+/**
+ * Handle special case output of schema.nullable()
+ *
+ * We go from:
+ * { anyOf: [ { type: 'string' }, { nullable: true, enum: [] } ] }
+ *
+ * To:
+ * { type: 'string', nullable: true, default: null }
+ */
+const processNullableOutput = (schema: OpenAPIV3.SchemaObject) => {
+  if (schema.anyOf!.length !== 2) return false;
+  const idx = schema.anyOf!.findIndex((item) => isNullableOutput(item));
+  if (idx === -1) return false;
+  const anyOf = schema.anyOf!;
+  const nullableTarget = anyOf[1 - idx];
+  const preservedDefault = schema.default;
+
+  if (isReferenceObject(nullableTarget)) {
+    delete schema.anyOf;
+    schema.nullable = true;
+    Object.assign(schema, { allOf: [nullableTarget] });
+    if (preservedDefault === null) {
+      schema.default = null;
+    }
+    return true;
+  }
+
+  delete nullableTarget.default;
+
+  delete schema.anyOf;
+  schema.nullable = true;
+  Object.assign(schema, nullableTarget);
+  if (preservedDefault === null) {
+    schema.default = null;
+  }
+  return true;
+};
+
+const prettifyEnum = (schema: OpenAPIV3.SchemaObject) => {
+  const result: unknown[] = [];
+  let type: OpenAPIV3.SchemaObject['type'];
+  for (const item of schema.anyOf!) {
+    if (isReferenceObject(item) || !item.enum || !item.type) return;
+    if (type && type !== item.type) return;
+
+    type = item.type;
+    result.push(...item.enum);
+  }
+  schema.type = type;
+  schema.enum = result;
+  delete schema.anyOf;
+};
+
+export const processEnum = (schema: OpenAPIV3.SchemaObject) => {
+  if (!schema.anyOf) return;
+  if (!processNullableOutput(schema)) {
+    replaceNullableOutputWithNullable(schema);
+    prettifyEnum(schema);
+  }
+  ensureNullableEnumIncludesNull(schema);
+};

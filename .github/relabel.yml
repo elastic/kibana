@@ -1,0 +1,3 @@
+issues:
+  - missingLabel: needs-team
+    regex: (^\:ml$)|(^Team:.+$)|(^EUI$)

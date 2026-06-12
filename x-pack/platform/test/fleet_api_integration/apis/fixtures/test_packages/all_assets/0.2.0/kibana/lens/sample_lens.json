@@ -1,0 +1,114 @@
+{
+    "type": "lens",
+    "id": "sample_lens",
+    "attributes": {
+        "title": "sample-lens",
+        "description": "",
+        "visualizationType": "lnsXY",
+        "state": {
+            "datasourceStates": {
+                "indexpattern": {
+                    "layers": {
+                        "91b37ed1-ec9f-401d-8ba5-990c2fc65cd0": {
+                            "columns": {
+                                "2c9a6ea8-f3c1-4178-b6af-9e1a5811888a": {
+                                    "label": "Top values of HostDetails.agent.name",
+                                    "dataType": "string",
+                                    "operationType": "terms",
+                                    "scale": "ordinal",
+                                    "sourceField": "HostDetails.agent.name",
+                                    "isBucketed": true,
+                                    "params": {
+                                        "size": 5,
+                                        "orderBy": {
+                                            "type": "column",
+                                            "columnId": "64b26756-2616-4835-bf77-e0e3807cf827"
+                                        },
+                                        "orderDirection": "desc",
+                                        "otherBucket": true,
+                                        "missingBucket": false
+                                    }
+                                },
+                                "64b26756-2616-4835-bf77-e0e3807cf827": {
+                                    "label": "Count of records",
+                                    "dataType": "number",
+                                    "operationType": "count",
+                                    "isBucketed": false,
+                                    "scale": "ratio",
+                                    "sourceField": "Records"
+                                }
+                            },
+                            "columnOrder": [
+                                "2c9a6ea8-f3c1-4178-b6af-9e1a5811888a",
+                                "64b26756-2616-4835-bf77-e0e3807cf827"
+                            ],
+                            "incompleteColumns": {}
+                        }
+                    }
+                }
+            },
+            "visualization": {
+                "legend": {
+                    "isVisible": true,
+                    "position": "right"
+                },
+                "valueLabels": "hide",
+                "fittingFunction": "None",
+                "axisTitlesVisibilitySettings": {
+                    "x": true,
+                    "yLeft": true,
+                    "yRight": true
+                },
+                "tickLabelsVisibilitySettings": {
+                    "x": true,
+                    "yLeft": true,
+                    "yRight": true
+                },
+                "gridlinesVisibilitySettings": {
+                    "x": true,
+                    "yLeft": true,
+                    "yRight": true
+                },
+                "preferredSeriesType": "bar_stacked",
+                "layers": [
+                    {
+                        "layerId": "91b37ed1-ec9f-401d-8ba5-990c2fc65cd0",
+                        "accessors": [
+                            "64b26756-2616-4835-bf77-e0e3807cf827"
+                        ],
+                        "position": "top",
+                        "seriesType": "bar_stacked",
+                        "showGridlines": false,
+                        "xAccessor": "2c9a6ea8-f3c1-4178-b6af-9e1a5811888a"
+                    }
+                ]
+            },
+            "query": {
+                "query": "",
+                "language": "kuery"
+            },
+            "filters": []
+        }
+    },
+    "references": [
+        {
+            "type": "index-pattern",
+            "id": "metrics-*",
+            "name": "indexpattern-datasource-current-indexpattern"
+        },
+        {
+            "type": "index-pattern",
+            "id": "metrics-*",
+            "name": "indexpattern-datasource-layer-91b37ed1-ec9f-401d-8ba5-990c2fc65cd0"
+        }
+    ],
+    "migrationVersion": {
+        "lens": "7.11.0"
+    },
+    "updated_at": "2021-01-13T15:16:10.075Z",
+    "version": "WzI5NCwxXQ==",
+    "namespaces": [
+        "default"
+    ],
+    "score": 0
+}

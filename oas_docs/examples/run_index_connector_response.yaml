@@ -1,0 +1,20 @@
+summary: Response from running an index connector.
+value:
+  connector_id: fd38c600-96a5-11ed-bb79-353b74189cba
+  data:
+    errors: false
+    items:
+      - create:
+          _id: 4JtvwYUBrcyxt2NnfW3y
+          _index: my-index
+          _primary_term: 1
+          _seq_no: 0
+          _shards:
+            failed: 0
+            successful: 1
+            total: 2
+          _version: 1
+          result: created
+          status: 201
+    took: 135
+  status: ok   

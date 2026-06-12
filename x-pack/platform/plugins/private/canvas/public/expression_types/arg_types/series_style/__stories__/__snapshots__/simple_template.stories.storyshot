@@ -1,0 +1,235 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots arguments/SeriesStyle simple 1`] = `
+<div
+  style={
+    Object {
+      "background": "#fff",
+      "padding": "16px",
+      "width": "323px",
+    }
+  }
+>
+  <div
+    className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive canvasArgSeries__colorPicker"
+  >
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        className="euiText emotion-euiText-xs"
+      >
+        Color
+      </div>
+    </div>
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        className="euiText emotion-euiText-xs"
+      >
+        <button
+          aria-label="Color: Auto"
+          className="euiLink emotion-euiLink-primary"
+          disabled={false}
+          onClick={[Function]}
+          type="button"
+        >
+          Auto
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Storyshots arguments/SeriesStyle/components simple: defaults 1`] = `
+<div
+  style={
+    Object {
+      "background": "#fff",
+      "padding": "16px",
+      "width": "323px",
+    }
+  }
+>
+  <div
+    className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive canvasArgSeries__colorPicker"
+  >
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        className="euiText emotion-euiText-xs"
+      >
+        Color
+      </div>
+    </div>
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        className="euiText emotion-euiText-xs"
+      >
+        <button
+          aria-label="Color: Auto"
+          className="euiLink emotion-euiLink-primary"
+          disabled={false}
+          onClick={[Function]}
+          type="button"
+        >
+          Auto
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Storyshots arguments/SeriesStyle/components simple: no labels 1`] = `
+<div
+  style={
+    Object {
+      "background": "#fff",
+      "padding": "16px",
+      "width": "323px",
+    }
+  }
+>
+  <div
+    className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive canvasArgSeries__colorPicker"
+  >
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        className="euiText emotion-euiText-xs"
+      >
+        Color
+      </div>
+    </div>
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        className="euiText emotion-euiText-xs"
+      >
+        <button
+          aria-label="Color: Auto"
+          className="euiLink emotion-euiLink-primary"
+          disabled={false}
+          onClick={[Function]}
+          type="button"
+        >
+          Auto
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Storyshots arguments/SeriesStyle/components simple: no series 1`] = `
+<div
+  style={
+    Object {
+      "background": "#fff",
+      "padding": "16px",
+      "width": "323px",
+    }
+  }
+>
+  <div
+    className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive canvasArgSeries__colorPicker"
+  >
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        className="euiText emotion-euiText-xs"
+      >
+        Color
+      </div>
+    </div>
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        className="euiText emotion-euiText-xs"
+      >
+        <button
+          aria-label="Color: Auto"
+          className="euiLink emotion-euiLink-primary"
+          disabled={false}
+          onClick={[Function]}
+          type="button"
+        >
+          Auto
+        </button>
+      </div>
+    </div>
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <span
+        className="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+        onMouseOut={[Function]}
+        onMouseOver={[Function]}
+      >
+        <span
+          color="warning"
+          data-euiicon-type="warning"
+          onBlur={[Function]}
+          onFocus={[Function]}
+          tabIndex={0}
+        >
+          Info
+        </span>
+      </span>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Storyshots arguments/SeriesStyle/components simple: with series 1`] = `
+<div
+  style={
+    Object {
+      "background": "#fff",
+      "padding": "16px",
+      "width": "323px",
+    }
+  }
+>
+  <div
+    className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive canvasArgSeries__colorPicker"
+  >
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        className="euiText emotion-euiText-xs"
+      >
+        Color
+      </div>
+    </div>
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        className="euiText emotion-euiText-xs"
+      >
+        <button
+          aria-label="Color: Auto"
+          className="euiLink emotion-euiLink-primary"
+          disabled={false}
+          onClick={[Function]}
+          type="button"
+        >
+          Auto
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+`;

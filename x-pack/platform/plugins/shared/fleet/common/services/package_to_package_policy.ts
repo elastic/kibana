@@ -1,0 +1,308 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type {
+  PackageInfo,
+  RegistryVarsEntry,
+  RegistryInput,
+  RegistryStream,
+  PackagePolicyConfigRecord,
+  NewPackagePolicyInput,
+  NewPackagePolicyInputStream,
+  NewPackagePolicy,
+  PackagePolicyConfigRecordEntry,
+  RegistryStreamWithDataStream,
+  RegistryDataStream,
+} from '../types';
+
+import { OTEL_COLLECTOR_INPUT_TYPE } from '../constants';
+
+import { doesPackageHaveIntegrations } from '.';
+import {
+  getNormalizedDataStreams,
+  getNormalizedInputs,
+  isIntegrationPolicyTemplate,
+} from './policy_template';
+
+type PackagePolicyStream = RegistryStream & {
+  data_stream: { type?: string; dataset: string };
+};
+
+/**
+ * Returns the effective discriminator for an input, regardless of whether it comes from
+ * the registry (`RegistryInput`) or a stored package policy (`NewPackagePolicyInput`).
+ *
+ * Uses the explicit `name` field when present, falling back to `type`. This value is
+ * used as the keying and matching discriminator throughout Fleet so that multiple inputs
+ * of the same `type` within one policy template can be distinguished.
+ */
+export const getInputEffectiveName = (input: { name?: string; type: string }): string =>
+  input.name ?? input.type;
+
+/**
+ * Returns true if the given data stream effectively uses the OTel collector input type.
+ *
+ * A data stream is considered OTel when any of its `streams[].input` values is either:
+ * - the literal type `'otelcol'`, or
+ * - the `name` of an input within `pkgInfo.policy_templates[*].inputs` whose `type` is `'otelcol'`.
+ *
+ * The second case handles the named-input feature (package-spec 3.6.1+) where multiple inputs
+ * of the same type coexist in one policy template and data streams reference them by name instead
+ * of by type.
+ */
+export const dataStreamUsesOtelInput = (
+  pkgInfo: Pick<PackageInfo, 'policy_templates'>,
+  dataStream: Pick<RegistryDataStream, 'streams'>
+): boolean => {
+  const namedOtelInputs = new Set<string>();
+  for (const tpl of pkgInfo.policy_templates ?? []) {
+    for (const input of getNormalizedInputs(tpl)) {
+      if (input.type === OTEL_COLLECTOR_INPUT_TYPE && input.name) {
+        namedOtelInputs.add(input.name);
+      }
+    }
+  }
+  return (dataStream.streams ?? []).some(
+    (stream) => stream.input === OTEL_COLLECTOR_INPUT_TYPE || namedOtelInputs.has(stream.input)
+  );
+};
+
+/**
+ * Builds the composite key used to index input validation results and var definitions.
+ * For packages with integrations (multiple policy templates), the key is prefixed with
+ * the policy template name to avoid collisions across templates.
+ */
+export const buildInputKey = (
+  effectiveName: string,
+  policyTemplateName: string | undefined,
+  hasIntegrations: boolean
+): string =>
+  hasIntegrations && policyTemplateName ? `${policyTemplateName}-${effectiveName}` : effectiveName;
+
+export const getStreamsForInputType = (
+  inputType: string,
+  packageInfo: PackageInfo,
+  dataStreamPaths: string[] = []
+): PackagePolicyStream[] => {
+  const streams: PackagePolicyStream[] = [];
+  const dataStreams = getNormalizedDataStreams(packageInfo);
+  const dataStreamsToSearch = dataStreamPaths.length
+    ? dataStreams.filter((dataStream) => dataStreamPaths.includes(dataStream.path))
+    : dataStreams;
+
+  dataStreamsToSearch.forEach((dataStream) => {
+    (dataStream.streams || []).forEach((stream) => {
+      if (stream.input === inputType) {
+        streams.push({
+          ...stream,
+          data_stream: {
+            type: dataStream.type,
+            dataset: dataStream.dataset,
+          },
+        });
+      }
+    });
+  });
+
+  return streams;
+};
+
+export const getRegistryStreamWithDataStreamForInputType = (
+  inputType: string,
+  packageInfo: PackageInfo,
+  dataStreamPaths: string[] = []
+): RegistryStreamWithDataStream[] => {
+  const streams: RegistryStreamWithDataStream[] = [];
+  const dataStreams = getNormalizedDataStreams(packageInfo);
+  const dataStreamsToSearch = dataStreamPaths.length
+    ? dataStreams.filter((dataStream) => dataStreamPaths.includes(dataStream.path))
+    : dataStreams;
+
+  dataStreamsToSearch.forEach((dataStream) => {
+    (dataStream.streams || []).forEach((stream) => {
+      if (stream.input === inputType) {
+        streams.push({
+          ...stream,
+          data_stream: {
+            ...dataStream,
+          },
+        });
+      }
+    });
+  });
+
+  return streams;
+};
+
+// Reduces registry var def into config object entry
+export const varsReducer = (
+  configObject: PackagePolicyConfigRecord,
+  registryVar: RegistryVarsEntry
+): PackagePolicyConfigRecord => {
+  const configEntry: PackagePolicyConfigRecordEntry = {
+    value: !registryVar.default && registryVar.multi ? [] : registryVar.default,
+  };
+  if (registryVar.type) {
+    configEntry.type = registryVar.type;
+  }
+  configObject![registryVar.name] = configEntry;
+  return configObject;
+};
+
+/*
+ * This service creates a package policy inputs definition from defaults provided in package info
+ */
+export const packageToPackagePolicyInputs = (
+  packageInfo: PackageInfo,
+  integrationToEnable?: string
+): NewPackagePolicyInput[] => {
+  const hasIntegrations = doesPackageHaveIntegrations(packageInfo);
+  const inputs: NewPackagePolicyInput[] = [];
+  const packageInputsByPolicyTemplateAndType: {
+    [key: string]: RegistryInput & { data_streams?: string[]; policy_template: string };
+  } = {};
+
+  packageInfo.policy_templates?.forEach((packagePolicyTemplate) => {
+    const normalizedInputs = getNormalizedInputs(packagePolicyTemplate);
+    normalizedInputs?.forEach((packageInput) => {
+      const inputKey = `${packagePolicyTemplate.name}-${getInputEffectiveName(packageInput)}`;
+      const input = {
+        ...packageInput,
+        ...(isIntegrationPolicyTemplate(packagePolicyTemplate) && packagePolicyTemplate.data_streams
+          ? { data_streams: packagePolicyTemplate.data_streams }
+          : {}),
+        policy_template: packagePolicyTemplate.name,
+      };
+      packageInputsByPolicyTemplateAndType[inputKey] = input;
+    });
+  });
+
+  Object.values(packageInputsByPolicyTemplateAndType).forEach((packageInput) => {
+    const streamsForInput: NewPackagePolicyInputStream[] = [];
+    let varsForInput: PackagePolicyConfigRecord = {};
+
+    // Use the input's id as the discriminator for stream matching when present,
+    // so that stream.input values reference the input id rather than the type.
+    const streamMatchKey = getInputEffectiveName(packageInput);
+
+    // Map each package input stream into package policy input stream
+    const streams = getStreamsForInputType(
+      streamMatchKey,
+      packageInfo,
+      packageInput.data_streams
+    ).map((packageStream) => {
+      const stream: NewPackagePolicyInputStream = {
+        // disable deprecated streams on new installations
+        enabled: packageStream.deprecated ? false : packageStream.enabled !== false,
+        data_stream: packageStream.data_stream,
+        ...(packageStream.migrate_from ? { migrate_from: packageStream.migrate_from } : {}),
+      };
+      if (packageStream.vars && packageStream.vars.length) {
+        stream.vars = packageStream.vars.reduce(varsReducer, {});
+      }
+      return stream;
+    });
+
+    if (packageInput.vars?.length) {
+      varsForInput = packageInput.vars.reduce(varsReducer, {});
+    }
+
+    streamsForInput.push(...streams);
+
+    // Check if we should enable this input by the streams below it
+    // Enable it if at least one of its streams is enabled
+    let enableInput = streamsForInput.length
+      ? !!streamsForInput.find((stream) => stream.enabled)
+      : true;
+
+    // Disable deprecated inputs on new installations
+    if (enableInput && packageInput.deprecated) {
+      enableInput = false;
+    }
+    // If we are wanting to enabling this input, check if we only want
+    // to enable specific integrations (aka `policy_template`s)
+    if (
+      enableInput &&
+      hasIntegrations &&
+      integrationToEnable &&
+      integrationToEnable !== packageInput.policy_template
+    ) {
+      enableInput = false;
+    }
+
+    const input: NewPackagePolicyInput = {
+      type: packageInput.type,
+      ...(packageInput.name ? { name: packageInput.name } : {}),
+      policy_template: packageInput.policy_template,
+      enabled: enableInput,
+      streams: streamsForInput,
+      ...(packageInput.migrate_from ? { migrate_from: packageInput.migrate_from } : {}),
+    };
+
+    if (Object.keys(varsForInput).length) {
+      input.vars = varsForInput;
+    }
+
+    if (packageInput.deprecated) {
+      input.deprecated = packageInput.deprecated;
+    }
+
+    inputs.push(input);
+  });
+
+  return inputs;
+};
+
+/**
+ * Builds a `NewPackagePolicy` structure based on a package
+ *
+ * @param packageInfo
+ * @param agentPolicyId
+ * @param outputId
+ * @param packagePolicyName
+ */
+export const packageToPackagePolicy = (
+  packageInfo: PackageInfo,
+  agentPolicyIds: string | string[],
+  namespace: string = '',
+  packagePolicyName?: string,
+  description?: string,
+  integrationToEnable?: string
+): NewPackagePolicy => {
+  if (!Array.isArray(agentPolicyIds)) {
+    agentPolicyIds = [agentPolicyIds];
+  }
+  const experimentalDataStreamFeatures =
+    'installationInfo' in packageInfo
+      ? packageInfo.installationInfo?.experimental_data_stream_features
+      : undefined;
+
+  const packagePolicy: NewPackagePolicy = {
+    name: packagePolicyName || `${packageInfo.name}-1`,
+    namespace,
+    description,
+    package: {
+      name: packageInfo.name,
+      title: packageInfo.title,
+      version: packageInfo.version,
+      ...(experimentalDataStreamFeatures
+        ? { experimental_data_stream_features: experimentalDataStreamFeatures }
+        : undefined),
+    },
+    enabled: true,
+    policy_id: agentPolicyIds[0],
+    policy_ids: agentPolicyIds,
+    inputs: packageToPackagePolicyInputs(packageInfo, integrationToEnable),
+    vars: undefined,
+  };
+
+  if (packageInfo.vars?.length) {
+    packagePolicy.vars = packageInfo.vars.reduce(varsReducer, {});
+  }
+
+  return packagePolicy;
+};

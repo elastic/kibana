@@ -1,0 +1,13 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "date-nested-1",
+    "index": "date-nested",
+    "source": {
+      "message": "test",
+      "nested": {
+        "timestamp": "2021-06-30T12:00:00.123Z"
+      }
+    }
+  }
+}

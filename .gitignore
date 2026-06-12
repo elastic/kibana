@@ -1,0 +1,208 @@
+.aws-config.json
+.bk.yaml
+.signing-config.json
+.ackrc
+/.es
+/.chromium
+.DS_Store
+.node_binaries
+/.beats
+.native_modules
+node_modules
+!/src/dev/npm/integration_tests/__fixtures__/fixture1/node_modules
+!/src/dev/notice/__fixtures__/node_modules
+!/src/platform/packages/private/kbn-import-resolver/src/__fixtures__/node_modules
+!/src/platform/packages/private/kbn-import-resolver/src/__fixtures__/packages/box/node_modules
+trash
+/optimize
+/built_assets
+target
+/build
+.jruby
+.idea
+.claude/*.local.json
+.claude/worktrees/
+/.cursor/*
+!/.cursor/hooks.json
+!/.cursor/hooks/
+!x-pack/solutions/security/.cursor
+!x-pack/solutions/security/test/security_solution_cypress/.cursor/
+.windsurf
+*.iml
+*.log
+types.eslint.config.js
+types.eslint.config.cjs
+__tmp__
+.bug-fixer-session/
+.playwright-mcp/
+.exploratory-session/
+config_sets/bug_fixer/
+
+# Ignore example plugin builds
+/examples/*/build
+/x-pack/examples/*/build
+
+# Ignore certain functional test runner artifacts
+/src/platform/test/*/failure_debug
+/src/platform/test/*/screenshots/diff
+/src/platform/test/*/screenshots/failure
+/src/platform/test/*/screenshots/session
+/src/platform/test/*/screenshots/visual_regression_gallery.html
+
+# Ignore the same artifacts in x-pack/platform and and x-pack/solutions/*/test
+/x-pack/**/test/*/failure_debug
+/x-pack/**/test/*/screenshots/diff
+/x-pack/**/test/*/screenshots/failure
+/x-pack/**/test/*/screenshots/session
+/x-pack/**/test/*/screenshots/visual_regression_gallery.html
+/x-pack/**/test/functional/apps/*/*/reporting/reports/failure
+
+# Ignore the same artifacts in x-pack/platform/test/serverless and x-pack/solutions/*/test/serverless
+/x-pack/**/test/serverless/*/failure_debug
+/x-pack/**/test/serverless/*/screenshots/diff
+/x-pack/**/test/serverless/*/screenshots/failure
+/x-pack/**/test/serverless/*/screenshots/session
+/x-pack/**/test/serverless/*/screenshots/visual_regression_gallery.html
+/x-pack/**/test/serverless/functional/test_suites/*/*/reporting/reports/failure
+
+/html_docs
+.eslintcache
+/plugins/
+/data
+disabledPlugins
+webpackstats.json
+/config/*
+!/config/kibana.yml
+!/config/README.md
+!/config/serverless.yml
+!/config/serverless.es.yml
+!/config/serverless.workplaceai.yml
+!/config/serverless.vectordb.yml
+!/config/serverless.oblt.yml
+!/config/serverless.oblt.complete.yml
+!/config/serverless.oblt.logs_essentials.yml
+!/config/serverless.security.yml
+!/config/serverless.security.essentials.yml
+!/config/serverless.security.complete.yml
+!/config/serverless.security.search_ai_lake.yml
+!/config/node.options
+coverage
+!/src/platform/test/common/fixtures/plugins/coverage
+selenium
+.babel_register_cache.json
+.webpack.babelcache
+.swc
+*.swp
+*.swo
+*.swn
+*.out
+package-lock.json
+!/.buildkite/package-lock.json
+.yo-rc.json
+.vscode
+*.sublime-*
+npm-debug.log*
+.tern-project
+.nyc_output
+.gradle
+.vagrant
+.envrc
+
+# @kbn/evals vault config (local-only; never commit real secrets)
+/x-pack/platform/packages/shared/kbn-evals/scripts/vault/config.json
+
+## Snyk
+.dccache
+
+## @cypress/snapshot from apm plugin
+/snapshots.js
+/apm-diagnostics*.json
+/x-pack/solutions/observability/plugins/apm/ftr_e2e/cypress/e2e/service_map/snapshots/*.actual.png
+/x-pack/solutions/observability/plugins/apm/ftr_e2e/cypress/e2e/service_map/snapshots/*.diff.png
+
+# transpiled cypress config
+x-pack/platform/plugins/shared/fleet/cypress.config.d.ts
+x-pack/platform/plugins/shared/fleet/cypress.config.js
+x-pack/platform/plugins/shared/fleet/cypress.config.space_awareness.d.ts
+x-pack/platform/plugins/shared/fleet/cypress.config.space_awareness.js
+x-pack/platform/plugins/shared/fleet/cypress_ci.config.d.ts
+x-pack/platform/plugins/shared/fleet/cypress_ci.config.js
+x-pack/platform/plugins/shared/fleet/cypress_ci.config.space_awareness.d.ts
+x-pack/platform/plugins/shared/fleet/cypress_ci.config.space_awareness.js
+x-pack/platform/plugins/shared/osquery/cypress.config.d.ts
+x-pack/platform/plugins/shared/osquery/cypress.config.js
+x-pack/solutions/search/plugins/enterprise_search/cypress.config.d.ts
+x-pack/solutions/search/plugins/enterprise_search/cypress.config.js
+x-pack/solutions/security/plugins/security_solution/public/management/cypress.config.d.ts
+x-pack/solutions/security/plugins/security_solution/public/management/cypress.config.js
+x-pack/solutions/security/plugins/security_solution/public/management/cypress_endpoint.config.d.ts
+x-pack/solutions/security/plugins/security_solution/public/management/cypress_endpoint.config.js
+
+# release notes script output
+report.csv
+report.asciidoc
+
+# TS incremental build cache
+*.tsbuildinfo
+
+# Automatically generated and user-modifiable
+/tsconfig.refs.json
+*.type_check.json
+
+# Yarn local mirror content
+.yarn-local-mirror
+
+# Bazel | TODO: Remove later
+.ijwb
+/bazel
+/bazel-*
+.bazelrc.user
+.bazelrc.cache
+
+elastic-agent-*
+fleet-server-*
+elastic-agent.yml
+fleet-server.yml
+src/platform/packages/**/package-map.json
+/packages/**/config-paths.json
+/packages/kbn-synthetic-package-map/
+**/.synthetics/
+**/.journeys/
+**/.rca/
+x-pack/platform/test/security_api_integration/plugins/audit_log/audit.log
+x-pack/test
+
+# ignore FTR temp directory
+.ftr
+role_users.json
+
+# ignore Scout temp directory
+.scout
+
+# Playwright
+**/test-results/.last-run.json
+
+.devcontainer/.env
+
+# Ignore temporary files in oas_docs
+oas_docs/output/kibana.serverless.tmp*.yaml
+oas_docs/output/kibana.tmp*.yaml
+oas_docs/output/kibana.new.yaml
+oas_docs/output/kibana.serverless.new.yaml
+oas_docs/bundle.json
+oas_docs/bundle.serverless.json
+
+.codeql
+.dependency-graph-log.json
+
+# Ignore the one-console translations build output folder
+src/platform/plugins/shared/console/packaging/react/translations
+
+.moon/cache
+
+# Batched commits marker, e.g.: from quick checks
+.collect_commits_marker
+
+# Agent skill working output (team-auto-tests-stats markdown only — never commit)
+.cursor/tmp/
+.agents/tmp/

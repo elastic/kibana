@@ -1,0 +1,6 @@
+{
+  "messages": {
+    "a.b.c": "bar",
+    "d.e.f": "foo"
+  }
+}

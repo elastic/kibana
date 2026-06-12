@@ -1,0 +1,13 @@
+name: Reassign Copilot Commit
+
+on:
+  workflow_dispatch:
+  # pull_request_target:
+  #   types: [closed]
+
+jobs:
+  reassign-copilot-commits:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Log dummy message
+        run: echo "I am working fine"

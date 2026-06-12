@@ -1,0 +1,23 @@
+// We apply brute force focus states to anything not coming from Eui
+// which has focus states designed at the component level.
+// You can also use "kbn-resetFocusState" to not apply the default focus
+// state. This is useful when you've already hand crafted your own
+// focus states in Kibana.
+:focus {
+  &:not([class^='eui']):not(.kbn-resetFocusState) {
+    // The focus policy causes double focus rings to appear on EuiSelectableList
+    // since the focusable element does not contain a class starting with "eui".
+    &:not(.euiSelectableList__list > ul) {
+      @include euiFocusRing;
+    }
+  }
+}
+
+// A necessary hack so that the above focus policy doesn't pollute some EUI
+// entrenched inputs.
+.euiComboBox {
+  // :not() specificity needed to override the above
+  input:not([class^='eui']):focus {
+    animation: none !important;
+  }
+}

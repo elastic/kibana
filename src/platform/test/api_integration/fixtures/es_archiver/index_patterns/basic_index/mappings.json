@@ -1,0 +1,41 @@
+{
+  "type": "index",
+  "value": {
+    "index": "basic_index",
+    "settings": {
+      "index": {
+        "number_of_shards": "1",
+        "number_of_replicas": "1"
+      }
+    },
+    "mappings": {
+      "properties": {
+        "bar": {
+          "type": "boolean"
+        },
+        "baz": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "foo": {
+          "type": "long"
+        },
+        "nestedField": {
+          "type": "nested",
+          "properties": {
+            "child": {
+              "type": "keyword"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+

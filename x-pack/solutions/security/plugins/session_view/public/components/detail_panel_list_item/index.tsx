@@ -1,0 +1,53 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import type { ReactNode } from 'react';
+import React, { useState } from 'react';
+import type { EuiTextProps } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
+import type { CSSObject } from '@emotion/react';
+import { useStyles } from './styles';
+
+interface DetailPanelListItemDeps {
+  children: ReactNode;
+  copy?: ReactNode;
+  display?: string;
+}
+
+interface EuiTextPropsCss extends EuiTextProps {
+  css: CSSObject;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
+}
+
+/**
+ * Detail panel description list item.
+ */
+export const DetailPanelListItem = ({
+  children,
+  copy,
+  display = 'grid',
+}: DetailPanelListItemDeps) => {
+  const [isHovered, setIsHovered] = useState(false);
+  const styles = useStyles({ display });
+
+  const props: EuiTextPropsCss = {
+    size: 's',
+    css: !!copy ? styles.copiableItem : styles.item,
+  };
+
+  if (!!copy) {
+    props.onMouseEnter = () => setIsHovered(true);
+    props.onMouseLeave = () => setIsHovered(false);
+  }
+
+  return (
+    <EuiText {...props} data-test-subj="sessionView:detail-panel-list-item">
+      {children}
+      {isHovered && copy}
+    </EuiText>
+  );
+};

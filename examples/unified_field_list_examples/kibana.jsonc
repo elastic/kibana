@@ -1,0 +1,26 @@
+{
+  "type": "plugin",
+  "id": "@kbn/unified-field-list-examples-plugin",
+  "owner": "@elastic/kibana-data-discovery",
+  "description": "Examples for using unified field list.",
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "unifiedFieldListExamples",
+    "server": false,
+    "browser": true,
+    "requiredPlugins": [
+      "navigation",
+      "developerExamples",
+      "inspector",
+      "kibanaUtils",
+      "unifiedSearch",
+      "data",
+      "dataViews",
+      "dataViewFieldEditor",
+      "charts",
+      "fieldFormats",
+      "uiActions"
+    ]
+  }
+}

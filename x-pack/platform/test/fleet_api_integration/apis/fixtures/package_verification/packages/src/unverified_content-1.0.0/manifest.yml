@@ -1,0 +1,24 @@
+format_version: 1.0.0
+name: unverified_content
+title: Unverified Package
+description: >-
+  This package has a signature created by the right publick key but the content doesn't match.
+type: integration
+version: 1.0.0
+release: ga
+license: basic
+categories:
+  - custom
+policy_templates:
+  - name: logs
+    title: Custom logs
+    description: Collect your custom log files.
+    inputs:
+      - type: logfile
+        title: Custom log file
+        description: Collect your custom log files.
+icons:
+  - src: "/img/icon.svg"
+    type: "image/svg+xml"
+owner:
+  github: elastic/fleet

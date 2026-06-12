@@ -1,0 +1,6 @@
+{
+  "id": "date_nanos_list",
+  "name": "Simple list with date nanos",
+  "description": "This list has dates in the format of nanos",
+  "type": "date_nanos"
+}

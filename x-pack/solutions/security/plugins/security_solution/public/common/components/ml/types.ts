@@ -1,0 +1,127 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { MlInfluencer } from '@kbn/ml-anomaly-utils';
+import type { EntityStoreRecord } from '../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import type { FlowTarget } from '../../../../common/search_strategy';
+
+import type { HostsType } from '../../../explore/hosts/store/model';
+import type { NetworkType } from '../../../explore/network/store/model';
+import type { UsersType } from '../../../explore/users/store/model';
+
+export interface Source {
+  job_id: string;
+  result_type: string;
+  probability: number;
+  multi_bucket_impact: number;
+  record_score: number;
+  initial_record_score: number;
+  bucket_span: number;
+  detector_index: number;
+  is_interim: boolean;
+  timestamp: number;
+  by_field_name: string;
+  by_field_value: string;
+  partition_field_name: string;
+  partition_field_value: string;
+  function: string;
+  function_description: string;
+  typical: number[];
+  actual: number[];
+  influencers: MlInfluencer[];
+}
+
+export interface CriteriaFields {
+  fieldName: string;
+  fieldValue: string;
+}
+
+export interface InfluencerInput {
+  fieldName: string;
+  fieldValue: string;
+}
+
+export interface Anomaly {
+  detectorIndex: number;
+  entityName: string;
+  entityValue: string;
+  influencers?: Array<Record<string, string>>;
+  jobId: string;
+  rowId: string;
+  severity: number;
+  time: number;
+  source: Source;
+}
+
+export interface Anomalies {
+  anomalies: Anomaly[];
+  interval: string;
+}
+
+export type NarrowDateRange = (score: Anomaly, interval: string) => void;
+
+export interface AnomaliesBy {
+  anomaly: Anomaly;
+  jobName: string | undefined;
+}
+
+export interface AnomaliesByHost extends AnomaliesBy {
+  hostName: string;
+}
+
+export type DestinationOrSource = 'source.ip' | 'destination.ip';
+
+export interface AnomaliesByNetwork extends AnomaliesBy {
+  type: DestinationOrSource;
+  ip: string;
+}
+
+export interface AnomaliesByUser extends AnomaliesBy {
+  userName: string;
+}
+
+export interface AnomaliesTableCommonProps {
+  startDate: string;
+  endDate: string;
+  narrowDateRange: NarrowDateRange;
+  skip: boolean;
+}
+
+export type AnomaliesHostTableProps = AnomaliesTableCommonProps & {
+  hostName?: string;
+  type: HostsType;
+  /** Entity Store / EUID identity fields; drives ML exists filter and anomaly row matching. */
+  identityFields?: Record<string, string>;
+};
+
+export type AnomaliesNetworkTableProps = AnomaliesTableCommonProps & {
+  ip?: string;
+  type: NetworkType;
+  flowTarget?: FlowTarget;
+};
+
+export type AnomaliesUserTableProps = AnomaliesTableCommonProps & {
+  userName?: string;
+  type: UsersType;
+  entityRecord?: EntityStoreRecord | null;
+  /** Entity Store / EUID identity fields; drives ML exists filter and anomaly row matching. */
+  identityFields?: Record<string, string>;
+};
+
+const sourceOrDestination = ['source.ip', 'destination.ip'];
+
+export const isDestinationOrSource = (value: string | null): value is DestinationOrSource =>
+  value != null && sourceOrDestination.includes(value);
+
+export interface MlError {
+  msg: string;
+  response: string;
+  statusCode: number;
+  path?: string;
+  query?: {};
+  body?: string;
+}

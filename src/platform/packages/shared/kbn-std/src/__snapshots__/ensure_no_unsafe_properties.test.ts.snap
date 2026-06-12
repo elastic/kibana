@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`can't submit {"__proto__":null} 1`] = `"'__proto__' is an invalid key"`;
+
+exports[`can't submit {"constructor":{"prototype":null}} 1`] = `"'constructor.prototype' is an invalid key"`;
+
+exports[`can't submit {"foo":{"__proto__":true}} 1`] = `"'__proto__' is an invalid key"`;
+
+exports[`can't submit {"foo":{"bar":{"__proto__":{}}}} 1`] = `"'__proto__' is an invalid key"`;
+
+exports[`can't submit {"foo":{"bar":{"constructor":{"prototype":null}}}} 1`] = `"'constructor.prototype' is an invalid key"`;
+
+exports[`can't submit {"foo":{"constructor":{"prototype":null}}} 1`] = `"'constructor.prototype' is an invalid key"`;

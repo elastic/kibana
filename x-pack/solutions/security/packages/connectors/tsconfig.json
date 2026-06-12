@@ -1,0 +1,23 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node",
+      "react",
+      "@testing-library/jest-dom",
+      "@testing-library/react",
+      "@kbn/ambient-ui-types",
+    ]
+  },
+  "include": ["**/*.ts", "**/*.tsx"],
+  "kbn_references": [
+    "@kbn/i18n",
+    "@kbn/ai-assistant-connector-selector-action",
+    "@kbn/triggers-actions-ui-plugin",
+    "@kbn/management-settings-ids",
+    "@kbn/core-ui-settings-browser",
+  ],
+  "exclude": ["target/**/*"]
+}

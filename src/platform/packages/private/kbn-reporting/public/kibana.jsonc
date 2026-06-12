@@ -1,0 +1,9 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/reporting-public",
+  "owner": [
+    "@elastic/response-ops"
+  ],
+  "group": "platform",
+  "visibility": "private"
+}

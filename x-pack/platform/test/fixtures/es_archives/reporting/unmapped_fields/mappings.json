@@ -1,0 +1,15 @@
+{
+  "type": "index",
+  "value": {
+    "index": "recipes",
+    "mappings": {
+      "dynamic": false,
+      "properties": {
+        "text": {
+          "type": "text",
+          "fielddata": "true"
+        }
+      }
+    }
+  }
+}

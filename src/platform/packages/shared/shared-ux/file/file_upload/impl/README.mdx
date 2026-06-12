@@ -1,0 +1,32 @@
+---
+id: sharedUX/Components/FileUpload
+slug: /shared-ux/components/file-upload
+title: File upload
+description: Upload file(s) to Kibana.
+tags: ['shared-ux', 'component', 'files']
+date: 2022-11-22
+---
+
+## Description
+
+A wrapper around `<EuiFilePicker />` that provides state management for the upload process using the `FileClient`.
+
+## Usage
+
+Must be wrapped in the `FilesContext`.
+
+```tsx
+<FilesContext ...>
+  <FileUpload ... />
+</FilesContext>
+```
+
+## Variants
+
+### Default
+
+The default layout should sit nicely in a form, modal or flyout.
+
+### Compressed
+
+When space is constrained you can render a smaller version of the UI by passing the `compressed` prop. This variant will be smaller in size, and start uploading a file immediately once it receives it.

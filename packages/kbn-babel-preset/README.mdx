@@ -1,0 +1,23 @@
+---
+id: kibDevDocsOpsBabelPreset
+slug: /kibana-dev-docs/ops/babel-preset
+title: "@kbn/babel-preset"
+description: A package holding the main babel configs on Kibana
+date: 2022-05-17
+tags: ['kibana', 'dev', 'contributor', 'operations', 'babel', 'custom', 'preset']
+---
+
+This package contains the shared bits of babel config that we use for transpiling our source code to code compatible with Node.JS and the various [browsers we support](https://www.elastic.co/support/matrix#matrix_browsers).
+
+## Usage
+
+To use those presets add either `@kbn/babel-preset/node_preset` or `@kbn/babel-preset/webpack_preset` into the babel config file.
+
+`@kbn/babel-preset/node_preset` is usually placed in a [`babel.config.js` file](https://babeljs.io/docs/en/configuration#babelconfigjs).
+
+`@kbn/babel-preset/webpack_preset` is usually placed directly in a `webpack` configuration.
+
+If you're transpiling code that will be run in both the browser and node you must transpile your code twice, once for each target. 
+
+Along with the introduction of Bazel to build packages we also provide now an easier way to easily use the babel transpiler by using the `js_ts_tarnspiler` rule with our without the `web` property enabled. 
+Take a look for example at `@kbn/i18n` to see how that can look.

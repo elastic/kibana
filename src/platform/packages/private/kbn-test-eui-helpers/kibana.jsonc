@@ -1,0 +1,10 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/test-eui-helpers",
+  "owner": [
+    "@elastic/kibana-visualizations"
+  ],
+  "group": "platform",
+  "visibility": "private",
+  "devOnly": true
+}

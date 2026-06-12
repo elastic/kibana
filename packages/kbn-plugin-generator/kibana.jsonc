@@ -1,0 +1,8 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/plugin-generator",
+  "owner": "@elastic/kibana-operations",
+  "group": "platform",
+  "visibility": "private",
+  "devOnly": true
+}

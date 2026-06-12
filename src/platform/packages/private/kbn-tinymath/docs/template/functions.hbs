@@ -1,0 +1,15 @@
+# TinyMath Functions
+This document provides detailed information about the functions available in Tinymath and lists what parameters each function accepts, the return value of that function, and examples of how each function behaves. Most of the functions below accept arrays and apply JavaScript Math methods to each element of that array. For the functions that accept multiple arrays as parameters, the function generally does calculation index by index. Any function below can be wrapped by another function as long as the return type of the inner function matches the acceptable parameter type of the outer function.
+
+{{#functions}}
+## _{{name}}(_{{#each params}} {{#if variable}}...{{/if}}_{{name}}_{{#unless @last}},{{/unless}} {{/each}}_)_
+{{description}}
+
+{{>params~}}
+{{>returns~}}
+{{>throws~}}
+{{>examples~}}
+{{#unless @last}}
+***
+{{/unless}}
+{{/functions}}

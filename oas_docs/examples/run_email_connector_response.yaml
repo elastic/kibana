@@ -1,0 +1,23 @@
+summary: Response for sending a message from an email connector.
+value:
+  connector_id: 7fc7b9a0-ecc9-11ec-8736-e7d63118c907
+  data:
+    accepted:
+      - user1@example.com
+      - user2@example.com
+      - user3@example.com
+      - user4@example.com
+    envelope:
+      from: tester@example.com
+      to:
+        - user1@example.com
+        - user2@example.com
+        - user3@example.com
+        - user4@example.com
+    envelopeTime: 8
+    messageTime: 3
+    messageSize: 729
+    response: "250 Message queued as QzEXKcGJ"
+    messageId: "<08a92d29-642a-0706-750c-de5996bd5cf3@example.com>"
+    rejected: []
+  status: ok

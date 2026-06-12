@@ -1,0 +1,37 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`news_loading rendering renders the News Loading with EuiLoadingSpinner 1`] = `
+<EuiEmptyPrompt
+  body={
+    <p>
+      <Memo(MemoizedFormattedMessage)
+        defaultMessage="Getting the latest news..."
+        id="newsfeed.loadingPrompt.gettingNewsText"
+      />
+    </p>
+  }
+  title={
+    <EuiLoadingSpinner
+      size="xl"
+    />
+  }
+/>
+`;
+
+exports[`news_loading rendering renders the default News Loading 1`] = `
+<EuiEmptyPrompt
+  body={
+    <p>
+      <Memo(MemoizedFormattedMessage)
+        defaultMessage="Getting the latest news..."
+        id="newsfeed.loadingPrompt.gettingNewsText"
+      />
+    </p>
+  }
+  title={
+    <EuiLoadingElastic
+      size="xl"
+    />
+  }
+/>
+`;
