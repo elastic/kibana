@@ -14,7 +14,7 @@ import { getTimeReporter } from '@kbn/ci-stats-reporter';
 
 import { Cluster } from '../cluster';
 import { parseTimeoutToMs } from '../utils';
-import { configureMockIdpSamlRealm } from '../utils/mock_idp_saml_realm';
+import { configureMockIdpSamlRealm } from '../utils/configure_mock_idp_saml_realm';
 import { createCliError } from '../errors';
 import { EIS_ES_ARG, resolveCcmApiKey, setCcmApiKey } from '../eis/eis_setup';
 import type { Command } from './types';
@@ -130,6 +130,7 @@ export const snapshot: Command = {
         log,
       });
       options.esArgs = samlEsArgs;
+
       const installStartTime = Date.now();
       const { installPath } = await cluster.installSnapshot({
         version: options.version,

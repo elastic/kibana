@@ -20,4 +20,3 @@ export * from './docker';
 export * from './serverless_file_realm';
 export * from './read_roles_from_resource';
 export * from './extract_and_archive_logs';
-export * from './mock_idp_saml_realm';

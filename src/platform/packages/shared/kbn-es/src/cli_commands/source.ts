@@ -12,7 +12,7 @@ import getopts from 'getopts';
 import { ToolingLog } from '@kbn/tooling-log';
 import { Cluster } from '../cluster';
 import { parseTimeoutToMs } from '../utils';
-import { configureMockIdpSamlRealm } from '../utils/mock_idp_saml_realm';
+import { configureMockIdpSamlRealm } from '../utils/configure_mock_idp_saml_realm';
 import type { Command } from './types';
 
 export const source: Command = {

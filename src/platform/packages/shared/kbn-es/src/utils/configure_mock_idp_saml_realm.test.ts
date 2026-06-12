@@ -10,20 +10,20 @@
 import { MOCK_IDP_REALM_NAME } from '@kbn/mock-idp-utils';
 import { ToolingLog } from '@kbn/tooling-log';
 
-const writeFileSyncMock = jest.fn();
+const mockWriteFileSync = jest.fn();
 jest.mock('fs', () => ({
   ...jest.requireActual('fs'),
-  writeFileSync: (...args: unknown[]) => writeFileSyncMock(...args),
+  writeFileSync: (...args: unknown[]) => mockWriteFileSync(...args),
 }));
 
-import { configureMockIdpSamlRealm } from './mock_idp_saml_realm';
+import { configureMockIdpSamlRealm } from './configure_mock_idp_saml_realm';
 
 describe('configureMockIdpSamlRealm', () => {
   let log: ToolingLog;
   let warnings: string[];
 
   beforeEach(() => {
-    writeFileSyncMock.mockReset();
+    mockWriteFileSync.mockReset();
     warnings = [];
     log = new ToolingLog();
     jest.spyOn(log, 'warning').mockImplementation((msg) => warnings.push(String(msg)));
@@ -37,13 +37,15 @@ describe('configureMockIdpSamlRealm', () => {
       log,
     });
 
-    expect(writeFileSyncMock).toHaveBeenCalledTimes(1);
+    expect(mockWriteFileSync).toHaveBeenCalledTimes(1);
 
     // SAML args are prepended so user-provided args can still override them.
     expect(esArgs[esArgs.length - 1]).toBe('cluster.name=test');
     expect(esArgs).toContain('xpack.security.authc.token.enabled=true');
     expect(
-      esArgs.some((arg) => arg.startsWith(`xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.`))
+      esArgs.some((arg) =>
+        arg.startsWith(`xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.`)
+      )
     ).toBe(true);
 
     expect(resources).toHaveLength(1);
@@ -58,7 +60,7 @@ describe('configureMockIdpSamlRealm', () => {
       log,
     });
 
-    expect(writeFileSyncMock).not.toHaveBeenCalled();
+    expect(mockWriteFileSync).not.toHaveBeenCalled();
     expect(esArgs).toEqual(['cluster.name=test']);
     expect(resources).toEqual([]);
     expect(warnings).toHaveLength(1);
@@ -67,9 +69,7 @@ describe('configureMockIdpSamlRealm', () => {
   });
 
   it('skips configuration and warns when the user already configured the SAML realm', async () => {
-    const userEsArgs = [
-      `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.order=0`,
-    ];
+    const userEsArgs = [`xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.order=0`];
 
     const { esArgs, resources } = await configureMockIdpSamlRealm({
       userEsArgs,
@@ -77,7 +77,7 @@ describe('configureMockIdpSamlRealm', () => {
       log,
     });
 
-    expect(writeFileSyncMock).not.toHaveBeenCalled();
+    expect(mockWriteFileSync).not.toHaveBeenCalled();
     expect(esArgs).toEqual(userEsArgs);
     expect(resources).toEqual([]);
     expect(warnings).toHaveLength(1);
