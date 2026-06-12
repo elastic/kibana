@@ -247,7 +247,7 @@ export const parseRulePreviewCommand = (command: string): ParsedPreviewCommand =
             desc: 'Minimum event count to alert (integer ≥ 1)',
           })
           .coerce('threshold-value', (v: number) => {
-            if (!Number.isFinite(v) || v < 1)
+            if (!Number.isFinite(v) || !Number.isInteger(v) || v < 1)
               throw new Error(`--threshold-value must be a positive integer, got "${v}"`);
             return v;
           })

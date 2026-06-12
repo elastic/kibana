@@ -331,6 +331,16 @@ describe('parseRulePreviewCommand — numeric / JSON validation', () => {
     expect(result.kind).toBe('error');
   });
 
+  it('returns kind:error when --threshold-value is a float (API requires integer)', () => {
+    const result = parseRulePreviewCommand(
+      'threshold --query "process.name: *" --threshold-value 2.5'
+    );
+    expect(result.kind).toBe('error');
+    if (result.kind === 'error') {
+      expect(result.message).toContain('integer');
+    }
+  });
+
   it('returns kind:error for invalid JSON in --threat-mapping', () => {
     const result = parseRulePreviewCommand(
       'threat_match --query "*:*" --threat-query "*:*" --threat-index idx --threat-mapping not-json'
