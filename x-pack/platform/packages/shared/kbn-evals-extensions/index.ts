@@ -80,3 +80,7 @@ export interface ExtensionConfig {
 
 // Placeholder export to ensure package builds
 export const EVALS_EXTENSIONS_VERSION = '1.0.0';
+
+export * as cli from './src/cli';
+export * as redTeam from './src/red_team';
+export type { RedTeamConfig, RedTeamReport, RedTeamModuleId } from './src/red_team/types';

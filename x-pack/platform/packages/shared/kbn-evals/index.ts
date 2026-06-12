@@ -23,6 +23,15 @@
 
 // CLI tools
 export * as cli from './src/cli';
+export { ensureEvalStack, type EnsureEvalStackOptions } from './src/cli/ensure_eval_stack';
+
+export {
+  resolveEvalSuites,
+  readSuiteMetadata,
+  discoverEvalSuites,
+  type EvalSuiteDefinition,
+  type EvalSuiteMetadata,
+} from './src/cli/suites';
 
 export { evaluate } from './src/evaluate';
 export type { DefaultEvaluators, ReportDisplayOptions } from './src/types';

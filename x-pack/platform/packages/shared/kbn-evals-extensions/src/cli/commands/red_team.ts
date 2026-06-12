@@ -1,0 +1,182 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { spawn } from 'child_process';
+import { createFlagError } from '@kbn/dev-cli-errors';
+import type { Command, FlagOptions, FlagsReader } from '@kbn/dev-cli-runner';
+import { ensureEvalStack } from '@kbn/evals';
+import {
+  ensureEvalInit,
+  resolveEvalSuite,
+  resolveEvalRunContext,
+  buildEvalRunEnv,
+  buildEvalRunArgs,
+  formatEvalCliCommand,
+  flags as evalOrchestrationFlags,
+} from '@kbn/evals/src/cli/commands/start';
+import { runRedTeam, type RedTeamConfig } from '../../red_team';
+
+const redTeamFlags: FlagOptions = {
+  ...evalOrchestrationFlags,
+  string: [...(evalOrchestrationFlags.string ?? []), 'modules'],
+  alias: {
+    ...evalOrchestrationFlags.alias,
+    module: 'modules',
+  },
+};
+
+const parseRedTeamModules = (flagsReader: FlagsReader) => {
+  const modulesFlag = flagsReader.string('modules');
+  if (!modulesFlag) {
+    return undefined;
+  }
+
+  const moduleIds = modulesFlag
+    .split(',')
+    .map((moduleId) => moduleId.trim())
+    .filter(Boolean);
+  if (moduleIds.length === 0) {
+    throw createFlagError('--modules must list at least one module id.');
+  }
+
+  return moduleIds;
+};
+
+const resolveRedTeamConfig = (suiteId: string, flagsReader: FlagsReader): RedTeamConfig => ({
+  suite: suiteId,
+  modules: parseRedTeamModules(flagsReader) as RedTeamConfig['modules'],
+  // TODO: Implement count
+  count: 0,
+});
+
+export const redTeamCmd: Command<void> = {
+  name: 'red-team',
+  description: `
+  Run red-team adversarial evals for a suite (experimental scaffold).
+
+  Boots the eval stack via shared @kbn/evals helpers, runs the stub orchestrator,
+  then delegates to \`node scripts/evals run\`.
+
+  Examples:
+    node scripts/evals_ext red-team --suite agent-builder --dry-run
+    node scripts/evals_ext red-team --suite agent-builder --judge eis-gpt-4.1 --skip-server
+    node scripts/evals_ext red-team --suite agent-builder --modules prompt_injection,jailbreaking --count 5
+  `,
+  flags: redTeamFlags,
+  run: async ({ log, flagsReader }) => {
+    const repoRoot = process.cwd();
+    const profile = await ensureEvalInit(repoRoot, log, flagsReader);
+
+    const { suite, suiteId, configPath } = await resolveEvalSuite(repoRoot, log, flagsReader);
+
+    if (!suiteId) {
+      throw createFlagError(
+        '--suite is required for red-team (config-only runs are not supported yet).'
+      );
+    }
+
+    const redTeamConfig = resolveRedTeamConfig(suiteId, flagsReader);
+
+    const {
+      evaluationConnectorId,
+      projects,
+      profileEnvOverrides,
+      exportProfile,
+      datasetsProfile,
+      requiresEisCcm,
+    } = await resolveEvalRunContext({ repoRoot, log, flagsReader, profile });
+
+    const skipServer = flagsReader.boolean('skip-server');
+
+    log.info('');
+    log.info(`Suite:     ${suiteId ?? configPath}`);
+    log.info(`Judge:     ${evaluationConnectorId}`);
+    if (projects.length > 0) {
+      log.info(`Models:    ${projects.join(', ')}`);
+    } else {
+      log.info(`Models:    all (from KIBANA_TESTING_AI_CONNECTORS)`);
+    }
+    log.info(`Server:    ${skipServer ? 'skip (using existing)' : 'managed'}`);
+    if (suite?.serverConfigSet) {
+      log.info(`Config:    ${suite.serverConfigSet}`);
+    }
+    log.info(
+      `Profiles:  datasets=${datasetsProfile ?? 'config'} export=${exportProfile ?? 'none'}`
+    );
+    if (redTeamConfig.modules?.length) {
+      log.info(`Modules:   ${redTeamConfig.modules.join(', ')}`);
+    }
+    if (redTeamConfig.count !== undefined) {
+      log.info(`Attacks:   ${redTeamConfig.count}`);
+    }
+    log.info('');
+
+    const report = await runRedTeam(redTeamConfig, log);
+    log.info(
+      `Stub report: ${report.attackCount} attacks, ${report.passCount} pass, ${report.failCount} fail`
+    );
+    log.info('');
+
+    const runArgs = buildEvalRunArgs({
+      suiteId,
+      configPath,
+      evaluationConnectorId,
+      projects,
+      profile,
+      flagsReader,
+    });
+
+    log.info(`Planned evals run: ${formatEvalCliCommand(['run', ...runArgs])}`);
+    log.info('');
+
+    if (flagsReader.boolean('dry-run')) {
+      log.info('Dry run -- exiting.');
+      return;
+    }
+
+    await ensureEvalStack({
+      repoRoot,
+      log,
+      skipServer,
+      profileEnvOverrides,
+      serverConfigSet: suite?.serverConfigSet,
+      requiresEisCcm,
+    });
+
+    const envOverrides = buildEvalRunEnv({
+      evaluationConnectorId,
+      requiresEisCcm,
+      skipServer,
+      suite,
+      profileEnvOverrides,
+      flagsReader,
+      log,
+    });
+
+    await new Promise<void>((resolve, reject) => {
+      const childEnv: Record<string, string> = { ...process.env, ...envOverrides } as Record<
+        string,
+        string
+      >;
+      delete childEnv.NO_COLOR;
+      const child = spawn('node', ['scripts/evals', 'run', ...runArgs], {
+        cwd: repoRoot,
+        stdio: 'inherit',
+        env: childEnv,
+      });
+
+      child.on('exit', (code) => {
+        if (code === 0) {
+          resolve();
+        } else {
+          reject(new Error(`evals run exited with code ${code}`));
+        }
+      });
+      child.on('error', reject);
+    });
+  },
+};

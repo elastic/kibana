@@ -43,6 +43,7 @@ This package extends `@kbn/evals` with advanced features ported from [cursor-plu
 ```
 
 **Dependency Rules:**
+
 - ✅ `kbn-evals-extensions` CAN import from `kbn-evals`
 - ❌ `kbn-evals` MUST NOT import from `kbn-evals-extensions`
 - ✅ Evaluation suites can use both packages independently
@@ -50,6 +51,7 @@ This package extends `@kbn/evals` with advanced features ported from [cursor-plu
 ## Features
 
 ### Current Status: Foundation (PR #1)
+
 - ✅ Package structure established
 - ✅ Build configuration
 - ✅ Test infrastructure
@@ -58,12 +60,14 @@ This package extends `@kbn/evals` with advanced features ported from [cursor-plu
 ### Roadmap
 
 #### **PR #2: Cost Tracking & Metadata** (Weeks 2-3)
+
 - Token-based cost calculation
 - Hyperparameter tracking (temperature, top_p, etc.)
 - Environment snapshots (Kibana/ES versions, plugins)
 - Run tagging and annotations
 
 #### **PR #3: Dataset Management** (Weeks 4-6)
+
 - Dataset versioning (semantic versioning)
 - Schema validation (Zod-based)
 - Deduplication (similarity-based)
@@ -71,6 +75,7 @@ This package extends `@kbn/evals` with advanced features ported from [cursor-plu
 - Filtering and statistics
 
 #### **PR #4: Safety Evaluators** (Weeks 7-10)
+
 - Toxicity detection
 - PII detection
 - Bias detection
@@ -79,12 +84,14 @@ This package extends `@kbn/evals` with advanced features ported from [cursor-plu
 - Content moderation
 
 #### **PR #5: UI Components** (Weeks 11-16)
+
 - Run comparison viewer (side-by-side diff)
 - Example explorer (worst-case analysis)
 - Score distribution charts
 - Integration with evals Kibana plugin
 
 #### **PR #6: DX Enhancements** (Weeks 17-21)
+
 - Watch mode (auto-rerun on changes)
 - Parallel execution (multi-suite concurrency)
 - Result caching (skip unchanged examples)
@@ -93,6 +100,7 @@ This package extends `@kbn/evals` with advanced features ported from [cursor-plu
 - Dry-run mode (validation without execution)
 
 #### **PR #7: Advanced Analytics** (Weeks 22-24)
+
 - Confidence intervals (bootstrapping)
 - Outlier detection (Z-score, IQR, Isolation Forest)
 - Failure clustering (K-means, hierarchical)
@@ -101,11 +109,13 @@ This package extends `@kbn/evals` with advanced features ported from [cursor-plu
 - Calibration analysis
 
 #### **PR #8: A/B Testing & Active Learning** (Weeks 25-29)
+
 - A/B testing framework with statistical tests
 - Bandit algorithms (epsilon-greedy, UCB, Thompson sampling)
 - Active learning (uncertainty and diversity sampling)
 
 #### **PR #9: Human-in-the-Loop** (Weeks 30-35)
+
 - Review queue UI
 - Annotation interface
 - Assignment workflow
@@ -113,6 +123,7 @@ This package extends `@kbn/evals` with advanced features ported from [cursor-plu
 - Conflict resolution
 
 #### **PR #10: IDE Integration** (Weeks 36-39)
+
 - VS Code extension
 - Cursor skills for eval authoring
 - AI-assisted dataset creation
@@ -131,19 +142,16 @@ import {
   createPiiDetector,
   createBiasEvaluator,
   costTracker,
-  watchMode
+  watchMode,
 } from '@kbn/evals-extensions';
 
 evaluate('security test', async ({ executorClient, workerExecutionId }) => {
   // Mix core and extension evaluators
-  await executorClient.runExperiment(
-    { datasets: [dataset], task },
-    [
-      ...createCorrectnessEvaluators(),     // core kbn/evals
-      createToxicityEvaluator(),            // extension
-      createPiiDetector(),                  // extension
-    ]
-  );
+  await executorClient.runExperiment({ datasets: [dataset], task }, [
+    ...createCorrectnessEvaluators(), // core kbn/evals
+    createToxicityEvaluator(), // extension
+    createPiiDetector(), // extension
+  ]);
 
   // Use extension features
   await costTracker.logRunCost(workerExecutionId.current);
@@ -177,6 +185,7 @@ KBN_EVALS_EXT_CACHE=true node scripts/evals run --suite <id>
 ## Vision Alignment
 
 All features follow principles from "Future of @kbn/evals":
+
 - **Trace-first**: Leverage OTel traces when applicable
 - **Elastic-native**: No external dependencies
 - **Shared layer**: Provide composable primitives
@@ -205,6 +214,7 @@ node scripts/eslint --fix x-pack/platform/packages/shared/kbn-evals-extensions
 ## Contributing
 
 See individual feature directories for contribution guidelines. All PRs should:
+
 - Follow Kibana code standards
 - Include unit tests
 - Update this README with new exports

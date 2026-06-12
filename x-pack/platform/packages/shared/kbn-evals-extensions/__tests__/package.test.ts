@@ -49,5 +49,11 @@ describe('@kbn/evals-extensions', () => {
       const exports = await import('..');
       expect(exports).toBeDefined();
     });
+
+    it('should export experimental cli namespace', async () => {
+      const mod = await import('..');
+      expect(mod.cli).toBeDefined();
+      expect(typeof mod.cli.run).toBe('function');
+    });
   });
 });
