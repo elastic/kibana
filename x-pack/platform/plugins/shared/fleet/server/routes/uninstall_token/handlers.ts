@@ -43,7 +43,6 @@ export const getUninstallTokensMetadataHandler: FleetRequestHandler<
 
   const excludedPolicyIds = excludedPolicies.map((policy) => policy.id);
 
-
   let policyIdSearchTerm: string | undefined;
   let policyNameSearchTerm: string | undefined;
   if (search) {
