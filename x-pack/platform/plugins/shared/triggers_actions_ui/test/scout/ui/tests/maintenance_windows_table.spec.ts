@@ -251,7 +251,10 @@ test.describe('Maintenance windows table', { tag: tags.stateful.classic }, () =>
     const upcomingTitle = uniqueTitle('filter-upcoming');
 
     const [r1, r2, r3] = await Promise.all([
-      createMw(kbnClient, { title: runningTitle }),
+      createMw(kbnClient, {
+        title: runningTitle,
+        startDate: new Date(Date.now() - 60 * 1000),
+      }),
       createMw(kbnClient, {
         title: finishedTitle,
         startDate: new Date('2023-05-01'),
@@ -293,7 +296,10 @@ test.describe('Maintenance windows table', { tag: tags.stateful.classic }, () =>
         notRecurring: true,
       }),
       createMw(kbnClient, { title: upcomingTitle, startDate: tomorrow }),
-      createMw(kbnClient, { title: runningTitle }),
+      createMw(kbnClient, {
+        title: runningTitle,
+        startDate: new Date(Date.now() - 60 * 1000),
+      }),
     ]);
     createdIds.push(r1.id, r2.id, r3.id);
 
