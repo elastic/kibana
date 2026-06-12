@@ -13,6 +13,7 @@ import {
   DIAMOND_CONNECTOR_SETTING_KEY,
   DIAMOND_GATE_CONNECTOR_SETTING_KEY,
   TRIAGE_CONNECTOR_SETTING_KEY,
+  SYNTHESIS_CONNECTOR_SETTING_KEY,
   TRIAGE_CONFIDENCE_FLOOR_SETTING_KEY,
   TRIAGE_TOP_N_SETTING_KEY,
   THREAT_REGIONS,
@@ -137,6 +138,29 @@ export const threatIntelligenceUiSettings: Record<string, UiSettingsParams> = {
     requiresPageReload: false,
   },
 
+  [SYNTHESIS_CONNECTOR_SETTING_KEY]: {
+    category: ['securitySolution'],
+    name: i18n.translate(
+      'xpack.securitySolution.threatIntelligence.uiSettings.synthesisConnector.name',
+      { defaultMessage: 'Threat Intelligence — synthesis connector' }
+    ),
+    description: i18n.translate(
+      'xpack.securitySolution.threatIntelligence.uiSettings.synthesisConnector.description',
+      {
+        defaultMessage:
+          'GenAI connector ID used for the §6 synthesis pass in correlate_threat. ' +
+          'Opus-tier — the most expensive call in the correlation pipeline; tuned independently ' +
+          'from the diamond and triage connectors. Defaults to the EIS-platform Opus 4.7 ' +
+          'connector; override to pin a different connector. Falls back to ' +
+          'genAi:defaultAIConnector if the configured connector is unavailable.',
+      }
+    ),
+    type: 'string',
+    value: '.anthropic-claude-4.7-opus-chat_completion',
+    schema: schema.string(),
+    requiresPageReload: false,
+  },
+
   [TRIAGE_CONFIDENCE_FLOOR_SETTING_KEY]: {
     category: ['securitySolution'],
     name: i18n.translate(
@@ -148,7 +172,7 @@ export const threatIntelligenceUiSettings: Record<string, UiSettingsParams> = {
       {
         defaultMessage:
           'Minimum triage confidence (0.0–1.0) a candidate must reach to advance to ' +
-          'synthesis. Default 0.65 matches Mustard\'s empirical floor; recalibrate in ' +
+          "synthesis. Default 0.65 matches Mustard's empirical floor; recalibrate in " +
           'Phase 6 evals if the score distribution on this corpus differs.',
       }
     ),
@@ -160,16 +184,15 @@ export const threatIntelligenceUiSettings: Record<string, UiSettingsParams> = {
 
   [TRIAGE_TOP_N_SETTING_KEY]: {
     category: ['securitySolution'],
-    name: i18n.translate(
-      'xpack.securitySolution.threatIntelligence.uiSettings.triageTopN.name',
-      { defaultMessage: 'Threat Intelligence — triage candidate cap (top-N)' }
-    ),
+    name: i18n.translate('xpack.securitySolution.threatIntelligence.uiSettings.triageTopN.name', {
+      defaultMessage: 'Threat Intelligence — triage candidate cap (top-N)',
+    }),
     description: i18n.translate(
       'xpack.securitySolution.threatIntelligence.uiSettings.triageTopN.description',
       {
         defaultMessage:
           'Maximum candidates ranked by (overlap, max_score) fed to the triage LLM. ' +
-          'Default 75 fits Sonnet\'s ~180K usable context at full Mustard-budget summary ' +
+          "Default 75 fits Sonnet's ~180K usable context at full Mustard-budget summary " +
           'lengths. Phase 6 eval knob — increase if triage is starved at corpus scale.',
       }
     ),

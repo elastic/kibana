@@ -11,6 +11,7 @@ import {
   THREAT_INTELLIGENCE_API_PRIVILEGES,
   DIAMOND_CONNECTOR_SETTING_KEY,
   TRIAGE_CONNECTOR_SETTING_KEY,
+  SYNTHESIS_CONNECTOR_SETTING_KEY,
   TRIAGE_CONFIDENCE_FLOOR_SETTING_KEY,
   TRIAGE_TOP_N_SETTING_KEY,
 } from '../../../common/threat_intelligence/hub';
@@ -115,9 +116,16 @@ export const registerCorrelateThreatRoute = ({
           }
         };
 
-        const [diamondConnectorId, triageConnectorId, triageFloor, triageTopN] = await Promise.all([
+        const [
+          diamondConnectorId,
+          triageConnectorId,
+          synthesisConnectorId,
+          triageFloor,
+          triageTopN,
+        ] = await Promise.all([
           readStringSetting(DIAMOND_CONNECTOR_SETTING_KEY),
           readStringSetting(TRIAGE_CONNECTOR_SETTING_KEY),
+          readStringSetting(SYNTHESIS_CONNECTOR_SETTING_KEY),
           readNumberSetting(TRIAGE_CONFIDENCE_FLOOR_SETTING_KEY, 0.65),
           readNumberSetting(TRIAGE_TOP_N_SETTING_KEY, 75),
         ]);
@@ -157,8 +165,27 @@ export const registerCorrelateThreatRoute = ({
           });
         }
 
-        const extractionModel = extractionModelOutcome.ok ? extractionModelOutcome.model : undefined;
+        // Resolve the synthesis model (Opus-tier, required for both input modes).
+        const synthesisModelOutcome = await resolveScopedModel({
+          inference,
+          request,
+          uiSettingsClient,
+          connectorIdOverride: synthesisConnectorId,
+          logger,
+        });
+
+        if (!synthesisModelOutcome.ok) {
+          return response.customError({
+            statusCode: synthesisModelOutcome.reason === 'no_inference_plugin' ? 503 : 400,
+            body: { message: `Synthesis model unavailable: ${synthesisModelOutcome.message}` },
+          });
+        }
+
+        const extractionModel = extractionModelOutcome.ok
+          ? extractionModelOutcome.model
+          : undefined;
         const { model: triageModel } = triageModelOutcome;
+        const { model: synthesisModel } = synthesisModelOutcome;
 
         try {
           let result;
@@ -167,6 +194,7 @@ export const registerCorrelateThreatRoute = ({
               esClient: core.elasticsearch.client.asCurrentUser,
               extractionModel,
               triageModel,
+              synthesisModel,
               logger,
               spaceId,
               input: { mode: 'raw_text', text: rawText },
@@ -178,6 +206,7 @@ export const registerCorrelateThreatRoute = ({
               esClient: core.elasticsearch.client.asCurrentUser,
               extractionModel,
               triageModel,
+              synthesisModel,
               logger,
               spaceId,
               input: { mode: 'report_id', report_id: reportId },

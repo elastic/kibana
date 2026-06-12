@@ -8,6 +8,7 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import { THREAT_REPORTS_INDEX_PATTERN } from '../../../common/threat_intelligence/hub';
+import type { CorrelationFindings } from '../../../common/threat_intelligence/correlation/schemas';
 import { extractIocs } from './extract_iocs';
 import { extractDiamond } from './extract_diamond';
 import { searchByAnchors } from './search_by_anchors';
@@ -15,6 +16,7 @@ import { searchByDiamond } from './search_by_diamond';
 import { triageDiamondCandidates } from './triage_diamond_candidates';
 import { keywordGapFill } from './keyword_gap_fill';
 import { collapseCandidates } from './collapse_candidates';
+import { synthesizeCorrelations } from './synthesize_correlations';
 import type { AnchorSet, AnchorMatchBreakdown, SearchByAnchorsResult } from './search_by_anchors';
 import type { DiamondVertexQueries, SearchByDiamondResult } from './search_by_diamond';
 import type { ExtractDiamondResult } from './extract_diamond';
@@ -39,6 +41,8 @@ export interface CorrelateThreatParams {
   extractionModel: ScopedModel | undefined;
   /** Sonnet-tier model for the triage pass. */
   triageModel: ScopedModel;
+  /** Opus-tier model for the §6 synthesis pass. */
+  synthesisModel: ScopedModel;
   logger: Logger;
   spaceId: string;
   input: CorrelateThreatInput;
@@ -46,7 +50,11 @@ export interface CorrelateThreatParams {
   triageTopN: number;
 }
 
-/** Triage-complete partial — synthesis stays stubbed until §6 lands. */
+/**
+ * Triage-complete diagnostic envelope — preserved for testing and
+ * future diagnostic endpoints; no longer the primary return type of
+ * correlateThreat now that §6 synthesis is wired in.
+ */
 export interface CorrelateThreatTriagedResult {
   stage: 'triage_complete';
   picks: TriagePick[];
@@ -62,7 +70,8 @@ export interface CorrelateThreatTriagedResult {
   collapsed_count: number;
 }
 
-export type CorrelateThreatResult = CorrelateThreatTriagedResult;
+/** Full correlation findings produced by the §6 synthesis pass. */
+export type CorrelateThreatResult = CorrelationFindings;
 
 // ---------------------------------------------------------------------------
 // Internal helpers
@@ -90,6 +99,24 @@ const buildCaseContextFromDiamond = (qd: QueryDiamond): string => {
 };
 
 const DIAMOND_VERTICES = ['adversary', 'capability', 'infrastructure', 'victim'] as const;
+
+/**
+ * Fetches the full body text of a stored report for use as the synthesis
+ * case context in report_id mode. Falls back to undefined if not found so
+ * the orchestrator can substitute the diamond-summary proxy.
+ */
+const fetchSourceBodyText = async (
+  esClient: ElasticsearchClient,
+  reportId: string
+): Promise<string | undefined> => {
+  const response = await esClient.search<{ content?: { body_text?: string } }>({
+    index: THREAT_REPORTS_INDEX_PATTERN,
+    size: 1,
+    query: { term: { _id: reportId } },
+    _source: ['content.body_text'],
+  });
+  return response.hits.hits[0]?._source?.content?.body_text ?? undefined;
+};
 
 interface StoredQueryDiamondSource {
   extracted?: {
@@ -225,16 +252,17 @@ const buildMergedCandidates = (
 // ---------------------------------------------------------------------------
 
 /**
- * Phase 3 correlation orchestrator.
+ * Correlation orchestrator — phases 1–6.
  *
  * Flow: resolve input → search_by_anchors + search_by_diamond in parallel
- * → merge + dedup candidates → triage (§5) → return triage_complete partial.
- * Synthesis (§6) is stubbed; this task will be replaced once §6 lands.
+ * → merge + dedup candidates → keyword gap-fill (§3) → collapse (§4)
+ * → triage (§5) → synthesize_correlations (§6) → CorrelationFindings.
  */
 export const correlateThreat = async ({
   esClient,
   extractionModel,
   triageModel,
+  synthesisModel,
   logger,
   spaceId,
   input,
@@ -343,16 +371,22 @@ export const correlateThreat = async ({
     topN: triageTopN,
   });
 
-  // §6 synthesis is stubbed — return triage_complete partial.
-  return {
-    stage: 'triage_complete',
+  // §6 Synthesis — build case text and call synthesize_correlations.
+  // For report_id mode we attempt to fetch the full source body text so the
+  // synthesis model receives the same quality input as raw_text mode.
+  // Falls back to the diamond-vertex proxy if body_text is absent.
+  const caseText =
+    input.mode === 'raw_text'
+      ? input.text
+      : (await fetchSourceBodyText(esClient, input.report_id)) ??
+        buildCaseContextFromDiamond(queryDiamond);
+
+  return synthesizeCorrelations({
+    synthesisModel,
+    logger,
+    esClient,
     picks: triageResult.picks,
-    groups: triageResult.groups,
-    candidates_fed: triageResult.candidates_fed,
-    fallback_used: triageResult.fallback_used,
-    anchor_results: anchorResults,
-    diamond_results: diamondResults,
-    gap_fill_added: gapFillCandidates.length,
-    collapsed_count: collapsedCount,
-  };
+    collapsed,
+    caseText,
+  });
 };

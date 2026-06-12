@@ -377,6 +377,21 @@ export const TRIAGE_CONNECTOR_SETTING_KEY =
   'securitySolution:threatIntelligence:triageConnector' as const;
 
 /**
+ * GenAI connector ID used for the §6 synthesis pass in `correlate_threat`.
+ * Opus-tier — the heaviest and most expensive call in the correlation
+ * pipeline; independently tunable from the diamond and triage connectors
+ * so operators can pin different models per stage. Defaults to the
+ * EIS-platform Opus 4.7 connector. Falls back to genAi:defaultAIConnector
+ * when absent.
+ *
+ * Defined in `common/` (not server-only `ui_settings.ts`) so future
+ * cost-dashboard UI components on the browser side can display the active
+ * synthesis connector without duplicating the key.
+ */
+export const SYNTHESIS_CONNECTOR_SETTING_KEY =
+  'securitySolution:threatIntelligence:synthesisConnector' as const;
+
+/**
  * Minimum confidence score (0.0–1.0) a triage candidate must reach to
  * survive to the synthesis stage. Matches Mustard's TRIAGE_CONFIDENCE_FLOOR
  * default (0.65) but is kept configurable because the score distribution on
@@ -390,8 +405,7 @@ export const TRIAGE_CONFIDENCE_FLOOR_SETTING_KEY =
  * context-budget cap that keeps the Sonnet call within the ~180K usable
  * token window even at large corpus scale. Phase 6 eval knob.
  */
-export const TRIAGE_TOP_N_SETTING_KEY =
-  'securitySolution:threatIntelligence:triageTopN' as const;
+export const TRIAGE_TOP_N_SETTING_KEY = 'securitySolution:threatIntelligence:triageTopN' as const;
 
 /**
  * Sentinel value written to `space_id` to denote "visible from every space".

@@ -173,6 +173,10 @@ export type {
 export { correlateThreat } from './correlate_threat';
 export type {
   CorrelateThreatInput,
+  CorrelateThreatParams,
   CorrelateThreatResult,
   CorrelateThreatTriagedResult,
 } from './correlate_threat';
+
+export { synthesizeCorrelations } from './synthesize_correlations';
+export type { SynthesizeCorrelationsParams } from './synthesize_correlations';
