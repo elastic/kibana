@@ -51,7 +51,7 @@ test.describe('General connector functionality', { tag: tags.stateful.classic },
 
     await page.testSubj.click('createConnectorButton');
     await page.testSubj.click('.index-card');
-    await page.locator('[data-test-subj="create-connector-flyout-back-btn"]').click();
+    await page.testSubj.click('create-connector-flyout-back-btn');
     await page.testSubj.click('.slack-card');
 
     await page.testSubj.locator('nameInput').fill(connectorName);
