@@ -21,6 +21,10 @@ export const CONNECTORS_ROLE: KibanaRole = {
         names: ['.alerts-*', 'scout-threshold-rule-test*'],
         privileges: ['read', 'view_index_metadata'],
       },
+      {
+        names: ['scout-idx-*'],
+        privileges: ['create_index', 'write'],
+      },
     ],
   },
   kibana: [

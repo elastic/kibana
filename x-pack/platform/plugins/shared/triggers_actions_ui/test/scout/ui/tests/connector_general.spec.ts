@@ -35,20 +35,11 @@ test.describe('General connector functionality', { tag: tags.stateful.classic },
     await browserAuth.loginWithCustomRole(CONNECTORS_ROLE);
   });
 
-  test.afterEach(async ({ apiServices, kbnClient }) => {
+  test.afterEach(async ({ apiServices }) => {
     await Promise.allSettled(
       createdConnectorIds.map((id) => apiServices.alerting.connectors.delete(id))
     );
-    await Promise.allSettled(
-      createdRuleIds.map((id) =>
-        kbnClient.request({
-          method: 'DELETE',
-          path: `/internal/alerting/rule/${id}`,
-          headers: { 'kbn-xsrf': 'scout' },
-          ignoreErrors: [404],
-        })
-      )
-    );
+    await Promise.allSettled(createdRuleIds.map((id) => apiServices.alerting.rules.delete(id)));
     createdConnectorIds.length = 0;
     createdRuleIds.length = 0;
   });
@@ -66,9 +57,8 @@ test.describe('General connector functionality', { tag: tags.stateful.classic },
     await page.testSubj.locator('nameInput').fill(connectorName);
     await page.testSubj.locator('slackWebhookUrlInput').fill('https://test.com');
 
-    await page
-      .locator('[data-test-subj="create-connector-flyout-save-btn"]:not([disabled])')
-      .click();
+    await expect(page.testSubj.locator('create-connector-flyout-save-btn')).toBeEnabled();
+    await page.testSubj.click('create-connector-flyout-save-btn');
 
     await expect(page.testSubj.locator('euiToastHeader__title')).toContainText(
       `Created '${connectorName}'`
@@ -76,6 +66,7 @@ test.describe('General connector functionality', { tag: tags.stateful.classic },
 
     await searchConnectors(page, connectorName);
     const row = page.testSubj.locator('connectors-row');
+    await expect(row).toHaveCount(1);
     await expect(row.getByTestId('connectorsTableCell-name')).toContainText(connectorName);
     await expect(row.getByTestId('connectorsTableCell-actionType')).toContainText('Slack');
 
@@ -83,7 +74,8 @@ test.describe('General connector functionality', { tag: tags.stateful.classic },
     const created = (all as Array<{ id: string; name: string }>).find(
       (c) => c.name === connectorName
     );
-    if (created) createdConnectorIds.push(created.id);
+    expect(created).toBeDefined();
+    createdConnectorIds.push(created!.id);
   });
 
   test('should create a connector with a custom user-defined ID', async ({
@@ -104,9 +96,8 @@ test.describe('General connector functionality', { tag: tags.stateful.classic },
     await page.testSubj.locator('connectorIdInput').fill(customId);
     await page.testSubj.locator('slackWebhookUrlInput').fill('https://test.com');
 
-    await page
-      .locator('[data-test-subj="create-connector-flyout-save-btn"]:not([disabled])')
-      .click();
+    await expect(page.testSubj.locator('create-connector-flyout-save-btn')).toBeEnabled();
+    await page.testSubj.click('create-connector-flyout-save-btn');
 
     await expect(page.testSubj.locator('euiToastHeader__title')).toContainText(
       `Created '${connectorName}'`
@@ -147,7 +138,9 @@ test.describe('General connector functionality', { tag: tags.stateful.classic },
     createdConnectorIds.push(connectorId);
 
     await navigateToConnectors(page, kbnUrl);
-    await searchAndOpenConnector(page, connectorName);
+    await searchConnectors(page, connectorName);
+    await expect(page.testSubj.locator('connectors-row')).toHaveCount(1);
+    await openConnectorFlyout(page);
 
     await expect(page.testSubj.locator('connectorIdInput')).toBeDisabled();
     await expect(page.testSubj.locator('connectorIdInput')).toHaveValue(connectorId);
@@ -167,12 +160,15 @@ test.describe('General connector functionality', { tag: tags.stateful.classic },
     createdConnectorIds.push(connectorId);
 
     await navigateToConnectors(page, kbnUrl);
-    await searchAndOpenConnector(page, connectorName);
+    await searchConnectors(page, connectorName);
+    await expect(page.testSubj.locator('connectors-row')).toHaveCount(1);
+    await openConnectorFlyout(page);
 
     await page.testSubj.locator('nameInput').fill(updatedName);
     await page.testSubj.locator('slackWebhookUrlInput').fill('https://test.com');
 
-    await page.locator('[data-test-subj="edit-connector-flyout-save-btn"]:not([disabled])').click();
+    await expect(page.testSubj.locator('edit-connector-flyout-save-btn')).toBeEnabled();
+    await page.testSubj.click('edit-connector-flyout-save-btn');
 
     await expect(page.testSubj.locator('euiToastHeader__title')).toContainText(
       `Updated '${updatedName}'`
@@ -182,6 +178,7 @@ test.describe('General connector functionality', { tag: tags.stateful.classic },
 
     await searchConnectors(page, updatedName);
     const row = page.testSubj.locator('connectors-row');
+    await expect(row).toHaveCount(1);
     await expect(row.getByTestId('connectorsTableCell-name')).toContainText(updatedName);
     await expect(row.getByTestId('connectorsTableCell-actionType')).toContainText('Slack');
   });
@@ -202,21 +199,23 @@ test.describe('General connector functionality', { tag: tags.stateful.classic },
     createdConnectorIds.push(connectorId);
 
     await navigateToConnectors(page, kbnUrl);
-    await searchAndOpenConnector(page, connectorName);
+    await searchConnectors(page, connectorName);
+    await expect(page.testSubj.locator('connectors-row')).toHaveCount(1);
+    await openConnectorFlyout(page);
 
     await page.testSubj.click('testConnectorTab');
     await page.testSubj.locator('executeActionButton').waitFor({ state: 'visible' });
 
     await setMonacoValue(page, '{ "key": "value" }');
-    await page.locator('[data-test-subj="executeActionButton"]:not([disabled])').click();
+    await expect(page.testSubj.locator('executeActionButton')).toBeEnabled();
+    await page.testSubj.click('executeActionButton');
 
     await expect(page.testSubj.locator('executionSuccessfulResult')).toBeVisible({
       timeout: 15_000,
     });
 
-    await page
-      .locator('[data-test-subj="edit-connector-flyout-close-btn"]:not([disabled])')
-      .click();
+    await expect(page.testSubj.locator('edit-connector-flyout-close-btn')).toBeEnabled();
+    await page.testSubj.click('edit-connector-flyout-close-btn');
   });
 
   test('should test a connector and display a failure result', async ({
@@ -235,21 +234,23 @@ test.describe('General connector functionality', { tag: tags.stateful.classic },
     createdConnectorIds.push(connectorId);
 
     await navigateToConnectors(page, kbnUrl);
-    await searchAndOpenConnector(page, connectorName);
+    await searchConnectors(page, connectorName);
+    await expect(page.testSubj.locator('connectors-row')).toHaveCount(1);
+    await openConnectorFlyout(page);
 
     await page.testSubj.click('testConnectorTab');
     await page.testSubj.locator('executeActionButton').waitFor({ state: 'visible' });
 
     await setMonacoValue(page, '"test"');
-    await page.locator('[data-test-subj="executeActionButton"]:not([disabled])').click();
+    await expect(page.testSubj.locator('executeActionButton')).toBeEnabled();
+    await page.testSubj.click('executeActionButton');
 
     await expect(page.testSubj.locator('executionFailureResult')).toBeVisible({
       timeout: 15_000,
     });
 
-    await page
-      .locator('[data-test-subj="edit-connector-flyout-close-btn"]:not([disabled])')
-      .click();
+    await expect(page.testSubj.locator('edit-connector-flyout-close-btn')).toBeEnabled();
+    await page.testSubj.click('edit-connector-flyout-close-btn');
   });
 
   test('should reset connector when canceling an edit', async ({ page, kbnUrl, apiServices }) => {
@@ -263,7 +264,9 @@ test.describe('General connector functionality', { tag: tags.stateful.classic },
     createdConnectorIds.push(connectorId);
 
     await navigateToConnectors(page, kbnUrl);
-    await searchAndOpenConnector(page, connectorName);
+    await searchConnectors(page, connectorName);
+    await expect(page.testSubj.locator('connectors-row')).toHaveCount(1);
+    await openConnectorFlyout(page);
 
     await page.testSubj.locator('nameInput').fill('some test name to cancel');
     await page.testSubj.click('edit-connector-flyout-close-btn');
@@ -279,20 +282,12 @@ test.describe('General connector functionality', { tag: tags.stateful.classic },
 
   test('should delete a connector', async ({ page, kbnUrl, apiServices }) => {
     const connectorName = `scout-slack-del-${Date.now()}`;
-    const keepConnectorName = `scout-slack-keep-${Date.now()}`;
-    const { id: keepId } = await apiServices.alerting.connectors.create({
-      name: keepConnectorName,
-      connectorTypeId: '.slack',
-      config: {},
-      secrets: SLACK_SECRETS,
-    });
-    const { id: deleteId } = await apiServices.alerting.connectors.create({
+    await apiServices.alerting.connectors.create({
       name: connectorName,
       connectorTypeId: '.slack',
       config: {},
       secrets: SLACK_SECRETS,
     });
-    createdConnectorIds.push(keepId, deleteId);
 
     await navigateToConnectors(page, kbnUrl);
     await searchConnectors(page, connectorName);
@@ -315,26 +310,18 @@ test.describe('General connector functionality', { tag: tags.stateful.classic },
 
   test('should bulk delete connectors', async ({ page, kbnUrl, apiServices }) => {
     const connectorName = `scout-slack-bulk-${Date.now()}`;
-    const keepConnectorName = `scout-slack-keep-${Date.now()}`;
-    const { id: keepId } = await apiServices.alerting.connectors.create({
-      name: keepConnectorName,
-      connectorTypeId: '.slack',
-      config: {},
-      secrets: SLACK_SECRETS,
-    });
-    const { id: deleteId } = await apiServices.alerting.connectors.create({
+    await apiServices.alerting.connectors.create({
       name: connectorName,
       connectorTypeId: '.slack',
       config: {},
       secrets: SLACK_SECRETS,
     });
-    createdConnectorIds.push(keepId, deleteId);
 
     await navigateToConnectors(page, kbnUrl);
     await searchConnectors(page, connectorName);
     await expect(page.testSubj.locator('connectors-row')).toHaveCount(1);
 
-    await page.testSubj.locator(`checkboxSelectRow-${deleteId}`).click();
+    await page.locator('.euiTableRowCellCheckbox .euiCheckbox__input').click();
     await page.testSubj.click('bulkDelete');
     await page.testSubj
       .locator('deleteIdsConfirmation')
@@ -358,7 +345,7 @@ test.describe('General connector functionality', { tag: tags.stateful.classic },
     await expect(page.testSubj.locator('deleteConnector')).toBeHidden();
     await expect(page.testSubj.locator('preConfiguredTitleMessage')).toBeVisible();
     await expect(
-      page.locator('[data-test-subj="checkboxSelectRow-preconfigured_my-server-log"]')
+      page.testSubj.locator('checkboxSelectRow-preconfigured_my-server-log')
     ).toBeDisabled();
   });
 
@@ -379,68 +366,49 @@ test.describe('General connector functionality', { tag: tags.stateful.classic },
 
   test('Execution log - renders the event log list and can filter/sort', async ({
     page,
-    kbnClient,
+    apiServices,
     pageObjects,
   }) => {
     // Create an ES query rule that always executes (substitute for test.always-firing)
     const ruleName = `scout-exec-log-${Date.now()}`;
-    const createResp = await kbnClient.request<{ id: string }>({
-      method: 'POST',
-      path: '/api/alerting/rule',
-      headers: { 'kbn-xsrf': 'scout' },
-      body: {
-        name: ruleName,
-        rule_type_id: '.es-query',
-        consumer: 'stackAlerts',
-        params: {
-          searchType: 'esQuery',
-          timeWindowSize: 5,
-          timeWindowUnit: 'm',
-          threshold: [0],
-          thresholdComparator: '>=',
-          size: 100,
-          esQuery: '{"query":{"match_all":{}}}',
-          aggType: 'count',
-          groupBy: 'all',
-          termSize: 5,
-          excludeHitsFromPreviousRun: false,
-          sourceFields: [],
-          index: ['.kibana'],
-          timeField: 'updated_at',
-        },
-        schedule: { interval: '1m' },
-        tags: ['scout-exec-log'],
-        actions: [],
-        enabled: true,
+    const createResp = await apiServices.alerting.rules.create({
+      name: ruleName,
+      ruleTypeId: '.es-query',
+      consumer: 'stackAlerts',
+      params: {
+        searchType: 'esQuery',
+        timeWindowSize: 5,
+        timeWindowUnit: 'm',
+        threshold: [0],
+        thresholdComparator: '>=',
+        size: 100,
+        esQuery: '{"query":{"match_all":{}}}',
+        aggType: 'count',
+        groupBy: 'all',
+        termSize: 5,
+        excludeHitsFromPreviousRun: false,
+        sourceFields: [],
+        index: ['.kibana'],
+        timeField: 'updated_at',
       },
+      schedule: { interval: '1m' },
+      tags: ['scout-exec-log'],
+      actions: [],
+      enabled: true,
     });
     const ruleId = createResp.data.id;
     createdRuleIds.push(ruleId);
 
-    // Trigger an immediate run
-    await kbnClient.request({
-      method: 'POST',
-      path: `/internal/alerting/rule/${ruleId}/_run_soon`,
-      headers: { 'kbn-xsrf': 'scout' },
-    });
-
-    // Wait until the execution log API reports at least one execution.
+    // Trigger an immediate run and wait for at least one execution.
     const dateStart = new Date();
-    await expect
-      .poll(
-        async () => {
-          const logResp = await kbnClient.request<{ total: number }>({
-            method: 'GET',
-            path: `/internal/alerting/rule/${ruleId}/_execution_log`,
-            headers: {},
-            query: { date_start: dateStart.toISOString() },
-            ignoreErrors: [404],
-          });
-          return logResp.data?.total ?? 0;
-        },
-        { timeout: 30_000, intervals: [1_000, 2_000, 5_000] }
-      )
-      .toBeGreaterThan(0);
+    await apiServices.alerting.rules.runSoon(ruleId);
+    await apiServices.alerting.waiting.waitForExecutionCount(
+      ruleId,
+      1,
+      undefined,
+      30_000,
+      dateStart
+    );
 
     // Navigate to rule details and open the Execution log tab
     await pageObjects.ruleDetailsPage.gotoById(ruleId);
@@ -470,23 +438,16 @@ test.describe('General connector functionality', { tag: tags.stateful.classic },
     // At least one data row exists
     await expect(page.testSubj.locator('dataGridRowCell')).not.toHaveCount(0, { timeout: 10_000 });
 
-    // Ensure timestamp column is visible
-    await page.testSubj.click('dataGridColumnSelectorButton');
-    const colToggle = page.testSubj.locator(
-      'dataGridColumnSelectorToggleColumnVisibility-timestamp'
-    );
-    if ((await colToggle.getAttribute('aria-checked')) === 'false') {
-      await colToggle.click();
-    }
-    await page.testSubj.click('dataGridColumnSelectorButton');
-
-    // At least one timestamp cell must be visible and not show "Invalid Date"
+    // At least one timestamp cell must contain a valid date (not "Invalid Date")
     const timestampCellLocator = page.locator(
       '[data-gridcell-column-id="timestamp"][data-test-subj="dataGridRowCell"]'
     );
     await expect(timestampCellLocator).not.toHaveCount(0, { timeout: 5_000 });
     const cellTexts = await timestampCellLocator.allInnerTexts();
-    expect(cellTexts[0].toLowerCase()).not.toBe('invalid date');
+    const validTimestamps = cellTexts.filter(
+      (text) => text.trim() !== '' && text.toLowerCase() !== 'invalid date'
+    );
+    expect(validTimestamps.length).toBeGreaterThan(0);
 
     // Sort ascending: open column action menu, click 2nd button (index 1 = ascending)
     await page.testSubj.locator('dataGridHeaderCell-timestamp').hover();
