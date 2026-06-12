@@ -268,7 +268,7 @@ export const LogEntryExampleMessageTable: React.FC<{
         },
         '& .euiTableCellContent': {
           padding: 0,
-          height: '24px',
+          minHeight: '24px',
         },
       }}
     >
