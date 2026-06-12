@@ -254,6 +254,34 @@ To keep maintenance light it is **highly** recommended to reduce the number of v
 
 If you need to version an internal endpoint use a single, larger-than-zero major version. Ex. `1`.
 
+#### API backwards compatibility
+
+Backwards-incompatible changes to a public API version cannot be merged into an existing API version; they require a new API version following a proper breaking change process.
+
+**Backwards-compatible changes** (safe within an existing version):
+
+* Adding a new API
+* Adding an optional request field or parameter
+* Adding a response field
+* Adding a new value to a non-exhaustive enum
+* Adding a new variant to a union of variants
+* Adding a value to a union type used for a request field or parameter
+* Changing a scalar type into a union type for a request field or parameter
+
+**Backwards-incompatible changes** (require a new API version):
+
+* Removing an API
+* Removing or renaming a request field or parameter
+* Removing or renaming a response field
+* Adding a new required request field or parameter
+* Changing an optional request field or parameter to required
+* Removing enum values
+* Removing a variant from a union of variants
+* Changing the type of a response field
+* Adding a value to an exhaustive enum
+
+When you make a backwards-compatible change, apply it to **all** supported API versions where it is applicable. Users should not need to upgrade their API version to take advantage of new features that are otherwise compatible.
+
 #### Use the versioned router
 
 Core exposes a versioned router that ensures your endpoint's behaviour and formatting all conforms to the versioning specification.
@@ -362,7 +390,3 @@ export class MyPlugin implements Plugin {
   }
 }
 ```
-
-#### Additional reading
-
-For more details on the versioning specification see [this document](https://docs.google.com/document/d/1YpF6hXIHZaHvwNaQAxWFzexUF1nbqACTtH2IfDu0ldA/edit?usp=sharing).

@@ -66,7 +66,7 @@ The [`scout-migrate-from-ftr`](https://github.com/elastic/kibana/blob/main/.agen
 
 ### Cypress → Scout
 
-The [`cypress-to-scout-migration`](https://github.com/elastic/kibana/tree/main/x-pack/solutions/security/plugins/security_solution/.agents/skills/cypress-to-scout-migration) skill, maintained by the Security Engineering Productivity team, ports Cypress tests to Scout. Redirect questions to the team in [#security-solution-scout](https://elastic.slack.com/archives/C0A1DD686RH).
+The [`cypress-to-scout-migration`](https://github.com/elastic/kibana/tree/main/x-pack/solutions/security/plugins/security_solution/.agents/skills/cypress-to-scout-migration) skill, maintained by the Security Engineering Productivity team, ports Cypress tests to Scout.
 
 ### Best practices review
 
