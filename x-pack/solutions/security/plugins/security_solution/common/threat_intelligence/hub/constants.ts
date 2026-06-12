@@ -369,6 +369,31 @@ export const DIAMOND_CONNECTOR_SETTING_KEY =
   'securitySolution:threatIntelligence:diamondConnector' as const;
 
 /**
+ * GenAI connector ID used for the triage pass in `correlate_threat` (§5).
+ * Sonnet-class — cheaper than Opus but strong enough for candidate ranking.
+ * Falls back to genAi:defaultAIConnector when absent.
+ */
+export const TRIAGE_CONNECTOR_SETTING_KEY =
+  'securitySolution:threatIntelligence:triageConnector' as const;
+
+/**
+ * Minimum confidence score (0.0–1.0) a triage candidate must reach to
+ * survive to the synthesis stage. Matches Mustard's TRIAGE_CONFIDENCE_FLOOR
+ * default (0.65) but is kept configurable because the score distribution on
+ * a given corpus may require recalibration (Phase 6 eval knob).
+ */
+export const TRIAGE_CONFIDENCE_FLOOR_SETTING_KEY =
+  'securitySolution:threatIntelligence:triageConfidenceFloor' as const;
+
+/**
+ * Maximum number of candidates fed into the triage LLM call. Acts as the
+ * context-budget cap that keeps the Sonnet call within the ~180K usable
+ * token window even at large corpus scale. Phase 6 eval knob.
+ */
+export const TRIAGE_TOP_N_SETTING_KEY =
+  'securitySolution:threatIntelligence:triageTopN' as const;
+
+/**
  * Sentinel value written to `space_id` to denote "visible from every space".
  * Used by the seeded source catalog and by global subscriptions so default
  * content stays usable regardless of which space the request originated

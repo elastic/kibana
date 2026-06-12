@@ -174,5 +174,5 @@ export { correlateThreat } from './correlate_threat';
 export type {
   CorrelateThreatInput,
   CorrelateThreatResult,
-  CorrelateThreatRetrievalOnlyResult,
+  CorrelateThreatTriagedResult,
 } from './correlate_threat';

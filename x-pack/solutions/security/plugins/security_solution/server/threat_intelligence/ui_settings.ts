@@ -12,6 +12,9 @@ import {
   DEFAULT_REGIONS_SETTING_KEY,
   DIAMOND_CONNECTOR_SETTING_KEY,
   DIAMOND_GATE_CONNECTOR_SETTING_KEY,
+  TRIAGE_CONNECTOR_SETTING_KEY,
+  TRIAGE_CONFIDENCE_FLOOR_SETTING_KEY,
+  TRIAGE_TOP_N_SETTING_KEY,
   THREAT_REGIONS,
 } from '../../common/threat_intelligence/hub';
 
@@ -110,6 +113,69 @@ export const threatIntelligenceUiSettings: Record<string, UiSettingsParams> = {
     // resolveScopedModel falls back to genAi:defaultAIConnector if this id is absent.
     value: '.anthropic-claude-4.7-opus-chat_completion',
     schema: schema.string(),
+    requiresPageReload: false,
+  },
+
+  [TRIAGE_CONNECTOR_SETTING_KEY]: {
+    category: ['securitySolution'],
+    name: i18n.translate(
+      'xpack.securitySolution.threatIntelligence.uiSettings.triageConnector.name',
+      { defaultMessage: 'Threat Intelligence — triage connector' }
+    ),
+    description: i18n.translate(
+      'xpack.securitySolution.threatIntelligence.uiSettings.triageConnector.description',
+      {
+        defaultMessage:
+          'GenAI connector ID used for the candidate-triage pass in correlate_threat (§5). ' +
+          'Sonnet-class — cheaper than Opus but capable of ranked candidate analysis. ' +
+          'Falls back to genAi:defaultAIConnector if the configured connector is unavailable.',
+      }
+    ),
+    type: 'string',
+    value: 'Anthropic-Claude-Sonnet-4-6',
+    schema: schema.string(),
+    requiresPageReload: false,
+  },
+
+  [TRIAGE_CONFIDENCE_FLOOR_SETTING_KEY]: {
+    category: ['securitySolution'],
+    name: i18n.translate(
+      'xpack.securitySolution.threatIntelligence.uiSettings.triageConfidenceFloor.name',
+      { defaultMessage: 'Threat Intelligence — triage confidence floor' }
+    ),
+    description: i18n.translate(
+      'xpack.securitySolution.threatIntelligence.uiSettings.triageConfidenceFloor.description',
+      {
+        defaultMessage:
+          'Minimum triage confidence (0.0–1.0) a candidate must reach to advance to ' +
+          'synthesis. Default 0.65 matches Mustard\'s empirical floor; recalibrate in ' +
+          'Phase 6 evals if the score distribution on this corpus differs.',
+      }
+    ),
+    type: 'number',
+    value: 0.65,
+    schema: schema.number({ min: 0, max: 1 }),
+    requiresPageReload: false,
+  },
+
+  [TRIAGE_TOP_N_SETTING_KEY]: {
+    category: ['securitySolution'],
+    name: i18n.translate(
+      'xpack.securitySolution.threatIntelligence.uiSettings.triageTopN.name',
+      { defaultMessage: 'Threat Intelligence — triage candidate cap (top-N)' }
+    ),
+    description: i18n.translate(
+      'xpack.securitySolution.threatIntelligence.uiSettings.triageTopN.description',
+      {
+        defaultMessage:
+          'Maximum candidates ranked by (overlap, max_score) fed to the triage LLM. ' +
+          'Default 75 fits Sonnet\'s ~180K usable context at full Mustard-budget summary ' +
+          'lengths. Phase 6 eval knob — increase if triage is starved at corpus scale.',
+      }
+    ),
+    type: 'number',
+    value: 75,
+    schema: schema.number({ min: 1, max: 500 }),
     requiresPageReload: false,
   },
 };

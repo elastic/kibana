@@ -10,6 +10,9 @@ import {
   CORRELATE_THREAT_API_PATH,
   THREAT_INTELLIGENCE_API_PRIVILEGES,
   DIAMOND_CONNECTOR_SETTING_KEY,
+  TRIAGE_CONNECTOR_SETTING_KEY,
+  TRIAGE_CONFIDENCE_FLOOR_SETTING_KEY,
+  TRIAGE_TOP_N_SETTING_KEY,
 } from '../../../common/threat_intelligence/hub';
 import { correlateThreat } from '../services/correlate_threat';
 import { resolveScopedModel } from './lib/scoped_model';
@@ -92,54 +95,95 @@ export const registerCorrelateThreatRoute = ({
 
         const core = await context.core;
         const spaceId = resolveCurrentSpaceId(getSpacesService(), request);
+        const { client: uiSettingsClient } = core.uiSettings;
 
-        // Resolve the connector. Required for raw_text (extractDiamond LLM call);
-        // for report_id the skeleton makes no LLM calls but we resolve eagerly so
-        // the route fails fast on a misconfigured deployment once triage/synthesis land.
-        let connectorIdOverride: string | undefined;
-        try {
-          const setting = await core.uiSettings.client.get<string>(DIAMOND_CONNECTOR_SETTING_KEY);
-          if (setting) connectorIdOverride = setting;
-        } catch {
-          // Setting not registered in this context — fall through.
-        }
+        // Read per-stage connector overrides from advanced settings.
+        const readStringSetting = async (key: string): Promise<string | undefined> => {
+          try {
+            const v = await uiSettingsClient.get<string>(key);
+            return v || undefined;
+          } catch {
+            return undefined;
+          }
+        };
+        const readNumberSetting = async (key: string, fallback: number): Promise<number> => {
+          try {
+            const v = await uiSettingsClient.get<number>(key);
+            return typeof v === 'number' && Number.isFinite(v) ? v : fallback;
+          } catch {
+            return fallback;
+          }
+        };
 
-        const modelOutcome = await resolveScopedModel({
-          inference: getInference(),
+        const [diamondConnectorId, triageConnectorId, triageFloor, triageTopN] = await Promise.all([
+          readStringSetting(DIAMOND_CONNECTOR_SETTING_KEY),
+          readStringSetting(TRIAGE_CONNECTOR_SETTING_KEY),
+          readNumberSetting(TRIAGE_CONFIDENCE_FLOOR_SETTING_KEY, 0.65),
+          readNumberSetting(TRIAGE_TOP_N_SETTING_KEY, 75),
+        ]);
+
+        const inference = getInference();
+
+        // Resolve the extraction model (diamond/raw_text). Required only for raw_text mode
+        // but resolved eagerly so misconfigured deployments fail fast.
+        const extractionModelOutcome = await resolveScopedModel({
+          inference,
           request,
-          uiSettingsClient: core.uiSettings.client,
-          connectorIdOverride,
+          uiSettingsClient,
+          connectorIdOverride: diamondConnectorId,
           logger,
         });
 
-        // Hard-fail on no connector only for raw_text (needs extractDiamond).
-        if (!modelOutcome.ok && rawText) {
+        if (!extractionModelOutcome.ok && rawText) {
           return response.customError({
-            statusCode: modelOutcome.reason === 'no_inference_plugin' ? 503 : 400,
-            body: { message: modelOutcome.message },
+            statusCode: extractionModelOutcome.reason === 'no_inference_plugin' ? 503 : 400,
+            body: { message: extractionModelOutcome.message },
           });
         }
 
-        const model = modelOutcome.ok ? modelOutcome.model : undefined;
+        // Resolve the triage model (Sonnet-class, required for both input modes).
+        const triageModelOutcome = await resolveScopedModel({
+          inference,
+          request,
+          uiSettingsClient,
+          connectorIdOverride: triageConnectorId,
+          logger,
+        });
+
+        if (!triageModelOutcome.ok) {
+          return response.customError({
+            statusCode: triageModelOutcome.reason === 'no_inference_plugin' ? 503 : 400,
+            body: { message: `Triage model unavailable: ${triageModelOutcome.message}` },
+          });
+        }
+
+        const extractionModel = extractionModelOutcome.ok ? extractionModelOutcome.model : undefined;
+        const { model: triageModel } = triageModelOutcome;
 
         try {
           let result;
           if (rawText) {
-            result = await correlateThreat(
-              core.elasticsearch.client.asCurrentUser,
-              model,
+            result = await correlateThreat({
+              esClient: core.elasticsearch.client.asCurrentUser,
+              extractionModel,
+              triageModel,
               logger,
               spaceId,
-              { mode: 'raw_text', text: rawText }
-            );
+              input: { mode: 'raw_text', text: rawText },
+              triageFloor,
+              triageTopN,
+            });
           } else if (reportId) {
-            result = await correlateThreat(
-              core.elasticsearch.client.asCurrentUser,
-              model,
+            result = await correlateThreat({
+              esClient: core.elasticsearch.client.asCurrentUser,
+              extractionModel,
+              triageModel,
               logger,
               spaceId,
-              { mode: 'report_id', report_id: reportId }
-            );
+              input: { mode: 'report_id', report_id: reportId },
+              triageFloor,
+              triageTopN,
+            });
           } else {
             // Schema validation guarantees one of the above is set — unreachable.
             return response.badRequest({ body: { message: 'No valid input mode resolved' } });
