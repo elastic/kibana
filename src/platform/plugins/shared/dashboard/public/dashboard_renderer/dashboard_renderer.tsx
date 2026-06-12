@@ -24,6 +24,7 @@ import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
+import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { DashboardLocatorParams } from '../../common';
@@ -251,9 +252,12 @@ export function DashboardRenderer({
 }
 
 /**
- * Maximizing a panel in Dashboard only works if the parent div has a certain class. This
- * small component listens to the Dashboard's expandedPanelId state and adds and removes
- * the class to whichever element renders the Dashboard.
+ * Maximizing a panel only works when a surrounding element carries a certain class. This
+ * small component listens to the Dashboard's expandedPanelId state and toggles that class
+ * on the app wrapper. It targets the app wrapper rather than the renderer's immediate
+ * parent because, when the Dashboard is embedded (for example in the Security solution),
+ * that parent can be a nested flex item that does not fill the viewport, which leaves the
+ * maximized panel with no height.
  */
 const ParentClassController = ({
   dashboardApi,
@@ -265,14 +269,14 @@ const ParentClassController = ({
   const maximizedPanelId = useStateFromPublishingSubject(dashboardApi.expandedPanelId$);
 
   useLayoutEffect(() => {
-    const parentDiv = viewportRef.parentElement;
-    if (!parentDiv) return;
+    const wrapper = viewportRef.closest(`.${APP_WRAPPER_CLASS}`) ?? viewportRef.parentElement;
+    if (!wrapper) return;
 
     if (maximizedPanelId) {
-      parentDiv.classList.add('dshDashboardViewportWrapper');
+      wrapper.classList.add('dshDashboardViewportWrapper');
     } else {
-      parentDiv.classList.remove('dshDashboardViewportWrapper');
+      wrapper.classList.remove('dshDashboardViewportWrapper');
     }
-  }, [maximizedPanelId, viewportRef.parentElement]);
+  }, [maximizedPanelId, viewportRef]);
   return null;
 };
