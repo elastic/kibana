@@ -126,7 +126,8 @@ test.describe('Jira Service Management connector', { tag: tags.stateful.classic 
     const created = (all as Array<{ id: string; name: string }>).find(
       (c) => c.name === connectorName
     );
-    if (created) createdConnectorIds.push(created.id);
+    expect(created).toBeDefined();
+    createdConnectorIds.push(created!.id);
   });
 
   test('connector page - should edit the connector', async ({ page, kbnUrl, apiServices }) => {
