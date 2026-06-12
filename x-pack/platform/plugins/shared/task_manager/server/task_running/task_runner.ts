@@ -16,7 +16,7 @@ import { withActiveSpan } from '@kbn/tracing-utils';
 import { v4 as uuidv4 } from 'uuid';
 import { addSpanLabels, withSpan } from '@kbn/apm-utils';
 import { flow, identity, omit } from 'lodash';
-import type { ExecutionContextStart, IBasePath, Logger } from '@kbn/core/server';
+import type { ExecutionContextStart, Logger } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { FakeRequestEnricher } from '@kbn/core-security-server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';

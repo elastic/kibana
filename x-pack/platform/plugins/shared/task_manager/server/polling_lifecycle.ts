@@ -12,7 +12,7 @@ import { pipe } from 'fp-ts/pipeable';
 import { map as mapOptional, none } from 'fp-ts/Option';
 import { tap } from 'rxjs';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import type { Logger, ExecutionContextStart, KibanaRequest } from '@kbn/core/server';
+import type { Logger, ExecutionContextStart } from '@kbn/core/server';
 import type { FakeRequestEnricher } from '@kbn/core-security-server';
 
 import type { Result } from './lib/result_type';
