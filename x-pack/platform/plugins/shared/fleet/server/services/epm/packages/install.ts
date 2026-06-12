@@ -19,7 +19,7 @@ import type {
   KibanaRequest,
 } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import pRetry from 'p-retry';
 import type { LicenseType } from '@kbn/licensing-types';
 import { addSpanLabels } from '@kbn/apm-utils';
@@ -68,6 +68,7 @@ import {
 } from '../../../constants';
 import { licenseService } from '../..';
 import { appContextService } from '../../app_context';
+import { AUTO_INSTALL_CONTENT_PACKAGES_TASK_ID } from '../../../tasks/auto_install_content_packages_task';
 import * as Registry from '../registry';
 import {
   setPackageInfo,
@@ -590,7 +591,7 @@ async function installPackageFromRegistry({
       );
     }
 
-    return await installPackageWithStateMachine({
+    const result = await installPackageWithStateMachine({
       pkgName,
       pkgVersion,
       installSource,
@@ -613,6 +614,23 @@ async function installPackageFromRegistry({
       installedAsDependencyOf,
       skipDependencyCheck,
     });
+
+    // After a successful, user-initiated (non-automatic) non-content-package install, trigger an
+    // immediate content pack autodiscovery run so users see content packs appear quickly rather
+    // than waiting for the next scheduled interval. Guard against re-triggering from the task's
+    // own content-pack installs (automaticInstall=true, type='content').
+    if (!result.error && !automaticInstall && packageInfo.type !== 'content') {
+      appContextService
+        .getTaskManagerStart()
+        ?.runSoon(AUTO_INSTALL_CONTENT_PACKAGES_TASK_ID)
+        .catch((e) =>
+          logger.debug(
+            `[AutoInstallContentPackagesTask] runSoon trigger after install failed (non-critical): ${e.message}`
+          )
+        );
+    }
+
+    return result;
   } catch (e) {
     sendEventWithLatestState(
       telemetryEvent,
@@ -1360,6 +1378,7 @@ export const saveKibanaAssetsRefs = async (
   savedObjectsClient: SavedObjectsClientContract,
   pkgName: string,
   assetRefs: KibanaAssetReference[] | null,
+  spaceId: string,
   saveAsAdditionnalSpace = false,
   append = false
 ) => {
@@ -1369,8 +1388,6 @@ export const saveKibanaAssetsRefs = async (
     name: pkgName,
     savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
   });
-
-  const spaceId = savedObjectsClient.getCurrentNamespace() || DEFAULT_SPACE_ID;
 
   // Because Kibana assets are installed in parallel with ES assets with refresh: false, we almost always run into an
   // issue that causes a conflict error due to this issue: https://github.com/elastic/kibana/issues/126240. This is safe
@@ -1390,6 +1407,20 @@ export const saveKibanaAssetsRefs = async (
           : undefined;
 
       if (saveAsAdditionnalSpace) {
+        const primarySpaceId = installation?.attributes?.installed_kibana_space_id;
+
+        if (primarySpaceId && primarySpaceId === spaceId) {
+          appContextService
+            .getLogger()
+            .error(
+              `saveKibanaAssetsRefs: unexpectedly received spaceId '${spaceId}' for package '${pkgName}' for saving as additional space that matches primary installation space. Skipping.`
+            );
+          return; // no-op: skip SO update
+        }
+
+        // Strip the primary-space key if it was unexpectedly written there
+        const keysToOmit = primarySpaceId ? [spaceId, primarySpaceId] : [spaceId];
+
         let spaceAssetRefs = assetRefs !== null ? assetRefs : [];
         if (append && installation) {
           const existingSpaceRefs =
@@ -1404,7 +1435,10 @@ export const saveKibanaAssetsRefs = async (
           pkgName,
           {
             additional_spaces_installed_kibana: {
-              ...omit(installation?.attributes?.additional_spaces_installed_kibana ?? {}, spaceId),
+              ...omit(
+                installation?.attributes?.additional_spaces_installed_kibana ?? {},
+                keysToOmit
+              ),
               ...(assetRefs !== null ? { [spaceId]: spaceAssetRefs } : {}),
             },
           },

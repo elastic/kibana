@@ -76,6 +76,7 @@ toc:
           - file: saved-objects/create.md
           - file: saved-objects/update.md
           - file: saved-objects/validate.md
+          - file: saved-objects/troubleshooting.md
           - file: saved-objects/delete.md
           - file: saved-objects/use.md
           - file: saved-objects/esql.md
@@ -182,6 +183,7 @@ toc:
               - file: write-api-tests.md
               - file: api-best-practices.md
               - file: api-auth.md
+          - file: migrate-tests.md
       - file: performance-journeys.md
         children:
           - file: write-single-user-performance-journey.md

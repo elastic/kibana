@@ -14,6 +14,7 @@ Scout is Kibana's **modern UI and API test framework** built on [Playwright](htt
 - [Best practices](./scout-best-practices.md) (see also [UI](./ui-best-practices.md) and [API](./api-best-practices.md) test best practices)
 - [UI testing](./ui-testing.md)
 - [API testing](./api-testing.md)
+- [Migrate tests to Scout](./migrate-tests.md)
 
 ## Scout benefits [scout-main-features]
 
@@ -59,7 +60,7 @@ We welcome contributions to one of the Scout packages.
 | Is reusable but scoped to a solution  | In the solution Scout package (for example `@kbn/scout-security`, `@kbn/scout-oblt`, `@kbn/scout-search`) | Solution workflows and domain-specific helpers     |
 | Is specific to one plugin or package  | In your plugin or package's `test/scout` directory                                                        | Components specific to your plugin or package only |
 
-## Need help?
+## Need help? [need-help]
 
 - **Internal (Elasticians)**: reach out to the AppEx QA team in the `#kibana-scout` Slack channel for guidance.
 
@@ -97,7 +98,7 @@ Existing FTR tests continue to run, and teams can migrate them to Scout incremen
 
 #### Q: Should I migrate every FTR test to Scout? [scout-faq-migrate-ftr-to-scout]
 
-_It, depends_: [pick the right test type](./scout-best-practices.md#pick-the-right-test-type) before migrating a test.
+_It depends_: [pick the right test type](./scout-best-practices.md#pick-the-right-test-type) before migrating a test. Refer to our [Migrate tests to Scout](./migrate-tests.md) guide.
 
 #### Q: Does Scout support feature flags? [scout-faq-feature-flags]
 

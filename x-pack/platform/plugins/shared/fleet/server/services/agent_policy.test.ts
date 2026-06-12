@@ -201,6 +201,7 @@ describe('Agent policy', () => {
       .mocked(getPackagePolicySavedObjectType)
       .mockResolvedValue(PACKAGE_POLICY_SAVED_OBJECT_TYPE);
     jest.spyOn(apm, 'startTransaction').mockReturnValue({ end: jest.fn() } as any);
+    mockedPackagePolicyService.findAllForAgentPolicy.mockResolvedValue([]);
   });
 
   afterEach(() => {
@@ -1014,6 +1015,7 @@ describe('Agent policy', () => {
         expect.anything(),
         'agent-policy',
         expect.objectContaining({
+          has_agent_version_conditions: true,
           // 9.3.0 is the highest minimum version across both conditions
           min_agent_version: '9.3.0',
           package_agent_version_conditions: [
@@ -1042,6 +1044,7 @@ describe('Agent policy', () => {
         expect.anything(),
         'agent-policy',
         expect.objectContaining({
+          has_agent_version_conditions: false,
           min_agent_version: null,
           package_agent_version_conditions: null,
         })
@@ -1925,6 +1928,57 @@ describe('Agent policy', () => {
 
       expect(postUpdateCallback).toHaveBeenCalled();
     });
+
+    it('should compute and persist has_agent_version_conditions from existing package policies', async () => {
+      jest.spyOn(agentPolicyService, 'requireUniqueName').mockResolvedValue(undefined);
+      const soClient = getAgentPolicyCreateMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [{ attributes: {}, id: 'agent-policy', type: 'mocked', references: [] }],
+      });
+
+      mockedPackagePolicyService.findAllForAgentPolicy.mockResolvedValue([
+        {
+          id: 'pp-1',
+          package: { name: 'apache', title: 'Apache', version: '1.3.2' },
+          package_agent_version_condition: '>=9.3.0',
+        } as any,
+      ]);
+
+      await agentPolicyService.update(soClient, esClient, 'agent-policy', {
+        name: 'updated',
+        namespace: 'default',
+      });
+
+      expect(soClient.update).toHaveBeenCalledWith(
+        expect.anything(),
+        'agent-policy',
+        expect.objectContaining({ has_agent_version_conditions: true })
+      );
+    });
+
+    it('should persist has_agent_version_conditions: false when no package policies have version conditions', async () => {
+      jest.spyOn(agentPolicyService, 'requireUniqueName').mockResolvedValue(undefined);
+      const soClient = getAgentPolicyCreateMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [{ attributes: {}, id: 'agent-policy', type: 'mocked', references: [] }],
+      });
+
+      // global beforeEach already mocks findAllForAgentPolicy to return []
+      await agentPolicyService.update(soClient, esClient, 'agent-policy', {
+        name: 'updated',
+        namespace: 'default',
+      });
+
+      expect(soClient.update).toHaveBeenCalledWith(
+        expect.anything(),
+        'agent-policy',
+        expect.objectContaining({ has_agent_version_conditions: false })
+      );
+    });
   });
 
   describe('copy', () => {
@@ -2049,6 +2103,88 @@ describe('Agent policy', () => {
             policy_ids: ['policy_1', 'policy_2', 'mocked'],
           },
         ]
+      );
+    });
+
+    it('should remove copied endpoint package policy input ids before bulk create', async () => {
+      jest.spyOn(agentPolicyService, 'requireUniqueName').mockResolvedValue(undefined);
+      soClient = createSavedObjectClientMock();
+      const mockPolicy = {
+        type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+        references: [],
+        attributes: { revision: 1, package_policies: ['package-1'] } as any,
+      };
+      soClient.bulkGet.mockImplementation(async (objects) => {
+        return {
+          saved_objects: objects.map(({ id }) => {
+            return {
+              id,
+              ...mockPolicy,
+            };
+          }),
+        };
+      });
+      soClient.create.mockImplementation(async (type, attributes) => {
+        return {
+          attributes: attributes as unknown as NewAgentPolicy,
+          id: 'mocked',
+          type: 'mocked',
+          references: [],
+        };
+      });
+      const packagePolicies = [
+        {
+          id: 'package-1',
+          name: 'endpoint-1',
+          policy_id: 'policy_1',
+          policy_ids: ['policy_1'],
+          package: {
+            name: 'endpoint',
+            title: 'Elastic Endpoint',
+            version: '1.0.0',
+          },
+          inputs: [
+            {
+              id: 'stale-input-id',
+              type: 'endpoint',
+              enabled: true,
+              streams: [
+                {
+                  id: 'stale-stream-id',
+                  enabled: true,
+                  data_stream: { type: 'logs', dataset: 'endpoint.events' },
+                },
+              ],
+            },
+          ],
+        },
+      ] as any;
+      mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue(packagePolicies);
+      mockedPackagePolicyService.list.mockResolvedValue({ items: packagePolicies } as any);
+
+      await agentPolicyService.copy(soClient, esClient, 'mocked', {
+        name: 'copy mocked',
+      });
+
+      const copiedPackagePolicies = mockedPackagePolicyService.bulkCreate.mock.calls[0][2];
+
+      expect(copiedPackagePolicies[0].inputs).toEqual([
+        {
+          type: 'endpoint',
+          enabled: true,
+          streams: [
+            {
+              enabled: true,
+              data_stream: { type: 'logs', dataset: 'endpoint.events' },
+            },
+          ],
+        },
+      ]);
+      expect(copiedPackagePolicies[0]).toEqual(
+        expect.objectContaining({
+          name: 'endpoint-1 (copy)',
+          policy_ids: ['mocked'],
+        })
       );
     });
   });
