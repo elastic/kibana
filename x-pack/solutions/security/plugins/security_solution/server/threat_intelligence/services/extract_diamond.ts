@@ -276,7 +276,9 @@ export const extractDiamond = async (
   const { text, report_id: reportId, traceBuilder } = params;
   const truncated = text.slice(0, DIAMOND_BODY_CHAR_LIMIT);
   const modelId = model.connector.connectorId;
-  const modelName = model.connector.config?.model as string | undefined;
+  const modelName =
+    (model.connector.config?.model as string | undefined) ??
+    (model.connector.config?.providerConfig as { model_id?: string } | undefined)?.model_id;
   const extractedAt = new Date().toISOString();
 
   interface RawResult<T> {
