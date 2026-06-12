@@ -6,48 +6,40 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import { buildChildRequestEnricher, buildTaskFakeRequest } from './fake_request_factory';
 
 describe('buildTaskFakeRequest', () => {
   const apiKey = 'abc';
-  let basePathService: ReturnType<typeof httpServiceMock.createBasePath>;
-
-  beforeEach(() => {
-    basePathService = httpServiceMock.createBasePath();
-  });
 
   it('returns undefined when no API key is provided', () => {
-    expect(buildTaskFakeRequest({ basePathService, enrichFakeRequest: jest.fn() })).toBeUndefined();
+    expect(buildTaskFakeRequest({ enrichFakeRequest: jest.fn() })).toBeUndefined();
   });
 
   it('builds a fake request with the ApiKey authorization header', () => {
-    const fakeRequest = buildTaskFakeRequest({ apiKey, basePathService });
+    const fakeRequest = buildTaskFakeRequest({ apiKey });
     expect(fakeRequest).toBeDefined();
     expect(fakeRequest!.headers.authorization).toBe(`ApiKey ${apiKey}`);
     expect(fakeRequest!.isFakeRequest).toBe(true);
   });
 
   it('uses the default space when none is provided', () => {
-    const fakeRequest = buildTaskFakeRequest({ apiKey, basePathService });
-    expect(basePathService.set).toHaveBeenCalledWith(fakeRequest, '/');
+    const fakeRequest = buildTaskFakeRequest({ apiKey });
+    expect(fakeRequest!.spaceId).toBe('default');
   });
 
   it('respects a supplied space id', () => {
-    const fakeRequest = buildTaskFakeRequest({ apiKey, spaceId: 'team-a', basePathService });
-    expect(basePathService.set).toHaveBeenCalledWith(fakeRequest, '/s/team-a');
+    const fakeRequest = buildTaskFakeRequest({ apiKey, spaceId: 'team-a' });
+    expect(fakeRequest!.spaceId).toBe('team-a');
   });
 
   it('does not call the enrichment hook when userProfileId is absent', () => {
     const enrichFakeRequest = jest.fn();
-    buildTaskFakeRequest({ apiKey, basePathService, enrichFakeRequest });
+    buildTaskFakeRequest({ apiKey, enrichFakeRequest });
     expect(enrichFakeRequest).not.toHaveBeenCalled();
   });
 
   it('does not call the enrichment hook when none is supplied', () => {
-    expect(() =>
-      buildTaskFakeRequest({ apiKey, userProfileId: 'u_1', basePathService })
-    ).not.toThrow();
+    expect(() => buildTaskFakeRequest({ apiKey, userProfileId: 'u_1' })).not.toThrow();
   });
 
   it('enriches the fake request when both userProfileId and enricher are present', () => {
@@ -55,7 +47,6 @@ describe('buildTaskFakeRequest', () => {
     const fakeRequest = buildTaskFakeRequest({
       apiKey,
       userProfileId: 'u_1',
-      basePathService,
       enrichFakeRequest,
     });
     expect(enrichFakeRequest).toHaveBeenCalledTimes(1);

@@ -373,17 +373,7 @@ describe('api_key_utils', () => {
       coreStart.security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockReturnValueOnce(true);
       coreStart.security.authc.getCurrentUser = jest.fn().mockReturnValue(enrichedUser);
 
-      const basePathMock = {
-        get: jest.fn(() => '/'),
-        serverBasePath: '/',
-      } as unknown as IBasePath;
-
-      const result = await getApiKeyAndUserScope(
-        [mockTask],
-        fakeRequest,
-        coreStart.security,
-        basePathMock
-      );
+      const result = await getApiKeyAndUserScope([mockTask], fakeRequest, coreStart.security);
 
       expect(result.get('task')).toEqual({
         apiKey: 'YXBpS2V5SWQ6bXktZmFrZS1hcGlLZXk=',
@@ -415,17 +405,7 @@ describe('api_key_utils', () => {
         api_key: 'apiKey',
       });
 
-      const basePathMock = {
-        get: jest.fn(() => '/'),
-        serverBasePath: '/',
-      } as unknown as IBasePath;
-
-      const result = await getApiKeyAndUserScope(
-        [mockTask],
-        request,
-        coreStart.security,
-        basePathMock
-      );
+      const result = await getApiKeyAndUserScope([mockTask], request, coreStart.security);
 
       expect(result.get('task')).toEqual({
         apiKey: 'YXBpS2V5SWQ6YXBpS2V5',
@@ -456,17 +436,7 @@ describe('api_key_utils', () => {
       coreStart.security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockReturnValueOnce(true);
       coreStart.security.authc.getCurrentUser = jest.fn().mockReturnValue(mockUser);
 
-      const basePathMock = {
-        get: jest.fn(() => '/'),
-        serverBasePath: '/',
-      } as unknown as IBasePath;
-
-      const result = await getApiKeyAndUserScope(
-        [mockTask],
-        request,
-        coreStart.security,
-        basePathMock
-      );
+      const result = await getApiKeyAndUserScope([mockTask], request, coreStart.security);
 
       expect(result.get('task')).toEqual({
         apiKey: 'YXBpS2V5SWQ6YXBpS2V5',
@@ -498,11 +468,6 @@ describe('api_key_utils', () => {
         api_key: 'apiKey',
       });
 
-      const basePathMock = {
-        get: jest.fn(() => '/'),
-        serverBasePath: '/',
-      } as unknown as IBasePath;
-
       await getApiKeyAndUserScope(
         [
           { ...mockTask, id: 'task-1' },
@@ -510,8 +475,7 @@ describe('api_key_utils', () => {
           { ...mockTask, id: 'task-3' },
         ],
         request,
-        coreStart.security,
-        basePathMock
+        coreStart.security
       );
 
       expect(coreStart.security.authc.getCurrentUser).toHaveBeenCalledTimes(1);

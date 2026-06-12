@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import type { FakeRawRequest, Headers, IBasePath, KibanaRequest } from '@kbn/core/server';
+import type { FakeRawRequest, Headers, KibanaRequest } from '@kbn/core/server';
 import type { FakeRequestEnricher } from '@kbn/core-security-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
-import { addSpaceIdToPath } from '@kbn/spaces-utils';
+import { asSpaceId } from '@kbn/core-spaces-common';
 
 interface BuildTaskFakeRequestOpts {
   apiKey?: string;
   spaceId?: string;
   userProfileId?: string;
-  basePathService: IBasePath;
   enrichFakeRequest?: FakeRequestEnricher;
 }
 
@@ -28,7 +27,6 @@ export const buildTaskFakeRequest = ({
   apiKey,
   spaceId,
   userProfileId,
-  basePathService,
   enrichFakeRequest,
 }: BuildTaskFakeRequestOpts): KibanaRequest | undefined => {
   if (!apiKey) return;
@@ -36,14 +34,33 @@ export const buildTaskFakeRequest = ({
   const headers: Headers = { authorization: `ApiKey ${apiKey}` };
   const fakeRawRequest: FakeRawRequest = {
     headers,
-    path: '/',
+    spaceId: asSpaceId(spaceId || 'default'),
   };
 
   const fakeRequest = kibanaRequestFactory(fakeRawRequest);
-  basePathService.set(fakeRequest, addSpaceIdToPath('/', spaceId || 'default'));
 
   if (userProfileId && enrichFakeRequest) {
     enrichFakeRequest(fakeRequest, userProfileId);
+    // eslint-disable-next-line no-console
+    console.log(
+      `[profile-id-debug] buildTaskFakeRequest: enriched fake request ${JSON.stringify({
+        userProfileId,
+        isFakeRequest: fakeRequest.isFakeRequest,
+        spaceId: fakeRequest.spaceId,
+      })}`
+    );
+  } else {
+    // eslint-disable-next-line no-console
+    console.log(
+      `[profile-id-debug] buildTaskFakeRequest: built fake request WITHOUT enrichment ${JSON.stringify(
+        {
+          userProfileId,
+          enrichFakeRequestWired: !!enrichFakeRequest,
+          isFakeRequest: fakeRequest.isFakeRequest,
+          spaceId: fakeRequest.spaceId,
+        }
+      )}`
+    );
   }
 
   return fakeRequest;
