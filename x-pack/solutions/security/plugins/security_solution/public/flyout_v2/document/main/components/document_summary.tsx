@@ -243,25 +243,29 @@ export const DocumentSummary = memo(
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="xs" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    iconType="refresh"
-                    aria-label={REGENERATE_ARIA_LABEL}
-                    onClick={fetchAISummary}
-                    isDisabled={messageAndReplacements == null}
-                    size="xs"
-                    data-test-subj={REGENERATE_INSIGHTS_BUTTON_TEST_ID}
-                  />
+                  <EuiToolTip content={REGENERATE_ARIA_LABEL} disableScreenReaderOutput>
+                    <EuiButtonIcon
+                      iconType="refresh"
+                      aria-label={REGENERATE_ARIA_LABEL}
+                      onClick={fetchAISummary}
+                      isDisabled={messageAndReplacements == null}
+                      size="xs"
+                      data-test-subj={REGENERATE_INSIGHTS_BUTTON_TEST_ID}
+                    />
+                  </EuiToolTip>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiCopy textToCopy={textToCopy}>
                     {(copy) => (
-                      <EuiButtonIcon
-                        iconType="copy"
-                        aria-label={COPY_ARIA_LABEL}
-                        onClick={copy}
-                        size="xs"
-                        data-test-subj={COPY_INSIGHTS_BUTTON_TEST_ID}
-                      />
+                      <EuiToolTip content={COPY_ARIA_LABEL} disableScreenReaderOutput>
+                        <EuiButtonIcon
+                          iconType="copy"
+                          aria-label={COPY_ARIA_LABEL}
+                          onClick={copy}
+                          size="xs"
+                          data-test-subj={COPY_INSIGHTS_BUTTON_TEST_ID}
+                        />
+                      </EuiToolTip>
                     )}
                   </EuiCopy>
                 </EuiFlexItem>
