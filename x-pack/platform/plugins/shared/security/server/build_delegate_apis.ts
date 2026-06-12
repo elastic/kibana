@@ -141,7 +141,10 @@ const serializeRequestImpl = (
     ...(authorization ? { authorization } : {}),
     ...(spaceId ? { spaceId } : {}),
   };
-  return state as OpaqueRequestState;
+  // Trust-boundary mint: only Core/Security is permitted to produce values of
+  // the branded `OpaqueRequestState` type. The double-cast through `unknown`
+  // makes the privilege visible at the call site.
+  return state as unknown as OpaqueRequestState;
 };
 
 const hydrateRequestImpl = (requestState: OpaqueRequestState): KibanaRequest | undefined => {

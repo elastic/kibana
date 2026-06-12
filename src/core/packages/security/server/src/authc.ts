@@ -12,17 +12,43 @@ import type { AuthenticatedUser } from '@kbn/core-security-common';
 import type { APIKeysType } from './authentication';
 
 /**
+ * Internal brand marker for {@link OpaqueRequestState}.
+ *
+ * `OpaqueRequestState` is intentionally nominal: only Core/Security can
+ * produce values of this type (via `serializeRequest`), and only Core/Security
+ * can consume the inner shape (via `hydrateRequest`). Downstream code such as
+ * Task Manager is limited to round-tripping the value through persistence,
+ * which is exactly the ownership boundary this spike is exploring.
+ *
+ * The brand is exported as a `unique symbol` type so consumers can refer to
+ * the brand in declarations (for example when typing a persisted SO field)
+ * without being able to forge a value.
+ *
+ * @public
+ */
+export declare const opaqueRequestStateBrand: unique symbol;
+
+/**
  * Opaque, serializable bag of request identity context.
  *
- * Producers (Core/Security) decide which fields to populate; consumers MUST treat
- * this as an opaque value and round-trip it untouched through persistence.
+ * Producers (Core/Security) decide which fields to populate; consumers MUST
+ * treat this as an opaque value and round-trip it untouched through
+ * persistence.
+ *
+ * The type is branded so callers cannot construct an `OpaqueRequestState`
+ * by hand — they must go through `CoreAuthenticationService.serializeRequest`.
+ * Persisted (deserialized) values are coerced back into the branded type by
+ * the consumer (for example Task Manager) at the trust boundary where they
+ * are read from storage.
  *
  * Unknown additive keys should be preserved across versions to keep rolling
  * upgrades safe and avoid version-specific awareness in downstream consumers.
  *
  * @public
  */
-export type OpaqueRequestState = Record<string, unknown>;
+export type OpaqueRequestState = Record<string, unknown> & {
+  readonly [opaqueRequestStateBrand]: never;
+};
 
 /**
  * Core's authentication service
