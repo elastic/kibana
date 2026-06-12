@@ -109,7 +109,14 @@ export const defineIndexThresholdRule = async (
   await indexCombo
     .locator('[data-test-subj="comboBoxSearchInput"]')
     .pressSequentially(indexName, { delay: 50 });
-  await page.getByRole('option', { name: indexName, exact: true }).click();
+  // EUI ComboBox may render two entries with the same title: the real index and
+  // a custom/free-text option ("Add X as a custom option"). Filter to exact text
+  // so we always click the actual index match, not the custom-option entry.
+  const indexOption = page
+    .locator(`.euiComboBoxOption[title="${indexName}"]`)
+    .filter({ hasText: new RegExp(`^\\s*${indexName}\\s*$`) });
+  await indexOption.waitFor({ state: 'visible', timeout: 30000 });
+  await indexOption.click();
 
   const timeFieldSelect = page.testSubj.locator('thresholdAlertTimeFieldSelect');
   await timeFieldSelect.waitFor({ state: 'visible' });
