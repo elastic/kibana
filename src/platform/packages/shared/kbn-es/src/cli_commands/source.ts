@@ -18,7 +18,7 @@ import type { Command } from './types';
 export const source: Command = {
   description: 'Build and run from source',
   help: (defaults: Record<string, any> = {}) => {
-    const { license = 'basic', password = 'changeme', 'base-path': basePath } = defaults;
+    const { license = 'trial', password = 'changeme', 'base-path': basePath } = defaults;
 
     return dedent`
       Options:
