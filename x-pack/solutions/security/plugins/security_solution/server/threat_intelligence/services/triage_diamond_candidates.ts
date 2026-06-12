@@ -221,14 +221,15 @@ const fetchCandidateSummaries = async (
   });
 
   for (const hit of response.hits.hits) {
-    if (!hit._id) continue;
-    const diamond = hit._source?.extracted?.diamond ?? {};
-    const summaries = {} as Record<DiamondVertex, VertexSummaryEntry>;
-    for (const v of DIAMOND_VERTICES_ORDER) {
-      const vd = diamond[v] ?? {};
-      summaries[v] = { signal: vd.signal ?? 'NONE', summary: vd.summary?.trim() ?? '' };
+    if (hit._id) {
+      const diamond = hit._source?.extracted?.diamond ?? {};
+      const summaries = {} as Record<DiamondVertex, VertexSummaryEntry>;
+      for (const v of DIAMOND_VERTICES_ORDER) {
+        const vd = diamond[v] ?? {};
+        summaries[v] = { signal: vd.signal ?? 'NONE', summary: vd.summary?.trim() ?? '' };
+      }
+      result.set(hit._id, summaries);
     }
-    result.set(hit._id, summaries);
   }
 
   return result;
@@ -360,7 +361,9 @@ export const triageDiamondCandidates = async ({
   traceBuilder,
 }: TriageDiamondCandidatesParams): Promise<TriageDiamondCandidatesResult> => {
   const connectorId = model.connector.connectorId;
-  const modelName = model.connector.config?.model as string | undefined;
+  const modelName =
+    (model.connector.config?.model as string | undefined) ??
+    (model.connector.config?.providerConfig as { model_id?: string } | undefined)?.model_id;
 
   // 1. Sort by (overlap DESC, score DESC), then apply topN cap while protecting
   //    discriminating anchor-only candidates. Anchor-only hits (overlap=0, score=0)
@@ -457,15 +460,16 @@ export const triageDiamondCandidates = async ({
 
     for (const entry of group.candidates) {
       const reportId = labelMap.get(entry.candidate_id);
-      if (!reportId || seen.has(reportId)) continue;
-      seen.add(reportId);
-      const pick: TriagePick = {
-        candidate_id: reportId,
-        confidence: entry.confidence,
-        justification: entry.justification,
-      };
-      rawPicks.push(pick);
-      mappedGroup.candidates.push({ ...pick });
+      if (reportId && !seen.has(reportId)) {
+        seen.add(reportId);
+        const pick: TriagePick = {
+          candidate_id: reportId,
+          confidence: entry.confidence,
+          justification: entry.justification,
+        };
+        rawPicks.push(pick);
+        mappedGroup.candidates.push({ ...pick });
+      }
     }
 
     if (mappedGroup.candidates.length > 0) groups.push(mappedGroup);

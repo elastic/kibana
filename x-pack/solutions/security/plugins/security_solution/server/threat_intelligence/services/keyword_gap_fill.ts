@@ -127,7 +127,9 @@ export const keywordGapFill = async ({
   }
 
   const connectorId = model.connector.connectorId;
-  const modelName = model.connector.config?.model as string | undefined;
+  const modelName =
+    (model.connector.config?.model as string | undefined) ??
+    (model.connector.config?.providerConfig as { model_id?: string } | undefined)?.model_id;
   const poolTitles = currentPool.map((c) => c.title);
   const prompt = buildGapFillPrompt(caseContext, poolTitles);
 

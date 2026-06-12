@@ -26,8 +26,23 @@ import {
 } from './threat_intelligence';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 
+const tryRegister = (
+  agentBuilder: AgentBuilderPluginSetup,
+  logger: Logger,
+  tool: Parameters<AgentBuilderPluginSetup['tools']['register']>[0]
+) => {
+  try {
+    agentBuilder.tools.register(tool);
+  } catch (err) {
+    logger.error(`Failed to register tool "${(tool as { id?: string }).id}": ${err}`);
+  }
+};
+
 /**
  * Registers all security agent builder tools with the agentBuilder plugin.
+ *
+ * Each tool is wrapped in its own try/catch so a single registration failure
+ * cannot silently prevent the remaining tools from registering.
  *
  * PCI compliance tools are gated behind `experimentalFeatures.pciComplianceAgentBuilder` so
  * the feature can ship dark and be enabled per environment.
@@ -38,39 +53,29 @@ export const registerTools = async (
   logger: Logger,
   experimentalFeatures: ExperimentalFeatures
 ) => {
-  agentBuilder.tools.register(entityRiskScoreTool(core, logger));
-  agentBuilder.tools.register(attackDiscoverySearchTool(core, logger));
-  agentBuilder.tools.register(securityLabsSearchTool(core));
-  agentBuilder.tools.register(createDetectionRuleTool(core, logger, experimentalFeatures));
-  agentBuilder.tools.register(alertsTool(core, logger));
-  agentBuilder.tools.register(getEntityTool(core, logger, experimentalFeatures));
-  agentBuilder.tools.register(searchEntitiesTool(core, logger, experimentalFeatures));
+  tryRegister(agentBuilder, logger, entityRiskScoreTool(core, logger));
+  tryRegister(agentBuilder, logger, attackDiscoverySearchTool(core, logger));
+  tryRegister(agentBuilder, logger, securityLabsSearchTool(core));
+  tryRegister(agentBuilder, logger, createDetectionRuleTool(core, logger, experimentalFeatures));
+  tryRegister(agentBuilder, logger, alertsTool(core, logger));
+  tryRegister(agentBuilder, logger, getEntityTool(core, logger, experimentalFeatures));
+  tryRegister(agentBuilder, logger, searchEntitiesTool(core, logger, experimentalFeatures));
 
   if (experimentalFeatures.pciComplianceAgentBuilder) {
-    agentBuilder.tools.register(pciScopeDiscoveryTool(core, logger));
-    agentBuilder.tools.register(pciComplianceTool(core, logger));
-    agentBuilder.tools.register(pciFieldMapperTool(core, logger));
+    tryRegister(agentBuilder, logger, pciScopeDiscoveryTool(core, logger));
+    tryRegister(agentBuilder, logger, pciComplianceTool(core, logger));
+    tryRegister(agentBuilder, logger, pciFieldMapperTool(core, logger));
   }
 
   // Threat-intelligence Agent Builder tools (folded in from the standalone
   // threat-intelligence plugin). Gated behind the
   // `threatIntelligenceSkillEnabled` experimental flag.
-  //
-  // Only the two `BuiltinToolDefinition` tools are globally registered here:
-  //   - `extractIocsTool`         — invoked by Workflow 2 as a builtin step
-  //   - `analyseEnvironmentTool`  — used by the orchestrating agent through
-  //     the registry to tailor feed recommendations without consuming one of
-  //     the skill's seven inline-tool slots.
-  // The remaining seven tools are `BuiltinSkillBoundedTool` and are
-  // surfaced inline on the threat-intelligence skill (see
-  // `agent_builder/skills/threat_intelligence/threat_intelligence_skill.ts`);
-  // they are not registered in the global tool registry by design.
   if (experimentalFeatures.threatIntelligenceSkillEnabled) {
-    agentBuilder.tools.register(extractIocsTool);
-    agentBuilder.tools.register(analyseEnvironmentTool);
-    agentBuilder.tools.register(correlateThreatTool);
-    agentBuilder.tools.register(searchByAnchorsTool);
-    agentBuilder.tools.register(searchByDiamondTool);
-    agentBuilder.tools.register(extractDiamondTool);
+    tryRegister(agentBuilder, logger, extractIocsTool);
+    tryRegister(agentBuilder, logger, analyseEnvironmentTool);
+    tryRegister(agentBuilder, logger, correlateThreatTool);
+    tryRegister(agentBuilder, logger, searchByAnchorsTool);
+    tryRegister(agentBuilder, logger, searchByDiamondTool);
+    tryRegister(agentBuilder, logger, extractDiamondTool);
   }
 };

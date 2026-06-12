@@ -60,10 +60,16 @@ interface ModelPricing {
 }
 
 const PRICING_TABLE: readonly ModelPricing[] = [
-  // Claude 4 family (Haiku 4.5, Sonnet 4.6, Opus 4.8)
+  // Claude 4 family — API format: claude-{family}-4.x / haiku-4 / sonnet-4 / opus-4
   { pattern: 'haiku-4', inputUsdPerM: 0.8, outputUsdPerM: 4.0 },
   { pattern: 'sonnet-4', inputUsdPerM: 3.0, outputUsdPerM: 15.0 },
   { pattern: 'opus-4', inputUsdPerM: 15.0, outputUsdPerM: 75.0 },
+  // Claude 4 family — EIS hosted format: anthropic-claude-4.x-{family}
+  { pattern: '4.5-haiku', inputUsdPerM: 0.8, outputUsdPerM: 4.0 },
+  { pattern: '4.6-sonnet', inputUsdPerM: 3.0, outputUsdPerM: 15.0 },
+  { pattern: '4.7-sonnet', inputUsdPerM: 3.0, outputUsdPerM: 15.0 },
+  { pattern: '4.7-opus', inputUsdPerM: 15.0, outputUsdPerM: 75.0 },
+  { pattern: '4.8-opus', inputUsdPerM: 15.0, outputUsdPerM: 75.0 },
   // Claude 3.x family
   { pattern: '3-5-haiku', inputUsdPerM: 0.8, outputUsdPerM: 4.0 },
   { pattern: '3-haiku', inputUsdPerM: 0.25, outputUsdPerM: 1.25 },

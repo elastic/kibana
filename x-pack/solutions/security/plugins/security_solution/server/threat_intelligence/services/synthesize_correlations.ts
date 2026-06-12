@@ -438,7 +438,10 @@ export const synthesizeCorrelations = async ({
   }
 
   const connectorId = synthesisModel.connector.connectorId;
-  const modelName = synthesisModel.connector.config?.model as string | undefined;
+  const modelName =
+    (synthesisModel.connector.config?.model as string | undefined) ??
+    (synthesisModel.connector.config?.providerConfig as { model_id?: string } | undefined)
+      ?.model_id;
 
   // 1. Index collapsed candidates by report_id for O(1) lookup.
   const collapsedByReportId = new Map<string, CollapsedCandidate>(
