@@ -3,6 +3,7 @@ redirects:
   'extend/configuration-service.md': 'extend/tutorials/configuring-your-plugin.md'
   'extend/core-packages.md': 'extend/key-concepts/platform-architecture/plugins-packages-and-the-platform.md'
   'extend/development-best-practices.md': 'extend/contributing/principles/developer-principles.md'
+  'extend/contributing/principles/best-practices.md': 'extend/contributing/principles/developer-principles.md'
   'extend/plugin-performance.md': 'extend/key-concepts/performance/plugin-performance-and-optimization.md'
   'extend/kibana-navigation.md': 'extend/key-concepts/platform-architecture/routing-navigation-and-url.md'
   'extend/stability.md': 'extend/contributing/principles/developer-principles.md'

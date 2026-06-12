@@ -20,7 +20,6 @@ toc:
           - file: accessibility.md
           - file: internationalization.md
           - file: performance.md
-          - file: best-practices.md
           - file: standards-and-guidelines.md
       - folder: workflow
         children:

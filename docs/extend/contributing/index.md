@@ -15,7 +15,6 @@ How we think about quality, security, accessibility, performance, and i18n when 
 - [Accessibility](./principles/accessibility.md)
 - [Internationalization](./principles/internationalization.md)
 - [Performance](./principles/performance.md)
-- [Best practices](./principles/best-practices.md)
 - [Standards and guidelines](./principles/standards-and-guidelines.md)
 
 ## Workflow

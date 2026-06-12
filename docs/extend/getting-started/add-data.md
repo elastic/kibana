@@ -43,7 +43,6 @@ node scripts/makelogs --auth <username>:<password>
 ```
 
 ## Realistic solution data
-###LGTODO verify that sample data won't work...
 
 :::{warning} Internal only
 Security and Observability solution applications only work if data exists in particularly named indices, abiding by our [ECS format](https://www.elastic.co/guide/en/ecs/current/index.html). If you would like to use these applications with realistic data, check out the [oblt_cli tool](https://github.com/elastic/observability-test-environments/blob/main/docs/tools/oblt-cli/CONTRIBUTING.md). This tool sets you up to connect to a remote Elasticsearch cluster that contains the appropriate data via CCS.

@@ -59,7 +59,7 @@ Each of these will run {{es}} with a basic license. Additional options are avail
 
 ## From a remote host [_from_a_remote_host]
 
-You can save some system resources, and the effort of generating sample data, if you have a remote {{es}} cluster to connect to. (Elasticians: you do! Check with your team about where to find credentials)
+You can save some system resources, and the effort of generating sample data, if you have a remote {{es}} cluster to connect to.
 
 You’ll need to create a kibana.dev.yml ([Customizing `config/kibana.dev.yml`](/extend/getting-started/set-up-a-development-environment.md)) and add the following to it:
 
