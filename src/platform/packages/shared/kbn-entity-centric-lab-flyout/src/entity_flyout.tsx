@@ -48,6 +48,7 @@ import { LogsTab } from './logs_tab';
 import { AlertsTab } from './alerts_tab';
 import { RelationshipsTab } from './relationships_tab';
 import { SecurityTab } from './security_tab';
+import { TracesTab } from './traces_tab';
 import { buildFakeEntityOverview } from './fake_entity_overview';
 import { buildFakeEntityTabsData } from './fake_entity_tabs';
 import {
@@ -100,13 +101,21 @@ interface EntityFlyoutProps {
   readonly onManageEntityType?: () => void;
 }
 
-type BuiltInTabId = 'overview' | 'metrics' | 'logs' | 'alerts' | 'relationships' | 'security';
+type BuiltInTabId =
+  | 'overview'
+  | 'metrics'
+  | 'logs'
+  | 'traces'
+  | 'alerts'
+  | 'relationships'
+  | 'security';
 
 /**
- * Tab ids can be either one of the six built-in tabs or a free-form string
- * coming from a user override (e.g. `'custom'`, `'profiling'`, or any future
- * id defined in the Manage entity types wizard). Unknown ids render a
- * placeholder so the flyout never crashes if the override schema drifts.
+ * Tab ids can be either one of the seven built-in tabs or a free-form
+ * string coming from a user override (e.g. `'custom'`, `'profiling'`, or
+ * any future id defined in the Manage entity types wizard). Unknown ids
+ * render a placeholder so the flyout never crashes if the override schema
+ * drifts.
  */
 type TabId = BuiltInTabId | string;
 
@@ -114,6 +123,7 @@ const BUILT_IN_TAB_IDS: readonly BuiltInTabId[] = [
   'overview',
   'metrics',
   'logs',
+  'traces',
   'alerts',
   'relationships',
   'security',
@@ -437,6 +447,22 @@ export const EntityFlyout = ({
           defaultMessage: 'Logs',
         }),
       },
+      // Traces sits between Logs and Alerts in APM-style nav. The row is
+      // only seeded into `defaultTabs` when the per-kind builder has
+      // populated `tabsData.traces` — the override path below still
+      // accepts `'traces'` as a known id so a wizard-driven enable on
+      // a kind without trace data falls through to the empty-prompt
+      // placeholder rather than crashing.
+      ...(tabsData.traces
+        ? [
+            {
+              id: 'traces' as TabId,
+              label: i18n.translate('entityCentricLabFlyout.flyout.tabs.traces', {
+                defaultMessage: 'Traces',
+              }),
+            },
+          ]
+        : []),
       {
         id: 'alerts',
         label: i18n.translate('entityCentricLabFlyout.flyout.tabs.alerts', {
@@ -480,7 +506,7 @@ export const EntityFlyout = ({
           appendBadge: builtIn?.appendBadge,
         };
       });
-  }, [overview.securityIssueCount, templateOverride]);
+  }, [overview.securityIssueCount, templateOverride, tabsData.traces]);
 
   // If the active tab disappears (override toggled it off, or the user
   // reordered everything and the previously-selected tab is gone), fall
@@ -746,6 +772,29 @@ const TabContent = ({
   readonly customLinks?: readonly FlyoutCustomLink[];
   readonly onSelectEntity?: (entityName: string) => void;
 }) => {
+  // Shared fallback: rendered for the `default` branch (unknown tab id from
+  // an override) and for the `traces` branch when the active entity has no
+  // curated trace payload (e.g. an override enabled the tab on a non-
+  // service kind). Hoisted out of the switch so both cases reuse the same
+  // copy and i18n key.
+  const placeholder = (
+    <EuiEmptyPrompt
+      iconType="documentEdit"
+      title={<h2>{activeTabLabel}</h2>}
+      body={
+        <EuiText size="s" color="subdued">
+          <p>
+            {i18n.translate('entityCentricLabFlyout.flyout.customTabPlaceholder', {
+              defaultMessage:
+                'This tab was added from "Manage entity types". Configure its content for {entityName} to surface domain-specific data here.',
+              values: { entityName },
+            })}
+          </p>
+        </EuiText>
+      }
+    />
+  );
+
   switch (activeTab) {
     case 'overview':
       return <OverviewTab overview={overview} />;
@@ -753,6 +802,11 @@ const TabContent = ({
       return <MetricsTab metrics={tabsData.metrics} />;
     case 'logs':
       return <LogsTab entityName={entityName} logs={tabsData.logs} />;
+    case 'traces':
+      // The override path may surface this tab on a kind that doesn't
+      // emit trace data — render the placeholder in that case rather
+      // than crashing on a missing payload.
+      return tabsData.traces ? <TracesTab traces={tabsData.traces} /> : placeholder;
     case 'alerts':
       return <AlertsTab alerts={tabsData.alerts} />;
     case 'relationships':
@@ -769,23 +823,7 @@ const TabContent = ({
       if (activeTab === 'custom' && customLinks && customLinks.length > 0) {
         return <CustomLinksTab links={customLinks} />;
       }
-      return (
-        <EuiEmptyPrompt
-          iconType="documentEdit"
-          title={<h2>{activeTabLabel}</h2>}
-          body={
-            <EuiText size="s" color="subdued">
-              <p>
-                {i18n.translate('entityCentricLabFlyout.flyout.customTabPlaceholder', {
-                  defaultMessage:
-                    'This tab was added from "Manage entity types". Configure its content for {entityName} to surface domain-specific data here.',
-                  values: { entityName },
-                })}
-              </p>
-            </EuiText>
-          }
-        />
-      );
+      return placeholder;
   }
 };
 

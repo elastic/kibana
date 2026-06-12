@@ -80,7 +80,6 @@ export const MetricsTab = ({ metrics }: MetricsTabProps) => {
             </h3>
           </EuiTitle>
         }
-        extraAction={<SectionMenuButton sectionLabel="goldenSignals" />}
         paddingSize="s"
         data-test-subj="entityCentricLabMetricsGoldenSignals"
       >
@@ -114,7 +113,6 @@ export const MetricsTab = ({ metrics }: MetricsTabProps) => {
             </h3>
           </EuiTitle>
         }
-        extraAction={<SectionMenuButton sectionLabel="otherMetrics" />}
         paddingSize="s"
         data-test-subj="entityCentricLabMetricsOtherSection"
       >
@@ -134,17 +132,6 @@ export const MetricsTab = ({ metrics }: MetricsTabProps) => {
     </>
   );
 };
-
-const SectionMenuButton = ({ sectionLabel }: { sectionLabel: string }) => (
-  <EuiButtonIcon
-    iconType="boxesVertical"
-    color="text"
-    aria-label={i18n.translate('entityCentricLabFlyout.flyout.metrics.sectionMenuAriaLabel', {
-      defaultMessage: 'Open section actions',
-    })}
-    data-test-subj={`entityCentricLabMetricsSectionMenu-${sectionLabel}`}
-  />
-);
 
 const CHART_HEIGHT = 200;
 

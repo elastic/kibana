@@ -42,6 +42,11 @@ export type {
   SecurityIssue,
   SecuritySeverity,
   SecurityTabData,
+  TraceServiceColor,
+  TraceServiceLegendEntry,
+  TraceSpan,
+  TraceSpanType,
+  TracesTabData,
 } from './src/fake_entity_tabs';
 
 export {

@@ -39,6 +39,8 @@ import type {
   RelatedEntity,
   RelationshipsTabData,
   SecurityTabData,
+  TraceSpan,
+  TracesTabData,
 } from './fake_entity_tabs';
 import { INCIDENT_DEPLOY_TIME_MS, INCIDENT_X_DOMAIN } from './time_domain';
 // `chaos_mode` imports `STORY_CLICKABLE_NAMES` from this file but only
@@ -472,12 +474,127 @@ const paymentsServiceSecurity: SecurityTabData = {
   issues: [],
 };
 
+// PayFlow story: payments-service is unhealthy after the v2.14.3 deploy,
+// so the curated trace shows a slow `/checkout` waterfall with the SQL leg
+// flagged as `blocking` and 2 errors on the root — narratively consistent
+// with the alerts and metrics already curated for this entity.
+const paymentsServiceTraceSpans: TraceSpan[] = [
+  {
+    id: 'root',
+    serviceId: 'rum',
+    name: 'POST /checkout',
+    startMs: 0,
+    durationMs: 1450,
+    type: 'browser',
+    errorCount: 2,
+  },
+  {
+    id: 'doc',
+    parentId: 'root',
+    serviceId: 'rum',
+    name: 'Requesting and receiving the document',
+    startMs: 0,
+    durationMs: 152,
+    type: 'browser',
+  },
+  {
+    id: 'parse',
+    parentId: 'root',
+    serviceId: 'rum',
+    name: 'Parsing the document, executing sync. scripts',
+    startMs: 160,
+    durationMs: 320,
+    type: 'render',
+  },
+  {
+    id: 'authorize',
+    parentId: 'root',
+    serviceId: 'rum',
+    name: 'POST /api/payments/authorize',
+    startMs: 470,
+    durationMs: 880,
+    type: 'http',
+    extraBadge: 'blocking',
+  },
+  {
+    id: 'authorize-handler',
+    parentId: 'authorize',
+    serviceId: 'java',
+    name: 'PaymentsController#authorize',
+    startMs: 478,
+    durationMs: 870,
+    type: 'http',
+    statusCode: '5xx',
+    errorCount: 1,
+  },
+  {
+    id: 'authorize-stripe',
+    parentId: 'authorize-handler',
+    serviceId: 'java',
+    name: 'POST stripe.com/v1/charges',
+    startMs: 490,
+    durationMs: 612,
+    type: 'http',
+    statusCode: '4xx',
+  },
+  {
+    id: 'authorize-sql',
+    parentId: 'authorize-handler',
+    serviceId: 'java',
+    name: 'UPDATE payments SET status = ?',
+    startMs: 1110,
+    durationMs: 230,
+    type: 'db',
+  },
+  {
+    id: 'fraud',
+    parentId: 'root',
+    serviceId: 'rum',
+    name: 'GET /api/fraud/score',
+    startMs: 540,
+    durationMs: 198,
+    type: 'http',
+  },
+  {
+    id: 'fraud-handler',
+    parentId: 'fraud',
+    serviceId: 'ruby',
+    name: 'FraudController#score',
+    startMs: 552,
+    durationMs: 184,
+    type: 'http',
+    statusCode: '2xx',
+  },
+  {
+    id: 'load',
+    parentId: 'root',
+    serviceId: 'rum',
+    name: 'Fire "load" event',
+    startMs: 1448,
+    durationMs: 1,
+    type: 'event',
+  },
+];
+
+const paymentsServiceTraces: TracesTabData = {
+  traceId: 'payments-service-checkout-001',
+  rootName: 'POST /checkout',
+  totalDurationMs: 1450,
+  services: [
+    { id: 'rum', name: 'payflow-web-rum', color: 'primary' },
+    { id: 'java', name: 'payments-service', color: 'success' },
+    { id: 'ruby', name: 'fraud-service', color: 'accent' },
+  ],
+  spans: paymentsServiceTraceSpans,
+};
+
 const paymentsServiceTabsData: EntityTabsData = {
   metrics: paymentsServiceMetrics,
   logs: paymentsServiceLogs,
   alerts: paymentsServiceAlerts,
   relationships: paymentsServiceRelationships,
   security: paymentsServiceSecurity,
+  traces: paymentsServiceTraces,
 };
 
 // ---------------------------------------------------------------------------
@@ -655,12 +772,113 @@ const checkoutServiceSecurity: SecurityTabData = {
   issues: [],
 };
 
+// PayFlow story: checkout-service is healthy (Sofia's "this is fine"
+// upstream), so the curated trace looks tidy — no errors, no blocking,
+// and totals well within the SLO budget.
+const checkoutServiceTraceSpans: TraceSpan[] = [
+  {
+    id: 'root',
+    serviceId: 'rum',
+    name: 'GET /cart',
+    startMs: 0,
+    durationMs: 612,
+    type: 'browser',
+  },
+  {
+    id: 'doc',
+    parentId: 'root',
+    serviceId: 'rum',
+    name: 'Requesting and receiving the document',
+    startMs: 0,
+    durationMs: 96,
+    type: 'browser',
+  },
+  {
+    id: 'parse',
+    parentId: 'root',
+    serviceId: 'rum',
+    name: 'Parsing the document, executing sync. scripts',
+    startMs: 102,
+    durationMs: 274,
+    type: 'render',
+  },
+  {
+    id: 'cart-fetch',
+    parentId: 'root',
+    serviceId: 'rum',
+    name: 'GET /api/cart',
+    startMs: 380,
+    durationMs: 198,
+    type: 'http',
+  },
+  {
+    id: 'cart-handler',
+    parentId: 'cart-fetch',
+    serviceId: 'java',
+    name: 'CartController#show',
+    startMs: 392,
+    durationMs: 174,
+    type: 'http',
+    statusCode: '2xx',
+  },
+  {
+    id: 'cart-sql',
+    parentId: 'cart-handler',
+    serviceId: 'java',
+    name: 'SELECT FROM cart_items',
+    startMs: 410,
+    durationMs: 22,
+    type: 'db',
+  },
+  {
+    id: 'recos',
+    parentId: 'root',
+    serviceId: 'rum',
+    name: 'GET /api/recommendations',
+    startMs: 420,
+    durationMs: 156,
+    type: 'http',
+  },
+  {
+    id: 'recos-handler',
+    parentId: 'recos',
+    serviceId: 'ruby',
+    name: 'RecommendationsController#index',
+    startMs: 432,
+    durationMs: 138,
+    type: 'http',
+    statusCode: '2xx',
+  },
+  {
+    id: 'load',
+    parentId: 'root',
+    serviceId: 'rum',
+    name: 'Fire "load" event',
+    startMs: 610,
+    durationMs: 1,
+    type: 'event',
+  },
+];
+
+const checkoutServiceTraces: TracesTabData = {
+  traceId: 'checkout-service-cart-001',
+  rootName: 'GET /cart',
+  totalDurationMs: 612,
+  services: [
+    { id: 'rum', name: 'payflow-web-rum', color: 'primary' },
+    { id: 'java', name: 'checkout-service', color: 'success' },
+    { id: 'ruby', name: 'recommendations-service', color: 'accent' },
+  ],
+  spans: checkoutServiceTraceSpans,
+};
+
 const checkoutServiceTabsData: EntityTabsData = {
   metrics: checkoutServiceMetrics,
   logs: checkoutServiceLogs,
   alerts: checkoutServiceAlerts,
   relationships: checkoutServiceRelationships,
   security: checkoutServiceSecurity,
+  traces: checkoutServiceTraces,
 };
 
 // ---------------------------------------------------------------------------

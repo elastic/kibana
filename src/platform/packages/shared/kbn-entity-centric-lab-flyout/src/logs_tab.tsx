@@ -12,7 +12,6 @@ import {
   EuiBadge,
   EuiBasicTable,
   EuiButtonIcon,
-  EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -42,30 +41,6 @@ export const LogsTab = ({ entityName, logs }: LogsTabProps) => {
 
   const columns = useMemo<Array<EuiBasicTableColumn<LogRow>>>(
     () => [
-      {
-        field: 'id',
-        name: (
-          <EuiCheckbox
-            id="entityCentricLabLogsSelectAll"
-            checked={false}
-            onChange={() => undefined}
-            aria-label={i18n.translate('entityCentricLabFlyout.flyout.logs.selectAllAriaLabel', {
-              defaultMessage: 'Select all rows',
-            })}
-          />
-        ),
-        width: '40px',
-        render: () => (
-          <EuiCheckbox
-            id="entityCentricLabLogsRowSelect"
-            checked={false}
-            onChange={() => undefined}
-            aria-label={i18n.translate('entityCentricLabFlyout.flyout.logs.selectRowAriaLabel', {
-              defaultMessage: 'Select row',
-            })}
-          />
-        ),
-      },
       {
         field: 'id',
         name: <EuiIcon type="info" aria-hidden />,
@@ -163,28 +138,14 @@ export const LogsTab = ({ entityName, logs }: LogsTabProps) => {
 
   return (
     <EuiPanel hasBorder hasShadow={false} paddingSize="m">
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-        <EuiFlexItem>
-          <EuiTitle size="xs">
-            <h3>
-              {i18n.translate('entityCentricLabFlyout.flyout.logs.panelTitle', {
-                defaultMessage: 'Logs emitted by {entityName}',
-                values: { entityName },
-              })}
-            </h3>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            iconType="boxesVertical"
-            color="text"
-            aria-label={i18n.translate('entityCentricLabFlyout.flyout.logs.sectionMenuAriaLabel', {
-              defaultMessage: 'Open section actions',
-            })}
-            data-test-subj="entityCentricLabLogsSectionMenu"
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiTitle size="xs">
+        <h3>
+          {i18n.translate('entityCentricLabFlyout.flyout.logs.panelTitle', {
+            defaultMessage: 'Logs emitted by {entityName}',
+            values: { entityName },
+          })}
+        </h3>
+      </EuiTitle>
       <EuiSpacer size="s" />
       <EuiBasicTable<LogRow>
         items={pageOfItems as LogRow[]}

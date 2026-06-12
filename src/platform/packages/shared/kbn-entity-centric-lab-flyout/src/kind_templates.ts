@@ -53,6 +53,8 @@ import type {
   RelationshipsTabData,
   SecurityIssue,
   SecurityTabData,
+  TraceSpan,
+  TracesTabData,
 } from './fake_entity_tabs';
 import { INCIDENT_DEPLOY_TIME_MS, INCIDENT_X_DOMAIN } from './time_domain';
 
@@ -673,8 +675,168 @@ const tabsOf = (
   logs: readonly LogRow[],
   alerts: AlertsTabData,
   relationships: RelationshipsTabData,
-  security: SecurityTabData
-): EntityTabsData => ({ metrics, logs, alerts, relationships, security });
+  security: SecurityTabData,
+  // Optional so the dozen non-service builders can keep their five-arg
+  // shape — only `kind === 'service'` populates this field today.
+  traces?: TracesTabData
+): EntityTabsData => ({
+  metrics,
+  logs,
+  alerts,
+  relationships,
+  security,
+  ...(traces ? { traces } : {}),
+});
+
+// ---------------------------------------------------------------------------
+// Traces (service kind only)
+// ---------------------------------------------------------------------------
+
+/**
+ * Build the curated trace waterfall surfaced under the Traces tab for an
+ * APM service. Mirrors the inspiration screenshot (a `/dashboard` browser
+ * trace fanning out into Java + Ruby backends) and tints the totals by
+ * health so the demo storyline reads "this trace is slower / errors when
+ * the service is unhealthy".
+ */
+const tracesByHealth = (name: string, h: EntityHealthVariant): TracesTabData => {
+  const totalDurationMs = pick(h, 720, 999, 1450);
+  // Three callers — RUM front-end, Java back-end, Ruby back-end — match
+  // the inspiration screenshot's three-colour legend.
+  const services: TracesTabData['services'] = [
+    { id: 'rum', name: `${name}-rum`, color: 'primary' },
+    { id: 'java', name: `${name}-java`, color: 'success' },
+    { id: 'ruby', name: `${name}-ruby`, color: 'accent' },
+  ];
+
+  // Hard-coded span tree (~12 spans, depth 4). Times are anchored to the
+  // 999 ms screenshot baseline; durations and offsets scale only via the
+  // narrative bumps below — keeping the layout instantly recognisable.
+  const slowdown = pick(h, 0, 1, 1.45);
+  const bump = (ms: number) => Math.round(ms * (1 + slowdown * 0.05));
+
+  const spans: TraceSpan[] = [
+    {
+      id: 'root',
+      serviceId: 'rum',
+      name: '/dashboard',
+      startMs: 0,
+      durationMs: totalDurationMs,
+      type: 'browser',
+      errorCount: pick(h, 0, 0, 2),
+    },
+    {
+      id: 'doc',
+      parentId: 'root',
+      serviceId: 'rum',
+      name: 'Requesting and receiving the document',
+      startMs: 0,
+      durationMs: bump(143),
+      type: 'browser',
+    },
+    {
+      id: 'parse',
+      parentId: 'root',
+      serviceId: 'rum',
+      name: 'Parsing the document, executing sync. scripts',
+      startMs: bump(150),
+      durationMs: bump(556),
+      type: 'render',
+    },
+    {
+      id: 'css',
+      parentId: 'parse',
+      serviceId: 'rum',
+      name: `http://${name}-frontend:3000/static/css/main.7bd7c5e8.css`,
+      startMs: bump(220),
+      durationMs: bump(52),
+      type: 'asset',
+    },
+    {
+      id: 'products',
+      parentId: 'root',
+      serviceId: 'rum',
+      name: 'GET /api/products/top',
+      startMs: bump(440),
+      durationMs: bump(305),
+      type: 'http',
+    },
+    {
+      id: 'products-handler',
+      parentId: 'products',
+      serviceId: 'java',
+      name: 'APIRestController#topProducts',
+      startMs: bump(700),
+      durationMs: bump(12),
+      type: 'http',
+      statusCode: '2xx',
+    },
+    {
+      id: 'products-cache',
+      parentId: 'products-handler',
+      serviceId: 'java',
+      name: 'empty query',
+      startMs: bump(700),
+      durationMs: bump(5),
+      type: 'db',
+    },
+    {
+      id: 'products-sql',
+      parentId: 'products-handler',
+      serviceId: 'java',
+      name: 'SELECT FROM order_lines',
+      startMs: bump(706),
+      durationMs: bump(4),
+      type: 'db',
+    },
+    {
+      id: 'stats',
+      parentId: 'root',
+      serviceId: 'rum',
+      name: 'GET /api/stats',
+      startMs: bump(540),
+      durationMs: bump(195),
+      type: 'http',
+      extraBadge: pick(h, undefined, 'blocking', 'blocking'),
+    },
+    {
+      id: 'stats-handler',
+      parentId: 'stats',
+      serviceId: 'ruby',
+      name: 'Api::StatsController#index',
+      startMs: bump(720),
+      durationMs: bump(11),
+      type: 'http',
+      statusCode: '3xx',
+    },
+    {
+      id: 'stats-inner',
+      parentId: 'stats-handler',
+      serviceId: 'ruby',
+      name: 'Api::StatsController#index',
+      startMs: bump(722),
+      durationMs: bump(8),
+      type: 'http',
+    },
+    {
+      id: 'load',
+      parentId: 'root',
+      serviceId: 'rum',
+      name: 'Fire "load" event',
+      startMs: bump(740),
+      durationMs: 1,
+      type: 'event',
+    },
+  ];
+
+  return {
+    traceId: `${name}-trace-001`,
+    rootName: '/dashboard',
+    totalDurationMs,
+    services,
+    spans,
+  };
+};
 
 // ---------------------------------------------------------------------------
 // Per-kind templates
@@ -1011,7 +1173,14 @@ const buildServiceTemplate = (
   );
   return {
     overview,
-    tabs: tabsOf(metrics, logs, alertsByHealth(name, h, 'service'), relationships, security),
+    tabs: tabsOf(
+      metrics,
+      logs,
+      alertsByHealth(name, h, 'service'),
+      relationships,
+      security,
+      tracesByHealth(name, h)
+    ),
   };
 };
 

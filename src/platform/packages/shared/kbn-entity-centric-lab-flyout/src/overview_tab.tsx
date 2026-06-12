@@ -56,7 +56,6 @@ export const OverviewTab = ({ overview }: OverviewTabProps) => {
             adornment={<AssistanceSparklesIcon />}
           />
         }
-        extraAction={<SectionMenuButton sectionLabel="entitySummary" />}
         paddingSize="s"
         data-test-subj="entityCentricLabOverviewEntitySummary"
       >
@@ -75,7 +74,6 @@ export const OverviewTab = ({ overview }: OverviewTabProps) => {
             })}
           />
         }
-        extraAction={<SectionMenuButton sectionLabel="goldenSignals" />}
         paddingSize="s"
         data-test-subj="entityCentricLabOverviewGoldenSignals"
       >
@@ -94,7 +92,6 @@ export const OverviewTab = ({ overview }: OverviewTabProps) => {
             })}
           />
         }
-        extraAction={<SectionMenuButton sectionLabel="entityDetails" />}
         paddingSize="s"
         data-test-subj="entityCentricLabOverviewEntityDetails"
       >
@@ -119,7 +116,6 @@ export const OverviewTab = ({ overview }: OverviewTabProps) => {
             })}
           />
         }
-        extraAction={<SectionMenuButton sectionLabel="ownership" />}
         paddingSize="s"
         data-test-subj="entityCentricLabOverviewOwnership"
       >
@@ -143,17 +139,6 @@ const SectionTitle = ({ title, adornment }: { title: string; adornment?: React.R
     </EuiFlexItem>
     {adornment ? <EuiFlexItem grow={false}>{adornment}</EuiFlexItem> : null}
   </EuiFlexGroup>
-);
-
-const SectionMenuButton = ({ sectionLabel }: { sectionLabel: string }) => (
-  <EuiButtonIcon
-    iconType="boxesVertical"
-    color="text"
-    aria-label={i18n.translate('entityCentricLabFlyout.flyout.overview.sectionMenuAriaLabel', {
-      defaultMessage: 'Open section actions',
-    })}
-    data-test-subj={`entityCentricLabSectionMenu-${sectionLabel}`}
-  />
 );
 
 const AssistanceSparklesIcon = () => {

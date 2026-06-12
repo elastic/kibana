@@ -154,12 +154,68 @@ export interface SecurityTabData {
   readonly issues: readonly SecurityIssue[];
 }
 
+/**
+ * Colour used for a service's bar in the Traces waterfall and its dot in
+ * the Services legend. Constrained to a small set of EUI-friendly hues so
+ * the renderer can map straight onto `EuiHealth` / theme colour tokens
+ * without an open string union widening to anything the design team didn't
+ * sign off on.
+ */
+export type TraceServiceColor = 'primary' | 'success' | 'accent' | 'warning' | 'danger';
+
+export interface TraceServiceLegendEntry {
+  readonly id: string;
+  readonly name: string;
+  readonly color: TraceServiceColor;
+}
+
+/**
+ * Span subtype drives the inline icon prefixed to a span row in the
+ * waterfall (globe for browser/HTTP, database for db calls, etc.) and is
+ * kept narrow on purpose — unknown values would render as a generic icon
+ * and fail the curated demo aesthetic.
+ */
+export type TraceSpanType = 'browser' | 'http' | 'render' | 'db' | 'event' | 'asset';
+
+export interface TraceSpan {
+  readonly id: string;
+  /** Parent span id; omitted for the trace's root span. */
+  readonly parentId?: string;
+  /** Foreign-key into {@link TracesTabData.services}. */
+  readonly serviceId: string;
+  readonly name: string;
+  /** Start offset (ms) from the trace root. */
+  readonly startMs: number;
+  readonly durationMs: number;
+  readonly type: TraceSpanType;
+  /** HTTP status code surfaced as a leading badge on HTTP spans (e.g. `2xx`). */
+  readonly statusCode?: string;
+  /** Renders a red error count badge ("2 Errors") next to the name. */
+  readonly errorCount?: number;
+  /** Free-form trailing badge — today only `'blocking'` is rendered. */
+  readonly extraBadge?: string;
+}
+
+export interface TracesTabData {
+  readonly traceId: string;
+  readonly rootName: string;
+  readonly totalDurationMs: number;
+  readonly services: readonly TraceServiceLegendEntry[];
+  readonly spans: readonly TraceSpan[];
+}
+
 export interface EntityTabsData {
   readonly metrics: MetricsTabData;
   readonly logs: readonly LogRow[];
   readonly alerts: AlertsTabData;
   readonly relationships: RelationshipsTabData;
   readonly security: SecurityTabData;
+  /**
+   * Mock APM-style trace waterfall surfaced under the Traces tab. Optional
+   * — only `kind === 'service'` builders populate it today, and the flyout
+   * hides the tab entirely when the field is absent.
+   */
+  readonly traces?: TracesTabData;
 }
 
 /**

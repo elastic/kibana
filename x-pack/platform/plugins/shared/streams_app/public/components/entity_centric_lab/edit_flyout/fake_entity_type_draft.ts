@@ -78,6 +78,7 @@ export type FlyoutTabId =
   | 'overview'
   | 'metrics'
   | 'logs'
+  | 'traces'
   | 'alerts'
   | 'security'
   | 'relationships'
@@ -187,7 +188,14 @@ export const buildBlankCustomLink = (): CustomLinkDraft => ({
 
 const defaultCustomLinks = (): CustomLinkDraft[] => [buildBlankCustomLink()];
 
-const defaultFlyoutTabs = (): FlyoutTabConfig[] => [
+/**
+ * Default flyout-tab catalogue surfaced under Step 4 of the wizard. The
+ * `entityTypeId` is forwarded so a small set of rows can flip their
+ * default `enabled` flag based on the entity type — today only the
+ * `apm-service` preset enables Traces, every other type leaves it off so
+ * the flyout doesn't surface an empty waterfall.
+ */
+const defaultFlyoutTabs = (entityTypeId?: string): FlyoutTabConfig[] => [
   {
     id: 'overview',
     label: 'Overview',
@@ -205,6 +213,12 @@ const defaultFlyoutTabs = (): FlyoutTabConfig[] => [
     label: 'Logs',
     description: 'Filtered log stream for this entity',
     enabled: true,
+  },
+  {
+    id: 'traces',
+    label: 'Traces',
+    description: 'APM trace waterfall for this service',
+    enabled: entityTypeId === 'apm-service',
   },
   {
     id: 'alerts',
@@ -329,7 +343,7 @@ const PRESETS: Readonly<Record<string, PresetSeed>> = {
         },
         contentOverride: {
           enabled: false,
-          flyoutTabs: defaultFlyoutTabs(),
+          flyoutTabs: defaultFlyoutTabs('k8s-cluster'),
           customLinks: defaultCustomLinks(),
         },
       },
@@ -347,7 +361,7 @@ const PRESETS: Readonly<Record<string, PresetSeed>> = {
         },
         contentOverride: {
           enabled: true,
-          flyoutTabs: defaultFlyoutTabs().map((tab) =>
+          flyoutTabs: defaultFlyoutTabs('k8s-cluster').map((tab) =>
             tab.id === 'profiling' ? { ...tab, enabled: true } : tab
           ),
           customLinks: defaultCustomLinks(),
@@ -498,7 +512,7 @@ export const buildFakeEntityTypeDraft = (entityType: FakeEntityType): EntityType
       owners: preset.owners,
     },
     coveragePreview: preset.coverage,
-    flyoutTabs: defaultFlyoutTabs(),
+    flyoutTabs: defaultFlyoutTabs(entityType.id),
     customLinks: defaultCustomLinks(),
     subsets: preset.subsets,
   };
