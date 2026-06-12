@@ -19,6 +19,10 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { UnifiedHistogramServices } from '@kbn/unified-histogram/types';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import { Parser } from '@elastic/esql';
+import { CommandNames } from '@kbn/esql-language';
 import type { ChangePointCardModel } from '../utils/derive_change_point_cards';
 import {
   formatPvalueLabel,
@@ -32,6 +36,7 @@ interface ChangePointDetailsSectionProps {
   card: ChangePointCardModel;
   row: Readonly<Record<string, unknown>>;
   seriesColumns: { valueColumn: string; timeColumn: string };
+  fieldFormats: UnifiedHistogramServices['fieldFormats'];
 }
 
 const IMPACT_LEVEL_LABELS: Record<PvalueImpactLevel, string> = {
@@ -47,6 +52,14 @@ const IMPACT_LEVEL_LABELS: Record<PvalueImpactLevel, string> = {
 };
 
 /**
+ * Returns `true` when the ES|QL query contains a STATS command.
+ */
+function hasStatsCommand(esql: string): boolean {
+  const { root } = Parser.parse(esql);
+  return root.commands.some((cmd) => 'name' in cmd && cmd.name === CommandNames.STATS);
+}
+
+/**
  * Displays change-point properties beneath the mini chart in the flyout.
  *
  * Short categorical facts (time, field, metric, type, p-value) are shown in a
@@ -58,6 +71,7 @@ export const ChangePointDetailsSection: React.FC<ChangePointDetailsSectionProps>
   card,
   row,
   seriesColumns,
+  fieldFormats,
 }) => {
   const pvalueRaw = row[card.pvalueColumnId];
   const pvalue =
@@ -71,7 +85,9 @@ export const ChangePointDetailsSection: React.FC<ChangePointDetailsSectionProps>
   const changePointDate = timeRaw != null ? new Date(timeRaw as string | number) : undefined;
   const changePointTime =
     changePointDate && !Number.isNaN(changePointDate.getTime())
-      ? changePointDate.toLocaleString()
+      ? fieldFormats
+          .getDefaultInstance(KBN_FIELD_TYPES.DATE)
+          .convertToText(changePointDate.getTime())
       : undefined;
 
   const typeRaw = row[card.typeColumnId];
@@ -115,12 +131,14 @@ export const ChangePointDetailsSection: React.FC<ChangePointDetailsSectionProps>
     });
   }
 
-  statItems.push({
-    label: i18n.translate('changePointChartViewer.details.metricLabel', {
-      defaultMessage: 'Metric',
-    }),
-    value: seriesColumns.valueColumn,
-  });
+  if (hasStatsCommand(card.lineEsql)) {
+    statItems.push({
+      label: i18n.translate('changePointChartViewer.details.metricLabel', {
+        defaultMessage: 'Metric',
+      }),
+      value: seriesColumns.valueColumn,
+    });
+  }
 
   if (typeLabel) {
     statItems.push({
@@ -162,7 +180,9 @@ export const ChangePointDetailsSection: React.FC<ChangePointDetailsSectionProps>
                 <EuiText size="xs" color="subdued">
                   <p>{label}</p>
                 </EuiText>
-                <EuiText size="s">{value}</EuiText>
+                <EuiText size="s" style={{ wordBreak: 'break-all' }}>
+                  {value}
+                </EuiText>
               </EuiFlexItem>
             ))}
           </EuiFlexGrid>

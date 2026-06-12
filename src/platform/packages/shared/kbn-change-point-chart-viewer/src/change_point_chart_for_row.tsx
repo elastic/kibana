@@ -76,7 +76,12 @@ export const ChangePointChartForRow: React.FC<ChangePointChartForRowProps> = ({
         onFilter={onFilter}
         actions={actions}
       />
-      <ChangePointDetailsSection card={card} row={row} seriesColumns={seriesColumns} />
+      <ChangePointDetailsSection
+        card={card}
+        row={row}
+        seriesColumns={seriesColumns}
+        fieldFormats={services.fieldFormats}
+      />
     </>
   );
 };
