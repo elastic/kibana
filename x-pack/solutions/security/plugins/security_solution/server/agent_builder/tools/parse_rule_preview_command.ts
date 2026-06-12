@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Argv as YargsArgv } from 'yargs';
 import yargs from 'yargs';
 
 // ── Public types ───────────────────────────────────────────────────────────────
@@ -42,6 +43,8 @@ export const tokenizeCommand = (command: string): string[] => {
     const ch = chars[i];
 
     // Inside a quoted string, a backslash escapes the matching quote char or another backslash.
+    // `handled` is set when we consume the escape sequence so normal char processing is skipped.
+    let handled = false;
     if (ch === '\\' && i + 1 < chars.length) {
       const next = chars[i + 1];
       if (
@@ -50,21 +53,23 @@ export const tokenizeCommand = (command: string): string[] => {
       ) {
         current += next;
         i++;
-        continue;
+        handled = true;
       }
     }
 
-    if (ch === '"' && !inSingle) {
-      inDouble = !inDouble;
-    } else if (ch === "'" && !inDouble) {
-      inSingle = !inSingle;
-    } else if ((ch === ' ' || ch === '\t' || ch === '\n') && !inDouble && !inSingle) {
-      if (current.length > 0) {
-        tokens.push(current);
-        current = '';
+    if (!handled) {
+      if (ch === '"' && !inSingle) {
+        inDouble = !inDouble;
+      } else if (ch === "'" && !inDouble) {
+        inSingle = !inSingle;
+      } else if ((ch === ' ' || ch === '\t' || ch === '\n') && !inDouble && !inSingle) {
+        if (current.length > 0) {
+          tokens.push(current);
+          current = '';
+        }
+      } else {
+        current += ch;
       }
-    } else {
-      current += ch;
     }
   }
   if (current.length > 0) tokens.push(current);
@@ -108,9 +113,9 @@ const QUERY_LANGUAGE_OPTIONS = {
 // ── Helper ─────────────────────────────────────────────────────────────────────
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-type Argv = Record<string, any>;
+type HandlerArgv = Record<string, any>;
 
-const toPreview = (rule: Record<string, unknown>, argv: Argv): ParsedPreviewCommand => ({
+const toPreview = (rule: Record<string, unknown>, argv: HandlerArgv): ParsedPreviewCommand => ({
   kind: 'preview',
   rule,
   interval: argv.interval,
@@ -134,13 +139,13 @@ export const parseRulePreviewCommand = (command: string): ParsedPreviewCommand =
 
   let result: ParsedPreviewCommand | undefined;
 
-  yargs()
+  yargs(tokens)
     .options(SCHEDULE_OPTIONS)
 
     .command(
       'esql',
       'Preview an ES|QL detection rule',
-      (y) =>
+      (y: YargsArgv) =>
         y
           .option('query', { type: 'string', demandOption: true, desc: 'ES|QL query string' })
           .example('$0 esql --query "FROM logs-* | LIMIT 10"', '')
@@ -148,7 +153,7 @@ export const parseRulePreviewCommand = (command: string): ParsedPreviewCommand =
             '$0 esql --query "FROM logs-* | STATS count() BY host.name" --timeframe-start now-24h',
             ''
           ),
-      (argv: Argv) => {
+      (argv: HandlerArgv) => {
         if (result) return;
         result = toPreview({ type: 'esql', query: argv.query, language: 'esql' }, argv);
       }
@@ -157,12 +162,12 @@ export const parseRulePreviewCommand = (command: string): ParsedPreviewCommand =
     .command(
       'eql',
       'Preview an EQL (event query language) detection rule',
-      (y) =>
+      (y: YargsArgv) =>
         y
           .option('query', { type: 'string', demandOption: true, desc: 'EQL query string' })
           .options(INDEX_OPTIONS)
           .example('$0 eql --query "process where process.name == \\"cmd.exe\\""', ''),
-      (argv: Argv) => {
+      (argv: HandlerArgv) => {
         if (result) return;
         result = toPreview(
           {
@@ -180,7 +185,7 @@ export const parseRulePreviewCommand = (command: string): ParsedPreviewCommand =
     .command(
       'query',
       'Preview a custom query detection rule (KQL / Lucene)',
-      (y) =>
+      (y: YargsArgv) =>
         y
           .option('query', {
             type: 'string',
@@ -192,7 +197,7 @@ export const parseRulePreviewCommand = (command: string): ParsedPreviewCommand =
             '$0 query --query "event.category:authentication AND event.outcome:failure"',
             ''
           ),
-      (argv: Argv) => {
+      (argv: HandlerArgv) => {
         if (result) return;
         result = toPreview(
           {
@@ -210,7 +215,7 @@ export const parseRulePreviewCommand = (command: string): ParsedPreviewCommand =
     .command(
       'saved_query',
       'Preview a saved query detection rule',
-      (y) =>
+      (y: YargsArgv) =>
         y
           .option('saved-id', {
             type: 'string',
@@ -221,7 +226,7 @@ export const parseRulePreviewCommand = (command: string): ParsedPreviewCommand =
           .options(QUERY_LANGUAGE_OPTIONS)
           .options(INDEX_OPTIONS)
           .example('$0 saved_query --saved-id my-saved-query-id', ''),
-      (argv: Argv) => {
+      (argv: HandlerArgv) => {
         if (result) return;
         result = toPreview(
           {
@@ -240,7 +245,7 @@ export const parseRulePreviewCommand = (command: string): ParsedPreviewCommand =
     .command(
       'threshold',
       'Preview a threshold-based detection rule',
-      (y) =>
+      (y: YargsArgv) =>
         y
           .option('query', { type: 'string', demandOption: true, desc: 'KQL / Lucene query' })
           .option('threshold-value', {
@@ -264,7 +269,7 @@ export const parseRulePreviewCommand = (command: string): ParsedPreviewCommand =
             '$0 threshold --query "event.category:auth" --threshold-value 10 --threshold-field host.name',
             ''
           ),
-      (argv: Argv) => {
+      (argv: HandlerArgv) => {
         if (result) return;
         result = toPreview(
           {
@@ -283,7 +288,7 @@ export const parseRulePreviewCommand = (command: string): ParsedPreviewCommand =
     .command(
       'threat_match',
       'Preview a threat indicator match detection rule',
-      (y) =>
+      (y: YargsArgv) =>
         y
           .option('query', { type: 'string', demandOption: true, desc: 'Source events query' })
           .option('threat-query', {
@@ -335,7 +340,7 @@ export const parseRulePreviewCommand = (command: string): ParsedPreviewCommand =
             '$0 threat_match --query "*:*" --threat-query "*:*" --threat-index logs-ti_* --threat-mapping \'[{"entries":[{"field":"source.ip","type":"mapping","value":"threat.indicator.ip"}]}]\'',
             ''
           ),
-      (argv: Argv) => {
+      (argv: HandlerArgv) => {
         if (result) return;
         result = toPreview(
           {
@@ -358,7 +363,7 @@ export const parseRulePreviewCommand = (command: string): ParsedPreviewCommand =
     .command(
       'machine_learning',
       'Preview a machine learning anomaly detection rule',
-      (y) =>
+      (y: YargsArgv) =>
         y
           .option('job-id', {
             type: 'string',
@@ -373,7 +378,7 @@ export const parseRulePreviewCommand = (command: string): ParsedPreviewCommand =
           })
           .example('$0 machine_learning --job-id my-ml-job --anomaly-threshold 75', '')
           .example('$0 machine_learning --job-id job-a --job-id job-b --anomaly-threshold 50', ''),
-      (argv: Argv) => {
+      (argv: HandlerArgv) => {
         if (result) return;
         result = toPreview(
           {
@@ -389,7 +394,7 @@ export const parseRulePreviewCommand = (command: string): ParsedPreviewCommand =
     .command(
       'new_terms',
       'Preview a new terms detection rule',
-      (y) =>
+      (y: YargsArgv) =>
         y
           .option('query', {
             type: 'string',
@@ -418,7 +423,7 @@ export const parseRulePreviewCommand = (command: string): ParsedPreviewCommand =
             '$0 new_terms --query "*:*" --new-terms-fields source.ip --history-window-start now-30d',
             ''
           ),
-      (argv: Argv) => {
+      (argv: HandlerArgv) => {
         if (result) return;
         result = toPreview(
           {
@@ -445,7 +450,7 @@ export const parseRulePreviewCommand = (command: string): ParsedPreviewCommand =
     .fail((msg: string | null) => {
       result = { kind: 'error', message: msg ?? 'Parse error. Run --help to see usage.' };
     })
-    .parse(tokens, {}, (_err, _argv, output) => {
+    .parse(tokens, {}, (_err: Error | undefined, _argv: HandlerArgv, output: string) => {
       if (!result && output) result = { kind: 'help', text: output };
     });
 
