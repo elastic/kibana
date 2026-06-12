@@ -52,6 +52,13 @@ export const searchConnectors = async (page: ScoutPage, name: string) => {
   const searchBox = page.locator(CONNECTORS_LIST_SELECTORS.SEARCH_INPUT);
   await searchBox.fill(name);
   await searchBox.press('Enter');
+  // Two-phase wait: catch the loading state then wait for it to clear.
+  // Without this, waitFor() can match the pre-search "not loading" table
+  // before React adds the loading class, returning stale results.
+  await page
+    .locator('.euiBasicTable[data-test-subj="actionsTable"].euiBasicTable-loading')
+    .waitFor({ state: 'visible', timeout: 1_000 })
+    .catch(() => {});
   await page.locator(CONNECTORS_LIST_SELECTORS.TABLE_LOADED).waitFor();
 };
 
@@ -71,12 +78,14 @@ export const searchAndOpenConnector = async (page: ScoutPage, name: string) => {
  */
 export const closeFlyoutIfOpen = async (page: ScoutPage) => {
   const closeBtn = page.testSubj.locator('edit-connector-flyout-close-btn');
-  if (await closeBtn.isVisible({ timeout: 1_000 }).catch(() => false)) {
+  if (await closeBtn.isVisible()) {
     await closeBtn.click();
     const confirmBtn = page.testSubj.locator('confirmModalConfirmButton');
-    if (await confirmBtn.isVisible({ timeout: 1_000 }).catch(() => false)) {
-      await confirmBtn.click();
-    }
+    const confirmVisible = await confirmBtn
+      .waitFor({ state: 'visible', timeout: 1_000 })
+      .then(() => true)
+      .catch(() => false);
+    if (confirmVisible) await confirmBtn.click();
   }
 };
 
@@ -85,13 +94,19 @@ export const closeFlyoutIfOpen = async (page: ScoutPage) => {
  */
 export const cancelRuleCreation = async (page: ScoutPage) => {
   const cancelBtn = page.testSubj.locator('rulePageFooterCancelButton');
-  if (await cancelBtn.isVisible({ timeout: 2_000 }).catch(() => false)) {
+  const cancelVisible = await cancelBtn
+    .waitFor({ state: 'visible', timeout: 2_000 })
+    .then(() => true)
+    .catch(() => false);
+  if (cancelVisible) {
     await cancelBtn.click();
     const confirmBtn = page.testSubj
       .locator('confirmRuleCloseModal')
       .locator('[data-test-subj="confirmModalConfirmButton"]');
-    if (await confirmBtn.isVisible({ timeout: 1_000 }).catch(() => false)) {
-      await confirmBtn.click();
-    }
+    const confirmVisible = await confirmBtn
+      .waitFor({ state: 'visible', timeout: 1_000 })
+      .then(() => true)
+      .catch(() => false);
+    if (confirmVisible) await confirmBtn.click();
   }
 };
