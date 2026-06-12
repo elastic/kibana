@@ -16,7 +16,14 @@ import { createDetectionRuleTool } from './create_detection_rule_tool';
 import { pciComplianceTool } from './pci_compliance_tool';
 import { pciScopeDiscoveryTool } from './pci_scope_discovery_tool';
 import { pciFieldMapperTool } from './pci_field_mapper_tool';
-import { analyseEnvironmentTool, extractIocsTool } from './threat_intelligence';
+import {
+  analyseEnvironmentTool,
+  extractIocsTool,
+  correlateThreatTool,
+  searchByAnchorsTool,
+  searchByDiamondTool,
+  extractDiamondTool,
+} from './threat_intelligence';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 
 /**
@@ -61,5 +68,9 @@ export const registerTools = async (
   if (experimentalFeatures.threatIntelligenceSkillEnabled) {
     agentBuilder.tools.register(extractIocsTool);
     agentBuilder.tools.register(analyseEnvironmentTool);
+    agentBuilder.tools.register(correlateThreatTool);
+    agentBuilder.tools.register(searchByAnchorsTool);
+    agentBuilder.tools.register(searchByDiamondTool);
+    agentBuilder.tools.register(extractDiamondTool);
   }
 };

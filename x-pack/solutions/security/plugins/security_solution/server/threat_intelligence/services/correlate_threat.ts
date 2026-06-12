@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
+import { CostTraceBuilder } from '../routes/lib/cost_tracker';
 import { THREAT_REPORTS_INDEX_PATTERN } from '../../../common/threat_intelligence/hub';
 import type { CorrelationFindings } from '../../../common/threat_intelligence/correlation/schemas';
 import { extractIocs } from './extract_iocs';
@@ -269,6 +270,8 @@ export const correlateThreat = async ({
   triageFloor,
   triageTopN,
 }: CorrelateThreatParams): Promise<CorrelateThreatResult> => {
+  const traceBuilder = new CostTraceBuilder();
+
   let anchorResults: SearchByAnchorsResult;
   let diamondResults: SearchByDiamondResult;
   let queryDiamond: QueryDiamond;
@@ -299,7 +302,10 @@ export const correlateThreat = async ({
     }
 
     const extractedIocs = extractIocs({ text: input.text });
-    const diamondResult = await extractDiamond(extractionModel, logger, { text: input.text });
+    const diamondResult = await extractDiamond(extractionModel, logger, {
+      text: input.text,
+      traceBuilder,
+    });
 
     queryDiamond = extractResultToQueryDiamond(diamondResult);
     const vertexQueries = buildVertexQueries(diamondResult);
@@ -339,6 +345,7 @@ export const correlateThreat = async ({
     currentPool: merged,
     sourceReportId,
     spaceId,
+    traceBuilder,
   });
 
   const extended: TriageCandidateInput[] =
@@ -369,6 +376,7 @@ export const correlateThreat = async ({
     candidates: collapsed,
     confidenceFloor: triageFloor,
     topN: triageTopN,
+    traceBuilder,
   });
 
   // §6 Synthesis — build case text and call synthesize_correlations.
@@ -381,12 +389,14 @@ export const correlateThreat = async ({
       : (await fetchSourceBodyText(esClient, input.report_id)) ??
         buildCaseContextFromDiamond(queryDiamond);
 
-  return synthesizeCorrelations({
+  const findings = await synthesizeCorrelations({
     synthesisModel,
     logger,
     esClient,
     picks: triageResult.picks,
     collapsed,
     caseText,
+    traceBuilder,
   });
+  return { ...findings, trace: traceBuilder.build() };
 };

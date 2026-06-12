@@ -8,6 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import { z } from '@kbn/zod/v4';
+import type { CostTraceBuilder } from '../routes/lib/cost_tracker';
 import { logStageUsage, extractUsageFromMetadata } from '../routes/lib/cost_tracker';
 
 /**
@@ -238,6 +239,7 @@ export type DiamondSignal = 'HIGH' | 'PARTIAL' | 'NONE';
 export interface ExtractDiamondParams {
   text: string;
   report_id?: string;
+  traceBuilder?: CostTraceBuilder;
 }
 
 export interface ExtractDiamondResult {
@@ -271,9 +273,10 @@ export const extractDiamond = async (
   logger: Logger,
   params: ExtractDiamondParams
 ): Promise<ExtractDiamondResult> => {
-  const { text, report_id: reportId } = params;
+  const { text, report_id: reportId, traceBuilder } = params;
   const truncated = text.slice(0, DIAMOND_BODY_CHAR_LIMIT);
   const modelId = model.connector.connectorId;
+  const modelName = model.connector.config?.model as string | undefined;
   const extractedAt = new Date().toISOString();
 
   interface RawResult<T> {
@@ -286,9 +289,11 @@ export const extractDiamond = async (
     const structured = model.chatModel.withStructuredOutput(extractDiamondLlmOutputSchema, {
       includeRaw: true,
     });
+    const t0 = Date.now();
     const result = (await structured.invoke(
       buildSingleCallPrompt(truncated)
     )) as RawResult<DiamondLlmOutput>;
+    const wallMs = Date.now() - t0;
     const output = result.parsed;
 
     logStageUsage(
@@ -297,6 +302,13 @@ export const extractDiamond = async (
       modelId,
       result.raw.response_metadata ?? {}
     );
+    traceBuilder?.addStage({
+      stage: 'extract_diamond/single_call',
+      connectorId: modelId,
+      modelName,
+      metadata: result.raw.response_metadata ?? {},
+      wallMs,
+    });
     logger.debug(
       `extract_diamond single_call ok signal_count=${countNonNone(output)} report_id=${reportId}`
     );
@@ -335,6 +347,7 @@ export const extractDiamond = async (
 
   let fallbackInputTokens = 0;
   let fallbackOutputTokens = 0;
+  const fallbackT0 = Date.now();
   for (const vertex of VERTICES) {
     try {
       const vertexResult = (await vertexStructured.invoke(
@@ -351,9 +364,18 @@ export const extractDiamond = async (
       );
     }
   }
-
-  logStageUsage(logger, 'extract_diamond/per_vertex_fallback', modelId, {
+  const fallbackWallMs = Date.now() - fallbackT0;
+  const fallbackMetadata = {
     usage: { input_tokens: fallbackInputTokens, output_tokens: fallbackOutputTokens },
+  };
+
+  logStageUsage(logger, 'extract_diamond/per_vertex_fallback', modelId, fallbackMetadata);
+  traceBuilder?.addStage({
+    stage: 'extract_diamond/per_vertex_fallback',
+    connectorId: modelId,
+    modelName,
+    metadata: fallbackMetadata,
+    wallMs: fallbackWallMs,
   });
 
   const fallbackOutput: DiamondLlmOutput = vertices;

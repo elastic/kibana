@@ -17,3 +17,7 @@ export { huntOrchestratedTool } from './hunt_orchestrator';
 export { synthesizeAdvisoryTool } from './synthesize_advisory';
 export { analyseEnvironmentTool } from './analyse_environment';
 export { generalizeFromTelemetryTool } from './generalize_from_telemetry';
+export { correlateThreatTool } from './correlate_threat';
+export { searchByAnchorsTool } from './search_by_anchors';
+export { searchByDiamondTool } from './search_by_diamond';
+export { extractDiamondTool } from './extract_diamond';

@@ -9,6 +9,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import { z } from '@kbn/zod/v4';
 import { THREAT_REPORTS_INDEX_PATTERN } from '../../../common/threat_intelligence/hub';
+import type { CostTraceBuilder } from '../routes/lib/cost_tracker';
 import { logStageUsage } from '../routes/lib/cost_tracker';
 import type { DiamondVertex, DiamondVertexScore } from './search_by_diamond';
 import type { AnchorMatchBreakdown } from './search_by_anchors';
@@ -66,6 +67,7 @@ export interface TriageDiamondCandidatesParams {
   candidates: TriageCandidateInput[];
   confidenceFloor: number;
   topN: number;
+  traceBuilder?: CostTraceBuilder;
 }
 
 export interface TriageDiamondCandidatesResult {
@@ -179,7 +181,7 @@ interface CandidateWithSummaries extends TriageCandidateInput {
   summaries: Record<DiamondVertex, VertexSummaryEntry>;
 }
 
-type StoredCandidateSource = {
+interface StoredCandidateSource {
   extracted?: {
     diamond?: {
       adversary?: { signal?: string; summary?: string };
@@ -188,7 +190,7 @@ type StoredCandidateSource = {
       victim?: { signal?: string; summary?: string };
     };
   };
-};
+}
 
 /**
  * Fetches full diamond vertex summaries for a batch of candidate report IDs.
@@ -244,9 +246,7 @@ const EMPTY_VERTEX: VertexSummaryEntry = { signal: 'NONE', summary: '' };
  */
 const TOKEN_BUDGET_GUARD_CHARS = 640_000; // ≈ 160K tokens at 4 chars/token
 
-const applyTokenBudgetGuard = (
-  candidates: CandidateWithSummaries[]
-): CandidateWithSummaries[] => {
+const applyTokenBudgetGuard = (candidates: CandidateWithSummaries[]): CandidateWithSummaries[] => {
   const estimateChars = (c: CandidateWithSummaries): number =>
     DIAMOND_VERTICES_ORDER.reduce((sum, v) => sum + c.summaries[v].summary.length, 0);
 
@@ -320,7 +320,9 @@ const buildCandidatesSection = (candidates: CandidateWithSummaries[]): string =>
     lines.push('');
   }
 
-  lines.push('Select candidates for deep analysis. Respond with the JSON output format from your instructions.');
+  lines.push(
+    'Select candidates for deep analysis. Respond with the JSON output format from your instructions.'
+  );
   return lines.join('\n');
 };
 
@@ -328,7 +330,9 @@ const buildTriagePrompt = (
   queryDiamond: QueryDiamond,
   candidates: CandidateWithSummaries[]
 ): string =>
-  `${TRIAGE_INSTRUCTIONS}\n\n---\n\n${buildCaseSummary(queryDiamond)}${buildCandidatesSection(candidates)}`;
+  `${TRIAGE_INSTRUCTIONS}\n\n---\n\n${buildCaseSummary(queryDiamond)}${buildCandidatesSection(
+    candidates
+  )}`;
 
 // ---------------------------------------------------------------------------
 // Public service
@@ -353,8 +357,10 @@ export const triageDiamondCandidates = async ({
   candidates,
   confidenceFloor,
   topN,
+  traceBuilder,
 }: TriageDiamondCandidatesParams): Promise<TriageDiamondCandidatesResult> => {
   const connectorId = model.connector.connectorId;
+  const modelName = model.connector.config?.model as string | undefined;
 
   // 1. Sort by (overlap DESC, score DESC), then apply topN cap while protecting
   //    discriminating anchor-only candidates. Anchor-only hits (overlap=0, score=0)
@@ -419,13 +425,25 @@ export const triageDiamondCandidates = async ({
 
   let llmOutput: TriageLlmOutput;
   try {
+    const t0 = Date.now();
     const result = (await structured.invoke(prompt)) as RawResult;
-    logStageUsage(logger, 'triage_diamond_candidates', connectorId, result.raw.response_metadata ?? {});
+    const wallMs = Date.now() - t0;
+    logStageUsage(
+      logger,
+      'triage_diamond_candidates',
+      connectorId,
+      result.raw.response_metadata ?? {}
+    );
+    traceBuilder?.addStage({
+      stage: 'triage_diamond_candidates',
+      connectorId,
+      modelName,
+      metadata: result.raw.response_metadata ?? {},
+      wallMs,
+    });
     llmOutput = result.parsed;
   } catch (err) {
-    logger.warn(
-      `[ti:triage] LLM call failed (${(err as Error).message}) — using top-10 fallback`
-    );
+    logger.warn(`[ti:triage] LLM call failed (${(err as Error).message}) — using top-10 fallback`);
     llmOutput = { groups: [] };
   }
 
@@ -460,9 +478,7 @@ export const triageDiamondCandidates = async ({
   // 8. Fallback: if no picks after floor, take top-10 by rank with default confidence.
   let fallbackUsed = false;
   if (picks.length === 0) {
-    logger.warn(
-      `[ti:triage] no picks above floor=${confidenceFloor} — using top-10 rank fallback`
-    );
+    logger.warn(`[ti:triage] no picks above floor=${confidenceFloor} — using top-10 rank fallback`);
     fallbackUsed = true;
     for (const c of capped.slice(0, 10)) {
       picks.push({ candidate_id: c.report_id, confidence: 0.5, justification: '' });

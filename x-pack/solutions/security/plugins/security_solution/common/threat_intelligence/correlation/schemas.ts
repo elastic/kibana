@@ -8,6 +8,31 @@
 import { z } from '@kbn/zod/v4';
 
 // ---------------------------------------------------------------------------
+// §8 Cost trace — per-stage token + cost + wall-time breakdown
+// ---------------------------------------------------------------------------
+
+const stageCostTraceSchema = z.object({
+  stage: z.string(),
+  connector_id: z.string(),
+  model_name: z.string().optional(),
+  input_tokens: z.number().int(),
+  output_tokens: z.number().int(),
+  cost_usd: z.number(),
+  wall_ms: z.number().int(),
+});
+
+export const costTraceSchema = z.object({
+  stages: z.array(stageCostTraceSchema),
+  total_input_tokens: z.number().int(),
+  total_output_tokens: z.number().int(),
+  total_cost_usd: z.number(),
+  total_wall_ms: z.number().int(),
+});
+
+export type StageCostTrace = z.infer<typeof stageCostTraceSchema>;
+export type CostTrace = z.infer<typeof costTraceSchema>;
+
+// ---------------------------------------------------------------------------
 // Shared sub-types
 // ---------------------------------------------------------------------------
 
@@ -61,8 +86,7 @@ export const correlationFindingsSchema = z.object({
   leads: z.array(correlationFindingsLeadSchema),
   no_match: z.array(correlationFindingsNoMatchSchema),
   synthesis: correlationFindingsSynthesisSchema,
-  // CostTrace shape is extended in §8 (routes/lib/cost_tracker.ts withStageTrace).
-  trace: z.record(z.string(), z.unknown()).optional(),
+  trace: costTraceSchema.optional(),
 });
 
 export type CorrelationFindingsLead = z.infer<typeof correlationFindingsLeadSchema>;

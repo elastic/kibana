@@ -64,6 +64,10 @@ export const threatIntelligenceSkill = defineSkillType({
     THREAT_INTEL_TOOL_IDS.analyseEnvironment,
     THREAT_INTEL_TOOL_IDS.huntOrchestrated,
     THREAT_INTEL_TOOL_IDS.synthesizeAdvisory,
+    THREAT_INTEL_TOOL_IDS.correlateThreat,
+    THREAT_INTEL_TOOL_IDS.searchByAnchors,
+    THREAT_INTEL_TOOL_IDS.searchByDiamond,
+    THREAT_INTEL_TOOL_IDS.extractDiamond,
     platformCoreTools.cases,
   ],
 });

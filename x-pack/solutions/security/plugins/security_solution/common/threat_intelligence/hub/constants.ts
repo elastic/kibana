@@ -167,6 +167,18 @@ export const THREAT_INTEL_TOOL_IDS = {
    * the 7-inline-tool cap.
    */
   synthesizeAdvisory: 'threat_intel.synthesize_advisory',
+  /**
+   * Full correlation pipeline — extract_diamond + search_by_anchors/diamond + triage + synthesis.
+   * Runs in-process (no HTTP round-trip); all four LLM stages run sequentially (30–90 s total).
+   * Registered as a registry tool; exposes the deep-dive REPL surface for agent-driven correlation.
+   */
+  correlateThreat: 'threat_intel.correlate_threat',
+  /** Exact-anchor search — hash IOCs, ioc_set_hash, threat actors. Registry tool. */
+  searchByAnchors: 'threat_intel.search_by_anchors',
+  /** Semantic Diamond Model search — per-vertex kNN over extracted.diamond.*.summary. Registry tool. */
+  searchByDiamond: 'threat_intel.search_by_diamond',
+  /** Diamond Model extraction from raw text — adversary/capability/infrastructure/victim. Registry tool. */
+  extractDiamond: 'threat_intel.extract_diamond',
 } as const;
 
 /**

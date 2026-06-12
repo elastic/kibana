@@ -10,6 +10,7 @@ import type { ScopedModel } from '@kbn/agent-builder-server';
 import { z } from '@kbn/zod/v4';
 import { THREAT_REPORTS_INDEX_PATTERN } from '../../../common/threat_intelligence/hub';
 import { buildSpaceFilterTerms } from '../lib/space_filter';
+import type { CostTraceBuilder } from '../routes/lib/cost_tracker';
 import { logStageUsage } from '../routes/lib/cost_tracker';
 import type { TriageCandidateInput } from './triage_diamond_candidates';
 
@@ -51,6 +52,7 @@ export interface KeywordGapFillParams {
   /** Source report _id to exclude from results (report_id input mode). */
   sourceReportId?: string;
   spaceId: string;
+  traceBuilder?: CostTraceBuilder;
 }
 
 // ---------------------------------------------------------------------------
@@ -117,6 +119,7 @@ export const keywordGapFill = async ({
   currentPool,
   sourceReportId,
   spaceId,
+  traceBuilder,
 }: KeywordGapFillParams): Promise<TriageCandidateInput[]> => {
   if (!caseContext.trim()) {
     logger.debug('[ti:gap-fill] empty case context — skipping');
@@ -124,6 +127,7 @@ export const keywordGapFill = async ({
   }
 
   const connectorId = model.connector.connectorId;
+  const modelName = model.connector.config?.model as string | undefined;
   const poolTitles = currentPool.map((c) => c.title);
   const prompt = buildGapFillPrompt(caseContext, poolTitles);
 
@@ -138,8 +142,17 @@ export const keywordGapFill = async ({
 
   let uncovered: string[];
   try {
+    const t0 = Date.now();
     const result = (await structured.invoke(prompt)) as RawResult;
+    const wallMs = Date.now() - t0;
     logStageUsage(logger, 'keyword_gap_fill', connectorId, result.raw.response_metadata ?? {});
+    traceBuilder?.addStage({
+      stage: 'keyword_gap_fill',
+      connectorId,
+      modelName,
+      metadata: result.raw.response_metadata ?? {},
+      wallMs,
+    });
     uncovered = result.parsed.uncovered_keywords
       .map((k) => k.trim())
       .filter((k) => k.length >= MIN_KEYWORD_LEN)

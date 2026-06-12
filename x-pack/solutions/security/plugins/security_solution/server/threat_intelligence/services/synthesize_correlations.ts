@@ -13,6 +13,7 @@ import type {
   CorrelationFindings,
   CorrelationFindingsLead,
 } from '../../../common/threat_intelligence/correlation/schemas';
+import type { CostTraceBuilder } from '../routes/lib/cost_tracker';
 import { logStageUsage } from '../routes/lib/cost_tracker';
 import type { TriagePick } from './triage_diamond_candidates';
 import type { CollapsedCandidate } from './collapse_candidates';
@@ -391,6 +392,7 @@ export interface SynthesizeCorrelationsParams {
   collapsed: readonly CollapsedCandidate[];
   /** Full text for the new case observation. */
   caseText: string;
+  traceBuilder?: CostTraceBuilder;
 }
 
 // ---------------------------------------------------------------------------
@@ -417,6 +419,7 @@ export const synthesizeCorrelations = async ({
   picks,
   collapsed,
   caseText,
+  traceBuilder,
 }: SynthesizeCorrelationsParams): Promise<CorrelationFindings> => {
   if (picks.length === 0) {
     return {
@@ -435,6 +438,7 @@ export const synthesizeCorrelations = async ({
   }
 
   const connectorId = synthesisModel.connector.connectorId;
+  const modelName = synthesisModel.connector.config?.model as string | undefined;
 
   // 1. Index collapsed candidates by report_id for O(1) lookup.
   const collapsedByReportId = new Map<string, CollapsedCandidate>(
@@ -493,13 +497,22 @@ export const synthesizeCorrelations = async ({
 
   let llmOutput: SynthesisLlmOutput;
   try {
+    const t0 = Date.now();
     const result = (await structured.invoke(prompt)) as RawResult;
+    const wallMs = Date.now() - t0;
     logStageUsage(
       logger,
       'synthesize_correlations',
       connectorId,
       result.raw.response_metadata ?? {}
     );
+    traceBuilder?.addStage({
+      stage: 'synthesize_correlations',
+      connectorId,
+      modelName,
+      metadata: result.raw.response_metadata ?? {},
+      wallMs,
+    });
     llmOutput = result.parsed;
   } catch (err) {
     logger.warn(
