@@ -30,7 +30,6 @@ import {
   type Direction,
   type EuiBasicTableColumn,
   type EuiBasicTableProps,
-  type EuiTableActionsColumnType,
   type EuiTableSelectionType,
 } from '@elastic/eui';
 import type { AuditMessageBase } from '@kbn/ml-common-types/audit_message';
@@ -38,7 +37,7 @@ import type { AuditMessageBase } from '@kbn/ml-common-types/audit_message';
 import { toLocaleString } from '../../../../util/string_utils';
 import { JobIcon } from '../../../../components/job_message_icon';
 import { useMlApi, useMlKibana } from '../../../../contexts/kibana';
-import { ResultLinks, actionsMenuContent } from '../job_actions';
+import { ResultLinks, useActionsMenuContent } from '../job_actions';
 import { JobDescription } from './job_description';
 import { isManagedJob, showCPSLegacyBadge } from '../../../jobs_utils';
 import { MLSavedObjectsSpacesList } from '../../../../components/ml_saved_objects_spaces_list';
@@ -105,6 +104,21 @@ export const JobsList: FC<JobsListProps> = ({
     services: { spaces, application, notifications, share },
   } = useMlKibana();
   const mlApi = useMlApi();
+
+  const jobActions = useActionsMenuContent({
+    toastNotifications: notifications.toasts,
+    share,
+    mlApi,
+    showEditJobFlyout: showEditJobFlyout!,
+    showDatafeedChartFlyout: showDatafeedChartFlyout!,
+    showDeleteJobModal: showDeleteJobModal!,
+    showResetJobModal: showResetJobModal!,
+    showStartDatafeedModal: showStartDatafeedModal!,
+    showCloseJobsConfirmModal: showCloseJobsConfirmModal!,
+    showStopDatafeedsConfirmModal: showStopDatafeedsConfirmModal!,
+    refreshJobs: refreshJobs ?? (() => undefined),
+    showCreateAlertFlyout: showCreateAlertFlyout!,
+  });
 
   const { pageIndex, pageSize, sortField, sortDirection } = jobsViewState;
 
@@ -427,20 +441,7 @@ export const JobsList: FC<JobsListProps> = ({
         name: i18n.translate('xpack.ml.jobsList.actionsLabel', {
           defaultMessage: 'Actions',
         }),
-        actions: actionsMenuContent(
-          notifications.toasts,
-          share,
-          mlApi,
-          showEditJobFlyout,
-          showDatafeedChartFlyout,
-          showDeleteJobModal,
-          showResetJobModal,
-          showStartDatafeedModal,
-          showCloseJobsConfirmModal,
-          showStopDatafeedsConfirmModal,
-          refreshJobs,
-          showCreateAlertFlyout
-        ) as unknown as EuiTableActionsColumnType<MlSummaryJobWithSpaces>['actions'],
+        actions: jobActions,
         width: '5%',
       }
     );
@@ -449,20 +450,10 @@ export const JobsList: FC<JobsListProps> = ({
   }, [
     application?.capabilities?.savedObjectsManagement?.shareIntoSpace,
     itemIdToExpandedRowMap,
-    mlApi,
-    notifications.toasts,
+    jobActions,
     onToggleRow,
     refreshJobs,
     renderJobId,
-    share,
-    showCloseJobsConfirmModal,
-    showCreateAlertFlyout,
-    showDatafeedChartFlyout,
-    showDeleteJobModal,
-    showEditJobFlyout,
-    showResetJobModal,
-    showStartDatafeedModal,
-    showStopDatafeedsConfirmModal,
     spaces,
   ]);
 

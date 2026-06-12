@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { actionsMenuContent } from './management';
+export { useActionsMenuContent } from './management';
 export { ResultLinks } from './results';
