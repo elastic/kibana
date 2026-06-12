@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import type { ScoutPage } from '@kbn/scout';
+import type { KibanaUrl, ScoutPage } from '@kbn/scout';
 import { CONNECTORS_APP_PATH, CONNECTORS_LIST_SELECTORS } from './constants';
-
-interface KbnUrl {
-  get: (path: string) => string;
-}
 
 interface MonacoBridge {
   MonacoEnvironment?: {
@@ -43,7 +39,7 @@ export const getMonacoValue = async (page: ScoutPage): Promise<string> => {
   });
 };
 
-export const navigateToConnectors = async (page: ScoutPage, kbnUrl: KbnUrl) => {
+export const navigateToConnectors = async (page: ScoutPage, kbnUrl: KibanaUrl) => {
   await page.goto(kbnUrl.get(CONNECTORS_APP_PATH));
   await page.locator(CONNECTORS_LIST_SELECTORS.TABLE_LOADED).waitFor();
 };
@@ -102,7 +98,7 @@ export const cancelRuleCreation = async (page: ScoutPage) => {
     await cancelBtn.click();
     const confirmBtn = page.testSubj
       .locator('confirmRuleCloseModal')
-      .locator('[data-test-subj="confirmModalConfirmButton"]');
+      .getByTestId('confirmModalConfirmButton');
     const confirmVisible = await confirmBtn
       .waitFor({ state: 'visible', timeout: 1_000 })
       .then(() => true)
