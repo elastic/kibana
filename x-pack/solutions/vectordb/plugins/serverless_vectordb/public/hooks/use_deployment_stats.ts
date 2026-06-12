@@ -13,7 +13,6 @@ export interface DeploymentStats {
   indicesCount: number | null;
   vectorDocsCount: number | null;
   storeSizeBytes: number | null;
-  agentsCount: number | null;
   workflowsCount: number | null;
   dashboardsCount: number | null;
 }
@@ -22,7 +21,6 @@ const initialStats: DeploymentStats = {
   indicesCount: null,
   vectorDocsCount: null,
   storeSizeBytes: null,
-  agentsCount: null,
   workflowsCount: null,
   dashboardsCount: null,
 };
@@ -35,7 +33,7 @@ export const useDeploymentStats = () => {
   const { data, isLoading } = useQuery({
     queryKey: ['deploymentStats'],
     queryFn: async () => {
-      const [esStats, agentsResponse, workflowsResponse] = await Promise.all([
+      const [esStats, workflowsResponse] = await Promise.all([
         http
           .get<{
             indicesCount: number;
@@ -45,24 +43,14 @@ export const useDeploymentStats = () => {
           }>(DEPLOYMENT_STATS_PATH)
           .catch(() => null),
         http
-          .get<{ results?: unknown[] } | unknown[]>('/api/agent_builder/agents')
-          .catch(() => null),
-        http
           .get<{ workflows?: { enabled?: number; disabled?: number } }>('/api/workflows/stats')
           .catch(() => null),
       ]);
-
-      const agentsCount = Array.isArray(agentsResponse)
-        ? agentsResponse.length
-        : Array.isArray(agentsResponse?.results)
-        ? agentsResponse?.results?.length
-        : null;
 
       return {
         indicesCount: esStats?.indicesCount ?? null,
         vectorDocsCount: esStats?.vectorDocsCount ?? null,
         storeSizeBytes: esStats?.storeSizeBytes ?? null,
-        agentsCount,
         workflowsCount: workflowsResponse?.workflows
           ? (workflowsResponse.workflows.enabled ?? 0) + (workflowsResponse.workflows.disabled ?? 0)
           : null,
