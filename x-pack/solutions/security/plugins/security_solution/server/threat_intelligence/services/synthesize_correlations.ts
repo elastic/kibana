@@ -32,7 +32,13 @@ const SYNTHESIS_CANDIDATE_BODY_CHAR_LIMIT = 50_000;
 const synthesisVertexEnum = z.enum(['adversary', 'capability', 'infrastructure', 'victim']);
 
 const synthesisLlmLeadSchema = z.object({
-  candidate_ids: z.array(z.string()).min(1),
+  candidate_labels: z
+    .array(z.string())
+    .min(1)
+    .describe(
+      'Short labels from the candidate list (e.g. ["c01", "c03"]). ' +
+        'Use ONLY the provided cNN labels exactly as given — never raw document IDs.'
+    ),
   title: z.string(),
   relationship: z.enum(['same_campaign', 'same_actor', 'shared_tradecraft']),
   confidence: z.enum(['high', 'moderate', 'low']),
@@ -44,7 +50,12 @@ const synthesisLlmLeadSchema = z.object({
 });
 
 const synthesisLlmNoMatchSchema = z.object({
-  id: z.string(),
+  label: z
+    .string()
+    .describe(
+      'Short label from the candidate list (e.g. "c02"). ' +
+        'Use ONLY the provided cNN label — never a raw document ID.'
+    ),
   title: z.string(),
 });
 
@@ -114,16 +125,18 @@ BEHAVIORAL RULES
 
 CANDIDATE ACCOUNTING
 
-Every candidate label provided to you must appear exactly once in your output — either in a leads entry's candidate_ids list, or in no_match. Do not omit any candidate from the accounting.
+Every candidate label provided to you must appear exactly once in your output — either in a leads entry's candidate_labels list, or in no_match. Do not omit any candidate from the accounting.
 
 When a candidate has a CLUSTER NOTE listing consolidated members (pre-identified duplicate or bilingual sibling reports not provided in full), treat those members as additional independent corroboration signal — cross-vendor consensus without requiring their full text. Mention this in your reasoning when it strengthens your confidence assessment.
+
+LABEL RULE (CRITICAL): In candidate_labels and no_match.label, use ONLY the short labels provided for each candidate (e.g. "c01", "c02"). Never output raw document IDs, URLs, or any other identifier. The labels are the ONLY valid values.
 
 OUTPUT FORMAT
 
 {
   "leads": [
     {
-      "candidate_ids": ["<short label exactly as given, e.g. c01>"],
+      "candidate_labels": ["c01", "c03"],
       "title": "<report title or cluster label describing the correlation>",
       "confidence": "high | moderate | low",
       "relationship": "same_campaign | same_actor | shared_tradecraft",
@@ -136,7 +149,7 @@ OUTPUT FORMAT
   ],
   "no_match": [
     {
-      "id": "<short label>",
+      "label": "c02",
       "title": "<report title>"
     }
   ],
@@ -148,7 +161,7 @@ OUTPUT FORMAT
   }
 }
 
-CANDIDATE AGGREGATION: Identify clusters of candidates describing the same activity and group them into a single lead entry. Include all their short labels in candidate_ids. Treat bilingual sibling articles (same research, different language) as a single source — do not count them as independent corroboration when assessing confidence.
+CANDIDATE AGGREGATION: Identify clusters of candidates describing the same activity and group them into a single lead entry. Include all their short labels in candidate_labels. Treat bilingual sibling articles (same research, different language) as a single source — do not count them as independent corroboration when assessing confidence.
 
 COUNTER EVIDENCE: The counter[] array must contain discrete observations from the source material that argue against the proposed relationship. Do not invent counter-evidence. An empty array [] is correct when none is found.
 
@@ -301,14 +314,28 @@ const buildGracefulDegradation = (
 
 const mapLlmOutputToFindings = (
   llmOutput: SynthesisLlmOutput,
-  labelToCollapsed: Map<string, CollapsedCandidate>
+  labelToCollapsed: Map<string, CollapsedCandidate>,
+  pickIdsSet: ReadonlySet<string>,
+  logger: Logger
 ): CorrelationFindings => {
+  const resolveLabel = (lbl: string): string | null => {
+    const id = labelToCollapsed.get(lbl)?.report_id ?? lbl;
+    if (!pickIdsSet.has(id)) {
+      logger.warn(
+        `[ti:synthesize] output label "${lbl}" resolved to unknown id "${id}" — dropped (not in triage picks)`
+      );
+      return null;
+    }
+    return id;
+  };
+
   const leads: CorrelationFindingsLead[] = llmOutput.leads.map((lead) => {
-    const realIds = lead.candidate_ids.map((lbl) => {
-      return labelToCollapsed.get(lbl)?.report_id ?? lbl;
+    const realIds = lead.candidate_labels.flatMap((lbl) => {
+      const id = resolveLabel(lbl);
+      return id !== null ? [id] : [];
     });
 
-    const consolidatedCandidates = lead.candidate_ids.flatMap((lbl) => {
+    const consolidatedCandidates = lead.candidate_labels.flatMap((lbl) => {
       const cc = labelToCollapsed.get(lbl);
       return (cc?.collapsed_members ?? []).map((m) => ({
         id: m.report_id,
@@ -334,10 +361,10 @@ const mapLlmOutputToFindings = (
     };
   });
 
-  const noMatch = llmOutput.no_match.map((nm) => ({
-    id: labelToCollapsed.get(nm.id)?.report_id ?? nm.id,
-    title: nm.title,
-  }));
+  const noMatch = llmOutput.no_match.flatMap((nm) => {
+    const id = resolveLabel(nm.label);
+    return id !== null ? [{ id, title: nm.title }] : [];
+  });
 
   return {
     leads,
@@ -487,5 +514,8 @@ export const synthesizeCorrelations = async ({
   );
 
   // 7. Map short labels → real report IDs and populate consolidated_candidates.
-  return mapLlmOutputToFindings(llmOutput, labelToCollapsed);
+  //    Pass pickIdsSet as the safety net: any resolved ID not in the triage picks
+  //    is dropped + warned rather than propagated as a phantom reference.
+  const pickIdsSet = new Set(pickIds);
+  return mapLlmOutputToFindings(llmOutput, labelToCollapsed, pickIdsSet, logger);
 };
