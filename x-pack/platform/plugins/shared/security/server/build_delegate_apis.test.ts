@@ -5,8 +5,13 @@
  * 2.0.
  */
 
+import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import type { AuditLogger, CoreSecurityDelegateContract } from '@kbn/core-security-server';
+import type {
+  AuditLogger,
+  CoreSecurityDelegateContract,
+  OpaqueRequestState,
+} from '@kbn/core-security-server';
 import type { UserProfileData } from '@kbn/core-user-profile-common';
 import type { CoreUserProfileDelegateContract } from '@kbn/core-user-profile-server';
 
@@ -111,6 +116,132 @@ describe('buildSecurityApi', () => {
       const result = await api.authc.getRedactedSessionId(request);
 
       expect(result).toBeUndefined();
+    });
+  });
+
+  describe('authc.serializeRequest / authc.hydrateRequest', () => {
+    // `serializeRequest` reads `request.fakeRawRequest?.spaceId` directly (it does NOT
+    // use the public `KibanaRequest.spaceId` field). This shim mirrors that exact access
+    // path so the tests exercise the production code path without depending on internal
+    // details of `kibanaRequestFactory`.
+    const buildSerializeInput = (overrides: {
+      authorization?: string;
+      spaceId?: string;
+    }): KibanaRequest => {
+      const headers = overrides.authorization ? { authorization: overrides.authorization } : {};
+      return {
+        headers,
+        fakeRawRequest: overrides.spaceId ? { spaceId: overrides.spaceId } : undefined,
+      } as unknown as KibanaRequest;
+    };
+
+    describe('serializeRequest', () => {
+      it('returns undefined when the request has no authorization header and no spaceId', () => {
+        const request = httpServerMock.createKibanaRequest();
+
+        expect(api.authc.serializeRequest(request)).toBeUndefined();
+      });
+
+      it('captures the authorization header and stamps the v1 envelope', () => {
+        const request = buildSerializeInput({ authorization: 'ApiKey abc' });
+
+        const state = api.authc.serializeRequest(request) as Record<string, unknown> | undefined;
+
+        expect(state).toEqual({ v: 1, authorization: 'ApiKey abc' });
+      });
+
+      it('captures the spaceId from fakeRawRequest when present', () => {
+        const request = buildSerializeInput({ authorization: 'ApiKey abc', spaceId: 'marketing' });
+
+        const state = api.authc.serializeRequest(request) as Record<string, unknown> | undefined;
+
+        expect(state).toEqual({ v: 1, authorization: 'ApiKey abc', spaceId: 'marketing' });
+      });
+
+      it('captures spaceId alone when no authorization header is present', () => {
+        const request = buildSerializeInput({ spaceId: 'marketing' });
+
+        const state = api.authc.serializeRequest(request) as Record<string, unknown> | undefined;
+
+        expect(state).toEqual({ v: 1, spaceId: 'marketing' });
+      });
+    });
+
+    describe('hydrateRequest', () => {
+      it('returns undefined for an unknown envelope version (no fabricated request)', () => {
+        const state = { v: 2, authorization: 'ApiKey abc' } as unknown as OpaqueRequestState;
+
+        expect(api.authc.hydrateRequest(state)).toBeUndefined();
+      });
+
+      it('returns undefined when the envelope version marker is missing entirely', () => {
+        // Defensive: any persisted shape without `v` cannot be safely rehydrated by this
+        // producer, so the hydrator must refuse rather than fabricate a request.
+        const state = { authorization: 'ApiKey abc' } as unknown as OpaqueRequestState;
+
+        expect(api.authc.hydrateRequest(state)).toBeUndefined();
+      });
+
+      it('returns undefined for a v1 envelope without an authorization header', () => {
+        const state = { v: 1, spaceId: 'marketing' } as unknown as OpaqueRequestState;
+
+        expect(api.authc.hydrateRequest(state)).toBeUndefined();
+      });
+
+      it('rebuilds a KibanaRequest with the persisted authorization header from a v1 envelope', () => {
+        const state = { v: 1, authorization: 'ApiKey abc' } as unknown as OpaqueRequestState;
+
+        const hydrated = api.authc.hydrateRequest(state);
+
+        expect(hydrated).toBeDefined();
+        expect(hydrated!.headers.authorization).toBe('ApiKey abc');
+      });
+
+      it('exposes spaceId on the rehydrated KibanaRequest when present in a v1 envelope', () => {
+        const state = {
+          v: 1,
+          authorization: 'ApiKey abc',
+          spaceId: 'marketing',
+        } as unknown as OpaqueRequestState;
+
+        const hydrated = api.authc.hydrateRequest(state);
+
+        expect(hydrated).toBeDefined();
+        expect(hydrated!.spaceId).toBe('marketing');
+      });
+
+      it('ignores additive unknown keys inside a known v1 envelope (forward-compat)', () => {
+        // A newer producer may add additive identity hints (e.g. profile_uid) inside
+        // the same `v: 1` shape. The hydrator must not reject the bag because of them.
+        const state = {
+          v: 1,
+          authorization: 'ApiKey abc',
+          spaceId: 'marketing',
+          futureHint: 'profile-uid-123',
+        } as unknown as OpaqueRequestState;
+
+        const hydrated = api.authc.hydrateRequest(state);
+
+        expect(hydrated).toBeDefined();
+        expect(hydrated!.headers.authorization).toBe('ApiKey abc');
+      });
+    });
+
+    describe('round-trip', () => {
+      it('serializeRequest -> hydrateRequest reproduces authorization and spaceId', () => {
+        const source = buildSerializeInput({
+          authorization: 'ApiKey abc',
+          spaceId: 'marketing',
+        });
+
+        const state = api.authc.serializeRequest(source);
+        expect(state).toBeDefined();
+
+        const hydrated = api.authc.hydrateRequest(state!);
+        expect(hydrated).toBeDefined();
+        expect(hydrated!.headers.authorization).toBe('ApiKey abc');
+        expect(hydrated!.spaceId).toBe('marketing');
+      });
     });
   });
 
