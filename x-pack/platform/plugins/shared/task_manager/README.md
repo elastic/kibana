@@ -4,6 +4,10 @@ The task manager is a generic system for running background tasks.
 
 [Documentation](https://www.elastic.co/docs/deploy-manage/distributed-architecture/kibana-tasks-management)
 
+## Design spikes
+
+- [Opaque request-state spike](./docs/opaque_request_state_spike.md) (alternative approach discussed relative to [#261423](https://github.com/elastic/kibana/pull/261423))
+
 It supports:
 
 - Single-run and recurring tasks
