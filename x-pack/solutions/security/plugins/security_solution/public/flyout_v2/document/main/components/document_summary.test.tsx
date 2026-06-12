@@ -34,7 +34,7 @@ const promptContext: PromptContext = {
   replacements: { 'host.name': '12345' },
 };
 const defaultProps = {
-  alertId: 'test-alert-id',
+  documentId: 'test-document-id',
   canSeeAdvancedSettings: true,
   defaultConnectorId: 'test-connector-id',
   promptContext,

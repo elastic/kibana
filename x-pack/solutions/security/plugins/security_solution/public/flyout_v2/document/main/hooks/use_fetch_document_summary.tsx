@@ -15,7 +15,7 @@ import { useAssistantContext } from '@kbn/elastic-assistant';
 
 export interface UseFetchDocumentSummaryParams {
   signal?: AbortSignal | undefined;
-  alertId: string;
+  documentId: string;
   connectorId: string;
 }
 
@@ -23,13 +23,13 @@ export interface UseFetchDocumentSummaryParams {
  * API call for fetching the AI document summary for the current spaceId.
  *
  * @param {Object} options - The options object.
- * @param {string} options.alertId - alert id
+ * @param {string} options.documentId - document id
  * @param {AbortSignal} [options.signal] - AbortSignal
  *
  * @returns {useQuery} hook for getting the status of the document summary
  */
 export const useFetchDocumentSummary = ({
-  alertId,
+  documentId,
   connectorId,
   signal,
 }: UseFetchDocumentSummaryParams) => {
@@ -41,7 +41,7 @@ export const useFetchDocumentSummary = ({
   const QUERY = {
     page: 1,
     per_page: 1, // only fetching one alert summary
-    filter: `alert_id:${alertId}`,
+    filter: `alert_id:${documentId}`,
     connector_id: connectorId,
   };
 

@@ -19,7 +19,7 @@ import type {
 import { useAssistantContext } from '@kbn/elastic-assistant';
 
 interface BulkUpdateDocumentSummaryProps {
-  alertSummary: PerformAlertSummaryBulkActionRequestBody;
+  documentSummary: PerformAlertSummaryBulkActionRequestBody;
 }
 
 interface UseBulkUpdateDocumentSummary {
@@ -36,13 +36,13 @@ export const useBulkUpdateDocumentSummary = (): UseBulkUpdateDocumentSummary => 
   const abortController = useRef(new AbortController());
 
   const bulkUpdate = useCallback(
-    async ({ alertSummary }: BulkUpdateDocumentSummaryProps) => {
+    async ({ documentSummary }: BulkUpdateDocumentSummaryProps) => {
       setIsLoading(true);
 
       try {
         return await bulkUpdateDocumentSummary({
           http,
-          alertSummary,
+          documentSummary,
           toasts,
           signal: abortController.current.signal,
         });
@@ -69,11 +69,11 @@ export const useBulkUpdateDocumentSummary = (): UseBulkUpdateDocumentSummary => 
 };
 
 const bulkUpdateDocumentSummary = async ({
-  alertSummary,
+  documentSummary,
   http,
   signal,
 }: {
-  alertSummary: PerformAlertSummaryBulkActionRequestBody;
+  documentSummary: PerformAlertSummaryBulkActionRequestBody;
   http: HttpSetup;
   signal?: AbortSignal;
   toasts?: IToasts;
@@ -83,7 +83,7 @@ const bulkUpdateDocumentSummary = async ({
     {
       method: 'POST',
       version: API_VERSIONS.internal.v1,
-      body: JSON.stringify(alertSummary),
+      body: JSON.stringify(documentSummary),
       signal,
     }
   );

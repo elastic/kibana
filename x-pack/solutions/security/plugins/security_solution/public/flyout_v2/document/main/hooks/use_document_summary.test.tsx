@@ -63,7 +63,7 @@ describe('useDocumentSummary', () => {
   it('should initialize with default values', () => {
     const { result } = renderHook(() =>
       useDocumentSummary({
-        alertId: 'test-alert-id',
+        documentId: 'test-document-id',
         defaultConnectorId: 'test-connector-id',
         promptContext,
         showAnonymizedValues: false,
@@ -113,7 +113,7 @@ describe('useDocumentSummary', () => {
 
     const { result } = renderHook(() =>
       useDocumentSummary({
-        alertId: 'test-alert-id',
+        documentId: 'test-document-id',
         defaultConnectorId: 'test-connector-id',
         promptContext,
         showAnonymizedValues: false,
@@ -141,7 +141,7 @@ describe('useDocumentSummary', () => {
     });
 
     expect(mockBulkUpdate).toHaveBeenCalledWith({
-      alertSummary: {
+      documentSummary: {
         update: [
           {
             id: 'summary-id',
@@ -161,7 +161,7 @@ describe('useDocumentSummary', () => {
   it('should abort stream on unmount', () => {
     const { unmount } = renderHook(() =>
       useDocumentSummary({
-        alertId: 'test-alert-id',
+        documentId: 'test-document-id',
         defaultConnectorId: 'test-connector-id',
         promptContext,
         showAnonymizedValues: false,

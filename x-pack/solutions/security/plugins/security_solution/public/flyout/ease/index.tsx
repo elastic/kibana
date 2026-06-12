@@ -49,7 +49,7 @@ export const EasePanel: React.FC<Partial<EaseDetailsProps>> = memo(() => {
         <EuiFlexGroup direction="column">
           <EuiFlexItem>
             <DocumentSummarySection
-              alertId={eventId}
+              documentId={eventId}
               getPromptContext={getPromptContext}
               data-test-subj={DOCUMENT_SUMMARY_SECTION_TEST_ID}
             />

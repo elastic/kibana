@@ -58,11 +58,11 @@ export const AISummarySection = memo(({ hit }: AISummarySectionProps) => {
     return null;
   }
 
-  const alertId = hit.raw._id ?? '';
+  const documentId = hit.raw._id ?? '';
 
   return (
     <DocumentSummarySection
-      alertId={alertId}
+      documentId={documentId}
       getPromptContext={getPromptContext}
       data-test-subj={AI_SUMMARY_SECTION_TEST_ID}
     />

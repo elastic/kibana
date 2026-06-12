@@ -28,9 +28,9 @@ const NO_SUMMARY_AVAILABLE = i18n.translate(
 
 export interface UseDocumentSummaryParams {
   /**
-   * If of the alert we want to generate the summary for
+   * Id of the document we want to generate the summary for
    */
-  alertId: string;
+  documentId: string;
   /**
    * Value of securitySolution:defaultAIConnector
    */
@@ -87,7 +87,7 @@ export interface UseDocumentSummaryResult {
  * Hook that generates the document AI summary along side other related items
  */
 export const useDocumentSummary = ({
-  alertId,
+  documentId,
   defaultConnectorId,
   promptContext,
   showAnonymizedValues = false,
@@ -113,7 +113,7 @@ export const useDocumentSummary = ({
     refetch: refetchSummary,
     isFetched: isSummaryFetched,
   } = useFetchDocumentSummary({
-    alertId,
+    documentId,
     connectorId: defaultConnectorId,
   });
   const { bulkUpdate } = useBulkUpdateDocumentSummary();
@@ -207,7 +207,7 @@ export const useDocumentSummary = ({
       if (!rawResponse.isError) {
         if (fetchedSummary.data.length > 0) {
           await bulkUpdate({
-            alertSummary: {
+            documentSummary: {
               update: [
                 {
                   id: fetchedSummary.data[0].id,
@@ -222,10 +222,10 @@ export const useDocumentSummary = ({
           });
         } else {
           await bulkUpdate({
-            alertSummary: {
+            documentSummary: {
               create: [
                 {
-                  alertId,
+                  alertId: documentId,
                   summary: responseSummary,
                   ...(responseRecommendedActions
                     ? { recommendedActions: responseRecommendedActions }
@@ -255,8 +255,8 @@ export const useDocumentSummary = ({
 
     if (messageAndReplacements !== null) generateSummary(messageAndReplacements);
   }, [
-    alertId,
     bulkUpdate,
+    documentId,
     fetchedSummary.data,
     messageAndReplacements,
     refetchSummary,
