@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useCallback, useEffect, useState } from 'react';
 import { apm } from '@elastic/apm-rum';
-import type { ExportJsonSanitizedState, ExportJsonStatus } from './types';
+import { useCallback, useEffect, useState } from 'react';
+import type { ExportJsonSanitizedState, ExportJsonStatus, SanitizeStateFunction } from './types';
 
 export type UseSanitizedStateResult<SanitizedState extends object> =
   ExportJsonSanitizedState<SanitizedState> & {
@@ -21,9 +21,7 @@ export function useSanitizedState<State extends object, SanitizedState extends o
   sanitizeState,
 }: {
   state: State;
-  sanitizeState: (
-    state: State
-  ) => Promise<{ data: SanitizedState; warnings: Array<{ message: string }> }>;
+  sanitizeState: SanitizeStateFunction<State, SanitizedState>;
 }): UseSanitizedStateResult<SanitizedState> {
   const [status, setStatus] = useState<ExportJsonStatus>('loading');
   const [error, setError] = useState<Error | undefined>(undefined);

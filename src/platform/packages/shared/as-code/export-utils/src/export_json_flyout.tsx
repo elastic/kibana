@@ -8,7 +8,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { css } from '@emotion/react';
+
 import {
   EuiBetaBadge,
   EuiButton,
@@ -22,19 +22,15 @@ import {
   EuiTitle,
   euiFullHeight,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  downloadFileAs,
-  useShareTypeContext,
-  type SharePluginStart,
-} from '@kbn/share-plugin/public';
+import { downloadFileAs, useShareTypeContext } from '@kbn/share-plugin/public';
 
-import { buildExportJsonFilename } from './export_json_share_utils';
-import { useSanitizedState } from './use_sanitized_state';
 import { ExportJsonPanel } from './export_json_panel';
-import type { CoreStart } from '../../../../../../core/public';
-import { useExportJsonFlyoutContext } from './export_json_context_provider';
+import { buildExportJsonFilename } from './export_json_share_utils';
+import type { ExportJsonSharingData, SanitizeStateFunction } from './types';
+import { useSanitizedState } from './use_sanitized_state';
 
 const flyoutBodyCss = css`
   ${euiFullHeight()}
@@ -56,16 +52,13 @@ export const ExportJsonFlyout = <State extends object, SanitizedState extends ob
 }: {
   apiPath: string;
   closeFlyout: () => void;
-  sanitizeState: (
-    state: State
-  ) => Promise<{ data: SanitizedState; warnings: Array<{ message: string }> }>;
+  sanitizeState: SanitizeStateFunction<State, SanitizedState>;
 }) => {
   const { objectType, objectTypeAlias, sharingData, isDirty } = useShareTypeContext(
     'integration',
     'exportDerivatives'
   );
-  // console.log({ objectType, objectTypeAlias, sharingData, isDirty });
-  const typedSharingData = sharingData as unknown as ReturnType<typeof buildExportSharingData>;
+  const typedSharingData = sharingData as unknown as ExportJsonSharingData<State>;
   const { title, exportJson } = typedSharingData;
   const state = useMemo(() => exportJson(), [exportJson]);
 
@@ -83,7 +76,6 @@ export const ExportJsonFlyout = <State extends object, SanitizedState extends ob
     closeFlyout();
   }, [closeFlyout, data, status, title]);
 
-  console.log('!!!!!!!!!!!!!!', { status, data, warnings, error, retry });
   return (
     <React.Fragment>
       <EuiFlyoutHeader hasBorder>

@@ -9,9 +9,18 @@
 
 export type ExportJsonStatus = 'loading' | 'success' | 'error';
 
+export interface ExportJsonSharingData<State extends object> {
+  title: string;
+  exportJson: () => State;
+}
+
 export interface ExportJsonSanitizedState<SanitizedState extends object> {
   status: ExportJsonStatus;
   data: SanitizedState | undefined;
   warnings: string[];
   error: Error | undefined;
 }
+
+export type SanitizeStateFunction<State extends object, SanitizedState extends object> = (
+  state: State
+) => Promise<{ data: SanitizedState; warnings: Array<{ message: string }> }>;

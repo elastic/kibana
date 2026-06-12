@@ -29,9 +29,8 @@ import {
 } from '@kbn/presentation-publishing';
 import type { ShareActionIntents, ShareIntegration } from '@kbn/share-plugin/public/types';
 import { firstValueFrom } from 'rxjs';
-import { coreServices, embeddableService, shareService } from '../services/kibana_services';
+import { shareService } from '../services/kibana_services';
 import { ACTION_EXPORT_JSON, DASHBOARD_EXPORT_GROUP } from './constants';
-import { compressToEncodedURIComponent } from 'lz-string';
 
 export type ExportJSONActionApi = HasLibraryTransforms &
   HasUniqueId &
@@ -50,7 +49,7 @@ export class ExportJSONAction implements Action<EmbeddableApiContext> {
   public readonly type = ACTION_EXPORT_JSON;
   public readonly order = 1;
   public grouping = [DASHBOARD_EXPORT_GROUP];
-  private exportJsonIntent: ShareIntegration | undefined;
+  private exportJsonIntentId: string | undefined;
 
   public getIconType() {
     return 'code';
@@ -62,49 +61,24 @@ export class ExportJSONAction implements Action<EmbeddableApiContext> {
     });
 
   public async isCompatible({ embeddable }: EmbeddableApiContext): Promise<boolean> {
-    // if (!isApiCompatible(embeddable) || !(await embeddable.canUnlinkFromLibrary())) return false;
     if (!isApiCompatible(embeddable)) return false;
-
     const exportDerivatives: ShareActionIntents[] = (
       shareService?.availableIntegrations(embeddable.type, 'exportDerivatives') ?? []
     ).filter((element) => element.shareType === 'integration' && element.id === 'exportJson');
-    if (exportDerivatives.length < 1) return false;
+    if (exportDerivatives.length < 1) return false; // this embeddable type has no JSON export integration
 
-    this.exportJsonIntent = exportDerivatives[0] as ShareIntegration;
+    this.exportJsonIntentId = (exportDerivatives[0] as ShareIntegration).id; // store value so we don't have to refetch
     return true;
   }
 
   public async execute({ embeddable }: EmbeddableApiContext): Promise<void> {
-    if (!isApiCompatible(embeddable) || !this.exportJsonIntent) throw new IncompatibleActionError();
+    if (!isApiCompatible(embeddable) || !this.exportJsonIntentId)
+      throw new IncompatibleActionError();
 
     let isDirty = false;
     if (apiPublishesUnsavedChanges(embeddable)) {
       isDirty = await firstValueFrom(embeddable.hasUnsavedChanges$);
     }
-
-    // const test = await embeddableService.getEmbeddableDefinition(embeddable.type);
-    // console.log({ test });
-
-    // let apiExists = false;
-    // try {
-    //   const response = await fetch(`api/${embeddable.type}`, { method: 'HEAD' });
-    //   if (response.ok) apiExists = true;
-    // } catch (e) {
-    //   // ignore - API does not exist
-    // }
-
-    // if (apiExists) {
-    // const openInConsoleRequest = `api/${embeddable.type}`;
-    // const devToolsDataUri = openInConsoleRequest
-    //   ? compressToEncodedURIComponent(openInConsoleRequest)
-    //   : undefined;
-    // const consoleHref = await shareService?.url.locators.get('CONSOLE_APP_LOCATOR')?.getUrl({
-    //   loadFrom: `data:text/plain,${devToolsDataUri}`,
-    // });
-    // const canShowDevTools = Boolean(
-    //   coreServices.application?.capabilities?.dev_tools?.show && consoleHref !== undefined
-    // );
-    // }
 
     const baseOptions = {
       objectType: embeddable.type,
@@ -124,9 +98,9 @@ export class ExportJSONAction implements Action<EmbeddableApiContext> {
       },
     };
 
-    const handler = await shareService?.getExportDerivativeHandler<typeof this.exportJsonIntent>(
+    const handler = await shareService?.getExportDerivativeHandler(
       baseOptions,
-      this.exportJsonIntent.id
+      this.exportJsonIntentId
     );
     await handler?.();
   }
