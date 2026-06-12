@@ -28,3 +28,18 @@ export const VIEWING_CASE = (caseId: string) =>
     defaultMessage: 'Viewing case: {caseId}. This page is under construction.',
     values: { caseId },
   });
+
+export const SHOW_METRICS = i18n.translate('xpack.cases.casesRedesign.details.showMetrics', {
+  defaultMessage: 'Show metrics',
+});
+
+export const EDIT_CASE_NAME = i18n.translate('xpack.cases.casesRedesign.details.editCaseName', {
+  defaultMessage: 'Edit case name',
+});
+
+export const NEW_CASE_NAME_LABEL = i18n.translate(
+  'xpack.cases.casesRedesign.details.newCaseNameLabel',
+  {
+    defaultMessage: 'Case name',
+  }
+);
