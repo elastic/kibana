@@ -159,7 +159,12 @@ test.describe('Jira Service Management connector', { tag: tags.stateful.classic 
     await page.testSubj.click('euiFlyoutCloseButton');
 
     await searchConnectors(page, updatedName);
-    await expect(page.testSubj.locator('connectors-row')).toHaveCount(1);
+    const editedRow = page.testSubj.locator('connectors-row');
+    await expect(editedRow).toHaveCount(1);
+    await expect(editedRow.getByTestId('connectorsTableCell-name')).toContainText(updatedName);
+    await expect(editedRow.getByTestId('connectorsTableCell-actionType')).toContainText(
+      'Jira Service Management'
+    );
   });
 
   test('connector page - should reset connector when canceling an edit', async ({
