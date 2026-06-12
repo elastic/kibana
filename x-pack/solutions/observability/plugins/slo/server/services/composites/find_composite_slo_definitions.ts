@@ -52,7 +52,7 @@ function toWithSummaryResponse(
   };
 }
 
-export async function findCompositeSloDefinitions(
+export async function findCompositeSlo(
   {
     search,
     tags = [],
