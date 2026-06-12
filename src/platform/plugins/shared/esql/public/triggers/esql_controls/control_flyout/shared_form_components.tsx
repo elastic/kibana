@@ -449,11 +449,13 @@ export function Header({
 }
 
 export function Footer({
-  onCancelControl,
+  type,
   isSaveDisabled,
   closeFlyout,
   onCreateControl,
+  onCancelControl,
 }: {
+  type: EsqlControlType;
   isSaveDisabled: boolean;
   closeFlyout: () => void;
   onCreateControl: () => void;
@@ -483,21 +485,37 @@ export function Footer({
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton
-            onClick={onCreateControl}
-            fill
-            aria-label={i18n.translate('esql.flyout..applyFlyoutAriaLabel', {
-              defaultMessage: 'Apply changes',
-            })}
-            disabled={isSaveDisabled}
-            color="primary"
-            iconType="check"
-            data-test-subj="saveEsqlControlsFlyoutButton"
+          <EuiToolTip
+            anchorProps={{ css: isSaveDisabled ? css({ cursor: 'not-allowed' }) : undefined }}
+            content={
+              !isSaveDisabled
+                ? undefined
+                : type === EsqlControlType.STATIC_VALUES
+                ? i18n.translate('esql.flyout.staticValues.saveTooltip', {
+                    defaultMessage: 'Add at least one value to save.',
+                  })
+                : i18n.translate('esql.flyout.valuesFromQuery.saveTooltip', {
+                    defaultMessage: 'Add a valid query to save.',
+                  })
+            }
           >
-            {i18n.translate('esql.flyout.saveLabel', {
-              defaultMessage: 'Save',
-            })}
-          </EuiButton>
+            <EuiButton
+              onClick={onCreateControl}
+              fill
+              aria-label={i18n.translate('esql.flyout..applyFlyoutAriaLabel', {
+                defaultMessage: 'Apply changes',
+              })}
+              disabled={isSaveDisabled}
+              hasAriaDisabled={isSaveDisabled}
+              color="primary"
+              iconType="check"
+              data-test-subj="saveEsqlControlsFlyoutButton"
+            >
+              {i18n.translate('esql.flyout.saveLabel', {
+                defaultMessage: 'Save',
+              })}
+            </EuiButton>
+          </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlyoutFooter>
