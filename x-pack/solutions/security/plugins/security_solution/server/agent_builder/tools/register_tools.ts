@@ -73,9 +73,9 @@ export const registerTools = async (
   if (experimentalFeatures.threatIntelligenceSkillEnabled) {
     tryRegister(agentBuilder, logger, extractIocsTool);
     tryRegister(agentBuilder, logger, analyseEnvironmentTool);
-    tryRegister(agentBuilder, logger, correlateThreatTool);
+    tryRegister(agentBuilder, logger, correlateThreatTool(core, logger));
     tryRegister(agentBuilder, logger, searchByAnchorsTool);
     tryRegister(agentBuilder, logger, searchByDiamondTool);
-    tryRegister(agentBuilder, logger, extractDiamondTool);
+    tryRegister(agentBuilder, logger, extractDiamondTool(core, logger));
   }
 };

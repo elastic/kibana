@@ -9,11 +9,15 @@ import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { Logger } from '@kbn/logging';
 import {
   EXTRACT_DIAMOND_API_PATH,
+  DIAMOND_CONNECTOR_SETTING_KEY,
   THREAT_INTEL_TOOL_IDS,
 } from '../../../../common/threat_intelligence/hub';
 import { extractDiamond } from '../../../threat_intelligence/services';
+import { resolveScopedModel } from '../../../threat_intelligence/routes/lib/scoped_model';
+import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
 
 /**
  * Portability wrapper around POST {@link EXTRACT_DIAMOND_API_PATH}.
@@ -22,9 +26,9 @@ import { extractDiamond } from '../../../threat_intelligence/services';
  * from raw threat report text using a single heavy LLM call, falling back to
  * four per-vertex calls on parse failure or context overflow.
  *
- * Registered as a registry tool — call via `execute_workflow_step` + `kibana-request`
- * inside Kibana orchestration for proper per-space scoping and per-stage connector
- * settings. Use this tool for 3rd-party or REPL agent contexts.
+ * The extraction connector is resolved from DIAMOND_CONNECTOR_SETTING_KEY in
+ * advanced settings, with graceful fallback to the space-wide genAi default
+ * connector — the same resolution chain as the HTTP route.
  */
 const extractDiamondSchema = z.object({
   text: z
@@ -43,7 +47,10 @@ const extractDiamondSchema = z.object({
     ),
 });
 
-export const extractDiamondTool: BuiltinToolDefinition<typeof extractDiamondSchema> = {
+export const extractDiamondTool = (
+  core: SecuritySolutionPluginCoreSetupDependencies,
+  logger: Logger
+): BuiltinToolDefinition<typeof extractDiamondSchema> => ({
   id: THREAT_INTEL_TOOL_IDS.extractDiamond,
   type: ToolType.builtin,
   description:
@@ -55,19 +62,35 @@ export const extractDiamondTool: BuiltinToolDefinition<typeof extractDiamondSche
     'inspect what diamond fields a text block would produce.',
   schema: extractDiamondSchema,
   tags: ['threat-intel', 'correlation'],
-  handler: async (params, { logger, modelProvider }) => {
-    let model;
-    try {
-      model = await modelProvider.getDefaultModel();
-    } catch (err) {
+  handler: async (params, { request, savedObjectsClient }) => {
+    const [coreStart, depsStart] = await core.getStartServices();
+    const inference = depsStart.inference;
+    const uiSettingsClient = coreStart.uiSettings.asScopedToClient(savedObjectsClient);
+
+    const diamondConnectorId = await (async () => {
+      try {
+        const v = await uiSettingsClient.get<string>(DIAMOND_CONNECTOR_SETTING_KEY);
+        return v || undefined;
+      } catch {
+        return undefined;
+      }
+    })();
+
+    const modelOutcome = await resolveScopedModel({
+      inference,
+      request,
+      uiSettingsClient,
+      connectorIdOverride: diamondConnectorId,
+      logger,
+    });
+
+    if (!modelOutcome.ok) {
       return {
         results: [
           {
             type: ToolResultType.error,
             data: {
-              message: `No GenAI connector available for extract_diamond: ${
-                (err as Error).message
-              }`,
+              message: `No GenAI connector available for extract_diamond: ${modelOutcome.message}`,
             },
           },
         ],
@@ -75,7 +98,7 @@ export const extractDiamondTool: BuiltinToolDefinition<typeof extractDiamondSche
     }
 
     try {
-      const data = await extractDiamond(model, logger, {
+      const data = await extractDiamond(modelOutcome.model, logger, {
         text: params.text,
         report_id: params.report_id,
       });
@@ -92,4 +115,4 @@ export const extractDiamondTool: BuiltinToolDefinition<typeof extractDiamondSche
       };
     }
   },
-};
+});

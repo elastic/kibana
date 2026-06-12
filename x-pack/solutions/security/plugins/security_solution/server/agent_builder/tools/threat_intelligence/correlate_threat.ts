@@ -8,16 +8,20 @@
 import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import type { BuiltinToolDefinition, ScopedModel } from '@kbn/agent-builder-server';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { Logger } from '@kbn/logging';
 import {
   CORRELATE_THREAT_API_PATH,
+  DIAMOND_CONNECTOR_SETTING_KEY,
+  TRIAGE_CONNECTOR_SETTING_KEY,
+  SYNTHESIS_CONNECTOR_SETTING_KEY,
+  TRIAGE_CONFIDENCE_FLOOR_SETTING_KEY,
+  TRIAGE_TOP_N_SETTING_KEY,
   THREAT_INTEL_TOOL_IDS,
 } from '../../../../common/threat_intelligence/hub';
 import { correlateThreat } from '../../../threat_intelligence/services';
-
-// Mirrors the route defaults (read from uiSettings there; hardcoded here for tool context).
-const DEFAULT_TRIAGE_FLOOR = 0.65;
-const DEFAULT_TRIAGE_TOP_N = 75;
+import { resolveScopedModel } from '../../../threat_intelligence/routes/lib/scoped_model';
+import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
 
 /**
  * Portability wrapper around POST {@link CORRELATE_THREAT_API_PATH}.
@@ -34,10 +38,12 @@ const DEFAULT_TRIAGE_TOP_N = 75;
  * Expect 30–90 s total wall time (4 sequential LLM calls). The response
  * includes a `trace` field with per-stage token counts and cost.
  *
- * Per-stage connector overrides (DIAMOND_CONNECTOR_SETTING_KEY etc.) are NOT
- * applied in this tool context — all three model tiers use the connector
- * selected by modelProvider. For per-stage connector control, call the HTTP
- * route directly via `execute_workflow_step` + `kibana-request`.
+ * Per-stage connectors are resolved from advanced settings via
+ * DIAMOND_CONNECTOR_SETTING_KEY / TRIAGE_CONNECTOR_SETTING_KEY /
+ * SYNTHESIS_CONNECTOR_SETTING_KEY — the same logic as the HTTP route, with
+ * graceful fallback to the space-wide genAi default connector.
+ * Triage confidence floor and candidate cap are read from
+ * TRIAGE_CONFIDENCE_FLOOR_SETTING_KEY / TRIAGE_TOP_N_SETTING_KEY.
  *
  * Gated on `.correlate` privilege at the HTTP route; this tool runs in-process.
  */
@@ -66,7 +72,10 @@ const correlateThreatSchema = z
     message: 'Exactly one of raw_text or report_id is required',
   });
 
-export const correlateThreatTool: BuiltinToolDefinition<typeof correlateThreatSchema> = {
+export const correlateThreatTool = (
+  core: SecuritySolutionPluginCoreSetupDependencies,
+  logger: Logger
+): BuiltinToolDefinition<typeof correlateThreatSchema> => ({
   id: THREAT_INTEL_TOOL_IDS.correlateThreat,
   type: ToolType.builtin,
   description:
@@ -81,38 +90,100 @@ export const correlateThreatTool: BuiltinToolDefinition<typeof correlateThreatSc
     'results for step-by-step reasoning.',
   schema: correlateThreatSchema,
   tags: ['threat-intel', 'correlation'],
-  handler: async (params, { esClient, logger, spaceId, modelProvider }) => {
-    let triageModel: ScopedModel;
-    let synthesisModel: ScopedModel;
-    try {
-      [triageModel, synthesisModel] = await Promise.all([
-        modelProvider.selectModel({ effortLevel: 'medium' }),
-        modelProvider.selectModel({ effortLevel: 'high' }),
+  handler: async (params, { esClient, spaceId, request, savedObjectsClient }) => {
+    const [coreStart, depsStart] = await core.getStartServices();
+    const inference = depsStart.inference;
+    const uiSettingsClient = coreStart.uiSettings.asScopedToClient(savedObjectsClient);
+
+    const readStringSetting = async (key: string): Promise<string | undefined> => {
+      try {
+        const v = await uiSettingsClient.get<string>(key);
+        return v || undefined;
+      } catch {
+        return undefined;
+      }
+    };
+
+    const readNumberSetting = async (key: string, fallback: number): Promise<number> => {
+      try {
+        const v = await uiSettingsClient.get<number>(key);
+        return typeof v === 'number' && Number.isFinite(v) ? v : fallback;
+      } catch {
+        return fallback;
+      }
+    };
+
+    const [diamondConnectorId, triageConnectorId, synthesisConnectorId, triageFloor, triageTopN] =
+      await Promise.all([
+        readStringSetting(DIAMOND_CONNECTOR_SETTING_KEY),
+        readStringSetting(TRIAGE_CONNECTOR_SETTING_KEY),
+        readStringSetting(SYNTHESIS_CONNECTOR_SETTING_KEY),
+        readNumberSetting(TRIAGE_CONFIDENCE_FLOOR_SETTING_KEY, 0.65),
+        readNumberSetting(TRIAGE_TOP_N_SETTING_KEY, 75),
       ]);
-    } catch (err) {
+
+    // Resolve the extraction model eagerly so misconfigured deployments fail fast.
+    // Required only for raw_text mode; !ok is treated as undefined for report_id.
+    const extractionModelOutcome = await resolveScopedModel({
+      inference,
+      request,
+      uiSettingsClient,
+      connectorIdOverride: diamondConnectorId,
+      logger,
+    });
+
+    if (!extractionModelOutcome.ok && params.raw_text) {
       return {
         results: [
           {
             type: ToolResultType.error,
-            data: {
-              message:
-                `No GenAI connector available for correlate_threat: ${(err as Error).message}. ` +
-                'Configure a connector in Kibana Advanced Settings.',
-            },
+            data: { message: extractionModelOutcome.message },
           },
         ],
       };
     }
 
-    let extractionModel: ScopedModel | undefined;
-    if (params.raw_text) {
-      try {
-        extractionModel = await modelProvider.getDefaultModel();
-      } catch {
-        // correlateThreat will surface a clear error for raw_text with no extraction model.
-        extractionModel = undefined;
-      }
+    const triageModelOutcome = await resolveScopedModel({
+      inference,
+      request,
+      uiSettingsClient,
+      connectorIdOverride: triageConnectorId,
+      logger,
+    });
+
+    if (!triageModelOutcome.ok) {
+      return {
+        results: [
+          {
+            type: ToolResultType.error,
+            data: { message: `Triage model unavailable: ${triageModelOutcome.message}` },
+          },
+        ],
+      };
     }
+
+    const synthesisModelOutcome = await resolveScopedModel({
+      inference,
+      request,
+      uiSettingsClient,
+      connectorIdOverride: synthesisConnectorId,
+      logger,
+    });
+
+    if (!synthesisModelOutcome.ok) {
+      return {
+        results: [
+          {
+            type: ToolResultType.error,
+            data: { message: `Synthesis model unavailable: ${synthesisModelOutcome.message}` },
+          },
+        ],
+      };
+    }
+
+    const extractionModel = extractionModelOutcome.ok ? extractionModelOutcome.model : undefined;
+    const { model: triageModel } = triageModelOutcome;
+    const { model: synthesisModel } = synthesisModelOutcome;
 
     if (!params.raw_text && !params.report_id) {
       return {
@@ -138,8 +209,8 @@ export const correlateThreatTool: BuiltinToolDefinition<typeof correlateThreatSc
         logger,
         spaceId,
         input,
-        triageFloor: DEFAULT_TRIAGE_FLOOR,
-        triageTopN: DEFAULT_TRIAGE_TOP_N,
+        triageFloor,
+        triageTopN,
       });
       return { results: [{ type: ToolResultType.other, data }] };
     } catch (err) {
@@ -154,4 +225,4 @@ export const correlateThreatTool: BuiltinToolDefinition<typeof correlateThreatSc
       };
     }
   },
-};
+});
