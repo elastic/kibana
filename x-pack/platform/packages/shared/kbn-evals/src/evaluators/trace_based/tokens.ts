@@ -23,9 +23,9 @@ export function createOutputTokensEvaluator({
     config: {
       name: 'Output Tokens',
       buildQuery: (traceId) => `FROM traces-*
-        | WHERE trace.id == "${traceId}"
+        | WHERE TraceId == "${traceId}"
         | STATS 
-        output_tokens = SUM(attributes.gen_ai.usage.output_tokens)`,
+        output_tokens = SUM(Attributes.gen_ai.usage.output_tokens)`,
       extractResult: (response) => {
         const { columns, values } = response;
         const row = values[0];
@@ -50,9 +50,9 @@ export function createInputTokensEvaluator({
     config: {
       name: 'Input Tokens',
       buildQuery: (traceId) => `FROM traces-*
-        | WHERE trace.id == "${traceId}"
+        | WHERE TraceId == "${traceId}"
         | STATS 
-        input_tokens = SUM(attributes.gen_ai.usage.input_tokens)`,
+        input_tokens = SUM(Attributes.gen_ai.usage.input_tokens)`,
       extractResult: (response) => {
         const { columns, values } = response;
         const row = values[0];
@@ -77,9 +77,9 @@ export function createCachedTokensEvaluator({
     config: {
       name: 'Cached Tokens',
       buildQuery: (traceId) => `FROM traces-*
-        | WHERE trace.id == "${traceId}"
+        | WHERE TraceId == "${traceId}"
         | STATS 
-        cached_tokens = SUM(attributes.gen_ai.usage.cached_input_tokens)`,
+        cached_tokens = SUM(Attributes.gen_ai.usage.cached_input_tokens)`,
       extractResult: (response) => {
         const { columns, values } = response;
         const row = values[0];

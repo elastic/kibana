@@ -33,20 +33,20 @@ export function createSkillInvocationEvaluator({
     config: {
       name: `Skill Invoked (${skillName})`,
       buildQuery: (traceId) => `FROM traces-*
-| WHERE trace.id == "${traceId}"
+| WHERE TraceId == "${traceId}"
 | STATS
   total_spans = COUNT(*),
   total_tool_spans = COUNT(
     CASE(
-      attributes.elastic.inference.span.kind == "TOOL",
+      Attributes.elastic.inference.span.kind == "TOOL",
       1,
       NULL
     )
   ),
   skill_invoked = COUNT(
     CASE(
-      attributes.gen_ai.tool.name == "filestore.read"
-        AND attributes.elastic.tool.parameters LIKE "*/${skillName}/SKILL.md*",
+      Attributes.gen_ai.tool.name == "filestore.read"
+        AND Attributes.elastic.tool.parameters LIKE "*/${skillName}/SKILL.md*",
       1,
       NULL
     )
