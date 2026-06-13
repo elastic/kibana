@@ -20,7 +20,7 @@ interface CreateInvestigationAttachmentTypeOptions {
   getScopedClients: GetScopedClients;
 }
 
-const formatInvestigationAsText = (result: InvestigationResult): string => {
+export const formatInvestigationAsText = (result: InvestigationResult): string => {
   const lines = [
     `Investigation Result`,
     `Root Cause: ${result.root_cause}`,
@@ -119,8 +119,11 @@ export const createInvestigationAttachmentType = ({
           return false;
         }
 
-        const { completed_at: _completedAt, workflow_execution_id: _workflowExecutionId, ...currentInvestigation } =
-          doc.investigation;
+        const {
+          completed_at: _completedAt,
+          workflow_execution_id: _workflowExecutionId,
+          ...currentInvestigation
+        } = doc.investigation;
         return JSON.stringify(currentInvestigation) !== JSON.stringify(latestVersion.data);
       } catch (error) {
         logger.warn(
