@@ -253,7 +253,7 @@ test.describe('Maintenance windows table', { tag: tags.stateful.classic }, () =>
     const [r1, r2, r3] = await Promise.all([
       createMw(kbnClient, {
         title: runningTitle,
-        startDate: new Date(Date.now() - 30 * 60 * 1000),
+        startDate: new Date(Date.now() - 5 * 60 * 1000),
       }),
       createMw(kbnClient, {
         title: finishedTitle,
@@ -298,7 +298,7 @@ test.describe('Maintenance windows table', { tag: tags.stateful.classic }, () =>
       createMw(kbnClient, { title: upcomingTitle, startDate: tomorrow }),
       createMw(kbnClient, {
         title: runningTitle,
-        startDate: new Date(Date.now() - 30 * 60 * 1000),
+        startDate: new Date(Date.now() - 5 * 60 * 1000),
       }),
     ]);
     createdIds.push(r1.id, r2.id, r3.id);
