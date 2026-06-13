@@ -225,6 +225,141 @@ describe('buildSecurityApi', () => {
         expect(hydrated).toBeDefined();
         expect(hydrated!.headers.authorization).toBe('ApiKey abc');
       });
+
+      // ---------------------------------------------------------------------
+      // BWC: the v1 envelope also carries the legacy Task Manager fields
+      // (`apiKey`, `uiamApiKey`, `userScope`) so the opaque bag can fully
+      // replace the prior per-task persistence shape without losing context.
+      // ---------------------------------------------------------------------
+      describe('backwards-compat with legacy apiKey / uiamApiKey / userScope fields', () => {
+        it('rebuilds Authorization from legacy `apiKey` when no explicit authorization is set', () => {
+          const state = {
+            v: 1,
+            apiKey: 'base64-encoded-id-and-key',
+          } as unknown as OpaqueRequestState;
+
+          const hydrated = api.authc.hydrateRequest(state);
+
+          expect(hydrated).toBeDefined();
+          expect(hydrated!.headers.authorization).toBe('ApiKey base64-encoded-id-and-key');
+        });
+
+        it('rebuilds Authorization from `uiamApiKey` when no explicit authorization is set', () => {
+          const state = {
+            v: 1,
+            uiamApiKey: 'essu_uiam-encoded',
+          } as unknown as OpaqueRequestState;
+
+          const hydrated = api.authc.hydrateRequest(state);
+
+          expect(hydrated).toBeDefined();
+          expect(hydrated!.headers.authorization).toBe('ApiKey essu_uiam-encoded');
+        });
+
+        it('prefers `uiamApiKey` over legacy `apiKey` when both are set', () => {
+          // Mirrors the ES+UIAM strategy preference: when both are present on a
+          // task, UIAM wins (matches `getApiKeyForFakeRequest` behavior).
+          const state = {
+            v: 1,
+            apiKey: 'es-key',
+            uiamApiKey: 'uiam-key',
+          } as unknown as OpaqueRequestState;
+
+          const hydrated = api.authc.hydrateRequest(state);
+
+          expect(hydrated).toBeDefined();
+          expect(hydrated!.headers.authorization).toBe('ApiKey uiam-key');
+        });
+
+        it('prefers explicit `authorization` over both `apiKey` and `uiamApiKey`', () => {
+          // Explicit authorization is the most flexible (allows Bearer/Basic/etc.),
+          // so it always wins over the legacy ApiKey reconstruction paths.
+          const state = {
+            v: 1,
+            authorization: '******',
+            apiKey: 'es-key',
+            uiamApiKey: 'uiam-key',
+          } as unknown as OpaqueRequestState;
+
+          const hydrated = api.authc.hydrateRequest(state);
+
+          expect(hydrated).toBeDefined();
+          expect(hydrated!.headers.authorization).toBe('******');
+        });
+
+        it('falls back to `userScope.spaceId` when no top-level `spaceId` is set', () => {
+          const state = {
+            v: 1,
+            apiKey: 'es-key',
+            userScope: {
+              apiKeyId: 'key-id',
+              spaceId: 'marketing',
+              apiKeyCreatedByUser: false,
+            },
+          } as unknown as OpaqueRequestState;
+
+          const hydrated = api.authc.hydrateRequest(state);
+
+          expect(hydrated).toBeDefined();
+          expect(hydrated!.spaceId).toBe('marketing');
+        });
+
+        it('prefers top-level `spaceId` over `userScope.spaceId` when both are set', () => {
+          const state = {
+            v: 1,
+            apiKey: 'es-key',
+            spaceId: 'sales',
+            userScope: {
+              apiKeyId: 'key-id',
+              spaceId: 'marketing',
+              apiKeyCreatedByUser: false,
+            },
+          } as unknown as OpaqueRequestState;
+
+          const hydrated = api.authc.hydrateRequest(state);
+
+          expect(hydrated).toBeDefined();
+          expect(hydrated!.spaceId).toBe('sales');
+        });
+
+        it('returns undefined when no auth-bearing field is present (no fabricated request)', () => {
+          // The hydrator must refuse to mint a request from a `userScope` alone:
+          // without an Authorization header we cannot scope the request to a user.
+          const state = {
+            v: 1,
+            userScope: {
+              apiKeyId: 'key-id',
+              spaceId: 'marketing',
+              apiKeyCreatedByUser: false,
+            },
+          } as unknown as OpaqueRequestState;
+
+          expect(api.authc.hydrateRequest(state)).toBeUndefined();
+        });
+
+        it('handles a `userScope` carrying `uiamApiKeyId` alongside legacy fields', () => {
+          // Full legacy shape: ES apiKey + uiamApiKey + the dual-id userScope
+          // structure used during the UIAM rollout. Hydrator must accept it
+          // and apply the documented precedence.
+          const state = {
+            v: 1,
+            apiKey: 'es-key',
+            uiamApiKey: 'uiam-key',
+            userScope: {
+              apiKeyId: 'es-key-id',
+              uiamApiKeyId: 'uiam-key-id',
+              spaceId: 'marketing',
+              apiKeyCreatedByUser: true,
+            },
+          } as unknown as OpaqueRequestState;
+
+          const hydrated = api.authc.hydrateRequest(state);
+
+          expect(hydrated).toBeDefined();
+          expect(hydrated!.headers.authorization).toBe('ApiKey uiam-key');
+          expect(hydrated!.spaceId).toBe('marketing');
+        });
+      });
     });
 
     describe('round-trip', () => {

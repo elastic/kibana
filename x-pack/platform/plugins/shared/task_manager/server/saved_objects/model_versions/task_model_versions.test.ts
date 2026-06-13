@@ -115,6 +115,28 @@ describe('taskModelVersions v11 / requestState (opaque request-state envelope)',
 
       expect(() => taskSchemaV11.validate(attributes)).not.toThrow();
     });
+
+    it('accepts a v1 `requestState` carrying the legacy apiKey/uiamApiKey/userScope BWC fields', () => {
+      // The opaque bag is permissive (`recordOf(string, any)`), so the full
+      // legacy persistence shape now embedded inside `requestState` must
+      // continue to validate cleanly.
+      const attributes = {
+        ...baseTaskAttributes,
+        requestState: {
+          v: 1,
+          apiKey: 'es-key',
+          uiamApiKey: 'uiam-key',
+          userScope: {
+            apiKeyId: 'es-key-id',
+            uiamApiKeyId: 'uiam-key-id',
+            spaceId: 'marketing',
+            apiKeyCreatedByUser: true,
+          },
+        },
+      };
+
+      expect(() => taskSchemaV11.validate(attributes)).not.toThrow();
+    });
   });
 
   describe('forwardCompatibility', () => {

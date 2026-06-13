@@ -102,12 +102,47 @@ export const buildUserProfileApi = ({
  */
 const REQUEST_STATE_VERSION = 1 as const;
 
+/**
+ * Mirror of the legacy Task Manager `userScope` field. Carried inside the
+ * envelope purely for backwards-compatibility with tasks whose identity
+ * context was previously persisted as a sibling of the task SO (not inside
+ * the opaque bag). The hydrator never *requires* these fields; they only
+ * provide additional reconstruction hints when the more specific
+ * `authorization` field is absent.
+ */
+interface SerializedUserScope {
+  apiKeyId: string;
+  uiamApiKeyId?: string;
+  spaceId: string;
+  apiKeyCreatedByUser: boolean;
+}
+
 interface SerializedRequestStateV1 {
   v: typeof REQUEST_STATE_VERSION;
   /** Raw Authorization header value, when present on the source request. */
   authorization?: string;
   /** Space ID derived from the source request (defaults to 'default' if unknown). */
   spaceId?: string;
+  /**
+   * Backwards-compat: the base64-encoded `id:api_key` value previously persisted
+   * by Task Manager as a sibling task field. When present and no explicit
+   * `authorization` is set, the hydrator rebuilds `Authorization: ApiKey ${apiKey}`.
+   */
+  apiKey?: string;
+  /**
+   * Backwards-compat: the UIAM-flavored API key previously persisted alongside
+   * `apiKey` so a single task can carry both during the UIAM rollout. Preferred
+   * over `apiKey` when present (mirrors the ES+UIAM API-key strategy ordering).
+   */
+  uiamApiKey?: string;
+  /**
+   * Backwards-compat: the legacy `userScope` block previously persisted as a
+   * sibling task field. The hydrator only reads `spaceId` from it (to pick a
+   * default space when no top-level `spaceId` is set); the other attributes
+   * are round-tripped unchanged so downstream consumers that still inspect
+   * them keep working.
+   */
+  userScope?: SerializedUserScope;
 }
 
 const isSerializedRequestStateV1 = (
@@ -154,15 +189,36 @@ const hydrateRequestImpl = (requestState: OpaqueRequestState): KibanaRequest | u
     return undefined;
   }
 
-  const { authorization, spaceId } = requestState;
-  if (!authorization) {
+  const { authorization, spaceId, apiKey, uiamApiKey, userScope } = requestState;
+
+  // Header reconstruction precedence:
+  //   1. Explicit `authorization` (the most flexible — bearer, basic, etc.).
+  //   2. `uiamApiKey` (matches the ES+UIAM strategy preference for UIAM-enabled
+  //      deployments, mirroring `task_runner.getFakeKibanaRequest`).
+  //   3. Legacy `apiKey` (base64 `id:api_key`).
+  // Refuse to fabricate a request when none of these are present.
+  let resolvedAuthorization: string | undefined;
+  if (authorization) {
+    resolvedAuthorization = authorization;
+  } else if (uiamApiKey) {
+    resolvedAuthorization = `ApiKey ${uiamApiKey}`;
+  } else if (apiKey) {
+    resolvedAuthorization = `ApiKey ${apiKey}`;
+  }
+
+  if (!resolvedAuthorization) {
     return undefined;
   }
 
-  const requestHeaders: Headers = { authorization };
+  // Space resolution: explicit `spaceId` wins; fall back to `userScope.spaceId`
+  // (the legacy persistence shape) so tasks scheduled against a specific space
+  // before the opaque-bag migration keep targeting that space after hydration.
+  const resolvedSpaceId = spaceId ?? userScope?.spaceId;
+
+  const requestHeaders: Headers = { authorization: resolvedAuthorization };
   const fakeRawRequest: FakeRawRequest = {
     headers: requestHeaders,
-    ...(spaceId ? { spaceId: asSpaceId(spaceId) } : {}),
+    ...(resolvedSpaceId ? { spaceId: asSpaceId(resolvedSpaceId) } : {}),
   };
   return kibanaRequestFactory(fakeRawRequest);
 };
