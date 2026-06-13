@@ -498,14 +498,15 @@ export const startCmd: Command<void> = {
       return;
     }
 
-    await ensureEvalStack({
-      repoRoot,
-      log,
-      skipServer,
-      profileEnvOverrides,
-      serverConfigSet: suite?.serverConfigSet,
-      requiresEisCcm,
-    });
+    if (!skipServer) {
+      await ensureEvalStack({
+        repoRoot,
+        log,
+        profileEnvOverrides,
+        serverConfigSet: suite?.serverConfigSet,
+        requiresEisCcm,
+      });
+    }
 
     log.info(`[4/4] Running suite: ${suiteId ?? configPath}`);
     log.info('');

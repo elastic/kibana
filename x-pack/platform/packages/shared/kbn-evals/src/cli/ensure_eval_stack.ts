@@ -102,7 +102,6 @@ const probeScoutHealth = async (repoRoot: string): Promise<{ ok: boolean; reason
 export interface EnsureEvalStackOptions {
   repoRoot: string;
   log: ToolingLog;
-  skipServer: boolean;
   profileEnvOverrides: Record<string, string>;
   serverConfigSet?: string;
   requiresEisCcm: boolean;
@@ -110,20 +109,14 @@ export interface EnsureEvalStackOptions {
 
 /**
  * Boots EDOT collector, Scout server, and EIS CCM as background daemons.
- * Shared by `evals start` and experimental extension CLIs (e.g. red-team).
  */
 export const ensureEvalStack = async ({
   repoRoot,
   log,
-  skipServer,
   profileEnvOverrides,
   serverConfigSet = 'evals_tracing',
   requiresEisCcm,
 }: EnsureEvalStackOptions): Promise<void> => {
-  if (skipServer) {
-    return;
-  }
-
   // --- Step 1: EDOT collector (exports traces to configured ES) ---
   if (isServiceRunning(repoRoot, 'edot') || isEdotDockerRunning()) {
     log.info('[1/4] EDOT collector already running -- reusing');

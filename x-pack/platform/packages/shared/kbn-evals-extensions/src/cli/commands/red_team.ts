@@ -161,14 +161,15 @@ export const redTeamCmd: Command<void> = {
       return;
     }
 
-    await ensureEvalStack({
-      repoRoot,
-      log,
-      skipServer,
-      profileEnvOverrides,
-      serverConfigSet: suite?.serverConfigSet,
-      requiresEisCcm,
-    });
+    if (!skipServer) {
+      await ensureEvalStack({
+        repoRoot,
+        log,
+        profileEnvOverrides,
+        serverConfigSet: suite?.serverConfigSet,
+        requiresEisCcm,
+      });
+    }
 
     const envOverrides = buildEvalRunEnv({
       evaluationConnectorId,
