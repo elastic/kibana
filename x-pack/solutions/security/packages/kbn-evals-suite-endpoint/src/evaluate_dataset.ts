@@ -111,7 +111,8 @@ export function createEvaluateSecurityDataset({
 
     const trajectoryEvaluator = createTrajectoryEvaluator({
       extractToolCalls: (output: unknown) => {
-        const steps = (output as { steps?: Array<{ type?: string; tool_id?: string }> })?.steps ?? [];
+        const steps =
+          (output as { steps?: Array<{ type?: string; tool_id?: string }> })?.steps ?? [];
         return steps
           .filter((s) => s.type === 'tool_call' || s.tool_id)
           .map((s) => s.tool_id ?? 'unknown')

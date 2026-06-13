@@ -138,21 +138,21 @@ export const toolToLangchain = async ({
         tool.id,
         {
           tool: {
-          description,
-          toolCallId,
-          input,
+            description,
+            toolCallId,
+            input,
           },
         },
         async (): Promise<[string, RunToolReturn]> => {
           try {
-            const toolReturn = await tool.execute({
+            const innerToolReturn = await tool.execute({
               toolParams: input,
               onEvent,
               toolCallId,
               source: 'agent',
             });
-            const content = JSON.stringify({ results: toolReturn.results });
-            return [content, toolReturn];
+            const innerContent = JSON.stringify({ results: innerToolReturn.results });
+            return [innerContent, innerToolReturn];
           } catch (e) {
             logger.warn(`error calling tool ${tool.id}: ${e}`);
             logger.debug(e.stack);
