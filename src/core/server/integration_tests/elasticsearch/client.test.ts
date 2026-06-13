@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { esTestConfig } from '@kbn/test';
 import * as http from 'http';
-import { ReplaySubject, firstValueFrom } from 'rxjs';
+import type { AddressInfo } from 'net';
+import { filter, firstValueFrom, tap, throwError, timeout, type Observable } from 'rxjs';
 
 import type { Root } from '@kbn/core-root-server-internal';
 import {
@@ -18,8 +18,12 @@ import {
   type TestElasticsearchUtils,
   type TestKibanaUtils,
 } from '@kbn/core-test-helpers-kbn-server';
-import type { ServiceStatus } from '@kbn/core-status-common';
+import { ServiceStatusLevels, type ServiceStatus } from '@kbn/core-status-common';
 import type { ElasticsearchStatusMeta } from '@kbn/core-elasticsearch-server-internal';
+
+const UNKNOWN_PRODUCT_ERROR =
+  'The client noticed that the server is not Elasticsearch and we do not support this unknown product.';
+const UNKNOWN_PRODUCT_STATUS_SUMMARY = `Unable to retrieve version information from Elasticsearch nodes. ${UNKNOWN_PRODUCT_ERROR}`;
 
 describe('elasticsearch clients', () => {
   let esServer: TestElasticsearchUtils;
@@ -68,34 +72,67 @@ function createFakeElasticsearchServer(): Promise<http.Server> {
       res.end();
     });
     server.on('error', reject);
-    server.listen(esTestConfig.getPort(), () => resolve(server));
+    // Ask OS for any available ephemeral port
+    server.listen(0, () => resolve(server));
   });
 }
 
 describe('fake elasticsearch', () => {
   let esServer: http.Server;
   let kibanaServer: Root;
-  let esStatus$: ReplaySubject<ServiceStatus<ElasticsearchStatusMeta>>;
+  let esStatus$: Observable<ServiceStatus<ElasticsearchStatusMeta>>;
+  let currentStatus: undefined | ServiceStatus<ElasticsearchStatusMeta>;
+
+  const waitForUnknownProductStatus = () => {
+    const expectedStatusSummary = UNKNOWN_PRODUCT_STATUS_SUMMARY;
+    const observedStatuses: string[] = [];
+
+    return firstValueFrom(
+      esStatus$.pipe(
+        tap((status) => {
+          currentStatus = status;
+          observedStatuses.push(`${status.level.toString()}: ${status.summary}`);
+        }),
+        filter(
+          (status) =>
+            status.level === ServiceStatusLevels.critical &&
+            status.summary === expectedStatusSummary
+        ),
+        timeout({
+          first: 30_000,
+          with: () =>
+            throwError(
+              () =>
+                new Error(
+                  [
+                    'Timed out waiting for Elasticsearch status.',
+                    `Expected: ${ServiceStatusLevels.critical.toString()}: ${expectedStatusSummary}`,
+                    `Observed: ${
+                      observedStatuses.length ? observedStatuses.join(' | ') : '<none>'
+                    }`,
+                  ].join('\n')
+                )
+            ),
+        })
+      )
+    );
+  };
 
   beforeAll(async () => {
+    esServer = await createFakeElasticsearchServer();
+    const esAddress = esServer.address() as AddressInfo;
+
     kibanaServer = createRootWithCorePlugins({
       elasticsearch: {
+        hosts: [`http://localhost:${esAddress.port}`],
         healthCheck: { retry: 1 },
       },
       status: { allowAnonymous: true },
     });
-    esServer = await createFakeElasticsearchServer();
 
     await kibanaServer.preboot();
     const { elasticsearch } = await kibanaServer.setup();
-    esStatus$ = new ReplaySubject(1);
-    elasticsearch.status$.subscribe(esStatus$);
-
-    // give kibanaServer's status Observables enough time to bootstrap
-    // and emit a status after the initial "unavailable: Waiting for Elasticsearch"
-    // set healthCheckRetry to 1, for faster testing
-    // see https://github.com/elastic/kibana/issues/129754
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    esStatus$ = elasticsearch.status$;
   });
 
   afterAll(async () => {
@@ -106,16 +143,13 @@ describe('fake elasticsearch', () => {
   });
 
   test('should return unknown product when it cannot perform the Product check (503 response)', async () => {
-    const esStatus = await firstValueFrom(esStatus$);
-    expect(esStatus.level.toString()).toBe('critical');
-    expect(esStatus.summary).toBe(
-      'Unable to retrieve version information from Elasticsearch nodes. The client noticed that the server is not Elasticsearch and we do not support this unknown product.'
-    );
+    await waitForUnknownProductStatus();
+    expect(currentStatus?.level.toString()).toBe('critical');
+    expect(currentStatus?.summary).toBe(UNKNOWN_PRODUCT_STATUS_SUMMARY);
   });
 
   test('should fail to start Kibana because of the Product Check Error', async () => {
-    await expect(kibanaServer.start()).rejects.toThrowError(
-      'The client noticed that the server is not Elasticsearch and we do not support this unknown product.'
-    );
+    await waitForUnknownProductStatus();
+    await expect(kibanaServer.start()).rejects.toThrowError(UNKNOWN_PRODUCT_ERROR);
   });
 });
