@@ -21,6 +21,7 @@ import { registerAgentBuilderSkills } from './skills/register_skills';
 import { registerAgentBuilderAttachments } from './attachments/register_attachments';
 import { registerAgentBuilderSmlTypes } from './sml/register_sml_types';
 import { registerSignificantEventsDiscoveryAgents } from './agents/discovery';
+import { registerInvestigationAgents } from './agents/investigation';
 
 type AgentDefinition = Parameters<AgentBuilderPluginSetup['agents']['register']>[0];
 
@@ -107,6 +108,7 @@ export const registerStreamsAgentBuilder = async ({
     streamsKIsOnboardingClient,
   });
   registerSignificantEventsDiscoveryAgents(agentBuilder);
+  registerInvestigationAgents(agentBuilder);
 
   agentBuilder.agents.register(systemOnboardingAgent);
   agentBuilder.agents.register(gapDetectorAgent);

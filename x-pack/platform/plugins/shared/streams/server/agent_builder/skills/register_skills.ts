@@ -19,6 +19,12 @@ import {
   createMemoryConsolidationSkill,
   createConversationScraperSkill,
 } from './memory';
+import {
+  investigationContextSkill,
+  hypothesisGatherSkill,
+  hypothesisReviewSkill,
+  investigationSynthesisSkill,
+} from './investigation';
 
 export const registerAgentBuilderSkills = ({
   agentBuilder,
@@ -39,6 +45,10 @@ export const registerAgentBuilderSkills = ({
     streamsManagementSkill,
     knowledgeIndicatorsManagementSkill,
     sigEventsManagementSkill,
+    investigationContextSkill,
+    hypothesisGatherSkill,
+    hypothesisReviewSkill,
+    investigationSynthesisSkill,
     ...(streamsKIsOnboardingClient
       ? [createKiIdentificationManagementSkill({ telemetry, streamsKIsOnboardingClient })]
       : []),

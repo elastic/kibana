@@ -65,6 +65,7 @@ export interface StreamsServer {
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
   ensureMemorySkillRegistered?: () => void;
   workflowsManagement?: WorkflowsServerPluginSetup;
+  workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
   spaces?: SpacesPluginStart;
 }
 
