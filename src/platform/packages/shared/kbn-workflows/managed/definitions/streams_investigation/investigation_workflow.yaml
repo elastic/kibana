@@ -632,23 +632,25 @@ steps:
       continue: false
 
   # ── Step 4: Write-back ────────────────────────────────────────────────────────
-  - name: write_back
-    type: kibana.request
+  - name: prepare_write_back
+    type: data.set
     with:
+      root_cause: "{{ steps.synthesize.output.root_cause }}"
+      confidence: "${{ steps.synthesize.output.confidence }}"
+      impact: "{{ steps.synthesize.output.impact }}"
+      ranked_hypotheses: "${{ steps.synthesize.output.ranked_hypotheses }}"
+      discarded_hypotheses: "${{ steps.synthesize.output.discarded_hypotheses }}"
+      remediation_options: "${{ steps.synthesize.output.remediation_options }}"
+      gaps_found: "${{ steps.synthesize.output.gaps_found }}"
+      investigation_complete: "${{ steps.synthesize.output.investigation_complete }}"
+      memory_pages_written: "${{ steps.synthesize.output.memory_pages_written }}"
+      workflow_execution_id: "{{ execution.id }}"
+
+  - name: write_back
+    type: http
+    with:
+      url: "{{ kibana.internal_url }}/internal/streams/sig_events/discoveries/{{ inputs.discovery_id }}/investigation"
       method: POST
-      path: "/internal/streams/sig_events/discoveries/{{ inputs.discovery_id }}/investigation"
-      headers:
-        x-elastic-internal-origin: "kibana"
-      body:
-        workflow_execution_id: "{{ execution.id }}"
-        root_cause: "{{ steps.synthesize.output.root_cause }}"
-        confidence: "${{ steps.synthesize.output.confidence }}"
-        impact: "{{ steps.synthesize.output.impact }}"
-        ranked_hypotheses: "${{ steps.synthesize.output.ranked_hypotheses }}"
-        discarded_hypotheses: "${{ steps.synthesize.output.discarded_hypotheses }}"
-        remediation_options: "${{ steps.synthesize.output.remediation_options }}"
-        gaps_found: "${{ steps.synthesize.output.gaps_found }}"
-        investigation_complete: "${{ steps.synthesize.output.investigation_complete }}"
-        memory_pages_written: "${{ steps.synthesize.output.memory_pages_written }}"
+      body: "{{ steps.prepare_write_back.output | json }}"
     on-failure:
       continue: true

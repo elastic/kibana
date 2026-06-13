@@ -112,16 +112,16 @@ export const createInvestigationAttachmentType = ({
       }
 
       try {
-        const latest = await fetchByDiscoveryId(attachment.origin, context);
-        if (!latest) return false;
         const { getDiscoveryClient } = await getScopedClients({ request: context.request });
         const { hits } = await getDiscoveryClient().findById(attachment.origin);
         const doc = hits.at(-1);
-        if (!doc?.investigation) return false;
-        return (
-          doc.investigation.completed_at !==
-          (latestVersion.data as InvestigationResult & { completed_at?: string }).completed_at
-        );
+        if (!doc?.investigation) {
+          return false;
+        }
+
+        const { completed_at: _completedAt, workflow_execution_id: _workflowExecutionId, ...currentInvestigation } =
+          doc.investigation;
+        return JSON.stringify(currentInvestigation) !== JSON.stringify(latestVersion.data);
       } catch (error) {
         logger.warn(
           `Failed to check staleness for investigation attachment "${attachment.origin}": ${error}`

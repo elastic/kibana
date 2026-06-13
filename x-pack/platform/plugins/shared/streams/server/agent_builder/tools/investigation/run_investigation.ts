@@ -12,6 +12,7 @@ import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { OBSERVABILITY_STREAMS_ENABLE_INVESTIGATION } from '@kbn/management-settings-ids';
 import type { InvestigationInput } from '@kbn/streams-schema';
 import type { GetScopedClients } from '../../../routes/types';
 import type { StreamsServer } from '../../../types';
@@ -57,6 +58,30 @@ export function createRunInvestigationTool({
           request,
         });
         await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+        const isInvestigationEnabled = await uiSettingsClient
+          .get<boolean>(OBSERVABILITY_STREAMS_ENABLE_INVESTIGATION)
+          .catch(() => false);
+
+        if (!isInvestigationEnabled) {
+          return {
+            results: [
+              {
+                type: ToolResultType.error,
+                data: {
+                  message: i18n.translate(
+                    'xpack.streams.agentBuilder.tools.runInvestigation.disabled',
+                    {
+                      defaultMessage:
+                        'Significant events investigation is disabled. Enable {settingId} to run investigations.',
+                      values: { settingId: OBSERVABILITY_STREAMS_ENABLE_INVESTIGATION },
+                    }
+                  ),
+                },
+              },
+            ],
+          };
+        }
 
         const { hits } = await getDiscoveryClient().findById(discovery_id);
         if (hits.length === 0) {
