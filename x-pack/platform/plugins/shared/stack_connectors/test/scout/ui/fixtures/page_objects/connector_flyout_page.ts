@@ -44,8 +44,15 @@ export class ConnectorFlyoutPage {
     return this.page.testSubj.locator('edit-connector-flyout-save-btn');
   }
 
-  public async openEditConnectorFlyout(connectorId: string) {
-    await this.page.testSubj.click(`edit${connectorId}`);
+  public async openEditConnectorFlyout({ id, name }: { id: string; name: string }) {
+    // Filter the list to the target connector first; the connectors table
+    // paginates at 10 rows by default, so on shared envs (e.g. cloud) the row
+    // we want may be on a later page and would never appear by id alone.
+    const searchBox = this.page.locator(CONNECTORS_LIST_SELECTORS.SEARCH_INPUT);
+    await searchBox.fill(name);
+    await searchBox.press('Enter');
+
+    await this.page.testSubj.click(`edit${id}`);
     await this.page.testSubj.waitForSelector('edit-connector-flyout', { state: 'visible' });
   }
 

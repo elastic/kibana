@@ -236,10 +236,6 @@ const ActionsConnectorsList = ({
     setConnectorsToDelete(itemIds);
     setDeleteConnectorWarning(itemIds);
   }
-  const hasDeprecatedConnectors = useMemo(() => {
-    return actionConnectorTableItems.some((item) => item.isConnectorTypeDeprecated);
-  }, [actionConnectorTableItems]);
-
   const actionsTableColumns = [
     {
       field: 'name',
@@ -356,38 +352,6 @@ const ActionsConnectorsList = ({
         );
       },
     },
-    ...(hasDeprecatedConnectors
-      ? [
-          {
-            name: '',
-            render: (item: ActionConnectorTableItem) => {
-              if (!item.isConnectorTypeDeprecated) return null;
-              return (
-                <EuiFlexGroup gutterSize="xs" alignItems="center" justifyContent="center">
-                  <EuiFlexItem grow={false}>
-                    <EuiBetaBadge
-                      label={DEPRECATED_LABEL}
-                      tooltipContent={DEPRECATED_CONNECTOR_TOOLTIP_CONTENT}
-                      color="warning"
-                      size="s"
-                    />
-                  </EuiFlexItem>
-                  {isLLMConnectorTypeId(item.actionTypeId) && (
-                    <EuiFlexItem grow={false}>
-                      <EuiIconTip
-                        type="info"
-                        color="subdued"
-                        content={DEPRECATED_LLM_CONNECTOR_INFO}
-                        data-test-subj={`deprecatedLLMConnectorInfo-${item.id}`}
-                      />
-                    </EuiFlexItem>
-                  )}
-                </EuiFlexGroup>
-              );
-            },
-          },
-        ]
-      : []),
     {
       field: 'actionType',
       'data-test-subj': 'connectorsTableCell-actionType',
@@ -399,6 +363,33 @@ const ActionsConnectorsList = ({
       ),
       sortable: false,
       truncateText: true,
+      render: (actionType: string, item: ActionConnectorTableItem) => {
+        if (!item.isConnectorTypeDeprecated) return actionType;
+        return (
+          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>{actionType}</EuiFlexItem>
+            {isLLMConnectorTypeId(item.actionTypeId) && (
+              <EuiFlexItem grow={false}>
+                <EuiIconTip
+                  type="info"
+                  color="subdued"
+                  content={DEPRECATED_LLM_CONNECTOR_INFO}
+                  data-test-subj={`deprecatedLLMConnectorInfo-${item.id}`}
+                />
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow={false}>
+              <EuiBetaBadge
+                label={DEPRECATED_LABEL}
+                tooltipContent={DEPRECATED_CONNECTOR_TOOLTIP_CONTENT}
+                color="warning"
+                size="s"
+                alignment="middle"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        );
+      },
     },
     {
       field: 'compatibility',

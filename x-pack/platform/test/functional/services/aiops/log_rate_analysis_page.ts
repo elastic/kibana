@@ -331,7 +331,7 @@ export function LogRateAnalysisPageProvider({ getService, getPageObject }: FtrPr
 
     async navigateToDataViewSelection() {
       await testSubjects.click('mlMainTab logRateAnalysis');
-      await testSubjects.existOrFail('mlPageSourceSelection');
+      await testSubjects.existOrFail('mlDataSourceSelectorButton');
     },
 
     async getBrushSelectionWidth(selector: string) {
