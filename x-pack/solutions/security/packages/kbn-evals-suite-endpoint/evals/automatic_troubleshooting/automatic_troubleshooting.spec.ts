@@ -40,6 +40,13 @@ const P0_EVALS = [
       'Explained that the policy response is successful and the missing alerts are caused by telemetry shipping, not policy application',
       'Recommended checking Fleet output or Logstash SSL configuration and verifying event flow after the output is fixed',
     ],
+    expectedToolCalls: [
+      'filestore.read',
+      'check_endpoint_package_freshness',
+      'platform.core.search_indices',
+      'generate_insight',
+    ],
+    maxToolCalls: 30,
   },
   {
     name: 'endpoint_exception_field_mismatch_explicit_prompt',
@@ -54,6 +61,13 @@ const P0_EVALS = [
       'Explained that Endpoint Alert Exceptions require literal field matching against the alert document',
       'Recommended recreating the endpoint exception with process.executable = C:\\Program Files\\GoodApp\\good.exe or comparing entries to the alert fields',
     ],
+    expectedToolCalls: [
+      'filestore.read',
+      'check_endpoint_package_freshness',
+      'get_endpoint_artifacts',
+      'generate_insight',
+    ],
+    maxToolCalls: 12,
   },
   {
     name: 'endpoint_alert_needs_endpoint_exception_not_siem_explicit_prompt',
@@ -68,6 +82,13 @@ const P0_EVALS = [
       'Explained that endpoint blocking requires an Endpoint Alert Exception rather than only a detection rule exception',
       'Recommended creating an Endpoint Alert Exception assigned to the affected policy or using alert fields such as file hash, signature, or path',
     ],
+    expectedToolCalls: [
+      'filestore.read',
+      'check_endpoint_package_freshness',
+      'platform.core.search_indices',
+      'generate_insight',
+    ],
+    maxToolCalls: 8,
   },
   {
     name: 'trusted_app_wrong_condition_field',
@@ -82,6 +103,13 @@ const P0_EVALS = [
       'Recommended using process.executable = C:\\Program Files\\NoisyApp\\noisy.exe for the Trusted Application entry',
       'Explained that field/operator mismatches silently prevent Trusted Applications from matching the running process',
     ],
+    expectedToolCalls: [
+      'filestore.read',
+      'check_endpoint_package_freshness',
+      'get_endpoint_artifacts',
+      'generate_insight',
+    ],
+    maxToolCalls: 22,
   },
   {
     name: 'linux_high_cpu_monitoring_scripts',
@@ -95,6 +123,13 @@ const P0_EVALS = [
       'Identified /opt/monitoring/check_database.sh or its short-lived child processes as the source of process churn',
       'Recommended a targeted Trusted Application, Event Filter, or event reduction strategy rather than treating this as a policy response failure',
     ],
+    expectedToolCalls: [
+      'filestore.read',
+      'check_endpoint_package_freshness',
+      'platform.core.integration_knowledge',
+      'generate_insight',
+    ],
+    maxToolCalls: 32,
   },
   {
     name: 'windows_high_cpu_authentication_events',
@@ -108,6 +143,13 @@ const P0_EVALS = [
       'Recognized the policy response is successful and the degraded state is caused by event processing load',
       'Recommended event filters, Trusted Applications for noisy sources, or disabling Malicious Behavior Protection only when acceptable',
     ],
+    expectedToolCalls: [
+      'filestore.read',
+      'check_endpoint_package_freshness',
+      'platform.core.search_indices',
+      'generate_insight',
+    ],
+    maxToolCalls: 28,
   },
   {
     name: 'linux_missed_checkins_selinux_203_exec',
@@ -121,6 +163,13 @@ const P0_EVALS = [
       'Identified SELinux denied execute on /opt/Elastic/Endpoint/elastic-endpoint with an unlabeled_t context as the cause',
       'Recommended fixing the SELinux file context with semanage or restorecon and restarting ElasticEndpoint.service',
     ],
+    expectedToolCalls: [
+      'filestore.read',
+      'check_endpoint_package_freshness',
+      'platform.core.search_indices',
+      'generate_insight',
+    ],
+    maxToolCalls: 22,
   },
   {
     name: 'windows_missed_checkins_crash_dump',
@@ -134,6 +183,13 @@ const P0_EVALS = [
       'Mentioned the crash dump path C:\\Program Files\\Elastic\\Endpoint\\cache\\CrashDumps\\elasticendpoint.dmp',
       'Recommended collecting the crash dump or diagnostics and restarting the service or rebooting as recovery steps',
     ],
+    expectedToolCalls: [
+      'filestore.read',
+      'check_endpoint_package_freshness',
+      'platform.core.search_indices',
+      'generate_insight',
+    ],
+    maxToolCalls: 20,
   },
   {
     name: 'output_kafka_message_size_rejection_explicit_prompt',
@@ -148,6 +204,13 @@ const P0_EVALS = [
       'Explained the version-aware behavior that newer versions drop non-retriable oversized messages instead of retrying indefinitely',
       'Recommended increasing Kafka topic or broker message-size limits or reducing event sizes with filters or Trusted Applications',
     ],
+    expectedToolCalls: [
+      'filestore.read',
+      'check_endpoint_package_freshness',
+      'platform.core.search_indices',
+      'generate_insight',
+    ],
+    maxToolCalls: 25,
   },
   {
     name: 'windows_bsod_network_driver_regression_explicit_prompt',
@@ -161,6 +224,14 @@ const P0_EVALS = [
       'Recognized this as the known network driver pool corruption regression involving long-lived idle network connections',
       'Recommended upgrading to 8.18.4 or disabling advanced.kernel.network as an immediate mitigation with the host-isolation tradeoff',
     ],
+    expectedToolCalls: [
+      'filestore.read',
+      'check_endpoint_package_freshness',
+      'platform.core.search_indices',
+      'platform.core.integration_knowledge',
+      'generate_insight',
+    ],
+    maxToolCalls: 24,
   },
   {
     name: 'incompatible_aws_vpc_cni_ebpf_conflict',
@@ -175,6 +246,13 @@ const P0_EVALS = [
       'Explained that disabling Linux network event collection does not fix the host isolation TC probe conflict',
       'Recommended setting linux.advanced.host_isolation.allowed to false if host isolation is not required',
     ],
+    expectedToolCalls: [
+      'filestore.read',
+      'check_endpoint_package_freshness',
+      'platform.core.integration_knowledge',
+      'generate_insight',
+    ],
+    maxToolCalls: 24,
   },
   {
     name: 'currently_healthy_endpoint_no_active_issue',
@@ -188,6 +266,13 @@ const P0_EVALS = [
       'Did not call integration_knowledge or search warning/error logs to manufacture a root cause for the healthy endpoint',
       'Asked the user for a specific symptom, time range, alert, or behavior to investigate instead of reporting a root cause',
     ],
+    expectedToolCalls: [
+      'filestore.read',
+      'check_endpoint_package_freshness',
+      'platform.core.search_indices',
+      'generate_insight',
+    ],
+    maxToolCalls: 22,
   },
 ] as const;
 
@@ -241,6 +326,13 @@ evaluate.describe('Automatic Troubleshooting', { tag: tags.stateful.classic }, (
                 'Identified incompatible antivirus software on the endpoint',
                 'Called generate_insight to persist structured findings',
               ],
+              expectedToolCalls: [
+                'filestore.read',
+                'check_endpoint_package_freshness',
+                'platform.core.integration_knowledge',
+                'generate_insight',
+              ],
+              maxToolCalls: 26,
             },
           },
         ],
@@ -266,6 +358,13 @@ evaluate.describe('Automatic Troubleshooting', { tag: tags.stateful.classic }, (
                 'Identified the policy application failure and its cause',
                 'Called generate_insight to persist structured findings',
               ],
+              expectedToolCalls: [
+                'filestore.read',
+                'check_endpoint_package_freshness',
+                'get_package_configurations',
+                'generate_insight',
+              ],
+              maxToolCalls: 23,
             },
           },
         ],
@@ -286,6 +385,8 @@ evaluate.describe('Automatic Troubleshooting', { tag: tags.stateful.classic }, (
               },
               output: {
                 criteria: [...evalDefinition.criteria],
+                expectedToolCalls: [...evalDefinition.expectedToolCalls],
+                maxToolCalls: evalDefinition.maxToolCalls,
               },
             },
           ],
@@ -321,6 +422,13 @@ evaluate.describe('Automatic Troubleshooting', { tag: tags.stateful.classic }, (
                   'Recommended restarting the stopped transform as a remediation step',
                   'Called generate_insight to persist structured findings',
                 ],
+                expectedToolCalls: [
+                  'filestore.read',
+                  'check_endpoint_package_freshness',
+                  'get_package_configurations',
+                  'generate_insight',
+                ],
+                maxToolCalls: 10,
               },
             },
           ],
