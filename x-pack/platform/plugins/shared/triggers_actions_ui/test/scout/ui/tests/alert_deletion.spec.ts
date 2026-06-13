@@ -71,9 +71,12 @@ test.describe('Alert deletion', { tag: tags.stateful.classic }, () => {
       })
     );
 
+    // Wipe the 3 backing indices entirely so no stale docs from parallel tests
+    // can coincidentally satisfy the deletion task's count, which would cause
+    // our own DELETED docs to survive and make the remaining check flaky.
     await esClient.deleteByQuery({
-      index: '.internal.alerts-*',
-      query: { ids: { values: ALL_ALERT_IDS } },
+      index: ALERT_INDEX_ALIASES.map(({ index }) => index),
+      query: { match_all: {} },
       refresh: true,
       conflicts: 'proceed',
     });
