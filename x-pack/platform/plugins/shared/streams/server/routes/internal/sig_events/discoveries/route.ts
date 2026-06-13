@@ -101,6 +101,10 @@ const discoveriesBulkCreateRoute = createServerRoute({
   },
 });
 
+const investigationWriteBackBodySchema = investigationResultSchema.extend({
+  workflow_execution_id: z.string().optional(),
+});
+
 const discoveryInvestigationWriteBackRoute = createServerRoute({
   endpoint: 'POST /internal/streams/sig_events/discoveries/{discovery_id}/investigation',
   options: {
@@ -117,7 +121,7 @@ const discoveryInvestigationWriteBackRoute = createServerRoute({
     path: z.object({
       discovery_id: z.string(),
     }),
-    body: investigationResultSchema,
+    body: investigationWriteBackBodySchema,
   }),
   handler: async ({ params, request, getScopedClients, server }) => {
     const { getDiscoveryClient, licensing, uiSettingsClient } = await getScopedClients({ request });
@@ -131,6 +135,7 @@ const discoveryInvestigationWriteBackRoute = createServerRoute({
 
     const latest = hits[hits.length - 1];
     const now = new Date().toISOString();
+    const { workflow_execution_id, ...investigationResult } = params.body;
 
     await getDiscoveryClient().bulkCreate([
       {
@@ -138,8 +143,8 @@ const discoveryInvestigationWriteBackRoute = createServerRoute({
         '@timestamp': now,
         investigation: {
           completed_at: now,
-          workflow_execution_id: '',
-          ...params.body,
+          workflow_execution_id: workflow_execution_id ?? '',
+          ...investigationResult,
         },
       },
     ]);
