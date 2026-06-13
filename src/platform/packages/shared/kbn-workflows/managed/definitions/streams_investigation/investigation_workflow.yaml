@@ -633,6 +633,8 @@ steps:
       continue: false
 
   # ── Step 4: Fetch current discovery doc to preserve all existing fields ───────
+  # No collapse needed: the query is already scoped to a single discovery_id so at
+  # most one group exists. Sorting by @timestamp desc gives the latest doc.
   - name: fetch_discovery
     type: elasticsearch.request
     with:
@@ -643,8 +645,6 @@ steps:
         sort:
           - "@timestamp":
               order: desc
-        collapse:
-          field: discovery_id
         query:
           bool:
             filter:
@@ -654,6 +654,9 @@ steps:
       continue: false
 
   # ── Step 5: Write investigation results back to the discoveries data stream ────
+  # Skipped if fetch_discovery returned no document (discovery deleted or index
+  # unavailable). Without this guard, Liquid expands hits[0]._source fields to nil
+  # and produces a mostly-null ES document.
   # All discovery fields are carried from fetch_discovery._source (not from inputs)
   # to avoid two classes of data loss:
   #   - inputs.impact is the event's criticality enum (critical/high/medium/low)
@@ -662,6 +665,7 @@ steps:
   #     fields (dependency_edges, grouped_discovery_ids, closes_discovery_id, etc.)
   #     must come from _source to avoid silently erasing grouping/clearance linkage
   - name: write_back
+    if: "${{ steps.fetch_discovery.output.hits.total.value > 0 }}"
     type: elasticsearch.request
     with:
       method: POST
