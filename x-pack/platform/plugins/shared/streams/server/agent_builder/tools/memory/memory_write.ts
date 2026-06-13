@@ -33,7 +33,13 @@ const memoryWriteSchema = z.object({
     .optional()
     .describe('IDs of other memory pages referenced from this content.'),
   tags: z.array(z.string()).optional().describe('Optional classification tags.'),
-  change_summary: z.string().optional().describe('Human-readable description of what was changed.'),
+  change_summary: z
+    .string()
+    .describe(
+      'Required: explain why you are creating or overwriting this page — what prompted this write, what was learned, or what changed. ' +
+        'This is stored in the version history and is the primary way for humans to understand the intent behind every agent write. ' +
+        'Without a meaningful summary the history is useless. Be specific (e.g. "Recorded nginx restart pattern observed during incident-42" not "Updated page").'
+    ),
 });
 
 export const createMemoryWriteTool = ({
@@ -75,7 +81,7 @@ export const createMemoryWriteTool = ({
           references,
           tags,
           user,
-          changeSummary: changeSummary ?? `Overwrote page "${name}"`,
+          changeSummary,
         });
         return {
           results: [
