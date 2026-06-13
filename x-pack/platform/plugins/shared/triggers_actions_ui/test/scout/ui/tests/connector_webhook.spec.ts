@@ -41,7 +41,12 @@ test.describe('Webhook connector', { tag: tags.stateful.classic }, () => {
     await page.testSubj.click(CREATE_CONNECTOR_BUTTON);
     await page.testSubj.click(WEBHOOK_CARD_SUBJ);
 
-    await page.testSubj.click('authNone');
+    // The webhook form fields render only after the action-type model resolves and
+    // ConnectorForm lazy-loads its field chunk via Suspense. On a cold CI cache that
+    // can exceed the default 10s click timeout, so wait for authNone first.
+    const authNone = page.testSubj.locator('authNone');
+    await authNone.waitFor({ state: 'visible', timeout: 30_000 });
+    await authNone.click();
     await page.testSubj.locator('nameInput').fill(connectorName);
     await page.testSubj.locator('webhookUrlText').fill('https://www.example.com');
 
@@ -87,7 +92,11 @@ test.describe('Webhook connector', { tag: tags.stateful.classic }, () => {
     await page.testSubj.click(CREATE_CONNECTOR_BUTTON);
     await page.testSubj.click(WEBHOOK_CARD_SUBJ);
 
-    await page.testSubj.click('authSSL');
+    // Wait for the lazily-loaded webhook form fields before interacting (cold CI
+    // cache can exceed the default 10s click timeout).
+    const authSSL = page.testSubj.locator('authSSL');
+    await authSSL.waitFor({ state: 'visible', timeout: 30_000 });
+    await authSSL.click();
 
     const tabs = page.testSubj.locator('webhookCertTypeTabs').locator('.euiTab');
     await expect(tabs).toHaveCount(2);
