@@ -131,6 +131,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'significant-events-investigation-gather',
   'significant-events-investigation-review',
   'significant-events-investigation-synthesis',
+  'significant-events-investigation-runner',
   'knowledge-indicators-management',
   'ki-identification-management',
 
