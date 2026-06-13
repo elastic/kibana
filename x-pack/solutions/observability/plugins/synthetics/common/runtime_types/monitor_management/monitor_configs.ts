@@ -115,6 +115,24 @@ export enum Mode {
 }
 export const ModeCodec = tEnum<Mode>('Mode', Mode);
 
+// UI-only selector value used by the HTTP monitor form to switch between the
+// mutually exclusive authentication schemes. Not persisted directly; the
+// underlying `kerberos.enabled` / `ntlm.enabled` flags (and basic auth
+// username/password) are the source of truth.
+export enum HttpAuthMethod {
+  NONE = 'none',
+  BASIC = 'basic',
+  KERBEROS = 'kerberos',
+  NTLM = 'ntlm',
+}
+
+// Mirrors the libbeat Kerberos client `auth_type` option used by Heartbeat.
+export enum KerberosAuthType {
+  PASSWORD = 'password',
+  KEYTAB = 'keytab',
+}
+export const KerberosAuthTypeCodec = tEnum<KerberosAuthType>('KerberosAuthType', KerberosAuthType);
+
 export const ResponseCheckJSONCodec = t.interface({
   description: t.string,
   expression: t.string,

@@ -23,6 +23,7 @@ import {
   MonitorTypeEnum,
   FormMonitorType,
   HTTPMethod,
+  KerberosAuthType,
   Mode,
   ResponseBodyIndexPolicy,
   ScheduleUnit,
@@ -228,6 +229,18 @@ export const DEFAULT_HTTP_ADVANCED_FIELDS: HTTPAdvancedFields = {
   [ConfigKey.RESPONSE_BODY_MAX_BYTES]: '1024',
   [ConfigKey.IPV4]: true,
   [ConfigKey.IPV6]: true,
+  [ConfigKey.KERBEROS_ENABLED]: false,
+  [ConfigKey.KERBEROS_AUTH_TYPE]: KerberosAuthType.PASSWORD,
+  [ConfigKey.KERBEROS_USERNAME]: '',
+  [ConfigKey.KERBEROS_PASSWORD]: '',
+  [ConfigKey.KERBEROS_KEYTAB]: '',
+  [ConfigKey.KERBEROS_CONFIG_PATH]: '',
+  [ConfigKey.KERBEROS_REALM]: '',
+  [ConfigKey.KERBEROS_SERVICE_NAME]: '',
+  [ConfigKey.NTLM_ENABLED]: false,
+  [ConfigKey.NTLM_USERNAME]: '',
+  [ConfigKey.NTLM_PASSWORD]: '',
+  [ConfigKey.NTLM_DOMAIN]: '',
 };
 
 export const DEFAULT_ICMP_SIMPLE_FIELDS: ICMPSimpleFields = {
