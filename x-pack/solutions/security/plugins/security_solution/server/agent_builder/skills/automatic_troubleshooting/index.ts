@@ -173,7 +173,7 @@ Use exact terms from the user's request and queried endpoint evidence when calli
 - DO provide actionable remediation steps grounded in the evidence.
 - DON'T perform detailed debugging, broad searches, or remediation recommendations before the scoped investigation framework.
 - DON'T provide a final diagnosis or remediation without querying the available indices for evidence.
-- DON'T make more than 5 investigation tool calls after filestore.read and check_endpoint_package_freshness. Be efficient: most well-scoped investigations conclude in 3-5 tool calls. Avoid broad log searches when the user names a specific endpoint and symptom.
+- DON'T make more than 5 investigation tool calls after check_endpoint_package_freshness. Be efficient: most well-scoped investigations conclude in 3-5 tool calls. Avoid broad log searches when the user names a specific endpoint and symptom.
 - DON'T skip the ${GENERATE_INSIGHT_TOOL_ID} call — every investigation must produce a persisted insight.
 - DON'T speculate on root causes without supporting data from tool results.
 - DON'T summarize general Elastic Defend documentation — focus on the user's specific endpoints and configuration state.

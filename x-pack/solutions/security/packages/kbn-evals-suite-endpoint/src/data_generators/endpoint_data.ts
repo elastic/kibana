@@ -360,6 +360,7 @@ export const SCENARIOS = {
     os: { name: 'Windows', version: '10', type: 'windows', full: 'Windows 10' },
     policyName: 'eval-policy-av',
     policyStatus: 'success',
+    policyId: 'eval-policy-av',
     extraDocuments: [
       { name: 'MsMpEng.exe', description: 'Windows Defender' },
       { name: 'avp.exe', description: 'Kaspersky Antivirus' },
@@ -384,6 +385,7 @@ export const SCENARIOS = {
     policyName: 'eval-policy-strict',
     policyStatus: 'failure',
     endpointStatus: 'degraded',
+    policyId: 'eval-policy-strict',
     extraDocuments: [
       {
         index: 'metrics-endpoint.policy-default',
@@ -419,6 +421,7 @@ export const SCENARIOS = {
     os: { name: 'Windows', version: '11', type: 'windows', full: 'Windows 11' },
     policyName: 'eval-policy-transform',
     policyStatus: 'success',
+    policyId: 'eval-policy-transform',
   },
 
   currentlyHealthyEndpoint: {

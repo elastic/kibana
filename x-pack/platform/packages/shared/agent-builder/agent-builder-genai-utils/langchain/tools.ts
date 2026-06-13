@@ -22,6 +22,7 @@ import type {
   ToolProvider,
 } from '@kbn/agent-builder-server';
 import { createErrorResult } from '@kbn/agent-builder-server';
+import { withExecuteToolSpan } from '@kbn/inference-tracing';
 import type { ToolCall } from './messages';
 
 export type ToolIdMapping = Map<string, string>;
@@ -133,25 +134,38 @@ export const toolToLangchain = async ({
       // remove internal parameters before calling tool handler.
       const input = omit(rawInput, ['_reasoning']);
 
-      try {
-        const toolReturn = await tool.execute({
-          toolParams: input,
-          onEvent,
+      const [content, toolReturn] = await withExecuteToolSpan(
+        tool.id,
+        {
+          tool: {
+          description,
           toolCallId,
-          source: 'agent',
-        });
-        const content = JSON.stringify({ results: toolReturn.results });
-        return [content, toolReturn];
-      } catch (e) {
-        logger.warn(`error calling tool ${tool.id}: ${e}`);
-        logger.debug(e.stack);
+          input,
+          },
+        },
+        async (): Promise<[string, RunToolReturn]> => {
+          try {
+            const toolReturn = await tool.execute({
+              toolParams: input,
+              onEvent,
+              toolCallId,
+              source: 'agent',
+            });
+            const content = JSON.stringify({ results: toolReturn.results });
+            return [content, toolReturn];
+          } catch (e) {
+            logger.warn(`error calling tool ${tool.id}: ${e}`);
+            logger.debug(e.stack);
 
-        const errorToolReturn: RunToolReturn = {
-          results: [createErrorResult(e.message)],
-        };
+            const errorToolReturn: RunToolReturn = {
+              results: [createErrorResult(e.message)],
+            };
 
-        return [`${e}`, errorToolReturn];
-      }
+            return [`${e}`, errorToolReturn];
+          }
+        }
+      );
+      return [content, toolReturn];
     },
     {
       name: toolId ?? tool.id,

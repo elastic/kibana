@@ -41,7 +41,7 @@ function isAlreadyExistsConnectorError(error: unknown): boolean {
   if (status === 409) {
     return true;
   }
-  if (status !== 400) {
+  if (status !== 400 && status !== 500) {
     return false;
   }
   const data = (error as any)?.response?.data ?? (error as any)?.data;

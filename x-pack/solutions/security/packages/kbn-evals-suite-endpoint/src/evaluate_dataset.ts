@@ -58,7 +58,10 @@ function createShortestPathEvaluator(): Evaluator {
     evaluate: async ({ output, expected }) => {
       const expectedOutput = expected as SecurityDatasetExample['output'] | null;
       const maxToolCalls = expectedOutput?.maxToolCalls;
-      const actualToolCalls = (output as { steps?: Array<{ tool?: string }> })?.steps?.length ?? 0;
+      const actualToolCalls =
+        (output as { steps?: Array<{ type?: string; tool_id?: string }> })?.steps?.filter(
+          (s) => s.type === 'tool_call' || s.tool_id
+        ).length ?? 0;
 
       if (!maxToolCalls || maxToolCalls <= 0) {
         return { score: 1, label: 'skipped', explanation: 'No maxToolCalls expectation set' };
@@ -108,8 +111,11 @@ export function createEvaluateSecurityDataset({
 
     const trajectoryEvaluator = createTrajectoryEvaluator({
       extractToolCalls: (output: unknown) => {
-        const steps = (output as { steps?: Array<{ tool?: string }> })?.steps ?? [];
-        return steps.map((s) => s.tool ?? 'unknown').filter(Boolean);
+        const steps = (output as { steps?: Array<{ type?: string; tool_id?: string }> })?.steps ?? [];
+        return steps
+          .filter((s) => s.type === 'tool_call' || s.tool_id)
+          .map((s) => s.tool_id ?? 'unknown')
+          .filter(Boolean);
       },
       goldenPathExtractor: (expected: unknown) => {
         return (expected as SecurityDatasetExample['output'])?.expectedToolCalls ?? [];
