@@ -1,0 +1,1 @@
+Ranks forwarded hypotheses, produces the final root cause and remediation options, records discarded hypotheses, writes lessons to memory, and returns the InvestigationResult.
