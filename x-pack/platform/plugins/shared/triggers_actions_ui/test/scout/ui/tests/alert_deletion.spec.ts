@@ -176,15 +176,33 @@ test.describe('Alert deletion', { tag: tags.stateful.classic }, () => {
         numDeleted: DELETED_ALERT_IDS.length,
       });
 
-    // Search via the same aliases the deletion task used, so we see exactly
-    // the indices it operated on.
+    // The deletion task bulk-deletes without refresh and logs num_deleted as soon
+    // as the bulk response returns, so the event-log poll above can succeed before
+    // the alert indices have refreshed. Force a refresh and poll the remaining count
+    // until it settles, otherwise we race the ~1s auto-refresh and still see some of
+    // the just-deleted docs.
+    const aliases = ALERT_INDEX_ALIASES.map(({ alias }) => alias);
+    await expect
+      .poll(
+        async () => {
+          await esClient.indices.refresh({ index: aliases });
+          const settling = await esClient.search({
+            index: aliases,
+            size: ALL_ALERT_IDS.length,
+            query: { ids: { values: ALL_ALERT_IDS } },
+          });
+          return settling.hits.hits.length;
+        },
+        { timeout: 30000, intervals: [1000] }
+      )
+      .toBe(EXPECTED_ALERT_IDS.length);
+
+    // Count has settled — verify the surviving docs are exactly the expected set.
     const remaining = await esClient.search({
-      index: ALERT_INDEX_ALIASES.map(({ alias }) => alias),
+      index: aliases,
       size: ALL_ALERT_IDS.length,
       query: { ids: { values: ALL_ALERT_IDS } },
     });
-
-    expect(remaining.hits.hits).toHaveLength(EXPECTED_ALERT_IDS.length);
     const remainingIds = remaining.hits.hits.map((h) => h._id);
     expect(remainingIds).toStrictEqual(expect.arrayContaining(EXPECTED_ALERT_IDS));
     expect(remainingIds).toStrictEqual(expect.not.arrayContaining(DELETED_ALERT_IDS));
