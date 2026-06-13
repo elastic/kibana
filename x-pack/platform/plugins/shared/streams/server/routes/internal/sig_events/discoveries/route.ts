@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { discoverySchema, type Discovery } from '@kbn/streams-schema';
+import { discoverySchema, investigationResultSchema, type Discovery } from '@kbn/streams-schema';
 import { z } from '@kbn/zod/v4';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import type { PaginatedResponse } from '../../../../lib/sig_events/query_utils';
@@ -101,8 +101,56 @@ const discoveriesBulkCreateRoute = createServerRoute({
   },
 });
 
+const discoveryInvestigationWriteBackRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/sig_events/discoveries/{discovery_id}/investigation',
+  options: {
+    access: 'internal',
+    summary: 'Write investigation result to discovery',
+    description: 'Appends investigation results to an existing discovery document.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+    },
+  },
+  params: z.object({
+    path: z.object({
+      discovery_id: z.string(),
+    }),
+    body: investigationResultSchema,
+  }),
+  handler: async ({ params, request, getScopedClients, server }) => {
+    const { getDiscoveryClient, licensing, uiSettingsClient } = await getScopedClients({ request });
+
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    const { hits } = await getDiscoveryClient().findById(params.path.discovery_id);
+    if (hits.length === 0) {
+      throw new Error(`Discovery ${params.path.discovery_id} not found`);
+    }
+
+    const latest = hits[hits.length - 1];
+    const now = new Date().toISOString();
+
+    await getDiscoveryClient().bulkCreate([
+      {
+        ...latest,
+        '@timestamp': now,
+        investigation: {
+          completed_at: now,
+          workflow_execution_id: '',
+          ...params.body,
+        },
+      },
+    ]);
+
+    return { acknowledged: true };
+  },
+});
+
 export const internalSigEventsDiscoveriesRoutes = {
   ...discoveriesSearchRoute,
   ...discoveriesHistoryRoute,
   ...discoveriesBulkCreateRoute,
+  ...discoveryInvestigationWriteBackRoute,
 };
