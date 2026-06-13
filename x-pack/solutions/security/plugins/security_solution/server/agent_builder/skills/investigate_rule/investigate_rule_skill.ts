@@ -5,8 +5,11 @@
  * 2.0.
  */
 
+import type { StartServicesAccessor } from '@kbn/core/server';
+import type { Logger } from '@kbn/logging';
 import { ToolType } from '@kbn/agent-builder-common/tools';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import { z } from '@kbn/zod/v4';
 import {
@@ -14,10 +17,16 @@ import {
   SECURITY_LABS_SEARCH_TOOL_ID,
   SECURITY_ENTITY_RISK_SCORE_TOOL_ID,
 } from '../../tools';
+import type { SecuritySolutionPluginStartDependencies } from '../../../plugin_contract';
 import {
   DEFAULT_ALERTS_INDEX,
   SecurityAgentBuilderAttachments,
 } from '../../../../common/constants';
+
+interface InvestigateRuleSkillDeps {
+  getStartServices: StartServicesAccessor<SecuritySolutionPluginStartDependencies>;
+  logger: Logger;
+}
 
 // Matches the content of brain_definition.md; edit that file first and keep them in sync.
 const SKILL_CONTENT = `# investigate-rule Skill
@@ -177,10 +186,13 @@ If the alert data is insufficient for a confident diagnosis:
    determine the root cause from available data. Here is the evidence for manual review."
 `;
 
-export const investigateRuleSkill = defineSkillType({
-  id: 'investigate-rule',
-  name: 'investigate-rule',
-  basePath: 'skills/security/rules',
+export const createInvestigateRuleSkill = ({
+  getStartServices,
+}: InvestigateRuleSkillDeps): SkillDefinition<'investigate-rule', 'skills/security/rules'> =>
+  defineSkillType({
+    id: 'investigate-rule',
+    name: 'investigate-rule',
+    basePath: 'skills/security/rules',
   description:
     'Rule noise and false-positive analysis: identify why a detection rule is generating too many alerts, ' +
     'surface the top contributing entities, and classify whether the root cause is benign activity, an overly ' +
@@ -191,8 +203,6 @@ export const investigateRuleSkill = defineSkillType({
     SECURITY_ALERTS_TOOL_ID,
     SECURITY_LABS_SEARCH_TOOL_ID,
     SECURITY_ENTITY_RISK_SCORE_TOOL_ID,
-    // TODO: add SECURITY_FIND_RULES_TOOL_ID here once #269089 lands so cross-rule
-    // referral lookups use the rulesClient layer instead of savedObjectsClient.
   ],
   getInlineTools: () => [
     // ── resolve_rule_attachment ──────────────────────────────────────────────
@@ -230,28 +240,28 @@ export const investigateRuleSkill = defineSkillType({
         }
 
         try {
-          const so = await context.savedObjectsClient.get<Record<string, unknown>>(
-            'alert',
-            String(ruleId)
+          const [, startPlugins] = await getStartServices();
+          const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(
+            context.request
           );
 
-          const attrs = so.attributes;
-          const params = (attrs.params ?? {}) as Record<string, unknown>;
-          const ruleName = String(attrs.name ?? ruleId);
+          const ruleObject = await rulesClient.get({ id: String(ruleId) });
+          const params = (ruleObject.params ?? {}) as Record<string, unknown>;
+          const ruleName = String(ruleObject.name ?? ruleId);
 
           const rule = {
-            id: so.id,
+            id: ruleObject.id,
             ruleId: params.ruleId ?? params.rule_id,
-            name: attrs.name,
+            name: ruleObject.name,
             description: params.description,
             type: params.type,
             language: params.language,
             query: params.query,
             index: params.index,
-            interval: (attrs.schedule as Record<string, unknown> | undefined)?.interval,
+            interval: ruleObject.schedule?.interval,
             from: params.from,
-            enabled: attrs.enabled,
-            tags: attrs.tags,
+            enabled: ruleObject.enabled,
+            tags: ruleObject.tags,
             threat: params.threat,
           };
 
@@ -457,4 +467,4 @@ export const investigateRuleSkill = defineSkillType({
       },
     },
   ],
-});
+  });

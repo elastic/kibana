@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { investigateRuleSkill } from './investigate_rule_skill';
+export { createInvestigateRuleSkill } from './investigate_rule_skill';

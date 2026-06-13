@@ -8,14 +8,30 @@
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills/tools';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { createToolHandlerContext, createToolTestMocks } from '../../__mocks__/test_helpers';
-import { investigateRuleSkill } from './investigate_rule_skill';
+import { createInvestigateRuleSkill } from './investigate_rule_skill';
 import {
   SECURITY_ALERTS_TOOL_ID,
   SECURITY_LABS_SEARCH_TOOL_ID,
   SECURITY_ENTITY_RISK_SCORE_TOOL_ID,
 } from '../../tools';
 import { DEFAULT_ALERTS_INDEX } from '../../../../common/constants';
+
+const mockRulesClient = {
+  get: jest.fn(),
+};
+
+const mockGetStartServices = jest.fn().mockResolvedValue([
+  {},
+  { alerting: { getRulesClientWithRequest: jest.fn().mockResolvedValue(mockRulesClient) } },
+  {},
+]);
+
+const investigateRuleSkill = createInvestigateRuleSkill({
+  getStartServices: mockGetStartServices as never,
+  logger: loggingSystemMock.createLogger(),
+});
 
 describe('investigateRuleSkill', () => {
   describe('skill definition', () => {
@@ -75,18 +91,14 @@ describe('investigateRuleSkill', () => {
 
     const makeCtx = () => createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
 
-    const mockSavedObject = (ctx: ReturnType<typeof makeCtx>, attrs: Record<string, unknown>) => {
-      (ctx.savedObjectsClient.get as jest.Mock).mockResolvedValueOnce({
-        id: 'rule-uuid-1',
-        type: 'alert',
-        attributes: attrs,
-        references: [],
-      });
+    const mockRuleObject = (ruleData: Record<string, unknown>) => {
+      mockRulesClient.get.mockResolvedValueOnce(ruleData);
     };
 
     it('creates an attachment and returns its ID on happy path', async () => {
       const ctx = makeCtx();
-      mockSavedObject(ctx, {
+      mockRuleObject({
+        id: 'rule-uuid-1',
         name: 'My Detection Rule',
         enabled: true,
         tags: ['MITRE'],
@@ -147,15 +159,13 @@ describe('investigateRuleSkill', () => {
       expect(data.attachmentId).toBe('rule-investigate-rule-uuid-1');
       expect(data.version).toBe(2);
       expect(ctx.attachments.add).not.toHaveBeenCalled();
-      expect(ctx.savedObjectsClient.get).not.toHaveBeenCalled();
+      expect(mockRulesClient.get).not.toHaveBeenCalled();
     });
 
     it('returns graceful message when rule is not found', async () => {
       const ctx = makeCtx();
       (ctx.attachments.get as jest.Mock).mockReturnValueOnce(undefined);
-      (ctx.savedObjectsClient.get as jest.Mock).mockRejectedValueOnce({
-        output: { statusCode: 404 },
-      });
+      mockRulesClient.get.mockRejectedValueOnce({ output: { statusCode: 404 } });
 
       const result = (await tool.handler(
         { rule_id: 'missing-id' },
@@ -166,12 +176,10 @@ describe('investigateRuleSkill', () => {
       expect((result.results[0].data as AttachmentResultData).message).toContain('not found');
     });
 
-    it('returns error result when savedObjectsClient throws unexpectedly', async () => {
+    it('returns error result when rulesClient throws unexpectedly', async () => {
       const ctx = makeCtx();
       (ctx.attachments.get as jest.Mock).mockReturnValueOnce(undefined);
-      (ctx.savedObjectsClient.get as jest.Mock).mockRejectedValueOnce(
-        new Error('Saved objects service unavailable')
-      );
+      mockRulesClient.get.mockRejectedValueOnce(new Error('Rules service unavailable'));
 
       const result = (await tool.handler({ rule_id: 'rule-1' }, ctx)) as ToolHandlerStandardReturn;
 
