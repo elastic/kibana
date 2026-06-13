@@ -50,6 +50,11 @@ export {
   type PendingSignificantEventAttachment,
 } from './significant_event_attachment';
 export {
+  INVESTIGATION_ATTACHMENT_TYPE,
+  type InvestigationAttachment,
+  type PendingInvestigationAttachment,
+} from './investigation_attachment';
+export {
   type StreamsAppLocation,
   type StreamsAppLocationParams,
   getStreamsLocation,

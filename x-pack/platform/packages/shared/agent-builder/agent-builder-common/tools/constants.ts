@@ -56,6 +56,8 @@ export const platformStreamsSigEventsTools = {
   searchEvent: `${internalNamespaces.platformStreams}.sig_events.event_search`,
   createEvent: `${internalNamespaces.platformStreams}.sig_events.event_create`,
   updateEventStatus: `${internalNamespaces.platformStreams}.sig_events.event_status_update`,
+  runInvestigation: `${internalNamespaces.platformStreams}.sig_events.investigation_run`,
+  showInvestigation: `${internalNamespaces.platformStreams}.sig_events.investigation_show`,
 } as const;
 
 export const attachmentTools = {
