@@ -6,18 +6,19 @@
  */
 
 /**
- * FTR (L4): privilege-axis test for the status route. ES role + index ACL
- * evaluation cannot be faithfully mocked, so it stays at L4. This file is
- * the canonical place to grow per-ACL-combination cases for cspm / kspm /
- * vuln_mgmt — the cap is one file, but the file may grow horizontally.
+ * FTR (L4): privilege-axis test for the status route. Covers two axes that
+ * cannot be faithfully mocked, so they stay at L4:
+ *  - Kibana feature privilege: a role lacking `cloud-security-posture-read`
+ *    gets a 403 from the route's `requiredPrivileges` gate.
+ *  - ES index ACLs: a CSP-read role missing index access gets a 200 with a
+ *    per-integration `unprivileged` status.
+ * The cap is one file; it may grow horizontally per role / ACL combination.
  *
  * Sibling coverage:
  * - State machine: server/routes/status/status.test.ts
  * - Orchestration: server/routes/status/status.handler.test.ts
  * - Happy-path smoke: status_smoke.ts
  * - Fleet schema: status_contract.ts
- *
- * Rationale: do not add non-privilege cases here.
  */
 import expect from '@kbn/expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
@@ -31,10 +32,18 @@ import { BENCHMARK_SCORE_INDEX_DEFAULT_NS } from '@kbn/cloud-security-posture-pl
 import { find, without } from 'lodash';
 import { createPackagePolicy } from '@kbn/cloud-security-posture-common/test_helper';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
-import { createUser, createCSPRole, deleteRole, deleteUser } from '../helper';
+import {
+  createUser,
+  createCSPRole,
+  createRoleWithoutCspRead,
+  deleteRole,
+  deleteUser,
+} from '../helper';
 
 const UNPRIVILEGED_ROLE = 'unprivileged_test_role';
 const UNPRIVILEGED_USERNAME = 'unprivileged_test_user';
+const NO_CSP_READ_ROLE = 'no_csp_read_test_role';
+const NO_CSP_READ_USERNAME = 'no_csp_read_test_user';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -125,6 +134,37 @@ export default function (providerContext: FtrProviderContext) {
           'unprivileged',
           `expected unprivileged but got ${res.vuln_mgmt.status} instead`
         );
+      });
+    });
+
+    describe('STATUS = MISSING KIBANA PRIVILEGE (cloud-security-posture-read)', () => {
+      before(async () => {
+        await createRoleWithoutCspRead(security, NO_CSP_READ_ROLE);
+        await createUser(security, NO_CSP_READ_USERNAME, NO_CSP_READ_ROLE);
+      });
+
+      after(async () => {
+        await deleteUser(security, NO_CSP_READ_USERNAME);
+        await deleteRole(security, NO_CSP_READ_ROLE);
+      });
+
+      it('Return 403 when the assigned role lacks the cloud-security-posture-read Kibana privilege', async () => {
+        const { body } = await supertestWithoutAuth
+          .get(`/internal/cloud_security_posture/status`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .set('kbn-xsrf', 'xxxx')
+          .auth(NO_CSP_READ_USERNAME, 'changeme')
+          .expect(403);
+
+        // Kibana feature-privilege gate (route `requiredPrivileges:
+        // ['cloud-security-posture-read']`), enforced by core API authorization
+        // before the handler runs — distinct from the ES index-ACL `unprivileged`
+        // status (200) the cases below assert. Core returns a typed 403 naming
+        // the missing privilege.
+        expect(body.statusCode).to.eql(403);
+        expect(body.error).to.eql('Forbidden');
+        expect(body.message).to.contain('is unauthorized for user');
+        expect(body.message).to.contain('cloud-security-posture-read');
       });
     });
 
