@@ -13,6 +13,8 @@ import {
   EuiButtonEmpty,
   EuiConfirmModal,
   EuiFieldSearch,
+  EuiFieldText,
+  EuiFormRow,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -324,12 +326,14 @@ function EntryFlyout({
   const { updateEntry, deleteEntry } = useMemoryMutations();
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState('');
+  const [changeSummary, setChangeSummary] = useState('');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showDiscardModal, setShowDiscardModal] = useState(false);
 
   const handleEdit = useCallback(() => {
     if (entry) {
       setEditContent(entry.content);
+      setChangeSummary('');
       setIsEditing(true);
     }
   }, [entry]);
@@ -337,13 +341,13 @@ function EntryFlyout({
   const handleSave = useCallback(() => {
     if (entry && editContent !== entry.content) {
       updateEntry.mutate(
-        { id: entry.id, content: editContent, change_summary: 'Manual edit via UI' },
+        { id: entry.id, content: editContent, change_summary: changeSummary || undefined },
         { onSuccess: () => setIsEditing(false) }
       );
     } else {
       setIsEditing(false);
     }
-  }, [entry, editContent, updateEntry]);
+  }, [entry, editContent, changeSummary, updateEntry]);
 
   const handleDelete = useCallback(() => {
     if (entry) {
@@ -426,6 +430,23 @@ function EntryFlyout({
                   data-test-subj="streamsMemoryEditArea"
                 />
                 <EuiSpacer size="m" />
+                <EuiFormRow
+                  label={i18n.translate('xpack.streams.memory.changeSummaryLabel', {
+                    defaultMessage: 'Describe your change',
+                  })}
+                  fullWidth
+                >
+                  <EuiFieldText
+                    value={changeSummary}
+                    onChange={(e) => setChangeSummary(e.target.value)}
+                    placeholder={i18n.translate('xpack.streams.memory.changeSummaryPlaceholder', {
+                      defaultMessage: 'e.g. "Corrected outdated deployment steps"',
+                    })}
+                    fullWidth
+                    data-test-subj="streamsMemoryChangeSummary"
+                  />
+                </EuiFormRow>
+                <EuiSpacer size="s" />
                 <EuiFlexGroup gutterSize="s">
                   <EuiFlexItem grow={false}>
                     <EuiButton
