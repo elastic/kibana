@@ -633,10 +633,22 @@ steps:
 
   # ── Step 4: Write-back ────────────────────────────────────────────────────────
   - name: write_back
-    type: http
+    type: kibana.request
     with:
-      url: "{{ kibana.internal_url }}/internal/streams/sig_events/discoveries/{{ inputs.discovery_id }}/investigation"
       method: POST
-      body: "{{ steps.synthesize.output | json }}"
+      path: "/internal/streams/sig_events/discoveries/{{ inputs.discovery_id }}/investigation"
+      headers:
+        x-elastic-internal-origin: "kibana"
+      body:
+        workflow_execution_id: "{{ execution.id }}"
+        root_cause: "{{ steps.synthesize.output.root_cause }}"
+        confidence: "${{ steps.synthesize.output.confidence }}"
+        impact: "{{ steps.synthesize.output.impact }}"
+        ranked_hypotheses: "${{ steps.synthesize.output.ranked_hypotheses }}"
+        discarded_hypotheses: "${{ steps.synthesize.output.discarded_hypotheses }}"
+        remediation_options: "${{ steps.synthesize.output.remediation_options }}"
+        gaps_found: "${{ steps.synthesize.output.gaps_found }}"
+        investigation_complete: "${{ steps.synthesize.output.investigation_complete }}"
+        memory_pages_written: "${{ steps.synthesize.output.memory_pages_written }}"
     on-failure:
       continue: true
