@@ -119,6 +119,10 @@ export const createInvestigationAttachmentType = ({
           return false;
         }
 
+        // Strip DB-level metadata fields before comparing: completed_at and
+        // workflow_execution_id change on every write-back even when the
+        // InvestigationResult content is identical. Including them would mark
+        // every attachment stale on the next orchestrator cycle.
         const {
           completed_at: _completedAt,
           workflow_execution_id: _workflowExecutionId,
