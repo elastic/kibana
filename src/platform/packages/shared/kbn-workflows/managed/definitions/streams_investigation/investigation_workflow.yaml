@@ -3,8 +3,9 @@ name: Investigation
 description: >
   Root cause analysis for a promoted Significant Event. Runs a context agent to
   generate hypotheses, then for each hypothesis: gathers evidence (Haiku) and
-  reviews it (Haiku). Reviewed results are merged and synthesised (Sonnet) back
-  to the Discovery document and memory.
+  reviews it (Haiku). Reviewed results are merged and synthesised (Sonnet).
+  Results are written back to the Discovery document via a direct
+  Elasticsearch request (no Kibana route required).
 enabled: true
 settings:
   timeout: "45m"
@@ -631,26 +632,63 @@ steps:
     on-failure:
       continue: false
 
-  # ── Step 4: Write-back ────────────────────────────────────────────────────────
-  - name: prepare_write_back
-    type: data.set
+  # ── Step 4: Fetch current discovery doc to preserve all existing fields ───────
+  - name: fetch_discovery
+    type: elasticsearch.request
     with:
-      root_cause: "{{ steps.synthesize.output.root_cause }}"
-      confidence: "${{ steps.synthesize.output.confidence }}"
-      impact: "{{ steps.synthesize.output.impact }}"
-      ranked_hypotheses: "${{ steps.synthesize.output.ranked_hypotheses }}"
-      discarded_hypotheses: "${{ steps.synthesize.output.discarded_hypotheses }}"
-      remediation_options: "${{ steps.synthesize.output.remediation_options }}"
-      gaps_found: "${{ steps.synthesize.output.gaps_found }}"
-      investigation_complete: "${{ steps.synthesize.output.investigation_complete }}"
-      memory_pages_written: "${{ steps.synthesize.output.memory_pages_written }}"
-      workflow_execution_id: "{{ execution.id }}"
-
-  - name: write_back
-    type: http
-    with:
-      url: "{{ kibana.internal_url }}/internal/streams/sig_events/discoveries/{{ inputs.discovery_id }}/investigation"
       method: POST
-      body: "{{ steps.prepare_write_back.output | json }}"
+      path: '/.significant_events-discoveries/_search?ignore_unavailable=true'
+      body:
+        size: 1
+        sort:
+          - "@timestamp":
+              order: desc
+        collapse:
+          field: discovery_id
+        query:
+          bool:
+            filter:
+              - term:
+                  discovery_id: "{{ inputs.discovery_id }}"
+    on-failure:
+      continue: false
+
+  # ── Step 5: Write investigation results back to the discoveries data stream ────
+  - name: write_back
+    type: elasticsearch.request
+    with:
+      method: POST
+      path: "/.significant_events-discoveries/_doc"
+      body:
+        "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S%:z' }}"
+        kibana:
+          space_ids: "${{ steps.fetch_discovery.output.hits.hits[0]._source.kibana.space_ids }}"
+        kind: "finding"
+        discovery_id: "{{ inputs.discovery_id }}"
+        discovery_slug: "{{ inputs.discovery_slug }}"
+        title: "{{ inputs.title }}"
+        summary: "{{ inputs.summary }}"
+        root_cause: "{{ inputs.root_cause }}"
+        impact: "{{ inputs.impact }}"
+        stream_names: "${{ inputs.stream_names }}"
+        rule_names: "${{ steps.fetch_discovery.output.hits.hits[0]._source.rule_names | default: [] }}"
+        criticality: "${{ steps.fetch_discovery.output.hits.hits[0]._source.criticality | default: 0 }}"
+        confidence: "${{ steps.fetch_discovery.output.hits.hits[0]._source.confidence | default: 0 }}"
+        detections: "${{ steps.fetch_discovery.output.hits.hits[0]._source.detections | default: [] }}"
+        cause_kis: "${{ inputs.cause_kis | default: [] }}"
+        evidences: "${{ inputs.evidences | default: [] }}"
+        workflow_execution_id: "{{ execution.id }}"
+        investigation:
+          completed_at: "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S%:z' }}"
+          workflow_execution_id: "{{ execution.id }}"
+          root_cause: "{{ steps.synthesize.output.root_cause }}"
+          confidence: "${{ steps.synthesize.output.confidence }}"
+          impact: "{{ steps.synthesize.output.impact }}"
+          ranked_hypotheses: "${{ steps.synthesize.output.ranked_hypotheses }}"
+          discarded_hypotheses: "${{ steps.synthesize.output.discarded_hypotheses }}"
+          remediation_options: "${{ steps.synthesize.output.remediation_options }}"
+          gaps_found: "${{ steps.synthesize.output.gaps_found }}"
+          investigation_complete: "${{ steps.synthesize.output.investigation_complete }}"
+          memory_pages_written: "${{ steps.synthesize.output.memory_pages_written }}"
     on-failure:
       continue: true

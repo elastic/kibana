@@ -1,6 +1,6 @@
 version: "1"
 name: ".significant-events-orchestrator"
-description: "Sequences detection, discovery, and triage. Each workflow handles its own idle-skip logic."
+description: "Sequences detection, discovery, triage, and investigation. Each workflow handles its own idle-skip logic."
 enabled: true
 tags:
   - observability
@@ -17,9 +17,18 @@ settings:
     # Sub-workflows exit cancelled (idle) or may fail transiently — always continue
     # so detection failure never blocks discovery/triage and vice-versa.
     continue: true
+consts:
+  DISCOVERIES_INDEX: ".significant_events-discoveries"
+  VERDICT_PROMOTED: "promoted"
+  INVESTIGATION_LOOKBACK: "now-2h"
 triggers:
   - type: manual
 steps:
+  - name: set_space_vars
+    type: data.set
+    with:
+      spaceId: "{{ workflow.spaceId }}"
+
   - name: detect
     type: workflow.execute
     with:
@@ -34,3 +43,57 @@ steps:
     type: workflow.execute
     with:
       workflow-id: "system-significant-events-triage"
+
+  # After triage, find discoveries that were just promoted in this cycle and
+  # have not yet received an investigation result. Fire each investigation
+  # asynchronously so the orchestrator is not blocked by the 45-minute pipeline.
+  - name: get_promoted_without_investigation
+    type: elasticsearch.request
+    with:
+      method: POST
+      path: '/{{ consts.DISCOVERIES_INDEX }}/_search?ignore_unavailable=true'
+      body:
+        size: 10
+        collapse:
+          field: discovery_id
+        sort:
+          - "@timestamp":
+              order: desc
+        query:
+          bool:
+            filter:
+              - term:
+                  "kibana.space_ids": "{{ variables.spaceId }}"
+              - term:
+                  kind: "finding"
+              - range:
+                  "@timestamp":
+                    gte: "{{ consts.INVESTIGATION_LOOKBACK }}"
+            must_not:
+              - exists:
+                  field: investigation.completed_at
+    on-failure:
+      continue: true
+
+  - name: trigger_investigations
+    type: foreach
+    if: "${{ steps.get_promoted_without_investigation.output.hits.total.value > 0 }}"
+    foreach: "${{ steps.get_promoted_without_investigation.output.hits.hits | map: '_source' | default: [] }}"
+    steps:
+      - name: start_investigation
+        type: workflow.executeAsync
+        with:
+          workflow-id: "system-streams-sigevents-investigation"
+          inputs:
+            event_id: "{{ foreach.item.workflow_execution_id | default: foreach.item.discovery_id }}"
+            discovery_id: "{{ foreach.item.discovery_id }}"
+            discovery_slug: "{{ foreach.item.discovery_slug }}"
+            title: "{{ foreach.item.title }}"
+            summary: "{{ foreach.item.summary }}"
+            root_cause: "{{ foreach.item.root_cause }}"
+            impact: "{{ foreach.item.impact }}"
+            stream_names: "${{ foreach.item.stream_names | default: [] }}"
+            cause_kis: "${{ foreach.item.cause_kis | default: [] }}"
+            evidences: "${{ foreach.item.evidences | default: [] }}"
+        on-failure:
+          continue: true
