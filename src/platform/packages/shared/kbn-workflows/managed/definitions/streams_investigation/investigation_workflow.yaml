@@ -654,6 +654,13 @@ steps:
       continue: false
 
   # ── Step 5: Write investigation results back to the discoveries data stream ────
+  # All discovery fields are carried from fetch_discovery._source (not from inputs)
+  # to avoid two classes of data loss:
+  #   - inputs.impact is the event's criticality enum (critical/high/medium/low)
+  #     while the discovery's impact is free-text written by the discovery agent
+  #   - inputs carries only a subset of discovery fields; optional structural
+  #     fields (dependency_edges, grouped_discovery_ids, closes_discovery_id, etc.)
+  #     must come from _source to avoid silently erasing grouping/clearance linkage
   - name: write_back
     type: elasticsearch.request
     with:
@@ -663,20 +670,34 @@ steps:
         "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S%:z' }}"
         kibana:
           space_ids: "${{ steps.fetch_discovery.output.hits.hits[0]._source.kibana.space_ids }}"
-        kind: "finding"
-        discovery_id: "{{ inputs.discovery_id }}"
-        discovery_slug: "{{ inputs.discovery_slug }}"
-        title: "{{ inputs.title }}"
-        summary: "{{ inputs.summary }}"
-        root_cause: "{{ inputs.root_cause }}"
-        impact: "{{ inputs.impact }}"
-        stream_names: "${{ inputs.stream_names }}"
+        # Required fields — all from _source to preserve discovery-agent enrichment
+        kind: "${{ steps.fetch_discovery.output.hits.hits[0]._source.kind | default: 'finding' }}"
+        discovery_id: "{{ steps.fetch_discovery.output.hits.hits[0]._source.discovery_id }}"
+        discovery_slug: "{{ steps.fetch_discovery.output.hits.hits[0]._source.discovery_slug }}"
         rule_names: "${{ steps.fetch_discovery.output.hits.hits[0]._source.rule_names | default: [] }}"
+        stream_names: "${{ steps.fetch_discovery.output.hits.hits[0]._source.stream_names | default: [] }}"
+        title: "{{ steps.fetch_discovery.output.hits.hits[0]._source.title }}"
+        summary: "{{ steps.fetch_discovery.output.hits.hits[0]._source.summary }}"
+        root_cause: "{{ steps.fetch_discovery.output.hits.hits[0]._source.root_cause }}"
         criticality: "${{ steps.fetch_discovery.output.hits.hits[0]._source.criticality | default: 0 }}"
         confidence: "${{ steps.fetch_discovery.output.hits.hits[0]._source.confidence | default: 0 }}"
+        impact: "{{ steps.fetch_discovery.output.hits.hits[0]._source.impact }}"
         detections: "${{ steps.fetch_discovery.output.hits.hits[0]._source.detections | default: [] }}"
-        cause_kis: "${{ inputs.cause_kis | default: [] }}"
-        evidences: "${{ inputs.evidences | default: [] }}"
+        # Optional descriptive/evidence fields
+        cause_kis: "${{ steps.fetch_discovery.output.hits.hits[0]._source.cause_kis }}"
+        evidences: "${{ steps.fetch_discovery.output.hits.hits[0]._source.evidences }}"
+        # Optional structural/linkage fields — must be preserved to maintain
+        # grouping, clearance, and recurrence linkage on the discovery entity
+        dependency_edges: "${{ steps.fetch_discovery.output.hits.hits[0]._source.dependency_edges }}"
+        infra_components: "${{ steps.fetch_discovery.output.hits.hits[0]._source.infra_components }}"
+        grouped_discovery_ids: "${{ steps.fetch_discovery.output.hits.hits[0]._source.grouped_discovery_ids }}"
+        closes_discovery_id: "{{ steps.fetch_discovery.output.hits.hits[0]._source.closes_discovery_id }}"
+        closed_by_execution_id: "{{ steps.fetch_discovery.output.hits.hits[0]._source.closed_by_execution_id }}"
+        grouping_rationale: "{{ steps.fetch_discovery.output.hits.hits[0]._source.grouping_rationale }}"
+        previous_discovery_id: "{{ steps.fetch_discovery.output.hits.hits[0]._source.previous_discovery_id }}"
+        discovered_at: "{{ steps.fetch_discovery.output.hits.hits[0]._source.discovered_at }}"
+        change_point_occurrence: "{{ steps.fetch_discovery.output.hits.hits[0]._source.change_point_occurrence }}"
+        conversation_id: "{{ steps.fetch_discovery.output.hits.hits[0]._source.conversation_id }}"
         workflow_execution_id: "{{ execution.id }}"
         investigation:
           completed_at: "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S%:z' }}"
