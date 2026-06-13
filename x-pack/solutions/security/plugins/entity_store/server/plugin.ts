@@ -30,6 +30,7 @@ import { CRUDClient } from './domain/crud';
 import { ResolutionClient } from './domain/resolution';
 import { registerTelemetry, createReportEvent } from './telemetry/events';
 import { automatedResolutionMaintainerConfig } from './maintainers/automated_resolution';
+import { createKiAutomatedResolutionMaintainerConfig } from './maintainers/ki_automated_resolution';
 
 export class EntityStorePlugin
   implements
@@ -87,6 +88,17 @@ export class EntityStorePlugin
       taskManager: plugins.taskManager,
       logger: this.logger,
       config: automatedResolutionMaintainerConfig,
+      core,
+      analytics: createReportEvent(core.analytics),
+    });
+
+    // KI entity resolution (POC). Registered alongside the email-based resolver
+    // above; each run is gated on the per-space `useKiEntityResolution` flag, so
+    // this is a no-op until an operator opts in.
+    registerEntityMaintainerTask({
+      taskManager: plugins.taskManager,
+      logger: this.logger,
+      config: createKiAutomatedResolutionMaintainerConfig({ core }),
       core,
       analytics: createReportEvent(core.analytics),
     });

@@ -70,6 +70,30 @@ Schema features describe the **log schema family** evident from field names and 
 - **Filter-evidence consistency**: every field/value used in `filter` must appear in, or be directly justified by, the feature's `evidence`.
 - **Keep rules generic**: Entity identification is not tied to specific technologies or log patterns. Any log evidence that reveals a distinct, named system component qualifies.
 
+### Identity Link (user / account entities)
+
+For `entity` features that represent a **user or account** (e.g. `subtype: "user"`, `subtype: "account"`), the stream may co-observe a low-trust local identity token (such as an endpoint/OS `user.name`) together with an authoritative directory identifier (such as a `user.email` / UPN) that refers to the **same real person**. When — and only when — both appear together in the evidence for the same identity, emit a `properties.identity_link` object so downstream entity resolution can link the two without re-scanning raw logs:
+
+- `properties.identity_link` shape (all keys are stable, low-cardinality strings):
+  - `user_name` (required): the local / endpoint identity token observed for the user (the value of `user.name`).
+  - `user_email` (required): the authoritative email / UPN observed for the same user (the value of `user.email`).
+  - `namespace_hint` (optional): the directory / IdP namespace the email belongs to when evident (e.g. `okta`, `entra_id`, `active_directory`).
+- **Strict co-occurrence**: only emit `identity_link` when the SAME documents tie `user_name` and `user_email` to one person. Never guess an email from a username, and never link two different people. If you are not certain both identifiers describe the same identity, omit `identity_link`.
+- **Evidence-backed**: both the `user_name` and `user_email` values used MUST appear in the feature's `evidence`.
+- **Applies to integration / IdP user entities too**, not only endpoint/OS accounts. When a SaaS or integration stream (e.g. a GitHub, SSO, or CI audit log) exposes both a service-local login (`user.name`, such as a GitHub handle) and the corporate email / UPN for the same person, emit `identity_link` with the login as `user_name`, the corporate email as `user_email`, and the directory it belongs to as `namespace_hint` (e.g. `okta`, `entra_id`). This lets downstream resolution bridge that service identity to the authoritative directory entity.
+- This is purely additive — it does not change any other property and is ignored for non-user entities.
+
+In addition to the per-identity `identity_link` above (which carries concrete *values* for one person), when the link between the local token and the authoritative email is carried by **stable, named fields** that hold the same relationship for EVERY user in the stream, also emit a `properties.identity_link_rule`. This lets downstream resolution deterministically materialize the link for all users in the stream by querying those fields directly, instead of relying on a per-user sample:
+
+- `properties.identity_link_rule` shape (all values are ECS-style dotted field NAMES, never concrete values):
+  - `user_name_field` (required): the field whose value is the local / service login (e.g. `user.name`).
+  - `user_email_field` (required): the field whose value is the authoritative email / UPN for the same person (e.g. `user.email`, or an SSO field such as `github.external_identity_nameid`).
+  - `namespace_hint` (optional): the directory / IdP namespace the email belongs to when evident (e.g. `okta`, `entra_id`, `active_directory`).
+- **Field names, not values**: every entry MUST be a field path that appears in the sample documents (and in the feature's `evidence`), NOT a concrete username or email. Emit the rule only when the two fields co-occur on the SAME documents and reliably describe one person per document across the sample.
+- **Use the most authoritative email-bearing field**: prefer a field that literally holds the corporate email / UPN (including SSO / SAML NameID fields like `github.external_identity_nameid`) over one that only holds a local login.
+- **Pair it with `filter` when the relationship only holds for a subset of documents** (e.g. only `iam` / SSO events carry the email): the same `filter` you emit for the entity scopes which documents the rule applies to. The rule is **stream-wide** — it describes the field relationship for EVERY user in the stream, so its scope should use broad, non-identity conditions (e.g. `data_stream.dataset`, `event.category`) and must NOT pin to a single user's value (do not rely on a `user.name == "<one user>"` style equality to scope the rule).
+- `identity_link_rule` is independent of `identity_link`: emit one, both, or neither. It is purely additive and ignored for non-user entities.
+
 ## Consolidation Rules
 
 **Consolidate** when properties belong to the same logical component and appear together in logs:
@@ -228,6 +252,41 @@ Version formatting rules (important for vulnerability analysis):
       { "field": "service.name", "eq": "checkout-api" },
       { "field": "event.dataset", "eq": "checkout-api.logs" }
     ]
+  }
+}
+```
+
+**Example 2c — Entity: a user/account with an identity link**
+```
+{
+  "type": "entity",
+  "subtype": "user",
+  "id": "user-jdoe",
+  "title": "jdoe",
+  "description": "Endpoint user account 'jdoe' observed on Windows hosts; the same sign-in events expose the corporate email john.doe@corp.com",
+  "properties": {
+    "name": "jdoe",
+    "identity_link": {
+      "user_name": "jdoe",
+      "user_email": "john.doe@corp.com",
+      "namespace_hint": "okta"
+    },
+    "identity_link_rule": {
+      "user_name_field": "user.name",
+      "user_email_field": "user.email",
+      "namespace_hint": "okta"
+    }
+  },
+  "confidence": 92,
+  "evidence": [
+    "user.name=jdoe",
+    "user.email=john.doe@corp.com",
+    "winlog.event_data.TargetUserName=jdoe"
+  ],
+  "evidence_doc_ids": ["a91c0d2", "5f0b7ae"],
+  "tags": ["entity", "user"],
+  "meta": {
+    "hosts_observed": ["WIN-HOST-01"]
   }
 }
 ```

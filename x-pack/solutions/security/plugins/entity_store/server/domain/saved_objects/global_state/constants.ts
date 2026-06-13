@@ -22,6 +22,23 @@ export const LOG_EXTRACTION_MAX_TIME_WINDOW_SIZE_DEFAULT = '15m';
 export const LOG_EXTRACTION_MAX_LOGS_PER_WINDOW_DEFAULT = 100_000;
 export const LOG_EXTRACTION_CAP_BEHAVIOR_DEFAULT = 'drop' as const;
 
+// KI entity resolution (POC): opt-in maintainer that links medium-confidence
+// user entities to high-confidence IdP entities using Streams Knowledge
+// Indicators. Off by default so behavior is byte-identical until opted in.
+export const USE_KI_ENTITY_RESOLUTION_DEFAULT = false;
+// Confidence floor (0-100) for KI `entity` features consumed by the resolver.
+// Defaults high so the maintainer "only resolves when confidence is high".
+export const KI_ENTITY_RESOLUTION_MIN_CONFIDENCE_DEFAULT = 90;
+// Opt-in extension: also resolve a high-confidence IdP entity in a lower-priority
+// namespace (e.g. GitHub) to a higher-priority IdP target (Okta/AD). Independent
+// of `useKiEntityResolution`; off by default so medium->high stays separable.
+export const KI_ENTITY_RESOLUTION_RESOLVE_IDP_TO_IDP_DEFAULT = false;
+// Opt-in extension: also load `identity_link_rule` KI features and execute them
+// deterministically over their streams (one ES|QL aggregation per stream) to
+// materialize a clue for every user, closing the LLM-sampling coverage gap.
+// Off by default so the LLM-only per-user clue path stays the baseline.
+export const KI_ENTITY_RESOLUTION_USE_RULES_DEFAULT = false;
+
 export type LogExtractionConfig = z.infer<typeof LogExtractionConfig>;
 export const LogExtractionConfig = z.object({
   additionalIndexPatterns: z.array(z.string()).default([]),
@@ -53,6 +70,17 @@ export const LogExtractionConfig = z.object({
   maxLogsPerWindowCapBehavior: z
     .enum(['defer', 'drop'])
     .default(LOG_EXTRACTION_CAP_BEHAVIOR_DEFAULT),
+  useKiEntityResolution: z.boolean().default(USE_KI_ENTITY_RESOLUTION_DEFAULT),
+  kiEntityResolutionMinConfidence: z
+    .number()
+    .int()
+    .min(0)
+    .max(100)
+    .default(KI_ENTITY_RESOLUTION_MIN_CONFIDENCE_DEFAULT),
+  kiEntityResolutionResolveIdpToIdp: z
+    .boolean()
+    .default(KI_ENTITY_RESOLUTION_RESOLVE_IDP_TO_IDP_DEFAULT),
+  kiEntityResolutionUseRules: z.boolean().default(KI_ENTITY_RESOLUTION_USE_RULES_DEFAULT),
 });
 
 export type HistorySnapshotStatus = z.infer<typeof HistorySnapshotStatus>;
