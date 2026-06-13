@@ -201,6 +201,7 @@ describe('investigateRuleSkill', () => {
         users: Array<{ value: string; count: number }>;
         source_ips: Array<{ value: string; count: number }>;
       };
+      workflow_reasons?: Array<{ reason: string; count: number }>;
     }
 
     const callHandler = (
@@ -223,6 +224,7 @@ describe('investigateRuleSkill', () => {
           top_hosts: { buckets: [] },
           top_users: { buckets: [] },
           top_source_ips: { buckets: [] },
+          workflow_reasons: { buckets: [] },
           ...aggs,
         },
       } as ReturnType<typeof mockEsClient.asCurrentUser.search> extends Promise<infer R> ? R : never);
@@ -238,7 +240,7 @@ describe('investigateRuleSkill', () => {
       expect(data.message).toContain('No alerts');
     });
 
-    it('returns alerts and top_entities on happy path', async () => {
+    it('returns alerts, top_entities, and workflow_reasons on happy path', async () => {
       mockAlertsSearch(
         [
           {
@@ -256,6 +258,12 @@ describe('investigateRuleSkill', () => {
           },
           top_users: { buckets: [{ key: 'admin', doc_count: 3 }] },
           top_source_ips: { buckets: [{ key: '10.0.0.1', doc_count: 2 }] },
+          workflow_reasons: {
+            buckets: [
+              { key: 'false_positive', doc_count: 3 },
+              { key: 'benign_positive', doc_count: 1 },
+            ],
+          },
         }
       );
 
@@ -270,6 +278,35 @@ describe('investigateRuleSkill', () => {
       ]);
       expect(data.top_entities?.users).toEqual([{ value: 'admin', count: 3 }]);
       expect(data.top_entities?.source_ips).toEqual([{ value: '10.0.0.1', count: 2 }]);
+      expect(data.workflow_reasons).toEqual([
+        { reason: 'false_positive', count: 3 },
+        { reason: 'benign_positive', count: 1 },
+      ]);
+    });
+
+    it('returns empty workflow_reasons when no alerts have been dispositioned', async () => {
+      mockAlertsSearch(
+        [{ _id: 'alert-1', _source: { '@timestamp': '2024-01-01T00:00:00Z' } }],
+        1
+      );
+
+      const result = await callHandler({ rule_id: 'rule-1' });
+      const data = result.results[0].data as AlertResultData;
+
+      expect(data.workflow_reasons).toEqual([]);
+    });
+
+    it('includes workflow_reasons in the ES aggregation request', async () => {
+      mockAlertsSearch([]);
+      await callHandler({ rule_id: 'rule-1' });
+
+      expect(mockEsClient.asCurrentUser.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          aggs: expect.objectContaining({
+            workflow_reasons: { terms: { field: 'kibana.alert.workflow_reason', size: 10 } },
+          }),
+        })
+      );
     });
 
     it('queries the alerts index scoped to the space', async () => {
