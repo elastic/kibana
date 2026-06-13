@@ -17,7 +17,6 @@ import {
   hypothesisGatherSkill,
   hypothesisReviewSkill,
   investigationSynthesisSkill,
-  investigationRunnerSkill,
 } from './investigation';
 
 export const registerAgentBuilderSkills = ({
@@ -41,7 +40,6 @@ export const registerAgentBuilderSkills = ({
     hypothesisGatherSkill,
     hypothesisReviewSkill,
     investigationSynthesisSkill,
-    investigationRunnerSkill,
     ...(streamsKIsOnboardingClient
       ? [createKiIdentificationManagementSkill({ telemetry, streamsKIsOnboardingClient })]
       : []),

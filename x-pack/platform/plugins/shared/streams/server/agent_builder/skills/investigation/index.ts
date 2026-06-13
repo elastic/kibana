@@ -9,4 +9,3 @@ export { investigationContextSkill } from './investigation_context_skill';
 export { hypothesisGatherSkill } from './hypothesis_gather_skill';
 export { hypothesisReviewSkill } from './hypothesis_review_skill';
 export { investigationSynthesisSkill } from './investigation_synthesis_skill';
-export { investigationRunnerSkill } from './investigation_runner_skill';
