@@ -16,6 +16,7 @@ import {
   EuiConfirmModal,
   EuiFieldSearch,
   EuiFieldText,
+  EuiFormRow,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -330,6 +331,7 @@ function EntryFlyout({ entryId, onClose }: { entryId: string; onClose: () => voi
   const [editTitle, setEditTitle] = useState('');
   const [editContent, setEditContent] = useState('');
   const [editTags, setEditTags] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
+  const [changeSummary, setChangeSummary] = useState('');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showDiscardModal, setShowDiscardModal] = useState(false);
 
@@ -338,6 +340,7 @@ function EntryFlyout({ entryId, onClose }: { entryId: string; onClose: () => voi
       setEditTitle(entry.title);
       setEditContent(entry.content);
       setEditTags(entry.tags.map((tag) => ({ label: tag })));
+      setChangeSummary('');
       setIsEditing(true);
     }
   }, [entry]);
@@ -355,14 +358,14 @@ function EntryFlyout({ entryId, onClose }: { entryId: string; onClose: () => voi
           ...(titleChanged ? { title: editTitle } : {}),
           ...(contentChanged ? { content: editContent } : {}),
           tags: editTags.map((t) => t.label),
-          change_summary: 'Manual edit via UI',
+          change_summary: changeSummary || undefined,
         },
         { onSuccess: () => setIsEditing(false) }
       );
     } else {
       setIsEditing(false);
     }
-  }, [entry, editTitle, editContent, editTags, updateEntry]);
+  }, [entry, editTitle, editContent, editTags, changeSummary, updateEntry]);
 
   const handleDelete = useCallback(() => {
     if (entry) {
@@ -500,6 +503,27 @@ function EntryFlyout({ entryId, onClose }: { entryId: string; onClose: () => voi
                       noSuggestions
                       data-test-subj="streamsMemoryEditTags"
                     />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiFormRow
+                      label={i18n.translate('xpack.streams.memory.changeSummaryLabel', {
+                        defaultMessage: 'Describe your change',
+                      })}
+                      fullWidth
+                    >
+                      <EuiFieldText
+                        value={changeSummary}
+                        onChange={(e) => setChangeSummary(e.target.value)}
+                        placeholder={i18n.translate(
+                          'xpack.streams.memory.changeSummaryPlaceholder',
+                          {
+                            defaultMessage: 'e.g. "Corrected outdated deployment steps"',
+                          }
+                        )}
+                        fullWidth
+                        data-test-subj="streamsMemoryChangeSummary"
+                      />
+                    </EuiFormRow>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               ) : (
