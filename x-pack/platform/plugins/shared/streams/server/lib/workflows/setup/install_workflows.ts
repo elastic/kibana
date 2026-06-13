@@ -15,6 +15,7 @@ import {
   STREAMS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID,
   STREAMS_KI_ONBOARDING_WORKFLOW_ID,
   STREAMS_KI_QUERIES_GENERATION_WORKFLOW_ID,
+  STREAMS_INVESTIGATION_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
@@ -50,5 +51,6 @@ export const installWorkflows = async ({
       client.install(workflowId, { spaceId })
     ),
     ...(isSignificantEventsMemoryEnabled ? [installMemoryWorkflows({ client })] : []),
+    client.install(STREAMS_INVESTIGATION_WORKFLOW_ID, { spaceId: GLOBAL_WORKFLOW_SPACE_ID }),
   ]);
 };

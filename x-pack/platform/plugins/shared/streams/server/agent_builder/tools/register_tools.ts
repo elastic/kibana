@@ -130,6 +130,7 @@ export function registerAgentBuilderTools({
       logger: logger.get('event_status_update_tool'),
       telemetry,
     }),
+
   ];
 
   for (const tool of streamsTools) {
