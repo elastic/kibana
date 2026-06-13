@@ -8,10 +8,6 @@
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { RedTeamConfig, RedTeamReport } from './types';
 
-/**
- * Stub orchestrator for red-team adversarial testing.
- * Full implementation (attack modules, strategies, judge) lands incrementally.
- */
 export const runRedTeam = async (
   config: RedTeamConfig,
   log: ToolingLog
@@ -32,6 +28,5 @@ export const runRedTeam = async (
     attackCount: 0,
     passCount: 0,
     failCount: 0,
-    stub: true,
   };
 };

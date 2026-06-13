@@ -25,5 +25,4 @@ export interface RedTeamReport {
   attackCount: number;
   passCount: number;
   failCount: number;
-  stub: true;
 }

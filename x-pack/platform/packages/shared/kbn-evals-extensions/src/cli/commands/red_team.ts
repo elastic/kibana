@@ -16,7 +16,7 @@ import {
   buildEvalRunEnv,
   buildEvalRunArgs,
   formatEvalCliCommand,
-  flags as evalOrchestrationFlags,
+  flags as evalStartFlags,
 } from '@kbn/evals/src/cli/commands/start';
 import {
   runRedTeam,
@@ -26,10 +26,10 @@ import {
 } from '../../red_team';
 
 const redTeamFlags: FlagOptions = {
-  ...evalOrchestrationFlags,
-  string: [...(evalOrchestrationFlags.string ?? []), 'modules', 'count'],
+  ...evalStartFlags,
+  string: [...(evalStartFlags.string ?? []), 'modules', 'count'],
   alias: {
-    ...evalOrchestrationFlags.alias,
+    ...evalStartFlags.alias,
     module: 'modules',
   },
 };
