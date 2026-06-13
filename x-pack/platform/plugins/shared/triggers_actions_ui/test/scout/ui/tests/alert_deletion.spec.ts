@@ -71,20 +71,31 @@ test.describe('Alert deletion', { tag: tags.stateful.classic }, () => {
       })
     );
 
-    // Wipe the 3 backing indices entirely so no stale docs from parallel tests
-    // can coincidentally satisfy the deletion task's count, which would cause
-    // our own DELETED docs to survive and make the remaining check flaky.
+    // Wipe via both the fixed backing indices AND their aliases. In CI,
+    // ILM may have rolled the index forward (e.g. -000002), so the alias
+    // points at a different backing index than the hardcoded -000001. Without
+    // this alias-based wipe, stale docs in the alias-target could be picked
+    // up by the deletion task and count toward numDeleted, causing our own
+    // DELETED docs to survive.
     await esClient.deleteByQuery({
-      index: ALERT_INDEX_ALIASES.map(({ index }) => index),
+      index: [
+        ...ALERT_INDEX_ALIASES.map(({ index }) => index),
+        ...ALERT_INDEX_ALIASES.map(({ alias }) => alias),
+      ],
       query: { match_all: {} },
       refresh: true,
       conflicts: 'proceed',
     });
 
+    // Insert via aliases so docs land in whatever backing index the deletion
+    // task will search (the current write target of each alias).
+    const indexToAlias = Object.fromEntries(
+      ALERT_INDEX_ALIASES.map(({ index, alias }) => [index, alias])
+    );
     await esClient.bulk({
       refresh: 'wait_for',
       operations: getTestAlertDocs('default').flatMap(({ _index, _id, _source }) => [
-        { index: { _index, _id } },
+        { index: { _index: indexToAlias[_index] ?? _index, _id } },
         _source,
       ]),
     });
@@ -95,7 +106,7 @@ test.describe('Alert deletion', { tag: tags.stateful.classic }, () => {
 
   test.afterEach(async ({ esClient }) => {
     await esClient.deleteByQuery({
-      index: '.internal.alerts-*',
+      index: ALERT_INDEX_ALIASES.map(({ alias }) => alias),
       query: { ids: { values: ALL_ALERT_IDS } },
       refresh: true,
       conflicts: 'proceed',
@@ -165,10 +176,10 @@ test.describe('Alert deletion', { tag: tags.stateful.classic }, () => {
         numDeleted: DELETED_ALERT_IDS.length,
       });
 
-    // Only the newer alerts should remain across stack, observability, and
-    // security.
+    // Search via the same aliases the deletion task used, so we see exactly
+    // the indices it operated on.
     const remaining = await esClient.search({
-      index: '.internal.alerts-*',
+      index: ALERT_INDEX_ALIASES.map(({ alias }) => alias),
       size: ALL_ALERT_IDS.length,
       query: { ids: { values: ALL_ALERT_IDS } },
     });
