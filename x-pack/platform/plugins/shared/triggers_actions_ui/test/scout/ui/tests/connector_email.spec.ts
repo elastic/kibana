@@ -18,8 +18,12 @@ import {
 
 const openTestTab = async (page: ScoutPage, connectorName: string) => {
   await searchAndOpenConnector(page, connectorName);
+  // Wait for the flyout header to mount before switching tabs. Without this the
+  // tab click can race with the flyout's initial render and the React onClick
+  // handler may not be attached yet, silently losing the state transition.
+  await page.testSubj.locator('edit-connector-flyout-header').waitFor({ state: 'visible' });
   await page.testSubj.click('testConnectorTab');
-  await page.testSubj.locator('test-connector-form').waitFor({ state: 'visible' });
+  await page.testSubj.locator('test-connector-form').waitFor({ state: 'visible', timeout: 30_000 });
 };
 
 const fillSubjectAndMessage = async (page: ScoutPage) => {
