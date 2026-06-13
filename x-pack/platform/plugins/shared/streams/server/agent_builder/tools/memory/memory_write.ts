@@ -34,6 +34,17 @@ const memoryWriteSchema = z.object({
     .describe('IDs of other memory pages referenced from this content.'),
   tags: z.array(z.string()).optional().describe('Optional classification tags.'),
   change_summary: z.string().optional().describe('Human-readable description of what was changed.'),
+  confidence: z
+    .number()
+    .int()
+    .min(0)
+    .max(100)
+    .describe(
+      'Required: your confidence in the accuracy of this page content, 0–100. ' +
+        '100 = verified fact you are certain of; 50 = plausible but unconfirmed; 0 = pure speculation or hypothesis. ' +
+        'Be honest — this helps readers calibrate how much to trust the page. ' +
+        'Examples: 90 for something you directly observed, 60 for something inferred, 20 for an educated guess.'
+    ),
 });
 
 export const createMemoryWriteTool = ({
@@ -50,7 +61,7 @@ export const createMemoryWriteTool = ({
   tags: ['memory'],
   confirmation: { askUser: 'never' },
   handler: async (
-    { name, title, content, categories, references, tags, change_summary: changeSummary },
+    { name, title, content, categories, references, tags, change_summary: changeSummary, confidence },
     context
   ) => {
     const memoryService = getMemoryService(context.esClient.asCurrentUser);
@@ -76,6 +87,7 @@ export const createMemoryWriteTool = ({
           tags,
           user,
           changeSummary: changeSummary ?? `Overwrote page "${name}"`,
+          confidence,
         });
         return {
           results: [
@@ -102,6 +114,7 @@ export const createMemoryWriteTool = ({
         references,
         tags,
         user,
+        confidence,
       });
 
       return {

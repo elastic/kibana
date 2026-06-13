@@ -18,6 +18,7 @@ export interface MemoryEntry {
   updated_at: string;
   created_by: string;
   updated_by: string;
+  confidence?: number;
 }
 
 export interface MemoryCategoryNode {
@@ -37,6 +38,7 @@ export interface MemorySearchResult {
   updated_by: string;
   tags: string[];
   categories: string[];
+  confidence?: number;
 }
 
 export interface MemoryVersionRecord {

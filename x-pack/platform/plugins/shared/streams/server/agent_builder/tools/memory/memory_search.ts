@@ -99,6 +99,7 @@ export const createMemorySearchTool = ({
                 categories: r.categories,
                 updated_at: r.updated_at,
                 updated_by: r.updated_by,
+                confidence: r.confidence,
               })),
             },
           },
