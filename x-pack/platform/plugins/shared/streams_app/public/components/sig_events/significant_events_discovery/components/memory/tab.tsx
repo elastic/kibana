@@ -420,7 +420,11 @@ function EntryFlyout({ entryId, onClose }: { entryId: string; onClose: () => voi
             <EuiTab isSelected={activeTab === 'content'} onClick={() => setActiveTab('content')}>
               {i18n.translate('xpack.streams.memory.contentTab', { defaultMessage: 'Content' })}
             </EuiTab>
-            <EuiTab isSelected={activeTab === 'history'} onClick={() => setActiveTab('history')}>
+            <EuiTab
+              isSelected={activeTab === 'history'}
+              onClick={() => setActiveTab('history')}
+              disabled={isEditing}
+            >
               {i18n.translate('xpack.streams.memory.historyTab', { defaultMessage: 'History' })}
             </EuiTab>
           </EuiTabs>
