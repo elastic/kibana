@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import {
   EuiAccordion,
   EuiBadge,
-  EuiButtonIcon,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
@@ -25,70 +24,6 @@ import { i18n } from '@kbn/i18n';
 import type { InvestigationResult } from '@kbn/streams-schema';
 
 type InvestigationData = InvestigationResult;
-
-interface NodeFeedbackProps {
-  nodeId: string;
-  onFeedback: (nodeId: string, positive: boolean) => void;
-}
-
-const NodeFeedback = ({ nodeId, onFeedback }: NodeFeedbackProps) => {
-  const [hasVoted, setHasVoted] = useState(false);
-
-  if (hasVoted) {
-    return (
-      <EuiText size="xs" color="subdued">
-        {i18n.translate('xpack.streams.investigation.feedbackThankYou', {
-          defaultMessage: 'Thanks!',
-        })}
-      </EuiText>
-    );
-  }
-
-  return (
-    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <EuiToolTip
-          content={i18n.translate('xpack.streams.investigation.feedbackHelpful', {
-            defaultMessage: 'This investigation step was helpful',
-          })}
-        >
-          <EuiButtonIcon
-            iconType="thumbUp"
-            size="xs"
-            color="success"
-            aria-label={i18n.translate('xpack.streams.investigation.feedbackHelpfulLabel', {
-              defaultMessage: 'Helpful',
-            })}
-            onClick={() => {
-              onFeedback(nodeId, true);
-              setHasVoted(true);
-            }}
-          />
-        </EuiToolTip>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiToolTip
-          content={i18n.translate('xpack.streams.investigation.feedbackNotHelpful', {
-            defaultMessage: 'This investigation step was not helpful',
-          })}
-        >
-          <EuiButtonIcon
-            iconType="thumbDown"
-            size="xs"
-            color="danger"
-            aria-label={i18n.translate('xpack.streams.investigation.feedbackNotHelpfulLabel', {
-              defaultMessage: 'Not helpful',
-            })}
-            onClick={() => {
-              onFeedback(nodeId, false);
-              setHasVoted(true);
-            }}
-          />
-        </EuiToolTip>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
 
 const confidenceColor = (confidence: number): 'success' | 'warning' | 'danger' => {
   if (confidence >= 0.7) return 'success';
@@ -151,20 +86,12 @@ const riskLevelColor = (risk: string): 'success' | 'warning' | 'danger' => {
 
 interface InvestigationVisualizationProps {
   investigation: InvestigationData;
-  onFeedback?: (nodeId: string, positive: boolean, context: string) => void;
 }
 
-export const InvestigationVisualization = ({
-  investigation,
-  onFeedback,
-}: InvestigationVisualizationProps) => {
+export const InvestigationVisualization = ({ investigation }: InvestigationVisualizationProps) => {
   const discardedAccordionId = useGeneratedHtmlId();
   const remediationAccordionId = useGeneratedHtmlId();
   const gapsAccordionId = useGeneratedHtmlId();
-
-  const handleFeedback = (nodeId: string, positive: boolean) => {
-    onFeedback?.(nodeId, positive, nodeId);
-  };
 
   return (
     <div>
@@ -292,11 +219,6 @@ export const InvestigationVisualization = ({
                         </EuiText>
                       </>
                     )}
-                    <EuiSpacer size="xs" />
-                    <NodeFeedback
-                      nodeId={`hypothesis:${hyp.hypothesis_id}`}
-                      onFeedback={handleFeedback}
-                    />
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiPanel>
