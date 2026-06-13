@@ -28,6 +28,7 @@ import {
 } from '@elastic/eui';
 import type { ComposeFormValues } from '../../compose_form_types';
 import { useDataFields } from '../../../../form/hooks/use_data_fields';
+import { useIndexSources } from '../../../../form/hooks/use_index_sources';
 import { ScheduleField } from '../../../../form/fields/schedule_field';
 import { LookbackWindowField } from '../../../../form/fields/lookback_window_field';
 import { ModeSelect } from '../../../../form/fields/mode_select';
@@ -67,6 +68,11 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
   const { setValue, watch } = useFormContext<ComposeFormValues>();
   const isAlert = watch('kind') === 'alert';
 
+  const { data: indexOptions, isLoading: isLoadingIndices } = useIndexSources({
+    http: services.http,
+    application: services.application,
+  });
+
   const fromQuery = thresholdValues.indexPattern ? `FROM ${thresholdValues.indexPattern}` : '';
 
   const { data: fieldMap } = useDataFields({
@@ -101,9 +107,15 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
       .filter((f) => f.type === 'date')
       .map((f) => f.name)
       .sort();
-    if (!dates.includes('@timestamp')) dates.unshift('@timestamp');
+    if (dates.length === 0) return ['@timestamp'];
     return dates;
   }, [fieldMap]);
+
+  useEffect(() => {
+    if (dateFields.length > 0 && !dateFields.includes(thresholdValues.timeField)) {
+      onThresholdValuesChange({ ...thresholdValues, timeField: dateFields[0] });
+    }
+  }, [dateFields, thresholdValues, onThresholdValuesChange]);
 
   const esqlQuery = useMemo(() => buildThresholdEsql(thresholdValues), [thresholdValues]);
   const recoveryBlock = useMemo(() => buildRecoveryBlock(thresholdValues), [thresholdValues]);
@@ -350,11 +362,19 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
           fullWidth
           compressed
           singleSelection={{ asPlainText: true }}
+          isLoading={isLoadingIndices}
+          options={indexOptions}
           selectedOptions={
             thresholdValues.indexPattern ? [{ label: thresholdValues.indexPattern }] : []
           }
-          onCreateOption={(val) => update('indexPattern', val)}
+          onCreateOption={(val) => {
+            update('indexPattern', val);
+            return true;
+          }}
           onChange={(opts) => update('indexPattern', opts[0]?.label ?? '')}
+          customOptionText={i18n.translate('xpack.alertingV2.ruleBuilder.indexCustomOption', {
+            defaultMessage: 'Use {searchValue} as an index pattern',
+          })}
           placeholder={i18n.translate('xpack.alertingV2.ruleBuilder.indexPlaceholder', {
             defaultMessage: 'Enter index pattern (e.g. logs-*)',
           })}
