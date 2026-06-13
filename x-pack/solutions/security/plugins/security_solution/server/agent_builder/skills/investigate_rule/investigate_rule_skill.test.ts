@@ -22,11 +22,13 @@ const mockRulesClient = {
   get: jest.fn(),
 };
 
-const mockGetStartServices = jest.fn().mockResolvedValue([
-  {},
-  { alerting: { getRulesClientWithRequest: jest.fn().mockResolvedValue(mockRulesClient) } },
-  {},
-]);
+const mockGetStartServices = jest
+  .fn()
+  .mockResolvedValue([
+    {},
+    { alerting: { getRulesClientWithRequest: jest.fn().mockResolvedValue(mockRulesClient) } },
+    {},
+  ]);
 
 const investigateRuleSkill = createInvestigateRuleSkill({
   getStartServices: mockGetStartServices as never,
@@ -293,10 +295,7 @@ describe('investigateRuleSkill', () => {
     });
 
     it('returns empty workflow_reasons when no alerts have been dispositioned', async () => {
-      mockAlertsSearch(
-        [{ _id: 'alert-1', _source: { '@timestamp': '2024-01-01T00:00:00Z' } }],
-        1
-      );
+      mockAlertsSearch([{ _id: 'alert-1', _source: { '@timestamp': '2024-01-01T00:00:00Z' } }], 1);
 
       const result = await callHandler({ rule_id: 'rule-1' });
       const data = result.results[0].data as AlertResultData;
@@ -355,5 +354,4 @@ describe('investigateRuleSkill', () => {
       expect((result.results[0].data as { message: string }).message).toContain('unavailable');
     });
   });
-
 });

@@ -193,278 +193,278 @@ export const createInvestigateRuleSkill = ({
     id: 'investigate-rule',
     name: 'investigate-rule',
     basePath: 'skills/security/rules',
-  description:
-    'Rule noise and false-positive analysis: identify why a detection rule is generating too many alerts, ' +
-    'surface the top contributing entities, and classify whether the root cause is benign activity, an overly ' +
-    'broad query, or a threshold misconfiguration. If no rule attachment is present yet (e.g. the user selected ' +
-    'a rule from find-rules output), the skill resolves the rule by UUID and creates the attachment before proceeding.',
-  content: SKILL_CONTENT,
-  getRegistryTools: () => [
-    SECURITY_ALERTS_TOOL_ID,
-    SECURITY_LABS_SEARCH_TOOL_ID,
-    SECURITY_ENTITY_RISK_SCORE_TOOL_ID,
-  ],
-  getInlineTools: () => [
-    // ── resolve_rule_attachment ──────────────────────────────────────────────
-    {
-      id: 'investigate-rule.resolve_rule_attachment',
-      type: ToolType.builtin,
-      description:
-        'Fetches a detection rule by UUID and creates a security.rule attachment for it. ' +
-        'Call when the user selects a rule to investigate but no security.rule attachment exists yet ' +
-        '(e.g., the user picked a rule from find-rules output and said "investigate this one"). ' +
-        'Returns the attachment ID and version; use these with attachment_read and render_attachment. ' +
-        'If an attachment for the same rule UUID already exists, returns the existing ID without re-fetching.',
-      schema: z.object({
-        rule_id: z
-          .string()
-          .describe('UUID of the detection rule (id field / kibana.alert.rule.uuid)'),
-      }),
-      handler: async ({ rule_id: ruleId }, context) => {
-        const attachmentId = `rule-investigate-${ruleId}`;
+    description:
+      'Rule noise and false-positive analysis: identify why a detection rule is generating too many alerts, ' +
+      'surface the top contributing entities, and classify whether the root cause is benign activity, an overly ' +
+      'broad query, or a threshold misconfiguration. If no rule attachment is present yet (e.g. the user selected ' +
+      'a rule from find-rules output), the skill resolves the rule by UUID and creates the attachment before proceeding.',
+    content: SKILL_CONTENT,
+    getRegistryTools: () => [
+      SECURITY_ALERTS_TOOL_ID,
+      SECURITY_LABS_SEARCH_TOOL_ID,
+      SECURITY_ENTITY_RISK_SCORE_TOOL_ID,
+    ],
+    getInlineTools: () => [
+      // ── resolve_rule_attachment ──────────────────────────────────────────────
+      {
+        id: 'investigate-rule.resolve_rule_attachment',
+        type: ToolType.builtin,
+        description:
+          'Fetches a detection rule by UUID and creates a security.rule attachment for it. ' +
+          'Call when the user selects a rule to investigate but no security.rule attachment exists yet ' +
+          '(e.g., the user picked a rule from find-rules output and said "investigate this one"). ' +
+          'Returns the attachment ID and version; use these with attachment_read and render_attachment. ' +
+          'If an attachment for the same rule UUID already exists, returns the existing ID without re-fetching.',
+        schema: z.object({
+          rule_id: z
+            .string()
+            .describe('UUID of the detection rule (id field / kibana.alert.rule.uuid)'),
+        }),
+        handler: async ({ rule_id: ruleId }, context) => {
+          const attachmentId = `rule-investigate-${ruleId}`;
 
-        const existing = context.attachments.get(attachmentId);
-        if (existing) {
-          return {
-            results: [
-              {
-                type: ToolResultType.other,
-                data: {
-                  message: `Rule ${ruleId} is already loaded as attachment "${attachmentId}".`,
-                  attachmentId,
-                  version: existing.version,
-                },
-              },
-            ],
-          };
-        }
-
-        try {
-          const [, startPlugins] = await getStartServices();
-          const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(
-            context.request
-          );
-
-          const ruleObject = await rulesClient.get({ id: String(ruleId) });
-          const params = (ruleObject.params ?? {}) as Record<string, unknown>;
-          const ruleName = String(ruleObject.name ?? ruleId);
-
-          const rule = {
-            id: ruleObject.id,
-            ruleId: params.ruleId ?? params.rule_id,
-            name: ruleObject.name,
-            description: params.description,
-            type: params.type,
-            language: params.language,
-            query: params.query,
-            index: params.index,
-            interval: ruleObject.schedule?.interval,
-            from: params.from,
-            enabled: ruleObject.enabled,
-            tags: ruleObject.tags,
-            threat: params.threat,
-          };
-
-          const created = await context.attachments.add({
-            id: attachmentId,
-            type: SecurityAgentBuilderAttachments.rule,
-            data: {
-              origin: ruleId,
-              text: JSON.stringify(rule),
-              attachmentLabel: ruleName,
-            },
-            description: `Rule: ${ruleName}`,
-          });
-
-          return {
-            results: [
-              {
-                type: ToolResultType.other,
-                data: {
-                  message: `Loaded rule "${ruleName}" as attachment "${created.id}".`,
-                  attachmentId: created.id,
-                  version: created.current_version,
-                },
-              },
-            ],
-          };
-        } catch (error) {
-          const isNotFound =
-            error != null &&
-            typeof error === 'object' &&
-            (error as { output?: { statusCode?: number } }).output?.statusCode === 404;
-
-          if (isNotFound) {
+          const existing = context.attachments.get(attachmentId);
+          if (existing) {
             return {
               results: [
                 {
                   type: ToolResultType.other,
-                  data: { message: `Rule ${ruleId} was not found in this space.` },
+                  data: {
+                    message: `Rule ${ruleId} is already loaded as attachment "${attachmentId}".`,
+                    attachmentId,
+                    version: existing.version,
+                  },
                 },
               ],
             };
           }
 
-          return {
-            results: [
-              {
-                type: ToolResultType.error,
-                data: {
-                  message: `Failed to resolve rule ${ruleId}: ${
-                    error instanceof Error ? error.message : String(error)
-                  }`,
-                },
+          try {
+            const [, startPlugins] = await getStartServices();
+            const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(
+              context.request
+            );
+
+            const ruleObject = await rulesClient.get({ id: String(ruleId) });
+            const params = (ruleObject.params ?? {}) as Record<string, unknown>;
+            const ruleName = String(ruleObject.name ?? ruleId);
+
+            const rule = {
+              id: ruleObject.id,
+              ruleId: params.ruleId ?? params.rule_id,
+              name: ruleObject.name,
+              description: params.description,
+              type: params.type,
+              language: params.language,
+              query: params.query,
+              index: params.index,
+              interval: ruleObject.schedule?.interval,
+              from: params.from,
+              enabled: ruleObject.enabled,
+              tags: ruleObject.tags,
+              threat: params.threat,
+            };
+
+            const created = await context.attachments.add({
+              id: attachmentId,
+              type: SecurityAgentBuilderAttachments.rule,
+              data: {
+                origin: ruleId,
+                text: JSON.stringify(rule),
+                attachmentLabel: ruleName,
               },
-            ],
-          };
-        }
-      },
-    },
+              description: `Rule: ${ruleName}`,
+            });
 
-    // ── get_rule_alerts ──────────────────────────────────────────────────────
-    {
-      id: 'investigate-rule.get_rule_alerts',
-      type: ToolType.builtin,
-      description:
-        'Fetches recent alerts produced by a specific detection rule, with entity and disposition aggregations for FP pattern detection. ' +
-        'Returns total_count, a sample of recent alerts (timestamp, severity, key entity fields, workflow_reason), ' +
-        'top_entities (aggregated counts of host.name, user.name, source.ip), ' +
-        'and workflow_reasons (aggregated counts of kibana.alert.workflow_reason values). ' +
-        'Check workflow_reasons first: if a significant share of alerts carry false_positive or benign_positive ' +
-        'dispositions, that is direct analyst confirmation of the FP pattern and takes precedence over entity analysis. ' +
-        'top_entities is the secondary FP signal: a single entity generating most alerts indicates ' +
-        'benign activity from a known source rather than a true threat.',
-      schema: z.object({
-        rule_id: z.string().describe('The UUID of the detection rule (kibana.alert.rule.uuid)'),
-        time_window_hours: z
-          .number()
-          .min(1)
-          .max(168)
-          .default(24)
-          .describe('Time window in hours to fetch alerts (1-168, default 24)'),
-        size: z
-          .number()
-          .int()
-          .min(1)
-          .max(100)
-          .default(50)
-          .describe('Maximum number of alert samples to return (default 50)'),
-      }),
-      handler: async ({ rule_id: ruleId, time_window_hours: timeWindowHours, size }, context) => {
-        const hours = Number(timeWindowHours);
-        const alertSize = Number(size);
+            return {
+              results: [
+                {
+                  type: ToolResultType.other,
+                  data: {
+                    message: `Loaded rule "${ruleName}" as attachment "${created.id}".`,
+                    attachmentId: created.id,
+                    version: created.current_version,
+                  },
+                },
+              ],
+            };
+          } catch (error) {
+            const isNotFound =
+              error != null &&
+              typeof error === 'object' &&
+              (error as { output?: { statusCode?: number } }).output?.statusCode === 404;
 
-        try {
-          const alertsIndex = `${DEFAULT_ALERTS_INDEX}-${context.spaceId}`;
-
-          const searchResult = await context.esClient.asCurrentUser.search({
-            index: alertsIndex,
-            size: alertSize,
-            query: {
-              bool: {
-                filter: [
-                  { term: { 'kibana.alert.rule.uuid': String(ruleId) } },
-                  { range: { '@timestamp': { gte: `now-${hours}h` } } },
+            if (isNotFound) {
+              return {
+                results: [
+                  {
+                    type: ToolResultType.other,
+                    data: { message: `Rule ${ruleId} was not found in this space.` },
+                  },
                 ],
-              },
-            },
-            sort: [{ '@timestamp': 'desc' }],
-            _source: [
-              '@timestamp',
-              'kibana.alert.severity',
-              'kibana.alert.risk_score',
-              'kibana.alert.workflow_status',
-              'kibana.alert.workflow_reason',
-              'host.name',
-              'user.name',
-              'source.ip',
-              'destination.ip',
-              'process.name',
-            ],
-            aggs: {
-              total: { value_count: { field: 'kibana.alert.uuid' } },
-              top_hosts: {
-                terms: { field: 'host.name', size: 10 },
-              },
-              top_users: {
-                terms: { field: 'user.name', size: 10 },
-              },
-              top_source_ips: {
-                terms: { field: 'source.ip', size: 10 },
-              },
-              workflow_reasons: {
-                terms: { field: 'kibana.alert.workflow_reason', size: 10 },
-              },
-            },
-            ignore_unavailable: true,
-          });
+              };
+            }
 
-          const totalCount =
-            typeof searchResult.hits.total === 'number'
-              ? searchResult.hits.total
-              : searchResult.hits.total?.value ?? 0;
-
-          const alerts = searchResult.hits.hits.map((hit) => ({
-            _id: hit._id,
-            ...(hit._source as Record<string, unknown>),
-          }));
-
-          const aggs = searchResult.aggregations as
-            | Record<string, { buckets?: Array<{ key: string; doc_count: number }> }>
-            | undefined;
-
-          const topEntities = {
-            hosts: (aggs?.top_hosts?.buckets ?? []).map((b) => ({
-              value: b.key,
-              count: b.doc_count,
-            })),
-            users: (aggs?.top_users?.buckets ?? []).map((b) => ({
-              value: b.key,
-              count: b.doc_count,
-            })),
-            source_ips: (aggs?.top_source_ips?.buckets ?? []).map((b) => ({
-              value: b.key,
-              count: b.doc_count,
-            })),
-          };
-
-          const workflowReasons = (aggs?.workflow_reasons?.buckets ?? []).map((b) => ({
-            reason: b.key,
-            count: b.doc_count,
-          }));
-
-          return {
-            results: [
-              {
-                type: ToolResultType.other,
-                data: {
-                  message:
-                    totalCount === 0
-                      ? `No alerts found for rule ${ruleId} in the last ${hours} hour(s).`
-                      : `Found ${totalCount} alert(s) for rule ${ruleId} in the last ${hours} hour(s) (showing ${alerts.length}).`,
-                  total_count: totalCount,
-                  alerts,
-                  top_entities: topEntities,
-                  workflow_reasons: workflowReasons,
+            return {
+              results: [
+                {
+                  type: ToolResultType.error,
+                  data: {
+                    message: `Failed to resolve rule ${ruleId}: ${
+                      error instanceof Error ? error.message : String(error)
+                    }`,
+                  },
                 },
-              },
-            ],
-          };
-        } catch (error) {
-          return {
-            results: [
-              {
-                type: ToolResultType.error,
-                data: {
-                  message: `Failed to fetch alerts for rule ${ruleId}: ${
-                    error instanceof Error ? error.message : String(error)
-                  }`,
-                },
-              },
-            ],
-          };
-        }
+              ],
+            };
+          }
+        },
       },
-    },
-  ],
+
+      // ── get_rule_alerts ──────────────────────────────────────────────────────
+      {
+        id: 'investigate-rule.get_rule_alerts',
+        type: ToolType.builtin,
+        description:
+          'Fetches recent alerts produced by a specific detection rule, with entity and disposition aggregations for FP pattern detection. ' +
+          'Returns total_count, a sample of recent alerts (timestamp, severity, key entity fields, workflow_reason), ' +
+          'top_entities (aggregated counts of host.name, user.name, source.ip), ' +
+          'and workflow_reasons (aggregated counts of kibana.alert.workflow_reason values). ' +
+          'Check workflow_reasons first: if a significant share of alerts carry false_positive or benign_positive ' +
+          'dispositions, that is direct analyst confirmation of the FP pattern and takes precedence over entity analysis. ' +
+          'top_entities is the secondary FP signal: a single entity generating most alerts indicates ' +
+          'benign activity from a known source rather than a true threat.',
+        schema: z.object({
+          rule_id: z.string().describe('The UUID of the detection rule (kibana.alert.rule.uuid)'),
+          time_window_hours: z
+            .number()
+            .min(1)
+            .max(168)
+            .default(24)
+            .describe('Time window in hours to fetch alerts (1-168, default 24)'),
+          size: z
+            .number()
+            .int()
+            .min(1)
+            .max(100)
+            .default(50)
+            .describe('Maximum number of alert samples to return (default 50)'),
+        }),
+        handler: async ({ rule_id: ruleId, time_window_hours: timeWindowHours, size }, context) => {
+          const hours = Number(timeWindowHours);
+          const alertSize = Number(size);
+
+          try {
+            const alertsIndex = `${DEFAULT_ALERTS_INDEX}-${context.spaceId}`;
+
+            const searchResult = await context.esClient.asCurrentUser.search({
+              index: alertsIndex,
+              size: alertSize,
+              query: {
+                bool: {
+                  filter: [
+                    { term: { 'kibana.alert.rule.uuid': String(ruleId) } },
+                    { range: { '@timestamp': { gte: `now-${hours}h` } } },
+                  ],
+                },
+              },
+              sort: [{ '@timestamp': 'desc' }],
+              _source: [
+                '@timestamp',
+                'kibana.alert.severity',
+                'kibana.alert.risk_score',
+                'kibana.alert.workflow_status',
+                'kibana.alert.workflow_reason',
+                'host.name',
+                'user.name',
+                'source.ip',
+                'destination.ip',
+                'process.name',
+              ],
+              aggs: {
+                total: { value_count: { field: 'kibana.alert.uuid' } },
+                top_hosts: {
+                  terms: { field: 'host.name', size: 10 },
+                },
+                top_users: {
+                  terms: { field: 'user.name', size: 10 },
+                },
+                top_source_ips: {
+                  terms: { field: 'source.ip', size: 10 },
+                },
+                workflow_reasons: {
+                  terms: { field: 'kibana.alert.workflow_reason', size: 10 },
+                },
+              },
+              ignore_unavailable: true,
+            });
+
+            const totalCount =
+              typeof searchResult.hits.total === 'number'
+                ? searchResult.hits.total
+                : searchResult.hits.total?.value ?? 0;
+
+            const alerts = searchResult.hits.hits.map((hit) => ({
+              _id: hit._id,
+              ...(hit._source as Record<string, unknown>),
+            }));
+
+            const aggs = searchResult.aggregations as
+              | Record<string, { buckets?: Array<{ key: string; doc_count: number }> }>
+              | undefined;
+
+            const topEntities = {
+              hosts: (aggs?.top_hosts?.buckets ?? []).map((b) => ({
+                value: b.key,
+                count: b.doc_count,
+              })),
+              users: (aggs?.top_users?.buckets ?? []).map((b) => ({
+                value: b.key,
+                count: b.doc_count,
+              })),
+              source_ips: (aggs?.top_source_ips?.buckets ?? []).map((b) => ({
+                value: b.key,
+                count: b.doc_count,
+              })),
+            };
+
+            const workflowReasons = (aggs?.workflow_reasons?.buckets ?? []).map((b) => ({
+              reason: b.key,
+              count: b.doc_count,
+            }));
+
+            return {
+              results: [
+                {
+                  type: ToolResultType.other,
+                  data: {
+                    message:
+                      totalCount === 0
+                        ? `No alerts found for rule ${ruleId} in the last ${hours} hour(s).`
+                        : `Found ${totalCount} alert(s) for rule ${ruleId} in the last ${hours} hour(s) (showing ${alerts.length}).`,
+                    total_count: totalCount,
+                    alerts,
+                    top_entities: topEntities,
+                    workflow_reasons: workflowReasons,
+                  },
+                },
+              ],
+            };
+          } catch (error) {
+            return {
+              results: [
+                {
+                  type: ToolResultType.error,
+                  data: {
+                    message: `Failed to fetch alerts for rule ${ruleId}: ${
+                      error instanceof Error ? error.message : String(error)
+                    }`,
+                  },
+                },
+              ],
+            };
+          }
+        },
+      },
+    ],
   });
