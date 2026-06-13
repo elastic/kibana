@@ -39,6 +39,7 @@ import {
 } from './discover_features';
 import { StreamsTelemetryService } from './telemetry/service';
 import { registerSignificantEventAttachment } from './components/sig_events/significant_event_attachment';
+import { registerInvestigationAttachment } from './components/sig_events/investigation_attachment';
 import { StreamsAppLocatorDefinition } from '../common/locators';
 
 const StreamsApplication = dynamic(() =>
@@ -224,6 +225,7 @@ export class StreamsAppPlugin
   start(_coreStart: CoreStart, pluginsStart: StreamsAppStartDependencies): StreamsAppPublicStart {
     if (pluginsStart.agentBuilder) {
       registerSignificantEventAttachment({ agentBuilder: pluginsStart.agentBuilder });
+      registerInvestigationAttachment({ agentBuilder: pluginsStart.agentBuilder });
     }
 
     const locator = pluginsStart.share.url.locators.create(new StreamsAppLocatorDefinition());

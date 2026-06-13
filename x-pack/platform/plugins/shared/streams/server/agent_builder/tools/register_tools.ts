@@ -37,6 +37,14 @@ import { createUpdateStreamTool } from './write/update_stream';
 import { createCreatePartitionTool } from './write/create_partition';
 import { createDeleteStreamTool } from './write/delete_stream';
 import { StreamsWriteQueue } from '../utils/write_queue';
+import {
+  createRunInvestigationTool,
+  STREAMS_RUN_INVESTIGATION_TOOL_ID,
+} from './investigation/run_investigation';
+import {
+  createShowInvestigationTool,
+  STREAMS_SHOW_INVESTIGATION_TOOL_ID,
+} from './investigation/show_investigation';
 export {
   STREAMS_READ_TOOL_IDS,
   STREAMS_WRITE_TOOL_IDS,
@@ -57,6 +65,8 @@ export {
   STREAMS_SEARCH_EVENTS_TOOL_ID,
   STREAMS_CREATE_EVENT_TOOL_ID,
   STREAMS_EVENT_STATUS_UPDATE_TOOL_ID,
+  STREAMS_RUN_INVESTIGATION_TOOL_ID,
+  STREAMS_SHOW_INVESTIGATION_TOOL_ID,
 };
 
 export function registerAgentBuilderTools({
@@ -131,6 +141,17 @@ export function registerAgentBuilderTools({
       telemetry,
     }),
 
+    // Investigation tools
+    createRunInvestigationTool({
+      getScopedClients,
+      server,
+      logger: logger.get('run_investigation_tool'),
+    }),
+    createShowInvestigationTool({
+      getScopedClients,
+      server,
+      logger: logger.get('show_investigation_tool'),
+    }),
   ];
 
   for (const tool of streamsTools) {
