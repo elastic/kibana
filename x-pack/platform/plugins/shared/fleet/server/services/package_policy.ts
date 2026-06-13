@@ -27,10 +27,12 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import { v4 as uuidv4 } from 'uuid';
 import { parse } from 'yaml';
+import { validateAgentConditionExpression } from '@kbn/elastic-agent-condition-language';
 import semverGt from 'semver/functions/gt';
 
-import { ALL_SPACES_ID, DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import pMap from 'p-map';
 
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
@@ -54,6 +56,8 @@ import {
   hasMultipleEnabledPolicyTemplates,
   getInputEffectiveName,
   getRegistryStreamWithDataStreamForInputType,
+  syncDataStreamTypeFromVar,
+  validateFleetSavedObjectId,
 } from '../../common/services';
 import {
   SO_SEARCH_LIMIT,
@@ -196,7 +200,10 @@ import type {
   RunExternalCallbacksPackagePolicyArgument,
   RunExternalCallbacksPackagePolicyResponse,
 } from './package_policy_service';
-import { installAssetsForInputPackagePolicy } from './epm/packages/input_type_packages';
+import {
+  installAssetsForInputPackagePolicy,
+  installAssetsForCustomDatasetPolicy,
+} from './epm/packages/input_type_packages';
 import { auditLoggingService } from './audit_logging';
 import {
   extractAndUpdateSecrets,
@@ -229,7 +236,6 @@ import { getInputsWithIds } from './package_policies/get_input_with_ids';
 import { runWithCache } from './epm/packages/cache';
 import {
   getAgentVersionsForVersionSpecificPolicies,
-  hasAgentVersionCondition,
   hasAgentVersionConditionInInputTemplate,
 } from './utils/version_specific_policies';
 import { recompileInputsWithAgentVersion } from './agent_policies/package_policies_to_agent_inputs';
@@ -514,11 +520,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       skipUniqueNameVerification?: boolean;
       overwrite?: boolean;
       packageInfo?: PackageInfo;
+      createDatasetTemplates?: boolean;
     } = {},
     context?: RequestHandlerContext,
     request?: KibanaRequest
   ): Promise<PackagePolicy> {
     const logger = this.getLogger('create');
+
+    validateFleetSavedObjectId(options?.id);
 
     logger.debug(
       () =>
@@ -556,6 +565,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     this.keepPolicyIdInSync(packagePolicy);
 
+    syncDataStreamTypeFromVar(packagePolicy);
     await preflightCheckPackagePolicy(soClient, packagePolicy, basePkgInfo);
 
     let enrichedPackagePolicy = await packagePolicyService.runExternalCallbacks(
@@ -716,8 +726,11 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     const elasticsearchPrivileges = pkgInfo.elasticsearch?.privileges;
 
-    if (pkgInfo.type === 'input') {
-      await installAssetsForInputPackagePolicy({
+    const shouldCreateDatasetTemplates =
+      options?.createDatasetTemplates ?? pkgInfo.type === 'input';
+
+    if (shouldCreateDatasetTemplates) {
+      await installAssetsForCustomDatasetPolicy({
         soClient,
         esClient,
         pkgInfo,
@@ -795,7 +808,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         enrichedPackagePolicy.policy_ids,
         {
           user: options?.user,
-          hasAgentVersionConditions: hasAgentVersionCondition(pkgInfo, assetsMap),
         }
       );
     }
@@ -893,7 +905,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       user?: AuthenticatedUser;
       removeProtectionFn?: (policyId: string) => undefined | boolean;
       asyncDeploy?: boolean;
-      hasAgentVersionConditions?: boolean;
     } = {}
   ) {
     return runWithCache(() =>
@@ -906,7 +917,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             removeProtection: options.removeProtectionFn
               ? options.removeProtectionFn(policyId)
               : undefined,
-            hasAgentVersionConditions: options?.hasAgentVersionConditions,
           }),
         {
           concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_10,
@@ -939,6 +949,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       bumpRevision?: boolean;
       force?: true;
       asyncDeploy?: boolean;
+      overwrite?: boolean;
     },
     request?: KibanaRequest
   ): Promise<{
@@ -966,6 +977,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       });
 
       this.keepPolicyIdInSync(packagePolicy);
+      syncDataStreamTypeFromVar(packagePolicy);
       await preflightCheckPackagePolicy(soClient, packagePolicy, basePkgInfo);
     });
 
@@ -1089,7 +1101,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     });
 
     const { saved_objects: createdObjects } = await soClient
-      .bulkCreate<PackagePolicySOAttributes>(policiesToCreate)
+      .bulkCreate<PackagePolicySOAttributes>(policiesToCreate, { overwrite: options?.overwrite })
       .catch(catchAndSetErrorStackTrace.withMessage('failed to bulk create package policies'));
 
     // Filter out invalid SOs
@@ -1147,14 +1159,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       await this.bumpAgentPoliciesRevision({ soClient, esClient }, [...agentPolicyIds], {
         user: options?.user,
         asyncDeploy: options?.asyncDeploy,
-        hasAgentVersionConditions: packageInfos
-          .values()
-          .some((pkgInfo) =>
-            hasAgentVersionCondition(
-              pkgInfo,
-              packageInfosandAssetsMap.get(`${pkgInfo.name}-${pkgInfo.version}`)?.assetsMap!
-            )
-          ),
       });
     }
     logger.debug(`Created new package policies`);
@@ -1633,7 +1637,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     inputs = enforceFrozenInputs(oldPackagePolicy.inputs, inputs, options?.force);
 
     _validateRestrictedFieldsNotModifiedOrThrow({
-      pkgInfo,
       oldPackagePolicy,
       packagePolicyUpdate,
     });
@@ -1825,7 +1828,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             (!assignedInOldPolicy && assignedInNewPolicy)
           );
         },
-        hasAgentVersionConditions: hasAgentVersionCondition(pkgInfo, assetsMap),
       }
     );
 
@@ -2246,14 +2248,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
           return removeProtection;
         },
-        hasAgentVersionConditions: packageInfos
-          .values()
-          .some((pkgInfo) =>
-            hasAgentVersionCondition(
-              pkgInfo,
-              packageInfosandAssetsMap.get(`${pkgInfo.name}-${pkgInfo.version}`)?.assetsMap!
-            )
-          ),
       }
     ).finally(() => {
       logger.debug(`bumping of revision for associated agent policies done`);
@@ -2545,47 +2539,12 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
       const agentPolicies = await agentPolicyService.getByIds(soClient, uniquePolicyIdsR);
 
-      let packageInfos: Map<string, PackageInfo> | undefined;
-      let packageInfosandAssetsMap:
-        | Map<string, { assetsMap: PackagePolicyAssetsMap; pkgInfo: PackageInfo }>
-        | undefined;
-
-      if (appContextService.getExperimentalFeatures().enableVersionSpecificPolicies) {
-        const agentPoliciesWithPackagePolicies = await agentPolicyService.getByIds(
-          soClient,
-          uniquePolicyIdsR,
-          { withPackagePolicies: true }
-        );
-        const packagePoliciesToCheck = agentPoliciesWithPackagePolicies.flatMap(
-          (agentPolicy) => agentPolicy.package_policies || []
-        );
-
-        packageInfos = await getPackageInfoForPackagePolicies(
-          packagePoliciesToCheck,
-          soClient,
-          true
-        );
-        packageInfosandAssetsMap = await getPkgInfoAssetsMap({
-          logger,
-          packageInfos: [...packageInfos.values()],
-          savedObjectsClient: soClient,
-        });
-      }
-
       await this.bumpAgentPoliciesRevision(
         { soClient, esClient },
         agentPolicies.map((p) => p.id),
         {
           user: options?.user,
           removeProtectionFn: (policyId) => agentPoliciesWithEndpointPackagePolicies.has(policyId),
-          hasAgentVersionConditions: packageInfos
-            ?.values()
-            .some((pkgInfo) =>
-              hasAgentVersionCondition(
-                pkgInfo,
-                packageInfosandAssetsMap?.get(`${pkgInfo.name}-${pkgInfo.version}`)?.assetsMap!
-              )
-            ),
         }
       );
     }
@@ -3550,6 +3509,7 @@ class PackagePolicyClientWithAuthz extends PackagePolicyClientImpl {
       skipUniqueNameVerification?: boolean;
       overwrite?: boolean;
       packageInfo?: PackageInfo;
+      createDatasetTemplates?: boolean;
     },
     context?: RequestHandlerContext,
     request?: KibanaRequest
@@ -3571,15 +3531,7 @@ class PackagePolicyClientWithAuthz extends PackagePolicyClientImpl {
 }
 
 function validateConditionPlacement(packagePolicy: NewPackagePolicy) {
-  const { enableIntegrationConditions } = appContextService.getExperimentalFeatures();
   const isAgentless = packagePolicy.supports_agentless === true;
-  const throwDisabled = () => {
-    throw new PackagePolicyValidationError(
-      i18n.translate('xpack.fleet.packagePolicyConditionFeatureDisabled', {
-        defaultMessage: '`condition` is not supported because the conditions feature is disabled.',
-      })
-    );
-  };
   const throwAgentless = () => {
     throw new PackagePolicyValidationError(
       i18n.translate('xpack.fleet.packagePolicyConditionNotAllowedAgentless', {
@@ -3597,20 +3549,17 @@ function validateConditionPlacement(packagePolicy: NewPackagePolicy) {
   };
 
   if (packagePolicy.condition) {
-    if (!enableIntegrationConditions) throwDisabled();
     if (isAgentless) throwAgentless();
   }
 
   for (const input of packagePolicy.inputs) {
     const isOtel = input.type === OTEL_COLLECTOR_INPUT_TYPE;
     if (input.condition) {
-      if (!enableIntegrationConditions) throwDisabled();
       if (isAgentless) throwAgentless();
       if (isOtel) throwOtel();
     }
     for (const stream of input.streams) {
       if (!stream.condition) continue;
-      if (!enableIntegrationConditions) throwDisabled();
       if (isAgentless) throwAgentless();
       if (isOtel) throwOtel();
     }
@@ -3619,7 +3568,10 @@ function validateConditionPlacement(packagePolicy: NewPackagePolicy) {
 
 function validatePackagePolicyOrThrow(packagePolicy: NewPackagePolicy, pkgInfo: PackageInfo) {
   validateConditionPlacement(packagePolicy);
-  const validationResults = validatePackagePolicy(packagePolicy, pkgInfo, parse);
+  const validationResults = validatePackagePolicy(packagePolicy, pkgInfo, {
+    safeLoadYaml: parse,
+    conditionValidator: validateAgentConditionExpression,
+  });
   if (validationHasErrors(validationResults)) {
     const responseFormattedValidationErrors = Object.entries(getFlattenedObject(validationResults))
       .map(([key, value]) => {
@@ -4367,7 +4319,10 @@ export function updatePackageInputs(
     vars,
   };
 
-  const validationResults = validatePackagePolicy(resultingPackagePolicy, packageInfo, parse);
+  const validationResults = validatePackagePolicy(resultingPackagePolicy, packageInfo, {
+    safeLoadYaml: parse,
+    conditionValidator: validateAgentConditionExpression,
+  });
 
   if (validationHasErrors(validationResults)) {
     const responseFormattedValidationErrors = Object.entries(getFlattenedObject(validationResults))
@@ -4486,23 +4441,12 @@ export function preconfigurePackageInputs(
 
 // input only packages cannot have their namespace or dataset modified
 export function _validateRestrictedFieldsNotModifiedOrThrow(opts: {
-  pkgInfo: PackageInfo;
   oldPackagePolicy: PackagePolicy;
   packagePolicyUpdate: UpdatePackagePolicy;
 }) {
-  const { pkgInfo, oldPackagePolicy, packagePolicyUpdate } = opts;
+  const { oldPackagePolicy, packagePolicyUpdate } = opts;
 
-  if (pkgInfo.type !== 'input') return;
-
-  const { namespace, inputs } = packagePolicyUpdate;
-  if (namespace && namespace !== oldPackagePolicy.namespace) {
-    throw new PackagePolicyValidationError(
-      i18n.translate('xpack.fleet.updatePackagePolicy.namespaceCannotBeModified', {
-        defaultMessage:
-          'Package policy namespace cannot be modified for input only packages, please create a new package policy.',
-      })
-    );
-  }
+  const { inputs } = packagePolicyUpdate;
 
   if (inputs) {
     for (const input of inputs) {
@@ -4519,7 +4463,6 @@ export function _validateRestrictedFieldsNotModifiedOrThrow(opts: {
             oldStream?.vars?.[DATASET_VAR_NAME] &&
             oldStream?.vars[DATASET_VAR_NAME]?.value !== stream?.vars?.[DATASET_VAR_NAME]?.value
           ) {
-            // seeing this error in dev? Package policy must be called with prepareInputPackagePolicyDataset function first in UI code
             appContextService
               .getLogger()
               .debug(
@@ -4531,7 +4474,7 @@ export function _validateRestrictedFieldsNotModifiedOrThrow(opts: {
             throw new PackagePolicyValidationError(
               i18n.translate('xpack.fleet.updatePackagePolicy.datasetCannotBeModified', {
                 defaultMessage:
-                  'Package policy dataset cannot be modified for input only packages, please create a new package policy.',
+                  'Package policy dataset cannot be modified, please create a new package policy.',
               })
             );
           }
@@ -4542,7 +4485,6 @@ export function _validateRestrictedFieldsNotModifiedOrThrow(opts: {
             oldStream?.vars[DATA_STREAM_TYPE_VAR_NAME]?.value !==
               stream?.vars?.[DATA_STREAM_TYPE_VAR_NAME]?.value
           ) {
-            // seeing this error in dev? Package policy must be called with prepareInputPackagePolicyDataset function first in UI code
             appContextService
               .getLogger()
               .debug(
@@ -4552,9 +4494,9 @@ export function _validateRestrictedFieldsNotModifiedOrThrow(opts: {
                   }, new val '${JSON.stringify(stream?.vars?.[DATA_STREAM_TYPE_VAR_NAME]?.value)}'`
               );
             throw new PackagePolicyValidationError(
-              i18n.translate('xpack.fleet.updatePackagePolicy.datasetCannotBeModified', {
+              i18n.translate('xpack.fleet.updatePackagePolicy.dataStreamTypeCannotBeModified', {
                 defaultMessage:
-                  'Package policy data stream type cannot be modified for input only packages, please create a new package policy.',
+                  'Package policy data stream type cannot be modified, please create a new package policy.',
               })
             );
           }

@@ -32,14 +32,16 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
   const openFirstRule = async (ruleName: string) => {
     await svlTriggersActionsUI.searchRules(ruleName);
-    await find.clickDisplayedByCssSelector(`[data-test-subj="rulesList"] [title="${ruleName}"]`);
+    await find.clickDisplayedByCssSelector(
+      `[data-test-subj="rulesList"] [data-test-subj="rulesListTableRowName-${ruleName}"]`
+    );
   };
 
   const openRulesSection = async () => {
     await svlSearchNavigation.navigateToLandingPage();
 
     await svlCommonNavigation.sidenav.clickLink({ navId: 'admin_and_settings' });
-    await svlCommonNavigation.sidenav.clickPanelLink('rules');
+    await svlCommonNavigation.sidenav.clickPanelLink('management:triggersActions');
   };
 
   const navigateToConnectors = async () => {

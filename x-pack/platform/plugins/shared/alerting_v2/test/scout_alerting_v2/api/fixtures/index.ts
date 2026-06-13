@@ -11,14 +11,12 @@ import {
   getActionPoliciesApiService,
   getAlertActionsApiService,
   getDispatcherApiService,
-  getInsightsApiService,
   getMaintenanceWindowsApiService,
   getRuleExecutionsApiService,
   getRulesApiService,
   type ActionPoliciesApiService,
   type AlertActionsApiService,
   type DispatcherApiService,
-  type InsightsApiService,
   type MaintenanceWindowsApiService,
   type RuleExecutionsApiService,
   type RulesApiService,
@@ -34,7 +32,6 @@ export interface AlertingApiServices {
   alertActions: AlertActionsApiService;
   actionPolicies: ActionPoliciesApiService;
   maintenanceWindows: MaintenanceWindowsApiService;
-  insights: InsightsApiService;
   sourceIndex: SourceIndexApiService;
   ruleExecutions: RuleExecutionsApiService;
   dispatcher: DispatcherApiService;
@@ -63,7 +60,6 @@ export const buildAlertingApiServices = ({
   alertActions: getAlertActionsApiService({ esClient, log }),
   actionPolicies: getActionPoliciesApiService({ kbnClient, log }),
   maintenanceWindows: getMaintenanceWindowsApiService({ kbnClient, log }),
-  insights: getInsightsApiService({ esClient, log }),
   sourceIndex: getSourceIndexApiService({ esClient, log }),
   ruleExecutions: getRuleExecutionsApiService({ esClient, log }),
   dispatcher: getDispatcherApiService({ esClient, log }),
@@ -85,8 +81,54 @@ export const apiTest = baseApiTest.extend<{}, { apiServices: AlertingApiServices
   ],
 });
 
-export { ALL_ROLE, NO_ACCESS_ROLE, READ_ROLE } from '../../common/roles';
-export { buildCreateRuleData } from '../../common/builders';
-export { getRuleUrl } from '../../common/urls';
+export {
+  ALL_ROLE,
+  NO_ACCESS_ROLE,
+  READ_ROLE,
+  ALERTING_V2_RULES_ALL_ROLE,
+  ALERTING_V2_RULES_READ_ROLE,
+  ALERTING_V2_ALERTS_ALL_ROLE,
+  ALERTING_V2_ALERTS_READ_ROLE,
+  ALERTING_V2_ACTION_POLICIES_ALL_ROLE,
+  ALERTING_V2_ACTION_POLICIES_READ_ROLE,
+  ALERTING_V2_ACTION_POLICIES_ALL_AND_RULES_READ_ROLE,
+  ALERTING_V2_EXECUTION_HISTORY_ALL_ROLE,
+  ALERTING_V2_EXECUTION_HISTORY_READ_ROLE,
+} from '../../common/roles';
+export {
+  buildAlertEvent,
+  buildCreateRuleData,
+  buildCreateActionPolicyData,
+} from '../../common/builders';
+export {
+  getActionPolicyUrl,
+  getAckAlertActionUrl,
+  getUnackAlertActionUrl,
+  getAssignAlertActionUrl,
+  getTagAlertActionUrl,
+  getSnoozeAlertActionUrl,
+  getUnsnoozeAlertActionUrl,
+  getActivateAlertActionUrl,
+  getDeactivateAlertActionUrl,
+  getRuleUrl,
+  getBulkRulesUrl,
+  BULK_ALERT_ACTION_URL,
+  getBulkActionPoliciesUrl,
+  getDisableActionPolicyUrl,
+  getEnableActionPolicyUrl,
+  getListActionPoliciesUrl,
+  getSnoozeActionPolicyUrl,
+  getUnsnoozeActionPolicyUrl,
+  getUpdateActionPolicyApiKeyUrl,
+  getListExecutionHistoryUrl,
+  getCountNewExecutionHistoryEventsUrl,
+} from '../../common/urls';
 export { expectNoBulkTruncationMetadata } from '../../common/assertions';
+export {
+  ACTION_POLICY_CREATED_BY_MAX_LENGTH,
+  ACTION_POLICY_PER_PAGE_MAX,
+  ACTION_POLICY_SEARCH_MAX_LENGTH,
+  ACTION_POLICY_TAG_MAX_LENGTH,
+  ACTION_POLICY_TAGS_MAX_COUNT,
+} from '../../common/constants';
 export * as testData from '../../common/constants';

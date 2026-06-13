@@ -3,6 +3,12 @@
 set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
+
+# This step only runs Node scripts and `playwright --list` (manifest generation,
+# config discovery); it never serves the Kibana UI, so skip building the
+# dev-mode shared webpack bundles (monaco, ui-shared-deps) during bootstrap.
+export KBN_BOOTSTRAP_NO_PREBUILT=true
+
 .buildkite/scripts/bootstrap.sh
 
 echo '--- Update Scout Test Config Manifests'

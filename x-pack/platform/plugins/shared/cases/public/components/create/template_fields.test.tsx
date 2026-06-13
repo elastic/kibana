@@ -18,6 +18,7 @@ jest.mock('@kbn/es-ui-shared-plugin/static/forms/hook_form_lib', () => ({
   ...jest.requireActual('@kbn/es-ui-shared-plugin/static/forms/hook_form_lib'),
   useFormData: (...args: unknown[]) => mockUseFormData(...args),
   useFormContext: () => mockUseFormContext(),
+  UseField: () => null,
 }));
 
 const mockUseTemplateFormSync = jest.fn();

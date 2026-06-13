@@ -7,7 +7,6 @@
 
 import { PluginSetup, PluginStart } from '@kbn/core-di';
 import { CoreStart, Request, SavedObjectsClientFactory } from '@kbn/core-di-server';
-import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '@kbn/maintenance-windows-plugin/common';
 import { AlertActionsClient } from '../lib/alert_actions_client';
@@ -32,7 +31,6 @@ import { EsServiceInternalToken, EsServiceScopedToken } from '../lib/services/es
 import { EventLogService } from '../lib/services/event_log_service/event_log_service';
 import { EventLogServiceToken } from '../lib/services/event_log_service/tokens';
 import { LoggerService, LoggerServiceToken } from '../lib/services/logger_service/logger_service';
-import { AlertingDomainEventBus, EventBusToken } from '../lib/events/event_bus';
 import { MaintenanceWindowService } from '../lib/services/maintenance_window_service/maintenance_window_service';
 import {
   MaintenanceWindowSavedObjectsClientToken,
@@ -68,11 +66,8 @@ import {
   TaskRunnerFactoryToken,
 } from '../lib/services/task_run_scope_service/create_task_runner';
 import { UserService } from '../lib/services/user_service/user_service';
-import { WorkflowExtensionsService } from '../lib/services/workflow_extensions_service/workflow_extensions_service';
-import {
-  WorkflowExtensionsServiceToken,
-  WorkflowsClientToken,
-} from '../lib/services/workflow_extensions_service/tokens';
+import { WorkflowService } from '../lib/services/workflow_service/workflow_service';
+import { WorkflowServiceToken } from '../lib/services/workflow_service/tokens';
 import { ApiKeyServiceSavedObjectsClientToken } from '../lib/services/api_key_service/tokens';
 import {
   API_KEY_PENDING_INVALIDATION_TYPE,
@@ -84,32 +79,11 @@ import {
   WorkflowsManagementApiToken,
 } from '../lib/dispatcher/steps/dispatch_step_tokens';
 import { MatcherSuggestionsService } from '../lib/services/matcher_suggestions_service/matcher_suggestions_service';
-import { RuleDoctorInsightsClient } from '../lib/rule_doctor_insights_client/rule_doctor_insights_client';
-import { SpaceContext } from '../routes/rule_doctor_insights/space_context';
-import {
-  InsightsClientScopedToken,
-  InsightsClientInternalToken,
-} from '../lib/rule_doctor_insights_client/tokens';
 import type { AlertingServerSetupDependencies, AlertingServerStartDependencies } from '../types';
 
 export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(AlertActionsClient).toSelf().inRequestScope();
-  bind(RulesClient)
-    .toDynamicValue(({ get }) => {
-      return new RulesClient({
-        services: {
-          request: get(Request),
-          rulesSavedObjectService: get(RulesSavedObjectServiceScopedToken),
-          taskManager: get(PluginStart<TaskManagerStartContract>('taskManager')),
-          userService: get(UserService),
-          actionPolicyClient: get(ActionPolicyClient),
-        },
-        options: {
-          spaceId: get(RequestSpaceIdToken),
-        },
-      });
-    })
-    .inRequestScope();
+  bind(RulesClient).toSelf().inRequestScope();
   bind(RequestSpaceIdToken)
     .toDynamicValue(({ get }) => {
       const request = get(Request);
@@ -125,18 +99,7 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
       return spaces.spacesService.spaceIdToNamespace(spaceId);
     })
     .inRequestScope();
-  bind(ActionPolicyClient)
-    .toDynamicValue(({ get }) => {
-      return new ActionPolicyClient(
-        get(ActionPolicySavedObjectServiceScopedToken),
-        get(RulesSavedObjectServiceScopedToken),
-        get(UserService),
-        get(ApiKeyService),
-        get(EncryptedSavedObjectsClientToken),
-        get(ActionPolicyNamespaceToken)
-      );
-    })
-    .inRequestScope();
+  bind(ActionPolicyClient).toSelf().inRequestScope();
   bind(ActionPolicyExecutionHistoryClient).toSelf().inRequestScope();
   bind(UserService).toSelf().inRequestScope();
   bind(ApiKeyService).toSelf().inRequestScope();
@@ -146,22 +109,10 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(LoggerService).toSelf().inSingletonScope();
   bind(LoggerServiceToken).toService(LoggerService);
 
-  bind(AlertingDomainEventBus).toSelf().inSingletonScope();
-  bind(EventBusToken).toService(AlertingDomainEventBus);
-
   bind(EventLogService).toSelf().inSingletonScope();
   bind(EventLogServiceToken).toService(EventLogService);
-  bind(WorkflowsClientToken)
-    .toResolvedValue(
-      async (workflowsExtensionsStart, request) => workflowsExtensionsStart.getClient(request),
-      [
-        PluginStart<AlertingServerStartDependencies['workflowsExtensions']>('workflowsExtensions'),
-        Request,
-      ]
-    )
-    .inRequestScope();
-  bind(WorkflowExtensionsService).toSelf().inRequestScope();
-  bind(WorkflowExtensionsServiceToken).toService(WorkflowExtensionsService);
+  bind(WorkflowService).toSelf().inSingletonScope();
+  bind(WorkflowServiceToken).toService(WorkflowService);
   bind(ResourceManager).toSelf().inSingletonScope();
 
   bind(EsServiceInternalToken)
@@ -316,24 +267,6 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
         const client = uiSettings.globalAsScopedToClient(soClient);
         return client.get<boolean>(ALERTING_V2_DISPATCHER_ENABLED_SETTING_ID);
       };
-    })
-    .inSingletonScope();
-
-  bind(SpaceContext).toSelf().inRequestScope();
-
-  bind(InsightsClientScopedToken)
-    .toDynamicValue(({ get }) => {
-      const loggerService = get(LoggerServiceToken);
-      const esClient = get(EsServiceScopedToken);
-      return new RuleDoctorInsightsClient(esClient, loggerService);
-    })
-    .inRequestScope();
-
-  bind(InsightsClientInternalToken)
-    .toDynamicValue(({ get }) => {
-      const loggerService = get(LoggerServiceToken);
-      const esClient = get(EsServiceInternalToken);
-      return new RuleDoctorInsightsClient(esClient, loggerService);
     })
     .inSingletonScope();
 

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { z } from '@kbn/zod/v4';
 import { CustomStepImpl } from './custom_step_impl';
 
 const createMocks = () => {
@@ -16,6 +17,7 @@ const createMocks = () => {
       getContext: jest.fn(() => ({})),
       getEsClientAsUser: jest.fn(() => ({})),
       getFakeRequest: jest.fn(() => null),
+      callKibanaApi: jest.fn(),
     },
     abortController: new AbortController(),
     node: { configuration: { with: { key: 'value' } } },
@@ -73,6 +75,8 @@ describe('CustomStepImpl', () => {
     expect(handler).toHaveBeenCalledWith(
       expect.objectContaining({
         input: { key: 'value' },
+        rawInput: { key: 'value' },
+        config: {},
         stepId: 'custom-step',
         stepType: 'my-custom-type',
       })
@@ -160,6 +164,48 @@ describe('CustomStepImpl', () => {
     expect(typeof (impl as any).onCancel).toBe('function');
   });
 
+  it('exposes callKibanaApi on the handler contextManager and forwards calls', async () => {
+    const { stepExecutionRuntime, connectorExecutor, workflowRuntime, workflowLogger } =
+      createMocks();
+    stepExecutionRuntime.contextManager.callKibanaApi.mockResolvedValue({
+      status: 200,
+      headers: {},
+      body: { ok: true },
+    });
+
+    let observedCallKibanaApi: unknown;
+    const handler = jest.fn(async (ctx: any) => {
+      observedCallKibanaApi = ctx.contextManager.callKibanaApi;
+      const result = await ctx.contextManager.callKibanaApi({ method: 'GET', path: '/api/status' });
+      return { output: result };
+    });
+    const stepDefinition = { handler };
+
+    const node = {
+      stepId: 'custom-step',
+      stepType: 'my-custom-type',
+      configuration: { with: {}, 'max-step-size': undefined },
+    };
+
+    const impl = new CustomStepImpl(
+      node as any,
+      stepDefinition as any,
+      stepExecutionRuntime as any,
+      connectorExecutor as any,
+      workflowRuntime as any,
+      workflowLogger as any
+    );
+
+    const result = await (impl as any)._run({});
+    expect(typeof observedCallKibanaApi).toBe('function');
+    expect(stepExecutionRuntime.contextManager.callKibanaApi).toHaveBeenCalledWith({
+      method: 'GET',
+      path: '/api/status',
+      signal: stepExecutionRuntime.abortController.signal,
+    });
+    expect(result.output).toEqual({ status: 200, headers: {}, body: { ok: true } });
+  });
+
   it('getInput renders the with data from node configuration', () => {
     const { stepExecutionRuntime, connectorExecutor, workflowRuntime, workflowLogger } =
       createMocks();
@@ -187,5 +233,118 @@ describe('CustomStepImpl', () => {
     expect(stepExecutionRuntime.contextManager.renderValueAccordingToContext).toHaveBeenCalledWith({
       foo: 'bar',
     });
+  });
+
+  it('passes rendered schema-defined config to the handler', async () => {
+    const { stepExecutionRuntime, connectorExecutor, workflowRuntime, workflowLogger } =
+      createMocks();
+
+    const renderedConfig = {
+      'agent-id': 'elastic-ai-agent',
+      'connector-id': 'my-connector',
+      'create-conversation': true,
+    };
+    stepExecutionRuntime.contextManager.renderValueAccordingToContext.mockReturnValueOnce(
+      renderedConfig
+    );
+
+    const handler = jest.fn().mockResolvedValue({ output: { result: 42 } });
+    const stepDefinition = {
+      configSchema: z.object({
+        'agent-id': z.string().optional(),
+        'connector-id': z.string().optional(),
+        'create-conversation': z.boolean().optional(),
+      }),
+      handler,
+    };
+
+    const node = {
+      stepId: 'custom-step',
+      stepType: 'ai.agent',
+      configuration: {
+        name: 'custom-step',
+        type: 'ai.agent',
+        'agent-id': '{{ consts.agent_id }}',
+        'connector-id': '{{ inputs.connector_id }}',
+        'create-conversation': true,
+        with: { message: 'hello' },
+        'max-step-size': undefined,
+        unexpected: '{{ consts.unexpected }}',
+      },
+    };
+
+    const impl = new CustomStepImpl(
+      node as any,
+      stepDefinition as any,
+      stepExecutionRuntime as any,
+      connectorExecutor as any,
+      workflowRuntime as any,
+      workflowLogger as any
+    );
+
+    await (impl as any)._run({ message: 'hello' });
+
+    expect(stepExecutionRuntime.contextManager.renderValueAccordingToContext).toHaveBeenCalledWith({
+      'agent-id': '{{ consts.agent_id }}',
+      'connector-id': '{{ inputs.connector_id }}',
+      'create-conversation': true,
+    });
+    expect(handler).toHaveBeenCalledWith(
+      expect.objectContaining({
+        config: renderedConfig,
+        rawInput: { message: 'hello' },
+      })
+    );
+  });
+
+  it('filters config to keys declared by the config schema', async () => {
+    const { stepExecutionRuntime, connectorExecutor, workflowRuntime, workflowLogger } =
+      createMocks();
+
+    const handler = jest.fn().mockResolvedValue({ output: { result: 42 } });
+    const stepDefinition = {
+      configSchema: z.object({
+        source: z.unknown(),
+      }),
+      handler,
+    };
+
+    const node = {
+      stepId: 'custom-step',
+      stepType: 'data.parse_json',
+      configuration: {
+        name: 'custom-step',
+        type: 'data.parse_json',
+        source: '{{ steps.previous.output }}',
+        with: { foo: 'bar' },
+        if: '{{ condition }}',
+        timeout: '1m',
+        'max-step-size': undefined,
+        'on-failure': { continue: true },
+      },
+    };
+
+    const impl = new CustomStepImpl(
+      node as any,
+      stepDefinition as any,
+      stepExecutionRuntime as any,
+      connectorExecutor as any,
+      workflowRuntime as any,
+      workflowLogger as any
+    );
+
+    await (impl as any)._run({ foo: 'bar' });
+
+    expect(stepExecutionRuntime.contextManager.renderValueAccordingToContext).toHaveBeenCalledWith({
+      source: '{{ steps.previous.output }}',
+    });
+    expect(handler).toHaveBeenCalledWith(
+      expect.objectContaining({
+        config: {
+          source: '{{ steps.previous.output }}',
+        },
+        rawInput: { foo: 'bar' },
+      })
+    );
   });
 });

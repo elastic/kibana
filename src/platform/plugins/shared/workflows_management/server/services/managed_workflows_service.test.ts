@@ -233,6 +233,11 @@ describe('ManagedWorkflowsService', () => {
 
       await service.installManagedWorkflow(WORKFLOW_ID, { spaceId: SPACE_ID }, definition.pluginId);
 
+      expect(crudService.prepareWorkflowDocumentForStorage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          lightweightValidation: true,
+        })
+      );
       expect(crudService.indexWorkflowDocument).toHaveBeenCalledWith(
         WORKFLOW_ID,
         expect.objectContaining({
@@ -380,6 +385,28 @@ describe('ManagedWorkflowsService', () => {
       expect(crudService.indexWorkflowDocument).not.toHaveBeenCalled();
     });
 
+    it('reindexes when the definition version changed but the hash is unchanged', async () => {
+      const definition = createDefinition({ version: 2 });
+      mockManagedWorkflowDefinitions = [definition];
+      const { crudService, service } = createService();
+      crudService.getWorkflowDocumentWithVersion.mockResolvedValue(
+        createVersionedDocument(
+          createWorkflowSource({
+            definitionHash: definitionHash(definition.yaml),
+            managedVersion: 1,
+          })
+        )
+      );
+
+      await service.installManagedWorkflow(WORKFLOW_ID, { spaceId: SPACE_ID }, definition.pluginId);
+
+      expect(crudService.indexWorkflowDocument).toHaveBeenCalledWith(
+        WORKFLOW_ID,
+        expect.objectContaining({ managedVersion: 2 }),
+        { ifSeqNo: 7, ifPrimaryTerm: 13 }
+      );
+    });
+
     it('re-renders and reindexes when template values change', async () => {
       const definition = createTemplateDefinition();
       mockManagedWorkflowDefinitions = [definition];
@@ -439,6 +466,262 @@ describe('ManagedWorkflowsService', () => {
         service.installManagedWorkflow(WORKFLOW_ID, { spaceId: SPACE_ID }, definition.pluginId)
       ).rejects.toBe(conflictError);
       expect(crudService.indexWorkflowDocument).toHaveBeenCalledTimes(3);
+    });
+  });
+
+  describe('getManagedWorkflowStatus', () => {
+    it('returns intact when the installed managed workflow matches the registry', async () => {
+      const definition = createDefinition();
+      mockManagedWorkflowDefinitions = [definition];
+      const { crudService, service } = createService();
+      crudService.getWorkflowDocumentSource.mockResolvedValue(
+        createWorkflowSource({
+          definitionHash: definitionHash(definition.yaml),
+          managedVersion: definition.version,
+          originManagedWorkflowId: definition.id,
+        })
+      );
+
+      const status = await service.getManagedWorkflowStatus(
+        WORKFLOW_ID,
+        { spaceId: SPACE_ID },
+        definition.pluginId
+      );
+
+      expect(status).toEqual({
+        status: 'intact',
+        workflowId: WORKFLOW_ID,
+        definitionId: WORKFLOW_ID,
+        spaceId: SPACE_ID,
+        installed: true,
+        enabled: true,
+        valid: true,
+        managedBy: PLUGIN_ID,
+        storedVersion: 1,
+        registryVersion: 1,
+        storedHash: definitionHash(definition.yaml),
+        registryHash: definitionHash(definition.yaml),
+      });
+      expect(crudService.getWorkflowDocumentSource).toHaveBeenCalledWith(WORKFLOW_ID, SPACE_ID, {
+        includeDeleted: true,
+        includeGlobal: true,
+      });
+    });
+
+    it('returns missing when the workflow document does not exist', async () => {
+      const definition = createDefinition();
+      mockManagedWorkflowDefinitions = [definition];
+      const { crudService, service } = createService();
+      crudService.getWorkflowDocumentSource.mockResolvedValue(null);
+
+      const status = await service.getManagedWorkflowStatus(
+        WORKFLOW_ID,
+        { spaceId: SPACE_ID },
+        definition.pluginId
+      );
+
+      expect(status).toEqual(
+        expect.objectContaining({
+          status: 'missing',
+          installed: false,
+          enabled: null,
+          valid: null,
+          managedBy: null,
+          storedVersion: null,
+          storedHash: null,
+        })
+      );
+    });
+
+    it('returns missing when the workflow document is soft-deleted', async () => {
+      const definition = createDefinition();
+      mockManagedWorkflowDefinitions = [definition];
+      const { crudService, service } = createService();
+      crudService.getWorkflowDocumentSource.mockResolvedValue(
+        createWorkflowSource({ deleted_at: new Date('2024-01-02T00:00:00.000Z') })
+      );
+
+      const status = await service.getManagedWorkflowStatus(
+        WORKFLOW_ID,
+        { spaceId: SPACE_ID },
+        definition.pluginId
+      );
+
+      expect(status.status).toBe('missing');
+      expect(status.installed).toBe(false);
+    });
+
+    it('returns disabled when the installed managed workflow is disabled', async () => {
+      const definition = createDefinition();
+      mockManagedWorkflowDefinitions = [definition];
+      const { crudService, service } = createService();
+      crudService.getWorkflowDocumentSource.mockResolvedValue(
+        createWorkflowSource({
+          enabled: false,
+          definitionHash: definitionHash(definition.yaml),
+          managedVersion: definition.version,
+          originManagedWorkflowId: definition.id,
+        })
+      );
+
+      const status = await service.getManagedWorkflowStatus(
+        WORKFLOW_ID,
+        { spaceId: SPACE_ID },
+        definition.pluginId
+      );
+
+      expect(status.status).toBe('disabled');
+      expect(status.enabled).toBe(false);
+    });
+
+    it('returns invalid before disabled when the document has no valid definition', async () => {
+      const definition = createDefinition();
+      mockManagedWorkflowDefinitions = [definition];
+      const { crudService, service } = createService();
+      crudService.getWorkflowDocumentSource.mockResolvedValue(
+        createWorkflowSource({
+          enabled: false,
+          valid: false,
+          definition: null,
+          definitionHash: definitionHash(definition.yaml),
+          managedVersion: definition.version,
+          originManagedWorkflowId: definition.id,
+        })
+      );
+
+      const status = await service.getManagedWorkflowStatus(
+        WORKFLOW_ID,
+        { spaceId: SPACE_ID },
+        definition.pluginId
+      );
+
+      expect(status.status).toBe('invalid');
+      expect(status.valid).toBe(false);
+    });
+
+    it('returns drifted when the stored hash or version differs from the registry', async () => {
+      const definition = createDefinition({ version: 2 });
+      mockManagedWorkflowDefinitions = [definition];
+      const { crudService, service } = createService();
+      crudService.getWorkflowDocumentSource.mockResolvedValue(
+        createWorkflowSource({
+          definitionHash: 'old-hash',
+          managedVersion: 1,
+          originManagedWorkflowId: definition.id,
+        })
+      );
+
+      const status = await service.getManagedWorkflowStatus(
+        WORKFLOW_ID,
+        { spaceId: SPACE_ID },
+        definition.pluginId
+      );
+
+      expect(status).toEqual(
+        expect.objectContaining({
+          status: 'drifted',
+          storedVersion: 1,
+          registryVersion: 2,
+          storedHash: 'old-hash',
+          registryHash: definitionHash(definition.yaml),
+        })
+      );
+    });
+
+    it('returns not_managed when a non-managed workflow exists at the resolved id', async () => {
+      const definition = createDefinition();
+      mockManagedWorkflowDefinitions = [definition];
+      const { crudService, service } = createService();
+      crudService.getWorkflowDocumentSource.mockResolvedValue(
+        createWorkflowSource({
+          managed: false,
+          managedBy: null,
+          managedVersion: null,
+          definitionHash: null,
+          originManagedWorkflowId: null,
+        })
+      );
+
+      const status = await service.getManagedWorkflowStatus(
+        WORKFLOW_ID,
+        { spaceId: SPACE_ID },
+        definition.pluginId
+      );
+
+      expect(status).toEqual(
+        expect.objectContaining({
+          status: 'not_managed',
+          installed: true,
+          managedBy: null,
+          storedVersion: null,
+          storedHash: null,
+        })
+      );
+    });
+
+    it('resolves explicit workflowId and workflowIdSuffix options', async () => {
+      const definition = createDefinition();
+      mockManagedWorkflowDefinitions = [definition];
+      const { crudService, service } = createService();
+      crudService.getWorkflowDocumentSource.mockResolvedValue(
+        createWorkflowSource({
+          definitionHash: definitionHash(definition.yaml),
+          managedVersion: definition.version,
+          originManagedWorkflowId: definition.id,
+        })
+      );
+
+      await service.getManagedWorkflowStatus(
+        WORKFLOW_ID,
+        { spaceId: SPACE_ID, workflowId: `${WORKFLOW_ID}-custom` },
+        definition.pluginId
+      );
+      await service.getManagedWorkflowStatus(
+        WORKFLOW_ID,
+        { spaceId: SPACE_ID, workflowIdSuffix: 'tenant-a' },
+        definition.pluginId
+      );
+
+      expect(crudService.getWorkflowDocumentSource).toHaveBeenNthCalledWith(
+        1,
+        `${WORKFLOW_ID}-custom`,
+        SPACE_ID,
+        {
+          includeDeleted: true,
+          includeGlobal: true,
+        }
+      );
+      expect(crudService.getWorkflowDocumentSource).toHaveBeenNthCalledWith(
+        2,
+        `${WORKFLOW_ID}-tenant-a`,
+        SPACE_ID,
+        {
+          includeDeleted: true,
+          includeGlobal: true,
+        }
+      );
+    });
+
+    it('throws clearly for unknown managed workflow ids', async () => {
+      mockManagedWorkflowDefinitions = [];
+      const { service } = createService();
+
+      await expect(
+        service.getManagedWorkflowStatus(WORKFLOW_ID, { spaceId: SPACE_ID }, PLUGIN_ID)
+      ).rejects.toThrow(`Unknown managed workflow id: ${WORKFLOW_ID}`);
+    });
+
+    it('validates definition ownership before querying stored workflow state', async () => {
+      const definition = createDefinition({ pluginId: 'otherPlugin' });
+      mockManagedWorkflowDefinitions = [definition];
+      const { crudService, service } = createService();
+
+      await expect(
+        service.getManagedWorkflowStatus(WORKFLOW_ID, { spaceId: SPACE_ID }, PLUGIN_ID)
+      ).rejects.toThrow(
+        `Managed workflow '${WORKFLOW_ID}' is owned by plugin 'otherPlugin' but was registered by '${PLUGIN_ID}'`
+      );
+      expect(crudService.getWorkflowDocumentSource).not.toHaveBeenCalled();
     });
   });
 
@@ -780,6 +1063,7 @@ describe('ManagedWorkflowsService', () => {
           managed: true,
           managedBy: PLUGIN_ID,
           originManagedWorkflowId: WORKFLOW_ID,
+          managedVersion: 1,
         }),
         {
           spaceId: SPACE_ID,

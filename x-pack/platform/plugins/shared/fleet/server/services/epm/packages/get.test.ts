@@ -38,6 +38,7 @@ import {
   getAgentTemplateAssetsMap,
   getInstalledPackages,
   getPackageDependencies,
+  getPackageFromSource,
   getPackageInfo,
   getPackages,
   getPackageUsageStats,
@@ -1969,6 +1970,60 @@ owner: elastic`,
       );
 
       expect(result).toBeUndefined();
+    });
+  });
+
+  describe('getPackageFromSource', () => {
+    const pkgName = 'apm';
+    const pkgVersion = '9.3.1';
+    const soClient = savedObjectsClientMock.create();
+
+    beforeEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    const bundledResult = {
+      paths: ['/bundled/path'],
+      packageInfo: { name: pkgName, version: pkgVersion } as any,
+      assetsMap: new Map(),
+      archiveIterator: {} as any,
+    };
+
+    it('falls back to bundled archive for an installed bundled package when ES assets are missing', async () => {
+      const installedPkg = {
+        install_status: 'installed',
+        install_source: 'bundled',
+        version: pkgVersion,
+        package_assets: [{ id: 'asset-1', type: 'epm-packages-assets' }],
+      } as any;
+
+      jest.mocked(getEsPackage).mockResolvedValueOnce(undefined);
+      MockRegistry.getBundledArchive.mockResolvedValue(bundledResult);
+
+      const result = await getPackageFromSource({
+        pkgName,
+        pkgVersion,
+        installedPkg,
+        savedObjectsClient: soClient,
+      });
+
+      expect(MockRegistry.getBundledArchive).toHaveBeenCalledWith(pkgName, pkgVersion);
+      expect(result).toMatchObject({ paths: bundledResult.paths });
+    });
+
+    it('falls back to bundled archive when EPR returns 404 for a package not in the registry', async () => {
+      const { RegistryResponseError } = jest.requireActual('../../../errors');
+      MockRegistry.getPackage.mockRejectedValue(new RegistryResponseError('not found', 404));
+      MockRegistry.getBundledArchive.mockResolvedValue(bundledResult);
+
+      const result = await getPackageFromSource({
+        pkgName,
+        pkgVersion,
+        savedObjectsClient: soClient,
+      });
+
+      expect(MockRegistry.getBundledArchive).toHaveBeenCalledWith(pkgName, pkgVersion);
+      expect(result).toMatchObject({ paths: bundledResult.paths });
     });
   });
 });

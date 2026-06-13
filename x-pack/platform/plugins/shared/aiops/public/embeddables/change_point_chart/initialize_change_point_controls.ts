@@ -8,52 +8,47 @@
 import type { StateComparators } from '@kbn/presentation-publishing';
 import { BehaviorSubject, map, merge, skip } from 'rxjs';
 import type { ChangePointDetectionViewType } from '@kbn/aiops-change-point-detection/constants';
-import type { ChangePointComponentApi } from './types';
-import type { ChangePointEmbeddableState } from '../../../common/embeddables/change_point_chart/types';
-
-type ChangePointEmbeddableCustomState = Omit<
-  ChangePointEmbeddableState,
-  'time_range' | 'title' | 'description' | 'hide_title' | 'hide_border'
->;
+import type { ChangePointChartEmbeddableState } from '@kbn/aiops-server-schemas/embeddables/change_point_chart';
+import type { ChangePointComponentApi, ChangePointEmbeddableCustomState } from './types';
 
 export const changePointComparators: StateComparators<ChangePointEmbeddableCustomState> = {
-  viewType: 'referenceEquality',
-  dataViewId: 'referenceEquality',
-  fn: 'referenceEquality',
-  metricField: 'referenceEquality',
-  splitField: 'referenceEquality',
+  view_type: 'referenceEquality',
+  data_view_id: 'referenceEquality',
+  aggregation_function: 'referenceEquality',
+  metric_field: 'referenceEquality',
+  split_field: 'referenceEquality',
   partitions: 'deepEquality',
-  maxSeriesToPlot: 'referenceEquality',
+  max_series_to_plot: 'referenceEquality',
 };
 
-export const initializeChangePointControls = (initialState: ChangePointEmbeddableState) => {
-  const viewType = new BehaviorSubject<ChangePointDetectionViewType>(initialState.viewType);
-  const dataViewId = new BehaviorSubject<string>(initialState.dataViewId);
-  const fn = new BehaviorSubject(initialState.fn);
-  const metricField = new BehaviorSubject(initialState.metricField);
-  const splitField = new BehaviorSubject(initialState.splitField);
+export const initializeChangePointControls = (initialState: ChangePointChartEmbeddableState) => {
+  const viewType = new BehaviorSubject<ChangePointDetectionViewType>(initialState.view_type);
+  const dataViewId = new BehaviorSubject<string>(initialState.data_view_id);
+  const fn = new BehaviorSubject(initialState.aggregation_function);
+  const metricField = new BehaviorSubject(initialState.metric_field);
+  const splitField = new BehaviorSubject(initialState.split_field);
   const partitions = new BehaviorSubject(initialState.partitions);
-  const maxSeriesToPlot = new BehaviorSubject(initialState.maxSeriesToPlot);
+  const maxSeriesToPlot = new BehaviorSubject(initialState.max_series_to_plot);
 
   const updateUserInput = (update: ChangePointEmbeddableCustomState) => {
-    viewType.next(update.viewType);
-    dataViewId.next(update.dataViewId);
-    fn.next(update.fn);
-    metricField.next(update.metricField);
-    splitField.next(update.splitField);
+    viewType.next(update.view_type);
+    dataViewId.next(update.data_view_id);
+    fn.next(update.aggregation_function);
+    metricField.next(update.metric_field);
+    splitField.next(update.split_field);
     partitions.next(update.partitions);
-    maxSeriesToPlot.next(update.maxSeriesToPlot);
+    maxSeriesToPlot.next(update.max_series_to_plot);
   };
 
   const getLatestState = (): ChangePointEmbeddableCustomState => {
     return {
-      viewType: viewType.getValue(),
-      dataViewId: dataViewId.getValue(),
-      fn: fn.getValue(),
-      metricField: metricField.getValue(),
-      splitField: splitField.getValue(),
+      view_type: viewType.getValue(),
+      data_view_id: dataViewId.getValue(),
+      aggregation_function: fn.getValue(),
+      metric_field: metricField.getValue(),
+      split_field: splitField.getValue(),
       partitions: partitions.getValue(),
-      maxSeriesToPlot: maxSeriesToPlot.getValue(),
+      max_series_to_plot: maxSeriesToPlot.getValue(),
     };
   };
 
@@ -67,7 +62,7 @@ export const initializeChangePointControls = (initialState: ChangePointEmbeddabl
       partitions,
       maxSeriesToPlot,
       updateUserInput,
-    } as unknown as ChangePointComponentApi,
+    } satisfies ChangePointComponentApi,
     anyStateChange$: merge(
       viewType.pipe(
         skip(1),
@@ -100,13 +95,13 @@ export const initializeChangePointControls = (initialState: ChangePointEmbeddabl
     ),
     getLatestState,
     reinitializeState: (lastSavedState: ChangePointEmbeddableCustomState) => {
-      viewType.next(lastSavedState.viewType);
-      dataViewId.next(lastSavedState.dataViewId);
-      fn.next(lastSavedState.fn);
-      metricField.next(lastSavedState.metricField);
-      splitField.next(lastSavedState.splitField);
+      viewType.next(lastSavedState.view_type);
+      dataViewId.next(lastSavedState.data_view_id);
+      fn.next(lastSavedState.aggregation_function);
+      metricField.next(lastSavedState.metric_field);
+      splitField.next(lastSavedState.split_field);
       partitions.next(lastSavedState.partitions);
-      maxSeriesToPlot.next(lastSavedState.maxSeriesToPlot);
+      maxSeriesToPlot.next(lastSavedState.max_series_to_plot);
     },
   };
 };

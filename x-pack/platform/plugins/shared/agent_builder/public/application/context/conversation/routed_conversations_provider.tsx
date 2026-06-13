@@ -5,17 +5,20 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback, useState } from 'react';
+import React, { useMemo, useCallback, useState, useEffect, useRef } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import { useQueryClient } from '@kbn/react-query';
-import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import type { ConversationAttachment } from '@kbn/agent-builder-common/attachments';
+import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common';
 import { ConversationContext } from './conversation_context';
 import type { LocationState } from '../../hooks/use_navigation';
 import { appPaths } from '../../utils/app_paths';
 import { useNavigation } from '../../hooks/use_navigation';
 import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
+import { useKibana } from '../../hooks/use_kibana';
 import { useConversationActions } from './use_conversation_actions';
 import { upsertAttachmentsIntoList } from './upsert_attachments_into_list';
+import { removeAttachmentFromList } from './remove_attachment_from_list';
 import { ConversationChangeNotifier } from './conversation_change_notifier';
 
 interface RoutedConversationsProviderProps {
@@ -27,6 +30,9 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
 }) => {
   const queryClient = useQueryClient();
   const { conversationsService } = useAgentBuilderServices();
+  const {
+    services: { analytics },
+  } = useKibana();
   const { conversationId: conversationIdParam, agentId: agentIdParam } = useParams<{
     conversationId?: string;
     agentId?: string;
@@ -41,6 +47,19 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
   const location = useLocation<LocationState>();
   const shouldStickToBottom = location.state?.shouldStickToBottom ?? true;
   const initialMessage = location.state?.initialMessage;
+  const entryPointSource = location.state?.entryPointSource ?? 'direct';
+
+  const hasFiredEntryPointRef = useRef(false);
+  useEffect(() => {
+    if (!conversationId || !agentIdFromPath) return;
+    if (hasFiredEntryPointRef.current) return;
+    hasFiredEntryPointRef.current = true;
+    analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.FullscreenEntryPoint, {
+      agent_id: agentIdFromPath,
+      conversation_id: conversationId,
+      source: entryPointSource,
+    });
+  }, [analytics, agentIdFromPath, conversationId, entryPointSource]);
 
   const { navigateToAgentBuilderUrl } = useNavigation();
 
@@ -54,7 +73,7 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
     [navigateToAgentBuilderUrl]
   );
 
-  const [attachments, setAttachments] = useState<AttachmentInput[] | undefined>(undefined);
+  const [attachments, setAttachments] = useState<ConversationAttachment[] | undefined>(undefined);
 
   const conversationActions = useConversationActions({
     conversationId,
@@ -63,7 +82,7 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
     onDeleteConversation,
   });
 
-  const upsertAttachments = useCallback((nextAttachments: AttachmentInput[]) => {
+  const upsertAttachments = useCallback((nextAttachments: ConversationAttachment[]) => {
     if (nextAttachments.length === 0) {
       return;
     }
@@ -75,9 +94,10 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
   }, []);
 
   const removeAttachment = useCallback((attachmentIndex: number) => {
-    setAttachments((prevAttachments) =>
-      prevAttachments?.filter((_, index) => index !== attachmentIndex)
-    );
+    setAttachments((prev) => {
+      if (!prev) return prev;
+      return removeAttachmentFromList(prev, attachmentIndex);
+    });
   }, []);
 
   const contextValue = useMemo(

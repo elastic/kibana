@@ -33,6 +33,8 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
 import type { ToolDefinitionWithSchema } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import moment from 'moment';
 import React, { useState } from 'react';
 import { Controller, FormProvider, useForm, type Control } from 'react-hook-form';
@@ -412,6 +414,11 @@ export const ToolTestFlyout: React.FC<ToolTestFlyoutProps> = ({ toolId, onClose 
             <EuiLink
               href={`${docLinksService.agentBuilderTools}#testing-your-tools`}
               target="_blank"
+              {...getEbtProps({
+                element: AGENT_BUILDER_UI_EBT.element.flyout,
+                action: AGENT_BUILDER_UI_EBT.action.globalManagement.TOOL_TEST_DOCS,
+                detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
+              })}
             >
               {i18n.translate('xpack.agentBuilder.tools.testFlyout.documentationLink', {
                 defaultMessage: 'Documentation - Testing tools',
@@ -485,6 +492,11 @@ export const ToolTestFlyout: React.FC<ToolTestFlyoutProps> = ({ toolId, onClose 
                         isLoading={isExecuting}
                         disabled={!tool || hasErrors}
                         data-test-subj="agentBuilderToolTestSubmitButton"
+                        {...getEbtProps({
+                          element: AGENT_BUILDER_UI_EBT.element.flyout,
+                          action: AGENT_BUILDER_UI_EBT.action.globalManagement.TOOL_TEST_SUBMIT,
+                          detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
+                        })}
                       >
                         {i18nMessages.executeButton}
                       </EuiButton>

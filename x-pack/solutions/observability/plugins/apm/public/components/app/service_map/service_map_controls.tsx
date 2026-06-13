@@ -68,6 +68,7 @@ export function ServiceMapControls({
           width: config.width,
           grow: config.grow,
           selected_options: initialSelectionsRef.current?.[config.field_name] ?? [],
+          single_select: config.single_select,
         });
       }
       return { initialState: state as ControlGroupRuntimeState };

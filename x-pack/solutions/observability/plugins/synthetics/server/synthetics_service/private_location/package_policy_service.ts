@@ -6,7 +6,7 @@
  */
 
 import type { NewPackagePolicyWithId } from '@kbn/fleet-plugin/server/services/package_policy';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { uniqBy } from 'lodash';
@@ -53,12 +53,24 @@ export class PackagePolicyService {
     );
   }
 
-  async getByIds({ spaceId, packagePolicyIds }: { spaceId: string; packagePolicyIds: string[] }) {
-    // For legacy reasons, we need to get the package policies from both the space and the default space
-    const clients =
-      spaceId === DEFAULT_SPACE_ID
-        ? [this.getSpaceSoClient(DEFAULT_SPACE_ID)]
-        : [this.getSpaceSoClient(spaceId), this.getSpaceSoClient(DEFAULT_SPACE_ID)];
+  async getByIds({
+    spaceId,
+    packagePolicyIds,
+    additionalSpaceIds,
+  }: {
+    spaceId: string;
+    packagePolicyIds: string[];
+    /**
+     * Extra spaces to look in alongside `spaceId` (and the default space).
+     * Use this when callers need a cross-space view — e.g. the monitor health
+     * API, which reports on monitors that may live in any space.
+     */
+    additionalSpaceIds?: string[];
+  }) {
+    // For legacy reasons, we always include the default space in addition to
+    // the request's space (older package policies were created there).
+    const spaces = new Set<string>([spaceId, DEFAULT_SPACE_ID, ...(additionalSpaceIds ?? [])]);
+    const clients = [...spaces].map((space) => this.getSpaceSoClient(space));
 
     const ids = await Promise.all(
       clients.map((soClient) =>

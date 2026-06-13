@@ -31,6 +31,13 @@ jest.mock('../../../../../hooks', () => ({
   useGetAppendCustomIntegrationsQuery: () => mockUseGetAppendCustomIntegrationsQuery(),
   useGetReplacementCustomIntegrationsQuery: () => mockUseGetReplacementCustomIntegrationsQuery(),
   useGetPackageVerificationKeyId: () => mockUseGetPackageVerificationKeyId(),
+  useStartServices: () => ({
+    featureFlags: { getBooleanValue: jest.fn().mockReturnValue(false) },
+    application: {
+      navigateToApp: jest.fn(),
+      getUrlForApp: jest.fn().mockReturnValue('/app/onboarding/aws'),
+    },
+  }),
 }));
 
 jest.mock('../../../../../hooks/use_merge_epr_with_replacements', () => ({

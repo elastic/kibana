@@ -11,7 +11,7 @@ import {
   AS_CODE_DATA_VIEW_REFERENCE_TYPE,
   AS_CODE_DATA_VIEW_SPEC_TYPE,
 } from '@kbn/as-code-data-views-schema';
-import { fromStoredDataView } from './from_stored_data_view';
+import { fromStoredDataView, fromStoredDataViewToAsCodeSavedSchema } from './from_stored_data_view';
 import { toStoredDataView } from './to_stored_data_view';
 
 describe('fromStoredDataView', () => {
@@ -125,5 +125,70 @@ describe('fromStoredDataView', () => {
         },
       },
     });
+  });
+});
+
+describe('fromStoredDataViewToAsCodeSavedSchema', () => {
+  it('returns saved data view shape and includes popularity', () => {
+    expect(
+      fromStoredDataViewToAsCodeSavedSchema({
+        id: 'saved-id',
+        name: 'Saved logs',
+        allowHidden: true,
+        title: 'logs-*',
+        timeFieldName: '@timestamp',
+        runtimeFieldMap: { rt: { type: 'keyword' } },
+        fieldAttrs: {
+          mapped: { count: 10, customLabel: 'Mapped' },
+          rt: { count: 5 },
+        },
+      })
+    ).toEqual({
+      id: 'saved-id',
+      name: 'Saved logs',
+      allow_hidden_indices: true,
+      index_pattern: 'logs-*',
+      time_field: '@timestamp',
+      field_settings: {
+        mapped: {
+          popularity: 10,
+          custom_label: 'Mapped',
+        },
+        rt: {
+          type: 'keyword',
+          popularity: 5,
+        },
+      },
+    });
+  });
+
+  it('maps sourceFilters to field_filters', () => {
+    expect(
+      fromStoredDataViewToAsCodeSavedSchema({
+        title: 'logs-*',
+        sourceFilters: [{ value: 'field_a' }, { value: 'field_b' }],
+      })
+    ).toEqual(
+      expect.objectContaining({
+        field_filters: ['field_a', 'field_b'],
+      })
+    );
+  });
+
+  it('omits field_filters when sourceFilters is empty', () => {
+    const result = fromStoredDataViewToAsCodeSavedSchema({
+      title: 'logs-*',
+      sourceFilters: [],
+    });
+
+    expect(result).not.toHaveProperty('field_filters');
+  });
+
+  it('omits field_filters when sourceFilters is absent', () => {
+    const result = fromStoredDataViewToAsCodeSavedSchema({
+      title: 'logs-*',
+    });
+
+    expect(result).not.toHaveProperty('field_filters');
   });
 });

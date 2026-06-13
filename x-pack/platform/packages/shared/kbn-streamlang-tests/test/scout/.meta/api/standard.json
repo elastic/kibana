@@ -1,5 +1,5 @@
 {
-  "sha1": "d686f02384a84239944421c7601ad4b10094e94b",
+  "sha1": "789fb85c9d28cfd105f11188585ff571da121bda",
   "tests": [
     {
       "id": "7a50a1b508e10f4-3be34281d1d9c2c",
@@ -3386,6 +3386,310 @@
       }
     },
     {
+      "id": "4fc1e2f8494f2d1-cf5aa4d3e4acb3b",
+      "title": "Cross-compatibility - URI Parts Processor extracts every documented sub-field from a fully-populated URI in both transpilers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/uri_parts.spec.ts",
+        "line": 28,
+        "column": 12
+      }
+    },
+    {
+      "id": "4fc1e2f8494f2d1-62fd62d82318095",
+      "title": "Cross-compatibility - URI Parts Processor honors a custom target prefix in both transpilers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/uri_parts.spec.ts",
+        "line": 98,
+        "column": 12
+      }
+    },
+    {
+      "id": "4fc1e2f8494f2d1-99d9e5896cf6bb4",
+      "title": "Cross-compatibility - URI Parts Processor parses relative URIs with null scheme+domain but populated path/query in both transpilers (testNoSchemeUri parity)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/uri_parts.spec.ts",
+        "line": 153,
+        "column": 12
+      }
+    },
+    {
+      "id": "4fc1e2f8494f2d1-bcb0c1b29523518",
+      "title": "Cross-compatibility - URI Parts Processor invalid URIs null every output column in ES|QL and, with ignore_failure=true, leave the ingest doc unchanged (testInvalidUri parity)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/uri_parts.spec.ts",
+        "line": 214,
+        "column": 12
+      }
+    },
+    {
+      "id": "4fc1e2f8494f2d1-bdf01a385f6f119",
+      "title": "Cross-compatibility - URI Parts Processor keep_original=false drops `<prefix>.original` in both transpilers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/uri_parts.spec.ts",
+        "line": 285,
+        "column": 12
+      }
+    },
+    {
+      "id": "4fc1e2f8494f2d1-a21b118d130ceed",
+      "title": "Cross-compatibility - URI Parts Processor remove_if_successful=true nulls the source field on success in both transpilers, and keeps it on ignored failure",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/uri_parts.spec.ts",
+        "line": 337,
+        "column": 12
+      }
+    },
+    {
+      "id": "4fc1e2f8494f2d1-2970c7d3e161653",
+      "title": "Cross-compatibility - URI Parts Processor where clause is respected by both transpilers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/uri_parts.spec.ts",
+        "line": 404,
+        "column": 12
+      }
+    },
+    {
+      "id": "4fc1e2f8494f2d1-2a0180a7de6b3e5",
+      "title": "Cross-compatibility - URI Parts Processor preserves pre-existing `<to>.*` and `<to>.original` values on where:false rows for every sub-field (destruction-fix parity, full coverage)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/uri_parts.spec.ts",
+        "line": 471,
+        "column": 12
+      }
+    },
+    {
+      "id": "4fc1e2f8494f2d1-1df6274d16b6aa9",
+      "title": "Cross-compatibility - URI Parts Processor ignore_missing=true lets documents without the source field through in both transpilers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/uri_parts.spec.ts",
+        "line": 576,
+        "column": 12
+      }
+    },
+    {
+      "id": "4fc1e2f8494f2d1-91c7ad569b9ab4d",
+      "title": "Cross-compatibility - URI Parts Processor missing source field with ignore_missing=false fails ingest and drops the ES|QL row",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/uri_parts.spec.ts",
+        "line": 645,
+        "column": 12
+      }
+    },
+    {
+      "id": "4fc1e2f8494f2d1-f61027bfc59bcf1",
+      "title": "Cross-compatibility - URI Parts Processor consistently rejects {{ }} template syntax in both Ingest Pipeline and ES|QL transpilers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/uri_parts.spec.ts",
+        "line": 693,
+        "column": 14
+      }
+    },
+    {
+      "id": "4fc1e2f8494f2d1-00f371a55541d6a",
+      "title": "Cross-compatibility - URI Parts Processor consistently rejects {{{ }}} template syntax in both Ingest Pipeline and ES|QL transpilers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/uri_parts.spec.ts",
+        "line": 693,
+        "column": 14
+      }
+    },
+    {
+      "id": "e24c75be36b4f7c-395ef1a6ff4026a",
+      "title": "Cross-compatibility - User Agent Processor should extract user agent in both ingest pipeline and ES|QL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/user_agent.spec.ts",
+        "line": 19,
+        "column": 12
+      }
+    },
+    {
+      "id": "e24c75be36b4f7c-fd63d88435d3781",
+      "title": "Cross-compatibility - User Agent Processor should extract user agent properties in both transpilers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/user_agent.spec.ts",
+        "line": 62,
+        "column": 12
+      }
+    },
+    {
+      "id": "e24c75be36b4f7c-422afd44270a292",
+      "title": "Cross-compatibility - User Agent Processor should handle where condition in both ingest pipeline and ES|QL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/user_agent.spec.ts",
+        "line": 104,
+        "column": 12
+      }
+    },
+    {
+      "id": "e24c75be36b4f7c-65e6e3e5e5df775",
+      "title": "Cross-compatibility - User Agent Processor should preserve pre-existing target sub-fields when parsing is skipped or fails (destruction-fix parity)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/user_agent.spec.ts",
+        "line": 152,
+        "column": 12
+      }
+    },
+    {
+      "id": "e24c75be36b4f7c-3ba8cf144f31c0d",
+      "title": "Cross-compatibility - User Agent Processor should consistently reject {{ }} template syntax in both Ingest Pipeline and ES|QL transpilers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/user_agent.spec.ts",
+        "line": 239,
+        "column": 14
+      }
+    },
+    {
+      "id": "e24c75be36b4f7c-7a998a70741a640",
+      "title": "Cross-compatibility - User Agent Processor should consistently reject {{{ }}} template syntax in both Ingest Pipeline and ES|QL transpilers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/user_agent.spec.ts",
+        "line": 239,
+        "column": 14
+      }
+    },
+    {
+      "id": "e24c75be36b4f7c-82b21f5b5781620",
+      "title": "Cross-compatibility - User Agent Processor should handle ignore_missing in both ingest pipeline and ES|QL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/user_agent.spec.ts",
+        "line": 261,
+        "column": 12
+      }
+    },
+    {
       "id": "fe4a4933a3033bf-99263210ec95a67",
       "title": "Streamlang to ES|QL - Append Processor should append a value to an existing field",
       "expectedStatus": "passed",
@@ -5730,6 +6034,214 @@
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/uppercase.spec.ts",
         "line": 95,
         "column": 12
+      }
+    },
+    {
+      "id": "7d81254e87e7849-bac8e0d18c7605a",
+      "title": "Streamlang to ES|QL - User Agent Processor should generate USER_AGENT command with basic configuration",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/user_agent.spec.ts",
+        "line": 18,
+        "column": 12
+      }
+    },
+    {
+      "id": "7d81254e87e7849-52e9b630cde33b8",
+      "title": "Streamlang to ES|QL - User Agent Processor should generate USER_AGENT command with default target field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/user_agent.spec.ts",
+        "line": 41,
+        "column": 12
+      }
+    },
+    {
+      "id": "7d81254e87e7849-cfd3043fd8417fc",
+      "title": "Streamlang to ES|QL - User Agent Processor should generate USER_AGENT command with regex_file option",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/user_agent.spec.ts",
+        "line": 60,
+        "column": 12
+      }
+    },
+    {
+      "id": "7d81254e87e7849-0f7d3dd34ed4dfb",
+      "title": "Streamlang to ES|QL - User Agent Processor should generate USER_AGENT command with extract_device_type option",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/user_agent.spec.ts",
+        "line": 80,
+        "column": 12
+      }
+    },
+    {
+      "id": "7d81254e87e7849-17a1e3a3d1f1d53",
+      "title": "Streamlang to ES|QL - User Agent Processor should generate USER_AGENT command with properties option",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/user_agent.spec.ts",
+        "line": 100,
+        "column": 12
+      }
+    },
+    {
+      "id": "7d81254e87e7849-9f96a771c693805",
+      "title": "Streamlang to ES|QL - User Agent Processor should omit original from USER_AGENT WITH map but add original via EVAL (ES|QL parity with ingest)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/user_agent.spec.ts",
+        "line": 123,
+        "column": 12
+      }
+    },
+    {
+      "id": "7d81254e87e7849-39554781e83e5dd",
+      "title": "Streamlang to ES|QL - User Agent Processor should add EVAL for target.original when properties default (ingest parity)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/user_agent.spec.ts",
+        "line": 150,
+        "column": 12
+      }
+    },
+    {
+      "id": "7d81254e87e7849-a1dea6b84f451ab",
+      "title": "Streamlang to ES|QL - User Agent Processor should not add EVAL for original when properties exclude it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/user_agent.spec.ts",
+        "line": 171,
+        "column": 12
+      }
+    },
+    {
+      "id": "7d81254e87e7849-1c3f52726fbd475",
+      "title": "Streamlang to ES|QL - User Agent Processor should gate input with NULL sentinel and COALESCE original when where is set",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/user_agent.spec.ts",
+        "line": 190,
+        "column": 12
+      }
+    },
+    {
+      "id": "7d81254e87e7849-81a269971b31a30",
+      "title": "Streamlang to ES|QL - User Agent Processor should generate USER_AGENT command with all options",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/user_agent.spec.ts",
+        "line": 219,
+        "column": 12
+      }
+    },
+    {
+      "id": "7d81254e87e7849-e45245abef6e9c4",
+      "title": "Streamlang to ES|QL - User Agent Processor should handle where condition with conditional execution",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/user_agent.spec.ts",
+        "line": 248,
+        "column": 12
+      }
+    },
+    {
+      "id": "7d81254e87e7849-46624ac365ce843",
+      "title": "Streamlang to ES|QL - User Agent Processor should consistently reject {{ }} template syntax",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/user_agent.spec.ts",
+        "line": 282,
+        "column": 14
+      }
+    },
+    {
+      "id": "7d81254e87e7849-272bbe33c497c9b",
+      "title": "Streamlang to ES|QL - User Agent Processor should consistently reject {{{ }}} template syntax",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/user_agent.spec.ts",
+        "line": 282,
+        "column": 14
       }
     },
     {
@@ -8481,6 +8993,150 @@
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/uppercase.spec.ts",
         "line": 98,
         "column": 12
+      }
+    },
+    {
+      "id": "80319a38a23e99e-074d64691ed78c2",
+      "title": "Streamlang to Ingest Pipeline - User Agent Processor should extract user agent details from a browser string",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/user_agent.spec.ts",
+        "line": 19,
+        "column": 12
+      }
+    },
+    {
+      "id": "80319a38a23e99e-3bbf293090e9a46",
+      "title": "Streamlang to Ingest Pipeline - User Agent Processor should extract user agent to a custom target field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/user_agent.spec.ts",
+        "line": 54,
+        "column": 12
+      }
+    },
+    {
+      "id": "80319a38a23e99e-6c97dd1e30a2937",
+      "title": "Streamlang to Ingest Pipeline - User Agent Processor should ignore missing field when ignore_missing is true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/user_agent.spec.ts",
+        "line": 87,
+        "column": 12
+      }
+    },
+    {
+      "id": "80319a38a23e99e-d83d65cc9dda7bc",
+      "title": "Streamlang to Ingest Pipeline - User Agent Processor should fail if field is missing and ignore_missing is false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/user_agent.spec.ts",
+        "line": 111,
+        "column": 12
+      }
+    },
+    {
+      "id": "80319a38a23e99e-cd81f7d20460c66",
+      "title": "Streamlang to Ingest Pipeline - User Agent Processor should extract only specified properties",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/user_agent.spec.ts",
+        "line": 131,
+        "column": 12
+      }
+    },
+    {
+      "id": "80319a38a23e99e-1a1d258ab579600",
+      "title": "Streamlang to Ingest Pipeline - User Agent Processor should extract device type when extract_device_type is true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/user_agent.spec.ts",
+        "line": 165,
+        "column": 12
+      }
+    },
+    {
+      "id": "80319a38a23e99e-b0308dfbe6fe5a8",
+      "title": "Streamlang to Ingest Pipeline - User Agent Processor should apply user_agent only when where condition matches",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/user_agent.spec.ts",
+        "line": 195,
+        "column": 12
+      }
+    },
+    {
+      "id": "80319a38a23e99e-80d2ff3df7cef2c",
+      "title": "Streamlang to Ingest Pipeline - User Agent Processor should reject {{ }} template syntax in field names",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/user_agent.spec.ts",
+        "line": 245,
+        "column": 14
+      }
+    },
+    {
+      "id": "80319a38a23e99e-5a53cab88ebca30",
+      "title": "Streamlang to Ingest Pipeline - User Agent Processor should reject {{{ }}} template syntax in field names",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/user_agent.spec.ts",
+        "line": 245,
+        "column": 14
       }
     }
   ]

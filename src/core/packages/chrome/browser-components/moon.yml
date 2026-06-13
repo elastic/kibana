@@ -46,6 +46,9 @@ dependsOn:
   - '@kbn/shared-ux-label-formatter'
   - '@kbn/test-jest-helpers'
   - '@kbn/use-observable'
+  - '@kbn/shared-ux-utility'
+  - '@kbn/ui-chrome-layout'
+  - '@kbn/app-header'
 tags:
   - shared-browser
   - package
