@@ -234,7 +234,16 @@ export class MemoryServiceImpl implements MemoryService {
   // ── Public API ──
 
   async create(params: CreateMemoryParams): Promise<MemoryEntry> {
-    const { name, title, content, categories = [], references = [], tags = [], user } = params;
+    const {
+      name,
+      title,
+      content,
+      categories = [],
+      references = [],
+      tags = [],
+      user,
+      changeSummary,
+    } = params;
 
     const existing = await this._getByName(name);
     if (existing) {
@@ -259,7 +268,12 @@ export class MemoryServiceImpl implements MemoryService {
         updated_by: user,
       };
       await this._indexPage(restored);
-      await this._writeHistory(restored, 'create', `Restored entry "${name}"`, user);
+      await this._writeHistory(
+        restored,
+        'create',
+        changeSummary ?? `Restored entry "${name}"`,
+        user
+      );
       return restored;
     }
 
@@ -279,7 +293,7 @@ export class MemoryServiceImpl implements MemoryService {
     };
 
     await this._indexPage(entry);
-    await this._writeHistory(entry, 'create', `Created entry "${name}"`, user);
+    await this._writeHistory(entry, 'create', changeSummary ?? `Created entry "${name}"`, user);
     return entry;
   }
 

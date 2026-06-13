@@ -108,6 +108,7 @@ export const createMemoryWriteTool = ({
         references,
         tags,
         user,
+        changeSummary,
       });
 
       return {
