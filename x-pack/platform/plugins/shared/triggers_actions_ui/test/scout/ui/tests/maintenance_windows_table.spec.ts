@@ -289,18 +289,24 @@ test.describe('Maintenance windows table', { tag: tags.stateful.classic }, () =>
     const runningTitle = uniqueTitle('archived-running');
     const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
-    const [r1, r2, r3] = await Promise.all([
+    // The table renders MWs in the server's find order, which is updatedAt desc
+    // (find_maintenance_window_so.ts), and clickTableAction below operates on the
+    // first row. Create the finished + upcoming windows first, then create the
+    // running window LAST and sequentially so it has the strictly-latest updatedAt
+    // and deterministically sorts to row 0. Creating all three via Promise.all
+    // races their updatedAt, which intermittently put the upcoming window first.
+    const [r1, r2] = await Promise.all([
       createMw(kbnClient, {
         title: finishedTitle,
         startDate: new Date('2023-05-01'),
         notRecurring: true,
       }),
       createMw(kbnClient, { title: upcomingTitle, startDate: tomorrow }),
-      createMw(kbnClient, {
-        title: runningTitle,
-        startDate: new Date(Date.now() - 5 * 60 * 1000),
-      }),
     ]);
+    const r3 = await createMw(kbnClient, {
+      title: runningTitle,
+      startDate: new Date(Date.now() - 5 * 60 * 1000),
+    });
     createdIds.push(r1.id, r2.id, r3.id);
 
     await page.goto(kbnUrl.get(MAINTENANCE_WINDOWS_APP_PATH));
@@ -308,7 +314,7 @@ test.describe('Maintenance windows table', { tag: tags.stateful.classic }, () =>
 
     let statuses = await getMwRowStatuses(page);
     expect(statuses).toHaveLength(3);
-    // The running MW should be first in the list
+    // The running MW was created last, so updatedAt-desc ordering puts it first.
     expect(statuses[0]).toBe('Running');
 
     // Cancel-and-archive the running one
