@@ -159,7 +159,11 @@ export const createAiNavigationTree = (
       children: [
         {
           title: i18nStrings.stackManagementV2.access.title,
-          children: [{ link: 'management:api_keys' }, { link: 'management:roles' }],
+          children: [
+            { link: 'management:api_keys' },
+            { link: 'management:application_connections' },
+            { link: 'management:roles' },
+          ],
         },
         {
           title: i18nStrings.stackManagementV2.organization.title,

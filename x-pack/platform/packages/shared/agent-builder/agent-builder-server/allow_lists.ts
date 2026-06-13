@@ -42,6 +42,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   // Security Solution
   `${internalNamespaces.security}.entity_risk_score`,
   `${internalNamespaces.security}.create_detection_rule`,
+  `${internalNamespaces.security}.run_rule_preview`,
   `${internalNamespaces.security}.attack_discovery_search`,
   `${internalNamespaces.security}.security_labs_search`,
   `${internalNamespaces.security}.alerts`,
@@ -73,12 +74,6 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.workflows}.list_workflows`,
   `${internalNamespaces.workflows}.get_workflow`,
   `${internalNamespaces.workflows}.get_examples`,
-  `${internalNamespaces.workflows}.workflow_insert_step`,
-  `${internalNamespaces.workflows}.workflow_modify_step`,
-  `${internalNamespaces.workflows}.workflow_modify_step_property`,
-  `${internalNamespaces.workflows}.workflow_modify_property`,
-  `${internalNamespaces.workflows}.workflow_delete_step`,
-  `${internalNamespaces.workflows}.workflow_set_yaml`,
   `${internalNamespaces.workflows}.workflow_execute_step`,
 ] as const;
 
@@ -91,6 +86,8 @@ export type AgentBuilderBuiltinTool = (typeof AGENT_BUILDER_BUILTIN_TOOLS)[numbe
 export const AGENT_BUILDER_BUILTIN_AGENTS = [
   `${internalNamespaces.search}.agent`,
   `${internalNamespaces.security}.agent`,
+  `${internalNamespaces.streams}.significant-events.discovery.investigator`,
+  `${internalNamespaces.streams}.significant-events.discovery.judge`,
 ] as const;
 
 export type AgentBuilderBuiltinAgent = (typeof AGENT_BUILDER_BUILTIN_AGENTS)[number];
@@ -125,6 +122,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   // Platform – Streams
   'streams-management',
   'significant-events-memory',
+  'significant-events-management',
   'knowledge-indicators-management',
   'ki-identification-management',
 
@@ -138,6 +136,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'alert-analysis',
   'detection-rule-edit',
   'threat-hunting',
+  'find-security-rules',
   'pci-compliance',
   'siem-readiness',
 
@@ -153,6 +152,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   `${internalNamespaces.search}.vector-hybrid-search`,
   `${internalNamespaces.search}.rag-chatbot`,
   `${internalNamespaces.search}.use-case-library`,
+  `${internalNamespaces.search}.elasticsearch-tutorial`,
   'skill-authoring',
 ] as const;
 

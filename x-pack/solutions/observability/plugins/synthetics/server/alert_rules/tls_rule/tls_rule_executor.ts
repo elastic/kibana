@@ -219,7 +219,9 @@ export class TLSRuleExecutor {
       return [];
     }
     const configIds = certs.map((cert) => cert.configId);
-    const certIds = certs.map((cert) => cert.sha256);
+    const certIds = certs
+      .map((cert) => cert.sha256)
+      .filter((sha256): sha256 is string => sha256 !== undefined);
     const { body } = await this.esClient.search({
       query: {
         bool: {
