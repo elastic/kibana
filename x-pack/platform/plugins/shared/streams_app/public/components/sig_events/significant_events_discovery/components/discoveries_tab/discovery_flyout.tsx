@@ -217,7 +217,10 @@ export const DiscoveryFlyout = ({
               </h3>
             </EuiTitle>
             <EuiSpacer size="s" />
-            <InvestigationVisualization investigation={discovery.investigation} />
+            <InvestigationVisualization
+              investigation={discovery.investigation}
+              discoveryId={discovery.discovery_slug}
+            />
           </>
         )}
 

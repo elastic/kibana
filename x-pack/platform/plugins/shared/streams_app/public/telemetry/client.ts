@@ -9,6 +9,7 @@ import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { IngestStreamLifecycle } from '@kbn/streams-schema';
 import type {
+  StreamsInvestigationFeedbackProps,
   StreamsAIGrokSuggestionAcceptedProps,
   StreamsAIGrokSuggestionLatencyProps,
   StreamsAIDissectSuggestionAcceptedProps,
@@ -55,6 +56,7 @@ import {
   STREAMS_PARTITIONING_SAMPLES_FETCH_LATENCY_EVENT_TYPE,
   STREAMS_TAB_VISITED_EVENT_TYPE,
   STREAMS_SIGNIFICANT_EVENTS_INSIGHT_FEEDBACK_EVENT_TYPE,
+  STREAMS_SIGNIFICANT_EVENTS_INVESTIGATION_FEEDBACK_EVENT_TYPE,
 } from './constants';
 
 export class StreamsTelemetryClient {
@@ -140,6 +142,13 @@ export class StreamsTelemetryClient {
 
   public trackInsightFeedback(params: StreamsInsightFeedbackProps) {
     this.analytics.reportEvent(STREAMS_SIGNIFICANT_EVENTS_INSIGHT_FEEDBACK_EVENT_TYPE, params);
+  }
+
+  public trackInvestigationFeedback(params: StreamsInvestigationFeedbackProps) {
+    this.analytics.reportEvent(
+      STREAMS_SIGNIFICANT_EVENTS_INVESTIGATION_FEEDBACK_EVENT_TYPE,
+      params
+    );
   }
 
   public startTrackingAIDissectSuggestionLatency(

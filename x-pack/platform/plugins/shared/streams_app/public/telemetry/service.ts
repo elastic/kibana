@@ -26,6 +26,7 @@ import {
   streamsFeatureIdentificationDeletedEventType,
   streamsTabVisitedEventType,
   streamsInsightFeedbackEventType,
+  streamsInvestigationFeedbackEventType,
 } from './events';
 import { StreamsTelemetryClient } from './client';
 
@@ -55,6 +56,7 @@ export class StreamsTelemetryService {
     this.analytics.registerEventType(streamsFeatureIdentificationDeletedEventType);
     this.analytics.registerEventType(streamsTabVisitedEventType);
     this.analytics.registerEventType(streamsInsightFeedbackEventType);
+    this.analytics.registerEventType(streamsInvestigationFeedbackEventType);
   }
 
   public getClient() {
