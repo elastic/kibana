@@ -95,6 +95,3 @@ export const POLL_DELAY_SECONDS = 30;
  * Sigevents memory data stream backing MemoryServiceImpl.
  */
 export const MEMORIES_DATA_STREAM = '.significant_events-memories';
-
-/** Display name for the gap detection workflow (must match gap_detection_workflow.yaml). */
-export const GAP_DETECTION_WORKFLOW_NAME = 'Gap Detection';
