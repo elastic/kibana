@@ -44,6 +44,20 @@ const consolidatedCandidateSchema = z.object({
   reason: z.string(),
 });
 
+const evidenceWeightSchema = z.enum([
+  'smoking_gun',
+  'supporting',
+  'non_discriminatory',
+  'counter',
+  'decisive_counter',
+]);
+
+const evidenceItemSchema = z.object({
+  vertex: correlationVertexSchema,
+  weight: evidenceWeightSchema,
+  text: z.string(),
+});
+
 // ---------------------------------------------------------------------------
 // CorrelationFindings — the load-bearing artifact (renderer + evals + context
 // handoff all consume this shape).
@@ -55,13 +69,17 @@ export const correlationFindingsLeadSchema = z.object({
   title: z.string(),
   relationship: z.enum(['same_campaign', 'same_actor', 'shared_tradecraft']),
   confidence: z.enum(['high', 'moderate', 'low']),
-  vertices_matched: z.array(correlationVertexSchema),
+  /** Per-vertex signal strength across all four Diamond Model vertices. */
+  vertex_signal: z.object({
+    adversary: z.enum(['high', 'partial', 'none']),
+    capability: z.enum(['high', 'partial', 'none']),
+    infrastructure: z.enum(['high', 'partial', 'none']),
+    victim: z.enum(['high', 'partial', 'none']),
+  }),
   /** Short evidence-first narrative (Mustard BLUF voice). */
   bluf: z.string(),
-  /** Discrete supporting-evidence items. */
-  supporting: z.array(z.string()),
-  /** Counter-evidence; empty array / "none found" is valid (do-not-invent rule). */
-  counter: z.array(z.string()),
+  /** Discrete evidence items; renderer derives supporting/counter sections and gutter glyphs from weight. */
+  evidence: z.array(evidenceItemSchema),
   /** What's missing; required for moderate / low confidence leads. */
   gaps: z.string(),
   /** Reports collapsed under this lead (see synthesize_correlations §6). */
@@ -75,11 +93,26 @@ export const correlationFindingsNoMatchSchema = z.object({
 });
 
 export const correlationFindingsSynthesisSchema = z.object({
+  /** Case-level one-liner stating the basis of correlation. */
+  bluf: z.string(),
   /** Overall cross-report correlation signal strength — NOT an actor identity claim. */
   correlation_signal: z.enum(['high', 'moderate', 'low', 'none']),
   reasoning: z.string(),
   gaps: z.string(),
-  next_steps: z.array(z.string()),
+  /** Prioritized actions — only high/moderate priority, ordered high-first. */
+  next_steps: z.array(
+    z.object({
+      priority: z.enum(['high', 'moderate']),
+      text: z.string(),
+    })
+  ),
+  inferential_hops: z.number().int().optional(),
+  atomic_ioc_overlap: z
+    .object({
+      assessed: z.boolean(),
+      note: z.string().optional(),
+    })
+    .optional(),
 });
 
 export const correlationFindingsSchema = z.object({
@@ -93,6 +126,8 @@ export type CorrelationFindingsLead = z.infer<typeof correlationFindingsLeadSche
 export type CorrelationFindingsNoMatch = z.infer<typeof correlationFindingsNoMatchSchema>;
 export type CorrelationFindingsSynthesis = z.infer<typeof correlationFindingsSynthesisSchema>;
 export type CorrelationFindings = z.infer<typeof correlationFindingsSchema>;
+export type EvidenceWeight = z.infer<typeof evidenceWeightSchema>;
+export type EvidenceItem = z.infer<typeof evidenceItemSchema>;
 
 // ---------------------------------------------------------------------------
 // ClusterDeepSynthesis — seam only; route deferred to Phase 5a.

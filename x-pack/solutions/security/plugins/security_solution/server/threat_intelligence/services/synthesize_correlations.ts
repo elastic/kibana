@@ -32,6 +32,16 @@ const SYNTHESIS_CANDIDATE_BODY_CHAR_LIMIT = 50_000;
 
 const synthesisVertexEnum = z.enum(['adversary', 'capability', 'infrastructure', 'victim']);
 
+const synthesisVertexSignalEnum = z.enum(['high', 'partial', 'none']);
+
+const synthesisEvidenceWeightEnum = z.enum([
+  'smoking_gun',
+  'supporting',
+  'non_discriminatory',
+  'counter',
+  'decisive_counter',
+]);
+
 const synthesisLlmLeadSchema = z.object({
   candidate_labels: z
     .array(z.string())
@@ -43,10 +53,20 @@ const synthesisLlmLeadSchema = z.object({
   title: z.string(),
   relationship: z.enum(['same_campaign', 'same_actor', 'shared_tradecraft']),
   confidence: z.enum(['high', 'moderate', 'low']),
-  vertices_matched: z.array(synthesisVertexEnum),
+  vertex_signal: z.object({
+    adversary: synthesisVertexSignalEnum,
+    capability: synthesisVertexSignalEnum,
+    infrastructure: synthesisVertexSignalEnum,
+    victim: synthesisVertexSignalEnum,
+  }),
   bluf: z.string(),
-  supporting: z.array(z.string()),
-  counter: z.array(z.string()),
+  evidence: z.array(
+    z.object({
+      vertex: synthesisVertexEnum,
+      weight: synthesisEvidenceWeightEnum,
+      text: z.string(),
+    })
+  ),
   gaps: z.string(),
 });
 
@@ -61,10 +81,23 @@ const synthesisLlmNoMatchSchema = z.object({
 });
 
 const synthesisLlmSynthesisSchema = z.object({
+  bluf: z.string(),
   correlation_signal: z.enum(['high', 'moderate', 'low', 'none']),
   reasoning: z.string(),
   gaps: z.string(),
-  next_steps: z.array(z.string()),
+  next_steps: z.array(
+    z.object({
+      priority: z.enum(['high', 'moderate']),
+      text: z.string(),
+    })
+  ),
+  inferential_hops: z.number().int().optional(),
+  atomic_ioc_overlap: z
+    .object({
+      assessed: z.boolean(),
+      note: z.string().optional(),
+    })
+    .optional(),
 });
 
 const synthesisLlmOutputSchema = z.object({
@@ -109,10 +142,30 @@ moderate — Meaningful overlap exists on at least one vertex with supporting in
 
 low — Surface-level similarity exists but the behavioral specificity is insufficient to distinguish this from other actors operating in the same space. You must explain why the similarity is weak.
 
+EVIDENCE WEIGHTS
+
+Each evidence item in \`evidence[]\` receives exactly one weight:
+
+smoking_gun — Decisive, highly discriminating; coincidence implausible. The item alone would materially determine the relationship.
+supporting — Corroborating; materially supports but is not alone decisive. Combines with other items to build confidence.
+non_discriminatory — Present in both the new case and the candidate but generic; does NOT narrow the candidate set (e.g. "both target Windows", commodity malware, broadly used techniques).
+counter — Argues against the proposed relationship; introduces doubt.
+decisive_counter — Decisively refutes or rules out the relationship.
+
+Each item also names the Diamond Model vertex it belongs to.
+
+JUDGE REASONING GUIDANCE
+
+Weight a coherent multi-vertex attack SHAPE over isolated atomic artifacts — the strongest correlation is usually the cross-vertex pattern, not any single item.
+
+Weight an indicator by its EXCLUSIVITY in real-world malicious use, not merely "tool vs. technique." A generic, independently-reimplemented technique is weak (→ non_discriminatory or counter). A rare, gated, or boutique tool CONFIRMED in-case is strong. An atomic code artifact is a tool-mark: distinctive and corroborating, but narrower than a behavioral-shape match.
+
+VALUE OF INFORMATION: where an UNCONFIRMED indicator would materially change the assessment if confirmed, say so in that lead's \`gaps\` AND add a HIGH-priority next step to verify it.
+
 BEHAVIORAL RULES
 
 1. Evidence-first reasoning. Lead with specific behavioral evidence before stating confidence.
-2. Cross-vertex corroboration must be explicit. Name which vertices matched and what matched in each.
+2. Cross-vertex corroboration must be explicit. Populate vertex_signal for all four vertices; use "high" only when specific evidence applies, "partial" for weak or inferred signal, "none" when absent.
 3. Articulate the gap. For moderate and low confidence leads, state what evidence is missing.
 4. No hallucinated linkage. Work only with the provided source material and candidate reports.
 5. Unidirectional output. Produce affirmative matches or no-match statements only.
@@ -141,10 +194,20 @@ OUTPUT FORMAT
       "title": "<report title or cluster label describing the correlation>",
       "confidence": "high | moderate | low",
       "relationship": "same_campaign | same_actor | shared_tradecraft",
-      "vertices_matched": ["capability", "infrastructure"],
+      "vertex_signal": {
+        "adversary": "high | partial | none",
+        "capability": "high | partial | none",
+        "infrastructure": "high | partial | none",
+        "victim": "high | partial | none"
+      },
       "bluf": "<evidence-first one-sentence narrative — name the specific behavioral evidence first, state relationship second>",
-      "supporting": ["<discrete supporting evidence item — one observation per entry>"],
-      "counter": ["<counter-evidence item>" ],
+      "evidence": [
+        {
+          "vertex": "capability | infrastructure | adversary | victim",
+          "weight": "smoking_gun | supporting | non_discriminatory | counter | decisive_counter",
+          "text": "<discrete observation — one per entry>"
+        }
+      ],
       "gaps": "<what evidence is missing — required for moderate and low confidence leads; 'none found' is valid for high confidence>"
     }
   ],
@@ -155,16 +218,23 @@ OUTPUT FORMAT
     }
   ],
   "synthesis": {
+    "bluf": "<case-level one-liner stating the BASIS of correlation — what makes this a match, e.g. the end-to-end attack shape, not a single artifact>",
     "correlation_signal": "high | moderate | low | none",
     "reasoning": "<overall correlation picture — state signal, name matched vertices with per-vertex strength, assess indicator overlap, note tracking designations, count inferential hops>",
     "gaps": "<what the primary source material did or did not claim about the relationship>",
-    "next_steps": ["<actionable investigative step>"]
+    "next_steps": [
+      { "priority": "high | moderate", "text": "<actionable investigative step>" }
+    ],
+    "inferential_hops": <integer — number of logical steps between case evidence and candidate claim; omit if 0 or unknown>,
+    "atomic_ioc_overlap": { "assessed": true | false, "note": "<optional context>" }
   }
 }
 
 CANDIDATE AGGREGATION: Identify clusters of candidates describing the same activity and group them into a single lead entry. Include all their short labels in candidate_labels. Treat bilingual sibling articles (same research, different language) as a single source — do not count them as independent corroboration when assessing confidence.
 
-COUNTER EVIDENCE: The counter[] array must contain discrete observations from the source material that argue against the proposed relationship. Do not invent counter-evidence. An empty array [] is correct when none is found.
+EVIDENCE ARRAY: The evidence[] array must contain discrete observations from the source material. Assign each item exactly one weight from the taxonomy above. Do not invent evidence. counter and decisive_counter items must have a textual basis in the source material — omit them if none is found.
+
+NEXT STEPS: Emit only high or moderate priority next steps — no low-value filler. Order high-priority steps first.
 
 DO NOT include retrieval scores, kNN distances, ranking positions, or other pipeline internals in your reasoning or output fields.`;
 
@@ -302,13 +372,17 @@ const buildGracefulDegradation = (
     title: bodyTextMap.get(p.candidate_id)?.title ?? p.candidate_id,
   })),
   synthesis: {
+    bluf: 'Synthesis failed — correlation evidence could not be assessed automatically.',
     correlation_signal: 'none',
     reasoning:
       'Synthesis LLM call failed — correlation evidence could not be assessed automatically. Review triage candidates manually.',
     gaps: '',
     next_steps: [
-      'Retry the correlation request.',
-      'If the issue persists, check the synthesis connector configuration in advanced settings.',
+      { priority: 'high', text: 'Retry the correlation request.' },
+      {
+        priority: 'moderate',
+        text: 'If the issue persists, check the synthesis connector configuration in advanced settings.',
+      },
     ],
   },
 });
@@ -353,10 +427,9 @@ const mapLlmOutputToFindings = (
       title: lead.title,
       relationship: lead.relationship,
       confidence: lead.confidence,
-      vertices_matched: lead.vertices_matched,
+      vertex_signal: lead.vertex_signal,
       bluf: lead.bluf,
-      supporting: lead.supporting,
-      counter: lead.counter,
+      evidence: lead.evidence,
       gaps: lead.gaps,
       consolidated_candidates: consolidatedCandidates,
     };
@@ -371,10 +444,13 @@ const mapLlmOutputToFindings = (
     leads,
     no_match: noMatch,
     synthesis: {
+      bluf: llmOutput.synthesis.bluf,
       correlation_signal: llmOutput.synthesis.correlation_signal,
       reasoning: llmOutput.synthesis.reasoning,
       gaps: llmOutput.synthesis.gaps,
       next_steps: llmOutput.synthesis.next_steps,
+      inferential_hops: llmOutput.synthesis.inferential_hops,
+      atomic_ioc_overlap: llmOutput.synthesis.atomic_ioc_overlap,
     },
   };
 };
@@ -426,12 +502,19 @@ export const synthesizeCorrelations = async ({
       leads: [],
       no_match: [],
       synthesis: {
+        bluf: 'No candidates survived triage — no correlation evidence found.',
         correlation_signal: 'none',
         reasoning: 'No candidates survived triage — no correlation evidence found.',
         gaps: '',
         next_steps: [
-          'Widen the retrieval window or provide a more detailed case description.',
-          'Lower the triage confidence floor (triageConfidenceFloor setting) if valid candidates are being filtered.',
+          {
+            priority: 'high',
+            text: 'Widen the retrieval window or provide a more detailed case description.',
+          },
+          {
+            priority: 'moderate',
+            text: 'Lower the triage confidence floor (triageConfidenceFloor setting) if valid candidates are being filtered.',
+          },
         ],
       },
     };
