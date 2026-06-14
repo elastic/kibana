@@ -7,5 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './data';
-export * from './scripts';
+import { scriptsJavaScriptStepCommonDefinition } from '../../../../common/steps/scripts/javascript';
+import { createServerStepDefinition } from '../../../step_registry/types';
+
+export const scriptsJavaScriptStepDefinition = createServerStepDefinition({
+  ...scriptsJavaScriptStepCommonDefinition,
+  handler: async () => {
+    return { error: new Error('scripts.javaScript handler is not implemented') };
+  },
+});

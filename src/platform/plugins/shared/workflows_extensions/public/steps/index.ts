@@ -38,4 +38,7 @@ export const registerInternalStepDefinitions = (stepRegistry: PublicStepRegistry
   stepRegistry.register(() =>
     import('./data/data_concat_step').then((m) => m.dataConcatStepDefinition)
   );
+  stepRegistry.register(() =>
+    import('./scripts/javascript/javascript_step').then((m) => m.scriptsJavaScriptStepDefinition)
+  );
 };

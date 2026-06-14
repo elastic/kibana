@@ -7,5 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './data';
-export * from './scripts';
+import React from 'react';
+import { scriptsJavaScriptStepCommonDefinition } from '../../../../common/steps/scripts/javascript';
+import { createPublicStepDefinition } from '../../../step_registry/types';
+
+export const scriptsJavaScriptStepDefinition = createPublicStepDefinition({
+  ...scriptsJavaScriptStepCommonDefinition,
+  icon: React.lazy(() =>
+    import('@elastic/eui/es/components/icon/assets/code').then(({ icon }) => ({
+      default: icon,
+    }))
+  ),
+});

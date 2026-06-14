@@ -7,5 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './data';
-export * from './scripts';
+export {
+  ScriptsJavaScriptStepTypeId,
+  scriptsJavaScriptStepCommonDefinition,
+  type ScriptsJavaScriptStepConfigSchema,
+  type ScriptsJavaScriptStepInputSchema,
+  type ScriptsJavaScriptStepOutputSchema,
+} from './javascript_step';

@@ -89,6 +89,10 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
     handlerHash: '2bdde599ac1b8f38faecbd72a2d17a3d7b2740b874e047e92e9c30ba0ff01a4f',
   },
   {
+    id: 'scripts.javaScript',
+    handlerHash: 'ec1d2100e5000a859ad493f7696885e7f15c300b949b3945d0510c0241346bab',
+  },
+  {
     id: 'security.buildAlertEntityGraph',
     handlerHash: '90e95df7b6deaa5b6ab908c1ff8f4a3606b6e8f7fce5d59e0411d3d577d0be44',
   },
