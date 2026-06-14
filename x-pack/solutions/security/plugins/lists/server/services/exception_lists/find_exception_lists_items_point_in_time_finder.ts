@@ -100,12 +100,11 @@ export const findExceptionListsItemsPointInTimeFinder = async ({
     });
     if (maxSize != null && count > maxSize) {
       const diff = count - maxSize;
-      exceptionListItem.data = exceptionListItem.data.slice(-exceptionListItem.data.length, -diff);
+      exceptionListItem.data = exceptionListItem.data.slice(0, -diff);
       executeFunctionOnStream(exceptionListItem);
       try {
         await finder.close();
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      } catch (exception) {
+      } catch (_exception) {
         // This is just a pre-caution in case the finder does a throw we don't want to blow up
         // the response. We have seen this within e2e test containers but nothing happen in normal
         // operational conditions which is why this try/catch is here.
@@ -119,8 +118,7 @@ export const findExceptionListsItemsPointInTimeFinder = async ({
 
   try {
     await finder.close();
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  } catch (exception) {
+  } catch (_exception) {
     // This is just a pre-caution in case the finder does a throw we don't want to blow up
     // the response. We have seen this within e2e test containers but nothing happen in normal
     // operational conditions which is why this try/catch is here.
