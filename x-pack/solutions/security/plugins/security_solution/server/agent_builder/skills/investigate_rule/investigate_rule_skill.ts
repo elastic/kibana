@@ -218,6 +218,7 @@ export const createInvestigateRuleSkill = ({
         schema: z.object({
           rule_id: z
             .string()
+            .max(512)
             .describe('UUID of the detection rule (id field / kibana.alert.rule.uuid)'),
         }),
         handler: async ({ rule_id: ruleId }, context) => {
@@ -335,7 +336,10 @@ export const createInvestigateRuleSkill = ({
           'top_entities is the secondary FP signal: a single entity generating most alerts indicates ' +
           'benign activity from a known source rather than a true threat.',
         schema: z.object({
-          rule_id: z.string().describe('The UUID of the detection rule (kibana.alert.rule.uuid)'),
+          rule_id: z
+            .string()
+            .max(512)
+            .describe('The UUID of the detection rule (kibana.alert.rule.uuid)'),
           time_window_hours: z
             .number()
             .min(1)
