@@ -547,6 +547,7 @@ const RiskInputsTabContent = <T extends EntityType>({
     </>
   );
 
+  console.log('ENTITY ID', entityId);
   return (
     <>
       {hasResolutionScore && (
@@ -582,24 +583,22 @@ const RiskInputsTabContent = <T extends EntityType>({
           <EuiSpacer size="m" />
         </>
       )}
-      {showTimeline && entityId !== undefined && (
-        <>
-          <RiskScoreTimeline
-            entityType={entityType}
-            entityId={entityId}
-            from={historyFrom}
-            to={HISTORY_RANGE_TO}
-            scoreType="base"
-            selectedTimestamp={selectedTimestamp}
-            onPointSelect={setSelectedTimestamp}
-            onRangeChange={onHistoryRangeChange}
-          />
-          <EuiSpacer size="m" />
-        </>
-      )}
+
+      <RiskScoreTimeline
+        entityType={entityType}
+        entityId={entityId || 'unknown'}
+        from={historyFrom}
+        to={HISTORY_RANGE_TO}
+        scoreType="base"
+        selectedTimestamp={selectedTimestamp}
+        onPointSelect={setSelectedTimestamp}
+        onRangeChange={onHistoryRangeChange}
+      />
+      <EuiSpacer size="m" />
       {pitSelectionActive && selectedTimestamp !== undefined && (
         <>
           <EuiCallOut
+            announceOnMount
             size="s"
             iconType="clock"
             data-test-subj="riskInputsTabPitIndicator"
