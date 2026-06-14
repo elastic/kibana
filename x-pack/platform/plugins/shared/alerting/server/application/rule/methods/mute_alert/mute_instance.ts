@@ -58,7 +58,6 @@ async function muteInstanceWithOCC(
       operation: WriteOperations.MuteAlert,
       entity: AlertingAuthorizationEntity.Rule,
     });
-
   } catch (error) {
     context.auditLogger?.log(
       ruleAuditEvent({
