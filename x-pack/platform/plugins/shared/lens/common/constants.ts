@@ -17,15 +17,14 @@ export const PLUGIN_ID = 'lens';
 export const APP_ID = PLUGIN_ID;
 export const DOC_TYPE = 'lens';
 export const LENS_APP_NAME = APP_ID;
-export const LENS_EMBEDDABLE_TYPE = DOC_TYPE;
 export const LENS_DASHBOARD_APP_TYPE = 'lens-dashboard-app';
 export const NOT_INTERNATIONALIZED_PRODUCT_NAME = 'Lens Visualizations';
 export const LENS_EDIT_BY_VALUE = 'edit_by_value';
 export const LENS_ICON = 'lensApp';
 export const STAGE_ID = 'production';
 
-export const LENS_API_VERSION = '1'; // TODO repalce with '2023-10-31' before 9.4 FF
-export const LENS_API_ACCESS: RouteAccess = 'internal'; // TODO replace with 'public' before 9.4 FF
+export const LENS_API_VERSION = '2023-10-31';
+export const LENS_API_ACCESS: RouteAccess = 'public';
 export const LENS_INTERNAL_API_VERSION = '1';
 /**
  * In the OpenAPISpec this represents the endpoint group name

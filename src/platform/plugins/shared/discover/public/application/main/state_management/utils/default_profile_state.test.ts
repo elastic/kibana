@@ -10,6 +10,7 @@
 import { fieldList } from '@kbn/data-views-plugin/common';
 import { buildDataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { createContextAwarenessMocks } from '../../../../context_awareness/__mocks__';
+import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../../../context_awareness/toolkit';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 import {
   DEFAULT_PROFILE_STATE_FIELDS,
@@ -29,6 +30,7 @@ const emptyDataView = buildDataViewMock({
 const { profilesManagerMock, scopedEbtManagerMock } = createContextAwarenessMocks();
 const scopedProfilesManager = profilesManagerMock.createScopedProfilesManager({
   scopedEbtManager: scopedEbtManagerMock,
+  toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
 });
 
 scopedProfilesManager.resolveDataSourceProfile({});
@@ -44,6 +46,7 @@ const getResetByField = (fieldsToReset: DefaultProfileStateField[]) => ({
   rowHeight: fieldsToReset.includes('rowHeight'),
   breakdownField: fieldsToReset.includes('breakdownField'),
   hideChart: fieldsToReset.includes('hideChart'),
+  hideTable: fieldsToReset.includes('hideTable'),
 });
 
 describe('getDefaultProfileState', () => {
@@ -85,6 +88,23 @@ describe('getDefaultProfileState', () => {
       }).getPreFetchState();
 
       expect(appStateWithoutHideChart).toBeUndefined();
+    });
+
+    it('should return expected hideTable', () => {
+      let appState = getDefaultProfileState({
+        scopedProfilesManager,
+        defaultProfileState: createDefaultProfileState(['hideTable']),
+        dataView: dataViewWithTimefieldMock,
+      }).getPreFetchState();
+      expect(appState).toEqual({
+        hideTable: false,
+      });
+      appState = getDefaultProfileState({
+        scopedProfilesManager,
+        defaultProfileState: createDefaultProfileState('none'),
+        dataView: dataViewWithTimefieldMock,
+      }).getPreFetchState();
+      expect(appState).toEqual(undefined);
     });
   });
 

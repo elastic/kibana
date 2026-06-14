@@ -6,18 +6,30 @@
  */
 
 import moment from 'moment';
+import { set } from '@kbn/safer-lodash-set';
 import { inject, injectable } from 'inversify';
 import type {
   AlertEpisode,
+  AlertEpisodeData,
   DispatcherStep,
   DispatcherPipelineState,
   DispatcherStepOutput,
 } from '../types';
+import type { AlertEventSeverity } from '../../../resources/datastreams/alert_events';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 import { QueryServiceInternalToken } from '../../services/query_service/tokens';
-import { queryResponseToRecords } from '../../services/query_service/query_response_to_records';
 import { LOOKBACK_WINDOW_MINUTES } from '../constants';
 import { getDispatchableAlertEventsQuery } from '../queries';
+
+interface RawAlertEpisode {
+  last_event_timestamp: string;
+  rule_id: string;
+  group_hash: string;
+  episode_id: string;
+  episode_status: 'inactive' | 'pending' | 'active' | 'recovering';
+  data_json: string | null;
+  severity: AlertEventSeverity | null;
+}
 
 @injectable()
 export class FetchEpisodesStep implements DispatcherStep {
@@ -34,7 +46,7 @@ export class FetchEpisodesStep implements DispatcherStep {
       .subtract(LOOKBACK_WINDOW_MINUTES, 'minutes')
       .toISOString();
 
-    const result = await this.queryService.executeQuery({
+    const result = await this.queryService.executeQueryRows<RawAlertEpisode>({
       query: getDispatchableAlertEventsQuery().query,
       filter: {
         range: {
@@ -45,12 +57,36 @@ export class FetchEpisodesStep implements DispatcherStep {
       },
     });
 
-    const episodes = queryResponseToRecords<AlertEpisode>(result);
+    const episodes = parseAlertEpisodes(result);
 
     if (episodes.length === 0) {
       return { type: 'halt', reason: 'no_episodes' };
     }
 
     return { type: 'continue', data: { episodes } };
+  }
+}
+
+export function parseAlertEpisodes(raw: RawAlertEpisode[]): AlertEpisode[] {
+  return raw.map(({ data_json, severity, ...rest }) => ({
+    ...rest,
+    ...(severity ? { severity } : {}),
+    ...(data_json ? { data: parseDataJson(data_json) } : {}),
+  }));
+}
+
+export function parseDataJson(json: string): AlertEpisodeData {
+  try {
+    const parsed = JSON.parse(json);
+    if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) return {};
+    const result: AlertEpisodeData = {};
+    for (const [key, value] of Object.entries(parsed)) {
+      if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+        set(result, key.split('.'), value);
+      }
+    }
+    return result;
+  } catch {
+    return {};
   }
 }

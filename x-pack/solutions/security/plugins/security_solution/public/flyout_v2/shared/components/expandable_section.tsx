@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, type ReactElement, useCallback } from 'react';
+import React, { memo, type ReactElement, type ReactNode, useCallback } from 'react';
 import type { EuiFlexGroupProps } from '@elastic/eui';
 import { EuiAccordion, EuiFlexGroup, EuiSpacer, EuiTitle, useGeneratedHtmlId } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -53,6 +53,10 @@ export interface ExpandableSectionProps {
    * Title value to render in the header of the accordion
    */
   title: ReactElement | string;
+  /**
+   * Optional content rendered in the accordion header row
+   */
+  extraAction?: ReactNode;
 }
 
 /**
@@ -69,6 +73,7 @@ export const ExpandableSection = memo(
     localStorageKey,
     sectionId,
     title,
+    extraAction,
   }: ExpandableSectionProps) => {
     const accordionId = useGeneratedHtmlId({ prefix: 'accordion' });
     const { renderContent, state, toggle } = useAccordionState(expanded);
@@ -93,6 +98,7 @@ export const ExpandableSection = memo(
         id={accordionId}
         buttonContent={header}
         css={accordionCss}
+        extraAction={extraAction}
       >
         <EuiSpacer size="m" />
         <EuiFlexGroup

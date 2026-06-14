@@ -14,7 +14,7 @@ import type { PublicTriggerDefinition } from '@kbn/workflows-extensions/public';
 import type { z } from '@kbn/zod/v4';
 import type { EventSchemaPropertyInfo } from './event_schema_properties';
 import { getEventSchemaProperties } from './event_schema_properties';
-import { getStabilityNote } from '../get_stability_note';
+import { getStabilityBadgeHtml } from '../get_stability_note';
 
 /**
  * Format event properties as a tree: nested paths (e.g. foo.bar.baz) are shown
@@ -84,8 +84,11 @@ function buildTriggerHoverFromDefinition(
   triggerType: string
 ): monaco.IMarkdownString {
   const lines: string[] = [];
-  lines.push(getStabilityNote());
-  lines.push('');
+  const stabilityBadge = getStabilityBadgeHtml('tech_preview');
+  if (stabilityBadge) {
+    lines.push(stabilityBadge);
+    lines.push('');
+  }
   lines.push(
     i18n.translate('workflows.triggerHover.workflowTriggerLabel', {
       defaultMessage: '**Workflow Trigger**: `{title}`',

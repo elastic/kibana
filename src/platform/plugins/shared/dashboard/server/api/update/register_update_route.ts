@@ -7,31 +7,39 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { VersionedRouter } from '@kbn/core-http-server';
-import type { RequestHandlerContext } from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
 import { once } from 'lodash';
+
+import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
+import { schema } from '@kbn/config-schema';
+import type { VersionedRouter } from '@kbn/core-http-server';
+import type { Logger, RequestHandlerContext } from '@kbn/core/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+
+import { trackCreateDashboardAction, trackUpdateDashboardAction } from '../../user_activity';
+import { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { getRouteConfig } from '../get_route_config';
-import { getUpdateRequestBodySchema, getUpdateResponseBodySchema } from './schemas';
+import { writeErrorHandler } from '../write_error_handler';
+import { getUpdateResponseBodySchema } from './schemas';
 import { update } from './update';
-import { allowUnmappedKeysSchema, getDashboardStateSchema } from '../dashboard_state_schemas';
 
 export function registerUpdateRoute(
   router: VersionedRouter<RequestHandlerContext>,
-  isDashboardAppRequest: boolean
+  usageCounter: UsageCounter | undefined,
+  isDashboardAppRequest: boolean,
+  logger: Logger
 ) {
   const { basePath, routeConfig, routeVersion } = getRouteConfig(isDashboardAppRequest);
   const updateRoute = router.put({
     path: `${basePath}/{id}`,
-    summary: `Replace current dashboard state with the dashboard state from request body.`,
     ...routeConfig,
+    summary: `Upsert a dashboard`,
   });
 
   // Do not call getDashboardStateSchema when registering route.
   // Route is registered during setup and before all plugins have registered embeddable schemas.
   // Instead, use once to only call getDashboardStateSchema the first time a route handler is executed.
   const getCachedDashboardStateSchema = once(() => {
-    return getDashboardStateSchema(isDashboardAppRequest);
+    return getDashboardStateSchema(false);
   });
 
   updateRoute.addVersion(
@@ -40,54 +48,59 @@ export function registerUpdateRoute(
       validate: () => ({
         request: {
           params: schema.object({
+            // Can not validate id at route level
+            // existing dashboards may have invalid "as code" ids
             id: schema.string({
-              meta: { description: 'A unique identifier for the dashboard.' },
+              meta: {
+                description: 'The unique ID of the dashboard to be created or updated',
+              },
             }),
           }),
-          query: schema.maybe(
-            schema.object({
-              allowUnmappedKeys: schema.maybe(allowUnmappedKeysSchema),
-            })
-          ),
-          body: getUpdateRequestBodySchema(isDashboardAppRequest),
+          body: getDashboardStateSchema(isDashboardAppRequest),
         },
         response: {
           200: {
             body: () => getUpdateResponseBodySchema(isDashboardAppRequest),
-            description: 'Indicates the dashboard is updated successfully',
+            description: 'updated',
+          },
+          201: {
+            body: () => getUpdateResponseBodySchema(isDashboardAppRequest),
+            description: 'created',
+          },
+          400: {
+            description: 'invalid request',
           },
           403: {
-            description: 'Indicates that this call is forbidden.',
+            description: 'forbidden',
           },
-          404: {
-            description: 'Indicates that the dashboard with the given ID is not found.',
+          409: {
+            description: 'conflict',
           },
         },
       }),
     },
-    async (ctx, req, res) => {
-      try {
-        const result = await update(
-          ctx,
-          getCachedDashboardStateSchema(),
-          req.params.id,
-          req.body,
-          isDashboardAppRequest
-        );
-        return res.ok({ body: result });
-      } catch (e) {
-        if (e.isBoom && e.output.statusCode === 404) {
-          return res.notFound({
-            body: {
-              message: `A dashboard with ID [${req.params.id}] was not found.`,
-            },
-          });
+    async (ctx, req, res) =>
+      telemetryHandler(req, usageCounter, async () => {
+        try {
+          const { body, operation } = await update(
+            ctx,
+            getCachedDashboardStateSchema(),
+            req.params.id,
+            req.body,
+            req.serverTiming,
+            isDashboardAppRequest
+          );
+          if (operation === 'create') {
+            // do not await tracking actions
+            void trackCreateDashboardAction(body, req).catch(); // do nothing on throw
+            return res.created({ body });
+          } else {
+            void trackUpdateDashboardAction(body, req).catch();
+            return res.ok({ body });
+          }
+        } catch (e) {
+          return writeErrorHandler(e, res, logger, req);
         }
-        if (e.isBoom && e.output.statusCode === 403) {
-          return res.forbidden({ body: { message: e.message } });
-        }
-        return res.badRequest({ body: { message: e.message } });
-      }
-    }
+      })
   );
 }

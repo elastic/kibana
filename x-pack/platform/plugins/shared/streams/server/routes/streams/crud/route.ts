@@ -16,6 +16,13 @@ import { classicIngestHasEsLevelChanges } from '../../../lib/streams/state_manag
 import { readStream } from './read_stream';
 import { createClassicStreamRoute } from './create_classic_stream_route';
 import { validateClassicStreamRoute } from './validate_classic_stream_route';
+import {
+  createWiredStreamRequest,
+  updateClassicStreamRequest,
+  createQueryStreamRequest,
+  getWiredStreamResponse,
+  listStreamsResponse,
+} from '../../../oas_examples';
 
 export const readStreamRoute = createServerRoute({
   endpoint: 'GET /api/streams/{name} 2023-10-31',
@@ -27,6 +34,27 @@ export const readStreamRoute = createServerRoute({
       since: '9.1.0',
       stability: 'experimental',
     },
+    oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {},
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: 'Stream definition and associated metadata.',
+          content: {
+            'application/json': {
+              examples: {
+                getWiredStream: { value: getWiredStreamResponse },
+              },
+            },
+          },
+        },
+      },
+    }),
   },
   security: {
     authz: {
@@ -34,7 +62,7 @@ export const readStreamRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ name: z.string() }),
+    path: z.object({ name: z.string().describe('The name of the stream.') }),
   }),
   handler: async ({
     params,
@@ -43,11 +71,12 @@ export const readStreamRoute = createServerRoute({
     server,
     logger,
   }): Promise<Streams.all.GetResponse> => {
-    const { queryClient, attachmentClient, streamsClient, scopedClusterClient } =
+    const { getQueryClient, attachmentClient, streamsClient, scopedClusterClient } =
       await getScopedClients({
         request,
       });
 
+    const queryClient = await getQueryClient();
     const body = await readStream({
       name: params.path.name,
       queryClient,
@@ -71,6 +100,27 @@ export const listStreamsRoute = createServerRoute({
       since: '9.1.0',
       stability: 'experimental',
     },
+    oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {},
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: 'A list of all streams.',
+          content: {
+            'application/json': {
+              examples: {
+                listStreams: { value: listStreamsResponse },
+              },
+            },
+          },
+        },
+      },
+    }),
   },
   security: {
     authz: {
@@ -100,6 +150,24 @@ export const editStreamRoute = createServerRoute({
       since: '9.1.0',
       stability: 'experimental',
     },
+    oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {
+              createWiredStream: { value: createWiredStreamRequest },
+              updateClassicStream: { value: updateClassicStreamRequest },
+              createQueryStream: { value: createQueryStreamRequest },
+            },
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: 'The stream was created or updated successfully.',
+        },
+      },
+    }),
   },
   security: {
     authz: {
@@ -108,7 +176,7 @@ export const editStreamRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      name: z.string(),
+      name: z.string().describe('The name of the stream.'),
     }),
     body: Streams.all.UpsertRequest.right,
   }),
@@ -164,6 +232,20 @@ export const deleteStreamRoute = createServerRoute({
       since: '9.1.0',
       stability: 'experimental',
     },
+    oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {},
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: 'The stream was deleted successfully.',
+        },
+      },
+    }),
   },
   security: {
     authz: {
@@ -172,7 +254,7 @@ export const deleteStreamRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      name: z.string(),
+      name: z.string().describe('The name of the stream.'),
     }),
   }),
   handler: async ({ params, request, getScopedClients }): Promise<{ acknowledged: true }> => {

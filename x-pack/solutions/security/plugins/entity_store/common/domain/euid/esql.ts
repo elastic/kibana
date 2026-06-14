@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { conditionToESQL } from '@kbn/streamlang';
+import { entityStoreConditionToESQL as conditionToESQL } from '../../esql/condition_to_esql';
+import { castField } from '../../esql/cast';
 import type {
   EntityDefinitionWithoutId,
   FieldEvaluation,
@@ -26,7 +27,6 @@ import {
   getSourceFieldNames,
   isEuidField,
   isEuidSeparator,
-  mergeDocumentsFilterAndPostAgg,
 } from './commons';
 import {
   applyFieldEvaluations,
@@ -130,9 +130,9 @@ export function getEuidEsqlFilterBasedOnDocument(
 
 function sourceToEsqlExpression(source: FieldEvaluation['sources'][number]): string {
   if ('field' in source) {
-    return `MV_FIRST(${source.field})`;
+    return `MV_FIRST(${castField(source.field)})`;
   }
-  return `MV_FIRST(SPLIT(MV_FIRST(${source.firstChunkOfField}), "${escapeEsqlString(
+  return `MV_FIRST(SPLIT(MV_FIRST(${castField(source.firstChunkOfField)}), "${escapeEsqlString(
     source.splitBy
   )}"))`;
 }
@@ -142,27 +142,37 @@ function sourceToEsqlExpression(source: FieldEvaluation['sources'][number]): str
  *
  * - Source values: each source is read with MV_FIRST so multi-value fields are supported; firstChunkOfField sources use SPLIT then MV_FIRST.
  * - Multiple sources: each is assigned to a variable (_src_<dest>0, _src_<dest>1, ...), then an effective source is the first non-null, non-empty variable (CASE).
- * - Destination: effective source is then mapped with CASE: if null/empty → fallbackValue; else if it matches a whenClause → clause's then; else → effective source as-is.
+ * - Destination: one CASE over `whenClauses` in order (sourceMatch arms, then condition arms), then null/empty → fallbackValue, else effective source.
  *
  * Returns a comma-separated list of EVAL assignments (one or more lines).
  */
 function buildOneFieldEvaluationEsql(evaluation: FieldEvaluation): string {
   const { destination, sources, fallbackValue, whenClauses } = evaluation;
-  const sourceExpressions = sources.map(sourceToEsqlExpression);
+  const sourceExpressions = sources.map((s) => sourceToEsqlExpression(s));
   const sourceVariablesBaseName = `_src_${destination.replace(/\./g, '_')}`;
   const effectiveSourceName = sourceVariablesBaseName;
   const fallbackExpression =
     fallbackValue === null ? 'NULL' : `"${escapeEsqlString(fallbackValue)}"`;
-  const destinationCaseParts: string[] = [
-    `(${effectiveSourceName} IS NULL OR ${effectiveSourceName} == ""), ${fallbackExpression}`,
-  ];
+
+  const destinationCaseParts: string[] = [];
   for (const clause of whenClauses) {
-    const conditions = clause.sourceMatchesAny
-      .map((v) => `${effectiveSourceName} == "${escapeEsqlString(v)}"`)
-      .join(' OR ');
-    destinationCaseParts.push(`(${conditions}), "${escapeEsqlString(clause.then)}"`);
+    if ('sourceMatchesAny' in clause) {
+      const conditions = clause.sourceMatchesAny
+        .map((v) => `${effectiveSourceName} == "${escapeEsqlString(v)}"`)
+        .join(' OR ');
+      destinationCaseParts.push(`(${conditions}), "${escapeEsqlString(clause.then)}"`);
+    } else {
+      destinationCaseParts.push(
+        `(${conditionToESQL(clause.condition)}), "${escapeEsqlString(clause.then)}"`
+      );
+    }
   }
+  destinationCaseParts.push(
+    `(${effectiveSourceName} IS NULL OR ${effectiveSourceName} == ""), ${fallbackExpression}`
+  );
   destinationCaseParts.push(effectiveSourceName);
+
+  const destinationCaseExpr = `CASE(${destinationCaseParts.join(', ')})`;
 
   const assignments: string[] = [];
 
@@ -180,7 +190,8 @@ function buildOneFieldEvaluationEsql(evaluation: FieldEvaluation): string {
     assignments.push(`${effectiveSourceName} = CASE(${sourceVarCaseParts.join(', ')})`);
   }
 
-  assignments.push(`${destination} = CASE(${destinationCaseParts.join(', ')})`);
+  assignments.push(`${destination} = ${destinationCaseExpr}`);
+
   return assignments.join(',\n ');
 }
 
@@ -189,6 +200,10 @@ function escapeEsqlString(s: string): string {
 }
 
 function buildSourceClauseEsql(evaluation: FieldEvaluation, spec: SourceMatchSpec): string {
+  if (spec.type === 'condition') {
+    return `(${conditionToESQL(spec.condition)})`;
+  }
+
   const { exactMatchFields, prefixMatchFields } = getSourceFieldNames(evaluation.sources);
   const allSourceFields = [...exactMatchFields, ...prefixMatchFields];
 
@@ -214,15 +229,14 @@ export function getFieldEvaluationsEsql(entityType: EntityType): string | undefi
  * Returns an ESQL EVAL fragment for all field evaluations of the given entity type.
  * Use in a pipeline as | EVAL <result>. Returns undefined when there are no field evaluations.
  */
-export function getFieldEvaluationsEsqlFromDefinition({
-  fieldEvaluations,
-  identityField,
-}: EntityDefinitionWithoutId): string | undefined {
-  const evaluations = getFieldEvaluationsFromDefinition({ fieldEvaluations, identityField });
+export function getFieldEvaluationsEsqlFromDefinition(
+  definition: EntityDefinitionWithoutId
+): string | undefined {
+  const evaluations = getFieldEvaluationsFromDefinition(definition);
   if (!evaluations || evaluations.length === 0) {
     return undefined;
   }
-  return evaluations.map(buildOneFieldEvaluationEsql).join(',\n ');
+  return evaluations.map((e) => buildOneFieldEvaluationEsql(e)).join(',\n ');
 }
 
 /**
@@ -250,9 +264,7 @@ export function getEuidEsqlDocumentsContainsIdFilter(entityType: EntityType) {
     return `(${esqlIsNotNullOrEmpty(identityField.singleField)})`;
   }
 
-  return conditionToESQL(
-    mergeDocumentsFilterAndPostAgg(identityField.documentsFilter, entityDefinition.postAggFilter)
-  );
+  return conditionToESQL(identityField.documentsFilter);
 }
 
 /**
@@ -290,7 +302,8 @@ function buildRankingCaseEsql(ranking: EuidAttribute[][]): string {
       throw new Error('Separator found in single field, invalid euid logic definition');
     }
     if (comp.length === 1 && isEuidField(firstAttr)) {
-      return (firstAttr as { field: string }).field;
+      // Entity IDs are always strings — always cast the single-field value to string.
+      return `TO_STRING(${(firstAttr as { field: string }).field})`;
     }
   }
 
@@ -309,11 +322,17 @@ function buildRankingCaseEsql(ranking: EuidAttribute[][]): string {
     }
 
     if (composedField.length === 1) {
-      return `(${compositionConditions}), ${(composedField[0] as { field: string }).field}`;
+      // Entity IDs are always strings — cast to string for safety.
+      return `(${compositionConditions}), TO_STRING(${
+        (composedField[0] as { field: string }).field
+      })`;
     }
 
+    // CONCAT requires string arguments — always wrap fields with TO_STRING.
     const evaluations = composedField
-      .map((attr) => (isEuidField(attr) ? attr.field : `"${escapeEsqlString(attr.sep)}"`))
+      .map((attr) =>
+        isEuidField(attr) ? `TO_STRING(${attr.field})` : `"${escapeEsqlString(attr.sep)}"`
+      )
       .join(', ');
 
     const concatLogic = `CONCAT(${evaluations})`;
@@ -328,11 +347,16 @@ export function getEuidEsqlEvaluation(
   entityType: EntityType,
   { withTypeId = true }: { withTypeId?: boolean } = {}
 ) {
-  const { identityField } = getEntityDefinitionWithoutId(entityType);
+  const entityDefinition = getEntityDefinitionWithoutId(entityType);
+  const { identityField } = entityDefinition;
   const mustPrependTypeId = withTypeId && !identityField.skipTypePrepend;
 
   if (isSingleFieldIdentity(identityField)) {
-    return appendTypeIdIfNeeded(entityType, identityField.singleField, mustPrependTypeId);
+    return appendTypeIdIfNeeded(
+      entityType,
+      castField(identityField.singleField),
+      mustPrependTypeId
+    );
   }
 
   const { euidRanking } = identityField;

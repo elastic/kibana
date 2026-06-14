@@ -14,12 +14,16 @@ import type {
 } from '@kbn/dashboard-plugin/public';
 import { DashboardRenderer as DashboardContainerRenderer } from '@kbn/dashboard-plugin/public';
 import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
+import { toAsCodeQuery } from '@kbn/as-code-shared-transforms';
 import type { Filter, Query } from '@kbn/es-query';
 import type { ViewMode } from '@kbn/presentation-publishing';
 
 import { useDispatch } from 'react-redux';
 import { BehaviorSubject } from 'rxjs';
-import type { DashboardInternalApi } from '@kbn/dashboard-plugin/public/dashboard_api/types';
+import type {
+  DashboardInitializationState,
+  DashboardInternalApi,
+} from '@kbn/dashboard-plugin/public/dashboard_api/types';
 import { fromStoredFilters } from '@kbn/as-code-filters-transforms';
 import { APP_UI_ID } from '../../../common';
 import { DASHBOARDS_PATH, SecurityPageName } from '../../../common/constants';
@@ -29,9 +33,7 @@ import { inputsActions } from '../../common/store/inputs';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { useSecurityTags } from '../context/dashboard_context';
 
-const initialInput = new BehaviorSubject<
-  ReturnType<NonNullable<DashboardCreationOptions['getInitialInput']>>
->({});
+const initialInput = new BehaviorSubject<DashboardInitializationState>({});
 
 const DashboardRendererComponent = ({
   canReadDashboard,
@@ -114,6 +116,7 @@ const DashboardRendererComponent = ({
   const getCreationOptions: () => Promise<DashboardCreationOptions> = useCallback(() => {
     return Promise.resolve({
       useSessionStorageIntegration: true,
+      useControlsIntegration: false,
       getInitialInput: () => {
         return initialInput.value;
       },
@@ -172,7 +175,7 @@ const DashboardRendererComponent = ({
     initialInput.next({
       time_range: timeRange,
       viewMode,
-      query,
+      query: toAsCodeQuery(query),
       filters: fromStoredFilters(filters),
     });
   }, [timeRange, viewMode, query, filters]);

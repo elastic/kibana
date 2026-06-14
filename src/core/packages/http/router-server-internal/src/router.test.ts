@@ -157,8 +157,8 @@ describe('Router', () => {
       const [{ handler }] = router.getRoutes();
       await handler(
         createRequestMock({
-          params: { foo: 1 },
-          query: { foo: 1 },
+          params: { foo: '1' },
+          query: { foo: '1' },
           payload: { foo: 1 },
         }),
         mockResponseToolkit
@@ -293,8 +293,8 @@ describe('Router', () => {
     for (let i = 0; i < 10; i++) {
       await handler(
         createRequestMock({
-          params: { foo: 1 },
-          query: { foo: 1 },
+          params: { foo: '1' },
+          query: { foo: '1' },
           payload: { foo: 1 },
         }),
         mockResponseToolkit

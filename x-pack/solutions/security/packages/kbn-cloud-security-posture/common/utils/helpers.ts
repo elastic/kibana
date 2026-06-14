@@ -7,8 +7,8 @@
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 
 import { i18n } from '@kbn/i18n';
+import { getLatestEntitiesIndexName } from '@kbn/entity-store/common';
 import type { CspBenchmarkRulesStates } from '../schema/rules/latest';
-import { ENTITIES_LATEST_INDEX } from '../constants';
 
 interface BuildEntityAlertsQueryParams {
   field: string;
@@ -207,5 +207,5 @@ export const buildEntityAlertsQuery = ({
  * Used for LOOKUP JOIN queries.
  */
 export const getEntitiesLatestIndexName = (spaceId: string = 'default'): string => {
-  return ENTITIES_LATEST_INDEX.replace('<space>', spaceId);
+  return getLatestEntitiesIndexName(spaceId);
 };

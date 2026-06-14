@@ -90,6 +90,7 @@ const FlyoutPreview = ({ showRecoveryPreview }: { showRecoveryPreview: boolean }
           data-test-subj="rulePreviewNestedFlyout"
         >
           <EuiFlyoutBody>
+            <EuiSpacer size="m" />
             <RuleResultsPreview />
             {showRecoveryPreview && (
               <>

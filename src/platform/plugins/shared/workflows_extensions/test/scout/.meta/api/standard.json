@@ -1,10 +1,10 @@
 {
-  "sha1": "29f456d20f856260b3758301bb7aec94c18c5dcf",
+  "sha1": "39914992235862a9fb0603c64eca59ae0fc054dc",
   "tests": [
     {
       "id": "2e9661be655a029-bbe4bc87d5491d8",
       "title": "Workflows Extensions - Custom Step Definitions Approval should validate that all registered custom step definitions are approved by workflows-eng team",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -15,11 +15,13 @@
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai"
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_extensions/test/scout/api/tests/step_definitions_approval.spec.ts",
-        "line": 34,
+        "line": 36,
         "column": 12
       }
     },
@@ -37,11 +39,13 @@
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai"
+        "@cloud-serverless-workplaceai",
+        "@local-serverless-vectordb",
+        "@cloud-serverless-vectordb"
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_extensions/test/scout/api/tests/trigger_definitions_approval.spec.ts",
-        "line": 34,
+        "line": 35,
         "column": 12
       }
     }

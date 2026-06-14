@@ -13,7 +13,7 @@ const logger = loggingSystemMock.createLogger();
 
 describe('bulkRemoveSourceOperationsFactory', () => {
   const buildOps = bulkRemoveSourceOperationsFactory(logger);
-  const targetIndex = '.entity-analytics.watchlists.test-watchlist-default';
+  const targetIndex = '.entity_analytics.watchlists.test-watchlist-default';
 
   afterEach(() => {
     jest.clearAllMocks();

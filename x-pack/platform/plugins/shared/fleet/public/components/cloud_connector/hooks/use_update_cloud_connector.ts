@@ -71,7 +71,7 @@ export const useUpdateCloudConnector = (
 
         notifications?.toasts.addSuccess({
           title: i18n.translate('xpack.fleet.cloudConnector.updateSuccess', {
-            defaultMessage: 'Cloud connector updated successfully',
+            defaultMessage: 'Federated identity updated successfully',
           }),
         });
 
@@ -85,7 +85,7 @@ export const useUpdateCloudConnector = (
 
         notifications?.toasts.addError(errorToDisplay, {
           title: i18n.translate('xpack.fleet.cloudConnector.updateError', {
-            defaultMessage: 'Failed to update cloud connector',
+            defaultMessage: 'Failed to update federated identity',
           }),
         });
 

@@ -8,12 +8,7 @@
 import type { FeatureWithFilter } from '@kbn/streams-schema';
 import type { Condition } from '@kbn/streamlang';
 
-export const MAX_FILTERS = 10;
-
-export function getEntityFilters(
-  features: FeatureWithFilter[],
-  maxFilters = MAX_FILTERS
-): Condition[] {
+export function getEntityFilters(features: FeatureWithFilter[], maxFilters: number): Condition[] {
   if (features.length === 0) {
     return [];
   }

@@ -7,76 +7,64 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiInlineEditTitle, EuiFormRow, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import { Controller, useFormContext } from 'react-hook-form';
 import type { FormValues } from '../types';
+import { DEFAULT_RULE_NAME } from '../constants';
+import { useRuleFormMeta } from '../contexts';
 
-const DEFAULT_NAME = i18n.translate('xpack.alertingV2.ruleForm.defaultRuleName', {
-  defaultMessage: 'Untitled rule',
-});
+const NAME_ROW_ID = 'ruleV2FormNameField';
 
 export const NameField = () => {
   const { control } = useFormContext<FormValues>();
-  const { euiTheme } = useEuiTheme();
-  const editTitleId = useGeneratedHtmlId({ prefix: 'ruleNameInlineEdit' });
-
-  const titleStyles = css`
-    .euiInlineEditForm {
-      .euiFieldText {
-        font-size: ${euiTheme.size.l};
-        font-weight: ${euiTheme.font.weight.bold};
-        height: auto;
-        padding: ${euiTheme.size.xs} ${euiTheme.size.s};
-      }
-    }
-  `;
+  const { layout } = useRuleFormMeta();
 
   return (
     <Controller
       name="metadata.name"
       control={control}
       rules={{
-        required: i18n.translate('xpack.alertingV2.ruleForm.nameRequiredError', {
-          defaultMessage: 'Name is required.',
-        }),
+        validate: (value) => {
+          if (!value || !value.trim()) {
+            return i18n.translate('xpack.alertingV2.ruleForm.nameRequiredError', {
+              defaultMessage: 'Name is required.',
+            });
+          }
+          if (value.trim() === DEFAULT_RULE_NAME) {
+            return i18n.translate('xpack.alertingV2.ruleForm.nameRequiredError', {
+              defaultMessage: 'Name is required.',
+            });
+          }
+          return true;
+        },
       }}
-      render={({ field: { value, onChange }, fieldState: { error } }) => {
-        const displayValue = value || DEFAULT_NAME;
-
-        return (
-          <EuiFormRow isInvalid={!!error} error={error?.message} fullWidth>
-            <EuiInlineEditTitle
-              heading="h2"
-              inputAriaLabel={i18n.translate('xpack.alertingV2.ruleForm.nameAriaLabel', {
-                defaultMessage: 'Edit rule name',
-              })}
-              value={displayValue}
-              onChange={(e) => {
-                const target = e.currentTarget as HTMLInputElement;
-                onChange(target.value);
-              }}
-              onCancel={(previousValue) => {
-                onChange(previousValue);
-              }}
-              css={titleStyles}
-              size="m"
-              isInvalid={!!error}
-              data-test-subj="ruleNameInlineEdit"
-              id={editTitleId}
-              isReadOnly={false}
-              editModeProps={{
-                formRowProps: {
-                  fullWidth: true,
-                },
-                inputProps: {
-                  fullWidth: true,
-                },
-              }}
-            />
-          </EuiFormRow>
-        );
-      }}
+      render={({ field: { ref, ...field }, fieldState: { error } }) => (
+        <EuiFormRow
+          id={NAME_ROW_ID}
+          label={i18n.translate('xpack.alertingV2.ruleForm.nameLabel', {
+            defaultMessage: 'Name',
+          })}
+          fullWidth
+          isInvalid={!!error}
+          error={error?.message}
+        >
+          <EuiFieldText
+            {...field}
+            value={field.value ?? ''}
+            inputRef={ref}
+            fullWidth
+            isInvalid={!!error}
+            compressed={layout === 'flyout'}
+            placeholder={i18n.translate('xpack.alertingV2.ruleForm.namePlaceholder', {
+              defaultMessage: 'Untitled rule',
+            })}
+            aria-label={i18n.translate('xpack.alertingV2.ruleForm.nameAriaLabel', {
+              defaultMessage: 'Rule name',
+            })}
+            data-test-subj="ruleNameInput"
+          />
+        </EuiFormRow>
+      )}
     />
   );
 };

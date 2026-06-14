@@ -19,9 +19,9 @@ import { getEntityDefinitionWithoutId } from '../../../../common/domain/definiti
 const USER_ENTITY_TYPE = 'user' as const;
 
 /**
- * Mirrors user entity field evaluations + whenConditionTrueSetFieldsPreAgg +
- * whenConditionTrueSetFieldsAfterStats (in-memory) so DSL / Painless Scout tests
- * can assert entity.namespace / entity.confidence / entity.name align with definitions.
+ * Mirrors user entity field evaluations (including condition whenClauses for entity.namespace) +
+ * whenConditionTrueSetFieldsAfterStats (entity.name + entity.confidence; in-memory)
+ * so DSL / Painless Scout tests can assert entity.namespace / entity.confidence / entity.name align with definitions.
  */
 export function deriveUserEntityPreAggMetadata(hit: { _source?: unknown }): {
   namespace?: string;

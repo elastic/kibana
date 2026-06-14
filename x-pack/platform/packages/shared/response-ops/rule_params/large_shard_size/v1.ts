@@ -8,7 +8,16 @@
 import { schema, type TypeOf } from '@kbn/config-schema';
 import { stackMonitoringCommonSchema } from '../common';
 
-export const largeShardSizeParamsSchema = stackMonitoringCommonSchema.extends({
-  indexPattern: schema.string({}),
-});
+export const largeShardSizeParamsSchema = stackMonitoringCommonSchema.extends(
+  {
+    indexPattern: schema.string({}),
+  },
+  {
+    meta: {
+      title: 'Large Shard Size Rule Params',
+      description:
+        'The parameters for the large shard size rule. These parameters are appropriate when `rule_type_id` is `monitoring_shard_size`.',
+    },
+  }
+);
 export type LargeShardSizeParams = TypeOf<typeof largeShardSizeParamsSchema>;

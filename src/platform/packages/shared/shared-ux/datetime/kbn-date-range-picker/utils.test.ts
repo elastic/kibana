@@ -99,12 +99,12 @@ describe('getOptionDisplayLabel', () => {
   });
 
   it('generates a label from relative bounds when no label is provided', () => {
-    expect(getOptionDisplayLabel({ start: 'now-7d', end: 'now' })).toBe('7 days ago → now');
+    expect(getOptionDisplayLabel({ start: 'now-7d', end: 'now' })).toBe('Last 7 days');
   });
 
   it('generates a label from absolute bounds when no label is provided', () => {
     expect(getOptionDisplayLabel({ start: '2025-01-01', end: '2025-01-31' })).toBe(
-      'Jan 1 2025, 00:00 → Jan 31 2025, 00:00'
+      'Jan 1, 2025, 00:00:00 → Jan 31, 2025, 00:00:00'
     );
   });
 });
@@ -113,7 +113,7 @@ describe('getOptionShorthand', () => {
   it('returns the start offset when end is now', () => {
     expect(getOptionShorthand({ start: 'now-15m', end: 'now' })).toBe('-15m');
     expect(getOptionShorthand({ start: 'now-7d', end: 'now' })).toBe('-7d');
-    expect(getOptionShorthand({ start: 'now-1M', end: 'now' })).toBe('-1M');
+    expect(getOptionShorthand({ start: 'now-1M', end: 'now' })).toBe('-1mo');
   });
 
   it('returns the end offset when start is now', () => {
@@ -121,13 +121,26 @@ describe('getOptionShorthand', () => {
   });
 
   it('combines both offsets when neither is now', () => {
-    expect(getOptionShorthand({ start: 'now-7d', end: 'now-1d' })).toBe('-7d - -1d');
+    expect(getOptionShorthand({ start: 'now-7d', end: 'now-1d' })).toBe('-7d to -1d');
   });
 
-  it('returns null when a bound has rounding', () => {
-    expect(getOptionShorthand({ start: 'now/d', end: 'now/d' })).toBeNull();
-    expect(getOptionShorthand({ start: 'now-1d/d', end: 'now' })).toBeNull();
+  it('returns named range alias when bounds match a known named range', () => {
+    expect(getOptionShorthand({ start: 'now/d', end: 'now/d' })).toBe('td');
+    expect(getOptionShorthand({ start: 'now-1d/d', end: 'now-1d/d' })).toBe('yd');
+    expect(getOptionShorthand({ start: 'now+1d/d', end: 'now+1d/d' })).toBe('tmr');
+  });
+
+  it('strips start rounding when end is now', () => {
+    expect(getOptionShorthand({ start: 'now-1d/d', end: 'now' })).toBe('-1d');
+    expect(getOptionShorthand({ start: 'now-24h/h', end: 'now' })).toBe('-24h');
+  });
+
+  it('returns null when end has rounding (not strippable)', () => {
     expect(getOptionShorthand({ start: 'now', end: 'now+1d/d' })).toBeNull();
+  });
+
+  it('returns null when both bounds have rounding', () => {
+    expect(getOptionShorthand({ start: 'now-7d/d', end: 'now-1d/d' })).toBeNull();
   });
 
   it('returns null when a bound is absolute', () => {
@@ -159,11 +172,11 @@ describe('getOptionInputText', () => {
   });
 
   it('joins both fragments with delimiter when neither bound is now', () => {
-    expect(getOptionInputText({ start: 'now-7d', end: 'now-1d' })).toBe('-7d - -1d');
+    expect(getOptionInputText({ start: 'now-7d', end: 'now-1d' })).toBe('-7d to -1d');
   });
 
   it('keeps bounds as-is when now prefix cannot be stripped', () => {
-    expect(getOptionInputText({ start: 'now/d', end: 'now/d' })).toBe('now/d - now/d');
+    expect(getOptionInputText({ start: 'now/d', end: 'now/d' })).toBe('now/d to now/d');
   });
 
   it('returns now when both bounds are now', () => {
@@ -224,23 +237,25 @@ describe('getEndDate', () => {
 });
 
 describe('formatDateRange', () => {
-  it('formats two dates with the standard delimiter', () => {
+  it('formats two dates with the standard delimiter (default precision = s)', () => {
     const start = new Date(2026, 1, 10, 10, 15, 30, 500);
     const end = new Date(2026, 1, 11, 23, 30, 0, 0);
-    expect(formatDateRange(start, end)).toBe('2026-02-10T10:15:30.500 - 2026-02-11T23:30:00.000');
+    expect(formatDateRange(start, end)).toBe('Feb 10, 2026, 10:15:30 to Feb 11, 2026, 23:30:00');
   });
 
-  it('uses local time (no Z suffix)', () => {
-    const start = new Date(2026, 0, 1, 0, 0, 0, 0);
-    const end = new Date(2026, 0, 2, 0, 0, 0, 0);
-    const result = formatDateRange(start, end);
-    expect(result).not.toMatch(/Z/);
+  it('respects timePrecision', () => {
+    const start = new Date(2026, 1, 10, 10, 15, 30, 500);
+    const end = new Date(2026, 1, 11, 23, 30, 0, 0);
+    expect(formatDateRange(start, end, 'ms')).toBe(
+      'Feb 10, 2026, 10:15:30.500 to Feb 11, 2026, 23:30:00.000'
+    );
+    expect(formatDateRange(start, end, 'none')).toBe('Feb 10, 2026, 10:15 to Feb 11, 2026, 23:30');
   });
 
   it('handles same-day ranges', () => {
     const start = new Date(2026, 2, 5, 9, 0, 0, 0);
     const end = new Date(2026, 2, 5, 17, 0, 0, 0);
-    expect(formatDateRange(start, end)).toBe('2026-03-05T09:00:00.000 - 2026-03-05T17:00:00.000');
+    expect(formatDateRange(start, end)).toBe('Mar 5, 2026, 09:00:00 to Mar 5, 2026, 17:00:00');
   });
 });
 

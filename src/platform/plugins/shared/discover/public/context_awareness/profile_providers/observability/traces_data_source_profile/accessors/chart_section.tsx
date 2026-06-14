@@ -10,15 +10,22 @@
 import { TraceMetricsGrid } from '@kbn/unified-chart-section-viewer';
 import React from 'react';
 import type { DataSourceProfileProvider } from '../../../../profiles';
+import { OBSERVABILITY_TRACES_DATA_SOURCE_PROFILE_ID } from '../profile';
 
 export const createChartSection =
   (): DataSourceProfileProvider['profile']['getChartSectionConfiguration'] =>
-  (prev) =>
-  (params) => {
+  (prev, { toolkit }) =>
+  () => {
     return {
-      ...prev(params),
+      ...prev(),
       renderChartSection: (props) => {
-        return <TraceMetricsGrid {...props} actions={params.actions} />;
+        return (
+          <TraceMetricsGrid
+            {...props}
+            actions={toolkit.actions}
+            profileId={OBSERVABILITY_TRACES_DATA_SOURCE_PROFILE_ID}
+          />
+        );
       },
       replaceDefaultChart: true,
       defaultTopPanelHeight: 300,

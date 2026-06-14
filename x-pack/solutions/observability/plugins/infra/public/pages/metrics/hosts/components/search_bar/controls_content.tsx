@@ -25,6 +25,7 @@ import {
   type DataSchemaFormat,
 } from '@kbn/metrics-data-access-plugin/common';
 import { NOT_AVAILABLE_LABEL } from '@kbn/observability-plugin/common';
+import { DEFAULT_SCHEMA } from '../../../../../../common/constants';
 import { useTimeRangeMetadataContext } from '../../../../../hooks/use_time_range_metadata';
 import { SchemaSelector } from '../../../../../components/schema_selector';
 import { getControlPanelConfigs } from './control_panels_config';
@@ -157,10 +158,9 @@ export const ControlsContent = ({
         filters={[...filters, ...schemaFilters]}
       />
       <SchemaSelector
-        isHostsView
         onChange={onPreferredSchemaChange}
         schemas={schemas}
-        value={schema ?? 'semconv'}
+        value={schema ?? DEFAULT_SCHEMA}
         isLoading={isLoading}
       />
     </ControlGroupContainer>
@@ -168,9 +168,14 @@ export const ControlsContent = ({
 };
 
 const ControlGroupContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: start;
+  gap: ${(props) => props.theme.euiTheme.size.s};
+  flex-wrap: wrap;
+  min-height: ${(props) => props.theme.euiTheme.size.xxl};
+
   .controlGroup {
-    min-height: ${(props) => props.theme.euiTheme.size.xxl};
-    align-items: start;
-    margin-bottom: ${(props) => props.theme.euiTheme.size.s};
+    display: contents;
   }
 `;

@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { RecoveryTypeField } from './recovery_type_field';
-import { createFormWrapper } from '../../test_utils';
+import { createFormWrapper, createMockServices } from '../../test_utils';
 
 describe('RecoveryTypeField', () => {
   it('renders the recovery label', () => {
@@ -61,6 +61,14 @@ describe('RecoveryTypeField', () => {
     fireEvent.change(select, { target: { value: 'query' } });
 
     expect(select.value).toBe('query');
+  });
+
+  it('renders correctly in flyout layout', () => {
+    render(<RecoveryTypeField />, {
+      wrapper: createFormWrapper({}, createMockServices(), { layout: 'flyout' }),
+    });
+
+    expect(screen.getByTestId('recoveryTypeSelect')).toBeInTheDocument();
   });
 
   it('updates value back to no_breach', () => {

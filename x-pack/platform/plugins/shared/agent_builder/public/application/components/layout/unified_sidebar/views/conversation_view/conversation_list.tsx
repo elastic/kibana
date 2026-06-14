@@ -15,34 +15,73 @@ import {
   EuiTextTruncate,
   useEuiTheme,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { ConversationDisplayStatus, ConversationRoundStatus } from '@kbn/agent-builder-common';
 import { appPaths } from '../../../../../utils/app_paths';
+import { useStreamingContext } from '../../../../../context/streaming/streaming_context';
 import { useConversationList } from '../../../../../hooks/use_conversation_list';
 import {
   createConversationListItemStyles,
   createActiveConversationListItemStyles,
 } from '../../../../conversations/conversation_list_item_styles';
-import { NoConversationsPrompt } from '../../../../conversations/embeddable_conversation_header/no_conversations_prompt';
+import { ConversationListItemRow } from './conversation_list_item_row';
+
+const deriveDisplayStatus = (
+  conversation: { read?: boolean; status?: ConversationRoundStatus },
+  isStreaming: boolean,
+  hasError: boolean,
+  isActive: boolean
+): ConversationDisplayStatus | undefined => {
+  if (isStreaming || conversation.status === ConversationRoundStatus.inProgress) {
+    return ConversationDisplayStatus.inProgress;
+  }
+  if (hasError) {
+    return ConversationDisplayStatus.error;
+  }
+  if (conversation.status === ConversationRoundStatus.awaitingPrompt) {
+    return ConversationDisplayStatus.awaitingPrompt;
+  }
+  // Do not show the "unread" status for the "active" (current) conversation.
+  // Since the user is actively viewing it, a request to mark it as read has likely already been sent.
+  if (conversation.read === false && !isActive) {
+    return ConversationDisplayStatus.unread;
+  }
+  return undefined;
+};
+
+const newConversationLabel = i18n.translate(
+  'xpack.agentBuilder.sidebar.conversation.newConversation',
+  { defaultMessage: 'New conversation' }
+);
 
 interface ConversationListProps {
   agentId: string;
   currentConversationId: string | undefined;
-  onItemClick?: () => void;
+  isNewConversationRoute: boolean;
+  onItemClick?: (conversationId: string) => void;
 }
 
 export const ConversationList: React.FC<ConversationListProps> = ({
   agentId,
   currentConversationId,
+  isNewConversationRoute,
   onItemClick,
 }) => {
   const { euiTheme } = useEuiTheme();
   const { conversations = [], isLoading } = useConversationList({ agentId });
+  const { activeStreams, byConversationId } = useStreamingContext();
 
   const sortedConversations = useMemo(
     () =>
-      [...conversations].sort(
-        (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
-      ),
-    [conversations]
+      [...conversations].sort((a, b) => {
+        const aInProgress =
+          activeStreams.has(a.id) || a.status === ConversationRoundStatus.inProgress;
+        const bInProgress =
+          activeStreams.has(b.id) || b.status === ConversationRoundStatus.inProgress;
+        if (aInProgress !== bInProgress) return aInProgress ? -1 : 1;
+        return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
+      }),
+    [conversations, activeStreams]
   );
 
   const linkStyles = createConversationListItemStyles(euiTheme);
@@ -58,24 +97,43 @@ export const ConversationList: React.FC<ConversationListProps> = ({
     );
   }
 
+  // If there are no conversations, show 1 mock conversation item that links to the new conversation route
   if (sortedConversations.length === 0) {
-    return <NoConversationsPrompt isFiltered={false} />;
+    return (
+      <EuiFlexGroup direction="column" gutterSize="xs">
+        <EuiFlexItem grow={false}>
+          <Link
+            to={appPaths.agent.conversations.new({ agentId })}
+            css={isNewConversationRoute ? activeLinkStyles : linkStyles}
+            data-test-subj="agentBuilderSidebarConversation-new"
+          >
+            <EuiTextTruncate text={newConversationLabel} />
+          </Link>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
   }
 
   return (
     <EuiFlexGroup direction="column" gutterSize="xs">
       {sortedConversations.map((conversation) => {
         const isActive = currentConversationId === conversation.id;
+        const isStreaming = activeStreams.has(conversation.id);
+        const hasError = Boolean(byConversationId[conversation.id]?.error);
+        const status = deriveDisplayStatus(conversation, isStreaming, hasError, isActive);
         return (
           <EuiFlexItem grow={false} key={conversation.id}>
-            <Link
-              to={appPaths.agent.conversations.byId({ agentId, conversationId: conversation.id })}
-              css={isActive ? activeLinkStyles : linkStyles}
-              data-test-subj={`agentBuilderSidebarConversation-${conversation.id}`}
-              onClick={onItemClick}
-            >
-              <EuiTextTruncate text={conversation.title || conversation.id} />
-            </Link>
+            <ConversationListItemRow
+              agentId={agentId}
+              conversationId={conversation.id}
+              title={conversation.title || conversation.id}
+              isActive={isActive}
+              routeConversationId={currentConversationId}
+              showActionsMenu={!isStreaming}
+              onItemClick={onItemClick ? () => onItemClick(conversation.id) : undefined}
+              status={status}
+              read={conversation.read}
+            />
           </EuiFlexItem>
         );
       })}

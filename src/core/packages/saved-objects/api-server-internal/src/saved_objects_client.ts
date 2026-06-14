@@ -52,6 +52,8 @@ import type {
   SavedObjectsRawDocSource,
   SavedObjectsSearchOptions,
   SavedObjectsSearchResponse,
+  SavedObjectsEsqlOptions,
+  SavedObjectsEsqlResponse,
 } from '@kbn/core-saved-objects-api-server';
 
 /**
@@ -115,6 +117,11 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
     options: SavedObjectsSearchOptions
   ): Promise<SavedObjectsSearchResponse<T, A>> {
     return await this._repository.search(options);
+  }
+
+  /** {@inheritDoc SavedObjectsClientContract.esql} */
+  async esql(options: SavedObjectsEsqlOptions): Promise<SavedObjectsEsqlResponse> {
+    return await this._repository.esql(options);
   }
 
   /** {@inheritDoc SavedObjectsClientContract.bulkGet} */

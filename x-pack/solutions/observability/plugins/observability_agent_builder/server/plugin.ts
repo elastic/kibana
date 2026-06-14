@@ -12,7 +12,6 @@ import type {
   PluginInitializerContext,
   Logger,
 } from '@kbn/core/server';
-import { registerObservabilityAgent } from './agent/register_observability_agent';
 import { registerTools } from './tools/register_tools';
 import { registerAttachments } from './attachments/register_attachments';
 import { registerSkills } from './skills/register_skills';
@@ -24,6 +23,10 @@ import type {
 } from './types';
 import { ObservabilityAgentBuilderDataRegistry } from './data_registry/data_registry';
 import { registerServerRoutes } from './routes/register_routes';
+import {
+  observabilityParentFeature,
+  observabilityAiInsightsInferenceFeatures,
+} from './inference_feature';
 
 export class ObservabilityAgentBuilderPlugin
   implements
@@ -49,10 +52,6 @@ export class ObservabilityAgentBuilderPlugin
     >,
     plugins: ObservabilityAgentBuilderPluginSetupDependencies
   ): ObservabilityAgentBuilderPluginSetup {
-    registerObservabilityAgent({ core, plugins, logger: this.logger }).catch((error) => {
-      this.logger.error(`Error registering observability agent: ${error}`);
-    });
-
     registerSkills({ plugins, logger: this.logger });
 
     registerTools({
@@ -74,6 +73,29 @@ export class ObservabilityAgentBuilderPlugin
     });
 
     registerServerRoutes({ core, plugins, logger: this.logger, dataRegistry: this.dataRegistry });
+
+    if (plugins.searchInferenceEndpoints) {
+      plugins.searchInferenceEndpoints.features.register(observabilityParentFeature);
+
+      const failures: string[] = [];
+      for (const feature of observabilityAiInsightsInferenceFeatures) {
+        const result = plugins.searchInferenceEndpoints.features.register(feature);
+        if (!result.ok) {
+          failures.push(`${feature.featureId}: ${result.error}`);
+        }
+      }
+      if (failures.length) {
+        this.logger.warn(
+          `Failed to register inference endpoints for Observability AI Insights: ${failures.join(
+            '; '
+          )}`
+        );
+      } else {
+        this.logger.debug(
+          'Successfully registered inference endpoints for Observability AI Insights'
+        );
+      }
+    }
 
     return {
       registerDataProvider: (id, provider) => this.dataRegistry.registerDataProvider(id, provider),

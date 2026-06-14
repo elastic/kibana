@@ -6,7 +6,7 @@
  */
 
 import type { SignificantEventsToolUsage } from '@kbn/streams-ai';
-import type { StreamType } from '@kbn/streams-schema';
+import type { SigEventStatus, StreamType } from '@kbn/streams-schema';
 
 interface StreamEndpointLatencyProps {
   name: string;
@@ -74,6 +74,34 @@ interface StreamsFeaturesIdentifiedProps {
   state: 'success' | 'failure' | 'canceled';
 }
 
+interface StreamsAgentBuilderKnowledgeIndicatorCreatedProps {
+  ki_kind: 'feature' | 'query';
+  tool_id: 'ki_feature_create' | 'ki_query_create';
+  success: boolean;
+  stream_name: string;
+  stream_type: StreamType | 'unknown';
+  error_message?: string;
+}
+
+interface StreamsAgentToolKiIdentificationStartedProps {
+  success: boolean;
+  stream_name: string;
+  error_message?: string;
+}
+
+interface StreamsAgentToolEventCreateProps {
+  success: boolean;
+  stream_names: string[];
+  error_message?: string;
+}
+
+interface StreamsAgentToolEventStatusUpdateProps {
+  success: boolean;
+  event_id: string;
+  status: SigEventStatus;
+  error_message?: string;
+}
+
 export {
   type StreamEndpointLatencyProps,
   type StreamsStateErrorProps,
@@ -82,4 +110,8 @@ export {
   type StreamsInsightsGeneratedProps,
   type StreamsProcessingPipelineSuggestedProps,
   type StreamsFeaturesIdentifiedProps,
+  type StreamsAgentBuilderKnowledgeIndicatorCreatedProps,
+  type StreamsAgentToolKiIdentificationStartedProps,
+  type StreamsAgentToolEventCreateProps,
+  type StreamsAgentToolEventStatusUpdateProps,
 };

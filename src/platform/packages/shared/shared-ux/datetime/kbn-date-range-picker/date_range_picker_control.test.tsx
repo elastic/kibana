@@ -8,6 +8,7 @@
  */
 
 import React, { useState } from 'react';
+import moment from 'moment-timezone';
 import { fireEvent, render, screen, waitFor, act, within } from '@testing-library/react';
 import { renderWithEuiTheme } from '@kbn/test-jest-helpers';
 import { EuiThemeProvider } from '@elastic/eui';
@@ -34,6 +35,15 @@ const waitForPopoverClose = () =>
   });
 
 describe('DateRangePickerControl', () => {
+  // Pin to UTC so date formatting is deterministic across local machines and CI agents.
+  beforeEach(() => {
+    moment.tz.setDefault('UTC');
+  });
+
+  afterEach(() => {
+    moment.tz.setDefault('Browser');
+  });
+
   describe('editing mode', () => {
     it('enters editing mode on control button click', async () => {
       renderWithEuiTheme(<DateRangePicker {...defaultProps} onChange={() => {}} />);
@@ -48,6 +58,79 @@ describe('DateRangePickerControl', () => {
 
       fireEvent.keyDown(input, { key: 'Escape' });
       await waitForPopoverClose();
+    });
+
+    it('selects the clicked display part in the input', async () => {
+      renderWithEuiTheme(<DateRangePicker {...defaultProps} onChange={() => {}} />);
+
+      const displayPart = screen.getByText('20');
+      fireEvent.mouseDown(displayPart);
+      fireEvent.click(displayPart);
+
+      const input = await screen.findByTestId('dateRangePickerInput');
+      await waitFor(() => {
+        expect(input).toHaveFocus();
+        expect((input as HTMLInputElement).selectionStart).toBe(5);
+        expect((input as HTMLInputElement).selectionEnd).toBe(7);
+      });
+
+      fireEvent.keyDown(input, { key: 'Escape' });
+      await waitForPopoverClose();
+    });
+
+    it('keeps the clicked display part visible when the input is scrolled', async () => {
+      const animationFrameCallbacks: FrameRequestCallback[] = [];
+      const requestAnimationFrameSpy = jest
+        .spyOn(window, 'requestAnimationFrame')
+        .mockImplementation((callback) => {
+          animationFrameCallbacks.push(callback);
+          return animationFrameCallbacks.length;
+        });
+      const cancelAnimationFrameSpy = jest
+        .spyOn(window, 'cancelAnimationFrame')
+        .mockImplementation(() => {});
+      const getContextSpy = jest
+        .spyOn(HTMLCanvasElement.prototype, 'getContext')
+        .mockReturnValue(null);
+
+      try {
+        renderWithEuiTheme(
+          <DateRangePicker
+            {...defaultProps}
+            defaultValue="2024-01-01T00:00:00.000Z to 2024-12-31T23:59:59.999Z"
+            onChange={() => {}}
+          />
+        );
+
+        // Both sides of the range render "2024"; pick the start-side year, matching the selection assertion below.
+        const displayPart = screen.getAllByText('2024')[0];
+        fireEvent.mouseDown(displayPart);
+        fireEvent.click(displayPart);
+
+        const input = (await screen.findByTestId('dateRangePickerInput')) as HTMLInputElement;
+        await waitFor(() => {
+          expect(input.selectionStart).toBe(7);
+          expect(input.selectionEnd).toBe(11);
+        });
+        Object.defineProperty(input, 'clientWidth', { configurable: true, value: 80 });
+        Object.defineProperty(input, 'scrollWidth', { configurable: true, value: 800 });
+        input.scrollLeft = 720;
+
+        act(() => {
+          for (const callback of animationFrameCallbacks) {
+            callback(performance.now());
+          }
+        });
+
+        expect(input.scrollLeft).toBeLessThan(200);
+
+        fireEvent.keyDown(input, { key: 'Escape' });
+        await waitForPopoverClose();
+      } finally {
+        requestAnimationFrameSpy.mockRestore();
+        cancelAnimationFrameSpy.mockRestore();
+        getContextSpy.mockRestore();
+      }
     });
 
     it('submits on Enter and returns to idle mode', async () => {
@@ -213,20 +296,48 @@ describe('DateRangePickerControl', () => {
   });
 
   describe('collapsed prop', () => {
-    it('shows the label and omits aria-label when not collapsed (default)', () => {
-      renderWithEuiTheme(<DateRangePicker {...defaultProps} />);
+    describe('collapsed=false (default)', () => {
+      it('shows the text label', () => {
+        renderWithEuiTheme(<DateRangePicker {...defaultProps} />);
 
-      const button = screen.getByTestId('dateRangePickerControlButton');
-      expect(button).not.toHaveAttribute('aria-label');
-      expect(button).toHaveTextContent('Last 20 minutes');
+        const button = screen.getByTestId('dateRangePickerControlButton');
+        expect(button).not.toHaveAttribute('aria-label');
+        expect(button).toHaveTextContent('Last 20 minutes');
+      });
+
+      it('hides the duration badge for relative-to-now ranges', () => {
+        renderWithEuiTheme(<DateRangePicker {...defaultProps} defaultValue="last 20 minutes" />);
+        expect(screen.queryByTestId('dateRangePickerDurationBadge')).not.toBeInTheDocument();
+      });
+
+      it('shows the duration badge for non-relative-to-now ranges', () => {
+        renderWithEuiTheme(
+          <DateRangePicker {...defaultProps} defaultValue="2024-01-01 to 2024-02-01" />
+        );
+        expect(screen.getByTestId('dateRangePickerDurationBadge')).toBeInTheDocument();
+      });
     });
 
-    it('hides the label and sets aria-label when collapsed', () => {
-      renderWithEuiTheme(<DateRangePicker {...defaultProps} collapsed />);
+    describe('collapsed=true', () => {
+      it('hides the text label and sets aria-label', () => {
+        renderWithEuiTheme(<DateRangePicker {...defaultProps} collapsed />);
 
-      const button = screen.getByTestId('dateRangePickerControlButton');
-      expect(button).toHaveAttribute('aria-label');
-      expect(button).not.toHaveTextContent('Last 20 minutes');
+        const button = screen.getByTestId('dateRangePickerControlButton');
+        expect(button).toHaveAttribute('aria-label');
+        expect(button).not.toHaveTextContent('Last 20 minutes');
+      });
+
+      it('shows the duration badge for non-relative-to-now ranges', () => {
+        renderWithEuiTheme(
+          <DateRangePicker {...defaultProps} collapsed defaultValue="2024-01-01 to 2024-02-01" />
+        );
+        expect(screen.getByTestId('dateRangePickerDurationBadge')).toBeInTheDocument();
+      });
+
+      it('shows the duration badge for relative-to-now ranges', () => {
+        renderWithEuiTheme(<DateRangePicker {...defaultProps} collapsed />);
+        expect(screen.getByTestId('dateRangePickerDurationBadge')).toBeInTheDocument();
+      });
     });
   });
 
@@ -275,7 +386,11 @@ describe('DateRangePickerControl', () => {
         'Last 20 minutes'
       );
 
-      rerender(<DateRangePicker value="last 1 hour" onChange={() => {}} {...controlledDefaults} />);
+      rerender(
+        <EuiThemeProvider>
+          <DateRangePicker value="last 1 hour" onChange={() => {}} {...controlledDefaults} />
+        </EuiThemeProvider>
+      );
       await waitFor(() => {
         expect(screen.getByTestId('dateRangePickerControlButton')).toHaveTextContent('Last 1 hour');
       });
@@ -291,7 +406,11 @@ describe('DateRangePickerControl', () => {
       fireEvent.change(input, { target: { value: 'last 5 minutes' } });
       expect(input).toHaveValue('last 5 minutes');
 
-      rerender(<DateRangePicker value="last 1 hour" onChange={() => {}} {...controlledDefaults} />);
+      rerender(
+        <EuiThemeProvider>
+          <DateRangePicker value="last 1 hour" onChange={() => {}} {...controlledDefaults} />
+        </EuiThemeProvider>
+      );
       await waitFor(() => {
         expect(input).toHaveValue('last 5 minutes');
       });
@@ -311,7 +430,9 @@ describe('DateRangePickerControl', () => {
 
       await act(async () =>
         rerender(
-          <DateRangePicker value="last 1 hour" onChange={() => {}} {...controlledDefaults} />
+          <EuiThemeProvider>
+            <DateRangePicker value="last 1 hour" onChange={() => {}} {...controlledDefaults} />
+          </EuiThemeProvider>
         )
       );
       fireEvent.keyDown(input, { key: 'Escape' });
@@ -367,14 +488,14 @@ describe('DateRangePickerControl', () => {
       renderWithEuiTheme(<DateRangePicker {...defaultProps} width="restricted" />);
       const wrapper = screen.getByTestId('dateRangePickerControlWrapper');
       expect(wrapper).toHaveStyle({
-        'inline-size': 'var(--kbnDateRangePickerWidth, 21.25rem)',
+        'inline-size': 'var(--kbnDateRangePickerWidthRestricted, 21.25rem)',
       });
     });
 
     it('full', () => {
       const { container } = renderWithEuiTheme(<DateRangePicker {...defaultProps} width="full" />);
       expect(container.firstElementChild).toHaveStyle({ display: 'flex', 'inline-size': '100%' });
-      const popover = screen.getByTestId('dateRangePickerDialogTriggerWrapper');
+      const popover = screen.getByTestId('dateRangePickerPopoverTriggerWrapper');
       expect(popover).toHaveStyle({ 'inline-size': '100%' });
     });
   });
@@ -413,11 +534,40 @@ describe('DateRangePickerControl', () => {
       expect(badge).toBeInTheDocument();
     });
 
-    it('renders a duration label when the range is valid', () => {
-      renderWithEuiTheme(<DateRangePicker {...defaultProps} defaultValue="last 20 minutes" />);
+    it('renders a duration label when the range is valid and not relative-to-now', () => {
+      renderWithEuiTheme(
+        <DateRangePicker {...defaultProps} defaultValue="2024-01-01 to 2024-02-01" />
+      );
       const button = screen.getByTestId('dateRangePickerControlButton');
-      const badge = within(button).getByText('20min');
+      const badge = within(button).getByTestId('dateRangePickerDurationBadge');
       expect(badge).toBeInTheDocument();
+    });
+  });
+
+  describe('roundRelativeTime', () => {
+    it('applies rounding to the start date when selecting a preset', async () => {
+      const onChange = jest.fn();
+      renderWithEuiTheme(
+        <DateRangePicker
+          defaultValue="last 20 minutes"
+          onChange={onChange}
+          settings={{ roundRelativeTime: true }}
+          onSettingsChange={() => {}}
+          presets={[{ start: 'now-15m', end: 'now', label: 'Last 15 minutes' }]}
+        />
+      );
+
+      const input = openEditing();
+      fireEvent.keyDown(input, { key: 'ArrowDown' });
+
+      const preset = screen.getByTestId('dateRangePickerPresetItem-Last_15_minutes');
+      fireEvent.click(within(preset).getByRole('button'));
+
+      expect(onChange).toHaveBeenCalledTimes(1);
+      expect(onChange).toHaveBeenCalledWith(
+        expect.objectContaining({ start: 'now-15m/m', end: 'now' })
+      );
+      await waitForPopoverClose();
     });
   });
 
@@ -435,7 +585,7 @@ describe('DateRangePickerControl', () => {
 
     const autoRefreshSettings = {
       roundRelativeTime: true,
-      autoRefresh: { isEnabled: true, isPaused: false, interval: 4000 },
+      autoRefresh: { isEnabled: true, isPaused: false, intervalMs: 4000, intervalDisplayUnit: 's' },
     } as const;
 
     it('does not render the auto-refresh append control when `settings.autoRefresh` is absent', () => {
@@ -461,7 +611,12 @@ describe('DateRangePickerControl', () => {
           onRefresh={onRefresh}
           settings={{
             roundRelativeTime: true,
-            autoRefresh: { isEnabled: false, isPaused: false, interval: 4000 },
+            autoRefresh: {
+              isEnabled: false,
+              isPaused: false,
+              intervalMs: 4000,
+              intervalDisplayUnit: 's',
+            },
           }}
         />
       );
@@ -476,7 +631,12 @@ describe('DateRangePickerControl', () => {
           onRefresh={onRefresh}
           settings={{
             roundRelativeTime: true,
-            autoRefresh: { isEnabled: true, isPaused: true, interval: 4000 },
+            autoRefresh: {
+              isEnabled: true,
+              isPaused: true,
+              intervalMs: 4000,
+              intervalDisplayUnit: 's',
+            },
           }}
         />
       );
@@ -578,7 +738,12 @@ describe('DateRangePickerControl', () => {
           {...defaultProps}
           settings={{
             roundRelativeTime: true,
-            autoRefresh: { isEnabled: true, isPaused: true, interval: 1000 },
+            autoRefresh: {
+              isEnabled: true,
+              isPaused: true,
+              intervalMs: 1000,
+              intervalDisplayUnit: 's',
+            },
           }}
           onRefresh={pausedOnRefresh}
         />
@@ -599,7 +764,12 @@ describe('DateRangePickerControl', () => {
           {...defaultProps}
           settings={{
             roundRelativeTime: true,
-            autoRefresh: { isEnabled: false, isPaused: false, interval: 1000 },
+            autoRefresh: {
+              isEnabled: false,
+              isPaused: false,
+              intervalMs: 1000,
+              intervalDisplayUnit: 's',
+            },
           }}
           onRefresh={disabledOnRefresh}
         />

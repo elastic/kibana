@@ -10,9 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { EuiButton } from '@elastic/eui';
 
-import useObservable from 'react-use/lib/useObservable';
 import { CreateIndexModal } from './create_index_modal';
-import { useAppContext } from '../../../../app_context';
 
 export interface CreateIndexButtonProps {
   loadIndices: () => void;
@@ -21,18 +19,7 @@ export interface CreateIndexButtonProps {
 }
 
 export const CreateIndexButton = ({ loadIndices, share, dataTestSubj }: CreateIndexButtonProps) => {
-  const {
-    core: { chrome },
-  } = useAppContext();
   const [createIndexModalOpen, setCreateIndexModalOpen] = useState<boolean>(false);
-  const createIndexUrl = share?.url.locators.get('SEARCH_CREATE_INDEX')?.useUrl({});
-
-  const activeSolutionId = useObservable(chrome.getActiveSolutionNavId$());
-
-  const actionProp =
-    createIndexUrl && activeSolutionId === 'es'
-      ? { href: createIndexUrl }
-      : { onClick: () => setCreateIndexModalOpen(true) };
 
   return (
     <>
@@ -42,7 +29,7 @@ export const CreateIndexButton = ({ loadIndices, share, dataTestSubj }: CreateIn
         key="createIndexButton"
         data-test-subj={dataTestSubj || 'createIndexButton'}
         data-telemetry-id="idxMgmt-indexList-createIndexButton"
-        {...actionProp}
+        onClick={() => setCreateIndexModalOpen(true)}
       >
         <FormattedMessage
           id="xpack.idxMgmt.indexTable.createIndexButton"

@@ -13,14 +13,14 @@ import type { WorkflowsExtensionsPublicPluginStart } from '@kbn/workflows-extens
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/public/mocks';
 import { z } from '@kbn/zod/v4';
 import { flattenOptions, getActionOptions } from './get_action_options';
-import { getAllConnectors } from '../../../../common/schema';
-import { getStepIconType } from '../../../shared/ui/step_icons/get_step_icon_type';
+import { getAllConnectors, isDeprecatedStepType } from '../../../../common/schema';
 import { triggerSchemas } from '../../../trigger_schemas';
 import type { ActionOptionData } from '../types';
 import { isActionGroup, isActionOption } from '../types';
 
 jest.mock('../../../../common/schema', () => ({
   getAllConnectors: jest.fn(),
+  isDeprecatedStepType: jest.fn(() => false),
 }));
 jest.mock('../../../trigger_schemas', () => ({
   triggerSchemas: { getTriggerDefinitions: jest.fn(() => []) },
@@ -28,9 +28,6 @@ jest.mock('../../../trigger_schemas', () => ({
 jest.mock('@kbn/workflows', () => ({
   ...jest.requireActual('@kbn/workflows'),
   isDynamicConnector: jest.fn(),
-}));
-jest.mock('../../../shared/ui/step_icons/get_step_icon_type', () => ({
-  getStepIconType: jest.fn(),
 }));
 jest.mock('@kbn/i18n', () => ({
   i18n: {
@@ -59,10 +56,10 @@ describe('getActionOptions', () => {
     mockWorkflowsExtensions = workflowsExtensionsMock.createStart();
 
     (getAllConnectors as jest.Mock).mockReturnValue([]);
+    (isDeprecatedStepType as jest.Mock).mockReturnValue(false);
     (isDynamicConnector as jest.MockedFunction<typeof isDynamicConnector>).mockImplementation(
       () => false
     );
-    (getStepIconType as jest.Mock).mockReturnValue('plugs');
   });
 
   it('should return all base action groups', () => {
@@ -119,13 +116,14 @@ describe('getActionOptions', () => {
 
     expect(flowControlGroup).toBeDefined();
     if (flowControlGroup && 'options' in flowControlGroup) {
-      expect(flowControlGroup.options).toHaveLength(7);
+      expect(flowControlGroup.options).toHaveLength(8);
       expect(flowControlGroup.options.map((opt) => opt.id)).toEqual([
         'if',
         'switch',
         'foreach',
         'while',
         'wait',
+        'waitForInput',
         'workflow.execute',
         'workflow.executeAsync',
       ]);
@@ -163,6 +161,126 @@ describe('getActionOptions', () => {
       if (isActionOption(option)) {
         expect(option.iconType).toBe('customIcon');
       }
+    }
+  });
+
+  it('should not show Cases nested group when no cases steps are registered', () => {
+    const result = getActionOptions(mockEuiTheme, mockWorkflowsExtensions);
+    const kibanaGroup = result.find((group) => group.id === 'kibana');
+
+    expect(kibanaGroup).toBeDefined();
+    if (kibanaGroup && isActionGroup(kibanaGroup)) {
+      expect(kibanaGroup.options).toHaveLength(0);
+      expect(kibanaGroup.options.find((opt) => opt.id === 'kibana.cases')).toBeUndefined();
+    }
+  });
+
+  it('should place KibanaCases steps in nested Cases group under Kibana', () => {
+    const mockConnector = {
+      type: 'cases.createCase',
+      description: 'Create case',
+    };
+
+    const mockStepDefinition = {
+      id: 'cases.createCase',
+      label: 'Create case',
+      description: 'Create a case',
+      icon: 'casesApp',
+      category: StepCategory.KibanaCases,
+      inputSchema: z.object({}),
+      outputSchema: z.object({}),
+    };
+
+    (getAllConnectors as jest.Mock).mockReturnValue([mockConnector]);
+    mockWorkflowsExtensions.getStepDefinition.mockReturnValue(mockStepDefinition as any);
+
+    const result = getActionOptions(mockEuiTheme, mockWorkflowsExtensions);
+    const kibanaGroup = result.find((group) => group.id === 'kibana');
+
+    expect(kibanaGroup).toBeDefined();
+    if (kibanaGroup && isActionGroup(kibanaGroup)) {
+      expect(kibanaGroup.options).toHaveLength(1);
+      const casesNested = kibanaGroup.options[0];
+      expect(casesNested.id).toBe('kibana.cases');
+      if (isActionGroup(casesNested)) {
+        expect(casesNested.options).toHaveLength(1);
+        expect(casesNested.options[0].id).toBe('cases.createCase');
+      }
+    }
+  });
+
+  it('should set pathIds on groups for navigation from search', () => {
+    const mockConnector = {
+      type: 'cases.createCase',
+      description: 'Create case',
+    };
+
+    const mockStepDefinition = {
+      id: 'cases.createCase',
+      label: 'Create case',
+      description: 'Create a case',
+      icon: 'casesApp',
+      category: StepCategory.KibanaCases,
+      inputSchema: z.object({}),
+      outputSchema: z.object({}),
+    };
+
+    (getAllConnectors as jest.Mock).mockReturnValue([mockConnector]);
+    mockWorkflowsExtensions.getStepDefinition.mockReturnValue(mockStepDefinition as any);
+
+    const result = getActionOptions(mockEuiTheme, mockWorkflowsExtensions);
+    const kibanaGroup = result.find((group) => group.id === 'kibana');
+
+    expect(kibanaGroup).toBeDefined();
+    if (kibanaGroup && isActionGroup(kibanaGroup)) {
+      expect(kibanaGroup.pathIds).toEqual(['kibana']);
+      const casesNested = kibanaGroup.options.find((opt) => opt.id === 'kibana.cases');
+      expect(casesNested).toBeDefined();
+      if (casesNested && isActionGroup(casesNested)) {
+        expect(casesNested.pathIds).toEqual(['kibana', 'kibana.cases']);
+      }
+    }
+  });
+
+  it('should list nested Cases group before other Kibana options when both are present', () => {
+    const mockConnectors = [
+      {
+        type: 'kibana.saved_object',
+        description: 'Saved Object',
+        summary: 'Kibana Summary',
+      },
+      {
+        type: 'cases.createCase',
+        description: 'Create case',
+      },
+    ];
+
+    const mockCasesStepDefinition = {
+      id: 'cases.createCase',
+      label: 'Create case',
+      description: 'Create a case',
+      icon: 'casesApp',
+      category: StepCategory.KibanaCases,
+      inputSchema: z.object({}),
+      outputSchema: z.object({}),
+    };
+
+    (getAllConnectors as jest.Mock).mockReturnValue(mockConnectors);
+    mockWorkflowsExtensions.getStepDefinition.mockImplementation((type: string) => {
+      if (type === 'cases.createCase') {
+        return mockCasesStepDefinition as any;
+      }
+      return undefined;
+    });
+
+    const result = getActionOptions(mockEuiTheme, mockWorkflowsExtensions);
+    const kibanaGroup = result.find((group) => group.id === 'kibana');
+
+    expect(kibanaGroup).toBeDefined();
+    if (kibanaGroup && isActionGroup(kibanaGroup)) {
+      expect(kibanaGroup.options).toHaveLength(2);
+      expect(kibanaGroup.options[0].id).toBe('kibana.cases');
+      expect(kibanaGroup.options[1].id).toBe('kibana.saved_object');
     }
   });
 
@@ -212,6 +330,28 @@ describe('getActionOptions', () => {
       if (isActionOption(option)) {
         expect(option.iconType).toBe('logoKibana');
       }
+    }
+  });
+
+  it('should hide deprecated connectors from the actions menu', () => {
+    const mockConnector = {
+      type: 'kibana.createCase',
+      description: 'Create a case',
+      summary: 'Create a case',
+    };
+
+    (getAllConnectors as jest.Mock).mockReturnValue([mockConnector]);
+    (isDeprecatedStepType as jest.Mock).mockImplementation(
+      (stepType: string) => stepType === 'kibana.createCase'
+    );
+    mockWorkflowsExtensions.getStepDefinition.mockReturnValue(undefined);
+
+    const result = getActionOptions(mockEuiTheme, mockWorkflowsExtensions);
+    const kibanaGroup = result.find((group) => group.id === 'kibana');
+
+    expect(kibanaGroup).toBeDefined();
+    if (kibanaGroup && isActionGroup(kibanaGroup)) {
+      expect(kibanaGroup.options).toHaveLength(0);
     }
   });
 
@@ -265,9 +405,11 @@ describe('getActionOptions', () => {
 
   it('should add dynamic connectors to external group', () => {
     const mockConnector = {
+      actionTypeId: '.slack',
+      displayName: 'Slack',
       type: 'slack.api',
-      description: 'Slack API',
-      iconType: 'logoSlack',
+      summary: 'API',
+      description: 'Slack - API',
       instances: [{ id: 'instance1' }, { id: 'instance2' }],
     };
 
@@ -276,7 +418,6 @@ describe('getActionOptions', () => {
     (isDynamicConnector as jest.MockedFunction<typeof isDynamicConnector>).mockImplementation(
       () => true
     );
-    (getStepIconType as jest.Mock).mockReturnValue('logoSlack');
 
     const result = getActionOptions(mockEuiTheme, mockWorkflowsExtensions);
     const externalGroup = result.find((group) => group.id === 'external');
@@ -286,14 +427,18 @@ describe('getActionOptions', () => {
       expect(externalGroup.options).toHaveLength(1);
       const option = externalGroup.options[0];
       expect(option.id).toBe('slack');
-      expect(option.label).toBe('slack');
+      expect(option.label).toBe('Slack');
+      expect(option.description).toBe('slack');
     }
   });
 
   it('should create connector groups for dynamic connectors with subtypes', () => {
     const mockConnector = {
-      type: 'slack.api',
-      description: 'Slack API',
+      actionTypeId: '.sharepoint-online',
+      displayName: 'SharePoint Online',
+      type: 'sharepoint-online.getAllSites',
+      summary: 'Get All Sites',
+      description: 'SharePoint Online - Get All Sites',
       instances: [{ id: 'instance1' }],
     };
 
@@ -302,19 +447,21 @@ describe('getActionOptions', () => {
     (isDynamicConnector as jest.MockedFunction<typeof isDynamicConnector>).mockImplementation(
       () => true
     );
-    (getStepIconType as jest.Mock).mockReturnValue('logoSlack');
 
     const result = getActionOptions(mockEuiTheme, mockWorkflowsExtensions);
     const externalGroup = result.find((group) => group.id === 'external');
 
     expect(externalGroup).toBeDefined();
     if (externalGroup && isActionGroup(externalGroup)) {
-      // Should create a group for 'slack' base type
-      const slackGroup = externalGroup.options.find((opt) => opt.id === 'slack');
-      expect(slackGroup).toBeDefined();
-      if (slackGroup && isActionGroup(slackGroup)) {
-        expect(slackGroup.options).toHaveLength(1);
-        expect(slackGroup.options[0].id).toBe('slack.api');
+      const sharepointGroup = externalGroup.options.find((opt) => opt.id === 'sharepoint-online');
+      expect(sharepointGroup).toBeDefined();
+      if (sharepointGroup && isActionGroup(sharepointGroup)) {
+        expect(sharepointGroup.label).toBe('SharePoint Online');
+        expect(sharepointGroup.description).toBe('sharepoint-online');
+        expect(sharepointGroup.options).toHaveLength(1);
+        expect(sharepointGroup.options[0].id).toBe('sharepoint-online.getAllSites');
+        expect(sharepointGroup.options[0].label).toBe('Get All Sites');
+        expect(sharepointGroup.options[0].description).toBe('sharepoint-online.getAllSites');
       }
     }
   });

@@ -26,12 +26,16 @@ import {
 import type { ICommandCallbacks } from '../types';
 import { ESQL_COMMON_NUMERIC_TYPES } from '../../definitions/types';
 import { getDateLiterals } from '../../definitions/utils';
-import { correctQuerySyntax, findAstPosition } from '../../definitions/utils/ast';
-import { Parser } from '@elastic/esql';
+import { findAutocompleteAstPosition } from '../../../language/shared/parse_for_autocomplete_query';
 
 const allEvalFns = getFunctionSignaturesByReturnType(Location.WHERE, 'any', {
   scalar: true,
 });
+
+const whereContext = {
+  ...mockContext,
+  subquerySupport: true,
+};
 
 export const EMPTY_WHERE_SUGGESTIONS = [...getFieldNamesByType('any'), ...allEvalFns];
 
@@ -46,7 +50,7 @@ const whereExpectSuggestions = (
   query: string,
   expectedSuggestions: string[],
   mockCallbacks?: ICommandCallbacks,
-  context = mockContext,
+  context = whereContext,
   offset?: number
 ) => {
   return expectSuggestions(
@@ -78,11 +82,8 @@ describe('WHERE Autocomplete', () => {
 
   describe('within the expression', () => {
     const suggest = async (query: string) => {
-      const correctedQuery = correctQuerySyntax(query);
-      const { root } = Parser.parse(correctedQuery, { withFormatting: true });
-
       const cursorPosition = query.length;
-      const { command } = findAstPosition(root, cursorPosition);
+      const { command } = findAutocompleteAstPosition(query, cursorPosition);
       if (!command) {
         throw new Error('Command not found in the parsed query');
       }
@@ -301,8 +302,32 @@ describe('WHERE Autocomplete', () => {
     });
 
     test('suggestions after IN', async () => {
-      await whereExpectSuggestions('from index | WHERE doubleField in ', ['($0)']);
-      await whereExpectSuggestions('from index | WHERE doubleField not in ', ['($0)']);
+      await whereExpectSuggestions('from index | WHERE doubleField in ', [
+        '($0)',
+        '(FROM $0)',
+        '(ROW $0)',
+        '(TS $0)',
+      ]);
+      await whereExpectSuggestions('from index | WHERE doubleField not in ', [
+        '($0)',
+        '(FROM $0)',
+        '(ROW $0)',
+        '(TS $0)',
+      ]);
+
+      await whereExpectSuggestions(
+        'from index | WHERE doubleField in (FROM index | KEEP doubleField) ',
+        [...getOperatorSuggestions(logicalOperators), '| ']
+      );
+      await whereExpectSuggestions(
+        'from index | WHERE doubleField not in (FROM index | KEEP doubleField) ',
+        [...getOperatorSuggestions(logicalOperators), '| ']
+      );
+      await whereExpectSuggestions('from index | WHERE doubleField in (ROW doubleField = 1) ', [
+        ...getOperatorSuggestions(logicalOperators),
+        '| ',
+      ]);
+
       const expectedFields = getFieldNamesByType(['double']);
       mockFieldsWithTypes(mockCallbacks, expectedFields);
       await whereExpectSuggestions(

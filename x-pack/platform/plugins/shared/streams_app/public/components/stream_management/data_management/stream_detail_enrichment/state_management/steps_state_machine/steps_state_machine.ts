@@ -4,18 +4,29 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { isEqual, isUndefined, omitBy } from 'lodash';
 import type { ActorRefFrom, SnapshotFrom } from 'xstate';
 import { and, assign, forwardTo, sendTo, setup } from 'xstate';
 import type {
   StreamlangProcessorDefinition,
   StreamlangStepWithUIAttributes,
   StreamlangConditionBlockWithUIAttributes,
+  StreamlangUIBranch,
 } from '@kbn/streamlang';
 import { isActionBlock } from '@kbn/streamlang';
 import type { StepContext, StepEvent, StepInput } from './types';
 
 export type StepActorRef = ActorRefFrom<typeof stepMachine>;
 export type StepActorSnapshot = SnapshotFrom<typeof stepMachine>;
+
+// Strips customIdentifier and undefined values from a step
+const sanitiseStep = ({ customIdentifier, ...restOfStep }: StreamlangStepWithUIAttributes) =>
+  omitBy(restOfStep, isUndefined);
+
+const isStepUpdated = (
+  step: StreamlangStepWithUIAttributes,
+  originalStep: StreamlangStepWithUIAttributes
+): boolean => !isEqual(sanitiseStep(step), sanitiseStep(originalStep));
 
 export const stepMachine = setup({
   types: {
@@ -35,6 +46,7 @@ export const stepMachine = setup({
           ...params.step,
           customIdentifier: context.step.customIdentifier,
           parentId: context.step.parentId,
+          branch: context.step.branch,
         };
 
         return {
@@ -71,27 +83,33 @@ export const stepMachine = setup({
       return {
         step: updatedStep,
         previousStep: updatedStep,
-        isUpdated: true,
+        isUpdated: isStepUpdated(updatedStep, context.originalStep),
       };
     }),
-    changeParent: assign(({ context }, { parentId }: { parentId: string | null }) => {
-      const updatedStep = {
-        ...context.step,
-        parentId,
-      };
+    changeParent: assign(
+      (
+        { context },
+        { parentId, branch }: { parentId: string | null; branch?: StreamlangUIBranch }
+      ) => {
+        const updatedStep = {
+          ...context.step,
+          parentId,
+          ...(branch !== undefined ? { branch } : {}),
+        };
 
-      return {
-        step: updatedStep,
-        previousStep: updatedStep,
-        isUpdated: true,
-      };
-    }),
+        return {
+          step: updatedStep,
+          previousStep: updatedStep,
+          isUpdated: isStepUpdated(updatedStep, context.originalStep),
+        };
+      }
+    ),
     resetToPrevious: assign(({ context }) => ({
       step: context.previousStep,
     })),
     markAsUpdated: assign(({ context }) => ({
       previousStep: context.step,
-      isUpdated: true,
+      isUpdated: isStepUpdated(context.step, context.originalStep),
     })),
     forwardEventToParent: forwardTo(({ context }) => context.parentRef),
     notifyStepSave: sendTo(
@@ -164,6 +182,7 @@ export const stepMachine = setup({
   id: 'processor',
   context: ({ input }) => ({
     parentRef: input.parentRef,
+    originalStep: input.step,
     previousStep: input.step,
     step: input.step,
     isNew: input.isNew ?? false,

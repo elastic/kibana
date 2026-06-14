@@ -46,7 +46,8 @@ dependsOn:
   - '@kbn/core-user-activity-server-internal'
   - '@kbn/core-user-activity-server-mocks'
   - '@kbn/core-security-common'
-  - '@kbn/spaces-utils'
+  - '@kbn/core-spaces-common'
+  - '@kbn/apm-utils'
 tags:
   - shared-server
   - package

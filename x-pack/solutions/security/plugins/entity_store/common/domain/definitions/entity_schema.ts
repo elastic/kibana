@@ -16,7 +16,7 @@ export const ALL_ENTITY_TYPES = Object.values(EntityType.enum);
 const mappingSchema = z.any();
 
 const retentionOperationSchema = z.discriminatedUnion('operation', [
-  z.object({ operation: z.literal('collect_values'), maxLength: z.number() }),
+  z.object({ operation: z.literal('collect_values') }),
   z.object({ operation: z.literal('prefer_newest_value') }),
   z.object({ operation: z.literal('prefer_oldest_value') }),
 ]);
@@ -38,10 +38,18 @@ const euidSeparatorSchema = z.object({
 });
 
 // Field evaluation: pre-evaluate a field before euid generation (first match wins; fallback to source value or fallbackValue).
-const fieldEvaluationWhenClauseSchema = z.object({
+const fieldEvaluationWhenClauseSourceMatchSchema = z.object({
   sourceMatchesAny: z.array(z.string()),
   then: z.string(),
 });
+const fieldEvaluationWhenClauseConditionSchema = z.object({
+  condition: streamlangConditionSchema,
+  then: z.string(),
+});
+const fieldEvaluationWhenClauseSchema = z.union([
+  fieldEvaluationWhenClauseSourceMatchSchema,
+  fieldEvaluationWhenClauseConditionSchema,
+]);
 
 const fieldEvaluationSourceSchema = z.union([
   z.object({ field: z.string() }),

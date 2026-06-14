@@ -21,6 +21,7 @@ export const fetchRulesByQueryOrIds = async ({
   maxRules,
   gapRange,
   gapFillStatuses,
+  schedulerId,
 }: {
   query: string | undefined;
   ids: string[] | undefined;
@@ -28,6 +29,7 @@ export const fetchRulesByQueryOrIds = async ({
   maxRules: number;
   gapRange?: { start: string; end: string };
   gapFillStatuses?: GapFillStatus[];
+  schedulerId?: string;
 }): Promise<PromisePoolOutcome<string, RuleAlertType>> => {
   if (ids) {
     const fallbackErrorMessage = 'Error resolving the rule';
@@ -78,6 +80,7 @@ export const fetchRulesByQueryOrIds = async ({
       gapFillStatuses,
       maxRuleIds: MAX_RULES_WITH_GAPS_TO_FETCH,
       filter: query,
+      schedulerId,
     });
 
     ruleIdsWithGaps = ruleIds;

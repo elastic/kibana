@@ -5,36 +5,48 @@
  * 2.0.
  */
 
-import { createPrompt } from '@kbn/inference-common';
+import { createPrompt, type ToolDefinition } from '@kbn/inference-common';
 import { z } from '@kbn/zod/v4';
 import systemPromptTemplate from './system_prompt.text';
 import userPromptTemplate from './user_prompt.text';
 import { insightsSchema, SUBMIT_INSIGHTS_TOOL_NAME } from '../../client/insight_tool';
 
-export const SummarizeQueriesPrompt = createPrompt({
-  name: 'summarize_queries',
-  input: z.object({
-    streamName: z.string(),
-    queries: z.string(),
-  }),
-})
-  .version({
-    system: {
-      mustache: {
-        template: systemPromptTemplate,
-      },
-    },
-    template: {
-      mustache: {
-        template: userPromptTemplate,
-      },
-    },
-    tools: {
-      [SUBMIT_INSIGHTS_TOOL_NAME]: {
-        description: 'Submit the identified insights for this stream',
-        schema: insightsSchema,
-      },
-    },
-    toolChoice: { function: SUBMIT_INSIGHTS_TOOL_NAME },
+export const createSummarizeQueriesPrompt = ({
+  additionalTools,
+  systemPromptSuffix,
+}: {
+  additionalTools?: Record<string, ToolDefinition>;
+  systemPromptSuffix?: string;
+} = {}) =>
+  createPrompt({
+    name: 'summarize_queries',
+    input: z.object({
+      streamName: z.string(),
+      queries: z.string(),
+    }),
   })
-  .get();
+    .version({
+      system: {
+        mustache: {
+          template: systemPromptSuffix
+            ? `${systemPromptTemplate}\n${systemPromptSuffix}`
+            : systemPromptTemplate,
+        },
+      },
+      template: {
+        mustache: {
+          template: userPromptTemplate,
+        },
+      },
+      tools: {
+        [SUBMIT_INSIGHTS_TOOL_NAME]: {
+          description: 'Submit the identified insights for this stream',
+          schema: insightsSchema,
+        },
+        ...(additionalTools ?? {}),
+      } as const,
+    })
+    .get();
+
+/** @deprecated Use createSummarizeQueriesPrompt() instead */
+export const SummarizeQueriesPrompt = createSummarizeQueriesPrompt();

@@ -10,11 +10,13 @@ import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiTextArea, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 import { Controller, useFormContext } from 'react-hook-form';
 import type { FormValues } from '../types';
+import { useRuleFormMeta } from '../contexts';
 
 const DESCRIPTION_ROW_ID = 'ruleV2FormDescriptionField';
 
 export const DescriptionField = () => {
   const { control, watch } = useFormContext<FormValues>();
+  const { layout } = useRuleFormMeta();
   const descriptionValue = watch('metadata.description');
 
   // Show the input if there's already a description value
@@ -71,6 +73,7 @@ export const DescriptionField = () => {
             rows={2}
             fullWidth
             isInvalid={!!error}
+            compressed={layout === 'flyout'}
             placeholder={i18n.translate('xpack.alertingV2.ruleForm.descriptionPlaceholder', {
               defaultMessage: 'Add an optional description for this rule...',
             })}

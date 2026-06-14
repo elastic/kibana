@@ -38,7 +38,6 @@ import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/s
 import {
   loggingSystemMock,
   savedObjectsRepositoryMock,
-  httpServiceMock,
   executionContextServiceMock,
   savedObjectsServiceMock,
   elasticsearchServiceMock,
@@ -183,7 +182,6 @@ describe('Task Runner', () => {
     actionsPlugin: actionsMock.createStart(),
     alertsService,
     backfillClient,
-    basePathService: httpServiceMock.createBasePath(),
     cancelAlertsOnRuleTimeout: true,
     connectorAdapterRegistry,
     data: dataPlugin,
@@ -395,9 +393,10 @@ describe('Task Runner', () => {
 
   test('passes consumer metrics to AlertingEventLogger', async () => {
     const consumerMetrics = {
+      matched_indices_count: 3,
+      frozen_indices_queried_count: 3,
       alerts_candidate_count: 42,
       alerts_suppressed_count: 7,
-      frozen_indices_queried_count: 3,
     };
     ruleType.executor.mockImplementation(async ({ services: { ruleMonitoringService } }) => {
       ruleMonitoringService?.setMetrics(consumerMetrics);
@@ -1368,14 +1367,6 @@ describe('Task Runner', () => {
           authorization: 'ApiKey MTIzOmFiYw==',
         },
       })
-    );
-
-    const [request] =
-      taskRunnerFactoryInitializerParams.actionsPlugin.getActionsClientWithRequest.mock.calls[0];
-
-    expect(taskRunnerFactoryInitializerParams.basePathService.set).toHaveBeenCalledWith(
-      request,
-      '/'
     );
 
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);

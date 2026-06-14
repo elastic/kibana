@@ -18,6 +18,7 @@ import {
   EuiText,
   EuiSpacer,
   EuiAccordion,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css, cx } from '@emotion/css';
 import React, { memo, useCallback, useMemo, useState } from 'react';
@@ -37,13 +38,14 @@ export interface CoverageOverviewMitreTechniquePanelPopoverProps {
 const CoverageOverviewMitreTechniquePanelPopoverComponent = ({
   technique,
 }: CoverageOverviewMitreTechniquePanelPopoverProps) => {
-  const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
+  const canEnableRules = useUserPrivileges().rulesPrivileges.enableDisable.edit;
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const popoverTitleId = useGeneratedHtmlId();
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
   const isEnableButtonDisabled = useMemo(
-    () => !canEditRules || technique.disabledRules.length === 0,
-    [canEditRules, technique.disabledRules.length]
+    () => !canEnableRules || technique.disabledRules.length === 0,
+    [canEnableRules, technique.disabledRules.length]
   );
 
   const isEnableButtonLoading = isLoading;
@@ -135,8 +137,10 @@ const CoverageOverviewMitreTechniquePanelPopoverComponent = ({
       anchorPosition="rightCenter"
       data-test-subj="coverageOverviewPopover"
       ownFocus={false}
+      aria-labelledby={popoverTitleId}
     >
       <EuiPopoverTitle
+        id={popoverTitleId}
         className={css`
           min-width: 30em;
         `}
@@ -166,9 +170,7 @@ const CoverageOverviewMitreTechniquePanelPopoverComponent = ({
         >
           <EuiListGroup
             data-test-subj="coverageOverviewEnabledRulesList"
-            flush
             listItems={enabledRuleListItems}
-            size="s"
           />
         </EuiAccordion>
         <EuiSpacer size="s" />
@@ -179,9 +181,7 @@ const CoverageOverviewMitreTechniquePanelPopoverComponent = ({
         >
           <EuiListGroup
             data-test-subj="coverageOverviewDisabledRulesList"
-            flush
             listItems={disabledRuleListItems}
-            size="s"
           />
         </EuiAccordion>
         <EuiSpacer size="s" />

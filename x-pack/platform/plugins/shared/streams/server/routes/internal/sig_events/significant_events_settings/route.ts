@@ -6,58 +6,34 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { ModelSettings } from '../../../../lib/sig_events/saved_objects/model_settings_config_service';
-import { getConfiguredIndexPatterns } from '../../../../lib/sig_events/helpers/get_configured_index_patterns';
+import {
+  OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED,
+  OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_INTERVAL_HOURS,
+  OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_EXCLUDED_STREAM_PATTERNS,
+} from '@kbn/management-settings-ids';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
-import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
-
-export type SignificantEventsSettingsResponse = ModelSettings & {
-  /** Resolved index patterns (with server default applied). Use this for filtering; do not duplicate default on the client. */
-  indexPatternsResolved: string[];
-};
-
-export const getSignificantEventsSettingsRoute = createServerRoute({
-  endpoint: 'GET /internal/streams/_significant_events/settings',
-  options: {
-    access: 'internal',
-    summary: 'Get settings for Significant Events',
-    description: 'Returns the settings defined by the user for the Significant Events feature.',
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
-    },
-  },
-  handler: async ({
-    request,
-    getScopedClients,
-    server,
-  }): Promise<SignificantEventsSettingsResponse> => {
-    const { modelSettingsClient, licensing, uiSettingsClient } = await getScopedClients({
-      request,
-    });
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
-    const settings = await modelSettingsClient.getSettings();
-    const indexPatternsResolved = await getConfiguredIndexPatterns(settings);
-    return { ...settings, indexPatternsResolved };
-  },
-});
+import { FeatureNotEnabledError } from '../../../../lib/streams/errors/feature_not_enabled_error';
+import {
+  STREAMS_API_PRIVILEGES,
+  MIN_EXTRACTION_INTERVAL_HOURS,
+} from '../../../../../common/constants';
 
 const putSignificantEventsSettingsBodySchema = z.object({
-  connectorIdKnowledgeIndicatorExtraction: z.string().optional(),
-  connectorIdRuleGeneration: z.string().optional(),
-  connectorIdDiscovery: z.string().optional(),
-  indexPatterns: z.string().optional(),
+  continuousKiExtraction: z.object({
+    enabled: z.boolean().optional(),
+    intervalHours: z.number().min(MIN_EXTRACTION_INTERVAL_HOURS).optional(),
+    excludedStreamPatterns: z.string().optional(),
+  }),
 });
 
 export const putSignificantEventsSettingsRoute = createServerRoute({
   endpoint: 'PUT /internal/streams/_significant_events/settings',
   options: {
     access: 'internal',
-    summary: 'Update significant events settings',
+    summary: 'Update continuous KI extraction settings',
     description:
-      'Sets one or more significant events settings. Omitted fields are left unchanged. Currently supports model settings (connector IDs): use empty string to use the default connector for that setting. Additional settings may be supported in the future.',
+      'Updates continuous KI extraction settings (enabled, interval, excluded patterns) and ensures the extraction workflow is created or updated accordingly.',
   },
   security: {
     authz: {
@@ -67,17 +43,78 @@ export const putSignificantEventsSettingsRoute = createServerRoute({
   params: z.object({
     body: putSignificantEventsSettingsBodySchema,
   }),
-  handler: async ({ params, request, getScopedClients, server }): Promise<{ success: true }> => {
-    const { modelSettingsClient, licensing, uiSettingsClient } = await getScopedClients({
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+    continuousKiOnboardingWorkflowService,
+    logger,
+  }): Promise<{ success: true }> => {
+    if (!continuousKiOnboardingWorkflowService) {
+      throw new FeatureNotEnabledError('Workflows management is not available');
+    }
+
+    const { licensing, uiSettingsClient, globalUiSettingsClient } = await getScopedClients({
       request,
     });
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
-    await modelSettingsClient.updateSettings(params.body);
+
+    const { continuousKiExtraction } = params.body;
+
+    const updates: Record<string, boolean | number | string> = {};
+
+    if (continuousKiExtraction.enabled !== undefined) {
+      updates[OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED] =
+        continuousKiExtraction.enabled;
+    }
+    if (continuousKiExtraction.intervalHours !== undefined) {
+      updates[OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_INTERVAL_HOURS] =
+        continuousKiExtraction.intervalHours;
+    }
+    if (continuousKiExtraction.excludedStreamPatterns !== undefined) {
+      updates[OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_EXCLUDED_STREAM_PATTERNS] =
+        continuousKiExtraction.excludedStreamPatterns;
+    }
+
+    const previousValues: Record<string, boolean | number | string> = {};
+    const keys = Object.keys(updates);
+    const allSettings = await globalUiSettingsClient.getAll<boolean | number | string>();
+    if (keys.length > 0) {
+      for (const key of keys) {
+        previousValues[key] = allSettings[key];
+      }
+      await globalUiSettingsClient.setMany(updates);
+    }
+
+    // Only reconcile the workflow on an actual enabled-state transition so the
+    // legacy and managed workflows never run at the same time. Interval/excluded
+    // changes are picked up by the running workflow at execution time.
+    const previousEnabled = allSettings[
+      OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED
+    ] as boolean;
+    const nextEnabled = continuousKiExtraction.enabled;
+
+    if (nextEnabled !== undefined && nextEnabled !== previousEnabled) {
+      try {
+        await continuousKiOnboardingWorkflowService.ensureWorkflow({
+          enabled: nextEnabled,
+          request,
+        });
+      } catch (err) {
+        if (Object.keys(previousValues).length > 0) {
+          await globalUiSettingsClient.setMany(previousValues).catch((rollbackErr) => {
+            logger.warn(`Failed to rollback settings after workflow sync error: ${rollbackErr}`);
+          });
+        }
+        throw err;
+      }
+    }
+
     return { success: true };
   },
 });
 
 export const internalSignificantEventsSettingsRoutes = {
-  ...getSignificantEventsSettingsRoute,
   ...putSignificantEventsSettingsRoute,
 };

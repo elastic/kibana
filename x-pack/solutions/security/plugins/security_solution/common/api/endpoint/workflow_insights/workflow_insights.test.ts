@@ -10,6 +10,8 @@ import { schema } from '@kbn/config-schema';
 import {
   GetWorkflowInsightsRequestSchema,
   UpdateWorkflowInsightRequestSchema,
+  CreateWorkflowInsightRequestSchema,
+  GetPendingInsightsRequestSchema,
 } from './workflow_insights';
 
 describe('Workflow Insights', () => {
@@ -124,6 +126,48 @@ describe('Workflow Insights', () => {
       };
 
       expect(() => validateQuery(validQuery)).not.toThrow();
+    });
+
+    describe('maxSize bounds', () => {
+      it('should not accept more than 50 ids', () => {
+        expect(() => validateQuery({ query: { ids: Array(51).fill('valid-id') } })).toThrow();
+      });
+
+      it('should not accept more than 50 sourceIds', () => {
+        expect(() =>
+          validateQuery({ query: { sourceIds: Array(51).fill('source-id') } })
+        ).toThrow();
+      });
+
+      it('should not accept more than 50 targetIds', () => {
+        expect(() =>
+          validateQuery({ query: { targetIds: Array(51).fill('target-id') } })
+        ).toThrow();
+      });
+
+      it('should not accept more than 20 categories', () => {
+        expect(() =>
+          validateQuery({ query: { categories: Array(21).fill('endpoint') } })
+        ).toThrow();
+      });
+
+      it('should not accept more than 20 types', () => {
+        expect(() =>
+          validateQuery({ query: { types: Array(21).fill('incompatible_antivirus') } })
+        ).toThrow();
+      });
+
+      it('should not accept more than 20 sourceTypes', () => {
+        expect(() =>
+          validateQuery({ query: { sourceTypes: Array(21).fill('llm-connector') } })
+        ).toThrow();
+      });
+
+      it('should not accept more than 20 actionTypes', () => {
+        expect(() =>
+          validateQuery({ query: { actionTypes: Array(21).fill('refreshed') } })
+        ).toThrow();
+      });
     });
 
     it('should throw an error for unsupported categories or types', () => {
@@ -383,6 +427,84 @@ describe('Workflow Insights', () => {
       });
     });
 
+    describe('maxSize bounds', () => {
+      const baseRequest = {
+        params: { insightId: 'valid-insight-id' },
+        body: {},
+      };
+
+      it('should not accept more than 50 target ids', () => {
+        expect(() =>
+          validateRequest({
+            ...baseRequest,
+            body: { target: { ids: Array(51).fill('target-id') } },
+          })
+        ).toThrow();
+      });
+
+      it('should not accept more than 100 exception_list_items', () => {
+        const item = {
+          list_id: 'list-id',
+          name: 'Exception',
+          entries: [],
+        };
+        expect(() =>
+          validateRequest({
+            ...baseRequest,
+            body: { remediation: { exception_list_items: Array(101).fill(item) } },
+          })
+        ).toThrow();
+      });
+
+      it('should not accept more than 250 entries in an exception list item', () => {
+        expect(() =>
+          validateRequest({
+            ...baseRequest,
+            body: {
+              remediation: {
+                exception_list_items: [{ list_id: 'list-id', entries: Array(251).fill({}) }],
+              },
+            },
+          })
+        ).toThrow();
+      });
+
+      it('should not accept more than 50 tags in an exception list item', () => {
+        expect(() =>
+          validateRequest({
+            ...baseRequest,
+            body: {
+              remediation: {
+                exception_list_items: [{ list_id: 'list-id', tags: Array(51).fill('tag') }],
+              },
+            },
+          })
+        ).toThrow();
+      });
+
+      it('should not accept more than 20 os_types in an exception list item', () => {
+        expect(() =>
+          validateRequest({
+            ...baseRequest,
+            body: {
+              remediation: {
+                exception_list_items: [{ list_id: 'list-id', os_types: Array(21).fill('windows') }],
+              },
+            },
+          })
+        ).toThrow();
+      });
+
+      it('should not accept more than 50 message_variables', () => {
+        expect(() =>
+          validateRequest({
+            ...baseRequest,
+            body: { metadata: { message_variables: Array(51).fill('var') } },
+          })
+        ).toThrow();
+      });
+    });
+
     it('should throw an error if target ids contain empty strings', () => {
       const invalidRequest = {
         params: {
@@ -461,6 +583,141 @@ describe('Workflow Insights', () => {
       expect(() => validateRequest(invalidRequest)).toThrowErrorMatchingInlineSnapshot(
         '"[body.remediation.exception_list_items.0.entries]: could not parse array value from json input"'
       );
+    });
+  });
+
+  describe('CreateWorkflowInsightRequestSchema', () => {
+    const validateBody = (body: Record<string, unknown>) => {
+      return schema.object(CreateWorkflowInsightRequestSchema).validate({ body });
+    };
+
+    it('should validate successfully with valid insightTypes and endpointIds', () => {
+      expect(() =>
+        validateBody({
+          insightTypes: ['incompatible_antivirus', 'policy_response_failure'],
+          endpointIds: ['endpoint-1', 'endpoint-2'],
+        })
+      ).not.toThrow();
+    });
+
+    it('should throw when insightTypes is missing', () => {
+      expect(() => validateBody({ endpointIds: ['endpoint-1'] })).toThrow(/insightTypes/);
+    });
+
+    it('should throw when endpointIds is missing', () => {
+      expect(() => validateBody({ insightTypes: ['incompatible_antivirus'] })).toThrow(
+        /endpointIds/
+      );
+    });
+
+    it('should throw when insightTypes contains an invalid value', () => {
+      expect(() =>
+        validateBody({ insightTypes: ['invalid_type'], endpointIds: ['endpoint-1'] })
+      ).toThrow();
+    });
+
+    it('should throw when endpointIds contains an empty string', () => {
+      expect(() =>
+        validateBody({ insightTypes: ['incompatible_antivirus'], endpointIds: [''] })
+      ).toThrow();
+    });
+
+    it('should throw when insightTypes exceeds maxSize of 10', () => {
+      const tooManyTypes = Array(11).fill('incompatible_antivirus');
+      expect(() =>
+        validateBody({ insightTypes: tooManyTypes, endpointIds: ['endpoint-1'] })
+      ).toThrow();
+    });
+
+    it('should throw when endpointIds exceeds maxSize of 50', () => {
+      const tooManyIds = Array(51).fill('endpoint-1');
+      expect(() =>
+        validateBody({ insightTypes: ['incompatible_antivirus'], endpointIds: tooManyIds })
+      ).toThrow();
+    });
+
+    it('should validate successfully with optional connectorId', () => {
+      expect(() =>
+        validateBody({
+          insightTypes: ['incompatible_antivirus'],
+          endpointIds: ['endpoint-1'],
+          connectorId: 'connector-123',
+        })
+      ).not.toThrow();
+    });
+
+    it('should throw when connectorId is an empty string', () => {
+      expect(() =>
+        validateBody({
+          insightTypes: ['incompatible_antivirus'],
+          endpointIds: ['endpoint-1'],
+          connectorId: '',
+        })
+      ).toThrow();
+    });
+  });
+
+  describe('GetPendingInsightsRequestSchema', () => {
+    const validateQuery = (query: Record<string, unknown>) => {
+      return schema.object(GetPendingInsightsRequestSchema).validate({ query });
+    };
+
+    it('should validate successfully with no params', () => {
+      expect(() => validateQuery({})).not.toThrow();
+    });
+
+    it('should validate successfully with insightTypes array', () => {
+      expect(() =>
+        validateQuery({ insightTypes: ['incompatible_antivirus', 'policy_response_failure'] })
+      ).not.toThrow();
+    });
+
+    it('should validate successfully with a single insightTypes value', () => {
+      expect(() => validateQuery({ insightTypes: ['incompatible_antivirus'] })).not.toThrow();
+    });
+
+    it('should validate successfully with endpointIds array', () => {
+      expect(() => validateQuery({ endpointIds: ['endpoint-1', 'endpoint-2'] })).not.toThrow();
+    });
+
+    it('should throw when insightTypes contains an invalid value', () => {
+      expect(() => validateQuery({ insightTypes: ['invalid_type'] })).toThrow();
+    });
+
+    it('should throw when insightTypes exceeds maxSize of 10', () => {
+      const tooManyTypes = Array(11).fill('incompatible_antivirus');
+      expect(() => validateQuery({ insightTypes: tooManyTypes })).toThrow();
+    });
+
+    it('should throw when endpointIds contains an empty string', () => {
+      expect(() => validateQuery({ endpointIds: ['endpoint-1', ''] })).toThrow();
+    });
+
+    it('should throw when endpointIds exceeds maxSize of 50', () => {
+      const tooManyIds = Array(51).fill('endpoint-1');
+      expect(() => validateQuery({ endpointIds: tooManyIds })).toThrow();
+    });
+
+    it('should validate successfully with both insightTypes and endpointIds', () => {
+      expect(() =>
+        validateQuery({
+          insightTypes: ['incompatible_antivirus', 'policy_response_failure'],
+          endpointIds: ['endpoint-1', 'endpoint-2'],
+        })
+      ).not.toThrow();
+    });
+
+    it('should throw when endpointIds contains a whitespace-only string', () => {
+      expect(() => validateQuery({ endpointIds: ['endpoint-1', '   '] })).toThrow();
+    });
+
+    it('should validate successfully with single-element arrays for both fields', () => {
+      expect(() =>
+        validateQuery({
+          insightTypes: ['incompatible_antivirus'],
+          endpointIds: ['endpoint-1'],
+        })
+      ).not.toThrow();
     });
   });
 });

@@ -9,7 +9,6 @@ import React, { Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import type { RuleFormFlyoutProps } from './rule_form_flyout';
 import type { DynamicRuleFormFlyoutProps } from './dynamic_rule_form_flyout';
-import type { StandaloneRuleFormFlyoutProps } from './standalone_rule_form_flyout';
 
 // Lazy load flyout components
 const LazyRuleFormFlyout = React.lazy(() =>
@@ -24,16 +23,10 @@ const LazyDynamicRuleFormFlyout = React.lazy(() =>
   }))
 );
 
-const LazyStandaloneRuleFormFlyout = React.lazy(() =>
-  import('./standalone_rule_form_flyout').then((module) => ({
-    default: module.StandaloneRuleFormFlyout,
-  }))
-);
-
 // Export lazy components directly for consumers who need full control over Suspense
-export { LazyDynamicRuleFormFlyout, LazyStandaloneRuleFormFlyout, LazyRuleFormFlyout };
+export { LazyDynamicRuleFormFlyout, LazyRuleFormFlyout };
 
-/** Base flyout wrapper - use with DynamicRuleForm or StandaloneRuleForm as children */
+/** Base flyout wrapper - use with DynamicRuleForm as children */
 export const RuleFormFlyout = (props: RuleFormFlyoutProps) => (
   <Suspense fallback={<EuiLoadingSpinner size="m" />}>
     <LazyRuleFormFlyout {...props} />
@@ -47,15 +40,7 @@ export const DynamicRuleFormFlyout = (props: DynamicRuleFormFlyoutProps) => (
   </Suspense>
 );
 
-/** Pre-composed flyout for classic experience - static initialization */
-export const StandaloneRuleFormFlyout = (props: StandaloneRuleFormFlyoutProps) => (
-  <Suspense fallback={<EuiLoadingSpinner size="m" />}>
-    <LazyStandaloneRuleFormFlyout {...props} />
-  </Suspense>
-);
-
 // Export types
 export type { RuleFormFlyoutProps } from './rule_form_flyout';
 export type { DynamicRuleFormFlyoutProps } from './dynamic_rule_form_flyout';
-export type { StandaloneRuleFormFlyoutProps } from './standalone_rule_form_flyout';
 export type * from '../form/types';

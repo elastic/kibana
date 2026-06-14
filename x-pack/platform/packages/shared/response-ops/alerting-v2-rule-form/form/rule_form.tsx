@@ -5,20 +5,14 @@
  * 2.0.
  */
 
-import React, { useCallback, useRef, useMemo, useState } from 'react';
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiSpacer,
-} from '@elastic/eui';
+import React, { useCallback, useEffect, useRef, useMemo, useState } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { useFormContext } from 'react-hook-form';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FormValues } from './types';
 import { EditModeToggle, type EditMode } from './components/edit_mode_toggle';
+import { SubmissionButtons } from './components/submission_buttons';
 import {
   RuleFormProvider,
   useRuleFormServices,
@@ -29,10 +23,10 @@ import {
 import { YamlRuleForm } from './yaml_rule_form';
 import { GuiRuleForm } from './gui_rule_form';
 import { RulePreviewPanel } from './fields/rule_preview_panel';
-import { NameField } from './fields/name_field';
+import { ErrorCallOut } from './error_callout';
 import { useCreateRule } from './hooks/use_create_rule';
 import { useUpdateRule } from './hooks/use_update_rule';
-import { RULE_FORM_ID } from './constants';
+import { parseYamlToFormValues, serializeFormToYaml } from './utils/yaml_form_utils';
 
 export type { RuleFormServices } from './contexts';
 
@@ -63,59 +57,6 @@ export interface RuleFormProps {
   ruleId?: string;
 }
 
-interface SubmissionButtonsProps {
-  isSubmitting: boolean;
-  onCancel?: () => void;
-  submitLabel?: React.ReactNode;
-  cancelLabel?: React.ReactNode;
-}
-
-const SubmissionButtons = ({
-  isSubmitting,
-  onCancel,
-  submitLabel,
-  cancelLabel,
-}: SubmissionButtonsProps) => {
-  const defaultSubmitLabel = (
-    <FormattedMessage id="xpack.alertingV2.ruleForm.submitLabel" defaultMessage="Save" />
-  );
-
-  const defaultCancelLabel = (
-    <FormattedMessage id="xpack.alertingV2.ruleForm.cancelLabel" defaultMessage="Cancel" />
-  );
-
-  return (
-    <>
-      <EuiHorizontalRule />
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-        {onCancel && (
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              onClick={onCancel}
-              isDisabled={isSubmitting}
-              data-test-subj="ruleV2FormCancelButton"
-            >
-              {cancelLabel ?? defaultCancelLabel}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        )}
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            type="submit"
-            form={RULE_FORM_ID}
-            isLoading={isSubmitting}
-            fill
-            iconType="plusInCircle"
-            data-test-subj="ruleV2FormSubmitButton"
-          >
-            {submitLabel ?? defaultSubmitLabel}
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </>
-  );
-};
-
 /**
  * Inner content component that renders the appropriate form based on edit mode.
  *
@@ -137,11 +78,27 @@ const RuleFormContent = ({
   cancelLabel,
   ruleId,
 }: RuleFormProps) => {
-  const { reset } = useFormContext<FormValues>();
+  const { reset, getValues, watch } = useFormContext<FormValues>();
   const services = useRuleFormServices();
   const { layout } = useRuleFormMeta();
   const { http, notifications } = services;
   const [editMode, setEditMode] = useState<EditMode>('form');
+  // YAML buffer is lifted here (rather than inside YamlRuleForm) so it survives
+  // the unmount that happens when the user toggles back to Form mode.
+  const [yamlText, setYamlText] = useState<string>(() => serializeFormToYaml(getValues()));
+
+  // Regenerate the YAML buffer on any form field change (name, tags, query,
+  // schedule, etc.) so toggling to YAML always shows the current form state.
+  // Using watch(callback) — the callback variant subscribes via side-effect and
+  // does NOT cause RuleFormContent to re-render on every keystroke.
+  // Per design, this always overwrites any user-typed YAML; that's the agreed
+  // invariant (see plan: "always overwrite YAML on form change").
+  useEffect(() => {
+    const subscription = watch(() => {
+      setYamlText(serializeFormToYaml(getValues()));
+    });
+    return () => subscription.unsubscribe();
+  }, [watch, getValues]);
 
   // Internal submission hooks — always initialised so hooks are stable,
   // but only the appropriate one is used when no external onSubmit is provided.
@@ -175,9 +132,15 @@ const RuleFormContent = ({
   const handleModeChange = useCallback(
     (newMode: EditMode) => {
       if (newMode === editMode) return;
+      if (editMode === 'yaml' && newMode === 'form') {
+        const result = parseYamlToFormValues(yamlText);
+        if (result.values) {
+          reset(result.values);
+        }
+      }
       setEditMode(newMode);
     },
-    [editMode]
+    [editMode, yamlText, reset]
   );
 
   // Wrapper that syncs YAML changes back to form state before submitting
@@ -193,28 +156,31 @@ const RuleFormContent = ({
 
   const formContent = (
     <>
-      {isYamlMode ? (
-        includeYaml && (
-          <EditModeToggle
-            editMode={editMode}
-            onChange={handleModeChange}
-            disabled={isDisabled || isSubmitting}
-          />
-        )
-      ) : (
-        <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-          <EuiFlexItem>
-            <NameField />
+      <ErrorCallOut />
+      {includeYaml && (
+        <EuiFlexGroup
+          alignItems="center"
+          justifyContent="spaceBetween"
+          responsive={false}
+          gutterSize="m"
+        >
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xs">
+              <h3>
+                <FormattedMessage
+                  id="xpack.alertingV2.ruleForm.ruleConfigurationHeading"
+                  defaultMessage="Configure Rule Behavior"
+                />
+              </h3>
+            </EuiTitle>
           </EuiFlexItem>
-          {includeYaml && (
-            <EuiFlexItem grow={false}>
-              <EditModeToggle
-                editMode={editMode}
-                onChange={handleModeChange}
-                disabled={isDisabled || isSubmitting}
-              />
-            </EuiFlexItem>
-          )}
+          <EuiFlexItem grow={false}>
+            <EditModeToggle
+              editMode={editMode}
+              onChange={handleModeChange}
+              disabled={isDisabled || isSubmitting}
+            />
+          </EuiFlexItem>
         </EuiFlexGroup>
       )}
       <EuiSpacer size="m" />
@@ -225,9 +191,15 @@ const RuleFormContent = ({
           onSubmit={handleYamlSubmit}
           isDisabled={isDisabled}
           isSubmitting={isSubmitting}
+          yamlText={yamlText}
+          setYamlText={setYamlText}
         />
       ) : (
-        <GuiRuleForm onSubmit={onSubmit} includeQueryEditor={includeQueryEditor} />
+        <GuiRuleForm
+          onSubmit={onSubmit}
+          includeQueryEditor={includeQueryEditor}
+          isEditing={Boolean(ruleId)}
+        />
       )}
 
       {includeSubmission && (
@@ -236,6 +208,7 @@ const RuleFormContent = ({
           onCancel={onCancel}
           submitLabel={submitLabel}
           cancelLabel={cancelLabel}
+          ruleId={ruleId}
         />
       )}
     </>

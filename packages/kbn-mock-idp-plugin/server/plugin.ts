@@ -22,8 +22,14 @@ import {
   STATEFUL_ROLES_ROOT_PATH,
 } from '@kbn/es';
 import type { ServerlessProductTier } from '@kbn/es/src/utils';
-import { createSAMLResponse, MOCK_IDP_LOGIN_PATH, MOCK_IDP_LOGOUT_PATH } from '@kbn/mock-idp-utils';
-import { getSAMLRequestId } from '@kbn/mock-idp-utils/src/utils';
+import {
+  createSAMLResponse,
+  MOCK_IDP_LOGIN_PATH,
+  MOCK_IDP_LOGOUT_PATH,
+  MOCK_IDP_SP_BASE_URL,
+  projectTypeToAlias,
+} from '@kbn/mock-idp-utils';
+import { parseSAMLRequest } from '@kbn/mock-idp-utils/src/utils';
 
 import type { ConfigType } from './config';
 
@@ -39,14 +45,6 @@ const createSAMLResponseSchema = schema.object({
   url: schema.string(),
 });
 
-// BOOKMARK - List of Kibana project types
-const projectToAlias = new Map<string, string>([
-  ['observability', 'oblt'],
-  ['security', 'security'],
-  ['search', 'es'],
-  ['workplaceai', 'workplaceai'],
-]);
-
 const tierSpecificRolesFileExists = (filePath: string): boolean => {
   try {
     return existsSync(filePath);
@@ -56,8 +54,8 @@ const tierSpecificRolesFileExists = (filePath: string): boolean => {
 };
 
 const readServerlessRoles = (projectType: string, productTier?: ServerlessProductTier) => {
-  if (projectToAlias.has(projectType)) {
-    const alias = projectToAlias.get(projectType)!;
+  if (projectTypeToAlias.has(projectType)) {
+    const alias = projectTypeToAlias.get(projectType)!;
 
     const tierSpecificRolesResourcePath =
       productTier && resolve(SERVERLESS_ROLES_ROOT_PATH, alias, productTier, 'roles.yml');
@@ -87,6 +85,30 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
       const logger = initializerContext.logger.get();
       const config = initializerContext.config.get<ConfigType>();
       const router = core.http.createRouter();
+
+      core.http.registerOnPreResponse((r, p, t) => {
+        // We only care about 302 redirects to the Mock IDP login/logout pages.
+        const location = p.headers?.location;
+        if (
+          p.statusCode !== 302 ||
+          typeof location !== 'string' ||
+          !location.startsWith(`${MOCK_IDP_SP_BASE_URL}/mock_idp/`)
+        ) {
+          return t.next();
+        }
+
+        // Rewrite to a path-only Location so the browser resolves the redirect against its own
+        // origin - that way the redirect just works regardless of where Kibana is actually served
+        // from (dev proxy with a random base path, custom port, HTTPS, a reverse proxy, …) and
+        // ES SAML realm config does not need to know the real Kibana URL.
+        return t.next({
+          headers: {
+            location: `${core.http.basePath.serverBasePath}${location.slice(
+              MOCK_IDP_SP_BASE_URL.length
+            )}`,
+          },
+        });
+      });
 
       core.http.resources.register(
         {
@@ -160,9 +182,6 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
           },
         },
         async (context, request, response) => {
-          const { protocol, hostname, port } = core.http.getServerInfo();
-          const pathname = core.http.basePath.prepend('/api/security/saml/callback');
-
           const serverlessOptions = plugins.cloud?.serverless
             ? {
                 serverless: {
@@ -174,22 +193,39 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
             : {};
 
           try {
-            const requestId = await getSAMLRequestId(request.body.url);
-            if (requestId) {
-              logger.info(`Sending SAML response for request ID: ${requestId}`);
+            const samlRequestInfo = await parseSAMLRequest(request.body.url);
+            if (samlRequestInfo?.requestId) {
+              logger.info(`Sending SAML response for request ID: ${samlRequestInfo.requestId}`);
             }
+
+            const parsed = new URL(request.body.url, 'https://localhost');
+            const relayState = parsed.searchParams.get('RelayState') ?? undefined;
+
+            // Kibana-bound ACS URLs are intentionally left to the `onPreResponse` rewrite above;
+            // we only override here for external SPs (e.g. UIAM).
+            const externalAcsUrl =
+              samlRequestInfo?.acsUrl && !samlRequestInfo.acsUrl.startsWith(MOCK_IDP_SP_BASE_URL)
+                ? samlRequestInfo.acsUrl
+                : undefined;
 
             return response.ok({
               body: {
                 SAMLResponse: await createSAMLResponse({
-                  kibanaUrl: `${protocol}://${hostname}:${port}${pathname}`,
                   username: request.body.username,
                   full_name: request.body.full_name ?? undefined,
                   email: request.body.email ?? undefined,
                   roles: request.body.roles,
-                  ...(requestId ? { authnRequestId: requestId } : {}),
+                  ...(samlRequestInfo?.requestId
+                    ? { authnRequestId: samlRequestInfo.requestId }
+                    : {}),
+                  ...(samlRequestInfo?.issuer ? { spEntityId: samlRequestInfo.issuer } : {}),
+                  ...(externalAcsUrl ? { acsUrl: externalAcsUrl } : {}),
                   ...serverlessOptions,
                 }),
+                ...(relayState ? { RelayState: relayState } : {}),
+                // Echoed alongside SAMLResponse so the browser's auto-submitted form posts to UIAM
+                // instead of the default Kibana ACS endpoint (see mock_idp_page form action).
+                ...(externalAcsUrl ? { acsUrl: externalAcsUrl } : {}),
               },
             });
           } catch (err) {

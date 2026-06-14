@@ -52,7 +52,13 @@ export const setTabs: InternalStateThunkActionCreator<
   function setTabsThunkFn(
     dispatch,
     getState,
-    { runtimeStateManager, tabsStorageManager, services, getCascadedDocumentsStateManager }
+    {
+      runtimeStateManager,
+      tabsStorageManager,
+      getCascadedDocumentsStateManager,
+      getContextAwarenessToolkit,
+      services,
+    }
   ) {
     const previousState = getState();
     const discoverSessionChanged =
@@ -81,6 +87,11 @@ export const setTabs: InternalStateThunkActionCreator<
       justRemovedTabs.push(newRecentlyClosedTab);
 
       dispatch(disconnectTab({ tabId: tab.id }));
+    }
+
+    // Wait to delete runtime state until after all removed tabs
+    // are disconnected to avoid undefined errors in side effects
+    for (const tab of removedTabs) {
       delete runtimeStateManager.tabs.byId[tab.id];
     }
 
@@ -88,6 +99,7 @@ export const setTabs: InternalStateThunkActionCreator<
       runtimeStateManager.tabs.byId[tab.id] = createTabRuntimeState({
         services,
         cascadedDocumentsStateManager: getCascadedDocumentsStateManager(tab.id),
+        toolkit: getContextAwarenessToolkit(tab.id),
         initialValues: {
           unifiedHistogramLayoutPropsMap: tab.duplicatedFromId
             ? selectInitialUnifiedHistogramLayoutPropsMap(runtimeStateManager, tab.duplicatedFromId)
@@ -359,7 +371,7 @@ export const initializeTabs = createInternalStateAsyncThunk(
       setBreadcrumbs({ services, titleBreadcrumbText: persistedDiscoverSession.title });
     }
 
-    const byValueEmbeddableTab = services.embeddableEditor.getByValueInput();
+    const byValueEmbeddableTab = services.embeddableEditor.getByValueTab();
     const byValueEmbeddableTabState = byValueEmbeddableTab
       ? fromSavedObjectTabToTabState({ tab: byValueEmbeddableTab })
       : undefined;
@@ -447,7 +459,8 @@ export const openInNewTab: InternalStateThunkActionCreator<
       searchSessionId?: string;
       dataViewSpec?: DataViewSpec;
     }
-  ]
+  ],
+  Promise<void>
 > = ({ tabLabel, appState, globalState, searchSessionId, dataViewSpec }) =>
   function openInNewTabThunkFn(dispatch, getState) {
     const initialAppState = appState ? cloneDeep(appState) : {};
@@ -485,11 +498,10 @@ export const openInNewTab: InternalStateThunkActionCreator<
     );
   };
 
-export const openInNewTabExtPointAction: InternalStateThunkActionCreator<[OpenInNewTabParams]> = ({
-  query,
-  tabLabel,
-  timeRange,
-}) =>
+export const openInNewTabExtPointAction: InternalStateThunkActionCreator<
+  [OpenInNewTabParams],
+  Promise<void>
+> = ({ query, tabLabel, timeRange }) =>
   function openInNewTabExtPointActionThunkFn(dispatch) {
     const appState: TabState['appState'] = { query };
     const globalState: TabState['globalState'] = { timeRange };
@@ -508,7 +520,8 @@ export const openSearchSessionInNewTab: InternalStateThunkActionCreator<
     {
       searchSession: UISession;
     }
-  ]
+  ],
+  Promise<void>
 > = ({ searchSession }) =>
   async function openSearchSessionInNewTabThunkFn(dispatch) {
     const restoreState = searchSession.restoreState as DiscoverAppLocatorParams;
@@ -563,6 +576,7 @@ export const disconnectTab: InternalStateThunkActionCreator<[TabActionPayload]> 
     tabRuntimeState.dataStateContainer$.getValue()?.cancel();
     dispatch(stopSyncing({ tabId }));
     tabRuntimeState.customizationService$.getValue()?.cleanup();
+    dispatch(internalStateSlice.actions.disconnectTab({ tabId }));
   };
 
 function differenceIterateeByTabId(tab: TabState) {

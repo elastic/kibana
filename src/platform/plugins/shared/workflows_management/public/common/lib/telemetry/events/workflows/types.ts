@@ -16,8 +16,10 @@ import type {
   WorkflowAiChatEventTypes,
 } from './ai_chat/types';
 import type {
+  ReportWorkflowExecutionsCancelledActionParams,
   ReportWorkflowRunCancelledActionParams,
   ReportWorkflowRunInitiatedActionParams,
+  ReportWorkflowRunResumedActionParams,
   ReportWorkflowStepTestRunInitiatedActionParams,
   ReportWorkflowTestRunInitiatedActionParams,
   WorkflowExecutionEventTypes,
@@ -36,6 +38,9 @@ import type {
   WorkflowLifecycleEventTypes,
 } from './lifecycle/types';
 import type {
+  ReportWorkflowAccessDeniedLicenseActionParams,
+  ReportWorkflowAccessDeniedPrivilegesActionParams,
+  ReportWorkflowAccessDeniedServerlessTierActionParams,
   ReportWorkflowCreateOpenedActionParams,
   ReportWorkflowDetailViewedActionParams,
   ReportWorkflowListViewedActionParams,
@@ -107,9 +112,14 @@ export interface WorkflowsTelemetryEventsMap {
   [WorkflowExecutionEventTypes.WorkflowStepTestRunInitiated]: ReportWorkflowStepTestRunInitiatedActionParams;
   [WorkflowExecutionEventTypes.WorkflowRunInitiated]: ReportWorkflowRunInitiatedActionParams;
   [WorkflowExecutionEventTypes.WorkflowRunCancelled]: ReportWorkflowRunCancelledActionParams;
+  [WorkflowExecutionEventTypes.WorkflowExecutionsCancelled]: ReportWorkflowExecutionsCancelledActionParams;
+  [WorkflowExecutionEventTypes.WorkflowRunResumed]: ReportWorkflowRunResumedActionParams;
   [WorkflowUIEventTypes.WorkflowListViewed]: ReportWorkflowListViewedActionParams;
   [WorkflowUIEventTypes.WorkflowDetailViewed]: ReportWorkflowDetailViewedActionParams;
   [WorkflowUIEventTypes.WorkflowCreateOpened]: ReportWorkflowCreateOpenedActionParams;
+  [WorkflowUIEventTypes.WorkflowAccessDeniedPrivileges]: ReportWorkflowAccessDeniedPrivilegesActionParams;
+  [WorkflowUIEventTypes.WorkflowAccessDeniedLicense]: ReportWorkflowAccessDeniedLicenseActionParams;
+  [WorkflowUIEventTypes.WorkflowAccessDeniedServerlessTier]: ReportWorkflowAccessDeniedServerlessTierActionParams;
   [WorkflowImportExportEventTypes.WorkflowExported]: ReportWorkflowExportedActionParams;
   [WorkflowImportExportEventTypes.WorkflowImported]: ReportWorkflowImportedActionParams;
   [WorkflowAiChatEventTypes.WorkflowAiChatOpened]: ReportWorkflowAiChatOpenedParams;

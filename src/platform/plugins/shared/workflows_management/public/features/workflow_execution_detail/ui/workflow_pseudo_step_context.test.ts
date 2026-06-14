@@ -10,6 +10,7 @@
 import type { WorkflowExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import {
+  buildOverviewStepExecutionFromContext,
   buildTriggerContextFromExecution,
   buildTriggerStepExecutionFromContext,
 } from './workflow_pseudo_step_context';
@@ -54,6 +55,15 @@ describe('buildTriggerContextFromExecution', () => {
     const result = buildTriggerContextFromExecution({ event });
     expect(result).toEqual({
       triggerType: 'document',
+      input: event,
+    });
+  });
+
+  it('should return event trigger type when triggeredBy from execution is event-driven', () => {
+    const event = { workflow: { id: 'w1' } };
+    const result = buildTriggerContextFromExecution({ event }, 'workflows.failed');
+    expect(result).toEqual({
+      triggerType: 'event',
       input: event,
     });
   });
@@ -113,5 +123,79 @@ describe('buildTriggerStepExecutionFromContext', () => {
     });
     expect(result).not.toBeNull();
     expect(result?.output).toBeUndefined();
+  });
+
+  it('sets trigger_event pseudo-step for event-driven execution', () => {
+    const result = buildTriggerStepExecutionFromContext({
+      ...baseExecution,
+      triggeredBy: 'workflows.failed',
+      context: { event: { error: { message: 'x' } } },
+    });
+    expect(result?.stepId).toBe('event');
+    expect(result?.stepType).toBe('trigger_event');
+  });
+});
+
+describe('buildOverviewStepExecutionFromContext', () => {
+  const baseOverviewExecution: WorkflowExecutionDto = {
+    spaceId: 'default',
+    id: 'exec-overview',
+    status: ExecutionStatus.FAILED,
+    error: { type: 'TaskRecoveryError', message: 'Resume interrupted' },
+    isTestRun: false,
+    startedAt: '2024-01-01T00:00:00Z',
+    finishedAt: '2024-01-01T00:01:00Z',
+    workflowId: 'wf-1',
+    workflowName: 'Test',
+    workflowDefinition: {} as WorkflowExecutionDto['workflowDefinition'],
+    stepExecutions: [{ id: 's1' } as WorkflowExecutionDto['stepExecutions'][number]],
+    duration: 60000,
+    yaml: '',
+    context: { inputs: {}, workflowRunId: 'run-1' },
+  };
+
+  it('adds executionError when execution.error is set and steps ran (no duplicate of trigger-only path)', () => {
+    const overview = buildOverviewStepExecutionFromContext(baseOverviewExecution);
+    const input = overview.input as Record<string, unknown>;
+    expect(input.executionError).toEqual({
+      type: 'TaskRecoveryError',
+      message: 'Resume interrupted',
+    });
+    expect(input.workflowRunId).toBe('run-1');
+  });
+
+  it('omits executionError when failed before steps (trigger row carries execution.error)', () => {
+    const overview = buildOverviewStepExecutionFromContext({
+      ...baseOverviewExecution,
+      stepExecutions: [],
+    });
+    const input = overview.input as Record<string, unknown>;
+    expect(input.executionError).toBeUndefined();
+  });
+
+  it('omits executionError when error is null', () => {
+    const overview = buildOverviewStepExecutionFromContext({
+      ...baseOverviewExecution,
+      error: null,
+    });
+    const input = overview.input as Record<string, unknown>;
+    expect(input.executionError).toBeUndefined();
+  });
+
+  it('merges executionError with trace when both present', () => {
+    const overview = buildOverviewStepExecutionFromContext({
+      ...baseOverviewExecution,
+      traceId: 'trace-abc',
+      entryTransactionId: 'txn-xyz',
+    });
+    const input = overview.input as Record<string, unknown>;
+    expect(input.trace).toEqual({
+      traceId: 'trace-abc',
+      entryTransactionId: 'txn-xyz',
+    });
+    expect(input.executionError).toEqual({
+      type: 'TaskRecoveryError',
+      message: 'Resume interrupted',
+    });
   });
 });

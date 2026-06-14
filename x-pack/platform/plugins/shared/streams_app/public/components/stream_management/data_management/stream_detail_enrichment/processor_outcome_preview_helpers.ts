@@ -98,7 +98,7 @@ export function getGrokFieldDisplayValue(
 export function hasPrecedingProcessorTouchedField(
   stepIds: string[],
   currentStepId: string | undefined,
-  processorsMetrics: Record<string, ProcessorMetrics> | undefined,
+  processorsMetrics: Partial<Record<string, ProcessorMetrics>> | undefined,
   grokSourceField: string
 ): boolean {
   if (!currentStepId || !processorsMetrics) {

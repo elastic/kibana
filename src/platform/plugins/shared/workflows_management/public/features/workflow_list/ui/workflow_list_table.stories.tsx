@@ -416,6 +416,8 @@ export const Default: Story = {
     onRequestRun: noop,
     getEditHref: () => '#',
     canCreateWorkflow: true,
+    canReadWorkflow: true,
+    canReadWorkflowExecution: true,
     canUpdateWorkflow: true,
     canDeleteWorkflow: true,
     canExecuteWorkflow: true,
@@ -456,4 +458,63 @@ export const Narrow: Story = {
     viewport: { defaultViewport: 'tablet' },
   },
   decorators: [(story) => <div style={{ maxWidth: 900 }}>{story()}</div>],
+};
+
+export const ConnectorSubtypeDeduplication: Story = {
+  args: {
+    ...Default.args,
+    items: [
+      {
+        id: 'wf-dedup-1',
+        name: '1Password Secret Rotation',
+        description:
+          'Fetches multiple secrets from 1Password, validates them, and rotates expired ones',
+        enabled: true,
+        valid: true,
+        createdAt: hoursAgo(24),
+        tags: ['1password', 'secrets'],
+        history: [],
+        definition: {
+          version: '1',
+          name: '1Password Secret Rotation',
+          enabled: true,
+          tags: ['1password', 'secrets'],
+          steps: [
+            { name: 'get_secret', type: '.one_password.get_item' },
+            { name: 'list_secrets', type: '.one_password.get_items' },
+            { name: 'check_expiry', type: 'if', condition: 'true', steps: [] },
+            { name: 'rotate', type: '.one_password.update_item' },
+            { name: 'notify', type: 'slack_api' },
+          ],
+          triggers: [{ type: 'scheduled', with: { every: '1d' } }],
+        },
+      },
+      {
+        id: 'wf-dedup-2',
+        name: 'Multi-ES Pipeline',
+        description: 'Queries multiple indices and bulk-indexes aggregated results',
+        enabled: true,
+        valid: true,
+        createdAt: hoursAgo(48),
+        tags: ['elasticsearch'],
+        history: [],
+        definition: {
+          version: '1',
+          name: 'Multi-ES Pipeline',
+          enabled: true,
+          tags: ['elasticsearch'],
+          steps: [
+            { name: 'search_logs', type: 'elasticsearch.search' },
+            { name: 'search_metrics', type: 'elasticsearch.search' },
+            { name: 'transform', type: 'data.set' },
+            { name: 'bulk_index', type: 'elasticsearch.bulk' },
+            { name: 'create_case', type: 'kibana.createCase' },
+            { name: 'update_case', type: 'kibana.updateCase' },
+          ],
+          triggers: [{ type: 'scheduled', with: { every: '5m' } }],
+        },
+      },
+    ],
+    total: 2,
+  },
 };

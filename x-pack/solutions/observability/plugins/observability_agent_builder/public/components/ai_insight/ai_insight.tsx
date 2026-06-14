@@ -20,6 +20,7 @@ import {
   EuiMarkdownFormat,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { AiButton } from '@kbn/shared-ux-ai-components';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
@@ -35,7 +36,6 @@ import { StartConversationButton } from './start_conversation_button';
 import { AiInsightErrorBanner } from './ai_insight_error_banner';
 import { LoadingCursor } from './loading_cursor';
 import { FeedbackButtons, type Feedback } from './feedback_buttons';
-import { OBSERVABILITY_AGENT_ID } from '../../../common/constants';
 import {
   ObservabilityAgentBuilderTelemetryEventType,
   reportTelemetryEvent,
@@ -80,8 +80,18 @@ export function AiInsight({ title, insightType, createStream, buildAttachments }
   const hasEnterpriseLicense = license?.hasAtLeast('enterprise');
   const hasAgentBuilderAccess = application?.capabilities.agentBuilder?.show === true;
 
-  const { isLoading, error, summary, context, connectorInfo, wasStopped, fetch, stop, regenerate } =
-    useStreamingAiInsight(createStream);
+  const {
+    isLoading,
+    error,
+    isErrorRetryable,
+    summary,
+    context,
+    connectorInfo,
+    wasStopped,
+    fetch,
+    stop,
+    regenerate,
+  } = useStreamingAiInsight(createStream);
 
   // Report the response generated event when the stream finishes (completely or stopped)
   useEffect(() => {
@@ -101,7 +111,6 @@ export function AiInsight({ title, insightType, createStream, buildAttachments }
 
     agentBuilder.openChat({
       newConversation: true,
-      agentId: OBSERVABILITY_AGENT_ID,
       attachments: buildAttachments(summary, context),
     });
   }, [agentBuilder, buildAttachments, summary, context]);
@@ -161,6 +170,7 @@ export function AiInsight({ title, insightType, createStream, buildAttachments }
                 color={euiTheme.colors.primary}
                 style={{ marginTop: 6 }}
                 size="l"
+                aria-hidden={true}
               />
             </EuiFlexItem>
             <EuiFlexItem>
@@ -170,7 +180,7 @@ export function AiInsight({ title, insightType, createStream, buildAttachments }
               <EuiText size="s" css={{ color: euiTheme.colors.textSubdued }}>
                 <span>
                   {i18n.translate('xpack.observabilityAgentBuilder.aiInsight.description', {
-                    defaultMessage: 'Get helpful insights from our Observability Agent',
+                    defaultMessage: 'Get helpful insights from our Elastic AI Agent',
                   })}
                 </span>
               </EuiText>
@@ -190,7 +200,7 @@ export function AiInsight({ title, insightType, createStream, buildAttachments }
         <EuiSpacer size="m" />
         <EuiPanel color="subdued">
           {error ? (
-            <AiInsightErrorBanner error={error} onRetry={fetch} />
+            <AiInsightErrorBanner error={error} onRetry={isErrorRetryable ? fetch : undefined} />
           ) : (
             <EuiText size="s">
               <EuiMarkdownFormat textSize="s">{summary}</EuiMarkdownFormat>
@@ -229,16 +239,17 @@ export function AiInsight({ title, insightType, createStream, buildAttachments }
               <EuiSpacer size="s" />
               <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
+                  <AiButton
                     data-test-subj="observabilityAgentBuilderRegenerateButton"
                     size="s"
                     iconType="sparkles"
+                    variant="empty"
                     onClick={regenerate}
                   >
                     {i18n.translate('xpack.observabilityAgentBuilder.aiInsight.regenerateButton', {
                       defaultMessage: 'Regenerate',
                     })}
-                  </EuiButtonEmpty>
+                  </AiButton>
                 </EuiFlexItem>
                 {Boolean(summary && summary.trim()) && (
                   <EuiFlexItem grow={false}>

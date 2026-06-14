@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { PRIVMON_PRIVILEGE_CHECK_API } from '@kbn/security-solution-plugin/common/entity_analytics/privileged_user_monitoring/constants';
-import { WATCHLISTS_URL } from '@kbn/security-solution-plugin/common/entity_analytics/watchlists/constants';
+import {
+  WATCHLISTS_PRIVILEGES_URL,
+  WATCHLISTS_URL,
+} from '@kbn/security-solution-plugin/common/entity_analytics/watchlists/constants';
 import { visit } from '../../../tasks/navigation';
 import { login } from '../../../tasks/login';
 import { ENTITY_ANALYTICS_MANAGEMENT_URL } from '../../../urls/navigation';
@@ -19,8 +21,7 @@ import {
   WATCHLISTS_MANAGEMENT_TABLE,
 } from '../../../screens/entity_analytics/watchlists_management';
 
-// Failing: See https://github.com/elastic/kibana/issues/256685
-describe.skip(
+describe(
   'Entity Analytics Watchlists Management Page ',
   {
     tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
@@ -68,6 +69,7 @@ describe.skip(
         riskModifier: number;
         source: string;
         updatedAt: string;
+        managed: boolean;
       }> = {}
     ) => ({
       id: 'watchlist-1',
@@ -82,7 +84,7 @@ describe.skip(
 
     beforeEach(() => {
       login();
-      cy.intercept('GET', PRIVMON_PRIVILEGE_CHECK_API, {
+      cy.intercept('GET', WATCHLISTS_PRIVILEGES_URL, {
         statusCode: 200,
         body: {
           has_all_required: true,
@@ -97,12 +99,16 @@ describe.skip(
           },
         },
       }).as('watchlistsPrivileges');
+      cy.intercept('GET', `${WATCHLISTS_URL}/*/entity_source/list`, {
+        statusCode: 200,
+        body: { sources: [] },
+      }).as('entitySources');
     });
 
     it('renders page as expected', () => {
       visit(ENTITY_ANALYTICS_WATCHLISTS_TAB_URL);
       cy.url({ timeout: 10000 }).should('include', ENTITY_ANALYTICS_WATCHLISTS_TAB_URL);
-      cy.contains('h1', 'Entity Analytics Management', { timeout: 60000 }).should('exist');
+      cy.contains('h1', 'Entity analytics', { timeout: 60000 }).should('exist');
     });
 
     it('shows empty state when no watchlists are returned', () => {
@@ -127,13 +133,14 @@ describe.skip(
 
     it('shows loading indicator while watchlists request is pending', () => {
       cy.intercept('GET', WATCHLISTS_LIST_URL, {
-        delayMs: 1000,
+        delay: 1000,
         statusCode: 200,
         body: [],
       }).as('watchlistsList');
 
       visitWatchlistsPage();
       cy.get(WATCHLISTS_MANAGEMENT_TABLE_LOADING).should('exist');
+      cy.wait('@watchlistsList');
       cy.get(WATCHLISTS_MANAGEMENT_TABLE_LOADING).should('not.exist');
     });
 
@@ -188,6 +195,7 @@ describe.skip(
 
       cy.contains('button', 'Create').click();
       cy.get('[data-test-subj="watchlist-flyout-header"]').should('exist');
+      cy.contains('Rule Based Data Sources').should('exist');
       cy.get('input[name="WatchlistName"]').type(watchlistName);
       cy.get('input[name="WatchlistDescription"]').type(watchlistDescription);
       cy.get('[data-test-subj="watchlist-flyout-save"]').click();
@@ -217,6 +225,7 @@ describe.skip(
       }).as('deleteWatchlist');
 
       visitWatchlistsPage();
+      cy.wait('@watchlistsList'); // drain the initial page-load request so the post-delete wait is unambiguous
       cy.get(WATCHLISTS_MANAGEMENT_TABLE).should('exist');
       cy.get(WATCHLISTS_MANAGEMENT_TABLE).contains(existingWatchlist.name);
 
@@ -225,7 +234,7 @@ describe.skip(
       cy.get('[data-test-subj="watchlistsDeleteConfirmationModal"]').should('exist');
       cy.contains('button', 'Delete').click();
       cy.wait('@deleteWatchlist');
-      cy.wait('@watchlistsList');
+      cy.wait('@watchlistsList'); // waits for the post-delete list refresh (returns [])
       cy.get(WATCHLISTS_MANAGEMENT_TABLE_EMPTY).should('exist');
     });
 
@@ -266,6 +275,7 @@ describe.skip(
       cy.get('[aria-label="Edit watchlist"]').click();
       cy.wait('@getWatchlist');
       cy.get('[data-test-subj="watchlist-flyout-header"]').contains('Edit watchlist');
+      cy.contains('Rule Based Data Sources').should('exist');
       cy.get('input[name="WatchlistDescription"]').should(
         'have.value',
         existingWatchlist.description
@@ -277,6 +287,34 @@ describe.skip(
       cy.wait('@updateWatchlist');
       cy.wait('@watchlistsList');
       cy.get(WATCHLISTS_MANAGEMENT_TABLE).contains(updatedName);
+    });
+
+    it('shows managed data sources for a managed watchlist via edit mode', () => {
+      const managedWatchlist = buildWatchlist({
+        id: 'watchlist-managed',
+        name: 'Privileged Users',
+        description: 'Managed watchlist',
+        managed: true,
+      });
+
+      interceptWatchlistsList(() => [managedWatchlist]);
+
+      cy.intercept('GET', `${WATCHLISTS_URL}/${managedWatchlist.id}`, {
+        statusCode: 200,
+        body: managedWatchlist,
+      }).as('getManagedWatchlist');
+
+      visitWatchlistsPage();
+      cy.get(WATCHLISTS_MANAGEMENT_TABLE).contains(managedWatchlist.name);
+
+      cy.get('[aria-label="Edit watchlist"]').click();
+      cy.wait('@getManagedWatchlist');
+      cy.get('[data-test-subj="watchlist-flyout-header"]').contains('Edit watchlist');
+
+      cy.contains('Managed Data Sources').should('exist');
+      cy.contains('Rule Based Data Sources').should('exist');
+      cy.get('input[name="WatchlistName"]').should('have.value', managedWatchlist.name);
+      cy.get('[data-test-subj="euiFlyoutCloseButton"]').click();
     });
   }
 );

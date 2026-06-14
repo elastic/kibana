@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import type { Node, Parent } from 'unist';
+import type { Parent } from 'unist';
+import type { MutableNode } from './markdown_plugins';
 import { render, screen } from '@testing-library/react';
 import { ToolResultType, type EsqlResults } from '@kbn/agent-builder-common/tools/tool_result';
 import { cloneDeep } from 'lodash';
@@ -87,13 +88,18 @@ function createStartDependencies() {
     cloud: {},
     share: {},
     uiActions: {},
-  } as AgentBuilderStartDependencies;
+    unifiedSearch: {
+      ui: {
+        SearchBar: () => null,
+      },
+    },
+  } as unknown as AgentBuilderStartDependencies;
 }
 
 function getAST(markdown: string) {
   const processor = unified().use(remarkParse);
   const tree = processor.parse(markdown);
-  return processor.runSync(tree) as Parent;
+  return processor.runSync(tree) as unknown as Parent;
 }
 
 describe('chat_message_text', () => {
@@ -111,39 +117,47 @@ describe('chat_message_text', () => {
       isEmbeddedContext: false,
       browserApiTools: undefined,
       conversationActions: {
-        removeNewConversationQuery: jest.fn(),
         invalidateConversation: jest.fn(),
         addOptimisticRound: jest.fn(),
         removeOptimisticRound: jest.fn(),
-        setAgentId: jest.fn(),
         addReasoningStep: jest.fn(),
         addToolCall: jest.fn(),
         setToolCallProgress: jest.fn(),
         setToolCallResult: jest.fn(),
         setAssistantMessage: jest.fn(),
         addAssistantMessageChunk: jest.fn(),
+        clearAssistantMessage: jest.fn(),
         onConversationCreated: jest.fn(),
         deleteConversation: jest.fn(),
         renameConversation: jest.fn(),
         setTimeToFirstToken: jest.fn(),
-        setPendingPrompt: jest.fn(),
-        clearPendingPrompt: jest.fn(),
+        addPendingPrompt: jest.fn(),
+        clearPendingPrompts: jest.fn(),
         clearLastRoundResponse: jest.fn(),
+        addBackgroundExecutionCompleteStep: jest.fn(),
         addCompactionStep: jest.fn(),
         setCompactionStepComplete: jest.fn(),
+        addOrUpdateTodosStep: jest.fn(),
+        setAttachments: jest.fn(),
+        onRoundComplete: jest.fn(),
       },
     });
   });
 
   describe('visualizationTagParser', () => {
-    function recursivelyFindVisualizationNodes(node: Node | Parent, nodes: Node[] = []) {
-      if (node.children) {
+    function recursivelyFindVisualizationNodes(
+      node: MutableNode | Parent,
+      nodes: MutableNode[] = []
+    ) {
+      if ('children' in node) {
         const parent = node as Parent;
-        parent.children.forEach((child) => recursivelyFindVisualizationNodes(child, nodes));
+        parent.children.forEach((child) =>
+          recursivelyFindVisualizationNodes(child as MutableNode | Parent, nodes)
+        );
       }
 
       if (node.type === 'visualization') {
-        nodes.push(node);
+        nodes.push(node as MutableNode);
       }
 
       return nodes;

@@ -20,7 +20,7 @@ const PopoverButton: React.FC<PopoverButtonProps> = ({ setIsOpen, size }) => (
   <EuiButtonEmpty
     color="text"
     data-test-subj="xpack.uptime.monitorList.pageSizeSelect.popoverOpen"
-    iconType="arrowDown"
+    iconType="chevronSingleDown"
     iconSide="right"
     onClick={() => setIsOpen(true)}
   >

@@ -69,7 +69,9 @@ const getCollapsibleNavStyles = (euiThemeContext: UseEuiTheme) => {
   };
 };
 
-function getAllCategories(allCategorizedLinks: Record<string, ChromeNavLink[]>) {
+function getAllCategories(
+  allCategorizedLinks: Record<string, ChromeNavLink[]>
+): Record<string, AppCategory | undefined> {
   const allCategories = {} as Record<string, AppCategory | undefined>;
 
   for (const [key, value] of Object.entries(allCategorizedLinks)) {
@@ -113,9 +115,9 @@ interface Props {
 
 const overviewIDsToHide = ['kibanaOverview'];
 const overviewIDs = [
-  ...overviewIDsToHide,
+  'kibanaOverview',
   'observability-overview',
-  'securitySolutionUI:get_started',
+  'securitySolutionUI:launchpad',
   'management',
   'enterpriseSearch',
 ];
@@ -131,17 +133,19 @@ export function CollapsibleNav({
   const navigateToUrl = useNavigateToUrl();
   const homeHref = useHomeHref();
   const allLinks = useNavLinks();
+
   const allowedLinks = useMemo(
     () =>
       allLinks.filter(
         (link) =>
-          // Filterting out hidden links,
-          link.visibleIn.includes('sideNav') &&
+          // Filtering out hidden links,
+          link.visibleIn.includes('classicSideNav') &&
           // and non-data overview pages
           !overviewIDsToHide.includes(link.id)
       ),
     [allLinks]
   );
+
   // Find just the integrations link
   const integrationsLink = useMemo(
     () => allLinks.find((link) => link.id === 'integrations'),
@@ -152,13 +156,17 @@ export function CollapsibleNav({
     () => allLinks.filter((link) => overviewIDs.includes(link.id)),
     [allLinks]
   );
+
   const recentlyAccessed = useRecentlyAccessed();
   const customNavLink = useCustomNavLink();
   const appId = useCurrentAppId();
+
   const groupedNavLinks = groupBy(allowedLinks, (link) => link?.category?.id);
   const { undefined: unknowns = [], ...allCategorizedLinks } = groupedNavLinks;
-  const categoryDictionary = getAllCategories(allCategorizedLinks);
-  const orderedCategories = getOrderedCategories(allCategorizedLinks, categoryDictionary);
+  const categoryDictionary: Record<string, AppCategory | undefined> =
+    getAllCategories(allCategorizedLinks);
+  const orderedCategories: string[] = getOrderedCategories(allCategorizedLinks, categoryDictionary);
+
   const readyForEUI = (link: ChromeNavLink, needsIcon: boolean = false) => {
     return createEuiListItem({
       link,
@@ -206,8 +214,6 @@ export function CollapsibleNav({
                     }),
                   ]}
                   maxWidth="none"
-                  gutterSize="none"
-                  size="s"
                 />
               </EuiThemeProvider>
             </EuiCollapsibleNavGroup>
@@ -248,8 +254,6 @@ export function CollapsibleNav({
             ]}
             maxWidth="none"
             color="text"
-            gutterSize="none"
-            size="s"
           />
         </EuiCollapsibleNavGroup>
       </EuiFlexItem>
@@ -294,8 +298,6 @@ export function CollapsibleNav({
             })}
             maxWidth="none"
             color="subdued"
-            gutterSize="none"
-            size="s"
             css={styles.navRecentsListGroupCss}
           />
         </EuiCollapsibleNavGroup>
@@ -346,8 +348,6 @@ export function CollapsibleNav({
                 listItems={allCategorizedLinks[categoryName].map((link) => readyForEUI(link))}
                 maxWidth="none"
                 color="subdued"
-                gutterSize="none"
-                size="s"
               />
             </EuiCollapsibleNavGroup>
           );
@@ -356,8 +356,8 @@ export function CollapsibleNav({
         {/* Things with no category (largely for custom plugins) */}
         {unknowns.map((link, i) => (
           <EuiCollapsibleNavGroup data-test-subj={`collapsibleNavGroup-noCategory`} key={i}>
-            <EuiListGroup flush>
-              <EuiListGroupItem color="text" size="s" {...readyForEUI(link, true)} />
+            <EuiListGroup>
+              <EuiListGroupItem color="text" {...readyForEUI(link, true)} />
             </EuiListGroup>
           </EuiCollapsibleNavGroup>
         ))}

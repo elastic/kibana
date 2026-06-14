@@ -6,39 +6,89 @@
  */
 
 import React from 'react';
-import { act, render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { act, render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { MemoryRouter } from 'react-router-dom';
 import { RulesListPage, SEARCH_DEBOUNCE_MS } from './rules_list_page';
+import { CREATE_WITH_AGENT_INITIAL_PROMPT } from '../../constants';
 
 const mockNavigateToUrl = jest.fn();
+const mockNavigateToApp = jest.fn();
 const mockGetUrlForApp = jest.fn((appId: string, options?: { path?: string }) => {
   const path = options?.path ?? '';
   return `/app/${appId}${path}`;
 });
-const mockSetBreadcrumbs = jest.fn();
 const mockDocTitleChange = jest.fn();
+
+jest.mock('../../application/breadcrumb_context', () => ({
+  useSetBreadcrumbs: () => jest.fn(),
+}));
 
 jest.mock('@kbn/core-di-browser', () => ({
   useService: (token: unknown) => {
     if (token === 'application') {
-      return { navigateToUrl: mockNavigateToUrl, getUrlForApp: mockGetUrlForApp };
+      return {
+        navigateToUrl: mockNavigateToUrl,
+        navigateToApp: mockNavigateToApp,
+        getUrlForApp: mockGetUrlForApp,
+      };
     }
     if (token === 'chrome') {
-      return { setBreadcrumbs: mockSetBreadcrumbs, docTitle: { change: mockDocTitleChange } };
+      return { docTitle: { change: mockDocTitleChange } };
     }
     if (token === 'http') {
       return { basePath: { prepend: (p: string) => p } };
     }
-    return {};
+    if (token === 'notifications') {
+      return { toasts: { addSuccess: jest.fn(), addError: jest.fn() } };
+    }
+    if (
+      token === 'data' ||
+      token === 'dataViews' ||
+      token === 'lens' ||
+      token === 'uiActions' ||
+      token === 'dashboard'
+    ) {
+      return {};
+    }
+    if (typeof token === 'function') {
+      return {};
+    }
+    throw new Error(`Unexpected token in useService mock: ${String(token)}`);
   },
   CoreStart: (key: string) => key,
+}));
+
+jest.mock('@kbn/core-di', () => ({
+  PluginStart: (key: string) => key,
+}));
+
+jest.mock('@kbn/alerting-v2-rule-form', () => ({
+  ComposeDiscoverFlyout: ({ onCreateRule }: { onCreateRule: (payload: unknown) => void }) => (
+    <button data-test-subj="composeDiscoverFlyout" onClick={() => onCreateRule({})}>
+      Compose Discover flyout
+    </button>
+  ),
 }));
 
 const mockUseFetchRules = jest.fn();
 jest.mock('../../hooks/use_fetch_rules', () => ({
   useFetchRules: (...args: unknown[]) => mockUseFetchRules(...args),
+}));
+
+jest.mock('../../hooks/use_fetch_rule_tags', () => ({
+  useFetchRuleTags: () => ({ data: ['prod'], isLoading: false, isError: false }),
+}));
+
+const mockCreateRuleMutate = jest.fn();
+jest.mock('../../hooks/use_create_rule', () => ({
+  useCreateRule: () => ({ mutate: mockCreateRuleMutate, isLoading: false }),
+}));
+
+const mockUpdateRuleMutate = jest.fn();
+jest.mock('../../hooks/use_update_rule', () => ({
+  useUpdateRule: () => ({ mutate: mockUpdateRuleMutate, isLoading: false }),
 }));
 
 const mockDeleteMutate = jest.fn();
@@ -70,7 +120,7 @@ const mockRules = [
     id: 'rule-1',
     kind: 'alert',
     enabled: true,
-    metadata: { name: 'Rule One', description: 'Monitors log errors', labels: ['prod'] },
+    metadata: { name: 'Rule One', description: 'Monitors log errors', tags: ['prod'] },
     schedule: { every: '1m' },
     evaluation: { query: { base: 'FROM logs-* | LIMIT 1' } },
   },
@@ -78,7 +128,7 @@ const mockRules = [
     id: 'rule-2',
     kind: 'alert',
     enabled: false,
-    metadata: { name: 'Rule Two', labels: [] },
+    metadata: { name: 'Rule Two', tags: [] },
     schedule: { every: '5m' },
     evaluation: { query: { base: 'FROM metrics-*' } },
   },
@@ -118,6 +168,19 @@ describe('RulesListPage', () => {
     jest.useRealTimers();
   });
 
+  it('renders the experimental badge in the page header', () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    expect(screen.getByTestId('alertingV2ExperimentalBadge')).toBeInTheDocument();
+  });
+
   it('renders loading state', () => {
     mockUseFetchRules.mockReturnValue({
       data: undefined,
@@ -128,7 +191,8 @@ describe('RulesListPage', () => {
 
     renderPage();
 
-    expect(screen.getByRole('table')).toBeInTheDocument();
+    expect(screen.getByTestId('rulesListLoading')).toBeInTheDocument();
+    expect(screen.queryByRole('table')).not.toBeInTheDocument();
   });
 
   it('renders rules in the table', () => {
@@ -214,7 +278,7 @@ describe('RulesListPage', () => {
     expect(screen.getByText('Network error')).toBeInTheDocument();
   });
 
-  it('shows "Showing 0-0 of 0 Rules" when there are no rules', () => {
+  it('shows empty state when there are no rules and no active filters', () => {
     mockUseFetchRules.mockReturnValue({
       data: { items: [], total: 0, page: 1, perPage: 20 },
       isLoading: false,
@@ -224,8 +288,25 @@ describe('RulesListPage', () => {
 
     renderPage();
 
-    const showingLabel = screen.getByTestId('rulesListShowingLabel');
-    expect(showingLabel).toHaveTextContent('Showing 0-0 of 0 Rules');
+    expect(
+      screen.getByRole('heading', { level: 2, name: /no rules yet\. let's get started!/i })
+    ).toBeInTheDocument();
+    expect(screen.queryByRole('table')).not.toBeInTheDocument();
+  });
+
+  it('opens the flyout from the empty state ES|QL rule card', () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: [], total: 0, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    fireEvent.click(screen.getByTestId('createEsqlRuleCard'));
+
+    expect(screen.getByTestId('composeDiscoverFlyout')).toBeInTheDocument();
   });
 
   it('shows correct "Showing" range when rules exist', () => {
@@ -260,7 +341,10 @@ describe('RulesListPage', () => {
     expect(mockUseFetchRules).toHaveBeenLastCalledWith({
       page: 1,
       perPage: 20,
+      filter: undefined,
       search: undefined,
+      sortField: 'name',
+      sortOrder: 'asc',
     });
 
     act(() => {
@@ -271,7 +355,10 @@ describe('RulesListPage', () => {
       expect(mockUseFetchRules).toHaveBeenLastCalledWith({
         page: 1,
         perPage: 20,
+        filter: undefined,
         search: 'Rule One',
+        sortField: 'name',
+        sortOrder: 'asc',
       });
     });
   });
@@ -301,7 +388,10 @@ describe('RulesListPage', () => {
       expect(mockUseFetchRules).toHaveBeenLastCalledWith({
         page: 1,
         perPage: 20,
+        filter: undefined,
         search: 'prod',
+        sortField: 'name',
+        sortOrder: 'asc',
       });
     });
 
@@ -317,7 +407,10 @@ describe('RulesListPage', () => {
       expect(mockUseFetchRules).toHaveBeenLastCalledWith({
         page: 1,
         perPage: 20,
+        filter: undefined,
         search: undefined,
+        sortField: 'name',
+        sortOrder: 'asc',
       });
     });
   });
@@ -339,7 +432,10 @@ describe('RulesListPage', () => {
       expect(mockUseFetchRules).toHaveBeenLastCalledWith({
         page: 2,
         perPage: 20,
+        filter: undefined,
         search: undefined,
+        sortField: 'name',
+        sortOrder: 'asc',
       });
     });
 
@@ -350,7 +446,10 @@ describe('RulesListPage', () => {
     expect(mockUseFetchRules).toHaveBeenLastCalledWith({
       page: 2,
       perPage: 20,
+      filter: undefined,
       search: undefined,
+      sortField: 'name',
+      sortOrder: 'asc',
     });
 
     act(() => {
@@ -361,14 +460,17 @@ describe('RulesListPage', () => {
       expect(mockUseFetchRules).toHaveBeenLastCalledWith({
         page: 1,
         perPage: 20,
+        filter: undefined,
         search: 'Rule',
+        sortField: 'name',
+        sortOrder: 'asc',
       });
     });
   });
 
-  it('navigates to create page when create button is clicked', () => {
+  it('renders filter controls', () => {
     mockUseFetchRules.mockReturnValue({
-      data: { items: [], total: 0, page: 1, perPage: 20 },
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
       isLoading: false,
       isError: false,
       error: null,
@@ -376,10 +478,344 @@ describe('RulesListPage', () => {
 
     renderPage();
 
-    expect(screen.getByTestId('createRuleButton')).toHaveAttribute(
-      'href',
-      '/app/management/insightsAndAlerting/alerting_v2/create'
+    expect(screen.getByTestId('rulesListStatusFilter')).toBeInTheDocument();
+    expect(screen.getByTestId('rulesListTagsFilter')).toBeInTheDocument();
+    expect(screen.getByTestId('rulesListModeFilter')).toBeInTheDocument();
+  });
+
+  it('does not show an active count on the status filter when nothing is selected', () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    expect(screen.getByTestId('rulesListStatusFilter')).toHaveTextContent(/^Status$/);
+  });
+
+  it('passes status filters to useFetchRules', async () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    fireEvent.click(screen.getByTestId('rulesListStatusFilter'));
+    fireEvent.click(screen.getByTestId('rulesListStatusFilterOption-true'));
+
+    await waitFor(() => {
+      expect(mockUseFetchRules).toHaveBeenLastCalledWith({
+        page: 1,
+        perPage: 20,
+        filter: 'enabled: true',
+        search: undefined,
+        sortField: 'name',
+        sortOrder: 'asc',
+      });
+    });
+  });
+
+  it('passes tags filters to useFetchRules', async () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    fireEvent.click(screen.getByTestId('rulesListTagsFilter'));
+    fireEvent.click(screen.getByTestId('rulesListTagsFilterOption-prod'));
+
+    await waitFor(() => {
+      expect(mockUseFetchRules).toHaveBeenLastCalledWith({
+        page: 1,
+        perPage: 20,
+        filter: '(metadata.tags: "prod")',
+        search: undefined,
+        sortField: 'name',
+        sortOrder: 'asc',
+      });
+    });
+  });
+
+  it('passes mode filters to useFetchRules', async () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    fireEvent.click(screen.getByTestId('rulesListModeFilter'));
+    fireEvent.click(screen.getByTestId('rulesListModeFilterOption-signal'));
+
+    await waitFor(() => {
+      expect(mockUseFetchRules).toHaveBeenLastCalledWith({
+        page: 1,
+        perPage: 20,
+        filter: 'kind: signal',
+        search: undefined,
+        sortField: 'name',
+        sortOrder: 'asc',
+      });
+    });
+  });
+
+  it('uses name ascending as the default sort', () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    expect(mockUseFetchRules).toHaveBeenLastCalledWith({
+      page: 1,
+      perPage: 20,
+      filter: undefined,
+      search: undefined,
+      sortField: 'name',
+      sortOrder: 'asc',
+    });
+  });
+
+  it('sorts by name when the Name header is clicked', async () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    const nameHeader = screen.getByRole('columnheader', { name: /^name$/i });
+    fireEvent.click(within(nameHeader).getByRole('button'));
+
+    await waitFor(() => {
+      expect(mockUseFetchRules).toHaveBeenLastCalledWith({
+        page: 1,
+        perPage: 20,
+        filter: undefined,
+        search: undefined,
+        sortField: 'name',
+        sortOrder: 'desc',
+      });
+    });
+  });
+
+  it('sorts by mode when the Mode header is clicked', async () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    const modeHeader = screen.getByRole('columnheader', { name: /^mode$/i });
+    fireEvent.click(within(modeHeader).getByRole('button'));
+
+    await waitFor(() => {
+      expect(mockUseFetchRules).toHaveBeenLastCalledWith({
+        page: 1,
+        perPage: 20,
+        filter: undefined,
+        search: undefined,
+        sortField: 'kind',
+        sortOrder: 'asc',
+      });
+    });
+  });
+
+  it('changes sort parameters when a sortable header is clicked', async () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    const statusHeader = screen.getByRole('columnheader', { name: /^status$/i });
+    fireEvent.click(within(statusHeader).getByRole('button'));
+
+    await waitFor(() => {
+      expect(mockUseFetchRules).toHaveBeenLastCalledWith({
+        page: 1,
+        perPage: 20,
+        filter: undefined,
+        search: undefined,
+        sortField: 'enabled',
+        sortOrder: 'asc',
+      });
+    });
+  });
+
+  it('toggles sort direction when the same header is clicked twice', async () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    const statusHeader = screen.getByRole('columnheader', { name: /^status$/i });
+    fireEvent.click(within(statusHeader).getByRole('button'));
+
+    await waitFor(() => {
+      expect(mockUseFetchRules).toHaveBeenLastCalledWith(
+        expect.objectContaining({ sortField: 'enabled', sortOrder: 'asc' })
+      );
+    });
+
+    fireEvent.click(within(statusHeader).getByRole('button'));
+
+    await waitFor(() => {
+      expect(mockUseFetchRules).toHaveBeenLastCalledWith(
+        expect.objectContaining({ sortField: 'enabled', sortOrder: 'desc' })
+      );
+    });
+  });
+
+  it('opens create rule options in a flyout when create button is clicked', () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    fireEvent.click(screen.getByTestId('createRuleButton'));
+
+    expect(screen.getByTestId('ruleCreateOptionsFlyout')).toBeInTheDocument();
+    expect(screen.getByText('Create ES|QL rule')).toBeInTheDocument();
+    expect(mockNavigateToUrl).not.toHaveBeenCalled();
+  });
+
+  it('closes create rule options flyout without navigating', () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    fireEvent.click(screen.getByTestId('createRuleButton'));
+    fireEvent.click(screen.getByTestId('ruleCreateOptionsFlyoutCloseButton'));
+
+    expect(screen.queryByTestId('ruleCreateOptionsFlyout')).not.toBeInTheDocument();
+    expect(screen.getByTestId('rulesListTable')).toBeInTheDocument();
+    expect(mockNavigateToUrl).not.toHaveBeenCalled();
+  });
+
+  it('opens the rule creation flow from the create rule options flyout', () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    fireEvent.click(screen.getByTestId('createRuleButton'));
+    fireEvent.click(screen.getByRole('button', { name: /create es\|ql rule/i }));
+
+    expect(screen.queryByTestId('ruleCreateOptionsFlyout')).not.toBeInTheDocument();
+    expect(screen.getByTestId('composeDiscoverFlyout')).toBeInTheDocument();
+    expect(mockNavigateToUrl).not.toHaveBeenCalled();
+  });
+
+  it('stays on the rules list after creating a rule from the flyout', () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+    mockCreateRuleMutate.mockImplementationOnce((_payload, options) =>
+      options?.onSuccess?.({ id: 'rule-1', metadata: { name: 'Test Rule' } })
     );
+
+    renderPage();
+
+    fireEvent.click(screen.getByTestId('createRuleButton'));
+    fireEvent.click(screen.getByRole('button', { name: /create es\|ql rule/i }));
+    fireEvent.click(screen.getByTestId('composeDiscoverFlyout'));
+
+    expect(mockCreateRuleMutate).toHaveBeenCalledWith(
+      {},
+      expect.objectContaining({ onSuccess: expect.any(Function) })
+    );
+    expect(screen.queryByTestId('composeDiscoverFlyout')).not.toBeInTheDocument();
+    expect(screen.getByTestId('rulesListTable')).toBeInTheDocument();
+    expect(mockNavigateToUrl).not.toHaveBeenCalled();
+  });
+
+  it('opens the rule creation flow from the split button dropdown', async () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    fireEvent.click(screen.getByTestId('createRulePopoverButton'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('createEsqlRuleButton')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId('createEsqlRuleButton'));
+
+    expect(screen.getByTestId('composeDiscoverFlyout')).toBeInTheDocument();
+  });
+
+  it('opens agent chat when "Create with agent" is clicked in the split button dropdown', async () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    fireEvent.click(screen.getByTestId('createRulePopoverButton'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('createWithAgentButton')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId('createWithAgentButton'));
+
+    expect(mockNavigateToApp).toHaveBeenCalledWith('agent_builder', {
+      path: '/agents/elastic-ai-agent/conversations/new',
+      state: { initialMessage: CREATE_WITH_AGENT_INITIAL_PROMPT },
+    });
   });
 
   it('shows delete confirmation modal when delete action is clicked', async () => {
@@ -428,7 +864,7 @@ describe('RulesListPage', () => {
     fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
 
     expect(mockDeleteMutate).toHaveBeenCalledWith(
-      'rule-1',
+      { id: 'rule-1', name: 'Rule One' },
       expect.objectContaining({
         onSettled: expect.any(Function),
       })
@@ -503,7 +939,7 @@ describe('RulesListPage', () => {
     });
   });
 
-  it('navigates to the create page with cloneFrom query param when clone is clicked', async () => {
+  it('opens the clone flyout when clone is clicked', async () => {
     mockUseFetchRules.mockReturnValue({
       data: { items: mockRules, total: 2, page: 1, perPage: 20 },
       isLoading: false,
@@ -516,9 +952,7 @@ describe('RulesListPage', () => {
     fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
     fireEvent.click(screen.getByTestId('cloneRule-rule-1'));
 
-    expect(mockNavigateToUrl).toHaveBeenCalledWith(
-      '/app/management/insightsAndAlerting/alerting_v2/create?cloneFrom=rule-1'
-    );
+    expect(screen.getByTestId('composeDiscoverFlyout')).toBeInTheDocument();
   });
 
   describe('selection', () => {

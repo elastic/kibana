@@ -446,7 +446,7 @@ describe('parseRecords', () => {
     ];
     // nodesLimit = 2, so only first record should be processed
     // First record creates 3 nodes (actor group, target group, label)
-    const result = parseRecords(mockLogger, records, [], 2);
+    const result = parseRecords(mockLogger, records, [], [], 2);
     expect(result.nodes.length).toBeLessThanOrEqual(3);
     expect(result.messages).toContain(ApiMessageCode.ReachedNodesLimit);
   });
@@ -538,7 +538,7 @@ describe('parseRecords', () => {
     // - First relationship record would add 3 more nodes (rel-actor-1, rel-target-1, rel(Owns))
     //   reaching 6 nodes total, but the limit check before the 2nd relationship stops further processing
     // - Second relationship record should NOT be processed
-    const result = parseRecords(mockLogger, eventRecords, relationshipRecords, 5);
+    const result = parseRecords(mockLogger, eventRecords, relationshipRecords, [], 5);
 
     // Verify that the second relationship record was skipped due to the shared limit
     const nodeIds = result.nodes.map((n) => n.id);

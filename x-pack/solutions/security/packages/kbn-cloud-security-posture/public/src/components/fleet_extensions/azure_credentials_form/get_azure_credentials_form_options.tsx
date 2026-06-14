@@ -132,14 +132,14 @@ export const getAzureCloudConnectorsCredentialsFormOptions = (): Pick<
       label: i18n.translate(
         'securitySolutionPackages.cloudSecurityPosture.cloudSetup.azure.cloudConnectorsLabel',
         {
-          defaultMessage: 'Cloud Connectors (recommended)',
+          defaultMessage: 'Federated Identity (recommended)',
         }
       ),
       info: (
         <EuiText color="subdued" size="s">
           <FormattedMessage
             id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.azure.cloudConnectorsInfo"
-            defaultMessage="Cloud Connectors allow you to connect to various cloud services securely."
+            defaultMessage="Federated Identity allows you to connect to various cloud services securely."
           />
         </EuiText>
       ),

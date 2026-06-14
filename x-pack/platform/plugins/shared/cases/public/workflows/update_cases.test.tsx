@@ -10,7 +10,7 @@ import { updateCasesStepDefinition } from './simple_steps';
 describe('createUpdateCasesStepDefinition', () => {
   it('returns a public step definition with expected metadata', () => {
     expect(updateCasesStepDefinition.id).toBe('cases.updateCases');
-    expect(updateCasesStepDefinition.category).toBe('kibana');
+    expect(updateCasesStepDefinition.category).toBe('kibana.cases');
     expect(updateCasesStepDefinition.documentation?.examples?.length).toBeGreaterThan(0);
   });
 });

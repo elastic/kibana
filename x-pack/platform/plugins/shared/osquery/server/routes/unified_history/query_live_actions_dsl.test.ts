@@ -110,16 +110,17 @@ describe('buildLiveActionsQuery', () => {
   });
 
   describe('kuery filter', () => {
-    test('adds simple_query_string filter when kuery is provided', () => {
+    test('adds multi_match bool_prefix filter when kuery is provided', () => {
       const result = buildLiveActionsQuery({ pageSize: 20, spaceId: 'default', kuery: 'myquery' });
       const query = result.body.query as Record<string, unknown>;
       const filters = (query.bool as Record<string, unknown>).filter as unknown[];
 
       expect(filters).toContainEqual({
-        simple_query_string: {
-          query: 'myquery*',
+        multi_match: {
+          query: 'myquery',
+          type: 'bool_prefix',
           fields: ['pack_name', 'queries.query', 'queries.id'],
-          analyze_wildcard: true,
+          operator: 'and',
         },
       });
     });
@@ -232,10 +233,11 @@ describe('buildLiveActionsQuery', () => {
 
       expect(result.body.search_after).toEqual([1710936000000, 42]);
       expect(filters).toContainEqual({
-        simple_query_string: {
-          query: 'myquery*',
+        multi_match: {
+          query: 'myquery',
+          type: 'bool_prefix',
           fields: ['pack_name', 'queries.query', 'queries.id'],
-          analyze_wildcard: true,
+          operator: 'and',
         },
       });
       expect(filters).toContainEqual({

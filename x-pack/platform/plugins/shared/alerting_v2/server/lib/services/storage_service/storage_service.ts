@@ -14,6 +14,8 @@ import { LoggerServiceToken } from '../logger_service/logger_service';
 export interface BulkIndexDocsParams<TDocument extends Record<string, unknown>> {
   index: string;
   docs: readonly TDocument[];
+  /** When `'wait_for'`, the bulk call blocks until the indexed documents are visible to search. Defaults to `false`. */
+  refresh?: boolean | 'wait_for';
 }
 
 export interface StorageServiceContract {
@@ -32,6 +34,7 @@ export class StorageService implements StorageServiceContract {
   public async bulkIndexDocs<TDocument extends Record<string, unknown>>({
     index,
     docs,
+    refresh = false,
   }: BulkIndexDocsParams<TDocument>): Promise<void> {
     if (docs.length === 0) {
       return;
@@ -47,7 +50,7 @@ export class StorageService implements StorageServiceContract {
     try {
       const response = await this.esClient.bulk({
         operations,
-        refresh: false,
+        refresh,
       });
 
       this.logBulkIndexResponse({ index, docsCount: docs.length, response });

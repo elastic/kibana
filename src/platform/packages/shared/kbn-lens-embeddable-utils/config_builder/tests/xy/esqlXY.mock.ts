@@ -9,6 +9,7 @@
 
 import type { XYDataLayerConfig } from '@kbn/lens-common';
 import type { LensAttributes } from '../../types';
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 
 const LAYER_ID = 'c2eacea8-91d4-4372-a82d-8760979ff893';
 
@@ -130,7 +131,7 @@ export const esqlChart: LensAttributes = {
     needsRefresh: false,
   },
   visualizationType: 'lnsXY',
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
 };
 
 /**
@@ -328,5 +329,5 @@ export const esqlXYWithCollapseByBreakdown: LensAttributes = {
     needsRefresh: false,
   },
   visualizationType: 'lnsXY',
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
 };

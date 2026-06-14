@@ -7,12 +7,16 @@
 
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import type { IHttpFetchError } from '@kbn/core/public';
+import { ENTITY_STORE_ROUTES } from '@kbn/entity-store/public';
+import { API_VERSIONS } from '../../../../../common/entity_analytics/constants';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import { ENTITY_REMOVED_TOAST, RESOLUTION_ERROR_TITLE } from '../translations';
+import {
+  ENTITY_REMOVED_TOAST,
+  ENTITY_REMOVED_TOAST_TEXT,
+  RESOLUTION_ERROR_TITLE,
+} from '../translations';
 import { RESOLUTION_GROUP_QUERY_KEY } from './use_resolution_group';
-
-const RESOLUTION_UNLINK_ROUTE = '/internal/security/entity_store/resolution/unlink';
 
 interface UnlinkEntitiesParams {
   entity_ids: string[];
@@ -30,14 +34,14 @@ export const useUnlinkEntities = () => {
 
   return useMutation<UnlinkEntitiesResponse, IHttpFetchError, UnlinkEntitiesParams>({
     mutationFn: (params) =>
-      http.fetch<UnlinkEntitiesResponse>(RESOLUTION_UNLINK_ROUTE, {
-        version: '2',
+      http.fetch<UnlinkEntitiesResponse>(ENTITY_STORE_ROUTES.public.RESOLUTION_UNLINK, {
+        version: API_VERSIONS.public.v1,
         method: 'POST',
         body: JSON.stringify(params),
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [RESOLUTION_GROUP_QUERY_KEY] });
-      addSuccess(ENTITY_REMOVED_TOAST);
+      addSuccess({ title: ENTITY_REMOVED_TOAST, text: ENTITY_REMOVED_TOAST_TEXT });
     },
     onError: (error) => {
       addError(error, { title: RESOLUTION_ERROR_TITLE });

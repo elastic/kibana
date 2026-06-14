@@ -29,7 +29,6 @@ export {
   screenContextAttachmentDataSchema,
   visualizationAttachmentDataSchema,
   connectorAttachmentDataSchema,
-  connectorAttachmentToolSchema,
   CONNECTOR_TAG_PREFIX,
   type TextAttachmentData,
   type ScreenContextAttachmentData,
@@ -49,6 +48,8 @@ export type {
   AttachmentRefActor,
   AttachmentDiff,
   AttachmentInput,
+  AttachmentGroup,
+  ConversationAttachment,
   UpdateOriginResponse,
 } from './versioned_attachment';
 export {
@@ -60,7 +61,9 @@ export {
   attachmentRefOperationSchema,
   attachmentRefActorSchema,
   attachmentInputSchema,
+  attachmentGroupSchema,
   attachmentDiffSchema,
+  isAttachmentGroup,
   getLatestVersion,
   getVersion,
   createVersionId,

@@ -6,7 +6,9 @@
  */
 
 import type { UserIdAndName } from '../base/users';
+import type { ToolOrigin, ToolType } from '../tools/definition';
 import type { ToolResult } from '../tools/tool_result';
+import type { ExecutionStatus, SerializedExecutionError } from '../agents/execution_status';
 import type {
   Attachment,
   VersionedAttachment,
@@ -75,6 +77,8 @@ export enum ConversationRoundStepType {
   toolCall = 'tool_call',
   reasoning = 'reasoning',
   compaction = 'compaction',
+  backgroundAgentComplete = 'background_agent_complete',
+  updateTodos = 'update_todos',
 }
 
 // tool call step
@@ -91,6 +95,10 @@ export interface ToolCallProgress {
    * The full text message
    */
   message: string;
+  /**
+   * Optional structured metadata attached to this progress event.
+   */
+  metadata?: Record<string, string>;
 }
 
 /**
@@ -121,6 +129,8 @@ export interface ToolCallWithResult {
    * Optional group ID shared by tool calls that were executed in parallel from the same LLM response
    */
   tool_call_group_id?: string;
+  tool_origin?: ToolOrigin;
+  tool_type?: ToolType;
 }
 
 export type ToolCallStep = ConversationRoundStepMixin<
@@ -151,6 +161,10 @@ export interface ReasoningStepData {
   reasoning: string;
   /** if true, will not be displayed in the thinking panel, only used as "current thinking" **/
   transient?: boolean;
+  /** when reasoning is bound to a tool call, the corresponding tool call ID */
+  tool_call_id?: string;
+  /** when reasoning is bound to a tool call group, the corresponding tool call group ID */
+  tool_call_group_id?: string;
 }
 
 export type ReasoningStep = ConversationRoundStepMixin<
@@ -185,7 +199,59 @@ export const isCompactionStep = (step: ConversationRoundStep): step is Compactio
   return step.type === ConversationRoundStepType.compaction;
 };
 
-export type ConversationRoundStep = ToolCallStep | ReasoningStep | CompactionStep;
+export type BackgroundAgentCompleteStep = ConversationRoundStepMixin<
+  ConversationRoundStepType.backgroundAgentComplete,
+  BackgroundExecutionState
+>;
+
+export const isBackgroundAgentCompleteStep = (
+  step: ConversationRoundStep
+): step is BackgroundAgentCompleteStep => {
+  return step.type === ConversationRoundStepType.backgroundAgentComplete;
+};
+
+export interface TodosStepData {
+  todos: TodoItem[];
+  /** True when todos were inherited from the previous round, not written by the agent this round */
+  carried_over?: boolean;
+}
+
+export type TodosStep = ConversationRoundStepMixin<
+  ConversationRoundStepType.updateTodos,
+  TodosStepData
+>;
+
+export const isTodosStep = (step: ConversationRoundStep): step is TodosStep => {
+  return step.type === ConversationRoundStepType.updateTodos;
+};
+
+/**
+ * Returns the (single) todos step from a list of steps, if present.
+ * A round only ever has at most one todos step, which is updated in place.
+ */
+export const findTodosStep = (
+  steps: ConversationRoundStep[] | undefined
+): TodosStep | undefined => {
+  return steps?.find(isTodosStep);
+};
+
+/**
+ * Returns the todo list to carry over from the previous round, or undefined if nothing should carry over.
+ * Carryover only happens when at least one item is still incomplete (pending / in_progress).
+ * When carried over, both complete and incomplete items are included so the full plan is visible.
+ */
+export const carriedOverTodos = (todos: TodoItem[] | undefined): TodoItem[] | undefined => {
+  if (!todos?.length) return undefined;
+  const hasIncomplete = todos.some((t) => t.status !== 'completed' && t.status !== 'cancelled');
+  return hasIncomplete ? todos : undefined;
+};
+
+export type ConversationRoundStep =
+  | ToolCallStep
+  | ReasoningStep
+  | CompactionStep
+  | BackgroundAgentCompleteStep
+  | TodosStep;
 
 export enum ConversationRoundStatus {
   /** round is currently being processed */
@@ -194,6 +260,24 @@ export enum ConversationRoundStatus {
   completed = 'completed',
   /** round has been interrupted and is awaiting user input */
   awaitingPrompt = 'awaiting_prompt',
+}
+
+/**
+ * Frontend-only derived status for a conversation in the sidebar list.
+ * Computed client-side from the backend `read` flag, `ConversationRoundStatus`,
+ * and the active-streams map — never returned directly by any API endpoint.
+ */
+export enum ConversationDisplayStatus {
+  /** conversation has been read, no pending activity */
+  read = 'read',
+  /** conversation has new content the user hasn't seen */
+  unread = 'unread',
+  /** agent is actively streaming a response */
+  inProgress = 'in_progress',
+  /** agent is paused and waiting for user confirmation (HITL) */
+  awaitingPrompt = 'awaiting_prompt',
+  /** last round ended with an error */
+  error = 'error',
 }
 
 /**
@@ -207,8 +291,8 @@ export interface ConversationRound {
   status: ConversationRoundStatus;
   /** persisted state to resume interrupted states */
   state?: RoundState;
-  /** if status is awaiting_prompt, contains the current prompt request*/
-  pending_prompt?: PromptRequest;
+  /** if status is awaiting_prompt, contains the current prompt requests */
+  pending_prompts?: PromptRequest[];
   /** The user input that initiated the round */
   input: RoundInput;
   /** List of intermediate steps before the end result, such as tool calls */
@@ -280,6 +364,20 @@ export interface Conversation {
    * Keeps track of which prompts have been answered and the response.
    */
   state?: ConversationInternalState;
+  /**
+   * Whether the conversation has been marked as read.
+   * Any new or updated conversation has `read` set to `false` by default
+   */
+  read?: boolean;
+  /** current status of the conversation */
+  status?: ConversationRoundStatus;
+}
+
+export type TodoStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled';
+
+export interface TodoItem {
+  content: string;
+  status: TodoStatus;
 }
 
 /**
@@ -299,6 +397,30 @@ export interface ConversationInternalState {
    * Reused across rounds until regeneration is needed.
    */
   compaction_summary?: CompactionSummary;
+  /** Background sub-agent executions keyed by execution ID. */
+  background_executions?: Record<string, BackgroundExecutionState>;
+  /** Active todo list for the current conversation. Replaced wholesale on each write. */
+  todos?: TodoItem[];
+}
+
+export interface BackgroundExecutionCompletedAt {
+  /** The round it was completed at. */
+  round_id: string;
+  /** If completion was resolved inside a round, the last tool call group ID before completion. */
+  tool_call_group_id?: string;
+}
+
+export interface BackgroundExecutionState {
+  /** The execution ID of the background sub-agent. */
+  execution_id: string;
+  /** Current status of the execution. */
+  status: ExecutionStatus;
+  /** The sub-agent's response, present when status is 'completed'. */
+  response?: AssistantResponse;
+  /** Error details, present when status is 'failed'. */
+  error?: SerializedExecutionError;
+  /** When and where the execution completed, for positioning the notification. */
+  completed_at?: BackgroundExecutionCompletedAt;
 }
 
 export type ConversationWithoutRounds = Omit<Conversation, 'rounds'>;

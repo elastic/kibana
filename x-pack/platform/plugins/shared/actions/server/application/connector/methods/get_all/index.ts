@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export { getAll, getAllUnsecured, getAllSystemConnectors } from './get_all';
+export {
+  getAll,
+  getAllUnsecured,
+  getAllSystemConnectors,
+  filterInferenceConnectors,
+} from './get_all';

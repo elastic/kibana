@@ -19,7 +19,15 @@ import type { SavedObjectFindOptionsKueryNode } from '../../common/types';
 
 export interface GetCaseIdsByAlertIdArgs {
   alertId: string;
+  /**
+   * Authorization + owner filter scoped to the legacy `cases-comments` saved object type.
+   */
   filter?: KueryNode;
+  /**
+   * Authorization + owner filter scoped to the unified `cases-attachments` saved object type.
+   * Only used when the unified attachments feature flag is enabled.
+   */
+  unifiedFilter?: KueryNode;
 }
 
 export interface PushedArgs {
@@ -68,6 +76,7 @@ export interface PatchCase extends IndexRefresh {
   caseId: string;
   updatedAttributes: Partial<CaseTransformedAttributes & PushedArgs & AttachmentStatsAttributes>;
   originalCase: CaseSavedObjectTransformed;
+  closeReason?: string;
   version?: string;
 }
 

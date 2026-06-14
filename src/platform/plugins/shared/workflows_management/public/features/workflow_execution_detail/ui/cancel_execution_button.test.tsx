@@ -8,7 +8,8 @@
  */
 
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import React from 'react';
+import { default as React } from 'react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { CancelExecutionButton } from './cancel_execution_button';
 import { TestWrapper } from '../../../shared/test_utils';
 
@@ -179,6 +180,53 @@ describe('CancelExecutionButton', () => {
           timeToCancellation: undefined,
         })
       );
+    });
+  });
+
+  describe('CancelExecutionButton authorization', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it.each([
+      {
+        label: 'cancel allowed',
+        cancelWorkflowExecution: true,
+        expectDisabled: false,
+      },
+      {
+        label: 'cancel denied',
+        cancelWorkflowExecution: false,
+        expectDisabled: true,
+      },
+    ])('$label: button disabled=$expectDisabled', ({ cancelWorkflowExecution, expectDisabled }) => {
+      useKibana.mockReturnValue({
+        services: {
+          application: {
+            capabilities: {
+              workflowsManagement: { cancelWorkflowExecution },
+            },
+          },
+          notifications: { toasts: { addSuccess: jest.fn(), addError: jest.fn() } },
+        },
+      });
+
+      render(
+        <I18nProvider>
+          <CancelExecutionButton
+            executionId="exec-1"
+            workflowId="wf-1"
+            startedAt="2020-01-01T00:00:00Z"
+          />
+        </I18nProvider>
+      );
+
+      const button = screen.getByTestId('cancelExecutionButton');
+      if (expectDisabled) {
+        expect(button).toBeDisabled();
+      } else {
+        expect(button).not.toBeDisabled();
+      }
     });
   });
 });

@@ -14,7 +14,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import pMap from 'p-map';
 import moment from 'moment';
@@ -548,7 +548,7 @@ export class SyntheticsService {
     // execute the remaining monitors
     await syncAllLocations();
 
-    await finder.close();
+    finder.close().catch(() => {});
   }
 
   async runOnceConfigs(configs?: ConfigData) {
@@ -741,6 +741,7 @@ export class SyntheticsService {
         configId: monitor.id,
         heartbeatId: attributes[ConfigKey.MONITOR_QUERY_ID],
         spaceId: monitorSpace,
+        kibanaUrl: this.server.basePath.publicBaseUrl ?? undefined,
       };
     });
 

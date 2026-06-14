@@ -16,6 +16,8 @@ import { scheduleApiKeyInvalidationTask } from '../lib/tasks/invalidate_pending_
 import type { PluginConfig } from '../config';
 import type { AlertingServerStartDependencies } from '../types';
 import { scheduleDispatcherTask } from '../lib/dispatcher/schedule_task';
+import { scheduleTelemetryTask } from '../lib/usage/schedule_task';
+import { initSubscribers } from '../lib/events/init_subscribers';
 
 export function bindOnStart({ bind }: ContainerModuleLoadOptions) {
   bind(OnStart).toConstantValue(async (container) => {
@@ -35,7 +37,9 @@ export function bindOnStart({ bind }: ContainerModuleLoadOptions) {
       logger,
     });
 
-    scheduleDispatcherTask({ taskManager, resourceManager }).catch((error) => {
+    initSubscribers(container);
+
+    scheduleDispatcherTask({ taskManager }).catch((error) => {
       logger.error(error as Error, {
         error: {
           code: 'DISPATCHER_TASK_SCHEDULE_FAILURE',
@@ -53,6 +57,18 @@ export function bindOnStart({ bind }: ContainerModuleLoadOptions) {
         error: {
           code: 'API_KEY_INVALIDATION_TASK_SCHEDULE_FAILURE',
           type: 'ApiKeyInvalidationTask',
+        },
+      });
+    });
+
+    scheduleTelemetryTask({
+      logger,
+      taskManager,
+    }).catch((error) => {
+      logger.error(error as Error, {
+        error: {
+          code: 'TELEMETRY_TASK_SCHEDULE_FAILURE',
+          type: 'AlertingV2TelemetryTask',
         },
       });
     });

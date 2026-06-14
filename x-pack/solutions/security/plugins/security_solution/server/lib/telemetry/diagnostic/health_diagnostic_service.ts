@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { randomUUID } from 'crypto';
 import { schema } from '@kbn/config-schema';
-import { bufferCount, defaultIfEmpty, from, mergeMap, take, tap } from 'rxjs';
+import { bufferCount, defaultIfEmpty, defer, from, mergeMap, take, tap } from 'rxjs';
 import { cloneDeep } from 'lodash';
 import type {
   TaskManagerSetupContract,
@@ -21,19 +22,23 @@ import type {
 } from '@kbn/core/server';
 import {
   PermissionError,
+  type ExecutableQuery,
+  type SkippedQuery,
   type HealthDiagnosticQuery,
   type HealthDiagnosticQueryStats,
   type HealthDiagnosticService,
   type HealthDiagnosticServiceSetup,
   type HealthDiagnosticServiceStart,
+  type ParseFailureQuery,
 } from './health_diagnostic_service.types';
 import {
   emptyStat as queryStat,
   fieldNames,
   shouldExecute as isDueForExecution,
-  parseDiagnosticQueries,
   applyFilterlist,
+  mergeByPriority,
 } from './health_diagnostic_utils';
+import { parseHealthDiagnosticQueries } from './health_diagnostic_query_parser';
 import { type CircuitBreaker, ValidationError } from './health_diagnostic_circuit_breakers.types';
 import type { CircuitBreakingQueryExecutor } from './health_diagnostic_receiver.types';
 import { CircuitBreakingQueryExecutorImpl } from './health_diagnostic_receiver';
@@ -41,7 +46,7 @@ import {
   TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_RESULT_EVENT,
   TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_STATS_EVENT,
 } from '../event_based/events';
-import { artifactService } from '../artifact';
+import { artifactService, type Manifest } from '../artifact';
 import { newTelemetryLogger, withErrorMessage } from '../helpers';
 import { telemetryConfiguration } from '../configuration';
 import { RssGrowthCircuitBreaker } from './circuit_breakers/rss_growth_circuit_breaker';
@@ -50,12 +55,17 @@ import { EventLoopUtilizationCircuitBreaker } from './circuit_breakers/event_loo
 import { EventLoopDelayCircuitBreaker } from './circuit_breakers/event_loop_delay_circuit_breaker';
 import { ElasticsearchCircuitBreaker } from './circuit_breakers/elastic_search_circuit_breaker';
 import type { TelemetryConfigProvider } from '../../../../common/telemetry_config/telemetry_config_provider';
+import {
+  IntegrationResolverImpl,
+  type IntegrationResolver,
+} from './health_diagnostic_integration_resolver';
 
 const TASK_TYPE = 'security:health-diagnostic';
 const TASK_ID = `${TASK_TYPE}:1.0.0`;
 const INTERVAL = '1h';
 const TIMEOUT = '10m';
-const QUERY_ARTIFACT_ID = 'health-diagnostic-queries-v1';
+const QUERY_ARTIFACT_ID_V1 = 'health-diagnostic-queries-v1';
+const QUERY_ARTIFACT_ID_V2 = 'health-diagnostic-queries-v2';
 
 export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
   private readonly salt = 'c2a5d101-d0ef-49cc-871e-6ee55f9546f8';
@@ -65,6 +75,7 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
   private analytics?: AnalyticsServiceStart;
   private _esClient?: ElasticsearchClient;
   private telemetryConfigProvider?: TelemetryConfigProvider;
+  private integrationResolver?: IntegrationResolver;
   private isServerless = false;
 
   constructor(logger: Logger) {
@@ -90,6 +101,7 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
     this.analytics = start.analytics;
     this._esClient = start.esClient;
     this.telemetryConfigProvider = start.telemetryConfigProvider;
+    this.integrationResolver = new IntegrationResolverImpl(start.packageService, this.logger);
 
     await this.scheduleTask(start.taskManager);
   }
@@ -101,121 +113,157 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
       this.logger.debug('Skipping health diagnostic task because telemetry is disabled');
       return [];
     }
-    this.logger.debug('Running health diagnostic task');
 
-    const queriesToRun = await this.getRunnableHealthQueries(lastExecutionByQuery, new Date());
-    const statistics: HealthDiagnosticQueryStats[] = [];
-
-    if (this.queryExecutor === undefined) {
-      this.logger.warn('CircuitBreakingQueryExecutor service is not started');
-      return statistics;
+    if (!this.queryExecutor || !this.integrationResolver) {
+      this.logger.warn('Service is not fully started');
+      return [];
     }
 
-    this.logger.debug('About to run health diagnostic queries', {
-      queriesToRun: queriesToRun.length,
-    } as LogMeta);
+    const queries = await this.getRunnableHealthQueries(lastExecutionByQuery, new Date());
+    const resolved = await this.integrationResolver.resolve(queries);
+    this.logger.trace('About to run queries', { numQueries: queries.length } as LogMeta);
+    const statistics: HealthDiagnosticQueryStats[] = [];
 
-    for (const query of queriesToRun) {
-      const now = new Date();
-      const circuitBreakers = this.buildCircuitBreakers();
-      const options = { query, circuitBreakers };
+    for (const resolvedQuery of resolved) {
+      this.logger.trace('About to execute health diagnostic query', {
+        name: resolvedQuery.query.name,
+      } as LogMeta);
+      let stats: HealthDiagnosticQueryStats;
 
-      const query$ = this.queryExecutor.search(options);
-
-      const stats = await new Promise<HealthDiagnosticQueryStats>((resolve) => {
-        const queryStats: HealthDiagnosticQueryStats = queryStat(query.name, now);
-        let currentPage = 0;
-
-        query$
-          .pipe(
-            // cap the result set to the max number of documents
-            take(telemetryConfiguration.health_diagnostic_config.query.maxDocuments),
-
-            // get the fields names, only once (assume all docs have the same structure)
-            tap((doc) => {
-              if (queryStats.fieldNames.length === 0) {
-                queryStats.fieldNames = fieldNames(doc);
-              }
-            }),
-
-            // publish N documents in the same EBT
-            bufferCount(telemetryConfiguration.health_diagnostic_config.query.bufferSize),
-
-            // emit empty array if no items were buffered (ensures EBT is always sent)
-            defaultIfEmpty([]),
-
-            // apply filterlist
-            mergeMap((result) =>
-              from(
-                applyFilterlist(
-                  result,
-                  query.filterlist,
-                  this.salt,
-                  query,
-                  telemetryConfiguration.encryption_public_keys
-                )
-              )
-            )
-          )
-          .subscribe({
-            next: (data) => {
-              this.logger.debug('Sending query result EBT', {
-                queryName: query.name,
-                traceId: queryStats.traceId,
-              } as LogMeta);
-
-              this.reportEBT(TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_RESULT_EVENT, {
-                name: query.name,
-                queryId: query.id,
-                traceId: queryStats.traceId,
-                page: currentPage++,
-                data,
-              });
-
-              queryStats.numDocs += data.length;
-            },
-            error: (error) => {
-              const failure = {
-                message: error.message,
-                reason: error instanceof ValidationError ? error.result : undefined,
-              };
-              if (error instanceof PermissionError) {
-                this.logger.info('Permission error running query.', withErrorMessage(error));
-              } else {
-                this.logger.error('Error running query', withErrorMessage(error));
-              }
-              resolve({
-                ...queryStats,
-                failure,
-                finished: new Date().toISOString(),
-                circuitBreakers: this.circuitBreakersStats(circuitBreakers),
-                passed: false,
-              });
-            },
-            complete: () => {
-              resolve({
-                ...queryStats,
-                finished: new Date().toISOString(),
-                circuitBreakers: this.circuitBreakersStats(circuitBreakers),
-                passed: true,
-              });
-            },
-          });
-      });
+      if (resolvedQuery.kind === 'skipped') {
+        stats = this.buildSkippedStats(resolvedQuery);
+      } else {
+        stats = await this.executeQuery(resolvedQuery);
+      }
 
       this.logger.debug('Query executed. Sending query stats EBT', {
-        queryName: query.name,
+        queryName: resolvedQuery.query.name,
         traceId: stats.traceId,
       } as LogMeta);
 
       this.reportEBT(TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_STATS_EVENT, stats);
-
       statistics.push(stats);
     }
 
-    this.logger.debug('Finished running health diagnostic task');
-
     return statistics;
+  }
+
+  private buildSkippedStats(skipped: SkippedQuery): HealthDiagnosticQueryStats {
+    const { query } = skipped;
+    const name = query.name ? query.name : query.id ?? 'unknown';
+    const now = new Date();
+    return {
+      name,
+      started: now.toISOString(),
+      finished: now.toISOString(),
+      traceId: randomUUID(),
+      numDocs: 0,
+      passed: false,
+      fieldNames: [],
+      descriptorVersion: 'version' in query ? query.version : 0,
+      status: 'skipped',
+      skipReason: skipped.reason,
+    };
+  }
+
+  private async executeQuery(
+    executableQuery: ExecutableQuery
+  ): Promise<HealthDiagnosticQueryStats> {
+    const { query } = executableQuery;
+    const now = new Date();
+    const circuitBreakers = this.buildCircuitBreakers();
+    const options = { query: executableQuery, circuitBreakers };
+
+    if (!this.queryExecutor) {
+      throw new Error('queryExecutor is unavailable');
+    }
+    const executor = this.queryExecutor;
+    const query$ = defer(() => executor.search(options));
+
+    return new Promise<HealthDiagnosticQueryStats>((resolve) => {
+      const queryStats: HealthDiagnosticQueryStats = queryStat(query.name, now, query.version);
+      let currentPage = 0;
+
+      query$
+        .pipe(
+          // cap the result set to the max number of documents
+          take(telemetryConfiguration.health_diagnostic_config.query.maxDocuments),
+
+          // get the fields names, only once (assume all docs have the same structure)
+          tap((doc) => {
+            if (queryStats.fieldNames.length === 0) {
+              queryStats.fieldNames = fieldNames(doc);
+            }
+          }),
+
+          // publish N documents in the same EBT
+          bufferCount(telemetryConfiguration.health_diagnostic_config.query.bufferSize),
+
+          // emit empty array if no items were buffered (ensures EBT is always sent)
+          defaultIfEmpty([]),
+
+          // apply filterlist
+          mergeMap((result) =>
+            from(
+              applyFilterlist(
+                result,
+                executableQuery.query.filterlist,
+                this.salt,
+                executableQuery.query,
+                telemetryConfiguration.encryption_public_keys
+              )
+            )
+          )
+        )
+        .subscribe({
+          next: (data) => {
+            this.logger.debug('Sending query result EBT', {
+              queryName: query.name,
+              traceId: queryStats.traceId,
+            } as LogMeta);
+
+            this.reportEBT(TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_RESULT_EVENT, {
+              name: query.name,
+              queryId: query.id,
+              traceId: queryStats.traceId,
+              page: currentPage++,
+              data,
+            });
+
+            queryStats.numDocs += data.length;
+          },
+          error: (error) => {
+            const failure = {
+              message: error.message,
+              reason: error instanceof ValidationError ? error.result : undefined,
+            };
+            if (error instanceof PermissionError) {
+              this.logger.debug('Permission error running query.', withErrorMessage(error));
+            } else {
+              this.logger.warn('Error running query', withErrorMessage(error));
+            }
+            resolve({
+              ...queryStats,
+              failure,
+              finished: new Date().toISOString(),
+              circuitBreakers: this.circuitBreakersStats(circuitBreakers),
+              passed: false,
+              status: 'failed',
+              integration: 'resolution' in executableQuery ? executableQuery.resolution : undefined,
+            });
+          },
+          complete: () => {
+            resolve({
+              ...queryStats,
+              finished: new Date().toISOString(),
+              circuitBreakers: this.circuitBreakersStats(circuitBreakers),
+              passed: true,
+              status: 'success',
+              integration: 'resolution' in executableQuery ? executableQuery.resolution : undefined,
+            });
+          },
+        });
+    });
   }
 
   private circuitBreakersStats(circuitBreakers: CircuitBreaker[]): Record<string, unknown> {
@@ -317,22 +365,34 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
     }
   }
 
+  private isParseFailureQuery(query: HealthDiagnosticQuery): query is ParseFailureQuery {
+    return '_raw' in query;
+  }
+
   private async getRunnableHealthQueries(
     lastExecutionByQuery: Record<string, number>,
     now: Date
   ): Promise<HealthDiagnosticQuery[]> {
     const healthQueries = await this.healthQueries();
     return healthQueries.filter((query) => {
+      this.logger.trace('Evaluating health diagnostic query for execution', {
+        query: query.name,
+      } as LogMeta);
       try {
-        const { name, scheduleCron, enabled = false } = query;
+        if (this.isParseFailureQuery(query)) {
+          // let it pass the filter to send the stats, i.e. this kind of query will be always
+          // skipped in the execution phase, but we want to report it in the stats with the
+          // parse failure reason.
+          return true;
+        }
+        const { name, scheduleCron, enabled } = query;
         const lastExecutedAt = new Date(lastExecutionByQuery[name] ?? 0);
-
         return enabled && isDueForExecution(lastExecutedAt, now, scheduleCron);
       } catch (error) {
         this.logger.warn(
           'Error processing health query',
           withErrorMessage(error, {
-            name: query.name,
+            name: (query as { name?: string }).name,
           } as LogMeta)
         );
         return false;
@@ -341,12 +401,28 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
   }
 
   private async healthQueries(): Promise<HealthDiagnosticQuery[]> {
-    try {
-      const artifact = await artifactService.getArtifact(QUERY_ARTIFACT_ID);
-      return parseDiagnosticQueries(artifact.data);
-    } catch (error) {
-      this.logger.warn('Error getting health diagnostic queries', withErrorMessage(error));
-      return [];
-    }
+    const [v1Result, v2Result] = await Promise.allSettled([
+      artifactService.getArtifact(QUERY_ARTIFACT_ID_V1),
+      artifactService.getArtifact(QUERY_ARTIFACT_ID_V2),
+    ]);
+
+    const toQueries = (
+      result: PromiseSettledResult<Manifest>,
+      artifactId: string
+    ): HealthDiagnosticQuery[] => {
+      if (result.status === 'rejected') {
+        this.logger.warn(
+          'Error getting health diagnostic queries',
+          withErrorMessage(result.reason, { artifactId } as LogMeta)
+        );
+        return [];
+      }
+      return parseHealthDiagnosticQueries(result.value.data);
+    };
+
+    return mergeByPriority(
+      toQueries(v1Result, QUERY_ARTIFACT_ID_V1),
+      toQueries(v2Result, QUERY_ARTIFACT_ID_V2)
+    );
   }
 }

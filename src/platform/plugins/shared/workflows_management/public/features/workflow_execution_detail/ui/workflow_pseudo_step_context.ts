@@ -9,9 +9,13 @@
 
 import type { JsonValue } from '@kbn/utility-types';
 import type { WorkflowExecutionDto, WorkflowStepExecutionDto } from '@kbn/workflows';
-import { ExecutionStatus, isFailedBeforeSteps } from '@kbn/workflows';
+import {
+  ExecutionStatus,
+  isEventDrivenWorkflowTriggerSource,
+  isFailedBeforeSteps,
+} from '@kbn/workflows';
 
-export type TriggerType = 'alert' | 'scheduled' | 'manual' | 'document';
+export type TriggerType = 'alert' | 'scheduled' | 'manual' | 'document' | 'event';
 
 export interface TriggerContextFromExecution {
   triggerType: TriggerType;
@@ -19,7 +23,8 @@ export interface TriggerContextFromExecution {
 }
 
 export function buildTriggerContextFromExecution(
-  executionContext: Record<string, unknown> | undefined | null
+  executionContext: Record<string, unknown> | undefined | null,
+  triggeredBy?: string
 ): TriggerContextFromExecution | null {
   if (!executionContext) {
     return null;
@@ -35,6 +40,8 @@ export function buildTriggerContextFromExecution(
     const event = executionContext.event as Record<string, unknown>;
     if (event.alerts != null || event.type === 'alert') {
       triggerType = 'alert';
+    } else if (isEventDrivenWorkflowTriggerSource(triggeredBy)) {
+      triggerType = 'event';
     } else {
       triggerType = 'document';
     }
@@ -54,7 +61,8 @@ export function buildTriggerStepExecutionFromContext(
   workflowExecution: WorkflowExecutionDto
 ): WorkflowStepExecutionDto | null {
   const triggerContext = buildTriggerContextFromExecution(
-    workflowExecution.context as Record<string, unknown> | undefined | null
+    workflowExecution.context as Record<string, unknown> | undefined | null,
+    workflowExecution.triggeredBy
   );
 
   if (!triggerContext) {
@@ -100,6 +108,22 @@ export function buildOverviewStepExecutionFromContext(
       trace: {
         traceId: workflowExecution.traceId,
         entryTransactionId: workflowExecution.entryTransactionId,
+      },
+    };
+  }
+
+  // Surface document-level error on Overview kv tree when the trigger row does not
+  // already attach the same execution.error (failed-before-steps → trigger pseudo-step only).
+  const failedBeforeSteps = isFailedBeforeSteps(
+    workflowExecution.status,
+    workflowExecution.stepExecutions
+  );
+  if (workflowExecution.error && !failedBeforeSteps) {
+    contextData = {
+      ...contextData,
+      executionError: {
+        type: workflowExecution.error.type,
+        message: workflowExecution.error.message,
       },
     };
   }

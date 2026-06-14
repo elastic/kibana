@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
+import { BULK_FILTER_MAX_RULES } from '@kbn/alerting-v2-schemas';
 import { RulesListTableContainer } from './rules_list_table_container';
 
 const mockNavigateToUrl = jest.fn();
@@ -54,7 +55,7 @@ const mockRules = [
     id: 'rule-1',
     kind: 'alert',
     enabled: true,
-    metadata: { name: 'Rule One', labels: ['prod'] },
+    metadata: { name: 'Rule One', tags: ['prod'] },
     schedule: { every: '1m' },
     evaluation: { query: { base: 'FROM logs-* | LIMIT 1' } },
   },
@@ -62,11 +63,14 @@ const mockRules = [
     id: 'rule-2',
     kind: 'alert',
     enabled: false,
-    metadata: { name: 'Rule Two', labels: [] },
+    metadata: { name: 'Rule Two', tags: [] },
     schedule: { every: '5m' },
     evaluation: { query: { base: 'FROM metrics-*' } },
   },
 ];
+
+const mockOnEditInFlyout = jest.fn();
+const mockOnCloneInFlyout = jest.fn();
 
 const renderContainer = (overrides = {}) => {
   const props = {
@@ -75,8 +79,11 @@ const renderContainer = (overrides = {}) => {
     page: 1,
     perPage: 20,
     search: '',
+    hasActiveFilters: false,
     isLoading: false,
     onTableChange: jest.fn(),
+    onEditInFlyout: mockOnEditInFlyout,
+    onCloneInFlyout: mockOnCloneInFlyout,
     ...overrides,
   };
   return render(
@@ -108,7 +115,7 @@ describe('RulesListTableContainer', () => {
   });
 
   describe('navigation callbacks', () => {
-    it('navigates to edit page when edit action is clicked', async () => {
+    it('calls onEditInFlyout when edit action is clicked', async () => {
       renderContainer();
 
       fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
@@ -119,12 +126,10 @@ describe('RulesListTableContainer', () => {
 
       fireEvent.click(screen.getByTestId('editRule-rule-1'));
 
-      expect(mockNavigateToUrl).toHaveBeenCalledWith(
-        '/app/management/insightsAndAlerting/alerting_v2/edit/rule-1'
-      );
+      expect(mockOnEditInFlyout).toHaveBeenCalledWith(expect.objectContaining({ id: 'rule-1' }));
     });
 
-    it('navigates to clone page when clone action is clicked', async () => {
+    it('calls onCloneInFlyout when clone action is clicked', async () => {
       renderContainer();
 
       fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
@@ -135,9 +140,7 @@ describe('RulesListTableContainer', () => {
 
       fireEvent.click(screen.getByTestId('cloneRule-rule-1'));
 
-      expect(mockNavigateToUrl).toHaveBeenCalledWith(
-        '/app/management/insightsAndAlerting/alerting_v2/create?cloneFrom=rule-1'
-      );
+      expect(mockOnCloneInFlyout).toHaveBeenCalledWith(expect.objectContaining({ id: 'rule-1' }));
     });
   });
 
@@ -177,7 +180,7 @@ describe('RulesListTableContainer', () => {
       fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
 
       expect(mockDeleteMutate).toHaveBeenCalledWith(
-        'rule-1',
+        { id: 'rule-1', name: 'Rule One' },
         expect.objectContaining({ onSettled: expect.any(Function) })
       );
     });
@@ -325,6 +328,41 @@ describe('RulesListTableContainer', () => {
       });
     });
 
+    it('shows "Select first {max}" when total count exceeds bulk cap', async () => {
+      renderContainer({ totalItemCount: BULK_FILTER_MAX_RULES + 500 });
+
+      const checkboxes = screen.getAllByRole('checkbox');
+      fireEvent.click(checkboxes[1]);
+
+      await waitFor(() => {
+        const btn = screen.getByTestId('selectAllRulesButton');
+        expect(btn).toHaveTextContent('Select first');
+        expect(btn.textContent?.replace(/\s/g, '')).toMatch(/10,?000/);
+      });
+
+      expect(screen.queryByTestId('bulkSelectAllLimitDisclosure')).not.toBeInTheDocument();
+    });
+
+    it('shows capped selection count and disclosure after select all over bulk cap', async () => {
+      renderContainer({ totalItemCount: BULK_FILTER_MAX_RULES + 500 });
+
+      const checkboxes = screen.getAllByRole('checkbox');
+      fireEvent.click(checkboxes[1]);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('selectAllRulesButton')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('selectAllRulesButton'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('bulkSelectAllLimitDisclosure')).toBeInTheDocument();
+        expect(screen.getByTestId('bulkActionsButton').textContent?.replace(/\s/g, '')).toMatch(
+          /10,?000/
+        );
+      });
+    });
+
     it('sends filter param when select all is used for bulk enable', async () => {
       renderContainer();
 
@@ -353,7 +391,37 @@ describe('RulesListTableContainer', () => {
       fireEvent.click(screen.getByTestId('bulkEnableRules'));
 
       expect(mockBulkEnableMutate).toHaveBeenCalledWith(
-        { filter: '' },
+        { match_all: true },
+        expect.objectContaining({ onSuccess: expect.any(Function) })
+      );
+    });
+
+    it('scopes bulk enable filter to filter when select all', async () => {
+      renderContainer({ filter: 'kind: alert' });
+
+      const checkboxes = screen.getAllByRole('checkbox');
+      fireEvent.click(checkboxes[1]);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('selectAllRulesButton')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('selectAllRulesButton'));
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('selectAllRulesButton')).not.toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('bulkActionsButton'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('bulkEnableRules')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('bulkEnableRules'));
+
+      expect(mockBulkEnableMutate).toHaveBeenCalledWith(
+        { filter: '(kind: alert)' },
         expect.objectContaining({ onSuccess: expect.any(Function) })
       );
     });

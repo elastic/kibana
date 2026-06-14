@@ -6,6 +6,8 @@
  */
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import { ESQLVariableType } from '@kbn/esql-types';
 import type { TextBasedDimensionEditorProps } from './dimension_editor';
 import { TextBasedDimensionEditor } from './dimension_editor';
 import type { FieldSelectProps } from './field_select';
@@ -43,7 +45,7 @@ const waitToLoad = async () =>
   });
 
 describe('TextBasedDimensionEditor', () => {
-  const defaultProps = {
+  const defaultProps: TextBasedDimensionEditorProps = {
     isFullscreen: false,
     columnId: 'dim1',
     layerId: 'layer1',
@@ -52,7 +54,6 @@ describe('TextBasedDimensionEditor', () => {
         layer1: {
           query: { esql: 'FROM my_data' },
           columns: [],
-          indexPatternRefs: [],
         },
       },
       indexPatternRefs: [],
@@ -60,19 +61,24 @@ describe('TextBasedDimensionEditor', () => {
     setState: jest.fn(),
     indexPatterns: {},
     dateRange: { fromDate: '2023-01-01', toDate: '2023-01-31' },
-    expressions: {},
+    expressions: {} as ExpressionsStart,
     esqlVariables: [
       {
         key: 'agent_keyword',
         value: 'Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1',
-        type: 'values',
+        type: ESQLVariableType.VALUES,
       },
     ],
     isMetricDimension: false,
     filterOperations: jest.fn(() => true),
-    core: { docLinks: {} },
+    core: {} as TextBasedDimensionEditorProps['core'],
     groupId: 'rows',
-  } as unknown as TextBasedDimensionEditorProps;
+    dimensionGroups: [],
+    toggleFullscreen: jest.fn(),
+    layerType: undefined,
+    supportStaticValue: false,
+    enableFormatSelector: true,
+  };
 
   const stateWithColumn = (overrides: Record<string, unknown> = {}) =>
     ({
@@ -291,6 +297,19 @@ describe('TextBasedDimensionEditor', () => {
         <TextBasedDimensionEditor
           {...defaultProps}
           state={stateWithColumn({ meta: { type: 'string' } })}
+        />
+      );
+      await waitToLoad();
+
+      expect(screen.queryByTestId('format-selector')).not.toBeInTheDocument();
+    });
+
+    it('should hide FormatSelector when enableFormatSelector is set to false', async () => {
+      render(
+        <TextBasedDimensionEditor
+          {...defaultProps}
+          state={stateWithColumn({ meta: { type: 'number' } })}
+          enableFormatSelector={false}
         />
       );
       await waitToLoad();

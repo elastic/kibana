@@ -84,6 +84,9 @@ test.describe(
       });
 
       await test.step('Click on waterfall accordion to fold', async () => {
+        await expect(page.getByTestId('traceWaterfallAccordionButton')).toBeVisible({
+          timeout: EXTENDED_TIMEOUT,
+        });
         await page.getByTestId('traceWaterfallAccordionButton').click();
       });
 
@@ -162,6 +165,9 @@ test.describe(
       });
 
       await test.step('Click on waterfall accordion', async () => {
+        await expect(page.getByTestId('traceWaterfallAccordionButton')).toBeVisible({
+          timeout: EXTENDED_TIMEOUT,
+        });
         await page.getByTestId('traceWaterfallAccordionButton').click();
       });
 

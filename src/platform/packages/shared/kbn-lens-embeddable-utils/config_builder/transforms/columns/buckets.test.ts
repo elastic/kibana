@@ -54,7 +54,7 @@ describe('Buckets Transforms', () => {
     it('should transform filters API to lens state', () => {
       const input: LensApiFiltersOperation = {
         operation: 'filters',
-        filters: [{ filter: { language: 'kuery', query: 'status:active' }, label: 'Active' }],
+        filters: [{ filter: { language: 'kql', expression: 'status:active' }, label: 'Active' }],
       };
       const result = fromBucketLensApiToLensState(input, metricColumns);
       if (!isLensStateColumnOfType<FiltersIndexPatternColumn>('filters', result)) {

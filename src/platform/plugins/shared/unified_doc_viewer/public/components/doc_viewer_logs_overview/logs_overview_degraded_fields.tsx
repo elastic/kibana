@@ -31,7 +31,7 @@ import { getRouterLinkProps } from '@kbn/router-utils';
 import type { DataQualityDetailsLocatorParams } from '@kbn/deeplinks-observability';
 import { DATA_QUALITY_DETAILS_LOCATOR_ID } from '@kbn/deeplinks-observability';
 import type { BrowserUrlService } from '@kbn/share-plugin/public';
-import { isCCSRemoteIndexName } from '@kbn/es-query';
+import { isNonLocalIndexName } from '@kbn/es-query';
 import { getUnifiedDocViewerServices } from '../../plugin';
 import type { ScrollableSectionWrapperApi } from './scrollable_section_wrapper';
 import { ScrollableSectionWrapper } from './scrollable_section_wrapper';
@@ -128,7 +128,7 @@ export const LogsOverviewDegradedFields = forwardRef<
     prefix: qualityIssuesAccordionTitle,
   });
 
-  const isCCSRemoteIndex = isCCSRemoteIndexName(rawDoc._index ?? '');
+  const isCCSRemoteIndex = isNonLocalIndexName(rawDoc._index ?? '');
 
   const [tableOptions, setTableOptions] = useState<TableOptions>(DEFAULT_TABLE_OPTIONS);
 

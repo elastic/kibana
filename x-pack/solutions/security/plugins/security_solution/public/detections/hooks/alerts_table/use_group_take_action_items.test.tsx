@@ -50,9 +50,9 @@ describe('useGroupTakeActionsItems', () => {
     );
 
     const { queryAllByRole } = render(result.current(getActionItemsParams));
-    const buttons = await queryAllByRole('button');
+    const items = queryAllByRole('menuitem');
 
-    expect(buttons.length).toBe(3);
+    expect(items.length).toBe(3);
   });
 
   it('returns all take actions items if currentStatus is []', async () => {
@@ -67,9 +67,9 @@ describe('useGroupTakeActionsItems', () => {
       }
     );
     const { queryAllByRole } = render(result.current(getActionItemsParams));
-    const buttons = await queryAllByRole('button');
+    const items = queryAllByRole('menuitem');
 
-    expect(buttons.length).toBe(3);
+    expect(items.length).toBe(3);
   });
 
   it('returns all take actions items if currentStatus.length > 1', async () => {
@@ -84,9 +84,9 @@ describe('useGroupTakeActionsItems', () => {
       }
     );
     const { queryAllByRole } = render(result.current(getActionItemsParams));
-    const buttons = await queryAllByRole('button');
+    const items = queryAllByRole('menuitem');
 
-    expect(buttons.length).toBe(3);
+    expect(items.length).toBe(3);
   });
 
   it('returns acknowledged & closed take actions items if currentStatus === ["open"]', async () => {
@@ -102,11 +102,11 @@ describe('useGroupTakeActionsItems', () => {
     );
 
     const { queryAllByRole } = render(result.current(getActionItemsParams));
-    const buttons = await queryAllByRole('button');
+    const items = queryAllByRole('menuitem');
 
-    expect(buttons.length).toBe(2);
-    expect(buttons[0].getAttribute('data-test-subj')).toBe('acknowledged-alert-status');
-    expect(buttons[1].getAttribute('data-test-subj')).toBe('alert-close-context-menu-item');
+    expect(items.length).toBe(2);
+    expect(items[0].getAttribute('data-test-subj')).toBe('acknowledged-alert-status');
+    expect(items[1].getAttribute('data-test-subj')).toBe('alert-close-context-menu-item');
   });
 
   it('returns open & acknowledged take actions items if currentStatus === ["closed"]', async () => {
@@ -122,11 +122,11 @@ describe('useGroupTakeActionsItems', () => {
     );
 
     const { queryAllByRole } = render(result.current(getActionItemsParams));
-    const buttons = await queryAllByRole('button');
+    const items = queryAllByRole('menuitem');
 
-    expect(buttons.length).toBe(2);
-    expect(buttons[0].getAttribute('data-test-subj')).toBe('open-alert-status');
-    expect(buttons[1].getAttribute('data-test-subj')).toBe('acknowledged-alert-status');
+    expect(items.length).toBe(2);
+    expect(items[0].getAttribute('data-test-subj')).toBe('open-alert-status');
+    expect(items[1].getAttribute('data-test-subj')).toBe('acknowledged-alert-status');
   });
 
   it('returns open & closed take actions items if currentStatus === ["acknowledged"]', async () => {
@@ -142,11 +142,11 @@ describe('useGroupTakeActionsItems', () => {
     );
 
     const { queryAllByRole } = render(result.current(getActionItemsParams));
-    const buttons = await queryAllByRole('button');
+    const items = queryAllByRole('menuitem');
 
-    expect(buttons.length).toBe(2);
-    expect(buttons[0].getAttribute('data-test-subj')).toBe('open-alert-status');
-    expect(buttons[1].getAttribute('data-test-subj')).toBe('alert-close-context-menu-item');
+    expect(items.length).toBe(2);
+    expect(items[0].getAttribute('data-test-subj')).toBe('open-alert-status');
+    expect(items[1].getAttribute('data-test-subj')).toBe('alert-close-context-menu-item');
   });
 
   it('returns empty take actions items if showAlertStatusActions is false', async () => {
@@ -160,9 +160,9 @@ describe('useGroupTakeActionsItems', () => {
       }
     );
     const { queryAllByRole } = render(result.current(getActionItemsParams));
-    const buttons = await queryAllByRole('button');
+    const items = queryAllByRole('menuitem');
 
-    expect(buttons.length).toBe(0);
+    expect(items.length).toBe(0);
   });
 
   it('returns array take actions items if showAlertStatusActions is true', async () => {
@@ -176,9 +176,9 @@ describe('useGroupTakeActionsItems', () => {
       }
     );
     const { queryAllByRole } = render(result.current(getActionItemsParams));
-    const buttons = await queryAllByRole('button');
+    const items = queryAllByRole('menuitem');
 
-    expect(buttons.length).toBe(3);
+    expect(items.length).toBe(3);
   });
 
   describe('when the user does not have alert edit privileges', () => {

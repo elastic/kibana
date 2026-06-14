@@ -8,6 +8,7 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { MessageEditor } from './message_editor';
+import { createTextFragment } from './utils';
 import type { MessageEditorController, MessageEditorInstance } from './use_message_editor';
 import { CommandId } from './command_menu';
 import type {
@@ -15,11 +16,6 @@ import type {
   CommandMenuHandle,
   CommandBadgeData,
 } from './command_menu';
-
-// TODO: Remove once the inline actions feature is no longer behind the experimental feature flag
-jest.mock('../../../../hooks/use_experimental_features', () => ({
-  useExperimentalFeatures: () => true,
-}));
 
 jest.mock('./command_menu/cursor_rect', () => ({
   getRectAtOffset: () => ({
@@ -81,6 +77,48 @@ const createMockMessageEditor = (): {
     },
   };
 };
+
+describe('createTextFragment', () => {
+  it('preserves line breaks as <br> elements', () => {
+    const text = [
+      'Create ES|QL SIEM detection rule (name, description, data sources, detection logic, severity, risk score, schedule, tags, and MITRE ATT&CK mappings) using dedicated detection rule creation tool. Always render inline the latest version of the rule attachment.',
+      '',
+      'You can review and edit everything before enabling the rule. ',
+      'Desired behavior or activity to detect:',
+      '',
+      '==== YOUR DESCRIPTION HERE====',
+    ].join('\n');
+
+    const fragment = createTextFragment(text);
+    const container = document.createElement('div');
+    container.appendChild(fragment);
+
+    expect(container.querySelectorAll('br').length).toBe(5);
+    expect(container.textContent).toContain('Create ES|QL SIEM detection rule');
+    expect(container.textContent).toContain('Always render inline the latest version');
+    expect(container.textContent).toContain('You can review and edit everything');
+    expect(container.textContent).toContain('Desired behavior or activity to detect:');
+    expect(container.textContent).toContain('==== YOUR DESCRIPTION HERE====');
+  });
+
+  it('returns a single text node for text with no newlines', () => {
+    const fragment = createTextFragment('hello world');
+    const container = document.createElement('div');
+    container.appendChild(fragment);
+
+    expect(container.querySelectorAll('br').length).toBe(0);
+    expect(container.textContent).toBe('hello world');
+  });
+
+  it('handles empty string', () => {
+    const fragment = createTextFragment('');
+    const container = document.createElement('div');
+    container.appendChild(fragment);
+
+    expect(container.querySelectorAll('br').length).toBe(0);
+    expect(container.textContent).toBe('');
+  });
+});
 
 describe('MessageEditor', () => {
   beforeEach(() => {
@@ -285,6 +323,46 @@ describe('MessageEditor', () => {
     );
 
     expect(screen.getByTestId('commandMenuPopover-content')).toBeInTheDocument();
+  });
+
+  it('preserves line breaks when pasting plain text', () => {
+    const { messageEditor } = createMockMessageEditor();
+    render(
+      <MessageEditor
+        messageEditor={messageEditor}
+        onSubmit={mockOnSubmit}
+        data-test-subj="messageEditor"
+      />
+    );
+
+    const editor = screen.getByTestId('messageEditor');
+
+    editor.focus();
+    const range = document.createRange();
+    range.setStart(editor, 0);
+    range.collapse(true);
+    const sel = window.getSelection()!;
+    sel.removeAllRanges();
+    sel.addRange(range);
+
+    const text = [
+      'Create ES|QL SIEM detection rule (name, description, data sources, detection logic, severity, risk score, schedule, tags, and MITRE ATT&CK mappings) using dedicated detection rule creation tool. Always render inline the latest version of the rule attachment.',
+      '',
+      'You can review and edit everything before enabling the rule. ',
+      'Desired behavior or activity to detect:',
+      '',
+      '==== YOUR DESCRIPTION HERE====',
+    ].join('\n');
+
+    fireEvent.paste(editor, {
+      clipboardData: {
+        getData: (type: string) => (type === 'text/plain' ? text : ''),
+      },
+    });
+
+    expect(editor.querySelectorAll('br').length).toBe(5);
+    expect(editor.textContent).toContain('Create ES|QL SIEM detection rule');
+    expect(editor.textContent).toContain('==== YOUR DESCRIPTION HERE====');
   });
 
   it('calls handleCommandSelect when a menu option is clicked', () => {

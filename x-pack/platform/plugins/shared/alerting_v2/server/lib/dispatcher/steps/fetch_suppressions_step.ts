@@ -6,16 +6,15 @@
  */
 
 import { inject, injectable } from 'inversify';
-import type {
-  AlertEpisodeSuppression,
-  DispatcherStep,
-  DispatcherPipelineState,
-  DispatcherStepOutput,
-} from '../types';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 import { QueryServiceInternalToken } from '../../services/query_service/tokens';
-import { queryResponseToRecords } from '../../services/query_service/query_response_to_records';
-import { getAlertEpisodeSuppressionsQuery } from '../queries';
+import { getAlertEpisodeSuppressionsQueries } from '../queries';
+import type {
+  AlertEpisodeSuppression,
+  DispatcherPipelineState,
+  DispatcherStep,
+  DispatcherStepOutput,
+} from '../types';
 
 @injectable()
 export class FetchSuppressionsStep implements DispatcherStep {
@@ -31,11 +30,14 @@ export class FetchSuppressionsStep implements DispatcherStep {
       return { type: 'continue', data: { suppressions: [] } };
     }
 
-    const result = await this.queryService.executeQuery({
-      query: getAlertEpisodeSuppressionsQuery(episodes).query,
-    });
+    const queries = getAlertEpisodeSuppressionsQueries(episodes);
+    const responses = await Promise.all(
+      queries.map((request) =>
+        this.queryService.executeQueryRows<AlertEpisodeSuppression>({ query: request.query })
+      )
+    );
+    const suppressions = responses.flat();
 
-    const suppressions = queryResponseToRecords<AlertEpisodeSuppression>(result);
     return { type: 'continue', data: { suppressions } };
   }
 }

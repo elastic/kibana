@@ -626,6 +626,13 @@ yargs(process.argv.slice(2))
           boolean: true,
           default: false,
         })
+        .option('cacheSource', {
+          alias: 'cache-source',
+          describe:
+            'If llm.zip already exists under load_esql_docs/__tmp__, skip downloading; default is always re-download',
+          boolean: true,
+          default: false,
+        })
         .option('kibana', kibanaOption)
         .option('elasticsearch', elasticsearchOption)
         .option('connectorId', connectorIdOption),
@@ -702,13 +709,13 @@ yargs(process.argv.slice(2))
           );
 
           try {
-            // Check if zip file already exists
             const zipExists = await Fs.access(zipPath)
               .then(() => true)
               .catch(() => false);
+            const skipDownload = Boolean(argv.cacheSource) && zipExists;
 
-            if (zipExists) {
-              log.info(`Zip file already exists at ${zipPath}, skipping download`);
+            if (skipDownload) {
+              log.info(`Zip file already exists at ${zipPath}, skipping download (--cache-source)`);
             } else {
               log.info(`Downloading zip file from ${zipUrl}...`);
               await Fs.mkdir(tempDir, { recursive: true });

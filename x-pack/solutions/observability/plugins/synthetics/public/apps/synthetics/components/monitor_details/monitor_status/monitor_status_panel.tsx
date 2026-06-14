@@ -27,11 +27,14 @@ export const MonitorStatusPanel = ({
   periodCaption = undefined,
   showViewHistoryButton = false,
   onBrushed,
+  monitorId,
+  locationLabel,
+  remoteName,
 }: MonitorStatusPanelProps) => {
   const { euiTheme, colorMode } = useEuiTheme();
   const initialSizeRef = useRef<HTMLDivElement | null>(null);
   const { loading, timeBins, handleResize, getTimeBinByXValue, xDomain, minsPerBin } =
-    useMonitorStatusData({ from, to, initialSizeRef });
+    useMonitorStatusData({ from, to, initialSizeRef, monitorId, locationLabel, remoteName });
   const { charts } = useKibana<ClientPluginsStart>().services;
   const baseTheme = charts.theme.useChartsBaseTheme();
 

@@ -83,7 +83,7 @@ export const findCasesStepCommonDefinition: CommonStepDefinition<
   FindCasesStepOutputSchema
 > = {
   id: FindCasesStepTypeId,
-  category: StepCategory.Kibana,
+  category: StepCategory.KibanaCases,
   label: i18n.FIND_CASES_STEP_LABEL,
   description: i18n.FIND_CASES_STEP_DESCRIPTION,
   documentation: {

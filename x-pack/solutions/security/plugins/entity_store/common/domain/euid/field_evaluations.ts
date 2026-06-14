@@ -6,15 +6,33 @@
  */
 
 import { get } from 'lodash';
+import type { Condition } from '@kbn/streamlang';
 import type {
   EntityDefinitionWithoutId,
   FieldEvaluation,
   FieldEvaluationSource,
+  FieldEvaluationWhenClause,
 } from '../definitions/entity_schema';
 import { isSingleFieldIdentity } from '../definitions/entity_schema';
+import { evaluateStreamlangCondition } from './commons';
 
 /** Result of resolving document + field evaluation into a filter-friendly spec (no EVAL). */
-export type SourceMatchSpec = { type: 'unknown' } | { type: 'values'; values: string[] };
+export type SourceMatchSpec =
+  | { type: 'unknown' }
+  | { type: 'values'; values: string[] }
+  | { type: 'condition'; condition: Condition };
+
+function isSourceMatchClause(
+  clause: FieldEvaluationWhenClause
+): clause is { sourceMatchesAny: string[]; then: string } {
+  return 'sourceMatchesAny' in clause;
+}
+
+function isConditionClause(
+  clause: FieldEvaluationWhenClause
+): clause is { condition: Condition; then: string } {
+  return 'condition' in clause;
+}
 
 export function getFieldValue(doc: any, field: string): string | undefined {
   const flattened = doc[field];
@@ -45,38 +63,100 @@ function resolveSourceValue(doc: any, source: FieldEvaluationSource): string | u
   return first !== '' ? first : undefined;
 }
 
+/** First resolved string from `sources`, in definition order. */
+function readRawValueFromSources(doc: any, sources: FieldEvaluationSource[]): string | undefined {
+  for (const source of sources) {
+    const candidate = resolveSourceValue(doc, source);
+    if (candidate !== undefined) {
+      return candidate;
+    }
+  }
+  return undefined;
+}
+
+/** First `whenClause` that applies to this document, in definition order. */
+function matchFirstWhenClause(
+  doc: any,
+  rawValueFromSources: string | undefined,
+  whenClauses: FieldEvaluationWhenClause[]
+) {
+  for (const clause of whenClauses) {
+    if (isSourceMatchClause(clause)) {
+      if (
+        rawValueFromSources !== undefined &&
+        clause.sourceMatchesAny.includes(rawValueFromSources)
+      ) {
+        return { then: clause.then, matchedSourceValues: clause.sourceMatchesAny };
+      }
+    } else if (isConditionClause(clause) && evaluateStreamlangCondition(doc, clause.condition)) {
+      return { then: clause.then, winningCondition: clause.condition };
+    }
+  }
+  return undefined;
+}
+
+/** Destination field value after applying optional when-clause override. */
+function resolveFinalFieldValue(
+  rawValueFromSources: string | undefined,
+  fallbackValue: string | null,
+  whenMatch: { then: string } | undefined
+): string | null {
+  if (whenMatch !== undefined) {
+    return whenMatch.then;
+  }
+  return rawValueFromSources === undefined ? fallbackValue : rawValueFromSources;
+}
+
+/** Builds `SourceMatchSpec` for filter construction without re-evaluating the document. */
+function buildEvaluationSourceMatchSpec(
+  rawValueFromSources: string | undefined,
+  whenMatch: { winningCondition?: Condition; matchedSourceValues?: string[] } | undefined
+): SourceMatchSpec {
+  if (whenMatch?.winningCondition !== undefined) {
+    return { type: 'condition', condition: whenMatch.winningCondition };
+  }
+  if (rawValueFromSources === undefined) {
+    return { type: 'unknown' };
+  }
+  if (whenMatch?.matchedSourceValues !== undefined) {
+    return { type: 'values', values: whenMatch.matchedSourceValues };
+  }
+  return { type: 'values', values: [rawValueFromSources] };
+}
+
+/** Applies one field evaluation: sources, when-clauses, value + filter spec. */
+function evaluateFieldEvaluation(
+  doc: any,
+  evaluation: FieldEvaluation
+): { value: string | null; sourceMatchSpec: SourceMatchSpec } {
+  const rawValueFromSources = readRawValueFromSources(doc, evaluation.sources);
+  const whenMatch = matchFirstWhenClause(doc, rawValueFromSources, evaluation.whenClauses);
+
+  return {
+    value: resolveFinalFieldValue(rawValueFromSources, evaluation.fallbackValue, whenMatch),
+    sourceMatchSpec: buildEvaluationSourceMatchSpec(rawValueFromSources, whenMatch),
+  };
+}
+
 /**
  * Resolves the document and a single field evaluation into a source match spec for building
  * ESQL/DSL filters without EVAL. Uses the same first-source-wins and whenClause logic as
- * applyFieldEvaluations; when a whenClause matches, returns that clause's sourceMatchesAny
+ * applyFieldEvaluations; when a sourceMatch whenClause matches, returns that clause's sourceMatchesAny
  * so the filter can match any of those source values (e.g. okta or entityanalytics_okta).
+ * When a condition whenClause wins, returns { type: 'condition', condition }.
  *
  * @param doc - The document (flat or nested)
  * @param evaluation - One entry from identityField.fieldEvaluations
- * @returns { type: 'unknown' } when no source has a value; otherwise { type: 'values', values }.
+ * @returns SourceMatchSpec for filter construction.
  */
 export function getSourceMatchSpec(doc: any, evaluation: FieldEvaluation): SourceMatchSpec {
-  let sourceValue: string | undefined;
-  for (const source of evaluation.sources) {
-    sourceValue = resolveSourceValue(doc, source);
-    if (sourceValue !== undefined) {
-      break;
-    }
-  }
-  if (sourceValue === undefined) {
-    return { type: 'unknown' };
-  }
-  for (const clause of evaluation.whenClauses) {
-    if (clause.sourceMatchesAny.includes(sourceValue)) {
-      return { type: 'values', values: clause.sourceMatchesAny };
-    }
-  }
-  return { type: 'values', values: [sourceValue] };
+  return evaluateFieldEvaluation(doc, evaluation).sourceMatchSpec;
 }
 
 /**
  * Applies field evaluations to a document and returns a map of destination field to value.
- * Tries each source in order; first matching whenClause wins; if none matches, uses raw source value; if no source has a value, uses fallbackValue.
+ * Tries sources, then walks `whenClauses` in order (sourceMatch and condition arms); first match
+ * wins. If none match, uses raw source value or fallbackValue when no source.
  * Used before euid resolution so that getFieldValue(doc, 'entity.namespace') etc. see computed values.
  *
  * @param doc - The document (flat or nested)
@@ -90,25 +170,7 @@ export function applyFieldEvaluations(
   const result: Record<string, string | null> = {};
   for (const evaluation of fieldEvaluations) {
     const currentDoc = { ...doc, ...result };
-    let sourceValue: string | undefined;
-    for (const source of evaluation.sources) {
-      sourceValue = resolveSourceValue(currentDoc, source);
-      if (sourceValue !== undefined) {
-        break;
-      }
-    }
-    let value: string | null;
-    if (sourceValue === undefined) {
-      value = evaluation.fallbackValue;
-    } else {
-      value = sourceValue;
-      for (const clause of evaluation.whenClauses) {
-        if (clause.sourceMatchesAny.includes(value)) {
-          value = clause.then;
-          break;
-        }
-      }
-    }
+    const { value } = evaluateFieldEvaluation(currentDoc, evaluation);
     result[evaluation.destination] = value;
   }
   return result;

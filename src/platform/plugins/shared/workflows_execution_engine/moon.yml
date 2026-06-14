@@ -17,9 +17,11 @@ project:
   owner: '@elastic/workflows-eng'
   sourceRoot: src/platform/plugins/shared/workflows_execution_engine
 dependsOn:
+  - '@kbn/apm-utils'
   - '@kbn/core'
   - '@kbn/config-schema'
   - '@kbn/actions-plugin'
+  - '@kbn/connector-specs'
   - '@kbn/workflows'
   - '@kbn/task-manager-plugin'
   - '@kbn/es-query'
@@ -37,6 +39,8 @@ dependsOn:
   - '@kbn/logging-mocks'
   - '@kbn/crypto'
   - '@kbn/es-errors'
+  - '@kbn/spaces-plugin'
+  - '@kbn/core-spaces-common'
 tags:
   - plugin
   - prod

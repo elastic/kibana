@@ -272,16 +272,17 @@ export function useExposePublicApi<G extends GroupNode, L extends LeafNode>(
           opts.enableStickyGroupHeader
         );
 
+        const scrollOffset = instance.scrollOffset ?? 0;
+
         storeRef.current.snapshot = {
           ...storeRef.current.snapshot,
-          scrollOffset: instance.scrollOffset ?? 0,
+          scrollOffset,
           range,
           isScrolling: instance.isScrolling ?? false,
           activeStickyIndex,
           scrollRect: instance.scrollRect ?? { width: 0, height: 0 },
           totalSize: instance.getTotalSize ? instance.getTotalSize() : 0,
-          scrollAnchorItemIndex:
-            instance.getVirtualItemForOffset(instance.scrollOffset!)?.index ?? null,
+          scrollAnchorItemIndex: instance.getVirtualItemForOffset(scrollOffset)?.index ?? null,
         };
 
         notifyListeners();

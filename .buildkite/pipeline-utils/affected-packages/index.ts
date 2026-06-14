@@ -11,13 +11,16 @@ import { findModuleForPath } from './module_lookup';
 import { getAffectedModulesGit } from './strategy_git';
 import { getAffectedProjectsMoon } from './strategy_moon';
 
+export * from './const';
+export * from './utils';
+export { listChangedFiles } from './strategy_git';
+
 export interface AffectedPackagesConfig {
-  strategy: 'git' | 'moon';
-  includeDownstream: boolean;
-  logging: boolean;
+  strategy?: 'git' | 'moon';
+  includeDownstream?: boolean;
   /** Glob patterns for changed files to exclude before module resolution (git strategy only). */
-  ignorePatterns: string[];
-  ignoreUncategorizedChanges: boolean;
+  ignorePatterns?: string[];
+  ignoreUncategorizedChanges?: boolean;
 }
 
 /**
@@ -26,11 +29,18 @@ export interface AffectedPackagesConfig {
  */
 export async function getAffectedPackages(
   mergeBase: string | undefined,
-  config: AffectedPackagesConfig = getConfigFromEnv()
+  configArgs: AffectedPackagesConfig = getConfigFromEnv()
 ): Promise<Set<string>> {
   if (!mergeBase) {
     throw new Error('No merge base found');
   }
+
+  const config = {
+    strategy: configArgs.strategy ?? 'git',
+    includeDownstream: configArgs.includeDownstream ?? false,
+    ignorePatterns: configArgs.ignorePatterns ?? [],
+    ignoreUncategorizedChanges: configArgs.ignoreUncategorizedChanges ?? false,
+  };
 
   try {
     const affectedPackages =
@@ -82,7 +92,6 @@ function getConfigFromEnv(): AffectedPackagesConfig {
   }
   const strategy = rawStrategy;
   const includeDownstream = process.env.AFFECTED_DOWNSTREAM !== 'false';
-  const logging = process.env.AFFECTED_LOGGING !== 'false';
   const ignorePatterns = (process.env.AFFECTED_IGNORE || '')
     .split(',')
     .map((p) => p.trim())
@@ -90,5 +99,5 @@ function getConfigFromEnv(): AffectedPackagesConfig {
 
   const ignoreUncategorizedChanges = process.env.AFFECTED_IGNORE_UNCATEGORIZED_CHANGES !== 'false';
 
-  return { strategy, includeDownstream, logging, ignorePatterns, ignoreUncategorizedChanges };
+  return { strategy, includeDownstream, ignorePatterns, ignoreUncategorizedChanges };
 }

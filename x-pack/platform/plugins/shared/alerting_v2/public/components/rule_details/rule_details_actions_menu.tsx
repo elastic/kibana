@@ -7,24 +7,21 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { EuiButtonEmpty, EuiContextMenu, EuiPopover } from '@elastic/eui';
-import { CoreStart, useService } from '@kbn/core-di-browser';
-import type { RuleApiResponse } from '../../services/rules_api';
-import { paths } from '../../constants';
+import { EuiButtonIcon, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import { useToggleRuleEnabled } from '../../hooks/use_toggle_rule_enabled';
+import { useRule } from './rule_context';
 
 export interface RuleDetailsActionsMenuProps {
-  rule: RuleApiResponse;
   showDeleteConfirmation: () => void;
+  onClone: () => void;
 }
 
 export const RuleDetailsActionsMenu: React.FunctionComponent<RuleDetailsActionsMenuProps> = ({
-  rule,
   showDeleteConfirmation,
+  onClone,
 }) => {
+  const rule = useRule();
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
-  const { navigateToUrl } = useService(CoreStart('application'));
-  const { basePath } = useService(CoreStart('http'));
   const { mutate: toggleRuleEnabled } = useToggleRuleEnabled();
 
   const handleToggleEnable = () => {
@@ -37,7 +34,7 @@ export const RuleDetailsActionsMenu: React.FunctionComponent<RuleDetailsActionsM
 
   const handleClone = () => {
     setIsPopoverOpen(false);
-    navigateToUrl(basePath.prepend(`${paths.ruleCreate}?cloneFrom=${encodeURIComponent(rule.id)}`));
+    onClone();
   };
 
   const handleDelete = () => {
@@ -89,10 +86,15 @@ export const RuleDetailsActionsMenu: React.FunctionComponent<RuleDetailsActionsM
 
   return (
     <EuiPopover
+      aria-label={i18n.translate('xpack.alertingV2.ruleDetails.actionsMenuPopoverAriaLabel', {
+        defaultMessage: 'Rule actions',
+      })}
       button={
-        <EuiButtonEmpty
+        <EuiButtonIcon
           data-test-subj="ruleDetailsActionsButton"
           iconType="boxesHorizontal"
+          color="text"
+          size="m"
           onClick={() => setIsPopoverOpen(!isPopoverOpen)}
           aria-label={i18n.translate('xpack.alertingV2.ruleDetails.actionsMenuAriaLabel', {
             defaultMessage: 'Actions',

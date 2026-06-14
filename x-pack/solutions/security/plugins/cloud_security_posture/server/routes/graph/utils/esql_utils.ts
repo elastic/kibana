@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
-
 /**
  * Utility functions for building ESQL queries
  */
@@ -54,12 +52,9 @@ export const generateFieldHintCases = (fields: readonly string[], entityIdVar: s
 };
 
 /**
- * Generates an ESQL expression that formats a JSON property with comma prefix.
+ * Generates an ESQL expression that formats a JSON property.
  * If the value is NOT NULL, it returns the full property with quoted value.
  * If the value is NULL, it returns an empty string (property is omitted entirely).
- *
- * Always includes comma prefix - place required properties first in the JSON
- * object so optional properties using this function come after.
  *
  * @param propertyName - The JSON property name (e.g., "name", "type", "sub_type")
  * @param valueVar - The ESQL variable name containing the value
@@ -75,45 +70,36 @@ export const generateFieldHintCases = (fields: readonly string[], entityIdVar: s
  * CONCAT("{", "\"required\":true", formatJsonProperty('optional', 'val'), "}")
  * ```
  */
-export const formatJsonProperty = (propertyName: string, valueVar: string): string => {
+export const concatJsonObjectPropertyEsqlExprSafe = (
+  propertyName: string,
+  esqlVariable: string
+): string => {
   // CONCAT returns null if any argument is null, so if valueVar is null,
   // the entire CONCAT returns null, and COALESCE returns empty string
-  return `COALESCE(CONCAT(",\\"${propertyName}\\":\\"", ${valueVar}, "\\""), "")`;
+  return `COALESCE(CONCAT("\\"${propertyName}\\":\\"", ${esqlVariable}, "\\""), "")`;
 };
 
-/**
- * Generates ESQL statements for entity enrichment using LOOKUP JOIN.
- * This is the preferred method for enriching actor and target entities with entity store data.
- *
- * @param lookupIndexName - The name of the lookup index (e.g., '.entities.v2.latest.security_default')
- * @returns ESQL statements for LOOKUP JOIN enrichment
- *
- * @example
- * ```typescript
- * buildLookupJoinEsql('.entities.v2.latest.security_default')
- * // Returns ESQL with LOOKUP JOIN for actor and target enrichment
- * ```
- */
-export const buildLookupJoinEsql = (lookupIndexName: string): string => {
-  return `| DROP entity.id
-| DROP entity.target.id
-// rename entity.*fields before next pipeline to avoid name collisions
-| EVAL entity.id = actorEntityId
-| LOOKUP JOIN ${lookupIndexName} ON entity.id
-| RENAME actorEntityName    = entity.name
-| RENAME actorEntityType    = entity.type
-| RENAME actorEntitySubType = entity.sub_type
-| RENAME actorHostIp        = host.ip
-| RENAME actorLookupEntityId = entity.id
-
-| EVAL entity.id = targetEntityId
-| LOOKUP JOIN ${lookupIndexName} ON entity.id
-| RENAME targetEntityName    = entity.name
-| RENAME targetEntityType    = entity.type
-| RENAME targetEntitySubType = entity.sub_type
-| RENAME targetHostIp        = host.ip
-| RENAME targetLookupEntityId = entity.id`;
+export const concatJsonObjectPropertyString = (
+  propertyName: string,
+  stringValue: string
+): string => {
+  return `CONCAT("\\"${propertyName}\\":\\"", "${stringValue}", "\\"")`;
 };
+
+export const concatJsonObjectPropertyBool = (propertyName: string, boolValue: boolean): string => {
+  return `CONCAT("\\"${propertyName}\\":", "${boolValue}")`;
+};
+
+export const concatJsonObjectPropertyEsqlExprAsString = (
+  propertyName: string,
+  esqlExpr: string
+): string => {
+  return `CONCAT("\\"${propertyName}\\":\\"", ${esqlExpr}, "\\"")`;
+};
+
+export const JSON_OBJECT_SEPARATOR = '","';
+export const JSON_OBJECT_START = '"{"';
+export const JSON_OBJECT_END = '"}"';
 
 /**
  * Generates ESQL EVAL statement for actor entity ID using COALESCE.
@@ -243,24 +229,4 @@ ${targetCases},
 export const buildSourceMetadataEvals = (): string => {
   return `| EVAL sourceIps = source.ip
 | EVAL sourceCountryCodes = source.geo.country_iso_code`;
-};
-
-/**
- * Builds ESQL enrichment pipeline based on availability.
- * Uses LOOKUP JOIN when available, otherwise falls back to null values.
- */
-export const buildEntityEnrichment = (isLookupIndexAvailable: boolean, spaceId: string): string => {
-  if (isLookupIndexAvailable) {
-    return buildLookupJoinEsql(getEntitiesLatestIndexName(spaceId));
-  }
-
-  return `// No enrichment available - use null values
-| EVAL actorEntityName = TO_STRING(null)
-| EVAL actorEntityType = TO_STRING(null)
-| EVAL actorEntitySubType = TO_STRING(null)
-| EVAL actorHostIp = TO_STRING(null)
-| EVAL targetEntityName = TO_STRING(null)
-| EVAL targetEntityType = TO_STRING(null)
-| EVAL targetEntitySubType = TO_STRING(null)
-| EVAL targetHostIp = TO_STRING(null)`;
 };

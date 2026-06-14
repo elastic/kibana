@@ -189,6 +189,8 @@ describe('RelationshipNode', () => {
         borderStrongPrimary: '#0000DD',
         textInverse: '#FFFFFF',
         textPrimary: '#000000',
+        textParagraph: '#DDDDDD',
+        backgroundLightText: '#a1b2c3',
         backgroundFilledText: '#333333',
         borderBaseProminent: '#CCCCCC',
       },
@@ -197,9 +199,9 @@ describe('RelationshipNode', () => {
     it('should return relationship colors with dark background and light text', () => {
       const colors = getRelationshipColors(mockEuiTheme as EuiThemeComputed);
       expect(colors).toEqual({
-        backgroundColor: mockEuiTheme.colors.backgroundFilledText,
+        backgroundColor: mockEuiTheme.colors.backgroundLightText,
         borderColor: mockEuiTheme.colors.borderBaseProminent,
-        textColor: mockEuiTheme.colors.textInverse,
+        textColor: mockEuiTheme.colors.textParagraph,
       });
     });
 

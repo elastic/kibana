@@ -15,10 +15,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ChatEvent } from '@kbn/agent-builder-common';
 import { agentBuilderDefaultAgentId, createBadRequestError } from '@kbn/agent-builder-common';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { Attachment, AttachmentInput } from '@kbn/agent-builder-common/attachments';
-import { getCurrentSpaceId } from '../../utils/spaces';
-import type { AttachmentServiceStart } from '../attachments';
 import type {
   AgentExecutionService,
   AgentExecution,
@@ -26,8 +23,10 @@ import type {
   ExecuteAgentResult,
   FollowExecutionOptions,
   FindExecutionsOptions,
-} from './types';
-import { ExecutionStatus } from './types';
+} from '@kbn/agent-builder-server/execution';
+import { ExecutionStatus } from '@kbn/agent-builder-common';
+import { getCurrentSpaceId } from '../../utils/spaces';
+import type { AttachmentServiceStart } from '../attachments';
 import { taskTypes } from './task';
 import { createAgentExecutionClient, type AgentExecutionClient } from './persistence';
 import {
@@ -63,28 +62,9 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     this.logger = deps.logger;
   }
 
-  private async validateAttachmentsIfProvided(
-    attachments: AttachmentInput[] | undefined,
-    request: KibanaRequest
-  ): Promise<Attachment[] | undefined> {
-    if (!attachments || attachments.length === 0) {
-      return undefined;
-    }
-
-    const validated: Attachment[] = [];
-    for (const attachment of attachments) {
-      const result = await this.deps.attachmentsService.validate(attachment, request);
-      if (!result.valid) {
-        throw createBadRequestError(`Attachment validation failed: ${result.error}`);
-      }
-      validated.push(result.attachment as Attachment);
-    }
-
-    return validated;
-  }
-
   async executeAgent({
     request,
+    mode,
     params,
     executionId: providedExecutionId,
     useTaskManager,
@@ -113,10 +93,12 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       : params;
 
     const execution = await executionClient.create({
+      executionMode: mode,
       executionId,
       agentId,
       spaceId,
       agentParams: validatedParams,
+      parentExecutionId: params.parentExecutionId,
       metadata,
     });
 
@@ -132,9 +114,9 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       }
     }
 
-    const runOnTaskManager = await this.shouldUseTaskManager(request, useTaskManager);
-    if (runOnTaskManager) {
-      return this.executeRemote({ executionId, agentId, request });
+    const useScheduledTask = await this.shouldUseScheduledTask(request, useTaskManager);
+    if (useScheduledTask) {
+      return this.executeWithScheduledTask({ executionId, agentId, request });
     } else {
       return this.executeLocally({ execution, request });
     }
@@ -175,7 +157,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
   /**
    * Execute on a TM node: schedule the task and return the followExecution polling observable.
    */
-  private async executeRemote({
+  private async executeWithScheduledTask({
     executionId,
     agentId,
     request,
@@ -316,9 +298,9 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
    *
    * 1. If `useTaskManager` is explicitly provided, honour it.
    * 2. If the request is a fakeRequest (already running on TM), run locally.
-   * 3. Otherwise, read the experimental-features UI setting.
+   * 3. Otherwise, run on task manager.
    */
-  private async shouldUseTaskManager(
+  private async shouldUseScheduledTask(
     request: KibanaRequest,
     useTaskManager?: boolean
   ): Promise<boolean> {
@@ -328,9 +310,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     if (request.isFakeRequest) {
       return false;
     }
-    const soClient = this.deps.savedObjects.getScopedClient(request);
-    const uiSettingsClient = this.deps.uiSettings.asScopedToClient(soClient);
-    return uiSettingsClient.get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID);
+    return true;
   }
 
   /**
@@ -354,5 +334,34 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       logger: this.logger.get('execution-client'),
       esClient: this.deps.elasticsearch.client.asInternalUser,
     });
+  }
+
+  private async validateAttachmentsIfProvided(
+    attachments: AttachmentInput[] | undefined,
+    request: KibanaRequest
+  ): Promise<AttachmentInput[] | undefined> {
+    if (!attachments || attachments.length === 0) {
+      return undefined;
+    }
+
+    const validated: AttachmentInput[] = [];
+    for (const attachment of attachments) {
+      const result = await this.deps.attachmentsService.validate(attachment, request);
+      if (!result.valid) {
+        throw createBadRequestError(`Attachment validation failed: ${result.error}`);
+      }
+      const a = result.attachment as Attachment;
+      validated.push({
+        id: a.id,
+        type: a.type,
+        data: a.data,
+        ...(a.description !== undefined ? { description: a.description } : {}),
+        ...(a.hidden !== undefined ? { hidden: a.hidden } : {}),
+        ...(a.origin !== undefined ? { origin: a.origin } : {}),
+        ...(a.groupId !== undefined ? { group_id: a.groupId } : {}),
+      });
+    }
+
+    return validated;
   }
 }

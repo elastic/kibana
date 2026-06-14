@@ -13,8 +13,8 @@
     "server/**/*",
     "test/scout/**/*",
     "../../../../../typings/**/*",
-    // ECS and Osquery schema files
-    "public/common/schemas/*/*.json"
+    // ECS and Osquery schema files (JSON not matched by **/* globs)
+    "common/schemas/*/*.json"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -79,7 +79,7 @@
     "@kbn/core-lifecycle-server",
     "@kbn/core-saved-objects-api-server-internal",
     "@kbn/core-http-server-utils",
-    "@kbn/spaces-utils",
+    "@kbn/core-spaces-common",
     "@kbn/core-http-server",
     "@kbn/setup-node-env",
     "@kbn/react-query",
@@ -94,6 +94,11 @@
     "@kbn/unified-search-plugin",
     "@kbn/core-notifications-browser",
     "@kbn/core-chrome-browser",
-    "@kbn/scout"
+    "@kbn/scout",
+    "@kbn/core-http-browser",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/core-http-request-handler-context-server",
+    "@kbn/core-security-server",
+    "@kbn/rrule"
   ]
 }

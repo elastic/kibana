@@ -10,7 +10,7 @@ import { schema } from '@kbn/config-schema';
 
 export const configSchema = schema.object({
   preconfigured: schema.object({
-    enabled: schema.boolean({ defaultValue: false }),
+    enabled: schema.boolean({ defaultValue: true }),
     stream_definitions: schema.arrayOf(schema.any(), { defaultValue: [] }),
   }),
   workers: schema.object({

@@ -6,13 +6,28 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import {
+  DEFAULT_ARTIFACT_VALUE_LIMIT,
+  ARTIFACT_VALUE_LIMITS,
+  MAX_ARTIFACT_VALUE_LIMIT,
+} from '@kbn/alerting-v2-constants';
 import { validateEsqlQuery, validateMinDuration } from './validation';
-import { durationSchema } from './common';
-import { MAX_CONSECUTIVE_BREACHES, MIN_SCHEDULE_INTERVAL } from './constants';
+import { durationSchema, tagsSchema } from './common';
+import {
+  MAX_CONSECUTIVE_BREACHES,
+  MAX_DESCRIPTION_LENGTH,
+  MAX_FIELD_NAME_LENGTH,
+  MAX_GROUPING_FIELDS,
+  MAX_NAME_LENGTH,
+  MIN_SCHEDULE_INTERVAL,
+  MAX_BULK_ITEMS,
+  ID_MAX_LENGTH,
+  VERSION_MAX_LENGTH,
+} from './constants';
 
 /** Primitives */
 
-const esqlQuerySchema = z
+export const esqlQuerySchema = z
   .string()
   .min(1)
   .max(10000)
@@ -25,56 +40,71 @@ const esqlQuerySchema = z
 
 /** Kind */
 
-export const ruleKindSchema = z.enum(['alert', 'signal']).describe('The kind of rule.');
+export const ruleKindSchema = z
+  .enum(['alert', 'signal'])
+  .describe(
+    'Rule kind: "alert" for stateful alerting with transitions, "signal" for stateless detection.'
+  );
 
 export type RuleKind = z.infer<typeof ruleKindSchema>;
 
 /** Metadata (required) */
 
-const metadataSchema = z
+export const metadataSchema = z
   .object({
-    name: z.string().min(1).max(256).describe('Unique rule name/identifier.'),
+    name: z
+      .string()
+      .min(1)
+      .max(MAX_NAME_LENGTH)
+      .describe('Rule name (must be unique within the space).'),
     description: z
       .string()
-      .max(1024)
+      .max(MAX_DESCRIPTION_LENGTH)
       .optional()
-      .describe('Optional human-readable description of the rule.'),
+      .describe('Human-readable description of the rule.'),
     owner: z.string().max(256).optional().describe('Owner of the rule.'),
-    labels: z.array(z.string().max(64)).max(100).optional().describe('Labels for categorization.'),
+    tags: tagsSchema
+      .min(1)
+      .optional()
+      .describe('Tags for categorization, e.g. ["production", "infra"].'),
+    builder_type: z
+      .string()
+      .max(64)
+      .optional()
+      .describe(
+        'Identifies the rule builder that authored this rule (e.g. "threshold"). Absent for rules authored directly in ES|QL.'
+      ),
   })
   .strict()
   .describe('Rule metadata.');
 
 /** Schedule (required) */
 
-const scheduleEverySchema = durationSchema.superRefine((value, ctx) => {
+/** Duration with an additional minimum-interval guard for schedule frequency. */
+export const scheduleEverySchema = durationSchema.superRefine((value, ctx) => {
   const error = validateMinDuration(value, MIN_SCHEDULE_INTERVAL);
   if (error) {
     ctx.addIssue({ code: z.ZodIssueCode.custom, message: error });
   }
 });
 
-const scheduleSchema = z
+export const scheduleSchema = z
   .object({
-    every: scheduleEverySchema.describe('Execution interval, e.g. 1m, 5m.'),
+    every: scheduleEverySchema.describe('Execution interval, e.g. 1m, 5m, 1h.'),
     lookback: durationSchema
       .optional()
-      .describe('Lookback window for the query (can also be expressed in ES|QL).'),
+      .describe('Lookback window for the query, e.g. 5m, 1h. Can also be expressed in ES|QL.'),
   })
   .strict()
   .describe('Execution schedule configuration.');
 
 /** Evaluation (required) */
 
-const evaluationQuerySchema = z
+export const evaluationQuerySchema = z
   .object({
-    base: esqlQuerySchema.describe('Base ES|QL query.'),
-    condition: z
-      .string()
-      .min(1)
-      .max(5000)
-      .optional()
-      .describe('Trigger condition (WHERE clause). Required when no_data is configured.'),
+    base: esqlQuerySchema.describe(
+      'Base ES|QL query. Time filters are applied automatically via the lookback window.'
+    ),
   })
   .strict();
 
@@ -91,31 +121,29 @@ export const recoveryPolicyTypeSchema = z.enum(['query', 'no_breach']);
 export const recoveryPolicyType = recoveryPolicyTypeSchema.enum;
 export type RecoveryPolicyType = z.infer<typeof recoveryPolicyTypeSchema>;
 
-const recoveryPolicySchema = z
+export const recoveryPolicySchema = z
   .object({
-    type: recoveryPolicyTypeSchema.describe('Recovery detection type.'),
+    type: recoveryPolicyTypeSchema.describe('Recovery detection type: "query" or "no_breach".'),
     query: z
       .object({
-        base: esqlQuerySchema.optional().describe('Base ES|QL query for recovery.'),
-        condition: z
-          .string()
-          .min(1)
-          .max(5000)
+        base: esqlQuerySchema
           .optional()
-          .describe('Recovery condition (WHERE clause) applied to the base query.'),
+          .describe('Recovery ES|QL query. Required when type is "query".'),
       })
       .strict()
       .optional()
-      .describe('Recovery query when type is query.'),
+      .describe('Recovery query configuration; required when type is "query".'),
   })
   .strict()
-  .describe('Recovery detection configuration.');
+  .describe(
+    'Recovery detection configuration. Optional: rules without a recovery policy never emit recovery events.'
+  );
 
 /** State transition (optional, alert-only) */
 
-const stateTransitionOperatorSchema = z.enum(['AND', 'OR']);
+export const stateTransitionOperatorSchema = z.enum(['AND', 'OR']);
 
-const stateTransitionSchema = z
+export const stateTransitionSchema = z
   .object({
     pending_operator: stateTransitionOperatorSchema
       .optional()
@@ -126,8 +154,10 @@ const stateTransitionSchema = z
       .min(0)
       .max(MAX_CONSECUTIVE_BREACHES)
       .optional()
-      .describe('Consecutive breaches before active.'),
-    pending_timeframe: durationSchema.optional().describe('Time window for pending evaluation.'),
+      .describe('Consecutive breaches before transitioning to active.'),
+    pending_timeframe: durationSchema
+      .optional()
+      .describe('Time window for pending evaluation, e.g. 5m, 15m.'),
     recovering_operator: stateTransitionOperatorSchema
       .optional()
       .describe('How to combine count and timeframe for recovering.'),
@@ -137,10 +167,10 @@ const stateTransitionSchema = z
       .min(0)
       .max(MAX_CONSECUTIVE_BREACHES)
       .optional()
-      .describe('Consecutive recoveries before inactive.'),
+      .describe('Consecutive recoveries before transitioning to inactive.'),
     recovering_timeframe: durationSchema
       .optional()
-      .describe('Time window for recovering evaluation.'),
+      .describe('Time window for recovering evaluation, e.g. 5m, 15m.'),
   })
   .strict()
   .describe('Episode state transition thresholds (alert-only).')
@@ -149,12 +179,14 @@ const stateTransitionSchema = z
 
 /** Grouping (optional) */
 
-const groupingSchema = z
+export const groupingSchema = z
   .object({
     fields: z
-      .array(z.string().max(256))
-      .max(16)
-      .describe('Fields to group by (convention: use ES|QL GROUP BY fields).'),
+      .array(z.string().min(1).max(MAX_FIELD_NAME_LENGTH))
+      .max(MAX_GROUPING_FIELDS)
+      .describe(
+        'Fields to group alerts by, e.g. ["host.name", "service.name"]. Should match ES|QL GROUP BY fields.'
+      ),
   })
   .strict()
   .describe('Grouping configuration.');
@@ -167,7 +199,9 @@ const noDataSchema = z
       .enum(['no_data', 'last_status', 'recover'])
       .optional()
       .describe('Behavior when no data is detected.'),
-    timeframe: durationSchema.optional().describe('Time window after which no data is detected.'),
+    timeframe: durationSchema
+      .optional()
+      .describe('Time window after which no data is detected, e.g. 10m, 1h.'),
   })
   .strict()
   .describe('No data handling configuration.');
@@ -178,17 +212,29 @@ const artifactSchema = z
   .object({
     id: z.string().min(1).max(256).describe('Artifact identifier.'),
     type: z.string().min(1).max(128).describe('Artifact type.'),
-    value: z.string().min(1).max(1024).describe('Artifact value.'),
+    value: z.string().min(1).max(MAX_ARTIFACT_VALUE_LIMIT).describe('Artifact value.'),
   })
-  .strict();
+  .strict()
+  .check((ctx) => {
+    const limit = ARTIFACT_VALUE_LIMITS[ctx.value.type] ?? DEFAULT_ARTIFACT_VALUE_LIMIT;
+    if (ctx.value.value.length > limit) {
+      ctx.issues.push({
+        code: 'custom',
+        path: ['value'],
+        message: `Artifact value must be at most ${limit} characters for type "${ctx.value.type}".`,
+        input: ctx.value.value,
+      });
+    }
+  });
 
 /** Create rule API schema */
 
 /**
- * Base schema without refinements - used for extending in response schema.
+ * Base schema without refinements - used for extending in response schema and
+ * for introspection by the immutability classification meta-tests.
  * @internal
  */
-const createRuleDataBaseSchema = z
+export const createRuleDataBaseSchema = z
   .object({
     kind: ruleKindSchema,
     metadata: metadataSchema,
@@ -204,48 +250,64 @@ const createRuleDataBaseSchema = z
     state_transition: stateTransitionSchema,
     grouping: groupingSchema.optional(),
     no_data: noDataSchema.optional(),
-    artifacts: z.array(artifactSchema).optional(),
+    artifacts: z.array(artifactSchema).max(100).optional(),
   })
   .strip();
 
-/**
- * The `.refine` method adds a custom validation to the schema.
- * In this case, it enforces that the `state_transition` property is only allowed when `kind` is "alert".
- * The predicate `data.kind === 'alert' || data.state_transition == null` means:
- * - If the rule kind is "alert", `state_transition` may be present (or absent).
- * - For any other `kind`, `state_transition` must be `null` or `undefined`.
- * If validation fails, the specified error message will be associated with the `state_transition` field.
- */
+/** Cross-field validation predicates — shared between the CRUD API and the manage_rule tool. */
+
+export const isStateTransitionAllowed = (data: {
+  kind?: string;
+  state_transition?: unknown;
+}): boolean => data.kind === 'alert' || data.state_transition == null;
+
+export const isRecoveryPolicyQueryProvided = (data: {
+  recovery_policy?: { type?: string; query?: { base?: string } };
+}): boolean =>
+  data.recovery_policy?.type !== 'query' ||
+  (data.recovery_policy.query?.base != null && data.recovery_policy.query.base.length > 0);
+
 export const createRuleDataSchema = createRuleDataBaseSchema
-  .refine((data) => data.kind === 'alert' || data.state_transition == null, {
+  .refine(isStateTransitionAllowed, {
     message: 'state_transition is only allowed when kind is "alert".',
     path: ['state_transition'],
   })
-  .refine((data) => data.kind === 'alert' || data.evaluation.query.condition == null, {
-    message: 'evaluation.query.condition is only allowed when kind is "alert".',
-    path: ['evaluation', 'query', 'condition'],
-  })
-  .refine((data) => !data.no_data || data.evaluation.query.condition != null, {
-    message: 'evaluation.query.condition is required when no_data is configured.',
-    path: ['evaluation', 'query', 'condition'],
-  })
-  .refine(
-    (data) =>
-      data.recovery_policy?.type !== 'query' ||
-      (data.recovery_policy.query?.base != null && data.recovery_policy.query.base.length > 0),
-    {
-      message: 'recovery_policy.query.base is required when recovery_policy.type is "query".',
-      path: ['recovery_policy', 'query', 'base'],
-    }
-  );
+  .refine(isRecoveryPolicyQueryProvided, {
+    message: 'recovery_policy.query.base is required when recovery_policy.type is "query".',
+    path: ['recovery_policy', 'query', 'base'],
+  });
 
 export type CreateRuleData = z.infer<typeof createRuleDataSchema>;
+
+/**
+ * Top-level fields of the create-rule schema that cannot be changed after the
+ * rule has been created. Every other field of {@link createRuleDataBaseSchema}
+ * is implicitly mutable.
+ *
+ * Consumers that implement PUT-style upsert must reject requests that try to
+ * mutate one of these. Consumers that implement PATCH-style update must
+ * preserve them from storage regardless of the body.
+ *
+ * Whenever a top-level field is added to {@link createRuleDataBaseSchema}, the
+ * snapshot test in `rule_data_schema.test.ts` will fail. Updating the
+ * snapshot surfaces the new field in the PR diff so reviewers can confirm
+ * whether it should be classified as immutable here instead of being silently
+ * mutable.
+ */
+export const IMMUTABLE_RULE_FIELDS = ['kind'] as const satisfies ReadonlyArray<
+  keyof CreateRuleData
+>;
+
+export type ImmutableRuleField = (typeof IMMUTABLE_RULE_FIELDS)[number];
 
 /** Update rule API schema — all fields optional for partial updates */
 
 export const updateRuleDataSchema = z
   .object({
-    metadata: metadataSchema.partial().optional(),
+    metadata: metadataSchema
+      .partial()
+      .extend({ builder_type: z.string().max(64).optional().nullable() })
+      .optional(),
     time_field: z.string().min(1).max(128).optional(),
     schedule: scheduleSchema.partial().optional().nullable(),
     evaluation: z
@@ -253,7 +315,6 @@ export const updateRuleDataSchema = z
         query: z
           .object({
             base: esqlQuerySchema.optional(),
-            condition: z.string().min(1).max(5000).optional(),
           })
           .strict()
           .optional(),
@@ -261,15 +322,27 @@ export const updateRuleDataSchema = z
       .strict()
       .optional(),
     recovery_policy: recoveryPolicySchema.optional().nullable(),
-    state_transition: stateTransitionSchema,
+    state_transition: stateTransitionSchema.nullable(),
     grouping: groupingSchema.optional().nullable(),
     no_data: noDataSchema.optional().nullable(),
-    artifacts: z.array(artifactSchema).optional().nullable(),
+    artifacts: z.array(artifactSchema).max(100).optional().nullable(),
     enabled: z.boolean().optional().describe('Whether the rule is enabled.'),
   })
   .strip();
 
 export type UpdateRuleData = z.infer<typeof updateRuleDataSchema>;
+
+/** Update rule API body schema — adds OCC version on top of update data. */
+export const updateRuleBodySchema = updateRuleDataSchema.extend({
+  version: z
+    .string()
+    .min(1)
+    .max(VERSION_MAX_LENGTH)
+    .optional()
+    .describe('The current version of the rule, used for optimistic concurrency control.'),
+});
+
+export type UpdateRuleBody = z.infer<typeof updateRuleBodySchema>;
 
 /**
  * Schema for rule response data returned from the API.
@@ -282,9 +355,39 @@ export const ruleResponseSchema = createRuleDataBaseSchema.extend({
   createdAt: z.string().describe('ISO timestamp when the rule was created.'),
   updatedBy: z.string().nullable().describe('User who last updated the rule.'),
   updatedAt: z.string().describe('ISO timestamp when the rule was last updated.'),
+  version: z
+    .string()
+    .optional()
+    .describe('The version of the rule, used for optimistic concurrency control'),
 });
 
 export type RuleResponse = z.infer<typeof ruleResponseSchema>;
+
+/** Sort field for find rules API. */
+export const findRulesSortFieldSchema = z.enum(['kind', 'enabled', 'name']);
+export type FindRulesSortField = z.infer<typeof findRulesSortFieldSchema>;
+
+/** Query parameters for the find rules (list) API. */
+export const findRulesParamsSchema = z.object({
+  page: z.coerce.number().min(1).optional().describe('The page number to return. Defaults to 1.'),
+  perPage: z.coerce
+    .number()
+    .min(1)
+    .max(1000)
+    .optional()
+    .describe('The number of rules to return per page. Defaults to 20.'),
+  filter: z.string().optional().describe('The filter to apply to the rules.'),
+  sortField: findRulesSortFieldSchema.optional().describe('The field to sort rules by.'),
+  sortOrder: z.enum(['asc', 'desc']).optional().describe('The direction to sort rules.'),
+  search: z
+    .string()
+    .trim()
+    .min(1)
+    .optional()
+    .describe('A text string to search across rule fields.'),
+});
+
+export type FindRulesParams = z.infer<typeof findRulesParamsSchema>;
 
 /** Paginated list response schema. */
 export const findRulesResponseSchema = z
@@ -295,6 +398,26 @@ export const findRulesResponseSchema = z
     perPage: z.number().describe('The number of rules per page.'),
   })
   .describe('Paginated list of rules.');
+
+export type FindRulesResponse = z.infer<typeof findRulesResponseSchema>;
+
+/** Query parameters for the rule tags API. */
+export const ruleTagsParamsSchema = z.object({
+  filter: z
+    .string()
+    .max(1024)
+    .optional()
+    .describe('The filter to apply when aggregating rule tags.'),
+});
+
+export type RuleTagsParams = z.infer<typeof ruleTagsParamsSchema>;
+
+/** Rule tags response schema. */
+export const ruleTagsResponseSchema = z
+  .object({
+    tags: z.array(z.string()).describe('The list of unique rule tags.'),
+  })
+  .describe('All unique tags across rules.');
 
 /** Bulk operation response schema. */
 export const bulkOperationResponseSchema = z
@@ -311,5 +434,50 @@ export const bulkOperationResponseSchema = z
         })
       )
       .describe('Errors encountered during the bulk operation.'),
+    truncated: z
+      .boolean()
+      .optional()
+      .describe(
+        'True when the request used a filter that matched more rules than were included in this operation.'
+      ),
+    totalMatched: z
+      .number()
+      .optional()
+      .describe('Total number of rules matching the filter when truncated is true.'),
   })
   .describe('Result of a bulk rule operation.');
+
+export type BulkOperationResponse = z.infer<typeof bulkOperationResponseSchema>;
+
+export const ruleIdSchema = z
+  .string()
+  .trim()
+  .min(1)
+  .max(ID_MAX_LENGTH)
+  .describe('A rule identifier.');
+
+/**
+ * Request body schema for `POST /api/alerting/v2/rules/_bulk_get`.
+ */
+export const bulkGetRulesParamsSchema = z
+  .object({
+    ids: z
+      .array(ruleIdSchema)
+      .min(1)
+      .max(MAX_BULK_ITEMS)
+      .describe('Rule identifiers to retrieve. The response preserved this order.'),
+  })
+  .strict();
+
+export type BulkGetRulesParams = z.infer<typeof bulkGetRulesParamsSchema>;
+
+/**
+ * Response schema for `POST /api/alerting/v2/rules/_bulk_get`.
+ */
+export const bulkGetRulesResponseSchema = z.object({
+  rules: z
+    .array(ruleResponseSchema)
+    .describe('The requested rules, in the same order as the requested ids.'),
+});
+
+export type BulkGetRulesResponse = z.infer<typeof bulkGetRulesResponseSchema>;

@@ -106,6 +106,23 @@ describe('Test discover app state', () => {
     expect(getCurrentTab().appState.dataSource?.type).toBe('esql');
   });
 
+  test('should not allow both chart and table hidden when setting app state', async () => {
+    const { internalState, getCurrentTab } = await setup();
+    internalState.dispatch(
+      internalStateActions.setAppState({
+        tabId: getCurrentTab().id,
+        appState: {
+          ...getCurrentTab().appState,
+          hideChart: true,
+          hideTable: true,
+        },
+      })
+    );
+
+    expect(getCurrentTab().appState.hideChart).toBe(true);
+    expect(getCurrentTab().appState.hideTable).toBe(false);
+  });
+
   describe('initializeAndSync', () => {
     it('should call setProfileStateFieldsToReset correctly with no initial state', async () => {
       const { initializeSingleTab, getCurrentTab } = await setupNoTab();
@@ -125,6 +142,7 @@ describe('Test discover app state', () => {
         'rowHeight',
         'breakdownField',
         'hideChart',
+        'hideTable',
       ]);
     });
 
@@ -139,6 +157,7 @@ describe('Test discover app state', () => {
         'columns',
         'breakdownField',
         'hideChart',
+        'hideTable',
       ]);
     });
 
@@ -153,6 +172,7 @@ describe('Test discover app state', () => {
         'columns',
         'rowHeight',
         'breakdownField',
+        'hideTable',
       ]);
     });
 

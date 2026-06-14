@@ -6,5 +6,6 @@ reviews:
   auto_review:
     labels:
       - reviewer:coderabbit
-      - Team:Kibana Management
-      - Team:AI Infra
+      - "!reviewer:skip-ai"
+      - "!reviewer:macroscope"
+      - "!backport"

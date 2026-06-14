@@ -6,6 +6,7 @@
  */
 
 import expect from 'expect';
+import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import {
   createRule,
   deleteAllRules,
@@ -27,7 +28,7 @@ export default ({ getService }: FtrProviderContext) => {
   const detectionsApi = getService('detectionsApi');
   const { indexListOfDocuments: indexListOfSourceDocuments } = dataGeneratorFactory({
     es,
-    index: 'logs-1',
+    index: 'test-data-1',
     log,
   });
 
@@ -37,29 +38,139 @@ export default ({ getService }: FtrProviderContext) => {
       await deleteAllRules(supertest, log);
 
       await es.indices.delete({
-        index: 'logs-1',
+        index: 'test-data-1,test-data-2',
         ignore_unavailable: true,
       });
-      await es.indices.create({
-        index: 'logs-1',
-        mappings: {
-          properties: {
-            '@timestamp': {
-              type: 'date',
-            },
-            host: {
-              properties: {
-                name: {
-                  type: 'keyword',
-                },
+
+      const mappings: MappingTypeMapping = {
+        properties: {
+          '@timestamp': {
+            type: 'date',
+          },
+          host: {
+            properties: {
+              name: {
+                type: 'keyword',
               },
             },
           },
         },
+      };
+      await es.indices.create({
+        index: 'test-data-1',
+        mappings,
+      });
+      await es.indices.create({
+        index: 'test-data-2',
+        mappings,
       });
     });
 
     describe('metrics collection', () => {
+      describe('matched_indices_count', () => {
+        it('records matched_indices_count for one matching index pattern', async () => {
+          const timestamp = new Date().toISOString();
+          const document = {
+            '@timestamp': timestamp,
+            host: { name: 'test-1' },
+          };
+
+          await indexListOfSourceDocuments([document, document]);
+
+          const createdRule = await createRule(
+            supertest,
+            log,
+            getThresholdRuleParams({
+              index: ['test-data-1'],
+              query: '*:*',
+              threshold: {
+                field: ['host.name'],
+                value: 2,
+              },
+              from: 'now-35m',
+              interval: '30m',
+              enabled: true,
+            })
+          );
+
+          const { matched_indices_count } = await getLatestSecurityRuleExecutionMetricsFromEventLog(
+            es,
+            log,
+            createdRule.id
+          );
+
+          expect(matched_indices_count).toBe(1);
+        });
+
+        it('records matched_indices_count for a single index pattern with wildcard', async () => {
+          const timestamp = new Date().toISOString();
+          const document = {
+            '@timestamp': timestamp,
+            host: { name: 'test-1' },
+          };
+
+          await indexListOfSourceDocuments([document, document]);
+
+          const createdRule = await createRule(
+            supertest,
+            log,
+            getThresholdRuleParams({
+              index: ['test-data-*'],
+              query: '*:*',
+              threshold: {
+                field: ['host.name'],
+                value: 2,
+              },
+              from: 'now-35m',
+              interval: '30m',
+              enabled: true,
+            })
+          );
+
+          const { matched_indices_count } = await getLatestSecurityRuleExecutionMetricsFromEventLog(
+            es,
+            log,
+            createdRule.id
+          );
+
+          expect(matched_indices_count).toBe(2);
+        });
+
+        it('records matched_indices_count for multiple matching index patterns', async () => {
+          const timestamp = new Date().toISOString();
+          const document = {
+            '@timestamp': timestamp,
+            host: { name: 'test-1' },
+          };
+
+          await indexListOfSourceDocuments([document, document]);
+
+          const createdRule = await createRule(
+            supertest,
+            log,
+            getThresholdRuleParams({
+              index: ['test-da*', 'test-data-1', 'test-data-2'],
+              query: '*:*',
+              threshold: {
+                field: ['host.name'],
+                value: 2,
+              },
+              from: 'now-35m',
+              interval: '30m',
+              enabled: true,
+            })
+          );
+
+          const { matched_indices_count } = await getLatestSecurityRuleExecutionMetricsFromEventLog(
+            es,
+            log,
+            createdRule.id
+          );
+
+          expect(matched_indices_count).toBe(2);
+        });
+      });
+
       describe('alerts_candidate_count', () => {
         it('records alerts_candidate_count value', async () => {
           const timestamp = new Date().toISOString();
@@ -74,7 +185,7 @@ export default ({ getService }: FtrProviderContext) => {
             supertest,
             log,
             getThresholdRuleParams({
-              index: ['logs-1'],
+              index: ['test-data-1'],
               query: '*:*',
               threshold: {
                 field: ['host.name'],
@@ -106,7 +217,7 @@ export default ({ getService }: FtrProviderContext) => {
             supertest,
             log,
             getThresholdRuleParams({
-              index: ['logs-1'],
+              index: ['test-data-1', 'test-data-2'],
               query: '*:*',
               threshold: {
                 field: ['host.name'],
@@ -165,6 +276,119 @@ export default ({ getService }: FtrProviderContext) => {
             await getLatestSecurityRuleExecutionMetricsFromEventLog(es, log, createdRule.id);
 
           expect(nextAlertsCandidateCount).toBe(1);
+        });
+      });
+
+      describe('alerts_suppressed_count', () => {
+        it('records alerts_suppressed_count as 0 when no suppression is configured', async () => {
+          const timestamp = new Date().toISOString();
+          const document = {
+            '@timestamp': timestamp,
+            host: { name: 'test-1' },
+          };
+
+          await indexListOfSourceDocuments([document, document]);
+
+          const createdRule = await createRule(
+            supertest,
+            log,
+            getThresholdRuleParams({
+              index: ['test-data-1'],
+              query: '*:*',
+              threshold: {
+                field: ['host.name'],
+                value: 2,
+              },
+              from: 'now-35m',
+              interval: '30m',
+              enabled: true,
+            })
+          );
+          const alerts = await getOpenAlerts(supertest, log, es, createdRule);
+
+          expect(alerts.hits.hits).toHaveLength(1);
+
+          const { alerts_suppressed_count } =
+            await getLatestSecurityRuleExecutionMetricsFromEventLog(es, log, createdRule.id);
+
+          expect(alerts_suppressed_count).toBe(0);
+        });
+
+        it('records alerts_suppressed_count when alerts are suppressed across rule runs', async () => {
+          const timestamp = new Date(Date.now() - 10 * 60 * 1000).toISOString();
+          const document1 = {
+            '@timestamp': timestamp,
+            host: { name: 'test-1' },
+          };
+
+          await indexListOfSourceDocuments([document1, document1]);
+
+          // Run rule for the first time
+          const createdRule = await createRule(
+            supertest,
+            log,
+            getThresholdRuleParams({
+              index: ['test-data-1', 'test-data-2'],
+              query: '*:*',
+              threshold: {
+                field: ['host.name'],
+                value: 2,
+              },
+              alert_suppression: {
+                duration: {
+                  value: 300,
+                  unit: 'm',
+                },
+              },
+              from: 'now-35m',
+              interval: '30m',
+              enabled: true,
+            })
+          );
+          await waitForRuleSuccess({
+            supertest,
+            log,
+            id: createdRule.id,
+          });
+          const alerts = await getOpenAlerts(supertest, log, es, createdRule);
+
+          expect(alerts.hits.hits).toHaveLength(1);
+
+          const { alerts_suppressed_count: alertsSuppressedCount } =
+            await getLatestSecurityRuleExecutionMetricsFromEventLog(es, log, createdRule.id);
+
+          expect(alertsSuppressedCount).toBe(0);
+
+          const nextTimestamp = new Date().toISOString();
+          const document2 = {
+            '@timestamp': nextTimestamp,
+            host: { name: 'test-1' },
+          };
+
+          await indexListOfSourceDocuments([document2, document2]);
+
+          // Disable and re-enable the rule to run it again. Alert suppression should work now.
+          await detectionsApi.patchRule({ body: { id: createdRule.id, enabled: false } });
+          await detectionsApi.patchRule({
+            body: { id: createdRule.id, from: 'now-1m', enabled: true },
+          });
+          await waitForRuleSuccess({
+            supertest,
+            log,
+            id: createdRule.id,
+          });
+
+          const nextAlerts = await getOpenAlerts(supertest, log, es, createdRule);
+
+          // We have only 1 alert after 2 rule runs
+          expect(nextAlerts.hits.hits).toHaveLength(1);
+
+          const { alerts_suppressed_count: nextAlertsSuppressedCount } =
+            await getLatestSecurityRuleExecutionMetricsFromEventLog(es, log, createdRule.id, {
+              totalExecutions: 2,
+            });
+
+          expect(nextAlertsSuppressedCount).toBe(1);
         });
       });
     });

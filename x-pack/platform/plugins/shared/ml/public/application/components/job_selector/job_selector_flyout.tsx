@@ -21,6 +21,10 @@ import {
   EuiResizeObserver,
   EuiProgress,
 } from '@elastic/eui';
+import type {
+  MlJobWithTimeRange,
+  MlJobTimeRange,
+} from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
 import { NewSelectionIdBadges } from './new_selection_id_badges';
 // @ts-ignore
 import { JobSelectorTable } from './job_selector_table';
@@ -29,10 +33,6 @@ import {
   getTimeRangeFromSelection,
   normalizeTimes,
 } from './job_select_service_utils';
-import type {
-  MlJobTimeRange,
-  MlJobWithTimeRange,
-} from '../../../../common/types/anomaly_detection_jobs';
 import { useMlKibana } from '../../contexts/kibana';
 import type { JobSelectionMaps } from './job_selector';
 

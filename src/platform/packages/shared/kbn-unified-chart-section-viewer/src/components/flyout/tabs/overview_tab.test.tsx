@@ -8,12 +8,17 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { render } from '@testing-library/react';
 import type { ParsedMetricItem } from '../../../types';
 import { OverviewTab } from './overview_tab';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
-import { METRIC_TYPE_DESCRIPTIONS } from '../components';
+import { ExternalServicesProvider } from '../../../context/external_services';
+import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
+import {
+  METRIC_SOURCE_KIND,
+  useMetricSourceKind,
+  type MetricSourceKind,
+} from '../hooks/use_metric_source_kind';
 
 jest.mock('../../../common/utils', () => ({
   getUnitLabel: jest.fn(({ unit }) => {
@@ -27,10 +32,23 @@ jest.mock('../../../common/utils', () => ({
   }),
 }));
 
+jest.mock('../hooks/use_metric_source_kind', () => {
+  const actual = jest.requireActual('../hooks/use_metric_source_kind');
+  return {
+    ...actual,
+    useMetricSourceKind: jest.fn(),
+  };
+});
+
+const mockedUseMetricSourceKind = useMetricSourceKind as jest.Mock;
+const mockSourceKind = (kind: MetricSourceKind) => {
+  mockedUseMetricSourceKind.mockReturnValue({ kind });
+};
+
 describe('Metric Flyout Overview Tab', () => {
   const createMockMetric = (overrides: Partial<ParsedMetricItem> = {}): ParsedMetricItem => ({
     metricName: 'test.metric',
-    dataStream: 'test-data-stream',
+    indexName: 'test-data-stream',
     fieldTypes: [ES_FIELD_TYPES.DOUBLE],
     units: ['ms'],
     dimensionFields: [],
@@ -40,6 +58,7 @@ describe('Metric Flyout Overview Tab', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockSourceKind(METRIC_SOURCE_KIND.DATA_STREAM);
   });
 
   describe('basic rendering', () => {
@@ -51,99 +70,11 @@ describe('Metric Flyout Overview Tab', () => {
       expect(getByText(metricItem.metricName)).toBeInTheDocument();
     });
 
-    it('renders main description list', () => {
-      const metricItem = createMockMetric({
-        dataStream: 'my-data-stream',
-        fieldTypes: [ES_FIELD_TYPES.LONG],
-      });
-      const { getByTestId, getByText } = render(<OverviewTab metricItem={metricItem} />);
+    it('renders metadata section from OverviewTabMetadata', () => {
+      const metricItem = createMockMetric();
+      const { getByTestId } = render(<OverviewTab metricItem={metricItem} />);
 
       expect(getByTestId('metricsExperienceFlyoutOverviewTabDescriptionList')).toBeInTheDocument();
-      expect(getByText('my-data-stream')).toBeInTheDocument();
-      expect(getByText('long')).toBeInTheDocument();
-    });
-  });
-
-  describe('unit display', () => {
-    it('renders unit when present', () => {
-      const metricItem = createMockMetric({ units: ['ms'] });
-      const { getByTestId, getByText } = render(<OverviewTab metricItem={metricItem} />);
-
-      expect(getByTestId('metricsExperienceFlyoutOverviewTabMetricUnitLabel')).toBeInTheDocument();
-      expect(getByText('Milliseconds')).toBeInTheDocument();
-    });
-
-    it('renders NoValueBadge when units are empty', () => {
-      const metricItem = createMockMetric({ units: [] });
-      const { getByTestId, getByText } = render(<OverviewTab metricItem={metricItem} />);
-
-      expect(getByTestId('metricsExperienceFlyoutOverviewTabMetricUnitLabel')).toBeInTheDocument();
-      expect(getByText('No value')).toBeInTheDocument();
-    });
-  });
-
-  describe('instrument display', () => {
-    it('renders instrument when present', () => {
-      const metricItem = createMockMetric({ metricTypes: ['counter'] });
-      const { getByTestId, getByText } = render(<OverviewTab metricItem={metricItem} />);
-
-      expect(getByTestId('metricsExperienceFlyoutOverviewTabMetricTypeLabel')).toBeInTheDocument();
-      expect(getByText('counter')).toBeInTheDocument();
-    });
-
-    it('renders NoValueBadge when metricTypes is undefined', () => {
-      const metricItem = createMockMetric({ metricTypes: undefined });
-      const { getByTestId, getByText } = render(<OverviewTab metricItem={metricItem} />);
-
-      expect(getByTestId('metricsExperienceFlyoutOverviewTabMetricTypeLabel')).toBeInTheDocument();
-      expect(getByText('No value')).toBeInTheDocument();
-    });
-
-    it('handles different instrument types', () => {
-      const instruments = ['counter', 'gauge', 'histogram'] as const;
-
-      instruments.forEach((instrument) => {
-        const metricItem = createMockMetric({ metricTypes: [instrument] });
-        const { rerender, getByTestId, getByText } = render(
-          <OverviewTab metricItem={metricItem} />
-        );
-
-        expect(
-          getByTestId('metricsExperienceFlyoutOverviewTabMetricTypeLabel')
-        ).toBeInTheDocument();
-        expect(getByText(instrument)).toBeInTheDocument();
-
-        rerender(<div />); // Clear between tests
-      });
-    });
-
-    it.each(['gauge', 'counter', 'histogram'] as const)(
-      'shows tooltip with description when hovering over %s badge',
-      async (instrument) => {
-        const metricItem = createMockMetric({ metricTypes: [instrument] });
-        render(<OverviewTab metricItem={metricItem} />);
-
-        const badge = screen.getByText(instrument);
-        await userEvent.hover(badge);
-
-        await waitFor(() => {
-          expect(screen.getByRole('tooltip')).toHaveTextContent(
-            METRIC_TYPE_DESCRIPTIONS[instrument]!
-          );
-        });
-      }
-    );
-
-    it('does not show tooltip for unknown instrument type', async () => {
-      const metricItem = createMockMetric({ metricTypes: ['position'] });
-      render(<OverviewTab metricItem={metricItem} />);
-
-      const badge = screen.getByText('position');
-      await userEvent.hover(badge);
-
-      await waitFor(() => {
-        expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
-      });
     });
   });
 
@@ -236,54 +167,6 @@ describe('Metric Flyout Overview Tab', () => {
     });
   });
 
-  describe('multiple values display', () => {
-    it('renders multiple field types as badges', () => {
-      const metricItem = createMockMetric({
-        fieldTypes: [ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.LONG],
-      });
-      const { getByText } = render(<OverviewTab metricItem={metricItem} />);
-
-      expect(getByText('double')).toBeInTheDocument();
-      expect(getByText('long')).toBeInTheDocument();
-    });
-
-    it('renders multiple units as badges', () => {
-      const metricItem = createMockMetric({ units: ['ms', 'bytes'] });
-      const { getByText } = render(<OverviewTab metricItem={metricItem} />);
-
-      expect(getByText('Milliseconds')).toBeInTheDocument();
-      expect(getByText('Bytes')).toBeInTheDocument();
-    });
-
-    it('renders null field type as NoValueBadge', () => {
-      const metricItem = createMockMetric({
-        fieldTypes: [ES_FIELD_TYPES.NULL],
-      });
-      const { getByText, queryByText } = render(<OverviewTab metricItem={metricItem} />);
-
-      expect(getByText('No value')).toBeInTheDocument();
-      expect(queryByText('null')).not.toBeInTheDocument();
-    });
-
-    it('renders mixed null and non-null field types correctly', () => {
-      const metricItem = createMockMetric({
-        fieldTypes: [ES_FIELD_TYPES.NULL, ES_FIELD_TYPES.DOUBLE],
-      });
-      const { getByText } = render(<OverviewTab metricItem={metricItem} />);
-
-      expect(getByText('No value')).toBeInTheDocument();
-      expect(getByText('double')).toBeInTheDocument();
-    });
-
-    it('renders multiple metric types as badges', () => {
-      const metricItem = createMockMetric({ metricTypes: ['counter', 'gauge'] });
-      const { getByText } = render(<OverviewTab metricItem={metricItem} />);
-
-      expect(getByText('counter')).toBeInTheDocument();
-      expect(getByText('gauge')).toBeInTheDocument();
-    });
-  });
-
   describe('description display', () => {
     it('renders description when present', () => {
       const metricItem = createMockMetric();
@@ -293,6 +176,135 @@ describe('Metric Flyout Overview Tab', () => {
 
       expect(getByTestId('metricsExperienceFlyoutMetricDescription')).toBeInTheDocument();
       expect(getByText('Test description')).toBeInTheDocument();
+    });
+  });
+
+  describe('source rendering policy', () => {
+    const buildExternalServices = (renderFlyoutStreamFieldByStreamName?: jest.Mock) => {
+      const features = renderFlyoutStreamFieldByStreamName
+        ? { id: 'streams', renderFlyoutStreamFieldByStreamName }
+        : undefined;
+      return {
+        discoverShared: {
+          features: {
+            registry: {
+              getById: jest.fn().mockReturnValue(features),
+            },
+          },
+        } as unknown as DiscoverSharedPublicStart,
+      };
+    };
+
+    const renderTab = (
+      metricItem: ParsedMetricItem,
+      renderFlyoutStreamFieldByStreamName?: jest.Mock,
+      withProvider: boolean = true
+    ) => {
+      if (!withProvider) {
+        return render(<OverviewTab metricItem={metricItem} />);
+      }
+      const externalServices = buildExternalServices(renderFlyoutStreamFieldByStreamName);
+      return render(
+        <ExternalServicesProvider externalServices={externalServices}>
+          <OverviewTab metricItem={metricItem} />
+        </ExternalServicesProvider>
+      );
+    };
+
+    const linkRenderer = () =>
+      jest
+        .fn()
+        .mockImplementation(({ streamName }: { streamName: string }) => (
+          <div data-test-subj="streamFieldSectionRendered">{streamName}</div>
+        ));
+
+    it('data_stream + streams feature on -> renders the link inside the Data stream metadata row', () => {
+      mockSourceKind(METRIC_SOURCE_KIND.DATA_STREAM);
+      const renderFn = linkRenderer();
+      const metricItem = createMockMetric({ indexName: 'logs-foo-default' });
+
+      const { getByTestId, queryByTestId } = renderTab(metricItem, renderFn);
+
+      expect(renderFn).toHaveBeenCalledWith({ streamName: 'logs-foo-default' });
+      const row = getByTestId('metricsExperienceFlyoutOverviewTabDataStreamLabel');
+      expect(row).toContainElement(getByTestId('streamFieldSectionRendered'));
+      expect(getByTestId('streamFieldSectionRendered')).toHaveTextContent('logs-foo-default');
+      expect(queryByTestId('metricsExperienceFlyoutOverviewTabIndexLabel')).not.toBeInTheDocument();
+    });
+
+    it('data_stream + streams feature off -> renders Data stream metadata row, no link', () => {
+      mockSourceKind(METRIC_SOURCE_KIND.DATA_STREAM);
+      const metricItem = createMockMetric({ indexName: 'logs-foo-default' });
+
+      const { getByTestId, queryByTestId } = renderTab(metricItem, undefined);
+
+      expect(queryByTestId('streamFieldSectionRendered')).not.toBeInTheDocument();
+      expect(getByTestId('metricsExperienceFlyoutOverviewTabDataStreamLabel')).toHaveTextContent(
+        'logs-foo-default'
+      );
+    });
+
+    it('data_stream + no external services -> renders Data stream metadata row (regression fix)', () => {
+      mockSourceKind(METRIC_SOURCE_KIND.DATA_STREAM);
+      const metricItem = createMockMetric({ indexName: 'logs-foo-default' });
+
+      const { getByTestId, queryByTestId } = renderTab(metricItem, undefined, false);
+
+      expect(queryByTestId('streamFieldSectionRendered')).not.toBeInTheDocument();
+      expect(getByTestId('metricsExperienceFlyoutOverviewTabDataStreamLabel')).toHaveTextContent(
+        'logs-foo-default'
+      );
+    });
+
+    it('index + streams feature on -> renders Index metadata row, no link', () => {
+      mockSourceKind(METRIC_SOURCE_KIND.INDEX);
+      const renderFn = linkRenderer();
+      const metricItem = createMockMetric({ indexName: 'metrics-plain-index' });
+
+      const { getByTestId, queryByTestId } = renderTab(metricItem, renderFn);
+
+      expect(renderFn).not.toHaveBeenCalled();
+      expect(queryByTestId('streamFieldSectionRendered')).not.toBeInTheDocument();
+      expect(getByTestId('metricsExperienceFlyoutOverviewTabIndexLabel')).toHaveTextContent(
+        'metrics-plain-index'
+      );
+    });
+
+    it('index + streams feature off -> renders Index metadata row, no link', () => {
+      mockSourceKind(METRIC_SOURCE_KIND.INDEX);
+      const metricItem = createMockMetric({ indexName: 'metrics-plain-index' });
+
+      const { getByTestId, queryByTestId } = renderTab(metricItem, undefined);
+
+      expect(queryByTestId('streamFieldSectionRendered')).not.toBeInTheDocument();
+      expect(getByTestId('metricsExperienceFlyoutOverviewTabIndexLabel')).toHaveTextContent(
+        'metrics-plain-index'
+      );
+    });
+
+    it('non-local data_stream (CCS) + streams feature on -> renders Data stream metadata row, no link', () => {
+      mockSourceKind(METRIC_SOURCE_KIND.DATA_STREAM);
+      const renderFn = linkRenderer();
+      const metricItem = createMockMetric({
+        indexName: 'remote_cluster:metrics-activemq.broker-default',
+      });
+
+      const { getByTestId, queryByTestId } = renderTab(metricItem, renderFn);
+
+      // The streams flyout cannot resolve cross-cluster / cross-project names,
+      // so we fall back to the metadata row instead of rendering a broken link.
+      expect(renderFn).not.toHaveBeenCalled();
+      expect(queryByTestId('streamFieldSectionRendered')).not.toBeInTheDocument();
+      expect(getByTestId('metricsExperienceFlyoutOverviewTabDataStreamLabel')).toHaveTextContent(
+        'remote_cluster:metrics-activemq.broker-default'
+      );
+      // Remote sources are not classified via `_resolve/index`; the hook is
+      // always called with `undefined` so we never issue a request that would
+      // fail or return a misleading result.
+      expect(mockedUseMetricSourceKind).toHaveBeenCalledWith({
+        name: undefined,
+        fallback: METRIC_SOURCE_KIND.DATA_STREAM,
+      });
     });
   });
 });

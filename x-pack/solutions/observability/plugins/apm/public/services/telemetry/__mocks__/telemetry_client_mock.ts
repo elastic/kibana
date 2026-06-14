@@ -13,4 +13,8 @@ export const mockTelemetryClient: ITelemetryClient = {
   reportSloOverviewFlyoutSearchQueried: jest.fn(),
   reportSloOverviewFlyoutStatusFiltered: jest.fn(),
   reportSloInfoShown: jest.fn(),
+  reportServiceMapDagreLayoutFallback: jest.fn(),
+  reportServiceMapAddedToDashboard: jest.fn(),
+  reportMetricsCalloutDateRangeSelected: jest.fn(),
+  reportMetricsCalloutLoaded: jest.fn(),
 };

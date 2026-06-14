@@ -18,6 +18,7 @@ import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
 import { createServerRoute } from '../create_server_route';
 import { StatusError } from '../../lib/streams/errors/status_error';
 import { generateArchive, parseArchive } from '../../lib/content';
+import { exportContentRequest } from '../../oas_examples';
 import {
   prepareStreamsForExport,
   prepareStreamsForImport,
@@ -40,10 +41,26 @@ const exportContentRoute = createServerRoute({
       since: '9.1.0',
       stability: 'experimental',
     },
+    oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {
+              exportContent: { value: exportContentRequest },
+            },
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: 'Content pack archive for the stream.',
+        },
+      },
+    }),
   },
   params: z.object({
     path: z.object({
-      name: z.string(),
+      name: z.string().describe('The name of the stream to export content from.'),
     }),
     body: z.object({
       name: z.string(),
@@ -60,7 +77,7 @@ const exportContentRoute = createServerRoute({
   async handler({ params, request, response, context, getScopedClients }) {
     await checkEnabled(context);
 
-    const { queryClient, streamsClient } = await getScopedClients({ request });
+    const { getQueryClient, streamsClient } = await getScopedClients({ request });
 
     const root = await streamsClient.getStream(params.path.name);
     if (!Streams.WiredStream.Definition.is(root)) {
@@ -72,6 +89,7 @@ const exportContentRoute = createServerRoute({
       streamsClient.getDescendants(params.path.name),
     ]);
 
+    const queryClient = await getQueryClient();
     const queryLinks = await queryClient.getStreamToQueryLinksMap([
       params.path.name,
       ...descendants.map((stream) => stream.name),
@@ -154,10 +172,31 @@ const importContentRoute = createServerRoute({
       maxBytes: MAX_CONTENT_PACK_SIZE_BYTES,
       output: 'stream',
     },
+    oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'multipart/form-data': {
+            examples: {
+              importContent: {
+                value: {
+                  include: JSON.stringify({ objects: { all: {} } }),
+                  content: '<binary zip archive>',
+                },
+              },
+            },
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: 'Content was imported into the stream successfully.',
+        },
+      },
+    }),
   },
   params: z.object({
     path: z.object({
-      name: z.string(),
+      name: z.string().describe('The name of the stream to import content into.'),
     }),
     body: z.object({
       include: z
@@ -174,7 +213,7 @@ const importContentRoute = createServerRoute({
   async handler({ params, request, context, getScopedClients }) {
     await checkEnabled(context);
 
-    const { queryClient, streamsClient } = await getScopedClients({ request });
+    const { getQueryClient, streamsClient } = await getScopedClients({ request });
 
     const root = await streamsClient.getStream(params.path.name);
     if (!Streams.WiredStream.Definition.is(root)) {
@@ -184,6 +223,7 @@ const importContentRoute = createServerRoute({
     const contentPack = await parseArchive(params.body.content);
 
     const descendants = await streamsClient.getDescendants(params.path.name);
+    const queryClient = await getQueryClient();
     const queryLinks = await queryClient.getStreamToQueryLinksMap([
       params.path.name,
       ...descendants.map(({ name }) => name),

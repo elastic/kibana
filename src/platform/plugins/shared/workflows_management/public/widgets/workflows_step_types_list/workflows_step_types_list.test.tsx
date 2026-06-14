@@ -16,8 +16,26 @@ jest.mock('@kbn/workflows', () => ({
   getBuiltInStepDefinition: jest.fn(() => undefined),
 }));
 
-jest.mock('../../shared/ui/step_icons/get_step_icon_type', () => ({
-  getStepIconType: jest.fn(() => 'globe'),
+jest.mock('../../shared/ui/step_icons/get_base_connector_type', () => ({
+  getBaseConnectorType: jest.fn((type: string) => {
+    if (type.startsWith('elasticsearch.')) {
+      return 'elasticsearch';
+    }
+    if (type.startsWith('kibana.')) {
+      return 'kibana';
+    }
+    const normalized = type.startsWith('.') ? type.slice(1) : type;
+    if (normalized.includes('.')) {
+      return normalized.split('.')[0];
+    }
+    return normalized;
+  }),
+}));
+
+jest.mock('../../shared/ui/step_icons/step_icon', () => ({
+  StepIcon: ({ stepType, title }: { stepType: string; title?: string }) => (
+    <span data-test-subj="step-icon" data-step-type={stepType} title={title} />
+  ),
 }));
 
 describe('calculateVisibleIconsCount', () => {
@@ -102,6 +120,19 @@ describe('WorkflowsStepTypesList', () => {
     const httpIcons = document.querySelectorAll('[title="http"]');
     const slackIcons = document.querySelectorAll('[title="slack"]');
     expect(httpIcons.length).toBe(1);
+    expect(slackIcons.length).toBe(1);
+  });
+
+  it('deduplicates by base connector type', () => {
+    const steps = [
+      { name: 'step1', type: 'elasticsearch.search' },
+      { name: 'step2', type: 'elasticsearch.bulk' },
+      { name: 'step3', type: 'slack' },
+    ];
+    render(<WorkflowsStepTypesList steps={steps} />);
+    const esIcons = document.querySelectorAll('[title="elasticsearch"]');
+    const slackIcons = document.querySelectorAll('[title="slack"]');
+    expect(esIcons.length).toBe(1);
     expect(slackIcons.length).toBe(1);
   });
 });

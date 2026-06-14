@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import '../../../../__mocks__/shallow_useeffect.mock';
 import { setMockValues, setMockActions } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
@@ -87,7 +86,7 @@ describe('SyncsContextMenu', () => {
     expect(lastButton.prop('disabled')).toEqual(false);
     expect(lastButton.text()).toEqual('Cancel Syncs');
 
-    menuItems.last().simulate('click');
+    menuItems.last().find('button').first().simulate('click');
     expect(cancelSyncs).toHaveBeenCalled();
   });
 
@@ -113,7 +112,7 @@ describe('SyncsContextMenu', () => {
         disabled: false,
       })
     );
-    menuItems.at(0).simulate('click');
+    menuItems.at(0).find('button').first().simulate('click');
     expect(startSync).toHaveBeenCalled();
   });
 

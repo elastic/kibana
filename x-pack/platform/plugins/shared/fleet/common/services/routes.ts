@@ -65,6 +65,13 @@ export const epmRouteService = {
     return EPM_API_ROUTES.STATS_PATTERN.replace('{pkgName}', pkgName);
   },
 
+  getDependenciesPath: (pkgName: string, pkgVersion: string) => {
+    return EPM_API_ROUTES.DEPENDENCIES_PATTERN.replace('{pkgName}', pkgName).replace(
+      '{pkgVersion}',
+      pkgVersion
+    );
+  },
+
   getFilePath: (filePath: string) => {
     return `${EPM_API_ROOT}${filePath.replace('/package', '/packages')}`;
   },
@@ -319,6 +326,9 @@ export const agentRouteService = {
   getUnenrollPath: (agentId: string) =>
     AGENT_API_ROUTES.UNENROLL_PATTERN.replace('{agentId}', agentId),
   getBulkUnenrollPath: () => AGENT_API_ROUTES.BULK_UNENROLL_PATTERN,
+  getRemoveCollectorPath: (agentId: string) =>
+    AGENT_API_ROUTES.REMOVE_COLLECTOR_PATTERN.replace('{agentId}', agentId),
+  getBulkRemoveCollectorsPath: () => AGENT_API_ROUTES.BULK_REMOVE_COLLECTORS_PATTERN,
   getReassignPath: (agentId: string) =>
     AGENT_API_ROUTES.REASSIGN_PATTERN.replace('{agentId}', agentId),
   getBulkReassignPath: () => AGENT_API_ROUTES.BULK_REASSIGN_PATTERN,
@@ -360,6 +370,7 @@ export const agentRouteService = {
   postGenerateAgentsReport: () => AGENT_API_ROUTES.GENERATE_REPORT_PATTERN,
   getAgentEffectiveConfig: (agentId: string) =>
     AGENT_API_ROUTES.EFFECTIVE_CONFIG_PATTERN.replace('{agentId}', agentId),
+  getCollectorGroupsPath: () => AGENT_API_ROUTES.COLLECTOR_GROUPS_PATTERN,
 };
 
 export const outputRoutesService = {
@@ -420,6 +431,7 @@ export const enrollmentAPIKeyRouteService = {
   getInfoPath: (keyId: string) => ENROLLMENT_API_KEY_ROUTES.INFO_PATTERN.replace('{keyId}', keyId),
   getDeletePath: (keyId: string) =>
     ENROLLMENT_API_KEY_ROUTES.DELETE_PATTERN.replace('{keyId}', keyId),
+  getBulkDeletePath: () => ENROLLMENT_API_KEY_ROUTES.BULK_DELETE_PATTERN,
 };
 
 export const uninstallTokensRouteService = {

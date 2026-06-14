@@ -22,13 +22,14 @@ export function useInsightsDiscoveryApi() {
 
   return useMemo(
     () => ({
-      scheduleInsightsDiscoveryTask: async (streamNames?: string[]) => {
+      scheduleInsightsDiscoveryTask: async (streamNames?: string[], connectorId?: string) => {
         await streamsRepositoryClient.fetch('POST /internal/streams/_insights/_task', {
           signal,
           params: {
             body: {
               action: 'schedule',
               ...(streamNames && streamNames.length > 0 ? { streamNames } : {}),
+              ...(connectorId !== undefined && { connectorId }),
             },
           },
         });

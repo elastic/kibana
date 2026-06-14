@@ -9,6 +9,8 @@ import React, { useState } from 'react';
 import {
   EuiBadge,
   EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -17,17 +19,19 @@ import {
   EuiHorizontalRule,
   EuiLink,
   EuiLoadingSpinner,
+  EuiSpacer,
   EuiText,
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { labels } from '../../../utils/i18n';
 import { usePlugin } from '../../../hooks/plugins/use_plugin';
 import { useSkill } from '../../../hooks/skills/use_skills';
-import { DetailRow } from '../common/detail_row';
 import { DetailPanelLayout } from '../common/detail_panel_layout';
-import { RenderSkillContentReadOnly } from '../common/render_skill_content_read_only';
+import { RenderMarkdownReadOnly } from '../common/render_markdown_read_only';
 
 interface PluginDetailPanelProps {
   pluginId: string;
@@ -44,13 +48,15 @@ export const PluginDetailPanel: React.FC<PluginDetailPanelProps> = ({
   const { plugin, isLoading } = usePlugin({ pluginId });
   const [selectedSkillId, setSelectedSkillId] = useState<string | null>(null);
 
+  const isReadOnly = plugin?.readonly;
+
   return (
     <>
       <DetailPanelLayout
         isLoading={isLoading}
         isEmpty={!plugin}
         title={plugin?.name ?? pluginId}
-        showAutoIcon={isAuto}
+        isReadOnly={isReadOnly}
         headerContent={
           <>
             <div
@@ -77,7 +83,17 @@ export const PluginDetailPanel: React.FC<PluginDetailPanelProps> = ({
           isAuto ? (
             <EuiBadge color="hollow">{labels.agentPlugins.autoIncludedBadgeLabel}</EuiBadge>
           ) : (
-            <EuiButtonEmpty iconType="cross" size="xs" color="danger" onClick={openConfirmRemove}>
+            <EuiButtonEmpty
+              iconType="cross"
+              size="xs"
+              color="danger"
+              onClick={openConfirmRemove}
+              {...getEbtProps({
+                element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                action: AGENT_BUILDER_UI_EBT.action.agentCustomization.ENTITY_REMOVE,
+                detail: AGENT_BUILDER_UI_EBT.entity.PLUGIN,
+              })}
+            >
               {labels.agentPlugins.removePluginButtonLabel}
             </EuiButtonEmpty>
           )
@@ -89,16 +105,14 @@ export const PluginDetailPanel: React.FC<PluginDetailPanelProps> = ({
           cancelButtonText: labels.agentPlugins.removePluginCancelButton,
           onConfirm: onRemove,
         }}
+        footer={plugin && <PluginIdFooter pluginId={plugin.id} />}
       >
-        <div
-          css={css`
-            padding: ${euiTheme.size.m};
-          `}
-        >
-          <DetailRow label={labels.agentPlugins.pluginDetailIdLabel}>
-            <EuiText size="s">{plugin?.id}</EuiText>
-          </DetailRow>
-          <DetailRow label={labels.agentPlugins.pluginDetailSourceLabel} isLast>
+        <EuiFlexGroup direction="column" gutterSize="none">
+          <EuiTitle size="xs">
+            <h4>{labels.agentPlugins.pluginDetailSourceLabel}</h4>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiFlexItem>
             {plugin?.source_url ? (
               <EuiLink href={plugin.source_url} target="_blank" external>
                 {plugin.source_url}
@@ -108,9 +122,13 @@ export const PluginDetailPanel: React.FC<PluginDetailPanelProps> = ({
                 {'\u2014'}
               </EuiText>
             )}
-          </DetailRow>
-          <EuiHorizontalRule margin="none" />
-          <DetailRow label={labels.agentPlugins.pluginDetailSkillsLabel}>
+          </EuiFlexItem>
+          <EuiHorizontalRule margin="l" />
+          <EuiTitle size="xs">
+            <h4>{labels.agentPlugins.pluginDetailSkillsLabel}</h4>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiFlexItem>
             {plugin?.skill_ids && plugin.skill_ids.length > 0 ? (
               <EuiFlexGroup direction="column" gutterSize="xs">
                 {plugin.skill_ids.map((skillId) => (
@@ -124,8 +142,8 @@ export const PluginDetailPanel: React.FC<PluginDetailPanelProps> = ({
                 {labels.plugins.noSkillsLabel}
               </EuiText>
             )}
-          </DetailRow>
-        </div>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </DetailPanelLayout>
 
       {selectedSkillId && (
@@ -136,6 +154,48 @@ export const PluginDetailPanel: React.FC<PluginDetailPanelProps> = ({
         />
       )}
     </>
+  );
+};
+
+const PluginIdFooter: React.FC<{ pluginId: string }> = ({ pluginId }) => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <EuiFlexGroup
+      alignItems="center"
+      justifyContent="center"
+      gutterSize="s"
+      responsive={false}
+      css={css`
+        padding: ${euiTheme.size.s} ${euiTheme.size.m};
+      `}
+    >
+      <EuiFlexItem grow={false}>
+        <EuiText size="xs">
+          <strong>{labels.agentPlugins.pluginDetailIdLabel}</strong>
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiText size="xs" color="subdued">
+          {pluginId}
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiCopy textToCopy={pluginId}>
+          {(copy) => (
+            <EuiButtonIcon
+              iconType="copyClipboard"
+              onClick={copy}
+              aria-label={labels.agentPlugins.pluginDetailIdCopyLabel}
+              size="xs"
+              css={css`
+                color: ${euiTheme.colors.textSubdued};
+              `}
+            />
+          )}
+        </EuiCopy>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 
@@ -194,7 +254,10 @@ const SkillDetailFlyout: React.FC<{
             </EuiFlexItem>
             <EuiHorizontalRule margin="none" />
             <EuiFlexItem grow={false}>
-              <RenderSkillContentReadOnly content={skill.content ?? ''} />
+              <RenderMarkdownReadOnly
+                label={labels.agentPlugins.pluginDetailInstructionsLabel}
+                content={skill.content ?? ''}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         ) : null}

@@ -17,9 +17,11 @@ import { PacksTableEmptyState } from './empty_state';
 import { useAssetsStatus } from '../../../assets/use_assets_status';
 import { usePacks } from '../../../packs/use_packs';
 import { useIsExperimentalFeatureEnabled } from '../../../common/experimental_features_context';
+import { useKibana } from '../../../common/lib/kibana';
 import { PacksTable } from './packs_table';
 
 const PacksPageComponent = () => {
+  const permissions = useKibana().services.application.capabilities.osquery;
   const queryHistoryRework = useIsExperimentalFeatureEnabled('queryHistoryRework');
   const { data: assetsData, isLoading: isLoadingAssetsStatus } = useAssetsStatus();
   const { data: packsData, isLoading: isLoadingPacks } = usePacks({
@@ -31,7 +33,7 @@ const PacksPageComponent = () => {
   );
 
   if (queryHistoryRework) {
-    if (isLoadingAssetsStatus) {
+    if (isLoadingAssetsStatus && permissions.writePacks) {
       return (
         <div css={fullWidthContentCss}>
           <EuiSkeletonText lines={10} />

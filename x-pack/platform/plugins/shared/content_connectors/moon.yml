@@ -60,6 +60,8 @@ dependsOn:
   - '@kbn/core-http-browser-mocks'
   - '@kbn/home-plugin'
   - '@kbn/logging'
+  - '@kbn/shared-ux-ai-components'
+  - '@kbn/deeplinks-management'
 tags:
   - plugin
   - prod

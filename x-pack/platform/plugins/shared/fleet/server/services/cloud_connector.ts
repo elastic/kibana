@@ -8,6 +8,7 @@
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 
+import { isCloudConnectorSecretReference } from '../../common/types/models/cloud_connector';
 import type {
   CloudConnector,
   CloudConnectorListOptions,
@@ -33,6 +34,8 @@ import {
   SERVICE_ACCOUNT_VAR_NAME,
   AUDIENCE_VAR_NAME,
   GCP_CREDENTIALS_CLOUD_CONNECTOR_ID,
+  buildPackagePolicyFilterExcludingHiddenPackages,
+  CLOUD_CONNECTOR_LIST_DEFAULT_PER_PAGE,
 } from '../../common/constants/cloud_connector';
 
 import {
@@ -41,9 +44,11 @@ import {
   CloudConnectorInvalidVarsError,
   CloudConnectorDeleteError,
   rethrowIfInstanceOrWrap,
+  getErrorMessage,
 } from '../errors';
 
 import { appContextService } from './app_context';
+import { validatePolicyNamespaceForSpace } from './spaces/policy_namespaces';
 import { extractSecretIdsFromCloudConnectorVars } from './secrets/cloud_connector';
 import { deleteSecrets } from './secrets/common';
 
@@ -91,10 +96,11 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
   }
 
   /**
-   * Queries package policies to get a map of cloud connector IDs to their package policy counts.
-   * Uses ES aggregations for efficient counting instead of fetching all documents.
-   * @param soClient - Saved objects client
-   * @returns Map of cloud connector ID to package policy count
+   * Queries package policies to get a map of cloud connector IDs to their
+   * user-visible package policy counts. Hidden internal packages (e.g. verifier_otel)
+   * and non-latest revisions (e.g. `:prev` rollback snapshots) are excluded in the
+   * saved-objects filter. Uses a terms aggregation (see `package_policies_aggregation`).
+   * `size` matches {@link SO_SEARCH_LIMIT} so bucket count is not capped at ES default (10).
    */
   private async getPackagePolicyCountsMap(
     soClient: SavedObjectsClientContract
@@ -102,12 +108,23 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
     const logger = this.getLogger('getPackagePolicyCountsMap');
 
     try {
-      const result = await soClient.find<{ cloud_connector_id?: string }>({
+      const filter = buildPackagePolicyFilterExcludingHiddenPackages(
+        `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.cloud_connector_id:*`
+      );
+
+      const res = await soClient.find<
+        Record<string, unknown>,
+        {
+          count_by_cloud_connector: {
+            buckets: Array<{ key: string; doc_count: number }>;
+          };
+        }
+      >({
         type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-        filter: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.cloud_connector_id:*`,
-        perPage: 0, // We don't need the actual documents, only aggregation results
+        perPage: 0,
+        filter,
         aggs: {
-          packagePolicyCounts: {
+          count_by_cloud_connector: {
             terms: {
               field: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.cloud_connector_id`,
               size: SO_SEARCH_LIMIT,
@@ -117,19 +134,9 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
       });
 
       const countMap = new Map<string, number>();
-      const aggregations = result.aggregations as
-        | {
-            packagePolicyCounts?: {
-              buckets?: Array<{ key: string; doc_count: number }>;
-            };
-          }
-        | undefined;
-      const buckets = aggregations?.packagePolicyCounts?.buckets || [];
-
-      for (const bucket of buckets) {
+      for (const bucket of res.aggregations?.count_by_cloud_connector?.buckets ?? []) {
         countMap.set(bucket.key, bucket.doc_count);
       }
-
       return countMap;
     } catch (error) {
       logger.error(`Failed to get package policy counts: ${error.message}`);
@@ -150,10 +157,15 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
     const logger = this.getLogger('getPackagePolicyCount');
 
     try {
-      const result = await soClient.find<{ cloud_connector_id?: string }>({
+      const filter = buildPackagePolicyFilterExcludingHiddenPackages(
+        `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.cloud_connector_id:"${cloudConnectorId}"`
+      );
+
+      const result = await soClient.find({
         type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-        filter: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.cloud_connector_id:"${cloudConnectorId}"`,
-        perPage: 0, // We only need the count
+        filter,
+        page: 1,
+        perPage: 0,
       });
 
       return result.total;
@@ -226,10 +238,14 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
       // Validate and normalize the name, checking for duplicates
       const name = await this.validateAndNormalizeName(soClient, cloudConnector.name);
 
-      // Check if space awareness is enabled for namespace handling
-      const { isSpaceAwarenessEnabled } = await import('./spaces/helpers');
-      const useSpaceAwareness = await isSpaceAwarenessEnabled();
-      const namespace = useSpaceAwareness ? '*' : undefined;
+      const namespace = cloudConnector.namespace ?? '*';
+
+      if (namespace) {
+        await validatePolicyNamespaceForSpace({
+          namespace,
+          spaceId: soClient.getCurrentNamespace(),
+        });
+      }
 
       const cloudConnectorAttributes: CloudConnectorSOAttributes = {
         name,
@@ -239,6 +255,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         vars,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
+        verification_status: 'pending',
       };
 
       const savedObject = await soClient.create<CloudConnectorSOAttributes>(
@@ -254,11 +271,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         packagePolicyCount: 0,
       };
     } catch (error) {
-      logger.error(
-        `Failed to create cloud connector: ${
-          error instanceof Error ? error.message : String(error)
-        }`
-      );
+      logger.error(`Failed to create cloud connector: ${getErrorMessage(error)}`);
       rethrowIfInstanceOrWrap(
         error,
         CloudConnectorCreateError,
@@ -288,7 +301,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
       const findOptions: any = {
         type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
         page: options?.page || 1,
-        perPage: options?.perPage || 20,
+        perPage: options?.perPage || CLOUD_CONNECTOR_LIST_DEFAULT_PER_PAGE,
         sortField: 'created_at',
         sortOrder: 'desc',
       };
@@ -432,11 +445,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         packagePolicyCount,
       };
     } catch (error) {
-      logger.error(
-        `Failed to update cloud connector: ${
-          error instanceof Error ? error.message : String(error)
-        }`
-      );
+      logger.error(`Failed to update cloud connector: ${getErrorMessage(error)}`);
       rethrowIfInstanceOrWrap(error, CloudConnectorCreateError, 'Failed to update cloud connector');
     }
   }
@@ -536,7 +545,12 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         throw new CloudConnectorInvalidVarsError('Package policy must contain role_arn variable');
       }
 
-      const externalId: CloudConnectorSecretReference = awsVars.external_id?.value;
+      const externalIdValue = awsVars.external_id?.value;
+      const externalId: CloudConnectorSecretReference | undefined = isCloudConnectorSecretReference(
+        externalIdValue
+      )
+        ? externalIdValue
+        : undefined;
       if (!externalId) {
         logger.error('Package policy must contain valid external_id secret reference');
         throw new CloudConnectorInvalidVarsError(

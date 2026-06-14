@@ -5,87 +5,67 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
-import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
-import type { Logger as KibanaLogger } from '@kbn/logging';
+import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
-import { Logger } from '@kbn/core-di';
-import type { RouteHandler } from '@kbn/core-di-server';
-import { Request, Response } from '@kbn/core-di-server';
-import type { RouteSecurity } from '@kbn/core-http-server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { z } from '@kbn/zod/v4';
-import { createRuleDataSchema, ruleResponseSchema } from '@kbn/alerting-v2-schemas';
+import { Request } from '@kbn/core-di-server';
+import {
+  createRuleDataSchema,
+  errorResponseSchema,
+  ruleResponseSchema,
+} from '@kbn/alerting-v2-schemas';
 import type { CreateRuleData, RuleResponse } from '@kbn/alerting-v2-schemas';
 import { RulesClient } from '../../lib/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { ALERTING_V2_RULE_API_PATH } from '../constants';
-
-const createRuleParamsSchema = z.object({
-  id: z
-    .string()
-    .optional()
-    .describe('An optional identifier for the rule. If omitted, an ID is generated automatically.'),
-});
+import { BaseAlertingRoute } from '../base_alerting_route';
+import { AlertingRouteContext } from '../alerting_route_context';
 
 @injectable()
-export class CreateRuleRoute implements RouteHandler {
+export class CreateRuleRoute extends BaseAlertingRoute {
   static method = 'post' as const;
-  static path = `${ALERTING_V2_RULE_API_PATH}/{id?}`;
+  static path = `${ALERTING_V2_RULE_API_PATH}`;
   static security: RouteSecurity = {
     authz: {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.rules.write],
     },
   };
-  static options = {
-    access: 'public',
+  static routeOptions = {
     summary: 'Create a rule',
-    tags: ['oas-tag:alerting-v2'],
-    availability: { stability: 'experimental' },
+    description:
+      'Creates a rule with a server-generated identifier. To create or replace a rule with a client-supplied identifier, use PUT /api/alerting/v2/rules/.',
   } as const;
-  static validate = {
+  static schemas = {
     request: {
-      body: buildRouteValidationWithZod(createRuleDataSchema),
-      params: buildRouteValidationWithZod(createRuleParamsSchema),
+      body: createRuleDataSchema,
     },
     response: {
-      200: {
+      201: {
         body: () => ruleResponseSchema,
-        description: 'Indicates a successful call.',
+        description: 'Returns the newly created rule.',
       },
       400: {
+        body: () => errorResponseSchema,
         description: 'Indicates an invalid schema or parameters.',
       },
     },
   };
 
+  protected readonly routeName = 'create rule';
+
   constructor(
-    @inject(Logger) private readonly logger: KibanaLogger,
+    @inject(AlertingRouteContext) ctx: AlertingRouteContext,
     @inject(Request)
-    private readonly request: KibanaRequest<
-      z.infer<typeof createRuleParamsSchema>,
-      unknown,
-      CreateRuleData
-    >,
-    @inject(Response) private readonly response: KibanaResponseFactory,
+    private readonly request: KibanaRequest<unknown, unknown, CreateRuleData>,
     @inject(RulesClient) private readonly rulesClient: RulesClient
-  ) {}
+  ) {
+    super(ctx);
+  }
 
-  async handle() {
-    try {
-      const created: RuleResponse = await this.rulesClient.createRule({
-        data: this.request.body,
-        options: { id: this.request.params.id },
-      });
+  protected async execute() {
+    const created: RuleResponse = await this.rulesClient.createRule({
+      data: this.request.body,
+    });
 
-      return this.response.ok({ body: created });
-    } catch (e) {
-      const boom = Boom.isBoom(e) ? e : Boom.boomify(e);
-      this.logger.debug(`create esql rule route error: ${boom.message}`);
-      return this.response.customError({
-        statusCode: boom.output.statusCode,
-        body: boom.output.payload,
-      });
-    }
+    return this.ctx.response.created({ body: created });
   }
 }

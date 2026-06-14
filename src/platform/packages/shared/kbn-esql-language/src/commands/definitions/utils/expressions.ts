@@ -13,6 +13,7 @@ import {
   isInlineCast,
   isLiteral,
   isParamLiteral,
+  isSubQuery,
   lastItem,
   type PromQLAstExpression,
 } from '@elastic/esql';
@@ -23,8 +24,8 @@ import { getMatchingSignatures } from './signatures';
 import { getColumnForASTNode } from './shared';
 import type { ESQLColumnData } from '../../registry/types';
 import { UnmappedFieldsStrategy } from '../../registry/types';
+import { inOperators } from '../all_operators';
 import { TIME_SYSTEM_PARAMS } from './literals';
-import { isMarkerNode } from './ast';
 import { getUnmappedFieldType } from './settings';
 import { getPromqlFunctionDefinition } from './promql';
 
@@ -67,11 +68,10 @@ export function getExpressionType(
     }
 
     const fnDef = getFunctionDefinition(castFunction);
-    if (!fnDef) {
+    if (!fnDef || fnDef.signatures.length === 0) {
       return 'unknown';
     }
 
-    // Safe to get the first one as all cast functions have a single return type
     return fnDef.signatures[0].returnType;
   }
 
@@ -128,11 +128,20 @@ export function getExpressionType(
        * at least we know that the final argument to case will never be a conditional
        * expression, always a result expression.
        *
-       * One problem with this is that if a false case is not provided, the return type
+       * One problem with this is that if a elseValue is not provided, the return type
        * will be null, which we aren't detecting. But this is ok because we consider
        * userDefinedColumns and fields to be nullable anyways and account for that during validation.
        */
       return getExpressionType(root.args[root.args.length - 1], columns, unmappedFieldsStrategy);
+    }
+
+    const rightArg = root.args[1];
+    if (
+      inOperators.some(({ name }) => name === fnDefinition.name) &&
+      !Array.isArray(rightArg) &&
+      isSubQuery(rightArg)
+    ) {
+      return 'boolean';
     }
 
     const { argTypes, literalMask } = resolveArgumentTypes(root.args, {
@@ -282,7 +291,7 @@ export function getBinaryExpressionOperand(
 }
 
 /**
- * Extracts a valid expression root from an assignment, handling arrays and marker nodes.
+ * Extracts a valid expression root from an assignment, handling array operands.
  */
 export function getAssignmentExpressionRoot(
   assignment: ESQLFunction
@@ -290,7 +299,7 @@ export function getAssignmentExpressionRoot(
   const rhs = getBinaryExpressionOperand(assignment, 'right');
   const root = Array.isArray(rhs) ? rhs[0] : rhs;
 
-  if (!root || isMarkerNode(root)) {
+  if (!root) {
     return undefined;
   }
 

@@ -14,19 +14,20 @@ import type {
   Criteria,
 } from '@elastic/eui';
 import {
-  EuiSuperDatePicker,
-  useEuiTheme,
-  EuiFlexItem,
-  EuiFieldSearch,
   EuiBasicTable,
-  EuiFlexGroup,
-  EuiContextMenuItem,
-  EuiComboBox,
   EuiButtonIcon,
-  EuiPopover,
+  EuiComboBox,
+  EuiContextMenuItem,
   EuiContextMenuPanel,
-  type OnTimeChangeProps,
   EuiEmptyPrompt,
+  EuiFieldSearch,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopover,
+  EuiSuperDatePicker,
+  EuiToolTip,
+  type OnTimeChangeProps,
+  useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage, FormattedDate } from '@kbn/i18n-react';
 import { useLinkProps, useUiTracker } from '@kbn/observability-shared-plugin/public';
@@ -228,14 +229,21 @@ const AnomalyActionMenu = ({
       anchorPosition="downRight"
       panelPaddingSize="none"
       button={
-        <EuiButtonIcon
-          data-test-subj="infraAnomalyActionMenuButton"
-          iconType="boxesVertical"
-          onClick={handleToggleMenu}
-          aria-label={i18n.translate('xpack.infra.ml.anomalyFlyout.actions.openActionMenu', {
+        <EuiToolTip
+          content={i18n.translate('xpack.infra.ml.anomalyFlyout.actions.openActionMenu', {
             defaultMessage: 'Open',
           })}
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            data-test-subj="infraAnomalyActionMenuButton"
+            iconType="boxesVertical"
+            onClick={handleToggleMenu}
+            aria-label={i18n.translate('xpack.infra.ml.anomalyFlyout.actions.openActionMenu', {
+              defaultMessage: 'Open',
+            })}
+          />
+        </EuiToolTip>
       }
       isOpen={isOpen}
       closePopover={close}
@@ -279,10 +287,9 @@ export interface Props {
   dateRange?: TimeRange;
   // In case the date picker is managed outside this component
   hideDatePicker?: boolean;
-  // subject to watch the completition of the request
+  // subject to watch the completion of the request
   fetcherOpts?: Pick<FetcherOptions, 'autoFetch' | 'requestObservable$'>;
   hideSelectGroup?: boolean;
-  onJobTypeChange?: (jobType: 'host' | 'pod') => void;
 }
 
 const DEFAULT_DATE_RANGE: TimeRange = {
@@ -290,7 +297,7 @@ const DEFAULT_DATE_RANGE: TimeRange = {
   to: 'now',
 };
 
-export const JOB_OPTIONS = [
+const JOB_OPTIONS = [
   {
     id: `hosts` as JobType,
     label: i18n.translate('xpack.infra.ml.anomalyFlyout.hostBtn', {
@@ -313,7 +320,6 @@ export const AnomaliesTable = ({
   dateRange = DEFAULT_DATE_RANGE,
   hideDatePicker = false,
   fetcherOpts,
-  onJobTypeChange,
   hideSelectGroup,
 }: Props) => {
   const [search, setSearch] = useState('');
@@ -438,14 +444,10 @@ export const AnomaliesTable = ({
     setSearch(e.target.value);
   }, []);
 
-  const changeJobType = useCallback(
-    (selectedOptions: any) => {
-      setSelectedJobType(selectedOptions);
-      setJobType(selectedOptions[0].id);
-      onJobTypeChange?.(selectedOptions[0].id === 'hosts' ? 'host' : 'pod');
-    },
-    [onJobTypeChange]
-  );
+  const changeJobType = useCallback((selectedOptions: any) => {
+    setSelectedJobType(selectedOptions);
+    setJobType(selectedOptions[0].id);
+  }, []);
 
   const changeSortOptions = useCallback(
     (nextSortOptions: Sort) => {

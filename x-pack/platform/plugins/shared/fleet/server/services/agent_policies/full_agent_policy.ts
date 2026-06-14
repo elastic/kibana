@@ -6,7 +6,7 @@
  */
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import { load } from 'js-yaml';
+import { parse } from 'yaml';
 import deepMerge from 'deepmerge';
 import { set } from '@kbn/safer-lodash-set';
 
@@ -163,7 +163,31 @@ export async function getFullAgentPolicy(
 
   let otelcolConfig;
   if (experimentalFeature.enableOtelIntegrations) {
-    otelcolConfig = generateOtelcolConfig(agentInputs, dataOutput, packageInfoCache);
+    const dataOutputProxy = dataOutput?.proxy_id
+      ? proxies.find((p) => p.id === dataOutput.proxy_id)
+      : undefined;
+
+    const packageOutputs = new Map<string, Output>();
+    for (const pkgPolicy of (agentPolicy.package_policies ?? []) as PackagePolicy[]) {
+      if (!pkgPolicy.output_id) continue;
+      const override = outputs.find((o) => o.id === pkgPolicy.output_id);
+      if (override) {
+        packageOutputs.set(pkgPolicy.id, override);
+      } else {
+        logger.warn(
+          `Output override [${pkgPolicy.output_id}] for package policy [${pkgPolicy.id}] not found, falling back to data output`
+        );
+      }
+    }
+
+    otelcolConfig = generateOtelcolConfig({
+      inputs: agentInputs,
+      dataOutput,
+      packageOutputs,
+      packageInfoCache,
+      proxy: dataOutputProxy,
+      logger,
+    });
   }
 
   const inputs = agentInputs
@@ -264,6 +288,11 @@ export async function getFullAgentPolicy(
         packagePolicy
       );
     } else {
+      if (packagePolicy.output_id) {
+        logger.warn(
+          `Output override [${packagePolicy.output_id}] for package policy [${packagePolicy.id}] not found, falling back to data output`
+        );
+      }
       packagePoliciesByOutputId[getOutputIdForAgentPolicy(dataOutput)].push(packagePolicy);
     }
   });
@@ -525,7 +554,7 @@ export function transformOutputToFullPolicyOutput(
     preset,
   } = output;
 
-  const configJs = config_yaml ? load(config_yaml) : {};
+  const configJs = config_yaml ? parse(config_yaml) : {};
 
   // build logic to read config_yaml and transform it with the new shipper data
   const isShipperDisabled = !configJs?.shipper || configJs?.shipper?.enabled === false;
@@ -677,7 +706,7 @@ export function transformOutputToFullPolicyOutput(
   }
 
   if (outputTypeSupportPresets(output.type)) {
-    newOutput.preset = preset ?? getDefaultPresetForEsOutput(config_yaml ?? '', load);
+    newOutput.preset = preset ?? getDefaultPresetForEsOutput(config_yaml ?? '', parse);
   }
 
   return newOutput;

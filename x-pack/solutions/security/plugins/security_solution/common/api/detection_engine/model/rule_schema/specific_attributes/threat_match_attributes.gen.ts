@@ -14,23 +14,25 @@
  *   version: not applicable
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { NonEmptyString } from '../../../../model/primitives.gen';
 
 /**
  * Query used to determine which fields in the Elasticsearch index are used for generating alerts.
  */
+export const ThreatQuery = lazySchema(() => z.string());
 export type ThreatQuery = z.infer<typeof ThreatQuery>;
-export const ThreatQuery = z.string();
 
+export const ThreatMappingEntry = lazySchema(() =>
+  z.object({
+    field: NonEmptyString,
+    type: z.literal('mapping'),
+    value: NonEmptyString,
+    negate: z.boolean().optional(),
+  })
+);
 export type ThreatMappingEntry = z.infer<typeof ThreatMappingEntry>;
-export const ThreatMappingEntry = z.object({
-  field: NonEmptyString,
-  type: z.literal('mapping'),
-  value: NonEmptyString,
-  negate: z.boolean().optional(),
-});
 
 /**
   * Array of entries objects that define mappings between the source event fields and the values in the Elasticsearch threat index. Each entries object must contain these fields:
@@ -42,32 +44,34 @@ export const ThreatMappingEntry = z.object({
 You can use Boolean and and or logic to define the conditions for when matching fields and values generate alerts. Sibling entries objects are evaluated using or logic, whereas multiple entries in a single entries object use and logic. See Example of Threat Match rule which uses both `and` and `or` logic.
 
   */
+export const ThreatMapping = lazySchema(() =>
+  z
+    .array(
+      z.object({
+        entries: z.array(ThreatMappingEntry),
+      })
+    )
+    .min(1)
+);
 export type ThreatMapping = z.infer<typeof ThreatMapping>;
-export const ThreatMapping = z
-  .array(
-    z.object({
-      entries: z.array(ThreatMappingEntry),
-    })
-  )
-  .min(1);
 
 /**
  * Elasticsearch indices used to check which field values generate alerts.
  */
+export const ThreatIndex = lazySchema(() => z.array(z.string()));
 export type ThreatIndex = z.infer<typeof ThreatIndex>;
-export const ThreatIndex = z.array(z.string());
 
+export const ThreatFilters = lazySchema(() => z.array(z.unknown()));
 export type ThreatFilters = z.infer<typeof ThreatFilters>;
-export const ThreatFilters = z.array(z.unknown());
 
 /**
  * Defines the path to the threat indicator in the indicator documents (optional)
  */
+export const ThreatIndicatorPath = lazySchema(() => z.string());
 export type ThreatIndicatorPath = z.infer<typeof ThreatIndicatorPath>;
-export const ThreatIndicatorPath = z.string();
 
+export const ConcurrentSearches = lazySchema(() => z.number().int().min(1));
 export type ConcurrentSearches = z.infer<typeof ConcurrentSearches>;
-export const ConcurrentSearches = z.number().int().min(1);
 
+export const ItemsPerSearch = lazySchema(() => z.number().int().min(1));
 export type ItemsPerSearch = z.infer<typeof ItemsPerSearch>;
-export const ItemsPerSearch = z.number().int().min(1);

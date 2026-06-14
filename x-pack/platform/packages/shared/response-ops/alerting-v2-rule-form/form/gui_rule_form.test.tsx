@@ -42,14 +42,10 @@ jest.mock('./fields/kind_field', () => ({
   KindField: () => <div data-test-subj="mockKindField">Kind Field</div>,
 }));
 
-jest.mock('./field_groups/attachment_runbook_field_group', () => ({
-  AttachmentRunbookFieldGroup: () => (
-    <div data-test-subj="mockAttachmentRunbookFieldGroup">Attachment Runbook Field Group</div>
+jest.mock('./field_groups/runbook_artifact_field', () => ({
+  RunbookArtifactField: () => (
+    <div data-test-subj="mockRunbookArtifactField">Runbook Artifact Field</div>
   ),
-}));
-
-jest.mock('../flyout/error_callout', () => ({
-  ErrorCallOut: () => <div data-test-subj="mockErrorCallOut">Error CallOut</div>,
 }));
 
 describe('GuiRuleForm', () => {
@@ -68,12 +64,6 @@ describe('GuiRuleForm', () => {
       const form = document.getElementById(RULE_FORM_ID);
       expect(form).toBeInTheDocument();
       expect(form?.tagName).toBe('FORM');
-    });
-
-    it('renders ErrorCallOut', () => {
-      render(<GuiRuleForm {...defaultProps} />, { wrapper: createFormWrapper() });
-
-      expect(screen.getByTestId('mockErrorCallOut')).toBeInTheDocument();
     });
 
     it('renders ConditionFieldGroup', () => {
@@ -100,10 +90,10 @@ describe('GuiRuleForm', () => {
       expect(screen.getByTestId('mockKindField')).toBeInTheDocument();
     });
 
-    it('renders AttachmentRunbookFieldGroup', () => {
+    it('renders RunbookArtifactField', () => {
       render(<GuiRuleForm {...defaultProps} />, { wrapper: createFormWrapper() });
 
-      expect(screen.getByTestId('mockAttachmentRunbookFieldGroup')).toBeInTheDocument();
+      expect(screen.getByTestId('mockRunbookArtifactField')).toBeInTheDocument();
     });
   });
 
@@ -144,13 +134,12 @@ describe('GuiRuleForm', () => {
       const order = Array.from(elements).map((el) => el.getAttribute('data-test-subj'));
 
       expect(order).toEqual([
-        'mockErrorCallOut',
         'mockRuleDetailsFieldGroup',
         'mockConditionFieldGroup',
         'mockRuleExecutionFieldGroup',
         'mockKindField',
         'mockAlertConditionsFieldGroup',
-        'mockAttachmentRunbookFieldGroup',
+        'mockRunbookArtifactField',
       ]);
     });
 
@@ -163,13 +152,12 @@ describe('GuiRuleForm', () => {
       const order = Array.from(elements).map((el) => el.getAttribute('data-test-subj'));
 
       expect(order).toEqual([
-        'mockErrorCallOut',
         'mockRuleDetailsFieldGroup',
         'mockConditionFieldGroup',
         'mockRuleExecutionFieldGroup',
         'mockKindField',
         'mockAlertConditionsFieldGroup',
-        'mockAttachmentRunbookFieldGroup',
+        'mockRunbookArtifactField',
       ]);
     });
   });

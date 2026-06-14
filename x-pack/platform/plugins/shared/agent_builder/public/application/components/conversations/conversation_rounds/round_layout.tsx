@@ -15,15 +15,21 @@ import type {
   AttachmentVersionRef,
 } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
-import { ConversationRoundStatus } from '@kbn/agent-builder-common';
-import { isConfirmationPrompt } from '@kbn/agent-builder-common/agents';
+import { ConversationRoundStatus, ConversationRoundStepType } from '@kbn/agent-builder-common';
+import { findTodosStep } from '@kbn/agent-builder-common/chat/conversation';
+import {
+  isAuthorizationPrompt,
+  isConfirmationPrompt,
+  type PromptResponse,
+} from '@kbn/agent-builder-common/agents';
 import { RoundInput } from './round_input';
-import { RoundThinking } from './round_thinking/round_thinking';
+import { RoundEvents } from './round_events/round_events';
 import { RoundResponse } from './round_response/round_response';
-import { useSendMessage } from '../../../context/send_message/send_message_context';
+import { useConversationStream } from '../../../hooks/use_conversation_stream';
 import { RoundError } from './round_error/round_error';
-import { ConfirmationPrompt } from './round_prompt';
+import { AuthorizationPrompt, ConfirmationPrompt } from './round_prompt';
 import { RoundAttachmentReferences } from './round_attachment_references';
+import { TodosStepDisplay } from './todos_step_display';
 
 interface RoundLayoutProps {
   isCurrentRound: boolean;
@@ -67,6 +73,27 @@ const computeCumulativeRefs = (
   return values.length > 0 ? values : undefined;
 };
 
+const getAttachmentRefsKey = (attachmentRefs: AttachmentVersionRef[] | undefined): string =>
+  attachmentRefs
+    ?.map(
+      ({ attachment_id: attachmentId, version }) => `${encodeURIComponent(attachmentId)}:${version}`
+    )
+    .join('|') ?? '';
+
+const parseAttachmentRefsKey = (attachmentRefsKey: string): AttachmentVersionRef[] | undefined => {
+  if (!attachmentRefsKey) {
+    return undefined;
+  }
+
+  return attachmentRefsKey.split('|').map((refKey) => {
+    const [encodedAttachmentId, version] = refKey.split(':');
+    return {
+      attachment_id: decodeURIComponent(encodedAttachmentId),
+      version: Number(version),
+    };
+  });
+};
+
 export const RoundLayout: React.FC<RoundLayoutProps> = ({
   isCurrentRound,
   scrollContainerHeight,
@@ -78,38 +105,78 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
 }) => {
   const [roundContainerMinHeight, setRoundContainerMinHeight] = useState(0);
   const [hasBeenLoading, setHasBeenLoading] = useState(false);
-  const { steps, response, input, status, pending_prompt: pendingPrompt } = rawRound;
+  const [promptResponses, setPromptResponses] = useState<Record<string, PromptResponse>>({});
+  const { steps, response, input, status, pending_prompts: pendingPrompts } = rawRound;
+  const todosStep = useMemo(() => findTodosStep(steps), [steps]);
 
   const {
     isResponseLoading,
+    isStreaming,
     error,
     retry: retrySendMessage,
     resumeRound,
     isResuming,
-  } = useSendMessage();
+  } = useConversationStream();
+  const isHitlDisabled = isStreaming && !isResuming;
 
   const isLoadingCurrentRound = isResponseLoading && isCurrentRound;
   const isErrorCurrentRound = Boolean(error) && isCurrentRound;
-  // Don't show prompt if we're already resuming (user already clicked confirm/cancel)
-  // This prevents the prompt from reappearing when server data is refetched
+  // Don't show prompts if we're already resuming (user already clicked confirm/cancel)
+  // This prevents prompts from reappearing when server data is refetched
   const isAwaitingPrompt =
     isCurrentRound &&
     status === ConversationRoundStatus.awaitingPrompt &&
-    pendingPrompt &&
+    pendingPrompts &&
+    pendingPrompts.length > 0 &&
     !isResuming;
 
-  const cumulativeAttachmentRefs = useMemo(() => {
-    if (!response?.message) return undefined;
-    return computeCumulativeRefs(allRounds, roundIndex);
+  const hasMessage = Boolean(response?.message);
+
+  const { latestStep, displayedSteps } = useMemo(() => {
+    if (!isLoadingCurrentRound || hasMessage) {
+      return { latestStep: undefined, displayedSteps: steps };
+    }
+    const idx = steps.findLastIndex((s) => s.type !== ConversationRoundStepType.updateTodos);
+    return idx === -1
+      ? { latestStep: undefined, displayedSteps: steps }
+      : { latestStep: steps[idx], displayedSteps: steps.slice(0, idx) };
+  }, [steps, isLoadingCurrentRound, hasMessage]);
+
+  const cumulativeAttachmentRefsKey = useMemo(() => {
+    if (!response?.message) {
+      return '';
+    }
+    return getAttachmentRefsKey(computeCumulativeRefs(allRounds, roundIndex));
   }, [allRounds, roundIndex, response?.message]);
 
-  const handleConfirm = useCallback(() => {
-    resumeRound({ promptId: pendingPrompt!.id, confirm: true });
-  }, [resumeRound, pendingPrompt]);
+  const attachmentRefs = useMemo(
+    () => parseAttachmentRefsKey(cumulativeAttachmentRefsKey),
+    [cumulativeAttachmentRefsKey]
+  );
 
-  const handleCancel = useCallback(() => {
-    resumeRound({ promptId: pendingPrompt!.id, confirm: false });
-  }, [resumeRound, pendingPrompt]);
+  const confirmationPrompts = useMemo(
+    () => (pendingPrompts ?? []).filter(isConfirmationPrompt),
+    [pendingPrompts]
+  );
+
+  const authorizationPrompts = useMemo(
+    () => (pendingPrompts ?? []).filter(isAuthorizationPrompt),
+    [pendingPrompts]
+  );
+
+  const handlePromptResponse = useCallback(
+    (promptId: string, promptResponse: PromptResponse) => {
+      setPromptResponses((prev) => {
+        const updated = { ...prev, [promptId]: promptResponse };
+        const allAnswered = (pendingPrompts ?? []).every((p) => updated[p.id] !== undefined);
+        if (allAnswered) {
+          resumeRound({ prompts: updated });
+        }
+        return updated;
+      });
+    },
+    [pendingPrompts, resumeRound]
+  );
 
   // Track if this round has ever been in a loading state during this session
   useEffect(() => {
@@ -144,7 +211,7 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
   return (
     <EuiFlexGroup
       direction="column"
-      gutterSize="m"
+      gutterSize="s"
       aria-label={labels.container}
       css={roundContainerStyles}
     >
@@ -158,32 +225,73 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
         />
       </EuiFlexItem>
 
-      {/* Thinking - treat awaiting prompt as loading to show last reasoning event */}
-      <EuiFlexItem grow={false}>
-        {isErrorCurrentRound ? (
-          <RoundError error={error} errorSteps={rawRound.steps} onRetry={retrySendMessage} />
-        ) : (
-          <RoundThinking
-            steps={steps}
-            isLoading={isLoadingCurrentRound || Boolean(isAwaitingPrompt)}
-            rawRound={rawRound}
-          />
-        )}
-      </EuiFlexItem>
-
-      {/* Confirmation Prompt */}
-      {isAwaitingPrompt && isConfirmationPrompt(pendingPrompt) && (
+      {/* Steps container — `latestStep` is held back from `displayedSteps`
+          and rendered inside `RoundResponse` as the live indicator instead.
+          Always rendered above the error block (when one exists) so the
+          steps stay anchored where the user last saw them and the error
+          appears below, rather than the error shoving them down. */}
+      {displayedSteps.length > 0 && (
         <EuiFlexItem grow={false}>
-          <ConfirmationPrompt
-            prompt={pendingPrompt}
-            onConfirm={handleConfirm}
-            onCancel={handleCancel}
-            isLoading={isResuming}
+          <RoundEvents
+            steps={displayedSteps}
+            isReloadedRound={!(isLoadingCurrentRound || hasBeenLoading)}
           />
         </EuiFlexItem>
       )}
 
-      {/* Response Message - hidden when awaiting confirmation */}
+      {/* Error */}
+      {isErrorCurrentRound && (
+        <EuiFlexItem grow={false}>
+          <RoundError error={error} onRetry={retrySendMessage} />
+        </EuiFlexItem>
+      )}
+
+      {/* Todos */}
+      {todosStep && (
+        <EuiFlexItem grow={false}>
+          <TodosStepDisplay step={todosStep} />
+        </EuiFlexItem>
+      )}
+
+      {/* Confirmation Prompts */}
+      {isAwaitingPrompt &&
+        confirmationPrompts.map((prompt) => {
+          const stored = promptResponses[prompt.id];
+          return (
+            <EuiFlexItem grow={false} key={prompt.id}>
+              <ConfirmationPrompt
+                prompt={prompt}
+                onConfirm={() => handlePromptResponse(prompt.id, { allow: true })}
+                onCancel={() => handlePromptResponse(prompt.id, { allow: false })}
+                isLoading={isResuming}
+                isDisabled={isHitlDisabled}
+                isAnswered={stored !== undefined}
+                answeredValue={stored && 'allow' in stored ? stored.allow : undefined}
+              />
+            </EuiFlexItem>
+          );
+        })}
+
+      {/* Authorization Prompts */}
+      {isAwaitingPrompt &&
+        authorizationPrompts.map((prompt) => {
+          const stored = promptResponses[prompt.id];
+          return (
+            <EuiFlexItem grow={false} key={prompt.id}>
+              <AuthorizationPrompt
+                prompt={prompt}
+                onAuthorize={() => handlePromptResponse(prompt.id, { authorized: true })}
+                onCancel={() => handlePromptResponse(prompt.id, { authorized: false })}
+                isLoading={isResuming}
+                isDisabled={isHitlDisabled}
+                isAnswered={stored !== undefined}
+                answeredValue={stored && 'authorized' in stored ? stored.authorized : undefined}
+              />
+            </EuiFlexItem>
+          );
+        })}
+
+      {/* Response */}
       {!isAwaitingPrompt && (
         <EuiFlexItem grow={false}>
           <EuiFlexItem>
@@ -193,9 +301,11 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
               steps={steps}
               isLoading={isLoadingCurrentRound}
               isLastRound={isCurrentRound}
+              latestStep={latestStep}
               conversationAttachments={conversationAttachments}
-              attachmentRefs={cumulativeAttachmentRefs}
+              attachmentRefs={attachmentRefs}
               conversationId={conversationId}
+              rawRound={rawRound}
             />
           </EuiFlexItem>
           <EuiSpacer />

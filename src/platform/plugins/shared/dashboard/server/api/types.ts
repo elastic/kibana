@@ -8,8 +8,8 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { storedFilterSchema, querySchema } from '@kbn/es-query-server';
 import type { Writable } from '@kbn/utility-types';
+import type { getControlsGroupSchema as getPinnedPanelsSchema } from '@kbn/controls-schemas';
 import type {
   getDashboardStateSchema,
   getPanelSchema,
@@ -21,10 +21,6 @@ import type { warningsSchema } from './warnings_schema';
 
 export type Warnings = TypeOf<typeof warningsSchema>;
 
-/** A filter stored in a dashboard. */
-export type DashboardFilter = TypeOf<typeof storedFilterSchema>;
-/** A query stored in a dashboard. */
-export type DashboardQuery = TypeOf<typeof querySchema>;
 /** Display options for a dashboard. */
 export type DashboardOptions = TypeOf<typeof optionsSchema>;
 /** Grid position and size data for a panel. */
@@ -35,5 +31,6 @@ export type DashboardPanel = TypeOf<ReturnType<typeof getPanelSchema>>;
 export type DashboardSection = TypeOf<ReturnType<typeof getSectionSchema>>;
 /** The complete state of a dashboard including panels, filters, and settings. */
 export type DashboardState = Writable<TypeOf<ReturnType<typeof getDashboardStateSchema>>>;
-export type DashboardPinnedPanelsState = NonNullable<DashboardState['pinned_panels']>;
+export type DashboardPinnedPanelsState = TypeOf<ReturnType<typeof getPinnedPanelsSchema>>;
 export type DashboardPinnedPanel = DashboardPinnedPanelsState[number];
+export type Operation = 'create' | 'read' | 'update' | 'search';

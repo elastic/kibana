@@ -17,6 +17,7 @@ import type { Duration } from 'moment';
 import type { Observable, Subscription } from 'rxjs';
 import { firstValueFrom, pairwise, take } from 'rxjs';
 import apm from 'elastic-apm-node';
+import { addSpanLabels, addTransactionLabels } from '@kbn/apm-utils';
 import Brok from 'brok';
 import type { Logger, LoggerFactory } from '@kbn/logging';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
@@ -24,7 +25,6 @@ import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-
 import type { InternalUserActivityServiceSetup } from '@kbn/core-user-activity-server-internal';
 import type { CoreVersionedRouter, Router } from '@kbn/core-http-router-server-internal';
 import { CoreKibanaRequest, isSafeMethod } from '@kbn/core-http-router-server-internal';
-import { getSpaceIdFromPath } from '@kbn/spaces-utils';
 import type {
   AuthenticationHandler,
   HttpAuth,
@@ -47,12 +47,13 @@ import type {
   VersionedRouterRoute,
 } from '@kbn/core-http-server';
 import { performance } from 'perf_hooks';
-import { isBoom } from '@hapi/boom';
+import Boom, { isBoom } from '@hapi/boom';
 import { identity, isNil, isObject, omitBy } from 'lodash';
 import type { IHttpEluMonitorConfig } from '@kbn/core-http-server/src/elu_monitor';
 import type { Env } from '@kbn/config';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import { type Attributes, metrics, ValueType } from '@opentelemetry/api';
+import { getSpaceIdFromPath } from '@kbn/core-spaces-common';
 import type { HttpConfig } from './http_config';
 import { adoptToHapiAuthFormat } from './lifecycle/auth';
 import { adoptToHapiOnPreAuth } from './lifecycle/on_pre_auth';
@@ -76,7 +77,7 @@ function startEluMeasurement<T>(
   path: string,
   log: Logger,
   eluMonitorOptions: IHttpEluMonitorConfig | undefined
-): (httpSpan?: OTelSpan) => void {
+): () => void {
   if (!eluMonitorOptions?.enabled) {
     return identity;
   }
@@ -84,20 +85,22 @@ function startEluMeasurement<T>(
   const startUtilization = performance.eventLoopUtilization();
   const start = performance.now();
 
-  return function stopEluMeasurement(httpSpan?: OTelSpan) {
+  return function stopEluMeasurement() {
     const { active, utilization } = performance.eventLoopUtilization(startUtilization);
 
-    apm.currentTransaction?.addLabels(
+    addTransactionLabels(
       {
         event_loop_utilization: utilization,
         event_loop_active: active,
       },
-      false
+      {
+        isString: false,
+        otelAttributes: {
+          'nodejs.eventloop.utilization': utilization,
+          'nodejs.eventloop.active': active,
+        },
+      }
     );
-    httpSpan?.setAttributes({
-      'nodejs.eventloop.utilization': utilization,
-      'nodejs.eventloop.active': active,
-    });
 
     const duration = performance.now() - start;
 
@@ -128,6 +131,28 @@ function startEluMeasurement<T>(
       );
     }
   };
+}
+
+/**
+ * Strips `config.basePath` from the request URL when `rewriteBasePath` is
+ * enabled. Returns false when the URL doesn't match the configured basePath,
+ * signalling the caller to respond with 404.
+ */
+function stripConfiguredBasePath(
+  request: Request,
+  config: HttpConfig,
+  basePathService: BasePath
+): boolean {
+  if (config.basePath === undefined || !config.rewriteBasePath) {
+    return true;
+  }
+  const oldUrl = request.url.pathname + request.url.search;
+  const newUrl = basePathService.remove(oldUrl);
+  if (newUrl === oldUrl) {
+    return false;
+  }
+  request.setUrl(newUrl);
+  return true;
 }
 
 /** @internal */
@@ -294,11 +319,10 @@ export class HttpServer {
       this.subscriptions.push(configSubscription);
     }
 
+    const basePathService = new BasePath(config.basePath, config.publicBaseUrl);
     // It's important to have setupRequestStateAssignment call the very first, otherwise context passing will be broken.
     // That's the only reason why context initialization exists in this method.
-    this.setupRequestStateAssignment(config, executionContext, userActivity);
-    const basePathService = new BasePath(config.basePath, config.publicBaseUrl);
-    this.setupBasePathRewrite(config, basePathService);
+    this.setupRequestStateAssignment(config, basePathService, executionContext, userActivity);
     this.setupConditionalCompression(config);
     this.setupResponseLogging();
     this.setupGracefulShutdownHandlers();
@@ -479,22 +503,6 @@ export class HttpServer {
     });
   }
 
-  private setupBasePathRewrite(config: HttpConfig, basePathService: BasePath) {
-    if (config.basePath === undefined || !config.rewriteBasePath) {
-      return;
-    }
-
-    this.registerOnPreRouting((request, response, toolkit) => {
-      const oldUrl = request.url.pathname + request.url.search;
-      const newURL = basePathService.remove(oldUrl);
-      const shouldRedirect = newURL !== oldUrl;
-      if (shouldRedirect) {
-        return toolkit.rewriteUrl(newURL);
-      }
-      return response.notFound();
-    });
-  }
-
   private setupConditionalCompression(config: HttpConfig) {
     if (this.server === undefined) {
       throw new Error('Server is not created yet');
@@ -572,6 +580,7 @@ export class HttpServer {
 
   private setupRequestStateAssignment(
     config: HttpConfig,
+    basePathService: BasePath,
     executionContext?: InternalExecutionContextSetup,
     userActivity?: InternalUserActivityServiceSetup
   ) {
@@ -601,11 +610,11 @@ export class HttpServer {
       }
 
       if (isBoom(request.response)) {
-        stop(app.httpSpan);
+        stop();
         app.otelSubSpan?.end();
       } else {
         request.response.events.once('finish', () => {
-          stop(app.httpSpan);
+          stop();
           app.otelSubSpan?.end();
         });
       }
@@ -614,19 +623,32 @@ export class HttpServer {
     });
 
     this.server!.ext('onRequest', (request, responseToolkit) => {
+      // Capture the original URL before any rewrites — must precede stripConfiguredBasePath
+      // so app.rewrittenUrl preserves the full pre-strip URL for audit/observability consumers.
+      const originalUrl = request.url;
+
+      if (!stripConfiguredBasePath(request, config, basePathService)) {
+        throw Boom.notFound();
+      }
+
       const stop = startEluMeasurement(request.path, this.log, this.config?.eluMonitor);
-
       const requestId = getRequestId(request, config.requestId);
-
       const parentContext = executionContext?.getParentContextFrom(request.headers);
 
-      let spaceId: string | undefined;
-      // try to getspace from URL (`/s/<id>`); fall back to `x-kbn-context` when parsing fails/missing.
-      try {
-        spaceId = getSpaceIdFromPath(request.url.pathname, config.basePath).spaceId;
-      } catch {
-        spaceId = parentContext?.space;
+      const {
+        spaceId,
+        pathname: pathnameWithoutSpacePrefix,
+        hasExplicitSpaceIdentifier,
+      } = getSpaceIdFromPath(request.url.pathname);
+      // Preserve the `/s/<spaceId>` prefix from the URL as the request basePath so links
+      // rendered in the response point back at the same space the client used. An implicit
+      // default space (no `/s/...` prefix) leaves the basePath without a space segment.
+      const spaceBasePath = hasExplicitSpaceIdentifier ? `/s/${spaceId}` : '';
+      if (hasExplicitSpaceIdentifier) {
+        request.setUrl(`${pathnameWithoutSpacePrefix}${request.url.search}`);
       }
+
+      const app: KibanaRequestState = request.app as KibanaRequestState;
 
       userActivity?.setInjectedContext({
         kibana: { space: { id: spaceId } },
@@ -635,26 +657,33 @@ export class HttpServer {
       if (executionContext && parentContext) {
         executionContext.set(parentContext);
         const labels = executionContext.getAsLabels();
-        apm.addLabels(labels);
         const { name, id, page } = labels;
-        trace.getActiveSpan()?.setAttributes(
-          omitBy(
+        addSpanLabels(labels, {
+          otelAttributes: omitBy(
             {
               'kibana.execution_context.name': name,
               'kibana.execution_context.id': id,
               'kibana.execution_context.page': page,
             },
             isNil
-          ) as Record<string, string>
-        );
+          ) as Record<string, string>,
+        });
       }
 
       executionContext?.setRequestId(requestId);
 
-      const app: KibanaRequestState = request.app as KibanaRequestState;
+      // NOTE: We store per-request Kibana state on Hapi's `request.app` bag.
+      // This couples our Request representation to a specific HTTP framework (Hapi).
+      // A Core-owned per-request state container (e.g. a WeakMap or a symbol-keyed
+      // field that doesn't depend on Hapi conventions) would let us swap or layer
+      // alternative HTTP backends without rewriting every reader.
       app.startTime = performance.now();
       app.requestId = requestId;
       app.requestUuid = uuidv4();
+      app.spaceId = spaceId;
+      const serverBasePath = config.basePath ?? '';
+      app.basePath = `${serverBasePath}${spaceBasePath}`;
+      app.rewrittenUrl = request.url !== originalUrl ? originalUrl : undefined;
       app.measureElu = stop;
       // Kibana stores trace.id until https://github.com/elastic/apm-agent-nodejs/issues/2353 is resolved
       // The current implementation of the APM agent ends a request transaction before "response" log is emitted.
@@ -1072,6 +1101,12 @@ export class HttpServer {
               parse,
               timeout: timeout?.payload,
               multipart: true,
+              compression: maxBytes
+                ? {
+                    gzip: { maxOutputLength: maxBytes },
+                    deflate: { maxOutputLength: maxBytes },
+                  }
+                : undefined,
             }
           : undefined,
         timeout: {

@@ -14,6 +14,7 @@ import { get } from 'lodash';
 import type { OpenAPIV3 } from 'openapi-types';
 import type { ConvertOptions, KnownParameters } from '../../type';
 import { isReferenceObject } from '../common';
+import { collapseArrayUnion } from '../collapse_array_union';
 import { parse } from './parse';
 
 import type { IContext } from './post_process_mutations';
@@ -130,14 +131,14 @@ const convertObjectMembersToParameterObjects = (
     if (!isReferenceObject(schemaObject)) {
       const { description: des, ...rest } = schemaObject;
       description = des;
-      finalSchema = rest;
+      finalSchema = !isPathParameter ? collapseArrayUnion(rest) : rest;
     } else {
       finalSchema = schemaObject;
     }
     return {
       name: schemaKey,
       in: isPathParameter ? 'path' : 'query',
-      required: isPathParameter ? !paramSchema.optional : isSubSchemaRequired,
+      required: isPathParameter || isSubSchemaRequired,
       schema: finalSchema,
       description,
     };

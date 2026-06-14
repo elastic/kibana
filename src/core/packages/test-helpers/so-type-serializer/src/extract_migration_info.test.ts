@@ -158,6 +158,25 @@ describe('extractMigrationInfo', () => {
         'properties.hits.type': 'integer',
       });
     });
+
+    it('preserves empty-object fields instead of dropping them', () => {
+      const type = createType({
+        mappings: {
+          dynamic: false,
+          properties: {
+            title: { type: 'text' },
+            meta: { dynamic: false, properties: {} },
+          },
+        },
+      });
+      const output = extractMigrationInfo(type);
+      expect(output.mappings).toEqual({
+        dynamic: false,
+        'properties.title.type': 'text',
+        'properties.meta.dynamic': false,
+        'properties.meta.properties': {},
+      });
+    });
   });
 
   describe('modelVersions', () => {
@@ -336,14 +355,72 @@ describe('extractMigrationInfo', () => {
         },
       });
       const output = extractMigrationInfo(type);
-      expect(output.modelVersions[0].schemas).toEqual({
-        forwardCompatibility: 'c7c71ae951f0ac343cea0403bc34144ede93afec1bfe0ae6bd3279dd28ddf696',
-        create: '7457866b52ceea9e20767b3337518de452b7790243891d81737d48eb8b3afd18',
-      });
+
+      const { forwardCompatibility, create } = output.modelVersions[0].schemas;
+      // Schemas are now stored as serialized objects, not hash strings
+      expect(typeof forwardCompatibility).toBe('object');
+      expect(typeof create).toBe('object');
       expect(output.modelVersions[1].schemas).toEqual({
         forwardCompatibility: false,
         create: false,
       });
+    });
+
+    it('returns the same serialized schema for two structurally identical config-schema objects', () => {
+      const makeType = () =>
+        createType({
+          modelVersions: {
+            1: {
+              changes: [],
+              schemas: {
+                create: schema.object({ title: schema.string() }),
+              },
+            },
+          },
+        });
+
+      const schemaA = extractMigrationInfo(makeType()).modelVersions[0].schemas.create;
+      const schemaB = extractMigrationInfo(makeType()).modelVersions[0].schemas.create;
+      expect(schemaA).toEqual(schemaB);
+    });
+
+    it('returns different serialized schemas for structurally different config-schema objects', () => {
+      const typeWithTitle = createType({
+        modelVersions: {
+          1: { changes: [], schemas: { create: schema.object({ title: schema.string() }) } },
+        },
+      });
+      const typeWithBody = createType({
+        modelVersions: {
+          1: { changes: [], schemas: { create: schema.object({ body: schema.string() }) } },
+        },
+      });
+
+      const schemaWithTitle = extractMigrationInfo(typeWithTitle).modelVersions[0].schemas.create;
+      const schemaWithBody = extractMigrationInfo(typeWithBody).modelVersions[0].schemas.create;
+      expect(schemaWithTitle).not.toEqual(schemaWithBody);
+    });
+
+    it('returns different serialized schemas when a custom validator is added to a config-schema object', () => {
+      const withoutValidator = createType({
+        modelVersions: {
+          1: { changes: [], schemas: { create: schema.object({ interval: schema.string() }) } },
+        },
+      });
+      const withValidator = createType({
+        modelVersions: {
+          1: {
+            changes: [],
+            schemas: {
+              create: schema.object({ interval: schema.string({ validate: () => undefined }) }),
+            },
+          },
+        },
+      });
+
+      const schemaWithout = extractMigrationInfo(withoutValidator).modelVersions[0].schemas.create;
+      const schemaWith = extractMigrationInfo(withValidator).modelVersions[0].schemas.create;
+      expect(schemaWithout).not.toEqual(schemaWith);
     });
   });
 

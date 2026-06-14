@@ -26,9 +26,12 @@ test.describe(
       page,
       pageObjects: { transactionDetailsPage },
     }) => {
-      await transactionDetailsPage.gotoServiceInventory('apm-generated', timeRange);
-      await page.getByText('Transaction A').click();
-      await page.waitForLoadingIndicatorHidden();
+      await transactionDetailsPage.goToTransactionDetails({
+        serviceName: 'apm-generated',
+        transactionName: 'Transaction A',
+        start: timeRange.rangeFrom,
+        end: timeRange.rangeTo,
+      });
 
       await test.step('opens span flyout', async () => {
         await page.getByText('Span A').click();
@@ -51,9 +54,12 @@ test.describe(
       page,
       pageObjects: { transactionDetailsPage },
     }) => {
-      await transactionDetailsPage.gotoServiceInventory('otel-generated', timeRange);
-      await page.getByText('Transaction A').click();
-      await page.waitForLoadingIndicatorHidden();
+      await transactionDetailsPage.goToTransactionDetails({
+        serviceName: 'otel-generated',
+        transactionName: 'Transaction A',
+        start: timeRange.rangeFrom,
+        end: timeRange.rangeTo,
+      });
 
       await test.step('opens span flyout', async () => {
         await page.getByText('Span A').click();

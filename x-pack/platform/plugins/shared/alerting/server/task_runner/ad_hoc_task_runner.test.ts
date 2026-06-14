@@ -12,7 +12,6 @@ import type { SavedObject } from '@kbn/core/server';
 import {
   elasticsearchServiceMock,
   executionContextServiceMock,
-  httpServiceMock,
   loggingSystemMock,
   savedObjectsRepositoryMock,
   savedObjectsServiceMock,
@@ -169,7 +168,6 @@ const taskRunnerFactoryInitializerParams: TaskRunnerFactoryInitializerParamsType
   actionsPlugin: actionsMock.createStart(),
   alertsService,
   backfillClient,
-  basePathService: httpServiceMock.createBasePath(),
   cancelAlertsOnRuleTimeout: true,
   connectorAdapterRegistry: new ConnectorAdapterRegistry(),
   data: dataPlugin,
@@ -595,6 +593,7 @@ describe('Ad Hoc Task Runner', () => {
 
   test('passes consumer metrics to AlertingEventLogger', async () => {
     const consumerMetrics = {
+      matched_indices_count: 3,
       alerts_candidate_count: 100,
       total_enrichment_duration_ms: 50,
     };

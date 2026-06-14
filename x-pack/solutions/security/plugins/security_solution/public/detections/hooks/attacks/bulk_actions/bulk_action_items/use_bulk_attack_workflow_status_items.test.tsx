@@ -6,6 +6,10 @@
  */
 
 import { renderHook } from '@testing-library/react';
+import {
+  ALERT_CLOSING_REASON_PANEL_ID,
+  useBulkClosingReasonItems,
+} from '@kbn/response-ops-detections-close-reason';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React from 'react';
 
@@ -13,13 +17,9 @@ import { useBulkAttackWorkflowStatusItems } from './use_bulk_attack_workflow_sta
 import { useAttacksPrivileges } from '../use_attacks_privileges';
 import { useApplyAttackWorkflowStatus } from '../apply_actions/use_apply_attack_workflow_status';
 
-import { useBulkAlertClosingReasonItems } from '../../../../../common/components/toolbar/bulk_actions/use_bulk_alert_closing_reason_items';
-
 jest.mock('../use_attacks_privileges');
 jest.mock('../apply_actions/use_apply_attack_workflow_status');
-jest.mock(
-  '../../../../../common/components/toolbar/bulk_actions/use_bulk_alert_closing_reason_items'
-);
+jest.mock('@kbn/response-ops-detections-close-reason');
 
 const mockUseAttacksPrivileges = useAttacksPrivileges as jest.MockedFunction<
   typeof useAttacksPrivileges
@@ -27,8 +27,8 @@ const mockUseAttacksPrivileges = useAttacksPrivileges as jest.MockedFunction<
 const mockUseApplyAttackWorkflowStatus = useApplyAttackWorkflowStatus as jest.MockedFunction<
   typeof useApplyAttackWorkflowStatus
 >;
-const mockUseBulkAlertClosingReasonItems = useBulkAlertClosingReasonItems as jest.MockedFunction<
-  typeof useBulkAlertClosingReasonItems
+const mockUseBulkClosingReasonItems = useBulkClosingReasonItems as jest.MockedFunction<
+  typeof useBulkClosingReasonItems
 >;
 
 let queryClient: QueryClient;
@@ -44,13 +44,20 @@ describe('useBulkAttackWorkflowStatusItems', () => {
     jest.clearAllMocks();
     queryClient = new QueryClient();
 
-    mockUseBulkAlertClosingReasonItems.mockReturnValue({
+    mockUseBulkClosingReasonItems.mockReturnValue({
       item: {
         label: 'Close',
         key: 'closed-attack-status',
-        disableOnQuery: true,
+        'data-test-subj': 'closed-attack-status',
+        panel: ALERT_CLOSING_REASON_PANEL_ID,
       },
-      panels: [],
+      panels: [
+        {
+          id: ALERT_CLOSING_REASON_PANEL_ID,
+          title: 'Close selected alerts',
+          renderContent: () => React.createElement('div'),
+        },
+      ],
       getPanels: jest.fn().mockReturnValue([]),
     });
 
@@ -105,10 +112,16 @@ describe('useBulkAttackWorkflowStatusItems', () => {
     expect(openItem).toBeUndefined();
   });
 
-  it('should return empty panels array', () => {
+  it('should return closing reason panel', () => {
     const { result } = renderHook(() => useBulkAttackWorkflowStatusItems(), { wrapper });
 
-    expect(result.current.panels).toEqual([]);
+    expect(result.current.panels).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: ALERT_CLOSING_REASON_PANEL_ID,
+        }),
+      ])
+    );
   });
 
   describe('actions', () => {
@@ -181,7 +194,7 @@ describe('useBulkAttackWorkflowStatusItems', () => {
       );
 
       const onSubmitCloseReason =
-        mockUseBulkAlertClosingReasonItems.mock.calls[0][0]?.onSubmitCloseReason;
+        mockUseBulkClosingReasonItems.mock.calls[0][0]?.onSubmitCloseReason;
       if (onSubmitCloseReason) {
         await onSubmitCloseReason({
           alertItems: [{ _id: '1', data: [], ecs: { _id: '1' } }],

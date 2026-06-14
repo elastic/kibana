@@ -11,8 +11,12 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { EuiPageTemplate } from '@elastic/eui';
 import { ElasticInferenceServiceModelsHeader } from './elastic_inference_service/header';
 import { ElasticInferenceServiceModelsPage } from './elastic_inference_service/elastic_inference_service_models_page';
+import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
+import { ELASTIC_INFERENCE_SERVICE_BREADCRUMB } from '../translations';
 
 export const ElasticInferenceService = () => {
+  useBreadcrumbs(ELASTIC_INFERENCE_SERVICE_BREADCRUMB);
+
   return (
     <KibanaPageTemplate
       offset={0}
@@ -21,7 +25,11 @@ export const ElasticInferenceService = () => {
       data-test-subj="eisModelsPage"
     >
       <ElasticInferenceServiceModelsHeader />
-      <EuiPageTemplate.Section className="eui-yScroll" data-test-subj="eisModelsPageMain">
+      <EuiPageTemplate.Section
+        className="eui-yScroll"
+        data-test-subj="eisModelsPageMain"
+        paddingSize="none"
+      >
         <ElasticInferenceServiceModelsPage />
       </EuiPageTemplate.Section>
     </KibanaPageTemplate>

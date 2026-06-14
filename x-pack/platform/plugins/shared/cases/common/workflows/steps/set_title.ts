@@ -34,7 +34,7 @@ export const setTitleStepCommonDefinition: CommonStepDefinition<
   SetTitleStepOutputSchema
 > = {
   id: SetTitleStepTypeId,
-  category: StepCategory.Kibana,
+  category: StepCategory.KibanaCases,
   label: i18n.SET_TITLE_STEP_LABEL,
   description: i18n.SET_TITLE_STEP_DESCRIPTION,
   documentation: {

@@ -19,13 +19,15 @@ export const useCreateRule = () => {
 
   return useMutation({
     mutationFn: (payload: CreateRuleData) => rulesApi.createRule(payload),
-    onSuccess: () => {
+    onSuccess: (data) => {
       toasts.addSuccess(
         i18n.translate('xpack.alertingV2.hooks.useCreateRule.successMessage', {
-          defaultMessage: 'Rule created successfully',
+          defaultMessage: 'Rule "{ruleName}" created successfully',
+          values: { ruleName: data.metadata.name },
         })
       );
       queryClient.invalidateQueries(ruleKeys.lists());
+      queryClient.invalidateQueries(ruleKeys.tags());
     },
     onError: () => {
       toasts.addDanger(

@@ -1,0 +1,43 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        startAllExample:
+          summary: "Start all entity engines"
+          description: "Start all stopped entity engines."
+          value:
+            entityTypes:
+              - user
+              - host
+              - service
+              - generic
+        startSingleExample:
+          summary: "Start a single entity engine"
+          description: "Start only the host entity engine."
+          value:
+            entityTypes:
+              - host
+responses:
+  200:
+    description: "Indicates a successful response."
+    content:
+      application/json:
+        examples:
+          startSuccessExample:
+            summary: "Engines started"
+            description: "The specified entity engines were successfully started."
+            value:
+              ok: true
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl -X PUT -H "kbn-xsrf: true" -H "Authorization: ApiKey ${API_KEY}" \
+        -H "Content-Type: application/json" \
+        -d '{"entityTypes":["user","host","service","generic"]}' \
+        "${KIBANA_URL}/api/security/entity_store/start"
+  - lang: Console
+    source: |
+      PUT kbn://api/security/entity_store/start
+      {
+        "entityTypes": ["user", "host", "service", "generic"]
+      }

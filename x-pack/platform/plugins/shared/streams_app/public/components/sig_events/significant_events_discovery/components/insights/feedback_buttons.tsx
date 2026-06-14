@@ -7,15 +7,40 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import type { InsightUserEvaluation } from '@kbn/streams-schema';
 
-export function FeedbackButtons() {
+interface FeedbackButtonsProps {
+  onFeedback: (feedback: InsightUserEvaluation) => void;
+}
+
+export function FeedbackButtons({ onFeedback }: FeedbackButtonsProps) {
   const [hasReacted, setHasReacted] = React.useState(false);
 
-  if (hasReacted) return null;
+  const handleFeedback = (feedback: InsightUserEvaluation) => {
+    onFeedback(feedback);
+    setHasReacted(true);
+  };
+
+  if (hasReacted) {
+    return (
+      <EuiText size="s" color="subdued">
+        {i18n.translate('xpack.streams.significantEventsSummary.thankYouLabel', {
+          defaultMessage: 'Thank you!',
+        })}
+      </EuiText>
+    );
+  }
 
   return (
-    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiText size="s" color="subdued">
+          {i18n.translate('xpack.streams.significantEventsSummary.shareYourFeedbackLabel', {
+            defaultMessage: 'Share your feedback:',
+          })}
+        </EuiText>
+      </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButtonIcon
           iconType="thumbUp"
@@ -24,7 +49,7 @@ export function FeedbackButtons() {
           })}
           color="success"
           data-test-subj="significant_events_summary_helpful_button"
-          onClick={() => setHasReacted(true)}
+          onClick={() => handleFeedback('helpful')}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -35,7 +60,7 @@ export function FeedbackButtons() {
           })}
           color="danger"
           data-test-subj="significant_events_summary_not_helpful_button"
-          onClick={() => setHasReacted(true)}
+          onClick={() => handleFeedback('not_helpful')}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

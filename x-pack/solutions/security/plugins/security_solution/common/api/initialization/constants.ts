@@ -7,7 +7,7 @@
 
 import {
   InitializationFlowIdEnum,
-  InitializationFlowReadyResult,
+  CreateListIndicesReadyResult,
   InitializationFlowErrorResult,
 } from './initialization.gen';
 
@@ -17,10 +17,16 @@ export const INITIALIZE_SECURITY_SOLUTION_SOCKET_TIMEOUT_MS = 2 * 60 * 1000;
 // Flow IDs
 export const INITIALIZATION_FLOW_CREATE_LIST_INDICES =
   InitializationFlowIdEnum['create-list-indices'];
-// TODO: the implementation of this flow is in a follow up PR
 export const INITIALIZATION_FLOW_SECURITY_DATA_VIEWS =
   InitializationFlowIdEnum['security-data-views'];
+export const INITIALIZATION_FLOW_INIT_PREBUILT_RULES =
+  InitializationFlowIdEnum['init-prebuilt-rules'];
+export const INITIALIZATION_FLOW_INIT_ENDPOINT_PROTECTION =
+  InitializationFlowIdEnum['init-endpoint-protection'];
+export const INITIALIZATION_FLOW_INIT_AI_PROMPTS = InitializationFlowIdEnum['init-ai-prompts'];
+export const INITIALIZATION_FLOW_INIT_DETECTION_RULE_MONITORING =
+  InitializationFlowIdEnum['init-detection-rule-monitoring'];
 
 // Flow statuses
-export const INITIALIZATION_FLOW_STATUS_READY = InitializationFlowReadyResult.shape.status.value;
+export const INITIALIZATION_FLOW_STATUS_READY = CreateListIndicesReadyResult.shape.status.value;
 export const INITIALIZATION_FLOW_STATUS_ERROR = InitializationFlowErrorResult.shape.status.value;

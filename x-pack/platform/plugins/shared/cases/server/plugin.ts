@@ -19,7 +19,7 @@ import {
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
 import { APP_ID, CASE_SAVED_OBJECT } from '../common/constants';
 
@@ -30,6 +30,7 @@ import type {
   CasesServerSetupDependencies,
   CasesServerStart,
   CasesServerStartDependencies,
+  CloseReasonValidator,
 } from './types';
 import { CasesClientFactory } from './client/factory';
 import { getCasesKibanaFeatures } from './features';
@@ -55,7 +56,11 @@ import type { ServerlessProjectType } from '../common/constants/types';
 import { IncrementalIdTaskManager } from './tasks/incremental_id/incremental_id_task_manager';
 import { createCasesAnalyticsIndexes, registerCasesAnalyticsIndexesTasks } from './cases_analytics';
 import { scheduleCAISchedulerTask } from './cases_analytics/tasks/scheduler_task';
+import { CasesEventBus } from './events/event_bus';
 import { registerCaseWorkflowSteps } from './workflows';
+import { registerCaseWorkflowTriggers } from './workflows/triggers';
+import { registerCasesWorkflowEventBridge } from './workflows/triggers/event_bridge';
+import { initUiSettings } from './ui_settings';
 
 export class CasePlugin
   implements
@@ -79,6 +84,8 @@ export class CasePlugin
   private incrementalIdTaskManager?: IncrementalIdTaskManager;
   private usageCounter?: IUsageCounter;
   private readonly isServerless: boolean;
+  private casesEventBus?: CasesEventBus;
+  private readonly closeReasonValidators: Map<string, CloseReasonValidator> = new Map();
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.caseConfig = initializerContext.config.get<ConfigType>();
@@ -102,11 +109,9 @@ export class CasePlugin
       )}] and plugins [${Object.keys(plugins)}]`
     );
 
-    registerInternalAttachments(
-      this.externalReferenceAttachmentTypeRegistry,
-      this.persistableStateAttachmentTypeRegistry,
-      this.unifiedAttachmentTypeRegistry
-    );
+    initUiSettings(core.uiSettings);
+
+    registerInternalAttachments(this.unifiedAttachmentTypeRegistry);
 
     registerCaseFileKinds(this.caseConfig.files, plugins.files, core.security.fips.isEnabled());
     registerCasesAnalyticsIndexesTasks({
@@ -127,6 +132,8 @@ export class CasePlugin
       plugins.features.registerKibanaFeature(casesFeatures.v2);
       plugins.features.registerKibanaFeature(casesFeatures.v3);
     }
+
+    this.casesEventBus = new CasesEventBus();
 
     registerSavedObjects({
       core,
@@ -211,6 +218,7 @@ export class CasePlugin
     });
 
     registerCaseWorkflowSteps(plugins.workflowsExtensions, getCasesClient);
+    registerCaseWorkflowTriggers(plugins.workflowsExtensions);
 
     return {
       attachmentFramework: {
@@ -225,6 +233,9 @@ export class CasePlugin
         },
       },
       config: this.caseConfig,
+      registerCloseReasonValidator: (owner: string, validator: CloseReasonValidator) => {
+        this.closeReasonValidators.set(owner, validator);
+      },
     };
   }
 
@@ -265,6 +276,10 @@ export class CasePlugin
       licensingPluginStart: plugins.licensing,
     });
 
+    // this.casesEventBus will be set to a defined value in the setup() function
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    registerCasesWorkflowEventBridge(this.casesEventBus!, plugins.workflowsExtensions, this.logger);
+
     this.clientFactory.initialize({
       // securityPluginSetup will be set to a defined value in the setup() function
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -292,6 +307,17 @@ export class CasePlugin
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       usageCounter: this.usageCounter!,
       config: this.caseConfig,
+      casesEventBus: this.casesEventBus,
+      closeReasonValidator:
+        this.closeReasonValidators.size > 0
+          ? (closeReason, owner, request) => {
+              const ownerValidator = this.closeReasonValidators.get(owner);
+              if (ownerValidator) {
+                return ownerValidator(closeReason, request);
+              }
+              return Promise.resolve(false);
+            }
+          : undefined,
     });
 
     return {

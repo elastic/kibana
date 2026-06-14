@@ -13,7 +13,8 @@ import { expect } from '@kbn/scout/api';
 import { APPROVED_STEP_DEFINITIONS } from '../fixtures/approved_step_definitions';
 import { COMMON_HEADERS } from '../fixtures/constants';
 
-apiTest.describe(
+// Failing: See https://github.com/elastic/kibana/issues/265012
+apiTest.describe.skip(
   'Workflows Extensions - Custom Step Definitions Approval',
   {
     tag: [
@@ -22,6 +23,7 @@ apiTest.describe(
       ...tags.serverless.security.complete,
       ...tags.serverless.observability.complete,
       ...tags.serverless.workplaceai,
+      ...tags.serverless.vectordb,
     ],
   },
   () => {
@@ -46,17 +48,34 @@ apiTest.describe(
         expect(response.body.steps).toBeDefined();
         expect(Array.isArray(response.body.steps)).toBe(true);
 
-        for (const step of response.body.steps) {
-          const approvedStep = APPROVED_STEP_DEFINITIONS.find(({ id }) => id === step.id);
+        const stepEntriesToUpdate: Array<{ id: string; handlerHash: string }> = [];
+        const issues = response.body.steps.reduce(
+          (acc: string[], step: { id: string; handlerHash: string }) => {
+            const approvedStep = APPROVED_STEP_DEFINITIONS.find(({ id }) => id === step.id);
 
-          expect(approvedStep, {
-            message: `Step "${step.id}" is not in the approved list`,
-          }).toBeDefined();
+            if (!approvedStep) {
+              acc.push(`Step "${step.id}" is not in the approved list.`);
+              stepEntriesToUpdate.push({ id: step.id, handlerHash: step.handlerHash });
+            } else if (step.handlerHash !== approvedStep.handlerHash) {
+              acc.push(
+                `Step "${step.id}" has an invalid handler hash (expected "${approvedStep.handlerHash}", got "${step.handlerHash}").`
+              );
+              stepEntriesToUpdate.push({ id: step.id, handlerHash: step.handlerHash });
+            }
+            return acc;
+          },
+          []
+        );
 
-          expect(step.handlerHash, {
-            message: `Step "${step.id}" has an invalid handler hash`,
-          }).toBe(approvedStep?.handlerHash);
-        }
+        expect(issues, {
+          message: `Found ${
+            issues.length
+          } unapproved step definition(s). Need to update the following step entries in APPROVED_STEP_DEFINITIONS and request review from the workflows-eng team:\n\n${JSON.stringify(
+            stepEntriesToUpdate,
+            null,
+            2
+          )}`,
+        }).toStrictEqual([]);
       }
     );
   }

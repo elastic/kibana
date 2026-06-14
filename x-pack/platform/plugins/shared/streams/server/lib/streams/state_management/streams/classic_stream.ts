@@ -406,6 +406,11 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
   // These actions are merged across ClassicStream instances as part of ExecutionPlan.plan()
   // This is to enable us to clean up any pipeline Streams creates when it is no longer needed
   protected async doDetermineCreateActions(): Promise<ElasticsearchAction[]> {
+    const dataStream = await this.fetchDataStream();
+    if (dataStream?.replicated === true) {
+      return this.elasticsearchActionsForReplicatedFollower();
+    }
+
     const actions: ElasticsearchAction[] = [];
     if (this._definition.ingest.processing.steps.length > 0) {
       actions.push(...(await this.createUpsertPipelineActions()));
@@ -487,6 +492,11 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
     startingState: State,
     startingStateStream: ClassicStream
   ): Promise<ElasticsearchAction[]> {
+    const dataStream = await this.fetchDataStream();
+    if (dataStream?.replicated === true) {
+      return this.elasticsearchActionsForReplicatedFollower();
+    }
+
     const actions: ElasticsearchAction[] = [];
     if (this._changes.processing && this._definition.ingest.processing.steps.length > 0) {
       actions.push(...(await this.createUpsertPipelineActions()));
@@ -696,6 +706,20 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
     if (!dataStream) {
       return undefined;
     }
+    if (dataStream.replicated === true) {
+      if (!useFallbackName) {
+        return undefined;
+      }
+      const template = dataStream.template;
+      if (typeof template !== 'string' || template.length === 0) {
+        return undefined;
+      }
+      return {
+        pipeline: `${template}-pipeline`,
+        template,
+      };
+    }
+
     const unmanagedAssets = await getUnmanagedElasticsearchAssets({
       dataStream,
       esClient: this.dependencies.esClient,
@@ -720,12 +744,35 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
     };
   }
 
+  private elasticsearchActionsForReplicatedFollower(): ElasticsearchAction[] {
+    const esLevelChanges =
+      this._changes.processing ||
+      this._changes.lifecycle ||
+      this._changes.failure_store ||
+      this._changes.settings ||
+      this._changes.field_overrides;
+
+    if (esLevelChanges) {
+      throw new StatusError(
+        'Cannot apply Elasticsearch-level changes to a replicated data stream',
+        422
+      );
+    }
+
+    return [
+      {
+        type: 'upsert_dot_streams_document',
+        request: this._definition,
+      },
+    ];
+  }
+
   private async getEffectiveSettings() {
     if (!this._effectiveSettings) {
       // Replicated data streams have no local index template and the
       // getDataStreamSettings ES API returns HTTP 400, so return empty settings.
       const dataStream = await this.fetchDataStream();
-      if (dataStream?.replicated) {
+      if (dataStream?.replicated === true) {
         this._effectiveSettings = {};
         return this._effectiveSettings;
       }

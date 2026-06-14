@@ -17,9 +17,8 @@ import { TooltipWrapper } from '@kbn/visualization-utils';
 import {
   EuiFieldText,
   EuiFormRow,
-  EuiComboBox,
+  EuiSuperSelect,
   EuiRadioGroup,
-  type EuiComboBoxOptionOption,
   EuiButtonGroup,
   EuiSpacer,
   EuiSwitch,
@@ -106,19 +105,11 @@ export function ControlType({
   initialControlFlyoutType: EsqlControlType;
   onFlyoutTypeChange?: (flyoutType: EsqlControlType) => void;
 }) {
-  const controlFlyoutType = controlTypeOptions.find(
-    (option) => option.key === initialControlFlyoutType
-  )!;
-
-  const onTypeChange = useCallback(
-    (selectedOptions: EuiComboBoxOptionOption[]) => {
-      const flyoutType = controlTypeOptions.find(
-        (option) => option.key === selectedOptions[0].key
-      )!;
-      onFlyoutTypeChange?.(flyoutType.key);
-    },
-    [onFlyoutTypeChange]
-  );
+  const superSelectOptions = controlTypeOptions.map((opt) => ({
+    value: opt.key,
+    inputDisplay: opt.label,
+    'data-test-subj': opt['data-test-subj'],
+  }));
 
   return (
     <>
@@ -138,23 +129,15 @@ export function ControlType({
           })}
           fullWidth
         >
-          <EuiComboBox
-            aria-label={i18n.translate('esql.flyout.controlTypeOptionsOptions.placeholder', {
-              defaultMessage: 'Select a control type',
-            })}
-            placeholder={i18n.translate('esql.flyout.controlTypeOptionsOptions.placeholder', {
-              defaultMessage: 'Select a control type',
-            })}
-            singleSelection={{ asPlainText: true }}
-            options={controlTypeOptions}
-            selectedOptions={[controlFlyoutType]}
-            onChange={onTypeChange}
+          <EuiSuperSelect
+            options={superSelectOptions}
+            valueOfSelected={initialControlFlyoutType}
+            onChange={(value) => onFlyoutTypeChange?.(value)}
             fullWidth
-            isDisabled={isDisabled}
+            disabled={isDisabled}
             compressed
-            isClearable={false}
             data-test-subj="esqlControlTypeDropdown"
-            inputPopoverProps={{
+            popoverProps={{
               'data-test-subj': 'esqlControlTypeInputPopover',
             }}
           />
@@ -356,6 +339,7 @@ export function ControlSelectionType({
     services: { docLinks },
   } = useKibana<ServiceDeps>();
   const multiValuesGuideLink = docLinks?.links.query.queryESQLMultiValueControls ?? '';
+  const mvIntersectsLink = docLinks?.links.query.queryESQLMvIntersects ?? '';
   return (
     <>
       <EuiSpacer size="m" />
@@ -394,11 +378,16 @@ export function ControlSelectionType({
             <EuiText size="s">
               <FormattedMessage
                 id="esql.flyout.selectionType.callout"
-                defaultMessage="You must use {mvContainsLink} in your ES|QL query for multi-select controls to work."
+                defaultMessage="You must use {mvContainsLink} or {mvIntersectsLink} in your ES|QL query for multi-select controls to work."
                 values={{
                   mvContainsLink: (
                     <EuiLink href={multiValuesGuideLink} target="_blank">
                       MV_CONTAINS
+                    </EuiLink>
+                  ),
+                  mvIntersectsLink: (
+                    <EuiLink href={mvIntersectsLink} target="_blank">
+                      MV_INTERSECTS
                     </EuiLink>
                   ),
                 }}

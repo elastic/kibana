@@ -6,13 +6,16 @@
  */
 
 import { injectable } from 'inversify';
+import { get } from 'lodash';
 import objectHash from 'object-hash';
 import type {
-  MatchedPair,
-  NotificationGroup,
-  DispatcherStep,
+  ActionGroup,
   DispatcherPipelineState,
+  DispatcherStep,
   DispatcherStepOutput,
+  MatchedPair,
+  Rule,
+  RuleId,
 } from '../types';
 
 @injectable()
@@ -20,47 +23,62 @@ export class BuildGroupsStep implements DispatcherStep {
   public readonly name = 'build_groups';
 
   public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
-    const { matched = [] } = state;
+    const { matched = [], rules } = state;
 
-    const groups = buildNotificationGroups(matched);
+    const groups = buildActionGroups(matched, rules);
 
     return { type: 'continue', data: { groups } };
   }
 }
 
-export function buildNotificationGroups(matched: readonly MatchedPair[]): NotificationGroup[] {
-  const groupMap = new Map<string, NotificationGroup>();
+export function buildActionGroups(
+  matched: readonly MatchedPair[],
+  rules?: Map<RuleId, Rule>
+): ActionGroup[] {
+  const groupMap = new Map<string, ActionGroup>();
 
   for (const { episode, policy } of matched) {
-    let groupKey: Record<string, unknown> = {};
-    if (policy.groupBy.length === 0) {
-      groupKey = {
-        groupHash: episode.group_hash,
-        episodeId: episode.episode_id,
-      };
-    } else {
-      throw new Error('Grouping by fields is not supported yet');
+    let groupKey: Record<string, unknown>;
+    switch (policy.groupingMode ?? 'per_episode') {
+      case 'per_episode':
+        groupKey = {
+          groupHash: episode.group_hash,
+          episodeId: episode.episode_id,
+        };
+        break;
+      case 'all':
+        groupKey = {};
+        break;
+      case 'per_field':
+        groupKey = Object.fromEntries(
+          policy.groupBy.map((field) => [field, get(episode, field, null)])
+        );
+        break;
     }
 
-    const notificationGroupId = objectHash({
-      ruleId: episode.rule_id,
+    const actionGroupId = objectHash({
       policyId: policy.id,
       groupKey,
     });
 
-    if (!groupMap.has(notificationGroupId)) {
-      groupMap.set(notificationGroupId, {
-        id: notificationGroupId,
+    if (!groupMap.has(actionGroupId)) {
+      groupMap.set(actionGroupId, {
+        id: actionGroupId,
         spaceId: policy.spaceId,
-        ruleId: episode.rule_id,
         policyId: policy.id,
         destinations: policy.destinations,
         groupKey,
         episodes: [],
+        rules: {},
       });
     }
 
-    groupMap.get(notificationGroupId)!.episodes.push(episode);
+    const group = groupMap.get(actionGroupId)!;
+    group.episodes.push(episode);
+    const rule = rules?.get(episode.rule_id);
+    if (rule) {
+      group.rules[episode.rule_id] = { name: rule.name };
+    }
   }
 
   return [...groupMap.values()];

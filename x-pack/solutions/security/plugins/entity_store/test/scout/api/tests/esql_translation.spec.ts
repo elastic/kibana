@@ -8,7 +8,7 @@
 import { expect } from '@kbn/scout-security/api';
 import { apiTest } from '@kbn/scout-security';
 import {
-  COMMON_HEADERS,
+  PUBLIC_HEADERS,
   ENTITY_STORE_ROUTES,
   ENTITY_STORE_TAGS,
   UPDATES_INDEX,
@@ -25,7 +25,7 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
     const credentials = await samlAuth.asInteractiveUser('admin');
     defaultHeaders = {
       ...credentials.cookieHeader,
-      ...COMMON_HEADERS,
+      ...PUBLIC_HEADERS,
     };
 
     await kbnClient.uiSettings.update({
@@ -33,7 +33,7 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
     });
 
     // Install first so the data stream exists; then load the archive.
-    const response = await apiClient.post(ENTITY_STORE_ROUTES.INSTALL, {
+    const response = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
       headers: defaultHeaders,
       responseType: 'json',
       body: {},
@@ -46,7 +46,7 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
   });
 
   apiTest.afterAll(async ({ apiClient, esClient }) => {
-    const response = await apiClient.post(ENTITY_STORE_ROUTES.UNINSTALL, {
+    const response = await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
       headers: defaultHeaders,
       responseType: 'json',
       body: {},
@@ -65,7 +65,6 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       const query = `FROM ${UPDATES_INDEX} | WHERE ${filter} | LIMIT 10`;
       const result = await esClient.esql.query({
         query,
-        drop_null_columns: true,
       });
 
       const { values, columns } = result;
@@ -86,7 +85,6 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       const query = `FROM ${UPDATES_INDEX} | WHERE ${filter} | LIMIT 10`;
       const result = await esClient.esql.query({
         query,
-        drop_null_columns: true,
       });
 
       const { values, columns } = result;
@@ -110,7 +108,6 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       const query = `FROM ${UPDATES_INDEX} | WHERE ${filter} | LIMIT 10`;
       const result = await esClient.esql.query({
         query,
-        drop_null_columns: true,
       });
 
       const { values, columns } = result;
@@ -126,7 +123,6 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
     async ({ esClient }) => {
       await esClient.esql.query({
         query: `FROM ${UPDATES_INDEX} | LIMIT 1`,
-        drop_null_columns: true,
       });
       for (const example of USER_SCOUT_INVALID_PER_DOCUMENT_FILTER_EXAMPLES) {
         expect(getEuidEsqlFilterBasedOnDocument('user', example.doc)).toBeUndefined();
@@ -147,7 +143,6 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       const query = `FROM ${UPDATES_INDEX} | WHERE ${filter} | LIMIT 10`;
       const result = await esClient.esql.query({
         query,
-        drop_null_columns: true,
       });
 
       const { values, columns } = result;
@@ -174,7 +169,6 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       const query = `FROM ${UPDATES_INDEX} | WHERE ${filter} | LIMIT 10`;
       const result = await esClient.esql.query({
         query,
-        drop_null_columns: true,
       });
 
       const { values, columns } = result;
@@ -199,7 +193,6 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       const query = `FROM ${UPDATES_INDEX} | WHERE ${filter} | LIMIT 10`;
       const result = await esClient.esql.query({
         query,
-        drop_null_columns: true,
       });
 
       const { values, columns } = result;
@@ -220,7 +213,6 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       const query = `FROM ${UPDATES_INDEX} | WHERE ${filter} | LIMIT 10`;
       const result = await esClient.esql.query({
         query,
-        drop_null_columns: true,
       });
 
       const { values, columns } = result;
@@ -241,7 +233,6 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       const query = `FROM ${UPDATES_INDEX} | WHERE ${filter} | LIMIT 10`;
       const result = await esClient.esql.query({
         query,
-        drop_null_columns: true,
       });
 
       const { values, columns } = result;
@@ -262,7 +253,6 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       const query = `FROM ${UPDATES_INDEX} | WHERE ${filter} | LIMIT 10`;
       const result = await esClient.esql.query({
         query,
-        drop_null_columns: true,
       });
 
       const { values, columns } = result;

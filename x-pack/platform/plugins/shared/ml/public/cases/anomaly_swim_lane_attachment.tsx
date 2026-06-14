@@ -6,32 +6,36 @@
  */
 
 import { EuiDescriptionList } from '@elastic/eui';
-import type { PersistableStateAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
+import type { UnifiedValueAttachmentViewProps } from '@kbn/cases-plugin/public';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { transformTimeRangeOut } from '@kbn/presentation-publishing';
 import deepEqual from 'fast-deep-equal';
 import { memoize } from 'lodash';
 import React from 'react';
-import { CASE_ATTACHMENT_TYPE_ID_ANOMALY_SWIMLANE } from '../../common/constants/cases';
-import type {
-  AnomalySwimLaneEmbeddableApi,
-  AnomalySwimLaneEmbeddableState,
-} from '../embeddables/anomaly_swimlane/types';
+import type { AnomalySwimLaneEmbeddableState } from '@kbn/ml-server-schemas/embeddables/anomaly_swimlane';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '@kbn/ml-common-types/embeddables/anomaly_swimlane';
+import { transformOut } from '../../common/embeddables/anomaly_swimlane/transform_out';
+import type { AnomalySwimLaneAttachmentData } from '../../common/util/cases_utils';
+import type { AnomalySwimLaneEmbeddableApi } from '../embeddables/anomaly_swimlane/types';
+
+type AnomalySwimLaneViewProps = UnifiedValueAttachmentViewProps<AnomalySwimLaneAttachmentData>;
 
 export const initComponent = memoize((fieldFormats: FieldFormatsStart) => {
   return React.memo(
-    (props: PersistableStateAttachmentViewProps) => {
-      const { persistableStateAttachmentState, caseData } = props;
+    (props: AnomalySwimLaneViewProps) => {
+      const { caseData } = props;
+
+      const attachmentState = props.data.state;
+      const attachmentId = typeof attachmentState.id === 'string' ? attachmentState.id : undefined;
 
       const dataFormatter = fieldFormats.deserialize({
         id: FIELD_FORMAT_IDS.DATE,
       });
 
-      const inputProps = transformTimeRangeOut(
-        persistableStateAttachmentState as unknown as AnomalySwimLaneEmbeddableState
+      const embeddableState = transformOut(
+        attachmentState as unknown as AnomalySwimLaneEmbeddableState
       );
 
       const listItems = [
@@ -42,9 +46,9 @@ export const initComponent = memoize((fieldFormats: FieldFormatsStart) => {
               defaultMessage="Job IDs"
             />
           ),
-          description: inputProps.jobIds.join(', '),
+          description: embeddableState.job_ids.join(', '),
         },
-        ...(inputProps.swimlaneType === 'viewBy' && inputProps.viewBy
+        ...(embeddableState.swimlane_type === 'viewBy'
           ? [
               {
                 title: (
@@ -53,43 +57,35 @@ export const initComponent = memoize((fieldFormats: FieldFormatsStart) => {
                     defaultMessage="View by"
                   />
                 ),
-                description: inputProps.viewBy,
+                description: embeddableState.view_by,
               },
             ]
           : []),
-        {
-          title: (
-            <FormattedMessage
-              id="xpack.ml.cases.anomalySwimLane.description.timeRangeLabel"
-              defaultMessage="Time range"
-            />
-          ),
-          description: `${dataFormatter.convert(
-            inputProps.time_range!.from
-          )} - ${dataFormatter.convert(inputProps.time_range!.to)}`,
-        },
+        ...(embeddableState.time_range
+          ? [
+              {
+                title: (
+                  <FormattedMessage
+                    id="xpack.ml.cases.anomalySwimLane.description.timeRangeLabel"
+                    defaultMessage="Time range"
+                  />
+                ),
+                description: `${dataFormatter.convertToText(
+                  embeddableState.time_range.from
+                )} - ${dataFormatter.convertToText(embeddableState.time_range.to)}`,
+              },
+            ]
+          : []),
       ];
-
-      if (typeof inputProps.query?.query === 'string' && inputProps.query?.query !== '') {
-        listItems.push({
-          title: (
-            <FormattedMessage
-              id="xpack.ml.cases.anomalySwimLane.description.queryLabel"
-              defaultMessage="Query"
-            />
-          ),
-          description: inputProps.query?.query,
-        });
-      }
 
       return (
         <>
           <EuiDescriptionList compressed type={'inline'} listItems={listItems} />
           <EmbeddableRenderer<AnomalySwimLaneEmbeddableState, AnomalySwimLaneEmbeddableApi>
-            maybeId={inputProps.id}
-            type={CASE_ATTACHMENT_TYPE_ID_ANOMALY_SWIMLANE}
+            maybeId={attachmentId}
+            type={ANOMALY_SWIMLANE_EMBEDDABLE_TYPE}
             getParentApi={() => ({
-              getSerializedStateForChild: () => inputProps,
+              getSerializedStateForChild: () => embeddableState,
               executionContext: {
                 type: 'cases',
                 description: caseData.title,
@@ -100,10 +96,6 @@ export const initComponent = memoize((fieldFormats: FieldFormatsStart) => {
         </>
       );
     },
-    (prevProps, nextProps) =>
-      deepEqual(
-        prevProps.persistableStateAttachmentState,
-        nextProps.persistableStateAttachmentState
-      )
+    (prevProps, nextProps) => deepEqual(prevProps.data.state, nextProps.data.state)
   );
 });

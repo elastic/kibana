@@ -35,9 +35,9 @@ import { mockContextValue } from '../../shared/mocks/mock_context';
 import { mockFlyoutApi } from '../../shared/mocks/mock_flyout_context';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { HostPreviewPanelKey } from '../../../entity_details/host_right';
-import { HOST_PREVIEW_BANNER } from '../../right/components/host_entity_overview';
+import { HOST_PREVIEW_BANNER } from '../../../../flyout_v2/document/main/components/host_entity_overview';
 import { UserPreviewPanelKey } from '../../../entity_details/user_right';
-import { USER_PREVIEW_BANNER } from '../../right/components/user_entity_overview';
+import { USER_PREVIEW_BANNER } from '../../../../flyout_v2/document/main/components/user_entity_overview';
 import { NetworkPreviewPanelKey, NETWORK_PREVIEW_BANNER } from '../../../network_details';
 import { useAlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
@@ -83,12 +83,6 @@ const mockUseMlUserPermissions = useMlCapabilities as jest.Mock;
 const mockUseHasSecurityCapability = jest.fn().mockReturnValue(false);
 jest.mock('../../../../helper_hooks', () => ({
   useHasSecurityCapability: () => mockUseHasSecurityCapability(),
-}));
-
-jest.mock('../../../../sourcerer/containers', () => ({
-  useSourcererDataView: jest
-    .fn()
-    .mockReturnValue({ selectedPatterns: ['index'], sourcererDataView: {} }),
 }));
 
 jest.mock('../../../../common/components/ml/anomaly/anomaly_table_provider', () => ({
@@ -235,6 +229,16 @@ describe('<HostDetails />', () => {
   });
 
   describe('Related users', () => {
+    it('renders related users table when attack cell actions are used without DocumentDetailsContext', () => {
+      const { getByTestId } = render(
+        <TestProviders>
+          <HostDetails {...defaultProps} isAttackDetails={true} />
+        </TestProviders>
+      );
+      expect(getByTestId(HOST_DETAILS_RELATED_USERS_TABLE_TEST_ID)).toBeInTheDocument();
+      expect(getByTestId(HOST_DETAILS_RELATED_USERS_LINK_TEST_ID)).toBeInTheDocument();
+    });
+
     it('should render the related user table with correct dates and indices', () => {
       const { getByTestId } = renderHostDetails(mockContextValue);
       expect(mockUseHostsRelatedUsers).toBeCalledWith({

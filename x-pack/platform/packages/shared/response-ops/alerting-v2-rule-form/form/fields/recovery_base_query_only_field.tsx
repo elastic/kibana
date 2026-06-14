@@ -17,9 +17,9 @@ interface RecoveryBaseQueryOnlyFieldProps {
 }
 
 /**
- * Recovery base query field for non-split mode (full ES|QL editor).
+ * Recovery base query field (full ES|QL editor).
  *
- * Displayed when the recovery type is `query` and no evaluation condition (WHERE clause) exists.
+ * Displayed when the recovery type is `query`.
  * Seeds the recovery query from the evaluation query on mount, and validates
  * ES|QL syntax, grouping fields, and that the recovery query differs from evaluation.
  *

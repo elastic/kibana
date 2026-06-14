@@ -33,7 +33,7 @@ interface Props {
 export const ArgAddPopover: FC<Props> = ({ options }) => {
   const button = (handleClick: MouseEventHandler<HTMLButtonElement>) => (
     <EuiButtonIcon
-      iconType="plusInCircle"
+      iconType="plusCircle"
       aria-label={strings.getAddAriaLabel()}
       onClick={handleClick}
       className="canvasArg__addArg"

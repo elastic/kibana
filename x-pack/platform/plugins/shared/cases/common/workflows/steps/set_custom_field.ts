@@ -8,6 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
+import { Owner } from '../../bundled-types.gen';
 import {
   CasesStepBaseConfigSchema,
   CasesStepCaseIdVersionSchema,
@@ -18,6 +19,7 @@ import * as i18n from '../translations';
 export const SetCustomFieldStepTypeId = 'cases.setCustomField';
 
 export const InputSchema = CasesStepCaseIdVersionSchema.extend({
+  owner: Owner,
   field_name: z.string().min(1, 'field_name is required'),
   value: z.union([z.string().min(1), z.boolean(), z.number().int(), z.null()]),
 });
@@ -34,7 +36,7 @@ export const setCustomFieldStepCommonDefinition: CommonStepDefinition<
   SetCustomFieldStepOutputSchema
 > = {
   id: SetCustomFieldStepTypeId,
-  category: StepCategory.Kibana,
+  category: StepCategory.KibanaCases,
   label: i18n.SET_CUSTOM_FIELD_STEP_LABEL,
   description: i18n.SET_CUSTOM_FIELD_STEP_DESCRIPTION,
   documentation: {
@@ -46,6 +48,7 @@ export const setCustomFieldStepCommonDefinition: CommonStepDefinition<
   type: ${SetCustomFieldStepTypeId}
   with:
     case_id: "abc-123-def-456"
+    owner: "securitySolution"
     field_name: "priority_reason"
     value: "investigate immediately"
 \`\`\``,
@@ -55,6 +58,7 @@ export const setCustomFieldStepCommonDefinition: CommonStepDefinition<
   type: ${SetCustomFieldStepTypeId}
   with:
     case_id: "abc-123-def-456"
+    owner: "securitySolution"
     field_name: "is_automated"
     value: true
 \`\`\``,

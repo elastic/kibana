@@ -55,7 +55,7 @@ export const AgentBuilderSkillDetailsPage = () => {
     }
     return [
       {
-        text: labels.skills.title,
+        text: labels.skills.libraryTitle,
         path: appPaths.skills.list,
       },
       {

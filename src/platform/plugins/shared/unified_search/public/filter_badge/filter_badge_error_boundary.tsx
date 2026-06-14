@@ -31,7 +31,9 @@ export class FilterBadgeErrorBoundary extends Component<
   }
 
   componentWillReceiveProps() {
-    this.setState({ hasError: false });
+    if (this.state.hasError) {
+      this.setState({ hasError: false });
+    }
   }
 
   render() {

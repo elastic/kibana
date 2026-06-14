@@ -106,8 +106,8 @@ export function DataCascadeProvider<G extends GroupNode, L extends LeafNode>({
   const initialTableState = useMemo(
     () =>
       ({
-        expanded: initialState?.expanded,
-        rowSelection: initialState?.rowSelection,
+        expanded: initialState?.expanded ?? {},
+        rowSelection: initialState?.rowSelection ?? {},
       } as TableState),
     [initialState?.expanded, initialState?.rowSelection]
   );

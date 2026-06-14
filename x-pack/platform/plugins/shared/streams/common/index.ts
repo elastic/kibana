@@ -13,12 +13,17 @@ export type {
   ProcessorSuggestionsResponse,
 } from './ingest_processor_suggestions';
 
+export { STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG } from './feature_flags';
+
 export {
   STREAMS_TIERED_FEATURES,
   STREAMS_TIERED_ML_FEATURE,
   STREAMS_TIERED_AI_FEATURE,
   STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE,
   ATTACHMENT_SUGGESTIONS_LIMIT,
+  DEFAULT_EXTRACTION_INTERVAL_HOURS,
+  MIN_EXTRACTION_INTERVAL_HOURS,
+  FAILURE_STORE_SELECTOR,
 } from './constants';
 
 export type { StreamDocsStat } from './doc_counts';
@@ -35,3 +40,20 @@ export {
   getDefaultTextField,
   extractMessagesFromField,
 } from './pattern_extraction_helpers';
+
+export type { SigEventsTuningConfig } from './sig_events_tuning_config';
+export { DEFAULT_SIG_EVENTS_TUNING_CONFIG } from './sig_events_tuning_config';
+export {
+  SIGNIFICANT_EVENT_ATTACHMENT_TYPE,
+  SIGNIFICANT_EVENT_SML_TYPE,
+  type SignificantEventAttachment,
+  type PendingSignificantEventAttachment,
+} from './significant_event_attachment';
+export {
+  type StreamsAppLocation,
+  type StreamsAppLocationParams,
+  getStreamsLocation,
+} from './get_streams_location/get_streams_location';
+
+export type { StreamSummary } from './stream_summary';
+export type { PaginatedResponse } from './pagination';

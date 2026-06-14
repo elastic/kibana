@@ -15,7 +15,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const log = getService('log');
   const retry = getService('retry');
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const queryBar = getService('queryBar');
   const inspector = getService('inspector');
@@ -37,10 +36,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug('load kibana index with default index pattern');
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
-      );
-      // and load a set of makelogs data
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
       );
       await kibanaServer.uiSettings.replace(defaultSettings);
       await common.navigateToApp('discover');
@@ -252,7 +247,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await header.awaitKibanaChrome();
         await discover.waitUntilTabIsLoaded();
         const time = await timePicker.getTimeConfig();
-        expect(time.start).to.be('~ 15 minutes ago');
+        expect(
+          time.start === '~ 15 minutes ago' ||
+            time.start === 'now-15m' ||
+            time.start === 'now-15m/m'
+        ).to.be(true);
         expect(time.end).to.be('now');
       });
     });

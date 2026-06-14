@@ -46,7 +46,7 @@ describe('useResolutionGroup', () => {
 
     await waitFor(() => {
       expect(mockFetch).toHaveBeenCalledWith(RESOLUTION_GROUP_ROUTE, {
-        version: '2',
+        version: '2023-10-31',
         method: 'GET',
         query: { entity_id: 'target-1' },
       });

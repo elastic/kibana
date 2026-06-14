@@ -4,102 +4,42 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  getStreamTypeFromDefinition,
-  type SignificantEventsGenerateResponse,
-  type SignificantEventsGetResponse,
-  type SignificantEventsPreviewResponse,
-} from '@kbn/streams-schema';
+import type { SignificantEventsGetResponse } from '@kbn/streams-schema';
 import { z } from '@kbn/zod/v4';
-import { catchError, from as fromRxjs, map } from 'rxjs';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
-import { PromptsConfigService } from '../../../../lib/sig_events/saved_objects/prompts_config_service';
-import { generateSignificantEventDefinitions } from '../../../../lib/sig_events/generate_significant_events';
-import { previewSignificantEvents } from '../../../../lib/sig_events/preview_significant_events';
+import { BUCKET_SIZE_PATTERN } from '../../../../lib/sig_events/helpers/fill_bucket_gaps';
 import { readSignificantEventsFromAlertsIndices } from '../../../../lib/sig_events/read_significant_events_from_alerts_indices';
+import { resolveAlertsSource } from '../../../utils/resolve_alerts_source';
+import { getSignificantEventsResponse } from '../../../../oas_examples';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
-import { createConnectorSSEError } from '../../../utils/create_connector_sse_error';
-import { getRequestAbortSignal } from '../../../utils/get_request_abort_signal';
-import { resolveConnectorId } from '../../../utils/resolve_connector_id';
+import { searchModeSchema } from '../../../utils/search_mode';
 
 // Make sure strings are expected for input, but still converted to a
-// Date, without breaking the OpenAPI generator
-const dateFromString = z.string().transform((input) => new Date(input));
-
-const previewSignificantEventsRoute = createServerRoute({
-  endpoint: 'POST /api/streams/{name}/significant_events/_preview 2023-10-31',
-  params: z.object({
-    path: z.object({ name: z.string() }),
-    query: z.object({ from: dateFromString, to: dateFromString, bucketSize: z.string() }),
-    body: z.object({
-      query: z.object({
-        esql: z.object({
-          query: z.string(),
-        }),
-      }),
-    }),
-  }),
-  options: {
-    access: 'public',
-    summary: 'Preview significant events',
-    description: 'Preview significant event results based on a given query',
-    availability: {
-      since: '9.1.0',
-      stability: 'experimental',
-    },
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
-    },
-  },
-  handler: async ({
-    params,
-    request,
-    getScopedClients,
-    server,
-  }): Promise<SignificantEventsPreviewResponse> => {
-    const { streamsClient, scopedClusterClient, licensing, uiSettingsClient } =
-      await getScopedClients({
-        request,
-      });
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
-
-    const {
-      body: { query },
-      path: { name },
-      query: { bucketSize, from, to },
-    } = params;
-
-    await streamsClient.ensureStream(name);
-
-    return await previewSignificantEvents(
-      {
-        esqlQuery: query.esql.query,
-        bucketSize,
-        from,
-        to,
-      },
-      {
-        scopedClusterClient,
-      }
-    );
-  },
-});
+// Date, without breaking the OpenAPI generator.
+// Descriptions must be on the inner z.string() so they propagate to OAS parameters.
+const makeDateFromString = (description: string) =>
+  z
+    .string()
+    .describe(description)
+    .transform((input) => new Date(input));
 
 const readStreamSignificantEventsRoute = createServerRoute({
   endpoint: 'GET /api/streams/{name}/significant_events 2023-10-31',
   params: z.object({
-    path: z.object({ name: z.string() }),
+    path: z.object({ name: z.string().describe('The name of the stream.') }),
     query: z.object({
-      from: dateFromString,
-      to: dateFromString,
-      bucketSize: z.string(),
+      from: makeDateFromString('Start of the time range as an ISO 8601 date string.'),
+      to: makeDateFromString('End of the time range as an ISO 8601 date string.'),
+      bucketSize: z
+        .string()
+        .regex(BUCKET_SIZE_PATTERN)
+        .describe('The bucket size for aggregating events (e.g. "1m", "1h").'),
       query: z
         .string()
         .optional()
         .describe('Query string to filter significant events on metadata fields'),
+      searchMode: searchModeSchema,
     }),
   }),
 
@@ -111,6 +51,27 @@ const readStreamSignificantEventsRoute = createServerRoute({
       since: '9.1.0',
       stability: 'experimental',
     },
+    oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {},
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: 'Significant events for the stream.',
+          content: {
+            'application/json': {
+              examples: {
+                significantEvents: { value: getSignificantEventsResponse },
+              },
+            },
+          },
+        },
+      },
+    }),
   },
   security: {
     authz: {
@@ -123,16 +84,27 @@ const readStreamSignificantEventsRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<SignificantEventsGetResponse> => {
-    const { streamsClient, queryClient, scopedClusterClient, licensing, uiSettingsClient } =
-      await getScopedClients({
-        request,
-      });
+    const {
+      streamsClient,
+      getQueryClient,
+      getAlertingV2RulesClient,
+      scopedClusterClient,
+      licensing,
+      uiSettingsClient,
+    } = await getScopedClients({
+      request,
+    });
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
     await streamsClient.ensureStream(params.path.name);
 
     const { name } = params.path;
-    const { from, to, bucketSize, query } = params.query;
+    const { from, to, bucketSize, query, searchMode } = params.query;
 
+    const alertsSource = await resolveAlertsSource({
+      uiSettingsClient,
+      alertingV2RulesClient: await getAlertingV2RulesClient(),
+    });
+    const queryClient = await getQueryClient();
     return readSignificantEventsFromAlertsIndices(
       {
         streamNames: [name],
@@ -140,127 +112,14 @@ const readStreamSignificantEventsRoute = createServerRoute({
         to,
         bucketSize,
         query,
+        searchMode,
+        alertsSource,
       },
       { queryClient, scopedClusterClient }
     );
   },
 });
 
-/**
- * This should be @deprecated and removed since it is no longer used.
- */
-const generateSignificantEventsRoute = createServerRoute({
-  endpoint: 'POST /api/streams/{name}/significant_events/_generate 2023-10-31',
-  params: z.object({
-    path: z.object({ name: z.string() }),
-    query: z.object({
-      connectorId: z
-        .string()
-        .optional()
-        .describe(
-          'Optional connector ID. If not provided, the default AI connector from settings will be used.'
-        ),
-      from: dateFromString,
-      to: dateFromString,
-      sampleDocsSize: z
-        .number()
-        .optional()
-        .describe(
-          'Number of sample documents to use for generation from the current data of stream'
-        ),
-    }),
-  }),
-  options: {
-    access: 'public',
-    summary: 'Generate significant events',
-    description: 'Generate significant events queries based on the stream data',
-    availability: {
-      since: '9.2.0',
-      stability: 'experimental',
-    },
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
-    },
-  },
-  handler: async ({
-    params,
-    request,
-    getScopedClients,
-    server,
-    logger,
-    telemetry,
-  }): Promise<SignificantEventsGenerateResponse> => {
-    const {
-      streamsClient,
-      licensing,
-      inferenceClient,
-      uiSettingsClient,
-      soClient,
-      featureClient,
-      scopedClusterClient,
-    } = await getScopedClients({ request });
-
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
-    await streamsClient.ensureStream(params.path.name);
-
-    const connectorId = await resolveConnectorId({
-      connectorId: params.query.connectorId,
-      uiSettingsClient,
-      logger,
-    });
-
-    // Get connector info for error enrichment
-    const [connector, definition, { significantEventsPromptOverride }] = await Promise.all([
-      inferenceClient.getConnectorById(connectorId),
-      streamsClient.getStream(params.path.name),
-      new PromptsConfigService({ soClient, logger }).getPrompt(),
-    ]);
-
-    return fromRxjs(
-      generateSignificantEventDefinitions(
-        {
-          definition,
-          connectorId,
-          start: params.query.from.valueOf(),
-          end: params.query.to.valueOf(),
-          systemPrompt: significantEventsPromptOverride,
-        },
-        {
-          inferenceClient,
-          featureClient,
-          logger: logger.get('significant_events'),
-          signal: getRequestAbortSignal(request),
-          esClient: scopedClusterClient.asCurrentUser,
-        }
-      )
-    ).pipe(
-      map(({ queries, tokensUsed, toolUsage }) => {
-        telemetry.trackSignificantEventsQueriesGenerated({
-          count: queries.length,
-          stream_name: definition.name,
-          stream_type: getStreamTypeFromDefinition(definition),
-          input_tokens_used: tokensUsed.prompt,
-          output_tokens_used: tokensUsed.completion,
-          tool_usage: toolUsage,
-        });
-
-        return {
-          type: 'generated_queries' as const,
-          queries,
-          tokensUsed,
-        };
-      }),
-      catchError((error: Error) => {
-        throw createConnectorSSEError(error, connector);
-      })
-    );
-  },
-});
-
 export const significantEventsRoutes = {
   ...readStreamSignificantEventsRoute,
-  ...previewSignificantEventsRoute,
-  ...generateSignificantEventsRoute,
 };

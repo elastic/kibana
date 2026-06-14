@@ -7,17 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { getMeta } from '@kbn/as-code-shared-schemas';
 import { tagsToFindOptions } from '@kbn/content-management-utils';
 import type { RequestHandlerContext } from '@kbn/core/server';
-import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
+
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
-import type { DashboardSearchRequestParams, DashboardSearchResponseBody } from './types';
+import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
+import type { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { transformDashboardOut } from '../transforms';
-import { getDashboardMeta } from '../saved_object_utils';
+import type { DashboardSearchRequestParams, DashboardSearchResponseBody } from './types';
 
 export async function search(
   requestCtx: RequestHandlerContext,
-  searchParams: DashboardSearchRequestParams
+  searchParams: DashboardSearchRequestParams,
+  strictValidationSchema: ReturnType<typeof getDashboardStateSchema>
 ): Promise<DashboardSearchResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
   const normalizeToArray = (value?: string | string[]) => {
@@ -50,7 +53,7 @@ export async function search(
     dashboards: soResponse.saved_objects.map((so) => {
       const {
         dashboardState: { description, tags, time_range, title },
-      } = transformDashboardOut(so.attributes, so.references);
+      } = transformDashboardOut(so.attributes, so.references, undefined, strictValidationSchema);
 
       return {
         id: so.id,
@@ -65,7 +68,7 @@ export async function search(
           }),
           title: title ?? '',
         },
-        meta: getDashboardMeta(so, 'search'),
+        meta: getMeta(so),
       };
     }),
     page: soResponse.page,

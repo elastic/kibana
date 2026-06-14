@@ -455,6 +455,52 @@ describe('BarDetails', () => {
     });
   });
 
+  describe('in case of missing destination', () => {
+    const mockItemWithMissingDestination = {
+      ...mockItem,
+      missingDestination: true,
+    } as unknown as TraceWaterfallItem;
+
+    it('renders missing destination icon when missingDestination is true', () => {
+      const { getByTestId } = render(
+        <BarDetails item={mockItemWithMissingDestination} left={10} />
+      );
+      expect(getByTestId('apmBarDetailsMissingDestinationIcon')).toBeInTheDocument();
+    });
+
+    it('does not render missing destination icon when missingDestination is false', () => {
+      const item = {
+        ...mockItem,
+        missingDestination: false,
+      } as unknown as TraceWaterfallItem;
+      const { queryByTestId } = render(<BarDetails item={item} left={10} />);
+      expect(queryByTestId('apmBarDetailsMissingDestinationIcon')).not.toBeInTheDocument();
+    });
+
+    it('does not render missing destination icon when missingDestination is undefined', () => {
+      const { queryByTestId } = render(<BarDetails item={mockItem} left={10} />);
+      expect(queryByTestId('apmBarDetailsMissingDestinationIcon')).not.toBeInTheDocument();
+    });
+
+    it('shows a tooltip on hover', async () => {
+      const user = userEvent.setup();
+      const { getByTestId, getByText } = render(
+        <BarDetails item={mockItemWithMissingDestination} left={10} />
+      );
+
+      await user.hover(getByTestId('apmBarDetailsMissingDestinationIcon'));
+
+      await waitFor(() => {
+        expect(getByTestId('apmBarDetailsMissingDestinationTooltip')).toBeInTheDocument();
+        expect(
+          getByText(
+            'This exit span is missing the span.destination.service.resource field which might prevent linking it to downstream transactions on features that depend on this information. i.e.: Service map. Make sure the instrumentation of this exit span follows OTel Semantic Conventions'
+          )
+        ).toBeInTheDocument();
+      });
+    });
+  });
+
   describe('in case of cold start', () => {
     it('renders cold start badge when coldstart is true', () => {
       const mockItemWithColdStart = {
@@ -519,6 +565,66 @@ describe('BarDetails', () => {
 
       const { queryByTestId } = render(<BarDetails item={mockItemWithoutServiceName} left={10} />);
       expect(queryByTestId('apmBarDetailsServiceNameBadge')).not.toBeInTheDocument();
+    });
+
+    describe('when getServiceBadgeHref is provided in context', () => {
+      const mockItemWithServiceName = {
+        ...mockItem,
+        serviceName: 'my-service',
+      } as unknown as TraceWaterfallItem;
+
+      beforeEach(() => {
+        (useTraceWaterfallContext as jest.Mock).mockReturnValue({
+          getServiceBadgeHref: (serviceName: string) => `/services/${serviceName}/overview`,
+        });
+      });
+
+      it('renders the badge as a link with the correct href', () => {
+        const { getByTestId } = render(<BarDetails item={mockItemWithServiceName} left={10} />);
+        const badge = getByTestId('apmBarDetailsServiceNameBadge');
+        expect(badge).toHaveAttribute('href', '/services/my-service/overview');
+      });
+
+      it('renders the correct aria-label', () => {
+        const { getByTestId } = render(<BarDetails item={mockItemWithServiceName} left={10} />);
+        const badge = getByTestId('apmBarDetailsServiceNameBadge');
+        expect(badge).toHaveAttribute('aria-label', 'Go to my-service service overview');
+      });
+
+      it('sets data-prevent-row-click to prevent the row click handler from firing', () => {
+        const { getByTestId } = render(<BarDetails item={mockItemWithServiceName} left={10} />);
+        expect(getByTestId('apmBarDetailsServiceNameBadge')).toHaveAttribute(
+          'data-prevent-row-click'
+        );
+      });
+    });
+
+    describe('when getServiceBadgeHref is not provided in context', () => {
+      beforeEach(() => {
+        (useTraceWaterfallContext as jest.Mock).mockReturnValue({
+          getServiceBadgeHref: undefined,
+        });
+      });
+
+      it('renders the badge without href', () => {
+        const mockItemWithServiceName = {
+          ...mockItem,
+          serviceName: 'my-service',
+        } as unknown as TraceWaterfallItem;
+
+        const { getByTestId } = render(<BarDetails item={mockItemWithServiceName} left={10} />);
+        expect(getByTestId('apmBarDetailsServiceNameBadge')).not.toHaveAttribute('href');
+      });
+
+      it('does not render aria-label', () => {
+        const mockItemWithServiceName = {
+          ...mockItem,
+          serviceName: 'my-service',
+        } as unknown as TraceWaterfallItem;
+
+        const { getByTestId } = render(<BarDetails item={mockItemWithServiceName} left={10} />);
+        expect(getByTestId('apmBarDetailsServiceNameBadge')).not.toHaveAttribute('aria-label');
+      });
     });
   });
 });

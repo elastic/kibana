@@ -6,18 +6,25 @@
  */
 
 import { useMemo } from 'react';
-import { useAbortController } from '@kbn/react-hooks';
 import type { Feature } from '@kbn/streams-schema';
-import { groupBy } from 'lodash';
 import { useKibana } from '../use_kibana';
 
-export interface BulkDeleteResult {
+export interface BulkOperationResult {
   succeededCount: number;
   failedCount: number;
 }
 
+type CrossStreamOp =
+  | { delete: { id: string } }
+  | { exclude: { id: string } }
+  | { restore: { id: string } };
+
+type BuildOp = (feature: Feature) => CrossStreamOp;
+
 interface DiscoveryFeaturesApi {
-  deleteFeaturesInBulk: (features: Feature[]) => Promise<BulkDeleteResult>;
+  deleteFeaturesInBulk: (features: Feature[]) => Promise<BulkOperationResult>;
+  excludeFeaturesInBulk: (features: Feature[]) => Promise<BulkOperationResult>;
+  restoreFeaturesInBulk: (features: Feature[]) => Promise<BulkOperationResult>;
 }
 
 export function useDiscoveryFeaturesApi(): DiscoveryFeaturesApi {
@@ -29,43 +36,32 @@ export function useDiscoveryFeaturesApi(): DiscoveryFeaturesApi {
     },
   } = useKibana();
 
-  const { signal } = useAbortController();
+  return useMemo(() => {
+    // All three methods share the same cross-stream endpoint. Server resolves
+    // each feature's owning stream from its UUID — no client-side fan-out and
+    // no per-op streamName needed. signal: null so unmount does not abort a
+    // partially-applied mutation.
+    const runBulk = async (features: Feature[], buildOp: BuildOp): Promise<BulkOperationResult> => {
+      if (features.length === 0) {
+        return { succeededCount: 0, failedCount: 0 };
+      }
+      const { succeeded, failed } = await streamsRepositoryClient.fetch(
+        'POST /internal/streams/features/_bulk',
+        {
+          signal: null,
+          params: { body: { operations: features.map(buildOp) } },
+        }
+      );
+      return { succeededCount: succeeded, failedCount: failed };
+    };
 
-  return useMemo(
-    () => ({
-      deleteFeaturesInBulk: async (features: Feature[]) => {
-        const featuresByStream = groupBy(features, 'stream_name');
-        const entries = Object.entries(featuresByStream);
-
-        const results = await Promise.allSettled(
-          entries.map(([streamName, streamFeatures]) =>
-            streamsRepositoryClient.fetch('POST /internal/streams/{name}/features/_bulk', {
-              signal,
-              params: {
-                path: { name: streamName },
-                body: {
-                  operations: streamFeatures.map(({ uuid }) => ({ delete: { id: uuid } })),
-                },
-              },
-            })
-          )
-        );
-
-        let succeededCount = 0;
-        let failedCount = 0;
-
-        results.forEach((result, index) => {
-          const count = entries[index][1].length;
-          if (result.status === 'fulfilled') {
-            succeededCount += count;
-          } else {
-            failedCount += count;
-          }
-        });
-
-        return { succeededCount, failedCount };
-      },
-    }),
-    [streamsRepositoryClient, signal]
-  );
+    return {
+      deleteFeaturesInBulk: (features) =>
+        runBulk(features, (feature) => ({ delete: { id: feature.uuid } })),
+      excludeFeaturesInBulk: (features) =>
+        runBulk(features, (feature) => ({ exclude: { id: feature.uuid } })),
+      restoreFeaturesInBulk: (features) =>
+        runBulk(features, (feature) => ({ restore: { id: feature.uuid } })),
+    };
+  }, [streamsRepositoryClient]);
 }

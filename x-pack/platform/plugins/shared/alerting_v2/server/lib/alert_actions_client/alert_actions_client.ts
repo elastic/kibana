@@ -7,11 +7,12 @@
 
 import { esql } from '@elastic/esql';
 import Boom from '@hapi/boom';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import { Request } from '@kbn/core-di-server';
 import { inject, injectable } from 'inversify';
 import { groupBy, omit } from 'lodash';
 import type {
   BulkCreateAlertActionItemBody,
-  BulkGetAlertActionsResponse,
   CreateAlertActionBody,
 } from '@kbn/alerting-v2-schemas';
 import {
@@ -19,6 +20,7 @@ import {
   type AlertAction,
 } from '../../resources/datastreams/alert_actions';
 import { ALERT_EVENTS_DATA_STREAM } from '../../resources/datastreams/alert_events';
+import { AlertActionEventPublisher } from '../events/alert_action_event_publisher/alert_action_event_publisher';
 import { queryResponseToRecords } from '../services/query_service/query_response_to_records';
 import { type QueryServiceContract } from '../services/query_service/query_service';
 import { QueryServiceInternalToken } from '../services/query_service/tokens';
@@ -26,14 +28,19 @@ import type { StorageServiceContract } from '../services/storage_service/storage
 import { StorageServiceScopedToken } from '../services/storage_service/tokens';
 import type { UserServiceContract } from '../services/user_service/user_service';
 import { UserService } from '../services/user_service/user_service';
-import { getBulkGetAlertActionsQuery } from './queries';
+import { ALERTING_V2_ERROR_CODES } from '../errors/error_codes';
+import { RequestSpaceIdToken } from '../services/spaces_service/tokens';
 
 @injectable()
 export class AlertActionsClient {
   constructor(
     @inject(QueryServiceInternalToken) private readonly queryService: QueryServiceContract,
     @inject(StorageServiceScopedToken) private readonly storageService: StorageServiceContract,
-    @inject(UserService) private readonly userService: UserServiceContract
+    @inject(UserService) private readonly userService: UserServiceContract,
+    @inject(Request) private readonly request: KibanaRequest,
+    @inject(RequestSpaceIdToken) private readonly spaceId: string,
+    @inject(AlertActionEventPublisher)
+    private readonly eventPublisher: AlertActionEventPublisher
   ) {}
 
   public async createAction(params: {
@@ -48,40 +55,14 @@ export class AlertActionsClient {
       }),
     ]);
 
-    await this.storageService.bulkIndexDocs({
-      index: ALERT_ACTIONS_DATA_STREAM,
-      docs: [
-        this.buildAlertActionDocument({
-          action: params.action,
-          alertEvent,
-          userProfileUid,
-        }),
-      ],
+    const doc = this.buildAlertActionDocument({
+      action: params.action,
+      alertEvent,
+      userProfileUid,
     });
-  }
 
-  public async bulkGet(episodeIds: string[]): Promise<BulkGetAlertActionsResponse> {
-    const query = getBulkGetAlertActionsQuery(episodeIds);
-    const records = queryResponseToRecords<BulkGetAlertActionsResponse[number]>(
-      await this.queryService.executeQuery({ query: query.query })
-    );
-
-    const returnedEpisodeIds = new Set(records.map((r) => r.episode_id));
-    for (const episodeId of episodeIds) {
-      if (!returnedEpisodeIds.has(episodeId)) {
-        records.push({
-          episode_id: episodeId,
-          rule_id: null,
-          group_hash: null,
-          last_ack_action: null,
-          last_deactivate_action: null,
-          last_snooze_action: null,
-          tags: null,
-        });
-      }
-    }
-
-    return records;
+    await this.bulkIndexActions([doc]);
+    this.eventPublisher.emitEpisodeActions(this.request, [doc]);
   }
 
   public async createBulkActions(
@@ -116,10 +97,20 @@ export class AlertActionsClient {
       .filter((doc): doc is AlertAction => doc !== undefined);
 
     if (docs.length > 0) {
-      await this.storageService.bulkIndexDocs({ index: ALERT_ACTIONS_DATA_STREAM, docs });
+      await this.bulkIndexActions(docs);
+      this.eventPublisher.emitEpisodeActions(this.request, docs);
     }
 
     return { processed: docs.length, total: actions.length };
+  }
+
+  private async bulkIndexActions(docs: readonly AlertAction[]): Promise<void> {
+    await this.storageService.bulkIndexDocs({
+      index: ALERT_ACTIONS_DATA_STREAM,
+      docs,
+      // this ensures that the action is immediately visible to the user in the UI
+      refresh: 'wait_for',
+    });
   }
 
   private async fetchLastAlertEventRecordsForActions(
@@ -134,13 +125,13 @@ export class AlertActionsClient {
 
     const query = esql`
       FROM ${ALERT_EVENTS_DATA_STREAM}
-      | WHERE type == "alert" AND (${whereClause})
+      | WHERE type == "alert" AND space_id == ${this.spaceId} AND (${whereClause})
       | STATS
         last_event_timestamp = MAX(@timestamp),
         last_episode_id = LAST(episode.id, @timestamp),
         rule_id = VALUES(rule.id)
-        BY group_hash
-      | KEEP last_event_timestamp, rule_id, group_hash, last_episode_id
+        BY group_hash, space_id
+      | KEEP last_event_timestamp, rule_id, group_hash, last_episode_id, space_id
       | RENAME last_event_timestamp AS @timestamp, last_episode_id AS episode_id
     `.toRequest();
 
@@ -169,6 +160,7 @@ export class AlertActionsClient {
       rule_id: alertEvent.rule_id,
       group_hash: alertEvent.group_hash,
       episode_id: alertEvent.episode_id,
+      space_id: alertEvent.space_id,
       ...actionData,
     };
   }
@@ -180,12 +172,12 @@ export class AlertActionsClient {
     const { groupHash, episodeId } = params;
     const query = esql`
       FROM ${ALERT_EVENTS_DATA_STREAM}
-      | WHERE type == "alert" AND group_hash == ${groupHash} AND ${
+      | WHERE type == "alert" AND space_id == ${this.spaceId} AND group_hash == ${groupHash} AND ${
       episodeId ? esql.exp`episode.id == ${episodeId}` : esql.exp`true`
     }
       | SORT @timestamp DESC
       | RENAME rule.id AS rule_id, episode.id AS episode_id
-      | KEEP @timestamp, group_hash, episode_id, rule_id
+      | KEEP @timestamp, group_hash, episode_id, rule_id, space_id
       | LIMIT 1`.toRequest();
 
     const result = queryResponseToRecords<AlertEventRecord>(
@@ -194,7 +186,14 @@ export class AlertActionsClient {
 
     if (result.length === 0) {
       throw Boom.notFound(
-        `Alert event with group_hash [${groupHash}] and episode_id [${episodeId}] not found`
+        `Alert event with group_hash [${groupHash}] and episode_id [${episodeId}] not found`,
+        {
+          code: ALERTING_V2_ERROR_CODES.ALERT_EVENT_NOT_FOUND,
+          details: {
+            group_hash: groupHash,
+            ...(episodeId ? { episode_id: episodeId } : {}),
+          },
+        }
       );
     }
 
@@ -207,4 +206,5 @@ interface AlertEventRecord {
   group_hash: string;
   episode_id: string;
   rule_id: string;
+  space_id: string;
 }

@@ -13,6 +13,7 @@ import objectHash from 'object-hash';
 
 import dateMath from '@kbn/datemath';
 import type { estypes, TransportResult } from '@elastic/elasticsearch';
+import { addSpanLabels } from '@kbn/apm-utils';
 import {
   ALERT_UUID,
   ALERT_RULE_UUID,
@@ -306,7 +307,7 @@ export const getGapBetweenRuns = ({
     return moment.duration(0);
   }
   const driftTolerance = moment.duration(originalTo.diff(originalFrom));
-  agent.addLabels({ [SECURITY_QUERY_SPAN_S]: driftTolerance.asSeconds() }, false);
+  addSpanLabels({ [SECURITY_QUERY_SPAN_S]: driftTolerance.asSeconds() }, { isString: false });
   const currentDuration = moment.duration(moment(startedAt).diff(previousStartedAt));
   return currentDuration.subtract(driftTolerance);
 };

@@ -14,8 +14,7 @@ import type { TableId } from '@kbn/securitysolution-data-table';
 import { dataTableActions } from '@kbn/securitysolution-data-table';
 import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { PageScope } from '../../../data_view_manager/constants';
-import { useBulkAddEventsToCaseActions } from '../../../cases/components/case_events/use_bulk_event_actions';
-import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
+import { useBulkAddEventsToCaseActions } from '../../../cases/attachments/event/hooks/use_bulk_event_actions';
 import type { CustomBulkAction } from '../../../../common/types';
 import { RowRendererValues } from '../../../../common/api/timeline';
 import { StatefulEventsViewer } from '../events_viewer';
@@ -80,8 +79,6 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
   tableId,
 }) => {
   let ACTION_BUTTON_COUNT = MAX_ACTION_BUTTON_COUNT;
-
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
   const dispatch = useDispatch();
   const { globalFullScreen } = useGlobalFullScreen();
@@ -198,9 +195,10 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
           startDate={startDate}
           endDate={endDate}
           filterQuery={filterQuery}
+          applyPageAndTabsFilters={false}
           {...(showExternalAlerts ? alertsHistogramConfig : eventsHistogramConfig)}
           subtitle={getHistogramSubtitle}
-          sourcererScopeId={newDataViewPickerEnabled ? PageScope.explore : PageScope.default}
+          pageScope={PageScope.explore}
         />
       )}
       <StatefulEventsViewer
@@ -211,7 +209,7 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
         leadingControlColumns={leadingControlColumns}
         renderCellValue={DefaultCellRenderer}
         rowRenderers={defaultRowRenderers}
-        sourcererScope={newDataViewPickerEnabled ? PageScope.explore : PageScope.default}
+        pageScope={PageScope.explore}
         tableId={tableId}
         unit={showExternalAlerts ? i18n.EXTERNAL_ALERTS_UNIT : i18n.EVENTS_UNIT}
         defaultModel={defaultModel}

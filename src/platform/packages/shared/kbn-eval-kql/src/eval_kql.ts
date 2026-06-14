@@ -174,6 +174,10 @@ function readContextPath(
   return { pathExists: true, value: result };
 }
 
+function isDateMathExpression(value: string): boolean {
+  return value.startsWith('now') || value.includes('||');
+}
+
 function convertLiteralToValue(
   node: KqlLiteralNode,
   expectedType: 'string' | 'number' | 'boolean'
@@ -181,10 +185,11 @@ function convertLiteralToValue(
   switch (expectedType) {
     case 'string': {
       const strValue = String(node.value);
-      const parsed = dateMath.parse(strValue);
-      if (parsed?.isValid()) {
-        // it's a date math expression, return the resolved ISO string
-        return parsed.toISOString();
+      if (isDateMathExpression(strValue)) {
+        const parsed = dateMath.parse(strValue);
+        if (parsed?.isValid()) {
+          return parsed.toISOString();
+        }
       }
 
       return strValue;

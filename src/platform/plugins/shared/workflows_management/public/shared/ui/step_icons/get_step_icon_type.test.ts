@@ -14,6 +14,7 @@ describe('getTriggerTypeIconType', () => {
     ['trigger_manual', 'play'],
     ['trigger_alert', 'warning'],
     ['trigger_document', 'document'],
+    ['trigger_event', 'document'],
     ['trigger_scheduled', 'clock'],
   ] as const)('should return "%s" icon for %s', (triggerType, expectedIcon) => {
     expect(getTriggerTypeIconType(triggerType)).toBe(expectedIcon);

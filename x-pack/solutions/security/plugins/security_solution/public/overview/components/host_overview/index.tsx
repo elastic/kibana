@@ -44,6 +44,7 @@ import { RiskScoreDocTooltip } from '../common';
 import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
 import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_risk_score';
 import { PreferenceFormattedDateFromPrimitive } from '../../../common/components/formatted_date';
+import type { InspectQuery } from '../../../common/store/inputs/model';
 
 interface HostSummaryProps {
   contextID?: string; // used to provide unique draggable context when viewing in the side panel
@@ -79,6 +80,10 @@ const HostRiskOverviewWrapper = styled(EuiFlexGroup, {
 `;
 
 export const HOST_OVERVIEW_RISK_SCORE_QUERY_ID = 'riskInputsTabQuery';
+
+/** Stable references for useQueryInspector when risk data comes from the entity store (avoids render loops). */
+const ENTITY_STORE_RISK_INSPECT_PLACEHOLDER: InspectQuery = { dsl: [], response: [] };
+const noopRiskScoreRefetch = (): void => {};
 
 export const HostOverview = React.memo<HostSummaryProps>(
   ({
@@ -130,10 +135,12 @@ export const HostOverview = React.memo<HostSummaryProps>(
 
     useQueryInspector({
       deleteQuery,
-      inspect: riskScoreStateFromEntityStore ? { dsl: [], response: [] } : inspectRiskScore,
+      inspect: riskScoreStateFromEntityStore
+        ? ENTITY_STORE_RISK_INSPECT_PLACEHOLDER
+        : inspectRiskScore,
       loading: riskScoreStateFromEntityStore ? false : loadingRiskScore,
       queryId: HOST_OVERVIEW_RISK_SCORE_QUERY_ID,
-      refetch: riskScoreStateFromEntityStore ? () => {} : refetchRiskScore,
+      refetch: riskScoreStateFromEntityStore ? noopRiskScoreRefetch : refetchRiskScore,
       setQuery,
     });
 

@@ -8,7 +8,7 @@
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@kbn/react-query';
-import { ALL_VALUE, type UpdateCompositeSLOResponse } from '@kbn/slo-schema';
+import { ALL_VALUE, type CompositeSLODefinitionResponse } from '@kbn/slo-schema';
 import React from 'react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -27,20 +27,24 @@ export function useUpdateCompositeSlo() {
   const queryClient = useQueryClient();
 
   return useMutation<
-    UpdateCompositeSLOResponse,
+    CompositeSLODefinitionResponse,
     ServerError,
     { compositeSloId: string; compositeSlo: CreateCompositeSLOForm }
   >(
     ['updateCompositeSlo'],
     ({ compositeSloId, compositeSlo }) => {
-      return http.put<UpdateCompositeSLOResponse>(
+      return http.put<CompositeSLODefinitionResponse>(
         `/api/observability/slo_composites/${encodeURIComponent(compositeSloId)}`,
         { body: JSON.stringify(toApiPayload(compositeSlo)) }
       );
     },
     {
-      onSuccess: (_data, { compositeSlo }) => {
-        queryClient.invalidateQueries({ queryKey: sloKeys.lists(), exact: false });
+      onSuccess: (_data, { compositeSloId, compositeSlo }) => {
+        queryClient.invalidateQueries({ queryKey: sloKeys.compositeLists(), exact: false });
+        queryClient.invalidateQueries({
+          queryKey: sloKeys.compositeDetail(compositeSloId),
+          exact: false,
+        });
         toasts.addSuccess({
           title: toMountPoint(
             <span>

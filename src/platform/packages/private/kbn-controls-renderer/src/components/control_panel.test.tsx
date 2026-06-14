@@ -8,12 +8,12 @@
  */
 
 import React from 'react';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 
 import { OPTIONS_LIST_CONTROL, DEFAULT_PINNED_CONTROL_STATE } from '@kbn/controls-constants';
 import {
-  registerReactEmbeddableFactory,
-  type EmbeddableFactory,
+  registerEmbeddablePublicDefinition,
+  type EmbeddablePublicDefinition,
 } from '@kbn/embeddable-plugin/public/react_embeddable_system';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { render, waitFor } from '@testing-library/react';
@@ -47,7 +47,7 @@ const parentApi = {
   registerChildApi: jest.fn(),
 } as unknown as ControlsRendererParentApi;
 
-const mockOptionsListFactory: EmbeddableFactory<{ type: typeof OPTIONS_LIST_CONTROL }> = {
+const mockOptionsListFactory: EmbeddablePublicDefinition<{ type: typeof OPTIONS_LIST_CONTROL }> = {
   type: OPTIONS_LIST_CONTROL,
   buildEmbeddable: async ({ initialState, finalizeApi }) => {
     const api = finalizeApi({
@@ -55,6 +55,8 @@ const mockOptionsListFactory: EmbeddableFactory<{ type: typeof OPTIONS_LIST_CONT
       serializeState: () => ({
         type: OPTIONS_LIST_CONTROL,
       }),
+      anyStateChange$: of(),
+      applySerializedState: () => undefined,
     });
     return {
       Component: () => <div data-test-subj="optionsListControl">Options list control</div>,
@@ -65,8 +67,8 @@ const mockOptionsListFactory: EmbeddableFactory<{ type: typeof OPTIONS_LIST_CONT
 
 describe('render', () => {
   beforeAll(() => {
-    registerReactEmbeddableFactory(
-      'optionsListControl',
+    registerEmbeddablePublicDefinition(
+      'options_list_control',
       jest.fn().mockResolvedValue(mockOptionsListFactory)
     );
   });
@@ -81,8 +83,8 @@ describe('render', () => {
         <ControlPanel
           control={{
             ...DEFAULT_PINNED_CONTROL_STATE,
-            uid: 'control1',
-            type: 'optionsListControl',
+            id: 'control1',
+            type: 'options_list_control',
             order: 0,
           }}
           parentApi={parentApi}
@@ -100,8 +102,8 @@ describe('render', () => {
       const controlPanel = render(
         <ControlPanel
           control={{
-            uid: 'control1',
-            type: 'optionsListControl',
+            id: 'control1',
+            type: 'options_list_control',
             order: 0,
             width: 'small',
             grow: true,

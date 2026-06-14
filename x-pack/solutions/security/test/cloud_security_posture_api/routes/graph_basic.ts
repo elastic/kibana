@@ -15,7 +15,7 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 import { result } from '../utils';
 
 // eslint-disable-next-line import/no-default-export
-export default function graphBasicTests({ getService }: FtrProviderContext) {
+export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const logger = getService('log');
 
@@ -28,7 +28,9 @@ export default function graphBasicTests({ getService }: FtrProviderContext) {
       .send(body);
   };
 
-  describe('POST /internal/cloud_security_posture/graph - Basic license', () => {
+  describe('POST /internal/cloud_security_posture/graph - Basic license', function () {
+    // FIPS mode overrides the license to trial, so license-based 403 checks will not work
+    this.tags('skipFIPS');
     it('should return 403 when license is below platinum', async () => {
       await postGraph(supertest, {
         query: {
@@ -39,4 +41,4 @@ export default function graphBasicTests({ getService }: FtrProviderContext) {
       }).expect(result(403, logger));
     });
   });
-}
+};

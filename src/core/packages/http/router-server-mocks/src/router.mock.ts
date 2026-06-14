@@ -22,6 +22,7 @@ import {
   type KibanaResponseFactory,
 } from '@kbn/core-http-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import { createVersionedRouterMock, type MockedVersionedRouter } from './versioned_router.mock';
 import { lazyObject } from '@kbn/lazy-object';
 
@@ -51,6 +52,8 @@ export interface RequestFixtureOptions<P = any, Q = any, B = any> {
   body?: Record<string, any>;
   query?: Record<string, any>;
   path?: string;
+  // Sets Hapi request.route.path
+  routePath?: string;
   method?: RouteMethod;
   socket?: Socket;
   routeTags?: string[];
@@ -62,6 +65,7 @@ export interface RequestFixtureOptions<P = any, Q = any, B = any> {
     query?: RouteValidationSpec<Q>;
     body?: RouteValidationSpec<B>;
   };
+  spaceId?: string;
 }
 
 function createKibanaRequestMock<P = any, Q = any, B = any>({
@@ -74,6 +78,7 @@ function createKibanaRequestMock<P = any, Q = any, B = any>({
   socket = new Socket(),
   routeTags,
   routeAuthRequired,
+  routePath,
   validation = {},
   kibanaRouteOptions = { xsrfRequired: true, access: 'internal' },
   kibanaRequestState = {
@@ -82,13 +87,18 @@ function createKibanaRequestMock<P = any, Q = any, B = any>({
     startTime: new Date('2025-01-01T00:00:00.000Z').getTime(),
   },
   auth = { isAuthenticated: true },
+  spaceId,
 }: RequestFixtureOptions<P, Q, B> = {}): KibanaRequest<P, Q, B> {
   const queryString = stringify(query, { sort: false });
   const url = new URL(`${path}${queryString ? `?${queryString}` : ''}`, 'http://localhost');
 
+  const appState = spaceId
+    ? { ...kibanaRequestState, spaceId: asSpaceId(spaceId) }
+    : kibanaRequestState;
+
   return kibanaRequestFactory<P, Q, B>(
     hapiMocks.createRequest({
-      app: kibanaRequestState,
+      app: appState,
       auth,
       headers,
       params,
@@ -98,6 +108,7 @@ function createKibanaRequestMock<P = any, Q = any, B = any>({
       method,
       url,
       route: {
+        ...(routePath ? { path: routePath } : {}),
         // @ts-expect-error According to types/hapi__hapi the following settings-fields have problems:
         // - `auth` can't be a boolean, but it can according to the @hapi/hapi source (https://github.com/hapijs/hapi/blob/v18.4.2/lib/route.js#L139)
         // - `app` isn't a valid property, but it is and this was fixed in the types in v19.0.1 (https://github.com/DefinitelyTyped/DefinitelyTyped/pull/41968)

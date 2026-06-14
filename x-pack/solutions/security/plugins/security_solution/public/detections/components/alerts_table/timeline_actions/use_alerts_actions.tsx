@@ -68,8 +68,17 @@ export const useAlertsActions = ({
       setEventsDeleted,
       onUpdateSuccess: onStatusUpdate,
       onUpdateFailure: onStatusUpdate,
+      closePopover,
+      showRunWorkflowActions: false,
     };
-  }, [alertStatus, eventIds, localSetEventsLoading, onStatusUpdate, setEventsDeleted]);
+  }, [
+    alertStatus,
+    closePopover,
+    eventIds,
+    localSetEventsLoading,
+    onStatusUpdate,
+    setEventsDeleted,
+  ]);
 
   const { items: actionItems, panels } = useBulkActionItems(actionItemArgs);
 

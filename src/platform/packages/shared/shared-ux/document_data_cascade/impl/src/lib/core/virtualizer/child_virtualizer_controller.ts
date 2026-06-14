@@ -25,6 +25,7 @@ export interface ConnectedChildState {
   totalItemCount: number;
   scrollAnchorItemIndex: number | null;
   isDetached: boolean;
+  hasStabilized: boolean;
 }
 
 export interface ChildConnectionHandle {
@@ -72,6 +73,12 @@ export interface ChildVirtualizerController {
    * to yield post-measurement corrections to a child.
    */
   hasConnectedChildWithPersistedAnchor(): boolean;
+  /**
+   * Returns true when every child that had an initial persisted anchor has
+   * reported `hasStabilized: true`. Trivially true when no persisted anchors
+   * existed at creation time.
+   */
+  haveAllRestoringChildrenStabilized(): boolean;
   destroy(): void;
 }
 
@@ -92,6 +99,7 @@ const createDefaultChildState = (cellId: string, rowIndex: number): ConnectedChi
   totalItemCount: 0,
   scrollAnchorItemIndex: null,
   isDetached: false,
+  hasStabilized: false,
 });
 
 export const createChildVirtualizerController = ({
@@ -100,12 +108,16 @@ export const createChildVirtualizerController = ({
   initialPersistedAnchors,
 }: CreateChildVirtualizerControllerOptions): ChildVirtualizerController => {
   const connectedChildren = new Map<string, ConnectedChildState>();
+  const connectionTokens = new Map<string, symbol>();
   const persistedAnchors = new Map<string, number>();
+  const initialPersistedCellIds = new Set<string>();
+  const stabilizedPersistedCellIds = new Set<string>();
 
   if (initialPersistedAnchors) {
     for (const [cellId, anchor] of Object.entries(initialPersistedAnchors)) {
       if (anchor != null) {
         persistedAnchors.set(cellId, anchor);
+        initialPersistedCellIds.add(cellId);
       }
     }
   }
@@ -185,7 +197,12 @@ export const createChildVirtualizerController = ({
   const enqueue: ChildVirtualizerController['enqueue'] = (cellId, rowIndex) => {
     if (!connectedChildren.has(cellId)) {
       enqueuedCells.add(cellId);
-      connectedChildren.set(cellId, createDefaultChildState(cellId, rowIndex));
+      const state = createDefaultChildState(cellId, rowIndex);
+      if (!persistedAnchors.has(cellId)) {
+        state.hasStabilized = true;
+      }
+
+      connectedChildren.set(cellId, state);
 
       if (persistedAnchors.has(cellId) && rootStable) {
         activatedRows.add(rowIndex);
@@ -246,18 +263,26 @@ export const createChildVirtualizerController = ({
       }
     }
 
+    const token = Symbol(cellId);
+    connectionTokens.set(cellId, token);
     let reconnecting = false;
+
+    const isCurrentConnection = () => connectionTokens.get(cellId) === token;
 
     return {
       reportState(patch) {
-        if (reconnecting) return;
+        if (reconnecting || !isCurrentConnection()) return;
         const current = connectedChildren.get(cellId);
         if (current) {
           connectedChildren.set(cellId, { ...current, ...patch });
+          if (patch.hasStabilized && initialPersistedCellIds.has(cellId)) {
+            stabilizedPersistedCellIds.add(cellId);
+          }
           scheduleStateUpdateNotification();
         }
       },
       detachScrollElement() {
+        if (!isCurrentConnection()) return;
         const current = connectedChildren.get(cellId);
         if (!current || current.isDetached) return;
 
@@ -268,6 +293,7 @@ export const createChildVirtualizerController = ({
         notifyListeners();
       },
       reattachScrollElement() {
+        if (!isCurrentConnection()) return;
         const current = connectedChildren.get(cellId);
         if (!current || !current.isDetached) return;
 
@@ -280,6 +306,8 @@ export const createChildVirtualizerController = ({
         });
       },
       disconnect() {
+        if (!isCurrentConnection()) return;
+        connectionTokens.delete(cellId);
         const current = connectedChildren.get(cellId);
         if (current?.scrollAnchorItemIndex != null) {
           persistedAnchors.set(cellId, current.scrollAnchorItemIndex);
@@ -325,6 +353,15 @@ export const createChildVirtualizerController = ({
       return false;
     };
 
+  const haveAllRestoringChildrenStabilized: ChildVirtualizerController['haveAllRestoringChildrenStabilized'] =
+    () => {
+      if (initialPersistedCellIds.size === 0) return true;
+      for (const cellId of initialPersistedCellIds) {
+        if (!stabilizedPersistedCellIds.has(cellId)) return false;
+      }
+      return true;
+    };
+
   const markRootStable: ChildVirtualizerController['markRootStable'] = () => {
     rootStable = true;
     notifyListeners();
@@ -358,6 +395,7 @@ export const createChildVirtualizerController = ({
     getPersistedAnchor,
     clearPersistedAnchor,
     hasConnectedChildWithPersistedAnchor,
+    haveAllRestoringChildrenStabilized,
     destroy,
   };
 };

@@ -14,10 +14,12 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const GetCapabilitiesResponse = lazySchema(() =>
+  z.object({
+    assistantModelEvaluation: z.boolean(),
+    defendInsightsPolicyResponseFailure: z.boolean(),
+  })
+);
 export type GetCapabilitiesResponse = z.infer<typeof GetCapabilitiesResponse>;
-export const GetCapabilitiesResponse = z.object({
-  assistantModelEvaluation: z.boolean(),
-  defendInsightsPolicyResponseFailure: z.boolean(),
-});

@@ -15,9 +15,9 @@ import type { RuleMigrationIntegration } from '../types';
 import { SiemMigrationsDataBaseClient } from '../../common/data/siem_migrations_data_base_client';
 
 const INTEGRATION_WEIGHTS = [
-  // Elastic Defend should be heavily boosted so that even if it is slighly relevant to the keywords, it should be available for LLM to make a correct choice. Since Defend is a general puporse integration,
-  // LLM chooses it for rules implementing broad detection logic
+  // These integrations should be boosted because in many cases they are used as fallback.
   { ids: ['endpoint'], weight: 10 },
+  { ids: ['network_traffic'], weight: 10 },
 ];
 
 const PATH_PATTERNS_TO_INCLUDE_IN_KB = ['sample_event', 'knowledge_base'];
@@ -100,13 +100,13 @@ export class RuleMigrationsDataIntegrationsClient extends SiemMigrationsDataBase
         pkg.version
       );
 
-      const allPaths = await packageArchive?.archiveIterator.getPaths();
+      const allPaths = await packageArchive?.archiveIterator?.getPaths();
       const relevantPaths = allPaths?.filter((path) =>
         PATH_PATTERNS_TO_INCLUDE_IN_KB.some((includedPath) => path.includes(includedPath))
       );
 
       let currentTokens = 0;
-      await packageArchive?.archiveIterator.traverseEntries(
+      await packageArchive?.archiveIterator?.traverseEntries(
         async (entry) => {
           if (!entry.buffer || !relevantPaths?.includes(entry.path)) {
             return;

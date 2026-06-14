@@ -5,18 +5,27 @@
  * 2.0.
  */
 
-import { createRuleDataSchema, updateRuleDataSchema } from './rule_data_schema';
+import {
+  DEFAULT_ARTIFACT_VALUE_LIMIT,
+  ARTIFACT_VALUE_LIMITS,
+  RUNBOOK_ARTIFACT_TYPE,
+} from '@kbn/alerting-v2-constants';
+import {
+  createRuleDataBaseSchema,
+  createRuleDataSchema,
+  updateRuleDataSchema,
+  IMMUTABLE_RULE_FIELDS,
+  bulkGetRulesResponseSchema,
+  bulkGetRulesParamsSchema,
+  updateRuleBodySchema,
+} from './rule_data_schema';
+import { ID_MAX_LENGTH, MAX_BULK_ITEMS } from './constants';
 
 const validCreateData = {
   kind: 'alert',
   metadata: { name: 'test rule' },
   schedule: { every: '5m' },
   evaluation: { query: { base: 'FROM logs-* | LIMIT 1' } },
-};
-
-const validCreateDataWithCondition = {
-  ...validCreateData,
-  evaluation: { query: { base: 'FROM logs-* | LIMIT 1', condition: 'count > 0' } },
 };
 
 describe('createRuleDataSchema', () => {
@@ -33,22 +42,10 @@ describe('createRuleDataSchema', () => {
       });
     });
 
-    it('accepts a minimal valid payload with condition', () => {
-      const result = createRuleDataSchema.parse(validCreateDataWithCondition);
-
-      expect(result).toEqual({
-        kind: 'alert',
-        metadata: { name: 'test rule' },
-        time_field: '@timestamp',
-        schedule: { every: '5m' },
-        evaluation: { query: { base: 'FROM logs-* | LIMIT 1', condition: 'count > 0' } },
-      });
-    });
-
     it('accepts a full payload with all optional fields', () => {
       const result = createRuleDataSchema.parse({
-        ...validCreateDataWithCondition,
-        metadata: { name: 'test rule', owner: 'team-a', labels: ['label-1', 'label-2'] },
+        ...validCreateData,
+        metadata: { name: 'test rule', owner: 'team-a', tags: ['label-1', 'label-2'] },
         time_field: 'event.created',
         schedule: { every: '5m', lookback: '10m' },
         grouping: { fields: ['host.name'] },
@@ -67,7 +64,7 @@ describe('createRuleDataSchema', () => {
 
       expect(result).toEqual(
         expect.objectContaining({
-          metadata: { name: 'test rule', owner: 'team-a', labels: ['label-1', 'label-2'] },
+          metadata: { name: 'test rule', owner: 'team-a', tags: ['label-1', 'label-2'] },
           time_field: 'event.created',
           schedule: { every: '5m', lookback: '10m' },
           grouping: { fields: ['host.name'] },
@@ -160,26 +157,47 @@ describe('createRuleDataSchema', () => {
     });
   });
 
-  describe('metadata.labels', () => {
-    it('rejects labels exceeding 100 items', () => {
+  describe('metadata.tags', () => {
+    it('rejects tags exceeding 20 items', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
         metadata: {
           name: 'test rule',
-          labels: Array.from({ length: 101 }, (_, i) => `label-${i}`),
+          tags: Array.from({ length: 21 }, (_, i) => `label-${i}`),
         },
       });
 
       expect(result.success).toBe(false);
     });
 
-    it('rejects a label exceeding 64 characters', () => {
+    it('accepts up to 20 tags', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
-        metadata: { name: 'test rule', labels: ['a'.repeat(65)] },
+        metadata: {
+          name: 'test rule',
+          tags: Array.from({ length: 20 }, (_, i) => `label-${i}`),
+        },
+      });
+
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects a label exceeding 128 characters', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        metadata: { name: 'test rule', tags: ['a'.repeat(129)] },
       });
 
       expect(result.success).toBe(false);
+    });
+
+    it('accepts a label at the 128 character limit', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        metadata: { name: 'test rule', tags: ['a'.repeat(128)] },
+      });
+
+      expect(result.success).toBe(true);
     });
   });
 
@@ -271,62 +289,6 @@ describe('createRuleDataSchema', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
         evaluation: { query: { base: 'FROM |' } },
-      });
-      expect(result.success).toBe(false);
-    });
-  });
-
-  describe('evaluation.query.condition', () => {
-    it('accepts an alert rule without condition', () => {
-      const result = createRuleDataSchema.safeParse(validCreateData);
-      expect(result.success).toBe(true);
-      expect(result.data?.evaluation.query.condition).toBeUndefined();
-    });
-
-    it('accepts an alert rule with condition', () => {
-      const result = createRuleDataSchema.safeParse(validCreateDataWithCondition);
-      expect(result.success).toBe(true);
-      expect(result.data?.evaluation.query.condition).toBe('count > 0');
-    });
-
-    it('accepts a signal rule without condition', () => {
-      const result = createRuleDataSchema.safeParse({
-        ...validCreateData,
-        kind: 'signal',
-      });
-      expect(result.success).toBe(true);
-    });
-
-    it('rejects a signal rule with condition', () => {
-      const result = createRuleDataSchema.safeParse({
-        ...validCreateDataWithCondition,
-        kind: 'signal',
-      });
-      expect(result.success).toBe(false);
-      expect(result.error?.issues[0].path).toEqual(['evaluation', 'query', 'condition']);
-    });
-
-    it('requires condition when no_data is configured', () => {
-      const result = createRuleDataSchema.safeParse({
-        ...validCreateData,
-        no_data: { behavior: 'no_data', timeframe: '10m' },
-      });
-      expect(result.success).toBe(false);
-      expect(result.error?.issues[0].path).toEqual(['evaluation', 'query', 'condition']);
-    });
-
-    it('accepts no_data with condition present', () => {
-      const result = createRuleDataSchema.safeParse({
-        ...validCreateDataWithCondition,
-        no_data: { behavior: 'no_data', timeframe: '10m' },
-      });
-      expect(result.success).toBe(true);
-    });
-
-    it('rejects an empty condition string', () => {
-      const result = createRuleDataSchema.safeParse({
-        ...validCreateData,
-        evaluation: { query: { base: 'FROM logs-* | LIMIT 1', condition: '' } },
       });
       expect(result.success).toBe(false);
     });
@@ -590,51 +552,83 @@ describe('createRuleDataSchema', () => {
       });
       expect(result.success).toBe(false);
     });
+  });
 
-    it('accepts recovery_policy with type "query" and query.condition', () => {
+  describe('artifacts value length', () => {
+    it('accepts a runbook artifact at the maximum allowed length', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
-        recovery_policy: {
-          type: 'query',
-          query: { base: 'FROM logs-* | LIMIT 1', condition: 'status == "ok"' },
-        },
+        artifacts: [
+          {
+            id: 'runbook-1',
+            type: RUNBOOK_ARTIFACT_TYPE,
+            value: 'a'.repeat(ARTIFACT_VALUE_LIMITS[RUNBOOK_ARTIFACT_TYPE]),
+          },
+        ],
       });
       expect(result.success).toBe(true);
-      expect(result.data?.recovery_policy?.query?.condition).toBe('status == "ok"');
     });
 
-    it('accepts recovery_policy with type "query" without condition', () => {
+    it('rejects a runbook artifact exceeding the maximum allowed length', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
-        recovery_policy: {
-          type: 'query',
-          query: { base: 'FROM logs-* | LIMIT 1' },
-        },
+        artifacts: [
+          {
+            id: 'runbook-1',
+            type: RUNBOOK_ARTIFACT_TYPE,
+            value: 'a'.repeat(ARTIFACT_VALUE_LIMITS[RUNBOOK_ARTIFACT_TYPE] + 1),
+          },
+        ],
+      });
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              message: `Artifact value must be at most ${ARTIFACT_VALUE_LIMITS[RUNBOOK_ARTIFACT_TYPE]} characters for type "${RUNBOOK_ARTIFACT_TYPE}".`,
+            }),
+          ])
+        );
+      }
+    });
+
+    it('accepts a non-runbook artifact at the default maximum length', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        artifacts: [
+          {
+            id: 'artifact-1',
+            type: 'host',
+            value: 'a'.repeat(DEFAULT_ARTIFACT_VALUE_LIMIT),
+          },
+        ],
       });
       expect(result.success).toBe(true);
-      expect(result.data?.recovery_policy?.query?.condition).toBeUndefined();
     });
 
-    it('rejects recovery_policy with an empty condition string', () => {
+    it('rejects a non-runbook artifact exceeding the default maximum length', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
-        recovery_policy: {
-          type: 'query',
-          query: { base: 'FROM logs-* | LIMIT 1', condition: '' },
-        },
+        artifacts: [
+          {
+            id: 'artifact-1',
+            type: 'host',
+            value: 'a'.repeat(DEFAULT_ARTIFACT_VALUE_LIMIT + 1),
+          },
+        ],
       });
       expect(result.success).toBe(false);
-    });
-
-    it('rejects recovery_policy condition exceeding 5000 characters', () => {
-      const result = createRuleDataSchema.safeParse({
-        ...validCreateData,
-        recovery_policy: {
-          type: 'query',
-          query: { base: 'FROM logs-* | LIMIT 1', condition: 'x'.repeat(5001) },
-        },
-      });
-      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              message: expect.stringContaining(
+                `Artifact value must be at most ${DEFAULT_ARTIFACT_VALUE_LIMIT} characters`
+              ),
+            }),
+          ])
+        );
+      }
     });
   });
 
@@ -770,9 +764,9 @@ describe('updateRuleDataSchema', () => {
       expect(result.success).toBe(false);
     });
 
-    it('rejects more than 100 labels', () => {
+    it('rejects more than 20 tags', () => {
       const result = updateRuleDataSchema.safeParse({
-        metadata: { labels: Array.from({ length: 101 }, (_, i) => `label-${i}`) },
+        metadata: { tags: Array.from({ length: 21 }, (_, i) => `label-${i}`) },
       });
 
       expect(result.success).toBe(false);
@@ -784,6 +778,80 @@ describe('updateRuleDataSchema', () => {
       });
 
       expect(result.success).toBe(false);
+    });
+  });
+
+  describe('artifacts value length', () => {
+    it('accepts a runbook artifact at the maximum allowed length', () => {
+      const result = updateRuleDataSchema.safeParse({
+        artifacts: [
+          {
+            id: 'runbook-1',
+            type: RUNBOOK_ARTIFACT_TYPE,
+            value: 'a'.repeat(ARTIFACT_VALUE_LIMITS[RUNBOOK_ARTIFACT_TYPE]),
+          },
+        ],
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects a runbook artifact exceeding the maximum allowed length', () => {
+      const result = updateRuleDataSchema.safeParse({
+        artifacts: [
+          {
+            id: 'runbook-1',
+            type: RUNBOOK_ARTIFACT_TYPE,
+            value: 'a'.repeat(ARTIFACT_VALUE_LIMITS[RUNBOOK_ARTIFACT_TYPE] + 1),
+          },
+        ],
+      });
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              message: `Artifact value must be at most ${ARTIFACT_VALUE_LIMITS[RUNBOOK_ARTIFACT_TYPE]} characters for type "${RUNBOOK_ARTIFACT_TYPE}".`,
+            }),
+          ])
+        );
+      }
+    });
+
+    it('accepts a non-runbook artifact at the default maximum length', () => {
+      const result = updateRuleDataSchema.safeParse({
+        artifacts: [
+          {
+            id: 'artifact-1',
+            type: 'host',
+            value: 'a'.repeat(DEFAULT_ARTIFACT_VALUE_LIMIT),
+          },
+        ],
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects a non-runbook artifact exceeding the default maximum length', () => {
+      const result = updateRuleDataSchema.safeParse({
+        artifacts: [
+          {
+            id: 'artifact-1',
+            type: 'host',
+            value: 'a'.repeat(DEFAULT_ARTIFACT_VALUE_LIMIT + 1),
+          },
+        ],
+      });
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              message: expect.stringContaining(
+                `Artifact value must be at most ${DEFAULT_ARTIFACT_VALUE_LIMIT} characters`
+              ),
+            }),
+          ])
+        );
+      }
     });
   });
 
@@ -851,5 +919,160 @@ describe('updateRuleDataSchema', () => {
 
       expect(result.success).toBe(false);
     });
+  });
+});
+
+describe('updateRuleBodySchema', () => {
+  it('accepts a payload without version', () => {
+    const result = updateRuleBodySchema.parse({});
+    expect(result).toEqual({});
+  });
+
+  it('accepts a payload with version', () => {
+    const result = updateRuleBodySchema.parse({ version: 'WzEsMV0=' });
+    expect(result.version).toBe('WzEsMV0=');
+  });
+
+  it('accepts version alongside data fields', () => {
+    const result = updateRuleBodySchema.parse({
+      version: 'WzEsMV0=',
+      metadata: { name: 'updated name' },
+    });
+    expect(result).toEqual({
+      version: 'WzEsMV0=',
+      metadata: { name: 'updated name' },
+    });
+  });
+
+  it('rejects an empty string version', () => {
+    expect(() => updateRuleBodySchema.parse({ version: '' })).toThrow();
+  });
+
+  it('rejects a version longer than 256 characters', () => {
+    expect(() => updateRuleBodySchema.parse({ version: 'x'.repeat(257) })).toThrow();
+  });
+});
+
+/**
+ * These tests are the safety net for {@link IMMUTABLE_RULE_FIELDS}. They keep
+ * `upsertRule` (PUT — rejects mutation) and `buildUpdateRuleAttributes`
+ * (PATCH — silently preserves) honest as the rule schema evolves.
+ */
+describe('rule field immutability classification', () => {
+  it('IMMUTABLE_RULE_FIELDS only references real top-level schema keys', () => {
+    const schemaKeys = new Set<string>(Object.keys(createRuleDataBaseSchema.shape));
+    const orphans = IMMUTABLE_RULE_FIELDS.filter((field) => !schemaKeys.has(field));
+
+    expect(orphans).toEqual([]);
+  });
+
+  // Tripwire: when a new top-level field is added to the create-rule schema,
+  // this snapshot fails. Update the snapshot if the field is meant to be
+  // mutable, or add it to IMMUTABLE_RULE_FIELDS if it is meant to be
+  // immutable. Either way, the change is visible in the PR diff so reviewers
+  // can confirm the classification.
+  it('matches the snapshot of mutable top-level rule fields', () => {
+    const immutable = new Set<string>(IMMUTABLE_RULE_FIELDS);
+    const mutable = Object.keys(createRuleDataBaseSchema.shape)
+      .filter((key) => !immutable.has(key))
+      .sort();
+
+    expect(mutable).toMatchInlineSnapshot(`
+      Array [
+        "artifacts",
+        "evaluation",
+        "grouping",
+        "metadata",
+        "no_data",
+        "recovery_policy",
+        "schedule",
+        "state_transition",
+        "time_field",
+      ]
+    `);
+  });
+});
+
+describe('bulkGetRulesParamsSchema', () => {
+  it('accepts a single id', () => {
+    const result = bulkGetRulesParamsSchema.parse({ ids: ['rule-1'] });
+    expect(result).toEqual({ ids: ['rule-1'] });
+  });
+
+  it('accepts up to MAX_BULK_ITEMS ids', () => {
+    const ids = Array.from({ length: MAX_BULK_ITEMS }, (_, i) => `rule-${i}`);
+    expect(() => bulkGetRulesParamsSchema.parse({ ids })).not.toThrow();
+  });
+
+  it('preserves caller-provided id order (no sorting)', () => {
+    const ids = ['rule-z', 'rule-a', 'rule-m'];
+    const result = bulkGetRulesParamsSchema.parse({ ids });
+    expect(result.ids).toEqual(ids);
+  });
+
+  it('trims whitespace around ids', () => {
+    const result = bulkGetRulesParamsSchema.parse({ ids: ['  rule-1  '] });
+    expect(result.ids).toEqual(['rule-1']);
+  });
+
+  it('rejects a missing ids field', () => {
+    expect(() => bulkGetRulesParamsSchema.parse({})).toThrow();
+  });
+
+  it('rejects an empty ids array', () => {
+    expect(() => bulkGetRulesParamsSchema.parse({ ids: [] })).toThrow();
+  });
+
+  it('rejects more than MAX_BULK_ITEMS ids', () => {
+    const ids = Array.from({ length: MAX_BULK_ITEMS + 1 }, (_, i) => `rule-${i}`);
+    expect(() => bulkGetRulesParamsSchema.parse({ ids })).toThrow();
+  });
+
+  it('rejects an id longer than ID_MAX_LENGTH', () => {
+    const tooLong = 'a'.repeat(ID_MAX_LENGTH + 1);
+    expect(() => bulkGetRulesParamsSchema.parse({ ids: [tooLong] })).toThrow();
+  });
+
+  it('rejects an empty-string id', () => {
+    expect(() => bulkGetRulesParamsSchema.parse({ ids: [''] })).toThrow();
+  });
+
+  it('rejects a whitespace-only id (after trim it is empty)', () => {
+    expect(() => bulkGetRulesParamsSchema.parse({ ids: ['   '] })).toThrow();
+  });
+
+  it('rejects unknown top-level fields (strict)', () => {
+    expect(() => bulkGetRulesParamsSchema.parse({ ids: ['rule-1'], foo: 'bar' })).toThrow();
+  });
+});
+
+describe('bulkGetRulesResponseSchema', () => {
+  const sampleRule = {
+    id: 'rule-1',
+    kind: 'alert' as const,
+    metadata: { name: 'r' },
+    time_field: '@timestamp',
+    schedule: { every: '5m' },
+    evaluation: { query: { base: 'FROM logs-* | LIMIT 1' } },
+    enabled: true,
+    createdBy: 'user-a',
+    createdAt: '2026-01-01T00:00:00.000Z',
+    updatedBy: 'user-a',
+    updatedAt: '2026-01-01T00:00:00.000Z',
+  };
+
+  it('accepts an empty rules array', () => {
+    const result = bulkGetRulesResponseSchema.parse({ rules: [] });
+    expect(result).toEqual({ rules: [] });
+  });
+
+  it('accepts a populated rules array', () => {
+    const result = bulkGetRulesResponseSchema.parse({ rules: [sampleRule] });
+    expect(result.rules).toHaveLength(1);
+    expect(result.rules[0]).toEqual(expect.objectContaining({ id: 'rule-1' }));
+  });
+
+  it('rejects a missing rules field', () => {
+    expect(() => bulkGetRulesResponseSchema.parse({})).toThrow();
   });
 });

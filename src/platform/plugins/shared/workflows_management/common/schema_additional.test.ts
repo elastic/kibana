@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isDynamicConnector, StepCategory } from '@kbn/workflows';
+import { z } from '@kbn/zod/v4';
 import {
   createMockConnectorInstance,
   createMockConnectorTypeInfo,
@@ -18,7 +20,9 @@ import {
   getAllConnectorsWithDynamic,
   getCachedAllConnectorsMap,
   getCachedDynamicConnectorTypes,
+  getDeprecatedStepMetadataMap,
 } from './schema';
+import { stepSchemas } from './step_schemas';
 
 describe('schema - additional coverage', () => {
   describe('getAllConnectorsInternal', () => {
@@ -45,6 +49,22 @@ describe('schema - additional coverage', () => {
       const first = getAllConnectorsInternal();
       const second = getAllConnectorsInternal();
       expect(first).toBe(second);
+    });
+  });
+
+  describe('getDeprecatedStepMetadataMap', () => {
+    it('should freeze the cached metadata map', () => {
+      const metadata = getDeprecatedStepMetadataMap();
+
+      expect(Object.isFrozen(metadata)).toBe(true);
+    });
+
+    it('should return the same cached frozen object on subsequent calls', () => {
+      const first = getDeprecatedStepMetadataMap();
+      const second = getDeprecatedStepMetadataMap();
+
+      expect(first).toBe(second);
+      expect(Object.isFrozen(second)).toBe(true);
     });
   });
 
@@ -114,6 +134,7 @@ describe('schema - additional coverage', () => {
       const contracts = convertDynamicConnectorsToContracts(types);
       expect(contracts).toHaveLength(1);
       expect(contracts[0].type).toBe('simple-action');
+      expect(contracts[0]).toHaveProperty('displayName', 'Simple Action');
       expect(contracts[0].summary).toBe('Simple Action');
       expect(contracts[0].description).toBe('Simple Action connector');
     });
@@ -138,6 +159,9 @@ describe('schema - additional coverage', () => {
         'inference.rerank',
         'inference.textEmbedding',
       ]);
+      const dynamicContracts = contracts.filter(isDynamicConnector);
+      expect(dynamicContracts).toHaveLength(3);
+      expect(dynamicContracts.every((contract) => contract.displayName === 'Inference')).toBe(true);
     });
 
     it('should skip disabled connectors', () => {
@@ -289,6 +313,51 @@ describe('schema - additional coverage', () => {
       const connector = map?.get('lookup-test');
       expect(connector).toBeDefined();
       expect(connector?.summary).toBe('Lookup Test');
+    });
+  });
+
+  describe('registered step definitions (public)', () => {
+    const longDescription =
+      'Transform an array of items by applying a step to each one. Useful for shaping data.';
+    const publicStepDefinition = {
+      id: 'data.test_map',
+      label: 'Map Collection',
+      description: longDescription,
+      category: StepCategory.Data,
+      inputSchema: z.object({}),
+      outputSchema: z.any(),
+    };
+
+    let originalGetAll: typeof stepSchemas.getAllRegisteredStepDefinitions;
+    let originalGetByType: typeof stepSchemas.getStepDefinition;
+
+    beforeAll(() => {
+      originalGetAll = stepSchemas.getAllRegisteredStepDefinitions.bind(stepSchemas);
+      originalGetByType = stepSchemas.getStepDefinition.bind(stepSchemas);
+
+      stepSchemas.getAllRegisteredStepDefinitions = () => [publicStepDefinition] as never;
+      stepSchemas.getStepDefinition = (stepTypeId: string) =>
+        stepTypeId === publicStepDefinition.id ? (publicStepDefinition as never) : undefined;
+
+      // Force the all-connectors cache to be rebuilt with the registered step.
+      stepSchemas.setAllConnectorsCache(null);
+      stepSchemas.setAllConnectorsMapCache(null);
+    });
+
+    afterAll(() => {
+      stepSchemas.getAllRegisteredStepDefinitions = originalGetAll;
+      stepSchemas.getStepDefinition = originalGetByType;
+      stepSchemas.setAllConnectorsCache(null);
+      stepSchemas.setAllConnectorsMapCache(null);
+    });
+
+    it('exposes the short label as `summary` and the long description as `description`', () => {
+      const connectors = getAllConnectorsInternal();
+      const registered = connectors.find((c) => c.type === publicStepDefinition.id);
+
+      expect(registered).toBeDefined();
+      expect(registered?.summary).toBe('Map Collection');
+      expect(registered?.description).toBe(longDescription);
     });
   });
 });

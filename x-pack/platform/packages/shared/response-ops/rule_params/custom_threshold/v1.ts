@@ -94,7 +94,14 @@ export const customThresholdParamsSchema = schema.object(
     ),
     searchConfiguration: searchConfigSchema,
   },
-  { unknowns: 'allow' }
+  {
+    unknowns: 'allow',
+    meta: {
+      title: 'Custom Threshold Rule Params',
+      description:
+        'The parameters for the custom threshold rule. These parameters are appropriate when `rule_type_id` is `observability.rules.custom_threshold`.',
+    },
+  }
 );
 
 export type CustomThresholdParams = TypeOf<typeof customThresholdParamsSchema>;

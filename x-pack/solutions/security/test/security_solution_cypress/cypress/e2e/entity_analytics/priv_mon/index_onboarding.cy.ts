@@ -19,6 +19,7 @@ import {
   openCreateIndexModal,
   clickCreateIndexButton,
   typeIndexName,
+  closeIndexPicker,
 } from '../../../tasks/privileged_user_monitoring';
 import { ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_URL } from '../../../urls/navigation';
 
@@ -30,6 +31,18 @@ describe(
   'Privileged User Monitoring - Index onboarding',
   {
     tags: ['@ess'],
+    env: {
+      ftrConfig: {
+        kbnServerArgs: [
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+            'disable:entityAnalyticsEntityStoreV2',
+            'disable:entityAnalyticsWatchlistEnabled',
+            'disable:entityAnalyticsNewHomePageEnabled',
+          ])}`,
+          '--uiSettings.overrides.securitySolution:entityStoreEnableV2=false',
+        ],
+      },
+    },
   },
   () => {
     before(() => {
@@ -72,6 +85,9 @@ describe(
       openIndexPicker();
       expandIndexPickerOptions();
       selectIndexPickerOption(sourceIndexName);
+      // the commbobox is in multi selection mode, it doesn't close on selection alone
+      // and the update button might be hidden under the popover
+      closeIndexPicker();
       clickFileUploaderUpdateButton();
 
       cy.get(ONBOARDING_CALLOUT).should('contain.text', 'Privileged user monitoring set up');

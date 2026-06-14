@@ -35,6 +35,22 @@ describe('evaluateKql', () => {
       expect(evaluateKql(kql, { user: { info: { name: 'Jane Doe' } } })).toBe(false);
     });
 
+    it('should correctly evaluate a quoted value with dots in nested field path', () => {
+      const kql = 'data.host.name: "admin-console.prod.001"';
+      expect(
+        evaluateKql(kql, {
+          episode_status: 'recovering',
+          data: { count: 2, host: { name: 'admin-console.prod.001' } },
+        })
+      ).toBe(true);
+      expect(
+        evaluateKql(kql, {
+          episode_status: 'recovering',
+          data: { count: 2, host: { name: 'other-host' } },
+        })
+      ).toBe(false);
+    });
+
     it('should correctly evaluate a simple "is" KQL expression with boolean', () => {
       const kql = 'isActive: true';
       expect(evaluateKql(kql, { isActive: true })).toBe(true);
@@ -257,6 +273,29 @@ describe('evaluateKql', () => {
         expect(evaluateKql(kql, { timestamp: resolved })).toBe(true);
         expect(evaluateKql(kql, { timestamp: '2025-01-01T00:00:00.000Z' })).toBe(false);
       });
+
+      it('should match "now+1h" against the resolved date', () => {
+        const kql = 'timestamp: now+1h';
+        const resolved = dateMath.parse('now+1h')!.toISOString();
+        expect(evaluateKql(kql, { timestamp: resolved })).toBe(true);
+        expect(evaluateKql(kql, { timestamp: '2020-01-01T00:00:00.000Z' })).toBe(false);
+      });
+
+      it('should match "now/d" with rounding', () => {
+        const kql = 'timestamp: now/d';
+        const resolved = dateMath.parse('now/d')!.toISOString();
+        expect(evaluateKql(kql, { timestamp: resolved })).toBe(true);
+        expect(evaluateKql(kql, { timestamp: '2020-01-01T00:00:00.000Z' })).toBe(false);
+      });
+
+      it('should match datemath against any element in an array field', () => {
+        const kql = 'timestamps: now-1d';
+        const resolved = dateMath.parse('now-1d')!.toISOString();
+        expect(evaluateKql(kql, { timestamps: ['2020-01-01T00:00:00.000Z', resolved] })).toBe(true);
+        expect(
+          evaluateKql(kql, { timestamps: ['2020-01-01T00:00:00.000Z', '2021-06-01T00:00:00.000Z'] })
+        ).toBe(false);
+      });
     });
 
     describe('range expressions with datemath', () => {
@@ -292,6 +331,34 @@ describe('evaluateKql', () => {
         expect(evaluateKql(`${baseKql}-7d/d`, { timestamp: '2025-01-10T00:00:00.000Z' })).toBe(
           true
         );
+      });
+
+      it('should evaluate > with datemath on the right side', () => {
+        const kql = 'timestamp > now-7d';
+        // now-7d is 2025-01-08T12:00:00Z
+        expect(evaluateKql(kql, { timestamp: '2025-01-09T00:00:00.000Z' })).toBe(true);
+        expect(evaluateKql(kql, { timestamp: dateMath.parse('now-7d')!.toISOString() })).toBe(
+          false
+        );
+      });
+
+      it('should evaluate <= with datemath on the right side', () => {
+        const kql = 'timestamp <= now';
+        const nowIso = dateMath.parse('now')!.toISOString();
+        expect(evaluateKql(kql, { timestamp: nowIso })).toBe(true);
+        expect(evaluateKql(kql, { timestamp: '2025-01-14T00:00:00.000Z' })).toBe(true);
+        expect(evaluateKql(kql, { timestamp: '2025-01-16T00:00:00.000Z' })).toBe(false);
+      });
+
+      it('should match range with datemath against any element in an array field', () => {
+        const kql = 'timestamps >= now-7d';
+        // now-7d is 2025-01-08T12:00:00Z
+        expect(
+          evaluateKql(kql, { timestamps: ['2025-01-01T00:00:00.000Z', '2025-01-10T00:00:00.000Z'] })
+        ).toBe(true);
+        expect(
+          evaluateKql(kql, { timestamps: ['2025-01-01T00:00:00.000Z', '2025-01-02T00:00:00.000Z'] })
+        ).toBe(false);
       });
     });
 

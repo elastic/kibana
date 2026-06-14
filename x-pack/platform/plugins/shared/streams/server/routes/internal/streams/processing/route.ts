@@ -128,10 +128,13 @@ export const processingGrokSuggestionRoute = createServerRoute({
         request,
       });
 
+    const { connector_id: connectorId } = params.body;
+
     // Wrap in Observable SSE to avoid timeout issues with long-running LLM requests
     return from(
       handleProcessingGrokSuggestions({
         params,
+        connectorId,
         inferenceClient,
         streamsClient,
         scopedClusterClient,
@@ -192,10 +195,13 @@ export const processingDissectSuggestionRoute = createServerRoute({
         request,
       });
 
+    const { connector_id: connectorId } = params.body;
+
     // Wrap in Observable SSE to avoid timeout issues with long-running LLM requests
     return from(
       handleProcessingDissectSuggestions({
         params,
+        connectorId,
         inferenceClient,
         streamsClient,
         scopedClusterClient,

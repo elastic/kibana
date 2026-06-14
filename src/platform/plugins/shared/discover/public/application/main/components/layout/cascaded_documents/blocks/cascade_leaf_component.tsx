@@ -22,9 +22,11 @@ import {
 } from '@kbn/shared-ux-document-data-cascade';
 import type { DataTableRecord, SortOrder } from '@kbn/discover-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
+import useObservable from 'react-use/lib/useObservable';
 import { useDiscoverServices } from '../../../../../../hooks/use_discover_services';
 import { getCustomCascadeGridBodyStyle } from './cascade_leaf_component.styles';
 import type { ESQLDataGroupNode } from './types';
+import { useCascadedDocumentsContext } from '../cascaded_documents_provider';
 
 interface ESQLDataCascadeLeafCellProps
   extends Pick<
@@ -33,7 +35,6 @@ interface ESQLDataCascadeLeafCellProps
       | 'showTimeCol'
       | 'dataView'
       | 'showKeyboardShortcuts'
-      | 'renderDocumentView'
       | 'externalCustomRenderers'
       | 'onUpdateDataGridDensity'
     >,
@@ -161,17 +162,48 @@ export const ESQLDataCascadeLeafCell = React.memo(
     dataGridDensityState,
     showTimeCol,
     dataView,
-    showKeyboardShortcuts,
-    renderDocumentView,
     externalCustomRenderers,
     virtualizerController,
     rowIndex,
     onUpdateDataGridDensity,
   }: ESQLDataCascadeLeafCellProps) => {
     const services = useDiscoverServices();
-    const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>();
+    const {
+      cascadedColumnsMeta,
+      expandedDoc$,
+      expandedDocOwner$,
+      getExpandedDocSetter,
+      getRenderDocumentViewMetaSetter,
+    } = useCascadedDocumentsContext();
+    const expandedDoc = useObservable(expandedDoc$, expandedDoc$.getValue());
+    const expandedDocOwner = useObservable(expandedDocOwner$, expandedDocOwner$.getValue());
+    const setExpandedDoc = useMemo(
+      () => getExpandedDocSetter(cellId),
+      [cellId, getExpandedDocSetter]
+    );
+    const setRenderDocumentViewMeta = useMemo(
+      () => getRenderDocumentViewMetaSetter(cellId),
+      [cellId, getRenderDocumentViewMetaSetter]
+    );
+
     const [cascadeDataGridDensityState, setCascadeDataGridDensityState] = useState<DataGridDensity>(
       dataGridDensityState ?? DataGridDensity.COMPACT
+    );
+
+    const { getDataGridUiStateMap, setDataGridUiState } = useCascadedDocumentsContext();
+
+    const initialGridState = useMemo(
+      () => getDataGridUiStateMap()?.[cellId],
+      [cellId, getDataGridUiStateMap]
+    );
+
+    const onInitialStateChange = useCallback<
+      NonNullable<UnifiedDataTableProps['onInitialStateChange']>
+    >(
+      (newInitialGridState) => {
+        setDataGridUiState(cellId, newInitialGridState);
+      },
+      [cellId, setDataGridUiState]
     );
 
     // TODO: Implement column selection logic,
@@ -185,12 +217,6 @@ export const ESQLDataCascadeLeafCell = React.memo(
     }, [cascadeDataGridDensityState, onUpdateDataGridDensity]);
 
     const [isCellInFullScreenMode, setIsCellInFullScreenMode] = useState(false);
-
-    const setExpandedDocFn = useCallback(
-      (...args: Parameters<NonNullable<UnifiedDataTableProps['setExpandedDoc']>>) =>
-        setExpandedDoc(args[0]),
-      [setExpandedDoc]
-    );
 
     const renderCustomToolbarWithElements = useMemo(
       () =>
@@ -223,7 +249,7 @@ export const ESQLDataCascadeLeafCell = React.memo(
         footerRow,
       }) => (
         <CustomCascadeGridBodyMemoized
-          key={isCellInFullScreenMode ? `full-screen-${cellId}` : cellId}
+          key={cellId}
           Cell={Cell}
           data={cellData}
           visibleColumns={visibleColumns}
@@ -240,34 +266,36 @@ export const ESQLDataCascadeLeafCell = React.memo(
       ),
       [virtualizerController, isCellInFullScreenMode, cellId, cellData, rowIndex]
     );
-
     return (
       <UnifiedDataTable
         isPlainRecord
         dataView={dataView}
         showTimeCol={showTimeCol}
-        showKeyboardShortcuts={showKeyboardShortcuts}
         services={services}
         sort={EMPTY_SORT}
         isSortEnabled={false}
-        enableInTableSearch
+        enableInTableSearch={false}
+        showKeyboardShortcuts={false}
         ariaLabelledBy="data-cascade-leaf-cell"
-        consumer={`discover_esql_cascade_row_leaf_${cellId}`}
         rows={cellData}
         loadingState={DataLoadingState.loaded}
         columns={selectedColumns}
+        columnsMeta={cascadedColumnsMeta}
         onSetColumns={setSelectedColumns}
         renderCustomToolbar={renderCustomToolbarWithElements}
-        expandedDoc={expandedDoc}
-        setExpandedDoc={setExpandedDocFn}
+        expandedDoc={expandedDocOwner === cellId ? expandedDoc : undefined}
+        setExpandedDoc={setExpandedDoc}
         dataGridDensityState={cascadeDataGridDensityState}
         onUpdateDataGridDensity={setCascadeDataGridDensityState}
-        renderDocumentView={renderDocumentView}
+        renderDocumentView="external"
+        setRenderDocumentViewMeta={setRenderDocumentViewMeta}
         renderCustomGridBody={renderCustomCascadeGridBodyCallback}
         onFullScreenChange={setIsCellInFullScreenMode}
         externalCustomRenderers={externalCustomRenderers}
         paginationMode="infinite"
         sampleSizeState={cellData.length}
+        initialState={initialGridState}
+        onInitialStateChange={onInitialStateChange}
       />
     );
   }

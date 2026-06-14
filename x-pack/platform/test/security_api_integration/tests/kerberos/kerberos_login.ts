@@ -9,9 +9,9 @@ import { expect as jestExpect } from 'expect';
 import { resolve } from 'path';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import type { Cookie } from 'tough-cookie';
-import { parse as parseCookie } from 'tough-cookie';
 
 import expect from '@kbn/expect';
+import { findSessionCookie } from '@kbn/security-api-integration-helpers';
 import {
   getMutualAuthenticationResponseToken,
   getSPNEGOToken,
@@ -78,9 +78,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
 
       const cookies = response.headers['set-cookie'];
-      expect(cookies).to.have.length(1);
-
-      const cookie = parseCookie(cookies[0])!;
+      const cookie = findSessionCookie(cookies);
       checkCookieIsSet(cookie);
 
       const { body: user } = await supertest
@@ -132,9 +130,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
 
         const cookies = response.headers['set-cookie'];
-        expect(cookies).to.have.length(1);
-
-        const sessionCookie = parseCookie(cookies[0])!;
+        const sessionCookie = findSessionCookie(cookies);
         checkCookieIsSet(sessionCookie);
 
         const isAnonymousAccessEnabled = (config.get('esTestCluster.serverArgs') as string[]).some(
@@ -152,7 +148,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('Cookie', sessionCookie.cookieString())
           .expect(200);
 
-        jestExpect(spnegoResponse.body).toEqual({
+        jestExpect(spnegoResponse.body).toMatchObject({
           username: 'tester@TEST.ELASTIC.CO',
           roles: expectedUserRoles,
           full_name: null,
@@ -200,9 +196,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         const cookies = response.headers['set-cookie'];
-        expect(cookies).to.have.length(1);
-
-        sessionCookie = parseCookie(cookies[0])!;
+        sessionCookie = findSessionCookie(cookies);
         checkCookieIsSet(sessionCookie);
       });
 
@@ -214,7 +208,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         expect(apiResponseOne.headers['set-cookie']).to.not.be(undefined);
-        const sessionCookieOne = parseCookie(apiResponseOne.headers['set-cookie'][0])!;
+        const sessionCookieOne = findSessionCookie(apiResponseOne.headers['set-cookie']);
 
         checkCookieIsSet(sessionCookieOne);
         expect(sessionCookieOne.value).to.not.equal(sessionCookie.value);
@@ -226,7 +220,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         expect(apiResponseTwo.headers['set-cookie']).to.not.be(undefined);
-        const sessionCookieTwo = parseCookie(apiResponseTwo.headers['set-cookie'][0])!;
+        const sessionCookieTwo = findSessionCookie(apiResponseTwo.headers['set-cookie']);
 
         checkCookieIsSet(sessionCookieTwo);
         expect(sessionCookieTwo.value).to.not.equal(sessionCookieOne.value);
@@ -264,9 +258,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         let cookies = response.headers['set-cookie'];
-        expect(cookies).to.have.length(1);
-
-        const sessionCookie = parseCookie(cookies[0])!;
+        const sessionCookie = findSessionCookie(cookies);
         checkCookieIsSet(sessionCookie);
 
         // And then log user out.
@@ -276,8 +268,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(302);
 
         cookies = logoutResponse.headers['set-cookie'];
-        expect(cookies).to.have.length(1);
-        checkCookieIsCleared(parseCookie(cookies[0])!);
+        checkCookieIsCleared(findSessionCookie(cookies));
 
         expect(logoutResponse.headers.location).to.be('/security/logged_out?msg=LOGGED_OUT');
 
@@ -291,8 +282,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         // If Kibana detects cookie with invalid token it tries to clear it.
         cookies = apiResponse.headers['set-cookie'];
-        expect(cookies).to.have.length(1);
-        checkCookieIsCleared(parseCookie(cookies[0])!);
+        checkCookieIsCleared(findSessionCookie(cookies));
 
         // Request with a session cookie that is linked to an invalidated/non-existent session is treated the same as
         // request without any session cookie at all.
@@ -317,9 +307,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         const cookies = response.headers['set-cookie'];
-        expect(cookies).to.have.length(1);
-
-        sessionCookie = parseCookie(cookies[0])!;
+        sessionCookie = findSessionCookie(cookies);
         checkCookieIsSet(sessionCookie);
       });
 
@@ -339,9 +327,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         const cookies = apiResponse.headers['set-cookie'];
-        expect(cookies).to.have.length(1);
-
-        const refreshedCookie = parseCookie(cookies[0])!;
+        const refreshedCookie = findSessionCookie(cookies);
         checkCookieIsSet(refreshedCookie);
 
         // The first new cookie with fresh pair of access and refresh tokens should work.
@@ -369,9 +355,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         const cookies = nonAjaxResponse.headers['set-cookie'];
-        expect(cookies).to.have.length(1);
-
-        const refreshedCookie = parseCookie(cookies[0])!;
+        const refreshedCookie = findSessionCookie(cookies);
         checkCookieIsSet(refreshedCookie);
 
         // The first new cookie with fresh pair of access and refresh tokens should work.
@@ -400,9 +384,7 @@ export default function ({ getService }: FtrProviderContext) {
               .expect(200);
 
             const newSessionCookies = response.headers['set-cookie'];
-            expect(newSessionCookies).to.have.length(1);
-
-            const refreshedCookie = parseCookie(newSessionCookies[0])!;
+            const refreshedCookie = findSessionCookie(newSessionCookies);
             checkCookieIsSet(refreshedCookie);
 
             // The second new cookie with fresh pair of access and refresh tokens should work.
@@ -444,9 +426,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         const cookies = response.headers['set-cookie'];
-        expect(cookies).to.have.length(1);
-
-        sessionCookie = parseCookie(cookies[0])!;
+        sessionCookie = findSessionCookie(cookies);
         checkCookieIsSet(sessionCookie);
 
         // Let's make sure that created tokens are available for search.
@@ -471,8 +451,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(401);
 
         const cookies = apiResponse.headers['set-cookie'];
-        expect(cookies).to.have.length(1);
-        checkCookieIsCleared(parseCookie(cookies[0])!);
+        checkCookieIsCleared(findSessionCookie(cookies));
 
         expect(apiResponse.headers['www-authenticate']).to.be('Negotiate');
       });
@@ -484,8 +463,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(401);
 
         const cookies = nonAjaxResponse.headers['set-cookie'];
-        expect(cookies).to.have.length(1);
-        checkCookieIsCleared(parseCookie(cookies[0])!);
+        checkCookieIsCleared(findSessionCookie(cookies));
 
         expect(nonAjaxResponse.headers['www-authenticate']).to.be('Negotiate');
       });
@@ -507,8 +485,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         const cookies = response.headers['set-cookie'];
-        expect(cookies).to.have.length(1);
-        const sessionCookie = parseCookie(cookies[0])!;
+        const sessionCookie = findSessionCookie(cookies);
 
         // Accessing Kibana again using the same session should not create another `user_login` event.
         await supertest
@@ -567,9 +544,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
 
       const cookies = response.headers['set-cookie'];
-      expect(cookies).to.have.length(1);
-
-      const sessionCookie = parseCookie(cookies[0])!;
+      const sessionCookie = findSessionCookie(cookies);
       checkCookieIsSet(sessionCookie);
 
       // Access the minimal and default auth endpoint with the session cookie.
@@ -597,6 +572,68 @@ export default function ({ getService }: FtrProviderContext) {
       // so we don't have `authentication_realm` information available.
       expect(minimalResponse.body.principal).to.not.have.property('authentication_realm');
       expect(defaultResponse.body).to.have.property('authentication_realm');
+    });
+
+    it('should support minimal authentication even when access token is expired', async function () {
+      this.timeout(60000);
+
+      const response = await supertest
+        .get('/security/account')
+        .set('Authorization', `Negotiate ${spnegoToken}`)
+        .expect(200);
+
+      const sessionCookie = findSessionCookie(response.headers['set-cookie']);
+      checkCookieIsSet(sessionCookie);
+
+      // Access token expiration is set to 15s for API integration tests.
+      // Let's wait for 20s to make sure token expires.
+      await setTimeoutAsync(20000);
+
+      // Access the minimal auth endpoint with the session cookie. The minimal route relies on
+      // Elasticsearch for credentials validation (e.g., via `_has_privileges` call), so the
+      // expired access token must be transparently refreshed via the re-authentication flow.
+      const minimalResponse = await supertest
+        .get('/authentication/fast/me')
+        .set('Cookie', sessionCookie.cookieString())
+        .expect(200);
+
+      expect(minimalResponse.body.principal.username).to.eql('tester@TEST.ELASTIC.CO');
+      expect(minimalResponse.body.principal.authentication_provider).to.eql({
+        type: 'kerberos',
+        name: 'kerberos',
+      });
+    });
+
+    it('should support minimal authentication with `kbn-auth-full` header forcing full authentication', async () => {
+      const response = await supertest
+        .get('/security/account')
+        .set('Authorization', `Negotiate ${spnegoToken}`)
+        .expect(200);
+
+      const sessionCookie = findSessionCookie(response.headers['set-cookie']);
+      checkCookieIsSet(sessionCookie);
+
+      // Access the minimal auth endpoint with the `kbn-auth-full` header set to `true` to force
+      // full authentication even on a route that otherwise supports the minimal authentication mode.
+      const fullAuthResponse = await supertest
+        .get('/authentication/fast/me')
+        .set('Cookie', sessionCookie.cookieString())
+        .set('kbn-auth-full', 'true')
+        .expect(200);
+
+      expect(fullAuthResponse.body.principal.username).to.eql('tester@TEST.ELASTIC.CO');
+      expect(fullAuthResponse.body.principal.authentication_provider).to.eql({
+        type: 'kerberos',
+        name: 'kerberos',
+      });
+
+      // When `kbn-auth-full` header is set, Kibana calls ES `_authenticate` API, so full user
+      // information (including `authentication_realm`) should be available.
+      expect(fullAuthResponse.body.principal).to.have.property('authentication_realm');
+      expect(fullAuthResponse.body.principal.authentication_realm).to.eql({
+        name: 'kerb1',
+        type: 'kerberos',
+      });
     });
   });
 }

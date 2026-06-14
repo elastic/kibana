@@ -21,6 +21,7 @@ interface OAuthConnectorSecrets {
   clientSecret?: string;
   tokenUrl?: string;
   scope?: string;
+  scopeParamName?: string;
 }
 
 /**
@@ -40,8 +41,10 @@ interface OAuthConnectorConfig {
 export interface OAuthFlowConfig {
   authTypeId: 'oauth_authorization_code';
   authorizationUrl: string;
+  tokenUrl: string;
   clientId: string;
   scope?: string;
+  scopeParamName?: string;
 }
 
 /**
@@ -62,6 +65,7 @@ interface BuildAuthorizationUrlParams {
   baseAuthorizationUrl: string;
   clientId: string;
   scope?: string;
+  scopeParamName?: string;
   redirectUri: string;
   state: string;
   codeChallenge: string;
@@ -89,6 +93,15 @@ interface ConstructorOptions {
   actionsClient: ActionsClient;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
 }
+
+const RESERVED_AUTH_URL_PARAMS = new Set([
+  'client_id',
+  'response_type',
+  'redirect_uri',
+  'state',
+  'code_challenge',
+  'code_challenge_method',
+]);
 
 /**
  * Service for handling OAuth2 Authorization Code flow operations
@@ -173,18 +186,23 @@ export class OAuthAuthorizationService {
     // For connector specs, OAuth config is always in secrets (encrypted)
     // Fallback to config for backwards compatibility with legacy connectors
     const authorizationUrl = secrets.authorizationUrl || config?.authorizationUrl;
+    const tokenUrl = secrets.tokenUrl || config?.tokenUrl;
     const clientId = secrets.clientId || config?.clientId;
-    if (!authorizationUrl || !clientId) {
+    if (!authorizationUrl || !tokenUrl || !clientId) {
       throw new Error(
-        'Connector missing required OAuth configuration (authorizationUrl, clientId)'
+        'Connector missing required OAuth configuration (authorizationUrl, tokenUrl, clientId)'
       );
     }
+
+    const scopeParamName = secrets.scopeParamName;
 
     return {
       authTypeId: 'oauth_authorization_code',
       authorizationUrl,
+      tokenUrl,
       clientId,
       scope,
+      scopeParamName,
     };
   }
 
@@ -213,7 +231,15 @@ export class OAuthAuthorizationService {
    * @returns The complete authorization URL as a string
    */
   buildAuthorizationUrl(params: BuildAuthorizationUrlParams): string {
-    const { baseAuthorizationUrl, clientId, scope, redirectUri, state, codeChallenge } = params;
+    const {
+      baseAuthorizationUrl,
+      clientId,
+      scope,
+      scopeParamName,
+      redirectUri,
+      state,
+      codeChallenge,
+    } = params;
 
     const authUrl = new URL(baseAuthorizationUrl);
     authUrl.searchParams.set('client_id', clientId);
@@ -224,7 +250,12 @@ export class OAuthAuthorizationService {
     authUrl.searchParams.set('code_challenge_method', 'S256');
 
     if (scope) {
-      authUrl.searchParams.set('scope', scope);
+      if (scopeParamName && RESERVED_AUTH_URL_PARAMS.has(scopeParamName)) {
+        throw new Error(
+          `scopeParamName "${scopeParamName}" conflicts with a reserved OAuth parameter`
+        );
+      }
+      authUrl.searchParams.set(scopeParamName ?? 'scope', scope);
     }
 
     return authUrl.toString();

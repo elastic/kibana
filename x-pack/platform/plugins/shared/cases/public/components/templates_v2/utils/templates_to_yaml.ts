@@ -5,12 +5,18 @@
  * 2.0.
  */
 
-import { dump as yamlDump } from 'js-yaml';
+import { stringify as yamlStringify } from 'yaml';
 import type { z } from '@kbn/zod/v4';
-import { FieldType, type FieldSchema } from '../../../../common/types/domain/template/fields';
+import {
+  FieldType,
+  isRefField,
+  type FieldSchema,
+  type RefField,
+} from '../../../../common/types/domain/template/fields';
 import type { ParsedTemplate } from '../../../../common/types/domain/template/v1';
 
 type Field = z.infer<typeof FieldSchema>;
+type InlineField = Exclude<Field, RefField>;
 
 const yamlString = (value: string | number | undefined | null) => {
   if (value == null) {
@@ -20,15 +26,6 @@ const yamlString = (value: string | number | undefined | null) => {
     return String(value);
   }
   return JSON.stringify(value);
-};
-
-const indentYaml = (yamlStr: string, spaces: number): string => {
-  const prefix = ' '.repeat(spaces);
-  return yamlStr
-    .split('\n')
-    .filter((line) => line.trim() !== '')
-    .map((line) => prefix + line)
-    .join('\n');
 };
 
 const serializeTemplateHeader = (out: string[], template: ParsedTemplate) => {
@@ -68,51 +65,145 @@ const serializeTemplateHeader = (out: string[], template: ParsedTemplate) => {
   }
 };
 
-const serializeFieldMetadata = (out: string[], field: Field) => {
+const serializeSelectMetadata = (
+  out: string[],
+  field: Extract<Field, { control: 'SELECT_BASIC' }>
+) => {
+  out.push(`      metadata:`);
+  out.push(`        options:`);
+  for (const option of field.metadata.options) {
+    out.push(`          - ${yamlString(option)}`);
+  }
+  const defaultValue = field.metadata?.default;
+  if (
+    defaultValue !== undefined &&
+    (typeof defaultValue === 'string' || typeof defaultValue === 'number')
+  ) {
+    out.push(`        default: ${yamlString(defaultValue)}`);
+  }
+};
+
+const serializeDatePickerMetadata = (
+  out: string[],
+  field: Extract<Field, { control: 'DATE_PICKER' }>
+) => {
+  const meta = field.metadata;
+  if (!meta) return;
+  // `default` is in the catchall bucket, typed as unknown
+  const defaultValue = meta.default;
+  const hasDefault =
+    typeof defaultValue === 'string' ||
+    typeof defaultValue === 'number' ||
+    defaultValue instanceof Date;
+  if (!hasDefault && meta.show_time === undefined && meta.timezone === undefined) return;
+  out.push(`      metadata:`);
+  if (hasDefault) {
+    const serialized =
+      defaultValue instanceof Date ? defaultValue.toISOString() : (defaultValue as string | number);
+    out.push(`        default: ${yamlString(serialized)}`);
+  }
+  if (meta.show_time !== undefined) {
+    out.push(`        show_time: ${meta.show_time}`);
+  }
+  if (meta.timezone !== undefined) {
+    out.push(`        timezone: ${meta.timezone}`);
+  }
+};
+
+const serializeTextareaMetadata = (
+  out: string[],
+  field: Extract<Field, { control: 'TEXTAREA' }>
+) => {
+  const meta = field.metadata;
+  if (!meta) return;
+  const defaultValue = meta.default;
+  const hasDefault = typeof defaultValue === 'string';
+  const hasMarkdown = meta.markdown === true;
+  if (!hasDefault && !hasMarkdown) return;
+  out.push(`      metadata:`);
+  if (hasDefault) {
+    out.push(`        default: ${yamlString(defaultValue)}`);
+  }
+  if (hasMarkdown) {
+    out.push(`        markdown: true`);
+  }
+};
+
+const serializeCheckboxGroupMetadata = (
+  out: string[],
+  field: Extract<Field, { control: 'CHECKBOX_GROUP' }>
+) => {
+  out.push(`      metadata:`);
+  out.push(`        options:`);
+  for (const option of field.metadata.options) {
+    out.push(`          - ${yamlString(option)}`);
+  }
+  const defaults = field.metadata.default;
+  if (defaults && defaults.length > 0) {
+    out.push(`        default:`);
+    for (const d of defaults) {
+      out.push(`          - ${yamlString(d)}`);
+    }
+  }
+};
+
+const serializeUserPickerMetadata = (
+  out: string[],
+  field: Extract<Field, { control: 'USER_PICKER' }>
+) => {
+  const meta = field.metadata;
+  if (!meta) return;
+  const hasMultiple = meta.multiple !== undefined;
+  const defaults = meta.default;
+  const hasDefaults = Array.isArray(defaults) && defaults.length > 0;
+  if (!hasMultiple && !hasDefaults) return;
+  out.push(`      metadata:`);
+  if (hasMultiple) {
+    out.push(`        multiple: ${meta.multiple}`);
+  }
+  if (hasDefaults) {
+    out.push(`        default:`);
+    for (const user of defaults) {
+      out.push(`          - uid: ${yamlString(user.uid)}`);
+      out.push(`            name: ${yamlString(user.name)}`);
+    }
+  }
+};
+
+const serializeFieldMetadata = (out: string[], field: InlineField) => {
   if (field.control === FieldType.SELECT_BASIC) {
+    serializeSelectMetadata(out, field);
+    return;
+  }
+  if (field.control === FieldType.DATE_PICKER) {
+    serializeDatePickerMetadata(out, field);
+    return;
+  }
+  if (field.control === FieldType.CHECKBOX_GROUP) {
+    serializeCheckboxGroupMetadata(out, field);
+    return;
+  }
+  if (field.control === FieldType.RADIO_GROUP) {
     out.push(`      metadata:`);
     out.push(`        options:`);
     for (const option of field.metadata.options) {
       out.push(`          - ${yamlString(option)}`);
     }
     const defaultValue = field.metadata?.default;
-    if (
-      defaultValue !== undefined &&
-      (typeof defaultValue === 'string' || typeof defaultValue === 'number')
-    ) {
+    if (defaultValue !== undefined && typeof defaultValue === 'string') {
       out.push(`        default: ${yamlString(defaultValue)}`);
     }
     return;
   }
-
-  if (field.control === FieldType.DATE_PICKER) {
-    const meta = field.metadata;
-    if (!meta) return;
-    // `default` is in the catchall bucket, typed as unknown
-    const defaultValue = meta.default;
-    const hasDefault =
-      typeof defaultValue === 'string' ||
-      typeof defaultValue === 'number' ||
-      defaultValue instanceof Date;
-    if (!hasDefault && meta.show_time === undefined && meta.timezone === undefined) return;
-    out.push(`      metadata:`);
-    if (hasDefault) {
-      const serialized =
-        defaultValue instanceof Date
-          ? defaultValue.toISOString()
-          : (defaultValue as string | number);
-      out.push(`        default: ${yamlString(serialized)}`);
-    }
-    if (meta.show_time !== undefined) {
-      out.push(`        show_time: ${meta.show_time}`);
-    }
-    if (meta.timezone !== undefined) {
-      out.push(`        timezone: ${meta.timezone}`);
-    }
+  if (field.control === FieldType.USER_PICKER) {
+    serializeUserPickerMetadata(out, field);
     return;
   }
-
-  // INPUT_TEXT, INPUT_NUMBER, TEXTAREA
+  if (field.control === FieldType.TEXTAREA) {
+    serializeTextareaMetadata(out, field);
+    return;
+  }
+  // INPUT_TEXT, INPUT_NUMBER
   const defaultValue = field.metadata?.default;
   if (
     defaultValue !== undefined &&
@@ -123,35 +214,61 @@ const serializeFieldMetadata = (out: string[], field: Field) => {
   }
 };
 
-const serializeFieldDisplay = (out: string[], field: Field) => {
-  if (!field.display?.show_when) return;
-  out.push(`      display:`);
-  out.push(
-    indentYaml(
-      yamlDump({ show_when: field.display.show_when }, { indent: 2, lineWidth: -1, noRefs: true }),
-      8
-    )
-  );
+const serializeNestedYaml = (out: string[], key: string, value: object) => {
+  const rendered = yamlStringify(value, null, { indent: 2 }).trimEnd();
+  out.push(`      ${key}:`);
+  for (const line of rendered.split('\n')) {
+    out.push(`        ${line}`);
+  }
 };
 
-const serializeFieldValidation = (out: string[], field: Field) => {
-  if (!field.validation) return;
-  const v = field.validation;
-  const filteredValidation: Record<string, unknown> = {};
-  if (v.required !== undefined) filteredValidation.required = v.required;
-  if (v.required_when !== undefined) filteredValidation.required_when = v.required_when;
-  if (v.pattern !== undefined) filteredValidation.pattern = v.pattern;
-  if (v.min !== undefined) filteredValidation.min = v.min;
-  if (v.max !== undefined) filteredValidation.max = v.max;
-  if (v.min_length !== undefined) filteredValidation.min_length = v.min_length;
-  if (v.max_length !== undefined) filteredValidation.max_length = v.max_length;
+const serializeDisplay = (out: string[], field: InlineField) => {
+  if (!field.display) return;
+  serializeNestedYaml(out, 'display', field.display);
+};
 
-  if (Object.keys(filteredValidation).length === 0) return;
-  out.push(`      validation:`);
-  out.push(indentYaml(yamlDump(filteredValidation, { indent: 2, lineWidth: -1, noRefs: true }), 8));
+const serializeValidation = (out: string[], field: InlineField) => {
+  if (!field.validation) return;
+  const defined = Object.fromEntries(
+    Object.entries(field.validation).filter(([, v]) => v !== undefined)
+  );
+  if (Object.keys(defined).length === 0) return;
+  serializeNestedYaml(out, 'validation', defined);
+};
+
+const serializeRefDefault = (
+  out: string[],
+  defaultValue: NonNullable<RefField['metadata']>['default']
+) => {
+  if (defaultValue === undefined) return;
+  out.push(`      metadata:`);
+  if (Array.isArray(defaultValue)) {
+    out.push(`        default:`);
+    for (const item of defaultValue) {
+      if (typeof item === 'string') {
+        out.push(`          - ${yamlString(item)}`);
+      } else {
+        out.push(`          - uid: ${yamlString(item.uid)}`);
+        out.push(`            name: ${yamlString(item.name)}`);
+      }
+    }
+    return;
+  }
+  out.push(`        default: ${yamlString(defaultValue)}`);
 };
 
 const serializeField = (out: string[], field: Field) => {
+  if (isRefField(field)) {
+    if (field.name !== undefined) {
+      out.push(`    - name: ${yamlString(field.name)}`);
+      out.push(`      $ref: ${yamlString(field.$ref)}`);
+    } else {
+      out.push(`    - $ref: ${yamlString(field.$ref)}`);
+    }
+    serializeRefDefault(out, field.metadata?.default);
+    out.push('');
+    return;
+  }
   out.push(`    - name: ${yamlString(field.name)}`);
   if (field.label) {
     out.push(`      label: ${yamlString(field.label)}`);
@@ -159,8 +276,8 @@ const serializeField = (out: string[], field: Field) => {
   out.push(`      control: ${yamlString(field.control)}`);
   out.push(`      type: ${yamlString(field.type)}`);
   serializeFieldMetadata(out, field);
-  serializeFieldDisplay(out, field);
-  serializeFieldValidation(out, field);
+  serializeDisplay(out, field);
+  serializeValidation(out, field);
   out.push('');
 };
 

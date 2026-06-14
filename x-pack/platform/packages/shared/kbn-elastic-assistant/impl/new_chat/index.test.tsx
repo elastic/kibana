@@ -48,7 +48,7 @@ describe('NewChat', () => {
     jest.clearAllMocks();
   });
 
-  it('renders the default New Chat button with a discuss icon', () => {
+  it('renders the default New Chat button with an assistant (AiButton) icon', () => {
     render(<NewChat {...defaultProps} />);
 
     const newChatButton = screen.getByTestId('plusCircle');

@@ -1,0 +1,6 @@
+summary: The default data view was set successfully.
+description: The acknowledged flag confirms that the default data view for the current Kibana space was updated.
+value:
+  {
+    "acknowledged": true
+  }

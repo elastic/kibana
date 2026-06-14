@@ -6,9 +6,9 @@
  */
 import apm from 'elastic-apm-node';
 import { withActiveSpan } from '@kbn/tracing-utils';
+import { escapeKuery, escapeQuotes } from '@kbn/es-query';
 import { groupBy, isEqual, keyBy, omit, pick, uniq } from 'lodash';
-import { v5 as uuidv5 } from 'uuid';
-import { dump } from 'js-yaml';
+import { v4 as uuidv4, v5 as uuidv5 } from 'uuid';
 import pMap from 'p-map';
 import { lt, minVersion, gt } from 'semver';
 import type {
@@ -28,11 +28,12 @@ import { SavedObjectsUtils } from '@kbn/core/server';
 
 import type { estypes } from '@elastic/elasticsearch';
 
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
-
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 
 import { withSpan } from '@kbn/apm-utils';
+
+import yaml from 'yaml';
 
 import { copyPackagePolicy } from '../../common/services/copy_package_policy_utils';
 
@@ -45,12 +46,12 @@ import {
   policyHasEndpointSecurity,
   policyHasFleetServer,
   policyHasSyntheticsIntegration,
+  validateFleetSavedObjectId,
 } from '../../common/services';
 
 import {
   LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
   AGENTS_PREFIX,
-  AGENT_POLICY_VERSION_SEPARATOR,
   FLEET_AGENT_POLICIES_SCHEMA_VERSION,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
@@ -73,19 +74,35 @@ import type {
 } from '../types';
 import type { AgentPolicyAgentVersionCondition } from '../../common/types/models/agent_policy';
 import {
+  AGENTLESS_AGENT_POLICY_INACTIVITY_TIMEOUT,
   AGENT_POLICY_INDEX,
+  AGENT_POLICY_VERSION_SEPARATOR,
   agentPolicyStatuses,
   FLEET_ELASTIC_AGENT_PACKAGE,
   UUID_V5_NAMESPACE,
   AGENT_POLICY_SAVED_OBJECT_TYPE,
+  CLOUD_CONNECTOR_DEFAULT_ACCOUNT_TYPE,
+  VERIFIER_PKG_NAME,
+  VERIFIER_POLICY_TEMPLATE,
+  VERIFIER_INPUT_TYPE,
+  VERIFIER_DATA_STREAM_TYPE,
+  VERIFIER_DATASET,
 } from '../../common/constants';
 import type {
+  AwsCloudConnectorVars,
+  AzureCloudConnectorVars,
+  CloudConnectorPackagePolicy,
+  CloudConnectorSecretVar,
+  CloudConnectorVar,
+  CloudConnectorVars,
   DeleteAgentPolicyResponse,
   FetchAllAgentPoliciesOptions,
   FetchAllAgentPolicyIdsOptions,
   FleetServerPolicy,
+  GcpCloudConnectorVars,
   IntegrationsOutput,
   PackageInfo,
+  VerifierStreamVars,
 } from '../../common/types';
 import {
   AgentPolicyNameExistsError,
@@ -114,6 +131,10 @@ import {
   removeVersionSuffixFromPolicyId,
 } from '../../common/services/version_specific_policies_utils';
 
+import { VERIFY_PERMISSIONS_TASK } from '../tasks/agentless/verify_permissions_task';
+
+import type { CloudConnectorSOAttributes } from '../types/so_attributes';
+
 import { appContextService } from '.';
 
 import { mapAgentPolicySavedObjectToAgentPolicy } from './agent_policies/utils';
@@ -124,11 +145,13 @@ import {
 } from './elastic_agent_manifest';
 
 import { bulkInstallPackages, getPackageInfo } from './epm/packages';
-import { getAgentsByKuery } from './agents';
+import { ensureInstalledPackage } from './epm/packages/install';
+import { getAgentsByKuery, unenrollForAgentPolicyId } from './agents';
 import {
+  buildCurrentRevisionFilter,
+  getCompiledVersionsForAgentPolicy,
   getPackagePolicySavedObjectType,
   packagePolicyService,
-  getCompiledVersionsForAgentPolicy,
 } from './package_policy';
 import { incrementPackagePolicyCopyName } from './package_policies';
 import { outputService } from './output';
@@ -448,6 +471,8 @@ class AgentPolicyService {
   ): Promise<AgentPolicy> {
     const logger = this.getLogger('create');
 
+    validateFleetSavedObjectId(options.id);
+
     const savedObjectType = await getAgentPolicySavedObjectType();
     // Ensure an ID is provided, so we can include it in the audit logs below
     if (!options.id) {
@@ -512,10 +537,14 @@ class AgentPolicyService {
         )
       );
 
-    await appContextService
-      .getUninstallTokenService()
-      ?.scoped(soClient.getCurrentNamespace())
-      ?.generateTokenForPolicyId(newSo.id);
+    if (!agentPolicy.supports_agentless) {
+      await appContextService
+        .getUninstallTokenService()
+        ?.scoped(soClient.getCurrentNamespace())
+        ?.generateTokenForPolicyId(newSo.id);
+    } else {
+      logger.debug('Skipping uninstall token generation for agentless policy');
+    }
     await this.triggerAgentPolicyUpdatedEvent(esClient, 'created', newSo.id, {
       skipDeploy: options.skipDeploy,
       spaceId: soClient.getCurrentNamespace(),
@@ -940,8 +969,11 @@ class AgentPolicyService {
               (await packagePolicyService.findAllForAgentPolicy(soClient, agentPolicy.id)) || [];
           }
           if (options.withAgentCount) {
-            // Wildcard outside quotes so KQL treats * as wildcard for version-specific policies
-            const policyKuery = `(${AGENTS_PREFIX}.policy_id:"${agentPolicy.id}" or ${AGENTS_PREFIX}.policy_id:${agentPolicy.id}${AGENT_POLICY_VERSION_SEPARATOR}*)`;
+            const policyKuery = `(${AGENTS_PREFIX}.policy_id:"${escapeQuotes(
+              agentPolicy.id
+            )}" or ${AGENTS_PREFIX}.policy_id:${escapeKuery(
+              agentPolicy.id
+            )}${AGENT_POLICY_VERSION_SEPARATOR}*)`;
             await getAgentsByKuery(appContextService.getInternalUserESClient(), soClient, {
               showInactive: true,
               perPage: 0,
@@ -1067,10 +1099,15 @@ class AgentPolicyService {
     }
 
     const { space_ids: _, ...preparedAgentPolicySo } = agentPolicy;
+    const { hasAgentVersionConditions, minAgentVersion, packageAgentVersionConditions } =
+      await this.computeMinAgentVersionData(soClient, id);
     return this._update(soClient, esClient, id, { ...preparedAgentPolicySo }, options?.user, {
       bumpRevision: options?.bumpRevision ?? true,
       removeProtection: false,
       skipValidation: options?.skipValidation ?? false,
+      hasAgentVersionConditions,
+      minAgentVersion: minAgentVersion ?? null,
+      packageAgentVersionConditions: packageAgentVersionConditions ?? null,
     })
       .then((updatedAgentPolicy) => {
         return this.runExternalCallbacks(
@@ -1227,11 +1264,10 @@ class AgentPolicyService {
       removeProtection?: boolean;
       asyncDeploy?: boolean;
       skipValidation?: boolean;
-      hasAgentVersionConditions?: boolean;
     }
   ): Promise<void> {
     return withSpan('bump_agent_policy_revision', async () => {
-      const { minAgentVersion, packageAgentVersionConditions } =
+      const { hasAgentVersionConditions, minAgentVersion, packageAgentVersionConditions } =
         await this.computeMinAgentVersionData(soClient, id);
       await this._update(soClient, esClient, id, {}, options?.user, {
         bumpRevision: true,
@@ -1239,7 +1275,7 @@ class AgentPolicyService {
         skipValidation: options?.skipValidation ?? true,
         returnUpdatedPolicy: false,
         asyncDeploy: options?.asyncDeploy,
-        hasAgentVersionConditions: options?.hasAgentVersionConditions,
+        hasAgentVersionConditions,
         minAgentVersion: minAgentVersion ?? null,
         packageAgentVersionConditions: packageAgentVersionConditions ?? null,
       });
@@ -1250,6 +1286,7 @@ class AgentPolicyService {
     soClient: SavedObjectsClientContract,
     policyId: string
   ): Promise<{
+    hasAgentVersionConditions: boolean;
     minAgentVersion: string | undefined;
     packageAgentVersionConditions: AgentPolicyAgentVersionCondition[] | undefined;
   }> {
@@ -1284,8 +1321,35 @@ class AgentPolicyService {
       }
     }
 
+    // inputs_for_versions is stripped from the PackagePolicy type but is the only reliable
+    // indicator of template-level version conditions (HBS templates referencing _meta.agent.version).
+    // compilePackagePolicyForVersions only populates it when hasAgentVersionConditionInInputTemplate
+    // is true, so its presence means the policy requires version-specific behaviour.
+    const savedObjectType = await getPackagePolicySavedObjectType();
+    const rawResult = await Promise.resolve(
+      soClient.find<PackagePolicySOAttributes>({
+        type: savedObjectType,
+        filter: buildCurrentRevisionFilter(
+          savedObjectType,
+          `${savedObjectType}.attributes.policy_ids:${escapeSearchQueryPhrase(policyId)}`
+        ),
+        perPage: SO_SEARCH_LIMIT,
+      })
+    ).catch(() => undefined);
+    const hasTemplateConditions = (rawResult?.saved_objects ?? []).some(
+      (so) =>
+        so.attributes.inputs_for_versions &&
+        Object.keys(so.attributes.inputs_for_versions).length > 0
+    );
+
+    const hasAgentVersionConditions = conditions.length > 0 || hasTemplateConditions;
+
     if (conditions.length === 0) {
-      return { minAgentVersion: undefined, packageAgentVersionConditions: undefined };
+      return {
+        hasAgentVersionConditions,
+        minAgentVersion: undefined,
+        packageAgentVersionConditions: undefined,
+      };
     }
 
     let highestMinVersion: string | undefined;
@@ -1301,6 +1365,7 @@ class AgentPolicyService {
     }
 
     return {
+      hasAgentVersionConditions,
       minAgentVersion: highestMinVersion,
       packageAgentVersionConditions: conditions,
     };
@@ -1485,20 +1550,30 @@ class AgentPolicyService {
   public async bumpAllAgentPoliciesForOutput(
     esClient: ElasticsearchClient,
     outputId: string,
-    options?: { user?: AuthenticatedUser }
+    options?: { isDefault?: boolean; isDefaultMonitoring?: boolean; user?: AuthenticatedUser }
   ): Promise<SavedObjectsBulkUpdateResponse<AgentPolicy>> {
     const useSpaceAwareness = await isSpaceAwarenessEnabled();
     const internalSoClientWithoutSpaceExtension =
       appContextService.getInternalUserSOClientWithoutSpaceExtension();
 
     const savedObjectType = await getAgentPolicySavedObjectType();
-    // All agent policies directly using output
+    const escapedId = escapeSearchQueryPhrase(outputId);
+    const filterClauses = [
+      `(${savedObjectType}.attributes.data_output_id:${escapedId} OR ${savedObjectType}.attributes.monitoring_output_id:${escapedId})`,
+    ];
+    if (options?.isDefault) {
+      filterClauses.push(`(NOT ${savedObjectType}.attributes.data_output_id:*)`);
+    }
+    if (options?.isDefaultMonitoring) {
+      filterClauses.push(`(NOT ${savedObjectType}.attributes.monitoring_output_id:*)`);
+    }
+    const filter = filterClauses.join(' OR ');
+
     const agentPoliciesUsingOutput =
       await internalSoClientWithoutSpaceExtension.find<AgentPolicySOAttributes>({
         type: savedObjectType,
         fields: ['revision', 'data_output_id', 'monitoring_output_id', 'namespaces'],
-        searchFields: ['data_output_id', 'monitoring_output_id'],
-        search: escapeSearchQueryPhrase(outputId),
+        filter,
         perPage: SO_SEARCH_LIMIT,
         namespaces: ['*'],
       });
@@ -1546,28 +1621,6 @@ class AgentPolicyService {
     );
   }
 
-  public async bumpAllAgentPolicies(
-    esClient: ElasticsearchClient,
-    options?: { user?: AuthenticatedUser }
-  ): Promise<SavedObjectsBulkUpdateResponse<AgentPolicy>> {
-    const internalSoClientWithoutSpaceExtension =
-      appContextService.getInternalUserSOClientWithoutSpaceExtension();
-    const savedObjectType = await getAgentPolicySavedObjectType();
-    const currentPolicies =
-      await internalSoClientWithoutSpaceExtension.find<AgentPolicySOAttributes>({
-        type: savedObjectType,
-        fields: ['name', 'revision', 'namespaces'],
-        perPage: SO_SEARCH_LIMIT,
-        namespaces: ['*'],
-      });
-
-    return this._bumpPolicies(
-      internalSoClientWithoutSpaceExtension,
-      currentPolicies.saved_objects,
-      options
-    );
-  }
-
   public async delete(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
@@ -1598,7 +1651,7 @@ class AgentPolicyService {
       showInactive: true,
       perPage: 0,
       page: 1,
-      kuery: `${AGENTS_PREFIX}.policy_id:"${id}"`,
+      kuery: `${AGENTS_PREFIX}.policy_id:"${escapeQuotes(id)}"`,
     });
 
     if (total > 0 && !agentPolicy?.supports_agentless) {
@@ -2113,7 +2166,7 @@ class AgentPolicyService {
         },
       };
 
-      const configMapYaml = fullAgentConfigMapToYaml(fullAgentConfigMap, dump);
+      const configMapYaml = fullAgentConfigMapToYaml(fullAgentConfigMap, yaml);
       const updateManifestVersion = elasticAgentStandaloneManifest.replace('VERSION', agentVersion);
       const fixedAgentYML = configMapYaml.replace('agent.yml:', 'agent.yml: |-');
       return [fixedAgentYML, updateManifestVersion].join('\n');
@@ -2201,17 +2254,23 @@ class AgentPolicyService {
   public async bumpAllAgentPoliciesForDownloadSource(
     esClient: ElasticsearchClient,
     downloadSourceId: string,
-    options?: { user?: AuthenticatedUser }
+    options?: { isDefault?: boolean; user?: AuthenticatedUser }
   ): Promise<SavedObjectsBulkUpdateResponse<AgentPolicy>> {
     const internalSoClientWithoutSpaceExtension =
       appContextService.getInternalUserSOClientWithoutSpaceExtension();
     const savedObjectType = await getAgentPolicySavedObjectType();
+    const escapedId = escapeSearchQueryPhrase(downloadSourceId);
+    const filterClauses = [`(${savedObjectType}.attributes.download_source_id:${escapedId})`];
+    if (options?.isDefault) {
+      filterClauses.push(`(NOT ${savedObjectType}.attributes.download_source_id:*)`);
+    }
+    const filter = filterClauses.join(' OR ');
+
     const currentPolicies =
       await internalSoClientWithoutSpaceExtension.find<AgentPolicySOAttributes>({
         type: savedObjectType,
         fields: ['revision', 'download_source_id', 'namespaces'],
-        searchFields: ['download_source_id'],
-        search: escapeSearchQueryPhrase(downloadSourceId),
+        filter,
         perPage: SO_SEARCH_LIMIT,
         namespaces: ['*'],
       });
@@ -2226,18 +2285,25 @@ class AgentPolicyService {
   public async bumpAllAgentPoliciesForFleetServerHosts(
     esClient: ElasticsearchClient,
     fleetServerHostId: string,
-    options?: { user?: AuthenticatedUser }
+    options?: { isDefault?: boolean; user?: AuthenticatedUser }
   ): Promise<SavedObjectsBulkUpdateResponse<AgentPolicy>> {
     const internalSoClientWithoutSpaceExtension =
       appContextService.getInternalUserSOClientWithoutSpaceExtension();
     const savedObjectType = await getAgentPolicySavedObjectType();
+    const escapedId = escapeSearchQueryPhrase(fleetServerHostId);
+    const filterClauses = [`(${savedObjectType}.attributes.fleet_server_host_id:${escapedId})`];
+    if (options?.isDefault) {
+      filterClauses.push(`(NOT ${savedObjectType}.attributes.fleet_server_host_id:*)`);
+    }
+    const filter = filterClauses.join(' OR ');
+
     const currentPolicies =
       await internalSoClientWithoutSpaceExtension.find<AgentPolicySOAttributes>({
         type: savedObjectType,
         fields: ['revision', 'fleet_server_host_id', 'namespaces'],
-        searchFields: ['fleet_server_host_id'],
-        search: escapeSearchQueryPhrase(fleetServerHostId),
+        filter,
         perPage: SO_SEARCH_LIMIT,
+        namespaces: ['*'],
       });
 
     return this._bumpPolicies(
@@ -2385,7 +2451,7 @@ class AgentPolicyService {
       findRequest: {
         type: savedObjectType,
         perPage,
-        sortField: 'created_at',
+        sortField: 'updated_at',
         sortOrder: 'asc',
         fields: ['id', 'name'],
         filter: kuery ? normalizeKuery(savedObjectType, kuery) : undefined,
@@ -2411,7 +2477,7 @@ class AgentPolicyService {
       perPage = 1000,
       kuery,
       sortOrder = 'asc',
-      sortField = 'created_at',
+      sortField = 'updated_at',
       fields = [],
       spaceId = undefined,
     }: FetchAllAgentPoliciesOptions = {}
@@ -2574,20 +2640,230 @@ class AgentPolicyService {
     options: { username?: string }
   ): AgentPolicySOAttributes {
     const { space_ids: _, ...baseAgentPolicySo } = agentPolicy;
+    const now = new Date().toISOString();
     return {
       ...baseAgentPolicySo,
       status: 'active',
       is_managed: agentPolicy.is_managed ?? false,
       revision: 1,
-      updated_at: new Date().toISOString(),
+      updated_at: now,
       updated_by: options?.username || 'system',
       schema_version: FLEET_AGENT_POLICIES_SCHEMA_VERSION,
       is_protected: false,
     };
   }
+
+  public async createVerifierPolicy(
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    connector: { id: string; attributes: CloudConnectorSOAttributes },
+    verificationInfo: {
+      policyTemplates: string[];
+      packageName: string;
+      packageTitle: string;
+      packageVersion: string;
+    }
+  ): Promise<{ policyId: string }> {
+    const logger = this.getLogger('createVerifierPolicy');
+    const connectorId = connector.id;
+    const {
+      name: connectorName,
+      cloudProvider,
+      accountType,
+      vars: connectorVars,
+    } = connector.attributes;
+    const { policyTemplates, packageName, packageTitle, packageVersion } = verificationInfo;
+    const shortId = uuidv4().slice(0, 8);
+    const policyName = `Verifier-Agent-Policy-${connectorName}-${shortId}`;
+    const verificationId = uuidv4();
+
+    const agentPolicy = await this.create(
+      soClient,
+      esClient,
+      {
+        name: policyName,
+        description: `OTel permission verifier for cloud connector ${connectorId}`,
+        inactivity_timeout: AGENTLESS_AGENT_POLICY_INACTIVITY_TIMEOUT,
+        supports_agentless: true,
+        is_verifier: true,
+        namespace: 'default',
+        monitoring_enabled: [],
+        keep_monitoring_alive: true,
+        is_protected: false,
+        agentless: {
+          cloud_connectors: {
+            enabled: true,
+            target_csp: cloudProvider,
+          },
+        },
+      },
+      { skipDeploy: true }
+    );
+
+    const resolvedAccountType = accountType ?? CLOUD_CONNECTOR_DEFAULT_ACCOUNT_TYPE;
+    logger.info(
+      `${VERIFY_PERMISSIONS_TASK} Connector ${connectorId} accountType="${resolvedAccountType}"`
+    );
+
+    const credentialVars = buildVerifierCredentialVars(cloudProvider, connectorVars);
+
+    const verifierPkgResult = await ensureInstalledPackage({
+      savedObjectsClient: soClient,
+      esClient,
+      pkgName: VERIFIER_PKG_NAME,
+    });
+    const verifierPkgVersion = verifierPkgResult.package.version;
+    logger.info(
+      `${VERIFY_PERMISSIONS_TASK} Package ${VERIFIER_PKG_NAME} v${verifierPkgVersion} ` +
+        `${verifierPkgResult.status === 'already_installed' ? 'already installed' : 'installed'}`
+    );
+
+    const verifierPkgInfo = await getPackageInfo({
+      savedObjectsClient: soClient,
+      pkgName: VERIFIER_PKG_NAME,
+      pkgVersion: verifierPkgVersion,
+      prerelease: true,
+    });
+
+    const streamVars: VerifierStreamVars = {
+      'data_stream.dataset': { type: 'text', value: VERIFIER_DATASET },
+      identity_federation_id: { type: 'text', value: connectorId },
+      identity_federation_name: { type: 'text', value: connectorName },
+      verification_id: { type: 'text', value: verificationId },
+      verification_type: { type: 'select', value: 'scheduled' },
+      provider: { type: 'text', value: cloudProvider },
+      account_type: { type: 'select', value: resolvedAccountType },
+      ...credentialVars,
+      policy_id: { type: 'text', value: agentPolicy.id },
+      policy_name: { type: 'text', value: policyName },
+      policy_templates: { type: 'text', value: policyTemplates },
+      package_name: { type: 'text', value: packageName },
+      package_title: { type: 'text', value: packageTitle },
+      package_version: { type: 'text', value: packageVersion },
+    };
+
+    const verifierPackagePolicy: CloudConnectorPackagePolicy = {
+      name: `verifier-${connectorName}-${shortId}`,
+      namespace: 'default',
+      enabled: true,
+      policy_ids: [agentPolicy.id],
+      supports_agentless: true,
+      cloud_connector_id: connectorId,
+      cloud_connector_name: connectorName,
+      supports_cloud_connector: true,
+      package: {
+        name: VERIFIER_PKG_NAME,
+        title: verifierPkgInfo.title ?? 'Permission Verifier',
+        version: verifierPkgVersion,
+      },
+      inputs: [
+        {
+          type: VERIFIER_INPUT_TYPE,
+          policy_template: VERIFIER_POLICY_TEMPLATE,
+          enabled: true,
+          streams: [
+            {
+              enabled: true,
+              data_stream: {
+                type: VERIFIER_DATA_STREAM_TYPE,
+                dataset: VERIFIER_DATASET,
+              },
+              vars: streamVars,
+            },
+          ],
+        },
+      ],
+    };
+
+    try {
+      logger.info(
+        `${VERIFY_PERMISSIONS_TASK} Creating verifier_otel package policy for ` +
+          `connector ${connectorId}, templates [${policyTemplates.join(', ')}]`
+      );
+      const otelPackagePolicy = await packagePolicyService.create(
+        soClient,
+        esClient,
+        verifierPackagePolicy,
+        {
+          bumpRevision: false,
+          force: true,
+          skipEnsureInstalled: true,
+          packageInfo: verifierPkgInfo,
+        }
+      );
+      const secretRefs = otelPackagePolicy.secret_references ?? [];
+      logger.info(
+        `${VERIFY_PERMISSIONS_TASK} Successfully Created OTel package policy ${otelPackagePolicy.id} for verifier policy ${agentPolicy.id}, ` +
+          `secret_references: ${secretRefs.length}`
+      );
+    } catch (err) {
+      logger.error(
+        `${VERIFY_PERMISSIONS_TASK} Failed to create verifier_otel package policy ` +
+          `for connector ${connectorId}: ${err}`
+      );
+      throw err;
+    }
+
+    logger.info(`${VERIFY_PERMISSIONS_TASK} Deploying verifier policy ${agentPolicy.id}`);
+
+    try {
+      await this.deployPolicy(soClient, agentPolicy.id, undefined, {
+        throwOnAgentlessError: true,
+      });
+    } catch (err) {
+      logger.error(
+        `${VERIFY_PERMISSIONS_TASK} Failed to deploy verifier policy ${agentPolicy.id}, rolling back: ${err}`
+      );
+      await this.deleteVerifierPolicy(soClient, esClient, agentPolicy.id);
+      throw err;
+    }
+
+    return { policyId: agentPolicy.id };
+  }
+
+  public async deleteVerifierPolicy(
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    policyId: string
+  ): Promise<void> {
+    const logger = this.getLogger('deleteVerifierPolicy');
+    try {
+      // Force-revoke agents before deleting the policy because the agentless deployment
+      // is destroyed immediately, so agents can never check in to acknowledge a graceful unenroll.
+      await unenrollForAgentPolicyId(soClient, esClient, policyId, { revoke: true });
+      await this.delete(soClient, esClient, policyId, { force: true });
+    } catch (err) {
+      logger.error(
+        `${VERIFY_PERMISSIONS_TASK} Failed to delete verifier agent policy ${policyId}: ${err}`
+      );
+    }
+  }
 }
 
 export const agentPolicyService = new AgentPolicyService();
+
+function buildVerifierCredentialVars(
+  provider: string,
+  connectorVars: CloudConnectorVars
+): Record<string, CloudConnectorSecretVar | CloudConnectorVar> {
+  const vars: Record<string, CloudConnectorSecretVar | CloudConnectorVar> = {};
+
+  if (provider === 'aws') {
+    const awsVars = connectorVars as AwsCloudConnectorVars;
+    vars.credentials_role_arn = awsVars.role_arn;
+    vars.credentials_external_id = awsVars.external_id as CloudConnectorSecretVar;
+  } else if (provider === 'azure') {
+    const azureVars = connectorVars as AzureCloudConnectorVars;
+    vars.credentials_tenant_id = azureVars.tenant_id;
+    vars.credentials_client_id = azureVars.client_id;
+  } else if (provider === 'gcp') {
+    const gcpVars = connectorVars as GcpCloudConnectorVars;
+    vars.credentials_service_account_email = gcpVars.service_account;
+    vars.credentials_audience = gcpVars.audience;
+  }
+
+  return vars;
+}
 
 export async function addPackageToAgentPolicy(
   soClient: SavedObjectsClientContract,

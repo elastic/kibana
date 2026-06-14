@@ -10,9 +10,15 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import type { WorkflowDetailDto, WorkflowListDto } from '@kbn/workflows';
+import type { WorkflowDetailDto, WorkflowListDto, WorkflowYaml } from '@kbn/workflows';
 import { createMockWorkflowApi } from '@kbn/workflows-ui/src/api/workflows_api.mock';
 import { useWorkflowActions } from './use_workflow_actions';
+import {
+  workflowEventNames,
+  WorkflowLifecycleEventTypes,
+} from '../../../common/lib/telemetry/events/workflows';
+import type { TelemetryServiceClient } from '../../../common/lib/telemetry/types';
+import { WorkflowsBaseTelemetry } from '../../../common/service/telemetry';
 import { parseImportFile } from '../../../features/import_workflows/lib/parse_import_file';
 import type { ClientPreflightResult } from '../../../features/import_workflows/lib/parse_import_file';
 import { useTelemetry } from '../../../hooks/use_telemetry';
@@ -116,7 +122,7 @@ describe('useWorkflowActions – import mutations', () => {
         },
       ],
       workflowIds: ['w-1'],
-      rawWorkflows: [{ id: 'w-1', yaml: 'name: W1' }],
+      rawWorkflows: [{ id: 'w-1', originalId: 'w-1', yaml: 'name: W1' }],
     };
 
     it('should parse the file client-side and check conflicts via mgetWorkflows', async () => {
@@ -167,8 +173,8 @@ describe('useWorkflowActions – import mutations', () => {
         ],
         workflowIds: ['w-1', 'w-2'],
         rawWorkflows: [
-          { id: 'w-1', yaml: 'name: Existing' },
-          { id: 'w-2', yaml: 'name: New' },
+          { id: 'w-1', originalId: 'w-1', yaml: 'name: Existing' },
+          { id: 'w-2', originalId: 'w-2', yaml: 'name: New' },
         ],
       };
       mockParseImportFile.mockResolvedValueOnce(parseResult);
@@ -257,7 +263,7 @@ describe('useWorkflowActions – import mutations', () => {
   // importWorkflows
   // ---------------------------------------------------------------------------
   describe('importWorkflows', () => {
-    const workflows = [{ id: 'w-1', yaml: 'name: Test' }];
+    const workflows = [{ id: 'w-1', originalId: 'w-1', yaml: 'name: Test' }];
     const importSuccess = { created: [{ id: 'w-1', name: 'W1' } as WorkflowDetailDto], failed: [] };
 
     it('should call bulkCreateWorkflows with workflows and default overwrite when not specified', async () => {
@@ -266,13 +272,15 @@ describe('useWorkflowActions – import mutations', () => {
       const { result } = renderHook(() => useWorkflowActions(), { wrapper });
 
       act(() => {
-        result.current.importWorkflows.mutate({ workflows });
+        result.current.importWorkflows.mutate({ workflows, conflictIds: [] });
       });
 
       await waitFor(() => expect(result.current.importWorkflows.isSuccess).toBe(true));
 
       expect(mockWorkflowApi.bulkCreateWorkflows).toHaveBeenCalledWith({
-        workflows,
+        workflows: expect.arrayContaining([
+          expect.objectContaining({ id: 'w-1', yaml: 'name: Test' }),
+        ]),
         overwrite: undefined,
       });
     });
@@ -283,13 +291,15 @@ describe('useWorkflowActions – import mutations', () => {
       const { result } = renderHook(() => useWorkflowActions(), { wrapper });
 
       act(() => {
-        result.current.importWorkflows.mutate({ workflows, overwrite: true });
+        result.current.importWorkflows.mutate({ workflows, overwrite: true, conflictIds: [] });
       });
 
       await waitFor(() => expect(result.current.importWorkflows.isSuccess).toBe(true));
 
       expect(mockWorkflowApi.bulkCreateWorkflows).toHaveBeenCalledWith({
-        workflows,
+        workflows: expect.arrayContaining([
+          expect.objectContaining({ id: 'w-1', yaml: 'name: Test' }),
+        ]),
         overwrite: true,
       });
     });
@@ -300,7 +310,7 @@ describe('useWorkflowActions – import mutations', () => {
       const { result } = renderHook(() => useWorkflowActions(), { wrapper });
 
       act(() => {
-        result.current.importWorkflows.mutate({ workflows, generateNewIds: true });
+        result.current.importWorkflows.mutate({ workflows, generateNewIds: true, conflictIds: [] });
       });
 
       await waitFor(() => expect(result.current.importWorkflows.isSuccess).toBe(true));
@@ -308,9 +318,28 @@ describe('useWorkflowActions – import mutations', () => {
       const [{ workflows: sentWorkflows, overwrite }] =
         mockWorkflowApi.bulkCreateWorkflows.mock.calls[0];
       expect(sentWorkflows).toHaveLength(1);
-      expect(sentWorkflows[0].id).toMatch(/^workflow-/);
-      expect(sentWorkflows[0].id).not.toBe('w-1');
+      // No conflicts → generateNewIds keeps the original slug-derived ID unchanged
+      expect(sentWorkflows[0].id).toBe('w-1');
       expect(overwrite).toBeUndefined();
+    });
+
+    it('should postfix the ID when generateNewIds is true and the ID conflicts', async () => {
+      mockWorkflowApi.bulkCreateWorkflows.mockResolvedValueOnce(importSuccess);
+
+      const { result } = renderHook(() => useWorkflowActions(), { wrapper });
+
+      act(() => {
+        result.current.importWorkflows.mutate({
+          workflows,
+          generateNewIds: true,
+          conflictIds: [{ id: 'w-1', existingName: 'Existing' }],
+        });
+      });
+
+      await waitFor(() => expect(result.current.importWorkflows.isSuccess).toBe(true));
+
+      const [{ workflows: sentWorkflows }] = mockWorkflowApi.bulkCreateWorkflows.mock.calls[0];
+      expect(sentWorkflows[0].id).toBe('w-1-1');
     });
 
     it('should generate new IDs and send overwrite when both flags are true', async () => {
@@ -323,6 +352,7 @@ describe('useWorkflowActions – import mutations', () => {
           workflows,
           overwrite: true,
           generateNewIds: true,
+          conflictIds: [],
         });
       });
 
@@ -330,7 +360,8 @@ describe('useWorkflowActions – import mutations', () => {
 
       const [{ workflows: sentWorkflows, overwrite }] =
         mockWorkflowApi.bulkCreateWorkflows.mock.calls[0];
-      expect(sentWorkflows[0].id).toMatch(/^workflow-/);
+      // No conflicts → ID unchanged
+      expect(sentWorkflows[0].id).toBe('w-1');
       expect(overwrite).toBe(true);
     });
 
@@ -344,13 +375,16 @@ describe('useWorkflowActions – import mutations', () => {
           workflows,
           overwrite: false,
           generateNewIds: false,
+          conflictIds: [],
         });
       });
 
       await waitFor(() => expect(result.current.importWorkflows.isSuccess).toBe(true));
 
       expect(mockWorkflowApi.bulkCreateWorkflows).toHaveBeenCalledWith({
-        workflows,
+        workflows: expect.arrayContaining([
+          expect.objectContaining({ id: 'w-1', yaml: 'name: Test' }),
+        ]),
         overwrite: false,
       });
     });
@@ -362,7 +396,7 @@ describe('useWorkflowActions – import mutations', () => {
       const { result } = renderHook(() => useWorkflowActions(), { wrapper });
 
       act(() => {
-        result.current.importWorkflows.mutate({ workflows });
+        result.current.importWorkflows.mutate({ workflows, conflictIds: [] });
       });
 
       await waitFor(() => expect(result.current.importWorkflows.isSuccess).toBe(true));
@@ -381,7 +415,7 @@ describe('useWorkflowActions – import mutations', () => {
       const { result } = renderHook(() => useWorkflowActions(), { wrapper });
 
       act(() => {
-        result.current.importWorkflows.mutate({ workflows });
+        result.current.importWorkflows.mutate({ workflows, conflictIds: [] });
       });
 
       await waitFor(() => expect(result.current.importWorkflows.isError).toBe(true));
@@ -403,7 +437,7 @@ describe('useWorkflowActions – import mutations', () => {
       const { result } = renderHook(() => useWorkflowActions(), { wrapper });
 
       act(() => {
-        result.current.importWorkflows.mutate({ workflows });
+        result.current.importWorkflows.mutate({ workflows, conflictIds: [] });
       });
 
       await waitFor(() => expect(result.current.importWorkflows.isSuccess).toBe(true));
@@ -419,7 +453,7 @@ describe('useWorkflowActions – import mutations', () => {
       const { result } = renderHook(() => useWorkflowActions(), { wrapper });
 
       act(() => {
-        result.current.importWorkflows.mutate({ workflows });
+        result.current.importWorkflows.mutate({ workflows, conflictIds: [] });
       });
 
       await waitFor(() => expect(result.current.importWorkflows.isError).toBe(true));
@@ -432,7 +466,7 @@ describe('useWorkflowActions – import mutations', () => {
       const { result } = renderHook(() => useWorkflowActions(), { wrapper });
 
       act(() => {
-        result.current.importWorkflows.mutate({ workflows });
+        result.current.importWorkflows.mutate({ workflows, conflictIds: [] });
       });
 
       await waitFor(() => expect(result.current.importWorkflows.isError).toBe(true));
@@ -466,14 +500,15 @@ describe('useWorkflowActions – import mutations', () => {
       const { result } = renderHook(() => useWorkflowActions(), { wrapper });
 
       act(() => {
-        result.current.importWorkflows.mutate({ workflows });
+        result.current.importWorkflows.mutate({ workflows, conflictIds: [] });
       });
       await waitFor(() => expect(result.current.importWorkflows.isSuccess).toBe(true));
       expect(result.current.importWorkflows.data).toEqual(firstResponse);
 
       act(() => {
         result.current.importWorkflows.mutate({
-          workflows: [{ id: 'w-2', yaml: 'name: Second' }],
+          workflows: [{ id: 'w-2', originalId: 'w-2', yaml: 'name: Second' }],
+          conflictIds: [],
         });
       });
       await waitFor(() => expect(result.current.importWorkflows.data).toEqual(secondResponse));
@@ -495,9 +530,10 @@ describe('useWorkflowActions – import mutations', () => {
 
       const childYaml = 'name: Child\nsteps: []';
 
-      const workflowsWithRefs: { id: string; yaml: string }[] = [
-        { id: 'parent-1', yaml: parentYaml },
-        { id: 'child-1', yaml: childYaml },
+      // id = slug-of-name (import ID), originalId = persisted export ID (used in YAML references)
+      const workflowsWithRefs: Array<{ id: string; originalId: string; yaml: string }> = [
+        { id: 'parent', originalId: 'parent-1', yaml: parentYaml },
+        { id: 'child', originalId: 'child-1', yaml: childYaml },
       ];
 
       const { result } = renderHook(() => useWorkflowActions(), { wrapper });
@@ -506,6 +542,7 @@ describe('useWorkflowActions – import mutations', () => {
         result.current.importWorkflows.mutate({
           workflows: workflowsWithRefs,
           generateNewIds: true,
+          conflictIds: [],
         });
       });
 
@@ -513,20 +550,109 @@ describe('useWorkflowActions – import mutations', () => {
 
       const [{ workflows: sentWorkflows }] = mockWorkflowApi.bulkCreateWorkflows.mock.calls[0];
 
-      // Both workflows should have new IDs
-      const parentPayload = sentWorkflows.find(
-        (w: { id?: string; yaml: string }) => w.id !== 'parent-1' && w.yaml.includes('Parent')
+      // Both workflows should keep their slug-of-name IDs (no conflicts)
+      const parentPayload = sentWorkflows.find((w: { id?: string; yaml: string }) =>
+        w.yaml.includes('Parent')
       );
-      const childPayload = sentWorkflows.find(
-        (w: { id?: string; yaml: string }) => w.id !== 'child-1' && w.yaml.includes('Child')
+      const childPayload = sentWorkflows.find((w: { id?: string; yaml: string }) =>
+        w.yaml.includes('Child')
       );
 
       expect(parentPayload).toBeDefined();
       expect(childPayload).toBeDefined();
+      expect(parentPayload!.id).toBe('parent');
+      expect(childPayload!.id).toBe('child');
 
-      // The parent's YAML should reference the child's NEW id, not 'child-1'
-      expect(parentPayload!.yaml).toContain(childPayload!.id);
+      // The parent's YAML should reference the child's import ID ('child'), not the old 'child-1'
+      expect(parentPayload!.yaml).toContain('workflow-id: child');
       expect(parentPayload!.yaml).not.toContain('workflow-id: child-1');
+    });
+
+    it('should preserve references as-is without generateNewIds when IDs are conforming', async () => {
+      mockWorkflowApi.bulkCreateWorkflows.mockResolvedValueOnce(importSuccess);
+
+      const parentYaml = [
+        'name: Parent',
+        'steps:',
+        '  - name: call-child',
+        '    type: workflow.execute',
+        '    with:',
+        '      workflow-id: child-processor',
+      ].join('\n');
+
+      const childYaml = 'name: Child\nsteps: []';
+
+      // For conforming exports, originalId === id (export ID preserved)
+      const workflowsWithRefs: Array<{ id: string; originalId: string; yaml: string }> = [
+        { id: 'parent-workflow', originalId: 'parent-workflow', yaml: parentYaml },
+        { id: 'child-processor', originalId: 'child-processor', yaml: childYaml },
+      ];
+
+      const { result } = renderHook(() => useWorkflowActions(), { wrapper });
+
+      act(() => {
+        result.current.importWorkflows.mutate({
+          workflows: workflowsWithRefs,
+          conflictIds: [],
+        });
+      });
+
+      await waitFor(() => expect(result.current.importWorkflows.isSuccess).toBe(true));
+
+      const [{ workflows: sentWorkflows }] = mockWorkflowApi.bulkCreateWorkflows.mock.calls[0];
+
+      const parentPayload = sentWorkflows.find((w: { id?: string; yaml: string }) =>
+        w.yaml.includes('Parent')
+      );
+
+      expect(parentPayload).toBeDefined();
+      // References should be preserved unchanged — no rewriting needed
+      expect(parentPayload!.yaml).toContain('workflow-id: child-processor');
+      expect(parentPayload!.id).toBe('parent-workflow');
+    });
+
+    it('should rewrite references without generateNewIds only for legacy exports', async () => {
+      mockWorkflowApi.bulkCreateWorkflows.mockResolvedValueOnce(importSuccess);
+
+      const parentYaml = [
+        'name: Parent',
+        'steps:',
+        '  - name: call-child',
+        '    type: workflow.execute',
+        '    with:',
+        '      workflow-id: Old_Export_Id',
+      ].join('\n');
+
+      const childYaml = 'name: Child\nsteps: []';
+
+      // Legacy export: originalId differs from id because the old ID
+      // didn't conform to the new pattern and was regenerated to a slug.
+      const workflowsWithRefs: Array<{ id: string; originalId: string; yaml: string }> = [
+        { id: 'parent', originalId: 'Old_Parent_Id', yaml: parentYaml },
+        { id: 'child', originalId: 'Old_Export_Id', yaml: childYaml },
+      ];
+
+      const { result } = renderHook(() => useWorkflowActions(), { wrapper });
+
+      act(() => {
+        result.current.importWorkflows.mutate({
+          workflows: workflowsWithRefs,
+          conflictIds: [],
+        });
+      });
+
+      await waitFor(() => expect(result.current.importWorkflows.isSuccess).toBe(true));
+
+      const [{ workflows: sentWorkflows }] = mockWorkflowApi.bulkCreateWorkflows.mock.calls[0];
+
+      const parentPayload = sentWorkflows.find((w: { id?: string; yaml: string }) =>
+        w.yaml.includes('Parent')
+      );
+
+      expect(parentPayload).toBeDefined();
+      // The legacy reference should be rewritten from 'Old_Export_Id' to 'child'
+      expect(parentPayload!.yaml).toContain('workflow-id: child');
+      expect(parentPayload!.yaml).not.toContain('workflow-id: Old_Export_Id');
     });
   });
 
@@ -551,7 +677,7 @@ describe('useWorkflowActions – import mutations', () => {
           },
         ],
         workflowIds: ['w-1'],
-        rawWorkflows: [{ id: 'w-1', yaml: 'name: W' }],
+        rawWorkflows: [{ id: 'w-1', originalId: 'w-1', yaml: 'name: W' }],
       };
       const importResponse = {
         created: [{ id: 'w-1', name: 'W' } as WorkflowDetailDto],
@@ -573,7 +699,10 @@ describe('useWorkflowActions – import mutations', () => {
       expect(result.current.preflightImportWorkflows.data?.conflicts).toHaveLength(0);
 
       act(() => {
-        result.current.importWorkflows.mutate({ workflows: clientResult.rawWorkflows });
+        result.current.importWorkflows.mutate({
+          workflows: clientResult.rawWorkflows,
+          conflictIds: [],
+        });
       });
       await waitFor(() => expect(result.current.importWorkflows.isSuccess).toBe(true));
       expect(result.current.importWorkflows.data?.created).toHaveLength(1);
@@ -585,7 +714,9 @@ describe('useWorkflowActions – import mutations', () => {
       });
       expect(mockWorkflowApi.bulkCreateWorkflows).toHaveBeenCalledTimes(1);
       expect(mockWorkflowApi.bulkCreateWorkflows).toHaveBeenCalledWith({
-        workflows: clientResult.rawWorkflows,
+        workflows: expect.arrayContaining([
+          expect.objectContaining({ id: 'w-1', yaml: 'name: W' }),
+        ]),
         overwrite: undefined,
       });
     });
@@ -607,7 +738,7 @@ describe('useWorkflowActions – import mutations', () => {
           },
         ],
         workflowIds: ['w-1'],
-        rawWorkflows: [{ id: 'w-1', yaml: 'name: Existing Workflow' }],
+        rawWorkflows: [{ id: 'w-1', originalId: 'w-1', yaml: 'name: Existing Workflow' }],
       };
       const importResponse = {
         created: [{ id: 'w-1', name: 'Existing Workflow' } as WorkflowDetailDto],
@@ -634,12 +765,15 @@ describe('useWorkflowActions – import mutations', () => {
         result.current.importWorkflows.mutate({
           workflows: clientResult.rawWorkflows,
           overwrite: true,
+          conflictIds: [],
         });
       });
       await waitFor(() => expect(result.current.importWorkflows.isSuccess).toBe(true));
 
       expect(mockWorkflowApi.bulkCreateWorkflows).toHaveBeenCalledWith({
-        workflows: clientResult.rawWorkflows,
+        workflows: expect.arrayContaining([
+          expect.objectContaining({ id: 'w-1', yaml: 'name: Existing Workflow' }),
+        ]),
         overwrite: true,
       });
     });
@@ -661,7 +795,7 @@ describe('useWorkflowActions – import mutations', () => {
           },
         ],
         workflowIds: ['w-1'],
-        rawWorkflows: [{ id: 'w-1', yaml: 'name: W' }],
+        rawWorkflows: [{ id: 'w-1', originalId: 'w-1', yaml: 'name: W' }],
       };
 
       mockParseImportFile.mockResolvedValueOnce(clientResult);
@@ -677,7 +811,10 @@ describe('useWorkflowActions – import mutations', () => {
       await waitFor(() => expect(result.current.preflightImportWorkflows.isSuccess).toBe(true));
 
       act(() => {
-        result.current.importWorkflows.mutate({ workflows: clientResult.rawWorkflows });
+        result.current.importWorkflows.mutate({
+          workflows: clientResult.rawWorkflows,
+          conflictIds: [],
+        });
       });
       await waitFor(() => expect(result.current.importWorkflows.isError).toBe(true));
 
@@ -865,6 +1002,94 @@ describe('useWorkflowActions – import mutations', () => {
         expect.objectContaining({
           isBulkAction: true,
           bulkActionCount: 5,
+        })
+      );
+    });
+
+    it('should pass workflowDefinition to telemetry for enable/disable updates', async () => {
+      mockWorkflowApi.updateWorkflow.mockResolvedValueOnce(undefined as never);
+      const workflowDefinition = {
+        version: '1',
+        name: 'Test',
+        enabled: false,
+        triggers: [{ type: 'cases.created' }],
+        steps: [],
+      } as unknown as Partial<WorkflowYaml>;
+
+      const { result } = renderHook(() => useWorkflowActions(), { wrapper });
+
+      act(() => {
+        result.current.updateWorkflow.mutate({
+          id: 'wf-1',
+          workflow: { enabled: true },
+          workflowDefinition,
+        });
+      });
+
+      await waitFor(() => expect(result.current.updateWorkflow.isSuccess).toBe(true));
+
+      expect(mockTelemetry.reportWorkflowUpdated).toHaveBeenCalledWith(
+        expect.objectContaining({
+          workflowId: 'wf-1',
+          workflowDefinition,
+        })
+      );
+    });
+
+    it('should not pass workflowDefinition to telemetry when mutate omits it', async () => {
+      mockWorkflowApi.updateWorkflow.mockResolvedValueOnce(undefined as never);
+
+      const { result } = renderHook(() => useWorkflowActions(), { wrapper });
+
+      act(() => {
+        result.current.updateWorkflow.mutate({
+          id: 'wf-1',
+          workflow: { enabled: true },
+        });
+      });
+
+      await waitFor(() => expect(result.current.updateWorkflow.isSuccess).toBe(true));
+
+      const telemetryParams = mockTelemetry.reportWorkflowUpdated.mock.calls[0]?.[0];
+      expect(telemetryParams?.workflowDefinition).toBeUndefined();
+    });
+
+    it('reports hasCustomEventTrigger on list enable when workflowDefinition is provided', async () => {
+      const reportEvent = jest.fn();
+      const telemetryClient: TelemetryServiceClient = { reportEvent };
+      const realTelemetry = new WorkflowsBaseTelemetry(telemetryClient);
+      mockUseTelemetry.mockReturnValue(realTelemetry as unknown as ReturnType<typeof useTelemetry>);
+
+      mockWorkflowApi.updateWorkflow.mockResolvedValueOnce(undefined as never);
+
+      const workflowDefinition = {
+        version: '1',
+        name: 'Test',
+        enabled: false,
+        triggers: [{ type: 'cases.created' }],
+        steps: [],
+      } as unknown as Partial<WorkflowYaml>;
+
+      const { result } = renderHook(() => useWorkflowActions(), { wrapper });
+
+      act(() => {
+        result.current.updateWorkflow.mutate({
+          id: 'wf-1',
+          workflow: { enabled: true },
+          workflowDefinition,
+        });
+      });
+
+      await waitFor(() => expect(result.current.updateWorkflow.isSuccess).toBe(true));
+
+      expect(reportEvent).toHaveBeenCalledWith(
+        WorkflowLifecycleEventTypes.WorkflowEnabledStateChanged,
+        expect.objectContaining({
+          eventName: workflowEventNames[WorkflowLifecycleEventTypes.WorkflowEnabledStateChanged],
+          workflowId: 'wf-1',
+          enabled: true,
+          hasCustomEventTrigger: true,
+          origin: 'workflow_list',
         })
       );
     });

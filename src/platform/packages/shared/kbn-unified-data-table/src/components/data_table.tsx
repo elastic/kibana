@@ -77,6 +77,7 @@ import type {
   CustomGridColumnsConfiguration,
   DataGridPaginationMode,
   CustomBulkActions,
+  DocMap,
 } from '../types';
 import { getDisplayedColumns } from '../utils/columns';
 import { convertValueToString } from '../utils/convert_value_to_string';
@@ -130,6 +131,18 @@ export enum DataLoadingState {
   loading = 'loading',
   loadingMore = 'loadingMore',
   loaded = 'loaded',
+}
+
+export type RenderDocumentViewCallback = (
+  hit: DataTableRecord,
+  displayedRows: DataTableRecord[],
+  displayedColumns: string[],
+  columnsMeta?: DataTableColumnsMeta
+) => JSX.Element | undefined;
+
+export interface RenderDocumentViewMeta {
+  displayedRows: DataTableRecord[];
+  displayedColumns: string[];
 }
 
 /**
@@ -325,15 +338,17 @@ interface InternalUnifiedDataTableProps {
     data: DataPublicPluginStart;
   };
   /**
-   * Callback to render DocumentView when the document is expanded
+   * Accepts one of two types:
+   * - Callback to render the document view when a document is expanded
+   * - 'external' const to indicate the consumer will handle rendering
+   *   the doc view themselves when a document is expanded
    */
-  renderDocumentView?: (
-    hit: DataTableRecord,
-    displayedRows: DataTableRecord[],
-    displayedColumns: string[],
-    expandedDocSetter: (doc?: DataTableRecord, options?: { initialTabId?: string }) => void,
-    columnsMeta?: DataTableColumnsMeta
-  ) => JSX.Element | undefined;
+  renderDocumentView?: RenderDocumentViewCallback | 'external';
+  /**
+   * Callback to set associated metadata when rendering the document view,
+   * only used when {@link renderDocumentView} is set to `external`
+   */
+  setRenderDocumentViewMeta?: (meta: RenderDocumentViewMeta | undefined) => void;
   /**
    * Optional value for providing configuration setting for enabling to display the complex fields in the table. Default is true.
    */
@@ -409,6 +424,14 @@ interface InternalUnifiedDataTableProps {
    * An optional value for a custom number of the visible cell actions in the table. By default is up to 3.
    **/
   visibleCellActions?: number;
+  /**
+   * Total number of visible slots in the actions column, including the overflow
+   * menu button when it appears. Defaults to 2 (one inline control + one overflow menu).
+   *
+   * When the total number of controls is `visibleRowLeadingControls` or fewer,
+   * all render inline with no overflow menu.
+   */
+  visibleRowLeadingControls?: number;
   /**
    * Disable cell actions for the table.
    */
@@ -507,6 +530,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       onUpdateHeaderRowHeight,
       controlColumnIds = CONTROL_COLUMN_IDS_DEFAULT,
       rowAdditionalLeadingControls,
+      visibleRowLeadingControls,
       dataView,
       loadingState,
       onFilter,
@@ -546,6 +570,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       totalHits,
       onFetchMoreRecords,
       renderDocumentView,
+      setRenderDocumentViewMeta,
       setExpandedDoc,
       expandedDoc,
       configRowHeight,
@@ -587,14 +612,10 @@ const InternalUnifiedDataTable = React.forwardRef<
     const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
     const displayedColumns = getDisplayedColumns(columns, dataView);
     const defaultColumns = displayedColumns.includes('_source');
-    const docMap = useMemo(
-      () =>
-        new Map<string, { doc: DataTableRecord; docIndex: number }>(
-          rows?.map((row, docIndex) => [row.id, { doc: row, docIndex }]) ?? []
-        ),
+    const docMap = useMemo<DocMap>(
+      () => new Map(rows?.map((row, docIndex) => [row.id, { doc: row, docIndex }]) ?? []),
       [rows]
     );
-    const getDocById = useCallback((id: string) => docMap.get(id)?.doc, [docMap]);
     const selectedDocsState = useSelectedDocs(docMap);
     const {
       isDocSelected,
@@ -737,6 +758,40 @@ const InternalUnifiedDataTable = React.forwardRef<
       currentPageSize,
       currentPageIndex,
       changeCurrentPageIndex,
+    ]);
+
+    // When the document view is rendered externally, we need to provide some metadata
+    // to the consumer to allow them to properly render the doc viewer component
+    const prevRenderDocumentViewMeta = useRef<RenderDocumentViewMeta>();
+
+    useEffect(() => {
+      if (renderDocumentView !== 'external' || !setRenderDocumentViewMeta) {
+        prevRenderDocumentViewMeta.current = undefined;
+        return;
+      }
+
+      if (!expandedDoc) {
+        prevRenderDocumentViewMeta.current = undefined;
+        setRenderDocumentViewMeta(undefined);
+        return;
+      }
+
+      const prevMeta = prevRenderDocumentViewMeta.current;
+      const metaChanged =
+        prevMeta?.displayedColumns !== displayedColumns ||
+        prevMeta?.displayedRows !== displayedRows;
+
+      if (metaChanged) {
+        const nextMeta: RenderDocumentViewMeta = { displayedColumns, displayedRows };
+        setRenderDocumentViewMeta(nextMeta);
+        prevRenderDocumentViewMeta.current = nextMeta;
+      }
+    }, [
+      displayedColumns,
+      displayedRows,
+      expandedDoc,
+      renderDocumentView,
+      setRenderDocumentViewMeta,
     ]);
 
     const unifiedDataTableContextValue = useMemo<DataTableContext>(
@@ -1073,6 +1128,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         baseColumns: leadColumnsExtraContent,
         rowAdditionalLeadingControls,
         externalControlColumns,
+        visibleRowLeadingControls,
       });
       if (actionsColumn) {
         filteredLeadColumns.push(actionsColumn);
@@ -1086,6 +1142,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       externalControlColumns,
       getRowIndicator,
       rowAdditionalLeadingControls,
+      visibleRowLeadingControls,
     ]);
 
     const additionalControls = useMemo(() => {
@@ -1100,7 +1157,7 @@ const InternalUnifiedDataTable = React.forwardRef<
               <DataTableDocumentToolbarBtn
                 isPlainRecord={isPlainRecord}
                 isFilterActive={isFilterActive}
-                rows={rows!}
+                rows={displayedRows}
                 setIsFilterActive={setIsFilterActive}
                 selectedDocsState={selectedDocsState}
                 enableComparisonMode={enableComparisonMode}
@@ -1136,7 +1193,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       inTableSearchControl,
       isPlainRecord,
       isFilterActive,
-      rows,
+      displayedRows,
       selectedDocsState,
       enableComparisonMode,
       setIsFilterActive,
@@ -1376,6 +1433,7 @@ const InternalUnifiedDataTable = React.forwardRef<
                 ariaDescribedBy={randomId}
                 ariaLabelledBy={ariaLabelledBy}
                 dataView={dataView}
+                columnsMeta={columnsMeta}
                 isPlainRecord={isPlainRecord}
                 selectedFieldNames={visibleColumns}
                 selectedDocIds={docIdsInSelectionOrder}
@@ -1383,7 +1441,7 @@ const InternalUnifiedDataTable = React.forwardRef<
                 forceShowAllFields={defaultColumns}
                 showFullScreenButton={showFullScreenButton}
                 fieldFormats={fieldFormats}
-                getDocById={getDocById}
+                docMap={docMap}
                 replaceSelectedDocs={replaceSelectedDocs}
                 setIsCompareActive={setIsCompareActive}
               />
@@ -1455,13 +1513,8 @@ const InternalUnifiedDataTable = React.forwardRef<
           )}
           {canSetExpandedDoc &&
             expandedDoc &&
-            renderDocumentView!(
-              expandedDoc,
-              displayedRows,
-              displayedColumns,
-              setExpandedDoc!,
-              columnsMeta
-            )}
+            typeof renderDocumentView === 'function' &&
+            renderDocumentView(expandedDoc, displayedRows, displayedColumns, columnsMeta)}
         </span>
       </UnifiedDataTableContext.Provider>
     );

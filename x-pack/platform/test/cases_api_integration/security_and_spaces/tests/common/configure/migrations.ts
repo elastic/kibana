@@ -16,19 +16,67 @@ import {
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const es = getService('es');
 
   describe('migrations', () => {
     describe('7.13.2', () => {
+      // `cases-configure` and `cases-connector-mappings` are not importable via the standard SO
+      // import API, so we use kibanaServer.savedObjects.create with old migrationVersion to trigger
+      // DocumentMigrator (adds owner field, moves connector.id to references).
+      const CONFIGURE_ID = 'd95d5640-cf9d-11eb-a603-13e7747d215c';
+      const CONNECTOR_MAPPINGS_ID = 'd903c490-cf9d-11eb-a603-13e7747d215c';
+
       before(async () => {
-        await esArchiver.load('x-pack/platform/test/fixtures/es_archives/cases/migrations/7.13.2');
+        await kibanaServer.savedObjects.create({
+          type: 'cases-configure',
+          id: CONFIGURE_ID,
+          overwrite: true,
+          attributes: {
+            closure_type: 'close-by-user',
+            connector: {
+              fields: [],
+              id: 'd68508f0-cf9d-11eb-a603-13e7747d215c',
+              name: 'Test Jira',
+              type: '.jira',
+            },
+            created_at: '2021-06-17T18:57:21.091Z',
+            created_by: { email: null, full_name: 'j@j.com', username: '711621466' },
+            updated_at: null,
+            updated_by: null,
+          },
+          migrationVersion: { 'cases-configure': '7.10.0' },
+          references: [],
+        });
+        await kibanaServer.savedObjects.create({
+          type: 'cases-connector-mappings',
+          id: CONNECTOR_MAPPINGS_ID,
+          overwrite: true,
+          attributes: {
+            mappings: [
+              { action_type: 'overwrite', source: 'title', target: 'summary' },
+              { action_type: 'overwrite', source: 'description', target: 'description' },
+              { action_type: 'append', source: 'comments', target: 'comments' },
+            ],
+          },
+          migrationVersion: {},
+          references: [
+            {
+              id: 'd68508f0-cf9d-11eb-a603-13e7747d215c',
+              name: 'associated-action',
+              type: 'action',
+            },
+          ],
+        });
       });
 
       after(async () => {
-        await esArchiver.unload(
-          'x-pack/platform/test/fixtures/es_archives/cases/migrations/7.13.2'
-        );
+        await kibanaServer.savedObjects
+          .delete({ type: 'cases-configure', id: CONFIGURE_ID })
+          .catch(() => undefined);
+        await kibanaServer.savedObjects
+          .delete({ type: 'cases-connector-mappings', id: CONNECTOR_MAPPINGS_ID })
+          .catch(() => undefined);
       });
 
       describe('owner field', () => {

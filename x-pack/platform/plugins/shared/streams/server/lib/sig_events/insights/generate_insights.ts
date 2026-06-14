@@ -6,16 +6,18 @@
  */
 
 import type { BoundInferenceClient, ChatCompletionTokenCount } from '@kbn/inference-common';
-import { sumTokens } from '@kbn/streams-ai';
+import { EMPTY_TOKENS, sumTokens } from '@kbn/streams-ai';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { Streams } from '@kbn/streams-schema';
 import type { GenerateInsightsResult } from '@kbn/streams-schema';
 import type { LogMeta } from '@kbn/logging';
+import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
 import type { QueryClient } from '../../streams/assets/query/query_client';
 import type { StreamsClient } from '../../streams/client';
 import { getErrorMessage } from '../../streams/errors/parse_error';
-import { SummarizeQueriesPrompt } from './prompts/summarize_queries/prompt';
-import { SummarizeStreamsPrompt } from './prompts/summarize_streams/prompt';
+import { createSummarizeQueriesPrompt } from './prompts/summarize_queries/prompt';
+import { createSummarizeStreamsPrompt } from './prompts/summarize_streams/prompt';
+import { SUBMIT_INSIGHTS_TOOL_NAME } from './client/insight_tool';
 import { extractInsightsFromResponse, collectQueryData, type QueryData } from './utils';
 
 export async function generateInsights({
@@ -59,17 +61,15 @@ export async function generateInsights({
     })
   );
 
-  // Filter out streams with no insights
   const streamInsightsWithData = streamInsightsResults.filter(
     (result) => result.insights.length > 0
   );
 
   const tokensUsed = streamInsightsResults.reduce<ChatCompletionTokenCount>(
-    (acc, result) => sumTokens(acc, result.tokens_used),
-    { prompt: 0, completion: 0, total: 0 }
+    (acc, result) => sumTokens({ accumulated: acc, added: result.tokens_used }),
+    EMPTY_TOKENS
   );
 
-  // If no stream insights, return empty
   if (streamInsightsWithData.length === 0) {
     return {
       insights: [],
@@ -78,10 +78,23 @@ export async function generateInsights({
   }
 
   try {
-    const response = await inferenceClient.prompt({
-      prompt: SummarizeStreamsPrompt,
+    const prompt = createSummarizeStreamsPrompt({});
+
+    const response = await executeAsReasoningAgent({
+      prompt,
       input: {
         streamInsights: JSON.stringify(streamInsightsWithData),
+      },
+      inferenceClient,
+      maxSteps: 2,
+      finalToolChoice: { function: SUBMIT_INSIGHTS_TOOL_NAME },
+      toolCallbacks: {
+        [SUBMIT_INSIGHTS_TOOL_NAME]: async (toolCall) => ({
+          response: {
+            status: 'submitted',
+            count: (toolCall.function.arguments as { insights?: unknown[] })?.insights?.length,
+          },
+        }),
       },
       abortSignal: signal,
     });
@@ -90,7 +103,7 @@ export async function generateInsights({
 
     return {
       insights,
-      tokens_used: sumTokens(tokensUsed, response.tokens),
+      tokens_used: sumTokens({ accumulated: tokensUsed, added: response.tokens }),
     };
   } catch (error) {
     if (
@@ -136,22 +149,34 @@ async function generateStreamInsights({
     )
   );
 
-  // Filter out queries with no events
   const queryDataList = queryDataResults.filter((data): data is QueryData => data !== undefined);
 
   if (queryDataList.length === 0) {
     return {
       insights: [],
-      tokens_used: { prompt: 0, completion: 0, total: 0 },
+      tokens_used: EMPTY_TOKENS,
     };
   }
 
   try {
-    const response = await inferenceClient.prompt({
-      prompt: SummarizeQueriesPrompt,
+    const prompt = createSummarizeQueriesPrompt({});
+
+    const response = await executeAsReasoningAgent({
+      prompt,
       input: {
         streamName: stream.name,
         queries: JSON.stringify(queryDataList),
+      },
+      inferenceClient,
+      maxSteps: 2,
+      finalToolChoice: { function: SUBMIT_INSIGHTS_TOOL_NAME },
+      toolCallbacks: {
+        [SUBMIT_INSIGHTS_TOOL_NAME]: async (toolCall) => ({
+          response: {
+            status: 'submitted',
+            count: (toolCall.function.arguments as { insights?: unknown[] })?.insights?.length,
+          },
+        }),
       },
       abortSignal: signal,
     });
@@ -160,7 +185,7 @@ async function generateStreamInsights({
 
     return {
       insights,
-      tokens_used: response.tokens ?? { prompt: 0, completion: 0, total: 0 },
+      tokens_used: response.tokens ?? EMPTY_TOKENS,
     };
   } catch (error) {
     if (
@@ -172,7 +197,7 @@ async function generateStreamInsights({
       );
       return {
         insights: [],
-        tokens_used: { prompt: 0, completion: 0, total: 0 },
+        tokens_used: EMPTY_TOKENS,
       };
     }
 

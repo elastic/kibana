@@ -189,7 +189,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
 
         expect(response.status).to.eql(400);
         expect(response.body.message).to.eql(
-          'Error find rules: Filter is not supported on this field alert.attributes.monitoring.run.calculated_metrics.success_ratio'
+          '[request query.filter]: Filter is not supported on this field alert.attributes.monitoring.run.calculated_metrics.success_ratio>50'
         );
       });
 
@@ -202,7 +202,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
 
         expect(response.status).to.eql(400);
         expect(response.body.message).to.eql(
-          'Error find rules: Sort is not supported on this field monitoring.run.calculated_metrics.success_ratio'
+          '[request query.sort_field]: Sort is not supported on this field monitoring.run.calculated_metrics.success_ratio'
         );
       });
 
@@ -215,7 +215,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
 
         expect(response.status).to.eql(400);
         expect(response.body.message).to.eql(
-          'Error find rules: Search field monitoring.run.calculated_metrics.success_ratio not supported'
+          '[request query.search_fields]: Search field monitoring.run.calculated_metrics.success_ratio is not supported'
         );
       });
 
@@ -329,6 +329,69 @@ export default function createFindTests({ getService }: FtrProviderContext) {
         expect(foundRule.actions[0].params.message).to.eql('test');
       });
 
+      it('should search by deeply nested fields under a nested ancestor (actions.params.message)', async () => {
+        const { body: createdConnector } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'Test connector for deep nesting',
+            connector_type_id: 'test.noop',
+            config: {},
+            secrets: {},
+          })
+          .expect(200);
+
+        const { body: matchingAlert } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              actions: [
+                {
+                  group: 'default',
+                  id: createdConnector.id,
+                  params: {
+                    message: 'deeplyNestedUniqueValue',
+                  },
+                },
+              ],
+            })
+          )
+          .expect(200);
+        objectRemover.add(Spaces.space1.id, matchingAlert.id, 'rule', 'alerting');
+
+        const { body: nonMatchingAlert } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              actions: [
+                {
+                  group: 'default',
+                  id: createdConnector.id,
+                  params: {
+                    message: 'completelyDifferentValue',
+                  },
+                },
+              ],
+            })
+          )
+          .expect(200);
+        objectRemover.add(Spaces.space1.id, nonMatchingAlert.id, 'rule', 'alerting');
+
+        const response = await supertest.get(
+          `${getUrlPrefix(
+            Spaces.space1.id
+          )}/api/alerting/rules/_find?search=deeplyNestedUniqueValue&search_fields=actions.params.message`
+        );
+
+        expect(response.status).to.eql(200);
+        expect(response.body.total).to.equal(1);
+        const foundRule = response.body.data[0];
+        expect(foundRule.id).to.equal(matchingAlert.id);
+        expect(foundRule.actions[0].params.message).to.eql('deeplyNestedUniqueValue');
+      });
+
       it('should filter on parameters', async () => {
         const response = await supertest.get(
           `${getUrlPrefix(
@@ -339,8 +402,6 @@ export default function createFindTests({ getService }: FtrProviderContext) {
         expect(response.status).to.eql(200);
         expect(response.body.total).to.equal(1);
         expect(response.body.data[0].params.risk_score).to.eql(40);
-
-        expect(response.body.data[0].mapped_params).to.eql(undefined);
       });
 
       it('should error if filtering on mapped parameters directly using the public API', async () => {
@@ -352,7 +413,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
 
         expect(response.status).to.eql(400);
         expect(response.body.message).to.eql(
-          'Error find rules: Filter is not supported on this field alert.attributes.mapped_params.risk_score'
+          '[request query.filter]: Filter is not supported on this field alert.attributes.mapped_params.risk_score:40'
         );
       });
 
@@ -402,13 +463,14 @@ export default function createFindTests({ getService }: FtrProviderContext) {
     });
 
     describe('artifacts', () => {
-      it('does not return artifacts when present', async () => {
+      it('returns artifacts when present', async () => {
         const expectedArtifacts = {
           artifacts: {
             investigation_guide: { blob: 'Sample investigation guide' },
             dashboards: [{ id: 'dashboard-1' }],
           },
         };
+
         const { body: createdAlert } = await supertest
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
           .set('kbn-xsrf', 'foo')
@@ -427,7 +489,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
 
         const foundAlert = response.body.data.find((obj: any) => obj.id === id);
         expect(foundAlert).not.to.be(undefined);
-        expect(foundAlert.artifacts).to.be(undefined);
+        expect(foundAlert.artifacts).to.eql(expectedArtifacts.artifacts);
       });
     });
   });

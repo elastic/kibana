@@ -5,81 +5,66 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
-import type { KibanaRequest, KibanaResponseFactory, RouteSecurity } from '@kbn/core-http-server';
+import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
-import { Request, Response } from '@kbn/core-di-server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { z } from '@kbn/zod/v4';
-import { findRulesResponseSchema } from '@kbn/alerting-v2-schemas';
+import { Request } from '@kbn/core-di-server';
+import {
+  bulkGetRulesParamsSchema,
+  bulkGetRulesResponseSchema,
+  errorResponseSchema,
+} from '@kbn/alerting-v2-schemas';
+import type { BulkGetRulesParams } from '@kbn/alerting-v2-schemas';
 import { RulesClient } from '../../lib/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { ALERTING_V2_RULE_API_PATH } from '../constants';
-
-const getRulesBulkQuerySchema = z.object({
-  ids: z
-    .array(z.string().describe('A rule identifier.'))
-    .min(1)
-    .max(1000)
-    .optional()
-    .describe('A list of rule identifiers to retrieve.'),
-});
+import { BaseAlertingRoute } from '../base_alerting_route';
+import { AlertingRouteContext } from '../alerting_route_context';
 
 @injectable()
-export class BulkGetRulesRoute {
-  static method = 'get' as const;
-  static path = `${ALERTING_V2_RULE_API_PATH}/_bulk`;
+export class BulkGetRulesRoute extends BaseAlertingRoute {
+  static method = 'post' as const;
+  static path = `${ALERTING_V2_RULE_API_PATH}/_bulk_get`;
   static security: RouteSecurity = {
     authz: {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.rules.read],
     },
   };
-  static options = {
-    access: 'public',
+  static routeOptions = {
     summary: 'Get rules in bulk',
-    tags: ['oas-tag:alerting-v2'],
-    availability: { stability: 'experimental' },
   } as const;
-  static validate = {
+  static schemas = {
     request: {
-      query: buildRouteValidationWithZod(getRulesBulkQuerySchema),
+      body: bulkGetRulesParamsSchema,
     },
     response: {
       200: {
-        body: () => findRulesResponseSchema,
-        description: 'Indicates a successful call.',
+        body: () => bulkGetRulesResponseSchema,
+        description: 'Returns the requested rules.',
       },
       400: {
+        body: () => errorResponseSchema,
         description: 'Indicates an invalid schema or parameters.',
+      },
+      404: {
+        body: () => errorResponseSchema,
+        description: 'One or more rule ids could not be found.',
       },
     },
   };
 
-  constructor(
-    @inject(Request)
-    private readonly request: KibanaRequest<unknown, z.infer<typeof getRulesBulkQuerySchema>>,
-    @inject(Response) private readonly response: KibanaResponseFactory,
-    @inject(RulesClient) private readonly rulesClient: RulesClient
-  ) {}
+  protected readonly routeName = 'bulk get rules';
 
-  async handle() {
-    try {
-      const ids = this.request.query.ids ?? [];
-      const items = await this.rulesClient.getRules(ids);
-      return this.response.ok({
-        body: {
-          items,
-          total: items.length,
-          page: 1,
-          perPage: items.length,
-        },
-      });
-    } catch (e) {
-      const boom = Boom.isBoom(e) ? e : Boom.boomify(e);
-      return this.response.customError({
-        statusCode: boom.output.statusCode,
-        body: boom.output.payload,
-      });
-    }
+  constructor(
+    @inject(AlertingRouteContext) ctx: AlertingRouteContext,
+    @inject(Request)
+    private readonly request: KibanaRequest<unknown, unknown, BulkGetRulesParams>,
+    @inject(RulesClient) private readonly rulesClient: RulesClient
+  ) {
+    super(ctx);
+  }
+
+  protected async execute() {
+    const rules = await this.rulesClient.getRules(this.request.body.ids);
+    return this.ctx.response.ok({ body: { rules } });
   }
 }

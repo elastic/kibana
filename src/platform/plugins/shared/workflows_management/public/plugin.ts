@@ -7,26 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Subject } from 'rxjs';
-import {
-  type AppDeepLinkLocations,
-  type AppMountParameters,
-  AppStatus,
-  type AppUpdater,
-  type CoreSetup,
-  type CoreStart,
-  DEFAULT_APP_CATEGORIES,
-  type Plugin,
+import { filter, Subject, type Subscription } from 'rxjs';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
+import type {
+  AppDeepLinkLocations,
+  AppMountParameters,
+  AppUpdater,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PluginInitializerContext,
 } from '@kbn/core/public';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import {
-  WORKFLOWS_AI_AGENT_SETTING_ID,
-  WORKFLOWS_UI_SETTING_ID,
-} from '@kbn/workflows/common/constants';
+import type { Logger } from '@kbn/logging';
+import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows/common/constants';
+import { getWorkflowsCapabilities } from '@kbn/workflows-ui';
+import { AvailabilityService } from './common/lib/availability';
 import { TelemetryService } from './common/lib/telemetry/telemetry_service';
+import type { WorkflowsBaseTelemetry } from './common/service/telemetry';
 import { triggerSchemas } from './trigger_schemas';
 import type {
-  AgentBuilderPluginStartContract,
   WorkflowsPublicPluginSetup,
   WorkflowsPublicPluginSetupDependencies,
   WorkflowsPublicPluginStart,
@@ -34,10 +35,10 @@ import type {
   WorkflowsPublicPluginStartDependencies,
   WorkflowsServices,
 } from './types';
+import { getWorkflowsAppDeepLinks } from './workflows_app_deep_links';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { stepSchemas } from '../common/step_schemas';
-
-const VisibleIn: AppDeepLinkLocations[] = ['globalSearch', 'home', 'kibanaOverview', 'sideNav'];
+import type { WorkflowsManagementConfig } from '../server/config';
 
 export class WorkflowsPlugin
   implements
@@ -48,13 +49,22 @@ export class WorkflowsPlugin
       WorkflowsPublicPluginStartDependencies
     >
 {
+  private logger: Logger;
   private appUpdater$: Subject<AppUpdater>;
   private telemetryService: TelemetryService;
-  private agentBuilderPromise: Promise<AgentBuilderPluginStartContract | undefined> | undefined;
+  private cachedTelemetry: WorkflowsBaseTelemetry | null = null;
+  private availabilityService: AvailabilityService;
+  private agentBuilderPromise: Promise<AgentBuilderPluginStart | undefined> | undefined;
+  private settingsSubscription?: Subscription;
+  private appVisibilitySubscription?: Subscription;
+  private readonly pluginConfig: WorkflowsManagementConfig;
 
-  constructor() {
+  constructor(initializerContext: PluginInitializerContext) {
+    this.logger = initializerContext.logger.get('WorkflowsManagement');
     this.appUpdater$ = new Subject<AppUpdater>();
     this.telemetryService = new TelemetryService();
+    this.availabilityService = new AvailabilityService();
+    this.pluginConfig = initializerContext.config.get<WorkflowsManagementConfig>();
   }
 
   public setup(
@@ -65,8 +75,7 @@ export class WorkflowsPlugin
     this.telemetryService.setup({ analytics: core.analytics });
 
     // Check if workflows UI is enabled
-    const isWorkflowsUiEnabled = core.uiSettings.get<boolean>(WORKFLOWS_UI_SETTING_ID, false);
-
+    const isWorkflowsUiEnabled = core.uiSettings.get<boolean>(WORKFLOWS_UI_SETTING_ID, true);
     /* **************************************************************************************************************************** */
     /* WARNING: DO NOT ADD ANYTHING ABOVE THIS LINE, which can expose workflows UI to users who don't have the feature flag enabled */
     /* **************************************************************************************************************************** */
@@ -83,17 +92,20 @@ export class WorkflowsPlugin
 
     registerConnectorType();
 
-    this.setupAiIntegration(core);
+    this.setupAgentBuilderStart(core);
+
+    const initialExecutionsViewEnabled = this.pluginConfig.globalExecutionsView.enabled;
 
     core.application.register({
       id: PLUGIN_ID,
       title: PLUGIN_NAME,
       appRoute: '/app/workflows',
       euiIconType: 'workflowsApp',
-      visibleIn: VisibleIn,
-      category: DEFAULT_APP_CATEGORIES.management,
+      visibleIn: this.getVisibleIn({ isAuthorized: true, isAvailable: true }),
+      category: DEFAULT_APP_CATEGORIES.management, // Only for the classic navigation
       order: 9015,
       updater$: this.appUpdater$,
+      deepLinks: getWorkflowsAppDeepLinks(initialExecutionsViewEnabled),
       mount: async (params: AppMountParameters) => {
         // Load application bundle
         const { renderApp } = await import('./application');
@@ -107,58 +119,124 @@ export class WorkflowsPlugin
   }
 
   public start(
-    _core: CoreStart,
+    core: CoreStart,
     plugins: WorkflowsPublicPluginStartDependencies
   ): WorkflowsPublicPluginStart {
     // Initialize singletons with workflowsExtensions
     stepSchemas.initialize(plugins.workflowsExtensions);
     triggerSchemas.initialize(plugins.workflowsExtensions);
 
-    // License check to set app status
-    plugins.licensing.license$.subscribe((license) => {
-      if (license.isActive && license.hasAtLeast('enterprise')) {
-        this.appUpdater$.next(() => ({ status: AppStatus.accessible, visibleIn: VisibleIn }));
-      } else {
-        this.appUpdater$.next(() => ({ status: AppStatus.inaccessible, visibleIn: [] }));
-      }
-    });
+    this.subscribeToWorkflowsSettingChange(core);
 
-    return {};
+    // Availability service: set license and subscribe to availability for app visibility changes
+    this.availabilityService.setLicense$(plugins.licensing.license$);
+
+    this.subscribeAppVisibilityChanges(core);
+
+    return {
+      setUnavailableInServerlessTier: (options) => {
+        this.availabilityService.setUnavailableInServerlessTier(options.requiredProducts);
+      },
+      getTelemetry: async () => {
+        if (!this.cachedTelemetry) {
+          const { WorkflowsBaseTelemetry } = await import('./common/service/telemetry');
+          this.cachedTelemetry = new WorkflowsBaseTelemetry(this.telemetryService.getClient());
+        }
+        return this.cachedTelemetry;
+      },
+      getQueryClient: async () => {
+        const { queryClient } = await import('./shared/lib/query_client');
+        return queryClient;
+      },
+    };
   }
 
-  public stop() {}
+  public stop() {
+    this.settingsSubscription?.unsubscribe();
+    this.appVisibilitySubscription?.unsubscribe();
+    this.availabilityService.stop();
+  }
 
   /**
-   * Sets up AI authoring features: resolves the Agent Builder contract and
-   * registers workflow attachment renderers. Eagerly kicks off the dynamic
-   * import so the chunk downloads in parallel with onStart resolution,
-   * minimising the window where renderers are not yet registered.
+   * When the user disables workflows via Advanced Settings, bulk-disable all
+   * active workflows before the page reloads (requiresPageReload is set).
    */
-  private setupAiIntegration(
+  private subscribeToWorkflowsSettingChange(core: CoreStart): void {
+    this.settingsSubscription = core.settings.client
+      .getUpdate$()
+      .pipe(
+        filter(({ key, oldValue, newValue }) => {
+          return key === WORKFLOWS_UI_SETTING_ID && oldValue === true && newValue === false;
+        })
+      )
+      .subscribe(() => {
+        core.http.post('/internal/workflows/disable', { version: '1' }).catch((err) => {
+          this.logger.error('Failed to disable all workflows on opt-out', { error: err });
+        });
+      });
+  }
+
+  /**
+   * Subscribes to the availability change and updates the application visibility accordingly.
+   * @param core - The core start services.
+   */
+  private subscribeAppVisibilityChanges(core: CoreStart): void {
+    const capabilities = getWorkflowsCapabilities(core.application.capabilities);
+    const isAuthorized = capabilities.canReadWorkflow; // Read privilege is the minimum privilege required
+
+    this.appVisibilitySubscription = this.availabilityService
+      .getIsAvailable$()
+      .subscribe((isAvailable) => {
+        this.appUpdater$.next(() => ({
+          visibleIn: this.getVisibleIn({ isAuthorized, isAvailable }),
+        }));
+      });
+  }
+
+  /**
+   * Returns the visible locations for the workflows application based on the user's capabilities and availability.
+   * @param isAuthorized - Whether the user is authorized to access workflows UI.
+   * @param isAvailable - Whether the workflows application is available (license / tier).
+   * @returns The visible locations for the workflows application.
+   */
+  private getVisibleIn(params: {
+    isAuthorized: boolean;
+    isAvailable: boolean;
+  }): AppDeepLinkLocations[] {
+    // Not available takes precedence over authorized.
+    if (!params.isAvailable) {
+      // Remove generic locations, but keep in 'classicSideNav', 'projectSideNav' and globalSearch to make users aware of the feature.
+      return ['globalSearch', 'classicSideNav', 'projectSideNav'];
+    }
+    if (!params.isAuthorized) {
+      // Remove from 'classicSideNav', 'projectSideNav' so it does not use nav real estate, but keep in globalSearch to make it discoverable
+      return ['globalSearch'];
+    }
+    return ['globalSearch', 'home', 'kibanaOverview', 'classicSideNav', 'projectSideNav'];
+  }
+
+  /**
+   * Wires the agentBuilder start contract through `agentBuilderPromise` so the
+   * workflow YAML editor's `use_agent_builder_integration` hook can consume it via
+   * Kibana services. Renderer registration is handled by the agentBuilderWorkflows
+   * plugin.
+   */
+  private setupAgentBuilderStart(
     core: CoreSetup<WorkflowsPublicPluginStartDependencies, WorkflowsPublicPluginStart>
   ): void {
-    const isAiAgentEnabled = core.uiSettings.get<boolean>(WORKFLOWS_AI_AGENT_SETTING_ID, false);
-    if (!isAiAgentEnabled) {
-      return;
+    // `core.plugins.onStart` throws synchronously when the named plugin is not in the
+    // current build's dependency map — which happens when `agentBuilder` is disabled
+    // for the running solution/tier (e.g. serverless security essentials sets
+    // `xpack.agentBuilder.enabled: false`). The synchronous throw bypasses the
+    // promise `.catch`, so we wrap the call in try/catch and fall back to undefined.
+    try {
+      this.agentBuilderPromise = core.plugins
+        .onStart<{ agentBuilder: AgentBuilderPluginStart }>('agentBuilder')
+        .then(({ agentBuilder }) => (agentBuilder.found ? agentBuilder.contract : undefined))
+        .catch(() => undefined);
+    } catch {
+      this.agentBuilderPromise = Promise.resolve(undefined);
     }
-
-    const aiIntegrationModule = import('./features/ai_integration');
-
-    this.agentBuilderPromise = core.plugins
-      .onStart<{ agentBuilder: AgentBuilderPluginStartContract }>('agentBuilder')
-      .then(async ({ agentBuilder }) => {
-        if (agentBuilder.found) {
-          const [coreStart] = await core.getStartServices();
-          const { registerWorkflowAttachmentRenderers } = await aiIntegrationModule;
-          registerWorkflowAttachmentRenderers(agentBuilder.contract.attachments, {
-            core: coreStart,
-            telemetry: this.telemetryService.getClient(),
-          });
-          return agentBuilder.contract;
-        }
-        return undefined;
-      })
-      .catch(() => undefined);
   }
 
   /** Creates the start services to be used in the Kibana services context of the workflows application */
@@ -173,8 +251,10 @@ export class WorkflowsPlugin
     const additionalServices: WorkflowsPublicPluginStartAdditionalServices = {
       storage: new Storage(localStorage),
       workflowsManagement: {
+        availability: this.availabilityService,
         telemetry: this.telemetryService.getClient(),
         agentBuilder,
+        globalExecutionsView: this.pluginConfig.globalExecutionsView,
       },
     };
 

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-export * from './auth';
 export * from './rules';
 export * from './exception_list_and_item';
 export * from './alerts';

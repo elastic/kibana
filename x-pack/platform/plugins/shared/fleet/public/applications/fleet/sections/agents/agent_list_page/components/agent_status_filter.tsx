@@ -245,14 +245,13 @@ export const AgentStatusFilter: React.FC<{
         }
         isOpen={isStatusFilterOpen}
         closePopover={() => updateIsStatusFilterOpen(false)}
-        panelPaddingSize="none"
+        panelPaddingSize="s"
       >
         <EuiSelectable
           options={options}
           onChange={onOptionsChange}
           data-test-subj="agentList.agentStatusFilterOptions"
           listProps={{
-            paddingSize: 's',
             style: {
               minWidth: 140,
             },

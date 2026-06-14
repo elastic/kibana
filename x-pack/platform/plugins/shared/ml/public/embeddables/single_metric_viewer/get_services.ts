@@ -7,9 +7,11 @@
 
 import type { StartServicesAccessor } from '@kbn/core/public';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { MlPluginStart, MlStartDependencies } from '../../plugin';
 import type { MlDependencies } from '../../application/app';
 import { HttpService } from '../../application/services/http_service';
+import { mlUsageCollectionProvider } from '../../application/services/usage_collection';
 import { AnomalyExplorerChartsService } from '../../application/services/anomaly_explorer_charts_service';
 import type { SingleMetricViewerEmbeddableServices, SingleMetricViewerServices } from '../types';
 
@@ -18,7 +20,8 @@ import type { SingleMetricViewerEmbeddableServices, SingleMetricViewerServices }
  */
 export const getMlServices = async (
   coreStart: CoreStart,
-  pluginsStart: MlStartDependencies
+  pluginsStart: MlStartDependencies,
+  usageCollection?: UsageCollectionSetup
 ): Promise<SingleMetricViewerServices> => {
   const [
     { AnomalyDetectorService },
@@ -84,6 +87,7 @@ export const getMlServices = async (
     mlTimeSeriesSearchService,
     mlTimeSeriesExplorerService,
     toastNotificationService,
+    mlUsageCollection: mlUsageCollectionProvider(usageCollection),
   };
 };
 
@@ -91,10 +95,11 @@ export const getMlServices = async (
  * Provides the services required by the Single Metric Viewer Embeddable.
  */
 export const getServices = async (
-  getStartServices: StartServicesAccessor<MlStartDependencies, MlPluginStart>
+  getStartServices: StartServicesAccessor<MlStartDependencies, MlPluginStart>,
+  usageCollection?: UsageCollectionSetup
 ): Promise<SingleMetricViewerEmbeddableServices> => {
   const [coreStart, pluginsStart] = await getStartServices();
-  const mlServices = await getMlServices(coreStart, pluginsStart);
+  const mlServices = await getMlServices(coreStart, pluginsStart, usageCollection);
 
   return [coreStart, pluginsStart as MlDependencies, mlServices];
 };

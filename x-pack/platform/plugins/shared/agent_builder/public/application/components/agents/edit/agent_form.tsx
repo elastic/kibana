@@ -32,10 +32,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
 import {
-  filterToolsBySelection,
+  defaultAgentToolIds,
   hasAgentWriteAccess,
+  AGENT_BUILDER_UI_EBT,
   type AgentDefinition,
 } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -63,6 +65,11 @@ import { useExperimentalFeatures } from '../../../hooks/use_experimental_feature
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
 import { useCurrentUser } from '../../../hooks/agents/use_current_user';
+import {
+  getActivePlugins,
+  getActiveSkills,
+  getActiveTools,
+} from '../../../utils/tool_selection_utils';
 
 const BUTTON_IDS = {
   SAVE: 'save',
@@ -91,7 +98,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
   const { services } = useKibana();
   const isExperimentalFeaturesEnabled = useExperimentalFeatures();
   const { manageAgents, isAdmin } = useUiPrivileges();
-  const { currentUser } = useCurrentUser({ enabled: isExperimentalFeaturesEnabled });
+  const { currentUser } = useCurrentUser();
   const { navigateToAgentBuilderUrl } = useNavigation();
   const { docLinksService } = useAgentBuilderServices();
   // Resolve state updates before navigation to avoid triggering unsaved changes prompt
@@ -157,8 +164,6 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
 
   const canEditAgent = !manageAgents
     ? false
-    : !isExperimentalFeaturesEnabled
-    ? true
     : hasAgentWriteAccess({
         visibility: agentState?.visibility,
         owner: agentState?.created_by,
@@ -237,24 +242,27 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
     shouldPromptOnReplace: false,
   });
 
+  const enableElasticCapabilities = watch('configuration.enable_elastic_capabilities') ?? false;
+  const defaultToolIdSet = useMemo(() => new Set<string>(defaultAgentToolIds), []);
+
   const agentTools = watch('configuration.tools');
-  const activeToolsCount = useMemo(() => {
-    return filterToolsBySelection(tools, agentTools).length;
-  }, [tools, agentTools]);
+  const activeToolsCount = useMemo(
+    () =>
+      getActiveTools(tools, agentTools ?? [], enableElasticCapabilities, defaultToolIdSet).length,
+    [tools, agentTools, enableElasticCapabilities, defaultToolIdSet]
+  );
 
   const agentSkills = watch('configuration.skill_ids') as string[] | undefined;
-  const activeSkillsCount = useMemo(() => {
-    const ids = agentSkills ?? [];
-    const selectedIds = new Set(ids);
-    return skills.filter((skill) => selectedIds.has(skill.id)).length;
-  }, [skills, agentSkills]);
+  const activeSkillsCount = useMemo(
+    () => getActiveSkills(skills, agentSkills, enableElasticCapabilities).length,
+    [skills, agentSkills, enableElasticCapabilities]
+  );
 
   const agentPlugins = watch('configuration.plugin_ids') as string[] | undefined;
-  const activePluginsCount = useMemo(() => {
-    const ids = agentPlugins ?? [];
-    const selectedIds = new Set(ids);
-    return plugins.filter((plugin) => selectedIds.has(plugin.id)).length;
-  }, [plugins, agentPlugins]);
+  const activePluginsCount = useMemo(
+    () => getActivePlugins(plugins, agentPlugins, enableElasticCapabilities).length,
+    [plugins, agentPlugins, enableElasticCapabilities]
+  );
 
   const tabs = useMemo<EuiTabbedContentTab[]>(
     () => [
@@ -285,6 +293,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
             tools={tools}
             isLoading={isLoading}
             isFormDisabled={isFormDisabled || !canEditAgent}
+            areElasticCapabilitiesEnabled={enableElasticCapabilities}
           />
         ),
         append: (
@@ -300,34 +309,35 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
           </EuiNotificationBadge>
         ),
       },
+      {
+        id: 'skills',
+        name: i18n.translate('xpack.agentBuilder.agents.form.skillsTab', {
+          defaultMessage: 'Skills',
+        }),
+        content: (
+          <SkillsTab
+            control={control}
+            skills={skills}
+            isLoading={isLoading}
+            isFormDisabled={isFormDisabled || !manageAgents}
+            areElasticCapabilitiesEnabled={enableElasticCapabilities}
+          />
+        ),
+        append: (
+          <EuiNotificationBadge
+            color="subdued"
+            css={css`
+              block-size: 20px;
+              min-inline-size: ${euiTheme.size.l};
+              padding: 0 ${euiTheme.size.xs};
+            `}
+          >
+            {activeSkillsCount}
+          </EuiNotificationBadge>
+        ),
+      },
       ...(isExperimentalFeaturesEnabled
         ? [
-            {
-              id: 'skills',
-              name: i18n.translate('xpack.agentBuilder.agents.form.skillsTab', {
-                defaultMessage: 'Skills',
-              }),
-              content: (
-                <SkillsTab
-                  control={control}
-                  skills={skills}
-                  isLoading={isLoading}
-                  isFormDisabled={isFormDisabled || !manageAgents}
-                />
-              ),
-              append: (
-                <EuiNotificationBadge
-                  color="subdued"
-                  css={css`
-                    block-size: 20px;
-                    min-inline-size: ${euiTheme.size.l};
-                    padding: 0 ${euiTheme.size.xs};
-                  `}
-                >
-                  {activeSkillsCount}
-                </EuiNotificationBadge>
-              ),
-            },
             {
               id: 'plugins',
               name: i18n.translate('xpack.agentBuilder.agents.form.pluginsTab', {
@@ -339,6 +349,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
                   plugins={plugins}
                   isLoading={isLoading}
                   isFormDisabled={isFormDisabled || !manageAgents}
+                  areElasticCapabilitiesEnabled={enableElasticCapabilities}
                 />
               ),
               append: (
@@ -375,6 +386,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
       activePluginsCount,
       manageAgents,
       isExperimentalFeaturesEnabled,
+      enableElasticCapabilities,
     ]
   );
 
@@ -397,6 +409,11 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
           iconType="save"
           isLoading={submittingButtonId === BUTTON_IDS.SAVE}
           isDisabled={isSaveDisabled}
+          {...getEbtProps({
+            element: AGENT_BUILDER_UI_EBT.element.pageContent,
+            action: AGENT_BUILDER_UI_EBT.action.agentEdit.SAVE,
+            detail: AGENT_BUILDER_UI_EBT.entity.AGENT,
+          })}
         >
           {i18n.translate('xpack.agentBuilder.agents.form.saveButton', {
             defaultMessage: 'Save',
@@ -433,6 +450,11 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
           onClick={() =>
             navigateToAgentBuilderUrl(appPaths.agent.conversations.new({ agentId: editingAgentId }))
           }
+          {...getEbtProps({
+            element: AGENT_BUILDER_UI_EBT.element.pageContent,
+            action: AGENT_BUILDER_UI_EBT.action.agentEdit.CHAT,
+            detail: AGENT_BUILDER_UI_EBT.entity.AGENT,
+          })}
         >
           {i18n.translate('xpack.agentBuilder.agents.form.chatButton', {
             defaultMessage: 'Chat',
@@ -443,6 +465,11 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
           {...commonProps}
           isLoading={submittingButtonId === BUTTON_IDS.SAVE_AND_CHAT}
           onClick={handleSubmit(handleSaveAndChat)}
+          {...getEbtProps({
+            element: AGENT_BUILDER_UI_EBT.element.pageContent,
+            action: AGENT_BUILDER_UI_EBT.action.agentEdit.SAVE_AND_CHAT,
+            detail: AGENT_BUILDER_UI_EBT.entity.AGENT,
+          })}
         >
           {i18n.translate('xpack.agentBuilder.agents.form.saveAndChatButton', {
             defaultMessage: 'Save and chat',
@@ -491,7 +518,14 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
           })}
         </p>
         <EuiSpacer size="m" />
-        <EuiButton onClick={() => navigateToAgentBuilderUrl(appPaths.agents.list)}>
+        <EuiButton
+          onClick={() => navigateToAgentBuilderUrl(appPaths.agents.list)}
+          {...getEbtProps({
+            element: AGENT_BUILDER_UI_EBT.element.pageContent,
+            action: AGENT_BUILDER_UI_EBT.action.agentEdit.BACK_TO_LIST,
+            detail: AGENT_BUILDER_UI_EBT.entity.AGENT,
+          })}
+        >
           {i18n.translate('xpack.agentBuilder.agents.backToListButton', {
             defaultMessage: 'Back to agents list',
           })}
@@ -562,6 +596,11 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
                         defaultMessage: 'Learn more about agents in the documentation',
                       }
                     )}
+                    {...getEbtProps({
+                      element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                      action: AGENT_BUILDER_UI_EBT.action.agentEdit.LEARN_MORE_DOCS,
+                      detail: AGENT_BUILDER_UI_EBT.entity.AGENT,
+                    })}
                   >
                     {i18n.translate(
                       'xpack.agentBuilder.agents.form.settings.systemReferencesLearnMore',
@@ -599,17 +638,25 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
                         display="fill"
                         iconType="chevronSingleDown"
                         onClick={() => setAdditionalActionsMenuOpen((openState) => !openState)}
+                        {...getEbtProps({
+                          element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                          action: AGENT_BUILDER_UI_EBT.action.agentEdit.OPEN_MENU,
+                          detail: AGENT_BUILDER_UI_EBT.entity.AGENT,
+                        })}
                       />
                     }
                   >
                     <EuiContextMenuPanel
-                      size="s"
                       items={[
                         <EuiContextMenuItem
                           icon="comment"
-                          size="s"
                           disabled={isSaveDisabled}
                           onClick={handleSubmit(handleSaveAndChat)}
+                          {...getEbtProps({
+                            element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                            action: AGENT_BUILDER_UI_EBT.action.agentEdit.SAVE_AND_CHAT,
+                            detail: AGENT_BUILDER_UI_EBT.entity.AGENT,
+                          })}
                         >
                           {i18n.translate('xpack.agentBuilder.agents.form.saveAndChatButton', {
                             defaultMessage: 'Save and chat',
@@ -635,6 +682,11 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
                       })}
                       iconType="boxesVertical"
                       onClick={() => setContextMenuOpen(!isContextMenuOpen)}
+                      {...getEbtProps({
+                        element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                        action: AGENT_BUILDER_UI_EBT.action.agentEdit.OPEN_MENU,
+                        detail: AGENT_BUILDER_UI_EBT.entity.AGENT,
+                      })}
                     />
                   }
                   isOpen={isContextMenuOpen}
@@ -644,17 +696,20 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
                   zIndex={Number(euiTheme.levels.header) - 1}
                 >
                   <EuiContextMenuPanel
-                    size="s"
                     items={[
                       <EuiContextMenuItem
                         icon="copy"
-                        size="s"
                         onClick={() => {
                           setContextMenuOpen(false);
                           navigateToAgentBuilderUrl(appPaths.agents.new, {
                             [searchParamNames.sourceId]: editingAgentId,
                           });
                         }}
+                        {...getEbtProps({
+                          element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                          action: AGENT_BUILDER_UI_EBT.action.agentEdit.CLONE,
+                          detail: AGENT_BUILDER_UI_EBT.entity.AGENT,
+                        })}
                       >
                         {i18n.translate('xpack.agentBuilder.agents.form.cloneButton', {
                           defaultMessage: 'Clone',
@@ -662,7 +717,6 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
                       </EuiContextMenuItem>,
                       <EuiContextMenuItem
                         icon="trash"
-                        size="s"
                         css={css`
                           color: ${euiTheme.colors.textDanger};
                         `}
@@ -670,6 +724,11 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
                           setContextMenuOpen(false);
                           onDelete?.();
                         }}
+                        {...getEbtProps({
+                          element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                          action: AGENT_BUILDER_UI_EBT.action.agentEdit.DELETE,
+                          detail: AGENT_BUILDER_UI_EBT.entity.AGENT,
+                        })}
                       >
                         {i18n.translate('xpack.agentBuilder.agents.form.deleteButton', {
                           defaultMessage: 'Delete',
@@ -724,6 +783,11 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
               iconType="cross"
               color="text"
               onClick={handleCancel}
+              {...getEbtProps({
+                element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                action: AGENT_BUILDER_UI_EBT.action.agentEdit.CANCEL,
+                detail: AGENT_BUILDER_UI_EBT.entity.AGENT,
+              })}
             >
               {labels.agents.settings.cancelButtonLabel}
             </EuiButtonEmpty>

@@ -7,12 +7,16 @@
 import type { SignificantEventsGetResponse } from '@kbn/streams-schema';
 import {
   TaskStatus,
+  deriveQueryType,
   type SignificantEventsQueriesGenerationResult,
   type SignificantEventsQueriesGenerationTaskResult,
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod/v4';
+import { BUCKET_SIZE_PATTERN } from '../../../../lib/sig_events/helpers/fill_bucket_gaps';
 import { readSignificantEventsFromAlertsIndices } from '../../../../lib/sig_events/read_significant_events_from_alerts_indices';
+import { resolveAlertsSource } from '../../../utils/resolve_alerts_source';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
+import { searchModeSchema } from '../../../utils/search_mode';
 import {
   getSignificantEventsQueriesGenerationTaskId,
   SIGNIFICANT_EVENTS_QUERIES_GENERATION_TASK_TYPE,
@@ -35,12 +39,22 @@ const dateFromString = z.string().transform((input) => new Date(input));
 const sanitizeTaskResult = (
   result: SignificantEventsQueriesGenerationTaskResult
 ): SignificantEventsQueriesGenerationTaskResult => {
-  if ('queries' in result && result.queries.some((q) => q.esql.query === undefined)) {
+  if ('queries' in result && result.queries.some((q) => q.esql?.query === undefined)) {
     return { status: TaskStatus.Failed, error: 'Stale task result from a previous version.' };
+  }
+  if ('queries' in result) {
+    return {
+      ...result,
+      queries: result.queries.map((q) => ({
+        ...q,
+        type: deriveQueryType(q.esql.query),
+      })),
+    };
   }
   return result;
 };
 
+/** @deprecated Use GET /internal/streams/{name}/onboarding/_status instead. Will be removed in a follow-up. */
 const significantEventsQueriesGenerationStatusRoute = createServerRoute({
   endpoint: 'GET /internal/streams/{name}/significant_events/_status',
   params: z.object({
@@ -80,6 +94,7 @@ const significantEventsQueriesGenerationStatusRoute = createServerRoute({
   },
 });
 
+/** @deprecated Use POST /internal/streams/{name}/onboarding/_execute instead. Will be removed in a follow-up. */
 const significantEventsQueriesGenerationTaskRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{name}/significant_events/_task',
   params: z.object({
@@ -153,12 +168,16 @@ const readAllSignificantEventsRoute = createServerRoute({
     query: z.object({
       from: dateFromString.describe('Start of the time range'),
       to: dateFromString.describe('End of the time range'),
-      bucketSize: z.string().describe('Size of time buckets for aggregation'),
+      bucketSize: z
+        .string()
+        .regex(BUCKET_SIZE_PATTERN)
+        .describe('Size of time buckets for aggregation'),
       query: z.string().optional().describe('Query string to filter significant events queries'),
       streamNames: z
         .union([z.string().transform((val) => [val]), z.array(z.string())])
         .optional()
         .describe('Stream names to filter significant events'),
+      searchMode: searchModeSchema,
     }),
   }),
   options: {
@@ -177,14 +196,24 @@ const readAllSignificantEventsRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<SignificantEventsGetResponse> => {
-    const { queryClient, scopedClusterClient, licensing, uiSettingsClient } =
-      await getScopedClients({
-        request,
-      });
+    const {
+      getQueryClient,
+      getAlertingV2RulesClient,
+      scopedClusterClient,
+      licensing,
+      uiSettingsClient,
+    } = await getScopedClients({
+      request,
+    });
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    const { from, to, bucketSize, query, streamNames } = params.query;
+    const { from, to, bucketSize, query, streamNames, searchMode } = params.query;
 
+    const alertsSource = await resolveAlertsSource({
+      uiSettingsClient,
+      alertingV2RulesClient: await getAlertingV2RulesClient(),
+    });
+    const queryClient = await getQueryClient();
     return readSignificantEventsFromAlertsIndices(
       {
         from,
@@ -192,6 +221,8 @@ const readAllSignificantEventsRoute = createServerRoute({
         bucketSize,
         query,
         streamNames,
+        searchMode,
+        alertsSource,
       },
       { queryClient, scopedClusterClient }
     );

@@ -14,7 +14,7 @@ import { shareService } from '../../../services/kibana_services';
 import { showPublicUrlSwitch, ShowShareModal } from './show_share_modal';
 import type { AccessControlClient } from '@kbn/content-management-access-control-public';
 import type { SavedObjectAccessControl } from '@kbn/core/server';
-import { DEFAULT_DASHBOARD_STATE } from '../../../dashboard_api/default_dashboard_state';
+import { DEFAULT_DASHBOARD_STATE } from '../../../../common/default_dashboard_state';
 
 describe('showPublicUrlSwitch', () => {
   test('returns false if "dashboard_v2" app is not available', () => {
@@ -59,7 +59,7 @@ describe('showPublicUrlSwitch', () => {
 
 describe('ShowShareModal', () => {
   const dashboardBackupService = getDashboardBackupService();
-  const unsavedStateKeys = ['query', 'options', 'savedQuery', 'panels'] as Array<
+  const unsavedStateKeys = ['options', 'savedQuery', 'panels'] as Array<
     keyof DashboardLocatorParams
   >;
   const toggleShareMenuSpy = jest.spyOn(shareService!, 'toggleShareContextMenu');
@@ -118,7 +118,7 @@ describe('ShowShareModal', () => {
           },
         },
       ],
-      query: { query: 'bye', language: 'kuery' },
+      query: { expression: 'bye', language: 'kql' },
     };
     dashboardBackupService.getState = jest.fn().mockReturnValue(unsavedDashboardState);
     ShowShareModal(defaultShareModalProps);
@@ -133,6 +133,13 @@ describe('ShowShareModal', () => {
         (unsavedDashboardState as Partial<DashboardLocatorParams>)[key]
       );
     });
+    // Query in the locator params is in the storedQuery format
+    expect(shareLocatorParams.query).toMatchInlineSnapshot(`
+      Object {
+        "language": "kuery",
+        "query": "bye",
+      }
+    `);
     // Filters in the locator params are in the storedFilter format
     expect(shareLocatorParams.filters).toMatchInlineSnapshot(`
       Array [

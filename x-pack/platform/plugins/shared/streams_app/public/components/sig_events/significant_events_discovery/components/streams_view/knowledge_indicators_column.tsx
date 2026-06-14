@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { EuiText } from '@elastic/eui';
+import { EuiI18nNumber, EuiText } from '@elastic/eui';
 import { css } from '@emotion/css';
-import type { OnboardingResult, Streams, TaskResult } from '@kbn/streams-schema';
+import type { Streams, StreamsKIsOnboardingStatusResult } from '@kbn/streams-schema';
 import React from 'react';
 import { useStreamFeatures } from '../../../../../hooks/sig_events/use_stream_features';
 
 interface KnowledgeIndicatorsColumnProps {
   stream: Streams.all.Definition;
-  streamOnboardingResult?: TaskResult<OnboardingResult>;
+  streamOnboardingResult?: StreamsKIsOnboardingStatusResult;
 }
 
 export function KnowledgeIndicatorsColumn({
@@ -30,7 +30,7 @@ export function KnowledgeIndicatorsColumn({
         font-family: 'Roboto Mono', monospace;
       `}
     >
-      {features.length || '—'}
+      {features.length ? <EuiI18nNumber value={features.length} /> : '—'}
     </EuiText>
   );
 }

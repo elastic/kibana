@@ -240,7 +240,7 @@ exports[`Paginated Table Component rendering it renders the default load more ta
                 </th>
                 <th
                   class="euiTableHeaderCell emotion-euiTableHeaderCell"
-                  data-test-subj="tableHeaderCell_node.host.os_2"
+                  data-test-subj="tableHeaderCell_node.host.os.name_2"
                   role="columnheader"
                   scope="col"
                 >
@@ -249,15 +249,15 @@ exports[`Paginated Table Component rendering it renders the default load more ta
                   >
                     <span
                       class="eui-textTruncate"
-                      title="OS"
+                      title="Operating system"
                     >
-                      OS
+                      Operating system
                     </span>
                   </div>
                 </th>
                 <th
                   class="euiTableHeaderCell emotion-euiTableHeaderCell"
-                  data-test-subj="tableHeaderCell_node.host.version_3"
+                  data-test-subj="tableHeaderCell_node.host.os.version_3"
                   role="columnheader"
                   scope="col"
                 >
@@ -286,11 +286,7 @@ exports[`Paginated Table Component rendering it renders the default load more ta
                   <div
                     class="euiTableCellContent emotion-euiTableCellContent-wrapText"
                   >
-                    <span
-                      class="css-16x51zl-EmptyWrapper"
-                    >
-                      —
-                    </span>
+                    elrond.elstc.co
                   </div>
                 </td>
                 <td
@@ -299,11 +295,7 @@ exports[`Paginated Table Component rendering it renders the default load more ta
                   <div
                     class="euiTableCellContent emotion-euiTableCellContent-wrapText"
                   >
-                    <span
-                      class="css-16x51zl-EmptyWrapper"
-                    >
-                      —
-                    </span>
+                    2018-12-06T15:40:53.319Z
                   </div>
                 </td>
                 <td
@@ -312,11 +304,7 @@ exports[`Paginated Table Component rendering it renders the default load more ta
                   <div
                     class="euiTableCellContent emotion-euiTableCellContent-wrapText"
                   >
-                    <span
-                      class="css-16x51zl-EmptyWrapper"
-                    >
-                      —
-                    </span>
+                    Ubuntu
                   </div>
                 </td>
                 <td
@@ -325,11 +313,7 @@ exports[`Paginated Table Component rendering it renders the default load more ta
                   <div
                     class="euiTableCellContent emotion-euiTableCellContent-wrapText"
                   >
-                    <span
-                      class="css-16x51zl-EmptyWrapper"
-                    >
-                      —
-                    </span>
+                    18.04.1 LTS (Bionic Beaver)
                   </div>
                 </td>
               </tr>
@@ -342,11 +326,7 @@ exports[`Paginated Table Component rendering it renders the default load more ta
                   <div
                     class="euiTableCellContent emotion-euiTableCellContent-wrapText"
                   >
-                    <span
-                      class="css-16x51zl-EmptyWrapper"
-                    >
-                      —
-                    </span>
+                    siem-kibana
                   </div>
                 </td>
                 <td
@@ -355,11 +335,7 @@ exports[`Paginated Table Component rendering it renders the default load more ta
                   <div
                     class="euiTableCellContent emotion-euiTableCellContent-wrapText"
                   >
-                    <span
-                      class="css-16x51zl-EmptyWrapper"
-                    >
-                      —
-                    </span>
+                    2018-12-07T14:12:38.560Z
                   </div>
                 </td>
                 <td
@@ -368,11 +344,7 @@ exports[`Paginated Table Component rendering it renders the default load more ta
                   <div
                     class="euiTableCellContent emotion-euiTableCellContent-wrapText"
                   >
-                    <span
-                      class="css-16x51zl-EmptyWrapper"
-                    >
-                      —
-                    </span>
+                    Debian GNU/Linux
                   </div>
                 </td>
                 <td
@@ -381,11 +353,7 @@ exports[`Paginated Table Component rendering it renders the default load more ta
                   <div
                     class="euiTableCellContent emotion-euiTableCellContent-wrapText"
                   >
-                    <span
-                      class="css-16x51zl-EmptyWrapper"
-                    >
-                      —
-                    </span>
+                    9 (stretch)
                   </div>
                 </td>
               </tr>

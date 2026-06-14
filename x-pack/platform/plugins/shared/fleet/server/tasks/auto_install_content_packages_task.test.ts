@@ -6,13 +6,12 @@
  */
 
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
-import { coreMock } from '@kbn/core/server/mocks';
+import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { CoreSetup } from '@kbn/core/server';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import * as Registry from '../services/epm/registry';
 
@@ -248,6 +247,57 @@ describe('AutoInstallContentPackagesTask', () => {
 
       expect(packageClientMock.installPackage).not.toHaveBeenCalled();
       expect(dataStreamService.getAllFleetDataStreams).not.toHaveBeenCalled();
+    });
+
+    it('should not downgrade package when a newer prerelease version is installed', async () => {
+      // Registry has 1.1.0, but a prerelease 2.0.0-preview is already installed.
+      // The task must not downgrade to 1.1.0.
+      mockGetInstalledPackages.mockResolvedValue({
+        items: [
+          {
+            name: 'kubernetes_otel',
+            version: '2.0.0-preview',
+          },
+          {
+            name: 'test_package',
+            version: '2.0.0-preview',
+          },
+        ],
+      });
+
+      await runTask();
+
+      expect(packageClientMock.installPackage).not.toHaveBeenCalled();
+    });
+
+    it('should not downgrade one package while upgrading another', async () => {
+      // kubernetes_otel has a prerelease installed (must not downgrade),
+      // test_package has an older version installed (must upgrade).
+      mockGetInstalledPackages.mockResolvedValue({
+        items: [
+          {
+            name: 'kubernetes_otel',
+            version: '2.0.0-preview',
+          },
+          {
+            name: 'test_package',
+            version: '1.0.0',
+          },
+        ],
+      });
+
+      await runTask();
+
+      expect(packageClientMock.installPackage).toHaveBeenCalledTimes(1);
+      expect(packageClientMock.installPackage).toHaveBeenCalledWith({
+        pkgName: 'test_package',
+        pkgVersion: '1.1.0',
+        useStreaming: true,
+        automaticInstall: true,
+      });
+      expect(packageClientMock.installPackage).not.toHaveBeenCalledWith(
+        expect.objectContaining({ pkgName: 'kubernetes_otel' })
+      );
     });
   });
 });

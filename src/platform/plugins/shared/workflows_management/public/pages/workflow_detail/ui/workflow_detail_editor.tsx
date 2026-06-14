@@ -19,6 +19,7 @@ import {
   WORKFLOWS_UI_EXECUTION_GRAPH_SETTING_ID,
   WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID,
 } from '@kbn/workflows';
+import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { useContextOverrideData } from './use_context_override_data';
 import { WorkflowDetailConnectorFlyout } from './workflow_detail_connector_flyout';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
@@ -58,10 +59,15 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
   const { runIndividualStep } = useWorkflowActions();
   const { notifications } = useKibana().services;
   const { setSelectedExecution } = useWorkflowUrlState();
+  const { canExecuteWorkflow } = useWorkflowsCapabilities();
 
   const handleStepRun = useCallback(
     async (params: { stepId: string; actionType: string }) => {
       if (params.actionType !== 'run') {
+        return;
+      }
+
+      if (!canExecuteWorkflow) {
         return;
       }
 
@@ -103,6 +109,7 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
       setSelectedExecution,
       dispatch,
       notifications.toasts,
+      canExecuteWorkflow,
     ]
   );
 

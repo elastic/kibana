@@ -144,7 +144,7 @@ interface FormValues {
     enabled: boolean;
     description?: string;
     owner?: string;
-    labels?: string[];
+    tags?: string[];
   };
   timeField: string;
   schedule: {

@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { RiskScoreDataClient } from '../../risk_score/risk_score_data_client';
 import type { LeadGenerationMode } from '../../../../../common/entity_analytics/lead_generation/constants';
 import { getLeadsIndexName } from '../../../../../common/entity_analytics/lead_generation/constants';
@@ -22,6 +23,7 @@ interface LeadGenerationServiceDeps {
   readonly spaceId: string;
   readonly fetchEntities: () => Promise<LeadEntity[]>;
   readonly riskScoreDataClient: RiskScoreDataClient;
+  readonly chatModel: InferenceChatModel;
 }
 
 export interface GenerateResult {
@@ -35,6 +37,7 @@ export const createLeadGenerationService = ({
   spaceId,
   fetchEntities,
   riskScoreDataClient,
+  chatModel,
 }: LeadGenerationServiceDeps) => ({
   async generate(mode: LeadGenerationMode, executionId: string): Promise<GenerateResult> {
     const routeStart = Date.now();
@@ -63,7 +66,7 @@ export const createLeadGenerationService = ({
     );
 
     const generateStart = Date.now();
-    const leads = await engine.generateLeads(leadEntities);
+    const leads = await engine.generateLeads(leadEntities, { chatModel });
     logger.debug(
       `[LeadGeneration] Engine pipeline: ${Date.now() - generateStart}ms (${leads.length} leads)`
     );

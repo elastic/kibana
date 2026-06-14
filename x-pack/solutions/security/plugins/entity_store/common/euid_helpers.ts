@@ -75,10 +75,16 @@ export const euid = {
     getEuidEvaluation: euidModule.getEuidEsqlEvaluation,
 
     /**
-     * ESQL predicate that locates documents matching one sample document’s identity (mirrors per-doc DSL).
+     * ESQL predicate that locates documents matching one sample document's identity (mirrors per-doc DSL).
      * Input: entity type and sample document; output: parenthesized boolean expression or `undefined` if not buildable.
      */
     getEuidFilterBasedOnDocument: euidModule.getEuidEsqlFilterBasedOnDocument,
+
+    /**
+     * Returns the ESQL `EVAL` expressions for field evaluations (e.g. entity.namespace derivation).
+     * Input: entity type. Output: ESQL expression string for `EVAL`, or `undefined` if none defined.
+     */
+    getFieldEvaluations: euidModule.getFieldEvaluationsEsql,
   },
 
   /**
@@ -96,6 +102,13 @@ export const euid = {
      * Input: entity type only. Output: query DSL equivalent to documentsFilter (and postAgg when defined).
      */
     getEuidDocumentsContainsIdFilter: euidModule.getEuidDslDocumentsContainsIdFilter,
+  },
+  kql: {
+    /**
+     * KQL that should match documents sharing the same identity fields as the given sample document.
+     * Input: entity type and one document; output: KQL, or `undefined` if identity or pipeline gate fails.
+     */
+    getEuidFilterBasedOnDocument: euidModule.getEuidKqlFilterBasedOnDocument,
   },
 };
 

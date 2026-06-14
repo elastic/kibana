@@ -1,6 +1,6 @@
 ---
 name: activate-connector
-description: Creates a connector instance in a running Kibana by calling the Actions API. When agentBuilder:connectorsEnabled is on, this also auto-creates workflows and AI tools. Use when asked to activate, connect, enable, or instantiate a connector in Kibana.
+description: Creates a connector instance in a running Kibana. Use when asked to activate, connect, enable, or instantiate a connector in Kibana.
 allowed-tools: Bash, Read, Glob, Grep
 argument-hint: [connector-type]
 ---
@@ -9,9 +9,7 @@ argument-hint: [connector-type]
 
 This skill creates a live connector instance in a running Kibana by calling the Actions API. The user wants to activate a **$ARGUMENTS** connector.
 
-When `agentBuilder:connectorsEnabled` is enabled in Kibana, creating a connector automatically:
-- Creates workflows from the connector spec's `agentBuilderWorkflows`
-- Creates Agent Builder tools for workflows tagged `agent-builder-tool`
+When `agentBuilder:experimentalFeatures` is enabled, creating a connector automatically indexes it into the Semantic Metadata Layer (SML), making its sub-actions discoverable by AI agents.
 
 **CRITICAL: Never read, log, or display the contents of any credentials file. Credentials must only flow through the bundled scripts.**
 
@@ -146,5 +144,5 @@ Show the user the newly created connector entry. If it appears, report success. 
 - **Auto-detection** tries http/https on localhost:5601 with both `elastic:changeme` (standard) and `elastic_serverless:changeme` (serverless) credentials
 - **Credentials are never seen by Claude** — they flow through the file -> script -> API pipeline only
 - **The credentials file is deleted immediately** after the script reads it
-- **Workflows and tools are auto-created** when `agentBuilder:connectorsEnabled` is true in Kibana settings
+- **Connector sub-actions become available to agents** when `agentBuilder:experimentalFeatures` is true in Kibana settings
 - To override auto-detection, set `KIBANA_URL` and/or `KIBANA_AUTH` environment variables, or pass `--kibana-url` to the scripts

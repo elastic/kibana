@@ -5,11 +5,25 @@
  * 2.0.
  */
 
-import type { Logger, Plugin, CoreSetup, PluginInitializerContext } from '@kbn/core/server';
+import type {
+  Logger,
+  Plugin,
+  CoreSetup,
+  PluginInitializerContext,
+  CustomRequestHandlerContext,
+} from '@kbn/core/server';
 import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
+import type {
+  PluginSetupContract as ActionsPluginSetup,
+  ActionsApiRequestHandlerContext,
+} from '@kbn/actions-plugin/server';
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { getService, register as registerDataService } from './data';
 import { createHealthRoute, createConfigRoute } from './routes';
+
+type TriggersActionsUiRequestHandlerContext = CustomRequestHandlerContext<{
+  actions: ActionsApiRequestHandlerContext;
+}>;
 
 const BASE_TRIGGERS_ACTIONS_UI_API_PATH = '/internal/triggers_actions_ui';
 
@@ -20,6 +34,7 @@ export interface PluginStartContract {
 interface PluginsSetup {
   encryptedSavedObjects?: EncryptedSavedObjectsPluginSetup;
   alerting: AlertingServerSetup;
+  actions: ActionsPluginSetup;
 }
 
 interface TriggersActionsPluginStart {
@@ -40,6 +55,7 @@ export class TriggersActionsPlugin implements Plugin<void, PluginStartContract> 
     plugins: PluginsSetup
   ): void {
     const router = core.http.createRouter();
+    const typedRouter = core.http.createRouter<TriggersActionsUiRequestHandlerContext>();
     registerDataService({
       logger: this.logger,
       data: this.data,
@@ -49,7 +65,7 @@ export class TriggersActionsPlugin implements Plugin<void, PluginStartContract> 
 
     createHealthRoute(
       this.logger,
-      router,
+      typedRouter,
       BASE_TRIGGERS_ACTIONS_UI_API_PATH,
       plugins.alerting !== undefined
     );

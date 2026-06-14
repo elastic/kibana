@@ -9,7 +9,6 @@
 import type {
   ESQLAstJoinCommand,
   ESQLAstAllCommands,
-  ESQLMessage,
   ESQLProperNode,
   ESQLSource,
   ESQLIdentifier,
@@ -21,6 +20,7 @@ import type { ICommandCallbacks, ICommandContext } from '../types';
 import { errors } from '../../definitions/utils/errors';
 import { validateCommandArguments } from '../../definitions/utils/validation';
 import { getOnOption } from './utils';
+import type { ESQLMessage } from '../../definitions/types';
 
 export const validate = (
   command: ESQLAstAllCommands,

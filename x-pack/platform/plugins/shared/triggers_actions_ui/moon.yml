@@ -18,6 +18,7 @@ project:
   sourceRoot: x-pack/platform/plugins/shared/triggers_actions_ui
 dependsOn:
   - '@kbn/core'
+  - '@kbn/human-readable-id'
   - '@kbn/alerting-plugin'
   - '@kbn/features-plugin'
   - '@kbn/rule-registry-plugin'
@@ -77,6 +78,7 @@ dependsOn:
   - '@kbn/charts-theme'
   - '@kbn/rrule'
   - '@kbn/core-notifications-browser-mocks'
+  - '@kbn/core-spaces-common'
   - '@kbn/response-ops-rule-params'
   - '@kbn/response-ops-rules-apis'
   - '@kbn/fields-metadata-plugin'
@@ -102,6 +104,10 @@ dependsOn:
   - '@kbn/cps-utils'
   - '@kbn/cps'
   - '@kbn/security-plugin'
+  - '@kbn/std'
+  - '@kbn/lens-common'
+  - '@kbn/inspector-plugin'
+  - '@kbn/connector-specs'
 tags:
   - plugin
   - prod

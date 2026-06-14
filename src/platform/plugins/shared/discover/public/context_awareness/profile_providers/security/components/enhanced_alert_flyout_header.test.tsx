@@ -53,7 +53,13 @@ describe('EnhancedAlertFlyoutHeader', () => {
       </IntlProvider>
     );
 
-    expect(renderHeaderFeature).toHaveBeenCalledWith(hit);
+    expect(renderHeaderFeature).toHaveBeenCalledWith(
+      expect.objectContaining({
+        hit,
+        dataView: dataViewMock,
+        onAlertUpdated: expect.any(Function),
+      })
+    );
     expect(screen.getByText('Header')).toBeInTheDocument();
   });
 

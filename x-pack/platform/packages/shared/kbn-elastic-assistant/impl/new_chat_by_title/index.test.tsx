@@ -9,7 +9,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { BUTTON_ICON_TEST_ID, BUTTON_TEST_ID, BUTTON_TEXT_TEST_ID, NewChatByTitle } from '.';
+import { BUTTON_TEST_ID, BUTTON_TEXT_TEST_ID, NewChatByTitle } from '.';
 
 const testProps = {
   showAssistantOverlay: jest.fn(),
@@ -21,18 +21,20 @@ describe('NewChatByTitle', () => {
   });
 
   it('should render icon only by default', () => {
-    const { getByTestId, queryByTestId } = render(<NewChatByTitle {...testProps} />);
+    const { getByTestId, queryByTestId, getByRole } = render(<NewChatByTitle {...testProps} />);
 
     expect(getByTestId(BUTTON_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(BUTTON_ICON_TEST_ID)).toBeInTheDocument();
+    expect(getByRole('button', { name: 'Ask AI Assistant' })).toBeInTheDocument();
     expect(queryByTestId(BUTTON_TEXT_TEST_ID)).not.toBeInTheDocument();
   });
 
   it('should render the button with icon and text', () => {
-    const { getByTestId } = render(<NewChatByTitle {...testProps} text={'Ask AI Assistant'} />);
+    const { getByTestId, getByRole } = render(
+      <NewChatByTitle {...testProps} text={'Ask AI Assistant'} />
+    );
 
     expect(getByTestId(BUTTON_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(BUTTON_ICON_TEST_ID)).toBeInTheDocument();
+    expect(getByRole('button', { name: 'Ask AI Assistant' })).toBeInTheDocument();
     expect(getByTestId(BUTTON_TEXT_TEST_ID)).toHaveTextContent('Ask AI Assistant');
   });
 

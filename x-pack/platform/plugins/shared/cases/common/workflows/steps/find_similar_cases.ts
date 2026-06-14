@@ -47,7 +47,7 @@ export const findSimilarCasesStepCommonDefinition: CommonStepDefinition<
   FindSimilarCasesStepOutputSchema
 > = {
   id: FindSimilarCasesStepTypeId,
-  category: StepCategory.Kibana,
+  category: StepCategory.KibanaCases,
   label: i18n.FIND_SIMILAR_CASES_STEP_LABEL,
   description: i18n.FIND_SIMILAR_CASES_STEP_DESCRIPTION,
   documentation: {

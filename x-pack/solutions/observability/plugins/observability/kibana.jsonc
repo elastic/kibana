@@ -57,7 +57,8 @@
       "serverless",
       "observabilityAIAssistant",
       "investigate",
-      "cps"
+      "cps",
+      "ingestHub"
     ],
     "requiredBundles": [
       "aiops",
@@ -69,7 +70,6 @@
       "kibanaReact",
       "kibanaUtils",
       "stackAlerts",
-      "spaces",
       "observabilityAgentBuilder"
     ],
     "extraPublicDirs": ["common"]

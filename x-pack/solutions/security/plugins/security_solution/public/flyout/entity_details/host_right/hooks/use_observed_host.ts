@@ -6,26 +6,25 @@
  */
 
 import { useMemo } from 'react';
-import { useSelector } from 'react-redux';
+import deepmerge from 'deepmerge';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { inputsSelectors, sourcererSelectors } from '../../../../common/store';
+import type { inputsModel } from '../../../../common/store';
+import { inputsSelectors } from '../../../../common/store';
 import { useHostDetails } from '../../../../explore/hosts/containers/hosts/details';
 import { useFirstLastSeen } from '../../../../common/containers/use_first_last_seen';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import type { HostItem } from '../../../../../common/search_strategy';
 import { Direction, NOT_EVENT_KIND_ASSET_FILTER } from '../../../../../common/search_strategy';
-import { HOST_PANEL_OBSERVED_HOST_QUERY_ID, HOST_PANEL_RISK_SCORE_QUERY_ID } from '..';
-import type { inputsModel } from '../../../../common/store';
+import { HOST_PANEL_OBSERVED_HOST_QUERY_ID, HOST_PANEL_RISK_SCORE_QUERY_ID } from '../constants';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import type { InspectResponse } from '../../../../types';
 import type {
-  EntityStoreRecord,
   EntityFromStoreResult,
+  EntityStoreRecord,
 } from '../../shared/hooks/use_entity_from_store';
 import type { ObservedEntityData } from '../../shared/components/observed_entity/types';
 import { isActiveTimeline } from '../../../../helpers';
 import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 export type ObservedHostResult = Omit<ObservedEntityData<HostItem>, 'anomalies'> & {
   entityRecord?: EntityStoreRecord | null;
@@ -49,15 +48,8 @@ export const useObservedHost = (
   const { to, from } = isActiveTimelines ? timelineTime : globalTime;
   const { isInitializing, setQuery, deleteQuery } = globalTime;
 
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const oldSecurityDefaultPatterns =
-    useSelector(sourcererSelectors.defaultDataView)?.patternList ?? [];
-  const { indexPatterns: experimentalSecurityDefaultIndexPatterns } = useSecurityDefaultPatterns();
-  const securityDefaultPatterns = newDataViewPickerEnabled
-    ? experimentalSecurityDefaultIndexPatterns
-    : oldSecurityDefaultPatterns;
+  const { indexPatterns } = useSecurityDefaultPatterns();
 
-  // Same as useObservedUser: use entity-store observed fields only when a store record exists.
   const useEntityStoreObservedData = Boolean(
     entityFromStore?.entityRecord ?? entityFromStore?.entity
   );
@@ -65,28 +57,27 @@ export const useObservedHost = (
   const [isLoading, { hostDetails, inspect: inspectObservedHost, refetch: refetchHostDetails }] =
     useHostDetails({
       endDate: to,
-      startDate: from,
       hostName,
-      indexNames: securityDefaultPatterns,
+      entityId: useEntityStoreObservedData ? entityFromStore?.entityRecord?.entity?.id : undefined,
+      indexNames: indexPatterns,
       id: HOST_PANEL_RISK_SCORE_QUERY_ID,
-      skip: isInitializing || useEntityStoreObservedData,
+      skip: isInitializing,
+      startDate: from,
     });
 
   useQueryInspector({
     deleteQuery,
-    inspect: useEntityStoreObservedData ? entityFromStore?.inspect : inspectObservedHost,
-    loading: useEntityStoreObservedData ? entityFromStore?.isLoading ?? false : isLoading,
+    inspect: inspectObservedHost,
+    loading: isLoading,
     queryId: HOST_PANEL_OBSERVED_HOST_QUERY_ID,
-    refetch: useEntityStoreObservedData
-      ? entityFromStore?.refetch ?? (() => {})
-      : refetchHostDetails,
+    refetch: refetchHostDetails,
     setQuery,
   });
 
   const [loadingFirstSeen, { firstSeen }] = useFirstLastSeen({
     field: 'host.name',
     value: hostName,
-    defaultIndex: securityDefaultPatterns,
+    defaultIndex: indexPatterns,
     order: Direction.asc,
     filterQuery: NOT_EVENT_KIND_ASSET_FILTER,
     skip: useEntityStoreObservedData,
@@ -95,7 +86,7 @@ export const useObservedHost = (
   const [loadingLastSeen, { lastSeen }] = useFirstLastSeen({
     field: 'host.name',
     value: hostName,
-    defaultIndex: securityDefaultPatterns,
+    defaultIndex: indexPatterns,
     order: Direction.desc,
     filterQuery: NOT_EVENT_KIND_ASSET_FILTER,
     skip: useEntityStoreObservedData,
@@ -104,8 +95,9 @@ export const useObservedHost = (
   return useMemo((): ObservedHostResult => {
     if (useEntityStoreObservedData && entityFromStore) {
       return {
-        details: (entityFromStore.entity ?? {}) as HostItem,
-        isLoading: entityFromStore.isLoading,
+        // merge with entity store record
+        details: deepmerge(hostDetails, entityFromStore.entityRecord ?? {}),
+        isLoading: isLoading || entityFromStore.isLoading,
         firstSeen: {
           date: entityFromStore.firstSeen ?? undefined,
           isLoading: entityFromStore.isLoading,
@@ -116,8 +108,8 @@ export const useObservedHost = (
         },
         entityRecord: entityFromStore.entityRecord ?? null,
         refetchEntityStore: entityFromStore.refetch,
-        observedDetailsInspect: undefined,
-        refetchObservedDetails: undefined,
+        observedDetailsInspect: inspectObservedHost,
+        refetchObservedDetails: refetchHostDetails,
       };
     }
     return {

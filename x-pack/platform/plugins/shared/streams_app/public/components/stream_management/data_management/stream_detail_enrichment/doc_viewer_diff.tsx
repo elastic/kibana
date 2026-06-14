@@ -144,6 +144,9 @@ function JsonDiffViewer({ hit, decreaseAvailableHeightBy }: DocViewRenderProps) 
         monaco.editor.defineTheme(languageId, languageThemeResolver!(euiTheme));
       }
     });
+
+    // apply the updated theme so the diff editor reflects the current color mode
+    monaco.editor.setTheme(CODE_EDITOR_DEFAULT_THEME_ID);
   }, [euiTheme]);
 
   return (

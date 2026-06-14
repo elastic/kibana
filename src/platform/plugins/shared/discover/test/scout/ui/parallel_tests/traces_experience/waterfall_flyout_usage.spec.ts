@@ -30,7 +30,7 @@ const openTraceTimeline = async (pageObjects: {
     flyout: TracesFlyout;
   };
 }) => {
-  await pageObjects.discover.goto();
+  await pageObjects.discover.goto({ queryMode: 'esql' });
   await pageObjects.discover.writeAndSubmitEsqlQuery(
     `${TRACES.ESQL_QUERY} | WHERE transaction.name == "${RICH_TRACE.TRANSACTION_NAME}"`
   );
@@ -201,7 +201,7 @@ spaceTest.describe(
 
         await spaceTest.step('setup: login and open the scroll target span document', async () => {
           await browserAuth.loginAsViewer();
-          await pageObjects.discover.goto();
+          await pageObjects.discover.goto({ queryMode: 'esql' });
           await pageObjects.discover.writeAndSubmitEsqlQuery(
             `${TRACES.ESQL_QUERY} | WHERE span.name == "${DEEP_TRACE.SCROLL_TARGET_SPAN_NAME}"`
           );
@@ -217,6 +217,32 @@ spaceTest.describe(
           await expect(
             flyout.waterfallFlyout.getWaterfallItem(DEEP_TRACE.SCROLL_TARGET_SPAN_NAME).row
           ).toBeInViewport();
+        });
+      }
+    );
+
+    spaceTest(
+      'Service badge in full-screen waterfall navigates to the APM service overview',
+      async ({ browserAuth, page, pageObjects }) => {
+        const { flyout } = pageObjects.tracesExperience;
+
+        await spaceTest.step('setup: login and open trace timeline', async () => {
+          await browserAuth.loginAsViewer();
+          await openTraceTimeline(pageObjects);
+        });
+
+        await spaceTest.step('Click the service badge on the transaction row', async () => {
+          const { serviceBadge } = flyout.waterfallFlyout.getWaterfallItem(
+            RICH_TRACE.TRANSACTION_NAME
+          );
+          await expect(serviceBadge).toBeVisible();
+          await serviceBadge.click();
+        });
+
+        await spaceTest.step('Verify navigation to the APM service overview', async () => {
+          await expect(page).toHaveURL(
+            new RegExp(`/app/apm/services/${RICH_TRACE.SERVICE_NAME}/overview`)
+          );
         });
       }
     );

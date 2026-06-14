@@ -11,6 +11,7 @@ import type { IBasePath } from '@kbn/core-http-browser';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { v4 } from 'uuid';
+import type { SavedObject } from '@kbn/core/server';
 import type {
   ActionConnector,
   AttachmentV2,
@@ -26,6 +27,7 @@ import type {
   Observable,
   User,
 } from '../../../common/types/domain';
+import type { Template } from '../../../common/types/domain/template/latest';
 import { AttachmentType, CaseStatuses, UserActionTypes } from '../../../common/types/domain';
 import type {
   CasePostRequest,
@@ -62,6 +64,9 @@ export const dedupAssignees = (assignees?: CaseAssignees): CaseAssignees | undef
   return uniqBy(assignees, 'uid');
 };
 
+export const getCloseReasonIfValid = (closeReason?: string): string | undefined =>
+  closeReason != null && closeReason.trim().length > 0 ? closeReason : undefined;
+
 type LatestPushInfo = { index: number; pushedInfo: ExternalService | null } | null;
 
 export const getLatestPushInfo = (
@@ -87,6 +92,26 @@ export const getLatestPushInfo = (
   return null;
 };
 
+/**
+ * Builds the connector-comment string that gets posted alongside the case to
+ * external incident systems (ServiceNow, Jira, Resilient, Swimlane).
+ *
+ * The legacy `actions` branch is intentionally absent: legacy `actions`
+ * attachments are projected to the unified `security.endpoint` shape on read
+ * (see `actionsAttachmentTransformer`), so they never surface here as
+ * `AttachmentType.actions`. The user-facing host-isolation comment now lives
+ * on the unified attachment's `data.content`, which the registry-hook
+ * redesign tracked in https://github.com/elastic/kibana/issues/262574 will
+ * surface to push-to-connector. Today host-isolation comments are not pushed
+ * (matches existing behavior for the `externalReference` + `endpoint` shape
+ * that has been in place since multi-EDR support landed).
+ *
+ * Likewise the `alert` branch below is currently unreachable because
+ * `formatComments` filters alerts out before this function is called; that
+ * dead code is preserved here intentionally as a placeholder for the same
+ * registry-hook redesign (#262574), which will fold both alert and unified
+ * attachment formatting into per-type registrations.
+ */
 const getCommentContent = (comment: AttachmentV2): string => {
   if (isLegacyAttachmentRequest(comment)) {
     if (comment.type === AttachmentType.user) {
@@ -94,17 +119,6 @@ const getCommentContent = (comment: AttachmentV2): string => {
     } else if (comment.type === AttachmentType.alert) {
       const ids = getAlertIds(comment);
       return `Alert with ids ${ids.join(', ')} added to case`;
-    } else if (
-      comment.type === AttachmentType.actions &&
-      (comment.actions.type === 'isolate' || comment.actions.type === 'unisolate')
-    ) {
-      const firstHostname =
-        comment.actions.targets?.length > 0 ? comment.actions.targets[0].hostname : 'unknown';
-      const totalHosts = comment.actions.targets.length;
-      const actionText = comment.actions.type === 'isolate' ? 'Isolated' : 'Released';
-      const additionalHostsText = totalHosts - 1 > 0 ? `and ${totalHosts - 1} more ` : ``;
-
-      return `${actionText} host ${firstHostname} ${additionalHostsText}with comment: ${comment.comment}`;
     }
   }
 
@@ -265,10 +279,13 @@ export const formatComments = ({
   );
 
   const commentsToBeUpdated = theCase.comments?.filter(
-    (comment) =>
-      // We push only user's comments
-      (comment.type === AttachmentType.user || comment.type === AttachmentType.actions) &&
-      commentsIdsToBeUpdated.has(comment.id)
+    // We push only user-authored comments. `AttachmentType.actions` was dropped
+    // when legacy `actions` attachments were folded into `security.endpoint`
+    // (the unified type does not surface here as legacy `actions`). The
+    // registry-hook redesign tracked in
+    // https://github.com/elastic/kibana/issues/262574 will let unified
+    // attachment types opt into push-to-connector formatting.
+    (comment) => comment.type === AttachmentType.user && commentsIdsToBeUpdated.has(comment.id)
   );
 
   let comments: ExternalServiceComment[] = [];
@@ -674,4 +691,58 @@ export const processObservables = (
       updatedAt: new Date().toISOString(),
     });
   }
+};
+
+/**
+ *
+ * For cases that have a template and extended fields, fetches the template definitions
+ * and populates `extended_fields_labels` with a mapping from storage keys (e.g.,
+ * `priority_as_keyword`) to user-facing labels (e.g., "Priority"). Cases without templates
+ * or extended fields, or whose templates cannot be retrieved, are returned unchanged.
+ *
+ * @param cases - Array of cases to enrich
+ * @param templateSOs - Pre-fetched template saved objects
+ * @returns The enriched cases array, preserving original order
+ */
+export const enrichCasesWithFieldLabels = (
+  cases: Case[],
+  templateSOs: Array<SavedObject<Template>>
+): Case[] => {
+  type EligibleCase = Case & {
+    template: NonNullable<Case['template']>;
+    extended_fields: NonNullable<Case['extended_fields']>;
+  };
+  const isEligible = (c: Case): c is EligibleCase =>
+    c.template?.id != null && c.extended_fields != null;
+
+  const eligibleCases = cases.filter(isEligible);
+
+  if (eligibleCases.length === 0) {
+    return cases;
+  }
+
+  const labelsByTemplateKey = new Map<string, Record<string, string>>();
+  for (const so of templateSOs) {
+    const fieldKeyToLabel = Object.fromEntries(
+      (so.attributes.fieldNames ?? []).map((field) => [
+        `${field.name}_as_${field.type}`,
+        field.label,
+      ])
+    );
+    labelsByTemplateKey.set(
+      `${so.attributes.templateId}:${so.attributes.templateVersion}`,
+      fieldKeyToLabel
+    );
+  }
+
+  const enrichedCasesById = new Map(
+    eligibleCases.flatMap((c) => {
+      const fieldKeyToLabel = labelsByTemplateKey.get(`${c.template.id}:${c.template.version}`);
+      return fieldKeyToLabel != null
+        ? [[c.id, { ...c, extended_fields_labels: fieldKeyToLabel }]]
+        : [];
+    })
+  );
+
+  return cases.map((c) => enrichedCasesById.get(c.id) ?? c);
 };

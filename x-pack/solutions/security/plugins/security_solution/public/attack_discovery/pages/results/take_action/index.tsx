@@ -12,6 +12,7 @@ import {
   getOriginalAlertIds,
   type Replacements,
 } from '@kbn/elastic-assistant-common';
+import { i18n as i18nTranslate } from '@kbn/i18n';
 import {
   EuiButtonEmpty,
   EuiContextMenu,
@@ -61,7 +62,7 @@ const TakeActionComponent: React.FC<Props> = ({
   );
 
   const {
-    services: { cases },
+    services: { cases, evals },
   } = useKibana();
   const { hasSearchAILakeConfigurations } = useAssistantAvailability();
 
@@ -203,7 +204,11 @@ const TakeActionComponent: React.FC<Props> = ({
     });
   }, [closePopover, onAddToExistingCase, alertIds, markdown, replacements]);
 
-  const { showAssistantOverlay, disabled: viewInAiAssistantDisabled } = useViewInAiAssistant({
+  const {
+    showAssistantOverlay,
+    disabled: viewInAiAssistantDisabled,
+    isAssistantVisible,
+  } = useViewInAiAssistant({
     attackDiscovery: attackDiscoveries[0],
     replacements,
   });
@@ -228,6 +233,53 @@ const TakeActionComponent: React.FC<Props> = ({
   }, [closePopover, openAgentBuilderFlyout, reportAddToChatClick]);
 
   const isAddToChatDisabled = !hasValidAgentBuilderLicense;
+
+  const addToDatasetAction = useMemo(() => {
+    if (!evals?.getAddToDatasetAction) return null;
+
+    return evals.getAddToDatasetAction({
+      label: i18n.ADD_TO_DATASET,
+      title: i18n.ADD_TO_DATASET,
+      onBeforeOpen: closePopover,
+      initialExamples: attackDiscoveries.map((ad, index) => {
+        const title =
+          ad.title && ad.title.trim().length > 0
+            ? ad.title.trim()
+            : i18nTranslate.translate(
+                'xpack.securitySolution.attackDiscovery.attackDiscoveryPanel.actions.takeAction.addToDatasetFallbackTitle',
+                {
+                  defaultMessage: 'Attack discovery {index}',
+                  values: { index: index + 1 },
+                }
+              );
+
+        return {
+          label: title,
+          input: {
+            attackDiscovery: {
+              id: ad.id,
+              title: ad.title,
+              alertIds: ad.alertIds,
+              detailsMarkdown: ad.detailsMarkdown,
+              summaryMarkdown: ad.summaryMarkdown,
+              ...(replacements != null ? { replacements } : {}),
+            },
+          },
+          output: {
+            title: ad.title,
+            summaryMarkdown: ad.summaryMarkdown,
+            detailsMarkdown: ad.detailsMarkdown,
+          },
+          metadata: {
+            source: 'security_attack_discovery',
+            attack_discovery_id: ad.id ?? null,
+            attack_discovery_ids: attackDiscoveryIds,
+          },
+          selected: true,
+        };
+      }),
+    });
+  }, [attackDiscoveries, attackDiscoveryIds, closePopover, evals, replacements]);
 
   const { items: runWorkflowItems, panels: runWorkflowPanels } =
     useAttackRunWorkflowContextMenuItems({
@@ -258,12 +310,18 @@ const TakeActionComponent: React.FC<Props> = ({
 
   const allItems = useMemo(() => {
     const isSingleAttackDiscovery = attackDiscoveries.length === 1;
-    const firstAttackDiscovery = isSingleAttackDiscovery ? attackDiscoveries[0] : null;
-    const isAlert = firstAttackDiscovery != null && isAttackDiscoveryAlert(firstAttackDiscovery);
 
-    const isOpen = isAlert && firstAttackDiscovery.alertWorkflowStatus === 'open';
-    const isAcknowledged = isAlert && firstAttackDiscovery.alertWorkflowStatus === 'acknowledged';
-    const isClosed = isAlert && firstAttackDiscovery.alertWorkflowStatus === 'closed';
+    const isOpen = attackDiscoveries.every(
+      (ad) => isAttackDiscoveryAlert(ad) && ad.alertWorkflowStatus === 'open'
+    );
+
+    const isAcknowledged = attackDiscoveries.every(
+      (ad) => isAttackDiscoveryAlert(ad) && ad.alertWorkflowStatus === 'acknowledged'
+    );
+
+    const isClosed = attackDiscoveries.every(
+      (ad) => isAttackDiscoveryAlert(ad) && ad.alertWorkflowStatus === 'closed'
+    );
 
     const markAsOpenItem =
       !isOpen && hasAlertsUpdate
@@ -301,22 +359,22 @@ const TakeActionComponent: React.FC<Props> = ({
           ]
         : [];
 
-    const caseItems = [
-      {
-        'data-test-subj': 'addToCase',
-        disabled: addToCaseDisabled,
-        key: 'addToCase',
-        name: i18n.ADD_TO_NEW_CASE,
-        onClick: onClickAddToNewCase,
-      },
-      {
-        'data-test-subj': 'addToExistingCase',
-        disabled: addToCaseDisabled,
-        key: 'addToExistingCase',
-        name: i18n.ADD_TO_EXISTING_CASE,
-        onClick: onClickAddToExistingCase,
-      },
-    ];
+    const caseItems = !addToCaseDisabled
+      ? [
+          {
+            'data-test-subj': 'addToCase',
+            key: 'addToCase',
+            name: i18n.ADD_TO_NEW_CASE,
+            onClick: onClickAddToNewCase,
+          },
+          {
+            'data-test-subj': 'addToExistingCase',
+            key: 'addToExistingCase',
+            name: i18n.ADD_TO_EXISTING_CASE,
+            onClick: onClickAddToExistingCase,
+          },
+        ]
+      : [];
 
     const aiItems = isSingleAttackDiscovery
       ? isAgentChatExperienceEnabled
@@ -334,7 +392,8 @@ const TakeActionComponent: React.FC<Props> = ({
               },
             ]
           : []
-        : [
+        : isAssistantVisible
+        ? [
             {
               'data-test-subj': 'viewInAiAssistant',
               disabled: viewInAiAssistantDisabled,
@@ -343,7 +402,20 @@ const TakeActionComponent: React.FC<Props> = ({
               onClick: onViewInAiAssistant,
             },
           ]
+        : []
       : [];
+
+    const datasetItems =
+      addToDatasetAction != null
+        ? [
+            {
+              'data-test-subj': 'addToDataset',
+              key: 'addToDataset',
+              name: addToDatasetAction.label,
+              onClick: addToDatasetAction.onClick,
+            },
+          ]
+        : [];
 
     return [
       ...markAsOpenItem,
@@ -352,6 +424,7 @@ const TakeActionComponent: React.FC<Props> = ({
       ...runWorkflowItems,
       ...caseItems,
       ...aiItems,
+      ...datasetItems,
     ];
   }, [
     attackDiscoveries,
@@ -362,11 +435,13 @@ const TakeActionComponent: React.FC<Props> = ({
     isAgentChatExperienceEnabled,
     hasAgentBuilderPrivilege,
     isAddToChatDisabled,
+    isAssistantVisible,
     onViewInAgentBuilder,
     viewInAiAssistantDisabled,
     onViewInAiAssistant,
     onUpdateWorkflowStatus,
     runWorkflowItems,
+    addToDatasetAction,
   ]);
 
   const panels: EuiContextMenuPanelDescriptor[] = useMemo(
@@ -381,7 +456,8 @@ const TakeActionComponent: React.FC<Props> = ({
   return (
     <>
       <EuiPopover
-        anchorPosition="downCenter"
+        aria-label={i18n.TAKE_ACTION}
+        anchorPosition="upCenter"
         button={button}
         closePopover={closePopover}
         data-test-subj="takeAction"
@@ -389,7 +465,7 @@ const TakeActionComponent: React.FC<Props> = ({
         isOpen={isPopoverOpen}
         panelPaddingSize="none"
       >
-        <EuiContextMenu size="s" initialPanelId={0} panels={panels} />
+        <EuiContextMenu initialPanelId={0} panels={panels} />
       </EuiPopover>
 
       {pendingAction != null && !hasSearchAILakeConfigurations && (

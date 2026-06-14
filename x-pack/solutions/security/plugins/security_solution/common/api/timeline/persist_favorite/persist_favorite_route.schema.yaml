@@ -33,13 +33,31 @@ paths:
                 timelineType:
                   $ref: '../model/components.schema.yaml#/components/schemas/TimelineType'
                   nullable: true
+            examples:
+              favoriteDefault:
+                summary: Favorite a default timeline
+                value:
+                  timelineId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+                  templateTimelineId: null
+                  templateTimelineVersion: null
+                  timelineType: default
       responses:
         '200':
-          description: Indicates the favorite status was successfully updated.
+          description: Indicates a successful call.
           content:
             application/json:
               schema:
                 $ref: '../model/components.schema.yaml#/components/schemas/FavoriteTimelineResponse'
+              examples:
+                favoriteResponse:
+                  summary: Favorite metadata updated
+                  value:
+                    savedObjectId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+                    version: WzE2LDFd
+                    timelineType: default
+                    favorite:
+                      - userName: elastic
+                        favoriteDate: 1741337636741
 
         '403':
           description: Indicates the user does not have the required permissions to persist the favorite status.
@@ -52,3 +70,9 @@ paths:
                     type: string
                   statusCode:
                     type: number
+              examples:
+                forbidden:
+                  summary: Forbidden
+                  value:
+                    body: Forbidden
+                    statusCode: 403

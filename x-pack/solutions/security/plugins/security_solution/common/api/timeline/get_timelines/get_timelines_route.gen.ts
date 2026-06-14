@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import {
   TimelineType,
@@ -23,59 +23,72 @@ import {
   TimelineResponse,
 } from '../model/components.gen';
 
+export const GetTimelinesRequestQuery = lazySchema(() =>
+  z.object({
+    /**
+     * If `true`, only Timelines that the current user has marked as favorite are returned.
+     */
+    only_user_favorite: z.enum(['true', 'false']).nullable().optional(),
+    /**
+     * Restrict results to `default` investigation timelines or `template` timeline templates.
+     */
+    timeline_type: TimelineType.nullable().optional(),
+    /**
+     * Field used to sort the list (`title`, `description`, `updated`, or `created`).
+     */
+    sort_field: SortFieldTimeline.optional(),
+    /**
+     * Whether to sort the results `ascending` or `descending`
+     */
+    sort_order: z.enum(['asc', 'desc']).optional(),
+    /**
+     * How many results should returned at once
+     */
+    page_size: z.string().nullable().optional(),
+    /**
+     * How many pages should be skipped
+     */
+    page_index: z.string().nullable().optional(),
+    /**
+     * Allows to search for timelines by their title
+     */
+    search: z.string().nullable().optional(),
+    /**
+     * Filter by timeline lifecycle state (`active`, `draft`, or `immutable`).
+     */
+    status: TimelineStatus.nullable().optional(),
+  })
+);
 export type GetTimelinesRequestQuery = z.infer<typeof GetTimelinesRequestQuery>;
-export const GetTimelinesRequestQuery = z.object({
-  /**
-   * If true, only timelines that are marked as favorites by the user are returned.
-   */
-  only_user_favorite: z.enum(['true', 'false']).nullable().optional(),
-  timeline_type: TimelineType.nullable().optional(),
-  sort_field: SortFieldTimeline.optional(),
-  /**
-   * Whether to sort the results `ascending` or `descending`
-   */
-  sort_order: z.enum(['asc', 'desc']).optional(),
-  /**
-   * How many results should returned at once
-   */
-  page_size: z.string().nullable().optional(),
-  /**
-   * How many pages should be skipped
-   */
-  page_index: z.string().nullable().optional(),
-  /**
-   * Allows to search for timelines by their title
-   */
-  search: z.string().nullable().optional(),
-  status: TimelineStatus.nullable().optional(),
-});
 export type GetTimelinesRequestQueryInput = z.input<typeof GetTimelinesRequestQuery>;
 
+export const GetTimelinesResponse = lazySchema(() =>
+  z.object({
+    timeline: z.array(TimelineResponse),
+    /**
+     * The total amount of results
+     */
+    totalCount: z.number(),
+    /**
+     * The amount of `default` type Timelines in the results
+     */
+    defaultTimelineCount: z.number().optional(),
+    /**
+     * The amount of Timeline templates in the results
+     */
+    templateTimelineCount: z.number().optional(),
+    /**
+     * The amount of favorited Timelines
+     */
+    favoriteCount: z.number().optional(),
+    /**
+     * The amount of Elastic's Timeline templates in the results
+     */
+    elasticTemplateTimelineCount: z.number().optional(),
+    /**
+     * The amount of custom Timeline templates in the results
+     */
+    customTemplateTimelineCount: z.number().optional(),
+  })
+);
 export type GetTimelinesResponse = z.infer<typeof GetTimelinesResponse>;
-export const GetTimelinesResponse = z.object({
-  timeline: z.array(TimelineResponse),
-  /**
-   * The total amount of results
-   */
-  totalCount: z.number(),
-  /**
-   * The amount of `default` type Timelines in the results
-   */
-  defaultTimelineCount: z.number().optional(),
-  /**
-   * The amount of Timeline templates in the results
-   */
-  templateTimelineCount: z.number().optional(),
-  /**
-   * The amount of favorited Timelines
-   */
-  favoriteCount: z.number().optional(),
-  /**
-   * The amount of Elastic's Timeline templates in the results
-   */
-  elasticTemplateTimelineCount: z.number().optional(),
-  /**
-   * The amount of custom Timeline templates in the results
-   */
-  customTemplateTimelineCount: z.number().optional(),
-});

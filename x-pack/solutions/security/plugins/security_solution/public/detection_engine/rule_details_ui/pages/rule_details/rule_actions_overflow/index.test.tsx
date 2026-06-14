@@ -66,6 +66,7 @@ describe('RuleActionsOverflow', () => {
       ...initialUserPrivilegesState(),
       rulesPrivileges: {
         rules: { read: true, edit: true },
+        manualRun: { read: true, edit: true },
         exceptions: { read: true, edit: true },
       },
     });
@@ -193,6 +194,7 @@ describe('RuleActionsOverflow', () => {
         ...initialUserPrivilegesState(),
         rulesPrivileges: {
           rules: { read: true, edit: false },
+          manualRun: { read: false, edit: false },
           exceptions: { read: true, edit: false },
         },
       });
@@ -325,6 +327,31 @@ describe('RuleActionsOverflow', () => {
           }
         );
       });
+    });
+
+    it('should be disabled when the user does not have permissions for the subfeature', async () => {
+      (useUserPrivileges as jest.Mock).mockReturnValue({
+        ...initialUserPrivilegesState(),
+        rulesPrivileges: {
+          rules: { read: true, edit: true }, // all rule permissions
+          manualRun: { read: false, edit: false }, // but no manual rule run permissions
+          exceptions: { read: true, edit: false },
+        },
+      });
+
+      const { getByTestId } = render(
+        <RuleActionsOverflow
+          showBulkDuplicateExceptionsConfirmation={showBulkDuplicateExceptionsConfirmation}
+          showManualRuleRunConfirmation={showManualRuleRunConfirmation}
+          rule={mockRule('id')}
+          isDisabled={false}
+          canDuplicateRuleWithActions={true}
+          confirmDeletion={() => Promise.resolve(true)}
+        />,
+        { wrapper: TestProviders }
+      );
+      fireEvent.click(getByTestId('rules-details-popover-button-icon'));
+      expect(getByTestId('rules-details-manual-rule-run')).toBeDisabled();
     });
   });
 

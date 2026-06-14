@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { v4 as uuid } from 'uuid';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
@@ -29,7 +29,6 @@ import { MISCONFIGURATION_INSIGHT_USER_DETAILS } from '@kbn/cloud-security-postu
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { buildEuidCspPreviewOptions } from '../../../../cloud_security_posture/utils/build_euid_csp_preview_options';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use_non_closed_alerts';
 import { ExpandablePanel } from '../../../../flyout_v2/shared/components/expandable_panel';
 import type { RelatedHost } from '../../../../../common/search_strategy/security_solution/related_entities/related_hosts';
@@ -41,10 +40,10 @@ import { InspectButton, InspectButtonContainer } from '../../../../common/compon
 import { EntityType } from '../../../../../common/entity_analytics/types';
 import { RiskScoreLevel } from '../../../../entity_analytics/components/severity/common';
 import { DefaultFieldRenderer } from '../../../../timelines/components/field_renderers/default_renderer';
-import { CellActions } from '../../shared/components/cell_actions';
+import { CellActions as DocumentDetailsCellActions } from '../../shared/components/cell_actions';
+import { CellActions as AttackDetailsCellActions } from '../../../attack_details/components/cell_actions';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { scoreIntervalToDateTime } from '../../../../common/components/ml/score/score_interval_to_datetime';
 import { setAbsoluteRangeDatePicker } from '../../../../common/store/inputs/actions';
 import { hostToCriteria } from '../../../../common/components/ml/criteria/host_to_criteria';
@@ -68,24 +67,27 @@ import { useKibana, useUiSetting } from '../../../../common/lib/kibana';
 import { ENTITY_RISK_LEVEL } from '../../../../entity_analytics/components/risk_score/translations';
 import { useHasSecurityCapability } from '../../../../helper_hooks';
 import { UserPreviewPanelKey } from '../../../entity_details/user_right';
-import { USER_PREVIEW_BANNER } from '../../right/components/user_entity_overview';
+import { USER_PREVIEW_BANNER } from '../../../../flyout_v2/document/main/components/user_entity_overview';
 import { PreviewLink } from '../../../shared/components/preview_link';
 import type { NarrowDateRange } from '../../../../common/components/ml/types';
-import { MisconfigurationsInsight } from '../../shared/components/misconfiguration_insight';
-import { AlertCountInsight } from '../../shared/components/alert_count_insight';
+import { MisconfigurationsInsight } from '../../../../flyout_v2/document/main/components/misconfiguration_insight';
+import { AlertCountInsight } from '../../../../flyout_v2/document/main/components/alert_count_insight';
 import { DocumentEventTypes } from '../../../../common/lib/telemetry';
 import { useNavigateToUserDetails } from '../../../entity_details/user_right/hooks/use_navigate_to_user_details';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
-import { sourcererSelectors } from '../../../../sourcerer/store';
 import { useEntityFromStore } from '../../../entity_details/shared/hooks/use_entity_from_store';
 import { useObservedUser } from '../../../entity_details/user_right/hooks/use_observed_user';
 import {
   buildRiskScoreStateFromEntityRecord,
   getRiskFromEntityRecord,
 } from '../../../entity_details/shared/entity_store_risk_utils';
-import { mergeLegacyIdentityWhenStoreEntityMissing, type IdentityFields } from '../../shared/utils';
+import {
+  CspInsightLeftPanelSubTab,
+  EntityDetailsLeftPanelTab,
+} from '../../../entity_details/shared/components/left_panel/left_panel_header';
+import { type IdentityFields, mergeLegacyIdentityWhenStoreEntityMissing } from '../../shared/utils';
 
 const USER_DETAILS_ID = 'entities-users-details';
 const RELATED_HOSTS_ID = 'entities-users-related-hosts';
@@ -116,6 +118,11 @@ export interface UserDetailsProps {
    * Set to false for attack flyout so multiple entity panels start collapsed.
    */
   expandedOnFirstRender?: boolean;
+  /**
+   * When true, related-entity cell actions use the attack flyout implementation.
+   * Set for attack flyout entity panels; omit in document details flyout.
+   */
+  isAttackDetails?: boolean;
 }
 
 /**
@@ -127,23 +134,13 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
   timestamp,
   scopeId,
   expandedOnFirstRender = true,
+  isAttackDetails = false,
 }) => {
+  const EntityCellActions = isAttackDetails ? AttackDetailsCellActions : DocumentDetailsCellActions;
+
   const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
-  const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView();
-
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const experimentalSelectedPatterns = useSelectedPatterns();
-  const selectedPatterns = newDataViewPickerEnabled
-    ? experimentalSelectedPatterns
-    : oldSelectedPatterns;
-
-  const oldSecurityDefaultPatterns =
-    useSelector(sourcererSelectors.defaultDataView)?.patternList ?? [];
-  const { indexPatterns: experimentalSecurityDefaultIndexPatterns } = useSecurityDefaultPatterns();
-  const securityDefaultPatterns = newDataViewPickerEnabled
-    ? experimentalSecurityDefaultIndexPatterns
-    : oldSecurityDefaultPatterns;
-
+  const selectedPatterns = useSelectedPatterns();
+  const { indexPatterns: securityDefaultPatterns } = useSecurityDefaultPatterns();
   const dispatch = useDispatch();
   const { telemetry } = useKibana().services;
   // create a unique, but stable (across re-renders) query id
@@ -178,7 +175,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
     [dispatch]
   );
 
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
   const euidApi = useEntityStoreEuidApi();
 
   const openUserPreview = useCallback(() => {
@@ -202,7 +199,11 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
     entityType: 'user',
     skip: !entityStoreV2Enabled || isInitializing,
   });
-  const observedUser = useObservedUser(userName, scopeId, entityId);
+  const observedUser = useObservedUser(
+    userName,
+    scopeId,
+    entityStoreV2Enabled ? entityFromStoreResult : undefined
+  );
 
   const filterQuery = useMemo(
     () => (userName ? buildUserNamesFilter([userName]) : undefined),
@@ -229,6 +230,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
             refetch: observedUser.refetchEntityStore ?? (() => {}),
             isLoading: observedUser.isLoading,
             error: null,
+            inspect: entityFromStoreResult?.inspect,
           })
         : undefined,
     [
@@ -236,6 +238,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
       observedUser.entityRecord,
       observedUser.refetchEntityStore,
       observedUser.isLoading,
+      entityFromStoreResult?.inspect,
     ]
   );
 
@@ -314,7 +317,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
         ),
         render: (host: string) => (
           <EuiText grow={false} size="xs">
-            <CellActions field={HOST_NAME_FIELD_NAME} value={host}>
+            <EntityCellActions field={HOST_NAME_FIELD_NAME} value={host}>
               <PreviewLink
                 field={HOST_NAME_FIELD_NAME}
                 value={host}
@@ -322,7 +325,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
                 scopeId={scopeId}
                 data-test-subj={USER_DETAILS_RELATED_HOSTS_LINK_TEST_ID}
               />
-            </CellActions>
+            </EntityCellActions>
           </EuiText>
         ),
       },
@@ -375,7 +378,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
           ]
         : []),
     ],
-    [isEntityAnalyticsAuthorized, scopeId, entityId]
+    [EntityCellActions, isEntityAnalyticsAuthorized, scopeId, entityId]
   );
 
   const relatedHostsCount = useMemo(
@@ -440,7 +443,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
       </EuiTitle>
       <EuiSpacer size="s" />
       <AnomalyTableProvider
-        criteriaFields={hostToCriteria(effectiveUserDetails)}
+        criteriaFields={hostToCriteria({ hostItem: effectiveUserDetails })}
         startDate={from}
         endDate={to}
         skip={isInitializing}
@@ -486,17 +489,28 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
       <EuiHorizontalRule margin="s" />
       <EuiFlexGrid responsive={false} columns={3} gutterSize="xl">
         <AlertCountInsight
+          entityRecord={observedUser.entityRecord}
           identityFields={userIdentityFields ?? {}}
           entityType={EntityType.user}
           queryId={`${USER_DETAILS_INSIGHTS_ID}-alerts-by-status`}
           direction="column"
-          openDetailsPanel={openDetailsPanel}
+          onShowAlertCountDetails={() =>
+            openDetailsPanel({
+              tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
+              subTab: CspInsightLeftPanelSubTab.ALERTS,
+            })
+          }
           data-test-subj={USER_DETAILS_ALERT_COUNT_TEST_ID}
         />
         <MisconfigurationsInsight
           identityFields={userIdentityFields ?? {}}
           direction="column"
-          openDetailsPanel={openDetailsPanel}
+          onShowMisconfigurationsDetails={() =>
+            openDetailsPanel({
+              tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
+              subTab: CspInsightLeftPanelSubTab.MISCONFIGURATIONS,
+            })
+          }
           data-test-subj={USER_DETAILS_MISCONFIGURATIONS_TEST_ID}
           telemetryKey={MISCONFIGURATION_INSIGHT_USER_DETAILS}
         />

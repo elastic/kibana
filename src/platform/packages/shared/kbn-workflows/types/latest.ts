@@ -22,6 +22,7 @@ export type {
   RunWorkflowCommand,
   RunStepCommand,
   RunWorkflowResponseDto,
+  ResumeWorkflowExecutionResponseDto,
   TestWorkflowResponseDto,
   TestWorkflowCommand,
   StackFrame,
@@ -44,6 +45,9 @@ export type {
   WorkflowStepExecutionListDto,
   WorkflowMgetResponseDto,
   ChildWorkflowExecutionItem,
+  WorkflowExecutionCollapseField,
+  WorkflowExecutionSortField,
+  WorkflowExecutionSortOrder,
   // enums
   ExecutionStatusUnion,
   ExecutionTypeUnion,
@@ -59,13 +63,19 @@ export type {
   BaseConnectorContract,
   StepStabilityLevel,
   HttpMethod,
+  EditorHandlers,
+  EditorHandlersConfig,
+  EditorHandlersInput,
+  DynamicSchema,
   StepPropertyHandler,
   PropertySelectionHandler,
   SelectionOption,
   SelectionDetails,
   SelectionContext,
+  StepSelectionValues,
   RequestOptions,
   GetAvailableConnectorsResponse,
+  BulkScheduleWorkflowResult,
 } from './v1';
 
 // exported full to use enum as values
@@ -77,11 +87,12 @@ export {
   ExecutionType,
   ExecutionStatusValues,
   ExecutionTypeValues,
+  WorkflowExecutionCollapseFields,
+  WorkflowExecutionSortFields,
   TerminalExecutionStatuses,
   NonTerminalExecutionStatuses,
   SearchWorkflowCommandSchema,
   UpdateWorkflowCommandSchema,
   // shared constants
   MAX_WORKFLOW_YAML_LENGTH,
-  WORKFLOW_ID_PATTERN,
 } from './v1';

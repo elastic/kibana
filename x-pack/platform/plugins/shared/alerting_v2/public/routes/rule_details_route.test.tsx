@@ -19,9 +19,9 @@ jest.mock('react-router-dom', () => ({
   useHistory: () => ({ push: mockHistoryPush }),
 }));
 
-const mockUseExistingRule = jest.fn();
-jest.mock('../hooks/use_existing_rule', () => ({
-  useExistingRule: (...args: unknown[]) => mockUseExistingRule(...args),
+const mockUseFetchRule = jest.fn();
+jest.mock('../hooks/use_fetch_rule', () => ({
+  useFetchRule: (...args: unknown[]) => mockUseFetchRule(...args),
 }));
 
 jest.mock('../components/rule_details/skeleton', () => ({
@@ -29,9 +29,7 @@ jest.mock('../components/rule_details/skeleton', () => ({
 }));
 
 jest.mock('../components/rule_details/rule_detail_page', () => ({
-  RuleDetailPage: ({ rule }: { rule: { id: string } }) => (
-    <div data-test-subj="ruleDetailPage">Rule: {rule.id}</div>
-  ),
+  RuleDetailPage: () => <div data-test-subj="ruleDetailPage">Rule detail page</div>,
 }));
 
 const renderRoute = (ruleId = 'rule-1') =>
@@ -51,16 +49,16 @@ describe('RuleDetailsRoute', () => {
   });
 
   it('renders skeleton while loading', () => {
-    mockUseExistingRule.mockReturnValue({ rule: undefined, isLoading: true, error: null });
+    mockUseFetchRule.mockReturnValue({ data: undefined, isLoading: true, isError: false });
     renderRoute();
     expect(screen.getByTestId('skeleton')).toBeInTheDocument();
   });
 
   it('renders error prompt when rule fails to load', () => {
-    mockUseExistingRule.mockReturnValue({
-      rule: undefined,
+    mockUseFetchRule.mockReturnValue({
+      data: undefined,
       isLoading: false,
-      error: new Error('Not found'),
+      isError: true,
     });
     renderRoute();
     expect(screen.getByTestId('ruleDetailsErrorPrompt')).toBeInTheDocument();
@@ -68,32 +66,32 @@ describe('RuleDetailsRoute', () => {
   });
 
   it('renders error prompt when rule is undefined after loading', () => {
-    mockUseExistingRule.mockReturnValue({ rule: undefined, isLoading: false, error: null });
+    mockUseFetchRule.mockReturnValue({ data: undefined, isLoading: false, isError: false });
     renderRoute();
     expect(screen.getByTestId('ruleDetailsErrorPrompt')).toBeInTheDocument();
   });
 
   it('renders the detail page when rule is loaded', async () => {
-    mockUseExistingRule.mockReturnValue({
-      rule: { id: 'rule-1' },
+    mockUseFetchRule.mockReturnValue({
+      data: { id: 'rule-1' },
       isLoading: false,
-      error: null,
+      isError: false,
     });
     renderRoute();
-    expect(await screen.findByTestId('ruleDetailPage')).toHaveTextContent('Rule: rule-1');
+    expect(await screen.findByTestId('ruleDetailPage')).toBeInTheDocument();
   });
 
-  it('passes the ruleId from URL params to useExistingRule', () => {
-    mockUseExistingRule.mockReturnValue({ rule: undefined, isLoading: true, error: null });
+  it('passes the ruleId from URL params to useFetchRule', () => {
+    mockUseFetchRule.mockReturnValue({ data: undefined, isLoading: true, isError: false });
     renderRoute('my-custom-id');
-    expect(mockUseExistingRule).toHaveBeenCalledWith('my-custom-id');
+    expect(mockUseFetchRule).toHaveBeenCalledWith('my-custom-id');
   });
 
   it('navigates back to rules list when back button is clicked', () => {
-    mockUseExistingRule.mockReturnValue({
-      rule: undefined,
+    mockUseFetchRule.mockReturnValue({
+      data: undefined,
       isLoading: false,
-      error: new Error('fail'),
+      isError: true,
     });
     renderRoute();
     screen.getByTestId('ruleDetailsErrorBackButton').click();

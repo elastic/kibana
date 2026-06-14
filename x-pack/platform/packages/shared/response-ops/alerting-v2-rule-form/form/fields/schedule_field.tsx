@@ -17,11 +17,13 @@ import { EuiFormRow, EuiIconTip } from '@elastic/eui';
 import { Controller, useFormContext } from 'react-hook-form';
 import type { FormValues } from '../types';
 import { RuleSchedule } from './rule_schedule';
+import { useRuleFormMeta } from '../contexts';
 
 const SCHEDULE_ROW_ID = 'ruleV2FormScheduleField';
 
 export const ScheduleField = () => {
   const { control } = useFormContext<FormValues>();
+  const { layout } = useRuleFormMeta();
 
   return (
     <Controller
@@ -72,7 +74,7 @@ export const ScheduleField = () => {
           }
           isInvalid={!!error}
         >
-          <RuleSchedule {...field} errors={error?.message} />
+          <RuleSchedule {...field} errors={error?.message} compressed={layout === 'flyout'} />
         </EuiFormRow>
       )}
     />

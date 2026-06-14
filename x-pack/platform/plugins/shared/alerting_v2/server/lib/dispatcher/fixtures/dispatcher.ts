@@ -9,7 +9,7 @@ import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { AlertEpisode, AlertEpisodeSuppression, LastNotifiedRecord } from '../types';
 
 export const createDispatchableAlertEventsResponse = (
-  alertEpisodes: AlertEpisode[]
+  alertEpisodes: Array<AlertEpisode & { data_json?: string | null }>
 ): EsqlQueryResponse => {
   return {
     columns: [
@@ -18,6 +18,8 @@ export const createDispatchableAlertEventsResponse = (
       { name: 'group_hash', type: 'keyword' },
       { name: 'episode_id', type: 'keyword' },
       { name: 'episode_status', type: 'keyword' },
+      { name: 'data_json', type: 'keyword' },
+      { name: 'severity', type: 'keyword' },
     ],
     values: alertEpisodes.map((alertEpisode) => [
       alertEpisode.last_event_timestamp,
@@ -25,6 +27,8 @@ export const createDispatchableAlertEventsResponse = (
       alertEpisode.group_hash,
       alertEpisode.episode_id,
       alertEpisode.episode_status,
+      alertEpisode.data_json ?? null,
+      alertEpisode.severity ?? null,
     ]),
   };
 };
@@ -53,9 +57,9 @@ export const createLastNotifiedTimestampsResponse = (
 ): EsqlQueryResponse => {
   return {
     columns: [
-      { name: 'notification_group_id', type: 'keyword' },
+      { name: 'action_group_id', type: 'keyword' },
       { name: 'last_notified', type: 'date' },
     ],
-    values: records.map((r) => [r.notification_group_id, r.last_notified]),
+    values: records.map((r) => [r.action_group_id, r.last_notified]),
   };
 };

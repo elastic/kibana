@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import type { KueryNode } from '@kbn/es-query';
 import { fromKueryExpression, toKqlExpression } from '@kbn/es-query';
 
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import { ALERTING_V2_ERROR_CODES } from '../errors/error_codes';
 
 /**
  * Mapping from clean API-facing field names to their saved-object KQL paths.
@@ -25,8 +27,10 @@ const FIELD_MAP: Record<string, string> = {
   kind: `${RULE_SAVED_OBJECT_TYPE}.attributes.kind`,
   enabled: `${RULE_SAVED_OBJECT_TYPE}.attributes.enabled`,
   'metadata.name': `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.name`,
+  'metadata.description': `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.description`,
   'metadata.owner': `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.owner`,
-  'metadata.labels': `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.labels`,
+  'metadata.tags': `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.tags`,
+  'grouping.fields': `${RULE_SAVED_OBJECT_TYPE}.attributes.grouping.fields`,
 };
 
 export const ALLOWED_FILTER_FIELDS = Object.keys(FIELD_MAP);
@@ -40,10 +44,14 @@ const rewriteFieldArg = (node: KueryNode): KueryNode => {
   if (fieldArg?.type === 'literal' && typeof fieldArg.value === 'string') {
     const soField = FIELD_MAP[fieldArg.value];
     if (!soField) {
-      throw new Error(
+      throw Boom.badRequest(
         `Invalid filter field "${fieldArg.value}". Allowed fields: ${ALLOWED_FILTER_FIELDS.join(
           ', '
-        )}`
+        )}`,
+        {
+          code: ALERTING_V2_ERROR_CODES.INVALID_FILTER_FIELD,
+          details: { field: fieldArg.value, allowed_fields: ALLOWED_FILTER_FIELDS },
+        }
       );
     }
     return {
@@ -63,8 +71,8 @@ const rewriteFieldArg = (node: KueryNode): KueryNode => {
  * type is added to KQL, this will throw immediately rather than silently
  * passing unvalidated fields through.
  *
- * @throws Error if a field name is not in the FIELD_MAP.
- * @throws Error if an unknown KQL function type is encountered.
+ * @throws Boom badRequest (400) if a field name is not in the FIELD_MAP.
+ * @throws Boom badRequest (400) if an unknown KQL function type is encountered.
  */
 const rewriteNode = (node: KueryNode): KueryNode => {
   if (node.type !== 'function') {
@@ -93,7 +101,10 @@ const rewriteNode = (node: KueryNode): KueryNode => {
       return rewriteFieldArg(node);
 
     default:
-      throw new Error(`Unsupported KQL function "${node.function}" in filter`);
+      throw Boom.badRequest(`Unsupported KQL function "${node.function}" in filter`, {
+        code: ALERTING_V2_ERROR_CODES.UNSUPPORTED_FILTER_FUNCTION,
+        details: { function: node.function },
+      });
   }
 };
 
@@ -116,7 +127,8 @@ const rewriteNode = (node: KueryNode): KueryNode => {
  *
  * Returns an empty string unchanged (used for "match all").
  *
- * @throws Error if the filter contains a field name not in the allowed set.
+ * @throws Boom badRequest (400) if the filter contains a field name not in
+ *   the allowed set or uses an unsupported KQL function.
  */
 export const buildRuleSoFilter = (apiFilter: string): string => {
   if (!apiFilter) {

@@ -18,6 +18,7 @@ project:
   sourceRoot: src/platform/packages/shared/as-code/shared-schemas
 dependsOn:
   - '@kbn/config-schema'
+  - '@kbn/core'
 tags:
   - shared-common
   - package

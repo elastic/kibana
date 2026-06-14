@@ -29,7 +29,7 @@ export const getCaseStepCommonDefinition: CommonStepDefinition<
   GetCaseStepOutputSchema
 > = {
   id: GetCaseStepTypeId,
-  category: StepCategory.Kibana,
+  category: StepCategory.KibanaCases,
   label: i18n.GET_CASE_STEP_LABEL,
   description: i18n.GET_CASE_STEP_DESCRIPTION,
   documentation: {

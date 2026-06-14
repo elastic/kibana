@@ -5,40 +5,127 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiEmptyPrompt,
   EuiLoadingSpinner,
   EuiPageTemplate,
   EuiSpacer,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { Location } from 'history';
 import { useHistory } from 'react-router-dom';
-import * as i18n from '../../../common/translations';
+import { NO_DEFAULT_MODEL } from '../../../common/constants';
 import { docLinks } from '../../../common/doc_links';
 import { FeatureSection } from './feature_section';
-import { ResetDefaultsModal } from './reset_defaults_modal';
+import { DefaultModelSection } from './default_model_section';
+import { NoModelsEmptyPrompt } from './no_models_empty_prompt';
 import { UnsavedChangesModal } from './unsaved_changes_modal';
 import { useModelSettingsForm } from './use_model_settings_form';
+import { useDefaultModelSettings } from '../../hooks/use_default_model_settings';
+import { useDefaultModelValidation } from '../../hooks/use_default_model_validation';
+import { useConnectors } from '../../hooks/use_connectors';
+import { useKibana } from '../../hooks/use_kibana';
+import { useUsageTracker } from '../../contexts/usage_tracker_context';
+import { EventType } from '../../analytics/constants';
+import { getModelStatus, isModelDeprecated } from '../../utils/eis_utils';
+import { EisModelStatus, type EndpointDeprecationInfo } from '../../types';
+import { ModelsCallout } from './models_callout';
 
 export const ModelSettings: React.FC = () => {
   const {
     isLoading,
-    isSaving,
-    isDirty,
+    isSaving: isFeatureSaving,
+    isDirty: isFeatureDirty,
     assignments,
+    effectiveRecommendedEndpoints,
     sections,
+    invalidEndpointIds,
+    hasSavedObject,
+    dirtyFeatureIds,
     updateEndpoints,
-    save,
-    resetSection,
+    save: saveFeatures,
   } = useModelSettingsForm();
+
+  const defaultModelSettings = useDefaultModelSettings();
+  const {
+    state: defaultModelState,
+    isDirty: isDefaultModelDirty,
+    save: saveDefaultModel,
+    reset: resetDefaultModel,
+  } = defaultModelSettings;
+  const { enableAi, featureSpecificModels } = defaultModelState;
+  const defaultModelValidation = useDefaultModelValidation(defaultModelState);
+  const { data: connectors, isLoading: connectorsLoading } = useConnectors();
+  const {
+    services: { application, http },
+  } = useKibana();
+  const usageTracker = useUsageTracker();
+  const deprecatedEndpointsMap: Map<string, EndpointDeprecationInfo> = useMemo(() => {
+    if (connectorsLoading || !connectors) return new Map();
+    return new Map(
+      connectors
+        .filter((connector) => isModelDeprecated(connector.metadata))
+        .map((connector) => [
+          connector.connectorId,
+          {
+            name: connector.name,
+            status: getModelStatus(connector.metadata),
+            metadata: connector.metadata!,
+          },
+        ])
+    );
+  }, [connectors, connectorsLoading]);
+  const [deprecatedAssignedModels, eolAssignedModels] = useMemo(() => {
+    const eolModels = new Set<string>();
+    const deprecatedModels = new Set<string>();
+
+    if (defaultModelState.defaultModelId !== NO_DEFAULT_MODEL) {
+      const depInfo = deprecatedEndpointsMap.get(defaultModelState.defaultModelId);
+      if (depInfo) {
+        switch (depInfo.status) {
+          case EisModelStatus.DeprecatedEOL:
+            eolModels.add(depInfo.name);
+            break;
+          case EisModelStatus.Deprecated:
+            deprecatedModels.add(depInfo.name);
+            break;
+        }
+      }
+    }
+    for (const sec of sections) {
+      for (const childFeature of sec.children) {
+        const selectedEndpointIds =
+          assignments[childFeature.featureId] ?? childFeature.recommendedEndpoints;
+        for (const endpointId of selectedEndpointIds) {
+          const depInfo = deprecatedEndpointsMap.get(endpointId);
+          if (depInfo) {
+            switch (depInfo.status) {
+              case EisModelStatus.DeprecatedEOL:
+                eolModels.add(depInfo.name);
+                break;
+              case EisModelStatus.Deprecated:
+                deprecatedModels.add(depInfo.name);
+                break;
+            }
+          }
+        }
+      }
+    }
+
+    return [Array.from(deprecatedModels), Array.from(eolModels)];
+  }, [deprecatedEndpointsMap, sections, assignments, defaultModelState.defaultModelId]);
+
+  const isDirty = isFeatureDirty || isDefaultModelDirty;
+  const hasNoModels = !connectorsLoading && connectors && !connectors.length;
+  const hasAdvancedSettingsSavePermission = application.capabilities.advancedSettings.save === true;
 
   const history = useHistory();
   const unblockRef = useRef<(() => void) | null>(null);
   const [pendingLocation, setPendingLocation] = useState<Location | null>(null);
-  const [resetParentKey, setResetParentKey] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isDirty) {
@@ -58,36 +145,90 @@ export const ModelSettings: React.FC = () => {
     };
   }, [isDirty, history]);
 
+  const handleSave = useCallback(async () => {
+    if (!defaultModelValidation.isValid) {
+      return;
+    }
+    if (!isFeatureDirty && !isDefaultModelDirty) {
+      return;
+    }
+
+    // Telemetry: count a save only when every dirty part finished successfully.
+    const saveOperations: Array<Promise<unknown>> = [];
+    if (isFeatureDirty) {
+      saveOperations.push(saveFeatures());
+    }
+    if (isDefaultModelDirty) {
+      saveOperations.push(saveDefaultModel());
+    }
+
+    const results = await Promise.allSettled(saveOperations);
+    const allSavesSucceeded = results.every((result) => result.status === 'fulfilled');
+    if (allSavesSucceeded) {
+      usageTracker.count(EventType.FEATURE_SETTINGS_SAVED);
+    }
+  }, [
+    isFeatureDirty,
+    saveFeatures,
+    isDefaultModelDirty,
+    saveDefaultModel,
+    defaultModelValidation.isValid,
+    usageTracker,
+  ]);
+
   const handleDiscardAndLeave = useCallback(() => {
+    resetDefaultModel();
     unblockRef.current?.();
     unblockRef.current = null;
     if (pendingLocation) {
-      history.push(pendingLocation);
+      const url =
+        http.basePath.prepend(pendingLocation.pathname) +
+        pendingLocation.search +
+        pendingLocation.hash;
+      application.navigateToUrl(url, { state: pendingLocation.state });
     }
     setPendingLocation(null);
-  }, [history, pendingLocation]);
+  }, [application, http.basePath, pendingLocation, resetDefaultModel]);
 
-  const handleResetConfirm = useCallback(() => {
-    if (!resetParentKey) return;
-    resetSection(resetParentKey);
-    setResetParentKey(null);
-  }, [resetParentKey, resetSection]);
+  const showFeatureSections = enableAi && featureSpecificModels;
+
+  if (connectorsLoading || isLoading) {
+    return (
+      <EuiPageTemplate.Section
+        paddingSize="none"
+        data-test-subj="modelSettingsContent"
+        restrictWidth={true}
+      >
+        <EuiLoadingSpinner size="l" />
+      </EuiPageTemplate.Section>
+    );
+  }
+
+  if (hasNoModels) {
+    return <NoModelsEmptyPrompt />;
+  }
 
   return (
     <>
       <EuiPageTemplate.Header
         data-test-subj="modelSettingsPageHeader"
-        pageTitle={i18n.SETTINGS_TITLE}
+        pageTitle={i18n.translate('xpack.searchInferenceEndpoints.settings.title', {
+          defaultMessage: 'Feature settings',
+        })}
         bottomBorder
+        paddingSize="none"
+        restrictWidth={true}
         rightSideItems={[
           <EuiButton
             fill
-            onClick={save}
-            isLoading={isSaving}
-            isDisabled={!isDirty}
+            onClick={handleSave}
+            isLoading={isFeatureSaving}
+            isDisabled={!isDirty || !defaultModelValidation.isValid}
             data-test-subj="save-settings-button"
           >
-            {i18n.SETTINGS_SAVE_BUTTON}
+            {i18n.translate('xpack.searchInferenceEndpoints.settings.saveButton', {
+              defaultMessage: 'Save settings',
+            })}
           </EuiButton>,
           <EuiButtonEmpty
             iconType="popout"
@@ -96,49 +237,176 @@ export const ModelSettings: React.FC = () => {
             flush="both"
             target="_blank"
             data-test-subj="settings-api-documentation"
-            href={docLinks.createInferenceEndpoint}
+            href={docLinks.featureSettings}
           >
-            {i18n.API_DOCUMENTATION_LINK}
+            {i18n.translate('xpack.searchInferenceEndpoints.settings.documentationLabel', {
+              defaultMessage: 'Documentation',
+            })}
           </EuiButtonEmpty>,
         ]}
       />
-      <EuiPageTemplate.Section data-test-subj="modelSettingsContent">
-        {isLoading ? (
-          <EuiLoadingSpinner size="l" />
-        ) : sections.length === 0 ? (
-          <EuiEmptyPrompt
-            iconType="gear"
-            title={<h2>{i18n.SETTINGS_NO_FEATURES_TITLE}</h2>}
-            body={<p>{i18n.SETTINGS_NO_FEATURES_DESCRIPTION}</p>}
-            data-test-subj="settings-no-features"
+      <EuiSpacer size="l" />
+      <EuiPageTemplate.Section
+        paddingSize="none"
+        data-test-subj="modelSettingsContent"
+        restrictWidth={true}
+      >
+        {!hasAdvancedSettingsSavePermission && (
+          <>
+            <EuiCallOut
+              title={i18n.translate(
+                'xpack.searchInferenceEndpoints.settings.noAdvancedSettingsPermission.title',
+                {
+                  defaultMessage: 'Advanced Settings permission required',
+                }
+              )}
+              color="warning"
+              iconType="lock"
+              data-test-subj="noAdvancedSettingsPermissionCallout"
+              announceOnMount={false}
+            >
+              <p data-test-subj="noAdvancedSettingsPermissionCalloutDescription">
+                {i18n.translate(
+                  'xpack.searchInferenceEndpoints.settings.noAdvancedSettingsPermission.description',
+                  {
+                    defaultMessage:
+                      'Saving the default AI model setting requires the Advanced Settings: All privilege. Contact your administrator if you need to make changes.',
+                  }
+                )}
+              </p>
+            </EuiCallOut>
+            <EuiSpacer size="l" />
+          </>
+        )}
+        {showFeatureSections && invalidEndpointIds.size > 0 && (
+          <>
+            <EuiCallOut
+              title={i18n.translate(
+                'xpack.searchInferenceEndpoints.settings.invalidEndpoints.title',
+                {
+                  defaultMessage: 'Some assigned inference endpoints are no longer available',
+                }
+              )}
+              color="danger"
+              iconType="warning"
+              data-test-subj="invalidEndpointsCallout"
+              announceOnMount
+            >
+              <p>
+                {i18n.translate(
+                  'xpack.searchInferenceEndpoints.settings.invalidEndpoints.description',
+                  {
+                    defaultMessage:
+                      'The following endpoints could not be found: {endpointList}. Features using these endpoints may not work as expected.',
+                    values: {
+                      endpointList: [...invalidEndpointIds].join(', '),
+                    },
+                  }
+                )}
+              </p>
+            </EuiCallOut>
+            <EuiSpacer size="l" />
+          </>
+        )}
+        {showFeatureSections && eolAssignedModels.length > 0 && (
+          <ModelsCallout
+            title={i18n.translate(
+              'xpack.searchInferenceEndpoints.settings.eolModelsCallout.title',
+              {
+                defaultMessage: 'Some assigned models have reached end of life',
+              }
+            )}
+            message={i18n.translate(
+              'xpack.searchInferenceEndpoints.settings.eolModelsCallout.description',
+              {
+                defaultMessage:
+                  'Features using these models may not work as expected. The following models have reached end of life and are no longer available:',
+              }
+            )}
+            modelList={eolAssignedModels}
+            color="danger"
+            data-test-subj="eolModelsCallout"
           />
-        ) : (
-          sections.map((section) => (
-            <React.Fragment key={section.featureId}>
-              <FeatureSection
-                parentName={section.featureName}
-                parentDescription={section.featureDescription}
-                features={section.children.map((f) => ({
-                  endpointIds: assignments[f.featureId] ?? f.recommendedEndpoints,
-                  feature: f,
-                }))}
-                onReset={() => setResetParentKey(section.featureId)}
-                onEndpointsChange={updateEndpoints}
-                isBeta={section.isBeta}
-                isTechPreview={section.isTechPreview}
+        )}
+        {showFeatureSections && deprecatedAssignedModels.length > 0 && (
+          <ModelsCallout
+            title={i18n.translate(
+              'xpack.searchInferenceEndpoints.settings.deprecatedModelsCallout.title',
+              {
+                defaultMessage: 'Some assigned models are deprecated',
+              }
+            )}
+            message={i18n.translate(
+              'xpack.searchInferenceEndpoints.settings.deprecatedModelsCallout.description',
+              {
+                defaultMessage:
+                  'Features using these models should be updated before the end-of-life date. The following models are deprecated:',
+              }
+            )}
+            modelList={deprecatedAssignedModels}
+            color="warning"
+            data-test-subj="deprecatedModelsCallout"
+          />
+        )}
+        <DefaultModelSection
+          defaultModelSettings={defaultModelSettings}
+          validation={defaultModelValidation}
+          disabled={!hasAdvancedSettingsSavePermission}
+        />
+        {showFeatureSections && (
+          <>
+            <EuiSpacer size="xl" />
+            {sections.length === 0 ? (
+              <EuiEmptyPrompt
+                iconType="gear"
+                title={
+                  <h2>
+                    {i18n.translate('xpack.searchInferenceEndpoints.settings.noFeatures.title', {
+                      defaultMessage: 'No features registered',
+                    })}
+                  </h2>
+                }
+                body={
+                  <p>
+                    {i18n.translate(
+                      'xpack.searchInferenceEndpoints.settings.noFeatures.description',
+                      {
+                        defaultMessage:
+                          'No features have been registered for inference settings in this project.',
+                      }
+                    )}
+                  </p>
+                }
+                data-test-subj="settings-no-features"
               />
-              <EuiSpacer size="xl" />
-            </React.Fragment>
-          ))
+            ) : (
+              sections.map((section) => (
+                <React.Fragment key={section.featureId}>
+                  <FeatureSection
+                    parentName={section.featureName}
+                    parentDescription={section.featureDescription}
+                    features={section.children.map((f) => ({
+                      endpointIds: assignments[f.featureId] ?? f.recommendedEndpoints,
+                      effectiveRecommendedEndpoints:
+                        effectiveRecommendedEndpoints[f.featureId] ?? f.recommendedEndpoints,
+                      feature: f,
+                      hasSavedObject: hasSavedObject[f.featureId] ?? false,
+                      isFeatureDirty: dirtyFeatureIds.has(f.featureId),
+                    }))}
+                    onEndpointsChange={updateEndpoints}
+                    invalidEndpointIds={invalidEndpointIds}
+                    deprecatedEndpointsMap={deprecatedEndpointsMap}
+                    isBeta={section.isBeta}
+                    isTechPreview={section.isTechPreview}
+                    globalDefaultId={defaultModelState.defaultModelId}
+                  />
+                  <EuiSpacer size="xl" />
+                </React.Fragment>
+              ))
+            )}
+          </>
         )}
       </EuiPageTemplate.Section>
-
-      {resetParentKey && (
-        <ResetDefaultsModal
-          onConfirm={handleResetConfirm}
-          onCancel={() => setResetParentKey(null)}
-        />
-      )}
 
       {pendingLocation && (
         <UnsavedChangesModal

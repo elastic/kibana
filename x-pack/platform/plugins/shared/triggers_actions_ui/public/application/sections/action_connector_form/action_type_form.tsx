@@ -28,8 +28,10 @@ import {
   EuiSplitPanel,
   useEuiTheme,
   EuiCallOut,
+  EuiLoadingSpinner,
   EuiSwitch,
   EuiFormPrepend,
+  EuiToolTip,
 } from '@elastic/eui';
 import { isEmpty, partition, some } from 'lodash';
 import type {
@@ -52,6 +54,7 @@ import {
 import { checkActionFormActionTypeEnabled, transformActionVariables } from '@kbn/alerts-ui-shared';
 import type { ActionGroupWithMessageVariables } from '@kbn/triggers-actions-ui-types';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared/src/common/hooks';
+import { useActionTypeModel } from '@kbn/alerts-ui-shared/src/common/hooks/use_action_type_model';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
 import { getIsExperimentalFeatureEnabled } from '../../../common/get_experimental_features';
 import type {
@@ -158,6 +161,7 @@ export const ActionTypeForm = ({
     notifications,
     unifiedSearch,
     data,
+    uiSettings,
   } = useKibana().services;
 
   const { euiTheme } = useEuiTheme();
@@ -259,7 +263,10 @@ export const ActionTypeForm = ({
   ]);
 
   const getDefaultParams = async () => {
-    const connectorType = await actionTypeRegistry.get(actionItem.actionTypeId);
+    if (!actionTypeRegistry.has(actionItem.actionTypeId)) {
+      return undefined;
+    }
+    const connectorType = actionTypeRegistry.get(actionItem.actionTypeId);
     let defaultParams;
     if (actionItem.group === recoveryActionGroup) {
       defaultParams = connectorType.defaultRecoveredActionParams;
@@ -412,21 +419,25 @@ export const ActionTypeForm = ({
     setActionFrequencyProperty('summary', summary, index);
   };
 
-  const actionNotifyWhen = (
-    <RuleActionsNotifyWhen
-      frequency={actionItem.frequency}
-      throttle={actionThrottle}
-      throttleUnit={actionThrottleUnit}
-      hasAlertsMappings={hasAlertsMappings}
-      onChange={onActionFrequencyChange}
-      showMinimumThrottleWarning={showMinimumThrottleWarning}
-      showMinimumThrottleUnitWarning={showMinimumThrottleUnitWarning}
-      notifyWhenSelectOptions={notifyWhenSelectOptions}
-      onUseDefaultMessage={() => setUseDefaultMessage(true)}
-    />
-  );
+  const { actionTypeModel: actionTypeRegistered, isLoading: isLoadingActionTypeModel } =
+    useActionTypeModel({
+      actionTypeRegistry,
+      actionTypeId:
+        actionTypesIndex[actionConnector.actionTypeId]?.id ?? actionConnector.actionTypeId,
+      http,
+      uiSettings,
+    });
 
-  const actionTypeRegistered = actionTypeRegistry.get(actionConnector.actionTypeId);
+  if (isLoadingActionTypeModel) {
+    return (
+      <EuiFlexGroup justifyContent="center">
+        <EuiFlexItem grow={false}>
+          <EuiLoadingSpinner size="m" data-test-subj="actionTypeFormLoading" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
   if (!actionTypeRegistered) return null;
   const allowGroupConnector = (actionTypeRegistered?.subtype ?? []).map((atr) => atr.id);
 
@@ -449,6 +460,24 @@ export const ActionTypeForm = ({
   const ruleType = ruleTypeId ? ruleTypesState.data.get(ruleTypeId) : null;
 
   const showActionAlertsFilter = ruleType?.hasAlertsMappings || producerId === AlertConsumers.SIEM;
+
+  const isRecoveredActionGroup =
+    !!selectedActionGroup?.id && selectedActionGroup.id === ruleType?.recoveryActionGroup?.id;
+
+  const actionNotifyWhen = (
+    <RuleActionsNotifyWhen
+      frequency={actionItem.frequency}
+      throttle={actionThrottle}
+      throttleUnit={actionThrottleUnit}
+      hasAlertsMappings={hasAlertsMappings}
+      onChange={onActionFrequencyChange}
+      showMinimumThrottleWarning={showMinimumThrottleWarning}
+      showMinimumThrottleUnitWarning={showMinimumThrottleUnitWarning}
+      notifyWhenSelectOptions={notifyWhenSelectOptions}
+      onUseDefaultMessage={() => setUseDefaultMessage(true)}
+      isRecoveredActionGroup={isRecoveredActionGroup}
+    />
+  );
 
   const accordionContent = checkEnabledResult.isEnabled ? (
     <>
@@ -648,7 +677,7 @@ export const ActionTypeForm = ({
                 </EuiFlexItem>
               ) : (
                 <EuiFlexItem grow={false}>
-                  <EuiIcon type={actionTypeRegistered.iconClass} size="m" />
+                  <EuiIcon type={actionTypeRegistered.iconClass} size="m" aria-hidden={true} />
                 </EuiFlexItem>
               )}
               <EuiFlexItem>
@@ -737,18 +766,28 @@ export const ActionTypeForm = ({
             </EuiFlexGroup>
           }
           extraAction={
-            <EuiButtonIcon
-              iconType="minusCircle"
-              color="danger"
-              className="actAccordionActionForm__extraAction"
-              aria-label={i18n.translate(
+            <EuiToolTip
+              content={i18n.translate(
                 'xpack.triggersActionsUI.sections.actionTypeForm.accordion.deleteIconAriaLabel',
                 {
                   defaultMessage: 'Delete',
                 }
               )}
-              onClick={onDeleteAction}
-            />
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                iconType="minusCircle"
+                color="danger"
+                className="actAccordionActionForm__extraAction"
+                aria-label={i18n.translate(
+                  'xpack.triggersActionsUI.sections.actionTypeForm.accordion.deleteIconAriaLabel',
+                  {
+                    defaultMessage: 'Delete',
+                  }
+                )}
+                onClick={onDeleteAction}
+              />
+            </EuiToolTip>
           }
         >
           {accordionContent}

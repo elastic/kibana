@@ -37,10 +37,13 @@ export const ElasticInferenceServiceModelsHeader = () => {
       description={i18n.translate('xpack.searchInferenceEndpoints.eisModelsPage.description', {
         defaultMessage: 'Manage models and endpoints for Elastic Inference Service',
       })}
+      paddingSize="none"
+      bottomBorder={true}
       rightSideItems={[
         ...(cloud?.isCloudEnabled && billingUrl
           ? [
               <EuiButton
+                data-test-subj="searchInferenceEndpointsElasticInferenceServiceModelsHeaderViewCloudUsageButton"
                 href={billingUrl}
                 target="_blank"
                 iconType="external"
