@@ -156,12 +156,24 @@ export const InvestigationVisualization = ({
     services: { telemetryClient },
   } = useKibana();
   const synthesizeWithFeedback = useSynthesizeWithFeedback();
+  // Debounce the synthesis trigger: EBT fires immediately per click, but the
+  // heavyweight workflow run is coalesced — only the last feedback signal within
+  // 2 s triggers synthesis. The workflow also has concurrency strategy: drop
+  // (max: 1) as a server-side safety net, but debouncing avoids the extra
+  // round-trips entirely.
+  const synthDebounceRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleFeedback = (payload: Omit<InvestigationFeedbackPayload, 'discovery_id'>) => {
     if (!discoveryId) return;
     const full = { ...payload, discovery_id: discoveryId };
+    // EBT: fire immediately so every individual signal is tracked.
     telemetryClient.trackInvestigationFeedback(full);
-    synthesizeWithFeedback.mutate(full);
+    // Synthesis: debounce so rapid multi-button feedback on one discovery
+    // collapses into a single workflow trigger.
+    if (synthDebounceRef.current) clearTimeout(synthDebounceRef.current);
+    synthDebounceRef.current = setTimeout(() => {
+      synthesizeWithFeedback.mutate(full);
+    }, 2000);
   };
   const discardedAccordionId = useGeneratedHtmlId();
   const remediationAccordionId = useGeneratedHtmlId();
