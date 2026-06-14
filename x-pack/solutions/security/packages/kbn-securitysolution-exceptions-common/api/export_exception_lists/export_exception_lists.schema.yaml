@@ -20,7 +20,7 @@ paths:
             maxLength: 10000
         - name: include_expired_exceptions
           in: query
-          required: true
+          required: false
           description: Determines whether to include expired exceptions in the exported list. Expiration date defined by `expire_time`.
           schema:
             type: string
@@ -87,7 +87,7 @@ paths:
                   value:
                     statusCode: 403
                     error: Forbidden
-                    message: 'API [POST /api/exception_lists/_export] is unauthorized for user, this action is granted by the Kibana privileges [lists-all]'
+                    message: 'API [POST /api/exception_lists/_bulk_export] is unauthorized for user, this action is granted by the Kibana privileges [lists-all]'
         500:
           description: Internal server error response
           content:

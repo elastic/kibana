@@ -7,7 +7,6 @@
 
 import type { ToolingLog } from '@kbn/tooling-log';
 import type SuperTest from 'supertest';
-import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { EXCEPTION_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 
 /**
@@ -21,7 +20,7 @@ export const deleteExceptionListItem = async (
   supertest: SuperTest.Agent,
   log: ToolingLog,
   itemId: string
-): Promise<RuleResponse> => {
+): Promise<unknown> => {
   const response = await supertest
     .delete(`${EXCEPTION_LIST_ITEM_URL}?item_id=${itemId}`)
     .set('kbn-xsrf', 'true');
