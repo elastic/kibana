@@ -20,8 +20,8 @@ export const ruleAttachmentDataSchema = securityAttachmentDataSchema.extend({
    * Present when the attachment was created by investigate-rule.resolve_rule_attachment
    * (i.e. the user selected a rule from find-rules output rather than creating a new one).
    */
-  origin: z.string().optional(),
-  text: z.string(),
+  origin: z.string().max(512).optional(),
+  text: z.string().max(100_000),
 });
 
 const DETECTION_RULE_SKILL_NAME_ID = 'detection-rule-edit';
