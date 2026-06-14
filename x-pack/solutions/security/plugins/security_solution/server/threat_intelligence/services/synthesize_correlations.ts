@@ -8,6 +8,7 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import { z } from '@kbn/zod/v4';
+import { isToolValidationError } from '@kbn/inference-common';
 import { THREAT_REPORTS_INDEX_PATTERN } from '../../../common/threat_intelligence/hub';
 import type {
   CorrelationFindings,
@@ -696,12 +697,17 @@ export const synthesizeCorrelations = async ({
     const pickIdsSet = new Set(pickIds);
     return mapLlmOutputToFindings(llmOutput, labelToCollapsed, pickIdsSet, logger);
   } catch (err) {
-    const e = err as Error;
+    const e = err instanceof Error ? err : new Error(String(err));
     const stackLines = (e.stack ?? '').split('\n').slice(0, 3).join(' | ');
     // [TEMP DIAGNOSTIC — remove after root-cause confirmed]
-    const diagnostic =
+    let diagnostic =
       `[TEMP DIAGNOSTIC — remove after root-cause] caught throw: ` +
       `${e.name}: ${e.message} | stack: ${stackLines}`;
+    if (isToolValidationError(e)) {
+      diagnostic +=
+        ` | errorsText=${e.meta.errorsText ?? '(none)'}` +
+        ` | arguments=${(e.meta.arguments ?? '').slice(0, 1000)}`;
+    }
     logger.warn(`[ti:synthesize] LLM call failed — ${diagnostic}`);
     return buildGracefulDegradation(picks, bodyTextMap, diagnostic);
   }
