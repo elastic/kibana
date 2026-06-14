@@ -7,6 +7,7 @@
 
 import React, { useMemo } from 'react';
 import {
+  EuiButton,
   EuiFlyout,
   EuiFlyoutHeader,
   EuiFlyoutBody,
@@ -24,11 +25,15 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import useObservable from 'react-use/lib/useObservable';
+import { OBSERVABILITY_STREAMS_ENABLE_INVESTIGATION } from '@kbn/management-settings-ids';
 import type { Discovery } from '@kbn/streams-schema';
 import { formatTimestamp } from '../../../../../util/formatters';
 import { CHANGE_TYPE_LABELS, DISCOVERY_KIND_LABELS } from '../shared/translations';
 import { DISCOVERY_KIND_COLORS } from '../shared/constants';
 import { InvestigationVisualization } from '../investigation/investigation_visualization';
+import { useInvestigateDiscovery } from '../../../../../hooks/sig_events/use_investigate_discovery';
+import { useKibana } from '../../../../../hooks/use_kibana';
 
 const timelineLabel = (entry: Discovery, prev: Discovery | undefined): string => {
   const criticality = entry.criticality ?? '-';
@@ -74,6 +79,16 @@ export const DiscoveryFlyout = ({
   onClose,
 }: DiscoveryFlyoutProps) => {
   const titleId = useGeneratedHtmlId();
+  const {
+    core: { uiSettings },
+  } = useKibana();
+  const isInvestigationEnabled = useObservable(
+    uiSettings.get$(OBSERVABILITY_STREAMS_ENABLE_INVESTIGATION),
+    false
+  );
+  const investigateMutation = useInvestigateDiscovery();
+  const [investigationStarted, setInvestigationStarted] = React.useState(false);
+  const isInvestigateError = investigateMutation.isError;
 
   const streams = useMemo(() => {
     const names = [
@@ -111,12 +126,43 @@ export const DiscoveryFlyout = ({
   return (
     <EuiFlyout onClose={onClose} size="m" aria-labelledby={titleId}>
       <EuiFlyoutHeader hasBorder>
-        <EuiFlexGroup alignItems="center" gutterSize="s" wrap>
+        <EuiFlexGroup alignItems="center" gutterSize="s" wrap justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiBadge color={DISCOVERY_KIND_COLORS[discovery.kind] ?? 'default'}>
               {DISCOVERY_KIND_LABELS[discovery.kind] ?? discovery.kind}
             </EuiBadge>
           </EuiFlexItem>
+          {isInvestigationEnabled && (
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                size="s"
+                iconType="inspect"
+                isLoading={investigateMutation.isLoading}
+                isDisabled={investigationStarted && !isInvestigateError}
+                color={isInvestigateError ? 'danger' : 'primary'}
+                onClick={() => {
+                  investigateMutation.reset();
+                  setInvestigationStarted(false);
+                  investigateMutation.mutate(discovery.discovery_slug, {
+                    onSuccess: () => setInvestigationStarted(true),
+                  });
+                }}
+                data-test-subj="discovery_flyout_investigate_button"
+              >
+                {investigationStarted
+                  ? i18n.translate('xpack.streams.discoveryFlyout.investigationStarted', {
+                      defaultMessage: 'Investigation started',
+                    })
+                  : discovery.investigation
+                  ? i18n.translate('xpack.streams.discoveryFlyout.reInvestigate', {
+                      defaultMessage: 'Re-investigate',
+                    })
+                  : i18n.translate('xpack.streams.discoveryFlyout.investigate', {
+                      defaultMessage: 'Investigate',
+                    })}
+              </EuiButton>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
         <EuiSpacer size="s" />
         <EuiTitle size="m">
