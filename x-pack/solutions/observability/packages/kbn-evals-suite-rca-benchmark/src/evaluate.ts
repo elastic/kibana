@@ -57,6 +57,7 @@ export const evaluate = base.extend<
         await executorClient.runExperiment(
           {
             datasets: [{ name, description, examples } satisfies EvaluationDataset],
+            concurrency: 1,
             task: async ({ input }) => {
               const { question, attachments } = input as RcaEvalExample['input'];
 

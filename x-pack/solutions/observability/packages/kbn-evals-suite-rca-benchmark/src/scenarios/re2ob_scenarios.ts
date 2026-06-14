@@ -27,15 +27,17 @@ function scenario(service: string, faultType: string): RcaScenario {
   };
 }
 
+/**
+ * Scenarios with local CSV data extracted from the RCAEval RE2-OB Zenodo dataset.
+ * Add a row here + capture a GCS snapshot (scripts/capture_re2ob_snapshot) to
+ * include a scenario in CI. Local runs only need RCAEVAL_DATA_DIR to point at the
+ * extracted RE2-OB directory.
+ */
 export const RE2OB_SCENARIOS: RcaScenario[] = [
   scenario('currencyservice', 'loss'),
-  scenario('currencyservice', 'cpu'),
-  scenario('cartservice', 'mem'),
-  scenario('cartservice', 'delay'),
-  scenario('checkoutservice', 'cpu'),
   scenario('checkoutservice', 'delay'),
-  scenario('paymentservice', 'disk'),
+  scenario('checkoutservice', 'mem'),
+  scenario('emailservice', 'cpu'),
   scenario('productcatalogservice', 'cpu'),
-  scenario('recommendationservice', 'mem'),
-  scenario('shippingservice', 'loss'),
+  scenario('recommendationservice', 'socket'),
 ];

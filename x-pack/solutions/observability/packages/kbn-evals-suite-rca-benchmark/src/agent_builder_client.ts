@@ -70,10 +70,13 @@ export class AgentBuilderClient {
 
     try {
       return await pRetry(call, {
-        retries: 2,
-        minTimeout: 2000,
+        retries: 4,
+        minTimeout: 10_000,
+        factor: 1.5,
         onFailedAttempt: (err) => {
-          this.log.warning(`Converse API attempt ${err.attemptNumber} failed; retrying…`);
+          this.log.warning(
+            `Converse API attempt ${err.attemptNumber} failed (${err.retriesLeft} left); retrying…`
+          );
         },
       });
     } catch (err) {
