@@ -10,9 +10,11 @@ import { esql } from '@elastic/esql';
 import type { ESQLAstExpression } from '@elastic/esql/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import {
+  type BulkCreateOptions,
   type CommonSearchOptions,
   type PaginatedSearchOptions,
   type PaginatedResponse,
+  throwOnBulkCreateErrors,
 } from '../query_utils';
 import {
   andWhere,
@@ -68,11 +70,17 @@ export class EventClient {
     return where;
   }
 
-  async bulkCreate(events: SigEvent[]) {
-    return this.clients.dataStreamClient.create({
+  async bulkCreate(events: SigEvent[], { throwOnFail = false }: BulkCreateOptions = {}) {
+    const response = await this.clients.dataStreamClient.create({
       space: this.clients.space,
       documents: events,
     });
+
+    if (throwOnFail) {
+      throwOnBulkCreateErrors(response);
+    }
+
+    return response;
   }
 
   async findLatest(options: CommonSearchOptions = {}): Promise<{ hits: SigEvent[] }> {

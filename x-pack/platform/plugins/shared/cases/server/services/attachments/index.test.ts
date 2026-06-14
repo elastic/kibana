@@ -487,9 +487,12 @@ describe('AttachmentService', () => {
       const unifiedEndpointAttrs = {
         type: 'security.endpoint',
         attachmentId: 'sec-endpoint-1',
+        // Post-lift wire shape: analyst comment lives on `data.content`, metadata
+        // carries only the machine-derived facts (`command`, `targets`). The legacy
+        // round-trip lowers `data.content` back into `externalReferenceMetadata.comment`.
+        data: { content: 'isolated by op' },
         metadata: {
           command: 'isolate',
-          comment: 'isolated by op',
           targets: [
             {
               endpointId: 'endpoint-1',
