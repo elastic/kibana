@@ -162,6 +162,11 @@ export const InvestigationVisualization = ({
   // (max: 1) as a server-side safety net, but debouncing avoids the extra
   // round-trips entirely.
   const synthDebounceRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  React.useEffect(() => {
+    return () => {
+      if (synthDebounceRef.current) clearTimeout(synthDebounceRef.current);
+    };
+  }, []);
 
   const handleFeedback = (payload: Omit<InvestigationFeedbackPayload, 'discovery_id'>) => {
     if (!discoveryId) return;
