@@ -99,6 +99,31 @@ const columns: Array<EuiBasicTableColumn<Discovery>> = [
     width: '100px',
     render: (value: number | undefined) => (value != null ? `${value}%` : '-'),
   },
+  {
+    name: i18n.translate('xpack.streams.discoveriesTab.investigationColumn', {
+      defaultMessage: 'Investigation',
+    }),
+    width: '120px',
+    render: (discovery: Discovery) => {
+      if (!discovery.investigation) return null;
+      if (discovery.investigation.investigation_complete) {
+        return (
+          <EuiBadge color="success">
+            {i18n.translate('xpack.streams.discoveriesTab.investigationComplete', {
+              defaultMessage: 'Complete',
+            })}
+          </EuiBadge>
+        );
+      }
+      return (
+        <EuiBadge color="warning">
+          {i18n.translate('xpack.streams.discoveriesTab.investigationIncomplete', {
+            defaultMessage: 'Incomplete',
+          })}
+        </EuiBadge>
+      );
+    },
+  },
 ];
 
 const DEFAULT_DISCOVERIES_RANGE = { from: 'now-7d', to: 'now' };
