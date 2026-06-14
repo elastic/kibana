@@ -31,6 +31,7 @@ dependsOn:
   - '@kbn/alerting-plugin'
   - '@kbn/features-plugin'
   - '@kbn/license-management-plugin'
+  - '@kbn/ml-common-types'
   - '@kbn/ml-plugin'
   - '@kbn/observability-plugin'
   - '@kbn/spaces-plugin'
@@ -146,6 +147,7 @@ dependsOn:
   - '@kbn/cps-utils'
   - '@kbn/es-query-constants'
   - '@kbn/cps'
+  - '@kbn/core-spaces-common'
 tags:
   - plugin
   - prod

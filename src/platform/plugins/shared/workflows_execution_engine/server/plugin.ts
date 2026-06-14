@@ -70,7 +70,10 @@ import type {
   WorkflowsExecutionEnginePluginStartDeps,
 } from './types';
 import { generateExecutionTaskScope } from './utils';
-import { buildWorkflowContext } from './workflow_context_manager/build_workflow_context';
+import {
+  buildWorkflowContext,
+  type WorkflowExecutionForInputRendering,
+} from './workflow_context_manager/build_workflow_context';
 import type { ContextDependencies } from './workflow_context_manager/types';
 import { WorkflowEventLoggerService } from './workflow_event_logger';
 import type {
@@ -699,7 +702,7 @@ export class WorkflowsExecutionEnginePlugin
       defaultTriggeredBy: string;
       authenticatedUser: string;
       now: Date;
-    }): Partial<EsWorkflowExecution> => {
+    }): WorkflowExecutionForInputRendering => {
       const { workflow, context, defaultTriggeredBy, authenticatedUser, now } = args;
       const triggeredBy = (context.triggeredBy as string | undefined) || defaultTriggeredBy;
       const spaceId = (context.spaceId as string | undefined) || 'default';
@@ -723,7 +726,7 @@ export class WorkflowsExecutionEnginePlugin
       );
       const dispatchEventId =
         typeof metadata?.eventId === 'string' ? metadata.eventId.trim() || undefined : undefined;
-      const workflowExecution: Partial<EsWorkflowExecution> = {
+      const workflowExecution: WorkflowExecutionForInputRendering = {
         id: generateUuid(),
         spaceId,
         workflowId: workflow.id,
@@ -762,7 +765,7 @@ export class WorkflowsExecutionEnginePlugin
       request: KibanaRequest,
       options: { refresh: boolean | 'wait_for' } = { refresh: false }
     ): Promise<{
-      workflowExecution: Partial<EsWorkflowExecution>;
+      workflowExecution: WorkflowExecutionForInputRendering;
       repository: WorkflowExecutionRepository;
     }> => {
       await this.initialize(coreStart);
@@ -879,21 +882,16 @@ export class WorkflowsExecutionEnginePlugin
         { refresh: true }
       );
 
-      const executionId = workflowExecution.id;
-      if (!executionId) {
-        throw new Error('Workflow execution ID is required');
-      }
-
       const inputsValid = await validateWorkflowInputs(
-        workflow,
-        context,
-        executionId,
+        workflowExecution,
         workflowExecutionRepository,
-        this.logger
+        this.logger,
+        coreStart,
+        dependencies
       );
       if (!inputsValid) {
         return {
-          workflowExecutionId: executionId,
+          workflowExecutionId: workflowExecution.id,
         };
       }
 
@@ -902,7 +900,7 @@ export class WorkflowsExecutionEnginePlugin
       if (!canProceed) {
         // Execution was dropped due to concurrency limit, return execution ID
         return {
-          workflowExecutionId: executionId,
+          workflowExecutionId: workflowExecution.id,
         };
       }
 
@@ -918,8 +916,8 @@ export class WorkflowsExecutionEnginePlugin
         const [, , workflowsExecutionEngine] = await this.coreSetup.getStartServices();
 
         await runWorkflow({
-          workflowRunId: executionId,
-          spaceId: workflowExecution.spaceId || 'default',
+          workflowRunId: workflowExecution.id,
+          spaceId: workflowExecution.spaceId,
           taskAbortController: new AbortController(), // TODO: We need to think how to pass this properly from outer task
           logger: this.logger,
           config: this.config,
@@ -941,7 +939,7 @@ export class WorkflowsExecutionEnginePlugin
       }
 
       return {
-        workflowExecutionId: executionId,
+        workflowExecutionId: workflowExecution.id,
       };
     };
 
@@ -1494,6 +1492,8 @@ export class WorkflowsExecutionEnginePlugin
       ...workflowExecution,
     } as EsWorkflowExecution;
 
+    // Concurrency keys are evaluated before validateWorkflowInputs renders and persists inputs.
+    // Liquid-rendered input defaults or templated input values are not supported here.
     return this.concurrencyManager.evaluateConcurrencyKey(
       concurrencySettings,
       buildWorkflowContext(normalizedWorkflowExecution, coreStart, dependencies)
