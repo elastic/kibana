@@ -1,6 +1,6 @@
 version: "1"
 name: ".significant-events-orchestrator"
-description: "Sequences detection, discovery, and triage. Each workflow handles its own idle-skip logic."
+description: "Sequences detection, discovery, triage, and investigation. Each workflow handles its own idle-skip logic."
 enabled: true
 tags:
   - observability
@@ -17,9 +17,23 @@ settings:
     # Sub-workflows exit cancelled (idle) or may fail transiently — always continue
     # so detection failure never blocks discovery/triage and vice-versa.
     continue: true
+consts:
+  EVENTS_INDEX: ".significant_events-events"
+  VERDICT_PROMOTED: "promoted"
+  # Short window: only capture promotions that happened in this triage cycle.
+  # This avoids the filter-before-collapse trap (discoveries are append-only so
+  # must_not-exists on the original doc never deduplicates against the write-back
+  # doc). Any remaining duplicates are handled by the investigation workflow's
+  # cancel-in-progress concurrency key.
+  INVESTIGATION_NEW_PROMOTION_WINDOW: "now-10m"
 triggers:
   - type: manual
 steps:
+  - name: set_space_vars
+    type: data.set
+    with:
+      spaceId: "{{ workflow.spaceId }}"
+
   - name: detect
     type: workflow.execute
     with:
@@ -34,3 +48,59 @@ steps:
     type: workflow.execute
     with:
       workflow-id: "system-significant-events-triage"
+
+  # After triage, query .significant_events-events for promotions that happened
+  # in this cycle's window. We query the events index (where verdict is stored),
+  # not the discoveries index (which has no verdict field and whose append-only
+  # write pattern makes post-collapse existence checks unreliable).
+  # The short INVESTIGATION_NEW_PROMOTION_WINDOW naturally deduplicates across
+  # cycles; the investigation workflow's cancel-in-progress handles any overlap.
+  - name: get_recently_promoted_events
+    type: elasticsearch.request
+    with:
+      method: POST
+      path: '/{{ consts.EVENTS_INDEX }}/_search?ignore_unavailable=true'
+      body:
+        size: 10
+        collapse:
+          field: discovery_id
+        sort:
+          - "@timestamp":
+              order: desc
+        query:
+          bool:
+            filter:
+              - term:
+                  "kibana.space_ids": "{{ variables.spaceId }}"
+              - term:
+                  verdict: "{{ consts.VERDICT_PROMOTED }}"
+              - exists:
+                  field: discovery_id
+              - range:
+                  "@timestamp":
+                    gte: "{{ consts.INVESTIGATION_NEW_PROMOTION_WINDOW }}"
+    on-failure:
+      continue: true
+
+  - name: trigger_investigations
+    type: foreach
+    if: "${{ steps.get_recently_promoted_events.output.hits.total.value > 0 }}"
+    foreach: "${{ steps.get_recently_promoted_events.output.hits.hits | map: '_source' | default: [] }}"
+    steps:
+      - name: start_investigation
+        type: workflow.executeAsync
+        with:
+          workflow-id: "system-streams-sigevents-investigation"
+          inputs:
+            event_id: "{{ foreach.item.event_id }}"
+            discovery_id: "{{ foreach.item.discovery_id }}"
+            discovery_slug: "{{ foreach.item.discovery_slug }}"
+            title: "{{ foreach.item.title }}"
+            summary: "{{ foreach.item.summary }}"
+            root_cause: "{{ foreach.item.root_cause }}"
+            impact: "{{ foreach.item.impact }}"
+            stream_names: "${{ foreach.item.stream_names | default: [] }}"
+            cause_kis: "${{ foreach.item.cause_kis | default: [] }}"
+            evidences: "${{ foreach.item.evidences | default: [] }}"
+        on-failure:
+          continue: true
