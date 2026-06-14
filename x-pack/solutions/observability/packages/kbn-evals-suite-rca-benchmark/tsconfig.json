@@ -16,6 +16,9 @@
     "@kbn/evals",
     "@kbn/tooling-log",
     "@kbn/core",
-    "@kbn/agent-builder-common"
+    "@kbn/agent-builder-common",
+    "@kbn/es-snapshot-loader",
+    "@kbn/scout",
+    "@kbn/dev-cli-runner"
   ]
 }

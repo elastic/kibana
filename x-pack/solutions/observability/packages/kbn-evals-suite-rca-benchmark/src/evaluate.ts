@@ -10,20 +10,40 @@ import {
   createToolCallsEvaluator,
   createSpanLatencyEvaluator,
   type EvaluationDataset,
+  type Example,
 } from '@kbn/evals';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { AgentBuilderClient } from './agent_builder_client';
-import type { RcaExample, EvaluateRcaDataset, RcaTaskOutput } from './types';
-import { createCriteriaFromGroundTruth } from './judges/criteria_from_ground_truth';
+import type { ConverseAttachment } from './agent_builder_client';
+import { createCriteriaEvaluator } from './criteria_evaluator';
+
+export interface RcaEvalExample extends Example {
+  input: {
+    question: string;
+    attachments?: ConverseAttachment[];
+  };
+  output: {
+    criteria: string[];
+  };
+  metadata?: Record<string, string>;
+}
+
+export type EvaluateRcaDataset = (params: {
+  dataset: {
+    name: string;
+    description: string;
+    examples: RcaEvalExample[];
+  };
+}) => Promise<void>;
 
 export const evaluate = base.extend<
   {},
   {
-    agentClient: AgentBuilderClient;
-    evaluateRcaDataset: EvaluateRcaDataset;
+    chatClient: AgentBuilderClient;
+    evaluateDataset: EvaluateRcaDataset;
   }
 >({
-  agentClient: [
+  chatClient: [
     async ({ fetch, log, connector }, use) => {
       const client = new AgentBuilderClient(fetch, log, connector.id, agentBuilderDefaultAgentId);
       await use(client);
@@ -31,76 +51,32 @@ export const evaluate = base.extend<
     { scope: 'worker' },
   ],
 
-  evaluateRcaDataset: [
-    ({ agentClient, evaluators, executorClient, traceEsClient, log }, use) => {
+  evaluateDataset: [
+    ({ chatClient, evaluators, executorClient, traceEsClient, log }, use) => {
       use(async ({ dataset: { name, description, examples } }) => {
         await executorClient.runExperiment(
           {
             datasets: [{ name, description, examples } satisfies EvaluationDataset],
-            task: async ({ input }): Promise<RcaTaskOutput> => {
-              const { question, streamName, timeRange } = input as RcaExample['input'];
+            task: async ({ input }) => {
+              const { question, attachments } = input as RcaEvalExample['input'];
 
-              const prompt = buildRcaPrompt(question, streamName, timeRange);
-
-              const response = await agentClient.converse({
-                messages: prompt,
-                attachments: [
-                  {
-                    type: 'screen_context',
-                    data: {
-                      app: 'observability-overview',
-                      time_range: timeRange,
-                    },
-                    hidden: true,
-                  },
-                ],
-              });
-
-              const responseText =
-                response.messages[response.messages.length - 1]?.content ?? '';
-
-              const toolCalls = (response.steps ?? [])
-                .filter((s: any) => s.type === 'tool_call')
-                .map((s: any) => s.tool_id as string);
+              const response = await chatClient.converse({ messages: question, attachments });
 
               return {
-                responseText,
-                toolCalls,
-                conversationId: response.conversationId,
-                traceId: response.traceId,
                 errors: response.errors,
+                messages: response.messages,
+                steps: response.steps,
+                traceId: response.traceId,
               };
             },
           },
           [
-            {
-              name: 'Criteria',
-              kind: 'LLM' as const,
-              evaluate: async ({ output, expected, input, metadata }: any) => {
-                const rcaOutput = output as RcaTaskOutput;
-                const groundTruth = (expected as RcaExample['output']).groundTruth;
-                const extraCriteria = (expected as RcaExample['output']).criteria ?? [];
-
-                const criteria = [
-                  ...createCriteriaFromGroundTruth(groundTruth),
-                  ...extraCriteria,
-                ];
-
-                return evaluators
-                  .criteria(criteria)
-                  .evaluate({
-                    input,
-                    expected,
-                    output: { responseText: rcaOutput.responseText },
-                    metadata,
-                  });
-              },
-            },
+            createCriteriaEvaluator({ evaluators }),
             createToolCallsEvaluator({ traceEsClient, log }),
-            createSpanLatencyEvaluator({ traceEsClient, log, spanName: 'ChatComplete' }),
             evaluators.traceBasedEvaluators.inputTokens,
             evaluators.traceBasedEvaluators.outputTokens,
             evaluators.traceBasedEvaluators.cachedTokens,
+            createSpanLatencyEvaluator({ traceEsClient, log, spanName: 'ChatComplete' }),
           ]
         );
       });
@@ -108,22 +84,3 @@ export const evaluate = base.extend<
     { scope: 'worker' },
   ],
 });
-
-function buildRcaPrompt(
-  question: string,
-  streamName: string,
-  timeRange: { from: string; to: string }
-): string {
-  return (
-    `You are performing root cause analysis for an observability incident.\n` +
-    `Data stream: ${streamName}\n` +
-    `Time window: ${timeRange.from} to ${timeRange.to}\n\n` +
-    `${question}\n\n` +
-    `Investigate using available tools. ` +
-    `When you have reached a conclusion, state:\n` +
-    `- The root cause component (service, pod, or system)\n` +
-    `- The failure reason\n` +
-    `- The supporting evidence from the telemetry\n` +
-    `If you cannot determine the root cause, explain what you found and why you cannot reach a conclusion.`
-  );
-}
