@@ -12,6 +12,13 @@ import { streamsManagementSkill } from './streams_management_skill';
 import { knowledgeIndicatorsManagementSkill } from './knowledge_indicators_management';
 import { createKiIdentificationManagementSkill } from './ki_identification_management';
 import { sigEventsManagementSkill } from './sig_events_management';
+import {
+  investigationContextSkill,
+  hypothesisGatherSkill,
+  hypothesisReviewSkill,
+  investigationSynthesisSkill,
+  investigationRunnerSkill,
+} from './investigation';
 
 export const registerAgentBuilderSkills = ({
   agentBuilder,
@@ -30,6 +37,11 @@ export const registerAgentBuilderSkills = ({
     streamsManagementSkill,
     knowledgeIndicatorsManagementSkill,
     sigEventsManagementSkill,
+    investigationContextSkill,
+    hypothesisGatherSkill,
+    hypothesisReviewSkill,
+    investigationSynthesisSkill,
+    investigationRunnerSkill,
     ...(streamsKIsOnboardingClient
       ? [createKiIdentificationManagementSkill({ telemetry, streamsKIsOnboardingClient })]
       : []),

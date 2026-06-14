@@ -63,6 +63,7 @@ export interface StreamsServer {
   taskManager: TaskManagerStartContract;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
   workflowsManagement?: WorkflowsServerPluginSetup;
+  workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
   spaces?: SpacesPluginStart;
 }
 
