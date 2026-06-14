@@ -99,7 +99,7 @@ type AlertingV2FeaturePrivilege = Pick<
 
 type AlertingV2SubFeaturePrivilege = Omit<
   SubFeaturePrivilegeConfig,
-  'api' | 'ui' | 'savedObject' | 'alerts'
+  'api' | 'ui' | 'savedObject'
 > & {
   readonly api: readonly AlertingV2ApiPrivilege[];
   readonly ui: readonly AlertingV2UICapability[];
