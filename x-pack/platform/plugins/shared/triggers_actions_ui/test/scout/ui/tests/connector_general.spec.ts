@@ -369,6 +369,11 @@ test.describe('General connector functionality', { tag: tags.stateful.classic },
     apiServices,
     pageObjects,
   }) => {
+    // Waiting for the rule's first execution depends on task manager picking up the
+    // run-soon task (or the 1m scheduled fire) plus the event-log write, which can
+    // exceed the default 60s test timeout under CI load. Give this test extra budget.
+    test.setTimeout(150_000);
+
     // Create an ES query rule that always executes (substitute for test.always-firing)
     const ruleName = `scout-exec-log-${Date.now()}`;
     const createResp = await apiServices.alerting.rules.create({
@@ -406,7 +411,7 @@ test.describe('General connector functionality', { tag: tags.stateful.classic },
       ruleId,
       1,
       undefined,
-      30_000,
+      90_000,
       dateStart
     );
 
