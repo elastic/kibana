@@ -59,8 +59,17 @@ test.describe('General connector functionality', { tag: tags.stateful.classic },
     const connectorName = `scout-slack-${uuidv4().slice(0, 8)}`;
 
     await page.testSubj.click('createConnectorButton');
+
+    // Wait for the connector-type card grid to finish loading and settle before
+    // clicking, otherwise the click can land on a card node React is re-creating as
+    // the action-type list/capabilities resolve, silently losing the selection so
+    // the back button never appears. Waiting for a sibling card proves the grid is
+    // painted; then confirm the selection registered before navigating back.
+    await page.testSubj.locator('.slack-card').waitFor({ state: 'visible', timeout: 30_000 });
     await page.testSubj.click('.index-card');
-    await page.testSubj.click('create-connector-flyout-back-btn');
+    const backBtn = page.testSubj.locator('create-connector-flyout-back-btn');
+    await backBtn.waitFor({ state: 'visible', timeout: 30_000 });
+    await backBtn.click();
     await page.testSubj.click('.slack-card');
 
     await waitForConnectorForm(page);
