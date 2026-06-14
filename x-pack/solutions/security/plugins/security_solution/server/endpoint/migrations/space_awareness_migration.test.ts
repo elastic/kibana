@@ -20,7 +20,7 @@ import {
   buildPerPolicyTag,
   buildSpaceOwnerIdTag,
 } from '../../../common/endpoint/service/artifacts/utils';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { EndpointActionGenerator } from '../../../common/endpoint/data_generators/endpoint_action_generator';
 import { applyEsClientSearchMock } from '../mocks/utils.mock';
 import { ENDPOINT_ACTIONS_INDEX } from '../../../common/endpoint/constants';
