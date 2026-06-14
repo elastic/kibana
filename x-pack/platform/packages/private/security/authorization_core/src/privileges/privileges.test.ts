@@ -1284,7 +1284,6 @@ describe('features', () => {
         const actual = privileges.get();
         expect(actual).toHaveProperty(`${group}.all`, [
           actions.login,
-          actions.alerts.read,
           ...(expectDecryptedTelemetry
             ? [actions.api.get(ApiOperation.Read, 'decryptedTelemetry')]
             : []),
@@ -1399,7 +1398,6 @@ describe('features', () => {
 
         const expectedActions = [
           actions.login,
-          actions.alerts.read,
           ...(expectDecryptedTelemetry
             ? [actions.api.get(ApiOperation.Read, 'decryptedTelemetry')]
             : []),
@@ -1501,7 +1499,6 @@ describe('features', () => {
         const actual = privileges.get();
         expect(actual).toHaveProperty(`${group}.read`, [
           actions.login,
-          actions.alerts.read,
           ...(expectDecryptedTelemetry
             ? [actions.api.get(ApiOperation.Read, 'decryptedTelemetry')]
             : []),
@@ -1593,7 +1590,6 @@ describe('features', () => {
 
         const expectedActions = [
           actions.login,
-          actions.alerts.read,
           ...(expectDecryptedTelemetry
             ? [actions.api.get(ApiOperation.Read, 'decryptedTelemetry')]
             : []),
@@ -1664,7 +1660,6 @@ describe('features', () => {
         const actual = privileges.get();
         expect(actual).toHaveProperty(`${group}.all`, [
           actions.login,
-          actions.alerts.read,
           ...(expectDecryptedTelemetry
             ? [actions.api.get(ApiOperation.Read, 'decryptedTelemetry')]
             : []),
@@ -1685,7 +1680,6 @@ describe('features', () => {
         ]);
         expect(actual).toHaveProperty(`${group}.read`, [
           actions.login,
-          actions.alerts.read,
           ...(expectDecryptedTelemetry
             ? [actions.api.get(ApiOperation.Read, 'decryptedTelemetry')]
             : []),
@@ -1739,7 +1733,6 @@ describe('features', () => {
         const actual = privileges.get();
         expect(actual).toHaveProperty(`${group}.all`, [
           actions.login,
-          actions.alerts.read,
           ...(expectDecryptedTelemetry
             ? [actions.api.get(ApiOperation.Read, 'decryptedTelemetry')]
             : []),
@@ -1760,7 +1753,6 @@ describe('features', () => {
         ]);
         expect(actual).toHaveProperty(`${group}.read`, [
           actions.login,
-          actions.alerts.read,
           ...(expectDecryptedTelemetry
             ? [actions.api.get(ApiOperation.Read, 'decryptedTelemetry')]
             : []),
@@ -1843,7 +1835,6 @@ describe('features', () => {
         const actual = privileges.get();
         expect(actual).toHaveProperty(`${group}.all`, [
           actions.login,
-          actions.alerts.read,
           ...(expectDecryptedTelemetry
             ? [actions.api.get(ApiOperation.Read, 'decryptedTelemetry')]
             : []),
@@ -1864,7 +1855,6 @@ describe('features', () => {
         ]);
         expect(actual).toHaveProperty(`${group}.read`, [
           actions.login,
-          actions.alerts.read,
           ...(expectDecryptedTelemetry
             ? [actions.api.get(ApiOperation.Read, 'decryptedTelemetry')]
             : []),
@@ -1919,7 +1909,6 @@ describe('features', () => {
         const actual = privileges.get();
         expect(actual).toHaveProperty(`${group}.all`, [
           actions.login,
-          actions.alerts.read,
           ...(expectDecryptedTelemetry
             ? [actions.api.get(ApiOperation.Read, 'decryptedTelemetry')]
             : []),
@@ -1940,7 +1929,6 @@ describe('features', () => {
         ]);
         expect(actual).toHaveProperty(`${group}.read`, [
           actions.login,
-          actions.alerts.read,
           ...(expectDecryptedTelemetry
             ? [actions.api.get(ApiOperation.Read, 'decryptedTelemetry')]
             : []),
@@ -2024,7 +2012,6 @@ describe('features', () => {
         const actual = privileges.get();
         expect(actual).toHaveProperty(`${group}.all`, [
           actions.login,
-          actions.alerts.read,
           ...(expectDecryptedTelemetry
             ? [actions.api.get(ApiOperation.Read, 'decryptedTelemetry')]
             : []),
@@ -2045,7 +2032,6 @@ describe('features', () => {
         ]);
         expect(actual).toHaveProperty(`${group}.read`, [
           actions.login,
-          actions.alerts.read,
           ...(expectDecryptedTelemetry
             ? [actions.api.get(ApiOperation.Read, 'decryptedTelemetry')]
             : []),
@@ -2253,7 +2239,6 @@ describe('subFeatures', () => {
 
       expect(actual).toHaveProperty('global.all', [
         actions.login,
-        actions.alerts.read,
         actions.api.get(ApiOperation.Read, 'decryptedTelemetry'),
         actions.api.get(ApiOperation.Read, 'features'),
         actions.api.get(ApiOperation.Manage, 'taskManager'),
@@ -2269,22 +2254,13 @@ describe('subFeatures', () => {
       ]);
       expect(actual).toHaveProperty('global.read', [
         actions.login,
-        actions.alerts.read,
         actions.api.get(ApiOperation.Read, 'decryptedTelemetry'),
         actions.ui.get('globalSettings', 'show'),
         actions.ui.get('foo', 'foo'),
       ]);
 
-      expect(actual).toHaveProperty('space.all', [
-        actions.login,
-        actions.alerts.read,
-        actions.ui.get('foo', 'foo'),
-      ]);
-      expect(actual).toHaveProperty('space.read', [
-        actions.login,
-        actions.alerts.read,
-        actions.ui.get('foo', 'foo'),
-      ]);
+      expect(actual).toHaveProperty('space.all', [actions.login, actions.ui.get('foo', 'foo')]);
+      expect(actual).toHaveProperty('space.read', [actions.login, actions.ui.get('foo', 'foo')]);
     });
 
     test(`with replacedBy and without excludeFromBasePrivileges show sub-features in base-privilege: ALL`, () => {
@@ -2768,7 +2744,6 @@ describe('subFeatures', () => {
 
       expect(actual).toHaveProperty('global.all', [
         actions.login,
-        actions.alerts.read,
         actions.api.get(ApiOperation.Read, 'decryptedTelemetry'),
         actions.api.get(ApiOperation.Read, 'features'),
         actions.api.get(ApiOperation.Manage, 'taskManager'),
@@ -2787,7 +2762,6 @@ describe('subFeatures', () => {
       ]);
       expect(actual).toHaveProperty('global.read', [
         actions.login,
-        actions.alerts.read,
         actions.api.get(ApiOperation.Read, 'decryptedTelemetry'),
         actions.ui.get('globalSettings', 'show'),
         ...getAllSavedObjectsActions('all-sub-feature-type'),
@@ -2798,7 +2772,6 @@ describe('subFeatures', () => {
 
       expect(actual).toHaveProperty('space.all', [
         actions.login,
-        actions.alerts.read,
         ...getAllSavedObjectsActions('all-sub-feature-type'),
         ...getReadSavedObjectsActions('read-sub-feature-type'),
         actions.ui.get('foo', 'foo'),
@@ -2806,7 +2779,6 @@ describe('subFeatures', () => {
       ]);
       expect(actual).toHaveProperty('space.read', [
         actions.login,
-        actions.alerts.read,
         ...getAllSavedObjectsActions('all-sub-feature-type'),
         ...getReadSavedObjectsActions('read-sub-feature-type'),
         actions.ui.get('foo', 'foo'),
@@ -2903,7 +2875,6 @@ describe('subFeatures', () => {
 
       expect(actual).toHaveProperty('global.all', [
         actions.login,
-        actions.alerts.read,
         actions.api.get(ApiOperation.Read, 'decryptedTelemetry'),
         actions.api.get(ApiOperation.Read, 'features'),
         actions.api.get(ApiOperation.Manage, 'taskManager'),
@@ -2918,13 +2889,12 @@ describe('subFeatures', () => {
       ]);
       expect(actual).toHaveProperty('global.read', [
         actions.login,
-        actions.alerts.read,
         actions.api.get(ApiOperation.Read, 'decryptedTelemetry'),
         actions.ui.get('globalSettings', 'show'),
       ]);
 
-      expect(actual).toHaveProperty('space.all', [actions.login, actions.alerts.read]);
-      expect(actual).toHaveProperty('space.read', [actions.login, actions.alerts.read]);
+      expect(actual).toHaveProperty('space.all', [actions.login]);
+      expect(actual).toHaveProperty('space.read', [actions.login]);
     });
   });
 
@@ -3014,7 +2984,6 @@ describe('subFeatures', () => {
 
       expect(actual).toHaveProperty('global.all', [
         actions.login,
-        actions.alerts.read,
         actions.api.get(ApiOperation.Read, 'decryptedTelemetry'),
         actions.api.get(ApiOperation.Read, 'features'),
         actions.api.get(ApiOperation.Manage, 'taskManager'),
@@ -3033,7 +3002,6 @@ describe('subFeatures', () => {
       ]);
       expect(actual).toHaveProperty('global.read', [
         actions.login,
-        actions.alerts.read,
         actions.api.get(ApiOperation.Read, 'decryptedTelemetry'),
         actions.ui.get('globalSettings', 'show'),
         actions.ui.get('foo', 'foo'),
@@ -3041,17 +3009,12 @@ describe('subFeatures', () => {
 
       expect(actual).toHaveProperty('space.all', [
         actions.login,
-        actions.alerts.read,
         ...getAllSavedObjectsActions('all-sub-feature-type'),
         ...getReadSavedObjectsActions('read-sub-feature-type'),
         actions.ui.get('foo', 'foo'),
         actions.ui.get('foo', 'sub-feature-ui'),
       ]);
-      expect(actual).toHaveProperty('space.read', [
-        actions.login,
-        actions.alerts.read,
-        actions.ui.get('foo', 'foo'),
-      ]);
+      expect(actual).toHaveProperty('space.read', [actions.login, actions.ui.get('foo', 'foo')]);
     });
 
     test(`should augment the primary 'all' feature privileges, but not the base privileges if the feature is excluded from them`, () => {
@@ -3140,7 +3103,6 @@ describe('subFeatures', () => {
 
       expect(actual).toHaveProperty('global.all', [
         actions.login,
-        actions.alerts.read,
         actions.api.get(ApiOperation.Read, 'decryptedTelemetry'),
         actions.api.get(ApiOperation.Read, 'features'),
         actions.api.get(ApiOperation.Manage, 'taskManager'),
@@ -3155,13 +3117,12 @@ describe('subFeatures', () => {
       ]);
       expect(actual).toHaveProperty('global.read', [
         actions.login,
-        actions.alerts.read,
         actions.api.get(ApiOperation.Read, 'decryptedTelemetry'),
         actions.ui.get('globalSettings', 'show'),
       ]);
 
-      expect(actual).toHaveProperty('space.all', [actions.login, actions.alerts.read]);
-      expect(actual).toHaveProperty('space.read', [actions.login, actions.alerts.read]);
+      expect(actual).toHaveProperty('space.all', [actions.login]);
+      expect(actual).toHaveProperty('space.read', [actions.login]);
     });
   });
 
@@ -3249,7 +3210,6 @@ describe('subFeatures', () => {
 
       expect(actual).toHaveProperty('global.all', [
         actions.login,
-        actions.alerts.read,
         actions.api.get(ApiOperation.Read, 'decryptedTelemetry'),
         actions.api.get(ApiOperation.Read, 'features'),
         actions.api.get(ApiOperation.Manage, 'taskManager'),
@@ -3268,7 +3228,6 @@ describe('subFeatures', () => {
       ]);
       expect(actual).toHaveProperty('global.read', [
         actions.login,
-        actions.alerts.read,
         actions.api.get(ApiOperation.Read, 'decryptedTelemetry'),
         actions.ui.get('globalSettings', 'show'),
         ...getAllSavedObjectsActions('all-sub-feature-type'),
@@ -3279,7 +3238,6 @@ describe('subFeatures', () => {
 
       expect(actual).toHaveProperty('space.all', [
         actions.login,
-        actions.alerts.read,
         ...getAllSavedObjectsActions('all-sub-feature-type'),
         ...getReadSavedObjectsActions('read-sub-feature-type'),
         actions.ui.get('foo', 'foo'),
@@ -3287,7 +3245,6 @@ describe('subFeatures', () => {
       ]);
       expect(actual).toHaveProperty('space.read', [
         actions.login,
-        actions.alerts.read,
         ...getAllSavedObjectsActions('all-sub-feature-type'),
         ...getReadSavedObjectsActions('read-sub-feature-type'),
         actions.ui.get('foo', 'foo'),
@@ -3378,7 +3335,6 @@ describe('subFeatures', () => {
 
       expect(actual).toHaveProperty('global.all', [
         actions.login,
-        actions.alerts.read,
         actions.api.get(ApiOperation.Read, 'decryptedTelemetry'),
         actions.api.get(ApiOperation.Read, 'features'),
         actions.api.get(ApiOperation.Manage, 'taskManager'),
@@ -3397,7 +3353,6 @@ describe('subFeatures', () => {
       ]);
       expect(actual).toHaveProperty('global.read', [
         actions.login,
-        actions.alerts.read,
         actions.api.get(ApiOperation.Read, 'decryptedTelemetry'),
         actions.ui.get('globalSettings', 'show'),
         ...getAllSavedObjectsActions('all-sub-feature-type'),
@@ -3408,7 +3363,6 @@ describe('subFeatures', () => {
 
       expect(actual).toHaveProperty('space.all', [
         actions.login,
-        actions.alerts.read,
         ...getAllSavedObjectsActions('all-sub-feature-type'),
         ...getReadSavedObjectsActions('read-sub-feature-type'),
         actions.ui.get('foo', 'foo'),
@@ -3416,7 +3370,6 @@ describe('subFeatures', () => {
       ]);
       expect(actual).toHaveProperty('space.read', [
         actions.login,
-        actions.alerts.read,
         ...getAllSavedObjectsActions('all-sub-feature-type'),
         ...getReadSavedObjectsActions('read-sub-feature-type'),
         actions.ui.get('foo', 'foo'),
@@ -3526,7 +3479,6 @@ describe('subFeatures', () => {
 
       expect(actual).toHaveProperty('global.all', [
         actions.login,
-        actions.alerts.read,
         actions.api.get(ApiOperation.Read, 'decryptedTelemetry'),
         actions.api.get(ApiOperation.Read, 'features'),
         actions.api.get(ApiOperation.Manage, 'taskManager'),
@@ -3545,7 +3497,6 @@ describe('subFeatures', () => {
       ]);
       expect(actual).toHaveProperty('global.read', [
         actions.login,
-        actions.alerts.read,
         actions.api.get(ApiOperation.Read, 'decryptedTelemetry'),
         actions.ui.get('globalSettings', 'show'),
         ...getAllSavedObjectsActions('all-sub-feature-type'),
@@ -3556,7 +3507,6 @@ describe('subFeatures', () => {
 
       expect(actual).toHaveProperty('space.all', [
         actions.login,
-        actions.alerts.read,
         ...getAllSavedObjectsActions('all-sub-feature-type'),
         ...getReadSavedObjectsActions('read-sub-feature-type'),
         actions.ui.get('foo', 'foo'),
@@ -3564,7 +3514,6 @@ describe('subFeatures', () => {
       ]);
       expect(actual).toHaveProperty('space.read', [
         actions.login,
-        actions.alerts.read,
         ...getAllSavedObjectsActions('all-sub-feature-type'),
         ...getReadSavedObjectsActions('read-sub-feature-type'),
         actions.ui.get('foo', 'foo'),
@@ -3680,7 +3629,6 @@ describe('subFeatures', () => {
 
       expect(actual).toHaveProperty('global.all', [
         actions.login,
-        actions.alerts.read,
         actions.api.get(ApiOperation.Read, 'decryptedTelemetry'),
         actions.api.get(ApiOperation.Read, 'features'),
         actions.api.get(ApiOperation.Manage, 'taskManager'),
@@ -3702,7 +3650,6 @@ describe('subFeatures', () => {
       ]);
       expect(actual).toHaveProperty('global.read', [
         actions.login,
-        actions.alerts.read,
         actions.api.get(ApiOperation.Read, 'decryptedTelemetry'),
         actions.ui.get('globalSettings', 'show'),
         ...getAllSavedObjectsActions('all-sub-feature-type'),
@@ -3716,7 +3663,6 @@ describe('subFeatures', () => {
 
       expect(actual).toHaveProperty('space.all', [
         actions.login,
-        actions.alerts.read,
         ...getAllSavedObjectsActions('all-sub-feature-type'),
         ...getAllSavedObjectsActions('all-licensed-sub-feature-type'),
         ...getReadSavedObjectsActions('read-sub-feature-type'),
@@ -3727,7 +3673,6 @@ describe('subFeatures', () => {
       ]);
       expect(actual).toHaveProperty('space.read', [
         actions.login,
-        actions.alerts.read,
         ...getAllSavedObjectsActions('all-sub-feature-type'),
         ...getAllSavedObjectsActions('all-licensed-sub-feature-type'),
         ...getReadSavedObjectsActions('read-sub-feature-type'),
