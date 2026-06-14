@@ -88,6 +88,7 @@ export const DiscoveryFlyout = ({
   );
   const investigateMutation = useInvestigateDiscovery();
   const [investigationStarted, setInvestigationStarted] = React.useState(false);
+  const isInvestigateError = investigateMutation.isError;
 
   const streams = useMemo(() => {
     const names = [
@@ -137,8 +138,11 @@ export const DiscoveryFlyout = ({
                 size="s"
                 iconType="inspect"
                 isLoading={investigateMutation.isLoading}
-                isDisabled={investigationStarted}
+                isDisabled={investigationStarted && !isInvestigateError}
+                color={isInvestigateError ? 'danger' : 'primary'}
                 onClick={() => {
+                  investigateMutation.reset();
+                  setInvestigationStarted(false);
                   investigateMutation.mutate(discovery.discovery_slug, {
                     onSuccess: () => setInvestigationStarted(true),
                   });
