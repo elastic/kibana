@@ -142,6 +142,23 @@ export async function createConnectorFixture({
     id: connectorIdAsUuid,
   };
 
+  // If the connector was already created by a previous test/worker, reuse it.
+  try {
+    const existing = (await fetch({
+      path: `/api/actions/connector/${encodeURIComponent(connectorWithUuid.id)}`,
+      method: 'GET',
+    })) as ConnectorGetResponse;
+    if (existing?.is_preconfigured !== undefined) {
+      log.info(`Reusing existing connector: ${connectorWithUuid.id}`);
+      await use(connectorWithUuid);
+      return;
+    }
+  } catch (error) {
+    if (getStatusCode(error) !== 404) {
+      throw error;
+    }
+  }
+
   log.info(`Creating connector: ${predefinedConnector.id} as ${connectorIdAsUuid}`);
 
   try {
