@@ -104,7 +104,7 @@ export const findExceptionListsItemsPointInTimeFinder = async ({
       executeFunctionOnStream(exceptionListItem);
       try {
         await finder.close();
-      } catch (_exception) {
+      } catch {
         // This is just a pre-caution in case the finder does a throw we don't want to blow up
         // the response. We have seen this within e2e test containers but nothing happen in normal
         // operational conditions which is why this try/catch is here.
@@ -118,7 +118,7 @@ export const findExceptionListsItemsPointInTimeFinder = async ({
 
   try {
     await finder.close();
-  } catch (_exception) {
+  } catch {
     // This is just a pre-caution in case the finder does a throw we don't want to blow up
     // the response. We have seen this within e2e test containers but nothing happen in normal
     // operational conditions which is why this try/catch is here.
