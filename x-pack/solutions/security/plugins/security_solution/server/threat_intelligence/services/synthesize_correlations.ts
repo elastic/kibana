@@ -14,7 +14,7 @@ import type {
   CorrelationFindingsLead,
 } from '../../../common/threat_intelligence/correlation/schemas';
 import type { CostTraceBuilder } from '../routes/lib/cost_tracker';
-import { logStageUsage } from '../routes/lib/cost_tracker';
+import { logStageUsage, extractUsageFromMetadata } from '../routes/lib/cost_tracker';
 import type { TriagePick } from './triage_diamond_candidates';
 import type { CollapsedCandidate } from './collapse_candidates';
 
@@ -364,7 +364,8 @@ const fetchCandidateBodyText = async (
 
 const buildGracefulDegradation = (
   picks: readonly TriagePick[],
-  bodyTextMap: Map<string, CandidateBodyEntry>
+  bodyTextMap: Map<string, CandidateBodyEntry>,
+  reasoningOverride?: string
 ): CorrelationFindings => ({
   leads: [],
   no_match: picks.map((p) => ({
@@ -375,6 +376,7 @@ const buildGracefulDegradation = (
     bluf: 'Synthesis failed — correlation evidence could not be assessed automatically.',
     correlation_signal: 'none',
     reasoning:
+      reasoningOverride ??
       'Synthesis LLM call failed — correlation evidence could not be assessed automatically. Review triage candidates manually.',
     gaps: '',
     next_steps: [
@@ -573,15 +575,25 @@ export const synthesizeCorrelations = async ({
 
   // 6. Call the Opus-tier model with structured output.
   interface RawResult {
-    raw: { response_metadata: Record<string, unknown> };
-    parsed: SynthesisLlmOutput;
+    raw: {
+      response_metadata: Record<string, unknown>;
+      // LangChain normalized tool calls (primary path for structured output args)
+      tool_calls?: Array<{ args?: unknown }>;
+      // Provider wire format fallback (e.g. Bedrock passes JSON string here)
+      additional_kwargs?: {
+        tool_calls?: Array<{ function?: { arguments?: string } }>;
+      };
+      content?: unknown;
+    };
+    // withStructuredOutput returns undefined when Zod parsing fails (soft failure)
+    parsed: SynthesisLlmOutput | undefined;
   }
 
   const structured = synthesisModel.chatModel.withStructuredOutput(synthesisLlmOutputSchema, {
     includeRaw: true,
   });
 
-  let llmOutput: SynthesisLlmOutput;
+  let llmOutput: SynthesisLlmOutput | undefined;
   try {
     const t0 = Date.now();
     const result = (await structured.invoke(prompt)) as RawResult;
@@ -600,9 +612,67 @@ export const synthesizeCorrelations = async ({
       wallMs,
     });
     llmOutput = result.parsed;
+
+    // [TEMP DIAGNOSTIC — remove after root-cause confirmed]
+    // Zod soft-failure: withStructuredOutput returned parsed=undefined without throwing.
+    // Surface stop_reason, token counts, and exact Zod issue paths in the response so
+    // the caller can diagnose truncation vs. schema-mismatch without needing server logs.
+    if (!llmOutput) {
+      const meta = result.raw.response_metadata ?? {};
+      const { outputTokens } = extractUsageFromMetadata(meta);
+      const stopReason = String(meta.stop_reason ?? meta.finish_reason ?? 'unknown');
+
+      // Locate the raw structured-output args the wrapper produced.
+      // Primary: tool_calls[0].args (LangChain normalized).
+      // Fallback: additional_kwargs.tool_calls[0].function.arguments (Bedrock wire).
+      const firstToolCallArgs: unknown =
+        (result.raw.tool_calls ?? [])[0]?.args ??
+        (() => {
+          const argStr = (result.raw.additional_kwargs?.tool_calls ?? [])[0]?.function?.arguments;
+          if (!argStr) return undefined;
+          try {
+            return JSON.parse(argStr) as unknown;
+          } catch {
+            return undefined;
+          }
+        })();
+
+      const rawPreview = JSON.stringify(
+        firstToolCallArgs ?? result.raw.content ?? '(no tool_calls or content)'
+      ).slice(0, 800);
+
+      let issuesSummary: string;
+      if (firstToolCallArgs !== undefined) {
+        const parseResult = synthesisLlmOutputSchema.safeParse(firstToolCallArgs);
+        issuesSummary = parseResult.success
+          ? '(schema valid — unknown parse failure)'
+          : parseResult.error.issues
+              .slice(0, 10)
+              .map((iss) => `${JSON.stringify(iss.path)}:${iss.message}`)
+              .join('; ');
+      } else {
+        issuesSummary = '(tool_calls[0].args was undefined)';
+      }
+
+      const diagnostic =
+        `[TEMP DIAGNOSTIC — remove after root-cause] ` +
+        `stop_reason=${stopReason} output_tokens=${outputTokens} ` +
+        `zod_issues=[${issuesSummary}] raw_preview=${rawPreview}`;
+
+      return buildGracefulDegradation(picks, bodyTextMap, diagnostic);
+    }
   } catch (err) {
     logger.warn(
       `[ti:synthesize] LLM call failed (${(err as Error).message}) — returning graceful degradation`
+    );
+    return buildGracefulDegradation(picks, bodyTextMap);
+  }
+
+  // Safety net: should not be reached now that the in-try guard handles undefined,
+  // but guards against future refactors that re-introduce a code path that skips the block above.
+  if (!llmOutput) {
+    logger.warn(
+      '[ti:synthesize] structured output parsing returned undefined — returning graceful degradation'
     );
     return buildGracefulDegradation(picks, bodyTextMap);
   }
