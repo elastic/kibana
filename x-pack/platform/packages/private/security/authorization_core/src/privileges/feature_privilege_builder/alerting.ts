@@ -61,6 +61,11 @@ const manageRuleSettingsOperations: Record<AlertingEntity, string[]> = {
   alert: [],
 };
 
+const manageAlertsOperations: Record<AlertingEntity, string[]> = {
+  rule: ['muteAlert', 'unmuteAlert'],
+  alert: [],
+};
+
 const writeOperations: Record<AlertingEntity, string[]> = {
   rule: [
     'create',
@@ -108,6 +113,7 @@ export class FeaturePrivilegeAlertingBuilder extends BaseFeaturePrivilegeBuilder
       const manualRun = get(privilegeDefinition.alerting, `${entity}.manual_run`) ?? [];
       const manageRuleSettings =
         get(privilegeDefinition.alerting, `${entity}.manage_rule_settings`) ?? [];
+      const manageAlerts = get(privilegeDefinition.alerting, `${entity}.manage_alerts`) ?? [];
       const read = get(privilegeDefinition.alerting, `${entity}.read`) ?? [];
 
       return uniq([
@@ -116,6 +122,7 @@ export class FeaturePrivilegeAlertingBuilder extends BaseFeaturePrivilegeBuilder
         ...getAlertingPrivilege(enableOperations[entity], enable, entity),
         ...getAlertingPrivilege(manualRunOperations[entity], manualRun, entity),
         ...getAlertingPrivilege(manageRuleSettingsOperations[entity], manageRuleSettings, entity),
+        ...getAlertingPrivilege(manageAlertsOperations[entity], manageAlerts, entity),
       ]);
     };
 

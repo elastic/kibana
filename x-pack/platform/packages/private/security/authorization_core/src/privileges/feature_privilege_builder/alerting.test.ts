@@ -314,6 +314,43 @@ describe(`feature_privilege_builder`, () => {
         `);
       });
 
+      test('grants `manage_alerts` privileges to rules under feature consumer', () => {
+        const actions = new Actions();
+        const alertingFeaturePrivileges = new FeaturePrivilegeAlertingBuilder(actions);
+
+        const privilege: FeatureKibanaPrivileges = {
+          alerting: {
+            rule: {
+              all: [],
+              manage_alerts: [{ ruleTypeId: 'alert-type', consumers: ['my-consumer'] }],
+            },
+          },
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+        };
+
+        const feature = new KibanaFeature({
+          id: 'my-feature',
+          name: 'my-feature',
+          app: [],
+          category: { id: 'foo', label: 'foo' },
+          privileges: {
+            all: privilege,
+            read: privilege,
+          },
+        });
+
+        expect(alertingFeaturePrivileges.getActions(privilege, feature)).toMatchInlineSnapshot(`
+          Array [
+            "alerting:alert-type/my-consumer/rule/muteAlert",
+            "alerting:alert-type/my-consumer/rule/unmuteAlert",
+          ]
+        `);
+      });
+
       test('grants `all` privileges to rules under feature consumer', () => {
         const actions = new Actions();
         const alertingFeaturePrivileges = new FeaturePrivilegeAlertingBuilder(actions);
