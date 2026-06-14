@@ -61,8 +61,8 @@ const manageRuleSettingsOperations: Record<AlertingEntity, string[]> = {
   alert: [],
 };
 
-// Per-alert snooze/unsnooze reuses these same operations, so this group covers all four actions.
-const manageAlertsOperations: Record<AlertingEntity, string[]> = {
+// Per-alert snooze/unsnooze reuses muteAlert/unmuteAlert internally, so this group covers both.
+const muteAlertsOperations: Record<AlertingEntity, string[]> = {
   rule: ['muteAlert', 'unmuteAlert'],
   alert: [],
 };
@@ -114,7 +114,7 @@ export class FeaturePrivilegeAlertingBuilder extends BaseFeaturePrivilegeBuilder
       const manualRun = get(privilegeDefinition.alerting, `${entity}.manual_run`) ?? [];
       const manageRuleSettings =
         get(privilegeDefinition.alerting, `${entity}.manage_rule_settings`) ?? [];
-      const manageAlerts = get(privilegeDefinition.alerting, `${entity}.manage_alerts`) ?? [];
+      const muteAlerts = get(privilegeDefinition.alerting, `${entity}.mute_alerts`) ?? [];
       const read = get(privilegeDefinition.alerting, `${entity}.read`) ?? [];
 
       return uniq([
@@ -123,7 +123,7 @@ export class FeaturePrivilegeAlertingBuilder extends BaseFeaturePrivilegeBuilder
         ...getAlertingPrivilege(enableOperations[entity], enable, entity),
         ...getAlertingPrivilege(manualRunOperations[entity], manualRun, entity),
         ...getAlertingPrivilege(manageRuleSettingsOperations[entity], manageRuleSettings, entity),
-        ...getAlertingPrivilege(manageAlertsOperations[entity], manageAlerts, entity),
+        ...getAlertingPrivilege(muteAlertsOperations[entity], muteAlerts, entity),
       ]);
     };
 

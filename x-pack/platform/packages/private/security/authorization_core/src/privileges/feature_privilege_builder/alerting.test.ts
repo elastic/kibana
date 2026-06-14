@@ -314,7 +314,7 @@ describe(`feature_privilege_builder`, () => {
         `);
       });
 
-      test('grants `manage_alerts` privileges to rules under feature consumer', () => {
+      test('grants `mute_alerts` privileges to rules under feature consumer', () => {
         const actions = new Actions();
         const alertingFeaturePrivileges = new FeaturePrivilegeAlertingBuilder(actions);
 
@@ -322,7 +322,7 @@ describe(`feature_privilege_builder`, () => {
           alerting: {
             rule: {
               all: [],
-              manage_alerts: [{ ruleTypeId: 'alert-type', consumers: ['my-consumer'] }],
+              mute_alerts: [{ ruleTypeId: 'alert-type', consumers: ['my-consumer'] }],
             },
           },
           savedObject: {
