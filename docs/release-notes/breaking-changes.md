@@ -38,6 +38,36 @@ If you are migrating from a version prior to version 9.0, you must first upgrade
 
 ## 9.4.0 [kibana-9.4.0-breaking-changes]
 
+$$$kibana-PR_NUMBER$$$
+::::{dropdown} Entity Analytics V2 requires additional index privileges for custom roles
+**Details**<br> In 9.4.0, Entity Store V2 is enabled by default on Stateful deployments and reads entity data from a new set of indices. Roles that grant access to the **Security → Entity Analytics** experience must now include `read` on the following index patterns:
+
+- `.entities.v2.latest.security_*`
+- `.entities.v2.updates.security_*`
+- `entities-latest-*`
+- `risk-score.risk-score-*`
+
+The built-in Serverless and Stack Security roles (`viewer`, `editor`, `t1_analyst`, `t2_analyst`, `t3_analyst`, `threat_intelligence_analyst`, `rule_author`, `soc_manager`, `detections_admin`, `platform_engineer`, `endpoint_operations_analyst`, `endpoint_policy_manager`) have been updated to grant these privileges. Custom roles authored against the V1 index patterns (`.entities.v1.latest.security_*`) are not updated automatically.
+
+**Impact**<br> Users assigned a custom role that does not include the index patterns above will see the **Advanced Entity Analytics** page load in a degraded state — without entity data and without the standard "insufficient privileges" message. Users assigned built-in Security roles are not affected.
+
+**Action**<br> If you use custom roles to control access to Entity Analytics, add `read` on the V2 entity and risk-score index patterns to each affected role:
+
+```yaml
+- names:
+    - ".entities.v2.latest.security_*"
+    - ".entities.v2.updates.security_*"
+    - "entities-latest-*"
+    - "risk-score.risk-score-*"
+  privileges:
+    - read
+```
+
+On Serverless, custom roles also require the `read_project_routing` cluster privilege as a temporary workaround tracked in [#264219]({{kib-pull}}264219).
+
+View [#PR_NUMBER]({{kib-pull}}PR_NUMBER).
+::::
+
 $$$kibana-255122-9.4.0$$$
 ::::{dropdown} The `_source` field mode is now saved to the template index settings
 **Details**<br> The index and component template forms in **Index Management** previously saved the `_source` field mode (`stored` and `synthetic`) in the `mappings._source.mode` setting. This path is deprecated and has no effect in {{es}}. The form now uses the correct `settings.index.mapping.source.mode` setting. Other `_source` options (`enabled`, `includes`, and `excludes`) remain in mappings.
