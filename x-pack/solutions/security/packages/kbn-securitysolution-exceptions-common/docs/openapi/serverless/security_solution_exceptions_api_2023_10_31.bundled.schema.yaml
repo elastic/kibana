@@ -858,7 +858,7 @@ paths:
           example: true
           in: query
           name: include_expired_exceptions
-          required: true
+          required: false
           schema:
             default: 'true'
             enum:
@@ -928,8 +928,9 @@ paths:
                 forbidden:
                   value:
                     error: Forbidden
-                    message: API [POST /api/exception_lists/_export] is unauthorized for user, this
-                      action is granted by the Kibana privileges [lists-all]
+                    message: API [POST /api/exception_lists/_bulk_export] is unauthorized for user,
+                      this action is granted by the Kibana privileges
+                      [lists-all]
                     statusCode: 403
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
