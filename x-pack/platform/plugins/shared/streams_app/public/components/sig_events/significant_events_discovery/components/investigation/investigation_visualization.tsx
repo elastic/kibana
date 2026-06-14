@@ -9,6 +9,7 @@ import React from 'react';
 import {
   EuiAccordion,
   EuiBadge,
+  EuiButtonIcon,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
@@ -22,6 +23,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { InvestigationResult } from '@kbn/streams-schema';
+import { useKibana } from '../../../../../hooks/use_kibana';
+import { useSynthesizeWithFeedback } from '../memory/use_memory';
+import type { InvestigationFeedbackPayload } from '../memory/use_memory';
 
 type InvestigationData = InvestigationResult;
 
@@ -84,11 +88,98 @@ const riskLevelColor = (risk: string): 'success' | 'warning' | 'danger' => {
   }
 };
 
+const InvestigationFeedbackButtons = ({
+  onFeedback,
+  positiveLabel,
+  negativeLabel,
+  positiveValue,
+  negativeValue,
+  testSubjPrefix,
+}: {
+  onFeedback: (v: 'correct' | 'incorrect' | 'helpful' | 'not_helpful') => void;
+  positiveLabel: string;
+  negativeLabel: string;
+  positiveValue: 'correct' | 'helpful';
+  negativeValue: 'incorrect' | 'not_helpful';
+  testSubjPrefix: string;
+}) => {
+  const [reacted, setReacted] = React.useState(false);
+
+  if (reacted) {
+    return (
+      <EuiText size="s" color="subdued">
+        {i18n.translate('xpack.streams.investigation.thankYou', { defaultMessage: 'Thank you!' })}
+      </EuiText>
+    );
+  }
+
+  return (
+    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiButtonIcon
+          iconType="thumbUp"
+          aria-label={positiveLabel}
+          color="success"
+          data-test-subj={`${testSubjPrefix}_positive`}
+          onClick={() => {
+            onFeedback(positiveValue);
+            setReacted(true);
+          }}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButtonIcon
+          iconType="thumbDown"
+          aria-label={negativeLabel}
+          color="danger"
+          data-test-subj={`${testSubjPrefix}_negative`}
+          onClick={() => {
+            onFeedback(negativeValue);
+            setReacted(true);
+          }}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
 interface InvestigationVisualizationProps {
   investigation: InvestigationData;
+  discoveryId?: string;
 }
 
-export const InvestigationVisualization = ({ investigation }: InvestigationVisualizationProps) => {
+export const InvestigationVisualization = ({
+  investigation,
+  discoveryId,
+}: InvestigationVisualizationProps) => {
+  const {
+    services: { telemetryClient },
+  } = useKibana();
+  const synthesizeWithFeedback = useSynthesizeWithFeedback();
+  // Debounce the synthesis trigger: EBT fires immediately per click, but the
+  // heavyweight workflow run is coalesced — only the last feedback signal within
+  // 2 s triggers synthesis. The workflow also has concurrency strategy: drop
+  // (max: 1) as a server-side safety net, but debouncing avoids the extra
+  // round-trips entirely.
+  const synthDebounceRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  React.useEffect(() => {
+    return () => {
+      if (synthDebounceRef.current) clearTimeout(synthDebounceRef.current);
+    };
+  }, []);
+
+  const handleFeedback = (payload: Omit<InvestigationFeedbackPayload, 'discovery_id'>) => {
+    if (!discoveryId) return;
+    const full = { ...payload, discovery_id: discoveryId };
+    // EBT: fire immediately so every individual signal is tracked.
+    telemetryClient.trackInvestigationFeedback(full);
+    // Synthesis: debounce so rapid multi-button feedback on one discovery
+    // collapses into a single workflow trigger.
+    if (synthDebounceRef.current) clearTimeout(synthDebounceRef.current);
+    synthDebounceRef.current = setTimeout(() => {
+      synthesizeWithFeedback.mutate(full);
+    }, 2000);
+  };
   const discardedAccordionId = useGeneratedHtmlId();
   const remediationAccordionId = useGeneratedHtmlId();
   const gapsAccordionId = useGeneratedHtmlId();
@@ -140,7 +231,34 @@ export const InvestigationVisualization = ({ investigation }: InvestigationVisua
         </h4>
       </EuiTitle>
       <EuiSpacer size="xs" />
-      <EuiText size="s">{investigation.root_cause}</EuiText>
+      <EuiFlexGroup
+        gutterSize="s"
+        alignItems="center"
+        justifyContent="spaceBetween"
+        responsive={false}
+      >
+        <EuiFlexItem>
+          <EuiText size="s">{investigation.root_cause}</EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          {discoveryId && (
+            <InvestigationFeedbackButtons
+              onFeedback={(v) =>
+                handleFeedback({ aspect: 'root_cause', feedback: v as 'correct' | 'incorrect' })
+              }
+              positiveLabel={i18n.translate('xpack.streams.investigation.rootCauseCorrect', {
+                defaultMessage: 'Root cause is correct',
+              })}
+              negativeLabel={i18n.translate('xpack.streams.investigation.rootCauseIncorrect', {
+                defaultMessage: 'Root cause is incorrect',
+              })}
+              positiveValue="correct"
+              negativeValue="incorrect"
+              testSubjPrefix="investigation_root_cause_feedback"
+            />
+          )}
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
       {investigation.impact && (
         <>
@@ -217,6 +335,31 @@ export const InvestigationVisualization = ({ investigation }: InvestigationVisua
                         <EuiText size="xs" color="subdued">
                           {hyp.evidence_summary}
                         </EuiText>
+                      </>
+                    )}
+                    {discoveryId && (
+                      <>
+                        <EuiSpacer size="xs" />
+                        <InvestigationFeedbackButtons
+                          onFeedback={(v) =>
+                            handleFeedback({
+                              aspect: 'hypothesis',
+                              feedback: v as 'correct' | 'incorrect',
+                              hypothesis_id: hyp.hypothesis_id,
+                            })
+                          }
+                          positiveLabel={i18n.translate(
+                            'xpack.streams.investigation.hypothesisAgrees',
+                            { defaultMessage: 'Verdict agrees with what I observed' }
+                          )}
+                          negativeLabel={i18n.translate(
+                            'xpack.streams.investigation.hypothesisDisagrees',
+                            { defaultMessage: 'Verdict disagrees with what I observed' }
+                          )}
+                          positiveValue="correct"
+                          negativeValue="incorrect"
+                          testSubjPrefix={`investigation_hypothesis_${hyp.hypothesis_id}_feedback`}
+                        />
                       </>
                     )}
                   </EuiFlexItem>
@@ -332,6 +475,31 @@ export const InvestigationVisualization = ({ investigation }: InvestigationVisua
                               })}
                             </em>
                           </EuiText>
+                        </>
+                      )}
+                      {discoveryId && (
+                        <>
+                          <EuiSpacer size="xs" />
+                          <InvestigationFeedbackButtons
+                            onFeedback={(v) =>
+                              handleFeedback({
+                                aspect: 'remediation',
+                                feedback: v as 'helpful' | 'not_helpful',
+                                remediation_rank: opt.rank,
+                              })
+                            }
+                            positiveLabel={i18n.translate(
+                              'xpack.streams.investigation.remediationHelpful',
+                              { defaultMessage: 'This remediation is applicable' }
+                            )}
+                            negativeLabel={i18n.translate(
+                              'xpack.streams.investigation.remediationNotHelpful',
+                              { defaultMessage: 'This remediation is not applicable' }
+                            )}
+                            positiveValue="helpful"
+                            negativeValue="not_helpful"
+                            testSubjPrefix={`investigation_remediation_${opt.rank}_feedback`}
+                          />
                         </>
                       )}
                     </EuiFlexItem>

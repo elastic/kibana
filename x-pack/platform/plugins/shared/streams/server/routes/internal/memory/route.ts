@@ -25,7 +25,10 @@ import type {
 } from '../../../lib/memory';
 import { MemoryServiceImpl } from '../../../lib/memory';
 import type { StreamsServer } from '../../../types';
-import { triggerMemorySynthesisWorkflow } from '../../../lib/memory/trigger_memory_synthesis_workflow';
+import {
+  triggerMemorySynthesisWorkflow,
+  type MemorySynthesisInputs,
+} from '../../../lib/memory/trigger_memory_synthesis_workflow';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
 import { isSignificantEventsMemoryEnabled } from '../../../lib/memory/is_significant_events_memory_enabled';
 import { FeatureNotEnabledError } from '../../../lib/streams/errors/feature_not_enabled_error';
@@ -508,12 +511,23 @@ const consolidateMemoryRoute = createWorkflowTriggerRoute(
   'Trigger memory consolidation'
 );
 
+const investigationFeedbackSchema = z.object({
+  aspect: z.enum(['root_cause', 'hypothesis', 'remediation']),
+  feedback: z.enum(['correct', 'incorrect', 'helpful', 'not_helpful']),
+  discovery_id: z.string(),
+  hypothesis_id: z.string().optional(),
+  remediation_rank: z.number().optional(),
+});
+
 const synthesizeMemoryRoute = createServerRoute({
   endpoint: 'POST /internal/streams/memory/_synthesize',
   options: { access: 'internal', summary: 'Trigger memory synthesis from significant events' },
   security: { authz: { requiredPrivileges: [STREAMS_API_PRIVILEGES.manage] } },
-  params: z.object({ body: z.object({}).passthrough().optional() }),
+  params: z.object({
+    body: z.object({ user_feedback: investigationFeedbackSchema.optional() }).optional(),
+  }),
   handler: async ({
+    params,
     request,
     server,
     logger,
@@ -522,12 +536,16 @@ const synthesizeMemoryRoute = createServerRoute({
     const { licensing, uiSettingsClient } = await getScopedClients({ request });
     await assertMemoryEnabled({ server, licensing, uiSettingsClient });
 
+    const userFeedback = params?.body?.user_feedback;
+    const inputs: MemorySynthesisInputs = userFeedback ? { user_feedback: userFeedback } : {};
+
     const executionId = await triggerMemorySynthesisWorkflow({
       workflowsManagement: server.workflowsManagement,
       spaces: server.spaces,
       request,
       logger,
-      triggeredBy: 'sigevents-memory-ui',
+      triggeredBy: userFeedback ? 'sigevents-investigation-feedback' : 'sigevents-memory-ui',
+      inputs,
     });
 
     if (!executionId) {
