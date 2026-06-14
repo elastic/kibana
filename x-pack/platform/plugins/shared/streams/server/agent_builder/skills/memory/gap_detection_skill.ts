@@ -90,10 +90,18 @@ Concrete actions to fill the most critical gaps (e.g. "Ask the team to document 
 - **Always overwrite**: use \`platform_streams_memory_write\` (not patch) to replace the entire \`_gaps/overview\` page each run.
 - **Categories**: assign the page to categories \`['_system/gaps']\`.`,
     getInlineTools: () => {
-      const memoryTools = createMemoryTools(options).map(({ tags, id, ...rest }) => ({
-        ...rest,
-        id: id.replaceAll('.', '_'),
-      }));
+      const allowedMemoryToolIds = [
+        'platform_streams_memory_list',
+        'platform_streams_memory_read',
+        'platform_streams_memory_search',
+        'platform_streams_memory_write',
+      ];
+      const memoryTools = createMemoryTools(options)
+        .map(({ tags, id, ...rest }) => ({
+          ...rest,
+          id: id.replaceAll('.', '_'),
+        }))
+        .filter((tool) => allowedMemoryToolIds.includes(tool.id));
 
       const extraTools: SkillBoundedTool[] = [];
       if (options.getScopedClients && options.server && options.logger) {
