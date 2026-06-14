@@ -61,6 +61,7 @@ const manageRuleSettingsOperations: Record<AlertingEntity, string[]> = {
   alert: [],
 };
 
+// Per-alert snooze/unsnooze reuses these same operations, so this group covers all four actions.
 const manageAlertsOperations: Record<AlertingEntity, string[]> = {
   rule: ['muteAlert', 'unmuteAlert'],
   alert: [],
