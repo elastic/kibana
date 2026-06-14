@@ -91,13 +91,16 @@ const synthesisLlmSynthesisSchema = z.object({
       text: z.string(),
     })
   ),
-  inferential_hops: z.number().int().optional(),
+  // Use .nullish() (not .optional()) so the model can return null for these fields without
+  // triggering ZodError in validateToolCalls when fromJSONSchema reconstructs the schema.
+  // mapLlmOutputToFindings converts null → undefined before writing to CorrelationFindings.
+  inferential_hops: z.number().int().nullish(),
   atomic_ioc_overlap: z
     .object({
       assessed: z.boolean(),
-      note: z.string().optional(),
+      note: z.string().nullish(),
     })
-    .optional(),
+    .nullish(),
 });
 
 const synthesisLlmOutputSchema = z.object({
@@ -451,8 +454,14 @@ const mapLlmOutputToFindings = (
       reasoning: llmOutput.synthesis.reasoning,
       gaps: llmOutput.synthesis.gaps,
       next_steps: llmOutput.synthesis.next_steps,
-      inferential_hops: llmOutput.synthesis.inferential_hops,
-      atomic_ioc_overlap: llmOutput.synthesis.atomic_ioc_overlap,
+      inferential_hops: llmOutput.synthesis.inferential_hops ?? undefined,
+      atomic_ioc_overlap:
+        llmOutput.synthesis.atomic_ioc_overlap != null
+          ? {
+              assessed: llmOutput.synthesis.atomic_ioc_overlap.assessed,
+              note: llmOutput.synthesis.atomic_ioc_overlap.note ?? undefined,
+            }
+          : undefined,
     },
   };
 };
@@ -662,10 +671,14 @@ export const synthesizeCorrelations = async ({
       return buildGracefulDegradation(picks, bodyTextMap, diagnostic);
     }
   } catch (err) {
-    logger.warn(
-      `[ti:synthesize] LLM call failed (${(err as Error).message}) — returning graceful degradation`
-    );
-    return buildGracefulDegradation(picks, bodyTextMap);
+    const e = err as Error;
+    const stackLines = (e.stack ?? '').split('\n').slice(0, 3).join(' | ');
+    // [TEMP DIAGNOSTIC — remove after root-cause confirmed]
+    const diagnostic =
+      `[TEMP DIAGNOSTIC — remove after root-cause] caught throw: ` +
+      `${e.name}: ${e.message} | stack: ${stackLines}`;
+    logger.warn(`[ti:synthesize] LLM call failed — ${diagnostic}`);
+    return buildGracefulDegradation(picks, bodyTextMap, diagnostic);
   }
 
   // Safety net: should not be reached now that the in-try guard handles undefined,
