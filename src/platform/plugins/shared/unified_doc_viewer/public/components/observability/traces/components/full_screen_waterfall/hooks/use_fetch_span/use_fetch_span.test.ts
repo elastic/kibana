@@ -9,11 +9,18 @@
 
 import { renderHook, waitFor } from '@testing-library/react';
 import type { UnifiedSpanDocument } from '@kbn/apm-types';
+import { apm } from '@elastic/apm-rum';
 import { useFetchSpan } from '.';
 import { getUnifiedDocViewerServices } from '../../../../../../../plugin';
 
 jest.mock('../../../../../../../plugin', () => ({
   getUnifiedDocViewerServices: jest.fn(),
+}));
+
+jest.mock('@elastic/apm-rum', () => ({
+  apm: {
+    captureError: jest.fn(),
+  },
 }));
 
 const mockFetchSpan = jest.fn<Promise<UnifiedSpanDocument | undefined>, any>();
@@ -181,20 +188,22 @@ describe('useFetchSpan', () => {
     expect(mockFetchSpan).toHaveBeenCalledTimes(1);
   });
 
-  it('should show toast notification when an error occurs', async () => {
+  it('should capture a single APM event with the operation id label and not show a toast', async () => {
     const errorMessage = 'Fetch error';
-    mockFetchSpan.mockRejectedValue(new Error(errorMessage));
+    const error = new Error(errorMessage);
+    mockFetchSpan.mockRejectedValue(error);
 
     const { result } = renderHook(() => useFetchSpan({ spanId, traceId }));
 
     await waitFor(() => !result.current.loading);
 
     await waitFor(() => {
-      expect(mockAddDanger).toHaveBeenCalledWith({
-        title: 'An error occurred while fetching the span document',
-        text: errorMessage,
+      expect(apm.captureError).toHaveBeenCalledWith(error, {
+        labels: { kibana_meta_operation_id: 'fetch-span' },
       });
     });
+
+    expect(mockAddDanger).not.toHaveBeenCalled();
   });
 
   it('should refetch when spanId changes', async () => {

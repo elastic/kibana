@@ -16,6 +16,9 @@ import type { HistogramItem } from '@kbn/apm-types-shared';
 import type { DurationDistributionChartData } from '@kbn/apm-ui-shared';
 import { useAbortableAsync } from '@kbn/react-hooks';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
+import { reportFetchError } from '../../utils/report_fetch_error';
+
+const FETCH_LATENCY_OVERALL_DISTRIBUTION_OPERATION_ID = 'fetch-latency-overall-distribution';
 
 interface GetTransactionDistributionChartDataParams {
   euiTheme: EuiThemeComputed;
@@ -171,7 +174,13 @@ export const useLatencyChart = ({
 
   useEffect(() => {
     if (error) {
-      core.notifications.toasts.addDanger({
+      reportFetchError({
+        error,
+        operationId: FETCH_LATENCY_OVERALL_DISTRIBUTION_OPERATION_ID,
+      });
+      core.notifications.toasts.add({
+        color: 'danger',
+        iconType: 'error',
         title: i18n.translate(
           'unifiedDocViewer.observability.traces.useTransactionLatencyChart.error',
           {

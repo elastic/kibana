@@ -9,8 +9,10 @@
 
 import { useAbortableAsync } from '@kbn/react-hooks';
 import { useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
 import { getUnifiedDocViewerServices } from '../../../../../../../plugin';
+import { reportFetchError } from '../../../../utils/report_fetch_error';
+
+const FETCH_SPAN_OPERATION_ID = 'fetch-span';
 
 interface UseFetchSpanParams {
   spanId: string;
@@ -18,7 +20,7 @@ interface UseFetchSpanParams {
 }
 
 export const useFetchSpan = ({ spanId, traceId }: UseFetchSpanParams) => {
-  const { discoverShared, core, data } = getUnifiedDocViewerServices();
+  const { discoverShared, data } = getUnifiedDocViewerServices();
 
   const fetchSpanFeature = discoverShared.features.registry.getById(
     'observability-traces-fetch-span'
@@ -46,16 +48,8 @@ export const useFetchSpan = ({ spanId, traceId }: UseFetchSpanParams) => {
   );
 
   useEffect(() => {
-    if (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      core.notifications.toasts.addDanger({
-        title: i18n.translate('unifiedDocViewer.fullScreenWaterfall.spanDocument.error', {
-          defaultMessage: 'An error occurred while fetching the span document',
-        }),
-        text: errorMessage,
-      });
-    }
-  }, [error, core.notifications.toasts]);
+    if (error) reportFetchError({ error, operationId: FETCH_SPAN_OPERATION_ID });
+  }, [error]);
 
   return {
     loading,

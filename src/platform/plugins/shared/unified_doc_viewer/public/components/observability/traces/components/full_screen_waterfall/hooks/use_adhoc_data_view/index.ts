@@ -11,6 +11,9 @@ import { useEffect, useState } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { getUnifiedDocViewerServices } from '../../../../../../../plugin';
+import { reportFetchError } from '../../../../utils/report_fetch_error';
+
+const CREATE_ADHOC_DATA_VIEW_OPERATION_ID = 'create-adhoc-data-view';
 
 const errorMessage = i18n.translate(
   'unifiedDocViewer.observability.traces.fullScreenWaterfall.logFlyout.error',
@@ -27,11 +30,11 @@ export const useAdhocDataView = ({ index }: { index: string | null }) => {
 
   useEffect(() => {
     async function createAdhocDataView() {
-      if (!index) {
-        return;
-      }
+      if (!index) return;
+
       setLoading(true);
       setError(null);
+
       try {
         const _dataView = await data.dataViews.create(
           { title: index, timeFieldName: '@timestamp' },
@@ -42,7 +45,10 @@ export const useAdhocDataView = ({ index }: { index: string | null }) => {
       } catch (e) {
         setError(errorMessage);
         const err = e as Error;
-        core.notifications.toasts.addDanger({
+        reportFetchError({ error: err, operationId: CREATE_ADHOC_DATA_VIEW_OPERATION_ID });
+        core.notifications.toasts.add({
+          color: 'danger',
+          iconType: 'error',
           title: errorMessage,
           text: err.message,
         });
@@ -50,6 +56,7 @@ export const useAdhocDataView = ({ index }: { index: string | null }) => {
         setLoading(false);
       }
     }
+
     createAdhocDataView();
   }, [index, data.dataViews, core.notifications.toasts]);
   return { dataView, error, loading };
