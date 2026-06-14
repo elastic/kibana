@@ -104,12 +104,17 @@ const synthesisLlmSynthesisSchema = z.object({
 });
 
 const synthesisLlmOutputSchema = z.object({
-  leads: z.array(synthesisLlmLeadSchema),
-  no_match: z.array(synthesisLlmNoMatchSchema),
+  // .default([]) so fromJSONSchema-reconstructed validation accepts a missing array
+  // instead of ToolValidationError-throwing, and normalizeLeads/normalizeNoMatch
+  // in mapLlmOutputToFindings handles the []-default at the mapping layer.
+  leads: z.array(synthesisLlmLeadSchema).default([]),
+  no_match: z.array(synthesisLlmNoMatchSchema).default([]),
   synthesis: synthesisLlmSynthesisSchema,
 });
 
 type SynthesisLlmOutput = z.infer<typeof synthesisLlmOutputSchema>;
+type SynthesisLlmLead = z.infer<typeof synthesisLlmLeadSchema>;
+type SynthesisLlmNoMatch = z.infer<typeof synthesisLlmNoMatchSchema>;
 
 // ---------------------------------------------------------------------------
 // System prompt — port of Mustard's JUDGE system prompt (prompts.yaml ~422–491).
@@ -409,7 +414,13 @@ const mapLlmOutputToFindings = (
     return id;
   };
 
-  const leads: CorrelationFindingsLead[] = llmOutput.leads.map((lead) => {
+  // Normalize: model may omit required arrays when fromJSONSchema skips validation.
+  const normalizedLeads: SynthesisLlmLead[] = Array.isArray(llmOutput.leads) ? llmOutput.leads : [];
+  const normalizedNoMatch: SynthesisLlmNoMatch[] = Array.isArray(llmOutput.no_match)
+    ? llmOutput.no_match
+    : [];
+
+  const leads: CorrelationFindingsLead[] = normalizedLeads.map((lead) => {
     const realIds = lead.candidate_labels.flatMap((lbl) => {
       const id = resolveLabel(lbl);
       return id !== null ? [id] : [];
@@ -440,7 +451,7 @@ const mapLlmOutputToFindings = (
     };
   });
 
-  const noMatch = llmOutput.no_match.flatMap((nm) => {
+  const noMatch = normalizedNoMatch.flatMap((nm) => {
     const id = resolveLabel(nm.label);
     return id !== null ? [{ id, title: nm.title }] : [];
   });
@@ -602,7 +613,6 @@ export const synthesizeCorrelations = async ({
     includeRaw: true,
   });
 
-  let llmOutput: SynthesisLlmOutput | undefined;
   try {
     const t0 = Date.now();
     const result = (await structured.invoke(prompt)) as RawResult;
@@ -620,7 +630,7 @@ export const synthesizeCorrelations = async ({
       metadata: result.raw.response_metadata ?? {},
       wallMs,
     });
-    llmOutput = result.parsed;
+    const llmOutput = result.parsed;
 
     // [TEMP DIAGNOSTIC — remove after root-cause confirmed]
     // Zod soft-failure: withStructuredOutput returned parsed=undefined without throwing.
@@ -670,6 +680,21 @@ export const synthesizeCorrelations = async ({
 
       return buildGracefulDegradation(picks, bodyTextMap, diagnostic);
     }
+
+    // 7. Map short labels → real report IDs and populate consolidated_candidates.
+    //    Pass pickIdsSet as the safety net: any resolved ID not in the triage picks
+    //    is dropped + warned rather than propagated as a phantom reference.
+    //    Both this debug line and mapLlmOutputToFindings are inside the try block so
+    //    any unexpected throw returns graceful degradation rather than escaping to the caller.
+    logger.debug(
+      `[ti:synthesize] complete — picks=${picks.length} leads=${llmOutput.leads?.length ?? 0} ` +
+        `no_match=${llmOutput.no_match?.length ?? 0} signal=${
+          llmOutput.synthesis.correlation_signal
+        }`
+    );
+
+    const pickIdsSet = new Set(pickIds);
+    return mapLlmOutputToFindings(llmOutput, labelToCollapsed, pickIdsSet, logger);
   } catch (err) {
     const e = err as Error;
     const stackLines = (e.stack ?? '').split('\n').slice(0, 3).join(' | ');
@@ -680,24 +705,4 @@ export const synthesizeCorrelations = async ({
     logger.warn(`[ti:synthesize] LLM call failed — ${diagnostic}`);
     return buildGracefulDegradation(picks, bodyTextMap, diagnostic);
   }
-
-  // Safety net: should not be reached now that the in-try guard handles undefined,
-  // but guards against future refactors that re-introduce a code path that skips the block above.
-  if (!llmOutput) {
-    logger.warn(
-      '[ti:synthesize] structured output parsing returned undefined — returning graceful degradation'
-    );
-    return buildGracefulDegradation(picks, bodyTextMap);
-  }
-
-  logger.debug(
-    `[ti:synthesize] complete — picks=${picks.length} leads=${llmOutput.leads.length} ` +
-      `no_match=${llmOutput.no_match.length} signal=${llmOutput.synthesis.correlation_signal}`
-  );
-
-  // 7. Map short labels → real report IDs and populate consolidated_candidates.
-  //    Pass pickIdsSet as the safety net: any resolved ID not in the triage picks
-  //    is dropped + warned rather than propagated as a phantom reference.
-  const pickIdsSet = new Set(pickIds);
-  return mapLlmOutputToFindings(llmOutput, labelToCollapsed, pickIdsSet, logger);
 };
