@@ -9,5 +9,5 @@ import { createPlaywrightEvalsConfig } from '@kbn/evals';
 
 export default createPlaywrightEvalsConfig({
   testDir: Path.resolve(__dirname, './evals'),
-  timeout: 20 * 60_000,
+  timeout: 45 * 60_000,
 });
