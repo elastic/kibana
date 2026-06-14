@@ -59,9 +59,6 @@ async function muteInstanceWithOCC(
       entity: AlertingAuthorizationEntity.Rule,
     });
 
-    if (attributes.actions.length) {
-      await context.actionsAuthorization.ensureAuthorized({ operation: 'execute' });
-    }
   } catch (error) {
     context.auditLogger?.log(
       ruleAuditEvent({
