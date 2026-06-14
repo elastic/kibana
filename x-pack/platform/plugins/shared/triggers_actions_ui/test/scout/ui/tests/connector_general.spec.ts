@@ -11,6 +11,7 @@
 // 13 of 13 tests migrated.
 
 import { v4 as uuidv4 } from 'uuid';
+import type { ScoutPage } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
@@ -25,6 +26,14 @@ import {
 
 const SLACK_SECRETS = {
   webhookUrl: 'https://example.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX',
+};
+
+// The connector flyout body (ConnectorForm) mounts and lazy-loads its fields after the
+// flyout opens. Interacting before nameInput is present races that mount on a cold CI
+// cache (the default 10s action timeout is not always enough). Editable connectors only
+// — preconfigured flyouts have no nameInput.
+const waitForConnectorForm = async (page: ScoutPage) => {
+  await page.testSubj.locator('nameInput').waitFor({ state: 'visible', timeout: 30_000 });
 };
 
 test.describe('General connector functionality', { tag: tags.stateful.classic }, () => {
@@ -54,6 +63,7 @@ test.describe('General connector functionality', { tag: tags.stateful.classic },
     await page.testSubj.click('create-connector-flyout-back-btn');
     await page.testSubj.click('.slack-card');
 
+    await waitForConnectorForm(page);
     await page.testSubj.locator('nameInput').fill(connectorName);
     await page.testSubj.locator('slackWebhookUrlInput').fill('https://test.com');
 
@@ -92,6 +102,7 @@ test.describe('General connector functionality', { tag: tags.stateful.classic },
     await page.testSubj.click('createConnectorButton');
     await page.testSubj.click('.slack-card');
 
+    await waitForConnectorForm(page);
     await page.testSubj.locator('nameInput').fill(connectorName);
     await page.testSubj.locator('connectorIdInput').fill(customId);
     await page.testSubj.locator('slackWebhookUrlInput').fill('https://test.com');
@@ -116,6 +127,7 @@ test.describe('General connector functionality', { tag: tags.stateful.classic },
     await page.testSubj.click('createConnectorButton');
     await page.testSubj.click('.slack-card');
 
+    await waitForConnectorForm(page);
     await page.testSubj.locator('nameInput').fill('My Test Connector');
 
     await expect(page.testSubj.locator('connectorIdInput')).toHaveValue('my-test-connector');
@@ -164,6 +176,7 @@ test.describe('General connector functionality', { tag: tags.stateful.classic },
     await expect(page.testSubj.locator('connectors-row')).toHaveCount(1);
     await openConnectorFlyout(page);
 
+    await waitForConnectorForm(page);
     await page.testSubj.locator('nameInput').fill(updatedName);
     await page.testSubj.locator('slackWebhookUrlInput').fill('https://test.com');
 
@@ -203,8 +216,13 @@ test.describe('General connector functionality', { tag: tags.stateful.classic },
     await expect(page.testSubj.locator('connectors-row')).toHaveCount(1);
     await openConnectorFlyout(page);
 
+    // Wait for the configuration form to load before switching tabs, otherwise the
+    // tab switch can race the flyout body's mount and the Test tab content never renders.
+    await waitForConnectorForm(page);
     await page.testSubj.click('testConnectorTab');
-    await page.testSubj.locator('executeActionButton').waitFor({ state: 'visible' });
+    await page.testSubj
+      .locator('executeActionButton')
+      .waitFor({ state: 'visible', timeout: 30_000 });
 
     await setMonacoValue(page, '{ "key": "value" }');
     await expect(page.testSubj.locator('executeActionButton')).toBeEnabled();
@@ -238,8 +256,13 @@ test.describe('General connector functionality', { tag: tags.stateful.classic },
     await expect(page.testSubj.locator('connectors-row')).toHaveCount(1);
     await openConnectorFlyout(page);
 
+    // Wait for the configuration form to load before switching tabs, otherwise the
+    // tab switch can race the flyout body's mount and the Test tab content never renders.
+    await waitForConnectorForm(page);
     await page.testSubj.click('testConnectorTab');
-    await page.testSubj.locator('executeActionButton').waitFor({ state: 'visible' });
+    await page.testSubj
+      .locator('executeActionButton')
+      .waitFor({ state: 'visible', timeout: 30_000 });
 
     await setMonacoValue(page, '"test"');
     await expect(page.testSubj.locator('executeActionButton')).toBeEnabled();
@@ -268,6 +291,7 @@ test.describe('General connector functionality', { tag: tags.stateful.classic },
     await expect(page.testSubj.locator('connectors-row')).toHaveCount(1);
     await openConnectorFlyout(page);
 
+    await waitForConnectorForm(page);
     await page.testSubj.locator('nameInput').fill('some test name to cancel');
     await page.testSubj.click('edit-connector-flyout-close-btn');
     await page.testSubj.click('confirmModalConfirmButton');
