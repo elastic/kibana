@@ -140,7 +140,7 @@ export function initializeLayoutManager(
       const expectedChildCount =
         renderedPanelCount + (viewMode === 'print' ? 0 : Object.keys(layout.pinnedPanels).length);
       const currentChildCount = Object.keys(children).filter((uuid) => {
-        const sectionId = layout.panels[uuid]?.grid.sectionId;
+        const sectionId = layout.panels[uuid]?.grid.sectionId; // uuid might reference a pinned panel
         return !(sectionId && isSectionCollapsed(sectionId)); // if a panel is collapsed, it should never trigger loading, even if the API exists
       }).length;
       return expectedChildCount !== currentChildCount;
