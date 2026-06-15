@@ -148,7 +148,7 @@
     "@elastic/monaco-esql": "3.3.0",
     "@elastic/node-crypto": "1.2.3",
     "@elastic/numeral": "2.5.1",
-    "@elastic/opentelemetry-node": "1.10.0",
+    "@elastic/opentelemetry-node": "1.14.0",
     "@elastic/react-search-ui": "1.24.2",
     "@elastic/react-search-ui-views": "1.24.2",
     "@elastic/request-converter": "9.4.0",
