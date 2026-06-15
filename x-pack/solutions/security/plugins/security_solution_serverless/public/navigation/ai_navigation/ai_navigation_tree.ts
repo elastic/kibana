@@ -25,7 +25,8 @@ const SOLUTION_NAME = i18n.translate(
 export const createAiNavigationTree = (
   core: CoreStart,
   chatExperience: AIChatExperience = AIChatExperience.Classic,
-  workflowsUiEnabled: boolean = false
+  workflowsUiEnabled: boolean = false,
+  showAgentBuilderNavAtTop: boolean = false
 ): NavigationTreeDefinition => ({
   body: [
     {
@@ -35,6 +36,14 @@ export const createAiNavigationTree = (
       icon: AiNavigationIcon,
       renderAs: 'home',
     },
+    ...(chatExperience === AIChatExperience.Agent && showAgentBuilderNavAtTop
+      ? [
+          {
+            icon: 'productAgent',
+            link: 'agent_builder' as AppDeepLinkId,
+          },
+        ]
+      : []),
     {
       id: SecurityPageName.alertSummary,
       link: securityLink(SecurityPageName.alertSummary),
@@ -85,7 +94,8 @@ export const createAiNavigationTree = (
           link: 'discover' as AppDeepLinkId,
           icon: 'productDiscover',
         },
-        ...(chatExperience === AIChatExperience.Agent
+        // TODO: remove this item when agentBuilderNavAtTop is enabled by default and the Agent Builder link is always at the top of the nav
+        ...(chatExperience === AIChatExperience.Agent && !showAgentBuilderNavAtTop
           ? [
               {
                 icon: 'productAgent',
