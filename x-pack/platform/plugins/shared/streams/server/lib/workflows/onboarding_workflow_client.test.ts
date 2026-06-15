@@ -272,7 +272,7 @@ describe('StreamsKIsOnboardingClient', () => {
       expect(result).toEqual({
         status: SigEventsWorkflowStatus.Failed,
         executionId: 'exec-1',
-        error: 'Onboarding workflow timed out',
+        error: 'Workflow system-streams-ki-onboarding timed out',
       });
     });
 

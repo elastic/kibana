@@ -131,7 +131,7 @@ describe('SignificantEventsDiscoveryClient', () => {
       expect(result).toEqual({
         status: SigEventsWorkflowStatus.Failed,
         executionId: 'exec-1',
-        error: 'Significant events discovery timed out',
+        error: 'Workflow system-significant-events-orchestrator timed out',
       });
     });
   });
