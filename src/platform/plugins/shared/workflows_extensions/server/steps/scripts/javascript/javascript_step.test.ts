@@ -30,14 +30,14 @@ const createLogger = (): ScriptLogger & {
 });
 
 const createMockContext = (
-  config: { script: string },
+  input: { script: string },
   options?: {
     abortSignal?: AbortSignal;
   }
 ): StepHandlerContext<any, any> => ({
-  config,
-  input: {},
-  rawInput: {},
+  config: {},
+  input,
+  rawInput: input,
   contextManager: {
     getContext: jest.fn(),
   } as any,
@@ -50,7 +50,7 @@ const createMockContext = (
 describe('scriptsJavaScriptStepDefinition', () => {
   it('has a stable handler hash for approval', () => {
     expect(createSHA256Hash(scriptsJavaScriptStepDefinition.handler.toString())).toBe(
-      '7b95d163f0651645ce01cab312f318f89c840fdba9a234cbccb4d1e198ddf23c'
+      '499f4cd443f8c27bf9ed365c9399abd4b82d34dacb89775207c34602ae2c396b'
     );
   });
 

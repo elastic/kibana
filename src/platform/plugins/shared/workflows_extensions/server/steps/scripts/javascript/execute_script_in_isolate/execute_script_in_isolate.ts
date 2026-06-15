@@ -11,6 +11,7 @@ import ivm from 'isolated-vm';
 import { CONSOLE_BRIDGE_SCRIPT } from './console_bridge_script';
 import { createIsolateWithCatastrophicHandler } from './create_isolate_with_catastrophic_handler';
 import type { ExecuteScriptInIsolateParams } from './execute_script_in_isolate_params';
+import { normalizeIsolateExecutionError } from './normalize_isolate_execution_error';
 import { raceWithAbort } from './race_with_abort';
 import { routeConsoleToLogger } from './route_console_to_logger';
 import { runUserScript } from './user_script_runner';
@@ -59,6 +60,8 @@ export const executeScriptInIsolate = async ({
     );
 
     return await resultPromise;
+  } catch (error) {
+    throw normalizeIsolateExecutionError(error);
   } finally {
     if (!isolate.isDisposed) {
       isolate.dispose();

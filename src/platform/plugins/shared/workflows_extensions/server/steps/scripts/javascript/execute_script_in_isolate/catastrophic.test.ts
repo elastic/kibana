@@ -138,9 +138,7 @@ describe('executeScriptInIsolate catastrophic OOM handling', () => {
 
     mockCapturedOnCatastrophicError?.('out of memory');
 
-    await expect(execution).rejects.toThrow(
-      'Script isolate encountered a catastrophic error: out of memory'
-    );
+    await expect(execution).rejects.toThrow('Script failed due to out of memory');
     expect(logger.error).toHaveBeenCalledWith(
       'JavaScript step isolate catastrophic error',
       expect.objectContaining({
@@ -171,9 +169,9 @@ describe('scriptsJavaScriptStepDefinition catastrophic OOM handling', () => {
 
   it('returns a step error when the isolate reports a catastrophic failure', async () => {
     const context: StepHandlerContext<any, any> = {
-      config: { script: 'return 1;' },
-      input: {},
-      rawInput: {},
+      config: {},
+      input: { script: 'return 1;' },
+      rawInput: { script: 'return 1;' },
       contextManager: { getContext: jest.fn() } as any,
       logger: createLogger(),
       abortSignal: new AbortController().signal,

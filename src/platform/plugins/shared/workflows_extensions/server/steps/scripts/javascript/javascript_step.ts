@@ -12,7 +12,7 @@ import { scriptsJavaScriptStepCommonDefinition } from '../../../../common/steps/
 import { createServerStepDefinition } from '../../../step_registry/types';
 
 export const SCRIPT_MEMORY_LIMIT_MB = 8;
-export const SCRIPT_EXECUTION_TIMEOUT_MS = 5_000;
+export const SCRIPT_EXECUTION_TIMEOUT_MS = 1_000; // 1 second timeout for the script execution
 export const MAX_CONSOLE_LOG_COUNT = 100;
 export const SCRIPT_MAX_LENGTH_CHARS = 1 * 1024 * 1024; // 1 MB after Liquid template rendering
 
@@ -40,7 +40,7 @@ const toExecutionError = (error: unknown, aborted: boolean): Error => {
 export const scriptsJavaScriptStepDefinition = createServerStepDefinition({
   ...scriptsJavaScriptStepCommonDefinition,
   handler: async (context) => {
-    const { script } = context.config;
+    const { script } = context.input;
 
     if (typeof script !== 'string' || script.trim().length === 0) {
       return { error: new Error('Script is required') };

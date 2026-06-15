@@ -14,11 +14,11 @@ import type { CommonStepDefinition } from '../../../step_registry/types';
 
 export const ScriptsJavaScriptStepTypeId = 'scripts.javaScript' as const;
 
-export const ConfigSchema = z.object({
-  script: z.string(),
-});
+export const ConfigSchema = z.object({});
 
-export const InputSchema = z.object({});
+export const InputSchema = z.object({
+  script: z.string().max(1024 * 1024), // 1 MB limit for the script
+});
 
 export const OutputSchema = z.unknown();
 
@@ -49,13 +49,14 @@ Execute a JavaScript script in a sandboxed runtime and return its result to down
 \`\`\`yaml
 - name: compute-value
   type: scripts.javaScript
-  script: |
-    return { greeting: 'Hello, World' };
+  with:
+    script: |
+      return { greeting: 'Hello, World' };
 \`\`\`
 
-Scripts run in an isolated sandbox with no workflow data passed in at runtime. Prior step outputs may be embedded via Liquid template expressions in \`script:\`; the rendered script is limited to 1 MB before execution.
+Scripts run in an isolated sandbox with no workflow data passed in at runtime. Prior step outputs may be embedded via Liquid template expressions in \`with.script\`; the rendered script is limited to 1 MB before execution.
 
-## Configuration
+## Inputs
 
 - **script** (required): JavaScript source code to execute (max 1 MB after template rendering).
 

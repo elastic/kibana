@@ -37,6 +37,7 @@ Analysis of the current implementation:
 | **Catastrophic OOM** | `onCatastrophicError` logs, disposes isolate, fails step; does **not** call `process.abort()`. Raced with script execution via `Promise.race`. |
 | **Script size cap** | Rejects scripts larger than **1 MB** after Liquid template rendering (`SCRIPT_MAX_LENGTH_CHARS`), before execution. |
 | **Safe script loading** | User script passed as copied `$0` to fixed `evalClosure` bootstrap + `AsyncFunction` — no string concatenation into wrapper source. |
+| **OOM user message** | Memory-limit failures from `isolated-vm` are normalized to `Script failed due to out of memory` for workflow users. |
 
 **Residual risk after mitigations:** Tight `console.*` or `applySync` loops can still burn CPU until the 5 s timeout. String-based memory bombs are still not reliably blocked by `memoryLimit: 8`.
 
@@ -317,7 +318,7 @@ isolate = new ivm.Isolate({
 **Severity:** ~~Low–Medium~~ **Mitigated**  
 **Main process crash:** No
 
-**Mitigation:** Handler rejects `config.script` when rendered length exceeds **1 MB** (`SCRIPT_MAX_LENGTH_CHARS`) before `compileScript`. Limit applies after Liquid template interpolation (prior step outputs embedded in `script:` count toward the cap).
+**Mitigation:** Handler rejects `input.script` when rendered length exceeds **1 MB** (`SCRIPT_MAX_LENGTH_CHARS`) before `compileScript`. Limit applies after Liquid template interpolation (prior step outputs embedded in `with.script` count toward the cap).
 
 **Residual risk:** Scripts at or near 1 MB still incur main-thread compile cost; authors should prefer data steps for large payloads.
 
@@ -373,7 +374,7 @@ Priority ordered:
 1. **Add `--no-node-snapshot` to Kibana `NODE_OPTIONS`** for all server processes (dev, CI, production).
 2. ~~**Register `onCatastrophicError`**~~ — **Done:** log, dispose, fail step; no `process.abort()`.
 3. ~~**Add `timeout` to `compiled.run()`**~~ — **Done:** 5 s default (`SCRIPT_EXECUTION_TIMEOUT_MS`).
-4. ~~**Cap `config.script` size**~~ — **Done:** 1 MB after template rendering (`SCRIPT_MAX_LENGTH_CHARS`).
+4. ~~**Cap `input.script` size**~~ — **Done:** 1 MB after template rendering (`SCRIPT_MAX_LENGTH_CHARS`).
 5. **Document `memoryLimit` limitations** for workflow authors; consider rejecting or bounding large string patterns if feasible.
 6. ~~**Hide `__logBridge__` from global**~~ — **Done:** setup + `jail.delete`; console-only access.
 7. **Feature flag / `stability: experimental`** until soak testing completes.

@@ -8,6 +8,7 @@
  */
 
 import { executeScriptInIsolate, type ScriptLogger } from '.';
+import { SCRIPT_OUT_OF_MEMORY_MESSAGE } from './normalize_isolate_execution_error';
 import {
   MAX_CONSOLE_LOG_COUNT,
   SCRIPT_EXECUTION_TIMEOUT_MS,
@@ -172,5 +173,16 @@ describe('executeScriptInIsolate', () => {
     }, 100);
 
     await expect(execution).rejects.toThrow('Step execution was cancelled');
+  });
+
+  it('returns a user-friendly error when an ArrayBuffer allocation exceeds the memory limit', async () => {
+    await expect(
+      executeScriptInIsolate({
+        script: 'new ArrayBuffer(100 * 1024 * 1024);',
+        logger: createLogger(),
+        abortSignal: new AbortController().signal,
+        ...defaultIsolateParams,
+      })
+    ).rejects.toThrow(SCRIPT_OUT_OF_MEMORY_MESSAGE);
   });
 });
