@@ -183,7 +183,7 @@ Add the following snippet of Markdown right after (and outside) the `<details>` 
 
 ```markdown
 > [!TIP]
-> Label this issue `ai:auto-flaky-fix` and we'll **open a fix PR** (experimental, share feedback in #appex-qa).
+> Label this issue `ai:auto-flaky-fix` and we'll **open a fix PR** (share early feedback in #appex-qa).
 ```
 
 If a fix PR(s) is already up (in draft or in review) in the Kibana repository, mention the link(s).
