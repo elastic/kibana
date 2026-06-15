@@ -68,7 +68,7 @@ dependsOn:
   - '@kbn/detections-response-ftr-services'
   - '@kbn/connector-schemas'
   - '@kbn/security-solution-features'
-  - '@kbn/spaces-utils'
+  - '@kbn/core-spaces-common'
   - '@kbn/entity-store'
 tags:
   - functional-tests

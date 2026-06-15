@@ -5,4 +5,19 @@
  * 2.0.
  */
 
+import { collectStreamResults, createPipelineStream } from '../test_utils';
+import type { RuleExecutionStep, RulePipelineState } from './types';
+
+export async function getStepError(
+  step: RuleExecutionStep,
+  state: RulePipelineState
+): Promise<Error | undefined> {
+  try {
+    await collectStreamResults(step.executeStream(createPipelineStream([state])));
+    return undefined;
+  } catch (error) {
+    return error as Error;
+  }
+}
+
 export * from '../test_utils';

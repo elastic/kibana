@@ -7,15 +7,21 @@
 
 import {
   FILE_ATTACHMENT_TYPE,
+  LEGACY_ACTIONS_TYPE,
   INDICATOR_ATTACHMENT_TYPE,
   LEGACY_LENS_ATTACHMENT_TYPE,
   LENS_ATTACHMENT_TYPE,
+  SECURITY_ENDPOINT_ATTACHMENT_TYPE,
+  OSQUERY_ATTACHMENT_TYPE,
+  SECURITY_ALERT_ATTACHMENT_TYPE,
+  SECURITY_TIMELINE_ATTACHMENT_TYPE,
 } from '../../constants/attachments';
 import { AttachmentType } from '../../types/domain';
 import { SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER, GENERAL_CASES_OWNER } from '../../constants';
 import {
   isMigratedAttachmentType,
   isPersistableType,
+  isUnifiedOnlyAttachmentType,
   toLegacyAttachmentType,
   toUnifiedAttachmentType,
 } from './migration_utils';
@@ -61,15 +67,44 @@ describe('migration_utils', () => {
     });
   });
 
+  describe('toUnifiedAttachmentType - legacy actions', () => {
+    it('maps the legacy top-level `actions` type to security.endpoint', () => {
+      expect(toUnifiedAttachmentType(LEGACY_ACTIONS_TYPE, owner)).toBe(
+        SECURITY_ENDPOINT_ATTACHMENT_TYPE
+      );
+    });
+  });
+
   describe('toLegacyAttachmentType', () => {
     it('maps the unified file type back to externalReference (top-level type)', () => {
       expect(toLegacyAttachmentType(FILE_ATTACHMENT_TYPE)).toBe(AttachmentType.externalReference);
     });
+
+    it('maps the unified security.endpoint type back to externalReference (top-level type)', () => {
+      expect(toLegacyAttachmentType(SECURITY_ENDPOINT_ATTACHMENT_TYPE)).toBe(
+        AttachmentType.externalReference
+      );
+    });
   });
 
-  describe('isMigratedAttachmentType - file', () => {
+  describe('isMigratedAttachmentType - file & endpoint', () => {
     it('is true for the unified file type', () => {
       expect(isMigratedAttachmentType(FILE_ATTACHMENT_TYPE, owner)).toBe(true);
+    });
+  });
+
+  describe('isMigratedAttachmentType - osquery', () => {
+    it('is true for the unified osquery type', () => {
+      expect(isMigratedAttachmentType(OSQUERY_ATTACHMENT_TYPE, owner)).toBe(true);
+      expect(isMigratedAttachmentType(OSQUERY_ATTACHMENT_TYPE, OBSERVABILITY_OWNER)).toBe(true);
+    });
+  });
+
+  describe('toLegacyAttachmentType - osquery', () => {
+    it('maps the unified osquery type back to externalReference (top-level type)', () => {
+      expect(toLegacyAttachmentType(OSQUERY_ATTACHMENT_TYPE)).toBe(
+        AttachmentType.externalReference
+      );
     });
   });
 
@@ -84,6 +119,23 @@ describe('migration_utils', () => {
       expect(toLegacyAttachmentType(INDICATOR_ATTACHMENT_TYPE)).toBe(
         AttachmentType.externalReference
       );
+    });
+  });
+
+  describe('isUnifiedOnlyAttachmentType', () => {
+    it('is true for unified types with no legacy equivalent', () => {
+      expect(isUnifiedOnlyAttachmentType(SECURITY_TIMELINE_ATTACHMENT_TYPE)).toBe(true);
+    });
+
+    it('is false for unified types that map back to a legacy type', () => {
+      expect(isUnifiedOnlyAttachmentType(SECURITY_ALERT_ATTACHMENT_TYPE)).toBe(false);
+      expect(isUnifiedOnlyAttachmentType(FILE_ATTACHMENT_TYPE)).toBe(false);
+      expect(isUnifiedOnlyAttachmentType(LENS_ATTACHMENT_TYPE)).toBe(false);
+    });
+
+    it('is false for legacy and unknown types', () => {
+      expect(isUnifiedOnlyAttachmentType(AttachmentType.user)).toBe(false);
+      expect(isUnifiedOnlyAttachmentType('something-custom')).toBe(false);
     });
   });
 

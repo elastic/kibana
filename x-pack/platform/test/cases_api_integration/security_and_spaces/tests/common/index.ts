@@ -56,6 +56,7 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
 
     loadTestFile(require.resolve('./attachments_framework/external_references.ts'));
     loadTestFile(require.resolve('./attachments_framework/persistable_state.ts'));
+    loadTestFile(require.resolve('./attachments_framework/osquery.ts'));
     loadTestFile(require.resolve('./attachments_framework/endpoint.ts'));
     loadTestFile(require.resolve('./attachments_framework/indicator.ts'));
 

@@ -28,7 +28,7 @@ import {
   initializeStateManager,
   titleComparators,
   apiIsPresentationContainer,
-  initializeUnsavedChanges,
+  initializeStateApi,
 } from '@kbn/presentation-publishing';
 import React from 'react';
 import { merge } from 'rxjs';
@@ -65,12 +65,10 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
         ...(id ? { savedObjectId: id } : bookStateManager.getLatestState()),
       });
 
-      const serializeState = () => serializeBook(savedObjectId);
-
-      const unsavedChangesApi = initializeUnsavedChanges<BookEmbeddableState>({
+      const stateApi = initializeStateApi<BookEmbeddableState>({
         uuid,
         parentApi,
-        serializeState,
+        serializeState: () => serializeBook(savedObjectId),
         anyStateChange$: merge(titleManager.anyStateChange$, bookStateManager.anyStateChange$),
         getComparators: () => {
           return {
@@ -79,14 +77,14 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
             savedObjectId: 'skip', // saved book id will not change over the lifetime of the embeddable.
           };
         },
-        onReset: async (lastSaved) => {
-          titleManager.reinitializeState(lastSaved);
-          if (!savedObjectId) bookStateManager.reinitializeState(lastSaved as BookState);
+        applySerializedState: async (nextState) => {
+          titleManager.reinitializeState(nextState);
+          if (!savedObjectId) bookStateManager.reinitializeState(nextState as BookState);
         },
       });
 
       const api = finalizeApi({
-        ...unsavedChangesApi,
+        ...stateApi,
         ...titleManager.api,
         onEdit: async () => {
           openLazyFlyout({
@@ -122,7 +120,6 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
           i18n.translate('embeddableExamples.savedbook.editBook.displayName', {
             defaultMessage: 'book',
           }),
-        serializeState,
 
         // library transforms
         getSavedObjectId: () => savedObjectId,

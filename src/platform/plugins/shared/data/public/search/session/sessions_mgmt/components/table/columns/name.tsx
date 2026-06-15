@@ -46,7 +46,6 @@ const NameColumnText = ({
     );
 
   return (
-    // eslint-disable-next-line @elastic/eui/href-or-on-click
     <EuiLink href={href} onClick={onClick} data-test-subj="sessionManagementNameLink">
       {children}
     </EuiLink>

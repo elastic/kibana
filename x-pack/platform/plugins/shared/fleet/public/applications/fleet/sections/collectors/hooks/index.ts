@@ -6,5 +6,6 @@
  */
 
 export { useCollectorsList } from './use_collectors_list';
+export { useCollectorGroups } from './use_collector_groups';
 export { useCollectorsUrlFilters, useSetCollectorsUrlFilters } from './use_url_filters';
 export { useCollectorsSessionState } from './use_session_state';
