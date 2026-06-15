@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { mlApiTest as apiTest, INTERNAL_API_HEADERS } from '../../fixtures';
@@ -21,39 +22,27 @@ apiTest.describe(
     ],
   },
   () => {
-    const validFilters = [
-      {
-        filterId: 'delete_filter_power',
-        requestBody: { description: 'Test delete filter #1', items: ['104.236.210.185'] },
-      },
-      {
-        filterId: 'delete_filter_viewer',
-        requestBody: { description: 'Test delete filter (viewer)', items: ['104.236.210.185'] },
-      },
-      {
-        filterId: 'delete_filter_unauthorized',
-        requestBody: {
-          description: 'Test delete filter (unauthorized)',
-          items: ['104.236.210.185'],
-        },
-      },
+    const validFilters: estypes.MlFilter[] = [
+      { filter_id: 'delete_filter_power', description: 'Test delete filter #1', items: ['104.236.210.185'] },
+      { filter_id: 'delete_filter_viewer', description: 'Test delete filter (viewer)', items: ['104.236.210.185'] },
+      { filter_id: 'delete_filter_unauthorized', description: 'Test delete filter (unauthorized)', items: ['104.236.210.185'] },
     ];
 
     apiTest.beforeAll(async ({ apiServices }) => {
-      for (const { filterId, requestBody } of validFilters) {
-        await apiServices.ml.anomalyDetection.filters.delete(filterId);
-        await apiServices.ml.anomalyDetection.filters.create(filterId, requestBody);
+      for (const filter of validFilters) {
+        await apiServices.ml.anomalyDetection.filters.delete(filter.filter_id);
+        await apiServices.ml.anomalyDetection.filters.create(filter);
       }
     });
 
     apiTest.afterAll(async ({ apiServices }) => {
-      for (const { filterId } of validFilters) {
-        await apiServices.ml.anomalyDetection.filters.delete(filterId);
+      for (const { filter_id } of validFilters) {
+        await apiServices.ml.anomalyDetection.filters.delete(filter_id);
       }
     });
 
     apiTest('should delete filter by id', async ({ apiClient, samlAuth }) => {
-      const { filterId } = validFilters[0];
+      const { filter_id: filterId } = validFilters[0];
       const { cookieHeader } = await samlAuth.asMlPoweruser();
 
       const res = await apiClient.delete(`internal/ml/filters/${filterId}`, {
@@ -75,7 +64,7 @@ apiTest.describe(
     apiTest(
       'should not delete filter for user without required permission',
       async ({ apiClient, samlAuth }) => {
-        const { filterId } = validFilters[1];
+        const { filter_id: filterId } = validFilters[1];
         const { cookieHeader: viewerCookie } = await samlAuth.asMlViewer();
 
         const res = await apiClient.delete(`internal/ml/filters/${filterId}`, {
@@ -98,7 +87,7 @@ apiTest.describe(
     );
 
     apiTest('should not delete filter for unauthorized user', async ({ apiClient, samlAuth }) => {
-      const { filterId } = validFilters[2];
+      const { filter_id: filterId } = validFilters[2];
       const { cookieHeader: unauthorizedCookie } = await samlAuth.asMlUnauthorized();
 
       const res = await apiClient.delete(`internal/ml/filters/${filterId}`, {

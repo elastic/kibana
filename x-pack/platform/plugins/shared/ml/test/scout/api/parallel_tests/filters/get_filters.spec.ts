@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { mlApiTest as apiTest, INTERNAL_API_HEADERS } from '../../fixtures';
@@ -21,27 +22,21 @@ apiTest.describe(
     ],
   },
   () => {
-    const validFilters = [
-      {
-        filterId: 'get_filter_1',
-        requestBody: { description: 'Valid filter #1', items: ['104.236.210.185'] },
-      },
-      {
-        filterId: 'get_filter_2',
-        requestBody: { description: 'Valid filter #2', items: ['104.236.210.185'] },
-      },
+    const validFilters: estypes.MlFilter[] = [
+      { filter_id: 'get_filter_1', description: 'Valid filter #1', items: ['104.236.210.185'] },
+      { filter_id: 'get_filter_2', description: 'Valid filter #2', items: ['104.236.210.185'] },
     ];
 
     apiTest.beforeAll(async ({ apiServices }) => {
-      for (const { filterId, requestBody } of validFilters) {
-        await apiServices.ml.anomalyDetection.filters.delete(filterId);
-        await apiServices.ml.anomalyDetection.filters.create(filterId, requestBody);
+      for (const filter of validFilters) {
+        await apiServices.ml.anomalyDetection.filters.delete(filter.filter_id);
+        await apiServices.ml.anomalyDetection.filters.create(filter);
       }
     });
 
     apiTest.afterAll(async ({ apiServices }) => {
-      for (const { filterId } of validFilters) {
-        await apiServices.ml.anomalyDetection.filters.delete(filterId);
+      for (const { filter_id } of validFilters) {
+        await apiServices.ml.anomalyDetection.filters.delete(filter_id);
       }
     });
 
@@ -55,8 +50,8 @@ apiTest.describe(
 
       expect(res).toHaveStatusCode(200);
       const filterIds = (res.body as Array<{ filter_id: string }>).map((f) => f.filter_id);
-      for (const { filterId } of validFilters) {
-        expect(filterIds).toContain(filterId);
+      for (const { filter_id } of validFilters) {
+        expect(filterIds).toContain(filter_id);
       }
     });
 
@@ -91,18 +86,18 @@ apiTest.describe(
     );
 
     apiTest('should fetch single filter by id', async ({ apiClient, samlAuth }) => {
-      const { filterId, requestBody } = validFilters[0];
+      const { filter_id, description, items } = validFilters[0];
       const { cookieHeader } = await samlAuth.asMlPoweruser();
 
-      const res = await apiClient.get(`internal/ml/filters/${filterId}`, {
+      const res = await apiClient.get(`internal/ml/filters/${filter_id}`, {
         headers: { ...INTERNAL_API_HEADERS, ...cookieHeader },
         responseType: 'json',
       });
 
       expect(res).toHaveStatusCode(200);
-      expect(res.body.filter_id).toBe(filterId);
-      expect(res.body.description).toBe(requestBody.description);
-      expect(res.body.items).toStrictEqual(requestBody.items);
+      expect(res.body.filter_id).toBe(filter_id);
+      expect(res.body.description).toBe(description);
+      expect(res.body.items).toStrictEqual(items);
     });
 
     apiTest('should return 404 if filterId does not exist', async ({ apiClient, samlAuth }) => {

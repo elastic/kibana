@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { mlApiTest as apiTest, INTERNAL_API_HEADERS } from '../../fixtures';
@@ -21,43 +22,33 @@ apiTest.describe(
     ],
   },
   () => {
-    const items = ['104.236.210.185'];
-    const validFilters = [
-      {
-        filterId: 'update_filter_power',
-        requestBody: { description: 'Test update filter #1', items },
-      },
-      {
-        filterId: 'update_filter_viewer',
-        requestBody: { description: 'Test update filter (viewer)', items },
-      },
-      {
-        filterId: 'update_filter_unauthorized',
-        requestBody: { description: 'Test update filter (unauthorized)', items },
-      },
+    const validFilters: estypes.MlFilter[] = [
+      { filter_id: 'update_filter_power', description: 'Test update filter #1', items: ['104.236.210.185'] },
+      { filter_id: 'update_filter_viewer', description: 'Test update filter (viewer)', items: ['104.236.210.185'] },
+      { filter_id: 'update_filter_unauthorized', description: 'Test update filter (unauthorized)', items: ['104.236.210.185'] },
     ];
 
     const updateFilterRequestBody = {
       description: 'Updated filter #1',
-      removeItems: items,
+      removeItems: ['104.236.210.185'],
       addItems: ['my_new_items_1', 'my_new_items_2'],
     };
 
     apiTest.beforeAll(async ({ apiServices }) => {
-      for (const { filterId, requestBody } of validFilters) {
-        await apiServices.ml.anomalyDetection.filters.delete(filterId);
-        await apiServices.ml.anomalyDetection.filters.create(filterId, requestBody);
+      for (const filter of validFilters) {
+        await apiServices.ml.anomalyDetection.filters.delete(filter.filter_id);
+        await apiServices.ml.anomalyDetection.filters.create(filter);
       }
     });
 
     apiTest.afterAll(async ({ apiServices }) => {
-      for (const { filterId } of validFilters) {
-        await apiServices.ml.anomalyDetection.filters.delete(filterId);
+      for (const { filter_id } of validFilters) {
+        await apiServices.ml.anomalyDetection.filters.delete(filter_id);
       }
     });
 
     apiTest('should update filter by id', async ({ apiClient, samlAuth }) => {
-      const { filterId } = validFilters[0];
+      const { filter_id: filterId } = validFilters[0];
       const { cookieHeader } = await samlAuth.asMlPoweruser();
 
       const res = await apiClient.put(`internal/ml/filters/${filterId}`, {
@@ -75,10 +66,10 @@ apiTest.describe(
     apiTest(
       'should not allow to update filter for user without required permission',
       async ({ apiClient, samlAuth }) => {
-        const { filterId, requestBody: oldFilterRequest } = validFilters[1];
+        const { filter_id, description, items } = validFilters[1];
         const { cookieHeader: viewerCookie } = await samlAuth.asMlViewer();
 
-        const res = await apiClient.put(`internal/ml/filters/${filterId}`, {
+        const res = await apiClient.put(`internal/ml/filters/${filter_id}`, {
           headers: { ...INTERNAL_API_HEADERS, ...viewerCookie },
           body: updateFilterRequestBody,
           responseType: 'json',
@@ -89,24 +80,24 @@ apiTest.describe(
 
         // Verify filter was not updated via the Kibana endpoint
         const { cookieHeader: poweruserCookie } = await samlAuth.asMlPoweruser();
-        const getRes = await apiClient.get(`internal/ml/filters/${filterId}`, {
+        const getRes = await apiClient.get(`internal/ml/filters/${filter_id}`, {
           headers: { ...INTERNAL_API_HEADERS, ...poweruserCookie },
           responseType: 'json',
         });
         expect(getRes).toHaveStatusCode(200);
-        expect(getRes.body.filter_id).toBe(filterId);
-        expect(getRes.body.description).toBe(oldFilterRequest.description);
-        expect(getRes.body.items).toStrictEqual(oldFilterRequest.items);
+        expect(getRes.body.filter_id).toBe(filter_id);
+        expect(getRes.body.description).toBe(description);
+        expect(getRes.body.items).toStrictEqual(items);
       }
     );
 
     apiTest(
       'should not allow to update filter for unauthorized user',
       async ({ apiClient, samlAuth }) => {
-        const { filterId, requestBody: oldFilterRequest } = validFilters[2];
+        const { filter_id, description, items } = validFilters[2];
         const { cookieHeader: unauthorizedCookie } = await samlAuth.asMlUnauthorized();
 
-        const res = await apiClient.put(`internal/ml/filters/${filterId}`, {
+        const res = await apiClient.put(`internal/ml/filters/${filter_id}`, {
           headers: { ...INTERNAL_API_HEADERS, ...unauthorizedCookie },
           body: updateFilterRequestBody,
           responseType: 'json',
@@ -117,14 +108,14 @@ apiTest.describe(
 
         // Verify filter was not updated via the Kibana endpoint
         const { cookieHeader: poweruserCookie } = await samlAuth.asMlPoweruser();
-        const getRes = await apiClient.get(`internal/ml/filters/${filterId}`, {
+        const getRes = await apiClient.get(`internal/ml/filters/${filter_id}`, {
           headers: { ...INTERNAL_API_HEADERS, ...poweruserCookie },
           responseType: 'json',
         });
         expect(getRes).toHaveStatusCode(200);
-        expect(getRes.body.filter_id).toBe(filterId);
-        expect(getRes.body.description).toBe(oldFilterRequest.description);
-        expect(getRes.body.items).toStrictEqual(oldFilterRequest.items);
+        expect(getRes.body.filter_id).toBe(filter_id);
+        expect(getRes.body.description).toBe(description);
+        expect(getRes.body.items).toStrictEqual(items);
       }
     );
 

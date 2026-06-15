@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type { FilterStats } from '@kbn/ml-common-types/filters';
@@ -18,19 +19,10 @@ const jobConfig1 = getADFqFilterStatsJobConfig1('fq_filter_stats_1');
 const jobConfig2 = getADFqFilterStatsJobConfig2('fq_filter_stats_2');
 const testJobConfigs = [jobConfig1, jobConfig2];
 
-const testFilters = [
-  {
-    filterId: 'ignore_a_airlines',
-    requestBody: { description: 'Airlines starting with A', items: ['AAL'] },
-  },
-  {
-    filterId: 'ignore_b_airlines',
-    requestBody: { description: 'Airlines starting with B', items: ['BAA', 'BAB'] },
-  },
-  {
-    filterId: 'ignore_c_airlines',
-    requestBody: { description: 'Airlines starting with C', items: ['CAA', 'CAB', 'CCC'] },
-  },
+const testFilters: estypes.MlFilter[] = [
+  { filter_id: 'ignore_a_airlines', description: 'Airlines starting with A', items: ['AAL'] },
+  { filter_id: 'ignore_b_airlines', description: 'Airlines starting with B', items: ['BAA', 'BAB'] },
+  { filter_id: 'ignore_c_airlines', description: 'Airlines starting with C', items: ['CAA', 'CAB', 'CCC'] },
 ];
 
 // TODO: Add the ECH cloud tag once support for custom roles is implemented.
@@ -46,9 +38,9 @@ apiTest.describe(
   },
   () => {
     apiTest.beforeAll(async ({ apiServices }) => {
-      for (const { filterId, requestBody } of testFilters) {
-        await apiServices.ml.anomalyDetection.filters.delete(filterId);
-        await apiServices.ml.anomalyDetection.filters.create(filterId, requestBody);
+      for (const filter of testFilters) {
+        await apiServices.ml.anomalyDetection.filters.delete(filter.filter_id);
+        await apiServices.ml.anomalyDetection.filters.create(filter);
       }
       for (const jobConfig of testJobConfigs) {
         await apiServices.ml.anomalyDetection.delete({ jobIds: [jobConfig.job_id] }).catch(() => {
@@ -69,8 +61,8 @@ apiTest.describe(
             )
           );
       }
-      for (const { filterId } of testFilters) {
-        await apiServices.ml.anomalyDetection.filters.delete(filterId);
+      for (const { filter_id } of testFilters) {
+        await apiServices.ml.anomalyDetection.filters.delete(filter_id);
       }
     });
 
