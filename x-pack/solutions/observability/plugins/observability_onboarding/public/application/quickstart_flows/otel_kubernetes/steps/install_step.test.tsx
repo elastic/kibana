@@ -10,22 +10,29 @@ import React from 'react';
 import { renderWithHostPageProviders } from '../../../pages/host/__tests__/test_helpers';
 import { OtelKubernetesInstallStep } from './install_step';
 
-const wiredStreamsStatus = {
-  isEnabled: false,
-  isLoading: false,
-  isEnabling: false,
-  enableWiredStreams: jest.fn(),
-};
+jest.mock('../../shared/masked_code_block', () => ({
+  MaskedCodeBlock: ({
+    value,
+    secrets,
+    dataTestSubj,
+  }: {
+    value: string;
+    secrets: string[];
+    dataTestSubj: string;
+  }) => (
+    <div data-test-subj={dataTestSubj} data-value={value} data-secrets={secrets.join('|')}>
+      {value}
+    </div>
+  ),
+}));
 
 describe('OtelKubernetesInstallStep', () => {
-  it('renders the V2 heading and inline copy affordance when requested', () => {
+  it('renders the heading and masked install command when requested', () => {
     renderWithHostPageProviders(
       <OtelKubernetesInstallStep
         installStackCommand="helm upgrade --install opentelemetry-kube-stack"
         valuesFileUrl="https://example.com/values.yaml"
-        ingestionMode="classic"
-        onIngestionModeChange={jest.fn()}
-        wiredStreamsStatus={wiredStreamsStatus}
+        secretValues={['encoded-api-key']}
         showTitle
         useInlineCopyOnly
       />
@@ -37,5 +44,12 @@ describe('OtelKubernetesInstallStep', () => {
     expect(
       screen.queryByTestId('observabilityOnboardingOtelKubernetesPanelInstallStackCopyToClipboard')
     ).not.toBeInTheDocument();
+    expect(
+      screen.getByTestId('observabilityOnboardingOtelKubernetesInstallStackSnippet')
+    ).toHaveAttribute('data-value', 'helm upgrade --install opentelemetry-kube-stack');
+    expect(
+      screen.getByTestId('observabilityOnboardingOtelKubernetesInstallStackSnippet')
+    ).toHaveAttribute('data-secrets', 'encoded-api-key');
+    expect(screen.queryByTestId('observabilityOnboardingIngestionModeSelector')).toBeNull();
   });
 });

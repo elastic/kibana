@@ -171,7 +171,7 @@ describe('LandingPage host tiles (V2)', () => {
 });
 
 describe('LandingPage Kubernetes tile (V2)', () => {
-  it('navigates to the Kubernetes V2 page when its tile is clicked', async () => {
+  it('navigates to the Kubernetes page when its tile is clicked', async () => {
     const user = userEvent.setup();
     const { getByTestId } = renderLandingWithRouter(true);
     const tile = getByTestId('observabilityOnboardingIntegrationTile-kubernetes');

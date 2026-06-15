@@ -18,8 +18,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { OTEL_STACK_NAMESPACE } from '../../quickstart_flows/otel_kubernetes/constants';
-import type { KubernetesV2CardOption } from './kubernetes_v2_card_selector';
-import { KubernetesV2CardSelector } from './kubernetes_v2_card_selector';
+import type { KubernetesCardOption } from './kubernetes_card_selector';
+import { KubernetesCardSelector } from './kubernetes_card_selector';
 
 type OtelAnnotationMode = 'pods' | 'namespace';
 type OtelLanguageId = 'nodejs' | 'java' | 'python' | 'dotnet' | 'go';
@@ -28,60 +28,60 @@ const OTEL_LANGUAGE_OPTIONS: Array<{ id: OtelLanguageId; label: string }> = [
   {
     id: 'nodejs',
     label: i18n.translate(
-      'xpack.observability_onboarding.kubernetesV2.otelInstrumentation.nodejsLanguageLabel',
+      'xpack.observability_onboarding.kubernetes.otelInstrumentation.nodejsLanguageLabel',
       { defaultMessage: 'Node.js' }
     ),
   },
   {
     id: 'java',
     label: i18n.translate(
-      'xpack.observability_onboarding.kubernetesV2.otelInstrumentation.javaLanguageLabel',
+      'xpack.observability_onboarding.kubernetes.otelInstrumentation.javaLanguageLabel',
       { defaultMessage: 'Java' }
     ),
   },
   {
     id: 'python',
     label: i18n.translate(
-      'xpack.observability_onboarding.kubernetesV2.otelInstrumentation.pythonLanguageLabel',
+      'xpack.observability_onboarding.kubernetes.otelInstrumentation.pythonLanguageLabel',
       { defaultMessage: 'Python' }
     ),
   },
   {
     id: 'dotnet',
     label: i18n.translate(
-      'xpack.observability_onboarding.kubernetesV2.otelInstrumentation.dotnetLanguageLabel',
+      'xpack.observability_onboarding.kubernetes.otelInstrumentation.dotnetLanguageLabel',
       { defaultMessage: '.NET' }
     ),
   },
   {
     id: 'go',
     label: i18n.translate(
-      'xpack.observability_onboarding.kubernetesV2.otelInstrumentation.goLanguageLabel',
+      'xpack.observability_onboarding.kubernetes.otelInstrumentation.goLanguageLabel',
       { defaultMessage: 'Go' }
     ),
   },
 ];
 
-const ANNOTATION_MODE_OPTIONS: Array<KubernetesV2CardOption<OtelAnnotationMode>> = [
+const ANNOTATION_MODE_OPTIONS: Array<KubernetesCardOption<OtelAnnotationMode>> = [
   {
     id: 'pods',
     label: i18n.translate(
-      'xpack.observability_onboarding.kubernetesV2.otelInstrumentation.specificPodsCardLabel',
+      'xpack.observability_onboarding.kubernetes.otelInstrumentation.specificPodsCardLabel',
       { defaultMessage: 'Annotate specific pods' }
     ),
     description: i18n.translate(
-      'xpack.observability_onboarding.kubernetesV2.otelInstrumentation.specificPodsCardDescription',
+      'xpack.observability_onboarding.kubernetes.otelInstrumentation.specificPodsCardDescription',
       { defaultMessage: 'Add annotations to selected deployment pod templates.' }
     ),
   },
   {
     id: 'namespace',
     label: i18n.translate(
-      'xpack.observability_onboarding.kubernetesV2.otelInstrumentation.namespaceCardLabel',
+      'xpack.observability_onboarding.kubernetes.otelInstrumentation.namespaceCardLabel',
       { defaultMessage: 'Annotate entire namespace' }
     ),
     description: i18n.translate(
-      'xpack.observability_onboarding.kubernetesV2.otelInstrumentation.namespaceCardDescription',
+      'xpack.observability_onboarding.kubernetes.otelInstrumentation.namespaceCardDescription',
       { defaultMessage: 'Apply instrumentation annotations to all resources in a namespace.' }
     ),
   },
@@ -96,12 +96,12 @@ export const OtelInstrumentationStep: React.FC = () => {
     <>
       <EuiSwitch
         label={i18n.translate(
-          'xpack.observability_onboarding.kubernetesV2.otelInstrumentation.switchLabel',
+          'xpack.observability_onboarding.kubernetes.otelInstrumentation.switchLabel',
           { defaultMessage: 'Instrument my application' }
         )}
         checked={isInstrumentationEnabled}
         onChange={(event) => setIsInstrumentationEnabled(event.target.checked)}
-        data-test-subj="observabilityOnboardingKubernetesV2OtelInstrumentationSwitch"
+        data-test-subj="observabilityOnboardingKubernetesOtelInstrumentationSwitch"
       />
 
       {isInstrumentationEnabled ? (
@@ -110,7 +110,7 @@ export const OtelInstrumentationStep: React.FC = () => {
           <EuiText size="s">
             <p>
               {i18n.translate(
-                'xpack.observability_onboarding.kubernetesV2.otelInstrumentation.introduction',
+                'xpack.observability_onboarding.kubernetes.otelInstrumentation.introduction',
                 {
                   defaultMessage:
                     'The Operator automates the injection of auto-instrumentation libraries into annotated pods for some languages.',
@@ -119,39 +119,39 @@ export const OtelInstrumentationStep: React.FC = () => {
             </p>
           </EuiText>
           <EuiSpacer />
-          <KubernetesV2CardSelector
+          <KubernetesCardSelector
             legend={i18n.translate(
-              'xpack.observability_onboarding.kubernetesV2.otelInstrumentation.annotationModeLegend',
+              'xpack.observability_onboarding.kubernetes.otelInstrumentation.annotationModeLegend',
               { defaultMessage: 'Select an annotation method' }
             )}
             selectedId={annotationMode}
             options={ANNOTATION_MODE_OPTIONS}
             onChange={setAnnotationMode}
-            dataTestSubjPrefix="observabilityOnboardingKubernetesV2OtelAnnotationMode"
+            dataTestSubjPrefix="observabilityOnboardingKubernetesOtelAnnotationMode"
           />
           <EuiSpacer />
           <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap>
             <EuiFlexItem grow={false}>
               <EuiButtonGroup
                 legend={i18n.translate(
-                  'xpack.observability_onboarding.kubernetesV2.otelInstrumentation.languageSelectorLegend',
+                  'xpack.observability_onboarding.kubernetes.otelInstrumentation.languageSelectorLegend',
                   { defaultMessage: 'Programming language' }
                 )}
                 idSelected={languageId}
                 onChange={(optionId) => setLanguageId(optionId as OtelLanguageId)}
                 options={OTEL_LANGUAGE_OPTIONS}
-                data-test-subj="observabilityOnboardingKubernetesV2OtelInstrumentationLanguageSelector"
+                data-test-subj="observabilityOnboardingKubernetesOtelInstrumentationLanguageSelector"
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiLink
                 href="https://opentelemetry.io/docs/platforms/kubernetes/operator/automatic/"
-                data-test-subj="observabilityOnboardingKubernetesV2OtelInstrumentationDocsLink"
+                data-test-subj="observabilityOnboardingKubernetesOtelInstrumentationDocsLink"
                 target="_blank"
                 external
               >
                 {i18n.translate(
-                  'xpack.observability_onboarding.kubernetesV2.otelInstrumentation.docsLinkLabel',
+                  'xpack.observability_onboarding.kubernetes.otelInstrumentation.docsLinkLabel',
                   { defaultMessage: 'Other languages documentation' }
                 )}
               </EuiLink>
@@ -164,7 +164,7 @@ export const OtelInstrumentationStep: React.FC = () => {
                 paddingSize="m"
                 language="yaml"
                 isCopyable={true}
-                data-test-subj="observabilityOnboardingKubernetesV2OtelInstrumentationPodsSnippet"
+                data-test-subj="observabilityOnboardingKubernetesOtelInstrumentationPodsSnippet"
               >
                 {`apiVersion: apps/v1
 kind: Deployment
@@ -188,7 +188,7 @@ spec:
                 paddingSize="m"
                 language="bash"
                 isCopyable={true}
-                data-test-subj="observabilityOnboardingKubernetesV2OtelInstrumentationRestartCommand"
+                data-test-subj="observabilityOnboardingKubernetesOtelInstrumentationRestartCommand"
               >
                 {`kubectl rollout restart deployment myapp -n my-namespace
 
@@ -200,7 +200,7 @@ kubectl describe pod <myapp-pod-name> -n my-namespace`}
               paddingSize="m"
               language="yaml"
               isCopyable={true}
-              data-test-subj="observabilityOnboardingKubernetesV2OtelInstrumentationNamespaceSnippet"
+              data-test-subj="observabilityOnboardingKubernetesOtelInstrumentationNamespaceSnippet"
             >
               {`apiVersion: v1
 kind: Namespace

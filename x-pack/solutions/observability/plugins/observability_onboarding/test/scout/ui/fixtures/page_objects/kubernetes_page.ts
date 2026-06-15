@@ -7,12 +7,12 @@
 
 import type { ScoutPage } from '@kbn/scout-oblt';
 
-export class KubernetesV2Page {
+export class KubernetesPage {
   constructor(private readonly page: ScoutPage) {}
 
   async gotoLanding() {
     await this.page.gotoApp('observabilityOnboarding');
-    await this.v2LandingWrapper.waitFor({ state: 'visible', timeout: 20_000 });
+    await this.landingWrapper.waitFor({ state: 'visible', timeout: 20_000 });
   }
 
   async gotoPath(path: string) {
@@ -20,7 +20,7 @@ export class KubernetesV2Page {
     await this.page.gotoApp(`observabilityOnboarding/${normalized}`);
   }
 
-  public get v2LandingWrapper() {
+  public get landingWrapper() {
     return this.page.getByTestId('addDataPageV2');
   }
 
@@ -29,19 +29,15 @@ export class KubernetesV2Page {
   }
 
   layout(method: 'otel') {
-    return this.page.getByTestId(`observabilityOnboardingKubernetesV2Layout-${method}`);
+    return this.page.getByTestId(`observabilityOnboardingKubernetesLayout-${method}`);
   }
 
   collectionMethodSelector() {
     return this.page.getByTestId('collectionMethodSelector');
   }
 
-  ingestionSelector() {
-    return this.page.getByTestId('observabilityOnboardingIngestionModeSelector');
-  }
-
   returnLink() {
-    return this.page.getByTestId('observabilityOnboardingKubernetesV2Return');
+    return this.page.getByTestId('observabilityOnboardingKubernetesReturn');
   }
 
   emptyPrompt() {
@@ -53,7 +49,7 @@ export class KubernetesV2Page {
   }
 
   collectorTab(id: 'edot' | 'existing') {
-    return this.page.getByTestId(`observabilityOnboardingKubernetesV2CollectorTab-${id}`);
+    return this.page.getByTestId(`observabilityOnboardingKubernetesCollectorTab-${id}`);
   }
 
   existingCollectorTitle() {
@@ -69,23 +65,21 @@ export class KubernetesV2Page {
   }
 
   otelInstrumentationSwitch() {
-    return this.page.getByTestId('observabilityOnboardingKubernetesV2OtelInstrumentationSwitch');
+    return this.page.getByTestId('observabilityOnboardingKubernetesOtelInstrumentationSwitch');
   }
 
   otelAnnotationCard(id: 'pods' | 'namespace') {
-    return this.page.getByTestId(`observabilityOnboardingKubernetesV2OtelAnnotationMode-${id}`);
+    return this.page.getByTestId(`observabilityOnboardingKubernetesOtelAnnotationMode-${id}`);
   }
 
   otelInstrumentationNamespaceSnippet() {
     return this.page.getByTestId(
-      'observabilityOnboardingKubernetesV2OtelInstrumentationNamespaceSnippet'
+      'observabilityOnboardingKubernetesOtelInstrumentationNamespaceSnippet'
     );
   }
 
   otelInstrumentationPodsSnippet() {
-    return this.page.getByTestId(
-      'observabilityOnboardingKubernetesV2OtelInstrumentationPodsSnippet'
-    );
+    return this.page.getByTestId('observabilityOnboardingKubernetesOtelInstrumentationPodsSnippet');
   }
 
   async clickOtelAnnotationCard(id: 'pods' | 'namespace') {

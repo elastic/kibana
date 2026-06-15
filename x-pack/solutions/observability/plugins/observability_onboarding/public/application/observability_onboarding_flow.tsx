@@ -6,7 +6,7 @@
  */
 
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import { Redirect } from 'react-router-dom';
 import { useLocation } from 'react-router-dom-v5-compat';
@@ -55,6 +55,12 @@ export function ObservabilityOnboardingFlow() {
   }, [pathname]);
 
   const isManagedOtlpServiceAvailable = useManagedOtlpServiceAvailability();
+  const kubernetesRedirectSearch = useMemo(() => {
+    const searchParams = new URLSearchParams(search);
+    searchParams.delete('ingestion');
+    const nextSearch = searchParams.toString();
+    return nextSearch ? `?${nextSearch}` : '';
+  }, [search]);
 
   const v2HostRoutes = isAddDataPageV2Enabled
     ? [
@@ -86,7 +92,7 @@ export function ObservabilityOnboardingFlow() {
           <KubernetesOtelPage />
         </Route>,
         <Route key="otel-kubernetes-v2-redirect" exact path="/otel-kubernetes">
-          <Redirect to={`/kubernetes${search}`} />
+          <Redirect to={`/kubernetes${kubernetesRedirectSearch}`} />
         </Route>,
       ]
     : [

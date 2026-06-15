@@ -12,7 +12,6 @@ export interface OtelKubernetesVisualizeStepProps {
   isMonitoringStepActive: boolean;
   data?: { onboardingId: string };
   actionLinks: ActionLink[];
-  useWiredStreams: boolean;
   onDataReceived: () => void;
 }
 
@@ -20,7 +19,6 @@ export const OtelKubernetesVisualizeStep: React.FC<OtelKubernetesVisualizeStepPr
   isMonitoringStepActive,
   data,
   actionLinks,
-  useWiredStreams,
   onDataReceived,
 }) => {
   if (!isMonitoringStepActive || !data) {
@@ -35,7 +33,7 @@ export const OtelKubernetesVisualizeStep: React.FC<OtelKubernetesVisualizeStepPr
       integration="kubernetes_otel"
       actionLinks={actionLinks}
       onDataReceived={onDataReceived}
-      respectPreExistingData={useWiredStreams}
+      respectPreExistingData={false}
     />
   );
 };

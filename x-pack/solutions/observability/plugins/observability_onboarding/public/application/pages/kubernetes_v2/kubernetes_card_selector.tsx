@@ -17,28 +17,28 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-export interface KubernetesV2CardOption<TId extends string> {
+export interface KubernetesCardOption<TId extends string> {
   id: TId;
   label: string;
   description?: string;
 }
 
-interface KubernetesV2CardSelectorProps<TId extends string> {
+interface KubernetesCardSelectorProps<TId extends string> {
   legend: string;
   selectedId: TId;
-  options: Array<KubernetesV2CardOption<TId>>;
+  options: Array<KubernetesCardOption<TId>>;
   onChange: (id: TId) => void;
   dataTestSubjPrefix: string;
 }
 
-export const KubernetesV2CardSelector = <TId extends string>({
+export const KubernetesCardSelector = <TId extends string>({
   legend,
   selectedId,
   options,
   onChange,
   dataTestSubjPrefix,
-}: KubernetesV2CardSelectorProps<TId>) => {
-  const radioGroupId = useMemo(() => htmlIdGenerator('kubernetesV2CardSelector')(), []);
+}: KubernetesCardSelectorProps<TId>) => {
+  const radioGroupId = useMemo(() => htmlIdGenerator('kubernetesCardSelector')(), []);
 
   return (
     <EuiFormFieldset legend={{ children: legend, display: 'hidden' }}>

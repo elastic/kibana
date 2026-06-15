@@ -5,32 +5,24 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import type { EuiStepStatus, EuiStepsProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useSearchParams } from 'react-router-dom-v5-compat';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { usePerformanceContext } from '@kbn/ebt-tools';
-import { type LogsLocatorParams, LOGS_LOCATOR_ID } from '@kbn/logs-shared-plugin/common';
+import { LOGS_LOCATOR_ID } from '@kbn/logs-shared-plugin/common';
 import { ObservabilityOnboardingPricingFeature } from '../../../../common/pricing_features';
 import type { ObservabilityOnboardingAppServices } from '../../..';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
-import { useWiredStreamsStatus } from '../../../hooks/use_wired_streams_status';
 import { OnboardingFlowLayout } from '../../shared/onboarding_flow_layout';
-import { usePreExistingDataCheck } from '../../quickstart_flows/shared/use_pre_existing_data_check';
 import { useWindowBlurDataMonitoringTrigger } from '../../quickstart_flows/shared/use_window_blur_data_monitoring_trigger';
 import { useManagedOtlpServiceAvailability } from '../../shared/use_managed_otlp_service_availability';
 import { usePricingFeature } from '../../quickstart_flows/shared/use_pricing_feature';
-import {
-  parseIngestionMode,
-  type IngestionMode,
-} from '../../quickstart_flows/shared/wired_streams_ingestion_selector';
 import { FeedbackButtons } from '../../quickstart_flows/shared/feedback_buttons';
 import { ManagedOtlpCallout } from '../../quickstart_flows/shared/managed_otlp_callout';
 import { EmptyPrompt } from '../../quickstart_flows/shared/empty_prompt';
 import { useFlowBreadcrumb } from '../../shared/use_flow_breadcrumbs';
-import { WIRED_OTEL_DATA_VIEW_SPEC } from '../../quickstart_flows/shared/wired_streams_data_view';
 import { useKubernetesFlow } from '../../quickstart_flows/kubernetes/use_kubernetes_flow';
 import { buildInstallStackCommand } from '../../quickstart_flows/otel_kubernetes/build_install_stack_command';
 import {
@@ -40,18 +32,18 @@ import {
 import { buildValuesFileUrl } from '../../quickstart_flows/otel_kubernetes/build_values_file_url';
 import { buildOtelKubernetesActionLinks } from '../../quickstart_flows/otel_kubernetes/build_otel_kubernetes_action_links';
 import { OtelKubernetesVisualizeStep } from '../../quickstart_flows/otel_kubernetes/steps';
-import { OtelCollectorSetupStep } from './otel_collector_setup_step';
+import { type CollectorMethod, OtelCollectorSetupStep } from './otel_collector_setup_step';
 import { OtelInstrumentationStep } from './otel_instrumentation_step';
 
 const SET_UP_OTEL_COLLECTOR_TITLE = i18n.translate(
-  'xpack.observability_onboarding.kubernetesV2.otel.collectorSetupStepTitle',
+  'xpack.observability_onboarding.kubernetes.otel.collectorSetupStepTitle',
   {
     defaultMessage: 'Set up the OpenTelemetry Collector',
   }
 );
 
 const INSTRUMENT_APPLICATION_STEP_TITLE = i18n.translate(
-  'xpack.observability_onboarding.kubernetesV2.otel.instrumentationStepTitle',
+  'xpack.observability_onboarding.kubernetes.otel.instrumentationStepTitle',
   {
     defaultMessage: 'Instrument your application',
   }
@@ -64,24 +56,9 @@ export const KubernetesOtelPage: React.FC = () => {
     })
   );
 
-  const [searchParams, setSearchParams] = useSearchParams();
-  const ingestionMode = parseIngestionMode(searchParams.get('ingestion'));
-  const setIngestionMode = useCallback(
-    (mode: IngestionMode) => {
-      const next = new URLSearchParams(searchParams);
-      if (mode === 'classic') {
-        next.delete('ingestion');
-      } else {
-        next.set('ingestion', mode);
-      }
-      setSearchParams(next, { replace: true });
-    },
-    [searchParams, setSearchParams]
-  );
-
   const { data, status, error, refetch } = useKubernetesFlow('kubernetes_otel');
   const {
-    services: { share, docLinks },
+    services: { share },
   } = useKibana<ObservabilityOnboardingAppServices>();
 
   const { onPageReady } = usePerformanceContext();
@@ -89,29 +66,24 @@ export const KubernetesOtelPage: React.FC = () => {
     ObservabilityOnboardingPricingFeature.METRICS_ONBOARDING
   );
   const isManagedOtlpServiceAvailable = useManagedOtlpServiceAvailability();
-  const wiredStreamsStatus = useWiredStreamsStatus();
-
-  const useWiredStreams = ingestionMode === 'wired';
 
   const [dataReceived, setDataReceived] = useState(false);
-
-  const hasPreExistingDataEarly = usePreExistingDataCheck({
-    flow: 'kubernetes',
-    onboardingId: data?.onboardingId,
-    enabled: useWiredStreams,
-  });
+  const [selectedCollectorMethod, setSelectedCollectorMethod] = useState<CollectorMethod>('edot');
+  const telemetryEventContext = useMemo(
+    () => ({
+      kubernetes: { selectedCollectorMethod },
+    }),
+    [selectedCollectorMethod]
+  );
 
   const windowBlurred = useWindowBlurDataMonitoringTrigger({
     isActive: status === FETCH_STATUS.SUCCESS,
     onboardingFlowType: 'kubernetes_otel',
     onboardingId: data?.onboardingId,
+    telemetryEventContext,
   });
 
-  const isMonitoringStepActive = windowBlurred || hasPreExistingDataEarly;
-  const logsLocatorParams = useMemo(
-    () => (useWiredStreams ? { dataViewSpec: WIRED_OTEL_DATA_VIEW_SPEC } : {}),
-    [useWiredStreams]
-  );
+  const isMonitoringStepActive = windowBlurred;
 
   useEffect(() => {
     if (data) {
@@ -125,7 +97,7 @@ export const KubernetesOtelPage: React.FC = () => {
 
   const apmLocator = share.url.locators.get('APM_LOCATOR');
   const dashboardLocator = share.url.locators.get(DASHBOARD_APP_LOCATOR);
-  const logsLocator = share.url.locators.get<LogsLocatorParams>(LOGS_LOCATOR_ID);
+  const logsLocator = share.url.locators.get(LOGS_LOCATOR_ID);
 
   const otelKubernetesActionLinks = useMemo(
     () =>
@@ -134,9 +106,9 @@ export const KubernetesOtelPage: React.FC = () => {
         dashboardHref:
           dashboardLocator?.getRedirectUrl({ dashboardId: CLUSTER_OVERVIEW_DASHBOARD_ID }) ?? '',
         servicesHref: apmLocator?.getRedirectUrl({ serviceName: undefined }) ?? '',
-        logsHref: logsLocator?.getRedirectUrl(logsLocatorParams) ?? '',
+        logsHref: logsLocator?.getRedirectUrl({}) ?? '',
       }),
-    [isMetricsOnboardingEnabled, dashboardLocator, apmLocator, logsLocator, logsLocatorParams]
+    [isMetricsOnboardingEnabled, dashboardLocator, apmLocator, logsLocator]
   );
 
   const addRepoCommand = `helm repo add open-telemetry '${OTEL_HELM_CHARTS_REPO}' --force-update`;
@@ -155,7 +127,6 @@ export const KubernetesOtelPage: React.FC = () => {
         elasticsearchUrl: data.elasticsearchUrl,
         apiKeyEncoded: data.apiKeyEncoded,
         agentVersion: data.elasticAgentVersionInfo.agentBaseVersion,
-        useWiredStreams,
         onboardingId: data.onboardingId,
       })
     : undefined;
@@ -181,12 +152,13 @@ export const KubernetesOtelPage: React.FC = () => {
               addRepoCommand={addRepoCommand}
               installStackCommand={installStackCommand}
               valuesFileUrl={otelKubeStackValuesFileUrl}
-              ingestionMode={ingestionMode}
-              onIngestionModeChange={setIngestionMode}
-              streamsDocLink={docLinks?.links.observability.logsStreams}
               isManagedOtlpServiceAvailable={isManagedOtlpServiceAvailable}
               onboardingId={data?.onboardingId}
-              wiredStreamsStatus={wiredStreamsStatus}
+              managedOtlpEndpointUrl={data?.managedOtlpServiceUrl}
+              elasticsearchUrl={data?.elasticsearchUrl}
+              apiKeyEncoded={data?.apiKeyEncoded}
+              selectedCollectorMethod={selectedCollectorMethod}
+              onCollectorMethodChange={setSelectedCollectorMethod}
             />
           ),
         };
@@ -206,7 +178,7 @@ export const KubernetesOtelPage: React.FC = () => {
       title: i18n.translate('xpack.observability_onboarding.otelKubernetesPanel.monitorStepTitle', {
         defaultMessage: 'Visualize your data',
       }),
-      status: (dataReceived || hasPreExistingDataEarly
+      status: (dataReceived
         ? 'complete'
         : isMonitoringStepActive
         ? 'current'
@@ -216,7 +188,6 @@ export const KubernetesOtelPage: React.FC = () => {
           isMonitoringStepActive={isMonitoringStepActive}
           data={data}
           actionLinks={otelKubernetesActionLinks}
-          useWiredStreams={useWiredStreams}
           onDataReceived={() => setDataReceived(true)}
         />
       ),
@@ -229,32 +200,27 @@ export const KubernetesOtelPage: React.FC = () => {
     refetch,
     installStackCommand,
     otelKubeStackValuesFileUrl,
-    ingestionMode,
-    setIngestionMode,
-    docLinks?.links.observability.logsStreams,
     isManagedOtlpServiceAvailable,
-    wiredStreamsStatus,
+    selectedCollectorMethod,
     isMetricsOnboardingEnabled,
     dataReceived,
-    hasPreExistingDataEarly,
     isMonitoringStepActive,
     data,
     otelKubernetesActionLinks,
-    useWiredStreams,
   ]);
 
   return (
     <OnboardingFlowLayout
-      title={i18n.translate('xpack.observability_onboarding.kubernetesV2.otel.title', {
+      title={i18n.translate('xpack.observability_onboarding.kubernetes.otel.title', {
         defaultMessage: 'Monitor your Kubernetes cluster',
       })}
-      subtitle={i18n.translate('xpack.observability_onboarding.kubernetesV2.otel.subtitle', {
+      subtitle={i18n.translate('xpack.observability_onboarding.kubernetes.otel.subtitle', {
         defaultMessage: 'Collect logs, metrics, and traces from your Kubernetes infrastructure.',
       })}
       logo="kubernetes"
       returnTo="/"
-      bodyDataTestSubj="observabilityOnboardingKubernetesV2Layout-otel"
-      returnDataTestSubj="observabilityOnboardingKubernetesV2Return"
+      bodyDataTestSubj="observabilityOnboardingKubernetesLayout-otel"
+      returnDataTestSubj="observabilityOnboardingKubernetesReturn"
       banners={<ManagedOtlpCallout />}
       steps={steps}
       feedback={<FeedbackButtons flow="otel_kubernetes" />}

@@ -144,9 +144,9 @@ describe('Feature-flag gate on Kubernetes routes', () => {
       expect(screen.queryByTestId('kubernetesOtelPageStub')).toBeNull();
     });
 
-    it('redirects /otel-kubernetes to /kubernetes preserving search params', () => {
-      renderFlow(true, '/otel-kubernetes?ingestion=wired');
-      expect(screen.getByTestId('locationProbe')).toHaveTextContent('/kubernetes?ingestion=wired');
+    it('redirects /otel-kubernetes to /kubernetes without the deprecated ingestion param', () => {
+      renderFlow(true, '/otel-kubernetes?ingestion=wired&foo=bar');
+      expect(screen.getByTestId('locationProbe')).toHaveTextContent('/kubernetes?foo=bar');
       expect(screen.getByTestId('kubernetesOtelPageStub')).toBeInTheDocument();
       expect(screen.queryByTestId('otelKubernetesPageStub')).toBeNull();
     });

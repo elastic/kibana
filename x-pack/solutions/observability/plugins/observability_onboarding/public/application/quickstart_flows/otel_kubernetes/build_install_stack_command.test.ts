@@ -109,94 +109,20 @@ helm upgrade --install opentelemetry-kube-stack open-telemetry/opentelemetry-kub
   });
 
   describe('wired streams', () => {
-    it('does not include wired streams config when useWiredStreams is false', () => {
-      const command = buildInstallStackCommand({
+    it('does not include wired streams config even if an old caller passes the deprecated flag', () => {
+      const argsWithDeprecatedWiredFlag = {
         ...defaultArgs,
-        useWiredStreams: false,
-      });
+        useWiredStreams: true,
+      };
+
+      const command = buildInstallStackCommand(argsWithDeprecatedWiredFlag);
 
       expect(command).not.toContain('resource\\/wired_streams');
       expect(command).not.toContain('elasticsearch.index');
-    });
-
-    it('routes daemon logs to wired streams when useWiredStreams is true (direct ES)', () => {
-      const command = buildInstallStackCommand({
-        ...defaultArgs,
-        isManagedOtlpServiceAvailable: false,
-        useWiredStreams: true,
-      });
-
-      expect(command).toContain('collectors.daemon.config.processors.resource\\/wired_streams');
-      expect(command).toContain('elasticsearch.index');
-      expect(command).toContain(
-        'collectors.daemon.config.service.pipelines.logs\\/node.processors[9]=resource/wired_streams'
-      );
-      expect(command).not.toContain('logs\\/apm');
-    });
-
-    it('routes daemon logs to wired streams when useWiredStreams is true (managed OTLP)', () => {
-      const command = buildInstallStackCommand({
-        ...defaultArgs,
-        isManagedOtlpServiceAvailable: true,
-        useWiredStreams: true,
-      });
-
-      expect(command).toContain('collectors.daemon.config.processors.resource\\/wired_streams');
-      expect(command).toContain('elasticsearch.index');
-      expect(command).toContain(
-        'collectors.daemon.config.service.pipelines.logs\\/node.processors[9]=resource/wired_streams'
-      );
-      expect(command).not.toContain('logs\\/apm');
-    });
-
-    it('excludes APM logs from wired streams regardless of metrics onboarding setting', () => {
-      const withMetrics = buildInstallStackCommand({
-        ...defaultArgs,
-        isMetricsOnboardingEnabled: true,
-        isManagedOtlpServiceAvailable: true,
-        useWiredStreams: true,
-      });
-
-      const withoutMetrics = buildInstallStackCommand({
-        ...defaultArgs,
-        isMetricsOnboardingEnabled: false,
-        isManagedOtlpServiceAvailable: true,
-        useWiredStreams: true,
-      });
-
-      expect(withMetrics).not.toContain('logs\\/apm');
-      expect(withoutMetrics).not.toContain('logs\\/apm');
-    });
-
-    it('does not modify gateway config when useWiredStreams is true', () => {
-      const command = buildInstallStackCommand({
-        ...defaultArgs,
-        useWiredStreams: true,
-      });
-
+      expect(command).not.toContain('logs\\/node.processors[9]=resource/wired_streams');
+      expect(command).toContain('logs\\/node.processors[8]=resource/onboarding_id');
       expect(command).not.toContain('collectors.gateway.config');
       expect(command).not.toContain('logs_index=logs');
-    });
-
-    it('assigns onboarding_id to logs processors[8] and wired_streams to logs processors[9]', () => {
-      const command = buildInstallStackCommand({
-        ...defaultArgs,
-        useWiredStreams: true,
-      });
-
-      expect(command).toContain('logs\\/node.processors[8]=resource/onboarding_id');
-      expect(command).toContain('logs\\/node.processors[9]=resource/wired_streams');
-    });
-
-    it('appends wired streams config after onboarding_id config', () => {
-      const command = buildInstallStackCommand({
-        ...defaultArgs,
-        useWiredStreams: true,
-      });
-
-      const onboardingIdIndex = command.indexOf('resource/onboarding_id');
-      const wiredStreamsIndex = command.indexOf('resource/wired_streams');
-      expect(onboardingIdIndex).toBeLessThan(wiredStreamsIndex);
     });
   });
 });

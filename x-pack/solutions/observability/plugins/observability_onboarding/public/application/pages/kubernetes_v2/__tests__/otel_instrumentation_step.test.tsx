@@ -16,16 +16,16 @@ describe('OtelInstrumentationStep', () => {
     renderWithHostPageProviders(<OtelInstrumentationStep />);
 
     expect(
-      screen.getByTestId('observabilityOnboardingKubernetesV2OtelInstrumentationSwitch')
+      screen.getByTestId('observabilityOnboardingKubernetesOtelInstrumentationSwitch')
     ).not.toBeChecked();
     expect(
-      screen.queryByTestId('observabilityOnboardingKubernetesV2OtelInstrumentationLanguageSelector')
+      screen.queryByTestId('observabilityOnboardingKubernetesOtelInstrumentationLanguageSelector')
     ).not.toBeInTheDocument();
     expect(
-      screen.queryByTestId('observabilityOnboardingKubernetesV2OtelInstrumentationPodsSnippet')
+      screen.queryByTestId('observabilityOnboardingKubernetesOtelInstrumentationPodsSnippet')
     ).not.toBeInTheDocument();
     expect(
-      screen.queryByTestId('observabilityOnboardingKubernetesV2OtelInstrumentationNamespaceSnippet')
+      screen.queryByTestId('observabilityOnboardingKubernetesOtelInstrumentationNamespaceSnippet')
     ).not.toBeInTheDocument();
   });
 
@@ -33,40 +33,38 @@ describe('OtelInstrumentationStep', () => {
     renderWithHostPageProviders(<OtelInstrumentationStep />);
 
     await userEvent.click(
-      screen.getByTestId('observabilityOnboardingKubernetesV2OtelInstrumentationSwitch')
+      screen.getByTestId('observabilityOnboardingKubernetesOtelInstrumentationSwitch')
     );
 
     expect(screen.getByText('Annotate specific pods')).toBeInTheDocument();
     expect(screen.getByText('Annotate entire namespace')).toBeInTheDocument();
     expect(
-      screen.getByTestId('observabilityOnboardingKubernetesV2OtelAnnotationMode-pods')
+      screen.getByTestId('observabilityOnboardingKubernetesOtelAnnotationMode-pods')
     ).toHaveAttribute('data-selected', 'true');
     expect(
-      screen.getByTestId('observabilityOnboardingKubernetesV2OtelAnnotationMode-namespace')
+      screen.getByTestId('observabilityOnboardingKubernetesOtelAnnotationMode-namespace')
     ).toHaveAttribute('data-selected', 'false');
     expect(
-      screen.getByTestId('observabilityOnboardingKubernetesV2OtelInstrumentationLanguageSelector')
+      screen.getByTestId('observabilityOnboardingKubernetesOtelInstrumentationLanguageSelector')
     ).toBeInTheDocument();
     expect(
       screen
-        .getByTestId('observabilityOnboardingKubernetesV2OtelAnnotationMode-pods')
+        .getByTestId('observabilityOnboardingKubernetesOtelAnnotationMode-pods')
         .compareDocumentPosition(
-          screen.getByTestId(
-            'observabilityOnboardingKubernetesV2OtelInstrumentationLanguageSelector'
-          )
+          screen.getByTestId('observabilityOnboardingKubernetesOtelInstrumentationLanguageSelector')
         )
     ).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
     expect(
-      screen.getByTestId('observabilityOnboardingKubernetesV2OtelInstrumentationPodsSnippet')
+      screen.getByTestId('observabilityOnboardingKubernetesOtelInstrumentationPodsSnippet')
     ).toHaveTextContent('instrumentation.opentelemetry.io/inject-nodejs');
     expect(
-      screen.queryByTestId('observabilityOnboardingKubernetesV2OtelInstrumentationNamespaceSnippet')
+      screen.queryByTestId('observabilityOnboardingKubernetesOtelInstrumentationNamespaceSnippet')
     ).not.toBeInTheDocument();
     expect(
-      screen.getByTestId('observabilityOnboardingKubernetesV2OtelInstrumentationRestartCommand')
+      screen.getByTestId('observabilityOnboardingKubernetesOtelInstrumentationRestartCommand')
     ).toHaveTextContent('kubectl rollout restart deployment myapp -n my-namespace');
     expect(
-      screen.getByTestId('observabilityOnboardingKubernetesV2OtelInstrumentationDocsLink')
+      screen.getByTestId('observabilityOnboardingKubernetesOtelInstrumentationDocsLink')
     ).toHaveAttribute(
       'href',
       'https://opentelemetry.io/docs/platforms/kubernetes/operator/automatic/'
@@ -78,33 +76,33 @@ describe('OtelInstrumentationStep', () => {
     renderWithHostPageProviders(<OtelInstrumentationStep />);
 
     await userEvent.click(
-      screen.getByTestId('observabilityOnboardingKubernetesV2OtelInstrumentationSwitch')
+      screen.getByTestId('observabilityOnboardingKubernetesOtelInstrumentationSwitch')
     );
     await userEvent.click(screen.getByRole('radio', { name: /Annotate entire namespace/ }));
 
     expect(
-      screen.getByTestId('observabilityOnboardingKubernetesV2OtelAnnotationMode-pods')
+      screen.getByTestId('observabilityOnboardingKubernetesOtelAnnotationMode-pods')
     ).toHaveAttribute('data-selected', 'false');
     expect(
-      screen.getByTestId('observabilityOnboardingKubernetesV2OtelAnnotationMode-namespace')
+      screen.getByTestId('observabilityOnboardingKubernetesOtelAnnotationMode-namespace')
     ).toHaveAttribute('data-selected', 'true');
     expect(
-      screen.queryByTestId('observabilityOnboardingKubernetesV2OtelInstrumentationPodsSnippet')
+      screen.queryByTestId('observabilityOnboardingKubernetesOtelInstrumentationPodsSnippet')
     ).not.toBeInTheDocument();
     expect(
-      screen.getByTestId('observabilityOnboardingKubernetesV2OtelInstrumentationNamespaceSnippet')
+      screen.getByTestId('observabilityOnboardingKubernetesOtelInstrumentationNamespaceSnippet')
     ).toHaveTextContent('apiVersion: v1');
     expect(
-      screen.getByTestId('observabilityOnboardingKubernetesV2OtelInstrumentationNamespaceSnippet')
+      screen.getByTestId('observabilityOnboardingKubernetesOtelInstrumentationNamespaceSnippet')
     ).toHaveTextContent('kind: Namespace');
     expect(
-      screen.getByTestId('observabilityOnboardingKubernetesV2OtelInstrumentationNamespaceSnippet')
+      screen.getByTestId('observabilityOnboardingKubernetesOtelInstrumentationNamespaceSnippet')
     ).not.toHaveTextContent('kubectl annotate namespace my-namespace');
     expect(
-      screen.queryByTestId('observabilityOnboardingKubernetesV2OtelInstrumentationRestartCommand')
+      screen.queryByTestId('observabilityOnboardingKubernetesOtelInstrumentationRestartCommand')
     ).not.toBeInTheDocument();
     expect(
-      screen.getByTestId('observabilityOnboardingKubernetesV2OtelInstrumentationDocsLink')
+      screen.getByTestId('observabilityOnboardingKubernetesOtelInstrumentationDocsLink')
     ).toBeInTheDocument();
   });
 });

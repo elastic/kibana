@@ -8,8 +8,11 @@
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import type { IngestionMode } from '../../../quickstart_flows/shared/wired_streams_ingestion_selector';
-import { renderWithHostPageProviders } from '../../host/__tests__/test_helpers';
+import { OBSERVABILITY_ONBOARDING_FLOW_PROGRESS_TELEMETRY_EVENT } from '../../../../../common/telemetry_events';
+import {
+  buildHostPageServices,
+  renderWithHostPageProviders,
+} from '../../host/__tests__/test_helpers';
 import { OtelCollectorSetupStep } from '../otel_collector_setup_step';
 
 jest.mock('../../../quickstart_flows/otel_kubernetes/steps', () => ({
@@ -31,22 +34,38 @@ jest.mock('../../../quickstart_flows/otel_kubernetes/steps', () => ({
   ),
   OtelKubernetesInstallStep: ({
     installStackCommand,
-    ingestionMode,
+    secretValues,
     showTitle,
     useInlineCopyOnly,
   }: {
     installStackCommand?: string;
-    ingestionMode: IngestionMode;
+    secretValues?: string[];
     showTitle?: boolean;
     useInlineCopyOnly?: boolean;
   }) => (
     <div
       data-test-subj="otelK8sInstallStep"
       data-install-stack-command={installStackCommand}
-      data-ingestion-mode={ingestionMode}
+      data-secret-values={secretValues?.join('|')}
       data-show-title={showTitle}
       data-use-inline-copy-only={useInlineCopyOnly}
     />
+  ),
+}));
+
+jest.mock('../../../quickstart_flows/shared/masked_code_block', () => ({
+  MaskedCodeBlock: ({
+    value,
+    secrets,
+    dataTestSubj,
+  }: {
+    value: string;
+    secrets: string[];
+    dataTestSubj: string;
+  }) => (
+    <div data-test-subj={dataTestSubj} data-value={value} data-secrets={secrets.join('|')}>
+      {value}
+    </div>
   ),
 }));
 
@@ -54,17 +73,13 @@ const defaultProps = {
   addRepoCommand: 'helm repo add elastic https://helm.elastic.co',
   installStackCommand: 'helm install edot-collector',
   valuesFileUrl: 'https://example.com/values.yaml',
-  ingestionMode: 'classic' as const,
-  onIngestionModeChange: jest.fn(),
-  streamsDocLink: 'https://example.com/streams',
   isManagedOtlpServiceAvailable: true,
   onboardingId: 'test-onboarding-id',
-  wiredStreamsStatus: {
-    isEnabled: false,
-    isLoading: false,
-    isEnabling: false,
-    enableWiredStreams: jest.fn(),
-  },
+  managedOtlpEndpointUrl: 'https://otlp.example',
+  elasticsearchUrl: 'https://elasticsearch.example',
+  apiKeyEncoded: 'encoded-api-key',
+  selectedCollectorMethod: 'edot' as const,
+  onCollectorMethodChange: jest.fn(),
 };
 
 describe('OtelCollectorSetupStep', () => {
@@ -72,10 +87,10 @@ describe('OtelCollectorSetupStep', () => {
     renderWithHostPageProviders(<OtelCollectorSetupStep {...defaultProps} />);
 
     expect(
-      screen.getByTestId('observabilityOnboardingKubernetesV2CollectorTabs')
+      screen.getByTestId('observabilityOnboardingKubernetesCollectorTabs')
     ).toBeInTheDocument();
     expect(
-      screen.getByTestId('observabilityOnboardingKubernetesV2CollectorTab-edot')
+      screen.getByTestId('observabilityOnboardingKubernetesCollectorTab-edot')
     ).toHaveAttribute('aria-selected', 'true');
     expect(screen.getByTestId('otelK8sAddRepoStep')).toHaveAttribute(
       'data-add-repo-command',
@@ -91,13 +106,40 @@ describe('OtelCollectorSetupStep', () => {
       'data-use-inline-copy-only',
       'true'
     );
+    expect(screen.getByTestId('otelK8sInstallStep')).toHaveAttribute(
+      'data-secret-values',
+      'https://otlp.example|encoded-api-key'
+    );
+  });
+
+  it('reports collector method telemetry when a collector tab is selected', async () => {
+    const services = buildHostPageServices();
+    const reportEvent = jest.fn();
+    services.analytics.reportEvent = reportEvent;
+
+    renderWithHostPageProviders(<OtelCollectorSetupStep {...defaultProps} />, { services });
+
+    await userEvent.click(
+      screen.getByTestId('observabilityOnboardingKubernetesCollectorTab-existing')
+    );
+
+    expect(defaultProps.onCollectorMethodChange).toHaveBeenCalledWith('existing_collector');
+    expect(reportEvent).toHaveBeenCalledWith(
+      OBSERVABILITY_ONBOARDING_FLOW_PROGRESS_TELEMETRY_EVENT.eventType,
+      {
+        onboardingFlowType: 'kubernetes_otel',
+        onboardingId: defaultProps.onboardingId,
+        step: 'collector_method_selected',
+        context: {
+          kubernetes: { selectedCollectorMethod: 'existing_collector' },
+        },
+      }
+    );
   });
 
   it('shows managed OTLP guidance and a copyable snippet when managed OTLP is available', async () => {
-    renderWithHostPageProviders(<OtelCollectorSetupStep {...defaultProps} />);
-
-    await userEvent.click(
-      screen.getByTestId('observabilityOnboardingKubernetesV2CollectorTab-existing')
+    renderWithHostPageProviders(
+      <OtelCollectorSetupStep {...defaultProps} selectedCollectorMethod="existing_collector" />
     );
 
     expect(screen.queryByTestId('otelK8sAddRepoStep')).not.toBeInTheDocument();
@@ -116,7 +158,7 @@ describe('OtelCollectorSetupStep', () => {
       )
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/Set ELASTIC_OTLP_ENDPOINT and ELASTIC_API_KEY in your collector environment/)
+      screen.getByText(/Create or adapt a Secret in the namespace where your collector runs/)
     ).toBeInTheDocument();
     expect(screen.getAllByText(/resource\/onboarding_id/).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/onboarding\.id/).length).toBeGreaterThan(0);
@@ -126,7 +168,7 @@ describe('OtelCollectorSetupStep', () => {
     expect(screen.getByText(/file_log/)).toBeInTheDocument();
 
     const managedSnippet = screen.getByTestId(
-      'observabilityOnboardingKubernetesV2ExistingCollectorManagedSnippet'
+      'observabilityOnboardingKubernetesExistingCollectorManagedSnippet'
     );
     expect(managedSnippet).toHaveTextContent(/test-onboarding-id/);
     expect(managedSnippet).toHaveTextContent(/action: upsert/);
@@ -136,6 +178,19 @@ describe('OtelCollectorSetupStep', () => {
     expect(managedSnippet).toHaveTextContent(/queue_size: 50_000_000/);
     expect(managedSnippet).toHaveTextContent(/block_on_overflow: true/);
 
+    const secretSnippet = screen.getByTestId(
+      'observabilityOnboardingKubernetesExistingCollectorSecretSnippet'
+    );
+    expect(secretSnippet).toHaveAttribute(
+      'data-value',
+      expect.stringContaining("--from-literal=ELASTIC_OTLP_ENDPOINT='https://otlp.example'")
+    );
+    expect(secretSnippet).toHaveAttribute(
+      'data-value',
+      expect.stringContaining("--from-literal=ELASTIC_API_KEY='encoded-api-key'")
+    );
+    expect(secretSnippet).toHaveAttribute('data-secrets', 'https://otlp.example|encoded-api-key');
+
     expect(
       screen.queryByRole('heading', { name: 'Use a gateway collector configuration' })
     ).not.toBeInTheDocument();
@@ -143,12 +198,10 @@ describe('OtelCollectorSetupStep', () => {
       screen.queryByText(/Managed OTLP is not available for this deployment/)
     ).not.toBeInTheDocument();
     expect(
-      screen.queryByTestId('observabilityOnboardingKubernetesV2ExistingCollectorKubeStackDocsLink')
+      screen.queryByTestId('observabilityOnboardingKubernetesExistingCollectorKubeStackDocsLink')
     ).not.toBeInTheDocument();
     expect(
-      screen.queryByTestId(
-        'observabilityOnboardingKubernetesV2ExistingCollectorOtlpEndpointDocsLink'
-      )
+      screen.queryByTestId('observabilityOnboardingKubernetesExistingCollectorOtlpEndpointDocsLink')
     ).not.toBeInTheDocument();
     expect(screen.queryByText(/prometheus/i)).not.toBeInTheDocument();
   });
@@ -157,11 +210,13 @@ describe('OtelCollectorSetupStep', () => {
     'shows a preparing message without the managed OTLP snippet when onboardingId is %p',
     async (onboardingId) => {
       renderWithHostPageProviders(
-        <OtelCollectorSetupStep {...defaultProps} onboardingId={onboardingId} />
-      );
-
-      await userEvent.click(
-        screen.getByTestId('observabilityOnboardingKubernetesV2CollectorTab-existing')
+        <OtelCollectorSetupStep
+          {...defaultProps}
+          onboardingId={onboardingId}
+          managedOtlpEndpointUrl={undefined}
+          apiKeyEncoded={undefined}
+          selectedCollectorMethod="existing_collector"
+        />
       );
 
       expect(
@@ -173,7 +228,7 @@ describe('OtelCollectorSetupStep', () => {
         )
       ).toBeInTheDocument();
       expect(
-        screen.getByText(/Set ELASTIC_OTLP_ENDPOINT and ELASTIC_API_KEY in your collector environment/)
+        screen.getByText(/Create or adapt a Secret in the namespace where your collector runs/)
       ).toBeInTheDocument();
       expect(screen.getByText(/k8s_cluster/)).toBeInTheDocument();
       expect(screen.getByText(/kubeletstats/)).toBeInTheDocument();
@@ -185,7 +240,10 @@ describe('OtelCollectorSetupStep', () => {
         )
       ).toBeInTheDocument();
       expect(
-        screen.queryByTestId('observabilityOnboardingKubernetesV2ExistingCollectorManagedSnippet')
+        screen.queryByTestId('observabilityOnboardingKubernetesExistingCollectorManagedSnippet')
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('observabilityOnboardingKubernetesExistingCollectorSecretSnippet')
       ).not.toBeInTheDocument();
       expect(screen.queryByText(/value: ""/)).not.toBeInTheDocument();
       expect(screen.queryByText(/test-onboarding-id/)).not.toBeInTheDocument();
@@ -194,11 +252,11 @@ describe('OtelCollectorSetupStep', () => {
 
   it('shows non-managed guidance without the managed OTLP snippet when managed OTLP is unavailable', async () => {
     renderWithHostPageProviders(
-      <OtelCollectorSetupStep {...defaultProps} isManagedOtlpServiceAvailable={false} />
-    );
-
-    await userEvent.click(
-      screen.getByTestId('observabilityOnboardingKubernetesV2CollectorTab-existing')
+      <OtelCollectorSetupStep
+        {...defaultProps}
+        isManagedOtlpServiceAvailable={false}
+        selectedCollectorMethod="existing_collector"
+      />
     );
 
     expect(
@@ -209,13 +267,13 @@ describe('OtelCollectorSetupStep', () => {
     ).toBeInTheDocument();
     expect(screen.getByText(/onboarding\.id/)).toBeInTheDocument();
     expect(
-      screen.getByTestId('observabilityOnboardingKubernetesV2ExistingCollectorKubeStackDocsLink')
+      screen.getByTestId('observabilityOnboardingKubernetesExistingCollectorKubeStackDocsLink')
     ).toHaveAttribute(
       'href',
       'https://www.elastic.co/docs/reference/edot-collector/config/default-config-k8s'
     );
     expect(
-      screen.getByTestId('observabilityOnboardingKubernetesV2ExistingCollectorOtlpEndpointDocsLink')
+      screen.getByTestId('observabilityOnboardingKubernetesExistingCollectorOtlpEndpointDocsLink')
     ).toHaveAttribute('href', 'https://www.elastic.co/docs/manage-data/ingest/otlp-endpoint');
 
     expect(
@@ -226,7 +284,10 @@ describe('OtelCollectorSetupStep', () => {
     ).not.toBeInTheDocument();
     expect(screen.queryByText(/test-onboarding-id/)).not.toBeInTheDocument();
     expect(
-      screen.queryByTestId('observabilityOnboardingKubernetesV2ExistingCollectorManagedSnippet')
+      screen.queryByTestId('observabilityOnboardingKubernetesExistingCollectorManagedSnippet')
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId('observabilityOnboardingKubernetesExistingCollectorSecretSnippet')
     ).not.toBeInTheDocument();
     expect(screen.queryByText(/endpoint: "\$\{ELASTIC_OTLP_ENDPOINT\}"/)).not.toBeInTheDocument();
     expect(

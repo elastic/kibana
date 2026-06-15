@@ -390,22 +390,6 @@
         "line": 53,
         "column": 9
       }
-    },
-    {
-      "id": "13fea49ba796590-306b56360167eea",
-      "title": "Wired Streams - OTel Kubernetes Flow shows ingestion selector with correct options",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/wired_streams_otel_kubernetes.spec.ts",
-        "line": 28,
-        "column": 9
-      }
     }
   ]
 }

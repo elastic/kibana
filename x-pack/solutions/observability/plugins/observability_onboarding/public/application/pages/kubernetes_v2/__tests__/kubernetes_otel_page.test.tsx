@@ -6,28 +6,37 @@
  */
 
 import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { KubernetesOtelPage } from '../kubernetes_otel_page';
 import { buildFetchError, renderWithHostPageProviders } from '../../host/__tests__/test_helpers';
 
 interface MockOtelCollectorSetupStepProps {
-  ingestionMode: string;
   isManagedOtlpServiceAvailable: boolean;
   onboardingId?: string;
+  selectedCollectorMethod: string;
+  onCollectorMethodChange: (method: string) => void;
 }
 
 const mockOtelCollectorSetupStep = jest.fn(
   ({
-    ingestionMode,
     isManagedOtlpServiceAvailable,
     onboardingId,
+    selectedCollectorMethod,
+    onCollectorMethodChange,
   }: MockOtelCollectorSetupStepProps) => (
-    <div
-      data-test-subj="otelCollectorSetupStep"
-      data-ingestion-mode={ingestionMode}
-      data-managed-otlp-service-available={String(isManagedOtlpServiceAvailable)}
-      data-onboarding-id={onboardingId}
-    />
+    <div data-test-subj="otelCollectorSetupStep">
+      <span data-test-subj="selectedCollectorMethod">{selectedCollectorMethod}</span>
+      <span data-test-subj="managedOtlpServiceAvailable">
+        {String(isManagedOtlpServiceAvailable)}
+      </span>
+      <span data-test-subj="collectorOnboardingId">{onboardingId}</span>
+      <button
+        type="button"
+        data-test-subj="selectExistingCollector"
+        onClick={() => onCollectorMethodChange('existing_collector')}
+      />
+    </div>
   )
 );
 
@@ -90,15 +99,6 @@ jest.mock('../../../shared/use_managed_otlp_service_availability', () => ({
   useManagedOtlpServiceAvailability: () => mockUseManagedOtlpServiceAvailability(),
 }));
 
-jest.mock('../../../../hooks/use_wired_streams_status', () => ({
-  useWiredStreamsStatus: () => ({
-    isEnabled: false,
-    isLoading: false,
-    isEnabling: false,
-    enableWiredStreams: jest.fn(),
-  }),
-}));
-
 const mockUsePricingFeature = jest.fn().mockReturnValue(true);
 jest.mock('../../../quickstart_flows/shared/use_pricing_feature', () => ({
   usePricingFeature: (...args: unknown[]) => mockUsePricingFeature(...args),
@@ -145,9 +145,7 @@ describe('KubernetesOtelPage', () => {
 
   it('renders the Kubernetes OTel layout chrome', () => {
     renderPage();
-    expect(
-      screen.getByTestId('observabilityOnboardingKubernetesV2Layout-otel')
-    ).toBeInTheDocument();
+    expect(screen.getByTestId('observabilityOnboardingKubernetesLayout-otel')).toBeInTheDocument();
   });
 
   it('does not render the collection method selector', () => {
@@ -155,10 +153,11 @@ describe('KubernetesOtelPage', () => {
     expect(screen.queryByTestId('collectionMethodSelector')).toBeNull();
   });
 
-  it('passes wired ingestion mode into the collector setup step when the URL says so', () => {
+  it('ignores the deprecated wired ingestion query param', () => {
     renderPage(['/kubernetes?ingestion=wired']);
-    const collectorSetupStep = screen.getByTestId('otelCollectorSetupStep');
-    expect(collectorSetupStep.getAttribute('data-ingestion-mode')).toBe('wired');
+
+    expect(screen.getByTestId('selectedCollectorMethod')).toHaveTextContent('edot');
+    expect(usePreExistingDataCheckMock).not.toHaveBeenCalled();
   });
 
   it('passes managed OTLP availability into the collector setup step', () => {
@@ -166,38 +165,42 @@ describe('KubernetesOtelPage', () => {
 
     renderPage();
 
-    const collectorSetupStep = screen.getByTestId('otelCollectorSetupStep');
-    expect(collectorSetupStep.getAttribute('data-managed-otlp-service-available')).toBe('true');
+    expect(screen.getByTestId('managedOtlpServiceAvailable')).toHaveTextContent('true');
   });
 
   it('passes the active onboarding ID into the collector setup step', () => {
     renderPage();
 
-    const collectorSetupStep = screen.getByTestId('otelCollectorSetupStep');
-    expect(collectorSetupStep.getAttribute('data-onboarding-id')).toBe(
+    expect(screen.getByTestId('collectorOnboardingId')).toHaveTextContent(
       mockKubernetesFlowData.onboardingId
     );
   });
 
-  it('wires the pre-existing-data probe with the kubernetes flow id and wired-streams flag', () => {
-    usePreExistingDataCheckMock.mockClear();
-    renderPage(['/kubernetes?ingestion=wired']);
-    expect(usePreExistingDataCheckMock).toHaveBeenCalledWith({
-      flow: 'kubernetes',
-      onboardingId: mockKubernetesFlowData.onboardingId,
-      enabled: true,
-    });
-  });
-
-  it('reports onboardingFlowType=kubernetes_otel to the window-blur hook', () => {
+  it('reports onboardingFlowType and selected collector method to the window-blur hook', async () => {
     useWindowBlurDataMonitoringTriggerMock.mockClear();
     renderPage();
     expect(useWindowBlurDataMonitoringTriggerMock).toHaveBeenCalledWith(
-      expect.objectContaining({ onboardingFlowType: 'kubernetes_otel' })
+      expect.objectContaining({
+        onboardingFlowType: 'kubernetes_otel',
+        telemetryEventContext: {
+          kubernetes: { selectedCollectorMethod: 'edot' },
+        },
+      })
+    );
+
+    await userEvent.click(screen.getByTestId('selectExistingCollector'));
+
+    expect(useWindowBlurDataMonitoringTriggerMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        onboardingFlowType: 'kubernetes_otel',
+        telemetryEventContext: {
+          kubernetes: { selectedCollectorMethod: 'existing_collector' },
+        },
+      })
     );
   });
 
-  it('renders the V2 instrumentation step when metrics onboarding is enabled', () => {
+  it('renders the instrumentation step when metrics onboarding is enabled', () => {
     renderPage();
     expect(screen.getByTestId('otelInstrumentationStep')).toBeInTheDocument();
     expect(screen.queryByTestId('otelK8sInstrumentStep')).toBeNull();

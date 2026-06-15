@@ -8,7 +8,6 @@
 import React from 'react';
 import {
   EuiButtonEmpty,
-  EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
@@ -19,23 +18,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { UseWiredStreamsStatusResult } from '../../../../hooks/use_wired_streams_status';
 import { CopyToClipboardButton } from '../../shared/copy_to_clipboard_button';
-import {
-  WiredStreamsIngestionSelector,
-  type IngestionMode,
-} from '../../shared/wired_streams_ingestion_selector';
+import { MaskedCodeBlock } from '../../shared/masked_code_block';
 
 export interface OtelKubernetesInstallStepProps {
   installStackCommand?: string;
   valuesFileUrl?: string;
-  ingestionMode: IngestionMode;
-  onIngestionModeChange: (mode: IngestionMode) => void;
-  streamsDocLink?: string;
-  wiredStreamsStatus: Pick<
-    UseWiredStreamsStatusResult,
-    'isEnabled' | 'isLoading' | 'isEnabling' | 'enableWiredStreams'
-  >;
+  secretValues?: string[];
   showTitle?: boolean;
   useInlineCopyOnly?: boolean;
 }
@@ -43,35 +32,16 @@ export interface OtelKubernetesInstallStepProps {
 export const OtelKubernetesInstallStep: React.FC<OtelKubernetesInstallStepProps> = ({
   installStackCommand,
   valuesFileUrl,
-  ingestionMode,
-  onIngestionModeChange,
-  streamsDocLink,
-  wiredStreamsStatus,
+  secretValues = [],
   showTitle = false,
   useInlineCopyOnly = false,
 }) => {
-  const { isEnabled, isLoading, isEnabling, enableWiredStreams } = wiredStreamsStatus;
-
   if (!installStackCommand) {
     return <EuiSkeletonText lines={6} />;
   }
 
   return (
     <>
-      {!isLoading && (
-        <>
-          <WiredStreamsIngestionSelector
-            ingestionMode={ingestionMode}
-            onChange={onIngestionModeChange}
-            streamsDocLink={streamsDocLink}
-            isWiredStreamsEnabled={isEnabled}
-            isEnabling={isEnabling}
-            flowType="otel_kubernetes"
-            onEnableWiredStreams={enableWiredStreams}
-          />
-          <EuiSpacer size="xl" />
-        </>
-      )}
       {showTitle ? (
         <>
           <EuiTitle size="xs">
@@ -129,14 +99,13 @@ export const OtelKubernetesInstallStep: React.FC<OtelKubernetesInstallStepProps>
         />
       </p>
       <EuiSpacer />
-      <EuiCodeBlock
-        paddingSize="m"
+      <MaskedCodeBlock
+        value={installStackCommand}
+        secrets={secretValues}
         language="bash"
-        isCopyable={useInlineCopyOnly}
         overflowHeight={useInlineCopyOnly ? 300 : undefined}
-      >
-        {installStackCommand}
-      </EuiCodeBlock>
+        dataTestSubj="observabilityOnboardingOtelKubernetesInstallStackSnippet"
+      />
       <EuiSpacer />
       <EuiFlexGroup alignItems="center" justifyContent="flexStart">
         {!useInlineCopyOnly ? (

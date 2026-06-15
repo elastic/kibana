@@ -12,16 +12,14 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { usePerformanceContext } from '@kbn/ebt-tools';
-import { type LogsLocatorParams, LOGS_LOCATOR_ID } from '@kbn/logs-shared-plugin/common';
+import { LOGS_LOCATOR_ID } from '@kbn/logs-shared-plugin/common';
 import { ObservabilityOnboardingPricingFeature } from '../../../../common/pricing_features';
 import { type ObservabilityOnboardingAppServices } from '../../..';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { EmptyPrompt } from '../shared/empty_prompt';
 import { FeedbackButtons } from '../shared/feedback_buttons';
-import { usePreExistingDataCheck } from '../shared/use_pre_existing_data_check';
 import { useWindowBlurDataMonitoringTrigger } from '../shared/use_window_blur_data_monitoring_trigger';
 import { type ActionLink } from '../kubernetes/data_ingest_status';
-import { type IngestionMode } from '../shared/wired_streams_ingestion_selector';
 import { useKubernetesFlow } from '../kubernetes/use_kubernetes_flow';
 import { useFlowBreadcrumb } from '../../shared/use_flow_breadcrumbs';
 import { buildInstallStackCommand } from './build_install_stack_command';
@@ -31,8 +29,6 @@ import { buildOtelKubernetesActionLinks } from './build_otel_kubernetes_action_l
 import { useManagedOtlpServiceAvailability } from '../../shared/use_managed_otlp_service_availability';
 import { usePricingFeature } from '../shared/use_pricing_feature';
 import { ManagedOtlpCallout } from '../shared/managed_otlp_callout';
-import { useWiredStreamsStatus } from '../../../hooks/use_wired_streams_status';
-import { WIRED_OTEL_DATA_VIEW_SPEC } from '../shared/wired_streams_data_view';
 import {
   OtelKubernetesAddRepositoryStep,
   OtelKubernetesInstallStep,
@@ -48,29 +44,19 @@ export const OtelKubernetesPanel: React.FC = () => {
   );
   const { data, status, error, refetch } = useKubernetesFlow('kubernetes_otel');
   const {
-    services: { share, docLinks },
+    services: { share },
   } = useKibana<ObservabilityOnboardingAppServices>();
 
   const apmLocator = share.url.locators.get('APM_LOCATOR');
   const dashboardLocator = share.url.locators.get(DASHBOARD_APP_LOCATOR);
-  const logsLocator = share.url.locators.get<LogsLocatorParams>(LOGS_LOCATOR_ID);
+  const logsLocator = share.url.locators.get(LOGS_LOCATOR_ID);
   const { onPageReady } = usePerformanceContext();
   const isMetricsOnboardingEnabled = usePricingFeature(
     ObservabilityOnboardingPricingFeature.METRICS_ONBOARDING
   );
   const isManagedOtlpServiceAvailable = useManagedOtlpServiceAvailability();
 
-  const wiredStreamsStatus = useWiredStreamsStatus();
-  const [ingestionMode, setIngestionMode] = useState<IngestionMode>('classic');
-  const useWiredStreams = ingestionMode === 'wired';
-
   const [dataReceived, setDataReceived] = useState(false);
-
-  const hasPreExistingDataEarly = usePreExistingDataCheck({
-    flow: 'kubernetes',
-    onboardingId: data?.onboardingId,
-    enabled: useWiredStreams,
-  });
 
   const windowBlurred = useWindowBlurDataMonitoringTrigger({
     isActive: status === FETCH_STATUS.SUCCESS,
@@ -78,8 +64,7 @@ export const OtelKubernetesPanel: React.FC = () => {
     onboardingId: data?.onboardingId,
   });
 
-  const isMonitoringStepActive = windowBlurred || hasPreExistingDataEarly;
-  const logsLocatorParams = useWiredStreams ? { dataViewSpec: WIRED_OTEL_DATA_VIEW_SPEC } : {};
+  const isMonitoringStepActive = windowBlurred;
 
   useEffect(() => {
     if (data) {
@@ -113,7 +98,6 @@ export const OtelKubernetesPanel: React.FC = () => {
         elasticsearchUrl: data.elasticsearchUrl,
         apiKeyEncoded: data.apiKeyEncoded,
         agentVersion: data.elasticAgentVersionInfo.agentBaseVersion,
-        useWiredStreams,
         onboardingId: data.onboardingId,
       })
     : undefined;
@@ -123,7 +107,7 @@ export const OtelKubernetesPanel: React.FC = () => {
     dashboardHref:
       dashboardLocator?.getRedirectUrl({ dashboardId: CLUSTER_OVERVIEW_DASHBOARD_ID }) ?? '',
     servicesHref: apmLocator?.getRedirectUrl({ serviceName: undefined }) ?? '',
-    logsHref: logsLocator?.getRedirectUrl(logsLocatorParams) ?? '',
+    logsHref: logsLocator?.getRedirectUrl({}) ?? '',
   });
 
   return (
@@ -151,10 +135,12 @@ export const OtelKubernetesPanel: React.FC = () => {
               <OtelKubernetesInstallStep
                 installStackCommand={installStackCommand}
                 valuesFileUrl={otelKubeStackValuesFileUrl}
-                ingestionMode={ingestionMode}
-                onIngestionModeChange={setIngestionMode}
-                streamsDocLink={docLinks?.links.observability.logsStreams}
-                wiredStreamsStatus={wiredStreamsStatus}
+                secretValues={[
+                  isManagedOtlpServiceAvailable
+                    ? data?.managedOtlpServiceUrl ?? ''
+                    : data?.elasticsearchUrl ?? '',
+                  data?.apiKeyEncoded ?? '',
+                ]}
               />
             ),
           },
@@ -178,7 +164,7 @@ export const OtelKubernetesPanel: React.FC = () => {
                 defaultMessage: 'Visualize your data',
               }
             ),
-            status: (dataReceived || hasPreExistingDataEarly
+            status: (dataReceived
               ? 'complete'
               : isMonitoringStepActive
               ? 'current'
@@ -188,7 +174,6 @@ export const OtelKubernetesPanel: React.FC = () => {
                 isMonitoringStepActive={isMonitoringStepActive}
                 data={data}
                 actionLinks={otelKubernetesActionLinks}
-                useWiredStreams={useWiredStreams}
                 onDataReceived={() => setDataReceived(true)}
               />
             ),
