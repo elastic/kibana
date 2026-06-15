@@ -147,18 +147,28 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
         </EuiFlexItem>
         {canDelete && (
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              data-test-subj="o11yExpressionRowButton"
-              aria-label={i18n.translate(
+            <EuiToolTip
+              content={i18n.translate(
                 'xpack.observability.customThreshold.rule.alertFlyout.removeCondition',
                 {
                   defaultMessage: 'Remove condition',
                 }
               )}
-              color={'text'}
-              iconType={'trash'}
-              onClick={() => remove(expressionId)}
-            />
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                data-test-subj="o11yExpressionRowButton"
+                aria-label={i18n.translate(
+                  'xpack.observability.customThreshold.rule.alertFlyout.removeCondition',
+                  {
+                    defaultMessage: 'Remove condition',
+                  }
+                )}
+                color={'text'}
+                iconType={'trash'}
+                onClick={() => remove(expressionId)}
+              />
+            </EuiToolTip>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
