@@ -42,5 +42,29 @@ test.describe(
 
       await expect(lensFailure).toBeVisible({ timeout: 20_000 });
     });
+
+    test('should render chart correctly after fixing an invalid equation', async ({ page }) => {
+      const customEquation = page.testSubj.locator('customEquation');
+      const customEquationField = page.testSubj.locator(
+        'thresholdRuleCustomEquationEditorFieldText'
+      );
+      const lensFailure = page.testSubj.locator('embeddable-lens-failure');
+      const previewChart = page.testSubj.locator(previewChartDataTestSubj);
+
+      // Introduce an invalid equation to trigger the error state
+      await customEquation.click();
+      await customEquationField.fill('A +');
+      await page.testSubj.click('o11yClosablePopoverTitleButton');
+      await expect(lensFailure).toBeVisible({ timeout: 20_000 });
+
+      // Fix the equation back to a valid value
+      await customEquation.click();
+      await customEquationField.fill('A');
+      await page.testSubj.click('o11yClosablePopoverTitleButton');
+
+      // Chart should recover: error gone, chart container visible
+      await expect(lensFailure).toBeHidden({ timeout: 20_000 });
+      await expect(previewChart).toBeVisible({ timeout: 20_000 });
+    });
   }
 );

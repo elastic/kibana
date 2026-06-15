@@ -79,19 +79,44 @@ export const CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS = {
   // Rule Form
   RULE_FORM: 'ruleForm',
   RULE_NAME_INPUT: 'ruleDetailsNameInput',
+  RULE_DETAILS_TAGS_INPUT: 'ruleDetailsTagsInput',
 
   // Data View Selection
   DATA_VIEW_EXPRESSION: 'selectDataViewExpression',
   INDEX_PATTERN_INPUT: 'indexPattern-switcher--input',
   EXPLORE_MATCHING_INDICES_BUTTON: 'explore-matching-indices-button',
 
-  // Metric Row / Custom Equation
+  // Metric Rows
   AGGREGATION_NAME_A: 'aggregationNameA',
+  AGGREGATION_NAME_B: 'aggregationNameB',
   AGGREGATION_TYPE_SELECT: 'aggregationTypeSelect',
+  ADD_AGGREGATION_BUTTON: 'thresholdRuleCustomEquationEditorAddAggregationFieldButton',
 
   // KQL Filter
   KQL_SEARCH_FIELD: 'o11ySearchField',
   KQL_SUGGESTIONS_PANEL: 'o11ySuggestionsPanel',
+
+  // Custom Equation
+  CUSTOM_EQUATION: 'customEquation',
+  CUSTOM_EQUATION_FIELD: 'thresholdRuleCustomEquationEditorFieldText',
+  CUSTOM_EQUATION_LABEL: 'thresholdRuleCustomEquationEditorFieldTextLabel',
+
+  // Threshold
+  THRESHOLD_POPOVER: 'thresholdPopover',
+  COMPARATOR_OPTIONS_COMBOBOX: 'comparatorOptionsComboBox',
+  ALERT_THRESHOLD_INPUT_0: 'alertThresholdInput0',
+  ALERT_THRESHOLD_INPUT_1: 'alertThresholdInput1',
+
+  // Time Range
+  FOR_LAST_EXPRESSION: 'forLastExpression',
+  TIME_WINDOW_SIZE_NUMBER: 'timeWindowSizeNumber',
+  TIME_WINDOW_UNIT_SELECT: 'timeWindowUnitSelect',
+
+  // Group By
+  GROUP_BY: 'thresholdRuleMetricsExplorer-groupBy',
+
+  // Popover close (o11y-flavoured closable popovers)
+  CLOSE_POPOVER: 'o11yClosablePopoverTitleButton',
 
   // Rule Save
   RULE_SAVE_BUTTON: 'rulePageFooterSaveButton',

@@ -521,6 +521,138 @@ export class RulesPage {
     await this.kqlSearchField.fill(text);
   }
 
+  // Second aggregation methods
+
+  /**
+   * Gets the aggregation expression for metric B
+   */
+  public get aggregationExpressionB() {
+    return this.page.testSubj.locator(CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.AGGREGATION_NAME_B);
+  }
+
+  /**
+   * Clicks the add-aggregation button and waits for metric B to appear
+   */
+  async addSecondAggregation() {
+    await this.page.testSubj.click(CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.ADD_AGGREGATION_BUTTON);
+    await expect(this.aggregationExpressionB).toBeVisible({ timeout: SHORTER_TIMEOUT });
+  }
+
+  /**
+   * Opens the metric B aggregation row popover
+   */
+  async openAggregationBPopover() {
+    await expect(this.aggregationExpressionB).toBeVisible({ timeout: SHORTER_TIMEOUT });
+    await this.aggregationExpressionB.click();
+    await expect(this.aggregationTypeSelect).toBeVisible({ timeout: SHORTER_TIMEOUT });
+  }
+
+  /**
+   * Closes the currently open o11y closable popover
+   */
+  async closeCurrentPopover() {
+    const closeButton = this.page.testSubj.locator(CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.CLOSE_POPOVER);
+    await expect(closeButton).toBeVisible({ timeout: SHORTER_TIMEOUT });
+    await closeButton.click();
+    await expect(closeButton).toBeHidden({ timeout: SHORTER_TIMEOUT });
+  }
+
+  /**
+   * Sets tags via the EUI ComboBox (creates custom options)
+   */
+  async setTags(tags: string[]) {
+    const tagsComboBox = this.page.testSubj.locator(
+      CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.RULE_DETAILS_TAGS_INPUT
+    );
+    for (const tag of tags) {
+      await tagsComboBox.locator('input').fill(tag);
+      await this.page.keyboard.press('Enter');
+    }
+  }
+
+  /**
+   * Opens the custom equation editor, fills the equation, and closes the popover
+   */
+  async setCustomEquation(equation: string) {
+    await this.page.testSubj.click(CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.CUSTOM_EQUATION);
+    const field = this.page.testSubj.locator(CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.CUSTOM_EQUATION_FIELD);
+    await expect(field).toBeVisible({ timeout: SHORTER_TIMEOUT });
+    await field.fill(equation);
+    await this.closeCurrentPopover();
+    // The equation editor debounces onChange by 500ms. Wait for the debounce to fire
+    // and the parent state to update, which is reflected in the equation button text.
+    await expect(this.page.testSubj.locator(CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.CUSTOM_EQUATION)).toContainText(
+      equation,
+      { timeout: BIGGER_TIMEOUT }
+    );
+  }
+
+  /**
+   * Fills the equation label field (always visible in the expression section)
+   */
+  async setEquationLabel(label: string) {
+    const labelField = this.page.testSubj.locator(
+      CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.CUSTOM_EQUATION_LABEL
+    );
+    await expect(labelField).toBeVisible({ timeout: SHORTER_TIMEOUT });
+    await labelField.fill(label);
+  }
+
+  /**
+   * Opens the threshold popover, selects a comparator, fills threshold values, and closes
+   */
+  async setThreshold(comparator: string, values: number[]) {
+    await this.page.testSubj.click(CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.THRESHOLD_POPOVER);
+    const comparatorSelect = this.page.testSubj.locator(
+      CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.COMPARATOR_OPTIONS_COMBOBOX
+    );
+    await expect(comparatorSelect).toBeVisible({ timeout: SHORTER_TIMEOUT });
+    await comparatorSelect.selectOption(comparator);
+    for (let i = 0; i < values.length; i++) {
+      const input = this.page.testSubj.locator(`alertThresholdInput${i}`);
+      await expect(input).toBeVisible({ timeout: SHORTER_TIMEOUT });
+      await input.fill(String(values[i]));
+    }
+    // Click the threshold popover's close button explicitly.
+    // Escape is avoided because Chrome reverts focused number inputs on Escape, firing onChange
+    // with the pre-fill value and wiping out changes.
+    // The :not() selector excludes o11y-flavoured closable popovers (which carry the
+    // o11yClosablePopoverTitleButton test-subj) to avoid accidentally clicking the equation
+    // editor's close button if its panel is still in the DOM.
+    await this.page
+      .locator('[aria-label="Close"]:not([data-test-subj="o11yClosablePopoverTitleButton"])')
+      .click();
+  }
+
+  /**
+   * Opens the time range popover, fills size and unit, and closes
+   */
+  async setTimeRange(size: string, unit: string) {
+    await this.page.testSubj.click(CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.FOR_LAST_EXPRESSION);
+    const sizeInput = this.page.testSubj.locator(
+      CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.TIME_WINDOW_SIZE_NUMBER
+    );
+    await expect(sizeInput).toBeVisible({ timeout: SHORTER_TIMEOUT });
+    await sizeInput.fill(size);
+    const unitSelect = this.page.testSubj.locator(
+      CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.TIME_WINDOW_UNIT_SELECT
+    );
+    await unitSelect.selectOption(unit);
+    await this.page.keyboard.press('Escape');
+  }
+
+  /**
+   * Sets the group-by field via the EUI ComboBox
+   */
+  async setGroupBy(field: string) {
+    const comboBoxInput = this.page.testSubj
+      .locator(CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.GROUP_BY)
+      .locator('[data-test-subj="comboBoxSearchInput"]');
+    await expect(comboBoxInput).toBeVisible({ timeout: SHORTER_TIMEOUT });
+    await comboBoxInput.fill(field);
+    await this.page.keyboard.press('Enter');
+  }
+
   // Rule Status Dropdown methods
 
   /**
