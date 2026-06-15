@@ -99,14 +99,3 @@ jest.mock('@kbn/tracing', () => ({
 jest.mock('@kbn/metrics', () => ({
   initMetrics: jest.fn(),
 }));
-
-export const mockLayoutFormat = jest.fn((record: { message: string }) => record.message);
-export const mockLayoutsCreate = jest.fn(() => ({ format: mockLayoutFormat }));
-
-jest.mock('../../layouts/layouts', () => ({
-  Layouts: {
-    // Use the real configSchema so that schema validation tests work correctly.
-    configSchema: jest.requireActual('../../layouts/layouts').Layouts.configSchema,
-    create: mockLayoutsCreate,
-  },
-}));

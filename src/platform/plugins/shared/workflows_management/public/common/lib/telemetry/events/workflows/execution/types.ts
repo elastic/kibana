@@ -69,6 +69,10 @@ export interface ReportWorkflowTestRunInitiatedActionParams extends BaseResultAc
    * The trigger tab selected in the Test Workflow modal
    */
   triggerTab?: WorkflowTriggerTab;
+  /**
+   * Whether the workflow defines extension (event-driven) triggers at test-run time.
+   */
+  hasCustomEventTrigger?: boolean;
 }
 
 /**
@@ -124,9 +128,13 @@ export interface ReportWorkflowRunInitiatedActionParams extends BaseResultAction
    */
   editorType?: WorkflowEditorType;
   /**
-   * The trigger tab selected in the Test Workflow modal: 'manual', 'alert', or 'index'
+   * The trigger tab selected in the Run Workflow modal: manual, alert, index, event, or historical.
    */
   triggerTab?: WorkflowTriggerTab;
+  /**
+   * Whether the workflow defines extension (event-driven) triggers at run time.
+   */
+  hasCustomEventTrigger?: boolean;
 }
 
 /**

@@ -6,28 +6,27 @@
  */
 
 import {
+  EuiAccordion,
   EuiButton,
   EuiButtonEmpty,
-  EuiAccordion,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiHorizontalRule,
   EuiPanel,
-  EuiSpacer,
-  EuiFlexGroup,
   EuiResizableContainer,
-  EuiFlexItem,
+  EuiSpacer,
 } from '@elastic/eui';
-import React, { memo, useCallback, useRef, useState, useMemo, useEffect } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 
-import { ProjectRoutingAccess, useRouteBasedCpsPickerAccess } from '@kbn/cps-utils';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 import { useGetEndpointExceptionsPerPolicyOptIn } from '../../../../management/hooks/artifacts/use_endpoint_per_policy_opt_in';
 import { EndpointExceptionsMovedCallout } from '../../../../exceptions/components/endpoint_exceptions_moved_callout';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import {
+  isEsqlRule,
   isMlRule,
   isThreatMatchRule,
-  isEsqlRule,
 } from '../../../../../common/detection_engine/utils';
 import { useCreateRule } from '../../../rule_management/logic';
 import type { RuleCreateProps } from '../../../../../common/api/detection_engine/model/rule_schema';
@@ -53,9 +52,9 @@ import {
 } from '../../../rule_creation/components/step_rule_actions';
 import * as RuleI18n from '../../../common/translations';
 import {
-  redirectToDetections,
   getActionMessageParams,
   MaxWidthEuiFlexItem,
+  redirectToDetections,
 } from '../../../common/helpers';
 import type { DefineStepRule } from '../../../common/types';
 import { RuleStep } from '../../../common/types';
@@ -118,9 +117,8 @@ const MyEuiPanel = styled(EuiPanel)<{
 MyEuiPanel.displayName = 'MyEuiPanel';
 
 const CreateRulePageComponent: React.FC<{}> = () => {
-  const { application, triggersActionsUi, cps } = useKibana().services;
+  const { application, triggersActionsUi } = useKibana().services;
   const { navigateToApp } = application;
-  useRouteBasedCpsPickerAccess(ProjectRoutingAccess.READONLY, { application, cps });
   const [{ loading: userInfoLoading, isSignalIndexExists, isAuthenticated, hasEncryptionKey }] =
     useUserData();
   const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;

@@ -11,13 +11,18 @@ Chrome Next uses one shared header view with two placement models:
 Prefer inline rendering for new migrations. Use Chrome-owned registration as a transitional path when
 the page cannot safely own the header placement yet.
 
+## Folder layout
+
+Region components (back button, badges, tabs, metadata, app menu, title actions, etc.) live as flat
+files directly in `src/app_header/`, with shared data resolution in `src/app_header/hooks/`. A region
+graduates to its own folder only when it gains real complexity of its own — an internal component
+split, dedicated stories, or a README. Today only `title_area/` meets that bar. Keep new regions flat
+until they earn a folder; don't pre-folder simple slots.
+
 ## Which API should I use?
 
 Use `AppHeader` when the page can render its header inline. This is the preferred model for pages
 that own their title, back target, tabs, badges, and app menu locally.
-
-Use `AppHeaderWithFallback` when the same page still needs a classic `EuiPageHeader` fallback while
-Chrome Next is disabled.
 
 Use `ChromeAppHeaderRegistration` when Chrome should own the top-bar slot. This keeps migration
 small for pages with sticky or shared top-nav constraints while still using the shared header view.
@@ -27,6 +32,46 @@ with other hooks. Most apps should use `ChromeAppHeaderRegistration`.
 
 Use `chrome.next.appHeader.set` only when a React adapter is not practical. It is the imperative
 primitive behind the React APIs.
+
+## Editable titles
+
+Pass a title object when the page title can be renamed from the header:
+
+```tsx
+<AppHeader
+  title={{
+    text: name,
+    onSave: async (nextName) => {
+      const saved = await saveName(nextName);
+      if (!saved) {
+        return 'Choose a different name.';
+      }
+    },
+  }}
+/>
+```
+
+The header renders a normal heading until the user edits it. Pressing Enter or leaving the input
+saves, Escape cancels, and returning a string from `onSave` keeps edit mode open.
+
+## Title size
+
+The title is `xs` for a single-row header and `s` when the header has a second row (tabs or a
+metadata row), where an `xs` title looks too small in the taller header. This is automatic — there
+is no size knob to set.
+
+## Padding
+
+`padding` controls the header's **horizontal** layout only. Vertical padding is standardized
+internally (independent of the `padding` prop and the title size) so the header keeps a consistent
+height — 48px for a single row, regardless of title size or whether only a back button is present.
+
+- `'none'` — no horizontal padding, no bleed.
+- `'m'` — symmetric horizontal padding (default for inline headers).
+- `{ bleed: 'm' | 'l' }` — negative margin on left/right + top, cancelling a padded container so the
+  header spans to its edges and sits flush at the top; content is auto re-inset to stay aligned with
+  the page gutter. Set `bleed` to your container's padding when rendering inline inside a padded page
+  template.
 
 ## Chrome Next flag and runtime checks
 
@@ -50,7 +95,7 @@ different buckets while the migration is in progress:
 
 | Bucket | Preferred API | When to use |
 |---|---|---|
-| Inline-ready | `AppHeader` or `AppHeaderWithFallback` | The page can colocate header state with its React tree. |
+| Inline-ready | `AppHeader` | The page can colocate header state with its React tree. |
 | Chrome-owned transitional | `ChromeAppHeaderRegistration` | Chrome should own the top-bar slot while the route keeps existing layout constraints. |
 | Fallback-only | Legacy Chrome state | Temporary safety net for routes that have not explicitly migrated. |
 

@@ -13,6 +13,7 @@ export const LINE_CHART_VIS_NAME = 'Visualization漢字 LineChart';
 export const UNSAVED_CHANGES_NOTIFICATION = 'split-button-notification-indicator';
 
 import expect from '@kbn/expect';
+import { DASHBOARD_APP_ID } from '@kbn/deeplinks-analytics';
 import { FtrService } from '../ftr_provider_context';
 import type { CommonPageObject } from './common_page';
 
@@ -61,8 +62,6 @@ export class DashboardPageObject extends FtrService {
     ? 'src/platform/test/functional/fixtures/kbn_archiver/ccs/dashboard/legacy/legacy.json'
     : 'src/platform/test/functional/fixtures/kbn_archiver/dashboard/legacy/legacy.json';
 
-  public readonly APP_ID = 'dashboards';
-
   async initTests({ kibanaIndex = this.kibanaIndex, defaultIndex = this.logstashIndex } = {}) {
     this.log.debug('load kibana index with visualizations and log data');
     await this.kibanaServer.savedObjects.cleanStandardList();
@@ -72,7 +71,7 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async navigateToApp() {
-    await this.common.navigateToApp(this.APP_ID);
+    await this.common.navigateToApp(DASHBOARD_APP_ID);
   }
 
   public async navigateToAppFromAppsMenu() {
@@ -216,8 +215,17 @@ export class DashboardPageObject extends FtrService {
    */
   public async onDashboardLandingPage() {
     this.log.debug(`onDashboardLandingPage`);
-    const currentUrl = await this.browser.getCurrentUrl();
-    return currentUrl.includes('dashboards#/list');
+    let currentUrl = await this.browser.getCurrentUrl();
+
+    // wait for dashboard route redirect to complete
+    if (currentUrl.includes(DASHBOARD_APP_ID) && !currentUrl.includes('#')) {
+      await this.retry.waitFor('dashboard route redirect to complete', async () => {
+        currentUrl = await this.browser.getCurrentUrl();
+        return currentUrl.includes('#');
+      });
+    }
+
+    return currentUrl.includes(`${DASHBOARD_APP_ID}#/list`);
   }
 
   public async expectExistsDashboardLandingPage() {
@@ -236,7 +244,7 @@ export class DashboardPageObject extends FtrService {
     );
   }
 
-  public async gotoDashboardLandingPage(ignorePageLeaveWarning = true) {
+  public async gotoDashboardLandingPage() {
     this.log.debug('gotoDashboardLandingPage');
     if (await this.onDashboardLandingPage()) return;
 
@@ -244,12 +252,6 @@ export class DashboardPageObject extends FtrService {
       ? 'breadcrumb breadcrumb-deepLinkId-dashboards'
       : 'breadcrumb dashboardListingBreadcrumb first';
     await this.testSubjects.click(breadcrumbLink);
-    const warning = await this.testSubjects.exists('confirmModalTitleText');
-    if (warning) {
-      await this.testSubjects.click(
-        ignorePageLeaveWarning ? 'confirmModalConfirmButton' : 'confirmModalCancelButton'
-      );
-    }
     await this.expectExistsDashboardLandingPage();
   }
 
@@ -458,7 +460,7 @@ export class DashboardPageObject extends FtrService {
         await this.common.clickConfirmOnModal();
       }
     }
-    await this.listingTable.clickNewButton();
+    await this.testSubjects.click('dashboardListingCreateButton');
     if (expectWarning) {
       await this.testSubjects.existOrFail('dashboardCreateConfirm');
     }
@@ -473,8 +475,23 @@ export class DashboardPageObject extends FtrService {
     await this.waitForRenderComplete();
   }
 
+  public async clickCreatePopoverItem(
+    itemTestSubj: 'createVisualizationButton' | 'createAnnotationButton'
+  ) {
+    await this.testSubjects.click('dashboardListingCreateButton-secondary-button');
+    await this.testSubjects.click(itemTestSubj);
+  }
+
   public async clickCreateDashboardPrompt() {
-    await this.testSubjects.click('newItemButton');
+    await this.testSubjects.click('dashboardListingCreateButton');
+  }
+
+  public async expectCreateButtonExists() {
+    await this.testSubjects.existOrFail('dashboardListingCreateButton');
+  }
+
+  public async expectCreateButtonMissing() {
+    await this.testSubjects.missingOrFail('dashboardListingCreateButton');
   }
 
   public async getCreateDashboardPromptExists() {
@@ -538,36 +555,43 @@ export class DashboardPageObject extends FtrService {
   /**
    * @description opens the dashboard settings flyout to modify an existing dashboard
    */
-  public async modifyExistingDashboardDetails(
-    dashboard: string,
-    saveOptions: Pick<SaveDashboardOptions, 'storeTimeWithDashboard' | 'tags' | 'needsConfirm'> = {}
-  ) {
+  public async modifySettings({
+    title,
+    storeTimeWithDashboard,
+    tags,
+    confirmDuplicateTitle,
+  }: {
+    title?: string;
+    storeTimeWithDashboard?: boolean;
+    tags?: string[];
+    confirmDuplicateTitle?: boolean;
+  }) {
     await this.openSettingsFlyout();
 
     await this.retry.try(async () => {
-      this.log.debug('entering new title');
-      await this.testSubjects.setValue('dashboardTitleInput', dashboard);
-
-      if (saveOptions.storeTimeWithDashboard !== undefined) {
-        await this.setStoreTimeWithDashboard(saveOptions.storeTimeWithDashboard);
+      if (title) {
+        this.log.debug('entering new title');
+        await this.testSubjects.setValue('dashboardTitleInput', title);
       }
 
-      if (saveOptions.tags) {
+      if (storeTimeWithDashboard !== undefined) {
+        await this.setStoreTimeWithDashboard(storeTimeWithDashboard);
+      }
+
+      if (tags) {
         const tagsComboBox = await this.testSubjects.find('comboBoxInput');
-        for (const tagName of saveOptions.tags) {
+        for (const tagName of tags) {
           await this.comboBox.setElement(tagsComboBox, tagName);
         }
       }
 
-      this.log.debug('DashboardPage.applyCustomization');
       await this.testSubjects.click('applyCustomizeDashboardButton');
 
-      if (saveOptions.needsConfirm) {
+      if (confirmDuplicateTitle) {
         await this.ensureDuplicateTitleCallout();
         await this.testSubjects.click('applyCustomizeDashboardButton');
       }
 
-      this.log.debug('isCustomizeDashboardLoadingIndicatorVisible');
       return await this.expectUnsavedChangesNotificationExists(1500);
     });
   }
@@ -589,7 +613,11 @@ export class DashboardPageObject extends FtrService {
       if (saveOptions.saveAsNew) {
         await this.enterDashboardSaveModalApplyUpdatesAndClickSave(dashboardName, saveOptions);
       } else {
-        await this.modifyExistingDashboardDetails(dashboardName, saveOptions);
+        if (saveOptions.storeTimeWithDashboard !== undefined || saveOptions.tags) {
+          throw new Error(
+            `Unable to update settings with quick save. Call 'modifySettings' before calling 'saveDashboard'.`
+          );
+        }
         await this.clickQuickSave();
       }
 

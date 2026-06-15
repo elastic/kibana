@@ -11,6 +11,7 @@ import type { FunctionComponent } from 'react';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import { createProfileProviderSharedServicesMock } from '../../../__mocks__';
 import { SolutionType } from '../../../profiles';
+import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../../toolkit';
 import { ALERTS_INDEX_PATTERN, SECURITY_PROFILE_ID } from '../constants';
 import { createSecurityRootProfileProvider } from './profile';
 
@@ -78,7 +79,10 @@ describe('createSecurityRootProfileProvider', () => {
   describe('getCellRenderers', () => {
     it('should return previous entries unchanged for non-alerts index patterns', async () => {
       const { provider, context } = await resolveSecurityContext(() => MockComponent);
-      const getCellRenderers = provider.profile.getCellRenderers!(() => ({}), { context });
+      const getCellRenderers = provider.profile.getCellRenderers!(() => ({}), {
+        context,
+        toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
+      });
       const result = getCellRenderers({
         dataView: createMockDataView('logs-*'),
       } as Parameters<typeof getCellRenderers>[0]);
@@ -89,7 +93,10 @@ describe('createSecurityRootProfileProvider', () => {
       const { provider, context } = await resolveSecurityContext((fieldName) =>
         fieldName === 'kibana.alert.workflow_status' ? MockComponent : undefined
       );
-      const getCellRenderers = provider.profile.getCellRenderers!(() => ({}), { context });
+      const getCellRenderers = provider.profile.getCellRenderers!(() => ({}), {
+        context,
+        toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
+      });
       const result = getCellRenderers({
         dataView: createMockDataView(`${ALERTS_INDEX_PATTERN}default`),
       } as Parameters<typeof getCellRenderers>[0]);
@@ -101,7 +108,10 @@ describe('createSecurityRootProfileProvider', () => {
       const { provider, context } = await resolveSecurityContext(() => MockComponent);
       const getCellRenderers = provider.profile.getCellRenderers!(
         () => ({ 'source.ip': ExistingRenderer }),
-        { context }
+        {
+          context,
+          toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
+        }
       );
       const result = getCellRenderers({
         dataView: createMockDataView(`${ALERTS_INDEX_PATTERN}default`, [
