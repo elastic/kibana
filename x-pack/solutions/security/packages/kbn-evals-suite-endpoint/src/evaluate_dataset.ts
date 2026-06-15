@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type {
   DefaultEvaluators,
@@ -14,8 +13,14 @@ import type {
   EvalsExecutorClient,
   Example,
 } from '@kbn/evals';
-import { createToolCallsEvaluator, createTrajectoryEvaluator } from '@kbn/evals';
+import { createTrajectoryEvaluator } from '@kbn/evals';
 import type { SecurityEvalChatClient } from './chat_client';
+import {
+  createInputTokensEvaluator,
+  createOutputTokensEvaluator,
+  createLlmCallsEvaluator,
+  createToolCallsCodeEvaluator,
+} from './token_usage_evaluators';
 
 export interface SecurityDatasetExample extends Example {
   input: {
@@ -82,13 +87,11 @@ export function createEvaluateSecurityDataset({
   evaluators,
   executorClient,
   chatClient,
-  traceEsClient,
   log,
 }: {
   evaluators: DefaultEvaluators;
   executorClient: EvalsExecutorClient;
   chatClient: SecurityEvalChatClient;
-  traceEsClient: Client;
   log: ToolingLog;
 }): EvaluateSecurityDataset {
   return async function evaluateSecurityDataset({
@@ -118,11 +121,10 @@ export function createEvaluateSecurityDataset({
       coverageWeight: 0.5,
     });
 
-    const toolCallsEvaluator = createToolCallsEvaluator({ traceEsClient, log });
-    // Note: skillInvocationEvaluator disabled because OTel trace index does not
-    // contain `attributes.elastic.inference.skill.name`. The platform telemetry
-    // gap is tracked separately; tool-call coverage is already enforced by
-    // toolCallsEvaluator + trajectoryEvaluator.
+    const toolCallsEvaluator = createToolCallsCodeEvaluator();
+    const inputTokensEvaluator = createInputTokensEvaluator();
+    const outputTokensEvaluator = createOutputTokensEvaluator();
+    const llmCallsEvaluator = createLlmCallsEvaluator();
 
     await executorClient.runExperiment(
       {
@@ -135,6 +137,7 @@ export function createEvaluateSecurityDataset({
             steps: response.steps,
             errors: response.errors,
             traceId: response.traceId,
+            modelUsage: response.modelUsage,
           };
         },
       },
@@ -142,6 +145,9 @@ export function createEvaluateSecurityDataset({
         createEndpointCriteriaEvaluator({ evaluators }),
         trajectoryEvaluator,
         toolCallsEvaluator,
+        inputTokensEvaluator,
+        outputTokensEvaluator,
+        llmCallsEvaluator,
         createShortestPathEvaluator(),
       ]
     );

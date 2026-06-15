@@ -18,12 +18,21 @@ export interface ConverseParams {
   conversationId?: string;
 }
 
+export interface ModelUsageStats {
+  input_tokens?: number;
+  output_tokens?: number;
+  llm_calls?: number;
+  model?: string;
+  connector_id?: string;
+}
+
 export interface ConverseResponse {
   conversationId?: string;
   messages: Array<{ message: string }>;
   steps?: unknown[];
   errors: unknown[];
   traceId?: string;
+  modelUsage?: ModelUsageStats;
 }
 
 export class SecurityEvalChatClient {
@@ -56,6 +65,7 @@ export class SecurityEvalChatClient {
         trace_id?: string;
         steps: unknown[];
         response: { message: string };
+        model_usage?: ModelUsageStats;
       };
 
       const {
@@ -63,6 +73,7 @@ export class SecurityEvalChatClient {
         response: latestResponse,
         steps,
         trace_id: traceId,
+        model_usage: modelUsage,
       } = chatResponse;
 
       return {
@@ -71,6 +82,7 @@ export class SecurityEvalChatClient {
         steps,
         errors: [],
         traceId,
+        modelUsage,
       };
     };
 
