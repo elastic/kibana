@@ -12,13 +12,13 @@ import type {
 import {
   initializeTitleManager,
   titleComparators,
-  initializeUnsavedChanges,
+  initializeStateApi,
   useBatchedPublishingSubjects,
   apiPublishesReload,
   apiPublishesTimeRange,
   type HasEditCapabilities,
 } from '@kbn/presentation-publishing';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { BehaviorSubject, map, merge, skip } from 'rxjs';
 import type { TimeRange } from '@kbn/es-query';
 import type { AiSummaryPanelEmbeddableState } from '../server';
@@ -37,15 +37,17 @@ export const aiSummaryPanelEmbeddableFactory: EmbeddablePublicDefinition<
     const titleManager = initializeTitleManager(initialState);
     const prompt$ = new BehaviorSubject<string>(initialState.prompt ?? '');
     const esqlQuery$ = new BehaviorSubject<string | undefined>(initialState.esqlQuery);
+    const template$ = new BehaviorSubject<string | undefined>(initialState.template);
     const isEditFlyoutOpen$ = new BehaviorSubject<boolean>(false);
 
     const serializeState = (): AiSummaryPanelEmbeddableState => ({
       ...titleManager.getLatestState(),
       prompt: prompt$.getValue(),
       esqlQuery: esqlQuery$.getValue(),
+      template: template$.getValue(),
     });
 
-    const unsavedChangesApi = initializeUnsavedChanges<AiSummaryPanelEmbeddableState>({
+    const stateApi = initializeStateApi<AiSummaryPanelEmbeddableState>({
       uuid,
       parentApi,
       serializeState,
@@ -54,22 +56,28 @@ export const aiSummaryPanelEmbeddableFactory: EmbeddablePublicDefinition<
         prompt$.pipe(
           skip(1),
           map(() => undefined)
+        ),
+        template$.pipe(
+          skip(1),
+          map(() => undefined)
         )
       ),
       getComparators: () => ({
         ...titleComparators,
         prompt: 'referenceEquality',
         esqlQuery: 'referenceEquality',
+        template: 'referenceEquality',
       }),
-      onReset: (lastSaved) => {
+      applySerializedState: (lastSaved) => {
         titleManager.reinitializeState(lastSaved ?? {});
         prompt$.next(lastSaved?.prompt ?? '');
         esqlQuery$.next(lastSaved?.esqlQuery);
+        template$.next(lastSaved?.template);
       },
     });
 
     const api = finalizeApi({
-      ...unsavedChangesApi,
+      ...stateApi,
       ...titleManager.api,
       serializeState,
       onEdit: async () => {
@@ -82,12 +90,13 @@ export const aiSummaryPanelEmbeddableFactory: EmbeddablePublicDefinition<
     return {
       api,
       Component: function AiSummaryPanelComponent() {
-        const [title, hideTitle, prompt, esqlQuery, isEditFlyoutOpen] =
+        const [title, hideTitle, prompt, esqlQuery, savedTemplate, isEditFlyoutOpen] =
           useBatchedPublishingSubjects(
             titleManager.api.title$,
             titleManager.api.hideTitle$,
             prompt$,
             esqlQuery$,
+            template$,
             isEditFlyoutOpen$
           );
 
@@ -112,6 +121,10 @@ export const aiSummaryPanelEmbeddableFactory: EmbeddablePublicDefinition<
           return () => sub.unsubscribe();
         }, []);
 
+        const onTemplateChange = useCallback((t: string) => {
+          template$.next(t);
+        }, []);
+
         return (
           <>
             <AiSummaryComponent
@@ -122,15 +135,27 @@ export const aiSummaryPanelEmbeddableFactory: EmbeddablePublicDefinition<
               esqlQuery={esqlQuery}
               timeRange={timeRange}
               generationVersion={generationVersion}
+              savedTemplate={savedTemplate}
+              onTemplateChange={onTemplateChange}
             />
             {isEditFlyoutOpen && (
               <EditAiPanelFlyout
                 prompt={prompt}
                 esqlQuery={esqlQuery}
+                template={savedTemplate}
                 timeRange={timeRange}
-                onSave={(newPrompt, newEsqlQuery) => {
+                onSave={(newPrompt, newEsqlQuery, newTemplate) => {
+                  const promptChanged = newPrompt !== prompt$.getValue();
+                  const queryChanged = newEsqlQuery !== esqlQuery$.getValue();
                   prompt$.next(newPrompt);
                   esqlQuery$.next(newEsqlQuery);
+                  if (promptChanged || queryChanged) {
+                    // Prompt or query changed — clear template so LLM regenerates.
+                    template$.next(undefined);
+                  } else {
+                    // Only template edited — save it directly, re-render without LLM.
+                    template$.next(newTemplate);
+                  }
                   setGenerationVersion((v) => v + 1);
                 }}
                 onClose={() => isEditFlyoutOpen$.next(false)}

@@ -17,8 +17,9 @@
     "@kbn/inference-common",
     "@kbn/inference-plugin",
     "@kbn/management-settings-ids",
-    "@kbn/task-manager-plugin",
-    "@kbn/esql-utils"
+    "@kbn/esql-utils",
+    "@kbn/code-editor",
+    "@kbn/monaco"
   ],
   "exclude": ["target/**/*"]
 }

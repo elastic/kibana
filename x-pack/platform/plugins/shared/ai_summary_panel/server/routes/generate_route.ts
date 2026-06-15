@@ -11,14 +11,6 @@ import type { IRouter, CoreSetup, IUiSettingsClient, KibanaRequest } from '@kbn/
 import { ChatCompletionEventType, MessageRole } from '@kbn/inference-common';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
-import {
-  getCached,
-  setCached,
-  hashKey,
-  L3_TTL_SECONDS,
-  TEMPLATE_TTL_SECONDS,
-  CACHE_SO_TYPE,
-} from '../cache/html_cache';
 import { runEsqlQuery } from '../utils/esql_query';
 import type { EsqlColumn } from '../utils/esql_query';
 
@@ -26,7 +18,6 @@ const SOCKET_TIMEOUT_MS = 5 * 60 * 1000;
 const NO_DEFAULT_CONNECTOR = 'NO_DEFAULT_CONNECTOR';
 const MAX_HTML_BYTES = 500_000;
 
-// Used for static panels (no esqlQuery) — generates full self-contained HTML.
 const SYSTEM_PROMPT_STATIC = `You are a data visualization assistant embedded in a Kibana dashboard panel.
 
 Your job is to generate a single self-contained HTML document that presents the user's data or answers their prompt in the most appropriate visual form.
@@ -53,8 +44,6 @@ CONTENT RULES:
 - For bar charts: use a div with a colored background and width set to the percentage value inline style. Example: <div style="width: 42%; background: #0077CC; height: 20px;"></div>
 - For status indicators: use colored badges/pills with CSS background-color.`;
 
-// Used for panels with an esqlQuery — generates a reusable HTML template with data placeholders.
-// The client fills placeholders with real query results at render time.
 const SYSTEM_PROMPT_TEMPLATE = `You are a data visualization assistant embedded in a Kibana dashboard panel.
 
 Generate a reusable HTML template with data placeholders. The template will be filled with real query results at render time — do NOT embed specific data values inline.
@@ -68,7 +57,7 @@ PLACEHOLDER SYNTAX:
     {{#col_gte_N}}...{{/col_gte_N}}      renders if col >= N
     {{#col_lt_N}}...{{/col_lt_N}}        renders if col < N
     {{#col_gte_N_lt_M}}...{{/col_gte_N_lt_M}}  renders if N <= col < M
-  Use normalized placeholder names (dots → underscores, e.g. category.keyword → category_keyword).
+  Use normalized placeholder names (dots and special chars → underscores, e.g. category.keyword → category_keyword, @timestamp → timestamp).
   Example for green/yellow/red status:
     class="{{#revenue_gte_10000}}card-green{{/revenue_gte_10000}}{{#revenue_gte_5000_lt_10000}}card-yellow{{/revenue_gte_5000_lt_10000}}{{#revenue_lt_5000}}card-red{{/revenue_lt_5000}}"
 
@@ -95,12 +84,6 @@ CONTENT RULES:
 - No title.
 - For bar charts: <div style="width: {{column_name_pct}}%; background: #0077CC; height: 20px;"></div>
 - For status indicators: colored badges with CSS background-color.`;
-
-const STATIC_PROMPT_HASH = hashKey(SYSTEM_PROMPT_STATIC.replace(/\s+/g, ' ').trim()).slice(0, 8);
-const TEMPLATE_PROMPT_HASH = hashKey(SYSTEM_PROMPT_TEMPLATE.replace(/\s+/g, ' ').trim()).slice(
-  0,
-  8
-);
 
 const CSP_META = `<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline';">`;
 
@@ -183,7 +166,7 @@ export function registerGenerateRoute(
       },
     },
     async (context, request, response) => {
-      const [coreStart, { inference }] = await getStartServices();
+      const [, { inference }] = await getStartServices();
       const { prompt, esqlQuery, timeRange } = request.body;
       const core = await context.core;
 
@@ -200,17 +183,11 @@ export function registerGenerateRoute(
       const abortController = new AbortController();
       request.events.aborted$.subscribe(() => abortController.abort());
 
-      const cacheRepo = coreStart.savedObjects.createInternalRepository([CACHE_SO_TYPE]);
-
       let userMessage: string;
-      let cacheKey: string;
       let systemPrompt: string;
       let isTemplatePath: boolean;
 
       if (esqlQuery) {
-        // Template path: LLM generates reusable HTML with placeholders.
-        // Cache key is schema-based (prompt + column names), not data-based — one template
-        // serves all time ranges as long as the schema doesn't change.
         isTemplatePath = true;
         systemPrompt = SYSTEM_PROMPT_TEMPLATE;
 
@@ -228,17 +205,8 @@ export function registerGenerateRoute(
           /* non-fatal — generate template from prompt + partial schema */
         }
 
-        const colNamesKey = columns
-          .map((c) => c.name)
-          .sort()
-          .join('|');
-        cacheKey = hashKey(`${TEMPLATE_PROMPT_HASH}:tpl:${prompt}:${colNamesKey}`);
-
         if (columns.length > 0) {
-          // Show each column's name, type, and the exact placeholder name to use.
-          // Dots/hyphens in column names (e.g. "category.keyword") are normalized to underscores
-          // so placeholder names are valid identifiers (e.g. {{category_keyword}}).
-          const normalize = (s: string) => s.replace(/[.\-\s]+/g, '_');
+          const normalize = (s: string) => s.replace(/[^a-zA-Z0-9]+/g, '_').replace(/^_+|_+$/g, '');
           const schemaLines = columns
             .map((c) => `  - ${c.name} (${c.type}) → placeholder: {{${normalize(c.name)}}}`)
             .join('\n');
@@ -251,33 +219,15 @@ export function registerGenerateRoute(
           userMessage = `${prompt}\n\nNote: schema unavailable. Generate a suitable template based on the prompt.`;
         }
       } else {
-        // Static path: no data, just the prompt. Returns full self-contained HTML.
         isTemplatePath = false;
         systemPrompt = SYSTEM_PROMPT_STATIC;
-        cacheKey = hashKey(`${STATIC_PROMPT_HASH}:l3:${prompt}`);
         userMessage = prompt;
       }
 
-      const cacheResult = await getCached(cacheRepo, cacheKey);
-      if (cacheResult) {
-        if (!cacheResult.stale) {
-          const payload = isTemplatePath ? cacheResult.html : injectCsp(cacheResult.html);
-          passThrough.write(JSON.stringify({ token: payload }) + '\n');
-          passThrough.end();
-          return response.ok({
-            headers: { 'Content-Type': 'application/x-ndjson' },
-            body: passThrough,
-          });
-        }
-        const stalePayload = isTemplatePath ? cacheResult.html : injectCsp(cacheResult.html);
-        passThrough.write(JSON.stringify({ stale: stalePayload }) + '\n');
-      }
-
-      // For static panels, prepend CSP as the first streaming token so the iframe gets it
-      // even before the LLM finishes. Template panels skip this — CSP is injected on the
-      // client after placeholder fill.
+      // For static panels, prepend CSP as the first token so the iframe gets it immediately.
+      // Template panels skip this — CSP is injected client-side after placeholder fill.
       if (!isTemplatePath) {
-        passThrough.write(JSON.stringify({ token: CSP_META }) + '\n');
+        passThrough.write(JSON.stringify({ token: injectCsp('') }) + '\n');
       }
 
       const client = inference.getClient({ request });
@@ -320,10 +270,6 @@ export function registerGenerateRoute(
         complete: () => {
           if (sizeLimitExceeded) return;
           if (!passThrough.destroyed) passThrough.end();
-          if (accHtml) {
-            const ttl = isTemplatePath ? TEMPLATE_TTL_SECONDS : L3_TTL_SECONDS;
-            setCached(cacheRepo, cacheKey, accHtml, ttl).catch(() => {});
-          }
         },
       });
 

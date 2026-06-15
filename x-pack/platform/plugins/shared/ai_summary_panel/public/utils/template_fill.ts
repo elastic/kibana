@@ -9,7 +9,8 @@ export const TEMPLATE_SENTINEL = '<!--ai-template-->';
 
 const CSP_META = `<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline';">`;
 
-function injectCsp(html: string): string {
+export function injectCsp(html: string): string {
+  if (html.includes(CSP_META)) return html;
   const headMatch = html.match(/<head[^>]*>/i);
   if (headMatch?.index !== undefined) {
     const at = headMatch.index + headMatch[0].length;
@@ -19,7 +20,35 @@ function injectCsp(html: string): string {
 }
 
 export function isTemplate(html: string): boolean {
-  return html.trimStart().startsWith(TEMPLATE_SENTINEL);
+  return html.includes(TEMPLATE_SENTINEL);
+}
+
+// Cleans raw LLM output before storing or filling:
+// - Strips markdown code fences (```html...```)
+// - Discards any text the LLM emitted before the sentinel
+// - Adds the sentinel if the LLM forgot it entirely
+export function sanitizeTemplate(raw: string): string {
+  let s = raw.trim();
+  // Strip markdown fences
+  s = s
+    .replace(/^```(?:html|HTML)?\s*\n?/, '')
+    .replace(/\n?```\s*$/, '')
+    .trim();
+  // Find sentinel — discard LLM preamble that appears before it
+  const idx = s.indexOf(TEMPLATE_SENTINEL);
+  if (idx > 0) {
+    s = s.slice(idx);
+  } else if (idx === -1) {
+    s = TEMPLATE_SENTINEL + '\n' + s;
+  }
+  return s;
+}
+
+// Returns true if the template looks structurally valid (has closing HTML tag or at least a div)
+export function isValidTemplate(template: string): boolean {
+  return (
+    template.includes('</html>') || template.includes('</body>') || template.includes('</div>')
+  );
 }
 
 export interface TemplateColumn {
@@ -27,9 +56,9 @@ export interface TemplateColumn {
   type: string;
 }
 
-// Dots, hyphens, and spaces in column names (e.g. "category.keyword") are normalized to
-// underscores so that LLM-generated placeholders like {{category_keyword}} resolve correctly.
-const normalizeColName = (s: string) => s.replace(/[.\-\s]+/g, '_');
+// All non-alphanumeric characters normalized to underscore, leading/trailing underscores stripped.
+// e.g. "category.keyword" → "category_keyword", "@timestamp" → "timestamp"
+const normalizeColName = (s: string) => s.replace(/[^a-zA-Z0-9]+/g, '_').replace(/^_+|_+$/g, '');
 
 // Comparison operators recognised in conditional block names, e.g. {{#revenue_gte_10000}}.
 // Longer tokens checked first so "_gte_" is never mis-parsed as "_gt_".
@@ -71,8 +100,8 @@ export function fillTemplate(
     return String(val ?? '');
   }
 
-  // Evaluate a conditional block name like "revenue_gte_10000" or "revenue_gte_5000_lt_10000".
-  // Returns true/false when it recognises the pattern, null when it doesn't.
+  // Evaluates conditional block names like "revenue_gte_10000" or "revenue_gte_5000_lt_10000".
+  // Returns true/false when recognised, null otherwise.
   function evalConditional(blockName: string, row: unknown[]): boolean | null {
     for (const op of COND_OPS) {
       const opIdx = blockName.indexOf(op.token);
@@ -85,12 +114,11 @@ export function fillTemplate(
       const val = Number(row[colIdx]);
       if (!isFinite(val)) return false;
 
-      const rest = blockName.slice(opIdx + op.token.length); // e.g. "10000" or "5000_lt_10000"
+      const rest = blockName.slice(opIdx + op.token.length);
       const numMatch = rest.match(/^(\d+(?:\.\d+)?)/);
       if (!numMatch) continue;
       if (!op.fn(val, parseFloat(numMatch[1]))) return false;
 
-      // Optional second condition, e.g. _lt_10000 appended after _gte_5000
       const rest2 = rest.slice(numMatch[0].length);
       for (const op2 of COND_OPS) {
         if (rest2.startsWith(op2.token)) {
@@ -104,24 +132,22 @@ export function fillTemplate(
     return null;
   }
 
-  // Fill one row's copy of the repeating template, evaluating conditionals and placeholders.
   function fillRow(rowTpl: string, row: unknown[]): string {
-    // Conditional sections: {{#col_op_N}}...{{/col_op_N}}
     let filled = rowTpl.replace(
       /\{\{#(\w[\w.]*?)\}\}([\s\S]*?)\{\{\/\1\}\}/g,
       (_m: string, blockName: string, content: string) => {
         const result = evalConditional(blockName, row);
-        if (result === null) return ''; // unrecognised block — strip
+        if (result === null) return '';
         return result ? content : '';
       }
     );
-    // Simple value placeholders
     filled = filled.replace(/\{\{(\w[\w.]*?)(_pct)?\}\}/g, (_m: string, col: string, p?: string) =>
       resolveVal(col, Boolean(p), row)
     );
     return filled;
   }
 
+  // Strip sentinel
   let result = template.trimStart();
   if (result.startsWith(TEMPLATE_SENTINEL)) {
     result = result.slice(TEMPLATE_SENTINEL.length);
@@ -144,44 +170,11 @@ export function fillTemplate(
     resolveVal(col, Boolean(p), firstRow)
   );
 
+  // Strip any remaining unresolved block tags (unclosed {{#tag}} or {{/tag}})
+  result = result.replace(/\{\{[#^/][^}]*\}\}/g, '');
+
+  // Strip any remaining unresolved value placeholders (wrong column names from LLM)
+  result = result.replace(/\{\{[^}]+\}\}/g, '');
+
   return injectCsp(result);
-}
-
-// Session-level template cache. Survives React re-renders and time-range changes within the
-// same browser session; does not survive page reload (SO cache handles cross-session persistence).
-const TPL_KEY = 'ai_panel_tpl:';
-const TPL_TTL_MS = 24 * 60 * 60 * 1000;
-
-function tplHash(s: string): string {
-  let h = 5381;
-  for (let i = 0; i < s.length; i++) {
-    h = (h * 33 + s.charCodeAt(i)) % 2147483647;
-  }
-  return h.toString(36);
-}
-
-function tplKey(prompt: string, esqlQuery: string): string {
-  return TPL_KEY + tplHash(prompt + '\0' + esqlQuery);
-}
-
-export function readSessionTemplate(prompt: string, esqlQuery: string): string | null {
-  try {
-    const raw = sessionStorage.getItem(tplKey(prompt, esqlQuery));
-    if (!raw) return null;
-    const { tpl, ts } = JSON.parse(raw) as { tpl: string; ts: number };
-    return Date.now() - ts < TPL_TTL_MS ? tpl : null;
-  } catch {
-    return null;
-  }
-}
-
-export function writeSessionTemplate(prompt: string, esqlQuery: string, template: string): void {
-  try {
-    sessionStorage.setItem(
-      tplKey(prompt, esqlQuery),
-      JSON.stringify({ tpl: template, ts: Date.now() })
-    );
-  } catch {
-    /* sessionStorage full — non-fatal */
-  }
 }

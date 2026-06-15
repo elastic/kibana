@@ -27,6 +27,8 @@ import {
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { CodeEditor } from '@kbn/code-editor';
+import { HANDLEBARS_LANG_ID } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { getServices } from '../services';
@@ -54,8 +56,9 @@ interface PreviewData {
 interface EditAiPanelFlyoutProps {
   prompt: string;
   esqlQuery: string | undefined;
+  template: string | undefined;
   timeRange: { from: string; to: string } | undefined;
-  onSave: (prompt: string, esqlQuery: string | undefined) => void;
+  onSave: (prompt: string, esqlQuery: string | undefined, template: string | undefined) => void;
   onClose: () => void;
 }
 
@@ -67,12 +70,14 @@ const monoTextAreaCss = css({
 export const EditAiPanelFlyout = ({
   prompt,
   esqlQuery,
+  template,
   timeRange,
   onSave,
   onClose,
 }: EditAiPanelFlyoutProps) => {
   const [draftPrompt, setDraftPrompt] = useState(prompt);
   const [draftEsqlQuery, setDraftEsqlQuery] = useState(esqlQuery ?? '');
+  const [draftTemplate, setDraftTemplate] = useState(template ?? '');
   const [isPreviewLoading, setIsPreviewLoading] = useState(false);
   const [previewData, setPreviewData] = useState<PreviewData | null>(null);
   const [previewError, setPreviewError] = useState<string | null>(null);
@@ -250,11 +255,7 @@ export const EditAiPanelFlyout = ({
           {previewError && (
             <>
               <EuiSpacer size="s" />
-              <EuiCallOut
-                color="danger"
-                size="s"
-                title={previewError}
-              />
+              <EuiCallOut color="danger" size="s" title={previewError} />
             </>
           )}
 
@@ -286,6 +287,64 @@ export const EditAiPanelFlyout = ({
             </>
           )}
         </EuiAccordion>
+
+        <EuiSpacer size="l" />
+
+        <EuiAccordion
+          id="editAiPanelTemplateSection"
+          buttonContent={
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiIcon type="editorCodeBlock" />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiText size="s">
+                  <strong>
+                    {i18n.translate('aiSummaryPanel.editFlyout.templateLabel', {
+                      defaultMessage: 'Template (HTML)',
+                    })}
+                  </strong>
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          }
+          initialIsOpen={false}
+          paddingSize="s"
+        >
+          <EuiCallOut
+            size="s"
+            color="warning"
+            title={i18n.translate('aiSummaryPanel.editFlyout.templateWarning', {
+              defaultMessage:
+                'Advanced: editing the template directly may produce unexpected results if placeholder syntax is broken.',
+            })}
+          />
+          <EuiSpacer size="s" />
+          <EuiFormRow
+            fullWidth
+            helpText={i18n.translate('aiSummaryPanel.editFlyout.templateHelp', {
+              defaultMessage:
+                'The HTML template uses {{column_name}} placeholders filled with live query data. Changing the prompt or query will regenerate this template.',
+            })}
+          >
+            <div css={css({ height: 400, border: '1px solid #D3DAE6', borderRadius: 4 })}>
+              <CodeEditor
+                languageId={HANDLEBARS_LANG_ID}
+                value={draftTemplate}
+                onChange={setDraftTemplate}
+                options={{
+                  fontSize: 12,
+                  minimap: { enabled: false },
+                  scrollBeyondLastLine: false,
+                  wordWrap: 'on',
+                  automaticLayout: true,
+                  lineNumbers: 'on',
+                  folding: true,
+                }}
+              />
+            </div>
+          </EuiFormRow>
+        </EuiAccordion>
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
@@ -302,12 +361,16 @@ export const EditAiPanelFlyout = ({
               fill
               disabled={!draftPrompt.trim()}
               onClick={() => {
-                onSave(draftPrompt, draftEsqlQuery.trim() || undefined);
+                onSave(
+                  draftPrompt,
+                  draftEsqlQuery.trim() || undefined,
+                  draftTemplate.trim() || undefined
+                );
                 onClose();
               }}
             >
               {i18n.translate('aiSummaryPanel.editFlyout.save', {
-                defaultMessage: 'Save and regenerate',
+                defaultMessage: 'Save',
               })}
             </EuiButton>
           </EuiFlexItem>

@@ -22,8 +22,9 @@ import { streamGenerate } from '../utils/stream_generate';
 import {
   isTemplate,
   fillTemplate,
-  readSessionTemplate,
-  writeSessionTemplate,
+  sanitizeTemplate,
+  isValidTemplate,
+  injectCsp,
 } from '../utils/template_fill';
 import type { TemplateColumn } from '../utils/template_fill';
 
@@ -35,56 +36,13 @@ interface AiSummaryComponentProps {
   esqlQuery: string | undefined;
   timeRange: { from: string; to: string } | undefined;
   generationVersion: number;
+  savedTemplate: string | undefined;
+  onTemplateChange: (template: string) => void;
 }
 
 interface EsqlDataResult {
   columns: TemplateColumn[];
   rows: unknown[][];
-}
-
-const L1_TTL_MS = 30 * 60 * 1000;
-
-interface L1Entry {
-  html: string;
-  ts: number;
-}
-
-function l1Hash(str: string): string {
-  let h = 5381;
-  for (let i = 0; i < str.length; i++) {
-    h = (h * 33 + str.charCodeAt(i)) % 2147483647;
-  }
-  return h.toString(36);
-}
-
-function l1Key(
-  embeddableId: string,
-  prompt: string,
-  esqlQuery: string | undefined,
-  timeRange: { from: string; to: string } | undefined
-): string {
-  return `ai_panel:${l1Hash(
-    embeddableId + prompt + (esqlQuery ?? '') + (timeRange?.from ?? '') + (timeRange?.to ?? '')
-  )}`;
-}
-
-function readL1(key: string): string | null {
-  try {
-    const raw = sessionStorage.getItem(key);
-    if (!raw) return null;
-    const entry = JSON.parse(raw) as L1Entry;
-    return Date.now() - entry.ts < L1_TTL_MS ? entry.html : null;
-  } catch {
-    return null;
-  }
-}
-
-function writeL1(key: string, html: string): void {
-  try {
-    sessionStorage.setItem(key, JSON.stringify({ html, ts: Date.now() } satisfies L1Entry));
-  } catch {
-    // sessionStorage full — non-fatal
-  }
 }
 
 const iframeContainerCss = css({
@@ -110,6 +68,8 @@ export const AiSummaryComponent = ({
   esqlQuery,
   timeRange,
   generationVersion,
+  savedTemplate,
+  onTemplateChange,
 }: AiSummaryComponentProps) => {
   const { euiTheme } = useEuiTheme();
   const [html, setHtml] = useState('');
@@ -119,39 +79,41 @@ export const AiSummaryComponent = ({
   const accRef = useRef('');
   const htmlRef = useRef('');
   htmlRef.current = html;
-  const mountedRef = useRef(false);
+
+  // Refs so effect closure always reads latest value without them being deps.
+  const savedTemplateRef = useRef(savedTemplate);
+  const onTemplateChangeRef = useRef(onTemplateChange);
+  useEffect(() => {
+    savedTemplateRef.current = savedTemplate;
+  }, [savedTemplate]);
+  useEffect(() => {
+    onTemplateChangeRef.current = onTemplateChange;
+  }, [onTemplateChange]);
 
   useEffect(() => {
     if (!prompt) return;
 
-    const isInitialMount = !mountedRef.current;
-    mountedRef.current = true;
+    const template = savedTemplateRef.current;
 
-    const key = l1Key(embeddableId, prompt, esqlQuery, timeRange);
-    if (isInitialMount && generationVersion === 0) {
-      const cached = readL1(key);
-      if (cached) {
-        setHtml(cached);
-        setIsLoading(false);
-        return;
-      }
+    // Fast path — static panel with stored HTML: render directly, no server calls.
+    if (template && !esqlQuery) {
+      setHtml(injectCsp(template));
+      setIsLoading(false);
+      setError(undefined);
+      return;
     }
 
     abortRef.current?.abort();
     const controller = new AbortController();
     abortRef.current = controller;
-
     accRef.current = '';
     setIsLoading(true);
     setError(undefined);
 
     const http = getServices().http;
 
-    // Fast path: a template is cached in sessionStorage from an earlier generation this session.
-    // Only run the ES|QL query — no LLM call needed.
-    const sessionTemplate = esqlQuery ? readSessionTemplate(prompt, esqlQuery) : null;
-
-    if (sessionTemplate && esqlQuery) {
+    // Fast path — esqlQuery panel with stored template: run query only, no LLM.
+    if (template && esqlQuery) {
       http
         .post<EsqlDataResult>('/internal/ai_summary_panel/esql_data', {
           body: JSON.stringify({ esqlQuery, timeRange }),
@@ -159,9 +121,7 @@ export const AiSummaryComponent = ({
         })
         .then(({ columns, rows }) => {
           if (controller.signal.aborted) return;
-          const filled = fillTemplate(sessionTemplate, columns, rows);
-          setHtml(filled);
-          writeL1(key, filled);
+          setHtml(fillTemplate(template, columns, rows));
           setIsLoading(false);
         })
         .catch((err: Error) => {
@@ -173,9 +133,8 @@ export const AiSummaryComponent = ({
       return () => controller.abort();
     }
 
-    // Slow path: LLM generates the template. For esqlQuery panels, data is fetched in parallel
-    // so both finish as close together as possible. For static panels (no esqlQuery), only the
-    // LLM runs and partial HTML is streamed live into the iframe.
+    // Slow path — no stored template: LLM generates template. For esqlQuery panels the
+    // data fetch runs in parallel so both complete as close together as possible.
     let esqlData: EsqlDataResult | null = null;
     let staleTemplate: string | null = null;
     let templateDone = false;
@@ -190,10 +149,8 @@ export const AiSummaryComponent = ({
       }
     };
 
-    // For static panels, stream partial HTML into the iframe every 300ms as it builds up.
-    // Skip for template panels — partial template HTML with {{placeholders}} looks broken.
-    const hasExistingHtml = Boolean(htmlRef.current);
-    if (!hasExistingHtml && !esqlQuery) {
+    // Stream partial HTML into the iframe for static panels (no placeholders to leak through).
+    if (!htmlRef.current && !esqlQuery) {
       intervalRef = setInterval(() => {
         if (accRef.current) setHtml(accRef.current);
       }, 300);
@@ -204,21 +161,29 @@ export const AiSummaryComponent = ({
       stopInterval();
 
       let rendered: string;
+
       if (esqlQuery && esqlData) {
-        rendered = fillTemplate(accRef.current, esqlData.columns, esqlData.rows);
-        writeSessionTemplate(prompt, esqlQuery, accRef.current);
+        const cleaned = sanitizeTemplate(accRef.current);
+        if (!isValidTemplate(cleaned)) {
+          setError('Failed to generate panel: LLM returned invalid template');
+          setIsLoading(false);
+          return;
+        }
+        rendered = fillTemplate(cleaned, esqlData.columns, esqlData.rows);
+        onTemplateChangeRef.current(cleaned);
       } else if (!esqlQuery) {
-        rendered = accRef.current; // static panel: full HTML already has CSP from route
+        // Static panel: full HTML already has CSP from the route's first token.
+        rendered = accRef.current;
+        onTemplateChangeRef.current(rendered);
       } else {
         return; // esqlQuery present but data fetch failed — error already set
       }
 
       setHtml(rendered);
-      writeL1(key, rendered);
       setIsLoading(false);
     };
 
-    // Fetch ES|QL data in parallel with the LLM call (template panels only)
+    // Fetch data in parallel with LLM (template panels only)
     if (esqlQuery) {
       http
         .post<EsqlDataResult>('/internal/ai_summary_panel/esql_data', {
@@ -229,8 +194,7 @@ export const AiSummaryComponent = ({
           if (controller.signal.aborted) return;
           esqlData = data;
           dataDone = true;
-          // SWR: if a stale template arrived before data did, fill and show it immediately
-          // while the fresh LLM template finishes in the background.
+          // SWR: if a stale template arrived before data, fill and show it immediately.
           if (staleTemplate && !templateDone) {
             setHtml(fillTemplate(staleTemplate, data.columns, data.rows));
           }
@@ -253,14 +217,10 @@ export const AiSummaryComponent = ({
       controller.signal,
       (staleHtml) => {
         if (esqlQuery && isTemplate(staleHtml)) {
-          // SWR for template panels: store the stale template and fill immediately if data
-          // has already arrived, otherwise it will be used when the data fetch completes.
-          staleTemplate = staleHtml;
-          if (esqlData) {
-            setHtml(fillTemplate(staleHtml, esqlData.columns, esqlData.rows));
-          }
+          // SWR for template panels: fill stale template with current data if available.
+          staleTemplate = sanitizeTemplate(staleHtml);
+          if (esqlData) setHtml(fillTemplate(staleTemplate, esqlData.columns, esqlData.rows));
         } else if (!esqlQuery && !isTemplate(staleHtml)) {
-          // Static panel: show stale full HTML while LLM regenerates
           stopInterval();
           setHtml(staleHtml);
         }
@@ -284,6 +244,7 @@ export const AiSummaryComponent = ({
       stopInterval();
       controller.abort();
     };
+    // savedTemplate intentionally omitted — read via savedTemplateRef to avoid re-triggering.
   }, [embeddableId, prompt, esqlQuery, timeRange, generationVersion]);
 
   const wrapperCss = css({
