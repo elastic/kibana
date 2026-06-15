@@ -288,7 +288,7 @@ describe('ScanResultsPanel', () => {
         results,
         scan: completedScan({ status: 'completed', problematic: 30 }),
         total: 30,
-        searchAfter: ['2026-02-27T10:00:00.000Z', 'scan-123', 'default', false, 'slo-24'],
+        searchAfter: 'encoded-cursor',
       },
       isLoading: false,
       isError: false,
@@ -302,7 +302,7 @@ describe('ScanResultsPanel', () => {
   });
 
   it('calls useGetHealthScanResults with searchAfter when Next is clicked', () => {
-    const searchAfterCursor = ['2026-02-27T10:00:00.000Z', 'scan-123', 'default', false, 'slo-24'];
+    const searchAfterCursor = 'encoded-cursor';
     const results = Array.from({ length: 25 }, (_, i) =>
       buildScanResult({
         slo: { id: `slo-${i}`, name: `SLO ${i}`, revision: 1, enabled: true },
@@ -346,7 +346,7 @@ describe('ScanResultsPanel', () => {
     expect(mockUseGetHealthScanResults).toHaveBeenLastCalledWith(
       expect.objectContaining({
         scanId: 'scan-123',
-        searchAfter: JSON.stringify(searchAfterCursor),
+        searchAfter: searchAfterCursor,
         size: 25,
       })
     );

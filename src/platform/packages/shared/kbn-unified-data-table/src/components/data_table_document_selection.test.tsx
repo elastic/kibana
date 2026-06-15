@@ -7,257 +7,235 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { act } from 'react-dom/test-utils';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { findTestSubject } from '@elastic/eui/lib/test';
 import type { DataTableCompareToolbarBtn } from './data_table_document_selection';
-import {
-  DataTableDocumentToolbarBtn,
-  SelectButton,
-  getSelectAllButton,
-} from './data_table_document_selection';
+import React from 'react';
+import userEvent from '@testing-library/user-event';
 import {
   buildSelectedDocsState,
   dataTableContextMock,
   dataTableContextRowsMock,
 } from '../../__mocks__/table_context';
-import { UnifiedDataTableContext } from '../table_context';
+import {
+  DataTableDocumentToolbarBtn,
+  SelectButton,
+  getSelectAllButton,
+} from './data_table_document_selection';
 import { getDocId } from '@kbn/discover-utils';
-import { render, screen } from '@testing-library/react';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { screen } from '@testing-library/react';
 import { servicesMock } from '../../__mocks__/services';
-import userEvent from '@testing-library/user-event';
+import { UnifiedDataTableContext } from '../table_context';
+
+const getSelectionToolbarButton = (selectedCount: number) =>
+  screen.getByRole('button', { name: new RegExp(`Selected.*Active:\\s*${selectedCount}`) });
+
+const renderWithTableContext = (ui: React.ReactElement, contextMock = dataTableContextMock) =>
+  renderWithI18n(
+    <UnifiedDataTableContext.Provider value={contextMock}>{ui}</UnifiedDataTableContext.Provider>
+  );
 
 describe('document selection', () => {
   describe('getDocId', () => {
-    test('doc with custom routing', () => {
+    it('doc with custom routing', () => {
       const doc = {
         _id: 'test-id',
         _index: 'test-indices',
         _routing: 'why-not',
       };
-      expect(getDocId(doc)).toMatchInlineSnapshot(`"test-indices::test-id::why-not"`);
+
+      expect(getDocId(doc)).toBe('test-indices::test-id::why-not');
     });
 
-    test('doc without custom routing', () => {
+    it('doc without custom routing', () => {
       const doc = {
         _id: 'test-id',
         _index: 'test-indices',
       };
-      expect(getDocId(doc)).toMatchInlineSnapshot(`"test-indices::test-id::"`);
+
+      expect(getDocId(doc)).toBe('test-indices::test-id::');
     });
   });
 
   describe('SelectAllButton', () => {
-    test('is not checked', () => {
+    it('is not checked', () => {
       const contextMock = {
         ...dataTableContextMock,
       };
+
       const SelectAllButton = getSelectAllButton(dataTableContextRowsMock);
 
-      const component = mountWithIntl(
-        <UnifiedDataTableContext.Provider value={contextMock}>
-          <SelectAllButton />
-        </UnifiedDataTableContext.Provider>
-      );
+      renderWithTableContext(<SelectAllButton />, contextMock);
 
-      const checkBox = findTestSubject(component, 'selectAllDocsOnPageToggle');
-      expect(checkBox.props().checked).toBeFalsy();
+      expect(screen.getByRole('checkbox', { name: 'Select all visible rows' })).not.toBeChecked();
     });
 
-    test('is checked correctly', () => {
+    it('is checked correctly', () => {
       const contextMock = {
         ...dataTableContextMock,
         selectedDocsState: buildSelectedDocsState(['i::1::']),
       };
+
       const SelectAllButton = getSelectAllButton(dataTableContextRowsMock);
 
-      const component = mountWithIntl(
-        <UnifiedDataTableContext.Provider value={contextMock}>
-          <SelectAllButton />
-        </UnifiedDataTableContext.Provider>
-      );
+      renderWithTableContext(<SelectAllButton />, contextMock);
 
-      const checkBox = findTestSubject(component, 'selectAllDocsOnPageToggle');
-      expect(checkBox.props().checked).toBeTruthy();
+      expect(screen.getByRole('checkbox', { name: 'Deselect all visible rows' })).toBeChecked();
     });
   });
 
   describe('SelectButton', () => {
-    test('is not checked', () => {
+    it('is not checked', () => {
       const contextMock = {
         ...dataTableContextMock,
       };
 
-      const component = mountWithIntl(
-        <UnifiedDataTableContext.Provider value={contextMock}>
-          <SelectButton
-            rowIndex={0}
-            colIndex={0}
-            setCellProps={jest.fn()}
-            columnId="test"
-            isExpanded={false}
-            isDetails={false}
-            isExpandable={false}
-          />
-        </UnifiedDataTableContext.Provider>
+      renderWithTableContext(
+        <SelectButton
+          colIndex={0}
+          columnId="test"
+          isDetails={false}
+          isExpandable={false}
+          isExpanded={false}
+          rowIndex={0}
+          setCellProps={jest.fn()}
+        />,
+        contextMock
       );
 
-      const checkBox = findTestSubject(component, 'dscGridSelectDoc-i::1::');
-      expect(checkBox.props().checked).toBeFalsy();
+      expect(screen.getByRole('checkbox', { name: "Select document '1'" })).not.toBeChecked();
     });
 
-    test('is checked correctly', () => {
+    it('is checked when the document is selected', () => {
       const contextMock = {
         ...dataTableContextMock,
         selectedDocsState: buildSelectedDocsState(['i::1::']),
       };
 
-      const component1 = mountWithIntl(
-        <UnifiedDataTableContext.Provider value={contextMock}>
-          <SelectButton
-            rowIndex={0}
-            colIndex={0}
-            setCellProps={jest.fn()}
-            columnId="test"
-            isExpanded={false}
-            isDetails={false}
-            isExpandable={false}
-          />
-        </UnifiedDataTableContext.Provider>
+      renderWithTableContext(
+        <SelectButton
+          colIndex={0}
+          columnId="test"
+          isDetails={false}
+          isExpandable={false}
+          isExpanded={false}
+          rowIndex={0}
+          setCellProps={jest.fn()}
+        />,
+        contextMock
       );
 
-      const checkBox1 = findTestSubject(component1, 'dscGridSelectDoc-i::1::');
-      expect(checkBox1.props().checked).toBeTruthy();
-
-      const component2 = mountWithIntl(
-        <UnifiedDataTableContext.Provider value={contextMock}>
-          <SelectButton
-            rowIndex={1}
-            colIndex={0}
-            setCellProps={jest.fn()}
-            columnId="test"
-            isExpanded={false}
-            isDetails={false}
-            isExpandable={false}
-          />
-        </UnifiedDataTableContext.Provider>
-      );
-
-      const checkBox2 = findTestSubject(component2, 'dscGridSelectDoc-i::2::');
-      expect(checkBox2.props().checked).toBeFalsy();
+      expect(screen.getByRole('checkbox', { name: "Select document '1'" })).toBeChecked();
     });
 
-    test('adding a selection', () => {
+    it('is not checked when the document is not selected', () => {
+      const contextMock = {
+        ...dataTableContextMock,
+        selectedDocsState: buildSelectedDocsState(['i::1::']),
+      };
+
+      renderWithTableContext(
+        <SelectButton
+          colIndex={0}
+          columnId="test"
+          isDetails={false}
+          isExpandable={false}
+          isExpanded={false}
+          rowIndex={1}
+          setCellProps={jest.fn()}
+        />,
+        contextMock
+      );
+
+      expect(screen.getByRole('checkbox', { name: "Select document '2'" })).not.toBeChecked();
+    });
+
+    it('adding a selection', async () => {
       const contextMock = {
         ...dataTableContextMock,
       };
 
-      const component = mountWithIntl(
-        <UnifiedDataTableContext.Provider value={contextMock}>
-          <SelectButton
-            rowIndex={0}
-            colIndex={0}
-            setCellProps={jest.fn()}
-            columnId="test"
-            isExpanded={false}
-            isDetails={false}
-            isExpandable={false}
-          />
-        </UnifiedDataTableContext.Provider>
+      renderWithTableContext(
+        <SelectButton
+          colIndex={0}
+          columnId="test"
+          isDetails={false}
+          isExpandable={false}
+          isExpanded={false}
+          rowIndex={0}
+          setCellProps={jest.fn()}
+        />,
+        contextMock
       );
 
-      const checkBox = findTestSubject(component, 'dscGridSelectDoc-i::1::');
-      checkBox.simulate('change');
+      await userEvent.click(screen.getByRole('checkbox', { name: "Select document '1'" }));
+
       expect(contextMock.selectedDocsState.toggleDocSelection).toHaveBeenCalledWith('i::1::');
     });
 
-    test('removing a selection', () => {
+    it('removing a selection', async () => {
       const contextMock = {
         ...dataTableContextMock,
         selectedDocsState: buildSelectedDocsState(['i::1::']),
       };
 
-      const component = mountWithIntl(
-        <UnifiedDataTableContext.Provider value={contextMock}>
-          <SelectButton
-            rowIndex={0}
-            colIndex={0}
-            setCellProps={jest.fn()}
-            columnId="test"
-            isExpanded={false}
-            isDetails={false}
-            isExpandable={false}
-          />
-        </UnifiedDataTableContext.Provider>
+      renderWithTableContext(
+        <SelectButton
+          colIndex={0}
+          columnId="test"
+          isDetails={false}
+          isExpandable={false}
+          isExpanded={false}
+          rowIndex={0}
+          setCellProps={jest.fn()}
+        />,
+        contextMock
       );
 
-      const checkBox = findTestSubject(component, 'dscGridSelectDoc-i::1::');
-      checkBox.simulate('change');
+      await userEvent.click(screen.getByRole('checkbox', { name: "Select document '1'" }));
+
       expect(contextMock.selectedDocsState.toggleDocSelection).toHaveBeenCalledWith('i::1::');
     });
   });
 
   describe('DataTableDocumentToolbarBtn', () => {
-    test('it renders the button and its menu correctly', () => {
+    it('it renders the button and its menu correctly', async () => {
       const props = {
-        isPlainRecord: false,
-        isFilterActive: false,
-        rows: dataTableContextRowsMock,
-        selectedDocsState: buildSelectedDocsState(['i::1::', 'i::2::']),
-        setIsFilterActive: jest.fn(),
+        columns: ['test'],
         enableComparisonMode: true,
-        setIsCompareActive: jest.fn(),
         fieldFormats: servicesMock.fieldFormats,
+        isFilterActive: false,
+        isPlainRecord: false,
         pageIndex: 0,
         pageSize: 2,
+        rows: dataTableContextRowsMock,
+        selectedDocsState: buildSelectedDocsState(['i::1::', 'i::2::']),
+        setIsCompareActive: jest.fn(),
+        setIsFilterActive: jest.fn(),
         toastNotifications: servicesMock.toastNotifications,
-        columns: ['test'],
       };
       const contextMock = {
         ...dataTableContextMock,
         selectedDocsState: props.selectedDocsState,
       };
-      const component = mountWithIntl(
-        <UnifiedDataTableContext.Provider value={contextMock}>
-          <DataTableDocumentToolbarBtn {...props} />
-        </UnifiedDataTableContext.Provider>
-      );
-      const button = findTestSubject(component, 'unifiedDataTableSelectionBtn');
-      expect(button.length).toBe(1);
-      expect(button.text()).toBe('Selected2');
 
-      act(() => {
-        button.simulate('click');
-      });
+      renderWithTableContext(<DataTableDocumentToolbarBtn {...props} />, contextMock);
 
-      component.update();
+      const button = getSelectionToolbarButton(2);
+      expect(button).toBeVisible();
 
-      expect(findTestSubject(component, 'dscGridShowSelectedDocuments').length).toBe(1);
-      expect(findTestSubject(component, 'unifiedDataTableCompareSelectedDocuments').length).toBe(1);
-      expect(findTestSubject(component, 'dscGridSelectAllDocs').text()).toBe('Select all 5');
+      await userEvent.click(button);
 
-      act(() => {
-        findTestSubject(component, 'dscGridClearSelectedDocuments').simulate('click');
-      });
+      expect(screen.getByText('Show selected documents only')).toBeVisible();
+      expect(screen.getByText('Compare selected')).toBeVisible();
+      expect(screen.getByText('Select all 5')).toBeVisible();
+
+      await userEvent.click(screen.getByText('Clear selection'));
 
       expect(props.selectedDocsState.clearAllSelectedDocs).toHaveBeenCalled();
     });
 
-    test('filters custom bulk actions based on the available predicate', () => {
+    it('filters custom bulk actions based on the available predicate', async () => {
       const props = {
-        isPlainRecord: false,
-        isFilterActive: false,
-        rows: dataTableContextRowsMock,
-        selectedDocsState: buildSelectedDocsState(['i::1::', 'i::2::']),
-        setIsFilterActive: jest.fn(),
-        enableComparisonMode: false,
-        setIsCompareActive: jest.fn(),
-        fieldFormats: servicesMock.fieldFormats,
-        pageIndex: 0,
-        pageSize: 2,
-        toastNotifications: servicesMock.toastNotifications,
         columns: ['test'],
         customBulkActions: [
           {
@@ -282,193 +260,181 @@ describe('document selection', () => {
               selectedDocIds.length >= 2,
           },
         ],
-      };
-      const contextMock = {
-        ...dataTableContextMock,
-        selectedDocsState: props.selectedDocsState,
-      };
-      const component = mountWithIntl(
-        <UnifiedDataTableContext.Provider value={contextMock}>
-          <DataTableDocumentToolbarBtn {...props} />
-        </UnifiedDataTableContext.Provider>
-      );
-
-      act(() => {
-        findTestSubject(component, 'unifiedDataTableSelectionBtn').simulate('click');
-      });
-      component.update();
-
-      expect(findTestSubject(component, 'bulkActionAlways').exists()).toBe(true);
-      expect(findTestSubject(component, 'bulkActionNever').exists()).toBe(false);
-      expect(findTestSubject(component, 'bulkActionWhenTwo').exists()).toBe(true);
-    });
-
-    test('it should not render "Select all X" button if less than pageSize is selected', () => {
-      const props = {
-        isPlainRecord: false,
-        isFilterActive: false,
-        rows: dataTableContextRowsMock,
-        selectedDocsState: buildSelectedDocsState(['i::1::']),
-        setIsFilterActive: jest.fn(),
-        enableComparisonMode: true,
-        setIsCompareActive: jest.fn(),
+        enableComparisonMode: false,
         fieldFormats: servicesMock.fieldFormats,
+        isFilterActive: false,
+        isPlainRecord: false,
         pageIndex: 0,
         pageSize: 2,
-        toastNotifications: servicesMock.toastNotifications,
-        columns: ['test'],
-      };
-      const contextMock = {
-        ...dataTableContextMock,
-        selectedDocsState: props.selectedDocsState,
-      };
-      const component = mountWithIntl(
-        <UnifiedDataTableContext.Provider value={contextMock}>
-          <DataTableDocumentToolbarBtn {...props} />
-        </UnifiedDataTableContext.Provider>
-      );
-      expect(findTestSubject(component, 'unifiedDataTableSelectionBtn').text()).toBe('Selected1');
-
-      expect(findTestSubject(component, 'dscGridSelectAllDocs').exists()).toBe(false);
-    });
-
-    test('it should render "Select all X" button if all rows on the page are selected', () => {
-      const props = {
-        isPlainRecord: false,
-        isFilterActive: false,
         rows: dataTableContextRowsMock,
         selectedDocsState: buildSelectedDocsState(['i::1::', 'i::2::']),
-        setIsFilterActive: jest.fn(),
-        enableComparisonMode: true,
         setIsCompareActive: jest.fn(),
-        fieldFormats: servicesMock.fieldFormats,
-        pageIndex: 0,
-        pageSize: 2,
+        setIsFilterActive: jest.fn(),
         toastNotifications: servicesMock.toastNotifications,
-        columns: ['test'],
       };
       const contextMock = {
         ...dataTableContextMock,
         selectedDocsState: props.selectedDocsState,
       };
-      const component = mountWithIntl(
-        <UnifiedDataTableContext.Provider value={contextMock}>
-          <DataTableDocumentToolbarBtn {...props} />
-        </UnifiedDataTableContext.Provider>
-      );
-      expect(findTestSubject(component, 'unifiedDataTableSelectionBtn').text()).toBe('Selected2');
 
-      const button = findTestSubject(component, 'dscGridSelectAllDocs');
-      expect(button.exists()).toBe(true);
+      renderWithTableContext(<DataTableDocumentToolbarBtn {...props} />, contextMock);
+      await userEvent.click(getSelectionToolbarButton(2));
 
-      act(() => {
-        button.simulate('click');
-      });
+      expect(screen.getByTestId('unifiedDataTableSelectionMenu')).toBeInTheDocument();
+      expect(screen.getByText('Always')).toBeInTheDocument();
+      expect(screen.queryByText('Never')).not.toBeInTheDocument();
+      expect(screen.getByText('When two')).toBeInTheDocument();
+    });
+
+    it('it should not render "Select all X" button if less than pageSize is selected', () => {
+      const props = {
+        columns: ['test'],
+        enableComparisonMode: true,
+        fieldFormats: servicesMock.fieldFormats,
+        isFilterActive: false,
+        isPlainRecord: false,
+        pageIndex: 0,
+        pageSize: 2,
+        rows: dataTableContextRowsMock,
+        selectedDocsState: buildSelectedDocsState(['i::1::']),
+        setIsCompareActive: jest.fn(),
+        setIsFilterActive: jest.fn(),
+        toastNotifications: servicesMock.toastNotifications,
+      };
+      const contextMock = {
+        ...dataTableContextMock,
+        selectedDocsState: props.selectedDocsState,
+      };
+
+      renderWithTableContext(<DataTableDocumentToolbarBtn {...props} />, contextMock);
+
+      expect(getSelectionToolbarButton(1)).toBeVisible();
+      expect(screen.queryByText('Select all 1')).not.toBeInTheDocument();
+    });
+
+    it('it should render "Select all X" button if all rows on the page are selected', async () => {
+      const props = {
+        columns: ['test'],
+        enableComparisonMode: true,
+        fieldFormats: servicesMock.fieldFormats,
+        isFilterActive: false,
+        isPlainRecord: false,
+        pageIndex: 0,
+        pageSize: 2,
+        rows: dataTableContextRowsMock,
+        selectedDocsState: buildSelectedDocsState(['i::1::', 'i::2::']),
+        setIsCompareActive: jest.fn(),
+        setIsFilterActive: jest.fn(),
+        toastNotifications: servicesMock.toastNotifications,
+      };
+      const contextMock = {
+        ...dataTableContextMock,
+        selectedDocsState: props.selectedDocsState,
+      };
+
+      renderWithTableContext(<DataTableDocumentToolbarBtn {...props} />, contextMock);
+
+      expect(getSelectionToolbarButton(2)).toBeVisible();
+
+      const button = screen.getByText('Select all 5');
+      expect(button).toBeVisible();
+
+      await userEvent.click(button);
 
       expect(props.selectedDocsState.selectAllDocs).toHaveBeenCalled();
     });
 
-    test('it should render "Select all X" button even if on another page', () => {
+    it('it should render "Select all X" button even if on another page', () => {
       const props = {
-        isPlainRecord: false,
+        columns: ['test'],
+        enableComparisonMode: true,
+        fieldFormats: servicesMock.fieldFormats,
         isFilterActive: false,
+        isPlainRecord: false,
+        pageIndex: 1,
+        pageSize: 2,
         rows: dataTableContextRowsMock,
         selectedDocsState: buildSelectedDocsState(['i::1::', 'i::2::']),
-        setIsFilterActive: jest.fn(),
-        enableComparisonMode: true,
         setIsCompareActive: jest.fn(),
-        fieldFormats: servicesMock.fieldFormats,
-        pageIndex: 1,
-        pageSize: 2,
+        setIsFilterActive: jest.fn(),
         toastNotifications: servicesMock.toastNotifications,
-        columns: ['test'],
       };
       const contextMock = {
         ...dataTableContextMock,
         selectedDocsState: props.selectedDocsState,
       };
-      const component = mountWithIntl(
-        <UnifiedDataTableContext.Provider value={contextMock}>
-          <DataTableDocumentToolbarBtn {...props} />
-        </UnifiedDataTableContext.Provider>
-      );
-      expect(findTestSubject(component, 'unifiedDataTableSelectionBtn').text()).toBe('Selected2');
 
-      expect(findTestSubject(component, 'dscGridSelectAllDocs').exists()).toBe(true);
+      renderWithTableContext(<DataTableDocumentToolbarBtn {...props} />, contextMock);
+
+      expect(getSelectionToolbarButton(2)).toBeVisible();
+      expect(screen.getByText('Select all 5')).toBeVisible();
     });
 
-    test('it should not render "Select all X" button if all rows are selected', () => {
+    it('it should not render "Select all X" button if all rows are selected', () => {
       const props = {
-        isPlainRecord: false,
-        isFilterActive: false,
-        rows: dataTableContextRowsMock,
-        selectedDocsState: buildSelectedDocsState(dataTableContextRowsMock.map((row) => row.id)),
-        setIsFilterActive: jest.fn(),
+        columns: ['test'],
         enableComparisonMode: true,
-        setIsCompareActive: jest.fn(),
         fieldFormats: servicesMock.fieldFormats,
+        isFilterActive: false,
+        isPlainRecord: false,
         pageIndex: 1,
         pageSize: 2,
+        rows: dataTableContextRowsMock,
+        selectedDocsState: buildSelectedDocsState(dataTableContextRowsMock.map((row) => row.id)),
+        setIsCompareActive: jest.fn(),
+        setIsFilterActive: jest.fn(),
         toastNotifications: servicesMock.toastNotifications,
-        columns: ['test'],
       };
       const contextMock = {
         ...dataTableContextMock,
         selectedDocsState: props.selectedDocsState,
       };
-      const component = mountWithIntl(
-        <UnifiedDataTableContext.Provider value={contextMock}>
-          <DataTableDocumentToolbarBtn {...props} />
-        </UnifiedDataTableContext.Provider>
-      );
-      expect(findTestSubject(component, 'unifiedDataTableSelectionBtn').text()).toBe(
-        `Selected${dataTableContextRowsMock.length}`
-      );
 
-      expect(findTestSubject(component, 'dscGridSelectAllDocs').exists()).toBe(false);
+      renderWithTableContext(<DataTableDocumentToolbarBtn {...props} />, contextMock);
+
+      expect(getSelectionToolbarButton(dataTableContextRowsMock.length)).toBeVisible();
+      expect(screen.queryByText('Select all 5')).not.toBeInTheDocument();
     });
   });
 
   describe('DataTableCompareToolbarBtn', () => {
     const props = {
-      isPlainRecord: false,
-      isFilterActive: false,
-      rows: dataTableContextRowsMock,
-      selectedDocsState: buildSelectedDocsState([]),
-      setIsFilterActive: jest.fn(),
+      columns: ['test'],
       enableComparisonMode: true,
-      setIsCompareActive: jest.fn(),
       fieldFormats: servicesMock.fieldFormats,
+      isFilterActive: false,
+      isPlainRecord: false,
       pageIndex: 0,
       pageSize: 2,
+      rows: dataTableContextRowsMock,
+      selectedDocsState: buildSelectedDocsState([]),
+      setIsCompareActive: jest.fn(),
+      setIsFilterActive: jest.fn(),
       toastNotifications: servicesMock.toastNotifications,
-      columns: ['test'],
     };
 
     const renderCompareBtn = ({
       selectedDocIds = ['1', '2'],
       setIsCompareActive = jest.fn(),
     }: Partial<Parameters<typeof DataTableCompareToolbarBtn>[0]> = {}) => {
-      render(
-        <IntlProvider locale="en">
-          <UnifiedDataTableContext.Provider
-            value={{
-              ...dataTableContextMock,
-              selectedDocsState: props.selectedDocsState,
-            }}
-          >
-            <DataTableDocumentToolbarBtn
-              {...props}
-              selectedDocsState={buildSelectedDocsState(selectedDocIds)}
-              setIsCompareActive={setIsCompareActive}
-            />
-          </UnifiedDataTableContext.Provider>
-        </IntlProvider>
+      renderWithTableContext(
+        <DataTableDocumentToolbarBtn
+          {...props}
+          selectedDocsState={buildSelectedDocsState(selectedDocIds)}
+          setIsCompareActive={setIsCompareActive}
+        />,
+        {
+          ...dataTableContextMock,
+          selectedDocsState: props.selectedDocsState,
+        }
       );
+
       return {
         getButton: async () => {
-          const menuButton = await screen.findByTestId('unifiedDataTableSelectionBtn');
+          const menuButton = await screen.findByRole('button', { name: /Selected/ });
+
           await userEvent.click(menuButton);
+
           return screen.queryByRole('button', { name: /Compare/ });
         },
       };
@@ -476,27 +442,36 @@ describe('document selection', () => {
 
     it('should render the compare button', async () => {
       const { getButton } = renderCompareBtn();
+
       expect(await getButton()).toBeInTheDocument();
     });
 
     it('should call setIsCompareActive when the button is clicked', async () => {
       const setIsCompareActive = jest.fn();
+
       const { getButton } = renderCompareBtn({ setIsCompareActive });
+
       const button = await getButton();
       expect(button).toBeInTheDocument();
-      expect(button?.getAttribute('disabled')).toBeNull();
-      button?.click();
+      expect(button).not.toBeDisabled();
+
+      await userEvent.click(button!);
+
       expect(setIsCompareActive).toHaveBeenCalledWith(true);
     });
 
     it('should disable the button if limit is reached', async () => {
       const selectedDocIds = Array.from({ length: 500 }, (_, i) => i.toString());
       const setIsCompareActive = jest.fn();
+
       const { getButton } = renderCompareBtn({ selectedDocIds, setIsCompareActive });
+
       const button = await getButton();
       expect(button).toBeInTheDocument();
-      expect(button?.getAttribute('disabled')).toBe('');
-      button?.click();
+      expect(button).toBeDisabled();
+
+      await userEvent.click(button!);
+
       expect(setIsCompareActive).not.toHaveBeenCalled();
     });
   });

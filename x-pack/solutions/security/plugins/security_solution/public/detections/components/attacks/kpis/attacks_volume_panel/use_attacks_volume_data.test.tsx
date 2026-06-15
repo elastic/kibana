@@ -8,11 +8,14 @@
 import { renderHook } from '@testing-library/react';
 import dateMath from '@elastic/datemath';
 import type { Moment } from 'moment';
+import type { Filter, Query } from '@kbn/es-query';
 import { useAttacksVolumeData } from './use_attacks_volume_data';
 import { useAlertsAggregation } from '../common/use_alerts_aggregation';
 import { useAttackTimestamps } from './use_attack_timestamps';
 import { parseAttacksVolumeData } from './helpers';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
+import { buildAttacksOnlyFilter } from '../../table/filtering_configs';
+import { ALERTS_QUERY_NAMES } from '../../../../containers/detection_engine/alerts/constants';
 
 jest.mock('../common/use_alerts_aggregation', () => ({
   useAlertsAggregation: jest.fn(),
@@ -50,6 +53,31 @@ describe('useAttacksVolumeData', () => {
       if (val === 'now-15m') return { valueOf: () => 1000 } as unknown as Moment;
       if (val === 'now') return { valueOf: () => 2000 } as unknown as Moment;
       return undefined;
+    });
+  });
+
+  it('fetches aggregation data with correct parameters', () => {
+    const mockFilters = [{ meta: {}, query: {} }] as Filter[];
+    const mockQuery = { query: 'test' } as unknown as Query;
+
+    (useAlertsAggregation as jest.Mock).mockReturnValue({
+      data: undefined,
+      loading: false,
+      refetch: jest.fn(),
+    });
+    (useAttackTimestamps as jest.Mock).mockReturnValue({
+      attackStartTimes: {},
+      isLoading: false,
+      refetch: jest.fn(),
+    });
+
+    renderHook(() => useAttacksVolumeData({ filters: mockFilters, query: mockQuery }));
+
+    expect(useAlertsAggregation).toHaveBeenCalledWith({
+      filters: [...mockFilters, ...buildAttacksOnlyFilter()],
+      query: mockQuery,
+      aggs: { some: 'agg' },
+      queryName: ALERTS_QUERY_NAMES.COUNT_ATTACKS_IDS,
     });
   });
 
