@@ -69,8 +69,7 @@ const columns: Array<EuiBasicTableColumn<SigEvent>> = [
     render: (timestamp: string) => formatTimestamp(timestamp),
   },
   {
-    // TODO: rename field binding to 'status' once the data stream field is renamed
-    field: 'verdict',
+    field: 'status',
     name: i18n.translate('xpack.streams.sigEventsTab.statusColumn', {
       defaultMessage: 'Status',
     }),
