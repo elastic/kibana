@@ -9,7 +9,7 @@ import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { APP_ID } from '../../../../../common/constants';
+import { APP_ID, API_VERSIONS } from '../../../../../common/constants';
 import { RISK_SCORE_HISTORY_URL } from '../../../../../common/entity_analytics/risk_score/constants';
 import type { RiskScoreHistoryResponse } from '../../../../../common/api/entity_analytics';
 import { GetRiskScoreHistoryRequestQuery } from '../../../../../common/api/entity_analytics';
@@ -35,7 +35,7 @@ export const riskScoreHistoryRoute = (
     })
     .addVersion(
       {
-        version: '1',
+        version: API_VERSIONS.public.v1,
         validate: {
           request: {
             query: buildRouteValidationWithZod(GetRiskScoreHistoryRequestQuery),
