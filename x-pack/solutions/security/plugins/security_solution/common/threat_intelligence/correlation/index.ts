@@ -10,6 +10,7 @@ export {
   correlationFindingsLeadSchema,
   correlationFindingsNoMatchSchema,
   correlationFindingsSynthesisSchema,
+  costTraceSchema,
   clusterDeepSynthesisSchema,
 } from './schemas';
 
@@ -20,6 +21,8 @@ export type {
   CorrelationFindingsSynthesis,
   CandidateMetaEntry,
   ClusterDeepSynthesis,
+  CostTrace,
+  StageCostTrace,
   EvidenceItem,
   EvidenceWeight,
 } from './schemas';

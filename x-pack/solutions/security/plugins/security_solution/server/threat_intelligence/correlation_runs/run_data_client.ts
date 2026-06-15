@@ -29,6 +29,7 @@ export interface RunUpdate {
   readonly stage?: CorrelationRunStage;
   readonly error?: string;
   readonly result?: CorrelationRunResult;
+  readonly title?: string;
   readonly updatedAt: string;
 }
 
@@ -65,6 +66,7 @@ interface EsRunDoc {
   input_type: 'report_id' | 'raw_text';
   report_id?: string;
   input_summary?: string;
+  title?: string;
   depth: CorrelationRun['depth'];
   status: CorrelationRunStatus;
   stage?: CorrelationRunStage;
@@ -81,6 +83,7 @@ const runToEsDoc = (run: CorrelationRun): EsRunDoc => ({
   input_type: run.input_type,
   report_id: run.report_id,
   input_summary: run.input_summary,
+  title: run.title,
   depth: run.depth,
   status: run.status,
   stage: run.stage,
@@ -97,6 +100,7 @@ const esDocToRun = (doc: EsRunDoc): CorrelationRun => ({
   input_type: doc.input_type,
   report_id: doc.report_id,
   input_summary: doc.input_summary,
+  title: doc.title,
   depth: doc.depth,
   status: doc.status,
   stage: doc.stage,
@@ -148,6 +152,7 @@ export const createRunDataClient = ({
     if (updates.stage !== undefined) doc.stage = updates.stage;
     if (updates.error !== undefined) doc.error = updates.error;
     if (updates.result !== undefined) doc.result = updates.result;
+    if (updates.title !== undefined) doc.title = updates.title;
 
     try {
       await esClient.update({

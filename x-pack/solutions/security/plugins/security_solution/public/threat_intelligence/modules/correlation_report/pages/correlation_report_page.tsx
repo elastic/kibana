@@ -50,7 +50,10 @@ import type {
   KnnDepthResult,
   TriageDepthResult,
 } from '../../../../../common/threat_intelligence/correlation_runs';
-import type { CorrelationFindingsLead } from '../../../../../common/threat_intelligence/correlation';
+import type {
+  CorrelationFindingsLead,
+  CostTrace,
+} from '../../../../../common/threat_intelligence/correlation';
 import { i18nText } from '../components/translations';
 
 // ---------------------------------------------------------------------------
@@ -209,27 +212,37 @@ const KnnResultView: FC<{ result: KnnDepthResult }> = ({ result }) => {
         field: 'overlap',
         name: i18nText.knnColOverlap(),
         width: '80px',
-        render: (value: MergedCandidate['overlap']) => value.toFixed(2),
+        render: (value: MergedCandidate['overlap']) => (value ?? 0).toFixed(2),
       },
       {
         field: 'score',
         name: i18nText.knnColScore(),
         width: '80px',
-        render: (value: MergedCandidate['score']) => value.toFixed(3),
+        render: (value: MergedCandidate['score']) => (value ?? 0).toFixed(3),
       },
       {
         name: i18nText.knnColVertexScores(),
-        render: (_: unknown, item: MergedCandidate) => (
-          <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-            {Object.entries(item.vertex_scores).map(([k, v]) => (
-              <EuiFlexItem key={k} grow={false}>
-                <EuiBadge color="hollow">
-                  {`${k.slice(0, 3).toUpperCase()}: ${v.toFixed(2)}`}
-                </EuiBadge>
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
-        ),
+        render: (_: unknown, item: MergedCandidate) => {
+          const entries = Object.entries(item.vertex_scores ?? {});
+          if (entries.length === 0) {
+            return (
+              <EuiText size="xs" color="subdued">
+                {i18nText.knnAnchorOnly()}
+              </EuiText>
+            );
+          }
+          return (
+            <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+              {entries.map(([k, v]) => (
+                <EuiFlexItem key={k} grow={false}>
+                  <EuiBadge color="hollow">
+                    {`${k.slice(0, 3).toUpperCase()}: ${v.toFixed(2)}`}
+                  </EuiBadge>
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGroup>
+          );
+        },
       },
     ],
     []
@@ -385,37 +398,151 @@ const TriageResultView: FC<{ result: TriageDepthResult }> = ({ result }) => {
 };
 
 // ---------------------------------------------------------------------------
+// CostTracePanel — compact per-stage token + cost breakdown
+// ---------------------------------------------------------------------------
+
+const formatCost = (usd: number): string => {
+  if (usd === 0) return '$0.00';
+  if (usd < 0.01) return `$${usd.toFixed(4)}`;
+  return `$${usd.toFixed(2)}`;
+};
+
+const CostTracePanel: FC<{ trace: CostTrace }> = ({ trace }) => {
+  if (trace.total_cost_usd === 0 && trace.stages.length === 0) return null;
+
+  const columns: Array<EuiBasicTableColumn<CostTrace['stages'][number]>> = [
+    {
+      field: 'stage',
+      name: i18nText.costTraceStageCol(),
+      truncateText: true,
+    },
+    {
+      field: 'model_name',
+      name: i18nText.costTraceModelCol(),
+      truncateText: true,
+      render: (v: string | undefined) => v ?? '—',
+    },
+    {
+      name: i18nText.costTraceTokensCol(),
+      render: (_: unknown, row: CostTrace['stages'][number]) =>
+        `${row.input_tokens.toLocaleString()} / ${row.output_tokens.toLocaleString()}`,
+    },
+    {
+      field: 'cost_usd',
+      name: i18nText.costTraceCostCol(),
+      width: '100px',
+      render: (v: number) => formatCost(v),
+    },
+  ];
+
+  return (
+    <EuiPanel hasBorder paddingSize="m" data-test-subj="correlationCostTrace">
+      <EuiFlexGroup
+        gutterSize="s"
+        alignItems="center"
+        justifyContent="spaceBetween"
+        responsive={false}
+      >
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xxs">
+            <h3>{i18nText.costTraceSectionTitle()}</h3>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued">
+            {`${i18nText.costTraceTotal()}: ${trace.total_input_tokens.toLocaleString()} / ${trace.total_output_tokens.toLocaleString()} tokens · ${formatCost(
+              trace.total_cost_usd
+            )}`}
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
+      <EuiBasicTable<CostTrace['stages'][number]>
+        items={trace.stages}
+        columns={columns}
+        compressed
+      />
+    </EuiPanel>
+  );
+};
+
+// ---------------------------------------------------------------------------
 // ResultDispatch — routes to the correct result view by depth
 // ---------------------------------------------------------------------------
 
 const ResultDispatch: FC<{
   run: CorrelationRun;
-}> = ({ run }) => {
+  onTitleSave: (title: string) => Promise<void>;
+}> = ({ run, onTitleSave }) => {
   const { result } = run;
   if (result === undefined) return null;
 
+  const runTitle = run.title ?? run.input_summary ?? run.runId;
+
   if (result.depth === 'full') {
     const fullResult = result as FullDepthResult;
+    const trace = fullResult.findings.trace;
     return (
-      <CorrelationReport
-        findings={fullResult.findings}
-        candidateMeta={fullResult.findings.candidate_meta}
-        title={run.input_summary ?? run.runId}
-        runId={run.runId}
-      />
+      <>
+        <CorrelationReport
+          findings={fullResult.findings}
+          candidateMeta={fullResult.findings.candidate_meta}
+          title={runTitle}
+          runId={run.runId}
+          onTitleSave={onTitleSave}
+        />
+        {trace !== undefined ? (
+          <>
+            <EuiSpacer size="m" />
+            <CostTracePanel trace={trace} />
+          </>
+        ) : null}
+      </>
     );
   }
 
+  const traceForDepth = (result as ExtractDepthResult | KnnDepthResult | TriageDepthResult).trace;
+
   if (result.depth === 'extract') {
-    return <ExtractResultView result={result as ExtractDepthResult} />;
+    return (
+      <>
+        <ExtractResultView result={result as ExtractDepthResult} />
+        {traceForDepth !== undefined ? (
+          <>
+            <EuiSpacer size="m" />
+            <CostTracePanel trace={traceForDepth} />
+          </>
+        ) : null}
+      </>
+    );
   }
 
   if (result.depth === 'knn') {
-    return <KnnResultView result={result as KnnDepthResult} />;
+    return (
+      <>
+        <KnnResultView result={result as KnnDepthResult} />
+        {traceForDepth !== undefined ? (
+          <>
+            <EuiSpacer size="m" />
+            <CostTracePanel trace={traceForDepth} />
+          </>
+        ) : null}
+      </>
+    );
   }
 
   if (result.depth === 'triage') {
-    return <TriageResultView result={result as TriageDepthResult} />;
+    return (
+      <>
+        <TriageResultView result={result as TriageDepthResult} />
+        {traceForDepth !== undefined ? (
+          <>
+            <EuiSpacer size="m" />
+            <CostTracePanel trace={traceForDepth} />
+          </>
+        ) : null}
+      </>
+    );
   }
 
   return null;
@@ -467,7 +594,9 @@ const RecentsPanel: FC<{
                   wrap
                 >
                   <EuiFlexItem>
-                    <EuiText size="xs">{run.input_summary ?? run.runId.slice(0, 16)}</EuiText>
+                    <EuiText size="xs">
+                      {run.title ?? run.input_summary ?? run.runId.slice(0, 16)}
+                    </EuiText>
                     <EuiText size="xs" color="subdued">
                       {new Date(run.createdAt).toLocaleString()}
                     </EuiText>
@@ -509,8 +638,17 @@ export const CorrelationReportPage: FC = () => {
 
   const lastInputRef = useRef<StartRunInput | null>(null);
 
-  const { activeRun, polling, error, recents, recentsLoading, startRun, loadRun, refreshRecents } =
-    useCorrelationRuns();
+  const {
+    activeRun,
+    polling,
+    error,
+    recents,
+    recentsLoading,
+    startRun,
+    loadRun,
+    refreshRecents,
+    updateRunTitle,
+  } = useCorrelationRuns();
 
   const inputType = inputTypeOptionId === INPUT_TYPE_OPTION_REPORT_ID ? 'report_id' : 'raw_text';
 
@@ -756,7 +894,10 @@ export const CorrelationReportPage: FC = () => {
 
         {/* ---- Result dispatch ---- */}
         {!polling && !error && activeRun?.status === 'succeeded' ? (
-          <ResultDispatch run={activeRun} />
+          <ResultDispatch
+            run={activeRun}
+            onTitleSave={(title) => updateRunTitle(activeRun.runId, title)}
+          />
         ) : null}
 
         <EuiSpacer size="xl" />

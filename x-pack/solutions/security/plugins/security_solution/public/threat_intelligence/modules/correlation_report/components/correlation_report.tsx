@@ -11,6 +11,7 @@ import {
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiInlineEditTitle,
   EuiLink,
   EuiMarkdownFormat,
   EuiPanel,
@@ -61,6 +62,7 @@ export interface CorrelationReportProps {
   candidateMeta?: Record<string, { title?: string; vendor?: string; url?: string }>;
   title?: string;
   runId?: string;
+  onTitleSave?: (title: string) => Promise<void>;
 }
 
 // ---------------------------------------------------------------------------
@@ -782,9 +784,12 @@ export const CorrelationReport: React.FC<CorrelationReportProps> = ({
   candidateMeta,
   title,
   runId,
+  onTitleSave,
 }) => {
   const { euiTheme } = useEuiTheme();
   const { colors } = euiTheme;
+
+  const [localTitle, setLocalTitle] = useState(title ?? i18nText.defaultTitle());
 
   const caseSignalColor = correlationSignalColor(findings.synthesis.correlation_signal, colors);
   const caseSignalLabel = correlationSignalLabel(findings.synthesis.correlation_signal);
@@ -794,9 +799,23 @@ export const CorrelationReport: React.FC<CorrelationReportProps> = ({
       {/* Header */}
       <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap>
         <EuiFlexItem>
-          <EuiTitle size="m">
-            <h1>{title ?? i18nText.defaultTitle()}</h1>
-          </EuiTitle>
+          {onTitleSave !== undefined ? (
+            <EuiInlineEditTitle
+              heading="h1"
+              size="m"
+              inputAriaLabel={i18nText.editTitleAriaLabel()}
+              value={localTitle}
+              onChange={(e) => setLocalTitle(e.target.value)}
+              onConfirm={() => {
+                void onTitleSave(localTitle);
+              }}
+              onCancel={(prev) => setLocalTitle(prev)}
+            />
+          ) : (
+            <EuiTitle size="m">
+              <h1>{localTitle}</h1>
+            </EuiTitle>
+          )}
         </EuiFlexItem>
         {runId ? (
           <EuiFlexItem grow={false}>

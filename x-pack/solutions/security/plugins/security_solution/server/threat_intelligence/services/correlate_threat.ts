@@ -9,7 +9,10 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import { CostTraceBuilder } from '../routes/lib/cost_tracker';
 import { THREAT_REPORTS_INDEX_PATTERN } from '../../../common/threat_intelligence/hub';
-import type { CorrelationFindings } from '../../../common/threat_intelligence/correlation/schemas';
+import type {
+  CorrelationFindings,
+  CostTrace,
+} from '../../../common/threat_intelligence/correlation/schemas';
 import type {
   CorrelationDepth,
   CorrelationRunStage,
@@ -74,6 +77,7 @@ export interface CorrelateThreatParams {
 export interface CorrelateThreatExtractResult {
   depth: 'extract';
   diamond: QueryDiamond;
+  trace?: CostTrace;
 }
 
 export interface CorrelateThreatKnnResult {
@@ -81,6 +85,7 @@ export interface CorrelateThreatKnnResult {
   anchor_hits: SearchByAnchorsResult;
   diamond_hits: SearchByDiamondResult;
   merged: TriageCandidateInput[];
+  trace?: CostTrace;
 }
 
 export interface CorrelateThreatTriageResult {
@@ -89,6 +94,7 @@ export interface CorrelateThreatTriageResult {
   groups: TriageGroup[];
   candidates_fed: number;
   fallback_used: boolean;
+  trace?: CostTrace;
 }
 
 export interface CorrelateThreatFullResult {
@@ -386,8 +392,22 @@ export const correlateThreat = async ({
   let diamondResults: SearchByDiamondResult;
   let queryDiamond: QueryDiamond;
 
+  // Notify BEFORE diamond resolution so the label shows during the work, not after.
+  await notifyStage('extract');
+
   if (input.mode === 'report_id') {
-    const [anchors, diamond, qd] = await Promise.all([
+    // Fetch the stored diamond first, then do parallel kNN retrieval.
+    // Splitting avoids conflating extract+search into one stage from the UI's perspective.
+    queryDiamond = (await fetchQueryDiamond(esClient, input.report_id)) ?? {
+      adversary: { signal: 'NONE', summary: '' },
+      capability: { signal: 'NONE', summary: '' },
+      infrastructure: { signal: 'NONE', summary: '' },
+      victim: { signal: 'NONE', summary: '' },
+    };
+
+    await notifyStage('search');
+
+    [anchorResults, diamondResults] = await Promise.all([
       searchByAnchors(esClient, logger, spaceId, {
         source_report_id: input.report_id,
         size: RETRIEVAL_POOL_SIZE,
@@ -396,16 +416,7 @@ export const correlateThreat = async ({
         source_report_id: input.report_id,
         size: RETRIEVAL_POOL_SIZE,
       }),
-      fetchQueryDiamond(esClient, input.report_id),
     ]);
-    anchorResults = anchors;
-    diamondResults = diamond;
-    queryDiamond = qd ?? {
-      adversary: { signal: 'NONE', summary: '' },
-      capability: { signal: 'NONE', summary: '' },
-      infrastructure: { signal: 'NONE', summary: '' },
-      victim: { signal: 'NONE', summary: '' },
-    };
   } else {
     if (!extractionModel) {
       throw new Error('correlateThreat: raw_text mode requires a resolved extraction ScopedModel');
@@ -424,6 +435,8 @@ export const correlateThreat = async ({
       ioc_set_hash: extractedIocs.ioc_set_hash,
     };
 
+    await notifyStage('search');
+
     [anchorResults, diamondResults] = await Promise.all([
       searchByAnchors(esClient, logger, spaceId, { anchors, size: RETRIEVAL_POOL_SIZE }),
       searchByDiamond(esClient, logger, spaceId, {
@@ -433,9 +446,8 @@ export const correlateThreat = async ({
     ]);
   }
 
-  await notifyStage('extract');
   if (depth === 'extract') {
-    return { depth: 'extract', diamond: queryDiamond };
+    return { depth: 'extract', diamond: queryDiamond, trace: traceBuilder.build() };
   }
 
   logger.debug(
@@ -445,13 +457,20 @@ export const correlateThreat = async ({
 
   const merged = buildMergedCandidates(anchorResults, diamondResults);
 
-  await notifyStage('search');
   if (depth === 'knn') {
-    return { depth: 'knn', anchor_hits: anchorResults, diamond_hits: diamondResults, merged };
+    return {
+      depth: 'knn',
+      anchor_hits: anchorResults,
+      diamond_hits: diamondResults,
+      merged,
+      trace: traceBuilder.build(),
+    };
   }
 
   // §3 Keyword gap-fill — extend pool with candidates covering named entities
   // not represented in the diamond/anchor retrieval results.
+  await notifyStage('gap_fill');
+
   const caseContext =
     input.mode === 'raw_text' ? input.text : buildCaseContextFromDiamond(queryDiamond);
 
@@ -476,10 +495,10 @@ export const correlateThreat = async ({
       `pool=${extended.length}`
   );
 
-  await notifyStage('gap_fill');
-
   // §4 Dedup-collapse — collapse exact ioc_set_hash duplicates and bilingual
   // sibling URL variants before spending the triage LLM.
+  await notifyStage('dedup');
+
   const preCollapseCount = extended.length;
   const collapsed = await collapseCandidates(esClient, extended);
   const collapsedCount = preCollapseCount - collapsed.length;
@@ -488,10 +507,10 @@ export const correlateThreat = async ({
     `[ti:correlate] collapse removed ${collapsedCount} candidate(s), pool=${collapsed.length}`
   );
 
-  await notifyStage('dedup');
-
   // §5 Triage — CollapsedCandidate extends TriageCandidateInput; triage
   // ignores the extra collapsed_members field.
+  await notifyStage('triage');
+
   const triageResult = await triageDiamondCandidates({
     model: triageModel,
     logger,
@@ -503,7 +522,6 @@ export const correlateThreat = async ({
     traceBuilder,
   });
 
-  await notifyStage('triage');
   if (depth === 'triage') {
     return {
       depth: 'triage',
@@ -511,6 +529,7 @@ export const correlateThreat = async ({
       groups: triageResult.groups,
       candidates_fed: triageResult.candidates_fed,
       fallback_used: triageResult.fallback_used,
+      trace: traceBuilder.build(),
     };
   }
 
@@ -518,6 +537,8 @@ export const correlateThreat = async ({
   // For report_id mode we attempt to fetch the full source body text so the
   // synthesis model receives the same quality input as raw_text mode.
   // Falls back to the diamond-vertex proxy if body_text is absent.
+  await notifyStage('synthesize');
+
   const caseText =
     input.mode === 'raw_text'
       ? input.text
@@ -533,8 +554,6 @@ export const correlateThreat = async ({
     caseText,
     traceBuilder,
   });
-
-  await notifyStage('synthesize');
 
   const caseVertexSignal = {
     adversary: mapDiamondSignal(queryDiamond.adversary.signal),

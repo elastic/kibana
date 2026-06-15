@@ -8,10 +8,12 @@
 import { registerCreateCorrelationRunRoute } from './create_run';
 import { registerGetCorrelationRunRoute } from './get_run';
 import { registerListCorrelationRunsRoute } from './list_runs';
+import { registerUpdateCorrelationRunRoute } from './update_run';
 import type { RouteRegistrationDeps } from '../../routes';
 
 export const registerCorrelationRunsRoutes = (deps: RouteRegistrationDeps): void => {
   registerCreateCorrelationRunRoute(deps);
   registerGetCorrelationRunRoute(deps);
   registerListCorrelationRunsRoute(deps);
+  registerUpdateCorrelationRunRoute(deps);
 };

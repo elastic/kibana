@@ -82,6 +82,15 @@ const synthesisLlmNoMatchSchema = z.object({
 });
 
 const synthesisLlmSynthesisSchema = z.object({
+  case_title: z
+    .string()
+    .describe(
+      '3–8 words. A specific case label grounded in source evidence — not a lead title, ' +
+        'not a restatement of the analyst query, and not an actor identity claim. ' +
+        'Good: "Credential theft via spearphish", "Cobalt Strike beacon cluster", ' +
+        '"Supply-chain compromise with DLL sideloading". ' +
+        'Bad: "Correlation Analysis" (generic), "APT28 is Fancy Bear" (identity claim).'
+    ),
   bluf: z.string(),
   correlation_signal: z.enum(['high', 'moderate', 'low', 'none']),
   reasoning: z.string(),
@@ -229,6 +238,7 @@ OUTPUT FORMAT
     }
   ],
   "synthesis": {
+    "case_title": "<3–8 word case label grounded in the evidence — not generic, not an actor claim>",
     "bluf": "<case-level one-liner stating the BASIS of correlation — what makes this a match, e.g. the end-to-end attack shape, not a single artifact>",
     "correlation_signal": "high | moderate | low | none",
     "reasoning": "<overall correlation picture — state signal, name matched vertices with per-vertex strength, assess indicator overlap, note tracking designations, count inferential hops>",
@@ -463,6 +473,7 @@ const mapLlmOutputToFindings = (
     leads,
     no_match: noMatch,
     synthesis: {
+      case_title: llmOutput.synthesis.case_title ?? undefined,
       bluf: llmOutput.synthesis.bluf,
       correlation_signal: llmOutput.synthesis.correlation_signal,
       reasoning: llmOutput.synthesis.reasoning,

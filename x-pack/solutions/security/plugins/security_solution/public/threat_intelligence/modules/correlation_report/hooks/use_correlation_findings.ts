@@ -32,6 +32,7 @@ export interface UseCorrelationRunsState {
   readonly loadRun: (runId: string) => Promise<void>;
   readonly refreshRecents: () => Promise<void>;
   readonly clearActive: () => void;
+  readonly updateRunTitle: (runId: string, title: string) => Promise<void>;
 }
 
 const extractErrorMessage = (err: unknown): string =>
@@ -159,6 +160,18 @@ export const useCorrelationRuns = (): UseCorrelationRunsState => {
     setPolling(false);
   }, [clearTimer]);
 
+  const updateRunTitle = useCallback(
+    async (runId: string, title: string): Promise<void> => {
+      await http.patch<{ runId: string; title: string }>(`${CORRELATION_RUNS_API_PATH}/${runId}`, {
+        version: '2023-10-31',
+        body: JSON.stringify({ title }),
+      });
+      setActiveRun((prev) => (prev?.runId === runId ? { ...prev, title } : prev));
+      setRecents((prev) => prev.map((r) => (r.runId === runId ? { ...r, title } : r)));
+    },
+    [http]
+  );
+
   useEffect(() => {
     void refreshRecents();
   }, [refreshRecents]);
@@ -176,5 +189,6 @@ export const useCorrelationRuns = (): UseCorrelationRunsState => {
     loadRun,
     refreshRecents,
     clearActive,
+    updateRunTitle,
   };
 };

@@ -256,6 +256,7 @@ export const registerCreateCorrelationRunRoute = ({
             input_type: inputType,
             report_id: inputType === 'report_id' ? reportId : undefined,
             input_summary: inputSummary,
+            title: inputSummary,
             depth,
             status: 'pending',
           });
@@ -294,10 +295,16 @@ export const registerCreateCorrelationRunRoute = ({
               },
             });
 
+            const caseTitleUpdate =
+              depthResult.depth === 'full' && depthResult.findings.synthesis.case_title
+                ? depthResult.findings.synthesis.case_title
+                : undefined;
+
             await runDataClient.updateRun(runId, {
               status: 'succeeded',
               stage: 'done',
               result: toRunResult(depthResult),
+              ...(caseTitleUpdate !== undefined ? { title: caseTitleUpdate } : {}),
               updatedAt: new Date().toISOString(),
             });
 

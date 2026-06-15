@@ -163,7 +163,8 @@ export const i18nText = {
   stageSearch: () =>
     i18n.translate(`${ns}.stageSearch`, { defaultMessage: 'Retrieving candidates…' }),
   stageGapFill: () => i18n.translate(`${ns}.stageGapFill`, { defaultMessage: 'Gap-filling…' }),
-  stageDedup: () => i18n.translate(`${ns}.stageDedup`, { defaultMessage: 'De-duplicating…' }),
+  stageDedup: () =>
+    i18n.translate(`${ns}.stageDedup`, { defaultMessage: 'Merging duplicate sources…' }),
   stageTriage: () => i18n.translate(`${ns}.stageTriage`, { defaultMessage: 'Triaging…' }),
   stageSynthesize: () =>
     i18n.translate(`${ns}.stageSynthesize`, { defaultMessage: 'Synthesizing…' }),
@@ -230,4 +231,22 @@ export const i18nText = {
   triageNo: () => i18n.translate(`${ns}.triageNo`, { defaultMessage: 'No' }),
   triageNoPicks: () =>
     i18n.translate(`${ns}.triageNoPicks`, { defaultMessage: 'No candidates survived triage.' }),
+
+  // kNN — anchor-only row placeholder
+  knnAnchorOnly: () => i18n.translate(`${ns}.knnAnchorOnly`, { defaultMessage: 'anchor-only' }),
+
+  // Cost trace
+  costTraceSectionTitle: () =>
+    i18n.translate(`${ns}.costTraceSectionTitle`, { defaultMessage: 'Cost trace' }),
+  costTraceStageCol: () => i18n.translate(`${ns}.costTraceStageCol`, { defaultMessage: 'Stage' }),
+  costTraceModelCol: () => i18n.translate(`${ns}.costTraceModelCol`, { defaultMessage: 'Model' }),
+  costTraceTokensCol: () =>
+    i18n.translate(`${ns}.costTraceTokensCol`, { defaultMessage: 'Tokens (in/out)' }),
+  costTraceCostCol: () =>
+    i18n.translate(`${ns}.costTraceCostCol`, { defaultMessage: 'Cost (USD)' }),
+  costTraceTotal: () => i18n.translate(`${ns}.costTraceTotal`, { defaultMessage: 'Total' }),
+
+  // Editable title
+  editTitleAriaLabel: () =>
+    i18n.translate(`${ns}.editTitleAriaLabel`, { defaultMessage: 'Edit run title' }),
 };

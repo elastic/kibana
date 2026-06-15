@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { correlationFindingsSchema } from '../correlation/schemas';
+import { correlationFindingsSchema, costTraceSchema } from '../correlation/schemas';
 
 // ---------------------------------------------------------------------------
 // Depth / status / stage enums
@@ -50,6 +50,7 @@ export const extractDepthResultSchema = z.object({
     infrastructure: diamondVertexResultSchema,
     victim: diamondVertexResultSchema,
   }),
+  trace: costTraceSchema.optional(),
 });
 export type ExtractDepthResult = z.infer<typeof extractDepthResultSchema>;
 
@@ -81,6 +82,7 @@ export const knnDepthResultSchema = z.object({
   anchor_hits: z.array(anchorHitSchema),
   diamond_hits: z.array(diamondHitSchema),
   merged: z.array(mergedCandidateSchema),
+  trace: costTraceSchema.optional(),
 });
 export type KnnDepthResult = z.infer<typeof knnDepthResultSchema>;
 
@@ -107,6 +109,7 @@ export const triageDepthResultSchema = z.object({
   groups: z.array(triageGroupSchema),
   candidates_fed: z.number().int(),
   fallback_used: z.boolean(),
+  trace: costTraceSchema.optional(),
 });
 export type TriageDepthResult = z.infer<typeof triageDepthResultSchema>;
 
@@ -139,6 +142,11 @@ export const correlationRunSchema = z.object({
   report_id: z.string().optional(),
   /** First 200 chars of raw_text, or the report_id — used as display label in the list. */
   input_summary: z.string().optional(),
+  /**
+   * User-visible title: defaults to input_summary on create, set to the
+   * LLM-generated case_title when a full run succeeds, user-editable thereafter.
+   */
+  title: z.string().optional(),
   depth: correlationDepthSchema,
   status: correlationRunStatusSchema,
   stage: correlationRunStageSchema.optional(),
@@ -173,6 +181,7 @@ export const correlationRunSummarySchema = correlationRunSchema.pick({
   runId: true,
   input_type: true,
   input_summary: true,
+  title: true,
   depth: true,
   status: true,
   stage: true,

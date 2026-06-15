@@ -113,6 +113,8 @@ export const correlationFindingsSynthesisSchema = z.object({
       note: z.string().optional(),
     })
     .optional(),
+  /** 3–8 word case label emitted by the synthesis LLM (e.g. "Lazarus Group supply-chain intrusion"). */
+  case_title: z.string().optional(),
 });
 
 export const candidateMetaEntrySchema = z.object({
