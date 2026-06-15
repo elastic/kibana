@@ -9,7 +9,7 @@
 
 import React, { useState, useCallback, useRef, useMemo, useEffect } from 'react';
 import type { DateRange } from 'react-day-picker';
-import { EuiButton, EuiCheckbox, EuiToolTip, useGeneratedHtmlId } from '@elastic/eui';
+import { EuiButton, EuiCheckbox, useGeneratedHtmlId } from '@elastic/eui';
 
 import { Calendar } from '../calendar';
 import { DATE_TYPE_ABSOLUTE } from '../constants';
@@ -22,7 +22,7 @@ import {
 } from '../date_range_picker_panel_ui';
 import { calendarPanelTexts, mainPanelTexts } from '../translations';
 import { timeRangeToDisplayText } from '../format';
-import { getEndDate, getStartDate, formatDateRange, formatAbsoluteDate } from '../utils';
+import { getEndDate, getStartDate, formatDateRange } from '../utils';
 import { useDateRangePickerContext } from '../date_range_picker_context';
 
 /** Calendar-based date selection panel. */
@@ -78,9 +78,7 @@ export function CalendarPanel() {
   }, []);
 
   const formatRangeText = useCallback(
-    (from: Date, to?: Date): string => {
-      if (!to) return formatAbsoluteDate(getStartDate(from), timePrecision);
-
+    (from: Date, to: Date): string => {
       const { start, end } = getOrderedDates(from, to);
       return formatDateRange(start, end, timePrecision);
     },
@@ -89,13 +87,18 @@ export function CalendarPanel() {
 
   const handleRangeChange = useCallback(
     (newRange: DateRange | undefined) => {
+      // A single click already yields a full-day range (00:00:00 → 23:59:59), so
+      // Apply is enabled immediately; clicking a second day extends it into a
+      // multi-day range. react-day-picker stays mid-selection (see `calendarRange`),
+      // which is what lets the second click extend rather than reset.
+
       // Complete range visible — user is starting a new selection
       if (!pendingFrom && calendarRange?.from && calendarRange?.to) {
         const fromChanged = newRange?.from?.getTime() !== calendarRange.from.getTime();
         const clickedDate = fromChanged ? newRange?.from : newRange?.to;
 
         setPendingFrom(clickedDate ?? null);
-        if (clickedDate) setText(formatRangeText(clickedDate));
+        if (clickedDate) setText(formatRangeText(clickedDate, clickedDate));
         return;
       }
 
@@ -106,17 +109,17 @@ export function CalendarPanel() {
         return;
       }
 
-      // First click with no existing selection
+      // First click with no existing selection — select the full clicked day
       if (newRange?.from) {
         setPendingFrom(newRange.from);
-        setText(formatRangeText(newRange.from));
+        setText(formatRangeText(newRange.from, newRange.from));
       }
     },
     [pendingFrom, calendarRange, setText, formatRangeText]
   );
 
-  const isRangeComplete = Boolean(calendarRange?.from && calendarRange?.to);
-  const isApplyDisabled = !isRangeComplete;
+  const isApplyDisabled =
+    timeRange.isInvalid || timeRange.startDate === null || timeRange.endDate === null;
 
   const onApply = useCallback(() => {
     // Apply the current input range exactly as pressing Enter does: defer to the
@@ -175,15 +178,7 @@ export function CalendarPanel() {
           firstDayOfWeek={calendarOptions?.firstDayOfWeek}
         />
       </PanelBody>
-      <PanelFooter
-        primaryAction={
-          isApplyDisabled && !isRangeComplete ? (
-            <EuiToolTip content={calendarPanelTexts.selectEndDateTooltip}>{applyButton}</EuiToolTip>
-          ) : (
-            applyButton
-          )
-        }
-      >
+      <PanelFooter primaryAction={applyButton}>
         {onPresetSave && (
           <EuiCheckbox
             id={saveAsPresetCheckboxId}

@@ -13,7 +13,7 @@ import { renderWithEuiTheme } from '@kbn/test-jest-helpers';
 
 import { CalendarPanel } from './calendar_panel';
 import { DATE_TYPE_ABSOLUTE, DATE_TYPE_NOW, DATE_TYPE_RELATIVE } from '../constants';
-import { formatDateRange, formatAbsoluteDate } from '../utils';
+import { formatDateRange } from '../utils';
 import { textToTimeRange } from '../parse';
 
 const mockUseDateRangePickerContext = jest.fn();
@@ -91,10 +91,6 @@ jest.mock('../calendar', () => {
 /** Creates a Date for Feb 2026 with the given components. */
 const feb2026 = (day: number, h: number, m: number, s = 0, ms = 0) =>
   new Date(2026, 1, day, h, m, s, ms);
-
-/** Builds the formatted display string for a given Feb 2026 date. */
-const feb2026Display = (day: number, h: number, m: number, s = 0, ms = 0) =>
-  formatAbsoluteDate(feb2026(day, h, m, s, ms));
 
 /** Click a day by its number in the February 2026 calendar. */
 const clickDay = (day: number) =>
@@ -209,13 +205,15 @@ describe('CalendarPanel', () => {
   });
 
   describe('date selection', () => {
-    it('calls setText with just the start date when only the first date is clicked', () => {
+    it('calls setText with a full-day range when only the first date is clicked', () => {
       mockUseDateRangePickerContext.mockReturnValue(makeContextNoDates());
       renderWithEuiTheme(<CalendarPanel />);
 
       clickDay(10);
 
-      expect(setText).toHaveBeenCalledWith(feb2026Display(10, 0, 0));
+      expect(setText).toHaveBeenCalledWith(
+        formatDateRange(feb2026(10, 0, 0), feb2026(10, 23, 59, 59, 999))
+      );
     });
 
     it('calls setText with the formatted range after both dates are selected', () => {
@@ -230,7 +228,7 @@ describe('CalendarPanel', () => {
       );
     });
 
-    it('resets range and shows new start date when clicking after a complete selection', () => {
+    it('resets to a new full-day range when clicking after a complete selection', () => {
       mockUseDateRangePickerContext.mockReturnValue(
         makeContext(
           [DATE_TYPE_ABSOLUTE, DATE_TYPE_ABSOLUTE],
@@ -242,7 +240,9 @@ describe('CalendarPanel', () => {
 
       clickDay(20);
 
-      expect(setText).toHaveBeenCalledWith(feb2026Display(20, 0, 0, 0, 0));
+      expect(setText).toHaveBeenCalledWith(
+        formatDateRange(feb2026(20, 0, 0), feb2026(20, 23, 59, 59, 999))
+      );
     });
   });
 
@@ -254,25 +254,13 @@ describe('CalendarPanel', () => {
       expect(screen.getByRole('button', { name: 'Apply' })).toBeDisabled();
     });
 
-    it('is disabled when only the start date is selected', () => {
+    it('is enabled after a single day is selected (full-day range)', () => {
       mockUseDateRangePickerContext.mockReturnValue(makeContextNoDates());
       renderWithEuiTheme(<CalendarPanel />);
 
       clickDay(10);
 
-      expect(screen.getByRole('button', { name: 'Apply' })).toBeDisabled();
-    });
-
-    it('shows tooltip when disabled due to missing end date', () => {
-      mockUseDateRangePickerContext.mockReturnValue(makeContextNoDates());
-      renderWithEuiTheme(<CalendarPanel />);
-
-      clickDay(10);
-
-      const applyButton = screen.getByRole('button', { name: 'Apply' });
-      expect(
-        applyButton.closest('[class*="euiToolTip"]') || applyButton.parentElement
-      ).toBeTruthy();
+      expect(screen.getByRole('button', { name: 'Apply' })).not.toBeDisabled();
     });
 
     it('is enabled when initialized with a valid date range', () => {
@@ -281,14 +269,14 @@ describe('CalendarPanel', () => {
       expect(screen.getByRole('button', { name: 'Apply' })).not.toBeDisabled();
     });
 
-    it('becomes enabled after both dates are selected', () => {
+    it('becomes enabled as soon as a day is selected and stays enabled for a range', () => {
       mockUseDateRangePickerContext.mockReturnValue(makeContextNoDates());
       renderWithEuiTheme(<CalendarPanel />);
 
       expect(screen.getByRole('button', { name: 'Apply' })).toBeDisabled();
 
       clickDay(10);
-      expect(screen.getByRole('button', { name: 'Apply' })).toBeDisabled();
+      expect(screen.getByRole('button', { name: 'Apply' })).not.toBeDisabled();
 
       clickDay(15);
       expect(screen.getByRole('button', { name: 'Apply' })).not.toBeDisabled();
