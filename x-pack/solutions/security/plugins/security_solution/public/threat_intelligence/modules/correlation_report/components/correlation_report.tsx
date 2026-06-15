@@ -40,7 +40,7 @@ import {
   evidenceGutterCss,
   evidenceItemRowCss,
   evidenceVertexBodyCss,
-  leadExtraActionCss,
+  leadButtonContentCss,
   leadHeaderCss,
   leadHeaderDotAlignCss,
   leadListCss,
@@ -463,7 +463,7 @@ const LeadCard: React.FC<{
     });
   }, [lead.candidate_ids, candidateMeta]);
 
-  const header = (
+  const headerBlock = (
     <div css={leadHeaderCss}>
       <div>
         <EuiBadge color="hollow">{RELATIONSHIP_LABEL[lead.relationship]()}</EuiBadge>
@@ -486,22 +486,24 @@ const LeadCard: React.FC<{
     </div>
   );
 
+  const buttonContent = (
+    <div css={leadButtonContentCss}>
+      {!isOpen ? (
+        <DiamondSvg vertexSignal={lead.vertex_signal} euiColors={euiColors} size={80} />
+      ) : null}
+      {headerBlock}
+    </div>
+  );
+
   return (
     <EuiPanel hasBorder paddingSize="none" data-test-subj={`correlationReportLead-${index}`}>
       <EuiAccordion
         id={`lead-${lead.candidate_ids[0]}-${index}`}
-        buttonContent={header}
+        buttonContent={buttonContent}
         paddingSize="m"
         buttonProps={{ css: accordionButtonCss }}
         forceState={isOpen ? 'open' : 'closed'}
         onToggle={setIsOpen}
-        extraAction={
-          !isOpen ? (
-            <div css={leadExtraActionCss}>
-              <DiamondSvg vertexSignal={lead.vertex_signal} euiColors={euiColors} size={80} />
-            </div>
-          ) : undefined
-        }
       >
         {/* BLUF */}
         <div css={markdownBodyCss}>

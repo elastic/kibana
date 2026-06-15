@@ -72,10 +72,11 @@ export const accordionButtonCss = css({
   padding: '12px 16px',
 });
 
-export const leadExtraActionCss = css({
+export const leadButtonContentCss = css({
   display: 'flex',
   alignItems: 'center',
-  marginRight: 6,
+  gap: 12,
+  minWidth: 0,
 });
 
 export const consolidatedListCss = css({
