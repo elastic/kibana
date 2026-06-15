@@ -10,6 +10,7 @@
 import type { BulkRequest, BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import { LOOKUP_INDEX_UPDATE_ROUTE } from '@kbn/esql-types';
 import { groupBy, chunk } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 import type { HttpStart } from '@kbn/core/public';
 import { ROW_PLACEHOLDER_PREFIX } from '../constants';
 import type { AddDocAction, DeleteDocAction } from '../types';
@@ -48,7 +49,7 @@ export async function bulkUpdate(
   const updateOperations =
     groupedOperations?.updates?.map((update) => [
       { update: { _id: update.id } },
-      { doc: update.value },
+      { doc: unflattenDoc(update.value) },
     ]) || [];
 
   const newDocs =
@@ -58,11 +59,11 @@ export async function bulkUpdate(
       return acc;
     }, {}) || {};
 
-  // Filter out new docs that have no fields defined
   const newDocOperations = Object.entries(newDocs)
+    // Filter out new docs that have no fields defined
     .filter(([, doc]) => Object.keys(doc).length > 0)
     .map(([id, doc]) => {
-      return [{ index: {} }, doc];
+      return [{ index: {} }, unflattenDoc(doc)];
     });
 
   const operations: BulkRequest['operations'] = [
@@ -110,4 +111,19 @@ export async function bulkUpdate(
     bulkResponse,
     bulkOperations: operations,
   };
+}
+
+/**
+ * Rebuilds a document so dotted field names become nested objects, e.g.
+ * `{ 'keyword.Description': 'x' }` -> `{ keyword: { Description: 'x' } }`.
+ *
+ * We receive field names as flattened paths when they are within objects,
+ * but when we need to update the document, we need to unflatten them,
+ * otherwise they can create a multi-value field.
+ */
+function unflattenDoc(doc: Record<string, unknown>): Record<string, unknown> {
+  return Object.entries(doc).reduce((acc, [key, value]) => {
+    set(acc, key, value);
+    return acc;
+  }, {});
 }
