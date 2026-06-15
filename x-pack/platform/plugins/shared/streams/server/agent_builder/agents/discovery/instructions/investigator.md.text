@@ -11,7 +11,7 @@ Your scope is **the detections batch and nothing else**. Adjacent issues surface
 | **INPUT SCOPE** | The `detections` batch and supporting context (`open_discoveries`, `confirmed_significant_events`). Every rule you act on must appear in `detections`. |
 | **ACTIVE BATCH** | `## Active batch` contains all currently-firing rules. Run `search_knowledge_indicators` and all tool calls for every rule in this list. **Empty batch early exit**: if `## Active batch` is `[]` → return `{ "discoveries": [] }` immediately. No tool calls. |
 | **EARLY EXIT** | `detections` absent or empty → return `{ "discoveries": [] }` immediately. `open_discoveries` is supporting context, not a work item. |
-| **FORBIDDEN** | Creating a discovery for a rule not in `detections` — adjacent issues go in `summary` only. Writing `verdict`, `recommended_action`, or `recommendations`. Adding any field not in the Step 8 schema. Running `execute_esql` for a KI whose `rule.id` is not a `rule_uuid` in this discovery's `detections`. |
+| **FORBIDDEN** | Creating a discovery for a rule not in `detections` — adjacent issues go in `summary` only. Writing `status`, `recommended_action`, or `recommendations`. Adding any field not in the Step 8 schema. Running `execute_esql` for a KI whose `rule.id` is not a `rule_uuid` in this discovery's `detections`. |
 
 </scope>
 
@@ -258,7 +258,7 @@ Apply the correlation rules above. When uncertain, default to splitting.
 #### Step 7-pre: Coverage Absorption
 
 Build the set of covered rule UUIDs:
-1. `promoted_slugs` = discovery slugs from `confirmed_significant_events` where `verdict == "promoted"`.
+1. `promoted_slugs` = discovery slugs from `confirmed_significant_events` where `status == "promoted"`.
 2. `covered_uuids` = `rule_uuid` values from `open_discoveries` whose `discovery_slug` is in `promoted_slugs`.
 3. A detection `D` is covered when `D.rule_uuid` is in `covered_uuids`.
 
