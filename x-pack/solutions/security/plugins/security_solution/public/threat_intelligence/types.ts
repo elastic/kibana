@@ -16,7 +16,7 @@ export type BrowserFields = Readonly<Record<string, Partial<BrowserField>>>;
  * plugin was folded into `securitySolution` — see the migration plan in
  * AGENTS.md for context.
  */
-export type TIPage = 'indicators' | 'intelligenceHub';
+export type TIPage = 'indicators' | 'intelligenceHub' | 'correlationReport';
 
 /**
  * All the IDs for the threat intelligence pages.
@@ -26,7 +26,10 @@ export type TIPage = 'indicators' | 'intelligenceHub';
  * `threat_intelligence-hub` (alias `intelligenceHub`) is the Intelligence
  * Hub dashboard deep link added during the standalone-plugin merge.
  */
-export type TIPageId = 'threat_intelligence' | 'threat_intelligence-hub';
+export type TIPageId =
+  | 'threat_intelligence'
+  | 'threat_intelligence-hub'
+  | 'threat_intelligence-correlation';
 
 /**
  * A record of all the properties that will be used to build deeplinks, links and navtabs objects.

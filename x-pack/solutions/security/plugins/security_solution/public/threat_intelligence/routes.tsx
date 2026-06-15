@@ -13,6 +13,7 @@ import { SecurityRoutePageWrapper } from '../common/components/security_route_pa
 import { SecuritySolutionTemplateWrapper } from '../app/home/template_wrapper';
 import {
   THREAT_INTELLIGENCE_BASE_PATH,
+  THREAT_INTELLIGENCE_CORRELATION_REPORT_PATH,
   THREAT_INTELLIGENCE_HUB_PATH,
 } from './constants/navigation';
 import { ThreatIntelligenceApp } from './plugin';
@@ -20,6 +21,12 @@ import { ThreatIntelligenceApp } from './plugin';
 const LazyIntelligenceHubPage = React.lazy(() =>
   import('./modules/intelligence_hub').then(({ IntelligenceHubPage }) => ({
     default: IntelligenceHubPage,
+  }))
+);
+
+const LazyCorrelationReportPage = React.lazy(() =>
+  import('./modules/correlation_report').then(({ CorrelationReportPage }) => ({
+    default: CorrelationReportPage,
   }))
 );
 
@@ -49,14 +56,30 @@ const IntelligenceHub = memo(() => {
 
 IntelligenceHub.displayName = 'IntelligenceHub';
 
+const CorrelationReportRoute = memo(() => {
+  return (
+    <SecurityRoutePageWrapper pageName={SecurityPageName.threatIntelligenceCorrelation}>
+      <SecuritySolutionTemplateWrapper>
+        <Suspense fallback={<div />}>
+          <LazyCorrelationReportPage />
+        </Suspense>
+      </SecuritySolutionTemplateWrapper>
+      <SpyRoute pageName={SecurityPageName.threatIntelligenceCorrelation} />
+    </SecurityRoutePageWrapper>
+  );
+});
+
+CorrelationReportRoute.displayName = 'CorrelationReportRoute';
+
 /**
- * Route order matters: `/threat_intelligence/hub` must come BEFORE
- * `/threat_intelligence` so React Router does not match the parent path
- * first. The base path catches both `/threat_intelligence` and
- * `/threat_intelligence/indicators` (it is non-strict by design — see
- * `isThreatIntelligencePath` in `../helpers.tsx`).
+ * Route order matters: more-specific paths must come BEFORE the base path
+ * so React Router does not match the parent path first.
  */
 export const routes: SecuritySubPluginRoutes = [
+  {
+    path: THREAT_INTELLIGENCE_CORRELATION_REPORT_PATH,
+    component: CorrelationReportRoute,
+  },
   {
     path: THREAT_INTELLIGENCE_HUB_PATH,
     component: IntelligenceHub,

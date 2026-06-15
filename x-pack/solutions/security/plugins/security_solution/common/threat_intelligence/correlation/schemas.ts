@@ -115,6 +115,12 @@ export const correlationFindingsSynthesisSchema = z.object({
     .optional(),
 });
 
+export const candidateMetaEntrySchema = z.object({
+  title: z.string().optional(),
+  vendor: z.string().optional(),
+  url: z.string().optional(),
+});
+
 export const correlationFindingsSchema = z.object({
   leads: z.array(correlationFindingsLeadSchema),
   no_match: z.array(correlationFindingsNoMatchSchema),
@@ -131,12 +137,15 @@ export const correlationFindingsSchema = z.object({
     .optional(),
   /** Maps each candidate doc ID to its short run label (e.g. 'c01'). */
   candidate_labels: z.record(z.string(), z.string()).optional(),
+  /** Source metadata per candidate doc id — title, vendor name, and URL for display. */
+  candidate_meta: z.record(z.string(), candidateMetaEntrySchema).optional(),
 });
 
 export type CorrelationFindingsLead = z.infer<typeof correlationFindingsLeadSchema>;
 export type CorrelationFindingsNoMatch = z.infer<typeof correlationFindingsNoMatchSchema>;
 export type CorrelationFindingsSynthesis = z.infer<typeof correlationFindingsSynthesisSchema>;
 export type CorrelationFindings = z.infer<typeof correlationFindingsSchema>;
+export type CandidateMetaEntry = z.infer<typeof candidateMetaEntrySchema>;
 export type EvidenceWeight = z.infer<typeof evidenceWeightSchema>;
 export type EvidenceItem = z.infer<typeof evidenceItemSchema>;
 

@@ -97,6 +97,7 @@ export enum SecurityPageName {
    */
   threatIntelligence = 'threat_intelligence',
   threatIntelligenceHub = 'threat_intelligence-hub',
+  threatIntelligenceCorrelation = 'threat_intelligence-correlation',
   timelines = 'timelines',
   timelinesTemplates = 'timelines-templates',
   trustedApps = 'trusted_apps',

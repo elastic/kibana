@@ -108,6 +108,41 @@ const mapDiamondSignal = (signal: string): 'high' | 'partial' | 'none' => {
   return 'none';
 };
 
+interface CandidateMetaSource {
+  content?: { title?: string };
+  source?: { name?: string; url?: string };
+}
+
+/**
+ * Lightweight fetch of display metadata (title, vendor, URL) for a set of
+ * candidate doc IDs. Called after synthesis so only IDs that appear in the
+ * final output are fetched — avoids over-fetching the full candidate pool.
+ */
+const fetchCandidateMeta = async (
+  esClient: ElasticsearchClient,
+  ids: readonly string[]
+): Promise<Record<string, { title?: string; vendor?: string; url?: string }>> => {
+  if (ids.length === 0) return {};
+  const response = await esClient.search<CandidateMetaSource>({
+    index: THREAT_REPORTS_INDEX_PATTERN,
+    size: ids.length + 5,
+    query: { ids: { values: [...ids] } },
+    _source: ['content.title', 'source.name', 'source.url'],
+    ignore_unavailable: true,
+  });
+  const result: Record<string, { title?: string; vendor?: string; url?: string }> = {};
+  for (const hit of response.hits.hits) {
+    if (hit._id) {
+      result[hit._id] = {
+        title: hit._source?.content?.title,
+        vendor: hit._source?.source?.name,
+        url: hit._source?.source?.url,
+      };
+    }
+  }
+  return result;
+};
+
 /**
  * Fetches the full body text of a stored report for use as the synthesis
  * case context in report_id mode. Falls back to undefined if not found so
@@ -412,5 +447,20 @@ export const correlateThreat = async ({
     victim: mapDiamondSignal(queryDiamond.victim.signal),
   };
 
-  return { ...findings, trace: traceBuilder.build(), case_vertex_signal: caseVertexSignal };
+  const outputIds = new Set<string>();
+  for (const lead of findings.leads) {
+    for (const id of lead.candidate_ids) outputIds.add(id);
+  }
+  for (const nm of findings.no_match) {
+    outputIds.add(nm.id);
+  }
+  const candidateMeta =
+    outputIds.size > 0 ? await fetchCandidateMeta(esClient, [...outputIds]) : undefined;
+
+  return {
+    ...findings,
+    trace: traceBuilder.build(),
+    case_vertex_signal: caseVertexSignal,
+    candidate_meta: candidateMeta,
+  };
 };

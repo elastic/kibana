@@ -18,6 +18,7 @@ export type {
   CorrelationFindingsLead,
   CorrelationFindingsNoMatch,
   CorrelationFindingsSynthesis,
+  CandidateMetaEntry,
   ClusterDeepSynthesis,
   EvidenceItem,
   EvidenceWeight,

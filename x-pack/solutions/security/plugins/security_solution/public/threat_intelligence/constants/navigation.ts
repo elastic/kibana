@@ -7,6 +7,8 @@
 
 import type { TIPage, TIPageProperties } from '../types';
 import {
+  CORRELATION_REPORT,
+  CORRELATION_REPORT_DESCRIPTION,
   DESCRIPTION,
   INDICATORS,
   INTELLIGENCE,
@@ -36,6 +38,13 @@ export const THREAT_INTELLIGENCE_INDICATORS_PATH = `${THREAT_INTELLIGENCE_BASE_P
 export const THREAT_INTELLIGENCE_HUB_PATH = `${THREAT_INTELLIGENCE_BASE_PATH}/hub`;
 
 /**
+ * Path for the Correlation Report page. Accepts a report_id via the input
+ * form and renders structured correlation findings from the correlate_threat
+ * pipeline.
+ */
+export const THREAT_INTELLIGENCE_CORRELATION_REPORT_PATH = `${THREAT_INTELLIGENCE_BASE_PATH}/correlation`;
+
+/**
  * All the links and navigation properties to be used in the Security Solution plugin.
  */
 export const threatIntelligencePages: Record<TIPage, TIPageProperties> = {
@@ -57,6 +66,16 @@ export const threatIntelligencePages: Record<TIPage, TIPageProperties> = {
     description: INTELLIGENCE_HUB_DESCRIPTION,
     globalSearchKeywords: [INTELLIGENCE_HUB, INTELLIGENCE],
     keywords: [INTELLIGENCE_HUB, INTELLIGENCE],
+    disabled: false,
+  },
+  correlationReport: {
+    oldNavigationName: CORRELATION_REPORT,
+    newNavigationName: CORRELATION_REPORT,
+    path: THREAT_INTELLIGENCE_CORRELATION_REPORT_PATH,
+    id: 'threat_intelligence-correlation',
+    description: CORRELATION_REPORT_DESCRIPTION,
+    globalSearchKeywords: [CORRELATION_REPORT, INTELLIGENCE],
+    keywords: [CORRELATION_REPORT, INTELLIGENCE],
     disabled: false,
   },
 };
