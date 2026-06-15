@@ -45,14 +45,20 @@ const truncateToolCallHistory = (steps: unknown[]): string => {
         if (serialized.length <= MAX_PER_RESULT_BYTES) {
           return result;
         }
-        return `[truncated: ${serialized.length} chars] ${serialized.slice(0, MAX_PER_RESULT_BYTES)}`;
+        return `[truncated: ${serialized.length} chars] ${serialized.slice(
+          0,
+          MAX_PER_RESULT_BYTES
+        )}`;
       }),
     };
   });
 
   let serialized = JSON.stringify(truncated);
   if (serialized.length > MAX_TOTAL_BYTES) {
-    serialized = `${serialized.slice(0, MAX_TOTAL_BYTES)}\n... [truncated at ${MAX_TOTAL_BYTES} chars]`;
+    serialized = `${serialized.slice(
+      0,
+      MAX_TOTAL_BYTES
+    )}\n... [truncated at ${MAX_TOTAL_BYTES} chars]`;
   }
   return serialized;
 };
