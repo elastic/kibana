@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import type { ElasticsearchClient, Logger, SecurityServiceStart } from '@kbn/core/server';
 
-export const INSUFFICIENT_INDEX_PRIVILEGES_ERROR = i18n.translate(
+const INSUFFICIENT_INDEX_PRIVILEGES_ERROR = i18n.translate(
   'xpack.securitySolution.entityAnalytics.watchlists.api.insufficientIndexPrivileges',
   {
     defaultMessage: 'Insufficient privileges to read from the selected index pattern.',
@@ -25,7 +26,7 @@ export const validateIndexPermissions = async (
   const hasPrivilege = response.index[indexPattern]?.read ?? false;
 
   if (!hasPrivilege) {
-    throw new Error(INSUFFICIENT_INDEX_PRIVILEGES_ERROR);
+    throw Boom.forbidden(INSUFFICIENT_INDEX_PRIVILEGES_ERROR);
   }
 };
 

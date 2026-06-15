@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import { loggerMock } from '@kbn/logging-mocks';
 import { WATCHLISTS_DATA_SOURCE_URL } from '../../../../../../../common/constants';
 import {
@@ -104,12 +105,14 @@ describe('POST /api/entity_analytics/watchlists/:watchlist_id/data_sources - cre
       enabled: true,
     };
 
-    it('returns 500 when index permission validation fails', async () => {
-      mockValidateIndexPermissions.mockRejectedValue(new Error('Insufficient index privileges'));
+    it('returns 403 when index permission validation fails', async () => {
+      mockValidateIndexPermissions.mockRejectedValue(
+        Boom.forbidden('Insufficient privileges to read from the selected index pattern.')
+      );
 
       const response = await server.inject(buildRequest(indexSourceBody), context);
 
-      expect(response.status).toEqual(500);
+      expect(response.status).toEqual(403);
       expect(mockWatchlistClientCreate).not.toHaveBeenCalled();
     });
 
