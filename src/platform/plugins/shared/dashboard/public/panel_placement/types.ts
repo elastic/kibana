@@ -12,7 +12,7 @@ import type { DashboardLayout, DashboardLayoutPanel } from '../dashboard_api/lay
 export type PanelPlacementReturn = DashboardLayout;
 
 export interface PanelPlacementProps {
-  panel: Omit<DashboardLayoutPanel, 'grid'> & {
+  panel: Pick<DashboardLayoutPanel, 'type'> & {
     uuid: string;
     grid: Pick<DashboardLayoutPanel['grid'], 'sectionId' | 'w' | 'h'>;
   };
