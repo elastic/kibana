@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 import classnames from 'classnames';
 import throttle from 'lodash/throttle';
@@ -112,9 +112,14 @@ import {
   EXECUTION_YAML_SNAPSHOT_CLASS,
   useWorkflowEditorStyles,
 } from '../styles/use_workflow_editor_styles';
+import { EDITOR_PADDING_TOP_PX, MINIMAP_RESERVE_PX } from '../styles/constants';
+import { WorkflowStepMinimap } from './workflow_step_minimap';
 
 const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
   minimap: { enabled: false },
+  overviewRulerBorder: false,
+  overviewRulerLanes: 0,
+  scrollbar: { useShadows: false },
   automaticLayout: true,
   lineNumbers: 'on',
   glyphMargin: true,
@@ -134,7 +139,7 @@ const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
   wrappingIndent: 'indent',
   theme: WORKFLOWS_MONACO_EDITOR_THEME,
   padding: {
-    top: 24,
+    top: EDITOR_PADDING_TOP_PX,
     bottom: 16,
   },
   quickSuggestions: {
@@ -198,6 +203,7 @@ export const WorkflowYAMLEditor = ({
 
   // Refs
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const minimapContainerRef = useRef<HTMLDivElement | null>(null);
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
 
   const stepExecutions = useSelector(selectStepExecutions);
@@ -251,9 +257,6 @@ export const WorkflowYAMLEditor = ({
 
   useWorkflowsMonacoTheme();
   useDynamicTypeIcons(connectorsData);
-
-  // Only show debug features in development
-  const isDevelopment = process.env.NODE_ENV !== 'production';
 
   // Lifecycle
   const [isEditorMounted, setIsEditorMounted] = useState(false);
@@ -535,7 +538,7 @@ export const WorkflowYAMLEditor = ({
 
     setPositionStyles({
       top: `${_editor.getTopForLineNumber(stepInfo.lineStart, true) - _editor.getScrollTop()}px`,
-      right: '0px',
+      right: isExecutionYaml ? '0px' : `${MINIMAP_RESERVE_PX}px`,
     });
   };
 
@@ -720,27 +723,6 @@ export const WorkflowYAMLEditor = ({
     };
   }, []);
 
-  // Debug
-  const downloadSchema = useCallback(() => {
-    try {
-      const blob = new Blob([JSON.stringify(workflowJsonSchemaStrict, null, 2)], {
-        type: 'application/json',
-      });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'workflow-schema.json';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    } catch (error) {
-      // to download schema:', error);
-      notifications?.toasts.addError(error as Error, {
-        title: 'Failed to download schema',
-      });
-    }
-  }, [workflowJsonSchemaStrict, notifications]);
 
   const extraActions = useMemo<ExtraAction[]>(
     () => [
@@ -813,34 +795,40 @@ export const WorkflowYAMLEditor = ({
       >
         <StepActions onStepRun={onStepRun} />
       </div>
-      {(isAgentBuilderAvailable || isDevelopment) && !isExecutionYaml ? (
+      {isAgentBuilderAvailable && !isExecutionYaml ? (
         <div css={styles.agentBuilderSectionCss}>
           <WorkflowYamlEditorAssistActions
             isAgentBuilderAvailable={isAgentBuilderAvailable}
-            isDevelopment={isDevelopment}
-            workflowJsonSchema={
-              (workflowJsonSchemaStrict ?? null) as SchemasSettings['schema'] | null
-            }
             onOpenAgentChat={openAgentChat}
-            onDownloadSchema={downloadSchema}
           />
         </div>
       ) : null}
-      <div
-        css={styles.editorContainer}
-        className={classnames({ [EXECUTION_YAML_SNAPSHOT_CLASS]: isExecutionYaml })}
-      >
-        <YamlEditor
-          editorDidMount={handleEditorDidMount}
-          editorWillUnmount={handleEditorWillUnmount}
-          onChange={onChange}
-          onSyncStateChange={onSyncStateChange}
-          options={options}
-          schemas={schemas}
-          value={workflowYaml}
-          enableFindAction={true}
-          dataTestSubj="workflowYamlEditor"
-        />
+      <div css={styles.editorAreaWrapper}>
+        {!isExecutionYaml && (
+          <div css={styles.minimapContainer} ref={minimapContainerRef}>
+            <WorkflowStepMinimap
+              editorRef={editorRef}
+              validationErrors={validationErrors}
+              scrollContainerRef={minimapContainerRef}
+            />
+          </div>
+        )}
+        <div
+          css={styles.editorContainer}
+          className={classnames({ [EXECUTION_YAML_SNAPSHOT_CLASS]: isExecutionYaml })}
+        >
+          <YamlEditor
+            editorDidMount={handleEditorDidMount}
+            editorWillUnmount={handleEditorWillUnmount}
+            onChange={onChange}
+            onSyncStateChange={onSyncStateChange}
+            options={options}
+            schemas={schemas}
+            value={workflowYaml}
+            enableFindAction={true}
+            dataTestSubj="workflowYamlEditor"
+          />
+        </div>
       </div>
       <div css={styles.validationErrorsContainer}>
         <WorkflowYamlValidationAccordion
@@ -858,68 +846,33 @@ export const WorkflowYAMLEditor = ({
 
 const WorkflowYamlEditorAssistActions = React.memo(function WorkflowYamlEditorAssistActions({
   isAgentBuilderAvailable,
-  isDevelopment,
-  workflowJsonSchema,
   onOpenAgentChat,
-  onDownloadSchema,
 }: {
   isAgentBuilderAvailable: boolean;
-  isDevelopment: boolean;
-  workflowJsonSchema: SchemasSettings['schema'] | null;
   onOpenAgentChat: () => void;
-  onDownloadSchema: () => void;
 }) {
-  const styles = useWorkflowEditorStyles();
+  if (!isAgentBuilderAvailable) return null;
   return (
-    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-      {isAgentBuilderAvailable && (
-        <EuiFlexItem grow={false}>
-          <EuiToolTip
-            content={
-              <FormattedMessage
-                id="workflows.yamlEditor.aiAgentTooltip"
-                defaultMessage="Ask AI to help edit this workflow"
-              />
-            }
-          >
-            <EuiButtonEmpty
-              iconType="sparkles"
-              size="xs"
-              aria-label="Open AI Agent"
-              onClick={onOpenAgentChat}
-              data-test-subj="workflowYamlEditorAiAgentButton"
-            >
-              <FormattedMessage
-                id="workflows.yamlEditor.aiAgentButtonLabel"
-                defaultMessage="AI Agent"
-              />
-            </EuiButtonEmpty>
-          </EuiToolTip>
-        </EuiFlexItem>
-      )}
-      {isDevelopment && (
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            css={styles.downloadSchemaButton}
-            iconType={workflowJsonSchema === null ? 'warning' : 'download'}
-            size="xs"
-            aria-label="Download JSON schema for debugging"
-            onClick={onDownloadSchema}
-            tabIndex={0}
-            disabled={workflowJsonSchema === null}
-            onKeyDown={(e: React.KeyboardEvent<HTMLButtonElement>) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.currentTarget.click();
-              }
-            }}
-          >
-            <FormattedMessage
-              id="workflows.yamlEditor.downloadSchemaButtonLabel"
-              defaultMessage="JSON Schema"
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      )}
-    </EuiFlexGroup>
+    <EuiToolTip
+      content={
+        <FormattedMessage
+          id="workflows.yamlEditor.aiAgentTooltip"
+          defaultMessage="Ask AI to help edit this workflow"
+        />
+      }
+    >
+      <EuiButtonEmpty
+        iconType="sparkles"
+        size="xs"
+        aria-label="Open AI Agent"
+        onClick={onOpenAgentChat}
+        data-test-subj="workflowYamlEditorAiAgentButton"
+      >
+        <FormattedMessage
+          id="workflows.yamlEditor.aiAgentButtonLabel"
+          defaultMessage="AI Agent"
+        />
+      </EuiButtonEmpty>
+    </EuiToolTip>
   );
 });

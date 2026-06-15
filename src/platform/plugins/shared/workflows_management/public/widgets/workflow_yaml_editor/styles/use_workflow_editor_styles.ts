@@ -11,7 +11,11 @@ import type { UseEuiTheme } from '@elastic/eui';
 import { transparentize } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { EDITOR_SCROLLBAR_WIDTH_PX, FOCUSED_STEP_DECORATION_INSET_PX } from './constants';
+import {
+  EDITOR_SCROLLBAR_WIDTH_PX,
+  FOCUSED_STEP_DECORATION_INSET_PX,
+  MINIMAP_RESERVE_PX,
+} from './constants';
 
 export const EXECUTION_YAML_SNAPSHOT_CLASS = 'execution-yaml-snapshot';
 
@@ -192,16 +196,19 @@ const editorStyleMap = {
       minWidth: 0,
       overflowY: 'auto',
       minHeight: 0,
+      paddingRight: MINIMAP_RESERVE_PX,
       backgroundColor: euiTheme.colors.backgroundBaseSubdued,
       [`&.${EXECUTION_YAML_SNAPSHOT_CLASS}`]: {
+        paddingRight: 0,
         backgroundColor: euiTheme.colors.backgroundBasePlain,
       },
     }),
 
   validationErrorsContainer: css({
+    position: 'relative',
     flexShrink: 0,
     overflow: 'hidden',
-    zIndex: 2, // overlay the editor flying action buttons
+    zIndex: 10, // renders above the step minimap (zIndex: 9)
   }),
 
   stepActionsContainer: css({
@@ -212,16 +219,6 @@ const editorStyleMap = {
     }px)`, // scrollbar + twice decoration inset (outside and inside)
   }),
 
-  downloadSchemaButton: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      color: euiTheme.colors.textSubdued,
-      '&:hover': {
-        color: euiTheme.colors.textPrimary,
-      },
-      '&:hover:not(:disabled)::before': {
-        backgroundColor: 'transparent',
-      },
-    }),
   agentBuilderSectionCss: (euiThemeContext: UseEuiTheme) =>
     css({
       position: 'absolute',
@@ -229,6 +226,27 @@ const editorStyleMap = {
       right: euiThemeContext.euiTheme.size.m,
       zIndex: 10,
     }),
+  editorAreaWrapper: css({
+    flex: '1 1 0',
+    minHeight: 0,
+    position: 'relative',
+    display: 'flex',
+    flexDirection: 'column',
+  }),
+
+  minimapContainer: (_euiTheme: UseEuiTheme) =>
+    css({
+      position: 'absolute',
+      top: 0,
+      bottom: 0,
+      right: EDITOR_SCROLLBAR_WIDTH_PX + 8,
+      zIndex: 9,
+      overflowY: 'auto',
+      overflowX: 'visible',
+      scrollbarWidth: 'none',
+      '&::-webkit-scrollbar': { display: 'none' },
+    }),
+
   hiddenButtonCss: css({ display: 'none' }),
 };
 
