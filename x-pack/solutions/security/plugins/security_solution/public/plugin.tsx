@@ -83,6 +83,7 @@ import {
   registerEntityAnalyticsDashboardAttachment,
   registerEntityAttachment,
   registerRuleAttachment,
+  registerRulePreviewAttachment,
 } from './agent_builder/attachment_types';
 import type { SecurityCanvasEmbeddedBundle } from './agent_builder/components/security_redux_embedded_provider';
 import { registerWorkflowSteps } from './workflows/step_types';
@@ -106,6 +107,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private _startedSubPluginsPromise?: Promise<StartedSubPlugins>;
   private _discoverFlyoutStorePromise?: Promise<SecurityAppStore>;
   private _securityCanvasContextPromise?: Promise<SecurityCanvasEmbeddedBundle>;
+  private _coreSetup?: CoreSetup<StartPluginsDependencies, PluginStart>;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<SecuritySolutionUiConfigType>();
@@ -129,6 +131,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     core: CoreSetup<StartPluginsDependencies, PluginStart>,
     plugins: SetupPlugins
   ): PluginSetup {
+    this._coreSetup = core;
     this.services.setup(core, plugins);
 
     const { home, usageCollection, management, cases, share, workflowsExtensions } = plugins;
@@ -307,6 +310,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.registerPluginUpdates(core, plugins); // Not awaiting to prevent blocking start execution
 
     if (plugins.agentBuilder?.attachments) {
+      const coreSetup = this._coreSetup;
+      if (!coreSetup) {
+        throw new Error('Security Solution setup contract is required to register attachments');
+      }
+
       registerAttachmentUiDefinitions(plugins.agentBuilder.attachments);
       registerRuleAttachment({
         attachments: plugins.agentBuilder.attachments,
@@ -331,6 +339,15 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           this.getSecurityCanvasContext(core, plugins as StartPluginsDependencies),
         searchSession: plugins.data.search.session,
       });
+      if (this.experimentalFeatures.rulePreviewAttachmentEnabled) {
+        registerRulePreviewAttachment({
+          attachments: plugins.agentBuilder.attachments,
+          data: plugins.data,
+          getServices: () => this.getDiscoverFlyoutServices(coreSetup),
+          getStore: () => this.getDiscoverFlyoutStore(coreSetup),
+          spaces: plugins.spaces,
+        });
+      }
     }
 
     // Enable CPS picker in READ_ONLY mode for all Security Solution pages
