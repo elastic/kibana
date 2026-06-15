@@ -29,6 +29,11 @@ import {
   DEFAULT_OUTPUT,
 } from '../constants';
 
+import { packagePolicyHasOtelInputs } from './otelcol_helpers';
+
+const agentPolicyHasOtelInputs = (agentPolicy: Partial<AgentPolicy>): boolean =>
+  (agentPolicy.package_policies ?? []).some((pp) => packagePolicyHasOtelInputs(pp.inputs));
+
 const sameClusterRestrictedPackages = [
   FLEET_SERVER_PACKAGE,
   FLEET_SYNTHETICS_PACKAGE,
@@ -55,17 +60,27 @@ export function getAllowedOutputTypesForAgentPolicy(agentPolicy: Partial<AgentPo
     return AGENTLESS_ALLOWED_OUTPUT_TYPES;
   }
 
+  if (agentPolicyHasOtelInputs(agentPolicy)) {
+    return OUTPUT_TYPES_WITH_OTEL_EXPORTER_SUPPORT;
+  }
+
   return Object.values(outputType);
 }
 
 /**
- * Return allowed output type for a given package policy
+ * Return allowed output types for a given package policy.
  */
 export function getAllowedOutputTypesForPackagePolicy(
-  packagePolicy: Pick<PackagePolicy, 'supports_agentless'>
+  packagePolicy: Pick<PackagePolicy, 'supports_agentless'> & {
+    inputs?: Array<{ type: string; enabled: boolean }>;
+  }
 ): string[] {
   if (packagePolicy.supports_agentless) {
     return AGENTLESS_ALLOWED_OUTPUT_TYPES;
+  }
+
+  if (packagePolicyHasOtelInputs(packagePolicy.inputs)) {
+    return OUTPUT_TYPES_WITH_OTEL_EXPORTER_SUPPORT;
   }
 
   return Object.values(outputType);

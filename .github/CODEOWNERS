@@ -1883,6 +1883,7 @@ x-pack/platform/plugins/shared/streams_app/public/hooks/use_index_patterns_confi
 x-pack/platform/plugins/shared/streams/server/lib/sig_events @elastic/obs-sig-events-team
 x-pack/platform/plugins/shared/streams/server/lib/streams/assets/query @elastic/obs-sig-events-team
 x-pack/platform/plugins/shared/streams/server/lib/streams/feature @elastic/obs-sig-events-team
+x-pack/platform/plugins/shared/streams/server/lib/streams/ki @elastic/obs-sig-events-team
 x-pack/platform/plugins/shared/streams/server/lib/tasks @elastic/obs-sig-events-team
 x-pack/platform/plugins/shared/streams/server/lib/memory @elastic/obs-sig-events-team
 x-pack/platform/plugins/shared/streams/server/lib/workflows @elastic/obs-sig-events-team
