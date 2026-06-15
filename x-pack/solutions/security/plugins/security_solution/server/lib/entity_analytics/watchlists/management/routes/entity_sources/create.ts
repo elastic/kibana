@@ -32,7 +32,8 @@ import { validateIndexPermissions } from '../../../entity_sources/entity_source_
 export const createEntitySourceRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
   logger: Logger,
-  getStartServices: EntityAnalyticsRoutesDeps['getStartServices']
+  getStartServices: EntityAnalyticsRoutesDeps['getStartServices'],
+  hasEncryptionKey: EntityAnalyticsRoutesDeps['hasEncryptionKey']
 ) => {
   router.versioned
     .post({
@@ -72,6 +73,7 @@ export const createEntitySourceRoute = (
               getStartServices,
               esClient: core.elasticsearch.client.asCurrentUser,
               logger,
+              hasEncryptionKey,
             });
 
             if (monitoringSource.type === 'index' && monitoringSource.indexPattern) {

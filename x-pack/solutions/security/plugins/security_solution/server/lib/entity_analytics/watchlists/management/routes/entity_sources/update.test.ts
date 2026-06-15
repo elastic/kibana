@@ -48,7 +48,7 @@ describe('PUT entity source route - updateEntitySourceRoute', () => {
     const mockSecurity = { authc: { apiKeys: { invalidateAsInternalUser: jest.fn() } } };
     mockGetStartServices.mockResolvedValue([{ security: mockSecurity }]);
 
-    updateEntitySourceRoute(server.router, logger, mockGetStartServices);
+    updateEntitySourceRoute(server.router, logger, mockGetStartServices, true);
   });
 
   afterEach(() => {

@@ -30,7 +30,8 @@ export const createWatchlistRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
   logger: Logger,
   telemetrySender: ITelemetryEventsSender,
-  getStartServices: EntityAnalyticsRoutesDeps['getStartServices']
+  getStartServices: EntityAnalyticsRoutesDeps['getStartServices'],
+  hasEncryptionKey: EntityAnalyticsRoutesDeps['hasEncryptionKey']
 ) => {
   router.versioned
     .post({
@@ -102,6 +103,7 @@ export const createWatchlistRoute = (
                 getStartServices,
                 esClient: core.elasticsearch.client.asCurrentUser,
                 logger,
+                hasEncryptionKey,
               });
 
               const createdSources = [];

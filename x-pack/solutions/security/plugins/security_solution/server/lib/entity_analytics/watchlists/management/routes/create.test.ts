@@ -87,7 +87,7 @@ describe('POST /api/entity_analytics/watchlists - createWatchlistRoute', () => {
       reportEBT,
     } as unknown as ITelemetryEventsSender;
 
-    createWatchlistRoute(server.router, logger, telemetrySenderMock, mockGetStartServices);
+    createWatchlistRoute(server.router, logger, telemetrySenderMock, mockGetStartServices, true);
   });
 
   afterEach(() => {

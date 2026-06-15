@@ -79,6 +79,7 @@ describe('WatchlistEntitySourceClient', () => {
       esClient,
       getStartServices: mockGetStartServices as never,
       logger,
+      hasEncryptionKey: true,
     });
   });
 
@@ -149,6 +150,25 @@ describe('WatchlistEntitySourceClient', () => {
       } as never);
 
       await client.create(sourceAttributes);
+
+      expect(mockSecurity.authc.apiKeys.grantAsInternalUser).not.toHaveBeenCalled();
+    });
+
+    it('throws before granting an API key when hasEncryptionKey is false', async () => {
+      const noEncryptClient = new WatchlistEntitySourceClient({
+        soClient,
+        namespace: 'default',
+        esClient,
+        getStartServices: mockGetStartServices as never,
+        logger,
+        hasEncryptionKey: false,
+      });
+      soClient.find.mockResolvedValue({ saved_objects: [], total: 0 } as never);
+      const mockRequest = httpServerMock.createKibanaRequest();
+
+      await expect(
+        noEncryptClient.create({ type: 'index', name: 'My Index Source' }, mockRequest)
+      ).rejects.toThrow('Index-type entity sources require encrypted saved objects');
 
       expect(mockSecurity.authc.apiKeys.grantAsInternalUser).not.toHaveBeenCalled();
     });
@@ -398,6 +418,27 @@ describe('WatchlistEntitySourceClient', () => {
           apiKeyId: mockedApiKey.id,
           apiKey: mockedApiKey.api_key,
         });
+      });
+
+      it('throws before granting an API key when hasEncryptionKey is false', async () => {
+        const noEncryptClient = new WatchlistEntitySourceClient({
+          soClient,
+          namespace: 'default',
+          esClient,
+          getStartServices: mockGetStartServices as never,
+          logger,
+          hasEncryptionKey: false,
+        });
+        const mockRequest = httpServerMock.createKibanaRequest();
+
+        await expect(
+          noEncryptClient.update(
+            { id: 'source-id', type: 'index', indexPattern: 'logs-*' },
+            mockRequest
+          )
+        ).rejects.toThrow('Index-type entity sources require encrypted saved objects');
+
+        expect(mockSecurity.authc.apiKeys.grantAsInternalUser).not.toHaveBeenCalled();
       });
     });
   });

@@ -15,11 +15,12 @@ import { listEntitySourcesRoute } from './list';
 export const registerEntitySourceRoutes = (
   router: EntityAnalyticsRoutesDeps['router'],
   logger: EntityAnalyticsRoutesDeps['logger'],
-  getStartServices: EntityAnalyticsRoutesDeps['getStartServices']
+  getStartServices: EntityAnalyticsRoutesDeps['getStartServices'],
+  hasEncryptionKey: EntityAnalyticsRoutesDeps['hasEncryptionKey']
 ) => {
-  createEntitySourceRoute(router, logger, getStartServices);
+  createEntitySourceRoute(router, logger, getStartServices, hasEncryptionKey);
   getEntitySourceRoute(router, logger, getStartServices);
-  updateEntitySourceRoute(router, logger, getStartServices);
+  updateEntitySourceRoute(router, logger, getStartServices, hasEncryptionKey);
   deleteEntitySourceRoute(router, logger, getStartServices);
   listEntitySourcesRoute(router, logger, getStartServices);
 };

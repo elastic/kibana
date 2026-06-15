@@ -33,6 +33,7 @@ export interface WatchlistEntitySourceClientDependencies {
   esClient: ElasticsearchClient;
   getStartServices: StartServicesAccessor<StartPlugins>;
   logger: Logger;
+  hasEncryptionKey?: boolean;
 }
 
 interface UpsertResult {
@@ -51,6 +52,11 @@ export class WatchlistEntitySourceClient {
 
     let apiKey;
     if (attributes.type === 'index' && request) {
+      if (!this.dependencies.hasEncryptionKey) {
+        throw new Error(
+          'Index-type entity sources require encrypted saved objects. Ensure xpack.encryptedSavedObjects.encryptionKey is configured.'
+        );
+      }
       const [coreStart] = await this.dependencies.getStartServices();
       apiKey = await grantEntitySourceApiKey(coreStart.security, request, attributes.name);
     }
@@ -116,6 +122,11 @@ export class WatchlistEntitySourceClient {
     // Needs new API key: index pattern changed or type changed from non-index to index
     if (isNowIndex && (indexPatternChanged || !wasIndex)) {
       if (request) {
+        if (!this.dependencies.hasEncryptionKey) {
+          throw new Error(
+            'Index-type entity sources require encrypted saved objects. Ensure xpack.encryptedSavedObjects.encryptionKey is configured.'
+          );
+        }
         apiKey = await grantEntitySourceApiKey(coreStart.security, request, entitySource.name);
       } else {
         logger.warn(

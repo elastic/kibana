@@ -81,7 +81,7 @@ describe('POST /api/entity_analytics/watchlists/:watchlist_id/data_sources - cre
 
     mockCreateEntitySourcesService.mockReturnValue({ syncWatchlist: mockSyncWatchlist });
 
-    createEntitySourceRoute(server.router, logger, mockGetStartServices);
+    createEntitySourceRoute(server.router, logger, mockGetStartServices, true);
   });
 
   afterEach(() => {

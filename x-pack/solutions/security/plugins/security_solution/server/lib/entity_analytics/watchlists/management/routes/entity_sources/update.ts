@@ -22,7 +22,8 @@ import { getRequestSavedObjectClient } from '../../../shared/utils';
 export const updateEntitySourceRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
   logger: Logger,
-  getStartServices: EntityAnalyticsRoutesDeps['getStartServices']
+  getStartServices: EntityAnalyticsRoutesDeps['getStartServices'],
+  hasEncryptionKey: EntityAnalyticsRoutesDeps['hasEncryptionKey']
 ) => {
   router.versioned
     .put({
@@ -61,6 +62,7 @@ export const updateEntitySourceRoute = (
               esClient: core.elasticsearch.client.asCurrentUser,
               getStartServices,
               logger,
+              hasEncryptionKey,
             });
 
             const body = await client.update({ ...request.body, id: request.params.id }, request);
