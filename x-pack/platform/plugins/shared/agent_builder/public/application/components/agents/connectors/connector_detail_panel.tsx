@@ -6,22 +6,202 @@
  */
 
 import React from 'react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiLoadingSpinner,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
+import { useConnectorOAuthConnect, OAuthRedirectMode } from '@kbn/response-ops-oauth-hooks';
 import type { ConnectorItem } from '../../../../../common/http_api/tools';
+import { OAUTH_STATUS } from '../../../../../common/http_api/tools';
 import { useKibana } from '../../../hooks/use_kibana';
+import { useConnectorsActions } from '../../../context/connectors_provider';
 import { labels } from '../../../utils/i18n';
+import { useNavigation } from '../../../hooks/use_navigation';
+import { appPaths } from '../../../utils/app_paths';
 import { DetailPanelLayout } from '../common/detail_panel_layout';
 import { ConnectorTypeIcon } from '../../connectors/connector_type_icon';
+import { useConnectorUsedByAgents } from '../../../hooks/connectors/use_connector_used_by_agents';
 
 interface ConnectorDetailPanelProps {
   connector: ConnectorItem;
+  agentId: string;
   onRemove: (connector: ConnectorItem) => void;
   canEditAgent: boolean;
 }
 
+const SubActionsSection: React.FC<{ connector: ConnectorItem }> = ({ connector }) => {
+  const { euiTheme } = useEuiTheme();
+  const tools = connector.tools ?? [];
+
+  return (
+    <div>
+      <EuiTitle size="xxs">
+        <h3>{labels.agentConnectors.subActionsSectionTitle(tools.length)}</h3>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      {tools.length === 0 ? (
+        <EuiText size="s" color="subdued">
+          {labels.agentConnectors.noSubActionsMessage}
+        </EuiText>
+      ) : (
+        <ul
+          css={css`
+            margin: 0;
+            padding-left: ${euiTheme.size.m};
+          `}
+        >
+          {tools.map((tool) => (
+            <li key={tool.name}>
+              <EuiText size="s">
+                <strong>{tool.name}</strong>
+              </EuiText>
+              {tool.description && (
+                <EuiText size="xs" color="subdued">
+                  {tool.description}
+                </EuiText>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+};
+
+const ConnectionSection: React.FC<{ connector: ConnectorItem }> = ({ connector }) => {
+  const {
+    services: {
+      notifications: { toasts },
+    },
+  } = useKibana();
+  const { invalidateConnectors } = useConnectorsActions();
+
+  const { connect: reauthenticate } = useConnectorOAuthConnect({
+    connectorId: connector.id,
+    redirectMode: OAuthRedirectMode.NewTab,
+    onSuccess: () => {
+      toasts.addSuccess({
+        title: labels.connectors.oauthConnectSuccessTitle,
+        text: labels.connectors.oauthConnectSuccessMessage,
+      });
+      invalidateConnectors();
+    },
+    onError: (error) => {
+      toasts.addDanger({
+        title: labels.connectors.oauthConnectErrorTitle,
+        text: error.message,
+      });
+    },
+  });
+
+  const isOAuth = connector.authMode === 'per-user';
+  const isOAuthConnected = isOAuth && connector.oauthStatus === OAUTH_STATUS.AUTHORIZED;
+  const isOAuthDisconnected = isOAuth && connector.oauthStatus === OAUTH_STATUS.DISCONNECTED;
+
+  let statusColor: 'success' | 'warning' | 'danger' = 'success';
+  let statusText: string;
+
+  if (connector.isMissingSecrets) {
+    statusColor = 'danger';
+    statusText = labels.agentConnectors.missingSecretsStatus;
+  } else if (isOAuthDisconnected) {
+    statusColor = 'warning';
+    statusText = labels.agentConnectors.oauthDisconnectedStatus;
+  } else if (isOAuthConnected) {
+    statusColor = 'success';
+    statusText = labels.agentConnectors.oauthConnectedStatus;
+  } else {
+    statusColor = 'success';
+    statusText = labels.agentConnectors.sharedCredentialsStatus;
+  }
+
+  const accountEmail =
+    typeof connector.config?.userEmail === 'string' ? connector.config.userEmail : undefined;
+
+  return (
+    <div>
+      <EuiTitle size="xxs">
+        <h3>{labels.agentConnectors.connectionSectionTitle}</h3>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiText size="s" color={statusColor}>
+            <strong>● {statusText}</strong>
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      {accountEmail && (
+        <EuiText size="xs" color="subdued">
+          {accountEmail}
+        </EuiText>
+      )}
+      {isOAuth && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiButton size="s" onClick={() => reauthenticate()}>
+            {isOAuthConnected
+              ? labels.agentConnectors.reauthenticateLink
+              : labels.agentConnectors.authenticateLink}
+          </EuiButton>
+        </>
+      )}
+    </div>
+  );
+};
+
+const UsedBySection: React.FC<{ connector: ConnectorItem; agentId: string }> = ({
+  connector,
+  agentId,
+}) => {
+  const { createAgentBuilderUrl } = useNavigation();
+  const { usedByAgents, isLoading, error } = useConnectorUsedByAgents({
+    connectorId: connector.id,
+    currentAgentId: agentId,
+  });
+
+  return (
+    <div>
+      <EuiTitle size="xxs">
+        <h3>{labels.agentConnectors.usedBySectionTitle}</h3>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      {isLoading ? (
+        <EuiLoadingSpinner size="s" />
+      ) : error ? null : usedByAgents.length === 0 ? (
+        <EuiText size="s" color="subdued">
+          {labels.agentConnectors.notUsedByOtherAgents}
+        </EuiText>
+      ) : (
+        <EuiText size="s">
+          {labels.agentConnectors.usedByAgentsMessage(usedByAgents.length)}
+          {': '}
+          {usedByAgents.map((agent, idx) => (
+            <React.Fragment key={agent.id}>
+              {idx > 0 && ', '}
+              <EuiLink href={createAgentBuilderUrl(appPaths.agent.root({ agentId: agent.id }))}>
+                {agent.name}
+              </EuiLink>
+            </React.Fragment>
+          ))}
+        </EuiText>
+      )}
+    </div>
+  );
+};
+
 export const ConnectorDetailPanel: React.FC<ConnectorDetailPanelProps> = ({
   connector,
+  agentId,
   onRemove,
   canEditAgent,
 }) => {
@@ -74,7 +254,22 @@ export const ConnectorDetailPanel: React.FC<ConnectorDetailPanelProps> = ({
         onConfirm: () => onRemove(connector),
       }}
     >
-      {description && <EuiText size="s">{description}</EuiText>}
+      {description && (
+        <>
+          <EuiText size="s">{description}</EuiText>
+          <EuiSpacer size="l" />
+        </>
+      )}
+
+      <ConnectionSection connector={connector} />
+
+      <EuiSpacer size="l" />
+
+      <SubActionsSection connector={connector} />
+
+      <EuiSpacer size="l" />
+
+      <UsedBySection connector={connector} agentId={agentId} />
     </DetailPanelLayout>
   );
 };

@@ -181,6 +181,11 @@ export interface BulkCreateMcpToolsResponse {
   };
 }
 
+export interface ConnectorToolAction {
+  name: string;
+  description: string;
+}
+
 export interface ConnectorItem {
   id: string;
   name: string;
@@ -193,6 +198,8 @@ export interface ConnectorItem {
   isConnectorTypeDeprecated: boolean;
   authMode?: 'shared' | 'per-user';
   oauthStatus?: OAuthStatus;
+  /** Tool-capable sub-actions derived from the connector spec (isTool: true) */
+  tools?: ConnectorToolAction[];
 }
 
 export const OAUTH_STATUS = {
