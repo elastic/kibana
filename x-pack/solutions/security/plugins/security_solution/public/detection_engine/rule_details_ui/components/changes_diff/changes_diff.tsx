@@ -23,23 +23,29 @@ interface ChangesPanelProps {
 }
 
 export function RuleChangesDiff({ item, isLoading }: ChangesPanelProps): JSX.Element {
-  const { oldSource, newSource, numOfChangedFields } = useMemo(() => {
+  const { oldSource, newSource, numOfChangedFields, noDiffAvailable } = useMemo(() => {
     if (!item) {
-      return { oldSource: '', newSource: '', numOfChangedFields: 0 };
+      return { oldSource: '', newSource: '', numOfChangedFields: 0, noDiffAvailable: true };
     }
 
+    const hasNoDiff = EDIT_ACTIONS_REQUIRING_PRIOR_STATE.includes(item.action) && !item.old_values;
     const after = filterAndSort(item.rule);
 
     // old_values is null for create/install actions — there is no previous state.
     // In that case show the full rule as a pure insertion.
     if (!item.old_values) {
-      return { oldSource: '', newSource: JSON.stringify(after, null, 2), numOfChangedFields: 0 };
+      return {
+        oldSource: '',
+        newSource: JSON.stringify(after, null, 2),
+        numOfChangedFields: 0,
+        noDiffAvailable: hasNoDiff,
+      };
     }
 
     const changedFields = extractChangedFieldNames(item);
 
     if (changedFields.length === 0) {
-      return { oldSource: '', newSource: '', numOfChangedFields: 0 };
+      return { oldSource: '', newSource: '', numOfChangedFields: 0, noDiffAvailable: hasNoDiff };
     }
 
     const before = filterAndSort(reconstructBefore(after, item.old_values));
@@ -48,6 +54,7 @@ export function RuleChangesDiff({ item, isLoading }: ChangesPanelProps): JSX.Ele
       oldSource: JSON.stringify(before, null, 2),
       newSource: JSON.stringify(after, null, 2),
       numOfChangedFields: changedFields.length,
+      noDiffAvailable: hasNoDiff,
     };
   }, [item]);
 
@@ -77,9 +84,6 @@ export function RuleChangesDiff({ item, isLoading }: ChangesPanelProps): JSX.Ele
       </EuiPanel>
     );
   }
-
-  const noDiffAvailable =
-    EDIT_ACTIONS_REQUIRING_PRIOR_STATE.includes(item.action) && !item.old_values;
 
   if (noDiffAvailable) {
     return (
