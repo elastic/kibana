@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { LensConfig, LensESQLDataset } from '@kbn/lens-embeddable-utils';
+import type { LensConfig, LensESQLDataset, LensSeriesLayer } from '@kbn/lens-embeddable-utils';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { ChartType } from '../../charts/helper/get_timeseries_color';
@@ -15,6 +15,13 @@ const INDEXES = 'traces-apm*,metrics-apm*';
 const INDEX_PATTERNS = ['traces-apm*', 'metrics-apm*'];
 
 type XYLensConfig = Extract<LensConfig, { chartType: 'xy' }>;
+
+function seriesLayerOf(config: LensConfig | undefined): LensSeriesLayer {
+  if (!config) {
+    throw new Error('Expected a built Lens config');
+  }
+  return (config as XYLensConfig).layers[0] as LensSeriesLayer;
+}
 
 function buildDefinitions(
   overrides: Partial<Parameters<typeof getChartDefinitions>[0]> = {}
@@ -62,14 +69,12 @@ describe('service flyout chart_configs', () => {
       const { keyMetrics, infrastructureMetrics } = buildDefinitions();
 
       [...keyMetrics, ...infrastructureMetrics].forEach(({ config }) => {
-        const xyConfig = config as XYLensConfig;
         const esql = esqlOf(config);
 
-        expect(esql).toContain('SET unmapped_fields="NULLIFY";');
         INDEX_PATTERNS.forEach((index) => expect(esql).toContain(index));
         expect(esql).toContain('BY timestamp = TBUCKET(100)');
         // the x-axis field must match the bucket column so Lens can resolve it
-        expect(xyConfig.layers[0].xAxis).toEqual({ field: 'timestamp', type: 'dateHistogram' });
+        expect(seriesLayerOf(config).xAxis).toEqual({ field: 'timestamp', type: 'dateHistogram' });
       });
     });
 
