@@ -9,6 +9,7 @@ import { entityStoreConditionToESQL as conditionToESQL } from '../../esql/condit
 import { castField } from '../../esql/cast';
 import type {
   EntityDefinitionWithoutId,
+  EuidRankingBranch,
   FieldEvaluation,
   EntityType,
   EuidAttribute,
@@ -44,9 +45,7 @@ import {
  * Single-field branches (ranking.length === 1, single EuidField) are skipped because
  * they short-circuit before the CASE and do not need `_present` aliases.
  */
-function collectRankingFields(
-  branches: Array<{ when?: unknown; ranking: EuidAttribute[][] }>
-): Set<string> {
+function collectRankingFields(branches: EuidRankingBranch[]): Set<string> {
   const fields = new Set<string>();
   for (const { ranking } of branches) {
     if (ranking.length === 1 && ranking[0].length === 1 && isEuidField(ranking[0][0])) {
