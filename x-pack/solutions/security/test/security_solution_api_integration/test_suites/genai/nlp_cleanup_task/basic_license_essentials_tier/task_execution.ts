@@ -25,10 +25,7 @@ export default ({ getService }: FtrProviderContext): void => {
     id: SUPPORTED_TRAINED_MODELS.TINY_ELSER.name,
   };
 
-  // This started failing after merging with main, so skipping for now
-  // See https://github.com/elastic/kibana/pull/186219 for details, but issue appears to be with
-  // sporadic errors in loading `pt_tiny_elser`
-  describe.skip('@serverless NLP Cleanup Task in Essentials Tier', () => {
+  describe('@serverless NLP Cleanup Task in Essentials Tier', () => {
     describe('New Essentials Deployment', () => {
       it('registers and enables NLP Cleanup Task', async () => {
         const task = await kibanaServer.savedObjects.get({
@@ -41,9 +38,25 @@ export default ({ getService }: FtrProviderContext): void => {
       describe('Model Loading', () => {
         before(async () => {
           // Make sure the .ml-stats index is created in advance, see https://github.com/elastic/elasticsearch/issues/65846
+          const config = {
+            ...ml.api.getTrainedModelConfig(TINY_ELSER.name),
+            input: { field_names: ['text_field'] },
+          };
           await ml.api.assureMlStatsIndexExists();
           // Create a light-weight model that has a `model_type` of `pytorch`
-          await ml.api.importTrainedModel(TINY_ELSER.name, TINY_ELSER.id);
+          for (let attempt = 0; attempt < 5; attempt++) {
+            try {
+              await ml.api.importTrainedModel(TINY_ELSER.name, TINY_ELSER.id, config);
+              break;
+            } catch (e) {
+              const is404 =
+                String(e?.message).includes('404') || e?.status === 404 || e?.statusCode === 404;
+              if (!is404 || attempt === 4) {
+                throw e;
+              }
+              await new Promise((resolve) => setTimeout(resolve, 2000));
+            }
+          }
         });
 
         after(async () => {

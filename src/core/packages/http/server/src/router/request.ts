@@ -13,6 +13,7 @@ import type { RequestApplicationState, RouteOptionsApp } from '@hapi/hapi';
 import type { Observable } from 'rxjs';
 import type { Span } from 'elastic-apm-node';
 import type { RecursiveReadonly } from '@kbn/utility-types';
+import type { SpaceId } from '@kbn/core-spaces-common';
 import type { HttpProtocol } from '../http_contract';
 import type { IKibanaSocket } from './socket';
 import type { RouteMethod, RouteConfigOptions, RouteSecurity, RouteDeprecationInfo } from './route';
@@ -50,8 +51,12 @@ export interface RequestTimingState {
 export interface KibanaRequestState extends RequestApplicationState {
   requestId: string;
   requestUuid: string;
+  /** The resolved base path for this request, including server base path and any explicit space prefix. */
+  basePath?: string;
   rewrittenUrl?: URL;
   traceId?: string;
+  /** The resolved space ID for this request. Defaults to 'default'. */
+  spaceId?: SpaceId;
   /** The top HTTP Otel Span for this request. */
   httpSpan?: OTelSpan;
   /** The OTel sub-span: used to group the pre-route handlers, the route handler, and the post-route handlers. */
@@ -63,8 +68,6 @@ export interface KibanaRequestState extends RequestApplicationState {
   startTime: number;
   redactedSessionId?: string;
   timingState?: RequestTimingState;
-  /** The resolved Kibana space ID for this request. Set by Core's onRequest handler; defaults to `'default'` when absent. */
-  spaceId?: string;
 }
 
 /**
@@ -216,7 +219,27 @@ export interface KibanaRequest<
   readonly auth: KibanaRequestAuth;
 
   /**
-   * URL rewritten in onPreRouting request interceptor.
+   * The resolved Kibana space ID for this request.
+   * Always populated; defaults to {@link DEFAULT_SPACE_ID} ('default') when no explicit space is present in the URL.
+   */
+  readonly spaceId: SpaceId;
+
+  /**
+   * The resolved Kibana base path for this request.
+   *
+   * Includes the configured server base path and, when present, the request's
+   * explicit space URL prefix. Defaults to the configured server base path for
+   * canonical default-space URLs.
+   */
+  readonly basePath: string;
+
+  /**
+   * The original request URL, captured before any rewrites by Core's onRequest
+   * handler (basePath strip, space prefix strip) or by `onPreRouting` interceptors
+   * via `toolkit.rewriteUrl`. Undefined when no rewrite occurred.
+   *
+   * Despite the name, this holds the URL as it was received — not the rewritten
+   * URL. The current (post-rewrite) URL is always {@link KibanaRequest.url}.
    */
   readonly rewrittenUrl?: URL;
 
@@ -247,15 +270,6 @@ export interface KibanaRequest<
    * Only available during development.
    */
   readonly serverTiming: RequestTiming;
-
-  /**
-   * The resolved Kibana space ID for this request.
-   *
-   * @remarks
-   * Always populated. Defaults to `'default'` for requests that do not target an explicit space
-   * (i.e. requests whose URL does not contain a `/s/{spaceId}` prefix).
-   */
-  readonly spaceId: string;
 }
 
 /**
