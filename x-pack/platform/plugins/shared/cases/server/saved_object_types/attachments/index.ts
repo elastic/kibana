@@ -48,13 +48,6 @@ export const createCaseAttachmentSavedObjectType = (): SavedObjectsType => ({
            */
         },
       },
-      metadata: {
-        properties: {
-          actionType: {
-            type: 'keyword',
-          },
-        },
-      },
       created_at: {
         type: 'date',
       },
