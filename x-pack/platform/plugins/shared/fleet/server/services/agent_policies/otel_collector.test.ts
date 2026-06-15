@@ -756,6 +756,242 @@ describe('generateOtelcolConfig', () => {
     expect(result.service?.extensions).not.toContain(`beatsauth/default/${expectedSuffix}`);
   });
 
+  it('should rewrite credentials_provider field that references a stream-declared extension', () => {
+    const inputId = 'aws-input-1';
+    const streamId = 'stream-id-1';
+    const expectedSuffix = `${inputId}-${streamId}`;
+
+    const input: FullAgentPolicyInput = {
+      type: OTEL_COLLECTOR_INPUT_TYPE,
+      id: inputId,
+      name: inputId,
+      revision: 0,
+      data_stream: { namespace: 'default' },
+      use_output: 'default',
+      package_policy_id: 'mypolicy',
+      streams: [
+        {
+          id: streamId,
+          data_stream: { dataset: 'aws.cloudwatch', type: 'logs' },
+          extensions: {
+            awscredentialsprovider: { region: 'us-east-1' },
+          },
+          receivers: {
+            awscloudwatch: {
+              region: 'us-east-1',
+              credentials_provider: 'awscredentialsprovider',
+            },
+          },
+          service: {
+            extensions: ['awscredentialsprovider'],
+            pipelines: {
+              logs: { receivers: ['awscloudwatch'] },
+            },
+          },
+        },
+      ],
+    };
+
+    const result = generateOtelcolConfig({ inputs: [input], dataOutput: defaultOutput });
+
+    expect(result.extensions?.[`awscredentialsprovider/${expectedSuffix}`]).toEqual({
+      region: 'us-east-1',
+    });
+    expect(result.extensions?.awscredentialsprovider).toBeUndefined();
+
+    const suffixedReceiver = result.receivers?.[`awscloudwatch/${expectedSuffix}`];
+    expect(suffixedReceiver?.credentials_provider).toBe(`awscredentialsprovider/${expectedSuffix}`);
+    expect(suffixedReceiver?.region).toBe('us-east-1');
+
+    expect(result.service?.extensions).toContain(`awscredentialsprovider/${expectedSuffix}`);
+    expect(result.service?.extensions).not.toContain('awscredentialsprovider');
+  });
+
+  it('should rewrite storage field that references a stream-declared extension (file_storage persistent queue)', () => {
+    const inputId = 'otlp-input-storage';
+    const streamId = 'stream-id-1';
+    const expectedSuffix = `${inputId}-${streamId}`;
+
+    const input: FullAgentPolicyInput = {
+      type: OTEL_COLLECTOR_INPUT_TYPE,
+      id: inputId,
+      name: inputId,
+      revision: 0,
+      data_stream: { namespace: 'default' },
+      use_output: 'default',
+      package_policy_id: 'mypolicy',
+      streams: [
+        {
+          id: streamId,
+          data_stream: { dataset: 'generic.otel', type: 'logs' },
+          extensions: {
+            file_storage: { directory: '/var/lib/otelcol' },
+          },
+          exporters: {
+            otlphttp: {
+              endpoint: 'https://example.com',
+              sending_queue: {
+                storage: 'file_storage',
+              },
+            },
+          },
+          service: {
+            extensions: ['file_storage'],
+            pipelines: {
+              logs: { receivers: ['otlp'], exporters: ['otlphttp'] },
+            },
+          },
+        },
+      ],
+    };
+
+    const result = generateOtelcolConfig({ inputs: [input], dataOutput: defaultOutput });
+
+    expect(result.extensions?.[`file_storage/${expectedSuffix}`]).toEqual({
+      directory: '/var/lib/otelcol',
+    });
+
+    const suffixedExporter = result.exporters?.[`otlphttp/${expectedSuffix}`];
+    expect(suffixedExporter?.sending_queue?.storage).toBe(`file_storage/${expectedSuffix}`);
+
+    expect(result.service?.extensions).toContain(`file_storage/${expectedSuffix}`);
+  });
+
+  it('should rewrite extension references that appear in an array value', () => {
+    const inputId = 'multi-ext-input';
+    const streamId = 'stream-id-1';
+    const expectedSuffix = `${inputId}-${streamId}`;
+
+    const input: FullAgentPolicyInput = {
+      type: OTEL_COLLECTOR_INPUT_TYPE,
+      id: inputId,
+      name: inputId,
+      revision: 0,
+      data_stream: { namespace: 'default' },
+      use_output: 'default',
+      package_policy_id: 'mypolicy',
+      streams: [
+        {
+          id: streamId,
+          data_stream: { dataset: 'generic.otel', type: 'logs' },
+          extensions: {
+            ext_a: { key: 'a' },
+            ext_b: { key: 'b' },
+          },
+          receivers: {
+            somereceiver: {
+              // hypothetical field that takes a list of extension IDs
+              providers: ['ext_a', 'ext_b', 'external_ext'],
+            },
+          },
+          service: {
+            extensions: ['ext_a', 'ext_b'],
+            pipelines: {
+              logs: { receivers: ['somereceiver'] },
+            },
+          },
+        },
+      ],
+    };
+
+    const result = generateOtelcolConfig({ inputs: [input], dataOutput: defaultOutput });
+
+    const suffixedReceiver = result.receivers?.[`somereceiver/${expectedSuffix}`];
+    expect(suffixedReceiver?.providers).toEqual([
+      `ext_a/${expectedSuffix}`,
+      `ext_b/${expectedSuffix}`,
+      'external_ext', // not a declared extension — must not be rewritten
+    ]);
+  });
+
+  it('should rewrite extension-to-extension references within the extensions block', () => {
+    const inputId = 'ext-chain-input';
+    const streamId = 'stream-id-1';
+    const expectedSuffix = `${inputId}-${streamId}`;
+
+    // ext_b references ext_a in its config body (e.g. a credential chaining pattern)
+    const input: FullAgentPolicyInput = {
+      type: OTEL_COLLECTOR_INPUT_TYPE,
+      id: inputId,
+      name: inputId,
+      revision: 0,
+      data_stream: { namespace: 'default' },
+      use_output: 'default',
+      package_policy_id: 'mypolicy',
+      streams: [
+        {
+          id: streamId,
+          data_stream: { dataset: 'generic.otel', type: 'logs' },
+          extensions: {
+            ext_base: { token: 'abc' },
+            ext_derived: { delegate: 'ext_base', extra: 'value' },
+          },
+          service: {
+            extensions: ['ext_base', 'ext_derived'],
+            pipelines: {
+              logs: { receivers: ['otlp'] },
+            },
+          },
+        },
+      ],
+    };
+
+    const result = generateOtelcolConfig({ inputs: [input], dataOutput: defaultOutput });
+
+    expect(result.extensions?.[`ext_base/${expectedSuffix}`]).toEqual({ token: 'abc' });
+    // The delegate reference inside ext_derived's body must be suffixed
+    expect(result.extensions?.[`ext_derived/${expectedSuffix}`]).toEqual({
+      delegate: `ext_base/${expectedSuffix}`,
+      extra: 'value',
+    });
+  });
+
+  it('should not rewrite substring occurrences — only exact whole-string matches are rewritten', () => {
+    const inputId = 'no-collision-input';
+    const streamId = 'stream-id-1';
+    const expectedSuffix = `${inputId}-${streamId}`;
+
+    const input: FullAgentPolicyInput = {
+      type: OTEL_COLLECTOR_INPUT_TYPE,
+      id: inputId,
+      name: inputId,
+      revision: 0,
+      data_stream: { namespace: 'default' },
+      use_output: 'default',
+      package_policy_id: 'mypolicy',
+      streams: [
+        {
+          id: streamId,
+          data_stream: { dataset: 'generic.otel', type: 'logs' },
+          extensions: {
+            myext: { token: 'secret' },
+          },
+          receivers: {
+            otlp: {
+              // substring — must not be rewritten
+              endpoint: 'http://myext.internal:4317',
+              // exact match — must be rewritten
+              auth: { authenticator: 'myext' },
+            },
+          },
+          service: {
+            extensions: ['myext'],
+            pipelines: {
+              logs: { receivers: ['otlp'] },
+            },
+          },
+        },
+      ],
+    };
+
+    const result = generateOtelcolConfig({ inputs: [input], dataOutput: defaultOutput });
+
+    const suffixedReceiver = result.receivers?.[`otlp/${expectedSuffix}`];
+    expect(suffixedReceiver?.auth?.authenticator).toBe(`myext/${expectedSuffix}`);
+    // substring inside a URL must not be touched
+    expect(suffixedReceiver?.endpoint).toBe('http://myext.internal:4317');
+  });
+
   it('should add elasticapm connector and processor for traces input with use_apm enabled', () => {
     const inputs: FullAgentPolicyInput[] = [otelTracesInputWithAPM];
     expect(generateOtelcolConfig({ inputs, dataOutput: defaultOutput })).toEqual({
