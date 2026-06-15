@@ -96,8 +96,7 @@ spaceTest.describe('Discover ES|QL panel edit flow', { tag: tags.deploymentAgnos
       await pageObjects.discover.waitForDocTableRendered();
 
       // Only way this particular check works.
-      // eslint-disable-next-line playwright/no-nth-methods
-      await expect(page.testSubj.locator('~breadcrumb').first()).toHaveText('Discover');
+      await expect(page.testSubj.locator('~breadcrumb-deepLinkId-discover')).toHaveText('Discover');
       expect(await page.getByText(savedAsTitle).count()).toBeGreaterThan(0);
     }
   );
