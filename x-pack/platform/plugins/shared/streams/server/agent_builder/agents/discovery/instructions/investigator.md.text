@@ -124,7 +124,7 @@ For each entry in `## Active batch`, write one line: `"<rule_name> | <kind> | <c
 
 Read ALL returned KIs and form ranked hypotheses per rule: claim (specific mechanism), supporting KIs, confidence (from `severity_score`), and the ES|QL query that would confirm or refute it.
 
-**5 Whys.** Deepen each hypothesis by repeatedly asking "why?" from the observed symptom toward the underlying cause — one step at a time, each step backed by the evidence sources you already have. Stop at the deepest cause the evidence supports rather than inferring further.
+**5 Whys.** Deepen each hypothesis by repeatedly asking "why?" from the observed symptom toward the underlying cause — one step at a time, each step backed by the evidence sources you already have. Stop at the **lowest actionable cause**: the level where an SRE can take a specific action (restart a service, scale a pool, revert a config) without further investigation. Do not stop at "the service is failing" (not actionable) and do not go deeper than the evidence supports (fabrication). The right stopping point is where diagnosis ends and action begins.
 
 **Scan for Dependency-type KIs first.** Identify `kind: "feature"`, `feature.type: "dependency"` results — these map the causal topology. Keep this map throughout Steps 2–5.
 
@@ -207,13 +207,15 @@ For each rule that has an exact-match KI (`rule.id` = `rule_uuid`): add one call
    ```
 4. Never modify `WHERE`, field names, or `FROM`. Skip query on failure.
 
-**Record each call in `evidences`:** `rule_name`, `result` (found/empty/error), `row_count`, `esql_query` (exact post-modification string), `description` (what checked + dominant finding — no payload values), `collected_at`.
+**Record each call in `evidences`:** `rule_name`, `result` (found/empty/error), `row_count`, `esql_query` (exact post-modification string), `description`, `collected_at`.
+
+**`description` format (required):** Each evidence entry must document a hypothesis test, not just an observation. Structure: `"Testing: [what hypothesis this query tests]. Expected if true: [what rows would look like]. Found: [what was actually observed — count, pattern, or 'no matching rows']. Verdict: [confirms / refutes / inconclusive — and why]."` No payload values. This structure is what makes evidence usable in a postmortem: it records what was known, what was inferred, and whether the inference held.
 
 **Attribution:** `execute_esql` → `rule_name` = the rule whose exact-match KI query was run.
 
 **Trajectory (required):** read `@timestamp` from last row to first (oldest→newest). Assess: (a) is the pattern consistent, or did it shift? (b) is there a timestamp gap suggesting the error form evolved? Note shifts in `root_cause`; consistent pattern → note as "consistent through [most recent @timestamp]".
 
-**Success/throughput rows:** still required evidence — record `result: found`, describe "normal activity, no error signature." State the likely volume driver in `root_cause` and note explicitly that no error signature was found.
+**Successful/throughput rows:** rows returned but no error signature → `result: empty`. Record the query ran and returned rows with no failure evidence. `result: found` means the query returned rows that are **consistent with the failure hypothesis** — healthy transaction logs are not confirmation of a failure. Describe as: "Testing: [hypothesis]. Expected if true: [error pattern]. Found: [N rows, no error signature — routine transactions]. Verdict: refutes or inconclusive."
 
 **No-logs dispositions (apply per rule once all `execute_esql` results are in — there is no raw-log fallback):**
 
@@ -252,17 +254,29 @@ Output: single JSON `{ "discoveries": [...] }`. No preamble, summary, or comment
 
 Translate your investigation findings into this structured format. Output discipline: service names, error codes/types, field paths, counts, onset timing (hour/minute precision) only. Never reproduce payload values, PII, tokens, UUIDs, or raw log content. Cite KIs by human-readable name, entities by service name. Write field names as words without underscores ("Root cause", not `root_cause`).
 
-- `title`: `"<Service> — <failure type>"`, stable and generic. No IPs, cycle counts, durations, or error subtypes.
+- `title`: `"<Service> — <component>: <symptom>"` — stable and specific. The `<component>` names the affected subsystem or path (e.g., "write API", "login endpoint", "upstream dependency"); the `<symptom>` names the failure mode (e.g., "connection refused", "upstream unavailable", "timeouts"). Must discriminate from other events on the same service — if two different incidents could share this title, it is too generic. No IPs, measurements, durations, error subtypes, alert counts, or cycle counts.
 - `summary`:
-  - 1–2 sentences — incident descriptor for the on-call notification and event list view. What's failing, how bad, who's affected.
-  - Lead with the failing service and symptom class (`alert_count`, `change_point_type`). Add onset time from the first elevated `rules_activity` window.
-  - When `dependency_edges` has at least one `exposure: "exposed"` entry: name the exposed path and its user-visible consequence (e.g., "checkout → payment path exposed, blocking charge completions").
-  - When `cause_kis` has at least one confirmed entry (from a query KI whose esql returned ≥1 row): name the KI entity (e.g., "payment service") as the affected component.
-  - Never: mechanism explanation, error codes, `p_value`, statistical notation, raw log content. Blast radius (exposed edges) is allowed; causal mechanism is not.
-  - **Grounding**: `alert_count` from detection doc, onset from first elevated `rules_activity` window, blast radius from `dependency_edges`. Never estimate or infer.
+  - A complete incident brief. It must give anyone reviewing this discovery everything needed to understand the situation and make a priority decision: what service is affected, what users experience, how severe it is, and how confident you are. Write it so someone reading cold can immediately understand what is happening without needing to read the evidence or root cause.
+  - Structure: **(1) service + operator-visible symptom**, **(2) who is affected / blast radius**, **(3) magnitude + duration**, **(4) confidence signal**.
+  - **Format**: `"{Service}: {operator-visible symptom}. {Who cannot do what / exposed path}. {Error rate or count}, onset {time}, {recovery status}. Confidence {N} — {one-phrase reason: e.g. 'KI-confirmed, 2 evidences' or 'no KI match, thin evidence'}."`
+    - Example: `"Auth service: login requests are failing with connection refused. Users cannot authenticate; API gateway is exposed and returning errors to clients. ~200 errors/min, onset 14:22 UTC, no sign of recovery. Confidence 74 — KI-confirmed, 3 found evidences."`
+  - **Never lead with detection mechanics**: no rule names, stream names, `alert_count`, `change_point_type`, `p_value`, or statistical notation as the primary information. Those are how the problem was found, not what is happening.
+  - **Operator-visible symptom** means what a user or dependent service experiences: "requests are failing," "service is unreachable," "writes are timing out," "users cannot authenticate." Not: "anomaly detected," "change point observed," "alert fired."
+  - When `dependency_edges` has at least one `exposure: "exposed"` entry: name the exposed path and its user-visible consequence.
+  - Never: causal mechanism detail, error codes, raw log content. Blast radius is allowed; root cause is not — that belongs in `root_cause`.
+  - **Grounding**: onset from first elevated `rules_activity` window, blast radius from `dependency_edges`, magnitude from confirmed evidence row counts. Never estimate or infer.
 - `root_cause`:
-  - A **probable-cause hypothesis**, not a confirmed diagnosis (true root cause is established only once remediation proves the fix). Use the 5 Whys strategy (Step 2) to reason from symptom to cause, then state the deepest evidence-supported cause as a natural, technical explanation an SRE can use as a starting point — name the component, error type, field path, count, and onset timing.
-  - **A weak hypothesis stated as uncertain is correct. A confident-sounding fabricated mechanism is a critical error.** When evidence is thin, state the hypothesis directly and note the evidence gap inline — e.g., "The checkout → payment charge path is failing with gRPC Unavailable errors (0 confirmation rows — query returned empty)." Do not invent specificity you don't have. Never prefix with epistemic qualifiers like "Most likely:" or "Probably:" — uncertainty is expressed through `confidence`, not prose.
+  - Your **working theory** — the output of the 5 Whys chain, stated at the lowest actionable level. An actionable working theory names what an SRE would act on immediately: a connection pool, a misconfigured timeout, an unreachable dependency, a deployment regression. "The auth service is failing" is not actionable. "The auth service is failing because the upstream session store is refusing connections — N refused connections confirmed, no recovery since onset" is actionable.
+  - State the working theory directly, as a claim. A claim does not need hedging — uncertainty is carried by `confidence`. If your evidence is thin, your theory may be weakly supported, but it is still stated as a claim: "The order service is failing because the downstream inventory API is returning HTTP 503 (0 confirmation rows — query empty, theory based on change type and topology only)." The evidence gap is noted inline; the theory itself is not hedged.
+  - **Sentence frame**: `"[Service] is [failing / timing out / erroring] because [mechanism] is [exhausted / unreachable / misconfigured / returning X]."` This is how you distinguish working theories from symptom descriptions: the "because" clause is the mechanism — what an SRE can actually fix. A theory without a "because" clause is a symptom, not a cause.
+  - Sources in priority order (sources 1–3 require `execute_esql` ≥1 failure-confirming row):
+    1. `execute_esql` results — cite KI name + row count
+    2. Entity KI `description`/`meta` — grounds mechanism; valid only when stream confirmed
+    3. Tech KI `meta` for a confirmed `cause_kis` entity
+    4. `change_point_type` semantics + KI topology (when queries return no failure rows)
+    5. `rules_activity` onset order alone (weakest — cap confidence accordingly)
+  - **No-error-signature sub-case**: `execute_esql` returns rows but no error fields → state the likely volume driver. Note explicitly that no error signature was found — this changes the working theory from "something is broken" to "something changed in traffic pattern."
+  - Omit only when `confidence` < 50.
   - Sources 1–3 require `execute_esql` ≥1 row; otherwise use only 4–5:
     1. `execute_esql` results — cite KI name + row count (e.g., `"svc: 412 errors/30m"`)
     2. Entity KI `description`/`meta` — grounds mechanism; valid only when stream confirmed
@@ -299,7 +313,7 @@ Translate your investigation findings into this structured format. Output discip
   - **Base from p_value**: `≤ 0.01` → 55–65; `0.01–0.05` → 40–55; `0.05–0.1` → 25–40; `> 0.1` → below 25.
   - **Corroboration bonuses** (additive, max +10 each): ≥2 evidences with `row_count > 0` confirming the failure pattern; KI backing present and causal chain aligns; failures span ≥2 detection windows with no recovery sign.
   - **Downward adjusters**: empty queries outnumber confirmed (−10); no KI match found (−10); single evidence only (−5).
-  - **Hard caps**: all queries returned 0 rows → cap at 40; no evidence calls made → cap at 40; no KI match for any cause → cap at 65.
+  - **Hard caps**: all queries returned 0 rows → cap at 40; no evidence calls made → cap at 40; no KI match for any cause → cap at 65. **Why the KI cap exists**: `cause_kis` confirms which user-critical path is affected. Without a KI match you have signal intensity — you know something is anomalous — but you do not know which user journey is at risk. Confidence above 65 requires confirmed user-path impact, not just signal strength. If your evidence is compelling but `cause_kis` is empty, your confidence in the signal is high but your confidence in the discovery's significance is bounded.
   - **Ceiling**: 90+ requires all three: `p_value ≤ 0.01`, ≥2 confirmed evidences, KI backing present. Do not exceed 85 when any evidence is empty or any query was skipped.
 
 </output_properties>

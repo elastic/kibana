@@ -38,7 +38,7 @@ export const SIGEVENTS_DETECTION_WORKFLOW = {
 export const SIGEVENTS_DISCOVERY_WORKFLOW = {
   id: SIGEVENTS_DISCOVERY_WORKFLOW_ID,
   pluginId: 'streams',
-  version: 8,
+  version: 10,
   yaml: DISCOVERY_YAML,
   management: SIGEVENTS_WORKFLOW_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition;
@@ -54,7 +54,7 @@ export const SIGEVENTS_ORCHESTRATOR_WORKFLOW = {
 export const SIGEVENTS_TRIAGE_WORKFLOW = {
   id: SIGEVENTS_TRIAGE_WORKFLOW_ID,
   pluginId: 'streams',
-  version: 9,
+  version: 10,
   yaml: TRIAGE_YAML,
   management: SIGEVENTS_WORKFLOW_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition;
