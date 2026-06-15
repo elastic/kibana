@@ -109,7 +109,7 @@ const createBulkEditDependencies = () => ({
   ruleCustomizationStatus: {} as PrebuiltRulesCustomizationStatus,
 });
 
-describe('alert validation workflow rule attachments', () => {
+describe('alert analysis workflow rule attachments', () => {
   it('detects the exact workflow action on a rule', () => {
     expect(
       hasAlertValidationWorkflowAction(

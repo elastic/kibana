@@ -1,5 +1,5 @@
 # =============================================================================
-# Security Alert Validation Workflow
+# Security Alert Analysis Workflow
 # =============================================================================
 #
 # Purpose:
@@ -14,7 +14,7 @@
 # Flow:
 #   - Initialise workflow variables (tag prefix, version).
 #   - For each alert in the trigger batch:
-#     - Skip if already validated (unless override_previous is true).
+#     - Skip if already analyzed (unless override_previous is true).
 #     - Add an "execution started" note to the alert timeline.
 #     - Gather enrichment data (close history, global prevalence,
 #       related alerts graph, alert history, rule metadata).
@@ -30,13 +30,13 @@
 # Author: Elastic
 # =============================================================================
 
-name: "security.alert.validation"
+name: "security.alert.analysis"
 enabled: true
-description: "Security alert validation workflow. Author: Elastic"
+description: "Security alert analysis workflow. Author: Elastic"
 version: "1"
 tags:
   - security
-  - alert_validation
+  - alert_analysis
 
 triggers:
   - type: alert
@@ -55,7 +55,7 @@ consts:
   workflow_version: "v0.0.1"
 
   # When false, the workflow exits early if the alert already carries the
-  # workflow tag prefix. Set to true to re-evaluate previously validated alerts.
+  # workflow tag prefix. Set to true to re-evaluate previously analyzed alerts.
   override_previous: false
 
   # --- Auto-close settings ---------------------------------------------------
@@ -104,32 +104,32 @@ steps:
             /app/security/alerts/redirect/{{ foreach.item._id }}
 
       # -----------------------------------------------------------------------
-      # Build the "already validated" check expression
+      # Build the "already analyzed" check expression
       # -----------------------------------------------------------------------
       # Creates a Liquid expression that evaluates to true when the alert's
       # workflow_tags array already contains the workflow tag prefix.
-      - name: build_already_validated_expr
+      - name: build_already_analyzed_expr
         type: data.set
         with:
-          already_validated_expr: 'tag == "{{ variables.tag_prefix }}"'
+          already_analyzed_expr: 'tag == "{{ variables.tag_prefix }}"'
 
-      - name: build_already_validated_condition
+      - name: build_already_analyzed_condition
         type: data.set
         with:
-          already_validated_condition: "${{ foreach.item.kibana.alert.workflow_tags | has_exp: 'tag', variables.already_validated_expr }}"
+          already_analyzed_condition: "${{ foreach.item.kibana.alert.workflow_tags | has_exp: 'tag', variables.already_analyzed_expr }}"
 
       # -----------------------------------------------------------------------
-      # Gate: skip if the alert was already validated
+      # Gate: skip if the alert was already analyzed
       # -----------------------------------------------------------------------
-      - name: already_validated
+      - name: already_analyzed
         type: if
-        condition: "${{ variables.already_validated_condition and consts.override_previous == false }}"
+        condition: "${{ variables.already_analyzed_condition and consts.override_previous == false }}"
         steps:
-          - name: log_already_validated
+          - name: log_already_analyzed
             type: console
             with:
               message: >-
-                Alert {{ foreach.item._id }} has already been validated.
+                Alert {{ foreach.item._id }} has already been analyzed.
                 Remove the "{{ variables.tag_prefix }}" tag to re-run.
         else:
 

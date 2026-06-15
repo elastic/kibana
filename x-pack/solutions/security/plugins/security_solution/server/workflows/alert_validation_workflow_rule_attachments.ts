@@ -342,7 +342,7 @@ export const createAlertValidationWorkflowRuleAttachmentService = (
       const errorCount = bulkEditResults.reduce((count, result) => count + result.errors.length, 0);
 
       if (errorCount > 0) {
-        throw new Error(`Failed to update the alert validation workflow on ${errorCount} rule(s)`);
+        throw new Error(`Failed to update the alert analysis workflow on ${errorCount} rule(s)`);
       }
 
       return {

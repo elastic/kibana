@@ -166,7 +166,7 @@ export const registerAlertValidationWorkflowSettingsRoutes = (
             },
           });
         } catch (error) {
-          logger.warn('Failed to save alert validation workflow settings', { error });
+          logger.warn('Failed to save alert analysis workflow settings', { error });
           return response.customError({
             statusCode: 500,
             body: {

@@ -38,7 +38,6 @@ import { PrePromptWorkflowSection } from './pre_prompt_workflow_section';
 import { DocumentationSection } from './documentation';
 import { AnonymizationProfilesSection } from './anonymization_profiles_section';
 import { TokenUsageTracking } from './token_usage_tracking/token_usage_tracking';
-import { AlertValidationWorkflowSection } from './alert_validation_workflow_section';
 
 interface GenAiSettingsAppProps {
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
@@ -303,7 +302,6 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
           </EuiSplitPanel.Outer>
 
           <PrePromptWorkflowSection />
-          <AlertValidationWorkflowSection />
 
           {isAgentExperience && (showChatExperienceSetting || hasAgentBuilderPrivileges) && (
             <>
