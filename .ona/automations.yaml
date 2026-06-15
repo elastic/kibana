@@ -1,19 +1,44 @@
 tasks:
   install-deps:
-    name: Bootstrap the project
+    name: Prebuild warmup
+    # Bootstrap + start ES/Kibana so optimizer bundles, ES indices, and fleet
+    # setup are cached in the snapshot.
     triggeredBy:
       - prebuild
-    command: yarn kbn bootstrap && node scripts/es snapshot --download-only && node scripts/build_kibana_platform_plugins
+    prebuildRequiresSuccess: true
+    command: bash .ona/prebuild_warmup.sh
+  post-start-extras:
+    name: Post-start setup
+    triggeredBy:
+      - postDevcontainerStart
+    command: bash .ona/post_start_extras.sh
 services:
   elasticsearch:
     name: Elasticsearch
     commands:
-      start: yarn es snapshot
+      # Services can't declare `dependsOn`, so wait for bootstrap to link the
+      # @kbn/* workspaces before starting; otherwise `yarn es` fails with
+      # "Cannot find module '@kbn/setup-node-env'".
+      start: |
+        until node -e "require.resolve('@kbn/setup-node-env')" 2>/dev/null; do
+          echo "Waiting for bootstrap to finish before starting Elasticsearch..."
+          sleep 5
+        done
+        yarn es snapshot
     triggeredBy:
       - postDevcontainerStart
   kibana:
     name: Kibana
     commands:
-      start: yarn start --no-base-path
+      start: |
+        until node -e "require.resolve('@kbn/setup-node-env')" 2>/dev/null; do
+          echo "Waiting for bootstrap to finish before starting Kibana..."
+          sleep 5
+        done
+        yarn start --no-base-path --server.host=0.0.0.0
+      ready: |
+        until curl -sf -o /dev/null http://localhost:5601/api/status; do sleep 5; done
+        curl -sf -o /dev/null http://localhost:5601/login
+        ona environment port open 5601 --name Kibana --admission organization
     triggeredBy:
       - postDevcontainerStart
