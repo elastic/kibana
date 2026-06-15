@@ -143,16 +143,20 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
     conversationTitle,
   });
 
-  // Set message in input when {autoSendInitialMessage} is false and {initialMessage} is provided.
-  // Works for both new conversations and existing ones (e.g. when "Add to chat" is clicked while
-  // a conversation is already open).
+  // Set initial message in input when {autoSendInitialMessage} is false and {initialMessage} is provided
   useEffect(() => {
-    if (initialMessage && !autoSendInitialMessage) {
+    if (initialMessage && !autoSendInitialMessage && isNewConversation) {
       messageEditorController.setContent(initialMessage);
       messageEditorController.focus();
-      resetInitialMessage?.(); // Reset to avoid re-populating on subsequent renders
+      resetInitialMessage?.(); // Reset the initial message to avoid sending it again
     }
-  }, [initialMessage, autoSendInitialMessage, messageEditorController, resetInitialMessage]);
+  }, [
+    initialMessage,
+    autoSendInitialMessage,
+    isNewConversation,
+    messageEditorController,
+    resetInitialMessage,
+  ]);
 
   // Auto-focus when conversation changes
   useEffect(() => {
