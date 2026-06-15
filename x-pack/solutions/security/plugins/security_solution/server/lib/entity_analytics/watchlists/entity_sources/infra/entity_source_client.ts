@@ -119,8 +119,8 @@ export class WatchlistEntitySourceClient {
     if ((indexPatternChanged || (wasIndex && !isNowIndex)) && currentSource.apiKeyId) {
       await invalidateEntitySourceApiKey(coreStart.security, currentSource.apiKeyId, logger);
     }
-    // Needs new API key: index pattern changed or type changed from non-index to index
-    if (isNowIndex && (indexPatternChanged || !wasIndex)) {
+    // Needs new API key: index pattern changed, type changed from non-index to index, or API key is missing (re-auth)
+    if (isNowIndex && (indexPatternChanged || !wasIndex || !currentSource.apiKeyId)) {
       if (request) {
         if (!this.dependencies.hasEncryptionKey) {
           throw new Error(

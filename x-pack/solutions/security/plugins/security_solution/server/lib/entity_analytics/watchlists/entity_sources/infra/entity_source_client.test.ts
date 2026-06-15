@@ -336,6 +336,39 @@ describe('WatchlistEntitySourceClient', () => {
         });
       });
 
+      it('grants a new key when the API key was cleared (re-authorization)', async () => {
+        const sourceId = 'source-id';
+        const indexPattern = 'logs-*';
+        const mockRequest = httpServerMock.createKibanaRequest();
+        soClient.get.mockResolvedValue({
+          id: sourceId,
+          type: watchlistEntitySourceTypeName,
+          references: [],
+          attributes: {
+            type: 'index' as const,
+            name: 'My Source',
+            indexPattern,
+            apiKeyId: null,
+            apiKey: null,
+          },
+        } as never);
+        soClient.find.mockResolvedValue({ saved_objects: [], total: 0 } as never);
+        soClient.update.mockResolvedValue({
+          id: sourceId,
+          attributes: { type: 'index', name: 'My Source', indexPattern },
+        } as never);
+
+        await client.update({ id: sourceId }, mockRequest);
+
+        expect(mockInvalidateEntitySourceApiKey).not.toHaveBeenCalled();
+        expect(mockSecurity.authc.apiKeys.grantAsInternalUser).toHaveBeenCalled();
+        const [, , savedAttrs] = (soClient.update as jest.Mock).mock.calls[0];
+        expect(savedAttrs).toMatchObject({
+          apiKeyId: mockedApiKey.id,
+          apiKey: mockedApiKey.api_key,
+        });
+      });
+
       it('does not rotate key when the index pattern is unchanged', async () => {
         const sourceId = 'source-id';
         const newName = 'Renamed';
