@@ -17,7 +17,6 @@ export const servers: ScoutServerConfig = {
     serverArgs: [
       ...defaultConfig.kbnTestServer.serverArgs,
       '--xpack.alerting_v2.enabled=true',
-      '--uiSettings.overrides.alerting:v2:experimentalFeatures=true',
     ],
   },
 };
