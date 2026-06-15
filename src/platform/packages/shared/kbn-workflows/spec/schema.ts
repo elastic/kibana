@@ -243,46 +243,17 @@ export const FetcherConfigSchema = z
   .meta({ $id: 'fetcher', description: 'Fetcher configuration for HTTP request customization' })
   .optional();
 
-export const KibanaHttpMethods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'] as const;
+// Single source of truth for the kibana.request HTTP method enum (mirrors the `http` step's
+// valid values). Reused by the connector schema (editor + validation) and the runtime guard so
+// the editor and runtime can never accept/reject different methods.
+export const KibanaHttpMethods = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'] as const;
 export const KibanaHttpMethodSchema = z.enum(KibanaHttpMethods);
-
-export const KibanaRequestFormDataSchema = z.record(
-  z.string(),
-  z.object({
-    content: z.string().describe('File content or field value'),
-    filename: z.string().optional().describe('Filename hint (e.g. "export.ndjson")'),
-    content_type: z
-      .string()
-      .optional()
-      .describe('MIME type of the content (e.g. "application/ndjson")'),
-  })
-);
-
-export const KibanaRequestParamsSchema = z.object({
-  method: KibanaHttpMethodSchema.optional(),
-  path: z.string(),
-  body: z.any().optional(),
-  headers: z.record(z.string(), z.string()).optional(),
-  query: z.record(z.string(), z.any()).optional(),
-  form_data: KibanaRequestFormDataSchema.optional().describe(
-    'Multipart form-data fields. Use instead of body for APIs that require file uploads (e.g. /api/saved_objects/_import). Mutually exclusive with body.'
-  ),
-});
-
-export const KibanaRequestParamsPartialSchema = KibanaRequestParamsSchema.partial();
-
-const KibanaHttpRequestSchema = z.object({
-  method: KibanaHttpMethodSchema.optional().default('GET'),
-  path: z.string().min(1),
-  body: z.any().optional(),
-  headers: z.record(z.string(), z.string()).optional(),
-});
 
 export const ElasticsearchStepInputSchema = z.union([
   // Raw API format - like Dev Console
   z.object({
     request: z.object({
-      method: KibanaHttpMethodSchema.optional().default('GET'),
+      method: z.enum(['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD']).optional().default('GET'),
       path: z.string().min(1),
       body: z.any().optional(),
     }),
@@ -332,7 +303,12 @@ export const KibanaStepMetaSchema = {
 export const KibanaStepInputSchema = z.union([
   // Raw API format - direct HTTP API calls
   z.object({
-    request: KibanaHttpRequestSchema,
+    request: z.object({
+      method: KibanaHttpMethodSchema.optional().default('GET'),
+      path: z.string().min(1),
+      body: z.any().optional(),
+      headers: z.record(z.string(), z.string()).optional(),
+    }),
     fetcher: FetcherConfigSchema,
     ...KibanaStepMetaSchema,
   }),
