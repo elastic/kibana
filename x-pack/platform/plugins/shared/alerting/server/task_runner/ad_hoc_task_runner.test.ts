@@ -12,7 +12,6 @@ import type { SavedObject } from '@kbn/core/server';
 import {
   elasticsearchServiceMock,
   executionContextServiceMock,
-  httpServiceMock,
   loggingSystemMock,
   savedObjectsRepositoryMock,
   savedObjectsServiceMock,
@@ -170,7 +169,6 @@ const taskRunnerFactoryInitializerParams: TaskRunnerFactoryInitializerParamsType
   actionsPlugin: actionsMock.createStart(),
   alertsService,
   backfillClient,
-  basePathService: httpServiceMock.createBasePath(),
   cancelAlertsOnRuleTimeout: true,
   connectorAdapterRegistry: new ConnectorAdapterRegistry(),
   data: dataPlugin,

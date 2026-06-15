@@ -8,7 +8,6 @@
 import type {
   Logger,
   KibanaRequest,
-  IBasePath,
   ExecutionContextStart,
   SavedObjectsServiceStart,
   ElasticsearchServiceStart,
@@ -189,7 +188,6 @@ export interface TaskRunnerContext {
   alertsService: AlertsService | null;
   auditService?: AuditServiceSetup;
   backfillClient: BackfillClient;
-  basePathService: IBasePath;
   cancelAlertsOnRuleTimeout: boolean;
   connectorAdapterRegistry: ConnectorAdapterRegistry;
   data: DataPluginStart;

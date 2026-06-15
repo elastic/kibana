@@ -29,7 +29,9 @@ import { useKibana } from '../../../common/lib/kibana';
 import { AttacksEventTypes } from '../../../common/lib/telemetry';
 import { useFindAttackDiscoveries } from '../../../attack_discovery/pages/use_find_attack_discoveries';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
-import { Schedule } from '../../../attack_discovery/pages/header/schedule';
+import { useAttackDiscoveryControls } from '../../../attack_discovery/pages/use_attack_discovery_controls';
+import { Actions } from '../../../attack_discovery/pages/header/actions';
+import { SCHEDULE_TAB_ID } from '../../../attack_discovery/pages/settings_flyout/constants';
 import { FilterByAssigneesPopover } from '../../../common/components/filter_by_assignees_popover/filter_by_assignees_popover';
 import { PAGE_TITLE } from '../../pages/attacks/translations';
 import { HeaderPage } from '../../../common/components/header_page';
@@ -38,7 +40,6 @@ import { SecuritySolutionPageWrapper } from '../../../common/components/page_wra
 import { useGlobalFullScreen } from '../../../common/containers/use_full_screen';
 import { Display } from '../../../explore/hosts/pages/display';
 import { SearchBarSection } from './search_bar/search_bar_section';
-import { SchedulesFlyout } from './schedule_flyout';
 import { TableSection } from './table/table_section';
 import type { AssigneesIdsSelection } from '../../../common/components/assignees/types';
 import { ConnectorFilter } from '../../../attack_discovery/pages/results/history/search_and_filter/connector_filter';
@@ -46,6 +47,8 @@ import { ConnectorFilter } from '../../../attack_discovery/pages/results/history
 import type { Status } from '../../../../common/api/detection_engine';
 import { FiltersSection } from './filters/filters_section';
 import { KPIsSection } from './kpis/kpis_section';
+
+import type { SettingsOverrideOptions } from '../../../attack_discovery/pages/results/history/types';
 
 export const CONTENT_TEST_ID = 'attacks-page-content';
 export const SECURITY_SOLUTION_PAGE_WRAPPER_TEST_ID = 'attacks-page-security-solution-page-wrapper';
@@ -100,19 +103,43 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
     http,
     isAssistantEnabled: true,
     start: from,
-    scheduled: true,
+    includeAllAuthors: true,
   });
   const aiConnectorNames = useMemo(() => data?.connector_names ?? [], [data]);
 
-  // showing / hiding the schedules flyout:
-  const [showSchedulesFlyout, setShowSchedulesFlyout] = useState<boolean>(false);
+  const { connectorId, isLoading, onGenerate, openFlyout, settingsFlyout } =
+    useAttackDiscoveryControls();
+
+  const handleOpenFlyout = useCallback(
+    (tabId: string) => {
+      openFlyout(tabId);
+      if (tabId === SCHEDULE_TAB_ID) {
+        telemetry.reportEvent(AttacksEventTypes.ScheduleFlyoutOpened, {
+          source: 'attacks_page_header',
+        });
+      } else {
+        telemetry.reportEvent(AttacksEventTypes.SettingsFlyoutOpened, {
+          source: 'attacks_page_header',
+        });
+      }
+    },
+    [openFlyout, telemetry]
+  );
+
+  const handleGenerate = useCallback(
+    async (overrideOptions?: SettingsOverrideOptions) => {
+      telemetry.reportEvent(AttacksEventTypes.GenerateClicked, {
+        source: 'attacks_page_header',
+      });
+      return onGenerate(overrideOptions);
+    },
+    [onGenerate, telemetry]
+  );
+
   const openSchedulesFlyout = useCallback(() => {
-    setShowSchedulesFlyout(true);
-    telemetry.reportEvent(AttacksEventTypes.ScheduleFlyoutOpened, {
-      source: 'attacks_page_header',
-    });
-  }, [telemetry]);
-  const onCloseSchedulesFlyout = useCallback(() => setShowSchedulesFlyout(false), []);
+    handleOpenFlyout(SCHEDULE_TAB_ID);
+  }, [handleOpenFlyout]);
+
   const [assignees, setAssignees] = useState<AssigneesIdsSelection[]>([]);
 
   const onAssigneesSelectionChange = useCallback(
@@ -165,7 +192,12 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
           >
             <EuiFlexGroup gutterSize="m" data-test-subj={ATTACKS_PAGE_ACTIONS_TEST_ID}>
               <EuiFlexItem>
-                <Schedule openFlyout={openSchedulesFlyout} />
+                <Actions
+                  isLoading={isLoading}
+                  onGenerate={handleGenerate}
+                  openFlyout={handleOpenFlyout}
+                  isDisabled={connectorId == null}
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
           </HeaderPage>
@@ -228,7 +260,7 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
           openSchedulesFlyout={openSchedulesFlyout}
         />
 
-        {showSchedulesFlyout && <SchedulesFlyout onClose={onCloseSchedulesFlyout} />}
+        {settingsFlyout}
       </SecuritySolutionPageWrapper>
     </StyledFullHeightContainer>
   );
