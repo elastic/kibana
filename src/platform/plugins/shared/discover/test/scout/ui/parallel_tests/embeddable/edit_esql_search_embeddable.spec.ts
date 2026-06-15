@@ -95,7 +95,9 @@ spaceTest.describe('Discover ES|QL panel edit flow', { tag: tags.deploymentAgnos
       await pageObjects.discover.saveAsSearch(savedAsTitle);
       await pageObjects.discover.waitForDocTableRendered();
 
-      expect(await page.getByText('Discover').count()).toBeGreaterThan(0);
+      // Only way this particular check works.
+      // eslint-disable-next-line playwright/no-nth-methods
+      await expect(page.testSubj.locator('~breadcrumb').first()).toHaveText('Discover');
       expect(await page.getByText(savedAsTitle).count()).toBeGreaterThan(0);
     }
   );
