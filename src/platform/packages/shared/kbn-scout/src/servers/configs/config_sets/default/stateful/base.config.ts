@@ -178,14 +178,6 @@ export const defaultConfig: ScoutServerConfig = {
       '--xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"', // server restarts should not invalidate active sessions
       '--xpack.encryptedSavedObjects.encryptionKey="DkdXazszSCYexXqz4YktBGHCRkV6hyNK"',
       '--xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled=true',
-      `--xpack.actions.preconfigured=${JSON.stringify({
-        'my-server-log': { actionTypeId: '.server-log', name: 'Serverlog' },
-        'my-email-connector': {
-          actionTypeId: '.email',
-          name: 'Email#test-preconfigured-email',
-          config: { from: 'me@example.com', host: 'localhost', port: '1025' },
-        },
-      })}`,
       '--savedObjects.maxImportPayloadBytes=10485760', // for OSS test management/_import_objects,
       '--savedObjects.allowHttpApiAccess=false', // override default to not allow hiddenFromHttpApis saved objects access to the http APIs see https://github.com/elastic/dev/issues/2200
       // explicitly disable internal API restriction. See https://github.com/elastic/kibana/issues/163654

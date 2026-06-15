@@ -8,7 +8,9 @@
 // Migrated from:
 //   x-pack/platform/test/functional_with_es_ssl/apps/triggers_actions_ui/connectors/general.ts
 //
-// 13 of 13 tests migrated.
+// 11 of 13 tests migrated here; 2 preconfigured-connector tests moved to
+// test/scout_triggers_actions_ui/ui/tests/connector_preconfigured.spec.ts
+// because they require the triggers_actions_ui kbn-scout config set.
 
 import { v4 as uuidv4 } from 'uuid';
 import type { ScoutPage } from '@kbn/scout';
@@ -368,33 +370,6 @@ test.describe('General connector functionality', { tag: tags.stateful.classic },
 
     await searchConnectors(page, connectorName);
     await expect(page.testSubj.locator('connectors-row')).toHaveCount(0);
-  });
-
-  test('should not be able to delete a preconfigured connector', async ({ page, kbnUrl }) => {
-    await navigateToConnectors(page, kbnUrl);
-    await searchConnectors(page, 'Serverlog');
-
-    await expect(page.testSubj.locator('connectors-row')).toHaveCount(1);
-    await expect(page.testSubj.locator('deleteConnector')).toBeHidden();
-    await expect(page.testSubj.locator('preConfiguredTitleMessage')).toBeVisible();
-    await expect(
-      page.testSubj.locator('checkboxSelectRow-preconfigured_my-server-log')
-    ).toBeDisabled();
-  });
-
-  test('should not be able to edit a preconfigured connector', async ({ page, kbnUrl }) => {
-    await navigateToConnectors(page, kbnUrl);
-    await searchConnectors(page, 'test-preconfigured-email');
-
-    await expect(page.testSubj.locator('connectors-row')).toHaveCount(1);
-    await expect(page.testSubj.locator('preConfiguredTitleMessage')).toBeVisible();
-
-    await openConnectorFlyout(page);
-
-    await expect(page.testSubj.locator('preconfiguredBadge')).toBeVisible();
-    await expect(page.testSubj.locator('edit-connector-flyout-save-btn')).toBeHidden();
-
-    await page.testSubj.click('euiFlyoutCloseButton');
   });
 
   test('Execution log - renders the event log list and can filter/sort', async ({
