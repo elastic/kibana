@@ -35,6 +35,7 @@ export class TracesExperiencePage {
   }
 
   public async openDocumentFlyout(discover: PageObjects['discover'], rowIndex = 0) {
+    await discover.waitForDocTableRendered();
     await discover.openAndWaitForDocViewerFlyout({ rowIndex });
   }
 
