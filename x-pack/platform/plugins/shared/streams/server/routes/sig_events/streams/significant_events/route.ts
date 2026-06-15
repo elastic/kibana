@@ -51,6 +51,13 @@ const readStreamSignificantEventsRoute = createServerRoute({
       since: '9.1.0',
       stability: 'experimental',
     },
+    deprecated: {
+      documentationUrl: '',
+      severity: 'warning',
+      message:
+        'This experimental Significant Events endpoint is deprecated and will be removed in a future release.',
+      reason: { type: 'remove' },
+    },
     oasOperationObject: () => ({
       requestBody: {
         content: {
