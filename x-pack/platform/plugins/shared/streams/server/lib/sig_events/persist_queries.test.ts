@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { GeneratedSignificantEventQuery, QueryLink, Streams } from '@kbn/streams-schema';
+import type {
+  GeneratedSignificantEventQuery,
+  QueryLink,
+  StreamQuery,
+  Streams,
+} from '@kbn/streams-schema';
 import { persistQueries } from './persist_queries';
 import type { KnowledgeIndicatorClient } from '../streams/ki';
 import type { StreamsClient } from '../streams/client';
@@ -48,7 +53,10 @@ const createMocks = (existingLinks: QueryLink[] = []) => {
     bulk: jest.fn().mockResolvedValue({ applied: 1, skipped: 0 }),
     syncQueries: jest.fn().mockResolvedValue(undefined),
     replaceStreamQueries: jest.fn(
-      async (def: unknown, getNextQueries: (links: QueryLink[]) => unknown[]) => {
+      async (
+        def: Streams.all.Definition,
+        getNextQueries: (links: QueryLink[]) => StreamQuery[]
+      ) => {
         await kiClient.syncQueries(def, getNextQueries(existingLinks));
       }
     ),
