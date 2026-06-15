@@ -32,13 +32,6 @@ interface UserStorageClientOpts {
    */
   savedObjectsClient: SavedObjectsClientContract;
   profileUid: string;
-  /**
-   * The active namespace (space id) for this request, or `undefined` for the
-   * default space. Used to build a per-space SO document id for space-scoped
-   * keys, so that writes in different spaces never collide on the same
-   * `multiple-isolated` document.
-   */
-  namespace: string | undefined;
   definitions: ReadonlyMap<string, UserStorageDefinition>;
   logger: Logger;
 }
@@ -60,7 +53,6 @@ export class UserStorageClient implements IUserStorageClient {
 
     this.soClient = savedObjectsClient;
     this.profileUid = profileUid;
-    this.namespace = namespace;
     this.definitions = definitions;
     this.logger = logger;
   }

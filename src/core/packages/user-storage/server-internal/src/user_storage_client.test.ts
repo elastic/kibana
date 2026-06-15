@@ -31,7 +31,6 @@ const buildClient = (
   const client = new UserStorageClient({
     savedObjectsClient,
     profileUid: PROFILE_UID,
-    namespace,
     definitions,
     logger,
   });
