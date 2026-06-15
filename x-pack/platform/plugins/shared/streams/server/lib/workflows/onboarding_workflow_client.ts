@@ -15,6 +15,7 @@ import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import {
   StreamsKIsOnboardingStatus,
   type StreamsKIsOnboardingStatusResult,
+  type StreamsKIsOnboardingStatusSummary,
   type StreamsKIsOnboardingFeaturesResult,
   type StreamsKIsOnboardingQueriesResult,
   type BaseFeature,
@@ -208,6 +209,12 @@ const mapExecutionToOnboardingStatus = (
   }
 };
 
+/** Extracts the failure message for an execution mapped to the Failed status. */
+const extractFailureError = (execution: WorkflowExecutionListItemDto): string =>
+  execution.status === ExecutionStatus.TIMED_OUT
+    ? 'Onboarding workflow timed out'
+    : execution.error?.message ?? 'Unknown error';
+
 /**
  * Converts a workflow execution (optionally enriched with `context.output`)
  * into the public {@link StreamsKIsOnboardingStatusResult} shape returned by the API.
@@ -220,11 +227,7 @@ const mapExecutionToStatusResult = (
   const onboardingStatus = mapExecutionToOnboardingStatus(execution.status);
 
   if (onboardingStatus === StreamsKIsOnboardingStatus.Failed) {
-    const errorMessage =
-      execution.status === ExecutionStatus.TIMED_OUT
-        ? 'Onboarding workflow timed out'
-        : execution.error?.message ?? 'Unknown error';
-    return { status: StreamsKIsOnboardingStatus.Failed, error: errorMessage };
+    return { status: StreamsKIsOnboardingStatus.Failed, error: extractFailureError(execution) };
   }
 
   if (onboardingStatus === StreamsKIsOnboardingStatus.Completed) {
@@ -237,6 +240,24 @@ const mapExecutionToStatusResult = (
       features,
       queries,
     };
+  }
+
+  return { status: onboardingStatus };
+};
+
+/**
+ * Lightweight variant of {@link mapExecutionToStatusResult} that omits the
+ * completed output (features/queries). Used by the batch status endpoint, which
+ * only conveys progress per stream and therefore avoids the extra per-stream
+ * fetch that assembling the completed output would require.
+ */
+const mapExecutionToStatusSummary = (
+  execution: WorkflowExecutionListItemDto
+): StreamsKIsOnboardingStatusSummary => {
+  const onboardingStatus = mapExecutionToOnboardingStatus(execution.status);
+
+  if (onboardingStatus === StreamsKIsOnboardingStatus.Failed) {
+    return { status: StreamsKIsOnboardingStatus.Failed, error: extractFailureError(execution) };
   }
 
   return { status: onboardingStatus };
@@ -335,6 +356,46 @@ export class StreamsKIsOnboardingClient {
     }
 
     return { ...mapExecutionToStatusResult(execution), executionId: execution.id };
+  }
+
+  /**
+   * Returns a lightweight status summary for many streams in one query.
+   *
+   * Collapses all onboarding executions via {@link getRecentExecutions} and
+   * filters to the requested names in memory (the management API can't filter
+   * by a set of concurrency keys). Streams with no execution map to
+   * `NotStarted`. Unlike {@link getStatus}, the completed output is omitted so
+   * no extra per-stream fetch is needed.
+   */
+  async getStatuses({
+    streamNames,
+  }: {
+    streamNames: string[];
+  }): Promise<Record<string, StreamsKIsOnboardingStatusSummary>> {
+    const statuses: Record<string, StreamsKIsOnboardingStatusSummary> = {};
+
+    for (const streamName of streamNames) {
+      statuses[streamName] = { status: StreamsKIsOnboardingStatus.NotStarted };
+    }
+
+    if (streamNames.length === 0) {
+      return statuses;
+    }
+
+    const executions = await this.getRecentExecutions();
+
+    for (const execution of executions) {
+      if (execution.concurrencyGroupKey === undefined) {
+        continue;
+      }
+      const streamName = parseStreamNameFromConcurrencyKey(execution.concurrencyGroupKey);
+      if (streamName === null || !(streamName in statuses)) {
+        continue;
+      }
+      statuses[streamName] = mapExecutionToStatusSummary(execution);
+    }
+
+    return statuses;
   }
 
   /**

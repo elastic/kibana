@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import {
   StreamsKIsOnboardingStep,
-  type StreamsKIsOnboardingStatusResult,
+  type StreamsKIsOnboardingStatusSummary,
 } from '@kbn/streams-schema';
 import pMap from 'p-map';
 import { useCallback, useState } from 'react';
@@ -21,7 +21,7 @@ import { useOnboardingStatusUpdateQueue } from './use_onboarding_status_update_q
 
 type StreamStatusUpdateCallback = (
   streamName: string,
-  result: StreamsKIsOnboardingStatusResult
+  result: StreamsKIsOnboardingStatusSummary
 ) => void;
 
 interface UseBulkOnboardingOptions {

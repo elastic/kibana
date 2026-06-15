@@ -56,6 +56,23 @@ export type StreamsKIsOnboardingStatusResult =
   | { status: StreamsKIsOnboardingStatus.Failed; error: string }
   | ({ status: StreamsKIsOnboardingStatus.Completed } & StreamsKIsOnboardingResult);
 
+/**
+ * Lightweight onboarding status, without the completed output payload
+ * (features/queries). Returned by the batch status endpoint, which only needs
+ * to convey progress per stream and intentionally skips the extra per-stream
+ * fetch required to assemble the completed output.
+ */
+export type StreamsKIsOnboardingStatusSummary =
+  | {
+      status:
+        | StreamsKIsOnboardingStatus.NotStarted
+        | StreamsKIsOnboardingStatus.InProgress
+        | StreamsKIsOnboardingStatus.BeingCanceled
+        | StreamsKIsOnboardingStatus.Canceled
+        | StreamsKIsOnboardingStatus.Completed;
+    }
+  | { status: StreamsKIsOnboardingStatus.Failed; error: string };
+
 /** Statuses that indicate the onboarding pipeline is still active (running or pending cancel). */
 export const STREAMS_KIS_ONBOARDING_IN_PROGRESS_STATUSES: ReadonlySet<StreamsKIsOnboardingStatus> =
   new Set([StreamsKIsOnboardingStatus.InProgress, StreamsKIsOnboardingStatus.BeingCanceled]);

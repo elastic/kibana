@@ -26,7 +26,7 @@ import {
   Streams,
   StreamsKIsOnboardingStatus,
   STREAMS_KIS_ONBOARDING_IN_PROGRESS_STATUSES,
-  type StreamsKIsOnboardingStatusResult,
+  type StreamsKIsOnboardingStatusSummary,
 } from '@kbn/streams-schema';
 import React, { useState } from 'react';
 import { useStreamsAppRouter } from '../../../../../hooks/use_streams_app_router';
@@ -67,7 +67,7 @@ export function StreamsTreeTable({
   onStopOnboardingActionClick,
 }: {
   streams?: ListStreamDetail[];
-  streamOnboardingResultMap: Record<string, StreamsKIsOnboardingStatusResult>;
+  streamOnboardingResultMap: Record<string, StreamsKIsOnboardingStatusSummary>;
   loading?: boolean;
   searchQuery?: Query;
   selection: EuiTableSelectionType<TableRow>;

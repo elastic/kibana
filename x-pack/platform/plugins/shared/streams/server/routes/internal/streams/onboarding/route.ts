@@ -10,6 +10,7 @@ import {
   StreamsKIsOnboardingStep,
   StreamsKIsOnboardingStatus,
   type StreamsKIsOnboardingStatusResult,
+  type StreamsKIsOnboardingStatusSummary,
 } from '@kbn/streams-schema';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
@@ -171,7 +172,48 @@ export const onboardingStatusRoute = createServerRoute({
   },
 });
 
+export const onboardingBulkStatusRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/onboarding/_bulk_status',
+  options: {
+    access: 'internal',
+    summary: 'Check the onboarding status of multiple streams',
+    description:
+      'Check the status of onboarding progress for a list of streams in a single request.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  params: z.object({
+    body: z.object({
+      streamNames: z.array(z.string()).min(1).max(10000),
+    }),
+  }),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+    streamsKIsOnboardingClient,
+  }): Promise<Record<string, StreamsKIsOnboardingStatusSummary>> => {
+    if (!streamsKIsOnboardingClient) {
+      throw new FeatureNotEnabledError('Workflows management is not available');
+    }
+
+    const { licensing, uiSettingsClient } = await getScopedClients({ request });
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    const {
+      body: { streamNames },
+    } = params;
+
+    return streamsKIsOnboardingClient.getStatuses({ streamNames });
+  },
+});
+
 export const internalOnboardingRoutes = {
   ...onboardingExecuteRoute,
   ...onboardingStatusRoute,
+  ...onboardingBulkStatusRoute,
 };
