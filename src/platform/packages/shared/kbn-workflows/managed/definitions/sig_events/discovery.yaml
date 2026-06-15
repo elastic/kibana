@@ -312,10 +312,9 @@ steps:
     type: data.set
     with:
       # active_rule_uuids: rules whose latest doc is kind:detection — fed to investigator batch.
-      # catchall_rule_uuids: detection OR quiet latest — fed to the catchall handled stamper so
-      #   quiet-latest rules also receive a kind:handled stamp after investigation.
       active_rule_uuids: "${{ steps.get_active_unhandled_rules.output.hits.hits | where: '_source.kind', 'detection' | map: '_source' | map: 'rule_uuid' | default: [] }}"
-      catchall_rule_uuids: "${{ steps.get_active_unhandled_rules.output.hits.hits | reject: '_source.kind', 'handled' | map: '_source' | map: 'rule_uuid' | default: [] }}"
+      # quiet_rule_uuids: rules whose latest doc is kind:quiet — not investigated, but stamped handled.
+      quiet_rule_uuids: "${{ steps.get_active_unhandled_rules.output.hits.hits | where: '_source.kind', 'quiet' | map: '_source' | map: 'rule_uuid' | default: [] }}"
 
   - name: get_detected_window
     # if guard: terms with an empty array causes an ES parsing_exception.
@@ -363,6 +362,14 @@ steps:
                     gte: '{{ inputs.detectionLookback }}'
     on-failure:
       continue: true
+
+  - name: compute_stamp_rule_uuids
+    # Rules to mark handled this cycle: the investigated batch plus quiet (recovered) rules,
+    # so recovered rules aren't left looking unprocessed. Active rules beyond the
+    # detectionBatchMax cap are excluded so they survive for the next cycle.
+    type: data.set
+    with:
+      stamp_rule_uuids: "${{ steps.get_detected_window.output.hits.hits | map: '_source' | map: 'rule_uuid' | compact | concat: steps.compute_active_unhandled_rule_uuids.output.quiet_rule_uuids | uniq | default: [] }}"
 
   - name: exit_idle
     type: workflow.output
@@ -925,12 +932,9 @@ steps:
               continue: true
 
   - name: get_unhandled_state_docs
-    # Use catchall_rule_uuids (detection OR quiet latest) so quiet-latest rules
-    # also get a kind:handled stamp. active_rule_uuids would exclude them.
-    # Gate on agent success: if the agent failed, skip handled stamping so detections
-    # are not silently consumed — they will be retried on the next discovery cycle.
+    # Skip handled-stamping if the agent failed, so its detections are retried next cycle.
     if: >-
-      ${{ steps.compute_active_unhandled_rule_uuids.output.catchall_rule_uuids.size > 0
+      ${{ steps.compute_stamp_rule_uuids.output.stamp_rule_uuids.size > 0
       and steps.run_investigator_agent.error == null }}
     type: elasticsearch.request
     with:
@@ -951,7 +955,7 @@ steps:
                     - '{{ consts.KIND_DETECTION }}'
                     - '{{ consts.KIND_QUIET }}'
               - terms:
-                  rule_uuid: "${{ steps.compute_active_unhandled_rule_uuids.output.catchall_rule_uuids }}"
+                  rule_uuid: "${{ steps.compute_stamp_rule_uuids.output.stamp_rule_uuids }}"
               - range:
                   "@timestamp":
                     gte: '{{ inputs.detectionLookback }}'
