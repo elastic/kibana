@@ -6,6 +6,7 @@
  */
 
 import { createTestConfig } from '../../../../../../config/serverless/config.base';
+import { getTinyElserServerArgs } from '../../utils/helpers';
 
 export default createTestConfig({
   kbnTestServerArgs: [
@@ -14,6 +15,9 @@ export default createTestConfig({
       { product_line: 'endpoint', product_tier: 'complete' },
       { product_line: 'cloud', product_tier: 'complete' },
     ])}`,
+    // Point Kibana at the tiny ELSER model installed by `installTinyElser` so the KB index
+    // binds `semantic_text` to `pt_tiny_elser_elasticsearch` instead of the full default ELSER.
+    ...getTinyElserServerArgs(),
   ],
   testFiles: [require.resolve('..')],
   junit: {
