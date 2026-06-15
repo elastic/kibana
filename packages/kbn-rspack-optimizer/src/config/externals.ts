@@ -60,7 +60,7 @@ export const SHARED_DEP_OVERRIDES: Array<{
  */
 export function getExternalsFunction(): (
   data: { context?: string; request?: string },
-  callback: (err?: null | Error, result?: string) => void
+  callback: (err?: Error, result?: string) => void
 ) => void {
   const sharedExternals: Record<string, string> = getExternals();
 
@@ -74,7 +74,7 @@ export function getExternalsFunction(): (
     }
 
     if (request && request in sharedExternals) {
-      return callback(null, sharedExternals[request]);
+      return callback(undefined, sharedExternals[request]);
     }
 
     return callback();
