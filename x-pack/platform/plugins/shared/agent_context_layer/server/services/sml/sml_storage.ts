@@ -70,7 +70,28 @@ const smlStorageSchemaProperties = {
   created_at: types.date({}),
   updated_at: types.date({}),
   spaces: types.keyword({}),
-  permissions: types.keyword({}),
+  permissions: types.object({
+    properties: {
+      kibana: types.object({
+        properties: {
+          privileges: types.object({
+            properties: {
+              name: types.keyword({}),
+            },
+          }),
+        },
+      }),
+      elasticsearch: types.object({
+        properties: {
+          indices: types.object({
+            properties: {
+              name: types.keyword({}),
+            },
+          }),
+        },
+      }),
+    },
+  }),
   ingestion_method: types.keyword({}),
 };
 
