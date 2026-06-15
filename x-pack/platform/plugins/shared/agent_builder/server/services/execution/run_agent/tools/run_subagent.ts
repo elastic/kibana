@@ -20,7 +20,7 @@ import type { BuiltinToolDefinition, SubAgentExecutor } from '@kbn/agent-builder
 import { createErrorResult, createOtherResult } from '@kbn/agent-builder-server';
 import type { BackgroundExecutionService } from '../background_execution_service';
 
-export const SubAgentToolName = internalTools.subAgentTool;
+export const SubAgentToolName = internalTools.runSubagent;
 
 const schema = z.object({
   description: z.string().describe('A short (3-5 word) description of the task'),

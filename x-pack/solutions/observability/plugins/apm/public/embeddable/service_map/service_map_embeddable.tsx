@@ -9,6 +9,12 @@ import { EuiCallOut, EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
 import React, { useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
+import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/es-query';
+import { useKibanaQuerySettings } from '@kbn/observability-shared-plugin/public';
+import type { ServiceMapOrientation } from '../../components/app/service_map/service_map_options_panel';
+import type { ServiceMapViewFilters } from '../../components/app/service_map/apply_service_map_visibility';
+import { useAdHocApmDataView } from '../../hooks/use_adhoc_apm_data_view';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { getDateRange } from '../../context/url_params_context/helpers';
 import { isActivePlatinumLicense } from '../../../common/license_check';
@@ -56,6 +62,24 @@ export interface ServiceMapEmbeddableProps {
   strictEnvironmentScope?: boolean;
   /** Fires when the topology is definitively empty (`SUCCESS && nodes.length === 0`). */
   onEmptyStateChange?: (isEmpty: boolean) => void;
+  /** Field-value pairs to pass as filter bar pills in the "View full map" link instead of kuery. */
+  filterPills?: Array<{ field: string; value: string }>;
+  /** Initial layout orientation; if `onMapOrientationChange` is also provided, becomes controlled. */
+  mapOrientation?: ServiceMapOrientation;
+  /** Called when the user (or the host) changes orientation. */
+  onMapOrientationChange?: (next: ServiceMapOrientation) => void;
+  /** Parent dashboard filters when the panel opts in to sync. Excludes `service.environment` (handled server-side). */
+  parentFilters?: Filter[];
+  /** Parent dashboard query when the panel opts in to sync. */
+  parentQuery?: Query | AggregateQuery;
+  /** Persisted view filters (alerts / SLOs / connection / anomaly severity) captured at "Copy to dashboard" time. */
+  viewFilters?: ServiceMapViewFilters;
+  /** Push in-panel filter edits back to the state manager so the embeddable's controlled value updates. */
+  onViewFiltersChange?: (next: ServiceMapViewFilters) => void;
+  /** Persisted find-in-page query captured at "Copy to dashboard" time. */
+  searchQuery?: string;
+  /** Push in-panel search edits back to the state manager. */
+  onSearchQueryChange?: (next: string) => void;
 }
 
 function LoadingSpinner() {
@@ -84,6 +108,15 @@ export function ServiceMapEmbeddable({
   alwaysNavigateOnPopoverFocus,
   strictEnvironmentScope,
   onEmptyStateChange,
+  filterPills,
+  mapOrientation,
+  onMapOrientationChange,
+  parentFilters,
+  parentQuery,
+  viewFilters,
+  onViewFiltersChange,
+  searchQuery,
+  onSearchQueryChange,
 }: ServiceMapEmbeddableProps) {
   const license = useLicenseContext();
   const { config } = useApmPluginContext();
@@ -126,6 +159,33 @@ export function ServiceMapEmbeddable({
   const { sloOverviewFlyout, openSloOverviewFlyout, closeSloOverviewFlyout } =
     useSloOverviewFlyout();
 
+  // Build an ES query from dashboard-level filters/query when the panel opts in to
+  // sync_with_dashboard_filters. Environment is excluded — it's still passed via the
+  // dedicated server param, mirroring service_map_search_bar.tsx.
+  const { dataView } = useAdHocApmDataView();
+  const kibanaQuerySettings = useKibanaQuerySettings();
+  const esQuery = useMemo(() => {
+    const hasParentFilters = Boolean(parentFilters && parentFilters.length > 0);
+    const parentQueryText =
+      parentQuery && 'query' in parentQuery && typeof parentQuery.query === 'string'
+        ? parentQuery.query.trim()
+        : undefined;
+    const hasParentQuery =
+      parentQueryText !== undefined ? parentQueryText.length > 0 : Boolean(parentQuery);
+    const hasParentSearchState = hasParentFilters || hasParentQuery;
+    if (!dataView || !hasParentSearchState) {
+      return undefined;
+    }
+    const filtersWithoutEnv = (parentFilters ?? []).filter(
+      (f) => f.meta?.key !== 'service.environment'
+    );
+    const queries: Query[] =
+      parentQuery && 'query' in parentQuery
+        ? [{ query: String(parentQuery.query ?? ''), language: parentQuery.language ?? 'kuery' }]
+        : [{ query: '', language: 'kuery' }];
+    return buildEsQuery(dataView, queries, filtersWithoutEnv, kibanaQuerySettings);
+  }, [dataView, parentFilters, parentQuery, kibanaQuerySettings]);
+
   const { data, status, error } = useServiceMap({
     environment,
     kuery,
@@ -134,6 +194,7 @@ export function ServiceMapEmbeddable({
     serviceGroupId,
     serviceName,
     strictEnvironmentScope,
+    esQuery,
   });
 
   // Only fire on SUCCESS — loading/error states carry no emptiness signal.
@@ -151,6 +212,23 @@ export function ServiceMapEmbeddable({
     nodes: data.nodes,
     nodesStatus: status,
   });
+
+  // The alert / SLO / anomaly-severity filters depend on badge data. Until badges arrive,
+  // node fields like `alertsCount` / `sloStatus` are undefined and the visibility helper
+  // would hide every service — producing a flash of empty map on dashboard load whenever
+  // a persisted filter is set. Strip those filters until badges resolve; the connection
+  // filter stays since it only needs topology. On a badges failure we deliberately stay
+  // stripped (fail open: show all services rather than nothing).
+  const viewFiltersForGraph = useMemo<ServiceMapViewFilters | undefined>(() => {
+    if (!viewFilters) return viewFilters;
+    if (badgesStatus === FETCH_STATUS.SUCCESS) return viewFilters;
+    return {
+      ...viewFilters,
+      alertStatusFilter: [],
+      sloStatusFilter: [],
+      anomalySeverityFilter: [],
+    };
+  }, [viewFilters, badgesStatus]);
 
   if (!license || !isActivePlatinumLicense(license) || !config.serviceMapEnabled) {
     return (
@@ -230,9 +308,9 @@ export function ServiceMapEmbeddable({
     rangeFrom,
     rangeTo,
     environment,
-    kuery,
     serviceName,
     serviceGroupId,
+    filterPills,
   });
 
   const isLoading = status === FETCH_STATUS.LOADING || badgesStatus === FETCH_STATUS.LOADING;
@@ -267,6 +345,12 @@ export function ServiceMapEmbeddable({
           showFocusMap={showFocusMapInPopover}
           alwaysNavigateOnPopoverFocus={alwaysNavigateOnPopoverFocus}
           clearKueryOnPopoverNavigation={clearKueryOnPopoverNavigation}
+          mapOrientation={mapOrientation}
+          onMapOrientationChange={onMapOrientationChange}
+          viewFilters={viewFiltersForGraph}
+          onViewFiltersChange={onViewFiltersChange}
+          searchQuery={searchQuery}
+          onSearchQueryChange={onSearchQueryChange}
         />
       </div>
       {sloOverviewFlyout && (

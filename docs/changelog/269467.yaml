@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/269467
+issues:
+- https://github.com/elastic/kibana/issues/268982
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-05-20
+areas:
+- Alerting and reporting
+title: Fix rule saves with oversized action message payloads
+description: 'Rules with very large action message bodies no longer fail to save after upgrade because `actions.params` now uses `ignore_above` like other rule parameter fields.'

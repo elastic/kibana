@@ -8,6 +8,19 @@
 import { createNavigationTree, filterForFeatureAvailability } from './navigation_tree';
 import type { NodeDefinition } from '@kbn/core-chrome-browser';
 
+const getAdminSettingsNode = (
+  options: Parameters<typeof createNavigationTree>[0] = {}
+): NodeDefinition => {
+  const { footer } = createNavigationTree(options);
+  const adminSettingsNode = footer?.find((item) => item.id === 'admin_and_settings');
+
+  if (!adminSettingsNode) {
+    throw new Error('Admin and Settings footer node not found');
+  }
+
+  return adminSettingsNode;
+};
+
 describe('Navigation Tree', () => {
   it('should generate tree with overview', () => {
     const navigation = createNavigationTree({});
@@ -65,6 +78,30 @@ describe('Navigation Tree', () => {
 
     expect(aiAssistantNode).toBeUndefined();
     expect(agentsNode).toBeDefined();
+  });
+
+  it('hides GenAI Settings in admin settings when unavailable', () => {
+    const adminSettingsNode = getAdminSettingsNode({ genAiSettingsAvailable: false });
+    const aiSection = adminSettingsNode?.children?.find(
+      (item) => item.title === 'AI' && 'children' in item
+    );
+
+    expect(aiSection).toBeUndefined();
+  });
+
+  it('hides ML and AI related admin settings when unavailable', () => {
+    const adminSettingsNode = getAdminSettingsNode({
+      overviewAvailable: false,
+      genAiSettingsAvailable: false,
+    });
+
+    expect(adminSettingsNode.children).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ id: 'machine_learning' }),
+        expect.objectContaining({ id: 'model_management' }),
+        expect.objectContaining({ title: 'AI' }),
+      ])
+    );
   });
 
   it('uses a single Alerts link to classic Observability alerts', () => {

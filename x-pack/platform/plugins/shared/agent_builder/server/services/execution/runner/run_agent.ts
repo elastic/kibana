@@ -52,6 +52,8 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     skillServiceStart,
     pluginsServiceStart,
     toolManager,
+    analyticsService,
+    trackingService,
   } = manager.deps;
 
   const spaceId = getCurrentSpaceId({ request, spaces });
@@ -114,6 +116,8 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     experimentalFeatures,
     executionMode: manager.deps.executionMode,
     subAgentExecutor: manager.deps.subAgentExecutor,
+    analyticsService,
+    trackingService,
   };
 };
 
@@ -136,7 +140,7 @@ export const runAgent = async ({
 
   const { agentsService, request } = manager.deps;
   const agentRegistry = await agentsService.getRegistry({ request });
-  const agent = await agentRegistry.get(agentId);
+  const agent = await agentRegistry.get(agentId, { access: 'use' });
 
   // Single merge point for runtime overrides — consumed by both the agent handler
   // (prompt construction, tool selection) and tool handlers (via ToolHandlerContext).

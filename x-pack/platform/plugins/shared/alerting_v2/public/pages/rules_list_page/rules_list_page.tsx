@@ -25,6 +25,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useBoolean, useDebouncedValue } from '@kbn/react-hooks';
 import type { FindRulesSortField } from '@kbn/alerting-v2-schemas';
 import type { RuleApiResponse } from '../../services/rules_api';
+import { ExperimentalBadge } from '../../components/experimental_badge';
 import { useFetchRules } from '../../hooks/use_fetch_rules';
 import { useFetchRuleTags } from '../../hooks/use_fetch_rule_tags';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
@@ -62,7 +63,8 @@ export const RulesListPage = () => {
   ] = useBoolean(false);
   const [isCreateMenuOpen, { off: closeCreateMenu, toggle: toggleCreateMenu }] = useBoolean(false);
   const createMenuId = useGeneratedHtmlId({ prefix: 'createRuleMenu' });
-  const { flyout, openCreateFlyout, openEditFlyout } = useComposeDiscoverFlyout();
+  const { flyout, openCreateFlyout, openCreateBuilderFlyout, openEditFlyout, openCloneFlyout } =
+    useComposeDiscoverFlyout();
   const navigateToAgentBuilder = useNavigateToAgentBuilder();
 
   const [page, setPage] = useState(1);
@@ -137,12 +139,23 @@ export const RulesListPage = () => {
     closeCreateOptionsFlyout();
     navigateToAgentBuilder();
   };
+  const onCreateThresholdAlertFromOptionsFlyout = () => {
+    closeCreateOptionsFlyout();
+    openCreateBuilderFlyout('threshold');
+  };
 
   return (
     <div>
       <EuiPageHeader
         pageTitle={
-          <FormattedMessage id="xpack.alertingV2.rulesList.pageTitle" defaultMessage="Rules" />
+          <EuiFlexGroup component="span" alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false} component="span">
+              <FormattedMessage id="xpack.alertingV2.rulesList.pageTitle" defaultMessage="Rules" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false} component="span">
+              <ExperimentalBadge />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         }
         rightSideItems={
           hasRules || hasActiveFilters
@@ -249,6 +262,7 @@ export const RulesListPage = () => {
         <RuleCreateOptionsPanel
           onCreateEsqlRule={openCreateFlyout}
           onCreateWithAgent={navigateToAgentBuilder}
+          onCreateThresholdAlert={onCreateThresholdAlertFromOptionsFlyout}
         />
       ) : null}
       {hasRules || hasActiveFilters ? (
@@ -292,6 +306,7 @@ export const RulesListPage = () => {
             isLoading={isLoading}
             onTableChange={onTableChange}
             onEditInFlyout={openEditFlyout}
+            onCloneInFlyout={openCloneFlyout}
           />
         </>
       ) : null}
@@ -300,6 +315,7 @@ export const RulesListPage = () => {
           onClose={closeCreateOptionsFlyout}
           onCreateEsqlRule={onCreateEsqlRuleFromOptionsFlyout}
           onCreateWithAgent={onCreateWithAgentFromOptionsFlyout}
+          onCreateThresholdAlert={onCreateThresholdAlertFromOptionsFlyout}
         />
       ) : null}
       {flyout}

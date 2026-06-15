@@ -57,8 +57,6 @@ test.describe('Tags management bulk actions', { tag: tags.stateful.classic }, ()
     await tagsTable.selectTagByName('tag-1');
     await tagsTable.selectTagByName('tag-3');
     await tagsTable.runBulkAction('clear_selection');
-    await tagsTable.waitForLoaded();
-
-    expect(await tagsTable.isBulkActionsButtonVisible()).toBe(false);
+    await expect(tagsTable.bulkActionsButton).toBeHidden();
   });
 });

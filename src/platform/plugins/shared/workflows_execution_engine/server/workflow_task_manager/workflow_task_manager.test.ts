@@ -465,5 +465,62 @@ describe('WorkflowTaskManager', () => {
         expect(mockTaskManager.runSoon).toHaveBeenCalledWith(task.id);
       });
     });
+
+    it('should not runSoon workflow-global-timeout idle task', async () => {
+      const globalTimeoutTaskId = getWorkflowGlobalTimeoutResumeTaskId(workflowExecutionId);
+      const mockIdleTasks = [
+        {
+          id: globalTimeoutTaskId,
+          taskType: WORKFLOW_RESUME_TASK_TYPE,
+          params: { workflowRunId: workflowExecutionId, spaceId: 'default' },
+          state: {},
+          scope: [`workflow:execution:${workflowExecutionId}`],
+          runAt: new Date('2099-01-01T00:00:00.000Z'),
+        },
+        {
+          id: 'immediate-resume-uuid',
+          taskType: WORKFLOW_RESUME_TASK_TYPE,
+          params: { workflowRunId: workflowExecutionId, spaceId: 'default' },
+          state: {},
+          scope: [`workflow:execution:${workflowExecutionId}`],
+        },
+      ];
+
+      mockTaskManager.fetch.mockResolvedValue({ docs: mockIdleTasks } as any);
+
+      await workflowTaskManager.forceRunIdleTasks(workflowExecutionId);
+
+      expect(mockTaskManager.runSoon).toHaveBeenCalledTimes(1);
+      expect(mockTaskManager.runSoon).toHaveBeenCalledWith('immediate-resume-uuid');
+      expect(mockTaskManager.runSoon).not.toHaveBeenCalledWith(globalTimeoutTaskId);
+    });
+
+    it('should schedule immediate resume when only workflow-global-timeout is idle', async () => {
+      const globalTimeoutTaskId = getWorkflowGlobalTimeoutResumeTaskId(workflowExecutionId);
+      mockTaskManager.fetch
+        .mockResolvedValueOnce({
+          docs: [
+            {
+              id: globalTimeoutTaskId,
+              taskType: WORKFLOW_RESUME_TASK_TYPE,
+              params: { workflowRunId: workflowExecutionId, spaceId: 'default' },
+              state: {},
+              scope: [`workflow:execution:${workflowExecutionId}`],
+              runAt: new Date('2099-01-01T00:00:00.000Z'),
+            },
+          ],
+        } as any)
+        .mockResolvedValueOnce({ docs: [] } as any);
+      mockTaskManager.schedule.mockResolvedValue({ id: 'new-resume-task' } as any);
+
+      await workflowTaskManager.forceRunIdleTasks(workflowExecutionId, {
+        spaceId: 'default',
+        fakeRequest,
+      });
+
+      expect(mockTaskManager.runSoon).not.toHaveBeenCalledWith(globalTimeoutTaskId);
+      expect(mockTaskManager.schedule).toHaveBeenCalledTimes(1);
+      expect(mockTaskManager.runSoon).toHaveBeenCalledWith('new-resume-task');
+    });
   });
 });

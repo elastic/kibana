@@ -99,7 +99,7 @@ export const useColumns = (
   children: ReactNode,
   onDelete?: (items: ContentListItem[]) => void
 ): ResolvedColumn[] => {
-  const { item: itemConfig, isReadOnly, labels, supports } = useContentListConfig();
+  const { item: itemConfig, isReadOnly, labels, supports, features } = useContentListConfig();
   const { euiTheme } = useEuiTheme();
 
   return useMemo(() => {
@@ -109,6 +109,7 @@ export const useColumns = (
       isReadOnly,
       entityName: labels.entity,
       supports,
+      features,
       actions: { onDelete },
       euiTheme,
     };
@@ -135,5 +136,5 @@ export const useColumns = (
     // parent render, so including them would defeat memoization. Re-running when context
     // deps change is sufficient.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [itemConfig, isReadOnly, labels.entity, supports, onDelete, euiTheme]);
+  }, [itemConfig, isReadOnly, labels.entity, supports, features, onDelete, euiTheme]);
 };

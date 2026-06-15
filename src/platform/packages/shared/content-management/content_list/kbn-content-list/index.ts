@@ -113,7 +113,7 @@ export {
   CreatedByCell,
   EditAction,
   DeleteAction,
-  InspectAction,
+  ContentEditorAction,
   useSelection,
 } from '@kbn/content-list-table';
 export type {
@@ -133,7 +133,7 @@ export type {
   ColumnProps,
   EditActionProps,
   DeleteActionProps,
-  InspectActionProps,
+  ContentEditorActionProps,
   ActionNamespace,
   ActionProps,
   UseSelectionReturn,
