@@ -51,6 +51,71 @@ const ensureUpdateAuthorized = async (
   });
 };
 
+/**
+ * License-agnostic core that dedupes, caps, persists, and records a user action
+ * for a set of observables on a case. Callers MUST enforce the Platinum license
+ * gate and call notifyUsage themselves.
+ *
+ * Skips the user action write when no new observables were added (idempotency).
+ */
+export const applyObservablesToCase = async (
+  caseId: string,
+  observables: ObservablePost[],
+  clientArgs: CasesClientArgs
+): Promise<void> => {
+  const {
+    services: { caseService, userActionService },
+    user,
+  } = clientArgs;
+
+  if (observables.length === 0) {
+    return;
+  }
+
+  const retrievedCase = await caseService.getCase({ id: caseId });
+
+  const currentObservables = retrievedCase.attributes.observables ?? [];
+  const updatedObservablesMap = new Map<string, Observable>();
+  currentObservables.forEach((observable) => {
+    processObservables(updatedObservablesMap, observable);
+  });
+
+  observables.forEach((observable) => processObservables(updatedObservablesMap, observable));
+
+  const finalObservables = Array.from(updatedObservablesMap.values()).slice(
+    0,
+    MAX_OBSERVABLES_PER_CASE
+  );
+
+  await caseService.patchCase({
+    caseId: retrievedCase.id,
+    originalCase: retrievedCase,
+    updatedAttributes: {
+      observables: finalObservables,
+      total_observables: finalObservables.length,
+    },
+  });
+
+  const newObservablesCount = finalObservables.length - currentObservables.length;
+
+  // Skip user action write when nothing new was added (prevents noise on idempotent re-extraction).
+  if (newObservablesCount === 0) {
+    return;
+  }
+
+  await userActionService.creator.createUserAction({
+    userAction: {
+      type: UserActionTypes.observables,
+      caseId: retrievedCase.id,
+      owner: retrievedCase.attributes.owner,
+      user,
+      payload: {
+        observables: { count: newObservablesCount, actionType: 'add' },
+      },
+    },
+  });
+};
+
 export const addObservable = async (
   caseId: string,
   params: AddObservableRequest,
@@ -296,9 +361,8 @@ export const bulkAddObservables = async (
   casesClient: CasesClient
 ) => {
   const {
-    services: { caseService, licensingService, userActionService },
+    services: { caseService, licensingService },
     authorization,
-    user,
   } = clientArgs;
 
   const hasPlatinumLicenseOrGreater = await licensingService.isAtLeastPlatinum();
@@ -325,52 +389,11 @@ export const bulkAddObservables = async (
       )
     );
 
-    const currentObservables = retrievedCase.attributes.observables ?? [];
-    const updatedObservablesMap = new Map<string, Observable>();
-    currentObservables.forEach((observable) => {
-      processObservables(updatedObservablesMap, observable);
-    });
+    await applyObservablesToCase(paramArgs.caseId, paramArgs.observables, clientArgs);
 
-    paramArgs.observables.forEach((observable) =>
-      processObservables(updatedObservablesMap, observable)
-    );
+    const freshCase = await caseService.getCase({ id: paramArgs.caseId });
 
-    const finalObservables = Array.from(updatedObservablesMap.values()).slice(
-      0,
-      MAX_OBSERVABLES_PER_CASE
-    );
-
-    const updatedCase = await caseService.patchCase({
-      caseId: retrievedCase.id,
-      originalCase: retrievedCase,
-      updatedAttributes: {
-        observables: finalObservables,
-        total_observables: finalObservables.length,
-      },
-    });
-
-    const newObservablesCount = finalObservables.length - currentObservables.length;
-
-    await userActionService.creator.createUserAction({
-      userAction: {
-        type: UserActionTypes.observables,
-        caseId: retrievedCase.id,
-        owner: retrievedCase.attributes.owner,
-        user,
-        payload: {
-          observables: { count: newObservablesCount, actionType: 'add' },
-        },
-      },
-    });
-
-    const res = flattenCaseSavedObject({
-      savedObject: {
-        ...retrievedCase,
-        ...updatedCase,
-        attributes: { ...retrievedCase.attributes, ...updatedCase?.attributes },
-        references: retrievedCase.references,
-      },
-    });
+    const res = flattenCaseSavedObject({ savedObject: freshCase });
 
     return decodeOrThrow(CaseRt)(res);
   } catch (error) {
