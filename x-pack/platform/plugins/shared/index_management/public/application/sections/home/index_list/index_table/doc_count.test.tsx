@@ -114,6 +114,34 @@ describe('DocCountCell', () => {
     expect(docCountApi.getByName).toHaveBeenCalledWith('index-a');
   });
 
+  it("keeps the reopen spinner when another index's count arrives before the reopened index count", () => {
+    const indexAResult = { status: RequestResultType.Success as const, count: 1000 };
+    mockedUseObservable.mockReturnValue({ 'index-a': indexAResult });
+
+    const { rerender } = render(
+      <DocCountCell indexName="index-a" indexStatus="closed" docCountApi={docCountApi} />
+    );
+
+    rerender(<DocCountCell indexName="index-a" indexStatus="open" docCountApi={docCountApi} />);
+
+    act(() => {
+      jest.advanceTimersByTime(1000);
+    });
+
+    // Simulate index-b's count arriving — scan() emits a new outer object but index-a's
+    // result reference is unchanged, so the spinner must stay.
+    act(() => {
+      mockedUseObservable.mockReturnValue({
+        'index-a': indexAResult,
+        'index-b': { status: RequestResultType.Success, count: 500 },
+      });
+      rerender(<DocCountCell indexName="index-a" indexStatus="open" docCountApi={docCountApi} />);
+    });
+
+    expect(screen.getByTestId('docCountLoadingSpinner')).toBeInTheDocument();
+    expect(screen.queryByText(Number(1000).toLocaleString())).not.toBeInTheDocument();
+  });
+
   it.each(['opening', 'opening...'])(
     'shows a spinner and requests the count when the index status is %s',
     (indexStatus) => {

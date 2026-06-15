@@ -27,6 +27,7 @@ import type { HttpSetup } from '@kbn/core-http-browser';
 import { flattenPanelTree } from '../../../../lib/flatten_panel_tree';
 import {
   INDEX_CLOSED,
+  INDEX_CLOSED_LABEL,
   INDEX_OPEN,
   IndexDetailsSection,
   MAX_DOCUMENTS_FOR_CONVERT_TO_LOOKUP_INDEX,
@@ -38,10 +39,8 @@ import type { Index } from '../../../../../../common';
 import { type DocCountApi, RequestResultType } from '../index_table/get_doc_count';
 import { ModalHost, type ModalHostHandles } from './modal_host/modal_host';
 
-const CLOSED_INDEX_STATUS_LABEL = 'closed';
-
 const isClosedIndexStatus = (indexStatus?: Index['status']) =>
-  indexStatus === INDEX_CLOSED || indexStatus === CLOSED_INDEX_STATUS_LABEL;
+  indexStatus === INDEX_CLOSED || indexStatus === INDEX_CLOSED_LABEL;
 
 export interface IndexActionsContextMenuProps {
   // either an array of indices selected in the list view or an array of 1 index name on the details panel/page

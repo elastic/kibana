@@ -9,7 +9,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { EuiLoadingSpinner, EuiText, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import useObservable from 'react-use/lib/useObservable';
-import { INDEX_CLOSED } from '../../../../../../common/constants';
+import { INDEX_CLOSED, INDEX_CLOSED_LABEL } from '../../../../../../common/constants';
 import { type DocCountResult, type docCountApi, RequestResultType } from './get_doc_count';
 interface DocCountCellProps {
   indexName: string;
@@ -17,11 +17,10 @@ interface DocCountCellProps {
   docCountApi: ReturnType<typeof docCountApi>;
 }
 
-const CLOSED_INDEX_STATUS_LABEL = 'closed';
 const REOPEN_DOC_COUNT_FETCH_DELAY_MS = 1000;
 
 const isClosedIndexStatus = (indexStatus?: string) =>
-  indexStatus === INDEX_CLOSED || indexStatus === CLOSED_INDEX_STATUS_LABEL;
+  indexStatus === INDEX_CLOSED || indexStatus === INDEX_CLOSED_LABEL;
 
 interface ReopenFetchState {
   responseAtRequestStart?: Record<string, DocCountResult>;
@@ -66,17 +65,22 @@ export const DocCountCell = ({ indexName, indexStatus, docCountApi }: DocCountCe
       docCountApi.getByName(indexName);
     }, REOPEN_DOC_COUNT_FETCH_DELAY_MS);
 
-    return () => window.clearTimeout(timeoutId);
+    return () => {
+      window.clearTimeout(timeoutId);
+      setReopenFetchState(null);
+    };
   }, [docCountApi, indexName, isClosedIndex]);
 
+  // Compare per-index rather than the whole response object — scan() always emits a new
+  // object, so object identity would fire whenever ANY index's count updates, not just ours.
   useEffect(() => {
     if (
       reopenFetchState?.hasRequestStarted &&
-      docCountResponse !== reopenFetchState.responseAtRequestStart
+      docCountResponse?.[indexName] !== reopenFetchState.responseAtRequestStart?.[indexName]
     ) {
       setReopenFetchState(null);
     }
-  }, [docCountResponse, reopenFetchState]);
+  }, [docCountResponse, indexName, reopenFetchState]);
 
   if (isClosedIndex) {
     const tooltipContent = i18n.translate('xpack.idxMgmt.indexTable.docCountClosedIndexTooltip', {
