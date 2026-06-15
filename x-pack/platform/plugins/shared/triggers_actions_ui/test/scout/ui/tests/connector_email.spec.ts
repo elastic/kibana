@@ -62,7 +62,9 @@ test.describe('Email connector', { tag: tags.stateful.classic }, () => {
     await navigateToConnectors(page, kbnUrl);
 
     await page.testSubj.click('createConnectorButton');
+    await page.testSubj.locator('.email-card').waitFor({ state: 'visible', timeout: 30_000 });
     await page.testSubj.click('.email-card');
+    await page.testSubj.locator('nameInput').waitFor({ state: 'visible', timeout: 30_000 });
     await page.testSubj.locator('emailServiceSelectInput').selectOption('ses');
 
     await expect(page.testSubj.locator('emailHostInput')).toHaveValue(

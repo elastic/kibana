@@ -104,7 +104,11 @@ test.describe('Jira Service Management connector', { tag: tags.stateful.classic 
     const connectorName = `jsm-create-${uuidv4().slice(0, 8)}`;
 
     await page.testSubj.click('createConnectorButton');
+    await page.testSubj
+      .locator('.jira-service-management-card')
+      .waitFor({ state: 'visible', timeout: 30_000 });
     await page.testSubj.click('.jira-service-management-card');
+    await page.testSubj.locator('nameInput').waitFor({ state: 'visible', timeout: 30_000 });
     await page.testSubj.locator('nameInput').fill(connectorName);
     await page.testSubj.locator('config\\.apiUrl-input').fill('https://test.atlassian.net');
     await page.testSubj.locator('secrets\\.apiKey-input').fill('apiKey');

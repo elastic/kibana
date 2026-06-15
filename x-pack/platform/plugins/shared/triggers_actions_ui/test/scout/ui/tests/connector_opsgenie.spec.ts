@@ -99,7 +99,9 @@ test.describe('Opsgenie connector', { tag: tags.stateful.classic }, () => {
     const connectorName = `opsgenie-create-${uuidv4().slice(0, 8)}`;
 
     await page.testSubj.click('createConnectorButton');
+    await page.testSubj.locator('.opsgenie-card').waitFor({ state: 'visible', timeout: 30_000 });
     await page.testSubj.click('.opsgenie-card');
+    await page.testSubj.locator('nameInput').waitFor({ state: 'visible', timeout: 30_000 });
     await page.testSubj.locator('nameInput').fill(connectorName);
     await page.testSubj.locator('config\\.apiUrl-input').fill('https://test.opsgenie.com');
     await page.testSubj.locator('secrets\\.apiKey-input').fill('apiKey');
