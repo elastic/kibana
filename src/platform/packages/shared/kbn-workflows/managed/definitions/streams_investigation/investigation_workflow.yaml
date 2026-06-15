@@ -89,7 +89,7 @@ steps:
         steps:
           - name: gather
             type: ai.agent
-            if: "{{ steps.build_context.output.hypotheses | size >= 1 }}"
+            if: "{{ steps.build_context.output.structured_output.hypotheses | size >= 1 }}"
             agent-id: sigevents.investigation.gather
             connector-id: ".anthropic-claude-4.5-haiku-chat_completion"
             with:
@@ -99,8 +99,8 @@ steps:
                 verdict — that is the next step's job. Record everything you tried,
                 including failed lookups and access blockers. Be thorough and honest.
 
-                Hypothesis: {{ steps.build_context.output.hypotheses[0] | json }}
-                Event context: {{ steps.build_context.output.context_summary }}
+                Hypothesis: {{ steps.build_context.output.structured_output.hypotheses[0] | json }}
+                Event context: {{ steps.build_context.output.structured_output.context_summary }}
                 Streams: {{ inputs.stream_names | json }}
               schema:
                 type: object
@@ -132,7 +132,7 @@ steps:
 
           - name: review
             type: ai.agent
-            if: "{{ steps.build_context.output.hypotheses | size >= 1 }}"
+            if: "{{ steps.build_context.output.structured_output.hypotheses | size >= 1 }}"
             agent-id: sigevents.investigation.review
             connector-id: ".anthropic-claude-4.5-haiku-chat_completion"
             with:
@@ -145,7 +145,7 @@ steps:
                 A clearly-refuted hypothesis is still worth forwarding if the
                 refutation itself is informative.
 
-                Hypothesis: {{ steps.build_context.output.hypotheses[0] | json }}
+                Hypothesis: {{ steps.build_context.output.structured_output.hypotheses[0] | json }}
                 Gathered evidence: {{ steps.hypothesis_0.gather.output | json }}
               schema:
                 type: object
@@ -172,7 +172,7 @@ steps:
         steps:
           - name: gather
             type: ai.agent
-            if: "{{ steps.build_context.output.hypotheses | size >= 2 }}"
+            if: "{{ steps.build_context.output.structured_output.hypotheses | size >= 2 }}"
             agent-id: sigevents.investigation.gather
             connector-id: ".anthropic-claude-4.5-haiku-chat_completion"
             with:
@@ -182,8 +182,8 @@ steps:
                 verdict — that is the next step's job. Record everything you tried,
                 including failed lookups and access blockers. Be thorough and honest.
 
-                Hypothesis: {{ steps.build_context.output.hypotheses[1] | json }}
-                Event context: {{ steps.build_context.output.context_summary }}
+                Hypothesis: {{ steps.build_context.output.structured_output.hypotheses[1] | json }}
+                Event context: {{ steps.build_context.output.structured_output.context_summary }}
                 Streams: {{ inputs.stream_names | json }}
               schema:
                 type: object
@@ -215,7 +215,7 @@ steps:
 
           - name: review
             type: ai.agent
-            if: "{{ steps.build_context.output.hypotheses | size >= 2 }}"
+            if: "{{ steps.build_context.output.structured_output.hypotheses | size >= 2 }}"
             agent-id: sigevents.investigation.review
             connector-id: ".anthropic-claude-4.5-haiku-chat_completion"
             with:
@@ -228,7 +228,7 @@ steps:
                 A clearly-refuted hypothesis is still worth forwarding if the
                 refutation itself is informative.
 
-                Hypothesis: {{ steps.build_context.output.hypotheses[1] | json }}
+                Hypothesis: {{ steps.build_context.output.structured_output.hypotheses[1] | json }}
                 Gathered evidence: {{ steps.hypothesis_1.gather.output | json }}
               schema:
                 type: object
@@ -255,7 +255,7 @@ steps:
         steps:
           - name: gather
             type: ai.agent
-            if: "{{ steps.build_context.output.hypotheses | size >= 3 }}"
+            if: "{{ steps.build_context.output.structured_output.hypotheses | size >= 3 }}"
             agent-id: sigevents.investigation.gather
             connector-id: ".anthropic-claude-4.5-haiku-chat_completion"
             with:
@@ -265,8 +265,8 @@ steps:
                 verdict — that is the next step's job. Record everything you tried,
                 including failed lookups and access blockers. Be thorough and honest.
 
-                Hypothesis: {{ steps.build_context.output.hypotheses[2] | json }}
-                Event context: {{ steps.build_context.output.context_summary }}
+                Hypothesis: {{ steps.build_context.output.structured_output.hypotheses[2] | json }}
+                Event context: {{ steps.build_context.output.structured_output.context_summary }}
                 Streams: {{ inputs.stream_names | json }}
               schema:
                 type: object
@@ -298,7 +298,7 @@ steps:
 
           - name: review
             type: ai.agent
-            if: "{{ steps.build_context.output.hypotheses | size >= 3 }}"
+            if: "{{ steps.build_context.output.structured_output.hypotheses | size >= 3 }}"
             agent-id: sigevents.investigation.review
             connector-id: ".anthropic-claude-4.5-haiku-chat_completion"
             with:
@@ -311,7 +311,7 @@ steps:
                 A clearly-refuted hypothesis is still worth forwarding if the
                 refutation itself is informative.
 
-                Hypothesis: {{ steps.build_context.output.hypotheses[2] | json }}
+                Hypothesis: {{ steps.build_context.output.structured_output.hypotheses[2] | json }}
                 Gathered evidence: {{ steps.hypothesis_2.gather.output | json }}
               schema:
                 type: object
@@ -338,7 +338,7 @@ steps:
         steps:
           - name: gather
             type: ai.agent
-            if: "{{ steps.build_context.output.hypotheses | size >= 4 }}"
+            if: "{{ steps.build_context.output.structured_output.hypotheses | size >= 4 }}"
             agent-id: sigevents.investigation.gather
             connector-id: ".anthropic-claude-4.5-haiku-chat_completion"
             with:
@@ -348,8 +348,8 @@ steps:
                 verdict — that is the next step's job. Record everything you tried,
                 including failed lookups and access blockers. Be thorough and honest.
 
-                Hypothesis: {{ steps.build_context.output.hypotheses[3] | json }}
-                Event context: {{ steps.build_context.output.context_summary }}
+                Hypothesis: {{ steps.build_context.output.structured_output.hypotheses[3] | json }}
+                Event context: {{ steps.build_context.output.structured_output.context_summary }}
                 Streams: {{ inputs.stream_names | json }}
               schema:
                 type: object
@@ -381,7 +381,7 @@ steps:
 
           - name: review
             type: ai.agent
-            if: "{{ steps.build_context.output.hypotheses | size >= 4 }}"
+            if: "{{ steps.build_context.output.structured_output.hypotheses | size >= 4 }}"
             agent-id: sigevents.investigation.review
             connector-id: ".anthropic-claude-4.5-haiku-chat_completion"
             with:
@@ -394,7 +394,7 @@ steps:
                 A clearly-refuted hypothesis is still worth forwarding if the
                 refutation itself is informative.
 
-                Hypothesis: {{ steps.build_context.output.hypotheses[3] | json }}
+                Hypothesis: {{ steps.build_context.output.structured_output.hypotheses[3] | json }}
                 Gathered evidence: {{ steps.hypothesis_3.gather.output | json }}
               schema:
                 type: object
@@ -421,7 +421,7 @@ steps:
         steps:
           - name: gather
             type: ai.agent
-            if: "{{ steps.build_context.output.hypotheses | size >= 5 }}"
+            if: "{{ steps.build_context.output.structured_output.hypotheses | size >= 5 }}"
             agent-id: sigevents.investigation.gather
             connector-id: ".anthropic-claude-4.5-haiku-chat_completion"
             with:
@@ -431,8 +431,8 @@ steps:
                 verdict — that is the next step's job. Record everything you tried,
                 including failed lookups and access blockers. Be thorough and honest.
 
-                Hypothesis: {{ steps.build_context.output.hypotheses[4] | json }}
-                Event context: {{ steps.build_context.output.context_summary }}
+                Hypothesis: {{ steps.build_context.output.structured_output.hypotheses[4] | json }}
+                Event context: {{ steps.build_context.output.structured_output.context_summary }}
                 Streams: {{ inputs.stream_names | json }}
               schema:
                 type: object
@@ -464,7 +464,7 @@ steps:
 
           - name: review
             type: ai.agent
-            if: "{{ steps.build_context.output.hypotheses | size >= 5 }}"
+            if: "{{ steps.build_context.output.structured_output.hypotheses | size >= 5 }}"
             agent-id: sigevents.investigation.review
             connector-id: ".anthropic-claude-4.5-haiku-chat_completion"
             with:
@@ -477,7 +477,7 @@ steps:
                 A clearly-refuted hypothesis is still worth forwarding if the
                 refutation itself is informative.
 
-                Hypothesis: {{ steps.build_context.output.hypotheses[4] | json }}
+                Hypothesis: {{ steps.build_context.output.structured_output.hypotheses[4] | json }}
                 Gathered evidence: {{ steps.hypothesis_4.gather.output | json }}
               schema:
                 type: object
@@ -635,15 +635,15 @@ steps:
   - name: prepare_write_back
     type: data.set
     with:
-      root_cause: "{{ steps.synthesize.output.root_cause }}"
-      confidence: "${{ steps.synthesize.output.confidence }}"
-      impact: "{{ steps.synthesize.output.impact }}"
-      ranked_hypotheses: "${{ steps.synthesize.output.ranked_hypotheses }}"
-      discarded_hypotheses: "${{ steps.synthesize.output.discarded_hypotheses }}"
-      remediation_options: "${{ steps.synthesize.output.remediation_options }}"
-      gaps_found: "${{ steps.synthesize.output.gaps_found }}"
-      investigation_complete: "${{ steps.synthesize.output.investigation_complete }}"
-      memory_pages_written: "${{ steps.synthesize.output.memory_pages_written }}"
+      root_cause: "{{ steps.synthesize.output.structured_output.root_cause }}"
+      confidence: "${{ steps.synthesize.output.structured_output.confidence }}"
+      impact: "{{ steps.synthesize.output.structured_output.impact }}"
+      ranked_hypotheses: "${{ steps.synthesize.output.structured_output.ranked_hypotheses }}"
+      discarded_hypotheses: "${{ steps.synthesize.output.structured_output.discarded_hypotheses }}"
+      remediation_options: "${{ steps.synthesize.output.structured_output.remediation_options }}"
+      gaps_found: "${{ steps.synthesize.output.structured_output.gaps_found }}"
+      investigation_complete: "${{ steps.synthesize.output.structured_output.investigation_complete }}"
+      memory_pages_written: "${{ steps.synthesize.output.structured_output.memory_pages_written }}"
       workflow_execution_id: "{{ execution.id }}"
 
   - name: write_back
