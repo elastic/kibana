@@ -186,6 +186,8 @@ EOF
           EVAL_FANOUT: "0"
           TEST_RUN_ID: "${TEST_RUN_ID:-}"
           EVAL_SERVER_CONFIG_SET: "${EVAL_SERVER_CONFIG_SET:-}"
+          EVAL_GREP: "${EVAL_GREP:-}"
+          EVALUATION_REPETITIONS: "${EVALUATION_REPETITIONS:-}"
         timeout_in_minutes: ${timeout_in_minutes}
         concurrency_group: "kbn-evals-${group_key_safe}"
         concurrency: ${EVAL_FANOUT_CONCURRENCY}
@@ -371,10 +373,16 @@ done
 
 # Run eval suite via @kbn/evals CLI (internal executor by default).
 # If EVAL_PROJECT is set, run a single Playwright project (used by CI fanout steps).
+# If EVAL_GREP is set, pass Playwright --grep to filter tests by name/pattern.
 # Otherwise, Playwright will run all projects defined by the suite config (useful locally).
+EVAL_RUN_ARGS=()
+if [[ -n "${EVAL_GREP:-}" ]]; then
+  EVAL_RUN_ARGS+=(--grep "${EVAL_GREP}")
+fi
+
 if [[ -n "${EVAL_PROJECT:-}" ]]; then
-  node scripts/evals run --suite "$EVAL_SUITE_ID" --project "$EVAL_PROJECT"
+  node scripts/evals run --suite "$EVAL_SUITE_ID" --project "$EVAL_PROJECT" "${EVAL_RUN_ARGS[@]}"
 else
-  node scripts/evals run --suite "$EVAL_SUITE_ID"
+  node scripts/evals run --suite "$EVAL_SUITE_ID" "${EVAL_RUN_ARGS[@]}"
 fi
 
