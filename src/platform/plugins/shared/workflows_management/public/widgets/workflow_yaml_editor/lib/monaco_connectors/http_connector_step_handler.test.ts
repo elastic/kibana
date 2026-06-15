@@ -9,12 +9,26 @@
 
 import { HttpMonacoConnectorStepHandler } from './http_connector_step_handler';
 import { createMockHoverContext, createMockStepContext } from './test_utils/mock_factories';
+import { getCachedAllConnectorsMap } from '../../../../../common/schema';
+import { getCachedAllConnectors } from '../connectors_cache';
+import { setMockStabilityBadgeThemeForTests } from '../stability/set_mock_stability_badge_theme_for_tests';
+
+jest.mock('../connectors_cache', () => ({
+  getCachedAllConnectors: jest.fn(),
+}));
+
+jest.mock('../../../../../common/schema', () => ({
+  getCachedAllConnectorsMap: jest.fn(),
+}));
 
 describe('HttpMonacoConnectorStepHandler', () => {
   let handler: HttpMonacoConnectorStepHandler;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    setMockStabilityBadgeThemeForTests();
+    (getCachedAllConnectors as jest.Mock).mockReturnValue([]);
+    (getCachedAllConnectorsMap as jest.Mock).mockReturnValue(null);
     handler = new HttpMonacoConnectorStepHandler();
   });
 
@@ -54,6 +68,21 @@ describe('HttpMonacoConnectorStepHandler', () => {
       expect(result?.value).toContain('HTTP');
       expect(result?.value).toContain('Usage Modes');
       expect(result?.isTrusted).toBe(true);
+    });
+
+    it('should prepend stability badge when connector has tech_preview stability', async () => {
+      (getCachedAllConnectorsMap as jest.Mock).mockReturnValue(
+        new Map([['http', { type: 'http', stability: 'tech_preview' }]])
+      );
+      const stepContext = createMockStepContext();
+      const context = createMockHoverContext('http', stepContext);
+      const result = await handler.generateHoverContent(context);
+
+      expect(result).not.toBeNull();
+      expect(result?.value).toContain('Tech preview');
+      expect(result?.value.indexOf('<img src="data:image/svg+xml,')).toBeLessThan(
+        result!.value.indexOf('**Workflow Connector**')
+      );
     });
 
     it('should include connector-id usage mode documentation', async () => {

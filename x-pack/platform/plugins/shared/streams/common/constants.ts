@@ -65,16 +65,33 @@ export const STREAMS_SETTINGS_DOCUMENT_ID = 'kibana_streams_settings';
  * tasks, and polls their status until completion or timeout.
  */
 
-// Workflow identity
-export const CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID = 'workflow-ad83678a-dba7-55d1-8caa-3010f6f46b81';
+// Legacy workflow identity.
+//
+// The continuous extraction workflow used to be a normal workflow created at
+// this hardcoded id in the default space. It is now a managed workflow
+// (`system-streams-ki-continuous-onboarding`). This constant is retained so the
+// legacy workflow can be deleted on-demand when the user disables continuous
+// KI extraction.
+export const LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID =
+  'workflow-ad83678a-dba7-55d1-8caa-3010f6f46b81';
 
 // Scheduling: the workflow runs every COORDINATOR_INTERVAL_MINUTES with a
 // timeout 1 minute shorter to avoid overlapping with the next run.
-export const COORDINATOR_INTERVAL_MINUTES = 10;
+//
+// The coordinator starts onboarding for each eligible stream (features AND
+// queries generation, plus best-effort memory) and then polls every stream
+// until it reaches a terminal state. Per-stream onboarding is capped at 30m
+// and runs in parallel, so the interval must comfortably exceed that ceiling.
+export const COORDINATOR_INTERVAL_MINUTES = 35;
 
 // Stream selection: how many streams to process per run and how often
 export const DEFAULT_EXTRACTION_INTERVAL_HOURS = 12;
 export const MIN_EXTRACTION_INTERVAL_HOURS = 0;
 export const MAX_SCHEDULED_STREAMS = 5;
 
-export const POLL_DELAY_SECONDS = 5;
+export const POLL_DELAY_SECONDS = 30;
+
+/**
+ * Sigevents memory data stream backing MemoryServiceImpl.
+ */
+export const MEMORIES_DATA_STREAM = '.significant_events-memories';

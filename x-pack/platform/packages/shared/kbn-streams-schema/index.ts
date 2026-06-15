@@ -207,8 +207,6 @@ export {
 export type {
   SignificantEventsResponse,
   SignificantEventsGetResponse,
-  SignificantEventsPreviewResponse,
-  SignificantEventsGenerateResponse,
   GeneratedSignificantEventQuery,
   SignificantEventsQueriesGenerationResult,
   SignificantEventsQueriesGenerationTaskResult,
@@ -296,14 +294,19 @@ export {
   getImpactLevel,
 } from './src/insights';
 export {
+  SIG_EVENT_STATUS_OPTIONS,
+  SIG_EVENT_IMPACT_OPTIONS,
   detectionSchema,
   type Detection,
   discoverySchema,
   type Discovery,
-  verdictSchema,
-  type Verdict,
   sigEventSchema,
+  sigEventStatusSchema,
+  sigEventImpactSchema,
   type SigEvent,
+  type KnowledgeIndicator,
+  type SigEventStatus,
+  type SigEventImpact,
 } from './src/sig_events';
 export type {
   StreamsKIsOnboardingResult,
