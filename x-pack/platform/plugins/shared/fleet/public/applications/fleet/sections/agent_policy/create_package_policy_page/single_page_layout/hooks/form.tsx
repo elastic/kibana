@@ -768,7 +768,7 @@ export function useOnSubmit({
         }
         const isAgentlessConfigured = createdPolicy
           ? isAgentlessAgentPolicy(createdPolicy)
-          : getAgentlessStatusForPackage(packageInfo).isAgentless;
+          : data?.item?.supports_agentless ?? !('policy_ids' in (data?.item ?? {}));
 
         // Cloud template helpers expect PackagePolicy with array-based inputs;
         // they are irrelevant for agentless policies where inputs are simplified.
