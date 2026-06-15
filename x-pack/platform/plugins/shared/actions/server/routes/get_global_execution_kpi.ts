@@ -7,7 +7,7 @@
 import type { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import type { GetGlobalExecutionKPIParams, RewriteRequestCase } from '../../common';
-import { INTERNAL_BASE_ACTION_API_PATH } from '../../common';
+import { INTERNAL_BASE_ACTION_API_PATH, ISO_DATE_MAX_LENGTH } from '../../common';
 import { verifyAccessAndContext } from './verify_access_and_context';
 import type { ActionsRequestHandlerContext } from '../types';
 import type { ILicenseState } from '../lib';
@@ -15,10 +15,10 @@ import { rewriteNamespaces } from './rewrite_namespaces';
 import { DEFAULT_ACTION_ROUTE_SECURITY } from './constants';
 
 const bodySchema = schema.object({
-  date_start: schema.string({ maxLength: 64 }),
-  date_end: schema.maybe(schema.string({ maxLength: 64 })),
-  filter: schema.maybe(schema.string({ maxLength: 4096 })),
-  namespaces: schema.maybe(schema.arrayOf(schema.string({ maxLength: 1024 }), { maxSize: 100 })),
+  date_start: schema.string({ maxLength: ISO_DATE_MAX_LENGTH }),
+  date_end: schema.maybe(schema.string({ maxLength: ISO_DATE_MAX_LENGTH })),
+  filter: schema.maybe(schema.string({ maxLength: 8192 })),
+  namespaces: schema.maybe(schema.arrayOf(schema.string({ maxLength: 100 }), { maxSize: 100 })),
 });
 
 const rewriteReq: RewriteRequestCase<GetGlobalExecutionKPIParams> = ({

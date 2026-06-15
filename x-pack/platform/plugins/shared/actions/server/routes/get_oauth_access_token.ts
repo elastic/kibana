@@ -9,7 +9,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
 import type { ILicenseState } from '../lib';
-import { INTERNAL_BASE_ACTION_API_PATH } from '../../common';
+import { CONNECTOR_ID_MAX_LENGTH, INTERNAL_BASE_ACTION_API_PATH } from '../../common';
 import type { ActionsRequestHandlerContext } from '../types';
 import { verifyAccessAndContext } from './verify_access_and_context';
 import type { ActionsConfigurationUtilities } from '../actions_config';
@@ -45,7 +45,7 @@ const oauthClientCredentialsBodySchema = schema.object({
 export type OAuthClientCredentialsParams = TypeOf<typeof oauthClientCredentialsBodySchema>;
 
 const oauthAuthorizationCodeBodySchema = schema.object({
-  connectorId: schema.string({ maxLength: 36 }),
+  connectorId: schema.string({ maxLength: CONNECTOR_ID_MAX_LENGTH }),
   tokenUrl: schema.string({ maxLength: 2048 }),
   scope: schema.maybe(schema.string({ maxLength: 1024 })),
   config: schema.object({
