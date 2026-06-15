@@ -97,79 +97,6 @@ export const SNOOZE_ACTION_POPOVER_ARIA_LABEL = i18n.translate(
   }
 );
 
-/** --- Snooze form --- */
-export const SNOOZE_FORM_MINUTES = i18n.translate(
-  'xpack.alertingV2.episodesUi.snoozeForm.minutes',
-  {
-    defaultMessage: 'Minutes',
-  }
-);
-
-export const SNOOZE_FORM_HOURS = i18n.translate('xpack.alertingV2.episodesUi.snoozeForm.hours', {
-  defaultMessage: 'Hours',
-});
-
-export const SNOOZE_FORM_DAYS = i18n.translate('xpack.alertingV2.episodesUi.snoozeForm.days', {
-  defaultMessage: 'Days',
-});
-
-export const SNOOZE_FORM_PRESET_1H = i18n.translate(
-  'xpack.alertingV2.episodesUi.snoozeForm.preset.1h',
-  {
-    defaultMessage: '1 hour',
-  }
-);
-
-export const SNOOZE_FORM_PRESET_3H = i18n.translate(
-  'xpack.alertingV2.episodesUi.snoozeForm.preset.3h',
-  {
-    defaultMessage: '3 hours',
-  }
-);
-
-export const SNOOZE_FORM_PRESET_8H = i18n.translate(
-  'xpack.alertingV2.episodesUi.snoozeForm.preset.8h',
-  {
-    defaultMessage: '8 hours',
-  }
-);
-
-export const SNOOZE_FORM_PRESET_1D = i18n.translate(
-  'xpack.alertingV2.episodesUi.snoozeForm.preset.1d',
-  {
-    defaultMessage: '1 day',
-  }
-);
-
-export const SNOOZE_FORM_TITLE = i18n.translate('xpack.alertingV2.episodesUi.snoozeForm.title', {
-  defaultMessage: 'Snooze notifications',
-});
-
-export const SNOOZE_FORM_DURATION_VALUE_ARIA_LABEL = i18n.translate(
-  'xpack.alertingV2.episodesUi.snoozeForm.durationValueAriaLabel',
-  {
-    defaultMessage: 'Snooze duration value',
-  }
-);
-
-export const SNOOZE_FORM_UNIT_SELECT_ARIA_LABEL = i18n.translate(
-  'xpack.alertingV2.episodesUi.snoozeForm.unitSelectAriaLabel',
-  {
-    defaultMessage: 'Snooze duration unit',
-  }
-);
-
-export const SNOOZE_FORM_APPLY = i18n.translate('xpack.alertingV2.episodesUi.snoozeForm.apply', {
-  defaultMessage: 'Apply',
-});
-
-export const SNOOZE_FORM_COMMONLY_USED = i18n.translate(
-  'xpack.alertingV2.episodesUi.snoozeForm.commonlyUsed',
-  {
-    defaultMessage: 'Commonly used',
-  }
-);
-
 /** --- Tag badges (list cell) --- */
 export const TAGS_MORE_BADGE_ARIA_LABEL = i18n.translate(
   'xpack.alertingV2.episodesUi.tags.moreTags.ariaLabel',
@@ -288,6 +215,50 @@ export const TAGS_ACTION_SELECT_NONE = i18n.translate(
   }
 );
 
+/** --- Bulk snooze modal --- */
+export const BULK_SNOOZE_MODAL_TITLE = i18n.translate(
+  'xpack.alertingV2.episodesUi.bulkSnoozeModal.title',
+  {
+    defaultMessage: 'Snooze selected episodes',
+  }
+);
+
+/** --- Bulk tags modal --- */
+export const BULK_TAGS_MODAL_TITLE = i18n.translate(
+  'xpack.alertingV2.episodesUi.bulkTagsModal.title',
+  {
+    defaultMessage: 'Set tags for selected episodes',
+  }
+);
+
+export const BULK_TAGS_MODAL_REPLACE_WARNING = i18n.translate(
+  'xpack.alertingV2.episodesUi.bulkTagsModal.replaceWarning',
+  {
+    defaultMessage: 'These tags will replace any existing tags on all selected episodes.',
+  }
+);
+
+export const BULK_TAGS_MODAL_COMBOBOX_PLACEHOLDER = i18n.translate(
+  'xpack.alertingV2.episodesUi.bulkTagsModal.comboboxPlaceholder',
+  {
+    defaultMessage: 'Add tags',
+  }
+);
+
+export const BULK_TAGS_MODAL_CANCEL = i18n.translate(
+  'xpack.alertingV2.episodesUi.bulkTagsModal.cancel',
+  {
+    defaultMessage: 'Cancel',
+  }
+);
+
+export const BULK_TAGS_MODAL_SAVE = i18n.translate(
+  'xpack.alertingV2.episodesUi.bulkTagsModal.save',
+  {
+    defaultMessage: 'Save',
+  }
+);
+
 /** --- Edit episode assignee flyout --- */
 export const ASSIGNEE_FLYOUT_EMPTY_LIST_TITLE = (totalEpisodes: number) =>
   i18n.translate('xpack.alertingV2.episodes.assignees.flyout.emptyListTitle', {
@@ -337,26 +308,6 @@ export const ASSIGNEE_FLYOUT_SUGGEST_ERROR_TITLE = i18n.translate(
     defaultMessage: 'Could not search users',
   }
 );
-
-export const ASSIGNEE_FLYOUT_SAVE_SUCCESS = i18n.translate(
-  'xpack.alertingV2.episodes.assignees.flyout.saveSuccess',
-  {
-    defaultMessage: 'Assignee updated.',
-  }
-);
-
-export const ASSIGNEE_FLYOUT_SAVE_ERROR_TITLE = i18n.translate(
-  'xpack.alertingV2.episodes.assignees.flyout.saveErrorTitle',
-  {
-    defaultMessage: 'Could not update assignee',
-  }
-);
-
-export const getAssigneeFlyoutSubtitle = (episodeId: string) =>
-  i18n.translate('xpack.alertingV2.episodes.assignees.flyout.subtitle', {
-    defaultMessage: 'Episode: {episodeId}',
-    values: { episodeId },
-  });
 
 export const ASSIGNEE_FLYOUT_TITLE = i18n.translate(
   'xpack.alertingV2.episodes.assignees.flyout.title',

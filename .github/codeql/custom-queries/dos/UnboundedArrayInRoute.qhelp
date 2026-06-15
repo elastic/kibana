@@ -19,10 +19,19 @@ requests. This can cause:
 <li>Degraded performance affecting all users of the system</li>
 </ul>
 <p>
-The query specifically targets <code>schema.arrayOf()</code> calls that are missing the 
-<code>maxSize</code> option in the second argument. It excludes configuration files 
-(<code>config.ts</code>) and plugin entry points (<code>server/index.ts</code>) as these 
-typically handle trusted internal configuration rather than external user input.
+The query specifically targets <code>schema.arrayOf()</code> calls that are missing the
+<code>maxSize</code> option in the second argument. It uses a shared exclusion list (defined
+in <code>KibanaDoSExclusions.qll</code>) to skip files whose schemas are known to never validate
+HTTP request payloads, such as saved-object attribute schemas, plugin configuration, UI settings
+definitions, content-management layer schemas, and similar structural/data-at-rest categories.
+See that file for the full set of excluded path patterns.
+</p>
+<p>
+Some findings will be in schemas that validate route <b>responses</b> or other non-request-payload
+contexts. These are expected false positives. To suppress a legitimate false positive, add a
+<code>codeql[js/kibana/unbounded-array-in-schema]</code> comment on the line above the flagged
+call. If a false positive affects an entire file category, consider proposing an addition to
+<code>KibanaDoSExclusions.qll</code> rather than adding per-line suppressions.
 </p>
 </overview>
 

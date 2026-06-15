@@ -144,7 +144,12 @@ const ServerlessTierAccessDenied = React.memo<{
   const [billingUrl, setBillingUrl] = useState<string | undefined>();
 
   useEffect(() => {
-    cloud?.getPrivilegedUrls().then(({ billingUrl: url }) => setBillingUrl(url));
+    if (cloud) {
+      cloud
+        .getPrivilegedUrls()
+        .then((urls) => setBillingUrl(urls.billingUrl))
+        .catch(() => {});
+    }
   }, [cloud]);
 
   const actions = useMemo(() => {

@@ -17,16 +17,13 @@ import {
 import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { useLocation } from 'react-router-dom';
-import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { LastEventIndexKey } from '@kbn/timelines-plugin/common';
 import { useUpdateAssetCriticality } from '../../../../entity_analytics/api/hooks/use_update_asset_criticality';
 import { PageScope } from '../../../../data_view_manager/constants';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { dataViewSpecToViewBase } from '../../../../common/lib/kuery';
 import { useCalculateEntityRiskScore } from '../../../../entity_analytics/api/hooks/use_calculate_entity_risk_score';
 import { useAssetCriticalityPrivileges } from '../../../../entity_analytics/components/asset_criticality/use_asset_criticality';
 import { AssetCriticalityAccordion } from '../../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
@@ -64,18 +61,13 @@ import { UsersDetailsTabs } from './details_tabs';
 import { navTabsUsersDetails } from './nav_tabs';
 import type { UsersDetailsProps } from './types';
 import { UsersType } from '../../store/model';
-import { getUsersDetailsPageFilters, getIdentityFieldsPageFilters } from './helpers';
-import {
-  identityFieldsHaveUsableValues,
-  mergeLegacyIdentityWhenStoreEntityMissing,
-} from '../../../../flyout/document_details/shared/utils';
+import { getUsersDetailsPageFilters } from './helpers';
 import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
 import { Display } from '../../../hosts/pages/display';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useObservedUserDetails } from '../../containers/users/observed_details';
 import { manageQuery } from '../../../../common/components/page/manage_query';
 import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { EmptyPrompt } from '../../../../common/components/empty_prompt';
 import { AlertCountByRuleByStatus } from '../../../../common/components/alert_count_by_status';
 import { useRefetchOverviewPageRiskScore } from '../../../../entity_analytics/api/hooks/use_refetch_overview_page_risk_score';
@@ -92,9 +84,9 @@ import { useObservedUser } from '../../../../flyout/entity_details/user_right/ho
 import { buildRiskScoreStateFromEntityRecord } from '../../../../flyout/entity_details/shared/entity_store_risk_utils';
 import { NO_CORRESPONDING_ENTITY_EXISTS } from '../../../../flyout/entity_details/shared/translations';
 import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
-import { sourcererSelectors } from '../../../../sourcerer/store';
 import type { UserItem } from '../../../../../common/search_strategy';
 import type { Entity } from '../../../../../common/api/entity_analytics';
+import { euidDslFilterToPageFilters } from '../../../helpers';
 
 const USERS_DETAILS_OVERVIEW_QUERY_ID = 'UsersDetailsQueryId';
 const ES_USER_FIELD = 'user.name';
@@ -187,11 +179,6 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     [identityFields, detailName]
   );
 
-  const usersDetailsPageFilters: Filter[] = useMemo(
-    () => getUsersDetailsPageFilters(detailName),
-    [detailName]
-  );
-
   const narrowDateRange = useCallback<UserSummaryProps['narrowDateRange']>(
     (score, interval) => {
       const fromTo = scoreIntervalToDateTime(score, interval);
@@ -206,25 +193,11 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     [dispatch]
   );
 
-  const {
-    indicesExist: oldIndicesExist,
-    selectedPatterns: oldSelectedPatterns,
-    sourcererDataView: oldSourcererDataViewSpec,
-  } = useSourcererDataView();
+  const { dataView, status } = useDataView(PageScope.explore);
+  const selectedPatterns = useSelectedPatterns(PageScope.explore);
+  const indicesExist = dataView.hasMatchedIndices();
 
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-
-  const { dataView: experimentalDataView, status } = useDataView(PageScope.explore);
-  const experimentalSelectedPatterns = useSelectedPatterns(PageScope.explore);
-
-  const indicesExist = newDataViewPickerEnabled
-    ? !!experimentalDataView.matchedIndices?.length
-    : oldIndicesExist;
-  const selectedPatterns = newDataViewPickerEnabled
-    ? experimentalSelectedPatterns
-    : oldSelectedPatterns;
-
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
 
   const userStoreIdentityFields = useMemo(() => {
     if (entityId) {
@@ -246,33 +219,29 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     entityStoreV2Enabled && !entityFromStoreResult.isLoading && !entityFromStoreResult.entityRecord;
 
   const usersDetailsEventsPageFilters = useMemo(() => {
+    // Builds Kibana (not ES DSL) filters
+    // Fallback to user.name filter if EUID-based filter cannot be built for any reason
+    const legacyFilters = getUsersDetailsPageFilters(detailName);
     if (!entityStoreV2Enabled || noEntityInStore) {
-      return getUsersDetailsPageFilters(detailName);
+      return legacyFilters;
     }
-    const fromStore =
-      euidApi?.euid?.getEntityIdentifiersFromDocument('user', entityFromStoreResult.entityRecord) ??
-      {};
-    const merged = mergeLegacyIdentityWhenStoreEntityMissing(fromStore, resolvedIdentityFields);
-    if (identityFieldsHaveUsableValues(merged)) {
-      return getIdentityFieldsPageFilters(merged);
-    }
-    return getUsersDetailsPageFilters(detailName);
+
+    const entityDslFilter = euidApi?.euid?.dsl.getEuidFilterBasedOnDocument(
+      EntityType.user,
+      entityFromStoreResult.entityRecord
+    );
+    return entityDslFilter ? euidDslFilterToPageFilters(entityDslFilter) : legacyFilters;
   }, [
     detailName,
     entityFromStoreResult.entityRecord,
     entityStoreV2Enabled,
     noEntityInStore,
     euidApi?.euid,
-    resolvedIdentityFields,
   ]);
 
-  const oldSecurityDefaultPatterns =
-    useSelector(sourcererSelectors.defaultDataView)?.patternList ?? [];
-  const { indexPatterns: experimentalSecurityDefaultIndexPatterns } = useSecurityDefaultPatterns();
-  const securityDefaultPatterns = newDataViewPickerEnabled
-    ? experimentalSecurityDefaultIndexPatterns
-    : oldSecurityDefaultPatterns;
+  const { indexPatterns: securityDefaultPatterns } = useSecurityDefaultPatterns();
 
+  // observedUser.entityRecord returns entityStoreFromResult.entityRecord when entityStoreV2Enabled
   const observedUser = useObservedUser(
     detailName,
     PageScope.explore,
@@ -316,55 +285,20 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     [entityId, entityStoreV2Enabled, observedUser.entityRecord?.entity?.id]
   );
 
-  const [rawFilteredQuery, kqlError] = useMemo(() => {
+  const [rawFilteredQueryForUserDetailsIdentity, kqlError] = useMemo(() => {
     try {
       return [
         buildEsQuery(
-          newDataViewPickerEnabled
-            ? experimentalDataView
-            : dataViewSpecToViewBase(oldSourcererDataViewSpec),
+          dataView,
           [query],
-          [...usersDetailsPageFilters, ...globalFilters],
+          [...usersDetailsEventsPageFilters, ...globalFilters],
           getEsQueryConfig(uiSettings)
         ),
       ];
     } catch (e) {
       return [undefined, e];
     }
-  }, [
-    newDataViewPickerEnabled,
-    experimentalDataView,
-    oldSourcererDataViewSpec,
-    query,
-    usersDetailsPageFilters,
-    globalFilters,
-    uiSettings,
-  ]);
-
-  const [rawFilteredQueryForUserDetailsIdentity] = useMemo(() => {
-    try {
-      return [
-        buildEsQuery(
-          newDataViewPickerEnabled
-            ? experimentalDataView
-            : dataViewSpecToViewBase(oldSourcererDataViewSpec),
-          [query],
-          [...usersDetailsEventsPageFilters, ...globalFilters],
-          getEsQueryConfig(uiSettings)
-        ),
-      ];
-    } catch {
-      return [undefined];
-    }
-  }, [
-    newDataViewPickerEnabled,
-    experimentalDataView,
-    oldSourcererDataViewSpec,
-    query,
-    usersDetailsEventsPageFilters,
-    globalFilters,
-    uiSettings,
-  ]);
+  }, [dataView, query, usersDetailsEventsPageFilters, globalFilters, uiSettings]);
 
   const stringifiedUserDetailsIdentityFilterQuery = useMemo(
     () =>
@@ -374,10 +308,9 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     [rawFilteredQueryForUserDetailsIdentity]
   );
 
-  const stringifiedAdditionalFilters = JSON.stringify(rawFilteredQuery);
   useInvalidFilterQuery({
     id: USERS_DETAILS_OVERVIEW_QUERY_ID,
-    filterQuery: stringifiedAdditionalFilters,
+    filterQuery: stringifiedUserDetailsIdentityFilterQuery,
     kqlError,
     query,
     startDate: from,
@@ -391,17 +324,9 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
   const { hasAlertsRead, hasIndexRead } = useAlertsPrivileges();
   const canReadAlerts = hasAlertsRead && hasIndexRead;
 
-  const entityFilter = useMemo(
-    () => ({
-      field: ES_USER_FIELD,
-      value: detailName,
-    }),
-    [detailName]
-  );
-
   const additionalFilters = useMemo(
-    () => (rawFilteredQuery ? [rawFilteredQuery] : []),
-    [rawFilteredQuery]
+    () => (rawFilteredQueryForUserDetailsIdentity ? [rawFilteredQueryForUserDetailsIdentity] : []),
+    [rawFilteredQueryForUserDetailsIdentity]
   );
 
   const entity = useMemo(
@@ -425,7 +350,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
 
   const canReadAssetCriticality = !!privileges.data?.has_read_permissions;
 
-  if (newDataViewPickerEnabled && status === 'pristine') {
+  if (status === 'pristine') {
     return <PageLoader />;
   }
 
@@ -435,11 +360,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
         <>
           <EuiWindowEvent event="resize" handler={noop} />
           <FiltersGlobal>
-            <SiemSearchBar
-              dataView={experimentalDataView}
-              id={InputsModelId.global}
-              sourcererDataViewSpec={oldSourcererDataViewSpec} // TODO remove when we remove the newDataViewPickerEnabled feature flag
-            />
+            <SiemSearchBar dataView={dataView} id={InputsModelId.global} />
           </FiltersGlobal>
 
           <SecuritySolutionPageWrapper
@@ -499,15 +420,21 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
               {!noEntityInStore && (
                 <>
                   <AnomalyTableProvider
-                    criteriaFields={getCriteriaFromUsersType(
-                      UsersType.details,
-                      detailName,
-                      resolvedIdentityFields,
-                      euidApi?.euid
-                    )}
+                    criteriaFields={getCriteriaFromUsersType({
+                      type: UsersType.details,
+                      userName: detailName,
+                      identityFields: resolvedIdentityFields,
+                      euid: euidApi?.euid,
+                      entityRecord: entityStoreV2Enabled
+                        ? entityFromStoreResult.entityRecord
+                        : undefined,
+                    })}
                     filterQuery={buildAnomaliesTableInfluencersFilterQuery({
                       euid: euidApi?.euid,
                       entityType: 'user',
+                      entityRecord: entityStoreV2Enabled
+                        ? entityFromStoreResult.entityRecord
+                        : undefined,
                       isScopedToEntity: true,
                       identityFields: resolvedIdentityFields,
                       fallbackDisplayName: detailName,
@@ -573,16 +500,18 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
                     <EuiFlexItem>
                       <AlertsByStatus
                         signalIndexName={signalIndexName}
-                        entityFilter={entityFilter}
+                        entityType={EntityType.user}
+                        entityRecord={entityStoreV2Enabled ? observedUser.entityRecord : undefined}
                         identityFields={resolvedIdentityFields}
                         additionalFilters={additionalFilters}
                       />
                     </EuiFlexItem>
                     <EuiFlexItem>
                       <AlertCountByRuleByStatus
-                        entityFilter={{ ...entityFilter, entityType: EntityType.user }}
                         identityFields={resolvedIdentityFields}
                         signalIndexName={signalIndexName}
+                        entityType={EntityType.user}
+                        entityRecord={entityStoreV2Enabled ? observedUser.entityRecord : undefined}
                         additionalFilters={additionalFilters}
                       />
                     </EuiFlexItem>
@@ -607,16 +536,18 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
               isInitializing={isInitializing}
               deleteQuery={deleteQuery}
               userDetailFilter={usersDetailsEventsPageFilters}
-              userDetailsIdentityFilterQuery={stringifiedUserDetailsIdentityFilterQuery}
               to={to}
               from={from}
               detailName={detailName}
               type={UsersType.details}
               setQuery={setQuery}
-              filterQuery={stringifiedAdditionalFilters}
+              entityRecord={
+                entityStoreV2Enabled ? observedUser.entityRecord ?? undefined : undefined
+              }
+              filterQuery={stringifiedUserDetailsIdentityFilterQuery}
               usersDetailsPagePath={usersDetailsPagePath}
               identityFields={resolvedIdentityFields}
-              entityId={entityId}
+              entityId={displayEntityId}
             />
           </SecuritySolutionPageWrapper>
         </>

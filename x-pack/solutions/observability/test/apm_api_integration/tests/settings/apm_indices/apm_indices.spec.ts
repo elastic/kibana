@@ -26,7 +26,7 @@ export default function apmIndicesTests({ getService }: FtrProviderContext) {
         id: APM_INDEX_SETTINGS_SAVED_OBJECT_ID,
       });
     } catch (e) {
-      if (e.response.status !== 404) {
+      if (e.status !== 404) {
         throw e;
       }
     }

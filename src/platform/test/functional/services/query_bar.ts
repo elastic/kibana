@@ -80,8 +80,11 @@ export class QueryBarService extends FtrService {
   }
 
   public async expectQueryLanguageOrFail(lang: 'kql' | 'lucene'): Promise<void> {
-    const queryLanguageButton = await this.testSubjects.find('switchQueryLanguageButton');
-    expect((await queryLanguageButton.getVisibleText()).toLowerCase()).to.eql(`language: ${lang}`);
+    await this.retry.try(async () => {
+      const queryLanguageButton = await this.testSubjects.find('switchQueryLanguageButton');
+      const text = (await queryLanguageButton.getVisibleText()).toLowerCase();
+      expect(text).to.eql(`language: ${lang}`);
+    });
   }
 
   /**

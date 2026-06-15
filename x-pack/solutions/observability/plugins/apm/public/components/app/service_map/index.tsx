@@ -7,11 +7,11 @@
 
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPanel, useEuiTheme } from '@elastic/eui';
-import type { AgentName } from '@kbn/elastic-agent-utils';
 import type { ReactNode } from 'react';
 import React, { useLayoutEffect, useMemo, useRef, useState, useCallback } from 'react';
 import useWindowSize from 'react-use/lib/useWindowSize';
 import { cx } from '@emotion/css';
+import type { BoolQuery } from '@kbn/es-query';
 import {
   useServiceMapFullScreen,
   applyServiceMapFullScreenBodyClasses,
@@ -19,11 +19,7 @@ import {
 import { SERVICE_MAP_WRAPPER_FULL_SCREEN_CLASS, SERVICE_MAP_FULL_SCREEN_CLASS } from './constants';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { isActivePlatinumLicense } from '../../../../common/license_check';
-import {
-  invalidLicenseMessage,
-  isServiceNodeData,
-  SERVICE_MAP_TIMEOUT_ERROR,
-} from '../../../../common/service_map';
+import { invalidLicenseMessage, SERVICE_MAP_TIMEOUT_ERROR } from '../../../../common/service_map';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useLicenseContext } from '../../../context/license/use_license_context';
 import { LicensePrompt } from '../../shared/license_prompt';
@@ -36,12 +32,13 @@ import { useApmRouter } from '../../../hooks/use_apm_router';
 import type { Environment } from '../../../../common/environment_rt';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { DisabledPrompt } from './disabled_prompt';
-import { SloOverviewFlyout } from '../../shared/slo_overview_flyout';
-import { mergeServiceMapNodesWithBadges } from './merge_service_map_nodes_with_badges';
+import { SloOverviewFlyout, useSloOverviewFlyout } from '../../shared/slo_overview_flyout';
 import { useServiceMap } from './use_service_map';
 import { useServiceMapBadges } from './use_service_map_badges';
+import { getServiceMapBadgesEnd } from './get_service_map_badges_end';
 import { ServiceMapGraph } from './graph';
-import { ServiceMapSloFlyoutProvider } from './service_map_slo_flyout_context';
+import { ServiceMapSloFlyoutProvider } from '../../shared/service_map/service_map_slo_flyout_context';
+import { useServiceMapSearchContext } from './service_map_search_context';
 
 function PromptContainer({ children }: { children: ReactNode }) {
   return (
@@ -62,13 +59,18 @@ export function ServiceMapHome() {
     query: { environment, kuery, rangeFrom, rangeTo, serviceGroup },
   } = useApmParams('/service-map');
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+  const { esQuery } = useServiceMapSearchContext();
+
   return (
     <ServiceMap
       environment={environment}
       kuery={kuery}
       start={start}
       end={end}
+      rangeFrom={rangeFrom}
+      rangeTo={rangeTo}
       serviceGroupId={serviceGroup}
+      esQuery={esQuery ?? undefined}
     />
   );
 }
@@ -81,8 +83,19 @@ export function ServiceMapServiceDetail() {
     '/mobile-services/{serviceName}/service-map'
   );
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+  const { esQuery } = useServiceMapSearchContext();
 
-  return <ServiceMap environment={environment} kuery={kuery} start={start} end={end} />;
+  return (
+    <ServiceMap
+      environment={environment}
+      kuery={kuery}
+      start={start}
+      end={end}
+      rangeFrom={rangeFrom}
+      rangeTo={rangeTo}
+      esQuery={esQuery ?? undefined}
+    />
+  );
 }
 
 export function ServiceMap({
@@ -90,13 +103,20 @@ export function ServiceMap({
   kuery,
   start,
   end,
+  rangeFrom,
+  rangeTo,
   serviceGroupId,
+  esQuery,
 }: {
   environment: Environment;
   kuery: string;
   start: string;
   end: string;
+  /** Raw (possibly relative) URL range — forwarded to "Add to dashboard" for dashboard time seeding. */
+  rangeFrom?: string;
+  rangeTo?: string;
   serviceGroupId?: string;
+  esQuery?: { bool: BoolQuery };
 }) {
   const license = useLicenseContext();
   const serviceName = useServiceName();
@@ -114,7 +134,9 @@ export function ServiceMap({
             rangeFrom: query.rangeFrom,
             rangeTo: query.rangeTo,
             environment: query.environment,
-            kuery: query.kuery,
+            // Drop kuery when navigating to the full map — filtering moves to
+            // the Controls API / filter bar on the destination page.
+            kuery: '',
             comparisonEnabled: query.comparisonEnabled,
             offset: query.offset,
             serviceGroup: 'serviceGroup' in query ? query.serviceGroup ?? '' : '',
@@ -132,6 +154,7 @@ export function ServiceMap({
     end,
     serviceGroupId,
     serviceName,
+    esQuery,
   });
 
   const { ref, height } = useRefDimensions();
@@ -168,18 +191,8 @@ export function ServiceMap({
     });
   }, []);
 
-  const [sloOverviewFlyout, setSloOverviewFlyout] = useState<{
-    serviceName: string;
-    agentName?: AgentName;
-  } | null>(null);
-
-  const openSloOverviewFlyout = useCallback((name: string, agent?: AgentName) => {
-    setSloOverviewFlyout({ serviceName: name, agentName: agent });
-  }, []);
-
-  const closeSloOverviewFlyout = useCallback(() => {
-    setSloOverviewFlyout(null);
-  }, []);
+  const { sloOverviewFlyout, openSloOverviewFlyout, closeSloOverviewFlyout } =
+    useSloOverviewFlyout();
 
   useLayoutEffect(() => {
     if (isFullscreen) {
@@ -191,38 +204,16 @@ export function ServiceMap({
     }
   }, [isFullscreen, bodyClassesToToggle]);
 
-  const serviceNamesForBadges = useMemo(() => {
-    const names = new Set<string>();
-    for (const node of data.nodes) {
-      if (isServiceNodeData(node.data)) {
-        names.add(node.data.label);
-      }
-    }
-    return [...names].sort();
-  }, [data.nodes]);
+  const badgesEnd = useMemo(() => getServiceMapBadgesEnd(end), [end]);
 
-  const badgesFetchEnabled =
-    !!license &&
-    isActivePlatinumLicense(license) &&
-    config.serviceMapEnabled &&
-    status === FETCH_STATUS.SUCCESS &&
-    serviceNamesForBadges.length > 0;
-
-  const { data: badgesData, status: badgesStatus } = useServiceMapBadges({
-    serviceNames: serviceNamesForBadges,
+  const { nodes: nodesForGraph, status: badgesStatus } = useServiceMapBadges({
     environment,
     start,
-    end,
-    kuery,
-    enabled: badgesFetchEnabled ?? false,
+    end: badgesEnd,
+    kuery: '',
+    nodes: data.nodes,
+    nodesStatus: status,
   });
-
-  const nodesForGraph = useMemo(() => {
-    if (badgesStatus !== FETCH_STATUS.SUCCESS || !badgesData) {
-      return data.nodes;
-    }
-    return mergeServiceMapNodesWithBadges(data.nodes, badgesData);
-  }, [badgesData, badgesStatus, data.nodes]);
 
   if (!license) {
     return null;
@@ -280,6 +271,8 @@ export function ServiceMap({
     });
   }
 
+  const isLoading = status === FETCH_STATUS.LOADING || badgesStatus === FETCH_STATUS.LOADING;
+
   return (
     <ServiceMapSloFlyoutProvider onSloBadgeClick={openSloOverviewFlyout}>
       <div
@@ -299,16 +292,20 @@ export function ServiceMap({
             }}
             ref={ref}
           >
-            {status === FETCH_STATUS.LOADING && <LoadingSpinner />}
+            {isLoading && <LoadingSpinner />}
             <ServiceMapGraph
               height={mapHeight}
-              nodes={nodesForGraph}
-              edges={data.edges}
+              nodes={isLoading ? [] : nodesForGraph}
+              edges={isLoading ? [] : data.edges}
               serviceName={serviceName}
+              highlightedServiceName={serviceName}
               environment={environment}
               kuery={kuery}
               start={start}
               end={end}
+              rangeFrom={rangeFrom}
+              rangeTo={rangeTo}
+              serviceGroupId={serviceGroupId}
               isFullscreen={isFullscreen}
               onToggleFullscreen={onToggleFullscreen}
               fullMapHref={fullMapHref}

@@ -54,6 +54,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     apm: {
       kibanaSettings: `${ELASTIC_DOCS}solutions/observability/apm/applications-ui-settings`,
       supportedServiceMaps: `${ELASTIC_DOCS}solutions/observability/apm/service-map`,
+      supportedServiceMapsLegend: `${ELASTIC_DOCS}solutions/observability/apm/service-map#service-maps-legend`,
       customLinks: `${ELASTIC_DOCS}solutions/observability/apm/create-custom-links`,
       droppedTransactionSpans: `${ELASTIC_DOCS}solutions/observability/apm/spans#apm-data-model-dropped-spans`,
       upgrading: `${ELASTIC_DOCS}solutions/observability/apm/upgrade`,
@@ -62,9 +63,11 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       tailSamplingPolicies: `${ELASTIC_DOCS}solutions/observability/apm/transaction-sampling`,
       elasticAgent: `${ELASTIC_DOCS}solutions/observability/apm/switch-to-elastic-apm-integration`,
       storageExplorer: `${ELASTIC_DOCS}solutions/observability/apm/storage-explorer`,
+      infrastructureTab: `${ELASTIC_DOCS}solutions/observability/apm/infrastructure#observability-apm-infrastructure-elastic-apm`,
       spanCompression: `${ELASTIC_DOCS}solutions/observability/apm/spans`,
       transactionSampling: `${ELASTIC_DOCS}solutions/observability/apm/transaction-sampling`,
       indexLifecycleManagement: `${ELASTIC_DOCS}solutions/observability/apm/index-lifecycle-management`,
+      metricsUi: `${ELASTIC_DOCS}solutions/observability/apm/metrics-ui`,
     },
     canvas: {
       guide: `${ELASTIC_DOCS}explore-analyze/visualize/canvas`,
@@ -166,6 +169,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       e5Model: `${ELASTIC_DOCS}explore-analyze/machine-learning/nlp/ml-nlp-e5`,
       elasticInferenceService: `${ELASTIC_DOCS}explore-analyze/elastic-inference/eis`,
       elasticInferenceServicePricing: `${ELASTIC_DOCS}explore-analyze/elastic-inference/eis#pricing`,
+      elasticInferenceServiceSupportedModels: `${ELASTIC_DOCS}explore-analyze/elastic-inference/eis-supported-models`,
       elser: `${ELASTIC_DOCS}solutions/search/semantic-search/semantic-search-semantic-text`,
       engines: `${ENTERPRISE_SEARCH_DOCS}engines.html`,
       indexApi: isServerless
@@ -179,6 +183,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       ingestPipelines: `${ELASTIC_DOCS}solutions/search/search-pipelines`,
       knnSearch: `${ELASTIC_DOCS}solutions/search/vector/knn`,
       knnSearchCombine: `${ELASTIC_DOCS}solutions/search/vector/knn#_combine_approximate_knn_with_other_features`,
+      knnSearchTuneForSpeedAccuracy: `${ELASTIC_DOCS}solutions/search/vector/knn#tune-approximate-knn-for-speed-accuracy`,
       languageAnalyzers: `${ELASTIC_DOCS}reference/text-analysis/analysis-lang-analyzer`,
       languageClients: `${ENTERPRISE_SEARCH_DOCS}programming-language-clients.html`,
       licenseManagement: `${ENTERPRISE_SEARCH_DOCS}license-management.html`,
@@ -193,7 +198,14 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       searchLabsRepo: `${SEARCH_LABS_REPO}`,
       semanticSearch: `${ELASTIC_DOCS}solutions/search/semantic-search`,
       searchTemplates: `${ELASTIC_DOCS}solutions/search/search-templates`,
+      semanticSearchGetStarted: `${ELASTIC_DOCS}solutions/search/get-started/semantic-search`,
       semanticTextField: `${ELASTIC_DOCS}reference/elasticsearch/mapping-reference/semantic-text`,
+      esAsVectorDatabase: `${ELASTIC_DOCS}solutions/search#es-as-vector-database`,
+      vectorSearch: `${ELASTIC_DOCS}solutions/search/vector`,
+      vectorSearchEmbeddingModels: `${ELASTIC_DOCS}solutions/search/vector#vector-embedding-models`,
+      vectorSearchBringOwnVectors: `${ELASTIC_DOCS}solutions/search/vector/bring-own-vectors`,
+      vectorSearchStorageOptimization: `${ELASTIC_DOCS}solutions/search/vector#vector-storage-optimization`,
+      vectorSearchVectorsAndEmbeddings: `${ELASTIC_DOCS}solutions/search/vector#vectors-and-embeddings`,
       start: `${ENTERPRISE_SEARCH_DOCS}start.html`,
       supportedNlpModels: `${ELASTIC_DOCS}explore-analyze/machine-learning/nlp/ml-nlp-model-ref`,
       syncRules: `${ELASTIC_DOCS}reference/search-connectors/es-sync-rules`,
@@ -472,6 +484,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       blocklist: `${ELASTIC_DOCS}solutions/security/manage-elastic-defend/blocklist`,
       threatIntelInt: `${ELASTIC_DOCS}solutions/security/get-started/enable-threat-intelligence-integrations`,
       endpointArtifacts: `${ELASTIC_DOCS}solutions/security/manage-elastic-defend/optimize-elastic-defend`,
+      endpointArtifactsNoEscaping: `${ELASTIC_DOCS}solutions/security/manage-elastic-defend/exception-types-and-syntax#endpoint-no-escaping`,
       eventMerging: `${ELASTIC_DOCS}solutions/security/configure-elastic-defend/configure-data-volume-for-elastic-endpoint`,
       policyResponseTroubleshooting: {
         full_disk_access: `${ELASTIC_DOCS}solutions/security/configure-elastic-defend/enable-access-for-macos-monterey#enable-fda-endpoint`,
@@ -482,6 +495,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
         es_connection: `${ELASTIC_DOCS}troubleshoot/security/elastic-defend`,
       },
       responseActions: `${ELASTIC_DOCS}solutions/security/endpoint-response-actions`,
+      scriptLibrary: `${ELASTIC_DOCS}solutions/security/endpoint-response-actions/script-library`,
       configureEndpointIntegrationPolicy: `${ELASTIC_DOCS}solutions/security/configure-elastic-defend/configure-an-integration-policy-for-elastic-defend`,
       exceptions: {
         value_lists: `${ELASTIC_DOCS}solutions/security/detect-and-alert/create-manage-value-lists`,
@@ -841,6 +855,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     },
     ingest: {
       append: `${ELASTIC_DOCS}reference/enrich-processor/append-processor`,
+      cef: `${ELASTIC_DOCS}reference/enrich-processor/cef-processor`,
       bytes: `${ELASTIC_DOCS}reference/enrich-processor/bytes-processor`,
       circle: `${ELASTIC_DOCS}reference/enrich-processor/ingest-circle-processor`,
       community: `${ELASTIC_DOCS}reference/enrich-processor/community-id-processor`,
@@ -935,9 +950,11 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       agentPolicy: `${ELASTIC_DOCS}reference/fleet/agent-policy`,
       agentlessIntegrations: `${ELASTIC_DOCS}solutions/security/get-started/agentless-integrations`,
       api: `${ELASTIC_DOCS}reference/fleet/fleet-api-docs`,
+      managedOtlp: `${ELASTIC_DOCS}reference/opentelemetry/motlp`,
       uninstallAgent: `${ELASTIC_DOCS}solutions/security/configure-elastic-defend/uninstall-elastic-agent`,
       installAndUninstallIntegrationAssets: `${ELASTIC_DOCS}reference/fleet/install-uninstall-integration-assets`,
       elasticAgentInputConfiguration: `${ELASTIC_DOCS}reference/fleet/elastic-agent-input-configuration`,
+      elasticAgentInputConditions: `${ELASTIC_DOCS}reference/fleet/dynamic-input-configuration#conditions`,
       policySecrets: `${ELASTIC_DOCS}reference/fleet/agent-policy#agent-policy-secret-values`,
       remoteESOoutput: `${ELASTIC_DOCS}reference/fleet/remote-elasticsearch-output`,
       performancePresets: `${ELASTIC_DOCS}reference/fleet/es-output-settings#es-output-settings-performance-tuning-settings`,
@@ -1074,7 +1091,11 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       models: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/models`,
       chat: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/chat`,
       agentBuilderAgents: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/agent-builder-agents`,
-      tools: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/tools`,
+      agentBuilderSkills: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/skills`,
+      agentBuilderPlugins: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/plugins`,
+      agentBuilderConnectors: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/connectors`,
+      agentBuilderTools: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/tools`,
+      elasticCapabilities: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/agent-builder-agents#elastic-capabilities`,
       programmaticAccess: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/programmatic-access`,
       kibanaApi: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/kibana-api`,
       mcpServer: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/mcp-server`,
@@ -1086,6 +1107,8 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       inferenceAPIDocumentation: isServerless
         ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-inference-put`
         : `${ELASTICSEARCH_APIS}operation/operation-inference-put`,
+      featureSettings: `${ELASTIC_DOCS}explore-analyze/ai-features/manage-access-to-ai-assistant`,
+      externalInference: `${ELASTIC_DOCS}explore-analyze/elastic-inference/external`,
     },
     synonyms: {
       synonymsAPIDocumentation: isServerless
@@ -1107,6 +1130,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     subscriptions: `${ELASTIC_WEBSITE_URL}subscriptions`,
     cases: {
       casesPermissions: `${ELASTIC_DOCS}solutions/security/investigate/cases-requirements`,
+      configureCaseSettings: `${ELASTIC_DOCS}explore-analyze/cases/configure-case-settings`,
     },
   });
 };

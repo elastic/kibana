@@ -714,7 +714,7 @@ describe('PolicySelector component', () => {
     ];
     const { getByTestId } = await render();
 
-    expect(getByTestId('customItem1').getAttribute('aria-disabled')).toEqual('false');
+    expect(getByTestId('customItem1')).not.toHaveAttribute('aria-disabled');
     expect((getByTestId('test-customItem1-checkbox') as HTMLInputElement).disabled).toBe(false);
   });
 

@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+/**
+ * @deprecated Features identification is now handled via the onboarding workflow (streams_ki/onboarding.yaml).
+ * This task definition is kept for reference and will be removed in a follow-up.
+ */
+
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { isInferenceProviderError, type InferenceConnector } from '@kbn/inference-common';
 import {
@@ -148,6 +153,11 @@ async function runFeaturesIdentification(
       max_entity_filters: tuningConfig.max_entity_filters,
     };
 
+    // NOTE: attach `.catch` eagerly here (not at the later `await`) so this
+    // floating promise can never become an unhandled rejection if the
+    // inferred-features loop below throws before we reach the `await`. An
+    // unhandled rejection on this promise (e.g. `index_not_found_exception`
+    // when a wired stream has no backing data stream yet) crashes Kibana.
     const computedFeaturesPromise = identifyComputedFeatures({
       stream,
       streamName: stream.name,
@@ -158,6 +168,14 @@ async function runFeaturesIdentification(
       logger: taskLogger,
       featureTtlDays: tuningConfig.feature_ttl_days,
       runId,
+    }).catch((err) => {
+      // Computed features generation is not expected to fail; surface it as
+      // an error so it's actionable, but swallow the rejection so it cannot
+      // become an unhandled rejection and crash Kibana.
+      taskLogger.error(`Computed features generation failed: ${parseError(err).message}`, {
+        error: err,
+      } as LogMeta);
+      return [] as Awaited<ReturnType<typeof identifyComputedFeatures>>;
     });
 
     let diverseOffset = 0;
@@ -210,10 +228,7 @@ async function runFeaturesIdentification(
       throw new Error(`All iterations failed for stream ${streamName}`);
     }
 
-    const reconciledComputedFeatures = await computedFeaturesPromise.catch((err) => {
-      taskLogger.warn(`Computed features generation failed: ${parseError(err).message}`);
-      return [] as Awaited<ReturnType<typeof identifyComputedFeatures>>;
-    });
+    const reconciledComputedFeatures = await computedFeaturesPromise;
     const allFeatures = [...discoveredFeatures, ...reconciledComputedFeatures];
 
     await taskClient.complete<FeaturesIdentificationTaskParams, IdentifyFeaturesResult>(

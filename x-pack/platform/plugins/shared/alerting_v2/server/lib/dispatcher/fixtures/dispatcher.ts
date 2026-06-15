@@ -19,6 +19,7 @@ export const createDispatchableAlertEventsResponse = (
       { name: 'episode_id', type: 'keyword' },
       { name: 'episode_status', type: 'keyword' },
       { name: 'data_json', type: 'keyword' },
+      { name: 'severity', type: 'keyword' },
     ],
     values: alertEpisodes.map((alertEpisode) => [
       alertEpisode.last_event_timestamp,
@@ -27,6 +28,7 @@ export const createDispatchableAlertEventsResponse = (
       alertEpisode.episode_id,
       alertEpisode.episode_status,
       alertEpisode.data_json ?? null,
+      alertEpisode.severity ?? null,
     ]),
   };
 };
@@ -55,9 +57,9 @@ export const createLastNotifiedTimestampsResponse = (
 ): EsqlQueryResponse => {
   return {
     columns: [
-      { name: 'notification_group_id', type: 'keyword' },
+      { name: 'action_group_id', type: 'keyword' },
       { name: 'last_notified', type: 'date' },
     ],
-    values: records.map((r) => [r.notification_group_id, r.last_notified]),
+    values: records.map((r) => [r.action_group_id, r.last_notified]),
   };
 };

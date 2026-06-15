@@ -33,6 +33,7 @@ import {
   normalizeKeywordList,
   searchDocById,
 } from '../fixtures/helpers';
+import { LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT } from '../../../../server/domain/saved_objects';
 
 apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
@@ -53,6 +54,26 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
     await kbnClient.uiSettings.update({
       [FF_ENABLE_ENTITY_STORE_V2]: true,
     });
+
+    // Pre-create the `security-solution-default` data view. In API-only test
+    // environments the Security Solution sourcerer (which normally creates it
+    // from the browser flow) never runs, so the entity store's data-view
+    // lookup in `logs_extraction_client.ts#getAllIndexPatternsIncludingRemote`
+    // always misses and takes its `logs-*` fallback branch.
+    const dataViewResponse = await apiClient.post('/api/data_views/data_view', {
+      headers: defaultHeaders,
+      responseType: 'json',
+      body: {
+        override: true,
+        data_view: {
+          id: 'security-solution-default',
+          name: 'security-solution-default',
+          title: 'logs-*',
+          timeFieldName: '@timestamp',
+        },
+      },
+    });
+    expect(dataViewResponse.statusCode).toBe(200);
 
     // Install the entity store
     const response = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
@@ -285,7 +306,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         namespace: 'okta',
         confidence: ENTITY_CONFIDENCE.High,
       },
-      user: { hash: ['hash-1', 'hash-2'] },
+      user: { hash: expect.arrayContaining(['hash-1', 'hash-2']) },
     });
 
     // Update sub_type in between documents with null values
@@ -359,7 +380,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         namespace: 'okta',
         confidence: ENTITY_CONFIDENCE.High,
       },
-      user: { hash: ['hash-1', 'hash-2', 'hash-3', 'hash-4', 'hash-5'] },
+      user: { hash: expect.arrayContaining(['hash-1', 'hash-2', 'hash-3', 'hash-4', 'hash-5']) },
     });
 
     // Make sure latest is not overwritten from the document if not changed
@@ -397,21 +418,27 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         confidence: ENTITY_CONFIDENCE.High,
       },
       user: {
-        hash: [
+        hash: expect.arrayContaining([
           'hash-1',
-          'hash-10',
-          'hash-11',
+          'hash-2',
           'hash-3',
           'hash-4',
           'hash-5',
           'hash-6',
           'hash-7',
           'hash-8',
-          'hash-2',
-        ],
+          'hash-9',
+          'hash-10',
+          'hash-11',
+        ]),
         domain: 'example.com',
       },
     });
+    // With cap=100 all 11 distinct hashes must be collected (exercises the raised cap).
+    const userHash = (
+      updatedLatestDomain.hits.hits[0]._source as Record<string, Record<string, unknown>>
+    ).user.hash;
+    expect(normalizeKeywordList(userHash)).toHaveLength(11);
   });
 
   apiTest(
@@ -626,7 +653,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
   );
 
   apiTest(
-    'Should set entity.namespace to local and entity.name to user.name@host.name for non-IDP documents',
+    'Should set entity.namespace to local and entity.name to user.name and host.name for non-IDP documents',
     async ({ apiClient, esClient }) => {
       // Non-IDP: user.name + host.id present, user.name not in excluded list.
       // Event must NOT be asset/iam so identity fieldEvaluations (condition whenClause) set entity.namespace = 'local'.
@@ -976,7 +1003,9 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
   apiTest(
     'Should omit documents at logs extraction when they do not match documentsFilter or postAggFilter',
     async ({ apiClient, esClient }) => {
-      const from = '2026-03-18T11:00:00Z';
+      // from is 1 second past the timestamp used by the "entity.name" test to avoid
+      // cross-test data leaking in with the now always-inclusive >= boundary.
+      const from = '2026-03-18T11:00:01Z';
       const to = '2026-03-18T12:00:00Z';
 
       // 1. event.outcome = 'failure' → documentsFilter omits (pre-agg)
@@ -1017,6 +1046,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         to
       );
       expect(extractionResponse.statusCode).toBe(200);
+      expect(extractionResponse.body).toMatchObject({ count: 0 });
 
       // Verify none of the omitted documents produced entities
       expect((await searchDocById(esClient, 'user:omitted-failure@okta')).hits.hits).toHaveLength(
@@ -1063,6 +1093,69 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         const topLevelKeys = Object.keys(source);
         const dottedKeys = topLevelKeys.filter((k) => k.includes('.'));
         expect(dottedKeys).toHaveLength(0);
+      }
+    }
+  );
+
+  apiTest(
+    'Should extract all entities when all documents share the same timestamp as fromDateISO (timestamp collision at slice boundary)',
+    async ({ apiClient, esClient }) => {
+      // Regression test for the log-slice boundary bug.
+      //
+      // Root cause: buildLogPageProbeSourceClause used `@timestamp > fromDateISO` (exclusive)
+      // when logsPageCursorStart was set. When all remaining docs share @timestamp = fromDateISO,
+      // the exclusive base filter drops them before the compound _id cursor can apply — the second
+      // outer iteration finds 0 documents and the entities are permanently lost.
+      //
+      // Fix: always use `@timestamp >= fromDateISO`. The compound cursor
+      // `(@timestamp > T OR (@timestamp = T AND _id > lastId))` owns the exclusive lower bound.
+      const SHARED_TIMESTAMP = '2026-05-01T10:00:00.000Z';
+      const from = SHARED_TIMESTAMP; // intentionally equal to all doc timestamps
+      const to = '2026-05-01T11:00:00.000Z';
+      const MAX_LOGS_PER_PAGE = 3;
+      const TOTAL_DOCS = 6; // > MAX_LOGS_PER_PAGE so a second outer iteration is required
+
+      // Shrink the log-slice window to force multiple outer loop iterations within one run.
+      const updateResponse = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: { logExtraction: { maxLogsPerPage: MAX_LOGS_PER_PAGE } },
+      });
+      expect(updateResponse.statusCode).toBe(200);
+
+      try {
+        // Ingest TOTAL_DOCS host documents all sharing @timestamp = fromDateISO.
+        // Outer iteration 1 processes the first MAX_LOGS_PER_PAGE docs and sets
+        // logsPageCursorStart = (SHARED_TIMESTAMP, lastId). Outer iteration 2 must
+        // find the remaining docs via the compound cursor — the fix makes this work.
+        for (let i = 1; i <= TOTAL_DOCS; i++) {
+          await ingestDoc(esClient, {
+            '@timestamp': SHARED_TIMESTAMP,
+            host: { name: `ts-collision-host-${i}` },
+          });
+        }
+
+        const extractionResponse = await forceLogExtraction(
+          apiClient,
+          internalHeaders,
+          'host',
+          from,
+          to
+        );
+        expect(extractionResponse.statusCode).toBe(200);
+        expect(extractionResponse.body).toMatchObject({ success: true, count: TOTAL_DOCS });
+
+        for (let i = 1; i <= TOTAL_DOCS; i++) {
+          const hit = await searchDocById(esClient, `host:ts-collision-host-${i}`);
+          expect(hit.hits.hits).toHaveLength(1);
+        }
+      } finally {
+        // Restore default so subsequent tests are not affected.
+        await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+          headers: defaultHeaders,
+          responseType: 'json',
+          body: { logExtraction: { maxLogsPerPage: LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT } },
+        });
       }
     }
   );

@@ -139,7 +139,12 @@ export const legacyColorByValueSchema = colorByValueBaseSchema.extends(
       },
     }),
 
-    shift: schema.boolean({ meta: { description: 'Whether to shift the palette.' } }),
+    shift: schema.boolean({
+      meta: {
+        description:
+          'When `true`, shifts the palette colors so they start from a different offset. Defaults to `false`.',
+      },
+    }),
   },
   {
     meta: {
@@ -197,6 +202,8 @@ export const colorByValueSchema = schema.oneOf(
     meta: {
       id: 'colorByValue',
       title: 'Color By Value',
+      description:
+        'Dynamic color mapping by numeric range, with support for absolute and percentage-based ranges.',
     },
   }
 );
@@ -209,16 +216,35 @@ export const staticColorSchema = schema.object(
      */
     color: schema.string({ meta: { description: 'The static color to be used for all values.' } }),
   },
-  { meta: { id: 'staticColor', title: 'Static Color' } }
+  {
+    meta: {
+      id: 'staticColor',
+      title: 'Static Color',
+      description: 'Fixed color for all values in the dimension.',
+    },
+  }
 );
 
 const colorFromPaletteSchema = schema.object(
   {
     type: schema.literal('from_palette'),
     index: schema.number({ meta: { description: 'The index of the color in the palette.' } }),
-    palette: schema.maybe(schema.string({ meta: { description: 'The palette name to use.' } })),
+    palette: schema.maybe(
+      schema.string({
+        meta: {
+          description:
+            "Color palette name. Accepted values: 'default', 'elastic_line_optimized', 'severity', 'eui_amsterdam', 'kibana_v7_legacy', 'elastic_brand_2023'. Defaults to `default`.",
+        },
+      })
+    ),
   },
-  { meta: { id: 'colorFromPalette', title: 'Color From Palette' } }
+  {
+    meta: {
+      id: 'colorFromPalette',
+      title: 'Color From Palette',
+      description: 'Color at a fixed index position in a named palette.',
+    },
+  }
 );
 
 const colorCodeSchema = schema.object(
@@ -226,7 +252,13 @@ const colorCodeSchema = schema.object(
     type: schema.literal('color_code'),
     value: schema.string({ meta: { description: 'The static color value to use.' } }),
   },
-  { meta: { id: 'color_code', title: 'Color Code' } }
+  {
+    meta: {
+      id: 'color_code',
+      title: 'Color Code',
+      description: 'A color specified as a hex or CSS color code string.',
+    },
+  }
 );
 
 const colorDefSchema = schema.oneOf([colorFromPaletteSchema, colorCodeSchema]);
@@ -239,7 +271,10 @@ const categoricalColorMappingSchema = schema.object(
   {
     mode: schema.literal('categorical'),
     palette: schema.string({
-      meta: { description: 'The palette name to use for color assignment.' },
+      meta: {
+        description:
+          "Color palette name. Accepted values: 'default', 'elastic_line_optimized', 'severity', 'eui_amsterdam', 'kibana_v7_legacy', 'elastic_brand_2023'. Defaults to `default`.",
+      },
     }),
     mapping: schema.arrayOf(
       schema.object({
@@ -250,14 +285,24 @@ const categoricalColorMappingSchema = schema.object(
     ),
     unassigned: schema.maybe(unassignedColorSchema),
   },
-  { meta: { id: 'categoricalColorMapping', title: 'Categorical Color Mapping' } }
+  {
+    meta: {
+      id: 'categoricalColorMapping',
+      title: 'Categorical Color Mapping',
+      description:
+        'Palette color assignment for specific categorical values. Unmapped values receive the unassigned color.',
+    },
+  }
 );
 
 const gradientColorMappingSchema = schema.object(
   {
     mode: schema.literal('gradient'),
     palette: schema.string({
-      meta: { description: 'The palette name to use for color assignment.' },
+      meta: {
+        description:
+          "Color palette name. Accepted values: 'default', 'elastic_line_optimized', 'severity', 'eui_amsterdam', 'kibana_v7_legacy', 'elastic_brand_2023'. Defaults to `default`.",
+      },
     }),
     sort: schema.maybe(
       schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
@@ -275,7 +320,13 @@ const gradientColorMappingSchema = schema.object(
     gradient: schema.maybe(schema.arrayOf(colorDefSchema, { maxSize: 3 })),
     unassigned: schema.maybe(unassignedColorSchema),
   },
-  { meta: { id: 'gradientColorMapping', title: 'Gradient Color Mapping' } }
+  {
+    meta: {
+      id: 'gradientColorMapping',
+      title: 'Gradient Color Mapping',
+      description: 'Gradient color mapping across categorical values.',
+    },
+  }
 );
 
 const DEFAULT_CATEGORICAL_COLOR_MAPPING_VALUE: TypeOf<typeof categoricalColorMappingSchema> = {
@@ -296,7 +347,12 @@ export const colorMappingSchema = schema.oneOf(
     gradientColorMappingSchema,
   ],
   {
-    meta: { id: 'colorMapping', title: 'Color Mapping' },
+    meta: {
+      id: 'colorMapping',
+      title: 'Color Mapping',
+      description:
+        'Color mapping for dimension values, either categorical (for specific values) or as a gradient.',
+    },
     defaultValue: DEFAULT_CATEGORICAL_COLOR_MAPPING_VALUE,
   }
 );
@@ -317,13 +373,17 @@ export const autoColorSchema = schema.object(
   }
 );
 
-export const allColoringTypeSchema = schema.oneOf([
-  colorByValueSchema,
-  staticColorSchema,
-  colorMappingSchema,
-  noColorSchema,
-  autoColorSchema,
-]);
+export const allColoringTypeSchema = schema.oneOf(
+  [colorByValueSchema, staticColorSchema, colorMappingSchema, noColorSchema, autoColorSchema],
+  {
+    meta: {
+      id: 'allColoringType',
+      title: 'Color Configuration',
+      description:
+        'Color configuration for a dimension, with options for value-range coloring, static color, categorical or gradient color mapping, or no color.',
+    },
+  }
+);
 
 export type StaticColorType = TypeOf<typeof staticColorSchema>;
 export type ColorByValueType = TypeOf<typeof colorByValueSchema>;
@@ -351,6 +411,9 @@ export const DEFAULT_CATEGORICAL_COLOR_MAPPING: ColorMappingCategoricalType =
 export const applyColorToSchema = schema.oneOf(
   [schema.literal('value'), schema.literal('background')],
   {
-    meta: { description: 'Where to apply the color' },
+    meta: {
+      description:
+        'Color target: `value` colors the metric text, `background` colors the cell or panel background.',
+    },
   }
 );

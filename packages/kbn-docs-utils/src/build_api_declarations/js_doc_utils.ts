@@ -10,16 +10,48 @@
 import type { JSDoc, JSDocTag } from 'ts-morph';
 import { Node } from 'ts-morph';
 import type { TextWithLinks } from '../types';
+import type { ApiScope } from '../types';
+import type { BuildApiDecOpts } from './types';
+import { getApiSectionId, getPluginApiDocId } from '../utils';
+
+/**
+ * Plugin context needed to resolve {@link} tags into cross-reference links.
+ */
+export interface PluginContext {
+  pluginId: string;
+  scope: ApiScope;
+  docId: string;
+}
+
+export const getPluginContextForNode = (node: Node, opts: BuildApiDecOpts): PluginContext => {
+  const currentPlugin = opts.plugins.find((plugin) => plugin.id === opts.currentPluginId);
+  const apiPath = node.getSourceFile().getFilePath();
+
+  return {
+    pluginId: opts.currentPluginId,
+    scope: opts.scope,
+    docId: currentPlugin
+      ? getPluginApiDocId(currentPlugin.id, {
+          serviceFolders: currentPlugin.manifest.serviceFolders,
+          apiPath,
+          directory: currentPlugin.directory,
+        })
+      : getPluginApiDocId(opts.currentPluginId),
+  };
+};
 
 /**
  * Extracts comments from a node to use as the description.
  * Prefers JSDoc descriptions over leading comments.
  */
-export const getCommentsFromNode = (node: Node): TextWithLinks | undefined => {
+export const getCommentsFromNode = (
+  node: Node,
+  pluginContext?: PluginContext
+): TextWithLinks | undefined => {
   const jsDocs = getJSDocs(node);
   if (jsDocs) {
     const description = jsDocs.map((jsDoc) => jsDoc.getDescription()).join('\n');
-    return getTextWithLinks(description);
+    return getTextWithLinks(description, pluginContext);
   }
 
   const leadingComments = node
@@ -27,7 +59,7 @@ export const getCommentsFromNode = (node: Node): TextWithLinks | undefined => {
     .map((c) => c.getText())
     .join('\n');
 
-  return getTextWithLinks(leadingComments);
+  return getTextWithLinks(leadingComments, pluginContext);
 };
 
 /**
@@ -37,6 +69,24 @@ export const getCommentsFromNode = (node: Node): TextWithLinks | undefined => {
 export const getJSDocs = (node: Node): JSDoc[] | undefined => {
   if (Node.isJSDocable(node)) {
     return node.getJsDocs();
+  }
+
+  // PropertyAssignment nodes inside object literals are JSDocable but virtually
+  // never carry their own JSDoc — the real block lives on the enclosing
+  // VariableStatement. The 4-parent chain (PropertyAssignment → ObjectLiteral →
+  // VariableDeclaration → VariableDeclarationList → VariableStatement) is exact
+  // for the `export const x = { prop: ... }` shape. A general ancestor-walk loop
+  // would risk matching an unrelated VariableStatement higher up; the fixed chain
+  // is rigid but precise, and the AST shape here is structural to TypeScript.
+  if (Node.isPropertyAssignment(node)) {
+    if (node.getLeadingCommentRanges().length > 0) {
+      return undefined;
+    }
+
+    const variableStatement = node.getParent()?.getParent()?.getParent()?.getParent();
+    if (Node.isJSDocable(variableStatement)) {
+      return variableStatement.getJsDocs();
+    }
   }
 
   if (Node.isVariableDeclaration(node)) {
@@ -53,10 +103,13 @@ export const getJSDocs = (node: Node): JSDoc[] | undefined => {
 /**
  * Extracts the @returns comment from a node or JSDoc array.
  */
-export const getJSDocReturnTagComment = (node: Node | JSDoc[]): TextWithLinks => {
+export const getJSDocReturnTagComment = (
+  node: Node | JSDoc[],
+  pluginContext?: PluginContext
+): TextWithLinks => {
   const tags = getJSDocTags(node);
   const returnTag = tags.find((tag) => Node.isJSDocReturnTag(tag));
-  return returnTag ? getTextWithLinks(returnTag.getCommentText()) : [];
+  return returnTag ? getTextWithLinks(returnTag.getCommentText(), pluginContext) : [];
 };
 
 /**
@@ -78,7 +131,11 @@ const matchesParamName = (tagName: string, normalizedNames: string[]): boolean =
  * Parses raw JSDoc text to find @param entries that ts-morph might not normalize.
  * Returns the comment text if a matching parameter is found.
  */
-const parseParamFromRawText = (text: string, normalizedNames: string[]): TextWithLinks | null => {
+const parseParamFromRawText = (
+  text: string,
+  normalizedNames: string[],
+  pluginContext?: PluginContext
+): TextWithLinks | null => {
   const lines = text.split(/\r?\n/);
 
   for (const line of lines) {
@@ -108,7 +165,7 @@ const parseParamFromRawText = (text: string, normalizedNames: string[]): TextWit
     const commentText = parts.slice(nameIndex + 1).join(' ');
 
     if (matchesParamName(nameToken, normalizedNames)) {
-      return getTextWithLinks(commentText.trim());
+      return getTextWithLinks(commentText.trim(), pluginContext);
     }
   }
 
@@ -121,7 +178,8 @@ const parseParamFromRawText = (text: string, normalizedNames: string[]): TextWit
  */
 export const getJSDocParamComment = (
   node: Node | JSDoc[],
-  name: string | string[]
+  name: string | string[],
+  pluginContext?: PluginContext
 ): TextWithLinks => {
   const names = Array.isArray(name) ? name : [name];
   const normalizedNames = names.map(normalizeParamName);
@@ -137,14 +195,14 @@ export const getJSDocParamComment = (
   });
 
   if (paramTag) {
-    return getTextWithLinks(paramTag.getCommentText());
+    return getTextWithLinks(paramTag.getCommentText(), pluginContext);
   }
 
   // Fallback: parse raw JSDoc text for @param entries that ts-morph might not normalize
   const jsDocs = node instanceof Array ? node : getJSDocs(node);
   if (jsDocs) {
     for (const jsDoc of jsDocs) {
-      const parsed = parseParamFromRawText(jsDoc.getText(), normalizedNames);
+      const parsed = parseParamFromRawText(jsDoc.getText(), normalizedNames, pluginContext);
       if (parsed) {
         return parsed;
       }
@@ -156,7 +214,7 @@ export const getJSDocParamComment = (
     const leadingCommentRanges = node.getLeadingCommentRanges();
     if (leadingCommentRanges.length > 0) {
       const leadingText = leadingCommentRanges.map((c) => c.getText()).join('\n');
-      const parsed = parseParamFromRawText(leadingText, normalizedNames);
+      const parsed = parseParamFromRawText(leadingText, normalizedNames, pluginContext);
       if (parsed) {
         return parsed;
       }
@@ -179,11 +237,87 @@ export const getJSDocTags = (node: Node | JSDoc[]): JSDocTag[] => {
 };
 
 /**
- * Converts text to TextWithLinks format.
- * TODO: This feature is not fully implemented yet. It will be used to create links for comments
- * that use {@link AnotherAPIItemInThisPlugin}.
+ * Converts text to TextWithLinks format, resolving `{@link Identifier}` tags into
+ * cross-reference links when plugin context is available.
+ *
+ * Supports two syntaxes:
+ * - `{@link Identifier}` — links to the identifier and displays its name.
+ * - `{@link Identifier | display text}` — links to the identifier with custom display text.
  */
-const getTextWithLinks = (text?: string): TextWithLinks => {
-  return text ? [text] : [];
-  // TODO: Replace `@links` in comments with relative api links.
+const parseLinkBody = (body: string): { target: string; displayText?: string } => {
+  const pipeIndex = body.indexOf('|');
+  if (pipeIndex >= 0) {
+    return {
+      target: body.slice(0, pipeIndex).trim(),
+      displayText: body.slice(pipeIndex + 1).trim(),
+    };
+  }
+
+  const spaceMatch = body.match(/^(\S+)\s+(.+)$/);
+  if (spaceMatch) {
+    return {
+      target: spaceMatch[1].trim(),
+      displayText: spaceMatch[2].trim(),
+    };
+  }
+
+  return { target: body.trim() };
+};
+
+const localIdentifierPattern = /^[A-Za-z_$][A-Za-z0-9_$]*(?:\.[A-Za-z_$][A-Za-z0-9_$]*)*$/;
+
+const toLocalReference = (target: string, displayText: string, pluginContext?: PluginContext) => {
+  if (!pluginContext || !localIdentifierPattern.test(target)) {
+    return undefined;
+  }
+
+  return {
+    pluginId: pluginContext.pluginId,
+    scope: pluginContext.scope,
+    docId: pluginContext.docId,
+    section: getApiSectionId({
+      id: target,
+      scope: pluginContext.scope,
+    }),
+    text: displayText,
+  };
+};
+
+const getTextWithLinks = (text?: string, pluginContext?: PluginContext): TextWithLinks => {
+  if (!text) {
+    return [];
+  }
+
+  const linkPattern = /\{@link\s+([^}]+?)\}/g;
+  let match = linkPattern.exec(text);
+
+  // Fast path: no {@link} tags found, return as-is.
+  if (!match) {
+    return [text];
+  }
+
+  const parts: TextWithLinks = [];
+  let lastIndex = 0;
+
+  do {
+    // Add text before the link.
+    if (match.index > lastIndex) {
+      parts.push(text.slice(lastIndex, match.index));
+    }
+
+    const { target, displayText } = parseLinkBody(match[1].trim());
+    const fallbackText = displayText || target;
+
+    parts.push(toLocalReference(target, fallbackText, pluginContext) ?? fallbackText);
+
+    lastIndex = match.index + match[0].length;
+    match = linkPattern.exec(text);
+  } while (match);
+
+  // Add remaining text after the last link.
+  if (lastIndex < text.length) {
+    parts.push(text.slice(lastIndex));
+  }
+
+  return parts;
 };

@@ -39,3 +39,13 @@ export const CLEAR_EMPTY_REFERENCE_SET_TOOLTIP = i18n.translate(
   'xpack.securitySolution.siemMigrations.common.dataInputFlyout.lookups.missingReferenceSetsList.clearEmptyReferenceSetTooltip',
   { defaultMessage: 'Mark the reference set as empty' }
 );
+
+export const COPY_WATCHLIST_NAME_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.siemMigrations.common.dataInputFlyout.lookups.missingWatchlistsList.copyWatchlistNameTooltip',
+  { defaultMessage: 'Copy watchlist name' }
+);
+
+export const CLEAR_EMPTY_WATCHLIST_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.siemMigrations.common.dataInputFlyout.lookups.missingWatchlistsList.clearEmptyWatchlistTooltip',
+  { defaultMessage: 'Mark the watchlist as empty' }
+);

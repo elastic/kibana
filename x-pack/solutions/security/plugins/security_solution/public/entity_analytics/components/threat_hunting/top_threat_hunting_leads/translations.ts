@@ -32,6 +32,16 @@ export const OPTIONS = i18n.translate(
   { defaultMessage: 'Options' }
 );
 
+export const COLLAPSE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.threatHunting.leads.collapse',
+  { defaultMessage: 'Collapse' }
+);
+
+export const EXPAND = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.threatHunting.leads.expand',
+  { defaultMessage: 'Expand' }
+);
+
 export const AUTO_GENERATE_LABEL = i18n.translate(
   'xpack.securitySolution.entityAnalytics.threatHunting.leads.autoGenerate',
   { defaultMessage: 'Auto-generate every 24 hours' }
@@ -99,7 +109,7 @@ export const NO_DATA_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.entityAnalytics.threatHunting.leads.noDataDescription',
   {
     defaultMessage:
-      'No entities, risk scores, or alerts were found to generate hunting leads. Ensure the Entity Store and Risk Engine are enabled with data available.',
+      'No entities, risk scores, or alerts were found to generate hunting leads. Ensure the Entity Store and risk score maintainer are enabled with data available.',
   }
 );
 
@@ -194,9 +204,27 @@ export const OPTIONS_LABEL = i18n.translate(
   { defaultMessage: 'Options' }
 );
 
+export const OPEN_GENAI_SETTINGS = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.threatHunting.openGenAiSettings',
+  { defaultMessage: 'Open GenAI settings' }
+);
+
+export const NO_CONNECTOR_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.threatHunting.noConnectorDescription',
+  {
+    defaultMessage:
+      'Enable AI Agent as your default chat experience to start generating threat hunting leads from your entity data',
+  }
+);
+
 export const SCHEDULE_UPDATE_ERROR = i18n.translate(
   'xpack.securitySolution.entityAnalytics.threatHunting.leads.scheduleUpdateError',
   { defaultMessage: 'Failed to update schedule' }
+);
+
+export const GENERATE_DISABLED_NO_WRITE_PERMISSION_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.threatHunting.leads.generateDisabledNoWritePermissionTooltip',
+  { defaultMessage: "You don't have write access to the leads index" }
 );
 
 export const getStalenessLabel = (staleness: string): string => {

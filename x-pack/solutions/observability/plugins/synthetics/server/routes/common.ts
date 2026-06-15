@@ -9,7 +9,7 @@ import type { Type, TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { isEmpty } from 'lodash';
 import { escapeQuotes } from '@kbn/es-query';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { useLogicalAndFields } from '../../common/constants';
 import type { RouteContext } from './types';
 import { MonitorSortFieldSchema } from '../../common/runtime_types/monitor_management/sort_field';
@@ -61,6 +61,7 @@ export type MonitorsQuery = TypeOf<typeof QuerySchema>;
 export const OverviewStatusSchema = schema.object({
   ...CommonQuerySchema,
   scopeStatusByLocation: schema.maybe(schema.boolean()),
+  groupByMonitor: schema.maybe(schema.boolean()),
 });
 
 export type OverviewStatusQuery = TypeOf<typeof OverviewStatusSchema>;

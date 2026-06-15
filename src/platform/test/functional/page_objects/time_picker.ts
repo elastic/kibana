@@ -194,10 +194,10 @@ export class TimePickerPageObject extends FtrService {
       if (isShowDatesButton) {
         await this.testSubjects.moveMouseTo('superDatePickerShowDatesButton');
         await this.testSubjects.click('superDatePickerShowDatesButton', 50);
-      }
-      await this.testSubjects.exists('superDatePickerstartDatePopoverButton', { timeout: 1000 });
-      // Close the start date popover which opens automatically if `superDatePickerShowDatesButton` is clicked
-      if (isShowDatesButton) {
+        // Close the start date popover which opens automatically
+        await this.testSubjects.existOrFail('superDatePickerstartDatePopoverButton', {
+          timeout: 1000,
+        });
         await this.testSubjects.click('superDatePickerstartDatePopoverButton');
       }
     });
@@ -243,7 +243,10 @@ export class TimePickerPageObject extends FtrService {
     const parsed = moment.tz(fromTime, TimePickerPageObject.LEGACY_DATE_FORMAT, true, tz);
     const expectedFromISO = (parsed.isValid() ? parsed : moment.tz(fromTime, tz)).toISOString();
     await this.retry.waitFor(`date range to be set to ${rangeText}`, async () => {
-      await this.testSubjects.click('dateRangePickerControlButton');
+      // Tooltips can sometimes hide the picker, so move mouse directly to it instead of direct click
+      const picker = await this.testSubjects.find('dateRangePickerControlButton');
+      await picker.moveMouseTo();
+      await picker.click();
       await this.testSubjects.exists('dateRangePickerInput', { timeout: 5000 });
       await this.inputValue('dateRangePickerInput', rangeText);
       // Pressing Enter in inputValue applies the range and closes the popover.
@@ -517,7 +520,8 @@ export class TimePickerPageObject extends FtrService {
 
   public async getShowDatesButtonText() {
     if (await this.isNewDateRangePicker()) {
-      return (await this.testSubjects.getAttribute('dateRangePickerControlButton', 'value')) ?? '';
+      const valueDisplay = await this.testSubjects.find('dateRangePickerValueDisplay');
+      return await valueDisplay.getVisibleText();
     }
     const button = await this.testSubjects.find('superDatePickerShowDatesButton');
     const text = await button.getVisibleText();

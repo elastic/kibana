@@ -103,6 +103,12 @@ export const ATTACK_DISCOVERY_SCHEDULES_BY_ID_ENABLE =
   `${ATTACK_DISCOVERY_SCHEDULES}/{id}/_enable` as const;
 export const ATTACK_DISCOVERY_SCHEDULES_BY_ID_DISABLE =
   `${ATTACK_DISCOVERY_SCHEDULES}/{id}/_disable` as const;
+export const ATTACK_DISCOVERY_SCHEDULES_BULK_ENABLE =
+  `${ATTACK_DISCOVERY_SCHEDULES}/_bulk_enable` as const;
+export const ATTACK_DISCOVERY_SCHEDULES_BULK_DISABLE =
+  `${ATTACK_DISCOVERY_SCHEDULES}/_bulk_disable` as const;
+export const ATTACK_DISCOVERY_SCHEDULES_BULK_DELETE =
+  `${ATTACK_DISCOVERY_SCHEDULES}/_bulk_delete` as const;
 export const ATTACK_DISCOVERY_SCHEDULES_FIND = `${ATTACK_DISCOVERY_SCHEDULES}/_find` as const;
 
 // Attack discovery internal API
@@ -122,6 +128,15 @@ export const ATTACK_DISCOVERY_AD_HOC_RULE_TYPE_ID = 'attack_discovery_ad_hoc_rul
  */
 export const ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX =
   '.alerts-security.attack.discovery.alerts' as const;
+
+export const ATTACK_DISCOVERY_ADHOC_ALERTS_INDEX_PREFIX =
+  '.adhoc.alerts-security.attack.discovery.alerts' as const;
+
+/**
+ * The common prefix for ad hoc Attack discovery alerts indices
+ */
+export const ATTACK_DISCOVERY_ADHOC_ALERTS_COMMON_INDEX_PREFIX =
+  '.adhoc.alerts-security.attack.discovery.alerts' as const;
 
 /**
  * This feature flag disables the InferenceChatModel feature.

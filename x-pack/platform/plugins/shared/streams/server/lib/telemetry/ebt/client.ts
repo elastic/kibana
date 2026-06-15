@@ -15,6 +15,9 @@ import type {
   StreamsProcessingPipelineSuggestedProps,
   StreamsFeaturesIdentifiedProps,
   StreamsAgentBuilderKnowledgeIndicatorCreatedProps,
+  StreamsAgentToolKiIdentificationStartedProps,
+  StreamsAgentToolEventCreateProps,
+  StreamsAgentToolEventStatusUpdateProps,
 } from './types';
 import {
   STREAMS_ENDPOINT_LATENCY_EVENT,
@@ -25,6 +28,9 @@ import {
   STREAMS_PROCESSING_PIPELINE_SUGGESTED_EVENT_TYPE,
   STREAMS_FEATURES_IDENTIFIED_EVENT_TYPE,
   STREAMS_AGENT_BUILDER_KNOWLEDGE_INDICATOR_CREATED_EVENT_TYPE,
+  STREAMS_AGENT_TOOL_KI_IDENTIFICATION_STARTED_EVENT_TYPE,
+  STREAMS_AGENT_TOOL_EVENT_CREATE_EVENT_TYPE,
+  STREAMS_AGENT_TOOL_EVENT_STATUS_UPDATE_EVENT_TYPE,
 } from './constants';
 
 const LATENCY_TRACKING_ENDPOINT_ALLOW_LIST = [
@@ -100,5 +106,19 @@ export class EbtTelemetryClient {
       STREAMS_AGENT_BUILDER_KNOWLEDGE_INDICATOR_CREATED_EVENT_TYPE,
       params
     );
+  }
+
+  public trackAgentToolKiIdentificationStarted(
+    params: StreamsAgentToolKiIdentificationStartedProps
+  ) {
+    this.analytics.reportEvent(STREAMS_AGENT_TOOL_KI_IDENTIFICATION_STARTED_EVENT_TYPE, params);
+  }
+
+  public trackAgentToolEventCreate(params: StreamsAgentToolEventCreateProps) {
+    this.analytics.reportEvent(STREAMS_AGENT_TOOL_EVENT_CREATE_EVENT_TYPE, params);
+  }
+
+  public trackAgentToolEventStatusUpdate(params: StreamsAgentToolEventStatusUpdateProps) {
+    this.analytics.reportEvent(STREAMS_AGENT_TOOL_EVENT_STATUS_UPDATE_EVENT_TYPE, params);
   }
 }

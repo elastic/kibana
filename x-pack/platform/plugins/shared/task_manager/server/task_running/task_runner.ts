@@ -20,13 +20,12 @@ import type {
   ExecutionContextStart,
   FakeRawRequest,
   Headers,
-  IBasePath,
   KibanaRequest,
   Logger,
 } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { addSpaceIdToPath } from '@kbn/spaces-utils';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { Middleware } from '../lib/middleware';
 import type { Result } from '../lib/result_type';
@@ -125,7 +124,6 @@ export interface Updatable {
 }
 
 type Opts = {
-  basePathService: IBasePath;
   logger: Logger;
   definitions: TaskTypeDictionary;
   instance: ConcreteTaskInstance;
@@ -187,7 +185,7 @@ export class TaskManagerRunner implements TaskRunner {
   private onTaskEvent: (event: TaskRun | TaskMarkRunning | TaskManagerStat) => void;
   private defaultMaxAttempts: number;
   private uuid: string;
-  private readonly basePathService: IBasePath;
+
   private readonly executionContext: ExecutionContextStart;
   private usageCounter?: UsageCounter;
   private config: TaskManagerConfig;
@@ -209,7 +207,6 @@ export class TaskManagerRunner implements TaskRunner {
    * @memberof TaskManagerRunner
    */
   constructor({
-    basePathService,
     instance,
     definitions,
     logger,
@@ -227,7 +224,6 @@ export class TaskManagerRunner implements TaskRunner {
     apiKeyStrategy,
     eventLogger,
   }: Opts) {
-    this.basePathService = basePathService;
     this.instance = asPending(sanitizeInstance(instance));
     this.definitions = definitions;
     this.logger = logger;
@@ -482,6 +478,8 @@ export class TaskManagerRunner implements TaskRunner {
             withSpan({ name: 'run', type: 'task manager' }, () => this.task!.run())
           );
 
+          stopUpdatingLongRunningTasks();
+
           const validatedResult = this.validateResult(result);
           const processedResult = await withSpan(
             { name: 'process result', type: 'task manager' },
@@ -490,6 +488,8 @@ export class TaskManagerRunner implements TaskRunner {
           if (apmTrans) apmTrans.end('success');
           return processedResult;
         } catch (err) {
+          stopUpdatingLongRunningTasks();
+
           const errorSource = isUserError(err) ? TaskErrorSource.USER : TaskErrorSource.FRAMEWORK;
           const errorMessage =
             err instanceof Error
@@ -514,10 +514,6 @@ export class TaskManagerRunner implements TaskRunner {
           if (apmTrans) apmTrans.end('failure');
           return processedResult;
         } finally {
-          // Stop updating retryAt for long running tasks once the task has finished
-          if (stopUpdatingLongRunningTasks) {
-            stopUpdatingLongRunningTasks();
-          }
           this.logger.debug(`Task ${this} ended`, { tags: ['task:end', this.id, this.taskType] });
         }
       }
@@ -1034,17 +1030,13 @@ export class TaskManagerRunner implements TaskRunner {
       const requestHeaders: Headers = {};
 
       requestHeaders.authorization = `ApiKey ${apiKey}`;
-      const path = addSpaceIdToPath('/', spaceId || 'default');
 
       const fakeRawRequest: FakeRawRequest = {
         headers: requestHeaders,
-        path: '/',
+        spaceId: asSpaceId(spaceId || 'default'),
       };
 
-      const fakeRequest = kibanaRequestFactory(fakeRawRequest);
-      this.basePathService.set(fakeRequest, path);
-
-      return fakeRequest;
+      return kibanaRequestFactory(fakeRawRequest);
     }
   }
 

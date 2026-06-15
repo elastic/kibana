@@ -15,6 +15,8 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { labels } from '../../../utils/i18n';
 import { useSkill } from '../../../hooks/skills/use_skills';
 import { DetailPanelLayout } from '../common/detail_panel_layout';
@@ -130,7 +132,16 @@ const SkillHeaderActions = ({
     <>
       {!isReadOnly && (
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty iconType="pencil" size="xs" onClick={onEdit}>
+          <EuiButtonEmpty
+            iconType="pencil"
+            size="xs"
+            onClick={onEdit}
+            {...getEbtProps({
+              element: AGENT_BUILDER_UI_EBT.element.pageContent,
+              action: AGENT_BUILDER_UI_EBT.action.agentCustomization.ENTITY_EDIT_FROM_AGENT,
+              detail: AGENT_BUILDER_UI_EBT.entity.SKILL,
+            })}
+          >
             {labels.skills.editSkillButtonLabel}
           </EuiButtonEmpty>
         </EuiFlexItem>

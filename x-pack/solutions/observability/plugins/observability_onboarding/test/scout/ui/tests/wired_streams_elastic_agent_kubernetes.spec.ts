@@ -25,12 +25,10 @@ test.describe(
       await setupWiredStreamsBeforeEach({ pageObjects, browserAuth });
     });
 
-    test('shows ingestion selector with correct options', async ({ pageObjects }) => {
-      await test.step('navigate to Elastic Agent Kubernetes flow', async () => {
-        await pageObjects.onboarding.selectKubernetesUseCase();
-        await pageObjects.onboarding.clickIntegrationCard(
-          'integration-card:kubernetes-quick-start'
-        );
+    test('shows ingestion selector with correct options', async ({ page, pageObjects }) => {
+      await test.step('navigate directly to Elastic Agent Kubernetes flow', async () => {
+        await page.gotoApp('observabilityOnboarding/kubernetes');
+        await pageObjects.onboarding.waitForIngestionModeSelector();
       });
 
       await test.step('ingestion selector is visible with both options', async () => {
@@ -49,10 +47,11 @@ test.describe(
     });
 
     test('command includes wired streams config when Wired Streams mode is selected', async ({
+      page,
       pageObjects,
     }) => {
-      await pageObjects.onboarding.selectKubernetesUseCase();
-      await pageObjects.onboarding.clickIntegrationCard('integration-card:kubernetes-quick-start');
+      await page.gotoApp('observabilityOnboarding/kubernetes');
+      await pageObjects.onboarding.waitForIngestionModeSelector();
 
       await test.step('command does NOT include wired streams config in Classic mode', async () => {
         const classicCommand = await pageObjects.onboarding.getKubernetesCommandContent();

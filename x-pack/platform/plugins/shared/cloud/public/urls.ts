@@ -40,16 +40,20 @@ export class CloudUrlsService {
       organization_url: organizationUrl,
       deployments_url: deploymentsUrl,
       deployment_url: deploymentUrl,
+      create_deployment_url: createDeploymentUrl,
       performance_url: performanceUrl,
       projects_url: projectsUrl,
+      create_project_url: createProjectUrl,
     } = this.config;
 
     const fullCloudDeploymentsUrl = getFullCloudUrl(baseUrl, deploymentsUrl);
     const fullCloudDeploymentUrl = getFullCloudUrl(baseUrl, deploymentUrl);
+    const fullCloudCreateDeploymentUrl = getFullCloudUrl(baseUrl, createDeploymentUrl);
     const fullCloudProfileUrl = getFullCloudUrl(baseUrl, profileUrl);
     const fullCloudOrganizationUrl = getFullCloudUrl(baseUrl, organizationUrl);
     const fullCloudPerformanceUrl = getFullCloudUrl(baseUrl, performanceUrl);
     const fullCloudProjectsUrl = getFullCloudUrl(baseUrl, projectsUrl);
+    const fullCloudCreateProjectUrl = getFullCloudUrl(baseUrl, createProjectUrl);
     const fullCloudSnapshotsUrl = `${fullCloudDeploymentUrl}/${CLOUD_SNAPSHOTS_PATH}`;
 
     return {
@@ -57,11 +61,13 @@ export class CloudUrlsService {
       kibanaUrl,
       deploymentsUrl: fullCloudDeploymentsUrl,
       deploymentUrl: fullCloudDeploymentUrl,
+      createDeploymentUrl: fullCloudCreateDeploymentUrl,
       profileUrl: fullCloudProfileUrl,
       organizationUrl: fullCloudOrganizationUrl,
       snapshotsUrl: fullCloudSnapshotsUrl,
       performanceUrl: fullCloudPerformanceUrl,
       projectsUrl: fullCloudProjectsUrl,
+      createProjectUrl: fullCloudCreateProjectUrl,
     };
   }
 
@@ -108,7 +114,7 @@ export class CloudUrlsService {
   ): Promise<readonly string[]> {
     let userRoles: readonly string[] = [];
     try {
-      userRoles = (await coreStart.security.authc.getCurrentUser()).roles;
+      userRoles = (await coreStart.security.authc.getCurrentUser()).roles ?? [];
     } catch (e) {
       // If no user is available, we just return an empty array of roles
     }

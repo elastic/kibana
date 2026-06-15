@@ -29,17 +29,16 @@ const createMockAlert = (overrides: Partial<Record<string, unknown>> = {}): TopA
     },
   } as unknown as TopAlert);
 
-const isLatencyRule = (id: string) => id === 'apm.transaction_duration';
 const DATE_FORMAT = 'HH:mm:ss';
 
 describe('useGetChartAlertAnnotations', () => {
-  it('returns all annotations when the rule type matches', () => {
+  it('returns all annotations when showAnnotations is true', () => {
     const alert = createMockAlert();
 
     const { result } = renderHook(() =>
       useGetChartAlertAnnotations({
         alert,
-        isMatchingRuleType: isLatencyRule,
+        showAnnotations: true,
         dateFormat: DATE_FORMAT,
       })
     );
@@ -48,15 +47,13 @@ describe('useGetChartAlertAnnotations', () => {
     expect(result.current).toHaveLength(4);
   });
 
-  it('returns undefined when the rule type does not match and no custom threshold', () => {
-    const alert = createMockAlert({
-      [ALERT_RULE_TYPE_ID]: 'apm.transaction_error_rate',
-    });
+  it('returns undefined when showAnnotations is false and no custom threshold', () => {
+    const alert = createMockAlert();
 
     const { result } = renderHook(() =>
       useGetChartAlertAnnotations({
         alert,
-        isMatchingRuleType: isLatencyRule,
+        showAnnotations: false,
         dateFormat: DATE_FORMAT,
       })
     );
@@ -64,15 +61,13 @@ describe('useGetChartAlertAnnotations', () => {
     expect(result.current).toBeUndefined();
   });
 
-  it('returns annotations when rule type does not match but customAlertEvaluationThreshold is provided', () => {
-    const alert = createMockAlert({
-      [ALERT_RULE_TYPE_ID]: 'apm.transaction_error_rate',
-    });
+  it('returns annotations when showAnnotations is false but customAlertEvaluationThreshold is provided', () => {
+    const alert = createMockAlert();
 
     const { result } = renderHook(() =>
       useGetChartAlertAnnotations({
         alert,
-        isMatchingRuleType: isLatencyRule,
+        showAnnotations: false,
         customAlertEvaluationThreshold: 2000,
         dateFormat: DATE_FORMAT,
       })
@@ -90,7 +85,7 @@ describe('useGetChartAlertAnnotations', () => {
     const { result } = renderHook(() =>
       useGetChartAlertAnnotations({
         alert,
-        isMatchingRuleType: isLatencyRule,
+        showAnnotations: true,
         dateFormat: DATE_FORMAT,
       })
     );
@@ -107,7 +102,7 @@ describe('useGetChartAlertAnnotations', () => {
     const { result } = renderHook(() =>
       useGetChartAlertAnnotations({
         alert,
-        isMatchingRuleType: isLatencyRule,
+        showAnnotations: true,
         customAlertEvaluationThreshold: 3000,
         dateFormat: DATE_FORMAT,
       })
@@ -127,7 +122,7 @@ describe('useGetChartAlertAnnotations', () => {
     const { result } = renderHook(() =>
       useGetChartAlertAnnotations({
         alert,
-        isMatchingRuleType: isLatencyRule,
+        showAnnotations: true,
         dateFormat: DATE_FORMAT,
       })
     );
@@ -142,7 +137,7 @@ describe('useGetChartAlertAnnotations', () => {
     const { result } = renderHook(() =>
       useGetChartAlertAnnotations({
         alert,
-        isMatchingRuleType: isLatencyRule,
+        showAnnotations: true,
         dateFormat: DATE_FORMAT,
       })
     );
@@ -159,7 +154,7 @@ describe('useGetChartAlertAnnotations', () => {
     const { result } = renderHook(() =>
       useGetChartAlertAnnotations({
         alert,
-        isMatchingRuleType: isLatencyRule,
+        showAnnotations: true,
         dateFormat: DATE_FORMAT,
         normalizeThreshold: (value) => value / 100,
       })
@@ -173,14 +168,12 @@ describe('useGetChartAlertAnnotations', () => {
   });
 
   it('returns annotations when customAlertEvaluationThreshold is 0', () => {
-    const alert = createMockAlert({
-      [ALERT_RULE_TYPE_ID]: 'apm.transaction_error_rate',
-    });
+    const alert = createMockAlert();
 
     const { result } = renderHook(() =>
       useGetChartAlertAnnotations({
         alert,
-        isMatchingRuleType: isLatencyRule,
+        showAnnotations: false,
         customAlertEvaluationThreshold: 0,
         dateFormat: DATE_FORMAT,
       })
@@ -188,5 +181,22 @@ describe('useGetChartAlertAnnotations', () => {
 
     expect(result.current).toBeDefined();
     expect(result.current).toHaveLength(4);
+  });
+
+  it('excludes threshold annotations for anomaly rule types', () => {
+    const alert = createMockAlert({
+      [ALERT_RULE_TYPE_ID]: 'apm.anomaly',
+    });
+
+    const { result } = renderHook(() =>
+      useGetChartAlertAnnotations({
+        alert,
+        showAnnotations: true,
+        dateFormat: DATE_FORMAT,
+      })
+    );
+
+    expect(result.current).toBeDefined();
+    expect(result.current).toHaveLength(2);
   });
 });

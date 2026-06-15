@@ -44,7 +44,7 @@ type LocalRangeType = RangeTypeLens & { id: string };
 
 const getBetterLabel = (range: RangeTypeLens, formatter: IFieldFormat) =>
   range.label ||
-  formatter.convert({
+  formatter.convertToText({
     gte: isValidNumber(range.from) ? range.from : -Infinity,
     lt: isValidNumber(range.to) ? range.to : Infinity,
   });
@@ -137,7 +137,7 @@ export const RangePopover = ({
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiIcon type="sortRight" color="subdued" />
+            <EuiIcon type="sortRight" color="subdued" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiFieldNumber
@@ -265,7 +265,7 @@ export const AdvancedRangeEditor = ({
       labelAppend={
         <EuiText size="xs">
           <EuiLink color="danger" onClick={onToggleEditor}>
-            <EuiIcon size="s" type="cross" color="danger" />{' '}
+            <EuiIcon size="s" type="cross" color="danger" aria-hidden={true} />{' '}
             {i18n.translate('xpack.lens.indexPattern.ranges.customRangesRemoval', {
               defaultMessage: 'Remove custom ranges',
             })}

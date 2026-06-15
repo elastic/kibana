@@ -8,7 +8,7 @@
  */
 
 import { camelCase } from 'lodash';
-import { BehaviorSubject, map, merge } from 'rxjs';
+import { BehaviorSubject, map, merge, skip } from 'rxjs';
 import { runComparator } from './state_comparators';
 import type { StateComparators, StateManager, WithAllKeys } from './types';
 
@@ -113,6 +113,8 @@ export const initializeStateManager = <StateType extends object>(
     api,
     getLatestState,
     reinitializeState,
-    anyStateChange$: merge(...allSubjects).pipe(map(() => undefined)),
+    anyStateChange$: merge(...allSubjects.map((subject) => subject.pipe(skip(1)))).pipe(
+      map(() => undefined)
+    ),
   };
 };

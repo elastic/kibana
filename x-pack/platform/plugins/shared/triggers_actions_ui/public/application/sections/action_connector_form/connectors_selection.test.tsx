@@ -8,7 +8,6 @@
 import * as React from 'react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { render, screen } from '@testing-library/react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { ConnectorsSelection } from './connectors_selection';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
@@ -86,7 +85,7 @@ describe('connectors_selection', () => {
   beforeEach(() => {});
 
   it('renders a selector', () => {
-    const wrapper = mountWithIntl(
+    render(
       <KibanaThemeProvider {...core}>
         <ConnectorsSelection
           accordionIndex={0}
@@ -99,9 +98,7 @@ describe('connectors_selection', () => {
       </KibanaThemeProvider>
     );
 
-    expect(
-      wrapper.find('[data-test-subj="selectActionConnector-.pagerduty-0"]').exists()
-    ).toBeTruthy();
+    expect(screen.getByTestId('selectActionConnector-.pagerduty-0')).toBeInTheDocument();
   });
 
   it('renders the title of the connector', () => {

@@ -8,28 +8,30 @@
 import { renderHook, act } from '@testing-library/react';
 import type React from 'react';
 import moment from 'moment-timezone';
-import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { UseFormReturn } from 'react-hook-form';
 import { useYamlToFormSync, useFormToYamlSync, useYamlFormSync } from './use_yaml_form_sync';
 import type { FieldInfo, OnFieldDefaultChange } from './use_yaml_form_sync';
 import { CASE_EXTENDED_FIELDS } from '../../../../../common/constants';
 import type { FieldDefaultValue } from '../../utils/update_yaml_field_default';
 
 const createMockForm = () => {
-  let subscriptionCallback: (data: { data: { internal: Record<string, unknown> } }) => void;
+  let watchCallback: (values: Record<string, unknown>) => void;
   const unsubscribe = jest.fn();
-  const form = {
-    setFieldValue: jest.fn(),
-    subscribe: jest.fn((cb) => {
-      subscriptionCallback = cb;
-      return { unsubscribe };
-    }),
-  } as unknown as jest.Mocked<FormHook>;
+  const setValue = jest.fn();
+  const watch = jest.fn((cb: typeof watchCallback) => {
+    watchCallback = cb;
+    return { unsubscribe };
+  });
+
+  const form = { setValue, watch } as unknown as jest.Mocked<UseFormReturn>;
 
   return {
     form,
+    setValue,
+    watch,
     unsubscribe,
-    fireSubscription: (internal: Record<string, unknown>) => {
-      subscriptionCallback({ data: { internal } });
+    fireWatch: (values: Record<string, unknown>) => {
+      watchCallback(values);
     },
   };
 };
@@ -50,12 +52,13 @@ const createParsedFields = (
   }));
 
 describe('useYamlToFormSync', () => {
-  let mockForm: jest.Mocked<FormHook>;
+  let mockForm: jest.Mocked<UseFormReturn>;
+  let setValue: jest.Mock;
   let syncingFromYamlRef: React.MutableRefObject<boolean>;
   let lastSyncedRef: React.MutableRefObject<Record<string, string>>;
 
   beforeEach(() => {
-    ({ form: mockForm } = createMockForm());
+    ({ form: mockForm, setValue } = createMockForm());
     syncingFromYamlRef = { current: false };
     lastSyncedRef = { current: {} };
   });
@@ -70,13 +73,15 @@ describe('useYamlToFormSync', () => {
 
     renderHook(() => useYamlToFormSync(mockForm, fields, syncingFromYamlRef, lastSyncedRef));
 
-    expect(mockForm.setFieldValue).toHaveBeenCalledWith(
+    expect(setValue).toHaveBeenCalledWith(
       `${CASE_EXTENDED_FIELDS}.summary_as_keyword`,
-      'Default text'
+      'Default text',
+      expect.any(Object)
     );
-    expect(mockForm.setFieldValue).toHaveBeenCalledWith(
+    expect(setValue).toHaveBeenCalledWith(
       `${CASE_EXTENDED_FIELDS}.count_as_integer`,
-      '42'
+      '42',
+      expect.any(Object)
     );
   });
 
@@ -87,9 +92,10 @@ describe('useYamlToFormSync', () => {
 
     renderHook(() => useYamlToFormSync(mockForm, fields, syncingFromYamlRef, lastSyncedRef));
 
-    expect(mockForm.setFieldValue).toHaveBeenCalledWith(
+    expect(setValue).toHaveBeenCalledWith(
       `${CASE_EXTENDED_FIELDS}.effort_as_integer`,
-      '100'
+      '100',
+      expect.any(Object)
     );
   });
 
@@ -100,9 +106,10 @@ describe('useYamlToFormSync', () => {
 
     renderHook(() => useYamlToFormSync(mockForm, fields, syncingFromYamlRef, lastSyncedRef));
 
-    expect(mockForm.setFieldValue).toHaveBeenCalledWith(
+    expect(setValue).toHaveBeenCalledWith(
       `${CASE_EXTENDED_FIELDS}.summary_as_keyword`,
-      ''
+      '',
+      expect.any(Object)
     );
   });
 
@@ -118,9 +125,10 @@ describe('useYamlToFormSync', () => {
 
     renderHook(() => useYamlToFormSync(mockForm, fields, syncingFromYamlRef, lastSyncedRef));
 
-    expect(mockForm.setFieldValue).toHaveBeenCalledWith(
+    expect(setValue).toHaveBeenCalledWith(
       `${CASE_EXTENDED_FIELDS}.systems_as_keyword`,
-      '["api","database"]'
+      '["api","database"]',
+      expect.any(Object)
     );
   });
 
@@ -131,9 +139,10 @@ describe('useYamlToFormSync', () => {
 
     renderHook(() => useYamlToFormSync(mockForm, fields, syncingFromYamlRef, lastSyncedRef));
 
-    expect(mockForm.setFieldValue).toHaveBeenCalledWith(
+    expect(setValue).toHaveBeenCalledWith(
       `${CASE_EXTENDED_FIELDS}.systems_as_keyword`,
-      '[]'
+      '[]',
+      expect.any(Object)
     );
   });
 
@@ -144,8 +153,6 @@ describe('useYamlToFormSync', () => {
 
     renderHook(() => useYamlToFormSync(mockForm, fields, syncingFromYamlRef, lastSyncedRef));
 
-    // Flag is set synchronously, then cleared via setTimeout
-    // After the effect runs synchronously, the flag should still be true (before setTimeout fires)
     expect(syncingFromYamlRef.current).toBe(true);
   });
 
@@ -173,7 +180,7 @@ describe('useYamlToFormSync', () => {
     expect(lastSyncedRef.current.summary).toBe('Hello');
   });
 
-  it('skips setFieldValue when YAML default has not changed (deduplication)', () => {
+  it('skips setValue when YAML default has not changed (deduplication)', () => {
     const fields = createParsedFields([
       { name: 'env', type: 'keyword', control: 'RADIO_GROUP', defaultValue: 'production' },
     ]);
@@ -183,18 +190,18 @@ describe('useYamlToFormSync', () => {
       { initialProps: { f: fields } }
     );
 
-    expect(mockForm.setFieldValue).toHaveBeenCalledTimes(1);
-    mockForm.setFieldValue.mockClear();
+    expect(setValue).toHaveBeenCalledTimes(1);
+    setValue.mockClear();
 
     const identicalFields = createParsedFields([
       { name: 'env', type: 'keyword', control: 'RADIO_GROUP', defaultValue: 'production' },
     ]);
     rerender({ f: identicalFields });
 
-    expect(mockForm.setFieldValue).not.toHaveBeenCalled();
+    expect(setValue).not.toHaveBeenCalled();
   });
 
-  it('calls setFieldValue when the YAML default genuinely changes', () => {
+  it('calls setValue when the YAML default genuinely changes', () => {
     const fields = createParsedFields([
       { name: 'env', type: 'keyword', control: 'RADIO_GROUP', defaultValue: 'production' },
     ]);
@@ -204,23 +211,24 @@ describe('useYamlToFormSync', () => {
       { initialProps: { f: fields } }
     );
 
-    mockForm.setFieldValue.mockClear();
+    setValue.mockClear();
 
     const updated = createParsedFields([
       { name: 'env', type: 'keyword', control: 'RADIO_GROUP', defaultValue: 'staging' },
     ]);
     rerender({ f: updated });
 
-    expect(mockForm.setFieldValue).toHaveBeenCalledWith(
+    expect(setValue).toHaveBeenCalledWith(
       `${CASE_EXTENDED_FIELDS}.env_as_keyword`,
-      'staging'
+      'staging',
+      expect.any(Object)
     );
   });
 
   it('does nothing for empty parsedFields', () => {
     renderHook(() => useYamlToFormSync(mockForm, [], syncingFromYamlRef, lastSyncedRef));
 
-    expect(mockForm.setFieldValue).not.toHaveBeenCalled();
+    expect(setValue).not.toHaveBeenCalled();
     expect(syncingFromYamlRef.current).toBe(false);
   });
 });
@@ -229,15 +237,16 @@ describe('useFormToYamlSync', () => {
   let syncingFromYamlRef: React.MutableRefObject<boolean>;
   let yamlDefaultsRef: React.MutableRefObject<Record<string, string>>;
   let mockOnChange: jest.MockedFunction<OnFieldDefaultChange>;
-  let fireSubscription: (internal: Record<string, unknown>) => void;
+  let fireWatch: (values: Record<string, unknown>) => void;
   let unsubscribe: jest.Mock;
-  let mockForm: jest.Mocked<FormHook>;
+  let mockForm: jest.Mocked<UseFormReturn>;
+  let watch: jest.Mock;
 
   beforeEach(() => {
     syncingFromYamlRef = { current: false };
     yamlDefaultsRef = { current: {} };
     mockOnChange = jest.fn();
-    ({ form: mockForm, unsubscribe, fireSubscription } = createMockForm());
+    ({ form: mockForm, watch, unsubscribe, fireWatch } = createMockForm());
   });
 
   afterEach(() => jest.clearAllMocks());
@@ -251,7 +260,7 @@ describe('useFormToYamlSync', () => {
       useFormToYamlSync(mockForm, fields, syncingFromYamlRef, yamlDefaultsRef, mockOnChange)
     );
 
-    expect(mockForm.subscribe).toHaveBeenCalled();
+    expect(watch).toHaveBeenCalled();
   });
 
   it('unsubscribes on unmount', () => {
@@ -278,7 +287,7 @@ describe('useFormToYamlSync', () => {
     );
 
     act(() => {
-      fireSubscription({
+      fireWatch({
         [CASE_EXTENDED_FIELDS]: { summary_as_keyword: 'User typed value' },
       });
     });
@@ -297,7 +306,7 @@ describe('useFormToYamlSync', () => {
     );
 
     act(() => {
-      fireSubscription({
+      fireWatch({
         [CASE_EXTENDED_FIELDS]: { summary_as_keyword: 'Same' },
       });
     });
@@ -317,7 +326,7 @@ describe('useFormToYamlSync', () => {
     );
 
     act(() => {
-      fireSubscription({
+      fireWatch({
         [CASE_EXTENDED_FIELDS]: { summary_as_keyword: 'Changed' },
       });
     });
@@ -337,7 +346,7 @@ describe('useFormToYamlSync', () => {
 
     expect(() => {
       act(() => {
-        fireSubscription({
+        fireWatch({
           [CASE_EXTENDED_FIELDS]: { summary_as_keyword: 'Changed' },
         });
       });
@@ -354,7 +363,7 @@ describe('useFormToYamlSync', () => {
     );
 
     act(() => {
-      fireSubscription({});
+      fireWatch({});
     });
 
     expect(mockOnChange).not.toHaveBeenCalled();
@@ -371,7 +380,7 @@ describe('useFormToYamlSync', () => {
     );
 
     act(() => {
-      fireSubscription({
+      fireWatch({
         [CASE_EXTENDED_FIELDS]: { systems_as_keyword: ['api', 'ui'] },
       });
     });
@@ -395,7 +404,7 @@ describe('useFormToYamlSync', () => {
     );
 
     act(() => {
-      fireSubscription({
+      fireWatch({
         [CASE_EXTENDED_FIELDS]: { systems_as_keyword: '["api","database"]' },
       });
     });
@@ -423,7 +432,7 @@ describe('useFormToYamlSync', () => {
       );
 
       act(() => {
-        fireSubscription({
+        fireWatch({
           [CASE_EXTENDED_FIELDS]: { scheduled_at_as_date: moment.utc('2024-06-15T14:30:00.000Z') },
         });
       });
@@ -443,7 +452,7 @@ describe('useFormToYamlSync', () => {
       );
 
       act(() => {
-        fireSubscription({
+        fireWatch({
           [CASE_EXTENDED_FIELDS]: { scheduled_at_as_date: localMoment },
         });
       });
@@ -459,7 +468,7 @@ describe('useFormToYamlSync', () => {
       );
 
       act(() => {
-        fireSubscription({
+        fireWatch({
           [CASE_EXTENDED_FIELDS]: { scheduled_at_as_date: moment.utc('2024-06-01T09:00:00.000Z') },
         });
       });
@@ -473,7 +482,7 @@ describe('useFormToYamlSync', () => {
       );
 
       act(() => {
-        fireSubscription({
+        fireWatch({
           [CASE_EXTENDED_FIELDS]: { scheduled_at_as_date: new Date('2024-06-15T14:30:00.000Z') },
         });
       });
@@ -498,7 +507,7 @@ describe('useFormToYamlSync', () => {
     );
 
     act(() => {
-      fireSubscription({
+      fireWatch({
         [CASE_EXTENDED_FIELDS]: { text_as_keyword: 'text', number_as_integer: '20' },
       });
     });
@@ -509,11 +518,13 @@ describe('useFormToYamlSync', () => {
 });
 
 describe('useYamlFormSync (composed)', () => {
-  let mockForm: jest.Mocked<FormHook>;
-  let fireSubscription: (internal: Record<string, unknown>) => void;
+  let mockForm: jest.Mocked<UseFormReturn>;
+  let setValue: jest.Mock;
+  let watch: jest.Mock;
+  let fireWatch: (values: Record<string, unknown>) => void;
 
   beforeEach(() => {
-    ({ form: mockForm, fireSubscription } = createMockForm());
+    ({ form: mockForm, setValue, watch, fireWatch } = createMockForm());
   });
 
   afterEach(() => jest.clearAllMocks());
@@ -526,11 +537,12 @@ describe('useYamlFormSync (composed)', () => {
 
     renderHook(() => useYamlFormSync(mockForm, fields, mockOnChange));
 
-    expect(mockForm.setFieldValue).toHaveBeenCalledWith(
+    expect(setValue).toHaveBeenCalledWith(
       `${CASE_EXTENDED_FIELDS}.summary_as_keyword`,
-      'Hello'
+      'Hello',
+      expect.any(Object)
     );
-    expect(mockForm.subscribe).toHaveBeenCalled();
+    expect(watch).toHaveBeenCalled();
   });
 
   it('returns yamlDefaults with current values', () => {
@@ -579,7 +591,7 @@ describe('useYamlFormSync (composed)', () => {
   it('returns empty object for empty parsedFields', () => {
     const { result } = renderHook(() => useYamlFormSync(mockForm, []));
 
-    expect(mockForm.setFieldValue).not.toHaveBeenCalled();
+    expect(setValue).not.toHaveBeenCalled();
     expect(result.current.yamlDefaults).toEqual({});
   });
 
@@ -607,9 +619,8 @@ describe('useYamlFormSync (composed)', () => {
 
     renderHook(() => useYamlFormSync(mockForm, fields, mockOnChange));
 
-    // The subscription fires with the YAML default value — should not trigger callback
     act(() => {
-      fireSubscription({
+      fireWatch({
         [CASE_EXTENDED_FIELDS]: { summary_as_keyword: 'Initial' },
       });
     });
@@ -625,13 +636,12 @@ describe('useYamlFormSync (composed)', () => {
 
     renderHook(() => useYamlFormSync(mockForm, fields, mockOnChange));
 
-    // Wait for setTimeout to clear syncingFromYamlRef
     await act(async () => {
       await new Promise((r) => setTimeout(r, 0));
     });
 
     act(() => {
-      fireSubscription({
+      fireWatch({
         [CASE_EXTENDED_FIELDS]: { summary_as_keyword: 'User changed' },
       });
     });
@@ -648,15 +658,15 @@ describe('useYamlFormSync (composed)', () => {
       initialProps: { f: fields },
     });
 
-    expect(mockForm.setFieldValue).toHaveBeenCalledTimes(1);
-    mockForm.setFieldValue.mockClear();
+    expect(setValue).toHaveBeenCalledTimes(1);
+    setValue.mockClear();
 
     const identical = createParsedFields([
       { name: 'env', type: 'keyword', control: 'RADIO_GROUP', defaultValue: 'production' },
     ]);
     rerender({ f: identical });
 
-    expect(mockForm.setFieldValue).not.toHaveBeenCalled();
+    expect(setValue).not.toHaveBeenCalled();
   });
 
   it('handles multiple field types with mixed changes', async () => {
@@ -670,14 +680,14 @@ describe('useYamlFormSync (composed)', () => {
 
     renderHook(() => useYamlFormSync(mockForm, fields, mockOnChange));
 
-    expect(mockForm.setFieldValue).toHaveBeenCalledTimes(4);
+    expect(setValue).toHaveBeenCalledTimes(4);
 
     await act(async () => {
       await new Promise((r) => setTimeout(r, 0));
     });
 
     act(() => {
-      fireSubscription({
+      fireWatch({
         [CASE_EXTENDED_FIELDS]: {
           text_as_keyword: 'text',
           number_as_integer: '20',
@@ -705,7 +715,7 @@ describe('useYamlFormSync (composed)', () => {
     });
 
     act(() => {
-      fireSubscription({
+      fireWatch({
         [CASE_EXTENDED_FIELDS]: {
           summary_as_keyword: 'text',
           systems_as_keyword: '["api","database"]',

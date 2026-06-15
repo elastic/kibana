@@ -6,6 +6,7 @@
  */
 
 import { omit } from 'lodash';
+import { validate as uuidValidate } from 'uuid';
 import { schema } from '@kbn/config-schema';
 import path from 'node:path';
 import type { Observable } from 'rxjs';
@@ -73,6 +74,7 @@ export function registerChatRoutes({
     ),
     conversation_id: schema.maybe(
       schema.string({
+        validate: (v) => (uuidValidate(v) ? undefined : 'conversation_id must be a valid UUID'),
         meta: {
           description: 'Optional existing conversation ID to continue a previous conversation.',
         },
@@ -84,9 +86,19 @@ export function registerChatRoutes({
       })
     ),
     prompts: schema.maybe(
-      schema.recordOf(schema.string(), schema.object({ allow: schema.boolean() }), {
-        meta: { description: 'Can be used to respond to a confirmation prompt.' },
-      })
+      schema.recordOf(
+        schema.string({ minLength: 1, maxLength: 512 }),
+        schema.oneOf([
+          schema.object({ allow: schema.boolean() }),
+          schema.object({ authorized: schema.boolean() }),
+        ]),
+        {
+          meta: {
+            description:
+              'Use this field to respond to a confirmation or authorization prompt. Send an `allow` boolean to answer a confirmation prompt, or an `authorized` boolean to answer an authorization prompt.',
+          },
+        }
+      )
     ),
     attachments: schema.maybe(
       schema.arrayOf(
@@ -119,6 +131,21 @@ export function registerChatRoutes({
             hidden: schema.maybe(
               schema.boolean({
                 meta: { description: 'When true, the attachment will not be displayed in the UI.' },
+              })
+            ),
+            description: schema.maybe(
+              schema.string({
+                maxLength: 1024,
+                meta: { description: 'Human-readable label for the attachment.' },
+              })
+            ),
+            group_id: schema.maybe(
+              schema.string({
+                maxLength: 256,
+                meta: {
+                  description:
+                    'Stable identifier for the logical group this attachment belongs to. Attachments sharing the same group_id were submitted together as a single logical entity.',
+                },
               })
             ),
           },
@@ -301,6 +328,7 @@ export function registerChatRoutes({
         agentId,
         connectorId,
         conversationId,
+        autoCreateConversationWithId: true,
         capabilities,
         browserApiTools,
         configurationOverrides,
@@ -325,7 +353,7 @@ export function registerChatRoutes({
       access: 'public',
       summary: 'Send chat message',
       description:
-        'Send a message to an agent and receive a complete response. This synchronous endpoint waits for the agent to fully process your request before returning the final result. Use this for simple chat interactions where you need the complete response. To learn more, refer to the [agent chat documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/chat).',
+        'Send a message to an agent and receive a complete response. This synchronous endpoint waits for the agent to fully process your request before returning the final result. Use this for simple chat interactions where you need the complete response. To learn more about agent chat, refer to the [agent chat documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/chat).',
       options: {
         timeout: {
           idleSocket: AGENT_SOCKET_TIMEOUT_MS,

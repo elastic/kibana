@@ -127,7 +127,10 @@ export default class CiStatsJestReporter extends BaseReporter {
         suites: t.ancestorTitles,
         type: 'test',
         error: t.failureMessages.join('\n\n'),
-        stdout: testResult.console?.map(formatConsoleLine).join('\n'),
+        stdout:
+          process.env.CI_STATS_INGEST_TEST_LOGS === 'true'
+            ? testResult.console?.map(formatConsoleLine).join('\n')
+            : undefined,
       });
     }
   }

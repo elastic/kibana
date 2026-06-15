@@ -306,6 +306,7 @@ export function StreamDetailAttachments({ definition }: { definition: Streams.al
                                 isSelectionPopoverOpen ? 'chevronSingleUp' : 'chevronSingleDown'
                               }
                               size="s"
+                              aria-hidden={true}
                             />
                           </EuiFlexItem>
                         </EuiFlexGroup>
@@ -317,7 +318,6 @@ export function StreamDetailAttachments({ definition }: { definition: Streams.al
                     anchorPosition="downLeft"
                   >
                     <EuiContextMenuPanel
-                      size="s"
                       items={[
                         <EuiContextMenuItem
                           key="unlink"

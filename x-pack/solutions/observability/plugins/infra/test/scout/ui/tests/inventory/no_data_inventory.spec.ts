@@ -9,13 +9,14 @@ import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../fixtures';
 
-test.describe(
+// Failing: See https://github.com/elastic/kibana/issues/263863
+test.describe.skip(
   'Infrastructure Inventory - Onboarding',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     test.beforeEach(async ({ browserAuth, pageObjects: { inventoryPage } }) => {
       await browserAuth.loginAsViewer();
-      // Skip load wait as there is no data to load in empty data test cases
+      // Skip full page load assertion; onboarding replaces inventory content after `/api/metrics/source/hasData`.
       await inventoryPage.goToPage({ skipLoadWait: true });
     });
 
@@ -24,6 +25,7 @@ test.describe(
       pageObjects: { inventoryPage },
     }) => {
       await test.step('display empty state', async () => {
+        await inventoryPage.waitForOnboardingNoDataPage();
         await expect(inventoryPage.noDataPage).toBeVisible();
         await expect(inventoryPage.noDataPageActionButton).toBeVisible();
       });

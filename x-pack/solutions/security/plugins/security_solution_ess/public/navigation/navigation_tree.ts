@@ -32,6 +32,10 @@ export const createNavigationTree = (
         title: SOLUTION_NAME,
       },
       {
+        link: 'inbox' as AppDeepLinkId,
+        icon: 'email',
+      },
+      {
         link: 'discover',
         icon: 'productDiscover',
       },
@@ -83,6 +87,10 @@ export const createNavigationTree = (
       },
       defaultNavigationTree.assets(services),
       defaultNavigationTree.ml(),
+      {
+        link: 'onboarding' as AppDeepLinkId,
+        sideNavStatus: 'hidden',
+      },
     ],
     footer: [
       {
@@ -207,7 +215,8 @@ export const createNavigationTree = (
                   children: [
                     { link: 'management:rules' as const },
                     { link: 'management:episodes' as const },
-                    { link: 'management:notification_policies' as const },
+                    { link: 'management:action_policies' as const },
+                    { link: 'management:execution_history' as const },
                   ],
                 },
               ]
@@ -215,7 +224,7 @@ export const createNavigationTree = (
           {
             title: i18nStrings.stackManagementV2.alertsAndInsights.title,
             children: [
-              { link: 'management:triggersActions' },
+              { id: 'stackRules', link: 'management:triggersActions' },
               { link: 'management:cases' },
               { link: 'management:triggersActionsConnectors' },
               { link: 'management:reporting' },

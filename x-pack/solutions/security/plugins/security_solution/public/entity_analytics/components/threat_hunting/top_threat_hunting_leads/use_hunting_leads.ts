@@ -11,6 +11,7 @@ import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useKibana } from '../../../../common/lib/kibana';
 import { EntityEventTypes } from '../../../../common/lib/telemetry';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
+import { useLeadGenerationPrivileges } from '../../../api/hooks/use_lead_generation_privileges';
 import { fromApiLead } from './types';
 import * as i18n from './translations';
 
@@ -21,6 +22,9 @@ const POLL_INTERVAL_MS = 2_000;
 const MAX_POLLS = 30;
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const isPermissionDenied = (error: unknown): boolean =>
+  (error as { body?: { statusCode?: number } })?.body?.statusCode === 403;
 
 const FETCH_LEADS_PARAMS = {
   params: {
@@ -45,6 +49,15 @@ export const useHuntingLeads = (connectorId: string, isEnabled: boolean = true) 
   const { telemetry } = useKibana().services;
   const abortCtrl = useRef(new AbortController());
   const [hasGenerated, setHasGenerated] = useState(false);
+  const [readPermissionError, setReadPermissionError] = useState(false);
+  const [writePermissionError, setWritePermissionError] = useState(false);
+
+  const { data: privileges } = useLeadGenerationPrivileges(isEnabled);
+
+  const proactiveReadPermissionError =
+    isEnabled && privileges != null && !privileges.has_read_permissions;
+  const proactiveWritePermissionError =
+    isEnabled && privileges != null && !privileges.has_write_permissions;
 
   useEffect(() => {
     return () => {
@@ -60,7 +73,13 @@ export const useHuntingLeads = (connectorId: string, isEnabled: boolean = true) 
     queryKey: [HUNTING_LEADS_QUERY_KEY],
     queryFn: ({ signal }) => fetchLeads({ signal, ...FETCH_LEADS_PARAMS }),
     enabled: isEnabled,
-    onError: (error: Error) => addError(error, { title: i18n.FETCH_LEADS_ERROR }),
+    onError: (error: Error) => {
+      if (isPermissionDenied(error)) {
+        setReadPermissionError(true);
+      } else {
+        addError(error, { title: i18n.FETCH_LEADS_ERROR });
+      }
+    },
   });
 
   const pollForCompletion = useCallback(
@@ -78,8 +97,21 @@ export const useHuntingLeads = (connectorId: string, isEnabled: boolean = true) 
 
           const result = await fetchLeads({ ...FETCH_LEADS_PARAMS, signal });
           queryClient.setQueryData([HUNTING_LEADS_QUERY_KEY], result);
+          queryClient.setQueryData([LEAD_SCHEDULE_QUERY_KEY], status);
           return 'success';
         }
+      }
+
+      // Poll timed out waiting for the execution uuid to be persisted.
+      // Fetch whatever leads are available so the cache is populated before
+      // isGenerating flips to false, preventing a spurious empty-state flash.
+      if (!signal.aborted) {
+        const [finalResult, finalStatus] = await Promise.all([
+          fetchLeads({ ...FETCH_LEADS_PARAMS, signal }),
+          fetchLeadGenerationStatus({ signal }),
+        ]);
+        queryClient.setQueryData([HUNTING_LEADS_QUERY_KEY], finalResult);
+        queryClient.setQueryData([LEAD_SCHEDULE_QUERY_KEY], finalStatus);
       }
       return 'timeout';
     },
@@ -104,7 +136,11 @@ export const useHuntingLeads = (connectorId: string, isEnabled: boolean = true) 
       }
     },
     onError: (error: Error) => {
-      addError(error, { title: i18n.GENERATE_ERROR });
+      if (isPermissionDenied(error)) {
+        setWritePermissionError(true);
+      } else {
+        addError(error, { title: i18n.GENERATE_ERROR });
+      }
     },
   });
 
@@ -112,7 +148,13 @@ export const useHuntingLeads = (connectorId: string, isEnabled: boolean = true) 
     queryKey: [LEAD_SCHEDULE_QUERY_KEY],
     queryFn: ({ signal }) => fetchLeadGenerationStatus({ signal }),
     enabled: isEnabled,
-    onError: (error: Error) => addError(error, { title: i18n.FETCH_STATUS_ERROR }),
+    onError: (error: Error) => {
+      if (isPermissionDenied(error)) {
+        setReadPermissionError(true);
+      } else {
+        addError(error, { title: i18n.FETCH_STATUS_ERROR });
+      }
+    },
   });
 
   const { mutate: toggleSchedule } = useMutation({
@@ -135,5 +177,7 @@ export const useHuntingLeads = (connectorId: string, isEnabled: boolean = true) 
     refetch,
     isScheduled: statusData?.isEnabled ?? false,
     toggleSchedule,
+    readPermissionError: proactiveReadPermissionError || readPermissionError,
+    writePermissionError: proactiveWritePermissionError || writePermissionError,
   };
 };

@@ -22,6 +22,9 @@ import { List } from '../model/list_schemas.gen';
 
 export const DeleteListRequestQuery = lazySchema(() =>
   z.object({
+    /**
+     * Value list identifier to delete, including all of its list items.
+     */
     id: ListId,
     /**
      * Determines whether exception items referencing this value list should be deleted.

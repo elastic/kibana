@@ -15,7 +15,14 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     ...functionalConfig.getAll(),
     kbnTestServer: {
       ...functionalConfig.get('kbnTestServer'),
-      serverArgs: [...functionalConfig.get('kbnTestServer.serverArgs')],
+      serverArgs: [
+        ...functionalConfig.get('kbnTestServer.serverArgs'),
+        `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+          'disable:entityAnalyticsEntityStoreV2',
+          'disable:entityAnalyticsWatchlistEnabled',
+        ])}`,
+        '--uiSettings.overrides.securitySolution:entityStoreEnableV2=false',
+      ],
     },
     testFiles: [require.resolve('..')],
     junit: {

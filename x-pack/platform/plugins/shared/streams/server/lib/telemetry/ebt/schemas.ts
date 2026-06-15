@@ -15,6 +15,9 @@ import type {
   StreamsProcessingPipelineSuggestedProps,
   StreamsFeaturesIdentifiedProps,
   StreamsAgentBuilderKnowledgeIndicatorCreatedProps,
+  StreamsAgentToolKiIdentificationStartedProps,
+  StreamsAgentToolEventCreateProps,
+  StreamsAgentToolEventStatusUpdateProps,
 } from './types';
 
 const streamsEndpointLatencySchema: RootSchema<StreamEndpointLatencyProps> = {
@@ -394,6 +397,86 @@ const streamsAgentBuilderKnowledgeIndicatorCreatedSchema: RootSchema<StreamsAgen
     },
   };
 
+const streamsAgentToolKiIdentificationStartedSchema: RootSchema<StreamsAgentToolKiIdentificationStartedProps> =
+  {
+    success: {
+      type: 'boolean',
+      _meta: {
+        description: 'Whether starting KI identification succeeded',
+      },
+    },
+    stream_name: {
+      type: 'keyword',
+      _meta: {
+        description: 'The name of the Stream',
+      },
+    },
+    error_message: {
+      type: 'text',
+      _meta: {
+        description: 'Error message when KI identification start fails',
+        optional: true,
+      },
+    },
+  };
+
+const streamsAgentToolEventCreateSchema: RootSchema<StreamsAgentToolEventCreateProps> = {
+  success: {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether the event creation succeeded',
+    },
+  },
+  stream_names: {
+    type: 'array',
+    items: {
+      type: 'keyword',
+      _meta: {
+        description: 'A stream name',
+      },
+    },
+    _meta: {
+      description: 'The names of the Streams associated with the event',
+    },
+  },
+  error_message: {
+    type: 'text',
+    _meta: {
+      description: 'Error message when event creation fails',
+      optional: true,
+    },
+  },
+};
+
+const streamsAgentToolEventStatusUpdateSchema: RootSchema<StreamsAgentToolEventStatusUpdateProps> =
+  {
+    success: {
+      type: 'boolean',
+      _meta: {
+        description: 'Whether the event status update succeeded',
+      },
+    },
+    event_id: {
+      type: 'keyword',
+      _meta: {
+        description: 'The identifier of the updated significant event',
+      },
+    },
+    status: {
+      type: 'keyword',
+      _meta: {
+        description: 'The status value set on the significant event',
+      },
+    },
+    error_message: {
+      type: 'text',
+      _meta: {
+        description: 'Error message when event status update fails',
+        optional: true,
+      },
+    },
+  };
+
 export {
   streamsEndpointLatencySchema,
   streamsStateErrorSchema,
@@ -403,4 +486,7 @@ export {
   streamsProcessingPipelineSuggestedSchema,
   streamsFeaturesIdentifiedSchema,
   streamsAgentBuilderKnowledgeIndicatorCreatedSchema,
+  streamsAgentToolKiIdentificationStartedSchema,
+  streamsAgentToolEventCreateSchema,
+  streamsAgentToolEventStatusUpdateSchema,
 };

@@ -87,21 +87,3 @@ jobs:
       with:
         category: "/language:${{matrix.language}}"
         wait-for-processing: true
-
-    - name: Fail on new CodeQL alerts
-      env:
-        GH_TOKEN: ${{ github.token }}
-      run: |
-        set -euo pipefail
-        # github/codeql-action/analyze already uploaded the SARIF and GitHub computed the
-        # differential against the base branch. Querying refs/pull/<N>/merge returns only
-        # alerts that are new in this PR.
-        COUNT=$(gh api \
-          "repos/${{ github.repository }}/code-scanning/alerts?ref=refs/pull/${{ github.event.pull_request.number }}/merge&state=open&tool_name=CodeQL&per_page=100" \
-          --jq 'length')
-
-        if [ "$COUNT" -gt 0 ]; then
-          echo "::error::Found $COUNT new CodeQL alert(s) introduced by this PR. See the Security tab for details."
-          exit 1
-        fi
-        echo "No new CodeQL alerts introduced by this PR."

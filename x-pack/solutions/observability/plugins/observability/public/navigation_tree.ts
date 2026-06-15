@@ -310,10 +310,6 @@ function createNavTree({
                 link: 'ml:indexDataVisualizer',
                 sideNavStatus: 'hidden',
               },
-              {
-                link: 'ml:indexDataVisualizerPage',
-                sideNavStatus: 'hidden',
-              },
             ],
           },
           {
@@ -432,6 +428,10 @@ function createNavTree({
                   defaultMessage: 'Get started',
                 }),
               },
+              {
+                link: 'onboarding' as const,
+                sideNavStatus: 'hidden',
+              },
             ],
           }
         : {
@@ -440,6 +440,12 @@ function createNavTree({
             }),
             link: 'observabilityOnboarding' as const,
             icon: 'plusInCircle',
+            children: [
+              {
+                link: 'onboarding' as const,
+                sideNavStatus: 'hidden',
+              },
+            ],
           },
       {
         id: 'devTools',
@@ -562,7 +568,8 @@ function createNavTree({
                   children: [
                     { link: 'management:rules' as const },
                     { link: 'management:episodes' as const },
-                    { link: 'management:notification_policies' as const },
+                    { link: 'management:action_policies' as const },
+                    { link: 'management:execution_history' as const },
                   ],
                 },
               ]

@@ -35,6 +35,7 @@ import type {
   ToolStateManager,
   WritableSkillsStore,
 } from '@kbn/agent-builder-server/runner';
+import { createTodoStateManager } from '@kbn/agent-builder-server/runner';
 import type { AttachmentsService } from '@kbn/agent-builder-server/runner/attachments_service';
 import type { IFileStore } from '@kbn/agent-builder-server/runner/filestore';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools/handler';
@@ -132,6 +133,7 @@ export const createPromptManagerMock = (): PromptManagerMock => {
     get: jest.fn(),
     dump: jest.fn(),
     getConfirmationStatus: jest.fn(),
+    getAuthorizationStatus: jest.fn(),
     clear: jest.fn(),
     forTool: jest.fn(),
   };
@@ -153,7 +155,7 @@ export const createToolManagerMock = (): ToolManagerMock => {
     list: jest.fn(),
     recordToolUse: jest.fn(),
     getToolIdMapping: jest.fn(),
-    getToolOrigin: jest.fn(),
+    getToolMeta: jest.fn(),
     getDynamicToolIds: jest.fn(),
     getSummarizer: jest.fn(),
   };
@@ -234,7 +236,9 @@ export const createFileSystemStoreMock = (): FileSystemStoreMock => {
 export const createToolPromptManagerMock = (): ToolPromptManagerMock => {
   return {
     checkConfirmationStatus: jest.fn(),
+    checkAuthorizationStatus: jest.fn(),
     askForConfirmation: jest.fn(),
+    askForAuthorization: jest.fn(),
   };
 };
 
@@ -297,6 +301,7 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
     resultStore: createToolResultStoreMock(),
     skillsStore: createSkillsStoreMock(),
     attachmentStateManager: createAttachmentStateManagerMock(),
+    todoStateManager: createTodoStateManager(),
     events: {
       emit: jest.fn(),
     },
@@ -312,6 +317,7 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
       filestore: false,
       skills: false,
       subagents: false,
+      todos: false,
     },
     subAgentExecutor: {
       executeSubAgent: jest.fn(),
@@ -337,6 +343,11 @@ export interface ToolHandlerContextMock extends ToolHandlerContext {
 
 export const createToolHandlerContextMock = (): ToolHandlerContextMock => {
   return {
+    callContext: {
+      toolId: 'toolId',
+      toolCallId: 'toolCallId',
+      callSource: 'agent',
+    },
     request: httpServerMock.createKibanaRequest(),
     spaceId: 'default',
     esClient: elasticsearchServiceMock.createScopedClusterClient(),
@@ -390,6 +401,7 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
     resultStore: createToolResultStoreMock(),
     skillsStore: createSkillsStoreMock(),
     attachmentStateManager: createAttachmentStateManagerMock(),
+    todoStateManager: createTodoStateManager(),
     attachmentsService: createAttachmentsServiceStartMock(),
     promptManager: createPromptManagerMock(),
     stateManager: createStateManagerMock(),

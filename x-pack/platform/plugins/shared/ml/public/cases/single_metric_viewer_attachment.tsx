@@ -6,7 +6,7 @@
  */
 
 import { EuiDescriptionList } from '@elastic/eui';
-import type { UnifiedValueAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
+import type { UnifiedValueAttachmentViewProps } from '@kbn/cases-plugin/public';
 import moment from 'moment';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
@@ -15,8 +15,12 @@ import { transformTimeRangeOut } from '@kbn/presentation-publishing';
 import deepEqual from 'fast-deep-equal';
 import { memoize } from 'lodash';
 import React from 'react';
-import type { SingleMetricViewerEmbeddableState } from '../embeddables/types';
+import type { SingleMetricViewerEmbeddableState } from '@kbn/ml-server-schemas/embeddables/single_metric_viewer';
+import type { SingleMetricViewerAttachmentData } from '../../common/util/cases_utils';
 import type { SingleMetricViewerSharedComponent } from '../shared_components/single_metric_viewer';
+
+type SingleMetricViewerViewProps =
+  UnifiedValueAttachmentViewProps<SingleMetricViewerAttachmentData>;
 
 export const initComponent = memoize(
   (
@@ -24,9 +28,9 @@ export const initComponent = memoize(
     SingleMetricViewerComponent: SingleMetricViewerSharedComponent
   ) => {
     return React.memo(
-      (props: UnifiedValueAttachmentViewProps) => {
+      (props: SingleMetricViewerViewProps) => {
         const { caseData } = props;
-        const attachmentState = props.data.state as Record<string, unknown>;
+        const attachmentState = props.data.state;
 
         const inputProps = transformTimeRangeOut(
           attachmentState as unknown as SingleMetricViewerEmbeddableState
@@ -53,9 +57,9 @@ export const initComponent = memoize(
                 defaultMessage="Time range"
               />
             ),
-            description: `${dataFormatter.convert(
+            description: `${dataFormatter.convertToText(
               inputProps.time_range!.from
-            )} - ${dataFormatter.convert(inputProps.time_range!.to)}`,
+            )} - ${dataFormatter.convertToText(inputProps.time_range!.to)}`,
           },
         ];
 

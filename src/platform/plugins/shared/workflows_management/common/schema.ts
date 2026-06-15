@@ -17,6 +17,7 @@ import type {
 import {
   builtInStepDefinitions,
   DEPRECATED_STEP_METADATA,
+  generateLightweightYamlSchema,
   generateYamlSchemaFromConnectors,
   getElasticsearchConnectors,
   getKibanaConnectors,
@@ -113,11 +114,13 @@ function getRegisteredStepDefinitions(): BaseConnectorContract[] {
       };
 
       if (stepSchemas.isPublicStepDefinition(stepDefinition)) {
-        // Only public step definitions have documentation and examples
+        // Only public step definitions have documentation and examples.
+        // Match the convention used by every other connector source: summary
+        // is the short label, description is the longer behavioral explanation.
         return {
           ...definition,
-          description: stepDefinition.label, // Short title-like text
-          summary: stepDefinition.description ?? null, // Explanation of the step behavior
+          summary: stepDefinition.label,
+          description: stepDefinition.description ?? null,
           documentation: stepDefinition.documentation?.url,
           examples: stepDefinition.documentation?.examples
             ? { snippet: stepDefinition.documentation?.examples.join('\n') }
@@ -160,6 +163,7 @@ function convertDynamicConnectorsToContractsInternal(
 
           connectorContracts.push({
             actionTypeId: connectorType.actionTypeId,
+            displayName: connectorType.displayName,
             type: subActionType,
             summary: subAction.displayName,
             paramsSchema,
@@ -177,6 +181,7 @@ function convertDynamicConnectorsToContractsInternal(
 
         connectorContracts.push({
           actionTypeId: connectorType.actionTypeId,
+          displayName: connectorType.displayName,
           type: connectorTypeName,
           summary: connectorType.displayName,
           paramsSchema,
@@ -191,6 +196,7 @@ function convertDynamicConnectorsToContractsInternal(
       // Return a basic connector contract as fallback
       connectorContracts.push({
         actionTypeId: connectorType.actionTypeId,
+        displayName: connectorType.displayName,
         type: connectorType.actionTypeId,
         summary: connectorType.displayName,
         paramsSchema: z.any(),
@@ -207,6 +213,10 @@ function convertDynamicConnectorsToContractsInternal(
 // Export types for schema results
 export type WorkflowZodSchemaType = z.infer<ReturnType<typeof getWorkflowZodSchema>>;
 export type WorkflowZodSchemaLooseType = z.infer<ReturnType<typeof getWorkflowZodSchemaLoose>>;
+
+export interface WorkflowZodSchemaOptions {
+  lightweight?: boolean;
+}
 
 // NOTE: The former `WORKFLOW_ZOD_SCHEMA` / `WORKFLOW_ZOD_SCHEMA_LOOSE`
 // module-level constants were removed in favour of `getWorkflowZodSchema()` /
@@ -401,8 +411,13 @@ export function getAllConnectorsWithDynamic(
 
 export const getWorkflowZodSchema = (
   dynamicConnectorTypes: Record<string, ConnectorTypeInfo>,
-  registeredTriggerIds: string[] = []
+  registeredTriggerIds: string[] = [],
+  options: WorkflowZodSchemaOptions = {}
 ): z.ZodType => {
+  if (options.lightweight) {
+    return generateLightweightYamlSchema(registeredTriggerIds);
+  }
+
   const allConnectors = getAllConnectorsWithDynamicInternal(dynamicConnectorTypes);
   return generateYamlSchemaFromConnectors(allConnectors, registeredTriggerIds);
 };

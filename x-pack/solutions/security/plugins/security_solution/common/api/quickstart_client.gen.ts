@@ -20,18 +20,32 @@ import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { replaceParams } from '@kbn/openapi-common/shared';
 import { catchAxiosErrorFormatAndThrow } from '@kbn/securitysolution-utils';
 
-import type { SetAlertAssigneesRequestBodyInput } from './detection_engine/alert_assignees/set_alert_assignees_route.gen';
+import type {
+  SetAlertAssigneesRequestBodyInput,
+  SetAlertAssigneesResponse,
+} from './detection_engine/alert_assignees/set_alert_assignees_route.gen';
 import type {
   SetAlertTagsRequestBodyInput,
   SetAlertTagsResponse,
 } from './detection_engine/alert_tags/set_alert_tags/set_alert_tags.gen';
+import type {
+  SearchAttacksRequestBodyInput,
+  SearchAttacksResponse,
+} from './detection_engine/attacks/search/search_route.gen';
 import type { CreateAlertsIndexResponse } from './detection_engine/index_management/create_index/create_index.gen';
 import type { DeleteAlertsIndexResponse } from './detection_engine/index_management/delete_index/delete_index.gen';
 import type { ReadAlertsIndexResponse } from './detection_engine/index_management/read_index/read_index.gen';
 import type { ReadPrivilegesResponse } from './detection_engine/index_management/read_privileges/read_privileges.gen';
-import type { BootstrapPrebuiltRulesResponse } from './detection_engine/prebuilt_rules/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules.gen';
 import type { InstallPrebuiltRulesAndTimelinesResponse } from './detection_engine/prebuilt_rules/install_prebuilt_rules_and_timelines/install_prebuilt_rules_and_timelines_route.gen';
 import type { ReadPrebuiltRulesAndTimelinesStatusResponse } from './detection_engine/prebuilt_rules/read_prebuilt_rules_and_timelines_status/read_prebuilt_rules_and_timelines_status_route.gen';
+import type {
+  ReviewRuleInstallationRequestBodyInput,
+  ReviewRuleInstallationResponse,
+} from './detection_engine/prebuilt_rules/review_rule_installation/review_rule_installation_route.gen';
+import type {
+  ReviewRuleUpgradeRequestBodyInput,
+  ReviewRuleUpgradeResponse,
+} from './detection_engine/prebuilt_rules/review_rule_upgrade/review_rule_upgrade_route.gen';
 import type {
   PerformRulesBulkActionRequestQueryInput,
   PerformRulesBulkActionRequestBodyInput,
@@ -70,6 +84,15 @@ import type {
   ImportRulesResponse,
 } from './detection_engine/rule_management/import_rules/import_rules_route.gen';
 import type { ReadTagsResponse } from './detection_engine/rule_management/read_tags/read_tags_route.gen';
+import type {
+  RuleChangesHistoryRequestQueryInput,
+  RuleChangesHistoryRequestParamsInput,
+  RuleChangesHistoryResponse,
+} from './detection_engine/rule_management/rule_history/rule_history_route.gen';
+import type {
+  SearchRulesRequestBodyInput,
+  SearchRulesResponse,
+} from './detection_engine/rule_management/search_rules/search_rules_route.gen';
 import type {
   ReadRuleExecutionResultsRequestParamsInput,
   ReadRuleExecutionResultsRequestBodyInput,
@@ -339,7 +362,10 @@ import type {
 import type { DisableRiskEngineResponse } from './entity_analytics/risk_engine/engine_disable_route.gen';
 import type { EnableRiskEngineResponse } from './entity_analytics/risk_engine/engine_enable_route.gen';
 import type { InitRiskEngineResponse } from './entity_analytics/risk_engine/engine_init_route.gen';
-import type { ScheduleRiskEngineNowResponse } from './entity_analytics/risk_engine/engine_schedule_now_route.gen';
+import type {
+  ScheduleRiskEngineNowRequestBodyInput,
+  ScheduleRiskEngineNowResponse,
+} from './entity_analytics/risk_engine/engine_schedule_now_route.gen';
 import type { ReadRiskEngineSettingsResponse } from './entity_analytics/risk_engine/engine_settings_route.gen';
 import type { GetRiskEngineStatusResponse } from './entity_analytics/risk_engine/engine_status_route.gen';
 import type {
@@ -516,6 +542,8 @@ import type {
   CreateRuleMigrationResponse,
   CreateRuleMigrationRulesRequestParamsInput,
   CreateRuleMigrationRulesRequestBodyInput,
+  CreateSentinelRuleMigrationRulesRequestParamsInput,
+  CreateSentinelRuleMigrationRulesRequestBodyInput,
   DeleteRuleMigrationRequestParamsInput,
   GetAllStatsRuleMigrationResponse,
   GetRuleMigrationRequestParamsInput,
@@ -575,13 +603,13 @@ export class Client {
     this.log = options.log;
   }
   /**
-    * Migrations favor data integrity over shard size. Consequently, unused or orphaned indices are artifacts of
-the migration process. A successful migration will result in both the old and new indices being present.
-As such, the old, orphaned index can (and likely should) be deleted.
+    * **DEPRECATED.** Cleanup API for old migration artifacts. Do not add new call sites.
+**WARNING:** This schedules deletions; ensure no production reads still point at the source index.
 
-While you can delete these indices manually,
-the endpoint accomplishes this task by applying a deletion policy to the relevant index, causing it to be deleted
-after 30 days. It also deletes other artifacts specific to the migration implementation.
+Migrations favor data integrity over shard size. Consequently, unused or orphaned indices are artifacts of
+the migration process. A successful migration can leave both the old and new indices present, so the old
+index may be deleted. While you can delete these indices manually, the endpoint applies a deletion policy
+to the relevant index, causing it to be deleted after 30 days, and removes other migration-specific artifacts.
 
     */
   async alertsMigrationCleanup(props: AlertsMigrationCleanupProps) {
@@ -645,21 +673,6 @@ is added to its existing source labels instead.
         },
         method: 'POST',
         body: props.body,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  /**
-   * Ensures that the packages needed for prebuilt detection rules to work are installed and up to date
-   */
-  async bootstrapPrebuiltRules() {
-    this.log.info(`${new Date().toISOString()} Calling API BootstrapPrebuiltRules`);
-    return this.kbnClient
-      .request<BootstrapPrebuiltRulesResponse>({
-        path: '/internal/detection_engine/prebuilt_rules/_bootstrap',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
-        },
-        method: 'POST',
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -784,8 +797,12 @@ rules and alerts without calling this API.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-    * Initiate a migration of detection alerts.
-Migrations are initiated per index. While the process is neither destructive nor interferes with existing data, it may be resource-intensive. As such, it is recommended that you plan your migrations accordingly.
+    * **DEPRECATED.** Legacy API for on-demand reindexing of old `.siem-signals-*` alert indices. Do not build new
+integrations; upgrade the Elastic Stack and rely on product-managed data lifecycle instead.
+**WARNING:** Migrations can be resource intensive and should be planned during a maintenance window.
+
+Initiate a migration of detection alerts. Migrations are initiated per index. The process is not destructive
+and should not remove existing data, but it can consume significant cluster resources. Plan capacity accordingly.
 
     */
   async createAlertsMigration(props: CreateAlertsMigrationProps) {
@@ -1019,6 +1036,25 @@ For detailed information on Kibana actions and alerting, and additional API call
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+   * Parses Microsoft Sentinel ARM template JSON export and adds rules to an existing migration
+   */
+  async createSentinelRuleMigrationRules(props: CreateSentinelRuleMigrationRulesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API CreateSentinelRuleMigrationRules`);
+    return this.kbnClient
+      .request({
+        path: replaceParams(
+          '/internal/siem_migrations/rules/{migration_id}/sentinel/rules',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
    * Create a new Timeline or Timeline template.
    */
   async createTimelines(props: CreateTimelinesProps) {
@@ -1085,6 +1121,12 @@ For detailed information on Kibana actions and alerting, and additional API call
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+    * Permanently deletes the Elastic Security alerts backing index in the current space, including the alerts
+stored in it. Use with caution; prefer lifecycle policies or the UI when available.
+Call `GET /api/detection_engine/index` first to confirm the index that will be removed.
+
+    */
   async deleteAlertsIndex() {
     this.log.info(`${new Date().toISOString()} Calling API DeleteAlertsIndex`);
     return this.kbnClient
@@ -1668,9 +1710,12 @@ The entity will be immediately deleted from the latest index.  It will remain av
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-    * Finalize successful migrations of detection alerts. This replaces the original index's alias with the successfully migrated index's alias.
-The endpoint is idempotent; therefore, it can safely be used to poll a given migration and, upon completion,
-finalize it.
+    * **DEPRECATED.** Completes a legacy alert index migration. Do not automate against this in new code.
+**WARNING:** Finalizing swaps read aliases; confirm the migration has finished successfully before calling.
+
+Finalize successful migrations of detection alerts. This replaces the original index's alias with the
+successfully migrated index's alias. The endpoint is idempotent, so you can poll until a migration
+finishes and then call this operation once.
 
     */
   async finalizeAlertsMigration(props: FinalizeAlertsMigrationProps) {
@@ -2849,6 +2894,12 @@ Requires the **Timeline and Notes** write privilege (`notes_write`).
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+    * Returns the backing Elasticsearch index for Elastic Security detection alerts in the current space, and
+whether its mapping is outdated. Use this to verify that an alert index is provisioned before creating
+or running rules that write alerts to it.
+
+    */
   async readAlertsIndex() {
     this.log.info(`${new Date().toISOString()} Calling API ReadAlertsIndex`);
     return this.kbnClient
@@ -2862,8 +2913,14 @@ Requires the **Timeline and Notes** write privilege (`notes_write`).
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Retrieve indices that contain detection alerts of a particular age, along with migration information for each of those indices.
-   */
+    * **DEPRECATED.** This endpoint was used for historical `.siem-signals-*` index migration workflows. Do not use
+for new automations; there is no supported replacement in this public API.
+**WARNING:** Prefer upgrading through supported Elastic stack upgrades rather than ad-hoc index migrations.
+
+Retrieves indices that contain detection alerts of a particular age, along with migration information for
+each of those indices.
+
+    */
   async readAlertsMigrationStatus(props: ReadAlertsMigrationStatusProps) {
     this.log.info(`${new Date().toISOString()} Calling API ReadAlertsMigrationStatus`);
     return this.kbnClient
@@ -3000,6 +3057,38 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Lists prebuilt detection rules that can be installed
+   */
+  async reviewRuleInstallation(props: ReviewRuleInstallationProps) {
+    this.log.info(`${new Date().toISOString()} Calling API ReviewRuleInstallation`);
+    return this.kbnClient
+      .request<ReviewRuleInstallationResponse>({
+        path: '/internal/detection_engine/prebuilt_rules/installation/_review',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Lists currently installed prebuilt detection rules that have newer versions available.
+   */
+  async reviewRuleUpgrade(props: ReviewRuleUpgradeProps) {
+    this.log.info(`${new Date().toISOString()} Calling API ReviewRuleUpgrade`);
+    return this.kbnClient
+      .request<ReviewRuleUpgradeResponse>({
+        path: '/internal/detection_engine/prebuilt_rules/upgrade/_review',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   async riskEngineGetPrivileges() {
     this.log.info(`${new Date().toISOString()} Calling API RiskEngineGetPrivileges`);
     return this.kbnClient
@@ -3009,6 +3098,26 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+    * Retrieve a paginated list of historical revisions for a single detection rule.
+Each item contains the rule snapshot at that point in time and the snapshot of
+the immediately preceding revision in `old_values`.
+
+    */
+  async ruleChangesHistory(props: RuleChangesHistoryProps) {
+    this.log.info(`${new Date().toISOString()} Calling API RuleChangesHistory`);
+    return this.kbnClient
+      .request<RuleChangesHistoryResponse>({
+        path: replaceParams('/internal/detection_engine/rules/{ruleId}/history', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+
+        query: props.query,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -3031,6 +3140,12 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+    * Simulates a detection rule using the same rule type and query logic as a persisted rule, over a short
+time window, without persisting a rule or writing alerts. Use the response to validate queries, see sample
+matching documents, and inspect execution logs. Pair `invocationCount` and `timeframeEnd` to cap run time.
+
+    */
   async rulePreview(props: RulePreviewProps) {
     this.log.info(`${new Date().toISOString()} Calling API RulePreview`);
     return this.kbnClient
@@ -3064,7 +3179,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
     this.log.info(`${new Date().toISOString()} Calling API RunScriptAction`);
     return this.kbnClient
       .request<RunScriptActionResponse>({
-        path: '/api/endpoint/action/runscript',
+        path: '/api/endpoint/action/run_script',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
@@ -3091,7 +3206,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
   /**
    * Schedule the risk scoring engine to run as soon as possible. You can use this to recalculate entity risk scores after updating their asset criticality.
    */
-  async scheduleRiskEngineNow() {
+  async scheduleRiskEngineNow(props: ScheduleRiskEngineNowProps) {
     this.log.info(`${new Date().toISOString()} Calling API ScheduleRiskEngineNow`);
     return this.kbnClient
       .request<ScheduleRiskEngineNowResponse>({
@@ -3100,6 +3215,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'POST',
+        body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -3119,6 +3235,22 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Find and/or aggregate attack discovery alerts that match the given query. Searches scheduled and ad hoc attack discovery alert indices for the active space only.
+   */
+  async searchAttacks(props: SearchAttacksProps) {
+    this.log.info(`${new Date().toISOString()} Calling API SearchAttacks`);
+    return this.kbnClient
+      .request<SearchAttacksResponse>({
+        path: '/api/detection_engine/attacks/search',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   async searchPrivilegesIndices(props: SearchPrivilegesIndicesProps) {
     this.log.info(`${new Date().toISOString()} Calling API SearchPrivilegesIndices`);
     return this.kbnClient
@@ -3130,6 +3262,22 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         method: 'GET',
 
         query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Retrieve a paginated list of detection rules with KQL filter, facet counts, and search_after pagination.
+   */
+  async searchRules(props: SearchRulesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API SearchRules`);
+    return this.kbnClient
+      .request<SearchRulesResponse>({
+        path: '/internal/detection_engine/rules/_search',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -3158,7 +3306,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
   async setAlertAssignees(props: SetAlertAssigneesProps) {
     this.log.info(`${new Date().toISOString()} Calling API SetAlertAssignees`);
     return this.kbnClient
-      .request({
+      .request<SetAlertAssigneesResponse>({
         path: '/api/detection_engine/signals/assignees',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -3185,7 +3333,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-    * And tags to detection alerts, and remove them from alerts.
+    * Add tags to detection alerts, and remove them from alerts, by alert IDs or a query, in a single request.
 > info
 > You cannot add and remove the same alert tag in the same request.
 
@@ -3753,6 +3901,10 @@ export interface CreateRuleMigrationRulesProps {
   params: CreateRuleMigrationRulesRequestParamsInput;
   body: CreateRuleMigrationRulesRequestBodyInput;
 }
+export interface CreateSentinelRuleMigrationRulesProps {
+  params: CreateSentinelRuleMigrationRulesRequestParamsInput;
+  body: CreateSentinelRuleMigrationRulesRequestBodyInput;
+}
 export interface CreateTimelinesProps {
   body: CreateTimelinesRequestBodyInput;
 }
@@ -4038,6 +4190,16 @@ export interface ReadRuleExecutionResultsProps {
 export interface ResolveTimelineProps {
   query: ResolveTimelineRequestQueryInput;
 }
+export interface ReviewRuleInstallationProps {
+  body: ReviewRuleInstallationRequestBodyInput;
+}
+export interface ReviewRuleUpgradeProps {
+  body: ReviewRuleUpgradeRequestBodyInput;
+}
+export interface RuleChangesHistoryProps {
+  query: RuleChangesHistoryRequestQueryInput;
+  params: RuleChangesHistoryRequestParamsInput;
+}
 export interface RuleMigrationEnhanceRuleProps {
   params: RuleMigrationEnhanceRuleRequestParamsInput;
   body: RuleMigrationEnhanceRuleRequestBodyInput;
@@ -4049,11 +4211,20 @@ export interface RulePreviewProps {
 export interface RunScriptActionProps {
   body: RunScriptActionRequestBodyInput;
 }
+export interface ScheduleRiskEngineNowProps {
+  body: ScheduleRiskEngineNowRequestBodyInput;
+}
 export interface SearchAlertsProps {
   body: SearchAlertsRequestBodyInput;
 }
+export interface SearchAttacksProps {
+  body: SearchAttacksRequestBodyInput;
+}
 export interface SearchPrivilegesIndicesProps {
   query: SearchPrivilegesIndicesRequestQueryInput;
+}
+export interface SearchRulesProps {
+  body: SearchRulesRequestBodyInput;
 }
 export interface SearchUnifiedAlertsProps {
   body: SearchUnifiedAlertsRequestBodyInput;

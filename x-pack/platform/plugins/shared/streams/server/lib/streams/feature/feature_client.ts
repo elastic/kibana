@@ -7,11 +7,12 @@
 
 import { dateRangeQuery, termQuery, termsQuery } from '@kbn/es-query';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { esql, type ComposerQuery, type ComposerQueryTagHole } from '@elastic/esql';
+import type { ESQLAstExpression } from '@elastic/esql/types';
 import type { IStorageClient } from '@kbn/storage-adapter';
 import type { Logger } from '@kbn/core/server';
 import type { BaseFeature, Feature } from '@kbn/streams-schema';
 import { isDuplicateFeature, isComputedFeature } from '@kbn/streams-schema';
-import { isNotFoundError } from '@kbn/es-errors';
 import { isConditionComplete } from '@kbn/streamlang';
 import {
   STREAM_NAME,
@@ -38,7 +39,14 @@ import {
 import type { FeatureStorageSettings } from './storage_settings';
 import type { StoredFeature } from './stored_feature';
 import { StatusError } from '../errors/status_error';
-import { parseError } from '../errors/parse_error';
+import { bulkWithInferenceFallback } from '../errors/bulk_with_inference_fallback';
+import { searchWithKeywordFallback } from '../errors/search_with_keyword_fallback';
+import {
+  normalizeColumn,
+  getColumnIndex,
+  getSourceColumnIndex,
+  mapSourceRows,
+} from '../helpers/esql';
 import type { SearchMode } from '../../../../common/queries';
 import {
   DEFAULT_SIG_EVENTS_TUNING_CONFIG,
@@ -96,6 +104,53 @@ function buildKeywordQuery(
       minimum_should_match: 1,
     },
   };
+}
+
+type WhereCondition = ESQLAstExpression & ComposerQueryTagHole;
+
+// `EVAL CASE` chain mirrors the DSL `wildcard(boost: N)` ranking so result order
+// is identical between the keyword and ES|QL search paths.
+function appendKeywordEsqlPipeline(searchTerm: string, size: number): ComposerQuery {
+  const lowerWildcard = esql.str(`*${escapeWildcard(searchTerm.toLowerCase())}*`);
+  const tagTokens = searchTerm
+    .split(/\s+/)
+    .filter((t) => t.length > 3)
+    .map((t) => esql.str(t.toLowerCase()));
+
+  const titleCol = normalizeColumn(FEATURE_TITLE);
+  const descCol = normalizeColumn(FEATURE_DESCRIPTION);
+  const typeCol = normalizeColumn(FEATURE_TYPE);
+  const subtypeCol = normalizeColumn(FEATURE_SUBTYPE);
+  const tagsCol = normalizeColumn(FEATURE_TAGS);
+
+  let tagOrExpr: WhereCondition | undefined;
+  for (const tokenLit of tagTokens) {
+    const cond = esql.exp`MV_CONTAINS(TO_LOWER(${tagsCol}), ${tokenLit})`;
+    tagOrExpr = tagOrExpr ? esql.exp`${tagOrExpr} OR ${cond}` : cond;
+  }
+
+  let whereExpr: WhereCondition = esql.exp`TO_LOWER(${titleCol}) LIKE ${lowerWildcard}
+    OR TO_LOWER(${descCol}) LIKE ${lowerWildcard}
+    OR TO_LOWER(${typeCol}) LIKE ${lowerWildcard}
+    OR TO_LOWER(${subtypeCol}) LIKE ${lowerWildcard}`;
+  if (tagOrExpr) {
+    whereExpr = esql.exp`${whereExpr} OR ${tagOrExpr}`;
+  }
+
+  const tagHitCase: WhereCondition = tagOrExpr
+    ? esql.exp`CASE(${tagOrExpr}, 1.0, 0.0)`
+    : esql.exp`0.0`;
+
+  return esql`WHERE ${whereExpr}
+    | EVAL _kw_title_hit = CASE(TO_LOWER(${titleCol}) LIKE ${lowerWildcard}, 3.0, 0.0)
+    | EVAL _kw_desc_hit = CASE(TO_LOWER(${descCol}) LIKE ${lowerWildcard}, 2.0, 0.0)
+    | EVAL _kw_type_hit = CASE(TO_LOWER(${typeCol}) LIKE ${lowerWildcard}, 1.0, 0.0)
+    | EVAL _kw_subtype_hit = CASE(TO_LOWER(${subtypeCol}) LIKE ${lowerWildcard}, 1.0, 0.0)
+    | EVAL _kw_tag_hit = ${tagHitCase}
+    | EVAL _kw_score = _kw_title_hit + _kw_desc_hit + _kw_type_hit + _kw_subtype_hit + _kw_tag_hit
+    | SORT _kw_score DESC, _id ASC
+    | KEEP _id, _source
+    | LIMIT ${esql.num(size)}`;
 }
 
 function buildBaseFilters({
@@ -187,7 +242,6 @@ export class FeatureClient {
       storageClient: IStorageClient<FeatureStorageSettings, StoredFeature>;
       logger: Logger;
     },
-    private readonly inferenceAvailable: boolean = false,
     private readonly config: Pick<
       SigEventsTuningConfig,
       'feature_ttl_days' | 'semantic_min_score' | 'rrf_rank_constant'
@@ -202,7 +256,10 @@ export class FeatureClient {
     await this.clients.storageClient.clean();
   }
 
-  async bulk(stream: string, operations: FeatureBulkOperation[]) {
+  async bulk(
+    stream: string,
+    operations: FeatureBulkOperation[]
+  ): Promise<{ applied: number; skipped: number }> {
     validateFeatures(
       operations
         .filter((operation) => 'index' in operation)
@@ -210,23 +267,32 @@ export class FeatureClient {
     );
 
     const resolvedOperations = await this.filterValidOperations(stream, operations);
+    const skipped = operations.length - resolvedOperations.length;
 
-    return await this.clients.storageClient.bulk({
-      operations: resolvedOperations.map((operation) => {
-        if ('index' in operation) {
-          const document = toStorage(stream, operation.index.feature, this.inferenceAvailable);
-          return {
-            index: {
-              document,
-              _id: document[FEATURE_UUID],
-            },
-          };
-        }
+    if (resolvedOperations.length === 0) {
+      return { applied: 0, skipped };
+    }
 
-        return { delete: { _id: operation.delete.id } };
-      }),
-      throwOnFail: true,
-    });
+    await bulkWithInferenceFallback(this.clients.logger, ({ includeEmbedding }) =>
+      this.clients.storageClient.bulk({
+        operations: resolvedOperations.map((operation) => {
+          if ('index' in operation) {
+            const document = toStorage(stream, operation.index.feature, includeEmbedding);
+            return {
+              index: {
+                document,
+                _id: document[FEATURE_UUID],
+              },
+            };
+          }
+
+          return { delete: { _id: operation.delete.id } };
+        }),
+        throwOnFail: true,
+      })
+    );
+
+    return { applied: resolvedOperations.length, skipped };
   }
 
   async getFeatures(
@@ -238,11 +304,12 @@ export class FeatureClient {
       limit?: number;
       includeExcluded?: boolean;
       includeExpired?: boolean;
+      sortBy?: 'confidence' | 'lastSeen';
     } = {}
-  ): Promise<{ hits: Feature[]; total: number }> {
+  ): Promise<{ hits: Feature[] }> {
     const streamNames = Array.isArray(streams) ? streams : [streams];
     if (streamNames.length === 0) {
-      return { hits: [], total: 0 };
+      return { hits: [] };
     }
 
     const filterClauses: QueryDslQueryContainer[] = [
@@ -251,36 +318,61 @@ export class FeatureClient {
       ...buildBaseFilters(options),
     ];
 
-    const featuresResponse = await this.clients.storageClient.search({
-      size: options.limit ?? 10_000,
-      track_total_hits: true,
-      query: {
-        bool: {
-          filter: filterClauses,
-        },
-      },
-      sort: [{ [FEATURE_CONFIDENCE]: { order: 'desc' } }],
+    const sortField = options.sortBy === 'lastSeen' ? FEATURE_LAST_SEEN : FEATURE_CONFIDENCE;
+    const size = options.limit ?? 10_000;
+    const response = await this.clients.storageClient.esql({
+      metadata: ['_id', '_source'],
+      pipeline: esql`SORT ${normalizeColumn(sortField)} DESC | LIMIT ${esql.num(size)}`,
+      filter: { bool: { filter: filterClauses } },
     });
 
-    return {
-      hits: featuresResponse.hits.hits.map((hit) => fromStorage(hit._source)),
-      total: featuresResponse.hits.total.value,
-    };
+    return { hits: mapSourceRows<StoredFeature, Feature>(response, fromStorage) };
   }
 
   async getFeature(stream: string, uuid: string) {
-    const hit = await this.clients.storageClient.get({ id: uuid }).catch((err) => {
-      if (isNotFoundError(err)) {
-        throw new StatusError(`Feature ${uuid} not found`, 404);
-      }
-      throw err;
+    const response = await this.clients.storageClient.esql({
+      metadata: ['_id', '_source'],
+      pipeline: esql`WHERE _id == ${{ uuid }} AND ${normalizeColumn(STREAM_NAME)} == ${{
+        stream,
+      }} | LIMIT 1`,
     });
 
-    const source = hit._source!;
-    if (source[STREAM_NAME] !== stream) {
+    const sourceIdx = getSourceColumnIndex(response);
+    const row = sourceIdx !== -1 ? response.values[0] : undefined;
+    if (!row) {
       throw new StatusError(`Feature ${uuid} not found`, 404);
     }
-    return fromStorage(source);
+    return fromStorage(row[sourceIdx] as StoredFeature);
+  }
+
+  /**
+   * Resolves a list of feature UUIDs to their owning stream by querying storage
+   * directly on `_id` (which is the UUID by construction — see `bulk` above).
+   * UUIDs that do not exist in storage are simply absent from the result; the
+   * caller can compute "not found" as `input.length - result.length` (deduped)
+   * and treat them as idempotent no-ops.
+   */
+  async findFeaturesByUuids(
+    uuids: string[]
+  ): Promise<Array<{ uuid: string; stream_name: string }>> {
+    if (uuids.length === 0) {
+      return [];
+    }
+
+    const idLiterals = uuids.map((id) => esql.str(id));
+    const response = await this.clients.storageClient.esql({
+      metadata: ['_id', '_source'],
+      pipeline: esql`WHERE _id IN (${idLiterals}) | LIMIT ${esql.num(uuids.length)}`,
+    });
+
+    const idIdx = getColumnIndex(response, '_id');
+    const sourceIdx = getSourceColumnIndex(response);
+    if (idIdx === -1 || sourceIdx === -1) return [];
+
+    return response.values.map((row) => ({
+      uuid: row[idIdx] as string,
+      stream_name: (row[sourceIdx] as StoredFeature)[STREAM_NAME] as string,
+    }));
   }
 
   async deleteFeature(stream: string, uuid: string) {
@@ -300,22 +392,17 @@ export class FeatureClient {
     });
   }
 
-  async getExcludedFeatures(stream: string): Promise<{ hits: Feature[]; total: number }> {
-    const featuresResponse = await this.clients.storageClient.search({
-      size: 10_000,
-      track_total_hits: true,
-      query: {
-        bool: {
-          filter: [...termQuery(STREAM_NAME, stream), { exists: { field: FEATURE_EXCLUDED_AT } }],
-        },
-      },
-      sort: [{ [FEATURE_EXCLUDED_AT]: { order: 'desc' } }],
+  async getExcludedFeatures(stream: string): Promise<{ hits: Feature[] }> {
+    const response = await this.clients.storageClient.esql({
+      metadata: ['_id', '_source'],
+      pipeline: esql`WHERE ${normalizeColumn(STREAM_NAME)} == ${{ stream }} AND ${normalizeColumn(
+        FEATURE_EXCLUDED_AT
+      )} IS NOT NULL | SORT ${normalizeColumn(FEATURE_EXCLUDED_AT)} DESC | LIMIT ${esql.num(
+        10_000
+      )}`,
     });
 
-    return {
-      hits: featuresResponse.hits.hits.map((hit) => fromStorage(hit._source)),
-      total: featuresResponse.hits.total.value,
-    };
+    return { hits: mapSourceRows<StoredFeature, Feature>(response, fromStorage) };
   }
 
   async findFeatures(
@@ -327,37 +414,14 @@ export class FeatureClient {
       includeExcluded?: boolean;
       limit?: number;
     }
-  ): Promise<{ hits: Feature[]; total: number }> {
-    const effectiveMode = this.resolveSearchMode(options?.searchMode);
+  ): Promise<{ hits: Feature[] }> {
+    const streamNames = Array.isArray(streams) ? streams : [streams];
 
-    try {
-      return await this.executeFindFeatures(effectiveMode, streams, query, options);
-    } catch (error) {
-      // Only fall back silently when the mode was auto-resolved (no explicit
-      // searchMode from the caller). If the caller explicitly requested a
-      // non-keyword mode, propagate the error so they know their request failed.
-      if (effectiveMode !== 'keyword' && !options?.searchMode) {
-        const { message } = parseError(error);
-        this.clients.logger.warn(
-          `Search mode "${effectiveMode}" failed, falling back to keyword: ${message}`
-        );
-        return await this.executeFindFeatures('keyword', streams, query, options);
-      }
-      throw error;
-    }
-  }
-
-  private resolveSearchMode(searchMode?: SearchMode): SearchMode {
-    if (searchMode) {
-      if (searchMode !== 'keyword' && !this.inferenceAvailable) {
-        this.clients.logger.debug(
-          `Search mode "${searchMode}" requested but inference is unavailable, falling back to keyword`
-        );
-        return 'keyword';
-      }
-      return searchMode;
-    }
-    return this.inferenceAvailable ? 'hybrid' : 'keyword';
+    return searchWithKeywordFallback(
+      this.clients.logger,
+      { searchMode: options?.searchMode, label: 'Feature', streamNames },
+      (mode) => this.executeFindFeatures(mode, streams, query, options)
+    );
   }
 
   private async executeFindFeatures(
@@ -369,10 +433,10 @@ export class FeatureClient {
       includeExpired?: boolean;
       includeExcluded?: boolean;
     } = {}
-  ): Promise<{ hits: Feature[]; total: number }> {
+  ): Promise<{ hits: Feature[] }> {
     const streamNames = Array.isArray(streams) ? streams : [streams];
     if (streamNames.length === 0) {
-      return { hits: [], total: 0 };
+      return { hits: [] };
     }
 
     const filter: QueryDslQueryContainer[] = [
@@ -395,33 +459,43 @@ export class FeatureClient {
     filter: QueryDslQueryContainer[],
     query: string,
     limit?: number
-  ): Promise<{ hits: Feature[]; total: number }> {
-    const response = await this.clients.storageClient.search({
-      size: limit ?? SEARCH_SIZE_LIMIT,
-      track_total_hits: true,
-      query: buildKeywordQuery(query, filter),
+  ): Promise<{ hits: Feature[] }> {
+    const size = limit ?? SEARCH_SIZE_LIMIT;
+    const response = await this.clients.storageClient.esql({
+      metadata: ['_id', '_source'],
+      pipeline: appendKeywordEsqlPipeline(query, size),
+      filter: { bool: { filter } },
     });
 
-    return {
-      hits: response.hits.hits.map((hit) => fromStorage(hit._source)),
-      total: response.hits.total.value,
-    };
+    return { hits: mapSourceRows<StoredFeature, Feature>(response, fromStorage) };
   }
 
+  // Stays on DSL: ES|QL has no equivalent of `linear.min_score` for semantic retrievers.
   private async findFeaturesBySemantic(
     filter: QueryDslQueryContainer[],
     query: string,
     limit?: number
-  ): Promise<{ hits: Feature[]; total: number }> {
+  ): Promise<{ hits: Feature[] }> {
     const response = await this.clients.storageClient.search({
       size: limit ?? SEARCH_SIZE_LIMIT,
-      track_total_hits: true,
+      track_total_hits: false,
       retriever: {
-        standard: {
-          query: {
-            match: { [FEATURE_SEARCH_EMBEDDING]: query },
-          },
-          filter: { bool: { filter } },
+        linear: {
+          retrievers: [
+            {
+              retriever: {
+                standard: {
+                  query: {
+                    match: { [FEATURE_SEARCH_EMBEDDING]: query },
+                  },
+                  filter: { bool: { filter } },
+                },
+              },
+              weight: 1,
+              normalizer: 'minmax',
+            },
+          ],
+          rank_window_size: limit ?? SEARCH_SIZE_LIMIT,
           min_score: this.config.semantic_min_score,
         },
       },
@@ -429,18 +503,18 @@ export class FeatureClient {
 
     return {
       hits: response.hits.hits.map((hit) => fromStorage(hit._source)),
-      total: response.hits.total.value,
     };
   }
 
+  // Stays on DSL: ES|QL has no equivalent of the RRF retriever with semantic min_score.
   private async findFeaturesByHybrid(
     filter: QueryDslQueryContainer[],
     query: string,
     limit?: number
-  ): Promise<{ hits: Feature[]; total: number }> {
+  ): Promise<{ hits: Feature[] }> {
     const response = await this.clients.storageClient.search({
       size: limit ?? SEARCH_SIZE_LIMIT,
-      track_total_hits: true,
+      track_total_hits: false,
       retriever: {
         rrf: {
           retrievers: [
@@ -452,11 +526,21 @@ export class FeatureClient {
               },
             },
             {
-              standard: {
-                query: {
-                  match: { [FEATURE_SEARCH_EMBEDDING]: query },
-                },
-                // See config.semantic_min_score for rationale.
+              linear: {
+                retrievers: [
+                  {
+                    retriever: {
+                      standard: {
+                        query: {
+                          match: { [FEATURE_SEARCH_EMBEDDING]: query },
+                        },
+                      },
+                    },
+                    weight: 1,
+                    normalizer: 'minmax',
+                  },
+                ],
+                rank_window_size: limit ?? SEARCH_SIZE_LIMIT,
                 min_score: this.config.semantic_min_score,
               },
             },
@@ -476,7 +560,6 @@ export class FeatureClient {
 
     return {
       hits: response.hits.hits.map((hit) => fromStorage(hit._source)),
-      total: response.hits.total.value,
     };
   }
 
@@ -498,19 +581,24 @@ export class FeatureClient {
     }
     const idsToValidate = [...deleteIdSet, ...excludeIdSet, ...restoreIdSet];
 
-    const validHits =
+    const validHits: Array<{ id: string; feature: Feature }> =
       idsToValidate.length > 0
-        ? (
-            await this.clients.storageClient.search({
-              size: idsToValidate.length,
-              track_total_hits: false,
-              query: {
-                bool: {
-                  filter: [{ terms: { _id: idsToValidate } }, ...termQuery(STREAM_NAME, stream)],
-                },
-              },
-            })
-          ).hits.hits
+        ? await (async () => {
+            const idLiterals = idsToValidate.map((id) => esql.str(id));
+            const response = await this.clients.storageClient.esql({
+              metadata: ['_id', '_source'],
+              pipeline: esql`WHERE _id IN (${idLiterals}) AND ${normalizeColumn(STREAM_NAME)} == ${{
+                stream,
+              }} | LIMIT ${esql.num(idsToValidate.length)}`,
+            });
+            const idIdx = getColumnIndex(response, '_id');
+            const sourceIdx = getSourceColumnIndex(response);
+            if (idIdx === -1 || sourceIdx === -1) return [];
+            return response.values.map((row) => ({
+              id: row[idIdx] as string,
+              feature: fromStorage(row[sourceIdx] as StoredFeature),
+            }));
+          })()
         : [];
 
     const now = new Date().toISOString();
@@ -522,10 +610,7 @@ export class FeatureClient {
       }
     }
 
-    for (const hit of validHits) {
-      const id = hit._id!;
-      const feature = fromStorage(hit._source);
-
+    for (const { id, feature } of validHits) {
       if (deleteIdSet.has(id)) {
         validatedOps.push({ delete: { id } });
       } else if (excludeIdSet.has(id)) {
@@ -571,7 +656,7 @@ export class FeatureClient {
   }
 }
 
-function toStorage(stream: string, feature: Feature, inferenceAvailable: boolean): StoredFeature {
+function toStorage(stream: string, feature: Feature, includeEmbedding: boolean): StoredFeature {
   const embeddingText = buildSearchEmbeddingText(feature, stream);
   return {
     [FEATURE_UUID]: feature.uuid,
@@ -593,7 +678,7 @@ function toStorage(stream: string, feature: Feature, inferenceAvailable: boolean
     [FEATURE_RUN_ID]: feature.run_id,
     [FEATURE_TITLE]: feature.title,
     [FEATURE_FILTER]: feature.filter,
-    ...(inferenceAvailable && embeddingText ? { [FEATURE_SEARCH_EMBEDDING]: embeddingText } : {}),
+    ...(includeEmbedding && embeddingText ? { [FEATURE_SEARCH_EMBEDDING]: embeddingText } : {}),
   } as StoredFeature;
 }
 

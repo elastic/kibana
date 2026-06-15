@@ -22,7 +22,7 @@ const makeParams = (
     workflowRuntime: {
       getWorkflowExecutionStatus: jest.fn().mockReturnValue(status),
     },
-    workflowExecutionState: {
+    stepIoService: {
       flush: jest
         .fn()
         .mockImplementation(() => new Promise<void>((resolve) => setTimeout(resolve, flushDelay))),
@@ -46,7 +46,7 @@ describe('persistenceLoop', () => {
   it('exits immediately when workflow status is not RUNNING', async () => {
     const params = makeParams({ status: ExecutionStatus.COMPLETED });
     await persistenceLoop(params);
-    expect(params.workflowExecutionState.flush).not.toHaveBeenCalled();
+    expect(params.stepIoService.flush).not.toHaveBeenCalled();
   });
 
   it('exits when the persistenceAbortSignal fires during the wait interval', async () => {
@@ -63,6 +63,22 @@ describe('persistenceLoop', () => {
     // Flush is synchronous (0 ms delay), so after one tick it's waiting on the 500 ms interval.
     // Advance timers a little, then abort.
     jest.advanceTimersByTime(100);
+    abortController.abort();
+    jest.advanceTimersByTime(500);
+
+    await expect(loopPromise).resolves.toBeUndefined();
+  });
+
+  it('passes the task abort signal to workflow log flushes', async () => {
+    const abortController = new AbortController();
+    const params = makeParams({ status: ExecutionStatus.RUNNING });
+
+    const loopPromise = persistenceLoop(params, abortController.signal);
+
+    expect(params.workflowLogger.flushEvents).toHaveBeenCalledWith({
+      signal: params.taskAbortController.signal,
+    });
+
     abortController.abort();
     jest.advanceTimersByTime(500);
 
@@ -111,6 +127,6 @@ describe('persistenceLoop', () => {
     await persistenceLoop(params, abortController.signal);
 
     // The loop should return immediately without flushing
-    expect(params.workflowExecutionState.flush).not.toHaveBeenCalled();
+    expect(params.stepIoService.flush).not.toHaveBeenCalled();
   });
 });

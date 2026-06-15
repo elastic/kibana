@@ -7,61 +7,48 @@
 
 import React from 'react';
 import { useLocation } from 'react-router-dom';
-
 import { DragDropContextWrapper } from '../../common/components/drag_and_drop/drag_drop_context_wrapper';
 import { SecuritySolutionAppWrapper } from '../../common/components/page';
-
 import { HelpMenu } from '../../common/components/help_menu';
 import { getScopeFromPath } from '../../sourcerer/containers/sourcerer_paths';
 import { GlobalHeader } from './global_header';
 import { ConsoleManager } from '../../management/components/console/components/console_manager';
-
 import { useUrlState } from '../../common/hooks/use_url_state';
 import { useUpdateBrowserTitle } from '../../common/hooks/use_update_browser_title';
 import { useUpdateExecutionContext } from '../../common/hooks/use_update_execution_context';
-import { useUpgradeSecurityPackages } from '../../detection_engine/rule_management/logic/use_upgrade_security_packages';
-import { useSetupDetectionEngineHealthApi } from '../../detection_engine/rule_monitoring';
+import { useSecuritySolutionInitialization } from '../../common/components/initialization/use_security_solution_initialization';
+import {
+  INITIALIZATION_FLOW_INIT_PREBUILT_RULES,
+  INITIALIZATION_FLOW_INIT_ENDPOINT_PROTECTION,
+  INITIALIZATION_FLOW_INIT_AI_PROMPTS,
+  INITIALIZATION_FLOW_INIT_DETECTION_RULE_MONITORING,
+} from '../../../common/api/initialization';
 import { TopValuesPopover } from '../components/top_values_popover/top_values_popover';
-import { useInitSourcerer } from '../../sourcerer/containers/use_init_sourcerer';
 import { useInitDataViewManager } from '../../data_view_manager/hooks/use_init_data_view_manager';
 import { useRestoreDataViewManagerStateFromURL } from '../../data_view_manager/hooks/use_sync_url_state';
 import { useBrowserFields } from '../../data_view_manager/hooks/use_browser_fields';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
-import { type BrowserFields } from '../../common/containers/source';
 
 interface HomePageProps {
   children: React.ReactNode;
 }
 
 const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-
   const { pathname } = useLocation();
-  const { browserFields: oldBrowserFields } = useInitSourcerer(getScopeFromPath(pathname, false));
-  const { browserFields: experimentalBrowserFields } = useBrowserFields(
-    getScopeFromPath(pathname, newDataViewPickerEnabled)
-  );
+  const browserFields = useBrowserFields(getScopeFromPath(pathname));
 
-  useRestoreDataViewManagerStateFromURL(
-    useInitDataViewManager(),
-    getScopeFromPath(pathname, newDataViewPickerEnabled)
-  );
+  useRestoreDataViewManagerStateFromURL(useInitDataViewManager(), getScopeFromPath(pathname));
 
   useUrlState();
   useUpdateBrowserTitle();
   useUpdateExecutionContext();
 
-  const browserFields = (
-    newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields
-  ) as BrowserFields;
-
-  // side effect: this will attempt to upgrade the endpoint package if it is not up to date
-  // this will run when a user navigates to the Security Solution app and when they navigate between
-  // tabs in the app. This is useful for keeping the endpoint package as up to date as possible until
-  // a background task solution can be built on the server side. Once a background task solution is available we
-  // can remove this.
-  useUpgradeSecurityPackages();
-  useSetupDetectionEngineHealthApi();
+  // Initialize dependencies of certain Security Solution areas and features
+  useSecuritySolutionInitialization([
+    INITIALIZATION_FLOW_INIT_PREBUILT_RULES,
+    INITIALIZATION_FLOW_INIT_ENDPOINT_PROTECTION,
+    INITIALIZATION_FLOW_INIT_AI_PROMPTS,
+    INITIALIZATION_FLOW_INIT_DETECTION_RULE_MONITORING,
+  ]);
 
   return (
     <SecuritySolutionAppWrapper id="security-solution-app" className="kbnAppWrapper">

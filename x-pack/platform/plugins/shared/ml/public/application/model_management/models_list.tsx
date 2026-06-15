@@ -20,6 +20,7 @@ import {
   EuiSwitch,
   EuiText,
   EuiTitle,
+  EuiToolTip,
   type EuiSearchBarProps,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
@@ -39,20 +40,21 @@ import useObservable from 'react-use/lib/useObservable';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { useEuiMaxBreakpoint } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { ML_PAGES } from '../../../common/constants/locator';
-import { ML_ELSER_CALLOUT_DISMISSED } from '../../../common/types/storage';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import { ML_ELSER_CALLOUT_DISMISSED } from '@kbn/ml-common-types/storage';
 import type {
   DFAModelItem,
   NLPModelItem,
   TrainedModelItem,
   TrainedModelUIItem,
-} from '../../../common/types/trained_models';
+} from '@kbn/ml-common-types/trained_models';
 import {
   isBaseNLPModelItem,
   isBuiltInModel,
   isModelDownloadItem,
   isNLPModelItem,
-} from '../../../common/types/trained_models';
+} from '@kbn/ml-common-types/trained_models';
+import { TRAINED_MODEL_SAVED_OBJECT_TYPE } from '@kbn/ml-common-types/saved_objects';
 import { AddInferencePipelineFlyout } from '../components/ml_inference';
 import { SavedObjectsWarning } from '../components/saved_objects_warning';
 import type { ModelsBarStats } from '../components/stats_bar';
@@ -70,7 +72,6 @@ import { useInitTrainedModelsService } from './hooks/use_init_trained_models_ser
 import { ModelStatusIndicator } from './model_status_indicator';
 import { MLSavedObjectsSpacesList } from '../components/ml_saved_objects_spaces_list';
 import { useCanManageSpacesAndSavedObjects } from '../hooks/use_spaces';
-import { TRAINED_MODEL_SAVED_OBJECT_TYPE } from '../../../common/types/saved_objects';
 import { SpaceManagementContextWrapper } from '../components/space_management_context_wrapper';
 import { SynchronizeSavedObjectsButton } from '../jobs/jobs_list/components/top_level_actions/synchronize_saved_objects_button';
 
@@ -305,9 +306,8 @@ export const ModelsList: FC<Props> = ({
           return null;
         }
         return (
-          <EuiButtonIcon
-            onClick={toggleDetails.bind(null, item)}
-            aria-label={
+          <EuiToolTip
+            content={
               itemIdToExpandedRowMap[item.model_id]
                 ? i18n.translate('xpack.ml.trainedModels.modelsList.collapseRow', {
                     defaultMessage: 'Collapse',
@@ -316,10 +316,24 @@ export const ModelsList: FC<Props> = ({
                     defaultMessage: 'Expand',
                   })
             }
-            iconType={
-              itemIdToExpandedRowMap[item.model_id] ? 'chevronSingleDown' : 'chevronSingleRight'
-            }
-          />
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              onClick={toggleDetails.bind(null, item)}
+              aria-label={
+                itemIdToExpandedRowMap[item.model_id]
+                  ? i18n.translate('xpack.ml.trainedModels.modelsList.collapseRow', {
+                      defaultMessage: 'Collapse',
+                    })
+                  : i18n.translate('xpack.ml.trainedModels.modelsList.expandRow', {
+                      defaultMessage: 'Expand',
+                    })
+              }
+              iconType={
+                itemIdToExpandedRowMap[item.model_id] ? 'chevronSingleDown' : 'chevronSingleRight'
+              }
+            />
+          </EuiToolTip>
         );
       },
       'data-test-subj': 'mlModelsTableRowDetailsToggle',

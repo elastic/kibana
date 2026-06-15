@@ -8,7 +8,7 @@
  */
 
 import { pick } from 'lodash';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 
 import {
   DEFAULT_DSL_OPTIONS_LIST_STATE,
@@ -84,6 +84,7 @@ describe('layout manager', () => {
     uuid: PANEL_ONE_ID,
     phase$: {} as unknown as PublishingSubject<PhaseEvent | undefined>,
     ...titleManager.api,
+    anyStateChange$: of(),
     serializeState: () => titleManager.getLatestState(),
     applySerializedState: jest.fn(),
   };
@@ -265,7 +266,7 @@ describe('layout manager', () => {
       );
       layoutManager.api.registerChildApi({
         ...panel1Api,
-        checkForDuplicateTitle: jest.fn(),
+        hasLibraryItemWithTitle: jest.fn(),
         canLinkToLibrary: jest.fn(),
         canUnlinkFromLibrary: jest.fn(),
         saveToLibrary: jest.fn(),

@@ -24,6 +24,7 @@ import {
   useEuiTheme,
   EuiToolTip,
   copyToClipboard,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -115,6 +116,7 @@ const MetadataPopover: React.FC<MetaDataProps> = ({
 }) => {
   const [popoverIsOpen, setPopoverIsOpen] = useState(false);
   const closePopover = () => setPopoverIsOpen(false);
+  const popoverTitleId = useGeneratedHtmlId();
 
   const metaDataIcon = (
     <EuiButtonIcon
@@ -138,8 +140,13 @@ const MetadataPopover: React.FC<MetaDataProps> = ({
   );
 
   return (
-    <EuiPopover button={metaDataIcon} isOpen={popoverIsOpen} closePopover={closePopover}>
-      <EuiPopoverTitle>
+    <EuiPopover
+      button={metaDataIcon}
+      isOpen={popoverIsOpen}
+      closePopover={closePopover}
+      aria-labelledby={popoverTitleId}
+    >
+      <EuiPopoverTitle id={popoverTitleId}>
         <FormattedMessage
           id="xpack.searchIndexDocuments.result.compactCard.header.metadata.title"
           defaultMessage="Document metadata"
@@ -229,7 +236,7 @@ const Score: React.FC<{ score: MetaDataProps['score'] }> = ({ score }) => {
         gutterSize="s"
       >
         <EuiFlexItem grow>
-          <EuiIcon type="chartGauge" size="m" />
+          <EuiIcon type="chartGauge" size="m" aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem grow>
           <EuiPanel

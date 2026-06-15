@@ -17,6 +17,7 @@
     "@kbn/core",
     "@kbn/config-schema",
     "@kbn/actions-plugin",
+    "@kbn/connector-specs",
     "@kbn/workflows",
     "@kbn/task-manager-plugin",
     "@kbn/es-query",
@@ -33,7 +34,9 @@
     "@kbn/usage-api-plugin",
     "@kbn/logging-mocks",
     "@kbn/crypto",
-    "@kbn/es-errors"
+    "@kbn/es-errors",
+    "@kbn/spaces-plugin",
+    "@kbn/core-spaces-common"
   ],
   "exclude": ["target/**/*"]
 }

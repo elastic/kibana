@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { PRIVMON_PRIVILEGE_CHECK_API } from '@kbn/security-solution-plugin/common/entity_analytics/privileged_user_monitoring/constants';
-import { WATCHLISTS_URL } from '@kbn/security-solution-plugin/common/entity_analytics/watchlists/constants';
+import {
+  WATCHLISTS_PRIVILEGES_URL,
+  WATCHLISTS_URL,
+} from '@kbn/security-solution-plugin/common/entity_analytics/watchlists/constants';
 import { visit } from '../../../tasks/navigation';
 import { login } from '../../../tasks/login';
 import { ENTITY_ANALYTICS_MANAGEMENT_URL } from '../../../urls/navigation';
@@ -82,7 +84,7 @@ describe(
 
     beforeEach(() => {
       login();
-      cy.intercept('GET', PRIVMON_PRIVILEGE_CHECK_API, {
+      cy.intercept('GET', WATCHLISTS_PRIVILEGES_URL, {
         statusCode: 200,
         body: {
           has_all_required: true,
@@ -223,6 +225,7 @@ describe(
       }).as('deleteWatchlist');
 
       visitWatchlistsPage();
+      cy.wait('@watchlistsList'); // drain the initial page-load request so the post-delete wait is unambiguous
       cy.get(WATCHLISTS_MANAGEMENT_TABLE).should('exist');
       cy.get(WATCHLISTS_MANAGEMENT_TABLE).contains(existingWatchlist.name);
 
@@ -231,7 +234,7 @@ describe(
       cy.get('[data-test-subj="watchlistsDeleteConfirmationModal"]').should('exist');
       cy.contains('button', 'Delete').click();
       cy.wait('@deleteWatchlist');
-      cy.wait('@watchlistsList');
+      cy.wait('@watchlistsList'); // waits for the post-delete list refresh (returns [])
       cy.get(WATCHLISTS_MANAGEMENT_TABLE_EMPTY).should('exist');
     });
 

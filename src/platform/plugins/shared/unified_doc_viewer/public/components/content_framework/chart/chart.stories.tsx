@@ -28,7 +28,6 @@ export const Basic: Story = {
     'data-test-subj': 'id',
     title: 'Chart Title',
     description: 'This is a description for the chart.',
-    esqlQuery: 'test',
     children: <div>Chart content goes here.</div>,
   },
 };

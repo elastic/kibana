@@ -12,7 +12,6 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
-import type { IndexStorageSettings } from '@kbn/storage-adapter';
 import { StorageIndexAdapter } from '@kbn/storage-adapter';
 import {
   ensureMetadata,
@@ -22,6 +21,7 @@ import {
 } from '@kbn/streams-schema';
 import type { Condition } from '@kbn/streamlang';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { StreamsPluginStartDependencies } from '../../../../types';
 import {
   QUERY_DESCRIPTION,
@@ -29,53 +29,83 @@ import {
   QUERY_KQL_BODY,
   QUERY_FEATURE_FILTER,
   QUERY_FEATURE_NAME,
+  QUERY_SEARCH_EMBEDDING,
   QUERY_TYPE,
   STREAM_NAME,
   RULE_ID,
   RULE_BACKED,
   ASSET_UUID,
 } from '../fields';
-import { getQueryStorageSettings } from '../storage_settings';
+import {
+  queryStorageSettings,
+  getQueryStorageSettings,
+  type QueryStorageSettings,
+} from '../storage_settings';
 import { QueryClient, type StoredQueryLink } from './query_client';
 import { computeRuleId, buildEsqlQueryFromKql } from './helpers/query';
-import type { InferenceResolver } from './helpers/inference_availability';
+import { V1RulesAdapter } from './v1_rules_adapter';
+import { V2RulesAdapter, V2RulesNotInstalledAdapter } from './v2_rules_adapter';
+import { DualCleanupRulesAdapter } from './dual_cleanup_rules_adapter';
 import {
   DEFAULT_SIG_EVENTS_TUNING_CONFIG,
   type SigEventsTuningConfig,
 } from '../../../../../common/sig_events_tuning_config';
+import { getInferenceIdFromIndex } from '../../helpers/get_inference_id_from_index';
+import {
+  isSignificantEventsAlertingV2Active,
+  logAlertingV2PluginUnavailable,
+  readSignificantEventsAlertingV2UiEnabled,
+} from '../../../sig_events/significant_events_alerting_v2';
 
 export class QueryService {
   constructor(
     private readonly coreSetup: CoreSetup<StreamsPluginStartDependencies>,
-    private readonly resolveInference: InferenceResolver,
     private readonly logger: Logger
   ) {}
 
   async getClient({
     esClient,
     soClient,
-    rulesClient,
+    alertingRulesClient,
+    alertingV2RulesClient,
     config = DEFAULT_SIG_EVENTS_TUNING_CONFIG,
   }: {
     esClient: ElasticsearchClient;
     soClient: SavedObjectsClientContract;
-    rulesClient: RulesClient;
+    alertingRulesClient: RulesClient;
+    alertingV2RulesClient?: RulesClientApi;
     config?: Pick<SigEventsTuningConfig, 'semantic_min_score' | 'rrf_rank_constant'>;
   }): Promise<QueryClient> {
     const [core] = await this.coreSetup.getStartServices();
 
     const uiSettings = core.uiSettings.asScopedToClient(soClient);
-    const isSignificantEventsEnabled =
-      (await uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS)) ?? false;
+    const [isSignificantEventsEnabled, alertingV2UiEnabled] = await Promise.all([
+      uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS).then((v) => v ?? false),
+      readSignificantEventsAlertingV2UiEnabled(uiSettings, this.logger),
+    ]);
 
-    const { inferenceId, available: inferenceAvailable } = await this.resolveInference(esClient);
+    if (alertingV2UiEnabled && !alertingV2RulesClient) {
+      logAlertingV2PluginUnavailable(this.logger);
+    }
 
-    const settings = getQueryStorageSettings(inferenceId);
+    const alertingV2Enabled = isSignificantEventsAlertingV2Active(
+      alertingV2UiEnabled,
+      alertingV2RulesClient
+    );
 
-    const adapter = new StorageIndexAdapter<IndexStorageSettings, StoredQueryLink>(
+    const existingInferenceId = await getInferenceIdFromIndex(
+      esClient,
+      queryStorageSettings.name,
+      QUERY_SEARCH_EMBEDDING,
+      this.logger
+    );
+
+    const storageSettings = getQueryStorageSettings(existingInferenceId);
+
+    const adapter = new StorageIndexAdapter<QueryStorageSettings, StoredQueryLink>(
       esClient,
       this.logger.get('queries'),
-      settings,
+      storageSettings as QueryStorageSettings,
       {
         migrateSource: (source) => {
           let migrated = source as Record<string, unknown>;
@@ -176,15 +206,23 @@ export class QueryService {
       }
     );
 
+    const v1Adapter = new V1RulesAdapter(alertingRulesClient);
+    const v2Client = alertingV2RulesClient
+      ? new V2RulesAdapter(alertingV2RulesClient)
+      : new V2RulesNotInstalledAdapter(this.logger);
+
+    const rulesManagementClient = alertingV2Enabled
+      ? new DualCleanupRulesAdapter(v2Client, v1Adapter, this.logger)
+      : new DualCleanupRulesAdapter(v1Adapter, v2Client, this.logger);
+
     return new QueryClient(
       {
         storageClient: adapter.getClient(),
         soClient,
-        rulesClient,
+        rulesManagementClient,
         logger: this.logger,
       },
       isSignificantEventsEnabled,
-      inferenceAvailable,
       config
     );
   }

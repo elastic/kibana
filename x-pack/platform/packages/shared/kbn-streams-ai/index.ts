@@ -6,6 +6,7 @@
  */
 
 export { generateStreamDescription } from './src/description/generate_description';
+export { descriptionPrompt, overviewDescriptionPrompt } from './src/description/prompt';
 export { partitionStream } from './workflows/partition_stream';
 export {
   suggestProcessingPipeline,
@@ -25,6 +26,7 @@ export {
 } from './workflows/suggest_processing_pipeline';
 export {
   generateSignificantEvents,
+  DEFAULT_MAX_EXISTING_QUERIES_FOR_CONTEXT,
   type ExistingQuerySummary,
 } from './src/significant_events/generate_significant_events';
 export {

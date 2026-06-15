@@ -59,8 +59,8 @@ const dateCompare: CompareFn<number | string> = (v1, v2) => {
 };
 
 const stringComparison: CompareFn<string> = (v1, v2, _, formatter) => {
-  const aString = formatter.convert(v1);
-  const bString = formatter.convert(v2);
+  const aString = formatter.convertToText(v1);
+  const bString = formatter.convertToText(v2);
   return handleInvalidValues(v1, v2) ?? aString.localeCompare(bString);
 };
 

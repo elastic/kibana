@@ -46,7 +46,10 @@ describe('datatable cell renderer', () => {
     rows,
   });
 
-  const defaultFormatter = { convert: (x: unknown) => `formatted ${x}` } as FieldFormat;
+  const defaultFormatter = {
+    convertToText: (x: unknown) => `formatted ${x}`,
+    convertToReact: (x: unknown) => `formatted ${x}`,
+  } as FieldFormat;
   const defaultFormatters = { a: defaultFormatter } as Record<string, FieldFormat>;
 
   const defaultAlignments = new Map<string, 'left' | 'right' | 'center'>([['a', 'right']]);
@@ -203,8 +206,14 @@ describe('datatable cell renderer', () => {
           sortingDirection: 'none',
         },
         formatters: {
-          a: { convert: (x) => `formatted ${x}` } as FieldFormat,
-          b: { convert: (x) => `formatted ${x}` } as FieldFormat,
+          a: {
+            convertToText: (x) => `formatted ${x}`,
+            convertToReact: (x) => `formatted ${x}`,
+          } as FieldFormat,
+          b: {
+            convertToText: (x) => `formatted ${x}`,
+            convertToReact: (x) => `formatted ${x}`,
+          } as FieldFormat,
         },
       });
 
@@ -302,6 +311,36 @@ describe('datatable cell renderer', () => {
       expect(setCellProps).not.toHaveBeenCalled();
     });
 
+    it('should resolve the badge color via getCellColor even when no palette or colorMapping is configured', () => {
+      // Regression: when configuring datatable columns through the as-code Lens API
+      // with `colorMode: badge` but without an explicit palette/colorMapping, badges
+      // must still pick up colors from the default resolution path (mirrors cell/text).
+      // Previously this path short-circuited to null and rendered a hollow badge.
+      const columnConfig = makeDatatableArgs();
+      columnConfig.columns[0].colorMode = 'badge';
+      expect(columnConfig.columns[0].palette).toBeUndefined();
+      expect(columnConfig.columns[0].colorMapping).toBeUndefined();
+
+      renderPaletteCell(columnConfig, {});
+
+      // getCellColor must be invoked even without explicit palette/colorMapping so
+      // the table-level default resolution kicks in (see table_basic.tsx).
+      expect(cellColorFnMock).toHaveBeenCalledWith('a', undefined, undefined);
+      expect(innerCellColorFnMock).toHaveBeenCalledWith(123);
+      expect(screen.getByTestId('lnsTableCellContentBadge')).toBeInTheDocument();
+    });
+
+    it('should not invoke the color function when the badge value is non-colorable', () => {
+      const columnConfig = makeDatatableArgs();
+      columnConfig.columns[0].colorMode = 'badge';
+
+      renderPaletteCell(columnConfig, {
+        table: makeTable([{ a: null }]),
+      });
+
+      expect(innerCellColorFnMock).not.toHaveBeenCalled();
+    });
+
     it('should not render badge for null values', () => {
       const columnConfig = makeDatatableArgs();
       columnConfig.columns[0].colorMode = 'badge';
@@ -330,15 +369,14 @@ describe('datatable cell renderer', () => {
           columnConfig,
           formatters: {
             a: {
-              convert: (x: unknown, contentType?: string) => {
+              convertToText: () => '(null)',
+              convertToReact: (x: unknown) => {
                 if (x == null) {
-                  return contentType === 'html'
-                    ? '<span class="ffString__emptyValue">(null)</span>'
-                    : '(null)';
+                  return <span className="ffString__emptyValue">(null)</span>;
                 }
                 return `formatted ${x}`;
               },
-            } as FieldFormat,
+            } as unknown as FieldFormat,
           },
         });
 
@@ -423,7 +461,7 @@ describe('datatable cell renderer', () => {
       expect(screen.getByTestId('lnsTableCellContent')).not.toHaveClass('lnsTableCell--colored');
     });
 
-    it('should fall back to html placeholder when text formatting is empty in badge mode', () => {
+    it('should fall back to React placeholder when text formatting is empty in badge mode', () => {
       const columnConfig = makeDatatableArgs();
       columnConfig.columns[0].colorMode = 'badge';
 
@@ -431,15 +469,19 @@ describe('datatable cell renderer', () => {
         columnConfig,
         formatters: {
           a: {
-            convert: (x: unknown, contentType?: string) => {
+            convertToText: (x: unknown) => {
               if (typeof x === 'number' && Number.isNaN(x)) {
-                return contentType === 'text'
-                  ? ''
-                  : '<span class="ffString__emptyValue">(null)</span>';
+                return '';
               }
               return `formatted ${x}`;
             },
-          } as FieldFormat,
+            convertToReact: (x: unknown) => {
+              if (typeof x === 'number' && Number.isNaN(x)) {
+                return <span className="ffString__emptyValue">(null)</span>;
+              }
+              return `formatted ${x}`;
+            },
+          } as unknown as FieldFormat,
         },
       });
 
