@@ -60,6 +60,7 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
     } = useAssistantContext();
     const { data: connectors } = useLoadConnectors({
       http,
+      inferenceEnabled: true,
       settings,
     });
     const defaultConnector = useMemo(
