@@ -21,6 +21,8 @@ import { REPO_ROOT } from '@kbn/repo-info';
 
 import { differsOnlyInPatch } from '../../../common/services';
 
+import { DEFAULT_PRODUCT_VERSIONS_TIMEOUT_MS } from '../../config';
+
 import { appContextService } from '..';
 
 const MINIMUM_SUPPORTED_VERSION = '7.17.0';
@@ -29,7 +31,6 @@ const AGENT_VERSION_BUILD_FILE =
 
 // Endpoint maintained by the web-team and hosted on the elastic website
 const PRODUCT_VERSIONS_URL = 'https://www.elastic.co/api/product_versions';
-const DEFAULT_PRODUCT_VERSIONS_TIMEOUT_MS = 60 * 1000;
 
 // Cache available versions in memory for 1 hour
 const CACHE_DURATION = 1000 * 60 * 60;
@@ -183,18 +184,24 @@ async function fetchAgentVersionsFromApi() {
     },
   };
 
-  try {
+  // Use a fresh AbortController per attempt so a timed-out request doesn't carry its
+  // already-aborted signal into the retry.
+  const fetchWithTimeout = async () => {
     const controller = new AbortController();
     const timeoutHandle = setTimeout(() => controller.abort(), timeoutMs);
-    let response;
+    // `unref` so a pending timer can't keep the Node.js event loop alive (e.g. during shutdown).
+    if (timeoutHandle.unref) {
+      timeoutHandle.unref();
+    }
     try {
-      response = await pRetry(
-        () => fetch(PRODUCT_VERSIONS_URL, { ...options, signal: controller.signal }),
-        { retries: 1 }
-      );
+      return await fetch(PRODUCT_VERSIONS_URL, { ...options, signal: controller.signal });
     } finally {
       clearTimeout(timeoutHandle);
     }
+  };
+
+  try {
+    const response = await pRetry(fetchWithTimeout, { retries: 1 });
     const rawBody = await response.text();
 
     // We need to handle non-200 responses gracefully here to support airgapped environments where

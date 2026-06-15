@@ -546,8 +546,7 @@ describe('getAvailableVersions', () => {
 
   it('should fall back to disk versions and log a warning when the fetch times out (AbortError)', async () => {
     mockKibanaVersion = '300.0.0';
-    // Use a very short timeout so the AbortController fires quickly in tests
-    mockConfig = { productVersionsApiTimeoutMs: 1 };
+    mockConfig = { productVersionsApiTimeoutMs: 1000 };
     mockedReadFile.mockResolvedValue(`["8.1.0", "8.0.0", "7.17.0"]`);
 
     const abortError = Object.assign(new Error('The operation was aborted'), {
@@ -568,7 +567,7 @@ describe('getAvailableVersions', () => {
 
   it('should fall back to disk versions and log a warning when the fetch times out (TimeoutError)', async () => {
     mockKibanaVersion = '300.0.0';
-    mockConfig = { productVersionsApiTimeoutMs: 1 };
+    mockConfig = { productVersionsApiTimeoutMs: 1000 };
     mockedReadFile.mockResolvedValue(`["8.1.0", "8.0.0", "7.17.0"]`);
 
     const timeoutError = Object.assign(new Error('The operation timed out'), {
