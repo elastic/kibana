@@ -67,12 +67,12 @@ export interface ChromeState {
   globalFooter: State<ReactNode>;
   aiButton: State<ReadonlySet<GlobalHeaderAiButton>>;
   globalSearch: State<GlobalSearchConfig | undefined>;
-  userMenu: State<ReactNode>;
   contextSwitcher: State<ReactNode>;
   customNavLink: State<ChromeNavLink | undefined>;
   appMenu: State<AppMenuConfig | undefined>;
   inlineAppHeader: State<boolean>;
   appHeader: State<AppHeaderConfig | undefined>;
+  userMenu: State<ReactNode>;
 
   /** Help system */
   help: {
@@ -127,11 +127,11 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
   const globalFooter = createState<ReactNode>(null);
   const aiButton = createState<ReadonlySet<GlobalHeaderAiButton>>(new Set());
   const globalSearch = createState<GlobalSearchConfig | undefined>(undefined);
-  const userMenu = createState<ReactNode>(null);
   const contextSwitcher = createState<ReactNode>(null);
   const customNavLink = createState<ChromeNavLink | undefined>(undefined);
   const inlineAppHeader = createState<boolean>(false);
   const appHeader = createState<AppHeaderConfig | undefined>(undefined);
+  const userMenu = createState<ReactNode>(null);
 
   // Help System
   const helpExtension = createState<ChromeHelpExtension | undefined>(undefined);
@@ -167,8 +167,6 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
     globalFooter,
     aiButton,
     globalSearch,
-    userMenu,
-    contextSwitcher,
     customNavLink,
     appMenu,
     inlineAppHeader,
@@ -179,6 +177,8 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
       globalMenuLinks: globalHelpMenuLinks,
     },
     appDocumentationLink,
+    contextSwitcher,
+    userMenu,
     feedbackHandler,
     newsfeedHandler,
   };

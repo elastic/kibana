@@ -285,12 +285,6 @@ export function useGlobalSearch(): GlobalSearchConfig | undefined {
   return useObservable(config$, undefined);
 }
 
-export function useUserMenu(): ReactNode {
-  const chrome = useChromeService();
-  const content$ = useMemo(() => chrome.next.userMenu.get$(), [chrome]);
-  return useObservable(content$, null);
-}
-
 /**
  * Returns the current context switcher content set via
  * `chrome.next.contextSwitcher.set()`, or null if not set.
@@ -330,4 +324,14 @@ export function useInternalHasAppMenu(): boolean {
   const hasLegacy = useInternalHasLegacyActionMenu();
   const hasConfig = useHasAppMenuConfig();
   return hasLegacy || hasConfig;
+}
+
+/**
+ * Returns the current user menu content set via
+ * `chrome.next.userMenu.set()`, or null if not set.
+ */
+export function useUserMenu(): ReactNode {
+  const chrome = useChromeService();
+  const content$ = useMemo(() => chrome.next.userMenu.get$(), [chrome]);
+  return useObservable(content$, null);
 }

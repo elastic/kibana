@@ -12,8 +12,8 @@ import { ChromeNextGlobalHeaderLogo } from './global_header_logo';
 import { AiButtonSlot } from './ai_button_slot';
 import { SearchButton } from './search_button';
 import { HelpButton } from './help_button';
-import { useContextSwitcher, useUserMenu } from '../../shared/chrome_hooks';
 import { ChromeNextGlobalHeaderShell } from './global_header_shell';
+import { useContextSwitcher, useUserMenu } from '../../shared/chrome_hooks';
 
 export const ChromeNextGlobalHeader = React.memo(() => (
   <ChromeNextGlobalHeaderShell
@@ -21,8 +21,8 @@ export const ChromeNextGlobalHeader = React.memo(() => (
     search={<SearchButton />}
     actions={<AiButtonSlot />}
     help={<HelpButton />}
-    userMenu={useUserMenu()}
     switcher={useContextSwitcher()}
+    userMenu={useUserMenu()}
   />
 ));
 

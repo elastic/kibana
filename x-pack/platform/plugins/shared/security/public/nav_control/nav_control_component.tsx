@@ -77,8 +77,8 @@ export interface SecurityNavControlRenderButtonProps {
 interface SecurityNavControlProps {
   editProfileUrl: string;
   logoutUrl: string;
-  userMenuLinks$: Observable<UserMenuLink[]>;
   renderButton?: (props: SecurityNavControlRenderButtonProps) => NonNullable<ReactNode>;
+  userMenuLinks$: Observable<UserMenuLink[]>;
   avatarSize?: 's' | 'm' | 'l';
 }
 

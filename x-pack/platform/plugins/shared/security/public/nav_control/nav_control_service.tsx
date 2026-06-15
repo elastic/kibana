@@ -12,8 +12,6 @@ import type { Subscription } from 'rxjs';
 import { BehaviorSubject, map, ReplaySubject, takeUntil } from 'rxjs';
 
 import type { CoreStart } from '@kbn/core/public';
-import { HeaderActionButton } from '@kbn/core-chrome-browser-components';
-import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type {
   AuthenticationServiceSetup,
@@ -23,7 +21,7 @@ import type {
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
 import { SecurityNavControl } from './nav_control_component';
-import type { SecurityNavControlRenderButtonProps } from './nav_control_component';
+import { UserMenuComponent } from './user_menu_component';
 import type { SecurityLicense } from '../../common';
 import type { SecurityApiClients } from '../components';
 import { AuthenticationProvider, SecurityApiClientsProvider } from '../components';
@@ -121,7 +119,9 @@ export class SecurityNavControlService {
       ),
     });
 
-    this.registerChromeNextUserMenu(core, authc);
+    if (core.chrome.next.isEnabled) {
+      this.registerChromeNextUserMenu(core, authc);
+    }
 
     this.navControlRegistered = true;
   }
@@ -133,7 +133,7 @@ export class SecurityNavControlService {
           editProfileUrl={core.http.basePath.prepend('/security/account')}
           logoutUrl={this.logoutUrl}
           userMenuLinks$={this.userMenuLinks$}
-          renderButton={chromeNextUserMenuButton}
+          renderButton={(props) => <UserMenuComponent {...props} />}
           avatarSize="m"
         />
       </Providers>
@@ -144,28 +144,6 @@ export class SecurityNavControlService {
     return sortBy(userMenuLinks, 'order');
   }
 }
-
-const ACCOUNT_MENU_ARIA_LABEL = i18n.translate(
-  'xpack.security.navControlComponent.accountMenuAriaLabel',
-  { defaultMessage: 'Account menu' }
-);
-
-const chromeNextUserMenuButton = ({
-  isOpen,
-  toggleMenu,
-  avatar,
-}: SecurityNavControlRenderButtonProps) => (
-  <HeaderActionButton
-    variant="plain"
-    onClick={toggleMenu}
-    aria-expanded={isOpen}
-    aria-haspopup={true}
-    aria-label={ACCOUNT_MENU_ARIA_LABEL}
-    data-test-subj="chromeNextUserMenuButton"
-  >
-    {avatar}
-  </HeaderActionButton>
-);
 
 export interface ProvidersProps {
   authc: AuthenticationServiceSetup;
