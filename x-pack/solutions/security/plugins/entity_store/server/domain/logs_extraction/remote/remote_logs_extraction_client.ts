@@ -151,7 +151,9 @@ export class RemoteLogsExtractionClient {
           remote: true,
         });
         this.logger.warn(
-          `${this.strategy.id.toUpperCase()} extraction volume cap reached for entity type "${type}" (manual run): processed ${result.logsProcessed} logs (limit: ${maxLogsPerWindow}). Cap behavior: "${maxLogsPerWindowCapBehavior}". Cursor is not persisted.`
+          `${this.strategy.id.toUpperCase()} extraction volume cap reached for entity type "${type}" (manual run): processed ${
+            result.logsProcessed
+          } logs (limit: ${maxLogsPerWindow}). Cap behavior: "${maxLogsPerWindowCapBehavior}". Cursor is not persisted.`
         );
       }
       entityStoreMetrics.extractionLogsProcessed.record(result.logsProcessed ?? 0, {
@@ -599,7 +601,9 @@ export class RemoteLogsExtractionClient {
     ) {
       const bumpedTs = moment(sliceEnd.timestampCursor).add(1, 'ms').toISOString();
       this.logger.warn(
-        `${this.strategy.id.toUpperCase()} log-slice probe stalled at ${sliceEnd.timestampCursor} with a full page (${sliceLogCount} docs); advancing cursor by 1ms. Docs sharing this timestamp beyond maxLogsPerPage will be dropped.`
+        `${this.strategy.id.toUpperCase()} log-slice probe stalled at ${
+          sliceEnd.timestampCursor
+        } with a full page (${sliceLogCount} docs); advancing cursor by 1ms. Docs sharing this timestamp beyond maxLogsPerPage will be dropped.`
       );
       return { timestampCursor: bumpedTs };
     }

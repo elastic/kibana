@@ -20,7 +20,7 @@ export interface RemoteExtractionStrategy {
   buildPatterns(args: { localIndexPatterns: string[]; remoteIndexPatterns: string[] }): string[];
 }
 
-/** 
+/**
  * this unique string excludes all indices on the origin project from the CPS scope.
  * see https://www.elastic.co/docs/reference/query-languages/esql/esql-cross-serverless-projects#exclude-specific-projects
  */
