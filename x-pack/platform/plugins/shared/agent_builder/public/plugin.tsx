@@ -189,15 +189,21 @@ export class AgentBuilderPlugin
         window?.localStorage?.setItem(storageKey, JSON.stringify(conversationId));
       }
 
-      // If already open, append to the current conversation instead of
-      // replacing it. Attachments are added individually and initialMessage
-      // (if any) pre-populates the input so the user can edit before sending.
+      // Sidebar is already open — decide whether to append or replace.
       if (this.activeSidebarRef && this.sidebarCallbacks) {
-        for (const attachment of config.attachments ?? []) {
-          this.sidebarCallbacks.addAttachment(attachment);
-        }
-        if (config.initialMessage) {
-          this.sidebarCallbacks.setInputMessage(config.initialMessage);
+        if (config.appendToActiveConversation) {
+          // "Add to chat" flows: enrich the current conversation rather than replacing it.
+          // Attachments are added individually and initialMessage (if any) pre-populates
+          // the input so the user can edit before sending.
+          for (const attachment of config.attachments ?? []) {
+            this.sidebarCallbacks.addAttachment(attachment);
+          }
+          if (config.initialMessage) {
+            this.sidebarCallbacks.setInputMessage(config.initialMessage);
+          }
+        } else {
+          // Default: update props, which honours newConversation, sessionTag, etc.
+          this.sidebarCallbacks.updateProps(config);
         }
         return { chatRef: this.activeSidebarRef };
       }

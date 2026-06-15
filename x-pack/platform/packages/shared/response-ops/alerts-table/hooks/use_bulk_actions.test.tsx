@@ -492,7 +492,7 @@ describe('bulk action hooks', () => {
       expect(convertAlertToAttachment).toHaveBeenCalledWith(alerts);
       expect(mockOpenChat).toHaveBeenCalledWith({
         autoSendInitialMessage: false,
-        newConversation: true,
+        appendToActiveConversation: true,
         initialMessage: undefined,
         attachments: mockAttachments,
       });

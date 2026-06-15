@@ -70,12 +70,15 @@ describe('alertsToAttachmentGroup', () => {
     });
   });
 
-  it('group id differs between separate calls', () => {
+  it('group id is stable for the same set of alerts (enables deduplication)', () => {
     const items = Array.from({ length: 5 }, (_, i) => makeItem(`id-${i}`));
-    const first = alertsToAttachmentGroup(items);
-    const second = alertsToAttachmentGroup(items);
+    expect(alertsToAttachmentGroup(items).id).toBe(alertsToAttachmentGroup(items).id);
+  });
 
-    expect(first.id).not.toBe(second.id);
+  it('group id differs for different alert sets', () => {
+    const setA = [makeItem('a'), makeItem('b')];
+    const setB = [makeItem('a'), makeItem('c')];
+    expect(alertsToAttachmentGroup(setA).id).not.toBe(alertsToAttachmentGroup(setB).id);
   });
 });
 

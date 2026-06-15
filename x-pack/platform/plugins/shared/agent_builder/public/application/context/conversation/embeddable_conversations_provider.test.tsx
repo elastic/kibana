@@ -93,11 +93,23 @@ const createMockAttachment = (overrides: Partial<AttachmentInput> = {}): Attachm
   ...overrides,
 });
 
+interface ContextCapture {
+  attachments: ConversationAttachment[] | undefined;
+  resetAttachments: (() => void) | undefined;
+}
+
 const AttachmentsReader: React.FC<{
   storeRef: React.MutableRefObject<ConversationAttachment[] | undefined>;
 }> = ({ storeRef }) => {
   const { attachments } = useConversationContext();
   storeRef.current = attachments;
+  return null;
+};
+
+const ContextReader: React.FC<{ capture: ContextCapture }> = ({ capture }) => {
+  const ctx = useConversationContext();
+  capture.attachments = ctx.attachments;
+  capture.resetAttachments = ctx.resetAttachments;
   return null;
 };
 
@@ -127,5 +139,77 @@ describe('EmbeddableConversationsProvider', () => {
 
     // Then — setConversationId(undefined) called by the init effect must NOT clear attachments
     expect(capturedRef.current).toEqual([mockAttachment]);
+  });
+
+  it('should clear attachments when resetAttachments is called', async () => {
+    // Given — sidebar opens with a pre-staged attachment
+    const mockAttachment = createMockAttachment();
+    const capture: ContextCapture = { attachments: undefined, resetAttachments: undefined };
+
+    render(
+      <EmbeddableConversationsProvider
+        coreStart={createMockCoreStart()}
+        services={createMockServices()}
+        ariaLabelledBy="test-aria"
+        attachments={[mockAttachment]}
+      >
+        <ContextReader capture={capture} />
+      </EmbeddableConversationsProvider>
+    );
+
+    await act(async () => {});
+
+    expect(capture.attachments).toEqual([mockAttachment]);
+
+    // When — user starts a new conversation or sends the round (both call resetAttachments)
+    act(() => {
+      capture.resetAttachments?.();
+    });
+
+    // Then — staged attachments are gone
+    expect(capture.attachments).toBeUndefined();
+  });
+
+  it('should append an attachment when addAttachment is called via the registered callback', async () => {
+    // Given — the sidebar registers its callbacks so the plugin can push attachments in
+    const firstAttachment = createMockAttachment({ type: 'test.first' });
+    const secondAttachment = createMockAttachment({ type: 'test.second' });
+    const capture: ContextCapture = { attachments: undefined, resetAttachments: undefined };
+
+    let registeredCallbacks:
+      | Parameters<
+          NonNullable<
+            React.ComponentProps<typeof EmbeddableConversationsProvider>['onRegisterCallbacks']
+          >
+        >[0]
+      | null = null;
+
+    render(
+      <EmbeddableConversationsProvider
+        coreStart={createMockCoreStart()}
+        services={createMockServices()}
+        ariaLabelledBy="test-aria"
+        onRegisterCallbacks={(callbacks) => {
+          registeredCallbacks = callbacks;
+        }}
+      >
+        <ContextReader capture={capture} />
+      </EmbeddableConversationsProvider>
+    );
+
+    await act(async () => {});
+
+    // When — the plugin pushes two attachments via the registered callback
+    act(() => {
+      registeredCallbacks?.addAttachment(firstAttachment);
+    });
+    act(() => {
+      registeredCallbacks?.addAttachment(secondAttachment);
+    });
+
+    // Then — both appear in the context; order is preserved
+    expect(capture.attachments).toHaveLength(2);
+    expect(capture.attachments?.[0]).toEqual(firstAttachment);
+    expect(capture.attachments?.[1]).toEqual(secondAttachment);
   });
 });

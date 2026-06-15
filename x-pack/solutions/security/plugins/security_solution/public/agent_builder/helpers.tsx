@@ -6,7 +6,6 @@
  */
 
 import { pick } from 'lodash';
-import { v4 as uuidv4 } from 'uuid';
 import type { AttachmentInput, AttachmentGroup } from '@kbn/agent-builder-common/attachments';
 import type { TimelineItem } from '@kbn/response-ops-alerts-table/types';
 
@@ -36,7 +35,10 @@ const chunkAlerts = (alertItems: TimelineItem[]): BulkAlertsAttachmentInput[] =>
  */
 export const alertsToAttachmentGroup = (alertItems: TimelineItem[]): AttachmentGroup => ({
   type: 'group',
-  id: uuidv4(),
+  id: `alerts:${alertItems
+    .map((a) => a._id)
+    .sort()
+    .join(',')}`,
   label: `${alertItems.length} Alert${alertItems.length !== 1 ? 's' : ''}`,
   items: chunkAlerts(alertItems),
 });

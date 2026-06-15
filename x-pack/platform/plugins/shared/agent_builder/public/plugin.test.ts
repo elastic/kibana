@@ -170,7 +170,7 @@ describe('AgentBuilderPlugin', () => {
   });
 
   describe('openChat when sidebar is already open', () => {
-    it('should append attachments to the existing conversation instead of forcing a new one', () => {
+    it('should append attachments to the active conversation when appendToActiveConversation is true', () => {
       // Given
       const sidebarApp = createMockSidebarApp();
       const plugin = new AgentBuilderPlugin(createMockInitializerContext());
@@ -180,10 +180,10 @@ describe('AgentBuilderPlugin', () => {
       const { mockAddAttachment, mockUpdateProps } = openSidebarAndRegisterCallbacks(start);
       const mockGroup = createMockAttachmentGroup();
 
-      // When — bulk-add alerts while sidebar is open
-      start.openChat({ newConversation: true, attachments: [mockGroup] });
+      // When — "Add to chat" from an alert while the sidebar is already open
+      start.openChat({ appendToActiveConversation: true, attachments: [mockGroup] });
 
-      // Then
+      // Then — attachment is added to the current conversation, sidebar is not replaced
       expect(mockAddAttachment).toHaveBeenCalledTimes(1);
       expect(mockAddAttachment).toHaveBeenCalledWith(mockGroup);
       expect(mockUpdateProps).not.toHaveBeenCalled();
@@ -201,7 +201,7 @@ describe('AgentBuilderPlugin', () => {
       const secondGroup = createMockAttachmentGroup({ id: 'group-2', label: '2 Alerts' });
 
       // When
-      start.openChat({ newConversation: true, attachments: [firstGroup, secondGroup] });
+      start.openChat({ appendToActiveConversation: true, attachments: [firstGroup, secondGroup] });
 
       // Then
       expect(mockAddAttachment).toHaveBeenCalledTimes(2);
@@ -209,8 +209,8 @@ describe('AgentBuilderPlugin', () => {
       expect(mockAddAttachment).toHaveBeenNthCalledWith(2, secondGroup);
     });
 
-    it('should call setInputMessage with the initialMessage to pre-populate the input rather than starting a new conversation', () => {
-      // Given — "Add to chat" from a rule flyout passes attachments + a predefined prompt
+    it('should pre-populate the input when appendToActiveConversation is true and initialMessage is provided', () => {
+      // Given — "Add to chat" from a flyout passes attachments + a predefined prompt
       const sidebarApp = createMockSidebarApp();
       const plugin = new AgentBuilderPlugin(createMockInitializerContext());
       plugin.setup(createMockCoreSetup(), createMockSetupDeps());
@@ -221,7 +221,7 @@ describe('AgentBuilderPlugin', () => {
 
       // When
       start.openChat({
-        newConversation: true,
+        appendToActiveConversation: true,
         attachments: [mockGroup],
         initialMessage: 'Analyze this rule',
       });
@@ -229,6 +229,24 @@ describe('AgentBuilderPlugin', () => {
       // Then — message goes into the input of the existing conversation, not a new one
       expect(mockSetInputMessage).toHaveBeenCalledWith('Analyze this rule');
       expect(mockUpdateProps).not.toHaveBeenCalled();
+    });
+
+    it('should call updateProps (not append) when appendToActiveConversation is not set, preserving newConversation semantics', () => {
+      // Given — a caller like "Create rule with AI" explicitly wants a fresh conversation
+      const sidebarApp = createMockSidebarApp();
+      const plugin = new AgentBuilderPlugin(createMockInitializerContext());
+      plugin.setup(createMockCoreSetup(), createMockSetupDeps());
+      const start = plugin.start(createMockCoreStart(sidebarApp), createMockStartDeps());
+
+      const { mockAddAttachment, mockUpdateProps } = openSidebarAndRegisterCallbacks(start);
+      const mockGroup = createMockAttachmentGroup();
+
+      // When — newConversation: true but no appendToActiveConversation
+      start.openChat({ newConversation: true, attachments: [mockGroup] });
+
+      // Then — the sidebar receives a full props update (which starts a new conversation)
+      expect(mockUpdateProps).toHaveBeenCalledTimes(1);
+      expect(mockAddAttachment).not.toHaveBeenCalled();
     });
   });
 });

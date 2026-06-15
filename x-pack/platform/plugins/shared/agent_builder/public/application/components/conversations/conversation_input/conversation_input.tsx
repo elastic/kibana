@@ -9,7 +9,7 @@ import { EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { PropsWithChildren } from 'react';
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { ConversationInputShell } from '@kbn/agent-builder-browser';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
 import { useConversationStream } from '../../../hooks/use_conversation_stream';
@@ -103,8 +103,13 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
   const { addErrorToast } = useToasts();
   const hasActiveConversation = useHasActiveConversation();
   const isAwaitingPrompt = useIsAwaitingPrompt();
-  const { attachments, initialMessage, autoSendInitialMessage, resetInitialMessage } =
-    useConversationContext();
+  const {
+    attachments,
+    initialMessage,
+    autoSendInitialMessage,
+    resetInitialMessage,
+    inputResetKey,
+  } = useConversationContext();
   const submitMessage = useSubmitMessage();
 
   const validateAgentId = useValidateAgentId();
@@ -153,6 +158,22 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
       resetInitialMessage?.(); // Reset to avoid re-populating on subsequent renders
     }
   }, [initialMessage, autoSendInitialMessage, messageEditorController, resetInitialMessage]);
+
+  // Keep a stable ref to the controller so the reset effect only fires when inputResetKey
+  // increments, not when the controller gets a new reference (e.g. when isEmpty state changes).
+  const messageEditorControllerRef = useRef(messageEditorController);
+  messageEditorControllerRef.current = messageEditorController;
+
+  // Clear the editor when a new conversation is requested (e.g. "Create new chat").
+  // Skip on initial mount to avoid racing with the initialMessage effect above.
+  const inputResetMountedRef = useRef(false);
+  useEffect(() => {
+    if (!inputResetMountedRef.current) {
+      inputResetMountedRef.current = true;
+      return;
+    }
+    messageEditorControllerRef.current.setContent('');
+  }, [inputResetKey]);
 
   // Auto-focus when conversation changes
   useEffect(() => {
