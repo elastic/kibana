@@ -87,15 +87,6 @@ CONTENT RULES:
 
 const CSP_META = `<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline';">`;
 
-function injectCsp(html: string): string {
-  const headMatch = html.match(/<head[^>]*>/i);
-  if (headMatch?.index !== undefined) {
-    const at = headMatch.index + headMatch[0].length;
-    return html.slice(0, at) + CSP_META + html.slice(at);
-  }
-  return CSP_META + html;
-}
-
 function sanitizeCellValue(v: unknown): string {
   return String(v ?? '')
     .replace(/[<>]/g, '')
@@ -227,7 +218,7 @@ export function registerGenerateRoute(
       // For static panels, prepend CSP as the first token so the iframe gets it immediately.
       // Template panels skip this — CSP is injected client-side after placeholder fill.
       if (!isTemplatePath) {
-        passThrough.write(JSON.stringify({ token: injectCsp('') }) + '\n');
+        passThrough.write(JSON.stringify({ token: CSP_META }) + '\n');
       }
 
       const client = inference.getClient({ request });
