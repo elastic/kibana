@@ -13,6 +13,7 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
 import { runEsqlQuery } from '../utils/esql_query';
 import type { EsqlColumn } from '../utils/esql_query';
+import { normalizeColumnName } from '../../common/utils';
 
 const SOCKET_TIMEOUT_MS = 5 * 60 * 1000;
 const NO_DEFAULT_CONNECTOR = 'NO_DEFAULT_CONNECTOR';
@@ -172,7 +173,7 @@ export function registerGenerateRoute(
 
       const passThrough = new PassThrough();
       const abortController = new AbortController();
-      request.events.aborted$.subscribe(() => abortController.abort());
+      const abortSub = request.events.aborted$.subscribe(() => abortController.abort());
 
       let userMessage: string;
       let systemPrompt: string;
@@ -197,9 +198,10 @@ export function registerGenerateRoute(
         }
 
         if (columns.length > 0) {
-          const normalize = (s: string) => s.replace(/[^a-zA-Z0-9]+/g, '_').replace(/^_+|_+$/g, '');
           const schemaLines = columns
-            .map((c) => `  - ${c.name} (${c.type}) → placeholder: {{${normalize(c.name)}}}`)
+            .map(
+              (c) => `  - ${c.name} (${c.type}) → placeholder: {{${normalizeColumnName(c.name)}}}`
+            )
             .join('\n');
           const sampleSection =
             sampleRows.length > 0
@@ -240,7 +242,8 @@ export function registerGenerateRoute(
             if (accHtml.length > MAX_HTML_BYTES) {
               sizeLimitExceeded = true;
               abortController.abort();
-              if (!passThrough.destroyed) {
+              abortSub.unsubscribe();
+              if (!passThrough.writableEnded) {
                 passThrough.write(
                   JSON.stringify({ error: 'Generated content exceeded size limit' }) + '\n'
                 );
@@ -248,19 +251,21 @@ export function registerGenerateRoute(
               }
               return;
             }
-            if (!passThrough.destroyed)
+            if (!passThrough.writableEnded)
               passThrough.write(JSON.stringify({ token: event.content }) + '\n');
           }
         },
         error: (err) => {
-          if (!passThrough.destroyed) {
+          abortSub.unsubscribe();
+          if (!passThrough.writableEnded) {
             passThrough.write(JSON.stringify({ error: err.message }) + '\n');
             passThrough.end();
           }
         },
         complete: () => {
+          abortSub.unsubscribe();
           if (sizeLimitExceeded) return;
-          if (!passThrough.destroyed) passThrough.end();
+          if (!passThrough.writableEnded) passThrough.end();
         },
       });
 

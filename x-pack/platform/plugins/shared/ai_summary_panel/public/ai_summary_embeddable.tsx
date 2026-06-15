@@ -57,6 +57,10 @@ export const aiSummaryPanelEmbeddableFactory: EmbeddablePublicDefinition<
           skip(1),
           map(() => undefined)
         ),
+        esqlQuery$.pipe(
+          skip(1),
+          map(() => undefined)
+        ),
         template$.pipe(
           skip(1),
           map(() => undefined)

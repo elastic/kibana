@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { normalizeColumnName } from '../../common/utils';
+
 export const TEMPLATE_SENTINEL = '<!--ai-template-->';
 
 const CSP_META = `<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline';">`;
@@ -29,12 +31,10 @@ export function isTemplate(html: string): boolean {
 // - Adds the sentinel if the LLM forgot it entirely
 export function sanitizeTemplate(raw: string): string {
   let s = raw.trim();
-  // Strip markdown fences
   s = s
     .replace(/^```(?:html|HTML)?\s*\n?/, '')
     .replace(/\n?```\s*$/, '')
     .trim();
-  // Find sentinel — discard LLM preamble that appears before it
   const idx = s.indexOf(TEMPLATE_SENTINEL);
   if (idx > 0) {
     s = s.slice(idx);
@@ -44,21 +44,15 @@ export function sanitizeTemplate(raw: string): string {
   return s;
 }
 
-// Returns true if the template looks structurally valid (has closing HTML tag or at least a div)
+// Returns true if the template contains at least one HTML element.
 export function isValidTemplate(template: string): boolean {
-  return (
-    template.includes('</html>') || template.includes('</body>') || template.includes('</div>')
-  );
+  return /<[a-zA-Z]/.test(template);
 }
 
 export interface TemplateColumn {
   name: string;
   type: string;
 }
-
-// All non-alphanumeric characters normalized to underscore, leading/trailing underscores stripped.
-// e.g. "category.keyword" → "category_keyword", "@timestamp" → "timestamp"
-const normalizeColName = (s: string) => s.replace(/[^a-zA-Z0-9]+/g, '_').replace(/^_+|_+$/g, '');
 
 // Comparison operators recognised in conditional block names, e.g. {{#revenue_gte_10000}}.
 // Longer tokens checked first so "_gte_" is never mis-parsed as "_gt_".
@@ -69,13 +63,21 @@ const COND_OPS: Array<{ token: string; fn: (a: number, b: number) => boolean }> 
   { token: '_lt_', fn: (a, b) => a < b },
 ];
 
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
 export function fillTemplate(
   template: string,
   columns: TemplateColumn[],
   rows: unknown[][]
 ): string {
   const colIndex = new Map(columns.map((c, i) => [c.name, i]));
-  const colNormIndex = new Map(columns.map((c, i) => [normalizeColName(c.name), i]));
+  const colNormIndex = new Map(columns.map((c, i) => [normalizeColumnName(c.name), i]));
 
   const maxValues = new Map<string, number>();
   for (const col of columns) {
@@ -85,7 +87,7 @@ export function fillTemplate(
   }
 
   function resolveIdx(col: string): number | undefined {
-    return colIndex.get(col) ?? colNormIndex.get(normalizeColName(col));
+    return colIndex.get(col) ?? colNormIndex.get(normalizeColumnName(col));
   }
 
   function resolveVal(col: string, pct: boolean, row: unknown[]): string {
@@ -95,9 +97,11 @@ export function fillTemplate(
     const val = row[idx];
     if (pct) {
       const max = maxValues.get(colName) ?? 1;
-      return max !== 0 ? String(Math.round((Number(val) / max) * 100)) : '0';
+      const num = Number(val);
+      if (!isFinite(num)) return '0';
+      return max !== 0 ? String(Math.min(100, Math.max(0, Math.round((num / max) * 100)))) : '0';
     }
-    return String(val ?? '');
+    return escapeHtml(String(val ?? ''));
   }
 
   // Evaluates conditional block names like "revenue_gte_10000" or "revenue_gte_5000_lt_10000".
@@ -132,13 +136,14 @@ export function fillTemplate(
     return null;
   }
 
+  // Fills one row's copy of the template, recursively resolving nested conditional blocks.
   function fillRow(rowTpl: string, row: unknown[]): string {
     let filled = rowTpl.replace(
       /\{\{#(\w[\w.]*?)\}\}([\s\S]*?)\{\{\/\1\}\}/g,
       (_m: string, blockName: string, content: string) => {
         const result = evalConditional(blockName, row);
         if (result === null) return '';
-        return result ? content : '';
+        return result ? fillRow(content, row) : '';
       }
     );
     filled = filled.replace(/\{\{(\w[\w.]*?)(_pct)?\}\}/g, (_m: string, col: string, p?: string) =>
@@ -147,7 +152,6 @@ export function fillTemplate(
     return filled;
   }
 
-  // Strip sentinel
   let result = template.trimStart();
   if (result.startsWith(TEMPLATE_SENTINEL)) {
     result = result.slice(TEMPLATE_SENTINEL.length);

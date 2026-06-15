@@ -92,7 +92,8 @@ export async function runEsqlQuery(
             fields: TIMESTAMP_CANDIDATES,
           });
           for (const field of TIMESTAMP_CANDIDATES) {
-            if (candidateCaps.fields[field] && 'date' in candidateCaps.fields[field]) {
+            const fieldTypes = candidateCaps.fields[field];
+            if (fieldTypes && ('date' in fieldTypes || 'date_nanos' in fieldTypes)) {
               detectedTimeField = field;
               break;
             }
@@ -100,7 +101,7 @@ export async function runEsqlQuery(
           if (!detectedTimeField) {
             const allCaps = await esClient.fieldCaps({ index: indexPattern, fields: ['*'] });
             const dateFields = Object.entries(allCaps.fields)
-              .filter(([, types]) => 'date' in types)
+              .filter(([, types]) => 'date' in types || 'date_nanos' in types)
               .map(([name]) => name);
             if (dateFields.length > 0) detectedTimeField = pickDateFieldHeuristic(dateFields);
           }

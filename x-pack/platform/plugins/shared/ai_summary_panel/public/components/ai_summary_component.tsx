@@ -91,7 +91,16 @@ export const AiSummaryComponent = ({
   }, [onTemplateChange]);
 
   useEffect(() => {
-    if (!prompt) return;
+    if (!prompt) {
+      setIsLoading(false);
+      return;
+    }
+
+    // Abort any prior inflight request unconditionally before taking any path.
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+    accRef.current = '';
 
     const template = savedTemplateRef.current;
 
@@ -103,10 +112,6 @@ export const AiSummaryComponent = ({
       return;
     }
 
-    abortRef.current?.abort();
-    const controller = new AbortController();
-    abortRef.current = controller;
-    accRef.current = '';
     setIsLoading(true);
     setError(undefined);
 

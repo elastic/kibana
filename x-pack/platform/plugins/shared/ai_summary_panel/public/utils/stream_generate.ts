@@ -50,6 +50,19 @@ export async function streamGenerate(
         if (event.token) onToken(event.token);
       }
     }
+    // Flush any final line the server sent without a trailing newline
+    const remaining = buffer.trim();
+    if (remaining) {
+      try {
+        const event = JSON.parse(remaining) as { token?: string; stale?: string; error?: string };
+        if (event.error) throw new Error(event.error);
+        if (event.stale) onStale?.(event.stale);
+        if (event.token) onToken(event.token);
+      } catch (e) {
+        if (e instanceof Error && e.message !== remaining) throw e;
+        // malformed final fragment — ignore
+      }
+    }
   } finally {
     reader.releaseLock();
   }
