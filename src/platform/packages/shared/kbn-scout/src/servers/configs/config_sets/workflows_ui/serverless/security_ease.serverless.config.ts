@@ -12,7 +12,7 @@ import { servers as defaultConfig } from '../../default/serverless/security_ease
 
 /**
  * Custom Scout server configuration for Workflows Management UI tests.
- * Enables the workflows:ui:enabled feature flag.
+ * Enables the workflows:ui:enabled feature flag and internal experimental workflow steps.
  *
  * This config is automatically used when running tests from:
  * workflows_management/test/scout_workflows_ui/
@@ -24,6 +24,7 @@ export const servers: ScoutServerConfig = {
     serverArgs: [
       ...defaultConfig.kbnTestServer.serverArgs,
       '--uiSettings.overrides.workflows:ui:enabled=true',
+      '--workflowsExtensions.experimentalSteps=true',
       // Allow short alert rule intervals for alert trigger tests (default minimum is 1m)
       '--xpack.alerting.rules.minimumScheduleInterval.value=15s',
     ],
