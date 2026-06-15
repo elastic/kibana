@@ -74,7 +74,7 @@ describe('OutputFilterControls', () => {
       expect(container).toBeEmptyDOMElement();
     });
 
-    it('renders nothing when status code is not 200', () => {
+    it('renders nothing when status code is an error (4xx)', () => {
       mockUseRequestReadContext.mockReturnValue({
         lastResult: { data: makeData(404) },
       } as any);
@@ -91,6 +91,20 @@ describe('OutputFilterControls', () => {
     it('renders the button when status code is 200', () => {
       mockUseRequestReadContext.mockReturnValue({
         lastResult: { data: makeData(200) },
+      } as any);
+      mockUseOutputFilterReadContext.mockReturnValue({
+        expression: '',
+        mode: 'jq',
+        invertMatch: false,
+        isExpanded: false,
+      });
+      renderComponent();
+      expect(screen.getByTestId('consoleOutputFilterButton')).toBeInTheDocument();
+    });
+
+    it('renders the button when status code is 201', () => {
+      mockUseRequestReadContext.mockReturnValue({
+        lastResult: { data: makeData(201) },
       } as any);
       mockUseOutputFilterReadContext.mockReturnValue({
         expression: '',

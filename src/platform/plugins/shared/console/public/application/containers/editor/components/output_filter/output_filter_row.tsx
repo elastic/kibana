@@ -25,6 +25,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useRequestReadContext } from '../../../../contexts';
+import { isFilterableStatusCode } from '../../../../lib/apply_response_filter';
 import {
   useOutputFilterActionContext,
   useOutputFilterReadContext,
@@ -207,7 +208,7 @@ export const OutputFilterExpandedPanel = () => {
   } = useRequestReadContext();
   const { euiTheme } = useEuiTheme();
 
-  if (!isExpanded || !data || data.length !== 1 || data[0].response.statusCode !== 200) return null;
+  if (!isExpanded || !data || data.length !== 1 || !isFilterableStatusCode(data[0].response.statusCode)) return null;
 
   return (
     <EuiSplitPanel.Inner

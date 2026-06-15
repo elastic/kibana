@@ -40,7 +40,7 @@ import {
   useServicesContext,
   useOutputFilterReadContext,
 } from '../../contexts';
-import { applyResponseFilter } from '../../lib/apply_response_filter';
+import { applyResponseFilter, isFilterableStatusCode } from '../../lib/apply_response_filter';
 import { MonacoEditorOutputActionsProvider } from './monaco_editor_output_actions_provider';
 import { useResizeCheckerUtils } from './hooks';
 import { useActionStyles, useHighlightedLinesClassName } from './styles';
@@ -190,7 +190,8 @@ export const MonacoEditorOutput: FunctionComponent = () => {
   }, [readOnlySettings, data, value, statusCodeClassNames]);
 
   const displayValue = useMemo(() => {
-    if (data?.length === 1 && data[0].response.statusCode === 200 && filterState.expression) {
+    const statusCode = data?.length === 1 ? data[0].response.statusCode : undefined;
+    if (statusCode !== undefined && isFilterableStatusCode(statusCode) && filterState.expression) {
       return applyResponseFilter({
         text: value,
         contentType: data[0].response.contentType,

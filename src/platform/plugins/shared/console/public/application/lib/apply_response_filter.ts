@@ -20,6 +20,10 @@ interface ApplyResponseFilterArgs {
  * Applies a regex or jq filter to a single response text string.
  * Returns the original text if the expression is empty, invalid, or inapplicable.
  */
+export function isFilterableStatusCode(statusCode: number): boolean {
+  return statusCode >= 200 && statusCode < 300;
+}
+
 export function applyResponseFilter({ text, contentType, state }: ApplyResponseFilterArgs): string {
   if (!state.expression) return text;
 

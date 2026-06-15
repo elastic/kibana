@@ -15,6 +15,7 @@ import {
   useOutputFilterActionContext,
   useOutputFilterReadContext,
 } from '../../../../contexts/output_filter_context';
+import { isFilterableStatusCode } from '../../../../lib/apply_response_filter';
 
 export const OutputFilterControls = () => {
   const {
@@ -24,7 +25,7 @@ export const OutputFilterControls = () => {
   const { setIsExpanded } = useOutputFilterActionContext();
   const { euiTheme } = useEuiTheme();
 
-  if (!data || data.length !== 1 || data[0].response.statusCode !== 200) return null;
+  if (!data || data.length !== 1 || !isFilterableStatusCode(data[0].response.statusCode)) return null;
 
   const isActive = appliedExpression.length > 0;
 
