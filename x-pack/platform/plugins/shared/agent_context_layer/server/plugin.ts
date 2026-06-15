@@ -20,6 +20,7 @@ import { registerGetRoute } from './routes/get';
 import { registerListRoute } from './routes/list';
 import { registerUpsertRoute } from './routes/upsert';
 import { registerDeleteRoute } from './routes/delete';
+import { registerAutocompleteRoute } from './routes/autocomplete';
 import { createSmlService, type SmlServiceInstance } from './services/sml/sml_service';
 import {
   registerSmlCrawlerTaskDefinition,
@@ -94,6 +95,12 @@ export class AgentContextLayerPlugin
     registerListRoute({ router, coreSetup, logger: this.logger, getSmlService });
     registerUpsertRoute({ router, coreSetup, logger: this.logger, getSmlService });
     registerDeleteRoute({ router, coreSetup, logger: this.logger, getSmlService });
+    registerAutocompleteRoute({
+      router,
+      coreSetup,
+      logger: this.logger,
+      getSmlService,
+    });
 
     if (setupDeps.workflowsExtensions) {
       registerAgentContextLayerWorkflowSteps({
