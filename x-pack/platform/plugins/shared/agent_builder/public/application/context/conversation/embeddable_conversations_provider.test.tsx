@@ -169,47 +169,4 @@ describe('EmbeddableConversationsProvider', () => {
     // Then — staged attachments are gone
     expect(capture.attachments).toBeUndefined();
   });
-
-  it('should append an attachment when addAttachment is called via the registered callback', async () => {
-    // Given — the sidebar registers its callbacks so the plugin can push attachments in
-    const firstAttachment = createMockAttachment({ type: 'test.first' });
-    const secondAttachment = createMockAttachment({ type: 'test.second' });
-    const capture: ContextCapture = { attachments: undefined, resetAttachments: undefined };
-
-    let registeredCallbacks:
-      | Parameters<
-          NonNullable<
-            React.ComponentProps<typeof EmbeddableConversationsProvider>['onRegisterCallbacks']
-          >
-        >[0]
-      | null = null;
-
-    render(
-      <EmbeddableConversationsProvider
-        coreStart={createMockCoreStart()}
-        services={createMockServices()}
-        ariaLabelledBy="test-aria"
-        onRegisterCallbacks={(callbacks) => {
-          registeredCallbacks = callbacks;
-        }}
-      >
-        <ContextReader capture={capture} />
-      </EmbeddableConversationsProvider>
-    );
-
-    await act(async () => {});
-
-    // When — the plugin pushes two attachments via the registered callback
-    act(() => {
-      registeredCallbacks?.addAttachment(firstAttachment);
-    });
-    act(() => {
-      registeredCallbacks?.addAttachment(secondAttachment);
-    });
-
-    // Then — both appear in the context; order is preserved
-    expect(capture.attachments).toHaveLength(2);
-    expect(capture.attachments?.[0]).toEqual(firstAttachment);
-    expect(capture.attachments?.[1]).toEqual(secondAttachment);
-  });
 });

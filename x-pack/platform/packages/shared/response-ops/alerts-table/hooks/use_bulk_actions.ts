@@ -428,7 +428,7 @@ export const useBulkAddToChatActions = ({
       const items = alerts ?? [];
       agentBuilderService.openChat({
         autoSendInitialMessage: false,
-        appendToActiveConversation: true,
+        newConversation: true,
         initialMessage,
         attachments: convertAlertToAttachment(items),
       });

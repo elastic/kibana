@@ -144,24 +144,17 @@ const createMockAttachmentGroup = (overrides: Partial<AttachmentGroup> = {}): At
 
 const openSidebarAndRegisterCallbacks = (
   start: AgentBuilderPluginStart,
-  mocks: {
-    addAttachment?: jest.Mock;
-    setInputMessage?: jest.Mock;
-    updateProps?: jest.Mock;
-  } = {}
+  mocks: { updateProps?: jest.Mock } = {}
 ) => {
   start.openChat({});
   const [sidebarCtx] = jest.mocked(setSidebarRuntimeContext).mock.calls[0];
-  const mockAddAttachment = mocks.addAttachment ?? jest.fn();
-  const mockSetInputMessage = mocks.setInputMessage ?? jest.fn();
   const mockUpdateProps = mocks.updateProps ?? jest.fn();
   sidebarCtx.onRegisterCallbacks?.({
-    addAttachment: mockAddAttachment,
-    setInputMessage: mockSetInputMessage,
     updateProps: mockUpdateProps,
     resetBrowserApiTools: jest.fn(),
+    addAttachment: jest.fn(),
   });
-  return { mockAddAttachment, mockSetInputMessage, mockUpdateProps };
+  return { mockUpdateProps };
 };
 
 describe('AgentBuilderPlugin', () => {
@@ -170,83 +163,22 @@ describe('AgentBuilderPlugin', () => {
   });
 
   describe('openChat when sidebar is already open', () => {
-    it('should append attachments to the active conversation when appendToActiveConversation is true', () => {
-      // Given
+    it('should call updateProps with the new config when the sidebar is already open', () => {
       const sidebarApp = createMockSidebarApp();
       const plugin = new AgentBuilderPlugin(createMockInitializerContext());
       plugin.setup(createMockCoreSetup(), createMockSetupDeps());
       const start = plugin.start(createMockCoreStart(sidebarApp), createMockStartDeps());
 
-      const { mockAddAttachment, mockUpdateProps } = openSidebarAndRegisterCallbacks(start);
+      const { mockUpdateProps } = openSidebarAndRegisterCallbacks(start);
       const mockGroup = createMockAttachmentGroup();
 
-      // When — "Add to chat" from an alert while the sidebar is already open
-      start.openChat({ appendToActiveConversation: true, attachments: [mockGroup] });
-
-      // Then — attachment is added to the current conversation, sidebar is not replaced
-      expect(mockAddAttachment).toHaveBeenCalledTimes(1);
-      expect(mockAddAttachment).toHaveBeenCalledWith(mockGroup);
-      expect(mockUpdateProps).not.toHaveBeenCalled();
-    });
-
-    it('should call addAttachment once per attachment when multiple attachments are passed', () => {
-      // Given
-      const sidebarApp = createMockSidebarApp();
-      const plugin = new AgentBuilderPlugin(createMockInitializerContext());
-      plugin.setup(createMockCoreSetup(), createMockSetupDeps());
-      const start = plugin.start(createMockCoreStart(sidebarApp), createMockStartDeps());
-
-      const { mockAddAttachment } = openSidebarAndRegisterCallbacks(start);
-      const firstGroup = createMockAttachmentGroup({ id: 'group-1', label: '3 Alerts' });
-      const secondGroup = createMockAttachmentGroup({ id: 'group-2', label: '2 Alerts' });
-
-      // When
-      start.openChat({ appendToActiveConversation: true, attachments: [firstGroup, secondGroup] });
-
-      // Then
-      expect(mockAddAttachment).toHaveBeenCalledTimes(2);
-      expect(mockAddAttachment).toHaveBeenNthCalledWith(1, firstGroup);
-      expect(mockAddAttachment).toHaveBeenNthCalledWith(2, secondGroup);
-    });
-
-    it('should pre-populate the input when appendToActiveConversation is true and initialMessage is provided', () => {
-      // Given — "Add to chat" from a flyout passes attachments + a predefined prompt
-      const sidebarApp = createMockSidebarApp();
-      const plugin = new AgentBuilderPlugin(createMockInitializerContext());
-      plugin.setup(createMockCoreSetup(), createMockSetupDeps());
-      const start = plugin.start(createMockCoreStart(sidebarApp), createMockStartDeps());
-
-      const { mockSetInputMessage, mockUpdateProps } = openSidebarAndRegisterCallbacks(start);
-      const mockGroup = createMockAttachmentGroup();
-
-      // When
-      start.openChat({
-        appendToActiveConversation: true,
-        attachments: [mockGroup],
-        initialMessage: 'Analyze this rule',
-      });
-
-      // Then — message goes into the input of the existing conversation, not a new one
-      expect(mockSetInputMessage).toHaveBeenCalledWith('Analyze this rule');
-      expect(mockUpdateProps).not.toHaveBeenCalled();
-    });
-
-    it('should call updateProps (not append) when appendToActiveConversation is not set, preserving newConversation semantics', () => {
-      // Given — a caller like "Create rule with AI" explicitly wants a fresh conversation
-      const sidebarApp = createMockSidebarApp();
-      const plugin = new AgentBuilderPlugin(createMockInitializerContext());
-      plugin.setup(createMockCoreSetup(), createMockSetupDeps());
-      const start = plugin.start(createMockCoreStart(sidebarApp), createMockStartDeps());
-
-      const { mockAddAttachment, mockUpdateProps } = openSidebarAndRegisterCallbacks(start);
-      const mockGroup = createMockAttachmentGroup();
-
-      // When — newConversation: true but no appendToActiveConversation
       start.openChat({ newConversation: true, attachments: [mockGroup] });
 
-      // Then — the sidebar receives a full props update (which starts a new conversation)
       expect(mockUpdateProps).toHaveBeenCalledTimes(1);
-      expect(mockAddAttachment).not.toHaveBeenCalled();
+      expect(mockUpdateProps).toHaveBeenCalledWith({
+        newConversation: true,
+        attachments: [mockGroup],
+      });
     });
   });
 });

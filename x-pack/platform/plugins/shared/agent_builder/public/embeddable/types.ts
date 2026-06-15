@@ -6,7 +6,7 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
-import type { ConversationAttachment } from '@kbn/agent-builder-common/attachments';
+import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { EmbeddableConversationProps } from '@kbn/agent-builder-browser';
 import type { AgentBuilderInternalService } from '../services';
 
@@ -28,8 +28,7 @@ export interface EmbeddableConversationSidebarProps {
   onRegisterCallbacks?: (callbacks: {
     updateProps: (props: EmbeddableConversationProps) => void;
     resetBrowserApiTools: () => void;
-    addAttachment: (attachment: ConversationAttachment) => void;
-    setInputMessage: (message: string) => void;
+    addAttachment: (attachment: AttachmentInput) => void;
   }) => void;
 }
 

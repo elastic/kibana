@@ -13,10 +13,7 @@ import {
   type AppUpdater,
 } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
-import type {
-  AttachmentInput,
-  ConversationAttachment,
-} from '@kbn/agent-builder-common/attachments';
+import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { BehaviorSubject, distinctUntilChanged, type Subscription } from 'rxjs';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import React from 'react';
@@ -92,8 +89,7 @@ export class AgentBuilderPlugin
   private sidebarCallbacks: {
     updateProps: (props: EmbeddableConversationProps) => void;
     resetBrowserApiTools: () => void;
-    addAttachment: (attachment: ConversationAttachment) => void;
-    setInputMessage: (message: string) => void;
+    addAttachment: (attachment: AttachmentInput) => void;
   } | null = null;
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private isEarsEnabled = false;
@@ -189,22 +185,8 @@ export class AgentBuilderPlugin
         window?.localStorage?.setItem(storageKey, JSON.stringify(conversationId));
       }
 
-      // Sidebar is already open — decide whether to append or replace.
       if (this.activeSidebarRef && this.sidebarCallbacks) {
-        if (config.appendToActiveConversation) {
-          // "Add to chat" flows: enrich the current conversation rather than replacing it.
-          // Attachments are added individually and initialMessage (if any) pre-populates
-          // the input so the user can edit before sending.
-          for (const attachment of config.attachments ?? []) {
-            this.sidebarCallbacks.addAttachment(attachment);
-          }
-          if (config.initialMessage) {
-            this.sidebarCallbacks.setInputMessage(config.initialMessage);
-          }
-        } else {
-          // Default: update props, which honours newConversation, sessionTag, etc.
-          this.sidebarCallbacks.updateProps(config);
-        }
+        this.sidebarCallbacks.updateProps(config);
         return { chatRef: this.activeSidebarRef };
       }
 

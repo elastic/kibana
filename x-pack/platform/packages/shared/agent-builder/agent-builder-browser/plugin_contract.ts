@@ -116,18 +116,6 @@ export interface PublicEmbeddableConversationProps extends EmbeddableConversatio
  */
 export interface OpenConversationSidebarOptions extends EmbeddableConversationProps {
   onClose?: () => void;
-  /**
-   * When true and the sidebar is already open with an active conversation, attachments
-   * and initialMessage are appended to the current conversation rather than replacing it.
-   * Use this for "Add to chat" flows where the caller wants to enrich the user's ongoing
-   * conversation rather than start a fresh one.
-   *
-   * When false (default) or when the sidebar is closed, normal open/update behavior applies:
-   * newConversation, sessionTag, and other props take effect as usual.
-   *
-   * @default false
-   */
-  appendToActiveConversation?: boolean;
 }
 
 /**
