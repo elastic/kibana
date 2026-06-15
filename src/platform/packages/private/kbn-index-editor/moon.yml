@@ -46,6 +46,7 @@ dependsOn:
   - '@kbn/field-utils'
   - '@kbn/es-query'
   - '@kbn/kql'
+  - '@kbn/safer-lodash-set'
 tags:
   - shared-browser
   - package
