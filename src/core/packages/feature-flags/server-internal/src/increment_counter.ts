@@ -7,15 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { metrics, ValueType } from '@opentelemetry/api';
+import { metrics, ValueType, type Counter } from '@opentelemetry/api';
 
-const flagEvaluationCounter = metrics
-  .getMeter('kibana.feature-flags')
-  .createCounter('flag.evaluation.count', {
-    description: 'Count of feature flag evaluations',
-    unit: '1',
-    valueType: ValueType.INT,
-  });
+let flagEvaluationCounter: Counter | undefined;
 
 /**
  * Increments the counter for the flag evaluation.
@@ -24,6 +18,18 @@ const flagEvaluationCounter = metrics
  * @internal
  */
 export function incrementCounter(flagName: string, value: boolean | number | string): void {
+  if (!flagEvaluationCounter) {
+    // Lazy initialize the counter to avoid creating it if it's not used.
+    // It also ensures that it waits for the global meter to be initialized.
+    flagEvaluationCounter = metrics
+      .getMeter('kibana.feature-flags')
+      .createCounter('flag.evaluation.count', {
+        description: 'Count of feature flag evaluations',
+        unit: '1',
+        valueType: ValueType.INT,
+      });
+  }
+
   flagEvaluationCounter.add(1, {
     // Attribute names follow the convention defined in https://opentelemetry.io/docs/specs/semconv/feature-flags/feature-flags-events/
     'feature_flag.key': flagName,
