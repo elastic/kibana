@@ -80,9 +80,9 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
       assertConnectorSelected('My OpenAI Connector');
     });
   });
-  // FLAKY: https://github.com/elastic/kibana/issues/237487
-  describe.skip('When no conversations exist but connectors do exist, show empty convo', () => {
+  describe('When no conversations exist but connectors do exist, show empty convo', () => {
     beforeEach(() => {
+      cy.clearLocalStorage();
       createAzureConnector();
     });
     it('When invoked on AI Assistant click', () => {
