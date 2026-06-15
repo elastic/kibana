@@ -303,7 +303,7 @@ export class WorkflowsService {
   public async getWorkflows(
     params: GetWorkflowsParams,
     spaceId: string,
-    options?: { includeExecutionHistory?: boolean }
+    options?: { includeExecutionHistory?: boolean; includeManagedExecutionHistory?: boolean }
   ): Promise<WorkflowListDto> {
     await this.ensureInitialized();
     return this.searchService.getWorkflows(params, spaceId, options);

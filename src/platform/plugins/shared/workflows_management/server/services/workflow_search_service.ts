@@ -125,7 +125,7 @@ export class WorkflowSearchService {
   async getWorkflows(
     params: GetWorkflowsParams,
     spaceId: string,
-    options?: { includeExecutionHistory?: boolean }
+    options?: { includeExecutionHistory?: boolean; includeManagedExecutionHistory?: boolean }
   ): Promise<WorkflowListDto> {
     const { size = 100, page = 1, enabled, createdBy, tags, query, managedFilter } = params;
     const from = (page - 1) * size;
@@ -173,7 +173,9 @@ export class WorkflowSearchService {
       .filter((workflow): workflow is NonNullable<typeof workflow> => workflow !== null);
 
     if (options?.includeExecutionHistory && workflows.length > 0) {
-      const workflowIds = workflows.map((w) => w.id);
+      const workflowIds = workflows
+        .filter((workflow) => workflow.managed !== true || options.includeManagedExecutionHistory)
+        .map((workflow) => workflow.id);
       const executionHistory = await this.getRecentExecutionsForWorkflows(workflowIds, spaceId);
       workflows.forEach((workflow) => {
         workflow.history = executionHistory[workflow.id] || [];

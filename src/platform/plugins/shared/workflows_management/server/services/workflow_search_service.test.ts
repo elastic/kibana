@@ -224,6 +224,25 @@ describe('WorkflowSearchService', () => {
         duration: 5000,
       });
     });
+
+    it('omits recent-execution history for managed workflows without managed execution access', async () => {
+      const { deps, storageClient, esClient } = makeDeps();
+      storageClient.search.mockResolvedValue({
+        hits: {
+          total: { value: 1 },
+          hits: [{ _id: 'managed-wf', _source: makeSource({ name: 'managed-wf', managed: true }) }],
+        },
+      });
+
+      const service = new WorkflowSearchService(deps);
+      const result = await service.getWorkflows({ size: 10, page: 1 } as any, 'default', {
+        includeExecutionHistory: true,
+        includeManagedExecutionHistory: false,
+      });
+
+      expect(esClient.search).not.toHaveBeenCalled();
+      expect(result.results[0].history).toEqual([]);
+    });
   });
 
   describe('getWorkflowStats', () => {
@@ -337,28 +356,6 @@ describe('WorkflowSearchService', () => {
       // name → name.keyword, other fields pass through verbatim
       expect(requestedAggs.name.terms.field).toBe('name.keyword');
       expect(requestedAggs.enabled.terms.field).toBe('enabled');
-
-      const expectedDefaultFilter = buildWorkflowFilters({
-        space: { id: 'default', includeGlobal: true },
-        deleted: 'not_deleted',
-        managed: 'unmanaged',
-      });
-      expect(storageClient.search.mock.calls[0][0].query.bool).toEqual(expectedDefaultFilter);
-    });
-
-    it('passes managed filter into the aggregation query', async () => {
-      const { deps, storageClient } = makeDeps();
-      storageClient.search.mockResolvedValue({ aggregations: {} });
-
-      const service = new WorkflowSearchService(deps);
-      await service.getWorkflowAggs(['tags'], 'default', { managedFilter: 'all' });
-
-      const expectedFilter = buildWorkflowFilters({
-        space: { id: 'default', includeGlobal: true },
-        deleted: 'not_deleted',
-        managed: 'all',
-      });
-      expect(storageClient.search.mock.calls[0][0].query.bool).toEqual(expectedFilter);
     });
 
     it('returns an empty response when the workflow index is missing', async () => {

@@ -7,16 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { WorkflowsManagementCapabilities } from './use_workflows_capabilities';
+import { WorkflowForbiddenError } from './workflow_forbidden_error';
 
-export const createMockWorkflowsCapabilities = (): WorkflowsManagementCapabilities => ({
-  canCreateWorkflow: true,
-  canReadWorkflow: true,
-  canReadManagedWorkflow: true,
-  canUpdateWorkflow: true,
-  canDeleteWorkflow: true,
-  canExecuteWorkflow: true,
-  canReadWorkflowExecution: true,
-  canReadManagedWorkflowExecution: true,
-  canCancelWorkflowExecution: true,
-});
+export class ManagedWorkflowExecutionReadForbiddenError extends WorkflowForbiddenError {
+  constructor() {
+    super('Managed workflow executions require the managed workflow execution read privilege.');
+  }
+}
