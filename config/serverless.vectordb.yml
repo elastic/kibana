@@ -5,6 +5,25 @@ plugins.allowlistPluginGroups: ['platform', 'vectordb']
 
 xpack.osquery.enabled: false
 
+## Fine-tune the vectordb solution feature privileges. Also, refer to `serverless.yml` for the project-agnostic overrides.
+xpack.features.overrides:
+  ### Agent Builder feature is moved from Analytics category to the VectorDB one.
+  agentBuilder.category: 'enterpriseSearch'
+  ### Agent Context Layer should match Agent Builder for role management.
+  agentContextLayer.category: 'enterpriseSearch'
+  ### Workflows Management should be moved from Analytics category to the VectorDB one.
+  workflowsManagement.category: 'enterpriseSearch'
+  ### Dashboards feature is moved from Analytics category to the VectorDB one.
+  dashboard_v2.category: "enterpriseSearch"
+  ### Dev Tools feature is moved from Analytics category to the VectorDB one.
+  dev_tools.category: "enterpriseSearch"
+  ### Discover feature is moved from Analytics category to the VectorDB one.
+  discover_v2.category: "enterpriseSearch"
+  ### Stack Alerts feature is moved from Analytics category to the VectorDB one and renamed to simply `Alerts`.
+  stackAlerts:
+    name: "Alerts"
+    category: "enterpriseSearch"
+
 ## Cloud settings
 xpack.cloud.serverless.project_type: vectordb
 
@@ -16,3 +35,7 @@ uiSettings.overrides.defaultRoute: /app/vectordb
 
 # Specify in telemetry the project type
 telemetry.labels.serverless: vectordb
+
+xpack.ml.ad.enabled: false    # Disables Anomaly Detection
+xpack.ml.dfa.enabled: false   # Disables Data Frame Analytics
+xpack.ml.nlp.enabled: false   # Disables NLP/Trained Models

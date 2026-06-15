@@ -28,11 +28,46 @@ const buildClient = (definitions: Map<string, UserStorageDefinition>) => {
   return { client, savedObjectsClient, logger };
 };
 
-describe('UserStorageClient.getAll()', () => {
-  it('issues a single bulkGet covering both SO types when both scopes are registered', async () => {
+describe('UserStorageClient.getForInjection()', () => {
+  it('returns empty object when no definitions have preload: true', async () => {
     const definitions = new Map<string, UserStorageDefinition>([
       ['space:a', { schema: z.string(), defaultValue: 'a-default', scope: 'space' }],
-      ['global:b', { schema: z.number(), defaultValue: 0, scope: 'global' }],
+    ]);
+    const { client, savedObjectsClient } = buildClient(definitions);
+
+    const result = await client.getForInjection();
+
+    expect(savedObjectsClient.bulkGet).not.toHaveBeenCalled();
+    expect(result).toEqual({});
+  });
+
+  it('only includes keys with preload: true, skipping non-injectable keys', async () => {
+    const definitions = new Map<string, UserStorageDefinition>([
+      ['space:a', { schema: z.string(), defaultValue: 'a-default', scope: 'space', preload: true }],
+      ['space:b', { schema: z.string(), defaultValue: 'b-default', scope: 'space' }],
+    ]);
+    const { client, savedObjectsClient } = buildClient(definitions);
+
+    savedObjectsClient.bulkGet.mockResolvedValue({
+      saved_objects: [
+        {
+          id: PROFILE_UID,
+          type: USER_STORAGE_SO_TYPE,
+          references: [],
+          attributes: { userId: PROFILE_UID, data: { 'space:a': 'hello', 'space:b': 'world' } },
+        },
+      ] as any,
+    });
+
+    const result = await client.getForInjection();
+
+    expect(result).toEqual({ 'space:a': 'hello' });
+  });
+
+  it('issues a single bulkGet covering both SO types when injectable keys span both scopes', async () => {
+    const definitions = new Map<string, UserStorageDefinition>([
+      ['space:a', { schema: z.string(), defaultValue: 'a-default', scope: 'space', preload: true }],
+      ['global:b', { schema: z.number(), defaultValue: 0, scope: 'global', preload: true }],
     ]);
     const { client, savedObjectsClient } = buildClient(definitions);
 
@@ -53,7 +88,7 @@ describe('UserStorageClient.getAll()', () => {
       ] as any,
     });
 
-    const result = await client.getAll();
+    const result = await client.getForInjection();
 
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(1);
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith([
@@ -64,9 +99,10 @@ describe('UserStorageClient.getAll()', () => {
     expect(result).toEqual({ 'space:a': 'hello', 'global:b': 7 });
   });
 
-  it('only requests the registered scope when one scope is unused', async () => {
+  it('only requests the scope(s) used by injectable keys', async () => {
     const definitions = new Map<string, UserStorageDefinition>([
-      ['space:a', { schema: z.string(), defaultValue: 'a-default', scope: 'space' }],
+      ['space:a', { schema: z.string(), defaultValue: 'a-default', scope: 'space', preload: true }],
+      ['global:b', { schema: z.number(), defaultValue: 0, scope: 'global' }],
     ]);
     const { client, savedObjectsClient } = buildClient(definitions);
 
@@ -81,28 +117,17 @@ describe('UserStorageClient.getAll()', () => {
       ] as any,
     });
 
-    await client.getAll();
+    await client.getForInjection();
 
-    expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(1);
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith([
       { type: USER_STORAGE_SO_TYPE, id: PROFILE_UID },
     ]);
   });
 
-  it('skips the SO request entirely when no definitions are registered', async () => {
-    const { client, savedObjectsClient } = buildClient(new Map());
-
-    const result = await client.getAll();
-
-    expect(savedObjectsClient.bulkGet).not.toHaveBeenCalled();
-    expect(savedObjectsClient.get).not.toHaveBeenCalled();
-    expect(result).toEqual({});
-  });
-
   it('returns defaults when bulkGet reports a missing doc via the error field', async () => {
     const definitions = new Map<string, UserStorageDefinition>([
-      ['space:a', { schema: z.string(), defaultValue: 'a-default', scope: 'space' }],
-      ['global:b', { schema: z.number(), defaultValue: 42, scope: 'global' }],
+      ['space:a', { schema: z.string(), defaultValue: 'a-default', scope: 'space', preload: true }],
+      ['global:b', { schema: z.number(), defaultValue: 42, scope: 'global', preload: true }],
     ]);
     const { client, savedObjectsClient } = buildClient(definitions);
 
@@ -128,14 +153,14 @@ describe('UserStorageClient.getAll()', () => {
       ] as any,
     });
 
-    const result = await client.getAll();
+    const result = await client.getForInjection();
 
     expect(result).toEqual({ 'space:a': 'a-default', 'global:b': 99 });
   });
 
   it('falls back to defaults and warns when a stored value fails schema validation', async () => {
     const definitions = new Map<string, UserStorageDefinition>([
-      ['space:a', { schema: z.string(), defaultValue: 'a-default', scope: 'space' }],
+      ['space:a', { schema: z.string(), defaultValue: 'a-default', scope: 'space', preload: true }],
     ]);
     const { client, savedObjectsClient, logger } = buildClient(definitions);
 
@@ -150,7 +175,7 @@ describe('UserStorageClient.getAll()', () => {
       ] as any,
     });
 
-    const result = await client.getAll();
+    const result = await client.getForInjection();
 
     expect(result).toEqual({ 'space:a': 'a-default' });
     expect(logger.warn).toHaveBeenCalledTimes(1);
@@ -159,12 +184,26 @@ describe('UserStorageClient.getAll()', () => {
 
   it('propagates errors thrown by bulkGet itself (e.g. transport failure)', async () => {
     const definitions = new Map<string, UserStorageDefinition>([
-      ['space:a', { schema: z.string(), defaultValue: 'a-default', scope: 'space' }],
+      ['space:a', { schema: z.string(), defaultValue: 'a-default', scope: 'space', preload: true }],
     ]);
     const { client, savedObjectsClient } = buildClient(definitions);
 
     savedObjectsClient.bulkGet.mockRejectedValue(new Error('boom'));
 
-    await expect(client.getAll()).rejects.toThrow('boom');
+    await expect(client.getForInjection()).rejects.toThrow('boom');
+  });
+});
+
+describe('UserStorageClient.set()', () => {
+  it('returns the schema-validated value', async () => {
+    const definitions = new Map<string, UserStorageDefinition>([
+      ['space:a', { schema: z.string().trim(), defaultValue: '', scope: 'space' }],
+    ]);
+    const { client, savedObjectsClient } = buildClient(definitions);
+    savedObjectsClient.update.mockResolvedValue({} as any);
+
+    const result = await client.set('space:a', '  hello  ');
+
+    expect(result).toBe('hello');
   });
 });

@@ -9,10 +9,23 @@ import { httpServiceMock } from '@kbn/core/public/mocks';
 import type { ITagsCache } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { Tag } from '../../../common/types';
 import { createTag, createTagAttributes } from '../../../common/test_utils';
+import { TAGS_API_PATH, TAGS_API_VERSION } from '../../../common/api_constants';
 import type { ITagsChangeListener } from './tags_cache';
 import { tagsCacheMock } from './tags_cache.mock';
 import { TagsClient, type FindTagsOptions } from './tags_client';
 import { coreMock } from '@kbn/core/public/mocks';
+
+const toResponseItem = (tag: Tag) => ({
+  id: tag.id,
+  data: {
+    name: tag.name,
+    description: tag.description,
+    color: tag.color,
+  },
+  meta: {
+    managed: tag.managed,
+  },
+});
 
 type TagsClientCache = ITagsCache & ITagsChangeListener;
 
@@ -37,7 +50,7 @@ describe('TagsClient', () => {
 
     beforeEach(() => {
       expectedTag = createTag();
-      http.post.mockResolvedValue({ tag: expectedTag });
+      http.post.mockResolvedValue(toResponseItem(expectedTag));
     });
 
     it('calls `http.post` with the correct parameters', async () => {
@@ -46,7 +59,8 @@ describe('TagsClient', () => {
       await tagsClient.create(attributes);
 
       expect(http.post).toHaveBeenCalledTimes(1);
-      expect(http.post).toHaveBeenCalledWith('/api/saved_objects_tagging/tags/create', {
+      expect(http.post).toHaveBeenCalledWith(TAGS_API_PATH, {
+        version: TAGS_API_VERSION,
         body: JSON.stringify(attributes),
       });
     });
@@ -81,16 +95,17 @@ describe('TagsClient', () => {
 
     beforeEach(() => {
       expectedTag = createTag({ id: tagId });
-      http.post.mockResolvedValue({ tag: expectedTag });
+      http.put.mockResolvedValue(toResponseItem(expectedTag));
     });
 
-    it('calls `http.post` with the correct parameters', async () => {
+    it('calls `http.put` with the correct parameters', async () => {
       const attributes = createTagAttributes();
 
       await tagsClient.update(tagId, attributes);
 
-      expect(http.post).toHaveBeenCalledTimes(1);
-      expect(http.post).toHaveBeenCalledWith(`/api/saved_objects_tagging/tags/${tagId}`, {
+      expect(http.put).toHaveBeenCalledTimes(1);
+      expect(http.put).toHaveBeenCalledWith(`${TAGS_API_PATH}/${tagId}`, {
+        version: TAGS_API_VERSION,
         body: JSON.stringify(attributes),
       });
     });
@@ -100,7 +115,7 @@ describe('TagsClient', () => {
     });
     it('forwards the error from the http call if any', async () => {
       const error = new Error('something when wrong');
-      http.post.mockRejectedValue(error);
+      http.put.mockRejectedValue(error);
 
       await expect(tagsClient.update(tagId, createTagAttributes())).rejects.toThrowError(error);
     });
@@ -126,14 +141,16 @@ describe('TagsClient', () => {
 
     beforeEach(() => {
       expectedTag = createTag({ id: tagId });
-      http.get.mockResolvedValue({ tag: expectedTag });
+      http.get.mockResolvedValue(toResponseItem(expectedTag));
     });
 
     it('calls `http.get` with the correct parameters', async () => {
       await tagsClient.get(tagId);
 
       expect(http.get).toHaveBeenCalledTimes(1);
-      expect(http.get).toHaveBeenCalledWith(`/api/saved_objects_tagging/tags/${tagId}`);
+      expect(http.get).toHaveBeenCalledWith(`${TAGS_API_PATH}/${tagId}`, {
+        version: TAGS_API_VERSION,
+      });
     });
     it('returns the tag object from the response', async () => {
       const tag = await tagsClient.get(tagId);
@@ -163,7 +180,7 @@ describe('TagsClient', () => {
       await tagsClient.getAll();
 
       expect(http.get).toHaveBeenCalledTimes(1);
-      expect(http.get).toHaveBeenCalledWith(`/api/saved_objects_tagging/tags`, {
+      expect(http.get).toHaveBeenCalledWith('/internal/saved_objects_tagging/tags/_all', {
         asSystemRequest: undefined,
       });
     });
@@ -171,7 +188,7 @@ describe('TagsClient', () => {
       await tagsClient.getAll({ asSystemRequest: true });
 
       expect(http.get).toHaveBeenCalledTimes(1);
-      expect(http.get).toHaveBeenCalledWith(`/api/saved_objects_tagging/tags`, {
+      expect(http.get).toHaveBeenCalledWith('/internal/saved_objects_tagging/tags/_all', {
         asSystemRequest: true,
       });
     });
@@ -216,7 +233,7 @@ describe('TagsClient', () => {
       const tags = await tagsClient.fetchAllFromNetwork({ asSystemRequest: true });
 
       expect(http.get).toHaveBeenCalledTimes(1);
-      expect(http.get).toHaveBeenCalledWith('/api/saved_objects_tagging/tags', {
+      expect(http.get).toHaveBeenCalledWith('/internal/saved_objects_tagging/tags/_all', {
         asSystemRequest: true,
       });
       expect(cache.onDidGetAll).toHaveBeenCalledTimes(1);
@@ -250,9 +267,11 @@ describe('TagsClient', () => {
       it('fetches via http and notifies onDidCreate when id is not in cache', async () => {
         cacheAndListener.getState.mockReturnValue([]);
         const expectedTag = createTag({ id: 'remote-id' });
-        http.get.mockResolvedValue({ tag: expectedTag });
+        http.get.mockResolvedValue(toResponseItem(expectedTag));
         const result = await tagsClient.get('remote-id');
-        expect(http.get).toHaveBeenCalledWith('/api/saved_objects_tagging/tags/remote-id');
+        expect(http.get).toHaveBeenCalledWith(`${TAGS_API_PATH}/remote-id`, {
+          version: TAGS_API_VERSION,
+        });
         expect(cacheAndListener.onDidCreate).toHaveBeenCalledWith(expectedTag);
         expect(result).toEqual(expectedTag);
       });
@@ -321,7 +340,9 @@ describe('TagsClient', () => {
       await tagsClient.delete(tagId);
 
       expect(http.delete).toHaveBeenCalledTimes(1);
-      expect(http.delete).toHaveBeenCalledWith(`/api/saved_objects_tagging/tags/${tagId}`);
+      expect(http.delete).toHaveBeenCalledWith(`${TAGS_API_PATH}/${tagId}`, {
+        version: TAGS_API_VERSION,
+      });
     });
     it('forwards the error from the http call if any', async () => {
       const error = new Error('something when wrong');

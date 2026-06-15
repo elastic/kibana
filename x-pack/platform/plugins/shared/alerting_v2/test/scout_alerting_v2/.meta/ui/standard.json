@@ -1,6 +1,71 @@
 {
-  "sha1": "ab1bd22b6762bd8927cbc45d5dea9ebb693e29f4",
+  "sha1": "b5c56b8fc8e4ccf28e991b8e54b19470344820ad",
   "tests": [
+    {
+      "id": "a3a9f820a79c452-b8b452a1ef0f11e",
+      "title": "ComposeDiscoverFlyout — create and edit flows create flow: open flyout, define query, step through, and submit",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
+        "line": 60,
+        "column": 9
+      }
+    },
+    {
+      "id": "a3a9f820a79c452-039ec3b1b89e8b7",
+      "title": "ComposeDiscoverFlyout — create and edit flows edit flow: pencil icon opens flyout with pre-populated name, save updates rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
+        "line": 134,
+        "column": 9
+      }
+    },
+    {
+      "id": "a3a9f820a79c452-8c58be25f025b7d",
+      "title": "ComposeDiscoverFlyout — create and edit flows step validation: Next disabled without query, name validation blocks advancement",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
+        "line": 194,
+        "column": 9
+      }
+    },
+    {
+      "id": "a3a9f820a79c452-db351a61fa1773d",
+      "title": "ComposeDiscoverFlyout — create and edit flows cancel: closing flyout via Cancel button dismisses without saving",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
+        "line": 256,
+        "column": 9
+      }
+    },
+    {
+      "id": "a3a9f820a79c452-34e6c15d6389044",
+      "title": "ComposeDiscoverFlyout — create and edit flows sandbox: Apply commits query, closing without Apply discards changes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
+        "line": 270,
+        "column": 9
+      }
+    },
     {
       "id": "9034fd33949a2e3-4b8fd1fab72dd63",
       "title": "Discover Alerts menu with alerting v2 should show Alerts menu with the v2 ES|QL rule row and hide v1 entries",

@@ -11,7 +11,6 @@ export enum CaseMetricsFeature {
   ALERTS_COUNT = 'alerts.count',
   ALERTS_USERS = 'alerts.users',
   ALERTS_HOSTS = 'alerts.hosts',
-  ACTIONS_ISOLATE_HOST = 'actions.isolateHost',
   CONNECTORS = 'connectors',
   LIFESPAN = 'lifespan',
   MTTR = 'mttr',
@@ -22,7 +21,6 @@ export const SingleCaseMetricsFeatureFieldSchema = z.union([
   z.literal(CaseMetricsFeature.ALERTS_COUNT),
   z.literal(CaseMetricsFeature.ALERTS_USERS),
   z.literal(CaseMetricsFeature.ALERTS_HOSTS),
-  z.literal(CaseMetricsFeature.ACTIONS_ISOLATE_HOST),
   z.literal(CaseMetricsFeature.CONNECTORS),
   z.literal(CaseMetricsFeature.LIFESPAN),
 ]);
@@ -80,16 +78,6 @@ export const SingleCaseMetricsResponseSchema = z.object({
     })
     .optional(),
   connectors: z.object({ total: z.number() }).optional(),
-  actions: z
-    .object({
-      isolateHost: z
-        .object({
-          isolate: z.object({ total: z.number() }),
-          unisolate: z.object({ total: z.number() }),
-        })
-        .optional(),
-    })
-    .optional(),
   lifespan: z
     .object({
       creationDate: z.string(),

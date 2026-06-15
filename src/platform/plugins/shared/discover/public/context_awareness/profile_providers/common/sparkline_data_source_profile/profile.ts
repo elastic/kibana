@@ -10,11 +10,12 @@
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getSparklineColumns } from '@kbn/esql-utils';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
+import { createElement } from 'react';
 import { DataSourceType, isDataSourceType } from '../../../../../common/data_sources';
 import type { DataSourceProfileProvider } from '../../../profiles';
 import { DataSourceCategory } from '../../../profiles';
 import type { ProfileProviderServices } from '../../profile_provider_services';
-import { getSparklineCellRenderer } from './sparkline_cell_renderer';
+import { SparklineCellRenderer } from './sparkline_cell_renderer';
 
 export const SPARKLINE_DATA_SOURCE_PROFILE_ID = 'sparkline-data-source-profile';
 
@@ -30,7 +31,7 @@ export const createSparklineDataSourceProfileProvider = (
     getCellRenderers:
       (prev, { context }) =>
       (params) => {
-        const { rowHeight } = params;
+        const { density } = params;
         const { sparklineColumns } = context;
         if (sparklineColumns.length === 0) {
           return prev(params);
@@ -39,12 +40,7 @@ export const createSparklineDataSourceProfileProvider = (
           (acc, column) =>
             Object.assign(acc, {
               [column]: (props: DataGridCellValueElementProps) =>
-                getSparklineCellRenderer(
-                  services.charts,
-                  props.row.flattened[props.columnId],
-                  props.isDetails,
-                  rowHeight
-                ),
+                createElement(SparklineCellRenderer, { ...props, services, density }),
             }),
           {}
         );

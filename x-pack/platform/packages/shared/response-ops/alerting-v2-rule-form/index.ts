@@ -13,14 +13,13 @@ export { ComposeDiscoverFlyout } from './flyout/compose_discover';
 export type { ComposeDiscoverFlyoutProps } from './flyout/compose_discover';
 export type { ComposeDiscoverMode } from './flyout/compose_discover/types';
 
+// Rule Builder registry
+export { RULE_BUILDER_REGISTRY } from './flyout/compose_discover/rule_builder';
+export type { BuilderState } from './flyout/compose_discover/rule_builder';
+
 // Compose Discover sandbox — embeddable ES|QL editor + results panel (props-only)
-export { QuerySandboxFlyout, useSandboxDraft, draftToRuleQuery } from './flyout/compose_discover';
-export type {
-  QuerySandboxFlyoutProps,
-  SandboxDraft,
-  SandboxTabConfig,
-  QueryTab,
-} from './flyout/compose_discover';
+export { QuerySandboxFlyout } from './flyout/compose_discover';
+export type { QuerySandboxFlyoutProps, QueryTab } from './flyout/compose_discover';
 
 // Lazy components (without Suspense wrapper) - for consumers who need full control
 export { LazyDynamicRuleFormFlyout, LazyRuleFormFlyout } from './flyout';
@@ -65,6 +64,10 @@ export type {
   RuleFormMeta,
   RuleFormLayout,
   RuleRequestCommon,
+  RuleNotificationsValue,
 } from './form';
 
 export type { RuleFormFlyoutProps, DynamicRuleFormFlyoutProps } from './flyout';
+
+export { buildInlineWorkflowYaml } from './actions_form';
+export type { ActionDraft } from './actions_form';

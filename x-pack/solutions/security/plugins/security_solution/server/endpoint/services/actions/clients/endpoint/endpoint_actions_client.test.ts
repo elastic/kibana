@@ -284,9 +284,9 @@ describe('EndpointActionsClient', () => {
         {
           type: 'security.endpoint',
           attachmentId: expect.any(String),
+          data: { content: 'test comment' },
           metadata: {
             command: 'isolate',
-            comment: 'test comment',
             targets: [
               {
                 agentType: 'endpoint',
@@ -312,10 +312,12 @@ describe('EndpointActionsClient', () => {
         {
           type: 'security.endpoint',
           attachmentId: expect.any(String),
+          data: {
+            content:
+              'test comment. (WARNING: The following agent ids are not valid: ["invalid-id"] and will not be included in action request)',
+          },
           metadata: {
             command: 'isolate',
-            comment:
-              'test comment. (WARNING: The following agent ids are not valid: ["invalid-id"] and will not be included in action request)',
             targets: [
               {
                 agentType: 'endpoint',
@@ -450,12 +452,25 @@ describe('EndpointActionsClient', () => {
 
     runscript: endpointActionClientMock.createRunScriptOptions(getCommonResponseActionOptions()),
 
-    cancel: responseActionsClientMock.createCancelActionOptions(getCommonResponseActionOptions()),
+    cancel: responseActionsClientMock.createCancelActionOptions({
+      ...getCommonResponseActionOptions(),
+      parameters: { id: 'test-action-id-123', force: true },
+    }),
   };
 
   it.each(Object.keys(responseActionMethods) as ResponseActionsMethodsOnly[])(
     'should dispatch a fleet action request calling %s() method',
     async (methodName) => {
+      if (methodName === 'cancel') {
+        getActionDetailsByIdMock.mockResolvedValue(
+          new EndpointActionGenerator('seed').generateActionDetails({
+            agents: ['1-2-3'],
+            isCompleted: false,
+            command: 'memory-dump',
+          })
+        );
+      }
+
       await endpointActionsClient[methodName](responseActionMethods[methodName]);
 
       let expectedParams = responseActionMethods[methodName].parameters;
@@ -491,6 +506,13 @@ describe('EndpointActionsClient', () => {
             timeout: 60000,
           };
           expectedComment = `(Script name: script one / File name: my_script.sh) ${expectedComment}`;
+          break;
+
+        case 'cancel':
+          expectedParams = {
+            id: 'test-action-id-123',
+            force: true,
+          };
           break;
       }
 
@@ -664,6 +686,7 @@ describe('EndpointActionsClient', () => {
         agents: ['1-2-3'],
         agentType: 'endpoint',
         isCompleted: false,
+        command: 'memory-dump',
       });
 
       getActionDetailsByIdMock.mockResolvedValue(actionToBeCanceledDetails);
@@ -729,6 +752,19 @@ describe('EndpointActionsClient', () => {
           })
         )
       ).rejects.toThrow('Endpoint [1-2-3] is not associated with action [action-123]');
+    });
+
+    it('should throw error if response action command is not cancelable', async () => {
+      actionToBeCanceledDetails.command = 'cancel';
+
+      await expect(
+        endpointActionsClient.cancel(
+          responseActionsClientMock.createCancelActionOptions({
+            ...getCommonResponseActionOptions(),
+            parameters: { id: 'action-123' },
+          })
+        )
+      ).rejects.toThrow('[cancel] response action cannot be canceled.');
     });
   });
 

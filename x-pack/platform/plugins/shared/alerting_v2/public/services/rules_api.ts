@@ -37,8 +37,10 @@ export type { BulkOperationParams, BulkOperationResponse };
 export class RulesApi {
   constructor(@inject(CoreStart('http')) private readonly http: HttpStart) {}
 
-  public async listTags() {
-    return this.http.get<{ tags: string[] }>(`${ALERTING_V2_RULE_API_PATH}/_tags`);
+  public async listTags(params: { filter?: string } = {}) {
+    return this.http.get<{ tags: string[] }>(`${ALERTING_V2_RULE_API_PATH}/_tags`, {
+      query: { filter: params.filter },
+    });
   }
 
   public async listRules(params: ListRulesParams) {
@@ -60,8 +62,14 @@ export class RulesApi {
     });
   }
 
-  public async getRule(id: string) {
-    return this.http.get<RuleResponse>(`${ALERTING_V2_RULE_API_PATH}/${id}`);
+  public async upsertRule(id: string, payload: CreateRuleData) {
+    return this.http.put<RuleResponse>(`${ALERTING_V2_RULE_API_PATH}/${id}`, {
+      body: JSON.stringify(payload),
+    });
+  }
+
+  public async getRule(id: string, signal?: AbortSignal) {
+    return this.http.get<RuleResponse>(`${ALERTING_V2_RULE_API_PATH}/${id}`, { signal });
   }
 
   public async updateRule(id: string, payload: UpdateRuleData) {

@@ -8,7 +8,7 @@
 jest.mock('../epm/packages');
 jest.mock('../app_context');
 
-import { DATASET_VAR_NAME } from '../../../common/constants';
+import { DATA_STREAM_TYPE_VAR_NAME, DATASET_VAR_NAME } from '../../../common/constants';
 import type { PackagePolicy } from '../../types';
 import { PackagePolicyValidationError } from '../../errors';
 
@@ -387,6 +387,30 @@ packageInfoCache.set('elastic_connectors-1.0.0', {
       ml_model: [],
     },
   },
+});
+
+packageInfoCache.set('sql_input-1.0.0', {
+  format_version: '3.1.5',
+  name: 'sql_input',
+  title: 'SQL Input',
+  version: '1.0.0',
+  type: 'input',
+  release: 'ga',
+  policy_templates: [
+    {
+      name: 'mysql',
+      type: 'metrics',
+      title: 'MySQL',
+      description: 'Collect metrics from MySQL.',
+      input: 'sql/metrics',
+      template_path: 'input.yml.hbs',
+      vars: [],
+    },
+  ],
+  data_streams: [],
+  latestVersion: '1.0.0',
+  status: 'not_installed',
+  assets: { kibana: {}, elasticsearch: {} },
 });
 
 packageInfoCache.set('non_dynamic_pkg-1.0.0', {
@@ -2279,6 +2303,58 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
       expect(permissions?.['policy-combined-logfile']?.indices?.[0].names).toEqual([
         'logs-combined_inputs_pkg.app-default',
       ]);
+    });
+
+    it('uses data_stream.type var value for permissions when it overrides stream.data_stream.type', () => {
+      // Simulates a sql_input policy where policyTemplate.type is 'metrics' but the user
+      // overrode data_stream.type to 'logs' via the simplified API. The saved stream retains
+      // data_stream.type = 'metrics' on the stream object; the override lives in the var.
+      const packagePolicies: PackagePolicy[] = [
+        {
+          id: 'sql-logs-override',
+          name: 'sql-logs-override-policy',
+          namespace: 'default',
+          enabled: true,
+          package: { name: 'sql_input', version: '1.0.0', title: 'SQL Input' },
+          inputs: [
+            {
+              type: 'sql/metrics',
+              enabled: true,
+              streams: [
+                {
+                  id: 'stream-1',
+                  enabled: true,
+                  data_stream: {
+                    type: 'metrics',
+                    dataset: 'sql_input.mysql',
+                    elasticsearch: { dynamic_dataset: true, dynamic_namespace: true },
+                  },
+                  vars: {
+                    [DATA_STREAM_TYPE_VAR_NAME]: { value: 'logs' },
+                  },
+                } as any,
+              ],
+            },
+          ],
+          created_at: '',
+          updated_at: '',
+          created_by: '',
+          updated_by: '',
+          revision: 1,
+          policy_id: '',
+          policy_ids: [''],
+        },
+      ];
+
+      const permissions = storedPackagePoliciesToAgentPermissions(
+        packageInfoCache,
+        'default',
+        packagePolicies
+      );
+
+      expect(permissions?.['sql-logs-override']?.indices).toHaveLength(1);
+      // Must use 'logs-*-*', not 'metrics-*-*'
+      expect(permissions?.['sql-logs-override']?.indices?.[0].names).toEqual(['logs-*-*']);
     });
   });
 });

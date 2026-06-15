@@ -12,6 +12,7 @@ import { createIsNarrowSchema } from '../../../shared/type_guards';
 export interface IngestStreamLifecycleDSL {
   dsl: {
     data_retention?: string;
+    frozen_after?: string;
     downsample?: DownsampleStep[];
   };
 }
@@ -68,6 +69,7 @@ const downsampleStepSchema = z.object({
 const dslLifecycleSchema = z.object({
   dsl: z.object({
     data_retention: z.optional(NonEmptyString),
+    frozen_after: z.optional(NonEmptyString),
     downsample: z.optional(z.array(downsampleStepSchema)),
   }),
 });

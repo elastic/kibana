@@ -9,7 +9,6 @@ import type { LlmProxy, LLmError } from '@kbn/ftr-llm-proxy';
 import {
   mockTitleGeneration,
   mockTitleGenerationWithError,
-  mockHandoverToAnswer,
   mockFinalAnswer,
   mockAgentToolCall,
   mockAgentParallelToolCalls,
@@ -33,7 +32,6 @@ export const setupAgentDirectAnswer = async ({
   if (!continueConversation) {
     mockTitleGeneration(proxy, title);
   }
-  mockHandoverToAnswer(proxy, 'ready to answer');
   mockFinalAnswer(proxy, response);
 };
 
@@ -54,7 +52,7 @@ export const setupAgentDirectError = async ({
   if (!continueConversation) {
     mockTitleGenerationWithError(proxy, titleError ?? error);
   }
-  mockHandoverToAnswer(proxy, error);
+  mockFinalAnswer(proxy, error);
 };
 
 /**
@@ -91,8 +89,6 @@ export const setupAgentCallSearchToolWithEsqlThenAnswer = async ({
     resource: { name: resourceName, type: resourceType },
   });
 
-  mockHandoverToAnswer(proxy, 'ready to answer');
-
   mockFinalAnswer(proxy, response);
 };
 
@@ -119,8 +115,6 @@ export const setupAgentCallSearchToolWithNoIndexSelectedThenAnswer = async ({
     },
   });
 
-  mockHandoverToAnswer(proxy, 'ready to answer');
-
   mockFinalAnswer(proxy, response);
 };
 
@@ -144,8 +138,6 @@ export const setupAgentParallelToolCallsThenAnswer = async ({
     llmProxy: proxy,
     toolCalls,
   });
-
-  mockHandoverToAnswer(proxy, 'ready to answer');
 
   mockFinalAnswer(proxy, response);
 };

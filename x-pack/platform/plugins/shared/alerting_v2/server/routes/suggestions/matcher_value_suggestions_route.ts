@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { errorResponseSchema } from '@kbn/alerting-v2-schemas';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { RouteSecurity } from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
@@ -31,8 +31,8 @@ export class MatcherValueSuggestionsRoute extends BaseAlertingRoute {
   static security: RouteSecurity = {
     authz: {
       requiredPrivileges: [
-        ALERTING_V2_API_PRIVILEGES.actionPolicies.read,
         ALERTING_V2_API_PRIVILEGES.rules.read,
+        ALERTING_V2_API_PRIVILEGES.alerts.read,
       ],
     },
   };
@@ -41,11 +41,17 @@ export class MatcherValueSuggestionsRoute extends BaseAlertingRoute {
     description:
       'Get suggestions for action policy matcher values based on an optional search query.',
   } as const;
-  static validate = {
+  static schemas = {
     request: {
-      body: buildRouteValidationWithZod(suggestionsBodySchema),
+      body: suggestionsBodySchema,
     },
-  } as const;
+    response: {
+      400: {
+        body: () => errorResponseSchema,
+        description: 'Indicates an invalid schema or parameters.',
+      },
+    },
+  };
 
   protected readonly routeName = 'matcher value suggestions';
 

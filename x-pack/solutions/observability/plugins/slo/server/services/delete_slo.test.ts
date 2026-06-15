@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import { rulesClientMock } from '@kbn/alerting-plugin/server/rules_client.mock';
 import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 import type { MockedLogger } from '@kbn/logging-mocks';
@@ -64,6 +65,41 @@ describe('DeleteSLO', () => {
       expect(mockScopedClusterClient.asCurrentUser.deleteByQuery).toMatchSnapshot();
       expect(mockRulesClient.bulkDeleteRules).toMatchSnapshot();
       expect(mockRepository.deleteById).toMatchSnapshot();
+    });
+  });
+
+  describe('deleteAssociatedRules', () => {
+    it('does not log a warning when bulkDeleteRules throws because no rules matched', async () => {
+      const slo = createSLO({
+        id: 'irrelevant',
+        indicator: createAPMTransactionErrorRateIndicator(),
+      });
+      mockRepository.findById.mockResolvedValueOnce(slo);
+      mockRulesClient.bulkDeleteRules.mockRejectedValueOnce(
+        Boom.badRequest('No rules found for bulk delete')
+      );
+
+      await expect(deleteSLO.execute(slo.id)).resolves.not.toThrow();
+
+      expect(mockLogger.warn).not.toHaveBeenCalled();
+    });
+
+    it('logs a warning when bulkDeleteRules throws for any other reason', async () => {
+      const slo = createSLO({
+        id: 'irrelevant',
+        indicator: createAPMTransactionErrorRateIndicator(),
+      });
+      mockRepository.findById.mockResolvedValueOnce(slo);
+      mockRulesClient.bulkDeleteRules.mockRejectedValueOnce(new Error('unexpected failure'));
+
+      await expect(deleteSLO.execute(slo.id)).resolves.not.toThrow();
+
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        'Failed to delete associated rules for SLO.',
+        expect.objectContaining({
+          labels: expect.objectContaining({ slo_id: slo.id, error_type: 'cleanup_failed' }),
+        })
+      );
     });
   });
 });

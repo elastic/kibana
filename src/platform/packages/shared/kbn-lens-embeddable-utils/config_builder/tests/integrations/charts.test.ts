@@ -22,7 +22,7 @@ const panels = JSON.parse(files || '[]') as Record<string, LensAttributes>[];
 
 const builder = new LensConfigBuilder(undefined, true);
 
-const stableChartTypes = new Set(['lnsHeatmap']);
+const stableChartTypes = new Set(['lnsHeatmap', 'lnsDatatable', 'lnsPie']);
 
 // These need special attention to be sure they are correctly handled in the transformations
 const skipList: Record<string, string[]> = {
@@ -56,7 +56,7 @@ describe('Integration panels', () => {
             it.each(active.map(({ panel_title: title, attributes }) => [title, attributes]))(
               'should convert the panel - %s',
               (_title, attributes) => {
-                const type = builder.getCompatibleType(chartType);
+                const type = builder.getCompatibleType(attributes);
                 const typeValidator = validator[type];
 
                 if (typeValidator) {

@@ -52,7 +52,6 @@ export const getDetectionRules = async (
   const detectionRules = Promise.all(
     rulesTags.map(async (ruleTags) => {
       return detectionRulesClient.find({
-        excludeFromPublicApi: false,
         options: {
           filter: convertRuleTagsToMatchAllKQL(ruleTags),
           searchFields: ['tags'],

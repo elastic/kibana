@@ -36,7 +36,7 @@ const BASE_COMPOSE_VALUES: ComposeFormValues = {
   metadata: { name: '', enabled: true },
   timeField: '@timestamp',
   schedule: { every: '1m', lookback: '5m' },
-  query: { format: 'standalone', breach: '' },
+  query: { format: 'composed', base: '', blocks: { breach: '' } },
   stateTransitionAlertDelayMode: 'immediate',
   stateTransitionRecoveryDelayMode: 'immediate',
 };
@@ -86,7 +86,6 @@ const renderRecoveryStep = (
   queryOverride?: RuleQuery
 ) => {
   const state = createState({
-    tracking: true,
     queryCommitted: true,
     ...stateOverrides,
   });
@@ -155,6 +154,10 @@ describe('RecoveryConditionStep', () => {
 
     fireEvent.click(screen.getByTestId('composeDiscoverEditRecovery'));
 
-    expect(dispatch).toHaveBeenCalledWith({ type: 'OPEN_CHILD_FOR_STEP', step: state.step });
+    expect(dispatch).toHaveBeenCalledWith({
+      type: 'OPEN_CHILD_FOR_STEP',
+      step: state.step,
+      isAlert: true,
+    });
   });
 });
