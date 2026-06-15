@@ -18,6 +18,7 @@ import type {
   PublishesTitle,
 } from '@kbn/presentation-publishing';
 import {
+  apiHasLibraryTransforms,
   apiHasSerializableState,
   apiHasType,
   apiHasUniqueId,
@@ -73,6 +74,7 @@ export class ExportJSONAction implements Action<EmbeddableApiContext> {
     if (!isApiCompatible(embeddable) || !this.exportJsonIntentId)
       throw new IncompatibleActionError();
 
+    const supportsByReference = apiHasLibraryTransforms(embeddable);
     const baseOptions = {
       objectType: embeddable.type,
       objectId: embeddable.uuid,
@@ -84,8 +86,13 @@ export class ExportJSONAction implements Action<EmbeddableApiContext> {
       },
       sharingData: {
         title: embeddable.title$.value ?? '',
-        exportJson: () => {
-          return embeddable.serializeState();
+        isByReference: supportsByReference && (await embeddable.canUnlinkFromLibrary()),
+        exportJson: (byReference: boolean = false) => {
+          if (supportsByReference && !byReference) {
+            return embeddable.getSerializedStateByValue();
+          } else {
+            return embeddable.serializeState();
+          }
         },
       },
     };

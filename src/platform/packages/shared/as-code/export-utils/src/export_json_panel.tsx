@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { compressToEncodedURIComponent } from 'lz-string';
 import React, { useEffect, useMemo, useState } from 'react';
-import { css } from '@emotion/react';
+
 import {
   EuiAccordion,
   EuiButton,
@@ -25,13 +26,11 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { CodeEditor, XJsonLang } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
-import { XJsonLang } from '@kbn/monaco';
-import { compressToEncodedURIComponent } from 'lz-string';
-import { CodeEditor } from '@kbn/code-editor';
-import type { ExportJsonSanitizedState } from './types';
 import { useExportJsonFlyoutContext } from './export_json_context_provider';
-import { buildCreateDashboardRequestForConsole } from './export_json_share_utils';
+import type { ExportJsonSanitizedState } from './types';
 
 export type ExportJsonPanelProps<SanitizedState extends object> =
   ExportJsonSanitizedState<SanitizedState> & {
@@ -179,7 +178,6 @@ function SuccessState({
     services.core.application?.capabilities?.dev_tools?.show && consoleHref !== undefined
   );
 
-  console.log('!!!!!!!!', { openInConsoleRequest, canShowDevTools, jsonValue });
   return (
     <EuiFlexGroup
       direction="column"
@@ -349,7 +347,6 @@ export const ExportJsonPanel = <State extends object, SanitizedState extends obj
     () => `POST kbn:${apiPath}\n${jsonValue}`,
     [apiPath, jsonValue]
   );
-  // console.log({ status, data, warnings, error, onRetry, openInConsoleRequest });
 
   return (
     <EuiFlexItem grow css={{ minHeight: 0 }}>

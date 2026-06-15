@@ -1,5 +1,5 @@
 {
-  "type": "shared-common",
+  "type": "shared-browser",
   "id": "@kbn/as-code-export-utils",
   "owner": "@elastic/kibana-presentation",
   "group": "platform",

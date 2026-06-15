@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import {
   EuiBetaBadge,
@@ -19,6 +19,7 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiSpacer,
+  EuiSwitch,
   EuiTitle,
   euiFullHeight,
 } from '@elastic/eui';
@@ -54,13 +55,14 @@ export const ExportJsonFlyout = <State extends object, SanitizedState extends ob
   closeFlyout: () => void;
   sanitizeState: SanitizeStateFunction<State, SanitizedState>;
 }) => {
+  const [exportFullState, setExportFullState] = useState<boolean>(false);
   const { objectType, objectTypeAlias, sharingData } = useShareTypeContext(
     'integration',
     'exportDerivatives'
   );
   const typedSharingData = sharingData as unknown as ExportJsonSharingData<State>;
-  const { title, exportJson } = typedSharingData;
-  const state = useMemo(() => exportJson(), [exportJson]);
+  const { title, exportJson, isByReference } = typedSharingData;
+  const state = useMemo(() => exportJson(!exportFullState), [exportJson, exportFullState]);
 
   const { status, data, warnings, error, retry } = useSanitizedState<State, SanitizedState>({
     state,
@@ -79,18 +81,31 @@ export const ExportJsonFlyout = <State extends object, SanitizedState extends ob
   return (
     <React.Fragment>
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle>
-          <h2>
-            <FormattedMessage
-              id="asCode.exportJson.flyoutTitle"
-              defaultMessage="Export {objectType} as {type}"
-              values={{
-                objectType: objectTypeAlias ?? objectType.toLocaleLowerCase(),
-                type: i18n.translate('asCode.exportJson.label', { defaultMessage: 'JSON' }),
-              }}
-            />
-          </h2>
-        </EuiTitle>
+        <EuiFlexGroup alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiTitle>
+              <h2>
+                <FormattedMessage
+                  id="asCode.exportJson.flyoutTitle"
+                  defaultMessage="Export {objectType} as {type}"
+                  values={{
+                    objectType: objectTypeAlias ?? objectType.toLocaleLowerCase(),
+                    type: i18n.translate('asCode.exportJson.label', { defaultMessage: 'JSON' }),
+                  }}
+                />
+              </h2>
+            </EuiTitle>
+          </EuiFlexItem>
+          {isByReference && (
+            <EuiFlexItem>
+              <EuiSwitch
+                label="View full state"
+                checked={exportFullState}
+                onChange={() => setExportFullState(!exportFullState)}
+              />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
         <React.Fragment>
           <EuiSpacer size="s" />
           <EuiBetaBadge

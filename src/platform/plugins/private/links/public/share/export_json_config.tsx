@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { ExportJsonFlyout, ExportJsonFlyoutContext } from '@kbn/as-code-export-utils';
 import type { ExportShareParameters } from '@kbn/share-plugin/public';
 import type { LinksState } from '../../server';
-import { coreServices } from '../services/kibana_services';
+import { coreServices, shareServices } from '../services/kibana_services';
 
 export const exportJsonConfig: ExportShareParameters = {
   label: ({ openFlyout }) => (
@@ -35,11 +35,12 @@ export const exportJsonConfig: ExportShareParameters = {
   },
   flyoutContent: ({ closeFlyout }) => {
     return (
-      <ExportJsonFlyoutContext.Provider value={{ services: { core: coreServices } }}>
+      <ExportJsonFlyoutContext.Provider
+        value={{ services: { core: coreServices, share: shareServices } }}
+      >
         <ExportJsonFlyout<LinksState, LinksState>
           closeFlyout={closeFlyout}
           sanitizeState={async (state: LinksState) => {
-            console.log(state);
             return { data: state, warnings: [] };
           }}
           apiPath={'/api/links'}
