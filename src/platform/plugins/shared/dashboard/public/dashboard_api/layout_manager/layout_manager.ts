@@ -133,21 +133,16 @@ export function initializeLayoutManager(
   /** Observable that publishes `true` when all children APIs are available */
   const childrenLoading$ = combineLatest([children$, layout$, viewModeManager.api.viewMode$]).pipe(
     map(([children, layout, viewMode]) => {
-      // gather the IDs of all panels in collapsed sections
-      const collapsedPanelIds = Object.entries(layout.panels).reduce((prev, [panelId, panel]) => {
-        return panel.grid.sectionId && isSectionCollapsed(panel.grid.sectionId)
-          ? [...prev, panelId]
-          : prev;
-      }, [] as string[]);
+      const renderedPanelCount = Object.keys(layout.panels).filter((uuid) => {
+        const sectionId = layout.panels[uuid].grid.sectionId;
+        return !(sectionId && isSectionCollapsed(sectionId)); // if a panel is collapseed, it does not render
+      }).length;
       const expectedChildCount =
-        Object.keys(layout.panels).length -
-        collapsedPanelIds.length + // if a panel is collapsed, we should not wait for its API to be available
-        (viewMode === 'print' ? 0 : Object.values(layout.pinnedPanels).length);
-      const currentChildCount = Object.values(children).filter(
-        // if a panel is collapsed, it should never trigger loading, even if the API exists
-        ({ uuid }) => !collapsedPanelIds.includes(uuid)
-      ).length;
-
+        renderedPanelCount + (viewMode === 'print' ? 0 : Object.keys(layout.pinnedPanels).length);
+      const currentChildCount = Object.keys(children).filter((uuid) => {
+        const sectionId = layout.panels[uuid]?.grid.sectionId;
+        return !(sectionId && isSectionCollapsed(sectionId)); // if a panel is collapsed, it should never trigger loading, even if the API exists
+      }).length;
       return expectedChildCount !== currentChildCount;
     }),
     distinctUntilChanged()
