@@ -19,7 +19,7 @@ import {
 import type { CompositeSLORepository } from './composite_slo_repository';
 import type { SLODefinitionRepository } from '../slo_definition_repository';
 import type { BurnRateWindow, SummaryClient } from '../summary_client';
-import { Duration, DurationUnit, type Summary } from '../../domain/models';
+import { type Summary } from '../../domain/models';
 
 const buildSummary = (overrides: Partial<Summary> = {}): Summary => ({
   status: 'HEALTHY',
