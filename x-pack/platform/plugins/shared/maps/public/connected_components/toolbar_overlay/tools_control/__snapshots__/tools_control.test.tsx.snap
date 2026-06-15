@@ -14,12 +14,12 @@ exports[`Should render cancel button when drawing 1`] = `
           paddingSize="none"
         >
           <EuiToolTip
+            anchorClassName="mapToolbarOverlay__buttonIcon-empty"
             content="Tools"
             disableScreenReaderOutput={true}
           >
             <EuiButtonIcon
               aria-label="Tools"
-              className="mapToolbarOverlay__buttonIcon-empty"
               color="text"
               iconType="wrench"
               isDisabled={false}
@@ -121,12 +121,12 @@ exports[`renders 1`] = `
       paddingSize="none"
     >
       <EuiToolTip
+        anchorClassName="mapToolbarOverlay__buttonIcon-empty"
         content="Tools"
         disableScreenReaderOutput={true}
       >
         <EuiButtonIcon
           aria-label="Tools"
-          className="mapToolbarOverlay__buttonIcon-empty"
           color="text"
           iconType="wrench"
           isDisabled={false}
