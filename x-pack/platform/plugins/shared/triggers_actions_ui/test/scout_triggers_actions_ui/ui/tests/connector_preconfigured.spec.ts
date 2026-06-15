@@ -47,7 +47,7 @@ const navigateToConnectors = async (page: ScoutPage, kbnUrl: KibanaUrl) => {
 
 const searchConnectors = async (page: ScoutPage, name: string) => {
   const searchBox = page.locator(CONNECTORS_LIST_SELECTORS.SEARCH_INPUT);
-  await searchBox.fill(name);
+  await searchBox.fill(name, { timeout: 30_000 });
   await searchBox.press('Enter');
   await page
     .locator('.euiBasicTable[data-test-subj="actionsTable"].euiBasicTable-loading')

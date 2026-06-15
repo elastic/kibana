@@ -46,7 +46,7 @@ export const navigateToConnectors = async (page: ScoutPage, kbnUrl: KibanaUrl) =
 
 export const searchConnectors = async (page: ScoutPage, name: string) => {
   const searchBox = page.locator(CONNECTORS_LIST_SELECTORS.SEARCH_INPUT);
-  await searchBox.fill(name);
+  await searchBox.fill(name, { timeout: 30_000 });
   await searchBox.press('Enter');
   // Two-phase wait: catch the loading state then wait for it to clear.
   // Without this, waitFor() can match the pre-search "not loading" table
