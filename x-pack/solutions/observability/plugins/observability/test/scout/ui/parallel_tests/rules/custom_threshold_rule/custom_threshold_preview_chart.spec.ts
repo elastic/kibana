@@ -7,25 +7,21 @@
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../../fixtures';
+import { CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS } from '../../../fixtures/constants';
 
 test.describe(
   'Custom threshold preview chart',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    const previewChartDataTestSubj = 'thresholdRulePreviewChart';
-
     test.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsAdmin();
-
       await pageObjects.rulesPage.goto();
-
-      await pageObjects.rulesPage.createRuleButton.click();
-      await pageObjects.rulesPage.observabilityCategory.click();
-      await pageObjects.rulesPage.customThresholdRuleTypeCard.click();
+      await pageObjects.rulesPage.openRuleTypeModal();
+      await pageObjects.rulesPage.clickCustomThresholdRuleType();
     });
 
     test('should render the empty chart only once at bootstrap', async ({ page }) => {
-      const previewChart = page.testSubj.locator(previewChartDataTestSubj);
+      const previewChart = page.testSubj.locator(CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.PREVIEW_CHART);
       await expect(previewChart.locator('[data-rendering-count="2"]')).toBeVisible();
     });
 
@@ -49,7 +45,9 @@ test.describe(
         'thresholdRuleCustomEquationEditorFieldText'
       );
       const lensFailure = page.testSubj.locator('embeddable-lens-failure');
-      const previewChart = page.testSubj.locator(previewChartDataTestSubj);
+      const previewChart = page.testSubj.locator(
+        CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.PREVIEW_CHART
+      );
 
       // Introduce an invalid equation to trigger the error state
       await customEquation.click();

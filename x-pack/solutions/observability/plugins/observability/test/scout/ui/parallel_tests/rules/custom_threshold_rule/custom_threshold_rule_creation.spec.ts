@@ -64,12 +64,12 @@ test.describe(
         await pageObjects.rulesPage.setCustomEquation('A - B');
       });
 
-      // Threshold, time range, and group-by are all set before the label.
-      // The expression_row debounces label changes by 300ms, capturing a snapshot of
-      // `expression` at fill-time. Setting label last ensures every other field is already
-      // committed in parent state when that debounce fires.
       await test.step('set threshold to notBetween 200 and 250', async () => {
         await pageObjects.rulesPage.setThreshold('notBetween', [200, 250]);
+      });
+
+      await test.step('set equation label', async () => {
+        await pageObjects.rulesPage.setEquationLabel('test equation');
       });
 
       await test.step('set time range to 2 days', async () => {
@@ -78,10 +78,6 @@ test.describe(
 
       await test.step('set group by', async () => {
         await pageObjects.rulesPage.setGroupBy('kibana.alert.rule.name');
-      });
-
-      await test.step('set equation label', async () => {
-        await pageObjects.rulesPage.setEquationLabel('test equation');
       });
 
       await test.step('save the rule and verify rule details page', async () => {
@@ -113,6 +109,8 @@ test.describe(
           filter: 'kibana.alert.status: "active"',
           name: 'B',
         });
+        expect(rule.params.groupBy).toEqual(['kibana.alert.rule.name']);
+        expect(rule.params.searchConfiguration).toBeDefined();
       });
     });
   }

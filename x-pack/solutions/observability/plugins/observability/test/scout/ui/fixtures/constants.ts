@@ -118,6 +118,9 @@ export const CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS = {
   // Popover close (o11y-flavoured closable popovers)
   CLOSE_POPOVER: 'o11yClosablePopoverTitleButton',
 
+  // Preview chart
+  PREVIEW_CHART: 'thresholdRulePreviewChart',
+
   // Rule Save
   RULE_SAVE_BUTTON: 'rulePageFooterSaveButton',
   CONFIRM_MODAL_BUTTON: 'confirmModalConfirmButton',

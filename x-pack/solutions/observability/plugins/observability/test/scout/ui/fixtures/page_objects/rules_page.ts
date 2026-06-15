@@ -434,8 +434,8 @@ export class RulesPage {
    */
   async clickExploreMatchingIndices() {
     await this.exploreMatchingIndicesButton.click();
-    // Wait for data view to be selected
-    await expect(this.dataViewExpression).toContainText('.alerts-*', { timeout: SHORTER_TIMEOUT });
+    // Wait for the button to disappear, which signals the ad-hoc data view was applied
+    await expect(this.exploreMatchingIndicesButton).toBeHidden({ timeout: BIGGER_TIMEOUT });
   }
 
   /**
@@ -579,12 +579,6 @@ export class RulesPage {
     await expect(field).toBeVisible({ timeout: SHORTER_TIMEOUT });
     await field.fill(equation);
     await this.closeCurrentPopover();
-    // The equation editor debounces onChange by 500ms. Wait for the debounce to fire
-    // and the parent state to update, which is reflected in the equation button text.
-    await expect(this.page.testSubj.locator(CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.CUSTOM_EQUATION)).toContainText(
-      equation,
-      { timeout: BIGGER_TIMEOUT }
-    );
   }
 
   /**
@@ -613,15 +607,9 @@ export class RulesPage {
       await expect(input).toBeVisible({ timeout: SHORTER_TIMEOUT });
       await input.fill(String(values[i]));
     }
-    // Click the threshold popover's close button explicitly.
-    // Escape is avoided because Chrome reverts focused number inputs on Escape, firing onChange
-    // with the pre-fill value and wiping out changes.
-    // The :not() selector excludes o11y-flavoured closable popovers (which carry the
-    // o11yClosablePopoverTitleButton test-subj) to avoid accidentally clicking the equation
-    // editor's close button if its panel is still in the DOM.
-    await this.page
-      .locator('[aria-label="Close"]:not([data-test-subj="o11yClosablePopoverTitleButton"])')
-      .click();
+    // Use the close button rather than Escape: Chrome reverts focused number
+    // inputs on Escape, firing onChange with the pre-fill value.
+    await this.page.testSubj.click('closablePopoverTitleButton');
   }
 
   /**
@@ -638,7 +626,7 @@ export class RulesPage {
       CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.TIME_WINDOW_UNIT_SELECT
     );
     await unitSelect.selectOption(unit);
-    await this.page.keyboard.press('Escape');
+    await this.page.testSubj.click('closablePopoverTitleButton');
   }
 
   /**

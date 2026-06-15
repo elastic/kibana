@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ReactElement } from 'react';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type { AggregationType, IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { ThresholdExpression } from '@kbn/triggers-actions-ui-plugin/public';
 import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
@@ -67,6 +67,11 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
   const isMetricPct = useMemo(() => isPercent(metrics), [metrics]);
   const [label, setLabel] = useState<string | undefined>(expression?.label || undefined);
 
+  // Keep a ref that always points to the latest expression prop so debounced
+  // callbacks never close over a stale snapshot.
+  const expressionRef = useRef(expression);
+  expressionRef.current = expression;
+
   const updateComparator = useCallback(
     (c?: string) => {
       setRuleParams(expressionId, { ...expression, comparator: c as COMPARATORS });
@@ -96,9 +101,16 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
     },
     [expressionId, setRuleParams]
   );
+  // Pass only the new label value; read the rest of the expression from the ref
+  // at fire time so the 300ms delay never overwrites unrelated fields.
   const debouncedLabelChange = useMemo(
-    () => debounce(handleCustomMetricChange, 300),
-    [handleCustomMetricChange]
+    () =>
+      debounce((labelValue: string) => {
+        setRuleParams(expressionId, { ...expressionRef.current, label: labelValue });
+      }, 300),
+    // expressionRef is a stable ref object; expressionId and setRuleParams are stable too
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [expressionId, setRuleParams]
   );
 
   const criticalThresholdExpression = (
@@ -121,9 +133,9 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
   const handleLabelChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       setLabel(e.target.value);
-      debouncedLabelChange({ ...expression, label: e.target.value });
+      debouncedLabelChange(e.target.value);
     },
-    [debouncedLabelChange, expression]
+    [debouncedLabelChange]
   );
   return (
     <>
