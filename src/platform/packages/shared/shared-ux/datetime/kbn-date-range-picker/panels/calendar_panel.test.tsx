@@ -96,10 +96,6 @@ const feb2026 = (day: number, h: number, m: number, s = 0, ms = 0) =>
 const feb2026Display = (day: number, h: number, m: number, s = 0, ms = 0) =>
   formatAbsoluteDate(feb2026(day, h, m, s, ms));
 
-/** Builds the UTC ISO string for a given Feb 2026 date. */
-const feb2026ISO = (day: number, h: number, m: number, s = 0, ms = 0) =>
-  feb2026(day, h, m, s, ms).toISOString();
-
 /** Click a day by its number in the February 2026 calendar. */
 const clickDay = (day: number) =>
   fireEvent.click(screen.getByRole('button', { name: String(day) }));
@@ -298,7 +294,7 @@ describe('CalendarPanel', () => {
       expect(screen.getByRole('button', { name: 'Apply' })).not.toBeDisabled();
     });
 
-    it('calls applyRange with UTC ISO bounds and formatted display text', () => {
+    it('delegates to applyRange() so the current input range is applied', () => {
       mockUseDateRangePickerContext.mockReturnValue(makeContextNoDates());
       renderWithEuiTheme(<CalendarPanel />);
 
@@ -306,13 +302,8 @@ describe('CalendarPanel', () => {
       clickDay(15);
       fireEvent.click(screen.getByRole('button', { name: 'Apply' }));
 
-      expect(applyRange).toHaveBeenCalledWith(
-        {
-          start: feb2026ISO(10, 0, 0),
-          end: feb2026ISO(15, 23, 59, 59, 999),
-        },
-        formatDateRange(feb2026(10, 0, 0), feb2026(15, 23, 59, 59, 999))
-      );
+      // Applies the resolved range from `text` (matching the Enter key)
+      expect(applyRange).toHaveBeenCalledWith();
     });
 
     it('calls onPresetSave when Save as preset is checked', () => {
@@ -338,6 +329,32 @@ describe('CalendarPanel', () => {
       fireEvent.click(screen.getByRole('button', { name: 'Apply' }));
 
       expect(onPresetSave).not.toHaveBeenCalled();
+    });
+
+    it('preserves manually edited times when applying (does not floor to day boundaries)', () => {
+      // Mid-day times, clearly distinct from the 00:00:00 / 23:59:59 day
+      // boundaries, simulate the user editing the time in the input after
+      // selecting days in the calendar.
+      const editedStart = feb2026(11, 9, 15, 42, 0);
+      const editedEnd = feb2026(13, 17, 48, 8, 0);
+
+      mockUseDateRangePickerContext.mockReturnValue(
+        makeContext([DATE_TYPE_ABSOLUTE, DATE_TYPE_ABSOLUTE], editedStart, editedEnd)
+      );
+      renderWithEuiTheme(<CalendarPanel />);
+
+      fireEvent.click(screen.getByRole('checkbox', { name: 'Save as preset' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Apply' }));
+
+      expect(applyRange).toHaveBeenCalledWith();
+
+      // The edited times are preserved when saving as a preset, not floored
+      expect(onPresetSave).toHaveBeenCalledWith(
+        expect.objectContaining({
+          start: editedStart.toISOString(),
+          end: editedEnd.toISOString(),
+        })
+      );
     });
   });
 

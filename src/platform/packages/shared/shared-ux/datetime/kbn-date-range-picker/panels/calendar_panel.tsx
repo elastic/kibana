@@ -11,7 +11,6 @@ import React, { useState, useCallback, useRef, useMemo, useEffect } from 'react'
 import type { DateRange } from 'react-day-picker';
 import { EuiButton, EuiCheckbox, EuiToolTip, useGeneratedHtmlId } from '@elastic/eui';
 
-import type { TimeRangeBounds } from '../types';
 import { Calendar } from '../calendar';
 import { DATE_TYPE_ABSOLUTE } from '../constants';
 import {
@@ -88,20 +87,6 @@ export function CalendarPanel() {
     [getOrderedDates, timePrecision]
   );
 
-  const absoluteRange = useMemo(() => {
-    if (!calendarRange?.from || !calendarRange?.to) return null;
-
-    const { start, end } = getOrderedDates(calendarRange.from, calendarRange.to);
-
-    return {
-      start: start.toISOString(),
-      end: end.toISOString(),
-      startDate: start,
-      endDate: end,
-      inputText: formatDateRange(start, end, timePrecision),
-    };
-  }, [calendarRange, getOrderedDates, timePrecision]);
-
   const handleRangeChange = useCallback(
     (newRange: DateRange | undefined) => {
       // Complete range visible — user is starting a new selection
@@ -131,27 +116,29 @@ export function CalendarPanel() {
   );
 
   const isRangeComplete = Boolean(calendarRange?.from && calendarRange?.to);
-  const isApplyDisabled = !isRangeComplete || !absoluteRange;
+  const isApplyDisabled = !isRangeComplete;
 
   const onApply = useCallback(() => {
-    if (!absoluteRange) return;
+    // Apply the current input range exactly as pressing Enter does: defer to the
+    // context, which applies the resolved range from `text`. This preserves any
+    // manual time edits made after selecting days in the calendar, instead of
+    // re-flooring the range to 00:00:00 / 23:59:59.
+    applyRange();
 
-    const rangeBounds: TimeRangeBounds = {
-      start: absoluteRange.start,
-      end: absoluteRange.end,
-    };
+    const { startDate, endDate } = timeRange;
+    if (onPresetSave && saveAsPreset && startDate && endDate) {
+      const start = startDate.toISOString();
+      const end = endDate.toISOString();
 
-    applyRange(rangeBounds, absoluteRange.inputText);
-
-    if (onPresetSave && saveAsPreset) {
       onPresetSave({
-        ...rangeBounds,
+        start,
+        end,
         label: timeRangeToDisplayText({
-          value: absoluteRange.inputText,
-          start: absoluteRange.start,
-          end: absoluteRange.end,
-          startDate: absoluteRange.startDate,
-          endDate: absoluteRange.endDate,
+          value: formatDateRange(startDate, endDate, timePrecision),
+          start,
+          end,
+          startDate,
+          endDate,
           type: [DATE_TYPE_ABSOLUTE, DATE_TYPE_ABSOLUTE],
           isNaturalLanguage: false,
           isInvalid: false,
@@ -160,7 +147,7 @@ export function CalendarPanel() {
         }),
       });
     }
-  }, [absoluteRange, applyRange, onPresetSave, saveAsPreset]);
+  }, [applyRange, onPresetSave, saveAsPreset, timeRange, timePrecision]);
 
   const applyButton = (
     <EuiButton
