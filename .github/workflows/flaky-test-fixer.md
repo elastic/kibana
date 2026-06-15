@@ -83,7 +83,6 @@ sandbox:
   agent: awf
 
 safe-outputs:
-  staged: true
   activation-comments: false
   report-failure-as-issue: false
   add-comment:
@@ -105,7 +104,7 @@ timeout-minutes: 90
 
 # Flaky Test Fixer
 
-Open one draft PR with the smallest test-side fix for this flaky-test issue. If you cannot find a credible fix, stop without opening a PR.
+Open one draft PR with the smallest test-side fix for this flaky-test issue. Don't open the PR if you find an open PR with an identical or similar fix, or you didn't find a credible fix.
 
 ## Steps
 
