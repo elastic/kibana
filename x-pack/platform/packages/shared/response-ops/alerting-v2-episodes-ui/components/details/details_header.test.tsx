@@ -15,7 +15,7 @@ import { AlertEpisodeDetailsHeader } from './details_header';
 const mockRule = {
   id: 'rule-1',
   metadata: { name: 'Rule 1', description: 'Some description' },
-} as unknown as RuleResponse;
+} as RuleResponse;
 
 const defaultProps = {
   isLoadingEpisode: false,

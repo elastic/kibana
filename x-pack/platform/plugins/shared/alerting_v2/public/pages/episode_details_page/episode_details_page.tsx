@@ -362,12 +362,8 @@ export function EpisodeDetailsPage() {
           }}
         >
           {isRuleNotFound ? (
-            <div
-              css={css`
-                padding: ${euiTheme.size.l};
-                padding-bottom: 0;
-              `}
-            >
+            <>
+              <EuiSpacer size="l" />
               <EuiCallOut
                 announceOnMount
                 title={RULE_NOT_FOUND_CALLOUT_TITLE}
@@ -377,7 +373,8 @@ export function EpisodeDetailsPage() {
               >
                 <p>{RULE_NOT_FOUND_CALLOUT_BODY}</p>
               </EuiCallOut>
-            </div>
+              <EuiSpacer size="l" />
+            </>
           ) : null}
           <EuiSplitPanel.Outer
             direction="row"

@@ -14,7 +14,7 @@ import { AlertEpisodesRelated } from './related';
 const mockRule = {
   id: 'rule-1',
   metadata: { name: 'Test Rule' },
-} as unknown as RuleResponse;
+} as RuleResponse;
 
 jest.mock('./group_subsection', () => ({
   RelatedEpisodesGroupSubsection: () => <div data-test-subj="mockGroupSubsection" />,

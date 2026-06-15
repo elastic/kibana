@@ -40,7 +40,7 @@ const mockUseFetch = jest.mocked(useFetchSameGroupEpisodesQuery);
 
 const mockRuleProps = {
   ruleId: 'rule-1',
-  rule: { id: 'rule-1', metadata: { name: 'Test Rule' } } as unknown as RuleResponse,
+  rule: { id: 'rule-1', metadata: { name: 'Test Rule' } } as RuleResponse,
   isRuleNotFound: false,
 };
 const mockGetEpisodeDetailsHref = (id: string) => `/base/${id}`;
