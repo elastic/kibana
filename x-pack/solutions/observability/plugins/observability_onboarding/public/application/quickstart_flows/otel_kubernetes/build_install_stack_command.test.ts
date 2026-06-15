@@ -109,20 +109,37 @@ helm upgrade --install opentelemetry-kube-stack open-telemetry/opentelemetry-kub
   });
 
   describe('wired streams', () => {
-    it('does not include wired streams config even if an old caller passes the deprecated flag', () => {
-      const argsWithDeprecatedWiredFlag = {
+    it('does not include wired streams config when useWiredStreams is false', () => {
+      const command = buildInstallStackCommand({
         ...defaultArgs,
-        useWiredStreams: true,
-      };
-
-      const command = buildInstallStackCommand(argsWithDeprecatedWiredFlag);
+        useWiredStreams: false,
+      });
 
       expect(command).not.toContain('resource\\/wired_streams');
       expect(command).not.toContain('elasticsearch.index');
-      expect(command).not.toContain('logs\\/node.processors[9]=resource/wired_streams');
+    });
+
+    it('routes daemon logs to wired streams when useWiredStreams is true', () => {
+      const command = buildInstallStackCommand({
+        ...defaultArgs,
+        useWiredStreams: true,
+      });
+
+      expect(command).toContain('collectors.daemon.config.processors.resource\\/wired_streams');
+      expect(command).toContain('elasticsearch.index');
+      expect(command).toContain(
+        'collectors.daemon.config.service.pipelines.logs\\/node.processors[9]=resource/wired_streams'
+      );
+    });
+
+    it('assigns onboarding_id before wired_streams in the logs pipeline', () => {
+      const command = buildInstallStackCommand({
+        ...defaultArgs,
+        useWiredStreams: true,
+      });
+
       expect(command).toContain('logs\\/node.processors[8]=resource/onboarding_id');
-      expect(command).not.toContain('collectors.gateway.config');
-      expect(command).not.toContain('logs_index=logs');
+      expect(command).toContain('logs\\/node.processors[9]=resource/wired_streams');
     });
   });
 });

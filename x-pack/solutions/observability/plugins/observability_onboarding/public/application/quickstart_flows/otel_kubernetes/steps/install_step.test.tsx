@@ -50,6 +50,23 @@ describe('OtelKubernetesInstallStep', () => {
     expect(
       screen.getByTestId('observabilityOnboardingOtelKubernetesInstallStackSnippet')
     ).toHaveAttribute('data-secrets', 'encoded-api-key');
+    expect(
+      screen.getByTestId('observabilityOnboardingOtelKubernetesPanelCertManagerInfoTip')
+    ).toBeInTheDocument();
     expect(screen.queryByTestId('observabilityOnboardingIngestionModeSelector')).toBeNull();
+  });
+
+  it('does not render a duplicate copy button outside the install command', () => {
+    renderWithHostPageProviders(
+      <OtelKubernetesInstallStep
+        installStackCommand="helm upgrade --install opentelemetry-kube-stack"
+        valuesFileUrl="https://example.com/values.yaml"
+        secretValues={['encoded-api-key']}
+      />
+    );
+
+    expect(
+      screen.queryByTestId('observabilityOnboardingOtelKubernetesPanelInstallStackCopyToClipboard')
+    ).not.toBeInTheDocument();
   });
 });

@@ -27,24 +27,21 @@ describe('buildHelmCommand', () => {
     expect(command).toContain('helm repo update elastic');
     expect(command).toContain('helm install elastic-agent elastic/elastic-agent');
     expect(command).toContain('--version 9.1.0');
-    expect(command).toContain('--set outputs.default.url="https://elasticsearch.example.com:9200"');
+    expect(command).toContain(
+      '--set outputs.default.url=https:\\/\\/elasticsearch.example.com:9200'
+    );
     expect(command).toContain('--set kubernetes.onboardingID=test-onboarding-id');
     expect(command).toContain('--set kubernetes.enabled=true');
     expect(command).toContain('--set outputs.default.type=ESPlainAuthAPI');
     expect(command).not.toContain('_write_to_logs_streams');
   });
 
-  it('formats the command across lines for readable bash syntax highlighting', () => {
+  it('formats the command as the existing copyable one-line command', () => {
     const command = buildHelmCommand(baseParams);
 
-    expect(command).toContain('helm repo add elastic https://helm.elastic.co/ && \\');
-    expect(command).toContain('\nhelm repo update elastic && \\');
-    expect(command).toContain(
-      '\nhelm install elastic-agent elastic/elastic-agent --version 9.1.0 \\'
-    );
-    expect(command).toContain(
-      '\n  --set outputs.default.url="https://elasticsearch.example.com:9200" \\'
-    );
+    expect(command).not.toContain('\n');
+    expect(command).toContain('helm repo add elastic https://helm.elastic.co/ &&');
+    expect(command).toContain('helm repo update elastic &&');
   });
 
   it('does not include wired streams config when useWiredStreams is false', () => {
@@ -98,14 +95,14 @@ describe('buildHelmCommand', () => {
     expect(command).toContain("--set 'outputs.default._write_to_logs_streams=true'");
   });
 
-  it('quotes the elasticsearch URL without escaping forward slashes', () => {
+  it('escapes forward slashes in elasticsearch URL', () => {
     const command = buildHelmCommand({
       ...baseParams,
       elasticsearchUrl: 'https://my-cluster.elasticsearch.com:9200/path',
     });
 
     expect(command).toContain(
-      '--set outputs.default.url="https://my-cluster.elasticsearch.com:9200/path"'
+      '--set outputs.default.url=https:\\/\\/my-cluster.elasticsearch.com:9200\\/path'
     );
   });
 });

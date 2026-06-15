@@ -8,7 +8,6 @@
 import React, { useCallback, useMemo } from 'react';
 import {
   EuiCode,
-  EuiCodeBlock,
   EuiLink,
   EuiSpacer,
   EuiTabbedContent,
@@ -35,7 +34,15 @@ const KUBE_STACK_DEFAULT_CONFIG_DOC_URL =
 const ELASTICSEARCH_OTLP_ENDPOINT_DOC_URL =
   'https://www.elastic.co/docs/manage-data/ingest/otlp-endpoint';
 
-const buildManagedOtlpExporterYaml = (onboardingId: string) => `processors:
+const buildManagedOtlpExporterYaml = ({
+  onboardingId,
+  managedOtlpEndpointUrl,
+  apiKeyEncoded,
+}: {
+  onboardingId: string;
+  managedOtlpEndpointUrl: string;
+  apiKeyEncoded: string;
+}) => `processors:
   resource/onboarding_id:
     attributes:
       - key: onboarding.id
@@ -44,18 +51,18 @@ const buildManagedOtlpExporterYaml = (onboardingId: string) => `processors:
 
 exporters:
   otlp/elastic:
-    endpoint: "\${ELASTIC_OTLP_ENDPOINT}"
+    endpoint: "${managedOtlpEndpointUrl}"
     headers:
-      Authorization: "ApiKey \${ELASTIC_API_KEY}"
+      Authorization: "ApiKey ${apiKeyEncoded}"
     sending_queue:
       enabled: true
       sizer: bytes
-      queue_size: 50_000_000
+      queue_size: 50000000
       block_on_overflow: true
       batch:
         flush_timeout: 1s
-        min_size: 1_000_000
-        max_size: 4_000_000
+        min_size: 1000000
+        max_size: 4000000
 
 service:
   pipelines:
@@ -69,116 +76,81 @@ service:
       processors: [resource/onboarding_id]
       exporters: [otlp/elastic]`;
 
-const buildExistingCollectorSecretSnippet = ({
-  managedOtlpEndpointUrl,
-  apiKeyEncoded,
-}: {
-  managedOtlpEndpointUrl: string;
-  apiKeyEncoded: string;
-}) => `kubectl create secret generic elastic-otel-env \\
-  --namespace <collector-namespace> \\
-  --from-literal=ELASTIC_OTLP_ENDPOINT='${managedOtlpEndpointUrl}' \\
-  --from-literal=ELASTIC_API_KEY='${apiKeyEncoded}'
-
-# Reference the Secret from your collector environment. Adapt the namespace,
-# resource name, and rollout command to your Helm, Operator, or Deployment setup.
-env:
-  - name: ELASTIC_OTLP_ENDPOINT
-    valueFrom:
-      secretKeyRef:
-        name: elastic-otel-env
-        key: ELASTIC_OTLP_ENDPOINT
-  - name: ELASTIC_API_KEY
-    valueFrom:
-      secretKeyRef:
-        name: elastic-otel-env
-        key: ELASTIC_API_KEY`;
-
 const ManagedExistingCollectorContent: React.FC<{
   onboardingId?: string;
   managedOtlpEndpointUrl?: string;
   apiKeyEncoded?: string;
-}> = ({ onboardingId, managedOtlpEndpointUrl, apiKeyEncoded }) => (
-  <>
-    <EuiSpacer size="l" />
-    <EuiTitle size="xs">
-      <h3>
-        {i18n.translate(
-          'xpack.observability_onboarding.kubernetes.collectorSetup.managedExistingCollectorTitle',
-          { defaultMessage: 'Add a managed OTLP exporter' }
-        )}
-      </h3>
-    </EuiTitle>
-    <EuiSpacer size="s" />
-    <EuiText size="s">
-      <p>
-        <FormattedMessage
-          id="xpack.observability_onboarding.kubernetes.collectorSetup.managedExistingCollectorDescription"
-          defaultMessage="Merge this configuration fragment into a collector config that already gathers the Kubernetes logs, metrics, and traces you want to send to Elastic."
-        />
-      </p>
-      <p>
-        <FormattedMessage
-          id="xpack.observability_onboarding.kubernetes.collectorSetup.managedExistingCollectorOnboardingIdDescription"
-          defaultMessage="Keep your current receivers and add this processor and exporter to the logs, metrics, and traces pipelines you want to send to Elastic. The {processor} processor adds {onboardingId} so Kibana can confirm data from this onboarding flow."
-          values={{
-            processor: <EuiCode>resource/onboarding_id</EuiCode>,
-            onboardingId: <EuiCode>onboarding.id</EuiCode>,
-          }}
-        />
-      </p>
-      <p>
-        <FormattedMessage
-          id="xpack.observability_onboarding.kubernetes.collectorSetup.managedExistingCollectorEnvironmentDescription"
-          defaultMessage="Create or adapt a Secret in the namespace where your collector runs, then reference ELASTIC_OTLP_ENDPOINT and ELASTIC_API_KEY from your collector environment. Apply the change with the Helm, Operator, or Deployment-specific rollout that manages your collector."
-        />
-      </p>
-      <p>
-        <FormattedMessage
-          id="xpack.observability_onboarding.kubernetes.collectorSetup.managedExistingCollectorReceiversDescription"
-          defaultMessage="For full Kubernetes observability, make sure your collector configuration includes maintained receiver examples such as {k8sCluster}, {kubeletstats}, {hostmetrics}, {fileLog}, and OTLP where applicable."
-          values={{
-            k8sCluster: <EuiCode>k8s_cluster</EuiCode>,
-            kubeletstats: <EuiCode>kubeletstats</EuiCode>,
-            hostmetrics: <EuiCode>hostmetrics</EuiCode>,
-            fileLog: <EuiCode>file_log</EuiCode>,
-          }}
-        />
-      </p>
-    </EuiText>
-    <EuiSpacer />
-    {onboardingId ? (
-      <EuiCodeBlock
-        paddingSize="m"
-        language="yaml"
-        isCopyable
-        data-test-subj="observabilityOnboardingKubernetesExistingCollectorManagedSnippet"
-      >
-        {buildManagedOtlpExporterYaml(onboardingId)}
-      </EuiCodeBlock>
-    ) : (
+}> = ({ onboardingId, managedOtlpEndpointUrl, apiKeyEncoded }) => {
+  const managedSnippet =
+    onboardingId && managedOtlpEndpointUrl && apiKeyEncoded
+      ? {
+          value: buildManagedOtlpExporterYaml({
+            onboardingId,
+            managedOtlpEndpointUrl,
+            apiKeyEncoded,
+          }),
+          secrets: [managedOtlpEndpointUrl, apiKeyEncoded],
+        }
+      : undefined;
+
+  return (
+    <>
+      <EuiSpacer size="l" />
+      <EuiTitle size="xs">
+        <h3>
+          {i18n.translate(
+            'xpack.observability_onboarding.kubernetes.collectorSetup.managedExistingCollectorTitle',
+            { defaultMessage: 'Add a managed OTLP exporter' }
+          )}
+        </h3>
+      </EuiTitle>
+      <EuiSpacer size="s" />
       <EuiText size="s">
         <p>
           <FormattedMessage
-            id="xpack.observability_onboarding.kubernetes.collectorSetup.managedExistingCollectorPreparingMessage"
-            defaultMessage="Preparing your collector configuration. The snippet will appear when the onboarding flow is ready."
+            id="xpack.observability_onboarding.kubernetes.collectorSetup.managedExistingCollectorDescription"
+            defaultMessage="Add the following OTLP exporter to your collector config. Ensure your receivers include {k8sCluster}, {kubeletstats}, {hostmetrics}, {fileLog}, {prometheus}, and OTLP where applicable for full Kubernetes observability."
+            values={{
+              k8sCluster: <EuiCode>k8s_cluster</EuiCode>,
+              kubeletstats: <EuiCode>kubeletstats</EuiCode>,
+              hostmetrics: <EuiCode>hostmetrics</EuiCode>,
+              fileLog: <EuiCode>file_log</EuiCode>,
+              prometheus: <EuiCode>prometheus</EuiCode>,
+            }}
+          />
+        </p>
+        <p>
+          <FormattedMessage
+            id="xpack.observability_onboarding.kubernetes.collectorSetup.managedExistingCollectorOnboardingIdDescription"
+            defaultMessage="The {processor} processor sets {onboardingId} so Kibana can confirm data from this onboarding flow."
+            values={{
+              processor: <EuiCode>resource/onboarding_id</EuiCode>,
+              onboardingId: <EuiCode>onboarding.id</EuiCode>,
+            }}
           />
         </p>
       </EuiText>
-    )}
-    {managedOtlpEndpointUrl && apiKeyEncoded ? (
-      <>
-        <EuiSpacer />
+      <EuiSpacer />
+      {managedSnippet ? (
         <MaskedCodeBlock
-          value={buildExistingCollectorSecretSnippet({ managedOtlpEndpointUrl, apiKeyEncoded })}
-          secrets={[managedOtlpEndpointUrl, apiKeyEncoded]}
-          language="bash"
-          dataTestSubj="observabilityOnboardingKubernetesExistingCollectorSecretSnippet"
+          value={managedSnippet.value}
+          secrets={managedSnippet.secrets}
+          language="yaml"
+          dataTestSubj="observabilityOnboardingKubernetesExistingCollectorManagedSnippet"
         />
-      </>
-    ) : null}
-  </>
-);
+      ) : (
+        <EuiText size="s">
+          <p>
+            <FormattedMessage
+              id="xpack.observability_onboarding.kubernetes.collectorSetup.managedExistingCollectorPreparingMessage"
+              defaultMessage="Preparing your collector configuration. The snippet will appear when the onboarding flow is ready."
+            />
+          </p>
+        </EuiText>
+      )}
+    </>
+  );
+};
 
 const NonManagedExistingCollectorContent: React.FC = () => (
   <>

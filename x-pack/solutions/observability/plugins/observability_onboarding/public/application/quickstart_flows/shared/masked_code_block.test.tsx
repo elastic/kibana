@@ -11,14 +11,54 @@ import React from 'react';
 import { renderWithHostPageProviders } from '../../pages/host/__tests__/test_helpers';
 import { MaskedCodeBlock, maskSecretValues } from './masked_code_block';
 
-jest.mock('./copy_to_clipboard_button', () => ({
-  CopyToClipboardButton: ({
-    textToCopy,
+jest.mock('@elastic/eui', () => ({
+  ...jest.requireActual('@elastic/eui'),
+  EuiButtonIcon: ({
+    'aria-label': ariaLabel,
+    'aria-pressed': ariaPressed,
+    'data-test-subj': dataTestSubj,
+    iconType,
+    onClick,
+  }: {
+    'aria-label': string;
+    'aria-pressed'?: boolean;
+    'data-test-subj'?: string;
+    iconType: string;
+    onClick: () => void;
+  }) => (
+    <button
+      aria-label={ariaLabel}
+      aria-pressed={ariaPressed}
+      data-icon-type={iconType}
+      data-test-subj={dataTestSubj}
+      onClick={onClick}
+    />
+  ),
+  EuiCodeBlock: ({
+    children,
+    overflowHeight,
     'data-test-subj': dataTestSubj,
   }: {
-    textToCopy: string;
+    children: React.ReactNode;
+    overflowHeight?: number | string;
     'data-test-subj'?: string;
-  }) => <button data-test-subj={dataTestSubj} data-text-to-copy={textToCopy} />,
+  }) => (
+    <div data-test-subj={dataTestSubj}>
+      {children}
+      {overflowHeight ? <button>Expand</button> : null}
+    </div>
+  ),
+  EuiCopy: ({
+    textToCopy,
+    children,
+  }: {
+    textToCopy: string;
+    children: (copy: () => void) => React.ReactNode;
+  }) => (
+    <span data-test-subj="mockEuiCopy" data-text-to-copy={textToCopy}>
+      {children(jest.fn())}
+    </span>
+  ),
 }));
 
 describe('MaskedCodeBlock', () => {
@@ -34,7 +74,7 @@ describe('MaskedCodeBlock', () => {
     expect(maskSecretValues('token-abc token', ['token', 'token-abc'])).toBe('******** ********');
   });
 
-  it('hides secrets by default while copying the unmasked snippet', async () => {
+  it('hides secrets by default while copying the unmasked snippet from compact controls', async () => {
     const snippet = "kubectl create secret --from-literal=api_key='real-api-key'";
 
     renderWithHostPageProviders(
@@ -42,6 +82,7 @@ describe('MaskedCodeBlock', () => {
         value={snippet}
         secrets={['real-api-key']}
         language="bash"
+        overflowHeight={300}
         dataTestSubj="testMaskedSnippet"
       />
     );
@@ -50,13 +91,21 @@ describe('MaskedCodeBlock', () => {
       "kubectl create secret --from-literal=api_key='********'"
     );
     expect(screen.queryByText(/real-api-key/)).not.toBeInTheDocument();
-    expect(screen.getByTestId('testMaskedSnippetCopyButton')).toHaveAttribute(
-      'data-text-to-copy',
-      snippet
+    expect(screen.queryByText('Copy to clipboard')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Expand' })).not.toBeInTheDocument();
+    expect(screen.getByTestId('testMaskedSnippetCopyButtonIcon')).toBeInTheDocument();
+    expect(screen.getByTestId('mockEuiCopy')).toHaveAttribute('data-text-to-copy', snippet);
+    expect(screen.getByTestId('testMaskedSnippetShowSecretsButton')).toHaveAttribute(
+      'data-icon-type',
+      'eye'
     );
 
-    await userEvent.click(screen.getByTestId('testMaskedSnippetShowSecretsSwitch'));
+    await userEvent.click(screen.getByTestId('testMaskedSnippetShowSecretsButton'));
 
     expect(screen.getByTestId('testMaskedSnippet')).toHaveTextContent(snippet);
+    expect(screen.getByTestId('testMaskedSnippetShowSecretsButton')).toHaveAttribute(
+      'data-icon-type',
+      'eyeSlash'
+    );
   });
 });

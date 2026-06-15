@@ -24,35 +24,37 @@ export function buildHelmCommand({
   elasticAgentVersionInfo,
   useWiredStreams,
 }: Params) {
-  const parameters = [
-    '  -n kube-system',
-    `  --set outputs.default.url="${elasticsearchUrl}"`,
-    `  --set kubernetes.onboardingID=${onboardingId}`,
-    '  --set kubernetes.enabled=true',
-    '  --set outputs.default.type=ESPlainAuthAPI',
-    `  --set outputs.default.api_key="$(echo "${encodedApiKey}" | base64 -d)"`,
-    ...(metricsEnabled
-      ? []
-      : [
-          '  --set kubernetes.state.enabled=false',
-          '  --set kubernetes.metrics.enabled=false',
-          '  --set kubernetes.apiserver.enabled=false',
-        ]),
-    ...(useWiredStreams
-      ? [
-          "  --set 'outputs.default._write_to_logs_streams=true'",
-          "  --set 'kubernetes.containers.logs.vars.processors[0].add_fields.target=@metadata'",
-          "  --set 'kubernetes.containers.logs.vars.processors[0].add_fields.fields.raw_index=logs.ecs'",
-        ]
-      : []),
-  ];
+  const escapedElasticsearchUrl = elasticsearchUrl.replace(/\//g, '\\/');
 
-  return [
-    'helm repo add elastic https://helm.elastic.co/ && \\',
-    'helm repo update elastic && \\',
-    `helm install elastic-agent elastic/elastic-agent --version ${elasticAgentVersionInfo.agentBaseVersion} \\`,
-    ...parameters.map((parameter, index) =>
-      index === parameters.length - 1 ? parameter : `${parameter} \\`
-    ),
-  ].join('\n');
+  const metricsParameters = metricsEnabled
+    ? ''
+    : `
+    --set kubernetes.state.enabled=false
+    --set kubernetes.metrics.enabled=false
+    --set kubernetes.apiserver.enabled=false
+  `;
+
+  const wiredStreamsConfig = useWiredStreams
+    ? `
+    --set 'outputs.default._write_to_logs_streams=true' \
+    --set 'kubernetes.containers.logs.vars.processors[0].add_fields.target=@metadata' \
+    --set 'kubernetes.containers.logs.vars.processors[0].add_fields.fields.raw_index=logs.ecs'
+  `
+    : '';
+
+  return `
+    helm repo add elastic https://helm.elastic.co/ && \
+    helm repo update elastic && \
+    helm install elastic-agent elastic/elastic-agent --version ${elasticAgentVersionInfo.agentBaseVersion} \
+      -n kube-system \
+      --set outputs.default.url=${escapedElasticsearchUrl} \
+      --set kubernetes.onboardingID=${onboardingId} \
+      --set kubernetes.enabled=true \
+      --set outputs.default.type=ESPlainAuthAPI \
+      --set outputs.default.api_key=$(echo "${encodedApiKey}" | base64 -d)
+      ${metricsParameters}${wiredStreamsConfig}
+  `
+    .trim()
+    .replace(/\n/g, ' ')
+    .replace(/\s\s+/g, ' ');
 }

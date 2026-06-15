@@ -137,7 +137,7 @@ describe('OtelCollectorSetupStep', () => {
     );
   });
 
-  it('shows managed OTLP guidance and a copyable snippet when managed OTLP is available', async () => {
+  it('shows managed OTLP guidance with one masked snippet when managed OTLP is available', async () => {
     renderWithHostPageProviders(
       <OtelCollectorSetupStep {...defaultProps} selectedCollectorMethod="existing_collector" />
     );
@@ -149,16 +149,13 @@ describe('OtelCollectorSetupStep', () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        /Merge this configuration fragment into a collector config that already gathers the Kubernetes logs, metrics, and traces/
+        /Add the following OTLP exporter to your collector config\. Ensure your receivers include/
       )
     ).toBeInTheDocument();
+    expect(screen.getByText(/for full Kubernetes observability/)).toBeInTheDocument();
+    expect(screen.getByText(/processor sets/)).toBeInTheDocument();
     expect(
-      screen.getByText(
-        /Keep your current receivers and add this processor and exporter to the logs, metrics, and traces pipelines/
-      )
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText(/Create or adapt a Secret in the namespace where your collector runs/)
+      screen.getByText(/so Kibana can confirm data from this onboarding flow/)
     ).toBeInTheDocument();
     expect(screen.getAllByText(/resource\/onboarding_id/).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/onboarding\.id/).length).toBeGreaterThan(0);
@@ -166,30 +163,42 @@ describe('OtelCollectorSetupStep', () => {
     expect(screen.getByText(/kubeletstats/)).toBeInTheDocument();
     expect(screen.getByText(/hostmetrics/)).toBeInTheDocument();
     expect(screen.getByText(/file_log/)).toBeInTheDocument();
+    expect(screen.getByText(/prometheus/)).toBeInTheDocument();
 
     const managedSnippet = screen.getByTestId(
       'observabilityOnboardingKubernetesExistingCollectorManagedSnippet'
     );
-    expect(managedSnippet).toHaveTextContent(/test-onboarding-id/);
-    expect(managedSnippet).toHaveTextContent(/action: upsert/);
-    expect(managedSnippet).toHaveTextContent(/endpoint: "\$\{ELASTIC_OTLP_ENDPOINT\}"/);
-    expect(managedSnippet).toHaveTextContent(/Authorization: "ApiKey \$\{ELASTIC_API_KEY\}"/);
-    expect(managedSnippet).toHaveTextContent(/sending_queue/);
-    expect(managedSnippet).toHaveTextContent(/queue_size: 50_000_000/);
-    expect(managedSnippet).toHaveTextContent(/block_on_overflow: true/);
-
-    const secretSnippet = screen.getByTestId(
-      'observabilityOnboardingKubernetesExistingCollectorSecretSnippet'
-    );
-    expect(secretSnippet).toHaveAttribute(
+    expect(managedSnippet).toHaveAttribute(
       'data-value',
-      expect.stringContaining("--from-literal=ELASTIC_OTLP_ENDPOINT='https://otlp.example'")
+      expect.stringContaining('value: "test-onboarding-id"')
     );
-    expect(secretSnippet).toHaveAttribute(
+    expect(managedSnippet).toHaveAttribute(
       'data-value',
-      expect.stringContaining("--from-literal=ELASTIC_API_KEY='encoded-api-key'")
+      expect.stringContaining('endpoint: "https://otlp.example"')
     );
-    expect(secretSnippet).toHaveAttribute('data-secrets', 'https://otlp.example|encoded-api-key');
+    expect(managedSnippet).toHaveAttribute(
+      'data-value',
+      expect.stringContaining('Authorization: "ApiKey encoded-api-key"')
+    );
+    expect(managedSnippet).toHaveAttribute('data-value', expect.stringContaining('sending_queue'));
+    expect(managedSnippet).toHaveAttribute(
+      'data-value',
+      expect.stringContaining('queue_size: 50000000')
+    );
+    expect(managedSnippet).toHaveAttribute(
+      'data-value',
+      expect.stringContaining('block_on_overflow: true')
+    );
+    expect(managedSnippet).toHaveAttribute('data-secrets', 'https://otlp.example|encoded-api-key');
+    expect(
+      screen.queryByTestId('observabilityOnboardingKubernetesExistingCollectorSecretSnippet')
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/kubectl create secret generic elastic-otel-env/)
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/The snippet includes a generated endpoint and API key/)
+    ).not.toBeInTheDocument();
 
     expect(
       screen.queryByRole('heading', { name: 'Use a gateway collector configuration' })
@@ -203,7 +212,6 @@ describe('OtelCollectorSetupStep', () => {
     expect(
       screen.queryByTestId('observabilityOnboardingKubernetesExistingCollectorOtlpEndpointDocsLink')
     ).not.toBeInTheDocument();
-    expect(screen.queryByText(/prometheus/i)).not.toBeInTheDocument();
   });
 
   it.each([undefined, ''])(
@@ -224,11 +232,13 @@ describe('OtelCollectorSetupStep', () => {
       ).toBeInTheDocument();
       expect(
         screen.getByText(
-          /Merge this configuration fragment into a collector config that already gathers the Kubernetes logs, metrics, and traces/
+          /Add the following OTLP exporter to your collector config\. Ensure your receivers include/
         )
       ).toBeInTheDocument();
+      expect(screen.getByText(/prometheus/)).toBeInTheDocument();
+      expect(screen.getByText(/processor sets/)).toBeInTheDocument();
       expect(
-        screen.getByText(/Create or adapt a Secret in the namespace where your collector runs/)
+        screen.getByText(/so Kibana can confirm data from this onboarding flow/)
       ).toBeInTheDocument();
       expect(screen.getByText(/k8s_cluster/)).toBeInTheDocument();
       expect(screen.getByText(/kubeletstats/)).toBeInTheDocument();
