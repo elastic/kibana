@@ -10,7 +10,7 @@
 import type { HttpStart } from '@kbn/core/public';
 import { ROW_PLACEHOLDER_PREFIX } from '../constants';
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import type { BulkOperationContainer, BulkResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { BulkOperationContainer } from '@elastic/elasticsearch/lib/api/types';
 import { BULK_UPDATE_CHUNK_SIZE, bulkUpdate } from './bulk_update_service';
 import { LOOKUP_INDEX_UPDATE_ROUTE } from '@kbn/esql-types';
 import { times } from 'lodash';
@@ -21,7 +21,13 @@ describe('Bulk update', () => {
   let http: HttpStart;
 
   beforeEach(() => {
+    jest.clearAllMocks();
     http = httpServiceMock.createStartContract();
+    (http.post as jest.Mock).mockResolvedValue({
+      errors: false,
+      items: [],
+      took: 0,
+    });
   });
   it('builds bulk update operations correctly and posts to the correct endpoint', async () => {
     const updates = [
@@ -38,13 +44,6 @@ describe('Bulk update', () => {
         payload: { ids: ['abc123', 'to-del'] },
       },
     ];
-
-    // mock success response
-    (http.post as jest.Mock).mockResolvedValue({
-      errors: false,
-      items: [],
-      took: 0,
-    } satisfies BulkResponse);
 
     await bulkUpdate(INDEX_NAME, updates, http);
 
@@ -91,12 +90,6 @@ describe('Bulk update', () => {
       },
     ];
 
-    (http.post as jest.Mock).mockResolvedValue({
-      errors: false,
-      items: [],
-      took: 0,
-    } satisfies BulkResponse);
-
     await bulkUpdate(INDEX_NAME, updates, http);
 
     const [, options] = (http.post as jest.Mock).mock.calls[0];
@@ -126,12 +119,6 @@ describe('Bulk update', () => {
       type: 'add-doc' as const,
       payload: { id: `doc-${i}`, value: { field: 'value' } },
     }));
-
-    (http.post as jest.Mock).mockResolvedValue({
-      errors: false,
-      items: [],
-      took: 10,
-    });
 
     await bulkUpdate(INDEX_NAME, updates, http);
 

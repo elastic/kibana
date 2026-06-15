@@ -115,7 +115,7 @@ export async function bulkUpdate(
 
 /**
  * Rebuilds a document so dotted field names become nested objects, e.g.
- * `{ 'keyword.Description': 'x' }` -> `{ keyword: { Description: 'x' } }`.
+ * `{ 'parent.child': 'value' }` -> `{ parent: { child: 'value' } }`.
  *
  * We receive field names as flattened paths when they are within objects,
  * but when we need to update the document, we need to unflatten them,
