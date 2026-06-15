@@ -55,12 +55,7 @@ export class KnowledgeIndicatorClient {
       config.feature_ttl_days
     );
     this.reader = new IndicatorReader(revisionReader);
-    this.searcher = new IndicatorSearcher(
-      deps.esClient,
-      deps.logger,
-      config,
-      revisionReader
-    );
+    this.searcher = new IndicatorSearcher(deps.esClient, deps.logger, config, revisionReader);
     this.orchestrator = new QueryRuleOrchestrator(
       deps.rulesManagementClient,
       deps.logger,
