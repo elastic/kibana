@@ -169,9 +169,9 @@ export const taskModelVersions: SavedObjectsModelVersionMap = {
     // (taskMappings has `dynamic: false`).
     changes: [],
     schemas: {
-      // Permissive forward-compat: older nodes ignore unknown additive keys
-      // inside `requestState` rather than stripping or rejecting them, so the
-      // opaque bag round-trips safely during rolling upgrades.
+      // Permissive forward-compat: older nodes accept additive unknown keys
+      // inside `callerSnapshot` rather than stripping or rejecting them, so
+      // newer identity hints round-trip safely during rolling upgrades.
       forwardCompatibility: taskSchemaV11.extends({}, { unknowns: 'ignore' }),
       create: taskSchemaV11,
     },

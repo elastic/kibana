@@ -3587,6 +3587,159 @@ describe('TaskManagerRunner', () => {
     });
   });
 
+  describe('callerSnapshot consumer trust boundary', () => {
+    const makeSnapshot = (overrides = {}) =>
+      ({
+        v: 1,
+        authorization: 'ApiKey abc',
+        spaceId: 'default',
+        ...overrides,
+      } as unknown as ConcreteTaskInstance['callerSnapshot']);
+
+    const makeCoreAuthcMock = (
+      adoptResult: ConcreteTaskInstance['callerSnapshot'] | null,
+      replayResult?: import('@kbn/core/server').KibanaRequest
+    ) => ({
+      getCurrentUser: jest.fn(),
+      getRedactedSessionId: jest.fn(),
+      captureCaller: jest.fn(),
+      // null means "adopt returns undefined"; anything else is passed through
+      replayCaller: jest.fn().mockReturnValue(replayResult),
+      stampCaller: jest.fn(),
+      adoptPersistedCaller: jest
+        .fn()
+        .mockReturnValue(adoptResult === null ? undefined : adoptResult),
+      apiKeys: {} as never,
+    });
+
+    const makeRunnerWithCoreAuthc = async (
+      taskOverrides: Partial<ConcreteTaskInstance>,
+      coreAuthcMock: ReturnType<typeof makeCoreAuthcMock> | undefined
+    ) => {
+      const logger = mockLogger();
+      const instance = Object.assign(
+        {
+          id: 'foo',
+          taskType: 'testCallerTrustBoundary',
+          sequenceNumber: 1,
+          primaryTerm: 1,
+          runAt: new Date(),
+          scheduledAt: new Date(),
+          startedAt: new Date(),
+          retryAt: null,
+          attempts: 0,
+          params: {},
+          state: {},
+          status: 'idle' as const,
+          ownerId: null,
+          traceparent: '',
+        },
+        taskOverrides
+      );
+
+      const store = bufferedTaskStoreMock.create();
+      store.update.mockResolvedValue(instance as ConcreteTaskInstance);
+      store.partialUpdate.mockResolvedValue(instance as ConcreteTaskInstance);
+
+      const capturedRequests: Array<import('@kbn/core/server').KibanaRequest | undefined> = [];
+      const definitions = new TaskTypeDictionary(logger);
+      definitions.registerTaskDefinitions({
+        testCallerTrustBoundary: {
+          title: 'Caller Trust Boundary Test',
+          createTaskRunner: ({ fakeRequest }) => {
+            capturedRequests.push(fakeRequest);
+            return { run: async () => ({ state: {} }) };
+          },
+        },
+      });
+
+      const runner = new TaskManagerRunner({
+        defaultMaxAttempts: 5,
+        beforeRun: (context) => Promise.resolve(context),
+        beforeMarkRunning: (context) => Promise.resolve(context),
+        logger,
+        store,
+        instance: instance as ConcreteTaskInstance,
+        definitions,
+        executionContext,
+        usageCounter: usageCountersServiceMock.createSetupContract().createUsageCounter('test'),
+        config: configMock.create(),
+        allowReadingInvalidState: false,
+        strategy: CLAIM_STRATEGY_UPDATE_BY_QUERY,
+        getPollInterval: () => 500,
+        apiKeyStrategy: new EsApiKeyStrategy(),
+        eventLogger: eventLoggerMock,
+        ...(coreAuthcMock ? { getCoreAuthc: () => coreAuthcMock as never } : {}),
+      });
+
+      await runner.markTaskAsRunning();
+      store.update.mockClear();
+      await runner.run();
+
+      return { capturedRequests, store };
+    };
+
+    it('uses legacy api-key path when task has no callerSnapshot', async () => {
+      const authcMock = makeCoreAuthcMock(null);
+      const { capturedRequests } = await makeRunnerWithCoreAuthc(
+        { callerSnapshot: undefined },
+        authcMock
+      );
+
+      expect(authcMock.adoptPersistedCaller).toHaveBeenCalledWith(undefined);
+      expect(authcMock.replayCaller).not.toHaveBeenCalled();
+      // createTaskRunner is still called (legacy path, no apiKey so fakeRequest may be undefined)
+      expect(capturedRequests).toHaveLength(1);
+    });
+
+    it('calls adoptPersistedCaller then replayCaller and passes the result as fakeRequest', async () => {
+      const { httpServerMock: httpMock } = await import('@kbn/core/server/mocks');
+      const fakeReq = httpMock.createKibanaRequest({ headers: { authorization: 'ApiKey abc' } });
+      const snapshot = makeSnapshot();
+      const authcMock = makeCoreAuthcMock(snapshot, fakeReq);
+
+      const { capturedRequests } = await makeRunnerWithCoreAuthc(
+        { callerSnapshot: snapshot },
+        authcMock
+      );
+
+      expect(authcMock.adoptPersistedCaller).toHaveBeenCalledWith(snapshot);
+      expect(authcMock.replayCaller).toHaveBeenCalledWith(snapshot);
+      expect(capturedRequests[0]).toBe(fakeReq);
+    });
+
+    it('falls back to legacy path when adoptPersistedCaller returns undefined (corrupt value)', async () => {
+      const snapshot = makeSnapshot();
+      // null signals "adoptPersistedCaller returns undefined"
+      const authcMock = makeCoreAuthcMock(null);
+
+      const { capturedRequests } = await makeRunnerWithCoreAuthc(
+        { callerSnapshot: snapshot },
+        authcMock
+      );
+
+      expect(authcMock.adoptPersistedCaller).toHaveBeenCalledWith(snapshot);
+      expect(authcMock.replayCaller).not.toHaveBeenCalled();
+      // createTaskRunner is still called (legacy fallback; no apiKey so fakeRequest may be undefined)
+      expect(capturedRequests).toHaveLength(1);
+    });
+
+    it('falls back to legacy path when replayCaller returns undefined (unknown snapshot version)', async () => {
+      const snapshot = makeSnapshot({ v: 99 });
+      // adoptPersistedCaller returns the snapshot, but replayCaller returns undefined
+      const authcMock = makeCoreAuthcMock(snapshot, undefined);
+
+      const { capturedRequests } = await makeRunnerWithCoreAuthc(
+        { callerSnapshot: snapshot },
+        authcMock
+      );
+
+      expect(authcMock.replayCaller).toHaveBeenCalledWith(snapshot);
+      // createTaskRunner is still called (legacy fallback; no apiKey so fakeRequest may be undefined)
+      expect(capturedRequests).toHaveLength(1);
+    });
+  });
+
   interface TestOpts {
     instance?: Partial<ConcreteTaskInstance>;
     definitions?: TaskDefinitionRegistry;

@@ -107,14 +107,25 @@ export const taskSchemaV10 = taskSchemaV9.extends({
 });
 
 /**
- * Adds `callerSnapshot`, the identity context captured at schedule time by
+ * Adds `callerSnapshot`, a typed identity context captured at schedule time by
  * `core.security.authc.captureCaller()` and replayed at run time via
  * `core.security.authc.replayCaller()`. Task Manager persists this untouched.
  *
- * The schema is intentionally permissive (any record shape, ignores unknowns)
- * so that newer producers can add fields without forcing a Task Manager model
- * version bump for additive identity context.
+ * Documented fields (`v`, `authorization`, `spaceId`, `userProfileId`) are
+ * Core/Security-owned and may evolve additively across versions. The schema
+ * is `unknowns: 'allow'` so that newer producers may add additive identity
+ * hints without forcing a Task Manager model version bump.
  */
 export const taskSchemaV11 = taskSchemaV10.extends({
-  callerSnapshot: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+  callerSnapshot: schema.maybe(
+    schema.object(
+      {
+        v: schema.number(),
+        authorization: schema.maybe(schema.string()),
+        spaceId: schema.maybe(schema.string()),
+        userProfileId: schema.maybe(schema.string()),
+      },
+      { unknowns: 'allow' }
+    )
+  ),
 });

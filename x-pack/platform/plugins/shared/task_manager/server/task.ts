@@ -417,9 +417,15 @@ export interface TaskInstance {
   userScope?: TaskUserScope;
 
   /**
-   * Identity context captured at schedule time by
-   * `core.security.authc.captureCaller()` and replayed at run time via
-   * `core.security.authc.replayCaller()`. Task Manager persists this untouched.
+   * Identity context captured at schedule time by `core.security.authc.captureCaller()`
+   * and replayed at run time via `core.security.authc.replayCaller()`.
+   * Task Manager persists this untouched and MUST NOT inspect individual fields.
+   *
+   * NOTE: when reading this value out of persistence and passing it to
+   * `replayCaller()`, go through `core.security.authc.adoptPersistedCaller()`
+   * to forge the brand at the persistence trust boundary. The TypeScript
+   * declaration here is a documentation aid; the runtime audit point is
+   * `adoptPersistedCaller`.
    */
   callerSnapshot?: CallerSnapshot;
 

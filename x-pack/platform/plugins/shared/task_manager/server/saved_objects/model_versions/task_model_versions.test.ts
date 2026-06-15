@@ -101,8 +101,8 @@ describe('taskModelVersions v11 / callerSnapshot (caller-snapshot envelope)', ()
 
     it('accepts a task whose `callerSnapshot` carries additive unknown keys from a newer producer', () => {
       // Forward-compat: an older node reading a SO written by a newer node may see
-      // additive identity hints inside `callerSnapshot`. The schema is permissive
-      // (`recordOf(string, any)`), so the bag must round-trip unchanged.
+      // additive identity hints inside `callerSnapshot`. The schema uses
+      // `unknowns: 'allow'`, so extra keys inside the bag round-trip unchanged.
       const attributes = {
         ...baseTaskAttributes,
         callerSnapshot: {
@@ -134,10 +134,10 @@ describe('taskModelVersions v11 / callerSnapshot (caller-snapshot envelope)', ()
     });
 
     it('preserves additive unknown keys inside `callerSnapshot` (not stripped)', () => {
-      // The bag uses `schema.recordOf(string, any)`, so unknown keys inside the
-      // bag must survive forwardCompatibility validation rather than being stripped.
-      // This is what keeps rolling upgrades safe: a v9-era node downgrading from a v10
-      // SO must not lose identity hints written by the newer node.
+      // The bag uses `schema.object({ ... }, { unknowns: 'allow' })`, so unknown
+      // keys inside the bag must survive forwardCompatibility validation rather
+      // than being stripped. This is what keeps rolling upgrades safe: an older
+      // node reading a SO written by a newer node must not lose identity hints.
       const attributes = {
         ...baseTaskAttributes,
         callerSnapshot: {
@@ -162,6 +162,27 @@ describe('taskModelVersions v11 / callerSnapshot (caller-snapshot envelope)', ()
       const result = runV11ForwardCompatibility(baseTaskAttributes);
 
       expect(result.callerSnapshot).toBeUndefined();
+    });
+
+    it('round-trips a `callerSnapshot` that includes `userProfileId` through forwardCompatibility', () => {
+      const attributes = {
+        ...baseTaskAttributes,
+        callerSnapshot: {
+          v: 1,
+          authorization: 'ApiKey abc',
+          spaceId: 'default',
+          userProfileId: 'u_abc123',
+        },
+      };
+
+      const result = runV11ForwardCompatibility(attributes);
+
+      expect(result.callerSnapshot).toEqual({
+        v: 1,
+        authorization: 'ApiKey abc',
+        spaceId: 'default',
+        userProfileId: 'u_abc123',
+      });
     });
 
     it('preserves a `callerSnapshot` envelope with an unknown future version (forward-compat with future replayers)', () => {

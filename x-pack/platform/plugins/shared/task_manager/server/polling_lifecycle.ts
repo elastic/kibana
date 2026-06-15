@@ -85,8 +85,8 @@ export interface TaskPollingLifecycleOpts {
   eventLogger: TaskEventLogger;
   /**
    * Lazy accessor for Core's security authc service, forwarded to each
-   * `TaskManagerRunner` so it can hydrate scoped fake requests from opaque
-   * `requestState` bags persisted on tasks.
+   * `TaskManagerRunner` so it can replay scoped fake requests from a task's
+   * `callerSnapshot` via `core.security.authc.replayCaller()`.
    */
   getCoreAuthc?: () => CoreAuthenticationService | undefined;
 }

@@ -1523,4 +1523,177 @@ describe('TaskScheduling', () => {
       });
     });
   });
+
+  describe('callerSnapshot capture during schedule', () => {
+    const mockRequest = httpServerMock.createKibanaRequest();
+
+    const makeSnapshot = (overrides = {}) =>
+      ({
+        v: 1,
+        authorization: 'ApiKey abc',
+        spaceId: 'default',
+        ...overrides,
+      } as unknown as import('./task').ConcreteTaskInstance['callerSnapshot']);
+
+    const makeAuthcMock = (captureResult?: ReturnType<typeof makeSnapshot>) => ({
+      getCurrentUser: jest.fn(),
+      getRedactedSessionId: jest.fn(),
+      captureCaller: jest
+        .fn()
+        .mockResolvedValue(captureResult !== undefined ? captureResult : makeSnapshot()),
+      replayCaller: jest.fn(),
+      stampCaller: jest.fn(),
+      adoptPersistedCaller: jest.fn(),
+      apiKeys: {} as never,
+    });
+    const makeAuthcMockReturningUndefined = () => ({
+      getCurrentUser: jest.fn(),
+      getRedactedSessionId: jest.fn(),
+      captureCaller: jest.fn().mockResolvedValue(undefined),
+      replayCaller: jest.fn(),
+      stampCaller: jest.fn(),
+      adoptPersistedCaller: jest.fn(),
+      apiKeys: {} as never,
+    });
+
+    it('does not call captureCaller when getCoreAuthc is not provided', async () => {
+      const authcMock = makeAuthcMock();
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      mockTaskStore.schedule.mockResolvedValueOnce(getTask());
+
+      await taskScheduling.schedule(
+        { taskType: 'foo', params: {}, state: {} },
+        { request: mockRequest }
+      );
+
+      expect(authcMock.captureCaller).not.toHaveBeenCalled();
+      const scheduledTask = mockTaskStore.schedule.mock.lastCall![0];
+      expect(scheduledTask.callerSnapshot).toBeUndefined();
+    });
+
+    it('does not call captureCaller when getCoreAuthc returns undefined', async () => {
+      const authcMock = makeAuthcMock();
+      const taskScheduling = new TaskScheduling({
+        ...taskSchedulingOpts,
+        getCoreAuthc: () => undefined,
+      });
+      mockTaskStore.schedule.mockResolvedValueOnce(getTask());
+
+      await taskScheduling.schedule(
+        { taskType: 'foo', params: {}, state: {} },
+        { request: mockRequest }
+      );
+
+      expect(authcMock.captureCaller).not.toHaveBeenCalled();
+      const scheduledTask = mockTaskStore.schedule.mock.lastCall![0];
+      expect(scheduledTask.callerSnapshot).toBeUndefined();
+    });
+
+    it('stamps callerSnapshot on the task when captureCaller returns a snapshot', async () => {
+      const snapshot = makeSnapshot();
+      const authcMock = makeAuthcMock(snapshot);
+      const taskScheduling = new TaskScheduling({
+        ...taskSchedulingOpts,
+        getCoreAuthc: () => authcMock as never,
+      });
+      mockTaskStore.schedule.mockResolvedValueOnce(getTask());
+
+      await taskScheduling.schedule(
+        { taskType: 'foo', params: {}, state: {} },
+        { request: mockRequest }
+      );
+
+      expect(authcMock.captureCaller).toHaveBeenCalledWith(mockRequest);
+      const scheduledTask = mockTaskStore.schedule.mock.lastCall![0];
+      expect(scheduledTask.callerSnapshot).toEqual(snapshot);
+    });
+
+    it('does not stamp callerSnapshot when captureCaller returns undefined (unauthenticated)', async () => {
+      const authcMock = makeAuthcMockReturningUndefined();
+      const taskScheduling = new TaskScheduling({
+        ...taskSchedulingOpts,
+        getCoreAuthc: () => authcMock as never,
+      });
+      mockTaskStore.schedule.mockResolvedValueOnce(getTask());
+
+      await taskScheduling.schedule(
+        { taskType: 'foo', params: {}, state: {} },
+        { request: mockRequest }
+      );
+
+      expect(authcMock.captureCaller).toHaveBeenCalledWith(mockRequest);
+      const scheduledTask = mockTaskStore.schedule.mock.lastCall![0];
+      expect(scheduledTask.callerSnapshot).toBeUndefined();
+    });
+
+    it('succeeds and logs at debug when captureCaller rejects', async () => {
+      const captureError = new Error('authc failure');
+      const authcMock = {
+        ...makeAuthcMock(),
+        captureCaller: jest.fn().mockRejectedValue(captureError),
+      };
+      const logger = mockLogger();
+      const taskScheduling = new TaskScheduling({
+        ...taskSchedulingOpts,
+        logger,
+        getCoreAuthc: () => authcMock as never,
+      });
+      mockTaskStore.schedule.mockResolvedValueOnce(getTask());
+
+      await expect(
+        taskScheduling.schedule(
+          { taskType: 'foo', params: {}, state: {} },
+          { request: mockRequest }
+        )
+      ).resolves.toBeDefined();
+
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.stringContaining('captureCaller failed during task scheduling')
+      );
+      const scheduledTask = mockTaskStore.schedule.mock.lastCall![0];
+      expect(scheduledTask.callerSnapshot).toBeUndefined();
+    });
+
+    describe('bulkSchedule', () => {
+      it('captures caller once and stamps the snapshot on every task in the batch', async () => {
+        const snapshot = makeSnapshot();
+        const authcMock = makeAuthcMock(snapshot);
+        const taskScheduling = new TaskScheduling({
+          ...taskSchedulingOpts,
+          getCoreAuthc: () => authcMock as never,
+        });
+        const tasks = [
+          { taskType: 'foo', params: {}, state: {} },
+          { taskType: 'foo', params: {}, state: {} },
+        ];
+        mockTaskStore.bulkSchedule.mockResolvedValueOnce([getTask(), getTask()]);
+
+        await taskScheduling.bulkSchedule(tasks, { request: mockRequest });
+
+        expect(authcMock.captureCaller).toHaveBeenCalledTimes(1);
+        expect(authcMock.captureCaller).toHaveBeenCalledWith(mockRequest);
+
+        const scheduledTasks = mockTaskStore.bulkSchedule.mock.lastCall![0];
+        expect(scheduledTasks).toHaveLength(2);
+        for (const task of scheduledTasks) {
+          expect(task.callerSnapshot).toEqual(snapshot);
+        }
+      });
+
+      it('does not stamp callerSnapshot on bulk tasks when no request is provided', async () => {
+        const authcMock = makeAuthcMock();
+        const taskScheduling = new TaskScheduling({
+          ...taskSchedulingOpts,
+          getCoreAuthc: () => authcMock as never,
+        });
+        mockTaskStore.bulkSchedule.mockResolvedValueOnce([getTask()]);
+
+        await taskScheduling.bulkSchedule([{ taskType: 'foo', params: {}, state: {} }]);
+
+        expect(authcMock.captureCaller).not.toHaveBeenCalled();
+        const scheduledTasks = mockTaskStore.bulkSchedule.mock.lastCall![0];
+        expect(scheduledTasks[0].callerSnapshot).toBeUndefined();
+      });
+    });
+  });
 });

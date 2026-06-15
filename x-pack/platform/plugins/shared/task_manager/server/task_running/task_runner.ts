@@ -451,9 +451,15 @@ export class TaskManagerRunner implements TaskRunner {
           // `callerSnapshot`. This keeps identity replay logic centralized in
           // Core/Security and avoids Task-Manager-specific per-attribute knowledge.
           let fakeRequest: KibanaRequest | undefined;
-          const callerSnapshot = modifiedContext.taskInstance.callerSnapshot;
+          const coreAuthc = this.getCoreAuthc?.();
+          // Persistence trust boundary: the value came from the SO store.
+          // `adoptPersistedCaller` is the one place where we forge the
+          // `CallerSnapshot` brand, and is auditable in `git grep adoptPersistedCaller`.
+          // `replayCaller` then re-validates the version.
+          const callerSnapshot = coreAuthc
+            ? coreAuthc.adoptPersistedCaller(modifiedContext.taskInstance.callerSnapshot)
+            : undefined;
           if (callerSnapshot) {
-            const coreAuthc = this.getCoreAuthc?.();
             fakeRequest = coreAuthc?.replayCaller(callerSnapshot);
           }
           if (!fakeRequest) {
