@@ -13,18 +13,15 @@ import type { WizardContent } from '../template_form';
 import { StepComponents } from './step_components';
 
 export const StepComponentContainer = () => {
-  const { defaultValue, updateContent, getSingleContentData } = Forms.useContent<
-    WizardContent,
+  const { defaultValue, updateContent } = Forms.useContent<WizardContent, 'components'>(
     'components'
-  >('components');
-  const createsDataStream = getSingleContentData('logistics').dataStream !== undefined;
+  );
 
   return (
     <StepComponents
       defaultValue={defaultValue}
       onChange={updateContent}
       esDocsBase={documentationService.getEsDocsBase()}
-      createsDataStream={createsDataStream}
     />
   );
 };

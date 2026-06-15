@@ -29,6 +29,7 @@ import { CreateButtonPopOver } from './components';
 import { ComponentTemplates } from './component_templates';
 import { ComponentTemplatesSelection } from './component_templates_selection';
 import { useApi } from '../component_templates_context';
+import { useCreatesDataStream } from '../../template_form/steps/use_creates_data_stream';
 
 const { useGlobalFlyout } = GlobalFlyout;
 
@@ -37,7 +38,6 @@ interface Props {
   onComponentsLoaded: (components: ComponentTemplateListItem[]) => void;
   defaultValue?: string[];
   docUri: string;
-  createsDataStream?: boolean;
   emptyPrompt?: {
     text?: string | JSX.Element;
     showCreateButton?: boolean;
@@ -111,12 +111,12 @@ export const ComponentTemplatesSelector = ({
   defaultValue,
   onComponentsLoaded,
   docUri,
-  createsDataStream = true,
   emptyPrompt: { text, showCreateButton } = {},
 }: Props) => {
   const { data: components, isLoading, error } = useApi().useLoadComponentTemplates();
   const { addContent: addContentToGlobalFlyout, removeContent: removeContentFromGlobalFlyout } =
     useGlobalFlyout();
+  const createsDataStream = useCreatesDataStream();
   const [selectedComponent, setSelectedComponent] = useState<string | null>(null);
   const [componentsSelected, setComponentsSelected] = useState<ComponentTemplateListItem[]>([]);
   const isInitialized = useRef(false);
