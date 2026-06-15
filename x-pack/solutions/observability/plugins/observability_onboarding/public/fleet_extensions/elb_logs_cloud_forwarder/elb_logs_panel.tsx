@@ -134,6 +134,7 @@ export const ElbLogsPanel: React.FC<ElbLogsPanelProps> = ({ http }) => {
           {flowError !== null && !isFlowLoading && (
             <>
               <EuiCallOut
+                announceOnMount
                 title={i18n.translate(
                   'xpack.observability_onboarding.fleetIntegration.elbLogs.flowErrorTitle',
                   { defaultMessage: 'Unable to load ELB logs configuration' }

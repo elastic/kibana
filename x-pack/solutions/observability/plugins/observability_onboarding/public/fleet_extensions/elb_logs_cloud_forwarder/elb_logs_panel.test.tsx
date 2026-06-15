@@ -33,8 +33,12 @@ describe('ElbLogsPanel', () => {
     const http = createMockHttp();
     render(<ElbLogsPanel http={http} />);
 
-    expect(screen.queryByTestId('fleetIntegrationElbLogsS3BucketNameInput')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('fleetIntegrationElbLogsLaunchStackButton')).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId('fleetIntegrationElbLogsS3BucketNameInput')
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId('fleetIntegrationElbLogsLaunchStackButton')
+    ).not.toBeInTheDocument();
   });
 
   it('shows the S3 field and launch button after enabling the toggle and loading', async () => {
