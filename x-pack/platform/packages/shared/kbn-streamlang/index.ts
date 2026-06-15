@@ -59,3 +59,4 @@ export {
 export type { CompiledRedactPattern } from './types/utils/grok_to_regex';
 export { streamlangOasDefinitions } from './src/oas_definitions';
 export type { StreamlangOasDefinitions } from './src/oas_definitions';
+export { parseDissectPattern, parseMultiDissectPatterns } from './types/utils/dissect_patterns';

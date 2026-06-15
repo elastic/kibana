@@ -8,15 +8,15 @@
 import type { DraftGrokExpression, FieldDefinition } from '@kbn/grok-ui';
 import type { FlattenRecord, ProcessorMetrics, SampleDocument } from '@kbn/streams-schema';
 import {
-  createOriginalGrokFieldValuesMap,
-  getGrokFieldDisplayValue,
+  createOriginalFieldValuesMap,
+  getSourceFieldDisplayValue,
   grokExpressionOverwritesSourceField,
   hasPrecedingProcessorTouchedField,
   type SampleWithDataSource,
 } from './processor_outcome_preview_helpers';
 
 describe('processor_outcome_preview_helpers', () => {
-  describe('createOriginalGrokFieldValuesMap', () => {
+  describe('createOriginalFieldValuesMap', () => {
     it('creates a map of original grok field values from preview documents and original samples', () => {
       // Setup: Original documents have the raw message, preview documents have transformed message
       const previewDocuments: FlattenRecord[] = [
@@ -35,7 +35,7 @@ describe('processor_outcome_preview_helpers', () => {
         },
       ];
 
-      const map = createOriginalGrokFieldValuesMap(previewDocuments, originalSamples, 'message');
+      const map = createOriginalFieldValuesMap(previewDocuments, originalSamples, 'message');
 
       // Verify the map contains original values keyed by preview document reference
       expect(map.get(previewDocuments[0])).toBe('original message with timestamp 2024-01-01');
@@ -52,7 +52,7 @@ describe('processor_outcome_preview_helpers', () => {
         },
       ];
 
-      const map = createOriginalGrokFieldValuesMap(previewDocuments, originalSamples, 'body.text');
+      const map = createOriginalFieldValuesMap(previewDocuments, originalSamples, 'body.text');
 
       expect(map.get(previewDocuments[0])).toBe('original nested value');
     });
@@ -71,7 +71,7 @@ describe('processor_outcome_preview_helpers', () => {
         },
       ];
 
-      const map = createOriginalGrokFieldValuesMap(previewDocuments, originalSamples, 'message');
+      const map = createOriginalFieldValuesMap(previewDocuments, originalSamples, 'message');
 
       expect(map.get(previewDocuments[0])).toBe('original_1');
       expect(map.get(previewDocuments[1])).toBeUndefined();
@@ -90,12 +90,8 @@ describe('processor_outcome_preview_helpers', () => {
         { dataSourceId: 'source-3', document: { message: 456 } }, // Number instead of string
       ];
 
-      const mapForCount = createOriginalGrokFieldValuesMap(
-        previewDocuments,
-        originalSamples,
-        'count'
-      );
-      const mapForMessage = createOriginalGrokFieldValuesMap(
+      const mapForCount = createOriginalFieldValuesMap(previewDocuments, originalSamples, 'count');
+      const mapForMessage = createOriginalFieldValuesMap(
         [previewDocuments[2]],
         [originalSamples[2]],
         'message'
@@ -107,7 +103,7 @@ describe('processor_outcome_preview_helpers', () => {
     });
 
     it('handles empty arrays', () => {
-      const map = createOriginalGrokFieldValuesMap([], [], 'message');
+      const map = createOriginalFieldValuesMap([], [], 'message');
       // Should not throw, returns an empty map
       expect(map).toBeInstanceOf(WeakMap);
     });
@@ -122,20 +118,20 @@ describe('processor_outcome_preview_helpers', () => {
         },
       ];
 
-      const map = createOriginalGrokFieldValuesMap(previewDocuments, originalSamples, 'message');
+      const map = createOriginalFieldValuesMap(previewDocuments, originalSamples, 'message');
 
       expect(map.get(previewDocuments[0])).toBeUndefined();
     });
   });
 
-  describe('getGrokFieldDisplayValue', () => {
+  describe('getSourceFieldDisplayValue', () => {
     describe('when columnId matches grokField', () => {
       it('returns the original value from the WeakMap when available', () => {
         const document: FlattenRecord = { message: 'transformed_value' };
         const originalGrokFieldValues = new WeakMap<FlattenRecord, string | undefined>();
         originalGrokFieldValues.set(document, 'original_value');
 
-        const result = getGrokFieldDisplayValue(
+        const result = getSourceFieldDisplayValue(
           document,
           'message',
           'message',
@@ -150,7 +146,7 @@ describe('processor_outcome_preview_helpers', () => {
         const originalGrokFieldValues = new WeakMap<FlattenRecord, string | undefined>();
         // Note: Not setting any value for this document in the map
 
-        const result = getGrokFieldDisplayValue(
+        const result = getSourceFieldDisplayValue(
           document,
           'message',
           'message',
@@ -163,7 +159,7 @@ describe('processor_outcome_preview_helpers', () => {
       it('falls back to document value when WeakMap is undefined', () => {
         const document: FlattenRecord = { message: 'document_value' };
 
-        const result = getGrokFieldDisplayValue(document, 'message', 'message', undefined);
+        const result = getSourceFieldDisplayValue(document, 'message', 'message', undefined);
 
         expect(result).toBe('document_value');
       });
@@ -173,7 +169,7 @@ describe('processor_outcome_preview_helpers', () => {
         const originalGrokFieldValues = new WeakMap<FlattenRecord, string | undefined>();
         originalGrokFieldValues.set(document, undefined);
 
-        const result = getGrokFieldDisplayValue(
+        const result = getSourceFieldDisplayValue(
           document,
           'count',
           'count',
@@ -188,7 +184,7 @@ describe('processor_outcome_preview_helpers', () => {
         const originalGrokFieldValues = new WeakMap<FlattenRecord, string | undefined>();
         originalGrokFieldValues.set(document, undefined);
 
-        const result = getGrokFieldDisplayValue(
+        const result = getSourceFieldDisplayValue(
           document,
           'message',
           'message',
@@ -205,7 +201,7 @@ describe('processor_outcome_preview_helpers', () => {
         const originalGrokFieldValues = new WeakMap<FlattenRecord, string | undefined>();
         originalGrokFieldValues.set(document, 'original_grok_value');
 
-        const result = getGrokFieldDisplayValue(
+        const result = getSourceFieldDisplayValue(
           document,
           'other_field', // Not the grok field
           'message',
@@ -230,7 +226,7 @@ describe('processor_outcome_preview_helpers', () => {
         const originalGrokFieldValues = new WeakMap<FlattenRecord, string | undefined>();
         originalGrokFieldValues.set(transformedDoc, 'INFO User logged in successfully');
 
-        const result = getGrokFieldDisplayValue(
+        const result = getSourceFieldDisplayValue(
           transformedDoc,
           'message',
           'message',
@@ -256,7 +252,7 @@ describe('processor_outcome_preview_helpers', () => {
         const originalGrokFieldValues = new WeakMap<FlattenRecord, string | undefined>();
         originalGrokFieldValues.set(transformedDoc, 'INFO - User logged in'); // Same as current
 
-        const result = getGrokFieldDisplayValue(
+        const result = getSourceFieldDisplayValue(
           transformedDoc,
           'message',
           'message',
@@ -276,7 +272,7 @@ describe('processor_outcome_preview_helpers', () => {
         };
 
         // When accessing via flattened key
-        const result = getGrokFieldDisplayValue(nestedDoc, 'body.text', 'body.text', undefined);
+        const result = getSourceFieldDisplayValue(nestedDoc, 'body.text', 'body.text', undefined);
 
         expect(result).toBe('flattened access would get this');
       });
@@ -286,7 +282,7 @@ describe('processor_outcome_preview_helpers', () => {
         const originalGrokFieldValues = new WeakMap<FlattenRecord, string | undefined>();
         originalGrokFieldValues.set(document, ''); // Empty string is still a string
 
-        const result = getGrokFieldDisplayValue(
+        const result = getSourceFieldDisplayValue(
           document,
           'message',
           'message',

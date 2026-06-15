@@ -10,3 +10,4 @@
 export * from './grok_collection_and_pattern';
 export * from './draft_grok_expression';
 export * from './types';
+export * from './pattern_colour_utils';
