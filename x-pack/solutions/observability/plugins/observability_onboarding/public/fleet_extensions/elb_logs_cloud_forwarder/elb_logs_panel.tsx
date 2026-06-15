@@ -34,7 +34,7 @@ interface CloudForwarderFlowResponse {
 }
 
 interface ElbLogsPanelProps {
-  http: HttpStart;
+  http: Pick<HttpStart, 'post'>;
 }
 
 export const ElbLogsPanel: React.FC<ElbLogsPanelProps> = ({ http }) => {

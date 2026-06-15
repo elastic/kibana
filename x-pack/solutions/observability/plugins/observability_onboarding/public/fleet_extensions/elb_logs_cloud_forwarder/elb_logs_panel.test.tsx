@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import type { HttpStart } from '@kbn/core-http-browser';
 import { ElbLogsPanel } from './elb_logs_panel';
 
 const mockFlowData = {
@@ -16,21 +17,21 @@ const mockFlowData = {
   managedOtlpServiceUrl: 'https://otlp.example.com',
 };
 
-const createMockHttp = (flowData = mockFlowData) => ({
-  post: jest.fn().mockResolvedValue(flowData),
+const createMockHttp = (flowData = mockFlowData): Pick<HttpStart, 'post'> => ({
+  post: jest.fn().mockResolvedValue(flowData) as HttpStart['post'],
 });
 
 describe('ElbLogsPanel', () => {
   it('renders the ELB Logs toggle', () => {
     const http = createMockHttp();
-    render(<ElbLogsPanel http={http as any} />);
+    render(<ElbLogsPanel http={http} />);
 
     expect(screen.getByTestId('fleetIntegrationElbLogsSwitch')).toBeInTheDocument();
   });
 
   it('does not show the S3 field or launch button when toggle is off', () => {
     const http = createMockHttp();
-    render(<ElbLogsPanel http={http as any} />);
+    render(<ElbLogsPanel http={http} />);
 
     expect(screen.queryByTestId('fleetIntegrationElbLogsS3BucketNameInput')).not.toBeInTheDocument();
     expect(screen.queryByTestId('fleetIntegrationElbLogsLaunchStackButton')).not.toBeInTheDocument();
@@ -38,7 +39,7 @@ describe('ElbLogsPanel', () => {
 
   it('shows the S3 field and launch button after enabling the toggle and loading', async () => {
     const http = createMockHttp();
-    render(<ElbLogsPanel http={http as any} />);
+    render(<ElbLogsPanel http={http} />);
 
     await userEvent.click(screen.getByTestId('fleetIntegrationElbLogsSwitch'));
 
@@ -50,7 +51,7 @@ describe('ElbLogsPanel', () => {
 
   it('calls the cloudforwarder/flow endpoint when the toggle is enabled', async () => {
     const http = createMockHttp();
-    render(<ElbLogsPanel http={http as any} />);
+    render(<ElbLogsPanel http={http} />);
 
     await userEvent.click(screen.getByTestId('fleetIntegrationElbLogsSwitch'));
 
@@ -63,7 +64,7 @@ describe('ElbLogsPanel', () => {
 
   it('disables the launch button when the bucket name is empty', async () => {
     const http = createMockHttp();
-    render(<ElbLogsPanel http={http as any} />);
+    render(<ElbLogsPanel http={http} />);
 
     await userEvent.click(screen.getByTestId('fleetIntegrationElbLogsSwitch'));
     await waitFor(() =>
@@ -75,7 +76,7 @@ describe('ElbLogsPanel', () => {
 
   it('disables the launch button when the bucket name is invalid', async () => {
     const http = createMockHttp();
-    render(<ElbLogsPanel http={http as any} />);
+    render(<ElbLogsPanel http={http} />);
 
     await userEvent.click(screen.getByTestId('fleetIntegrationElbLogsSwitch'));
     await waitFor(() =>
@@ -89,7 +90,7 @@ describe('ElbLogsPanel', () => {
 
   it('enables the launch button with a valid bucket name', async () => {
     const http = createMockHttp();
-    render(<ElbLogsPanel http={http as any} />);
+    render(<ElbLogsPanel http={http} />);
 
     await userEvent.click(screen.getByTestId('fleetIntegrationElbLogsSwitch'));
     await waitFor(() =>
@@ -106,7 +107,7 @@ describe('ElbLogsPanel', () => {
 
   it('builds a CloudFormation href with elbaccess log type for valid bucket', async () => {
     const http = createMockHttp();
-    render(<ElbLogsPanel http={http as any} />);
+    render(<ElbLogsPanel http={http} />);
 
     await userEvent.click(screen.getByTestId('fleetIntegrationElbLogsSwitch'));
     await waitFor(() =>
@@ -130,10 +131,10 @@ describe('ElbLogsPanel', () => {
   });
 
   it('shows an error callout and retry button when the API call fails', async () => {
-    const http = {
-      post: jest.fn().mockRejectedValue(new Error('Network error')),
+    const http: Pick<HttpStart, 'post'> = {
+      post: jest.fn().mockRejectedValue(new Error('Network error')) as HttpStart['post'],
     };
-    render(<ElbLogsPanel http={http as any} />);
+    render(<ElbLogsPanel http={http} />);
 
     await userEvent.click(screen.getByTestId('fleetIntegrationElbLogsSwitch'));
 
