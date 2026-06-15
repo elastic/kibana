@@ -81,10 +81,36 @@ export function getWebpackConfig(
       },
     },
 
-    externals: {
-      'node:crypto': 'commonjs crypto',
-      ...UiSharedDepsSrc.externals,
-    },
+    externals: [
+      function (
+        { context, request }: { context?: string; request?: string },
+        callback: (err?: null | Error, result?: string) => void
+      ) {
+        // Let redux-toolkit-v1 resolve its own nested copies of redux-related
+        // deps (immer v9, redux v4, etc.) instead of the shared externals
+        // (immer v10 / RTK v2). RTK v1 calls immer's enableES5() which was
+        // removed in immer v10.
+        if (
+          context &&
+          request &&
+          /node_modules[\\/]redux-toolkit-v1/.test(context) &&
+          ['immer', '@reduxjs/toolkit', 'redux', 'react-redux', 'reselect'].includes(request)
+        ) {
+          return callback();
+        }
+
+        const sharedExternals: Record<string, string> = {
+          'node:crypto': 'commonjs crypto',
+          ...UiSharedDepsSrc.externals,
+        };
+
+        if (request && request in sharedExternals) {
+          return callback(null, sharedExternals[request]);
+        }
+
+        return callback();
+      },
+    ],
 
     plugins: [
       new NodeLibsBrowserPlugin(),
