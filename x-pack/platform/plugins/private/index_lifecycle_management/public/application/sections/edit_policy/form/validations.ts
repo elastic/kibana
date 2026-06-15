@@ -87,7 +87,10 @@ const getFieldValue = <T = unknown>(formData: Record<string, any>, path: string)
 };
 
 const getActiveTriggerFields = (formData: FormInternal): RolloverTriggerField[] => {
-  return formData?._meta?.hot?.customRollover?.triggerFields ?? DEFAULT_ROLLOVER_TRIGGER_FIELDS;
+  return (
+    getFieldValue<RolloverTriggerField[]>(formData, '_meta.hot.customRollover.triggerFields') ??
+    DEFAULT_ROLLOVER_TRIGGER_FIELDS
+  );
 };
 
 /**
@@ -96,13 +99,13 @@ const getActiveTriggerFields = (formData: FormInternal): RolloverTriggerField[] 
  * This validator checks that and updates form values by setting errors states imperatively to
  * indicate this error state.
  */
-export const rolloverThresholdsValidator: ValidationFunc = ({ form, path }) => {
+export const rolloverThresholdsValidator: ValidationFunc = ({ form, path, formData }) => {
   const fields = form.getFields();
-  const formData = form.getFormData() as FormInternal;
-  const activeTriggerFields = getActiveTriggerFields(formData);
+  const formInternalData = formData as FormInternal;
+  const activeTriggerFields = getActiveTriggerFields(formInternalData);
   // At least one rollover field needs a value specified for this action.
   const someRolloverFieldHasAValue = activeTriggerFields.some((rolloverField) =>
-    Boolean(fields[ROLLOVER_TRIGGER_FIELD_PATHS[rolloverField]]?.value)
+    Boolean(getFieldValue(formInternalData, ROLLOVER_TRIGGER_FIELD_PATHS[rolloverField]))
   );
   if (!someRolloverFieldHasAValue) {
     const errorToReturn: ValidationError = {
