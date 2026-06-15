@@ -25,22 +25,8 @@ export const eventsMappings = {
     impact: mappings.keyword(),
     title: mappings.text(),
     summary: mappings.text(),
-    root_cause: mappings.text(),
-    analysis_summary: mappings.text(),
-    assessment_note: mappings.text(),
-    criticality: mappings.integer(),
-    confidence: mappings.integer(),
-    recommended_action: mappings.keyword(),
-    created_at: mappings.date({ format: 'strict_date_optional_time' }),
-    workflow_execution_id: mappings.keyword(),
-    conversation_id: mappings.keyword(),
-    analysis_source: mappings.keyword(),
-    grouped_discovery_ids: mappings.keyword(),
-    rule_names: mappings.keyword(),
   },
 } satisfies MappingsDefinition;
-// version: 5
-
 export type StoredEvent = GetFieldsOf<typeof eventsMappings>;
 export type { SigEvent };
 
