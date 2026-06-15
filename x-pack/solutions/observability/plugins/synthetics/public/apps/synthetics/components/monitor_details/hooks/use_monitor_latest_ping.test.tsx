@@ -38,8 +38,8 @@ jest.mock('./use_selected_location', () => ({
 
 const mockDispatch = jest.fn();
 const mockLatestPingState = jest.fn();
-jest.mock('react-redux', () => {
-  const actual = jest.requireActual('react-redux');
+jest.mock('react-redux-v7', () => {
+  const actual = jest.requireActual('react-redux-v7');
   return {
     ...actual,
     useDispatch: () => mockDispatch,

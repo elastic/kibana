@@ -11,11 +11,11 @@ import { useSelectDataView } from './use_select_data_view';
 import { useDispatch } from 'react-redux-v7';
 import { PageScope } from '../constants';
 
-jest.mock('react-redux', () => {
+jest.mock('react-redux-v7', () => {
   const dispatch = jest.fn();
 
   return {
-    ...jest.requireActual('react-redux'),
+    ...jest.requireActual('react-redux-v7'),
     useDispatch: () => dispatch,
   };
 });

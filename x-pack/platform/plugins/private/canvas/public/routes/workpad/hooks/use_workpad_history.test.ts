@@ -17,7 +17,7 @@ jest.mock('react-router-dom', () => ({
   useHistory: () => mockGetHistory(),
 }));
 
-jest.mock('react-redux', () => ({
+jest.mock('react-redux-v7', () => ({
   useSelector: (selector: any) => selector(mockGetState()),
 }));
 

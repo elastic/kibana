@@ -16,7 +16,7 @@ import { useSpaceId } from '../../../../../../common/hooks/use_space_id';
 
 jest.mock('../../../../../../data_view_manager/hooks/use_data_view');
 jest.mock('../../../../../../common/lib/kibana');
-jest.mock('react-redux');
+jest.mock('react-redux-v7');
 jest.mock('../../../../../../common/hooks/use_space_id');
 
 const dataView: DataView = createStubDataView({

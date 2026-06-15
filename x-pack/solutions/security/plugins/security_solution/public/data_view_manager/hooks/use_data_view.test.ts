@@ -14,8 +14,8 @@ import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 
 jest.mock('../../common/hooks/use_experimental_features');
 
-jest.mock('react-redux', () => ({
-  ...jest.requireActual('react-redux'),
+jest.mock('react-redux-v7', () => ({
+  ...jest.requireActual('react-redux-v7'),
   useSelector: jest.fn(),
 }));
 

@@ -17,7 +17,7 @@ import { useSecurityDefaultPatterns } from '../../../../../data_view_manager/hoo
 
 jest.mock('@kbn/es-query');
 jest.mock('@kbn/react-query');
-jest.mock('react-redux');
+jest.mock('react-redux-v7');
 jest.mock('../../../main/utils/fetch_data');
 jest.mock('../../../../../common/lib/kibana');
 jest.mock('../../../../../data_view_manager/hooks/use_security_default_patterns');

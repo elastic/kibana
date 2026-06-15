@@ -9,7 +9,7 @@ import { useSelector } from 'react-redux-v7';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import { useIsExperimentalFeatureEnabled } from './use_experimental_features';
 
-jest.mock('react-redux');
+jest.mock('react-redux-v7');
 const useSelectorMock = useSelector as jest.Mock;
 const mockAppState = {
   app: {

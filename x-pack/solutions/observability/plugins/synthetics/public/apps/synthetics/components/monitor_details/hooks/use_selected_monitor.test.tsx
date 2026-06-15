@@ -16,7 +16,7 @@ jest.mock('react-router-dom', () => ({
 }));
 
 const mockDispatch = jest.fn();
-jest.mock('react-redux', () => ({
+jest.mock('react-redux-v7', () => ({
   useDispatch: () => mockDispatch,
   useSelector: jest.fn(),
 }));

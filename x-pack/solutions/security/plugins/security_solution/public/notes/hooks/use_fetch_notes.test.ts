@@ -11,7 +11,7 @@ import { fetchNotesByDocumentIds } from '../store/notes.slice';
 import { useFetchNotes } from './use_fetch_notes';
 import { useUserPrivileges } from '../../common/components/user_privileges';
 
-jest.mock('react-redux', () => ({
+jest.mock('react-redux-v7', () => ({
   useDispatch: jest.fn(),
 }));
 

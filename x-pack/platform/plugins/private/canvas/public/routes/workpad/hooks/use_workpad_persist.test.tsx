@@ -17,7 +17,7 @@ const mockUpdate = jest.fn();
 const mockNotifyError = jest.fn();
 
 // Mock the hooks and actions used by the UseWorkpad hook
-jest.mock('react-redux', () => ({
+jest.mock('react-redux-v7', () => ({
   useSelector: (selector: any) => selector(mockGetState()),
 }));
 

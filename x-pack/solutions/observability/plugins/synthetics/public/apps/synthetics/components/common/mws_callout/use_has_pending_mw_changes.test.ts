@@ -12,8 +12,8 @@ import { useHasPendingMwChanges } from './use_has_pending_mw_changes';
 import { selectMaintenanceWindowsState } from '../../../state/maintenance_windows';
 import { selectDynamicSettings } from '../../../state/settings/selectors';
 
-jest.mock('react-redux', () => ({
-  ...jest.requireActual('react-redux'),
+jest.mock('react-redux-v7', () => ({
+  ...jest.requireActual('react-redux-v7'),
   useDispatch: jest.fn(),
   useSelector: jest.fn(),
 }));

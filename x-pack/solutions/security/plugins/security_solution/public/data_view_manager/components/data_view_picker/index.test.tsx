@@ -27,9 +27,9 @@ jest.mock('../../hooks/use_select_data_view', () => ({
   useSelectDataView: jest.fn().mockReturnValue(jest.fn()),
 }));
 
-jest.mock('react-redux', () => {
+jest.mock('react-redux-v7', () => {
   return {
-    ...jest.requireActual('react-redux'),
+    ...jest.requireActual('react-redux-v7'),
     useDispatch: jest.fn(),
   };
 });

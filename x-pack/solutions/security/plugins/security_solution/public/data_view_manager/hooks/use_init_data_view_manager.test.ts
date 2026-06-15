@@ -15,11 +15,11 @@ jest.mock('../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: () => true,
 }));
 
-jest.mock('react-redux', () => {
+jest.mock('react-redux-v7', () => {
   const dispatch = jest.fn();
 
   return {
-    ...jest.requireActual('react-redux'),
+    ...jest.requireActual('react-redux-v7'),
     useDispatch: () => dispatch,
   };
 });

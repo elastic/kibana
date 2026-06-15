@@ -9,7 +9,7 @@ import { useSelector } from 'react-redux-v7';
 import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } from '../constants';
 import { useSecurityDefaultPatterns } from './use_security_default_patterns';
 
-jest.mock('react-redux', () => ({
+jest.mock('react-redux-v7', () => ({
   useSelector: jest.fn(),
 }));
 

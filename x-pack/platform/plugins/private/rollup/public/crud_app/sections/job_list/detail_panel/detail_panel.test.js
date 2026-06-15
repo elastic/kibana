@@ -8,7 +8,7 @@
 import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
-import { Provider } from 'react-redux';
+import { Provider } from 'react-redux-v7';
 import { getJob } from '../../../../../fixtures';
 import { createRollupJobsStore } from '../../../store';
 import { DetailPanel } from './detail_panel';

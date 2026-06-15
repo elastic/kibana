@@ -28,7 +28,7 @@ jest.mock('../../user_info', () => ({
   useUserData: jest.fn(),
 }));
 
-jest.mock('react-redux', () => ({
+jest.mock('react-redux-v7', () => ({
   useDispatch: jest.fn(),
 }));
 

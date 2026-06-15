@@ -25,8 +25,8 @@ import { initialUserPrivilegesState } from '../../user_privileges/user_privilege
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 
 const mockDispatch = jest.fn();
-jest.mock('react-redux', () => {
-  const original = jest.requireActual('react-redux');
+jest.mock('react-redux-v7', () => {
+  const original = jest.requireActual('react-redux-v7');
 
   return {
     ...original,
