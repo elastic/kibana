@@ -5,7 +5,10 @@
  * 2.0.
  */
 import { z } from '@kbn/zod';
-import { compositeStatusSchema } from '../../../schema/composite_slo';
+import {
+  compositeStatusSchema,
+  compositeSloWithSummaryResponseSchema,
+} from '../../../schema/composite_slo';
 
 const findCompositeSLODefinitionsQuerySchema = z.object({
   search: z.string().optional(),
@@ -28,7 +31,17 @@ const findCompositeSLODefinitionsParamsSchema = z.object({
   query: findCompositeSLODefinitionsQuerySchema.optional(),
 });
 
-type FindCompositeSLODefinitionsParams = z.infer<typeof findCompositeSLODefinitionsQuerySchema>;
+// The list endpoint returns summary responses (definition + summary), mirroring the SLO
+// `find` endpoint, so the list UI does not need a second round-trip to fetch summaries.
+const findCompositeSLOResponseSchema = z.object({
+  page: z.number(),
+  perPage: z.number(),
+  total: z.number(),
+  results: z.array(compositeSloWithSummaryResponseSchema),
+});
 
-export { findCompositeSLODefinitionsParamsSchema };
-export type { FindCompositeSLODefinitionsParams };
+type FindCompositeSLODefinitionsParams = z.infer<typeof findCompositeSLODefinitionsQuerySchema>;
+type FindCompositeSLOResponse = z.output<typeof findCompositeSLOResponseSchema>;
+
+export { findCompositeSLODefinitionsParamsSchema, findCompositeSLOResponseSchema };
+export type { FindCompositeSLODefinitionsParams, FindCompositeSLOResponse };
