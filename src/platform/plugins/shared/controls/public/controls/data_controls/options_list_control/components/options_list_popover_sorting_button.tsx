@@ -112,17 +112,22 @@ export const OptionsListPopoverSortingButton = ({
   );
 
   const SortButton = () => (
-    <EuiButtonIcon
-      size="xs"
-      display="empty"
-      color="text"
-      iconType={sort?.direction === 'asc' ? 'sortAscending' : 'sortDescending'}
-      isDisabled={showOnlySelected}
-      className="optionsList__sortButton"
-      data-test-subj="optionsListControl__sortingOptionsButton"
-      onClick={() => setIsSortingPopoverOpen(!isSortingPopoverOpen)}
-      aria-label={OptionsListStrings.popover.getSortPopoverDescription()}
-    />
+    <EuiToolTip
+      content={OptionsListStrings.popover.getSortPopoverDescription()}
+      disableScreenReaderOutput
+    >
+      <EuiButtonIcon
+        size="xs"
+        display="empty"
+        color="text"
+        iconType={sort?.direction === 'asc' ? 'sortAscending' : 'sortDescending'}
+        isDisabled={showOnlySelected}
+        className="optionsList__sortButton"
+        data-test-subj="optionsListControl__sortingOptionsButton"
+        onClick={() => setIsSortingPopoverOpen(!isSortingPopoverOpen)}
+        aria-label={OptionsListStrings.popover.getSortPopoverDescription()}
+      />
+    </EuiToolTip>
   );
 
   return (
