@@ -47,9 +47,11 @@ const createMocks = (existingLinks: QueryLink[] = []) => {
     getStreamToQueryLinksMap: jest.fn().mockResolvedValue({ 'logs.test': existingLinks }),
     bulk: jest.fn().mockResolvedValue({ applied: 1, skipped: 0 }),
     syncQueries: jest.fn().mockResolvedValue(undefined),
-    replaceStreamQueries: jest.fn(async (def: unknown, getNextQueries: (links: QueryLink[]) => unknown[]) => {
-      await kiClient.syncQueries(def, getNextQueries(existingLinks));
-    }),
+    replaceStreamQueries: jest.fn(
+      async (def: unknown, getNextQueries: (links: QueryLink[]) => unknown[]) => {
+        await kiClient.syncQueries(def, getNextQueries(existingLinks));
+      }
+    ),
   } as unknown as jest.Mocked<KnowledgeIndicatorClient>;
 
   const streamsClient = {
