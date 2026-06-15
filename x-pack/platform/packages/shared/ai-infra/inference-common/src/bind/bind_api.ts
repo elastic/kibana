@@ -31,8 +31,7 @@ type BoundAPI<F extends BindableAPI> = F extends (options: infer O, ...rest: inf
   : never;
 
 // Bound metadata acts as the default; per-call metadata overrides it, with
-// `connectorTelemetry` deep-merged so a per-call `pluginId` wins without dropping
-// other bound telemetry fields (mirrors the kbn-evals connector-telemetry wrapper).
+// `connectorTelemetry` deep-merged so a per-call `pluginId` wins without dropping other bound telemetry fields
 function mergeBoundMetadata(
   bound: ChatCompleteMetadata,
   perCall: ChatCompleteMetadata | undefined
