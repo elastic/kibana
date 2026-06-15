@@ -17,7 +17,6 @@ import { SIGNIFICANT_EVENT_ATTACHMENT_TYPE } from '@kbn/streams-plugin/common';
 import type { StreamsAppStartDependencies } from '../../../types';
 import { getStatusColor } from '../significant_events_discovery/utils/event_status_color';
 import { SigEventDetails } from '../sig_event_details/sig_event_details';
-import sigEventIcon from '../../asset_image/sig_event_icon.svg';
 
 const labels = {
   fallback: i18n.translate('xpack.streams.significantEventAttachment.fallbackLabel', {
@@ -31,9 +30,9 @@ const labels = {
 export const significantEventAttachmentDefinition: AttachmentUIDefinition<SignificantEventAttachment> =
   {
     getLabel: (attachment) => attachment.data.title || labels.fallback,
-    getIcon: () => sigEventIcon,
+    getIcon: () => 'significantEvent',
     getHeader: ({ attachment }) => ({
-      icon: sigEventIcon,
+      icon: 'significantEvent',
       subtitle: labels.fallback,
       badges: [{ label: attachment.data.verdict, color: getStatusColor(attachment.data.verdict) }],
     }),
