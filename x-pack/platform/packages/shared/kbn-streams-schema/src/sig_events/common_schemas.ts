@@ -27,7 +27,7 @@ export const causeKiSchema = z.object({
 });
 
 export const evidenceSchema = z.object({
-  rule_name: z.string().max(MAX_RULE_NAME_LENGTH).nullish(),
+  rule_name: z.string().max(MAX_RULE_NAME_LENGTH).optional(),
   result: z.string().optional(),
   description: z.string().optional(),
   stream_name: z.string().optional(),
