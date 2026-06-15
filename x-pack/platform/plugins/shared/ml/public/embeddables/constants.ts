@@ -9,7 +9,6 @@ import type { AnomalySingleMetricViewerEmbeddableType } from '@kbn/ml-common-typ
 import type { AnomalySwimLaneEmbeddableType } from '@kbn/ml-common-types/embeddables/anomaly_swimlane';
 
 export const ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE = 'ml_anomaly_charts' as const;
-export const ANOMALY_SWIMLANE_EMBEDDABLE_TYPE = 'ml_anomaly_swimlane' as const;
 
 export type AnomalyExplorerChartsEmbeddableType = typeof ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE;
 
