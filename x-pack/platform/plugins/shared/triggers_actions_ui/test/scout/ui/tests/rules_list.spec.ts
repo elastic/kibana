@@ -774,6 +774,13 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
     // Add disabled → disabled + snoozed (3)
     await page.testSubj.click('ruleStatusFilterOption-disabled');
     await expect(getTableRows(page)).toHaveCount(3);
+    // Wait for the table to finish any in-progress reload before the next click.
+    // Without this, clicking "enabled" while a previous request is still in flight
+    // can race the filter update — the stale response arrives last and overwrites
+    // the new filter state, leaving the table at 3 rows instead of 4.
+    await expect(
+      page.locator('.euiBasicTable[data-test-subj="rulesList"].euiBasicTable-loading')
+    ).toBeHidden({ timeout: 10_000 });
 
     // Add enabled → all 4
     await page.testSubj.click('ruleStatusFilterOption-enabled');
