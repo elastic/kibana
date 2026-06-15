@@ -25,8 +25,7 @@ const NEW_CONVERSATION_BUTTON_LABEL = i18n.translate(
 
 export const StartNewConversationButton: React.FC = () => {
   const { navigateToAgentBuilderUrl } = useNavigation();
-  const { isEmbeddedContext, setConversationId, resetAttachments, resetInputMessage } =
-    useConversationContext();
+  const { isEmbeddedContext, setConversationId, resetAttachments } = useConversationContext();
   const { removeError } = useConversationStream();
   const lastAgentId = useLastAgentId();
 
@@ -35,7 +34,6 @@ export const StartNewConversationButton: React.FC = () => {
       removeError();
       setConversationId?.(undefined);
       resetAttachments?.();
-      resetInputMessage?.();
     } else {
       navigateToAgentBuilderUrl(appPaths.agent.conversations.new({ agentId: lastAgentId }));
     }
@@ -44,7 +42,6 @@ export const StartNewConversationButton: React.FC = () => {
     removeError,
     setConversationId,
     resetAttachments,
-    resetInputMessage,
     navigateToAgentBuilderUrl,
     lastAgentId,
   ]);

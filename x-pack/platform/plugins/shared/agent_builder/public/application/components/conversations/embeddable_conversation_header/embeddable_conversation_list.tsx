@@ -33,8 +33,7 @@ export const EmbeddableConversationList: React.FC<EmbeddableConversationListProp
   onClose,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const { agentId, conversationId, setConversationId, resetAttachments, resetInputMessage } =
-    useConversationContext();
+  const { agentId, conversationId, setConversationId, resetAttachments } = useConversationContext();
   const { removeAllErrors } = useStreamingContext();
   const { conversations = [], isLoading } = useConversationList({ agentId });
 
@@ -87,7 +86,6 @@ export const EmbeddableConversationList: React.FC<EmbeddableConversationListProp
                 removeAllErrors();
                 if (!isActive) {
                   resetAttachments?.();
-                  resetInputMessage?.();
                 }
                 setConversationId?.(conversation.id);
                 onClose();

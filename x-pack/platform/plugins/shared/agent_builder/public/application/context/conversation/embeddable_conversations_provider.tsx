@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useEffect, useCallback, useState, useRef, useReducer } from 'react';
+import React, { useMemo, useEffect, useCallback, useState, useRef } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -194,9 +194,6 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     setCurrentProps((prevProps) => ({ ...prevProps, attachments: undefined }));
   }, []);
 
-  const [inputResetKey, incrementInputResetKey] = useReducer((n: number) => n + 1, 0);
-  const resetInputMessage = useCallback(() => incrementInputResetKey(), []);
-
   const upsertAttachments = useCallback((attachments: ConversationAttachment[]) => {
     if (attachments.length === 0) {
       return;
@@ -238,8 +235,6 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       upsertAttachments,
       resetAttachments,
       removeAttachment,
-      inputResetKey,
-      resetInputMessage,
       conversationActions,
     }),
     [
@@ -256,8 +251,6 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       setAgentId,
       resetAttachments,
       removeAttachment,
-      inputResetKey,
-      resetInputMessage,
       conversationActions,
     ]
   );

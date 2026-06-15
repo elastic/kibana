@@ -6,6 +6,7 @@
  */
 
 import { pick } from 'lodash';
+import murmur from 'murmurhash';
 import type { AttachmentInput, AttachmentGroup } from '@kbn/agent-builder-common/attachments';
 import type { TimelineItem } from '@kbn/response-ops-alerts-table/types';
 
@@ -35,10 +36,12 @@ const chunkAlerts = (alertItems: TimelineItem[]): BulkAlertsAttachmentInput[] =>
  */
 export const alertsToAttachmentGroup = (alertItems: TimelineItem[]): AttachmentGroup => ({
   type: 'group',
-  id: `alerts:${alertItems
-    .map((a) => a._id)
-    .sort()
-    .join(',')}`,
+  id: `alerts:${murmur.v3(
+    alertItems
+      .map((a) => a._id)
+      .sort()
+      .join(',')
+  )}`,
   label: `${alertItems.length} Alert${alertItems.length !== 1 ? 's' : ''}`,
   items: chunkAlerts(alertItems),
 });

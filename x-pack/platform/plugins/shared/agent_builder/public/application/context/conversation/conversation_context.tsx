@@ -22,9 +22,6 @@ interface ConversationContextValue {
   attachments?: ConversationAttachment[];
   upsertAttachments?: (attachments: ConversationAttachment[]) => void;
   resetAttachments?: () => void;
-  /** Incremented each time the input editor should be cleared (e.g. "Create new chat"). */
-  inputResetKey?: number;
-  resetInputMessage?: () => void;
   removeAttachment?: (attachmentIndex: number) => void;
   browserApiTools?: Array<BrowserApiToolDefinition<any>>;
   setConversationId?: (conversationId?: string) => void;
