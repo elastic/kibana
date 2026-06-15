@@ -947,6 +947,7 @@ steps:
                           - type: "null"
                       confirmed:
                         type: boolean
+                        enum: [true]
                   description: "Inherit all discovery evidences unchanged, then append one entry per tool call made during this evaluation."
               required: [discovery_id, discovery_slug, status, criticality, confidence, analysis_summary, assessment_note, title, evidences]
         required: [significant_events]
@@ -1102,4 +1103,4 @@ steps:
             grouped_discovery_ids: "${{ foreach.item.grouped_discovery_ids }}"
             workflow_execution_id: "{{ execution.id }}"
         on-failure:
-          continue: true
+          continue: false
