@@ -780,7 +780,6 @@
     "@kbn/item-buffer": "link:src/platform/packages/private/kbn-item-buffer",
     "@kbn/json-schemas": "link:x-pack/platform/packages/private/ml/json_schemas",
     "@kbn/kbn-health-gateway-status-plugin": "link:src/platform/test/health_gateway/plugins/status",
-    "@kbn/kbn-sample-panel-action-plugin": "link:src/platform/test/plugin_functional/plugins/kbn_sample_panel_action",
     "@kbn/kbn-top-nav-plugin": "link:src/platform/test/plugin_functional/plugins/kbn_top_nav",
     "@kbn/kbn-tp-custom-visualizations-plugin": "link:src/platform/test/plugin_functional/plugins/kbn_tp_custom_visualizations",
     "@kbn/kbn-tp-run-pipeline-plugin": "link:src/platform/test/interpreter_functional/plugins/kbn_tp_run_pipeline",

@@ -7514,10 +7514,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/kbn-sample-panel-action-plugin@link:src/platform/test/plugin_functional/plugins/kbn_sample_panel_action":
-  version "0.0.0"
-  uid ""
-
 "@kbn/kbn-top-nav-plugin@link:src/platform/test/plugin_functional/plugins/kbn_top_nav":
   version "0.0.0"
   uid ""
