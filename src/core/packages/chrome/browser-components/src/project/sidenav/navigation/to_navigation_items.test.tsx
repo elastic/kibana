@@ -290,3 +290,33 @@ describe('hidden panel link', () => {
     expect(activeItemId).toBe('stack_management');
   });
 });
+
+describe('Chrome Next mode (isNextChrome)', () => {
+  const createChromeNextNavigationItems = (
+    tree: NavigationTreeDefinitionUI = navigationTree,
+    activeNodes: ChromeProjectNavigationNode[][] = []
+  ) => {
+    return toNavigationItems(tree, activeNodes, mockPanelStateManager, true);
+  };
+
+  it('should not extract logoItem when isNextChrome is true', () => {
+    const { logoItem } = createChromeNextNavigationItems();
+    expect(logoItem).toBeUndefined();
+  });
+
+  it('should extract logoItem when isNextChrome is false (default)', () => {
+    const { logoItem } = createNavigationItems();
+    expect(logoItem).toBeDefined();
+    expect(logoItem?.id).toBe('security_solution_home');
+  });
+
+  it('should keep visible home node in primaryItems with title "Home" and icon "home"', () => {
+    const {
+      navItems: { primaryItems },
+    } = createChromeNextNavigationItems();
+    const homeItem = primaryItems.find((item) => item.id === 'security_solution_home');
+    expect(homeItem).toBeDefined();
+    expect(homeItem?.label).toBe('Home');
+    expect(homeItem?.iconType).toBe('home');
+  });
+});
