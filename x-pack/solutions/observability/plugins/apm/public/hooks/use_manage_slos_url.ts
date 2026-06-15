@@ -6,10 +6,12 @@
  */
 
 import { useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import type { Filter } from '@kbn/es-query';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { SloListLocatorParams } from '@kbn/deeplinks-observability';
 import { sloListLocatorID } from '@kbn/deeplinks-observability';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import { APM_SLO_INDICATOR_TYPES } from '../../common/slo_indicator_types';
 import { ENVIRONMENT_ALL } from '../../common/environment_filter_values';
 import { useApmPluginContext } from '../context/apm_plugin/use_apm_plugin_context';
@@ -65,17 +67,32 @@ export function getManageSlosUrl(
   }
 
   if (params?.environment && params.environment !== ENVIRONMENT_ALL.value) {
+    // Match the selected environment plus SLOs that apply to all environments, so the SLO app
+    // list stays consistent with the APM SLO overview flyout. All-environment APM SLOs are not
+    // stored with `service.environment: *`; instead the field is omitted from the summary
+    // documents (see the APM transform generator's `buildGroupBy`). We therefore match documents
+    // where `service.environment` is missing, mirroring the flyout's server-side query in
+    // `get_service_slos`. The `*` clause is kept as a defensive match for parity with the server.
     filters.push({
       meta: {
-        alias: null,
+        alias: i18n.translate('xpack.apm.manageSlosUrl.environmentFilterLabel', {
+          defaultMessage: 'service.environment: {environment} or all environments',
+          values: { environment: params.environment },
+        }),
         disabled: false,
         key: 'service.environment',
         negate: false,
-        params: { query: params.environment },
-        type: 'phrase',
+        type: 'custom',
       },
       query: {
-        match_phrase: { 'service.environment': params.environment },
+        bool: {
+          minimum_should_match: 1,
+          should: [
+            { match_phrase: { 'service.environment': params.environment } },
+            { match_phrase: { 'service.environment': ALL_VALUE } },
+            { bool: { must_not: { exists: { field: 'service.environment' } } } },
+          ],
+        },
       },
     });
   }
