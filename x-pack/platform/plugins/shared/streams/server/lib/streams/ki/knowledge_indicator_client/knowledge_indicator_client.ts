@@ -56,7 +56,7 @@ export class KnowledgeIndicatorClient {
     );
     this.reader = new IndicatorReader(revisionReader);
     this.searcher = new IndicatorSearcher(
-      deps.dataStreamClient,
+      deps.esClient,
       deps.logger,
       config,
       revisionReader
