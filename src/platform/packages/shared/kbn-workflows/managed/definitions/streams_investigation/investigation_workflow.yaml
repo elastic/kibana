@@ -89,7 +89,7 @@ steps:
         steps:
           - name: gather
             type: ai.agent
-            if: "{{ steps.build_context.output.structured_output.hypotheses | size >= 1 }}"
+            if: "${{ steps.build_context.output.structured_output.hypotheses.size >= 1 }}"
             agent-id: sigevents.investigation.gather
             connector-id: ".anthropic-claude-4.5-haiku-chat_completion"
             with:
@@ -132,7 +132,7 @@ steps:
 
           - name: review
             type: ai.agent
-            if: "{{ steps.build_context.output.structured_output.hypotheses | size >= 1 }}"
+            if: "${{ steps.build_context.output.structured_output.hypotheses.size >= 1 }}"
             agent-id: sigevents.investigation.review
             connector-id: ".anthropic-claude-4.5-haiku-chat_completion"
             with:
@@ -172,7 +172,7 @@ steps:
         steps:
           - name: gather
             type: ai.agent
-            if: "{{ steps.build_context.output.structured_output.hypotheses | size >= 2 }}"
+            if: "${{ steps.build_context.output.structured_output.hypotheses.size >= 2 }}"
             agent-id: sigevents.investigation.gather
             connector-id: ".anthropic-claude-4.5-haiku-chat_completion"
             with:
@@ -215,7 +215,7 @@ steps:
 
           - name: review
             type: ai.agent
-            if: "{{ steps.build_context.output.structured_output.hypotheses | size >= 2 }}"
+            if: "${{ steps.build_context.output.structured_output.hypotheses.size >= 2 }}"
             agent-id: sigevents.investigation.review
             connector-id: ".anthropic-claude-4.5-haiku-chat_completion"
             with:
@@ -255,7 +255,7 @@ steps:
         steps:
           - name: gather
             type: ai.agent
-            if: "{{ steps.build_context.output.structured_output.hypotheses | size >= 3 }}"
+            if: "${{ steps.build_context.output.structured_output.hypotheses.size >= 3 }}"
             agent-id: sigevents.investigation.gather
             connector-id: ".anthropic-claude-4.5-haiku-chat_completion"
             with:
@@ -298,7 +298,7 @@ steps:
 
           - name: review
             type: ai.agent
-            if: "{{ steps.build_context.output.structured_output.hypotheses | size >= 3 }}"
+            if: "${{ steps.build_context.output.structured_output.hypotheses.size >= 3 }}"
             agent-id: sigevents.investigation.review
             connector-id: ".anthropic-claude-4.5-haiku-chat_completion"
             with:
@@ -338,7 +338,7 @@ steps:
         steps:
           - name: gather
             type: ai.agent
-            if: "{{ steps.build_context.output.structured_output.hypotheses | size >= 4 }}"
+            if: "${{ steps.build_context.output.structured_output.hypotheses.size >= 4 }}"
             agent-id: sigevents.investigation.gather
             connector-id: ".anthropic-claude-4.5-haiku-chat_completion"
             with:
@@ -381,7 +381,7 @@ steps:
 
           - name: review
             type: ai.agent
-            if: "{{ steps.build_context.output.structured_output.hypotheses | size >= 4 }}"
+            if: "${{ steps.build_context.output.structured_output.hypotheses.size >= 4 }}"
             agent-id: sigevents.investigation.review
             connector-id: ".anthropic-claude-4.5-haiku-chat_completion"
             with:
@@ -421,7 +421,7 @@ steps:
         steps:
           - name: gather
             type: ai.agent
-            if: "{{ steps.build_context.output.structured_output.hypotheses | size >= 5 }}"
+            if: "${{ steps.build_context.output.structured_output.hypotheses.size >= 5 }}"
             agent-id: sigevents.investigation.gather
             connector-id: ".anthropic-claude-4.5-haiku-chat_completion"
             with:
@@ -464,7 +464,7 @@ steps:
 
           - name: review
             type: ai.agent
-            if: "{{ steps.build_context.output.structured_output.hypotheses | size >= 5 }}"
+            if: "${{ steps.build_context.output.structured_output.hypotheses.size >= 5 }}"
             agent-id: sigevents.investigation.review
             connector-id: ".anthropic-claude-4.5-haiku-chat_completion"
             with:
