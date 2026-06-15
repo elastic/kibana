@@ -41,7 +41,7 @@ export const getMonacoValue = async (page: ScoutPage): Promise<string> => {
 
 export const navigateToConnectors = async (page: ScoutPage, kbnUrl: KibanaUrl) => {
   await page.goto(kbnUrl.get(CONNECTORS_APP_PATH));
-  await page.locator(CONNECTORS_LIST_SELECTORS.TABLE_LOADED).waitFor();
+  await page.locator(CONNECTORS_LIST_SELECTORS.TABLE_LOADED).waitFor({ timeout: 30_000 });
 };
 
 export const searchConnectors = async (page: ScoutPage, name: string) => {
