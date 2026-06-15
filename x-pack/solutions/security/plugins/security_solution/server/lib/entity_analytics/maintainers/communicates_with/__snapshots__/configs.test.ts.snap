@@ -1,6 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots aws_cloudtrail: targets-per-actor ES|QL is locked 1`] = `
+exports[
+  `COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots aws_cloudtrail: targets-per-actor ES|QL is locked 1`
+] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM logs-aws.cloudtrail-__namespace__
 | WHERE aws.cloudtrail.user_identity.type IN (\\"IAMUser\\", \\"AssumedRole\\", \\"Root\\", \\"FederatedUser\\", \\"IdentityCenterUser\\")
@@ -10,12 +12,12 @@ FROM logs-aws.cloudtrail-__namespace__
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
  _src_entity_source = CASE((_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\"), _src_entity_source0, (_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\"), _src_entity_source1, (_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\"), _src_entity_source2, NULL),
- entity.source = CASE((_src_entity_source IS NULL OR _src_entity_source == \\"\\"), NULL, _src_entity_source),
- _src_entity_namespace0 = MV_FIRST(TO_STRING(event.module)),
+ entity.source = CASE((_src_entity_source IS NULL OR _src_entity_source == \\"\\"), NULL, _src_entity_source)
+| EVAL _src_entity_namespace0 = MV_FIRST(TO_STRING(event.module)),
  _src_entity_namespace1 = MV_FIRST(SPLIT(MV_FIRST(TO_STRING(data_stream.dataset)), \\".\\")),
  _src_entity_namespace = CASE((_src_entity_namespace0 IS NOT NULL AND _src_entity_namespace0 != \\"\\"), _src_entity_namespace0, (_src_entity_namespace1 IS NOT NULL AND _src_entity_namespace1 != \\"\\"), _src_entity_namespace1, NULL),
- entity.namespace = CASE((TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\" AND TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\" AND NOT (TO_STRING(user.name) IN (\\"root\\", \\"bin\\", \\"daemon\\", \\"sys\\", \\"nobody\\", \\"jenkins\\", \\"ansible\\", \\"deploy\\", \\"terraform\\", \\"gitlab-runner\\", \\"postgres\\", \\"mysql\\", \\"redis\\", \\"elasticsearch\\", \\"kafka\\", \\"admin\\", \\"operator\\", \\"service\\")) AND (MV_CONTAINS(TO_STRING(event.kind), \\"asset\\") OR NOT (MV_CONTAINS(TO_STRING(event.kind), \\"asset\\") OR (TO_STRING(event.kind) != \\"enrichment\\" OR TO_STRING(event.kind) IS NULL) AND MV_CONTAINS(TO_STRING(event.category), \\"iam\\") AND (MV_CONTAINS(TO_STRING(event.type), \\"user\\") OR MV_CONTAINS(TO_STRING(event.type), \\"creation\\") OR MV_CONTAINS(TO_STRING(event.type), \\"deletion\\") OR MV_CONTAINS(TO_STRING(event.type), \\"group\\"))))), \\"local\\", (_src_entity_namespace == \\"okta\\" OR _src_entity_namespace == \\"entityanalytics_okta\\"), \\"okta\\", (_src_entity_namespace == \\"azure\\" OR _src_entity_namespace == \\"entityanalytics_entra_id\\"), \\"entra_id\\", (_src_entity_namespace == \\"o365\\" OR _src_entity_namespace == \\"o365_metrics\\"), \\"microsoft_365\\", (_src_entity_namespace == \\"entityanalytics_ad\\"), \\"active_directory\\", (_src_entity_namespace IS NULL OR _src_entity_namespace == \\"\\"), \\"unknown\\", _src_entity_namespace)
-| EVAL user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
+ entity.namespace = CASE((TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\" AND TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\" AND NOT (TO_STRING(user.name) IN (\\"root\\", \\"bin\\", \\"daemon\\", \\"sys\\", \\"nobody\\", \\"jenkins\\", \\"ansible\\", \\"deploy\\", \\"terraform\\", \\"gitlab-runner\\", \\"postgres\\", \\"mysql\\", \\"redis\\", \\"elasticsearch\\", \\"kafka\\", \\"admin\\", \\"operator\\", \\"service\\")) AND (MV_CONTAINS(TO_STRING(event.kind), \\"asset\\") OR NOT (MV_CONTAINS(TO_STRING(event.kind), \\"asset\\") OR (TO_STRING(event.kind) != \\"enrichment\\" OR TO_STRING(event.kind) IS NULL) AND MV_CONTAINS(TO_STRING(event.category), \\"iam\\") AND (MV_CONTAINS(TO_STRING(event.type), \\"user\\") OR MV_CONTAINS(TO_STRING(event.type), \\"creation\\") OR MV_CONTAINS(TO_STRING(event.type), \\"deletion\\") OR MV_CONTAINS(TO_STRING(event.type), \\"group\\"))))), \\"local\\", (_src_entity_namespace == \\"okta\\" OR _src_entity_namespace == \\"entityanalytics_okta\\"), \\"okta\\", (_src_entity_namespace == \\"azure\\" OR _src_entity_namespace == \\"entityanalytics_entra_id\\"), \\"entra_id\\", (_src_entity_namespace == \\"o365\\" OR _src_entity_namespace == \\"o365_metrics\\"), \\"microsoft_365\\", (_src_entity_namespace == \\"entityanalytics_ad\\"), \\"active_directory\\", (_src_entity_namespace IS NULL OR _src_entity_namespace == \\"\\"), \\"unknown\\", _src_entity_namespace),
+ user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
  host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
  entity_namespace_present = TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\",
  user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
@@ -34,7 +36,9 @@ true, CASE((user_email_present AND entity_namespace_present), CONCAT(TO_STRING(u
 | LIMIT 3500"
 `;
 
-exports[`COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots azure_auditlogs: targets-per-actor ES|QL is locked 1`] = `
+exports[
+  `COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots azure_auditlogs: targets-per-actor ES|QL is locked 1`
+] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM logs-azure.auditlogs-__namespace__
 | WHERE azure.auditlogs.properties.initiated_by.user.userPrincipalName IS NOT NULL
@@ -55,7 +59,9 @@ FROM logs-azure.auditlogs-__namespace__
 | LIMIT 3500"
 `;
 
-exports[`COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots jamf_pro: targets-per-actor ES|QL is locked 1`] = `
+exports[
+  `COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots jamf_pro: targets-per-actor ES|QL is locked 1`
+] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM logs-jamf_pro.events-__namespace__
 | WHERE user.name IS NOT NULL
@@ -65,12 +71,12 @@ FROM logs-jamf_pro.events-__namespace__
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
  _src_entity_source = CASE((_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\"), _src_entity_source0, (_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\"), _src_entity_source1, (_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\"), _src_entity_source2, NULL),
- entity.source = CASE((_src_entity_source IS NULL OR _src_entity_source == \\"\\"), NULL, _src_entity_source),
- _src_entity_namespace0 = MV_FIRST(TO_STRING(event.module)),
+ entity.source = CASE((_src_entity_source IS NULL OR _src_entity_source == \\"\\"), NULL, _src_entity_source)
+| EVAL _src_entity_namespace0 = MV_FIRST(TO_STRING(event.module)),
  _src_entity_namespace1 = MV_FIRST(SPLIT(MV_FIRST(TO_STRING(data_stream.dataset)), \\".\\")),
  _src_entity_namespace = CASE((_src_entity_namespace0 IS NOT NULL AND _src_entity_namespace0 != \\"\\"), _src_entity_namespace0, (_src_entity_namespace1 IS NOT NULL AND _src_entity_namespace1 != \\"\\"), _src_entity_namespace1, NULL),
- entity.namespace = CASE((TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\" AND TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\" AND NOT (TO_STRING(user.name) IN (\\"root\\", \\"bin\\", \\"daemon\\", \\"sys\\", \\"nobody\\", \\"jenkins\\", \\"ansible\\", \\"deploy\\", \\"terraform\\", \\"gitlab-runner\\", \\"postgres\\", \\"mysql\\", \\"redis\\", \\"elasticsearch\\", \\"kafka\\", \\"admin\\", \\"operator\\", \\"service\\")) AND (MV_CONTAINS(TO_STRING(event.kind), \\"asset\\") OR NOT (MV_CONTAINS(TO_STRING(event.kind), \\"asset\\") OR (TO_STRING(event.kind) != \\"enrichment\\" OR TO_STRING(event.kind) IS NULL) AND MV_CONTAINS(TO_STRING(event.category), \\"iam\\") AND (MV_CONTAINS(TO_STRING(event.type), \\"user\\") OR MV_CONTAINS(TO_STRING(event.type), \\"creation\\") OR MV_CONTAINS(TO_STRING(event.type), \\"deletion\\") OR MV_CONTAINS(TO_STRING(event.type), \\"group\\"))))), \\"local\\", (_src_entity_namespace == \\"okta\\" OR _src_entity_namespace == \\"entityanalytics_okta\\"), \\"okta\\", (_src_entity_namespace == \\"azure\\" OR _src_entity_namespace == \\"entityanalytics_entra_id\\"), \\"entra_id\\", (_src_entity_namespace == \\"o365\\" OR _src_entity_namespace == \\"o365_metrics\\"), \\"microsoft_365\\", (_src_entity_namespace == \\"entityanalytics_ad\\"), \\"active_directory\\", (_src_entity_namespace IS NULL OR _src_entity_namespace == \\"\\"), \\"unknown\\", _src_entity_namespace)
-| EVAL user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
+ entity.namespace = CASE((TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\" AND TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\" AND NOT (TO_STRING(user.name) IN (\\"root\\", \\"bin\\", \\"daemon\\", \\"sys\\", \\"nobody\\", \\"jenkins\\", \\"ansible\\", \\"deploy\\", \\"terraform\\", \\"gitlab-runner\\", \\"postgres\\", \\"mysql\\", \\"redis\\", \\"elasticsearch\\", \\"kafka\\", \\"admin\\", \\"operator\\", \\"service\\")) AND (MV_CONTAINS(TO_STRING(event.kind), \\"asset\\") OR NOT (MV_CONTAINS(TO_STRING(event.kind), \\"asset\\") OR (TO_STRING(event.kind) != \\"enrichment\\" OR TO_STRING(event.kind) IS NULL) AND MV_CONTAINS(TO_STRING(event.category), \\"iam\\") AND (MV_CONTAINS(TO_STRING(event.type), \\"user\\") OR MV_CONTAINS(TO_STRING(event.type), \\"creation\\") OR MV_CONTAINS(TO_STRING(event.type), \\"deletion\\") OR MV_CONTAINS(TO_STRING(event.type), \\"group\\"))))), \\"local\\", (_src_entity_namespace == \\"okta\\" OR _src_entity_namespace == \\"entityanalytics_okta\\"), \\"okta\\", (_src_entity_namespace == \\"azure\\" OR _src_entity_namespace == \\"entityanalytics_entra_id\\"), \\"entra_id\\", (_src_entity_namespace == \\"o365\\" OR _src_entity_namespace == \\"o365_metrics\\"), \\"microsoft_365\\", (_src_entity_namespace == \\"entityanalytics_ad\\"), \\"active_directory\\", (_src_entity_namespace IS NULL OR _src_entity_namespace == \\"\\"), \\"unknown\\", _src_entity_namespace),
+ user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
  host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
  entity_namespace_present = TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\",
  user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
@@ -94,7 +100,9 @@ true, CASE((user_email_present AND entity_namespace_present), CONCAT(TO_STRING(u
 | LIMIT 3500"
 `;
 
-exports[`COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots okta: targets-per-actor ES|QL is locked 1`] = `
+exports[
+  `COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots okta: targets-per-actor ES|QL is locked 1`
+] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM logs-okta.system-__namespace__
 | WHERE event.action IN (\\"user.lifecycle.create\\", \\"user.lifecycle.activate\\", \\"user.lifecycle.deactivate\\", \\"user.lifecycle.suspend\\", \\"user.lifecycle.unsuspend\\", \\"group.user_membership.add\\", \\"group.user_membership.remove\\", \\"application.user_membership.add\\", \\"application.user_membership.remove\\", \\"application.user_membership.change_username\\")
@@ -104,12 +112,12 @@ FROM logs-okta.system-__namespace__
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
  _src_entity_source = CASE((_src_entity_source0 IS NOT NULL AND _src_entity_source0 != \\"\\"), _src_entity_source0, (_src_entity_source1 IS NOT NULL AND _src_entity_source1 != \\"\\"), _src_entity_source1, (_src_entity_source2 IS NOT NULL AND _src_entity_source2 != \\"\\"), _src_entity_source2, NULL),
- entity.source = CASE((_src_entity_source IS NULL OR _src_entity_source == \\"\\"), NULL, _src_entity_source),
- _src_entity_namespace0 = MV_FIRST(TO_STRING(event.module)),
+ entity.source = CASE((_src_entity_source IS NULL OR _src_entity_source == \\"\\"), NULL, _src_entity_source)
+| EVAL _src_entity_namespace0 = MV_FIRST(TO_STRING(event.module)),
  _src_entity_namespace1 = MV_FIRST(SPLIT(MV_FIRST(TO_STRING(data_stream.dataset)), \\".\\")),
  _src_entity_namespace = CASE((_src_entity_namespace0 IS NOT NULL AND _src_entity_namespace0 != \\"\\"), _src_entity_namespace0, (_src_entity_namespace1 IS NOT NULL AND _src_entity_namespace1 != \\"\\"), _src_entity_namespace1, NULL),
- entity.namespace = CASE((TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\" AND TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\" AND NOT (TO_STRING(user.name) IN (\\"root\\", \\"bin\\", \\"daemon\\", \\"sys\\", \\"nobody\\", \\"jenkins\\", \\"ansible\\", \\"deploy\\", \\"terraform\\", \\"gitlab-runner\\", \\"postgres\\", \\"mysql\\", \\"redis\\", \\"elasticsearch\\", \\"kafka\\", \\"admin\\", \\"operator\\", \\"service\\")) AND (MV_CONTAINS(TO_STRING(event.kind), \\"asset\\") OR NOT (MV_CONTAINS(TO_STRING(event.kind), \\"asset\\") OR (TO_STRING(event.kind) != \\"enrichment\\" OR TO_STRING(event.kind) IS NULL) AND MV_CONTAINS(TO_STRING(event.category), \\"iam\\") AND (MV_CONTAINS(TO_STRING(event.type), \\"user\\") OR MV_CONTAINS(TO_STRING(event.type), \\"creation\\") OR MV_CONTAINS(TO_STRING(event.type), \\"deletion\\") OR MV_CONTAINS(TO_STRING(event.type), \\"group\\"))))), \\"local\\", (_src_entity_namespace == \\"okta\\" OR _src_entity_namespace == \\"entityanalytics_okta\\"), \\"okta\\", (_src_entity_namespace == \\"azure\\" OR _src_entity_namespace == \\"entityanalytics_entra_id\\"), \\"entra_id\\", (_src_entity_namespace == \\"o365\\" OR _src_entity_namespace == \\"o365_metrics\\"), \\"microsoft_365\\", (_src_entity_namespace == \\"entityanalytics_ad\\"), \\"active_directory\\", (_src_entity_namespace IS NULL OR _src_entity_namespace == \\"\\"), \\"unknown\\", _src_entity_namespace)
-| EVAL user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
+ entity.namespace = CASE((TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\" AND TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\" AND NOT (TO_STRING(user.name) IN (\\"root\\", \\"bin\\", \\"daemon\\", \\"sys\\", \\"nobody\\", \\"jenkins\\", \\"ansible\\", \\"deploy\\", \\"terraform\\", \\"gitlab-runner\\", \\"postgres\\", \\"mysql\\", \\"redis\\", \\"elasticsearch\\", \\"kafka\\", \\"admin\\", \\"operator\\", \\"service\\")) AND (MV_CONTAINS(TO_STRING(event.kind), \\"asset\\") OR NOT (MV_CONTAINS(TO_STRING(event.kind), \\"asset\\") OR (TO_STRING(event.kind) != \\"enrichment\\" OR TO_STRING(event.kind) IS NULL) AND MV_CONTAINS(TO_STRING(event.category), \\"iam\\") AND (MV_CONTAINS(TO_STRING(event.type), \\"user\\") OR MV_CONTAINS(TO_STRING(event.type), \\"creation\\") OR MV_CONTAINS(TO_STRING(event.type), \\"deletion\\") OR MV_CONTAINS(TO_STRING(event.type), \\"group\\"))))), \\"local\\", (_src_entity_namespace == \\"okta\\" OR _src_entity_namespace == \\"entityanalytics_okta\\"), \\"okta\\", (_src_entity_namespace == \\"azure\\" OR _src_entity_namespace == \\"entityanalytics_entra_id\\"), \\"entra_id\\", (_src_entity_namespace == \\"o365\\" OR _src_entity_namespace == \\"o365_metrics\\"), \\"microsoft_365\\", (_src_entity_namespace == \\"entityanalytics_ad\\"), \\"active_directory\\", (_src_entity_namespace IS NULL OR _src_entity_namespace == \\"\\"), \\"unknown\\", _src_entity_namespace),
+ user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
  host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
  entity_namespace_present = TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\",
  user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",

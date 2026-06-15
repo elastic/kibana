@@ -235,31 +235,27 @@ describe('getFieldEvaluationsEsql', () => {
     }
   );
 
-  it('returns EVAL fragment for user entity.namespace', () => {
+  it('returns only entity.source for user (entity.namespace is now in getEuidEsqlEvaluation)', () => {
     const result = getFieldEvaluationsEsqlFromDefinition(getEntityDefinition('user', 'default'));
-    const base = '_src_entity_namespace';
-    const v0 = `${base}0`;
-    const v1 = `${base}1`;
-    const namespacePart = [
-      `${v0} = MV_FIRST(TO_STRING(event.module))`,
-      `${v1} = MV_FIRST(SPLIT(MV_FIRST(TO_STRING(data_stream.dataset)), "."))`,
-      `${base} = CASE((${v0} IS NOT NULL AND ${v0} != ""), ${v0}, (${v1} IS NOT NULL AND ${v1} != ""), ${v1}, NULL)`,
-    ].join(', ');
+
     expect(result).toBeDefined();
-    expect(result?.replace(/\s+/g, ' ').trim()).toContain(
-      namespacePart.replace(/\s+/g, ' ').trim()
-    );
-    expect(result).toContain('entity.namespace = CASE(');
-    expect(result).toContain(
-      '(_src_entity_namespace == "okta" OR _src_entity_namespace == "entityanalytics_okta")'
-    );
-    expect(result).toContain('"local"');
-    expect(result).toContain(
-      '(_src_entity_namespace IS NULL OR _src_entity_namespace == ""), "unknown"'
-    );
-    expect(result).not.toContain('_fe_inner_entity_namespace');
+    expect(result).toContain('entity.source = CASE(');
+    // entity.namespace is now emitted by getEuidEsqlEvaluation, not here
+    expect(result).not.toContain('entity.namespace');
     expect(result).not.toContain('entity.confidence');
-    expect(result).not.toContain('_src_entity_confidence');
+  });
+
+  it('getEuidEsqlEvaluation includes entity.namespace for user', () => {
+    const result = getEuidEsqlEvaluation('user', 'entity.id');
+
+    expect(result).toContain('entity.namespace = CASE(');
+    expect(result).toContain('_src_entity_namespace');
+    expect(result).toContain('"local"');
+    expect(result).toContain('"unknown"');
+    // namespace computed before the _present booleans that reference it
+    const namespacePos = result.indexOf('entity.namespace =');
+    const presentPos = result.indexOf('entity_namespace_present =');
+    expect(namespacePos).toBeLessThan(presentPos);
   });
 });
 

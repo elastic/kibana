@@ -13,7 +13,6 @@ import type {
   FieldEvaluationSource,
   FieldEvaluationWhenClause,
 } from '../definitions/entity_schema';
-import { isSingleFieldIdentity } from '../definitions/entity_schema';
 import { evaluateStreamlangCondition } from './commons';
 
 /** Result of resolving document + field evaluation into a filter-friendly spec (no EVAL). */
@@ -176,15 +175,19 @@ export function applyFieldEvaluations(
   return result;
 }
 
+/**
+ * Returns the top-level (shared) field evaluations for an entity definition.
+ * These are pre-STATS computations like `entity.source` that are not specific
+ * to the identity computation.
+ *
+ * Identity-specific field evaluations (e.g. `entity.namespace` for user) are
+ * handled by {@link getEuidEsqlEvaluation} directly, since they are prerequisites
+ * of the entity-id expression and must be co-located with it.
+ */
 export function getFieldEvaluationsFromDefinition(
   entityDefinition: Pick<EntityDefinitionWithoutId, 'fieldEvaluations' | 'identityField'>
 ): FieldEvaluation[] {
-  const sharedEvaluations = entityDefinition.fieldEvaluations ?? [];
-  if (isSingleFieldIdentity(entityDefinition.identityField)) {
-    return sharedEvaluations;
-  }
-
-  return [...sharedEvaluations, ...(entityDefinition.identityField.fieldEvaluations ?? [])];
+  return entityDefinition.fieldEvaluations ?? [];
 }
 
 function isNotEmpty(value: string): boolean {

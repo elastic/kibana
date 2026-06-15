@@ -369,6 +369,13 @@ export function getEuidEsqlEvaluation(
   const presentFields = collectRankingFields(branches);
   const presentAliases = new Map([...presentFields].map((f) => [f, esqlPresentColumnName(f)]));
   const assignments: string[] = [];
+
+  // Prepend identity-specific field evaluations (e.g. entity.namespace for user).
+  // These are prerequisites of the EUID expression and must precede the _present
+  // booleans that may reference their output columns.
+  for (const evaluation of identityField.fieldEvaluations ?? []) {
+    assignments.push(buildOneFieldEvaluationEsql(evaluation));
+  }
   for (const f of presentFields) {
     assignments.push(`${esqlPresentColumnName(f)} = ${esqlIsNotNullOrEmpty(f)}`);
   }
