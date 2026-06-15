@@ -140,13 +140,19 @@ export const DetailsPanel: FunctionComponent<Props> = ({
   );
 
   const fieldAccessPatternLabels: Record<FieldAccessPattern, string> = {
-  classic: i18n.translate('xpack.ingestPipelines.list.pipelineDetails.fieldAccessPatternClassic', {
-    defaultMessage: 'Classic',
-  }),
-  flexible: i18n.translate('xpack.ingestPipelines.list.pipelineDetails.fieldAccessPatternFlexible', {
-    defaultMessage: 'Flexible',
-  }),
-};
+    classic: i18n.translate(
+      'xpack.ingestPipelines.list.pipelineDetails.fieldAccessPatternClassic',
+      {
+        defaultMessage: 'Classic',
+      }
+    ),
+    flexible: i18n.translate(
+      'xpack.ingestPipelines.list.pipelineDetails.fieldAccessPatternFlexible',
+      {
+        defaultMessage: 'Flexible',
+      }
+    ),
+  };
 
   return (
     <EuiSplitPanel.Inner grow={true} paddingSize="none">
@@ -220,34 +226,33 @@ export const DetailsPanel: FunctionComponent<Props> = ({
               </>
             )}
 
+            {/* Field access pattern */}
+            {pipeline.field_access_pattern && (
+              <>
+                <EuiSpacer size="m" />
+                <EuiSkeletonText isLoading={isLoading} lines={1} size="s">
+                  <EuiText size="s" data-test-subj="fieldAccessPatternValue">
+                    <FormattedMessage
+                      id="xpack.ingestPipelines.list.pipelineDetails.fieldAccessPatternTitle"
+                      defaultMessage="{label}: {pattern}"
+                      values={{
+                        label: (
+                          <strong>
+                            <FormattedMessage
+                              id="xpack.ingestPipelines.list.pipelineDetails.fieldAccessPatternLabel"
+                              defaultMessage="Field access pattern"
+                            />
+                          </strong>
+                        ),
+                        pattern: fieldAccessPatternLabels[pipeline.field_access_pattern],
+                      }}
+                    />
+                  </EuiText>
+                </EuiSkeletonText>
 
-          {/* Field access pattern */}
-          {pipeline.field_access_pattern && (
-            <>
-            <EuiSpacer size="m" />
-              <EuiSkeletonText isLoading={isLoading} lines={1} size="s">
-                <EuiText size="s" data-test-subj="fieldAccessPatternValue">
-                  <FormattedMessage
-                    id="xpack.ingestPipelines.list.pipelineDetails.fieldAccessPatternTitle"
-                    defaultMessage="{label}: {pattern}"
-                    values={{
-                      label: (
-                        <strong>
-                          <FormattedMessage
-                            id="xpack.ingestPipelines.list.pipelineDetails.fieldAccessPatternLabel"
-                            defaultMessage="Field access pattern"
-                          />
-                        </strong>
-                      ),
-                      pattern: fieldAccessPatternLabels[pipeline.field_access_pattern],
-                    }}
-                  />
-                </EuiText>
-              </EuiSkeletonText>
-
-              <EuiSpacer size="s" />
-            </>
-          )}
+                <EuiSpacer size="s" />
+              </>
+            )}
 
             {/* Processors JSON */}
             <EuiDescriptionListTitle>
