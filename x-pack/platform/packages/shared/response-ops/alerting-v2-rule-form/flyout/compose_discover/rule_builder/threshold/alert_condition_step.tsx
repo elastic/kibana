@@ -318,6 +318,14 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
 
   return (
     <>
+      {/* ── Mode select ── */}
+      <ModeSelect
+        value={isAlert ? 'alert' : 'signal'}
+        onChange={handleModeChange}
+        compressed
+        data-test-subj="ruleBuilderModeSelect"
+      />
+      <EuiSpacer size="m" />
       {/* ── Header with preview icon ── */}
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
@@ -834,15 +842,6 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
           defaultMessage="Add condition"
         />
       </EuiButtonEmpty>
-
-      {/* ── Mode select ── */}
-      <EuiSpacer size="m" />
-      <ModeSelect
-        value={isAlert ? 'alert' : 'signal'}
-        onChange={handleModeChange}
-        compressed
-        data-test-subj="ruleBuilderModeSelect"
-      />
 
       {/* ── Schedule and lookback ── */}
       <EuiSpacer size="m" />
