@@ -149,6 +149,12 @@ export interface FeatureKibanaPrivileges {
        * ```
        */
       manage_rule_settings?: AlertingKibanaPrivilege;
+      /**
+       * List of rule types and consumers for which users should have the ability to mute and unmute
+       * per-alert instances when granted this privilege. Per-alert snooze/unsnooze reuses the
+       * muteAlert/unmuteAlert operations internally and is therefore also covered.
+       */
+      mute_alerts?: AlertingKibanaPrivilege;
     };
     alert?: {
       /**
