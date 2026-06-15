@@ -417,7 +417,7 @@ evaluate.describe('Automatic Troubleshooting', { tag: tags.stateful.classic }, (
               output: {
                 criteria: [
                   `Activated the troubleshooting skill by reading ${SKILL_PATH}`,
-                  'Called get_package_configurations to inspect transform settings and stats',
+                  'Inspected transform settings and stats to identify why endpoints are missing from the list',
                   'Identified that the endpoint.metadata_united transform is stopped',
                   'Recommended restarting the stopped transform as a remediation step',
                   'Called generate_insight to persist structured findings',
@@ -425,10 +425,11 @@ evaluate.describe('Automatic Troubleshooting', { tag: tags.stateful.classic }, (
                 expectedToolCalls: [
                   'filestore.read',
                   'check_endpoint_package_freshness',
+                  'platform.core.search',
                   'get_package_configurations',
                   'generate_insight',
                 ],
-                maxToolCalls: 10,
+                maxToolCalls: 15,
               },
             },
           ],
