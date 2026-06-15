@@ -115,8 +115,8 @@ export function createToolCallsCodeEvaluator(): Evaluator {
     name: 'Tool Calls',
     kind: 'CODE',
     evaluate: async ({ output }) => {
-      const steps = (output as { steps?: Array<{ tool?: string }> })?.steps ?? [];
-      const toolCalls = steps.filter((s) => typeof s.tool === 'string' && s.tool.length > 0).length;
+      const steps = (output as { steps?: Array<{ type?: string; tool_id?: string }> })?.steps ?? [];
+      const toolCalls = steps.filter((s) => s.type === 'tool_call').length;
       return {
         score: toolCalls,
         label: 'reported',
