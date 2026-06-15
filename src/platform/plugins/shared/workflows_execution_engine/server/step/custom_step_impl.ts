@@ -21,8 +21,7 @@ import type { IWorkflowEventLogger } from '../workflow_event_logger';
  * Implementation for custom registered step types.
  *
  * This class executes custom step types registered via the registerStepType API.
- * It validates input against the step's schema, executes the handler function,
- * and validates the output.
+ * It renders input and config values before executing the handler function.
  *
  * When the step definition provides an `onCancel` handler, instances expose
  * the `CancellableNode.onCancel` method so the execution engine can invoke
@@ -61,6 +60,21 @@ export class CustomStepImpl extends BaseAtomicNodeImplementation<BaseStep> {
     return this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(withData);
   }
 
+  private getRenderedConfig(): Record<string, unknown> {
+    const configShape = this.stepDefinition.configSchema?.shape;
+    if (!configShape) {
+      return {};
+    }
+
+    const config = Object.fromEntries(
+      Object.keys(configShape)
+        .filter((key) => Object.hasOwn(this.node.configuration, key))
+        .map((key) => [key, this.node.configuration[key]])
+    );
+
+    return this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(config);
+  }
+
   /**
    * Execute the custom step handler
    */
@@ -87,7 +101,7 @@ export class CustomStepImpl extends BaseAtomicNodeImplementation<BaseStep> {
     return {
       input,
       rawInput: this.node.configuration.with || {},
-      config: this.node.configuration, // TODO: pick only the config properties that are defined in the step definition
+      config: this.getRenderedConfig(),
       contextManager: {
         getContext: () => {
           return this.stepExecutionRuntime.contextManager.getContext();
