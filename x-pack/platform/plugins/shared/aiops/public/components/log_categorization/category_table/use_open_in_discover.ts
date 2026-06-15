@@ -15,13 +15,12 @@ import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { QueryStringContract, TimefilterContract } from '@kbn/data-plugin/public';
 import type { CategorizationAdditionalFilter } from '@kbn/aiops-log-pattern-analysis/create_category_request';
-import { appendToESQLQuery } from '@kbn/esql-utils';
+import { appendToESQLQuery, sanitazeESQLInput } from '@kbn/esql-utils';
+import { Parser } from '@elastic/esql';
 import { useAiopsAppContext } from '../../../hooks/use_aiops_app_context';
 import { useDiscoverLinks, createFilter } from '../use_discover_links';
 import type { LogCategorizationAppState } from '../../../application/url_state/log_pattern_analysis';
 import { getLabels } from './labels';
-
-const DOC_LIMIT = 10000;
 
 export interface OpenInDiscover {
   openFunction: (mode: QueryMode, navigateToDiscover: boolean, category?: Category) => void;
@@ -29,9 +28,17 @@ export interface OpenInDiscover {
   count: number;
 }
 
+const buildMatchFilterExpression = (fieldName: string, value: string, mode: QueryMode) => {
+  const field = sanitazeESQLInput(fieldName);
+  const escapedValue = value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+  const notPrefix = mode === QUERY_MODE.INCLUDE ? '' : 'NOT ';
+
+  return `${notPrefix}MATCH(${field}, "${escapedValue}", {"auto_generate_synonyms_phrase_query": false, "fuzziness": 0, "operator": "AND"})`;
+};
+
 export function onPopulateWhereClause(
   queryString: QueryStringContract,
-  fieldName: string,
+  field: DataViewField,
   value: string,
   mode: QueryMode
 ) {
@@ -40,16 +47,14 @@ export function onPopulateWhereClause(
     return;
   }
 
-  const operator = mode === QUERY_MODE.INCLUDE ? '' : 'NOT ';
+  const filterExpression = buildMatchFilterExpression(field.name, value, mode);
+  const { root } = Parser.parse(query.esql);
+  const lastCommand = root.commands[root.commands.length - 1];
+  const isLastCommandWhere = lastCommand.name === 'where';
 
-  const updatedQuery = appendToESQLQuery(
-    query.esql,
-    `| WHERE ${operator}MATCH(${fieldName}, "${value}", {"auto_generate_synonyms_phrase_query": false, "fuzziness": 0, "operator": "AND"})\n  | LIMIT ${DOC_LIMIT}`
-  );
-
-  if (!updatedQuery) {
-    return;
-  }
+  const updatedQuery = isLastCommandWhere
+    ? appendToESQLQuery(query.esql, `AND ${filterExpression}`)
+    : appendToESQLQuery(query.esql, `| WHERE ${filterExpression}`);
 
   queryString.setQuery({
     esql: updatedQuery,
@@ -82,7 +87,7 @@ export function useOpenInDiscover(
         if (isEsql) {
           onPopulateWhereClause(
             data.query.queryString,
-            selectedField.name,
+            selectedField,
             selectedCategories[0].key,
             mode
           );
