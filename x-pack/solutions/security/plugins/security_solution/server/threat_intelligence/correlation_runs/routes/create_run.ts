@@ -56,8 +56,14 @@ const toRunResult = (depthResult: CorrelateThreatDepthResult): CorrelationRunRes
         hypothesis: string;
         candidates: Array<{ candidate_id: string; confidence: number; justification: string }>;
       }>,
+      triaged_out: depthResult.triaged_out as unknown as Array<{
+        candidate_id: string;
+        score: number;
+        reason: string;
+      }>,
       candidates_fed: depthResult.candidates_fed,
       fallback_used: depthResult.fallback_used,
+      candidate_meta: depthResult.candidate_meta,
     };
   }
   if (depthResult.depth === 'knn') {
@@ -83,6 +89,7 @@ const toRunResult = (depthResult: CorrelateThreatDepthResult): CorrelationRunRes
         vertex_scores: Record<string, number>;
         match_breakdown?: Record<string, unknown>;
       }>,
+      candidate_meta: depthResult.candidate_meta,
     };
   }
   // extract — QueryDiamondVertex matches extractDepthResultSchema's diamond shape

@@ -59,6 +59,14 @@ export interface TriageGroup {
   candidates: Array<{ candidate_id: string; confidence: number; justification: string }>;
 }
 
+/** A candidate fed to triage but excluded from the final picks list. */
+export interface TriagedOutCandidate {
+  candidate_id: string;
+  /** LLM confidence if scored below the confidence floor; retrieval headline score otherwise. */
+  score: number;
+  reason: 'below_floor' | 'not_selected';
+}
+
 export interface TriageDiamondCandidatesParams {
   model: ScopedModel;
   logger: Logger;
@@ -79,6 +87,8 @@ export interface TriageDiamondCandidatesResult {
   fallback_used: boolean;
   /** Candidates actually fed to the LLM (post top-N cap). */
   candidates_fed: number;
+  /** Candidates fed to triage that were not selected as picks. */
+  triaged_out: TriagedOutCandidate[];
 }
 
 // ---------------------------------------------------------------------------
@@ -384,7 +394,7 @@ export const triageDiamondCandidates = async ({
 
   if (capped.length === 0) {
     logger.debug('[ti:triage] no candidates — returning empty picks');
-    return { picks: [], groups: [], fallback_used: false, candidates_fed: 0 };
+    return { picks: [], groups: [], fallback_used: false, candidates_fed: 0, triaged_out: [] };
   }
 
   // 2. Assign short prompt labels (c01, c02, …) to avoid UUID echo errors.
@@ -489,10 +499,36 @@ export const triageDiamondCandidates = async ({
     }
   }
 
+  // 9. Build triaged-out list — candidates fed but not in final picks.
+  const finalPickIds = new Set(picks.map((p) => p.candidate_id));
+  const llmScoredMap = new Map<string, number>();
+  for (const p of rawPicks) {
+    llmScoredMap.set(p.candidate_id, p.confidence);
+  }
+  const triagedOut: TriagedOutCandidate[] = capped
+    .filter((c) => !finalPickIds.has(c.report_id))
+    .map((c) => {
+      const llmConf = llmScoredMap.get(c.report_id);
+      return {
+        candidate_id: c.report_id,
+        score: llmConf !== undefined ? llmConf : c.score,
+        reason: (llmConf !== undefined
+          ? 'below_floor'
+          : 'not_selected') as TriagedOutCandidate['reason'],
+      };
+    });
+
   logger.debug(
     `[ti:triage] complete — fed=${guarded.length} picks=${picks.length} ` +
-      `groups=${groups.length} floor=${confidenceFloor} fallback=${fallbackUsed}`
+      `groups=${groups.length} floor=${confidenceFloor} fallback=${fallbackUsed} ` +
+      `triaged_out=${triagedOut.length}`
   );
 
-  return { picks, groups, fallback_used: fallbackUsed, candidates_fed: guarded.length };
+  return {
+    picks,
+    groups,
+    fallback_used: fallbackUsed,
+    candidates_fed: guarded.length,
+    triaged_out: triagedOut,
+  };
 };

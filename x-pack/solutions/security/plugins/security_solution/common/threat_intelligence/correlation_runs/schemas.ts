@@ -6,7 +6,11 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { correlationFindingsSchema, costTraceSchema } from '../correlation/schemas';
+import {
+  correlationFindingsSchema,
+  costTraceSchema,
+  candidateMetaEntrySchema,
+} from '../correlation/schemas';
 
 // ---------------------------------------------------------------------------
 // Depth / status / stage enums
@@ -82,6 +86,7 @@ export const knnDepthResultSchema = z.object({
   anchor_hits: z.array(anchorHitSchema),
   diamond_hits: z.array(diamondHitSchema),
   merged: z.array(mergedCandidateSchema),
+  candidate_meta: z.record(z.string(), candidateMetaEntrySchema).optional(),
   trace: costTraceSchema.optional(),
 });
 export type KnnDepthResult = z.infer<typeof knnDepthResultSchema>;
@@ -103,12 +108,20 @@ const triageGroupSchema = z.object({
   ),
 });
 
+const triagedOutCandidateSchema = z.object({
+  candidate_id: z.string(),
+  score: z.number(),
+  reason: z.enum(['below_floor', 'not_selected']),
+});
+
 export const triageDepthResultSchema = z.object({
   depth: z.literal('triage'),
   picks: z.array(triagePickSchema),
   groups: z.array(triageGroupSchema),
+  triaged_out: z.array(triagedOutCandidateSchema).optional(),
   candidates_fed: z.number().int(),
   fallback_used: z.boolean(),
+  candidate_meta: z.record(z.string(), candidateMetaEntrySchema).optional(),
   trace: costTraceSchema.optional(),
 });
 export type TriageDepthResult = z.infer<typeof triageDepthResultSchema>;

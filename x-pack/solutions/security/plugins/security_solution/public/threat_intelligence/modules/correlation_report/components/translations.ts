@@ -231,6 +231,14 @@ export const i18nText = {
   triageNo: () => i18n.translate(`${ns}.triageNo`, { defaultMessage: 'No' }),
   triageNoPicks: () =>
     i18n.translate(`${ns}.triageNoPicks`, { defaultMessage: 'No candidates survived triage.' }),
+  triageTriagedOutTitle: () =>
+    i18n.translate(`${ns}.triageTriagedOutTitle`, { defaultMessage: 'Triaged out' }),
+  triageColScore: () => i18n.translate(`${ns}.triageColScore`, { defaultMessage: 'Score' }),
+  triageColReason: () => i18n.translate(`${ns}.triageColReason`, { defaultMessage: 'Reason' }),
+  triageReasonBelowFloor: () =>
+    i18n.translate(`${ns}.triageReasonBelowFloor`, { defaultMessage: 'below floor' }),
+  triageReasonNotSelected: () =>
+    i18n.translate(`${ns}.triageReasonNotSelected`, { defaultMessage: 'not selected' }),
 
   // kNN — anchor-only row placeholder
   knnAnchorOnly: () => i18n.translate(`${ns}.knnAnchorOnly`, { defaultMessage: 'anchor-only' }),

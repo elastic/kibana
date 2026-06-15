@@ -20,6 +20,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiLink,
   EuiListGroup,
   EuiListGroupItem,
   EuiLoadingSpinner,
@@ -201,12 +202,32 @@ type MergedCandidate = KnnDepthResult['merged'][number];
 type AnchorHit = KnnDepthResult['anchor_hits'][number];
 
 const KnnResultView: FC<{ result: KnnDepthResult }> = ({ result }) => {
+  const { candidate_meta } = result;
+
   const mergedColumns: Array<EuiBasicTableColumn<MergedCandidate>> = useMemo(
     () => [
       {
-        field: 'title',
         name: i18nText.knnColTitle(),
-        truncateText: true,
+        render: (_: unknown, item: MergedCandidate) => {
+          const meta = candidate_meta?.[item.report_id];
+          const title = meta?.title ?? item.title;
+          return (
+            <div>
+              {meta?.url ? (
+                <EuiLink href={meta.url} target="_blank" external>
+                  {title}
+                </EuiLink>
+              ) : (
+                <span>{title}</span>
+              )}
+              {meta?.vendor ? (
+                <EuiText size="xs" color="subdued">
+                  {meta.vendor}
+                </EuiText>
+              ) : null}
+            </div>
+          );
+        },
       },
       {
         field: 'overlap',
@@ -245,7 +266,7 @@ const KnnResultView: FC<{ result: KnnDepthResult }> = ({ result }) => {
         },
       },
     ],
-    []
+    [candidate_meta]
   );
 
   return (
@@ -280,11 +301,28 @@ const KnnResultView: FC<{ result: KnnDepthResult }> = ({ result }) => {
             <h3>{i18nText.knnAnchorHitsTitle()}</h3>
           </EuiTitle>
           <EuiSpacer size="s" />
-          {result.anchor_hits.map((hit: AnchorHit) => (
-            <EuiText key={hit.report_id} size="s">
-              {hit.title}
-            </EuiText>
-          ))}
+          {result.anchor_hits.map((hit: AnchorHit) => {
+            const meta = candidate_meta?.[hit.report_id];
+            const title = meta?.title ?? hit.title;
+            return (
+              <div key={hit.report_id}>
+                {meta?.url ? (
+                  <EuiLink href={meta.url} target="_blank" external>
+                    <EuiText size="s" component="span">
+                      {title}
+                    </EuiText>
+                  </EuiLink>
+                ) : (
+                  <EuiText size="s">{title}</EuiText>
+                )}
+                {meta?.vendor ? (
+                  <EuiText size="xs" color="subdued">
+                    {meta.vendor}
+                  </EuiText>
+                ) : null}
+              </div>
+            );
+          })}
         </>
       ) : null}
     </EuiPanel>
@@ -296,28 +334,80 @@ const KnnResultView: FC<{ result: KnnDepthResult }> = ({ result }) => {
 // ---------------------------------------------------------------------------
 
 type TriagePick = TriageDepthResult['picks'][number];
+type TriagedOut = NonNullable<TriageDepthResult['triaged_out']>[number];
 
 const TriageResultView: FC<{ result: TriageDepthResult }> = ({ result }) => {
+  const { candidate_meta } = result;
+
+  const renderCandidateCell = (candidateId: string): React.ReactNode => {
+    const meta = candidate_meta?.[candidateId];
+    const title = meta?.title ?? candidateId;
+    return (
+      <div>
+        {meta?.url ? (
+          <EuiLink href={meta.url} target="_blank" external>
+            {title}
+          </EuiLink>
+        ) : (
+          <span>{title}</span>
+        )}
+        {meta?.vendor ? (
+          <EuiText size="xs" color="subdued">
+            {meta.vendor}
+          </EuiText>
+        ) : null}
+      </div>
+    );
+  };
+
   const picksColumns: Array<EuiBasicTableColumn<TriagePick>> = useMemo(
     () => [
       {
-        field: 'candidate_id',
         name: i18nText.triageColCandidate(),
-        truncateText: true,
+        render: (_: unknown, item: TriagePick) => renderCandidateCell(item.candidate_id),
       },
       {
         field: 'confidence',
         name: i18nText.triageColConfidence(),
-        width: '100px',
-        render: (value: TriagePick['confidence']) => `${(value * 100).toFixed(0)}%`,
+        width: '80px',
+        render: (value: TriagePick['confidence']) => value.toFixed(2),
       },
       {
         field: 'justification',
         name: i18nText.triageColJustification(),
       },
     ],
-    []
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [candidate_meta]
   );
+
+  const triagedOutColumns: Array<EuiBasicTableColumn<TriagedOut>> = useMemo(
+    () => [
+      {
+        name: i18nText.triageColCandidate(),
+        render: (_: unknown, item: TriagedOut) => renderCandidateCell(item.candidate_id),
+      },
+      {
+        field: 'score',
+        name: i18nText.triageColScore(),
+        width: '80px',
+        render: (value: number) => (value > 0 ? value.toFixed(2) : '—'),
+      },
+      {
+        field: 'reason',
+        name: i18nText.triageColReason(),
+        width: '120px',
+        render: (value: string) =>
+          value === 'below_floor'
+            ? i18nText.triageReasonBelowFloor()
+            : i18nText.triageReasonNotSelected(),
+      },
+    ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [candidate_meta]
+  );
+
+  const triagedOut = result.triaged_out ?? [];
 
   return (
     <EuiPanel hasBorder paddingSize="m" data-test-subj="correlationTriageResult">
@@ -350,7 +440,10 @@ const TriageResultView: FC<{ result: TriageDepthResult }> = ({ result }) => {
       <EuiSpacer size="m" />
 
       <EuiTitle size="xs">
-        <h3>{i18nText.triagePicksTitle()}</h3>
+        <h3>
+          {i18nText.triagePicksTitle()}
+          {` (${result.picks.length})`}
+        </h3>
       </EuiTitle>
       <EuiSpacer size="s" />
       {result.picks.length === 0 ? (
@@ -366,6 +459,26 @@ const TriageResultView: FC<{ result: TriageDepthResult }> = ({ result }) => {
           })}
         />
       )}
+
+      {triagedOut.length > 0 ? (
+        <>
+          <EuiSpacer size="m" />
+          <EuiTitle size="xs">
+            <h3>
+              {i18nText.triageTriagedOutTitle()}
+              {` (${triagedOut.length})`}
+            </h3>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiBasicTable<TriagedOut>
+            items={triagedOut}
+            columns={triagedOutColumns}
+            rowProps={(item: TriagedOut) => ({
+              'data-test-subj': `triageTriagedOutRow-${item.candidate_id}`,
+            })}
+          />
+        </>
+      ) : null}
 
       {result.groups.length > 0 ? (
         <>
@@ -384,11 +497,15 @@ const TriageResultView: FC<{ result: TriageDepthResult }> = ({ result }) => {
                 {group.hypothesis}
               </EuiText>
               <EuiSpacer size="xs" />
-              {group.candidates.map((c) => (
-                <EuiText key={c.candidate_id} size="xs" color="subdued">
-                  {`${c.candidate_id} — ${(c.confidence * 100).toFixed(0)}%`}
-                </EuiText>
-              ))}
+              {group.candidates.map((c) => {
+                const meta = candidate_meta?.[c.candidate_id];
+                const title = meta?.title ?? c.candidate_id;
+                return (
+                  <EuiText key={c.candidate_id} size="xs" color="subdued">
+                    {`${title} — ${c.confidence.toFixed(2)}`}
+                  </EuiText>
+                );
+              })}
             </EuiPanel>
           ))}
         </>

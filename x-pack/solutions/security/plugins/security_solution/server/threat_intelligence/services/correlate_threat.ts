@@ -33,6 +33,7 @@ import type {
   TriageCandidateInput,
   TriagePick,
   TriageGroup,
+  TriagedOutCandidate,
 } from './triage_diamond_candidates';
 
 // ---------------------------------------------------------------------------
@@ -85,6 +86,7 @@ export interface CorrelateThreatKnnResult {
   anchor_hits: SearchByAnchorsResult;
   diamond_hits: SearchByDiamondResult;
   merged: TriageCandidateInput[];
+  candidate_meta?: Record<string, { title?: string; vendor?: string; url?: string }>;
   trace?: CostTrace;
 }
 
@@ -92,8 +94,10 @@ export interface CorrelateThreatTriageResult {
   depth: 'triage';
   picks: TriagePick[];
   groups: TriageGroup[];
+  triaged_out: TriagedOutCandidate[];
   candidates_fed: number;
   fallback_used: boolean;
+  candidate_meta?: Record<string, { title?: string; vendor?: string; url?: string }>;
   trace?: CostTrace;
 }
 
@@ -458,11 +462,18 @@ export const correlateThreat = async ({
   const merged = buildMergedCandidates(anchorResults, diamondResults);
 
   if (depth === 'knn') {
+    const knnIds = new Set<string>([
+      ...merged.map((c) => c.report_id),
+      ...anchorResults.hits.map((h) => h.report_id),
+    ]);
+    const candidateMeta =
+      knnIds.size > 0 ? await fetchCandidateMeta(esClient, [...knnIds]) : undefined;
     return {
       depth: 'knn',
       anchor_hits: anchorResults,
       diamond_hits: diamondResults,
       merged,
+      candidate_meta: candidateMeta,
       trace: traceBuilder.build(),
     };
   }
@@ -523,12 +534,21 @@ export const correlateThreat = async ({
   });
 
   if (depth === 'triage') {
+    const triageIds = new Set<string>([
+      ...triageResult.picks.map((p) => p.candidate_id),
+      ...triageResult.groups.flatMap((g) => g.candidates.map((c) => c.candidate_id)),
+      ...triageResult.triaged_out.map((t) => t.candidate_id),
+    ]);
+    const candidateMeta =
+      triageIds.size > 0 ? await fetchCandidateMeta(esClient, [...triageIds]) : undefined;
     return {
       depth: 'triage',
       picks: triageResult.picks,
       groups: triageResult.groups,
+      triaged_out: triageResult.triaged_out,
       candidates_fed: triageResult.candidates_fed,
       fallback_used: triageResult.fallback_used,
+      candidate_meta: candidateMeta,
       trace: traceBuilder.build(),
     };
   }
