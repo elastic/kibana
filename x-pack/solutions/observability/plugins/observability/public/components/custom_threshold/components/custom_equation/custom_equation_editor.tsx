@@ -128,7 +128,11 @@ export function CustomEquationEditor({
   const handleEquationChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       setEquation(e.target.value);
-      debouncedOnChange({ ...expressionRef.current, metrics: customMetrics, equation: e.target.value });
+      debouncedOnChange({
+        ...expressionRef.current,
+        metrics: customMetrics,
+        equation: e.target.value,
+      });
     },
     [debouncedOnChange, customMetrics]
   );

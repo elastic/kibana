@@ -109,7 +109,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
         setRuleParams(expressionId, { ...expressionRef.current, label: labelValue });
       }, 300),
     // expressionRef is a stable ref object; expressionId and setRuleParams are stable too
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
     [expressionId, setRuleParams]
   );
 

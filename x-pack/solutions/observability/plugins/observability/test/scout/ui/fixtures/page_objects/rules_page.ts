@@ -654,7 +654,7 @@ export class RulesPage {
     );
     await expect(equationField).toBeVisible({ timeout: SHORTER_TIMEOUT });
     await equationField.fill(equation);
-    await this.closeMetricPopover();
+    await this.closeCurrentPopover();
   }
 
   /** Sets the inline equation label field (rendered directly on the form). */
