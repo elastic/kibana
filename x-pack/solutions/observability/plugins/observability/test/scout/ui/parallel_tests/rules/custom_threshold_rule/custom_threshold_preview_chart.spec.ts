@@ -45,9 +45,7 @@ test.describe(
         'thresholdRuleCustomEquationEditorFieldText'
       );
       const lensFailure = page.testSubj.locator('embeddable-lens-failure');
-      const previewChart = page.testSubj.locator(
-        CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.PREVIEW_CHART
-      );
+      const previewChart = page.testSubj.locator(CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.PREVIEW_CHART);
 
       // Introduce an invalid equation to trigger the error state
       await customEquation.click();

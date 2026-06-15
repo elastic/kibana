@@ -551,7 +551,9 @@ export class RulesPage {
    * Closes the currently open o11y closable popover
    */
   async closeCurrentPopover() {
-    const closeButton = this.page.testSubj.locator(CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.CLOSE_POPOVER);
+    const closeButton = this.page.testSubj.locator(
+      CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.CLOSE_POPOVER
+    );
     await expect(closeButton).toBeVisible({ timeout: SHORTER_TIMEOUT });
     await closeButton.click();
     await expect(closeButton).toBeHidden({ timeout: SHORTER_TIMEOUT });
@@ -575,7 +577,9 @@ export class RulesPage {
    */
   async setCustomEquation(equation: string) {
     await this.page.testSubj.click(CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.CUSTOM_EQUATION);
-    const field = this.page.testSubj.locator(CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.CUSTOM_EQUATION_FIELD);
+    const field = this.page.testSubj.locator(
+      CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.CUSTOM_EQUATION_FIELD
+    );
     await expect(field).toBeVisible({ timeout: SHORTER_TIMEOUT });
     await field.fill(equation);
     await this.closeCurrentPopover();
