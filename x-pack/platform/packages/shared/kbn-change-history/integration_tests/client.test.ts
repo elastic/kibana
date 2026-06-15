@@ -14,7 +14,7 @@ import { FLAGS } from '../src/constants';
 import { ChangeHistoryClient, ILM_POLICY_NAME } from '..';
 import { DATA_STREAM_NAME } from '../src/client';
 import type { ObjectChange } from '..';
-import { sha256 } from '../src/utils';
+import { sha256, hmacSha256 } from '../src/utils';
 
 const KIBANA_SPACE = 'default';
 const TEST_MODULE = 'test-module';
@@ -412,10 +412,10 @@ describe('ChangeHistoryClient', () => {
       expect(snapshot).toEqual({
         name: 'My Rule',
         user: {
-          email: sha256('secret@example.com'),
+          email: hmacSha256('secret@example.com', 'masked-id'),
           name: 'Alice',
         },
-        apiKey: sha256('sk-secret-key-12345'),
+        apiKey: hmacSha256('sk-secret-key-12345', 'masked-id'),
       });
     });
   });

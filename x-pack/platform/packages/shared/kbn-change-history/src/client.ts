@@ -32,7 +32,7 @@ import type {
   GetChangeHistoryOptions,
   ObjectChange,
 } from './types';
-import { sha256, hashFields } from './utils';
+import { sha256, processFields } from './utils';
 
 export { DATA_STREAM_NAME } from './constants';
 
@@ -192,7 +192,7 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
       this.logger.error(err);
       throw err;
     }
-    const { username, userProfileId, spaceId: space, correlationId, refresh } = opts;
+    const { username, userProfileId, spaceId: space, fieldsToHash, correlationId, refresh } = opts;
     const request: ClientCreateRequest<ChangeHistoryDocument> = {
       refresh,
       space,
@@ -203,7 +203,7 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
       // Create document and populate
       const { objectType, objectId, timestamp, sequence } = change;
       const hash = sha256(JSON.stringify(change.snapshot));
-      const hashed = hashFields(change.snapshot, opts.fieldsToHash);
+      const processsed = processFields(change.snapshot, { fieldsToHash, secret: objectId });
       const { event, metadata, tags } = opts.data ?? {};
       const created = new Date().toISOString();
       const document: ChangeHistoryDocument = {
@@ -224,8 +224,8 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
           type: objectType,
           hash,
           sequence,
-          fields: { hashed: hashed.fields },
-          snapshot: hashed.snapshot,
+          fields: { hashed: processsed.fields.hashed },
+          snapshot: processsed.snapshot,
         },
         tags,
         metadata,

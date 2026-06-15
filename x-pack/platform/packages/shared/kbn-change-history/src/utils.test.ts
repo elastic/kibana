@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { sha256, hashFields } from './utils';
+import { hmacSha256, processFields } from './utils';
 
-describe('#hashFields', () => {
+describe('#processFields', () => {
   describe('when fieldsToHash is not provided', () => {
     it('should return snapshot unchanged and empty hashed paths', () => {
       const snapshot = { user: { email: 'bob@example.com' } };
-      const result = hashFields(snapshot);
+      const result = processFields(snapshot);
 
-      expect(result.fields).toEqual([]);
+      expect(result.fields.hashed).toEqual([]);
       expect(result.snapshot).toEqual(snapshot);
     });
   });
@@ -21,9 +21,9 @@ describe('#hashFields', () => {
   describe('when fieldsToHash is undefined', () => {
     it('should return snapshot unchanged and empty hashed paths', () => {
       const snapshot = { secret: 'sensitive' };
-      const result = hashFields(snapshot, undefined);
+      const result = processFields(snapshot, { fieldsToHash: undefined });
 
-      expect(result.fields).toEqual([]);
+      expect(result.fields.hashed).toEqual([]);
       expect(result.snapshot).toEqual(snapshot);
     });
   });
@@ -32,20 +32,20 @@ describe('#hashFields', () => {
     it('should hash a top-level string field and list its path', () => {
       const snapshot = { user: { email: 'bob@example.com' } };
       const fieldsToHash = { user: true };
-      const result = hashFields(snapshot, fieldsToHash);
+      const result = processFields(snapshot, { fieldsToHash });
 
-      expect(result.fields).toEqual(['user.email']);
-      expect(result.snapshot.user.email).toBe(sha256('bob@example.com'));
+      expect(result.fields.hashed).toEqual(['user.email']);
+      expect(result.snapshot.user.email).toBe(hmacSha256('bob@example.com', ''));
       expect(result.snapshot.user.email).not.toBe('bob@example.com');
     });
 
     it('should hash a nested field when only that path is in fieldsToHash', () => {
       const snapshot = { user: { email: 'bob@example.com', name: 'Bob' } };
       const fieldsToHash = { user: { email: true } };
-      const result = hashFields(snapshot, fieldsToHash);
+      const result = processFields(snapshot, { fieldsToHash });
 
-      expect(result.fields).toEqual(['user.email']);
-      expect(result.snapshot.user.email).toBe(sha256('bob@example.com'));
+      expect(result.fields.hashed).toEqual(['user.email']);
+      expect(result.snapshot.user.email).toBe(hmacSha256('bob@example.com', ''));
       expect(result.snapshot.user.name).toBe('Bob');
     });
   });
@@ -57,14 +57,14 @@ describe('#hashFields', () => {
         token: 'abc-token',
       };
       const fieldsToHash = { user: true, token: true };
-      const result = hashFields(snapshot, fieldsToHash);
+      const result = processFields(snapshot, { fieldsToHash });
 
       // Using `.sort()` below because we're not depending on array order.
       // @see https://stackoverflow.com/questions/40135684
-      expect(result.fields.sort()).toEqual(['token', 'user.apiKey', 'user.email'].sort());
-      expect(result.snapshot.user.email).toBe(sha256('bob@example.com'));
-      expect(result.snapshot.user.apiKey).toBe(sha256('secret-key-123'));
-      expect(result.snapshot.token).toBe(sha256('abc-token'));
+      expect(result.fields.hashed.sort()).toEqual(['token', 'user.apiKey', 'user.email'].sort());
+      expect(result.snapshot.user.email).toBe(hmacSha256('bob@example.com', ''));
+      expect(result.snapshot.user.apiKey).toBe(hmacSha256('secret-key-123', ''));
+      expect(result.snapshot.token).toBe(hmacSha256('abc-token', ''));
     });
   });
 
@@ -72,9 +72,9 @@ describe('#hashFields', () => {
     it('should not hash non-string values even when key is in fieldsToHash', () => {
       const snapshot = { config: { count: 42, enabled: true, nested: { id: 1 } } };
       const fieldsToHash = { config: true };
-      const result = hashFields(snapshot, fieldsToHash);
+      const result = processFields(snapshot, { fieldsToHash });
 
-      expect(result.fields).toEqual([]);
+      expect(result.fields.hashed).toEqual([]);
       expect(result.snapshot).toEqual(snapshot);
     });
 
@@ -83,10 +83,10 @@ describe('#hashFields', () => {
         user: { email: 'bob@example.com', count: 5, active: true },
       };
       const fieldsToHash = { user: true };
-      const result = hashFields(snapshot, fieldsToHash);
+      const result = processFields(snapshot, { fieldsToHash });
 
-      expect(result.fields).toEqual(['user.email']);
-      expect(result.snapshot.user.email).toBe(sha256('bob@example.com'));
+      expect(result.fields.hashed).toEqual(['user.email']);
+      expect(result.snapshot.user.email).toBe(hmacSha256('bob@example.com', ''));
       expect(result.snapshot.user.count).toBe(5);
       expect(result.snapshot.user.active).toBe(true);
     });
@@ -99,54 +99,63 @@ describe('#hashFields', () => {
         title: 'My Dashboard',
       };
       const fieldsToHash = { user: { email: true } };
-      const result = hashFields(snapshot, fieldsToHash);
+      const result = processFields(snapshot, { fieldsToHash });
 
       expect(result.snapshot.user.name).toBe('Bob');
       expect(result.snapshot.title).toBe('My Dashboard');
     });
   });
 
-  describe('hash format', () => {
-    it('should produce deterministic digest for the same input', () => {
-      const snapshot = { secret: 'same-value' };
-      const fieldsToHash = { secret: true };
-      const result1 = hashFields(snapshot, fieldsToHash);
-      const result2 = hashFields(snapshot, fieldsToHash);
+  describe('HMAC-SHA256', () => {
+    it('should use hmacSha256 keyed by secret', () => {
+      const snapshot = { apiKey: 'abc123' };
+      const fieldsToHash = { apiKey: true };
+      const result = processFields(snapshot, { fieldsToHash, secret: 'rule-id-xyz' });
 
-      expect(result1.snapshot.secret).toBe(result2.snapshot.secret);
+      expect(result.snapshot.apiKey).toBe(hmacSha256('abc123', 'rule-id-xyz'));
     });
 
-    it('should store the full sha256 hex digest', () => {
-      const snapshot = { secret: 'test' };
-      const fieldsToHash = { secret: true };
-      const result = hashFields(snapshot, fieldsToHash);
+    it('should produce deterministic output for the same value and secret', () => {
+      const snapshot = { apiKey: 'abc123' };
+      const fieldsToHash = { apiKey: true };
+      const result1 = processFields(snapshot, { fieldsToHash, secret: 'same-id' });
+      const result2 = processFields(snapshot, { fieldsToHash, secret: 'same-id' });
 
-      expect(result.snapshot.secret).toEqual(sha256('test'));
+      expect(result1.snapshot.apiKey).toBe(result2.snapshot.apiKey);
+    });
+
+    it('should produce different hashes for different secrets', () => {
+      const snapshot = { apiKey: 'abc123' };
+      const fieldsToHash = { apiKey: true };
+      const result1 = processFields(snapshot, { fieldsToHash, secret: 'rule-id-1' });
+      const result2 = processFields(snapshot, { fieldsToHash, secret: 'rule-id-2' });
+
+      expect(result1.snapshot.apiKey).not.toBe(result2.snapshot.apiKey);
     });
   });
 
   describe('edge cases', () => {
     it('should handle empty snapshot', () => {
-      const result = hashFields({}, { user: true });
+      const result = processFields({}, { fieldsToHash: { user: true } });
 
-      expect(result.fields).toEqual([]);
+      expect(result.fields.hashed).toEqual([]);
       expect(result.snapshot).toEqual({});
     });
 
     it('should handle empty string value', () => {
       const snapshot = { secret: '' };
       const fieldsToHash = { secret: true };
-      const result = hashFields(snapshot, fieldsToHash);
+      const result = processFields(snapshot, { fieldsToHash });
 
-      expect(result.fields).toEqual(['secret']);
-      expect(result.snapshot.secret).toBe(sha256(''));
+      expect(result.fields.hashed).toEqual(['secret']);
+      expect(result.snapshot.secret).toBe(hmacSha256('', ''));
     });
 
     it('should not mutate the original snapshot', () => {
       const user = { email: 'bob@example.com' };
       const snapshot = { user };
       const fieldsToHash = { user: true };
-      hashFields(snapshot, fieldsToHash);
+      processFields(snapshot, { fieldsToHash });
 
       expect(snapshot.user).toBe(user);
     });
