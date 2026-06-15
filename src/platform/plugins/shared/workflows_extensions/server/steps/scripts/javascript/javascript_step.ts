@@ -14,6 +14,7 @@ import { createServerStepDefinition } from '../../../step_registry/types';
 export const SCRIPT_MEMORY_LIMIT_MB = 8;
 export const SCRIPT_EXECUTION_TIMEOUT_MS = 5_000;
 export const MAX_CONSOLE_LOG_COUNT = 100;
+export const SCRIPT_MAX_LENGTH_CHARS = 1 * 1024 * 1024; // 1 MB after Liquid template rendering
 
 const toExecutionError = (error: unknown, aborted: boolean): Error => {
   if (aborted) {
@@ -43,6 +44,18 @@ export const scriptsJavaScriptStepDefinition = createServerStepDefinition({
 
     if (typeof script !== 'string' || script.trim().length === 0) {
       return { error: new Error('Script is required') };
+    }
+
+    if (script.length > SCRIPT_MAX_LENGTH_CHARS) {
+      return {
+        error: new Error(
+          `Script exceeds maximum allowed size of ${
+            SCRIPT_MAX_LENGTH_CHARS / 1024 / 1024
+          } MB after template rendering. Current size: ${(script.length / 1024 / 1024).toFixed(
+            2
+          )} MB. Reduce interpolated data or split the workflow.`
+        ),
+      };
     }
 
     try {

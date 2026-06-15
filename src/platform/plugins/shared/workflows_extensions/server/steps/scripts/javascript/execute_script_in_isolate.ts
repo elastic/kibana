@@ -61,11 +61,22 @@ const CONSOLE_BRIDGE_SCRIPT = `
 })();
 `;
 
-const wrapUserScript = (script: string): string => `
-(async function () {
-  ${script}
-})()
+const USER_SCRIPT_RUNNER = `
+  const AsyncFunction = async function () {}.constructor;
+  return new AsyncFunction($0)();
 `;
+
+const runUserScript = (
+  ivmContext: ivm.Context,
+  script: string,
+  executionTimeoutMs: number
+): Promise<unknown> =>
+  ivmContext.evalClosure(USER_SCRIPT_RUNNER, [script], {
+    arguments: { copy: true },
+    promise: true,
+    result: { promise: true, copy: true },
+    timeout: executionTimeoutMs,
+  });
 
 const routeConsoleToLogger = (level: string, message: string, logger: ScriptLogger): void => {
   switch (level) {
@@ -121,6 +132,43 @@ const raceWithAbort = async <T>(
   });
 };
 
+const createCatastrophicError = (message: string): Error =>
+  new Error(`Script isolate encountered a catastrophic error${message ? `: ${message}` : ''}`);
+
+const createIsolateWithCatastrophicHandler = ({
+  memoryLimitMb,
+  logger,
+}: {
+  memoryLimitMb: number;
+  logger: ScriptLogger;
+}): {
+  isolate: ivm.Isolate;
+  catastrophicPromise: Promise<never>;
+} => {
+  let rejectCatastrophic: (error: Error) => void;
+  const catastrophicPromise = new Promise<never>((_, reject) => {
+    rejectCatastrophic = reject;
+  });
+
+  const isolate = new ivm.Isolate({
+    memoryLimit: memoryLimitMb,
+    onCatastrophicError: (message: string) => {
+      const error = createCatastrophicError(message);
+      logger.error('JavaScript step isolate catastrophic error', error);
+      if (!isolate.isDisposed) {
+        try {
+          isolate.dispose();
+        } catch {
+          // isolate may already be corrupted
+        }
+      }
+      rejectCatastrophic(error);
+    },
+  });
+
+  return { isolate, catastrophicPromise };
+};
+
 export const executeScriptInIsolate = async ({
   script,
   logger,
@@ -129,7 +177,10 @@ export const executeScriptInIsolate = async ({
   executionTimeoutMs,
   maxConsoleLogCount,
 }: ExecuteScriptInIsolateParams): Promise<unknown> => {
-  const isolate = new ivm.Isolate({ memoryLimit: memoryLimitMb });
+  const { isolate, catastrophicPromise } = createIsolateWithCatastrophicHandler({
+    memoryLimitMb,
+    logger,
+  });
 
   try {
     const ivmContext = await isolate.createContext();
@@ -155,14 +206,8 @@ export const executeScriptInIsolate = async ({
 
     await jail.delete('__logBridge__');
 
-    const compiled = await isolate.compileScript(wrapUserScript(script));
-
     const resultPromise = await raceWithAbort(
-      compiled.run(ivmContext, {
-        copy: true,
-        promise: true,
-        timeout: executionTimeoutMs,
-      }),
+      Promise.race([catastrophicPromise, runUserScript(ivmContext, script, executionTimeoutMs)]),
       abortSignal,
       isolate
     );

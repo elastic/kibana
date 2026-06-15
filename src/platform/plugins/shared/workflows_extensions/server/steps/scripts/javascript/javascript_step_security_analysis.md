@@ -18,7 +18,7 @@ Analysis of the current implementation:
 | ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Safe to ship as-is?**                                | **No — not without additional hardening.**                                                                                                                      |
 | **Will it crash the main process in the common case?** | **Unlikely** compared to the prior `worker_threads` + `worker.terminate()` design. Teardown uses `isolate.dispose()` in `finally`, which is the supported path. |
-| **Can it still crash or take down Kibana?**            | **Yes, in edge cases** — catastrophic isolate OOM defaults to `process.abort()`, and `--no-node-snapshot` is not wired into Kibana startup.                     |
+| **Can it still crash or take down Kibana?**            | **Possible in edge cases** — `--no-node-snapshot` is not wired into Kibana startup; catastrophic isolate OOM is handled via `onCatastrophicError` (step fails, no `process.abort()`), but isolated-vm warns recovery is not guaranteed. |
 | **Is arbitrary code execution contained?**             | **Partially.** No `require` / `process` / `fetch` in the child isolate, but scripts can burn CPU/memory and invoke host callbacks (`__logBridge__`).            |
 | **Who can run scripts?**                               | Users with **Enterprise** license and `**workflow_execute`** (or broader workflow write) privileges who can author or trigger workflows containing this step.   |
 
@@ -33,7 +33,10 @@ Analysis of the current implementation:
 |---|---|
 | **Console-only logging** | `__logBridge__` is set during setup, captured in a closure for `globalThis.console`, then removed via `jail.delete('__logBridge__')`. User scripts see only `console.*`. |
 | **Log volume cap** | Host-side silent drop after **100** total `console.*` emissions per script run (`MAX_CONSOLE_LOG_COUNT`). Step does not fail when cap is exceeded. |
-| **Script CPU timeout** | `compiled.run({ timeout: 5000 })` — 5 s hard limit (`SCRIPT_EXECUTION_TIMEOUT_MS`). |
+| **Script CPU timeout** | `evalClosure({ timeout: 5000 })` — 5 s hard limit (`SCRIPT_EXECUTION_TIMEOUT_MS`). |
+| **Catastrophic OOM** | `onCatastrophicError` logs, disposes isolate, fails step; does **not** call `process.abort()`. Raced with script execution via `Promise.race`. |
+| **Script size cap** | Rejects scripts larger than **1 MB** after Liquid template rendering (`SCRIPT_MAX_LENGTH_CHARS`), before execution. |
+| **Safe script loading** | User script passed as copied `$0` to fixed `evalClosure` bootstrap + `AsyncFunction` — no string concatenation into wrapper source. |
 
 **Residual risk after mitigations:** Tight `console.*` or `applySync` loops can still burn CPU until the 5 s timeout. String-based memory bombs are still not reliably blocked by `memoryLimit: 8`.
 
@@ -120,9 +123,7 @@ Reproduction (child isolate):
 
 ### 3. Wrapper breakout is not a clean escape
 
-Injecting `})(); … //` into user script produces a **syntax error** (`Illegal return statement`), not host code execution.
-
-**Verdict:** Naive wrapper escape fails. (This is not a formal proof against all parser tricks; see [§4.3](#43-script-injection-into-wrapper).)
+**Mitigated:** User script is no longer concatenated into a wrapper function. It is passed as copied data to a fixed `evalClosure` bootstrap that runs `new AsyncFunction($0)()`, per [isolated-vm guidance](https://github.com/laverdet/isolated-vm/issues/434#issuecomment-1565003090). Structural injection payloads (e.g. `})(); … //`) fail at `AsyncFunction` parse time and cannot break out of host-controlled source.
 
 ### 4. Prototype pollution stays in the child isolate
 
@@ -151,7 +152,7 @@ A `return 'A'.repeat(50MB)` is copied into the main process, then the step fails
 ### 4.1 `memoryLimit: 8` does not reliably cap string heap usage
 
 **Severity:** High (DoS)  
-**Main process crash:** No (isolate only), unless catastrophic OOM path triggers [§4.6](#46-catastrophic-oom-can-abort-the-process).
+**Main process crash:** No (isolate only), unless catastrophic OOM path triggers residual risk in [§4.6](#46-catastrophic-oom-can-abort-the-process).
 
 **Observed behavior:**
 
@@ -197,10 +198,10 @@ Sequence for `return 'A'.repeat(50MB)`:
 
 ### 4.3 Script injection into wrapper
 
-**Severity:** Low (today)  
+**Severity:** ~~Low (today)~~ **Mitigated**  
 **Main process crash:** No
 
-Current wrapper:
+**Previous risk:** User script was concatenated into a wrapper:
 
 ```ts
 (async function () {
@@ -208,9 +209,18 @@ Current wrapper:
 })()
 ```
 
-User script is **concatenated**, not passed as a string literal. Malicious content can break out of the intended function body in theory (e.g. injecting `})` sequences).
+**Mitigation (implemented):** Fixed bootstrap via `evalClosure`; user script is copied as `$0` and executed with `AsyncFunction`:
 
-Today, tested breakout attempts fail at **compile** or **parse** time rather than executing host code. This should be monitored; safer pattern is `compileScript` on user code wrapped via `new ivm.Script` with explicit function boundary or `evalClosure` with no string interpolation.
+```ts
+ivmContext.evalClosure(
+  `const AsyncFunction = async function () {}.constructor;
+   return new AsyncFunction($0)();`,
+  [script],
+  { arguments: { copy: true }, promise: true, result: { promise: true, copy: true }, timeout }
+);
+```
+
+User code is **data**, not spliced into host-controlled source. Injection payloads fail at parse time inside the isolate.
 
 ---
 
@@ -255,25 +265,28 @@ Per-step YAML `timeout:` and workflow `settings.timeout` can still abort earlier
 
 ### 4.6 Catastrophic OOM can `abort()` the process
 
-**Severity:** Critical (ship blocker)  
-**Main process crash:** **Yes**
+**Severity:** ~~Critical (ship blocker)~~ **Mitigated**  
+**Main process crash:** **No** (intended) / **Possible** (residual — see below)
 
-`isolated-vm` README:
+Without `onCatastrophicError`, isolated-vm native `OOMErrorCallback` calls `process.abort()`, terminating the entire Kibana process.
 
-> If you receive [a catastrophic error] you should log the error, stop serving requests, finish outstanding work, and end the process by calling `process.abort()`.
-
-Native `OOMErrorCallback` in isolated-vm calls `abort()` when no `onCatastrophicError` handler is registered.
-
-Current code:
+**Mitigation (implemented):**
 
 ```ts
-const isolate = new ivm.Isolate({ memoryLimit: SCRIPT_MEMORY_LIMIT_MB });
-// onCatastrophicError: not set
+isolate = new ivm.Isolate({
+  memoryLimit: memoryLimitMb,
+  onCatastrophicError: (message) => {
+    logger.error('JavaScript step isolate catastrophic error', error);
+    isolate.dispose();
+    rejectCatastrophic(error); // fails step via Promise.race
+    // does NOT call process.abort()
+  },
+});
 ```
 
-**Impact:** A pathological heap state inside the child isolate can **terminate the entire Kibana process**, not just the workflow step.
+**Policy:** Fail the step only — log, dispose, return step error. Do not call `process.abort()`.
 
-**Mitigation:** Provide `onCatastrophicError` that logs, marks isolate dead, and **does not** call `process.abort()` unless product policy explicitly accepts process-level failure (isolated-vm itself warns this state may be unrecoverable).
+**Residual risk:** isolated-vm describes `onCatastrophicError` as an "unreliable band-aid"; the main process may be in an undefined state after catastrophic failure even without abort. True hardening would require multi-process isolation (isolated-vm README recommendation).
 
 ---
 
@@ -301,10 +314,12 @@ const isolate = new ivm.Isolate({ memoryLimit: SCRIPT_MEMORY_LIMIT_MB });
 
 ### 4.9 No script source size limit
 
-**Severity:** Low–Medium  
+**Severity:** ~~Low–Medium~~ **Mitigated**  
 **Main process crash:** No
 
-`config.script` is an unbounded string. Very large scripts increase compile time and memory at compile time on the main thread (before `run`).
+**Mitigation:** Handler rejects `config.script` when rendered length exceeds **1 MB** (`SCRIPT_MAX_LENGTH_CHARS`) before `compileScript`. Limit applies after Liquid template interpolation (prior step outputs embedded in `script:` count toward the cap).
+
+**Residual risk:** Scripts at or near 1 MB still incur main-thread compile cost; authors should prefer data steps for large payloads.
 
 ---
 
@@ -325,15 +340,15 @@ Each workflow execution creates its own isolate. No global concurrency cap for s
 | Infinite `while(true)` loop                      | **No**                       | Burns thread-pool CPU until abort; event loop stays free          |
 | `worker.terminate()` during isolate (old design) | **Yes**                      | **Removed** in current design                                     |
 | `isolate.dispose()` on cancel / `finally`        | **No**                       | Supported teardown path; unit tests pass                          |
-| Catastrophic isolate OOM                         | **Yes**                      | `abort()` without `onCatastrophicError` handler                   |
+| Catastrophic isolate OOM                         | **No** (intended) / **Possible** (residual) | `onCatastrophicError` registered; step fails, no `process.abort()` |
 | Missing `--no-node-snapshot`                     | **Possible**                 | Environment-dependent                                             |
 | Return 50 MB string                              | **No** (usually)             | Brief main-heap spike; step fails size check                      |
 | `ArrayBuffer` OOM in isolate                     | **Rare / edge**              | Typically throws inside isolate; catastrophic path if V8 gives up |
 | `__logBridge__` spam                             | **No**                       | Bridge removed from global; log cap at 100                        |
-| Malicious wrapper escape to `require`            | **No** (today)               | Tested probes undefined                                           |
+| Malicious wrapper escape to `require`            | **No**                       | `evalClosure` + `AsyncFunction($0)`; injection fails at parse time |
 
 
-**Bottom line for “shouldn’t crash the main process anyhow”:** The design is **directionally correct** (no hard thread kill), but **cannot be guaranteed** until catastrophic OOM handling and Node startup flags are fixed.
+**Bottom line for “shouldn’t crash the main process anyhow”:** Catastrophic OOM is handled at the step level, but **cannot be fully guaranteed** until `--no-node-snapshot` is wired and multi-process isolation is considered for hostile workloads.
 
 ---
 
@@ -346,7 +361,7 @@ Each workflow execution creates its own isolate. No global concurrency cap for s
 | Known native crash on cancel | **High**                       | **Low**                                       |
 | Memory limit (strings)       | Soft                           | Soft (same underlying isolated-vm)            |
 | CPU hang without timeout     | **5 s** script timeout       | Until abort if step/workflow timeout is shorter                   |
-| Process OOM                  | Worker may die                 | Catastrophic path can `abort()` whole process |
+| Process OOM                  | Worker may die                 | Step fails via `onCatastrophicError`; no `process.abort()` (residual risk remains) |
 
 
 ---
@@ -356,9 +371,9 @@ Each workflow execution creates its own isolate. No global concurrency cap for s
 Priority ordered:
 
 1. **Add `--no-node-snapshot` to Kibana `NODE_OPTIONS`** for all server processes (dev, CI, production).
-2. **Register `onCatastrophicError`** on `new ivm.Isolate({...})` — log, dispose, fail step; avoid `process.abort()` unless security accepts full restart.
+2. ~~**Register `onCatastrophicError`**~~ — **Done:** log, dispose, fail step; no `process.abort()`.
 3. ~~**Add `timeout` to `compiled.run()`**~~ — **Done:** 5 s default (`SCRIPT_EXECUTION_TIMEOUT_MS`).
-4. **Cap `config.script` size** (e.g. 256 KB–1 MB) before compile.
+4. ~~**Cap `config.script` size**~~ — **Done:** 1 MB after template rendering (`SCRIPT_MAX_LENGTH_CHARS`).
 5. **Document `memoryLimit` limitations** for workflow authors; consider rejecting or bounding large string patterns if feasible.
 6. ~~**Hide `__logBridge__` from global**~~ — **Done:** setup + `jail.delete`; console-only access.
 7. **Feature flag / `stability: experimental`** until soak testing completes.
@@ -370,7 +385,7 @@ Priority ordered:
 
 - Global concurrency limit for active script isolates per Kibana node.
 - `onCancel` handler (redundant if `finally` always runs, but explicit for engine contract).
-- Safer wrapper: no string interpolation of user script into source.
+- ~~Safer wrapper: no string interpolation of user script into source.~~ — **Done:** `evalClosure` + `AsyncFunction($0)`.
 - Soak / fuzz tests (OOM, dispose-during-run, concurrent isolates).
 - Security review of who may use `scripts.javaScript` in managed vs user-authored workflows.
 
@@ -398,8 +413,8 @@ Environment: Node 24.14.1, `isolated-vm@6.1.2`, `NODE_OPTIONS=--no-node-snapshot
 
 | Ship?                      | Condition                                                                                           |
 | -------------------------- | --------------------------------------------------------------------------------------------------- |
-| **No (current state)**     | Missing startup flag, missing run timeout, catastrophic OOM → `abort()`, soft string memory limits. |
-| **Yes (with mitigations)** | After §6 items 1–3 at minimum, plus experimental flag and monitoring.                               |
+| **No (current state)**     | Missing startup flag (`--no-node-snapshot`), soft string memory limits, experimental soak incomplete. |
+| **Yes (with mitigations)** | After §6 item 1 at minimum, plus experimental flag and monitoring.                               |
 
 
 The move away from `worker.terminate()` **materially reduces** the known Kibana crash. It does **not** yet meet a strict “hostile script must never crash the main process” bar.

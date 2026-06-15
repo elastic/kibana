@@ -12,6 +12,7 @@ import { executeScriptInIsolate, type ScriptLogger } from './execute_script_in_i
 import {
   MAX_CONSOLE_LOG_COUNT,
   SCRIPT_EXECUTION_TIMEOUT_MS,
+  SCRIPT_MAX_LENGTH_CHARS,
   SCRIPT_MEMORY_LIMIT_MB,
   scriptsJavaScriptStepDefinition,
 } from './javascript_step';
@@ -130,6 +131,39 @@ describe('executeScriptInIsolate', () => {
     expect(result).toBe('undefined');
   });
 
+  it('executes scripts with await', async () => {
+    const result = await executeScriptInIsolate({
+      script: 'const value = await Promise.resolve(42); return value;',
+      logger: createLogger(),
+      abortSignal: new AbortController().signal,
+      ...defaultIsolateParams,
+    });
+
+    expect(result).toBe(42);
+  });
+
+  it('returns primitive values from user scripts', async () => {
+    const result = await executeScriptInIsolate({
+      script: 'return 42;',
+      logger: createLogger(),
+      abortSignal: new AbortController().signal,
+      ...defaultIsolateParams,
+    });
+
+    expect(result).toBe(42);
+  });
+
+  it('does not allow wrapper injection via concatenated script payloads', async () => {
+    await expect(
+      executeScriptInIsolate({
+        script: '})(); return 1; (function(){',
+        logger: createLogger(),
+        abortSignal: new AbortController().signal,
+        ...defaultIsolateParams,
+      })
+    ).rejects.toThrow();
+  });
+
   it(
     'times out script execution after 5 seconds',
     async () => {
@@ -166,7 +200,7 @@ describe('executeScriptInIsolate', () => {
 describe('scriptsJavaScriptStepDefinition', () => {
   it('has a stable handler hash for approval', () => {
     expect(createSHA256Hash(scriptsJavaScriptStepDefinition.handler.toString())).toBe(
-      '5889a44823f42f237f70bf770c0666e9e35e2dd1533679ae9b1a3718bfa75d7a'
+      '7b95d163f0651645ce01cab312f318f89c840fdba9a234cbccb4d1e198ddf23c'
     );
   });
 
@@ -179,6 +213,17 @@ describe('scriptsJavaScriptStepDefinition', () => {
     const result = await scriptsJavaScriptStepDefinition.handler(context);
 
     expect(result.error?.message).toBe('Script is required');
+  });
+
+  it('returns an error when script exceeds the maximum size after template rendering', async () => {
+    const context = createMockContext({
+      script: 'x'.repeat(SCRIPT_MAX_LENGTH_CHARS + 1),
+    });
+
+    const result = await scriptsJavaScriptStepDefinition.handler(context);
+
+    expect(result.error?.message).toContain('exceeds maximum allowed size of 1 MB');
+    expect(result.error?.message).toContain('Reduce interpolated data or split the workflow');
   });
 
   it('returns script output without passing host data into the sandbox', async () => {

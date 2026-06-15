@@ -53,11 +53,11 @@ Execute a JavaScript script in a sandboxed runtime and return its result to down
     return { greeting: 'Hello, World' };
 \`\`\`
 
-Scripts run in an isolated sandbox with no workflow data passed in. Use literals and pure computation inside the script; downstream steps receive only the script's return value.
+Scripts run in an isolated sandbox with no workflow data passed in at runtime. Prior step outputs may be embedded via Liquid template expressions in \`script:\`; the rendered script is limited to 1 MB before execution.
 
 ## Configuration
 
-- **script** (required): JavaScript source code to execute.
+- **script** (required): JavaScript source code to execute (max 1 MB after template rendering).
 
 ## Output
 
