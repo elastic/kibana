@@ -57,7 +57,7 @@ const columns: Array<EuiBasicTableColumn<Discovery>> = [
     name: i18n.translate('xpack.streams.discoveriesTab.kindColumn', {
       defaultMessage: 'Kind',
     }),
-    width: '90px',
+    width: '100px',
     render: (kind: Discovery['kind']) => (
       <EuiBadge color={DISCOVERY_KIND_COLORS[kind]}>{DISCOVERY_KIND_LABELS[kind]}</EuiBadge>
     ),

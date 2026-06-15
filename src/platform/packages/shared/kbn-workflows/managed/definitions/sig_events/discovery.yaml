@@ -141,6 +141,9 @@ steps:
             - confidence
             - criticality
             - cause_kis
+            - stream_names
+            - dependency_edges
+            - infra_components
         query:
           bool:
             filter:
@@ -381,7 +384,7 @@ steps:
     with:
       message: |
         ## Active batch
-        {{ steps.get_detected_window.output.hits.hits | json }}
+        {{ steps.get_detected_window.output.hits.hits | map: '_source' | json }}
 
         {% if steps.get_open_discoveries.output.hits.hits.size > 0 %}
         ## Continuation Candidates

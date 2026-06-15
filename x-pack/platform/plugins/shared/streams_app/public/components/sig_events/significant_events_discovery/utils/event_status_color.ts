@@ -8,7 +8,7 @@
 import { SIG_EVENT_STATUS_OPTIONS, type SigEventStatus } from '@kbn/streams-schema';
 
 export const STATUS_COLORS: Record<SigEventStatus, string> = {
-  promoted: 'success',
+  promoted: 'danger',
   acknowledged: 'warning',
   resolved: 'success',
   demoted: 'default',
