@@ -174,7 +174,6 @@ describe('FeatureFlagsService Server', () => {
     let startContract: FeatureFlagsStart;
     let apmSpy: jest.SpyInstance;
     let addHandlerSpy: jest.SpyInstance;
-    let flagEvaluationCounterAddSpy: jest.SpyInstance;
 
     beforeEach(() => {
       mockFlagEvaluationCounterAdd.mockClear();
