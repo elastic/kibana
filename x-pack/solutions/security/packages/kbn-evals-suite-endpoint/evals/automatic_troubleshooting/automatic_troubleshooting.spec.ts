@@ -43,7 +43,7 @@ const P0_EVALS = [
     expectedToolCalls: [
       'filestore.read',
       'check_endpoint_package_freshness',
-      'platform.core.search_indices',
+      'platform.core.search',
       'generate_insight',
     ],
     maxToolCalls: 30,
@@ -85,7 +85,7 @@ const P0_EVALS = [
     expectedToolCalls: [
       'filestore.read',
       'check_endpoint_package_freshness',
-      'platform.core.search_indices',
+      'platform.core.search',
       'generate_insight',
     ],
     maxToolCalls: 8,
@@ -146,7 +146,7 @@ const P0_EVALS = [
     expectedToolCalls: [
       'filestore.read',
       'check_endpoint_package_freshness',
-      'platform.core.search_indices',
+      'platform.core.search',
       'generate_insight',
     ],
     maxToolCalls: 28,
@@ -166,7 +166,7 @@ const P0_EVALS = [
     expectedToolCalls: [
       'filestore.read',
       'check_endpoint_package_freshness',
-      'platform.core.search_indices',
+      'platform.core.search',
       'generate_insight',
     ],
     maxToolCalls: 22,
@@ -186,7 +186,7 @@ const P0_EVALS = [
     expectedToolCalls: [
       'filestore.read',
       'check_endpoint_package_freshness',
-      'platform.core.search_indices',
+      'platform.core.search',
       'generate_insight',
     ],
     maxToolCalls: 20,
@@ -207,7 +207,7 @@ const P0_EVALS = [
     expectedToolCalls: [
       'filestore.read',
       'check_endpoint_package_freshness',
-      'platform.core.search_indices',
+      'platform.core.search',
       'generate_insight',
     ],
     maxToolCalls: 25,
@@ -227,7 +227,7 @@ const P0_EVALS = [
     expectedToolCalls: [
       'filestore.read',
       'check_endpoint_package_freshness',
-      'platform.core.search_indices',
+      'platform.core.search',
       'platform.core.integration_knowledge',
       'generate_insight',
     ],
@@ -269,7 +269,7 @@ const P0_EVALS = [
     expectedToolCalls: [
       'filestore.read',
       'check_endpoint_package_freshness',
-      'platform.core.search_indices',
+      'platform.core.search',
       'generate_insight',
     ],
     maxToolCalls: 22,
