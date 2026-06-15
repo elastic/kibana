@@ -344,6 +344,13 @@ export class DiscoverApp {
   }
 
   /**
+   * Navigate from the document-viewer flyout to the full single-document view.
+   */
+  async openSingleDocumentFromDocViewer() {
+    await this.page.testSubj.locator('docViewerFlyout').getByLabel('View single document').click();
+  }
+
+  /**
    * Hover the given data-grid cell and click its "expand" action, opening the
    * cell-value popover (which embeds a Monaco editor with the row JSON).
    *
@@ -375,6 +382,27 @@ export class DiscoverApp {
       await toggle.waitFor({ state: 'visible' });
       await toggle.scrollIntoViewIfNeeded();
       await toggle.click();
+    }).toPass({ timeout: 15_000 });
+  }
+
+  /**
+   * Click a field action in the document-viewer table, e.g. `addExistsFilterButton`.
+   */
+  async clickFieldActionInDocViewer(fieldName: string, actionName: string) {
+    const flyout = this.page.testSubj.locator('docViewerFlyout');
+    await this.page.testSubj.click('docViewerTab-doc_view_table');
+
+    await expect(async () => {
+      const nameElement = flyout.locator(`[data-test-subj="tableDocViewRow-${fieldName}-name"]`);
+      await nameElement.evaluate((el) => {
+        el.scrollIntoView({ block: 'center', inline: 'nearest' });
+      });
+      await nameElement.hover();
+      await nameElement.click();
+
+      const action = flyout.locator(`[data-test-subj="${actionName}-${fieldName}"]`);
+      await action.waitFor({ state: 'visible' });
+      await action.click();
     }).toPass({ timeout: 15_000 });
   }
 
