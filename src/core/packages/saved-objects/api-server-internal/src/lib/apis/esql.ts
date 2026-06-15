@@ -18,7 +18,7 @@ import type {
   SavedObjectsEsqlOptions,
   SavedObjectsEsqlResponse,
 } from '@kbn/core-saved-objects-api-server';
-import { esql } from '@elastic/esql';
+import { esql, Walker, SOURCE_COMMANDS } from '@elastic/esql';
 import type { ApiExecutionContext } from './types';
 import { getNamespacesBoolFilter } from '../search';
 
@@ -103,15 +103,18 @@ export async function performEsql(
       ? esql.from(indices, metadata).print()
       : esql.from(indices).print();
 
-  const req = pipeline.toRequest();
+  Walker.walk(pipeline.ast, {
+    visitCommand: (cmd) => {
+      if (SOURCE_COMMANDS.has(cmd.name.toUpperCase())) {
+        throw SavedObjectsErrorHelpers.createBadRequestError(
+          `options.pipeline must not contain source command "${cmd.name.toUpperCase()}". ` +
+            'The FROM clause is auto-generated from the type parameter.'
+        );
+      }
+    },
+  });
 
-  if (/^\s*(FROM|ROW|SHOW|METRICS|TS|EXPLAIN|PROMQL)\b/i.test(req.query)) {
-    throw SavedObjectsErrorHelpers.createBadRequestError(
-      'options.pipeline must not start with a source command ' +
-        '(FROM, ROW, SHOW, METRICS, TS, EXPLAIN, PROMQL). ' +
-        'The FROM clause is auto-generated from the type parameter.'
-    );
-  }
+  const req = pipeline.toRequest();
 
   // toRequest() prints pipeline-only queries without a leading '|';
   // we supply the separator when joining with the FROM clause.

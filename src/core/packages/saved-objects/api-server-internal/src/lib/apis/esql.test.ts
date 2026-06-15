@@ -136,17 +136,17 @@ describe('esql', () => {
     expect(request.query).toMatch(/^FROM .+ METADATA _id, _source \| LIMIT 10$/);
   });
 
-  it('should throw if pipeline starts with a source command', async () => {
+  it('should throw if pipeline contains a source command', async () => {
     await expect(
       repository.esql({ ...options, pipeline: esql`FROM .kibana | LIMIT 10` })
-    ).rejects.toThrowError('options.pipeline must not start with a source command');
+    ).rejects.toThrowError('options.pipeline must not contain source command "FROM"');
 
     await expect(repository.esql({ ...options, pipeline: esql`ROW x = 1` })).rejects.toThrowError(
-      'options.pipeline must not start with a source command'
+      'options.pipeline must not contain source command "ROW"'
     );
 
     await expect(repository.esql({ ...options, pipeline: esql`SHOW INFO` })).rejects.toThrowError(
-      'options.pipeline must not start with a source command'
+      'options.pipeline must not contain source command "SHOW"'
     );
 
     expect(client.esql.query).not.toHaveBeenCalled();
