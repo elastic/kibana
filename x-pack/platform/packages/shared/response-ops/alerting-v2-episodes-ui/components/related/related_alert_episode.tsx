@@ -8,7 +8,6 @@
 import React from 'react';
 import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import type { AlertEpisode } from '../../queries/episodes_query';
 import type { EpisodeActionState, AlertEpisodeGroupAction } from '../../types/action';
 import { AlertingEpisodeGroupingTags } from '../grouping/alerting_episode_grouping_tags';
@@ -17,7 +16,8 @@ import { getNonEmptyGroupingFields, parseEpisodeDataJson } from '../../utils/epi
 
 export interface RelatedAlertEpisodeProps {
   episode: AlertEpisode;
-  rule: RuleResponse;
+  ruleName: string;
+  groupingFields: string[];
   episodeAction?: EpisodeActionState;
   groupAction?: AlertEpisodeGroupAction;
   href: string;
@@ -30,7 +30,8 @@ export interface RelatedAlertEpisodeProps {
 
 export function RelatedAlertEpisode({
   episode,
-  rule,
+  ruleName,
+  groupingFields,
   episodeAction,
   groupAction,
   href,
@@ -38,7 +39,6 @@ export function RelatedAlertEpisode({
 }: RelatedAlertEpisodeProps) {
   const status = episode['episode.status'];
   const episodeId = episode['episode.id'];
-  const groupingFields = rule.grouping?.fields ?? [];
   const episodeData = parseEpisodeDataJson(episode.episode_data);
   const showGroupingBadges =
     groupingFields.length > 0 && getNonEmptyGroupingFields(groupingFields, episodeData).length > 0;
@@ -58,7 +58,7 @@ export function RelatedAlertEpisode({
           responsive={true}
           wrap
         >
-          <EuiFlexItem grow={false}>{rule.metadata.name}</EuiFlexItem>
+          <EuiFlexItem grow={false}>{ruleName}</EuiFlexItem>
           {status ? (
             <EuiFlexItem grow={false}>
               <AlertEpisodeStatusBadges

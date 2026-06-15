@@ -76,6 +76,7 @@ describe('useAlertingRulesCache', () => {
       })
     );
     expect(result.current.rulesCache).toEqual({ [ruleId]: fetchedRule });
+    expect(result.current.missingRuleIds).toEqual(new Set());
     expect(result.current.loading).toBe(false);
     expect(result.current.error).toBeUndefined();
   });
@@ -90,7 +91,30 @@ describe('useAlertingRulesCache', () => {
 
     expect(mockHttp.post).not.toHaveBeenCalled();
     expect(result.current.rulesCache).toEqual({});
+    expect(result.current.missingRuleIds).toEqual(new Set());
     expect(result.current.loading).toBe(false);
     expect(result.current.error).toBeUndefined();
+  });
+
+  it('tracks missing rule ids that are not returned by bulk get', async () => {
+    const presentRuleId = 'rule-present';
+    const missingRuleId = 'rule-missing';
+    const fetchedRule = {
+      id: presentRuleId,
+      name: 'Fetched Rule',
+    } as unknown as BulkGetRulesResponse['rules'][number];
+    mockHttp.post.mockResolvedValue({
+      rules: [fetchedRule],
+    } as BulkGetRulesResponse);
+
+    const { result } = renderHook(() =>
+      useAlertingRulesCache({
+        ruleIds: [presentRuleId, missingRuleId],
+        services: { http: mockHttp },
+      })
+    );
+
+    await waitFor(() => expect(result.current.missingRuleIds).toEqual(new Set([missingRuleId])));
+    expect(result.current.rulesCache).toEqual({ [presentRuleId]: fetchedRule });
   });
 });

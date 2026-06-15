@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import type { FindRulesResponse } from '@kbn/alerting-v2-schemas';
 import {
   EpisodeStatusCell,
@@ -123,6 +124,7 @@ describe('EpisodeTagsCell', () => {
 });
 
 describe('EpisodeRuleCell', () => {
+  const emptyMissingRuleIds = new Set<string>();
   const makeRule = (name: string, grouping?: { fields: string[] }): Rule =>
     ({
       metadata: { name },
@@ -138,11 +140,30 @@ describe('EpisodeRuleCell', () => {
         columnId="rule.id"
         row={row}
         rulesCache={{}}
+        missingRuleIds={emptyMissingRuleIds}
         isLoadingRules={true}
         rowHeight={2}
       />
     );
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
+  });
+
+  it('renders the deleted rule label when the rule id is missing from bulk get', () => {
+    const row = makeRow({ 'rule.id': 'deleted-rule' });
+    render(
+      <I18nProvider>
+        <EpisodeRuleCell
+          {...baseCellProps}
+          columnId="rule.id"
+          row={row}
+          rulesCache={{}}
+          missingRuleIds={new Set(['deleted-rule'])}
+          isLoadingRules={false}
+          rowHeight={1}
+        />
+      </I18nProvider>
+    );
+    expect(screen.getByTestId('episodeRuleCellDeletedRule')).toHaveTextContent('Deleted rule');
   });
 
   it('renders the raw ruleId when the rule is not in cache', () => {
@@ -153,6 +174,7 @@ describe('EpisodeRuleCell', () => {
         columnId="rule.id"
         row={row}
         rulesCache={{}}
+        missingRuleIds={emptyMissingRuleIds}
         isLoadingRules={false}
         rowHeight={2}
       />
@@ -168,6 +190,7 @@ describe('EpisodeRuleCell', () => {
         columnId="rule.id"
         row={row}
         rulesCache={{ r1: makeRule('My Rule') }}
+        missingRuleIds={emptyMissingRuleIds}
         isLoadingRules={false}
         rowHeight={2}
       />
@@ -183,6 +206,7 @@ describe('EpisodeRuleCell', () => {
         columnId="rule.id"
         row={row}
         rulesCache={{ r1: makeRule('My Rule', { fields: ['host.name'] }) }}
+        missingRuleIds={emptyMissingRuleIds}
         isLoadingRules={false}
         rowHeight={2}
       />
@@ -201,6 +225,7 @@ describe('EpisodeRuleCell', () => {
         columnId="rule.id"
         row={row}
         rulesCache={{ r1: makeRule('My Rule', { fields: ['host.name'] }) }}
+        missingRuleIds={emptyMissingRuleIds}
         isLoadingRules={false}
         rowHeight={2}
       />
@@ -218,6 +243,7 @@ describe('EpisodeRuleCell', () => {
         columnId="rule.id"
         row={row}
         rulesCache={{ r1: makeRule('My Rule') }}
+        missingRuleIds={emptyMissingRuleIds}
         isLoadingRules={false}
         rowHeight={1}
       />
@@ -234,6 +260,7 @@ describe('EpisodeRuleCell', () => {
         columnId="rule.id"
         row={row}
         rulesCache={{ r1: makeRule('My Rule') }}
+        missingRuleIds={emptyMissingRuleIds}
         isLoadingRules={false}
         rowHeight={2}
       />

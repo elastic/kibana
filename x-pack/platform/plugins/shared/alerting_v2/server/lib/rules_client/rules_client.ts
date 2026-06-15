@@ -281,6 +281,9 @@ export class RulesClient {
 
     for (const doc of result) {
       if ('error' in doc) {
+        if (doc.error.statusCode === 404) {
+          continue;
+        }
         throw new Boom.Boom(doc.error.message, { statusCode: doc.error.statusCode });
       }
       rulesById.set(doc.id, transformRuleSoAttributesToRuleApiResponse(doc.id, doc.attributes));

@@ -15,7 +15,9 @@ import * as i18n from './translations';
 export interface AlertEpisodesRelatedProps {
   currentEpisodeId: string | undefined;
   groupHash: string | undefined;
-  rule: RuleResponse;
+  ruleId: string;
+  rule: RuleResponse | undefined;
+  isRuleNotFound: boolean;
   getEpisodeDetailsHref: (episodeId: string) => string;
   /**
    * Whether to render the "Related episodes" section heading. Defaults to `true`.
@@ -34,7 +36,9 @@ export interface AlertEpisodesRelatedProps {
 export function AlertEpisodesRelated({
   currentEpisodeId,
   groupHash,
+  ruleId,
   rule,
+  isRuleNotFound,
   getEpisodeDetailsHref,
   showHeading = true,
   compressed = false,
@@ -54,7 +58,9 @@ export function AlertEpisodesRelated({
           <RelatedEpisodesGroupSubsection
             currentEpisodeId={currentEpisodeId}
             groupHash={groupHash}
+            ruleId={ruleId}
             rule={rule}
+            isRuleNotFound={isRuleNotFound}
             getEpisodeDetailsHref={getEpisodeDetailsHref}
             compressed={compressed}
           />
@@ -64,7 +70,9 @@ export function AlertEpisodesRelated({
       <RelatedEpisodesRuleSubsection
         currentEpisodeId={currentEpisodeId}
         currentGroupHash={groupHash}
+        ruleId={ruleId}
         rule={rule}
+        isRuleNotFound={isRuleNotFound}
         getEpisodeDetailsHref={getEpisodeDetailsHref}
         compressed={compressed}
       />

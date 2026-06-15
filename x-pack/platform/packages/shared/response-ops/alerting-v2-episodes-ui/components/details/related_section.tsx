@@ -40,17 +40,13 @@ export const AlertEpisodesRelatedSection = ({
   const ruleId = episode?.['rule.id'];
   const groupHash = episode?.group_hash;
 
-  const {
-    data: rule,
-    isLoading: isLoadingRule,
-    isError: isRuleError,
-  } = useFetchRule({ id: ruleId, http: services.http });
+  const { rule, isRuleLoading, isRuleNotFound } = useFetchRule({ id: ruleId, http: services.http });
 
-  if (isLoadingEpisode || (ruleId && isLoadingRule)) {
+  if (isLoadingEpisode || (ruleId && isRuleLoading)) {
     return <EuiLoadingSpinner size="m" data-test-subj="alertingV2EpisodesRelatedSectionLoading" />;
   }
 
-  if (isEpisodeError || isRuleError || !rule) {
+  if (isEpisodeError || !ruleId) {
     return (
       <EuiText size="s" color="danger" data-test-subj="alertingV2EpisodesRelatedSectionError">
         {i18n.RELATED_SECTION_LOAD_ERROR}
@@ -62,7 +58,9 @@ export const AlertEpisodesRelatedSection = ({
     <AlertEpisodesRelated
       currentEpisodeId={episodeId}
       groupHash={groupHash}
+      ruleId={ruleId} // needed in case the rule was deleted
       rule={rule}
+      isRuleNotFound={isRuleNotFound}
       getEpisodeDetailsHref={getEpisodeDetailsHref}
       showHeading={showHeading}
       compressed={compressed}

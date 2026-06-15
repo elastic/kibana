@@ -11,6 +11,11 @@ import { I18nProvider } from '@kbn/i18n-react';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import { AlertEpisodesRelated } from './related';
 
+const mockRule = {
+  id: 'rule-1',
+  metadata: { name: 'Test Rule' },
+} as unknown as RuleResponse;
+
 jest.mock('./group_subsection', () => ({
   RelatedEpisodesGroupSubsection: () => <div data-test-subj="mockGroupSubsection" />,
 }));
@@ -19,8 +24,6 @@ jest.mock('./rule_subsection', () => ({
   RelatedEpisodesRuleSubsection: () => <div data-test-subj="mockRuleSubsection" />,
 }));
 
-const mockRule = { id: 'rule-1', metadata: { name: 'Test Rule' } } as RuleResponse;
-
 describe('AlertEpisodesRelated', () => {
   it('renders the section heading', () => {
     render(
@@ -28,7 +31,9 @@ describe('AlertEpisodesRelated', () => {
         <AlertEpisodesRelated
           currentEpisodeId="ep-1"
           groupHash={undefined}
+          ruleId="rule-1"
           rule={mockRule}
+          isRuleNotFound={false}
           getEpisodeDetailsHref={(id) => `/base/${id}`}
         />
       </I18nProvider>
@@ -46,7 +51,9 @@ describe('AlertEpisodesRelated', () => {
         <AlertEpisodesRelated
           currentEpisodeId="ep-1"
           groupHash="gh-1"
+          ruleId="rule-1"
           rule={mockRule}
+          isRuleNotFound={false}
           getEpisodeDetailsHref={(id) => `/base/${id}`}
         />
       </I18nProvider>

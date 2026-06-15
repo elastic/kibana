@@ -31,13 +31,12 @@ export const AlertEpisodeRuleOverviewPanelSection = ({
 
   const ruleId = episode?.['rule.id'];
 
-  const {
-    data: rule,
-    isLoading: isLoadingRule,
-    isError: isRuleError,
-  } = useFetchRule({ id: ruleId, http: services.http });
+  const { rule, isRuleLoading, isRuleNotFound, isRuleError } = useFetchRule({
+    id: ruleId,
+    http: services.http,
+  });
 
-  if (isLoadingEpisode || (ruleId && isLoadingRule)) {
+  if (isLoadingEpisode || (ruleId && isRuleLoading)) {
     return (
       <EuiLoadingSpinner
         size="m"
@@ -46,7 +45,7 @@ export const AlertEpisodeRuleOverviewPanelSection = ({
     );
   }
 
-  if (isEpisodeError || isRuleError || !ruleId || !rule) {
+  if (isEpisodeError || isRuleError) {
     return (
       <EuiEmptyPrompt
         data-test-subj="alertingV2EpisodeRuleOverviewPanelSectionError"
@@ -54,6 +53,18 @@ export const AlertEpisodeRuleOverviewPanelSection = ({
         color="danger"
         titleSize="xs"
         title={<h3>{i18n.RULE_OVERVIEW_PANEL_SECTION_ERROR_TITLE}</h3>}
+      />
+    );
+  }
+
+  if (isRuleNotFound || !ruleId || !rule) {
+    return (
+      <EuiEmptyPrompt
+        data-test-subj="alertingV2EpisodeRuleOverviewPanelSectionDeleted"
+        iconType="document"
+        titleSize="xs"
+        title={<h3>{i18n.RULE_OVERVIEW_PANEL_SECTION_DELETED_TITLE}</h3>}
+        body={<p>{i18n.RULE_OVERVIEW_PANEL_SECTION_DELETED_BODY}</p>}
       />
     );
   }

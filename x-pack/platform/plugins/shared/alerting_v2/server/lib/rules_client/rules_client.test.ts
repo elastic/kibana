@@ -1013,7 +1013,7 @@ describe('RulesClient', () => {
       );
     });
 
-    it('throws with the SO error status when a requested id is missing', async () => {
+    it('filters out ids that return a 404 error from bulkGet', async () => {
       const client = createClient();
 
       mockSavedObjectsClient.bulkGet.mockResolvedValueOnce({
@@ -1038,9 +1038,15 @@ describe('RulesClient', () => {
         ],
       });
 
-      await expect(client.getRules(['rule-id-present', 'rule-id-missing'])).rejects.toMatchObject({
-        output: { statusCode: 404 },
-      });
+      const res = await client.getRules(['rule-id-present', 'rule-id-missing']);
+
+      expect(res).toHaveLength(1);
+      expect(res[0]).toEqual(
+        expect.objectContaining({
+          id: 'rule-id-present',
+          metadata: expect.objectContaining({ name: 'present' }),
+        })
+      );
     });
 
     it('throws with the SO error status when bulkGet reports a non-404 error', async () => {
@@ -1073,7 +1079,7 @@ describe('RulesClient', () => {
       });
     });
 
-    it('throws on the first encountered error', async () => {
+    it('throws on the first encountered non-404 error', async () => {
       const client = createClient();
 
       mockSavedObjectsClient.bulkGet.mockResolvedValueOnce({
@@ -1103,11 +1109,10 @@ describe('RulesClient', () => {
         ],
       });
 
-      // 'first error wins': the 404 surfaces, not the later 500.
       await expect(
         client.getRules(['rule-id-first-missing', 'rule-id-second-failure'])
       ).rejects.toMatchObject({
-        output: { statusCode: 404 },
+        output: { statusCode: 500 },
       });
     });
   });

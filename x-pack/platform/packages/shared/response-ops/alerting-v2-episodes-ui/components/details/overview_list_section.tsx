@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import { EuiCallOut, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
 import { useFetchEpisodeQuery } from '../../hooks/use_fetch_episode_query';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { useFetchEpisodeActions } from '../../hooks/use_fetch_episode_actions';
@@ -40,11 +40,7 @@ export const AlertEpisodeOverviewListSection = ({
   const triggeredAt = episode?.triggered_at;
   const durationMs = episode?.duration;
 
-  const {
-    data: rule,
-    isLoading: isLoadingRule,
-    isError: isRuleError,
-  } = useFetchRule({ id: ruleId, http: services.http });
+  const { rule, isRuleNotFound, isRuleError } = useFetchRule({ id: ruleId, http: services.http });
 
   const {
     data: episodeActionsMap,
@@ -69,34 +65,44 @@ export const AlertEpisodeOverviewListSection = ({
     );
   }
 
-  if (
-    isLoadingEpisode ||
-    (ruleId && isLoadingRule) ||
-    isLoadingEpisodeActions ||
-    (groupHash && isLoadingGroupActions)
-  ) {
+  if (isLoadingEpisode || isLoadingEpisodeActions || (groupHash && isLoadingGroupActions)) {
     return (
       <EuiLoadingSpinner size="m" data-test-subj="alertingV2EpisodeOverviewListSectionLoading" />
     );
   }
 
-  const groupingFields = rule?.grouping?.fields ?? [];
+  const groupingFields = isRuleNotFound ? [] : rule?.grouping?.fields ?? [];
   const groupingData = parseEpisodeDataJson(episode?.episode_data);
   const assigneeUid = episode?.last_assignee_uid ?? undefined;
   const episodeAction = episodeActionsMap?.get(episodeId);
   const groupAction = groupHash ? groupActionsMap?.get(groupHash) : undefined;
 
   return (
-    <AlertEpisodeOverviewList
-      groupingFields={groupingFields}
-      groupingData={groupingData}
-      triggeredAt={triggeredAt}
-      durationMs={durationMs}
-      assigneeUid={assigneeUid}
-      episodeAction={episodeAction}
-      groupAction={groupAction}
-      userProfile={services.userProfile}
-      dateFormat={services.uiSettings.get('dateFormat') ?? undefined}
-    />
+    <>
+      {isRuleNotFound ? (
+        <>
+          <EuiCallOut
+            announceOnMount
+            size="s"
+            title={i18n.OVERVIEW_LIST_SECTION_RULE_DELETED_CALLOUT}
+            color="warning"
+            iconType="warning"
+            data-test-subj="alertingV2EpisodeOverviewListSectionRuleDeletedCallout"
+          />
+          <EuiSpacer size="m" />
+        </>
+      ) : null}
+      <AlertEpisodeOverviewList
+        groupingFields={groupingFields}
+        groupingData={groupingData}
+        triggeredAt={triggeredAt}
+        durationMs={durationMs}
+        assigneeUid={assigneeUid}
+        episodeAction={episodeAction}
+        groupAction={groupAction}
+        userProfile={services.userProfile}
+        dateFormat={services.uiSettings.get('dateFormat') ?? undefined}
+      />
+    </>
   );
 };

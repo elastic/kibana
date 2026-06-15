@@ -38,7 +38,9 @@ interface RelatedEpisodesGroupSubsectionServices {
 export interface RelatedEpisodesGroupSubsectionProps {
   currentEpisodeId: string | undefined;
   groupHash: string | undefined;
-  rule: RuleResponse;
+  ruleId: string;
+  rule: RuleResponse | undefined;
+  isRuleNotFound: boolean;
   getEpisodeDetailsHref: (episodeId: string) => string;
   /**
    * When `true`, drop the inner horizontal padding so the subsection sits
@@ -54,7 +56,9 @@ export interface RelatedEpisodesGroupSubsectionProps {
 export function RelatedEpisodesGroupSubsection({
   currentEpisodeId,
   groupHash,
+  ruleId,
   rule,
+  isRuleNotFound,
   getEpisodeDetailsHref,
   compressed = false,
 }: RelatedEpisodesGroupSubsectionProps) {
@@ -71,7 +75,7 @@ export function RelatedEpisodesGroupSubsection({
 
   const { data: sameGroupRows = [], isLoading: isLoadingSameGroupRows } =
     useFetchSameGroupEpisodesQuery({
-      ruleId: rule.id,
+      ruleId,
       excludeEpisodeId: currentEpisodeId,
       pageSize: RELATED_ALERT_EPISODES_PAGE_SIZE,
       groupHash,
@@ -150,6 +154,7 @@ export function RelatedEpisodesGroupSubsection({
         <RelatedAlertEpisodesList
           rows={sameGroupRows}
           rule={rule}
+          isRuleNotFound={isRuleNotFound}
           getEpisodeAction={(id) => sameGroupEpisodeActionsMap?.get(id)}
           getGroupAction={(gh) => sameGroupGroupActionsMap?.get(gh)}
           getEpisodeDetailsHref={getEpisodeDetailsHref}

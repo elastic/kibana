@@ -30,13 +30,12 @@ export const AlertEpisodeRunbookSection = ({
 
   const ruleId = episode?.['rule.id'];
 
-  const {
-    data: rule,
-    isLoading: isLoadingRule,
-    isError: isRuleError,
-  } = useFetchRule({ id: ruleId, http: services.http });
+  const { rule, isRuleLoading, isRuleNotFound, isRuleError } = useFetchRule({
+    id: ruleId,
+    http: services.http,
+  });
 
-  if (isLoadingEpisode || (ruleId && isLoadingRule)) {
+  if (isLoadingEpisode || (ruleId && isRuleLoading)) {
     return <EuiLoadingSpinner size="m" data-test-subj="alertingV2EpisodeRunbookSectionLoading" />;
   }
 
@@ -44,6 +43,14 @@ export const AlertEpisodeRunbookSection = ({
     return (
       <EuiText size="s" color="danger" data-test-subj="alertingV2EpisodeRunbookSectionError">
         {i18n.RUNBOOK_SECTION_LOAD_ERROR}
+      </EuiText>
+    );
+  }
+
+  if (isRuleNotFound) {
+    return (
+      <EuiText size="s" color="subdued" data-test-subj="alertingV2EpisodeRunbookSectionRuleDeleted">
+        {i18n.RUNBOOK_SECTION_RULE_DELETED}
       </EuiText>
     );
   }

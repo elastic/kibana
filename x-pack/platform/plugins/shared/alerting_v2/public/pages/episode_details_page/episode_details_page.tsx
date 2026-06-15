@@ -9,6 +9,7 @@ import React, { useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonGroup,
+  EuiCallOut,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -26,6 +27,11 @@ import { useQueryClient } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useFetchEpisodeQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_query';
 import { useFetchRule } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_rule';
+import {
+  HEADER_DELETED_RULE_TITLE,
+  RULE_NOT_FOUND_CALLOUT_BODY,
+  RULE_NOT_FOUND_CALLOUT_TITLE,
+} from '@kbn/alerting-v2-episodes-ui/components/details/translations';
 import { useInvalidateEpisodeQueries } from '@kbn/alerting-v2-episodes-ui/hooks/use_invalidate_episode_queries';
 import { createEpisodeActions, type EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
 import { EpisodeActionsBar } from '@kbn/alerting-v2-episodes-ui/components/episode_actions_bar';
@@ -81,11 +87,13 @@ export function EpisodeDetailsPage() {
   const ruleId = episode?.['rule.id'];
   const groupHash = episode?.group_hash;
 
-  const { data: rule, isLoading: isLoadingRule } = useFetchRule({ id: ruleId, http });
+  const { rule, isRuleNotFound } = useFetchRule({ id: ruleId, http });
 
   const episodeBreadcrumbTitle =
     rule?.metadata.name != null && rule.metadata.name.length > 0
       ? rule.metadata.name
+      : isRuleNotFound
+      ? HEADER_DELETED_RULE_TITLE
       : i18n.EPISODE_DETAILS_BREADCRUMB_FALLBACK;
 
   useBreadcrumbs('episode_details', { ruleName: episodeBreadcrumbTitle });
@@ -151,7 +159,7 @@ export function EpisodeDetailsPage() {
     [episodeActions, episode]
   );
 
-  const isLoading = isLoadingEpisode || (Boolean(ruleId) && isLoadingRule);
+  const isLoading = isLoadingEpisode;
   const episodeNotFound = !isLoading && episode == null;
 
   if (!episodeId || episodeNotFound || isEpisodeError) {
@@ -353,6 +361,24 @@ export function EpisodeDetailsPage() {
             `,
           }}
         >
+          {isRuleNotFound ? (
+            <div
+              css={css`
+                padding: ${euiTheme.size.l};
+                padding-bottom: 0;
+              `}
+            >
+              <EuiCallOut
+                announceOnMount
+                title={RULE_NOT_FOUND_CALLOUT_TITLE}
+                color="warning"
+                iconType="warning"
+                data-test-subj="alertingV2EpisodeDetailsRuleNotFoundCallout"
+              >
+                <p>{RULE_NOT_FOUND_CALLOUT_BODY}</p>
+              </EuiCallOut>
+            </div>
+          ) : null}
           <EuiSplitPanel.Outer
             direction="row"
             hasBorder={false}

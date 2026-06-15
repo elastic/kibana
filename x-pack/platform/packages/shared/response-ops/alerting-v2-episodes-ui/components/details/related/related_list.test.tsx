@@ -18,7 +18,10 @@ jest.mock('../../related/related_alert_episode', () => ({
   ),
 }));
 
-const mockRule = { id: 'rule-1', metadata: { name: 'Test Rule' } } as RuleResponse;
+const mockRule = {
+  id: 'rule-1',
+  metadata: { name: 'Test Rule' },
+} as unknown as RuleResponse;
 
 const makeRow = (id: string): AlertEpisode =>
   ({
@@ -39,6 +42,7 @@ describe('RelatedAlertEpisodesList', () => {
         <RelatedAlertEpisodesList
           rows={[makeRow('ep-1'), makeRow('ep-2')]}
           rule={mockRule}
+          isRuleNotFound={false}
           getEpisodeAction={() => undefined}
           getGroupAction={() => undefined}
           getEpisodeDetailsHref={(id) => `/base/${id}`}
@@ -59,6 +63,7 @@ describe('RelatedAlertEpisodesList', () => {
         <RelatedAlertEpisodesList
           rows={[]}
           rule={mockRule}
+          isRuleNotFound={false}
           getEpisodeAction={() => undefined}
           getGroupAction={() => undefined}
           getEpisodeDetailsHref={(id) => `/base/${id}`}

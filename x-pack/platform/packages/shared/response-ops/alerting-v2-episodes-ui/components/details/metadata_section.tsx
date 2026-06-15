@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import { EuiCallOut, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { useFetchEpisodeQuery } from '../../hooks/use_fetch_episode_query';
 import { useFetchEpisodeEventDataQuery } from '../../hooks/use_fetch_episode_event_data_query';
@@ -45,7 +45,7 @@ export const AlertEpisodeMetadataSection = ({
   });
   const ruleId = episode?.['rule.id'];
 
-  const { data: rule } = useFetchRule({ id: ruleId, http: services.http });
+  const { rule, isRuleNotFound, isRuleLoading } = useFetchRule({ id: ruleId, http: services.http });
 
   const {
     data: eventData,
@@ -88,8 +88,20 @@ export const AlertEpisodeMetadataSection = ({
     );
   }
 
-  if (isLoadingEpisode || isEventDataLoading || isDataViewLoading) {
+  if (isLoadingEpisode || isEventDataLoading || (ruleId && isRuleLoading) || isDataViewLoading) {
     return <EuiLoadingSpinner size="m" data-test-subj="alertingV2EpisodeMetadataSectionLoading" />;
+  }
+
+  if (isRuleNotFound) {
+    return (
+      <EuiCallOut
+        announceOnMount
+        title={i18n.METADATA_SECTION_RULE_DELETED}
+        color="warning"
+        iconType="warning"
+        data-test-subj="alertingV2EpisodeMetadataSectionRuleDeleted"
+      />
+    );
   }
 
   if (!hit || !dataView || !eventData) {

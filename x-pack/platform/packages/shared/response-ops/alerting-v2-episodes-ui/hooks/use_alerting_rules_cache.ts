@@ -27,9 +27,10 @@ type Rule = FindRulesResponse['items'][number];
  */
 export const useAlertingRulesCache = ({ ruleIds, services }: UseAlertingRulesCacheOptions) => {
   const [rulesCache, setRulesCache] = useState<Record<string, Rule>>({});
+  const [missingRuleIds, setMissingRuleIds] = useState<ReadonlySet<string>>(new Set());
 
   const { loading, error } = useAsync(async () => {
-    const uncachedIds = ruleIds.filter((id) => !rulesCache[id]);
+    const uncachedIds = ruleIds.filter((id) => !rulesCache[id] && !missingRuleIds.has(id));
 
     if (uncachedIds.length === 0) {
       return;
@@ -42,6 +43,8 @@ export const useAlertingRulesCache = ({ ruleIds, services }: UseAlertingRulesCac
       }
     );
 
+    const returnedRuleIds = new Set(rulesResponse.rules.map((rule) => rule.id));
+
     setRulesCache((prev) => {
       const next = { ...prev };
       rulesResponse.rules.forEach((rule) => {
@@ -49,10 +52,21 @@ export const useAlertingRulesCache = ({ ruleIds, services }: UseAlertingRulesCac
       });
       return next;
     });
+
+    setMissingRuleIds((prev) => {
+      const next = new Set(prev);
+      uncachedIds.forEach((id) => {
+        if (!returnedRuleIds.has(id)) {
+          next.add(id);
+        }
+      });
+      return next;
+    });
   }, [ruleIds, services.http]);
 
   return {
     rulesCache,
+    missingRuleIds,
     loading,
     error,
   };
