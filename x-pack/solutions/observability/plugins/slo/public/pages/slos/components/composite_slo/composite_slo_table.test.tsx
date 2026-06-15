@@ -7,13 +7,12 @@
 
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { ALL_VALUE } from '@kbn/slo-schema';
-import type { CompositeSLODefinitionResponse, CompositeSLOSummaryResponse } from '@kbn/slo-schema';
+import type { CompositeSLOWithSummaryResponse } from '@kbn/slo-schema';
 import { fireEvent, screen } from '@testing-library/react';
 import React from 'react';
 import { ActiveAlerts } from '../../../../hooks/active_alerts';
 import { useFetchActiveAlerts } from '../../../../hooks/use_fetch_active_alerts';
 import { useFetchCompositeHistoricalSummary } from '../../../../hooks/use_fetch_composite_historical_summary';
-import { useFetchCompositeSloDetails } from '../../../../hooks/use_fetch_composite_slo_details';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { usePermissions } from '../../../../hooks/use_permissions';
 import { render } from '../../../../utils/test_helper';
@@ -22,7 +21,6 @@ import { CompositeSloTable } from './composite_slo_table';
 jest.mock('../../../../hooks/use_kibana');
 jest.mock('../../../../hooks/use_permissions');
 jest.mock('../../../../hooks/use_fetch_active_alerts');
-jest.mock('../../../../hooks/use_fetch_composite_slo_details');
 jest.mock('../../../../hooks/use_fetch_composite_historical_summary');
 jest.mock('../slo_sparkline', () => ({
   SloSparkline: () => <div data-test-subj="sloSparkline" />,
@@ -31,33 +29,11 @@ jest.mock('../slo_sparkline', () => ({
 const useKibanaMock = useKibana as jest.Mock;
 const usePermissionsMock = usePermissions as jest.Mock;
 const useFetchActiveAlertsMock = useFetchActiveAlerts as jest.Mock;
-const useFetchCompositeSloDetailsMock = useFetchCompositeSloDetails as jest.Mock;
 const useFetchCompositeHistoricalSummaryMock = useFetchCompositeHistoricalSummary as jest.Mock;
 
-type CompositeSLOItem = CompositeSLODefinitionResponse;
+type CompositeSLOItem = CompositeSLOWithSummaryResponse;
 
 const buildCompositeSloItem = (overrides: Partial<CompositeSLOItem> = {}): CompositeSLOItem => ({
-  id: 'composite-slo-1',
-  name: 'My Composite SLO',
-  description: 'A test composite SLO',
-  compositeMethod: 'weightedAverage',
-  timeWindow: { duration: '30d', type: 'rolling' },
-  budgetingMethod: 'occurrences',
-  objective: { target: 0.99 },
-  tags: [],
-  enabled: true,
-  createdAt: '2024-01-01T00:00:00.000Z',
-  updatedAt: '2024-01-01T00:00:00.000Z',
-  createdBy: 'user',
-  updatedBy: 'user',
-  version: 1,
-  members: [{ sloId: 'member-slo-1', weight: 1 }],
-  ...overrides,
-});
-
-const buildCompositeSloDetails = (
-  overrides: Partial<CompositeSLOSummaryResponse> = {}
-): CompositeSLOSummaryResponse => ({
   id: 'composite-slo-1',
   name: 'My Composite SLO',
   description: 'A test composite SLO',
@@ -82,7 +58,7 @@ const buildCompositeSloDetails = (
   },
   members: [
     {
-      id: 'member-slo-1',
+      sloId: 'member-slo-1',
       name: 'Member SLO 1',
       weight: 1,
       normalisedWeight: 1,
@@ -104,10 +80,6 @@ const defaultTableProps = {
   onPageChange: jest.fn(),
   onSortChange: jest.fn(),
   onDelete: jest.fn(),
-};
-
-const mockCompositeSloDetails = (detailsById: Map<string, CompositeSLOSummaryResponse>) => {
-  useFetchCompositeSloDetailsMock.mockReturnValue({ detailsById, isLoading: false });
 };
 
 describe('CompositeSloTable', () => {
@@ -133,10 +105,6 @@ describe('CompositeSloTable', () => {
 
     usePermissionsMock.mockReturnValue({ data: { hasAllWriteRequested: true } });
     useFetchActiveAlertsMock.mockReturnValue({ data: new ActiveAlerts() });
-    useFetchCompositeSloDetailsMock.mockReturnValue({
-      detailsById: new Map<string, CompositeSLOSummaryResponse>(),
-      isLoading: false,
-    });
     useFetchCompositeHistoricalSummaryMock.mockReturnValue({
       historicalSummaryById: new Map(),
       isLoading: false,
@@ -163,7 +131,6 @@ describe('CompositeSloTable', () => {
   describe('burn rate column', () => {
     it('shows "Burn rate (5m)" in the column header by default', () => {
       const item = buildCompositeSloItem();
-      mockCompositeSloDetails(new Map([['composite-slo-1', buildCompositeSloDetails()]]));
 
       render(<CompositeSloTable {...defaultTableProps} results={[item]} />);
 
@@ -172,7 +139,6 @@ describe('CompositeSloTable', () => {
 
     it('displays the 5m burn rate value by default', () => {
       const item = buildCompositeSloItem();
-      mockCompositeSloDetails(new Map([['composite-slo-1', buildCompositeSloDetails()]]));
 
       render(<CompositeSloTable {...defaultTableProps} results={[item]} />);
 
@@ -181,7 +147,6 @@ describe('CompositeSloTable', () => {
 
     it('switches to 1h burn rate when selected from the popover', async () => {
       const item = buildCompositeSloItem();
-      mockCompositeSloDetails(new Map([['composite-slo-1', buildCompositeSloDetails()]]));
 
       render(<CompositeSloTable {...defaultTableProps} results={[item]} />);
 
@@ -195,7 +160,6 @@ describe('CompositeSloTable', () => {
 
     it('switches to 1d burn rate when selected from the popover', async () => {
       const item = buildCompositeSloItem();
-      mockCompositeSloDetails(new Map([['composite-slo-1', buildCompositeSloDetails()]]));
 
       render(<CompositeSloTable {...defaultTableProps} results={[item]} />);
 
@@ -208,8 +172,7 @@ describe('CompositeSloTable', () => {
     });
 
     it('shows N/A for burn rate when status is NO_DATA', () => {
-      const item = buildCompositeSloItem();
-      const details = buildCompositeSloDetails({
+      const item = buildCompositeSloItem({
         summary: {
           status: 'NO_DATA',
           sliValue: -1,
@@ -219,7 +182,6 @@ describe('CompositeSloTable', () => {
           oneDayBurnRate: 0,
         },
       });
-      mockCompositeSloDetails(new Map([['composite-slo-1', details]]));
 
       render(<CompositeSloTable {...defaultTableProps} results={[item]} />);
 
@@ -241,8 +203,22 @@ describe('CompositeSloTable', () => {
     it('shows an alert badge with the aggregated count across member SLOs', () => {
       const item = buildCompositeSloItem({
         members: [
-          { sloId: 'member-slo-1', weight: 1 },
-          { sloId: 'member-slo-2', weight: 1 },
+          {
+            sloId: 'member-slo-1',
+            weight: 1,
+            name: 'Member SLO 1',
+            normalisedWeight: 0.5,
+            sliValue: 0.995,
+            status: 'HEALTHY',
+          },
+          {
+            sloId: 'member-slo-2',
+            weight: 1,
+            name: 'Member SLO 2',
+            normalisedWeight: 0.5,
+            sliValue: 0.995,
+            status: 'HEALTHY',
+          },
         ],
       });
 
