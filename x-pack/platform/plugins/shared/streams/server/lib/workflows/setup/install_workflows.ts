@@ -16,7 +16,6 @@ import {
   STREAMS_KI_ONBOARDING_WORKFLOW_ID,
   STREAMS_KI_QUERIES_GENERATION_WORKFLOW_ID,
   STREAMS_INVESTIGATION_WORKFLOW_ID,
-  STREAMS_INVESTIGATION_HYP_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
@@ -53,10 +52,9 @@ export const installWorkflows = async ({
     ),
     ...(isSignificantEventsMemoryEnabled ? [installMemoryWorkflows({ client })] : []),
     // Installed unconditionally so it is available the moment the feature flag
-    // (observability:streamsEnableInvestigation) is toggled on — the workflow only
-    // runs when triggered by the orchestrator or the events route, both of which
-    // gate on that UI setting at call-time.
+    // (observability:streamsEnableInvestigation) is toggled on. The events route
+    // gates on the flag at call-time; the orchestrator triggers unconditionally
+    // but only for discoveries that have already been promoted via triage.
     client.install(STREAMS_INVESTIGATION_WORKFLOW_ID, { spaceId: GLOBAL_WORKFLOW_SPACE_ID }),
-    client.install(STREAMS_INVESTIGATION_HYP_WORKFLOW_ID, { spaceId: GLOBAL_WORKFLOW_SPACE_ID }),
   ]);
 };

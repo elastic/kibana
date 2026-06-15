@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { randomUUID } from 'crypto';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { HttpHandler } from '@kbn/core/public';
 import type { ConverseResponse } from './agent_builder_client';
@@ -98,8 +99,9 @@ export class InvestigationWorkflowClient {
   ) {}
 
   async run(input: InvestigationInput): Promise<ConverseResponse> {
-    const { streamNames, scenarioId, scenarioTitle, service, faultType } = input;
-    const discoveryId = `eval-${scenarioId}-${Date.now()}`;
+    const { streamNames, scenarioId, service, faultType } = input;
+    const opaqueId = randomUUID();
+    const discoveryId = `eval-${opaqueId}`;
 
     this.log.info(`[investigation-workflow] Triggering workflow for scenario: ${scenarioId}`);
 
@@ -110,10 +112,10 @@ export class InvestigationWorkflowClient {
         version: '2023-10-31',
         body: JSON.stringify({
           inputs: {
-            event_id: `eval-event-${scenarioId}`,
+            event_id: `eval-event-${opaqueId}`,
             discovery_id: discoveryId,
-            discovery_slug: scenarioId,
-            title: `Evaluation: ${scenarioTitle}`,
+            discovery_slug: opaqueId,
+            title: `Automated RCA evaluation`,
             summary:
               `Automated RCA evaluation run. ` +
               `A microservice system is experiencing degradation or an outage. ` +

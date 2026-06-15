@@ -18,6 +18,7 @@ import { createReadStream, existsSync } from 'fs';
 import { readFile } from 'fs/promises';
 import { createInterface } from 'readline';
 import { join } from 'path';
+import { randomUUID } from 'crypto';
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { RcaScenario } from '../scenarios/types';
@@ -33,13 +34,14 @@ export interface LocalReplayHandle {
   tracesIndex: string;
 }
 
-export function getLocalDataStreamNames(scenario: RcaScenario): {
+function generateOpaqueDataStreamNames(): {
   logsIndex: string;
   tracesIndex: string;
 } {
+  const runId = randomUUID().slice(0, 8);
   return {
-    logsIndex: `logs-rca-bench-re2ob-${scenario.snapshotName}`,
-    tracesIndex: `traces-rca-bench-re2ob-${scenario.snapshotName}`,
+    logsIndex: `logs-rcabench-${runId}`,
+    tracesIndex: `traces-rcabench-${runId}`,
   };
 }
 
@@ -176,7 +178,7 @@ export async function indexLocalScenario(
   const injectTime = parseInt(await readFile(join(caseDir, 'inject_time.txt'), 'utf-8'), 10);
   const shiftS = Date.now() / 1000 - TARGET_INJECT_OFFSET_S - injectTime;
 
-  const { logsIndex, tracesIndex } = getLocalDataStreamNames(scenario);
+  const { logsIndex, tracesIndex } = generateOpaqueDataStreamNames();
 
   log.info(
     `[${scenario.snapshotName}] Indexing — shift +${Math.round(shiftS / 3600)}h, ` +
