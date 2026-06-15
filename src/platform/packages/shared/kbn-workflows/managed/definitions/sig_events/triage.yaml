@@ -39,6 +39,7 @@ consts:
   KIND_CLEARANCE: 'clearance'
   KIND_HANDLED: 'handled'
   BATCH_MAX: 5
+  STATUS_ACKNOWLEDGED: 'acknowledged'
 steps:
   # Copy workflow.spaceId into variables so ES body Liquid expressions can reference it.
   - name: set_space_vars
@@ -89,11 +90,6 @@ steps:
             filter:
               - term:
                   kibana.space_ids: '{{ variables.spaceId }}'
-              - terms:
-                  kind:
-                    - '{{ consts.KIND_DISCOVERY }}'
-                    - '{{ consts.KIND_CLEARANCE }}'
-                    - '{{ consts.KIND_HANDLED }}'
               - range:
                   '@timestamp':
                     gte: '{{ inputs.discoveryLookback }}'
@@ -110,18 +106,11 @@ steps:
       findings: >-
         ${{ steps.get_unassessed_discoveries.output.hits.hits
           | map: '_source'
-          | reject: 'kind', 'handled'
+          | reject: 'kind', '{{ consts.KIND_HANDLED }}'
           | default: [] }}
 
   # -----------------------------------------------------------------------
-  # Step 2b: Fetch stale acknowledged events — events that have been in
-  # acknowledged status for longer than staleAcknowledgedThreshold with no
-  # new detection or discovery signal. Detection only writes docs on change
-  # points; when alerts drop to zero with no statistically significant
-  # transition, no new kind:quiet detection is written and the resolution
-  # chain stalls. These events are re-submitted to the Judge so it can query
-  # current alert state via execute_esql and produce a resolved verdict if
-  # alerts have genuinely stopped.
+  # Step 2b: Fetch stale acknowledged events
   # -----------------------------------------------------------------------
   - name: get_stale_acknowledged
     type: elasticsearch.request
@@ -175,7 +164,7 @@ steps:
       stale_findings: >-
         ${{ steps.get_stale_acknowledged.output.hits.hits
           | map: '_source'
-          | where: 'status', 'acknowledged'
+          | where: 'status', '{{ consts.STATUS_ACKNOWLEDGED }}'
           | default: [] }}
 
   # Merge normal unassessed discoveries with stale acknowledged events so

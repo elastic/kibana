@@ -54,7 +54,7 @@ Use tools only to verify what detection change points suggest. Do not search for
 
 | Tool | Use when | Constraints |
 |------|----------|-------------|
-| `search_knowledge_indicators` | **Mandatory first call — always** (your service knowledge base) | One call per failure-domain group in parallel; `kind: ["feature", "query"]`, `limit: 15`, `search_text` required. Query KIs appear at the end — read to the end. Follow-up rules: see Step 1. |
+| `search_knowledge_indicators` | **Mandatory first call — always** (your service knowledge base) | One call for the entire batch; `kind: ["feature", "query"]`, `stream_names` required. No other filters required. Query KIs appear at the end — read to the end. Follow-up rules: see Step 1. |
 | `execute_esql` | Confirm or refute a KI hypothesis | KI queries only — no new queries. Run all query KIs whose `rule.id` matches a rule in the batch and whose description semantically matches the failure. Modifications: see Step 4. |
 
 </tool_usage>
@@ -119,15 +119,14 @@ Entries where your initial hypothesis is "noise / normal volume / rule returned 
 
 **Partition rules into failure domains.** Assign each rule a 2–4 word label from `rule_name` + `change_point_type` (e.g., `"database connection errors"`, `"sensitive data in logs"`). Rules with matching labels share a domain; a single rule always forms its own domain.
 
-**Fire one `search_knowledge_indicators` call per domain in parallel** (`kind: ["feature", "query"]`, `limit: 15`):
-- `stream_names`: deduplicated `stream_name` values from that domain's rules.
-- `search_text`: one focused sentence describing the domain's failure mechanism. Never concatenate domains.
+**Fire one `search_knowledge_indicators` call for the entire batch** (`kind: ["feature", "query"]`):
+- `stream_names`: deduplicated union of all `stream_name` values from the batch. No other filters required.
 
-**Merge results.** Dedup by `feature.uuid` / `query.id`. Use top-10 feature KIs by `severity_score` — always keep ALL Dependency-type and Infrastructure-type KIs regardless of score.
+**Dedup results** by `feature.uuid` / `query.id`. Keep ALL Dependency-type and Infrastructure-type KIs regardless of score.
 
 **Discard `dataset_analysis` KIs immediately** — schema field-distribution metadata with no diagnostic value. Note presence only (Critical Rule #3).
 
-**Follow-ups.** For each domain with 0 query KIs: fire one follow-up `kind: ["query"]`, `limit: 5`, same params. Entity KI follow-up deferred to Step 4 (fires only when esql results have unconfirmed rules).
+**Follow-up if 0 query KIs returned:** one follow-up `kind: ["query"]`, same `stream_names`. Entity KI follow-up deferred to Step 4 (fires only when esql results have unconfirmed rules).
 
 ### Step 2: Form Hypotheses
 
@@ -149,7 +148,7 @@ Read ALL returned KIs and form ranked hypotheses per rule: claim (specific mecha
 
 **Build `dependency_edges` and `infra_components`.** Use the same `search_knowledge_indicators` results — no second search call.
 
-**Gate.** Set both to `[]` ONLY when ALL hold: `change_point_type` is `stationary` AND all tool calls returned 0 rows AND `alert_count` is negligible. If the discovery already has non-empty values, preserve them.
+**Gate** (scope: `dependency_edges` and `infra_components` only — does not affect query execution in Step 3). Set both to `[]` ONLY when ALL hold: `change_point_type` is `stationary` AND all tool calls returned 0 rows AND `alert_count` is negligible. If the discovery already has non-empty values, preserve them.
 Gate passes when: `change_point_type` is NOT `stationary`, OR any tool call returned ≥1 row confirming active problems, OR `alert_count` is non-trivial.
 
 **When the gate passes**, include only KIs involving the failing service. **Failing service name**: prefer `feature.id` of a matching entity KI, then fall back to the detection `stream_name` with index suffix stripped (e.g., `logs-orders-*` → `orders`).
@@ -158,6 +157,8 @@ Gate passes when: `change_point_type` is NOT `stationary`, OR any tool call retu
   - `exposure: "exposed"` when `target` is the failing service (the upstream `source` caller is affected).
   - `exposure: "not_exposed"` otherwise.
   - When `exposure: "exposed"`, paraphrase the dep KI's `description` into `root_cause`.
+  - `evidence[]`: scan for error log signatures captured at service discovery time — error messages, exception types, and failure patterns; these are the strongest hypothesis seeds before running ES|QL.
+  - `meta` is free-form relationship context curated by Agent Builder — may contain observed operations, anomaly notes, failure indicators, or behavioral patterns. Read holistically; do not expect specific keys.
 - **Infrastructure KI** (`feature.type: "infrastructure"`): include when the failing service appears in `description` or `evidence`. Emit `title` from `feature.title` (omit if absent). Extract service names from `description`/`evidence` for `workloads`. `exposure: "exposed"` when the failing service is in `workloads`. Paraphrase the infra KI's `description` into `root_cause` when `exposure: "exposed"`.
 - **Secondary signals** (only when no Dependency-type KI covers the edge):
   - `meta.downstream_services` on entity KIs: emit edges `source` = entity name, `target` = service (strip `:port`).
@@ -177,13 +178,11 @@ Emit `dependency_edges: []` and `infra_components: []` when no relevant KIs matc
   - Qualifying failure evidence: `execute_esql` returned ≥1 row whose text (`body.text` or `message`) contains error messages, exception traces, or failure keywords — routine entries (health checks, successful transactions) do not qualify. Rows with neither `body.text` nor `message` populated are non-qualifying.
   - Sustained alert volume alone is NOT qualifying failure evidence for a stationary detection.
 
-**Enrich `root_cause` and `summary` with technology KI `meta`**: when a matching `feature.type == "technology"` KI exists for a `cause_kis` entity, use its `meta` to add mechanism depth — **only when `execute_esql` for that entity's stream returned ≥1 row**.
+**Enrich `root_cause` and `summary` with feature KI content** (when `execute_esql` returned ≥1 row):
 
-**Enrich `root_cause` with entity KI `evidence[]` and `properties`** (when `execute_esql` returned ≥1 row):
-- `evidence[]` field=value strings: error-type fields (`error.type`, `http.response.status_code`) reveal the specific failure mechanism — cite the error code in `root_cause`.
-- `properties`: stable structural facts (language, runtime, database) — use to ground the mechanism when `execute_esql` confirms the stream.
-
-**Deployment version hypothesis.** For `step_change` or `spike`: if an entity KI carries `meta.container_image_tag` or `meta.image_tag`, include the version in `root_cause` as a possible deployment trigger — only when `execute_esql` confirms active errors.
+- **`evidence[]`** on any feature KI: scan for error signatures, exception types, and failure patterns. Error-type fields (`error.type`, `http.response.status_code`) reveal the specific failure mechanism — cite them in `root_cause`.
+- **`properties`**: stable structural facts (language, runtime, database type) — use to ground the mechanism when `execute_esql` confirms the stream.
+- **`meta`** is free-form and varies by KI type and what Agent Builder observed. Read it holistically — it may contain deployment details, runtime info, observed operations, behavioral notes, anomaly observations, or any other context found relevant. Do not assume specific key names. If any version, image tag, or build identifier appears in `meta`, include it in `root_cause` as a possible deployment trigger for `step_change` or `spike` — only when `execute_esql` confirms active errors.
 
 ### Step 3: Run Confirmation Queries
 
@@ -208,7 +207,7 @@ For each rule that has an exact-match KI (`rule.id` = `rule_uuid`): add one call
 
 **Early fallback:** 0 results from all KI queries for a rule → record `result: empty` (the 0-row confirming-query disposition below). Do not retry.
 
-**Deferred entity KI follow-up.** After recording all results, for each failure domain where: (1) the entity KI was absent from Step 1, AND (2) ≥1 rule has no confirmed esql rows — fire one `search_knowledge_indicators`: `kind: ["feature"]`, `limit: 15`, same params as Step 1. Dispatch all qualifying domains in parallel. Use results to enrich `dependency_edges`. Skip entirely if all groups have ≥1 confirmed esql row.
+**Deferred entity KI follow-up.** After recording all results, for each failure domain where: (1) the entity KI was absent from Step 1, AND (2) ≥1 rule has no confirmed esql rows — fire one `search_knowledge_indicators`: `kind: ["feature"]`, same `stream_names`. Dispatch all qualifying domains in parallel. Use results to enrich `dependency_edges`. Skip entirely if all groups have ≥1 confirmed esql row.
 
 **Required modifications before executing:**
 1. Strip `METADATA _id, _source` from every query.
@@ -216,9 +215,9 @@ For each rule that has an exact-match KI (`rule.id` = `rule_uuid`): add one call
    - Text field: ONLY `body.text` (OTel, `logs.otel*`) or `message` (ECS). Unknown → try `body.text` first, fall back to `message` on empty.
    - Never project other fields — unmapped columns cause `Unknown column` errors. Aggregation queries: strip METADATA only.
    - `ASC` returns the earliest matching logs — onset evidence for root-cause hypothesis.
-3. Time scoping: insert `| WHERE @timestamp >= "<detected_at>" AND @timestamp <= NOW()` immediately after `FROM`. Use `detected_at` from the detection whose `rule_uuid` matches the KI's `rule.id`; fall back to the earliest `detected_at` in the batch. Never use `NOW() - N minutes`. Skip for `ROW`/`SHOW`/`METRICS`.
+3. Time scoping: insert `| WHERE @timestamp >= "<detected_at>" AND @timestamp <= NOW()` immediately after `FROM`. Use `detected_at` from the detection whose `rule_uuid` matches the KI's `rule.id`; fall back to the earliest `detected_at` in the batch. `detected_at` is the start of the earliest active alert window — it is earlier than when the detection workflow ran, so this filter covers the full incident window. Never use `NOW() - N minutes`. Skip for `ROW`/`SHOW`/`METRICS`.
    ```
-   Before: FROM logs.* | WHERE body.text : "ECONNREFUSED" | LIMIT 10
+   Before: FROM logs.* | WHERE body.text : "ECONNREFUSED" | LIMIT 3
    After:  FROM logs.* | WHERE @timestamp >= "2026-06-11T15:03:00Z" AND @timestamp <= NOW() | WHERE body.text : "ECONNREFUSED" | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 3
    ```
 4. Never modify `WHERE`, field names, or `FROM`. Skip query on failure.
@@ -327,11 +326,12 @@ Translate your investigation findings into this structured format. Output discip
   - **Trend**: `change_point_occurrence: "recurring"` or failures spreading → escalate one tier.
   - Tiers: 76–100 (SEV-1/2: core journey broken), 51–75 (SEV-2/3: feature degraded), 31–50 (SEV-3/4: partial), 0–30 (SEV-4/5: noise).
   - **No-evidence cap**: 0-row results or no evidence calls → cap at 50. **When uncertain, choose the higher tier.**
-- `confidence`: How correct is your root-cause hypothesis — not how strong the anomaly is. `p_value` measures signal credibility; confidence measures hypothesis correctness.
-  - **Base from p_value**: `≤ 0.01` → 55–65; `0.01–0.05` → 40–55; `0.05–0.1` → 25–40; `> 0.1` → below 25.
+- `confidence`: How correct is your root-cause assessment — not how strong the anomaly is. `p_value` measures signal credibility; confidence measures assessment correctness.
+  - **Refuted discoveries** (queries returned healthy/non-failure rows — `row_count > 0` but no error signature): confidence measures certainty the signal is a non-event. "No errors found" is a positive finding, not absence of finding. ≥1 evidence with `row_count > 0` and only healthy rows → 65–75. `change_point_type: stationary` (no change detected by the algorithm) + no confirming query available → 50–60; `stationary` is a statistical conclusion, not absence of one. Non-stationary + all evidences `row_count = 0` (no data at all) → 35–45. Do NOT apply the failure-hypothesis adjusters, hard caps, or ceiling below to refuted discoveries — the ranges above are self-contained.
+  - **Base from p_value** (failure hypotheses): `≤ 0.01` → 55–65; `0.01–0.05` → 40–55; `0.05–0.1` → 25–40; `> 0.1` → below 25.
   - **Corroboration bonuses** (additive, max +10 each): ≥2 evidences with `row_count > 0` confirming the failure pattern; KI backing present and causal chain aligns; failures span ≥2 detection windows with no recovery sign.
-  - **Downward adjusters**: empty queries outnumber confirmed (−10); no KI match found (−10); single evidence only (−5).
-  - **Hard caps**: all queries returned 0 rows → cap at 40; no evidence calls made → cap at 40; no KI match for any cause → cap at 65. **Why the KI cap exists**: `cause_kis` confirms which user-critical path is affected. Without a KI match you have signal intensity — you know something is anomalous — but you do not know which user journey is at risk. Confidence above 65 requires confirmed user-path impact, not just signal strength. If your evidence is compelling but `cause_kis` is empty, your confidence in the signal is high but your confidence in the discovery's significance is bounded.
+  - **Downward adjusters**: queries with `row_count = 0` outnumber confirmed (−10); no KI match found (−10); single evidence only (−5).
+  - **Hard caps**: all evidences have `row_count = 0` → cap at 40; no evidence calls made → cap at 40; no KI match for any cause → cap at 65. **Why the KI cap exists**: `cause_kis` confirms which user-critical path is affected. Without a KI match you have signal intensity — you know something is anomalous — but you do not know which user journey is at risk. Confidence above 65 requires confirmed user-path impact, not just signal strength. If your evidence is compelling but `cause_kis` is empty, your confidence in the signal is high but your confidence in the discovery's significance is bounded.
   - **Ceiling**: 90+ requires all three: `p_value ≤ 0.01`, ≥2 confirmed evidences, KI backing present. Do not exceed 85 when any evidence is empty or any query was skipped.
 
 </output_properties>
@@ -339,8 +339,9 @@ Translate your investigation findings into this structured format. Output discip
 <critical_rules>
 
 1. **`search_knowledge_indicators` must be the first tool call for every rule** — before `execute_esql`. Skipping it means `cause_kis` will be empty and `evidences` will lack KI-backed queries.
-2. **A `dip` is especially important** — it often means a service went DOWN and stopped producing alerts.
-3. **Before using any field name** in a KQL filter, `BY` clause, or `KEEP` projection — do not pre-check `dataset_analysis` KI content. Proceed with the field name. On `Unknown column`: skip the query (no retry). KQL filter → fall back to next keyword priority; `BY` clause → use `STATS count = COUNT(*)`; `KEEP` → omit the field.
-4. **`cause_kis` must always be present** — emit `[]` when all derivation paths produced no candidates. Omitting it is a schema error.
+2. **Exact-match KI queries always run — `stationary` does not skip them.** The Step 2 gate controls `dependency_edges`/`infra_components` population only. "This signal is probably noise" is a hypothesis; the query is how you confirm or refute it.
+3. **A `dip` is especially important** — it often means a service went DOWN and stopped producing alerts.
+4. **Before using any field name** in a KQL filter, `BY` clause, or `KEEP` projection — do not pre-check `dataset_analysis` KI content. Proceed with the field name. On `Unknown column`: skip the query (no retry). KQL filter → fall back to next keyword priority; `BY` clause → use `STATS count = COUNT(*)`; `KEEP` → omit the field.
+5. **`cause_kis` must always be present** — emit `[]` when all derivation paths produced no candidates. Omitting it is a schema error.
 
 </critical_rules>

@@ -108,6 +108,13 @@ steps:
       alerts_count: "${{ steps.count_alerts_in_lookback.output.count | default: 1 }}"
       detections_count: "${{ steps.count_active_detections.output.count | default: 1 }}"
 
+  - name: exit_no_active_alerts
+    type: workflow.output
+    if: "${{ steps.compute_idle_counts.output.alerts_count == 0 and steps.compute_idle_counts.output.detections_count == 0 }}"
+    status: cancelled
+    with:
+      reason: "No recent alerts and no active detections — change point scan skipped"
+
   # -----------------------------------------------------------------------
   # Stale sweep — two-step truth check to avoid redundant quiet writes.
   # -----------------------------------------------------------------------
@@ -260,13 +267,6 @@ steps:
             workflow_execution_id: "{{ execution.id }}"
         on-failure:
           continue: true
-
-  - name: exit_idle
-    type: workflow.output
-    if: "${{ steps.compute_idle_counts.output.alerts_count == 0 and steps.compute_idle_counts.output.detections_count == 0 }}"
-    status: cancelled
-    with:
-      reason: "No recent alerts and no active detections — change point scan skipped"
 
   # -----------------------------------------------------------------------
   # Step 1: Per-rule change_point over the main lookback.
@@ -456,7 +456,6 @@ steps:
       - name: compute_gates
         type: data.set
         with:
-          has_active_detection: "${{ steps.compute_rule_state.output.latest_is_detection }}"
           is_detectable: >-
             ${{ steps.compute_event_signals.output.has_change_point
             or steps.compute_rule_context.output.change_point_type == consts.CP_TYPE_STATIONARY
@@ -472,7 +471,7 @@ steps:
       # Phase 2: Quick recovery
       - name: run_quick_recovery
         type: if
-        condition: "${{ steps.compute_rule_state.output.latest_is_detection }}"
+        condition: "${{ steps.compute_rule_state.output.latest_is_detection and foreach.item.last_5m.doc_count == 0 }}"
         steps:
           - name: get_quick_recovery_change_point
             type: elasticsearch.request
@@ -613,19 +612,19 @@ steps:
           peak_alert_count: "${{ steps.get_rule_activity.output.aggregations.peak.value | default: 0 }}"
           resolution_lookback_minutes: "{% assign parent = steps.check_active_result.output.hits.hits[0]._source.resolution_lookback_minutes | default: 0 | plus: 0 %}{% if parent > 0 %}{{ parent }}{% else %}{%- assign peak = steps.get_rule_activity.output.aggregations.peak.value | default: 0 | at_least: 1 -%}{{ consts.RESOLUTION_WINDOW_MINUTES | divided_by: peak | at_least: consts.LOOKBACK_MINUTES_FLOOR | at_most: consts.LOOKBACK_MINUTES_CEILING }}{% endif %}"
           is_quick_recovery: >-
-            ${{ steps.compute_quick_recovery_type.output.quick_recovery_type == consts.CP_TYPE_STATIONARY
-            and steps.compute_gates.output.has_active_detection
-            and steps.compute_quick_recovery_gate.output.quick_recovery_rate_is_normal
-            and steps.check_active_result.output.hits.hits[0]._source.detection_evidence.change_point_type != consts.CP_TYPE_STATIONARY
-            and foreach.item.last_5m.doc_count == 0 }}
-          is_stationary_recovery: >-
-            ${{ steps.compute_rule_context.output.change_point_type == consts.CP_TYPE_STATIONARY
-            and steps.compute_gates.output.has_active_detection
-            and steps.check_active_result.output.hits.hits[0]._source.detection_evidence.change_point_type != consts.CP_TYPE_STATIONARY
+            ${{ steps.compute_rule_state.output.latest_is_detection
             and foreach.item.last_5m.doc_count == 0
+            and steps.compute_quick_recovery_type.output.quick_recovery_type == consts.CP_TYPE_STATIONARY
+            and steps.compute_quick_recovery_gate.output.quick_recovery_rate_is_normal
+            and steps.check_active_result.output.hits.hits[0]._source.detection_evidence.change_point_type != consts.CP_TYPE_STATIONARY }}
+          is_stationary_recovery: >-
+            ${{ steps.compute_rule_state.output.latest_is_detection
+            and foreach.item.last_5m.doc_count == 0
+            and steps.compute_rule_context.output.change_point_type == consts.CP_TYPE_STATIONARY
+            and steps.check_active_result.output.hits.hits[0]._source.detection_evidence.change_point_type != consts.CP_TYPE_STATIONARY
             and steps.compute_quick_recovery_type.output.quick_recovery_type != consts.CP_TYPE_STATIONARY }}
           is_quiet_stationary: >-
-            ${{ steps.compute_gates.output.has_active_detection
+            ${{ steps.compute_rule_state.output.latest_is_detection
             and foreach.item.last_5m.doc_count == 0
             and steps.check_active_result.output.hits.hits[0]._source.peak_alert_count >= 30 }}
 
@@ -638,7 +637,7 @@ steps:
         type: data.set
         with:
           detection_id: "{% if steps.compute_event_signals.output.is_type_changed and steps.check_recent_active.output.hits.total.value > 0 and steps.check_recent_clearance.output.hits.hits[0]._source.kind == consts.KIND_DETECTION %}{{ steps.check_recent_active.output.hits.hits[0]._source.detection_id }}{% else %}{{ foreach.item.key }}-{{ 'now' | date: '%Y%m%dT%H%M' }}{% endif %}"
-          detected_at: "{% if steps.compute_event_signals.output.is_type_changed and steps.check_recent_active.output.hits.total.value > 0 and steps.check_recent_clearance.output.hits.hits[0]._source.kind == consts.KIND_DETECTION %}{{ steps.check_recent_active.output.hits.hits[0]._source.detected_at | default: steps.check_recent_active.output.hits.hits[0]._source['@timestamp'] }}{% else %}{{ 'now' | date: '%Y-%m-%dT%H:%M:%S%:z' }}{% endif %}"
+          detected_at: "{% if steps.compute_event_signals.output.is_type_changed and steps.check_recent_active.output.hits.total.value > 0 and steps.check_recent_clearance.output.hits.hits[0]._source.kind == consts.KIND_DETECTION %}{{ steps.check_recent_active.output.hits.hits[0]._source.detected_at | default: steps.check_recent_active.output.hits.hits[0]._source['@timestamp'] }}{% elsif steps.get_rule_activity.output.aggregations.activity_windows.buckets[0].doc_count > 0 %}{{ steps.get_rule_activity.output.aggregations.activity_windows.buckets[0].key_as_string }}{% elsif steps.get_rule_activity.output.aggregations.activity_windows.buckets[1].doc_count > 0 %}{{ steps.get_rule_activity.output.aggregations.activity_windows.buckets[1].key_as_string }}{% else %}{{ 'now' | date: '%Y-%m-%dT%H:%M:%S%:z' }}{% endif %}"
           quiet_p_value: "{% if steps.compute_write_signals.output.is_quick_recovery %}{{ steps.get_quick_recovery_change_point.output.aggregations.change_points.type.stationary.p_value | default: 0 }}{% elsif steps.compute_write_signals.output.is_stationary_recovery %}{{ foreach.item.change_points.type.stationary.p_value | default: 0 }}{% else %}0{% endif %}"
 
       - name: write_detection_doc

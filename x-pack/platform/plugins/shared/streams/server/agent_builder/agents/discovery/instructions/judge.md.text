@@ -46,7 +46,7 @@ Use tools only when stale or absent evidence leaves a material ambiguity about w
 
 | Tool | Use when | Constraints |
 |------|----------|-------------|
-| `search_knowledge_indicators` | Fallback only — `evidences` is absent or empty | `kind: ["feature", "query"]`, `limit: 10`; `search_text` = failure description using `cause_kis` entity names + failure type. Pass `stream_names`. Never omit `kind`. If 0 query KIs, one follow-up `kind: ["query"]`; if still none, proceed. |
+| `search_knowledge_indicators` | Fallback only — `evidences` is absent or empty | `kind: ["feature", "query"]`; `stream_names` = discovery `stream_names[]`; `search_text` = extract 1–2 core entity keywords from `cause_kis[].name`; if `cause_kis` is empty, extract from the discovery `title`. Never omit `kind`. If 0 query KIs, one follow-up `kind: ["query"]`; if still none, proceed. |
 | `execute_esql` | Current-state check — evidence is stale or failed | Primary: re-run `evidences[].esql_query` as-is. Fallback (all `esql_query` null): run highest-severity query from `search_knowledge_indicators`. Liveness exception: the broad `COUNT(*)` — see Step 4b. Skip on error. |
 
 **`execute_esql` modifications:**
@@ -55,8 +55,8 @@ Use tools only when stale or absent evidence leaves a material ambiguity about w
   - Text field: ONLY `body.text` (OTel) or `message` (ECS). Never project other fields.
   - Retry (new queries only): 0 rows + unknown schema → retry replacing `body.text` with `message`.
   - `DESC` returns the most recent logs — you want current state, not onset reconstruction.
-- Time scoping: insert `| WHERE @timestamp >= '<onset_time>' AND @timestamp <= NOW()` immediately after `FROM`.
-  - `<onset_time>`: use the earliest `detected_at` across all `detections[]` entries. This gives you the full window from incident onset to now. You will see what was observed at discovery time PLUS what has happened since. The difference is current-state signal — if you see recent errors, it's still active; if you see none, it may have resolved.
+- Time scoping: insert `| WHERE @timestamp >= "<detected_at>" AND @timestamp <= NOW()` immediately after `FROM`.
+  - `<detected_at>`: use the earliest `detected_at` across all `detections[]` entries. `detected_at` is the start of the earliest active alert window — it is earlier than when the detection workflow ran, so this filter covers the full incident window from onset to now. You will see what was observed at discovery time PLUS what has happened since. The difference is current-state signal — if you see recent errors, it's still active; if you see none, it may have resolved.
   - Never use `NOW() - N minutes` — a sliding window is non-deterministic across re-runs.
 - Never modify `WHERE`, field names, or `FROM` except for the broad liveness `COUNT(*)`.
 
@@ -230,9 +230,9 @@ Emit only fields defined in this schema. Output discipline applies to all narrat
 - `criticality`: 76–100 critical, 51–75 major, 31–50 partial, 0–30 noise. Your own assessment.
 - `confidence`: How certain you are in this verdict, grounded in the discovery's evidence and your own verification — not general confidence in the system.
   - **Prior**: start from the discovery's `confidence` value.
-  - **`cause_kis` ceiling (apply before any adjustment)**: if `cause_kis` is `[]`, cap your output `confidence` at 65 regardless of the discovery's value. See the discipline audit for the rationale — this is a non-negotiable ceiling, not an adjustment.
+  - **`cause_kis` ceiling (apply before any adjustment, `promoted`/`acknowledged` only)**: if `cause_kis` is `[]` and you are issuing `promoted` or `acknowledged`, cap your output `confidence` at 65. Rationale: without KI backing you cannot confirm which user journey is at risk, so high confidence in a positive finding is unwarranted. For `demoted` and `resolved`, this ceiling does not apply — "no user journey is at risk" does not require KI confirmation.
   - **Increase when**: your independent verification confirms the root_cause (+5–10); multiple confirmed evidences present with no contradiction (+5); KI backing aligns with your assessment (+5).
-  - **Decrease when**: key queries in `evidences` returned 0 rows (−10 each); no confirmed evidence entries (−15); you issued a `root_cause` correction — you found an error (−10); clearance duration ambiguous (`kind:clearance` path only, −10).
+  - **Decrease when**: key queries in `evidences` have `row_count = 0` (−10 each — do not apply to evidences where `row_count > 0` but `result: "empty"`, those are healthy-row refutations, not missing data); no confirmed evidence entries (−15); you issued a `root_cause` correction — you found an error (−10); clearance duration ambiguous (`kind:clearance` path only, −10).
   - **Hard caps**: no confirmed evidence in discoveries → cap at 55; stale evidences only (all `collected_at` > 1 h before `@timestamp`) → cap at 65; you issued a `root_cause` correction → cap at 75.
   - **Ceiling**: 90+ requires discovery confidence ≥ 70, multiple confirmed evidences, your verification found no contradiction, and no correction needed. Do not exceed 85 when any evidence gap exists.
 - `summary` (**required for `promoted` and `acknowledged`**; optional for `demoted`/`resolved`): the operator notification. As Incident Commander, this is your communication — the on-call engineer receiving this page has seconds to understand what is happening and what to do. Write it for that moment.
