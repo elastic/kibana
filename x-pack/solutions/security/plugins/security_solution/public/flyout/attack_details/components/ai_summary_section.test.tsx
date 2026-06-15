@@ -45,9 +45,13 @@ jest.mock('../../../flyout_v2/shared/components/expandable_section', () => ({
 }));
 
 jest.mock('../../../attack_discovery/pages/results/attack_discovery_markdown_formatter', () => ({
-  AttackDiscoveryMarkdownFormatter: ({ markdown, alertIds }: { markdown: string; alertIds?: string[] }) => (
-    <div data-alert-ids={JSON.stringify(alertIds)}>{markdown}</div>
-  ),
+  AttackDiscoveryMarkdownFormatter: ({
+    markdown,
+    alertIds,
+  }: {
+    markdown: string;
+    alertIds?: string[];
+  }) => <div data-alert-ids={JSON.stringify(alertIds)}>{markdown}</div>,
 }));
 
 const mockedUseOverviewTabData = jest.mocked(useOverviewTabData);

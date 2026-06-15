@@ -28,7 +28,9 @@ jest.mock(
   '../../../../../attack_discovery/pages/results/attack_discovery_markdown_formatter',
   () => ({
     AttackDiscoveryMarkdownFormatter: jest.fn(({ markdown, alertIds }) => (
-      <div data-test-subj="mock-markdown-formatter" data-alert-ids={JSON.stringify(alertIds)}>{markdown}</div>
+      <div data-test-subj="mock-markdown-formatter" data-alert-ids={JSON.stringify(alertIds)}>
+        {markdown}
+      </div>
     )),
   })
 );
