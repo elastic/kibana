@@ -38,10 +38,17 @@ export type AppHeaderTab = CoreAppHeaderTab;
 export type AppHeaderTitle = CoreAppHeaderTitle;
 export type AppHeaderTitleSaveResult = CoreAppHeaderTitleSaveResult;
 
+// Controls the header's HORIZONTAL layout only. Vertical padding is standardized internally so
+// the header keeps a consistent height regardless of this value.
 export type AppHeaderPadding =
-  | 'none'
-  | 'm'
+  | 'none' // no horizontal padding, no bleed
+  | 'm' // symmetric horizontal padding
   | {
+      /**
+       * Negative margin on left/right + top: cancels a padded container so the header spans to
+       * its edges and sits flush at the top. Set this to your container's padding when rendering
+       * the header inline inside a padded page template. Content is auto re-inset to match, so it
+       * stays aligned with the page gutter.
+       */
       bleed: 'm' | 'l';
-      size?: 'none' | 'm' | 'l';
     };
