@@ -318,6 +318,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
 
   return (
     <>
+      {/* ── Mode select ── */}
       <ModeSelect
         value={isAlert ? 'alert' : 'signal'}
         onChange={handleModeChange}
