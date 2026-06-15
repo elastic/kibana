@@ -15,6 +15,8 @@ export const DISCOVER_KBN_ARCHIVE = 'src/platform/test/functional/fixtures/kbn_a
 
 export const DEFAULT_DATA_VIEW = 'logstash-*';
 
+export const SAVED_SEARCH_TITLE = 'A Saved Search';
+
 /**
  * Default time range that covers the `logstash_functional` fixture data.
  * Matches the FTR `timePicker.setDefaultAbsoluteRangeViaUiSettings()` values.

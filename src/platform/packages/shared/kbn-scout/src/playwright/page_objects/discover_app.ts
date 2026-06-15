@@ -17,6 +17,8 @@ import { resolveSelector } from '../utils/locator_helper';
 const DISCOVER_QUERY_MODE_KEY = 'discover.defaultQueryMode';
 
 export type DiscoverQueryMode = 'esql' | 'classic';
+export type DiscoverGridDensity = 'Compact' | 'Normal' | 'Expanded';
+export type DiscoverGridRowHeight = 'Auto' | 'Custom';
 
 export interface DiscoverGotoOptions {
   queryMode?: DiscoverQueryMode;
@@ -160,6 +162,14 @@ export class DiscoverApp {
     }
     await this.page.testSubj.click('confirmSaveSavedObjectButton');
     await this.page.testSubj.waitForSelector('savedObjectSaveModal', { state: 'hidden' });
+  }
+
+  async saveUnsavedChanges() {
+    await this.page.testSubj.click('discoverSaveButton');
+    await this.page.testSubj.waitForSelector('confirmSaveSavedObjectButton', { state: 'visible' });
+    await this.page.testSubj.click('confirmSaveSavedObjectButton');
+    await this.page.testSubj.waitForSelector('savedObjectSaveModal', { state: 'hidden' });
+    await this.waitUntilSearchingHasFinished();
   }
 
   /**
@@ -460,8 +470,64 @@ export class DiscoverApp {
     await this.waitUntilSearchingHasFinished();
   }
 
+  unsavedChangesIndicator(): Locator {
+    return this.page.testSubj.locator('split-button-notification-indicator');
+  }
+
   getColumnHeader(name: string): Locator {
     return this.page.testSubj.locator(`dataGridHeaderCell-${name}`);
+  }
+
+  async openGridDisplaySettings() {
+    await this.page.testSubj.click('dataGridDisplaySelectorButton');
+  }
+
+  async getCurrentDensityValue(): Promise<DiscoverGridDensity> {
+    const buttonGroup = this.page.testSubj.locator('densityButtonGroup');
+    await expect(buttonGroup).toBeVisible();
+
+    const selectedButton = buttonGroup.locator('[aria-pressed="true"]');
+    await expect(selectedButton).toBeVisible();
+
+    return (await selectedButton.innerText()).trim() as DiscoverGridDensity;
+  }
+
+  async setDensityValue(newValue: DiscoverGridDensity) {
+    const buttonGroup = this.page.testSubj.locator('densityButtonGroup');
+
+    await expect(buttonGroup).toBeVisible();
+
+    await buttonGroup.locator(`[data-text="${newValue}"]`).click();
+  }
+
+  async getCurrentRowHeight(scope: 'row' | 'header' = 'row'): Promise<DiscoverGridRowHeight> {
+    const buttonGroup = this.page.testSubj.locator(
+      `unifiedDataTable${scope === 'header' ? 'Header' : ''}RowHeightSettings_rowHeightButtonGroup`
+    );
+    await expect(buttonGroup).toBeVisible();
+
+    const selectedButton = buttonGroup.locator('.euiButtonGroupButton-isSelected');
+    await expect(selectedButton).toBeVisible();
+
+    return (await selectedButton.innerText()).trim() as DiscoverGridRowHeight;
+  }
+
+  async setRowHeight(newValue: DiscoverGridRowHeight) {
+    const buttonGroup = this.page.testSubj.locator(
+      'unifiedDataTableRowHeightSettings_rowHeightButtonGroup'
+    );
+
+    await expect(buttonGroup).toBeVisible();
+
+    await buttonGroup.locator(`[data-text="${newValue}"]`).click();
+  }
+
+  async setCustomRowHeight(newValue: number) {
+    const input = this.page.testSubj.locator('unifiedDataTableRowHeightSettings_lineCountNumber');
+
+    await expect(input).toBeVisible();
+
+    await input.fill(newValue.toString());
   }
 
   public readonly controls = {
