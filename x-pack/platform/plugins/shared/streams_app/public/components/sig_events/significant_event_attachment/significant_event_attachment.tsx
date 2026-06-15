@@ -14,10 +14,13 @@ import {
 } from '@kbn/agent-builder-browser/attachments';
 import type { SignificantEventAttachment } from '@kbn/streams-plugin/common';
 import { SIGNIFICANT_EVENT_ATTACHMENT_TYPE } from '@kbn/streams-plugin/common';
+import type { ChromeStart } from '@kbn/core/public';
 import type { StreamsAppStartDependencies } from '../../../types';
 import { getStatusColor } from '../significant_events_discovery/utils/event_status_color';
 import { SigEventDetails } from '../sig_event_details/sig_event_details';
 import sigEventIcon from '../../asset_image/sig_event_icon.svg';
+import type { FocusedSignificantEventService } from '../../../services/significant_events/focused_significant_event_service';
+import { registerSignificantEventAutoAttach } from '../lib/significant_event_auto_attach';
 
 const labels = {
   fallback: i18n.translate('xpack.streams.significantEventAttachment.fallbackLabel', {
@@ -35,7 +38,7 @@ export const significantEventAttachmentDefinition: AttachmentUIDefinition<Signif
     getHeader: ({ attachment }) => ({
       icon: sigEventIcon,
       subtitle: labels.fallback,
-      badges: [{ label: attachment.data.verdict, color: getStatusColor(attachment.data.verdict) }],
+      badges: [{ label: attachment.data.status, color: getStatusColor(attachment.data.status) }],
     }),
     getActionButtons: ({ openCanvas, isCanvas }) => {
       if (isCanvas || !openCanvas) {
@@ -58,11 +61,21 @@ export const significantEventAttachmentDefinition: AttachmentUIDefinition<Signif
 
 export const registerSignificantEventAttachment = ({
   agentBuilder,
+  chrome,
+  focusedSignificantEventService,
 }: {
   agentBuilder: NonNullable<StreamsAppStartDependencies['agentBuilder']>;
-}) => {
+  chrome: ChromeStart;
+  focusedSignificantEventService: FocusedSignificantEventService;
+}): (() => void) => {
   agentBuilder.attachments.addAttachmentType(
     SIGNIFICANT_EVENT_ATTACHMENT_TYPE,
     significantEventAttachmentDefinition
   );
+
+  return registerSignificantEventAutoAttach({
+    agentBuilder,
+    chrome,
+    focusedSignificantEventService,
+  });
 };

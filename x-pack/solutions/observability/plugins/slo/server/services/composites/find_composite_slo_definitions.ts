@@ -7,10 +7,21 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { FindCompositeSLODefinitionsParams, Paginated } from '@kbn/slo-schema';
+import type {
+  CompositeSLOMemberWithSummary,
+  CompositeSLOWithSummaryResponse,
+  FindCompositeSLODefinitionsParams,
+  Paginated,
+} from '@kbn/slo-schema';
 import { COMPOSITE_SUMMARY_INDEX_NAME } from '../../../common/constants';
+import { NO_DATA } from '../../domain/services';
 import type { CompositeSLODefinition } from '../../domain/models';
+import { buildNoDataSummary } from './compute_composite_summary';
 import type { CompositeSLORepository } from './composite_slo_repository';
+import {
+  fetchCompositeSloSummariesFromIndex,
+  type PersistedCompositeSummary,
+} from './composite_slo_summary_index';
 
 interface Dependencies {
   spaceId: string;
@@ -18,7 +29,30 @@ interface Dependencies {
   esClient: ElasticsearchClient;
 }
 
-export async function findCompositeSloDefinitions(
+function toMemberWithSummary(
+  member: CompositeSLODefinition['members'][number]
+): CompositeSLOMemberWithSummary {
+  return {
+    ...member,
+    name: member.sloId,
+    normalisedWeight: NO_DATA,
+    sliValue: NO_DATA,
+    status: 'NO_DATA',
+  };
+}
+
+function toWithSummaryResponse(
+  definition: CompositeSLODefinition,
+  persisted: PersistedCompositeSummary | undefined
+): CompositeSLOWithSummaryResponse {
+  return {
+    ...definition,
+    summary: persisted?.summary ?? buildNoDataSummary(),
+    members: persisted?.members ?? definition.members.map(toMemberWithSummary),
+  };
+}
+
+export async function findCompositeSlo(
   {
     search,
     tags = [],
@@ -29,7 +63,7 @@ export async function findCompositeSloDefinitions(
     perPage = 25,
   }: FindCompositeSLODefinitionsParams,
   { spaceId, compositeRepository, esClient }: Dependencies
-): Promise<Paginated<CompositeSLODefinition>> {
+): Promise<Paginated<CompositeSLOWithSummaryResponse>> {
   const filters: QueryDslQueryContainer[] = [{ term: { spaceId } }];
   if (search) {
     filters.push({
@@ -46,7 +80,7 @@ export async function findCompositeSloDefinitions(
   }
 
   if (status.length > 0) {
-    filters.push({ terms: { status } });
+    filters.push({ terms: { 'summary.status': status } });
   }
 
   const sortField =
@@ -74,13 +108,19 @@ export async function findCompositeSloDefinitions(
     return { page, perPage, total, results: [] };
   }
 
-  const definitions = await compositeRepository.findAllByIds(compositeIds);
+  const [definitions, persistedSummaryById] = await Promise.all([
+    compositeRepository.findAllByIds(compositeIds),
+    fetchCompositeSloSummariesFromIndex(esClient, spaceId, compositeIds),
+  ]);
   const definitionsById = new Map(definitions.map((d) => [d.id, d]));
 
   // Preserve the order returned by the ES search (which honours the sort).
   const results = compositeIds
     .map((id) => definitionsById.get(id))
-    .filter((d): d is CompositeSLODefinition => d !== undefined);
+    .filter((d): d is CompositeSLODefinition => d !== undefined)
+    .map((definition) =>
+      toWithSummaryResponse(definition, persistedSummaryById.get(definition.id))
+    );
 
   return { page, perPage, total, results };
 }
