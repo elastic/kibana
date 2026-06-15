@@ -1,0 +1,14 @@
+prs:
+- https://github.com/elastic/kibana/pull/265331
+issues:
+- https://github.com/elastic/kibana/issues/232587
+type: feature
+products:
+- product: cloud-serverless
+  target: 2026-06-01
+areas:
+- Alerting and reporting
+- Discover and ES|QL
+- AI and machine Learning
+- Dashboards and visualizations
+title: Add change point view in Discover
