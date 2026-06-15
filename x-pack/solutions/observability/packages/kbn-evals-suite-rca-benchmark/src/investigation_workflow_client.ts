@@ -120,7 +120,7 @@ export class InvestigationWorkflowClient {
             question:
               `A microservice system is experiencing degradation or an outage. ` +
               `Investigate the root cause and identify the responsible service. ` +
-              `Telemetry is in stream_names (logs and traces): ${streamNames.join(', ')}. ` +
+              `Telemetry is in stream_names (logs, traces, and infrastructure metrics): ${streamNames.join(', ')}. ` +
               `Use available tools to inspect these data streams. ` +
               `Identify: (1) the root cause component, (2) the failure mode, and (3) supporting evidence.`,
             root_cause: '',

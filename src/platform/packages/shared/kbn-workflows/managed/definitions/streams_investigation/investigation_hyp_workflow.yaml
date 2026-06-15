@@ -28,8 +28,9 @@ steps:
         Collect evidence for this hypothesis.
 
         The data is in these specific Elasticsearch indices:
-        - Logs:   {{ inputs.stream_names[0] }}
-        - Traces: {{ inputs.stream_names[1] }}
+        - Logs:    {{ inputs.stream_names[0] }}
+        - Traces:  {{ inputs.stream_names[1] }}
+        - Metrics: {{ inputs.stream_names[2] }}
 
         Query rules:
         - Use executeEsql with FROM <index> to scope queries to these indices only.
@@ -39,11 +40,17 @@ steps:
         - Record every attempt including failed lookups and access blockers.
         - 0 rows means the condition is not currently firing — move on rather than retrying
           with the same parameters.
+        - For infrastructure hypotheses (CPU stress, memory pressure, socket exhaustion,
+          network saturation), query the metrics index first — these faults produce minimal
+          APM trace signal. Fields: system.cpu.pct, system.memory.bytes, system.socket.count,
+          system.diskio.bytes, service.latency.p50_ms, service.latency.p90_ms, service.error_rate.
 
         Key investigation principle: a service showing errors or latency is often a
         downstream victim of a failing dependency, not the source of the problem.
         When evidence points at a service, also check what that service depends on —
         a dependency with a high error rate is the more likely root cause.
+        For resource faults, the affected service's CPU or memory will spike independently
+        of its callers' behavior — this is the key distinguishing signal.
 
         Hypothesis: {{ inputs.hypothesis | json }}
         Event context: {{ inputs.context_summary }}

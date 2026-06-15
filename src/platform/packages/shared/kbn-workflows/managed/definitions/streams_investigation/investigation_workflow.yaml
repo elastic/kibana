@@ -34,15 +34,31 @@ steps:
       message: |
         {{ inputs.question }}
 
-        Stream names: {{ inputs.stream_names | json }}
+        Data streams:
+        - Logs:    {{ inputs.stream_names[0] }}
+        - Traces:  {{ inputs.stream_names[1] }}
+        - Metrics: {{ inputs.stream_names[2] }}
         Event metadata: {{ inputs | json }}
 
-        Before generating hypotheses, run exploratory ES|QL queries against the streams
-        to understand service behavior. Key principles from observability investigation:
+        Before generating hypotheses, run exploratory ES|QL queries against ALL THREE streams.
+        Start with metrics — infrastructure signals (CPU%, memory, socket counts) are the
+        fastest path to isolating resource-level faults that leave little trace in APM data.
+
+        Suggested opening queries (substitute the actual index names):
+        1. CPU by service: FROM <metrics-index> | STATS max(system.cpu.pct) BY `service.name` | SORT max(system.cpu.pct) DESC | LIMIT 12
+        2. Memory by service: FROM <metrics-index> | STATS max(system.memory.bytes) BY `service.name` | SORT max(system.memory.bytes) DESC | LIMIT 12
+        3. Socket count (connection exhaustion): FROM <metrics-index> | STATS max(system.socket.count) BY `service.name` | SORT max(system.socket.count) DESC | LIMIT 12
+        4. Error rate by service (traces): FROM <traces-index> | WHERE `http.response.status_code` >= 500 | STATS count() AS errors BY `service.name` | SORT errors DESC | LIMIT 12
+        5. Error logs by service: FROM <logs-index> | WHERE `log.level` == "error" | STATS count() AS errors BY `service.name` | SORT errors DESC | LIMIT 12
+
+        Key principles from observability investigation:
 
         - Many problems originate in one service but surface as errors or latency spikes
           in its callers. Check dependencies early: a service with high error rates may
           be a downstream victim of a failing dependency, not the root cause itself.
+        - Infrastructure faults (CPU stress, memory pressure, socket exhaustion) often
+          produce degraded latency rather than hard errors. Always check the metrics index
+          for the suspected service before concluding "no signal".
         - A service having errors is a symptom, not a root cause. Investigate WHY it has
           errors — which of its dependencies are healthy vs unhealthy, and what does its
           own behavior look like independent of those calls?

@@ -28,12 +28,20 @@ export function createPlaywrightEvalsConfig({
   repetitions,
   timeout,
   runGlobalSetup,
+  singleProject,
 }: {
   testDir: string;
   testIgnore?: PlaywrightTestConfig['testIgnore'];
   repetitions?: number;
   timeout?: number;
   runGlobalSetup?: boolean;
+  /**
+   * When true, creates a single Playwright project instead of one per available connector.
+   * Use this for specs whose task ignores the project connector (e.g. workflow specs that
+   * call the workflow API directly and have the model hardcoded in the workflow YAML).
+   * The project is named after the evaluation connector.
+   */
+  singleProject?: boolean;
 }): PlaywrightTestConfig<{}, EvaluationTestOptions> {
   const { reporter, use, outputDir, projects, ...config } = createPlaywrightConfig({
     testDir,
@@ -81,7 +89,10 @@ export function createPlaywrightEvalsConfig({
     ) ?? [];
 
   // get just the 'local' project (for now)
-  const nextProjects = connectors.flatMap((connector) => {
+  // When singleProject is true, create one project instead of one per connector.
+  // Used by specs whose task ignores the project connector (e.g. workflow specs).
+  const projectConnectors = singleProject ? [evaluationConnector] : connectors;
+  const nextProjects = projectConnectors.flatMap((connector) => {
     return (
       projects
         ?.filter((project) => project.name === 'local')

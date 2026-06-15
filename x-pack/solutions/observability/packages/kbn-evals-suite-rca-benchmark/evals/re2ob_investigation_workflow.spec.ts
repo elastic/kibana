@@ -21,10 +21,10 @@
  *
  * Run:
  *   RCAEVAL_DATA_DIR=/home/beast/rcaeval-data \
+ *   EVALUATION_CONNECTOR_ID=<judge-connector-id> \
  *   node scripts/evals run --suite rca-benchmark \
- *     --spec evals/re2ob_investigation_workflow.spec.ts \
- *     --model anthropic-claude-4-5-haiku \
- *     --judge anthropic-claude-4-5-haiku
+ *     --config playwright.workflow.config.ts \
+ *     --spec evals/re2ob_investigation_workflow.spec.ts
  */
 
 import { tags } from '@kbn/scout';
@@ -102,7 +102,7 @@ evaluate.describe(
                   '(context → parallel gather+review → synthesis). ' +
                   'Results are compared against the single-agent Agent Builder baseline.',
                 examples: loadedScenarios.map(({ handle }) =>
-                  buildExample(handle.scenario, handle.logsIndex, handle.tracesIndex)
+                  buildExample(handle.scenario, handle.logsIndex, handle.tracesIndex, handle.metricsIndex)
                 ),
               },
             ],
@@ -155,10 +155,10 @@ evaluate.describe(
   }
 );
 
-function buildExample(scenario: RcaScenario, logsIndex: string, tracesIndex: string) {
+function buildExample(scenario: RcaScenario, logsIndex: string, tracesIndex: string, metricsIndex: string) {
   return {
     input: {
-      streamNames: [logsIndex, tracesIndex],
+      streamNames: [logsIndex, tracesIndex, metricsIndex],
       scenarioId: scenario.snapshotName,
       scenarioTitle: `${scenario.service} / ${scenario.faultType}`,
       service: scenario.service,
