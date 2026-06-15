@@ -124,8 +124,11 @@ End with a brief summary of total alerts assessed and how many groups were ident
           .number()
           .min(1)
           .max(500)
-          .default(200)
-          .describe('Maximum number of alerts to fetch and score (1–500, default 200)'),
+          .default(100)
+          .describe(
+            'Maximum number of alerts to fetch and score before grouping (1–500, default 100). ' +
+              'The tool always returns at most 10 ranked groups regardless of this value.'
+          ),
         workflowStatus: z
           .enum(['open', 'open+acknowledged'])
           .default('open')

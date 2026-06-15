@@ -57,19 +57,28 @@ export interface TriageAlert {
   scoreBreakdown: ScoreBreakdown;
 }
 
-export interface TriageGroup {
+/** Maximum number of ranked groups returned to the LLM. */
+const MAX_GROUPS_RETURNED = 10;
+
+export interface TriageGroupSummary {
   groupKey: string;
   groupType: 'entity' | 'ungrouped';
   groupScore: number;
   entityType?: 'host' | 'user';
   entityName?: string;
   sharedEntities: string[];
-  alerts: TriageAlert[];
+  alertCount: number;
+  /** _id of the highest-scoring alert in the group — include verbatim in the response. */
+  topAlertId: string;
+  topRuleName: string;
+  severity: string;
+  /** Deduplicated rule names across all alerts in the group (up to 5). */
+  ruleNames: string[];
   scoreBreakdown: ScoreBreakdown;
 }
 
 export interface TriageResult {
-  groups: TriageGroup[];
+  groups: TriageGroupSummary[];
   totalAlertsFetched: number;
   timeWindowHours: number;
 }
@@ -166,7 +175,7 @@ function getOrCreate<K>(map: Map<K, number[]>, key: K): number[] {
   return arr;
 }
 
-function buildGroups(alerts: TriageAlert[]): TriageGroup[] {
+function buildGroups(alerts: TriageAlert[]): TriageGroupSummary[] {
   // Union-find to cluster alerts that share entities
   const parent: number[] = alerts.map((_, i) => i);
 
@@ -207,7 +216,7 @@ function buildGroups(alerts: TriageAlert[]): TriageGroup[] {
     getOrCreate(components, root).push(i);
   }
 
-  const groups: TriageGroup[] = [];
+  const groups: TriageGroupSummary[] = [];
 
   for (const [, indices] of components) {
     const groupAlerts = indices.map((i) => alerts[i]);
@@ -237,7 +246,6 @@ function buildGroups(alerts: TriageAlert[]): TriageGroup[] {
     let sharedEntities: string[];
 
     if (hasSharedEntities) {
-      // Multiple alerts share an entity — true entity cluster
       if (uniqueSharedHosts.length > 0) {
         entityType = 'host';
         entityName = uniqueSharedHosts[0];
@@ -250,7 +258,6 @@ function buildGroups(alerts: TriageAlert[]): TriageGroup[] {
         sharedEntities = uniqueSharedUsers;
       }
     } else if (hasSingleAlertWithEntities) {
-      // Single alert with an entity — label it by its entity for context
       const singleAlert = groupAlerts[0];
       if (singleAlert.hostNames.length > 0) {
         entityType = 'host';
@@ -264,12 +271,14 @@ function buildGroups(alerts: TriageAlert[]): TriageGroup[] {
         sharedEntities = singleAlert.userNames;
       }
     } else {
-      // No entity context
       groupKey = `ungrouped:${topAlert.id}`;
       sharedEntities = [];
     }
 
     const groupType: 'entity' | 'ungrouped' = entityType != null ? 'entity' : 'ungrouped';
+
+    // Deduplicate rule names across the group (cap at 5 to stay compact)
+    const ruleNames = [...new Set(groupAlerts.map((a) => a.ruleName).filter(Boolean))].slice(0, 5);
 
     groups.push({
       groupKey,
@@ -278,12 +287,17 @@ function buildGroups(alerts: TriageAlert[]): TriageGroup[] {
       entityType,
       entityName,
       sharedEntities,
-      alerts: groupAlerts.sort((a, b) => b.scoreBreakdown.finalScore - a.scoreBreakdown.finalScore),
+      alertCount: groupAlerts.length,
+      topAlertId: topAlert.id,
+      topRuleName: topAlert.ruleName,
+      severity: topAlert.severity,
+      ruleNames,
       scoreBreakdown: topAlert.scoreBreakdown,
     });
   }
 
-  return groups.sort((a, b) => b.groupScore - a.groupScore);
+  // Return only the top N groups — the LLM doesn't need the full long tail.
+  return groups.sort((a, b) => b.groupScore - a.groupScore).slice(0, MAX_GROUPS_RETURNED);
 }
 
 export const prioritizeAlerts = async ({
