@@ -22,3 +22,4 @@ export { Sidebar } from './src/sidebar';
 export { AppMenuBar } from './src/project/app_menu';
 export { HeaderBreadcrumbsBadges, HeaderTopBanner, ChromelessHeader } from './src/shared';
 export { useHasAppMenu, useHasInlineAppHeader } from './src/shared/chrome_hooks';
+export { HeaderActionButton, type HeaderActionButtonProps } from './src/chrome_next/global_header';
