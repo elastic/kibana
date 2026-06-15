@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { createExpandableFlyoutApiMock } from '../../../../../common/mock/expandable_flyout';
 
 import { ActionableSummary } from '.';
 import { TestProviders } from '../../../../../common/mock';
@@ -15,6 +17,7 @@ import { useKibana } from '../../../../../common/lib/kibana';
 import { SECURITY_FEATURE_ID } from '../../../../../../common';
 
 jest.mock('../../../../../common/lib/kibana');
+jest.mock('@kbn/expandable-flyout');
 
 jest.mock(
   '../../attack_discovery_markdown_formatter/field_markdown_renderer/use_entity_euid_from_alerts',
@@ -34,6 +37,19 @@ describe('ActionableSummary', () => {
     '3bdc7952-a334-4d95-8092-cd176546e18a': 'bar.username',
   };
 
+  const mockOpenRightPanel = jest.fn();
+  const mockUseExpandableFlyoutApi = useExpandableFlyoutApi as jest.MockedFunction<
+    typeof useExpandableFlyoutApi
+  >;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseExpandableFlyoutApi.mockReturnValue({
+      ...createExpandableFlyoutApiMock(),
+      openRightPanel: mockOpenRightPanel,
+    });
+  });
+
   describe('when entities with replacements are provided', () => {
     beforeEach(() => {
       render(
@@ -52,6 +68,12 @@ describe('ActionableSummary', () => {
 
     it('renders a username with the expected value from replacements', () => {
       expect(screen.getAllByTestId('entityButton')[1]).toHaveTextContent('bar.username');
+    });
+
+    it('opens the right panel when an entity badge is clicked', () => {
+      const entityButton = screen.getAllByTestId('entityButton')[0];
+      fireEvent.click(entityButton);
+      expect(mockOpenRightPanel).toHaveBeenCalledTimes(1);
     });
   });
 

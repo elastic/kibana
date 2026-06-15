@@ -45,7 +45,9 @@ jest.mock('../../../flyout_v2/shared/components/expandable_section', () => ({
 }));
 
 jest.mock('../../../attack_discovery/pages/results/attack_discovery_markdown_formatter', () => ({
-  AttackDiscoveryMarkdownFormatter: ({ markdown }: { markdown: string }) => <div>{markdown}</div>,
+  AttackDiscoveryMarkdownFormatter: ({ markdown, alertIds }: { markdown: string; alertIds?: string[] }) => (
+    <div data-alert-ids={JSON.stringify(alertIds)}>{markdown}</div>
+  ),
 }));
 
 const mockedUseOverviewTabData = jest.mocked(useOverviewTabData);
@@ -158,5 +160,23 @@ describe('AISummarySection', () => {
 
     expect(toggle).toBeTruthy();
     expect(toggle.disabled).toBe(true);
+  });
+
+  it('passes originalAlertIds to AttackDiscoveryMarkdownFormatter', () => {
+    mockedUseOverviewTabData.mockReturnValue({
+      summaryMarkdown: 'SUMMARY (ANONYMIZED)',
+      summaryMarkdownWithReplacements: 'SUMMARY (WITH REPLACEMENTS)',
+      detailsMarkdown: 'DETAILS (ANONYMIZED)',
+      detailsMarkdownWithReplacements: 'DETAILS (WITH REPLACEMENTS)',
+      originalAlertIds: ['alert-1', 'alert-2'],
+    });
+
+    render(<AISummarySection />);
+
+    const formatters = document.querySelectorAll('[data-alert-ids]');
+    expect(formatters.length).toBeGreaterThan(0);
+    formatters.forEach((formatter) => {
+      expect(formatter).toHaveAttribute('data-alert-ids', JSON.stringify(['alert-1', 'alert-2']));
+    });
   });
 });
