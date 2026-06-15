@@ -160,7 +160,7 @@ apiTest.describe(
         const getAlertAttrs = async () => {
           const result = await esClient.search({
             index: '.kibana_alerting_cases*',
-            body: { query: { term: { _id: `alert:${ruleId}` } } },
+            query: { term: { _id: `alert:${ruleId}` } },
             size: 1,
           });
           const hit = result.hits.hits[0];
@@ -213,7 +213,7 @@ apiTest.describe(
         const getAlertAttrs = async () => {
           const result = await esClient.search({
             index: '.kibana_alerting_cases*',
-            body: { query: { term: { _id: `alert:${ruleId}` } } },
+            query: { term: { _id: `alert:${ruleId}` } },
             size: 1,
           });
           const hit = result.hits.hits[0];
@@ -242,7 +242,7 @@ apiTest.describe(
         const getAlertAttrs = async () => {
           const result = await esClient.search({
             index: '.kibana_alerting_cases*',
-            body: { query: { term: { _id: `alert:${ruleId}` } } },
+            query: { term: { _id: `alert:${ruleId}` } },
             size: 1,
           });
           const hit = result.hits.hits[0];
