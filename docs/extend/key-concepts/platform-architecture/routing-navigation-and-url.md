@@ -58,7 +58,7 @@ const discoverUrl = await plugins.discover.locator.getUrl({filters, timeRange});
 await plugins.discover.locator.navigate({filters, timeRange});
 ```
 
-To get a better idea, take a look at *Discover* locator [implementation](https://docs.elastic.dev/kibana-dev-docs/key_concepts/src/platform/plugins/shared/discover/public/application/context/services/locator.ts).
+To get a better idea, take a look at *Discover* locator [implementation](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/discover/public/application/context/services/locator.ts).
 It allows specifying various **Discover** app state pieces like: index pattern, filters, query, time range and more.
 
 There are two ways to access locators of other apps:

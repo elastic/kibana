@@ -106,8 +106,7 @@ Scout is deployment-agnostic: write once, run locally and on Elastic Cloud.
 
 - Every suite must have [deployment tags](../testing/deployment-tags.md). Use tags to target the environments where your tests apply (for example, a feature that only exists in stateful deployments).
 - Within a test, avoid relying on configuration, data, or behavior specific to a single deployment. Test logic should produce the same result locally and on Cloud.
-- Run your tests against a real Elastic Cloud project before merging to catch environment-specific surprises early. See [Run tests on Elastic Cloud](../testing/run-scout-tests.md#scout-run-tests-cloud) for setup instructions.
-
+- Run your tests against a real Elastic Cloud project before merging to catch environment-specific surprises early.
 ## Keep tests close to the code they test [keep-tests-close-to-source-code]
 
 A test should live in the plugin or package that owns the code it exercises. When writing or reviewing a test, confirm that the scenarios logically belong to the plugin they were added to:

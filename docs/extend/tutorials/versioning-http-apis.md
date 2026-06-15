@@ -98,8 +98,6 @@ The changes are:
 
 These changes might seem subtle, but they are the difference between a versionable and unversionable HTTP API.
 
-_See "[Versioning interfaces](https://docs.elastic.dev/kibana-dev-docs/kibana-dev-docs/versioning-interfaces)" for a more detailed strategy for managing multiple versions of TypeScript interfaces._
-
 ### 2. Strict input validation
 
 Consider this example of an HTTP API that accepts unexpected values as input:
