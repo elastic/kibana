@@ -55,6 +55,26 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
       [FF_ENABLE_ENTITY_STORE_V2]: true,
     });
 
+    // Pre-create the `security-solution-default` data view. In API-only test
+    // environments the Security Solution sourcerer (which normally creates it
+    // from the browser flow) never runs, so the entity store's data-view
+    // lookup in `logs_extraction_client.ts#getAllIndexPatternsIncludingRemote`
+    // always misses and takes its `logs-*` fallback branch.
+    const dataViewResponse = await apiClient.post('/api/data_views/data_view', {
+      headers: defaultHeaders,
+      responseType: 'json',
+      body: {
+        override: true,
+        data_view: {
+          id: 'security-solution-default',
+          name: 'security-solution-default',
+          title: 'logs-*',
+          timeFieldName: '@timestamp',
+        },
+      },
+    });
+    expect(dataViewResponse.statusCode).toBe(200);
+
     // Install the entity store
     const response = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
       headers: defaultHeaders,

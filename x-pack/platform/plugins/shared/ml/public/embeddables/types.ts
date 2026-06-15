@@ -29,6 +29,7 @@ import type {
 } from '@kbn/presentation-publishing';
 import { type BehaviorSubject } from 'rxjs';
 import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type { AnomalySwimLaneEmbeddableType } from '@kbn/ml-common-types/embeddables/anomaly_swimlane';
 import type { MlDependencies } from '../application/app';
 import type { MlCapabilitiesService } from '../application/capabilities/check_capabilities';
 import type { AppStateSelectedCells } from '../application/explorer/explorer_utils';
@@ -42,11 +43,7 @@ import type { MlTimeSeriesSearchService } from '../application/timeseriesexplore
 import type { TimeSeriesExplorerService } from '../application/util/time_series_explorer_service';
 import type { ToastNotificationService } from '../application/services/toast_notification_service';
 import type { MlPublicUsageCollection } from '../application/services/usage_collection';
-import type {
-  AnomalyExplorerChartsEmbeddableType,
-  AnomalySwimLaneEmbeddableType,
-  MlEmbeddableTypes,
-} from './constants';
+import type { AnomalyExplorerChartsEmbeddableType, MlEmbeddableTypes } from './constants';
 
 export type { AnomalySwimLaneEmbeddableApi } from './anomaly_swimlane/types';
 

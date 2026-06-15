@@ -23,6 +23,7 @@
     "@kbn/actions-plugin",
     "@kbn/aiops-change-point-detection",
     "@kbn/aiops-common",
+    "@kbn/aiops-components",
     "@kbn/aiops-plugin",
     "@kbn/alerting-plugin",
     "@kbn/alerts-as-data-utils",
@@ -43,6 +44,7 @@
     "@kbn/dashboard-plugin",
     "@kbn/data-plugin",
     "@kbn/data-view-editor-plugin",
+    "@kbn/data-view-field-editor-plugin",
     "@kbn/data-views-plugin",
     "@kbn/data-visualizer-plugin",
     "@kbn/discover-utils",
@@ -117,6 +119,7 @@
     "@kbn/shared-ux-router",
     "@kbn/shared-ux-utility",
     "@kbn/spaces-plugin",
+    "@kbn/core-spaces-common",
     "@kbn/std",
     "@kbn/task-manager-plugin",
     "@kbn/test-jest-helpers",
@@ -153,5 +156,6 @@
     "@kbn/lens-common",
     "@kbn/scout",
     "@kbn/core-http-common",
+    "@kbn/zod",
   ]
 }

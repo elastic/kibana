@@ -27,6 +27,8 @@ concurrency:
 
 env:
   ISSUE_NUMBER: &issue_number ${{ github.event.issue.number || github.event.inputs.issue_number }}
+  # Lets the agent omit `-o elastic` on every `bk` invocation (see https://buildkite.com/docs/pipelines/configure/environment-variables)
+  BUILDKITE_ORGANIZATION_SLUG: elastic
 
 engine:
   id: claude
@@ -46,20 +48,62 @@ tools:
   github:
     toolsets: [default, actions, search]
   web-fetch:
-  bash: true
+  bash:
+    [
+      'cat',
+      'head',
+      'tail',
+      'grep',
+      'wc',
+      'sort',
+      'uniq',
+      'date',
+      'yq',
+      'jq',
+      'echo',
+      'ls',
+      'pwd',
+      'git:*',
+      'gh:*',
+      'bk:*',
+      'node',
+      'curl',
+    ]
 
 network:
   allowed:
     - defaults
     - buildkite.com
     - '*.buildkite.com'
+    - buildkiteartifacts.com
     - ci-stats.kibana.dev
     - github.com
     - api.github.com
-    - chatgpt.com
     - elastic.litellm-prod.ai
 sandbox:
   agent: awf # Migrated from deprecated network setting
+steps:
+  - name: Install Buildkite CLI and export BUILDKITE_API_TOKEN
+    env:
+      BK_VERSION: 3.44.0
+      BK_SHA256: 88867c0b983ad2afe1efc26f0df6b46b5673577c1aea95eba76992636fb9abe9
+      OPS_BUILDKITE_TOKEN: ${{ secrets.OPS_BUILDKITE_TOKEN }}
+    run: |
+      set -euo pipefail
+      tmp="$(mktemp -d)"
+      url="https://github.com/buildkite/cli/releases/download/v${BK_VERSION}/bk_${BK_VERSION}_linux_amd64.tar.gz"
+      curl -fsSL --retry 3 --retry-delay 2 "${url}" -o "${tmp}/bk.tgz"
+      echo "${BK_SHA256}  ${tmp}/bk.tgz" | sha256sum -c -
+      tar -xzf "${tmp}/bk.tgz" -C "${tmp}" --strip-components=1 "bk_${BK_VERSION}_linux_amd64/bk"
+      install -d "${RUNNER_TEMP}/gh-aw/mcp-cli/bin"
+      install -m 0755 "${tmp}/bk" "${RUNNER_TEMP}/gh-aw/mcp-cli/bin/bk"
+      "${RUNNER_TEMP}/gh-aw/mcp-cli/bin/bk" --version
+      if [ -z "${OPS_BUILDKITE_TOKEN:-}" ]; then
+        echo "::error::OPS_BUILDKITE_TOKEN secret is not set" >&2
+        exit 1
+      fi
+      echo "BUILDKITE_API_TOKEN=${OPS_BUILDKITE_TOKEN}" >> "${GITHUB_ENV}"
+
 safe-outputs:
   noop:
     report-as-issue: false
@@ -69,10 +113,6 @@ safe-outputs:
     max: 1
     target: *issue_number
     hide-older-comments: true
-  add-labels:
-    allowed: [ai:auto-flaky-fix]
-    max: 1
-    target: *issue_number
 
 strict: false
 timeout-minutes: 20
@@ -89,7 +129,7 @@ Investigate a failed-test issue, classify the failure, and propose a fix when ap
 
 ## Investigate
 
-Investigate the test failure(s) using the `flaky-test-investigator` skill.
+Investigate the test failure(s) using the `flaky-test-investigator` skill. Use all of the data at your disposal to reach a conclusion (source code, logs, failure screenshots, etc.).
 
 Every conclusion must cite specific evidence. Do not guess.
 
@@ -105,16 +145,7 @@ Set `classification` based on where the evidence points:
 
 Set `confidence` to `high` (direct evidence pins the cause), `medium` (strong inference from converging signals), or `low` (plausible but underspecified).
 
-## Assign label `ai:auto-flaky-fix` in specific cases
-
-Apply the `ai:auto-flaky-fix` label to the triggering issue **only** when **all** of these conditions hold:
-
-- The GitHub issue represents a Scout test failure (it has the `scout-playwright` label)
-- The test failed in the `kibana-on-merge` pipeline
-- `classification` is `test-design`, `test-environment`, or `application`
-- A concrete fix has been identified.
-
-No other side-effects beyond posting the comment and updating the label.
+No other side-effects beyond posting the comment.
 
 ## Fix proposal
 
@@ -139,32 +170,67 @@ No other side-effects beyond posting the comment and updating the label.
 
 ## Comment format
 
-Post exactly one comment. Keep the visible portion very short and easy to read:
+Post exactly one comment on the issue. Keep the content concise and actionable.
 
-1. **One-line bold headline** stating the result kind and one identifying detail.
-2. **Diagnosis** (≤5 concise bullet points): what broke and where, the most likely root cause.
-3. **Next steps** (≤5 concise bullet points).
+Follow the format below exactly. Do not create standalone sections for "what the test does" "evidence," "where the test ran," or "failure screenshot". Integrate these details seamlessly into the sections below if they add value.
 
-Put the full `flaky-test-investigator` skill output inside a collapsed `<details><summary>Investigation details</summary> ... </details>` block (not in the visible portion). Open the block with a `#### Findings` subsection containing exactly these four bullets in this order — downstream tooling parses them, so preserve keys, casing, and `` - `key`: value `` shape. These bullets must live **inside `<details>`**, never in the visible portion:
+The comment has two parts: a compact header that stays visible on the issue page (one `####` headline + metadata + summary), and a `<details>` block that hides everything else. **Inside the `<details>` block, every section starts with `#### Section name` on its own line** (e.g., `#### Proposed fix`, `#### Root cause & evidence`).
 
-- `classification`: `test-design` | `test-environment` | `application` | `external` | `inconclusive`
-- `confidence`: `high` | `medium` | `low`
-- `test.type`: `scout` (if `scout-playwright` label) | `ftr` | `jest` | `unknown`
-- `test.file`: repo-relative path, or `unknown`
+### 1. Visible header (required)
 
-The skill's "Reporting" subsections should also be inside the collapsible section:
+Three things in order, with a blank line between each:
 
-- What the test does
-- What failed and when
-- Where it ran
-- Root cause hypothesis
-- Evidence
-- Failure screenshot
-- Recommended next step
-- Open questions
+```
+#### [{classification}] {One-line description of what broke}
 
-Blank lines around `</summary>` and `</details>` are required for the inner markdown to render.
+**Confidence:** {level} | **Introduced by:** {commit/PR if known — omit this segment entirely if unknown}
 
-End the comment with this footer line (verbatim, on its own line after the `</details>` block):
+**Summary:** One or two sentences explaining the exact failure point.
+```
 
-`<sup>AI-generated, share feedback in [#appex-qa](https://elastic.slack.com/archives/C04HT4P1YS3)</sup>`
+### 2. Collapsible investigation (required)
+
+Wrap **everything after the summary** in a single `<details>` block so the issue page stays scannable. The sections below live inside the block, in this order:
+
+```
+<details>
+<summary>Investigation details</summary>
+
+#### Proposed fix
+
+{content — see guidance below}
+
+#### Root cause & evidence
+
+{content — see guidance below}
+
+#### Additional context
+
+{content — optional, omit the whole section if there is nothing high-signal to add}
+
+</details>
+```
+
+#### Proposed fix (required)
+
+Provide the most direct path to resolution.
+
+- **Single file:** lead directly with the suggested code diff or specific action.
+- **Multiple files:** use a brief table to list affected files, followed by the necessary changes.
+- **No concrete fix:** clearly state what additional evidence or investigation is needed to propose one.
+
+#### Root cause & evidence (required)
+
+Explain _why_ the failure occurred, citing specific evidence. Choose the format that best fits the complexity of the bug:
+
+- Use concise paragraphs with inline Markdown links pointing to specific code lines, commits, or files.
+- Use an ASCII timeline diagram for race conditions, multi-component bugs, or complex state leaks.
+- Fold relevant evidence (like missing `data-test-subj` attributes, failing network calls, or screenshot descriptions) directly into this narrative.
+
+#### Additional context (optional)
+
+Include the following only if they provide high-value, actionable signal:
+
+- **Ruled out:** a brief note on alternative hypotheses that were investigated and dismissed.
+- **Verification:** specific steps to reproduce the failure or confirm the fix.
+- **Open questions:** unresolved design or environmental issues blocking a definitive fix ("a screenshot would have helped troubleshoot this" is a valid open question).

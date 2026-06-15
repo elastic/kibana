@@ -221,6 +221,9 @@ export const testProperties: Record<PropertyName, MappingProperty> = {
   status: {
     type: 'keyword',
   },
+  console_errors: {
+    type: 'match_only_text',
+  },
   step: {
     type: 'object',
     properties: {
