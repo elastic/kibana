@@ -11,8 +11,10 @@ import { v4 } from 'uuid';
 import type { KnowledgeIndicatorClient, KIBulkOperation } from '../streams/ki';
 import type { StreamsClient } from '../streams/client';
 
+type PersistedQuery = GeneratedSignificantEventQuery & { id: string };
+
 export interface PersistQueriesResult {
-  persistedQueries: Array<GeneratedSignificantEventQuery & { id: string }>;
+  persistedQueries: PersistedQuery[];
   skippedQueries: GeneratedSignificantEventQuery[];
 }
 
@@ -46,8 +48,8 @@ export async function persistQueries(
   );
 
   const standardOps: KIBulkOperation[] = [];
-  const ruleEligibleQueries: Array<{ id: string } & GeneratedSignificantEventQuery> = [];
-  const persistedQueries: Array<GeneratedSignificantEventQuery & { id: string }> = [];
+  const ruleEligibleQueries: PersistedQuery[] = [];
+  const persistedQueries: PersistedQuery[] = [];
   const skippedQueries: GeneratedSignificantEventQuery[] = [];
 
   for (const query of queries) {
