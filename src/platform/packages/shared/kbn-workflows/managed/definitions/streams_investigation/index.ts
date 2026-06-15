@@ -8,6 +8,7 @@
  */
 
 import INVESTIGATION_WORKFLOW_YAML from './investigation_workflow.yaml';
+import INVESTIGATION_HYP_WORKFLOW_YAML from './investigation_hyp_workflow.yaml';
 import type { ManagedWorkflowDefinition } from '../../types';
 
 export const STREAMS_INVESTIGATION_WORKFLOW_ID = 'system-streams-sigevents-investigation';
@@ -15,8 +16,23 @@ export const STREAMS_INVESTIGATION_WORKFLOW_ID = 'system-streams-sigevents-inves
 export const STREAMS_INVESTIGATION_WORKFLOW = {
   id: STREAMS_INVESTIGATION_WORKFLOW_ID,
   pluginId: 'streams',
-  version: 3,
+  version: 4,
   yaml: INVESTIGATION_WORKFLOW_YAML,
+  management: {
+    lifecycle: 'static',
+    versionStrategy: 'auto',
+    enablement: 'restorable',
+  },
+} as const satisfies ManagedWorkflowDefinition;
+
+export const STREAMS_INVESTIGATION_HYP_WORKFLOW_ID =
+  'system-streams-sigevents-investigation-hyp';
+
+export const STREAMS_INVESTIGATION_HYP_WORKFLOW = {
+  id: STREAMS_INVESTIGATION_HYP_WORKFLOW_ID,
+  pluginId: 'streams',
+  version: 4,
+  yaml: INVESTIGATION_HYP_WORKFLOW_YAML,
   management: {
     lifecycle: 'static',
     versionStrategy: 'auto',
