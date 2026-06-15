@@ -46,7 +46,7 @@ flowchart TB
 
 ## What happens without `worker_threads`
 
-Current implementation ([`execute_script_in_isolate.js`](./execute_script_in_isolate.js)) uses:
+Current implementation ([`execute_script_in_isolate/`](./execute_script_in_isolate/)) uses:
 
 ```javascript
 compiled.runSync(ivmContext, { timeout: PING_TIMEOUT_MS, copy: true });
@@ -98,7 +98,7 @@ Current stack:
 ```
 javascript_script_runner.ts
   → new Worker(javascript_worker.js)
-      → execute_script_in_isolate.js
+      → execute_script_in_isolate/
           → isolated-vm
 ```
 
@@ -195,7 +195,7 @@ For `while (true) {}`:
 
 ## References
 
-- [`execute_script_in_isolate.js`](./execute_script_in_isolate.js) — current sandbox
+- [`execute_script_in_isolate/`](./execute_script_in_isolate/) — current sandbox
 - [`javascript_script_runner.ts`](./javascript_script_runner.ts) — worker + ping watchdog
 - [isolated-vm README](https://github.com/laverdet/isolated-vm) — `timeout`, sync vs async, memory limits
 - [isolated-vm #464 — environment can be null on worker teardown](https://github.com/laverdet/isolated-vm/issues/464)

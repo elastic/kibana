@@ -8,7 +8,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ScriptLogger } from './execute_script_in_isolate';
+import type { ScriptLogger } from '.';
 
 type IsolateOptions = {
   memoryLimit?: number;
@@ -60,14 +60,14 @@ jest.mock('isolated-vm', () => {
   };
 });
 
-import { executeScriptInIsolate } from './execute_script_in_isolate';
+import { executeScriptInIsolate } from '.';
 import {
   MAX_CONSOLE_LOG_COUNT,
   SCRIPT_EXECUTION_TIMEOUT_MS,
   SCRIPT_MEMORY_LIMIT_MB,
   scriptsJavaScriptStepDefinition,
-} from './javascript_step';
-import type { StepHandlerContext } from '../../../step_registry/types';
+} from '../javascript_step';
+import type { StepHandlerContext } from '../../../../step_registry/types';
 
 const createLogger = (): ScriptLogger & {
   debug: jest.Mock;

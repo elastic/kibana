@@ -2,7 +2,7 @@
 
 Analysis of the current implementation:
 
-- `[execute_script_in_isolate.ts](./execute_script_in_isolate.ts)`
+- [`execute_script_in_isolate/`](./execute_script_in_isolate/)
 - `[javascript_step.ts](./javascript_step.ts)`
 - Engine integration via `[custom_step_impl.ts](../../../../workflows_execution_engine/server/step/custom_step_impl.ts)` and `[node_implementation.ts](../../../../workflows_execution_engine/server/step/node_implementation.ts)`
 
@@ -423,7 +423,7 @@ The move away from `worker.terminate()` **materially reduces** the known Kibana 
 
 ## References
 
-- `[execute_script_in_isolate.ts](./execute_script_in_isolate.ts)`
+- [`execute_script_in_isolate/`](./execute_script_in_isolate/)
 - `[javascript_step.ts](./javascript_step.ts)`
 - `[isolated_vm_without_worker_analysis.md](./isolated_vm_without_worker_analysis.md)`
 - [isolated-vm README — memoryLimit, timeout, `--no-node-snapshot](https://github.com/laverdet/isolated-vm)`
