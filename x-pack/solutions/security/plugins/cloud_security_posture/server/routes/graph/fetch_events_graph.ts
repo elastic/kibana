@@ -221,7 +221,7 @@ const buildV2ActorResolution = (): string => {
     evalParts.push(userFieldEvaluationsEsql);
   }
   typedEntityTypes.forEach((type) => {
-    evalParts.push(`_actor_${type}_euid = ${getEuidEsqlEvaluation(type)}`);
+    evalParts.push(getEuidEsqlEvaluation(type, `_actor_${type}_euid`));
   });
 
   // Use raw entity.id directly (not saved variable) since buildSaveSourceFieldsEsql
