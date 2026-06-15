@@ -1,0 +1,10 @@
+{
+  "extends": "../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "declaration": true,
+    "declarationMap": true
+  },
+  "include": ["index.ts", "src/**/*"],
+  "kbn_references": ["@kbn/zod"]
+}

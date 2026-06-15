@@ -1,0 +1,43 @@
+version: "1"
+name: "SDLC release calendar sync"
+enabled: true
+description: "Daily ingest of Serverless release signals (Slack) and Stack release schedule (Google Sheet)."
+tags:
+  - security
+  - sdlc
+  - release-calendar
+settings:
+  timeout: "30m"
+consts:
+  slack_connector_id: "slack-mission-control"
+  google_drive_connector_id: "google-drive-read"
+  slack_channel: "kibana-mission-control"
+  spreadsheet_id: "1ohPWWkUy5Cc2k4HJSx3XBKXY5nxeuiehApFLFHdHM3U"
+  sheet_gid: "915204807"
+triggers:
+  - type: scheduled
+    with:
+      every: 1d
+  - type: manual
+steps:
+  - name: sync_slack_serverless
+    type: sdlc.syncReleaseCalendarSlack
+    on-failure:
+      continue: true
+    with:
+      slackConnectorId: "{{ consts.slack_connector_id }}"
+      channelName: "{{ consts.slack_channel }}"
+
+  - name: sync_stack_spreadsheet
+    type: sdlc.syncReleaseCalendarSpreadsheet
+    on-failure:
+      continue: true
+    with:
+      googleDriveConnectorId: "{{ consts.google_drive_connector_id }}"
+      spreadsheetId: "{{ consts.spreadsheet_id }}"
+      sheetGid: "{{ consts.sheet_gid }}"
+
+  - name: log_complete
+    type: console
+    with:
+      message: "Release calendar sync complete. slack={{ steps.sync_slack_serverless.output.updated }}, sheet={{ steps.sync_stack_spreadsheet.output.updated }}"
