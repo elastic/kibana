@@ -23,7 +23,8 @@ import type {
 } from '@kbn/workflows/server/types';
 import { registerGetStepDefinitionsRoute } from './routes/get_step_definitions';
 import { registerGetTriggerDefinitionsRoute } from './routes/get_trigger_definitions';
-import type { WorkflowsExtensionsConfig } from './config';
+import type { WorkflowsExtensionsConfig, WorkflowsExtensionsExperimentalStepsConfig } from './config';
+import { resolveExperimentalStepsConfig } from './config';
 import { ServerStepRegistry } from './step_registry';
 import { registerInternalStepDefinitions } from './steps';
 import { TriggerRegistry } from './trigger_registry';
@@ -47,6 +48,7 @@ export class WorkflowsExtensionsServerPlugin
 {
   private readonly logger: Logger;
   private readonly config: WorkflowsExtensionsConfig;
+  private readonly experimentalStepsConfig: WorkflowsExtensionsExperimentalStepsConfig;
   private readonly stepRegistry: ServerStepRegistry;
   private readonly triggerRegistry: TriggerRegistry;
   private readonly managedWorkflowPluginIds = new Set<string>();
@@ -56,6 +58,7 @@ export class WorkflowsExtensionsServerPlugin
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
     this.config = initializerContext.config.get<WorkflowsExtensionsConfig>();
+    this.experimentalStepsConfig = resolveExperimentalStepsConfig(this.config.experimentalSteps);
     this.stepRegistry = new ServerStepRegistry(this.logger);
     this.triggerRegistry = new TriggerRegistry();
   }
@@ -81,7 +84,7 @@ export class WorkflowsExtensionsServerPlugin
     registerGetTriggerDefinitionsRoute(router, this.triggerRegistry);
 
     registerInternalStepDefinitions(this.stepRegistry, {
-      experimentalSteps: this.config.experimentalSteps,
+      experimentalSteps: this.experimentalStepsConfig,
     });
     registerInternalTriggerDefinitions(this.triggerRegistry);
 

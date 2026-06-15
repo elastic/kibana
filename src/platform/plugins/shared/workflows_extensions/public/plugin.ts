@@ -8,7 +8,11 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import type { WorkflowsExtensionsConfig } from '../server/config';
+import type {
+  WorkflowsExtensionsConfig,
+  WorkflowsExtensionsExperimentalStepsConfig,
+} from '../server/config';
+import { resolveExperimentalStepsConfig } from '../server/config';
 import { PublicStepRegistry } from './step_registry';
 import { registerInternalStepDefinitions } from './steps';
 import { PublicTriggerRegistry } from './trigger_registry';
@@ -32,9 +36,11 @@ export class WorkflowsExtensionsPublicPlugin
   private readonly stepRegistry: PublicStepRegistry;
   private readonly triggerRegistry: PublicTriggerRegistry;
   private readonly config: WorkflowsExtensionsConfig;
+  private readonly experimentalStepsConfig: WorkflowsExtensionsExperimentalStepsConfig;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<WorkflowsExtensionsConfig>();
+    this.experimentalStepsConfig = resolveExperimentalStepsConfig(this.config.experimentalSteps);
     this.stepRegistry = new PublicStepRegistry(initializerContext.logger.get());
     this.triggerRegistry = new PublicTriggerRegistry();
   }
@@ -44,7 +50,7 @@ export class WorkflowsExtensionsPublicPlugin
     _plugins: WorkflowsExtensionsPublicPluginSetupDeps
   ): WorkflowsExtensionsPublicPluginSetup {
     registerInternalStepDefinitions(this.stepRegistry, {
-      experimentalSteps: this.config.experimentalSteps,
+      experimentalSteps: this.experimentalStepsConfig,
     });
     registerInternalTriggerDefinitions(this.triggerRegistry);
 

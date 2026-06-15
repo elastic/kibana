@@ -15,12 +15,32 @@ const experimentalStepsSchema = schema.object({
   javaScriptStep: schema.boolean({ defaultValue: false }),
 });
 
+const experimentalStepsInputSchema = schema.oneOf(
+  [schema.boolean(), experimentalStepsSchema],
+  { defaultValue: false }
+);
+
 const configSchema = schema.object({
-  experimentalSteps: experimentalStepsSchema,
+  experimentalSteps: experimentalStepsInputSchema,
 });
 
 export type WorkflowsExtensionsExperimentalStepsConfig = TypeOf<typeof experimentalStepsSchema>;
+export type WorkflowsExtensionsExperimentalStepsInputConfig = TypeOf<
+  typeof experimentalStepsInputSchema
+>;
 export type WorkflowsExtensionsConfig = TypeOf<typeof configSchema>;
+
+export const resolveExperimentalStepsConfig = (
+  experimentalSteps: WorkflowsExtensionsExperimentalStepsInputConfig
+): WorkflowsExtensionsExperimentalStepsConfig => {
+  if (typeof experimentalSteps === 'boolean') {
+    return {
+      javaScriptStep: experimentalSteps,
+    };
+  }
+
+  return experimentalSteps;
+};
 
 export const config: PluginConfigDescriptor<WorkflowsExtensionsConfig> = {
   schema: configSchema,
