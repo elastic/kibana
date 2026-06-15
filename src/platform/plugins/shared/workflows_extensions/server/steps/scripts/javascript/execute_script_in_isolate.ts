@@ -9,8 +9,6 @@
 
 import ivm from 'isolated-vm';
 
-export const SCRIPT_MEMORY_LIMIT_MB = 8;
-
 export interface ScriptLogger {
   debug(message: string, meta?: object): void;
   info(message: string, meta?: object): void;
@@ -20,13 +18,16 @@ export interface ScriptLogger {
 
 export interface ExecuteScriptInIsolateParams {
   script: string;
-  context: unknown;
   logger: ScriptLogger;
   abortSignal: AbortSignal;
+  memoryLimitMb: number;
+  executionTimeoutMs: number;
+  maxConsoleLogCount: number;
 }
 
 const CONSOLE_BRIDGE_SCRIPT = `
 (function () {
+  const logBridge = __logBridge__;
   const formatArgs = (args) =>
     args
       .map((arg) => {
@@ -48,7 +49,7 @@ const CONSOLE_BRIDGE_SCRIPT = `
       .join(' ');
 
   const emit = (level, args) =>
-    __logBridge__.applySync(undefined, [level, formatArgs(args)], { arguments: { copy: true } });
+    logBridge.applySync(undefined, [level, formatArgs(args)], { arguments: { copy: true } });
 
   globalThis.console = {
     log: (...args) => emit('info', args),
@@ -61,8 +62,7 @@ const CONSOLE_BRIDGE_SCRIPT = `
 `;
 
 const wrapUserScript = (script: string): string => `
-(function () {
-  const context = globalThis.__context__;
+(async function () {
   ${script}
 })()
 `;
@@ -123,11 +123,13 @@ const raceWithAbort = async <T>(
 
 export const executeScriptInIsolate = async ({
   script,
-  context,
   logger,
   abortSignal,
+  memoryLimitMb,
+  executionTimeoutMs,
+  maxConsoleLogCount,
 }: ExecuteScriptInIsolateParams): Promise<unknown> => {
-  const isolate = new ivm.Isolate({ memoryLimit: SCRIPT_MEMORY_LIMIT_MB });
+  const isolate = new ivm.Isolate({ memoryLimit: memoryLimitMb });
 
   try {
     const ivmContext = await isolate.createContext();
@@ -135,7 +137,13 @@ export const executeScriptInIsolate = async ({
 
     await jail.set('global', jail.derefInto());
 
+    let logCount = 0;
+
     const logBridge = new ivm.Reference((level: string, message: string) => {
+      if (logCount >= maxConsoleLogCount) {
+        return;
+      }
+      logCount++;
       routeConsoleToLogger(level, message, logger);
     });
 
@@ -145,18 +153,21 @@ export const executeScriptInIsolate = async ({
       timeout: 1_000,
     });
 
-    await jail.set('__context__', new ivm.ExternalCopy(context).copyInto());
+    await jail.delete('__logBridge__');
 
     const compiled = await isolate.compileScript(wrapUserScript(script));
 
-    return await raceWithAbort(
+    const resultPromise = await raceWithAbort(
       compiled.run(ivmContext, {
         copy: true,
         promise: true,
+        timeout: executionTimeoutMs,
       }),
       abortSignal,
       isolate
     );
+
+    return await resultPromise;
   } finally {
     if (!isolate.isDisposed) {
       isolate.dispose();

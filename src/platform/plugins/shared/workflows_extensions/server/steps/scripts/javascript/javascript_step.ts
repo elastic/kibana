@@ -11,6 +11,10 @@ import { executeScriptInIsolate } from './execute_script_in_isolate';
 import { scriptsJavaScriptStepCommonDefinition } from '../../../../common/steps/scripts/javascript';
 import { createServerStepDefinition } from '../../../step_registry/types';
 
+export const SCRIPT_MEMORY_LIMIT_MB = 8;
+export const SCRIPT_EXECUTION_TIMEOUT_MS = 5_000;
+export const MAX_CONSOLE_LOG_COUNT = 100;
+
 const toExecutionError = (error: unknown, aborted: boolean): Error => {
   if (aborted) {
     return new Error('Step execution was cancelled');
@@ -18,6 +22,15 @@ const toExecutionError = (error: unknown, aborted: boolean): Error => {
 
   if (error instanceof Error) {
     return error;
+  }
+
+  if (
+    typeof error === 'object' &&
+    error !== null &&
+    'message' in error &&
+    typeof error.message === 'string'
+  ) {
+    return new Error(error.message);
   }
 
   return new Error('Script execution failed');
@@ -35,9 +48,11 @@ export const scriptsJavaScriptStepDefinition = createServerStepDefinition({
     try {
       const output = await executeScriptInIsolate({
         script,
-        context: context.contextManager.getContext(),
         logger: context.logger,
         abortSignal: context.abortSignal,
+        memoryLimitMb: SCRIPT_MEMORY_LIMIT_MB,
+        executionTimeoutMs: SCRIPT_EXECUTION_TIMEOUT_MS,
+        maxConsoleLogCount: MAX_CONSOLE_LOG_COUNT,
       });
 
       return { output };

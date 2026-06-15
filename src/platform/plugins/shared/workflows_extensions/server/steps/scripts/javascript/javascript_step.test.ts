@@ -8,13 +8,20 @@
  */
 
 import { createSHA256Hash } from '@kbn/crypto';
-import type { StepHandlerContext } from '../../../step_registry/types';
+import { executeScriptInIsolate, type ScriptLogger } from './execute_script_in_isolate';
 import {
-  executeScriptInIsolate,
+  MAX_CONSOLE_LOG_COUNT,
+  SCRIPT_EXECUTION_TIMEOUT_MS,
   SCRIPT_MEMORY_LIMIT_MB,
-  type ScriptLogger,
-} from './execute_script_in_isolate';
-import { scriptsJavaScriptStepDefinition } from './javascript_step';
+  scriptsJavaScriptStepDefinition,
+} from './javascript_step';
+import type { StepHandlerContext } from '../../../step_registry/types';
+
+const defaultIsolateParams = {
+  memoryLimitMb: SCRIPT_MEMORY_LIMIT_MB,
+  executionTimeoutMs: SCRIPT_EXECUTION_TIMEOUT_MS,
+  maxConsoleLogCount: MAX_CONSOLE_LOG_COUNT,
+};
 
 const createLogger = (): ScriptLogger & {
   debug: jest.Mock;
@@ -32,21 +39,13 @@ const createMockContext = (
   config: { script: string },
   options?: {
     abortSignal?: AbortSignal;
-    workflowContext?: Record<string, unknown>;
   }
 ): StepHandlerContext<any, any> => ({
   config,
   input: {},
   rawInput: {},
   contextManager: {
-    getContext: jest.fn(
-      () =>
-        options?.workflowContext ?? {
-          workflow: { id: 'workflow-1', name: 'Test Workflow' },
-          inputs: { name: 'World' },
-          steps: {},
-        }
-    ),
+    getContext: jest.fn(),
   } as any,
   logger: createLogger(),
   abortSignal: options?.abortSignal ?? new AbortController().signal,
@@ -57,10 +56,10 @@ const createMockContext = (
 describe('executeScriptInIsolate', () => {
   it('executes script asynchronously and returns the result', async () => {
     const result = await executeScriptInIsolate({
-      script: "return { greeting: 'Hello, ' + context.inputs.name };",
-      context: { inputs: { name: 'World' } },
+      script: "return { greeting: 'Hello, World' };",
       logger: createLogger(),
       abortSignal: new AbortController().signal,
+      ...defaultIsolateParams,
     });
 
     expect(result).toEqual({ greeting: 'Hello, World' });
@@ -78,9 +77,9 @@ describe('executeScriptInIsolate', () => {
         console.debug('debug message');
         return true;
       `,
-      context: {},
       logger,
       abortSignal: new AbortController().signal,
+      ...defaultIsolateParams,
     });
 
     expect(logger.info).toHaveBeenCalledWith('log message');
@@ -90,18 +89,70 @@ describe('executeScriptInIsolate', () => {
     expect(logger.debug).toHaveBeenCalledWith('debug message');
   });
 
-  it('uses an 8 MB memory limit for the isolate', () => {
-    expect(SCRIPT_MEMORY_LIMIT_MB).toBe(8);
+  it('silently drops console logs after the cap is reached', async () => {
+    const logger = createLogger();
+
+    const result = await executeScriptInIsolate({
+      script: `
+        for (let i = 0; i < 150; i++) {
+          console.log('message-' + i);
+        }
+        return 42;
+      `,
+      logger,
+      abortSignal: new AbortController().signal,
+      ...defaultIsolateParams,
+    });
+
+    expect(result).toBe(42);
+    expect(logger.info).toHaveBeenCalledTimes(MAX_CONSOLE_LOG_COUNT);
   });
+
+  it('does not expose host data to user scripts', async () => {
+    const result = await executeScriptInIsolate({
+      script: 'return { context: typeof context, input: typeof input };',
+      logger: createLogger(),
+      abortSignal: new AbortController().signal,
+      ...defaultIsolateParams,
+    });
+
+    expect(result).toEqual({ context: 'undefined', input: 'undefined' });
+  });
+
+  it('does not expose __logBridge__ to user scripts', async () => {
+    const result = await executeScriptInIsolate({
+      script: 'return typeof __logBridge__;',
+      logger: createLogger(),
+      abortSignal: new AbortController().signal,
+      ...defaultIsolateParams,
+    });
+
+    expect(result).toBe('undefined');
+  });
+
+  it(
+    'times out script execution after 5 seconds',
+    async () => {
+      await expect(
+        executeScriptInIsolate({
+          script: 'while (true) {}',
+          logger: createLogger(),
+          abortSignal: new AbortController().signal,
+          ...defaultIsolateParams,
+        })
+      ).rejects.toThrow('Script execution timed out.');
+    },
+    SCRIPT_EXECUTION_TIMEOUT_MS + 2_000
+  );
 
   it('cancels execution when the abort signal fires', async () => {
     const abortController = new AbortController();
 
     const execution = executeScriptInIsolate({
       script: 'while (true) {}',
-      context: {},
       logger: createLogger(),
       abortSignal: abortController.signal,
+      ...defaultIsolateParams,
     });
 
     setTimeout(() => {
@@ -115,8 +166,12 @@ describe('executeScriptInIsolate', () => {
 describe('scriptsJavaScriptStepDefinition', () => {
   it('has a stable handler hash for approval', () => {
     expect(createSHA256Hash(scriptsJavaScriptStepDefinition.handler.toString())).toBe(
-      'd3dddfec1936868f4773c055755741af5672b4a220dbd09575ffd0ddd52ac2b7'
+      '5889a44823f42f237f70bf770c0666e9e35e2dd1533679ae9b1a3718bfa75d7a'
     );
+  });
+
+  it('uses an 8 MB memory limit for the isolate', () => {
+    expect(SCRIPT_MEMORY_LIMIT_MB).toBe(8);
   });
 
   it('returns an error when script is missing', async () => {
@@ -126,15 +181,28 @@ describe('scriptsJavaScriptStepDefinition', () => {
     expect(result.error?.message).toBe('Script is required');
   });
 
-  it('returns script output from workflow context', async () => {
+  it('returns script output without passing host data into the sandbox', async () => {
     const context = createMockContext({
-      script: "return { greeting: 'Hello, ' + context.inputs.name };",
+      script: "return { greeting: 'Hello, World' };",
     });
 
     const result = await scriptsJavaScriptStepDefinition.handler(context);
 
     expect(result.output).toEqual({ greeting: 'Hello, World' });
+    expect(context.contextManager.getContext).not.toHaveBeenCalled();
   });
+
+  it(
+    'returns a timeout error when script execution exceeds 5 seconds',
+    async () => {
+      const context = createMockContext({ script: 'while (true) {}' });
+
+      const result = await scriptsJavaScriptStepDefinition.handler(context);
+
+      expect(result.error?.message).toBe('Script execution timed out.');
+    },
+    SCRIPT_EXECUTION_TIMEOUT_MS + 2_000
+  );
 
   it('returns a cancellation error when aborted before execution completes', async () => {
     const abortController = new AbortController();

@@ -47,11 +47,13 @@ Execute a JavaScript script in a sandboxed runtime and return its result to down
 ## Basic Usage
 
 \`\`\`yaml
-- name: transform-data
+- name: compute-value
   type: scripts.javaScript
   script: |
-    return { greeting: 'Hello, ' + context.inputs.name };
+    return { greeting: 'Hello, World' };
 \`\`\`
+
+Scripts run in an isolated sandbox with no workflow data passed in. Use literals and pure computation inside the script; downstream steps receive only the script's return value.
 
 ## Configuration
 
