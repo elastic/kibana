@@ -32,12 +32,13 @@ steps:
     with:
       timeout: 180s
       message: |
-        Investigate this significant event and propose root cause hypotheses.
+        {{ inputs.question }}
+
         Generate as many hypotheses as are genuinely distinct and worth investigating —
         up to 5 maximum. Do not pad to 5; fewer strong hypotheses are better than many
         weak ones. Order them by your prior confidence, highest first.
 
-        Event: {{ inputs | json }}
+        Event metadata: {{ inputs | json }}
       schema:
         type: object
         properties:
