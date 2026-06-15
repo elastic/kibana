@@ -14,7 +14,7 @@ import {
   SigEventsWorkflowStatus,
   type StreamsKIsOnboardingFeaturesResult,
   type StreamsKIsOnboardingQueriesResult,
-  type StreamsKIsOnboardingServerStatusResult,
+  type StreamsKIsOnboardingStatusResult,
   type BaseFeature,
   type GeneratedSignificantEventQuery,
 } from '@kbn/streams-schema';
@@ -232,7 +232,7 @@ export class StreamsKIsOnboardingClient {
     streamName,
   }: {
     streamName: string;
-  }): Promise<StreamsKIsOnboardingServerStatusResult> {
+  }): Promise<StreamsKIsOnboardingStatusResult> {
     const result = await this.workflowExecutionService.getStatus({
       spaceId: ONBOARDING_EXECUTIONS_SPACE_ID,
       queryParams: { concurrencyGroupKey: buildConcurrencyKey(streamName) },

@@ -312,7 +312,6 @@ export type {
   StreamsKIsOnboardingFeaturesResult,
   StreamsKIsOnboardingQueriesResult,
   StreamsKIsOnboardingStatusResult,
-  StreamsKIsOnboardingServerStatusResult,
 } from './src/onboarding';
 export {
   StreamsKIsOnboardingStep,

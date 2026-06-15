@@ -9,7 +9,7 @@ import { z } from '@kbn/zod/v4';
 import {
   StreamsKIsOnboardingStep,
   SigEventsWorkflowStatus,
-  type StreamsKIsOnboardingServerStatusResult,
+  type StreamsKIsOnboardingStatusResult,
 } from '@kbn/streams-schema';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
@@ -85,7 +85,7 @@ export const onboardingExecuteRoute = createServerRoute({
     getScopedClients,
     server,
     workflowClients,
-  }): Promise<StreamsKIsOnboardingServerStatusResult> => {
+  }): Promise<StreamsKIsOnboardingStatusResult> => {
     const { streamsKIsOnboardingClient } = workflowClients;
     if (!streamsKIsOnboardingClient) {
       throw new FeatureNotEnabledError('Workflows management is not available');
@@ -151,7 +151,7 @@ export const onboardingStatusRoute = createServerRoute({
     getScopedClients,
     server,
     workflowClients,
-  }): Promise<StreamsKIsOnboardingServerStatusResult> => {
+  }): Promise<StreamsKIsOnboardingStatusResult> => {
     const { streamsKIsOnboardingClient } = workflowClients;
     if (!streamsKIsOnboardingClient) {
       throw new FeatureNotEnabledError('Workflows management is not available');

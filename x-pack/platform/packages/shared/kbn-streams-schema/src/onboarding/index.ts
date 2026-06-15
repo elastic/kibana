@@ -34,9 +34,6 @@ export interface StreamsKIsOnboardingResult {
 export type StreamsKIsOnboardingStatusResult =
   SigEventsWorkflowStatusResult<StreamsKIsOnboardingResult>;
 
-/** @deprecated Use {@link StreamsKIsOnboardingStatusResult} — the server/client distinction was removed. */
-export type StreamsKIsOnboardingServerStatusResult = StreamsKIsOnboardingStatusResult;
-
 export enum StreamsKIsOnboardingStep {
   FeaturesIdentification = 'features_identification',
   QueriesGeneration = 'queries_generation',
