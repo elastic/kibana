@@ -24,6 +24,9 @@ const AD_HOC_WITHOUT_TIME_RANGE = 'logs';
 const PERSISTED_WITHOUT_TIME_RANGE = 'logstas*';
 
 test.describe('tabs - time based save behavior', { tag: tags.stateful.all }, () => {
+  // The setup test creates a persisted data view that subsequent tests depend on.
+  // Serial mode makes this ordering dependency explicit.
+  test.describe.configure({ mode: 'serial' });
   test.setTimeout(180_000);
 
   test.beforeAll(async ({ kbnClient, esArchiver }) => {

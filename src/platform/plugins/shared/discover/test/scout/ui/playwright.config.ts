@@ -11,4 +11,6 @@ import { createPlaywrightConfig } from '@kbn/scout';
 
 export default createPlaywrightConfig({
   testDir: './tests',
+  // Tests in this suite mutate shared state; enforce serial execution explicitly.
+  workers: 1,
 });

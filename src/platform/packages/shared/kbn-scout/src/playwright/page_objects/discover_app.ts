@@ -717,7 +717,7 @@ export class DiscoverApp {
     await this.page.keyboard.press('Enter');
 
     // Wait for the label to update
-    const fullText = tab.getByTestId('fullText');
+    const fullText = tab.locator('[data-test-subj="fullText"]');
     await expect(fullText).toHaveText(newLabel);
   }
 

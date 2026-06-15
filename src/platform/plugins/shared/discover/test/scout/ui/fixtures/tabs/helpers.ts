@@ -102,13 +102,12 @@ export const createDataViewFromSearchBar = async (
  * Switches from ES|QL mode to data view mode via the tab context menu.
  */
 export const selectDataViewMode = async (page: ScoutPage, options?: { discardModal?: boolean }) => {
-  // Click the tab menu for the active tab, then select "Switch to classic"
-  const activeTab = page.locator(
-    '[data-test-subj^="unifiedTabs_selectTabBtn_"][aria-selected="true"]'
-  );
-  const testSubj = await activeTab.getAttribute('data-test-subj');
-  const tabId = testSubj?.replace('unifiedTabs_selectTabBtn_', '') ?? '';
-  await page.testSubj.click(`unifiedTabs_tabMenuBtn_${tabId}`);
+  // Locate the active tab container and click its menu button directly, avoiding
+  // brittle string extraction from data-test-subj.
+  const activeTabContainer = page
+    .locator('[data-test-subj^="unifiedTabs_tab_"]')
+    .filter({ has: page.locator('[data-test-subj^="unifiedTabs_selectTabBtn_"][aria-selected="true"]') });
+  await activeTabContainer.locator('[data-test-subj^="unifiedTabs_tabMenuBtn_"]').click();
   await page.testSubj.click('unifiedTabs_tabMenuItem_switchToClassic');
 
   if (options?.discardModal) {
@@ -126,9 +125,10 @@ export const selectDataViewMode = async (page: ScoutPage, options?: { discardMod
  */
 const dismissAllToasts = async (page: ScoutPage) => {
   const toastList = page.testSubj.locator('globalToastList');
-  // Wait briefly for any toasts to appear, then dismiss them
-  for (const dismissBtn of await toastList.locator('[data-test-subj$="dismissToast"]').all()) {
-    await dismissBtn.click();
+  const dismissBtns = toastList.locator('[data-test-subj$="dismissToast"]');
+  // Loop until no dismiss buttons remain, avoiding index-shift issues from snapshot arrays.
+  while ((await dismissBtns.count()) > 0) {
+    await dismissBtns.first().click();
   }
 };
 

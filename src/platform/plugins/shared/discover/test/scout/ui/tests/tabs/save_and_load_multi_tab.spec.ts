@@ -67,6 +67,9 @@ const ESQL_TAB = {
 };
 
 test.describe('tabs - multi-tab Discover sessions', { tag: tags.stateful.all }, () => {
+  // Tests in this suite depend on state created by previous tests (e.g. saved session name).
+  // Serial mode makes this ordering dependency explicit.
+  test.describe.configure({ mode: 'serial' });
   test.setTimeout(180_000);
 
   test.beforeAll(async ({ kbnClient, esArchiver }) => {
