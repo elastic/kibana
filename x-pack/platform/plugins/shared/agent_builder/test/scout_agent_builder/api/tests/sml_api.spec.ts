@@ -69,6 +69,7 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
         updated_at: now,
         spaces: ['default'],
         permissions: [],
+        ingestion_method: 'crawled',
       },
     });
   });
@@ -195,6 +196,7 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
           updated_at: now,
           spaces: ['default'],
           permissions: [],
+          ingestion_method: 'crawled',
         },
       });
 
