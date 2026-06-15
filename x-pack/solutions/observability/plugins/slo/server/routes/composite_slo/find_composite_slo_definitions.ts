@@ -6,7 +6,7 @@
  */
 
 import { findCompositeSLODefinitionsParamsSchema } from '@kbn/slo-schema';
-import { findCompositeSloDefinitions } from '../../services/composites/find_composite_slo_definitions';
+import { findCompositeSlo } from '../../services/composites/find_composite_slo_definitions';
 import { createCompositeSloServerRoute } from './create_composite_slo_server_route';
 
 export const findCompositeSLORoute = createCompositeSloServerRoute({
@@ -24,7 +24,7 @@ export const findCompositeSLORoute = createCompositeSloServerRoute({
       logger,
     });
 
-    return await findCompositeSloDefinitions(params?.query ?? {}, {
+    return await findCompositeSlo(params?.query ?? {}, {
       spaceId,
       compositeRepository,
       esClient: scopedClusterClient.asCurrentUser,
