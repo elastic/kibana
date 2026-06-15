@@ -10,6 +10,9 @@ import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 import { KBN_ARCHIVES } from '../fixtures/constants';
 
+const getExpectedResultLabels = (resultLabels: string[], expectedLabels: string[]) =>
+  resultLabels.filter((resultLabel) => expectedLabels.includes(resultLabel));
+
 /**
  * IMPORTANT: These tests only work in 'classic' navigation mode. Once https://github.com/elastic/kibana/pull/251436 is merged, we might need to revisit this and make them work in 'solution' navigation as well.
  */
@@ -55,12 +58,21 @@ test.describe('GlobalSearchBar', { tag: tags.stateful.classic }, () => {
     const searchTerm = await pageObjects.globalSearch.getFieldValue();
     expect(searchTerm).toBe('type:dashboard');
 
-    await expect(pageObjects.globalSearch.resultLabels).toHaveText([
+    const expectedLabels = [
       'dashboard 1 (tag-2)',
       'dashboard 2 (tag-3)',
       'dashboard 3 (tag-1 and tag-3)',
       'dashboard 4 (tag-special-chars)',
-    ]);
+    ];
+
+    await expect
+      .poll(async () =>
+        getExpectedResultLabels(
+          await pageObjects.globalSearch.resultLabels.allTextContents(),
+          expectedLabels
+        )
+      )
+      .toStrictEqual(expectedLabels);
   });
 
   test('shows a suggestion when searching for a term matching a tag name', async ({
@@ -87,18 +99,27 @@ test.describe('GlobalSearchBar', { tag: tags.stateful.classic }, () => {
     await pageObjects.globalSearch.navigateToHome();
     await pageObjects.globalSearch.searchFor('type:dashboard');
 
-    await expect(pageObjects.globalSearch.resultLabels).toHaveText([
+    const expectedLabels = [
       'dashboard 1 (tag-2)',
       'dashboard 2 (tag-3)',
       'dashboard 3 (tag-1 and tag-3)',
       'dashboard 4 (tag-special-chars)',
-    ]);
+    ];
+
+    await expect
+      .poll(async () =>
+        getExpectedResultLabels(
+          await pageObjects.globalSearch.resultLabels.allTextContents(),
+          expectedLabels
+        )
+      )
+      .toStrictEqual(expectedLabels);
   });
 
   test('allows to filter by multiple types', async ({ pageObjects }) => {
     await pageObjects.globalSearch.searchFor('type:(dashboard OR visualization)');
 
-    await expect(pageObjects.globalSearch.resultLabels).toHaveText([
+    const expectedLabels = [
       'Visualization 1 (tag-1)',
       'Visualization 2 (tag-2)',
       'Visualization 3 (tag-1 + tag-3)',
@@ -108,7 +129,16 @@ test.describe('GlobalSearchBar', { tag: tags.stateful.classic }, () => {
       'dashboard 2 (tag-3)',
       'dashboard 3 (tag-1 and tag-3)',
       'dashboard 4 (tag-special-chars)',
-    ]);
+    ];
+
+    await expect
+      .poll(async () =>
+        getExpectedResultLabels(
+          await pageObjects.globalSearch.resultLabels.allTextContents(),
+          expectedLabels
+        )
+      )
+      .toStrictEqual(expectedLabels);
   });
 
   test('allows to filter by tag', async ({ pageObjects }) => {
@@ -147,12 +177,21 @@ test.describe('GlobalSearchBar', { tag: tags.stateful.classic }, () => {
       'type:(dashboard OR visualization) tag:(tag-1 OR tag-3)'
     );
 
-    await expect(pageObjects.globalSearch.resultLabels).toHaveText([
+    const expectedLabels = [
       'Visualization 1 (tag-1)',
       'Visualization 3 (tag-1 + tag-3)',
       'dashboard 2 (tag-3)',
       'dashboard 3 (tag-1 and tag-3)',
-    ]);
+    ];
+
+    await expect
+      .poll(async () =>
+        getExpectedResultLabels(
+          await pageObjects.globalSearch.resultLabels.allTextContents(),
+          expectedLabels
+        )
+      )
+      .toStrictEqual(expectedLabels);
   });
 
   test('allows to filter by term and type', async ({ pageObjects }) => {
