@@ -19,11 +19,11 @@ const REQUEST_TIMEOUT = 3 * 60 * 1000; // 3 min — dashboard migration ~100s ty
 
 const requestBodyValidation = buildRouteValidationWithZod(
   z.object({
-    connector_id: z.string(),
+    connector_id: z.string().max(512),
     input: z.object({
-      id: z.string(),
-      original_dashboard: z.record(z.string(), z.unknown()),
-      resources: z.record(z.string(), z.array(z.unknown())).optional().default({}),
+      id: z.string().max(512),
+      original_dashboard: z.record(z.string().max(256), z.unknown()),
+      resources: z.record(z.string().max(256), z.array(z.unknown())).optional().default({}),
     }),
     config: z
       .object({
