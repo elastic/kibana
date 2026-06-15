@@ -317,8 +317,9 @@ export function textToTimeRange(text: string, options?: TimeRangeTransformOption
   // (1) Preset label match
   const preset = matchPreset(trimmed, presets);
   if (preset) {
-    const roundedStart = applyStartBoundRounding(preset.start, roundRelativeTime);
-    return buildRange(text, roundedStart, preset.end, formats, true);
+    const roundedStart = applyRelativeRounding(preset.start, roundRelativeTime);
+    const roundedEnd = applyRelativeRounding(preset.end, roundRelativeTime);
+    return buildRange(text, roundedStart, roundedEnd, formats, true);
   }
 
   // (2) Named range ("today", "yesterday", "this week", ...) or alias ("td", "yd", "tmr")
@@ -332,8 +333,9 @@ export function textToTimeRange(text: string, options?: TimeRangeTransformOption
   // (3) Natural duration ("last 7 minutes", "next 3 days")
   const duration = matchNaturalDuration(trimmed, config, compiled);
   if (duration) {
-    const roundedStart = applyStartBoundRounding(duration.start, roundRelativeTime);
-    return buildRange(text, roundedStart, duration.end, formats, true);
+    const roundedStart = applyRelativeRounding(duration.start, roundRelativeTime);
+    const roundedEnd = applyRelativeRounding(duration.end, roundRelativeTime);
+    return buildRange(text, roundedStart, roundedEnd, formats, true);
   }
 
   // (4) Try splitting on delimiters (config + universal dash + extra)
@@ -342,8 +344,9 @@ export function textToTimeRange(text: string, options?: TimeRangeTransformOption
     const startDateString = instantToDateString(parts[0], config, compiled, formats);
     const endDateString = instantToDateString(parts[1], config, compiled, formats);
     if (startDateString && endDateString) {
-      const roundedStart = applyStartBoundRounding(startDateString, roundRelativeTime);
-      return buildRange(text, roundedStart, endDateString, formats, false);
+      const roundedStart = applyRelativeRounding(startDateString, roundRelativeTime);
+      const roundedEnd = applyRelativeRounding(endDateString, roundRelativeTime);
+      return buildRange(text, roundedStart, roundedEnd, formats, false);
     }
     return buildInvalidRange(text);
   }
@@ -355,7 +358,7 @@ export function textToTimeRange(text: string, options?: TimeRangeTransformOption
   if (dateString.startsWith('now+')) {
     return buildRange(text, 'now', dateString, formats, false);
   }
-  const roundedStart = applyStartBoundRounding(dateString, roundRelativeTime);
+  const roundedStart = applyRelativeRounding(dateString, roundRelativeTime);
   return buildRange(text, roundedStart, 'now', formats, false);
 }
 
@@ -394,35 +397,31 @@ function dateStringToOffset(dateString: DateString): DateOffset | null {
 }
 
 /**
- * Applies or strips the rounding suffix on a relative datemath `start` string.
+ * Applies the rounding suffix on a relative datemath `start` or `end` string
+ * when `roundRelativeTime` is `true`.
  *
  * - `true` — keeps existing rounding; when absent, appends `/{roundUnit}`
  *   inferred from the offset unit via {@link ROUND_UNIT_MAP}.
- * - `false` — removes any trailing rounding suffix.
- * - `undefined` — returns the string unchanged.
+ * - `false` / `undefined` — returns the string unchanged (preserves any
+ *   rounding suffix the caller/user provided).
  *
  * Bare `'now'` and non-relative strings are always returned as-is.
  */
-function applyStartBoundRounding(
-  start: DateString,
+function applyRelativeRounding(
+  bound: DateString,
   roundRelativeTime: boolean | undefined
 ): DateString {
-  if (roundRelativeTime === undefined) return start;
-  if (start === 'now' || !start.includes('now')) return start;
+  if (!roundRelativeTime) return bound;
+  if (bound === 'now' || !bound.includes('now')) return bound;
 
-  const offset = dateStringToOffset(start);
-  if (!offset) return start;
-
-  if (roundRelativeTime === false) {
-    return start.replace(/\/[smhdwMy]$/, '');
-  }
-
-  if (offset.roundTo) return start;
+  const offset = dateStringToOffset(bound);
+  if (!offset) return bound;
+  if (offset.roundTo) return bound;
 
   const roundUnit = ROUND_UNIT_MAP[offset.unit];
-  if (!roundUnit) return start;
+  if (!roundUnit) return bound;
 
-  return `${start}/${roundUnit}`;
+  return `${bound}/${roundUnit}`;
 }
 
 /**

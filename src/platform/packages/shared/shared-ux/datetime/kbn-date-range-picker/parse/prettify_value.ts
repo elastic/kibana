@@ -55,7 +55,7 @@ const prettifyAbsoluteDate = (bound: string): string | null => {
 };
 
 /**
- * Strips the `now` prefix and rounding suffix from a dateMath offset bound.
+ * Strips the `now` prefix from a dateMath offset bound, preserving any rounding suffix.
  * Returns `null` if the bound is not a relative offset expression
  * (bare `now`, `now/w`, absolute dates, natural language all return null).
  */
@@ -63,9 +63,8 @@ const prettifyStartBound = (bound: string): string | null => {
   const match = bound.match(DATEMATH_OFFSET_RE);
   if (!match) return null;
 
-  // first two values omitted on purpose
-  const [, , sign, count, unit] = match;
-  return `${sign}${count}${unit}`;
+  const [, , sign, count, unit, rounding] = match;
+  return `${sign}${count}${unit}${rounding ?? ''}`;
 };
 
 /**

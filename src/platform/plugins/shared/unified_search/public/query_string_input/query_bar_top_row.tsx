@@ -342,7 +342,7 @@ export const QueryBarTopRow = React.memo(
     const [isQueryInputFocused, setIsQueryInputFocused] = useState(false);
     const [dateRangePickerSettings, setDateRangePickerSettings] = useState<DateRangePickerSettings>(
       {
-        roundRelativeTime: true,
+        roundRelativeTime: false,
         timePrecision: 'none',
       }
     );
