@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Direction, EuiSearchBarProps, CriteriaWithPagination, Query } from '@elastic/eui';
 import {
@@ -20,6 +20,7 @@ import {
   EuiTourStep,
   EuiBadge,
   EuiToolTip,
+  EuiFilterGroup,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
@@ -61,6 +62,7 @@ import { useTimeRange } from '../../hooks/use_time_range';
 import { IngestionColumn } from './ingestion_column';
 import { StorageColumn } from './storage_column';
 import { RetentionColumn } from './retention_column';
+import { FilterGroup } from './filter_group';
 import { calculateDataQuality } from '../../util/calculate_data_quality';
 import {
   NAME_COLUMN_HEADER,
@@ -79,6 +81,10 @@ import {
   STREAM_TYPE_CLASSIC_LABEL,
   STREAM_TYPE_WIRED_LABEL,
   STREAM_TYPE_QUERY_LABEL,
+  DATA_QUALITY_FILTER_LABEL,
+  DATA_QUALITY_GOOD_LABEL,
+  DATA_QUALITY_DEGRADED_LABEL,
+  DATA_QUALITY_POOR_LABEL,
 } from './translations';
 import {
   DeprecatedLogsBadge,
@@ -125,6 +131,11 @@ export function StreamsTreeTable({
     pageIndex: 0,
     pageSize: 25,
   });
+  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
+  const [selectedQualities, setSelectedQualities] = useState<string[]>([]);
+
+  const handleTypeFilterChange = useCallback((keys: string[]) => setSelectedTypes(keys), []);
+  const handleQualityFilterChange = useCallback((keys: string[]) => setSelectedQualities(keys), []);
 
   const { privilegeMap, hasFailureStoreAccess } = React.useMemo(() => {
     return streams.reduce(
@@ -253,27 +264,23 @@ export function StreamsTreeTable({
   const allRows = React.useMemo(() => {
     let rows = buildStreamRows(enrichedStreams, sortField, sortDirection, qualityByStream);
 
-    const getFieldFilterValues = (field: string): string[] => {
-      if (!searchQuery?.ast) return [];
-      const clause = searchQuery.ast.getOrFieldClause(field);
-      if (clause && Array.isArray(clause.value)) {
-        return clause.value as string[];
-      }
-      return [];
-    };
-
-    const typeValues = getFieldFilterValues('type');
-    if (typeValues.length > 0) {
-      rows = rows.filter((row) => typeValues.includes(row.type));
+    if (selectedTypes.length > 0) {
+      rows = rows.filter((row) => selectedTypes.includes(row.type));
     }
 
-    const qualityValues = getFieldFilterValues('dataQuality');
-    if (qualityValues.length > 0) {
-      rows = rows.filter((row) => qualityValues.includes(row.dataQuality));
+    if (selectedQualities.length > 0) {
+      rows = rows.filter((row) => selectedQualities.includes(row.dataQuality));
     }
 
     return rows;
-  }, [enrichedStreams, sortField, sortDirection, qualityByStream, searchQuery?.ast]);
+  }, [
+    enrichedStreams,
+    sortField,
+    sortDirection,
+    qualityByStream,
+    selectedTypes,
+    selectedQualities,
+  ]);
 
   // Only pass filtered rows if tree mode is active
   const items = React.useMemo(
@@ -722,58 +729,38 @@ export function StreamsTreeTable({
           'aria-label': STREAMS_TABLE_SEARCH_ARIA_LABEL,
         },
         toolsRight: (
-          <div className={datePickerStyle}>
-            <StreamsAppSearchBar showDatePicker />
-          </div>
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiFilterGroup>
+                {qualityLoaded && hasFailureStoreAccess && (
+                  <FilterGroup
+                    label={DATA_QUALITY_FILTER_LABEL}
+                    options={[
+                      { key: 'good', label: DATA_QUALITY_GOOD_LABEL },
+                      { key: 'degraded', label: DATA_QUALITY_DEGRADED_LABEL },
+                      { key: 'poor', label: DATA_QUALITY_POOR_LABEL },
+                    ]}
+                    onChange={handleQualityFilterChange}
+                  />
+                )}
+                <FilterGroup
+                  label={STREAM_TYPE_FILTER_LABEL}
+                  options={[
+                    { key: 'classic', label: STREAM_TYPE_CLASSIC_LABEL },
+                    { key: 'wired', label: STREAM_TYPE_WIRED_LABEL },
+                    { key: 'query', label: STREAM_TYPE_QUERY_LABEL },
+                  ]}
+                  onChange={handleTypeFilterChange}
+                />
+              </EuiFilterGroup>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <div className={datePickerStyle}>
+                <StreamsAppSearchBar showDatePicker />
+              </div>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         ),
-        filters: [
-          ...(qualityLoaded && hasFailureStoreAccess
-            ? [
-                {
-                  type: 'field_value_selection' as const,
-                  name: i18n.translate('xpack.streams.streamsTreeTable.dataQualityFilter.label', {
-                    defaultMessage: 'Data quality',
-                  }),
-                  field: 'dataQuality',
-                  multiSelect: 'or' as const,
-                  options: [
-                    {
-                      value: 'good',
-                      name: i18n.translate(
-                        'xpack.streams.streamsTreeTable.dataQualityFilter.goodLabel',
-                        { defaultMessage: 'Good' }
-                      ),
-                    },
-                    {
-                      value: 'degraded',
-                      name: i18n.translate(
-                        'xpack.streams.streamsTreeTable.dataQualityFilter.degradedLabel',
-                        { defaultMessage: 'Degraded' }
-                      ),
-                    },
-                    {
-                      value: 'poor',
-                      name: i18n.translate(
-                        'xpack.streams.streamsTreeTable.dataQualityFilter.poorLabel',
-                        { defaultMessage: 'Poor' }
-                      ),
-                    },
-                  ],
-                },
-              ]
-            : []),
-          {
-            type: 'field_value_selection' as const,
-            name: STREAM_TYPE_FILTER_LABEL,
-            field: 'type',
-            multiSelect: 'or' as const,
-            options: [
-              { value: 'classic', name: STREAM_TYPE_CLASSIC_LABEL },
-              { value: 'wired', name: STREAM_TYPE_WIRED_LABEL },
-              { value: 'query', name: STREAM_TYPE_QUERY_LABEL },
-            ],
-          },
-        ],
       }}
       tableCaption={STREAMS_TABLE_CAPTION_ARIA_LABEL}
     />

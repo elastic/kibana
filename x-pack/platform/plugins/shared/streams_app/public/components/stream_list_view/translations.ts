@@ -122,3 +122,23 @@ export const STREAM_TYPE_QUERY_LABEL = i18n.translate(
   'xpack.streams.streamsTreeTable.streamTypeFilter.queryLabel',
   { defaultMessage: 'Query' }
 );
+
+export const DATA_QUALITY_FILTER_LABEL = i18n.translate(
+  'xpack.streams.streamsTreeTable.dataQualityFilter.label',
+  { defaultMessage: 'Data quality' }
+);
+
+export const DATA_QUALITY_GOOD_LABEL = i18n.translate(
+  'xpack.streams.streamsTreeTable.dataQualityFilter.goodLabel',
+  { defaultMessage: 'Good' }
+);
+
+export const DATA_QUALITY_DEGRADED_LABEL = i18n.translate(
+  'xpack.streams.streamsTreeTable.dataQualityFilter.degradedLabel',
+  { defaultMessage: 'Degraded' }
+);
+
+export const DATA_QUALITY_POOR_LABEL = i18n.translate(
+  'xpack.streams.streamsTreeTable.dataQualityFilter.poorLabel',
+  { defaultMessage: 'Poor' }
+);
