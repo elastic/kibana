@@ -25,7 +25,6 @@ import type {
 } from '../../../../../../common/api/entity_analytics/watchlists/data_source/list.gen';
 import type { StartPlugins } from '../../../../../plugin';
 import { watchlistEntitySourceTypeName } from './entity_source_type';
-import type { EntitySourceApiKeyFields } from './entity_source_type';
 import { invalidateEntitySourceApiKey, validateIndexPermissions } from '../entity_source_api_key';
 
 export interface WatchlistEntitySourceClientDependencies {
@@ -232,15 +231,6 @@ export class WatchlistEntitySourceClient {
         );
       }
     }
-  }
-
-  async updateApiKeyFields(
-    id: string,
-    fields: { apiKeyId: string | null; apiKey: string | null }
-  ): Promise<void> {
-    await this.dependencies.soClient.update<
-      MonitoringEntitySourceAttributes & EntitySourceApiKeyFields
-    >(watchlistEntitySourceTypeName, id, fields, { refresh: 'wait_for' });
   }
 
   /**

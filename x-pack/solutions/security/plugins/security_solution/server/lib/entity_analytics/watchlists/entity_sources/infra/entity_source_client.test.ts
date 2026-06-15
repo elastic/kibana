@@ -402,34 +402,6 @@ describe('WatchlistEntitySourceClient', () => {
     });
   });
 
-  describe('updateApiKeyFields', () => {
-    it('writes apiKeyId and apiKey to soClient.update', async () => {
-      soClient.update.mockResolvedValue({} as never);
-
-      await client.updateApiKeyFields('source-id', { apiKeyId: 'kid-1', apiKey: 'secret-1' });
-
-      expect(soClient.update).toHaveBeenCalledWith(
-        watchlistEntitySourceTypeName,
-        'source-id',
-        { apiKeyId: 'kid-1', apiKey: 'secret-1' },
-        { refresh: 'wait_for' }
-      );
-    });
-
-    it('writes null values to clear a stored API key', async () => {
-      soClient.update.mockResolvedValue({} as never);
-
-      await client.updateApiKeyFields('source-id', { apiKeyId: null, apiKey: null });
-
-      expect(soClient.update).toHaveBeenCalledWith(
-        watchlistEntitySourceTypeName,
-        'source-id',
-        { apiKeyId: null, apiKey: null },
-        { refresh: 'wait_for' }
-      );
-    });
-  });
-
   describe('get', () => {
     it('delegates to soClient.get and returns the source with id', async () => {
       soClient.get.mockResolvedValue({

@@ -12,7 +12,6 @@ export const mockGetEntitySource = jest.fn();
 export const mockDeleteEntitySource = jest.fn();
 export const mockFindEntitySources = jest.fn();
 export const mockListEntitySources = jest.fn();
-export const mockUpdateApiKeyFields = jest.fn();
 export const mockGetLastProcessedMarker = jest.fn();
 export const mockUpdateLastProcessedMarker = jest.fn();
 export const mockGetLastFullSyncMarker = jest.fn();
@@ -26,7 +25,6 @@ export class WatchlistEntitySourceClient {
   public delete = mockDeleteEntitySource;
   public find = mockFindEntitySources;
   public list = mockListEntitySources;
-  public updateApiKeyFields = mockUpdateApiKeyFields;
   public getLastProcessedMarker = mockGetLastProcessedMarker;
   public updateLastProcessedMarker = mockUpdateLastProcessedMarker;
   public getLastFullSyncMarker = mockGetLastFullSyncMarker;

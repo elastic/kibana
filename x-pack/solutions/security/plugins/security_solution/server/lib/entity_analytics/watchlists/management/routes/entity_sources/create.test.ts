@@ -14,7 +14,6 @@ import {
 } from '../../../../../detection_engine/routes/__mocks__';
 
 const mockWatchlistClientCreate = jest.fn();
-const mockUpdateApiKeyFields = jest.fn();
 const mockAddEntitySourceReference = jest.fn();
 const mockSyncWatchlist = jest.fn();
 const mockValidateIndexPermissions = jest.fn();
@@ -69,7 +68,6 @@ describe('POST /api/entity_analytics/watchlists/:watchlist_id/data_sources - cre
     context = requestContextMock.convertContext(ctx);
 
     mockWatchlistClientCreate.mockReset();
-    mockUpdateApiKeyFields.mockReset();
     mockAddEntitySourceReference.mockReset();
     mockSyncWatchlist.mockReset();
     mockValidateIndexPermissions.mockReset().mockResolvedValue(undefined);
@@ -79,7 +77,6 @@ describe('POST /api/entity_analytics/watchlists/:watchlist_id/data_sources - cre
 
     MockWatchlistEntitySourceClient.mockImplementation(() => ({
       create: mockWatchlistClientCreate,
-      updateApiKeyFields: mockUpdateApiKeyFields,
     }));
 
     mockCreateEntitySourcesService.mockReturnValue({ syncWatchlist: mockSyncWatchlist });
@@ -145,7 +142,6 @@ describe('POST /api/entity_analytics/watchlists/:watchlist_id/data_sources - cre
 
       expect(response.status).toEqual(200);
       expect(mockValidateIndexPermissions).not.toHaveBeenCalled();
-      expect(mockUpdateApiKeyFields).not.toHaveBeenCalled();
     });
   });
 
