@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { expect } from '@kbn/scout/ui';
 import type { PageObjects, ScoutPage } from '@kbn/scout';
 import type { ApmPage } from './apm';
 import type { TracesFlyout } from './flyout';
@@ -30,13 +29,12 @@ export class TracesExperiencePage {
   constructor(page: ScoutPage, discover: PageObjects['discover']) {
     this.apm = createApmPage(page);
     this.flyout = createTracesFlyout(page);
-    this.grid = createTracesGrid(page);
+    this.grid = createTracesGrid();
     this.charts = createTracesCharts(page);
     this.controls = createTracesControls(discover);
   }
 
   public async openDocumentFlyout(discover: PageObjects['discover'], rowIndex = 0) {
-    await expect(this.grid.firstRow).toBeVisible({ timeout: 30_000 });
     await discover.openAndWaitForDocViewerFlyout({ rowIndex });
   }
 
