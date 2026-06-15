@@ -37,30 +37,30 @@ import { getEsqlQuery } from './utils/get_esql_query';
 
 const EMPTY_APPLICABLE_DIMENSIONS: Dimension[] = [];
 
-const getApplicableDimensionNames = (
-  dimensions: Dimension[],
-  dimensionFields: readonly Dimension[]
-): string[] =>
-  dimensions
-    .filter((dimension) => dimensionFields.some((field) => field.name === dimension.name))
-    .map((dimension) => dimension.name);
-
 const useStableApplicableDimensions = (
   dimensions: Dimension[],
   dimensionFields: readonly Dimension[]
 ): Dimension[] => {
-  const applicableDimensionNamesKey = useMemo(
-    () => stableStringify(getApplicableDimensionNames(dimensions, dimensionFields)),
-    [dimensions, dimensionFields]
-  );
+  const { applicableDimensionNamesKey, applicableDimensions } = useMemo(() => {
+    const applicable = dimensions.filter((dimension) =>
+      dimensionFields.some((field) => field.name === dimension.name)
+    );
+
+    return {
+      applicableDimensions: applicable,
+      applicableDimensionNamesKey:
+        applicable.length === 0
+          ? null
+          : stableStringify(applicable.map((dimension) => dimension.name)),
+    };
+  }, [dimensions, dimensionFields]);
 
   return useMemo(() => {
-    if (applicableDimensionNamesKey === '[]') {
+    if (applicableDimensionNamesKey === null) {
       return EMPTY_APPLICABLE_DIMENSIONS;
     }
 
-    const names: string[] = JSON.parse(applicableDimensionNamesKey);
-    return names.map((name) => ({ name }));
+    return applicableDimensions;
   }, [applicableDimensionNamesKey]);
 };
 
