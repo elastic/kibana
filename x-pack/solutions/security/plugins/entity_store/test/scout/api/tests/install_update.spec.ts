@@ -130,38 +130,35 @@ apiTest.describe('Entity Store install / update API tests', { tag: ENTITY_STORE_
     });
   });
 
-  apiTest(
-    'Update should change installed logExtraction params',
-    async ({ apiClient }) => {
-      await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
-        headers: defaultHeaders,
-        responseType: 'json',
-        body: { logExtraction: { delay: '2m' } },
-      });
+  apiTest('Update should change installed logExtraction params', async ({ apiClient }) => {
+    await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
+      headers: defaultHeaders,
+      responseType: 'json',
+      body: { logExtraction: { delay: '2m' } },
+    });
 
-      const update = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
-        headers: defaultHeaders,
-        responseType: 'json',
-        body: { logExtraction: { delay: '5m' } },
-      });
-      expect(update.statusCode).toBe(200);
+    const update = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+      headers: defaultHeaders,
+      responseType: 'json',
+      body: { logExtraction: { delay: '5m' } },
+    });
+    expect(update.statusCode).toBe(200);
 
-      const status = await apiClient.get(ENTITY_STORE_ROUTES.public.STATUS, {
-        headers: defaultHeaders,
-        responseType: 'json',
-      });
-      expect(status.statusCode).toBe(200);
-      const engines = (status.body as { engines: Array<{ delay: string }> }).engines;
-      expect(engines.length).toBeGreaterThan(0);
-      expect(engines[0].delay).toBe('5m');
+    const status = await apiClient.get(ENTITY_STORE_ROUTES.public.STATUS, {
+      headers: defaultHeaders,
+      responseType: 'json',
+    });
+    expect(status.statusCode).toBe(200);
+    const engines = (status.body as { engines: Array<{ delay: string }> }).engines;
+    expect(engines.length).toBeGreaterThan(0);
+    expect(engines[0].delay).toBe('5m');
 
-      await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
-        headers: defaultHeaders,
-        responseType: 'json',
-        body: {},
-      });
-    }
-  );
+    await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
+      headers: defaultHeaders,
+      responseType: 'json',
+      body: {},
+    });
+  });
 
   apiTest('install rejects unknown body keys', async ({ apiClient }) => {
     const install = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
