@@ -63,14 +63,16 @@ test.describe('Rule Details - Execution log', { tag: tags.stateful.classic }, ()
       expect(await rows.count()).toBeGreaterThan(0);
     }).toPass({ timeout: 30_000, intervals: [2_000] });
 
-    // The timestamp and total_search_duration columns render cells (selectors
-    // match the FTR equivalent).
+    // The timestamp and execution_duration columns render cells. total_search_duration
+    // is hidden by default (not in RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS) and
+    // only appears once toggled on via the Columns button — a clean Playwright context
+    // starts with empty localStorage so that column is never rendered.
     await expect(
       page.locator('[data-gridcell-column-id="timestamp"][data-test-subj="dataGridRowCell"]')
     ).not.toHaveCount(0);
     await expect(
       page.locator(
-        '[data-gridcell-column-id="total_search_duration"][data-test-subj="dataGridRowCell"]'
+        '[data-gridcell-column-id="execution_duration"][data-test-subj="dataGridRowCell"]'
       )
     ).not.toHaveCount(0);
 
