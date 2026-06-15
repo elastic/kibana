@@ -240,12 +240,14 @@ const DIAMOND_EDGES: ReadonlyArray<EdgeCoords> = [
   [142, 80, 80, 142],
 ];
 
-const DiamondSvg: React.FC<{
+export interface DiamondSvgProps {
   vertexSignal: CorrelationFindingsLead['vertex_signal'];
   euiColors: EuiThemeComputed['colors'];
   /** Rendered px size; viewBox stays 0 0 160 160. Default 160. Labels hidden below 100px. */
   size?: number;
-}> = ({ vertexSignal, euiColors, size = 160 }) => (
+}
+
+export const DiamondSvg: React.FC<DiamondSvgProps> = ({ vertexSignal, euiColors, size = 160 }) => (
   <svg
     width={size}
     height={size}

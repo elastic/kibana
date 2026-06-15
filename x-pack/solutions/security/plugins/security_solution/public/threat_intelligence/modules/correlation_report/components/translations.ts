@@ -105,4 +105,129 @@ export const i18nText = {
     i18n.translate(`${ns}.consolidatedReportsLabel`, {
       defaultMessage: 'Consolidated Reports',
     }),
+
+  // Input mode toggle
+  inputTypeReportId: () =>
+    i18n.translate(`${ns}.inputTypeReportId`, { defaultMessage: 'Report ID' }),
+  inputTypeRawText: () => i18n.translate(`${ns}.inputTypeRawText`, { defaultMessage: 'Free text' }),
+
+  // Report ID input
+  reportIdLabel: () => i18n.translate(`${ns}.reportIdLabel`, { defaultMessage: 'Report ID' }),
+  reportIdHelp: () =>
+    i18n.translate(`${ns}.reportIdHelp`, {
+      defaultMessage: 'The Elasticsearch document ID of the stored threat report to correlate.',
+    }),
+  reportIdPlaceholder: () =>
+    i18n.translate(`${ns}.reportIdPlaceholder`, { defaultMessage: 'e.g. report_abc123' }),
+
+  // Raw text input
+  rawTextLabel: () =>
+    i18n.translate(`${ns}.rawTextLabel`, { defaultMessage: 'Event text / narrative' }),
+  rawTextHelp: () =>
+    i18n.translate(`${ns}.rawTextHelp`, {
+      defaultMessage:
+        'Paste events, alerts, Slack messages, or any narrative text to correlate against the knowledge base.',
+    }),
+  rawTextPlaceholder: () =>
+    i18n.translate(`${ns}.rawTextPlaceholder`, {
+      defaultMessage: 'e.g. Slack thread, event log snippet, analyst notes…',
+    }),
+
+  // Execution options
+  executionOptionsTitle: () =>
+    i18n.translate(`${ns}.executionOptionsTitle`, { defaultMessage: 'Execution options' }),
+  executionOptionsAriaLabel: () =>
+    i18n.translate(`${ns}.executionOptionsAriaLabel`, { defaultMessage: 'Open execution options' }),
+
+  // Depth labels
+  depthFullLabel: () =>
+    i18n.translate(`${ns}.depthFullLabel`, { defaultMessage: 'Full correlation run' }),
+  depthFullHint: () =>
+    i18n.translate(`${ns}.depthFullHint`, { defaultMessage: '~120s · ~$2.35 est.' }),
+  depthTriageLabel: () =>
+    i18n.translate(`${ns}.depthTriageLabel`, { defaultMessage: 'Through triage' }),
+  depthTriageHint: () =>
+    i18n.translate(`${ns}.depthTriageHint`, { defaultMessage: '~30s · ~$0.24 est.' }),
+  depthKnnLabel: () => i18n.translate(`${ns}.depthKnnLabel`, { defaultMessage: 'Retrieval (kNN)' }),
+  depthKnnHint: () => i18n.translate(`${ns}.depthKnnHint`, { defaultMessage: '~secs' }),
+  depthExtractLabel: () =>
+    i18n.translate(`${ns}.depthExtractLabel`, { defaultMessage: 'Extract diamond' }),
+  depthExtractHint: () => i18n.translate(`${ns}.depthExtractHint`, { defaultMessage: '~secs' }),
+
+  // Run button
+  runBtn: () => i18n.translate(`${ns}.runBtn`, { defaultMessage: 'Run' }),
+
+  // Stage progress labels
+  stageExtract: () =>
+    i18n.translate(`${ns}.stageExtract`, { defaultMessage: 'Extracting diamond…' }),
+  stageSearch: () =>
+    i18n.translate(`${ns}.stageSearch`, { defaultMessage: 'Retrieving candidates…' }),
+  stageGapFill: () => i18n.translate(`${ns}.stageGapFill`, { defaultMessage: 'Gap-filling…' }),
+  stageDedup: () => i18n.translate(`${ns}.stageDedup`, { defaultMessage: 'De-duplicating…' }),
+  stageTriage: () => i18n.translate(`${ns}.stageTriage`, { defaultMessage: 'Triaging…' }),
+  stageSynthesize: () =>
+    i18n.translate(`${ns}.stageSynthesize`, { defaultMessage: 'Synthesizing…' }),
+  stagePending: () => i18n.translate(`${ns}.stagePending`, { defaultMessage: 'Queued…' }),
+
+  // Progress / error messages
+  progressTitle: () =>
+    i18n.translate(`${ns}.progressTitle`, { defaultMessage: 'Running correlation…' }),
+  progressBody: () =>
+    i18n.translate(`${ns}.progressBody`, {
+      defaultMessage:
+        'The pipeline is running in the background. This page polls for updates every 1.5 seconds.',
+    }),
+  errorTitle: () => i18n.translate(`${ns}.errorTitle`, { defaultMessage: 'Run failed' }),
+  retryBtn: () => i18n.translate(`${ns}.retryBtn`, { defaultMessage: 'Retry' }),
+
+  // Status labels
+  statusPending: () => i18n.translate(`${ns}.statusPending`, { defaultMessage: 'Pending' }),
+  statusRunning: () => i18n.translate(`${ns}.statusRunning`, { defaultMessage: 'Running' }),
+  statusSucceeded: () => i18n.translate(`${ns}.statusSucceeded`, { defaultMessage: 'Succeeded' }),
+  statusFailed: () => i18n.translate(`${ns}.statusFailed`, { defaultMessage: 'Failed' }),
+
+  // Recents
+  recentsTitle: () => i18n.translate(`${ns}.recentsTitle`, { defaultMessage: 'Recent runs' }),
+  recentsEmpty: () => i18n.translate(`${ns}.recentsEmpty`, { defaultMessage: 'No recent runs.' }),
+
+  // Extract result
+  extractResultTitle: () =>
+    i18n.translate(`${ns}.extractResultTitle`, { defaultMessage: 'Extracted Diamond' }),
+
+  // kNN result
+  knnResultTitle: () =>
+    i18n.translate(`${ns}.knnResultTitle`, { defaultMessage: 'Retrieval Results' }),
+  knnMergedTitle: () =>
+    i18n.translate(`${ns}.knnMergedTitle`, { defaultMessage: 'Merged Candidates' }),
+  knnAnchorHitsTitle: () =>
+    i18n.translate(`${ns}.knnAnchorHitsTitle`, { defaultMessage: 'Anchor Hits' }),
+  knnColTitle: () => i18n.translate(`${ns}.knnColTitle`, { defaultMessage: 'Title' }),
+  knnColOverlap: () => i18n.translate(`${ns}.knnColOverlap`, { defaultMessage: 'Overlap' }),
+  knnColScore: () => i18n.translate(`${ns}.knnColScore`, { defaultMessage: 'Score' }),
+  knnColVertexScores: () =>
+    i18n.translate(`${ns}.knnColVertexScores`, { defaultMessage: 'Vertex scores' }),
+  knnNoMerged: () =>
+    i18n.translate(`${ns}.knnNoMerged`, { defaultMessage: 'No merged candidates returned.' }),
+
+  // Triage result
+  triageResultTitle: () =>
+    i18n.translate(`${ns}.triageResultTitle`, { defaultMessage: 'Triage Results' }),
+  triagePicksTitle: () => i18n.translate(`${ns}.triagePicksTitle`, { defaultMessage: 'Picks' }),
+  triageGroupsTitle: () => i18n.translate(`${ns}.triageGroupsTitle`, { defaultMessage: 'Groups' }),
+  triageColCandidate: () =>
+    i18n.translate(`${ns}.triageColCandidate`, { defaultMessage: 'Candidate' }),
+  triageColConfidence: () =>
+    i18n.translate(`${ns}.triageColConfidence`, { defaultMessage: 'Confidence' }),
+  triageColJustification: () =>
+    i18n.translate(`${ns}.triageColJustification`, { defaultMessage: 'Justification' }),
+  triageCandidatesFed: () =>
+    i18n.translate(`${ns}.triageCandidatesFed`, { defaultMessage: 'Candidates fed' }),
+  triageFallbackUsed: () =>
+    i18n.translate(`${ns}.triageFallbackUsed`, { defaultMessage: 'Fallback used' }),
+  triageGroupHypothesis: () =>
+    i18n.translate(`${ns}.triageGroupHypothesis`, { defaultMessage: 'Hypothesis' }),
+  triageYes: () => i18n.translate(`${ns}.triageYes`, { defaultMessage: 'Yes' }),
+  triageNo: () => i18n.translate(`${ns}.triageNo`, { defaultMessage: 'No' }),
+  triageNoPicks: () =>
+    i18n.translate(`${ns}.triageNoPicks`, { defaultMessage: 'No candidates survived triage.' }),
 };
