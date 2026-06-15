@@ -146,8 +146,16 @@ export const createContextEngineAddEntryStepDefinition = ({
             content: chunk.content,
             ...(chunk.description !== undefined ? { description: chunk.description } : {}),
             ...(chunk.user_id !== undefined ? { user_id: chunk.user_id } : {}),
-            ...(chunk.references !== undefined ? { references: chunk.references } : {}),
-            ...(chunk.permissions !== undefined ? { permissions: chunk.permissions } : {}),
+            ...(chunk.references !== undefined
+              ? { references: chunk.references.map((uri) => ({ uri })) }
+              : {}),
+            // The workflow input carries flat Kibana privilege strings; map
+            // them into the nested permissions shape (no ES index gating is
+            // expressible via this step yet).
+            permissions: {
+              kibana: { privileges: (chunk.permissions ?? []).map((name) => ({ name })) },
+              elasticsearch: { indices: [] },
+            },
           }));
 
           await startContract.indexAttachment({

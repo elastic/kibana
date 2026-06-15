@@ -30,6 +30,11 @@ export class AlertsTablePage {
   public readonly flyoutViewInAppButton: Locator;
   public readonly flyoutAlertDetailsButton: Locator;
   public readonly flyoutViewRuleDetailsLink: Locator;
+  // Add-to-case row actions / dialogs
+  public readonly addToExistingCaseAction: Locator;
+  public readonly addToNewCaseAction: Locator;
+  public readonly createCaseFlyout: Locator;
+  public readonly addToExistingCaseModal: Locator;
   public readonly queryInput: Locator;
   public readonly dataGrid: EuiDataGridWrapper;
   public readonly groupSelector: Locator;
@@ -65,6 +70,10 @@ export class AlertsTablePage {
     this.flyoutViewInAppButton = this.page.testSubj.locator('alertsFlyoutViewInAppButton');
     this.flyoutAlertDetailsButton = this.page.testSubj.locator('alertsFlyoutAlertDetailsButton');
     this.flyoutViewRuleDetailsLink = this.page.testSubj.locator('viewRuleDetailsFlyout');
+    this.addToExistingCaseAction = this.page.testSubj.locator('add-to-existing-case-action');
+    this.addToNewCaseAction = this.page.testSubj.locator('add-to-new-case-action');
+    this.createCaseFlyout = this.page.testSubj.locator('create-case-flyout');
+    this.addToExistingCaseModal = this.page.testSubj.locator('all-cases-modal');
     this.queryInput = this.page.testSubj.locator('queryInput');
   }
 
@@ -115,8 +124,15 @@ export class AlertsTablePage {
    * data grid's `aria-rowcount` (set by EuiDataGrid to the full alert count)
    * rather than counting rendered cells, which would undercount because the grid
    * virtualizes rows outside the viewport.
+   *
+   * When a query matches no alerts the page renders the empty state instead of
+   * the data grid, so short-circuit to 0 rather than waiting for a grid body
+   * that will never appear (which would otherwise time out).
    */
   async getRowCount(): Promise<number> {
+    if (await this.noDataState.isVisible()) {
+      return 0;
+    }
     const grid = this.page.locator(
       '[data-test-subj="alertsTableIsLoaded"] [data-test-subj="euiDataGridBody"]'
     );
@@ -181,6 +197,15 @@ export class AlertsTablePage {
     await this.page.testSubj.click('viewRuleDetails');
   }
 
+  // Add to case (from the row actions menu opened via `openActionsMenuForRow`)
+  async clickAddToNewCase() {
+    await this.addToNewCaseAction.click();
+  }
+
+  async clickAddToExistingCase() {
+    await this.addToExistingCaseAction.click();
+  }
+
   // Date picker
   /**
    * Opens the super date picker quick menu and selects a "commonly used" range
@@ -228,5 +253,54 @@ export class AlertsTablePage {
     const statTitle = this.page.testSubj.locator(testSubj).locator('.euiStat__title');
     const text = (await statTitle.innerText()).trim();
     return Number.parseInt(text, 10);
+  }
+
+  // Bulk actions
+  /**
+   * Toggles the table header "select all" checkbox and waits for the bulk
+   * actions button to appear.
+   */
+  async selectAllVisibleAlerts() {
+    await this.page.testSubj.click('bulk-actions-header');
+    await this.page.testSubj.locator('selectedShowBulkActionsButton').waitFor({ state: 'visible' });
+  }
+
+  async bulkMuteSelected() {
+    await this.page.testSubj.click('selectedShowBulkActionsButton');
+    await this.page.testSubj.click('bulk-mute');
+  }
+
+  async bulkUnmuteSelected() {
+    await this.page.testSubj.click('selectedShowBulkActionsButton');
+    await this.page.testSubj.click('bulk-unmute');
+  }
+
+  /**
+   * Reads the title of the most recent toast and dismisses all visible toasts.
+   * `waitFor` tolerates multiple matches (waits for the first), and
+   * `allInnerTexts` returns every title so we can pick the most recently
+   * rendered one without a positional locator method.
+   */
+  async readAndDismissLatestToastTitle(): Promise<string> {
+    const titles = this.page.testSubj.locator('euiToastHeader__title');
+    await titles.waitFor({ state: 'visible' });
+    const allTitles = await titles.allInnerTexts();
+    for (const button of await this.page.testSubj.locator('toastCloseButton').all()) {
+      await button.click().catch(() => {});
+    }
+    return (allTitles[allTitles.length - 1] ?? '').trim();
+  }
+
+  /**
+   * Re-runs the query bar with `query` and returns the resulting total alert
+   * count. Used to poll for server-side updates that the table only reflects on
+   * a fresh search (e.g. the muted field, written via a fire-and-forget
+   * `updateByQuery`).
+   */
+  async countForQuery(query: string): Promise<number> {
+    await this.clearQueryBar();
+    await this.submitQuery(query);
+    await this.waitForTableToLoad();
+    return this.getRowCount();
   }
 }
