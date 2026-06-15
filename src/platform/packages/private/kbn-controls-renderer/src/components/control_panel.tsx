@@ -86,7 +86,7 @@ export const ControlPanel = ({
   const indicateControl = useMemo(
     () =>
       Boolean(
-        api &&
+        api && // Check to make sure onApiAvailable has returned; control panels initialize their own apis internally
           selectedPanel &&
           apiPublishesRelatedPanels(selectedPanel) &&
           selectedPanelRelatedPanels.includes(id)
@@ -181,6 +181,7 @@ export const ControlPanel = ({
                   defaultMessage: 'Warning: No related panels',
                 })}
                 type="warning"
+                className="controlLabel__warning-icon"
               />
             </>
           )}
@@ -326,6 +327,12 @@ const controlPanelStyles = {
         '&[role="button"]': {
           cursor: 'pointer',
         },
+      },
+      '.controlLabel__warning-icon': {
+        // Warning icon has a tiny bit of whitespace at the top which makes it look visually off-center with the text next
+        // to it when "correctly" aligned, so nudge it upward by a subpixel. -1px is too much, but -0.5px manages to trick
+        // most browser engines' anti-aliasing into aligning the icon just right
+        transform: 'translateY(-0.5px)',
       },
     }),
 };

@@ -44,7 +44,6 @@ import { initializeUnsavedChangesManager } from './unsaved_changes_manager';
 import { initializeViewModeManager } from './view_mode_manager';
 import type { DashboardReadResponseBody } from '../../server';
 import { initializePauseFetchManager } from './pause_fetch_manager';
-import { getDashboardBackupService } from '../services/dashboard_api_services';
 import type { DashboardChildren } from './layout_manager/types';
 
 export function getDashboardApi({
@@ -94,9 +93,7 @@ export function getDashboardApi({
     async (id: string) => {
       await layoutManager.api.getChildApi(id);
     },
-    childrenSubject$.pipe(concatMap((children) => children)),
-    getDashboardBackupService(),
-    savedObjectId$
+    childrenSubject$.pipe(concatMap((children) => children))
   );
 
   const layoutManager = initializeLayoutManager(

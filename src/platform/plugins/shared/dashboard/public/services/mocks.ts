@@ -85,6 +85,4 @@ export const mockDashboardBackupService = {
     .fn()
     .mockReturnValue(['dashboardUnsavedOne', 'dashboardUnsavedTwo']),
   dashboardHasUnsavedEdits: jest.fn(),
-  getrelatedPanelsIndicatorId: jest.fn().mockReturnValue(undefined),
-  setRelatedPanelsIndicatorId: jest.fn(),
 };

@@ -9,7 +9,6 @@
 
 import { BehaviorSubject } from 'rxjs';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type { DashboardBackupService } from '../services/dashboard_backup_service';
 import { initializeTrackPanel } from './track_panel';
 import type { DashboardChildren } from './layout_manager/types';
 
@@ -26,16 +25,9 @@ const buildChild = (
 
 describe('track panel', () => {
   const mockChildrenSubject = new BehaviorSubject<DashboardChildren>({});
-  const mockBackupService = {
-    getrelatedPanelsIndicatorId: jest.fn(() => undefined),
-    setRelatedPanelsIndicatorId: jest.fn(),
-  } as unknown as DashboardBackupService;
-  const savedObjectId$ = new BehaviorSubject<string | undefined>(undefined);
   const { api, cleanup } = initializeTrackPanel(
     async (id: string) => undefined,
-    mockChildrenSubject,
-    mockBackupService,
-    savedObjectId$
+    mockChildrenSubject
   );
   const {
     expandPanel,
@@ -205,20 +197,12 @@ describe('track panel', () => {
   });
 
   describe('setRelatedPanelsIndicatorId', () => {
-    it('updates the subject and persists the id to the backup service', () => {
+    it('updates the subject', () => {
       setRelatedPanelsIndicatorId('control-id');
       expect(relatedPanelsIndicatorId$.value).toBe('control-id');
-      expect(mockBackupService.setRelatedPanelsIndicatorId).toHaveBeenCalledWith(
-        undefined,
-        'control-id'
-      );
 
       setRelatedPanelsIndicatorId(undefined);
       expect(relatedPanelsIndicatorId$.value).toBeUndefined();
-      expect(mockBackupService.setRelatedPanelsIndicatorId).toHaveBeenCalledWith(
-        undefined,
-        undefined
-      );
     });
   });
 
@@ -227,16 +211,9 @@ describe('track panel', () => {
     // without other state leaking in from prior cases.
     const setupBlurTest = () => {
       const children$ = new BehaviorSubject<DashboardChildren>({});
-      const backupService = {
-        getrelatedPanelsIndicatorId: jest.fn(() => undefined),
-        setRelatedPanelsIndicatorId: jest.fn(),
-      } as unknown as DashboardBackupService;
-      const savedObjectIdSubject$ = new BehaviorSubject<string | undefined>(undefined);
       const { api: blurApi, cleanup: blurCleanup } = initializeTrackPanel(
         async () => undefined,
-        children$,
-        backupService,
-        savedObjectIdSubject$
+        children$
       );
       return { children$, blurApi, blurCleanup };
     };

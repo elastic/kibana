@@ -249,11 +249,15 @@ const dashboardGridItemStyles = {
           outline: `${context.euiTheme.border.width.thick} solid ${context.euiTheme.colors.vis.euiColorVis0}`,
         },
         // Call out panels that are selected to indicate their related panels with the same border plus a semitransparent overlay
-        '&.dshDashboardGrid__item--selected .embPanel': {
-          backgroundColor: transparentize(context.euiTheme.colors.vis.euiColorVis0, 0.1),
+        '&.dshDashboardGrid__item--selected': {
+          // Ensure the overall panel still has a plain background so we can apply the semitransparent overlay on top of it
+          backgroundColor: context.euiTheme.colors.backgroundBasePlain,
+          '& .embPanel': {
+            backgroundColor: transparentize(context.euiTheme.colors.vis.euiColorVis0, 0.1),
 
-          '& div, & button': {
-            backgroundColor: 'transparent',
+            '& div, & button': {
+              backgroundColor: 'transparent',
+            },
           },
         },
       },
