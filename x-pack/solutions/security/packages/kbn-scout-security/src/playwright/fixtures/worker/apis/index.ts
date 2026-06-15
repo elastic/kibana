@@ -27,3 +27,6 @@ export type { ThreatIntelligenceApiService } from './threat_intelligence';
 
 export { getCorrelationsApiService } from './correlations';
 export type { CorrelationsApiService, CorrelationsFixture } from './correlations';
+
+export { getPrevalenceApiService, PREVALENCE_SOURCE_IP } from './prevalence';
+export type { PrevalenceApiService, PrevalenceFixture } from './prevalence';

@@ -17,6 +17,8 @@ export {
   getAttackDiscoveryApiService,
   getThreatIntelligenceApiService,
   getCorrelationsApiService,
+  getPrevalenceApiService,
+  PREVALENCE_SOURCE_IP,
 } from './apis';
 export type {
   DetectionRuleApiService,
@@ -28,4 +30,6 @@ export type {
   ThreatIntelligenceApiService,
   CorrelationsApiService,
   CorrelationsFixture,
+  PrevalenceApiService,
+  PrevalenceFixture,
 } from './apis';

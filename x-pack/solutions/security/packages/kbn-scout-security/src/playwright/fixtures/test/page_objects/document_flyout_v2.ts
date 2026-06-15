@@ -91,6 +91,8 @@ export class DocumentFlyoutV2 {
   public readonly threatIntelligence: Locator;
   /** Container for a child document flyout */
   public readonly childDocumentFlyout: Locator;
+  /** Alert title text scoped inside the child document flyout. */
+  public readonly childDocumentAlertTitle: Locator;
   /** Status-change context menu rendered inside the header badge popover. */
   public readonly statusPopoverMenu: Locator;
   /** EuiSelectable inside the "closing reason" sub-panel. */
@@ -198,6 +200,9 @@ export class DocumentFlyoutV2 {
       'actionItem-security-default-cellActions-addToTimeline'
     );
     this.childDocumentFlyout = page.testSubj.locator('securitySolutionFlyoutChildDocumentFlyout');
+    this.childDocumentAlertTitle = this.childDocumentFlyout.getByTestId(
+      'securitySolutionFlyoutAlertTitleText'
+    );
     this.statusPopoverMenu = page.testSubj.locator('event-details-alertStatusPopover');
     this.closingReasonSelectable = page.testSubj.locator('alert-closing-reason-selectable');
     this.closingReasonSubmitButton = page.testSubj.locator('alert-closing-reason-submit-button');

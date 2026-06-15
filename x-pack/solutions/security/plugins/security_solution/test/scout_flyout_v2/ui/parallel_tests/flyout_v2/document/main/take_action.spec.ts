@@ -27,7 +27,7 @@ import {
   RUN_ALERT_WORKFLOW_MENU_ITEM_TEST_SUBJ,
   ALERT_WORKFLOW_PANEL_TEST_SUBJ,
   INVESTIGATE_IN_TIMELINE_MENU_ITEM_TEST_SUBJ,
-  TIMELINE_BOTTOM_BAR_TITLE_BUTTON_TEST_SUBJ,
+  TIMELINE_MODAL_HEADER_PANEL_TEST_SUBJ,
 } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
 
@@ -168,8 +168,7 @@ spaceTest.describe(
           INVESTIGATE_IN_TIMELINE_MENU_ITEM_TEST_SUBJ
         );
 
-        // Timeline should open (bottom bar becomes visible)
-        await expect(page.getByTestId(TIMELINE_BOTTOM_BAR_TITLE_BUTTON_TEST_SUBJ)).toBeVisible({
+        await expect(page.getByTestId(TIMELINE_MODAL_HEADER_PANEL_TEST_SUBJ)).toBeVisible({
           timeout: 15_000,
         });
       }

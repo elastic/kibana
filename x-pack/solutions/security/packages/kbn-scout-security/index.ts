@@ -10,6 +10,7 @@ export { test, spaceTest } from './src/playwright';
 
 // Security-specific test constants
 export { CUSTOM_QUERY_RULE } from './src/playwright/constants/detection_rules';
+export { PREVALENCE_SOURCE_IP } from './src/playwright/fixtures/worker/apis/prevalence';
 export {
   SIGNALS_STATUS_API_PATH,
   ALERT_ASSIGNEES_API_PATH,
@@ -38,7 +39,8 @@ export {
   ALERT_WORKFLOW_PANEL_TEST_SUBJ,
   ISOLATE_HOST_MENU_ITEM_TEST_SUBJ,
   INVESTIGATE_IN_TIMELINE_MENU_ITEM_TEST_SUBJ,
-  TIMELINE_BOTTOM_BAR_TITLE_BUTTON_TEST_SUBJ,
+  TIMELINE_MODAL_HEADER_PANEL_TEST_SUBJ,
+  TIMELINE_PROVIDER_BADGE_TEST_SUBJ,
   NOTES_TOOL_CONTENT_TEST_SUBJ,
 } from './src/playwright/constants/take_action';
 

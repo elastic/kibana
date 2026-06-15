@@ -69,9 +69,11 @@ export const ISOLATE_HOST_MENU_ITEM_TEST_SUBJ = 'isolate-host-action-item' as co
 export const INVESTIGATE_IN_TIMELINE_MENU_ITEM_TEST_SUBJ =
   'investigate-in-timeline-action-item' as const;
 
-/** data-test-subj for the Timeline bottom-bar title button used to confirm Timeline opened. */
-export const TIMELINE_BOTTOM_BAR_TITLE_BUTTON_TEST_SUBJ =
-  'timeline-bottom-bar-title-button' as const;
+/** data-test-subj for the Timeline modal header panel (confirms the modal is fully open). */
+export const TIMELINE_MODAL_HEADER_PANEL_TEST_SUBJ = 'timeline-modal-header-panel' as const;
+
+/** data-test-subj for a data-provider badge rendered inside the open Timeline modal. */
+export const TIMELINE_PROVIDER_BADGE_TEST_SUBJ = 'providerBadge' as const;
 
 /* Notes tool */
 

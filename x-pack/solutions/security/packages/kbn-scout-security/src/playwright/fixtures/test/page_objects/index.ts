@@ -21,6 +21,7 @@ import { ServerlessProjectChromePage } from './serverless_project_chrome_page';
 import { DocumentFlyoutV2 } from './document_flyout_v2';
 import { ThreatIntelligenceToolPage } from './threat_intelligence_tool';
 import { CorrelationsToolPage } from './correlations_tool';
+import { PrevalenceToolPage } from './prevalence_tool';
 
 export type { ThreatMatchRuleCreatePage } from './threat_match_rule_create_page';
 
@@ -43,6 +44,8 @@ export interface SecurityPageObjects extends PageObjects {
   threatIntelligenceTool: ThreatIntelligenceToolPage;
   /** Correlations tool overlay inside the flyout v2 document flyout. */
   correlationsTool: CorrelationsToolPage;
+  /** Prevalence tool overlay inside the flyout v2 document flyout. */
+  prevalenceTool: PrevalenceToolPage;
 }
 
 export function extendPageObjects(
@@ -70,5 +73,6 @@ export function extendPageObjects(
     documentFlyoutV2: createLazyPageObject(DocumentFlyoutV2, page),
     threatIntelligenceTool: createLazyPageObject(ThreatIntelligenceToolPage, page),
     correlationsTool: createLazyPageObject(CorrelationsToolPage, page),
+    prevalenceTool: createLazyPageObject(PrevalenceToolPage, page),
   };
 }

@@ -14,6 +14,8 @@ import type { ScoutPage, Locator } from '@kbn/scout';
 export class CorrelationsToolPage {
   /** Title link in the insights correlations panel that opens the tool overlay. */
   public readonly titleLink: Locator;
+  /** Header row of the tools flyout — use to confirm the overlay is open. */
+  public readonly toolsFlyoutHeader: Locator;
   /** Clickable button in the tools flyout header showing the document icon and title. */
   public readonly toolsFlyoutTitle: Locator;
   /** Warning icon inside the tools flyout title button, confirming the document is an alert. */
@@ -34,6 +36,7 @@ export class CorrelationsToolPage {
 
   constructor(page: ScoutPage) {
     this.titleLink = page.testSubj.locator('securitySolutionFlyoutCorrelationsTitleLink');
+    this.toolsFlyoutHeader = page.testSubj.locator('securitySolutionFlyoutToolsFlyoutHeader');
     this.toolsFlyoutTitle = page.testSubj.locator('securitySolutionFlyoutToolsFlyoutHeaderTitle');
     this.toolsFlyoutTitleAlertIcon = page.testSubj.locator(
       'securitySolutionFlyoutToolsFlyoutHeaderTitleIcon'

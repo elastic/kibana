@@ -9,7 +9,8 @@ import {
   spaceTest,
   tags,
   CUSTOM_QUERY_RULE,
-  TIMELINE_BOTTOM_BAR_TITLE_BUTTON_TEST_SUBJ,
+  TIMELINE_MODAL_HEADER_PANEL_TEST_SUBJ,
+  TIMELINE_PROVIDER_BADGE_TEST_SUBJ,
 } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
 
@@ -56,11 +57,7 @@ spaceTest.describe(
 
         await pageObjects.correlationsTool.toolsFlyoutTitle.click();
         await pageObjects.documentFlyoutV2.waitForChildDocumentFlyout();
-        await expect(
-          pageObjects.documentFlyoutV2.childDocumentFlyout.getByTestId(
-            'securitySolutionFlyoutAlertTitleText'
-          )
-        ).toContainText(ruleName);
+        await expect(pageObjects.documentFlyoutV2.childDocumentAlertTitle).toContainText(ruleName);
       }
     );
 
@@ -77,18 +74,14 @@ spaceTest.describe(
         await pageObjects.correlationsTool.titleLink.waitFor({ state: 'visible' });
         await pageObjects.correlationsTool.titleLink.click();
 
-        await expect(page.getByTestId('securitySolutionFlyoutToolsFlyoutHeader')).toBeVisible({
+        await expect(pageObjects.correlationsTool.toolsFlyoutHeader).toBeVisible({
           timeout: 10_000,
         });
 
         await expect(pageObjects.correlationsTool.sameSourceAlertsSectionTable).toBeVisible();
         await pageObjects.correlationsTool.sameSourceAlertsSectionFirstPreviewButton.click();
         await pageObjects.documentFlyoutV2.waitForChildDocumentFlyout();
-        await expect(
-          pageObjects.documentFlyoutV2.childDocumentFlyout.getByTestId(
-            'securitySolutionFlyoutAlertTitleText'
-          )
-        ).toContainText(ruleName);
+        await expect(pageObjects.documentFlyoutV2.childDocumentAlertTitle).toContainText(ruleName);
 
         // Close the child flyout
         await page.keyboard.press('Escape');
@@ -96,11 +89,7 @@ spaceTest.describe(
         await expect(pageObjects.correlationsTool.sessionAlertsSectionTable).toBeVisible();
         await pageObjects.correlationsTool.sessionAlertsSectionFirstPreviewButton.click();
         await pageObjects.documentFlyoutV2.waitForChildDocumentFlyout();
-        await expect(
-          pageObjects.documentFlyoutV2.childDocumentFlyout.getByTestId(
-            'securitySolutionFlyoutAlertTitleText'
-          )
-        ).toContainText(ruleName);
+        await expect(pageObjects.documentFlyoutV2.childDocumentAlertTitle).toContainText(ruleName);
 
         // TODO: Related Attacks
       }
@@ -119,7 +108,7 @@ spaceTest.describe(
         await pageObjects.correlationsTool.titleLink.waitFor({ state: 'visible' });
         await pageObjects.correlationsTool.titleLink.click();
 
-        await expect(page.getByTestId('securitySolutionFlyoutToolsFlyoutHeader')).toBeVisible({
+        await expect(pageObjects.correlationsTool.toolsFlyoutHeader).toBeVisible({
           timeout: 10_000,
         });
 
@@ -128,13 +117,12 @@ spaceTest.describe(
           .getByRole('button')
           .click();
 
-        await expect(page.getByTestId(TIMELINE_BOTTOM_BAR_TITLE_BUTTON_TEST_SUBJ)).toBeVisible({
+        await expect(page.getByTestId(TIMELINE_MODAL_HEADER_PANEL_TEST_SUBJ)).toBeVisible({
           timeout: 15_000,
         });
-        await expect(page.getByTestId('timeline-modal-header-panel')).toBeVisible();
 
-        await expect(page.getByTestId('providerBadge')).toBeVisible();
-        await expect(page.getByTestId('providerBadge')).toContainText('_id:');
+        await expect(page.getByTestId(TIMELINE_PROVIDER_BADGE_TEST_SUBJ)).toBeVisible();
+        await expect(page.getByTestId(TIMELINE_PROVIDER_BADGE_TEST_SUBJ)).toContainText('_id:');
       }
     );
   }
