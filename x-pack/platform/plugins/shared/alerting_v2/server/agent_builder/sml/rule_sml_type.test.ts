@@ -185,7 +185,10 @@ describe('createRuleSmlType', () => {
               'ops, cpu',
               baseRuleAttrs.evaluation!.query!.base,
             ].join('\n'),
-            permissions: [`api:${ALERTING_V2_API_PRIVILEGES.rules.read}`],
+            permissions: {
+              kibana: { privileges: [{ name: `api:${ALERTING_V2_API_PRIVILEGES.rules.read}` }] },
+              elasticsearch: { indices: [] },
+            },
           },
         ],
       });
@@ -231,7 +234,7 @@ describe('createRuleSmlType', () => {
         created_at: '2026-04-10T00:00:00.000Z',
         updated_at: '2026-04-10T00:00:00.000Z',
         spaces: ['default'],
-        permissions: [],
+        permissions: { kibana: { privileges: [] }, elasticsearch: { indices: [] } },
         ingestion_method: 'crawled' as const,
       };
     };
