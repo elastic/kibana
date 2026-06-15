@@ -483,7 +483,11 @@ describe('ai.agent workflow step (Agent Builder)', () => {
 
       const res = await step.handler(createContext({ input: { message: 'hi' } }));
 
-      expect(res.output?.metadata?.usage).toEqual({ inputTokens: 100, outputTokens: 50, totalTokens: 150 });
+      expect(res.output?.metadata?.usage).toEqual({
+        inputTokens: 100,
+        outputTokens: 50,
+        totalTokens: 150,
+      });
     });
 
     it('accumulates token usage across multiple rounds', async () => {
@@ -528,7 +532,11 @@ describe('ai.agent workflow step (Agent Builder)', () => {
       // Output should be from the last round
       expect(res.output?.message).toBe('final');
       // Usage should be the sum across all rounds
-      expect(res.output?.metadata?.usage).toEqual({ inputTokens: 500, outputTokens: 200, totalTokens: 700 });
+      expect(res.output?.metadata?.usage).toEqual({
+        inputTokens: 500,
+        outputTokens: 200,
+        totalTokens: 700,
+      });
     });
 
     it('returns zero usage when round has no model_usage', async () => {
@@ -548,11 +556,16 @@ describe('ai.agent workflow step (Agent Builder)', () => {
 
       const res = await step.handler(createContext({ input: { message: 'hi' } }));
 
-      expect(res.output?.metadata?.usage).toEqual({ inputTokens: 0, outputTokens: 0, totalTokens: 0 });
+      expect(res.output?.metadata?.usage).toEqual({
+        inputTokens: 0,
+        outputTokens: 0,
+        totalTokens: 0,
+      });
     });
 
     it('preserves partial token counts when the event stream errors mid-execution', async () => {
-      const { concat, throwError: rxThrowError } = jest.requireActual<typeof import('rxjs')>('rxjs');
+      const { concat, throwError: rxThrowError } =
+        jest.requireActual<typeof import('rxjs')>('rxjs');
 
       // Cold observable: emits one round with tokens, then errors
       const events$ = concat(
@@ -562,7 +575,12 @@ describe('ai.agent workflow step (Agent Builder)', () => {
             round: {
               id: 'r-1',
               response: { message: 'partial' },
-              model_usage: { connector_id: 'c', llm_calls: 1, input_tokens: 150, output_tokens: 60 },
+              model_usage: {
+                connector_id: 'c',
+                llm_calls: 1,
+                input_tokens: 150,
+                output_tokens: 60,
+              },
             },
           },
         }),
@@ -576,7 +594,11 @@ describe('ai.agent workflow step (Agent Builder)', () => {
 
       expect(res.error).toBeInstanceOf(Error);
       // Partial token counts are preserved in the output despite the error
-      expect(res.output?.metadata?.usage).toEqual({ inputTokens: 150, outputTokens: 60, totalTokens: 210 });
+      expect(res.output?.metadata?.usage).toEqual({
+        inputTokens: 150,
+        outputTokens: 60,
+        totalTokens: 210,
+      });
     });
   });
 });
