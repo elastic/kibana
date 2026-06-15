@@ -66,7 +66,7 @@ export const sampleDocument: SmlDocument = {
   created_at: '2024-01-01',
   updated_at: '2024-01-02',
   spaces: ['test-space'],
-  permissions: [],
+  permissions: { kibana: { privileges: [] }, elasticsearch: { indices: [] } },
   ingestion_method: 'crawled',
 };
 

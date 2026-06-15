@@ -99,7 +99,10 @@ export const createSignificantEventSmlType = ({
               type: SIGNIFICANT_EVENT_SML_TYPE,
               title: event.title,
               content: eventToSmlContent(event),
-              permissions: [`api:${STREAMS_API_PRIVILEGES.read}`],
+              permissions: {
+                kibana: { privileges: [{ name: `api:${STREAMS_API_PRIVILEGES.read}` }] },
+                elasticsearch: { indices: [] },
+              },
             },
           ],
         };
