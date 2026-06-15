@@ -49,6 +49,7 @@ export interface SyntheticsPrivateLocationApi {
 interface FleetPackageItem {
   status?: string;
   version?: string;
+  latestVersion?: string;
   installationInfo?: { version?: string };
 }
 
@@ -68,7 +69,15 @@ export function createSyntheticsPrivateLocationApi(
 
   const fetchSyntheticsPackageVersion = async (): Promise<string> => {
     const { data } = await fleetApi.integration.getPackage('synthetics');
-    return data?.item?.version ?? DEFAULT_SYNTHETICS_VERSION;
+    // When a package is installed, Fleet's GET epm/packages/{name} returns the
+    // *installed* version in `item.version` and exposes the registry's latest in
+    // `item.latestVersion`. Prefer `latestVersion` so no-arg callers of
+    // `installSyntheticsPackage()` always target the registry's latest and
+    // perform a real upgrade even when an older version is already installed
+    // (e.g. the "handles auto upgrading policies" test installs an old version
+    // first, then expects a subsequent no-arg install to upgrade it).
+    const item = data?.item as FleetPackageItem | undefined;
+    return item?.latestVersion ?? item?.version ?? DEFAULT_SYNTHETICS_VERSION;
   };
 
   // The synthetics Fleet package install is a *global* operation: every Scout
