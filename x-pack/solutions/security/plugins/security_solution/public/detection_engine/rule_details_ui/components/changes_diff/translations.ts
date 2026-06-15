@@ -25,6 +25,6 @@ export const NO_DIFF_AVAILABLE_CALLOUT = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleChangesHistory.noDiffAvailableCallout',
   {
     defaultMessage:
-      'Change tracking was activated while this rule already existed. Because no prior state was captured, a before/after comparison is unavailable the complete rule state at the time of this update is shown instead.',
+      'Change tracking was activated while this rule already existed. Because no prior state was captured, a before/after comparison is unavailable. The complete rule state at the time of this update is shown instead.',
   }
 );
