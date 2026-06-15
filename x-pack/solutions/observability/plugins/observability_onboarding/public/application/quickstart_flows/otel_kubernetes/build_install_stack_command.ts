@@ -8,11 +8,10 @@
 import { buildValuesFileUrl } from './build_values_file_url';
 import { OTEL_KUBE_STACK_VERSION, OTEL_STACK_NAMESPACE } from './constants';
 
-const CURRENT_BASELINE_AGENT_VERSION = '9.4.2';
-const CURRENT_BASELINE_AGENT_VERSION_PARSED: [number, number, number] = [9, 4, 2];
+const EXTENDED_DAEMON_PROCESSORS_AGENT_VERSION = '9.4.2';
+const EXTENDED_DAEMON_PROCESSORS_AGENT_VERSION_PARSED: [number, number, number] = [9, 4, 2];
 const LEGACY_DAEMON_PROCESSOR_START_INDEX = 8;
-const MANAGED_OTLP_9_1_DAEMON_PROCESSOR_START_INDEX = 9;
-const CURRENT_DAEMON_PROCESSOR_START_INDEX = 9;
+const EXTENDED_DAEMON_PROCESSOR_START_INDEX = 9;
 
 interface GetDaemonProcessorStartIndexesParams {
   agentVersion: string;
@@ -46,8 +45,8 @@ const parseAgentVersion = (agentVersion: string): [number, number, number] => {
   }
 
   // Malformed version data should not append custom processors before upstream
-  // processors such as resource/cloud, so fail closed to the current baseline.
-  return CURRENT_BASELINE_AGENT_VERSION_PARSED;
+  // processors such as resource/cloud, so fail closed to the extended baseline.
+  return EXTENDED_DAEMON_PROCESSORS_AGENT_VERSION_PARSED;
 };
 
 const isAgentVersionAtLeast = (agentVersion: string, minimumVersion: string): boolean => {
@@ -59,34 +58,14 @@ const isAgentVersionAtLeast = (agentVersion: string, minimumVersion: string): bo
   return patch >= minimumPatch;
 };
 
-const isAgentVersionBefore = (agentVersion: string, maximumVersion: string): boolean => {
-  const [major, minor, patch] = parseAgentVersion(agentVersion);
-  const [maximumMajor, maximumMinor, maximumPatch] = parseAgentVersion(maximumVersion);
-
-  if (major !== maximumMajor) return major < maximumMajor;
-  if (minor !== maximumMinor) return minor < maximumMinor;
-  return patch < maximumPatch;
-};
-
 const getDaemonProcessorStartIndex = ({
   agentVersion,
-  isManagedOtlpServiceAvailable,
-  isMetricsOnboardingEnabled,
 }: GetDaemonProcessorStartIndexesParams): number => {
   // Helm --set can replace list items by index, but it cannot append to an
-  // existing list. Keep the known EDOT append indexes explicit so custom
-  // processors start after upstream processors such as resource/cloud.
-  if (isAgentVersionAtLeast(agentVersion, CURRENT_BASELINE_AGENT_VERSION)) {
-    return CURRENT_DAEMON_PROCESSOR_START_INDEX;
-  }
-
-  if (
-    isAgentVersionAtLeast(agentVersion, '9.1.0') &&
-    isAgentVersionBefore(agentVersion, '9.2.0') &&
-    isManagedOtlpServiceAvailable &&
-    isMetricsOnboardingEnabled
-  ) {
-    return MANAGED_OTLP_9_1_DAEMON_PROCESSOR_START_INDEX;
+  // existing list. EDOT 9.4.2 added a daemon processor, so custom processors
+  // must start one slot later to avoid replacing resource/cloud.
+  if (isAgentVersionAtLeast(agentVersion, EXTENDED_DAEMON_PROCESSORS_AGENT_VERSION)) {
+    return EXTENDED_DAEMON_PROCESSOR_START_INDEX;
   }
 
   return LEGACY_DAEMON_PROCESSOR_START_INDEX;
