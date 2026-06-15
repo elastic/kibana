@@ -17,13 +17,14 @@ export interface ReindexOptions {
   source: { index: Names; query?: QueryDslQueryContainer };
   dest: { index: IndexName };
   signal?: AbortSignal;
+  requestTimeout?: number;
 }
 
 export const reindex = async (
   esClient: EsClient,
   options: ReindexOptions
 ): Promise<{ created: number; total: number }> => {
-  const { source, dest, signal } = options;
+  const { source, dest, signal, requestTimeout } = options;
   const body: ReindexRequest = {
     source: { index: source.index, query: source.query },
     dest: { index: dest.index },
@@ -31,7 +32,7 @@ export const reindex = async (
     refresh: true,
     conflicts: 'proceed',
   };
-  const response = await esClient.reindex(body, { signal });
+  const response = await esClient.reindex(body, { signal, requestTimeout });
   const created = response.created ?? 0;
   const total = response.total ?? 0;
   return { created, total };

@@ -18,13 +18,14 @@ export interface UpdateByQueryWithScriptOptions {
   script: string;
   params: Record<string, unknown>;
   signal?: AbortSignal;
+  requestTimeout?: number;
 }
 
 export const updateByQueryWithScript = async (
   esClient: ElasticsearchClient,
   options: UpdateByQueryWithScriptOptions
 ): Promise<{ updated: number; total: number }> => {
-  const { index, query, script, params, signal } = options;
+  const { index, query, script, params, signal, requestTimeout } = options;
   const response = await esClient.updateByQuery(
     {
       index,
@@ -40,7 +41,7 @@ export const updateByQueryWithScript = async (
         params,
       },
     },
-    { signal }
+    { signal, requestTimeout }
   );
   const updated = response.updated ?? 0;
   const total = response.total ?? 0;

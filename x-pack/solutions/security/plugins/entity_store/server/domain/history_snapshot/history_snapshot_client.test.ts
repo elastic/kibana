@@ -40,16 +40,18 @@ function createMockGlobalStateClient(overrides?: { status?: 'started' | 'stopped
 
 describe('HistorySnapshotClient', () => {
   const namespace = 'default';
+  let mockLogger: ReturnType<typeof loggerMock.create>;
   let mockEsClient: jest.Mocked<ElasticsearchClient>;
   let mockGlobalStateClient: ReturnType<typeof createMockGlobalStateClient>;
   let client: HistorySnapshotClient;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockLogger = loggerMock.create();
     mockEsClient = {} as jest.Mocked<ElasticsearchClient>;
     mockGlobalStateClient = createMockGlobalStateClient();
     client = new HistorySnapshotClient({
-      logger: loggerMock.create(),
+      logger: mockLogger,
       esClient: mockEsClient,
       namespace,
       globalStateClient:
@@ -79,6 +81,7 @@ describe('HistorySnapshotClient', () => {
         expect.objectContaining({
           source: { index: '.entities.v2.latest.security_default-00001' },
           dest: { index: expect.stringMatching(/\.entities\.v2\.history\.security_default\./) },
+          requestTimeout: 2 * 60 * 1000,
         })
       );
       expect(mockUpdateByQueryWithScript).toHaveBeenCalledWith(
@@ -88,6 +91,7 @@ describe('HistorySnapshotClient', () => {
           query: { match_all: {} },
           script: HISTORY_SNAPSHOT_RESET_SCRIPT,
           params: expect.objectContaining({ timestampNow: expect.any(String) }),
+          requestTimeout: 2 * 60 * 1000,
         })
       );
       expect(mockGlobalStateClient.update).toHaveBeenCalledWith({
@@ -130,7 +134,7 @@ describe('HistorySnapshotClient', () => {
         historySnapshot: { ...mockGlobalStateStarted.historySnapshot, status: 'stopped' },
       });
       client = new HistorySnapshotClient({
-        logger: loggerMock.create(),
+        logger: mockLogger,
         esClient: mockEsClient,
         namespace,
         globalStateClient:
@@ -153,8 +157,11 @@ describe('HistorySnapshotClient', () => {
 
       expect(result.ok).toBe(false);
       if (!result.ok) {
-        expect(result.error.message).toBe('History snapshot failed');
+        expect(result.error.message).toBe('History snapshot failed during create index');
       }
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'history snapshot failed during create index: index creation failed'
+      );
       expect(mockReindex).not.toHaveBeenCalled();
       expect(mockUpdateByQueryWithScript).not.toHaveBeenCalled();
       expect(mockGlobalStateClient.update).toHaveBeenCalledWith({
@@ -172,8 +179,11 @@ describe('HistorySnapshotClient', () => {
 
       expect(result.ok).toBe(false);
       if (!result.ok) {
-        expect(result.error.message).toBe('History snapshot failed');
+        expect(result.error.message).toBe('History snapshot failed during reindex');
       }
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'history snapshot failed during reindex: reindex failed'
+      );
       expect(mockUpdateByQueryWithScript).not.toHaveBeenCalled();
       expect(mockGlobalStateClient.update).toHaveBeenCalledWith({
         historySnapshot: expect.objectContaining({
@@ -191,8 +201,11 @@ describe('HistorySnapshotClient', () => {
 
       expect(result.ok).toBe(false);
       if (!result.ok) {
-        expect(result.error.message).toBe('History snapshot failed');
+        expect(result.error.message).toBe('History snapshot failed during update by query');
       }
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'history snapshot failed during update by query: update_by_query failed'
+      );
       expect(mockGlobalStateClient.update).toHaveBeenCalledWith({
         historySnapshot: expect.objectContaining({
           lastError: {

@@ -26,6 +26,8 @@ export interface RunHistorySnapshotOptions {
 
 export { HISTORY_SNAPSHOT_RESET_SCRIPT } from './constants';
 
+const HISTORY_SNAPSHOT_TIMEOUT_MS = 2 * 60 * 1000;
+
 export interface HistorySnapshotClientDependencies {
   logger: Logger;
   esClient: ElasticsearchClient;
@@ -70,38 +72,60 @@ export class HistorySnapshotClient {
 
     try {
       await createIndex(this.esClient, historySnapshotIndex, { throwIfExists: false });
+    } catch (err) {
+      return this.handleOperationError('create index', err, globalState);
+    }
 
-      const reindexResult = await reindex(this.esClient, {
+    let reindexResult: { created: number; total: number };
+    try {
+      reindexResult = await reindex(this.esClient, {
         source: { index: latestIndex },
         dest: { index: historySnapshotIndex },
         signal: abortSignal,
+        requestTimeout: HISTORY_SNAPSHOT_TIMEOUT_MS,
       });
-      const docCount = reindexResult.total;
-      if (docCount === 0) {
-        await this.updateGlobalStateOnSuccess(globalState);
-        return { ok: true, historySnapshotIndex, docCount: 0, resetCount: 0 };
-      }
+    } catch (err) {
+      return this.handleOperationError('reindex', err, globalState);
+    }
 
-      const updateResult = await updateByQueryWithScript(this.esClient, {
+    const { total: docCount } = reindexResult;
+    if (docCount === 0) {
+      await this.updateGlobalStateOnSuccess(globalState);
+      return { ok: true, historySnapshotIndex, docCount: 0, resetCount: 0 };
+    }
+
+    let updateResult: { updated: number; total: number };
+    try {
+      updateResult = await updateByQueryWithScript(this.esClient, {
         index: latestIndex,
         query: { match_all: {} },
         script: HISTORY_SNAPSHOT_RESET_SCRIPT,
         params: { timestampNow },
         signal: abortSignal,
+        requestTimeout: HISTORY_SNAPSHOT_TIMEOUT_MS,
       });
-      await this.updateGlobalStateOnSuccess(globalState);
-      return {
-        ok: true,
-        historySnapshotIndex,
-        docCount,
-        resetCount: updateResult.updated,
-      };
     } catch (err) {
-      const caughtError = err instanceof Error ? err : new Error(String(err));
-      this.logger.error(`history snapshot failed: ${caughtError.message}`);
-      await this.updateGlobalStateOnError(globalState, caughtError);
-      return { ok: false, error: new Error('History snapshot failed') };
+      return this.handleOperationError('update by query', err, globalState);
     }
+
+    await this.updateGlobalStateOnSuccess(globalState);
+    return {
+      ok: true,
+      historySnapshotIndex,
+      docCount,
+      resetCount: updateResult.updated,
+    };
+  }
+
+  private async handleOperationError(
+    operation: string,
+    err: unknown,
+    globalState: EntityStoreGlobalState
+  ): Promise<RunHistorySnapshotResult> {
+    const message = getErrorMessage(err);
+    this.logger.error(`history snapshot failed during ${operation}: ${message}`);
+    await this.updateGlobalStateOnError(globalState, new Error(message));
+    return { ok: false, error: new Error(`History snapshot failed during ${operation}`) };
   }
 
   private async updateGlobalStateOnSuccess(globalState: EntityStoreGlobalState): Promise<void> {
