@@ -140,10 +140,7 @@ async function preValidate<Params extends RuleParams>({
 }> {
   const validated = new Map<string, { id: string; rule: BulkCreateRulesItem<Params> }>();
   const errors: BulkOperationError[] = [];
-  const authPairs = new Map<
-    string,
-    { ruleTypeId: string; consumer: string; ids: string[]; names: Map<string, string> }
-  >();
+  const authPairs = new Map<string, { ruleTypeId: string; consumer: string }>();
 
   // Phase A1: per-rule in-memory checks, sequential, cheapest-first.
   await withSpan({ name: 'preValidate.checkInMemory', type: 'rules' }, async () => {
@@ -183,17 +180,8 @@ async function preValidate<Params extends RuleParams>({
         }
 
         const authzKey = `${data.alertTypeId}::${data.consumer}`;
-        const pair = authPairs.get(authzKey);
-        if (pair) {
-          pair.ids.push(id);
-          pair.names.set(id, data.name);
-        } else {
-          authPairs.set(authzKey, {
-            ruleTypeId: data.alertTypeId,
-            consumer: data.consumer,
-            ids: [id],
-            names: new Map([[id, data.name]]),
-          });
+        if (!authPairs.has(authzKey)) {
+          authPairs.set(authzKey, { ruleTypeId: data.alertTypeId, consumer: data.consumer });
         }
 
         validated.set(id, { id, rule });
@@ -211,34 +199,24 @@ async function preValidate<Params extends RuleParams>({
     return { validated: [], errors };
   }
 
-  // Phase A2: deduped per-pair authorization.
-  await withSpan({ name: 'preValidate.ensureAuthorized', type: 'rules' }, async () => {
-    for (const { ruleTypeId, consumer, ids, names } of authPairs.values()) {
-      try {
-        await context.authorization.ensureAuthorized({
+  // Phase A2: bulk authz. Phase A2: bulk authz fails the whole request on any unauthorized pair.
+  await withSpan({ name: 'preValidate.bulkEnsureAuthorized', type: 'rules' }, async () => {
+    try {
+      // Runs after A1 intentionally. A1 removes invalid/unregistered ruleTypeIds,
+      // so we only authorize pairs that survived schema + registry checks.
+      await context.authorization.bulkEnsureAuthorized({
+        ruleTypeIdConsumersPairs: [...authPairs.values()].map(({ ruleTypeId, consumer }) => ({
           ruleTypeId,
-          consumer,
-          operation: WriteOperations.Create,
-          entity: AlertingAuthorizationEntity.Rule,
-        });
-      } catch (authzError) {
-        // One audit per rule in failing set. Following single rule `create()`.
-        for (const ruleId of ids) {
-          context.auditLogger?.log(
-            ruleAuditEvent({
-              action: RuleAuditAction.CREATE,
-              savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: ruleId, name: names.get(ruleId)! },
-              error: authzError,
-            })
-          );
-          errors.push({
-            message: authzError.message,
-            status: authzError.output?.statusCode,
-            rule: { id: ruleId, name: names.get(ruleId) ?? 'n/a' },
-          });
-          validated.delete(ruleId);
-        }
-      }
+          consumers: [consumer],
+        })),
+        operation: WriteOperations.Create,
+        entity: AlertingAuthorizationEntity.Rule,
+      });
+    } catch (authzError) {
+      context.auditLogger?.log(
+        ruleAuditEvent({ action: RuleAuditAction.CREATE, error: authzError })
+      );
+      throw authzError;
     }
   });
 

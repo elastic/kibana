@@ -535,7 +535,7 @@ describe('bulkCreateRules', () => {
       expect(unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0]).toHaveLength(2);
     });
 
-    test('all inputs fail preValidate: zero calls to authorization.ensureAuthorized, bulkSchedule, bulkCreate, createAPIKey', async () => {
+    test('all inputs fail preValidate: zero calls to authorization.bulkEnsureAuthorized, bulkSchedule, bulkCreate, createAPIKey', async () => {
       ruleTypeRegistry.get.mockImplementation(() => {
         throw new Error('unregistered');
       });
@@ -546,7 +546,7 @@ describe('bulkCreateRules', () => {
 
       expect(result.errors).toHaveLength(2);
       expect(result.successfulIds).toEqual([]);
-      expect(authorization.ensureAuthorized).not.toHaveBeenCalled();
+      expect(authorization.bulkEnsureAuthorized).not.toHaveBeenCalled();
       expect(rulesClientParams.createAPIKey).not.toHaveBeenCalled();
       expect(taskManager.bulkSchedule).not.toHaveBeenCalled();
       expect(unsecuredSavedObjectsClient.bulkCreate).not.toHaveBeenCalled();
@@ -626,22 +626,44 @@ describe('bulkCreateRules', () => {
       expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
     });
 
-    test('deduped per-pair authz: two rules same pair, rejected → ensureAuthorized called once, both get per-rule audit+error', async () => {
-      (authorization.ensureAuthorized as jest.Mock).mockRejectedValueOnce(
-        new Error('not authorized')
+    test('bulk authz: deduped pairs sent in a single call', async () => {
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue(
+        buildBulkResponse([{ id: 'mock-id-1' }, { id: 'mock-id-2' }, { id: 'mock-id-3' }])
       );
 
-      const result = await rulesClient.bulkCreateRules({
+      await rulesClient.bulkCreateRules({
         rules: [
           { data: baseRule({ name: 'a', alertTypeId: '123', consumer: 'bar' }) },
           { data: baseRule({ name: 'b', alertTypeId: '123', consumer: 'bar' }) },
+          { data: baseRule({ name: 'c', alertTypeId: '123', consumer: 'other' }) },
         ],
       });
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledTimes(1);
-      expect(result.errors).toHaveLength(2);
-      expect(result.successfulIds).toEqual([]);
+      expect(authorization.bulkEnsureAuthorized).toHaveBeenCalledTimes(1);
+      const callArg = (authorization.bulkEnsureAuthorized as jest.Mock).mock.calls[0][0];
+      expect(callArg.ruleTypeIdConsumersPairs).toEqual([
+        { ruleTypeId: '123', consumers: ['bar'] },
+        { ruleTypeId: '123', consumers: ['other'] },
+      ]);
+    });
+
+    test('bulk authz rejection: throws, single audit event, zero writes', async () => {
+      (authorization.bulkEnsureAuthorized as jest.Mock).mockRejectedValueOnce(
+        new Error('not authorized')
+      );
+
+      await expect(
+        rulesClient.bulkCreateRules({
+          rules: [
+            { data: baseRule({ name: 'a', alertTypeId: '123', consumer: 'bar' }) },
+            { data: baseRule({ name: 'b', alertTypeId: '123', consumer: 'other' }) },
+          ],
+        })
+      ).rejects.toThrow('not authorized');
+
+      expect(authorization.bulkEnsureAuthorized).toHaveBeenCalledTimes(1);
       expect(unsecuredSavedObjectsClient.bulkCreate).not.toHaveBeenCalled();
+      expect(taskManager.bulkSchedule).not.toHaveBeenCalled();
 
       const failAudits = (auditLogger.log as jest.Mock).mock.calls
         .map(([event]) => event)
@@ -649,30 +671,8 @@ describe('bulkCreateRules', () => {
           (e: { event?: { action: string; outcome?: string } }) =>
             e?.event?.action === RuleAuditAction.CREATE && e?.event?.outcome === 'failure'
         );
-      expect(failAudits).toHaveLength(2);
-    });
-
-    test('partial authz: pair A authorized, pair B rejected → pair A survives, pair B gets audit+error', async () => {
-      (authorization.ensureAuthorized as jest.Mock).mockImplementation(
-        async ({ consumer }: { consumer: string }) => {
-          if (consumer === 'other') throw new Error('not authorized for other');
-        }
-      );
-      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue(
-        buildBulkResponse([{ id: 'mock-id-1' }])
-      );
-
-      const result = await rulesClient.bulkCreateRules({
-        rules: [
-          { data: baseRule({ name: 'allowed', alertTypeId: '123', consumer: 'bar' }) },
-          { data: baseRule({ name: 'blocked', alertTypeId: '123', consumer: 'other' }) },
-        ],
-      });
-
-      expect(result.errors).toHaveLength(1);
-      expect(result.errors[0].rule.name).toBe('blocked');
-      expect(result.successfulIds).toEqual(['mock-id-1']);
-      expect(unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0]).toHaveLength(1);
+      expect(failAudits).toHaveLength(1);
+      expect(failAudits[0].kibana?.saved_object).toBeUndefined();
     });
 
     test('ids are assigned before preValidate (caller-supplied id passed through)', async () => {
