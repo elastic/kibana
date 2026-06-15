@@ -13,12 +13,15 @@ import { verifyAccessAndContext, rewriteNamespaces } from './lib';
 import type { GetGlobalExecutionKPIParams } from '../rules_client';
 import type { ILicenseState } from '../lib';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from './constants';
+import { MAX_KQL_FILTER_LENGTH, MAX_NAMESPACES, MAX_ID_LENGTH } from '../../common/constants';
 
 const querySchema = schema.object({
   date_start: schema.string(),
   date_end: schema.maybe(schema.string()),
-  filter: schema.maybe(schema.string()),
-  namespaces: schema.maybe(schema.arrayOf(schema.string())),
+  filter: schema.maybe(schema.string({ maxLength: MAX_KQL_FILTER_LENGTH })),
+  namespaces: schema.maybe(
+    schema.arrayOf(schema.string({ maxLength: MAX_ID_LENGTH }), { maxSize: MAX_NAMESPACES })
+  ),
 });
 
 const rewriteReq: RewriteRequestCase<GetGlobalExecutionKPIParams> = ({

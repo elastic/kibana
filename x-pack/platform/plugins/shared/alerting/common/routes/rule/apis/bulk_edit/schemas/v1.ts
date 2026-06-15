@@ -16,7 +16,7 @@ import {
   MAX_BULK_EDIT_ACTIONS,
   MAX_BULK_EDIT_TAGS,
   MAX_TAG_LENGTH,
-  MAX_GENERIC_ID_LENGTH,
+  MAX_ID_LENGTH,
   MAX_KQL_FILTER_LENGTH,
   MAX_SNOOZE_SCHEDULE_IDS,
 } from '../../../../../constants';
@@ -30,10 +30,10 @@ export const ruleSnoozeScheduleSchema = schema.object({
 });
 
 const ruleActionSchema = schema.object({
-  group: schema.maybe(schema.string({ maxLength: MAX_GENERIC_ID_LENGTH })),
-  id: schema.string({ maxLength: MAX_GENERIC_ID_LENGTH }),
+  group: schema.maybe(schema.string({ maxLength: MAX_ID_LENGTH })),
+  id: schema.string({ maxLength: MAX_ID_LENGTH }),
   params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
-  uuid: schema.maybe(schema.string({ maxLength: MAX_GENERIC_ID_LENGTH })),
+  uuid: schema.maybe(schema.string({ maxLength: MAX_ID_LENGTH })),
   frequency: schema.maybe(
     schema.object({
       summary: schema.boolean(),
@@ -85,7 +85,7 @@ export const bulkEditOperationsSchema = schema.arrayOf(
       operation: schema.oneOf([schema.literal('delete')]),
       field: schema.literal('snoozeSchedule'),
       value: schema.maybe(
-        schema.arrayOf(schema.string({ maxLength: MAX_GENERIC_ID_LENGTH }), {
+        schema.arrayOf(schema.string({ maxLength: MAX_ID_LENGTH }), {
           maxSize: MAX_SNOOZE_SCHEDULE_IDS,
         })
       ),

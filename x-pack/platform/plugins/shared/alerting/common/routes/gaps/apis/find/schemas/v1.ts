@@ -7,13 +7,14 @@
 import { schema } from '@kbn/config-schema';
 import { gapsResponseSchemaV1 } from '../../../response';
 import { optionalExcludedGapReasonsSchema } from '../../../../../schemas';
+import { MAX_ID_LENGTH } from '../../../../../constants';
 
 export const findGapsBodySchema = schema.object(
   {
     end: schema.string(),
     page: schema.number({ defaultValue: 1, min: 1 }),
     per_page: schema.number({ defaultValue: 10, min: 1, max: 10000 }),
-    rule_id: schema.string(),
+    rule_id: schema.string({ maxLength: MAX_ID_LENGTH }),
     start: schema.string(),
     sort_field: schema.maybe(
       schema.oneOf([
@@ -29,7 +30,8 @@ export const findGapsBodySchema = schema.object(
           schema.literal('partially_filled'),
           schema.literal('unfilled'),
           schema.literal('filled'),
-        ])
+        ]),
+        { maxSize: 3 }
       )
     ),
     excluded_reasons: optionalExcludedGapReasonsSchema,

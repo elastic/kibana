@@ -14,6 +14,13 @@ import { verifyAccessAndContext, rewriteNamespaces } from './lib';
 import type { AlertingRequestHandlerContext } from '../types';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../types';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from './constants';
+import {
+  MAX_PER_PAGE_LOGS,
+  MAX_KQL_FILTER_LENGTH,
+  MAX_NAMESPACES,
+  MAX_ID_LENGTH,
+  MAX_SORT_FIELDS,
+} from '../../common/constants';
 
 const sortOrderSchema = schema.oneOf([schema.literal('asc'), schema.literal('desc')]);
 
@@ -32,16 +39,19 @@ const sortFieldSchema = schema.oneOf([
 
 const sortFieldsSchema = schema.arrayOf(sortFieldSchema, {
   defaultValue: [{ timestamp: { order: 'desc' } }],
+  maxSize: MAX_SORT_FIELDS,
 });
 
 const querySchema = schema.object({
   date_start: schema.string(),
   date_end: schema.maybe(schema.string()),
-  filter: schema.maybe(schema.string()),
-  per_page: schema.number({ defaultValue: 10, min: 1 }),
+  filter: schema.maybe(schema.string({ maxLength: MAX_KQL_FILTER_LENGTH })),
+  per_page: schema.number({ defaultValue: 10, min: 1, max: MAX_PER_PAGE_LOGS }),
   page: schema.number({ defaultValue: 1, min: 1 }),
   sort: sortFieldsSchema,
-  namespaces: schema.maybe(schema.arrayOf(schema.string())),
+  namespaces: schema.maybe(
+    schema.arrayOf(schema.string({ maxLength: MAX_ID_LENGTH }), { maxSize: MAX_NAMESPACES })
+  ),
 });
 
 const rewriteReq: RewriteRequestCase<GetGlobalExecutionLogParams> = ({
