@@ -41,6 +41,8 @@ const formatField = (field: MappingField): string => {
   return `- ${field.path} [${renderTypeSegment(field)}]${description}`;
 };
 
+const FIELD_LIMIT = 500;
+
 export const getIndexMappingsTool = (): BuiltinToolDefinition<typeof getIndexMappingsSchema> => {
   return {
     id: platformCoreTools.getIndexMapping,
@@ -58,24 +60,32 @@ export const getIndexMappingsTool = (): BuiltinToolDefinition<typeof getIndexMap
 
       const resources = Object.fromEntries(
         Object.entries(indexFields).map(([name, v]) => {
-          if (raw && v.rawMapping) {
-            return [name, { type: v.type, mappings: v.rawMapping }];
-          }
+          const totalFields = v.fields.length;
+          const truncated = totalFields > FIELD_LIMIT;
+          const fields = truncated ? v.fields.slice(0, FIELD_LIMIT) : v.fields;
+
           if (raw) {
-            return [
-              name,
-              {
-                type: v.type,
-                fields: v.fields.map(({ path, type, tsDimension, tsMetric }) => ({
-                  path,
-                  type,
-                  ...(tsDimension === true ? { tsDimension: true } : {}),
-                  ...(tsMetric != null ? { tsMetric } : {}),
-                })),
-              },
-            ];
+            if (!truncated && v.rawMapping) {
+              return [name, { type: v.type, mappings: v.rawMapping }];
+            }
+            const flatFields = fields.map(({ path, type, tsDimension, tsMetric }) => ({
+              path,
+              type,
+              ...(tsDimension === true ? { tsDimension: true } : {}),
+              ...(tsMetric != null ? { tsMetric } : {}),
+            }));
+            const entry: Record<string, unknown> = { type: v.type, fields: flatFields };
+            if (truncated) {
+              entry.warning = `Truncated: showing ${FIELD_LIMIT} of ${totalFields} fields. Use a more specific index pattern to retrieve full mappings.`;
+            }
+            return [name, entry];
           }
-          return [name, { type: v.type, fields: v.fields.map(formatField).join('\n') }];
+
+          const formatted = fields.map(formatField).join('\n');
+          const fieldString = truncated
+            ? `${formatted}\n[Truncated: showing ${FIELD_LIMIT} of ${totalFields} fields. Use a more specific index pattern to retrieve full mappings.]`
+            : formatted;
+          return [name, { type: v.type, fields: fieldString }];
         })
       );
 
