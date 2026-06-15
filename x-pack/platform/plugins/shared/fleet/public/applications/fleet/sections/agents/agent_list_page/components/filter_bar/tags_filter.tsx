@@ -6,8 +6,7 @@
  */
 import React, { useCallback, useEffect, useState } from 'react';
 import type { EuiSelectableOption } from '@elastic/eui';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
-import { EuiHorizontalRule } from '@elastic/eui';
+import { EuiButton, EuiPopoverFooter, EuiPopoverTitle, useEuiTheme } from '@elastic/eui';
 import { EuiFilterButton, EuiPopover, EuiSelectable } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -97,29 +96,27 @@ export const TagsFilter: React.FunctionComponent<Props> = ({
       >
         {(list, search) => (
           <>
-            {search}
+            <EuiPopoverTitle>{search}</EuiPopoverTitle>
             {list}
+            <EuiPopoverFooter>
+              <EuiButton
+                size="s"
+                fullWidth
+                iconType="cross"
+                data-test-subj="agentList.tagFilterClearAllBtn"
+                onClick={() => {
+                  onSelectedTagsChange([]);
+                }}
+              >
+                <FormattedMessage
+                  id="xpack.fleet.agentList.tagsFilterClearAllBtnText"
+                  defaultMessage="Clear all"
+                />
+              </EuiButton>
+            </EuiPopoverFooter>
           </>
         )}
       </EuiSelectable>
-      <EuiHorizontalRule margin="none" />
-      <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            iconType="error"
-            color="danger"
-            data-test-subj="agentList.tagFilterClearAllBtn"
-            onClick={() => {
-              onSelectedTagsChange([]);
-            }}
-          >
-            <FormattedMessage
-              id="xpack.fleet.agentList.tagsFilterClearAllBtnText"
-              defaultMessage="Clear all"
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      </EuiFlexGroup>
     </EuiPopover>
   );
 };

@@ -162,7 +162,7 @@ export const Match: React.FC<{
 };
 
 function getOptionForRawValueFn(fieldFormat?: IFieldFormat) {
-  const formatter = fieldFormat?.convert.bind(fieldFormat) ?? String;
+  const formatter = fieldFormat ? (v: unknown) => fieldFormat.convertToText(v) : String;
   return (serializedValue: unknown) => {
     const rawValue = deserializeField(serializedValue);
     const key = getValueKey(rawValue);

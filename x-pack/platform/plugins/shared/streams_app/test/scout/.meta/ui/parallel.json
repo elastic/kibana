@@ -1,6 +1,17 @@
 {
-  "sha1": "94742069f676df19be38b2623c6f0cc0adb94c91",
+  "sha1": "8d319a8855d2f4e921bc024614a1ef3565494c92",
   "tests": [
+    {
+      "id": "b26b2efa27acfba-7132d4e40af07dc",
+      "title": "Teardown environment for streams tests",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/global.teardown.ts",
+        "line": 10,
+        "column": 19
+      }
+    },
     {
       "id": "a32deb51dbb353f-744ce32675c025c",
       "title": "Setup environment for streams tests",
@@ -1410,20 +1421,6 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/esql_source_enrichment.spec.ts",
-        "line": 34,
-        "column": 9
-      }
-    },
-    {
-      "id": "79a7766088f8c37-06decc1df543773",
-      "title": "Nightshift navigation from Significant Events Discovery navigation to the Nightshift page when clicking the Nightshift button",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/nightshift_navigation.spec.ts",
         "line": 34,
         "column": 9
       }

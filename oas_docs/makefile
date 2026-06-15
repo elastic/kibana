@@ -49,10 +49,6 @@ api-docs-lint-stateful: ## Run redocly API docs linter on kibana.yaml
 api-docs-lint-serverless: ## Run redocly API docs linter on kibana.serverless.yaml
 	@./node_modules/.bin/redocly lint "output/kibana.serverless.yaml" --config "linters/redocly.yaml" --format stylish --max-problems 500
 
-.PHONY: api-docs-fix-required
-api-docs-fix-required: ## Auto-generate required_field_fixes.overlays.yaml from merged OAS bundles
-	@node scripts/generate_required_field_fixes.js
-
 .PHONY: api-docs-overlay
 api-docs-overlay: ## Apply all overlays (including bump-slim placeholder for Dashboards & Visualizations)
 	@./node_modules/.bin/bump overlay "output/kibana.serverless.yaml" "overlays/kibana.overlays.serverless.yaml" > "output/kibana.serverless.tmp1.yaml"
@@ -104,9 +100,8 @@ api-docs-overlay: ## Apply all overlays (including bump-slim placeholder for Das
 # are kept only in the Bump pipeline output (kibana.yaml / kibana.serverless.yaml).
 # ──────────────────────────────────────────────────────────────────────────────
 .PHONY: api-docs-overlay-external
-api-docs-overlay-external: merge-api-docs-stateful api-docs-fix-required ## Apply all overlays except bump-slim — output is kibana.external.yaml (full Dashboards & Visualizations for external hosting)
-	@./node_modules/.bin/bump overlay "output/kibana.yaml" "overlays/required_field_fixes.overlays.yaml" > "output/kibana.tmp0.yaml"
-	@./node_modules/.bin/bump overlay "output/kibana.tmp0.yaml" "overlays/kibana.overlays.yaml" > "output/kibana.tmp1.yaml"
+api-docs-overlay-external: merge-api-docs-stateful ## Apply all overlays except bump-slim — output is kibana.external.yaml (full Dashboards & Visualizations for external hosting)
+	@./node_modules/.bin/bump overlay "output/kibana.yaml" "overlays/kibana.overlays.yaml" > "output/kibana.tmp1.yaml"
 	@./node_modules/.bin/bump overlay "output/kibana.tmp1.yaml" "overlays/alerting.overlays.yaml" > "output/kibana.tmp2.yaml"
 	@./node_modules/.bin/bump overlay "output/kibana.tmp2.yaml" "overlays/connectors.overlays.yaml" > "output/kibana.tmp3.yaml"
 	@./node_modules/.bin/bump overlay "output/kibana.tmp3.yaml" "overlays/kibana.overlays.shared.yaml" > "output/kibana.tmp4.yaml"

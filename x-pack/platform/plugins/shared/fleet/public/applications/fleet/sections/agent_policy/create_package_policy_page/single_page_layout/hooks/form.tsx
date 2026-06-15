@@ -9,9 +9,11 @@ import React from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isEqual, omit, pick } from 'lodash';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink } from '@elastic/eui';
+
+import { validateAgentConditionExpression } from '@kbn/elastic-agent-condition-language';
 
 import { inputsFormat } from '../../../../../../../../common/constants';
 import {
@@ -325,6 +327,8 @@ export function useOnSubmit({
 
   // only used to store the resulting package policy once saved
   const [savedPackagePolicy, setSavedPackagePolicy] = useState<PackagePolicy>();
+  // Create dataset templates toggle (checked/recommended by default)
+  const [createDatasetTemplates, setCreateDatasetTemplates] = useState<boolean>(true);
   // Form state
   const [formState, setFormState] = useState<PackagePolicyFormState>('VALID');
 
@@ -368,7 +372,7 @@ export function useOnSubmit({
         const newValidationResult = validatePackagePolicy(
           newPackagePolicy || packagePolicy,
           packageInfo,
-          yaml.parse,
+          { safeLoadYaml: yaml.parse, conditionValidator: validateAgentConditionExpression },
           spaceSettings
         );
         setValidationResults(newValidationResult);
@@ -748,6 +752,7 @@ export function useOnSubmit({
             ...packagePolicy,
             policy_ids: agentPolicyIdToSave,
             force: forceInstall,
+            create_dataset_templates: createDatasetTemplates,
           },
           varGroups
         );
@@ -879,6 +884,7 @@ export function useOnSubmit({
       spaceId,
       onSaveNavigate,
       confirmForceInstall,
+      createDatasetTemplates,
     ]
   );
 
@@ -905,5 +911,7 @@ export function useOnSubmit({
     selectedSetupTechnology,
     defaultSetupTechnology,
     isAgentlessSelected,
+    createDatasetTemplates,
+    setCreateDatasetTemplates,
   };
 }

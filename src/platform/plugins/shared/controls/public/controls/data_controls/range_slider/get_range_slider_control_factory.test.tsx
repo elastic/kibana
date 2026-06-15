@@ -23,6 +23,7 @@ import { rangeSliderControlSchema, type RangeSliderControlState } from '@kbn/con
 import { ControlValuesSource } from '@kbn/controls-constants';
 import type { Filter, AggregateQuery, TimeRange } from '@kbn/es-query';
 import type { RangeSliderControlApi } from './types';
+import type { DataView } from '@kbn/data-views-plugin/common';
 
 const mockGetESQLResults = jest.fn();
 jest.mock('@kbn/esql-utils', () => ({
@@ -89,9 +90,7 @@ describe('RangeSliderControlApi', () => {
       },
       getFormatterForField: () => {
         return {
-          getConverterFor: () => {
-            return (value: string) => `${value} myUnits`;
-          },
+          convertToText: (value: string) => `${value} myUnits`,
         };
       },
     } as unknown as DataView;

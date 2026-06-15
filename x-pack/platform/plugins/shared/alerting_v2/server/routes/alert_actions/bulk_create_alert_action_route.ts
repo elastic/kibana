@@ -7,10 +7,10 @@
 
 import { Request } from '@kbn/core-di-server';
 import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { inject, injectable } from 'inversify';
 import {
   bulkCreateAlertActionBodySchema,
+  errorResponseSchema,
   type BulkCreateAlertActionBody,
 } from '@kbn/alerting-v2-schemas';
 import { AlertActionsClient } from '../../lib/alert_actions_client';
@@ -32,11 +32,17 @@ export class BulkCreateAlertActionRoute extends BaseAlertingRoute {
     summary: 'Bulk create alert actions',
     description: 'Create actions for multiple alert groups in a single request.',
   } as const;
-  static validate = {
+  static schemas = {
     request: {
-      body: buildRouteValidationWithZod(bulkCreateAlertActionBodySchema),
+      body: bulkCreateAlertActionBodySchema,
     },
-  } as const;
+    response: {
+      400: {
+        body: () => errorResponseSchema,
+        description: 'Indicates an invalid schema or parameters.',
+      },
+    },
+  };
 
   protected readonly routeName = 'bulk create alert action';
 
