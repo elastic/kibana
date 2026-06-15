@@ -35,7 +35,6 @@ export const DiscoverLink = ({
   });
 
   let link = (
-    // eslint-disable-next-line @elastic/eui/tooltip-button-icon-wrap -- link is already wrapped with tooltip below
     <EuiButtonIcon
       onClick={onClick}
       display="empty"
