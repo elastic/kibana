@@ -13,9 +13,8 @@ servers:
 paths:
   /api/risk_score/history:
     get:
-      description: >-
-        Returns time-ordered historical risk score entries from the risk score
-        time-series index for a given entity.
+      description: Returns time-ordered historical risk score entries from the risk
+        score time-series index for a given entity.
       operationId: GetRiskScoreHistory
       parameters:
         - description: The type of entity to retrieve history for.
@@ -29,15 +28,16 @@ paths:
           name: entity_id
           required: true
           schema:
+            maxLength: 1000
             type: string
-        - description: >-
-            Start of the time range, in date-math syntax. Defaults to 90 days
+        - description: Start of the time range, in date-math syntax. Defaults to 90 days
             ago.
           in: query
           name: from
           required: false
           schema:
             default: now-90d
+            maxLength: 100
             type: string
         - description: End of the time range, in date-math syntax. Defaults to now.
           in: query
@@ -45,9 +45,9 @@ paths:
           required: false
           schema:
             default: now
+            maxLength: 100
             type: string
-        - description: >-
-            Filter entries by the type of score recorded (`base`, `propagated`,
+        - description: Filter entries by the type of score recorded (`base`, `propagated`,
             or `resolution`).
           in: query
           name: score_type
@@ -115,6 +115,7 @@ components:
       properties:
         '@timestamp':
           format: date-time
+          maxLength: 33
           type: string
         calculated_level:
           $ref: '#/components/schemas/EntityRiskLevels'
@@ -145,6 +146,7 @@ components:
       type: object
       properties:
         entity_id:
+          maxLength: 1000
           type: string
         entity_type:
           $ref: '#/components/schemas/IdentifierType'
