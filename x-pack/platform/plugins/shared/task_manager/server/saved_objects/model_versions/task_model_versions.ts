@@ -163,18 +163,7 @@ export const taskModelVersions: SavedObjectsModelVersionMap = {
     },
   },
   '11': {
-    changes: [
-      {
-        type: 'mappings_addition',
-        addedMappings: {
-          userScope: {
-            properties: {
-              userProfileId: { type: 'keyword', ignore_above: 1024 },
-            },
-          },
-        },
-      },
-    ],
+    changes: [],
     schemas: {
       forwardCompatibility: taskSchemaV11.extends({}, { unknowns: 'ignore' }),
       create: taskSchemaV11,

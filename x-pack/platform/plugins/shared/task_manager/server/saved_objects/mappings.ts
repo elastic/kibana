@@ -84,16 +84,16 @@ export const taskMappings: SavedObjectsTypeMappingDefinition = {
         uiamApiKeyId: {
           type: 'keyword',
         },
-        userProfileId: {
-          type: 'keyword',
-          ignore_above: 1024,
-        },
         // NO NEED TO BE INDEXED
         // apiKeyCreatedByUser: {
         //   type: 'boolean',
         // },
         // spaceId: {
         //   type: 'keyword',
+        // },
+        // userProfileId: {
+        //   type: 'keyword',
+        //   ignore_above: 1024,
         // },
       },
     },
