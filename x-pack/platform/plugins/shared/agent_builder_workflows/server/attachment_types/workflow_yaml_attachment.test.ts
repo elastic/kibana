@@ -56,11 +56,12 @@ const registerAndCapture = (api: Partial<WorkflowsManagementApi> = {}) => {
 
 describe('workflow_yaml_attachment', () => {
   describe('getTools', () => {
-    it('includes all workflow tools and generate_workflow', () => {
+    it('includes all workflow tools, generate_workflow, and execute_workflow', () => {
       const type = registerAndCapture();
       expect(type.getTools()).toEqual([
         ...Object.values(workflowTools),
         platformCoreTools.generateWorkflow,
+        platformCoreTools.executeWorkflow,
       ]);
     });
   });

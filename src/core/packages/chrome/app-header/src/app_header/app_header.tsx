@@ -17,6 +17,7 @@ import type {
   AppHeaderMetadataItems,
   AppHeaderPadding,
   AppHeaderTab,
+  AppHeaderTitle,
 } from '../types';
 import { useHasLegacyActionMenu } from './hooks/chrome';
 import { AppHeaderShell } from './app_header_shell';
@@ -29,7 +30,7 @@ import { AppHeaderMetadata } from './app_header_metadata';
 import { useResolvedBadges, useShareAction } from './hooks';
 
 export interface AppHeaderViewProps {
-  title?: string;
+  title?: AppHeaderTitle;
   back?: AppHeaderBack | AppHeaderBack[];
   tabs?: AppHeaderTab[];
   badges?: AppHeaderBadge[];
@@ -100,7 +101,7 @@ export const AppHeaderView = React.memo<AppHeaderViewProps>(
 AppHeaderView.displayName = 'AppHeaderView';
 
 export interface AppHeaderProps extends AppHeaderViewProps {
-  title: string;
+  title: AppHeaderTitle;
 }
 
 export const AppHeader = React.memo<AppHeaderProps>((props) => {
