@@ -89,8 +89,21 @@ export function generateCreateAgentlessPolicyDevToolsRequest(
       'cloud_connector_id',
       'cloud_connector_name'
     ),
+    id: packagePolicy.id ? String(packagePolicy.id) : undefined,
     inputs: formatInputs(packagePolicy.inputs, true),
     vars: formatVars(packagePolicy.vars),
+    ...(packagePolicy.supports_cloud_connector && {
+      cloud_connector: {
+        enabled: true,
+        ...(packagePolicy.cloud_connector_id && {
+          cloud_connector_id: packagePolicy.cloud_connector_id,
+        }),
+        ...(!packagePolicy.cloud_connector_id &&
+          packagePolicy.cloud_connector_name && {
+            name: packagePolicy.cloud_connector_name,
+          }),
+      },
+    }),
   });
 }
 
