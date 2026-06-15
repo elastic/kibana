@@ -258,10 +258,14 @@ export class FeatureFlagsService {
         path: '/internal/feature-flags/{flagName}/counter',
         validate: {
           params: schema.object({
-            flagName: schema.string(),
+            flagName: schema.string({ minLength: 1, maxLength: 255 }),
           }),
           body: schema.object({
-            value: schema.oneOf([schema.boolean(), schema.number(), schema.string()]),
+            value: schema.oneOf([
+              schema.boolean(),
+              schema.number(),
+              schema.string({ maxLength: 5000 }),
+            ]),
           }),
         },
         security: {
