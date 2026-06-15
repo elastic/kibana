@@ -28,6 +28,7 @@ const investigationContextAgent = {
       {
         tool_ids: [
           platformStreamsSigEventsTools.searchKnowledgeIndicators,
+          platformCoreTools.executeEsql,
         ],
       },
     ],

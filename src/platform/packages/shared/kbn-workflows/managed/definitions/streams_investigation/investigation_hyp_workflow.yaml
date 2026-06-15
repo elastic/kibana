@@ -25,13 +25,35 @@ steps:
     with:
       timeout: 360s
       message: |
-        Collect all available evidence for this hypothesis. Do not render a
-        verdict — that is the next step's job. Record everything you tried,
-        including failed lookups and access blockers. Be thorough and honest.
+        Collect evidence for this hypothesis using ES|QL queries (executeEsql tool).
+
+        The data for this scenario is in these specific Elasticsearch indices:
+        - Logs:   {{ inputs.stream_names[0] }}
+        - Traces: {{ inputs.stream_names[1] }}
+
+        IMPORTANT — query instructions:
+        1. Use executeEsql with `FROM <index>` to scope all queries to these indices only.
+           Example: FROM {{ inputs.stream_names[0] }} | STATS count(*) BY service.name
+        2. Do NOT pass index names as KQL filter values — this causes syntax errors.
+        3. Do NOT use broad patterns like logs-* or traces-*; they include unrelated data.
+        4. Keep result sets small: add `| LIMIT 20` or use STATS aggregations.
+        5. Data boundary: if ALL services show zero activity at the very END of the time
+           range, that is the data window boundary — ignore it. Focus on anomalies WITHIN
+           the window (service.name error spikes, latency jumps, volume drops).
+
+        Useful ESQL patterns:
+          Error counts by service:
+            FROM {{ inputs.stream_names[0] }} | STATS errors=COUNT(*) BY service.name | SORT errors DESC | LIMIT 10
+          Latency percentiles by service:
+            FROM {{ inputs.stream_names[1] }} | STATS p99=PERCENTILE(event.duration,99), p50=PERCENTILE(event.duration,50) BY service.name | SORT p99 DESC | LIMIT 10
+          Log sample for a specific service:
+            FROM {{ inputs.stream_names[0] }} | WHERE service.name == "myservice" | KEEP @timestamp,message,log.level | LIMIT 10
+
+        Note: some log field values may be structurally anomalous (e.g. product IDs in
+        log.level) — note these as data quality observations, not root causes.
 
         Hypothesis: {{ inputs.hypothesis | json }}
         Event context: {{ inputs.context_summary }}
-        Streams: {{ inputs.stream_names | json }}
       schema:
         type: object
         properties:
@@ -56,11 +78,24 @@ steps:
             type: array
             items:
               type: string
+          key_metrics:
+            type: array
+            description: "Concrete numerical values observed (latency, error rates, counts)"
+            items:
+              type: object
+              properties:
+                metric:
+                  type: string
+                value:
+                  type: string
+                service:
+                  type: string
+              required: [metric, value]
           gather_summary:
             type: string
-        required: [hypothesis_id, evidence, gaps_found, gather_summary]
+        required: [hypothesis_id, evidence, gaps_found, key_metrics, gather_summary]
     on-failure:
-      continue: false
+      continue: true
 
   # ── Review evidence ───────────────────────────────────────────────────────────
   - name: review

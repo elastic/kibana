@@ -7,7 +7,7 @@ description: >
   (Sonnet) back to the Discovery document and memory.
 enabled: true
 settings:
-  timeout: "45m"
+  timeout: "120m"
   concurrency:
     key: "streams-sigevents-investigation-{{ inputs.discovery_id }}"
     strategy: cancel-in-progress
@@ -34,9 +34,31 @@ steps:
       message: |
         {{ inputs.question }}
 
-        Generate as many hypotheses as are genuinely distinct and worth investigating —
-        up to 5 maximum. Do not pad to 5; fewer strong hypotheses are better than many
-        weak ones. Order them by your prior confidence, highest first.
+        Stream names: {{ inputs.stream_names | json }}
+
+        BEFORE generating hypotheses, run these two ESQL triage queries to identify
+        which service is the originating fault source vs. downstream victim:
+
+        1. Latency by service (use traces index {{ inputs.stream_names[1] }}):
+           FROM {{ inputs.stream_names[1] }}
+           | STATS avg_dur=AVG(event.duration), p99_dur=PERCENTILE(event.duration,99), call_count=COUNT(*) BY service.name
+           | SORT p99_dur DESC | LIMIT 15
+
+        2. Error rate by service in logs (use logs index {{ inputs.stream_names[0] }}):
+           FROM {{ inputs.stream_names[0] }}
+           | EVAL is_error = CASE(log.level == "ERROR" OR log.level == "FATAL", 1, 0)
+           | STATS total=COUNT(*), errors=SUM(is_error) BY service.name
+           | EVAL error_rate = errors / total
+           | SORT error_rate DESC | LIMIT 15
+
+        Use these results to identify: which service shows HIGH internal latency (not just
+        slow calls TO its dependencies), and which services are merely downstream victims.
+        A service with elevated self-latency (its own span duration is high regardless of
+        what it calls) is more likely the fault originator than one where slowness is
+        explained entirely by slow dependency calls.
+
+        Then generate up to 5 targeted hypotheses focused on the service(s) showing the
+        most anomalous self-behavior. Fewer strong hypotheses beat many weak ones.
 
         Event metadata: {{ inputs | json }}
       schema:
@@ -156,7 +178,7 @@ steps:
   - name: poll_hyp_0
     type: while
     if: "${{ steps.build_context.output.structured_output.hypotheses.size >= 1 }}"
-    condition: "true"
+    condition: "${{ true }}"
     steps:
       - name: fetch_hyp_0
         type: kibana.request
@@ -191,7 +213,7 @@ steps:
   - name: poll_hyp_1
     type: while
     if: "${{ steps.build_context.output.structured_output.hypotheses.size >= 2 }}"
-    condition: "true"
+    condition: "${{ true }}"
     steps:
       - name: fetch_hyp_1
         type: kibana.request
@@ -226,7 +248,7 @@ steps:
   - name: poll_hyp_2
     type: while
     if: "${{ steps.build_context.output.structured_output.hypotheses.size >= 3 }}"
-    condition: "true"
+    condition: "${{ true }}"
     steps:
       - name: fetch_hyp_2
         type: kibana.request
@@ -261,7 +283,7 @@ steps:
   - name: poll_hyp_3
     type: while
     if: "${{ steps.build_context.output.structured_output.hypotheses.size >= 4 }}"
-    condition: "true"
+    condition: "${{ true }}"
     steps:
       - name: fetch_hyp_3
         type: kibana.request
@@ -296,7 +318,7 @@ steps:
   - name: poll_hyp_4
     type: while
     if: "${{ steps.build_context.output.structured_output.hypotheses.size >= 5 }}"
-    condition: "true"
+    condition: "${{ true }}"
     steps:
       - name: fetch_hyp_4
         type: kibana.request
@@ -367,6 +389,7 @@ steps:
         grounded in the evidence; leave the array empty rather than offering generic advice.
         Write lessons learned to memory. Set investigation_complete to false if all
         forwarded hypotheses were out_of_reach or no hypotheses were forwarded at all.
+        If investigation_complete is false, provide lessons_for_next_round with specific, actionable guidance on what different angles or services to investigate in a second round.
 
         Context: {{ steps.build_context.output.structured_output | json }}
         Branch results: {{ steps.collect_results.output | json }}
@@ -457,6 +480,9 @@ steps:
             type: array
             items:
               type: string
+          lessons_for_next_round:
+            type: string
+            description: "If investigation_complete is false, specific guidance on new angles to try in round 2"
         required:
           - root_cause
           - confidence
@@ -467,22 +493,957 @@ steps:
           - gaps_found
           - investigation_complete
           - memory_pages_written
+          - lessons_for_next_round
     on-failure:
       continue: false
+
+  # ── Step 6b: Save round 1 results to variables ────────────────────────────────
+  - name: set_final
+    type: data.set
+    with:
+      final_root_cause: "{{ steps.synthesize.output.structured_output.root_cause }}"
+      final_confidence: "${{ steps.synthesize.output.structured_output.confidence }}"
+      final_impact: "{{ steps.synthesize.output.structured_output.impact }}"
+      final_ranked_hypotheses: "${{ steps.synthesize.output.structured_output.ranked_hypotheses }}"
+      final_discarded_hypotheses: "${{ steps.synthesize.output.structured_output.discarded_hypotheses }}"
+      final_remediation_options: "${{ steps.synthesize.output.structured_output.remediation_options }}"
+      final_gaps_found: "${{ steps.synthesize.output.structured_output.gaps_found }}"
+      final_investigation_complete: "${{ steps.synthesize.output.structured_output.investigation_complete }}"
+      final_memory_pages_written: "${{ steps.synthesize.output.structured_output.memory_pages_written }}"
+
+  # ── Round 2: runs only if round 1 was inconclusive ───────────────────────────
+  - name: round_2
+    type: if
+    condition: "${{ variables.final_root_cause == 'Undetermined' }}"
+    steps:
+
+      - name: build_context_r2
+        type: ai.agent
+        agent-id: sigevents.investigation.context
+        connector-id: ".anthropic-claude-4.5-haiku-chat_completion"
+        create-conversation: true
+        with:
+          timeout: 180s
+          message: |
+            {{ inputs.question }}
+
+            This is a SECOND investigation round. Round 1 was inconclusive.
+            Lessons from round 1: {{ steps.synthesize.output.structured_output.lessons_for_next_round }}
+            Gaps found: {{ steps.synthesize.output.structured_output.gaps_found | json }}
+            Hypotheses already tried: {{ steps.build_context.output.structured_output.hypotheses | json }}
+
+            Generate 3–5 FRESH hypotheses that explore angles NOT tried in round 1.
+            Do NOT repeat hypotheses from round 1. Focus on the gaps and lessons above.
+
+            Event metadata: {{ inputs | json }}
+          schema:
+            type: object
+            properties:
+              context_summary:
+                type: string
+              memory_context:
+                type: string
+              known_gaps:
+                type: array
+                items:
+                  type: string
+              hypotheses:
+                type: array
+                minItems: 1
+                maxItems: 5
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    statement:
+                      type: string
+                    prior_confidence:
+                      type: number
+                      minimum: 0
+                      maximum: 1
+                    suggested_queries:
+                      type: array
+                      items:
+                        type: string
+                  required:
+                    - id
+                    - statement
+                    - prior_confidence
+                    - suggested_queries
+            required:
+              - context_summary
+              - memory_context
+              - known_gaps
+              - hypotheses
+        on-failure:
+          continue: false
+
+      - name: launch_0_r2
+        type: workflow.executeAsync
+        if: "${{ steps.build_context_r2.output.structured_output.hypotheses.size >= 1 }}"
+        with:
+          workflow-id: system-streams-sigevents-investigation-hyp
+          inputs:
+            hypothesis: "${{ steps.build_context_r2.output.structured_output.hypotheses[0] }}"
+            context_summary: "{{ steps.build_context_r2.output.structured_output.context_summary }}"
+            stream_names: "${{ inputs.stream_names }}"
+
+      - name: launch_1_r2
+        type: workflow.executeAsync
+        if: "${{ steps.build_context_r2.output.structured_output.hypotheses.size >= 2 }}"
+        with:
+          workflow-id: system-streams-sigevents-investigation-hyp
+          inputs:
+            hypothesis: "${{ steps.build_context_r2.output.structured_output.hypotheses[1] }}"
+            context_summary: "{{ steps.build_context_r2.output.structured_output.context_summary }}"
+            stream_names: "${{ inputs.stream_names }}"
+
+      - name: launch_2_r2
+        type: workflow.executeAsync
+        if: "${{ steps.build_context_r2.output.structured_output.hypotheses.size >= 3 }}"
+        with:
+          workflow-id: system-streams-sigevents-investigation-hyp
+          inputs:
+            hypothesis: "${{ steps.build_context_r2.output.structured_output.hypotheses[2] }}"
+            context_summary: "{{ steps.build_context_r2.output.structured_output.context_summary }}"
+            stream_names: "${{ inputs.stream_names }}"
+
+      - name: launch_3_r2
+        type: workflow.executeAsync
+        if: "${{ steps.build_context_r2.output.structured_output.hypotheses.size >= 4 }}"
+        with:
+          workflow-id: system-streams-sigevents-investigation-hyp
+          inputs:
+            hypothesis: "${{ steps.build_context_r2.output.structured_output.hypotheses[3] }}"
+            context_summary: "{{ steps.build_context_r2.output.structured_output.context_summary }}"
+            stream_names: "${{ inputs.stream_names }}"
+
+      - name: launch_4_r2
+        type: workflow.executeAsync
+        if: "${{ steps.build_context_r2.output.structured_output.hypotheses.size >= 5 }}"
+        with:
+          workflow-id: system-streams-sigevents-investigation-hyp
+          inputs:
+            hypothesis: "${{ steps.build_context_r2.output.structured_output.hypotheses[4] }}"
+            context_summary: "{{ steps.build_context_r2.output.structured_output.context_summary }}"
+            stream_names: "${{ inputs.stream_names }}"
+
+      - name: init_hyp_results_r2
+        type: data.set
+        with:
+          hyp_0_gather_r2: null
+          hyp_0_review_r2: null
+          hyp_1_gather_r2: null
+          hyp_1_review_r2: null
+          hyp_2_gather_r2: null
+          hyp_2_review_r2: null
+          hyp_3_gather_r2: null
+          hyp_3_review_r2: null
+          hyp_4_gather_r2: null
+          hyp_4_review_r2: null
+
+      - name: poll_hyp_0_r2
+        type: while
+        if: "${{ steps.build_context_r2.output.structured_output.hypotheses.size >= 1 }}"
+        condition: "${{ true }}"
+        steps:
+          - name: fetch_hyp_0_r2
+            type: kibana.request
+            with:
+              method: GET
+              path: "/api/workflows/executions/{{ steps.launch_0_r2.output.executionId }}"
+            on-failure:
+              retry:
+                max-attempts: 3
+                delay: "5s"
+                strategy: exponential
+          - name: check_done_0_r2
+            type: if
+            condition: "${{ steps.fetch_hyp_0_r2.output.status == 'completed' or steps.fetch_hyp_0_r2.output.status == 'failed' }}"
+            steps:
+              - name: save_0_r2
+                type: data.set
+                with:
+                  hyp_0_gather_r2: "${{ steps.fetch_hyp_0_r2.output.context.output.gather }}"
+                  hyp_0_review_r2: "${{ steps.fetch_hyp_0_r2.output.context.output.review }}"
+              - name: break_0_r2
+                type: loop.break
+          - name: poll_delay_0_r2
+            type: if
+            condition: "${{ steps.fetch_hyp_0_r2.output.status != 'completed' and steps.fetch_hyp_0_r2.output.status != 'failed' }}"
+            steps:
+              - name: wait_0_r2
+                type: wait
+                with:
+                  duration: "15s"
+
+      - name: poll_hyp_1_r2
+        type: while
+        if: "${{ steps.build_context_r2.output.structured_output.hypotheses.size >= 2 }}"
+        condition: "${{ true }}"
+        steps:
+          - name: fetch_hyp_1_r2
+            type: kibana.request
+            with:
+              method: GET
+              path: "/api/workflows/executions/{{ steps.launch_1_r2.output.executionId }}"
+            on-failure:
+              retry:
+                max-attempts: 3
+                delay: "5s"
+                strategy: exponential
+          - name: check_done_1_r2
+            type: if
+            condition: "${{ steps.fetch_hyp_1_r2.output.status == 'completed' or steps.fetch_hyp_1_r2.output.status == 'failed' }}"
+            steps:
+              - name: save_1_r2
+                type: data.set
+                with:
+                  hyp_1_gather_r2: "${{ steps.fetch_hyp_1_r2.output.context.output.gather }}"
+                  hyp_1_review_r2: "${{ steps.fetch_hyp_1_r2.output.context.output.review }}"
+              - name: break_1_r2
+                type: loop.break
+          - name: poll_delay_1_r2
+            type: if
+            condition: "${{ steps.fetch_hyp_1_r2.output.status != 'completed' and steps.fetch_hyp_1_r2.output.status != 'failed' }}"
+            steps:
+              - name: wait_1_r2
+                type: wait
+                with:
+                  duration: "15s"
+
+      - name: poll_hyp_2_r2
+        type: while
+        if: "${{ steps.build_context_r2.output.structured_output.hypotheses.size >= 3 }}"
+        condition: "${{ true }}"
+        steps:
+          - name: fetch_hyp_2_r2
+            type: kibana.request
+            with:
+              method: GET
+              path: "/api/workflows/executions/{{ steps.launch_2_r2.output.executionId }}"
+            on-failure:
+              retry:
+                max-attempts: 3
+                delay: "5s"
+                strategy: exponential
+          - name: check_done_2_r2
+            type: if
+            condition: "${{ steps.fetch_hyp_2_r2.output.status == 'completed' or steps.fetch_hyp_2_r2.output.status == 'failed' }}"
+            steps:
+              - name: save_2_r2
+                type: data.set
+                with:
+                  hyp_2_gather_r2: "${{ steps.fetch_hyp_2_r2.output.context.output.gather }}"
+                  hyp_2_review_r2: "${{ steps.fetch_hyp_2_r2.output.context.output.review }}"
+              - name: break_2_r2
+                type: loop.break
+          - name: poll_delay_2_r2
+            type: if
+            condition: "${{ steps.fetch_hyp_2_r2.output.status != 'completed' and steps.fetch_hyp_2_r2.output.status != 'failed' }}"
+            steps:
+              - name: wait_2_r2
+                type: wait
+                with:
+                  duration: "15s"
+
+      - name: poll_hyp_3_r2
+        type: while
+        if: "${{ steps.build_context_r2.output.structured_output.hypotheses.size >= 4 }}"
+        condition: "${{ true }}"
+        steps:
+          - name: fetch_hyp_3_r2
+            type: kibana.request
+            with:
+              method: GET
+              path: "/api/workflows/executions/{{ steps.launch_3_r2.output.executionId }}"
+            on-failure:
+              retry:
+                max-attempts: 3
+                delay: "5s"
+                strategy: exponential
+          - name: check_done_3_r2
+            type: if
+            condition: "${{ steps.fetch_hyp_3_r2.output.status == 'completed' or steps.fetch_hyp_3_r2.output.status == 'failed' }}"
+            steps:
+              - name: save_3_r2
+                type: data.set
+                with:
+                  hyp_3_gather_r2: "${{ steps.fetch_hyp_3_r2.output.context.output.gather }}"
+                  hyp_3_review_r2: "${{ steps.fetch_hyp_3_r2.output.context.output.review }}"
+              - name: break_3_r2
+                type: loop.break
+          - name: poll_delay_3_r2
+            type: if
+            condition: "${{ steps.fetch_hyp_3_r2.output.status != 'completed' and steps.fetch_hyp_3_r2.output.status != 'failed' }}"
+            steps:
+              - name: wait_3_r2
+                type: wait
+                with:
+                  duration: "15s"
+
+      - name: poll_hyp_4_r2
+        type: while
+        if: "${{ steps.build_context_r2.output.structured_output.hypotheses.size >= 5 }}"
+        condition: "${{ true }}"
+        steps:
+          - name: fetch_hyp_4_r2
+            type: kibana.request
+            with:
+              method: GET
+              path: "/api/workflows/executions/{{ steps.launch_4_r2.output.executionId }}"
+            on-failure:
+              retry:
+                max-attempts: 3
+                delay: "5s"
+                strategy: exponential
+          - name: check_done_4_r2
+            type: if
+            condition: "${{ steps.fetch_hyp_4_r2.output.status == 'completed' or steps.fetch_hyp_4_r2.output.status == 'failed' }}"
+            steps:
+              - name: save_4_r2
+                type: data.set
+                with:
+                  hyp_4_gather_r2: "${{ steps.fetch_hyp_4_r2.output.context.output.gather }}"
+                  hyp_4_review_r2: "${{ steps.fetch_hyp_4_r2.output.context.output.review }}"
+              - name: break_4_r2
+                type: loop.break
+          - name: poll_delay_4_r2
+            type: if
+            condition: "${{ steps.fetch_hyp_4_r2.output.status != 'completed' and steps.fetch_hyp_4_r2.output.status != 'failed' }}"
+            steps:
+              - name: wait_4_r2
+                type: wait
+                with:
+                  duration: "15s"
+
+      - name: collect_results_r2
+        type: data.set
+        with:
+          hypothesis_0:
+            gather: "${{ variables.hyp_0_gather_r2 }}"
+            review: "${{ variables.hyp_0_review_r2 }}"
+          hypothesis_1:
+            gather: "${{ variables.hyp_1_gather_r2 }}"
+            review: "${{ variables.hyp_1_review_r2 }}"
+          hypothesis_2:
+            gather: "${{ variables.hyp_2_gather_r2 }}"
+            review: "${{ variables.hyp_2_review_r2 }}"
+          hypothesis_3:
+            gather: "${{ variables.hyp_3_gather_r2 }}"
+            review: "${{ variables.hyp_3_review_r2 }}"
+          hypothesis_4:
+            gather: "${{ variables.hyp_4_gather_r2 }}"
+            review: "${{ variables.hyp_4_review_r2 }}"
+
+      - name: synthesize_r2
+        type: ai.agent
+        agent-id: sigevents.investigation.synthesis
+        connector-id: ".anthropic-claude-4.5-haiku-chat_completion"
+        create-conversation: true
+        with:
+          timeout: 180s
+          message: |
+            Synthesise the round 2 investigation results.
+            This is the SECOND round — round 1 was inconclusive.
+            Use the same rules: forward-only hypotheses, Undetermined if none supported.
+
+            Round 1 baseline: {{ steps.synthesize.output.structured_output | json }}
+            Round 1 context: {{ steps.build_context.output.structured_output | json }}
+            Round 2 context: {{ steps.build_context_r2.output.structured_output | json }}
+            Round 2 branch results: {{ steps.collect_results_r2.output | json }}
+            Event: event_id={{ inputs.event_id }}, discovery_id={{ inputs.discovery_id }}
+          schema:
+            type: object
+            properties:
+              root_cause:
+                type: string
+              confidence:
+                type: number
+                minimum: 0
+                maximum: 1
+              impact:
+                type: string
+              ranked_hypotheses:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    rank:
+                      type: integer
+                      minimum: 1
+                    hypothesis_id:
+                      type: string
+                    statement:
+                      type: string
+                    verdict:
+                      type: string
+                      enum: [supported, refuted, inconclusive, out_of_reach]
+                    prior_confidence:
+                      type: number
+                      minimum: 0
+                      maximum: 1
+                    posterior_confidence:
+                      type: number
+                      minimum: 0
+                      maximum: 1
+                    evidence_summary:
+                      type: string
+                  required:
+                    - rank
+                    - hypothesis_id
+                    - statement
+                    - verdict
+                    - prior_confidence
+                    - posterior_confidence
+                    - evidence_summary
+              discarded_hypotheses:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    hypothesis_id:
+                      type: string
+                    statement:
+                      type: string
+                    discard_reason:
+                      type: string
+                  required: [hypothesis_id, statement, discard_reason]
+              remediation_options:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    rank:
+                      type: integer
+                      minimum: 1
+                    action:
+                      type: string
+                    rationale:
+                      type: string
+                    risk_level:
+                      type: string
+                      enum: [low, medium, high]
+                    prerequisites:
+                      type: array
+                      items:
+                        type: string
+                  required: [rank, action, rationale, risk_level]
+              gaps_found:
+                type: array
+                items:
+                  type: string
+              investigation_complete:
+                type: boolean
+              memory_pages_written:
+                type: array
+                items:
+                  type: string
+              lessons_for_next_round:
+                type: string
+            required:
+              - root_cause
+              - confidence
+              - impact
+              - ranked_hypotheses
+              - discarded_hypotheses
+              - remediation_options
+              - gaps_found
+              - investigation_complete
+              - memory_pages_written
+              - lessons_for_next_round
+        on-failure:
+          continue: false
+
+      - name: set_final_r2
+        type: data.set
+        with:
+          final_root_cause: "{{ steps.synthesize_r2.output.structured_output.root_cause }}"
+          final_confidence: "${{ steps.synthesize_r2.output.structured_output.confidence }}"
+          final_impact: "{{ steps.synthesize_r2.output.structured_output.impact }}"
+          final_ranked_hypotheses: "${{ steps.synthesize_r2.output.structured_output.ranked_hypotheses }}"
+          final_discarded_hypotheses: "${{ steps.synthesize_r2.output.structured_output.discarded_hypotheses }}"
+          final_remediation_options: "${{ steps.synthesize_r2.output.structured_output.remediation_options }}"
+          final_gaps_found: "${{ steps.synthesize_r2.output.structured_output.gaps_found }}"
+          final_investigation_complete: "${{ steps.synthesize_r2.output.structured_output.investigation_complete }}"
+          final_memory_pages_written: "${{ steps.synthesize_r2.output.structured_output.memory_pages_written }}"
+
+  # ── Round 3: runs only if round 2 was still Undetermined (FINAL) ────────────
+  - name: round_3
+    type: if
+    condition: "${{ variables.final_root_cause == 'Undetermined' }}"
+    steps:
+
+      - name: build_context_r3
+        type: ai.agent
+        agent-id: sigevents.investigation.context
+        connector-id: ".anthropic-claude-4.5-haiku-chat_completion"
+        create-conversation: true
+        with:
+          timeout: 180s
+          message: |
+            {{ inputs.question }}
+
+            This is the THIRD and FINAL investigation round. Two previous rounds were inconclusive.
+            Round 1 lessons: {{ steps.synthesize.output.structured_output.lessons_for_next_round }}
+            Round 2 lessons: {{ steps.synthesize_r2.output.structured_output.lessons_for_next_round }}
+            Round 1 gaps: {{ steps.synthesize.output.structured_output.gaps_found | json }}
+            Round 2 gaps: {{ steps.synthesize_r2.output.structured_output.gaps_found | json }}
+            Round 1 hypotheses tried: {{ steps.build_context.output.structured_output.hypotheses | json }}
+            Round 2 hypotheses tried: {{ steps.build_context_r2.output.structured_output.hypotheses | json }}
+
+            Generate 3–5 FINAL hypotheses that take a completely different approach.
+            Focus on the single most likely root cause even if evidence is limited.
+            Event metadata: {{ inputs | json }}
+          schema:
+            type: object
+            properties:
+              context_summary:
+                type: string
+              memory_context:
+                type: string
+              known_gaps:
+                type: array
+                items:
+                  type: string
+              hypotheses:
+                type: array
+                minItems: 1
+                maxItems: 5
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    statement:
+                      type: string
+                    prior_confidence:
+                      type: number
+                      minimum: 0
+                      maximum: 1
+                    suggested_queries:
+                      type: array
+                      items:
+                        type: string
+                  required:
+                    - id
+                    - statement
+                    - prior_confidence
+                    - suggested_queries
+            required:
+              - context_summary
+              - memory_context
+              - known_gaps
+              - hypotheses
+        on-failure:
+          continue: false
+
+      - name: launch_0_r3
+        type: workflow.executeAsync
+        if: "${{ steps.build_context_r3.output.structured_output.hypotheses.size >= 1 }}"
+        with:
+          workflow-id: system-streams-sigevents-investigation-hyp
+          inputs:
+            hypothesis: "${{ steps.build_context_r3.output.structured_output.hypotheses[0] }}"
+            context_summary: "{{ steps.build_context_r3.output.structured_output.context_summary }}"
+            stream_names: "${{ inputs.stream_names }}"
+
+      - name: launch_1_r3
+        type: workflow.executeAsync
+        if: "${{ steps.build_context_r3.output.structured_output.hypotheses.size >= 2 }}"
+        with:
+          workflow-id: system-streams-sigevents-investigation-hyp
+          inputs:
+            hypothesis: "${{ steps.build_context_r3.output.structured_output.hypotheses[1] }}"
+            context_summary: "{{ steps.build_context_r3.output.structured_output.context_summary }}"
+            stream_names: "${{ inputs.stream_names }}"
+
+      - name: launch_2_r3
+        type: workflow.executeAsync
+        if: "${{ steps.build_context_r3.output.structured_output.hypotheses.size >= 3 }}"
+        with:
+          workflow-id: system-streams-sigevents-investigation-hyp
+          inputs:
+            hypothesis: "${{ steps.build_context_r3.output.structured_output.hypotheses[2] }}"
+            context_summary: "{{ steps.build_context_r3.output.structured_output.context_summary }}"
+            stream_names: "${{ inputs.stream_names }}"
+
+      - name: launch_3_r3
+        type: workflow.executeAsync
+        if: "${{ steps.build_context_r3.output.structured_output.hypotheses.size >= 4 }}"
+        with:
+          workflow-id: system-streams-sigevents-investigation-hyp
+          inputs:
+            hypothesis: "${{ steps.build_context_r3.output.structured_output.hypotheses[3] }}"
+            context_summary: "{{ steps.build_context_r3.output.structured_output.context_summary }}"
+            stream_names: "${{ inputs.stream_names }}"
+
+      - name: launch_4_r3
+        type: workflow.executeAsync
+        if: "${{ steps.build_context_r3.output.structured_output.hypotheses.size >= 5 }}"
+        with:
+          workflow-id: system-streams-sigevents-investigation-hyp
+          inputs:
+            hypothesis: "${{ steps.build_context_r3.output.structured_output.hypotheses[4] }}"
+            context_summary: "{{ steps.build_context_r3.output.structured_output.context_summary }}"
+            stream_names: "${{ inputs.stream_names }}"
+
+      - name: init_hyp_results_r3
+        type: data.set
+        with:
+          hyp_0_gather_r3: null
+          hyp_0_review_r3: null
+          hyp_1_gather_r3: null
+          hyp_1_review_r3: null
+          hyp_2_gather_r3: null
+          hyp_2_review_r3: null
+          hyp_3_gather_r3: null
+          hyp_3_review_r3: null
+          hyp_4_gather_r3: null
+          hyp_4_review_r3: null
+
+      - name: poll_hyp_0_r3
+        type: while
+        if: "${{ steps.build_context_r3.output.structured_output.hypotheses.size >= 1 }}"
+        condition: "${{ true }}"
+        steps:
+          - name: fetch_hyp_0_r3
+            type: kibana.request
+            with:
+              method: GET
+              path: "/api/workflows/executions/{{ steps.launch_0_r3.output.executionId }}"
+            on-failure:
+              retry:
+                max-attempts: 3
+                delay: "5s"
+                strategy: exponential
+          - name: check_done_0_r3
+            type: if
+            condition: "${{ steps.fetch_hyp_0_r3.output.status == 'completed' or steps.fetch_hyp_0_r3.output.status == 'failed' }}"
+            steps:
+              - name: save_0_r3
+                type: data.set
+                with:
+                  hyp_0_gather_r3: "${{ steps.fetch_hyp_0_r3.output.context.output.gather }}"
+                  hyp_0_review_r3: "${{ steps.fetch_hyp_0_r3.output.context.output.review }}"
+              - name: break_0_r3
+                type: loop.break
+          - name: poll_delay_0_r3
+            type: if
+            condition: "${{ steps.fetch_hyp_0_r3.output.status != 'completed' and steps.fetch_hyp_0_r3.output.status != 'failed' }}"
+            steps:
+              - name: wait_0_r3
+                type: wait
+                with:
+                  duration: "15s"
+
+      - name: poll_hyp_1_r3
+        type: while
+        if: "${{ steps.build_context_r3.output.structured_output.hypotheses.size >= 2 }}"
+        condition: "${{ true }}"
+        steps:
+          - name: fetch_hyp_1_r3
+            type: kibana.request
+            with:
+              method: GET
+              path: "/api/workflows/executions/{{ steps.launch_1_r3.output.executionId }}"
+            on-failure:
+              retry:
+                max-attempts: 3
+                delay: "5s"
+                strategy: exponential
+          - name: check_done_1_r3
+            type: if
+            condition: "${{ steps.fetch_hyp_1_r3.output.status == 'completed' or steps.fetch_hyp_1_r3.output.status == 'failed' }}"
+            steps:
+              - name: save_1_r3
+                type: data.set
+                with:
+                  hyp_1_gather_r3: "${{ steps.fetch_hyp_1_r3.output.context.output.gather }}"
+                  hyp_1_review_r3: "${{ steps.fetch_hyp_1_r3.output.context.output.review }}"
+              - name: break_1_r3
+                type: loop.break
+          - name: poll_delay_1_r3
+            type: if
+            condition: "${{ steps.fetch_hyp_1_r3.output.status != 'completed' and steps.fetch_hyp_1_r3.output.status != 'failed' }}"
+            steps:
+              - name: wait_1_r3
+                type: wait
+                with:
+                  duration: "15s"
+
+      - name: poll_hyp_2_r3
+        type: while
+        if: "${{ steps.build_context_r3.output.structured_output.hypotheses.size >= 3 }}"
+        condition: "${{ true }}"
+        steps:
+          - name: fetch_hyp_2_r3
+            type: kibana.request
+            with:
+              method: GET
+              path: "/api/workflows/executions/{{ steps.launch_2_r3.output.executionId }}"
+            on-failure:
+              retry:
+                max-attempts: 3
+                delay: "5s"
+                strategy: exponential
+          - name: check_done_2_r3
+            type: if
+            condition: "${{ steps.fetch_hyp_2_r3.output.status == 'completed' or steps.fetch_hyp_2_r3.output.status == 'failed' }}"
+            steps:
+              - name: save_2_r3
+                type: data.set
+                with:
+                  hyp_2_gather_r3: "${{ steps.fetch_hyp_2_r3.output.context.output.gather }}"
+                  hyp_2_review_r3: "${{ steps.fetch_hyp_2_r3.output.context.output.review }}"
+              - name: break_2_r3
+                type: loop.break
+          - name: poll_delay_2_r3
+            type: if
+            condition: "${{ steps.fetch_hyp_2_r3.output.status != 'completed' and steps.fetch_hyp_2_r3.output.status != 'failed' }}"
+            steps:
+              - name: wait_2_r3
+                type: wait
+                with:
+                  duration: "15s"
+
+      - name: poll_hyp_3_r3
+        type: while
+        if: "${{ steps.build_context_r3.output.structured_output.hypotheses.size >= 4 }}"
+        condition: "${{ true }}"
+        steps:
+          - name: fetch_hyp_3_r3
+            type: kibana.request
+            with:
+              method: GET
+              path: "/api/workflows/executions/{{ steps.launch_3_r3.output.executionId }}"
+            on-failure:
+              retry:
+                max-attempts: 3
+                delay: "5s"
+                strategy: exponential
+          - name: check_done_3_r3
+            type: if
+            condition: "${{ steps.fetch_hyp_3_r3.output.status == 'completed' or steps.fetch_hyp_3_r3.output.status == 'failed' }}"
+            steps:
+              - name: save_3_r3
+                type: data.set
+                with:
+                  hyp_3_gather_r3: "${{ steps.fetch_hyp_3_r3.output.context.output.gather }}"
+                  hyp_3_review_r3: "${{ steps.fetch_hyp_3_r3.output.context.output.review }}"
+              - name: break_3_r3
+                type: loop.break
+          - name: poll_delay_3_r3
+            type: if
+            condition: "${{ steps.fetch_hyp_3_r3.output.status != 'completed' and steps.fetch_hyp_3_r3.output.status != 'failed' }}"
+            steps:
+              - name: wait_3_r3
+                type: wait
+                with:
+                  duration: "15s"
+
+      - name: poll_hyp_4_r3
+        type: while
+        if: "${{ steps.build_context_r3.output.structured_output.hypotheses.size >= 5 }}"
+        condition: "${{ true }}"
+        steps:
+          - name: fetch_hyp_4_r3
+            type: kibana.request
+            with:
+              method: GET
+              path: "/api/workflows/executions/{{ steps.launch_4_r3.output.executionId }}"
+            on-failure:
+              retry:
+                max-attempts: 3
+                delay: "5s"
+                strategy: exponential
+          - name: check_done_4_r3
+            type: if
+            condition: "${{ steps.fetch_hyp_4_r3.output.status == 'completed' or steps.fetch_hyp_4_r3.output.status == 'failed' }}"
+            steps:
+              - name: save_4_r3
+                type: data.set
+                with:
+                  hyp_4_gather_r3: "${{ steps.fetch_hyp_4_r3.output.context.output.gather }}"
+                  hyp_4_review_r3: "${{ steps.fetch_hyp_4_r3.output.context.output.review }}"
+              - name: break_4_r3
+                type: loop.break
+          - name: poll_delay_4_r3
+            type: if
+            condition: "${{ steps.fetch_hyp_4_r3.output.status != 'completed' and steps.fetch_hyp_4_r3.output.status != 'failed' }}"
+            steps:
+              - name: wait_4_r3
+                type: wait
+                with:
+                  duration: "15s"
+
+      - name: collect_results_r3
+        type: data.set
+        with:
+          hypothesis_0:
+            gather: "${{ variables.hyp_0_gather_r3 }}"
+            review: "${{ variables.hyp_0_review_r3 }}"
+          hypothesis_1:
+            gather: "${{ variables.hyp_1_gather_r3 }}"
+            review: "${{ variables.hyp_1_review_r3 }}"
+          hypothesis_2:
+            gather: "${{ variables.hyp_2_gather_r3 }}"
+            review: "${{ variables.hyp_2_review_r3 }}"
+          hypothesis_3:
+            gather: "${{ variables.hyp_3_gather_r3 }}"
+            review: "${{ variables.hyp_3_review_r3 }}"
+          hypothesis_4:
+            gather: "${{ variables.hyp_4_gather_r3 }}"
+            review: "${{ variables.hyp_4_review_r3 }}"
+
+      - name: synthesize_r3
+        type: ai.agent
+        agent-id: sigevents.investigation.synthesis
+        connector-id: ".anthropic-claude-4.5-haiku-chat_completion"
+        create-conversation: true
+        with:
+          timeout: 180s
+          message: |
+            Synthesise the round 3 (FINAL) investigation results.
+            This is the last investigation round — do NOT return "Undetermined" as
+            root_cause unless absolutely zero evidence was gathered across all three rounds.
+            Provide the best-effort root cause assessment combining all available evidence,
+            state your confidence honestly, and clearly note what remains uncertain.
+
+            Round 1 synthesis: {{ steps.synthesize.output.structured_output | json }}
+            Round 2 synthesis: {{ steps.synthesize_r2.output.structured_output | json }}
+            Round 3 context: {{ steps.build_context_r3.output.structured_output | json }}
+            Round 3 branch results: {{ steps.collect_results_r3.output | json }}
+            Event: event_id={{ inputs.event_id }}, discovery_id={{ inputs.discovery_id }}
+          schema:
+            type: object
+            properties:
+              root_cause:
+                type: string
+              confidence:
+                type: number
+                minimum: 0
+                maximum: 1
+              impact:
+                type: string
+              ranked_hypotheses:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    rank:
+                      type: integer
+                      minimum: 1
+                    hypothesis_id:
+                      type: string
+                    statement:
+                      type: string
+                    verdict:
+                      type: string
+                      enum: [supported, refuted, inconclusive, out_of_reach]
+                    prior_confidence:
+                      type: number
+                      minimum: 0
+                      maximum: 1
+                    posterior_confidence:
+                      type: number
+                      minimum: 0
+                      maximum: 1
+                    evidence_summary:
+                      type: string
+                  required:
+                    - rank
+                    - hypothesis_id
+                    - statement
+                    - verdict
+                    - prior_confidence
+                    - posterior_confidence
+                    - evidence_summary
+              discarded_hypotheses:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    hypothesis_id:
+                      type: string
+                    statement:
+                      type: string
+                    discard_reason:
+                      type: string
+                  required: [hypothesis_id, statement, discard_reason]
+              remediation_options:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    rank:
+                      type: integer
+                      minimum: 1
+                    action:
+                      type: string
+                    rationale:
+                      type: string
+                    risk_level:
+                      type: string
+                      enum: [low, medium, high]
+                    prerequisites:
+                      type: array
+                      items:
+                        type: string
+                  required: [rank, action, rationale, risk_level]
+              gaps_found:
+                type: array
+                items:
+                  type: string
+              investigation_complete:
+                type: boolean
+              memory_pages_written:
+                type: array
+                items:
+                  type: string
+              lessons_for_next_round:
+                type: string
+            required:
+              - root_cause
+              - confidence
+              - impact
+              - ranked_hypotheses
+              - discarded_hypotheses
+              - remediation_options
+              - gaps_found
+              - investigation_complete
+              - memory_pages_written
+              - lessons_for_next_round
+        on-failure:
+          continue: false
+
+      - name: set_final_r3
+        type: data.set
+        with:
+          final_root_cause: "{{ steps.synthesize_r3.output.structured_output.root_cause }}"
+          final_confidence: "${{ steps.synthesize_r3.output.structured_output.confidence }}"
+          final_impact: "{{ steps.synthesize_r3.output.structured_output.impact }}"
+          final_ranked_hypotheses: "${{ steps.synthesize_r3.output.structured_output.ranked_hypotheses }}"
+          final_discarded_hypotheses: "${{ steps.synthesize_r3.output.structured_output.discarded_hypotheses }}"
+          final_remediation_options: "${{ steps.synthesize_r3.output.structured_output.remediation_options }}"
+          final_gaps_found: "${{ steps.synthesize_r3.output.structured_output.gaps_found }}"
+          final_investigation_complete: "${{ steps.synthesize_r3.output.structured_output.investigation_complete }}"
+          final_memory_pages_written: "${{ steps.synthesize_r3.output.structured_output.memory_pages_written }}"
 
   # ── Step 7: Write-back ────────────────────────────────────────────────────────
   - name: prepare_write_back
     type: data.set
     with:
-      root_cause: "{{ steps.synthesize.output.structured_output.root_cause }}"
-      confidence: "${{ steps.synthesize.output.structured_output.confidence }}"
-      impact: "{{ steps.synthesize.output.structured_output.impact }}"
-      ranked_hypotheses: "${{ steps.synthesize.output.structured_output.ranked_hypotheses }}"
-      discarded_hypotheses: "${{ steps.synthesize.output.structured_output.discarded_hypotheses }}"
-      remediation_options: "${{ steps.synthesize.output.structured_output.remediation_options }}"
-      gaps_found: "${{ steps.synthesize.output.structured_output.gaps_found }}"
-      investigation_complete: "${{ steps.synthesize.output.structured_output.investigation_complete }}"
-      memory_pages_written: "${{ steps.synthesize.output.structured_output.memory_pages_written }}"
+      root_cause: "{{ variables.final_root_cause }}"
+      confidence: "${{ variables.final_confidence }}"
+      impact: "{{ variables.final_impact }}"
+      ranked_hypotheses: "${{ variables.final_ranked_hypotheses }}"
+      discarded_hypotheses: "${{ variables.final_discarded_hypotheses }}"
+      remediation_options: "${{ variables.final_remediation_options }}"
+      gaps_found: "${{ variables.final_gaps_found }}"
+      investigation_complete: "${{ variables.final_investigation_complete }}"
+      memory_pages_written: "${{ variables.final_memory_pages_written }}"
       workflow_execution_id: "{{ execution.id }}"
 
   - name: write_back

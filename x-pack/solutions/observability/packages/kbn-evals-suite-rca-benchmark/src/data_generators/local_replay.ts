@@ -79,6 +79,45 @@ type RowMapper = (
   injectTime: number
 ) => Record<string, unknown> | null;
 
+function parseCsvRow(line: string): string[] {
+  const fields: string[] = [];
+  let i = 0;
+
+  while (true) {
+    if (i < line.length && line[i] === '"') {
+      let field = '';
+      i++; // skip opening quote
+      while (i < line.length) {
+        if (line[i] === '"') {
+          if (i + 1 < line.length && line[i + 1] === '"') {
+            field += '"';
+            i += 2;
+          } else {
+            i++; // skip closing quote
+            break;
+          }
+        } else {
+          field += line[i++];
+        }
+      }
+      fields.push(field);
+    } else {
+      const start = i;
+      while (i < line.length && line[i] !== ',') i++;
+      fields.push(line.slice(start, i).trim());
+    }
+
+    if (i >= line.length) break;
+    i++; // skip comma separator
+    if (i === line.length) {
+      fields.push('');
+      break;
+    }
+  }
+
+  return fields;
+}
+
 async function indexCsv(
   esClient: Client,
   csvPath: string,
@@ -101,12 +140,12 @@ async function indexCsv(
 
   for await (const line of rl) {
     if (!header) {
-      header = line.split(',');
+      header = parseCsvRow(line);
       continue;
     }
     if (!line.trim()) continue;
-    const values = line.split(',');
-    const row = Object.fromEntries(header.map((k, i) => [k.trim(), (values[i] ?? '').trim()]));
+    const values = parseCsvRow(line);
+    const row = Object.fromEntries(header.map((k, i) => [k.trim(), values[i] ?? '']));
     const doc = rowMapper(row, shiftS, injectTime);
     if (!doc) continue;
     batch.push(doc);
@@ -169,6 +208,34 @@ function mapTraceRow(
   return doc;
 }
 
+async function createTracesIndex(esClient: Client, index: string): Promise<void> {
+  await esClient.indices.create({
+    index,
+    mappings: {
+      dynamic: true,
+      properties: {
+        '@timestamp': { type: 'date' },
+        service: { properties: { name: { type: 'keyword' } } },
+        trace: { properties: { id: { type: 'keyword' } } },
+        span: {
+          properties: {
+            id: { type: 'keyword' },
+            name: { type: 'keyword' },
+            action: { type: 'keyword' },
+          },
+        },
+        parent: { properties: { id: { type: 'keyword' } } },
+        event: { properties: { duration: { type: 'long' } } },
+        http: {
+          properties: {
+            response: { properties: { status_code: { type: 'long' } } },
+          },
+        },
+      },
+    },
+  });
+}
+
 export async function indexLocalScenario(
   esClient: Client,
   log: ToolingLog,
@@ -184,6 +251,8 @@ export async function indexLocalScenario(
     `[${scenario.snapshotName}] Indexing — shift +${Math.round(shiftS / 3600)}h, ` +
       `inject → ${new Date((injectTime + shiftS) * 1000).toISOString()}`
   );
+
+  await createTracesIndex(esClient, tracesIndex);
 
   const logsIndexed = await indexCsv(
     esClient,
