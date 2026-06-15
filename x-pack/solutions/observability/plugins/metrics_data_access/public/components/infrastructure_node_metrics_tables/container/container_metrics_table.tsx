@@ -77,6 +77,9 @@ export const ContainerMetricsTable = (props: ContainerMetricsTableProps) => {
     [setSortState, setCurrentPageIndex]
   );
 
+  const rows = data.state === 'data' ? data.rows : undefined;
+  const containerIds = useMemo(() => rows?.map((row) => row.id), [rows]);
+
   if (data.state === 'error') {
     return (
       <>
@@ -96,7 +99,7 @@ export const ContainerMetricsTable = (props: ContainerMetricsTableProps) => {
       <>
         <EuiFlexGroup justifyContent="flexEnd">
           <AnalyzeMetricButton
-            ids={data.rows.map((row) => row.id)}
+            ids={containerIds ?? []}
             nodeType="container"
             timerange={timerange}
             metricsIndices={metricsIndices}

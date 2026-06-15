@@ -8,4 +8,3 @@
 export { ContainerMetricsTable, useContainerMetricsTable } from './container';
 export { HostMetricsTable, useHostMetricsTable } from './host';
 export { PodMetricsTable, usePodMetricsTable } from './pod';
-export { AnalyzeMetricButton } from './shared';

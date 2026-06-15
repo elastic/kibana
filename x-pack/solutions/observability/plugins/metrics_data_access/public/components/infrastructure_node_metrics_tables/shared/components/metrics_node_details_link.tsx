@@ -43,7 +43,7 @@ function getDiscoverBreakdownForNodeType(nodeType: NodeTypeForLink): string {
     case 'container':
       return 'resource.attributes.container.id';
     case 'pod':
-      return 'resource.attributes.k8s.pod.uid';
+      return 'resource.attributes.k8s.pod.name';
     case 'host':
       return 'resource.attributes.host.name';
     default:
@@ -63,9 +63,9 @@ function getDiscoverEsqlQueryForNodeComparison(
     case 'container':
       return esql`TS ${from} | WHERE container.id IN (${idLiterals})`;
     case 'pod':
-      return esql`TS ${from} | WHERE k8s.pod.uid IN (${idLiterals})`;
+      return esql`TS ${from} | WHERE k8s.pod.name IN (${idLiterals})`;
     default:
-      return esql`TS ${from} | Where host.name IN (${idLiterals})`;
+      return esql`TS ${from} | WHERE host.name IN (${idLiterals})`;
   }
 }
 
@@ -80,7 +80,7 @@ export const CompareMetricNodesLink = ({
   return useMemo(() => {
     const discoverLocator = share?.url?.locators?.get(DISCOVER_APP_LOCATOR_ID);
     const esqlQuery = getDiscoverEsqlQueryForNodeComparison(
-      nodeType as NodeTypeForLink,
+      nodeType,
       ids,
       metricsIndices ?? DEFAULT_METRICS_INDEX
     );

@@ -73,6 +73,8 @@ export const HostMetricsTable = (props: HostMetricsTableProps) => {
     },
     [setSortState, setCurrentPageIndex]
   );
+  const rows = data.state === 'data' ? data.rows : undefined;
+  const hostIds = useMemo(() => rows?.map((row) => row.name), [rows]);
 
   if (data.state === 'error') {
     return (
@@ -93,7 +95,7 @@ export const HostMetricsTable = (props: HostMetricsTableProps) => {
       <>
         <EuiFlexGroup justifyContent="flexEnd">
           <AnalyzeMetricButton
-            ids={data.rows.map((row) => row.name)}
+            ids={hostIds ?? []}
             nodeType="host"
             timerange={timerange}
             metricsIndices={metricIndices}

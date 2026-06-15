@@ -76,6 +76,9 @@ export const PodMetricsTable = (props: PodMetricsTableProps) => {
     setCurrentPageIndex(0);
   };
 
+  const rows = data.state === 'data' ? data.rows : undefined;
+  const podNames = useMemo(() => rows?.map((row) => row.name), [rows]);
+
   if (data.state === 'error') {
     return (
       <>
@@ -95,7 +98,7 @@ export const PodMetricsTable = (props: PodMetricsTableProps) => {
       <>
         <EuiFlexGroup justifyContent="flexEnd">
           <AnalyzeMetricButton
-            ids={data.rows.map((row) => row.id)}
+            ids={podNames ?? []}
             nodeType="pod"
             timerange={timerange}
             metricsIndices={metricIndices}
