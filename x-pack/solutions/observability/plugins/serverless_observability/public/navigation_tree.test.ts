@@ -10,6 +10,19 @@ import type { NodeDefinition } from '@kbn/core-chrome-browser';
 import type { CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 
+const getAdminSettingsNode = (
+  options: Parameters<typeof createNavigationTree>[0] = {}
+): NodeDefinition => {
+  const { footer } = createNavigationTree(options);
+  const adminSettingsNode = footer?.find((item) => item.id === 'admin_and_settings');
+
+  if (!adminSettingsNode) {
+    throw new Error('Admin and Settings footer node not found');
+  }
+
+  return adminSettingsNode;
+};
+
 describe('Navigation Tree', () => {
   let core: CoreStart;
 
@@ -77,14 +90,27 @@ describe('Navigation Tree', () => {
   });
 
   it('hides GenAI Settings in admin settings when unavailable', () => {
-    const { body } = createNavigationTree({ core, genAiSettingsAvailable: false });
-    const adminSettingsNode = body.find((item) => item.id === 'admin_and_settings');
+    const adminSettingsNode = getAdminSettingsNode({ core, genAiSettingsAvailable: false });
     const aiSection = adminSettingsNode?.children?.find(
       (item) => item.title === 'AI' && 'children' in item
     );
 
-    expect(aiSection?.children).not.toEqual(
-      expect.arrayContaining([expect.objectContaining({ link: 'management:genAiSettings' })])
+    expect(aiSection).toBeUndefined();
+  });
+
+  it('hides ML and AI related admin settings when unavailable', () => {
+    const adminSettingsNode = getAdminSettingsNode({
+      core,
+      overviewAvailable: false,
+      genAiSettingsAvailable: false,
+    });
+
+    expect(adminSettingsNode.children).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ id: 'machine_learning' }),
+        expect.objectContaining({ id: 'model_management' }),
+        expect.objectContaining({ title: 'AI' }),
+      ])
     );
   });
 

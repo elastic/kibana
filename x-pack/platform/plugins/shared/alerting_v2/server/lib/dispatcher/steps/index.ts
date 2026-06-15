@@ -6,6 +6,7 @@
  */
 
 export { CheckEngineEnabledStep } from './check_engine_enabled_step';
+export { WaitForResourcesStep } from './wait_for_resources_step';
 export { FetchEpisodesStep } from './fetch_episodes_step';
 export { FetchSuppressionsStep } from './fetch_suppressions_step';
 export { ApplySuppressionStep } from './apply_suppression_step';

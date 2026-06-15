@@ -101,7 +101,6 @@ export const getNavigationTreeDefinition = ({
                     { link: 'ml:dataDriftPage', sideNavStatus: 'hidden' },
                     { link: 'ml:fileUpload', sideNavStatus: 'hidden' },
                     { link: 'ml:indexDataVisualizer', sideNavStatus: 'hidden' },
-                    { link: 'ml:indexDataVisualizerPage', sideNavStatus: 'hidden' },
                   ],
                   id: 'ml_overview',
                   title: '',
