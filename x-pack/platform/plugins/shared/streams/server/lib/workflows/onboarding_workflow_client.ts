@@ -217,7 +217,6 @@ export class StreamsKIsOnboardingClient {
       executionSpaceId: ONBOARDING_EXECUTIONS_SPACE_ID,
       inputs: toWorkflowInputPayload(inputs),
       request,
-      notFoundMessage: `Onboarding workflow ${STREAMS_KI_ONBOARDING_WORKFLOW_ID} not found`,
     });
     return { executionId };
   }
@@ -236,7 +235,6 @@ export class StreamsKIsOnboardingClient {
   }): Promise<StreamsKIsOnboardingServerStatusResult> {
     const result = await this.workflowExecutionService.getStatus({
       spaceId: ONBOARDING_EXECUTIONS_SPACE_ID,
-      timedOutMessage: 'Onboarding workflow timed out',
       queryParams: { concurrencyGroupKey: buildConcurrencyKey(streamName) },
     });
 

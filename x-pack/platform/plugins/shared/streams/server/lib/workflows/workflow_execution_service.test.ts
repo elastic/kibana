@@ -63,20 +63,20 @@ describe('WorkflowExecutionService', () => {
   });
 
   describe('getFailureMessage', () => {
-    it('returns the provided timeout message for TIMED_OUT executions', () => {
+    it('returns "Workflow <id> timed out" for TIMED_OUT executions', () => {
       expect(
         WorkflowExecutionService.getFailureMessage({
           execution: { status: ExecutionStatus.TIMED_OUT, error: { message: 'ignored' } } as never,
-          timedOutMessage: 'It timed out',
+          workflowId: WORKFLOW_ID,
         })
-      ).toBe('It timed out');
+      ).toBe(`Workflow ${WORKFLOW_ID} timed out`);
     });
 
     it('returns the execution error message for non-timeout failures', () => {
       expect(
         WorkflowExecutionService.getFailureMessage({
           execution: { status: ExecutionStatus.FAILED, error: { message: 'boom' } } as never,
-          timedOutMessage: 'It timed out',
+          workflowId: WORKFLOW_ID,
         })
       ).toBe('boom');
     });
@@ -85,7 +85,7 @@ describe('WorkflowExecutionService', () => {
       expect(
         WorkflowExecutionService.getFailureMessage({
           execution: { status: ExecutionStatus.FAILED } as never,
-          timedOutMessage: 'It timed out',
+          workflowId: WORKFLOW_ID,
         })
       ).toBe('Unknown error');
     });
@@ -146,22 +146,19 @@ describe('WorkflowExecutionService', () => {
       });
     });
 
-    it('returns Failed with the caller-supplied message for a timed-out execution', async () => {
+    it('returns Failed with "Workflow <id> timed out" for a timed-out execution', async () => {
       const { service } = createService({
         getWorkflowExecutions: jest
           .fn()
           .mockResolvedValue({ results: [{ id: 'exec-1', status: ExecutionStatus.TIMED_OUT }] }),
       });
 
-      const result = await service.getStatus({
-        spaceId: 'space-a',
-        timedOutMessage: 'It timed out',
-      });
+      const result = await service.getStatus({ spaceId: 'space-a' });
 
       expect(result).toEqual({
         status: SigEventsWorkflowStatus.Failed,
         executionId: 'exec-1',
-        error: 'It timed out',
+        error: `Workflow ${WORKFLOW_ID} timed out`,
       });
     });
 
@@ -261,16 +258,15 @@ describe('WorkflowExecutionService', () => {
       ).rejects.toThrow(new RegExp(`Workflow ${WORKFLOW_ID} not found`));
     });
 
-    it('throws the caller-supplied message when the workflow is not found', async () => {
+    it('throws "Workflow <id> not found" when the workflow is not found', async () => {
       const { service } = createService({ getWorkflow: jest.fn().mockResolvedValue(null) });
 
       await expect(
         service.execute({
           executionSpaceId: 'space-a',
           request: httpServerMock.createKibanaRequest(),
-          notFoundMessage: 'Onboarding workflow not found',
         })
-      ).rejects.toThrow(/Onboarding workflow not found/);
+      ).rejects.toThrow(new RegExp(`Workflow ${WORKFLOW_ID} not found`));
     });
   });
 

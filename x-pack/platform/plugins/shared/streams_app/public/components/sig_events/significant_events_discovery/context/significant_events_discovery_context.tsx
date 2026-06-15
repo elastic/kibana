@@ -97,6 +97,7 @@ export function SignificantEventsDiscoveryProvider({
     mutationFn: triggerSignificantEventsDiscovery,
     onSuccess: ({ executionId }) => {
       setTrackedExecutionId(executionId);
+      void queryClient.invalidateQueries({ queryKey: ['significant_events_discovery_status'] });
     },
     onError: (error: Error) => {
       setIsOptimisticallyRunning(false);

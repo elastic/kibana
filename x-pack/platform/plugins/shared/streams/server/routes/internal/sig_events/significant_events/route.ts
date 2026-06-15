@@ -4,15 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SignificantEventsGetResponse } from '@kbn/streams-schema';
-import {
-  TaskStatus,
-  deriveQueryType,
-  type SignificantEventsQueriesGenerationResult,
-  type SignificantEventsQueriesGenerationTaskResult,
+import type {
+  SignificantEventsGetResponse,
+  SigEventsWorkflowStatusResult,
+  SignificantEventsQueriesGenerationResult,
+  SignificantEventsQueriesGenerationTaskResult,
 } from '@kbn/streams-schema';
+import { TaskStatus, deriveQueryType } from '@kbn/streams-schema';
 import { z } from '@kbn/zod/v4';
-import type { SignificantEventsDiscoveryStatusResult } from '../../../../lib/workflows/significant_events_discovery_client';
 import { FeatureNotEnabledError } from '../../../../lib/streams/errors/feature_not_enabled_error';
 import { BUCKET_SIZE_PATTERN } from '../../../../lib/sig_events/helpers/fill_bucket_gaps';
 import { readSignificantEventsFromAlertsIndices } from '../../../../lib/sig_events/read_significant_events_from_alerts_indices';
@@ -312,7 +311,7 @@ const significantEventsDiscoveryStatusRoute = createServerRoute({
     workflowClients,
     getSpaceId,
     server,
-  }): Promise<SignificantEventsDiscoveryStatusResult> => {
+  }): Promise<SigEventsWorkflowStatusResult> => {
     const { significantEventsDiscoveryClient } = workflowClients;
     if (!significantEventsDiscoveryClient) {
       throw new FeatureNotEnabledError('Significant events discovery is not available');

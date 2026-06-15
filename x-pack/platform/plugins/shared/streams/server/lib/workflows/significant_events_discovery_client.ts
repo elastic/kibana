@@ -23,8 +23,6 @@ export interface SignificantEventsDiscoveryRunParams {
  * Currently has no workflow-specific completion data (T defaults to {}).
  * Extend the generic when the discovery pipeline produces structured output.
  */
-export type SignificantEventsDiscoveryStatusResult = SigEventsWorkflowStatusResult;
-
 export class SignificantEventsDiscoveryClient {
   private readonly workflowExecutionService: WorkflowExecutionService;
 
@@ -62,14 +60,7 @@ export class SignificantEventsDiscoveryClient {
     return this.workflowExecutionService.cancelLatest({ spaceId, request });
   }
 
-  async getStatus({
-    spaceId,
-  }: {
-    spaceId: string;
-  }): Promise<SignificantEventsDiscoveryStatusResult> {
-    return this.workflowExecutionService.getStatus({
-      spaceId,
-      timedOutMessage: 'Significant events discovery timed out',
-    });
+  async getStatus({ spaceId }: { spaceId: string }): Promise<SigEventsWorkflowStatusResult> {
+    return this.workflowExecutionService.getStatus({ spaceId });
   }
 }

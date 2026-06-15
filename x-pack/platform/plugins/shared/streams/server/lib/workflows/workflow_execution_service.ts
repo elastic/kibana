@@ -94,28 +94,25 @@ export class WorkflowExecutionService<TInput extends object = {}> {
 
   static getFailureMessage({
     execution,
-    timedOutMessage,
+    workflowId,
   }: {
     execution: Pick<WorkflowExecutionListItemDto, 'status' | 'error'>;
-    timedOutMessage: string;
+    workflowId: string;
   }): string {
     if (execution.status === ExecutionStatus.TIMED_OUT) {
-      return timedOutMessage;
+      return `Workflow ${workflowId} timed out`;
     }
     return execution.error?.message ?? 'Unknown error';
   }
 
   async getStatus({
     spaceId,
-    timedOutMessage = 'Workflow timed out',
-    queryParams = {},
+    queryParams,
   }: {
     spaceId: string;
-    timedOutMessage?: string;
     queryParams?: WorkflowExecutionQueryParams;
   }): Promise<SigEventsWorkflowStatusResult> {
-    const { results } = await this.getExecutions({ ...queryParams, size: 1 }, spaceId);
-    const lastExecution = results[0] ?? null;
+    const lastExecution = await this.getLastExecution(spaceId, queryParams);
 
     if (!lastExecution) {
       return { status: SigEventsWorkflowStatus.NotStarted, executionId: null };
@@ -129,7 +126,7 @@ export class WorkflowExecutionService<TInput extends object = {}> {
         executionId: lastExecution.id,
         error: WorkflowExecutionService.getFailureMessage({
           execution: lastExecution,
-          timedOutMessage,
+          workflowId: this.workflowId,
         }),
       };
     }
@@ -149,17 +146,15 @@ export class WorkflowExecutionService<TInput extends object = {}> {
     executionSpaceId,
     inputs,
     request,
-    notFoundMessage,
   }: {
     executionSpaceId: string;
     inputs?: TInput;
     request: KibanaRequest;
-    notFoundMessage?: string;
   }): Promise<string> {
     const workflow = await this.managementApi.getWorkflow(this.workflowId, this.workflowSpaceId);
 
     if (!workflow || !workflow.definition) {
-      throw new Error(notFoundMessage ?? `Workflow ${this.workflowId} not found`);
+      throw new Error(`Workflow ${this.workflowId} not found`);
     }
 
     return this.managementApi.runWorkflow(
@@ -179,18 +174,14 @@ export class WorkflowExecutionService<TInput extends object = {}> {
     request: KibanaRequest;
     concurrencyGroupKey?: string;
   }): Promise<string | null> {
-    const { results } = await this.managementApi.getWorkflowExecutions(
-      {
-        workflowId: this.workflowId,
-        ...(concurrencyGroupKey !== undefined && { concurrencyGroupKey }),
-        size: 1,
-      },
-      spaceId
+    const lastExecution = await this.getLastExecution(
+      spaceId,
+      concurrencyGroupKey !== undefined ? { concurrencyGroupKey } : undefined
     );
 
-    if (results.length > 0 && !isTerminalStatus(results[0].status)) {
-      await this.managementApi.cancelWorkflowExecution(results[0].id, spaceId, request);
-      return results[0].id;
+    if (lastExecution && !isTerminalStatus(lastExecution.status)) {
+      await this.managementApi.cancelWorkflowExecution(lastExecution.id, spaceId, request);
+      return lastExecution.id;
     }
 
     return null;
@@ -203,9 +194,12 @@ export class WorkflowExecutionService<TInput extends object = {}> {
     );
   }
 
-  async getLastExecution(spaceId: string): Promise<WorkflowExecutionListItemDto | null> {
+  async getLastExecution(
+    spaceId: string,
+    queryParams?: WorkflowExecutionQueryParams
+  ): Promise<WorkflowExecutionListItemDto | null> {
     const { results } = await this.getExecutions(
-      { size: 1, sortField: 'createdAt', sortOrder: 'desc' },
+      { sortField: 'createdAt', sortOrder: 'desc', ...queryParams, size: 1 },
       spaceId
     );
     return results[0] ?? null;

@@ -20,15 +20,16 @@ export enum SigEventsWorkflowStatus {
 }
 
 /**
- * Client-side workflow execution status result.
+ * Workflow execution status result, shared by both client and server.
  * `T` extends the `Completed` variant with workflow-specific output data.
  *
- * `InProgress` and `BeingCanceled` carry `executionId?: string` (optional/undefined)
- * because they may be set optimistically on the client before the server response
- * provides the real id. All other non-NotStarted variants carry `executionId: string`.
+ * `InProgress` and `BeingCanceled` carry `executionId?: string` because they may
+ * be set optimistically before a server response provides the real id. All other
+ * non-NotStarted variants carry `executionId: string`.
  *
- * Note: `BeingCanceled` is a client-only optimistic state — the server never
- * returns it. For the server-returned shape use {@link SigEventsWorkflowServerStatusResult}.
+ * `BeingCanceled` is a client-only optimistic state — the server never returns it,
+ * but having it in the shared type is harmless since the server simply never
+ * constructs that variant.
  */
 export type SigEventsWorkflowStatusResult<T extends object = {}> =
   | { status: SigEventsWorkflowStatus.NotStarted; executionId: null }
@@ -41,12 +42,3 @@ export type SigEventsWorkflowStatusResult<T extends object = {}> =
       | { status: SigEventsWorkflowStatus.Failed; error: string }
       | ({ status: SigEventsWorkflowStatus.Completed } & T)
     ));
-
-/**
- * Server-returned workflow status result — identical to {@link SigEventsWorkflowStatusResult}
- * but excludes the client-only `BeingCanceled` variant.
- */
-export type SigEventsWorkflowServerStatusResult<T extends object = {}> = Exclude<
-  SigEventsWorkflowStatusResult<T>,
-  { status: SigEventsWorkflowStatus.BeingCanceled }
->;
