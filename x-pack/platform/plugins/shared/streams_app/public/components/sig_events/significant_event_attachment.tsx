@@ -92,8 +92,8 @@ const SignificantEventInlineContent = ({
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
             <EuiFlexItem grow={false}>
-              <EuiBadge color={getStatusColor(data.verdict)}>
-                {labels.status}: {data.verdict}
+              <EuiBadge color={getStatusColor(data.status)}>
+                {labels.status}: {data.status}
               </EuiBadge>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -161,7 +161,7 @@ export const significantEventAttachmentDefinition: AttachmentUIDefinition<Signif
     getIcon: () => 'warning',
     getHeader: ({ attachment }) => {
       const badges: HeaderBadge[] = [
-        { label: attachment.data.verdict, color: getStatusColor(attachment.data.verdict) },
+        { label: attachment.data.status, color: getStatusColor(attachment.data.status) },
         { label: attachment.data.impact, color: 'hollow' },
       ];
       return {
