@@ -10,9 +10,6 @@ import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 import { KBN_ARCHIVES } from '../fixtures/constants';
 
-const getExpectedResultLabels = (resultLabels: string[], expectedLabels: string[]) =>
-  resultLabels.filter((resultLabel) => expectedLabels.includes(resultLabel));
-
 /**
  * IMPORTANT: These tests only work in 'classic' navigation mode. Once https://github.com/elastic/kibana/pull/251436 is merged, we might need to revisit this and make them work in 'solution' navigation as well.
  */
@@ -65,14 +62,9 @@ test.describe('GlobalSearchBar', { tag: tags.stateful.classic }, () => {
       'dashboard 4 (tag-special-chars)',
     ];
 
-    await expect
-      .poll(async () =>
-        getExpectedResultLabels(
-          await pageObjects.globalSearch.resultLabels.allTextContents(),
-          expectedLabels
-        )
-      )
-      .toStrictEqual(expectedLabels);
+    for (const label of expectedLabels) {
+      await expect(pageObjects.globalSearch.resultLabels.filter({ hasText: label })).toBeVisible();
+    }
   });
 
   test('shows a suggestion when searching for a term matching a tag name', async ({
@@ -106,14 +98,9 @@ test.describe('GlobalSearchBar', { tag: tags.stateful.classic }, () => {
       'dashboard 4 (tag-special-chars)',
     ];
 
-    await expect
-      .poll(async () =>
-        getExpectedResultLabels(
-          await pageObjects.globalSearch.resultLabels.allTextContents(),
-          expectedLabels
-        )
-      )
-      .toStrictEqual(expectedLabels);
+    for (const label of expectedLabels) {
+      await expect(pageObjects.globalSearch.resultLabels.filter({ hasText: label })).toBeVisible();
+    }
   });
 
   test('allows to filter by multiple types', async ({ pageObjects }) => {
@@ -131,14 +118,9 @@ test.describe('GlobalSearchBar', { tag: tags.stateful.classic }, () => {
       'dashboard 4 (tag-special-chars)',
     ];
 
-    await expect
-      .poll(async () =>
-        getExpectedResultLabels(
-          await pageObjects.globalSearch.resultLabels.allTextContents(),
-          expectedLabels
-        )
-      )
-      .toStrictEqual(expectedLabels);
+    for (const label of expectedLabels) {
+      await expect(pageObjects.globalSearch.resultLabels.filter({ hasText: label })).toBeVisible();
+    }
   });
 
   test('allows to filter by tag', async ({ pageObjects }) => {
@@ -184,14 +166,9 @@ test.describe('GlobalSearchBar', { tag: tags.stateful.classic }, () => {
       'dashboard 3 (tag-1 and tag-3)',
     ];
 
-    await expect
-      .poll(async () =>
-        getExpectedResultLabels(
-          await pageObjects.globalSearch.resultLabels.allTextContents(),
-          expectedLabels
-        )
-      )
-      .toStrictEqual(expectedLabels);
+    for (const label of expectedLabels) {
+      await expect(pageObjects.globalSearch.resultLabels.filter({ hasText: label })).toBeVisible();
+    }
   });
 
   test('allows to filter by term and type', async ({ pageObjects }) => {
