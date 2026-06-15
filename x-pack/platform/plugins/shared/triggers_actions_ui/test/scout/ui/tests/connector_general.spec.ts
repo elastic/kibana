@@ -487,12 +487,16 @@ test.describe('General connector functionality', { tag: tags.stateful.classic },
     );
     expect(validTimestamps.length).toBeGreaterThan(0);
 
+    // Sort ascending: open column action menu and click the ascending sort button.
+    // The timestamp column has no explicit EuiDataGrid schema and the grid has no
+    // inMemory prop, so EUI uses the default sort labels ("A-Z" / "Z-A") rather
+    // than the datetime schema labels ("Old-New" / "New-Old").
     await page.testSubj.locator('dataGridHeaderCell-timestamp').hover();
     await page.testSubj.click('dataGridHeaderCellActionButton-timestamp');
     await page.testSubj.locator('dataGridHeaderCellActionGroup-timestamp').waitFor();
     await page.testSubj
       .locator('dataGridHeaderCellActionGroup-timestamp')
-      .getByRole('button', { name: 'Sort Old-New' })
+      .getByRole('button', { name: 'Sort A-Z' })
       .click();
 
     await expect(page.testSubj.locator('dataGridHeaderCellSortingIcon-timestamp')).toBeVisible();
