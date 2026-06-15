@@ -103,24 +103,6 @@ export const Zoom: ConnectorSpec = {
   auth: {
     types: [
       {
-        type: 'bearer',
-        defaults: {},
-        overrides: {
-          meta: {
-            token: {
-              sensitive: true,
-              label: i18n.translate('core.kibanaConnectorSpecs.zoom.auth.token.label', {
-                defaultMessage: 'Zoom access token',
-              }),
-              helpText: i18n.translate('core.kibanaConnectorSpecs.zoom.auth.token.helpText', {
-                defaultMessage:
-                  'Paste a Zoom Server-to-Server OAuth access token. Generate one via the Zoom Marketplace or API. Tokens expire after 1 hour.',
-              }),
-            },
-          },
-        },
-      },
-      {
         type: 'oauth_authorization_code',
         overrides: {
           meta: {

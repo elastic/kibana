@@ -267,6 +267,10 @@ export interface ConnectorTest {
 
 export interface AuthTypeDef {
   type: string;
+  /** Display name shown in the auth type picker. Defaults to the auth type's built-in label when omitted. */
+  label?: string;
+  /** When true, renders a caution indicator — use for deprecated or less-preferred auth options. */
+  warn?: boolean;
   isExperimental?: boolean;
   defaults: Record<string, unknown>;
   overrides?: {

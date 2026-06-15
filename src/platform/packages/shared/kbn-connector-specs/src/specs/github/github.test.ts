@@ -45,8 +45,13 @@ describe('GithubConnector', () => {
   });
 
   describe('auth', () => {
-    it('supports bearer auth', () => {
-      expect(GithubConnector.auth?.types).toContain('bearer');
+    it('supports bearer auth labeled as Personal Access Token (PAT)', () => {
+      const bearerType = GithubConnector.auth?.types.find(
+        (t) => typeof t === 'object' && t.type === 'bearer'
+      );
+      expect(bearerType).toEqual(
+        expect.objectContaining({ type: 'bearer', label: 'Personal Access Token (PAT)' })
+      );
     });
 
     it('supports oauth_authorization_code with correct GitHub defaults', () => {

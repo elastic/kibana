@@ -39,11 +39,11 @@ describe('Zoom', () => {
   });
 
   describe('auth', () => {
-    it('supports bearer auth', () => {
+    it('does not include bearer auth (removed in favour of OAuth)', () => {
       const types = (Zoom.auth?.types as Array<string | { type: string }>).map((t) =>
         typeof t === 'string' ? t : t.type
       );
-      expect(types).toContain('bearer');
+      expect(types).not.toContain('bearer');
     });
 
     it('supports oauth_authorization_code with correct Zoom defaults', () => {

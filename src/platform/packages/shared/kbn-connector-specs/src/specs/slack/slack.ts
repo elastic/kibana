@@ -191,6 +191,18 @@ export const Slack: ConnectorSpec = {
   auth: {
     types: [
       {
+        type: 'ears',
+        label: 'Quick Connect OAuth 2.0',
+        overrides: {
+          meta: { scope: { disabled: true } },
+        },
+        defaults: {
+          provider: 'slack',
+          scope:
+            'channels:read chat:write files:read groups:read im:read mpim:read search:read.files search:read.im search:read.mpim search:read.private search:read.public users:read',
+        },
+      },
+      {
         type: 'oauth_authorization_code',
         defaults: {
           authorizationUrl: 'https://slack.com/oauth/v2/authorize',
@@ -200,17 +212,6 @@ export const Slack: ConnectorSpec = {
           scopeParamName: 'user_scope',
           accessTokenPath: 'authed_user.access_token',
           tokenType: 'Bearer',
-        },
-      },
-      {
-        type: 'ears',
-        overrides: {
-          meta: { scope: { disabled: true } },
-        },
-        defaults: {
-          provider: 'slack',
-          scope:
-            'channels:read chat:write files:read groups:read im:read mpim:read search:read.files search:read.im search:read.mpim search:read.private search:read.public users:read',
         },
       },
     ],

@@ -66,14 +66,20 @@ describe('MicrosoftTeams', () => {
   });
 
   describe('auth', () => {
-    it('should support bearer, oauth_authorization_code, oauth_client_credentials, and ears', () => {
+    it('should support ears, oauth_authorization_code, oauth_client_credentials, and oauth_client_credentials_private_key_jwt', () => {
       const { auth } = MicrosoftTeams;
       expect(auth).toBeDefined();
       expect(auth?.types).toHaveLength(4);
-      expect(auth?.types[0]).toEqual(expect.objectContaining({ type: 'bearer' }));
+      expect(auth?.types[0]).toEqual(
+        expect.objectContaining({ type: 'ears', label: 'Quick Connect OAuth 2.0' })
+      );
       expect(auth?.types[1]).toEqual(expect.objectContaining({ type: 'oauth_authorization_code' }));
-      expect(auth?.types[2]).toEqual(expect.objectContaining({ type: 'oauth_client_credentials' }));
-      expect(auth?.types[3]).toEqual(expect.objectContaining({ type: 'ears' }));
+      expect(auth?.types[2]).toEqual(
+        expect.objectContaining({ type: 'oauth_client_credentials', warn: true })
+      );
+      expect(auth?.types[3]).toEqual(
+        expect.objectContaining({ type: 'oauth_client_credentials_private_key_jwt', warn: true })
+      );
     });
 
     it('should have correct oauth_authorization_code defaults', () => {

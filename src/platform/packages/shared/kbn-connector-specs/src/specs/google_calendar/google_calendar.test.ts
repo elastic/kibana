@@ -35,8 +35,10 @@ describe('GoogleCalendar', () => {
     expect(GoogleCalendar.metadata.supportedFeatureIds).toContain('workflows');
   });
 
-  it('should support bearer auth', () => {
-    expect(GoogleCalendar.auth?.types).toContain('bearer');
+  it('should support ears auth type as first option with Quick Connect label', () => {
+    expect(GoogleCalendar.auth?.types[0]).toEqual(
+      expect.objectContaining({ type: 'ears', label: 'Quick Connect OAuth 2.0' })
+    );
   });
 
   it('should support oauth_authorization_code with correct Google defaults', () => {

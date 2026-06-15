@@ -35,8 +35,10 @@ describe('GmailConnector', () => {
   });
 
   describe('auth', () => {
-    it('supports bearer auth', () => {
-      expect(GmailConnector.auth?.types).toContain('bearer');
+    it('supports ears auth type as first option with Quick Connect label', () => {
+      expect(GmailConnector.auth?.types[0]).toEqual(
+        expect.objectContaining({ type: 'ears', label: 'Quick Connect OAuth 2.0' })
+      );
     });
 
     it('supports oauth_authorization_code with correct Google defaults', () => {

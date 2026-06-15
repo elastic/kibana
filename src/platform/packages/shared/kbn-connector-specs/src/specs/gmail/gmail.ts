@@ -40,7 +40,18 @@ export const GmailConnector: ConnectorSpec = {
 
   auth: {
     types: [
-      'bearer',
+      {
+        type: 'ears',
+        label: 'Quick Connect OAuth 2.0',
+        isExperimental: true,
+        overrides: {
+          meta: { scope: { disabled: true } },
+        },
+        defaults: {
+          provider: 'google',
+          scope: 'https://www.googleapis.com/auth/gmail.readonly',
+        },
+      },
       {
         type: 'oauth_authorization_code',
         overrides: {
@@ -53,17 +64,6 @@ export const GmailConnector: ConnectorSpec = {
         defaults: {
           authorizationUrl: 'https://accounts.google.com/o/oauth2/v2/auth',
           tokenUrl: 'https://oauth2.googleapis.com/token',
-          scope: 'https://www.googleapis.com/auth/gmail.readonly',
-        },
-      },
-      {
-        type: 'ears',
-        isExperimental: true,
-        overrides: {
-          meta: { scope: { disabled: true } },
-        },
-        defaults: {
-          provider: 'google',
           scope: 'https://www.googleapis.com/auth/gmail.readonly',
         },
       },

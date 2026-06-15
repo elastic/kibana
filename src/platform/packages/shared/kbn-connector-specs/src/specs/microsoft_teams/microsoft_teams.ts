@@ -55,24 +55,15 @@ export const MicrosoftTeams: ConnectorSpec = {
   auth: {
     types: [
       {
-        type: 'bearer',
-        defaults: {},
+        type: 'ears',
+        label: 'Quick Connect OAuth 2.0',
         overrides: {
-          meta: {
-            token: {
-              label: i18n.translate(
-                'core.kibanaConnectorSpecs.microsoftTeams.auth.bearer.token.label',
-                { defaultMessage: 'Microsoft API token' }
-              ),
-              helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.microsoftTeams.auth.bearer.token.helpText',
-                {
-                  defaultMessage:
-                    'A Microsoft Bearer token obtained via delegated OAuth flow (for example, a user access token).',
-                }
-              ),
-            },
-          },
+          meta: { scope: { disabled: true } },
+        },
+        defaults: {
+          provider: 'microsoft',
+          scope:
+            'Team.ReadBasic.All Channel.ReadBasic.All Chat.Read ChannelMessage.Read.All offline_access',
         },
       },
       {
@@ -119,6 +110,7 @@ export const MicrosoftTeams: ConnectorSpec = {
       },
       {
         type: 'oauth_client_credentials',
+        warn: true,
         defaults: {
           scope: 'https://graph.microsoft.com/.default',
         },
@@ -144,14 +136,31 @@ export const MicrosoftTeams: ConnectorSpec = {
         },
       },
       {
-        type: 'ears',
-        overrides: {
-          meta: { scope: { disabled: true } },
-        },
+        type: 'oauth_client_credentials_private_key_jwt',
+        warn: true,
         defaults: {
-          provider: 'microsoft',
-          scope:
-            'Team.ReadBasic.All Channel.ReadBasic.All Chat.Read ChannelMessage.Read.All offline_access',
+          algorithm: 'PS256',
+          certificateBinding: 'x5t#S256',
+        },
+        overrides: {
+          meta: {
+            scope: { hidden: true },
+            tokenUrl: {
+              label: i18n.translate(
+                'core.kibanaConnectorSpecs.microsoftTeams.auth.privateKeyJwt.tokenUrl.label',
+                { defaultMessage: 'Token URL' }
+              ),
+              placeholder: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token',
+              helpText: i18n.translate(
+                'core.kibanaConnectorSpecs.microsoftTeams.auth.privateKeyJwt.tokenUrl.helpText',
+                {
+                  defaultMessage:
+                    "Replace '{tenantId}' with your Azure AD tenant ID. For example: https://login.microsoftonline.com/your-tenant-id/oauth2/v2.0/token",
+                  values: { tenantId: '{tenant-id}' },
+                }
+              ),
+            },
+          },
         },
       },
     ],

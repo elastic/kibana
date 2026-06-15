@@ -56,15 +56,6 @@ export const SalesforceConnector: ConnectorSpec = {
   auth: {
     types: [
       {
-        type: 'oauth_client_credentials',
-        defaults: {},
-        overrides: {
-          meta: {
-            scope: { hidden: true },
-          },
-        },
-      },
-      {
         type: 'oauth_authorization_code',
         defaults: {
           scope: 'api refresh_token',
@@ -77,6 +68,16 @@ export const SalesforceConnector: ConnectorSpec = {
             tokenUrl: {
               placeholder: 'https://login.salesforce.com/services/oauth2/token',
             },
+            scope: { hidden: true },
+          },
+        },
+      },
+      {
+        type: 'oauth_client_credentials',
+        warn: true,
+        defaults: {},
+        overrides: {
+          meta: {
             scope: { hidden: true },
           },
         },

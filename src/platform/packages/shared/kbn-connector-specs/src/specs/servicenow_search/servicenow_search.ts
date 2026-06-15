@@ -58,10 +58,13 @@ export const ServicenowSearch: ConnectorSpec = {
   auth: {
     types: [
       {
-        type: 'oauth_client_credentials',
+        type: 'oauth_authorization_code',
         defaults: {},
         overrides: {
           meta: {
+            authorizationUrl: {
+              placeholder: 'https://your-instance.service-now.com/oauth_auth.do',
+            },
             tokenUrl: {
               placeholder: 'https://your-instance.service-now.com/oauth_token.do',
             },
@@ -70,13 +73,11 @@ export const ServicenowSearch: ConnectorSpec = {
         },
       },
       {
-        type: 'oauth_authorization_code',
+        type: 'oauth_client_credentials',
+        warn: true,
         defaults: {},
         overrides: {
           meta: {
-            authorizationUrl: {
-              placeholder: 'https://your-instance.service-now.com/oauth_auth.do',
-            },
             tokenUrl: {
               placeholder: 'https://your-instance.service-now.com/oauth_token.do',
             },

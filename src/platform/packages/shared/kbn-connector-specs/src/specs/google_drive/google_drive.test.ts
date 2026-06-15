@@ -30,8 +30,10 @@ describe('GoogleDriveConnector', () => {
   });
 
   describe('auth', () => {
-    it('supports bearer auth', () => {
-      expect(GoogleDriveConnector.auth?.types).toContain('bearer');
+    it('supports ears auth type as first option with Quick Connect label', () => {
+      expect(GoogleDriveConnector.auth?.types[0]).toEqual(
+        expect.objectContaining({ type: 'ears', label: 'Quick Connect OAuth 2.0' })
+      );
     });
 
     it('supports oauth_authorization_code with correct Google defaults', () => {

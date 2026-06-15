@@ -205,24 +205,6 @@ export const Snowflake: ConnectorSpec = {
   auth: {
     types: [
       {
-        type: 'bearer',
-        defaults: {},
-        overrides: {
-          meta: {
-            token: {
-              sensitive: true,
-              label: i18n.translate('core.kibanaConnectorSpecs.snowflake.auth.pat.label', {
-                defaultMessage: 'Snowflake access token',
-              }),
-              helpText: i18n.translate('core.kibanaConnectorSpecs.snowflake.auth.pat.helpText', {
-                defaultMessage:
-                  'A Snowflake programmatic access token (PAT) or manually obtained OAuth access token.',
-              }),
-            },
-          },
-        },
-      },
-      {
         type: 'oauth_authorization_code',
         defaults: {},
         overrides: {
@@ -255,6 +237,25 @@ export const Snowflake: ConnectorSpec = {
             },
             scope: {
               hidden: true,
+            },
+          },
+        },
+      },
+      {
+        type: 'bearer',
+        label: 'Programmatic access token (PAT)',
+        defaults: {},
+        overrides: {
+          meta: {
+            token: {
+              sensitive: true,
+              label: i18n.translate('core.kibanaConnectorSpecs.snowflake.auth.pat.label', {
+                defaultMessage: 'Snowflake access token',
+              }),
+              helpText: i18n.translate('core.kibanaConnectorSpecs.snowflake.auth.pat.helpText', {
+                defaultMessage:
+                  'A Snowflake programmatic access token (PAT) or manually obtained OAuth access token.',
+              }),
             },
           },
         },

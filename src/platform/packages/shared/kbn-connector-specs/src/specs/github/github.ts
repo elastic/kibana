@@ -79,7 +79,6 @@ export const GithubConnector: ConnectorSpec = {
 
   auth: {
     types: [
-      'bearer',
       {
         type: 'oauth_authorization_code',
         defaults: {
@@ -87,6 +86,11 @@ export const GithubConnector: ConnectorSpec = {
           tokenUrl: 'https://github.com/login/oauth/access_token',
           scope: 'repo',
         },
+      },
+      {
+        type: 'bearer',
+        label: 'Personal Access Token (PAT)',
+        defaults: {},
       },
     ],
     headers: {
