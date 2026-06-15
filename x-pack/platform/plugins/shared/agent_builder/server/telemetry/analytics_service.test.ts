@@ -14,6 +14,7 @@ import {
   ConversationRoundStatus,
   ConversationRoundStepType,
   agentBuilderDefaultAgentId,
+  ToolType,
   type ConversationRound,
 } from '@kbn/agent-builder-common';
 import { ModelProvider } from '@kbn/inference-common';
@@ -109,6 +110,37 @@ describe('AnalyticsService', () => {
         tool_call_errors: 0,
         tools_invoked: ['custom-3c9388baa67aef90'],
       });
+    });
+
+    it('keeps the real tool id in tools_invoked for built-in tools (by tool_type)', () => {
+      const roundWithBuiltinTool: ConversationRound = {
+        ...round,
+        steps: [
+          {
+            type: ConversationRoundStepType.toolCall,
+            tool_call_id: 'tool-call-1',
+            tool_id: 'platform.dashboard.manage_dashboard',
+            tool_type: ToolType.builtin,
+            params: {},
+            results: [],
+          },
+        ],
+      };
+
+      service.reportRoundComplete({
+        agentId: agentBuilderDefaultAgentId,
+        conversationId: 'conversation-1',
+        round: roundWithBuiltinTool,
+        roundCount: 2,
+        modelProvider,
+      });
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(
+        AGENT_BUILDER_EVENT_TYPES.RoundComplete,
+        expect.objectContaining({
+          tools_invoked: ['platform.dashboard.manage_dashboard'],
+        })
+      );
     });
 
     it('reports a hashed agent_id for custom agents', () => {
@@ -461,6 +493,25 @@ describe('AnalyticsService', () => {
           result_types: ['resource', 'esql_results'],
           duration_ms: 150,
         }
+      );
+    });
+
+    it('keeps the real tool_id for built-in tools (by type) not on the allow-list', () => {
+      service.reportToolCallSuccess({
+        agentId: agentBuilderDefaultAgentId,
+        toolId: 'platform.dashboard.manage_dashboard',
+        toolType: ToolType.builtin,
+        toolCallId: 'tc-1',
+        source: 'agent',
+        resultTypes: ['other'],
+        duration: 10,
+      });
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(
+        AGENT_BUILDER_EVENT_TYPES.ToolCallSuccess,
+        expect.objectContaining({
+          tool_id: 'platform.dashboard.manage_dashboard',
+        })
       );
     });
 
