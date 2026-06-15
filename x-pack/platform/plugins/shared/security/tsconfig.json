@@ -113,7 +113,8 @@
     "@kbn/react-query",
     "@kbn/agent-builder-common",
     "@kbn/agent-builder-browser",
-    "@kbn/core-user-profile-common"
+    "@kbn/core-user-profile-common",
+    "@kbn/core-chrome-browser-components"
   ],
   "exclude": ["target/**/*"]
 }
