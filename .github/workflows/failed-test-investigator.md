@@ -42,7 +42,7 @@ engine:
     ANTHROPIC_DEFAULT_OPUS_MODEL: llm-gateway/claude-opus-4-8[1m]
     ANTHROPIC_DEFAULT_HAIKU_MODEL: llm-gateway/claude-haiku-4-5
     ANTHROPIC_DEFAULT_SONNET_MODEL: llm-gateway/claude-sonnet-4-6
-    CLAUDE_CODE_EFFORT_LEVEL: high
+    CLAUDE_CODE_EFFORT_LEVEL: xhigh
     CLAUDE_CODE_SUBAGENT_MODEL: opus[1m]
 
 tools:
