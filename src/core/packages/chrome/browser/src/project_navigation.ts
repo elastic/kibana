@@ -39,8 +39,10 @@ import type { VectordbApp, DeepLinkId as VectordbLink } from '@kbn/deeplinks-vec
 import type { DeepLinkId as AgentBuilderLink } from '@kbn/deeplinks-agent-builder';
 import type { AppId as WorkflowsApp, DeepLinkId as WorkflowsLink } from '@kbn/deeplinks-workflows';
 import type { KibanaProject } from '@kbn/projects-solutions-groups';
-import type { BadgeType, NavExtensionId } from '@kbn/ui-side-navigation';
+import type { BadgeType } from '@kbn/ui-side-navigation';
+import type { SerializableRecord } from '@kbn/utility-types';
 
+import type { NavExtensionId } from './nav_extensions';
 import type { ChromeNavLink } from './nav_links';
 
 export type SolutionId = KibanaProject;
@@ -366,7 +368,7 @@ export type SolutionNavigationDefinitions = {
  * Runtime data sources powering extension slots, keyed by `slotId`. Supplied by a
  * solution at registration; the serializable tree only references slots by id.
  */
-export type SlotDataSources = Record<string, Observable<unknown>>;
+export type SlotDataSources = Record<string, Observable<SerializableRecord>>;
 
 /** Event emitted when an extension template fires a non-link (callback) action. */
 export interface NavExtensionActionEvent {

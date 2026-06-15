@@ -12,8 +12,9 @@ import type {
   NavigationTreeDefinition,
   RootNodeDefinition,
   ExtensionPointNodeDefinition,
+  NavExtensionData,
+  NavExtensionId,
 } from '@kbn/core-chrome-browser';
-import type { NavExtensionData, NavExtensionId } from '@kbn/ui-side-navigation';
 
 /** A `{ slotId, extensionId }` placement pair extracted from an extension node. */
 interface SlotPair {

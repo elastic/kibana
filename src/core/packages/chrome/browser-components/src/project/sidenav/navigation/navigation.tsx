@@ -10,20 +10,18 @@
 import React, { useCallback, useMemo } from 'react';
 import { map } from 'rxjs';
 import { Navigation as NavigationComponent } from '@kbn/ui-side-navigation';
-import {
-  NavExtensionTemplateHost,
-  type NavExtensionPointContext as SecondaryNavExtensionPointContext,
-} from '@kbn/shared-ux-navigation-extension-templates';
 import classnames from 'classnames';
 import type { SolutionId } from '@kbn/core-chrome-browser';
 import { useObservable } from '@kbn/use-observable';
 import { useChromeService } from '@kbn/core-chrome-browser-context';
 import { KibanaSectionErrorBoundary } from '@kbn/shared-ux-error-boundary';
 import { useIsNextChrome } from '@kbn/core-chrome-browser-hooks';
+import type { NavExtensionRenderContext } from '@kbn/ui-side-navigation';
 import { useBasePath } from '../../../shared/chrome_hooks';
 import type { NavigationItems } from './to_navigation_items';
 import { toNavigationItems } from './to_navigation_items';
 import { PanelStateManager } from './panel_state_manager';
+import { NavExtensionTemplateHost } from './navigation_extension_template_host';
 
 export interface ChromeNavigationProps {
   isCollapsed: boolean;
@@ -39,7 +37,7 @@ export const Navigation = (props: ChromeNavigationProps) => {
   const slotDataSources = useObservable(chrome.project.getActiveSlotDataSources$(), undefined);
 
   const renderExtensionPoint = useCallback(
-    (slotId: string, extensionId: string, context: SecondaryNavExtensionPointContext) => {
+    (slotId: string, extensionId: string, context: NavExtensionRenderContext) => {
       const definition = extensionRegistry?.[extensionId];
       const data$ = slotDataSources?.[slotId];
 
@@ -51,7 +49,7 @@ export const Navigation = (props: ChromeNavigationProps) => {
         <NavExtensionTemplateHost
           definition={definition}
           data$={data$}
-          context={context}
+          context={{ ...context, slotId, extensionId }}
           onAction={(actionId, itemId) =>
             chrome.project.dispatchExtensionAction({ slotId, extensionId, actionId, itemId })
           }

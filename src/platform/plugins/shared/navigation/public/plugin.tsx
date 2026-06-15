@@ -18,13 +18,13 @@ import type {
 } from '@kbn/core/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { Space } from '@kbn/spaces-plugin/public';
-import type { SolutionId } from '@kbn/core-chrome-browser';
-import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
 import type {
-  NavExtensionDefinition,
+  SolutionId,
   NavExtensionDefinitionMap,
   NavExtensionId,
-} from '@kbn/ui-side-navigation';
+} from '@kbn/core-chrome-browser';
+import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
+import type { NavExtensionDefinition } from '@kbn/shared-ux-navigation-extension-templates';
 import type {
   NavigationPublicSetup,
   NavigationPublicStart,

@@ -35,7 +35,7 @@ import { useNavigation } from '../hooks/use_navigation';
 import { useNewItems } from '../hooks/use_new_items';
 import { useResponsiveMenu } from '../hooks/use_responsive_menu';
 import { getHighContrastSeparator } from '../hooks/use_high_contrast_mode_styles';
-import type { NavExtensionRenderContext as SecondaryNavExtensionPointContext } from '../../types';
+import type { NavExtensionRenderContext } from '../../types';
 
 const navigationWrapperStyles = css`
   display: flex;
@@ -93,7 +93,7 @@ export interface NavigationProps {
   renderExtensionPoint?: (
     slotId: string,
     extensionId: string,
-    context: SecondaryNavExtensionPointContext
+    context: NavExtensionRenderContext
   ) => ReactNode;
 }
 

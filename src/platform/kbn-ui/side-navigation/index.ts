@@ -19,14 +19,4 @@ export type {
   SecondaryMenuSection,
   SideNavLogo,
   NavExtensionRenderContext,
-  // Template catalog
-  NavTemplateConfig,
-  // Extension registry (augmentable)
-  NavExtensionRegistry,
-  NavExtensionEntry,
-  NavExtensionId,
-  NavExtensionData,
-  NavExtensionTemplateId,
-  NavExtensionDefinition,
-  NavExtensionDefinitionMap,
 } from './types';

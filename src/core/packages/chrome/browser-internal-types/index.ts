@@ -32,8 +32,8 @@ import type {
   SolutionId,
   SlotDataSources,
   NavExtensionActionEvent,
+  NavExtensionDefinitionMap,
 } from '@kbn/core-chrome-browser';
-import type { NavExtensionDefinitionMap } from '@kbn/ui-side-navigation';
 
 /** @internal */
 export type InternalChromeSetup = ChromeSetup;

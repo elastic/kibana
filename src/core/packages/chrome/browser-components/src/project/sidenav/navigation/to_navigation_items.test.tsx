@@ -333,8 +333,9 @@ describe('extension point sections', () => {
         {
           id: 'recent-dashboards',
           title: 'Recently viewed',
-          renderAs: 'extensionPoint',
-          extensionPointId: 'security.dashboards.recent',
+          renderAs: 'extension',
+          slotId: 'security.dashboards.recent',
+          extensionId: 'recentlyAccessedDashboards',
           popoverOnly: true,
           path: 'dashboards.recent-dashboards',
         },
@@ -375,7 +376,8 @@ describe('extension point sections', () => {
       {
         id: 'recent-dashboards',
         label: 'Recently viewed',
-        extensionPointId: 'security.dashboards.recent',
+        slotId: 'security.dashboards.recent',
+        extensionId: 'recentlyAccessedDashboards',
         popoverOnly: true,
       },
       {

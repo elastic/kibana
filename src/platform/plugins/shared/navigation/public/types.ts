@@ -14,8 +14,9 @@ import type {
   NavigationTreeDefinition,
   SolutionNavigationDefinition,
   NavExtensionActionEvent,
+  NavExtensionId,
 } from '@kbn/core-chrome-browser';
-import type { NavExtensionDefinition, NavExtensionId } from '@kbn/ui-side-navigation';
+import type { NavExtensionDefinition } from '@kbn/shared-ux-navigation-extension-templates';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type {

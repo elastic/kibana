@@ -87,3 +87,12 @@ export type {
 } from './sidebar';
 
 export type { GlobalSearchConfig } from './chrome_next/global_search';
+
+export type {
+  NavExtensionRegistry,
+  NavExtensionEntry,
+  NavExtensionId,
+  NavExtensionData,
+  NavExtensionRuntimeDefinition,
+  NavExtensionDefinitionMap,
+} from './nav_extensions';

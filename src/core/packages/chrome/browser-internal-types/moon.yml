@@ -20,7 +20,6 @@ dependsOn:
   - '@kbn/core-chrome-browser'
   - '@kbn/core-http-browser'
   - '@kbn/core-mount-utils-browser'
-  - '@kbn/ui-side-navigation'
 tags:
   - shared-common
   - package
