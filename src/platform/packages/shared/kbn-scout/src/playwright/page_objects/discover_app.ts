@@ -351,6 +351,29 @@ export class DiscoverApp {
   }
 
   /**
+   * Navigate from the document-viewer flyout to the surrounding-documents context view.
+   */
+  async openSurroundingDocuments(rowIndex: number) {
+    await this.openAndWaitForDocViewerFlyout({ rowIndex });
+    await this.page.testSubj
+      .locator('docViewerFlyout')
+      .getByLabel('View surrounding documents')
+      .click();
+  }
+
+  /**
+   * Open the document-viewer flyout for the highlighted anchor row in the context view.
+   */
+  async openAnchorDocumentDetails() {
+    const expandButton = this.page.testSubj.locator('docTableExpandToggleColumnAnchor');
+    await expect(expandButton).toBeVisible();
+    await expandButton.scrollIntoViewIfNeeded();
+    await expandButton.hover();
+    await expandButton.click();
+    await this.waitForDocViewerFlyoutOpen();
+  }
+
+  /**
    * Hover the given data-grid cell and click its "expand" action, opening the
    * cell-value popover (which embeds a Monaco editor with the row JSON).
    *
@@ -576,6 +599,28 @@ export class DiscoverApp {
     await expect(input).toBeVisible();
 
     await input.fill(newValue.toString());
+  }
+
+  async addFieldFromSidebar(field: string) {
+    const sidebarToggleButton = this.page.testSubj.locator('discover-sidebar-fields-button');
+    if (await sidebarToggleButton.isVisible()) await sidebarToggleButton.click();
+
+    await this.waitUntilFieldListHasCountOfFields();
+    await this.page.testSubj.fill('fieldListFiltersFieldSearch', field);
+    await this.page.testSubj.click(`fieldToggle-${field}`);
+    await this.waitUntilSearchingHasFinished();
+  }
+
+  async addFilterForFieldValueFromSidebar(field: string, value: string) {
+    const sidebarToggleButton = this.page.testSubj.locator('discover-sidebar-fields-button');
+    if (await sidebarToggleButton.isVisible()) await sidebarToggleButton.click();
+
+    await this.waitUntilFieldListHasCountOfFields();
+    await this.page.testSubj.fill('fieldListFiltersFieldSearch', field);
+    await this.page.testSubj.click(`field-${field}`);
+    await this.waitUntilFieldPopoverIsLoaded();
+    await this.page.testSubj.click(`plus-${field}-${value}`);
+    await this.waitUntilSearchingHasFinished();
   }
 
   public readonly controls = {
