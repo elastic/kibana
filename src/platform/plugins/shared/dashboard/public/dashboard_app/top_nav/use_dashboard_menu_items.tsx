@@ -24,6 +24,7 @@ import type {
 import { useDashboardExportItems } from './share/use_dashboard_export_items';
 import { getAccessControlClient } from '../../services/access_control_service';
 import { UI_SETTINGS } from '../../../common/constants';
+import { useAllowEditingManagedDashboards } from '../hooks/use_allow_editing_managed_dashboards';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { confirmDiscardUnsavedChanges } from '../../dashboard_listing/confirm_overlays';
 import { openSettingsFlyout } from '../../dashboard_renderer/settings/open_settings_flyout';
@@ -73,6 +74,11 @@ export const useDashboardMenuItems = ({
     });
     return dashboardApi?.user?.hasGlobalAccessControlPrivilege || userAccessControl;
   }, [accessControl, accessControlClient, dashboardApi.createdBy, dashboardApi.user]);
+
+  // When the `dashboard:allowEditingManagedDashboards` advanced setting is on,
+  // the managed-dashboard read-only gate is bypassed in the top-nav UI.
+  const allowEditingManagedDashboards = useAllowEditingManagedDashboards();
+  const isManagedAndLocked = dashboardApi.isManaged && !allowEditingManagedDashboards;
 
   const isEditButtonDisabled = useMemo(() => {
     if (disableTopNav) return true;
@@ -215,14 +221,14 @@ export const useDashboardMenuItems = ({
   ]);
 
   const getEditTooltip = useCallback(() => {
-    if (dashboardApi.isManaged) {
+    if (isManagedAndLocked) {
       return topNavStrings.edit.managedDashboardTooltip;
     }
     if (isInEditAccessMode || canManageAccessControl) {
       return undefined;
     }
     return topNavStrings.edit.writeRestrictedTooltip;
-  }, [isInEditAccessMode, canManageAccessControl, dashboardApi.isManaged]);
+  }, [isInEditAccessMode, canManageAccessControl, isManagedAndLocked]);
 
   const getShareTooltip = useCallback(() => {
     if (!dashboardApi.isAccessControlEnabled) return undefined;
@@ -484,7 +490,7 @@ export const useDashboardMenuItems = ({
       items,
     };
 
-    if (showWriteControls && !dashboardApi.isManaged) {
+    if (showWriteControls && !isManagedAndLocked) {
       viewModeConfig.primaryActionItem = menuItems.edit;
     }
 
@@ -498,7 +504,7 @@ export const useDashboardMenuItems = ({
     menuItems.backgroundSearch,
     menuItems.labs,
     resetChangesMenuItem,
-    dashboardApi.isManaged,
+    isManagedAndLocked,
     showResetChange,
     isLabsEnabled,
     hasExportMenuItems,

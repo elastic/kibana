@@ -15,6 +15,7 @@ import type { ShareActionIntents } from '@kbn/share-plugin/public/types';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import { buildMockDashboardApi } from '../../mocks';
+import { UI_SETTINGS } from '../../../common/constants';
 import { DashboardContext } from '../../dashboard_api/use_dashboard_api';
 import { coreServices, shareService } from '../../services/kibana_services';
 import { useDashboardMenuItems } from './use_dashboard_menu_items';
@@ -182,6 +183,44 @@ describe('useDashboardMenuItems', () => {
       expect(editModeExportItemIds).toEqual(
         expect.arrayContaining(['exportJson', 'pdfReports', 'imageReports'])
       );
+    });
+  });
+
+  describe('managed dashboard edit gate', () => {
+    function renderForManagedDashboard(allowEditing: boolean) {
+      jest.mocked(coreServices.uiSettings.get).mockImplementation((key: string) => {
+        if (key === UI_SETTINGS.ALLOW_EDITING_MANAGED_DASHBOARDS) return allowEditing;
+        return false;
+      });
+      const { api } = buildMockDashboardApi({ savedObjectId: 'test-id' });
+      return renderHook(
+        () =>
+          useDashboardMenuItems({
+            isLabsShown: false,
+            setIsLabsShown: jest.fn(),
+            maybeRedirect: jest.fn(),
+          }),
+        {
+          wrapper: ({ children }) => (
+            <I18nProvider>
+              <DashboardContext.Provider value={{ ...api, isManaged: true }}>
+                {children}
+              </DashboardContext.Provider>
+            </I18nProvider>
+          ),
+        }
+      );
+    }
+
+    test('does not expose the Edit primary action when the setting is off', () => {
+      const { result } = renderForManagedDashboard(false);
+      expect(result.current.viewModeTopNavConfig.primaryActionItem).toBeUndefined();
+    });
+
+    test('exposes the Edit primary action when the setting is on', () => {
+      const { result } = renderForManagedDashboard(true);
+      expect(result.current.viewModeTopNavConfig.primaryActionItem).toBeDefined();
+      expect(result.current.viewModeTopNavConfig.primaryActionItem?.id).toBe('edit');
     });
   });
 

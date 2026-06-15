@@ -24,7 +24,7 @@ import { SAVED_OBJECT_POST_TIME } from '../../utils/telemetry_constants';
 import { extractTitleAndCount } from '../../utils/extract_title_and_count';
 import { DashboardSaveModal } from './save_modal';
 import { saveDashboard } from './save_dashboard';
-import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
+import { DASHBOARD_SAVED_OBJECT_TYPE, UI_SETTINGS } from '../../../common/constants';
 import { dashboardClient } from '../../dashboard_client';
 
 /**
@@ -59,7 +59,14 @@ export async function openSaveModal({
   accessControl?: Partial<SavedObjectAccessControl>;
 }) {
   try {
-    if (viewMode === 'edit' && isManaged) {
+    // The `dashboard:allowEditingManagedDashboards` advanced setting bypasses
+    // the managed-dashboard read-only gate so the save modal can open while
+    // editing a managed dashboard.
+    const allowEditingManagedDashboards = coreServices.uiSettings.get<boolean>(
+      UI_SETTINGS.ALLOW_EDITING_MANAGED_DASHBOARDS,
+      false
+    );
+    if (viewMode === 'edit' && isManaged && !allowEditingManagedDashboards) {
       return undefined;
     }
 
