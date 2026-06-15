@@ -42,7 +42,7 @@ function comparePanels(a: GridData, b: GridData): number {
 
 export function placeClonePanel({
   currentLayout,
-  panel: newPanel,
+  newPanel,
   placeBesideId,
 }: PanelPlacementProps & { placeBesideId: string }): PanelPlacementReturn {
   const panelToPlaceBeside = currentLayout.panels[placeBesideId];

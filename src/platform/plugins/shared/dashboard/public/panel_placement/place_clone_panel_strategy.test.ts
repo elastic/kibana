@@ -21,7 +21,7 @@ describe('Clone panel placement strategies', () => {
     };
     const newLayout = placeClonePanel({
       currentLayout: { panels: currentPanels, sections: {}, pinnedPanels: {} },
-      panel: { uuid: 'newPanel', type: 'panelType', grid: { w: 6, h: 6 } },
+      newPanel: { uuid: 'newPanel', type: 'panelType', grid: { w: 6, h: 6 } },
       placeBesideId: '1',
     });
     expect(newLayout.panels).toEqual({
@@ -42,7 +42,7 @@ describe('Clone panel placement strategies', () => {
     const panels = getMockLayout().panels;
     const newLayout = placeClonePanel({
       currentLayout: { panels, sections: {}, pinnedPanels: {} },
-      panel: { uuid: 'newPanel', type: 'panelType', grid: { w: 6, h: 6 } },
+      newPanel: { uuid: 'newPanel', type: 'panelType', grid: { w: 6, h: 6 } },
       placeBesideId: '1',
     });
     expect(newLayout.panels).toEqual({
@@ -63,7 +63,11 @@ describe('Clone panel placement strategies', () => {
     const mockedLayout = getMockLayoutWithSections();
     const newLayout = placeClonePanel({
       currentLayout: mockedLayout,
-      panel: { uuid: 'newPanel', type: 'panelType', grid: { w: 6, h: 6, sectionId: 'section1' } },
+      newPanel: {
+        uuid: 'newPanel',
+        type: 'panelType',
+        grid: { w: 6, h: 6, sectionId: 'section1' },
+      },
       placeBesideId: '3',
     });
     expect(newLayout.panels).toEqual({

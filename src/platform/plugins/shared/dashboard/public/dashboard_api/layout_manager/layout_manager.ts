@@ -199,7 +199,7 @@ export function initializeLayoutManager(
     const placementHints = await getPlacementHints(type, serializedState);
     const updatedLayout = runPanelPlacementStrategy(placementHints.strategy, {
       currentLayout: layout$.value,
-      panel: {
+      newPanel: {
         type,
         uuid,
         grid: {
@@ -237,7 +237,7 @@ export function initializeLayoutManager(
           }
         : runPanelPlacementStrategy(PlacementStrategy.findTopLeftMostOpenSpace, {
             currentLayout: layout$.value,
-            panel: {
+            newPanel: {
               uuid,
               type,
               grid: {
@@ -402,7 +402,7 @@ export function initializeLayoutManager(
 
     const updatedLayout = placeClonePanel({
       currentLayout: layout$.value,
-      panel: {
+      newPanel: {
         uuid: uuidOfDuplicate,
         type: layoutItemToDuplicate.type,
         grid: {
@@ -621,7 +621,7 @@ export function initializeLayoutManager(
         // place the new control panel in the top left corner, bumping other panels down as necessary
         const updatedLayout = runPanelPlacementStrategy(PlacementStrategy.placeAtTop, {
           currentLayout: layout$.value,
-          panel: {
+          newPanel: {
             uuid,
             type: panelToUnpin.type,
             grid: {

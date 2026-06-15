@@ -17,7 +17,7 @@ describe('new panel placement strategies', () => {
     it('no other panels', () => {
       const newLayout = runPanelPlacementStrategy(PlacementStrategy.placeAtTop, {
         currentLayout: { panels: {}, sections: {}, pinnedPanels: {} },
-        panel: { uuid: 'newPanel', type: 'panelType', grid: { w: 6, h: 6 } },
+        newPanel: { uuid: 'newPanel', type: 'panelType', grid: { w: 6, h: 6 } },
       });
       expect(newLayout).toEqual({
         sections: {},
@@ -30,7 +30,7 @@ describe('new panel placement strategies', () => {
       const panels = getMockLayout().panels;
       const newLayout = runPanelPlacementStrategy(PlacementStrategy.placeAtTop, {
         currentLayout: { panels, sections: {}, pinnedPanels: {} },
-        panel: { uuid: 'newPanel', type: 'panelType', grid: { w: 6, h: 6 } },
+        newPanel: { uuid: 'newPanel', type: 'panelType', grid: { w: 6, h: 6 } },
       });
       const expectedPanels = Object.keys(newLayout.panels).reduce((prev, panelId) => {
         if (panelId === 'newPanel') {
@@ -55,7 +55,11 @@ describe('new panel placement strategies', () => {
       const mockedLayout = getMockLayoutWithSections();
       const newLayout = runPanelPlacementStrategy(PlacementStrategy.placeAtTop, {
         currentLayout: mockedLayout,
-        panel: { uuid: 'newPanel', type: 'panelType', grid: { w: 6, h: 6, sectionId: 'section1' } },
+        newPanel: {
+          uuid: 'newPanel',
+          type: 'panelType',
+          grid: { w: 6, h: 6, sectionId: 'section1' },
+        },
       });
 
       const expectedPanels = Object.keys(newLayout.panels).reduce((prev, panelId) => {
@@ -96,7 +100,7 @@ describe('new panel placement strategies', () => {
       };
       const newLayout = runPanelPlacementStrategy(PlacementStrategy.placeAtTop, {
         currentLayout: { panels, sections: {}, pinnedPanels: {} },
-        panel: {
+        newPanel: {
           uuid: 'newPanel',
           type: 'panelType',
           grid: { w: 6, h: 6 },
@@ -124,7 +128,7 @@ describe('new panel placement strategies', () => {
     it('no other panels', () => {
       const newLayout = runPanelPlacementStrategy(PlacementStrategy.findTopLeftMostOpenSpace, {
         currentLayout: { panels: {}, sections: {}, pinnedPanels: {} },
-        panel: { uuid: 'newPanel', type: 'panelType', grid: { w: 6, h: 6 } },
+        newPanel: { uuid: 'newPanel', type: 'panelType', grid: { w: 6, h: 6 } },
       });
       expect(newLayout).toEqual({
         sections: {},
@@ -144,7 +148,7 @@ describe('new panel placement strategies', () => {
 
       const newLayout = runPanelPlacementStrategy(PlacementStrategy.findTopLeftMostOpenSpace, {
         currentLayout: { panels, sections: {}, pinnedPanels: {} },
-        panel: { uuid: 'newPanel', type: 'panelType', grid: { w: 6, h: 6 } },
+        newPanel: { uuid: 'newPanel', type: 'panelType', grid: { w: 6, h: 6 } },
       });
       const expectedPanels = {
         ...panels, // other panels don't move with this strategy
@@ -171,7 +175,7 @@ describe('new panel placement strategies', () => {
       };
       const newLayout = runPanelPlacementStrategy(PlacementStrategy.findTopLeftMostOpenSpace, {
         currentLayout: { panels, sections: {}, pinnedPanels: {} },
-        panel: { uuid: 'newPanel', type: 'panelType', grid: { w: 6, h: 6 } },
+        newPanel: { uuid: 'newPanel', type: 'panelType', grid: { w: 6, h: 6 } },
       });
       const expectedPanels = {
         ...panels, // other panels don't move with this strategy
@@ -214,7 +218,11 @@ describe('new panel placement strategies', () => {
           ...mockedLayout,
           panels,
         },
-        panel: { uuid: 'newPanel', type: 'panelType', grid: { w: 6, h: 6, sectionId: 'section1' } },
+        newPanel: {
+          uuid: 'newPanel',
+          type: 'panelType',
+          grid: { w: 6, h: 6, sectionId: 'section1' },
+        },
       });
       const expectedPanels = {
         ...panels, // other panels don't move with this strategy
@@ -242,7 +250,7 @@ describe('new panel placement strategies', () => {
 
       const newLayout = runPanelPlacementStrategy(PlacementStrategy.findTopLeftMostOpenSpace, {
         currentLayout: { panels, sections: {}, pinnedPanels: {} },
-        panel: { uuid: 'newPanel', type: 'panelType', grid: { w: 6, h: 6 } },
+        newPanel: { uuid: 'newPanel', type: 'panelType', grid: { w: 6, h: 6 } },
         beside: '3',
       });
       const expectedPanels = {

@@ -16,7 +16,7 @@ import type { DashboardLayoutPanel } from '../dashboard_api/layout_manager';
 
 export const runPanelPlacementStrategy = (
   strategy: PlacementStrategy,
-  { panel: newPanel, currentLayout, beside }: PanelPlacementProps
+  { newPanel, currentLayout, beside }: PanelPlacementProps
 ): PanelPlacementReturn => {
   let targetPanel: DashboardLayoutPanel | undefined;
   const { panels: currentPanels, sections: currentSections } = currentLayout;
