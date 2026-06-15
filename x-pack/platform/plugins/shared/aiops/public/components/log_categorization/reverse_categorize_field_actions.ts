@@ -7,14 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 import { createAction } from '@kbn/ui-actions-plugin/public';
-import type { CoreStart } from '@kbn/core/public';
 import type { CategorizeFieldContext } from '@kbn/ml-ui-actions';
 import { ACTION_REVERSE_CATEGORIZE_FIELD } from '@kbn/ml-ui-actions/src/aiops/ui_actions';
-import type { AiopsPluginStartDeps } from '../../types';
+import type { AiopsCoreSetup } from '../../types';
 
 export const createReverseCategorizeFieldAction = (
-  coreStart: CoreStart,
-  plugins: AiopsPluginStartDeps
+  getStartServices: AiopsCoreSetup['getStartServices']
 ) =>
   createAction<CategorizeFieldContext>({
     type: ACTION_REVERSE_CATEGORIZE_FIELD,
@@ -36,13 +34,16 @@ export const createReverseCategorizeFieldAction = (
         focusTrapProps,
         onFilter,
       } = context;
-      const { showReverseCategorizeFieldFlyout } = await import('./show_reverse_flyout');
+      const [[coreStart, pluginStart], { showReverseCategorizeFieldFlyout }] = await Promise.all([
+        getStartServices(),
+        import('./show_reverse_flyout'),
+      ]);
       showReverseCategorizeFieldFlyout(
         field,
         dataView,
         fieldValue,
         coreStart,
-        plugins,
+        pluginStart,
         originatingApp,
         additionalFilter,
         focusTrapProps,
