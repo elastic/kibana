@@ -16,6 +16,7 @@ export {
   getTimelineApiService,
   getAttackDiscoveryApiService,
   getThreatIntelligenceApiService,
+  getCorrelationsApiService,
 } from './apis';
 export type {
   DetectionRuleApiService,
@@ -25,4 +26,6 @@ export type {
   TimelineApiService,
   AttackDiscoveryApiService,
   ThreatIntelligenceApiService,
+  CorrelationsApiService,
+  CorrelationsFixture,
 } from './apis';

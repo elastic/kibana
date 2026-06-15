@@ -20,6 +20,7 @@ import {
   getTimelineApiService,
   getAttackDiscoveryApiService,
   getThreatIntelligenceApiService,
+  getCorrelationsApiService,
 } from './worker';
 import { extendPageObjects, securityBrowserAuthFixture } from './test';
 
@@ -95,6 +96,10 @@ export const spaceTest = securityParallelFixtures.extend<
         scoutSpace,
       });
       extendedApiServices.threatIntelligence = getThreatIntelligenceApiService({
+        esClient,
+        log,
+      });
+      extendedApiServices.correlations = getCorrelationsApiService({
         esClient,
         log,
       });

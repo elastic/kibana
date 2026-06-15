@@ -21,7 +21,7 @@ import { noopCellActionRenderer } from './cell_actions';
 import { flyoutProviders } from './flyout_provider';
 import { DocumentFlyout } from '../../document/main';
 import { useDefaultDocumentFlyoutProperties } from '../hooks/use_default_flyout_properties';
-import { TOOLS_FLYOUT_HEADER_TITLE_TEST_ID } from './test_ids';
+import { CHILD_DOCUMENT_FLYOUT_TEST_ID, TOOLS_FLYOUT_HEADER_TITLE_TEST_ID } from './test_ids';
 
 const noop = () => {};
 
@@ -73,7 +73,11 @@ export const ToolsFlyoutTitle: FC<ToolsFlyoutTitleProps> = memo(
             />
           ),
         }),
-        { ...defaultFlyoutProperties, session: 'inherit' }
+        {
+          ...defaultFlyoutProperties,
+          session: 'inherit',
+          'data-test-subj': CHILD_DOCUMENT_FLYOUT_TEST_ID,
+        }
       );
     }, [defaultFlyoutProperties, history, hit, onAlertUpdated, renderCellActions, services, store]);
 

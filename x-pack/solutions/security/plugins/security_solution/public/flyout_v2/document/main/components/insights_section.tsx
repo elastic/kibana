@@ -37,6 +37,7 @@ import {
   defaultToolsFlyoutProperties,
   useDefaultDocumentFlyoutProperties,
 } from '../../../shared/hooks/use_default_flyout_properties';
+import { CHILD_DOCUMENT_FLYOUT_TEST_ID } from '../../../shared/components/test_ids';
 
 export const INSIGHTS_SECTION_TEST_ID = `${PREFIX}InsightsSection` as const;
 
@@ -136,6 +137,7 @@ export const InsightsSection = memo(
           {
             ...defaultFlyoutProperties,
             session: 'inherit',
+            'data-test-subj': CHILD_DOCUMENT_FLYOUT_TEST_ID,
           }
         ),
       [

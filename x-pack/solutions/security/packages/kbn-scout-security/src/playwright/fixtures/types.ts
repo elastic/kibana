@@ -21,6 +21,7 @@ import type {
   TimelineApiService,
   AttackDiscoveryApiService,
   ThreatIntelligenceApiService,
+  CorrelationsApiService,
 } from './worker';
 
 export interface SecurityApiServicesFixture extends ApiServicesFixture {
@@ -31,6 +32,7 @@ export interface SecurityApiServicesFixture extends ApiServicesFixture {
   timeline: TimelineApiService;
   attackDiscovery: AttackDiscoveryApiService;
   threatIntelligence: ThreatIntelligenceApiService;
+  correlations: CorrelationsApiService;
 }
 
 export interface SecurityTestFixtures extends ScoutTestFixtures {

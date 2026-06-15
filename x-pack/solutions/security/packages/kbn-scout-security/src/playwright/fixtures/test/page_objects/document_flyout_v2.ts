@@ -89,6 +89,8 @@ export class DocumentFlyoutV2 {
   public readonly prevalence: Locator;
   /** Threat intelligence panel content. */
   public readonly threatIntelligence: Locator;
+  /** Container for a child document flyout */
+  public readonly childDocumentFlyout: Locator;
   /** Status-change context menu rendered inside the header badge popover. */
   public readonly statusPopoverMenu: Locator;
   /** EuiSelectable inside the "closing reason" sub-panel. */
@@ -195,6 +197,7 @@ export class DocumentFlyoutV2 {
     this.statusAddToTimelineButton = page.testSubj.locator(
       'actionItem-security-default-cellActions-addToTimeline'
     );
+    this.childDocumentFlyout = page.testSubj.locator('securitySolutionFlyoutChildDocumentFlyout');
     this.statusPopoverMenu = page.testSubj.locator('event-details-alertStatusPopover');
     this.closingReasonSelectable = page.testSubj.locator('alert-closing-reason-selectable');
     this.closingReasonSubmitButton = page.testSubj.locator('alert-closing-reason-submit-button');
@@ -207,6 +210,11 @@ export class DocumentFlyoutV2 {
   /** Wait for the flyout to be visible and fully loaded. */
   async waitForAlertFlyout() {
     await this.title.waitFor({ state: 'visible', timeout: 15_000 });
+  }
+
+  /** Wait for the child document flyout (opened from a tools overlay) to be visible. */
+  async waitForChildDocumentFlyout() {
+    await this.childDocumentFlyout.waitFor({ state: 'visible', timeout: 15_000 });
   }
 
   /** Open the Take action popover and wait for the context menu to appear. */

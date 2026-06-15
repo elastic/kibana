@@ -24,3 +24,6 @@ export type { AttackDiscoveryApiService } from './attack_discovery';
 
 export { getThreatIntelligenceApiService } from './threat_intelligence';
 export type { ThreatIntelligenceApiService } from './threat_intelligence';
+
+export { getCorrelationsApiService } from './correlations';
+export type { CorrelationsApiService, CorrelationsFixture } from './correlations';
