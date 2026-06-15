@@ -24,6 +24,8 @@ import {
 import { AWS_ONBOARDING_TITLE, AWS_ONBOARDING_DESCRIPTION } from '../../common/constants';
 import { ONBOARDING_STEPS } from './steps';
 import { useStepState } from './use_step_state';
+import { AWS_SERVICES_MAP } from './aws_service_matrix';
+import { useOnboardingFlow } from './onboarding_flow_context';
 import {
   ConnectStep,
   ServicesStep,
@@ -31,6 +33,7 @@ import {
   DeploymentStep,
   SeeDataStep,
 } from './step_components';
+const CONNECT_STEP_INDEX = ONBOARDING_STEPS.findIndex((s) => s.id === 'connect');
 
 interface StepComponentProps {
   onNext: () => void;
@@ -69,6 +72,19 @@ export function OnboardingShell() {
 
   const { completedSteps, markStepComplete, firstIncompleteStepId } = useStepState(integrationId);
 
+  const { servicesStep } = useOnboardingFlow();
+  const { selectedServiceIds } = servicesStep;
+
+  const needsConnectStep = useMemo(
+    () =>
+      selectedServiceIds.length === 0 ||
+      selectedServiceIds.some(
+        (id) =>
+          AWS_SERVICES_MAP.get(id)?.deliveryMethods.some((dm) => dm.method === 'agentless') ?? false
+      ),
+    [selectedServiceIds]
+  );
+
   const currentStepId = location.hash ? location.hash.slice(1) : '';
   const isValidStep = ONBOARDING_STEPS.some((s) => s.id === currentStepId);
 
@@ -95,7 +111,13 @@ export function OnboardingShell() {
         const nextStep = ONBOARDING_STEPS[index + 1];
         const onNext = () => {
           markStepComplete(step.id);
-          if (nextStep) {
+          if (step.id === 'services' && !needsConnectStep) {
+            markStepComplete('connect');
+            const stepAfterConnect = ONBOARDING_STEPS[CONNECT_STEP_INDEX + 1];
+            if (stepAfterConnect) {
+              history.push({ ...location, hash: `#${stepAfterConnect.id}` });
+            }
+          } else if (nextStep) {
             history.push({ ...location, hash: `#${nextStep.id}` });
           }
         };
@@ -112,7 +134,7 @@ export function OnboardingShell() {
             : {}),
         };
       }),
-    [currentStepId, completedSteps, markStepComplete, history, location]
+    [currentStepId, completedSteps, markStepComplete, history, location, needsConnectStep]
   );
 
   if (!meta || !isValidStep) {
