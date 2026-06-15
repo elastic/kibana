@@ -186,7 +186,7 @@ Add the following snippet of Markdown right after (and outside) the `<details>` 
 > Label this issue with `ai:auto-flaky-fix` to **open a fix PR** (experimental). Provide feedback in #appex-qa.
 ```
 
-If a fix is already up in the Kibana, mention the link.
+If a fix PR(s) is already up (in draft or in review) in the Kibana repository, mention the link(s).
 
 ### 1. Visible header (required)
 
