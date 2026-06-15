@@ -33,6 +33,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CodeEditor, ESQL_LANG_ID, type monaco } from '@kbn/code-editor';
+import { CpsPicker } from './cps_picker';
 import { useRuleFormServices } from '../../form/contexts/rule_form_context';
 import { useDataFields } from '../../form/hooks/use_data_fields';
 import type { RuleQuery } from './compose_form_types';
@@ -97,7 +98,6 @@ const VISIBLE_ROWS = 10;
 const INITIAL_EDITOR_HEIGHT = 200;
 const MIN_EDITOR_HEIGHT = 80;
 const MAX_EDITOR_HEIGHT = 600;
-
 const isMac = typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.userAgent);
 const RUN_SHORTCUT_LABEL = isMac ? '⌘⏎' : 'Ctrl+Enter';
 
@@ -329,6 +329,7 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
 
         {/* ── 1. Time field / date picker / Search row — one line ──────── */}
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={false}>
+          <CpsPicker />
           <EuiFlexItem grow={false} style={{ width: 200, minWidth: 0 }}>
             <EuiSelect
               options={timeFieldOptions}
