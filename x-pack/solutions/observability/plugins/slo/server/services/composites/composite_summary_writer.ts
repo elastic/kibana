@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { CompositeSLOMemberSummary } from '@kbn/slo-schema';
+import type { CompositeSLOMemberWithSummary, CompositeSLOSummaryDocument } from '@kbn/slo-schema';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { COMPOSITE_SUMMARY_INDEX_NAME } from '../../../common/constants';
 import type { CompositeSLODefinition } from '../../domain/models';
@@ -17,40 +17,13 @@ import type { SummaryClient } from '../summary_client';
 import { buildCompositeSloSummaryDocId } from './composite_slo_summary_index';
 import { computeCompositeSummary, type MemberSummaryData } from './compute_composite_summary';
 
-export interface CompositeSummaryDoc {
-  spaceId: string;
-  summaryUpdatedAt: string;
-  compositeSlo: {
-    id: string;
-    name: string;
-    description: string;
-    tags: string[];
-    objective: { target: number };
-    timeWindow: { duration: string; type: string };
-    budgetingMethod: string;
-    createdAt: string;
-    updatedAt: string;
-  };
-  sliValue: number;
-  status: string;
-  errorBudgetInitial: number;
-  errorBudgetConsumed: number;
-  errorBudgetRemaining: number;
-  errorBudgetIsEstimated: boolean;
-  fiveMinuteBurnRate: number;
-  oneHourBurnRate: number;
-  oneDayBurnRate: number;
-  unresolvedMemberIds: string[];
-  members: CompositeSLOMemberSummary[];
-}
-
 export function buildCompositeSummaryDoc(
   compositeSlo: CompositeSLODefinition,
   summary: ReturnType<typeof computeCompositeSummary>['compositeSummary'],
-  members: CompositeSLOMemberSummary[],
+  members: CompositeSLOMemberWithSummary[],
   spaceId: string,
   unresolvedMemberIds: string[]
-): CompositeSummaryDoc {
+): CompositeSLOSummaryDocument {
   return {
     spaceId,
     summaryUpdatedAt: new Date().toISOString(),
@@ -68,15 +41,7 @@ export function buildCompositeSummaryDoc(
       createdAt: compositeSlo.createdAt,
       updatedAt: compositeSlo.updatedAt,
     },
-    sliValue: summary.sliValue,
-    status: summary.status,
-    errorBudgetInitial: summary.errorBudget.initial,
-    errorBudgetConsumed: summary.errorBudget.consumed,
-    errorBudgetRemaining: summary.errorBudget.remaining,
-    errorBudgetIsEstimated: summary.errorBudget.isEstimated,
-    fiveMinuteBurnRate: summary.fiveMinuteBurnRate,
-    oneHourBurnRate: summary.oneHourBurnRate,
-    oneDayBurnRate: summary.oneDayBurnRate,
+    summary,
     unresolvedMemberIds,
     members,
   };
