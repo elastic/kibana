@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import type { AnomalyExplorerChartsEmbeddableType } from '@kbn/ml-common-types/embeddables/anomaly_charts';
 import type { AnomalySwimLaneEmbeddableType } from '@kbn/ml-common-types/embeddables/anomaly_swimlane';
 

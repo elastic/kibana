@@ -6,12 +6,15 @@
  */
 
 import React, { useCallback, useEffect, useState, useMemo, memo } from 'react';
-import type { BoolQuery, Filter } from '@kbn/es-query';
+import type { BoolQuery, Filter, Query } from '@kbn/es-query';
 import { FILTERS } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { AlertFilterControls } from '@kbn/alerts-ui-shared/src/alert_filter_controls';
 import { SPACE_IDS } from '@kbn/rule-data-utils';
-import type { FilterControlConfig } from '@kbn/alerts-ui-shared/src/alert_filter_controls/types';
+import type {
+  FilterControlConfig,
+  FilterGroupHandler,
+} from '@kbn/alerts-ui-shared/src/alert_filter_controls/types';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { useKibana } from '../../..';
@@ -77,6 +80,19 @@ export interface UrlSyncedAlertsSearchBarProps
   showFilterControls?: boolean;
   urlStorageKey?: string;
   filterControlsStorageKey?: string;
+  /**
+   * Filters emitted by the filter controls. Owned by the parent page so that
+   * it can gate the alerts table on the controls being initialized.
+   */
+  filterControls?: Filter[];
+  /**
+   * Setter for the filter controls output filters.
+   */
+  onFilterControlsChange?: (filterControls: Filter[]) => void;
+  /**
+   * Fires with the control group handle once the controls have initialized.
+   */
+  onControlApiAvailable?: (controlGroupHandler: FilterGroupHandler | undefined) => void;
   onEsQueryChange: (esQuery: { bool: BoolQuery }) => void;
   onFilterSelected?: (filters: Filter[]) => void;
   defaultFilterControls?: FilterControlConfig[];
@@ -90,6 +106,9 @@ export const UrlSyncedAlertsSearchBar = ({
   showFilterControls = false,
   urlStorageKey = ALERTS_SEARCH_BAR_PARAMS_URL_STORAGE_KEY,
   filterControlsStorageKey: filterControlsStorageKeyProp = 'alertsSearchBar',
+  filterControls,
+  onFilterControlsChange = () => {},
+  onControlApiAvailable,
   onEsQueryChange,
   onFilterSelected,
   defaultFilterControls,
@@ -115,16 +134,14 @@ export const UrlSyncedAlertsSearchBar = ({
     // KQL bar filters
     filters,
     onFiltersChange,
-    // Controls bar filters
-    controlFilters,
-    onControlFiltersChange,
     // Time range
     rangeFrom,
     onRangeFromChange,
     rangeTo,
     onRangeToChange,
     // Controls bar configuration
-    filterControls,
+    filterControls: filterControlsConfig,
+    onFilterControlsChange: onFilterControlsConfigChange,
     // Saved KQL query
     savedQuery,
     setSavedQuery,
@@ -146,7 +163,7 @@ export const UrlSyncedAlertsSearchBar = ({
             from: rangeFrom,
           },
           kuery,
-          filters: [...filters, ...controlFilters],
+          filters: [...filters, ...(filterControls ?? [])],
         })
       );
 
@@ -158,7 +175,7 @@ export const UrlSyncedAlertsSearchBar = ({
       onKueryChange('');
     }
   }, [
-    controlFilters,
+    filterControls,
     filters,
     kuery,
     onEsQueryChange,
@@ -207,9 +224,16 @@ export const UrlSyncedAlertsSearchBar = ({
   }, [spaceId]);
 
   const controlFiltersWithSpace = useMemo(
-    () => [...controlFilters, ...spaceFilter],
-    [controlFilters, spaceFilter]
+    () => [...(filterControls ?? []), ...spaceFilter],
+    [filterControls, spaceFilter]
   );
+
+  const queryFilter = useMemo<Query | undefined>(
+    () => (kuery ? { query: kuery, language: 'kuery' } : undefined),
+    [kuery]
+  );
+
+  const timeRange = useMemo(() => ({ from: rangeFrom, to: rangeTo }), [rangeFrom, rangeTo]);
 
   return (
     <>
@@ -233,13 +257,18 @@ export const UrlSyncedAlertsSearchBar = ({
             dataViewSpec={{
               id: 'unified-alerts-dv',
               title: '.alerts-*',
+              timeFieldName: '@timestamp',
             }}
             spaceId={spaceId}
-            controlsUrlState={filterControls}
+            controlsUrlState={filterControlsConfig}
+            setControlsUrlState={onFilterControlsConfigChange}
             filters={controlFiltersWithSpace}
-            onFiltersChange={onControlFiltersChange}
+            onFiltersChange={onFilterControlsChange}
+            onInit={onControlApiAvailable}
             storageKey={filterControlsStorageKey}
             defaultControls={defaultFilterControls}
+            query={queryFilter}
+            timeRange={timeRange}
             services={{
               http,
               notifications,

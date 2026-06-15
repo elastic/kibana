@@ -147,6 +147,7 @@ dependsOn:
   - '@kbn/cps-utils'
   - '@kbn/es-query-constants'
   - '@kbn/cps'
+  - '@kbn/core-spaces-common'
 tags:
   - plugin
   - prod
