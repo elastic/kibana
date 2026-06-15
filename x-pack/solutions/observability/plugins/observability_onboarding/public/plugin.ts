@@ -150,14 +150,20 @@ export class ObservabilityOnboardingPlugin
       registerIngestFlows(core, plugins);
     }
 
-    const { getLazyElbLogsCloudForwarderExtension } = await import(
-      './fleet_extensions/elb_logs_cloud_forwarder'
-    );
-    plugins.fleet.registerExtension({
-      package: 'aws_cloudwatch_input_otel',
-      view: 'package-policy-create-bottom',
-      Component: getLazyElbLogsCloudForwarderExtension(core),
-    });
+    const isServerless =
+      Boolean(plugins.cloud?.isServerlessEnabled) ||
+      this.ctx.env.packageInfo.buildFlavor === 'serverless';
+
+    if (isServerless) {
+      const { getLazyElbLogsCloudForwarderExtension } = await import(
+        './fleet_extensions/elb_logs_cloud_forwarder'
+      );
+      plugins.fleet.registerExtension({
+        package: 'aws_cloudwatch_input_otel',
+        view: 'package-policy-create-bottom',
+        Component: getLazyElbLogsCloudForwarderExtension(core),
+      });
+    }
 
     return {
       locators: this.locators,

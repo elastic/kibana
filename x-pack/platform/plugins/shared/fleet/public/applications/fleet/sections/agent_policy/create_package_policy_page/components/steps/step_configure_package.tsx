@@ -53,6 +53,7 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
   isUpgrade?: boolean;
   isAgentlessSelected?: boolean;
   varGroupSelections?: VarGroupSelection;
+  bottomExtension?: React.ReactNode;
 }> = ({
   packageInfo,
   showOnlyIntegration,
@@ -65,6 +66,7 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
   isUpgrade = false,
   isAgentlessSelected = false,
   varGroupSelections = {},
+  bottomExtension,
 }) => {
   const hasIntegrations = useMemo(() => doesPackageHaveIntegrations(packageInfo), [packageInfo]);
   const deploymentMode =
@@ -218,6 +220,7 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
               </React.Fragment>
             );
           })}
+          {bottomExtension && <EuiFlexItem>{bottomExtension}</EuiFlexItem>}
         </EuiFlexGroup>
       </>
     ) : (

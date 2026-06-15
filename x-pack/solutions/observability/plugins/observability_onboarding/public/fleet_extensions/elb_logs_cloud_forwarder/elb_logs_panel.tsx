@@ -14,11 +14,11 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiHorizontalRule,
   EuiLoadingSpinner,
   EuiSpacer,
   EuiSwitch,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import type { HttpStart } from '@kbn/core-http-browser';
 import {
@@ -92,15 +92,20 @@ export const ElbLogsPanel: React.FC<ElbLogsPanelProps> = ({ http }) => {
 
   return (
     <>
-      <EuiHorizontalRule margin="m" />
       <EuiFlexGroup alignItems="center" gutterSize="m">
         <EuiFlexItem grow={false}>
           <EuiSwitch
             data-test-subj="fleetIntegrationElbLogsSwitch"
-            label={i18n.translate(
-              'xpack.observability_onboarding.fleetIntegration.elbLogs.toggleLabel',
-              { defaultMessage: 'ELB Logs' }
-            )}
+            label={
+              <EuiTitle size="xs">
+                <h3>
+                  {i18n.translate(
+                    'xpack.observability_onboarding.fleetIntegration.elbLogs.toggleLabel',
+                    { defaultMessage: 'ELB Logs' }
+                  )}
+                </h3>
+              </EuiTitle>
+            }
             checked={isEnabled}
             onChange={handleToggleChange}
           />
@@ -184,21 +189,25 @@ export const ElbLogsPanel: React.FC<ElbLogsPanelProps> = ({ http }) => {
                   )}
                 />
               </EuiFormRow>
-              <EuiSpacer size="l" />
-              <EuiButton
-                data-test-subj="fleetIntegrationElbLogsLaunchStackButton"
-                href={cloudFormationHref}
-                target="_blank"
-                iconSide="right"
-                iconType="external"
-                fill
-                isDisabled={!isValidS3BucketName(trimmedBucketName)}
-              >
-                {i18n.translate(
-                  'xpack.observability_onboarding.fleetIntegration.elbLogs.launchStackButtonLabel',
-                  { defaultMessage: 'Launch Stack in AWS' }
-                )}
-              </EuiButton>
+              <EuiSpacer size="m" />
+              <EuiFlexGroup>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    data-test-subj="fleetIntegrationElbLogsLaunchStackButton"
+                    href={cloudFormationHref}
+                    target="_blank"
+                    iconSide="right"
+                    iconType="external"
+                    size="s"
+                    isDisabled={!isValidS3BucketName(trimmedBucketName)}
+                  >
+                    {i18n.translate(
+                      'xpack.observability_onboarding.fleetIntegration.elbLogs.launchStackButtonLabel',
+                      { defaultMessage: 'Launch Stack in AWS' }
+                    )}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </>
           )}
         </>

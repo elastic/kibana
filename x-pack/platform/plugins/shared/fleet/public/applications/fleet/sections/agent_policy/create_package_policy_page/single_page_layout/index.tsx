@@ -620,6 +620,13 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
               submitAttempted={formState === 'INVALID'}
               isAgentlessSelected={isAgentlessSelected}
               varGroupSelections={varGroupSelections}
+              bottomExtension={
+                createBottomExtensionView && packagePolicy.package?.name ? (
+                  <ExtensionWrapper>
+                    <createBottomExtensionView.Component newPolicy={packagePolicy} />
+                  </ExtensionWrapper>
+                ) : undefined
+              }
             />
           )}
 
@@ -630,13 +637,6 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
                 newPolicy={packagePolicy}
                 onChange={handleExtensionViewOnChange}
               />
-            </ExtensionWrapper>
-          )}
-
-          {/* Additive bottom extension: rendered below native data streams, read-only (no onChange) */}
-          {createBottomExtensionView && packagePolicy.package?.name && (
-            <ExtensionWrapper>
-              <createBottomExtensionView.Component newPolicy={packagePolicy} />
             </ExtensionWrapper>
           )}
         </CreatePackagePolicyFormProvider>
