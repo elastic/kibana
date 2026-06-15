@@ -164,7 +164,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<InputFieldProps
       return null;
     }
 
-    if (name === DATASET_VAR_NAME && packageType === 'input') {
+    if (name === DATASET_VAR_NAME) {
       return (
         <DatasetComponent
           pkgName={packageName}
