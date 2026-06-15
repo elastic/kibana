@@ -78,6 +78,26 @@ describe('registerUpsertRoute', () => {
     });
   });
 
+  it('forwards permissions to sml.upsertDocument when provided', async () => {
+    mockSmlService.upsertDocument.mockResolvedValue({ document: sampleDocument, created: true });
+    const bodyWithPermissions = {
+      ...validBody,
+      permissions: {
+        kibana: { privileges: [{ name: 'saved_object:lens/get' }] },
+        elasticsearch: {
+          indices: [{ name: 'logs-app-*' }, { name: 'metrics-prod' }],
+        },
+      },
+    };
+    await callHandler({ params: { id: 'chunk-1' }, body: bodyWithPermissions });
+    expect(mockSmlService.upsertDocument).toHaveBeenCalledWith({
+      id: 'chunk-1',
+      spaceId: 'test-space',
+      document: bodyWithPermissions,
+      esClient: expect.any(Object),
+    });
+  });
+
   it('returns 200 with created=false when the document already existed', async () => {
     mockSmlService.upsertDocument.mockResolvedValue({ document: sampleDocument, created: false });
     const response = await callHandler({ params: { id: 'chunk-1' }, body: validBody });
