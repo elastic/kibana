@@ -132,10 +132,13 @@ export const DETECTION_KIND_LABELS: Record<Detection['kind'], string> = {
 };
 
 export const DISCOVERY_KIND_LABELS: Record<Discovery['kind'], string> = {
-  finding: i18n.translate('xpack.streams.discovery.kind.finding', {
-    defaultMessage: 'Open',
+  discovery: i18n.translate('xpack.streams.discovery.kind.discovery', {
+    defaultMessage: 'Discovery',
   }),
   clearance: i18n.translate('xpack.streams.discovery.kind.clearance', {
     defaultMessage: 'Cleared',
+  }),
+  handled: i18n.translate('xpack.streams.discovery.kind.handled', {
+    defaultMessage: 'Processed',
   }),
 };

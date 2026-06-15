@@ -20,21 +20,25 @@ triggers:
         type: string
         default: 'now-7d'
         required: false
-        description: 'Lookback window for active discoveries and reviewed discovery IDs. Should match .significant_events-discoveries retention.'
+        description: 'Lookback window for active discoveries. Should match .significant_events-discoveries retention.'
       - name: discoveryBatchMax
         type: number
         default: 5
         required: false
         description: 'Max discoveries per judge invocation. Caps agent message size; remaining discoveries are picked up on the next cycle.'
+      - name: staleAcknowledgedThreshold
+        type: string
+        default: 'now-30m'
+        required: false
+        description: 'Acknowledged events older than this threshold are re-submitted to the Judge for resolution evaluation, even when no new detection or discovery signal has arrived. Addresses the case where alerts stop without triggering a change-point detection.'
 
 consts:
   DISCOVERIES_INDEX: '.significant_events-discoveries'
   EVENTS_INDEX: '.significant_events-events'
-  KB_BATCH_MAX: 5
+  KIND_DISCOVERY: 'discovery'
   KIND_CLEARANCE: 'clearance'
-  KIND_FINDING: 'finding'
-  LOOKUP_BATCH_SIZE: 100
-  REVIEWED_IDS_MAX: 1000
+  KIND_HANDLED: 'handled'
+  BATCH_MAX: 5
 steps:
   # Copy workflow.spaceId into variables so ES body Liquid expressions can reference it.
   - name: set_space_vars
@@ -43,198 +47,159 @@ steps:
       spaceId: '{{ workflow.spaceId }}'
 
   # -----------------------------------------------------------------------
-  # Step 1: Collect reviewed discovery IDs from the events index.
+  # Step 1: Fetch unassessed discoveries — latest doc per slug where kind is
+  # discovery or quiet. kind:handled slugs are excluded by the collapse sort:
+  # if the latest doc is kind:handled, it surfaces in the results and gets
+  # filtered out in collect_findings below.
   # -----------------------------------------------------------------------
-  - name: get_reviewed_discovery_ids
-    type: elasticsearch.request
-    with:
-      method: POST
-      path: '/{{ consts.EVENTS_INDEX }}/_search?ignore_unavailable=true'
-      body:
-        size: 0
-        query:
-          bool:
-            filter:
-              - term:
-                  kibana.space_ids: '{{ variables.spaceId }}'
-              - range:
-                  '@timestamp':
-                    gte: '{{ inputs.discoveryLookback }}'
-        aggs:
-          reviewed_ids:
-            terms:
-              field: discovery_id
-              size: '${{ consts.REVIEWED_IDS_MAX }}'
-    on-failure:
-      continue: true
-
-  # -----------------------------------------------------------------------
-  # Step 2: Fetch unreviewed findings — guards empty-array terms queries.
-  # -----------------------------------------------------------------------
-  - name: get_new_findings
-    # Two-branch if/else: ES rejects terms: [] at parse time, so the true branch
-    # excludes already-reviewed discovery_ids; the false branch omits the exclusion.
-    type: if
-    condition: '${{ steps.get_reviewed_discovery_ids.output.aggregations.reviewed_ids.buckets.size > 0 }}'
-    steps:
-      - name: get_new_findings_unreviewed
-        type: elasticsearch.request
-        with:
-          method: POST
-          path: '/{{ consts.DISCOVERIES_INDEX }}/_search?ignore_unavailable=true'
-          body:
-            size: '{{ inputs.discoveryBatchMax }}'
-            sort:
-              - criticality:
-                  order: desc
-                  missing: '_last'
-                  unmapped_type: integer
-              - '@timestamp':
-                  order: desc
-            # Collapse by discovery_slug so the judge sees one finding per incident.
-            collapse:
-              field: discovery_slug
-            _source:
-              includes:
-                - discovery_id
-                - discovery_slug
-                - title
-                - summary
-                - root_cause
-                - criticality
-                - confidence
-                - cause_kis
-                - evidences
-                - detections
-                - dependency_edges
-                - infra_components
-                - grouped_discovery_ids
-                - change_point_occurrence
-            query:
-              bool:
-                filter:
-                  - term:
-                      kibana.space_ids: '{{ variables.spaceId }}'
-                  - term:
-                      kind: '{{ consts.KIND_FINDING }}'
-                  - range:
-                      '@timestamp':
-                        gte: '{{ inputs.discoveryLookback }}'
-                must_not:
-                  - terms:
-                      discovery_id: "${{ steps.get_reviewed_discovery_ids.output.aggregations.reviewed_ids.buckets | map: 'key' }}"
-        on-failure:
-          continue: true
-    else:
-      - name: get_new_findings_all
-        type: elasticsearch.request
-        with:
-          method: POST
-          path: '/{{ consts.DISCOVERIES_INDEX }}/_search?ignore_unavailable=true'
-          body:
-            size: '{{ inputs.discoveryBatchMax }}'
-            sort:
-              - criticality:
-                  order: desc
-                  missing: '_last'
-                  unmapped_type: integer
-              - '@timestamp':
-                  order: desc
-            # Collapse by discovery_slug so the judge sees one finding per incident.
-            collapse:
-              field: discovery_slug
-            _source:
-              includes:
-                - discovery_id
-                - discovery_slug
-                - title
-                - summary
-                - root_cause
-                - criticality
-                - confidence
-                - cause_kis
-                - evidences
-                - detections
-                - dependency_edges
-                - infra_components
-                - grouped_discovery_ids
-                - change_point_occurrence
-            query:
-              bool:
-                filter:
-                  - term:
-                      kibana.space_ids: '{{ variables.spaceId }}'
-                  - term:
-                      kind: '{{ consts.KIND_FINDING }}'
-                  - range:
-                      '@timestamp':
-                        gte: '{{ inputs.discoveryLookback }}'
-        on-failure:
-          continue: true
-
-  # -----------------------------------------------------------------------
-  # Step 3: Coalesce the two get_new_findings branch outputs.
-  # Findings with missing detections/evidences are passed to the judge,
-  # which demotes them with an assessment_note per its instructions.
-  # -----------------------------------------------------------------------
-  - name: collect_findings
-    type: data.set
-    with:
-      findings: >-
-        ${{ steps.get_new_findings_unreviewed.output.hits.hits
-          | default: steps.get_new_findings_all.output.hits.hits
-          | default: [] | map: '_source' }}
-
-  # -----------------------------------------------------------------------
-  # Step 4: Fetch cleared discovery slugs, excluding slugs that already have
-  # an unreviewed finding — prevents the judge from demoting discoveries that
-  # have both a finding and a clearance (e.g. future supersede flow).
-  # -----------------------------------------------------------------------
-  - name: get_cleared_slugs
+  - name: get_unassessed_discoveries
     type: elasticsearch.request
     with:
       method: POST
       path: '/{{ consts.DISCOVERIES_INDEX }}/_search?ignore_unavailable=true'
       body:
-        size: '${{ consts.LOOKUP_BATCH_SIZE }}'
+        size: '{{ inputs.discoveryBatchMax }}'
         sort:
           - '@timestamp':
               order: desc
+          - criticality:
+              order: desc
+              missing: '_last'
+              unmapped_type: integer
         collapse:
           field: discovery_slug
         _source:
           includes:
+            - kind
+            - discovery_id
             - discovery_slug
+            - title
+            - summary
+            - root_cause
+            - criticality
+            - confidence
+            - cause_kis
+            - evidences
+            - detections
+            - dependency_edges
+            - infra_components
+            - stream_names
         query:
           bool:
             filter:
               - term:
                   kibana.space_ids: '{{ variables.spaceId }}'
-              - term:
-                  kind: '{{ consts.KIND_CLEARANCE }}'
+              - terms:
+                  kind:
+                    - '{{ consts.KIND_DISCOVERY }}'
+                    - '{{ consts.KIND_CLEARANCE }}'
+                    - '{{ consts.KIND_HANDLED }}'
               - range:
                   '@timestamp':
                     gte: '{{ inputs.discoveryLookback }}'
-            must_not:
-              - terms:
-                  discovery_slug: "${{ steps.collect_findings.output.findings | map: 'discovery_slug' }}"
     on-failure:
       continue: true
 
   # -----------------------------------------------------------------------
-  # Step 5: Exit early when there is nothing to triage.
+  # Step 2: Filter to only unassessed slugs (latest doc is discovery or quiet,
+  # not handled).
+  # -----------------------------------------------------------------------
+  - name: collect_findings
+    type: data.set
+    with:
+      findings: >-
+        ${{ steps.get_unassessed_discoveries.output.hits.hits
+          | map: '_source'
+          | reject: 'kind', 'handled'
+          | default: [] }}
+
+  # -----------------------------------------------------------------------
+  # Step 2b: Fetch stale acknowledged events — events that have been in
+  # acknowledged status for longer than staleAcknowledgedThreshold with no
+  # new detection or discovery signal. Detection only writes docs on change
+  # points; when alerts drop to zero with no statistically significant
+  # transition, no new kind:quiet detection is written and the resolution
+  # chain stalls. These events are re-submitted to the Judge so it can query
+  # current alert state via execute_esql and produce a resolved verdict if
+  # alerts have genuinely stopped.
+  # -----------------------------------------------------------------------
+  - name: get_stale_acknowledged
+    type: elasticsearch.request
+    with:
+      method: POST
+      path: '/{{ consts.EVENTS_INDEX }}/_search?ignore_unavailable=true'
+      body:
+        size: '{{ inputs.discoveryBatchMax }}'
+        sort:
+          - '@timestamp':
+              order: desc
+          - criticality:
+              order: desc
+              missing: '_last'
+              unmapped_type: integer
+        collapse:
+          field: discovery_slug
+        _source:
+          includes:
+            - discovery_id
+            - discovery_slug
+            - title
+            - summary
+            - root_cause
+            - criticality
+            - confidence
+            - cause_kis
+            - evidences
+            - detections
+            - dependency_edges
+            - infra_components
+            - stream_names
+        query:
+          bool:
+            filter:
+              - term:
+                  kibana.space_ids: '{{ variables.spaceId }}'
+              - range:
+                  '@timestamp':
+                    gte: '{{ inputs.discoveryLookback }}'
+    on-failure:
+      continue: true
+
+  - name: compute_stale_findings
+    # Filter in Liquid — not in ES — to ensure we see the latest event per slug.
+    # An ES-side status:acknowledged filter would exclude newer promoted/resolved docs
+    # from the collapse, causing stale acknowledged events to surface for slugs that
+    # have already progressed to a different status.
+    type: data.set
+    with:
+      stale_findings: >-
+        ${{ steps.get_stale_acknowledged.output.hits.hits
+          | map: '_source'
+          | where: 'status', 'acknowledged'
+          | default: [] }}
+
+  # Merge normal unassessed discoveries with stale acknowledged events so
+  # both are available to resolve_discovery and write_event_doc.
+  - name: compute_all_findings
+    type: data.set
+    with:
+      findings: >-
+        ${{ steps.collect_findings.output.findings
+          | concat: steps.compute_stale_findings.output.stale_findings
+          | default: [] }}
+
+  # -----------------------------------------------------------------------
+  # Step 3: Exit early when there is nothing to triage.
   # -----------------------------------------------------------------------
   - name: exit_idle
     type: workflow.output
-    if: >-
-      ${{ steps.collect_findings.output.findings.size == 0
-      and steps.get_cleared_slugs.output.hits.total.value == 0 }}
+    if: '${{ steps.compute_all_findings.output.findings.size == 0 }}'
     status: cancelled
     with:
-      reason: 'No unreviewed findings or cleared discoveries — nothing to triage'
+      reason: 'No unassessed discoveries or quiet docs — nothing to triage'
 
   # -----------------------------------------------------------------------
-  # Step 7: Judge — evaluate unreviewed discoveries.
+  # Step 4: Judge — evaluate unreviewed discoveries and quiet docs.
   # -----------------------------------------------------------------------
   - name: run_judge_agent
     # TODO: agent-id and connector-id are config fields and are NOT rendered through Liquid by the
@@ -254,9 +219,9 @@ steps:
 
         {{ steps.collect_findings.output.findings | json }}
 
-        ## Discoveries with Detections Cleared
+        ## Stale Acknowledged Events
 
-        {{ steps.get_cleared_slugs.output.hits.hits | map: '_source' | map: 'discovery_slug' | json }}
+        {{ steps.compute_stale_findings.output.stale_findings | json }}
       schema:
         type: object
         properties:
@@ -267,141 +232,45 @@ steps:
               properties:
                 discovery_id:
                   type: string
-                  description: "The discovery's discovery_id — echo verbatim from the input discovery doc."
+                  description: 'Echo verbatim from the input discovery doc. READ-ONLY.'
                 discovery_slug:
                   type: string
-                  description: "The discovery's discovery_slug — echo verbatim from the input discovery doc. READ-ONLY."
-                grouped_discovery_ids:
-                  type: array
-                  items:
-                    type: string
-                  description: 'For new group events: populate with the discovery_ids of all grouped discoveries. For re-reviewed group events: echo verbatim from the group discovery — do not add or modify entries.'
+                  description: 'Echo verbatim from the input discovery doc. READ-ONLY.'
                 status:
                   type: string
-                  enum: [acknowledged, demoted, promoted]
+                  enum: [promoted, acknowledged, demoted, resolved]
+                  description: 'promoted: active incident requiring immediate action. acknowledged: real issue, not critical enough for immediate escalation. demoted: insignificant or confirmed false positive. resolved: alerts genuinely stopped (kind:clearance inputs only).'
                 criticality:
                   type: integer
                   minimum: 0
                   maximum: 100
+                  description: "Judge's own severity assessment 0–100."
                 confidence:
                   type: integer
                   minimum: 0
                   maximum: 100
-                impact:
+                  description: 'Confidence in this verdict 0–100.'
+                summary:
                   type: string
-                  enum: [critical, high, medium, low]
-                  description: 'Severity tier derived from criticality score.'
-                recommended_action:
+                  description: "Corrected incident descriptor — omit when the discovery's summary already covers failing service, blast radius, and on-call action. Emit when any are missing or changed by verification. Lead with service + symptom + scale; name exposed path when dependency_edges has exposed entries; close with the single most time-sensitive on-call action. One to two sentences."
+                root_cause:
                   type: string
-                  enum: [escalate, investigate, monitor]
-                  description: 'Top-level operator action. escalate ≥76 criticality; investigate ≥51; monitor otherwise or when demoted.'
+                  description: 'Corrected probable-cause hypothesis. Omit when nothing contradicts the discovery. Must cite KI name + row_count and keep the causal chain coherent.'
                 recommendations:
                   type: array
                   items:
                     type: string
-                  description: 'Top 3 operator action items. Required for promoted and acknowledged events.'
-                analysis_summary:
-                  type: string
+                  description: '3 candidate stop-the-bleeding actions ranked by likelihood of stopping user impact. These are operational attempts — not a guaranteed fix sequence. Order from most reversible and most targeted to broader interventions. Each must name the specific service or error code observed in evidences and include the exact operational command (kubectl, helm, systemctl, CLI). No ES|QL or diagnostic queries — investigation is complete. Required for promoted and acknowledged.'
                 assessment_note:
                   type: string
-                title:
-                  type: string
-                summary:
-                  type: string
-                root_cause:
-                  type: string
-                cause_kis:
-                  type: array
-                  items:
-                    type: object
-                    properties:
-                      name:
-                        type: string
-                      stream_name:
-                        type: string
-                dependency_edges:
-                  type: array
-                  items:
-                    type: object
-                    required: [source, target]
-                    properties:
-                      source:
-                        type: string
-                      target:
-                        type: string
-                      protocol:
-                        type: string
-                      exposure:
-                        type: string
-                        enum: ['exposed', 'not_exposed']
-                infra_components:
-                  type: array
-                  items:
-                    type: object
-                    properties:
-                      title:
-                        type: string
-                      workloads:
-                        type: array
-                        items:
-                          type: string
-                      exposure:
-                        type: string
-                        enum: ['exposed', 'not_exposed']
-                evidences:
-                  type: array
-                  items:
-                    type: object
-                    properties:
-                      rule_name:
-                        anyOf:
-                          - type: string
-                          - type: 'null'
-                        description: 'Name of the rule this evidence targets.'
-                      rule_uuid:
-                        anyOf:
-                          - type: string
-                          - type: 'null'
-                        description: 'UUID of the rule this evidence targets.'
-                      result:
-                        type: string
-                        enum: [found, empty, error]
-                      description:
-                        type: string
-                      stream_name:
-                        type: string
-                      row_count:
-                        type: integer
-                      collected_at:
-                        type: string
-                      esql_query:
-                        anyOf:
-                          - type: string
-                          - type: 'null'
-                      confirmed:
-                        type: boolean
-                        enum: [true]
-                  description: 'Inherit all discovery evidences unchanged, then append one entry per tool call made during this evaluation.'
-              required:
-                [
-                  discovery_id,
-                  discovery_slug,
-                  status,
-                  criticality,
-                  confidence,
-                  impact,
-                  recommended_action,
-                  analysis_summary,
-                  assessment_note,
-                  title,
-                  evidences,
-                ]
+                  description: 'Adversarial reasoning trace: what was independently verified, what signals confirmed or contradicted the discovery, and how criticality and status were calibrated. Not operator-facing. Required for promoted and acknowledged; brief for demoted and resolved.'
+              required: [discovery_id, discovery_slug, status, criticality, confidence]
         required: [significant_events]
     on-failure:
       continue: false
 
   # -----------------------------------------------------------------------
-  # Step 9: Process each significant event — write to events index.
+  # Step 5: Process each significant event — write to events index.
   # -----------------------------------------------------------------------
 
   # Eviction-safe snapshot — ai.agent outputs are evictable; data.set outputs are not.
@@ -456,8 +325,14 @@ steps:
             or steps.check_existing_event.output.hits.total.value > 0
             and steps.check_existing_event.output.hits.hits[0]._source.status != foreach.item.status }}
           event_id: '{% if steps.check_existing_event.output.hits.total.value == 0 %}{{ foreach.item.discovery_id }}-event{% else %}{{ execution.id }}-{{ foreach.item.discovery_id }}{% endif %}'
-          created_at: "{% if steps.check_existing_event.output.hits.total.value > 0 %}{{ steps.check_existing_event.output.hits.hits[0]._source.created_at }}{% else %}{{ 'now' | date: '%Y-%m-%dT%H:%M:%S%:z' }}{% endif %}"
+          created_at: "{% if steps.check_existing_event.output.hits.total.value > 0 and steps.check_existing_event.output.hits.hits[0]._source.status != 'resolved' %}{{ steps.check_existing_event.output.hits.hits[0]._source.created_at }}{% else %}{{ 'now' | date: '%Y-%m-%dT%H:%M:%S%:z' }}{% endif %}"
           previous_event_id: '{% if steps.check_existing_event.output.hits.total.value > 0 %}{{ steps.check_existing_event.output.hits.hits[0]._source.event_id }}{% endif %}'
+
+      # Resolve the source discovery for the Liquid join.
+      - name: resolve_discovery
+        type: data.set
+        with:
+          discovery: "${{ steps.compute_all_findings.output.findings | where: 'discovery_id', foreach.item.discovery_id | first }}"
 
       - name: write_event_doc
         type: elasticsearch.request
@@ -478,22 +353,50 @@ steps:
             status: '${{ foreach.item.status }}'
             criticality: '${{ foreach.item.criticality }}'
             confidence: '${{ foreach.item.confidence }}'
-            title: '{{ foreach.item.title }}'
-            summary: '{{ foreach.item.summary }}'
-            root_cause: '{{ foreach.item.root_cause }}'
-            cause_kis: '${{ foreach.item.cause_kis | default: [] }}'
-            dependency_edges: '${{ foreach.item.dependency_edges | default: [] }}'
-            infra_components: '${{ foreach.item.infra_components | default: [] }}'
-            grouped_discovery_ids: '${{ foreach.item.grouped_discovery_ids }}'
+            summary: '{{ foreach.item.summary | default: steps.resolve_discovery.output.discovery.summary }}'
+            title: '{{ steps.resolve_discovery.output.discovery.title }}'
+            root_cause: '{{ foreach.item.root_cause | default: steps.resolve_discovery.output.discovery.root_cause }}'
+            cause_kis: '${{ steps.resolve_discovery.output.discovery.cause_kis | default: [] }}'
+            dependency_edges: '${{ steps.resolve_discovery.output.discovery.dependency_edges | default: [] }}'
+            infra_components: '${{ steps.resolve_discovery.output.discovery.infra_components | default: [] }}'
+            evidences: "${{ steps.resolve_discovery.output.discovery.evidences | reject: 'result', 'error' | default: [] }}"
+            stream_names: '${{ steps.resolve_discovery.output.discovery.stream_names | default: [] }}'
             recommendations: '${{ foreach.item.recommendations | default: [] }}'
-            impact: '${{ foreach.item.impact }}'
-            recommended_action: '${{ foreach.item.recommended_action }}'
-            analysis_summary: '${{ foreach.item.analysis_summary }}'
-            assessment_note: '${{ foreach.item.assessment_note }}'
-            evidences: "${{ foreach.item.evidences | where: 'result', 'found' }}"
-            stream_names: "${{ foreach.item.evidences | map: 'stream_name' | compact | uniq }}"
+            assessment_note: '{{ foreach.item.assessment_note }}'
             analysis_source: judge_agent
             conversation_id: '{{ steps.store_significant_events.output.conversation_id }}'
             workflow_execution_id: '{{ execution.id }}'
         on-failure:
-          continue: false
+          continue: true
+
+      # Write kind:handled to the discoveries index after write_event_doc succeeds.
+      # Carries the full discovery payload plus event_id lineage pointer.
+      # This closes the slug for re-assessment by the next triage run.
+      - name: write_handled_discovery
+        type: elasticsearch.request
+        if: '${{ steps.compute_write_gate.output.should_write and steps.write_event_doc.error == null }}'
+        with:
+          method: POST
+          path: '/{{ consts.DISCOVERIES_INDEX }}/_doc'
+          body:
+            '@timestamp': '{{ "now" | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
+            kibana:
+              space_ids:
+                - '{{ variables.spaceId }}'
+            kind: '{{ consts.KIND_HANDLED }}'
+            event_id: '{{ steps.compute_write_gate.output.event_id }}'
+            workflow_execution_id: '{{ execution.id }}'
+            discovery_id: '{{ steps.resolve_discovery.output.discovery.discovery_id }}'
+            discovery_slug: '{{ steps.resolve_discovery.output.discovery.discovery_slug }}'
+            title: '{{ steps.resolve_discovery.output.discovery.title }}'
+            summary: '{{ steps.resolve_discovery.output.discovery.summary }}'
+            root_cause: '{{ steps.resolve_discovery.output.discovery.root_cause }}'
+            criticality: '${{ steps.resolve_discovery.output.discovery.criticality }}'
+            confidence: '${{ steps.resolve_discovery.output.discovery.confidence }}'
+            cause_kis: '${{ steps.resolve_discovery.output.discovery.cause_kis | default: [] }}'
+            evidences: '${{ steps.resolve_discovery.output.discovery.evidences | default: [] }}'
+            detections: '${{ steps.resolve_discovery.output.discovery.detections | default: [] }}'
+            dependency_edges: '${{ steps.resolve_discovery.output.discovery.dependency_edges | default: [] }}'
+            infra_components: '${{ steps.resolve_discovery.output.discovery.infra_components | default: [] }}'
+        on-failure:
+          continue: true

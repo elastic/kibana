@@ -14,7 +14,12 @@ import {
 } from '../common_schemas';
 import { MAX_TEXT_LENGTH } from '../constants';
 
-export const SIG_EVENT_STATUS_OPTIONS = ['promoted', 'acknowledged', 'demoted'] as const;
+export const SIG_EVENT_STATUS_OPTIONS = [
+  'promoted',
+  'acknowledged',
+  'demoted',
+  'resolved',
+] as const;
 export const sigEventStatusSchema = z.enum(SIG_EVENT_STATUS_OPTIONS);
 export type SigEventStatus = z.infer<typeof sigEventStatusSchema>;
 
@@ -38,14 +43,12 @@ export const sigEventSchema = z.object({
   root_cause: z.string().max(4000),
   criticality: z.number(),
   confidence: z.number(),
-  recommended_action: z.string().max(200).optional(),
   impact: sigEventImpactSchema,
   recommendations: z.array(z.string().max(1000)).max(50),
   dependency_edges: z.array(dependencyEdgeSchema).optional(),
   infra_components: z.array(infraComponentSchema).optional(),
   cause_kis: z.array(causeKiSchema).optional(),
   evidences: z.array(evidenceSchema).optional(),
-  analysis_summary: z.string().max(MAX_TEXT_LENGTH).optional(),
   assessment_note: z.string().max(MAX_TEXT_LENGTH).optional(),
 });
 

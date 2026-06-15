@@ -14,6 +14,7 @@ export const DETECTION_KIND_COLORS: Record<Detection['kind'], string> = {
 };
 
 export const DISCOVERY_KIND_COLORS: Record<Discovery['kind'], string> = {
-  finding: 'warning',
+  discovery: 'warning',
   clearance: 'success',
+  handled: 'primary',
 };

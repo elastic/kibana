@@ -92,7 +92,7 @@ const columns: Array<EuiBasicTableColumn<Detection>> = [
   },
   {
     name: i18n.translate('xpack.streams.detectionsTab.discoveryColumn', {
-      defaultMessage: 'Discovery',
+      defaultMessage: 'Status',
     }),
     width: '110px',
     render: (detection: Detection) => {

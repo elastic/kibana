@@ -48,14 +48,14 @@ triggers:
         description: 'ES date math expression controlling the minimum time between finding re-writes for the same slug. Longer windows reduce LLM cost for stable incidents; shorter windows surface escalations faster. Must be a valid ES date math value (e.g. now-30m, now-2h, now-24h). Default 1h.'
 consts:
   CONTEXT_FETCH_SIZE: 20
-  DETECTIONS_INDEX: ".significant_events-detections"
-  DISCOVERIES_INDEX: ".significant_events-discoveries"
-  EVENTS_INDEX: ".significant_events-events"
-  KIND_CLEARANCE: "clearance"
-  KIND_DETECTION: "detection"
-  KIND_FINDING: "finding"
-  KIND_HANDLED: "handled"
-  KIND_QUIET: "quiet"
+  DETECTIONS_INDEX: '.significant_events-detections'
+  DISCOVERIES_INDEX: '.significant_events-discoveries'
+  EVENTS_INDEX: '.significant_events-events'
+  KIND_CLEARANCE: 'clearance'
+  KIND_DETECTION: 'detection'
+  KIND_FINDING: 'discovery'
+  KIND_HANDLED: 'handled'
+  KIND_QUIET: 'quiet'
   SCAN_BATCH_SIZE: 100
   REMAINING_DETECTIONS_MAX: 50
   SEVERITY_CRITICAL: 76
@@ -73,43 +73,45 @@ steps:
       spaceId: "{{ workflow.spaceId }}"
 
   # -----------------------------------------------------------------------
-  # Step 1: Recently resolved rules.
+  # Step 1: Read current detection state.
+  # Must run before clearance propagation so both paths share the same
+  # detection snapshot — eliminates the race where clearance runs before
+  # quiet docs are indexed.
   # -----------------------------------------------------------------------
-  - name: get_resolved_quiet_rule_uuids
+  - name: get_active_unhandled_rules
     type: elasticsearch.request
     with:
       method: POST
       path: '/{{ consts.DETECTIONS_INDEX }}/_search?ignore_unavailable=true'
       body:
-        size: "${{ consts.SCAN_BATCH_SIZE }}"
+        size: '${{ consts.UNHANDLED_RULES_MAX }}'
+        collapse:
+          field: rule_uuid
         sort:
           - "@timestamp":
               order: desc
-        collapse:
-          field: rule_uuid
         _source:
           includes:
+            - kind
             - rule_uuid
-            - rule_name
         query:
           bool:
             filter:
               - term:
                   kibana.space_ids: '{{ variables.spaceId }}'
-              - term:
-                  kind: '{{ consts.KIND_QUIET }}'
               - range:
-                  "@timestamp":
-                    gte: '{{ inputs.resolvedLookback }}'
-                    lte: '{{ inputs.resolvedCooldown }}'
+                  '@timestamp':
+                    gte: '{{ inputs.detectionLookback }}'
     on-failure:
       continue: true
 
-  - name: compute_resolved_quiet_rules
-    # Resolved (silenced) rules as { rule_uuid, rule_name } — the partial-recovery signal.
+  - name: compute_active_unhandled_rule_uuids
     type: data.set
     with:
-      resolved_rules: "${{ steps.get_resolved_quiet_rule_uuids.output.hits.hits | map: '_source' | default: [] }}"
+      # active_rule_uuids: rules whose latest doc is kind:detection — fed to investigator batch.
+      active_rule_uuids: "${{ steps.get_active_unhandled_rules.output.hits.hits | where: '_source.kind', 'detection' | map: '_source' | map: 'rule_uuid' | default: [] }}"
+      # quiet_rule_uuids: rules whose latest doc is kind:quiet — not investigated, but stamped handled.
+      quiet_rule_uuids: "${{ steps.get_active_unhandled_rules.output.hits.hits | where: '_source.kind', 'quiet' | map: '_source' | map: 'rule_uuid' | default: [] }}"
 
   # -----------------------------------------------------------------------
   # Step 2: Propagate resolutions.
@@ -183,7 +185,7 @@ steps:
                   - term:
                       discovery_slug: "{{ foreach.item._source.discovery_slug }}"
                   - term:
-                      closes_discovery_id: "{{ foreach.item._source.discovery_id }}"
+                      parent_discovery_id: '{{ foreach.item._source.discovery_id }}'
                   - term:
                       kind: '{{ consts.KIND_CLEARANCE }}'
         on-failure:
@@ -246,57 +248,25 @@ steps:
                     - "{{ variables.spaceId }}"
                 kind: '{{ consts.KIND_CLEARANCE }}'
                 closed_by_execution_id: '{{ execution.id }}'
-                closes_discovery_id: '{{ foreach.item._source.discovery_id }}'
+                parent_discovery_id: '{{ foreach.item._source.discovery_id }}'
                 confidence: '${{ foreach.item._source.confidence }}'
                 criticality: '${{ foreach.item._source.criticality }}'
                 detections: '${{ foreach.item._source.detections }}'
                 discovery_id: '{{ foreach.item._source.discovery_id }}-clearance'
                 discovery_slug: '{{ foreach.item._source.discovery_slug }}'
-                impact: '{% if foreach.item._source.criticality >= 76 %}critical{% elsif foreach.item._source.criticality >= 51 %}high{% elsif foreach.item._source.criticality >= 25 %}medium{% else %}low{% endif %}'
                 root_cause: '{{ foreach.item._source.root_cause }}'
                 summary: '{{ foreach.item._source.summary }}'
                 title: '{{ foreach.item._source.title }}'
+                cause_kis: '${{ foreach.item._source.cause_kis | default: [] }}'
+                dependency_edges: '${{ foreach.item._source.dependency_edges | default: [] }}'
+                infra_components: '${{ foreach.item._source.infra_components | default: [] }}'
+                stream_names: '${{ foreach.item._source.stream_names | default: [] }}'
             on-failure:
               continue: true
 
   # -----------------------------------------------------------------------
   # Step 3: Unhandled detection docs → correlation agent → index discoveries.
   # -----------------------------------------------------------------------
-  - name: get_active_unhandled_rules
-    type: elasticsearch.request
-    with:
-      method: POST
-      path: '/{{ consts.DETECTIONS_INDEX }}/_search?ignore_unavailable=true'
-      body:
-        size: "${{ consts.UNHANDLED_RULES_MAX }}"
-        collapse:
-          field: rule_uuid
-        sort:
-          - "@timestamp":
-              order: desc
-        _source:
-          includes:
-            - kind
-            - rule_uuid
-        query:
-          bool:
-            filter:
-              - term:
-                  kibana.space_ids: "{{ variables.spaceId }}"
-              - range:
-                  "@timestamp":
-                    gte: '{{ inputs.detectionLookback }}'
-    on-failure:
-      continue: true
-
-  - name: compute_active_unhandled_rule_uuids
-    type: data.set
-    with:
-      # active_rule_uuids: rules whose latest doc is kind:detection — fed to investigator batch.
-      active_rule_uuids: "${{ steps.get_active_unhandled_rules.output.hits.hits | where: '_source.kind', 'detection' | map: '_source' | map: 'rule_uuid' | default: [] }}"
-      # quiet_rule_uuids: rules whose latest doc is kind:quiet — not investigated, but stamped handled.
-      quiet_rule_uuids: "${{ steps.get_active_unhandled_rules.output.hits.hits | where: '_source.kind', 'quiet' | map: '_source' | map: 'rule_uuid' | default: [] }}"
-
   - name: get_detected_window
     # if guard: terms with an empty array causes an ES parsing_exception.
     if: "${{ steps.compute_active_unhandled_rule_uuids.output.active_rule_uuids.size > 0 }}"
@@ -418,10 +388,6 @@ steps:
         {{ steps.get_open_discoveries.output.hits.hits | map: '_source' | json }}
         {% endif %}
 
-        {% if steps.compute_resolved_quiet_rules.output.resolved_rules.size > 0 %}
-        ## Resolution context
-        {{ steps.compute_resolved_quiet_rules.output.resolved_rules | json }}
-        {% endif %}
       schema:
         type: object
         properties:
@@ -620,7 +586,7 @@ steps:
                   - term:
                       kind: '{{ consts.KIND_CLEARANCE }}'
                   - term:
-                      closes_discovery_id: "${{ steps.check_recent_finding.output.hits.hits[0]._source.discovery_id }}"
+                      parent_discovery_id: '${{ steps.check_recent_finding.output.hits.hits[0]._source.discovery_id }}'
         on-failure:
           continue: true
 

@@ -32,14 +32,14 @@ import { DISCOVERY_KIND_COLORS } from '../shared/constants';
 const timelineLabel = (entry: Discovery, prev: Discovery | undefined): string => {
   const criticality = entry.criticality ?? '-';
   switch (entry.kind) {
-    case 'finding':
+    case 'discovery':
       if (prev?.kind === 'clearance') {
         return i18n.translate('xpack.streams.discoveryFlyout.transition.reopened', {
           defaultMessage: 'Re-opened — Criticality {criticality}',
           values: { criticality },
         });
       }
-      if (prev?.kind === 'finding') {
+      if (prev?.kind === 'discovery') {
         return i18n.translate('xpack.streams.discoveryFlyout.transition.updated', {
           defaultMessage: 'Updated — Criticality {criticality}',
           values: { criticality },

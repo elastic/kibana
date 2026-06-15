@@ -161,7 +161,7 @@ steps:
               - term:
                   kibana.space_ids: "{{ variables.spaceId }}"
               - terms:
-                  rule_uuid: "${{ steps.get_stale_candidates.output.hits.hits | where: '_source.kind', 'detection' | map: '_source.rule_uuid' | default: [] }}"
+                  rule_uuid: "${{ steps.get_stale_candidates.output.hits.hits | where: '_source.kind', 'detection' | map: '_source.rule_uuid' }}"
               - range:
                   "@timestamp":
                     gte: '{{ consts.DETECTION_RETENTION_WINDOW }}'

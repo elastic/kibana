@@ -124,19 +124,6 @@ const columns: Array<EuiBasicTableColumn<SigEvent>> = [
     width: '90px',
     render: (criticality: number | undefined) => <EuiText size="xs">{criticality ?? '-'}</EuiText>,
   },
-  {
-    field: 'recommended_action',
-    name: i18n.translate('xpack.streams.sigEventsTab.actionColumn', {
-      defaultMessage: 'Action',
-    }),
-    width: '100px',
-    render: (action?: string) =>
-      action ? (
-        <EuiBadge color={action === 'escalate' ? 'danger' : 'hollow'}>{action}</EuiBadge>
-      ) : (
-        '-'
-      ),
-  },
 ];
 
 const extractCheckedKeys = (options: EuiSelectableOption[]): string[] =>

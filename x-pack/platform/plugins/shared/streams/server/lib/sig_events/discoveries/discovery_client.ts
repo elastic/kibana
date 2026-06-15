@@ -71,7 +71,7 @@ export class DiscoveryClient {
       options,
       index: DISCOVERIES_DATA_STREAM,
       groupBy: FIELD_DISCOVERY_SLUG,
-      where: esql.exp`${esql.col('kind')} == ${esql.str('finding')}`,
+      where: esql.exp`${esql.col('kind')} == ${esql.str('discovery')}`,
     });
 
     if (!result.hits.length) return result;
@@ -106,7 +106,7 @@ export class DiscoveryClient {
     for (let i = 0; i < slugs.length; i += CLEARED_IDS_CHUNK_SIZE) {
       const batch = slugs.slice(i, i + CLEARED_IDS_CHUNK_SIZE);
       const slugLiterals = batch.map((slug) => esql.str(slug));
-      const kindFinding = esql.str('finding');
+      const kindFinding = esql.str('discovery');
       const kindClearance = esql.str('clearance');
       // Group both doc kinds by `discovery_slug` (the incident identity under A1):
       // finding docs and clearance docs both carry the slug for the incident they belong to.

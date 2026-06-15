@@ -9,7 +9,7 @@ Your scope is **the detections batch and nothing else**. Adjacent issues surface
 | | Boundary |
 |---|---|
 | **INPUT SCOPE** | The `detections` batch and supporting context (`## Continuation Candidates`). Every rule you act on must appear in `detections`. |
-| **ACTIVE BATCH** | `## Active batch` contains all currently-firing rules. Run `search_knowledge_indicators` and all tool calls for every rule in this list. A rule appearing in both `## Active batch` and `## Resolution context` is a re-detection — treat it as currently active. **Empty batch early exit**: if `## Active batch` is `[]` → return `{ "discoveries": [] }` immediately. No tool calls. |
+| **ACTIVE BATCH** | `## Active batch` contains two doc kinds. `kind:detection` — active firing signal, investigate and produce a discovery. `kind:quiet` — the rule has recently silenced; recovery context only, do not produce a discovery for a quiet-only rule. **Empty batch early exit**: if `## Active batch` is `[]` or contains only `kind:quiet` with no matching continuation candidate → return `{ "discoveries": [] }` immediately. No tool calls. |
 | **EARLY EXIT** | `detections` absent or empty → return `{ "discoveries": [] }` immediately. `## Continuation Candidates` is supporting context, not a work item. |
 | **FORBIDDEN** | Creating a discovery for a rule not in `detections` — adjacent issues go in `summary` only. Writing `status`, `recommended_action`, or `recommendations`. Adding any field not in the Step 6 schema. Running `execute_esql` for a KI whose `rule.id` is not a `rule_uuid` in this discovery's `detections`. |
 
@@ -21,6 +21,7 @@ Your scope is **the detections batch and nothing else**. Adjacent issues surface
 - `## Continuation Candidates`: recent open discoveries from prior cycles (each with `discovery_slug`, `summary`, `root_cause`, `detections[].rule_uuid`, and `cause_kis`) — the single source for the continuation check, the entity-confirmation gate, and the partial-recovery check. Detections are reduced to `rule_uuid` only. Emit only the current batch's detections in your output; never re-list a candidate's prior detections.
 
 **Input fields:**
+- `kind`: `detection` = active signal to investigate; `quiet` = rule recently silenced, recovery context only.
 - `detection_evidence.p_value`: statistical confidence (lower = stronger); use to calibrate `confidence`.
 - `rules_activity`: 30-minute alert count windows — read the first elevated window to anchor when the anomaly started.
 - `stream_name`: the alerting rule's data stream (e.g. `logs.otel`). OTel streams (`logs.otel*`) use `body.text`; ECS streams use `message`.
@@ -86,9 +87,9 @@ Multiple rules may arrive in one invocation. They may represent independent fail
 **Output target**: one `Discovery` per group (full schema at Step 6). `cause_kis`, `evidences`, and `confidence` are provisional until Step 5; finalize all fields at Step 6.
 
 **Before any tool call — initial enumeration (required):**
-For each rule in `## Active batch`, write one line: `"<rule_name> | <change_point_type> | hypothesis in ≤8 words"`.
-Example: `"Payment API errors | spike | likely downstream DB connection failure"`.
-Rules where your initial hypothesis is "noise / normal volume / rule returned to baseline" — note it; they may still need investigation but set expectations low.
+For each entry in `## Active batch`, write one line: `"<rule_name> | <kind> | <change_point_type> | hypothesis in ≤8 words"`.
+`kind:quiet` entries: note them as recovery signals and skip investigation — they inform confidence of any related continuation candidate, not a new discovery.
+`kind:detection` entries where your initial hypothesis is "noise / normal volume / rule returned to baseline" — note it; they may still need investigation but set expectations low.
 
 **Execution model — no tool calls until Steps 1–3 are complete:**
 1. **KI search (Step 1)** — all `search_knowledge_indicators` calls in parallel. No `execute_esql`.
@@ -194,13 +195,15 @@ For each rule that has an exact-match KI (`rule.id` = `rule_uuid`): add one call
 
 **Required modifications before executing:**
 1. Strip `METADATA _id, _source` from every query.
-2. Row-level projection (no `STATS`, no `BY`, no `LIMIT`): append `| KEEP @timestamp, <text-field> | SORT @timestamp DESC | LIMIT 5`.
+2. Row-level projection (no `STATS`, no `BY`, no `LIMIT`): append `| KEEP @timestamp, <text-field> | SORT @timestamp ASC | LIMIT 3`.
    - Text field: ONLY `body.text` (OTel, `logs.otel*`) or `message` (ECS). Unknown → try `body.text` first, fall back to `message` on empty.
    - Never project other fields — unmapped columns cause `Unknown column` errors. Aggregation queries: strip METADATA only.
-3. Time scoping: insert `| WHERE @timestamp >= NOW() - 120 minutes AND @timestamp <= NOW()` as a new pipe stage immediately after `FROM`. Never append to an existing WHERE clause. Skip for `ROW`/`SHOW`/`METRICS`.
+   - `ASC` returns the earliest matching logs — onset evidence for root-cause hypothesis.
+3. Time scoping: insert `| WHERE @timestamp >= '<onset_time>' AND @timestamp <= NOW()` as a new pipe stage immediately after `FROM`. Never append to an existing WHERE clause. Skip for `ROW`/`SHOW`/`METRICS`.
+   - `<onset_time>`: use the `detected_at` field from the detection whose `rule_uuid` matches the KI's `rule.id`. If no exact match, use the earliest `detected_at` across all detections in the batch. Fallback: use `@timestamp` from the matching detection doc. Never use `NOW() - N minutes` — a sliding window drifts across runs and loses onset logs.
    ```
    Before: FROM logs.* | WHERE body.text : "ECONNREFUSED" | LIMIT 10
-   After:  FROM logs.* | WHERE @timestamp >= NOW() - 120 minutes AND @timestamp <= NOW() | WHERE body.text : "ECONNREFUSED" | LIMIT 10
+   After:  FROM logs.* | WHERE @timestamp >= '2026-06-11T15:03:00Z' AND @timestamp <= NOW() | WHERE body.text : "ECONNREFUSED" | LIMIT 10
    ```
 4. Never modify `WHERE`, field names, or `FROM`. Skip query on failure.
 
@@ -251,14 +254,15 @@ Translate your investigation findings into this structured format. Output discip
 
 - `title`: `"<Service> — <failure type>"`, stable and generic. No IPs, cycle counts, durations, or error subtypes.
 - `summary`:
-  - 2–3 sentences — observable narrative only: change type, alert counts, onset timing, recurrence if relevant.
-  - Tech KI stack context may trail the affected-service sentence — only when `execute_esql` returned ≥1 row for that stream.
-  - Never: mechanism, infra details, dependency chains, `p_value` or statistical notation.
-  - When multiple discoveries in the batch share a symptom class: use `alert_count` to differentiate severity.
-  - **Grounding**: every factual claim must come from one of these inputs — `alert_count` from the detection doc, onset from the first elevated `rules_activity` window, recurrence only if `## Continuation Candidates` has a matching slug. Never estimate or infer.
+  - 1–2 sentences — incident descriptor for the on-call notification and event list view. What's failing, how bad, who's affected.
+  - Lead with the failing service and symptom class (`alert_count`, `change_point_type`). Add onset time from the first elevated `rules_activity` window.
+  - When `dependency_edges` has at least one `exposure: "exposed"` entry: name the exposed path and its user-visible consequence (e.g., "checkout → payment path exposed, blocking charge completions").
+  - When `cause_kis` has at least one confirmed entry (from a query KI whose esql returned ≥1 row): name the KI entity (e.g., "payment service") as the affected component.
+  - Never: mechanism explanation, error codes, `p_value`, statistical notation, raw log content. Blast radius (exposed edges) is allowed; causal mechanism is not.
+  - **Grounding**: `alert_count` from detection doc, onset from first elevated `rules_activity` window, blast radius from `dependency_edges`. Never estimate or infer.
 - `root_cause`:
   - A **probable-cause hypothesis**, not a confirmed diagnosis (true root cause is established only once remediation proves the fix). Use the 5 Whys strategy (Step 2) to reason from symptom to cause, then state the deepest evidence-supported cause as a natural, technical explanation an SRE can use as a starting point — name the component, error type, field path, count, and onset timing.
-  - **A weak hypothesis stated as uncertain is correct. A confident-sounding fabricated mechanism is a critical error.** When evidence is thin, write: "Most likely: [mechanism] — not yet confirmed by queries." Do not invent specificity you don't have.
+  - **A weak hypothesis stated as uncertain is correct. A confident-sounding fabricated mechanism is a critical error.** When evidence is thin, state the hypothesis directly and note the evidence gap inline — e.g., "The checkout → payment charge path is failing with gRPC Unavailable errors (0 confirmation rows — query returned empty)." Do not invent specificity you don't have. Never prefix with epistemic qualifiers like "Most likely:" or "Probably:" — uncertainty is expressed through `confidence`, not prose.
   - Sources 1–3 require `execute_esql` ≥1 row; otherwise use only 4–5:
     1. `execute_esql` results — cite KI name + row count (e.g., `"svc: 412 errors/30m"`)
     2. Entity KI `description`/`meta` — grounds mechanism; valid only when stream confirmed
@@ -285,13 +289,18 @@ Translate your investigation findings into this structured format. Output discip
 - `infra_components`: always emit — `[]` when empty. Each entry: `title` (omit if absent), `workloads`, `exposure`.
 - `cause_kis`: always emit. Each entry: `name` (from `feature.id`), `stream_name` (from `feature.stream_name`). No `confirmed` field.
 - `evidences`: always emit — `[]` only when no tool calls were made. One entry per call. Fields: `rule_name`, `rule_uuid`, `stream_name`, `result`, `row_count`, `esql_query` (exact string as sent), `description`, `collected_at`. No payload values in `description`.
-- `criticality`:
-  - `p_value ≤ 0.01` + `dip` → 76+. `p_value ≤ 0.01` + non-`stationary` → 51–75, bump to 76+ only if evidence confirms active failures. `p_value 0.01–0.05` → 31–50. `p_value > 0.1` → below 30.
-  - **No-evidence cap**: 0-row results or no evidence calls → cap at 50.
-- `confidence`:
-  - `p_value ≤ 0.01` → 80–100. `0.01–0.05` → 60–79. `0.05–0.1` → 40–59. `> 0.1` → below 40.
-  - Adjust upward when evidence confirms failures; downward when queries return empty or KI backing is absent.
-  - **No-evidence cap**: 0-row results or no evidence calls → cap at 60.
+- `criticality`: Criticality = user experience impact, not signal anomaly. `p_value` gate first: `> 0.1` → cap at 30. For credible signals (`≤ 0.05`), apply:
+  - **User task completion**: confirmed errors on a stream users depend on to complete a task → ≥51. Failure across ≥2 detection windows with no sign of recovery → ≥76. `dip` = service silent → user-blocking.
+  - **Blast radius**: each `dependency_edges` entry with `exposure: "exposed"` raises the tier. ≥2 exposed downstream services → ≥76.
+  - **Trend**: `change_point_occurrence: "recurring"` or failures spreading → escalate one tier.
+  - Tiers: 76–100 (SEV-1/2: core journey broken), 51–75 (SEV-2/3: feature degraded), 31–50 (SEV-3/4: partial), 0–30 (SEV-4/5: noise).
+  - **No-evidence cap**: 0-row results or no evidence calls → cap at 50. **When uncertain, choose the higher tier.**
+- `confidence`: How correct is your root-cause hypothesis — not how strong the anomaly is. `p_value` measures signal credibility; confidence measures hypothesis correctness.
+  - **Base from p_value**: `≤ 0.01` → 55–65; `0.01–0.05` → 40–55; `0.05–0.1` → 25–40; `> 0.1` → below 25.
+  - **Corroboration bonuses** (additive, max +10 each): ≥2 evidences with `row_count > 0` confirming the failure pattern; KI backing present and causal chain aligns; failures span ≥2 detection windows with no recovery sign.
+  - **Downward adjusters**: empty queries outnumber confirmed (−10); no KI match found (−10); single evidence only (−5).
+  - **Hard caps**: all queries returned 0 rows → cap at 40; no evidence calls made → cap at 40; no KI match for any cause → cap at 65.
+  - **Ceiling**: 90+ requires all three: `p_value ≤ 0.01`, ≥2 confirmed evidences, KI backing present. Do not exceed 85 when any evidence is empty or any query was skipped.
 
 </output_properties>
 

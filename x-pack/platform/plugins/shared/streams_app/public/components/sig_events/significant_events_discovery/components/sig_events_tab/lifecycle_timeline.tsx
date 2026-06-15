@@ -101,8 +101,7 @@ const buildEventDescription = ({
       criticality: event.criticality != null ? String(event.criticality) : '-',
     },
   });
-  const detail =
-    [event.analysis_summary, event.assessment_note].filter(Boolean).join(' — ') || undefined;
+  const detail = event.assessment_note || undefined;
   return { description, detail };
 };
 
@@ -114,12 +113,14 @@ function buildTimelineEntries(data: EventLifecycleResponse): TimelineEntry[] {
     description: [detection.stream_name, detection.change_point_type].filter(Boolean).join(' · '),
   }));
 
-  const discoveries: TimelineEntry[] = data.discoveries.map((discovery) => ({
-    type: (discovery.kind === 'clearance' ? 'clearance' : 'discovery') as EntityType,
-    timestamp: discovery['@timestamp'],
-    title: discovery.title,
-    description: buildDiscoveryDescription(discovery),
-  }));
+  const discoveries: TimelineEntry[] = data.discoveries
+    .filter((d) => d.kind !== 'handled')
+    .map((discovery) => ({
+      type: (discovery.kind === 'clearance' ? 'clearance' : 'discovery') as EntityType,
+      timestamp: discovery['@timestamp'],
+      title: discovery.title,
+      description: buildDiscoveryDescription(discovery),
+    }));
 
   const sortedEvents = [...data.events].sort(
     (a, b) => (Date.parse(a['@timestamp']) || 0) - (Date.parse(b['@timestamp']) || 0)

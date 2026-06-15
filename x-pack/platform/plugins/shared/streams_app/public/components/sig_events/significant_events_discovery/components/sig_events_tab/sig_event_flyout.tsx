@@ -80,13 +80,6 @@ export const SigEventFlyout = ({ event, onClose }: SigEventFlyoutProps) => {
             <EuiFlexItem grow={false}>
               <EuiBadge color={getStatusColor(event.status)}>{event.status}</EuiBadge>
             </EuiFlexItem>
-            {event.recommended_action && (
-              <EuiFlexItem grow={false}>
-                <EuiBadge color={event.recommended_action === 'escalate' ? 'danger' : 'hollow'}>
-                  {event.recommended_action}
-                </EuiBadge>
-              </EuiFlexItem>
-            )}
           </EuiFlexGroup>
           <EuiTitle size="m">
             <h2 id={flyoutTitleId}>{event.title}</h2>

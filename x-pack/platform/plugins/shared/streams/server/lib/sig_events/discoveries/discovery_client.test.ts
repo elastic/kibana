@@ -13,7 +13,7 @@ type StoredRow = Partial<Discovery> & { '@timestamp': string };
 
 const createFinding = (overrides: StoredRow): Discovery =>
   ({
-    kind: 'finding',
+    kind: 'discovery',
     discovery_id: overrides.discovery_id ?? 'discovery-1',
     discovery_slug: overrides.discovery_slug ?? 'svc__rule',
     rule_names: [],
@@ -23,7 +23,6 @@ const createFinding = (overrides: StoredRow): Discovery =>
     root_cause: 'Test root cause',
     criticality: 50,
     confidence: 0.8,
-    impact: 'medium',
     detections: [],
     ...overrides,
   } as Discovery);
@@ -94,7 +93,7 @@ describe('DiscoveryClient', () => {
 
       expect(result.hits).toHaveLength(1);
       expect(result.hits[0].discovery_slug).toBe('svc__rule');
-      expect(result.hits[0].kind).toBe('finding');
+      expect(result.hits[0].kind).toBe('discovery');
     });
 
     it('groups by discovery_slug, not discovery_id', async () => {
@@ -153,7 +152,7 @@ describe('DiscoveryClient', () => {
       const result = await client.findLatestPaginated();
 
       expect(result.hits).toHaveLength(1);
-      expect(result.hits[0].kind).toBe('finding');
+      expect(result.hits[0].kind).toBe('discovery');
     });
   });
 
