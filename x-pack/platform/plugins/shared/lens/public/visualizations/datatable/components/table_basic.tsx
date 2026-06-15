@@ -25,7 +25,7 @@ import type {
   EuiDataGridSorting,
   EuiDataGridStyle,
 } from '@elastic/eui';
-import { EuiButtonIcon, EuiDataGrid, useEuiTheme, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiDataGrid, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import type { CustomPaletteState } from '@kbn/charts-plugin/public';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import type { ClickTriggerEvent } from '@kbn/charts-plugin/public';
@@ -55,6 +55,7 @@ import type { LensGridDirection } from '../../../../common/expressions';
 import { findMinMaxByColumnId, shouldColorByTerms } from '../../../shared_components';
 import type { DataContextType, DatatableRenderProps } from './types';
 import { createGridColumns } from './columns';
+import { createRenderDatatableCellPopover } from './datatable_cell_popover';
 import { createGridCell } from './cell_value';
 import {
   buildSchemaDetectors,
@@ -519,6 +520,11 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     syncColors,
   ]);
 
+  const renderCellPopover = useMemo(
+    () => createRenderDatatableCellPopover(sortedTable, props.columnFilterable),
+    [sortedTable, props.columnFilterable]
+  );
+
   const columnVisibility = useMemo(
     () => ({
       visibleColumns,
@@ -660,6 +666,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
           trailingControlColumns={trailingControlColumns}
           rowCount={sortedTable.rows.length}
           renderCellValue={renderCellValue}
+          renderCellPopover={renderCellPopover}
           gridStyle={gridStyle}
           schemaDetectors={schemaDetectors}
           sorting={sorting}

@@ -6,7 +6,7 @@
  */
 
 import type { ProfilingSetupOptions } from '@kbn/profiling-data-access-plugin/common/setup';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { RouteRegisterParameters } from '..';
 import { getRoutePaths } from '../../../common';
 import { getHasSetupPrivileges } from '../../lib/setup/get_has_setup_privileges';

@@ -8,7 +8,9 @@
  */
 
 import type { ReactElement, ReactNode, MouseEventHandler } from 'react';
+import type { Observable } from 'rxjs';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import type { GlobalHeaderAiButton } from './ai_button';
 import type { GlobalSearchConfig } from './global_search';
 
 /** @public */
@@ -64,13 +66,96 @@ export interface AppHeaderTab {
 }
 
 /** @public */
+export type AppHeaderMetadataItem =
+  | AppHeaderMetadataTextItem
+  | AppHeaderMetadataButtonItem
+  | AppHeaderMetadataHealthItem;
+
+/** @public */
+export type AppHeaderMetadataItems = readonly [
+  AppHeaderMetadataItem,
+  AppHeaderMetadataItem?,
+  AppHeaderMetadataItem?
+];
+
+/** @public */
+export interface AppHeaderMetadataTextItem {
+  type: 'text';
+  label: string;
+  'data-test-subj'?: string;
+}
+
+/** @public */
+export type AppHeaderMetadataButtonItem =
+  | AppHeaderMetadataButtonAction
+  | AppHeaderMetadataButtonLink;
+
+/** @public */
+export interface AppHeaderMetadataButtonBase {
+  type: 'button';
+  label: string;
+  iconType?: string;
+  'data-test-subj'?: string;
+}
+
+/** @public */
+export interface AppHeaderMetadataButtonAction extends AppHeaderMetadataButtonBase {
+  onClick: () => void;
+  href?: never;
+}
+
+/** @public */
+export interface AppHeaderMetadataButtonLink extends AppHeaderMetadataButtonBase {
+  href: string;
+  onClick?: never;
+}
+
+/** @public */
+export interface AppHeaderMetadataHealthItem {
+  type: 'health';
+  label: string;
+  color: string;
+  'data-test-subj'?: string;
+}
+
+/** @public */
+export type AppHeaderTitleSaveResult = string | void;
+
+/** @public */
+export interface AppHeaderEditableTitle {
+  /** Current title text rendered in the header. */
+  text: string;
+  /**
+   * Commits a rename. Receives the trimmed new title. Return nothing on success; return an
+   * error string to reject the value -- it is shown inline and the editor stays open.
+   * Thrown or rejected errors are caught and surfaced as a generic error.
+   */
+  onSave: (nextTitle: string) => AppHeaderTitleSaveResult | Promise<AppHeaderTitleSaveResult>;
+  /**
+   * Accessible label for the edit input, naming what is being renamed (the title is the
+   * dashboard/case/etc. name, not a generic "page title"). Prefer a context-specific label
+   * such as "Edit dashboard name". Falls back to a generic label when omitted.
+   */
+  ariaLabel?: string;
+  /**
+   * Hint shown when the title is empty: muted text in read mode and the input placeholder
+   * in edit mode. Name the entity being created, e.g. "Untitled dashboard".
+   */
+  placeholder?: string;
+}
+
+/** @public */
+export type AppHeaderTitle = string | AppHeaderEditableTitle;
+
+/** @public */
 export interface AppHeaderConfig {
-  title?: string;
+  title?: AppHeaderTitle;
   back?: AppHeaderBack;
   tabs?: AppHeaderTab[];
   badges?: AppHeaderBadge[];
   menu?: AppMenuConfig;
   favorite?: ReactNode;
+  metadata?: AppHeaderMetadataItems;
 }
 
 /**
@@ -85,6 +170,25 @@ export interface AppHeaderConfig {
 export interface ChromeNext {
   /** Whether the Chrome Next feature flag is enabled. */
   readonly isEnabled: boolean;
+  aiButton: {
+    /**
+     * Register an AI button rendered in a fixed slot in the Chrome-Next global header.
+     * Returns an unregister callback. Global — persists across app changes.
+     *
+     * @remarks
+     * Stop-gap for the Chrome-Next transition. The end goal is a single, chrome-owned
+     * AI button with one registration point. We are not there yet: the legacy header
+     * lets every solution register its own button and self-manage visibility, so apps
+     * can have more than one in flight at a time. To migrate those apps without
+     * regressing behavior, `register` mirrors that model — it accepts multiple
+     * registrations and renders each registered button as-is (each owner remains
+     * responsible for its own visibility). Once the single-button model lands, this
+     * should collapse to one registration and the multi-button handling can be removed.
+     *
+     * Tech debt: https://github.com/elastic/kibana/issues/272279
+     */
+    register(button: GlobalHeaderAiButton): () => void;
+  };
   /** Global search configuration. */
   globalSearch: {
     /**
@@ -93,6 +197,14 @@ export interface ChromeNext {
      * Pass `undefined` to remove. Global — persists across app changes.
      */
     set(config?: GlobalSearchConfig): void;
+  };
+  /** Context switcher content. */
+  contextSwitcher: {
+    /**
+     * Set the context switcher content for the Chrome-Next header.
+     * Pass `undefined` to remove. Global — persists across app changes.
+     */
+    set(content?: ReactNode): void;
   };
   appHeader: {
     /**
@@ -104,4 +216,20 @@ export interface ChromeNext {
      */
     set(config: AppHeaderConfig): () => void;
   };
+  /**
+   * Register a handler that opens the feedback UI in the Chrome Next help menu.
+   *
+   * @returns A function to unregister the handler.
+   */
+  registerFeedbackHandler(handler: () => void): () => void;
+  /** Get the currently registered Chrome Next feedback handler. */
+  getFeedbackHandler$(): Observable<(() => void) | undefined>;
+  /**
+   * Register a handler that opens the newsfeed UI in the Chrome Next help menu.
+   *
+   * @returns A function to unregister the handler.
+   */
+  registerNewsfeedHandler(handler: { open: () => void; hasNew$: Observable<boolean> }): () => void;
+  /** Get the currently registered Chrome Next newsfeed handler. */
+  getNewsfeedHandler$(): Observable<{ open: () => void; hasNew$: Observable<boolean> } | undefined>;
 }

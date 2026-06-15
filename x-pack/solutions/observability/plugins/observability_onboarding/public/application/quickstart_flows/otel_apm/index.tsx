@@ -23,6 +23,7 @@ import {
   EuiSpacer,
   EuiSteps,
   EuiText,
+  EuiToolTip,
   copyToClipboard,
   useEuiTheme,
 } from '@elastic/eui';
@@ -46,11 +47,11 @@ const FETCH_INTERVAL = 2000;
 const SHOW_TROUBLESHOOTING_DELAY = 120_000;
 
 export function OtelApmQuickstartFlow() {
-  useFlowBreadcrumb({
-    text: i18n.translate('xpack.observability_onboarding.otelApm.breadcrumbs.k8sOtel', {
+  useFlowBreadcrumb(
+    i18n.translate('xpack.observability_onboarding.otelApm.breadcrumbs.k8sOtel', {
       defaultMessage: 'Application: OpenTelemetry',
-    }),
-  });
+    })
+  );
   const {
     services: { share },
   } = useKibana<ObservabilityOnboardingAppServices>();
@@ -346,15 +347,22 @@ function ConfigureSDKInstructions({
             {value}
           </EuiText>
           {value && (
-            <EuiButtonIcon
-              data-test-subj="apmConfigurationValueColumnButton"
-              aria-label={i18n.translate('xpack.observability_onboarding.otelApm.copyIconText', {
+            <EuiToolTip
+              content={i18n.translate('xpack.observability_onboarding.otelApm.copyIconText', {
                 defaultMessage: 'Copy to clipboard',
               })}
-              color="text"
-              iconType="copy"
-              onClick={() => copyToClipboard(value)}
-            />
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                data-test-subj="apmConfigurationValueColumnButton"
+                aria-label={i18n.translate('xpack.observability_onboarding.otelApm.copyIconText', {
+                  defaultMessage: 'Copy to clipboard',
+                })}
+                color="text"
+                iconType="copy"
+                onClick={() => copyToClipboard(value)}
+              />
+            </EuiToolTip>
           )}
         </>
       ),
