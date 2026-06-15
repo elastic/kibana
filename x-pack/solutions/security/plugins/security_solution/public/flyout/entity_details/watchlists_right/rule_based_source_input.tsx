@@ -22,10 +22,11 @@ import { useDebounceFn } from '@kbn/react-hooks';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Filter, Query } from '@kbn/es-query';
 import type { FilterManager, SavedQuery } from '@kbn/data-plugin/public';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import type { CreateWatchlistRequestBodyInput } from '../../../../common/api/entity_analytics/watchlists/management/create.gen';
 import { QueryBar } from '../../../common/components/query_bar';
 import { useFetchWatchlistIndices } from './hooks/use_fetch_watchlist_indices';
-import { useRuleBasedSourceState, ENTITY_FIELD_OPTIONS } from './hooks/use_rule_based_source_state';
+import { ENTITY_FIELD_OPTIONS, useRuleBasedSourceState } from './hooks/use_rule_based_source_state';
 import { useDataViewSetup } from './hooks/use_data_view_setup';
 import {
   WATCHLIST_ENTITY_FIELD_ARIA_LABEL,
@@ -36,6 +37,7 @@ import {
   WATCHLIST_INDEX_PATTERN_PLACEHOLDER,
   WATCHLIST_LOOKBACK_PERIOD_LABEL,
 } from './translations';
+import { PageScope } from '../../../data_view_manager/constants';
 
 const DEBOUNCE_OPTIONS = { wait: 300 };
 
@@ -113,7 +115,8 @@ export const RuleBasedSourceInput: React.FC<RuleBasedSourceInputProps> = ({
   initialEntitySources,
   onSourceValidationChange,
 }) => {
-  const { dataView, filters, filterManager } = useDataViewSetup();
+  const { dataView, status } = useDataView(PageScope.default);
+  const { filters, filterManager } = useDataViewSetup();
 
   const {
     filterQuery,
@@ -198,6 +201,7 @@ export const RuleBasedSourceInput: React.FC<RuleBasedSourceInputProps> = ({
         >
           <EuiComboBox
             isLoading={isLoadingIndices && !indicesError}
+            isInvalid={validation.errors.indexPattern}
             fullWidth
             aria-label={WATCHLIST_INDEX_PATTERN_PLACEHOLDER}
             placeholder={WATCHLIST_INDEX_PATTERN_PLACEHOLDER}
@@ -219,7 +223,7 @@ export const RuleBasedSourceInput: React.FC<RuleBasedSourceInputProps> = ({
 
       {!isNone && (
         <FilterQueryRow
-          dataView={dataView}
+          dataView={status === 'ready' ? dataView : undefined}
           filterQuery={filterQuery}
           filterManager={filterManager}
           filters={filters}

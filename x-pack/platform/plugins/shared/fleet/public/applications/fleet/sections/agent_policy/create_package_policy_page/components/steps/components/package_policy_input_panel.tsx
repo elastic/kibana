@@ -49,6 +49,7 @@ import {
   DATA_STREAM_TYPE_VAR_NAME,
   USE_APM_VAR_NAME,
 } from '../../../../../../../../../common/constants';
+import { OTEL_COLLECTOR_INPUT_TYPE } from '../../../../../../../../../common/constants/epm';
 
 import type { StreamAdvancedVarsConfig } from './package_policy_input_config';
 import { PackagePolicyInputConfig } from './package_policy_input_config';
@@ -167,6 +168,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
   isSingleInputAndStreams?: boolean;
   isEditPage?: boolean;
   isUpgrade?: boolean;
+  isAgentless?: boolean;
   varGroupSelections?: Record<string, string>;
 }> = memo(
   ({
@@ -180,11 +182,17 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
     isSingleInputAndStreams = false,
     isEditPage = false,
     isUpgrade = false,
+    isAgentless = false,
     varGroupSelections = {},
   }) => {
     const theme = useEuiTheme();
     const defaultDataStreamId = useDataStreamId();
     const { isAgentlessEnabled } = useAgentless();
+
+    const conditionFieldAllowed =
+      !isAgentless && packagePolicyInput.type !== OTEL_COLLECTOR_INPUT_TYPE;
+
+    const showConditionField = packagePolicyInput.enabled && conditionFieldAllowed;
 
     const inputVarGroups = packageInput.var_groups?.length ? packageInput.var_groups : undefined;
 
@@ -333,6 +341,11 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
       updatePackagePolicyInput,
       inputValidationResults,
     ]);
+
+    // Render the input config section only when there is actual content to show:
+    // input-level vars, the condition field, or consolidated stream advanced vars.
+    const showInputConfig =
+      Boolean(packageInput.vars?.length) || showConditionField || shouldConsolidateAdvancedSections;
 
     const topLevelDescription = showTopLevelDescription && (
       <EuiText size="s" color="subdued">
@@ -530,14 +543,10 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
         </EuiFlexGroup>
 
         {/* Spacing if we are showing rest of content */}
-        {isShowingStreams &&
-        hasInputStreams &&
-        ((packageInput.vars && packageInput.vars.length) || !shouldConsolidateAdvancedSections) ? (
-          <EuiSpacer size="m" />
-        ) : null}
+        {isShowingStreams && hasInputStreams && showInputConfig ? <EuiSpacer size="m" /> : null}
 
         {/* Input level policy */}
-        {isShowingStreams && packageInput.vars && packageInput.vars.length ? (
+        {isShowingStreams && showInputConfig ? (
           <>
             <PackagePolicyInputConfig
               data-test-subj="PackagePolicy.InputConfig"
@@ -548,6 +557,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
               inputValidationResults={inputValidationResults}
               forceShowErrors={forceShowErrors}
               isEditPage={isEditPage}
+              showConditionField={showConditionField}
               varGroups={inputVarGroups}
               varGroupSelections={inputVarGroupSelections}
               onVarGroupSelectionChange={handleInputVarGroupSelectionChange}
@@ -620,6 +630,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                     }
                     forceShowErrors={forceShowErrors}
                     isEditPage={isEditPage}
+                    showConditionField={packagePolicyInputStream!.enabled && conditionFieldAllowed}
                     varGroupSelections={varGroupSelections}
                   />
                   {index !== inputStreams.length - 1 ? (

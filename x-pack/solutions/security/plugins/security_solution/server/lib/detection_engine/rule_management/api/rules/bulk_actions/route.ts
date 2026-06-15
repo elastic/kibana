@@ -15,6 +15,7 @@ import type {
   GapReasonType,
 } from '@kbn/alerting-plugin/common';
 import { RULES_API_ALL, RULES_API_READ } from '@kbn/security-solution-features/constants';
+import { SecurityRuleChangeTrackingAction } from '../../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import { validateRuleResponseActions } from '../../../../../../endpoint/services';
 import type { PerformRulesBulkActionResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
@@ -25,7 +26,6 @@ import {
 import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   MAX_RULES_TO_UPDATE_IN_PARALLEL,
-  RULES_TABLE_MAX_PAGE_SIZE,
   EXCLUDED_GAP_REASONS_KEY,
 } from '../../../../../../../common/constants';
 import type { SetupPlugins } from '../../../../../../plugin';
@@ -54,8 +54,13 @@ import { checkAlertSuppressionBulkEditSupport } from '../../../logic/bulk_action
 import { bulkScheduleRuleGapFilling } from './bulk_schedule_rule_gap_filling';
 
 const MAX_RULES_TO_PROCESS_TOTAL = 10000;
-// Set a lower limit for bulk edit as the rules client might fail with a "Query
-// contains too many nested clauses" error
+// The alerting layer converts IDs into a KQL "OR" boolean query (one should-clause per ID).
+// ES maxClauseCount defaults to 1024, so all IDs-based paths are capped at 1000 to leave
+// headroom for the authorization filter clauses that are ANDed in.
+// The alerting-layer schemas for bulkDelete/bulkEnable/bulkDisable also enforce maxSize: 1000.
+const MAX_RULES_IDS_FOR_BULK_ACTION = 1000;
+// Edit has a lower cap than query-path limits because the bulk edit operation does
+// heavier per-rule work and the initial edit query is not chunked like the conflict retry is.
 const MAX_RULES_TO_BULK_EDIT = 2000;
 const MAX_ROUTE_CONCURRENCY = 5;
 
@@ -67,9 +72,9 @@ interface ValidationError {
 const validateBulkAction = (
   body: PerformRulesBulkActionRequestBody
 ): ValidationError | undefined => {
-  if (body?.ids && body.ids.length > RULES_TABLE_MAX_PAGE_SIZE) {
+  if (body?.ids && body.ids.length > MAX_RULES_IDS_FOR_BULK_ACTION) {
     return {
-      body: `More than ${RULES_TABLE_MAX_PAGE_SIZE} ids sent for bulk edit action.`,
+      body: `More than ${MAX_RULES_IDS_FOR_BULK_ACTION} ids sent for bulk action.`,
       statusCode: 400,
     };
   }
@@ -329,7 +334,18 @@ export const performBulkActionRoute = (
 
                   const createdRule = await rulesClient.create({
                     data: duplicateRuleToCreate,
+                    changeTracking: {
+                      action: SecurityRuleChangeTrackingAction.ruleDuplicate,
+                      metadata: {
+                        bulkCount: rules.length,
+                        originalRuleSoId: rule.id,
+                      },
+                    },
                   });
+
+                  if (!shouldDuplicateExceptions) {
+                    return createdRule;
+                  }
 
                   // we try to create exceptions after rule created, and then update rule
                   const exceptions = shouldDuplicateExceptions
@@ -348,6 +364,11 @@ export const performBulkActionRoute = (
                       params: {
                         ...duplicateRuleToCreate.params,
                         exceptionsList: exceptions,
+                      },
+                    },
+                    changeTracking: {
+                      metadata: {
+                        bulkCount: rules.length,
                       },
                     },
                     shouldIncrementRevision: () => false,

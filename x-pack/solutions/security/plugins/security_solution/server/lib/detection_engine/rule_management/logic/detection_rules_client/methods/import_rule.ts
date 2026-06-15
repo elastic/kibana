@@ -8,6 +8,8 @@
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 
+import type { SecurityRuleChangeTracking } from '../../../../../../../common/detection_engine/rule_management/rule_change_tracking';
+import { SecurityRuleChangeTrackingAction } from '../../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import type { RuleResponse } from '../../../../../../../common/api/detection_engine/model/rule_schema';
 import type { MlAuthz } from '../../../../../machine_learning/authz';
 import type { IPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
@@ -26,6 +28,7 @@ interface ImportRuleOptions {
   prebuiltRuleAssetClient: IPrebuiltRuleAssetsClient;
   importRulePayload: ImportRuleArgs;
   mlAuthz: MlAuthz;
+  changeTracking?: SecurityRuleChangeTracking;
 }
 
 export const importRule = async ({
@@ -34,6 +37,7 @@ export const importRule = async ({
   importRulePayload,
   prebuiltRuleAssetClient,
   mlAuthz,
+  changeTracking,
 }: ImportRuleOptions): Promise<RuleResponse> => {
   const { ruleToImport, overwriteRules, overrideFields, allowMissingConnectorSecrets } =
     importRulePayload;
@@ -67,6 +71,7 @@ export const importRule = async ({
     const updatedRule = await rulesClient.update({
       id: existingRule.id,
       data: convertRuleResponseToAlertingRule(ruleWithUpdates, actionsClient),
+      changeTracking: { action: SecurityRuleChangeTrackingAction.ruleImport, ...changeTracking },
     });
 
     // We strip `enabled` from the rule object to use in the rules client and need to enable it separately if user has enabled the updated rule
@@ -82,5 +87,6 @@ export const importRule = async ({
     mlAuthz,
     rule,
     allowMissingConnectorSecrets,
+    changeTracking: { ...changeTracking, action: SecurityRuleChangeTrackingAction.ruleImport },
   });
 };

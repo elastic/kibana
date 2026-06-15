@@ -7,7 +7,7 @@
 
 import type { Output, FullAgentPolicyInput, TemplateAgentPolicyInput } from '../../types';
 
-import { OTEL_COLLECTOR_INPUT_TYPE } from '../../../common/constants';
+import { OTEL_COLLECTOR_INPUT_TYPE, outputType } from '../../../common/constants';
 
 import { generateOtelcolConfig } from './otel_collector';
 
@@ -282,7 +282,7 @@ describe('generateOtelcolConfig', () => {
         },
       },
       connectors: {
-        forward: {},
+        'forward/default': {},
       },
       exporters: {
         'elasticsearch/default': {
@@ -294,10 +294,10 @@ describe('generateOtelcolConfig', () => {
           'metrics/test-1-stream-id-1': {
             receivers: ['httpcheck/test-1-stream-id-1'],
             processors: ['transform/test-1-stream-id-1', 'transform/test-1-stream-id-1-routing'],
-            exporters: ['forward'],
+            exporters: ['forward/default'],
           },
-          metrics: {
-            receivers: ['forward'],
+          'metrics/default': {
+            receivers: ['forward/default'],
             exporters: ['elasticsearch/default'],
           },
         },
@@ -337,7 +337,7 @@ describe('generateOtelcolConfig', () => {
         },
       },
       connectors: {
-        forward: {},
+        'forward/fleet-default-output': {},
       },
       exporters: {
         'elasticsearch/fleet-default-output': {
@@ -349,10 +349,10 @@ describe('generateOtelcolConfig', () => {
           'metrics/test-1-stream-id-1': {
             receivers: ['httpcheck/test-1-stream-id-1'],
             processors: ['transform/test-1-stream-id-1', 'transform/test-1-stream-id-1-routing'],
-            exporters: ['forward'],
+            exporters: ['forward/fleet-default-output'],
           },
-          metrics: {
-            receivers: ['forward'],
+          'metrics/fleet-default-output': {
+            receivers: ['forward/fleet-default-output'],
             exporters: ['elasticsearch/fleet-default-output'],
           },
         },
@@ -390,7 +390,7 @@ describe('generateOtelcolConfig', () => {
         },
       },
       connectors: {
-        forward: {},
+        'forward/default': {},
       },
       exporters: {
         'elasticsearch/default': {
@@ -402,10 +402,10 @@ describe('generateOtelcolConfig', () => {
           'metrics/test-1-stream-id-1': {
             receivers: ['httpcheck/test-1-stream-id-1'],
             processors: ['transform/test-1-stream-id-1', 'transform/test-1-stream-id-1-routing'],
-            exporters: ['forward'],
+            exporters: ['forward/default'],
           },
-          metrics: {
-            receivers: ['forward'],
+          'metrics/default': {
+            receivers: ['forward/default'],
             exporters: ['elasticsearch/default'],
           },
         },
@@ -505,7 +505,7 @@ describe('generateOtelcolConfig', () => {
         },
       },
       connectors: {
-        forward: {},
+        'forward/default': {},
       },
       exporters: {
         'elasticsearch/default': {
@@ -517,15 +517,15 @@ describe('generateOtelcolConfig', () => {
           'metrics/test-1-stream-id-1': {
             receivers: ['httpcheck/test-1-stream-id-1'],
             processors: ['transform/test-1-stream-id-1', 'transform/test-1-stream-id-1-routing'],
-            exporters: ['forward'],
+            exporters: ['forward/default'],
           },
           'metrics/test-2-stream-id-1': {
             receivers: ['httpcheck/test-2-stream-id-1'],
             processors: ['transform/test-2-stream-id-1', 'transform/test-2-stream-id-1-routing'],
-            exporters: ['forward'],
+            exporters: ['forward/default'],
           },
-          metrics: {
-            receivers: ['forward'],
+          'metrics/default': {
+            receivers: ['forward/default'],
             exporters: ['elasticsearch/default'],
           },
         },
@@ -573,7 +573,7 @@ describe('generateOtelcolConfig', () => {
         },
       },
       connectors: {
-        forward: {},
+        'forward/default': {},
       },
       exporters: {
         'elasticsearch/default': {
@@ -589,15 +589,171 @@ describe('generateOtelcolConfig', () => {
               'transform/2/test-3-stream-id-1',
               'transform/test-3-stream-id-1-routing',
             ],
-            exporters: ['forward'],
+            exporters: ['forward/default'],
           },
-          metrics: {
-            receivers: ['forward'],
+          'metrics/default': {
+            receivers: ['forward/default'],
             exporters: ['elasticsearch/default'],
           },
         },
       },
     });
+  });
+
+  it('should suffix service.extensions and auth.authenticator references to match suffixed extension keys (bearertokenauth regression)', () => {
+    const inputId = 'otlp-input-1';
+    const streamId = 'stream-id-1';
+    const expectedSuffix = `${inputId}-${streamId}`;
+
+    const otelInputWithExtension: FullAgentPolicyInput = {
+      type: OTEL_COLLECTOR_INPUT_TYPE,
+      id: inputId,
+      name: inputId,
+      revision: 0,
+      data_stream: { namespace: 'default' },
+      use_output: 'default',
+      package_policy_id: 'mypolicy',
+      streams: [
+        {
+          id: streamId,
+          data_stream: { dataset: 'generic.otel', type: 'logs' },
+          extensions: {
+            bearertokenauth: { token: 'secret' },
+          },
+          receivers: {
+            otlp: {
+              protocols: {
+                grpc: {
+                  endpoint: '0.0.0.0:4317',
+                  auth: { authenticator: 'bearertokenauth' },
+                },
+                http: {
+                  endpoint: '0.0.0.0:4318',
+                  auth: { authenticator: 'bearertokenauth' },
+                },
+              },
+            },
+          },
+          service: {
+            extensions: ['bearertokenauth'],
+            pipelines: {
+              logs: { receivers: ['otlp'] },
+            },
+          },
+        },
+      ],
+    };
+
+    const result = generateOtelcolConfig({
+      inputs: [otelInputWithExtension],
+      dataOutput: defaultOutput,
+    });
+
+    // The extension key must be suffixed
+    expect(result.extensions?.[`bearertokenauth/${expectedSuffix}`]).toEqual({ token: 'secret' });
+    expect(result.extensions?.bearertokenauth).toBeUndefined();
+
+    // The service.extensions reference must also be suffixed to match
+    expect(result.service?.extensions).toContain(`bearertokenauth/${expectedSuffix}`);
+    expect(result.service?.extensions).not.toContain('bearertokenauth');
+
+    // auth.authenticator references inside receiver bodies must be suffixed
+    const suffixedReceiver = result.receivers?.[`otlp/${expectedSuffix}`];
+    expect(suffixedReceiver?.protocols?.grpc?.auth?.authenticator).toBe(
+      `bearertokenauth/${expectedSuffix}`
+    );
+    expect(suffixedReceiver?.protocols?.http?.auth?.authenticator).toBe(
+      `bearertokenauth/${expectedSuffix}`
+    );
+
+    // Pipeline component references must still be suffixed
+    expect(result.service?.pipelines?.[`logs/${expectedSuffix}`]?.receivers).toContain(
+      `otlp/${expectedSuffix}`
+    );
+  });
+
+  it('should leave auth.authenticator untouched when it does not reference a stream-declared extension', () => {
+    const inputId = 'otlp-input-2';
+    const streamId = 'stream-id-1';
+    const expectedSuffix = `${inputId}-${streamId}`;
+
+    // The receiver references an externally-managed authenticator (e.g. injected by output path)
+    // that was NOT declared in stream.extensions — it must not be rewritten.
+    const otelInputExternalAuth: FullAgentPolicyInput = {
+      type: OTEL_COLLECTOR_INPUT_TYPE,
+      id: inputId,
+      name: inputId,
+      revision: 0,
+      data_stream: { namespace: 'default' },
+      use_output: 'default',
+      package_policy_id: 'mypolicy2',
+      streams: [
+        {
+          id: streamId,
+          data_stream: { dataset: 'generic.otel', type: 'logs' },
+          receivers: {
+            otlp: {
+              protocols: {
+                grpc: {
+                  auth: { authenticator: 'beatsauth/default' },
+                },
+              },
+            },
+          },
+          service: {
+            pipelines: {
+              logs: { receivers: ['otlp'] },
+            },
+          },
+        },
+      ],
+    };
+
+    const result = generateOtelcolConfig({
+      inputs: [otelInputExternalAuth],
+      dataOutput: defaultOutput,
+    });
+
+    const suffixedReceiver = result.receivers?.[`otlp/${expectedSuffix}`];
+    expect(suffixedReceiver?.protocols?.grpc?.auth?.authenticator).toBe('beatsauth/default');
+  });
+
+  it('should suffix only locally-declared extensions in service.extensions, leaving external references untouched', () => {
+    const inputId = 'otlp-input-1';
+    const streamId = 'stream-id-1';
+    const expectedSuffix = `${inputId}-${streamId}`;
+
+    const input: FullAgentPolicyInput = {
+      type: OTEL_COLLECTOR_INPUT_TYPE,
+      id: inputId,
+      name: inputId,
+      revision: 0,
+      data_stream: { namespace: 'default' },
+      use_output: 'default',
+      package_policy_id: 'mypolicy',
+      streams: [
+        {
+          id: streamId,
+          data_stream: { dataset: 'generic.otel', type: 'logs' },
+          extensions: {
+            bearertokenauth: { token: 'secret' },
+          },
+          service: {
+            extensions: ['bearertokenauth', 'beatsauth/default'],
+            pipelines: {
+              logs: { receivers: ['otlp'] },
+            },
+          },
+        },
+      ],
+    };
+
+    const result = generateOtelcolConfig({ inputs: [input], dataOutput: defaultOutput });
+
+    expect(result.service?.extensions).toContain(`bearertokenauth/${expectedSuffix}`);
+    expect(result.service?.extensions).not.toContain('bearertokenauth');
+    expect(result.service?.extensions).toContain('beatsauth/default');
+    expect(result.service?.extensions).not.toContain(`beatsauth/default/${expectedSuffix}`);
   });
 
   it('should add elasticapm connector and processor for traces input with use_apm enabled', () => {
@@ -641,7 +797,7 @@ describe('generateOtelcolConfig', () => {
       },
       connectors: {
         'elasticapm/apmtest': {},
-        forward: {},
+        'forward/default': {},
       },
       exporters: {
         'elasticsearch/default': {
@@ -652,20 +808,20 @@ describe('generateOtelcolConfig', () => {
         pipelines: {
           'traces/test-traces-stream-id-1': {
             receivers: ['zipkin/test-traces-stream-id-1'],
-            exporters: ['elasticapm/apmtest', 'forward'],
+            exporters: ['elasticapm/apmtest', 'forward/default'],
             processors: ['elasticapm/apmtest', 'transform/test-traces-stream-id-1-routing'],
           },
           'metrics/apmtest-aggregated-apm-metrics': {
             receivers: ['elasticapm/apmtest'],
             processors: ['transform/apmtest-apm-namespace-routing'],
-            exporters: ['forward'],
+            exporters: ['forward/default'],
           },
-          traces: {
-            receivers: ['forward'],
+          'traces/default': {
+            receivers: ['forward/default'],
             exporters: ['elasticsearch/default'],
           },
-          metrics: {
-            receivers: ['forward'],
+          'metrics/default': {
+            receivers: ['forward/default'],
             exporters: ['elasticsearch/default'],
           },
         },
@@ -750,12 +906,12 @@ describe('generateOtelcolConfig', () => {
     expect(result.service?.pipelines?.['metrics/ns-a-aggregated-apm-metrics']).toEqual({
       receivers: ['elasticapm/ns-a'],
       processors: ['transform/ns-a-apm-namespace-routing'],
-      exporters: ['forward'],
+      exporters: ['forward/default'],
     });
     expect(result.service?.pipelines?.['metrics/ns-b-aggregated-apm-metrics']).toEqual({
       receivers: ['elasticapm/ns-b'],
       processors: ['transform/ns-b-apm-namespace-routing'],
-      exporters: ['forward'],
+      exporters: ['forward/default'],
     });
     expect(
       result.service?.pipelines?.['metrics/policy-a-stream-id-1-aggregated-apm-metrics']
@@ -830,7 +986,7 @@ describe('generateOtelcolConfig', () => {
     expect(result.service?.pipelines?.['metrics/ns-shared-aggregated-apm-metrics']).toEqual({
       receivers: ['elasticapm/ns-shared'],
       processors: ['transform/ns-shared-apm-namespace-routing'],
-      exporters: ['forward'],
+      exporters: ['forward/default'],
     });
 
     expect(result.service?.pipelines?.['traces/policy-a-stream-id-1']?.exporters).toContain(
@@ -984,7 +1140,7 @@ describe('generateOtelcolConfig', () => {
       expect(result.service?.pipelines?.['metrics/default-aggregated-apm-metrics']).toEqual({
         receivers: ['elasticapm/default'],
         processors: ['transform/default-apm-namespace-routing'],
-        exporters: ['forward'],
+        exporters: ['forward/default'],
       });
       const tracesPipelineKey = 'traces/otlp/test-multi-signal-stream-id-1';
       const tracesPipeline = result.service?.pipelines?.[tracesPipelineKey];
@@ -1314,7 +1470,7 @@ describe('generateOtelcolConfig', () => {
 
       expect(result.receivers).toHaveProperty('otlp/integration-otel-stream-id-1');
       expect(result.exporters).toHaveProperty('elasticsearch/default');
-      expect(result.service?.pipelines).toHaveProperty('metrics');
+      expect(result.service?.pipelines).toHaveProperty('metrics/default');
     });
 
     it('uses defaultPackageInfo for dynamic signal types when packageInfoCache has no meta match', () => {
@@ -2239,6 +2395,108 @@ describe('generateOtelcolConfig', () => {
     });
   });
 
+  describe('remote_elasticsearch output', () => {
+    const inputs: FullAgentPolicyInput[] = [otelInput1];
+    const remoteOutput: Output = {
+      ...defaultOutput,
+      id: 'remote-output',
+      name: 'remote-output',
+      is_default: false,
+      type: outputType.RemoteElasticsearch,
+      hosts: ['https://remote-es.example.com:9200'],
+    };
+
+    it('should generate an elasticsearch exporter keyed by the remote output id', () => {
+      const result = generateOtelcolConfig({ inputs, dataOutput: remoteOutput });
+
+      expect(result.exporters).toHaveProperty('elasticsearch/remote-output');
+      expect(result.exporters).not.toHaveProperty('elasticsearch/default');
+      expect(result.exporters?.['elasticsearch/remote-output']).toMatchObject({
+        endpoints: ['https://remote-es.example.com:9200'],
+      });
+    });
+
+    it('should include beatsauth extension with ssl fields when remote output has ssl config', () => {
+      const remoteOutputWithSSL: Output = {
+        ...remoteOutput,
+        ca_trusted_fingerprint: 'remote-fingerprint',
+        ssl: {
+          certificate_authorities: ['-----BEGIN CERTIFICATE-----\nREMOTE...'],
+          verification_mode: 'full',
+        },
+      };
+
+      const result = generateOtelcolConfig({ inputs, dataOutput: remoteOutputWithSSL });
+
+      expect(result.extensions?.['beatsauth/remote-output']).toEqual({
+        ssl: {
+          ca_trusted_fingerprint: 'remote-fingerprint',
+          certificate_authorities: ['-----BEGIN CERTIFICATE-----\nREMOTE...'],
+          verification_mode: 'full',
+        },
+      });
+      expect(result.exporters?.['elasticsearch/remote-output']).toMatchObject({
+        auth: { authenticator: 'beatsauth/remote-output' },
+      });
+      expect(result.service?.extensions).toContain('beatsauth/remote-output');
+    });
+
+    it('should omit beatsauth when remote output has no ssl or proxy', () => {
+      const result = generateOtelcolConfig({ inputs, dataOutput: remoteOutput });
+
+      expect(result.extensions?.['beatsauth/remote-output']).toBeUndefined();
+      expect(result.exporters?.['elasticsearch/remote-output']).not.toHaveProperty('auth');
+      expect(result.service?.extensions ?? []).not.toContain('beatsauth/remote-output');
+    });
+
+    it('should include proxy fields in beatsauth for remote output', () => {
+      const proxy = {
+        id: 'proxy-1',
+        name: 'my-proxy',
+        url: 'http://proxy.example.com:3128',
+        is_preconfigured: false,
+      };
+
+      const result = generateOtelcolConfig({ inputs, dataOutput: remoteOutput, proxy });
+
+      expect(result.extensions?.['beatsauth/remote-output']).toEqual({
+        proxy_url: 'http://proxy.example.com:3128',
+      });
+      expect(result.service?.extensions).toContain('beatsauth/remote-output');
+    });
+
+    it('should omit beatsauth and include only endpoints when otel_disable_beatsauth is true on remote output', () => {
+      const remoteOutputDisabled: Output = {
+        ...remoteOutput,
+        otel_disable_beatsauth: true,
+        ssl: {
+          certificate_authorities: ['-----BEGIN CERTIFICATE-----\nREMOTE...'],
+        },
+      };
+
+      const result = generateOtelcolConfig({ inputs, dataOutput: remoteOutputDisabled });
+
+      expect(result.extensions?.['beatsauth/remote-output']).toBeUndefined();
+      expect(result.exporters?.['elasticsearch/remote-output']).toEqual({
+        endpoints: ['https://remote-es.example.com:9200'],
+      });
+    });
+
+    it('should merge otel_exporter_config_yaml into exporter for remote output', () => {
+      const remoteOutputWithYaml: Output = {
+        ...remoteOutput,
+        otel_exporter_config_yaml: 'flush_interval: 10s',
+      };
+
+      const result = generateOtelcolConfig({ inputs, dataOutput: remoteOutputWithYaml });
+
+      expect(result.exporters?.['elasticsearch/remote-output']).toMatchObject({
+        flush_interval: '10s',
+        endpoints: ['https://remote-es.example.com:9200'],
+      });
+    });
+  });
+
   describe('otel_disable_beatsauth toggle', () => {
     const inputs: FullAgentPolicyInput[] = [otelInput1];
 
@@ -2315,6 +2573,466 @@ describe('generateOtelcolConfig', () => {
 
       expect(result.extensions?.['beatsauth/default']).toBeDefined();
       expect(result.exporters?.['elasticsearch/default']).toHaveProperty('auth');
+    });
+  });
+
+  it('should fall back to default output when packageOutputs is empty', () => {
+    const inputA: FullAgentPolicyInput = {
+      ...otelInput1,
+      id: 'input-a',
+      name: 'input-a',
+      package_policy_id: 'pkg-policy-a',
+    };
+    expect(
+      generateOtelcolConfig({
+        inputs: [inputA],
+        dataOutput: defaultOutput,
+        packageOutputs: new Map(),
+      })
+    ).toEqual({
+      receivers: {
+        'httpcheck/input-a-stream-id-1': {
+          targets: [{ endpoints: ['https://epr.elastic.co'] }],
+        },
+      },
+      processors: {
+        'transform/input-a-stream-id-1': {
+          metric_statements: ['set(metric.description, "Sum") where metric.type == "Sum"'],
+        },
+        'transform/input-a-stream-id-1-routing': {
+          metric_statements: [
+            {
+              context: 'datapoint',
+              statements: [
+                'set(attributes["data_stream.type"], "metrics")',
+                'set(attributes["data_stream.dataset"], "somedataset")',
+                'set(attributes["data_stream.namespace"], "testing")',
+              ],
+            },
+          ],
+        },
+      },
+      connectors: {
+        'forward/default': {},
+      },
+      exporters: {
+        'elasticsearch/default': {
+          endpoints: ['http://localhost:9200'],
+        },
+      },
+      service: {
+        pipelines: {
+          'metrics/input-a-stream-id-1': {
+            receivers: ['httpcheck/input-a-stream-id-1'],
+            processors: ['transform/input-a-stream-id-1', 'transform/input-a-stream-id-1-routing'],
+            exporters: ['forward/default'],
+          },
+          'metrics/default': {
+            receivers: ['forward/default'],
+            exporters: ['elasticsearch/default'],
+          },
+        },
+      },
+    });
+  });
+
+  it('should route streams to the override output when packageOutputs contains an entry', () => {
+    const overrideOutput: Output = {
+      id: 'override-output-id',
+      name: 'override-output',
+      type: outputType.Elasticsearch,
+      is_default: false,
+      is_default_monitoring: false,
+      hosts: ['http://override-es:9200'],
+    };
+    const inputA: FullAgentPolicyInput = {
+      ...otelInput1,
+      id: 'input-a',
+      name: 'input-a',
+      package_policy_id: 'pkg-policy-a',
+    };
+    expect(
+      generateOtelcolConfig({
+        inputs: [inputA],
+        dataOutput: defaultOutput,
+        packageOutputs: new Map([['pkg-policy-a', overrideOutput]]),
+      })
+    ).toEqual({
+      receivers: {
+        'httpcheck/input-a-stream-id-1': {
+          targets: [{ endpoints: ['https://epr.elastic.co'] }],
+        },
+      },
+      processors: {
+        'transform/input-a-stream-id-1': {
+          metric_statements: ['set(metric.description, "Sum") where metric.type == "Sum"'],
+        },
+        'transform/input-a-stream-id-1-routing': {
+          metric_statements: [
+            {
+              context: 'datapoint',
+              statements: [
+                'set(attributes["data_stream.type"], "metrics")',
+                'set(attributes["data_stream.dataset"], "somedataset")',
+                'set(attributes["data_stream.namespace"], "testing")',
+              ],
+            },
+          ],
+        },
+      },
+      connectors: {
+        'forward/override-output-id': {},
+      },
+      exporters: {
+        'elasticsearch/override-output-id': {
+          endpoints: ['http://override-es:9200'],
+        },
+      },
+      service: {
+        pipelines: {
+          'metrics/input-a-stream-id-1': {
+            receivers: ['httpcheck/input-a-stream-id-1'],
+            processors: ['transform/input-a-stream-id-1', 'transform/input-a-stream-id-1-routing'],
+            exporters: ['forward/override-output-id'],
+          },
+          'metrics/override-output-id': {
+            receivers: ['forward/override-output-id'],
+            exporters: ['elasticsearch/override-output-id'],
+          },
+        },
+      },
+    });
+  });
+
+  it('should route to different outputs for two inputs with different overrides', () => {
+    const overrideOutput: Output = {
+      id: 'override-output-id',
+      name: 'override-output',
+      type: outputType.Elasticsearch,
+      is_default: false,
+      is_default_monitoring: false,
+      hosts: ['http://override-es:9200'],
+    };
+    const inputA: FullAgentPolicyInput = {
+      ...otelInput1,
+      id: 'input-a',
+      name: 'input-a',
+      package_policy_id: 'pkg-policy-a',
+    };
+    const inputB: FullAgentPolicyInput = {
+      ...otelInput2,
+      id: 'input-b',
+      name: 'input-b',
+      package_policy_id: 'pkg-policy-b',
+    };
+    expect(
+      generateOtelcolConfig({
+        inputs: [inputA, inputB],
+        dataOutput: defaultOutput,
+        packageOutputs: new Map([
+          ['pkg-policy-a', overrideOutput],
+          ['pkg-policy-b', { ...defaultOutput, is_default: false }],
+        ]),
+      })
+    ).toEqual({
+      receivers: {
+        'httpcheck/input-a-stream-id-1': {
+          targets: [{ endpoints: ['https://epr.elastic.co'] }],
+        },
+        'httpcheck/input-b-stream-id-1': {
+          targets: [{ endpoints: ['https://www.elastic.co'] }],
+        },
+      },
+      processors: {
+        'transform/input-a-stream-id-1': {
+          metric_statements: ['set(metric.description, "Sum") where metric.type == "Sum"'],
+        },
+        'transform/input-a-stream-id-1-routing': {
+          metric_statements: [
+            {
+              context: 'datapoint',
+              statements: [
+                'set(attributes["data_stream.type"], "metrics")',
+                'set(attributes["data_stream.dataset"], "somedataset")',
+                'set(attributes["data_stream.namespace"], "testing")',
+              ],
+            },
+          ],
+        },
+        'transform/input-b-stream-id-1': {
+          metric_statements: ['set(metric.description, "Sum") where metric.type == "Sum"'],
+        },
+        'transform/input-b-stream-id-1-routing': {
+          metric_statements: [
+            {
+              context: 'datapoint',
+              statements: [
+                'set(attributes["data_stream.type"], "metrics")',
+                'set(attributes["data_stream.dataset"], "otherdataset")',
+                'set(attributes["data_stream.namespace"], "default")',
+              ],
+            },
+          ],
+        },
+      },
+      connectors: {
+        'forward/override-output-id': {},
+        'forward/fleet-default-output': {},
+      },
+      exporters: {
+        'elasticsearch/override-output-id': {
+          endpoints: ['http://override-es:9200'],
+        },
+        'elasticsearch/fleet-default-output': {
+          endpoints: ['http://localhost:9200'],
+        },
+      },
+      service: {
+        pipelines: {
+          'metrics/input-a-stream-id-1': {
+            receivers: ['httpcheck/input-a-stream-id-1'],
+            processors: ['transform/input-a-stream-id-1', 'transform/input-a-stream-id-1-routing'],
+            exporters: ['forward/override-output-id'],
+          },
+          'metrics/input-b-stream-id-1': {
+            receivers: ['httpcheck/input-b-stream-id-1'],
+            processors: ['transform/input-b-stream-id-1', 'transform/input-b-stream-id-1-routing'],
+            exporters: ['forward/fleet-default-output'],
+          },
+          'metrics/override-output-id': {
+            receivers: ['forward/override-output-id'],
+            exporters: ['elasticsearch/override-output-id'],
+          },
+          'metrics/fleet-default-output': {
+            receivers: ['forward/fleet-default-output'],
+            exporters: ['elasticsearch/fleet-default-output'],
+          },
+        },
+      },
+    });
+  });
+
+  it('should route one input to override and one to default when only one has an override', () => {
+    const overrideOutput: Output = {
+      id: 'override-output-id',
+      name: 'override-output',
+      type: outputType.Elasticsearch,
+      is_default: false,
+      is_default_monitoring: false,
+      hosts: ['http://override-es:9200'],
+    };
+    const inputA: FullAgentPolicyInput = {
+      ...otelInput1,
+      id: 'input-a',
+      name: 'input-a',
+      package_policy_id: 'pkg-policy-a',
+    };
+    const inputB: FullAgentPolicyInput = {
+      ...otelInput2,
+      id: 'input-b',
+      name: 'input-b',
+      package_policy_id: 'pkg-policy-b',
+    };
+    expect(
+      generateOtelcolConfig({
+        inputs: [inputA, inputB],
+        dataOutput: defaultOutput,
+        packageOutputs: new Map([['pkg-policy-a', overrideOutput]]),
+      })
+    ).toEqual({
+      receivers: {
+        'httpcheck/input-a-stream-id-1': {
+          targets: [{ endpoints: ['https://epr.elastic.co'] }],
+        },
+        'httpcheck/input-b-stream-id-1': {
+          targets: [{ endpoints: ['https://www.elastic.co'] }],
+        },
+      },
+      processors: {
+        'transform/input-a-stream-id-1': {
+          metric_statements: ['set(metric.description, "Sum") where metric.type == "Sum"'],
+        },
+        'transform/input-a-stream-id-1-routing': {
+          metric_statements: [
+            {
+              context: 'datapoint',
+              statements: [
+                'set(attributes["data_stream.type"], "metrics")',
+                'set(attributes["data_stream.dataset"], "somedataset")',
+                'set(attributes["data_stream.namespace"], "testing")',
+              ],
+            },
+          ],
+        },
+        'transform/input-b-stream-id-1': {
+          metric_statements: ['set(metric.description, "Sum") where metric.type == "Sum"'],
+        },
+        'transform/input-b-stream-id-1-routing': {
+          metric_statements: [
+            {
+              context: 'datapoint',
+              statements: [
+                'set(attributes["data_stream.type"], "metrics")',
+                'set(attributes["data_stream.dataset"], "otherdataset")',
+                'set(attributes["data_stream.namespace"], "default")',
+              ],
+            },
+          ],
+        },
+      },
+      connectors: {
+        'forward/override-output-id': {},
+        'forward/default': {},
+      },
+      exporters: {
+        'elasticsearch/override-output-id': {
+          endpoints: ['http://override-es:9200'],
+        },
+        'elasticsearch/default': {
+          endpoints: ['http://localhost:9200'],
+        },
+      },
+      service: {
+        pipelines: {
+          'metrics/input-a-stream-id-1': {
+            receivers: ['httpcheck/input-a-stream-id-1'],
+            processors: ['transform/input-a-stream-id-1', 'transform/input-a-stream-id-1-routing'],
+            exporters: ['forward/override-output-id'],
+          },
+          'metrics/input-b-stream-id-1': {
+            receivers: ['httpcheck/input-b-stream-id-1'],
+            processors: ['transform/input-b-stream-id-1', 'transform/input-b-stream-id-1-routing'],
+            exporters: ['forward/default'],
+          },
+          'metrics/override-output-id': {
+            receivers: ['forward/override-output-id'],
+            exporters: ['elasticsearch/override-output-id'],
+          },
+          'metrics/default': {
+            receivers: ['forward/default'],
+            exporters: ['elasticsearch/default'],
+          },
+        },
+      },
+    });
+  });
+
+  it('should throw when packageOutputs contains an unsupported output type', () => {
+    const logstashOutput: Output = {
+      id: 'logstash-output-id',
+      name: 'logstash',
+      type: 'logstash' as any,
+      is_default: false,
+      is_default_monitoring: false,
+      hosts: ['localhost:5044'],
+    };
+    const inputA: FullAgentPolicyInput = {
+      ...otelInput1,
+      id: 'input-a',
+      name: 'input-a',
+      package_policy_id: 'pkg-policy-a',
+    };
+    expect(() =>
+      generateOtelcolConfig({
+        inputs: [inputA],
+        dataOutput: defaultOutput,
+        packageOutputs: new Map([['pkg-policy-a', logstashOutput]]),
+      })
+    ).toThrow();
+  });
+
+  it('should route APM aggregated pipeline to the default output even when the input has an override', () => {
+    const overrideOutput: Output = {
+      id: 'override-output-id',
+      name: 'override-output',
+      type: outputType.Elasticsearch,
+      is_default: false,
+      is_default_monitoring: false,
+      hosts: ['http://override-es:9200'],
+    };
+    const apmInput: FullAgentPolicyInput = {
+      ...otelTracesInputWithAPM,
+      id: 'apm-input',
+      name: 'apm-input',
+      package_policy_id: 'pkg-policy-a',
+      data_stream: { namespace: 'apmtest' },
+    };
+    expect(
+      generateOtelcolConfig({
+        inputs: [apmInput],
+        dataOutput: defaultOutput,
+        packageOutputs: new Map([['pkg-policy-a', overrideOutput]]),
+      })
+    ).toEqual({
+      receivers: {
+        'zipkin/apm-input-stream-id-1': { endpoint: 'localhost:9411' },
+      },
+      processors: {
+        'transform/apm-input-stream-id-1-routing': {
+          trace_statements: [
+            {
+              context: 'span',
+              statements: [
+                'set(attributes["data_stream.type"], "traces")',
+                'set(attributes["data_stream.dataset"], "zipkinreceiver")',
+                'set(attributes["data_stream.namespace"], "apmtest")',
+              ],
+            },
+            {
+              context: 'spanevent',
+              statements: [
+                'set(attributes["data_stream.type"], "logs")',
+                'set(attributes["data_stream.dataset"], "zipkinreceiver")',
+                'set(attributes["data_stream.namespace"], "apmtest")',
+              ],
+            },
+          ],
+        },
+        'elasticapm/apmtest': {},
+        'transform/apmtest-apm-namespace-routing': {
+          metric_statements: [
+            {
+              context: 'datapoint',
+              statements: ['set(attributes["data_stream.namespace"], "apmtest")'],
+            },
+          ],
+        },
+      },
+      connectors: {
+        'elasticapm/apmtest': {},
+        'forward/override-output-id': {},
+        'forward/default': {},
+      },
+      exporters: {
+        'elasticsearch/override-output-id': {
+          endpoints: ['http://override-es:9200'],
+        },
+        'elasticsearch/default': {
+          endpoints: ['http://localhost:9200'],
+        },
+      },
+      service: {
+        pipelines: {
+          'traces/apm-input-stream-id-1': {
+            receivers: ['zipkin/apm-input-stream-id-1'],
+            exporters: ['elasticapm/apmtest', 'forward/override-output-id'],
+            processors: ['elasticapm/apmtest', 'transform/apm-input-stream-id-1-routing'],
+          },
+          'metrics/apmtest-aggregated-apm-metrics': {
+            receivers: ['elasticapm/apmtest'],
+            processors: ['transform/apmtest-apm-namespace-routing'],
+            exporters: ['forward/default'],
+          },
+          'traces/override-output-id': {
+            receivers: ['forward/override-output-id'],
+            exporters: ['elasticsearch/override-output-id'],
+          },
+          'metrics/default': {
+            receivers: ['forward/default'],
+            exporters: ['elasticsearch/default'],
+          },
+        },
+      },
     });
   });
 });

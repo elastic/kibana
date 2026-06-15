@@ -18,6 +18,7 @@ import type { KibanaRequest, HttpAuth } from '@kbn/core-http-server';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
+import type { UserStorageServiceStart } from '@kbn/core-user-storage-server';
 import {
   type DarkModeValue,
   type ThemeName,
@@ -45,6 +46,7 @@ import {
   getScriptPaths,
   getBrowserLoggingConfig,
 } from './render_utils';
+import { resolveLocale } from './resolve_locale';
 import { filterUiPlugins } from './filter_ui_plugins';
 import { getApmConfig } from './get_apm_config';
 import type { InternalRenderingRequestHandlerContext } from './internal_types';
@@ -71,6 +73,7 @@ export class RenderingService {
   private readonly themeName$ = new BehaviorSubject<ThemeName>(DEFAULT_THEME_NAME);
   private airgapped: boolean = false;
   private isCoreRenderingInReactConcurrentMode: boolean = true;
+  private userStorageStart?: UserStorageServiceStart;
   constructor(private readonly coreContext: CoreContext) {}
 
   public async preboot({
@@ -140,7 +143,8 @@ export class RenderingService {
     };
   }
 
-  public start({ featureFlags }: RenderingStartDeps) {
+  public start({ featureFlags, userStorage }: RenderingStartDeps) {
+    this.userStorageStart = userStorage;
     featureFlags
       .getStringValue$<ThemeName>(DEFAULT_THEME_NAME_FEATURE_FLAG, DEFAULT_THEME_NAME)
       // Parse the input feature flag value to ensure it's of type ThemeName
@@ -197,6 +201,7 @@ export class RenderingService {
       globalSettingsUserValues = {},
       userSettingDarkMode,
       userSettingLocale,
+      userStorageValues = {},
     ] = await Promise.all(
       isAnonymousPage
         ? [uiSettings.client?.getRegistered() ?? {}]
@@ -208,12 +213,15 @@ export class RenderingService {
             userSettings?.getUserSettingDarkMode(request),
             // locale
             userSettings?.getUserSettingLocale(request),
+            // user storage
+            this.fetchUserStorageValues(request),
           ] as [
             ReturnType<typeof withAsyncDefaultValues>,
             Promise<Record<string, UserProvidedValues>>,
             Promise<Record<string, UserProvidedValues>>,
             Promise<DarkModeValue> | undefined,
-            Promise<string> | undefined
+            Promise<string> | undefined,
+            Promise<Record<string, unknown>>
           ])
     );
 
@@ -277,11 +285,17 @@ export class RenderingService {
     const configLocale = i18nLib.getLocale();
     const translationHashes = i18n.getTranslationHashes();
     const availableLocales = i18n.getAvailableLocales();
-    // Resolve the effective locale server-side using the priority chain:
-    // 1. User profile setting
-    // 2. kibana.yml i18n.defaultLocale (configLocale)
-    const effectiveLocale =
-      userSettingLocale && translationHashes[userSettingLocale] ? userSettingLocale : configLocale;
+    const isServerless = this.coreContext.env.packageInfo.buildFlavor === 'serverless';
+    const { locale: effectiveLocale, setCookieHeader } = resolveLocale({
+      request,
+      userSettingLocale,
+      configLocale,
+      configuredLocales: availableLocales.map((entry) => entry.id),
+      translationHashes,
+      isServerless,
+      serverBasePath,
+      allowLocaleCookie: i18n.allowLocaleCookie,
+    });
     let translationsUrl: string;
     if (usingCdn) {
       translationsUrl = `${staticAssetsHrefBase}/translations/${effectiveLocale}.json`;
@@ -339,6 +353,7 @@ export class RenderingService {
         branch: env.packageInfo.branch,
         basePath,
         serverBasePath,
+        spaceId: request.spaceId,
         publicBaseUrl,
         assetsHrefBase: staticAssetsHrefBase,
         logging: loggingConfig,
@@ -385,13 +400,31 @@ export class RenderingService {
           uiSettings: settings,
           globalUiSettings: globalSettings,
         },
+        userStorage: { values: userStorageValues },
       },
     };
 
-    return `<!DOCTYPE html>${renderToStaticMarkup(<Template metadata={metadata} />)}`;
+    const cookieHeaders: Record<string, string> = i18n.allowLocaleCookie
+      ? { 'set-cookie': setCookieHeader }
+      : {};
+
+    return {
+      body: `<!DOCTYPE html>${renderToStaticMarkup(<Template metadata={metadata} />)}`,
+      headers: cookieHeaders,
+    };
   }
 
   public async stop() {}
+
+  private async fetchUserStorageValues(request: KibanaRequest): Promise<Record<string, unknown>> {
+    const userStorage = this.userStorageStart;
+    if (!userStorage) return {};
+
+    const client = userStorage.asScoped(request);
+    if (!client) return {};
+
+    return client.getForInjection();
+  }
 }
 
 const getUiConfig = async (uiPlugins: UiPlugins, pluginId: string) => {

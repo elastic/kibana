@@ -17,7 +17,7 @@ import {
   MetricsExecutionContextAction,
   MetricsExecutionContextName,
 } from './execution_context_enums';
-import { EsqlResponseError } from '../../../chart/utils/esql_response_error';
+import { EsqlResponseError } from '../../../../common/errors/esql_response_error';
 import { executeEsqlQuery, fetchEsqlResponseOrThrow } from './execute_esql_query';
 import { getMetricsExecutionContext } from './execution_context';
 
@@ -228,7 +228,10 @@ describe('executeEsqlQuery', () => {
         uiSettings: mockUiSettings,
         profileId: 'metrics-data-source-profile',
       })
-    ).rejects.toThrow(EsqlResponseError);
+    ).rejects.toMatchObject({
+      name: 'EsqlResponseError',
+      message: 'remote_transport_exception: ccs query failed',
+    });
   });
 
   it('sets status on EsqlResponseError when response includes top-level status', async () => {

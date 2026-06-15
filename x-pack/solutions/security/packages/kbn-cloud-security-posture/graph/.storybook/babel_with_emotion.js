@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-// CJS module on purpose. Jest loads the transformer with `require`, and the
-// inner `require.resolve('@kbn/babel-preset/node_preset')` only resolves in
-// CJS scope. The previous `.ts` version mixed `import` with `require.resolve`
-// and crashed Jest's transform pipeline with "require is not defined in ES
-// module scope" whenever 2+ test files needed the transformer in the same run.
+// CommonJS so Node's native .ts loader doesn't load this file in ES module
+// scope (which would break the require.resolve below). Mirrors the pattern in
+// src/platform/packages/shared/kbn-test/src/jest/transforms/babel/index.js.
 
-const babelJest = require('babel-jest').default;
+const babelJest = require('babel-jest');
 
 module.exports = babelJest.createTransformer({
   presets: [

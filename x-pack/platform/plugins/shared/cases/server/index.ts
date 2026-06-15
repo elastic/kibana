@@ -22,6 +22,11 @@ export const config: PluginConfigDescriptor<ConfigType> = {
     templates: {
       enabled: true,
     },
+    casesRedesign: {
+      list: true,
+      details: true,
+      settings: true,
+    },
     attachments: {
       enabled: true,
     },
