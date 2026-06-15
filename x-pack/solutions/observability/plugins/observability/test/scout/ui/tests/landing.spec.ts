@@ -10,8 +10,7 @@ import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
 import { generateApmData, generateLogsData } from '../fixtures/generators';
 
-// Failing: See https://github.com/elastic/kibana/issues/253824
-test.describe.skip(
+test.describe(
   'Observability Landing Page',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {

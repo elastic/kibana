@@ -18,7 +18,6 @@ import {
 
 export default function ({ getPageObject, getService }: FtrProviderContext) {
   const headerPage = getPageObject('header');
-  const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
   function runTests(testData: TestData) {
@@ -144,11 +143,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   describe('index based', function () {
     this.tags(['ml']);
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
-      await esArchiver.loadIfNeeded(
-        'x-pack/platform/test/fixtures/es_archives/ml/module_sample_logs'
-      );
-
       await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
       await ml.testResources.createDataViewIfNeeded('ft_module_sample_logs', '@timestamp');
       await ml.testResources.createSavedSearchFarequoteLuceneIfNeeded();

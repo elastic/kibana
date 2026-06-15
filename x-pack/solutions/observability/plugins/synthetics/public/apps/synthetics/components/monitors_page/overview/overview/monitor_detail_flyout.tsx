@@ -33,6 +33,7 @@ import { useKibanaSpace } from '../../../../../../hooks/use_kibana_space';
 import type { ClientPluginsStart } from '../../../../../../plugin';
 import { useMonitorDetail } from '../../../../hooks/use_monitor_detail';
 import { useMonitorDetailLocator } from '../../../../hooks/use_monitor_detail_locator';
+import { getMonitorSpaceToAppend } from '../../../../hooks/use_edit_monitor_locator';
 import type { LocationsStatus } from '../../../../hooks/use_status_by_location';
 import { useStatusByLocation } from '../../../../hooks/use_status_by_location';
 import {
@@ -264,14 +265,24 @@ export function MonitorDetailFlyout(props: Props) {
 
   const { space } = useKibanaSpace();
 
+  const { spaceId: crossSpaceId } = getMonitorSpaceToAppend(space, spaces);
+
   useEffect(() => {
+    // `useKibanaSpace` resolves asynchronously, so `space` is undefined on
+    // the first render. `getMonitorSpaceToAppend` short-circuits to `{}` in
+    // that case, which means an early dispatch would fetch the SO from the
+    // active space and 404 for cross-space monitors. The follow-up dispatch
+    // (after `space` resolves) is silently dropped by the `takeLeading`
+    // saga while the first request is still in flight, leaving the 404 in
+    // Redux state forever. Wait for the active space before dispatching.
+    if (!space) return;
     dispatch(
       getMonitorAction.get({
         monitorId: configId,
-        ...(space && spaces?.length && !spaces?.includes(space?.id) ? { spaceId: spaces[0] } : {}),
+        ...(crossSpaceId ? { spaceId: crossSpaceId } : {}),
       })
     );
-  }, [configId, dispatch, space, space?.id, spaces, upsertSuccess]);
+  }, [configId, crossSpaceId, dispatch, space, upsertSuccess]);
 
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
 

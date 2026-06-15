@@ -1,12 +1,11 @@
 openapi: 3.0.3
 info:
-  description: >-
-    Use the Attack discovery APIs to generate and manage Attack discoveries.
-    Attack Discovery leverages large language models (LLMs) to analyze alerts in
-    your environment and identify threats. Each "discovery" represents a
-    potential attack and describes relationships among multiple alerts to tell
-    you which users and hosts are involved, how alerts correspond to the MITRE
-    ATT&CK matrix, and which threat actor might be responsible.
+  description: Use the Attack discovery APIs to generate and manage Attack
+    discoveries. Attack Discovery leverages large language models (LLMs) to
+    analyze alerts in your environment and identify threats. Each "discovery"
+    represents a potential attack and describes relationships among multiple
+    alerts to tell you which users and hosts are involved, how alerts correspond
+    to the MITRE ATT&CK matrix, and which threat actor might be responsible.
   title: Security Attack discovery API (Elastic Cloud & self-hosted)
   version: '2023-10-31'
 servers:
@@ -19,11 +18,10 @@ servers:
 paths:
   /api/attack_discovery/_bulk:
     post:
-      description: >-
-        Performs bulk updates on multiple Attack discoveries, including workflow
-        status changes and visibility settings. This endpoint allows efficient
-        batch processing of alert modifications without requiring individual API
-        calls for each alert.
+      description: Performs bulk updates on multiple Attack discoveries, including
+        workflow status changes and visibility settings. This endpoint allows
+        efficient batch processing of alert modifications without requiring
+        individual API calls for each alert.
       operationId: PostAttackDiscoveryBulk
       requestBody:
         content:
@@ -32,35 +30,30 @@ paths:
               type: object
               properties:
                 update:
-                  description: >-
-                    Configuration object containing all parameters for the bulk
-                    update operation
+                  description: Configuration object containing all parameters for the bulk update
+                    operation
                   type: object
                   properties:
                     enable_field_rendering:
                       default: false
-                      description: >-
-                        Enables a markdown syntax used to render pivot fields,
-                        for example `{{ user.name james }}`. When disabled, the
-                        same example would be rendered as `james`. This is
-                        primarily used for Attack discovery views within Kibana.
-                        Defaults to `false`.
+                      description: Enables a markdown syntax used to render pivot fields, for example
+                        `{{ user.name james }}`. When disabled, the same example
+                        would be rendered as `james`. This is primarily used for
+                        Attack discovery views within Kibana. Defaults to
+                        `false`.
                       example: false
                       type: boolean
                     ids:
                       description: Array of Attack discovery IDs to update
                       example:
-                        - >-
-                          c0c8a8bbb4a6561856a974ee9e461f0c82e673a1f0d83f86c5a8d80fc8de4c4f
-                        - >-
-                          5aa8f2900c0b03854b3b1a52a19558c5ea9893865c78235d4ad3dcc46196f4c7
+                        - c0c8a8bbb4a6561856a974ee9e461f0c82e673a1f0d83f86c5a8d80fc8de4c4f
+                        - 5aa8f2900c0b03854b3b1a52a19558c5ea9893865c78235d4ad3dcc46196f4c7
                       items:
                         type: string
                       type: array
                     kibana_alert_workflow_status:
-                      description: >-
-                        When provided, update the kibana.alert.workflow_status
-                        of the attack discovery alerts
+                      description: When provided, update the kibana.alert.workflow_status of the
+                        attack discovery alerts
                       enum:
                         - open
                         - acknowledged
@@ -68,10 +61,8 @@ paths:
                       example: acknowledged
                       type: string
                     visibility:
-                      description: >-
-                        When provided, update the visibility of the alert, as
-                        determined by the kibana.alert.attack_discovery.users
-                        field
+                      description: When provided, update the visibility of the alert, as determined by
+                        the kibana.alert.attack_discovery.users field
                       enum:
                         - not_shared
                         - shared
@@ -79,9 +70,8 @@ paths:
                       type: string
                     with_replacements:
                       default: true
-                      description: >-
-                        When true, returns the updated Attack discoveries with
-                        text replacements applied to the detailsMarkdown,
+                      description: When true, returns the updated Attack discoveries with text
+                        replacements applied to the detailsMarkdown,
                         entitySummaryMarkdown, summaryMarkdown, and title
                         fields. This substitutes anonymized values with
                         human-readable equivalents. Defaults to `true`.
@@ -101,10 +91,8 @@ paths:
                 type: object
                 properties:
                   data:
-                    description: >-
-                      Array of updated Attack discovery alert objects. Each item
-                      includes the applied modifications from the bulk update
-                      request.
+                    description: Array of updated Attack discovery alert objects. Each item includes
+                      the applied modifications from the bulk update request.
                     items:
                       $ref: '#/components/schemas/AttackDiscoveryApiAlert'
                     type: array
@@ -122,9 +110,8 @@ paths:
                     example: Bad Request
                     type: string
                   message:
-                    description: >-
-                      Human-readable error message describing what went wrong
-                      with the bulk update request
+                    description: Human-readable error message describing what went wrong with the
+                      bulk update request
                     example: Invalid request parameters
                     type: string
                   status_code:
@@ -158,13 +145,11 @@ paths:
              }'
   /api/attack_discovery/_find:
     get:
-      description: >-
-        Find Attack discoveries that match the search criteria. Supports free
-        text search, filtering, pagination, and sorting.
+      description: Find Attack discoveries that match the search criteria. Supports
+        free text search, filtering, pagination, and sorting.
       operationId: AttackDiscoveryFind
       parameters:
-        - description: >-
-            Filter results to Attack discoveries that include any of the
+        - description: Filter results to Attack discoveries that include any of the
             provided alert IDs
           in: query
           name: alert_ids
@@ -173,8 +158,7 @@ paths:
             items:
               type: string
             type: array
-        - description: >-
-            Filter results to Attack discoveries created by any of the provided
+        - description: Filter results to Attack discoveries created by any of the provided
             human readable connector names. Note that values must match the
             human readable `connector_name` property of an Attack discovery,
             e.g. "GPT-5 Chat", which are distinct from `connector_id` values
@@ -186,8 +170,7 @@ paths:
             items:
               type: string
             type: array
-        - description: >-
-            Enables a markdown syntax used to render pivot fields, for example
+        - description: Enables a markdown syntax used to render pivot fields, for example
             `{{ user.name james }}`. When disabled, the same example would be
             rendered as `james`. This is primarily used for Attack discovery
             views within Kibana. Defaults to `false`.
@@ -198,8 +181,7 @@ paths:
           schema:
             default: false
             type: boolean
-        - description: >-
-            End of the time range for the search. Accepts absolute timestamps
+        - description: End of the time range for the search. Accepts absolute timestamps
             (ISO 8601) or relative date math (e.g. "now", "now-24h").
           example: now
           in: query
@@ -215,8 +197,7 @@ paths:
             items:
               type: string
             type: array
-        - description: >-
-            If `true`, the response will include `unique_alert_ids` and
+        - description: If `true`, the response will include `unique_alert_ids` and
             `unique_alert_ids_count` aggregated across the matched Attack
             discoveries
           example: false
@@ -234,8 +215,7 @@ paths:
             default: 1
             minimum: 1
             type: integer
-        - description: >-
-            Number of Attack discoveries to return per page (used for
+        - description: Number of Attack discoveries to return per page (used for
             pagination). Defaults to 10.
           example: 10
           in: query
@@ -245,8 +225,7 @@ paths:
             default: 10
             minimum: 1
             type: integer
-        - description: >-
-            Free-text search query applied to relevant text fields of Attack
+        - description: Free-text search query applied to relevant text fields of Attack
             discoveries (title, description, tags, etc.)
           example: ''
           in: query
@@ -254,8 +233,7 @@ paths:
           required: false
           schema:
             type: string
-        - description: >-
-            Whether to filter by shared visibility. If omitted, both shared and
+        - description: Whether to filter by shared visibility. If omitted, both shared and
             privately visible Attack discoveries are returned. Use `true` to
             return only shared discoveries, `false` to return only those visible
             to the current user.
@@ -264,8 +242,7 @@ paths:
           required: false
           schema:
             type: boolean
-        - description: >-
-            Field used to sort results. See `AttackDiscoveryFindSortField` for
+        - description: Field used to sort results. See `AttackDiscoveryFindSortField` for
             allowed values.
           example: '@timestamp'
           in: query
@@ -274,8 +251,7 @@ paths:
           schema:
             $ref: '#/components/schemas/AttackDiscoveryFindSortField'
             default: '@timestamp'
-        - description: >-
-            Sort order direction `asc` for ascending or `desc` for descending.
+        - description: Sort order direction `asc` for ascending or `desc` for descending.
             Defaults to `desc`.
           example: desc
           in: query
@@ -284,8 +260,7 @@ paths:
           schema:
             $ref: '#/components/schemas/SortOrder'
             default: desc
-        - description: >-
-            Start of the time range for the search. Accepts absolute timestamps
+        - description: Start of the time range for the search. Accepts absolute timestamps
             (ISO 8601) or relative date math (e.g. "now-7d").
           example: now-24h
           in: query
@@ -293,8 +268,7 @@ paths:
           required: false
           schema:
             type: string
-        - description: >-
-            Filter by alert workflow status. Provide one or more of the allowed
+        - description: Filter by alert workflow status. Provide one or more of the allowed
             workflow states.
           example:
             - open
@@ -310,8 +284,7 @@ paths:
                 - open
               type: string
             type: array
-        - description: >-
-            When true, return the created Attack discoveries with text
+        - description: When true, return the created Attack discoveries with text
             replacements applied to the detailsMarkdown, entitySummaryMarkdown,
             summaryMarkdown, and title fields. Defaults to `true`.
           example: true
@@ -329,17 +302,15 @@ paths:
                 type: object
                 properties:
                   connector_names:
-                    description: >-
-                      List of human readable connector names that are present in
-                      the matched Attack discoveries. Useful for building client
+                    description: List of human readable connector names that are present in the
+                      matched Attack discoveries. Useful for building client
                       filters or summaries.
                     items:
                       type: string
                     type: array
                   data:
-                    description: >-
-                      Array of matched Attack discovery objects. Each item
-                      follows the `AttackDiscoveryApiAlert` schema.
+                    description: Array of matched Attack discovery objects. Each item follows the
+                      `AttackDiscoveryApiAlert` schema.
                     items:
                       $ref: '#/components/schemas/AttackDiscoveryApiAlert'
                     type: array
@@ -350,23 +321,20 @@ paths:
                     description: Number of items requested per page.
                     type: integer
                   total:
-                    description: >-
-                      Total number of Attack discoveries matching the query
-                      (across all pages).
+                    description: Total number of Attack discoveries matching the query (across all
+                      pages).
                     type: integer
                   unique_alert_ids:
-                    description: >-
-                      List of unique alert IDs aggregated from the matched
-                      Attack discoveries. Only present if
+                    description: List of unique alert IDs aggregated from the matched Attack
+                      discoveries. Only present if
                       `include_unique_alert_ids=true` in the request.
                     items:
                       type: string
                     type: array
                   unique_alert_ids_count:
-                    description: >-
-                      Number of unique alert IDs across all matched Attack
-                      discoveries. Only present if
-                      `include_unique_alert_ids=true` in the request.
+                    description: Number of unique alert IDs across all matched Attack discoveries.
+                      Only present if `include_unique_alert_ids=true` in the
+                      request.
                     type: integer
                 required:
                   - connector_names
@@ -408,11 +376,10 @@ paths:
              --header "Content-Type: application/json"
   /api/attack_discovery/_generate:
     post:
-      description: >-
-        Initiates the generation of attack discoveries by analyzing security
-        alerts using AI. Returns an execution UUID that can be used to track the
-        generation progress and retrieve results. Results may also be retrieved
-        via the find endpoint.
+      description: Initiates the generation of attack discoveries by analyzing
+        security alerts using AI. Returns an execution UUID that can be used to
+        track the generation progress and retrieve results. Results may also be
+        retrieved via the find endpoint.
       operationId: PostAttackDiscoveryGenerate
       requestBody:
         content:
@@ -429,10 +396,9 @@ paths:
                 properties:
                   execution_uuid:
                     $ref: '#/components/schemas/NonEmptyString'
-                    description: >-
-                      The unique identifier for the attack discovery generation
-                      process. Use this UUID to track the generation progress
-                      and retrieve results via the find endpoint.
+                    description: The unique identifier for the attack discovery generation process.
+                      Use this UUID to track the generation progress and
+                      retrieve results via the find endpoint.
                     example: edd26039-0990-4d9f-9829-2a1fcacb77b5
                 required:
                   - execution_uuid
@@ -1406,15 +1372,13 @@ paths:
               }'
   /api/attack_discovery/generations:
     get:
-      description: >-
-        Get the latest attack discovery generations metadata (that are not
+      description: Get the latest attack discovery generations metadata (that are not
         dismissed) for the current user. This endpoint retrieves generation
         metadata including execution status and statistics for Attack discovery
         generations.
       operationId: GetAttackDiscoveryGenerations
       parameters:
-        - description: >-
-            End of the time range for filtering generations. Accepts absolute
+        - description: End of the time range for filtering generations. Accepts absolute
             timestamps (ISO 8601) or relative date math (e.g. "now", "now-24h").
           example: now
           in: query
@@ -1431,8 +1395,7 @@ paths:
             default: 50
             minimum: 1
             type: number
-        - description: >-
-            Start of the time range for filtering generations. Accepts absolute
+        - description: Start of the time range for filtering generations. Accepts absolute
             timestamps (ISO 8601) or relative date math (e.g. "now-7d").
           example: now-24h
           in: query
@@ -1474,9 +1437,7 @@ paths:
                     example: 400
                     type: number
           description: Bad request
-      summary: >-
-        Get the latest attack discovery generations metadata for the current
-        user
+      summary: Get the latest attack discovery generations metadata for the current user
       tags:
         - Security Attack discovery API
       x-code-samples:
@@ -1489,15 +1450,13 @@ paths:
              --header "Content-Type: application/json"
   /api/attack_discovery/generations/{execution_uuid}:
     get:
-      description: >-
-        Returns a specific Attack discovery generation, including all generated
-        Attack discoveries and associated metadata, including execution status
-        and statistics.
+      description: Returns a specific Attack discovery generation, including all
+        generated Attack discoveries and associated metadata, including
+        execution status and statistics.
       operationId: GetAttackDiscoveryGeneration
       parameters:
-        - description: >-
-            The unique identifier for the Attack discovery generation execution.
-            This UUID is returned at the start of an Attack discovery
+        - description: The unique identifier for the Attack discovery generation
+            execution. This UUID is returned at the start of an Attack discovery
             generation.
           example: 2e13f386-46cf-4d65-9e2b-68609e132ba5
           in: path
@@ -1505,8 +1464,7 @@ paths:
           required: true
           schema:
             $ref: '#/components/schemas/NonEmptyString'
-        - description: >-
-            Enables a markdown syntax used to render pivot fields, for example
+        - description: Enables a markdown syntax used to render pivot fields, for example
             `{{ user.name james }}`. When disabled, the same example would be
             rendered as `james`. This is primarily used for Attack discovery
             views within Kibana. Defaults to `false`.
@@ -1517,8 +1475,7 @@ paths:
           schema:
             default: false
             type: boolean
-        - description: >-
-            When true, return the created Attack discoveries with text
+        - description: When true, return the created Attack discoveries with text
             replacements applied to the detailsMarkdown, entitySummaryMarkdown,
             summaryMarkdown, and title fields. Defaults to `true`.
           example: true
@@ -1536,19 +1493,15 @@ paths:
                 type: object
                 properties:
                   data:
-                    description: >-
-                      Array of Attack discoveries generated during this
-                      execution.
+                    description: Array of Attack discoveries generated during this execution.
                     items:
                       $ref: '#/components/schemas/AttackDiscoveryApiAlert'
                     type: array
                   generation:
                     $ref: '#/components/schemas/AttackDiscoveryGeneration'
-                    description: >-
-                      Optional metadata about the attack discovery generation
-                      process, metadata including execution status and
-                      statistics. This metadata may not be available for all
-                      generations.
+                    description: Optional metadata about the attack discovery generation process,
+                      metadata including execution status and statistics. This
+                      metadata may not be available for all generations.
                 required:
                   - data
           description: Successful response
@@ -1563,9 +1516,8 @@ paths:
                     example: Bad Request
                     type: string
                   message:
-                    description: >-
-                      Human-readable error message describing what went wrong
-                      with the request
+                    description: Human-readable error message describing what went wrong with the
+                      request
                     example: Invalid request parameters
                     type: string
                   status_code:
@@ -1577,8 +1529,7 @@ paths:
                   - error
                   - message
           description: Generic Error
-      summary: >-
-        Get a single Attack discovery generation, including its discoveries and
+      summary: Get a single Attack discovery generation, including its discoveries and
         (optional) generation metadata
       tags:
         - Security Attack discovery API
@@ -1592,17 +1543,15 @@ paths:
              --header "Content-Type: application/json"
   /api/attack_discovery/generations/{execution_uuid}/_dismiss:
     post:
-      description: >-
-        Dismisses an attack discovery generation for the current user,
+      description: Dismisses an attack discovery generation for the current user,
         indicating that it's status should not be reported in the UI. This sets
         the generation's status to "dismissed" and affects how the generation
         appears in subsequent queries.
       operationId: PostAttackDiscoveryGenerationsDismiss
       parameters:
-        - description: >-
-            The unique identifier for the Attack discovery generation execution.
-            This UUID is returned when an attack discovery generation is created
-            and can be found in generation responses.
+        - description: The unique identifier for the Attack discovery generation
+            execution. This UUID is returned when an attack discovery generation
+            is created and can be found in generation responses.
           example: 46b218d5-535d-4329-be56-d0f6af6986b7
           in: path
           name: execution_uuid
@@ -1617,82 +1566,69 @@ paths:
                 type: object
                 properties:
                   alerts_context_count:
-                    description: >-
-                      The number of alerts that were sent as context to the LLM
-                      for this generation.
+                    description: The number of alerts that were sent as context to the LLM for this
+                      generation.
                     example: 75
                     type: number
                   connector_id:
-                    description: >-
-                      The unique identifier of the connector used to generate
-                      the attack discoveries.
+                    description: The unique identifier of the connector used to generate the attack
+                      discoveries.
                     example: chatGpt5_0ChatAzure
                     type: string
                   connector_stats:
-                    description: >-
-                      Statistical information about the connector's performance
-                      for this user, providing insights into usage patterns and
-                      success rates.
+                    description: Statistical information about the connector's performance for this
+                      user, providing insights into usage patterns and success
+                      rates.
                     type: object
                     properties:
                       average_successful_duration_nanoseconds:
-                        description: >-
-                          The average duration in nanoseconds for successful
-                          generations using this connector by the current user.
+                        description: The average duration in nanoseconds for successful generations
+                          using this connector by the current user.
                         example: 47958500000
                         type: number
                       successful_generations:
-                        description: >-
-                          The total number of Attack discoveries successfully
-                          created for this generation
+                        description: The total number of Attack discoveries successfully created for
+                          this generation
                         example: 2
                         type: number
                   discoveries:
-                    description: >-
-                      The number of attack discoveries that were generated
-                      during this execution.
+                    description: The number of attack discoveries that were generated during this
+                      execution.
                     example: 3
                     type: number
                   end:
-                    description: >-
-                      The timestamp when the generation process completed, in
-                      ISO 8601 format. This field may be absent for generations
-                      that haven't finished.
+                    description: The timestamp when the generation process completed, in ISO 8601
+                      format. This field may be absent for generations that
+                      haven't finished.
                     example: '2025-09-29T06:42:44.810Z'
                     type: string
                   execution_uuid:
-                    description: >-
-                      The unique identifier for this attack discovery generation
+                    description: The unique identifier for this attack discovery generation
                       execution. This UUID can be used to reference this
                       specific generation in other API calls.
                     example: 46b218d5-535d-4329-be56-d0f6af6986b7
                     type: string
                   loading_message:
-                    description: >-
-                      A human-readable message describing the current state or
-                      progress of the generation process. Provides context about
-                      what the AI is analyzing.
-                    example: >-
-                      AI is analyzing up to 100 alerts in the last 24 hours to
-                      generate discoveries.
+                    description: A human-readable message describing the current state or progress
+                      of the generation process. Provides context about what the
+                      AI is analyzing.
+                    example: AI is analyzing up to 100 alerts in the last 24 hours to generate
+                      discoveries.
                     type: string
                   reason:
-                    description: >-
-                      Additional context or reasoning provided when a generation
-                      fails or encounters issues. This field helps diagnose
-                      problems with the generation process.
+                    description: Additional context or reasoning provided when a generation fails or
+                      encounters issues. This field helps diagnose problems with
+                      the generation process.
                     example: Connection timeout to AI service
                     type: string
                   start:
-                    description: >-
-                      The timestamp when the generation process began, in ISO
-                      8601 format. This marks the beginning of the AI analysis.
+                    description: The timestamp when the generation process began, in ISO 8601
+                      format. This marks the beginning of the AI analysis.
                     example: '2025-09-29T06:42:08.962Z'
                     type: string
                   status:
-                    description: >-
-                      The current status of the attack discovery generation.
-                      After dismissing, this will be set to "dismissed".
+                    description: The current status of the attack discovery generation. After
+                      dismissing, this will be set to "dismissed".
                     enum:
                       - canceled
                       - dismissed
@@ -1708,8 +1644,7 @@ paths:
                   - loading_message
                   - start
                   - status
-          description: >-
-            Successful response - The attack discovery generation has been
+          description: Successful response - The attack discovery generation has been
             dismissed
         '400':
           content:
@@ -1722,9 +1657,8 @@ paths:
                     example: Bad Request
                     type: string
                   message:
-                    description: >-
-                      Human-readable error message describing what went wrong
-                      with the request.
+                    description: Human-readable error message describing what went wrong with the
+                      request.
                     example: Invalid request parameters
                     type: string
                   status_code:
@@ -1749,11 +1683,11 @@ paths:
              --header "Content-Type: application/json"
   /api/attack_discovery/schedules:
     post:
-      description: >-
-        Creates a new Attack discovery schedule that analyzes security alerts at
-        specified intervals. The schedule defines when and how Attack discovery
-        analysis should run, including which alerts to analyze, which AI
-        connector to use, and what actions to take when discoveries are found.
+      description: Creates a new Attack discovery schedule that analyzes security
+        alerts at specified intervals. The schedule defines when and how Attack
+        discovery analysis should run, including which alerts to analyze, which
+        AI connector to use, and what actions to take when discoveries are
+        found.
       operationId: CreateAttackDiscoverySchedules
       requestBody:
         content:
@@ -1775,8 +1709,7 @@ paths:
                 interval: 24h
             schema:
               $ref: '#/components/schemas/AttackDiscoveryApiScheduleCreateProps'
-        description: >-
-          Attack discovery schedule configuration including name, parameters,
+        description: Attack discovery schedule configuration including name, parameters,
           schedule interval, and actions
         required: true
       responses:
@@ -1863,8 +1796,7 @@ paths:
              }'
   /api/attack_discovery/schedules/_find:
     get:
-      description: >-
-        Finds Attack discovery schedules that match the search criteria.
+      description: Finds Attack discovery schedules that match the search criteria.
         Supports pagination and sorting by various fields.
       operationId: FindAttackDiscoverySchedules
       parameters:
@@ -1875,8 +1807,7 @@ paths:
           required: false
           schema:
             type: number
-        - description: >-
-            Number of Attack discovery schedules to return per page (used for
+        - description: Number of Attack discovery schedules to return per page (used for
             pagination). Defaults to 10.
           example: 10
           in: query
@@ -1884,8 +1815,7 @@ paths:
           required: false
           schema:
             type: number
-        - description: >-
-            Field used to sort results. Common fields include 'name',
+        - description: Field used to sort results. Common fields include 'name',
             'created_at', 'updated_at', and 'enabled'.
           example: name
           in: query
@@ -1893,8 +1823,7 @@ paths:
           required: false
           schema:
             $ref: '#/components/schemas/NonEmptyString'
-        - description: >-
-            Sort order direction. Use 'asc' for ascending or 'desc' for
+        - description: Sort order direction. Use 'asc' for ascending or 'desc' for
             descending. Defaults to 'asc'.
           example: asc
           in: query
@@ -1924,9 +1853,8 @@ paths:
                     description: Number of items requested per page.
                     type: number
                   total:
-                    description: >-
-                      Total number of Attack discovery schedules matching the
-                      query (across all pages).
+                    description: Total number of Attack discovery schedules matching the query
+                      (across all pages).
                     type: number
                 required:
                   - page
@@ -1966,13 +1894,11 @@ paths:
              --header "Content-Type: application/json"
   /api/attack_discovery/schedules/{id}:
     delete:
-      description: >-
-        Permanently deletes an Attack discovery schedule and all associated
+      description: Permanently deletes an Attack discovery schedule and all associated
         configuration.
       operationId: DeleteAttackDiscoverySchedules
       parameters:
-        - description: >-
-            The unique identifier (UUID) of the Attack Discovery schedule to
+        - description: The unique identifier (UUID) of the Attack Discovery schedule to
             delete. This ID is returned when creating a schedule and can be
             found in schedule listings.
           example: 12345678-1234-1234-1234-123456789012
@@ -1992,13 +1918,10 @@ paths:
                 properties:
                   id:
                     $ref: '#/components/schemas/NonEmptyString'
-                    description: >-
-                      The unique identifier of the deleted Attack Discovery
-                      schedule
+                    description: The unique identifier of the deleted Attack Discovery schedule
                 required:
                   - id
-          description: >-
-            Successfully deleted Attack Discovery schedule, returning the ID of
+          description: Successfully deleted Attack Discovery schedule, returning the ID of
             the deleted schedule for confirmation
         '400':
           content:
@@ -2022,14 +1945,13 @@ paths:
              --header "Authorization: $API_KEY" \
              --header "Content-Type: application/json"
     get:
-      description: >-
-        Retrieves a specific Attack discovery schedule by its unique identifier.
-        Returns complete schedule configuration including parameters, interval
-        settings, associated actions, and execution history.
+      description: Retrieves a specific Attack discovery schedule by its unique
+        identifier. Returns complete schedule configuration including
+        parameters, interval settings, associated actions, and execution
+        history.
       operationId: GetAttackDiscoverySchedules
       parameters:
-        - description: >-
-            The unique identifier (UUID) of the Attack Discovery schedule to
+        - description: The unique identifier (UUID) of the Attack Discovery schedule to
             retrieve. This ID is returned when creating a schedule and can be
             found in schedule listings.
           example: 12345678-1234-1234-1234-123456789012
@@ -2068,8 +1990,7 @@ paths:
                 updated_by: elastic
               schema:
                 $ref: '#/components/schemas/AttackDiscoveryApiSchedule'
-          description: >-
-            Successfully retrieved Attack Discovery schedule with complete
+          description: Successfully retrieved Attack Discovery schedule with complete
             configuration and metadata
         '400':
           content:
@@ -2093,15 +2014,13 @@ paths:
              --header "Authorization: $API_KEY" \
              --header "Content-Type: application/json"
     put:
-      description: >-
-        Updates an existing Attack discovery schedule with new configuration.
-        All schedule properties can be modified including name, parameters,
-        interval, and actions. The update operation replaces the entire schedule
-        configuration with the provided values.
+      description: Updates an existing Attack discovery schedule with new
+        configuration. All schedule properties can be modified including name,
+        parameters, interval, and actions. The update operation replaces the
+        entire schedule configuration with the provided values.
       operationId: UpdateAttackDiscoverySchedules
       parameters:
-        - description: >-
-            The unique identifier (UUID) of the Attack Discovery schedule to
+        - description: The unique identifier (UUID) of the Attack Discovery schedule to
             update. This ID is returned when creating a schedule and can be
             found in schedule listings.
           example: 12345678-1234-1234-1234-123456789012
@@ -2129,8 +2048,7 @@ paths:
                 interval: 12h
             schema:
               $ref: '#/components/schemas/AttackDiscoveryApiScheduleUpdateProps'
-        description: >-
-          Updated Attack discovery schedule configuration. All fields are
+        description: Updated Attack discovery schedule configuration. All fields are
           required as this replaces the entire schedule configuration.
         required: true
       responses:
@@ -2159,8 +2077,7 @@ paths:
                 updated_by: elastic
               schema:
                 $ref: '#/components/schemas/AttackDiscoveryApiSchedule'
-          description: >-
-            Successfully updated Attack Discovery schedule with the new
+          description: Successfully updated Attack Discovery schedule with the new
             configuration and metadata
         '400':
           content:
@@ -2203,15 +2120,13 @@ paths:
              }'
   /api/attack_discovery/schedules/{id}/_disable:
     post:
-      description: >-
-        Disables an Attack discovery schedule, preventing it from running
+      description: Disables an Attack discovery schedule, preventing it from running
         according to its configured interval. The schedule configuration is
         preserved and can be re-enabled later. Any currently running executions
         will complete, but no new executions will be started.
       operationId: DisableAttackDiscoverySchedules
       parameters:
-        - description: >-
-            The unique identifier (UUID) of the Attack Discovery schedule to
+        - description: The unique identifier (UUID) of the Attack Discovery schedule to
             disable. This ID is returned when creating a schedule and can be
             found in schedule listings.
           example: 12345678-1234-1234-1234-123456789012
@@ -2231,13 +2146,10 @@ paths:
                 properties:
                   id:
                     $ref: '#/components/schemas/NonEmptyString'
-                    description: >-
-                      The unique identifier of the disabled Attack Discovery
-                      schedule
+                    description: The unique identifier of the disabled Attack Discovery schedule
                 required:
                   - id
-          description: >-
-            Successfully disabled Attack Discovery schedule, returning the
+          description: Successfully disabled Attack Discovery schedule, returning the
             schedule ID for confirmation
         '400':
           content:
@@ -2262,15 +2174,13 @@ paths:
              --header "Content-Type: application/json"
   /api/attack_discovery/schedules/{id}/_enable:
     post:
-      description: >-
-        Enables a previously disabled Attack discovery schedule, allowing it to
-        run according to its configured interval. Once enabled, the schedule
-        will begin executing at the next scheduled time based on its interval
-        configuration.
+      description: Enables a previously disabled Attack discovery schedule, allowing
+        it to run according to its configured interval. Once enabled, the
+        schedule will begin executing at the next scheduled time based on its
+        interval configuration.
       operationId: EnableAttackDiscoverySchedules
       parameters:
-        - description: >-
-            The unique identifier (UUID) of the Attack Discovery schedule to
+        - description: The unique identifier (UUID) of the Attack Discovery schedule to
             enable. This ID is returned when creating a schedule and can be
             found in schedule listings.
           example: 12345678-1234-1234-1234-123456789012
@@ -2290,13 +2200,10 @@ paths:
                 properties:
                   id:
                     $ref: '#/components/schemas/NonEmptyString'
-                    description: >-
-                      The unique identifier of the enabled Attack Discovery
-                      schedule
+                    description: The unique identifier of the enabled Attack Discovery schedule
                 required:
                   - id
-          description: >-
-            Successfully enabled Attack Discovery schedule, returning the
+          description: Successfully enabled Attack Discovery schedule, returning the
             schedule ID for confirmation
         '400':
           content:
@@ -2401,8 +2308,7 @@ components:
             type: string
           type: array
         alert_rule_uuid:
-          description: >-
-            The optional kibana.alert.rule.uuid of the rule that generated this
+          description: The optional kibana.alert.rule.uuid of the rule that generated this
             attack discovery (not applicable to ad hock runs)
           type: string
         alert_start:
@@ -2412,39 +2318,33 @@ components:
           description: The optional time the attack discovery alert was last updated
           type: string
         alert_updated_by_user_id:
-          description: >-
-            The optional id of the user who last updated the attack discovery
+          description: The optional id of the user who last updated the attack discovery
             alert
           type: string
         alert_updated_by_user_name:
-          description: >-
-            The optional username of the user who updated the attack discovery
+          description: The optional username of the user who updated the attack discovery
             alert
           type: string
         alert_workflow_status:
           description: The optional kibana.alert.workflow_status of this attack discovery
           type: string
         alert_workflow_status_updated_at:
-          description: >-
-            The optional time the attack discovery alert workflow status was
+          description: The optional time the attack discovery alert workflow status was
             last updated
           type: string
         connector_id:
           description: The ID of the connector that generated the attack discovery
           type: string
         connector_name:
-          description: >-
-            The (human readable) name of the connector that generated the attack
-            discovery
+          description: The (human readable) name of the connector that generated the
+            attack discovery
           type: string
         details_markdown:
-          description: >-
-            Details of the attack with bulleted markdown that always uses
+          description: Details of the attack with bulleted markdown that always uses
             special syntax for field names and values from the source data.
           type: string
         entity_summary_markdown:
-          description: >-
-            An optional, short (no more than a sentence) summary of the attack
+          description: An optional, short (no more than a sentence) summary of the attack
             discovery featuring only the host.name and user.name fields (when
             they are applicable), using the same syntax
           type: string
@@ -2461,12 +2361,10 @@ components:
           type: array
         replacements:
           $ref: '#/components/schemas/Replacements'
-          description: >-
-            Key-value pairs that are used to replace placeholders in the
+          description: Key-value pairs that are used to replace placeholders in the
             markdown fields
         risk_score:
-          description: >-
-            The optional, (but typically populated after generation) risk score
+          description: The optional, (but typically populated after generation) risk score
             of the alert
           type: integer
         summary_markdown:
@@ -2482,13 +2380,11 @@ components:
           description: The optional id of the user who generated the attack discovery
           type: string
         user_name:
-          description: >-
-            The optional username of the user who generated the attack
+          description: The optional username of the user who generated the attack
             discovery, (not applicable to attack discoveries generated by rules)
           type: string
         users:
-          description: >-
-            The optional array of users who may view the attack discovery. When
+          description: The optional array of users who may view the attack discovery. When
             empty, (or not present), all users may view the attack discovery.
           items:
             $ref: '#/components/schemas/User'
@@ -2563,17 +2459,16 @@ components:
       additionalProperties: true
       type: object
     AttackDiscoveryApiScheduleActionFrequency:
-      description: >-
-        The action frequency defines when the action runs (for example, only on
-        schedule execution or at specific time intervals).
+      description: The action frequency defines when the action runs (for example,
+        only on schedule execution or at specific time intervals).
       type: object
       properties:
         notify_when:
           $ref: '#/components/schemas/AttackDiscoveryApiScheduleActionNotifyWhen'
         summary:
-          description: >-
-            Action summary indicates whether we will send a summary notification
-            about all the generate alerts or notification per individual alert
+          description: Action summary indicates whether we will send a summary
+            notification about all the generate alerts or notification per
+            individual alert
           type: boolean
         throttle:
           $ref: '#/components/schemas/AttackDiscoveryApiScheduleActionThrottle'
@@ -2589,9 +2484,8 @@ components:
       description: The connector ID.
       type: string
     AttackDiscoveryApiScheduleActionNotifyWhen:
-      description: >-
-        The condition for throttling the notification: `onActionGroupChange`,
-        `onActiveAlert`,  or `onThrottleInterval`
+      description: 'The condition for throttling the notification:
+        `onActionGroupChange`, `onActiveAlert`,  or `onThrottleInterval`'
       enum:
         - onActiveAlert
         - onThrottleInterval
@@ -2599,14 +2493,12 @@ components:
       type: string
     AttackDiscoveryApiScheduleActionParams:
       additionalProperties: true
-      description: >-
-        Object containing the allowed connector fields, which varies according
-        to the connector type.
+      description: Object containing the allowed connector fields, which varies
+        according to the connector type.
       type: object
     AttackDiscoveryApiScheduleActionThrottle:
-      description: >-
-        Defines how often schedule actions are taken. Time interval in seconds,
-        minutes, hours, or days.
+      description: Defines how often schedule actions are taken. Time interval in
+        seconds, minutes, hours, or days.
       example: 1h
       pattern: ^[1-9]\d*[smhd]$
       type: string
@@ -2762,9 +2654,8 @@ components:
         - schedule
         - actions
     AttackDiscoveryFindSortField:
-      description: >-
-        Allowed field names to sort Attack discovery results by. Clients should
-        only pass one of the listed values.
+      description: Allowed field names to sort Attack discovery results by. Clients
+        should only pass one of the listed values.
       enum:
         - '@timestamp'
       type: string
@@ -2772,8 +2663,7 @@ components:
       type: object
       properties:
         alerts_context_count:
-          description: >-
-            The number of alerts sent as context (max
+          description: The number of alerts sent as context (max
             kibana.alert.rule.execution.metrics.alert_counts.active) to the LLM
             for the generation
           type: number
@@ -2785,19 +2675,16 @@ components:
           type: object
           properties:
             average_successful_duration_nanoseconds:
-              description: >-
-                The average duration (avg event.duration) in nanoseconds of
+              description: The average duration (avg event.duration) in nanoseconds of
                 successful generations for the same connector id, for the
                 current user
               type: number
             successful_generations:
-              description: >-
-                The number of successful generations for the same connector id,
-                for the current user
+              description: The number of successful generations for the same connector id, for
+                the current user
               type: number
         discoveries:
-          description: >-
-            The number of new Attack discovery alerts (max
+          description: The number of new Attack discovery alerts (max
             kibana.alert.rule.execution.metrics.alert_counts.new) for this
             generation
           type: number
@@ -2805,8 +2692,7 @@ components:
           description: When generation ended (max event.end)
           type: string
         execution_uuid:
-          description: >-
-            The unique identifier (kibana.alert.rule.execution.uuid) for the
+          description: The unique identifier (kibana.alert.rule.execution.uuid) for the
             generation
           type: string
         loading_message:
@@ -2847,8 +2733,7 @@ components:
             Example: .alerts-security.alerts-default
           type: string
         anonymizationFields:
-          description: >-
-            The list of fields, and whether or not they are anonymized, allowed
+          description: The list of fields, and whether or not they are anonymized, allowed
             to be sent to LLMs. Consider using the output of the
             `/api/security_ai_assistant/anonymization_fields/_find` API (for a
             specific Kibana space) to provide this value.
@@ -2928,8 +2813,7 @@ components:
           example: 400
           type: number
     Filters:
-      description: >-
-        The filter array used to define the conditions for when alerts are
+      description: The filter array used to define the conditions for when alerts are
         selected as an attack discovery context. Defaults to an empty array.
       items: {}
       type: array
@@ -2948,9 +2832,8 @@ components:
       minLength: 1
       type: string
     NonEmptyTimestamp:
-      description: >-
-        A string that represents a timestamp in ISO 8601 format and does not
-        contain only whitespace characters.
+      description: A string that represents a timestamp in ISO 8601 format and does
+        not contain only whitespace characters.
       example: '2023-10-31T12:00:00Z'
       format: nonempty
       minLength: 1
@@ -3008,12 +2891,12 @@ components:
 security:
   - BasicAuth: []
 tags:
-  - description: >-
-      Use the Attack discovery APIs to generate and manage Attack discoveries.
-      Attack Discovery leverages large language models (LLMs) to analyze alerts
-      in your environment and identify threats. Each "discovery" represents a
-      potential attack and describes relationships among multiple alerts to tell
-      you which users and hosts are involved, how alerts correspond to the MITRE
-      ATT&CK matrix, and which threat actor might be responsible.
+  - description: Use the Attack discovery APIs to generate and manage Attack
+      discoveries. Attack Discovery leverages large language models (LLMs) to
+      analyze alerts in your environment and identify threats. Each "discovery"
+      represents a potential attack and describes relationships among multiple
+      alerts to tell you which users and hosts are involved, how alerts
+      correspond to the MITRE ATT&CK matrix, and which threat actor might be
+      responsible.
     name: Security Attack discovery API
     x-displayName: Security Attack discovery

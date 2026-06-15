@@ -13,11 +13,10 @@ servers:
 paths:
   /api/endpoint_list:
     post:
-      description: >-
-        Create the exception list for Elastic Endpoint rule exceptions. When you
-        create the exception list, it will have a `list_id` of `endpoint_list`.
-        If the Elastic Endpoint exception list already exists, your request will
-        return an empty response.
+      description: Create the exception list for Elastic Endpoint rule exceptions.
+        When you create the exception list, it will have a `list_id` of
+        `endpoint_list`. If the Elastic Endpoint exception list already exists,
+        your request will return an empty response.
       operationId: CreateEndpointList
       responses:
         '200':
@@ -57,9 +56,8 @@ paths:
         - Security Endpoint Exceptions API
   /api/endpoint_list/items:
     delete:
-      description: >-
-        Delete an Elastic Endpoint exception list item, specified by the `id` or
-        `item_id` field.
+      description: Delete an Elastic Endpoint exception list item, specified by the
+        `id` or `item_id` field.
       operationId: DeleteEndpointListItem
       parameters:
         - description: Either `id` or `item_id` must be specified
@@ -117,9 +115,8 @@ paths:
       tags:
         - Security Endpoint Exceptions API
     get:
-      description: >-
-        Get the details of an Elastic Endpoint exception list item, specified by
-        the `id` or `item_id` field.
+      description: Get the details of an Elastic Endpoint exception list item,
+        specified by the `id` or `item_id` field.
       operationId: ReadEndpointListItem
       parameters:
         - description: Either `id` or `item_id` must be specified
@@ -177,9 +174,8 @@ paths:
       tags:
         - Security Endpoint Exceptions API
     post:
-      description: >-
-        Create an Elastic Endpoint exception list item, and associate it with
-        the Elastic Endpoint exception list.
+      description: Create an Elastic Endpoint exception list item, and associate it
+        with the Elastic Endpoint exception list.
       operationId: CreateEndpointListItem
       requestBody:
         content:
@@ -258,9 +254,8 @@ paths:
       tags:
         - Security Endpoint Exceptions API
     put:
-      description: >-
-        Update an Elastic Endpoint exception list item, specified by the `id` or
-        `item_id` field.
+      description: Update an Elastic Endpoint exception list item, specified by the
+        `id` or `item_id` field.
       operationId: UpdateEndpointListItem
       requestBody:
         content:
@@ -463,8 +458,7 @@ components:
       type: object
       properties:
         _version:
-          description: >-
-            The version id, normally returned by the API when the item was
+          description: The version id, normally returned by the API when the item was
             retrieved. Use it ensure updates are done against the latest
             version.
           type: string
@@ -494,8 +488,7 @@ components:
         tags:
           $ref: '#/components/schemas/ExceptionListTags'
         tie_breaker_id:
-          description: >-
-            Field used in search to ensure all containers are sorted and
+          description: Field used in search to ensure all containers are sorted and
             returned correctly.
           type: string
         type:
@@ -543,8 +536,7 @@ components:
       type: object
       properties:
         _version:
-          description: >-
-            The version id, normally returned by the API when the item was
+          description: The version id, normally returned by the API when the item was
             retrieved. Use it ensure updates are done against the latest
             version.
           type: string
@@ -580,8 +572,7 @@ components:
         tags:
           $ref: '#/components/schemas/ExceptionListItemTags'
         tie_breaker_id:
-          description: >-
-            Field used in search to ensure all containers are sorted and
+          description: Field used in search to ensure all containers are sorted and
             returned correctly.
           type: string
         type:
@@ -784,9 +775,8 @@ components:
         - included
       type: string
     ExceptionListItemExpireTime:
-      description: >-
-        The exception item’s expiration date, in ISO format. This field is only
-        available for regular exception items, not endpoint exceptions.
+      description: The exception item’s expiration date, in ISO format. This field is
+        only available for regular exception items, not endpoint exceptions.
       format: date-time
       type: string
     ExceptionListItemHumanId:
@@ -815,9 +805,8 @@ components:
       type: array
     ExceptionListItemTags:
       items:
-        description: >-
-          String array containing words and phrases to help categorize exception
-          items.
+        description: String array containing words and phrases to help categorize
+          exception items.
         format: nonempty
         minLength: 1
         type: string
@@ -847,15 +836,13 @@ components:
         $ref: '#/components/schemas/ExceptionListOsType'
       type: array
     ExceptionListTags:
-      description: >-
-        String array containing words and phrases to help categorize exception
-        containers.
+      description: String array containing words and phrases to help categorize
+        exception containers.
       items:
         type: string
       type: array
     ExceptionListType:
-      description: >-
-        The type of exception list to be created. Different list types may
+      description: The type of exception list to be created. Different list types may
         denote where they can be utilized.
       enum:
         - detection
@@ -966,9 +953,8 @@ components:
 security:
   - BasicAuth: []
 tags:
-  - description: >-
-      Endpoint Exceptions API allows you to manage detection rule endpoint
-      exceptions to prevent a rule from generating an alert from incoming events
-      even when the rule's other criteria are met.
+  - description: Endpoint Exceptions API allows you to manage detection rule
+      endpoint exceptions to prevent a rule from generating an alert from
+      incoming events even when the rule's other criteria are met.
     name: Security Endpoint Exceptions API
     x-displayName: Security Elastic Endpoint exceptions

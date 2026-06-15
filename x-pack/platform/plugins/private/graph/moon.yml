@@ -57,6 +57,7 @@ dependsOn:
   - '@kbn/react-kibana-context-render'
   - '@kbn/core-saved-objects-api-server'
   - '@kbn/licensing-types'
+  - '@kbn/scout'
 tags:
   - plugin
   - prod
@@ -69,6 +70,7 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js

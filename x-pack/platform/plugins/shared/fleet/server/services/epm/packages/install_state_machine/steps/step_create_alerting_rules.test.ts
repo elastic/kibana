@@ -8,6 +8,7 @@
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
 import { appContextService } from '../../../../app_context';
 import type { ArchiveAsset } from '../../../kibana/assets/install';
@@ -184,6 +185,7 @@ describe('stepCreateAlertingRules', () => {
 
     const context = {
       savedObjectsClient,
+      spaceId: DEFAULT_SPACE_ID,
       packageInstallContext: {
         packageInfo: { name: 'elastic_agent' },
         archiveIterator: createArchiveIteratorFromMap(
@@ -216,6 +218,7 @@ describe('stepCreateAlertingRules', () => {
           deferred: false,
         },
       ],
+      DEFAULT_SPACE_ID,
       false,
       true
     );

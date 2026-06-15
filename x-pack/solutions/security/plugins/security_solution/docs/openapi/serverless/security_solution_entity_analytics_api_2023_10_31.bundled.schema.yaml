@@ -46,9 +46,8 @@ paths:
                 type: object
                 properties:
                   deleted:
-                    description: >-
-                      True if the record was deleted or false if the record did
-                      not exist.
+                    description: True if the record was deleted or false if the record did not
+                      exist.
                     type: boolean
                   record:
                     $ref: '#/components/schemas/AssetCriticalityRecord'
@@ -111,9 +110,7 @@ paths:
                 - type: object
                   properties:
                     refresh:
-                      description: >-
-                        If 'wait_for' the request will wait for the index
-                        refresh.
+                      description: If 'wait_for' the request will wait for the index refresh.
                       enum:
                         - wait_for
                       type: string
@@ -166,8 +163,7 @@ paths:
                       - type: object
                         properties:
                           criticality_level:
-                            $ref: >-
-                              #/components/schemas/AssetCriticalityLevelsForBulkUpload
+                            $ref: '#/components/schemas/AssetCriticalityLevelsForBulkUpload'
                         required:
                           - criticality_level
                   maxItems: 1000
@@ -418,9 +414,7 @@ paths:
                         description: Current number of privileged users being monitored
                         type: integer
                       max_allowed:
-                        description: >-
-                          Maximum number of privileged users allowed to be
-                          monitored
+                        description: Maximum number of privileged users allowed to be monitored
                         type: integer
                     required:
                       - current_count
@@ -433,9 +427,8 @@ paths:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/privileges/privileges:
     get:
-      description: >-
-        Check if the current user has all required permissions for Privilege
-        Monitoring
+      description: Check if the current user has all required permissions for
+        Privilege Monitoring
       operationId: PrivMonPrivileges
       responses:
         '200':
@@ -540,9 +533,8 @@ paths:
                     description: Indicates if the deletion was successful
                     type: boolean
                   message:
-                    description: >-
-                      A message providing additional information about the
-                      deletion status
+                    description: A message providing additional information about the deletion
+                      status
                     type: string
                 required:
                   - success
@@ -611,8 +603,7 @@ paths:
                 required:
                   - message
           description: Successful response
-      summary: >-
-        Installs the privileged access detection package for the Entity
+      summary: Installs the privileged access detection package for the Entity
         Analytics privileged user monitoring experience
       tags:
         - Security Entity Analytics API
@@ -661,15 +652,13 @@ paths:
                   - ml_module_setup_status
                   - jobs
           description: Privileged access detection status retrieved
-      summary: >-
-        Gets the status of the privileged access detection package for the
+      summary: Gets the status of the privileged access detection package for the
         Entity Analytics privileged user monitoring experience
       tags:
         - Security Entity Analytics API
   /api/entity_store/enable:
     post:
-      description: >-
-        Initialize the entire Entity Store, creating engines for all or
+      description: Initialize the entire Entity Store, creating engines for all or
         specified entity types.
       operationId: InitEntityStore
       requestBody:
@@ -715,16 +704,14 @@ paths:
                   $ref: '#/components/schemas/IndexPattern'
                 lookbackPeriod:
                   default: 3h
-                  description: >-
-                    The amount of time the transform looks back to calculate the
+                  description: The amount of time the transform looks back to calculate the
                     aggregations.
                   pattern: '[smdh]$'
                   type: string
                 maxPageSearchSize:
                   default: 500
-                  description: >-
-                    The initial page size to use for the composite aggregation
-                    of each checkpoint.
+                  description: The initial page size to use for the composite aggregation of each
+                    checkpoint.
                   type: integer
                 timeout:
                   default: 180s
@@ -743,9 +730,8 @@ paths:
             application/json:
               examples:
                 initEntityStoreExample:
-                  description: >-
-                    The Entity Store was successfully initialized, creating host
-                    and user engines in the installing state.
+                  description: The Entity Store was successfully initialized, creating host and
+                    user engines in the installing state.
                   summary: Entity Store initialized with host and user engines
                   value:
                     engines:
@@ -789,9 +775,7 @@ paths:
     delete:
       operationId: DeleteEntityEngines
       parameters:
-        - description: >-
-            The entity type of the engine ('user', 'host', 'service',
-            'generic').
+        - description: The entity type of the engine ('user', 'host', 'service', 'generic').
           examples:
             hostAndService:
               value: host,service
@@ -799,9 +783,8 @@ paths:
           name: entityTypes
           required: false
           schema:
-            description: >-
-              Array of engine types to delete. Empty by default, which results
-              in all the engines being deleted.
+            description: Array of engine types to delete. Empty by default, which results in
+              all the engines being deleted.
             items:
               $ref: '#/components/schemas/EntityType'
             type: array
@@ -851,9 +834,8 @@ paths:
             application/json:
               examples:
                 listEntityEnginesExample:
-                  description: >-
-                    Returns a list with one running host engine and one stopped
-                    user engine.
+                  description: Returns a list with one running host engine and one stopped user
+                    engine.
                   summary: Two engines installed
                   value:
                     count: 2
@@ -937,8 +919,7 @@ paths:
       tags:
         - Security Entity Analytics API
     get:
-      description: >-
-        Get the engine descriptor for a specific entity type, including its
+      description: Get the engine descriptor for a specific entity type, including its
         configuration and current status.
       operationId: GetEntityEngine
       parameters:
@@ -955,9 +936,8 @@ paths:
             application/json:
               examples:
                 getEntityEngineExample:
-                  description: >-
-                    Returns the engine descriptor for a host engine that is
-                    currently running with default settings.
+                  description: Returns the engine descriptor for a host engine that is currently
+                    running with default settings.
                   summary: A running host engine
                   value:
                     delay: 1m
@@ -1028,16 +1008,14 @@ paths:
                   $ref: '#/components/schemas/IndexPattern'
                 lookbackPeriod:
                   default: 3h
-                  description: >-
-                    The amount of time the transform looks back to calculate the
+                  description: The amount of time the transform looks back to calculate the
                     aggregations.
                   pattern: '[smdh]$'
                   type: string
                 maxPageSearchSize:
                   default: 500
-                  description: >-
-                    The initial page size to use for the composite aggregation
-                    of each checkpoint.
+                  description: The initial page size to use for the composite aggregation of each
+                    checkpoint.
                   type: integer
                 timeout:
                   default: 180s
@@ -1056,8 +1034,7 @@ paths:
             application/json:
               examples:
                 initEntityEngineExample:
-                  description: >-
-                    A host engine was successfully initialized and is now in the
+                  description: A host engine was successfully initialized and is now in the
                     installing state.
                   summary: Host engine initialized
                   value:
@@ -1080,9 +1057,8 @@ paths:
         - Security Entity Analytics API
   /api/entity_store/engines/{entityType}/start:
     post:
-      description: >-
-        Start a previously stopped entity engine, resuming transform processing
-        for the given entity type.
+      description: Start a previously stopped entity engine, resuming transform
+        processing for the given entity type.
       operationId: StartEntityEngine
       parameters:
         - description: The entity type of the engine to start.
@@ -1098,9 +1074,7 @@ paths:
             application/json:
               examples:
                 startEntityEngineExample:
-                  description: >-
-                    The engine was successfully started and is now processing
-                    data.
+                  description: The engine was successfully started and is now processing data.
                   summary: Engine started successfully
                   value:
                     started: true
@@ -1116,9 +1090,8 @@ paths:
         - Security Entity Analytics API
   /api/entity_store/engines/{entityType}/stop:
     post:
-      description: >-
-        Stop a running entity engine, pausing transform processing for the given
-        entity type.
+      description: Stop a running entity engine, pausing transform processing for the
+        given entity type.
       operationId: StopEntityEngine
       parameters:
         - description: The entity type of the engine to stop.
@@ -1134,9 +1107,8 @@ paths:
             application/json:
               examples:
                 stopEntityEngineExample:
-                  description: >-
-                    The engine was successfully stopped and is no longer
-                    processing data.
+                  description: The engine was successfully stopped and is no longer processing
+                    data.
                   summary: Engine stopped successfully
                   value:
                     stopped: true
@@ -1152,9 +1124,8 @@ paths:
         - Security Entity Analytics API
   /api/entity_store/engines/apply_dataview_indices:
     post:
-      description: >-
-        Synchronize data view index patterns to all running entity engines so
-        that newly added indices are picked up by the transforms.
+      description: Synchronize data view index patterns to all running entity engines
+        so that newly added indices are picked up by the transforms.
       operationId: ApplyEntityEngineDataviewIndices
       responses:
         '200':
@@ -1162,9 +1133,8 @@ paths:
             application/json:
               examples:
                 applyDataviewIndicesExample:
-                  description: >-
-                    All running engines were successfully updated with the
-                    current data view index patterns.
+                  description: All running engines were successfully updated with the current data
+                    view index patterns.
                   summary: All engines updated
                   value:
                     result:
@@ -1198,9 +1168,8 @@ paths:
             application/json:
               examples:
                 partialSuccessExample:
-                  description: >-
-                    The host engine was updated but the user engine failed due
-                    to insufficient privileges.
+                  description: The host engine was updated but the user engine failed due to
+                    insufficient privileges.
                   summary: One engine failed
                   value:
                     errors:
@@ -1234,9 +1203,7 @@ paths:
             application/json:
               examples:
                 serverErrorExample:
-                  description: >-
-                    An unexpected error occurred while applying data view
-                    indices.
+                  description: An unexpected error occurred while applying data view indices.
                   summary: Internal server error
                   value:
                     body: An internal error occurred while updating engine indices
@@ -1260,9 +1227,9 @@ paths:
         Delete a single entity in Entity Store.
 
         The entity will be immediately deleted from the latest index.  It will
-        remain available in historical snapshots if it has been snapshotted. 
-        The delete operation does not prevent the entity from being recreated if
-        it is observed again in the future. 
+        remain available in historical snapshots if it has been
+        snapshotted.  The delete operation does not prevent the entity from
+        being recreated if it is observed again in the future. 
       operationId: DeleteSingleEntity
       parameters:
         - description: The entity type of the entity to delete.
@@ -1284,9 +1251,7 @@ paths:
               type: object
               properties:
                 id:
-                  description: >-
-                    Identifier of the entity to be deleted, commonly entity.id
-                    value.
+                  description: Identifier of the entity to be deleted, commonly entity.id value.
                   example: arn:aws:iam::123456789012:user/jane.doe
                   type: string
               required:
@@ -1299,9 +1264,8 @@ paths:
             application/json:
               examples:
                 deleteEntityExample:
-                  description: >-
-                    The entity was found and successfully removed from the
-                    latest index.
+                  description: The entity was found and successfully removed from the latest
+                    index.
                   summary: Entity deleted
                   value:
                     deleted: true
@@ -1315,8 +1279,7 @@ paths:
         '404':
           description: Entity Not Found. No entity with this ID and Type exists.
         '503':
-          description: >-
-            Operation on an uninitialized Engine or in a cluster without CRUD
+          description: Operation on an uninitialized Engine or in a cluster without CRUD
             API Enabled
       summary: Delete an entity in Entity Store
       tags:
@@ -1396,12 +1359,10 @@ paths:
         '403':
           description: Operation on a restricted field
         '409':
-          description: >-
-            Conflict. The entity was updated while another update was happening
+          description: Conflict. The entity was updated while another update was happening
             in ElasticSearch
         '503':
-          description: >-
-            Operation on an uninitialized Engine or in a cluster without CRUD
+          description: Operation on an uninitialized Engine or in a cluster without CRUD
             API Enabled
       summary: Upsert an entity in Entity Store
       tags:
@@ -1460,8 +1421,7 @@ paths:
         '403':
           description: Operation on a restricted field
         '503':
-          description: >-
-            Operation on an uninitialized Engine or in a cluster without CRUD
+          description: Operation on an uninitialized Engine or in a cluster without CRUD
             API Enabled
       summary: Upsert many entities in Entity Store
       tags:
@@ -1572,13 +1532,11 @@ paths:
         - Security Entity Analytics API
   /api/entity_store/status:
     get:
-      description: >-
-        Get the overall Entity Store status and per-engine statuses, optionally
-        including component-level health details.
+      description: Get the overall Entity Store status and per-engine statuses,
+        optionally including component-level health details.
       operationId: GetEntityStoreStatus
       parameters:
-        - description: >-
-            If true, returns a detailed status of each engine including all its
+        - description: If true, returns a detailed status of each engine including all its
             components.
           example: true
           in: query
@@ -1591,9 +1549,8 @@ paths:
             application/json:
               examples:
                 entityStoreRunning:
-                  description: >-
-                    The Entity Store is running with both host and user engines
-                    started and using default settings.
+                  description: The Entity Store is running with both host and user engines started
+                    and using default settings.
                   summary: Entity Store running with two engines
                   value:
                     engines:
@@ -1627,9 +1584,8 @@ paths:
                         - type: object
                           properties:
                             components:
-                              description: >-
-                                Detailed component-level status. Only included
-                                when include_components is true.
+                              description: Detailed component-level status. Only included when
+                                include_components is true.
                               items:
                                 $ref: '#/components/schemas/EngineComponentStatus'
                               type: array
@@ -1646,9 +1602,8 @@ paths:
         - Security Entity Analytics API
   /api/risk_score/engine/dangerously_delete_data:
     delete:
-      description: >-
-        Cleaning up the the Risk Engine by removing the indices, mapping and
-        transforms
+      description: Cleaning up the the Risk Engine by removing the indices, mapping
+        and transforms
       operationId: CleanUpRiskEngine
       responses:
         '200':
@@ -1742,18 +1697,16 @@ paths:
           content:
             application/json:
               schema:
-                $ref: >-
-                  #/components/schemas/ConfigureRiskEngineSavedObjectErrorResponse
+                $ref: '#/components/schemas/ConfigureRiskEngineSavedObjectErrorResponse'
           description: Unexpected error
       summary: Configure the Risk Engine Saved Object
       tags:
         - Security Entity Analytics API
   /api/risk_score/engine/schedule_now:
     post:
-      description: >-
-        Schedule the risk scoring engine to run as soon as possible. You can use
-        this to recalculate entity risk scores after updating their asset
-        criticality.
+      description: Schedule the risk scoring engine to run as soon as possible. You
+        can use this to recalculate entity risk scores after updating their
+        asset criticality.
       operationId: ScheduleRiskEngineNow
       requestBody:
         content:
@@ -1846,8 +1799,7 @@ components:
         - extreme_impact
       type: string
     AssetCriticalityLevelsForBulkUpload:
-      description: >-
-        The criticality level of the asset for bulk upload. The value
+      description: The criticality level of the asset for bulk upload. The value
         `unassigned` is used to indicate that the criticality level is not
         assigned and is only used for bulk upload.
       enum:
@@ -2014,9 +1966,7 @@ components:
           required:
             - criticality_level
     EngineComponentResource:
-      description: >-
-        The type of Elasticsearch or Kibana resource backing an engine
-        component.
+      description: The type of Elasticsearch or Kibana resource backing an engine component.
       enum:
         - entity_engine
         - entity_definition
@@ -2031,8 +1981,7 @@ components:
         - ilm_policy
       type: string
     EngineComponentStatus:
-      description: >-
-        Status of an individual Elasticsearch or Kibana resource backing an
+      description: Status of an individual Elasticsearch or Kibana resource backing an
         engine.
       type: object
       properties:
@@ -2090,23 +2039,20 @@ components:
       required:
         - type
     EngineDescriptor:
-      description: >-
-        Describes a single entity engine, including its configuration and
+      description: Describes a single entity engine, including its configuration and
         current status.
       type: object
       properties:
         delay:
           default: 1m
-          description: >-
-            The delay before the transform processes new data, allowing
+          description: The delay before the transform processes new data, allowing
             late-arriving documents to be included.
           example: 1m
           pattern: '[smdh]$'
           type: string
         docsPerSecond:
-          description: >-
-            Throttle value for the number of documents processed per second. Use
-            -1 for no throttle.
+          description: Throttle value for the number of documents processed per second.
+            Use -1 for no throttle.
           type: integer
         error:
           description: Present when the engine status is `error`. Describes the failure.
@@ -2128,8 +2074,7 @@ components:
           example: 10
           type: integer
         filter:
-          description: >-
-            An optional Kibana Query Language (KQL) filter applied to source
+          description: An optional Kibana Query Language (KQL) filter applied to source
             documents before aggregation.
           example: 'host.name: "my-host"'
           type: string
@@ -2197,8 +2142,7 @@ components:
       required:
         - entities
     Entity:
-      description: >-
-        An entity record from the Entity Store. The `entity` namespace is a
+      description: An entity record from the Entity Store. The `entity` namespace is a
         root-level field in the latest index, unlike source logs where it is
         nested under `host`, `user`, or `service`.
       oneOf:
@@ -2255,8 +2199,7 @@ components:
         - record
     EntityField:
       additionalProperties: false
-      description: >-
-        Core entity fields shared across all entity types. The `entity`
+      description: Core entity fields shared across all entity types. The `entity`
         namespace is a root-level field in the Entity Store latest index.
       type: object
       properties:
@@ -2269,8 +2212,7 @@ components:
               description: Whether the entity is classified as an asset.
               type: boolean
             managed:
-              description: >-
-                Whether the entity is managed (for example, via a directory
+              description: Whether the entity is managed (for example, via a directory
                 service).
               type: boolean
             mfa_enabled:
@@ -2380,8 +2322,7 @@ components:
               format: double
               type: number
             calculated_score_norm:
-              description: >-
-                The normalized numeric value of the given entity's risk score.
+              description: The normalized numeric value of the given entity's risk score.
                 Useful for comparing with other entities.
               format: double
               maximum: 100
@@ -2424,21 +2365,18 @@ components:
           format: double
           type: number
         calculated_score_norm:
-          description: >-
-            The normalized numeric value of the given entity's risk score.
+          description: The normalized numeric value of the given entity's risk score.
             Useful for comparing with other entities.
           format: double
           maximum: 100
           minimum: 0
           type: number
         category_1_count:
-          description: >-
-            The number of risk input documents that contributed to the Category
+          description: The number of risk input documents that contributed to the Category
             1 score (`category_1_score`).
           type: integer
         category_1_score:
-          description: >-
-            The contribution of Category 1 to the overall risk score
+          description: The contribution of Category 1 to the overall risk score
             (`calculated_score`). Category 1 contains Detection Engine Alerts.
           format: double
           type: number
@@ -2453,20 +2391,17 @@ components:
           format: double
           type: number
         id_field:
-          description: >-
-            The identifier field defining this risk score. Coupled with
+          description: The identifier field defining this risk score. Coupled with
             `id_value`, uniquely identifies the entity being scored.
           example: host.name
           type: string
         id_value:
-          description: >-
-            The identifier value defining this risk score. Coupled with
+          description: The identifier value defining this risk score. Coupled with
             `id_field`, uniquely identifies the entity being scored.
           example: example.host
           type: string
         inputs:
-          description: >-
-            A list of the highest-risk documents contributing to this risk
+          description: A list of the highest-risk documents contributing to this risk
             score. Useful for investigative purposes.
           items:
             $ref: '#/components/schemas/RiskScoreInput'
@@ -2518,9 +2453,8 @@ components:
       type: string
     GenericEntity:
       additionalProperties: false
-      description: >-
-        A generic entity record. Maps only the `entity` and `asset` namespaces.
-        Add additional field mappings here as needed.
+      description: A generic entity record. Maps only the `entity` and `asset`
+        namespaces. Add additional field mappings here as needed.
       type: object
       properties:
         '@timestamp':
@@ -2536,9 +2470,8 @@ components:
         - entity
     HostEntity:
       additionalProperties: false
-      description: >-
-        An entity record representing a host, stored in the Entity Store latest
-        index.
+      description: An entity record representing a host, stored in the Entity Store
+        latest index.
       type: object
       properties:
         '@timestamp':
@@ -2617,10 +2550,9 @@ components:
         - entity.id
       type: string
     IndexPattern:
-      description: >-
-        An additional Elasticsearch index pattern to include as a source for
-        entity data. Merged with the default data view indices when the engine
-        runs.
+      description: An additional Elasticsearch index pattern to include as a source
+        for entity data. Merged with the default data view indices when the
+        engine runs.
       example: logs-*
       type: string
     InspectQuery:
@@ -2641,10 +2573,9 @@ components:
         - dsl
         - response
     Interval:
-      description: >-
-        Interval in which enrich policy runs. For example, `"1h"` means the rule
-        runs every hour. Must be less than or equal to half the duration of the
-        lookback period,
+      description: Interval in which enrich policy runs. For example, `"1h"` means the
+        rule runs every hour. Must be less than or equal to half the duration of
+        the lookback period,
       example: 1h
       pattern: ^[1-9]\d*[smh]$
       type: string
@@ -2729,8 +2660,7 @@ components:
           type: object
           properties:
             message:
-              description: >-
-                Error message typically only present if the engine is in error
+              description: Error message typically only present if the engine is in error
                 state
               type: string
         status:
@@ -2844,8 +2774,7 @@ components:
         - category
     ServiceEntity:
       additionalProperties: false
-      description: >-
-        An entity record representing a service, stored in the Entity Store
+      description: An entity record representing a service, stored in the Entity Store
         latest index.
       type: object
       properties:
@@ -2976,9 +2905,8 @@ components:
         - exponential_avg_documents_processed
     UserEntity:
       additionalProperties: false
-      description: >-
-        An entity record representing a user, stored in the Entity Store latest
-        index.
+      description: An entity record representing a user, stored in the Entity Store
+        latest index.
       type: object
       properties:
         '@timestamp':
@@ -3059,9 +2987,7 @@ components:
                     description: The field name for the label
                     type: string
                   source:
-                    description: >-
-                      The source where this label was created (api, csv, or
-                      index_sync)
+                    description: The source where this label was created (api, csv, or index_sync)
                     enum:
                       - api
                       - csv

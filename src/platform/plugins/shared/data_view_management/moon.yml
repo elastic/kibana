@@ -58,6 +58,7 @@ dependsOn:
   - '@kbn/shared-ux-table-persist'
   - '@kbn/css-utils'
   - '@kbn/saved-objects-tagging-oss-plugin'
+  - '@kbn/scout'
 tags:
   - plugin
   - prod
@@ -68,6 +69,7 @@ fileGroups:
   src:
     - public/**/*
     - server/**/*
+    - test/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js
