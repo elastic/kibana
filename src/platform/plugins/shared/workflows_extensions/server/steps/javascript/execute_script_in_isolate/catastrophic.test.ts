@@ -1,4 +1,3 @@
-/* eslint-disable max-classes-per-file */
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the "Elastic License
@@ -8,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/* eslint-disable max-classes-per-file */
+
 import type { ScriptLogger } from '.';
 
-type IsolateOptions = {
+interface IsolateOptions {
   memoryLimit?: number;
   onCatastrophicError?: (message: string) => void;
-};
+}
 
 let mockCapturedOnCatastrophicError: ((message: string) => void) | undefined;
 let mockIsolateDisposed = false;
@@ -25,16 +26,14 @@ const mockDispose = jest.fn(() => {
 const mockEvalClosure = jest.fn(() => new Promise(() => {}));
 
 jest.mock('isolated-vm', () => {
-  class MockReference {
-    constructor(_callback: (...args: unknown[]) => void) {}
-  }
+  class MockReference {}
 
   class MockIsolate {
     constructor(options: IsolateOptions) {
       mockCapturedOnCatastrophicError = options.onCatastrophicError;
     }
 
-    get isDisposed() {
+    public get isDisposed() {
       return mockIsolateDisposed;
     }
 
@@ -61,13 +60,13 @@ jest.mock('isolated-vm', () => {
 });
 
 import { executeScriptInIsolate } from '.';
+import type { StepHandlerContext } from '../../../step_registry/types';
 import {
   MAX_CONSOLE_LOG_COUNT,
   SCRIPT_EXECUTION_TIMEOUT_MS,
   SCRIPT_MEMORY_LIMIT_MB,
   scriptsJavaScriptStepDefinition,
 } from '../javascript_step';
-import type { StepHandlerContext } from '../../../../step_registry/types';
 
 const createLogger = (): ScriptLogger & {
   debug: jest.Mock;

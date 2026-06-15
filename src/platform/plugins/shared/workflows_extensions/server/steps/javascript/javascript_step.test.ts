@@ -8,14 +8,14 @@
  */
 
 import { createSHA256Hash } from '@kbn/crypto';
+import type { ScriptLogger } from './execute_script_in_isolate';
 import {
   SCRIPT_EXECUTION_TIMEOUT_MS,
   SCRIPT_MAX_LENGTH_CHARS,
   SCRIPT_MEMORY_LIMIT_MB,
   scriptsJavaScriptStepDefinition,
 } from './javascript_step';
-import type { StepHandlerContext } from '../../../step_registry/types';
-import type { ScriptLogger } from './execute_script_in_isolate';
+import type { StepHandlerContext } from '../../step_registry/types';
 
 const createLogger = (): ScriptLogger & {
   debug: jest.Mock;

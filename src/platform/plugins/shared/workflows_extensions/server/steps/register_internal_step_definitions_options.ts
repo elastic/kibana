@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { WorkflowsExtensionsExperimentalStepsConfig } from '../config';
+import type { WorkflowsExtensionsExperimentalStepsConfig } from '../../common/experimental_steps_config';
 
-export type RegisterInternalStepDefinitionsOptions = {
+export interface RegisterInternalStepDefinitionsOptions {
   experimentalSteps: WorkflowsExtensionsExperimentalStepsConfig;
-};
+}

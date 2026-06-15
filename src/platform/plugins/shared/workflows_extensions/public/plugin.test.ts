@@ -34,10 +34,9 @@ describe('WorkflowsExtensionsPublicPlugin', () => {
       plugin.setup(coreMock.createSetup(), {});
 
       expect(registerInternalStepDefinitions).toHaveBeenCalledTimes(1);
-      expect(registerInternalStepDefinitions).toHaveBeenCalledWith(
-        expect.anything(),
-        { experimentalSteps: { javaScriptStep: false } }
-      );
+      expect(registerInternalStepDefinitions).toHaveBeenCalledWith(expect.anything(), {
+        experimentalSteps: { javaScriptStep: false },
+      });
     });
 
     it('returns registerStepDefinition that delegates to step registry', () => {

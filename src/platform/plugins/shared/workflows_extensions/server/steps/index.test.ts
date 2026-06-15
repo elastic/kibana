@@ -8,9 +8,9 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import { ScriptsJavaScriptStepTypeId } from '../../common/steps/scripts/javascript';
+import { registerInternalStepDefinitions } from '.';
+import { ScriptsJavaScriptStepTypeId } from '../../common/steps/javascript';
 import { ServerStepRegistry } from '../step_registry';
-import { registerInternalStepDefinitions } from './index';
 
 describe('registerInternalStepDefinitions', () => {
   it('does not register scripts.javaScript when javaScriptStep is disabled', () => {

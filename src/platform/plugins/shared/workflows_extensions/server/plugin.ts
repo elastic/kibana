@@ -21,10 +21,13 @@ import type {
   WorkflowsClient,
   WorkflowsClientProvider,
 } from '@kbn/workflows/server/types';
+import type {
+  WorkflowsExtensionsConfig,
+  WorkflowsExtensionsExperimentalStepsConfig,
+} from './config';
+import { resolveExperimentalStepsConfig } from './config';
 import { registerGetStepDefinitionsRoute } from './routes/get_step_definitions';
 import { registerGetTriggerDefinitionsRoute } from './routes/get_trigger_definitions';
-import type { WorkflowsExtensionsConfig, WorkflowsExtensionsExperimentalStepsConfig } from './config';
-import { resolveExperimentalStepsConfig } from './config';
 import { ServerStepRegistry } from './step_registry';
 import { registerInternalStepDefinitions } from './steps';
 import { TriggerRegistry } from './trigger_registry';

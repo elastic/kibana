@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PublicStepRegistry } from '../step_registry';
 import type { RegisterInternalStepDefinitionsOptions } from '../../server/steps/register_internal_step_definitions_options';
+import type { PublicStepRegistry } from '../step_registry';
 
 export const registerInternalStepDefinitions = (
   stepRegistry: PublicStepRegistry,
@@ -45,7 +45,7 @@ export const registerInternalStepDefinitions = (
 
   if (experimentalSteps.javaScriptStep) {
     stepRegistry.register(() =>
-      import('./scripts/javascript/javascript_step').then((m) => m.scriptsJavaScriptStepDefinition)
+      import('./javascript/javascript_step').then((m) => m.scriptsJavaScriptStepDefinition)
     );
   }
 };

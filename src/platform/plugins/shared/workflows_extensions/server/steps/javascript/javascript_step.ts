@@ -8,8 +8,8 @@
  */
 
 import { executeScriptInIsolate } from './execute_script_in_isolate';
-import { scriptsJavaScriptStepCommonDefinition } from '../../../../common/steps/scripts/javascript';
-import { createServerStepDefinition } from '../../../step_registry/types';
+import { scriptsJavaScriptStepCommonDefinition } from '../../../common/steps/javascript';
+import { createServerStepDefinition } from '../../step_registry/types';
 
 export const SCRIPT_MEMORY_LIMIT_MB = 8;
 export const SCRIPT_EXECUTION_TIMEOUT_MS = 1_000; // 1 second timeout for the script execution

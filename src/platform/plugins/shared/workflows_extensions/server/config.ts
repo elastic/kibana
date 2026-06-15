@@ -7,40 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from '@kbn/core/server';
+import type {
+  WorkflowsExtensionsConfig,
+  WorkflowsExtensionsExperimentalStepsConfig,
+  WorkflowsExtensionsExperimentalStepsInputConfig,
+} from '../common/experimental_steps_config';
+import { resolveExperimentalStepsConfig } from '../common/experimental_steps_config';
+
+export type {
+  WorkflowsExtensionsConfig,
+  WorkflowsExtensionsExperimentalStepsConfig,
+  WorkflowsExtensionsExperimentalStepsInputConfig,
+};
+export { resolveExperimentalStepsConfig };
 
 const experimentalStepsSchema = schema.object({
   javaScriptStep: schema.boolean({ defaultValue: false }),
 });
 
-const experimentalStepsInputSchema = schema.oneOf(
-  [schema.boolean(), experimentalStepsSchema],
-  { defaultValue: false }
-);
+const experimentalStepsInputSchema = schema.oneOf([schema.boolean(), experimentalStepsSchema], {
+  defaultValue: false,
+});
 
 const configSchema = schema.object({
   experimentalSteps: experimentalStepsInputSchema,
 });
-
-export type WorkflowsExtensionsExperimentalStepsConfig = TypeOf<typeof experimentalStepsSchema>;
-export type WorkflowsExtensionsExperimentalStepsInputConfig = TypeOf<
-  typeof experimentalStepsInputSchema
->;
-export type WorkflowsExtensionsConfig = TypeOf<typeof configSchema>;
-
-export const resolveExperimentalStepsConfig = (
-  experimentalSteps: WorkflowsExtensionsExperimentalStepsInputConfig
-): WorkflowsExtensionsExperimentalStepsConfig => {
-  if (typeof experimentalSteps === 'boolean') {
-    return {
-      javaScriptStep: experimentalSteps,
-    };
-  }
-
-  return experimentalSteps;
-};
 
 export const config: PluginConfigDescriptor<WorkflowsExtensionsConfig> = {
   schema: configSchema,

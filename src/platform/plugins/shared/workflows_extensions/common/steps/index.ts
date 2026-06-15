@@ -8,4 +8,4 @@
  */
 
 export * from './data';
-export * from './scripts';
+export * from './javascript';

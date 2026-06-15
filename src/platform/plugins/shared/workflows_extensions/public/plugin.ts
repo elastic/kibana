@@ -8,11 +8,6 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import type {
-  WorkflowsExtensionsConfig,
-  WorkflowsExtensionsExperimentalStepsConfig,
-} from '../server/config';
-import { resolveExperimentalStepsConfig } from '../server/config';
 import { PublicStepRegistry } from './step_registry';
 import { registerInternalStepDefinitions } from './steps';
 import { PublicTriggerRegistry } from './trigger_registry';
@@ -23,6 +18,11 @@ import type {
   WorkflowsExtensionsPublicPluginStart,
   WorkflowsExtensionsPublicPluginStartDeps,
 } from './types';
+import type {
+  WorkflowsExtensionsConfig,
+  WorkflowsExtensionsExperimentalStepsConfig,
+} from '../common/experimental_steps_config';
+import { resolveExperimentalStepsConfig } from '../common/experimental_steps_config';
 
 export class WorkflowsExtensionsPublicPlugin
   implements
