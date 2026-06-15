@@ -6,6 +6,7 @@
  */
 
 import { useMemo } from 'react';
+import { omit } from 'lodash';
 
 import type { CasesColumnSelection } from '../types';
 
@@ -14,23 +15,11 @@ import type { CasesColumnsConfiguration } from '../../../all_cases/use_cases_col
 import { useCasesColumnsConfiguration } from '../../../all_cases/use_cases_columns_configuration';
 import { mergeSelectedColumnsWithConfiguration } from '../../../all_cases/utils/merge_selected_columns_with_configuration';
 import { useCasesLocalStorage } from '../../../../common/use_cases_local_storage';
-
-/** Fields always shown on each list item; excluded from the list view Fields popover. */
-const LIST_ALWAYS_VISIBLE_FIELDS = new Set([
-  'title',
-  'assignees',
-  'createdBy',
-  'updatedAt',
-  'status',
-  'severity',
-]);
+import { LIST_ALWAYS_VISIBLE_FIELDS } from '../components/list_view/case_list_item';
 
 const getListFieldsConfiguration = (
   casesColumnsConfig: CasesColumnsConfiguration
-): CasesColumnsConfiguration =>
-  Object.fromEntries(
-    Object.entries(casesColumnsConfig).filter(([field]) => !LIST_ALWAYS_VISIBLE_FIELDS.has(field))
-  ) as CasesColumnsConfiguration;
+): CasesColumnsConfiguration => omit(casesColumnsConfig, LIST_ALWAYS_VISIBLE_FIELDS);
 
 export function useListFieldsSelection() {
   const casesColumnsConfig = useCasesColumnsConfiguration();
@@ -44,18 +33,25 @@ export function useListFieldsSelection() {
     []
   );
 
-  const fields = selectedFields || [];
-  const storedFieldKeys = new Set(fields.map(({ field }) => field));
+  const mergedFields = useMemo(() => {
+    const fields = selectedFields || [];
+    const storedFieldKeys = new Set(fields.map(({ field }) => field));
 
-  const mergedFields = mergeSelectedColumnsWithConfiguration({
-    selectedColumns: fields,
-    casesColumnsConfig: listFieldsConfig,
-  });
+    const merged = mergeSelectedColumnsWithConfiguration({
+      selectedColumns: fields,
+      casesColumnsConfig: listFieldsConfig,
+    });
+
+    // Fields already in localStorage keep their checked state; newly added fields default to unchecked.
+    const withDefaults = merged.map((column) =>
+      storedFieldKeys.has(column.field) ? column : { ...column, isChecked: false }
+    );
+
+    return withDefaults;
+  }, [selectedFields, listFieldsConfig]);
 
   return {
-    selectedFields: mergedFields.map((column) =>
-      storedFieldKeys.has(column.field) ? column : { ...column, isChecked: false }
-    ),
+    selectedFields: mergedFields,
     setSelectedFields,
   };
 }

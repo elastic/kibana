@@ -5,101 +5,18 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { css } from '@emotion/react';
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import React from 'react';
+import { EuiLink } from '@elastic/eui';
 import { CaseStatuses } from '@kbn/cases-components';
 
-import type { CaseUI, CaseUICustomField } from '../../../../../common/ui/types';
-import type { CasesColumnSelection } from '../types';
-import { FormattedRelativePreferenceDate } from '../../../formatted_date';
-import { getExtendedFieldDisplayLabels } from '../../../all_cases/utils/extended_fields_column_utils';
-import * as i18n from '../translations';
+import type { CaseUI, CaseUICustomField } from '../../../../../../../common/ui/types';
+import { FormattedRelativePreferenceDate } from '../../../../../formatted_date';
+import { getExtendedFieldDisplayLabels } from '../../../../../all_cases/utils/extended_fields_column_utils';
+import { ExtendedFieldsListItemContent } from './extended_fields_content';
+import type { ListItemFieldContent } from './types';
+import * as i18n from '../../../translations';
 
 const DESCRIPTION_MAX_LENGTH = 100;
-
-interface ExtendedFieldsListItemContentProps {
-  extendedFields: CaseUI['extendedFields'];
-  extendedFieldsLabels: CaseUI['extendedFieldsLabels'];
-}
-
-const ExtendedFieldsListItemContent: React.FC<ExtendedFieldsListItemContentProps> = ({
-  extendedFields,
-  extendedFieldsLabels,
-}) => {
-  const { euiTheme } = useEuiTheme();
-  const labels = getExtendedFieldDisplayLabels(extendedFields, extendedFieldsLabels);
-  const count = labels.length;
-
-  const styles = useMemo(
-    () => ({
-      tooltipContent: css`
-        display: flex;
-        flex-direction: column;
-        gap: ${euiTheme.size.xs};
-      `,
-      tooltipAnchor: {
-        cursor: 'default',
-      },
-    }),
-    [euiTheme]
-  );
-
-  const tooltipContent = (
-    <div css={styles.tooltipContent}>
-      {labels.map((label, index) => (
-        <div key={`${label}-${index}`}>{label}</div>
-      ))}
-    </div>
-  );
-
-  return (
-    <EuiToolTip content={tooltipContent} position="top">
-      <span
-        css={styles.tooltipAnchor}
-        data-test-subj="cases-list-item-field-extended-fields-tooltip-anchor"
-        tabIndex={0}
-      >
-        {count}
-      </span>
-    </EuiToolTip>
-  );
-};
-
-ExtendedFieldsListItemContent.displayName = 'ExtendedFieldsListItemContent';
-
-interface ListItemFieldTextProps {
-  label: string;
-  testSubj: string;
-  children: React.ReactNode;
-}
-
-const ListItemFieldText: React.FC<ListItemFieldTextProps> = ({ label, testSubj, children }) => {
-  const { euiTheme } = useEuiTheme();
-
-  const styles = useMemo(
-    () => ({
-      label: css`
-        font-weight: ${euiTheme.font.weight.semiBold};
-      `,
-    }),
-    [euiTheme]
-  );
-
-  return (
-    <EuiFlexItem grow={false}>
-      <EuiText size="xs" color="subdued" data-test-subj={testSubj}>
-        <span css={styles.label}>
-          {label}
-          {':'}
-        </span>{' '}
-        {children}
-      </EuiText>
-    </EuiFlexItem>
-  );
-};
-
-ListItemFieldText.displayName = 'ListItemFieldText';
 
 const getCustomFieldDisplayValue = (customField: CaseUICustomField): string => {
   const { value } = customField;
@@ -111,12 +28,6 @@ const getCustomFieldDisplayValue = (customField: CaseUICustomField): string => {
   }
   return '';
 };
-
-interface ListItemFieldContent {
-  label: string;
-  content: React.ReactNode;
-  testSubj: string;
-}
 
 const getTagsFieldContent = (theCase: CaseUI): ListItemFieldContent | null => {
   if (theCase.tags == null || theCase.tags.length === 0) {
@@ -265,71 +176,13 @@ const listItemFieldContentGetters: Record<
   },
 };
 
-const getListItemFieldContent = (field: string, theCase: CaseUI): ListItemFieldContent | null => {
+export const getListItemFieldContent = (
+  field: string,
+  theCase: CaseUI
+): ListItemFieldContent | null => {
   const getter = listItemFieldContentGetters[field];
   if (getter != null) {
     return getter(theCase);
   }
   return getCustomFieldContent(field, theCase);
 };
-
-interface ListItemOptionalFieldsProps {
-  theCase: CaseUI;
-  selectedFields: CasesColumnSelection[];
-}
-
-export const ListItemOptionalFields: React.FC<ListItemOptionalFieldsProps> = ({
-  theCase,
-  selectedFields,
-}) => {
-  const { euiTheme } = useEuiTheme();
-
-  const styles = useMemo(
-    () => ({
-      container: css`
-        margin-top: ${euiTheme.size.s};
-      `,
-    }),
-    [euiTheme]
-  );
-
-  const visibleFields = useMemo(
-    () =>
-      selectedFields.reduce<Array<ListItemFieldContent & { field: string }>>(
-        (acc, { isChecked, field, name }) => {
-          if (isChecked) {
-            const fieldContent = getListItemFieldContent(field, theCase);
-            if (fieldContent != null) {
-              acc.push({ ...fieldContent, field, label: name ?? fieldContent.label });
-            }
-          }
-          return acc;
-        },
-        []
-      ),
-    [selectedFields, theCase]
-  );
-
-  if (visibleFields.length === 0) {
-    return null;
-  }
-
-  return (
-    <EuiFlexGroup
-      alignItems="center"
-      gutterSize="s"
-      responsive={false}
-      wrap={false}
-      data-test-subj="cases-list-item-optional-fields"
-      css={styles.container}
-    >
-      {visibleFields.map(({ field, label, content, testSubj }) => (
-        <ListItemFieldText key={field} label={label} testSubj={testSubj}>
-          {content}
-        </ListItemFieldText>
-      ))}
-    </EuiFlexGroup>
-  );
-};
-
-ListItemOptionalFields.displayName = 'ListItemOptionalFields';

@@ -38,7 +38,7 @@ import { builderMap as customFieldsBuilderMap } from '../../../custom_fields/bui
 import { useGetCaseConfiguration } from '../../../../containers/configure/use_get_case_configuration';
 import { IncrementalIdText } from '../../../incremental_id';
 import { ExtendedFieldsColumnCell } from '../../../all_cases/extended_fields_column_cell';
-import { SeverityBadge } from '../components/severity_badge';
+import { severities } from '../../../severity/config';
 
 type CasesColumns = EuiBasicTableColumn<CaseUI>;
 
@@ -304,7 +304,14 @@ export const useCasesColumns = ({
         sortable: true,
         render: (severity: CaseUI['severity']) => {
           if (severity != null) {
-            return <SeverityBadge severity={severity} />;
+            return (
+              <EuiBadge
+                color={severities[severity].badgeColor}
+                data-test-subj={`case-severity-badge-${severity}`}
+              >
+                {severities[severity].label}
+              </EuiBadge>
+            );
           }
 
           return getEmptyCellValue();

@@ -24,7 +24,6 @@ import { useFilterConfig } from '../../../all_cases/table_filter_config/use_filt
 import { useGetCaseConfiguration } from '../../../../containers/configure/use_get_case_configuration';
 import { TableSearch } from '../../../all_cases/search';
 import { DateRangeFilter } from '../../../all_cases/date_range_filter';
-import { ListViewControls } from './list_view_controls';
 import type { CasesColumnSelection } from '../types';
 import { ColumnsPopover } from './columns_popover';
 
@@ -186,9 +185,11 @@ const CasesTableFiltersComponent = ({
             onSelectedColumnsChange={onSelectedColumnsChange}
           />
         ) : (
-          <ListViewControls
-            selectedFields={listFields}
-            onSelectedFieldsChange={onListFieldsChange}
+          <ColumnsPopover
+            selectedColumns={listFields}
+            onSelectedColumnsChange={onListFieldsChange}
+            buttonLabel={i18n.FIELDS_BUTTON_LABEL}
+            buttonIconType="list"
           />
         )}
       </EuiFlexItem>

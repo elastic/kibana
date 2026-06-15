@@ -9,11 +9,11 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { CustomFieldTypes } from '../../../../../common/types/domain';
-import { renderWithTestingProviders } from '../../../../common/mock';
-import { basicCase } from '../../../../containers/mock';
+import { CustomFieldTypes } from '../../../../../../../common/types/domain';
+import { renderWithTestingProviders } from '../../../../../../common/mock';
+import { basicCase } from '../../../../../../containers/mock';
 import { ListItemOptionalFields } from './list_item_optional_fields';
-import * as i18n from '../translations';
+import * as i18n from '../../../translations';
 
 const buildExtendedFields = (count: number): Record<string, string> =>
   Object.fromEntries(

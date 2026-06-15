@@ -19,37 +19,49 @@ import {
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { Status } from '@kbn/cases-components/src/status/status';
 
-import type { CaseUI } from '../../../../../common/ui/types';
-import type { CasesColumnSelection } from '../types';
+import type { CaseUI } from '../../../../../../common/ui/types';
+import type { CasesColumnSelection } from '../../types';
 import { ListItemOptionalFields } from './list_item_optional_fields';
-import { UserToolTip } from '../../../user_profiles/user_tooltip';
-import { SmallUserAvatar } from '../../../user_profiles/small_user_avatar';
-import { useAssignees } from '../../../../containers/user_profiles/use_assignees';
-import { FormattedRelativePreferenceDate } from '../../../formatted_date';
-import { CaseDetailsLink } from '../../../links';
-import { ActionColumnComponent as ActionColumn } from '../../../all_cases/use_actions';
-import { SeverityBadge } from './severity_badge';
-import * as i18n from '../translations';
+import { UserToolTip } from '../../../../user_profiles/user_tooltip';
+import { SmallUserAvatar } from '../../../../user_profiles/small_user_avatar';
+import { useAssignees } from '../../../../../containers/user_profiles/use_assignees';
+import { FormattedRelativePreferenceDate } from '../../../../formatted_date';
+import { CaseDetailsLink } from '../../../../links';
+import { ActionColumnComponent as ActionColumn } from '../../../../all_cases/use_actions';
+import { severities } from '../../../../severity/config';
+import * as i18n from '../../translations';
+
+/**
+ * Fields rendered directly in every list item (title row + meta row).
+ * The Fields popover excludes these so users only toggle optional extras.
+ */
+export const LIST_ALWAYS_VISIBLE_FIELDS = [
+  'title',
+  'assignees',
+  'createdBy',
+  'updatedAt',
+  'status',
+  'severity',
+];
 
 const LIST_ITEM_HEIGHT = 80;
 const MAX_VISIBLE_ASSIGNEES = 3;
-
-const mainFlexGroupStyle = css`
-  height: 100%;
-`;
 
 const useStyles = () => {
   const { euiTheme } = useEuiTheme();
 
   return useMemo(
     () => ({
+      mainFlexGroup: css`
+        height: 100%;
+      `,
       panel: css`
         min-height: ${LIST_ITEM_HEIGHT}px;
         border-radius: ${euiTheme.border.radius.medium};
         transition: background-color 150ms ease-in-out;
 
         &:hover {
-          background-color: ${euiTheme.colors.lightestShade};
+          background-color: ${euiTheme.colors.backgroundBaseSubdued};
         }
       `,
       title: css`
@@ -58,7 +70,7 @@ const useStyles = () => {
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        color: ${euiTheme.colors.title};
+        color: ${euiTheme.colors.textHeading};
       `,
       metaRow: css`
         margin-top: ${euiTheme.size.s};
@@ -100,7 +112,7 @@ export const CaseListItem: React.FC<{
         gutterSize="s"
         responsive={false}
         wrap={false}
-        css={mainFlexGroupStyle}
+        css={styles.mainFlexGroup}
       >
         <EuiFlexItem grow>
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={false}>
@@ -120,7 +132,12 @@ export const CaseListItem: React.FC<{
               </CaseDetailsLink>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <SeverityBadge severity={theCase.severity} />
+              <EuiBadge
+                color={severities[theCase.severity].badgeColor}
+                data-test-subj={`case-severity-badge-${theCase.severity}`}
+              >
+                {severities[theCase.severity].label}
+              </EuiBadge>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <Status status={theCase.status} />

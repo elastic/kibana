@@ -9,13 +9,13 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { noCreateCasesPermissions, renderWithTestingProviders } from '../../../../common/mock';
+import { noCreateCasesPermissions, renderWithTestingProviders } from '../../../../../common/mock';
 import { CasesList } from './cases_list';
-import { basicCase } from '../../../../containers/mock';
-import type { CasesFindResponseUI } from '../../../../../common/ui/types';
-import * as i18n from '../translations';
+import { basicCase } from '../../../../../containers/mock';
+import type { CasesFindResponseUI } from '../../../../../../common/ui/types';
+import * as i18n from '../../translations';
 
-jest.mock('../../../../common/navigation/hooks');
+jest.mock('../../../../../common/navigation/hooks');
 
 jest.mock('./case_list_item', () => ({
   CaseListItem: ({ theCase }: { theCase: { id: string } }) => (

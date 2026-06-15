@@ -18,14 +18,14 @@ import {
 } from '@elastic/eui';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 
-import type { CasesFindResponseUI } from '../../../../../common/ui/types';
-import type { CasesColumnSelection, EuiBasicTableOnChange } from '../types';
-import { CASES_TABLE_PER_PAGE_VALUES } from '../types';
+import type { CasesFindResponseUI } from '../../../../../../common/ui/types';
+import type { CasesColumnSelection, EuiBasicTableOnChange } from '../../types';
+import { CASES_TABLE_PER_PAGE_VALUES } from '../../types';
 import { CaseListItem } from './case_list_item';
-import { LinkButton } from '../../../links';
-import { useCreateCaseNavigation } from '../../../../common/navigation';
-import { useCasesContext } from '../../../cases_context/use_cases_context';
-import * as i18n from '../translations';
+import { LinkButton } from '../../../../links';
+import { useCreateCaseNavigation } from '../../../../../common/navigation';
+import { useCasesContext } from '../../../../cases_context/use_cases_context';
+import * as i18n from '../../translations';
 
 const LIST_ITEM_HEIGHT = 80;
 const SKELETON_COUNT = 5;

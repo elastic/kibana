@@ -8,16 +8,16 @@
 import React from 'react';
 import { screen } from '@testing-library/react';
 
-import { renderWithTestingProviders } from '../../../../common/mock';
+import { renderWithTestingProviders } from '../../../../../common/mock';
 import { CaseListItem } from './case_list_item';
-import { basicCase } from '../../../../containers/mock';
-import { suggestionUserProfiles } from '../../../../containers/user_profiles/api.mock';
-import { CaseSeverity } from '../../../../../common/types/domain';
+import { basicCase } from '../../../../../containers/mock';
+import { suggestionUserProfiles } from '../../../../../containers/user_profiles/api.mock';
+import { CaseSeverity } from '../../../../../../common/types/domain';
 import { CaseStatuses } from '@kbn/cases-components';
-import * as i18n from '../translations';
+import * as i18n from '../../translations';
 
-jest.mock('../../../all_cases/use_actions', () => ({
-  ...jest.requireActual('../../../all_cases/use_actions'),
+jest.mock('../../../../all_cases/use_actions', () => ({
+  ...jest.requireActual('../../../../all_cases/use_actions'),
   ActionColumnComponent: () => (
     <button type="button" data-test-subj="mock-action-column">
       {'...'}
