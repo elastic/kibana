@@ -61,7 +61,6 @@ const PROJECT_PERFORMANCE_TITLE = i18n.translate(
 );
 
 export function createNavigationTree({
-  isAppRegistered,
   core,
   showAiAssistant = true,
 }: ApplicationStart & {
@@ -357,7 +356,3 @@ export function createNavigationTree({
     ],
   };
 }
-
-export const navigationTree = (application: ApplicationStart): NavigationTreeDefinition => {
-  return createNavigationTree(application);
-};

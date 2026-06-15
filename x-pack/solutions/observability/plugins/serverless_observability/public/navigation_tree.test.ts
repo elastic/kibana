@@ -11,7 +11,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 
 const getAdminSettingsNode = (
-  options: Parameters<typeof createNavigationTree>[0] = {}
+  options: Parameters<typeof createNavigationTree>[0]
 ): NodeDefinition => {
   const { footer } = createNavigationTree(options);
   const adminSettingsNode = footer?.find((item) => item.id === 'admin_and_settings');
