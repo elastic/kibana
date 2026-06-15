@@ -65,6 +65,7 @@ describe('useOverviewTabData', () => {
       summaryMarkdownWithReplacements: '',
       detailsMarkdown: '',
       detailsMarkdownWithReplacements: '',
+      originalAlertIds: [],
     });
   });
 
