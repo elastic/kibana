@@ -10,7 +10,7 @@ import { bulkPurgeRollupRoute } from './bulk_purge_rollup';
 import { createCompositeSLORoute } from './composite_slo/create_composite_slo';
 import { deleteCompositeSLORoute } from './composite_slo/delete_composite_slo';
 import { fetchCompositeHistoricalSummaryRoute } from './composite_slo/fetch_composite_historical_summary';
-import { findCompositeSLORoute } from './composite_slo/find_composite_slo_definitions';
+import { findCompositeSLORoute } from './composite_slo/find_composite_slo';
 import { getCompositeSLORoute } from './composite_slo/get_composite_slo';
 import { getCompositeSLOSuggestionsRoute } from './composite_slo/get_composite_slo_suggestions';
 import { postCompositeSloSummaryRefreshRoute } from './composite_slo/post_composite_slo_summary_refresh';

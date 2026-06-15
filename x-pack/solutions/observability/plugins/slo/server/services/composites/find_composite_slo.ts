@@ -9,7 +9,7 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type {
   CompositeSLOWithSummaryResponse,
-  FindCompositeSLODefinitionsParams,
+  FindCompositeSLOParams,
   Paginated,
 } from '@kbn/slo-schema';
 import { COMPOSITE_SUMMARY_INDEX_NAME } from '../../../common/constants';
@@ -47,7 +47,7 @@ export async function findCompositeSlo(
     sortDirection = 'desc',
     page = 1,
     perPage = 25,
-  }: FindCompositeSLODefinitionsParams,
+  }: FindCompositeSLOParams,
   { spaceId, compositeRepository, esClient }: Dependencies
 ): Promise<Paginated<CompositeSLOWithSummaryResponse>> {
   const filters: QueryDslQueryContainer[] = [{ term: { spaceId } }];

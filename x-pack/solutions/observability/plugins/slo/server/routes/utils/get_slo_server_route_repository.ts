@@ -9,7 +9,7 @@ import { getSloRouteRepository } from '../route';
 import type { createCompositeSLORoute } from '../composite_slo/create_composite_slo';
 import type { getCompositeSLORoute } from '../composite_slo/get_composite_slo';
 import type { getCompositeSLOSuggestionsRoute } from '../composite_slo/get_composite_slo_suggestions';
-import type { findCompositeSLORoute } from '../composite_slo/find_composite_slo_definitions';
+import type { findCompositeSLORoute } from '../composite_slo/find_composite_slo';
 import type { updateCompositeSLORoute } from '../composite_slo/update_composite_slo';
 import type { deleteCompositeSLORoute } from '../composite_slo/delete_composite_slo';
 import type { fetchCompositeHistoricalSummaryRoute } from '../composite_slo/fetch_composite_historical_summary';
