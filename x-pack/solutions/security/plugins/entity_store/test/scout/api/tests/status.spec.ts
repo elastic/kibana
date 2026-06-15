@@ -16,11 +16,14 @@ import {
   uninstallAllEntityTypes,
 } from '../fixtures/helpers';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
+import {
+  LOG_EXTRACTION_MAX_LOGS_PER_WINDOW_DEFAULT,
+  LOG_EXTRACTION_CAP_BEHAVIOR_DEFAULT,
+} from '../../../../server/domain/saved_objects';
 
 const ALL_ENTITY_TYPES = ['generic', 'host', 'service', 'user'];
 
-// Failing: See https://github.com/elastic/kibana/issues/264299
-apiTest.describe.skip('Entity Store Status API tests', { tag: ENTITY_STORE_TAGS }, () => {
+apiTest.describe('Entity Store Status API tests', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ samlAuth, kbnClient }) => {
@@ -52,6 +55,8 @@ apiTest.describe.skip('Entity Store Status API tests', { tag: ENTITY_STORE_TAGS 
 
       for (const engine of status.body.engines) {
         expect(engine.status).toBe('started');
+        expect(engine.maxLogsPerWindow).toBe(LOG_EXTRACTION_MAX_LOGS_PER_WINDOW_DEFAULT);
+        expect(engine.maxLogsPerWindowCapBehavior).toBe(LOG_EXTRACTION_CAP_BEHAVIOR_DEFAULT);
       }
     }
   );

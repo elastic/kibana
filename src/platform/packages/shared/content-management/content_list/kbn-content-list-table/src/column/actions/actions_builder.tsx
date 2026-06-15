@@ -16,7 +16,7 @@ import type { ContentListItem } from '@kbn/content-list-provider';
 import type { ParsedPart, SkeletonOutput } from '@kbn/content-list-assembly';
 import type { ColumnBuilderContext } from '../types';
 import { column } from '../part';
-import { getColumnLayoutProps, type ColumnLayoutProps } from '../layout';
+import { getColumnLayoutProps, pickAttribute, type ColumnLayoutProps } from '../layout';
 import { action, type ActionOutput, type ActionBuilderContext } from '../../action';
 
 /** Default i18n-translated column title for the actions column. */
@@ -29,11 +29,26 @@ const DEFAULT_ACTIONS_COLUMN_TITLE = i18n.translate(
  * EUI renders row actions as `EuiButtonIcon` `size="s"`, which `euiButtonSizeMap`
  * sets to `euiTheme.size.xl` (32px) with an `euiTheme.size.xs` (4px) gap between
  * icons. The cell content adds `euiTheme.size.s` (8px) of padding on each side.
- * The cell also has `flex-wrap: wrap` applied (see EUI's `_table_cell_content.styles`),
- * so any width shortfall causes icons to stack vertically. The formula below
- * sizes the column to fit `N` icons inline plus padding:
+ * The formula below sizes the column to fit `N` icons inline plus padding:
  * `xl * N + xs * (N - 1) + s * 2`, which works out to `36N + 12` at the default
  * theme scale.
+ *
+ * `N` is the number of action parts the consumer declared (e.g. ContentEditor
+ * + Edit + Delete = 3). When EUI's auto-collapse kicks in (>2 actions, see
+ * `renderItemActionsCell` in `@elastic/eui`) the visible footprint is "primary
+ * icons (max 2) + the 3-dot overflow trigger" — which still fits inside `36N`
+ * because the 3-dot trigger replaces one of the inline icons rather than
+ * adding a fourth.
+ *
+ * EUI's action cells ship `flex-wrap: wrap` on desktop, which without
+ * intervention would let the icons stack vertically when the column squeezes.
+ * `cssActionsCellNoWrap` (in `content_list_table.tsx`) pins the cell's flex
+ * container to `flex-wrap: nowrap` — keyed on EUI's
+ * `td.euiTableRowCell--hasActions` so the rule actually matches body cells,
+ * not just the header (which is the only `<td>`/`<th>` that receives the
+ * column's `data-test-subj`) — so the column's `min-width: 'max-content'`
+ * floor resolves to the full icon-row width and the auto table-layout
+ * algorithm can't shrink the column past that point.
  *
  * Falls back to the static formula when the theme is not threaded through
  * context (e.g. unit tests that construct contexts inline).
@@ -72,31 +87,29 @@ export interface ActionsColumnProps
    *
    * When provided, only the specified actions are rendered in the given order.
    * When omitted, actions are determined automatically from the provider config
-   * (e.g., edit is shown if `getEditUrl` or `onEdit` is configured, delete is
-   * shown if `onDelete` is configured).
+   * (e.g., edit is shown if `actions.edit.onItemAction` is configured, delete
+   * is shown if `actions.delete.onBulkAction` is configured, content editor is
+   * shown if `features.contentEditor.open` is configured).
    */
   children?: ReactNode;
 }
 
 /**
- * Build default action parts based on the current context.
+ * Build default action parts when `Column.Actions` has no children.
  *
- * When `Column.Actions` has no children, this function determines which actions
- * to show based on the provider configuration. For example, edit is included
- * when `getEditUrl` or `onEdit` is configured, and delete is included when
- * `onDelete` is configured.
+ * Each configured `actions[id]` handler contributes its preset; the content
+ * editor (view details) preset is sourced from `features.contentEditor.open`
+ * instead, and is always shown when an editor is wired regardless of
+ * read-only state — matching the existing TableListView behavior.
  */
 const getDefaultActionParts = (context: ColumnBuilderContext): ParsedPart[] => {
   const parts: ParsedPart[] = [];
-  const { itemConfig, isReadOnly } = context;
+  const { itemConfig, isReadOnly, features } = context;
+  const itemActions = itemConfig?.actions;
 
-  // Edit and delete actions are suppressed in read-only mode, but inspect
-  // (view details) is always available when the content editor is enabled —
-  // matching the existing TableListView behavior where "View details" is
-  // shown regardless of read-only state.
   if (!isReadOnly) {
-    const hasEdit = itemConfig?.getEditUrl || itemConfig?.onEdit;
-    const hasDelete = itemConfig?.onDelete;
+    const hasEdit = itemActions?.edit?.onItemAction || itemActions?.edit?.getItemActionHref;
+    const hasDelete = itemActions?.delete?.onBulkAction;
 
     if (hasEdit) {
       parts.push({
@@ -119,12 +132,12 @@ const getDefaultActionParts = (context: ColumnBuilderContext): ParsedPart[] => {
     }
   }
 
-  if (itemConfig?.onInspect) {
+  if (features?.contentEditor?.open) {
     parts.push({
       type: 'part',
       part: 'action',
-      preset: 'inspect',
-      instanceId: 'inspect',
+      preset: 'contentEditor',
+      instanceId: 'contentEditor',
       attributes: {},
     });
   }
@@ -136,8 +149,7 @@ const getDefaultActionParts = (context: ColumnBuilderContext): ParsedPart[] => {
  * Build an `EuiBasicTableColumn` (actions column) from `Column.Actions` declarative attributes.
  *
  * Parses action children to determine which row actions to render. When no children
- * are provided, defaults are inferred from the provider configuration. Returns
- * `undefined` when no actions are available (e.g., read-only mode, no handlers configured).
+ * are provided, defaults are inferred from the provider configuration.
  *
  * @param attributes - The declarative attributes from the parsed `Column.Actions` element.
  * @param context - Builder context with provider configuration.
@@ -147,7 +159,7 @@ export const buildActionsColumn = (
   attributes: ActionsColumnProps,
   context: ColumnBuilderContext
 ): EuiBasicTableColumn<ContentListItem> | undefined => {
-  const { children, width, minWidth, maxWidth, columnTitle, sticky = true } = attributes;
+  const { children, columnTitle, sticky = true } = attributes;
 
   // Parse action children from the Column.Actions element.
   const actionParts = children !== undefined ? action.parseChildren(children) : [];
@@ -171,14 +183,23 @@ export const buildActionsColumn = (
   }
 
   const defaultWidth = getActionsColumnDefaultWidth(actions.length, context.euiTheme);
+  const resolvedWidth = pickAttribute(attributes, 'width', defaultWidth);
 
   return {
     name: columnTitle ?? DEFAULT_ACTIONS_COLUMN_TITLE,
     actions,
     ...getColumnLayoutProps({
-      width: width ?? defaultWidth,
-      minWidth: minWidth ?? width ?? defaultWidth,
-      maxWidth,
+      width: resolvedWidth,
+      // `'max-content'` lets the translated header push the column wider
+      // than the icon-row width when needed (e.g. de "Aktionen" ~75px is
+      // wider than the one-icon `36 + 12 = 48px` derived width). `min-width`
+      // wins over `max-width` per the CSS spec, so this floor never fights
+      // the cap below.
+      minWidth: pickAttribute(attributes, 'minWidth', 'max-content'),
+      // Cap at the derived width so the column never absorbs slack on
+      // full-width pages — the trailing whitespace lives in `Column.Name`
+      // (which is the only column intentionally allowed to grow).
+      maxWidth: pickAttribute(attributes, 'maxWidth', resolvedWidth),
     }),
     sticky,
     'data-test-subj': 'content-list-table-column-actions',
@@ -236,8 +257,8 @@ const buildActionsColumnSkeleton = (
 
   // Hard-coded fallback when no explicit children were provided. The real
   // resolver may ultimately produce 0 (none configured), 2 (edit + delete),
-  // or 3 (edit, delete, inspect) depending on provider configuration — 2 is
-  // the most common shape and close enough that the swap is not jarring.
+  // or 3 (edit, delete, content editor) depending on provider configuration
+  // — 2 is the most common shape and close enough that the swap is not jarring.
   const count = actionParts.length > 0 ? actionParts.length : 2;
 
   // Match the rendered footprint of an `EuiButtonIcon size="s"` icon glyph

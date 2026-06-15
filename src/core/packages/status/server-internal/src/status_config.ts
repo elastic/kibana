@@ -13,6 +13,7 @@ import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 
 const statusConfigSchema = schema.object({
   allowAnonymous: schema.boolean({ defaultValue: false }),
+  statusPageBypassMonitorPrivilege: schema.boolean({ defaultValue: false }),
 });
 
 export type StatusConfigType = TypeOf<typeof statusConfigSchema>;

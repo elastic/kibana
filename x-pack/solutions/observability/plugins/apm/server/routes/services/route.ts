@@ -56,6 +56,8 @@ import type { ServiceTransactionDetailedStatPeriodsResponse } from './get_servic
 import { getServiceTransactionDetailedStatsPeriods } from './get_services_detailed_statistics/get_service_transaction_detailed_statistics';
 import type { ServiceAgentResponse } from './get_service_agent';
 import { getServiceAgent } from './get_service_agent';
+import type { ServiceMixedIngestionResponse } from './get_service_mixed_ingestion';
+import { getServiceMixedIngestion } from './get_service_mixed_ingestion';
 import type { ServiceDependenciesResponse } from './get_service_dependencies';
 import { getServiceDependencies } from './get_service_dependencies';
 import type { ServiceDependenciesBreakdownResponse } from './get_service_dependencies_breakdown';
@@ -303,6 +305,32 @@ const serviceAgentRoute = createApmServerRoute({
     });
 
     return apmServiceAgent;
+  },
+});
+
+const serviceMixedIngestionRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/services/{serviceName}/metrics/mixed_ingestion',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
+    query: t.intersection([environmentRt, kueryRt, rangeRt]),
+  }),
+  security: { authz: { requiredPrivileges: ['apm'] } },
+  handler: async (resources): Promise<ServiceMixedIngestionResponse> => {
+    const apmEventClient = await getApmEventClient(resources);
+    const { params } = resources;
+    const { serviceName } = params.path;
+    const { environment, kuery, start, end } = params.query;
+
+    return getServiceMixedIngestion({
+      serviceName,
+      apmEventClient,
+      start,
+      end,
+      environment,
+      kuery,
+    });
   },
 });
 
@@ -1004,6 +1032,7 @@ export const serviceRouteRepository = {
   ...serviceMetadataDetailsRoute,
   ...serviceMetadataIconsRoute,
   ...serviceAgentRoute,
+  ...serviceMixedIngestionRoute,
   ...serviceTransactionTypesRoute,
   ...serviceNodeMetadataRoute,
   ...serviceAnnotationsRoute,

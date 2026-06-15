@@ -25,6 +25,7 @@ dependsOn:
   - '@kbn/agent-builder-browser'
   - '@kbn/core-http-server'
   - '@kbn/agent-builder-common'
+  - '@kbn/ebt-click'
   - '@kbn/core-elasticsearch-server'
   - '@kbn/core-security-server'
   - '@kbn/logging-mocks'
@@ -43,6 +44,7 @@ dependsOn:
   - '@kbn/shared-ux-page-kibana-template'
   - '@kbn/kibana-react-plugin'
   - '@kbn/i18n-react'
+  - '@kbn/llm-trace-waterfall'
   - '@kbn/shared-ux-router'
   - '@kbn/shared-ux-link-redirect-app'
   - '@kbn/core-lifecycle-browser'
@@ -82,7 +84,7 @@ dependsOn:
   - '@kbn/doc-links'
   - '@kbn/ui-actions-plugin'
   - '@kbn/workflows'
-  - '@kbn/spaces-utils'
+  - '@kbn/core-spaces-common'
   - '@kbn/spaces-plugin'
   - '@kbn/licensing-types'
   - '@kbn/licensing-plugin'
@@ -107,6 +109,7 @@ dependsOn:
   - '@kbn/triggers-actions-ui-plugin'
   - '@kbn/home-plugin'
   - '@kbn/data-plugin'
+  - '@kbn/unified-search-plugin'
   - '@kbn/security-plugin'
   - '@kbn/core-feature-flags-server'
   - '@kbn/core-chrome-sidebar'
@@ -127,6 +130,18 @@ dependsOn:
   - '@kbn/connector-specs'
   - '@kbn/core-user-profile-browser'
   - '@kbn/security-plugin-types-public'
+  - '@kbn/scout-synthtrace'
+  - '@kbn/synthtrace-client'
+  - '@kbn/ftr-llm-proxy'
+  - '@kbn/kbn-client'
+  - '@kbn/test-subj-selector'
+  - '@kbn/gen-ai-functional-testing'
+  - '@kbn/repo-info'
+  - '@kbn/test'
+  - '@kbn/test-es-server'
+  - '@kbn/react-kibana-mount'
+  - '@kbn/user-profile-components'
+  - '@kbn/telemetry'
 tags:
   - plugin
   - prod
@@ -138,6 +153,9 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/scout_agent_builder/**/*
+    - test/scout_agent_builder_smoke/**/*
+    - test/scout_agent_builder_shared/**/*
     - '!target/**/*'
     - '!.storybook/**/*.js'
   jest-config:

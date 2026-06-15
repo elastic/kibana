@@ -12,10 +12,11 @@ import type {
   DispatcherPipelineState,
   DispatcherStep,
   DispatcherStepOutput,
+  GlobalActionPolicy,
   MatchedPair,
   ActionGroup,
-  ActionPolicy,
   Rule,
+  SingleRuleActionPolicy,
 } from '../types';
 
 export function createDispatcherPipelineInput(
@@ -65,23 +66,39 @@ export function createRule(overrides: Partial<Rule> = {}): Rule {
   return {
     id: 'rule-1',
     spaceId: 'default',
-    kind: 'alert',
     name: 'Test rule',
-    description: '',
     tags: [],
-    enabled: true,
-    createdAt: '2026-01-01T00:00:00.000Z',
-    updatedAt: '2026-01-01T00:00:00.000Z',
     ...overrides,
   };
 }
 
-export function createActionPolicy(overrides: Partial<ActionPolicy> = {}): ActionPolicy {
+export function createActionPolicy(
+  overrides: Partial<GlobalActionPolicy> = {}
+): GlobalActionPolicy {
   return {
     id: 'policy-1',
     spaceId: 'default',
     name: 'Test policy',
     enabled: true,
+    type: 'global',
+    destinations: [{ type: 'workflow' as const, id: 'workflow-1' }],
+    groupBy: [],
+    tags: [],
+    ...overrides,
+  };
+}
+
+export function createSingleRuleActionPolicy(
+  ruleId: string,
+  overrides: Partial<Omit<SingleRuleActionPolicy, 'type' | 'ruleId'>> = {}
+): SingleRuleActionPolicy {
+  return {
+    id: 'policy-1',
+    spaceId: 'default',
+    name: 'Test single_rule policy',
+    enabled: true,
+    type: 'single_rule',
+    ruleId,
     destinations: [{ type: 'workflow' as const, id: 'workflow-1' }],
     groupBy: [],
     tags: [],
@@ -105,6 +122,7 @@ export function createActionGroup(overrides: Partial<ActionGroup> = {}): ActionG
     destinations: [{ type: 'workflow' as const, id: 'workflow-1' }],
     groupKey: {},
     episodes: [createAlertEpisode()],
+    rules: {},
     ...overrides,
   };
 }

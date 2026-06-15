@@ -220,7 +220,7 @@ export const usePresentationPanelHeaderActions = <
 
         if (tooltip) {
           notificationComponent = (
-            <EuiToolTip position="top" delay="regular" content={tooltip} key={notification.id}>
+            <EuiToolTip position="top" content={tooltip} key={notification.id}>
               {notificationComponent}
             </EuiToolTip>
           );

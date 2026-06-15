@@ -17,6 +17,9 @@ export type {
   AgentContextLayerPluginSetup,
   AgentContextLayerPluginStart,
   SmlIndexAttachmentParams,
+  SmlIndexAttachmentOriginParams,
+  SmlIndexAttachmentContentParams,
+  SmlDeleteAttachmentParams,
 } from './types';
 
 export type {
@@ -27,12 +30,19 @@ export type {
   SmlToAttachmentContext,
   SmlListItem,
   SmlSearchResult,
+  SmlSearchConstraints,
+  SmlSearchFilters,
   SmlDocument,
   SmlIndexAction,
+  SmlIngestionMethod,
+  SmlDeleteScope,
+  SmlIndexAttachmentOriginMode,
+  SmlIndexAttachmentContentMode,
 } from './services/sml/types';
 
 export type { SmlResolvedItemResult } from './services/sml/execute_sml_attach_items';
 export { smlElasticsearchIndexMappings, smlIndexName } from './services/sml/sml_storage';
+export { SmlSearchFilterType } from '../common/http_api/sml';
 
 export const plugin: PluginInitializer<
   AgentContextLayerPluginSetup,

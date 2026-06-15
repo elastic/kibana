@@ -10,6 +10,7 @@ import type { z } from '@kbn/zod/v4';
 import { CASE_EXTENDED_FIELDS } from '../../../common/constants';
 import type { CaseUI } from '../../../common';
 import type { FieldSchema } from '../../../common/types/domain/template/fields';
+import { isInlineField } from '../../../common/types/domain/template/fields';
 import { patchCase } from '../../containers/api';
 import { casesMutationsKeys } from '../../containers/constants';
 import { useCasesToast } from '../../common/use_cases_toast';
@@ -33,13 +34,15 @@ export const computeNewExtendedFields = (
 ): Record<string, string> => {
   const result: Record<string, string> = {};
   for (const field of newTemplateFields) {
-    const snakeKey = getFieldSnakeKey(field.name, field.type);
-    const camelKey = getFieldCamelKey(field.name, field.type);
-    const existingValue = currentExtendedFields[camelKey];
-    if (existingValue !== undefined && existingValue !== '') {
-      result[snakeKey] = String(existingValue);
-    } else {
-      result[snakeKey] = getYamlDefaultAsString(field.metadata?.default);
+    if (isInlineField(field)) {
+      const snakeKey = getFieldSnakeKey(field.name, field.type);
+      const camelKey = getFieldCamelKey(field.name, field.type);
+      const existingValue = currentExtendedFields[camelKey];
+      if (existingValue !== undefined && existingValue !== '') {
+        result[snakeKey] = String(existingValue);
+      } else {
+        result[snakeKey] = getYamlDefaultAsString(field.metadata?.default);
+      }
     }
   }
   return result;

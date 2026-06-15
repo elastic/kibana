@@ -15,7 +15,12 @@ import { monaco, YAML_LANG_ID } from '@kbn/monaco';
 import type { WorkflowYAMLEditorProps } from './workflow_yaml_editor';
 import { WorkflowYAMLEditor } from './workflow_yaml_editor';
 import { useSaveYaml } from '../../../entities/workflows/model/use_save_yaml';
-import { setActiveTab, setExecution, setYamlString } from '../../../entities/workflows/store';
+import {
+  setActiveTab,
+  setExecution,
+  setWorkflow,
+  setYamlString,
+} from '../../../entities/workflows/store';
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
 import { saveYamlThunk } from '../../../entities/workflows/store/workflow_detail/thunks/save_yaml_thunk';
 import { getTestProvider } from '../../../shared/mocks/test_providers';
@@ -24,7 +29,7 @@ import { getCompletionItemProvider } from '../lib/autocomplete/get_completion_it
 
 // Mock the YamlEditor component to avoid Monaco complexity in tests
 jest.mock('../../../shared/ui/yaml_editor', () => ({
-  YamlEditor: ({ value, onChange, editorDidMount, ...props }: YamlEditorProps) => (
+  YamlEditor: ({ value, onChange, editorDidMount, options }: YamlEditorProps) => (
     <div data-testid="yaml-editor">
       <textarea
         ref={(el) => {
@@ -38,6 +43,7 @@ jest.mock('../../../shared/ui/yaml_editor', () => ({
         }}
         value={value || ''}
         onChange={(e: any) => onChange?.(e.target.value)}
+        readOnly={Boolean(options?.readOnly)}
         data-testid="yaml-textarea"
       />
     </div>
@@ -155,7 +161,8 @@ jest.mock('../styles/use_workflow_editor_styles', () => ({
   useWorkflowEditorStyles: jest.fn(() => ({})),
 }));
 
-jest.mock('../styles/use_workflows_monaco_theme', () => ({
+jest.mock('@kbn/workflows-ui', () => ({
+  ...jest.requireActual('@kbn/workflows-ui'),
   useWorkflowsMonacoTheme: jest.fn(),
 }));
 
@@ -198,6 +205,10 @@ const mockCompletionProvider = {
   provideCompletionItems: jest.fn(),
 };
 
+jest.mock('../lib/esql_validation/use_workflow_esql_callbacks', () => ({
+  useWorkflowEsqlCallbacks: () => ({}),
+}));
+
 jest.mock('../lib/autocomplete/get_completion_item_provider', () => ({
   getCompletionItemProvider: jest.fn(() => mockCompletionProvider),
 }));
@@ -233,6 +244,18 @@ describe('WorkflowYAMLEditor', () => {
   const defaultProps: WorkflowYAMLEditorProps = {
     onStepRun: jest.fn(),
     editorRef: { current: null },
+  };
+  const mockWorkflow = {
+    id: 'test-123',
+    name: 'Test Workflow',
+    enabled: true,
+    yaml: 'version: "1"\nname: "test"',
+    createdAt: '2024-01-01T00:00:00Z',
+    createdBy: 'test-user',
+    lastUpdatedAt: '2024-01-01T00:00:00Z',
+    lastUpdatedBy: 'test-user',
+    definition: null,
+    valid: true,
   };
 
   const renderWithProviders = (
@@ -273,6 +296,39 @@ describe('WorkflowYAMLEditor', () => {
     // Wait for the store to be updated (the component uses setTimeout to defer state updates)
     await waitFor(() => {
       expect(store.getState().detail.yamlString).toBe(newValue);
+    });
+  });
+
+  it('renders managed workflow YAML as read-only', async () => {
+    const store = createMockStore();
+    store.dispatch(setWorkflow({ ...mockWorkflow, managed: true }));
+    store.dispatch(setYamlString(mockWorkflow.yaml));
+    store.dispatch(setActiveTab('workflow'));
+
+    renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store);
+
+    await waitFor(() => {
+      const textarea = document.querySelector(
+        '[data-testid="yaml-textarea"]'
+      ) as HTMLTextAreaElement;
+      expect(textarea).toBeInTheDocument();
+      expect(textarea.readOnly).toBe(true);
+    });
+  });
+
+  it('does not update YAML for managed workflows when change events fire', async () => {
+    const store = createMockStore();
+    store.dispatch(setWorkflow({ ...mockWorkflow, managed: true }));
+    store.dispatch(setYamlString(mockWorkflow.yaml));
+    store.dispatch(setActiveTab('workflow'));
+
+    renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store);
+
+    const textarea = document.querySelector('[data-testid="yaml-textarea"]') as HTMLTextAreaElement;
+    fireEvent.change(textarea, { target: { value: 'version: "1"\nname: "changed"' } });
+
+    await waitFor(() => {
+      expect(store.getState().detail.yamlString).toBe(mockWorkflow.yaml);
     });
   });
 
@@ -589,6 +645,25 @@ steps:
       // Second save should also work since isSaving is false
       capturedKeyboardHandlers.save!();
       expect(mockSaveYaml).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not save managed workflow YAML with keyboard shortcuts', async () => {
+      const store = createMockStore();
+      store.dispatch(setWorkflow({ ...mockWorkflow, managed: true }));
+      store.dispatch(setYamlString(mockWorkflow.yaml));
+      store.dispatch(setActiveTab('workflow'));
+
+      renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store);
+
+      await waitFor(() => {
+        expect(capturedKeyboardHandlers.save).toBeDefined();
+        expect(capturedKeyboardHandlers.saveAndRun).toBeDefined();
+      });
+
+      capturedKeyboardHandlers.save!();
+      capturedKeyboardHandlers.saveAndRun!();
+
+      expect(mockSaveYaml).not.toHaveBeenCalled();
     });
   });
 

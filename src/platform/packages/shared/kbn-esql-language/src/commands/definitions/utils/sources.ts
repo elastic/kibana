@@ -8,6 +8,7 @@
  */
 import type {
   ESQLCallbacks,
+  EsqlDataset,
   IndexAutocompleteItem,
   ESQLSourceResult,
   EsqlView,
@@ -21,16 +22,15 @@ import type { ISuggestionItem } from '../../registry/types';
 import { pipeCompleteItem, commaCompleteItem } from '../../registry/complete_items';
 import { ESQL_APPLY_TEXT_REPLACEMENT_COMMAND } from '../../registry/constants';
 import { findFinalWord, withAutoSuggest } from './autocomplete/helpers';
-import { EDITOR_MARKER } from '../constants';
 import { metadataSuggestion } from '../../registry/options/metadata';
 import { fuzzySearch } from './shared';
 import { computePrefixRange } from '../../../language/autocomplete/utils/prefix_range';
 
-const removeSourceNameQuotes = (sourceName: string) =>
+export const removeSourceNameQuotes = (sourceName: string) =>
   sourceName.startsWith('"') && sourceName.endsWith('"') ? sourceName.slice(1, -1) : sourceName;
 
 // Function to clean a single index string from failure stores
-const cleanIndex = (inputIndex: string): string => {
+export const cleanIndex = (inputIndex: string): string => {
   let cleaned = inputIndex.trim();
 
   // Remove '::data' suffix
@@ -164,6 +164,27 @@ export const buildViewsDefinitions = (
     });
 
 /**
+ * Builds suggestion items for ES|QL datasets (GET _query/dataset).
+ */
+export const buildDatasetsDefinitions = (
+  datasets: EsqlDataset[],
+  alreadyUsed: string[] = []
+): ISuggestionItem[] =>
+  datasets
+    .filter(({ name }) => !alreadyUsed.includes(name))
+    .map(({ name }) => {
+      const text = getSafeInsertSourceText(name);
+      return withAutoSuggest({
+        label: name,
+        text,
+        kind: 'Issue',
+        detail: i18n.translate('kbn-esql-language.esql.autocomplete.datasetDefinition', {
+          defaultMessage: 'Dataset',
+        }),
+      });
+    });
+
+/**
  * Checks if the source exists in the provided sources set.
  * It supports both exact matches and fuzzy searches.
  *
@@ -199,10 +220,7 @@ export function getSourcesFromCommands(
 ) {
   const sourceCommand = commands.find(({ name }) => name === 'from' || name === 'ts');
   const args = (sourceCommand?.args ?? []) as ESQLSource[];
-  // the marker gets added in queries like "FROM "
-  return args.filter(
-    (arg) => arg.sourceType === sourceType && arg.name !== '' && arg.name !== EDITOR_MARKER
-  );
+  return args.filter((arg) => arg.sourceType === sourceType && arg.name !== '');
 }
 
 /**
@@ -268,6 +286,7 @@ export async function additionalSourcesSuggestions(
   ignored: string[],
   recommendedQuerySuggestions: ISuggestionItem[],
   views: EsqlView[] = [],
+  datasets: EsqlDataset[] = [],
   sourceReplacementContext?: {
     textBeforeCursor: string;
     commandStart: number;
@@ -276,6 +295,7 @@ export async function additionalSourcesSuggestions(
   const sourceNames = new Set([
     ...sources.map(({ name }) => name),
     ...views.map(({ name }) => name),
+    ...datasets.map(({ name }) => name),
   ]);
   const prefix = findFinalWord(queryText);
   const isComplete = prefix ? sourceExists(prefix, sourceNames) : false;
@@ -319,8 +339,9 @@ export async function additionalSourcesSuggestions(
 
   const sourceSuggestions = getSourceSuggestions(sources, ignored, sourceReplacementContext);
   const viewSuggestions = buildViewsDefinitions(views, ignored);
+  const datasetSuggestions = buildDatasetsDefinitions(datasets, ignored);
 
-  return [...sourceSuggestions, ...viewSuggestions];
+  return [...sourceSuggestions, ...viewSuggestions, ...datasetSuggestions];
 }
 
 // Treating lookup and time_series mode indices

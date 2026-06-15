@@ -19,6 +19,26 @@ describe('DownsamplingBar', () => {
     canManageLifecycle: true,
   };
 
+  describe('Empty state', () => {
+    it('should render empty state when no downsampling steps exist', () => {
+      render(
+        <DownsamplingBar
+          {...defaultProps}
+          segments={[{ grow: 5 }] as DownsamplingSegment[]}
+          gridTemplateColumns="1fr"
+        />
+      );
+
+      expect(screen.getByTestId('downsamplingBar-empty')).toBeInTheDocument();
+      expect(screen.getByTestId('downsamplingBar-emptyLabel')).toHaveTextContent('No downsampling');
+      expect(screen.queryByTestId('downsamplingPhase-1h-label')).not.toBeInTheDocument();
+
+      expect(screen.getByTestId('downsamplingBar-container')).toHaveStyle('border: none');
+      expect(screen.getByTestId('downsamplingBar-empty')).toHaveStyle('text-align: center');
+      expect(screen.getByTestId('downsamplingBar-empty')).toHaveStyle('border-radius: 8px');
+    });
+  });
+
   describe('Rendering', () => {
     it('should render downsampling label', () => {
       render(<DownsamplingBar {...defaultProps} />);
@@ -72,6 +92,7 @@ describe('DownsamplingBar', () => {
 
       expect(screen.getByTestId('downsamplingPhase-1h-label')).toBeInTheDocument();
       expect(screen.queryByTestId('downsamplingPhase-delete-label')).not.toBeInTheDocument();
+      expect(screen.getByTestId('downsamplingBar-container')).toHaveStyle('border: none');
     });
   });
 
@@ -83,8 +104,9 @@ describe('DownsamplingBar', () => {
       fireEvent.click(button);
 
       expect(screen.getByTestId('downsamplingPopover-step1-title')).toBeInTheDocument();
-      expect(screen.getByTestId('downsamplingPopover-step1-afterDataStored')).toBeInTheDocument();
+      expect(screen.getByTestId('downsamplingPopover-step1-ageBadge')).toHaveTextContent('0d');
       expect(screen.getByTestId('downsamplingPopover-step1-interval')).toBeInTheDocument();
+      expect(screen.getByLabelText('Downsample step 1')).toBeInTheDocument();
     });
 
     it('should display phase name in popover for ILM', () => {

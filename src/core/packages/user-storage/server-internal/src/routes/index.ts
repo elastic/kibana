@@ -52,19 +52,30 @@ const createClientOrNull = (
 export const registerRoutes = ({ router, definitions, logger }: RegisterRoutesParams) => {
   router.get(
     {
-      path: '/internal/user_storage',
-      validate: false,
+      path: '/internal/user_storage/{key}',
+      validate: {
+        params: z.object({ key: z.string() }),
+      },
       security: {
         authz: AuthzDisabled.delegateToSOClient,
       },
     },
-    async (requestHandlerContext, _request, response) => {
+    async (requestHandlerContext, request, response) => {
       const coreCtx = await requestHandlerContext.core;
       const client = createClientOrNull(coreCtx, { definitions, logger });
       if (!client) return response.forbidden({ body: { message: FORBIDDEN_MESSAGE } });
 
-      const values = await client.getAll();
-      return response.ok({ body: values });
+      const { key } = request.params;
+
+      try {
+        const value = await client.get(key);
+        return response.ok({ body: { value } });
+      } catch (err) {
+        if (isUnregisteredKeyError(err)) {
+          return response.badRequest({ body: { message: err.message } });
+        }
+        throw err;
+      }
     }
   );
 
@@ -87,8 +98,9 @@ export const registerRoutes = ({ router, definitions, logger }: RegisterRoutesPa
       const { key } = request.params;
       const { value } = request.body;
 
+      let validated: unknown;
       try {
-        await client.set(key, value);
+        validated = await client.set(key, value);
       } catch (err) {
         if (err instanceof z.ZodError) {
           return response.badRequest({ body: { message: `Validation failed: ${err.message}` } });
@@ -99,7 +111,7 @@ export const registerRoutes = ({ router, definitions, logger }: RegisterRoutesPa
         throw err;
       }
 
-      return response.ok({ body: {} });
+      return response.ok({ body: { value: validated } });
     }
   );
 

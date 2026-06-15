@@ -8,6 +8,7 @@
 import { EuiPanel, EuiTitle, EuiIconTip, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
+
 import { usePreviousPeriodLabel } from '../../../../hooks/use_previous_period_text';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import { AnomalyDetectorType } from '../../../../../common/anomaly_detection/apm_ml_detectors';
@@ -26,6 +27,7 @@ import { ApmDocumentType } from '../../../../../common/document_type';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { getThroughputScreenContext } from './get_throughput_screen_context';
 import { OpenInDiscover } from '../../../shared/links/discover_links/open_in_discover';
+import { APM_CHART_EBT_ELEMENTS } from '../../../shared/charts/ebt_constants';
 import { useLicenseContext } from '../../../../context/license/use_license_context';
 import { OpenAnomalies } from '../../../shared/links/machine_learning_links/open_anomalies';
 
@@ -216,6 +218,9 @@ export function ServiceOverviewThroughputChart({
                   transactionName,
                   transactionType,
                   sortDirection: 'DESC',
+                }}
+                ebt={{
+                  element: APM_CHART_EBT_ELEMENTS.THROUGHPUT,
                 }}
               />
             </EuiFlexItem>

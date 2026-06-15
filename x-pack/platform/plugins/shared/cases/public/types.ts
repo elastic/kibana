@@ -129,6 +129,12 @@ export interface CasesPublicSetup {
 export interface CasesPublicStart {
   config: {
     templatesEnabled: boolean;
+    attachmentsEnabled: boolean;
+    casesRedesign: {
+      list: boolean;
+      details: boolean;
+      settings: boolean;
+    };
   };
   api: {
     getRelatedCases: (

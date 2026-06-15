@@ -7,6 +7,8 @@
 
 import {
   actionPolicyResponseSchema,
+  errorResponseSchema,
+  ID_MAX_LENGTH,
   snoozeActionPolicyBodySchema,
   type SnoozeActionPolicyBody,
 } from '@kbn/alerting-v2-schemas';
@@ -19,10 +21,9 @@ import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
-import { buildRouteValidationWithZod } from '../route_validation';
 
 const snoozeActionPolicyParamsSchema = z.object({
-  id: z.string().describe('The action policy identifier.'),
+  id: z.string().min(1).max(ID_MAX_LENGTH).describe('The action policy identifier.'),
 });
 
 @injectable()
@@ -38,21 +39,27 @@ export class SnoozeActionPolicyRoute extends BaseAlertingRoute {
     summary: 'Snooze an action policy',
     description: 'Snooze an action policy until a specified time.',
   } as const;
-  static validate = {
+  static schemas = {
     request: {
-      params: buildRouteValidationWithZod(snoozeActionPolicyParamsSchema),
-      body: buildRouteValidationWithZod(snoozeActionPolicyBodySchema),
+      params: snoozeActionPolicyParamsSchema,
+      body: snoozeActionPolicyBodySchema,
     },
     response: {
       200: {
         body: () => actionPolicyResponseSchema,
-        description: 'Indicates a successful call.',
+        description: 'Returns the snoozed action policy.',
       },
       400: {
+        body: () => errorResponseSchema,
         description: 'Indicates invalid request parameters or body.',
       },
       404: {
+        body: () => errorResponseSchema,
         description: 'Indicates an action policy with the given ID does not exist.',
+      },
+      409: {
+        body: () => errorResponseSchema,
+        description: 'Indicates the action policy was concurrently updated by another caller.',
       },
     },
   };

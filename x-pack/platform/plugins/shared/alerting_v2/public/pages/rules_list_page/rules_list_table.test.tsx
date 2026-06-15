@@ -81,6 +81,7 @@ const defaultProps: RulesListTableProps = {
   onBulkDelete: jest.fn(),
   onNavigateToDetails: jest.fn(),
   onExpand: jest.fn(),
+  onQuickEdit: jest.fn(),
   onEdit: jest.fn(),
   onClone: jest.fn(),
   onDelete: jest.fn(),
@@ -156,11 +157,11 @@ describe('RulesListTable', () => {
       expect(screen.getByTestId('ruleStatusDisabled')).toHaveTextContent('Disabled');
     });
 
-    it('renders Mode column with Alerting and Detect only', () => {
+    it('renders Mode column with Alert and Signal', () => {
       renderTable();
 
-      expect(screen.getByText('Alerting')).toBeInTheDocument();
-      expect(screen.getByText('Detect only')).toBeInTheDocument();
+      expect(screen.getByText('Alert')).toBeInTheDocument();
+      expect(screen.getByText('Signal')).toBeInTheDocument();
     });
 
     it('renders tag badges for rules with tags', () => {

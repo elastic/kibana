@@ -13,7 +13,8 @@ import { expect } from '@kbn/scout/api';
 import { APPROVED_STEP_DEFINITIONS } from '../fixtures/approved_step_definitions';
 import { COMMON_HEADERS } from '../fixtures/constants';
 
-apiTest.describe(
+// Failing: See https://github.com/elastic/kibana/issues/265012
+apiTest.describe.skip(
   'Workflows Extensions - Custom Step Definitions Approval',
   {
     tag: [
@@ -22,6 +23,7 @@ apiTest.describe(
       ...tags.serverless.security.complete,
       ...tags.serverless.observability.complete,
       ...tags.serverless.workplaceai,
+      ...tags.serverless.vectordb,
     ],
   },
   () => {

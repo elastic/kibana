@@ -16,6 +16,7 @@ import type {
   WorkflowListDto,
   WorkflowStatsDto,
 } from '@kbn/workflows';
+import { buildWorkflowFilters } from '@kbn/workflows/server';
 import type { WorkflowListItemDto } from '@kbn/workflows/types/v1';
 
 import type { WorkflowSearchDeps } from './types';
@@ -26,11 +27,21 @@ import { transformStorageDocumentToWorkflowDto } from '../api/lib/workflow_dto_t
 import {
   buildConditionalTermsFilters,
   buildWorkflowTextSearchClause,
-  workflowSpaceFilter,
 } from '../api/lib/workflow_query_filters';
-import type { GetWorkflowsParams } from '../api/workflows_management_api';
+import type { GetWorkflowAggsOptions, GetWorkflowsParams } from '../api/workflows_management_api';
 import type { WorkflowProperties } from '../storage/workflow_storage';
 import { workflowIndexName } from '../storage/workflow_storage';
+
+interface WorkflowAggBucket {
+  key: string | number | boolean;
+  key_as_string?: string;
+  doc_count: number;
+}
+
+type WorkflowAggsResponse = Record<
+  string,
+  estypes.AggregationsMultiBucketAggregateBase<WorkflowAggBucket>
+>;
 
 export class WorkflowSearchService {
   constructor(private readonly deps: WorkflowSearchDeps) {}
@@ -46,7 +57,10 @@ export class WorkflowSearchService {
     const keepAlive = '1m';
     const indexPattern = `${workflowIndexName}-*`;
     const sort: estypes.Sort = [{ updated_at: { order: 'desc' } }, '_shard_doc'];
-    const { must, must_not } = workflowSpaceFilter(spaceId);
+    const { must, must_not } = buildWorkflowFilters({
+      space: { id: spaceId, includeGlobal: true },
+      deleted: 'not_deleted',
+    });
     must.push({ term: { enabled: true } }, { term: { triggerTypes: triggerId } });
     const query = { bool: { must, must_not } };
     const _source = [
@@ -113,10 +127,14 @@ export class WorkflowSearchService {
     spaceId: string,
     options?: { includeExecutionHistory?: boolean }
   ): Promise<WorkflowListDto> {
-    const { size = 100, page = 1, enabled, createdBy, tags, query } = params;
+    const { size = 100, page = 1, enabled, createdBy, tags, query, managedFilter } = params;
     const from = (page - 1) * size;
 
-    const { must, must_not } = workflowSpaceFilter(spaceId);
+    const { must, must_not } = buildWorkflowFilters({
+      space: { id: spaceId, includeGlobal: true },
+      deleted: 'not_deleted',
+      managed: managedFilter ?? 'unmanaged',
+    });
 
     must.push(
       ...buildConditionalTermsFilters([
@@ -177,11 +195,16 @@ export class WorkflowSearchService {
     spaceId: string,
     options?: { includeExecutionStats?: boolean }
   ): Promise<WorkflowStatsDto> {
+    const statsFilter = buildWorkflowFilters({
+      space: { id: spaceId, includeGlobal: true },
+      deleted: 'not_deleted',
+      managed: 'unmanaged',
+    });
     const statsResponse = await this.deps.workflowStorage.getClient().search({
       size: 0,
       track_total_hits: true,
       query: {
-        bool: workflowSpaceFilter(spaceId),
+        bool: statsFilter,
       },
       aggs: {
         enabled_count: {
@@ -208,9 +231,12 @@ export class WorkflowSearchService {
     return workflowsStats;
   }
 
-  async getWorkflowAggs(fields: string[], spaceId: string): Promise<WorkflowAggsDto> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const aggs: Record<string, any> = {};
+  async getWorkflowAggs(
+    fields: string[],
+    spaceId: string,
+    options?: GetWorkflowAggsOptions
+  ): Promise<WorkflowAggsDto> {
+    const aggs: Record<string, estypes.AggregationsAggregationContainer> = {};
 
     fields.forEach((field) => {
       aggs[field] = {
@@ -221,31 +247,47 @@ export class WorkflowSearchService {
       };
     });
 
-    const aggsResponse = await this.deps.workflowStorage.getClient().search({
-      size: 0,
-      track_total_hits: true,
-      query: {
-        bool: workflowSpaceFilter(spaceId),
-      },
-      aggs,
-    });
+    try {
+      const aggsFilter = buildWorkflowFilters({
+        space: { id: spaceId, includeGlobal: true },
+        deleted: 'not_deleted',
+        managed: options?.managedFilter ?? 'unmanaged',
+      });
+      const aggsResponse = await this.deps.workflowStorage.getClient().search({
+        size: 0,
+        track_total_hits: true,
+        query: {
+          bool: aggsFilter,
+        },
+        aggs,
+      });
 
-    const result: WorkflowAggsDto = {};
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const responseAggs = aggsResponse.aggregations as any;
+      const result: WorkflowAggsDto = {};
+      const responseAggs = aggsResponse.aggregations ?? {};
 
-    fields.forEach((field) => {
-      if (responseAggs[field]) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        result[field] = responseAggs[field].buckets.map((bucket: any) => ({
-          label: bucket.key_as_string,
-          key: bucket.key,
-          doc_count: bucket.doc_count,
-        }));
+      fields.forEach((field) => {
+        const termsAggregation = (responseAggs as WorkflowAggsResponse)[field];
+        if (termsAggregation && Array.isArray(termsAggregation.buckets)) {
+          result[field] = termsAggregation.buckets.map((bucket) => {
+            // Prefer `key_as_string` so non-string ES keys (booleans, numbers, dates)
+            // round-trip back to the matching schema values used by the workflow filters.
+            const key = bucket.key_as_string ?? String(bucket.key);
+            return {
+              label: key,
+              key,
+              doc_count: bucket.doc_count,
+            };
+          });
+        }
+      });
+
+      return result;
+    } catch (error) {
+      if (isIndexNotFoundError(error)) {
+        return {};
       }
-    });
-
-    return result;
+      throw error;
+    }
   }
 
   private async getExecutionHistoryStats(spaceId: string) {
