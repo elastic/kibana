@@ -33,6 +33,11 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'Auto refresh is on and set to {prettyInterval}',
         values: { prettyInterval },
       }),
+    'euiBanner.dismissAriaLabel': ({ title }: EuiValues) =>
+      i18n.translate('core.euiBanner.dismissAriaLabel', {
+        defaultMessage: 'Dismiss "{title}" announcement',
+        values: { title },
+      }),
     'euiBasicTable.selectAllRows': i18n.translate('core.euiBasicTable.selectAllRows', {
       defaultMessage: 'Select all rows',
       description: 'ARIA and displayed label on a checkbox to select all table rows',

@@ -158,7 +158,7 @@ const SignificantEventInlineContent = ({
 export const significantEventAttachmentDefinition: AttachmentUIDefinition<SignificantEventAttachment> =
   {
     getLabel: (attachment) => attachment.data.title || labels.fallback,
-    getIcon: () => 'warning',
+    getIcon: () => 'significantEvents',
     getHeader: ({ attachment }) => {
       const badges: HeaderBadge[] = [
         { label: attachment.data.verdict, color: getStatusColor(attachment.data.verdict) },
