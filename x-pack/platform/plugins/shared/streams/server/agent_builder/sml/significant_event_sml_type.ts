@@ -24,7 +24,7 @@ const eventToSmlContent = (event: SigEvent): string => {
     event.title,
     event.summary,
     event.root_cause,
-    `status: ${event.verdict}`,
+    `status: ${event.status}`,
     `impact: ${event.impact}`,
     `criticality: ${event.criticality}`,
     `confidence: ${event.confidence}`,
