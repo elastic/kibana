@@ -9,7 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { CompositeSLOWithSummaryResponse } from '@kbn/slo-schema';
 import { ALL_VALUE, compositeSloWithSummaryResponseSchema } from '@kbn/slo-schema';
 import { z } from '@kbn/zod';
-import { toRichRollingTimeWindow } from '../../domain/models';
+import { type CompositeSLODefinition, toRichRollingTimeWindow } from '../../domain/models';
 import type { SLODefinitionRepository } from '../slo_definition_repository';
 import type { SummaryClient } from '../summary_client';
 import type { CompositeSLORepository } from './composite_slo_repository';
@@ -55,18 +55,25 @@ export class GetCompositeSLO {
   private async executeOne(
     id: string,
     persistedSummaryById: Map<string, PersistedCompositeSummary>
-  ) {
+  ): Promise<CompositeSLOWithSummaryResponse> {
     const compositeSlo = await this.compositeRepository.findById(id);
     const persisted = persistedSummaryById.get(id);
 
-    if (persisted?.members) {
-      return {
-        ...compositeSlo,
-        summary: persisted.summary,
-        members: persisted.members,
-      };
+    // Legacy docs may not have members, so we fallback to computing the summary on the fly if they are missing.
+    if (!persisted?.members) {
+      return this.computeCompositeSloWithSummary(compositeSlo);
     }
 
+    return {
+      ...compositeSlo,
+      summary: persisted.summary,
+      members: persisted.members,
+    };
+  }
+
+  private async computeCompositeSloWithSummary(
+    compositeSlo: CompositeSLODefinition,
+  ): Promise<CompositeSLOWithSummaryResponse> {
     const memberSloIds = compositeSlo.members.map((m) => m.sloId);
     const memberDefinitions = await this.repository.findAllByIds(memberSloIds);
 
@@ -101,11 +108,10 @@ export class GetCompositeSLO {
     }));
 
     const { compositeSummary, members } = computeCompositeSummary(compositeSlo, memberSummaries);
-    const summary = persisted?.summary ?? compositeSummary;
 
     return {
       ...compositeSlo,
-      summary,
+      summary: compositeSummary,
       members,
     };
   }
