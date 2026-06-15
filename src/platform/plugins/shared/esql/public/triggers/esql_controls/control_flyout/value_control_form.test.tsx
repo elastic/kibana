@@ -24,6 +24,7 @@ import {
   DEFAULT_ESQL_OPTIONS_LIST_STATE,
   DEFAULT_PINNED_CONTROL_STATE,
 } from '@kbn/controls-constants';
+import { setupEuiMatchers } from '@elastic/eui/lib/test/rtl/matchers';
 
 jest.mock('@kbn/esql-utils', () => {
   return {
@@ -82,6 +83,10 @@ describe('ValueControlForm', () => {
     telemetryTriggerSource: ControlTriggerSource.QUESTION_MARK,
     telemetryService: new ESQLEditorTelemetryService(services.core.analytics),
   };
+
+  beforeAll(() => {
+    setupEuiMatchers();
+  });
 
   describe('Interval type', () => {
     it('should default correctly if no initial state is given for an interval variable type', async () => {
@@ -379,10 +384,10 @@ describe('ValueControlForm', () => {
         );
 
         const saveButton = getByTestId('saveEsqlControlsFlyoutButton');
-        expect(saveButton).toBeDisabled();
+        expect(saveButton).toBeEuiDisabled();
 
         await waitFor(() => {
-          expect(saveButton).not.toBeDisabled();
+          expect(saveButton).not.toBeEuiDisabled();
         });
       });
     });
