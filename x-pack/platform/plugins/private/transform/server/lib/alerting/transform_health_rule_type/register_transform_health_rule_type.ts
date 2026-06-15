@@ -17,6 +17,7 @@ import type {
 } from '@kbn/alerting-plugin/common';
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import type { AlertingServerSetup, IRuleTypeAlerts, RuleType } from '@kbn/alerting-plugin/server';
+import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { TransformHealthAlert } from '@kbn/alerts-as-data-utils';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
@@ -59,6 +60,19 @@ export type TransformHealthAlertContext = {
   results: TransformHealthResult[];
   message: string;
 } & AlertInstanceContext;
+
+/**
+ * Detect a 404 response from Elasticsearch (e.g. when a transform ID in
+ * `includeTransforms` does not exist). Both the modern `@elastic/elasticsearch`
+ * client and legacy error shapes are handled.
+ */
+function isNotFoundError(error: unknown): boolean {
+  if (!error || typeof error !== 'object') {
+    return false;
+  }
+  const err = error as { statusCode?: number; meta?: { statusCode?: number } };
+  return err.statusCode === 404 || err.meta?.statusCode === 404;
+}
 
 export const TRANSFORM_ISSUE = 'transform_issue';
 
@@ -187,10 +201,21 @@ export function getTransformHealthRuleType(
         fieldFormatsRegistry,
       });
 
-      const executionResult = await transformHealthService.getHealthChecksResults(
-        params,
-        previousState
-      );
+      let executionResult;
+      try {
+        executionResult = await transformHealthService.getHealthChecksResults(
+          params,
+          previousState
+        );
+      } catch (error) {
+        // Only treat 404s (e.g. transform IDs not found) as user errors so the task is
+        // not retried and does not pollute error metrics. Other errors should propagate
+        // as framework errors.
+        if (isNotFoundError(error)) {
+          throw createTaskRunError(error as Error, TaskErrorSource.USER);
+        }
+        throw error;
+      }
 
       const unhealthyTests = executionResult.filter(({ isHealthy }) => !isHealthy);
 
