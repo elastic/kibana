@@ -17,12 +17,14 @@ import {
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormRow,
   EuiSelect,
   EuiSplitPanel,
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { useRequestReadContext } from '../../../../contexts';
 import {
   useOutputFilterActionContext,
   useOutputFilterReadContext,
@@ -96,9 +98,19 @@ export const OutputFilterRow = () => {
     setDraftInvertMatch(checked);
   };
 
+  const errorText = isInvalid
+    ? draftMode === 'jq'
+      ? i18n.translate('console.outputFilter.jq.error', {
+          defaultMessage: 'Invalid JQ expression',
+        })
+      : i18n.translate('console.outputFilter.regex.error', {
+          defaultMessage: 'Invalid regular expression',
+        })
+    : undefined;
+
   return (
     <>
-      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+      <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiSelect
             options={modeOptions}
@@ -109,45 +121,47 @@ export const OutputFilterRow = () => {
         </EuiFlexItem>
 
         <EuiFlexItem>
-          <EuiFieldText
-            data-test-subj={draftMode === 'regex' ? 'filterRegex' : 'filterJq'}
-            value={draftExpression}
-            onChange={(e) => handleExpressionChange(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') handleApply();
-            }}
-            isInvalid={isInvalid}
-            placeholder={
-              draftMode === 'regex'
-                ? i18n.translate('console.outputFilter.regex.placeholder', {
-                    defaultMessage: 'Regular expression',
-                  })
-                : i18n.translate('console.outputFilter.jq.placeholder', {
-                    defaultMessage: 'JQ expression',
-                  })
-            }
-            prepend={
-              draftMode === 'regex' ? (
-                <EuiButtonEmpty
-                  size="xs"
-                  color={draftInvertMatch ? 'danger' : 'primary'}
-                  iconType={draftInvertMatch ? 'filterExclude' : 'filterInclude'}
-                  data-test-subj="invertFilter"
-                  onClick={() => handleInvertMatchChange(!draftInvertMatch)}
-                >
-                  {draftInvertMatch
-                    ? i18n.translate('console.outputFilter.regex.exclude', {
-                        defaultMessage: 'Exclude',
-                      })
-                    : i18n.translate('console.outputFilter.regex.include', {
-                        defaultMessage: 'Include',
-                      })}
-                </EuiButtonEmpty>
-              ) : undefined
-            }
-            compressed
-            fullWidth
-          />
+          <EuiFormRow isInvalid={isInvalid} error={errorText} display="rowCompressed">
+            <EuiFieldText
+              data-test-subj={draftMode === 'regex' ? 'filterRegex' : 'filterJq'}
+              value={draftExpression}
+              onChange={(e) => handleExpressionChange(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleApply();
+              }}
+              isInvalid={isInvalid}
+              placeholder={
+                draftMode === 'regex'
+                  ? i18n.translate('console.outputFilter.regex.placeholder', {
+                      defaultMessage: 'Regular expression',
+                    })
+                  : i18n.translate('console.outputFilter.jq.placeholder', {
+                      defaultMessage: 'JQ expression',
+                    })
+              }
+              prepend={
+                draftMode === 'regex' ? (
+                  <EuiButtonEmpty
+                    size="xs"
+                    color={draftInvertMatch ? 'danger' : 'primary'}
+                    iconType={draftInvertMatch ? 'filterExclude' : 'filterInclude'}
+                    data-test-subj="invertFilter"
+                    onClick={() => handleInvertMatchChange(!draftInvertMatch)}
+                  >
+                    {draftInvertMatch
+                      ? i18n.translate('console.outputFilter.regex.exclude', {
+                          defaultMessage: 'Exclude',
+                        })
+                      : i18n.translate('console.outputFilter.regex.include', {
+                          defaultMessage: 'Include',
+                        })}
+                  </EuiButtonEmpty>
+                ) : undefined
+              }
+              compressed
+              fullWidth
+            />
+          </EuiFormRow>
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
@@ -188,9 +202,12 @@ export const OutputFilterRow = () => {
 
 export const OutputFilterExpandedPanel = () => {
   const { isExpanded } = useOutputFilterReadContext();
+  const {
+    lastResult: { data },
+  } = useRequestReadContext();
   const { euiTheme } = useEuiTheme();
 
-  if (!isExpanded) return null;
+  if (!isExpanded || !data || data.length !== 1 || data[0].response.statusCode !== 200) return null;
 
   return (
     <EuiSplitPanel.Inner
