@@ -753,34 +753,41 @@ test.describe('Rules list', { tag: tags.stateful.classic }, () => {
     // The dropdown stays open between clicks; use toHaveCount (auto-retry) instead
     // of waitFor (unreliable with fast table reloads).
 
+    // Each filter click triggers an API call. Clicking the next option before the
+    // previous request finishes can race the filter update — the stale response
+    // arrives last and overwrites the new filter state. Wait for the loading
+    // indicator to clear between every click to prevent this.
+    const waitForListStable = () =>
+      expect(
+        page.locator('.euiBasicTable[data-test-subj="rulesList"].euiBasicTable-loading')
+      ).toBeHidden({ timeout: 10_000 });
+
     // Select only enabled → 2 rules (enabled + snoozed)
     await page.testSubj.click('ruleStatusFilterButton');
     await page.testSubj.click('ruleStatusFilterOption-enabled');
     await expect(getTableRows(page)).toHaveCount(2);
+    await waitForListStable();
 
     // Add disabled → all 4
     await page.testSubj.click('ruleStatusFilterOption-disabled');
     await expect(getTableRows(page)).toHaveCount(4);
+    await waitForListStable();
 
     // Deselect enabled → only disabled (2)
     await page.testSubj.click('ruleStatusFilterOption-enabled');
     await expect(getTableRows(page)).toHaveCount(2);
+    await waitForListStable();
 
     // Deselect disabled, select snoozed → only snoozed (2)
     await page.testSubj.click('ruleStatusFilterOption-disabled');
     await page.testSubj.click('ruleStatusFilterOption-snoozed');
     await expect(getTableRows(page)).toHaveCount(2);
+    await waitForListStable();
 
     // Add disabled → disabled + snoozed (3)
     await page.testSubj.click('ruleStatusFilterOption-disabled');
     await expect(getTableRows(page)).toHaveCount(3);
-    // Wait for the table to finish any in-progress reload before the next click.
-    // Without this, clicking "enabled" while a previous request is still in flight
-    // can race the filter update — the stale response arrives last and overwrites
-    // the new filter state, leaving the table at 3 rows instead of 4.
-    await expect(
-      page.locator('.euiBasicTable[data-test-subj="rulesList"].euiBasicTable-loading')
-    ).toBeHidden({ timeout: 10_000 });
+    await waitForListStable();
 
     // Add enabled → all 4
     await page.testSubj.click('ruleStatusFilterOption-enabled');
