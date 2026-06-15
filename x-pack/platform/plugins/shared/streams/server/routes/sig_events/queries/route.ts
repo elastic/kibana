@@ -52,7 +52,8 @@ const listQueriesRoute = createServerRoute({
       stability: 'experimental',
     },
     deprecated: {
-      documentationUrl: 'https://www.elastic.co/docs/api/doc/serverless/operation/operation-get-streams-name-queries',
+      documentationUrl:
+        'https://www.elastic.co/docs/api/doc/serverless/operation/operation-get-streams-name-queries',
       severity: 'warning',
       message:
         'This experimental Significant Events endpoint is deprecated and will be removed in a future release.',
@@ -121,7 +122,8 @@ const upsertQueryRoute = createServerRoute({
       stability: 'experimental',
     },
     deprecated: {
-      documentationUrl: '',
+      documentationUrl:
+        'https://www.elastic.co/docs/api/doc/serverless/operation/operation-put-streams-name-queries-queryid',
       severity: 'warning',
       message:
         'This experimental Significant Events endpoint is deprecated and will be removed in a future release.',
@@ -201,7 +203,8 @@ const deleteQueryRoute = createServerRoute({
       stability: 'experimental',
     },
     deprecated: {
-      documentationUrl: '',
+      documentationUrl:
+        'https://www.elastic.co/docs/api/doc/serverless/operation/operation-delete-streams-name-queries-queryid',
       severity: 'warning',
       message:
         'This experimental Significant Events endpoint is deprecated and will be removed in a future release.',
@@ -278,7 +281,8 @@ const bulkQueriesRoute = createServerRoute({
       stability: 'experimental',
     },
     deprecated: {
-      documentationUrl: '',
+      documentationUrl:
+        'https://www.elastic.co/docs/api/doc/serverless/operation/operation-post-streams-name-queries-bulk',
       severity: 'warning',
       message:
         'This experimental Significant Events endpoint is deprecated and will be removed in a future release.',
