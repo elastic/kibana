@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import type { PropsWithChildren } from 'react';
-import React, { createContext, useContext, useMemo } from 'react';
 import type { ApplicationStart, HttpStart, NotificationsStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { PropsWithChildren } from 'react';
+import React, { createContext, useContext, useMemo } from 'react';
 
 export interface RuleFormServices {
   http: HttpStart;
@@ -21,6 +22,7 @@ export interface RuleFormServices {
   application: ApplicationStart;
   lens: LensPublicStart;
   uiActions?: UiActionsStart;
+  dashboard?: DashboardStart;
 }
 
 export type RuleFormLayout = 'page' | 'flyout';
@@ -48,7 +50,10 @@ export const RuleFormProvider = ({
   children,
   services,
   meta = DEFAULT_META,
-}: PropsWithChildren<{ services: RuleFormServices; meta?: RuleFormMeta }>) => {
+}: PropsWithChildren<{
+  services: RuleFormServices;
+  meta?: RuleFormMeta;
+}>): React.ReactElement => {
   const value = useMemo(() => ({ services, meta }), [services, meta]);
   return <RuleFormContext.Provider value={value}>{children}</RuleFormContext.Provider>;
 };

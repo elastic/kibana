@@ -49,8 +49,10 @@ export default ({ getService }: FtrProviderContext): void => {
     }
   };
 
-  // Skipped until a feature flag in @kbn/change-history package is enabled
-  describe.skip('@ess @serverless @serverlessQA rule change history', () => {
+  // Skip in Serverless until "xpack.alerting.ruleChangeTracking.enabled" and
+  // xpack.securitySolution.enableExperimental: [ruleChangesHistoryEnabled] feature flags
+  // permanently enabled
+  describe.skip('@ess @skipInServerless rule change history', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
       await deleteAllPrebuiltRuleAssets(es, log);

@@ -11,7 +11,7 @@ import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
 import type { KueryNode } from '@kbn/es-query';
 import { fromKueryExpression, toElasticsearchQuery, escapeQuotes } from '@kbn/es-query';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
 
 import type { AgentSOAttributes, Agent, ListWithKuery } from '../../types';
@@ -42,10 +42,10 @@ import { SIGNALS_RUNTIME_FIELD } from './build_signals_runtime_field';
 import { getLatestAvailableAgentVersion } from './versions';
 
 const INACTIVE_AGENT_CONDITION = `status:inactive`;
-const ACTIVE_AGENT_CONDITION = `NOT (${INACTIVE_AGENT_CONDITION})`;
-const ENROLLED_AGENT_CONDITION = `NOT status:unenrolled`;
+export const ACTIVE_AGENT_CONDITION = `NOT (${INACTIVE_AGENT_CONDITION})`;
+export const ENROLLED_AGENT_CONDITION = `NOT status:unenrolled`;
 
-const includeUnenrolled = (kuery?: string) =>
+export const includeUnenrolled = (kuery?: string) =>
   kuery?.toLowerCase().includes('status:*') || kuery?.toLowerCase().includes('status:unenrolled');
 
 export function _joinFilters(

@@ -75,7 +75,7 @@ const parseStatsCommand = (
   stats: StatDefinition[],
   groupByFields: string[]
 ): ESQLSingleAstItem[] => {
-  const assignments = stats.map((s) => `${s.label} = ${buildAggFragment(s)}`);
+  const assignments = stats.map((s) => `${escapeField(s.label)} = ${buildAggFragment(s)}`);
   const groupBy =
     groupByFields.length > 0 ? ` BY ${groupByFields.map(escapeField).join(', ')}` : '';
   const src = `ROW x = 1 | STATS ${assignments.join(', ')}${groupBy}`;
@@ -189,4 +189,21 @@ export const buildThresholdEsql = (values: ThresholdFormValues): string => {
 
   const root = Builder.expression.query(commands);
   return BasicPrettyPrinter.multiline(root, { pipeTab: '  ' });
+};
+
+export const buildRecoveryBlock = (values: ThresholdFormValues): string | undefined => {
+  const { recovery } = values;
+  if (!recovery) return undefined;
+
+  const validConditions = recovery.conditions.filter((c) => c.metric && c.threshold.length > 0);
+  if (validConditions.length === 0) return undefined;
+
+  const conditionExprs = validConditions.map(buildConditionExpr);
+  const joiner = recovery.conditionOperator === 'OR' ? 'or' : 'and';
+  const combined = conditionExprs.reduce((left, right) =>
+    Builder.expression.func.binary(joiner, [left, right])
+  );
+
+  const whereCmd = Builder.command({ name: 'where', args: [combined] });
+  return `| ${BasicPrettyPrinter.command(whereCmd)}`;
 };

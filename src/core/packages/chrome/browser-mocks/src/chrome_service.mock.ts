@@ -18,6 +18,7 @@ import type {
 } from '@kbn/core-chrome-browser-internal-types';
 import { lazyObject } from '@kbn/lazy-object';
 import { sidebarServiceMock } from '@kbn/core-chrome-sidebar-mocks';
+import type { ReactNode } from 'react';
 
 const createSetupContractMock = (): DeeplyMockedKeys<InternalChromeSetup> => {
   return lazyObject({
@@ -119,9 +120,19 @@ const createStartContractMock = () => {
     }),
     next: lazyObject({
       isEnabled: false,
+      aiButton: lazyObject({
+        get$: jest.fn().mockReturnValue(new BehaviorSubject([])),
+        register: jest.fn().mockReturnValue(() => {}),
+      }),
       globalSearch: lazyObject({
         set: jest.fn(),
         get$: jest.fn().mockReturnValue(new BehaviorSubject(undefined)),
+      }),
+      contextSwitcher: lazyObject({
+        set: jest.fn((content?: ReactNode) => {
+          new BehaviorSubject<ReactNode>(null).next(content ?? null);
+        }),
+        get$: jest.fn().mockReturnValue(new BehaviorSubject<ReactNode>(null)),
       }),
       inlineAppHeader: lazyObject({
         get$: jest.fn().mockReturnValue(inlineAppHeaderState$),
@@ -139,6 +150,16 @@ const createStartContractMock = () => {
           };
         }),
       }),
+      userMenu: lazyObject({
+        get$: jest.fn().mockReturnValue(new BehaviorSubject<ReactNode>(null)),
+        set: jest.fn((content?: ReactNode) => {
+          new BehaviorSubject<ReactNode>(null).next(content ?? null);
+        }),
+      }),
+      getFeedbackHandler$: jest.fn().mockReturnValue(new BehaviorSubject(undefined)),
+      registerFeedbackHandler: jest.fn().mockReturnValue(() => {}),
+      getNewsfeedHandler$: jest.fn().mockReturnValue(new BehaviorSubject(undefined)),
+      registerNewsfeedHandler: jest.fn().mockReturnValue(() => {}),
     }),
     setGlobalFooter: jest.fn(),
     getGlobalFooter$: jest.fn().mockReturnValue(new BehaviorSubject(null)),

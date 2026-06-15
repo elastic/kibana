@@ -254,4 +254,72 @@ steps: []
 
     getDef.mockRestore();
   });
+
+  describe('ES|QL region detection', () => {
+    it('detects when the cursor sits inside an elasticsearch.esql.query body', () => {
+      const result = buildAutocompleteContext(
+        getFakeAutocompleteContextParams(`steps:
+  - type: elasticsearch.esql.query
+    with:
+      query: |
+        FROM logs-* | |<-
+`)
+      );
+
+      expect(result?.isInEsqlQueryField).toBe(true);
+      expect(result?.esqlRegion).not.toBeNull();
+      expect(result?.esqlOffsetInQuery).not.toBeNull();
+      expect(result?.esqlOffsetInQuery).toBeGreaterThan(0);
+    });
+
+    it('keeps the cursor inside the region when it sits in trailing whitespace', () => {
+      // Reproduces the bug where a 500ms-debounced store yamlDocument made the
+      // cursor land outside `contentEndInFile` on every keystroke. The build
+      // context now re-parses model.getValue() directly AND treats trailing
+      // whitespace immediately after the trimmed region content as in-region,
+      // so the cursor at the very end of an in-progress ES|QL line still
+      // resolves as in-region.
+      const result = buildAutocompleteContext(
+        getFakeAutocompleteContextParams(`steps:
+  - type: elasticsearch.esql.query
+    with:
+      query: |
+        FROM logs-* |<-`)
+      );
+
+      expect(result?.isInEsqlQueryField).toBe(true);
+      expect(result?.esqlRegion?.esql).toBe('        FROM logs-*');
+      // Cursor offset is past the trimmed end, into the trailing whitespace.
+      expect(result?.esqlOffsetInQuery).toBeGreaterThan(result!.esqlRegion!.esql.length);
+    });
+
+    it('returns isInEsqlQueryField=false outside an ES|QL query body', () => {
+      const result = buildAutocompleteContext(
+        getFakeAutocompleteContextParams(`steps:
+  - type: elasticsearch.esql.query
+    with:
+      query: |
+        FROM logs
+    name: "|<-"
+`)
+      );
+
+      expect(result?.isInEsqlQueryField).toBe(false);
+      expect(result?.esqlRegion).toBeNull();
+      expect(result?.esqlOffsetInQuery).toBeNull();
+    });
+
+    it('skips the YAML walk when no elasticsearch.esql.query step exists', () => {
+      const result = buildAutocompleteContext(
+        getFakeAutocompleteContextParams(`steps:
+  - type: console
+    with:
+      message: "|<-"
+`)
+      );
+
+      expect(result?.isInEsqlQueryField).toBe(false);
+      expect(result?.esqlRegion).toBeNull();
+    });
+  });
 });

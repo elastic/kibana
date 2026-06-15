@@ -162,85 +162,62 @@ describe('EarsStrategy', () => {
     describe('Slack 200 + ok:false auth error', () => {
       const slackDeps = { ...baseDeps, secrets: { provider: 'slack' } };
 
-      it('token_expired triggers refresh and retries', async () => {
+      it.each([
+        {
+          slackError: 'token_expired',
+          description: 'triggers refresh and retries',
+          refreshFails: false,
+        },
+        {
+          slackError: 'invalid_auth',
+          description: 'triggers refresh and retries',
+          refreshFails: false,
+        },
+        {
+          slackError: 'not_authed',
+          description: 'triggers refresh and retries',
+          refreshFails: false,
+        },
+        {
+          slackError: 'token_revoked',
+          description:
+            'attempts refresh; ConnectorAuthorizationError propagates when refresh fails',
+          refreshFails: true,
+        },
+      ])('$slackError $description', async ({ slackError, refreshFails }) => {
         const { instance, mockRequest } = createMockAxiosInstance();
         strategy.installResponseInterceptor(instance, slackDeps);
         const onFulfilled = getOnFulfilled(instance);
 
-        mockGetEarsAccessToken.mockResolvedValue('Bearer newtoken');
-        mockRequest.mockResolvedValue({ status: 200, data: { ok: true } });
-
         const response = {
           config: { _retry: false, headers: {} as Record<string, string> },
-          data: { ok: false, error: 'token_expired' },
+          data: { ok: false, error: slackError },
         };
-        await onFulfilled(response);
 
-        expect(mockGetEarsAccessToken).toHaveBeenCalledWith(
-          expect.objectContaining({ forceRefresh: true, connectorId: 'connector-1' })
-        );
-        expect(response.config.headers.Authorization).toBe('Bearer newtoken');
-        expect(mockRequest).toHaveBeenCalledWith(response.config);
-      });
+        if (refreshFails) {
+          const authError = new ConnectorAuthorizationError({
+            authMethod: 'ears',
+            reason: 'token_revoked',
+            message: 'The token was revoked',
+          });
+          mockGetEarsAccessToken.mockRejectedValue(authError);
 
-      it('invalid_auth triggers refresh and retries', async () => {
-        const { instance, mockRequest } = createMockAxiosInstance();
-        strategy.installResponseInterceptor(instance, slackDeps);
-        const onFulfilled = getOnFulfilled(instance);
+          await expect(onFulfilled(response)).rejects.toBe(authError);
+          expect(mockGetEarsAccessToken).toHaveBeenCalledWith(
+            expect.objectContaining({ forceRefresh: true })
+          );
+        } else {
+          mockGetEarsAccessToken.mockResolvedValue('Bearer newtoken');
+          mockRequest.mockResolvedValue({ status: 200, data: { ok: true } });
 
-        mockGetEarsAccessToken.mockResolvedValue('Bearer newtoken');
-        mockRequest.mockResolvedValue({ status: 200, data: { ok: true } });
+          await onFulfilled(response);
 
-        const response = {
-          config: { _retry: false, headers: {} as Record<string, string> },
-          data: { ok: false, error: 'invalid_auth' },
-        };
-        await onFulfilled(response);
-
-        expect(mockGetEarsAccessToken).toHaveBeenCalledWith(
-          expect.objectContaining({ forceRefresh: true })
-        );
-        expect(mockRequest).toHaveBeenCalledWith(response.config);
-      });
-
-      it('not_authed triggers refresh and retries', async () => {
-        const { instance, mockRequest } = createMockAxiosInstance();
-        strategy.installResponseInterceptor(instance, slackDeps);
-        const onFulfilled = getOnFulfilled(instance);
-
-        mockGetEarsAccessToken.mockResolvedValue('Bearer newtoken');
-        mockRequest.mockResolvedValue({ status: 200, data: { ok: true } });
-
-        const response = {
-          config: { _retry: false, headers: {} as Record<string, string> },
-          data: { ok: false, error: 'not_authed' },
-        };
-        await onFulfilled(response);
-
-        expect(mockGetEarsAccessToken).toHaveBeenCalledTimes(1);
-        expect(mockRequest).toHaveBeenCalledWith(response.config);
-      });
-
-      it('token_revoked attempts refresh; ConnectorAuthorizationError propagates when refresh fails', async () => {
-        const { instance } = createMockAxiosInstance();
-        strategy.installResponseInterceptor(instance, slackDeps);
-        const onFulfilled = getOnFulfilled(instance);
-
-        const authError = new ConnectorAuthorizationError({
-          authMethod: 'ears',
-          reason: 'token_revoked',
-          message: 'The token was revoked',
-        });
-        mockGetEarsAccessToken.mockRejectedValue(authError);
-
-        const response = {
-          config: { _retry: false, headers: {} as Record<string, string> },
-          data: { ok: false, error: 'token_revoked' },
-        };
-        await expect(onFulfilled(response)).rejects.toBe(authError);
-        expect(mockGetEarsAccessToken).toHaveBeenCalledWith(
-          expect.objectContaining({ forceRefresh: true })
-        );
+          expect(mockGetEarsAccessToken).toHaveBeenCalledWith(
+            expect.objectContaining({ forceRefresh: true, connectorId: 'connector-1' })
+          );
+          expect(response.config.headers.Authorization).toBe('Bearer newtoken');
+          expect(mockRequest).toHaveBeenCalledWith(response.config);
+        }
       });
 
       it('non-auth Slack error passes through unchanged', async () => {

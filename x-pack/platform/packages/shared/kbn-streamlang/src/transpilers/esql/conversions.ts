@@ -34,6 +34,8 @@ import type {
   NetworkDirectionProcessor,
   JsonExtractProcessor,
   EnrichProcessor,
+  UserAgentProcessor,
+  UriPartsProcessor,
   RegisteredDomainProcessor,
 } from '../../../types/processors';
 import { type StreamlangProcessorDefinition } from '../../../types/processors';
@@ -63,6 +65,8 @@ import { convertConcatProcessorToESQL } from './processors/concat';
 import { convertNetworkDirectionProcessorToESQL } from './processors/network_direction';
 import { convertJsonExtractProcessorToESQL } from './processors/json_extract';
 import { convertEnrichProcessorToESQL } from './processors/enrich';
+import { convertUserAgentProcessorToESQL } from './processors/user_agent';
+import { convertUriPartsProcessorToESQL } from './processors/uri_parts';
 import { convertRegisteredDomainProcessorToESQL } from './processors/registered_domain';
 
 async function convertProcessorToESQL(
@@ -90,6 +94,9 @@ async function convertProcessorToESQL(
 
     case 'grok':
       return convertGrokProcessorToESQL(processor as GrokProcessor);
+
+    case 'uri_parts':
+      return convertUriPartsProcessorToESQL(processor as UriPartsProcessor);
 
     case 'math':
       return convertMathProcessorToESQL(processor as MathProcessor);
@@ -144,6 +151,8 @@ async function convertProcessorToESQL(
         throw new Error('Enrich policy resolver is required for enrich processor.');
       }
       return await convertEnrichProcessorToESQL(processor as EnrichProcessor, resolver);
+    case 'user_agent':
+      return convertUserAgentProcessorToESQL(processor as UserAgentProcessor);
 
     case 'registered_domain':
       return convertRegisteredDomainProcessorToESQL(processor as RegisteredDomainProcessor);

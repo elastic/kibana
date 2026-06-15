@@ -31,6 +31,7 @@ import {
 } from './triggers_utils';
 import type { StepInfo, WorkflowDetailState } from '../../../../../entities/workflows/store';
 import { getContextSchemaForPath } from '../../../../../features/workflow_context/lib/get_context_for_path';
+import { findEsqlRegionContainingCursor } from '../../esql_validation/extract_esql_region';
 import { getRegisteredTriggerConditionDefinition } from '../get_registered_trigger_condition_definition';
 
 function buildCompletionInsertRange(
@@ -61,7 +62,8 @@ function resolveContextSchemaForAutocomplete(
   path: (string | number)[],
   yamlDocument: Document,
   absoluteOffset: number,
-  lineParseResult: LineParseResult | null
+  lineParseResult: LineParseResult | null,
+  yamlSource: string
 ): { contextSchema: z.ZodType; contextScopedToPath: string | null } {
   let contextSchema: z.ZodType = DynamicStepContextSchema;
   let contextScopedToPath: string | null = null;
@@ -72,7 +74,8 @@ function resolveContextSchemaForAutocomplete(
       workflowGraph,
       path,
       yamlDocument,
-      absoluteOffset
+      absoluteOffset,
+      yamlSource
     );
   }
 
@@ -148,13 +151,15 @@ export function buildAutocompleteContext({
   const lineUpToCursor = line.substring(0, position.column - 1);
   const parseResult = parseLineForCompletion(lineUpToCursor);
 
+  const yamlSource = model.getValue();
   const { contextSchema, contextScopedToPath } = resolveContextSchemaForAutocomplete(
     workflowDefinition,
     workflowGraph,
     path,
     yamlDocument,
     absoluteOffset,
-    parseResult
+    parseResult,
+    yamlSource
   );
 
   // Check if we're actually inside a liquid block
@@ -166,6 +171,10 @@ export function buildAutocompleteContext({
 
   const { isInTriggerConditionField, triggerConditionDefinition } =
     resolveTriggerConditionAutocomplete(path, yamlDocument);
+
+  const esqlRegion = findEsqlRegionContainingCursor(model.getValue(), absoluteOffset, path);
+  const esqlOffsetInQuery =
+    esqlRegion !== null ? absoluteOffset - esqlRegion.contentStartInFile : null;
 
   return {
     // what triggered the completion
@@ -200,6 +209,9 @@ export function buildAutocompleteContext({
     isInStepsContext: isInStepsContext(path),
     isInWorkflowInputsContext:
       isInWorkflowInputsPath(path) || isInWorkflowInputsByPosition(focusedStepInfo, absoluteOffset),
+    isInEsqlQueryField: esqlRegion !== null,
+    esqlRegion,
+    esqlOffsetInQuery,
 
     // dynamic connector types
     dynamicConnectorTypes: currentDynamicConnectorTypes ?? null,
