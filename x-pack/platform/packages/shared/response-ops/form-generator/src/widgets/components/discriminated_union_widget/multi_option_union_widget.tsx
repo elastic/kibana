@@ -6,7 +6,15 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
-import { EuiCheckableCard, EuiFormFieldset, EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiCheckableCard,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormFieldset,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
 import { useFormData, useFormContext } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
   getDiscriminatorFieldValue,
@@ -124,6 +132,7 @@ export const MultiOptionUnionWidget: React.FC<DiscriminatedUnionWidgetProps> = (
         const onChange = () => setSelectedOption(discriminatorValue);
         const optionMeta = getMeta(option);
         const label = optionMeta.label;
+        const isWarn = Boolean((optionMeta as Record<string, unknown>).warn);
         const isChecked = selectedOption === discriminatorValue;
 
         // if the entire fieldset is disabled, ensure each option is also marked as disabled
@@ -132,11 +141,22 @@ export const MultiOptionUnionWidget: React.FC<DiscriminatedUnionWidgetProps> = (
         }
         const isDisabled = getMeta(option).disabled;
 
+        const cardLabel = isWarn ? (
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>{label as string}</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="warning">Not recommended</EuiBadge>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ) : (
+          (label as string)
+        );
+
         return (
           <React.Fragment key={discriminatorValue}>
             <EuiCheckableCard
               onChange={onChange}
-              label={label as string}
+              label={cardLabel}
               id={discriminatorValue}
               checked={isChecked}
               data-test-subj={`form-generator-field-${rootPath}-${discriminatorValue}`}

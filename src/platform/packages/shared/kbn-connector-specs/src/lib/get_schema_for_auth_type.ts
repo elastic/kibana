@@ -29,6 +29,9 @@ export const getSchemaForAuthType = (authTypeDef: string | AuthTypeDef) => {
   let defaults: Record<string, unknown> | undefined;
   let meta: Record<string, Record<string, unknown>> | undefined;
 
+  let labelOverride: string | undefined;
+  let warnOverride: boolean | undefined;
+
   if (isString(authTypeDef)) {
     authTypeId = authTypeDef as string;
   } else {
@@ -36,6 +39,8 @@ export const getSchemaForAuthType = (authTypeDef: string | AuthTypeDef) => {
     authTypeId = def.type;
     defaults = def.defaults;
     meta = def?.overrides?.meta;
+    labelOverride = def.label;
+    warnOverride = def.warn;
   }
 
   if (!authTypeId) {
@@ -79,12 +84,18 @@ export const getSchemaForAuthType = (authTypeDef: string | AuthTypeDef) => {
   }
 
   // add the authType discriminator key
+  const schemaMeta = {
+    ...existingMeta,
+    ...(labelOverride !== undefined ? { label: labelOverride } : {}),
+    ...(warnOverride !== undefined ? { warn: warnOverride } : {}),
+  };
+
   return {
     id: authTypeId,
     schema: schemaToUse
       .extend({
         [AUTH_TYPE_DISCRIMINATOR]: z.literal(authTypeId),
       })
-      .meta(existingMeta),
+      .meta(schemaMeta),
   };
 };
