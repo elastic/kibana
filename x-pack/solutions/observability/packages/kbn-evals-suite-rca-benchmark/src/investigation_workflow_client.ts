@@ -115,11 +115,13 @@ export class InvestigationWorkflowClient {
             event_id: `eval-event-${opaqueId}`,
             discovery_id: discoveryId,
             discovery_slug: opaqueId,
-            title: `Automated RCA evaluation`,
+            title: `Microservice system degradation or outage`,
             summary:
-              `Automated RCA evaluation run. ` +
               `A microservice system is experiencing degradation or an outage. ` +
-              `Investigate using the telemetry in stream_names to find the root cause.`,
+              `Investigate the root cause and identify the responsible service. ` +
+              `Telemetry is in stream_names (logs and traces). ` +
+              `Use available tools to inspect these data streams. ` +
+              `Identify: (1) the root cause component, (2) the failure mode, and (3) supporting evidence.`,
             root_cause: '',
             impact: '',
             stream_names: streamNames,

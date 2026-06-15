@@ -7,6 +7,8 @@
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { BuiltInAgentDefinition } from '@kbn/agent-builder-server/agents';
+import { platformCoreTools, platformStreamsSigEventsTools } from '@kbn/agent-builder-common/tools';
+import { OBSERVABILITY_GET_LOGS_TOOL_ID } from '../discovery/constants';
 
 export const SIGEVENTS_INVESTIGATION_CONTEXT_AGENT_ID = 'sigevents.investigation.context';
 export const SIGEVENTS_INVESTIGATION_GATHER_AGENT_ID = 'sigevents.investigation.gather';
@@ -22,7 +24,13 @@ const investigationContextAgent = {
   labels: ['observability', 'streams', 'significant-events', 'investigation', 'context'],
   configuration: {
     skill_ids: ['significant-events-memory', 'significant-events-investigation-context'],
-    tools: [],
+    tools: [
+      {
+        tool_ids: [
+          platformStreamsSigEventsTools.searchKnowledgeIndicators,
+        ],
+      },
+    ],
   },
 } as const satisfies BuiltInAgentDefinition;
 
@@ -34,8 +42,16 @@ const investigationGatherAgent = {
     'tools. Does not render a verdict — records what was found and what was blocked.',
   labels: ['observability', 'streams', 'significant-events', 'investigation', 'gather'],
   configuration: {
-    skill_ids: ['significant-events-investigation-gather'],
-    tools: [],
+    skill_ids: ['significant-events-memory', 'significant-events-investigation-gather'],
+    tools: [
+      {
+        tool_ids: [
+          platformStreamsSigEventsTools.searchKnowledgeIndicators,
+          platformCoreTools.executeEsql,
+          OBSERVABILITY_GET_LOGS_TOOL_ID,
+        ],
+      },
+    ],
   },
 } as const satisfies BuiltInAgentDefinition;
 
