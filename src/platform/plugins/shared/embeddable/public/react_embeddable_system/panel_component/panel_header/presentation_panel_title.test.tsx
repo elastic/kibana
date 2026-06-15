@@ -87,11 +87,7 @@ describe('PresentationPanelTitle', () => {
 
     it('opens the customize panel flyout when Enter is pressed on the editable title', () => {
       renderWithTheme(
-        <PresentationPanelTitle
-          {...defaultProps}
-          panelTitle="CPU Usage"
-          viewMode="edit"
-        />
+        <PresentationPanelTitle {...defaultProps} panelTitle="CPU Usage" viewMode="edit" />
       );
 
       const titleLink = screen.getByTestId('embeddablePanelTitle');
@@ -105,11 +101,7 @@ describe('PresentationPanelTitle', () => {
 
     it('does not open the flyout for non-Enter key presses on the editable title', () => {
       renderWithTheme(
-        <PresentationPanelTitle
-          {...defaultProps}
-          panelTitle="CPU Usage"
-          viewMode="edit"
-        />
+        <PresentationPanelTitle {...defaultProps} panelTitle="CPU Usage" viewMode="edit" />
       );
 
       const titleLink = screen.getByTestId('embeddablePanelTitle');
