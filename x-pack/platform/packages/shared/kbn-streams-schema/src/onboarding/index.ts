@@ -8,6 +8,7 @@
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import type { BaseFeature } from '../feature';
 import type { GeneratedSignificantEventQuery } from '../api/significant_events';
+import { SigEventsWorkflowStatus, type SigEventsWorkflowStatusResult } from '../workflows';
 
 /** Summary of the features identification step of a completed onboarding run. */
 export interface StreamsKIsOnboardingFeaturesResult {
@@ -30,49 +31,14 @@ export interface StreamsKIsOnboardingResult {
   queries: StreamsKIsOnboardingQueriesResult;
 }
 
+export type StreamsKIsOnboardingStatusResult =
+  SigEventsWorkflowStatusResult<StreamsKIsOnboardingResult>;
+
 export enum StreamsKIsOnboardingStep {
   FeaturesIdentification = 'features_identification',
   QueriesGeneration = 'queries_generation',
 }
 
-export enum StreamsKIsOnboardingStatus {
-  NotStarted = 'not_started',
-  InProgress = 'in_progress',
-  /** Client-only optimistic state; the server never returns this value. */
-  BeingCanceled = 'being_canceled',
-  Canceled = 'canceled',
-  Failed = 'failed',
-  Completed = 'completed',
-}
-
-export type StreamsKIsOnboardingStatusResult =
-  | {
-      status:
-        | StreamsKIsOnboardingStatus.NotStarted
-        | StreamsKIsOnboardingStatus.InProgress
-        | StreamsKIsOnboardingStatus.BeingCanceled
-        | StreamsKIsOnboardingStatus.Canceled;
-    }
-  | { status: StreamsKIsOnboardingStatus.Failed; error: string }
-  | ({ status: StreamsKIsOnboardingStatus.Completed } & StreamsKIsOnboardingResult);
-
-/**
- * Lightweight onboarding status, without the completed output payload
- * (features/queries). Returned by the batch status endpoint, which only needs
- * to convey progress per stream and intentionally skips the extra per-stream
- * fetch required to assemble the completed output.
- */
-export type StreamsKIsOnboardingStatusSummary =
-  | {
-      status:
-        | StreamsKIsOnboardingStatus.NotStarted
-        | StreamsKIsOnboardingStatus.InProgress
-        | StreamsKIsOnboardingStatus.BeingCanceled
-        | StreamsKIsOnboardingStatus.Canceled
-        | StreamsKIsOnboardingStatus.Completed;
-    }
-  | { status: StreamsKIsOnboardingStatus.Failed; error: string };
-
 /** Statuses that indicate the onboarding pipeline is still active (running or pending cancel). */
-export const STREAMS_KIS_ONBOARDING_IN_PROGRESS_STATUSES: ReadonlySet<StreamsKIsOnboardingStatus> =
-  new Set([StreamsKIsOnboardingStatus.InProgress, StreamsKIsOnboardingStatus.BeingCanceled]);
+export const STREAMS_KIS_ONBOARDING_IN_PROGRESS_STATUSES: ReadonlySet<SigEventsWorkflowStatus> =
+  new Set([SigEventsWorkflowStatus.InProgress, SigEventsWorkflowStatus.BeingCanceled]);

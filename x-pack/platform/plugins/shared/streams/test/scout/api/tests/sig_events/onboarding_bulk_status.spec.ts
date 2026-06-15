@@ -7,7 +7,7 @@
 
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
-import { StreamsKIsOnboardingStatus } from '@kbn/streams-schema';
+import { SigEventsWorkflowStatus } from '@kbn/streams-schema';
 import { v4 as uuidv4 } from 'uuid';
 import { streamsApiTest as apiTest } from '../../fixtures';
 import { COMMON_API_HEADERS } from '../../fixtures/constants';
@@ -46,7 +46,8 @@ apiTest.describe(
         expect(Object.keys(response.body).sort()).toStrictEqual([...streamNames].sort());
         for (const streamName of streamNames) {
           expect(response.body[streamName]).toStrictEqual({
-            status: StreamsKIsOnboardingStatus.NotStarted,
+            status: SigEventsWorkflowStatus.NotStarted,
+            executionId: null,
           });
         }
       }

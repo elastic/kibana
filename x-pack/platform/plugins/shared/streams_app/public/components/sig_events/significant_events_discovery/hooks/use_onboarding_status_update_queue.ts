@@ -7,14 +7,14 @@
 
 import {
   STREAMS_KIS_ONBOARDING_IN_PROGRESS_STATUSES,
-  type StreamsKIsOnboardingStatusSummary,
+  type SigEventsWorkflowStatusResult,
 } from '@kbn/streams-schema';
 import { useCallback, useRef } from 'react';
 import { useOnboardingApi } from '../../../../hooks/use_onboarding_api';
 
 type StreamOnboardingStatusUpdateCallback = (
   streamName: string,
-  status: StreamsKIsOnboardingStatusSummary
+  status: SigEventsWorkflowStatusResult
 ) => void;
 
 export function useOnboardingStatusUpdateQueue(

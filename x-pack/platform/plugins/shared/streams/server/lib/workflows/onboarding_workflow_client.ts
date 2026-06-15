@@ -6,22 +6,23 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import { ExecutionStatus, NonTerminalExecutionStatuses, isTerminalStatus } from '@kbn/workflows';
+import { NonTerminalExecutionStatuses } from '@kbn/workflows';
 import type { WorkflowExecutionListItemDto } from '@kbn/workflows';
 import { STREAMS_KI_ONBOARDING_WORKFLOW_ID } from '@kbn/workflows/managed';
-import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
-import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import {
-  StreamsKIsOnboardingStatus,
-  type StreamsKIsOnboardingStatusResult,
-  type StreamsKIsOnboardingStatusSummary,
+  SigEventsWorkflowStatus,
+  type SigEventsWorkflowStatusResult,
   type StreamsKIsOnboardingFeaturesResult,
   type StreamsKIsOnboardingQueriesResult,
+  type StreamsKIsOnboardingStatusResult,
   type BaseFeature,
   type GeneratedSignificantEventQuery,
 } from '@kbn/streams-schema';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import { WorkflowExecutionService } from './workflow_execution_service';
 
 const EMPTY_TOKEN_COUNT: ChatCompletionTokenCount = { prompt: 0, completion: 0, total: 0 };
 
@@ -180,91 +181,36 @@ export const parseStreamNameFromConcurrencyKey = (key: string): string | null =>
   return key.slice(CONCURRENCY_KEY_PREFIX.length);
 };
 
-/** Maps a workflow engine execution status to the domain-level onboarding status. */
-const mapExecutionToOnboardingStatus = (
-  status: ExecutionStatus
-):
-  | StreamsKIsOnboardingStatus.InProgress
-  | StreamsKIsOnboardingStatus.Completed
-  | StreamsKIsOnboardingStatus.Failed
-  | StreamsKIsOnboardingStatus.Canceled => {
-  switch (status) {
-    case ExecutionStatus.PENDING:
-    case ExecutionStatus.RUNNING:
-    case ExecutionStatus.WAITING:
-    case ExecutionStatus.WAITING_FOR_INPUT:
-    case ExecutionStatus.WAITING_FOR_CHILD:
-      return StreamsKIsOnboardingStatus.InProgress;
-    case ExecutionStatus.COMPLETED:
-      return StreamsKIsOnboardingStatus.Completed;
-    case ExecutionStatus.FAILED:
-    case ExecutionStatus.TIMED_OUT:
-      return StreamsKIsOnboardingStatus.Failed;
-    case ExecutionStatus.CANCELLED:
-    case ExecutionStatus.SKIPPED:
-      return StreamsKIsOnboardingStatus.Canceled;
-    default:
-      const _exhaustiveCheck: never = status;
-      return _exhaustiveCheck;
-  }
-};
-
-/** Extracts the failure message for an execution mapped to the Failed status. */
-const extractFailureError = (execution: WorkflowExecutionListItemDto): string =>
-  execution.status === ExecutionStatus.TIMED_OUT
-    ? 'Onboarding workflow timed out'
-    : execution.error?.message ?? 'Unknown error';
-
 /**
- * Converts a workflow execution (optionally enriched with `context.output`)
- * into the public {@link StreamsKIsOnboardingStatusResult} shape returned by the API.
- * For completed executions the output is unpacked into summary counts;
- * for failures the error message is extracted.
- */
-const mapExecutionToStatusResult = (
-  execution: WorkflowExecutionListItemDto
-): StreamsKIsOnboardingStatusResult => {
-  const onboardingStatus = mapExecutionToOnboardingStatus(execution.status);
-
-  if (onboardingStatus === StreamsKIsOnboardingStatus.Failed) {
-    return { status: StreamsKIsOnboardingStatus.Failed, error: extractFailureError(execution) };
-  }
-
-  if (onboardingStatus === StreamsKIsOnboardingStatus.Completed) {
-    const ctx = (execution.context ?? {}) as {
-      output?: Partial<OnboardingWorkflowOutputContext>;
-    };
-    const { features, queries } = parseWorkflowOutput(ctx.output ?? {});
-    return {
-      status: StreamsKIsOnboardingStatus.Completed,
-      features,
-      queries,
-    };
-  }
-
-  return { status: onboardingStatus };
-};
-
-/**
- * Lightweight variant of {@link mapExecutionToStatusResult} that omits the
+ * Lightweight mapping of a workflow execution to a status result without the
  * completed output (features/queries). Used by the batch status endpoint, which
  * only conveys progress per stream and therefore avoids the extra per-stream
  * fetch that assembling the completed output would require.
  */
 const mapExecutionToStatusSummary = (
   execution: WorkflowExecutionListItemDto
-): StreamsKIsOnboardingStatusSummary => {
-  const onboardingStatus = mapExecutionToOnboardingStatus(execution.status);
+): SigEventsWorkflowStatusResult => {
+  const status = WorkflowExecutionService.classifyExecutionStatus(execution.status);
 
-  if (onboardingStatus === StreamsKIsOnboardingStatus.Failed) {
-    return { status: StreamsKIsOnboardingStatus.Failed, error: extractFailureError(execution) };
+  if (status === SigEventsWorkflowStatus.Failed) {
+    return {
+      status: SigEventsWorkflowStatus.Failed,
+      executionId: execution.id,
+      error: WorkflowExecutionService.getFailureMessage({
+        execution,
+        workflowId: STREAMS_KI_ONBOARDING_WORKFLOW_ID,
+      }),
+    };
   }
 
-  return { status: onboardingStatus };
+  if (status === SigEventsWorkflowStatus.Completed) {
+    return { status: SigEventsWorkflowStatus.Completed, executionId: execution.id };
+  }
+
+  return { status, executionId: execution.id };
 };
 
 const MAX_STREAMS_PER_QUERY = 10000;
-
 /**
  * Client that wraps the workflows management API to provide a stream-centric
  * interface for running, querying, and canceling KI onboarding workflows.
@@ -273,10 +219,14 @@ const MAX_STREAMS_PER_QUERY = 10000;
  * from the stream name, so at most one onboarding run is active per stream.
  */
 export class StreamsKIsOnboardingClient {
-  private readonly managementApi: WorkflowsServerPluginSetup['management'];
+  private readonly workflowExecutionService: WorkflowExecutionService<OnboardingWorkflowInputPayload>;
 
   constructor({ managementApi }: { managementApi: WorkflowsServerPluginSetup['management'] }) {
-    this.managementApi = managementApi;
+    this.workflowExecutionService = new WorkflowExecutionService({
+      managementApi,
+      workflowId: STREAMS_KI_ONBOARDING_WORKFLOW_ID,
+      workflowSpaceId: GLOBAL_WORKFLOW_SPACE_ID,
+    });
   }
 
   /**
@@ -292,22 +242,13 @@ export class StreamsKIsOnboardingClient {
   }: {
     inputs: StreamsKIsOnboardingInputs;
     request: KibanaRequest;
-  }): Promise<void> {
-    const workflow = await this.managementApi.getWorkflow(
-      STREAMS_KI_ONBOARDING_WORKFLOW_ID,
-      GLOBAL_WORKFLOW_SPACE_ID
-    );
-
-    if (!workflow || !workflow.definition) {
-      throw new Error(`Onboarding workflow ${STREAMS_KI_ONBOARDING_WORKFLOW_ID} not found`);
-    }
-
-    await this.managementApi.runWorkflow(
-      { ...workflow, definition: workflow.definition },
-      ONBOARDING_EXECUTIONS_SPACE_ID,
-      toWorkflowInputPayload(inputs),
-      request
-    );
+  }): Promise<{ executionId: string }> {
+    const executionId = await this.workflowExecutionService.execute({
+      executionSpaceId: ONBOARDING_EXECUTIONS_SPACE_ID,
+      inputs: toWorkflowInputPayload(inputs),
+      request,
+    });
+    return { executionId };
   }
 
   /**
@@ -321,41 +262,26 @@ export class StreamsKIsOnboardingClient {
     streamName,
   }: {
     streamName: string;
-  }): Promise<StreamsKIsOnboardingStatusResult & { executionId: string | null }> {
-    const { results } = await this.managementApi.getWorkflowExecutions(
-      {
-        workflowId: STREAMS_KI_ONBOARDING_WORKFLOW_ID,
-        concurrencyGroupKey: buildConcurrencyKey(streamName),
-        size: 1,
-      },
-      ONBOARDING_EXECUTIONS_SPACE_ID
-    );
+  }): Promise<StreamsKIsOnboardingStatusResult> {
+    const result = await this.workflowExecutionService.getStatus({
+      spaceId: ONBOARDING_EXECUTIONS_SPACE_ID,
+      queryParams: { concurrencyGroupKey: buildConcurrencyKey(streamName) },
+    });
 
-    if (results.length === 0) {
-      return { status: StreamsKIsOnboardingStatus.NotStarted, executionId: null };
+    if (result.status !== SigEventsWorkflowStatus.Completed) {
+      return result;
     }
 
-    const execution = results[0];
-
-    if (execution.status === ExecutionStatus.COMPLETED) {
-      const fullExecution = await this.managementApi.getWorkflowExecution(
-        execution.id,
-        ONBOARDING_EXECUTIONS_SPACE_ID,
-        { includeOutput: true }
-      );
-
-      if (fullExecution) {
-        return {
-          ...mapExecutionToStatusResult({
-            ...execution,
-            context: fullExecution.context,
-          }),
-          executionId: execution.id,
-        };
-      }
-    }
-
-    return { ...mapExecutionToStatusResult(execution), executionId: execution.id };
+    const fullExecution = await this.workflowExecutionService.getExecution({
+      id: result.executionId,
+      spaceId: ONBOARDING_EXECUTIONS_SPACE_ID,
+      options: { includeOutput: true },
+    });
+    const ctx = (fullExecution?.context ?? {}) as {
+      output?: Partial<OnboardingWorkflowOutputContext>;
+    };
+    const { features, queries } = parseWorkflowOutput(ctx.output ?? {});
+    return { ...result, features, queries };
   }
 
   /**
@@ -371,11 +297,11 @@ export class StreamsKIsOnboardingClient {
     streamNames,
   }: {
     streamNames: string[];
-  }): Promise<Record<string, StreamsKIsOnboardingStatusSummary>> {
-    const statuses: Record<string, StreamsKIsOnboardingStatusSummary> = {};
+  }): Promise<Record<string, SigEventsWorkflowStatusResult>> {
+    const statuses: Record<string, SigEventsWorkflowStatusResult> = {};
 
     for (const streamName of streamNames) {
-      statuses[streamName] = { status: StreamsKIsOnboardingStatus.NotStarted };
+      statuses[streamName] = { status: SigEventsWorkflowStatus.NotStarted, executionId: null };
     }
 
     if (streamNames.length === 0) {
@@ -412,25 +338,11 @@ export class StreamsKIsOnboardingClient {
     streamName: string;
     request: KibanaRequest;
   }): Promise<string | null> {
-    const { results } = await this.managementApi.getWorkflowExecutions(
-      {
-        workflowId: STREAMS_KI_ONBOARDING_WORKFLOW_ID,
-        concurrencyGroupKey: buildConcurrencyKey(streamName),
-        size: 1,
-      },
-      ONBOARDING_EXECUTIONS_SPACE_ID
-    );
-
-    if (results.length > 0 && !isTerminalStatus(results[0].status)) {
-      await this.managementApi.cancelWorkflowExecution(
-        results[0].id,
-        ONBOARDING_EXECUTIONS_SPACE_ID,
-        request
-      );
-      return results[0].id;
-    }
-
-    return null;
+    return this.workflowExecutionService.cancelLatest({
+      spaceId: ONBOARDING_EXECUTIONS_SPACE_ID,
+      request,
+      concurrencyGroupKey: buildConcurrencyKey(streamName),
+    });
   }
 
   /**
@@ -438,12 +350,8 @@ export class StreamsKIsOnboardingClient {
    * Used during teardown of the continuous KI onboarding workflow.
    */
   async cancelAllRunning({ request }: { request: KibanaRequest }): Promise<void> {
-    const { results } = await this.managementApi.getWorkflowExecutions(
-      {
-        workflowId: STREAMS_KI_ONBOARDING_WORKFLOW_ID,
-        statuses: [...NonTerminalExecutionStatuses],
-        size: MAX_STREAMS_PER_QUERY,
-      },
+    const { results } = await this.workflowExecutionService.getExecutions(
+      { statuses: [...NonTerminalExecutionStatuses], size: MAX_STREAMS_PER_QUERY },
       ONBOARDING_EXECUTIONS_SPACE_ID
     );
 
@@ -453,11 +361,11 @@ export class StreamsKIsOnboardingClient {
 
     await Promise.all(
       results.map((result) =>
-        this.managementApi.cancelWorkflowExecution(
-          result.id,
-          ONBOARDING_EXECUTIONS_SPACE_ID,
-          request
-        )
+        this.workflowExecutionService.cancelExecution({
+          id: result.id,
+          spaceId: ONBOARDING_EXECUTIONS_SPACE_ID,
+          request,
+        })
       )
     );
   }
@@ -473,9 +381,8 @@ export class StreamsKIsOnboardingClient {
    * completed run, breaking the "already running" classification.
    */
   async getRecentExecutions(): Promise<WorkflowExecutionListItemDto[]> {
-    const { results } = await this.managementApi.getWorkflowExecutions(
+    const { results } = await this.workflowExecutionService.getExecutions(
       {
-        workflowId: STREAMS_KI_ONBOARDING_WORKFLOW_ID,
         size: MAX_STREAMS_PER_QUERY,
         sortField: 'createdAt',
         sortOrder: 'desc',

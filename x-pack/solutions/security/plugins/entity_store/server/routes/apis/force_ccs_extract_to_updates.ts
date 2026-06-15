@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { z } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
+import { buildStrictRouteValidationWithZod } from './utils/build_strict_route_validation';
 import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../common';
 import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
@@ -60,8 +60,8 @@ export function registerForceCcsExtractToUpdates(router: EntityStorePluginRouter
         version: API_VERSIONS.internal.v2,
         validate: {
           request: {
-            params: buildRouteValidationWithZod(paramsSchema),
-            body: buildRouteValidationWithZod(bodySchema),
+            params: buildStrictRouteValidationWithZod(paramsSchema),
+            body: buildStrictRouteValidationWithZod(bodySchema),
           },
         },
       },

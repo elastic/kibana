@@ -8,9 +8,9 @@
 import { z } from '@kbn/zod/v4';
 import {
   StreamsKIsOnboardingStep,
-  StreamsKIsOnboardingStatus,
+  SigEventsWorkflowStatus,
   type StreamsKIsOnboardingStatusResult,
-  type StreamsKIsOnboardingStatusSummary,
+  type SigEventsWorkflowStatusResult,
 } from '@kbn/streams-schema';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
@@ -33,7 +33,7 @@ export const onboardingExecuteRoute = createServerRoute({
     access: 'internal',
     summary: 'Onboard stream',
     description:
-      'Generate features and queries for a stream, the data that is necessary for insights discovery.',
+      'Generate features and queries for a stream as part of the significant events discovery workflow.',
   },
   security: {
     authz: {
@@ -85,8 +85,9 @@ export const onboardingExecuteRoute = createServerRoute({
     request,
     getScopedClients,
     server,
-    streamsKIsOnboardingClient,
+    workflowClients,
   }): Promise<StreamsKIsOnboardingStatusResult> => {
+    const { streamsKIsOnboardingClient } = workflowClients;
     if (!streamsKIsOnboardingClient) {
       throw new FeatureNotEnabledError('Workflows management is not available');
     }
@@ -116,9 +117,9 @@ export const onboardingExecuteRoute = createServerRoute({
         },
       };
 
-      await streamsKIsOnboardingClient.run({ inputs, request });
+      const { executionId } = await streamsKIsOnboardingClient.run({ inputs, request });
 
-      return { status: StreamsKIsOnboardingStatus.InProgress };
+      return { status: SigEventsWorkflowStatus.InProgress, executionId };
     }
 
     // action === 'cancel'
@@ -126,10 +127,7 @@ export const onboardingExecuteRoute = createServerRoute({
     // return the real post-cancel status rather than assuming `canceled`.
     await streamsKIsOnboardingClient.cancel({ streamName, request });
 
-    const { executionId: _executionId, ...statusResult } =
-      await streamsKIsOnboardingClient.getStatus({ streamName });
-
-    return statusResult;
+    return streamsKIsOnboardingClient.getStatus({ streamName });
   },
 });
 
@@ -153,8 +151,9 @@ export const onboardingStatusRoute = createServerRoute({
     request,
     getScopedClients,
     server,
-    streamsKIsOnboardingClient,
+    workflowClients,
   }): Promise<StreamsKIsOnboardingStatusResult> => {
+    const { streamsKIsOnboardingClient } = workflowClients;
     if (!streamsKIsOnboardingClient) {
       throw new FeatureNotEnabledError('Workflows management is not available');
     }
@@ -166,9 +165,7 @@ export const onboardingStatusRoute = createServerRoute({
       path: { streamName },
     } = params;
 
-    const { executionId: _executionId, ...statusResult } =
-      await streamsKIsOnboardingClient.getStatus({ streamName });
-    return statusResult;
+    return streamsKIsOnboardingClient.getStatus({ streamName });
   },
 });
 
@@ -195,8 +192,9 @@ export const onboardingBulkStatusRoute = createServerRoute({
     request,
     getScopedClients,
     server,
-    streamsKIsOnboardingClient,
-  }): Promise<Record<string, StreamsKIsOnboardingStatusSummary>> => {
+    workflowClients,
+  }): Promise<Record<string, SigEventsWorkflowStatusResult>> => {
+    const { streamsKIsOnboardingClient } = workflowClients;
     if (!streamsKIsOnboardingClient) {
       throw new FeatureNotEnabledError('Workflows management is not available');
     }
