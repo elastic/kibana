@@ -13,15 +13,15 @@ import type { FormatFactory } from '@kbn/field-formats-plugin/common';
 import { downloadMultipleAs } from '@kbn/share-plugin/public';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { i18n } from '@kbn/i18n';
-
 import type { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
 import { apiHasInspectorAdapters, type Adapters } from '@kbn/inspector-plugin/public';
+import { EXPORT_ACTION_GROUP } from '@kbn/embeddable-plugin/public';
 import type { EmbeddableApiContext, PublishesTitle } from '@kbn/presentation-publishing';
 import { getTitle } from '@kbn/presentation-publishing';
+
 import { coreServices, fieldFormatService } from '../services/kibana_services';
 import { dashboardExportCsvActionStrings } from './_dashboard_actions_strings';
-import { ACTION_EXPORT_CSV, DASHBOARD_ACTION_GROUP, DASHBOARD_EXPORT_GROUP } from './constants';
+import { ACTION_EXPORT_CSV } from './constants';
 
 export type ExportContext = EmbeddableApiContext & {
   // used for testing
@@ -37,10 +37,10 @@ export class ExportCSVAction implements Action<ExportContext> {
   public readonly id = ACTION_EXPORT_CSV;
   public readonly type = ACTION_EXPORT_CSV;
   public readonly order = 2;
-  public grouping = [DASHBOARD_EXPORT_GROUP];
+  public grouping = [EXPORT_ACTION_GROUP];
 
   public getIconType() {
-    return 'document';
+    return 'upload';
   }
 
   public readonly getDisplayName = (context: ExportContext): string =>

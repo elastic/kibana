@@ -27,9 +27,10 @@ import {
 import type { ShareActionIntents, ShareIntegration } from '@kbn/share-plugin/public/types';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { EXPORT_ACTION_GROUP } from '@kbn/embeddable-plugin/public';
 
 import { shareService } from '../services/kibana_services';
-import { ACTION_EXPORT_JSON, DASHBOARD_EXPORT_GROUP } from './constants';
+import { ACTION_EXPORT_JSON } from './constants';
 
 export type ExportJSONActionApi = HasLibraryTransforms &
   HasUniqueId &
@@ -47,7 +48,7 @@ export class ExportJSONAction implements Action<EmbeddableApiContext> {
   public readonly id = ACTION_EXPORT_JSON;
   public readonly type = ACTION_EXPORT_JSON;
   public readonly order = 1;
-  public grouping = [DASHBOARD_EXPORT_GROUP];
+  public grouping = [EXPORT_ACTION_GROUP];
   private exportJsonIntentId: string | undefined;
 
   public getIconType() {
