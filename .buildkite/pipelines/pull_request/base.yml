@@ -53,8 +53,10 @@ steps:
     label: 'Linting'
     agents:
       machineType: n4-standard-16
+      diskType: hyperdisk-balanced
       preemptible: true
       diskSizeGb: 105
+      spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c
     key: linting
     timeout_in_minutes: 60
     env:
@@ -68,8 +70,10 @@ steps:
     label: 'Linting (with types)'
     agents:
       machineType: n4-standard-32
+      diskType: hyperdisk-balanced
       preemptible: true
       diskSizeGb: 105
+      spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c
     key: linting_with_types
     timeout_in_minutes: 60
     env:
