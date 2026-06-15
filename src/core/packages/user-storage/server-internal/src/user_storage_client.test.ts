@@ -26,6 +26,7 @@ const buildClient = (
   namespace?: string | undefined
 ) => {
   const savedObjectsClient = savedObjectsClientMock.create();
+  savedObjectsClient.getCurrentNamespace.mockReturnValue(namespace);
   const logger: MockedLogger = loggerMock.create();
   const client = new UserStorageClient({
     savedObjectsClient,

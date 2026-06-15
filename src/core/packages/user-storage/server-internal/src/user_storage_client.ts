@@ -25,6 +25,11 @@ const getErrorMessage = (err: unknown): string =>
   err instanceof Error ? err.message : String(err);
 
 interface UserStorageClientOpts {
+  /**
+   * Must be a client obtained via `getScopedClient` (not `createScopedRepository`):
+   * only the former applies the spaces extension, so `getCurrentNamespace()` returns
+   * the correct space id rather than always `undefined`.
+   */
   savedObjectsClient: SavedObjectsClientContract;
   profileUid: string;
   /**
@@ -46,13 +51,13 @@ export class UserStorageClient implements IUserStorageClient {
   private readonly definitions: ReadonlyMap<string, UserStorageDefinition>;
   private readonly logger: Logger;
 
-  constructor({
-    savedObjectsClient,
-    profileUid,
-    namespace,
-    definitions,
-    logger,
-  }: UserStorageClientOpts) {
+  constructor({ savedObjectsClient, profileUid, definitions, logger }: UserStorageClientOpts) {
+    // Resolve the active space namespace so that space-scoped document ids are
+    // namespaced (e.g. `<space>:<profile_uid>`), preventing cross-space id
+    // collisions on the `multiple-isolated` SO type.
+    const namespace = savedObjectsClient.getCurrentNamespace();
+    this.namespace = namespace;
+
     this.soClient = savedObjectsClient;
     this.profileUid = profileUid;
     this.namespace = namespace;

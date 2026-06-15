@@ -124,21 +124,9 @@ export class UserStorageService {
         includedHiddenTypes: [USER_STORAGE_SO_TYPE, USER_STORAGE_GLOBAL_SO_TYPE],
       });
 
-      // Resolve the active space namespace so that space-scoped document ids are
-      // namespaced (e.g. `<space>:<profile_uid>`), preventing cross-space id
-      // collisions on the `multiple-isolated` SO type.
-      //
-      // This must be read from the scoped client (not a bare
-      // `createScopedRepository`): `getScopedClient` applies the spaces extension
-      // via the client provider, so `getCurrentNamespace()` reflects the request's
-      // space. A repository built directly from `createScopedRepository` without
-      // extensions has no spaces extension and always returns `undefined`.
-      const namespace = savedObjectsClient.getCurrentNamespace();
-
       return new UserStorageClient({
         savedObjectsClient,
         profileUid,
-        namespace,
         definitions: this.definitions,
         logger: this.logger,
       });
