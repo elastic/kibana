@@ -17,6 +17,5 @@ export interface PanelPlacementProps {
     grid: Pick<DashboardLayoutPanel['grid'], 'sectionId' | 'w' | 'h'>;
   };
   currentLayout: DashboardLayout;
-  sectionId?: string; // section where panel is being placed
   beside?: string; // the ID of the panel to place the new panel relative to
 }
