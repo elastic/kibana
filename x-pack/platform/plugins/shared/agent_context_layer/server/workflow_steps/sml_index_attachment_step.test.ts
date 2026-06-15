@@ -148,6 +148,7 @@ describe('createContextEngineAddEntryStepDefinition', () => {
           title: 'My title',
           content: 'My content',
           description: 'desc',
+          permissions: { kibana: { privileges: [] }, elasticsearch: { indices: [] } },
         },
       ],
     });
@@ -181,8 +182,20 @@ describe('createContextEngineAddEntryStepDefinition', () => {
 
     await definition.handler(context as any);
     const callArgs = startContract.indexAttachment.mock.calls[0][0];
-    expect((callArgs as any).content).toEqual([{ type: 'custom', title: 't', content: 'c' }]);
-    expect(Object.keys((callArgs as any).content[0])).toEqual(['type', 'title', 'content']);
+    expect((callArgs as any).content).toEqual([
+      {
+        type: 'custom',
+        title: 't',
+        content: 'c',
+        permissions: { kibana: { privileges: [] }, elasticsearch: { indices: [] } },
+      },
+    ]);
+    expect(Object.keys((callArgs as any).content[0])).toEqual([
+      'type',
+      'title',
+      'content',
+      'permissions',
+    ]);
   });
 
   it('preserves optional chunk fields when provided', async () => {
@@ -219,8 +232,11 @@ describe('createContextEngineAddEntryStepDefinition', () => {
       content: 'c',
       description: 'd',
       user_id: 'u',
-      references: ['r1'],
-      permissions: ['p1'],
+      references: [{ uri: 'r1' }],
+      permissions: {
+        kibana: { privileges: [{ name: 'p1' }] },
+        elasticsearch: { indices: [] },
+      },
     });
   });
 
