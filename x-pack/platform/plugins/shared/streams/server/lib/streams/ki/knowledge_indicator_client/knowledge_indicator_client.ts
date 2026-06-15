@@ -172,6 +172,16 @@ export class KnowledgeIndicatorClient {
     return this.orchestrator.syncQueries(definition, queries, options);
   }
 
+  async replaceStreamQueries(
+    definition: Streams.all.Definition,
+    getNextQueries: (currentLinks: QueryLink[]) => StreamQuery[]
+  ): Promise<void> {
+    const { [definition.name]: currentLinks } = await this.getStreamToQueryLinksMap([
+      definition.name,
+    ]);
+    await this.syncQueries(definition, getNextQueries(currentLinks), { currentLinks });
+  }
+
   upsertQuery(definition: Streams.all.Definition, query: StreamQuery): Promise<void> {
     return this.orchestrator.upsertQuery(definition, query);
   }

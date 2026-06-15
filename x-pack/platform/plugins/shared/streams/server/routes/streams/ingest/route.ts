@@ -145,7 +145,7 @@ const upsertIngestRoute = createServerRoute({
     if (WiredIngestUpsertRequest.is(ingest)) {
       return await updateWiredIngest({
         streamsClient,
-        queryClient: kiClient,
+        kiClient,
         attachmentClient,
         name,
         ingest,
@@ -154,7 +154,7 @@ const upsertIngestRoute = createServerRoute({
 
     return await updateClassicIngest({
       streamsClient,
-      queryClient: kiClient,
+      kiClient,
       attachmentClient,
       name,
       ingest,

@@ -86,16 +86,11 @@ export async function persistQueries(
   }
 
   if (ruleEligibleQueries.length > 0) {
-    const { [streamName]: currentLinks } = await kiClient.getStreamToQueryLinksMap([streamName]);
     const ruleEligibleIds = new Set(ruleEligibleQueries.map((q) => q.id));
-    await kiClient.syncQueries(
-      definition,
-      [
-        ...currentLinks.filter((l) => !ruleEligibleIds.has(l.query.id)).map((l) => l.query),
-        ...ruleEligibleQueries.map(({ replaces: _replaces, ...q }) => q),
-      ],
-      { currentLinks }
-    );
+    await kiClient.replaceStreamQueries(definition, (currentLinks) => [
+      ...currentLinks.filter((l) => !ruleEligibleIds.has(l.query.id)).map((l) => l.query),
+      ...ruleEligibleQueries.map(({ replaces: _replaces, ...q }) => q),
+    ]);
   }
 
   return { persistedQueries, skippedQueries };

@@ -201,7 +201,7 @@ const upsertQueryStreamRoute = createServerRoute({
     const kiClient = await getKnowledgeIndicatorClient();
     const { dashboards, queries, rules } = await getStreamAssets({
       name,
-      queryClient: kiClient,
+      kiClient,
       attachmentClient,
     });
 

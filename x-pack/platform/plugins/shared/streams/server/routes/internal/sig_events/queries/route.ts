@@ -263,13 +263,8 @@ export const bulkDeleteQueriesRoute = createServerRoute({
       }
       try {
         const deleteIds = new Set(queryIds);
-        const { [streamName]: allCurrentLinks } = await kiClient.getStreamToQueryLinksMap([
-          streamName,
-        ]);
-        await kiClient.syncQueries(
-          definition,
-          allCurrentLinks.filter((l) => !deleteIds.has(l.query.id)).map((l) => l.query),
-          { currentLinks: allCurrentLinks }
+        await kiClient.replaceStreamQueries(definition, (currentLinks) =>
+          currentLinks.filter((l) => !deleteIds.has(l.query.id)).map((l) => l.query)
         );
         succeeded += queryIds.length;
       } catch (error) {

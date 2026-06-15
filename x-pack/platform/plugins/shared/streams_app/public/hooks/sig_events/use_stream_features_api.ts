@@ -78,35 +78,35 @@ export function useStreamFeaturesApi(streamName: string): StreamFeaturesApi {
           },
         });
       },
-      deleteFeaturesInBulk: async (uuids: string[]) => {
+      deleteFeaturesInBulk: async (ids: string[]) => {
         await streamsRepositoryClient.fetch('POST /internal/streams/{name}/features/_bulk', {
           signal,
           params: {
             path: { name: streamName },
             body: {
-              operations: uuids.map((id) => ({ delete: { id } })),
+              operations: ids.map((id) => ({ delete: { id } })),
             },
           },
         });
       },
-      excludeFeaturesInBulk: async (uuids: string[]) => {
+      excludeFeaturesInBulk: async (ids: string[]) => {
         await streamsRepositoryClient.fetch('POST /internal/streams/{name}/features/_bulk', {
           signal,
           params: {
             path: { name: streamName },
             body: {
-              operations: uuids.map((id) => ({ exclude: { id } })),
+              operations: ids.map((id) => ({ exclude: { id } })),
             },
           },
         });
       },
-      restoreFeaturesInBulk: async (uuids: string[]) => {
+      restoreFeaturesInBulk: async (ids: string[]) => {
         await streamsRepositoryClient.fetch('POST /internal/streams/{name}/features/_bulk', {
           signal,
           params: {
             path: { name: streamName },
             body: {
-              operations: uuids.map((id) => ({ restore: { id } })),
+              operations: ids.map((id) => ({ restore: { id } })),
             },
           },
         });

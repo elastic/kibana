@@ -61,9 +61,8 @@ export const upsertFeatureRoute = createServerRoute({
     const { id, ...baseBody } = params.body;
 
     if (id) {
-      const [resolved] = await kiClient
-        .getFeatures(params.path.name, { id: [id] })
-        .then(({ hits }) => hits);
+      const { hits } = await kiClient.getFeatures(params.path.name, { id: [id] });
+      const [resolved] = hits;
       if (resolved && resolved.stream_name !== params.path.name) {
         throw new StatusError(
           `Feature ${id} belongs to stream '${resolved.stream_name}', not '${params.path.name}'`,

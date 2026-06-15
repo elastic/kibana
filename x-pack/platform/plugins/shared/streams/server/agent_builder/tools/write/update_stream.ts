@@ -164,7 +164,7 @@ export const createUpdateStreamTool = ({
         await getScopedClients({
           request,
         });
-      const queryClient = await getKnowledgeIndicatorClient();
+      const kiClient = await getKnowledgeIndicatorClient();
 
       if (changes.processing) {
         const validation = validateProcessingJson({ steps: changes.processing });
@@ -200,7 +200,7 @@ export const createUpdateStreamTool = ({
 
         await patchIngestAndUpsert({
           streamsClient,
-          queryClient,
+          kiClient,
           attachmentClient,
           name,
           patchFn: (definition) => {
