@@ -185,6 +185,7 @@ export class AgentBuilderPlugin
         window?.localStorage?.setItem(storageKey, JSON.stringify(conversationId));
       }
 
+      // If already open, update props instead of creating new
       if (this.activeSidebarRef && this.sidebarCallbacks) {
         this.sidebarCallbacks.updateProps(config);
         return { chatRef: this.activeSidebarRef };
