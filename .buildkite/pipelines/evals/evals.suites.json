@@ -261,6 +261,14 @@
       "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-alert-triage/playwright.config.ts",
       "tags": ["security", "alert-triage"],
       "ciLabels": ["evals:security-alert-triage"]
+    },
+    {
+      "id": "skill-selection-benchmark",
+      "name": "Skill Selection Benchmark",
+      "slackChannel": "#agent-builder-alerts",
+      "configPath": "x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/skill_selection.playwright.config.ts",
+      "tags": ["platform", "agent-builder", "skill-selection"],
+      "ciLabels": ["evals:skill-selection-benchmark"]
     }
   ]
 }
