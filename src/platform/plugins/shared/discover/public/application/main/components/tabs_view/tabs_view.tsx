@@ -83,7 +83,7 @@ export const TabsView = (props: SingleTabViewProps) => {
     [currentTabId, props]
   );
 
-  const renderTabsBar = useMemo((): UnifiedTabsProps['renderTabsBar'] => {
+  const wrapTabsBar = useMemo((): UnifiedTabsProps['wrapTabsBar'] => {
     if (!isChromeNextProjectHeader) {
       return undefined;
     }
@@ -152,7 +152,7 @@ export const TabsView = (props: SingleTabViewProps) => {
             onTabLimitReached={onTabLimitReached}
             getTopTabMenuItems={getTopTabMenuItems}
             getAdditionalTabMenuItems={getAdditionalTabMenuItems}
-            renderTabsBar={renderTabsBar}
+            wrapTabsBar={wrapTabsBar}
             appendRight={appendRight}
           />
         </div>
