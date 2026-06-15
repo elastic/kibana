@@ -16,6 +16,8 @@ import type {
   StreamsFeaturesIdentifiedProps,
   StreamsAgentBuilderKnowledgeIndicatorCreatedProps,
   StreamsAgentToolKiIdentificationStartedProps,
+  StreamsAgentToolEventCreateProps,
+  StreamsAgentToolEventStatusUpdateProps,
 } from './types';
 
 const streamsEndpointLatencySchema: RootSchema<StreamEndpointLatencyProps> = {
@@ -418,6 +420,74 @@ const streamsAgentToolKiIdentificationStartedSchema: RootSchema<StreamsAgentTool
     },
   };
 
+const streamsAgentToolEventCreateSchema: RootSchema<StreamsAgentToolEventCreateProps> = {
+  success: {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether the event creation succeeded',
+    },
+  },
+  stream_names: {
+    type: 'array',
+    items: {
+      type: 'keyword',
+      _meta: {
+        description: 'A stream name',
+      },
+    },
+    _meta: {
+      description: 'The names of the Streams associated with the event',
+    },
+  },
+  error_message: {
+    type: 'text',
+    _meta: {
+      description: 'Error message when event creation fails',
+      optional: true,
+    },
+  },
+};
+
+const streamsAgentToolEventStatusUpdateSchema: RootSchema<StreamsAgentToolEventStatusUpdateProps> =
+  {
+    success: {
+      type: 'boolean',
+      _meta: {
+        description: 'Whether the event status update succeeded',
+      },
+    },
+    event_id: {
+      type: 'keyword',
+      _meta: {
+        description: 'The identifier of the updated significant event',
+      },
+    },
+    status: {
+      type: 'keyword',
+      _meta: {
+        description: 'The status value set on the significant event',
+      },
+    },
+    error_message: {
+      type: 'text',
+      _meta: {
+        description: 'Error message when event status update fails',
+        optional: true,
+      },
+    },
+  };
+
+const streamsSignificantEventsDiscoveryTriggeredSchema = {
+  execution_id: {
+    type: 'keyword' as const,
+    _meta: { description: 'The workflow execution ID returned by the orchestrator' },
+  },
+  space_id: {
+    type: 'keyword' as const,
+    _meta: { description: 'The Kibana space in which the pipeline was triggered' },
+  },
+};
+
 export {
   streamsEndpointLatencySchema,
   streamsStateErrorSchema,
@@ -428,4 +498,7 @@ export {
   streamsFeaturesIdentifiedSchema,
   streamsAgentBuilderKnowledgeIndicatorCreatedSchema,
   streamsAgentToolKiIdentificationStartedSchema,
+  streamsAgentToolEventCreateSchema,
+  streamsAgentToolEventStatusUpdateSchema,
+  streamsSignificantEventsDiscoveryTriggeredSchema,
 };
