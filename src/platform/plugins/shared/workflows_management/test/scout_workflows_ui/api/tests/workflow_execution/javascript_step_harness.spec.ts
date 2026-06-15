@@ -16,6 +16,8 @@ import type { WorkflowsApiService } from '../../../common/apis/workflows';
 import { waitForConditionOrThrow } from '../../../common/utils/wait_for_condition';
 import { spaceTest } from '../../fixtures';
 
+const SCRIPTS_JAVA_SCRIPT_STEP_TYPE = 'scripts.javaScript';
+
 const JAVASCRIPT_STEP_HARNESS_YAML = `
 version: "1"
 name: JavaScript Step — Security & Performance Test Harness
@@ -105,7 +107,6 @@ steps:
 
   - name: perf-infinite-loop-timeout
     type: scripts.javaScript
-    timeout: 5s
     on-failure:
       continue: true
     with:
@@ -138,7 +139,6 @@ steps:
 
   - name: perf-console-cpu-after-cap
     type: scripts.javaScript
-    timeout: 3s
     on-failure:
       continue: true
     with:
@@ -146,15 +146,19 @@ steps:
         for (let i = 0; i < 200; i++) {
           console.log('spam-' + i);
         }
-        while (true) {
-          console.log('post-cap spam');
-        }
+        while (true) {}
 `;
 
 const EXECUTION_POLL_TIMEOUT_MS = 120_000;
 
-const getStep = (execution: WorkflowExecutionDto, stepId: string): WorkflowStepExecutionDto => {
-  const step = execution.stepExecutions.find((s) => s.stepId === stepId);
+const getJavaScriptStep = (
+  execution: WorkflowExecutionDto,
+  stepId: string
+): WorkflowStepExecutionDto => {
+  // Steps with `timeout:` also create a step_level_timeout execution record with the same stepId.
+  const step = execution.stepExecutions.find(
+    (s) => s.stepId === stepId && s.stepType === SCRIPTS_JAVA_SCRIPT_STEP_TYPE
+  );
   expect(step).toBeDefined();
   return step as WorkflowStepExecutionDto;
 };
@@ -214,29 +218,35 @@ spaceTest.describe(
       expect(execution?.status).toBe(ExecutionStatus.COMPLETED);
       expect(execution?.stepExecutions).toHaveLength(11);
 
-      const liquidMutation = getStep(
+      const liquidMutation = getJavaScriptStep(
         execution as WorkflowExecutionDto,
         'func-liquid-const-mutation'
       );
       expectStepCompleted(liquidMutation);
       expect(liquidMutation.output).toStrictEqual([1, 2, 3, 4, 5, 6]);
 
-      const asyncAwait = getStep(execution as WorkflowExecutionDto, 'func-async-await');
+      const asyncAwait = getJavaScriptStep(execution as WorkflowExecutionDto, 'func-async-await');
       expectStepCompleted(asyncAwait);
       expect(asyncAwait.output).toBe(42);
 
-      const complexReturn = getStep(execution as WorkflowExecutionDto, 'func-complex-return-value');
+      const complexReturn = getJavaScriptStep(
+        execution as WorkflowExecutionDto,
+        'func-complex-return-value'
+      );
       expectStepCompleted(complexReturn);
       expect(complexReturn.output).toStrictEqual({
         greeting: 'Hello from consts',
         nested: { ok: true, items: [1, 2, 3] },
       });
 
-      const cpuBaseline = getStep(execution as WorkflowExecutionDto, 'func-cpu-baseline');
+      const cpuBaseline = getJavaScriptStep(execution as WorkflowExecutionDto, 'func-cpu-baseline');
       expectStepCompleted(cpuBaseline);
       expect(cpuBaseline.output).toBe(499_500);
 
-      const noGlobals = getStep(execution as WorkflowExecutionDto, 'sec-no-host-or-node-globals');
+      const noGlobals = getJavaScriptStep(
+        execution as WorkflowExecutionDto,
+        'sec-no-host-or-node-globals'
+      );
       expectStepCompleted(noGlobals);
       expect(noGlobals.output).toStrictEqual({
         context: 'undefined',
@@ -247,31 +257,37 @@ spaceTest.describe(
         fetch: 'undefined',
       });
 
-      const wrapperInjection = getStep(execution as WorkflowExecutionDto, 'sec-wrapper-injection');
-      expectStepFailedWithMessage(
-        wrapperInjection,
-        /Script execution failed|SyntaxError|Unexpected token/i
+      const wrapperInjection = getJavaScriptStep(
+        execution as WorkflowExecutionDto,
+        'sec-wrapper-injection'
       );
+      expectStepFailedWithMessage(wrapperInjection, /Illegal return statement/i);
 
-      const emptyScript = getStep(execution as WorkflowExecutionDto, 'sec-empty-script-rejected');
+      const emptyScript = getJavaScriptStep(
+        execution as WorkflowExecutionDto,
+        'sec-empty-script-rejected'
+      );
       expectStepFailedWithMessage(emptyScript, 'Script is required');
 
-      const infiniteLoop = getStep(execution as WorkflowExecutionDto, 'perf-infinite-loop-timeout');
+      const infiniteLoop = getJavaScriptStep(
+        execution as WorkflowExecutionDto,
+        'perf-infinite-loop-timeout'
+      );
       expectStepFailedWithMessage(infiniteLoop, 'Script execution timed out.');
 
-      const memoryBombObjects = getStep(
+      const memoryBombObjects = getJavaScriptStep(
         execution as WorkflowExecutionDto,
         'perf-memory-bomb-objects'
       );
       expectStepFailedWithMessage(memoryBombObjects, 'Script failed due to out of memory');
 
-      const memoryBombArrayBuffer = getStep(
+      const memoryBombArrayBuffer = getJavaScriptStep(
         execution as WorkflowExecutionDto,
         'perf-memory-bomb-arraybuffer'
       );
       expectStepFailedWithMessage(memoryBombArrayBuffer, 'Script failed due to out of memory');
 
-      const consoleCpuAfterCap = getStep(
+      const consoleCpuAfterCap = getJavaScriptStep(
         execution as WorkflowExecutionDto,
         'perf-console-cpu-after-cap'
       );
