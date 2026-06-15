@@ -242,15 +242,40 @@ describe('enrichFinding', () => {
   });
 
   describe('recommended actions', () => {
-    it('should always include View affected rules for non-coverage dimensions', () => {
-      const ctx = createMockContext({ dimension: 'quality' });
-      const finding = createMockFinding({ resource: 'test-index' });
+    it('should include View affected rules for index-keyed dimensions (quality, retention)', () => {
+      for (const dimension of ['quality', 'retention'] as const) {
+        const ctx = createMockContext({ dimension });
+        const finding = createMockFinding({ resource: 'logs-test-default' });
+        const result = enrichFinding(finding, ctx);
+
+        const viewRulesAction = result.recommendedActions?.find(
+          (a) => a.label === 'View affected rules'
+        );
+        expect(viewRulesAction).toBeDefined();
+        expect(viewRulesAction?.href).toContain(encodeURIComponent('logs-test-default'));
+      }
+    });
+
+    it('should NOT include View affected rules for continuity (resource is a pipeline name)', () => {
+      const ctx = createMockContext({ dimension: 'continuity' });
+      const finding = createMockFinding({ resource: 'logs-network@custom' });
       const result = enrichFinding(finding, ctx);
 
       const viewRulesAction = result.recommendedActions?.find(
         (a) => a.label === 'View affected rules'
       );
-      expect(viewRulesAction).toBeDefined();
+      expect(viewRulesAction).toBeUndefined();
+    });
+
+    it('should NOT include View affected rules for coverage (resource is a category name)', () => {
+      const ctx = createMockContext({ dimension: 'coverage' });
+      const finding = createMockFinding({ resource: 'Cloud' });
+      const result = enrichFinding(finding, ctx);
+
+      const viewRulesAction = result.recommendedActions?.find(
+        (a) => a.label === 'View affected rules'
+      );
+      expect(viewRulesAction).toBeUndefined();
     });
 
     it('should always include Open case action with proper tags', () => {
@@ -300,6 +325,115 @@ describe('enrichFinding', () => {
       expect(results).toHaveLength(2);
       expect(results[0].recommendedActions).toBeDefined();
       expect(results[1].recommendedActions).toBeDefined();
+    });
+  });
+
+  describe('blastRadiusStatus — error signal propagation', () => {
+    it('should set blastRadiusStatus to "unavailable" and omit affected* for continuity when pipelineMap failed', () => {
+      const rule = createMockRule({ id: 'rule-1', name: 'Rule 1' });
+      const ctx = createMockContext({
+        dimension: 'continuity',
+        pipelineToIndices: new Map([['my-pipeline', ['logs-test']]]),
+        indexToRules: new Map([['logs-test', [rule]]]),
+        errors: { pipelineMap: true, categoryMap: false, rulesPartial: false },
+      });
+
+      const finding = createMockFinding({ resource: 'my-pipeline' });
+      const result = enrichFinding(finding, ctx);
+
+      expect(result.blastRadiusStatus).toBe('unavailable');
+      expect(result.affectedRules).toBeUndefined();
+      expect(result.affectedTactics).toBeUndefined();
+      expect(result.affectedPlatform).toBeUndefined();
+      // Recommended actions are still included
+      expect(result.recommendedActions).toBeDefined();
+    });
+
+    it('should set blastRadiusStatus to "unavailable" and omit affected* for coverage when categoryMap failed', () => {
+      const rule = createMockRule({ id: 'rule-1', name: 'Rule 1' });
+      const ctx = createMockContext({
+        dimension: 'coverage',
+        categoryToIndices: new Map([['Cloud', ['logs-aws']]]),
+        indexToRules: new Map([['logs-aws', [rule]]]),
+        errors: { pipelineMap: false, categoryMap: true, rulesPartial: false },
+      });
+
+      const finding = createMockFinding({ resource: 'Cloud' });
+      const result = enrichFinding(finding, ctx);
+
+      expect(result.blastRadiusStatus).toBe('unavailable');
+      expect(result.affectedRules).toBeUndefined();
+      expect(result.affectedTactics).toBeUndefined();
+      expect(result.affectedPlatform).toBeUndefined();
+    });
+
+    it('should not set unavailable for quality/retention even when pipelineMap or categoryMap failed', () => {
+      const rule = createMockRule({ id: 'rule-1', name: 'Rule 1' });
+      const ctx = createMockContext({
+        dimension: 'quality',
+        indexToRules: new Map([['logs-test', [rule]]]),
+        // pipelineMap/categoryMap failures are irrelevant for quality dimension
+        errors: { pipelineMap: true, categoryMap: true, rulesPartial: false },
+      });
+
+      const finding = createMockFinding({ resource: 'logs-test' });
+      const result = enrichFinding(finding, ctx);
+
+      expect(result.blastRadiusStatus).toBeUndefined();
+      expect(result.affectedRules).toHaveLength(1);
+    });
+
+    it('should set blastRadiusStatus to "partial" when rulesPartial is true', () => {
+      const rule = createMockRule({ id: 'rule-1', name: 'Rule 1' });
+      const ctx = createMockContext({
+        dimension: 'quality',
+        indexToRules: new Map([['logs-test', [rule]]]),
+        errors: { pipelineMap: false, categoryMap: false, rulesPartial: true },
+      });
+
+      const finding = createMockFinding({ resource: 'logs-test' });
+      const result = enrichFinding(finding, ctx);
+
+      expect(result.blastRadiusStatus).toBe('partial');
+      // affected* still populated from what did resolve
+      expect(result.affectedRules).toHaveLength(1);
+    });
+
+    it('should set "partial" for continuity when rulesPartial is true but pipelineMap succeeded', () => {
+      const rule = createMockRule({ id: 'rule-1', name: 'Rule 1' });
+      const ctx = createMockContext({
+        dimension: 'continuity',
+        pipelineToIndices: new Map([['my-pipeline', ['logs-test']]]),
+        indexToRules: new Map([['logs-test', [rule]]]),
+        errors: { pipelineMap: false, categoryMap: false, rulesPartial: true },
+      });
+
+      const finding = createMockFinding({ resource: 'my-pipeline' });
+      const result = enrichFinding(finding, ctx);
+
+      expect(result.blastRadiusStatus).toBe('partial');
+      expect(result.affectedRules).toHaveLength(1);
+    });
+
+    it('should leave blastRadiusStatus undefined when errors is omitted (backward compat)', () => {
+      const ctx = createMockContext({ dimension: 'quality' });
+      // No `errors` field in context — defaults to all-false
+      const finding = createMockFinding({ resource: 'logs-test' });
+      const result = enrichFinding(finding, ctx);
+
+      expect(result.blastRadiusStatus).toBeUndefined();
+    });
+
+    it('should leave blastRadiusStatus undefined when all errors are false', () => {
+      const ctx = createMockContext({
+        dimension: 'quality',
+        errors: { pipelineMap: false, categoryMap: false, rulesPartial: false },
+      });
+
+      const finding = createMockFinding({ resource: 'logs-test' });
+      const result = enrichFinding(finding, ctx);
+
+      expect(result.blastRadiusStatus).toBeUndefined();
     });
   });
 });

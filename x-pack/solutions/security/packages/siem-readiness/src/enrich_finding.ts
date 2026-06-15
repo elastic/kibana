@@ -19,6 +19,7 @@ import type {
   CategoryToIndicesMap,
   TacticTotals,
   RuleIndexEntry,
+  ReverseMapErrors,
 } from './reverse_map_types';
 
 export type Dimension = 'coverage' | 'quality' | 'continuity' | 'retention';
@@ -31,6 +32,8 @@ export type Dimension = 'coverage' | 'quality' | 'continuity' | 'retention';
  * - categoryToIndices: SIEM category (e.g. "Cloud") → indices in that category
  * - tacticTotals: tactic ID → total number of rules covering that tactic (for % impact)
  * - indexToPlatform: data stream name → platform label derived from ECS fields in the data
+ * - errors: tracks which lookups failed so blast radius can be marked unavailable/partial
+ *   instead of showing a confident "none" false signal.
  *
  * All maps are built once per request by fetchRulesReverseMap / fetchIndexPlatforms and
  * passed into enrichFinding/enrichFindings.
@@ -43,6 +46,13 @@ export interface EnrichmentContext {
   dimension: Dimension;
   /** Data stream name → platform label, derived from actual ECS field values in the index */
   indexToPlatform: Map<string, string>;
+  /**
+   * Tracks which reverse-map lookups failed. Used to set blastRadiusStatus on enriched findings
+   * so the agent can distinguish "no rules found" from "lookup failed".
+   *
+   * Defaults to all-false when omitted (e.g. in tests that don't exercise error paths).
+   */
+  errors?: ReverseMapErrors;
 }
 
 // A rule can appear in multiple indices (e.g. via wildcard patterns), so when
@@ -117,8 +127,10 @@ const createResourceSlug = (resource: string): string => {
 
 /**
  * Builds the list of recommended actions for a finding.
- * "View affected rules" is omitted for coverage/detection_rules findings because
- * that finding has no concrete index to pass as a filter to the rules page.
+ * "View affected rules" with an ?index= filter is only meaningful for index-keyed dimensions
+ * (quality and retention), where finding.resource IS an index name.
+ * For continuity, resource is a pipeline name; for coverage, it is a category name or
+ * "detection_rules" — none of which are valid index filter values on the rules page.
  */
 const buildRecommendedActionsForFinding = (
   finding: ActionableFinding,
@@ -127,7 +139,7 @@ const buildRecommendedActionsForFinding = (
   const slug = createResourceSlug(finding.resource);
   const actions: RecommendedAction[] = [];
 
-  if (dimension !== 'coverage' || finding.resource !== 'detection_rules') {
+  if (dimension === 'quality' || dimension === 'retention') {
     actions.push({
       label: 'View affected rules',
       href: `/app/security/rules?index=${encodeURIComponent(finding.resource)}`,
@@ -170,16 +182,60 @@ const buildRecommendedActionsForFinding = (
 };
 
 /**
+ * Derives the blast radius status for a finding based on which reverse-map lookups failed.
+ *
+ * - 'unavailable': the primary lookup for this dimension failed entirely (pipeline map for
+ *   continuity, category map for coverage). The affected* fields must be omitted because the
+ *   empty map is not trustworthy — returning "none" would be a false signal.
+ * - 'partial': at least one rule's index resolution failed, so indexToRules is incomplete.
+ *   The affected* fields are still populated from what did resolve, but may be undercounted.
+ * - undefined: blast radius is complete and trustworthy.
+ */
+const deriveBlastRadiusStatus = (
+  dimension: Dimension,
+  errors: ReverseMapErrors
+): 'unavailable' | 'partial' | undefined => {
+  if (dimension === 'continuity' && errors.pipelineMap) return 'unavailable';
+  if (dimension === 'coverage' && errors.categoryMap) return 'unavailable';
+  if (errors.rulesPartial) return 'partial';
+  return undefined;
+};
+
+/**
  * Enriches a single finding with blast radius data:
  * affected rules, MITRE tactics, platform, and recommended actions.
  *
- * Fields are omitted (set to undefined) when empty to keep the AI tool payload
- * concise and avoid misleading "0 rules affected" signals.
+ * When a reverse-map lookup failed, blastRadiusStatus is set to 'unavailable' or 'partial'
+ * and affected* fields are omitted (unavailable) or flagged as potentially incomplete (partial),
+ * to avoid presenting a confident "none" when the truth is "we couldn't determine this."
+ *
+ * Fields are omitted (set to undefined) when empty to keep the AI tool payload concise.
  */
 export const enrichFinding = (
   finding: ActionableFinding,
   ctx: EnrichmentContext
 ): ActionableFinding => {
+  const errors = ctx.errors ?? { pipelineMap: false, categoryMap: false, rulesPartial: false };
+  const blastRadiusStatus = deriveBlastRadiusStatus(ctx.dimension, errors);
+
+  // 5. Build dimension-specific recommended actions (always included, independent of blast radius)
+  const recommendedActions = buildRecommendedActionsForFinding(finding, ctx.dimension);
+  const severity = finding.severity.toUpperCase() as FindingSeverity;
+
+  // When the primary lookup for this dimension failed entirely, omit affected* fields entirely
+  // rather than showing empty arrays that look like "no impact found".
+  if (blastRadiusStatus === 'unavailable') {
+    return {
+      ...finding,
+      severity,
+      affectedRules: undefined,
+      affectedTactics: undefined,
+      affectedPlatform: undefined,
+      recommendedActions,
+      blastRadiusStatus,
+    };
+  }
+
   // 1. Resolve which detection rules are affected by this finding
   const rules = getRulesForFinding(finding, ctx);
 
@@ -220,11 +276,6 @@ export const enrichFinding = (
     ctx.indexToPlatform.get(platformLookupIndex) ??
     ctx.indexToPlatform.get(extractDataStreamName(platformLookupIndex) ?? '');
 
-  // 5. Build dimension-specific recommended actions
-  const recommendedActions = buildRecommendedActionsForFinding(finding, ctx.dimension);
-
-  const severity = finding.severity.toUpperCase() as FindingSeverity;
-
   // 6. Return enriched finding; omit empty arrays to keep payload clean
   return {
     ...finding,
@@ -233,6 +284,7 @@ export const enrichFinding = (
     affectedTactics: affectedTactics.length > 0 ? affectedTactics : undefined,
     affectedPlatform,
     recommendedActions,
+    blastRadiusStatus,
   };
 };
 

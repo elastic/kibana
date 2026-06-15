@@ -163,6 +163,15 @@ export interface ActionableFinding {
   affectedTactics?: AffectedTactic[];
   affectedPlatform?: string;
   recommendedActions?: RecommendedAction[];
+  /**
+   * Indicates the reliability of the blast-radius fields on this finding.
+   * - 'unavailable': a lookup that this dimension depends on failed entirely (e.g. pipeline map
+   *   for continuity, category map for coverage). The affected* fields are intentionally omitted.
+   * - 'partial': at least one rule's index resolution failed, so affectedRules/Tactics may be
+   *   undercounted.
+   * - omitted (undefined): blast radius is complete.
+   */
+  blastRadiusStatus?: 'partial' | 'unavailable';
 }
 
 export interface CoveragePayload {
