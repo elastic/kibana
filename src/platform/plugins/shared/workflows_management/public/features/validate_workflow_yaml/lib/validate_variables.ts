@@ -98,7 +98,12 @@ export function validateVariables(
         if (cachedContext) {
           context = cachedContext;
         } else {
-          context = getContextSchemaWithTemplateLocals(yamlDocument, variableOffset, pathSchema);
+          context = getContextSchemaWithTemplateLocals(
+            yamlDocument,
+            variableOffset,
+            pathSchema,
+            model?.getValue()
+          );
           fullContextCache.set(fullContextKey, context);
         }
       } else {

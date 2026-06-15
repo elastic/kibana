@@ -105,7 +105,6 @@ export function createNavigationTree({
               { link: 'ml:dataDriftPage', sideNavStatus: 'hidden' },
               { link: 'ml:fileUpload', sideNavStatus: 'hidden' },
               { link: 'ml:indexDataVisualizer', sideNavStatus: 'hidden' },
-              { link: 'ml:indexDataVisualizerPage', sideNavStatus: 'hidden' },
             ],
           },
           {
@@ -233,6 +232,7 @@ export function createNavigationTree({
             title: ACCESS_TITLE,
             children: [
               { link: 'management:api_keys', breadcrumbStatus: 'hidden' },
+              { link: 'management:application_connections', breadcrumbStatus: 'hidden' },
               { link: 'management:roles', breadcrumbStatus: 'hidden' },
             ],
           },

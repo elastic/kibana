@@ -15,6 +15,7 @@ import {
   type PaginatedResponse,
   type PaginatedSearchOptions,
 } from './query_utils';
+import { runEsqlQuery } from './run_esql_query';
 
 export const isIndexNotFoundError = (error: unknown): boolean => {
   if (error instanceof Error) {
@@ -40,6 +41,19 @@ export const queryEsql = async ({
   query: ComposerQuery;
 }): Promise<ESQLSearchResponse> =>
   (await esClient.esql.query(toEsqlRequest(query))) as ESQLSearchResponse;
+
+// Converts a columnar ESQLSearchResponse into an array of plain objects keyed by column name.
+export const esqlToObjects = <T extends Record<string, unknown>>(
+  response: ESQLSearchResponse
+): T[] =>
+  response.values.map(
+    (row) =>
+      row.reduce<Record<string, unknown>>((acc, value, i) => {
+        const col = response.columns[i];
+        if (col) acc[col.name] = value;
+        return acc;
+      }, {}) as T
+  );
 
 const parseSourceResponse = <T>(response: ESQLSearchResponse): T[] => {
   const sourceIdx = getSourceColumnIndex(response);
@@ -322,4 +336,93 @@ export const runFindByIdsEsqlQuery = async <T>({
 
   const hits = await executeEsqlQuery<T>({ esClient, query });
   return { hits };
+};
+
+export type LatestSourceGroupBy = string | [string, string] | [string, string, string];
+
+export type LatestSourceWhereCondition = ESQLAstExpression;
+
+/**
+ * Start an ES|QL query from a data stream, filtered to the given space.
+ */
+export const latestSourceFrom = (index: string, space: string): ComposerQuery =>
+  esql.from([index], ['_id', '_source']).where`\`kibana.space_ids\` == ${space}`;
+
+export const withTimeRange = (
+  query: ComposerQuery,
+  options: CommonSearchOptions
+): ComposerQuery => {
+  let next = query;
+  if (options.from !== undefined) {
+    next = next.where`@timestamp >= TO_DATETIME(${esql.str(options.from)})`;
+  }
+  if (options.to !== undefined) {
+    next = next.where`@timestamp <= TO_DATETIME(${esql.str(options.to)})`;
+  }
+  return next;
+};
+
+export const withWhere = (
+  query: ComposerQuery,
+  condition?: LatestSourceWhereCondition
+): ComposerQuery => {
+  if (!condition) {
+    return query;
+  }
+  return query.where`${condition}`;
+};
+
+const buildGroupByCols = (groupBy: LatestSourceGroupBy) => {
+  if (typeof groupBy === 'string') {
+    return [esql.col(groupBy)];
+  }
+  return groupBy.map((field) => esql.col(field));
+};
+
+/**
+ * Two-stage `INLINE STATS` reduction: keeps the latest revision per group by
+ * `MAX(@timestamp)`, breaking ties with `MAX(_id)`.
+ */
+export const pickLatestPerGroup = (
+  query: ComposerQuery,
+  groupBy: LatestSourceGroupBy
+): ComposerQuery => {
+  const groupByCols = buildGroupByCols(groupBy);
+  return query.pipe`INLINE STATS latest_ts = MAX(@timestamp) BY ${groupByCols}`
+    .where`@timestamp == latest_ts`.pipe`INLINE STATS tiebreaker_id = MAX(_id) BY ${groupByCols}`
+    .where`_id == tiebreaker_id`;
+};
+
+export const withSort = (query: ComposerQuery, sort?: ComposerSortShorthand[]): ComposerQuery => {
+  if (!sort?.length) {
+    return query;
+  }
+  return query.sort(sort[0], ...sort.slice(1));
+};
+
+/**
+ * Run the composed query, locate `_source`, and strip the `kibana` envelope
+ * that `IDataStreamClient` adds on write.
+ */
+export const executeAndDecodeSource = async <T>(
+  esClient: ElasticsearchClient,
+  query: ComposerQuery
+): Promise<{ hits: T[] }> => {
+  const response = await runEsqlQuery(esClient, query.print('basic'));
+  if (!response) {
+    return { hits: [] };
+  }
+
+  const sourceIdx = response.columns.findIndex((c) => c.name === '_source');
+  if (sourceIdx === -1) {
+    return { hits: [] };
+  }
+
+  return {
+    hits: response.values.map((row) => {
+      const source = (row[sourceIdx] ?? {}) as Record<string, unknown>;
+      const { kibana: _kibana, ...rest } = source;
+      return rest as T;
+    }),
+  };
 };

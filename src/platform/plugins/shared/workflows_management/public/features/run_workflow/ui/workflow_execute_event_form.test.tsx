@@ -7,72 +7,112 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { EuiProvider } from '@elastic/eui';
+import { fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
-import { fetchAlertsIndexNames } from '@kbn/alerts-ui-shared/src/common/apis/fetch_alerts_index_names';
-import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
-import { testQueryClientConfig } from '@kbn/alerts-ui-shared/src/common/test_utils/test_query_client_config';
+import { themeServiceMock } from '@kbn/core/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import {
-  createCommonMockServices,
-  createEventFormKibanaMocks,
-  MockSearchBar,
-} from './test_utils/workflow_form_test_setup';
+import { useQueryTriggerEvents } from '@kbn/workflows-ui';
+import { testQueryClientConfig } from '@kbn/workflows-ui/src/test_utils';
+import { TIMEPICKER_FALLBACK } from './constants';
+import { MockSearchBar } from './test_utils/workflow_form_test_setup';
 import { WorkflowExecuteEventForm } from './workflow_execute_event_form';
 import { useKibana } from '../../../hooks/use_kibana';
 
-const mockFetchAlertsIndexNames = fetchAlertsIndexNames as jest.MockedFunction<
-  typeof fetchAlertsIndexNames
->;
+const mockTheme = themeServiceMock.createSetupContract({ darkMode: false, name: 'borealis' });
+const mockData = dataPluginMock.createStartContract();
+const mockUiSettings = {
+  get: jest.fn(),
+  isDefault: jest.fn(() => true),
+};
+const mockStorage = {
+  get: jest.fn(),
+  set: jest.fn(),
+  clear: jest.fn(),
+  remove: jest.fn(),
+};
 
 jest.mock('../../../hooks/use_kibana');
-jest.mock('@kbn/unified-search-plugin/public', () => ({
-  SearchBar: MockSearchBar,
+jest.mock('../../workflow_list/ui/use_event_driven_execution_status', () => ({
+  useEventDrivenExecutionStatus: () => ({
+    eventDrivenExecutionEnabled: true,
+    isLoading: false,
+    error: false,
+  }),
 }));
-jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_alerts_index_names', () => ({
-  fetchAlertsIndexNames: jest.fn(),
-}));
-jest.mock('@kbn/alerts-ui-shared/src/common/hooks', () => {
-  const actual = jest.requireActual('@kbn/alerts-ui-shared/src/common/hooks');
+
+jest.mock('@kbn/workflows-ui', () => {
+  const actual = jest.requireActual('@kbn/workflows-ui');
   return {
     ...actual,
-    useAlertsDataView: jest.fn(() => ({
-      isLoading: false,
-      dataView: {
-        id: 'test-data-view',
-        title: '.alerts-*-default',
-        timeFieldName: '@timestamp',
-        fields: [],
-      },
-    })),
-    useFetchUnifiedAlertsFields: jest.fn(() => ({
-      isLoading: false,
-      data: { fields: [] },
-    })),
+    useQueryTriggerEvents: jest.fn(),
   };
 });
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
-
+const mockUseQueryTriggerEvents = useQueryTriggerEvents as jest.MockedFunction<
+  typeof useQueryTriggerEvents
+>;
 const queryClient = new QueryClient(testQueryClientConfig);
 
 const TestWrapper = ({ children }: { children: React.ReactNode }) => (
-  <QueryClientProvider client={queryClient}>
-    <QueryClientProvider client={queryClient} context={AlertsQueryContext}>
+  <EuiProvider>
+    <QueryClientProvider client={queryClient}>
       <I18nProvider>{children}</I18nProvider>
     </QueryClientProvider>
-  </QueryClientProvider>
+  </EuiProvider>
 );
+
+const baseDefinition = {
+  version: '1',
+  name: 'wf',
+  enabled: true,
+  triggers: [{ type: 'custom.trigger' }],
+  steps: [],
+};
 
 describe('WorkflowExecuteEventForm', () => {
   const mockSetValue = jest.fn();
-  const mockSetErrors = jest.fn();
-  const { mockSearchSource, mockData } = createEventFormKibanaMocks();
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockFetchAlertsIndexNames.mockResolvedValue(['.alerts-security.alerts-default']);
+    queryClient.clear();
+    mockUseQueryTriggerEvents.mockReset();
+    (mockData.query.timefilter.timefilter.getTimeDefaults as jest.Mock).mockReturnValue({
+      from: 'now-15m',
+      to: 'now',
+    });
+    mockUseQueryTriggerEvents.mockReturnValue({
+      data: {
+        hits: [
+          {
+            id: 'doc-1',
+            source: {
+              '@timestamp': '2025-01-01T12:00:00.000Z',
+              eventId: 'e1',
+              triggerId: 'custom.trigger',
+              spaceId: 'default',
+              subscriptions: [],
+              payload: { foo: 'bar' },
+            },
+          },
+        ],
+        total: 1,
+        page: 1,
+        size: 50,
+      },
+      isLoading: false,
+      isFetching: false,
+      isPreviousData: false,
+      isError: false,
+      error: undefined,
+      isSuccess: true,
+      status: 'success',
+      refetch: jest.fn().mockResolvedValue(undefined),
+    } as unknown as ReturnType<typeof useQueryTriggerEvents>);
     mockUseKibana.mockReturnValue({
       services: {
         unifiedSearch: {
@@ -80,205 +120,332 @@ describe('WorkflowExecuteEventForm', () => {
             SearchBar: MockSearchBar,
           },
         },
-        data: mockData as any,
-        fieldFormats: mockData.fieldFormats as any,
-        ...createCommonMockServices(),
+        dataViews: {
+          create: jest.fn().mockResolvedValue({
+            id: 'dv-workflows-events',
+            title: '.workflows-events',
+            timeFieldName: '@timestamp',
+            getFieldByName: jest.fn(() => ({ name: 'triggerId' })),
+            fields: {
+              replaceAll: jest.fn(),
+              getByName: jest.fn(() => null),
+              getAll: jest.fn().mockReturnValue([]),
+              create: jest.fn(),
+              add: jest.fn(),
+              remove: jest.fn(),
+              update: jest.fn(),
+              filter: jest.fn().mockReturnValue([]),
+            },
+          }),
+          refreshFields: jest.fn().mockResolvedValue(undefined),
+        },
+        notifications: {
+          toasts: {
+            addWarning: jest.fn(),
+            addError: jest.fn(),
+          },
+        },
+        http: {},
+        theme: mockTheme,
+        fieldFormats: fieldFormatsMock,
+        uiSettings: mockUiSettings,
+        storage: mockStorage,
+        data: mockData,
       },
-    } as any);
+    } as unknown as ReturnType<typeof useKibana>);
   });
 
-  afterEach(() => {
-    queryClient.clear();
-  });
-
-  it('renders the form with search bar', async () => {
-    const { getByTestId } = render(
+  it('renders trigger events table', async () => {
+    const { getByTestId, findByTestId } = render(
       <TestWrapper>
         <WorkflowExecuteEventForm
+          definition={baseDefinition as any}
           value=""
           setValue={mockSetValue}
           errors={null}
-          setErrors={mockSetErrors}
         />
       </TestWrapper>
     );
 
-    await waitFor(() => {
-      expect(getByTestId('search-bar')).toBeInTheDocument();
+    await findByTestId('workflowTriggerEventsTable');
+    expect(getByTestId('workflowTriggerEventsTable')).toBeInTheDocument();
+    expect(getByTestId('query-input')).toHaveValue('triggerId: "custom.trigger"');
+    expect(mockUseQueryTriggerEvents).toHaveBeenCalledWith(
+      expect.objectContaining({
+        kql: 'triggerId: "custom.trigger"',
+        page: 1,
+        size: 50,
+        from: TIMEPICKER_FALLBACK.from,
+        to: TIMEPICKER_FALLBACK.to,
+      }),
+      expect.objectContaining({ enabled: true })
+    );
+  });
+
+  it('uses TIMEPICKER_FALLBACK when timefilter getTimeDefaults returns undefined', async () => {
+    (mockData.query.timefilter.timefilter.getTimeDefaults as jest.Mock).mockReturnValue(undefined);
+
+    const { findByTestId } = render(
+      <TestWrapper>
+        <WorkflowExecuteEventForm
+          definition={baseDefinition as any}
+          value=""
+          setValue={mockSetValue}
+          errors={null}
+        />
+      </TestWrapper>
+    );
+
+    await findByTestId('workflowTriggerEventsTable');
+    expect(mockUseQueryTriggerEvents).toHaveBeenCalledWith(
+      expect.objectContaining({
+        from: TIMEPICKER_FALLBACK.from,
+        to: TIMEPICKER_FALLBACK.to,
+      }),
+      expect.objectContaining({ enabled: true })
+    );
+  });
+
+  it('uses timefilter getTimeDefaults for the initial trigger event query range when set', async () => {
+    (mockData.query.timefilter.timefilter.getTimeDefaults as jest.Mock).mockReturnValue({
+      from: 'now-1h',
+      to: 'now',
     });
-  });
 
-  it('does not create data view when alert indices API is unavailable', async () => {
-    mockFetchAlertsIndexNames.mockRejectedValue(new Error('alerting unavailable'));
-
-    render(
+    const { findByTestId } = render(
       <TestWrapper>
         <WorkflowExecuteEventForm
+          definition={baseDefinition as any}
           value=""
           setValue={mockSetValue}
           errors={null}
-          setErrors={mockSetErrors}
         />
       </TestWrapper>
     );
 
-    await new Promise((resolve) => setTimeout(resolve, 100));
-    expect(mockData.dataViews.create).not.toHaveBeenCalled();
+    await findByTestId('workflowTriggerEventsTable');
+    expect(mockUseQueryTriggerEvents).toHaveBeenCalledWith(
+      expect.objectContaining({
+        from: 'now-1h',
+        to: 'now',
+      }),
+      expect.objectContaining({ enabled: true })
+    );
   });
 
-  it('does not call RAC index API when racQueriesEnabled is false', async () => {
-    render(
+  it('sends only the KQL visible in the search bar after submit', async () => {
+    const { findByTestId, getByTestId } = render(
       <TestWrapper>
         <WorkflowExecuteEventForm
+          definition={baseDefinition as any}
           value=""
           setValue={mockSetValue}
           errors={null}
-          setErrors={mockSetErrors}
-          racQueriesEnabled={false}
         />
       </TestWrapper>
     );
 
-    await new Promise((resolve) => setTimeout(resolve, 100));
-    expect(mockFetchAlertsIndexNames).not.toHaveBeenCalled();
-  });
-
-  it('creates data view from alert indices returned by RAC API', async () => {
-    mockFetchAlertsIndexNames.mockResolvedValue([
-      '.alerts-observability.logs.alerts-default',
-      '.alerts-security.alerts-default',
-    ]);
-
-    render(
-      <TestWrapper>
-        <WorkflowExecuteEventForm
-          value=""
-          setValue={mockSetValue}
-          errors={null}
-          setErrors={mockSetErrors}
-        />
-      </TestWrapper>
-    );
+    await findByTestId('workflowTriggerEventsTable');
+    const input = getByTestId('query-input');
+    fireEvent.change(input, { target: { value: 'eventId: e1' } });
+    fireEvent.keyDown(input, { key: 'Enter', code: 'Enter', charCode: 13 });
 
     await waitFor(() => {
-      expect(mockData.dataViews.create).toHaveBeenCalledWith({
-        title: '.alerts-observability.logs.alerts-default,.alerts-security.alerts-default',
-        timeFieldName: '@timestamp',
+      const calls = mockUseQueryTriggerEvents.mock.calls;
+      const lastParams = calls[calls.length - 1][0] as Record<string, unknown>;
+      expect(lastParams).toMatchObject({
+        kql: 'eventId: e1',
       });
     });
   });
 
-  it('fetches and displays alerts in table', async () => {
-    render(
+  it('scopes search KQL to every custom trigger id from the workflow', async () => {
+    const definitionWithTwoCustomTriggers = {
+      ...baseDefinition,
+      triggers: [
+        { type: 'workflow.execution.failed' },
+        { type: 'cases.created' },
+        { type: 'manual' },
+      ],
+    };
+
+    const { findByTestId } = render(
       <TestWrapper>
         <WorkflowExecuteEventForm
+          definition={definitionWithTwoCustomTriggers as any}
           value=""
           setValue={mockSetValue}
           errors={null}
-          setErrors={mockSetErrors}
         />
       </TestWrapper>
     );
 
+    await findByTestId('workflowTriggerEventsTable');
+    expect(mockUseQueryTriggerEvents).toHaveBeenCalledWith(
+      expect.objectContaining({
+        kql: 'triggerId: ("workflow.execution.failed" or "cases.created")',
+      }),
+      expect.objectContaining({ enabled: true })
+    );
+  });
+
+  it('resets trigger event search pagination when the search bar is submitted again', async () => {
+    const { findByTestId, getByTestId } = render(
+      <TestWrapper>
+        <WorkflowExecuteEventForm
+          definition={baseDefinition as any}
+          value=""
+          setValue={mockSetValue}
+          errors={null}
+        />
+      </TestWrapper>
+    );
+
+    await findByTestId('workflowTriggerEventsTable');
+    fireEvent.click(getByTestId('mock-search-bar-submit'));
+
     await waitFor(() => {
-      expect(mockSearchSource.fetch$).toHaveBeenCalled();
-      expect(screen.getByText('Test Rule')).toBeInTheDocument();
+      const lastCall =
+        mockUseQueryTriggerEvents.mock.calls[mockUseQueryTriggerEvents.mock.calls.length - 1];
+      expect((lastCall[0] as { page: number }).page).toBe(1);
     });
   });
 
-  it('displays message column in table', async () => {
-    const { getByRole } = render(
+  it('shows an empty state when no trigger events match the default scope', async () => {
+    mockUseQueryTriggerEvents.mockReturnValue({
+      data: {
+        hits: [],
+        total: 0,
+        page: 1,
+        size: 50,
+      },
+      isLoading: false,
+      isFetching: false,
+      isPreviousData: false,
+      isError: false,
+      error: undefined,
+      isSuccess: true,
+      status: 'success',
+      refetch: jest.fn().mockResolvedValue(undefined),
+    } as unknown as ReturnType<typeof useQueryTriggerEvents>);
+
+    const { findByTestId, getByText } = render(
       <TestWrapper>
         <WorkflowExecuteEventForm
+          definition={baseDefinition as any}
           value=""
           setValue={mockSetValue}
           errors={null}
-          setErrors={mockSetErrors}
         />
       </TestWrapper>
     );
 
-    await waitFor(() => {
-      expect(getByRole('columnheader', { name: 'Message' })).toBeInTheDocument();
-    });
+    expect(await findByTestId('workflowTriggerEventsEmptyState')).toBeInTheDocument();
+    expect(getByText('No events in the selected time range')).toBeInTheDocument();
+    expect(
+      getByText(/widening the time range or adjusting the query in the search bar/)
+    ).toBeInTheDocument();
   });
 
-  it('handles query change without triggering fetch', async () => {
-    const { getByTestId } = render(
+  it('shows the filtered empty state when custom KQL returns no events', async () => {
+    mockUseQueryTriggerEvents.mockReturnValue({
+      data: {
+        hits: [],
+        total: 0,
+        page: 1,
+        size: 50,
+      },
+      isLoading: false,
+      isFetching: false,
+      isPreviousData: false,
+      isError: false,
+      error: undefined,
+      isSuccess: true,
+      status: 'success',
+      refetch: jest.fn().mockResolvedValue(undefined),
+    } as unknown as ReturnType<typeof useQueryTriggerEvents>);
+
+    const { findByTestId, getByTestId, getByText } = render(
       <TestWrapper>
         <WorkflowExecuteEventForm
+          definition={baseDefinition as any}
           value=""
           setValue={mockSetValue}
           errors={null}
-          setErrors={mockSetErrors}
         />
       </TestWrapper>
     );
 
-    // Wait for initial data view creation and fetch
-    await waitFor(() => {
-      expect(mockData.dataViews.create).toHaveBeenCalled();
-    });
+    await findByTestId('workflowTriggerEventsTable');
+    const input = getByTestId('query-input');
+    fireEvent.change(input, { target: { value: 'eventId: "missing"' } });
+    fireEvent.keyDown(input, { key: 'Enter', code: 'Enter', charCode: 13 });
 
-    await waitFor(() => {
-      expect(getByTestId('search-bar')).toBeInTheDocument();
-    });
-
-    // Wait for initial fetch to complete
-    await waitFor(() => {
-      expect(mockSearchSource.fetch$).toHaveBeenCalled();
-    });
-
-    const initialFetchCount = mockSearchSource.fetch$.mock.calls.length;
-    const queryInput = getByTestId('query-input') as HTMLInputElement;
-
-    // Simulate typing (onQueryChange) - this should NOT trigger a fetch
-    fireEvent.change(queryInput, { target: { value: 'test query' } });
-
-    // Wait a bit to ensure no additional fetch was triggered
-    await new Promise((resolve) => setTimeout(resolve, 50));
-
-    // Should not trigger additional fetch calls (only submitting should)
-    expect(mockSearchSource.fetch$.mock.calls.length).toBe(initialFetchCount);
+    expect(await findByTestId('workflowTriggerEventsEmptyState')).toBeInTheDocument();
+    expect(getByText('No events match your search')).toBeInTheDocument();
+    expect(
+      getByText(/Try widening the time range, adjusting the query in the search bar/)
+    ).toBeInTheDocument();
   });
 
-  it('calls setValue when alerts are selected', async () => {
-    const { getByRole, getByTestId } = render(
+  it('does not show the empty state while refetching with no rows', async () => {
+    mockUseQueryTriggerEvents.mockReturnValue({
+      data: {
+        hits: [],
+        total: 0,
+        page: 1,
+        size: 50,
+      },
+      isLoading: false,
+      isFetching: true,
+      isPreviousData: false,
+      isError: false,
+      error: undefined,
+      isSuccess: true,
+      status: 'success',
+      refetch: jest.fn().mockResolvedValue(undefined),
+    } as unknown as ReturnType<typeof useQueryTriggerEvents>);
+
+    const { findByTestId, queryByTestId } = render(
       <TestWrapper>
         <WorkflowExecuteEventForm
+          definition={baseDefinition as any}
           value=""
           setValue={mockSetValue}
           errors={null}
-          setErrors={mockSetErrors}
         />
       </TestWrapper>
     );
 
-    // Wait for alerts to load
-    await waitFor(() => {
-      expect(mockSearchSource.fetch$).toHaveBeenCalled();
-    });
+    await findByTestId('workflowTriggerEventsTable');
+    expect(queryByTestId('workflowTriggerEventsEmptyState')).not.toBeInTheDocument();
+  });
 
-    // Wait for table to render with data
-    await waitFor(() => {
-      expect(getByRole('table')).toBeInTheDocument();
-    });
+  it('shows a privilege message when trigger event search returns 403', async () => {
+    mockUseQueryTriggerEvents.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isError: true,
+      error: { response: { status: 403 } },
+      isSuccess: false,
+      status: 'error',
+    } as unknown as ReturnType<typeof useQueryTriggerEvents>);
 
-    // Find and click the checkbox for the first row
-    const checkbox = getByTestId('checkboxSelectRow-1');
-    fireEvent.click(checkbox);
+    const { findByText } = render(
+      <TestWrapper>
+        <WorkflowExecuteEventForm
+          definition={baseDefinition as any}
+          value=""
+          setValue={mockSetValue}
+          errors={null}
+        />
+      </TestWrapper>
+    );
 
-    // Verify setValue was called with the selected alert data
-    await waitFor(() => {
-      expect(mockSetValue).toHaveBeenCalled();
-    });
-
-    const lastCall = mockSetValue.mock.calls[mockSetValue.mock.calls.length - 1][0];
-    const parsedValue = JSON.parse(lastCall);
-
-    expect(parsedValue.event).toBeDefined();
-    expect(parsedValue.event.alertIds).toHaveLength(1);
-    expect(parsedValue.event.alertIds[0]._id).toBe('1');
-    expect(parsedValue.event.triggerType).toBe('alert');
+    expect(
+      await findByText(
+        'You need the Workflows "Read Workflow Execution" privilege to search trigger events.'
+      )
+    ).toBeInTheDocument();
   });
 });

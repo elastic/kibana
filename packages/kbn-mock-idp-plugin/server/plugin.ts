@@ -201,6 +201,13 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
             const parsed = new URL(request.body.url, 'https://localhost');
             const relayState = parsed.searchParams.get('RelayState') ?? undefined;
 
+            // Kibana-bound ACS URLs are intentionally left to the `onPreResponse` rewrite above;
+            // we only override here for external SPs (e.g. UIAM).
+            const externalAcsUrl =
+              samlRequestInfo?.acsUrl && !samlRequestInfo.acsUrl.startsWith(MOCK_IDP_SP_BASE_URL)
+                ? samlRequestInfo.acsUrl
+                : undefined;
+
             return response.ok({
               body: {
                 SAMLResponse: await createSAMLResponse({
@@ -212,9 +219,13 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
                     ? { authnRequestId: samlRequestInfo.requestId }
                     : {}),
                   ...(samlRequestInfo?.issuer ? { spEntityId: samlRequestInfo.issuer } : {}),
+                  ...(externalAcsUrl ? { acsUrl: externalAcsUrl } : {}),
                   ...serverlessOptions,
                 }),
                 ...(relayState ? { RelayState: relayState } : {}),
+                // Echoed alongside SAMLResponse so the browser's auto-submitted form posts to UIAM
+                // instead of the default Kibana ACS endpoint (see mock_idp_page form action).
+                ...(externalAcsUrl ? { acsUrl: externalAcsUrl } : {}),
               },
             });
           } catch (err) {

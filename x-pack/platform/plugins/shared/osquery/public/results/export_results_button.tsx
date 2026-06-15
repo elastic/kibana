@@ -6,13 +6,14 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Filter } from '@kbn/es-query';
 
 import { useIsExperimentalFeatureEnabled } from '../common/experimental_features_context';
 import { useExportResults } from './use_export_results';
 import { ExportResultsModal } from './export_results_modal';
+import { EXPORT_NO_DATA_TOOLTIP } from './translations';
 import type { ExportFormat } from './use_export_results';
 
 interface ExportResultsButtonProps {
@@ -73,19 +74,32 @@ const ExportResultsButtonComponent: React.FC<ExportResultsButtonProps> = ({
     return null;
   }
 
+  // Strict `=== 0` so unknown counts (publisher hasn't mounted, error
+  // response, or a collapsed pack row where the store entry was cleared) do
+  // not disable the button. Only a successfully-fetched zero-row result
+  // disables it; `undefined` during the publisher's initial fetch is
+  // represented as `isLoading` instead, to avoid flashing the disabled state.
+  const isEmpty = total === 0;
+  const isInitialLoading = total === undefined;
+
+  const button = (
+    <EuiButtonEmpty
+      size="m"
+      iconType="exportAction"
+      onClick={openModal}
+      isLoading={isExporting || isInitialLoading}
+      isDisabled={isEmpty}
+      data-test-subj="osqueryExportResultsButton"
+    >
+      {i18n.translate('xpack.osquery.exportResults.buttonLabel', {
+        defaultMessage: 'Export results',
+      })}
+    </EuiButtonEmpty>
+  );
+
   return (
     <>
-      <EuiButtonEmpty
-        size="m"
-        iconType="exportAction"
-        onClick={openModal}
-        isLoading={isExporting}
-        data-test-subj="osqueryExportResultsButton"
-      >
-        {i18n.translate('xpack.osquery.exportResults.buttonLabel', {
-          defaultMessage: 'Export results',
-        })}
-      </EuiButtonEmpty>
+      {isEmpty ? <EuiToolTip content={EXPORT_NO_DATA_TOOLTIP}>{button}</EuiToolTip> : button}
 
       {isModalOpen && (
         <ExportResultsModal
