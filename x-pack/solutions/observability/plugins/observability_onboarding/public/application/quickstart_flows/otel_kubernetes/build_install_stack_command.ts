@@ -9,78 +9,10 @@ import { buildValuesFileUrl } from './build_values_file_url';
 import { OTEL_KUBE_STACK_VERSION, OTEL_STACK_NAMESPACE } from './constants';
 
 const CURRENT_BASELINE_AGENT_VERSION = '9.4.2';
-
-// These processor lists intentionally mirror the EDOT values-file daemon pipeline
-// baselines and should be updated when those values-file baselines change.
-const LEGACY_DAEMON_LOGS_NODE_PROCESSORS = [
-  'batch',
-  'k8sattributes',
-  'resourcedetection/system',
-  'resourcedetection/eks',
-  'resourcedetection/gcp',
-  'resourcedetection/aks',
-  'resource/hostname',
-  'resource/cloud',
-] as const;
-
-const LEGACY_DAEMON_METRICS_NODE_OTEL_PROCESSORS = [
-  'batch/metrics',
-  'k8sattributes',
-  'resourcedetection/system',
-  'resourcedetection/eks',
-  'resourcedetection/gcp',
-  'resourcedetection/aks',
-  'resource/hostname',
-  'resource/cloud',
-] as const;
-
-const LEGACY_9_1_MANAGED_DAEMON_LOGS_NODE_PROCESSORS = [
-  'batch',
-  'k8sattributes',
-  'resourcedetection/system',
-  'resourcedetection/eks',
-  'resourcedetection/gcp',
-  'resourcedetection/aks',
-  'resource/k8s',
-  'resource/hostname',
-  'resource/cloud',
-] as const;
-
-const LEGACY_9_1_MANAGED_DAEMON_METRICS_NODE_OTEL_PROCESSORS = [
-  'batch/metrics',
-  'k8sattributes',
-  'resourcedetection/system',
-  'resourcedetection/eks',
-  'resourcedetection/gcp',
-  'resourcedetection/aks',
-  'resource/k8s',
-  'resource/hostname',
-  'resource/cloud',
-] as const;
-
-const CURRENT_DAEMON_LOGS_NODE_PROCESSORS = [
-  'batch',
-  'k8sattributes',
-  'resourcedetection/env',
-  'resourcedetection/system',
-  'resourcedetection/eks',
-  'resourcedetection/gcp',
-  'resourcedetection/aks',
-  'resource/hostname',
-  'resource/cloud',
-] as const;
-
-const CURRENT_DAEMON_METRICS_NODE_OTEL_PROCESSORS = [
-  'batch/metrics',
-  'k8sattributes',
-  'resourcedetection/env',
-  'resourcedetection/system',
-  'resourcedetection/eks',
-  'resourcedetection/gcp',
-  'resourcedetection/aks',
-  'resource/hostname',
-  'resource/cloud',
-] as const;
+const CURRENT_BASELINE_AGENT_VERSION_PARSED: [number, number, number] = [9, 4, 2];
+const LEGACY_DAEMON_PROCESSOR_START_INDEX = 8;
+const MANAGED_OTLP_9_1_DAEMON_PROCESSOR_START_INDEX = 9;
+const CURRENT_DAEMON_PROCESSOR_START_INDEX = 9;
 
 interface GetDaemonProcessorStartIndexesParams {
   agentVersion: string;
@@ -95,9 +27,6 @@ interface DaemonProcessorStartIndexes {
 
 const tryParseAgentVersion = (agentVersion: string): [number, number, number] | undefined => {
   const normalizedVersion = agentVersion.trim().replace(/^v/i, '');
-  // Prerelease and build metadata are normalized to the base version because this
-  // helper only models released EDOT values-file baseline shapes used by onboarding;
-  // the tests guard this normalization.
   const versionMatch = normalizedVersion.match(/^(\d+)\.(\d+)(?:\.(\d+))?(?:[-+].*)?$/);
 
   if (!versionMatch) {
@@ -108,20 +37,6 @@ const tryParseAgentVersion = (agentVersion: string): [number, number, number] | 
 
   return [Number.parseInt(major, 10), Number.parseInt(minor, 10), Number.parseInt(patch, 10)];
 };
-
-const parseStrictAgentVersion = (agentVersion: string): [number, number, number] => {
-  const parsedVersion = tryParseAgentVersion(agentVersion);
-
-  if (!parsedVersion) {
-    throw new Error(`Expected a parseable agent version: ${agentVersion}`);
-  }
-
-  return parsedVersion;
-};
-
-const CURRENT_BASELINE_AGENT_VERSION_PARSED = parseStrictAgentVersion(
-  CURRENT_BASELINE_AGENT_VERSION
-);
 
 const parseAgentVersion = (agentVersion: string): [number, number, number] => {
   const parsedVersion = tryParseAgentVersion(agentVersion);
@@ -153,19 +68,16 @@ const isAgentVersionBefore = (agentVersion: string, maximumVersion: string): boo
   return patch < maximumPatch;
 };
 
-const getBaseDaemonProcessorLists = ({
+const getDaemonProcessorStartIndex = ({
   agentVersion,
   isManagedOtlpServiceAvailable,
   isMetricsOnboardingEnabled,
-}: GetDaemonProcessorStartIndexesParams) => {
+}: GetDaemonProcessorStartIndexesParams): number => {
   // Helm --set can replace list items by index, but it cannot append to an
-  // existing list. Keep the EDOT baseline explicit so custom processors start
-  // after upstream processors such as resource/cloud.
+  // existing list. Keep the known EDOT append indexes explicit so custom
+  // processors start after upstream processors such as resource/cloud.
   if (isAgentVersionAtLeast(agentVersion, CURRENT_BASELINE_AGENT_VERSION)) {
-    return {
-      logsNode: CURRENT_DAEMON_LOGS_NODE_PROCESSORS,
-      metricsNodeOtel: CURRENT_DAEMON_METRICS_NODE_OTEL_PROCESSORS,
-    };
+    return CURRENT_DAEMON_PROCESSOR_START_INDEX;
   }
 
   if (
@@ -174,27 +86,21 @@ const getBaseDaemonProcessorLists = ({
     isManagedOtlpServiceAvailable &&
     isMetricsOnboardingEnabled
   ) {
-    return {
-      logsNode: LEGACY_9_1_MANAGED_DAEMON_LOGS_NODE_PROCESSORS,
-      metricsNodeOtel: LEGACY_9_1_MANAGED_DAEMON_METRICS_NODE_OTEL_PROCESSORS,
-    };
+    return MANAGED_OTLP_9_1_DAEMON_PROCESSOR_START_INDEX;
   }
 
-  return {
-    logsNode: LEGACY_DAEMON_LOGS_NODE_PROCESSORS,
-    metricsNodeOtel: LEGACY_DAEMON_METRICS_NODE_OTEL_PROCESSORS,
-  };
+  return LEGACY_DAEMON_PROCESSOR_START_INDEX;
 };
 
 export const getDaemonProcessorStartIndexes = (
   params: GetDaemonProcessorStartIndexesParams
 ): DaemonProcessorStartIndexes => {
   const { isMetricsOnboardingEnabled } = params;
-  const { logsNode, metricsNodeOtel } = getBaseDaemonProcessorLists(params);
+  const daemonProcessorStartIndex = getDaemonProcessorStartIndex(params);
 
   return {
-    logsNode: logsNode.length,
-    metricsNodeOtel: isMetricsOnboardingEnabled ? metricsNodeOtel.length : undefined,
+    logsNode: daemonProcessorStartIndex,
+    metricsNodeOtel: isMetricsOnboardingEnabled ? daemonProcessorStartIndex : undefined,
   };
 };
 

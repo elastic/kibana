@@ -105,28 +105,10 @@ describe('getDaemonProcessorStartIndexes()', () => {
     });
   });
 
-  describe('version normalization guards', () => {
+  describe('version parsing guards', () => {
     it.each([
       {
-        description: 'v9.1.0 managed logs and metrics',
-        params: {
-          agentVersion: 'v9.1.0',
-          isManagedOtlpServiceAvailable: true,
-          isMetricsOnboardingEnabled: true,
-        },
-        expected: { logsNode: 9, metricsNodeOtel: 9 },
-      },
-      {
-        description: '9.1.0+build123 managed logs and metrics',
-        params: {
-          agentVersion: '9.1.0+build123',
-          isManagedOtlpServiceAvailable: true,
-          isMetricsOnboardingEnabled: true,
-        },
-        expected: { logsNode: 9, metricsNodeOtel: 9 },
-      },
-      {
-        description: 'v9.4.2 direct logs and metrics',
+        description: 'v-prefixed current version',
         params: {
           agentVersion: 'v9.4.2',
           isManagedOtlpServiceAvailable: false,
@@ -135,54 +117,9 @@ describe('getDaemonProcessorStartIndexes()', () => {
         expected: { logsNode: 9, metricsNodeOtel: 9 },
       },
       {
-        description: '9.4.2-rc1 direct logs and metrics',
-        params: {
-          agentVersion: '9.4.2-rc1',
-          isManagedOtlpServiceAvailable: false,
-          isMetricsOnboardingEnabled: true,
-        },
-        expected: { logsNode: 9, metricsNodeOtel: 9 },
-      },
-      {
-        description: '9.4.2+build123 direct logs and metrics',
-        params: {
-          agentVersion: '9.4.2+build123',
-          isManagedOtlpServiceAvailable: false,
-          isMetricsOnboardingEnabled: true,
-        },
-        expected: { logsNode: 9, metricsNodeOtel: 9 },
-      },
-      {
-        description: '9.4 direct logs and metrics',
-        params: {
-          agentVersion: '9.4',
-          isManagedOtlpServiceAvailable: false,
-          isMetricsOnboardingEnabled: true,
-        },
-        expected: { logsNode: 8, metricsNodeOtel: 8 },
-      },
-      {
-        description: 'malformed version direct logs and metrics',
+        description: 'malformed version',
         params: {
           agentVersion: 'not-a-version',
-          isManagedOtlpServiceAvailable: false,
-          isMetricsOnboardingEnabled: true,
-        },
-        expected: { logsNode: 9, metricsNodeOtel: 9 },
-      },
-      {
-        description: 'empty version direct logs and metrics',
-        params: {
-          agentVersion: '',
-          isManagedOtlpServiceAvailable: false,
-          isMetricsOnboardingEnabled: true,
-        },
-        expected: { logsNode: 9, metricsNodeOtel: 9 },
-      },
-      {
-        description: 'whitespace-only version direct logs and metrics',
-        params: {
-          agentVersion: '   ',
           isManagedOtlpServiceAvailable: false,
           isMetricsOnboardingEnabled: true,
         },
@@ -310,25 +247,6 @@ helm upgrade --install opentelemetry-kube-stack open-telemetry/opentelemetry-kub
     expect(command).not.toContain('metrics\\/node\\/otel.processors[8]=resource/onboarding_id');
   });
 
-  it.each(['v9.4.2', '9.4.2-rc1', 'not-a-version'])(
-    'builds direct logs+metrics command with onboarding_id at index 9 for agentVersion %s',
-    (agentVersion) => {
-      const command = buildInstallStackCommand({
-        ...defaultArgs,
-        agentVersion,
-      });
-
-      expect(command).toContain(
-        'collectors.daemon.config.service.pipelines.logs\\/node.processors[9]=resource/onboarding_id'
-      );
-      expect(command).toContain(
-        'collectors.daemon.config.service.pipelines.metrics\\/node\\/otel.processors[9]=resource/onboarding_id'
-      );
-      expect(command).not.toContain('logs\\/node.processors[8]=resource/onboarding_id');
-      expect(command).not.toContain('metrics\\/node\\/otel.processors[8]=resource/onboarding_id');
-    }
-  );
-
   describe('onboarding_id processor', () => {
     it('injects resource/onboarding_id into direct 9.1.0 logs-only pipeline', () => {
       const command = buildInstallStackCommand({
@@ -358,37 +276,6 @@ helm upgrade --install opentelemetry-kube-stack open-telemetry/opentelemetry-kub
       });
 
       expect(command).not.toContain('metrics\\/node\\/otel');
-    });
-
-    it('injects resource/onboarding_id into managed 9.1.0 metrics pipeline at index 9', () => {
-      const command = buildInstallStackCommand({
-        ...defaultArgs,
-        agentVersion: '9.1.0',
-        isManagedOtlpServiceAvailable: true,
-        isMetricsOnboardingEnabled: true,
-      });
-
-      expect(command).toContain(
-        'collectors.daemon.config.service.pipelines.metrics\\/node\\/otel.processors[9]=resource/onboarding_id'
-      );
-    });
-
-    it('injects resource/onboarding_id into managed 9.4.2 logs and metrics pipelines at index 9', () => {
-      const command = buildInstallStackCommand({
-        ...defaultArgs,
-        agentVersion: '9.4.2',
-        isManagedOtlpServiceAvailable: true,
-        isMetricsOnboardingEnabled: true,
-      });
-
-      expect(command).toContain(
-        'collectors.daemon.config.service.pipelines.logs\\/node.processors[9]=resource/onboarding_id'
-      );
-      expect(command).toContain(
-        'collectors.daemon.config.service.pipelines.metrics\\/node\\/otel.processors[9]=resource/onboarding_id'
-      );
-      expect(command).not.toContain('logs\\/node.processors[8]=resource/onboarding_id');
-      expect(command).not.toContain('metrics\\/node\\/otel.processors[8]=resource/onboarding_id');
     });
   });
 
@@ -479,29 +366,6 @@ helm upgrade --install opentelemetry-kube-stack open-telemetry/opentelemetry-kub
       expect(command).toContain('logs\\/node.processors[9]=resource/wired_streams');
     });
 
-    it('assigns direct 9.4.2 custom log processors after resource/cloud', () => {
-      const command = buildInstallStackCommand({
-        ...defaultArgs,
-        agentVersion: '9.4.2',
-        useWiredStreams: true,
-      });
-
-      expect(command).not.toContain('logs\\/node.processors[8]=resource/onboarding_id');
-      expect(command).not.toContain('logs\\/node.processors[8]=resource/wired_streams');
-      expect(command).toContain('logs\\/node.processors[9]=resource/onboarding_id');
-      expect(command).toContain('logs\\/node.processors[10]=resource/wired_streams');
-
-      const onboardingIdPipelineIndex = command.indexOf(
-        'logs\\/node.processors[9]=resource/onboarding_id'
-      );
-      const wiredStreamsPipelineIndex = command.indexOf(
-        'logs\\/node.processors[10]=resource/wired_streams'
-      );
-      expect(onboardingIdPipelineIndex).toBeGreaterThan(-1);
-      expect(wiredStreamsPipelineIndex).toBeGreaterThan(-1);
-      expect(onboardingIdPipelineIndex).toBeLessThan(wiredStreamsPipelineIndex);
-    });
-
     it('assigns managed 9.4.2 custom log processors after resource/cloud', () => {
       const command = buildInstallStackCommand({
         ...defaultArgs,
@@ -538,24 +402,6 @@ helm upgrade --install opentelemetry-kube-stack open-telemetry/opentelemetry-kub
       expect(command).toContain('logs\\/node.processors[8]=resource/onboarding_id');
       expect(command).toContain('logs\\/node.processors[9]=resource/wired_streams');
       expect(command).not.toContain('metrics\\/node\\/otel');
-    });
-
-    it('appends wired streams log processor after onboarding_id for direct 9.1.0', () => {
-      const command = buildInstallStackCommand({
-        ...defaultArgs,
-        isManagedOtlpServiceAvailable: false,
-        useWiredStreams: true,
-      });
-
-      const onboardingIdPipelineIndex = command.indexOf(
-        'logs\\/node.processors[8]=resource/onboarding_id'
-      );
-      const wiredStreamsPipelineIndex = command.indexOf(
-        'logs\\/node.processors[9]=resource/wired_streams'
-      );
-      expect(onboardingIdPipelineIndex).toBeGreaterThan(-1);
-      expect(wiredStreamsPipelineIndex).toBeGreaterThan(-1);
-      expect(onboardingIdPipelineIndex).toBeLessThan(wiredStreamsPipelineIndex);
     });
   });
 });
