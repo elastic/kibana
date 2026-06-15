@@ -9,8 +9,10 @@ import type { ServiceIdentifier } from 'inversify';
 import type { QueryServiceContract } from './query_service';
 
 /**
- * QueryService flavor that uses an Elasticsearch client scoped to the current request user:
- * `elasticsearch.client.asScoped(request).asCurrentUser`
+ * QueryService flavor for rule-execution queries against user data. Uses an Elasticsearch client
+ * scoped to the current request user with `projectRouting: 'space'`:
+ * `elasticsearch.client.asScoped(request, { projectRouting: 'space' }).asCurrentUser`.
+ * This scopes queries to the originating space/project when CPS is enabled.
  */
 export const QueryServiceScopedToken = Symbol.for(
   'alerting_v2.QueryServiceScoped'
