@@ -26,9 +26,13 @@ import {
   CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
   CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
   FINDINGS_INDEX_PATTERN,
+  CLOUD_SECURITY_PLUGIN_VERSION,
 } from '@kbn/cloud-security-posture-common';
 import type { CspSetupStatus } from '@kbn/cloud-security-posture-common';
-import { BENCHMARK_SCORE_INDEX_DEFAULT_NS } from '@kbn/cloud-security-posture-plugin/common/constants';
+import {
+  BENCHMARK_SCORE_INDEX_DEFAULT_NS,
+  CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
+} from '@kbn/cloud-security-posture-plugin/common/constants';
 import { find, without } from 'lodash';
 import { createPackagePolicy } from '@kbn/cloud-security-posture-common/test_helper';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
@@ -52,6 +56,7 @@ export default function (providerContext: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
+  const retry = getService('retry');
 
   const allIndices = [
     CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
@@ -62,6 +67,26 @@ export default function (providerContext: FtrProviderContext) {
 
   describe('GET /internal/cloud_security_posture/status', () => {
     let agentPolicyId: string;
+
+    // Installing the CSP integration package reaches the package registry over
+    // the network. The cases below install it lazily via `createPackagePolicy`
+    // (which expects 200), so whichever test runs first in this config absorbs
+    // that cold install — and a transient registry error there fails an
+    // otherwise-unrelated assertion with a 404. Pull the install once to the
+    // front and retry it, so the registry flake is contained here and the suite
+    // no longer depends on an earlier-loaded file having installed the package.
+    before(async () => {
+      await retry.try(async () => {
+        await supertest
+          .post(
+            `/api/fleet/epm/packages/${CLOUD_SECURITY_POSTURE_PACKAGE_NAME}/${CLOUD_SECURITY_PLUGIN_VERSION}`
+          )
+          .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+          .set('kbn-xsrf', 'xxxx')
+          .send({ force: true })
+          .expect(200);
+      });
+    });
 
     describe('STATUS = UNPRIVILEGED TEST', () => {
       before(async () => {
