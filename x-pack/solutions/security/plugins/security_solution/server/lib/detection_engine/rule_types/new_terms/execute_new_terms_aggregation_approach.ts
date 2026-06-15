@@ -56,9 +56,7 @@ type NewTermsExecutorOptions = SecurityExecutorOptions<
  *
  * This is the implementation available to all license tiers.
  */
-export const executeNewTermsAggregationApproach = async (
-  execOptions: NewTermsExecutorOptions
-) => {
+export const executeNewTermsAggregationApproach = async (execOptions: NewTermsExecutorOptions) => {
   const { sharedParams, services, params, state, logger } = execOptions;
 
   const {

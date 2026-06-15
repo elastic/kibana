@@ -223,10 +223,7 @@ export const executeNewTermsEsqlApproach = async (execOptions: NewTermsExecutorO
 
       const esFilterForBucket = await getFilter({
         ...filterArgs,
-        filters: [
-          ...(Array.isArray(filterArgs.filters) ? filterArgs.filters : []),
-          bucketFilter,
-        ],
+        filters: [...(Array.isArray(filterArgs.filters) ? filterArgs.filters : []), bucketFilter],
       });
 
       // Body for this search - find first document sorted by timestamp
@@ -373,10 +370,7 @@ export const executeNewTermsEsqlApproach = async (execOptions: NewTermsExecutorO
         }
       }
 
-      if (
-        bulkCreateResult.alertsWereTruncated ||
-        result.createdSignalsCount >= params.maxSignals
-      ) {
+      if (bulkCreateResult.alertsWereTruncated || result.createdSignalsCount >= params.maxSignals) {
         break;
       }
     }
