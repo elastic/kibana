@@ -41,27 +41,28 @@ const useStableApplicableDimensions = (
   dimensions: Dimension[],
   dimensionFields: readonly Dimension[]
 ): Dimension[] => {
-  const { applicableDimensionNamesKey, applicableDimensions } = useMemo(() => {
+  const stabilizedRef = useRef<{ key: string | null; value: Dimension[] }>({
+    key: null,
+    value: EMPTY_APPLICABLE_DIMENSIONS,
+  });
+
+  return useMemo(() => {
     const applicable = dimensions.filter((dimension) =>
       dimensionFields.some((field) => field.name === dimension.name)
     );
+    const key =
+      applicable.length === 0
+        ? null
+        : stableStringify(applicable.map((dimension) => dimension.name));
 
-    return {
-      applicableDimensions: applicable,
-      applicableDimensionNamesKey:
-        applicable.length === 0
-          ? null
-          : stableStringify(applicable.map((dimension) => dimension.name)),
-    };
-  }, [dimensions, dimensionFields]);
-
-  return useMemo(() => {
-    if (applicableDimensionNamesKey === null) {
-      return EMPTY_APPLICABLE_DIMENSIONS;
+    if (stabilizedRef.current.key === key) {
+      return stabilizedRef.current.value;
     }
 
-    return applicableDimensions;
-  }, [applicableDimensionNamesKey]);
+    const value = applicable.length === 0 ? EMPTY_APPLICABLE_DIMENSIONS : applicable;
+    stabilizedRef.current = { key, value };
+    return value;
+  }, [dimensions, dimensionFields]);
 };
 
 const METRICS_QUICK_ACTION_IDS: QuickActionIds = [
