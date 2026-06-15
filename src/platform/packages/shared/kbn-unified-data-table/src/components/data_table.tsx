@@ -78,6 +78,7 @@ import type {
   CustomGridColumnsConfiguration,
   DataGridPaginationMode,
   CustomBulkActions,
+  DocMap,
 } from '../types';
 import { getDisplayedColumns } from '../utils/columns';
 import { convertValueToString } from '../utils/convert_value_to_string';
@@ -426,6 +427,14 @@ interface InternalUnifiedDataTableProps {
    **/
   visibleCellActions?: number;
   /**
+   * Total number of visible slots in the actions column, including the overflow
+   * menu button when it appears. Defaults to 2 (one inline control + one overflow menu).
+   *
+   * When the total number of controls is `visibleRowLeadingControls` or fewer,
+   * all render inline with no overflow menu.
+   */
+  visibleRowLeadingControls?: number;
+  /**
    * Disable cell actions for the table.
    */
   disableCellActions?: boolean;
@@ -523,6 +532,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       onUpdateHeaderRowHeight,
       controlColumnIds = CONTROL_COLUMN_IDS_DEFAULT,
       rowAdditionalLeadingControls,
+      visibleRowLeadingControls,
       dataView,
       loadingState,
       onFilter,
@@ -611,14 +621,10 @@ const InternalUnifiedDataTable = React.forwardRef<
     const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
     const displayedColumns = getDisplayedColumns(columns, dataView);
     const defaultColumns = displayedColumns.includes('_source');
-    const docMap = useMemo(
-      () =>
-        new Map<string, { doc: DataTableRecord; docIndex: number }>(
-          rows?.map((row, docIndex) => [row.id, { doc: row, docIndex }]) ?? []
-        ),
+    const docMap = useMemo<DocMap>(
+      () => new Map(rows?.map((row, docIndex) => [row.id, { doc: row, docIndex }]) ?? []),
       [rows]
     );
-    const getDocById = useCallback((id: string) => docMap.get(id)?.doc, [docMap]);
     const selectedDocsState = useSelectedDocs(docMap);
     const {
       isDocSelected,
@@ -1133,6 +1139,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         baseColumns: leadColumnsExtraContent,
         rowAdditionalLeadingControls,
         externalControlColumns,
+        visibleRowLeadingControls,
       });
       if (actionsColumn) {
         filteredLeadColumns.push(actionsColumn);
@@ -1146,6 +1153,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       externalControlColumns,
       getRowIndicator,
       rowAdditionalLeadingControls,
+      visibleRowLeadingControls,
     ]);
 
     const additionalControls = useMemo(() => {
@@ -1436,6 +1444,7 @@ const InternalUnifiedDataTable = React.forwardRef<
                 ariaDescribedBy={randomId}
                 ariaLabelledBy={ariaLabelledBy}
                 dataView={dataView}
+                columnsMeta={columnsMeta}
                 isPlainRecord={isPlainRecord}
                 selectedFieldNames={visibleColumns}
                 selectedDocIds={docIdsInSelectionOrder}
@@ -1443,7 +1452,7 @@ const InternalUnifiedDataTable = React.forwardRef<
                 forceShowAllFields={defaultColumns}
                 showFullScreenButton={showFullScreenButton}
                 fieldFormats={fieldFormats}
-                getDocById={getDocById}
+                docMap={docMap}
                 replaceSelectedDocs={replaceSelectedDocs}
                 setIsCompareActive={setIsCompareActive}
               />

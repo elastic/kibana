@@ -125,7 +125,7 @@ export const ReverseCategorizeBtn = ({
   const isTextfield = field.esTypes?.includes('text') === true;
 
   if (!uiActions || !isTextfield) {
-    return null;
+    return <></>;
   }
 
   const result = valueToStringConverter(rowIndex, columnId);

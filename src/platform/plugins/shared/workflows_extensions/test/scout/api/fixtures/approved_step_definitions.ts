@@ -25,24 +25,28 @@
  */
 export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string }> = [
   {
+    id: 'contextEngine.addEntry',
+    handlerHash: '27344216178a96568fc8bcaf53701928a274b598b297a9b39bfbae6eb8b5b8ff',
+  },
+  {
     id: 'ai.agent',
     handlerHash: 'ee8c280a01262305768e617ba97723d50c1c13fd01f620825bece394aaf48ee6',
   },
   {
     id: 'ai.classify',
-    handlerHash: '544ebbf2b32840510958ced5ddc6109712a11b260ab22d13fa8c83d5265aa481',
+    handlerHash: '0dcc5fb63038d1cb5fe73dd7ae7744d3eb3dda9d95d7e1dd860e587926177553',
   },
   {
     id: 'ai.prompt',
-    handlerHash: 'a9315bd19fcf4c2ac4d05f652a52bc1c8073b9a7d2dd289a69bedabb827f3249',
+    handlerHash: '3b7be086fd3479a81113a1d1f0bcc37e3e7f008e8fa5eaa2c905bf4b4a3b5ca6',
   },
   {
     id: 'ai.summarize',
-    handlerHash: 'aa1db14ff6af424a3f66f5528e18c7b8d1f462ca8ba8e6feb01221e6fa1518ea',
+    handlerHash: 'f4337c9b87598cd32c2b4a78494f4f015c655873b65f6e4ca981104ea432a2b0',
   },
   {
     id: 'data.aggregate',
-    handlerHash: '0223bec699354d5878732a6ebcb99a2b4b43a28b4f01da293df1ab7165c33e00',
+    handlerHash: '6f224b6b7a31f3b4b1facc210bf464ca6540eb63f6a03a2793b88f965e3a876c',
   },
   {
     id: 'data.concat',
@@ -50,35 +54,35 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
   },
   {
     id: 'data.dedupe',
-    handlerHash: '16c3b3d67e68e77e66ed68869790a4388423a5b4b5aa8a194035f3ff52192836',
+    handlerHash: '4e3712f3f47dc44a733d2d962b8323e05ca9ca8b5c73b4ca4b89d2a2645cde95',
   },
   {
     id: 'data.filter',
-    handlerHash: '829a245561a33b2f8349755a4ff6b4a2953774b6f862a7a0228b93f517742c9a',
+    handlerHash: '42139d6a33796b17bfbf8b4955987fade26cb60e3a24cb741f6e5c08fb7c9611',
   },
   {
     id: 'data.find',
-    handlerHash: 'b23058c153f427b8a8cb4a9ee1ed8c06881e3d2ed291ea7e78846e113aa0301d',
+    handlerHash: 'c998d0fcc849f88c657cc208d8613f356876765e1b484841ee4ccf513a6570f0',
   },
   {
     id: 'data.map',
-    handlerHash: '79ddef521ebd6ae8278e5d9034b7005687e31c2e949796add213eff2ebd21d82',
+    handlerHash: '06462a317dce4d05e72e292df9a209ff099fb523a69ed3fd136b64c8abe9d65b',
   },
   {
     id: 'data.parseJson',
-    handlerHash: 'f1de4bd3d12fc65492d01d59dc63af5df68f23031376b9f78738ecda2fb2067c',
+    handlerHash: '1f0fec35b9b4c0560fc52642535d438f3d1df744d76742f4565bf9114f42483b',
   },
   {
     id: 'data.regexExtract',
-    handlerHash: 'ab7b47758fa93b773f537351149845c8b60c22ae10efd0e1c592406170bb3cb6',
+    handlerHash: 'cf209d493a84da12da6c997a420bbc5db7c638b13d30ac846fa340f9b2dfbe1c',
   },
   {
     id: 'data.regexReplace',
-    handlerHash: '95c4970a0154de57472d394bc05514c6dcc483b74abb008b2950a5816398aaae',
+    handlerHash: 'c4b852f5746aed68b3465f7925e38e560bf350e479abf8eead909ffc0f0df7c0',
   },
   {
     id: 'data.stringifyJson',
-    handlerHash: '827bdbb31e4e493bc7746809a6e32f9d9248a05e7d1810a39c5db9a0fe1970ca',
+    handlerHash: 'b84edc967669a557af96b25d554c9800b9103fd6d2f2d54453e4697a9263d52d',
   },
   {
     id: 'search.rerank',

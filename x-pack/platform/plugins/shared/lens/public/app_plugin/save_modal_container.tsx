@@ -309,107 +309,101 @@ export const runSaveLensVisualization = async (
   const originalInput = saveProps.newCopyOnSave ? undefined : initialInput;
   const originalSavedObjectId = originalInput?.ref_id;
 
+  // wrap the doc into a serializable state
+  const newDoc = fromDocumentToSerializedState(
+    docToSave,
+    {
+      time_range: saveProps.panelTimeRange ?? originalInput?.time_range,
+      ref_id: options.saveToLibrary ? originalSavedObjectId : undefined,
+    },
+    originalInput
+  );
+
+  let savedObjectId: string | undefined;
   try {
-    // wrap the doc into a serializable state
-    const newDoc = fromDocumentToSerializedState(
-      docToSave,
-      {
-        time_range: saveProps.panelTimeRange ?? originalInput?.time_range,
-        ref_id: options.saveToLibrary ? originalSavedObjectId : undefined,
-      },
-      originalInput
-    );
-
-    let savedObjectId: string | undefined;
-    try {
-      savedObjectId =
-        newDoc.attributes && options.saveToLibrary
-          ? await attributeService.saveToLibrary(
-              newDoc.attributes,
-              newDoc.attributes.references || [],
-              originalSavedObjectId
-            )
-          : undefined;
-    } catch (error) {
-      notifications.toasts.addDanger({
-        title: i18n.translate('xpack.lens.app.saveVisualization.errorNotificationText', {
-          defaultMessage: `An error occurred while saving. Error: {errorMessage}`,
-          values: {
-            errorMessage: error.message,
-          },
-        }),
-      });
-      // trigger a reject to jump to the final catch clause
-      throw error;
-    }
-
-    const shouldNavigateBackToOrigin = saveProps.returnToOrigin && redirectToOrigin;
-    const hasRedirect = shouldNavigateBackToOrigin || saveProps.dashboardId;
-
-    // if a redirect was set, prevent the validation on app leave
-    if (hasRedirect) {
-      // disabling the validation on app leave because the document has been saved.
-      onAppLeave?.((actions) => {
-        return actions.default();
-      });
-    }
-
-    if (shouldNavigateBackToOrigin) {
-      const apiConfig = transformToApiConfig({ ...newDoc, ref_id: savedObjectId });
-      redirectToOrigin({
-        state: apiConfig,
-        isCopied: saveProps.newCopyOnSave,
-      });
-      return;
-    }
-    // should we make it more robust here and better check the context of the saving
-    // or keep the responsability of the consumer of the function to provide the right set
-    // of args here in case the user is within a by value chart AND want's to save it in the library
-    // without redirect?
-    if (saveProps.dashboardId) {
-      redirectToDashboard({
-        embeddableInput: { ...newDoc, ref_id: savedObjectId },
-        dashboardId: saveProps.dashboardId,
-        stateTransfer,
-        originatingApp: props.originatingApp,
-        getOriginatingPath: props.getOriginatingPath,
-        controlsState,
-      });
-      return;
-    }
-
-    notifications.toasts.addSuccess(
-      i18n.translate('xpack.lens.app.saveVisualization.successNotificationText', {
-        defaultMessage: `Saved ''{visTitle}''`,
+    savedObjectId =
+      newDoc.attributes && options.saveToLibrary
+        ? await attributeService.saveToLibrary(
+            newDoc.attributes,
+            newDoc.attributes.references || [],
+            originalSavedObjectId
+          )
+        : undefined;
+  } catch (error) {
+    notifications.toasts.addDanger({
+      title: i18n.translate('xpack.lens.app.saveVisualization.errorNotificationText', {
+        defaultMessage: `An error occurred while saving. Error: {errorMessage}`,
         values: {
-          visTitle: docToSave.title,
+          errorMessage: error.message,
         },
-      })
-    );
-
-    if (savedObjectId && savedObjectId !== originalSavedObjectId) {
-      chrome.recentlyAccessed.add(getFullPath(savedObjectId), docToSave.title, savedObjectId);
-
-      // remove editor state so the connection is still broken after reload
-      stateTransfer.clearEditorState?.(APP_ID);
-      if (textBasedLanguageSave) {
-        switchDatasource?.();
-        application.navigateToApp('lens', { path: '/' });
-      } else {
-        redirectTo?.(savedObjectId);
-      }
-      return { isLinkedToOriginatingApp: false };
-    }
-
-    return {
-      persistedDoc: newDoc.attributes,
-      isLinkedToOriginatingApp: false,
-    };
-  } catch (e) {
-    // eslint-disable-next-line no-console
-    console.dir(e);
-    throw e;
+      }),
+    });
+    // trigger a reject to jump to the final catch clause
+    throw error;
   }
+
+  const shouldNavigateBackToOrigin = saveProps.returnToOrigin && redirectToOrigin;
+  const hasRedirect = shouldNavigateBackToOrigin || saveProps.dashboardId;
+
+  // if a redirect was set, prevent the validation on app leave
+  if (hasRedirect) {
+    // disabling the validation on app leave because the document has been saved.
+    onAppLeave?.((actions) => {
+      return actions.default();
+    });
+  }
+
+  if (shouldNavigateBackToOrigin) {
+    const apiConfig = transformToApiConfig({ ...newDoc, ref_id: savedObjectId });
+    redirectToOrigin({
+      state: apiConfig,
+      isCopied: saveProps.newCopyOnSave,
+    });
+    return;
+  }
+  // should we make it more robust here and better check the context of the saving
+  // or keep the responsability of the consumer of the function to provide the right set
+  // of args here in case the user is within a by value chart AND want's to save it in the library
+  // without redirect?
+  if (saveProps.dashboardId) {
+    redirectToDashboard({
+      embeddableInput: { ...newDoc, ref_id: savedObjectId },
+      dashboardId: saveProps.dashboardId,
+      stateTransfer,
+      originatingApp: props.originatingApp,
+      getOriginatingPath: props.getOriginatingPath,
+      controlsState,
+    });
+    return;
+  }
+
+  notifications.toasts.addSuccess(
+    i18n.translate('xpack.lens.app.saveVisualization.successNotificationText', {
+      defaultMessage: `Saved ''{visTitle}''`,
+      values: {
+        visTitle: docToSave.title,
+      },
+    })
+  );
+
+  if (savedObjectId && savedObjectId !== originalSavedObjectId) {
+    chrome.recentlyAccessed.add(getFullPath(savedObjectId), docToSave.title, savedObjectId);
+
+    // remove editor state so the connection is still broken after reload
+    stateTransfer.clearEditorState?.(APP_ID);
+    if (textBasedLanguageSave) {
+      switchDatasource?.();
+      application.navigateToApp('lens', { path: '/' });
+    } else {
+      redirectTo?.(savedObjectId);
+    }
+    return { isLinkedToOriginatingApp: false };
+  }
+
+  return {
+    persistedDoc: newDoc.attributes,
+    isLinkedToOriginatingApp: false,
+  };
 };
 
 export function removePinnedFilters(doc?: LensDocument) {

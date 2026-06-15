@@ -21,13 +21,15 @@ import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { ESQLEditor } from './esql_editor';
+import { VALIDATION_DEBOUNCE_MS } from './hooks/use_query_validation';
 import type { ESQLEditorProps } from './types';
 
 const mockValidate = jest.fn().mockResolvedValue({ errors: [], warnings: [] });
-jest.mock('@kbn/monaco', () => ({
-  ...jest.requireActual('@kbn/monaco'),
+
+jest.mock('@kbn/code-editor', () => ({
+  ...jest.requireActual('@kbn/code-editor'),
   ESQLLang: {
-    ...jest.requireActual('@kbn/monaco').ESQLLang,
+    ...jest.requireActual('@kbn/code-editor').ESQLLang,
     getEsqlLanguage: jest.fn(() => ({
       id: 'esql',
       name: 'ESQL',
@@ -266,6 +268,128 @@ describe('ESQLEditor', () => {
       });
       expect(queryByTestId('ESQLEditor-footerPopover-dataErrorsSwitch')).not.toBeInTheDocument();
     });
+  });
+
+  it('displays server errors when query is submitted from editors parent', async () => {
+    jest.useFakeTimers();
+
+    const executedQuery = 'FROM logs | COMPLETION "prompt" WITH { "inference_id": "bad" }';
+    const serverErrorMessage = 'Unknown inference_id [bad]';
+
+    const { rerender } = renderWithI18n(
+      renderESQLEditorComponent({
+        ...props,
+        isLoading: false,
+      })
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('ESQLEditor')).toBeInTheDocument();
+    });
+
+    // Simulate query bar Search: parent sets loading true.
+    await act(async () => {
+      rerender(
+        renderESQLEditorComponent({
+          ...props,
+          query: { esql: executedQuery },
+          isLoading: true,
+        })
+      );
+    });
+
+    // Query failed: parent passes server errors and clears loading.
+    await act(async () => {
+      rerender(
+        renderESQLEditorComponent({
+          ...props,
+          query: { esql: executedQuery },
+          isLoading: false,
+          errors: [new Error(serverErrorMessage)],
+        })
+      );
+    });
+
+    await act(async () => {
+      jest.advanceTimersByTime(VALIDATION_DEBOUNCE_MS);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('1 error')).toBeInTheDocument();
+    });
+
+    await act(async () => {
+      await userEvent
+        .setup({ advanceTimers: jest.advanceTimersByTime })
+        .click(screen.getByText('1 error'));
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText(serverErrorMessage)).toBeInTheDocument();
+    });
+
+    jest.useRealTimers();
+  });
+
+  it('displays server warnings when query is submitted from editors parent', async () => {
+    jest.useFakeTimers();
+
+    const executedQuery = 'FROM logs';
+    const serverWarningMessage = 'No limit defined, adding default limit of [1000].';
+
+    const { rerender } = renderWithI18n(
+      renderESQLEditorComponent({
+        ...props,
+        isLoading: false,
+      })
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('ESQLEditor')).toBeInTheDocument();
+    });
+
+    // Simulate query bar Search: parent sets loading true.
+    await act(async () => {
+      rerender(
+        renderESQLEditorComponent({
+          ...props,
+          query: { esql: executedQuery },
+          isLoading: true,
+        })
+      );
+    });
+
+    // Query succeeded with warning: parent passes server warning and clears loading.
+    await act(async () => {
+      rerender(
+        renderESQLEditorComponent({
+          ...props,
+          query: { esql: executedQuery },
+          isLoading: false,
+          warning: serverWarningMessage,
+        })
+      );
+    });
+
+    await act(async () => {
+      jest.advanceTimersByTime(VALIDATION_DEBOUNCE_MS);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('1 warning')).toBeInTheDocument();
+    });
+
+    await act(async () => {
+      await userEvent
+        .setup({ advanceTimers: jest.advanceTimersByTime })
+        .click(screen.getByText('1 warning'));
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText(serverWarningMessage)).toBeInTheDocument();
+    });
+
+    jest.useRealTimers();
   });
 
   it('should render warning if the warning and mergeExternalMessages props are set', async () => {

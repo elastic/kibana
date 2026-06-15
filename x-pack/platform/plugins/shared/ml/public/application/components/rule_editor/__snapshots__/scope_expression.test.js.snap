@@ -11,12 +11,17 @@ exports[`ScopeExpression renders when empty list of filter IDs is supplied 1`] =
       class="euiCheckbox emotion-euiCheckbox"
     >
       <div
-        class="euiCheckbox__square emotion-euiCheckbox__square-selected"
+        class="euiCheckbox__square emotion-euiCheckbox__square"
       >
         <span
-          class="emotion-euiCheckbox__icon-check"
-          data-euiicon-type="check"
-        />
+          class="euiCheckboxControl emotion-euiCheckboxControl-selected"
+        >
+          <span
+            class="emotion-euiCheckbox__icon-check"
+            data-euiicon-type="check"
+            role="presentation"
+          />
+        </span>
         <input
           checked=""
           class="euiCheckbox__input emotion-euiCheckbox__input"
@@ -60,12 +65,17 @@ exports[`ScopeExpression renders when enabled set to false 1`] = `
       class="euiCheckbox emotion-euiCheckbox"
     >
       <div
-        class="euiCheckbox__square emotion-euiCheckbox__square-unselected"
+        class="euiCheckbox__square emotion-euiCheckbox__square"
       >
         <span
-          class="emotion-euiCheckbox__icon-check"
-          data-euiicon-type="empty"
-        />
+          class="euiCheckboxControl emotion-euiCheckboxControl-unselected"
+        >
+          <span
+            class="emotion-euiCheckbox__icon-check"
+            data-euiicon-type="empty"
+            role="presentation"
+          />
+        </span>
         <input
           class="euiCheckbox__input emotion-euiCheckbox__input"
           data-test-subj="mlScopeCheckbox_domain"
@@ -133,12 +143,17 @@ exports[`ScopeExpression renders when filter ID and type supplied 1`] = `
       class="euiCheckbox emotion-euiCheckbox"
     >
       <div
-        class="euiCheckbox__square emotion-euiCheckbox__square-selected"
+        class="euiCheckbox__square emotion-euiCheckbox__square"
       >
         <span
-          class="emotion-euiCheckbox__icon-check"
-          data-euiicon-type="check"
-        />
+          class="euiCheckboxControl emotion-euiCheckboxControl-selected"
+        >
+          <span
+            class="emotion-euiCheckbox__icon-check"
+            data-euiicon-type="check"
+            role="presentation"
+          />
+        </span>
         <input
           checked=""
           class="euiCheckbox__input emotion-euiCheckbox__input"
@@ -207,12 +222,17 @@ exports[`ScopeExpression renders when no filter ID or type supplied 1`] = `
       class="euiCheckbox emotion-euiCheckbox"
     >
       <div
-        class="euiCheckbox__square emotion-euiCheckbox__square-selected"
+        class="euiCheckbox__square emotion-euiCheckbox__square"
       >
         <span
-          class="emotion-euiCheckbox__icon-check"
-          data-euiicon-type="check"
-        />
+          class="euiCheckboxControl emotion-euiCheckboxControl-selected"
+        >
+          <span
+            class="emotion-euiCheckbox__icon-check"
+            data-euiicon-type="check"
+            role="presentation"
+          />
+        </span>
         <input
           checked=""
           class="euiCheckbox__input emotion-euiCheckbox__input"

@@ -13,6 +13,7 @@ import {
   withAutoSuggest,
   METADATA_FIELDS,
   ESQL_STRING_TYPES,
+  ESQL_COMMON_NUMERIC_TYPES,
 } from '../../..';
 import { getSafeInsertText } from '../../commands/definitions/utils';
 import { scalarFunctionDefinitions } from '../../commands/definitions/generated/scalar_functions';
@@ -36,6 +37,7 @@ import {
 import { suggest } from './autocomplete';
 import { datasets, editorExtensions, views } from '../../__tests__/language/helpers';
 import { mapRecommendedQueriesFromExtensions } from './recommended_queries_helpers';
+import { EDITOR_MARKER } from '../../commands/definitions/constants';
 
 const getRecommendedQueriesSuggestionsFromTemplates = (
   fromCommand: string,
@@ -309,6 +311,41 @@ describe('autocomplete', () => {
       const triggerOffset = statement.lastIndexOf('p') + 1; // drop <here>
       await suggest(statement, triggerOffset + 1, callbackMocks);
       expect(callbackMocks.getColumnsFor).toHaveBeenCalledWith({ query: 'FROM index_d' });
+    });
+    it.each([
+      ['EVAL incomplete assignment', 'FROM marker_eval_assignment | EVAL foo = 1, bar = '],
+      ['EVAL function argument', 'FROM marker_eval_function | EVAL result = ROUND(doubleField, '],
+      ['WHERE list value', 'FROM marker_where_list | WHERE integerField IN (1, '],
+      ['STATS aggregation list', 'FROM marker_stats_agg | STATS total = SUM(integerField), '],
+      [
+        'STATS WHERE predicate',
+        'FROM marker_stats_where | STATS MIN(integerField) WHERE integerField > ',
+      ],
+      ['RERANK ON field list', 'FROM marker_rerank_list | RERANK "search query" ON keywordField, '],
+      [
+        'LOOKUP JOIN ON condition list',
+        'FROM marker_join_list | LOOKUP JOIN join_index ON textField, ',
+      ],
+    ])('should not send autocomplete markers in the columns query for %s', async (_, statement) => {
+      const callbackMocks = createCustomCallbackMocks(undefined, undefined, undefined);
+
+      await suggest(statement, statement.length, callbackMocks);
+
+      const { getColumnsFor } = callbackMocks;
+      if (!getColumnsFor) {
+        throw new Error('Expected getColumnsFor callback to be defined');
+      }
+      const getColumnsForMock = getColumnsFor as jest.MockedFunction<typeof getColumnsFor>;
+
+      expect(getColumnsForMock).toHaveBeenCalled();
+      for (const [params] of getColumnsForMock.mock.calls) {
+        if (!params) {
+          throw new Error('Expected getColumnsFor to be called with query params');
+        }
+
+        expect(params.query).toEqual(expect.any(String));
+        expect(params.query).not.toContain(EDITOR_MARKER);
+      }
     });
   });
 
@@ -666,10 +703,12 @@ describe('autocomplete', () => {
         'FROM /',
         [
           withAutoSuggest({ text: '(FROM $0)' } as ISuggestionItem),
-          withAutoSuggest({ text: 'index1' } as ISuggestionItem),
-          withAutoSuggest({ text: 'index2' } as ISuggestionItem),
-          ...views.map((v) => withAutoSuggest({ text: v.name } as ISuggestionItem)),
-          ...datasets.map((d) => withAutoSuggest({ text: d.name } as ISuggestionItem)),
+          withAutoSuggest({ text: '(ROW $0)' } as ISuggestionItem),
+          withAutoSuggest({ text: '(TS $0)' } as ISuggestionItem),
+          'index1',
+          'index2',
+          ...views.map((v) => v.name),
+          ...datasets.map((d) => d.name),
         ],
         undefined,
         [
@@ -740,18 +779,11 @@ describe('autocomplete', () => {
         'FROM index1, index2/',
         [
           withAutoSuggest({ text: '(FROM $0)' } as ISuggestionItem),
-          withAutoSuggest({
-            text: 'index2 | ',
-            filterText: 'index2',
-          } as ISuggestionItem),
-          withAutoSuggest({
-            text: 'index2, ',
-            filterText: 'index2',
-          } as ISuggestionItem),
-          withAutoSuggest({
-            text: 'index2 METADATA ',
-            filterText: 'index2',
-          } as ISuggestionItem),
+          withAutoSuggest({ text: '(ROW $0)' } as ISuggestionItem),
+          withAutoSuggest({ text: '(TS $0)' } as ISuggestionItem),
+          withAutoSuggest({ text: 'index2 | ', filterText: 'index2' } as ISuggestionItem),
+          withAutoSuggest({ text: 'index2, ', filterText: 'index2' } as ISuggestionItem),
+          withAutoSuggest({ text: 'index2 METADATA ', filterText: 'index2' } as ISuggestionItem),
           ...recommendedQuerySuggestions.map((q) => `index2${q.queryString}`),
         ],
         undefined,
@@ -1144,6 +1176,28 @@ describe('autocomplete', () => {
 
   describe('IN operator with lists', () => {
     testSuggestions('FROM a | WHERE integerField IN (doubleField /', [{ text: ',' }]);
+
+    testSuggestions('FROM index | WHERE doubleField IN (ROW /)', [
+      'col0 = ',
+      ...getFunctionSignaturesByReturnType(Location.ROW, 'any', { scalar: true }),
+    ]);
+
+    testSuggestions(
+      'FROM kibana_sample_data_logs | WHERE agent NOT IN (FROM kibana_sample_data_logs)/',
+      ['AND $0', 'OR $0', '| ']
+    );
+  });
+
+  describe('ROW operator expressions', () => {
+    testSuggestions('ROW col0 = ABS(/)', [
+      ...getFunctionSignaturesByReturnType(
+        Location.ROW,
+        [...ESQL_COMMON_NUMERIC_TYPES, 'unsigned_long'],
+        { scalar: true },
+        undefined,
+        ['abs']
+      ),
+    ]);
   });
 
   describe('Replacement ranges are attached when needed', () => {

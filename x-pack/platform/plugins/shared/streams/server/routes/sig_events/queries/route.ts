@@ -51,7 +51,22 @@ const listQueriesRoute = createServerRoute({
       since: '9.1.0',
       stability: 'experimental',
     },
+    deprecated: {
+      documentationUrl:
+        'https://www.elastic.co/docs/api/doc/serverless/operation/operation-get-streams-name-queries',
+      severity: 'warning',
+      message:
+        'This experimental Significant Events endpoint is deprecated and will be removed in a future release.',
+      reason: { type: 'remove' },
+    },
     oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {},
+          },
+        },
+      },
       responses: {
         200: {
           description: 'List of queries linked to the stream.',
@@ -105,6 +120,14 @@ const upsertQueryRoute = createServerRoute({
     availability: {
       since: '9.1.0',
       stability: 'experimental',
+    },
+    deprecated: {
+      documentationUrl:
+        'https://www.elastic.co/docs/api/doc/serverless/operation/operation-put-streams-name-queries-queryid',
+      severity: 'warning',
+      message:
+        'This experimental Significant Events endpoint is deprecated and will be removed in a future release.',
+      reason: { type: 'remove' },
     },
     oasOperationObject: () => ({
       requestBody: {
@@ -179,7 +202,22 @@ const deleteQueryRoute = createServerRoute({
       since: '9.1.0',
       stability: 'experimental',
     },
+    deprecated: {
+      documentationUrl:
+        'https://www.elastic.co/docs/api/doc/serverless/operation/operation-delete-streams-name-queries-queryid',
+      severity: 'warning',
+      message:
+        'This experimental Significant Events endpoint is deprecated and will be removed in a future release.',
+      reason: { type: 'remove' },
+    },
     oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {},
+          },
+        },
+      },
       responses: {
         200: {
           description: 'The query was removed successfully.',
@@ -241,6 +279,14 @@ const bulkQueriesRoute = createServerRoute({
     availability: {
       since: '9.1.0',
       stability: 'experimental',
+    },
+    deprecated: {
+      documentationUrl:
+        'https://www.elastic.co/docs/api/doc/serverless/operation/operation-post-streams-name-queries-bulk',
+      severity: 'warning',
+      message:
+        'This experimental Significant Events endpoint is deprecated and will be removed in a future release.',
+      reason: { type: 'remove' },
     },
     oasOperationObject: () => ({
       requestBody: {

@@ -9,7 +9,7 @@ import { buildEpisodeActionsQuery } from './episode_actions_query';
 
 describe('buildEpisodeActionsQuery', () => {
   it('filters by episode ids and aggregates last ack action and assignee per episode', () => {
-    const queryString = buildEpisodeActionsQuery(['ep-a', 'ep-b']).print('basic');
+    const queryString = buildEpisodeActionsQuery('default', ['ep-a', 'ep-b']).print('basic');
     expect(queryString).toContain('episode_id IN');
     expect(queryString).toContain('"ep-a"');
     expect(queryString).toContain('"ep-b"');

@@ -23,8 +23,11 @@ import {
   EuiSelect,
   type EuiComboBoxOptionOption,
   EuiIconTip,
+  EuiSwitch,
+  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+
 import styled from 'styled-components';
 
 import { NamespaceComboBox } from '../../../../../../../components/namespace_combo_box';
@@ -49,9 +52,16 @@ import { isAdvancedVar, shouldShowVar, isVarRequiredByVarGroup } from '../../ser
 import type { PackagePolicyValidationResults } from '../../services';
 
 import { ExperimentalFeaturesService } from '../../../../../services';
+import { OTEL_COLLECTOR_INPUT_TYPE } from '../../../../../../../../common/constants/epm';
 
-import { PackagePolicyInputVarField, VarGroupSelector, useVarGroupSelections } from './components';
+import {
+  PackagePolicyConditionField,
+  PackagePolicyInputVarField,
+  VarGroupSelector,
+  useVarGroupSelections,
+} from './components';
 import { useOutputs } from './components/hooks';
+import { useNamespaceCustomization } from './use_namespace_customization';
 
 // on smaller screens, fields should be displayed in one column
 const FormGroupResponsiveFields = styled(EuiDescribedFormGroup)`
@@ -73,6 +83,8 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
   noAdvancedToggle?: boolean;
   isAgentlessSelected?: boolean;
   agentPolicies?: AgentPolicy[];
+  onNamespaceCustomizationEnabledChange?: (enabled: boolean, isInit?: boolean) => void;
+  packagePolicyId?: string;
 }> = memo(
   ({
     namespacePlaceholder,
@@ -85,12 +97,20 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
     isEditPage = false,
     isAgentlessSelected = false,
     agentPolicies,
+    onNamespaceCustomizationEnabledChange,
+    packagePolicyId,
   }) => {
     const { docLinks, cloud } = useStartServices();
     const { enableVarGroups } = ExperimentalFeaturesService.get();
 
     const varGroups =
       enableVarGroups && packageInfo.var_groups ? packageInfo.var_groups : undefined;
+
+    const isAgentless =
+      (isEditPage || isAgentlessSelected) && Boolean(packagePolicy.supports_agentless);
+    const allInputsAreOtel =
+      packagePolicy.inputs.length > 0 &&
+      packagePolicy.inputs.every((i) => i.type === OTEL_COLLECTOR_INPUT_TYPE);
 
     // Form show/hide states
     const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(noAdvancedToggle);
@@ -203,6 +223,24 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
 
     // Output is also disabled when any parent agent policy is managed (e.g. Elastic Cloud Agent Policy).
     const isOutputDisabled = isManaged || agentPolicies?.some((p) => p.is_managed) === true;
+
+    const {
+      showToggle: showNamespaceCustomizationToggle,
+      currentNamespace,
+      isPrefixAllowed: isNamespacePrefixAllowed,
+      isToggleDisabled: isNamespaceCustomizationInputDisabled,
+      namespaceCustomizationEnabled,
+      showOptInImpactWarning,
+      showOptOutImpactWarning,
+      otherPoliciesCount,
+      handleToggleChange: handleNamespaceCustomizationToggleChange,
+    } = useNamespaceCustomization({
+      packageInfo,
+      namespace: packagePolicy.namespace,
+      onEnabledChange: onNamespaceCustomizationEnabledChange,
+      isManaged: !!isManaged,
+      packagePolicyId,
+    });
 
     return validationResults ? (
       <>
@@ -432,6 +470,133 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                     />
                   </EuiFlexItem>
 
+                  {showNamespaceCustomizationToggle && (
+                    <EuiFlexItem>
+                      <EuiToolTip
+                        position="top"
+                        content={
+                          !currentNamespace
+                            ? i18n.translate(
+                                'xpack.fleet.createPackagePolicy.namespaceCustomization.disabledMissingNamespace',
+                                {
+                                  defaultMessage:
+                                    'Enter a namespace to enable namespace index templates.',
+                                }
+                              )
+                            : !isNamespacePrefixAllowed
+                            ? i18n.translate(
+                                'xpack.fleet.createPackagePolicy.namespaceCustomization.disabledPrefix',
+                                {
+                                  defaultMessage:
+                                    'This namespace does not match an allowed prefix for this space, so namespace index templates cannot be enabled.',
+                                }
+                              )
+                            : isManaged
+                            ? i18n.translate(
+                                'xpack.fleet.createPackagePolicy.namespaceCustomization.disabledManaged',
+                                {
+                                  defaultMessage:
+                                    'Namespace index templates cannot be enabled on a managed integration policy.',
+                                }
+                              )
+                            : undefined
+                        }
+                      >
+                        <EuiSwitch
+                          data-test-subj="packagePolicyNamespaceCustomizationToggle"
+                          label={i18n.translate(
+                            'xpack.fleet.createPackagePolicy.namespaceCustomization.label',
+                            { defaultMessage: 'Use dedicated index templates for this namespace' }
+                          )}
+                          checked={namespaceCustomizationEnabled}
+                          disabled={isNamespaceCustomizationInputDisabled}
+                          onChange={(e) =>
+                            handleNamespaceCustomizationToggleChange(e.target.checked)
+                          }
+                        />
+                      </EuiToolTip>
+                      <EuiSpacer size="xs" />
+                      <EuiText size="xs" color="subdued">
+                        <FormattedMessage
+                          id="xpack.fleet.createPackagePolicy.namespaceCustomization.helpText"
+                          defaultMessage="Enables independent settings and mappings for this namespace's data streams. {learnMoreLink}"
+                          values={{
+                            learnMoreLink: (
+                              <EuiLink
+                                href={docLinks.links.fleet.datastreams}
+                                external={true}
+                                target="_blank"
+                              >
+                                <FormattedMessage
+                                  id="xpack.fleet.createPackagePolicy.namespaceCustomization.learnMoreLink"
+                                  defaultMessage="Learn more"
+                                />
+                              </EuiLink>
+                            ),
+                          }}
+                        />
+                      </EuiText>
+                      {showOptInImpactWarning && (
+                        <>
+                          <EuiSpacer size="s" />
+                          <EuiCallOut
+                            announceOnMount
+                            iconType="warning"
+                            color="warning"
+                            size="s"
+                            data-test-subj="packagePolicyNamespaceCustomizationOptInImpactWarning"
+                            title={i18n.translate(
+                              'xpack.fleet.createPackagePolicy.namespaceCustomization.optInImpactTitle',
+                              {
+                                defaultMessage:
+                                  'Enabling namespace index templates will affect {count, plural, one {# other policy} other {# other policies}}',
+                                values: { count: otherPoliciesCount },
+                              }
+                            )}
+                          >
+                            <FormattedMessage
+                              id="xpack.fleet.createPackagePolicy.namespaceCustomization.optInImpactDescription"
+                              defaultMessage="Namespace index templates are shared across all {packageTitle} integration policies targeting namespace {namespace}. Enabling them here will apply them to all of them."
+                              values={{
+                                packageTitle: packageInfo.title,
+                                namespace: <strong>{currentNamespace}</strong>,
+                              }}
+                            />
+                          </EuiCallOut>
+                        </>
+                      )}
+                      {showOptOutImpactWarning && (
+                        <>
+                          <EuiSpacer size="s" />
+                          <EuiCallOut
+                            announceOnMount
+                            iconType="warning"
+                            color="warning"
+                            size="s"
+                            data-test-subj="packagePolicyNamespaceCustomizationOptOutImpactWarning"
+                            title={i18n.translate(
+                              'xpack.fleet.createPackagePolicy.namespaceCustomization.optOutImpactTitle',
+                              {
+                                defaultMessage:
+                                  'Disabling namespace index templates will affect {count, plural, one {# other policy} other {# other policies}}',
+                                values: { count: otherPoliciesCount },
+                              }
+                            )}
+                          >
+                            <FormattedMessage
+                              id="xpack.fleet.createPackagePolicy.namespaceCustomization.optOutImpactDescription"
+                              defaultMessage="Namespace index templates are shared across all {packageTitle} integration policies targeting namespace {namespace}. Disabling them here will remove them from all of them."
+                              values={{
+                                packageTitle: packageInfo.title,
+                                namespace: <strong>{currentNamespace}</strong>,
+                              }}
+                            />
+                          </EuiCallOut>
+                        </>
+                      )}
+                    </EuiFlexItem>
+                  )}
+
                   {/* Output */}
                   {canUseOutputPerIntegration && (
                     <EuiFlexItem>
@@ -604,6 +769,17 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                       </EuiFlexItem>
                     );
                   })}
+                  {/* Integration-level condition — hidden for agentless and all-otelcol */}
+                  {!isAgentless && !allInputsAreOtel && (
+                    <EuiFlexItem>
+                      <PackagePolicyConditionField
+                        value={packagePolicy.condition ?? ''}
+                        onChange={(v) => updatePackagePolicy({ condition: v })}
+                        isInvalid={submitAttempted && Boolean(validationResults?.condition)}
+                        errors={validationResults?.condition ?? null}
+                      />
+                    </EuiFlexItem>
+                  )}
                   {/* Custom fields — agentless only */}
                   {isAgentlessSelected && (
                     <EuiFlexItem>

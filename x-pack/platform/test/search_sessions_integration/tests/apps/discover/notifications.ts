@@ -8,10 +8,8 @@
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const retry = getService('retry');
   const monacoEditor = getService('monacoEditor');
   const searchSessions = getService('searchSessions');
-  const toasts = getService('toasts');
   const esArchiver = getService('esArchiver');
 
   const { common, timePicker, discover } = getPageObjects(['common', 'discover', 'timePicker']);
@@ -34,10 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await searchSessions.save({ withRefresh: true });
 
       // Verify the completion toast is shown
-      await retry.waitFor('completion toast is shown', async () => {
-        const toastContent = await toasts.getContentByIndex(1); // 0 is the sent to background toast, 1 is the completion toast
-        return toastContent.includes('Background search completed');
-      });
+      await searchSessions.expectCompletedSearchToast();
     });
   });
 }

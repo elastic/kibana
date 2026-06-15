@@ -30,7 +30,14 @@
       "dashboard",
       "uiActions",
     ],
-    "optionalPlugins": ["cloud", "cps", "spaces", "indexLifecycleManagement", "evals"],
+    "optionalPlugins": [
+      "agentBuilder",
+      "cloud",
+      "cps",
+      "spaces",
+      "indexLifecycleManagement",
+      "evals"
+    ],
     "requiredBundles": [
       "discover",
       "esql",

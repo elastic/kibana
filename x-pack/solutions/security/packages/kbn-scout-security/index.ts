@@ -8,8 +8,11 @@
 // Security-specific test framework
 export { test, spaceTest } from './src/playwright';
 
+// Security-specific test constants
+export { CUSTOM_QUERY_RULE } from './src/playwright/constants/detection_rules';
+
 // re-exported test framework from @kbn/scout
-export { lighthouseTest, apiTest, globalSetupHook, tags } from '@kbn/scout';
+export { lighthouseTest, apiTest, globalSetupHook, globalTeardownHook, tags } from '@kbn/scout';
 
 // re-exported fixtures & configuration from @kbn/scout
 export {

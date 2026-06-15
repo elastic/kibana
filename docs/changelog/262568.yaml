@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/262568
+issues:
+- https://github.com/elastic/kibana/issues/245181
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-05-12
+areas:
+- Search and data
+title: Add namespace-level customization for integration packages
+description: Adds opt-in namespace-level customization for integration packages.

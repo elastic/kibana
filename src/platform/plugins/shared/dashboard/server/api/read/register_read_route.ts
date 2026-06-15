@@ -7,21 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { VersionedRouter } from '@kbn/core-http-server';
-import type { RequestHandlerContext } from '@kbn/core/server';
-import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { schema } from '@kbn/config-schema';
-import { once } from 'lodash';
 import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
-import { getRouteConfig } from '../get_route_config';
-import { getReadResponseBodySchema } from './schemas';
-import { read } from './read';
+import { schema } from '@kbn/config-schema';
+import type { VersionedRouter } from '@kbn/core-http-server';
+import type { Logger, RequestHandlerContext } from '@kbn/core/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { once } from 'lodash';
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
+import { getRouteConfig } from '../get_route_config';
+import { logRequest } from '../log_request';
+import { read } from './read';
+import { getReadResponseBodySchema } from './schemas';
 
 export function registerReadRoute(
   router: VersionedRouter<RequestHandlerContext>,
   usageCounter: UsageCounter | undefined,
-  isDashboardAppRequest: boolean
+  isDashboardAppRequest: boolean,
+  logger: Logger
 ) {
   const { basePath, routeConfig, routeVersion } = getRouteConfig(isDashboardAppRequest);
   const readRoute = router.get({
@@ -35,7 +37,7 @@ export function registerReadRoute(
   // Route is registered during setup and before all plugins have registered embeddable schemas.
   // Instead, use once to only call getDashboardStateSchema the first time a route handler is executed.
   const getCachedDashboardStateSchema = once(() => {
-    return getDashboardStateSchema(isDashboardAppRequest);
+    return getDashboardStateSchema(false, true);
   });
 
   readRoute.addVersion(
@@ -56,11 +58,17 @@ export function registerReadRoute(
             body: () => getReadResponseBodySchema(isDashboardAppRequest),
             description: 'success',
           },
+          400: {
+            description: 'invalid response',
+          },
           403: {
             description: 'forbidden',
           },
           404: {
             description: 'not found',
+          },
+          500: {
+            description: 'internal server error',
           },
         },
       }),
@@ -69,7 +77,9 @@ export function registerReadRoute(
       telemetryHandler(req, usageCounter, async () => {
         try {
           const { body, resolveHeaders } = await read(
-            ctx,
+            (
+              await ctx.resolve(['core'])
+            ).core.savedObjects.client,
             getCachedDashboardStateSchema(),
             req.params.id,
             req.serverTiming,
@@ -81,18 +91,27 @@ export function registerReadRoute(
           });
         } catch (e) {
           if (e.isBoom && e.output.statusCode === 404) {
+            const message = `A dashboard with ID [${req.params.id}] was not found.`;
+            logRequest(logger, req, 'debug', message);
             return res.notFound({
               body: {
-                message: `A dashboard with ID [${req.params.id}] was not found.`,
+                message,
               },
             });
           }
 
           if (e.isBoom && e.output.statusCode === 403) {
+            logRequest(logger, req, 'debug', e.message);
             return res.forbidden({ body: { message: e.message } });
           }
 
-          return res.badRequest({ body: { message: e.message } });
+          if (e.isBoom && e.output.statusCode === 400) {
+            logRequest(logger, req, 'warn', e.message);
+            return res.badRequest({ body: { message: e.message } });
+          }
+
+          logRequest(logger, req, 'error', e.message);
+          return res.customError({ statusCode: 500, body: { message: e.message } });
         }
       })
   );

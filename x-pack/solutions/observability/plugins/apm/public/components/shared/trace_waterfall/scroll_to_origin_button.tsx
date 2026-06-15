@@ -43,7 +43,7 @@ export function ScrollToOriginButton({
           }}
           {...getEbtProps({
             action: TRACE_WATERFALL_EBT_CLICK_ACTIONS.SCROLL_TO_ORIGIN,
-            element: TRACE_WATERFALL_EBT_ELEMENTS.FLYOUT_SCROLL_TO_ORIGIN,
+            element: TRACE_WATERFALL_EBT_ELEMENTS.FLYOUT_WATERFALL_SCROLL_TO_ORIGIN,
           })}
           data-test-subj="waterfallScrollToOriginButton"
         >

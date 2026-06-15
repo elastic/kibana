@@ -228,7 +228,7 @@ export const ActionPolicyActionsMenu = ({
       anchorPosition="downRight"
       panelPaddingSize="s"
     >
-      <EuiContextMenu initialPanelId={0} panels={panels} size="s" />
+      <EuiContextMenu initialPanelId={0} panels={panels} />
     </EuiPopover>
   );
 };

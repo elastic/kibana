@@ -8,9 +8,9 @@
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
 import { ElasticInferenceServiceModelsPage } from './elastic_inference_service_models_page';
+import type { EisInferenceEndpoint } from '../../../common/types';
 import { useEisModels } from '../../hooks/use_eis_models';
 import { InferenceEndpoints } from '../../__mocks__/inference_endpoints';
-import type { EisInferenceEndpoint } from '../../utils/eis_utils';
 
 jest.mock('../../hooks/use_eis_models');
 jest.mock('../../hooks/use_kibana', () => ({

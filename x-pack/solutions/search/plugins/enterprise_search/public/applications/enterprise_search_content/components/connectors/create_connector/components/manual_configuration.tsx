@@ -16,8 +16,9 @@ import {
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiPopover,
-  useGeneratedHtmlId,
+  EuiToolTip,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -220,20 +221,32 @@ GET connector-${rawName}/_search
   return (
     <>
       <EuiPopover
+        aria-label={i18n.translate(
+          'xpack.enterpriseSearch.createConnector.finishUpStep.popover.ariaLabel',
+          { defaultMessage: 'More configuration options' }
+        )}
         id={splitButtonPopoverId}
         button={
-          <EuiButtonIcon
-            data-test-subj="enterpriseSearchFinishUpStepButton"
-            display="fill"
-            disabled={isDisabled}
-            size="m"
-            iconType="boxesVertical"
-            aria-label={i18n.translate(
+          <EuiToolTip
+            content={i18n.translate(
               'xpack.enterpriseSearch.createConnector.finishUpStep.euiButtonIcon.moreLabel',
               { defaultMessage: 'More' }
             )}
-            onClick={onButtonClick}
-          />
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              data-test-subj="enterpriseSearchFinishUpStepButton"
+              display="fill"
+              disabled={isDisabled}
+              size="m"
+              iconType="boxesVertical"
+              aria-label={i18n.translate(
+                'xpack.enterpriseSearch.createConnector.finishUpStep.euiButtonIcon.moreLabel',
+                { defaultMessage: 'More' }
+              )}
+              onClick={onButtonClick}
+            />
+          </EuiToolTip>
         }
         isOpen={isPopoverOpen}
         closePopover={closePopover}

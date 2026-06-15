@@ -15,7 +15,8 @@
     "@kbn/saved-objects-tagging-oss-plugin",
     "@kbn/core-chrome-browser",
     "@kbn/config-schema",
-    "@kbn/shared-ux-utility"
+    "@kbn/shared-ux-utility",
+    "@kbn/react-kibana-mount"
   ],
   "exclude": [
     "target/**/*",

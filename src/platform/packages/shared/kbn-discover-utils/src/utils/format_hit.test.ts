@@ -37,11 +37,11 @@ describe('formatHitReact', () => {
     };
     row = buildDataTableRecord(hit, dataViewMock);
     (dataViewMock.getFormatterForField as jest.Mock).mockReturnValue({
-      reactConvert: (value: unknown) => `formatted:${value}`,
+      convertToReact: (value: unknown) => `formatted:${value}`,
     });
   });
 
-  it('formats a document as expected using reactConvert', () => {
+  it('formats a document as expected using convertToReact', () => {
     const formatted = formatHitReact(
       row,
       dataViewMock,
@@ -68,6 +68,31 @@ describe('formatHitReact', () => {
       dataViewMock
     );
 
+    const formatted = formatHitReact(
+      highlightHit,
+      dataViewMock,
+      (fieldName) => ['_index', 'message', 'extension', 'object.value'].includes(fieldName),
+      220,
+      fieldFormatsMock,
+      undefined
+    );
+    expect(formatted.map(([fieldName]) => fieldName)).toEqual([
+      'message',
+      'extension',
+      'object.value',
+      '_index',
+      '_score',
+    ]);
+  });
+
+  it('orders inline highlights first', () => {
+    const highlightHit = buildDataTableRecord(
+      {
+        ...hit,
+        inline_highlights: { message: { preTag: '<em>', postTag: '</em>' } },
+      },
+      dataViewMock
+    );
     const formatted = formatHitReact(
       highlightHit,
       dataViewMock,

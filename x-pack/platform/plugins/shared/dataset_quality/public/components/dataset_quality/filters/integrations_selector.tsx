@@ -13,6 +13,7 @@ import {
   EuiPopoverTitle,
   EuiSelectable,
   EuiText,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import type { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
@@ -69,6 +70,7 @@ export function IntegrationsSelector({
   onIntegrationsChange,
 }: IntegrationsSelectorProps) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const popoverTitleId = useGeneratedHtmlId({ prefix: 'integrationsSelectorPopoverTitle' });
 
   const onButtonClick = () => {
     setIsPopoverOpen(!isPopoverOpen);
@@ -108,6 +110,7 @@ export function IntegrationsSelector({
       isOpen={isPopoverOpen}
       closePopover={closePopover}
       panelPaddingSize="none"
+      aria-labelledby={popoverTitleId}
     >
       <EuiSelectable
         data-test-subj="datasetQualityIntegrationsSelectable"
@@ -116,6 +119,7 @@ export function IntegrationsSelector({
           placeholder: integrationsSelectorSearchPlaceholder,
           compressed: true,
         }}
+        listProps={{ paddingSize: 's' }}
         aria-label={integrationsSelectorLabel}
         options={integrations}
         onChange={onIntegrationsChange}
@@ -127,7 +131,9 @@ export function IntegrationsSelector({
       >
         {(list, search) => (
           <div style={{ width: 300 }}>
-            <EuiPopoverTitle paddingSize="s">{search}</EuiPopoverTitle>
+            <EuiPopoverTitle paddingSize="s" id={popoverTitleId}>
+              {search}
+            </EuiPopoverTitle>
             {list}
           </div>
         )}

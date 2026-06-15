@@ -10,6 +10,7 @@ import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
 import { renderingServiceMock } from '@kbn/core-rendering-browser-mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
+import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import { QueryClient } from '@kbn/react-query';
 import { createEditTagsAction } from './edit_tags';
 import * as flyout from '../components/tags_flyout';
@@ -34,6 +35,7 @@ const makeDeps = () => ({
   notifications: notificationServiceMock.createStartContract(),
   rendering: renderingServiceMock.create(),
   expressions: expressionsPluginMock.createStartContract(),
+  spaces: spacesPluginMock.createStartContract(),
   queryClient: new QueryClient(),
 });
 
@@ -73,8 +75,8 @@ describe('createEditTagsAction', () => {
     });
 
     expect(flyout.openTagsFlyout).toHaveBeenCalledWith(deps.overlays, deps.rendering, [], {
-      http: deps.http,
       expressions: deps.expressions,
+      spaces: deps.spaces,
       queryClient: deps.queryClient,
     });
     expect(bulk.bulkCreateAlertActions).toHaveBeenCalledWith(deps.http, [
@@ -98,8 +100,8 @@ describe('createEditTagsAction', () => {
       deps.rendering,
       ['existing', 'tags'],
       {
-        http: deps.http,
         expressions: deps.expressions,
+        spaces: deps.spaces,
         queryClient: deps.queryClient,
       }
     );

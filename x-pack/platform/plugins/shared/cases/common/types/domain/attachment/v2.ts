@@ -7,7 +7,12 @@
 
 import * as rt from 'io-ts';
 import { jsonValueRt } from '../../../api';
-import { SECURITY_EVENT_ATTACHMENT_TYPE } from '../../../constants/attachments';
+import {
+  SECURITY_EVENT_ATTACHMENT_TYPE,
+  SECURITY_ALERT_ATTACHMENT_TYPE,
+  OBSERVABILITY_ALERT_ATTACHMENT_TYPE,
+  STACK_ALERT_ATTACHMENT_TYPE,
+} from '../../../constants/attachments';
 import {
   AlertAttachmentAttributesRt,
   EventAttachmentAttributesRt,
@@ -120,37 +125,43 @@ export type UnifiedAttachmentPayload = rt.TypeOf<typeof UnifiedAttachmentPayload
 export type UnifiedAttachmentAttributes = rt.TypeOf<typeof UnifiedAttachmentAttributesRt>;
 export type UnifiedAttachment = rt.TypeOf<typeof UnifiedAttachmentRt>;
 
-const UnifiedEventDocumentAttachmentMetadataRt = rt.union([
-  rt.null,
-  rt.exact(
-    rt.partial({
-      index: rt.union([rt.string, rt.array(rt.string)]),
-    })
-  ),
-]);
-
-const UnifiedEventDocumentAttachmentPayloadRt = rt.intersection([
+const UnifiedDocumentAttachmentAttributesRt = rt.intersection([
   rt.strict({
-    type: rt.literal(SECURITY_EVENT_ATTACHMENT_TYPE),
+    type: rt.union([
+      rt.literal(SECURITY_EVENT_ATTACHMENT_TYPE),
+      rt.literal(SECURITY_ALERT_ATTACHMENT_TYPE),
+      rt.literal(OBSERVABILITY_ALERT_ATTACHMENT_TYPE),
+      rt.literal(STACK_ALERT_ATTACHMENT_TYPE),
+    ]),
     attachmentId: rt.union([rt.string, rt.array(rt.string)]),
     owner: rt.string,
   }),
   rt.exact(
     rt.partial({
-      metadata: UnifiedEventDocumentAttachmentMetadataRt,
+      metadata: rt.union([
+        rt.null,
+        rt.exact(
+          rt.partial({
+            index: rt.union([rt.string, rt.array(rt.string)]),
+            rule: rt.union([
+              rt.null,
+              rt.strict({
+                id: rt.union([rt.string, rt.null]),
+                name: rt.union([rt.string, rt.null]),
+              }),
+            ]),
+          })
+        ),
+      ]),
     })
   ),
-]);
-
-const UnifiedEventDocumentAttachmentAttributesRt = rt.intersection([
-  UnifiedEventDocumentAttachmentPayloadRt,
   AttachmentAttributesBasicRt,
 ]);
 
 export const DocumentAttachmentAttributesRtV2 = rt.union([
   AlertAttachmentAttributesRt,
   EventAttachmentAttributesRt,
-  UnifiedEventDocumentAttachmentAttributesRt,
+  UnifiedDocumentAttachmentAttributesRt,
 ]);
 export type DocumentAttachmentAttributesV2 = rt.TypeOf<typeof DocumentAttachmentAttributesRtV2>;
 

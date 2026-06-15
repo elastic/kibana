@@ -11,9 +11,11 @@ import {
   PERSISTABLE_STATE_LEGACY_TO_UNIFIED_MAP,
   PERSISTABLE_STATE_UNIFIED_TO_LEGACY_MAP,
   PERSISTABLE_ATTACHMENT_TYPES,
+  UNIFIED_ATTACHMENT_TYPES,
   UNIFIED_TO_LEGACY_MAP,
   OWNER_TO_PREFIX_MAP,
   LEGACY_EVENT_TYPE,
+  LEGACY_ALERT_TYPE,
 } from '../../constants/attachments';
 
 export const isMigratedAttachmentType = (type: string, owner: string): boolean => {
@@ -22,6 +24,14 @@ export const isMigratedAttachmentType = (type: string, owner: string): boolean =
     MIGRATED_ATTACHMENT_TYPES.has(toUnifiedPersistableStateAttachmentType(type))
   );
 };
+
+/**
+ * True for unified attachment types that have no legacy (v1) equivalent
+ */
+export const isUnifiedOnlyAttachmentType = (type: string): boolean =>
+  UNIFIED_ATTACHMENT_TYPES.has(type) &&
+  !Object.hasOwn(UNIFIED_TO_LEGACY_MAP, type) &&
+  !Object.hasOwn(PERSISTABLE_STATE_UNIFIED_TO_LEGACY_MAP, type);
 
 export const toLegacyAttachmentType = (type?: string): string | undefined => {
   if (typeof type !== 'string') {
@@ -34,15 +44,22 @@ export const toLegacyAttachmentType = (type?: string): string | undefined => {
 };
 
 export const toUnifiedAttachmentType = (type: string, owner: string): string => {
-  if (type === LEGACY_EVENT_TYPE) {
+  if (type === LEGACY_EVENT_TYPE || type === LEGACY_ALERT_TYPE) {
     const ownerPrefix = OWNER_TO_PREFIX_MAP[owner];
     if (ownerPrefix == null) {
       return type;
     }
-    return `${ownerPrefix}.event`;
+    return `${ownerPrefix}.${type}`;
   }
   return LEGACY_TO_UNIFIED_MAP[type] ?? type;
 };
+
+/**
+ * Returns true when the owner has a registered prefix in `OWNER_TO_PREFIX_MAP`,
+ * meaning legacy `alert` / `event` types can be mapped to a valid unified
+ * `<prefix>.<type>` (e.g. `security.alert`).
+ */
+export const hasOwnerUnifiedPrefix = (owner: string): boolean => OWNER_TO_PREFIX_MAP[owner] != null;
 
 /**
  * True when the persistable-state subtype id (legacy `.lens` or unified `lens`) is one

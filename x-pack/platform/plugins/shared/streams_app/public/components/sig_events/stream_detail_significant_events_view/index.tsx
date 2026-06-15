@@ -21,27 +21,29 @@ import { i18n } from '@kbn/i18n';
 import { useDebouncedValue } from '@kbn/react-hooks';
 import { useQueryClient } from '@kbn/react-query';
 import {
-  TaskStatus,
-  type OnboardingResult,
   type Streams,
-  type TaskResult,
+  StreamsKIsOnboardingStatus,
+  type StreamsKIsOnboardingStatusResult,
 } from '@kbn/streams-schema';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import React, { useCallback, useMemo, useState } from 'react';
 import useInterval from 'react-use/lib/useInterval';
 import { DISCOVERY_QUERIES_QUERY_KEY } from '../../../hooks/sig_events/use_fetch_discovery_queries';
+import { useSignificantEventsAvailability } from '../../../hooks/sig_events/use_significant_events_availability';
 import { useKibana } from '../../../hooks/use_kibana';
+import { SignificantEventsNotEnabledPrompt } from '../significant_events_not_enabled_prompt';
 import { EmptyState } from './empty_state';
 import { useFetchKnowledgeIndicators } from './hooks/use_knowledge_indicators_data';
 import { KnowledgeIndicatorsTable } from './knowledge_indicators_table';
 import { KnowledgeIndicatorDetailsFlyout } from './knowledge_indicator_details_flyout';
-import { useKnowledgeIndicatorsTask } from './hooks/use_knowledge_indicators_task';
+import { useKnowledgeIndicatorsOnboarding } from './hooks/use_knowledge_indicators_onboarding';
 import { KnowledgeIndicatorRulesSelector } from './knowledge_indicator_rules_selector';
 import { KnowledgeIndicatorsStatusFilter } from './knowledge_indicators_status_filter';
 import { KnowledgeIndicatorsTypeFilter } from './knowledge_indicators_type_filter';
 import { RulesTable } from './rules_table';
 import { LoadingPanel } from '../../loading_panel';
 import { getKnowledgeIndicatorItemId } from './utils/get_knowledge_indicator_item_id';
+import { getFeaturesFromKIs } from './utils/get_features_from_kis';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
@@ -56,6 +58,11 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
     },
   } = useKibana();
   const queryClient = useQueryClient();
+  const { availability, isLoading: isAvailabilityLoading } = useSignificantEventsAvailability();
+  // Only fetch features and queries once availability has resolved and is not
+  // explicitly unavailable (stays fail-open while the probe result is unknown).
+  const shouldFetchKnowledgeIndicators =
+    !isAvailabilityLoading && availability?.available !== false;
   const [tableSearchValue, setTableSearchValue] = useState('');
   const debouncedTableSearchValue = useDebouncedValue(tableSearchValue, SEARCH_DEBOUNCE_MS)
     .trim()
@@ -85,24 +92,17 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
     isLoading: isKnowledgeIndicatorsLoading,
     isEmpty,
     refetch,
-  } = useFetchKnowledgeIndicators({ definition });
-  const onKnowledgeIndicatorsTaskComplete = useCallback(
+  } = useFetchKnowledgeIndicators({ definition, enabled: shouldFetchKnowledgeIndicators });
+  const onKnowledgeIndicatorsOnboardingComplete = useCallback(
     (
-      completedTaskState: Extract<TaskResult<OnboardingResult>, { status: TaskStatus.Completed }>
+      completedState: Extract<
+        StreamsKIsOnboardingStatusResult,
+        { status: StreamsKIsOnboardingStatus.Completed }
+      >
     ) => {
-      const { queriesTaskResult, featuresTaskResult } = completedTaskState;
-      const featuresSkipped = !featuresTaskResult;
-      const generatedFeaturesCount =
-        featuresTaskResult?.status === TaskStatus.Completed
-          ? (featuresTaskResult.iterations ?? []).reduce(
-              (sum, iteration) => sum + iteration.newFeatures.length,
-              0
-            )
-          : 0;
-      const generatedQueriesCount =
-        queriesTaskResult?.status === TaskStatus.Completed ? queriesTaskResult.queries.length : 0;
+      const { features, queries } = completedState;
 
-      const count = generatedFeaturesCount + generatedQueriesCount;
+      const count = features.discovered.length + queries.persisted.length;
 
       toasts.addSuccess({
         title: i18n.translate(
@@ -113,7 +113,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
             values: { count },
           }
         ),
-        text: featuresSkipped
+        text: features.skipped
           ? i18n.translate('xpack.streams.significantEventsTable.featuresSkippedToastText', {
               defaultMessage: 'Feature identification was skipped.',
             })
@@ -124,18 +124,23 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
         queryClient.invalidateQueries({ queryKey: DISCOVERY_QUERIES_QUERY_KEY }),
         queryClient.invalidateQueries({ queryKey: ['features', definition.stream.name] }),
         queryClient.invalidateQueries({
-          queryKey: ['onboardingTaskStatus', definition.stream.name],
+          queryKey: ['knowledgeIndicatorsOnboardingStatus', definition.stream.name],
         }),
       ]);
     },
     [definition.stream.name, queryClient, toasts]
   );
 
-  const onKnowledgeIndicatorsTaskError = useCallback(
-    (failedTaskState: Extract<TaskResult<OnboardingResult>, { status: TaskStatus.Failed }>) => {
+  const onKnowledgeIndicatorsOnboardingError = useCallback(
+    (
+      failedState: Extract<
+        StreamsKIsOnboardingStatusResult,
+        { status: StreamsKIsOnboardingStatus.Failed }
+      >
+    ) => {
       toasts.addDanger({
-        title: KNOWLEDGE_INDICATORS_TASK_FAILED_TOAST_TITLE,
-        text: failedTaskState.error,
+        title: KNOWLEDGE_INDICATORS_ONBOARDING_FAILED_TOAST_TITLE,
+        text: failedState.error,
       });
     },
     [toasts]
@@ -143,18 +148,20 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
 
   const {
     isPending: isKnowledgeIndicatorsGenerationPending,
-    knowledgeIndicatorsTaskState,
-    scheduleKnowledgeIndicatorsTask,
-    cancelKnowledgeIndicatorsTask,
-  } = useKnowledgeIndicatorsTask({
+    onboardingState: knowledgeIndicatorsOnboardingState,
+    scheduleKnowledgeIndicatorsOnboarding,
+    cancelKnowledgeIndicatorsOnboarding,
+  } = useKnowledgeIndicatorsOnboarding({
     streamName: definition.stream.name,
-    onComplete: onKnowledgeIndicatorsTaskComplete,
-    onError: onKnowledgeIndicatorsTaskError,
+    onComplete: onKnowledgeIndicatorsOnboardingComplete,
+    onError: onKnowledgeIndicatorsOnboardingError,
   });
 
   useInterval(
     refetch,
-    knowledgeIndicatorsTaskState?.status === TaskStatus.InProgress ? 5000 : null
+    knowledgeIndicatorsOnboardingState?.status === StreamsKIsOnboardingStatus.InProgress
+      ? 5000
+      : null
   );
 
   const ruleKnowledgeIndicators = useMemo(
@@ -165,6 +172,9 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
       ),
     [knowledgeIndicators]
   );
+
+  const features = useMemo(() => getFeaturesFromKIs(knowledgeIndicators), [knowledgeIndicators]);
+
   const selectedKnowledgeIndicatorId = selectedKnowledgeIndicator
     ? getKnowledgeIndicatorItemId(selectedKnowledgeIndicator)
     : undefined;
@@ -191,9 +201,17 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
     [typeFilterOptions]
   );
   const isKnowledgeIndicatorsGenerationCanceling =
-    knowledgeIndicatorsTaskState?.status === TaskStatus.BeingCanceled;
+    knowledgeIndicatorsOnboardingState?.status === StreamsKIsOnboardingStatus.BeingCanceled;
   const isGenerateButtonDisabled =
-    knowledgeIndicatorsTaskState === null || isKnowledgeIndicatorsGenerationPending;
+    knowledgeIndicatorsOnboardingState === null || isKnowledgeIndicatorsGenerationPending;
+
+  if (isAvailabilityLoading) {
+    return <LoadingPanel size="xxl" />;
+  }
+
+  if (availability && !availability.available) {
+    return <SignificantEventsNotEnabledPrompt reason={availability.reason} />;
+  }
 
   if (isKnowledgeIndicatorsLoading) {
     return <LoadingPanel size="xxl" />;
@@ -205,8 +223,8 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
         isGenerating={isKnowledgeIndicatorsGenerationPending}
         isCanceling={isKnowledgeIndicatorsGenerationCanceling}
         isGenerateDisabled={isGenerateButtonDisabled}
-        onGenerateSuggestionsClick={scheduleKnowledgeIndicatorsTask}
-        onCancelGenerationClick={cancelKnowledgeIndicatorsTask}
+        onGenerateSuggestionsClick={scheduleKnowledgeIndicatorsOnboarding}
+        onCancelGenerationClick={cancelKnowledgeIndicatorsOnboarding}
       />
     );
   }
@@ -276,8 +294,8 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
                     isGenerating={isKnowledgeIndicatorsGenerationPending}
                     isCanceling={isKnowledgeIndicatorsGenerationCanceling}
                     isGenerateDisabled={isGenerateButtonDisabled}
-                    onGenerateSuggestionsClick={scheduleKnowledgeIndicatorsTask}
-                    onCancelGenerationClick={cancelKnowledgeIndicatorsTask}
+                    onGenerateSuggestionsClick={scheduleKnowledgeIndicatorsOnboarding}
+                    onCancelGenerationClick={cancelKnowledgeIndicatorsOnboarding}
                   />
                 </EuiFlexItem>
               ) : null}
@@ -311,6 +329,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
           knowledgeIndicator={selectedKnowledgeIndicator}
           occurrencesByQueryId={occurrencesByQueryId}
           onClose={closeFlyout}
+          features={features}
         />
       ) : null}
     </>
@@ -455,7 +474,7 @@ const CANCEL_GENERATION_BUTTON_TOOLTIP = i18n.translate(
   }
 );
 
-const KNOWLEDGE_INDICATORS_TASK_FAILED_TOAST_TITLE = i18n.translate(
+const KNOWLEDGE_INDICATORS_ONBOARDING_FAILED_TOAST_TITLE = i18n.translate(
   'xpack.streams.significantEventsTable.knowledgeIndicatorsTaskFailedToastTitle',
   {
     defaultMessage: 'Failed to generate knowledge indicators',

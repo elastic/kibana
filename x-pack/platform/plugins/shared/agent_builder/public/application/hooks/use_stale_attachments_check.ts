@@ -16,6 +16,7 @@ import type { AttachmentInput, StaleAttachment } from '@kbn/agent-builder-common
 import { labels } from '../utils/i18n';
 import { useAgentBuilderServices } from './use_agent_builder_service';
 import { useToasts } from './use_toasts';
+import { useStreamingContext } from '../context/streaming/streaming_context';
 
 const STALE_CHECK_DEBOUNCE_MS = 300;
 const STALE_CHECK_DEBOUNCE_OPTIONS = { wait: STALE_CHECK_DEBOUNCE_MS } as const;
@@ -36,6 +37,7 @@ export const useStaleAttachments = (
 ): UseStaleAttachmentsCheckResult => {
   const { attachmentsService } = useAgentBuilderServices();
   const { addErrorToast } = useToasts();
+  const { activeStreams } = useStreamingContext();
   const [staleAttachments, setStaleAttachments] = useState<AttachmentInput[]>([]);
 
   // Always hold the latest stale attachments to avoid stale-closure issues in the debounced fn.
@@ -45,6 +47,10 @@ export const useStaleAttachments = (
   const { run: scheduleStaleCheck } = useDebounceFn(async () => {
     if (!conversationId) {
       setStaleAttachments([]);
+      return;
+    }
+
+    if (activeStreams.has(conversationId)) {
       return;
     }
 

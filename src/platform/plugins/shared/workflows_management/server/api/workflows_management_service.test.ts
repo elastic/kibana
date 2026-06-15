@@ -224,6 +224,7 @@ describe('WorkflowsService (facade)', () => {
       });
       await service.getWorkflowStats('default', { includeExecutionStats: true });
       await service.getWorkflowAggs(['name'], 'default');
+      await service.getWorkflowAggs(['tags'], 'default', { managedFilter: 'all' });
 
       expect(searchSpies.getWorkflowsSubscribedToTrigger).toHaveBeenCalledWith('trig-1', 'default');
       expect(searchSpies.getWorkflows).toHaveBeenCalledWith({ page: 1, size: 10 }, 'default', {
@@ -233,6 +234,9 @@ describe('WorkflowsService (facade)', () => {
         includeExecutionStats: true,
       });
       expect(searchSpies.getWorkflowAggs).toHaveBeenCalledWith(['name'], 'default');
+      expect(searchSpies.getWorkflowAggs).toHaveBeenCalledWith(['tags'], 'default', {
+        managedFilter: 'all',
+      });
     });
 
     it('delegates execution reads to WorkflowExecutionQueryService', async () => {
@@ -289,6 +293,24 @@ describe('WorkflowsService (facade)', () => {
       (crudSpies.getWorkflow as jest.SpyInstance).mockRejectedValueOnce(boom);
 
       await expect(service.getWorkflow('wf-1', 'default')).rejects.toBe(boom);
+    });
+  });
+
+  describe('listWaitingForInputSteps', () => {
+    it('delegates to WorkflowExecutionQueryService.listWaitingForInputSteps after init', async () => {
+      // Behavioural coverage for this method lives next to the implementation
+      // in `services/workflow_execution_query_service.test.ts`. This facade
+      // test only asserts the delegation shape.
+      const listSpy = jest
+        .spyOn(WorkflowExecutionQueryService.prototype, 'listWaitingForInputSteps')
+        .mockResolvedValue({ results: [], total: 0 } as never);
+      try {
+        const service = await buildService();
+        await service.listWaitingForInputSteps('my-space', { page: 2, perPage: 25 });
+        expect(listSpy).toHaveBeenCalledWith('my-space', { page: 2, perPage: 25 });
+      } finally {
+        listSpy.mockRestore();
+      }
     });
   });
 });

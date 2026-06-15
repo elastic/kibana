@@ -17,6 +17,7 @@
     "@kbn/aiops-components",
     "@kbn/aiops-log-pattern-analysis",
     "@kbn/aiops-log-rate-analysis",
+    "@kbn/aiops-server-schemas",
     "@kbn/aiops-test-utils",
     "@kbn/analytics",
     "@kbn/cases-plugin",
@@ -29,7 +30,11 @@
     "@kbn/core",
     "@kbn/data-plugin",
     "@kbn/data-service",
+    "@kbn/content-management-plugin",
+    "@kbn/data-view-editor-plugin",
+    "@kbn/data-view-field-editor-plugin",
     "@kbn/data-views-plugin",
+    "@kbn/saved-objects-finder-plugin",
     "@kbn/datemath",
     "@kbn/ebt-tools",
     "@kbn/embeddable-plugin",
@@ -85,7 +90,8 @@
     "@kbn/discover-utils",
     "@kbn/css-utils",
     "@kbn/presentation-publishing-schemas",
-    "@kbn/cps"
+    "@kbn/cps",
+    "@kbn/zod"
   ],
   "exclude": ["target/**/*"]
 }
