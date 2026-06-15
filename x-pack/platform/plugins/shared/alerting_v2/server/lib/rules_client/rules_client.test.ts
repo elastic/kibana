@@ -111,10 +111,14 @@ describe('RulesClient', () => {
         .mockResolvedValue({ processed: 0, total: 0, errors: [] }),
     } as unknown as ActionPolicyClient;
 
-    return new RulesClient({
-      services: { request, rulesSavedObjectService, taskManager, userService, actionPolicyClient },
-      options: { spaceId: 'space-1' },
-    });
+    return new RulesClient(
+      request,
+      rulesSavedObjectService,
+      taskManager,
+      userService,
+      actionPolicyClient,
+      'space-1'
+    );
   }
 
   describe('createRule', () => {
@@ -1387,6 +1391,53 @@ describe('RulesClient', () => {
         expect.objectContaining({
           sortField: 'enabled',
           sortOrder: 'desc',
+        })
+      );
+    });
+  });
+
+  describe('getTags', () => {
+    const findResponseWithTags = (tags: string[]) => ({
+      saved_objects: [],
+      total: 0,
+      page: 1,
+      per_page: 0,
+      aggregations: {
+        tags: { buckets: tags.map((key) => ({ key })) },
+      },
+    });
+
+    it('returns the aggregated tags without a filter', async () => {
+      const client = createClient();
+
+      mockSavedObjectsClient.find.mockResolvedValueOnce(findResponseWithTags(['cpu', 'memory']));
+
+      const tags = await client.getTags();
+
+      expect(tags).toEqual(['cpu', 'memory']);
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: RULE_SAVED_OBJECT_TYPE,
+          perPage: 0,
+        })
+      );
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
+        expect.not.objectContaining({ filter: expect.anything() })
+      );
+    });
+
+    it('translates a clean API filter to an SO filter before aggregating', async () => {
+      const client = createClient();
+
+      mockSavedObjectsClient.find.mockResolvedValueOnce(findResponseWithTags(['cpu']));
+
+      await client.getTags({ filter: 'kind:alert' });
+
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: RULE_SAVED_OBJECT_TYPE,
+          perPage: 0,
+          filter: `${RULE_SAVED_OBJECT_TYPE}.attributes.kind: alert`,
         })
       );
     });

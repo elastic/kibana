@@ -287,7 +287,8 @@ export class AnalyticsService {
       // call). This allows downstream telemetry analysis to compute per-tool invocation counts by
       // aggregating over the array values.
       const toolsInvoked =
-        toolCallSteps.map((step) => normalizeToolIdForTelemetry(step.tool_id)) ?? [];
+        toolCallSteps.map((step) => normalizeToolIdForTelemetry(step.tool_id, step.tool_type)) ??
+        [];
 
       const toolCallErrors = toolCallSteps.filter(({ results }) => {
         return results.length > 0 && results.every((r) => r.type === ToolResultType.error);
@@ -366,6 +367,7 @@ export class AnalyticsService {
     conversationId,
     executionId,
     toolId,
+    toolType,
     toolCallId,
     source,
     resultTypes,
@@ -375,6 +377,7 @@ export class AnalyticsService {
     conversationId?: string;
     executionId?: string;
     toolId: string;
+    toolType?: ToolType | string;
     toolCallId: string;
     source: string;
     resultTypes: string[];
@@ -387,7 +390,7 @@ export class AnalyticsService {
           agent_id: normalizeAgentIdForTelemetry(agentId),
           conversation_id: conversationId,
           execution_id: executionId,
-          tool_id: normalizeToolIdForTelemetry(toolId),
+          tool_id: normalizeToolIdForTelemetry(toolId, toolType),
           tool_call_id: toolCallId,
           source,
           result_types: resultTypes,
@@ -404,6 +407,7 @@ export class AnalyticsService {
     conversationId,
     executionId,
     toolId,
+    toolType,
     toolCallId,
     source,
     errorType,
@@ -414,6 +418,7 @@ export class AnalyticsService {
     conversationId?: string;
     executionId?: string;
     toolId: string;
+    toolType?: ToolType | string;
     toolCallId: string;
     source: string;
     errorType: string;
@@ -427,7 +432,7 @@ export class AnalyticsService {
           agent_id: normalizeAgentIdForTelemetry(agentId),
           conversation_id: conversationId,
           execution_id: executionId,
-          tool_id: normalizeToolIdForTelemetry(toolId),
+          tool_id: normalizeToolIdForTelemetry(toolId, toolType),
           tool_call_id: toolCallId,
           source,
           error_type: sanitizeForCounterName(errorType),
