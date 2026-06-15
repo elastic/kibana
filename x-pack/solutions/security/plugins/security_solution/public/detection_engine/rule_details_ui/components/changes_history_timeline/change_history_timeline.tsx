@@ -20,7 +20,6 @@ import { css } from '@emotion/react';
 import type { RuleHistoryItem } from '../../../../../common/api/detection_engine/rule_management';
 import { ChangeHistoryItem } from './change_history_item';
 import { TrackingStartedFooter } from './change_history_footer';
-import { DIFFABLE_CHANGE_ACTIONS } from './constants';
 import * as i18n from './translations';
 
 interface ChangeHistoryTimelineProps {
@@ -44,20 +43,7 @@ export function RuleChangesHistoryTimeline({
   onLoadMore,
 }: ChangeHistoryTimelineProps): JSX.Element {
   const { euiTheme } = useEuiTheme();
-  const autoSelectedIdRef = useRef<string | undefined>(undefined);
   const sentinelRef = useRef<HTMLDivElement>(null);
-
-  // Auto-select the first active item, and follow it when a new one appears at the top
-  useEffect(() => {
-    const firstActiveItem = items.find((item) => DIFFABLE_CHANGE_ACTIONS.includes(item.action));
-
-    if (!firstActiveItem || firstActiveItem.id === autoSelectedIdRef.current) {
-      return;
-    }
-
-    autoSelectedIdRef.current = firstActiveItem.id;
-    onSelectItem?.(firstActiveItem);
-  }, [items, onSelectItem]);
 
   // Track scrolling to load more items
   useEffect(() => {

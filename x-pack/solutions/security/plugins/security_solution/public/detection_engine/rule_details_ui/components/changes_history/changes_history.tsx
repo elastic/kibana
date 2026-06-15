@@ -32,6 +32,7 @@ import { useInfiniteChangeHistory } from '../../../rule_management/api/hooks/use
 import { RuleDetailTabs } from '../../pages/rule_details/use_rule_details_tabs';
 import { RuleChangesDiff } from '../changes_diff/changes_diff';
 import * as i18n from './translations';
+import { useChangeHistoryAutoSelection } from './use_change_history_auto_selection';
 
 const SIDEBAR_WIDTH = 400;
 const NO_HISTORY_IMG_SIZE = 128;
@@ -48,7 +49,6 @@ export const RuleChangesHistory = memo(function RuleChangesHistory({
   const {
     application: { navigateToApp },
   } = useKibana().services;
-  const [selectedItem, setSelectedItem] = useState<RuleHistoryItem | undefined>();
   const handleClose = useCallback(() => {
     navigateToApp(APP_UI_ID, {
       deepLinkId: SecurityPageName.rules,
@@ -56,6 +56,7 @@ export const RuleChangesHistory = memo(function RuleChangesHistory({
     });
   }, [navigateToApp, ruleId]);
 
+  const [selectedItem, setSelectedItem] = useState<RuleHistoryItem | undefined>();
   const { data, isLoading, isFetching, isFetchingNextPage, fetchNextPage, hasNextPage } =
     useInfiniteChangeHistory({ ruleId });
   const handleNextPageLoading = useCallback(() => {
@@ -67,11 +68,19 @@ export const RuleChangesHistory = memo(function RuleChangesHistory({
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const items = useMemo(() => data?.pages.flatMap((page) => page.items) ?? [], [data?.pages]);
+  const hasNoHistory = !isLoading && items.length === 0;
   const trackingStartedAt = data?.pages[0]?.tracking_started_at;
   const changeHistoryStartedAt = useMemo(
     () => (trackingStartedAt ? new Date(trackingStartedAt) : undefined),
     [trackingStartedAt]
   );
+
+  // Track rule change and makes sure the first item is selected when there is no selection
+  useChangeHistoryAutoSelection({
+    ruleId,
+    items,
+    setSelectedItem,
+  });
 
   const styles = useMemo(
     () => ({
@@ -107,8 +116,6 @@ export const RuleChangesHistory = memo(function RuleChangesHistory({
     }),
     [euiTheme]
   );
-
-  const hasNoHistory = !isLoading && items.length === 0;
 
   if (hasNoHistory) {
     return (
@@ -170,6 +177,7 @@ export const RuleChangesHistory = memo(function RuleChangesHistory({
         </EuiFlyoutHeader>
         <EuiFlyoutBody css={styles.flyoutBodyCss}>
           <RuleChangesHistoryTimeline
+            key={ruleId}
             items={items}
             selectedItem={selectedItem}
             isLoading={isLoading || isFetching}
