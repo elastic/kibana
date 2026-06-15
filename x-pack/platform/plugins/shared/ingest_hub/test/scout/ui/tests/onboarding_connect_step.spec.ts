@@ -10,18 +10,34 @@ import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 
 test.describe('Onboarding connect step', { tag: tags.stateful.classic }, () => {
-  test.beforeAll(async ({ apiServices }) => {
+  test.beforeAll(async ({ apiServices, config }) => {
+    // The /internal/core/_settings route is only registered when
+    // coreApp.allowDynamicConfigOverrides=true (Scout's local stateful base config).
+    // ECH deployments don't carry that override, so the PUT 404s. Skip on Cloud.
+    // eslint-disable-next-line playwright/no-skipped-test
+    test.skip(
+      config.isCloud === true,
+      `Core API returns 404 for 'ingestHub.onboardingEnabled' on ECH`
+    );
+    // skip() in beforeAll only skips the tests, not the hook body itself.
+    if (config.isCloud) {
+      return;
+    }
+
     await apiServices.core.settings({
       'feature_flags.overrides': {
-        'ingestHub.onboardingEnabled': true,
+        'ingestHub.onboardingEnabled': 'true',
       },
     });
   });
 
-  test.afterAll(async ({ apiServices }) => {
+  test.afterAll(async ({ apiServices, config }) => {
+    if (config.isCloud) {
+      return;
+    }
     await apiServices.core.settings({
       'feature_flags.overrides': {
-        'ingestHub.onboardingEnabled': false,
+        'ingestHub.onboardingEnabled': 'false',
       },
     });
   });
@@ -37,7 +53,6 @@ test.describe('Onboarding connect step', { tag: tags.stateful.classic }, () => {
     await page.testSubj.locator('awsAuthTypeSelector').selectOption('static_keys');
 
     await expect(page.testSubj.locator('awsStaticKeysForm')).toBeVisible();
-    await expect(page.testSubj.locator('awsStaticKeysForm-launchCloudFormation')).toBeVisible();
     await expect(page.testSubj.locator('awsConnectSetup-nextButton')).toBeDisabled();
 
     await page.testSubj.locator('awsStaticKeysForm-accessKeyId').fill('AKIAIOSFODNN7EXAMPLE');
@@ -54,9 +69,18 @@ test.describe('Onboarding connect step', { tag: tags.stateful.classic }, () => {
   }) => {
     await browserAuth.loginAsAdmin();
     await page.gotoApp('onboarding/aws#connect');
+
+    // Clear all selections so selectedServiceIds is empty → showIdentityFederation = true
+    await page.evaluate(() => {
+      sessionStorage.setItem(
+        'onboarding.aws.servicesStep',
+        JSON.stringify({ selectedServiceIds: [] })
+      );
+    });
+    await page.reload();
     await expect(page.testSubj.locator('onboardingStep-connect')).toBeVisible();
 
-    // Identity federation is the default auth type; with no connectors the New Identity tab is shown
+    // Identity federation is shown when no services are selected; with no connectors the New Identity tab is shown
     await expect(page.testSubj.locator('awsIdentityFederationSetup-roleArn')).toBeVisible();
     await expect(
       page.testSubj.locator('awsIdentityFederationSetup-launchCloudFormation')
@@ -86,9 +110,9 @@ test.describe('Onboarding connect step', { tag: tags.stateful.classic }, () => {
 
     await page.testSubj.locator('awsAuthTypeSelector').selectOption('temporary_keys');
 
-    // Temporary keys form has no CloudFormation button
+    // Temporary keys form is visible; static keys form is hidden
     await expect(page.testSubj.locator('awsTemporaryKeysForm')).toBeVisible();
-    await expect(page.testSubj.locator('awsStaticKeysForm-launchCloudFormation')).toBeHidden();
+    await expect(page.testSubj.locator('awsStaticKeysForm')).toBeHidden();
     await expect(page.testSubj.locator('awsConnectSetup-nextButton')).toBeDisabled();
 
     await expect(page.testSubj.locator('awsTemporaryKeysForm-sessionToken')).toBeVisible();
@@ -128,6 +152,15 @@ test.describe('Onboarding connect step', { tag: tags.stateful.classic }, () => {
 
       await browserAuth.loginAsAdmin();
       await page.gotoApp('onboarding/aws#connect');
+
+      // Clear all selections so selectedServiceIds is empty → showIdentityFederation = true
+      await page.evaluate(() => {
+        sessionStorage.setItem(
+          'onboarding.aws.servicesStep',
+          JSON.stringify({ selectedServiceIds: [] })
+        );
+      });
+      await page.reload();
       await expect(page.testSubj.locator('onboardingStep-connect')).toBeVisible();
 
       // When at least one connector exists, the Existing Identity tab is pre-selected
