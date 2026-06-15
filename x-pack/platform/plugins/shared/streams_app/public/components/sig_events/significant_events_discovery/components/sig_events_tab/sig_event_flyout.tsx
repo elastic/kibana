@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   EuiBadge,
   EuiButtonEmpty,
@@ -28,6 +28,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { SigEvent } from '@kbn/streams-schema';
 import { useFetchEventLifecycle } from '../../../../../hooks/sig_events/use_fetch_sig_events';
+import { useKibana } from '../../../../../hooks/use_kibana';
 import { LifecycleTimeline } from './lifecycle_timeline';
 import { getStatusColor } from './filter_constants';
 import { formatTimestamp } from '../../../../../util/formatters';
@@ -84,6 +85,9 @@ interface SigEventFlyoutProps {
 
 export const SigEventFlyout = ({ event, onClose }: SigEventFlyoutProps) => {
   const {
+    services: { focusedSignificantEventService },
+  } = useKibana();
+  const {
     data: lifecycleData,
     isLoading: isLifecycleLoading,
     isError: isLifecycleError,
@@ -92,14 +96,21 @@ export const SigEventFlyout = ({ event, onClose }: SigEventFlyoutProps) => {
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'sigEventFlyout' });
   const ruleNames = event.rule_names ?? [];
 
+  useEffect(() => {
+    focusedSignificantEventService.setFocusedEvent(event);
+
+    return () => {
+      focusedSignificantEventService.clearFocusedEvent(event.discovery_slug);
+    };
+  }, [event, focusedSignificantEventService]);
+
   return (
     <EuiFlyout onClose={onClose} size="m" aria-labelledby={flyoutTitleId}>
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
-              {/* TODO: rename event.verdict to event.status once the data stream field is renamed */}
-              <EuiBadge color={getStatusColor(event.verdict)}>{event.verdict}</EuiBadge>
+              <EuiBadge color={getStatusColor(event.status)}>{event.status}</EuiBadge>
             </EuiFlexItem>
             {event.recommended_action && (
               <EuiFlexItem grow={false}>
