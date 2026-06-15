@@ -185,7 +185,10 @@ describe('CallerSnapshot end-to-end: schedule → persist → adoptPersistedCall
     const buildRunner = (
       taskOverrides: Partial<ConcreteTaskInstance>,
       coreAuthc: jest.Mocked<CoreAuthenticationService> | undefined,
-      onCreateTaskRunner: (opts: { fakeRequest: KibanaRequest | undefined }) => void
+      onCreateTaskRunner: (opts: {
+        fakeRequest: KibanaRequest | undefined;
+        caller: CallerSnapshot | undefined;
+      }) => void
     ) => {
       const logger: Logger = mockLogger();
       const instance: ConcreteTaskInstance = {
@@ -215,7 +218,7 @@ describe('CallerSnapshot end-to-end: schedule → persist → adoptPersistedCall
         callerSnapshotRunnerTask: {
           title: 'CallerSnapshot runner task',
           createTaskRunner: (opts) => {
-            onCreateTaskRunner({ fakeRequest: opts.fakeRequest });
+            onCreateTaskRunner({ fakeRequest: opts.fakeRequest, caller: opts.caller });
             return { run: async () => ({ state: {} }) };
           },
         },
@@ -243,7 +246,7 @@ describe('CallerSnapshot end-to-end: schedule → persist → adoptPersistedCall
       });
     };
 
-    it('passes replayCaller result as fakeRequest when callerSnapshot is present', async () => {
+    it('passes replayCaller result as fakeRequest and the snapshot as caller when callerSnapshot is present', async () => {
       const snapshot = makeSnapshot();
       const fakeReq = httpServerMock.createKibanaRequest({
         headers: { authorization: 'ApiKey integration-test-key' },
@@ -251,9 +254,15 @@ describe('CallerSnapshot end-to-end: schedule → persist → adoptPersistedCall
       const coreAuthc = buildCoreAuthcMock({ captureResult: snapshot, replayResult: fakeReq });
 
       let receivedFakeRequest: KibanaRequest | undefined;
-      const runner = buildRunner({ callerSnapshot: snapshot }, coreAuthc, ({ fakeRequest }) => {
-        receivedFakeRequest = fakeRequest;
-      });
+      let receivedCaller: CallerSnapshot | undefined;
+      const runner = buildRunner(
+        { callerSnapshot: snapshot },
+        coreAuthc,
+        ({ fakeRequest, caller }) => {
+          receivedFakeRequest = fakeRequest;
+          receivedCaller = caller;
+        }
+      );
 
       await runner.markTaskAsRunning();
       await runner.run();
@@ -261,6 +270,9 @@ describe('CallerSnapshot end-to-end: schedule → persist → adoptPersistedCall
       expect(coreAuthc.adoptPersistedCaller).toHaveBeenCalledWith(snapshot);
       expect(coreAuthc.replayCaller).toHaveBeenCalledWith(snapshot);
       expect(receivedFakeRequest).toBe(fakeReq);
+      // `caller` carries the durable identity for snapshot-aware consumers;
+      // see `RunContext.caller` docstring.
+      expect(receivedCaller).toBe(snapshot);
     });
 
     it('falls back to legacy path when callerSnapshot is absent', async () => {

@@ -86,10 +86,15 @@ export interface CoreAuthenticationService {
    * Replay a scoped, fake `KibanaRequest` from a previously captured
    * `CallerSnapshot`.
    *
-   * The returned request is intended for use in background execution paths
-   * (e.g. Task Manager) that need to act on behalf of an originating user.
-   * Returns `undefined` when the snapshot is empty, has an unrecognised shape,
-   * or no security implementation is registered.
+   * The returned request is an adapter for the existing scoped-client API
+   * surface — pass it to `core.savedObjects.getScopedClient(request)`,
+   * `core.elasticsearch.client.asScoped(request)`, etc. The durable identity
+   * is the `CallerSnapshot` itself; consumers that can keep the snapshot in
+   * their data model should do so and call `replayCaller` only at the point
+   * where they hand off to a scoped-client factory.
+   *
+   * Returns `undefined` when the snapshot is empty, has an unrecognised
+   * shape, or no security implementation is registered.
    *
    * @param snapshot The identity context captured at schedule time.
    */

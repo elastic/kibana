@@ -91,8 +91,35 @@ export interface RunContext {
   /**
    * If an API key is associated with the task, a fake KibanaRequest object
    * is generated using the API key and passed as part of the run context.
+   *
+   * This field is the historical adapter to existing scoped-client factories
+   * (e.g. `core.savedObjects.getScopedClient(request)`,
+   * `core.elasticsearch.client.asScoped(request)`). Task definitions written
+   * today are expected to consume `fakeRequest`. New task definitions that
+   * want to interact with snapshot-aware APIs as those are introduced should
+   * prefer `caller` and treat `fakeRequest` as a fallback for scoped-client
+   * factories that still require a `KibanaRequest`.
    */
   fakeRequest?: KibanaRequest;
+
+  /**
+   * Durable identity context for the originating caller, captured at schedule
+   * time via `core.security.authc.captureCaller()`. When present, `fakeRequest`
+   * was reconstructed from this snapshot via `replayCaller()`.
+   *
+   * `caller` is the longer-term currency for "who scheduled this task" —
+   * unlike `fakeRequest`, it carries no transport-layer fakeness (no URL,
+   * method, body, abort signal) and is safe to round-trip through persistence
+   * or pass to snapshot-native APIs as those become available. The
+   * `fakeRequest` field above is an adapter for the existing scoped-client
+   * API surface; the underlying durable identity is this `CallerSnapshot`.
+   *
+   * Absent when the task was scheduled by a code path that does not provide
+   * a `request` (e.g. internal recurring TM tasks), or when no security
+   * implementation is registered.
+   */
+  caller?: CallerSnapshot;
+
   abortController: AbortController;
 }
 

@@ -477,6 +477,10 @@ export class TaskManagerRunner implements TaskRunner {
           this.task = definition.createTaskRunner({
             taskInstance: sanitizedTaskInstance,
             fakeRequest,
+            // Surface the durable identity snapshot too. `fakeRequest` is the
+            // adapter for existing scoped-client factories; `caller` is the
+            // longer-term currency for snapshot-aware APIs. See `RunContext`.
+            caller: callerSnapshot,
             abortController,
           });
 

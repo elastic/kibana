@@ -195,6 +195,47 @@ The recommended sequencing:
    `callerSnapshot` first, falls back to `userScope.userProfileId`. Once the
    legacy key is no longer needed it is dropped from the schema.
 
+## Future direction: `CallerSnapshot` as the durable identity currency
+
+`replayCaller` returns a `KibanaRequest` as an adapter to the existing
+scoped-client API surface (`core.savedObjects.getScopedClient(request)`,
+`core.elasticsearch.client.asScoped(request)`, `core.security.authc.getCurrentUser(request)`,
+etc.). That keeps this PR small and reviewable: every existing background
+consumer keeps consuming a `KibanaRequest` and the contract slots in
+non-invasively.
+
+Architecturally the longer-term move is for scoped-client factories to accept
+`CallerSnapshot` directly, with `KibanaRequest` reserved for the live-execution
+path. A `CallerSnapshot`:
+
+- carries no transport-layer fakeness (no URL, method, body, abort signal,
+  `events$` stream, socket reference);
+- is pure data, safe to round-trip through persistence, queue, replay
+  arbitrarily;
+- doesn't require downstream code to branch on `request.isFakeRequest`;
+- doesn't tempt plugins to capture a request in closures or long-lived
+  workers, which is a recurring source of bugs when the underlying connection
+  dies or work resumes on another node after failover.
+
+This is intentionally not done in this PR — adding a `CallerSnapshot`-shaped
+overload to every scoped-client factory is a cross-cutting Core change that
+should be sequenced separately, after the contract here has stabilised. The
+contract is shaped so that future migration is additive:
+
+- `RunContext.caller?: CallerSnapshot` already exposes the snapshot to task
+  definitions today. Task definitions that adopt it can later move to
+  snapshot-native APIs without re-plumbing.
+- `RunContext.fakeRequest` remains for backwards-compat with existing task
+  definitions and as the path for scoped-client factories that still require
+  a `KibanaRequest`.
+- `replayCaller` stays available as an escape hatch indefinitely — consumers
+  that haven't migrated still have a one-line bridge to the legacy API
+  surface.
+
+The recommended posture for new code is: **store the snapshot, not the
+request**; call `replayCaller` only at the point where you hand off to a
+scoped-client factory that still requires a `KibanaRequest`.
+
 ## Out of scope
 
 - **Other `taskManager.schedule()` callers** in Alerting, Actions, Reporting,
