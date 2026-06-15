@@ -139,6 +139,18 @@ export function buildNoDataSummary(): CompositeSLOSummary {
   };
 }
 
+export function toMemberWithSummary(
+  member: CompositeSLODefinition['members'][number]
+): CompositeSLOMemberWithSummary {
+  return {
+    ...member,
+    name: member.sloId,
+    normalisedWeight: NO_DATA,
+    sliValue: NO_DATA,
+    status: 'NO_DATA',
+  };
+}
+
 function getWindowSli(windows: BurnRateWindow[], name: string): number {
   return windows.find((w) => w.name === name)?.sli ?? NO_DATA;
 }

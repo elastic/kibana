@@ -58,7 +58,8 @@ export class GetCompositeSLO {
     const compositeSlo = await this.compositeRepository.findById(id);
     const persisted = persistedSummaryById.get(id);
 
-    // Legacy docs may not have members, so we fallback to computing the summary on the fly if they are missing.
+    // When the persisted summary lacks members, recompute live so the expand flow can show
+    // per-member data even if the background task has not refreshed the document yet.
     if (!persisted?.members) {
       const { compositeSummary, members } = await computeLiveCompositeSummary(compositeSlo, {
         repository: this.repository,
