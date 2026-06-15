@@ -27,10 +27,10 @@ steps:
   - name: build_context
     type: ai.agent
     agent-id: sigevents.investigation.context
-    connector-id: ".anthropic-claude-4.6-sonnet-chat_completion"
+    connector-id: ".anthropic-claude-4.5-haiku-chat_completion"
     create-conversation: true
     with:
-      timeout: 600s
+      timeout: 180s
       message: |
         Investigate this significant event and propose root cause hypotheses.
         Generate as many hypotheses as are genuinely distinct and worth investigating —
@@ -351,10 +351,10 @@ steps:
   - name: synthesize
     type: ai.agent
     agent-id: sigevents.investigation.synthesis
-    connector-id: ".anthropic-claude-4.6-sonnet-chat_completion"
+    connector-id: ".anthropic-claude-4.5-haiku-chat_completion"
     create-conversation: true
     with:
-      timeout: 600s
+      timeout: 180s
       message: |
         Synthesise the investigation results.
         The branch results contain both gather and review outputs per hypothesis.
