@@ -7,7 +7,7 @@
 
 import { parse } from 'yaml';
 import { httpServerMock } from '@kbn/core/server/mocks';
-import { StreamsKIsOnboardingStatus } from '@kbn/streams-schema';
+import { SigEventsWorkflowStatus } from '@kbn/streams-schema';
 import { ExecutionStatus } from '@kbn/workflows';
 import {
   getManagedWorkflowDefinition,
@@ -18,7 +18,6 @@ import {
   buildConcurrencyKey,
   parseStreamNameFromConcurrencyKey,
 } from './onboarding_workflow_client';
-
 const createMockManagementApi = (overrides: Record<string, jest.Mock> = {}) => ({
   getWorkflow: jest.fn().mockResolvedValue({
     id: STREAMS_KI_ONBOARDING_WORKFLOW_ID,
@@ -83,11 +82,11 @@ describe('StreamsKIsOnboardingClient', () => {
   });
 
   describe('run', () => {
-    it('fetches the workflow definition and runs it', async () => {
+    it('fetches the workflow definition and runs it and returns executionId', async () => {
       const { client, managementApi } = createClient();
       const request = httpServerMock.createKibanaRequest();
 
-      await client.run({
+      const result = await client.run({
         inputs: {
           streamName: 'logs.nginx',
           features: { skip: false, start: 1000, end: 2000 },
@@ -96,6 +95,7 @@ describe('StreamsKIsOnboardingClient', () => {
         request,
       });
 
+      expect(result).toEqual({ executionId: 'execution-id' });
       expect(managementApi.getWorkflow).toHaveBeenCalledWith(
         STREAMS_KI_ONBOARDING_WORKFLOW_ID,
         '*'
@@ -151,7 +151,7 @@ describe('StreamsKIsOnboardingClient', () => {
 
       const result = await client.getStatus({ streamName: 'logs.nginx' });
 
-      expect(result).toEqual({ status: StreamsKIsOnboardingStatus.NotStarted, executionId: null });
+      expect(result).toEqual({ status: SigEventsWorkflowStatus.NotStarted, executionId: null });
     });
 
     it('returns InProgress for a running execution', async () => {
@@ -164,7 +164,7 @@ describe('StreamsKIsOnboardingClient', () => {
       const result = await client.getStatus({ streamName: 'logs.nginx' });
 
       expect(result).toEqual({
-        status: StreamsKIsOnboardingStatus.InProgress,
+        status: SigEventsWorkflowStatus.InProgress,
         executionId: 'exec-1',
       });
     });
@@ -193,7 +193,7 @@ describe('StreamsKIsOnboardingClient', () => {
       const result = await client.getStatus({ streamName: 'logs.nginx' });
 
       expect(result).toEqual({
-        status: StreamsKIsOnboardingStatus.Completed,
+        status: SigEventsWorkflowStatus.Completed,
         executionId: 'exec-1',
         features: {
           skipped: false,
@@ -221,7 +221,7 @@ describe('StreamsKIsOnboardingClient', () => {
       const result = await client.getStatus({ streamName: 'logs.nginx' });
 
       expect(result).toEqual({
-        status: StreamsKIsOnboardingStatus.Completed,
+        status: SigEventsWorkflowStatus.Completed,
         executionId: 'exec-1',
         features: {
           skipped: false,
@@ -254,7 +254,7 @@ describe('StreamsKIsOnboardingClient', () => {
       const result = await client.getStatus({ streamName: 'logs.nginx' });
 
       expect(result).toEqual({
-        status: StreamsKIsOnboardingStatus.Failed,
+        status: SigEventsWorkflowStatus.Failed,
         executionId: 'exec-1',
         error: 'something broke',
       });
@@ -270,9 +270,9 @@ describe('StreamsKIsOnboardingClient', () => {
       const result = await client.getStatus({ streamName: 'logs.nginx' });
 
       expect(result).toEqual({
-        status: StreamsKIsOnboardingStatus.Failed,
+        status: SigEventsWorkflowStatus.Failed,
         executionId: 'exec-1',
-        error: 'Onboarding workflow timed out',
+        error: 'Workflow system-streams-ki-onboarding timed out',
       });
     });
 
@@ -286,7 +286,7 @@ describe('StreamsKIsOnboardingClient', () => {
       const result = await client.getStatus({ streamName: 'logs.nginx' });
 
       expect(result).toEqual({
-        status: StreamsKIsOnboardingStatus.Canceled,
+        status: SigEventsWorkflowStatus.Canceled,
         executionId: 'exec-1',
       });
     });

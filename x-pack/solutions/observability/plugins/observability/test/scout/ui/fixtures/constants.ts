@@ -86,37 +86,37 @@ export const CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS = {
   INDEX_PATTERN_INPUT: 'indexPattern-switcher--input',
   EXPLORE_MATCHING_INDICES_BUTTON: 'explore-matching-indices-button',
 
-  // Metric Rows
+  // Rule Details (name + tags)
+  RULE_TAGS_INPUT: 'ruleDetailsTagsInput',
+
+  // Metric Row / Custom Equation
   AGGREGATION_NAME_A: 'aggregationNameA',
   AGGREGATION_NAME_B: 'aggregationNameB',
   AGGREGATION_TYPE_SELECT: 'aggregationTypeSelect',
+  AGGREGATION_FIELD: 'aggregationField',
   ADD_AGGREGATION_BUTTON: 'thresholdRuleCustomEquationEditorAddAggregationFieldButton',
+  CUSTOM_EQUATION: 'customEquation',
+  CUSTOM_EQUATION_FIELD: 'thresholdRuleCustomEquationEditorFieldText',
+  CUSTOM_EQUATION_LABEL: 'thresholdRuleCustomEquationEditorFieldTextLabel',
+  CLOSE_POPOVER_BUTTON: 'o11yClosablePopoverTitleButton',
+
+  // Threshold expression
+  THRESHOLD_POPOVER: 'thresholdPopover',
+  COMPARATOR_SELECT: 'comparatorOptionsComboBox',
+  THRESHOLD_INPUT_0: 'alertThresholdInput0',
+  THRESHOLD_INPUT_1: 'alertThresholdInput1',
+
+  // Time-window expression
+  FOR_LAST_EXPRESSION: 'forLastExpression',
+  TIME_SIZE_INPUT: 'timeWindowSizeNumber',
+  TIME_UNIT_SELECT: 'timeWindowUnitSelect',
+
+  // Group by
+  GROUP_BY: 'thresholdRuleMetricsExplorer-groupBy',
 
   // KQL Filter
   KQL_SEARCH_FIELD: 'o11ySearchField',
   KQL_SUGGESTIONS_PANEL: 'o11ySuggestionsPanel',
-
-  // Custom Equation
-  CUSTOM_EQUATION: 'customEquation',
-  CUSTOM_EQUATION_FIELD: 'thresholdRuleCustomEquationEditorFieldText',
-  CUSTOM_EQUATION_LABEL: 'thresholdRuleCustomEquationEditorFieldTextLabel',
-
-  // Threshold
-  THRESHOLD_POPOVER: 'thresholdPopover',
-  COMPARATOR_OPTIONS_COMBOBOX: 'comparatorOptionsComboBox',
-  ALERT_THRESHOLD_INPUT_0: 'alertThresholdInput0',
-  ALERT_THRESHOLD_INPUT_1: 'alertThresholdInput1',
-
-  // Time Range
-  FOR_LAST_EXPRESSION: 'forLastExpression',
-  TIME_WINDOW_SIZE_NUMBER: 'timeWindowSizeNumber',
-  TIME_WINDOW_UNIT_SELECT: 'timeWindowUnitSelect',
-
-  // Group By
-  GROUP_BY: 'thresholdRuleMetricsExplorer-groupBy',
-
-  // Popover close (o11y-flavoured closable popovers)
-  CLOSE_POPOVER: 'o11yClosablePopoverTitleButton',
 
   // Preview chart
   PREVIEW_CHART: 'thresholdRulePreviewChart',
