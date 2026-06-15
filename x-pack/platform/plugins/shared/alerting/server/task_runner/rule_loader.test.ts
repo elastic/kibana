@@ -30,7 +30,6 @@ import { getAlertFromRaw } from '../rules_client/lib/get_alert_from_raw';
 // create mocks
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
-const mockBasePathService = { set: jest.fn() };
 const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
 jest.mock('../rules_client/lib/get_alert_from_raw');
@@ -40,7 +39,7 @@ const mockGetAlertFromRaw = getAlertFromRaw as jest.MockedFunction<typeof getAle
 const apiKey = mockedRawRuleSO.attributes.apiKey!;
 const ruleId = 'rule-id-1';
 const enabled = true;
-const spaceId = 'rule-spaceId';
+const spaceId = 'rule-spaceid';
 const ruleName = mockedRule.name;
 const consumer = mockedRule.consumer;
 const ruleTypeId = mockedRule.alertTypeId;
@@ -246,8 +245,7 @@ describe('rule_loader', () => {
   describe('getFakeKibanaRequest()', () => {
     test('has API key, in default space', async () => {
       const { fakeRequest, effectiveApiKey } = getFakeKibanaRequest(context, 'default', apiKey);
-      const bpsSetParams = mockBasePathService.set.mock.calls[0];
-      expect(bpsSetParams).toEqual([fakeRequest, '/']);
+      expect(fakeRequest.spaceId).toEqual('default');
       expect(isCoreKibanaRequest(fakeRequest)).toEqual(true);
       expect(fakeRequest.auth.isAuthenticated).toEqual(false);
       expect(fakeRequest.headers.authorization).toEqual('ApiKey MTIzOmFiYw==');
@@ -255,30 +253,28 @@ describe('rule_loader', () => {
       expect(fakeRequest.isInternalApiRequest).toEqual(false);
       expect(fakeRequest.isSystemRequest).toEqual(false);
       expect(fakeRequest.route.path).toEqual('/');
-      expect(fakeRequest.url.toString()).toEqual('https://fake-request/');
+      expect(fakeRequest.url.toString()).toEqual('https://fake-request/url');
       expect(fakeRequest.uuid).toEqual(expect.any(String));
       expect(effectiveApiKey).toEqual(apiKey);
     });
 
     test('has API key, in non-default space', async () => {
       const { fakeRequest } = getFakeKibanaRequest(context, spaceId, apiKey);
-      const bpsSetParams = mockBasePathService.set.mock.calls[0];
-      expect(bpsSetParams).toEqual([fakeRequest, '/s/rule-spaceId']);
+      expect(fakeRequest.spaceId).toEqual(spaceId);
       expect(isCoreKibanaRequest(fakeRequest)).toEqual(true);
       expect(fakeRequest.auth.isAuthenticated).toEqual(false);
       expect(fakeRequest.headers.authorization).toEqual('ApiKey MTIzOmFiYw==');
       expect(fakeRequest.isFakeRequest).toEqual(true);
       expect(fakeRequest.isInternalApiRequest).toEqual(false);
       expect(fakeRequest.isSystemRequest).toEqual(false);
-      expect(fakeRequest.route.path).toEqual('/s/rule-spaceId');
-      expect(fakeRequest.url.toString()).toEqual('https://fake-request/s/rule-spaceId');
+      expect(fakeRequest.route.path).toEqual('/');
+      expect(fakeRequest.url.toString()).toEqual('https://fake-request/url');
       expect(fakeRequest.uuid).toEqual(expect.any(String));
     });
 
     test('does not have API key, in default space', async () => {
       const { fakeRequest, effectiveApiKey } = getFakeKibanaRequest(context, 'default', null);
-      const bpsSetParams = mockBasePathService.set.mock.calls[0];
-      expect(bpsSetParams).toEqual([fakeRequest, '/']);
+      expect(fakeRequest.spaceId).toEqual('default');
 
       expect(fakeRequest.auth.isAuthenticated).toEqual(false);
       expect(fakeRequest.headers).toEqual({});
@@ -286,7 +282,7 @@ describe('rule_loader', () => {
       expect(fakeRequest.isInternalApiRequest).toEqual(false);
       expect(fakeRequest.isSystemRequest).toEqual(false);
       expect(fakeRequest.route.path).toEqual('/');
-      expect(fakeRequest.url.toString()).toEqual('https://fake-request/');
+      expect(fakeRequest.url.toString()).toEqual('https://fake-request/url');
       expect(fakeRequest.uuid).toEqual(expect.any(String));
       expect(effectiveApiKey).toBeNull();
     });
@@ -416,6 +412,5 @@ function getTaskRunnerContext() {
   return {
     spaceIdToNamespace: jest.fn(),
     encryptedSavedObjectsClient: encryptedSavedObjects,
-    basePathService: mockBasePathService,
   };
 }
