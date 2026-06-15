@@ -64,9 +64,10 @@ export type {
   RuleFormMeta,
   RuleFormLayout,
   RuleRequestCommon,
-  WorkflowFormComponentProps,
   RuleNotificationsValue,
 } from './form';
-export { NOOP_WORKFLOW_FORM } from './form';
 
 export type { RuleFormFlyoutProps, DynamicRuleFormFlyoutProps } from './flyout';
+
+export { buildInlineWorkflowYaml } from './actions_form';
+export type { ActionDraft } from './actions_form';

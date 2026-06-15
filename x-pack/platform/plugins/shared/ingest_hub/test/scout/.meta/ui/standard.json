@@ -1,5 +1,5 @@
 {
-  "sha1": "22c65fb9e93eaa5ae91623982f8ab718841db21f",
+  "sha1": "ebe85ea280aca1fb833ea8fa7b265bb8af6d25e6",
   "tests": [
     {
       "id": "2f88d785c412e06-9e9bcc234fbcf5f",
@@ -11,7 +11,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_connect_step.spec.ts",
-        "line": 29,
+        "line": 45,
         "column": 7
       }
     },
@@ -25,7 +25,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_connect_step.spec.ts",
-        "line": 51,
+        "line": 66,
         "column": 7
       }
     },
@@ -39,7 +39,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_connect_step.spec.ts",
-        "line": 79,
+        "line": 103,
         "column": 7
       }
     },
@@ -53,7 +53,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_connect_step.spec.ts",
-        "line": 107,
+        "line": 131,
         "column": 7
       }
     },
@@ -67,7 +67,105 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_ff_enabled.spec.ts",
-        "line": 29,
+        "line": 45,
+        "column": 7
+      }
+    },
+    {
+      "id": "b0669359ac1acfc-0e3d67be95f42a3",
+      "title": "Onboarding connect step IAM permissions viewer shows the aggregated IAM policy for the selected services",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_permissions_viewer.spec.ts",
+        "line": 68,
+        "column": 9
+      }
+    },
+    {
+      "id": "b0669359ac1acfc-de90b35ab9eb820",
+      "title": "Onboarding connect step IAM permissions viewer narrows the policy when a single integration is selected",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_permissions_viewer.spec.ts",
+        "line": 99,
+        "column": 9
+      }
+    },
+    {
+      "id": "240d7a094dcfd2b-345f674a3ce3ecd",
+      "title": "Onboarding services step renders step header and default category view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_services_step.spec.ts",
+        "line": 50,
+        "column": 7
+      }
+    },
+    {
+      "id": "240d7a094dcfd2b-7495eeb4b6af77d",
+      "title": "Onboarding services step deselect and reselect a service",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_services_step.spec.ts",
+        "line": 68,
+        "column": 7
+      }
+    },
+    {
+      "id": "240d7a094dcfd2b-34b2946ab4f92b6",
+      "title": "Onboarding services step per-category select all and deselect all",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_services_step.spec.ts",
+        "line": 81,
+        "column": 7
+      }
+    },
+    {
+      "id": "240d7a094dcfd2b-215fb10fa4ca864",
+      "title": "Onboarding services step Next is disabled when no services are selected",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_services_step.spec.ts",
+        "line": 104,
+        "column": 7
+      }
+    },
+    {
+      "id": "240d7a094dcfd2b-d189ec3bbd08bf3",
+      "title": "Onboarding services step signal-type filter hides categories with no matching services",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_services_step.spec.ts",
+        "line": 130,
         "column": 7
       }
     },
