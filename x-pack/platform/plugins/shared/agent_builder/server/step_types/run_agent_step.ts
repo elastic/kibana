@@ -142,7 +142,7 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
           error instanceof Error ? error : new Error(String(error))
         );
         return {
-          output: { metadata: { usage } },
+          output: { message: '', metadata: { usage } },
           error: error instanceof Error ? error : new Error(String(error)),
         };
       }
