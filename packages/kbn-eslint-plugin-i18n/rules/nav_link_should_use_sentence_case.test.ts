@@ -20,7 +20,8 @@ const tsTester = [
 
 const NAV_FILE = '/x-pack/solutions/observability/plugins/observability/public/navigation_tree.ts';
 
-const wrap = (code: string) => `import { i18n } from '@kbn/i18n';\n${code}`;
+const wrap = (code: string) =>
+  `import { i18n } from '@kbn/i18n';\nimport type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';\n${code}`;
 
 const invalid: RuleTester.InvalidTestCase[] = [
   // Brand term with wrong casing
