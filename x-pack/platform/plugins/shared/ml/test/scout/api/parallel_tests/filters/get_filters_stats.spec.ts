@@ -21,8 +21,16 @@ const testJobConfigs = [jobConfig1, jobConfig2];
 
 const testFilters: estypes.MlFilter[] = [
   { filter_id: 'ignore_a_airlines', description: 'Airlines starting with A', items: ['AAL'] },
-  { filter_id: 'ignore_b_airlines', description: 'Airlines starting with B', items: ['BAA', 'BAB'] },
-  { filter_id: 'ignore_c_airlines', description: 'Airlines starting with C', items: ['CAA', 'CAB', 'CCC'] },
+  {
+    filter_id: 'ignore_b_airlines',
+    description: 'Airlines starting with B',
+    items: ['BAA', 'BAB'],
+  },
+  {
+    filter_id: 'ignore_c_airlines',
+    description: 'Airlines starting with C',
+    items: ['CAA', 'CAB', 'CCC'],
+  },
 ];
 
 // TODO: Add the ECH cloud tag once support for custom roles is implemented.

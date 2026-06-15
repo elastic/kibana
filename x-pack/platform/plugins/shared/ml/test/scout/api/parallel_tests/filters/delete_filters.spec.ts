@@ -23,9 +23,21 @@ apiTest.describe(
   },
   () => {
     const validFilters: estypes.MlFilter[] = [
-      { filter_id: 'delete_filter_power', description: 'Test delete filter #1', items: ['104.236.210.185'] },
-      { filter_id: 'delete_filter_viewer', description: 'Test delete filter (viewer)', items: ['104.236.210.185'] },
-      { filter_id: 'delete_filter_unauthorized', description: 'Test delete filter (unauthorized)', items: ['104.236.210.185'] },
+      {
+        filter_id: 'delete_filter_power',
+        description: 'Test delete filter #1',
+        items: ['104.236.210.185'],
+      },
+      {
+        filter_id: 'delete_filter_viewer',
+        description: 'Test delete filter (viewer)',
+        items: ['104.236.210.185'],
+      },
+      {
+        filter_id: 'delete_filter_unauthorized',
+        description: 'Test delete filter (unauthorized)',
+        items: ['104.236.210.185'],
+      },
     ];
 
     apiTest.beforeAll(async ({ apiServices }) => {

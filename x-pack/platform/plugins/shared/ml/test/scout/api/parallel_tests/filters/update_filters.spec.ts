@@ -23,9 +23,21 @@ apiTest.describe(
   },
   () => {
     const validFilters: estypes.MlFilter[] = [
-      { filter_id: 'update_filter_power', description: 'Test update filter #1', items: ['104.236.210.185'] },
-      { filter_id: 'update_filter_viewer', description: 'Test update filter (viewer)', items: ['104.236.210.185'] },
-      { filter_id: 'update_filter_unauthorized', description: 'Test update filter (unauthorized)', items: ['104.236.210.185'] },
+      {
+        filter_id: 'update_filter_power',
+        description: 'Test update filter #1',
+        items: ['104.236.210.185'],
+      },
+      {
+        filter_id: 'update_filter_viewer',
+        description: 'Test update filter (viewer)',
+        items: ['104.236.210.185'],
+      },
+      {
+        filter_id: 'update_filter_unauthorized',
+        description: 'Test update filter (unauthorized)',
+        items: ['104.236.210.185'],
+      },
     ];
 
     const updateFilterRequestBody = {
