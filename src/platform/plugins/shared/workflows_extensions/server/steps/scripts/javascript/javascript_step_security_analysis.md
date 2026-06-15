@@ -38,6 +38,7 @@ Analysis of the current implementation:
 | **Script size cap** | Rejects scripts larger than **1 MB** after Liquid template rendering (`SCRIPT_MAX_LENGTH_CHARS`), before execution. |
 | **Safe script loading** | User script passed as copied `$0` to fixed `evalClosure` bootstrap + `AsyncFunction` — no string concatenation into wrapper source. |
 | **OOM user message** | Memory-limit failures from `isolated-vm` are normalized to `Script failed due to out of memory` for workflow users. |
+| **Experimental gate** | Step registration requires `workflowsExtensions.experimentalSteps.javaScriptStep: true` in `kibana.yml` (default off). Marked `stability: tech_preview` when enabled. |
 
 **Residual risk after mitigations:** Tight `console.*` or `applySync` loops can still burn CPU until the 5 s timeout. String-based memory bombs are still not reliably blocked by `memoryLimit: 8`.
 
@@ -377,7 +378,7 @@ Priority ordered:
 4. ~~**Cap `input.script` size**~~ — **Done:** 1 MB after template rendering (`SCRIPT_MAX_LENGTH_CHARS`).
 5. **Document `memoryLimit` limitations** for workflow authors; consider rejecting or bounding large string patterns if feasible.
 6. ~~**Hide `__logBridge__` from global**~~ — **Done:** setup + `jail.delete`; console-only access.
-7. **Feature flag / `stability: experimental`** until soak testing completes.
+7. ~~**Feature flag / `stability: tech_preview`**~~ — **Done:** `workflowsExtensions.experimentalSteps.javaScriptStep` (default off).
 8. **Consider** output size check *before* `copy: true` (e.g. return handle + size probe) to reduce main-heap spikes.
 
 ---

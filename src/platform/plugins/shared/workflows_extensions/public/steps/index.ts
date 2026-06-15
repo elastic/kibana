@@ -8,8 +8,12 @@
  */
 
 import type { PublicStepRegistry } from '../step_registry';
+import type { RegisterInternalStepDefinitionsOptions } from '../../server/steps/register_internal_step_definitions_options';
 
-export const registerInternalStepDefinitions = (stepRegistry: PublicStepRegistry) => {
+export const registerInternalStepDefinitions = (
+  stepRegistry: PublicStepRegistry,
+  { experimentalSteps }: RegisterInternalStepDefinitionsOptions
+) => {
   stepRegistry.register(() => import('./data/data_map_step').then((m) => m.dataMapStepDefinition));
   stepRegistry.register(() =>
     import('./data/data_dedupe_step').then((m) => m.dataDedupeStepDefinition)
@@ -38,7 +42,10 @@ export const registerInternalStepDefinitions = (stepRegistry: PublicStepRegistry
   stepRegistry.register(() =>
     import('./data/data_concat_step').then((m) => m.dataConcatStepDefinition)
   );
-  stepRegistry.register(() =>
-    import('./scripts/javascript/javascript_step').then((m) => m.scriptsJavaScriptStepDefinition)
-  );
+
+  if (experimentalSteps.javaScriptStep) {
+    stepRegistry.register(() =>
+      import('./scripts/javascript/javascript_step').then((m) => m.scriptsJavaScriptStepDefinition)
+    );
+  }
 };

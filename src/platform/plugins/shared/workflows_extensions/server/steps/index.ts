@@ -21,8 +21,12 @@ import {
 } from './data';
 import { scriptsJavaScriptStepDefinition } from './scripts/javascript/javascript_step';
 import type { ServerStepRegistry } from '../step_registry/step_registry';
+import type { RegisterInternalStepDefinitionsOptions } from './register_internal_step_definitions_options';
 
-export const registerInternalStepDefinitions = (serverStepRegistry: ServerStepRegistry) => {
+export const registerInternalStepDefinitions = (
+  serverStepRegistry: ServerStepRegistry,
+  { experimentalSteps }: RegisterInternalStepDefinitionsOptions
+) => {
   serverStepRegistry.register(dataMapStepDefinition);
   serverStepRegistry.register(dataDedupeStepDefinition);
   serverStepRegistry.register(dataFilterStepDefinition);
@@ -33,5 +37,8 @@ export const registerInternalStepDefinitions = (serverStepRegistry: ServerStepRe
   serverStepRegistry.register(dataConcatStepDefinition);
   serverStepRegistry.register(dataParseJsonStepDefinition);
   serverStepRegistry.register(dataStringifyJsonStepDefinition);
-  serverStepRegistry.register(scriptsJavaScriptStepDefinition);
+
+  if (experimentalSteps.javaScriptStep) {
+    serverStepRegistry.register(scriptsJavaScriptStepDefinition);
+  }
 };

@@ -33,6 +33,7 @@ export const scriptsJavaScriptStepCommonDefinition: CommonStepDefinition<
 > = {
   id: ScriptsJavaScriptStepTypeId,
   category: StepCategory.Kibana,
+  stability: 'tech_preview',
   label: i18n.translate('workflowsExtensions.scriptsJavaScriptStep.label', {
     defaultMessage: 'Run JavaScript',
   }),

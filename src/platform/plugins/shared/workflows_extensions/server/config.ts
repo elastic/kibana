@@ -7,8 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import type { PluginConfigDescriptor } from '@kbn/core/server';
 
-export const config = {
-  schema: schema.object({}, { defaultValue: {} }),
+const experimentalStepsSchema = schema.object({
+  javaScriptStep: schema.boolean({ defaultValue: false }),
+});
+
+const configSchema = schema.object({
+  experimentalSteps: experimentalStepsSchema,
+});
+
+export type WorkflowsExtensionsExperimentalStepsConfig = TypeOf<typeof experimentalStepsSchema>;
+export type WorkflowsExtensionsConfig = TypeOf<typeof configSchema>;
+
+export const config: PluginConfigDescriptor<WorkflowsExtensionsConfig> = {
+  schema: configSchema,
+  exposeToBrowser: {
+    experimentalSteps: true,
+  },
 };
