@@ -210,9 +210,7 @@ export function initializeLayoutManager(
       beside,
     });
 
-    return {
-      ...updatedLayout,
-    };
+    return updatedLayout;
   };
 
   // --------------------------------------------------------------------------------------
