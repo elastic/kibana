@@ -29,6 +29,7 @@ import { registerSearchByAnchorsRoute } from './search_by_anchors';
 import { registerSearchByDiamondRoute } from './search_by_diamond';
 import { registerCorrelateThreatRoute } from './correlate_threat';
 import { registerSynthesizeAdvisoryRoute } from './synthesize_advisory';
+import { registerCorrelationRunsRoutes } from '../correlation_runs/routes';
 
 export interface RouteRegistrationDeps {
   router: IRouter;
@@ -80,6 +81,7 @@ export const registerRoutes = (deps: RouteRegistrationDeps): void => {
   registerSearchByAnchorsRoute(deps);
   registerSearchByDiamondRoute(deps);
   registerCorrelateThreatRoute(deps);
+  registerCorrelationRunsRoutes(deps);
   registerSubscriptionRoutes(deps);
 
   // UI-facing routes (dashboard + saved views + flyout).

@@ -201,7 +201,7 @@ export const correlateThreatTool = (
       : ({ mode: 'report_id', report_id: params.report_id as string } as const);
 
     try {
-      const data = await correlateThreat({
+      const depthResult = await correlateThreat({
         esClient: esClient.asCurrentUser,
         extractionModel,
         triageModel,
@@ -211,8 +211,21 @@ export const correlateThreatTool = (
         input,
         triageFloor,
         triageTopN,
+        depth: 'full',
       });
-      return { results: [{ type: ToolResultType.other, data }] };
+
+      if (depthResult.depth !== 'full') {
+        return {
+          results: [
+            {
+              type: ToolResultType.error,
+              data: { message: 'Internal error: unexpected depth result from correlateThreat' },
+            },
+          ],
+        };
+      }
+
+      return { results: [{ type: ToolResultType.other, data: depthResult.findings }] };
     } catch (err) {
       logger.warn(`correlate_threat tool failed: ${(err as Error).message}`);
       return {

@@ -279,6 +279,38 @@ export const CORRELATE_THREAT_API_PATH =
   `${THREAT_INTELLIGENCE_API_BASE}/correlate_threat` as const;
 
 /**
+ * Background correlation runs — async, persisted, depth-aware.
+ *
+ * POST creates a run record (status=pending) and fires the pipeline in the
+ * background, returning 202 { runId } immediately.
+ * GET /{runId} returns the run record (with stale guard).
+ * GET / returns the recent runs list for the current space.
+ *
+ * Gated on `.correlate` privilege — same as `correlate_threat`.
+ */
+export const CORRELATION_RUNS_API_PATH =
+  `${THREAT_INTELLIGENCE_API_BASE}/correlation_runs` as const;
+
+export const CORRELATION_RUN_BY_ID_API_PATH =
+  `${THREAT_INTELLIGENCE_API_BASE}/correlation_runs/{runId}` as const;
+
+/**
+ * Per-space ES index for correlation run records.
+ * Hidden (.kibana-*) so kibana_system's existing index privileges apply.
+ */
+export const getCorrelationRunsIndexName = (spaceId: string): string =>
+  `.kibana-threat-correlation-runs-${spaceId}`;
+
+/**
+ * A run stuck in 'running' with no stage update for this long is considered
+ * stale and reported as failed by the GET endpoint (without mutating ES).
+ */
+export const CORRELATION_RUN_STALE_MS = 5 * 60 * 1_000; // 5 min
+
+/** Hard cap on concurrent pending+running runs per space (prevents pile-ups). */
+export const CORRELATION_RUNS_MAX_CONCURRENT = 3;
+
+/**
  * Stage-2 taxonomy enrichment route — POST /api/threat_intelligence/enrich_taxonomy.
  * Invoked by `nl_extraction_behavioral` for every pending report. Produces
  * categories / regions / relevance / detection_actionability / diamond_suitable.

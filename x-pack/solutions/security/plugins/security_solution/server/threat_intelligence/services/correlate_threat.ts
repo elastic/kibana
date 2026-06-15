@@ -10,6 +10,10 @@ import type { ScopedModel } from '@kbn/agent-builder-server';
 import { CostTraceBuilder } from '../routes/lib/cost_tracker';
 import { THREAT_REPORTS_INDEX_PATTERN } from '../../../common/threat_intelligence/hub';
 import type { CorrelationFindings } from '../../../common/threat_intelligence/correlation/schemas';
+import type {
+  CorrelationDepth,
+  CorrelationRunStage,
+} from '../../../common/threat_intelligence/correlation_runs';
 import { extractIocs } from './extract_iocs';
 import { extractDiamond } from './extract_diamond';
 import { searchByAnchors } from './search_by_anchors';
@@ -49,12 +53,58 @@ export interface CorrelateThreatParams {
   input: CorrelateThreatInput;
   triageFloor: number;
   triageTopN: number;
+  /**
+   * Controls how far the pipeline runs before returning.
+   * - `extract` — return after diamond extraction (or fetch for report_id mode).
+   * - `knn`     — return after anchor + diamond retrieval, before gap-fill.
+   * - `triage`  — return after the triage LLM pass.
+   * - `full`    — run to completion (§6 synthesis). Default.
+   */
+  depth?: CorrelationDepth;
+  /**
+   * Called after each completed pipeline stage so background-run callers can
+   * record progress without polling. Must not throw; errors are ignored by the
+   * orchestrator to preserve the pipeline.
+   */
+  onStage?: (stage: CorrelationRunStage) => void | Promise<void>;
 }
+
+// Depth-tagged result variants ---
+
+export interface CorrelateThreatExtractResult {
+  depth: 'extract';
+  diamond: QueryDiamond;
+}
+
+export interface CorrelateThreatKnnResult {
+  depth: 'knn';
+  anchor_hits: SearchByAnchorsResult;
+  diamond_hits: SearchByDiamondResult;
+  merged: TriageCandidateInput[];
+}
+
+export interface CorrelateThreatTriageResult {
+  depth: 'triage';
+  picks: TriagePick[];
+  groups: TriageGroup[];
+  candidates_fed: number;
+  fallback_used: boolean;
+}
+
+export interface CorrelateThreatFullResult {
+  depth: 'full';
+  findings: CorrelationFindings;
+}
+
+export type CorrelateThreatDepthResult =
+  | CorrelateThreatExtractResult
+  | CorrelateThreatKnnResult
+  | CorrelateThreatTriageResult
+  | CorrelateThreatFullResult;
 
 /**
  * Triage-complete diagnostic envelope — preserved for testing and
- * future diagnostic endpoints; no longer the primary return type of
- * correlateThreat now that §6 synthesis is wired in.
+ * future diagnostic endpoints.
  */
 export interface CorrelateThreatTriagedResult {
   stage: 'triage_complete';
@@ -295,11 +345,18 @@ const buildMergedCandidates = (
 // ---------------------------------------------------------------------------
 
 /**
- * Correlation orchestrator — phases 1–6.
+ * Correlation orchestrator — phases 1–6 with optional depth-based early exit.
  *
  * Flow: resolve input → search_by_anchors + search_by_diamond in parallel
  * → merge + dedup candidates → keyword gap-fill (§3) → collapse (§4)
  * → triage (§5) → synthesize_correlations (§6) → CorrelationFindings.
+ *
+ * Pass `depth` to exit early: 'extract' stops after diamond resolution,
+ * 'knn' stops after retrieval, 'triage' stops after the triage LLM call.
+ * The default ('full') runs all six phases as before.
+ *
+ * Pass `onStage` to receive progress notifications after each phase —
+ * useful for background-run callers that persist stage to ES.
  */
 export const correlateThreat = async ({
   esClient,
@@ -311,8 +368,19 @@ export const correlateThreat = async ({
   input,
   triageFloor,
   triageTopN,
-}: CorrelateThreatParams): Promise<CorrelateThreatResult> => {
+  depth = 'full',
+  onStage,
+}: CorrelateThreatParams): Promise<CorrelateThreatDepthResult> => {
   const traceBuilder = new CostTraceBuilder();
+
+  const notifyStage = async (stage: CorrelationRunStage): Promise<void> => {
+    if (!onStage) return;
+    try {
+      await onStage(stage);
+    } catch (e) {
+      logger.warn(`[ti:correlate] onStage('${stage}') threw — ignoring: ${(e as Error).message}`);
+    }
+  };
 
   let anchorResults: SearchByAnchorsResult;
   let diamondResults: SearchByDiamondResult;
@@ -365,12 +433,22 @@ export const correlateThreat = async ({
     ]);
   }
 
+  await notifyStage('extract');
+  if (depth === 'extract') {
+    return { depth: 'extract', diamond: queryDiamond };
+  }
+
   logger.debug(
     `[ti:correlate] retrieval complete — mode=${input.mode} ` +
       `anchors=${anchorResults.hits.length} diamond=${diamondResults.hits.length}`
   );
 
   const merged = buildMergedCandidates(anchorResults, diamondResults);
+
+  await notifyStage('search');
+  if (depth === 'knn') {
+    return { depth: 'knn', anchor_hits: anchorResults, diamond_hits: diamondResults, merged };
+  }
 
   // §3 Keyword gap-fill — extend pool with candidates covering named entities
   // not represented in the diamond/anchor retrieval results.
@@ -398,6 +476,8 @@ export const correlateThreat = async ({
       `pool=${extended.length}`
   );
 
+  await notifyStage('gap_fill');
+
   // §4 Dedup-collapse — collapse exact ioc_set_hash duplicates and bilingual
   // sibling URL variants before spending the triage LLM.
   const preCollapseCount = extended.length;
@@ -407,6 +487,8 @@ export const correlateThreat = async ({
   logger.debug(
     `[ti:correlate] collapse removed ${collapsedCount} candidate(s), pool=${collapsed.length}`
   );
+
+  await notifyStage('dedup');
 
   // §5 Triage — CollapsedCandidate extends TriageCandidateInput; triage
   // ignores the extra collapsed_members field.
@@ -420,6 +502,17 @@ export const correlateThreat = async ({
     topN: triageTopN,
     traceBuilder,
   });
+
+  await notifyStage('triage');
+  if (depth === 'triage') {
+    return {
+      depth: 'triage',
+      picks: triageResult.picks,
+      groups: triageResult.groups,
+      candidates_fed: triageResult.candidates_fed,
+      fallback_used: triageResult.fallback_used,
+    };
+  }
 
   // §6 Synthesis — build case text and call synthesize_correlations.
   // For report_id mode we attempt to fetch the full source body text so the
@@ -440,6 +533,9 @@ export const correlateThreat = async ({
     caseText,
     traceBuilder,
   });
+
+  await notifyStage('synthesize');
+
   const caseVertexSignal = {
     adversary: mapDiamondSignal(queryDiamond.adversary.signal),
     capability: mapDiamondSignal(queryDiamond.capability.signal),
@@ -458,9 +554,12 @@ export const correlateThreat = async ({
     outputIds.size > 0 ? await fetchCandidateMeta(esClient, [...outputIds]) : undefined;
 
   return {
-    ...findings,
-    trace: traceBuilder.build(),
-    case_vertex_signal: caseVertexSignal,
-    candidate_meta: candidateMeta,
+    depth: 'full',
+    findings: {
+      ...findings,
+      trace: traceBuilder.build(),
+      case_vertex_signal: caseVertexSignal,
+      candidate_meta: candidateMeta,
+    },
   };
 };

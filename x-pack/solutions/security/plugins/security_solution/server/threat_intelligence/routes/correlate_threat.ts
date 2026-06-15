@@ -188,37 +188,38 @@ export const registerCorrelateThreatRoute = ({
         const { model: synthesisModel } = synthesisModelOutcome;
 
         try {
-          let result;
-          if (rawText) {
-            result = await correlateThreat({
-              esClient: core.elasticsearch.client.asCurrentUser,
-              extractionModel,
-              triageModel,
-              synthesisModel,
-              logger,
-              spaceId,
-              input: { mode: 'raw_text', text: rawText },
-              triageFloor,
-              triageTopN,
-            });
-          } else if (reportId) {
-            result = await correlateThreat({
-              esClient: core.elasticsearch.client.asCurrentUser,
-              extractionModel,
-              triageModel,
-              synthesisModel,
-              logger,
-              spaceId,
-              input: { mode: 'report_id', report_id: reportId },
-              triageFloor,
-              triageTopN,
-            });
-          } else {
+          const input = rawText
+            ? ({ mode: 'raw_text', text: rawText } as const)
+            : reportId
+            ? ({ mode: 'report_id', report_id: reportId } as const)
+            : null;
+
+          if (!input) {
             // Schema validation guarantees one of the above is set — unreachable.
             return response.badRequest({ body: { message: 'No valid input mode resolved' } });
           }
 
-          return response.ok({ body: result });
+          const depthResult = await correlateThreat({
+            esClient: core.elasticsearch.client.asCurrentUser,
+            extractionModel,
+            triageModel,
+            synthesisModel,
+            logger,
+            spaceId,
+            input,
+            triageFloor,
+            triageTopN,
+            depth: 'full',
+          });
+
+          if (depthResult.depth !== 'full') {
+            return response.customError({
+              statusCode: 500,
+              body: { message: 'Internal error: unexpected depth result from correlateThreat' },
+            });
+          }
+
+          return response.ok({ body: depthResult.findings });
         } catch (err) {
           logger.warn(`correlate_threat failed: ${(err as Error).message}`);
           return response.customError({

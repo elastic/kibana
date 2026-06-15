@@ -176,6 +176,11 @@ export type {
   CorrelateThreatParams,
   CorrelateThreatResult,
   CorrelateThreatTriagedResult,
+  CorrelateThreatDepthResult,
+  CorrelateThreatExtractResult,
+  CorrelateThreatKnnResult,
+  CorrelateThreatTriageResult,
+  CorrelateThreatFullResult,
 } from './correlate_threat';
 
 export { synthesizeCorrelations } from './synthesize_correlations';
