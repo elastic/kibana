@@ -18,6 +18,9 @@ project:
   sourceRoot: src/platform/packages/shared/shared-ux/navigation-extension-templates
 dependsOn:
   - '@kbn/i18n'
+  - '@kbn/utility-types'
+  - '@kbn/ui-side-navigation'
+  - '@kbn/core-chrome-browser'
 tags:
   - shared-common
   - package

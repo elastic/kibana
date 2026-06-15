@@ -19,5 +19,8 @@
   ],
   "kbn_references": [
     "@kbn/i18n",
+    "@kbn/utility-types",
+    "@kbn/ui-side-navigation",
+    "@kbn/core-chrome-browser",
   ]
 }

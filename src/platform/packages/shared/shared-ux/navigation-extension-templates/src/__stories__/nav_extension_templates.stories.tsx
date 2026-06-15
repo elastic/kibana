@@ -8,12 +8,14 @@
  */
 
 import type { Meta, StoryObj } from '@storybook/react';
+import { TEMPLATES } from '../templates';
 import { ListTemplateUsage as ListTemplateSimpleUsageScene } from './scenes/list_template_simple_usage';
 import { ListTemplateRobustUsage as ListTemplateRobustUsageScene } from './scenes/list_template_robust_usage';
 import mdx from './guide.mdx';
 
 export default {
   title: 'Navigation Extension Templates',
+  subcomponents: TEMPLATES,
   parameters: {
     docs: {
       page: mdx,

@@ -8,5 +8,5 @@
  */
 
 export { TEMPLATES } from './src/templates';
-export type { NavExtensionRuntimeDefinition, NavExtensionPointContext } from './src/types';
-export { NavExtensionTemplateHost } from './src/template_host';
+export type { NavTemplateId, NavTemplateConfig, NavExtensionDefinition } from './src/catalog';
+export type { NavExtensionPointContext, NavTemplateActionConfig } from './src/types';

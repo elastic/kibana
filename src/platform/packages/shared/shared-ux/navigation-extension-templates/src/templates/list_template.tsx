@@ -24,7 +24,8 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-import type { ListTemplateConfig, NavListTemplateProps } from '../types';
+import type { SerializableRecord } from '@kbn/utility-types';
+import type { NavExtensionPointBaseComponentProps, NavTemplateActionConfig } from '../types';
 import { getField, getStringField } from '../utils/get_field';
 
 interface NormalizedRow {
@@ -35,7 +36,38 @@ interface NormalizedRow {
   iconType?: IconType;
 }
 
-function normalizeRows<Data = Record<string, string>>(
+export interface ListTemplateConfig<Data = SerializableRecord> {
+  item: {
+    /** field property path of the data record, mapped as the displayed item's id */
+    idField: keyof Data;
+    /** field property path of the data record, mapped as the displayed item's label */
+    labelField: keyof Data;
+    /** field property path of the data record, mapped as the displayed item's href */
+    hrefField: keyof Data;
+    /** field property path of the data record, mapped as the displayed item's icon */
+    iconField?: keyof Data;
+    /** field property path of the data record, mapped as the displayed item's badge */
+    badgeField?: keyof Data;
+  };
+  /** Optional client-side search box. */
+  search?: { enabled: boolean; placeholder?: string };
+  /** Optional section-level actions. */
+  actions?: NavTemplateActionConfig[];
+  /** Message shown when the data source emits no rows. */
+  emptyMessage?: string;
+  /** Cap the number of rows rendered to this value. */
+  max?: number;
+}
+
+export interface NavListTemplateProps<Data = Record<string, string>>
+  extends NavExtensionPointBaseComponentProps<Data, ListTemplateConfig<Data>> {
+  /**
+   * Handler for non-link actions.
+   */
+  onAction: (actionId: string, extensionId: string, itemData: Data) => void;
+}
+
+function normalizeRows<Data = SerializableRecord>(
   data: Data[] | undefined,
   config: ListTemplateConfig<Data>
 ): Map<string, NormalizedRow> {
@@ -70,7 +102,7 @@ function normalizeRows<Data = Record<string, string>>(
  * Renders a list of links from an array data source, with optional client-side
  * search and declarative section actions. Field names are read from config.
  */
-export function ListTemplate<Data = Record<string, string>>({
+export function ListTemplate<Data = SerializableRecord>({
   data,
   config,
   context,

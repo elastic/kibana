@@ -39,6 +39,9 @@ export const ListTemplateUsage: StoryObj<typeof ListTemplate<ListTemplateData>> 
     context: {
       slotId: 'slotId',
       extensionId: 'extensionId',
+      primaryItemId: 'primaryItemId',
+      sectionId: 'sectionId',
+      surface: 'sidePanel',
     },
     onAction: () => {},
   },
