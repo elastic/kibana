@@ -341,16 +341,17 @@ export class ActionPolicyClient {
   public async matchActionPoliciesForRule(
     params: MatchActionPoliciesForRuleParams
   ): Promise<MatchActionPoliciesForRuleResponse> {
-    const { ruleId, ruleName: ruleNameParam, ruleTags: ruleTagsParam } = params;
+    const { ruleId, ruleName, ruleTags } = params;
 
-    let resolvedName = ruleNameParam ?? '';
-    let resolvedTags = ruleTagsParam ?? [];
+    let resolvedName = ruleName ?? '';
+    let resolvedTags = ruleTags ?? [];
 
-    if (ruleId && (ruleNameParam === undefined || ruleTagsParam === undefined)) {
+    // If ruleId is provided but not name or tags, fetch the rule from the DB to get the current name and tags
+    if (ruleId && (ruleName === undefined || ruleTags === undefined)) {
       try {
         const rule = await this.rulesSavedObjectService.get(ruleId);
-        resolvedName = ruleNameParam ?? rule.attributes.metadata.name;
-        resolvedTags = ruleTagsParam ?? rule.attributes.metadata.tags ?? [];
+        resolvedName = ruleName ?? rule.attributes.metadata.name;
+        resolvedTags = ruleTags ?? rule.attributes.metadata.tags ?? [];
       } catch (e) {
         if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
           return { items: [] };
@@ -367,11 +368,7 @@ export class ActionPolicyClient {
       rule: {
         id: ruleId ?? '',
         name: resolvedName,
-        description: '',
         tags: resolvedTags,
-        enabled: true,
-        createdAt: '',
-        updatedAt: '',
       },
     };
 

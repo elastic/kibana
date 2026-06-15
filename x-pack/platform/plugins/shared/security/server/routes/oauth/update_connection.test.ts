@@ -7,7 +7,8 @@
 
 import Boom from '@hapi/boom';
 
-import type { RequestHandler } from '@kbn/core/server';
+import type { ObjectType } from '@kbn/config-schema';
+import type { RequestHandler, RouteConfig } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { UiamOAuthType } from '@kbn/core-security-server';
@@ -31,6 +32,7 @@ describe('Update OAuth Connection route', () => {
     });
   }
 
+  let routeConfig: RouteConfig<any, any, any, any>;
   let routeHandler: RequestHandler<any, any, any, any>;
   let authc: DeeplyMockedKeys<InternalAuthenticationServiceStart>;
   let oauthMock: jest.Mocked<UiamOAuthType>;
@@ -42,10 +44,11 @@ describe('Update OAuth Connection route', () => {
 
     defineUpdateOAuthConnectionRoute(mockRouteDefinitionParams);
 
-    const [, handler] = mockRouteDefinitionParams.router.patch.mock.calls.find(
+    const [config, handler] = mockRouteDefinitionParams.router.patch.mock.calls.find(
       ([{ path }]) =>
         path === '/internal/security/oauth/clients/{client_id}/connections/{connection_id}'
     )!;
+    routeConfig = config;
     routeHandler = handler;
   });
 
@@ -71,6 +74,18 @@ describe('Update OAuth Connection route', () => {
     expect(response.payload).toEqual(mockConnection);
     expect(oauthMock.updateConnection).toHaveBeenCalledWith(expect.anything(), 'c1', 'conn1', {
       name: 'Updated',
+    });
+  });
+
+  describe('name length validation aligned with UIAM (128)', () => {
+    const getBodySchema = () => (routeConfig.validate as any).body as ObjectType;
+
+    it('accepts a name at the 128-character limit', () => {
+      expect(() => getBodySchema().validate({ name: 'a'.repeat(128) })).not.toThrow();
+    });
+
+    it('rejects a name over the 128-character limit', () => {
+      expect(() => getBodySchema().validate({ name: 'a'.repeat(129) })).toThrow(/name/);
     });
   });
 
