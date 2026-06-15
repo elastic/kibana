@@ -8,7 +8,6 @@
 import type {
   Logger,
   SecurityServiceStart,
-  IBasePath,
   KibanaRequest,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
@@ -25,10 +24,9 @@ export class EsApiKeyStrategy implements ApiKeyStrategy {
   async grantApiKeys(
     taskInstances: TaskInstance[],
     request: KibanaRequest,
-    security: SecurityServiceStart,
-    basePath: IBasePath
+    security: SecurityServiceStart
   ): Promise<Map<string, ApiKeySOFields>> {
-    return getApiKeyAndUserScope(taskInstances, request, security, basePath);
+    return getApiKeyAndUserScope(taskInstances, request, security);
   }
 
   getApiKeyForFakeRequest(taskInstance: ConcreteTaskInstance): string | undefined {
