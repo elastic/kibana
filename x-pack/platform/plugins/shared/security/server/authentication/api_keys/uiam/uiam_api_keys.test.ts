@@ -50,6 +50,8 @@ describe('UiamAPIKeys', () => {
       revokeApiKey: jest.fn(),
       convertApiKeys: jest.fn(),
       exchangeOAuthToken: jest.fn(),
+      setOAuthCredential: jest.fn(),
+      getOAuthCredential: jest.fn(),
       createOAuthClient: jest.fn(),
       listOAuthClients: jest.fn(),
       updateOAuthClient: jest.fn(),
@@ -225,6 +227,53 @@ describe('UiamAPIKeys', () => {
         }
       );
       expect(logger.debug).toHaveBeenCalledWith('Using authorization scheme: Bearer');
+    });
+
+    it('prefers the stored original OAuth token over the request authorization header', async () => {
+      // The request only carries the short-lived ephemeral token after token exchange.
+      const request = createMockRequest('Bearer essu_ephemeral_token');
+      mockUiam.getOAuthCredential.mockReturnValue('essu_original_oauth_token');
+      mockUiam.grantApiKey.mockResolvedValue({
+        id: 'new_key_id',
+        key: 'essu_new_key_value',
+        description: 'My Test Key',
+      });
+
+      const result = await uiamApiKeys.grant(request, { name: 'test-key' });
+
+      expect(result).toEqual({
+        id: 'new_key_id',
+        name: 'My Test Key',
+        api_key: 'essu_new_key_value',
+      });
+      expect(mockUiam.getOAuthCredential).toHaveBeenCalledWith(request);
+      expect(mockUiam.grantApiKey).toHaveBeenCalledWith(
+        expect.objectContaining({
+          scheme: 'Bearer',
+          credentials: 'essu_original_oauth_token',
+        }),
+        { name: 'test-key' }
+      );
+    });
+
+    it('falls back to the request authorization header when no stored OAuth token exists', async () => {
+      const request = createMockRequest('ApiKey essu_uiam_credential_123');
+      mockUiam.getOAuthCredential.mockReturnValue(undefined);
+      mockUiam.grantApiKey.mockResolvedValue({
+        id: 'new_key_id',
+        key: 'essu_new_key_value',
+        description: 'My Test Key',
+      });
+
+      await uiamApiKeys.grant(request, { name: 'test-key' });
+
+      expect(mockUiam.grantApiKey).toHaveBeenCalledWith(
+        expect.objectContaining({
+          scheme: 'ApiKey',
+          credentials: 'essu_uiam_credential_123',
+        }),
+        { name: 'test-key' }
+      );
     });
   });
 

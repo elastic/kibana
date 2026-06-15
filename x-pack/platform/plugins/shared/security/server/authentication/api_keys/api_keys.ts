@@ -270,7 +270,13 @@ export class APIKeys implements NativeAPIKeysType {
     }
 
     this.logger.debug('Trying to grant an API key');
-    const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
+    // Prefer the original UIAM OAuth access token captured during token exchange (if any). After
+    // exchange, the request `Authorization` header carries only the short-lived ephemeral token,
+    // which cannot be used to grant a durable API key.
+    const originalOAuthToken = this.uiam?.getOAuthCredential(request);
+    const authorizationHeader = originalOAuthToken
+      ? new HTTPAuthorizationHeader('Bearer', originalOAuthToken)
+      : HTTPAuthorizationHeader.parseFromRequest(request);
     if (authorizationHeader == null) {
       throw new Error(
         `Unable to grant an API Key, request does not contain an authorization header`

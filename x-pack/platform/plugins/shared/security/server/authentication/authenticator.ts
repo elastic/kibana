@@ -700,6 +700,7 @@ export class Authenticator {
       new HTTPAuthenticationProvider(options, {
         supportedSchemes,
         jwt: this.options.config.authc.http.jwt,
+        uiam: this.options.config.authc.http.uiam,
       })
     );
   }
