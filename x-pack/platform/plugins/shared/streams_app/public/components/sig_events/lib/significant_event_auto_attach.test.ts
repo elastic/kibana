@@ -25,7 +25,6 @@ const createEvent = (overrides?: Partial<SigEvent>): SigEvent => ({
   created_at: '2026-01-01T00:00:00.000Z',
   event_id: 'event-1',
   discovery_slug: 'payment-outage',
-  verdict: 'promoted',
   stream_names: ['logs.payment'],
   title: 'Payment outage',
   summary: 'Payments are failing.',
@@ -34,6 +33,7 @@ const createEvent = (overrides?: Partial<SigEvent>): SigEvent => ({
   confidence: 0.8,
   impact: 'high',
   recommendations: ['Restart gateway client'],
+  status: 'promoted',
   ...overrides,
 });
 

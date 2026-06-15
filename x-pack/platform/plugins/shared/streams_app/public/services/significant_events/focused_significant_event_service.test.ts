@@ -13,7 +13,6 @@ const createEvent = (discoverySlug: string): SigEvent => ({
   created_at: '2026-01-01T00:00:00.000Z',
   event_id: `event-${discoverySlug}`,
   discovery_slug: discoverySlug,
-  verdict: 'promoted',
   stream_names: ['logs.payment'],
   title: `Event ${discoverySlug}`,
   summary: 'Summary',
@@ -22,6 +21,7 @@ const createEvent = (discoverySlug: string): SigEvent => ({
   confidence: 0.8,
   impact: 'high',
   recommendations: [],
+  status: 'promoted',
 });
 
 describe('FocusedSignificantEventService', () => {
