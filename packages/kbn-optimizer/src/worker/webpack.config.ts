@@ -99,6 +99,12 @@ export function getWebpackConfig(
           return callback();
         }
 
+        // Let kea resolve react-redux normally (not as shared external) so the
+        // NormalModuleReplacementPlugin below can redirect it to react-redux-v7.
+        if (context && request === 'react-redux' && /node_modules[\\/]kea/.test(context)) {
+          return callback();
+        }
+
         const sharedExternals: Record<string, string> = {
           'node:crypto': 'commonjs crypto',
           ...UiSharedDepsSrc.externals,
@@ -113,6 +119,14 @@ export function getWebpackConfig(
     ],
 
     plugins: [
+      // Redirect kea's react-redux import to react-redux-v7 so it shares the
+      // same React context as the <Provider> from react-redux-v7 used by
+      // consumers like enterprise_search.
+      new webpack.NormalModuleReplacementPlugin(/^react-redux$/, (resource) => {
+        if (resource.context && /node_modules[\\/]kea/.test(resource.context)) {
+          resource.request = 'react-redux-v7';
+        }
+      }),
       new NodeLibsBrowserPlugin(),
       new CleanWebpackPlugin(),
       new BundleRemotesPlugin(bundle, bundleRemotes),
