@@ -487,13 +487,12 @@ test.describe('General connector functionality', { tag: tags.stateful.classic },
     );
     expect(validTimestamps.length).toBeGreaterThan(0);
 
-    // Sort ascending: open column action menu, click 2nd button (index 1 = ascending)
     await page.testSubj.locator('dataGridHeaderCell-timestamp').hover();
     await page.testSubj.click('dataGridHeaderCellActionButton-timestamp');
     await page.testSubj.locator('dataGridHeaderCellActionGroup-timestamp').waitFor();
     await page.testSubj
       .locator('dataGridHeaderCellActionGroup-timestamp')
-      .locator('li:nth-child(2) button')
+      .getByRole('button', { name: 'Sort Old-New' })
       .click();
 
     await expect(page.testSubj.locator('dataGridHeaderCellSortingIcon-timestamp')).toBeVisible();
