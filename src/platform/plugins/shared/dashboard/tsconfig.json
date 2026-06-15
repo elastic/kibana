@@ -127,7 +127,8 @@
     "@kbn/core-user-activity-server",
     "@kbn/core-test-helpers-test-utils",
     "@kbn/app-header",
-    "@kbn/ui-side-navigation"
+    "@kbn/core-chrome-browser",
+    "@kbn/shared-ux-navigation-extension-templates"
   ],
   "exclude": [
     "target/**/*"

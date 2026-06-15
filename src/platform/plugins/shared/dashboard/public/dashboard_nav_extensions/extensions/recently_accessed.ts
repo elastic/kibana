@@ -10,7 +10,8 @@
 import { map, type Observable } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import type { ChromeRecentlyAccessed, IBasePath } from '@kbn/core/public';
-import type { NavExtensionDefinition, NavExtensionEntry } from '@kbn/ui-side-navigation';
+import type { NavExtensionEntry } from '@kbn/core-chrome-browser';
+import type { NavExtensionDefinition } from '@kbn/shared-ux-navigation-extension-templates';
 
 /**
  * Expected Row shape expected to be emitted by a `recentItems` slot's data source.
@@ -23,7 +24,7 @@ export interface RecentItemRow {
 
 export const RECENTLY_ACCESSED_DASHBOARDS_EXTENSION_ID = 'recentlyAccessedDashboards' as const;
 
-declare module '@kbn/ui-side-navigation' {
+declare module '@kbn/core-chrome-browser' {
   interface NavExtensionRegistry {
     // The `list` template receives the full array; the data source emits `RecentItemRow[]`.
     [RECENTLY_ACCESSED_DASHBOARDS_EXTENSION_ID]: NavExtensionEntry<RecentItemRow[]>;
