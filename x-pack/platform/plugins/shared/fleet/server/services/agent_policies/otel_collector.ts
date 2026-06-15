@@ -159,7 +159,11 @@ export function generateOtelcolConfig({
         };
 
         let otelConfig: OTelCollectorConfig = {
-          ...addSuffixToOtelcolComponentsConfig('extensions', suffix, rewriteExtRefs(stream?.extensions)),
+          ...addSuffixToOtelcolComponentsConfig(
+            'extensions',
+            suffix,
+            rewriteExtRefs(stream?.extensions)
+          ),
           ...addSuffixToOtelcolComponentsConfig(
             'receivers',
             suffix,
