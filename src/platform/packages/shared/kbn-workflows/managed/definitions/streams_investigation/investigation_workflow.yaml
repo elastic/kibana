@@ -1,0 +1,656 @@
+version: "1"
+name: Investigation
+description: >
+  Root cause analysis for a promoted Significant Event. Runs a context agent to
+  generate hypotheses, then for each hypothesis: gathers evidence (Haiku) and
+  reviews it (Haiku). Reviewed results are merged and synthesised (Sonnet) back
+  to the Discovery document and memory.
+enabled: true
+settings:
+  timeout: "45m"
+  concurrency:
+    key: "streams-sigevents-investigation-{{ inputs.discovery_id }}"
+    strategy: cancel-in-progress
+    max: 1
+tags:
+  - observability
+  - streams
+  - sigevents
+  - investigation
+
+triggers:
+  - type: manual
+
+steps:
+
+  # ── Step 1: Context ──────────────────────────────────────────────────────────
+  - name: build_context
+    type: ai.agent
+    agent-id: sigevents.investigation.context
+    connector-id: ".anthropic-claude-4.6-sonnet-chat_completion"
+    create-conversation: true
+    with:
+      timeout: 600s
+      message: |
+        Investigate this significant event and propose root cause hypotheses.
+        Generate as many hypotheses as are genuinely distinct and worth investigating —
+        up to 5 maximum. Do not pad to 5; fewer strong hypotheses are better than many
+        weak ones. Order them by your prior confidence, highest first.
+
+        Event: {{ inputs | json }}
+      schema:
+        type: object
+        properties:
+          context_summary:
+            type: string
+          memory_context:
+            type: string
+          known_gaps:
+            type: array
+            items:
+              type: string
+          hypotheses:
+            type: array
+            minItems: 1
+            maxItems: 5
+            items:
+              type: object
+              properties:
+                id:
+                  type: string
+                statement:
+                  type: string
+                prior_confidence:
+                  type: number
+                  minimum: 0
+                  maximum: 1
+                suggested_queries:
+                  type: array
+                  items:
+                    type: string
+              required:
+                - id
+                - statement
+                - prior_confidence
+                - suggested_queries
+        required:
+          - context_summary
+          - memory_context
+          - known_gaps
+          - hypotheses
+    on-failure:
+      continue: false
+
+  # ── Step 2: Parallel gather + review per hypothesis (Haiku × 2 per branch) ──
+  - name: investigate_hypotheses
+    type: parallel
+    branches:
+      - name: hypothesis_0
+        steps:
+          - name: gather
+            type: ai.agent
+            if: "{{ steps.build_context.output.structured_output.hypotheses | size >= 1 }}"
+            agent-id: sigevents.investigation.gather
+            connector-id: ".anthropic-claude-4.5-haiku-chat_completion"
+            with:
+              timeout: 360s
+              message: |
+                Collect all available evidence for this hypothesis. Do not render a
+                verdict — that is the next step's job. Record everything you tried,
+                including failed lookups and access blockers. Be thorough and honest.
+
+                Hypothesis: {{ steps.build_context.output.structured_output.hypotheses[0] | json }}
+                Event context: {{ steps.build_context.output.structured_output.context_summary }}
+                Streams: {{ inputs.stream_names | json }}
+              schema:
+                type: object
+                properties:
+                  hypothesis_id:
+                    type: string
+                  evidence:
+                    type: array
+                    maxItems: 12
+                    items:
+                      type: object
+                      properties:
+                        source:
+                          type: string
+                          enum: [esql, memory, ki, mcp, none]
+                        description:
+                          type: string
+                        relevance:
+                          type: string
+                          enum: [supporting, refuting, neutral, unreachable]
+                      required: [source, description, relevance]
+                  gaps_found:
+                    type: array
+                    items:
+                      type: string
+                  gather_summary:
+                    type: string
+                required: [hypothesis_id, evidence, gaps_found, gather_summary]
+
+          - name: review
+            type: ai.agent
+            if: "{{ steps.build_context.output.structured_output.hypotheses | size >= 1 }}"
+            agent-id: sigevents.investigation.review
+            connector-id: ".anthropic-claude-4.5-haiku-chat_completion"
+            with:
+              timeout: 180s
+              message: |
+                Review the gathered evidence and verdict the hypothesis.
+                Decide whether to forward it to synthesis or discard it.
+                Discard only when the evidence is so thin or so clearly refuted
+                that including it would add no signal to the final ranking.
+                A clearly-refuted hypothesis is still worth forwarding if the
+                refutation itself is informative.
+
+                Hypothesis: {{ steps.build_context.output.structured_output.hypotheses[0] | json }}
+                Gathered evidence: {{ steps.hypothesis_0.gather.output | json }}
+              schema:
+                type: object
+                properties:
+                  hypothesis_id:
+                    type: string
+                  decision:
+                    type: string
+                    enum: [forward, discard]
+                  discard_reason:
+                    type: string
+                  verdict:
+                    type: string
+                    enum: [supported, refuted, inconclusive, out_of_reach]
+                  posterior_confidence:
+                    type: number
+                    minimum: 0
+                    maximum: 1
+                  reasoning:
+                    type: string
+                required: [hypothesis_id, decision, verdict, posterior_confidence, reasoning]
+
+      - name: hypothesis_1
+        steps:
+          - name: gather
+            type: ai.agent
+            if: "{{ steps.build_context.output.structured_output.hypotheses | size >= 2 }}"
+            agent-id: sigevents.investigation.gather
+            connector-id: ".anthropic-claude-4.5-haiku-chat_completion"
+            with:
+              timeout: 360s
+              message: |
+                Collect all available evidence for this hypothesis. Do not render a
+                verdict — that is the next step's job. Record everything you tried,
+                including failed lookups and access blockers. Be thorough and honest.
+
+                Hypothesis: {{ steps.build_context.output.structured_output.hypotheses[1] | json }}
+                Event context: {{ steps.build_context.output.structured_output.context_summary }}
+                Streams: {{ inputs.stream_names | json }}
+              schema:
+                type: object
+                properties:
+                  hypothesis_id:
+                    type: string
+                  evidence:
+                    type: array
+                    maxItems: 12
+                    items:
+                      type: object
+                      properties:
+                        source:
+                          type: string
+                          enum: [esql, memory, ki, mcp, none]
+                        description:
+                          type: string
+                        relevance:
+                          type: string
+                          enum: [supporting, refuting, neutral, unreachable]
+                      required: [source, description, relevance]
+                  gaps_found:
+                    type: array
+                    items:
+                      type: string
+                  gather_summary:
+                    type: string
+                required: [hypothesis_id, evidence, gaps_found, gather_summary]
+
+          - name: review
+            type: ai.agent
+            if: "{{ steps.build_context.output.structured_output.hypotheses | size >= 2 }}"
+            agent-id: sigevents.investigation.review
+            connector-id: ".anthropic-claude-4.5-haiku-chat_completion"
+            with:
+              timeout: 180s
+              message: |
+                Review the gathered evidence and verdict the hypothesis.
+                Decide whether to forward it to synthesis or discard it.
+                Discard only when the evidence is so thin or so clearly refuted
+                that including it would add no signal to the final ranking.
+                A clearly-refuted hypothesis is still worth forwarding if the
+                refutation itself is informative.
+
+                Hypothesis: {{ steps.build_context.output.structured_output.hypotheses[1] | json }}
+                Gathered evidence: {{ steps.hypothesis_1.gather.output | json }}
+              schema:
+                type: object
+                properties:
+                  hypothesis_id:
+                    type: string
+                  decision:
+                    type: string
+                    enum: [forward, discard]
+                  discard_reason:
+                    type: string
+                  verdict:
+                    type: string
+                    enum: [supported, refuted, inconclusive, out_of_reach]
+                  posterior_confidence:
+                    type: number
+                    minimum: 0
+                    maximum: 1
+                  reasoning:
+                    type: string
+                required: [hypothesis_id, decision, verdict, posterior_confidence, reasoning]
+
+      - name: hypothesis_2
+        steps:
+          - name: gather
+            type: ai.agent
+            if: "{{ steps.build_context.output.structured_output.hypotheses | size >= 3 }}"
+            agent-id: sigevents.investigation.gather
+            connector-id: ".anthropic-claude-4.5-haiku-chat_completion"
+            with:
+              timeout: 360s
+              message: |
+                Collect all available evidence for this hypothesis. Do not render a
+                verdict — that is the next step's job. Record everything you tried,
+                including failed lookups and access blockers. Be thorough and honest.
+
+                Hypothesis: {{ steps.build_context.output.structured_output.hypotheses[2] | json }}
+                Event context: {{ steps.build_context.output.structured_output.context_summary }}
+                Streams: {{ inputs.stream_names | json }}
+              schema:
+                type: object
+                properties:
+                  hypothesis_id:
+                    type: string
+                  evidence:
+                    type: array
+                    maxItems: 12
+                    items:
+                      type: object
+                      properties:
+                        source:
+                          type: string
+                          enum: [esql, memory, ki, mcp, none]
+                        description:
+                          type: string
+                        relevance:
+                          type: string
+                          enum: [supporting, refuting, neutral, unreachable]
+                      required: [source, description, relevance]
+                  gaps_found:
+                    type: array
+                    items:
+                      type: string
+                  gather_summary:
+                    type: string
+                required: [hypothesis_id, evidence, gaps_found, gather_summary]
+
+          - name: review
+            type: ai.agent
+            if: "{{ steps.build_context.output.structured_output.hypotheses | size >= 3 }}"
+            agent-id: sigevents.investigation.review
+            connector-id: ".anthropic-claude-4.5-haiku-chat_completion"
+            with:
+              timeout: 180s
+              message: |
+                Review the gathered evidence and verdict the hypothesis.
+                Decide whether to forward it to synthesis or discard it.
+                Discard only when the evidence is so thin or so clearly refuted
+                that including it would add no signal to the final ranking.
+                A clearly-refuted hypothesis is still worth forwarding if the
+                refutation itself is informative.
+
+                Hypothesis: {{ steps.build_context.output.structured_output.hypotheses[2] | json }}
+                Gathered evidence: {{ steps.hypothesis_2.gather.output | json }}
+              schema:
+                type: object
+                properties:
+                  hypothesis_id:
+                    type: string
+                  decision:
+                    type: string
+                    enum: [forward, discard]
+                  discard_reason:
+                    type: string
+                  verdict:
+                    type: string
+                    enum: [supported, refuted, inconclusive, out_of_reach]
+                  posterior_confidence:
+                    type: number
+                    minimum: 0
+                    maximum: 1
+                  reasoning:
+                    type: string
+                required: [hypothesis_id, decision, verdict, posterior_confidence, reasoning]
+
+      - name: hypothesis_3
+        steps:
+          - name: gather
+            type: ai.agent
+            if: "{{ steps.build_context.output.structured_output.hypotheses | size >= 4 }}"
+            agent-id: sigevents.investigation.gather
+            connector-id: ".anthropic-claude-4.5-haiku-chat_completion"
+            with:
+              timeout: 360s
+              message: |
+                Collect all available evidence for this hypothesis. Do not render a
+                verdict — that is the next step's job. Record everything you tried,
+                including failed lookups and access blockers. Be thorough and honest.
+
+                Hypothesis: {{ steps.build_context.output.structured_output.hypotheses[3] | json }}
+                Event context: {{ steps.build_context.output.structured_output.context_summary }}
+                Streams: {{ inputs.stream_names | json }}
+              schema:
+                type: object
+                properties:
+                  hypothesis_id:
+                    type: string
+                  evidence:
+                    type: array
+                    maxItems: 12
+                    items:
+                      type: object
+                      properties:
+                        source:
+                          type: string
+                          enum: [esql, memory, ki, mcp, none]
+                        description:
+                          type: string
+                        relevance:
+                          type: string
+                          enum: [supporting, refuting, neutral, unreachable]
+                      required: [source, description, relevance]
+                  gaps_found:
+                    type: array
+                    items:
+                      type: string
+                  gather_summary:
+                    type: string
+                required: [hypothesis_id, evidence, gaps_found, gather_summary]
+
+          - name: review
+            type: ai.agent
+            if: "{{ steps.build_context.output.structured_output.hypotheses | size >= 4 }}"
+            agent-id: sigevents.investigation.review
+            connector-id: ".anthropic-claude-4.5-haiku-chat_completion"
+            with:
+              timeout: 180s
+              message: |
+                Review the gathered evidence and verdict the hypothesis.
+                Decide whether to forward it to synthesis or discard it.
+                Discard only when the evidence is so thin or so clearly refuted
+                that including it would add no signal to the final ranking.
+                A clearly-refuted hypothesis is still worth forwarding if the
+                refutation itself is informative.
+
+                Hypothesis: {{ steps.build_context.output.structured_output.hypotheses[3] | json }}
+                Gathered evidence: {{ steps.hypothesis_3.gather.output | json }}
+              schema:
+                type: object
+                properties:
+                  hypothesis_id:
+                    type: string
+                  decision:
+                    type: string
+                    enum: [forward, discard]
+                  discard_reason:
+                    type: string
+                  verdict:
+                    type: string
+                    enum: [supported, refuted, inconclusive, out_of_reach]
+                  posterior_confidence:
+                    type: number
+                    minimum: 0
+                    maximum: 1
+                  reasoning:
+                    type: string
+                required: [hypothesis_id, decision, verdict, posterior_confidence, reasoning]
+
+      - name: hypothesis_4
+        steps:
+          - name: gather
+            type: ai.agent
+            if: "{{ steps.build_context.output.structured_output.hypotheses | size >= 5 }}"
+            agent-id: sigevents.investigation.gather
+            connector-id: ".anthropic-claude-4.5-haiku-chat_completion"
+            with:
+              timeout: 360s
+              message: |
+                Collect all available evidence for this hypothesis. Do not render a
+                verdict — that is the next step's job. Record everything you tried,
+                including failed lookups and access blockers. Be thorough and honest.
+
+                Hypothesis: {{ steps.build_context.output.structured_output.hypotheses[4] | json }}
+                Event context: {{ steps.build_context.output.structured_output.context_summary }}
+                Streams: {{ inputs.stream_names | json }}
+              schema:
+                type: object
+                properties:
+                  hypothesis_id:
+                    type: string
+                  evidence:
+                    type: array
+                    maxItems: 12
+                    items:
+                      type: object
+                      properties:
+                        source:
+                          type: string
+                          enum: [esql, memory, ki, mcp, none]
+                        description:
+                          type: string
+                        relevance:
+                          type: string
+                          enum: [supporting, refuting, neutral, unreachable]
+                      required: [source, description, relevance]
+                  gaps_found:
+                    type: array
+                    items:
+                      type: string
+                  gather_summary:
+                    type: string
+                required: [hypothesis_id, evidence, gaps_found, gather_summary]
+
+          - name: review
+            type: ai.agent
+            if: "{{ steps.build_context.output.structured_output.hypotheses | size >= 5 }}"
+            agent-id: sigevents.investigation.review
+            connector-id: ".anthropic-claude-4.5-haiku-chat_completion"
+            with:
+              timeout: 180s
+              message: |
+                Review the gathered evidence and verdict the hypothesis.
+                Decide whether to forward it to synthesis or discard it.
+                Discard only when the evidence is so thin or so clearly refuted
+                that including it would add no signal to the final ranking.
+                A clearly-refuted hypothesis is still worth forwarding if the
+                refutation itself is informative.
+
+                Hypothesis: {{ steps.build_context.output.structured_output.hypotheses[4] | json }}
+                Gathered evidence: {{ steps.hypothesis_4.gather.output | json }}
+              schema:
+                type: object
+                properties:
+                  hypothesis_id:
+                    type: string
+                  decision:
+                    type: string
+                    enum: [forward, discard]
+                  discard_reason:
+                    type: string
+                  verdict:
+                    type: string
+                    enum: [supported, refuted, inconclusive, out_of_reach]
+                  posterior_confidence:
+                    type: number
+                    minimum: 0
+                    maximum: 1
+                  reasoning:
+                    type: string
+                required: [hypothesis_id, decision, verdict, posterior_confidence, reasoning]
+
+  - name: collect_results
+    type: merge
+    sources:
+      - hypothesis_0
+      - hypothesis_1
+      - hypothesis_2
+      - hypothesis_3
+      - hypothesis_4
+
+  # ── Step 3: Synthesis ─────────────────────────────────────────────────────────
+  - name: synthesize
+    type: ai.agent
+    agent-id: sigevents.investigation.synthesis
+    connector-id: ".anthropic-claude-4.6-sonnet-chat_completion"
+    create-conversation: true
+    with:
+      timeout: 600s
+      message: |
+        Synthesise the investigation results.
+        The branch results contain both gather and review outputs per hypothesis.
+        For ranking and remediation, use ONLY entries where review.decision === 'forward'.
+        Record entries where review.decision === 'discard' in discarded_hypotheses
+        (copy their hypothesis_id, statement, and discard_reason — do not rank them).
+        Produce a root cause statement only if at least one forwarded hypothesis was
+        'supported' — otherwise use "Undetermined". Only propose remediation options
+        grounded in the evidence; leave the array empty rather than offering generic advice.
+        Write lessons learned to memory. Set investigation_complete to false if all
+        forwarded hypotheses were out_of_reach or no hypotheses were forwarded at all.
+
+        Context: {{ steps.build_context.output | json }}
+        Branch results: {{ steps.collect_results.output | json }}
+        Event: event_id={{ inputs.event_id }}, discovery_id={{ inputs.discovery_id }}
+      schema:
+        type: object
+        properties:
+          root_cause:
+            type: string
+          confidence:
+            type: number
+            minimum: 0
+            maximum: 1
+          impact:
+            type: string
+          ranked_hypotheses:
+            type: array
+            items:
+              type: object
+              properties:
+                rank:
+                  type: integer
+                  minimum: 1
+                hypothesis_id:
+                  type: string
+                statement:
+                  type: string
+                verdict:
+                  type: string
+                  enum: [supported, refuted, inconclusive, out_of_reach]
+                prior_confidence:
+                  type: number
+                  minimum: 0
+                  maximum: 1
+                posterior_confidence:
+                  type: number
+                  minimum: 0
+                  maximum: 1
+                evidence_summary:
+                  type: string
+              required:
+                - rank
+                - hypothesis_id
+                - statement
+                - verdict
+                - prior_confidence
+                - posterior_confidence
+                - evidence_summary
+          discarded_hypotheses:
+            type: array
+            items:
+              type: object
+              properties:
+                hypothesis_id:
+                  type: string
+                statement:
+                  type: string
+                discard_reason:
+                  type: string
+              required: [hypothesis_id, statement, discard_reason]
+          remediation_options:
+            type: array
+            items:
+              type: object
+              properties:
+                rank:
+                  type: integer
+                  minimum: 1
+                action:
+                  type: string
+                rationale:
+                  type: string
+                risk_level:
+                  type: string
+                  enum: [low, medium, high]
+                prerequisites:
+                  type: array
+                  items:
+                    type: string
+              required: [rank, action, rationale, risk_level]
+          gaps_found:
+            type: array
+            items:
+              type: string
+          investigation_complete:
+            type: boolean
+          memory_pages_written:
+            type: array
+            items:
+              type: string
+        required:
+          - root_cause
+          - confidence
+          - impact
+          - ranked_hypotheses
+          - discarded_hypotheses
+          - remediation_options
+          - gaps_found
+          - investigation_complete
+          - memory_pages_written
+    on-failure:
+      continue: false
+
+  # ── Step 4: Write-back ────────────────────────────────────────────────────────
+  - name: prepare_write_back
+    type: data.set
+    with:
+      root_cause: "{{ steps.synthesize.output.structured_output.root_cause }}"
+      confidence: "${{ steps.synthesize.output.structured_output.confidence }}"
+      impact: "{{ steps.synthesize.output.structured_output.impact }}"
+      ranked_hypotheses: "${{ steps.synthesize.output.structured_output.ranked_hypotheses }}"
+      discarded_hypotheses: "${{ steps.synthesize.output.structured_output.discarded_hypotheses }}"
+      remediation_options: "${{ steps.synthesize.output.structured_output.remediation_options }}"
+      gaps_found: "${{ steps.synthesize.output.structured_output.gaps_found }}"
+      investigation_complete: "${{ steps.synthesize.output.structured_output.investigation_complete }}"
+      memory_pages_written: "${{ steps.synthesize.output.structured_output.memory_pages_written }}"
+      workflow_execution_id: "{{ execution.id }}"
+
+  - name: write_back
+    type: http
+    with:
+      url: "{{ kibana.internal_url }}/internal/streams/sig_events/discoveries/{{ inputs.discovery_id }}/investigation"
+      method: POST
+      body: "{{ steps.prepare_write_back.output | json }}"
+    on-failure:
+      continue: true

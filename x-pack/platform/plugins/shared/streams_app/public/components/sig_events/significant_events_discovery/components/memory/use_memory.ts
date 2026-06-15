@@ -190,3 +190,21 @@ export const useSynthesizeMemory = () => {
     })
   );
 };
+
+export interface InvestigationFeedbackPayload {
+  aspect: 'root_cause' | 'hypothesis' | 'remediation';
+  feedback: 'correct' | 'incorrect' | 'helpful' | 'not_helpful';
+  discovery_id: string;
+  hypothesis_id?: string;
+  remediation_rank?: number;
+}
+
+export const useSynthesizeWithFeedback = () => {
+  const { core } = useKibana();
+  return useMutation({
+    mutationFn: (payload: InvestigationFeedbackPayload) =>
+      core.http.post(`${MEMORY_BASE}/_synthesize`, {
+        body: JSON.stringify({ user_feedback: payload }),
+      }),
+  });
+};

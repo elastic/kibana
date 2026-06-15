@@ -151,6 +151,17 @@ interface StreamsInsightFeedbackProps {
   insight_impact: InsightImpactLevel;
 }
 
+type InvestigationFeedbackAspect = 'root_cause' | 'hypothesis' | 'remediation';
+type InvestigationFeedbackValue = 'correct' | 'incorrect' | 'helpful' | 'not_helpful';
+
+interface StreamsInvestigationFeedbackProps {
+  feedback: InvestigationFeedbackValue;
+  aspect: InvestigationFeedbackAspect;
+  discovery_id: string;
+  hypothesis_id?: string;
+  remediation_rank?: number;
+}
+
 interface StreamsTabVisitedProps {
   stream_name: string;
   stream_type: StreamType;
@@ -169,6 +180,9 @@ interface StreamsTabVisitedProps {
 }
 
 export {
+  type InvestigationFeedbackAspect,
+  type InvestigationFeedbackValue,
+  type StreamsInvestigationFeedbackProps,
   type ConfigurationMode,
   type StreamsAttachmentCountProps,
   type StreamsAttachmentClickEventProps,

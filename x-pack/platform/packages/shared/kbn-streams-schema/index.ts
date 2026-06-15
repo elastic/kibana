@@ -307,6 +307,17 @@ export {
   type KnowledgeIndicator,
   type SigEventStatus,
   type SigEventImpact,
+  investigationInputSchema,
+  contextOutputSchema,
+  gatherOutputSchema,
+  reviewOutputSchema,
+  investigationResultSchema,
+  type InvestigationInput,
+  type HypothesisProposal,
+  type ContextOutput,
+  type GatherOutput,
+  type ReviewOutput,
+  type InvestigationResult,
 } from './src/sig_events';
 export type {
   StreamsKIsOnboardingResult,

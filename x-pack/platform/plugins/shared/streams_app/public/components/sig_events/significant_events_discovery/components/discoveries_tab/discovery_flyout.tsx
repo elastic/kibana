@@ -28,6 +28,7 @@ import type { Discovery } from '@kbn/streams-schema';
 import { formatTimestamp } from '../../../../../util/formatters';
 import { CHANGE_TYPE_LABELS, DISCOVERY_KIND_LABELS } from '../shared/translations';
 import { DISCOVERY_KIND_COLORS } from '../shared/constants';
+import { InvestigationVisualization } from '../investigation/investigation_visualization';
 
 const timelineLabel = (entry: Discovery, prev: Discovery | undefined): string => {
   const criticality = entry.criticality ?? '-';
@@ -204,6 +205,24 @@ export const DiscoveryFlyout = ({
             </EuiFlexGroup>
           ))}
         </EuiListGroup>
+
+        {discovery.investigation && (
+          <>
+            <EuiSpacer size="l" />
+            <EuiTitle size="xs">
+              <h3>
+                {i18n.translate('xpack.streams.discoveryFlyout.investigationSection', {
+                  defaultMessage: 'Investigation',
+                })}
+              </h3>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            <InvestigationVisualization
+              investigation={discovery.investigation}
+              discoveryId={discovery.discovery_slug}
+            />
+          </>
+        )}
 
         <EuiSpacer size="l" />
 
