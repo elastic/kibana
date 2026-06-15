@@ -301,13 +301,15 @@ export function DiscoverBadgeButton({
       })}
     </EuiButton>
   ) : (
-    <EuiButtonIcon
-      data-test-subj={`streamsDiscoverActionButton-${stream.name}`}
-      href={discoverLink}
-      iconType="discoverApp"
-      size="xs"
-      aria-label={ariaLabel}
-    />
+    <EuiToolTip content={ariaLabel} disableScreenReaderOutput>
+      <EuiButtonIcon
+        data-test-subj={`streamsDiscoverActionButton-${stream.name}`}
+        href={discoverLink}
+        iconType="discoverApp"
+        size="xs"
+        aria-label={ariaLabel}
+      />
+    </EuiToolTip>
   );
 }
 

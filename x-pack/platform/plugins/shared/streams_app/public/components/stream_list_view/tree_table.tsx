@@ -351,16 +351,8 @@ export function StreamsTreeTable({
 
   // Expand/Collapse all button for the name column header
   const expandCollapseAllButton = (
-    <EuiButtonIcon
-      size="xs"
-      iconType={allExpanded ? 'fold' : 'unfold'}
-      color="text"
-      onClick={(e: React.MouseEvent) => {
-        e.stopPropagation();
-        handleExpandCollapseAll();
-      }}
-      data-test-subj={`streams${allExpanded ? 'Collapse' : 'Expand'}AllButton`}
-      aria-label={
+    <EuiToolTip
+      content={
         allExpanded
           ? i18n.translate('xpack.streams.streamsTreeTable.collapseAll', {
               defaultMessage: 'Collapse all',
@@ -369,7 +361,28 @@ export function StreamsTreeTable({
               defaultMessage: 'Expand all',
             })
       }
-    />
+      disableScreenReaderOutput
+    >
+      <EuiButtonIcon
+        size="xs"
+        iconType={allExpanded ? 'fold' : 'unfold'}
+        color="text"
+        onClick={(e: React.MouseEvent) => {
+          e.stopPropagation();
+          handleExpandCollapseAll();
+        }}
+        data-test-subj={`streams${allExpanded ? 'Collapse' : 'Expand'}AllButton`}
+        aria-label={
+          allExpanded
+            ? i18n.translate('xpack.streams.streamsTreeTable.collapseAll', {
+                defaultMessage: 'Collapse all',
+              })
+            : i18n.translate('xpack.streams.streamsTreeTable.expandAll', {
+                defaultMessage: 'Expand all',
+              })
+        }
+      />
+    </EuiToolTip>
   );
 
   const streamsListStepProps = getStepPropsByStepId('streams_list');
