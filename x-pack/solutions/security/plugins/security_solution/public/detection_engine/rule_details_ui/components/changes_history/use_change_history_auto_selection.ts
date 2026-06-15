@@ -40,5 +40,5 @@ export function useChangeHistoryAutoSelection({
 
     lastAutoSelectedRuleRef.current = ruleId;
     setSelectedItem(firstActive);
-  }, [items, ruleId]);
+  }, [items, ruleId, setSelectedItem]);
 }
