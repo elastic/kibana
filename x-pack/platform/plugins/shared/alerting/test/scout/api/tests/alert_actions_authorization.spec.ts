@@ -31,8 +31,7 @@ const ENCODED_ALERT_INSTANCE_ID = 'query%20matched';
 
 apiTest.describe(
   'Per-alert mute/unmute without connector privilege',
-  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
-  () => {
+  { tag: tags.deploymentAgnostic }  () => {
     let adminCreds: RoleApiCredentials;
     let restrictedCreds: RoleApiCredentials;
     let ruleId: string;
