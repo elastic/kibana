@@ -20,6 +20,7 @@ import {
   EuiSpacer,
   EuiPanel,
   EuiBadge,
+  EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -150,7 +151,11 @@ const AIValueReportContent: React.FC<AIValueReportContentProps> = ({
                   text-align: left;
                 `}
               >
-                <h3>{i18n.WHAT_REPORT_WILL_LOOK_LIKE_TEXT}</h3>
+                <h3>
+                  <EuiTextColor color="subdued">
+                    {i18n.WHAT_REPORT_WILL_LOOK_LIKE_TEXT}
+                  </EuiTextColor>
+                </h3>
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>

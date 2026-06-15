@@ -10,14 +10,14 @@ import type { ScoutPage, Locator } from '@kbn/scout';
 const PAGE_URL = 'security/reports/ai_value';
 
 export class AIValueReportPage {
-  public page: Locator;
-  public sampleBanner: Locator;
-  public sampleDataBadge: Locator;
-  public attackDiscoveryCtaButton: Locator;
-  public exportButton: Locator;
-  public noPrivilegesPage: Locator;
-  public noResultsEmptyState: Locator;
-  public executiveSummary: Locator;
+  public readonly page: Locator;
+  public readonly sampleBanner: Locator;
+  public readonly sampleDataBadge: Locator;
+  public readonly attackDiscoveryCtaButton: Locator;
+  public readonly exportButton: Locator;
+  public readonly noPrivilegesPage: Locator;
+  public readonly noResultsEmptyState: Locator;
+  public readonly executiveSummary: Locator;
 
   constructor(private readonly scoutPage: ScoutPage) {
     this.page = this.scoutPage.testSubj.locator('aiValuePage');
