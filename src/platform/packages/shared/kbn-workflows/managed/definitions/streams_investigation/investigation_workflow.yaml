@@ -35,32 +35,24 @@ steps:
         {{ inputs.question }}
 
         Stream names: {{ inputs.stream_names | json }}
-
-        BEFORE generating hypotheses, run these two ESQL triage queries to identify
-        which service is the originating fault source vs. downstream victim:
-
-        1. Latency by service (use traces index {{ inputs.stream_names[1] }}):
-           FROM {{ inputs.stream_names[1] }}
-           | STATS avg_dur=AVG(event.duration), p99_dur=PERCENTILE(event.duration,99), call_count=COUNT(*) BY service.name
-           | SORT p99_dur DESC | LIMIT 15
-
-        2. Error rate by service in logs (use logs index {{ inputs.stream_names[0] }}):
-           FROM {{ inputs.stream_names[0] }}
-           | EVAL is_error = CASE(log.level == "ERROR" OR log.level == "FATAL", 1, 0)
-           | STATS total=COUNT(*), errors=SUM(is_error) BY service.name
-           | EVAL error_rate = errors / total
-           | SORT error_rate DESC | LIMIT 15
-
-        Use these results to identify: which service shows HIGH internal latency (not just
-        slow calls TO its dependencies), and which services are merely downstream victims.
-        A service with elevated self-latency (its own span duration is high regardless of
-        what it calls) is more likely the fault originator than one where slowness is
-        explained entirely by slow dependency calls.
-
-        Then generate up to 5 targeted hypotheses focused on the service(s) showing the
-        most anomalous self-behavior. Fewer strong hypotheses beat many weak ones.
-
         Event metadata: {{ inputs | json }}
+
+        Before generating hypotheses, run exploratory ES|QL queries against the streams
+        to understand service behavior. Key principles from observability investigation:
+
+        - Many problems originate in one service but surface as errors or latency spikes
+          in its callers. Check dependencies early: a service with high error rates may
+          be a downstream victim of a failing dependency, not the root cause itself.
+        - A service having errors is a symptom, not a root cause. Investigate WHY it has
+          errors — which of its dependencies are healthy vs unhealthy, and what does its
+          own behavior look like independent of those calls?
+        - Match claims to evidence depth. Evidence from a caller's perspective (e.g., slow
+          responses from a dependency) does not by itself tell you about the dependency's
+          internal state — deeper claims need deeper evidence.
+
+        Generate up to 5 targeted hypotheses ordered by prior confidence (highest first).
+        Each hypothesis should name a specific mechanism, not just a symptom.
+        Fewer strong hypotheses beat many weak ones.
       schema:
         type: object
         properties:
@@ -389,7 +381,19 @@ steps:
         grounded in the evidence; leave the array empty rather than offering generic advice.
         Write lessons learned to memory. Set investigation_complete to false if all
         forwarded hypotheses were out_of_reach or no hypotheses were forwarded at all.
-        If investigation_complete is false, provide lessons_for_next_round with specific, actionable guidance on what different angles or services to investigate in a second round.
+        If investigation_complete is false, provide lessons_for_next_round with specific,
+        actionable guidance on what different angles or services to investigate in round 2.
+
+        Additional synthesis rules from observability investigation practice:
+        - When the same evidence is consistent with multiple causes, report all plausible
+          ones in ranked_hypotheses rather than collapsing to one — the evidence does not
+          distinguish between them, and picking the most familiar match is the most common
+          way investigations go wrong.
+        - Match claims to evidence depth. Evidence from a caller's view of a dependency
+          call is not direct evidence about the dependency's internal state. State claims
+          at the abstraction level the evidence actually supports.
+        - A service showing errors is a symptom until proven otherwise — ensure root_cause
+          names the mechanism, not just the affected component.
 
         Context: {{ steps.build_context.output.structured_output | json }}
         Branch results: {{ steps.collect_results.output | json }}

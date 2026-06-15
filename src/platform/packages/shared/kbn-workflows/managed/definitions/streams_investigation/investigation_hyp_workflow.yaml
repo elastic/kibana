@@ -25,32 +25,25 @@ steps:
     with:
       timeout: 360s
       message: |
-        Collect evidence for this hypothesis using ES|QL queries (executeEsql tool).
+        Collect evidence for this hypothesis.
 
-        The data for this scenario is in these specific Elasticsearch indices:
+        The data is in these specific Elasticsearch indices:
         - Logs:   {{ inputs.stream_names[0] }}
         - Traces: {{ inputs.stream_names[1] }}
 
-        IMPORTANT — query instructions:
-        1. Use executeEsql with `FROM <index>` to scope all queries to these indices only.
-           Example: FROM {{ inputs.stream_names[0] }} | STATS count(*) BY service.name
-        2. Do NOT pass index names as KQL filter values — this causes syntax errors.
-        3. Do NOT use broad patterns like logs-* or traces-*; they include unrelated data.
-        4. Keep result sets small: add `| LIMIT 20` or use STATS aggregations.
-        5. Data boundary: if ALL services show zero activity at the very END of the time
-           range, that is the data window boundary — ignore it. Focus on anomalies WITHIN
-           the window (service.name error spikes, latency jumps, volume drops).
+        Query rules:
+        - Use executeEsql with FROM <index> to scope queries to these indices only.
+          Do NOT use KQL index-name filters and do NOT use broad patterns like logs-*.
+        - Prefer STATS aggregations over raw rows; always add | LIMIT 20 on row-level queries.
+        - Stop after 6–8 queries. Targeted queries beat exhaustive scanning.
+        - Record every attempt including failed lookups and access blockers.
+        - 0 rows means the condition is not currently firing — move on rather than retrying
+          with the same parameters.
 
-        Useful ESQL patterns:
-          Error counts by service:
-            FROM {{ inputs.stream_names[0] }} | STATS errors=COUNT(*) BY service.name | SORT errors DESC | LIMIT 10
-          Latency percentiles by service:
-            FROM {{ inputs.stream_names[1] }} | STATS p99=PERCENTILE(event.duration,99), p50=PERCENTILE(event.duration,50) BY service.name | SORT p99 DESC | LIMIT 10
-          Log sample for a specific service:
-            FROM {{ inputs.stream_names[0] }} | WHERE service.name == "myservice" | KEEP @timestamp,message,log.level | LIMIT 10
-
-        Note: some log field values may be structurally anomalous (e.g. product IDs in
-        log.level) — note these as data quality observations, not root causes.
+        Key investigation principle: a service showing errors or latency is often a
+        downstream victim of a failing dependency, not the source of the problem.
+        When evidence points at a service, also check what that service depends on —
+        a dependency with a high error rate is the more likely root cause.
 
         Hypothesis: {{ inputs.hypothesis | json }}
         Event context: {{ inputs.context_summary }}

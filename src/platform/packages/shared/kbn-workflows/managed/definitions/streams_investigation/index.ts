@@ -16,7 +16,7 @@ export const STREAMS_INVESTIGATION_WORKFLOW_ID = 'system-streams-sigevents-inves
 export const STREAMS_INVESTIGATION_WORKFLOW = {
   id: STREAMS_INVESTIGATION_WORKFLOW_ID,
   pluginId: 'streams',
-  version: 12,
+  version: 13,
   yaml: INVESTIGATION_WORKFLOW_YAML,
   management: {
     lifecycle: 'static',
@@ -31,7 +31,7 @@ export const STREAMS_INVESTIGATION_HYP_WORKFLOW_ID =
 export const STREAMS_INVESTIGATION_HYP_WORKFLOW = {
   id: STREAMS_INVESTIGATION_HYP_WORKFLOW_ID,
   pluginId: 'streams',
-  version: 10,
+  version: 11,
   yaml: INVESTIGATION_HYP_WORKFLOW_YAML,
   management: {
     lifecycle: 'static',
