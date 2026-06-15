@@ -302,16 +302,23 @@ const RolloverRuleRow = <T extends RolloverField>({
 }: RolloverRuleRowProps<T>) => {
   const config = rolloverFieldConfig[field];
   const removeButton = (
-    <EuiButtonIcon
-      aria-label={i18n.translate('xpack.indexLifecycleMgmt.hotPhase.removeRolloverRuleLabel', {
+    <EuiToolTip
+      content={i18n.translate('xpack.indexLifecycleMgmt.hotPhase.removeRolloverRuleLabel', {
         defaultMessage: 'Remove rollover rule',
       })}
-      color="danger"
-      iconType="cross"
-      isDisabled={disableRemove}
-      onClick={() => onRemove(field)}
-      data-test-subj={`rolloverRemoveField-${field}`}
-    />
+      disableScreenReaderOutput
+    >
+      <EuiButtonIcon
+        aria-label={i18n.translate('xpack.indexLifecycleMgmt.hotPhase.removeRolloverRuleLabel', {
+          defaultMessage: 'Remove rollover rule',
+        })}
+        color="danger"
+        iconType="cross"
+        isDisabled={disableRemove}
+        onClick={() => onRemove(field)}
+        data-test-subj={`rolloverRemoveField-${field}`}
+      />
+    </EuiToolTip>
   );
   const conditionPrefix = (
     <span style={{ alignSelf: 'center', fontSize: 12, textAlign: 'right' }}>{conditionLabel}</span>
