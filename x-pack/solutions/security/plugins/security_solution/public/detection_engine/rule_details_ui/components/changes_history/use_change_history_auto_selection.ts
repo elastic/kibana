@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import type { RuleHistoryItem } from '../../../../../common/api/detection_engine/rule_management';
 import { DIFFABLE_CHANGE_ACTIONS } from '../changes_history_timeline/constants';
 

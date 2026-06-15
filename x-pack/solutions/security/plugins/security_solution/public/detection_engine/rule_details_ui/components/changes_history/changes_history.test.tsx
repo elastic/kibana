@@ -12,7 +12,7 @@ import { RuleChangesHistory } from './changes_history';
 import { useInfiniteChangeHistory } from '../../../rule_management/api/hooks/use_infinite_change_history';
 import type { RuleHistoryItem } from '../../../../../common/api/detection_engine/rule_management';
 import { TestProviders } from '../../../../common/mock';
-import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema';
+import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema';
 
 // IntersectionObserver is used by the rule changes history timeline's scroll-to-load-more sentinel but is absent in jsdom.
 class MockIntersectionObserver {
