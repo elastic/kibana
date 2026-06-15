@@ -63,18 +63,6 @@ function collectRankingFields(
   return fields;
 }
 
-/**
- * Builds the `| EVAL` prelude stage that pre-computes a `<field>_present` boolean
- * for each identity field in the set.  Returns `null` when the set is empty.
- */
-function buildPresentPrelude(presentFields: Set<string>): string | null {
-  if (presentFields.size === 0) return null;
-  const assignments = [...presentFields]
-    .map((f) => `${esqlPresentColumnName(f)} = ${esqlIsNotNullOrEmpty(f)}`)
-    .join(',\n ');
-  return `| EVAL ${assignments}`;
-}
-
 export function getEuidEsqlFilterBasedOnDocument(
   entityType: EntityType,
   doc: any
@@ -344,41 +332,25 @@ export function getEuidEsqlDocumentsContainsIdFilter(entityType: EntityType) {
 }
 
 /**
- * Computes the ES|QL entity-id expression or EVAL assignments fragment for the given entity type.
+ * Returns a comma-separated ES|QL EVAL assignments fragment that computes the entity id for
+ * the given entity type and assigns it to `outputColumn`.
  *
- * **With `outputColumn`** (pipeline form — preferred for new code):
- * Returns a comma-separated EVAL assignments fragment.  For multi-field identities the fragment
- * pre-computes `<field>_present` boolean columns before the entity-id assignment so the CASE
- * conditions reference plain `Attribute` columns, enabling `CaseEagerEvaluator` (vectorized)
- * instead of `CaseLazyEvaluator`.  Wrap with `| EVAL`:
- * ```ts
- * parts.push(`| EVAL ${getEuidEsqlEvaluation(type, outputColumn)}`);
- * ```
+ * For multi-field identities the fragment also pre-computes `<field>_present` boolean columns
+ * as sequential assignments in the same `| EVAL` stage.  Because ES|QL materialises sequential
+ * EVAL assignments in order, those columns are plain `Attribute` references by the time the
+ * CASE expression is evaluated — enabling `CaseEagerEvaluator` (vectorised) instead of
+ * `CaseLazyEvaluator`.
  *
- * **Without `outputColumn`** (expression form — for callers that embed the value inline):
- * Returns a self-contained expression string with no pipeline setup required.  Use when embedding
- * in an existing `| EVAL` alongside other assignments or as part of a larger expression:
+ * Wrap the returned string with `| EVAL`:
  * ```ts
- * evalParts.push(`myCol = ${getEuidEsqlEvaluation(type)}`);
+ * parts.push(`| EVAL ${getEuidEsqlEvaluation(type, 'entity.id')}`);
  * ```
  */
 export function getEuidEsqlEvaluation(
   entityType: EntityType,
   outputColumn: string,
-  opts?: { withTypeId?: boolean }
-): string;
-export function getEuidEsqlEvaluation(
-  entityType: EntityType,
-  opts?: { withTypeId?: boolean }
-): string;
-export function getEuidEsqlEvaluation(
-  entityType: EntityType,
-  outputColumnOrOpts?: string | { withTypeId?: boolean },
-  opts?: { withTypeId?: boolean }
+  { withTypeId = true }: { withTypeId?: boolean } = {}
 ): string {
-  const outputColumn = typeof outputColumnOrOpts === 'string' ? outputColumnOrOpts : undefined;
-  const { withTypeId = true } =
-    (typeof outputColumnOrOpts === 'object' ? outputColumnOrOpts : opts) ?? {};
   const entityDefinition = getEntityDefinitionWithoutId(entityType);
   const { identityField } = entityDefinition;
   const mustPrependTypeId = withTypeId && !identityField.skipTypePrepend;
@@ -389,35 +361,11 @@ export function getEuidEsqlEvaluation(
       castField(identityField.singleField),
       mustPrependTypeId
     );
-    return outputColumn ? `${outputColumn} = ${expression}` : expression;
+    return `${outputColumn} = ${expression}`;
   }
 
   const { euidRanking } = identityField;
   const branches = euidRanking.branches;
-
-  // Expression form (no outputColumn): self-contained inline CASE with no prelude.
-  if (!outputColumn) {
-    const hasConditionalBranch = branches.some((b) => b.when != null);
-    if (!hasConditionalBranch && branches.length === 1) {
-      return appendTypeIdIfNeeded(
-        entityType,
-        buildRankingCaseEsqlInline(branches[0].ranking),
-        mustPrependTypeId
-      );
-    }
-    const branchCaseParts: string[] = [];
-    for (const branch of branches) {
-      const rankingCase = buildRankingCaseEsqlInline(branch.ranking);
-      branchCaseParts.push(
-        branch.when ? `(${conditionToESQL(branch.when)}), ${rankingCase}` : `true, ${rankingCase}`
-      );
-    }
-    const idLogic =
-      branchCaseParts.length > 0 ? `CASE(${branchCaseParts.join(',\n')}, NULL)` : 'NULL';
-    return appendTypeIdIfNeeded(entityType, idLogic, mustPrependTypeId);
-  }
-
-  // Pipeline form (outputColumn provided): optimized EVAL fragment with _present precomputes.
   const presentFields = collectRankingFields(branches);
   const presentAliases = new Map([...presentFields].map((f) => [f, esqlPresentColumnName(f)]));
   const assignments: string[] = [];
@@ -444,50 +392,6 @@ export function getEuidEsqlEvaluation(
     `${outputColumn} = ${appendTypeIdIfNeeded(entityType, idLogic, mustPrependTypeId)}`
   );
   return assignments.join(',\n ');
-}
-
-/**
- * Self-contained ranking CASE expression with inline IS NOT NULL / != "" guards.
- * Only referenced by the expression form (no outputColumn) of {@link getEuidEsqlEvaluation}.
- */
-function buildRankingCaseEsqlInline(ranking: EuidAttribute[][]): string {
-  if (ranking.length === 0) {
-    throw new Error('No euid fields found, invalid euid logic definition');
-  }
-  if (ranking.length === 1) {
-    const comp = ranking[0];
-    const firstAttr = comp[0];
-    if (isEuidSeparator(firstAttr)) {
-      throw new Error('Separator found in single field, invalid euid logic definition');
-    }
-    if (comp.length === 1 && isEuidField(firstAttr)) {
-      return `TO_STRING(${(firstAttr as { field: string }).field})`;
-    }
-  }
-  const euidLogic = ranking.map((composedField) => {
-    if (composedField.length === 1 && isEuidSeparator(composedField[0])) {
-      throw new Error('Separator found in single field, invalid euid logic definition');
-    }
-    const compositionConditions = composedField
-      .filter(isEuidField)
-      .map((f) => `${esqlIsNotNullOrEmpty(f.field)}`)
-      .join(' AND ');
-    if (isEuidSeparator(composedField[0])) {
-      throw new Error('The first field of a composed field cannot be a separator');
-    }
-    if (composedField.length === 1) {
-      return `(${compositionConditions}), TO_STRING(${
-        (composedField[0] as { field: string }).field
-      })`;
-    }
-    const evaluations = composedField
-      .map((attr) =>
-        isEuidField(attr) ? `TO_STRING(${attr.field})` : `"${escapeEsqlString(attr.sep)}"`
-      )
-      .join(', ');
-    return `(${compositionConditions}), CONCAT(${evaluations})`;
-  });
-  return `CASE(${euidLogic.join(',\n')}, NULL)`;
 }
 
 function appendTypeIdIfNeeded(

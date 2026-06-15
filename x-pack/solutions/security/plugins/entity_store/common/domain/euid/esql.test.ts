@@ -263,32 +263,7 @@ describe('getFieldEvaluationsEsql', () => {
   });
 });
 
-describe('getEuidEsqlEvaluation — expression form (no outputColumn)', () => {
-  it('returns raw field for generic (skipTypePrepend: no type prefix)', () => {
-    const result = getEuidEsqlEvaluation('generic');
-
-    expect(normalize(result)).toBe('TO_STRING(entity.id)');
-  });
-
-  it('returns full CONCAT(type:, CASE(...), NULL) for calculated identity (host)', () => {
-    const result = getEuidEsqlEvaluation('host');
-
-    const expected = `CONCAT("host:", CASE((TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != ""), TO_STRING(host.id),
-                      (TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != ""), TO_STRING(host.name),
-                      (TO_STRING(host.hostname) IS NOT NULL AND TO_STRING(host.hostname) != ""), TO_STRING(host.hostname), NULL))`;
-    expect(normalize(result)).toBe(normalize(expected));
-  });
-
-  it('returns conditional CASE for user', () => {
-    const result = getEuidEsqlEvaluation('user');
-
-    expect(normalize(result)).toBe(normalize(getEuidEsqlEvaluation('user')));
-    expect(result).toContain('IS NOT NULL AND');
-    expect(result).not.toContain('_present');
-  });
-});
-
-describe('getEuidEsqlEvaluation — pipeline form (with outputColumn)', () => {
+describe('getEuidEsqlEvaluation', () => {
   it('returns bare assignment for single-field identity (generic)', () => {
     const result = getEuidEsqlEvaluation('generic', 'entity.id');
 
@@ -330,20 +305,6 @@ describe('getEuidEsqlEvaluation — pipeline form (with outputColumn)', () => {
 
     expect(result).toContain('my_custom_euid =');
     expect(result).not.toContain('entity.id =');
-  });
-
-  it('expression form and pipeline form produce consistent entity-id logic', () => {
-    // The expression embedded in the pipeline form must be semantically equivalent
-    // to the expression form (same branches, same value expressions, same type prefix).
-    const expr = getEuidEsqlEvaluation('host');
-    const fragment = getEuidEsqlEvaluation('host', 'entity.id');
-
-    // Both should produce the same CONCAT("host:", ...) structure
-    expect(expr).toContain('CONCAT("host:",');
-    expect(fragment).toContain('CONCAT("host:",');
-    // Both reference the same identity fields
-    expect(expr).toContain('TO_STRING(host.id)');
-    expect(fragment).toContain('TO_STRING(host.id)');
   });
 });
 

@@ -259,10 +259,9 @@ const buildV2TargetResolution = (): string => {
     .map((field) => `| MV_EXPAND \`${field}\``)
     .join('\n');
 
-  const targetEvalParts = ALL_ENTITY_TYPES.map((type) => {
-    const targetEuidEval = getTargetEuidEsqlEvaluation(type);
-    return `_target_${type}_euid = ${targetEuidEval}`;
-  });
+  const targetEvalParts = ALL_ENTITY_TYPES.map((type) =>
+    getTargetEuidEsqlEvaluation(type, `_target_${type}_euid`)
+  );
 
   const appendStatements = [
     '| EVAL targetEntityId = TO_STRING(null)',
