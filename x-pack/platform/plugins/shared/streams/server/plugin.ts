@@ -131,6 +131,9 @@ export class StreamsPlugin
       logger: this.logger,
       workflowsManagement: plugins.workflowsManagement,
     } as StreamsServer;
+    // workflowsManagement is only available as a setup dependency; capture its
+    // presence here so significant events availability checks can read it.
+    this.server.workflowsManagement = plugins.workflowsManagement;
 
     this.patternExtractionService = new PatternExtractionService(
       this.config.workers.patternExtraction,
@@ -583,6 +586,8 @@ export class StreamsPlugin
       this.server.taskManager = plugins.taskManager;
       this.server.searchInferenceEndpoints = plugins.searchInferenceEndpoints;
       this.server.spaces = plugins.spaces;
+      this.server.workflowsExtensions = plugins.workflowsExtensions;
+      this.server.agentBuilder = plugins.agentBuilder;
     }
 
     initializeSignificantEventsTemplates({
