@@ -117,10 +117,14 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
       cy.get(PROMPT_CONTEXT_BUTTON(0)).should('have.text', 'Alert (from summary)');
     });
     it('Shows empty connector callout when a conversation that had a connector no longer does', () => {
+      cy.intercept('PUT', '**/api/security_ai_assistant/current_user/conversations/**').as(
+        'updateConversation'
+      );
       visitGetStartedPage();
       openAssistant();
       selectConversation(mockConvo1.title);
       selectConnector(azureConnectorAPIPayload.name);
+      cy.wait('@updateConversation');
       closeAssistant();
       deleteConnectors();
       openAssistant();
