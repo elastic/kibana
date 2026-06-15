@@ -101,6 +101,13 @@ const buildCaseContextFromDiamond = (qd: QueryDiamond): string => {
 
 const DIAMOND_VERTICES = ['adversary', 'capability', 'infrastructure', 'victim'] as const;
 
+/** Maps stored uppercase diamond signal values to the output enum. */
+const mapDiamondSignal = (signal: string): 'high' | 'partial' | 'none' => {
+  if (signal === 'HIGH') return 'high';
+  if (signal === 'PARTIAL') return 'partial';
+  return 'none';
+};
+
 /**
  * Fetches the full body text of a stored report for use as the synthesis
  * case context in report_id mode. Falls back to undefined if not found so
@@ -398,5 +405,12 @@ export const correlateThreat = async ({
     caseText,
     traceBuilder,
   });
-  return { ...findings, trace: traceBuilder.build() };
+  const caseVertexSignal = {
+    adversary: mapDiamondSignal(queryDiamond.adversary.signal),
+    capability: mapDiamondSignal(queryDiamond.capability.signal),
+    infrastructure: mapDiamondSignal(queryDiamond.infrastructure.signal),
+    victim: mapDiamondSignal(queryDiamond.victim.signal),
+  };
+
+  return { ...findings, trace: traceBuilder.build(), case_vertex_signal: caseVertexSignal };
 };

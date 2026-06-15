@@ -185,6 +185,8 @@ BEHAVIORAL RULES
 8. Distinguish what the new case shows from what candidate reports claim.
 8a. Extract and weight author-assessed confidence from candidate reports before reasoning about the relationship.
 9. Resolve vendor tracking labels before reasoning. Elastic REF#### = intrusion sets. Mandiant UNC#### = uncategorized clusters. Microsoft weather names = actor groups. CrowdStrike animals = actor designations.
+10. Format technical indicators. Wrap IOCs, file paths, commands, domains, package versions, and hashes in backtick code spans in all text fields (bluf, evidence[].text, reasoning, gaps).
+11. Evidence per rated vertex. Every vertex you rate \`partial\` or \`high\` in vertex_signal MUST have at least one evidence item whose \`vertex\` matches it. If you cannot cite evidence for a vertex, rate it \`none\`.
 
 CANDIDATE ACCOUNTING
 
@@ -567,6 +569,12 @@ export const synthesizeCorrelations = async ({
     return { label, pick };
   });
 
+  // Build inverse label map: report_id → cNN (for candidate_labels output field).
+  const candidateLabels: Record<string, string> = {};
+  for (const { label, pick } of labeledPicks) {
+    candidateLabels[pick.candidate_id] = label;
+  }
+
   // 3. Bulk-fetch full report text for all picks.
   const pickIds = picks.map((p) => p.candidate_id);
   const bodyTextMap = await fetchCandidateBodyText(esClient, pickIds);
@@ -679,7 +687,10 @@ export const synthesizeCorrelations = async ({
         `stop_reason=${stopReason} output_tokens=${outputTokens} ` +
         `zod_issues=[${issuesSummary}] raw_preview=${rawPreview}`;
 
-      return buildGracefulDegradation(picks, bodyTextMap, diagnostic);
+      return {
+        ...buildGracefulDegradation(picks, bodyTextMap, diagnostic),
+        candidate_labels: candidateLabels,
+      };
     }
 
     // 7. Map short labels → real report IDs and populate consolidated_candidates.
@@ -695,7 +706,21 @@ export const synthesizeCorrelations = async ({
     );
 
     const pickIdsSet = new Set(pickIds);
-    return mapLlmOutputToFindings(llmOutput, labelToCollapsed, pickIdsSet, logger);
+    const findings = mapLlmOutputToFindings(llmOutput, labelToCollapsed, pickIdsSet, logger);
+
+    // Log-only invariant: every non-none vertex_signal must have a matching evidence item.
+    const VERTICES = ['adversary', 'capability', 'infrastructure', 'victim'] as const;
+    for (const lead of findings.leads) {
+      for (const v of VERTICES) {
+        if (lead.vertex_signal[v] !== 'none' && !lead.evidence.some((e) => e.vertex === v)) {
+          logger.warn(
+            `[ti:synthesize] lead "${lead.title}" rates ${v}=${lead.vertex_signal[v]} with no evidence`
+          );
+        }
+      }
+    }
+
+    return { ...findings, candidate_labels: candidateLabels };
   } catch (err) {
     const e = err instanceof Error ? err : new Error(String(err));
     const stackLines = (e.stack ?? '').split('\n').slice(0, 3).join(' | ');
@@ -709,6 +734,9 @@ export const synthesizeCorrelations = async ({
         ` | arguments=${(e.meta.arguments ?? '').slice(0, 1000)}`;
     }
     logger.warn(`[ti:synthesize] LLM call failed — ${diagnostic}`);
-    return buildGracefulDegradation(picks, bodyTextMap, diagnostic);
+    return {
+      ...buildGracefulDegradation(picks, bodyTextMap, diagnostic),
+      candidate_labels: candidateLabels,
+    };
   }
 };

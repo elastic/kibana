@@ -120,6 +120,17 @@ export const correlationFindingsSchema = z.object({
   no_match: z.array(correlationFindingsNoMatchSchema),
   synthesis: correlationFindingsSynthesisSchema,
   trace: costTraceSchema.optional(),
+  /** Per-vertex signal for the case under analysis (extracted from the case's own diamond). */
+  case_vertex_signal: z
+    .object({
+      adversary: z.enum(['high', 'partial', 'none']),
+      capability: z.enum(['high', 'partial', 'none']),
+      infrastructure: z.enum(['high', 'partial', 'none']),
+      victim: z.enum(['high', 'partial', 'none']),
+    })
+    .optional(),
+  /** Maps each candidate doc ID to its short run label (e.g. 'c01'). */
+  candidate_labels: z.record(z.string(), z.string()).optional(),
 });
 
 export type CorrelationFindingsLead = z.infer<typeof correlationFindingsLeadSchema>;

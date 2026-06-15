@@ -19,4 +19,6 @@ export type {
   CorrelationFindingsNoMatch,
   CorrelationFindingsSynthesis,
   ClusterDeepSynthesis,
+  EvidenceItem,
+  EvidenceWeight,
 } from './schemas';
