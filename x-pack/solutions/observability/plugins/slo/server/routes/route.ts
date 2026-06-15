@@ -7,7 +7,6 @@
 
 import { bulkDeleteSLORoute, getBulkDeleteStatusRoute } from './bulk_delete';
 import { bulkPurgeRollupRoute } from './bulk_purge_rollup';
-import { batchGetCompositeSLORoute } from './composite_slo/batch_get_composite_slo';
 import { createCompositeSLORoute } from './composite_slo/create_composite_slo';
 import { deleteCompositeSLORoute } from './composite_slo/delete_composite_slo';
 import { fetchCompositeHistoricalSummaryRoute } from './composite_slo/fetch_composite_historical_summary';
@@ -95,7 +94,6 @@ export const getSloRouteRepository = ({ isServerless }: RouteRepositoryOptions =
     ...updateCompositeSLORoute,
     ...deleteCompositeSLORoute,
     ...fetchCompositeHistoricalSummaryRoute,
-    ...batchGetCompositeSLORoute,
     ...getCompositeSLOSuggestionsRoute,
     ...postCompositeSloSummaryRefreshRoute,
   };
