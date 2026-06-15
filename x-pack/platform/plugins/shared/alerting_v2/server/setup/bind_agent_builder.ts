@@ -119,8 +119,7 @@ export function bindAgentBuilder({ bind }: ContainerModuleLoadOptions) {
     const workflowsManagementApi = container.get(WorkflowsManagementApiToken);
     registerSkills(agentBuilder, {
       getWorkflow: (id, sid) => workflowsManagementApi.getWorkflow(id, sid),
-      getAvailableConnectors: (sid, req) =>
-        workflowsManagementApi.getAvailableConnectors(sid, req),
+      getAvailableConnectors: (sid, req) => workflowsManagementApi.getAvailableConnectors(sid, req),
     });
 
     container.get(Logger).debug('Rule management skill and attachments registered');
