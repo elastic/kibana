@@ -28,24 +28,32 @@ describe('#processFields', () => {
     });
   });
 
+  describe('when fieldsToHash is provided without a secret', () => {
+    it('should throw', () => {
+      expect(() => processFields({ apiKey: 'abc' }, { fieldsToHash: { apiKey: true } })).toThrow(
+        'processFields: secret missing when hashing fields, please use the object.id'
+      );
+    });
+  });
+
   describe('single field hashing', () => {
     it('should hash a top-level string field and list its path', () => {
       const snapshot = { user: { email: 'bob@example.com' } };
       const fieldsToHash = { user: true };
-      const result = processFields(snapshot, { fieldsToHash });
+      const result = processFields(snapshot, { fieldsToHash, secret: 'obj-id' });
 
       expect(result.fields.hashed).toEqual(['user.email']);
-      expect(result.snapshot.user.email).toBe(hmacSha256('bob@example.com', ''));
+      expect(result.snapshot.user.email).toBe(hmacSha256('bob@example.com', 'obj-id'));
       expect(result.snapshot.user.email).not.toBe('bob@example.com');
     });
 
     it('should hash a nested field when only that path is in fieldsToHash', () => {
       const snapshot = { user: { email: 'bob@example.com', name: 'Bob' } };
       const fieldsToHash = { user: { email: true } };
-      const result = processFields(snapshot, { fieldsToHash });
+      const result = processFields(snapshot, { fieldsToHash, secret: 'obj-id' });
 
       expect(result.fields.hashed).toEqual(['user.email']);
-      expect(result.snapshot.user.email).toBe(hmacSha256('bob@example.com', ''));
+      expect(result.snapshot.user.email).toBe(hmacSha256('bob@example.com', 'obj-id'));
       expect(result.snapshot.user.name).toBe('Bob');
     });
   });
@@ -57,14 +65,14 @@ describe('#processFields', () => {
         token: 'abc-token',
       };
       const fieldsToHash = { user: true, token: true };
-      const result = processFields(snapshot, { fieldsToHash });
+      const result = processFields(snapshot, { fieldsToHash, secret: 'obj-id' });
 
       // Using `.sort()` below because we're not depending on array order.
       // @see https://stackoverflow.com/questions/40135684
       expect(result.fields.hashed.sort()).toEqual(['token', 'user.apiKey', 'user.email'].sort());
-      expect(result.snapshot.user.email).toBe(hmacSha256('bob@example.com', ''));
-      expect(result.snapshot.user.apiKey).toBe(hmacSha256('secret-key-123', ''));
-      expect(result.snapshot.token).toBe(hmacSha256('abc-token', ''));
+      expect(result.snapshot.user.email).toBe(hmacSha256('bob@example.com', 'obj-id'));
+      expect(result.snapshot.user.apiKey).toBe(hmacSha256('secret-key-123', 'obj-id'));
+      expect(result.snapshot.token).toBe(hmacSha256('abc-token', 'obj-id'));
     });
   });
 
@@ -72,7 +80,7 @@ describe('#processFields', () => {
     it('should not hash non-string values even when key is in fieldsToHash', () => {
       const snapshot = { config: { count: 42, enabled: true, nested: { id: 1 } } };
       const fieldsToHash = { config: true };
-      const result = processFields(snapshot, { fieldsToHash });
+      const result = processFields(snapshot, { fieldsToHash, secret: 'obj-id' });
 
       expect(result.fields.hashed).toEqual([]);
       expect(result.snapshot).toEqual(snapshot);
@@ -83,10 +91,10 @@ describe('#processFields', () => {
         user: { email: 'bob@example.com', count: 5, active: true },
       };
       const fieldsToHash = { user: true };
-      const result = processFields(snapshot, { fieldsToHash });
+      const result = processFields(snapshot, { fieldsToHash, secret: 'obj-id' });
 
       expect(result.fields.hashed).toEqual(['user.email']);
-      expect(result.snapshot.user.email).toBe(hmacSha256('bob@example.com', ''));
+      expect(result.snapshot.user.email).toBe(hmacSha256('bob@example.com', 'obj-id'));
       expect(result.snapshot.user.count).toBe(5);
       expect(result.snapshot.user.active).toBe(true);
     });
@@ -99,7 +107,7 @@ describe('#processFields', () => {
         title: 'My Dashboard',
       };
       const fieldsToHash = { user: { email: true } };
-      const result = processFields(snapshot, { fieldsToHash });
+      const result = processFields(snapshot, { fieldsToHash, secret: 'obj-id' });
 
       expect(result.snapshot.user.name).toBe('Bob');
       expect(result.snapshot.title).toBe('My Dashboard');
@@ -136,7 +144,7 @@ describe('#processFields', () => {
 
   describe('edge cases', () => {
     it('should handle empty snapshot', () => {
-      const result = processFields({}, { fieldsToHash: { user: true } });
+      const result = processFields({}, { fieldsToHash: { user: true }, secret: 'obj-id' });
 
       expect(result.fields.hashed).toEqual([]);
       expect(result.snapshot).toEqual({});
@@ -145,17 +153,17 @@ describe('#processFields', () => {
     it('should handle empty string value', () => {
       const snapshot = { secret: '' };
       const fieldsToHash = { secret: true };
-      const result = processFields(snapshot, { fieldsToHash });
+      const result = processFields(snapshot, { fieldsToHash, secret: 'obj-id' });
 
       expect(result.fields.hashed).toEqual(['secret']);
-      expect(result.snapshot.secret).toBe(hmacSha256('', ''));
+      expect(result.snapshot.secret).toBe(hmacSha256('', 'obj-id'));
     });
 
     it('should not mutate the original snapshot', () => {
       const user = { email: 'bob@example.com' };
       const snapshot = { user };
       const fieldsToHash = { user: true };
-      processFields(snapshot, { fieldsToHash });
+      processFields(snapshot, { fieldsToHash, secret: 'obj-id' });
 
       expect(snapshot.user).toBe(user);
     });

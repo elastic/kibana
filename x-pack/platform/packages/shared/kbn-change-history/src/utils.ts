@@ -35,11 +35,14 @@ export interface ProcessFieldsOpts {
  */
 export function processFields(
   snapshot: Record<string, any>,
-  { fieldsToHash, secret = '' }: ProcessFieldsOpts = {}
+  { fieldsToHash, secret }: ProcessFieldsOpts = {}
 ): { fields: { hashed: string[] }; snapshot: Record<string, any> } {
   const hashed: string[] = [];
   if (!fieldsToHash || Object.keys(fieldsToHash).length === 0) {
     return { fields: { hashed }, snapshot };
+  }
+  if (!secret) {
+    throw new Error('processFields: secret missing when hashing fields, please use the object.id');
   }
   const flatSnapshot = flatten(snapshot);
   const flatFieldsToHash = flatten(fieldsToHash);
@@ -47,14 +50,12 @@ export function processFields(
     Object.entries(flatFieldsToHash).some(
       ([k, v]) => !!v && (key === k || key.startsWith(k + '.'))
     );
-  const hash = (value: string) => hmacSha256(value, secret);
 
   for (const key of Object.keys(flatSnapshot)) {
     const value = flatSnapshot[key];
-    // TODO: We might need to expand this for binary blobs.
     if (typeof value === 'string' && shouldBeHashed(key)) {
       hashed.push(key);
-      flatSnapshot[key] = hash(value);
+      flatSnapshot[key] = hmacSha256(value, secret);
     }
   }
 
