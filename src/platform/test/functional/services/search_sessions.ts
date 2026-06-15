@@ -18,7 +18,6 @@ const APP_MENU_OVERFLOW_BUTTON = 'app-menu-overflow-button';
 const BACKGROUND_SEARCH_FLYOUT_ENTRYPOINT = 'openBackgroundSearchFlyoutButton';
 const BACKGROUND_SEARCH_SUBMIT_BUTTON = 'querySubmitButton-secondary-button';
 const BACKGROUND_SEARCH_CANCEL_BUTTON = 'queryCancelButton-secondary-button';
-const BACKGROUND_SEARCH_COMPLETED_MESSAGE = 'Background search completed';
 
 export class SearchSessionsService extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
