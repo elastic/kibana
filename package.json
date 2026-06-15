@@ -1440,6 +1440,7 @@
     "io-ts": "2.2.22",
     "ipaddr.js": "2.3.0",
     "isbinaryfile": "4.0.2",
+    "isolated-vm": "6.1.2",
     "jest-diff": "29.7.0",
     "joi": "18.2.1",
     "joi-to-json": "5.0.0",
