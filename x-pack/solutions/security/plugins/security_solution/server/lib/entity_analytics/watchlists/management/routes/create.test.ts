@@ -45,11 +45,10 @@ jest.mock('../../entity_sources/entity_source_api_key', () => ({
   validateIndexPermissions: (...args: unknown[]) => mockValidateIndexPermissions(...args),
 }));
 
-const { mockCreateEntitySource, mockUpdateApiKeyFields } = jest.requireMock(
+const { mockCreateEntitySource } = jest.requireMock(
   '../../entity_sources/infra/entity_source_client'
 ) as {
   mockCreateEntitySource: jest.Mock;
-  mockUpdateApiKeyFields: jest.Mock;
 };
 
 const mockGetStartServices = jest.fn();
@@ -76,7 +75,6 @@ describe('POST /api/entity_analytics/watchlists - createWatchlistRoute', () => {
     mockCreateEntitySource.mockReset();
     mockSyncWatchlist.mockReset();
     mockValidateIndexPermissions.mockReset().mockResolvedValue(undefined);
-    mockUpdateApiKeyFields.mockReset();
 
     const mockSecurity = { authc: { apiKeys: { grantAsInternalUser: jest.fn() } } };
     mockGetStartServices.mockResolvedValue([{ security: mockSecurity }]);
@@ -404,7 +402,6 @@ describe('POST /api/entity_analytics/watchlists - createWatchlistRoute', () => {
 
       expect(response.status).toEqual(200);
       expect(mockValidateIndexPermissions).not.toHaveBeenCalled();
-      expect(mockUpdateApiKeyFields).not.toHaveBeenCalled();
     });
   });
   describe('error handling', () => {
