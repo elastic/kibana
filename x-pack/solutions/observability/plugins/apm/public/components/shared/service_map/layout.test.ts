@@ -7,13 +7,19 @@
 
 import Dagre from '@dagrejs/dagre';
 import { Position, type Node, type Edge } from '@xyflow/react';
-import { applyDagreLayout } from './layout';
+import {
+  applyDagreLayout,
+  applyServiceMapLayout,
+  foldWideLayout,
+  type LayoutOptions,
+} from './layout';
 import {
   NODE_WIDTH,
   NODE_HEIGHT,
   GRAPH_MARGIN,
   NODE_SEPARATION,
   RANK_SEPARATION,
+  FOLD_MIN_NODE_COUNT,
 } from '../../../../common/service_map/constants';
 
 interface TestNodeData extends Record<string, unknown> {
@@ -350,5 +356,161 @@ describe('applyDagreLayout', () => {
         })
       );
     });
+  });
+});
+
+function createChain(length: number): { nodes: Node<TestNodeData>[]; edges: Edge[] } {
+  const nodes = Array.from({ length }, (_, i) => createNode(`n${i}`, `Node ${i}`));
+  const edges = Array.from({ length: length - 1 }, (_, i) => createEdge(`n${i}`, `n${i + 1}`));
+  return { nodes, edges };
+}
+
+const distinctValues = (values: number[]) => new Set(values).size;
+
+const resolveOptions = (overrides: LayoutOptions = {}): Required<LayoutOptions> => ({
+  rankdir: 'LR',
+  ranksep: RANK_SEPARATION,
+  nodesep: NODE_SEPARATION,
+  marginx: GRAPH_MARGIN,
+  marginy: GRAPH_MARGIN,
+  nodeWidth: NODE_WIDTH,
+  nodeHeight: NODE_HEIGHT,
+  ...overrides,
+});
+
+/**
+ * Builds an already-positioned single line of nodes, mimicking what Dagre produces for a chain:
+ * one node per rank along the primary axis, all sharing the cross-axis coordinate.
+ */
+function positionedLine(
+  length: number,
+  rankdir: 'LR' | 'TB' = 'LR'
+): { nodes: Node<TestNodeData>[]; edges: Edge[] } {
+  const cellAlong = (rankdir === 'TB' ? NODE_HEIGHT : NODE_WIDTH) + RANK_SEPARATION;
+  const nodes = Array.from({ length }, (_, i) => ({
+    ...createNode(`n${i}`, `Node ${i}`),
+    position: rankdir === 'TB' ? { x: 0, y: i * cellAlong } : { x: i * cellAlong, y: 0 },
+  }));
+  const edges = Array.from({ length: length - 1 }, (_, i) => createEdge(`n${i}`, `n${i + 1}`));
+  return { nodes, edges };
+}
+
+describe('foldWideLayout', () => {
+  it('folds a very wide line into multiple rows (LR) and shrinks the long axis', () => {
+    const { nodes, edges } = positionedLine(20, 'LR');
+    const widthBefore = Math.max(...nodes.map((n) => n.position.x));
+
+    const result = foldWideLayout(nodes, edges, resolveOptions({ rankdir: 'LR' }));
+
+    expect(distinctValues(result.map((n) => n.position.y))).toBeGreaterThan(1);
+    expect(Math.max(...result.map((n) => n.position.x))).toBeLessThan(widthBefore);
+  });
+
+  it('alternates band direction and routes turn edges with rotated handles (LR)', () => {
+    // 20 ranks fold into bands of 4 ranks (the near-square choice), so the first band is n0..n3.
+    const { nodes, edges } = positionedLine(20, 'LR');
+
+    const result = foldWideLayout(nodes, edges, resolveOptions({ rankdir: 'LR' }));
+    const byId = new Map(result.map((n) => [n.id, n] as const));
+
+    // Start node: enters from the left, leaves to the right (first band runs left→right).
+    expect(byId.get('n0')?.targetPosition).toBe(Position.Left);
+    expect(byId.get('n0')?.sourcePosition).toBe(Position.Right);
+
+    // Last rank of the first band turns down to the next band.
+    expect(byId.get('n3')?.sourcePosition).toBe(Position.Bottom);
+
+    // First rank of the second (reversed) band is entered from above, then continues leftward.
+    expect(byId.get('n4')?.targetPosition).toBe(Position.Top);
+    expect(byId.get('n4')?.sourcePosition).toBe(Position.Left);
+  });
+
+  it('folds a very tall line into multiple columns (TB)', () => {
+    const { nodes, edges } = positionedLine(20, 'TB');
+
+    const result = foldWideLayout(nodes, edges, resolveOptions({ rankdir: 'TB' }));
+
+    expect(distinctValues(result.map((n) => n.position.x))).toBeGreaterThan(1);
+
+    const byId = new Map(result.map((n) => [n.id, n] as const));
+    expect(byId.get('n0')?.targetPosition).toBe(Position.Top);
+    expect(byId.get('n0')?.sourcePosition).toBe(Position.Bottom);
+  });
+
+  it('returns integer positions', () => {
+    const { nodes, edges } = positionedLine(20, 'LR');
+
+    const result = foldWideLayout(nodes, edges, resolveOptions());
+
+    expect(
+      result.every((node) => Number.isInteger(node.position.x) && Number.isInteger(node.position.y))
+    ).toBe(true);
+  });
+
+  it('leaves small layouts unchanged', () => {
+    const { nodes, edges } = positionedLine(FOLD_MIN_NODE_COUNT - 1, 'LR');
+
+    const result = foldWideLayout(nodes, edges, resolveOptions());
+
+    expect(result).toEqual(nodes);
+  });
+
+  it('leaves a roughly square layout unchanged', () => {
+    // 4×4 grid: long/short axis ratio is well under the fold threshold.
+    const nodes = Array.from({ length: 16 }, (_, i) => ({
+      ...createNode(`n${i}`, `Node ${i}`),
+      position: {
+        x: (i % 4) * (NODE_WIDTH + RANK_SEPARATION),
+        y: Math.floor(i / 4) * (NODE_HEIGHT + NODE_SEPARATION),
+      },
+    }));
+
+    const result = foldWideLayout(nodes, [], resolveOptions());
+
+    expect(result).toEqual(nodes);
+  });
+
+  it('does not fold when most edges span more than one rank', () => {
+    const { nodes } = positionedLine(20, 'LR');
+    // Hub edges from n0 reach across many ranks, so folding would create long diagonals.
+    const edges = nodes.slice(1).map((n) => createEdge('n0', n.id));
+
+    const result = foldWideLayout(nodes, edges, resolveOptions());
+
+    expect(result).toEqual(nodes);
+  });
+});
+
+describe('applyServiceMapLayout', () => {
+  it('folds the Dagre output for a long chain into multiple rows (LR)', () => {
+    const { nodes, edges } = createChain(20);
+
+    const result = applyServiceMapLayout(nodes, edges, { rankdir: 'LR' });
+
+    expect(distinctValues(result.map((n) => n.position.y))).toBeGreaterThan(1);
+  });
+
+  it('leaves Dagre output unchanged for a chain below the node threshold', () => {
+    const { nodes, edges } = createChain(FOLD_MIN_NODE_COUNT - 1);
+
+    const result = applyServiceMapLayout(nodes, edges, { rankdir: 'LR' });
+    const dagreResult = applyDagreLayout(nodes, edges, { rankdir: 'LR' });
+
+    expect(result).toEqual(dagreResult);
+  });
+
+  it('leaves Dagre output unchanged for a wide-but-shallow branching graph', () => {
+    // A root fanning out to many leaves is only two ranks deep, so Dagre stacks it tall, not wide,
+    // and there is nothing to fold.
+    const nodes = [
+      createNode('root', 'Root'),
+      ...Array.from({ length: 15 }, (_, i) => createNode(`leaf${i}`, `Leaf ${i}`)),
+    ];
+    const edges = Array.from({ length: 15 }, (_, i) => createEdge('root', `leaf${i}`));
+
+    const result = applyServiceMapLayout(nodes, edges, { rankdir: 'LR' });
+    const dagreResult = applyDagreLayout(nodes, edges, { rankdir: 'LR' });
+
+    expect(result).toEqual(dagreResult);
   });
 });
