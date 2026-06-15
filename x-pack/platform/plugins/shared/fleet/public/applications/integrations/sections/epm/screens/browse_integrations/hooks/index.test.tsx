@@ -438,9 +438,21 @@ describe('useBrowseIntegrationHook', () => {
     it('hides content packs by default (showContent falsy)', () => {
       const cards = [
         { id: '1', name: 'nginx', title: 'Nginx', type: 'integration', categories: ['web'] },
-        { id: '2', name: 'nginx-content', title: 'Nginx Content', type: 'content', categories: ['web'] },
+        {
+          id: '2',
+          name: 'nginx-content',
+          title: 'Nginx Content',
+          type: 'content',
+          categories: ['web'],
+        },
         { id: '3', name: 'redis', title: 'Redis', type: 'integration', categories: ['database'] },
-        { id: '4', name: 'redis-content', title: 'Redis Content', type: 'content', categories: ['database'] },
+        {
+          id: '4',
+          name: 'redis-content',
+          title: 'Redis Content',
+          type: 'content',
+          categories: ['database'],
+        },
       ];
 
       mockUseAvailablePackages(cards as IntegrationCardItem[]);
@@ -462,9 +474,21 @@ describe('useBrowseIntegrationHook', () => {
     it('shows content packs when showContent is true', () => {
       const cards = [
         { id: '1', name: 'nginx', title: 'Nginx', type: 'integration', categories: ['web'] },
-        { id: '2', name: 'nginx-content', title: 'Nginx Content', type: 'content', categories: ['web'] },
+        {
+          id: '2',
+          name: 'nginx-content',
+          title: 'Nginx Content',
+          type: 'content',
+          categories: ['web'],
+        },
         { id: '3', name: 'redis', title: 'Redis', type: 'integration', categories: ['database'] },
-        { id: '4', name: 'redis-content', title: 'Redis Content', type: 'content', categories: ['database'] },
+        {
+          id: '4',
+          name: 'redis-content',
+          title: 'Redis Content',
+          type: 'content',
+          categories: ['database'],
+        },
       ];
 
       mockUseAvailablePackages(cards as IntegrationCardItem[]);
@@ -491,7 +515,13 @@ describe('useBrowseIntegrationHook', () => {
     it('updates category counts to exclude content packs when showContent is false', () => {
       const cards = [
         { id: '1', name: 'nginx', title: 'Nginx', type: 'integration', categories: ['web'] },
-        { id: '2', name: 'nginx-content', title: 'Nginx Content', type: 'content', categories: ['web'] },
+        {
+          id: '2',
+          name: 'nginx-content',
+          title: 'Nginx Content',
+          type: 'content',
+          categories: ['web'],
+        },
       ];
 
       const allCategories = [
