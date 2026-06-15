@@ -28,13 +28,7 @@ const totalHitCount = 14004;
 let downloadedFilePath: string | null = null;
 
 test.describe('Discover app', { tag: tags.stateful.classic }, () => {
-  test.beforeAll(async ({ kbnClient, esArchiver }) => {
-    await kbnClient.importExport.load(
-      'src/platform/test/functional/fixtures/kbn_archiver/discover'
-    );
-    await esArchiver.loadIfNeeded(
-      'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-    );
+  test.beforeAll(async ({ kbnClient }) => {
     await kbnClient.uiSettings.update(defaultSettings);
   });
 
@@ -52,7 +46,7 @@ test.describe('Discover app', { tag: tags.stateful.classic }, () => {
   });
 
   test.afterAll(async ({ kbnClient }) => {
-    await kbnClient.savedObjects.clean({ types: ['search', 'index-pattern'] });
+    await kbnClient.savedObjects.clean({ types: ['search'] });
   });
 
   test('should display selected time range in date picker and matching docs in table', async ({
