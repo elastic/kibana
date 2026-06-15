@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { OptionsListDSLControlState } from '@kbn/controls-schemas';
+import { DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
+import type { OptionsListDSLControlState, OptionsListSelection } from '@kbn/controls-schemas';
 
 import type { GetESQLSingleColumnValuesSuccess } from '../../common/options_list/get_esql_single_column_values';
 import type { OptionsListSuccessResponse } from '../../common/options_list/types';
@@ -37,19 +38,37 @@ export function esqlColumnValuesToOptionsListResponse(
     searchTechnique,
     selectedOptions,
     ignoreValidations,
+    sort,
   }: {
     searchString?: string;
     searchTechnique?: OptionsListDSLControlState['search_technique'];
     selectedOptions?: OptionsListDSLControlState['selected_options'];
     ignoreValidations?: boolean;
+    sort?: OptionsListDSLControlState['sort'];
   }
 ): OptionsListSuccessResponse {
-  const suggestions = result.values
+  const uniqueValues = Array.from(new Set(result.values as ReadonlyArray<string | number>));
+  const sortConfig =
+    sort?.by === '_count'
+      ? {
+          ...DEFAULT_DSL_OPTIONS_LIST_STATE.sort,
+          by: '_key' as const,
+          direction: sort.direction,
+        }
+      : sort ?? DEFAULT_DSL_OPTIONS_LIST_STATE.sort;
+  const directionMultiplier = sortConfig.direction === 'asc' ? 1 : -1;
+
+  const suggestions = uniqueValues
     .filter((value) => clientSideSearch(value, searchString, searchTechnique))
+    .sort((valueA, valueB) => directionMultiplier * String(valueA).localeCompare(String(valueB)))
     .map((value) => ({ value: String(value) }));
+
   const invalidSelections = ignoreValidations
     ? []
-    : selectedOptions?.filter((selection) => !result.values.some((value) => value === selection));
+    : selectedOptions?.filter(
+        (selection: OptionsListSelection) =>
+          !uniqueValues.some((value) => value === selection || String(value) === String(selection))
+      );
   return {
     suggestions,
     totalCardinality: suggestions.length,

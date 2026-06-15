@@ -13,9 +13,7 @@ import type {
   OptionsListSortingType,
 } from '@kbn/controls-schemas';
 import { ControlValuesSource } from '@kbn/controls-constants';
-import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import { buildEsQuery } from '@kbn/es-query';
 import type { FetchContext } from '@kbn/presentation-publishing';
 
 import { isValidSearch } from '../../../../common/options_list/is_valid_search';
@@ -24,8 +22,11 @@ import type {
   OptionsListSuccessResponse,
   OptionsListUnifiedFetchBody,
 } from '../../../../common/options_list/types';
-import { coreServices, dataService } from '../../../services/kibana_services';
-import { buildESQLPreFilter, getFetchContextFilters, getFetchContextTimeRange } from '../utils';
+import {
+  buildESQLPreFilter,
+  buildOptionsListDashboardFilters,
+  getFetchContextTimeRange,
+} from '../utils';
 
 export type BuildOptionsListFetchBodyResult =
   | {
@@ -72,11 +73,21 @@ export function buildOptionsListFetchBody({
       return { outcome: 'empty', response: { suggestions: [] } };
     }
 
+    const timeRange = getFetchContextTimeRange(fetchContext, useGlobalFilters);
+    const dataView = dataViews?.[0];
+
     const body: OptionsListESQLFetchBody = {
       kind: 'esql',
       esql: esqlQuery,
-      timeRange: getFetchContextTimeRange(fetchContext, useGlobalFilters),
-      filter: buildESQLPreFilter(fetchContext, useGlobalFilters),
+      timeRange,
+      filter: buildESQLPreFilter({
+        fetchContext,
+        useGlobalFilters,
+        dataView,
+        timeRange,
+        esqlQuery,
+      }),
+      sort,
       searchString,
       searchTechnique,
       selectedOptions,
@@ -97,13 +108,7 @@ export function buildOptionsListFetchBody({
     return { outcome: 'empty', response: { suggestions: [], totalCardinality: 0 } };
   }
 
-  const timeRange = getFetchContextTimeRange(fetchContext, useGlobalFilters);
-  const filters = getFetchContextFilters(fetchContext, useGlobalFilters);
-  const timeService = dataService.query.timefilter.timefilter;
-  const timeFilter = timeRange ? timeService.createFilter(dataView, timeRange) : undefined;
-  const filtersToUse = [...(filters ?? []), ...(timeFilter ? [timeFilter] : [])];
-  const config = getEsQueryConfig(coreServices.uiSettings);
-  const esFilters = [buildEsQuery(dataView, fetchContext.query ?? [], filtersToUse ?? [], config)];
+  const filters = buildOptionsListDashboardFilters(dataView, fetchContext, useGlobalFilters);
 
   return {
     outcome: 'fetch',
@@ -120,7 +125,7 @@ export function buildOptionsListFetchBody({
       fieldSpec: field.toSpec(),
       size: requestSize,
       ignoreValidations,
-      filters: esFilters,
+      filters,
       runtimeFieldMap: dataView.toSpec?.(false).runtimeFieldMap,
       isReload: fetchContext.isReload,
     },

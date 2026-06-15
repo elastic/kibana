@@ -92,7 +92,13 @@ export function minMax$({
             // ES|QL itself), so it mirrors how field-based controls inherit the filter bar.
             esqlPreFilter:
               valuesSource === ControlValuesSource.ESQL
-                ? buildESQLPreFilter(controlFetchContext, useGlobalFilters)
+                ? buildESQLPreFilter({
+                    fetchContext: controlFetchContext,
+                    useGlobalFilters,
+                    dataView,
+                    timeRange: getFetchContextTimeRange(controlFetchContext, useGlobalFilters),
+                    esqlQuery,
+                  })
                 : undefined,
           });
         } catch (error) {

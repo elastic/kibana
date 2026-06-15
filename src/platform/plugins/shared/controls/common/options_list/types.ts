@@ -64,6 +64,7 @@ export interface OptionsListESQLFetchBody {
   timeRange?: TimeRange;
   /** Pre-built ES DSL bool used as `params.filter` on the ES|QL `_query` endpoint to pre-filter the pipeline. */
   filter?: { bool: BoolQuery };
+  sort?: OptionsListDSLControlState['sort'];
   esqlVariables?: ESQLControlVariable[];
   searchString?: string;
   searchTechnique?: OptionsListDSLControlState['search_technique'];

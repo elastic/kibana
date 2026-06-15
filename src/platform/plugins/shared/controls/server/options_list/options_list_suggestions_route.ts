@@ -65,6 +65,7 @@ const esqlFetchBodySchema = schema.object(
     esql: schema.string(),
     timeRange: schema.maybe(schema.any()),
     filter: schema.maybe(schema.any()),
+    sort: schema.maybe(schema.any()),
     esqlVariables: schema.maybe(schema.arrayOf(schema.any(), { maxSize: 999 })),
     searchString: schema.maybe(schema.string()),
     searchTechnique: searchTechniqueSchema,
@@ -234,6 +235,7 @@ const getOptionsListEsqlSuggestions = async ({
       searchTechnique: request.searchTechnique,
       selectedOptions: request.selectedOptions,
       ignoreValidations: request.ignoreValidations,
+      sort: request.sort,
     });
   }
 
