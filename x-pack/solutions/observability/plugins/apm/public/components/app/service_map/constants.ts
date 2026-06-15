@@ -27,6 +27,12 @@ export const GRAPH_MARGIN = 50;
 /** Padding around the graph when fitting the view (as a ratio) */
 export const FIT_VIEW_PADDING = 0.2;
 
+/** Minimum zoom level the user can pan/zoom to (also the floor fitView clamps to) */
+export const MIN_ZOOM = 0.2;
+
+/** Maximum zoom level the user can pan/zoom to */
+export const MAX_ZOOM = 3;
+
 /** Duration of the fit view animation in milliseconds */
 export const FIT_VIEW_DURATION = 200;
 
