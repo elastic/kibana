@@ -42,7 +42,6 @@ import {
   evidenceVertexBodyCss,
   leadButtonContentCss,
   leadHeaderCss,
-  leadHeaderDotAlignCss,
   leadListCss,
   markdownBodyCss,
   markdownInlineCss,
@@ -466,23 +465,22 @@ const LeadCard: React.FC<{
   const headerBlock = (
     <div css={leadHeaderCss}>
       <div>
-        <EuiBadge color="hollow">{RELATIONSHIP_LABEL[lead.relationship]()}</EuiBadge>
+        <EuiBadge color="hollow">
+          {RELATIONSHIP_LABEL[lead.relationship]()}
+          {' · '}
+          {confidenceLabel} <Dot color={confidenceDotColor} ariaLabel={confidenceLabel} size={8} />
+        </EuiBadge>
       </div>
-      <EuiFlexGroup gutterSize="xs" alignItems="flexStart" responsive={false}>
-        <EuiFlexItem grow={false} css={leadHeaderDotAlignCss}>
-          <Dot color={confidenceDotColor} ariaLabel={confidenceLabel} />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiText size="s">
-            <strong>{leadTitleMain}</strong>
+      <div>
+        <EuiText size="s">
+          <strong>{leadTitleMain}</strong>
+        </EuiText>
+        {leadTitleSub !== undefined ? (
+          <EuiText size="xs" color="subdued">
+            {leadTitleSub}
           </EuiText>
-          {leadTitleSub !== undefined ? (
-            <EuiText size="xs" color="subdued">
-              {leadTitleSub}
-            </EuiText>
-          ) : null}
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        ) : null}
+      </div>
     </div>
   );
 
