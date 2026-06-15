@@ -10,11 +10,11 @@ import { i18n } from '@kbn/i18n';
 import type { SignificantEventsUnavailableReason } from '@kbn/streams-plugin/common';
 import React from 'react';
 
-export function SignificantEventsNotEnabledPrompt({
-  reason,
-}: {
-  reason: SignificantEventsUnavailableReason;
-}) {
+// The server reasons plus the client-only `unknown` fallback, surfaced when the
+// availability request itself fails (see `useSignificantEventsAvailability`).
+type NotEnabledReason = SignificantEventsUnavailableReason | 'unknown';
+
+export function SignificantEventsNotEnabledPrompt({ reason }: { reason: NotEnabledReason }) {
   return (
     <EuiEmptyPrompt
       data-test-subj="streamsSignificantEventsNotEnabledPrompt"
@@ -42,7 +42,7 @@ export function SignificantEventsNotEnabledPrompt({
  * `SignificantEventsUnavailableReason` lacks a message here. Factories are lazy
  * so `i18n.translate` runs at render time.
  */
-const NOT_ENABLED_BODY_MESSAGES: Record<SignificantEventsUnavailableReason, () => string> = {
+const NOT_ENABLED_BODY_MESSAGES: Record<NotEnabledReason, () => string> = {
   pricing_tier: () =>
     i18n.translate('xpack.streams.significantEvents.notEnabledPrompt.pricingTierBody', {
       defaultMessage: 'Significant events is not available on the current pricing tier.',
@@ -55,6 +55,11 @@ const NOT_ENABLED_BODY_MESSAGES: Record<SignificantEventsUnavailableReason, () =
     i18n.translate('xpack.streams.significantEvents.notEnabledPrompt.uiSettingBody', {
       defaultMessage:
         'Significant events is disabled. Enable it in Advanced Settings to start using it.',
+    }),
+  unknown: () =>
+    i18n.translate('xpack.streams.significantEvents.notEnabledPrompt.unknownBody', {
+      defaultMessage:
+        'We could not determine whether significant events is available. Please check your connection and try again.',
     }),
   workflowsExtensions: () =>
     i18n.translate('xpack.streams.significantEvents.notEnabledPrompt.workflowsBody', {
