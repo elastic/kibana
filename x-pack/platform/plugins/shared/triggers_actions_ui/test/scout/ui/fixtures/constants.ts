@@ -45,6 +45,8 @@ export const MAINTENANCE_WINDOWS_APP_PATH =
 export const CONNECTORS_LIST_SELECTORS = {
   SEARCH_INPUT: '[data-test-subj="actionsList"] .euiFieldSearch',
   TABLE_LOADED: '.euiBasicTable[data-test-subj="actionsTable"]:not(.euiBasicTable-loading)',
+  // Shown instead of the table when no connectors exist yet.
+  EMPTY_STATE: '[data-test-subj="createFirstConnectorEmptyPrompt"]',
 } as const;
 
 export const RULE_DETAILS_TEST_SUBJECTS = {

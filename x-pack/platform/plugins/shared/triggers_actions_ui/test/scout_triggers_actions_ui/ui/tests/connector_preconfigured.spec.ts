@@ -15,6 +15,7 @@ const CONNECTORS_APP_PATH =
 const CONNECTORS_LIST_SELECTORS = {
   SEARCH_INPUT: '[data-test-subj="actionsList"] .euiFieldSearch',
   TABLE_LOADED: '.euiBasicTable[data-test-subj="actionsTable"]:not(.euiBasicTable-loading)',
+  EMPTY_STATE: '[data-test-subj="createFirstConnectorEmptyPrompt"]',
 } as const;
 
 const CONNECTORS_ROLE: KibanaRole = {
@@ -42,12 +43,20 @@ const CONNECTORS_ROLE: KibanaRole = {
 
 const navigateToConnectors = async (page: ScoutPage, kbnUrl: KibanaUrl) => {
   await page.goto(kbnUrl.get(CONNECTORS_APP_PATH));
-  await page.locator(CONNECTORS_LIST_SELECTORS.TABLE_LOADED).waitFor({ timeout: 30_000 });
+  await page
+    .locator(CONNECTORS_LIST_SELECTORS.TABLE_LOADED)
+    .or(page.locator(CONNECTORS_LIST_SELECTORS.EMPTY_STATE))
+    .waitFor();
 };
 
 const searchConnectors = async (page: ScoutPage, name: string) => {
   const searchBox = page.locator(CONNECTORS_LIST_SELECTORS.SEARCH_INPUT);
-  await searchBox.fill(name, { timeout: 30_000 });
+  const present = await searchBox
+    .waitFor({ state: 'visible', timeout: 1_000 })
+    .then(() => true)
+    .catch(() => false);
+  if (!present) return;
+  await searchBox.fill(name);
   await searchBox.press('Enter');
   await page
     .locator('.euiBasicTable[data-test-subj="actionsTable"].euiBasicTable-loading')

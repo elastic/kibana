@@ -317,12 +317,13 @@ test.describe('General connector functionality', { tag: tags.stateful.classic },
 
   test('should delete a connector', async ({ page, kbnUrl, apiServices }) => {
     const connectorName = `scout-slack-del-${Date.now()}`;
-    await apiServices.alerting.connectors.create({
+    const { id: connectorId } = await apiServices.alerting.connectors.create({
       name: connectorName,
       connectorTypeId: '.slack',
       config: {},
       secrets: SLACK_SECRETS,
     });
+    createdConnectorIds.push(connectorId);
 
     await navigateToConnectors(page, kbnUrl);
     await searchConnectors(page, connectorName);
@@ -345,12 +346,13 @@ test.describe('General connector functionality', { tag: tags.stateful.classic },
 
   test('should bulk delete connectors', async ({ page, kbnUrl, apiServices }) => {
     const connectorName = `scout-slack-bulk-${Date.now()}`;
-    await apiServices.alerting.connectors.create({
+    const { id: connectorId } = await apiServices.alerting.connectors.create({
       name: connectorName,
       connectorTypeId: '.slack',
       config: {},
       secrets: SLACK_SECRETS,
     });
+    createdConnectorIds.push(connectorId);
 
     await navigateToConnectors(page, kbnUrl);
     await searchConnectors(page, connectorName);

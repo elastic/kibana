@@ -41,12 +41,25 @@ export const getMonacoValue = async (page: ScoutPage): Promise<string> => {
 
 export const navigateToConnectors = async (page: ScoutPage, kbnUrl: KibanaUrl) => {
   await page.goto(kbnUrl.get(CONNECTORS_APP_PATH));
-  await page.locator(CONNECTORS_LIST_SELECTORS.TABLE_LOADED).waitFor({ timeout: 30_000 });
+  // Accept either the loaded table (connectors exist) or the empty-state prompt
+  // (zero connectors). The table selector never appears when the page is empty.
+  await page
+    .locator(CONNECTORS_LIST_SELECTORS.TABLE_LOADED)
+    .or(page.locator(CONNECTORS_LIST_SELECTORS.EMPTY_STATE))
+    .waitFor();
 };
 
 export const searchConnectors = async (page: ScoutPage, name: string) => {
   const searchBox = page.locator(CONNECTORS_LIST_SELECTORS.SEARCH_INPUT);
-  await searchBox.fill(name, { timeout: 30_000 });
+  // The search box only renders when connectors exist. If the page is showing the
+  // empty state (zero connectors), skip the search — callers asserting count 0 will
+  // still pass because there are no rows.
+  const present = await searchBox
+    .waitFor({ state: 'visible', timeout: 1_000 })
+    .then(() => true)
+    .catch(() => false);
+  if (!present) return;
+  await searchBox.fill(name);
   await searchBox.press('Enter');
   // Two-phase wait: catch the loading state then wait for it to clear.
   // Without this, waitFor() can match the pre-search "not loading" table
