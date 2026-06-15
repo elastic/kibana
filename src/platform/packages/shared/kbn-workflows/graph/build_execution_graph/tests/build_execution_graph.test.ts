@@ -348,7 +348,7 @@ describe('convertToWorkflowGraph', () => {
       const executionGraph = convertToWorkflowGraph(rawApiWorkflow as any);
       const node = executionGraph.node('testKibanaRawStep') as unknown as KibanaGraphNode;
       expect(node.type).toBe('kibana.cases.get');
-      expect(node.configuration.with.request.path).toBe('/api/cases/test-case-id');
+      expect(node.configuration.with.request?.path).toBe('/api/cases/test-case-id');
     });
   });
 

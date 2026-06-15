@@ -12,6 +12,7 @@ import {
   CollisionStrategySchema,
   ConcurrencySettingsSchema,
   EventTimestampSchema,
+  KibanaStepSchema,
   WorkflowOutputStepSchema,
   WorkflowSchema,
   WorkflowSchemaForAutocomplete,
@@ -836,6 +837,49 @@ describe('EventTimestampSchema', () => {
 
   it('should reject missing timestamp', () => {
     const result = EventTimestampSchema.safeParse({});
+    expect(result.success).toBe(false);
+  });
+});
+
+describe('KibanaStepSchema', () => {
+  it('should accept kibana.request with valid top-level method', () => {
+    const result = KibanaStepSchema.safeParse({
+      name: 'simpleTest',
+      type: 'kibana.request',
+      with: {
+        method: 'POST',
+        path: '/api/status',
+      },
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it('should reject kibana.request with invalid top-level method', () => {
+    const result = KibanaStepSchema.safeParse({
+      name: 'simpleTest',
+      type: 'kibana.request',
+      with: {
+        method: 'POSTs',
+        path: '/api/status',
+      },
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it('should reject kibana.request with invalid nested request method', () => {
+    const result = KibanaStepSchema.safeParse({
+      name: 'simpleTest',
+      type: 'kibana.request',
+      with: {
+        request: {
+          method: 'POSTs',
+          path: '/api/status',
+        },
+      },
+    });
+
     expect(result.success).toBe(false);
   });
 });

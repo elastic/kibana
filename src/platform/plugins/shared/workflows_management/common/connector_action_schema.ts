@@ -7,10 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { HttpMethodSchema } from '@kbn/connector-schemas/http/schemas/v1';
 import { connectorsSpecs } from '@kbn/connector-specs';
 import { i18n } from '@kbn/i18n';
 import type { BaseConnectorContract } from '@kbn/workflows';
-import { FetcherConfigSchema, KibanaStepMetaSchema } from '@kbn/workflows';
+import {
+  FetcherConfigSchema,
+  KibanaRequestParamsSchema,
+  KibanaStepMetaSchema,
+} from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 
 import {
@@ -485,28 +490,8 @@ export const staticConnectors: BaseConnectorContract[] = [
   {
     type: 'kibana.request',
     summary: 'Kibana Request',
-    paramsSchema: z.object({
-      method: z.string().optional(),
-      path: z.string(),
-      body: z.any().optional(),
-      headers: z.any().optional(),
-      query: z.record(z.string(), z.any()).optional(),
-      form_data: z
-        .record(
-          z.string(),
-          z.object({
-            content: z.string().describe('File content or field value'),
-            filename: z.string().optional().describe('Filename hint (e.g. "export.ndjson")'),
-            content_type: z
-              .string()
-              .optional()
-              .describe('MIME type of the content (e.g. "application/ndjson")'),
-          })
-        )
-        .optional()
-        .describe(
-          'Multipart form-data fields. Use instead of body for APIs that require file uploads (e.g. /api/saved_objects/_import). Mutually exclusive with body.'
-        ),
+    paramsSchema: KibanaRequestParamsSchema.omit({ method: true }).extend({
+      method: HttpMethodSchema.optional().describe('The HTTP method to use for the request.'),
       fetcher: FetcherConfigSchema,
       ...KibanaStepMetaSchema,
     }),
