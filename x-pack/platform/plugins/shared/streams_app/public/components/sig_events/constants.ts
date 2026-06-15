@@ -5,8 +5,5 @@
  * 2.0.
  */
 
-export async function asyncForEach<T>(array: T[], callback: (item: T, index: number) => void) {
-  for (let index = 0; index < array.length; index++) {
-    await callback(array[index], index);
-  }
-}
+/** How often to poll the server (status + result data) while a sig-events pipeline is running. */
+export const RUNNING_POLL_INTERVAL_MS = 5 * 1000;

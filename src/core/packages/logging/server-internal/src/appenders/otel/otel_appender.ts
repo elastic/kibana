@@ -155,15 +155,15 @@ const toAttributes = (record: LogRecord, includeLogMeta: boolean): Attributes =>
     if (id !== undefined) attrs['service.id'] = id;
     // Flatten anything that we don't know about into the service object (ideally, nothing).
     Object.entries(getFlattenedObject(serviceRest)).forEach(([key, value]) => {
-      attrs[key] = value;
+      attrs[`service.${key}`] = value;
     });
 
-    // Flatten non-service meta into individual OTel attributes prefixed with
-    // kibana.log.meta. so they are discoverable as flat fields in backends.
+    // Flatten non-service meta into individual OTel attributes so they are
+    // discoverable as flat fields in backends.
     // Only included for pattern layout: with JSON layout the meta is part of
     // the structured body and repeating it here would be redundant.
     Object.entries(getFlattenedObject(metaRest)).forEach(([key, value]) => {
-      attrs[`kibana.log.meta.${key}`] = value as AttributeValue;
+      attrs[key] = value as AttributeValue;
     });
   }
 
