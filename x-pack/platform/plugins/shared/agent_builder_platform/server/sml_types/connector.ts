@@ -73,7 +73,10 @@ export const createConnectorSmlType = (deps: ConnectorSmlTypeDeps): SmlTypeDefin
               type: CONNECTOR_SML_TYPE,
               title: name,
               content: contentParts.join('\n'),
-              permissions: ['action:execute'],
+              permissions: {
+                kibana: { privileges: [{ name: 'action:execute' }] },
+                elasticsearch: { indices: [] },
+              },
             },
           ],
         };

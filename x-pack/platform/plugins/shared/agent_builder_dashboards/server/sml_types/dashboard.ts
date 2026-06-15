@@ -100,7 +100,10 @@ export const createDashboardSmlType = ({
             type: DASHBOARD_SML_TYPE,
             title: dashboard.data.title ?? originId,
             content: toDashboardSearchContent(dashboard.data),
-            permissions: ['saved_object:dashboard/get'],
+            permissions: {
+              kibana: { privileges: [{ name: 'saved_object:dashboard/get' }] },
+              elasticsearch: { indices: [] },
+            },
           },
         ],
       };

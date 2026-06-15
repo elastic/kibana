@@ -10,6 +10,7 @@
 import type { ReactElement, ReactNode, MouseEventHandler } from 'react';
 import type { Observable } from 'rxjs';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import type { GlobalHeaderAiButton } from './ai_button';
 import type { GlobalSearchConfig } from './global_search';
 
 /** @public */
@@ -169,6 +170,25 @@ export interface AppHeaderConfig {
 export interface ChromeNext {
   /** Whether the Chrome Next feature flag is enabled. */
   readonly isEnabled: boolean;
+  aiButton: {
+    /**
+     * Register an AI button rendered in a fixed slot in the Chrome-Next global header.
+     * Returns an unregister callback. Global — persists across app changes.
+     *
+     * @remarks
+     * Stop-gap for the Chrome-Next transition. The end goal is a single, chrome-owned
+     * AI button with one registration point. We are not there yet: the legacy header
+     * lets every solution register its own button and self-manage visibility, so apps
+     * can have more than one in flight at a time. To migrate those apps without
+     * regressing behavior, `register` mirrors that model — it accepts multiple
+     * registrations and renders each registered button as-is (each owner remains
+     * responsible for its own visibility). Once the single-button model lands, this
+     * should collapse to one registration and the multi-button handling can be removed.
+     *
+     * Tech debt: https://github.com/elastic/kibana/issues/272279
+     */
+    register(button: GlobalHeaderAiButton): () => void;
+  };
   /** Global search configuration. */
   globalSearch: {
     /**
