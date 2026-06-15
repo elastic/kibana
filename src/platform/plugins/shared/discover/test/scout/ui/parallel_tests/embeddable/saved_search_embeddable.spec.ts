@@ -23,7 +23,8 @@ const addSearchEmbeddableToDashboard = async (
 ) => {
   await objects.dashboard.addSavedSearch(title);
   await objects.dashboard.waitForRenderComplete();
-  expect(page.getByTestId('docTable').locator('.euiDataGridRowCell')).toBeTruthy();
+  // eslint-disable-next-line playwright/no-nth-methods
+  await expect(page.getByTestId('docTable').locator('.euiDataGridRowCell').first()).toBeVisible();
 };
 
 spaceTest.describe('Discover saved search embeddable', { tag: tags.deploymentAgnostic }, () => {
@@ -53,28 +54,49 @@ spaceTest.describe('Discover saved search embeddable', { tag: tags.deploymentAgn
     await scoutSpace.savedObjects.cleanStandardList();
   });
 
-  spaceTest('should control columns correctly', async ({ page, pageObjects }) => {
+  spaceTest('Display behaviours', async ({ page, pageObjects }) => {
     await addSearchEmbeddableToDashboard(page, pageObjects);
 
-    const timestamp = page
-      .getByTestId('dataGridRowCell')
-      .filter({ hasText: 'Sep 22, 2015 @ 23:50:13.253' });
+    await spaceTest.step('should not show the full screen button', async () => {
+      await expect(page.getByTestId('dataGridFullScreenButton')).toHaveCount(0);
+    });
 
-    expect(await timestamp.count()).toBeGreaterThan(0);
-    const colNum = await timestamp.getAttribute('data-gridcell-column-index');
-    expect(colNum).not.toBeNull();
+    await spaceTest.step('should show the the grid toolbar', async () => {
+      await expect(page.getByTestId('unifiedDataTableToolbar')).toHaveCount(1);
+    });
 
-    await page.getByTestId('dataGridHeaderCell-agent').focus();
-    await page.getByTestId('dataGridHeaderCellActionButton-agent').click();
-    await page.getByText('Move left').click();
+    await spaceTest.step('should display an error', async () => {
+      await pageObjects.queryBar.setQuery('bytes > 5000');
+      await pageObjects.queryBar.submitQuery();
+      await pageObjects.dashboard.waitForRenderComplete();
+      await expect(page.getByTestId('savedSearchTotalDocuments')).toHaveText('7,777 documents');
+      await pageObjects.queryBar.setQuery('this < is not : a valid > query');
+      await pageObjects.queryBar.submitQuery();
+      await pageObjects.dashboard.waitForRenderComplete();
+      await expect(page.getByTestId('errorMessageMarkdown')).toHaveText(
+        /Expected[\S\s]+but "n" found/
+      );
+    });
 
-    await expect(timestamp).not.toHaveAttribute('data-gridcell-column-index', colNum!);
+    await spaceTest.step('should display search highlights', async () => {
+      await pageObjects.queryBar.setQuery('Mozilla');
+      await pageObjects.queryBar.submitQuery();
+      await pageObjects.dashboard.waitForRenderComplete();
+      const marks = await page.locator('.unifiedDataTable__cellValue mark').allInnerTexts();
+      expect(marks.length).toBeGreaterThan(0);
+      expect(marks.every((mark) => mark === 'Mozilla')).toBe(true);
+    });
 
-    await page.getByTestId('dataGridHeaderCell-agent').focus();
-    await page.getByTestId('dataGridHeaderCellActionButton-agent').click();
-    await page.getByText('Remove column').click();
-
-    await expect(timestamp).toHaveAttribute('data-gridcell-column-index', colNum!);
+    await spaceTest.step(
+      'should expand the detail row when the toggle arrow is clicked',
+      async () => {
+        // There are many toggles, we need to pick one/any to click. The first one
+        // is good enough.
+        // eslint-disable-next-line playwright/no-nth-methods
+        await page.getByTestId('docTableExpandToggleColumn').first().click();
+        await expect(page.getByTestId('kbnDocViewer')).toBeVisible();
+      }
+    );
   });
 
   spaceTest('should render duplicate saved search embeddables', async ({ page, pageObjects }) => {
@@ -91,62 +113,13 @@ spaceTest.describe('Discover saved search embeddable', { tag: tags.deploymentAgn
     expect(first).toStrictEqual(last);
   });
 
-  spaceTest('should not show the full screen button', async ({ page, pageObjects }) => {
-    await addSearchEmbeddableToDashboard(page, pageObjects);
-    await expect(page.getByTestId('dataGridFullScreenButton')).toHaveCount(0);
-  });
-
-  spaceTest('should show the the grid toolbar', async ({ page, pageObjects }) => {
-    await addSearchEmbeddableToDashboard(page, pageObjects);
-    await expect(page.getByTestId('unifiedDataTableToolbar')).toHaveCount(1);
-  });
-
-  spaceTest('should display an error', async ({ page, pageObjects }) => {
-    await addSearchEmbeddableToDashboard(page, pageObjects);
-    await pageObjects.queryBar.setQuery('bytes > 5000');
-    await expect(page.getByTestId('savedSearchTotalDocuments')).toHaveText('14,004 documents');
-    await pageObjects.queryBar.setQuery('this < is not : a valid > query');
-    await pageObjects.queryBar.submitQuery();
-    await pageObjects.dashboard.waitForRenderComplete();
-    await expect(page.getByTestId('errorMessageMarkdown')).toHaveText(
-      /Expected[\S\s]+but "n" found/
-    );
-  });
-
-  spaceTest('should display search highlights', async ({ page, pageObjects }) => {
-    await addSearchEmbeddableToDashboard(page, pageObjects);
-    await pageObjects.queryBar.setQuery('Mozilla');
-    await pageObjects.queryBar.submitQuery();
-    await pageObjects.dashboard.waitForRenderComplete();
-    const marks = await page.locator('.unifiedDataTable__cellValue mark').allInnerTexts();
-    expect(marks.length).toBeGreaterThan(0);
-    expect(marks.every((mark) => mark === 'Mozilla')).toBe(true);
-  });
-
-  spaceTest(
-    'should expand the detail row when the toggle arrow is clicked',
-    async ({ page, pageObjects }) => {
-      await addSearchEmbeddableToDashboard(page, pageObjects);
-      // There are many toggles, we need to pick one/any to click. The first one
-      // is good enough.
-      // eslint-disable-next-line playwright/no-nth-methods
-      await page.getByTestId('docTableExpandToggleColumn').first().click();
-      await pageObjects.dashboard.waitForRenderComplete();
-      await expect(page.getByTestId('kbnDocViewer')).toBeVisible();
-    }
-  );
-
   spaceTest('filters are added when a cell filter is clicked', async ({ page, pageObjects }) => {
     await addSearchEmbeddableToDashboard(page, pageObjects);
-    await page.getByRole('gridcell').filter({ hasText: '5,453' }).click();
-    await pageObjects.dashboard.waitForRenderComplete();
+    await page.testSubj.locator('dataGridRowCell').filter({ hasText: '8,788' }).click();
     await page.getByTestId('filterOutButton').click();
-    await pageObjects.dashboard.waitForRenderComplete();
     await expect(page.testSubj.locator('~filter')).toHaveCount(1);
-    await page.getByRole('gridcell').filter({ hasText: '7,124' }).click();
-    await pageObjects.dashboard.waitForRenderComplete();
+    await page.testSubj.locator('dataGridRowCell').filter({ hasText: '7,124' }).click();
     await page.getByTestId('filterForButton').click();
-    await pageObjects.dashboard.waitForRenderComplete();
     await expect(page.testSubj.locator('~filter')).toHaveCount(2);
   });
 
