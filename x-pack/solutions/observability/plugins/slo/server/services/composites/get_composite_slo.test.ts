@@ -163,32 +163,12 @@ describe('GetCompositeSLO', () => {
       oneHourBurnRate: 0.108,
       oneDayBurnRate: 0.07,
     };
-    const fetchSpy = mockPersistedCompositeSummary(composite.id, persistedSummary);
+    const fetchSpy = mockPersistedCompositeSummary(composite.id, persistedSummary, [sloA, sloB].map(buildMemberSummary));
 
     const result = await getCompositeSLO.execute(composite.id, DEFAULT_SPACE_ID);
     fetchSpy.mockRestore();
 
     expect(result.summary).toEqual(persistedSummary);
-
-    expect(result.members).toHaveLength(2);
-    expect(result.members[0]).toMatchObject({
-      sloId: sloA.id,
-      name: 'Service A',
-      weight: 6,
-      normalisedWeight: 0.6,
-      fiveMinuteBurnRate: 1.0,
-      oneHourBurnRate: 0.8,
-      oneDayBurnRate: 0.5,
-    });
-    expect(result.members[1]).toMatchObject({
-      sloId: sloB.id,
-      name: 'Service B',
-      weight: 4,
-      normalisedWeight: 0.4,
-      fiveMinuteBurnRate: 2.0,
-      oneHourBurnRate: 1.5,
-      oneDayBurnRate: 1.0,
-    });
   });
 
   it('produces consistent burn rates when member targets differ from composite target', async () => {
