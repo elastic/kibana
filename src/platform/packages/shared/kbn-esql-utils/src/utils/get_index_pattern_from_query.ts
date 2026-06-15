@@ -12,7 +12,12 @@ import type { ESQLSource, ESQLCommand, ESQLAstPromqlCommand } from '@elastic/esq
 
 const INDEX_SOURCE_COMMANDS = new Set(['FROM', 'TS']);
 
-function getPromQLSourcesFromAst(commands: ESQLCommand[]): string[] {
+export interface ESQLIndexPatterns {
+  indexPattern: string;
+  indexPatternWithoutRemoteClusterPrefix: string;
+}
+
+function getPromQLSources(commands: ESQLCommand[]): string[] {
   const promqlCommand = commands.find(({ name }) => name === 'promql');
   if (!promqlCommand) {
     return [];
@@ -22,28 +27,59 @@ function getPromQLSourcesFromAst(commands: ESQLCommand[]): string[] {
   return index ? [index] : [];
 }
 
-function getSourcesFromAst(commands: ESQLCommand[]): string[] {
+function getDirectIndexSources(commands: ESQLCommand[]): ESQLSource[] {
   const sourceCommand = commands.find(({ name }) => INDEX_SOURCE_COMMANDS.has(name.toUpperCase()));
   if (!sourceCommand) {
     return [];
   }
 
-  const args = sourceCommand.args as ESQLSource[];
-  return args
-    .filter((arg): arg is ESQLSource => arg.sourceType === 'index')
-    .map((index) => index.name);
+  return (sourceCommand.args as ESQLSource[]).filter(
+    (arg): arg is ESQLSource => arg.sourceType === 'index'
+  );
 }
 
-function extractSubquerySources(sourceCommand: ESQLCommand): string[] {
-  const subqueryArgs = sourceCommand.args.filter(isSubQuery);
-  const subquerySources: string[] = [];
-
-  for (const subquery of subqueryArgs) {
-    const sources = getSourcesFromAst(subquery.child.commands);
-    subquerySources.push(...sources);
+function getIndexSources(commands: ESQLCommand[]): ESQLSource[] {
+  const sourceCommand = commands.find(({ name }) => INDEX_SOURCE_COMMANDS.has(name.toUpperCase()));
+  if (!sourceCommand) {
+    return [];
   }
 
-  return subquerySources;
+  const subquerySources = sourceCommand.args
+    .filter(isSubQuery)
+    .flatMap((subquery) => getDirectIndexSources(subquery.child.commands));
+
+  return [...getDirectIndexSources(commands), ...subquerySources];
+}
+
+function getSourceNameWithoutRemoteClusterPrefix(source: ESQLSource): string {
+  if (!source.prefix || !source.index) {
+    return source.name;
+  }
+
+  return source.text.slice(source.index.location.min - source.location.min);
+}
+
+export function getIndexPatternsFromESQLQuery(esql?: string): ESQLIndexPatterns {
+  if (!esql?.trim()) {
+    return { indexPattern: '', indexPatternWithoutRemoteClusterPrefix: '' };
+  }
+
+  const { root } = Parser.parse(esql);
+  const indexSources = getIndexSources(root.commands);
+  const promqlSources = getPromQLSources(root.commands);
+
+  const indexPattern = [...indexSources.map((source) => source.name), ...promqlSources];
+  const indexPatternWithoutRemoteClusterPrefix = [
+    ...indexSources.map(getSourceNameWithoutRemoteClusterPrefix),
+    ...promqlSources,
+  ];
+
+  return {
+    indexPattern: [...new Set(indexPattern)].join(','),
+    indexPatternWithoutRemoteClusterPrefix: [
+      ...new Set(indexPatternWithoutRemoteClusterPrefix),
+    ].join(','),
+  };
 }
 
 /**
@@ -54,32 +90,7 @@ function extractSubquerySources(sourceCommand: ESQLCommand): string[] {
  * @returns Comma-separated string of unique index names, or empty string if no sources found
  */
 export function getIndexPatternFromESQLQuery(esql?: string): string {
-  if (!esql?.trim()) {
-    return '';
-  }
-
-  const { root } = Parser.parse(esql);
-  const allSources: string[] = [];
-
-  // Get sources from main query
-  const mainSources = getSourcesFromAst(root.commands);
-  const promqlSources = getPromQLSourcesFromAst(root.commands);
-  allSources.push(...mainSources, ...promqlSources);
-
-  // Get sources from subqueries
-  const sourceCommand = root.commands.find(({ name }) =>
-    INDEX_SOURCE_COMMANDS.has(name.toUpperCase())
-  );
-
-  if (sourceCommand) {
-    const subquerySources = extractSubquerySources(sourceCommand);
-    allSources.push(...subquerySources);
-  }
-
-  // Remove duplicates
-  const uniqueSources = [...new Set(allSources)];
-
-  return uniqueSources.join(',');
+  return getIndexPatternsFromESQLQuery(esql).indexPattern;
 }
 
 /**

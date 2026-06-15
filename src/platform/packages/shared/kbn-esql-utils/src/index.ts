@@ -44,8 +44,10 @@ export {
 } from './utils/change_point_helpers';
 export {
   getIndexPatternFromESQLQuery,
+  getIndexPatternsFromESQLQuery,
   getSourceCommandFromESQLQuery,
 } from './utils/get_index_pattern_from_query';
+export type { ESQLIndexPatterns } from './utils/get_index_pattern_from_query';
 export { queryCannotBeSampled } from './utils/query_cannot_be_sampled';
 export { appendToESQLQuery } from './utils/append_to_query/utils';
 export { appendStatsByToQuery } from './utils/append_to_query/append_stats_by';
