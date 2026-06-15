@@ -279,6 +279,7 @@ describe('EpisodeRuleCell', () => {
         columnId="rule.id"
         row={row}
         rulesCache={{ r1: makeRule('My Rule', { fields: ['host.name'] }) }}
+        missingRuleIds={emptyMissingRuleIds}
         isLoadingRules={false}
         rowHeight={2}
       />

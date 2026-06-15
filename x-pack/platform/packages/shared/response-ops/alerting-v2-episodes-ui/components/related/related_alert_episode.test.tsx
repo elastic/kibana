@@ -53,7 +53,7 @@ describe('RelatedAlertEpisode', () => {
 
     render(
       <RelatedAlertEpisode
-        episode={episodeWithoutStatus}
+        episode={episodeWithoutStatus as AlertEpisode}
         ruleName={ruleName}
         groupingFields={groupingFields}
         href="/x"

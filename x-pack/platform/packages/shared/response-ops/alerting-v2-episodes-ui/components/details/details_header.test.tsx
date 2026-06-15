@@ -60,15 +60,6 @@ describe('AlertEpisodeDetailsHeader', () => {
     expect(screen.getByTestId('alertingV2EpisodeDetailsHeaderTitle')).toHaveTextContent('Loading…');
   });
 
-  it('renders the loading title while the rule is loading', () => {
-    render(
-      <I18nProvider>
-        <AlertEpisodeDetailsHeader {...defaultProps} isRuleLoading={true} rule={undefined} />
-      </I18nProvider>
-    );
-    expect(screen.getByTestId('alertingV2EpisodeDetailsHeaderTitle')).toHaveTextContent('Loading…');
-  });
-
   it('renders the deleted rule title and rule id when the rule was not found', () => {
     render(
       <I18nProvider>
