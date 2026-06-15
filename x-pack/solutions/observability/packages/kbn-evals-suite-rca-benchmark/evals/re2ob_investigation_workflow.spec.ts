@@ -42,6 +42,9 @@ import { createCriteriaEvaluator } from '../src/criteria_evaluator';
 import { InvestigationWorkflowClient } from '../src/investigation_workflow_client';
 
 const RCAEVAL_DATA_DIR = process.env.RCAEVAL_DATA_DIR;
+const RCAEVAL_MAX_SCENARIOS = process.env.RCAEVAL_MAX_SCENARIOS
+  ? parseInt(process.env.RCAEVAL_MAX_SCENARIOS, 10)
+  : undefined;
 
 interface LoadedScenario {
   handle: LocalReplayHandle;
@@ -63,7 +66,7 @@ evaluate.describe(
         return;
       }
 
-      for (const scenario of RE2OB_SCENARIOS) {
+      for (const scenario of RCAEVAL_MAX_SCENARIOS ? RE2OB_SCENARIOS.slice(0, RCAEVAL_MAX_SCENARIOS) : RE2OB_SCENARIOS) {
         const caseDir = resolveLocalCaseDir(RCAEVAL_DATA_DIR, scenario);
         if (!caseDir) {
           log.warning(
