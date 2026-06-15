@@ -14,6 +14,9 @@ import { isResponseError } from '@kbn/es-errors';
 import { TYPE_A, TYPE_B } from './saved_objects';
 import { setupData } from './saved_objects_data';
 
+const colTypeAField = esql.col(`${TYPE_A}.myField`);
+const colTypeBField = esql.col(`${TYPE_B}.anotherField`);
+
 export function registerEsqlExampleRoutes(router: IRouter, log: Logger) {
   // Basic query — no user input, plain pipeline string is safe.
   router.versioned
@@ -39,12 +42,11 @@ export function registerEsqlExampleRoutes(router: IRouter, log: Logger) {
           // The `type` parameter controls index resolution (FROM clause is auto-generated)
           // and security filtering (type + namespace restrictions are injected via the
           // `filter` parameter). You don't need FROM or WHERE type == in your pipeline.
-          // TYPE_A and TYPE_B are compile-time constants — write field names inline.
           const result = await savedObjectsClient.esql({
             type: [TYPE_A, TYPE_B],
             namespaces: ['default'],
             pipeline: esql`
-              KEEP type, \`type-a.myField\`, \`type-b.anotherField\`
+              KEEP type, ${colTypeAField}, ${colTypeBField}
               | SORT type
               | LIMIT 100
             `,
@@ -94,7 +96,7 @@ export function registerEsqlExampleRoutes(router: IRouter, log: Logger) {
             type: TYPE_A,
             namespaces: ['default'],
             pipeline: esql`
-              WHERE ${esql.exp(`${TYPE_A}.myField`)} == ${{ searchTerm }}
+              WHERE ${colTypeAField} == ${{ searchTerm }}
               | LIMIT 10
             `,
           });
