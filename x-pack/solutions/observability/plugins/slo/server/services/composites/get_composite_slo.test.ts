@@ -94,6 +94,13 @@ describe('GetCompositeSLO', () => {
     );
   });
 
+  describe('when persisted summary is missing or incomplete', () => {
+    beforeEach(() => {
+      jest
+        .spyOn(compositeSloSummaryIndex, 'fetchCompositeSloSummariesFromIndex')
+        .mockResolvedValue(new Map());
+    });
+
   it('derives composite burn rates from composite per-window SLIs and composite target', async () => {
     const sloA = createSLO({
       id: 'slo-a-xxxxxxxx',
@@ -150,25 +157,22 @@ describe('GetCompositeSLO', () => {
       },
     ]);
 
-    const persistedSummary: CompositeSLOSummary = {
-      sliValue: 0.989,
-      status: 'VIOLATED',
-      errorBudget: {
-        initial: 0.01,
-        consumed: 1.1,
-        remaining: -0.1,
-        isEstimated: false,
-      },
-      fiveMinuteBurnRate: 0.14,
-      oneHourBurnRate: 0.108,
-      oneDayBurnRate: 0.07,
-    };
-    const fetchSpy = mockPersistedCompositeSummary(composite.id, persistedSummary, [sloA, sloB].map(buildMemberSummary));
-
     const result = await getCompositeSLO.execute(composite.id, DEFAULT_SPACE_ID);
-    fetchSpy.mockRestore();
 
-    expect(result.summary).toEqual(persistedSummary);
+    // weighted_sli      = 0.6 * sloA_sli + 0.4 * sloB_sli
+    // composite_burn    = (1 - weighted_sli) / (1 - composite_target)
+    // initial_budget    = 1 - composite_target
+    // consumed_budget   = (1 - weighted_sli) / initial_budget
+    // remaining_budget  = 1 - consumed_budget
+    expect(result.summary.sliValue).toBeCloseTo(0.989); // 0.6*0.995 + 0.4*0.98
+    expect(result.summary.fiveMinuteBurnRate).toBeCloseTo(0.14); // (1 - (0.6*0.999 + 0.4*0.998)) / 0.01
+    expect(result.summary.oneHourBurnRate).toBeCloseTo(0.108); // (1 - (0.6*0.9992 + 0.4*0.9985)) / 0.01
+    expect(result.summary.oneDayBurnRate).toBeCloseTo(0.07); // (1 - (0.6*0.9995 + 0.4*0.999)) / 0.01
+    expect(result.summary.status).toBe('VIOLATED'); // consumed > 1 → exhausted
+    expect(result.summary.errorBudget.initial).toBeCloseTo(0.01); // 1 - 0.99
+    expect(result.summary.errorBudget.consumed).toBeCloseTo(1.1); // (1 - 0.989) / 0.01
+    expect(result.summary.errorBudget.remaining).toBeCloseTo(-0.1); // 1 - 1.1
+    expect(result.summary.errorBudget.isEstimated).toBe(false);
   });
 
   it('produces consistent burn rates when member targets differ from composite target', async () => {
@@ -214,27 +218,13 @@ describe('GetCompositeSLO', () => {
       },
     ]);
 
-    const persistedSummary: CompositeSLOSummary = {
-      sliValue: 0.97,
-      status: 'HEALTHY',
-      errorBudget: {
-        initial: 0.05,
-        consumed: 0.15,
-        remaining: 0.85,
-        isEstimated: false,
-      },
-      fiveMinuteBurnRate: 0.6,
-      oneHourBurnRate: 0.45,
-      oneDayBurnRate: 0.32,
-    };
-    const fetchSpy = mockPersistedCompositeSummary(composite.id, persistedSummary);
-
     const result = await getCompositeSLO.execute(composite.id, DEFAULT_SPACE_ID);
-    fetchSpy.mockRestore();
 
-    expect(result.summary.fiveMinuteBurnRate).toBeCloseTo(persistedSummary.fiveMinuteBurnRate);
-    expect(result.summary.oneHourBurnRate).toBeCloseTo(persistedSummary.oneHourBurnRate);
-    expect(result.summary.oneDayBurnRate).toBeCloseTo(persistedSummary.oneDayBurnRate);
+    // Equal weights → weighted_sli = (sloA_sli + sloB_sli) / 2.
+    // composite_burn = (1 - weighted_sli) / (1 - 0.95).
+    expect(result.summary.fiveMinuteBurnRate).toBeCloseTo(0.6); // (1 - (0.99 + 0.95)/2) / 0.05
+    expect(result.summary.oneHourBurnRate).toBeCloseTo(0.45); // (1 - (0.995 + 0.96)/2) / 0.05
+    expect(result.summary.oneDayBurnRate).toBeCloseTo(0.32); // (1 - (0.998 + 0.97)/2) / 0.05
   });
 
   it('computes error budget from composite SLI and target', async () => {
@@ -260,25 +250,15 @@ describe('GetCompositeSLO', () => {
       },
     ]);
 
-    const persistedSummary: CompositeSLOSummary = {
-      sliValue: 0.995,
-      status: 'HEALTHY',
-      errorBudget: {
-        initial: 0.01,
-        consumed: 0.5,
-        remaining: 0.5,
-        isEstimated: false,
-      },
-      fiveMinuteBurnRate: 0,
-      oneHourBurnRate: 0,
-      oneDayBurnRate: 0,
-    };
-    const fetchSpy = mockPersistedCompositeSummary(composite.id, persistedSummary);
-
     const result = await getCompositeSLO.execute(composite.id, DEFAULT_SPACE_ID);
-    fetchSpy.mockRestore();
 
-    expect(result.summary.errorBudget).toEqual(persistedSummary.errorBudget);
+    // Single member, sli=0.995, target=0.99.
+    expect(result.summary.errorBudget).toEqual({
+      initial: 0.01, // 1 - 0.99
+      consumed: 0.5, // (1 - 0.995) / 0.01
+      remaining: 0.5, // 1 - 0.5
+      isEstimated: false,
+    });
   });
 
   it('excludes members with no data and re-normalises weights', async () => {
@@ -319,25 +299,9 @@ describe('GetCompositeSLO', () => {
       },
     ]);
 
-    const persistedSummary: CompositeSLOSummary = {
-      sliValue: 0.995,
-      status: 'HEALTHY',
-      errorBudget: {
-        initial: 0.01,
-        consumed: 0.5,
-        remaining: 0.5,
-        isEstimated: false,
-      },
-      fiveMinuteBurnRate: 0,
-      oneHourBurnRate: 0,
-      oneDayBurnRate: 0,
-    };
-    const fetchSpy = mockPersistedCompositeSummary(composite.id, persistedSummary);
-
     const result = await getCompositeSLO.execute(composite.id, DEFAULT_SPACE_ID);
-    fetchSpy.mockRestore();
 
-    // sloB has no data (-1), so only sloA participates with normalisedWeight = 1.0    
+    // sloB has no data (-1), so only sloA participates with normalisedWeight = 1.0
     expect(result.members[0].normalisedWeight).toBe(1);
     expect(result.members[1].normalisedWeight).toBe(0);
     expect(result.members[1].sliValue).toBe(-1);
@@ -380,11 +344,7 @@ describe('GetCompositeSLO', () => {
       },
     ]);
 
-    const fetchSpy = jest
-      .spyOn(compositeSloSummaryIndex, 'fetchCompositeSloSummariesFromIndex')
-      .mockResolvedValue(new Map());
     const result = await getCompositeSLO.execute(composite.id, DEFAULT_SPACE_ID);
-    fetchSpy.mockRestore();
 
     expect(result.summary.sliValue).toBe(-1);
     expect(result.summary.status).toBe('NO_DATA');
@@ -418,25 +378,9 @@ describe('GetCompositeSLO', () => {
       },
     ]);
 
-    const persistedSummary: CompositeSLOSummary = {
-      sliValue: 0.995,
-      status: 'HEALTHY',
-      errorBudget: {
-        initial: 0.01,
-        consumed: 0.5,
-        remaining: 0.5,
-        isEstimated: false,
-      },
-      fiveMinuteBurnRate: 0,
-      oneHourBurnRate: 0,
-      oneDayBurnRate: 0,
-    };
-    const fetchSpy = mockPersistedCompositeSummary(composite.id, persistedSummary);
-
     const result = await getCompositeSLO.execute(composite.id, DEFAULT_SPACE_ID);
-    fetchSpy.mockRestore();
 
-    // Only sloA participates    
+    // Only sloA participates
     expect(result.members).toHaveLength(1);
     expect(result.members[0].sloId).toBe(sloA.id);
     expect(result.members[0].normalisedWeight).toBe(1);
@@ -464,12 +408,7 @@ describe('GetCompositeSLO', () => {
       },
     ]);
 
-    const fetchSpy = jest
-      .spyOn(compositeSloSummaryIndex, 'fetchCompositeSloSummariesFromIndex')
-      .mockResolvedValue(new Map());
-
     const result = await getCompositeSLO.execute(composite.id, DEFAULT_SPACE_ID);
-    fetchSpy.mockRestore();
 
     expect(mockSummaryClient.computeSummaries).toHaveBeenCalledWith([
       {
@@ -484,7 +423,41 @@ describe('GetCompositeSLO', () => {
     expect(result.members[0].instanceId).toBe('my-instance');
   });
 
-  it('uses persisted composite summary from index when it is present and has computed members', async () => {
+  it('returns VIOLATED status when composite SLI is below target and error budget is exhausted', async () => {
+    const sloA = createSLO({
+      id: 'slo-a-xxxxxxxx',
+      name: 'Violated',
+      indicator: createAPMTransactionErrorRateIndicator(),
+    });
+
+    const composite = createCompositeSlo({
+      members: [{ sloId: sloA.id, weight: 1 }],
+      objective: { target: 0.999 },
+    });
+
+    mockCompositeRepo.findById.mockResolvedValue(composite);
+    mockSloRepo.findAllByIds.mockResolvedValue([sloA]);
+    mockSummaryClient.computeSummaries.mockResolvedValueOnce([
+      {
+        groupings: {},
+        meta: {},
+        summary: buildSummary({ sliValue: 0.95 }),
+        burnRateWindows: buildBurnRateWindows({ '5m': 0.95, '1h': 0.95, '1d': 0.95 }),
+      },
+    ]);
+
+    const result = await getCompositeSLO.execute(composite.id, DEFAULT_SPACE_ID);
+
+    // Single member, sli=0.95, target=0.999.
+    expect(result.summary.status).toBe('VIOLATED'); // consumed > 1 → exhausted
+    expect(result.summary.errorBudget.initial).toBeCloseTo(0.001); // 1 - 0.999
+    expect(result.summary.errorBudget.consumed).toBeCloseTo(50); // (1 - 0.95) / 0.001
+    expect(result.summary.errorBudget.remaining).toBeCloseTo(-49); // 1 - 50
+  });
+  });
+
+  describe('when persisted summary and members are present', () => {
+    it('uses persisted composite summary from index when it is present and has computed members', async () => {
     const sloA = createSLO({
       id: 'slo-a-xxxxxxxx',
       name: 'A',
@@ -532,49 +505,7 @@ describe('GetCompositeSLO', () => {
     expect(result.members).toHaveLength(1);
 
     fetchSpy.mockRestore();
+    });
   });
 
-  it('returns VIOLATED status when composite SLI is below target and error budget exhausted', async () => {
-    const sloA = createSLO({
-      id: 'slo-a-xxxxxxxx',
-      name: 'Violated',
-      indicator: createAPMTransactionErrorRateIndicator(),
-    });
-
-    const composite = createCompositeSlo({
-      members: [{ sloId: sloA.id, weight: 1 }],
-      objective: { target: 0.999 },
-    });
-
-    mockCompositeRepo.findById.mockResolvedValue(composite);
-    mockSloRepo.findAllByIds.mockResolvedValue([sloA]);
-    mockSummaryClient.computeSummaries.mockResolvedValueOnce([
-      {
-        groupings: {},
-        meta: {},
-        summary: buildSummary({ sliValue: 0.95 }),
-        burnRateWindows: buildBurnRateWindows({ '5m': 0.95, '1h': 0.95, '1d': 0.95 }),
-      },
-    ]);
-
-    const persistedSummary: CompositeSLOSummary = {
-      sliValue: 0.95,
-      status: 'VIOLATED',
-      errorBudget: {
-        initial: 0.001,
-        consumed: 50,
-        remaining: -49,
-        isEstimated: false,
-      },
-      fiveMinuteBurnRate: 1,
-      oneHourBurnRate: 1,
-      oneDayBurnRate: 1,
-    };
-    const fetchSpy = mockPersistedCompositeSummary(composite.id, persistedSummary, [ buildMemberSummary(sloA) ]);
-
-    const result = await getCompositeSLO.execute(composite.id, DEFAULT_SPACE_ID);
-    fetchSpy.mockRestore();
-
-    expect(result.summary).toEqual(persistedSummary);
-  });
 });
