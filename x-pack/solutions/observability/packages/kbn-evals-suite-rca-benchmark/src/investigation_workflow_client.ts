@@ -65,7 +65,7 @@ function formatSynthesisAsMessage(synthesis: SynthesisOutput): string {
   lines.push(`Impact: ${synthesis.impact}`);
   lines.push('');
 
-  if (synthesis.ranked_hypotheses.length > 0) {
+  if ((synthesis.ranked_hypotheses ?? []).length > 0) {
     lines.push('Ranked hypotheses:');
     for (const h of synthesis.ranked_hypotheses) {
       lines.push(
@@ -76,7 +76,7 @@ function formatSynthesisAsMessage(synthesis: SynthesisOutput): string {
     lines.push('');
   }
 
-  if (synthesis.discarded_hypotheses.length > 0) {
+  if ((synthesis.discarded_hypotheses ?? []).length > 0) {
     lines.push('Discarded hypotheses:');
     for (const h of synthesis.discarded_hypotheses) {
       lines.push(`  - ${h.statement} (reason: ${h.discard_reason})`);
@@ -84,7 +84,7 @@ function formatSynthesisAsMessage(synthesis: SynthesisOutput): string {
     lines.push('');
   }
 
-  if (synthesis.gaps_found.length > 0) {
+  if ((synthesis.gaps_found ?? []).length > 0) {
     lines.push(`Gaps: ${synthesis.gaps_found.join('; ')}`);
   }
 
@@ -190,7 +190,9 @@ export class InvestigationWorkflowClient {
     }
 
     if (synthesizeStep?.output) {
-      const synthesis = synthesizeStep.output as SynthesisOutput;
+      // ai.agent steps wrap the structured output in { structured_output, conversation_id, message }
+      const rawOutput = synthesizeStep.output as { structured_output?: SynthesisOutput } | SynthesisOutput;
+      const synthesis = ('structured_output' in rawOutput ? rawOutput.structured_output : rawOutput) as SynthesisOutput;
       messageContent = formatSynthesisAsMessage(synthesis);
       this.log.info(
         `[investigation-workflow] ${scenarioId} synthesis root_cause: ${synthesis.root_cause}`
