@@ -22,6 +22,7 @@ import {
   EuiScreenReaderOnly,
   EuiSelectable,
   EuiSpacer,
+  EuiToolTip,
   mathWithUnits,
   useEuiTheme,
 } from '@elastic/eui';
