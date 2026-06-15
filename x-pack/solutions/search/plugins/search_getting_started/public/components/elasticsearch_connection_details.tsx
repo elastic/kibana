@@ -25,7 +25,7 @@ export const ElasticsearchConnectionDetails = () => {
             <EuiTitle size="xxxs">
               <h3>
                 {i18n.translate(
-                  'xpack.search.gettingStarted.elasticsearchConnectionDetails.endpointLabel',
+                  'xpack.searchGettingStarted.elasticsearchConnectionDetails.endpointLabel',
                   {
                     defaultMessage: 'Elasticsearch endpoint:',
                   }
@@ -36,7 +36,7 @@ export const ElasticsearchConnectionDetails = () => {
           <EuiFlexItem grow={false}>
             <EuiIconTip
               content={i18n.translate(
-                'xpack.search.gettingStarted.elasticsearchConnectionDetails.endpointTooltip',
+                'xpack.searchGettingStarted.elasticsearchConnectionDetails.endpointTooltip',
                 {
                   defaultMessage:
                     'The Elasticsearch endpoint is the URL for your Elasticsearch cluster.',
@@ -70,14 +70,14 @@ export const ElasticsearchConnectionDetails = () => {
                 onClick={() => openWiredConnectionDetails()}
                 color="text"
                 aria-label={i18n.translate(
-                  'xpack.search.gettingStarted.elasticsearchConnectionDetails.viewDetails',
+                  'xpack.searchGettingStarted.elasticsearchConnectionDetails.viewDetails',
                   {
                     defaultMessage: 'View connection details',
                   }
                 )}
               >
                 {i18n.translate(
-                  'xpack.search.gettingStarted.elasticsearchConnectionDetails.viewDetails',
+                  'xpack.searchGettingStarted.elasticsearchConnectionDetails.viewDetails',
                   {
                     defaultMessage: 'View connection details',
                   }
