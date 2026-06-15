@@ -306,3 +306,13 @@ export function useInternalLegacyActionMenu(): MountPoint | undefined {
   const { legacyActionMenu$ } = useChromeService().componentDeps;
   return useObservable(legacyActionMenu$, undefined);
 }
+
+/**
+ * Returns the current user menu content set via
+ * `chrome.next.userMenu.set()`, or null if not set.
+ */
+export function useUserMenu(): ReactNode {
+  const chrome = useChromeService();
+  const content$ = useMemo(() => chrome.next.userMenu.get$(), [chrome]);
+  return useObservable(content$, null);
+}
