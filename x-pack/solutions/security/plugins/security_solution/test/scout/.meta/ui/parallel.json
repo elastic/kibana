@@ -322,7 +322,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/investigations/bulk_add_alerts_to_chat.spec.ts",
-        "line": 50,
+        "line": 60,
         "column": 14
       }
     },
@@ -336,7 +336,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/investigations/bulk_add_alerts_to_chat.spec.ts",
-        "line": 79,
+        "line": 89,
         "column": 14
       }
     },
@@ -487,94 +487,6 @@
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/navigation/serverless_agent_builder_chrome_nav.spec.ts",
         "line": 44,
-        "column": 14
-      }
-    },
-    {
-      "id": "4590c32e59db580-70f1d886ab87713",
-      "title": "Serverless Security - AI Value Report item hidden in project chrome on essentials tier hides AI Value Report in chrome nav on essentials tier",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-serverless-security_essentials",
-        "@cloud-serverless-security_essentials"
-      ],
-      "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/navigation/serverless_ai_value_report_chrome_nav.spec.ts",
-        "line": 15,
-        "column": 14
-      }
-    },
-    {
-      "id": "09ea96a744bb261-b6c3ce7e87e3b8c",
-      "title": "Serverless Security - AI Value Report item hidden in project chrome for non-socManager role hides AI Value Report in chrome nav for a non-socManager role",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/navigation/serverless_ai_value_report_role_chrome_nav.spec.ts",
-        "line": 15,
-        "column": 14
-      }
-    },
-    {
-      "id": "0e2e581757f10a8-b63472fd75edd4f",
-      "title": "AI Value Report renders the sample data banner, badge and attack discovery CTA when there are no attack discoveries",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete",
-        "@local-serverless-security_ease",
-        "@cloud-serverless-security_ease"
-      ],
-      "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/reports/ai_value_report.spec.ts",
-        "line": 22,
-        "column": 14
-      }
-    },
-    {
-      "id": "0e2e581757f10a8-89f0a961d32bcde",
-      "title": "AI Value Report export button is disabled when there is no real data",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete",
-        "@local-serverless-security_ease",
-        "@cloud-serverless-security_ease"
-      ],
-      "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/reports/ai_value_report.spec.ts",
-        "line": 37,
-        "column": 14
-      }
-    },
-    {
-      "id": "0e2e581757f10a8-c10e3c1a58b1390",
-      "title": "AI Value Report shows NoPrivileges for a user without the socManagement capability",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete",
-        "@local-serverless-security_ease",
-        "@cloud-serverless-security_ease"
-      ],
-      "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/reports/ai_value_report.spec.ts",
-        "line": 51,
         "column": 14
       }
     }
