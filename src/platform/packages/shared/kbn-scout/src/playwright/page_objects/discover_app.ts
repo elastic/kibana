@@ -478,6 +478,26 @@ export class DiscoverApp {
     return this.page.testSubj.locator(`dataGridHeaderCell-${name}`);
   }
 
+  private async openColumnMenuByField(field: string) {
+    await expect(async () => {
+      await this.page.testSubj.hover(`dataGridHeaderCell-${field}`);
+      await this.page.testSubj.click(`dataGridHeaderCellActionButton-${field}`);
+      await this.page.testSubj.locator(`dataGridHeaderCellActionGroup-${field}`).waitFor({
+        state: 'visible',
+      });
+    }).toPass();
+  }
+
+  async clickCopyColumnValues(field: string) {
+    await this.openColumnMenuByField(field);
+    await this.page.getByRole('button', { name: 'Copy column' }).click();
+  }
+
+  async clickCopyColumnName(field: string) {
+    await this.openColumnMenuByField(field);
+    await this.page.getByRole('button', { name: 'Copy name' }).click();
+  }
+
   async openGridDisplaySettings() {
     await this.page.testSubj.click('dataGridDisplaySelectorButton');
   }
