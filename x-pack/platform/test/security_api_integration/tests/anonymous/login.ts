@@ -7,9 +7,9 @@
 
 import { resolve } from 'path';
 import type { Cookie } from 'tough-cookie';
-import { parse as parseCookie } from 'tough-cookie';
 
 import expect from '@kbn/expect';
+import { findSessionCookie } from '@kbn/security-api-integration-helpers';
 import { adminTestUser } from '@kbn/test';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
@@ -75,9 +75,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
 
       const cookies = response.headers['set-cookie'];
-      expect(cookies).to.have.length(1);
-
-      const cookie = parseCookie(cookies[0])!;
+      const cookie = findSessionCookie(cookies);
       checkCookieIsSet(cookie);
 
       const { body: user } = await supertest
@@ -97,9 +95,7 @@ export default function ({ getService }: FtrProviderContext) {
         const response = await supertest.get('/security/account').expect(200);
 
         const cookies = response.headers['set-cookie'];
-        expect(cookies).to.have.length(1);
-
-        const sessionCookie = parseCookie(cookies[0])!;
+        const sessionCookie = findSessionCookie(cookies);
         checkCookieIsSet(sessionCookie);
 
         const { body: user } = await supertest
@@ -135,9 +131,7 @@ export default function ({ getService }: FtrProviderContext) {
         const response = await supertest.get('/security/account').expect(200);
 
         const cookies = response.headers['set-cookie'];
-        expect(cookies).to.have.length(1);
-
-        sessionCookie = parseCookie(cookies[0])!;
+        sessionCookie = findSessionCookie(cookies);
         checkCookieIsSet(sessionCookie);
       });
 
@@ -182,9 +176,7 @@ export default function ({ getService }: FtrProviderContext) {
         // First authenticate user to retrieve session cookie.
         const response = await supertest.get('/security/account').expect(200);
         let cookies = response.headers['set-cookie'];
-        expect(cookies).to.have.length(1);
-
-        const sessionCookie = parseCookie(cookies[0])!;
+        const sessionCookie = findSessionCookie(cookies);
         checkCookieIsSet(sessionCookie);
 
         // And then log user out.
@@ -194,8 +186,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(302);
 
         cookies = logoutResponse.headers['set-cookie'];
-        expect(cookies).to.have.length(1);
-        checkCookieIsCleared(parseCookie(cookies[0])!);
+        checkCookieIsCleared(findSessionCookie(cookies));
 
         expect(logoutResponse.headers.location).to.be('/security/logged_out?msg=LOGGED_OUT');
 
@@ -208,8 +199,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         // If Kibana detects cookie with invalid token it tries to clear it.
         cookies = apiResponse.headers['set-cookie'];
-        expect(cookies).to.have.length(1);
-        checkCookieIsCleared(parseCookie(cookies[0])!);
+        checkCookieIsCleared(findSessionCookie(cookies));
       });
 
       it('should redirect to home page if session cookie is not provided', async () => {
@@ -233,8 +223,7 @@ export default function ({ getService }: FtrProviderContext) {
         const response = await supertest.get('/security/account').expect(200);
 
         const cookies = response.headers['set-cookie'];
-        expect(cookies).to.have.length(1);
-        const sessionCookie = parseCookie(cookies[0])!;
+        const sessionCookie = findSessionCookie(cookies);
 
         // Accessing Kibana again using the same session should not create another `user_login` event.
         await supertest
@@ -274,9 +263,7 @@ export default function ({ getService }: FtrProviderContext) {
       const loginResponse = await supertest.get('/security/account').expect(200);
 
       const cookies = loginResponse.headers['set-cookie'];
-      expect(cookies).to.have.length(1);
-
-      const sessionCookie = parseCookie(cookies[0])!;
+      const sessionCookie = findSessionCookie(cookies);
       checkCookieIsSet(sessionCookie);
 
       // Access the minimal and default auth endpoint with the session cookie.

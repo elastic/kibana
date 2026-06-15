@@ -7,6 +7,7 @@
 
 import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
 import { v5 } from 'uuid';
+import pRetry from 'p-retry';
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { getStatusCode } from './retry_utils';
@@ -90,17 +91,27 @@ export async function createConnectorFixture({
   }
 
   async function isPreconfiguredConnector(connectorId: string): Promise<boolean> {
-    try {
-      const res = (await fetch({
-        path: `/api/actions/connector/${encodeURIComponent(connectorId)}`,
-        method: 'GET',
-      })) as ConnectorGetResponse;
+    const retries = process.env.KBN_EVALS_AWAIT_CCM_CONNECTORS ? 3 : 0;
 
-      return res?.is_preconfigured === true;
-    } catch (error) {
+    return pRetry(
+      async () => {
+        try {
+          const res = (await fetch({
+            path: `/api/actions/connector/${encodeURIComponent(connectorId)}`,
+            method: 'GET',
+          })) as ConnectorGetResponse;
+
+          return res?.is_preconfigured === true;
+        } catch (error) {
+          if (getStatusCode(error) === 404) throw error;
+          throw new pRetry.AbortError(error instanceof Error ? error : new Error(String(error)));
+        }
+      },
+      { retries, minTimeout: 3000, factor: 1 }
+    ).catch((error) => {
       if (getStatusCode(error) === 404) return false;
       throw error;
-    }
+    });
   }
 
   if (process.env.KBN_EVALS_SKIP_CONNECTOR_SETUP) {

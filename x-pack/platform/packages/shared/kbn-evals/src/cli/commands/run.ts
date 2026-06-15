@@ -83,8 +83,6 @@ export const runSuiteCmd: Command<void> = {
       'export-profile',
       'trace-es-url',
       'trace-es-api-key',
-      'evaluations-es-url',
-      'evaluations-es-api-key',
       'evaluations-kbn-url',
       'evaluations-kbn-api-key',
       'phoenix-base-url',
@@ -153,22 +151,11 @@ export const runSuiteCmd: Command<void> = {
     );
 
     if (isExportProfileImplicitLocal(flagsReader, exportProfile)) {
-      const evaluationsEsUrl = envOverrides.EVALUATIONS_ES_URL;
       const tracingEsUrl = envOverrides.TRACING_ES_URL;
 
-      const [evalsReachable, tracingReachable] = await Promise.all([
-        evaluationsEsUrl ? probeHttp(stripTrailingSlash(evaluationsEsUrl)) : Promise.resolve(true),
-        tracingEsUrl ? probeHttp(stripTrailingSlash(tracingEsUrl)) : Promise.resolve(true),
-      ]);
-
-      if (!evalsReachable) {
-        log.warning(
-          `Export profile \"local\" was auto-selected but EVALUATIONS_ES_URL is not reachable (${evaluationsEsUrl}). ` +
-            'Continuing without exporting evaluation results. To require export, pass --export-profile local.'
-        );
-        delete envOverrides.EVALUATIONS_ES_URL;
-        delete envOverrides.EVALUATIONS_ES_API_KEY;
-      }
+      const tracingReachable = tracingEsUrl
+        ? await probeHttp(stripTrailingSlash(tracingEsUrl))
+        : true;
 
       if (!tracingReachable) {
         log.warning(
@@ -199,16 +186,6 @@ export const runSuiteCmd: Command<void> = {
     const traceEsApiKey = flagsReader.string('trace-es-api-key');
     if (traceEsApiKey) {
       envOverrides.TRACING_ES_API_KEY = traceEsApiKey;
-    }
-
-    const evaluationsEsUrl = flagsReader.string('evaluations-es-url');
-    if (evaluationsEsUrl) {
-      envOverrides.EVALUATIONS_ES_URL = evaluationsEsUrl;
-    }
-
-    const evaluationsEsApiKey = flagsReader.string('evaluations-es-api-key');
-    if (evaluationsEsApiKey) {
-      envOverrides.EVALUATIONS_ES_API_KEY = evaluationsEsApiKey;
     }
 
     const evaluationsKbnUrl = flagsReader.string('evaluations-kbn-url');
