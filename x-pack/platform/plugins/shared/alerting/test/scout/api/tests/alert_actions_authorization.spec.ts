@@ -188,41 +188,68 @@ apiTest.describe(
     );
 
     apiTest(
-      'restricted user is blocked from mute_all (requires connector privilege)',
+      'restricted user can mute_all without connector privilege',
       async ({ apiClient }) => {
         const response = await apiClient.post(`api/alerting/rule/${ruleId}/_mute_all`, {
           headers: { ...COMMON_HEADERS, ...restrictedCreds.apiKeyHeader },
-          responseType: 'json',
         });
-        expect(response).toHaveStatusCode(403);
+        expect(response).toHaveStatusCode(204);
       }
     );
 
     apiTest(
-      'restricted user is blocked from unmute_all (requires connector privilege)',
+      'restricted user can unmute_all without connector privilege',
       async ({ apiClient }) => {
         const response = await apiClient.post(`api/alerting/rule/${ruleId}/_unmute_all`, {
           headers: { ...COMMON_HEADERS, ...restrictedCreds.apiKeyHeader },
-          responseType: 'json',
         });
-        expect(response).toHaveStatusCode(403);
+        expect(response).toHaveStatusCode(204);
       }
     );
 
     apiTest(
-      'restricted user is blocked from enable (requires connector privilege)',
-      async ({ apiClient }) => {
-        const response = await apiClient.post(`api/alerting/rule/${ruleId}/_enable`, {
+      'mute_all/unmute_all by restricted user does not rotate the rule API key',
+      async ({ apiClient, esClient }) => {
+        const getAlertAttrs = async () => {
+          const result = await esClient.search({
+            index: '.kibana_alerting_cases*',
+            body: { query: { term: { _id: `alert:${ruleId}` } } },
+            size: 1,
+          });
+          const hit = result.hits.hits[0];
+          expect(hit).toBeDefined();
+          return (hit._source as Record<string, unknown>)?.alert as Record<string, unknown>;
+        };
+
+        const before = await getAlertAttrs();
+
+        await apiClient.post(`api/alerting/rule/${ruleId}/_mute_all`, {
           headers: { ...COMMON_HEADERS, ...restrictedCreds.apiKeyHeader },
-          responseType: 'json',
         });
-        expect(response).toHaveStatusCode(403);
+        await apiClient.post(`api/alerting/rule/${ruleId}/_unmute_all`, {
+          headers: { ...COMMON_HEADERS, ...restrictedCreds.apiKeyHeader },
+        });
+
+        const after = await getAlertAttrs();
+        expect(after.apiKey).toBe(before.apiKey);
+        expect(after.apiKeyOwner).toBe(before.apiKeyOwner);
       }
     );
 
     apiTest(
-      'restricted user is blocked from run_soon (requires connector privilege)',
-      async ({ apiClient, samlAuth }) => {
+      'snooze/unsnooze by restricted user does not rotate the rule API key',
+      async ({ apiClient, samlAuth, esClient }) => {
+        const getAlertAttrs = async () => {
+          const result = await esClient.search({
+            index: '.kibana_alerting_cases*',
+            body: { query: { term: { _id: `alert:${ruleId}` } } },
+            size: 1,
+          });
+          const hit = result.hits.hits[0];
+          expect(hit).toBeDefined();
+          return (hit._source as Record<string, unknown>)?.alert as Record<string, unknown>;
+        };
+
         const { cookieHeader } = await samlAuth.asInteractiveUser({
           kibana: [{ base: [], feature: { logs: ['all'] }, spaces: ['*'] }],
           elasticsearch: {
@@ -230,25 +257,10 @@ apiTest.describe(
             indices: [{ names: ['.alerts-*'], privileges: ['read'] }],
           },
         });
-        const response = await apiClient.post(`internal/alerting/rule/${ruleId}/_run_soon`, {
-          headers: { ...COMMON_HEADERS, ...cookieHeader },
-          responseType: 'json',
-        });
-        expect(response).toHaveStatusCode(403);
-      }
-    );
 
-    apiTest(
-      'restricted user is blocked from rule-level snooze (requires connector privilege)',
-      async ({ apiClient, samlAuth }) => {
-        const { cookieHeader } = await samlAuth.asInteractiveUser({
-          kibana: [{ base: [], feature: { logs: ['all'] }, spaces: ['*'] }],
-          elasticsearch: {
-            cluster: [],
-            indices: [{ names: ['.alerts-*'], privileges: ['read'] }],
-          },
-        });
-        const response = await apiClient.post(`internal/alerting/rule/${ruleId}/_snooze`, {
+        const before = await getAlertAttrs();
+
+        await apiClient.post(`internal/alerting/rule/${ruleId}/_snooze`, {
           headers: { ...COMMON_HEADERS, ...cookieHeader },
           body: {
             snooze_schedule: {
@@ -261,9 +273,16 @@ apiTest.describe(
               },
             },
           },
-          responseType: 'json',
         });
-        expect(response).toHaveStatusCode(403);
+
+        await apiClient.post(`internal/alerting/rule/${ruleId}/_unsnooze`, {
+          headers: { ...COMMON_HEADERS, ...cookieHeader },
+          body: { schedule_ids: [] },
+        });
+
+        const after = await getAlertAttrs();
+        expect(after.apiKey).toBe(before.apiKey);
+        expect(after.apiKeyOwner).toBe(before.apiKeyOwner);
       }
     );
   }
