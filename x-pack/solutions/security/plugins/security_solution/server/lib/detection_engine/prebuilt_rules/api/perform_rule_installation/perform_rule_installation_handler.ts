@@ -20,6 +20,7 @@ import { buildSiemResponse } from '../../../routes/utils';
 import { aggregatePrebuiltRuleErrors } from '../../logic/aggregate_prebuilt_rule_errors';
 import { ensureLatestRulesPackageInstalled } from '../../logic/integrations/ensure_latest_rules_package_installed';
 import { createPrebuiltRuleAssetsClient } from '../../logic/rule_assets/prebuilt_rule_assets_client';
+import { PREBUILT_RULE_BATCH_SIZE } from '../../constants';
 import { createPrebuiltRules } from '../../logic/rule_objects/create_prebuilt_rules';
 import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebuilt_rule_objects_client';
 import { performTimelinesInstallation } from '../../logic/perform_timelines_installation';
@@ -110,14 +111,20 @@ export const performRuleInstallationHandler = async (
       ruleInstallQueue.push(...(await excludeLicenseRestrictedRules(allInstallableRules, mlAuthz)));
     }
 
-    const BATCH_SIZE = 100;
+    const changeTracking = {
+      metadata: {
+        bulkCount: ruleInstallQueue.length,
+      },
+    };
+
     while (ruleInstallQueue.length > 0) {
-      const rulesToInstall = ruleInstallQueue.splice(0, BATCH_SIZE);
-      const ruleAssets = await ruleAssetsClient.fetchAssetsByVersion(rulesToInstall);
+      const rulesToInstall = ruleInstallQueue.splice(0, PREBUILT_RULE_BATCH_SIZE);
+      const { assets: ruleAssets } = await ruleAssetsClient.fetchAssetsByVersion(rulesToInstall);
 
       const { results, errors } = await createPrebuiltRules(
         detectionRulesClient,
         ruleAssets,
+        changeTracking,
         logger
       );
 
