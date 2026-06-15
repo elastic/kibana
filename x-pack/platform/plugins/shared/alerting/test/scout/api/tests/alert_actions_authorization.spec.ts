@@ -186,25 +186,19 @@ apiTest.describe(
       }
     );
 
-    apiTest(
-      'restricted user can mute_all without connector privilege',
-      async ({ apiClient }) => {
-        const response = await apiClient.post(`api/alerting/rule/${ruleId}/_mute_all`, {
-          headers: { ...COMMON_HEADERS, ...restrictedCreds.apiKeyHeader },
-        });
-        expect(response).toHaveStatusCode(204);
-      }
-    );
+    apiTest('restricted user can mute_all without connector privilege', async ({ apiClient }) => {
+      const response = await apiClient.post(`api/alerting/rule/${ruleId}/_mute_all`, {
+        headers: { ...COMMON_HEADERS, ...restrictedCreds.apiKeyHeader },
+      });
+      expect(response).toHaveStatusCode(204);
+    });
 
-    apiTest(
-      'restricted user can unmute_all without connector privilege',
-      async ({ apiClient }) => {
-        const response = await apiClient.post(`api/alerting/rule/${ruleId}/_unmute_all`, {
-          headers: { ...COMMON_HEADERS, ...restrictedCreds.apiKeyHeader },
-        });
-        expect(response).toHaveStatusCode(204);
-      }
-    );
+    apiTest('restricted user can unmute_all without connector privilege', async ({ apiClient }) => {
+      const response = await apiClient.post(`api/alerting/rule/${ruleId}/_unmute_all`, {
+        headers: { ...COMMON_HEADERS, ...restrictedCreds.apiKeyHeader },
+      });
+      expect(response).toHaveStatusCode(204);
+    });
 
     apiTest(
       'mute_all/unmute_all by restricted user does not rotate the rule API key',
