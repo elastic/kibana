@@ -398,6 +398,6 @@ export async function partiallyUpdateAdHocRun(
 ## Making Changes
 
 If you will be making changes to your ESOs, or creating new ESOs, the AppEx Platform Services Security team is available for consultation and assistance. Please reach
-out to us on Slack (#kibana-security) with any questions or queries.
+out to the Kibana Security Team with any questions or queries.
 
 We also ask that you please tag us (@elastic/kibana-security) for review on any PRs related to ESOs.

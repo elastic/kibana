@@ -37,7 +37,7 @@ The FIPS overrides can be found in the [fips_overrides.ts](https://github.com/el
 
 For a FIPS/OpenSSL error, the error will be more cryptic/the test will fail to run, usually something like "digital envelope routines::unsupported". Generally these are related to Node.js's crypto module.
 
-If you are unsure, please reach out to the Security team for guidance at `#kibana-security` in Slack.
+If you are unsure, please reach out to the Kibana Security team for guidance.
 
 ### Skipping failing tests due to FIPS overrides
 

@@ -21,7 +21,7 @@ For custom server configs, reach out to the AppEx QA team before creating one (s
 
 ## Enabling feature flags at runtime [scout-feature-flags-runtime]
 
-Use `apiServices.core.settings()` to toggle feature flags while the server is running. Under the hood, this calls Kibana's [config overrides API](https://docs.elastic.dev/kibana-dev-docs/tutorials/feature-flags-service#config-overrides) (Elasticians only), which forces flag values directly — bypassing the feature flag provider — so the same test code works locally and on Elastic Cloud (QA).
+Use `apiServices.core.settings()` to toggle feature flags while the server is running. Under the hood, this calls Kibana's [config overrides API](https://github.com/elastic/kibana/blob/main/src/core/packages/feature-flags/README.mdx#config-overrides), which forces flag values directly — bypassing the feature flag provider — so the same test code works locally and on Elastic Cloud (QA).
 
 ::::::{note}
 Feature flag overrides are **server-wide**: they apply to the entire Kibana instance, not to a single space or worker. In [parallel suites](./parallelism.md) all workers share the same server, so a flag set by one worker is visible to every other worker. For parallel tests, enable flags in the **[global setup hook](./global-setup-hook.md)** so they are set once before any worker starts.

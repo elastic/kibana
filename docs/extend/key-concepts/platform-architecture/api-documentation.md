@@ -31,16 +31,7 @@ does *not* handle REST APIs).
 API items that have an `@internal` in the comment are not 
 included in the documentation system.
 :::
- 
 
-## How it works
-
-If you change or delete a public plugin API, or add a new one, you will have to run the command `node scripts/build_api_docs` in order to update the
-docs in your PR, or CI will fail. When this happens, consider:
- 
-1. If this affects an existing API item, have you emailed the `kibana-contributors` list with a heads up? It's important to give advance 
-notice, since there may be corner cases you aren't aware of, even if your PR passes CI.
-2. If the change you are making aren't relevant to contributors, consider a) making the API private, or b) adding the `@internal` flag to it.
 
 ## Q & A 
 

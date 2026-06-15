@@ -103,9 +103,3 @@ node scripts/scout.js run-tests \
 ```
 
 See [Feature flags](./feature-flags.md#scout-feature-flags-custom-servers) for more details on when and how to use custom server configurations.
-
-## Run tests on Elastic Cloud [scout-run-tests-cloud]
-
-:::::{note}
-For a detailed walkthrough of running Scout tests on Elastic Cloud, see the [AppEx QA internal guide](https://docs.elastic.dev/appex-qa/scout/run-tests) (Elasticians only, requires Elastic's internal QA environment).
-:::::

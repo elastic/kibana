@@ -62,7 +62,7 @@ We welcome contributions to one of the Scout packages.
 
 ## Need help? [need-help]
 
-- **Internal (Elasticians)**: reach out to the AppEx QA team in the `#kibana-scout` Slack channel for guidance.
+- **Internal (Elasticians)**: reach out to the AppEx QA team for guidance.
 
 - **External contributors**: open an issue in the Kibana repository and label it with `Team:QA`.
 

@@ -33,7 +33,7 @@ test.describe('My suite', { tag: tags.deploymentAgnostic }, () => {
 ```
 
 ::::::{note}
-Local runs can create on-demand identities via a trusted mock IdP. Cloud runs authenticate using pre-provisioned users (internal provisioning details live in [internal AppEx QA documentation](https://docs.elastic.dev/appex-qa/create-cloud-users)).
+Local runs can create on-demand identities via a trusted mock IdP. Cloud runs authenticate using pre-provisioned users.
 ::::::
 
 ## Custom roles [scout-browser-auth-custom-role]

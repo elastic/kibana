@@ -50,10 +50,6 @@ Other useful query parameters for filtering are:
  * `pluginId` - get the OAS for a specific plugin, for example: `@kbn/data-views-plugin`
  * `access` - filter for specific access levels: `public` or `internal` are supported
 
-:::{note}
-For assistance with the writing docs or any other questions about the docs impact, check out https://docs.elastic.dev/content-architecture/oas or chat with writers on **#docs** or **#next-api-reference**
-:::
-
 ### Some good practices to consider
 <a id="oas-compatibility-kbn-config-schema-types"></a>
 
@@ -363,7 +359,7 @@ OAS for public routes are written to the Kibana repo as a snapshot that will ult
 :::{warning} Under construction
 At the time of writing we only capture OAS for a subset of Kibana's HTTP APIs to give teams time to check and improve the quality of generated OAS.
 
-  If you would like OAS for your endpoints to be included in the snapshot, **please reach out to #kibana-core** or follow the instructions below.
+  If you would like OAS for your endpoints to be included in the snapshot, **please reach out to the Kibana Core team** or follow the instructions below.
 :::
 
 To publish OAS to our docs site create a pull request updating [this command](https://github.com/elastic/kibana/blob/970e9fe4a3c29df81ccff6761d4986d316338398/.buildkite/scripts/steps/checks/capture_oas_snapshot.sh#L11) to include your HTTP API path.
@@ -382,7 +378,7 @@ If you would like to preview your docs before merging, you can do the following:
 #### What about runtime validation libary X?
 Teams have adopted different runtime validation libraries for their HTTP APIs. Kibana core does not intend to support all runtime validation libraries.
 
-Reach out to **#kibana-core** with questions, concerns or issues you may be facing with `@kbn/config-schema` and we will help you find a solution.
+Reach out to **the Kibana Core Team** with questions, concerns or issues you may be facing with `@kbn/config-schema` and we will help you find a solution.
 
 #### What about internal HTTP APIs?
 It's possible to generate OpenAPI specification for `access: 'internal'` routes but it is not required. The benefit will largely be for your team's internal reference and for other teams to discover your APIs. If you follow the practices outlined in this tutorial it should be simple to generate OAS for internal routes as well.
