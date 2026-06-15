@@ -26,12 +26,14 @@ paths:
           description: The identifier of the entity to retrieve history for.
           schema:
             type: string
+            maxLength: 1000
         - name: from
           in: query
           required: false
           description: Start of the time range, in date-math syntax. Defaults to 90 days ago.
           schema:
             type: string
+            maxLength: 100
             default: 'now-90d'
         - name: to
           in: query
@@ -39,6 +41,7 @@ paths:
           description: End of the time range, in date-math syntax. Defaults to now.
           schema:
             type: string
+            maxLength: 100
             default: 'now'
         - name: score_type
           in: query
@@ -92,6 +95,7 @@ components:
         '@timestamp':
           type: string
           format: date-time
+          maxLength: 33
         calculated_score_norm:
           type: number
           format: double
@@ -120,6 +124,7 @@ components:
       properties:
         entity_id:
           type: string
+          maxLength: 1000
         entity_type:
           $ref: '../common/common.schema.yaml#/components/schemas/IdentifierType'
         entries:

@@ -20,7 +20,7 @@ import { IdentifierType, EntityRiskLevels } from '../common/common.gen';
 
 export const RiskScoreHistoryEntry = lazySchema(() =>
   z.object({
-    '@timestamp': z.string().datetime(),
+    '@timestamp': z.string().max(33).datetime(),
     calculated_score_norm: z.number().min(0).max(100),
     calculated_level: EntityRiskLevels,
     calculated_score: z.number().optional(),
@@ -33,7 +33,7 @@ export type RiskScoreHistoryEntry = z.infer<typeof RiskScoreHistoryEntry>;
 
 export const RiskScoreHistoryResponse = lazySchema(() =>
   z.object({
-    entity_id: z.string(),
+    entity_id: z.string().max(1000),
     entity_type: IdentifierType,
     entries: z.array(RiskScoreHistoryEntry),
   })
@@ -49,15 +49,15 @@ export const GetRiskScoreHistoryRequestQuery = lazySchema(() =>
     /**
      * The identifier of the entity to retrieve history for.
      */
-    entity_id: z.string(),
+    entity_id: z.string().max(1000),
     /**
      * Start of the time range, in date-math syntax. Defaults to 90 days ago.
      */
-    from: z.string().optional().default('now-90d'),
+    from: z.string().max(100).optional().default('now-90d'),
     /**
      * End of the time range, in date-math syntax. Defaults to now.
      */
-    to: z.string().optional().default('now'),
+    to: z.string().max(100).optional().default('now'),
     /**
      * Filter entries by the type of score recorded (`base`, `propagated`, or `resolution`).
      */
