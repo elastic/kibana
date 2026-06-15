@@ -30,10 +30,13 @@ export const mapMicrosoftSentinelSeverityToElasticSeverity = (
     return DEFAULT_TRANSLATION_SEVERITY;
   }
 
-  const normalizedSeverity = sentinelSeverity.toLowerCase() as MicrosoftSentinelSeverity;
-  return (
-    MICROSOFT_SENTINEL_ELASTIC_SEVERITY_MAP[normalizedSeverity] || DEFAULT_TRANSLATION_SEVERITY
-  );
+  const normalizedSeverity = sentinelSeverity.toLowerCase();
+
+  if (Object.hasOwn(MICROSOFT_SENTINEL_ELASTIC_SEVERITY_MAP, normalizedSeverity)) {
+    return MICROSOFT_SENTINEL_ELASTIC_SEVERITY_MAP[normalizedSeverity as MicrosoftSentinelSeverity];
+  }
+
+  return DEFAULT_TRANSLATION_SEVERITY;
 };
 
 export const mapRangedSeverityToElasticSeverity = (

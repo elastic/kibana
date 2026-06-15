@@ -13,6 +13,7 @@ import {
   mapMicrosoftSentinelSeverityToElasticSeverity,
   mapSplunkSeverityToElasticSeverity,
 } from './severity';
+import { ELASTIC_SEVERITY_TO_RISK_SCORE_MAP } from '../../../../../../constants';
 
 const defaultSplunkRule: OriginalRule = {
   id: 'some_id',
@@ -61,7 +62,7 @@ describe('tests', () => {
       describe('when there is a vendor match', () => {
         it('should return the correct risk score', async () => {
           const riskScore = await getElasticRiskScoreFromOriginalRule(defaultSentinelRule);
-          expect(riskScore).toEqual(47);
+          expect(riskScore).toEqual(ELASTIC_SEVERITY_TO_RISK_SCORE_MAP.medium);
         });
       });
     });
@@ -185,7 +186,7 @@ describe('tests', () => {
 
     describe('microsoft-sentinel', () => {
       describe('when there is a vendor match', () => {
-        it('should call the correct function with the correct severity', async () => {
+        it('returns the expected Elastic severity for a Sentinel rule', async () => {
           expect(await getElasticSeverityFromOriginalRule(defaultSentinelRule)).toBe('medium');
         });
       });
