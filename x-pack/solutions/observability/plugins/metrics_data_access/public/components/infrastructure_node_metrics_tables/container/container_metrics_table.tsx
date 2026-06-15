@@ -15,6 +15,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo } from 'react';
 import type { SortState, NodeMetricsTableData } from '../shared';
 import {
+  AnalyzeMetricButton,
   MetricsNodeDetailsLink,
   MetricsTableEmptyIndicesContent,
   MetricsTableErrorContent,
@@ -93,6 +94,15 @@ export const ContainerMetricsTable = (props: ContainerMetricsTableProps) => {
   } else if (data.state === 'data') {
     return (
       <>
+        <EuiFlexGroup justifyContent="flexEnd">
+          <AnalyzeMetricButton
+            ids={data.rows.map((row) => row.id)}
+            nodeType="container"
+            timerange={timerange}
+            metricsIndices={metricsIndices}
+          />
+        </EuiFlexGroup>
+        <EuiSpacer size="s" />
         <EuiBasicTable
           tableCaption={i18n.translate('xpack.metricsData.metricsTable.container.tableCaption', {
             defaultMessage: 'Infrastructure metrics for containers',

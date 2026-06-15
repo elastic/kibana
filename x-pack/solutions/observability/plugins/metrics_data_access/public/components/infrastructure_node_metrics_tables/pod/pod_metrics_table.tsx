@@ -15,6 +15,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import type { SortState, NodeMetricsTableData } from '../shared';
 import {
+  AnalyzeMetricButton,
   MetricsNodeDetailsLink,
   MetricsTableEmptyIndicesContent,
   MetricsTableErrorContent,
@@ -92,6 +93,15 @@ export const PodMetricsTable = (props: PodMetricsTableProps) => {
   } else if (data.state === 'data') {
     return (
       <>
+        <EuiFlexGroup justifyContent="flexEnd">
+          <AnalyzeMetricButton
+            ids={data.rows.map((row) => row.id)}
+            nodeType="pod"
+            timerange={timerange}
+            metricsIndices={metricIndices}
+          />
+        </EuiFlexGroup>
+        <EuiSpacer size="s" />
         <EuiBasicTable
           tableCaption={i18n.translate('xpack.metricsData.metricsTable.pod.tableCaption', {
             defaultMessage: 'Infrastructure metrics for pods',

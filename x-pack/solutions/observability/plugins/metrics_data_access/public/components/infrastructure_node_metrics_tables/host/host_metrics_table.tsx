@@ -15,6 +15,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo } from 'react';
 import type { SortState, NodeMetricsTableData } from '../shared';
 import {
+  AnalyzeMetricButton,
   MetricsNodeDetailsLink,
   MetricsTableEmptyIndicesContent,
   MetricsTableErrorContent,
@@ -90,6 +91,15 @@ export const HostMetricsTable = (props: HostMetricsTableProps) => {
   } else if (data.state === 'data') {
     return (
       <>
+        <EuiFlexGroup justifyContent="flexEnd">
+          <AnalyzeMetricButton
+            ids={data.rows.map((row) => row.name)}
+            nodeType="host"
+            timerange={timerange}
+            metricsIndices={metricIndices}
+          />
+        </EuiFlexGroup>
+        <EuiSpacer size="s" />
         <EuiBasicTable
           tableCaption={i18n.translate('xpack.metricsData.metricsTable.host.tableCaption', {
             defaultMessage: 'Infrastructure metrics for hosts',
