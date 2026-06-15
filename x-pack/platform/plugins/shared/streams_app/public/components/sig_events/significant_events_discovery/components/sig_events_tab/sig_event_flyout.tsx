@@ -110,8 +110,7 @@ export const SigEventFlyout = ({ event, onClose }: SigEventFlyoutProps) => {
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
-              {/* TODO: rename event.verdict to event.status once the data stream field is renamed */}
-              <EuiBadge color={getStatusColor(event.verdict)}>{event.verdict}</EuiBadge>
+              <EuiBadge color={getStatusColor(event.status)}>{event.status}</EuiBadge>
             </EuiFlexItem>
             {event.recommended_action && (
               <EuiFlexItem grow={false}>
