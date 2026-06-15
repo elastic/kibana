@@ -22,13 +22,18 @@ export const checkRemovedTypes: Task = async (ctx, task) => {
       title: 'Detecting conflicts with removed types',
       task: async () => {
         ctx.currentRemovedTypes = await getRemovedTypes();
-        await detectConflictsWithRemovedTypes(ctx.to!, ctx.currentRemovedTypes);
+        await detectConflictsWithRemovedTypes(ctx.to!, ctx.currentRemovedTypes, ctx.wipTypes);
       },
     },
     {
       title: `Detecting new removed types`,
       task: () => {
-        ctx.newRemovedTypes = detectNewRemovedTypes(ctx.from!, ctx.to!, ctx.currentRemovedTypes);
+        ctx.newRemovedTypes = detectNewRemovedTypes(
+          ctx.from!,
+          ctx.to!,
+          ctx.currentRemovedTypes,
+          ctx.wipTypes
+        );
       },
     },
     {
