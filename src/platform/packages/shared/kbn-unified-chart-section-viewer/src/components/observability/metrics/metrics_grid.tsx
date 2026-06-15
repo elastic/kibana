@@ -32,8 +32,37 @@ import {
 } from '../../../common/constants';
 import { useChartLayers } from '../../chart/hooks/use_chart_layers';
 import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
+import { stableStringify } from '@kbn/std';
 import { getEsqlQuery } from './utils/get_esql_query';
-import { useApplicableDimensionsPerItem } from './hooks/use_applicable_dimensions_per_item';
+
+const EMPTY_APPLICABLE_DIMENSIONS: Dimension[] = [];
+
+const getApplicableDimensionNames = (
+  dimensions: Dimension[],
+  dimensionFields: readonly Dimension[]
+): string[] =>
+  dimensions
+    .filter((dimension) => dimensionFields.some((field) => field.name === dimension.name))
+    .map((dimension) => dimension.name);
+
+const useStableApplicableDimensions = (
+  dimensions: Dimension[],
+  dimensionFields: readonly Dimension[]
+): Dimension[] => {
+  const applicableDimensionNamesKey = useMemo(
+    () => stableStringify(getApplicableDimensionNames(dimensions, dimensionFields)),
+    [dimensions, dimensionFields]
+  );
+
+  return useMemo(() => {
+    if (applicableDimensionNamesKey === '[]') {
+      return EMPTY_APPLICABLE_DIMENSIONS;
+    }
+
+    const names: string[] = JSON.parse(applicableDimensionNamesKey);
+    return names.map((name) => ({ name }));
+  }, [applicableDimensionNamesKey]);
+};
 
 const METRICS_QUICK_ACTION_IDS: QuickActionIds = [
   ACTION_EXPLORE_IN_DISCOVER_TAB,
@@ -108,8 +137,6 @@ export const MetricsGrid = ({
       totalRows: metricItems.length,
       gridRef,
     });
-
-  const applicableDimensionsPerItem = useApplicableDimensionsPerItem(metricItems, dimensions);
 
   const flyoutData = useMemo(() => {
     if (!flyoutState) {
@@ -209,7 +236,7 @@ export const MetricsGrid = ({
                   index={index}
                   metricItem={metricItem}
                   size="s"
-                  applicableDimensions={applicableDimensionsPerItem[index]}
+                  dimensions={dimensions}
                   services={services}
                   onBrushEnd={onBrushEnd}
                   onFilter={onFilter}
@@ -252,7 +279,7 @@ interface ChartItemProps
   metricItem: ParsedMetricItem;
   index: number;
   size: ChartSize;
-  applicableDimensions: Dimension[];
+  dimensions: Dimension[];
   discoverFetch$: UnifiedMetricsGridProps['fetch$'];
   rowIndex: number;
   colIndex: number;
@@ -272,7 +299,7 @@ const ChartItem = React.memo(
     metricItem,
     index,
     size,
-    applicableDimensions,
+    dimensions,
     services,
     onBrushEnd,
     onFilter,
@@ -295,6 +322,11 @@ const ChartItem = React.memo(
     const colorPalette = useMemo(
       () => Object.values(euiTheme.colors.vis).slice(0, 10),
       [euiTheme.colors.vis]
+    );
+
+    const applicableDimensions = useStableApplicableDimensions(
+      dimensions,
+      metricItem.dimensionFields
     );
 
     const esqlQuery = useMemo(() => {
