@@ -18,6 +18,7 @@ import { track } from '../../../lib/telemetry';
 import { useKibana } from '../../../lib/kibana';
 import { getNavCategories } from './categories';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
+import { SecurityGroupName } from '@kbn/security-solution-navigation';
 
 const settingsNavLink: NavigationLink = {
   id: SecurityPageName.administration,
@@ -33,6 +34,24 @@ const settingsNavLink: NavigationLink = {
     },
   ],
 };
+
+const launchpadNavLink: NavigationLink = {
+  id: SecurityPageName.launchpad,
+  title: 'Launchpad',
+  description: 'Launchpad',
+  categories: [{ label: 'Launchpad category', linkIds: [] }],
+  links: [
+    {
+      id: SecurityPageName.landing,
+      title: 'Get started',
+    },
+    {
+      id: SecurityPageName.siemReadiness,
+      title: 'SIEM Readiness',
+    },
+  ],
+};
+
 const alertsNavLink: NavigationLink = {
   id: SecurityPageName.alerts,
   title: 'alerts',
@@ -177,18 +196,15 @@ describe('SecuritySideNav', () => {
     );
   });
 
-  it('should render launchpad item', () => {
-    mockUseNavLinks.mockReturnValue([
-      { id: SecurityPageName.launchpad, title: 'Launchpad', sideNavIcon: 'rocket' },
-    ]);
+  it('should render launchpad item in footer', () => {
+    mockUseNavLinks.mockReturnValue([alertsNavLink, launchpadNavLink, settingsNavLink]);
     renderNav();
     expect(mockSolutionSideNav).toHaveBeenCalledWith(
       expect.objectContaining({
         items: expect.arrayContaining([
           expect.objectContaining({
-            id: SecurityPageName.launchpad,
-            label: 'Launchpad',
-            position: 'top',
+            id: SecurityGroupName.launchpad,
+            position: 'bottom',
           }),
         ]),
       })
@@ -196,7 +212,7 @@ describe('SecuritySideNav', () => {
   });
 
   it('should place administration item in footer', () => {
-    mockUseNavLinks.mockReturnValue([alertsNavLink, settingsNavLink]);
+    mockUseNavLinks.mockReturnValue([alertsNavLink, launchpadNavLink, settingsNavLink]);
     renderNav();
     expect(mockSolutionSideNav).toHaveBeenCalledWith(
       expect.objectContaining({

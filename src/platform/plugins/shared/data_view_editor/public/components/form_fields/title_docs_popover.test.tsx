@@ -8,21 +8,29 @@
  */
 
 import React from 'react';
-import { findTestSubject } from '@elastic/eui/lib/test';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import userEvent from '@testing-library/user-event';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { screen } from '@testing-library/react';
 import { TitleDocsPopover } from './title_docs_popover';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 describe('DataViewEditor TitleDocsPopover', () => {
   it('should render normally', async () => {
-    const component = mountWithIntl(<TitleDocsPopover />);
+    const user = userEvent.setup();
 
-    expect(findTestSubject(component, 'indexPatternDocsButton').exists()).toBeTruthy();
-    expect(findTestSubject(component, 'indexPatternDocsPopoverContent').exists()).toBeFalsy();
+    renderWithI18n(<TitleDocsPopover />);
 
-    findTestSubject(component, 'indexPatternDocsButton').simulate('click');
+    expect(screen.getByTestId('indexPatternDocsButton')).toBeVisible();
+    expect(screen.queryByTestId('indexPatternDocsPopoverContent')).not.toBeInTheDocument();
 
-    await component.update();
+    await user.click(screen.getByTestId('indexPatternDocsButton'));
+    await waitForEuiPopoverOpen();
 
-    expect(findTestSubject(component, 'indexPatternDocsPopoverContent').exists()).toBeTruthy();
+    expect(screen.getByTestId('indexPatternDocsPopoverContent')).toBeVisible();
+    expect(
+      screen.getByText(
+        'An index pattern is a string that you use to match one or more data streams, indices, or aliases.'
+      )
+    ).toBeVisible();
   });
 });
