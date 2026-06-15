@@ -9,8 +9,8 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type {
   AuditLogger,
+  CallerSnapshot,
   CoreSecurityDelegateContract,
-  OpaqueRequestState,
 } from '@kbn/core-security-server';
 import type { UserProfileData } from '@kbn/core-user-profile-common';
 import type { CoreUserProfileDelegateContract } from '@kbn/core-user-profile-server';
@@ -119,12 +119,12 @@ describe('buildSecurityApi', () => {
     });
   });
 
-  describe('authc.serializeRequest / authc.hydrateRequest', () => {
-    // `serializeRequest` reads `request.fakeRawRequest?.spaceId` directly (it does NOT
+  describe('authc.captureCaller / authc.replayCaller / authc.stampCaller / authc.adoptPersistedCaller', () => {
+    // `captureCaller` reads `request.fakeRawRequest?.spaceId` directly (it does NOT
     // use the public `KibanaRequest.spaceId` field). This shim mirrors that exact access
     // path so the tests exercise the production code path without depending on internal
     // details of `kibanaRequestFactory`.
-    const buildSerializeInput = (overrides: {
+    const buildCaptureInput = (overrides: {
       authorization?: string;
       spaceId?: string;
     }): KibanaRequest => {
@@ -135,247 +135,224 @@ describe('buildSecurityApi', () => {
       } as unknown as KibanaRequest;
     };
 
-    describe('serializeRequest', () => {
-      it('returns undefined when the request has no authorization header and no spaceId', () => {
+    describe('captureCaller', () => {
+      it('returns undefined when the request has no authorization, no spaceId, and no resolved profile', async () => {
+        authc.getCurrentUser.mockReturnValue(null);
         const request = httpServerMock.createKibanaRequest();
 
-        expect(api.authc.serializeRequest(request)).toBeUndefined();
+        await expect(api.authc.captureCaller(request)).resolves.toBeUndefined();
       });
 
-      it('captures the authorization header and stamps the v1 envelope', () => {
-        const request = buildSerializeInput({ authorization: 'ApiKey abc' });
+      it('returns a v:1 snapshot with authorization only when only auth is set', async () => {
+        authc.getCurrentUser.mockReturnValue(null);
+        const request = buildCaptureInput({ authorization: 'ApiKey abc' });
 
-        const state = api.authc.serializeRequest(request) as Record<string, unknown> | undefined;
+        const snapshot = (await api.authc.captureCaller(request)) as unknown as Record<
+          string,
+          unknown
+        >;
 
-        expect(state).toEqual({ v: 1, authorization: 'ApiKey abc' });
+        expect(snapshot).toEqual({ v: 1, authorization: 'ApiKey abc' });
       });
 
-      it('captures the spaceId from fakeRawRequest when present', () => {
-        const request = buildSerializeInput({ authorization: 'ApiKey abc', spaceId: 'marketing' });
+      it('returns a v:1 snapshot with authorization and spaceId when both are set', async () => {
+        authc.getCurrentUser.mockReturnValue(null);
+        const request = buildCaptureInput({ authorization: 'ApiKey abc', spaceId: 'marketing' });
 
-        const state = api.authc.serializeRequest(request) as Record<string, unknown> | undefined;
+        const snapshot = (await api.authc.captureCaller(request)) as unknown as Record<
+          string,
+          unknown
+        >;
 
-        expect(state).toEqual({ v: 1, authorization: 'ApiKey abc', spaceId: 'marketing' });
+        expect(snapshot).toEqual({ v: 1, authorization: 'ApiKey abc', spaceId: 'marketing' });
       });
 
-      it('captures spaceId alone when no authorization header is present', () => {
-        const request = buildSerializeInput({ spaceId: 'marketing' });
+      it('includes userProfileId when getCurrentUser resolves a profile_uid', async () => {
+        authc.getCurrentUser.mockReturnValue(
+          securityMock.createMockAuthenticatedUser({ profile_uid: 'uid-abc-123' })
+        );
+        const request = buildCaptureInput({ authorization: 'ApiKey abc' });
 
-        const state = api.authc.serializeRequest(request) as Record<string, unknown> | undefined;
+        const snapshot = (await api.authc.captureCaller(request)) as unknown as Record<
+          string,
+          unknown
+        >;
 
-        expect(state).toEqual({ v: 1, spaceId: 'marketing' });
+        expect(snapshot).toEqual({
+          v: 1,
+          authorization: 'ApiKey abc',
+          userProfileId: 'uid-abc-123',
+        });
+      });
+
+      it('omits userProfileId when getCurrentUser returns null', async () => {
+        authc.getCurrentUser.mockReturnValue(null);
+        const request = buildCaptureInput({ authorization: 'ApiKey abc' });
+
+        const snapshot = (await api.authc.captureCaller(request)) as unknown as Record<
+          string,
+          unknown
+        >;
+
+        expect(snapshot).not.toHaveProperty('userProfileId');
+      });
+
+      it('omits userProfileId when getCurrentUser throws (best-effort)', async () => {
+        authc.getCurrentUser.mockImplementation(() => {
+          throw new Error('auth failure');
+        });
+        const request = buildCaptureInput({ authorization: 'ApiKey abc' });
+
+        const snapshot = (await api.authc.captureCaller(request)) as unknown as Record<
+          string,
+          unknown
+        >;
+
+        expect(snapshot).not.toHaveProperty('userProfileId');
+      });
+
+      it('returns a snapshot with only userProfileId when no auth and no spaceId but profile resolves', async () => {
+        authc.getCurrentUser.mockReturnValue(
+          securityMock.createMockAuthenticatedUser({ profile_uid: 'uid-only' })
+        );
+        const request = buildCaptureInput({});
+
+        const snapshot = (await api.authc.captureCaller(request)) as unknown as Record<
+          string,
+          unknown
+        >;
+
+        expect(snapshot).toEqual({ v: 1, userProfileId: 'uid-only' });
       });
     });
 
-    describe('hydrateRequest', () => {
-      it('returns undefined for an unknown envelope version (no fabricated request)', () => {
-        const state = { v: 2, authorization: 'ApiKey abc' } as unknown as OpaqueRequestState;
+    describe('replayCaller', () => {
+      it('returns undefined for a snapshot with unknown v', () => {
+        const snapshot = { v: 2, authorization: 'ApiKey abc' } as unknown as CallerSnapshot;
 
-        expect(api.authc.hydrateRequest(state)).toBeUndefined();
+        expect(api.authc.replayCaller(snapshot)).toBeUndefined();
       });
 
-      it('returns undefined when the envelope version marker is missing entirely', () => {
-        // Defensive: any persisted shape without `v` cannot be safely rehydrated by this
-        // producer, so the hydrator must refuse rather than fabricate a request.
-        const state = { authorization: 'ApiKey abc' } as unknown as OpaqueRequestState;
-
-        expect(api.authc.hydrateRequest(state)).toBeUndefined();
+      it('returns undefined when snapshot is missing v entirely', () => {
+        const snapshot = api.authc.adoptPersistedCaller({
+          authorization: 'ApiKey abc',
+        });
+        // adoptPersistedCaller requires numeric v — without it, returns undefined
+        expect(snapshot).toBeUndefined();
       });
 
-      it('returns undefined for a v1 envelope without an authorization header', () => {
-        const state = { v: 1, spaceId: 'marketing' } as unknown as OpaqueRequestState;
+      it('returns undefined for v1 snapshot without authorization', () => {
+        const snapshot = { v: 1, spaceId: 'marketing' } as unknown as CallerSnapshot;
 
-        expect(api.authc.hydrateRequest(state)).toBeUndefined();
+        expect(api.authc.replayCaller(snapshot)).toBeUndefined();
       });
 
-      it('rebuilds a KibanaRequest with the persisted authorization header from a v1 envelope', () => {
-        const state = { v: 1, authorization: 'ApiKey abc' } as unknown as OpaqueRequestState;
+      it('rebuilds a KibanaRequest with the persisted authorization header', () => {
+        const snapshot = { v: 1, authorization: 'ApiKey abc' } as unknown as CallerSnapshot;
 
-        const hydrated = api.authc.hydrateRequest(state);
+        const replayed = api.authc.replayCaller(snapshot);
 
-        expect(hydrated).toBeDefined();
-        expect(hydrated!.headers.authorization).toBe('ApiKey abc');
+        expect(replayed).toBeDefined();
+        expect(replayed!.headers.authorization).toBe('ApiKey abc');
       });
 
-      it('exposes spaceId on the rehydrated KibanaRequest when present in a v1 envelope', () => {
-        const state = {
+      it('rebuilds a KibanaRequest with the persisted spaceId', () => {
+        const snapshot = {
           v: 1,
           authorization: 'ApiKey abc',
           spaceId: 'marketing',
-        } as unknown as OpaqueRequestState;
+        } as unknown as CallerSnapshot;
 
-        const hydrated = api.authc.hydrateRequest(state);
+        const replayed = api.authc.replayCaller(snapshot);
 
-        expect(hydrated).toBeDefined();
-        expect(hydrated!.spaceId).toBe('marketing');
+        expect(replayed).toBeDefined();
+        expect(replayed!.spaceId).toBe('marketing');
+      });
+    });
+
+    describe('stampCaller', () => {
+      it('returns undefined when all parts are empty', () => {
+        expect(api.authc.stampCaller({})).toBeUndefined();
       });
 
-      it('ignores additive unknown keys inside a known v1 envelope (forward-compat)', () => {
-        // A newer producer may add additive identity hints (e.g. profile_uid) inside
-        // the same `v: 1` shape. The hydrator must not reject the bag because of them.
-        const state = {
-          v: 1,
+      it('mints a v:1 snapshot with provided fields, omitting absent ones', () => {
+        const snapshot = api.authc.stampCaller({
+          authorization: 'Bearer tok',
+          spaceId: 'sales',
+        }) as unknown as Record<string, unknown> | undefined;
+
+        expect(snapshot).toEqual({ v: 1, authorization: 'Bearer tok', spaceId: 'sales' });
+      });
+
+      it('round-trips through replayCaller', () => {
+        const snapshot = api.authc.stampCaller({
           authorization: 'ApiKey abc',
           spaceId: 'marketing',
-          futureHint: 'profile-uid-123',
-        } as unknown as OpaqueRequestState;
+        });
+        expect(snapshot).toBeDefined();
 
-        const hydrated = api.authc.hydrateRequest(state);
+        const replayed = api.authc.replayCaller(snapshot!);
+        expect(replayed).toBeDefined();
+        expect(replayed!.headers.authorization).toBe('ApiKey abc');
+        expect(replayed!.spaceId).toBe('marketing');
+      });
+    });
 
-        expect(hydrated).toBeDefined();
-        expect(hydrated!.headers.authorization).toBe('ApiKey abc');
+    describe('adoptPersistedCaller', () => {
+      it('returns undefined for null', () => {
+        expect(api.authc.adoptPersistedCaller(null)).toBeUndefined();
       });
 
-      // ---------------------------------------------------------------------
-      // BWC: the v1 envelope also carries the legacy Task Manager fields
-      // (`apiKey`, `uiamApiKey`, `userScope`) so the opaque bag can fully
-      // replace the prior per-task persistence shape without losing context.
-      // ---------------------------------------------------------------------
-      describe('backwards-compat with legacy apiKey / uiamApiKey / userScope fields', () => {
-        it('rebuilds Authorization from legacy `apiKey` when no explicit authorization is set', () => {
-          const state = {
-            v: 1,
-            apiKey: 'base64-encoded-id-and-key',
-          } as unknown as OpaqueRequestState;
+      it('returns undefined for non-objects', () => {
+        expect(api.authc.adoptPersistedCaller('string')).toBeUndefined();
+        expect(api.authc.adoptPersistedCaller(42)).toBeUndefined();
+        expect(api.authc.adoptPersistedCaller(undefined)).toBeUndefined();
+      });
 
-          const hydrated = api.authc.hydrateRequest(state);
+      it('returns undefined when v is missing', () => {
+        expect(api.authc.adoptPersistedCaller({ authorization: 'ApiKey abc' })).toBeUndefined();
+      });
 
-          expect(hydrated).toBeDefined();
-          expect(hydrated!.headers.authorization).toBe('ApiKey base64-encoded-id-and-key');
-        });
+      it('returns undefined when v is not a number', () => {
+        expect(
+          api.authc.adoptPersistedCaller({ v: '1', authorization: 'ApiKey abc' })
+        ).toBeUndefined();
+      });
 
-        it('rebuilds Authorization from `uiamApiKey` when no explicit authorization is set', () => {
-          const state = {
-            v: 1,
-            uiamApiKey: 'essu_uiam-encoded',
-          } as unknown as OpaqueRequestState;
+      it('returns the value brand-cast for an object with numeric v', () => {
+        const persisted = { v: 1, authorization: 'ApiKey abc', spaceId: 'sales' };
+        const snapshot = api.authc.adoptPersistedCaller(persisted);
 
-          const hydrated = api.authc.hydrateRequest(state);
+        expect(snapshot).toBeDefined();
+        expect(snapshot).toBe(persisted);
+      });
 
-          expect(hydrated).toBeDefined();
-          expect(hydrated!.headers.authorization).toBe('ApiKey essu_uiam-encoded');
-        });
+      it('the returned value can be passed to replayCaller without further casts', () => {
+        const persisted = { v: 1, authorization: 'ApiKey abc' };
+        const snapshot = api.authc.adoptPersistedCaller(persisted);
+        expect(snapshot).toBeDefined();
 
-        it('prefers `uiamApiKey` over legacy `apiKey` when both are set', () => {
-          // Mirrors the ES+UIAM strategy preference: when both are present on a
-          // task, UIAM wins (matches `getApiKeyForFakeRequest` behavior).
-          const state = {
-            v: 1,
-            apiKey: 'es-key',
-            uiamApiKey: 'uiam-key',
-          } as unknown as OpaqueRequestState;
-
-          const hydrated = api.authc.hydrateRequest(state);
-
-          expect(hydrated).toBeDefined();
-          expect(hydrated!.headers.authorization).toBe('ApiKey uiam-key');
-        });
-
-        it('prefers explicit `authorization` over both `apiKey` and `uiamApiKey`', () => {
-          // Explicit authorization is the most flexible (allows Bearer/Basic/etc.),
-          // so it always wins over the legacy ApiKey reconstruction paths.
-          const state = {
-            v: 1,
-            authorization: '******',
-            apiKey: 'es-key',
-            uiamApiKey: 'uiam-key',
-          } as unknown as OpaqueRequestState;
-
-          const hydrated = api.authc.hydrateRequest(state);
-
-          expect(hydrated).toBeDefined();
-          expect(hydrated!.headers.authorization).toBe('******');
-        });
-
-        it('falls back to `userScope.spaceId` when no top-level `spaceId` is set', () => {
-          const state = {
-            v: 1,
-            apiKey: 'es-key',
-            userScope: {
-              apiKeyId: 'key-id',
-              spaceId: 'marketing',
-              apiKeyCreatedByUser: false,
-            },
-          } as unknown as OpaqueRequestState;
-
-          const hydrated = api.authc.hydrateRequest(state);
-
-          expect(hydrated).toBeDefined();
-          expect(hydrated!.spaceId).toBe('marketing');
-        });
-
-        it('prefers top-level `spaceId` over `userScope.spaceId` when both are set', () => {
-          const state = {
-            v: 1,
-            apiKey: 'es-key',
-            spaceId: 'sales',
-            userScope: {
-              apiKeyId: 'key-id',
-              spaceId: 'marketing',
-              apiKeyCreatedByUser: false,
-            },
-          } as unknown as OpaqueRequestState;
-
-          const hydrated = api.authc.hydrateRequest(state);
-
-          expect(hydrated).toBeDefined();
-          expect(hydrated!.spaceId).toBe('sales');
-        });
-
-        it('returns undefined when no auth-bearing field is present (no fabricated request)', () => {
-          // The hydrator must refuse to mint a request from a `userScope` alone:
-          // without an Authorization header we cannot scope the request to a user.
-          const state = {
-            v: 1,
-            userScope: {
-              apiKeyId: 'key-id',
-              spaceId: 'marketing',
-              apiKeyCreatedByUser: false,
-            },
-          } as unknown as OpaqueRequestState;
-
-          expect(api.authc.hydrateRequest(state)).toBeUndefined();
-        });
-
-        it('handles a `userScope` carrying `uiamApiKeyId` alongside legacy fields', () => {
-          // Full legacy shape: ES apiKey + uiamApiKey + the dual-id userScope
-          // structure used during the UIAM rollout. Hydrator must accept it
-          // and apply the documented precedence.
-          const state = {
-            v: 1,
-            apiKey: 'es-key',
-            uiamApiKey: 'uiam-key',
-            userScope: {
-              apiKeyId: 'es-key-id',
-              uiamApiKeyId: 'uiam-key-id',
-              spaceId: 'marketing',
-              apiKeyCreatedByUser: true,
-            },
-          } as unknown as OpaqueRequestState;
-
-          const hydrated = api.authc.hydrateRequest(state);
-
-          expect(hydrated).toBeDefined();
-          expect(hydrated!.headers.authorization).toBe('ApiKey uiam-key');
-          expect(hydrated!.spaceId).toBe('marketing');
-        });
+        const replayed = api.authc.replayCaller(snapshot!);
+        expect(replayed).toBeDefined();
+        expect(replayed!.headers.authorization).toBe('ApiKey abc');
       });
     });
 
     describe('round-trip', () => {
-      it('serializeRequest -> hydrateRequest reproduces authorization and spaceId', () => {
-        const source = buildSerializeInput({
+      it('captureCaller -> replayCaller reproduces authorization and spaceId', async () => {
+        authc.getCurrentUser.mockReturnValue(null);
+        const source = buildCaptureInput({
           authorization: 'ApiKey abc',
           spaceId: 'marketing',
         });
 
-        const state = api.authc.serializeRequest(source);
-        expect(state).toBeDefined();
+        const snapshot = await api.authc.captureCaller(source);
+        expect(snapshot).toBeDefined();
 
-        const hydrated = api.authc.hydrateRequest(state!);
-        expect(hydrated).toBeDefined();
-        expect(hydrated!.headers.authorization).toBe('ApiKey abc');
-        expect(hydrated!.spaceId).toBe('marketing');
+        const replayed = api.authc.replayCaller(snapshot!);
+        expect(replayed).toBeDefined();
+        expect(replayed!.headers.authorization).toBe('ApiKey abc');
+        expect(replayed!.spaceId).toBe('marketing');
       });
     });
   });

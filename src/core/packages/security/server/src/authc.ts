@@ -12,43 +12,41 @@ import type { AuthenticatedUser } from '@kbn/core-security-common';
 import type { APIKeysType } from './authentication';
 
 /**
- * Internal brand marker for {@link OpaqueRequestState}.
+ * Internal brand marker for {@link CallerSnapshot}.
  *
- * `OpaqueRequestState` is intentionally nominal: only Core/Security can
- * produce values of this type (via `serializeRequest`), and only Core/Security
- * can consume the inner shape (via `hydrateRequest`). Downstream code such as
- * Task Manager is limited to round-tripping the value through persistence,
- * which is exactly the ownership boundary this spike is exploring.
+ * `CallerSnapshot` is nominally typed: only Core/Security can produce values
+ * of this type (via `captureCaller`, `stampCaller`, or `adoptPersistedCaller`).
+ * The brand makes construction sites visible at code-review time without
+ * preventing read access to documented fields.
  *
  * The brand is exported as a `unique symbol` type so consumers can refer to
- * the brand in declarations (for example when typing a persisted SO field)
- * without being able to forge a value.
+ * it in declarations (e.g. when typing a persisted SO field) without being
+ * able to forge a value.
  *
  * @public
  */
-export declare const opaqueRequestStateBrand: unique symbol;
+export declare const callerSnapshotBrand: unique symbol;
 
 /**
- * Opaque, serializable bag of request identity context.
+ * Frozen, point-in-time capture of the caller's identity context (auth
+ * credential, space, profile) suitable for replaying a deferred operation on
+ * their behalf. Owned by Core/Security.
  *
- * Producers (Core/Security) decide which fields to populate; consumers MUST
- * treat this as an opaque value and round-trip it untouched through
- * persistence.
- *
- * The type is branded so callers cannot construct an `OpaqueRequestState`
- * by hand — they must go through `CoreAuthenticationService.serializeRequest`.
- * Persisted (deserialized) values are coerced back into the branded type by
- * the consumer (for example Task Manager) at the trust boundary where they
- * are read from storage.
- *
- * Unknown additive keys should be preserved across versions to keep rolling
- * upgrades safe and avoid version-specific awareness in downstream consumers.
+ * You may read the documented fields if you need them. You must NOT construct
+ * a `CallerSnapshot` from an object literal — always mint via `captureCaller`,
+ * `stampCaller`, or `adoptPersistedCaller`. The brand makes those construction
+ * sites visible in code review; the on-disk encoding is Core's and may evolve
+ * additively.
  *
  * @public
  */
-export type OpaqueRequestState = Record<string, unknown> & {
-  readonly [opaqueRequestStateBrand]: never;
-};
+export interface CallerSnapshot {
+  readonly [callerSnapshotBrand]: never;
+  readonly v: number;
+  readonly authorization?: string;
+  readonly spaceId?: string;
+  readonly userProfileId?: string;
+}
 
 /**
  * Core's authentication service
@@ -72,29 +70,46 @@ export interface CoreAuthenticationService {
    */
   getRedactedSessionId(request: KibanaRequest): Promise<string | undefined>;
   /**
-   * Serialize the identity context of the provided request into an opaque
-   * `OpaqueRequestState` bag suitable for persistence.
+   * Capture the frozen identity context of the provided request as a
+   * `CallerSnapshot` suitable for persistence and later replay.
    *
-   * The shape is implementation-defined and may evolve across versions.
-   * Callers must NOT inspect or mutate individual fields.
+   * The snapshot stamps the resolved user profile at capture time so
+   * background runs can act on behalf of the originating user without
+   * re-resolving identity. Returns `undefined` when no meaningful identity
+   * context is available (e.g. unauthenticated request, or no security
+   * implementation registered).
    *
-   * @param request The authenticated request to serialize.
-   * @returns An opaque request-state bag, or `undefined` when no meaningful
-   * identity context could be captured (e.g. unauthenticated request, or
-   * when no security implementation is registered).
+   * @param request The authenticated request to capture.
    */
-  serializeRequest(request: KibanaRequest): OpaqueRequestState | undefined;
+  captureCaller(request: KibanaRequest): Promise<CallerSnapshot | undefined>;
   /**
-   * Hydrate a scoped, fake `KibanaRequest` from a previously serialized
-   * `OpaqueRequestState` bag.
+   * Replay a scoped, fake `KibanaRequest` from a previously captured
+   * `CallerSnapshot`.
    *
    * The returned request is intended for use in background execution paths
    * (e.g. Task Manager) that need to act on behalf of an originating user.
+   * Returns `undefined` when the snapshot is empty, has an unrecognised shape,
+   * or no security implementation is registered.
    *
-   * @param requestState The opaque state captured at schedule time.
-   * @returns A scoped `KibanaRequest`, or `undefined` when the state is empty
-   * or no security implementation is registered to interpret it.
+   * @param snapshot The identity context captured at schedule time.
    */
-  hydrateRequest(requestState: OpaqueRequestState): KibanaRequest | undefined;
+  replayCaller(snapshot: CallerSnapshot): KibanaRequest | undefined;
+  /**
+   * Narrow mint helper for migrations and tests. Constructs a `CallerSnapshot`
+   * from explicitly provided parts without requiring a live `KibanaRequest`.
+   * Returns `undefined` when no auth-bearing field is provided.
+   */
+  stampCaller(parts: {
+    authorization?: string;
+    spaceId?: string;
+    userProfileId?: string;
+  }): CallerSnapshot | undefined;
+  /**
+   * Persistence trust boundary. Coerces a value read from storage into a
+   * `CallerSnapshot` after a minimal structural check (`v` is a number).
+   * Returns `undefined` for clearly-invalid shapes (non-object, missing `v`).
+   * Field-level validation is deferred to `replayCaller`.
+   */
+  adoptPersistedCaller(persisted: unknown): CallerSnapshot | undefined;
   apiKeys: APIKeysType;
 }

@@ -163,8 +163,8 @@ export const taskModelVersions: SavedObjectsModelVersionMap = {
     },
   },
   '11': {
-    // Additive only: `requestState` is an opaque, not-indexed bag persisted by
-    // Task Manager and round-tripped to `core.security.authc.hydrateRequest()`
+    // Additive only: `callerSnapshot` is the identity context captured at
+    // schedule time and replayed via `core.security.authc.replayCaller()`
     // at run time. No mappings change because the field is not indexed
     // (taskMappings has `dynamic: false`).
     changes: [],

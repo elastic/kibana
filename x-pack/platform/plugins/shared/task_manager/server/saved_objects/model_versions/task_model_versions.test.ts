@@ -56,9 +56,9 @@ describe('taskModelVersions v10 forwardCompatibility', () => {
   });
 });
 
-describe('taskModelVersions v11 / requestState (opaque request-state envelope)', () => {
+describe('taskModelVersions v11 / callerSnapshot (caller-snapshot envelope)', () => {
   // Minimum task attribute shape satisfying v11 (extends v1..v10). Each test that needs
-  // a `requestState` spreads on top of this baseline.
+  // a `callerSnapshot` spreads on top of this baseline.
   const baseTaskAttributes = {
     taskType: 'test',
     scheduledAt: '2026-06-12T00:00:00.000Z',
@@ -76,7 +76,7 @@ describe('taskModelVersions v11 / requestState (opaque request-state envelope)',
   // v11's forwardCompatibility is `taskSchemaV11.extends({}, { unknowns: 'ignore' })` — a
   // permissive *schema*, not a function like v10's. We run it through `.validate()` to
   // exercise the same path the SO migration layer uses (which strips unknown top-level
-  // keys but preserves them inside the permissive `requestState` record).
+  // keys but preserves them inside the permissive `callerSnapshot` record).
   const v11ForwardCompatibilitySchema = taskModelVersions['11']!.schemas!.forwardCompatibility as {
     validate: (attributes: Record<string, unknown>) => Record<string, unknown>;
   };
@@ -84,54 +84,32 @@ describe('taskModelVersions v11 / requestState (opaque request-state envelope)',
     v11ForwardCompatibilitySchema.validate(attributes);
 
   describe('create schema', () => {
-    it('accepts a task without `requestState` (back-compat with pre-v11 tasks)', () => {
-      // Tasks created before v11 never carried `requestState`. The new schema must
+    it('accepts a task without `callerSnapshot` (back-compat with pre-v11 tasks)', () => {
+      // Tasks created before v11 never carried `callerSnapshot`. The new schema must
       // continue to accept them so existing persisted state hydrates unchanged.
       expect(() => taskSchemaV11.validate(baseTaskAttributes)).not.toThrow();
     });
 
-    it('accepts a task with a v1 `requestState` envelope', () => {
+    it('accepts a task with a v1 `callerSnapshot` envelope', () => {
       const attributes = {
         ...baseTaskAttributes,
-        requestState: { v: 1, authorization: 'ApiKey abc', spaceId: 'marketing' },
+        callerSnapshot: { v: 1, authorization: 'ApiKey abc', spaceId: 'marketing' },
       };
 
       expect(() => taskSchemaV11.validate(attributes)).not.toThrow();
     });
 
-    it('accepts a task whose `requestState` carries additive unknown keys from a newer producer', () => {
+    it('accepts a task whose `callerSnapshot` carries additive unknown keys from a newer producer', () => {
       // Forward-compat: an older node reading a SO written by a newer node may see
-      // additive identity hints inside `requestState`. The schema is permissive
+      // additive identity hints inside `callerSnapshot`. The schema is permissive
       // (`recordOf(string, any)`), so the bag must round-trip unchanged.
       const attributes = {
         ...baseTaskAttributes,
-        requestState: {
+        callerSnapshot: {
           v: 1,
           authorization: 'ApiKey abc',
           spaceId: 'marketing',
           futureHint: { profileUid: 'abc-123' },
-        },
-      };
-
-      expect(() => taskSchemaV11.validate(attributes)).not.toThrow();
-    });
-
-    it('accepts a v1 `requestState` carrying the legacy apiKey/uiamApiKey/userScope BWC fields', () => {
-      // The opaque bag is permissive (`recordOf(string, any)`), so the full
-      // legacy persistence shape now embedded inside `requestState` must
-      // continue to validate cleanly.
-      const attributes = {
-        ...baseTaskAttributes,
-        requestState: {
-          v: 1,
-          apiKey: 'es-key',
-          uiamApiKey: 'uiam-key',
-          userScope: {
-            apiKeyId: 'es-key-id',
-            uiamApiKeyId: 'uiam-key-id',
-            spaceId: 'marketing',
-            apiKeyCreatedByUser: true,
-          },
         },
       };
 
@@ -140,29 +118,29 @@ describe('taskModelVersions v11 / requestState (opaque request-state envelope)',
   });
 
   describe('forwardCompatibility', () => {
-    it('preserves a known v1 `requestState` envelope unchanged', () => {
+    it('preserves a known v1 `callerSnapshot` envelope unchanged', () => {
       const attributes = {
         ...baseTaskAttributes,
-        requestState: { v: 1, authorization: 'ApiKey abc', spaceId: 'marketing' },
+        callerSnapshot: { v: 1, authorization: 'ApiKey abc', spaceId: 'marketing' },
       };
 
       const result = runV11ForwardCompatibility(attributes);
 
-      expect(result.requestState).toEqual({
+      expect(result.callerSnapshot).toEqual({
         v: 1,
         authorization: 'ApiKey abc',
         spaceId: 'marketing',
       });
     });
 
-    it('preserves additive unknown keys inside `requestState` (not stripped)', () => {
-      // The opaque bag uses `schema.recordOf(string, any)`, so unknown keys inside the
+    it('preserves additive unknown keys inside `callerSnapshot` (not stripped)', () => {
+      // The bag uses `schema.recordOf(string, any)`, so unknown keys inside the
       // bag must survive forwardCompatibility validation rather than being stripped.
       // This is what keeps rolling upgrades safe: a v9-era node downgrading from a v10
       // SO must not lose identity hints written by the newer node.
       const attributes = {
         ...baseTaskAttributes,
-        requestState: {
+        callerSnapshot: {
           v: 1,
           authorization: 'ApiKey abc',
           spaceId: 'marketing',
@@ -172,7 +150,7 @@ describe('taskModelVersions v11 / requestState (opaque request-state envelope)',
 
       const result = runV11ForwardCompatibility(attributes);
 
-      expect(result.requestState).toEqual({
+      expect(result.callerSnapshot).toEqual({
         v: 1,
         authorization: 'ApiKey abc',
         spaceId: 'marketing',
@@ -180,25 +158,25 @@ describe('taskModelVersions v11 / requestState (opaque request-state envelope)',
       });
     });
 
-    it('passes through a task without `requestState` without inventing one', () => {
+    it('passes through a task without `callerSnapshot` without inventing one', () => {
       const result = runV11ForwardCompatibility(baseTaskAttributes);
 
-      expect(result.requestState).toBeUndefined();
+      expect(result.callerSnapshot).toBeUndefined();
     });
 
-    it('preserves a `requestState` envelope with an unknown future version (forward-compat with future hydrators)', () => {
-      // The Task Manager schema does NOT branch on `requestState.v` — that is the
-      // hydrator's job at run time. So an envelope written by a future producer
-      // (e.g. `v: 2`) must still pass schema validation; the hydrator will then
+    it('preserves a `callerSnapshot` envelope with an unknown future version (forward-compat with future replayers)', () => {
+      // The Task Manager schema does NOT branch on `callerSnapshot.v` — that is the
+      // replayer's job at run time. So an envelope written by a future producer
+      // (e.g. `v: 2`) must still pass schema validation; the replayer will then
       // return `undefined` and the runner will fall back to the legacy path.
       const attributes = {
         ...baseTaskAttributes,
-        requestState: { v: 2, somethingNew: 'opaque-payload' },
+        callerSnapshot: { v: 2, somethingNew: 'opaque-payload' },
       };
 
       const result = runV11ForwardCompatibility(attributes);
 
-      expect(result.requestState).toEqual({ v: 2, somethingNew: 'opaque-payload' });
+      expect(result.callerSnapshot).toEqual({ v: 2, somethingNew: 'opaque-payload' });
     });
   });
 });

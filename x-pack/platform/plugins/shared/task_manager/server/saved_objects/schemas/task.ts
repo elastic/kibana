@@ -107,13 +107,14 @@ export const taskSchemaV10 = taskSchemaV9.extends({
 });
 
 /**
- * Adds `requestState`, an opaque request-state bag stored by Task Manager and
- * round-tripped to `core.security.authc.hydrateRequest()` at run time.
+ * Adds `callerSnapshot`, the identity context captured at schedule time by
+ * `core.security.authc.captureCaller()` and replayed at run time via
+ * `core.security.authc.replayCaller()`. Task Manager persists this untouched.
  *
  * The schema is intentionally permissive (any record shape, ignores unknowns)
  * so that newer producers can add fields without forcing a Task Manager model
  * version bump for additive identity context.
  */
 export const taskSchemaV11 = taskSchemaV10.extends({
-  requestState: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+  callerSnapshot: schema.maybe(schema.recordOf(schema.string(), schema.any())),
 });

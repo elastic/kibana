@@ -6,13 +6,13 @@
  */
 
 import type { FakeRawRequest, Headers, KibanaRequest } from '@kbn/core-http-server';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type {
+  CallerSnapshot,
   CoreSecurityDelegateContract,
   GrantUiamAPIKeyParams,
   InvalidateUiamAPIKeyParams,
-  OpaqueRequestState,
 } from '@kbn/core-security-server';
-import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { asSpaceId } from '@kbn/core-spaces-common';
 import type { CoreUserProfileDelegateContract } from '@kbn/core-user-profile-server';
 import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
@@ -42,8 +42,10 @@ export const buildSecurityApi = ({
         const sid = await getSession().getSID(request);
         return sid ? getPrintableSessionId(sid) : undefined;
       },
-      serializeRequest: (request) => serializeRequestImpl(request, getAuthc),
-      hydrateRequest: (requestState) => hydrateRequestImpl(requestState),
+      captureCaller: (request) => captureCallerImpl(request, getAuthc),
+      replayCaller: (snapshot) => replayCallerImpl(snapshot),
+      stampCaller: (parts) => stampCallerImpl(parts),
+      adoptPersistedCaller: (persisted) => adoptPersistedCallerImpl(persisted),
       apiKeys: {
         areAPIKeysEnabled: () => getAuthc().apiKeys.areAPIKeysEnabled(),
         areCrossClusterAPIKeysEnabled: () => getAuthc().apiKeys.areAPIKeysEnabled(),
@@ -96,129 +98,111 @@ export const buildUserProfileApi = ({
 };
 
 /**
- * Internal version markers for the opaque request-state envelope. Producers stamp
- * the current version so future hydrators can detect (and ignore) shapes they
- * don't understand. Consumers MUST NOT branch on individual fields.
+ * Version marker for the caller-snapshot envelope. Producers stamp this so
+ * future replayers can detect (and refuse) shapes they don't understand.
+ *
+ * In scope: identity context only (auth credential, space, profile uid).
+ * NOT in scope: Task Manager api-key bookkeeping fields (`apiKey`,
+ * `uiamApiKey`, `userScope`) — those live on `task.userScope` and are
+ * unrelated to the caller-snapshot contract.
  */
-const REQUEST_STATE_VERSION = 1 as const;
+const CALLER_SNAPSHOT_VERSION = 1 as const;
 
-/**
- * Mirror of the legacy Task Manager `userScope` field. Carried inside the
- * envelope purely for backwards-compatibility with tasks whose identity
- * context was previously persisted as a sibling of the task SO (not inside
- * the opaque bag). The hydrator never *requires* these fields; they only
- * provide additional reconstruction hints when the more specific
- * `authorization` field is absent.
- */
-interface SerializedUserScope {
-  apiKeyId: string;
-  uiamApiKeyId?: string;
-  spaceId: string;
-  apiKeyCreatedByUser: boolean;
-}
-
-interface SerializedRequestStateV1 {
-  v: typeof REQUEST_STATE_VERSION;
-  /** Raw Authorization header value, when present on the source request. */
+interface SerializedCallerSnapshotV1 {
+  v: typeof CALLER_SNAPSHOT_VERSION;
+  /** Raw Authorization header value captured from the source request. */
   authorization?: string;
-  /** Space ID derived from the source request (defaults to 'default' if unknown). */
+  /** Space ID derived from the source request. */
   spaceId?: string;
-  /**
-   * Backwards-compat: the base64-encoded `id:api_key` value previously persisted
-   * by Task Manager as a sibling task field. When present and no explicit
-   * `authorization` is set, the hydrator rebuilds `Authorization: ApiKey ${apiKey}`.
-   */
-  apiKey?: string;
-  /**
-   * Backwards-compat: the UIAM-flavored API key previously persisted alongside
-   * `apiKey` so a single task can carry both during the UIAM rollout. Preferred
-   * over `apiKey` when present (mirrors the ES+UIAM API-key strategy ordering).
-   */
-  uiamApiKey?: string;
-  /**
-   * Backwards-compat: the legacy `userScope` block previously persisted as a
-   * sibling task field. The hydrator only reads `spaceId` from it (to pick a
-   * default space when no top-level `spaceId` is set); the other attributes
-   * are round-tripped unchanged so downstream consumers that still inspect
-   * them keep working.
-   */
-  userScope?: SerializedUserScope;
+  /** Kibana user-profile UID resolved at capture time. */
+  userProfileId?: string;
 }
 
-const isSerializedRequestStateV1 = (
-  state: OpaqueRequestState
-): state is SerializedRequestStateV1 & OpaqueRequestState =>
-  typeof state === 'object' && state !== null && (state as { v?: unknown }).v === REQUEST_STATE_VERSION;
+const isSerializedCallerSnapshotV1 = (
+  snapshot: CallerSnapshot
+): snapshot is SerializedCallerSnapshotV1 & CallerSnapshot =>
+  typeof snapshot === 'object' &&
+  snapshot !== null &&
+  (snapshot as { v?: unknown }).v === CALLER_SNAPSHOT_VERSION;
 
-const serializeRequestImpl = (
+const captureCallerImpl = async (
   request: KibanaRequest,
   getAuthc: () => InternalAuthenticationServiceStart
-): OpaqueRequestState | undefined => {
-  // Best-effort: capture only the inputs needed to reconstruct a scoped fake
-  // request later. Identity hints (e.g. profile_uid) can be added here without
-  // requiring downstream persisters to learn about new fields.
+): Promise<CallerSnapshot | undefined> => {
   const authorization =
     typeof request.headers?.authorization === 'string' ? request.headers.authorization : undefined;
   const spaceId =
     (request as unknown as { fakeRawRequest?: { spaceId?: string } }).fakeRawRequest?.spaceId ??
     undefined;
 
-  // Touch getAuthc to keep the dependency explicit; future versions may resolve
-  // additional identity context from the live auth service at schedule time.
-  void getAuthc;
+  // Look up profile_uid from the live request. Best-effort: if getCurrentUser
+  // throws or returns null/undefined, we simply omit userProfileId. This is
+  // the call that justifies captureCaller being async — the snapshot stamps
+  // the resolved profile so background runs can act on behalf of the user
+  // without re-resolving identity at run time.
+  let userProfileId: string | undefined;
+  try {
+    const currentUser = getAuthc().getCurrentUser(request);
+    userProfileId = currentUser?.profile_uid ?? undefined;
+  } catch {
+    userProfileId = undefined;
+  }
 
-  if (!authorization && !spaceId) {
+  if (!authorization && !spaceId && !userProfileId) {
     return undefined;
   }
 
-  const state: SerializedRequestStateV1 = {
-    v: REQUEST_STATE_VERSION,
+  const snapshot: SerializedCallerSnapshotV1 = {
+    v: CALLER_SNAPSHOT_VERSION,
     ...(authorization ? { authorization } : {}),
     ...(spaceId ? { spaceId } : {}),
+    ...(userProfileId ? { userProfileId } : {}),
   };
   // Trust-boundary mint: only Core/Security is permitted to produce values of
-  // the branded `OpaqueRequestState` type. The double-cast through `unknown`
-  // makes the privilege visible at the call site.
-  return state as unknown as OpaqueRequestState;
+  // the branded `CallerSnapshot` type.
+  return snapshot as unknown as CallerSnapshot;
 };
 
-const hydrateRequestImpl = (requestState: OpaqueRequestState): KibanaRequest | undefined => {
-  if (!isSerializedRequestStateV1(requestState)) {
-    // Forward-compat: unknown shape from a newer producer — ignore rather than
-    // fabricate a request. Older nodes should round-trip the bag untouched.
+const replayCallerImpl = (snapshot: CallerSnapshot): KibanaRequest | undefined => {
+  if (!isSerializedCallerSnapshotV1(snapshot)) {
+    // Forward-compat: unknown shape from a newer producer — refuse rather
+    // than fabricate a request. Consumers should fall back to their legacy
+    // path (e.g. Task Manager's api-key based fake request).
     return undefined;
   }
-
-  const { authorization, spaceId, apiKey, uiamApiKey, userScope } = requestState;
-
-  // Header reconstruction precedence:
-  //   1. Explicit `authorization` (the most flexible — bearer, basic, etc.).
-  //   2. `uiamApiKey` (matches the ES+UIAM strategy preference for UIAM-enabled
-  //      deployments, mirroring `task_runner.getFakeKibanaRequest`).
-  //   3. Legacy `apiKey` (base64 `id:api_key`).
-  // Refuse to fabricate a request when none of these are present.
-  let resolvedAuthorization: string | undefined;
-  if (authorization) {
-    resolvedAuthorization = authorization;
-  } else if (uiamApiKey) {
-    resolvedAuthorization = `ApiKey ${uiamApiKey}`;
-  } else if (apiKey) {
-    resolvedAuthorization = `ApiKey ${apiKey}`;
-  }
-
-  if (!resolvedAuthorization) {
+  const { authorization, spaceId } = snapshot;
+  if (!authorization) {
     return undefined;
   }
-
-  // Space resolution: explicit `spaceId` wins; fall back to `userScope.spaceId`
-  // (the legacy persistence shape) so tasks scheduled against a specific space
-  // before the opaque-bag migration keep targeting that space after hydration.
-  const resolvedSpaceId = spaceId ?? userScope?.spaceId;
-
-  const requestHeaders: Headers = { authorization: resolvedAuthorization };
+  const requestHeaders: Headers = { authorization };
   const fakeRawRequest: FakeRawRequest = {
     headers: requestHeaders,
-    ...(resolvedSpaceId ? { spaceId: asSpaceId(resolvedSpaceId) } : {}),
+    ...(spaceId ? { spaceId: asSpaceId(spaceId) } : {}),
   };
   return kibanaRequestFactory(fakeRawRequest);
+};
+
+const stampCallerImpl = (parts: {
+  authorization?: string;
+  spaceId?: string;
+  userProfileId?: string;
+}): CallerSnapshot | undefined => {
+  const { authorization, spaceId, userProfileId } = parts;
+  if (!authorization && !spaceId && !userProfileId) {
+    return undefined;
+  }
+  const snapshot: SerializedCallerSnapshotV1 = {
+    v: CALLER_SNAPSHOT_VERSION,
+    ...(authorization ? { authorization } : {}),
+    ...(spaceId ? { spaceId } : {}),
+    ...(userProfileId ? { userProfileId } : {}),
+  };
+  return snapshot as unknown as CallerSnapshot;
+};
+
+const adoptPersistedCallerImpl = (persisted: unknown): CallerSnapshot | undefined => {
+  if (!persisted || typeof persisted !== 'object') return undefined;
+  const v = (persisted as { v?: unknown }).v;
+  if (typeof v !== 'number') return undefined;
+  return persisted as CallerSnapshot;
 };

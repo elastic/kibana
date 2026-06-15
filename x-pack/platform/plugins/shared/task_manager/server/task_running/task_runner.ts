@@ -141,8 +141,8 @@ type Opts = {
   eventLogger: TaskEventLogger;
   /**
    * Lazy accessor for Core's security authc service. Used at run time to
-   * hydrate a fake `KibanaRequest` from the task's opaque `requestState`
-   * (see `core.security.authc.hydrateRequest`). Optional: when not provided
+   * replay a fake `KibanaRequest` from the task's `callerSnapshot`
+   * (see `core.security.authc.replayCaller`). Optional: when not provided
    * (e.g. very early bootstrap, or when no security implementation is
    * registered), the runner falls back to the legacy api-key-based fake
    * request path.
@@ -445,17 +445,16 @@ export class TaskManagerRunner implements TaskRunner {
             'apiKey',
             'uiamApiKey',
             'userScope',
-            'requestState',
+            'callerSnapshot',
           ]);
-          // Prefer the Core/Security hydration path when the task carries an
-          // opaque `requestState` bag. This keeps identity hydration logic
-          // centralized in Core/Security and avoids Task-Manager-specific
-          // per-attribute knowledge (see opaque_request_state_spike.md).
+          // Prefer the Core/Security replay path when the task carries a
+          // `callerSnapshot`. This keeps identity replay logic centralized in
+          // Core/Security and avoids Task-Manager-specific per-attribute knowledge.
           let fakeRequest: KibanaRequest | undefined;
-          const requestState = modifiedContext.taskInstance.requestState;
-          if (requestState) {
+          const callerSnapshot = modifiedContext.taskInstance.callerSnapshot;
+          if (callerSnapshot) {
             const coreAuthc = this.getCoreAuthc?.();
-            fakeRequest = coreAuthc?.hydrateRequest(requestState);
+            fakeRequest = coreAuthc?.replayCaller(callerSnapshot);
           }
           if (!fakeRequest) {
             const apiKeyForRequest = this.apiKeyStrategy.getApiKeyForFakeRequest(

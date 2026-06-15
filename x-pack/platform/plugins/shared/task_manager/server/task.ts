@@ -11,7 +11,7 @@ import type { ObjectType, TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { isNumber } from 'lodash';
 import type { KibanaRequest } from '@kbn/core/server';
-import type { OpaqueRequestState } from '@kbn/core-security-server';
+import type { CallerSnapshot } from '@kbn/core-security-server';
 import type { IntervalSchedule, RruleSchedule } from '@kbn/response-ops-scheduling-types';
 import { isErr, tryAsResult } from './lib/result_type';
 import { isInterval, parseIntervalAsMillisecond } from './lib/intervals';
@@ -417,14 +417,11 @@ export interface TaskInstance {
   userScope?: TaskUserScope;
 
   /**
-   * Opaque request-state bag captured at schedule time by
-   * `core.security.authc.serializeRequest()`. Task Manager persists this
-   * untouched and forwards it to `core.security.authc.hydrateRequest()` at
-   * run time to materialize the fake `KibanaRequest`.
-   *
-   * Task Manager MUST NOT inspect individual fields of this object.
+   * Identity context captured at schedule time by
+   * `core.security.authc.captureCaller()` and replayed at run time via
+   * `core.security.authc.replayCaller()`. Task Manager persists this untouched.
    */
-  requestState?: OpaqueRequestState;
+  callerSnapshot?: CallerSnapshot;
 
   /*
    * Optionally override the priority defined in the task type for this specific task instance
@@ -573,7 +570,7 @@ export type SerializedConcreteTaskInstance = Omit<
   apiKey?: string;
   uiamApiKey?: string;
   userScope?: TaskUserScope;
-  requestState?: OpaqueRequestState;
+  callerSnapshot?: CallerSnapshot;
 };
 
 export type PartialSerializedConcreteTaskInstance = Partial<SerializedConcreteTaskInstance> & {
