@@ -20,6 +20,7 @@ import {
   type LogSlicePaginationParams,
   ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
   MAIN_ENTITY_ID_FIELD,
+  NULLIFY_UNMAPPED_FIELDS_SETTING,
   TIMESTAMP_FIELD,
   aggregationStats,
   fieldsToKeep,

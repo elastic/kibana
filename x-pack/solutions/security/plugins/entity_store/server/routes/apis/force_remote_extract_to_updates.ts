@@ -17,7 +17,6 @@ import { getEntityDefinition } from '../../../common/domain/definitions/registry
 import {
   LOG_EXTRACTION_CAP_BEHAVIOR_DEFAULT,
   LOG_EXTRACTION_DELAY_DEFAULT,
-  LOG_EXTRACTION_FREQUENCY_DEFAULT,
   LOG_EXTRACTION_LOOKBACK_PERIOD_DEFAULT,
   LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT,
   LOG_EXTRACTION_MAX_LOGS_PER_WINDOW_DEFAULT,
@@ -94,7 +93,6 @@ export function registerForceRemoteExtractToUpdates(router: EntityStorePluginRou
           maxLogsPerPage: maxLogsPerPage ?? LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT,
           lookbackPeriod: LOG_EXTRACTION_LOOKBACK_PERIOD_DEFAULT,
           delay: LOG_EXTRACTION_DELAY_DEFAULT,
-          frequency: LOG_EXTRACTION_FREQUENCY_DEFAULT,
           entityDefinition,
           windowOverride: { fromDateISO, toDateISO },
           maxTimeWindowSize: LOG_EXTRACTION_MAX_TIME_WINDOW_SIZE_DEFAULT,

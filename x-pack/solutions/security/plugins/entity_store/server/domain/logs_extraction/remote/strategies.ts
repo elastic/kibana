@@ -26,6 +26,8 @@ export interface RemoteExtractionStrategy {
  */
 const EXCLUDED_ORIGIN = '-_origin:*';
 
+const isNotSystemIndex = (indexPattern: string) => !indexPattern.startsWith('.');
+
 export const createCcsStrategy = (
   esClient: ElasticsearchClient,
   stateClient: RemoteLogExtractionStateClient
@@ -43,5 +45,8 @@ export const createCpsStrategy = (
   id: 'cps',
   client: cpsClient,
   stateClient,
-  buildPatterns: ({ localIndexPatterns }) => [...localIndexPatterns, EXCLUDED_ORIGIN],
+  buildPatterns: ({ localIndexPatterns }) => [
+    ...localIndexPatterns.filter(isNotSystemIndex), // avoids verification errors on remote clusters
+    EXCLUDED_ORIGIN,
+  ],
 });

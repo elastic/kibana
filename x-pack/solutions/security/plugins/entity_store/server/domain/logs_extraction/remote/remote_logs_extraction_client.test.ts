@@ -83,7 +83,6 @@ describe('RemoteLogsExtractionClient', () => {
     maxLogsPerPage: DEFAULT_MAX_LOGS_PER_PAGE,
     lookbackPeriod: '3h',
     delay: '1m',
-    frequency: '1m',
     entityDefinition: getEntityDefinition('host', 'default'),
     // Use a very large cap so existing tests remain a single sub-window. The sub-window cap
     // behavior is exercised by the dedicated tests at the end of this describe block.

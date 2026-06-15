@@ -45,7 +45,6 @@ interface RemoteExtractToUpdatesParams {
   maxLogsPerPage: number;
   lookbackPeriod: string;
   delay: string;
-  frequency: string;
   entityDefinition: ManagedEntityDefinition;
   abortController?: AbortController;
   windowOverride?: { fromDateISO: string; toDateISO: string };
@@ -96,7 +95,6 @@ export class RemoteLogsExtractionClient {
     maxLogsPerPage,
     lookbackPeriod,
     delay,
-    frequency,
     entityDefinition,
     abortController,
     windowOverride,

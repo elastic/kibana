@@ -121,6 +121,8 @@ apiTest.describe(
 
         // First call: CPS path writes the entity-update doc into updates.
         await forceLogExtraction(apiClient, internalHeaders, 'user');
+        // Ensure the updates doc is visible before the main path reads it.
+        await esClient.indices.refresh({ index: UPDATES_INDEX });
         // Second call: main path scans updates and merges into latest.
         await forceLogExtraction(apiClient, internalHeaders, 'user');
 
