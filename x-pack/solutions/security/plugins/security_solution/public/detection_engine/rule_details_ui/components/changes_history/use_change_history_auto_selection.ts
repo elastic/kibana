@@ -22,9 +22,8 @@ export function useChangeHistoryAutoSelection({
 }: UseChangeHistoryAutoSelectionParams): void {
   // Reset the selected item when ruleId changes
   useEffect(() => {
-    console.log('reset selection');
     setSelectedItem(undefined);
-  }, [ruleId]);
+  }, [ruleId, setSelectedItem]);
 
   // Auto-select first active item
   const lastAutoSelectedRuleRef = useRef<string | undefined>(undefined);
