@@ -184,6 +184,8 @@ describe('Features Plugin', () => {
               "savedObject": Object {
                 "all": Array [
                   "three",
+                  "user-storage",
+                  "user-storage-global",
                 ],
                 "read": Array [
                   "four",
@@ -193,8 +195,6 @@ describe('Features Plugin', () => {
                   "url",
                   "tag",
                   "cloud",
-                  "user-storage",
-                  "user-storage-global",
                 ],
               },
               "ui": Array [],

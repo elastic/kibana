@@ -147,7 +147,9 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
     },
     async clickOnAlertInAlertsList(name: string) {
       await this.searchAlerts(name);
-      await find.clickDisplayedByCssSelector(`[data-test-subj="rulesList"] [title="${name}"]`);
+      await find.clickDisplayedByCssSelector(
+        `[data-test-subj="rulesList"] [data-test-subj="rulesListTableRowName-${name}"]`
+      );
     },
     async maybeClickOnAlertTab() {
       if (await testSubjects.exists('ruleDetailsTabbedContent')) {
