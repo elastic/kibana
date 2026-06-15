@@ -175,7 +175,18 @@ Post exactly one comment on the issue. Keep the content concise and actionable.
 
 Follow the format below exactly. Do not create standalone sections for "what the test does" "evidence," "where the test ran," or "failure screenshot". Integrate these details seamlessly into the sections below if they add value.
 
-The comment has two parts: a compact header that stays visible on the issue page (one `####` headline + metadata + summary), and a `<details>` block that hides everything else. **Inside the `<details>` block, every section starts with `#### Section name` on its own line** (e.g., `#### Proposed fix`, `#### Root cause & evidence`).
+The comment has different parts: a compact header that stays visible on the issue page (one `####` headline + metadata + summary), and a `<details>` block that hides everything else, as well as a comment to label the issue to trigger the flaky test fixer workflow (it is only posted under certain conditions, more info below).
+
+**Inside the `<details>` block, every section starts with `#### Section name` on its own line** (e.g., `#### Proposed fix`, `#### Root cause & evidence`).
+
+Add the following snippet of Markdown right after (and outside) the `<details>` block only if a fix is needed and available.
+
+```markdown
+> [!TIP]
+> Label this issue with `ai:auto-flaky-fix` to **open a fix PR** (experimental). Provide feedback in #appex-qa.
+```
+
+If a fix is already up in the Kibana, mention the link.
 
 ### 1. Visible header (required)
 
