@@ -88,7 +88,6 @@
     "**/@types/prop-types": "15.7.5",
     "**/@typescript-eslint/utils": "8.46.3",
     "**/baseline-browser-mapping": "2.9.14",
-    "**/brace-expansion": "5.0.6",
     "**/cheerio": "1.0.0-rc.12",
     "**/chokidar": "3.5.3",
     "**/d3-scale/**/d3-color": "npm:@elastic/kibana-d3-color@2.0.1",
