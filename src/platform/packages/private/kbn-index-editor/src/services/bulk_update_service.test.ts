@@ -10,7 +10,7 @@
 import type { HttpStart } from '@kbn/core/public';
 import { ROW_PLACEHOLDER_PREFIX } from '../constants';
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import type { BulkOperationContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { BulkOperationContainer, BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import { BULK_UPDATE_CHUNK_SIZE, bulkUpdate } from './bulk_update_service';
 import { LOOKUP_INDEX_UPDATE_ROUTE } from '@kbn/esql-types';
 import { times } from 'lodash';
@@ -27,7 +27,7 @@ describe('Bulk update', () => {
       errors: false,
       items: [],
       took: 0,
-    });
+    } satisfies BulkResponse);
   });
   it('builds bulk update operations correctly and posts to the correct endpoint', async () => {
     const updates = [
@@ -110,6 +110,44 @@ describe('Bulk update', () => {
           },
         },
       },
+    ]);
+  });
+
+  it('un-flattens dotted field names when creatiing new docs', async () => {
+    const updates = [
+      {
+        type: 'add-doc' as const,
+        payload: {
+          id: `${ROW_PLACEHOLDER_PREFIX}xyz`,
+          value: { 'parent.child': 'test' },
+        },
+      },
+    ];
+
+    await bulkUpdate(INDEX_NAME, updates, http);
+
+    const [, options] = (http.post as jest.Mock).mock.calls[0];
+    const { operations } = JSON.parse(options.body);
+
+    expect(operations).toEqual([{ index: {} }, { parent: { child: 'test' } }]);
+  });
+
+  it('un-flattens correctly when keys are numeric', async () => {
+    const updates = [
+      {
+        type: 'add-doc' as const,
+        payload: { id: 'sensor-a', value: { 'measurements.0': 3.14 } },
+      },
+    ];
+
+    await bulkUpdate(INDEX_NAME, updates, http);
+
+    const [, options] = (http.post as jest.Mock).mock.calls[0];
+    const { operations } = JSON.parse(options.body);
+
+    expect(operations).toEqual([
+      { update: { _id: 'sensor-a' } },
+      { doc: { measurements: { '0': 3.14 } } },
     ]);
   });
 

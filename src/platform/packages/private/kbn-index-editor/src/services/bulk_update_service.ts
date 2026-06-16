@@ -10,7 +10,6 @@
 import type { BulkRequest, BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import { LOOKUP_INDEX_UPDATE_ROUTE } from '@kbn/esql-types';
 import { groupBy, chunk } from 'lodash';
-import { set } from '@kbn/safer-lodash-set';
 import type { HttpStart } from '@kbn/core/public';
 import { ROW_PLACEHOLDER_PREFIX } from '../constants';
 import type { AddDocAction, DeleteDocAction } from '../types';
@@ -122,8 +121,25 @@ export async function bulkUpdate(
  * otherwise they can create a multi-value field.
  */
 function unflattenDoc(doc: Record<string, unknown>): Record<string, unknown> {
-  return Object.entries(doc).reduce((acc, [key, value]) => {
-    set(acc, key, value);
-    return acc;
-  }, {});
+  const result: Record<string, unknown> = {};
+
+  for (const [key, value] of Object.entries(doc)) {
+    const segments = key.split('.');
+    let current = result;
+
+    segments.forEach((segment, index) => {
+      if (index === segments.length - 1) {
+        current[segment] = value;
+        return;
+      }
+
+      const next = current[segment];
+      if (typeof next !== 'object' || next === null || Array.isArray(next)) {
+        current[segment] = {};
+      }
+      current = current[segment] as Record<string, unknown>;
+    });
+  }
+
+  return result;
 }
