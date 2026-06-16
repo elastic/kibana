@@ -167,8 +167,8 @@ Each evidence item in \`evidence[]\` receives exactly one weight:
 smoking_gun — Decisive, highly discriminating; coincidence implausible. The item alone would materially determine the relationship.
 supporting — Corroborating; materially supports but is not alone decisive. Combines with other items to build confidence.
 non_discriminatory — Present in both the new case and the candidate but generic; does NOT narrow the candidate set (e.g. "both target Windows", commodity malware, broadly used techniques).
-counter — Argues against the proposed relationship; introduces doubt.
-decisive_counter — Decisively refutes or rules out the relationship.
+counter — Argues against the proposed relationship; introduces doubt. Requires POSITIVE contradictory evidence (e.g. the same infrastructure role attributed to a different, confirmed actor; conflicting malware families in the same functional role). The absence of overlap, a missing indicator, or "X was not found in the candidate" is a GAP — never a counter or decisive_counter.
+decisive_counter — Decisively refutes or rules out the relationship. Same positive-evidence requirement as counter, at a higher threshold.
 
 Each item also names the Diamond Model vertex it belongs to.
 
@@ -194,8 +194,8 @@ BEHAVIORAL RULES
 8. Distinguish what the new case shows from what candidate reports claim.
 8a. Extract and weight author-assessed confidence from candidate reports before reasoning about the relationship.
 9. Resolve vendor tracking labels before reasoning. Elastic REF#### = intrusion sets. Mandiant UNC#### = uncategorized clusters. Microsoft weather names = actor groups. CrowdStrike animals = actor designations.
-10. Format technical indicators. Wrap IOCs, file paths, commands, domains, package versions, and hashes in backtick code spans in all text fields (bluf, evidence[].text, reasoning, gaps).
-11. Evidence per rated vertex. Every vertex you rate \`partial\` or \`high\` in vertex_signal MUST have at least one evidence item whose \`vertex\` matches it. If you cannot cite evidence for a vertex, rate it \`none\`.
+10. Format technical indicators. Wrap IOCs, file paths, commands, domains, package versions, and hashes in backtick code spans in all text fields — including both the lead \`bluf\` and the case-level \`synthesis.bluf\`.
+11. Evidence per rated vertex. Every vertex you rate \`partial\` or \`high\` in vertex_signal MUST have at least one evidence item whose \`vertex\` matches it. If you cannot cite evidence for a vertex, rate it \`none\`. (e.g. if you rate infrastructure: partial, there must be an evidence[] item with vertex: infrastructure.)
 
 CANDIDATE ACCOUNTING
 
@@ -568,12 +568,18 @@ export const synthesizeCorrelations = async ({
   );
 
   // 2. Assign short labels (c01, c02…) to picks.
-  //    Labels avoid UUID echo errors and enforce the GUARDRAIL (no report IDs
-  //    that could carry rank-order information to the model).
-  const labelWidth = String(picks.length).length;
+  //    Shuffle before labeling so neither the cNN number nor prompt position
+  //    correlates with triage rank — the judge must not see the triage ranking.
+  const shuffledPicks = [...picks];
+  for (let i = shuffledPicks.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffledPicks[i], shuffledPicks[j]] = [shuffledPicks[j], shuffledPicks[i]];
+  }
+
+  const labelWidth = String(shuffledPicks.length).length;
   const labelToCollapsed = new Map<string, CollapsedCandidate>();
 
-  const labeledPicks = picks.map((pick, i) => {
+  const labeledPicks = shuffledPicks.map((pick, i) => {
     const label = `c${String(i + 1).padStart(labelWidth, '0')}`;
     const cc = collapsedByReportId.get(pick.candidate_id);
     if (cc) labelToCollapsed.set(label, cc);
