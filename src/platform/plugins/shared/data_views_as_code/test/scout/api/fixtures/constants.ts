@@ -7,5 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const SAMPLE_PANEL_ACTION = 'samplePanelAction';
-export const SAMPLE_PANEL_LINK = 'samplePanelLink';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
+
+export const COMMON_HEADERS = {
+  'kbn-xsrf': 'some-xsrf-token',
+  [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+  [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+};
+
+export const BASE_PATH = '/api/data_views';
+
+export const ID_OVER_MAX_LENGTH = 'x'.repeat(1759);
