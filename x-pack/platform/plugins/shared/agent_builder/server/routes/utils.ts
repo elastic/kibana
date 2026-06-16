@@ -38,7 +38,7 @@ export const getConnectorSubActions = (actionTypeId: string): ConnectorSubAction
   if (!spec) return [];
   return Object.entries(spec.actions)
     .filter(([name]) => isToolAction(spec, name))
-    .map(([name, action]) => ({ name, description: action.description ?? '' }));
+    .map(([name, action]) => ({ name, description: action.description }));
 };
 
 export const toConnectorItem = (

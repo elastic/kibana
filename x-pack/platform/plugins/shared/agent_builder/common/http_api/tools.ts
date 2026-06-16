@@ -183,7 +183,7 @@ export interface BulkCreateMcpToolsResponse {
 
 export interface ConnectorSubAction {
   name: string;
-  description: string;
+  description?: string;
 }
 
 export interface ConnectorItem {

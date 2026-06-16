@@ -43,10 +43,11 @@ const SubActionsSection: React.FC<{ connector: ConnectorItem }> = ({ connector }
   const { euiTheme } = useEuiTheme();
   const { subActions } = connector;
 
+  // Not all agentBuilder-compatible connectors have a kbn-connector-spec (e.g. Tines, ServiceNow,
+  // Swimlane register AgentBuilderConnectorFeatureId directly in stack_connectors without a spec).
+  // For those, subActions is [] — render nothing rather than crash.
   if (subActions.length === 0) {
-    throw new Error(
-      `Connector ${connector.actionTypeId} has no sub-actions — connectors must have at least one isTool action to appear here`
-    );
+    return null;
   }
 
   return (
@@ -111,6 +112,9 @@ const ConnectionSection: React.FC<{ connector: ConnectorItem }> = ({ connector }
   let statusColor: 'success' | 'warning' | 'danger';
   let statusText: string;
 
+  // isMissingSecrets reflects missing system-level connector secrets (e.g. service account
+  // credentials), which is orthogonal to per-user OAuth status. We surface this first because
+  // a connector with missing system secrets is broken regardless of individual OAuth state.
   if (connector.isMissingSecrets) {
     statusColor = 'danger';
     statusText = labels.agentConnectors.missingSecretsStatus;
@@ -127,9 +131,6 @@ const ConnectionSection: React.FC<{ connector: ConnectorItem }> = ({ connector }
     statusText = labels.agentConnectors.sharedCredentialsStatus;
   }
 
-  const accountEmail =
-    typeof connector.config?.userEmail === 'string' ? connector.config.userEmail : undefined;
-
   return (
     <div>
       <EuiTitle size="xxs">
@@ -137,11 +138,6 @@ const ConnectionSection: React.FC<{ connector: ConnectorItem }> = ({ connector }
       </EuiTitle>
       <EuiSpacer size="s" />
       <EuiHealth color={statusColor}>{statusText}</EuiHealth>
-      {accountEmail && (
-        <EuiText size="xs" color="subdued">
-          {accountEmail}
-        </EuiText>
-      )}
       {isOAuth && (
         <>
           <EuiSpacer size="s" />
