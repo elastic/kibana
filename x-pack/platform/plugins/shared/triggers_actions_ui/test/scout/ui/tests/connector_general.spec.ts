@@ -67,10 +67,10 @@ test.describe('General connector functionality', { tag: tags.stateful.classic },
     // the action-type list/capabilities resolve, silently losing the selection so
     // the back button never appears. Waiting for a sibling card proves the grid is
     // painted; then confirm the selection registered before navigating back.
-    await page.testSubj.locator('.slack-card').waitFor({ state: 'visible', timeout: 30_000 });
+    await page.testSubj.locator('.slack-card').waitFor({ state: 'visible' });
     await page.testSubj.click('.index-card');
     const backBtn = page.testSubj.locator('create-connector-flyout-back-btn');
-    await backBtn.waitFor({ state: 'visible', timeout: 30_000 });
+    await backBtn.waitFor({ state: 'visible' });
     await backBtn.click();
     await page.testSubj.click('.slack-card');
 
@@ -112,10 +112,10 @@ test.describe('General connector functionality', { tag: tags.stateful.classic },
 
     await page.testSubj.click('createConnectorButton');
 
-    await page.testSubj.locator('.slack-card').waitFor({ state: 'visible', timeout: 30_000 });
+    await page.testSubj.locator('.slack-card').waitFor({ state: 'visible' });
     await page.testSubj.click('.index-card');
     const backBtn = page.testSubj.locator('create-connector-flyout-back-btn');
-    await backBtn.waitFor({ state: 'visible', timeout: 30_000 });
+    await backBtn.waitFor({ state: 'visible' });
     await backBtn.click();
     await page.testSubj.click('.slack-card');
 
@@ -143,10 +143,10 @@ test.describe('General connector functionality', { tag: tags.stateful.classic },
 
     await page.testSubj.click('createConnectorButton');
 
-    await page.testSubj.locator('.slack-card').waitFor({ state: 'visible', timeout: 30_000 });
+    await page.testSubj.locator('.slack-card').waitFor({ state: 'visible' });
     await page.testSubj.click('.index-card');
     const backBtn2 = page.testSubj.locator('create-connector-flyout-back-btn');
-    await backBtn2.waitFor({ state: 'visible', timeout: 30_000 });
+    await backBtn2.waitFor({ state: 'visible' });
     await backBtn2.click();
     await page.testSubj.click('.slack-card');
 

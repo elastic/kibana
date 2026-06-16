@@ -90,6 +90,11 @@ test.describe('Slack connector', { tag: tags.stateful.classic }, () => {
     await page.goto(kbnUrl.get(CONNECTORS_APP_PATH));
 
     await page.testSubj.click('createConnectorButton');
+    await page.testSubj.locator('.slack-card').waitFor({ state: 'visible' });
+    await page.testSubj.click('.index-card');
+    const backBtn = page.testSubj.locator('create-connector-flyout-back-btn');
+    await backBtn.waitFor({ state: 'visible' });
+    await backBtn.click();
     await page.testSubj.click('.slack-card');
 
     // The connector form renders only after the action-type model resolves and
