@@ -38,7 +38,11 @@ import { RuleExecutionStatusErrorReasons } from '../types';
 import type { Result } from '../lib/result_type';
 import { asErr, asOk, isOk } from '../lib/result_type';
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
-import { partiallyUpdateRuleWithEs, RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
+import {
+  atomicRemoveSnoozedInstancesWithEs,
+  partiallyUpdateRuleWithEs,
+  RULE_SAVED_OBJECT_TYPE,
+} from '../saved_objects';
 import { AlertAuditAction, alertAuditSystemEvent } from '../lib/alert_audit_events';
 import type {
   AlertInstanceContext,
@@ -214,8 +218,7 @@ export class TaskRunner<
   }
 
   /**
-   * Persists the post-run rule attributes (including any pruned per-alert
-   * snoozes) to Elasticsearch.
+   * Persists the post-run rule attributes to Elasticsearch.
    */
   private async updateRuleSavedObjectPostRun(
     ruleId: string,
@@ -224,9 +227,10 @@ export class TaskRunner<
       monitoring?: RawRuleMonitoring;
       nextRun?: string | null;
       lastRun?: RawRuleLastRun | null;
-      snoozedInstances?: RawRuleSnoozedInstance[];
+      snoozedInstanceIdsToRemove?: string[];
     }
   ): Promise<boolean> {
+    const { snoozedInstanceIdsToRemove, ...docAttributes } = attributes;
     const client = this.context.elasticsearch.client.asInternalUser;
     try {
       // Future engineer -> Here we are just checking if we need to wait for
@@ -241,12 +245,21 @@ export class TaskRunner<
       await partiallyUpdateRuleWithEs(
         client,
         ruleId,
-        { ...attributes, running: false },
+        { ...docAttributes, running: false },
         {
           ignore404: true,
           refresh: false,
         }
       );
+      if (snoozedInstanceIdsToRemove?.length) {
+        // Per-alert snooze expiry is applied via an atomic Painless script.
+        // This prevents the race condition where a user snooze added between SO load
+        // and post-run write would be silently overwritten.
+        await atomicRemoveSnoozedInstancesWithEs(client, ruleId, snoozedInstanceIdsToRemove, {
+          ignore404: true,
+          refresh: false,
+        });
+      }
       return true;
     } catch (err) {
       this.logger.error(`error updating rule for ${this.ruleType.id}:${ruleId} ${err.message}`);
@@ -545,9 +558,12 @@ export class TaskRunner<
         alertRecoveredInstances: recoveredAlertsToReturn,
         summaryActions: actionSchedulerResult.throttledSummaryActions,
       },
-      prunedSnoozedInstances:
-        updatedActiveInstances.length < rule.snoozedInstances.length
-          ? updatedActiveInstances
+      expiredSnoozedInstanceIds:
+        expiredInstances.length > 0 || conditionExpiredInstances.length > 0
+          ? [
+              ...expiredInstances.map((i) => i.instanceId),
+              ...conditionExpiredInstances.map((i) => i.instanceId),
+            ]
           : undefined,
       ...(expiredInstances.length > 0 || conditionExpiredInstances.length > 0
         ? {
@@ -768,8 +784,8 @@ export class TaskRunner<
         });
       }
 
-      const prunedSnoozedInstances = isOk(runRuleResult)
-        ? runRuleResult.value.prunedSnoozedInstances
+      const expiredSnoozedInstanceIds = isOk(runRuleResult)
+        ? runRuleResult.value.expiredSnoozedInstanceIds
         : undefined;
       const autoUnsnoozeAudit = isOk(runRuleResult)
         ? runRuleResult.value.autoUnsnoozeAudit
@@ -793,8 +809,8 @@ export class TaskRunner<
           nextRun,
           lastRun: lastRunToRaw(lastRun),
           monitoring: this.ruleMonitoring.getMonitoring() as RawRuleMonitoring,
-          ...(prunedSnoozedInstances !== undefined
-            ? { snoozedInstances: prunedSnoozedInstances }
+          ...(expiredSnoozedInstanceIds !== undefined
+            ? { snoozedInstanceIdsToRemove: expiredSnoozedInstanceIds }
             : {}),
         });
 

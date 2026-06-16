@@ -8,7 +8,11 @@
 import type { SavedObjectsClientContract, ISavedObjectsRepository } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { PartiallyUpdateableRuleAttributes } from './partially_update_rule';
-import { partiallyUpdateRule, partiallyUpdateRuleWithEs } from './partially_update_rule';
+import {
+  atomicRemoveSnoozedInstancesWithEs,
+  partiallyUpdateRule,
+  partiallyUpdateRuleWithEs,
+} from './partially_update_rule';
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { RULE_SAVED_OBJECT_TYPE } from '.';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
@@ -196,6 +200,94 @@ describe('partiallyUpdateRuleWithEs', () => {
       },
       refresh: 'wait_for',
     });
+  });
+});
+
+describe('atomicRemoveSnoozedInstancesWithEs', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+    jest.clearAllMocks();
+  });
+
+  test('should call update with a Painless script (not a doc) and retry_on_conflict', async () => {
+    esClient.update.mockResolvedValueOnce(MockEsUpdateResponse(MockRuleId));
+
+    await atomicRemoveSnoozedInstancesWithEs(esClient, MockRuleId, ['alert-1', 'alert-2']);
+
+    expect(esClient.update).toHaveBeenCalledTimes(1);
+    expect(esClient.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: `alert:${MockRuleId}`,
+        index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+        retry_on_conflict: 3,
+        script: expect.objectContaining({
+          lang: 'painless',
+          params: { expiredInstanceIds: ['alert-1', 'alert-2'] },
+        }),
+      })
+    );
+    // Must not send a `doc` field — otherwise it would replace the whole array
+    expect(esClient.update).not.toHaveBeenCalledWith(
+      expect.objectContaining({ doc: expect.anything() }),
+      expect.anything()
+    );
+  });
+
+  test('should pass ignore: [404] when ignore404 option is set', async () => {
+    esClient.update.mockResolvedValueOnce(MockEsUpdateResponse(MockRuleId));
+
+    await atomicRemoveSnoozedInstancesWithEs(esClient, MockRuleId, ['alert-1'], {
+      ignore404: true,
+    });
+
+    expect(esClient.update).toHaveBeenCalledWith(
+      expect.objectContaining({ retry_on_conflict: 3 }),
+      { ignore: [404] }
+    );
+  });
+
+  test('should include the refresh option when set', async () => {
+    esClient.update.mockResolvedValueOnce(MockEsUpdateResponse(MockRuleId));
+
+    await atomicRemoveSnoozedInstancesWithEs(esClient, MockRuleId, ['alert-1'], {
+      refresh: 'wait_for',
+    });
+
+    expect(esClient.update).toHaveBeenCalledWith(
+      expect.objectContaining({ refresh: 'wait_for' })
+    );
+  });
+
+  test('should not include refresh when the option is not set', async () => {
+    esClient.update.mockResolvedValueOnce(MockEsUpdateResponse(MockRuleId));
+
+    await atomicRemoveSnoozedInstancesWithEs(esClient, MockRuleId, ['alert-1']);
+
+    const [callArgs] = esClient.update.mock.calls[0];
+    expect(callArgs).not.toHaveProperty('refresh');
+  });
+
+  test('should work with an empty expiredInstanceIds array (idempotent noop)', async () => {
+    esClient.update.mockResolvedValueOnce(MockEsUpdateResponse(MockRuleId));
+
+    await atomicRemoveSnoozedInstancesWithEs(esClient, MockRuleId, []);
+
+    expect(esClient.update).toHaveBeenCalledTimes(1);
+    expect(esClient.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        script: expect.objectContaining({
+          params: { expiredInstanceIds: [] },
+        }),
+      })
+    );
+  });
+
+  test('should propagate ES errors', async () => {
+    esClient.update.mockRejectedValueOnce(new Error('es error'));
+
+    await expect(
+      atomicRemoveSnoozedInstancesWithEs(esClient, MockRuleId, ['alert-1'])
+    ).rejects.toThrowError('es error');
   });
 });
 
