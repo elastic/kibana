@@ -16,15 +16,16 @@ import {
   agentBuilderDefaultAgentId,
   createAgentNotFoundError,
   createBadRequestError,
+  getDefaultAgentAccessControl,
   isAgentNotFoundError,
-  type AgentAcl,
+  type AgentAccessControl,
   type CurrentUser,
   type ToolSelection,
 } from '@kbn/agent-builder-common';
 import { SYSTEM_USER_ID } from '@kbn/agent-builder-common/constants';
 import { isAdminFromRequest, getUserFromRequest } from '../../../utils';
 import type {
-  AgentAclUpdateRequest,
+  AgentAccessControlUpdateRequest,
   AgentCreateRequest,
   AgentDeleteRequest,
   AgentListOptions,
@@ -41,7 +42,7 @@ import type { AgentAccess } from '../../agent_source';
 import type { AgentProfileStorage } from './storage';
 import { createStorage } from './storage';
 import {
-  aclUpdateToEs,
+  accessControlUpdateToEs,
   createRequestToEs,
   type Document,
   fromEs,
@@ -54,21 +55,21 @@ import { runPluginRefCleanup } from '../plugin_reference_cleanup';
 import {
   buildReadAccessFilter,
   hasDeleteAccess,
-  hasManageAclAccess,
+  hasManageAccessControlAccess,
   hasReadAccess,
   hasUseAccess,
   hasWriteAccess,
-  redactAclForCaller,
-  validateVisibilityUpdateAccess,
+  redactAccessControlForCaller,
+  validateAccessControlUpdateAccess,
 } from './utils/access_control';
 import { hasRequiredDocumentFields } from './utils/helper';
-import { validateAclUpdate } from './utils/acl';
+import { validateAccessControlUpdate } from './utils/acl';
 
-export interface GetAgentAclResult {
+export interface GetAgentAccessControlResult {
   /** True when the caller is allowed to read the principal list. */
   canManage: boolean;
-  /** Always present; entries[] may be empty for legacy or default agents. */
-  acl: AgentAcl;
+  /** Always present; entries[] may be empty for default agents. */
+  accessControl: AgentAccessControl;
 }
 
 export interface AgentClient {
@@ -81,8 +82,11 @@ export interface AgentClient {
   update(agentId: string, profile: AgentUpdateRequest): Promise<PersistedAgentDefinition>;
   list(options?: AgentListOptions): Promise<PersistedAgentDefinition[]>;
   delete(options: AgentDeleteRequest): Promise<boolean>;
-  getAcl(agentId: string): Promise<GetAgentAclResult>;
-  updateAcl(agentId: string, update: AgentAclUpdateRequest): Promise<AgentAcl>;
+  getAccessControl(agentId: string): Promise<GetAgentAccessControlResult>;
+  updateAccessControl(
+    agentId: string,
+    update: AgentAccessControlUpdateRequest
+  ): Promise<AgentAccessControl>;
   getAgentsUsingTools(params: { toolIds: string[] }): Promise<AgentsUsingToolsResult>;
   removeToolRefsFromAgents(params: { toolIds: string[] }): Promise<AgentsUsingToolsResult>;
   getAgentsUsingPlugins(params: { pluginIds: string[] }): Promise<AgentsUsingToolsResult>;
@@ -228,7 +232,7 @@ class AgentClientImpl implements AgentClient {
   async get(agentId: string): Promise<PersistedAgentDefinition> {
     const document = await this.getDocumentWithAccess({ agentId, access: 'read' });
 
-    return redactAclForCaller({
+    return redactAccessControlForCaller({
       definition: fromEs(document),
       source: document._source,
       user: this.user,
@@ -238,7 +242,7 @@ class AgentClientImpl implements AgentClient {
 
   async getWithAccess(agentId: string, access: AgentAccess): Promise<PersistedAgentDefinition> {
     const document = await this.getDocumentWithAccess({ agentId, access });
-    return redactAclForCaller({
+    return redactAccessControlForCaller({
       definition: fromEs(document),
       source: document._source,
       user: this.user,
@@ -276,7 +280,7 @@ class AgentClientImpl implements AgentClient {
 
     return response.hits.hits.map((hit) => {
       const document = hit as Document;
-      return redactAclForCaller({
+      return redactAccessControlForCaller({
         definition: fromEs(document),
         source: document._source!,
         user: this.user,
@@ -349,7 +353,7 @@ class AgentClientImpl implements AgentClient {
     const source = document._source;
 
     if (
-      !validateVisibilityUpdateAccess({
+      !validateAccessControlUpdateAccess({
         source,
         update: profileUpdate,
         user: this.user,
@@ -387,39 +391,45 @@ class AgentClientImpl implements AgentClient {
     return deleteResponse.result === 'deleted';
   }
 
-  async getAcl(agentId: string): Promise<GetAgentAclResult> {
+  async getAccessControl(agentId: string): Promise<GetAgentAccessControlResult> {
     // Caller must at least have read access on the agent.
     const document = await this.getDocumentWithAccess({ agentId, access: 'read' });
     const source = document._source;
-    const canManage = hasManageAclAccess({
+    const canManage = hasManageAccessControlAccess({
       source,
       user: this.user,
       isAdmin: this.isAdmin,
     });
-    const acl: AgentAcl = source.acl ?? { entries: [] };
-    return { canManage, acl };
+    const accessControl = source.access_control ?? getDefaultAgentAccessControl();
+    return { canManage, accessControl };
   }
 
-  async updateAcl(agentId: string, update: AgentAclUpdateRequest): Promise<AgentAcl> {
+  async updateAccessControl(
+    agentId: string,
+    update: AgentAccessControlUpdateRequest
+  ): Promise<AgentAccessControl> {
     if (agentId === agentBuilderDefaultAgentId) {
       throw createBadRequestError(
         `The default agent (${agentBuilderDefaultAgentId}) does not support custom access controls.`
       );
     }
 
-    const document = await this.getDocumentWithAccess({ agentId, access: 'manageAcl' });
+    const document = await this.getDocumentWithAccess({ agentId, access: 'manageAccessControl' });
     const source = document._source;
 
-    const validationError = validateAclUpdate(update.entries);
+    const validationError = validateAccessControlUpdate(update.entries);
     if (validationError) {
       throw createBadRequestError(validationError);
     }
 
-    const nextAcl: AgentAcl = { entries: update.entries };
+    const nextAccessControl: AgentAccessControl = {
+      ...(source.access_control ?? getDefaultAgentAccessControl()),
+      entries: update.entries,
+    };
 
-    const next = aclUpdateToEs({
+    const next = accessControlUpdateToEs({
       currentProps: source,
-      acl: nextAcl,
+      accessControl: nextAccessControl,
       updateDate: new Date(),
     });
 
@@ -428,7 +438,7 @@ class AgentClientImpl implements AgentClient {
       document: next,
     });
 
-    return nextAcl;
+    return nextAccessControl;
   }
 
   // Agent tool selection validation helper
@@ -472,8 +482,8 @@ class AgentClientImpl implements AgentClient {
       case 'delete':
         allowed = hasDeleteAccess({ source, user: this.user, isAdmin: this.isAdmin });
         break;
-      case 'manageAcl':
-        allowed = hasManageAclAccess({
+      case 'manageAccessControl':
+        allowed = hasManageAccessControlAccess({
           source,
           user: this.user,
           isAdmin: this.isAdmin,

@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { agentBuilderDefaultAgentId, AgentVisibility } from '@kbn/agent-builder-common';
+import { agentBuilderDefaultAgentId, AgentAccessControlScope } from '@kbn/agent-builder-common';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest } from '../fixtures';
 import { API_AGENT_BUILDER } from '../fixtures/constants';
 
 apiTest.describe(
-  'Agent Builder — agents visibility API',
+  'Agent Builder — agents access-control scope API',
   { tag: [...tags.stateful.classic] },
   () => {
     const createdAgentIds: string[] = [];
 
     const mockAgent = {
-      id: 'test-agent-visibility',
+      id: 'test-agent-access-control scope',
       name: 'Test Agent',
       description: 'A test agent for API testing',
       configuration: {
@@ -33,19 +33,26 @@ apiTest.describe(
       }
     });
 
-    apiTest('POST allows explicit private visibility', async ({ asAdmin }) => {
-      const agentId = `visibility-private-agent-${Date.now()}`;
+    apiTest('POST allows explicit private access-control scope', async ({ asAdmin }) => {
+      const agentId = `access-control-private-agent-${Date.now()}`;
       const response = await asAdmin.post(`${API_AGENT_BUILDER}/agents`, {
-        body: { ...mockAgent, id: agentId, visibility: AgentVisibility.Private },
+        body: {
+          ...mockAgent,
+          id: agentId,
+          access_control: { scope: AgentAccessControlScope.Private, entries: [] },
+        },
         responseType: 'json',
       });
       expect(response).toHaveStatusCode(200);
-      expect(response.body).toMatchObject({ id: agentId, visibility: AgentVisibility.Private });
+      expect(response.body).toMatchObject({
+        id: agentId,
+        access_control: { scope: AgentAccessControlScope.Private, entries: [] },
+      });
       createdAgentIds.push(agentId);
     });
 
-    apiTest('PUT updates visibility explicitly', async ({ asAdmin }) => {
-      const agentId = `visibility-update-agent-${Date.now()}`;
+    apiTest('PUT updates access-control scope explicitly', async ({ asAdmin }) => {
+      const agentId = `access-control-update-agent-${Date.now()}`;
       await asAdmin.post(`${API_AGENT_BUILDER}/agents`, {
         body: { ...mockAgent, id: agentId },
         responseType: 'json',
@@ -55,31 +62,37 @@ apiTest.describe(
       const response = await asAdmin.put(
         `${API_AGENT_BUILDER}/agents/${encodeURIComponent(agentId)}`,
         {
-          body: { visibility: AgentVisibility.Shared },
+          body: { access_control: { scope: AgentAccessControlScope.Shared, entries: [] } },
           responseType: 'json',
         }
       );
       expect(response).toHaveStatusCode(200);
-      expect(response.body).toMatchObject({ id: agentId, visibility: AgentVisibility.Shared });
+      expect(response.body).toMatchObject({
+        id: agentId,
+        access_control: { scope: AgentAccessControlScope.Shared, entries: [] },
+      });
     });
 
-    apiTest('PUT rejects visibility change for default agent (404)', async ({ asAdmin }) => {
-      const getRes = await asAdmin.get(
-        `${API_AGENT_BUILDER}/agents/${encodeURIComponent(agentBuilderDefaultAgentId)}`,
-        { responseType: 'json' }
-      );
-      expect(getRes).toHaveStatusCode(200);
+    apiTest(
+      'PUT rejects access-control scope change for default agent (404)',
+      async ({ asAdmin }) => {
+        const getRes = await asAdmin.get(
+          `${API_AGENT_BUILDER}/agents/${encodeURIComponent(agentBuilderDefaultAgentId)}`,
+          { responseType: 'json' }
+        );
+        expect(getRes).toHaveStatusCode(200);
 
-      const response = await asAdmin.put(
-        `${API_AGENT_BUILDER}/agents/${encodeURIComponent(agentBuilderDefaultAgentId)}`,
-        {
-          body: { visibility: AgentVisibility.Private },
-          responseType: 'json',
-        }
-      );
-      expect(response).toHaveStatusCode(404);
-      expect(response.body.message).toBeDefined();
-      expect(String(response.body.message)).toContain('not found');
-    });
+        const response = await asAdmin.put(
+          `${API_AGENT_BUILDER}/agents/${encodeURIComponent(agentBuilderDefaultAgentId)}`,
+          {
+            body: { access_control: { scope: AgentAccessControlScope.Private, entries: [] } },
+            responseType: 'json',
+          }
+        );
+        expect(response).toHaveStatusCode(404);
+        expect(response.body.message).toBeDefined();
+        expect(String(response.body.message)).toContain('not found');
+      }
+    );
   }
 );

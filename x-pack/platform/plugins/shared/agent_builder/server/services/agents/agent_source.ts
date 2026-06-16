@@ -7,24 +7,24 @@
 
 import type { MaybePromise } from '@kbn/utility-types';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { AgentAcl } from '@kbn/agent-builder-common';
+import type { AgentAccessControl } from '@kbn/agent-builder-common';
 import type {
-  AgentAclUpdateRequest,
+  AgentAccessControlUpdateRequest,
   AgentCreateRequest,
   AgentListOptions,
   AgentUpdateRequest,
 } from '../../../common/agents';
 import type { InternalAgentDefinition } from './agent_registry';
 
-export type AgentAccess = 'read' | 'use' | 'write' | 'delete' | 'manageAcl';
+export type AgentAccess = 'read' | 'use' | 'write' | 'delete' | 'manageAccessControl';
 
 export interface GetAgentOptions {
   access?: AgentAccess;
 }
 
-export interface AgentAclResult {
-  can_manage: boolean;
-  acl: AgentAcl;
+export interface AgentAccessControlResult {
+  canManage: boolean;
+  accessControl: AgentAccessControl;
 }
 
 export interface ReadonlyAgentProvider {
@@ -40,8 +40,11 @@ export interface WritableAgentProvider extends Omit<ReadonlyAgentProvider, 'read
   create(createRequest: AgentCreateRequest): MaybePromise<InternalAgentDefinition>;
   update(agentId: string, update: AgentUpdateRequest): MaybePromise<InternalAgentDefinition>;
   delete(agentId: string): MaybePromise<boolean>;
-  getAcl(agentId: string): MaybePromise<AgentAclResult>;
-  updateAcl(agentId: string, update: AgentAclUpdateRequest): MaybePromise<AgentAcl>;
+  getAccessControl(agentId: string): MaybePromise<AgentAccessControlResult>;
+  updateAccessControl(
+    agentId: string,
+    update: AgentAccessControlUpdateRequest
+  ): MaybePromise<AgentAccessControl>;
 }
 
 export type AgentProvider = ReadonlyAgentProvider | WritableAgentProvider;

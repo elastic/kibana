@@ -24,10 +24,10 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import {
-  AgentVisibility,
+  AgentAccessControlScope,
   AGENT_BUILDER_UI_EBT,
-  VISIBILITY_BADGE_COLOR,
-  VISIBILITY_ICON,
+  ACCESS_CONTROL_SCOPE_BADGE_COLOR,
+  ACCESS_CONTROL_SCOPE_ICON,
   type AgentDefinition,
 } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
@@ -73,7 +73,10 @@ export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
       avatar_symbol: agent.avatar_symbol ?? '',
       avatar_color: agent.avatar_color ?? '',
       labels: agent.labels ?? [],
-      visibility: agent.visibility ?? AgentVisibility.Private,
+      accessControl: agent.accessControl ?? {
+        scope: AgentAccessControlScope.Private,
+        entries: [],
+      },
       configuration: {
         enable_elastic_capabilities: agent.configuration?.enable_elastic_capabilities ?? false,
         workflow_ids: agent.configuration?.workflow_ids ?? [],
@@ -93,7 +96,7 @@ export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
         avatar_symbol: data.avatar_symbol || undefined,
         avatar_color: data.avatar_color || undefined,
         labels: data.labels,
-        visibility: data.visibility,
+        accessControl: data.accessControl,
         configuration: {
           enable_elastic_capabilities: data.configuration.enable_elastic_capabilities,
           workflow_ids: data.configuration.workflow_ids,
@@ -111,7 +114,7 @@ export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
     },
   });
 
-  const isShared = (agent.visibility as AgentVisibility) === AgentVisibility.Shared;
+  const isShared = agent.accessControl?.scope === AgentAccessControlScope.Shared;
 
   const contentPadding = css`
     padding: ${euiTheme.size.s};
@@ -142,8 +145,8 @@ export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
                   <span>
                     {flyoutLabels.sharedWarningPrefix}
                     <EuiBadge
-                      iconType={VISIBILITY_ICON[AgentVisibility.Shared]}
-                      color={VISIBILITY_BADGE_COLOR[AgentVisibility.Shared]}
+                      iconType={ACCESS_CONTROL_SCOPE_ICON[AgentAccessControlScope.Shared]}
+                      color={ACCESS_CONTROL_SCOPE_BADGE_COLOR[AgentAccessControlScope.Shared]}
                     >
                       {flyoutLabels.sharedWarningBadge}
                     </EuiBadge>

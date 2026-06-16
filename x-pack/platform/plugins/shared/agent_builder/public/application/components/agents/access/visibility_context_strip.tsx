@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiCallOut } from '@elastic/eui';
-import { AgentVisibility, type AgentDefinition } from '@kbn/agent-builder-common';
+import { AgentAccessControlScope, type AgentDefinition } from '@kbn/agent-builder-common';
 import { VISIBILITY_LABELS } from '../../../utils/visibility_i18n';
 import { visibilityContextMessage } from './access_i18n';
 
@@ -16,19 +16,19 @@ interface VisibilityContextStripProps {
 }
 
 export const VisibilityContextStrip: React.FC<VisibilityContextStripProps> = ({ agent }) => {
-  const visibility = agent.visibility ?? AgentVisibility.Public;
+  const visibility = agent.accessControl?.scope ?? AgentAccessControlScope.Public;
   const label = VISIBILITY_LABELS[visibility];
   const messages = visibilityContextMessage(label);
 
   let title: string;
   switch (visibility) {
-    case AgentVisibility.Private:
+    case AgentAccessControlScope.Private:
       title = messages.privateMessage;
       break;
-    case AgentVisibility.Shared:
+    case AgentAccessControlScope.Shared:
       title = messages.sharedMessage;
       break;
-    case AgentVisibility.Public:
+    case AgentAccessControlScope.Public:
     default:
       title = messages.publicMessage;
       break;

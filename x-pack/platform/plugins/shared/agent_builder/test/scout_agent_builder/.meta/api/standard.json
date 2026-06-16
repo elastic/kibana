@@ -3,7 +3,7 @@
   "tests": [
     {
       "id": "23fa02f46a56f43-4512d1a251a937e",
-      "title": "Agent Builder — agents ACL API non-owner gets 404 on a Private agent until granted",
+      "title": "Agent Builder — agents access-control API non-owner gets 404 on a Private agent until granted",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -17,7 +17,7 @@
     },
     {
       "id": "23fa02f46a56f43-b539fc98b2a96fa",
-      "title": "Agent Builder — agents ACL API GET /agents/{id} redacts acl.entries for non-managers",
+      "title": "Agent Builder — agents access-control API GET /agents/{id} redacts acl.entries for non-managers",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -31,7 +31,7 @@
     },
     {
       "id": "23fa02f46a56f43-45fb1940d294f6d",
-      "title": "Agent Builder — agents ACL API GET /agents/{id}/acl returns can_manage and redacts entries for non-managers",
+      "title": "Agent Builder — agents access-control API GET /agents/{id}/access_control returns can_manage_access_control and redacts entries for non-managers",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -45,7 +45,7 @@
     },
     {
       "id": "23fa02f46a56f43-b20de015f475d9a",
-      "title": "Agent Builder — agents ACL API PUT /agents/{id}/acl gates on write access (User → 404, Editor → 200)",
+      "title": "Agent Builder — agents access-control API PUT /agents/{id}/access_control gates on write access (User → 404, Editor → 200)",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -59,7 +59,7 @@
     },
     {
       "id": "23fa02f46a56f43-d9a1b949866e89a",
-      "title": "Agent Builder — agents ACL API PUT /agents/{id}/acl rejects callers without manageAgents (403)",
+      "title": "Agent Builder — agents access-control API PUT /agents/{id}/access_control rejects callers without manageAgents (403)",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -73,7 +73,7 @@
     },
     {
       "id": "23fa02f46a56f43-d2168f01973b14c",
-      "title": "Agent Builder — agents ACL API PUT /acl on the default agent returns 400",
+      "title": "Agent Builder — agents access-control API PUT /access_control on the default agent returns 400",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -87,7 +87,7 @@
     },
     {
       "id": "23fa02f46a56f43-d31f223e0dbf85c",
-      "title": "Agent Builder — agents ACL API cluster admin can read a Private agent they are not in the ACL of",
+      "title": "Agent Builder — agents access-control API cluster admin can read a Private agent they are not in the ACL of",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -101,7 +101,7 @@
     },
     {
       "id": "23fa02f46a56f43-d310e0b65173d25",
-      "title": "Agent Builder — agents ACL API /_suggest_user_profiles requires manageAgents (reader gets 403)",
+      "title": "Agent Builder — agents access-control API /_suggest_user_profiles requires manageAgents (reader gets 403)",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",

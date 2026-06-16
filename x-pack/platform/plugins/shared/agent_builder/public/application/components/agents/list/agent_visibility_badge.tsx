@@ -8,22 +8,25 @@
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
-  AgentVisibility,
-  VISIBILITY_ICON,
-  VISIBILITY_BADGE_COLOR,
+  AgentAccessControlScope,
+  ACCESS_CONTROL_SCOPE_ICON,
+  ACCESS_CONTROL_SCOPE_BADGE_COLOR,
   type AgentDefinition,
 } from '@kbn/agent-builder-common';
 import React from 'react';
 import { VISIBILITY_LABELS, VISIBILITY_TOOLTIPS } from '../../../utils/visibility_i18n';
 import { accessFlyoutCustomBadge, accessFlyoutCustomBadgeWithCount } from '../access/access_i18n';
 
-export interface AgentVisibilityBadgeProps {
+export interface AgentAccessControlScopeBadgeProps {
   agent: AgentDefinition;
 }
 
-const aclEntryCount = (agent: AgentDefinition): number => agent.acl?.entries?.length ?? 0;
+const accessControlEntryCount = (agent: AgentDefinition): number =>
+  agent.accessControl?.entries?.length ?? 0;
 
-export const AgentVisibilityBadge: React.FC<AgentVisibilityBadgeProps> = ({ agent }) => {
+export const AgentAccessControlScopeBadge: React.FC<AgentAccessControlScopeBadgeProps> = ({
+  agent,
+}) => {
   if (agent.readonly) {
     return (
       <EuiToolTip
@@ -44,11 +47,11 @@ export const AgentVisibilityBadge: React.FC<AgentVisibilityBadgeProps> = ({ agen
     );
   }
 
-  const visibility = agent.visibility ?? AgentVisibility.Public;
-  const aclCount = aclEntryCount(agent);
+  const visibility = agent.accessControl?.scope ?? AgentAccessControlScope.Public;
+  const accessControlCount = accessControlEntryCount(agent);
   const tooltip =
-    aclCount > 0
-      ? `${VISIBILITY_TOOLTIPS[visibility]} ${accessFlyoutCustomBadgeWithCount(aclCount)}`
+    accessControlCount > 0
+      ? `${VISIBILITY_TOOLTIPS[visibility]} ${accessFlyoutCustomBadgeWithCount(accessControlCount)}`
       : VISIBILITY_TOOLTIPS[visibility];
 
   return (
@@ -57,15 +60,15 @@ export const AgentVisibilityBadge: React.FC<AgentVisibilityBadgeProps> = ({ agen
         <EuiToolTip content={tooltip}>
           <EuiBadge
             tabIndex={0}
-            iconType={VISIBILITY_ICON[visibility]}
-            color={VISIBILITY_BADGE_COLOR[visibility]}
+            iconType={ACCESS_CONTROL_SCOPE_ICON[visibility]}
+            color={ACCESS_CONTROL_SCOPE_BADGE_COLOR[visibility]}
             data-test-subj={`agentBuilderAgentsListVisibility-${visibility}`}
           >
             {VISIBILITY_LABELS[visibility]}
           </EuiBadge>
         </EuiToolTip>
       </EuiFlexItem>
-      {aclCount > 0 && (
+      {accessControlCount > 0 && (
         <EuiFlexItem grow={false}>
           <EuiToolTip content={accessFlyoutCustomBadge}>
             <EuiBadge
@@ -74,7 +77,7 @@ export const AgentVisibilityBadge: React.FC<AgentVisibilityBadgeProps> = ({ agen
               iconType="users"
               data-test-subj="agentBuilderAgentsListCustomAccess"
             >
-              +{aclCount}
+              +{accessControlCount}
             </EuiBadge>
           </EuiToolTip>
         </EuiFlexItem>

@@ -9,10 +9,9 @@ import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
 import {
   agentBuilderDefaultAgentId,
   AgentType,
-  AgentVisibility,
-  getEmptyAgentAcl,
+  getDefaultAgentAccessControl,
 } from '@kbn/agent-builder-common';
-import type { AgentAcl, UserIdAndName } from '@kbn/agent-builder-common';
+import type { AgentAccessControl, UserIdAndName } from '@kbn/agent-builder-common';
 import type { AgentCreateRequest, AgentUpdateRequest } from '../../../../../common/agents';
 import type { AgentConfigurationProperties, AgentProperties } from './storage';
 import type { PersistedAgentDefinition } from '../types';
@@ -40,8 +39,7 @@ export const fromEs = (document: Document): PersistedAgentDefinition => {
     labels: document._source.labels,
     avatar_color: document._source.avatar_color,
     avatar_symbol: document._source.avatar_symbol,
-    visibility: document._source.visibility ?? AgentVisibility.Public,
-    acl: normalizeAcl(document._source.acl),
+    accessControl: normalizeAccessControl(document._source.access_control),
     created_by:
       document._source.created_by_id || document._source.created_by_name
         ? {
@@ -83,10 +81,9 @@ export const createRequestToEs = ({
     labels: profile.labels,
     avatar_color: profile.avatar_color,
     avatar_symbol: profile.avatar_symbol,
-    visibility: profile.visibility ?? AgentVisibility.Public,
     created_by_id: user.id,
     created_by_name: user.username,
-    acl: getEmptyAgentAcl(),
+    access_control: profile.accessControl ?? getDefaultAgentAccessControl(),
     config: {
       instructions: profile.configuration.instructions,
       tools: profile.configuration.tools,
@@ -113,12 +110,13 @@ export const updateRequestToEs = ({
   updateDate: Date;
 }): AgentProperties => {
   const currentConfig = currentProps.configuration ?? currentProps.config;
-  const { configuration, ...restUpdate } = update;
+  const { configuration, accessControl, ...restUpdate } = update;
 
   const updated: AgentProperties = {
     ...currentProps,
     ...restUpdate,
     id: agentId,
+    access_control: accessControl ?? currentProps.access_control,
     // Explicitly omit configuration to ensure migration
     configuration: undefined,
     config: {
@@ -131,25 +129,28 @@ export const updateRequestToEs = ({
   return updated;
 };
 
-const normalizeAcl = (acl: AgentAcl | undefined): AgentAcl => {
-  if (!acl) return getEmptyAgentAcl();
+const normalizeAccessControl = (
+  accessControl: AgentAccessControl | undefined
+): AgentAccessControl => {
+  if (!accessControl) return getDefaultAgentAccessControl();
   return {
-    entries: acl.entries,
+    scope: accessControl.scope,
+    entries: accessControl.entries,
   };
 };
 
-export const aclUpdateToEs = ({
+export const accessControlUpdateToEs = ({
   currentProps,
-  acl,
+  accessControl,
   updateDate,
 }: {
   currentProps: AgentProperties;
-  acl: AgentAcl;
+  accessControl: AgentAccessControl;
   updateDate: Date;
 }): AgentProperties => {
   return {
     ...currentProps,
-    acl,
+    access_control: accessControl,
     updated_at: updateDate.toISOString(),
   };
 };

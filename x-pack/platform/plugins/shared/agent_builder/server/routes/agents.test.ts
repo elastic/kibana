@@ -7,7 +7,7 @@
 
 import type { IRouter } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { AgentVisibility } from '@kbn/agent-builder-common';
+import { AgentAccessControlScope } from '@kbn/agent-builder-common';
 import { registerAgentRoutes } from './agents';
 import type { RouteDependencies } from './types';
 import { publicApiPath } from '../../common/constants';
@@ -48,9 +48,9 @@ describe('Agent Routes - experimental visibility gate', () => {
     configuration: { tools: [] },
   };
 
-  const updateBodyWithVisibility = {
+  const updateBodyWithAccessControl = {
     name: 'Updated',
-    visibility: AgentVisibility.Private,
+    access_control: { scope: AgentAccessControlScope.Private, entries: [] },
   };
 
   const mockProfile = {
@@ -58,7 +58,7 @@ describe('Agent Routes - experimental visibility gate', () => {
     name: 'Test Agent',
     description: 'Test',
     configuration: { tools: [] },
-    visibility: AgentVisibility.Public,
+    accessControl: { scope: AgentAccessControlScope.Public, entries: [] },
   };
 
   beforeEach(() => {
@@ -145,18 +145,24 @@ describe('Agent Routes - experimental visibility gate', () => {
   };
 
   describe('POST /agents (create)', () => {
-    it('allows create and calls service.create when experimental setting is true and visibility is provided', async () => {
+    it('allows create and calls service.create when access control is provided', async () => {
       const handler = getCreateHandler();
       expect(handler).toBeDefined();
 
       const ctx = createMockContext(true);
       const request = {
-        body: { ...createBody, visibility: AgentVisibility.Shared },
+        body: {
+          ...createBody,
+          access_control: { scope: AgentAccessControlScope.Shared, entries: [] },
+        },
       };
 
       const result = await handler!(ctx, request, mockResponse);
 
-      expect(mockCreate).toHaveBeenCalledWith(request.body);
+      expect(mockCreate).toHaveBeenCalledWith({
+        ...createBody,
+        accessControl: { scope: AgentAccessControlScope.Shared, entries: [] },
+      });
       expect(result).toMatchObject({ type: 'ok', body: mockProfile });
     });
 
@@ -175,19 +181,22 @@ describe('Agent Routes - experimental visibility gate', () => {
   });
 
   describe('PUT /agents/{id} (update)', () => {
-    it('allows update and calls service.update when experimental setting is true and visibility is provided', async () => {
+    it('allows update and calls service.update when access control is provided', async () => {
       const handler = getUpdateHandler();
       expect(handler).toBeDefined();
 
       const ctx = createMockContext(true);
       const request = {
         params: { id: 'agent-1' },
-        body: updateBodyWithVisibility,
+        body: updateBodyWithAccessControl,
       };
 
       const result = await handler!(ctx, request, mockResponse);
 
-      expect(mockUpdate).toHaveBeenCalledWith('agent-1', request.body);
+      expect(mockUpdate).toHaveBeenCalledWith('agent-1', {
+        name: 'Updated',
+        accessControl: { scope: AgentAccessControlScope.Private, entries: [] },
+      });
       expect(result).toMatchObject({ type: 'ok', body: mockProfile });
     });
 

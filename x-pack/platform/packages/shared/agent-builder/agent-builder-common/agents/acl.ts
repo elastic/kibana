@@ -5,19 +5,21 @@
  * 2.0.
  */
 
+import { AgentAccessControlScope } from './visibility';
+
 /**
  * Hierarchical role granted to a principal on an individual agent.
  * Each role implies all the capabilities of the lower roles.
  *
  * - User:    see, list, read details, run/converse
  * - Editor:  User + update fields/configuration
- * - Manager: Editor + delete + edit ACL + change visibility
+ * - Manager: Editor + delete + manage access control
  *
  * Design note: there is intentionally no "Viewer" tier. If a user can see an agent at
  * all, they can run it — splitting "see" from "run" added complexity without a real
  * use case for an agent-style product.
  */
-export enum AgentAclRole {
+export enum AgentAccessControlRole {
   User = 'user',
   Editor = 'editor',
   Manager = 'manager',
@@ -27,42 +29,48 @@ export enum AgentAclRole {
  * V1 only supports `'user'` principals. Role-based grants are planned for V2 once the
  * upstream Elasticsearch change for unprivileged role listing lands.
  */
-export type AgentAclPrincipalType = 'user';
+export type AgentAccessControlPrincipalType = 'user';
 
-export interface AgentAclEntry {
-  type: AgentAclPrincipalType;
+export interface AgentAccessControlEntry {
+  type: AgentAccessControlPrincipalType;
   /** Case-sensitive Kibana username. */
   name: string;
-  role: AgentAclRole;
+  role: AgentAccessControlRole;
 }
 
-export interface AgentAcl {
-  entries: AgentAclEntry[];
+export interface AgentAccessControl {
+  scope: AgentAccessControlScope;
+  entries: AgentAccessControlEntry[];
 }
 
-export const getEmptyAgentAcl = (): AgentAcl => ({ entries: [] });
+export const getDefaultAgentAccessControl = (): AgentAccessControl => ({
+  scope: AgentAccessControlScope.Public,
+  entries: [],
+});
 
-export const AGENT_ACL_MAX_ENTRIES = 100;
-export const AGENT_ACL_PRINCIPAL_NAME_MAX_LENGTH = 1024;
+export const AGENT_ACCESS_CONTROL_MAX_ENTRIES = 100;
+export const AGENT_ACCESS_CONTROL_PRINCIPAL_NAME_MAX_LENGTH = 1024;
 
-const ROLE_RANK: Record<AgentAclRole, number> = {
-  [AgentAclRole.User]: 1,
-  [AgentAclRole.Editor]: 2,
-  [AgentAclRole.Manager]: 3,
+const ROLE_RANK: Record<AgentAccessControlRole, number> = {
+  [AgentAccessControlRole.User]: 1,
+  [AgentAccessControlRole.Editor]: 2,
+  [AgentAccessControlRole.Manager]: 3,
 };
 
-export const isAgentAclRole = (value: unknown): value is AgentAclRole =>
+export const isAgentAccessControlRole = (value: unknown): value is AgentAccessControlRole =>
   typeof value === 'string' && value in ROLE_RANK;
 
 /** Returns true when `role` is at or above the `threshold` in the role hierarchy. */
-export const aclRoleMeets = (role: AgentAclRole, threshold: AgentAclRole): boolean =>
-  ROLE_RANK[role] >= ROLE_RANK[threshold];
+export const accessControlRoleMeets = (
+  role: AgentAccessControlRole,
+  threshold: AgentAccessControlRole
+): boolean => ROLE_RANK[role] >= ROLE_RANK[threshold];
 
 /** Returns the higher of two roles, or undefined if both inputs are undefined. */
-export const maxAclRole = (
-  a: AgentAclRole | undefined,
-  b: AgentAclRole | undefined
-): AgentAclRole | undefined => {
+export const maxAccessControlRole = (
+  a: AgentAccessControlRole | undefined,
+  b: AgentAccessControlRole | undefined
+): AgentAccessControlRole | undefined => {
   if (a === undefined) return b;
   if (b === undefined) return a;
   return ROLE_RANK[a] >= ROLE_RANK[b] ? a : b;

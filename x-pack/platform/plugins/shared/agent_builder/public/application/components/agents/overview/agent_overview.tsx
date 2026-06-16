@@ -15,7 +15,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { canChangeAgentVisibility, defaultAgentToolIds } from '@kbn/agent-builder-common';
+import { canChangeAgentAccessControl, defaultAgentToolIds } from '@kbn/agent-builder-common';
 import { useAgentBuilderAgentById } from '../../../hooks/agents/use_agent_by_id';
 import { useCanEditAgent } from '../../../hooks/agents/use_can_edit_agent';
 import { useSkillsService } from '../../../hooks/skills/use_skills';
@@ -68,8 +68,9 @@ export const AgentOverview: React.FC = () => {
 
   const canChangeVisibility = useMemo(() => {
     if (!isExperimentalFeaturesEnabled || !agent) return false;
-    return canChangeAgentVisibility({
+    return canChangeAgentAccessControl({
       agentId: agent.id,
+      accessControl: agent.accessControl,
       owner: agent.created_by,
       currentUser: currentUser ?? undefined,
       isAdmin,

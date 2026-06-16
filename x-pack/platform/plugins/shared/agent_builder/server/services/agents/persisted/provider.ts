@@ -112,12 +112,12 @@ const createPersistedProvider = async ({
     delete: (agentId: string) => {
       return client.delete({ id: agentId });
     },
-    getAcl: async (agentId: string) => {
-      const result = await client.getAcl(agentId);
-      return { can_manage: result.canManage, acl: result.acl };
+    getAccessControl: async (agentId: string) => {
+      const result = await client.getAccessControl(agentId);
+      return { canManage: result.canManage, accessControl: result.accessControl };
     },
-    updateAcl: async (agentId, update) => {
-      return client.updateAcl(agentId, update);
+    updateAccessControl: async (agentId, update) => {
+      return client.updateAccessControl(agentId, update);
     },
   };
 };

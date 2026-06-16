@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { agentBuilderDefaultAgentId, AgentType, AgentVisibility } from '@kbn/agent-builder-common';
+import {
+  agentBuilderDefaultAgentId,
+  AgentType,
+  AgentAccessControlScope,
+} from '@kbn/agent-builder-common';
 import type { AgentCreateRequest, AgentUpdateRequest } from '../../../../../common/agents';
 import type { AgentProperties } from './storage';
 import type { Document } from './converters';
@@ -27,7 +31,7 @@ describe('fromEs', () => {
         labels: ['foo', 'bar'],
         avatar_color: 'blue',
         avatar_symbol: 'star',
-        visibility: AgentVisibility.Shared,
+        access_control: { scope: AgentAccessControlScope.Shared, entries: [] },
         created_by_id: 'user-id-1',
         created_by_name: 'test-user',
         config: {
@@ -61,11 +65,8 @@ describe('fromEs', () => {
       labels: ['foo', 'bar'],
       avatar_color: 'blue',
       avatar_symbol: 'star',
-      visibility: AgentVisibility.Shared,
+      accessControl: { scope: AgentAccessControlScope.Shared, entries: [] },
       created_by: { id: 'user-id-1', username: 'test-user' },
-      acl: {
-        entries: [],
-      },
     });
   });
 
@@ -96,11 +97,8 @@ describe('fromEs', () => {
       labels: ['foo', 'bar'],
       avatar_color: 'blue',
       avatar_symbol: 'star',
-      visibility: AgentVisibility.Shared,
+      accessControl: { scope: AgentAccessControlScope.Shared, entries: [] },
       created_by: { id: 'user-id-1', username: 'test-user' },
-      acl: {
-        entries: [],
-      },
     });
   });
 
@@ -140,7 +138,7 @@ describe('fromEs', () => {
   it('defaults ownership and visibility for legacy documents without new fields', () => {
     const document = getSampleDoc();
     // @ts-ignore simulating legacy document
-    delete document._source.visibility;
+    delete document._source.access_control;
     // @ts-ignore simulating legacy document
     delete document._source.created_by_id;
     // @ts-ignore simulating legacy document
@@ -148,7 +146,10 @@ describe('fromEs', () => {
 
     const definition = fromEs(document);
 
-    expect(definition.visibility).toEqual(AgentVisibility.Public);
+    expect(definition.accessControl).toEqual({
+      scope: AgentAccessControlScope.Public,
+      entries: [],
+    });
     expect(definition.created_by).toBeUndefined();
   });
 });
@@ -198,14 +199,11 @@ describe('createRequestToEs', () => {
       labels: ['foo', 'bar'],
       avatar_color: 'green',
       avatar_symbol: 'circle',
-      visibility: AgentVisibility.Public,
+      access_control: { scope: AgentAccessControlScope.Public, entries: [] },
       created_by_id: 'user-id',
       created_by_name: 'test-user',
       created_at: expect.any(String),
       updated_at: expect.any(String),
-      acl: {
-        entries: [],
-      },
     });
   });
 
@@ -265,7 +263,7 @@ describe('updateRequestToEs', () => {
       labels: ['foo', 'bar'],
       avatar_color: 'red',
       avatar_symbol: 'triangle',
-      visibility: AgentVisibility.Public,
+      access_control: { scope: AgentAccessControlScope.Public, entries: [] },
       created_by_id: 'test-user-id',
       created_by_name: 'test-user',
       created_at: creationDate,
@@ -304,7 +302,7 @@ describe('updateRequestToEs', () => {
       labels: ['foo', 'bar'],
       avatar_color: 'red',
       avatar_symbol: 'triangle',
-      visibility: AgentVisibility.Public,
+      access_control: { scope: AgentAccessControlScope.Public, entries: [] },
       created_by_id: 'test-user-id',
       created_by_name: 'test-user',
       created_at: creationDate,
@@ -334,7 +332,7 @@ describe('updateRequestToEs', () => {
       labels: ['foo', 'bar'],
       avatar_color: 'yellow',
       avatar_symbol: 'square',
-      visibility: AgentVisibility.Public,
+      access_control: { scope: AgentAccessControlScope.Public, entries: [] },
       created_by_id: 'test-user-id',
       created_by_name: 'test-user',
       created_at: creationDate,
@@ -373,7 +371,7 @@ describe('updateRequestToEs', () => {
       labels: ['foo', 'bar'],
       avatar_color: 'yellow',
       avatar_symbol: 'square',
-      visibility: AgentVisibility.Public,
+      access_control: { scope: AgentAccessControlScope.Public, entries: [] },
       created_by_id: 'test-user-id',
       created_by_name: 'test-user',
       created_at: creationDate,
@@ -398,7 +396,7 @@ describe('updateRequestToEs', () => {
         enable_elastic_capabilities: false,
       },
       labels: [],
-      visibility: AgentVisibility.Public,
+      access_control: { scope: AgentAccessControlScope.Public, entries: [] },
       created_by_id: 'test-user-id',
       created_by_name: 'test-user',
       created_at: creationDate,

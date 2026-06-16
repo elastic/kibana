@@ -6,16 +6,16 @@
  */
 
 import {
-  AgentVisibility,
-  type AgentAcl,
+  AgentAccessControlScope,
+  type AgentAccessControl,
   type CurrentUser,
   type UserIdAndName,
   hasAgentReadAccess,
   hasAgentUseAccess,
   hasAgentWriteAccess,
   canDeleteAgent,
-  canManageAgentAcl,
-  canChangeAgentVisibility,
+  canManageAgentAccessControl,
+  canChangeAgentAccessControl,
 } from '@kbn/agent-builder-common';
 import type { AgentUpdateRequest } from '../../../../../../common/agents';
 import type { AgentProperties } from '../storage';
@@ -24,6 +24,9 @@ const sourceToOwner = (source: AgentProperties): UserIdAndName | undefined =>
   source.created_by_name !== undefined
     ? { id: source.created_by_id, username: source.created_by_name }
     : undefined;
+
+const sourceToAccessControl = (source: AgentProperties): AgentAccessControl | undefined =>
+  source.access_control;
 
 export const hasReadAccess = ({
   source,
@@ -35,9 +38,8 @@ export const hasReadAccess = ({
   isAdmin: boolean;
 }): boolean =>
   hasAgentReadAccess({
-    visibility: source.visibility,
+    accessControl: sourceToAccessControl(source),
     owner: sourceToOwner(source),
-    acl: source.acl,
     currentUser: user,
     isAdmin,
   });
@@ -52,9 +54,8 @@ export const hasUseAccess = ({
   isAdmin: boolean;
 }): boolean =>
   hasAgentUseAccess({
-    visibility: source.visibility,
+    accessControl: sourceToAccessControl(source),
     owner: sourceToOwner(source),
-    acl: source.acl,
     currentUser: user,
     isAdmin,
   });
@@ -69,9 +70,8 @@ export const hasWriteAccess = ({
   isAdmin: boolean;
 }): boolean =>
   hasAgentWriteAccess({
-    visibility: source.visibility,
+    accessControl: sourceToAccessControl(source),
     owner: sourceToOwner(source),
-    acl: source.acl,
     currentUser: user,
     isAdmin,
   });
@@ -86,14 +86,13 @@ export const hasDeleteAccess = ({
   isAdmin: boolean;
 }): boolean =>
   canDeleteAgent({
-    visibility: source.visibility,
+    accessControl: sourceToAccessControl(source),
     owner: sourceToOwner(source),
-    acl: source.acl,
     currentUser: user,
     isAdmin,
   });
 
-export const hasManageAclAccess = ({
+export const hasManageAccessControlAccess = ({
   source,
   user,
   isAdmin,
@@ -102,20 +101,19 @@ export const hasManageAclAccess = ({
   user: CurrentUser;
   isAdmin: boolean;
 }): boolean =>
-  canManageAgentAcl({
+  canManageAgentAccessControl({
     agentId: source.id,
-    visibility: source.visibility,
+    accessControl: sourceToAccessControl(source),
     owner: sourceToOwner(source),
-    acl: source.acl,
     currentUser: user,
     isAdmin,
   });
 
 /**
- * Strips `acl.entries` from a returned agent definition when the caller is not allowed
- * to manage the ACL.
+ * Strips `accessControl.entries` from a returned agent definition when the caller is not allowed
+ * to manage the agent access control.
  */
-export const redactAclForCaller = <T extends { acl?: AgentAcl }>({
+export const redactAccessControlForCaller = <T extends { accessControl?: AgentAccessControl }>({
   definition,
   source,
   user,
@@ -126,14 +124,14 @@ export const redactAclForCaller = <T extends { acl?: AgentAcl }>({
   user: CurrentUser;
   isAdmin: boolean;
 }): T => {
-  if (!definition.acl || definition.acl.entries.length === 0) {
+  if (!definition.accessControl || definition.accessControl.entries.length === 0) {
     return definition;
   }
-  const canManage = hasManageAclAccess({ source, user, isAdmin });
+  const canManage = hasManageAccessControlAccess({ source, user, isAdmin });
   if (canManage) {
     return definition;
   }
-  return { ...definition, acl: { entries: [] } };
+  return { ...definition, accessControl: { ...definition.accessControl, entries: [] } };
 };
 
 /**
@@ -141,9 +139,9 @@ export const redactAclForCaller = <T extends { acl?: AgentAcl }>({
  * to those they may at least see/list.
  *
  * A non-admin user can list an agent when any of the following holds:
- *   - the agent's visibility is not Private (Public + Shared cover the world by default), OR
+ *   - the agent's scope is not Private (Public + Shared cover the world by default), OR
  *   - the user is the agent's creator (matched on profile id and/or username), OR
- *   - the agent's ACL has a `type=user` entry naming the current user.
+ *   - the agent's access-control entries have a `type=user` entry naming the current user.
  *
  * V1: only user-type ACL entries are matched. Role-type grants land in V2 once the
  * upstream Elasticsearch role-listing change is in.
@@ -153,7 +151,7 @@ export const buildReadAccessFilter = ({ user }: { user: CurrentUser }) => {
     {
       bool: {
         must_not: {
-          term: { visibility: AgentVisibility.Private },
+          term: { 'access_control.scope': AgentAccessControlScope.Private },
         },
       },
     },
@@ -166,12 +164,12 @@ export const buildReadAccessFilter = ({ user }: { user: CurrentUser }) => {
 
   shouldClauses.push({
     nested: {
-      path: 'acl.entries',
+      path: 'access_control.entries',
       query: {
         bool: {
           filter: [
-            { term: { 'acl.entries.type': 'user' } },
-            { term: { 'acl.entries.name': user.username } },
+            { term: { 'access_control.entries.type': 'user' } },
+            { term: { 'access_control.entries.name': user.username } },
           ],
         },
       },
@@ -190,9 +188,9 @@ export const buildReadAccessFilter = ({ user }: { user: CurrentUser }) => {
  * Backwards-compatible alias. Prefer {@link buildReadAccessFilter} for new code.
  * @deprecated
  */
-export const buildVisibilityReadFilter = buildReadAccessFilter;
+export const buildAccessControlReadFilter = buildReadAccessFilter;
 
-export const validateVisibilityUpdateAccess = ({
+export const validateAccessControlUpdateAccess = ({
   source,
   update,
   user,
@@ -203,17 +201,16 @@ export const validateVisibilityUpdateAccess = ({
   user: CurrentUser;
   isAdmin: boolean;
 }): boolean => {
-  const isVisibilityChange =
-    update.visibility !== undefined &&
-    update.visibility !== (source.visibility ?? AgentVisibility.Public);
+  const currentScope = source.access_control?.scope ?? AgentAccessControlScope.Public;
+  const nextScope = update.accessControl?.scope;
+  const isScopeChange = nextScope !== undefined && nextScope !== currentScope;
 
   return (
-    !isVisibilityChange ||
-    canChangeAgentVisibility({
+    !isScopeChange ||
+    canChangeAgentAccessControl({
       agentId: source.id,
-      visibility: source.visibility,
+      accessControl: sourceToAccessControl(source),
       owner: sourceToOwner(source),
-      acl: source.acl,
       currentUser: user,
       isAdmin,
     })

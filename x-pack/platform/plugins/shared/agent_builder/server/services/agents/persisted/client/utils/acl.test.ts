@@ -5,67 +5,76 @@
  * 2.0.
  */
 
-import { AGENT_ACL_MAX_ENTRIES, AgentAclRole, type AgentAclEntry } from '@kbn/agent-builder-common';
-import { validateAclUpdate } from './acl';
+import {
+  AGENT_ACCESS_CONTROL_MAX_ENTRIES,
+  AgentAccessControlRole,
+  type AgentAccessControlEntry,
+} from '@kbn/agent-builder-common';
+import { validateAccessControlUpdate } from './acl';
 
-const entry = (over: Partial<AgentAclEntry> = {}): AgentAclEntry => ({
+const entry = (over: Partial<AgentAccessControlEntry> = {}): AgentAccessControlEntry => ({
   type: 'user',
   name: 'alice',
-  role: AgentAclRole.User,
+  role: AgentAccessControlRole.User,
   ...over,
 });
 
-describe('validateAclUpdate', () => {
+describe('validateAccessControlUpdate', () => {
   test('accepts an empty list', () => {
-    expect(validateAclUpdate([])).toBeUndefined();
+    expect(validateAccessControlUpdate([])).toBeUndefined();
   });
 
   test('accepts a list of valid user entries', () => {
     expect(
-      validateAclUpdate([
-        entry({ name: 'alice', role: AgentAclRole.Editor }),
-        entry({ name: 'bob', role: AgentAclRole.User }),
+      validateAccessControlUpdate([
+        entry({ name: 'alice', role: AgentAccessControlRole.Editor }),
+        entry({ name: 'bob', role: AgentAccessControlRole.User }),
       ])
     ).toBeUndefined();
   });
 
   test('rejects non-array input', () => {
     // Cast to bypass the type guard; we want to verify the runtime check.
-    expect(validateAclUpdate(undefined as unknown as AgentAclEntry[])).toMatch(/array/);
+    expect(validateAccessControlUpdate(undefined as unknown as AgentAccessControlEntry[])).toMatch(
+      /array/
+    );
   });
 
   test('rejects entries past the maximum', () => {
-    const tooMany: AgentAclEntry[] = Array.from({ length: AGENT_ACL_MAX_ENTRIES + 1 }, (_, i) =>
-      entry({ name: `user${i}` })
+    const tooMany: AgentAccessControlEntry[] = Array.from(
+      { length: AGENT_ACCESS_CONTROL_MAX_ENTRIES + 1 },
+      (_, i) => entry({ name: `user${i}` })
     );
-    expect(validateAclUpdate(tooMany)).toMatch(/maximum/);
+    expect(validateAccessControlUpdate(tooMany)).toMatch(/maximum/);
   });
 
   test('rejects role-type entries (V1 supports user-only; V2 will add roles)', () => {
-    expect(validateAclUpdate([{ ...entry(), type: 'role' as 'user', name: 'analyst' }])).toMatch(
+    expect(
+      validateAccessControlUpdate([{ ...entry(), type: 'role' as 'user', name: 'analyst' }])
+    ).toMatch(/type of "user"/);
+  });
+
+  test('rejects unknown principal type', () => {
+    expect(validateAccessControlUpdate([{ ...entry(), type: 'group' as 'user' }])).toMatch(
       /type of "user"/
     );
   });
 
-  test('rejects unknown principal type', () => {
-    expect(validateAclUpdate([{ ...entry(), type: 'group' as 'user' }])).toMatch(/type of "user"/);
-  });
-
   test('rejects empty principal name', () => {
-    expect(validateAclUpdate([entry({ name: '' })])).toMatch(/non-empty/);
+    expect(validateAccessControlUpdate([entry({ name: '' })])).toMatch(/non-empty/);
   });
 
   test('rejects unknown role', () => {
-    expect(validateAclUpdate([{ ...entry(), role: 'super-admin' as AgentAclRole }])).toMatch(
-      /Unknown ACL role/
-    );
+    expect(
+      validateAccessControlUpdate([{ ...entry(), role: 'super-admin' as AgentAccessControlRole }])
+    ).toMatch(/Unknown ACL role/);
   });
 
   test('rejects duplicate (type, name) pairs', () => {
     expect(
-      validateAclUpdate([
+      validateAccessControlUpdate([
         entry({ name: 'alice' }),
-        entry({ name: 'alice', role: AgentAclRole.Manager }),
+        entry({ name: 'alice', role: AgentAccessControlRole.Manager }),
       ])
     ).toMatch(/Duplicate/);
   });

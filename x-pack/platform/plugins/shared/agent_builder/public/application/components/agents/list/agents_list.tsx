@@ -41,7 +41,7 @@ import { useCurrentUser } from '../../../hooks/agents/use_current_user';
 import { FilterOptionWithMatchesBadge } from '../../common/filter_option_with_matches_badge';
 import { Labels } from '../../common/labels';
 import { AgentAvatar } from '../../common/agent_avatar';
-import { AgentVisibilityBadge } from './agent_visibility_badge';
+import { AgentAccessControlScopeBadge } from './agent_visibility_badge';
 import { AccessFlyout } from '../access/access_flyout';
 import { accessSummaryManageButton } from '../access/access_i18n';
 
@@ -179,7 +179,7 @@ export const AgentsList: React.FC = () => {
     const agentVisibility: EuiTableComputedColumnType<AgentDefinition> = {
       width: '135px',
       name: columnNames.visibility,
-      render: (agent) => <AgentVisibilityBadge agent={agent} />,
+      render: (agent) => <AgentAccessControlScopeBadge agent={agent} />,
       'data-test-subj': 'agentBuilderAgentsListVisibility',
     };
 

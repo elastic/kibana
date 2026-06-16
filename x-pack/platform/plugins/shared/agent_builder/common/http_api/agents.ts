@@ -5,36 +5,44 @@
  * 2.0.
  */
 
-import type { AgentAcl, AgentAclEntry, AgentDefinition } from '@kbn/agent-builder-common';
+import type {
+  AgentAccessControl,
+  AgentAccessControlEntry,
+  AgentDefinition,
+} from '@kbn/agent-builder-common';
 
-export type GetAgentResponse = AgentDefinition;
+export type AgentResponse = Omit<AgentDefinition, 'accessControl'> & {
+  access_control?: AgentAccessControl;
+};
+
+export type GetAgentResponse = AgentResponse;
 
 export interface ListAgentResponse {
-  results: AgentDefinition[];
+  results: AgentResponse[];
 }
 
-export type UpdateAgentResponse = AgentDefinition;
+export type UpdateAgentResponse = AgentResponse;
 
-export type CreateAgentResponse = AgentDefinition;
+export type CreateAgentResponse = AgentResponse;
 
 export interface DeleteAgentResponse {
   success: boolean;
 }
 
 /**
- * Response shape for `GET /api/agent_builder/agents/{id}/acl`.
+ * Response shape for `GET /api/agent_builder/agents/{id}/access_control`.
  *
- * `can_manage` indicates whether the requesting user can edit the ACL via PUT.
- * `acl` is always present and reflects the current persisted entries.
+ * `can_manage_access_control` indicates whether the requesting user can edit access control via PUT.
+ * `access_control` is always present and reflects the current persisted scope and entries.
  */
-export interface GetAgentAclResponse {
-  can_manage: boolean;
-  acl: AgentAcl;
+export interface GetAgentAccessControlResponse {
+  can_manage_access_control: boolean;
+  access_control: AgentAccessControl;
 }
 
-/** Body for `PUT /api/agent_builder/agents/{id}/acl`. */
-export interface UpdateAgentAclRequestBody {
-  entries: AgentAclEntry[];
+/** Body for `PUT /api/agent_builder/agents/{id}/access_control`. */
+export interface UpdateAgentAccessControlRequestBody {
+  entries: AgentAccessControlEntry[];
 }
 
-export type UpdateAgentAclResponse = AgentAcl;
+export type UpdateAgentAccessControlResponse = AgentAccessControl;

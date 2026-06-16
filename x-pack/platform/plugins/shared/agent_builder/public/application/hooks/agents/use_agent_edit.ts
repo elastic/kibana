@@ -8,9 +8,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import {
-  type AgentAclEntry,
   type AgentDefinition,
-  AgentVisibility,
+  AgentAccessControlScope,
   type ToolSelection,
   defaultAgentToolIds,
 } from '@kbn/agent-builder-common';
@@ -38,7 +37,7 @@ const emptyState = (): AgentEditState => ({
   id: '',
   name: '',
   description: '',
-  visibility: AgentVisibility.Public,
+  accessControl: { scope: AgentAccessControlScope.Public, entries: [] },
   labels: [],
   avatar_color: '',
   avatar_symbol: '',
@@ -101,20 +100,6 @@ export function useAgentEdit({
     },
   });
 
-  const updateAclMutation = useMutation({
-    mutationFn: ({ id, entries }: { id: string; entries: AgentAclEntry[] }) =>
-      agentService.updateAcl(id, { entries }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.agentProfiles.all });
-      if (editingAgentId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.agentProfiles.acl(editingAgentId) });
-      }
-    },
-    onError: (err: Error) => {
-      onSaveError(err);
-    },
-  });
-
   useEffect(() => {
     if (!agentId) {
       setState(emptyState());
@@ -124,7 +109,10 @@ export function useAgentEdit({
 
     if (agent) {
       const { type, ...agentState } = agent;
-      agentState.visibility = agentState.visibility ?? AgentVisibility.Public;
+      agentState.accessControl = agentState.accessControl ?? {
+        scope: AgentAccessControlScope.Public,
+        entries: [],
+      };
       if (isClone) {
         agentState.id = duplicateName(agentState.id);
       }
@@ -137,19 +125,13 @@ export function useAgentEdit({
       const requestData = cleanInvalidToolReferences(data, tools);
 
       if (editingAgentId) {
-        const { id, acl, ...updatedAgent } = requestData;
+        const { id, ...updatedAgent } = requestData;
         await updateMutation.mutateAsync(updatedAgent);
-
-        const nextEntries = acl?.entries ?? [];
-        const prevEntries = agent?.acl?.entries ?? [];
-        if (aclEntriesChanged(prevEntries, nextEntries)) {
-          await updateAclMutation.mutateAsync({ id: editingAgentId, entries: nextEntries });
-        }
       } else {
         await createMutation.mutateAsync(requestData);
       }
     },
-    [editingAgentId, createMutation, updateMutation, updateAclMutation, tools, agent]
+    [editingAgentId, createMutation, updateMutation, tools]
   );
 
   const isLoading = agentId
@@ -162,8 +144,7 @@ export function useAgentEdit({
   return {
     state,
     isLoading,
-    isSubmitting:
-      createMutation.isLoading || updateMutation.isLoading || updateAclMutation.isLoading,
+    isSubmitting: createMutation.isLoading || updateMutation.isLoading,
     submit,
     tools,
     skills,
@@ -174,13 +155,4 @@ export function useAgentEdit({
       (isExperimentalFeaturesEnabled ? pluginsError : undefined) ||
       agentError,
   };
-}
-function aclEntriesChanged(a: AgentAclEntry[], b: AgentAclEntry[]): boolean {
-  if (a.length !== b.length) return true;
-  const signature = (entries: AgentAclEntry[]) =>
-    [...entries]
-      .map((e) => `${e.type}:${e.name}:${e.role}`)
-      .sort()
-      .join('|');
-  return signature(a) !== signature(b);
 }

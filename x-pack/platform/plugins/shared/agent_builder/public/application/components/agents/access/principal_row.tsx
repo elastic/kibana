@@ -16,16 +16,20 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
-import type { AgentAclEntry, AgentAclRole, AgentVisibility } from '@kbn/agent-builder-common';
+import type {
+  AgentAccessControlEntry,
+  AgentAccessControlRole,
+  AgentAccessControlScope,
+} from '@kbn/agent-builder-common';
 import { ROLE_DESCRIPTION, ROLE_LABEL, selectableRolesForVisibility } from './role_to_capabilities';
 import { accessFlyoutRemoveAriaLabel, accessFlyoutRoleAriaLabel } from './access_i18n';
 
 interface PrincipalRowProps {
-  entry: AgentAclEntry;
+  entry: AgentAccessControlEntry;
   /** Used to constrain the selectable roles for Public/Shared agents. */
-  visibility?: AgentVisibility;
+  visibility?: AgentAccessControlScope;
   isDisabled?: boolean;
-  onChangeRole: (next: AgentAclRole) => void;
+  onChangeRole: (next: AgentAccessControlRole) => void;
   onRemove: () => void;
 }
 
@@ -101,7 +105,7 @@ export const PrincipalRow: React.FC<PrincipalRowProps> = ({
                 min-width: 180px;
               `}
             >
-              <EuiSuperSelect<AgentAclRole>
+              <EuiSuperSelect<AgentAccessControlRole>
                 compressed
                 aria-label={accessFlyoutRoleAriaLabel}
                 valueOfSelected={entry.role}

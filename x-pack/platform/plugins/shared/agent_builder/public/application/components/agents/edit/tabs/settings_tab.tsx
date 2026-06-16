@@ -30,11 +30,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   agentBuilderDefaultAgentId,
-  AgentVisibility,
+  AgentAccessControlScope,
   AGENT_BUILDER_UI_EBT,
-  VISIBILITY_ICON,
-  canChangeAgentVisibility,
-  type AgentDefinition,
+  ACCESS_CONTROL_SCOPE_ICON,
+  canChangeAgentAccessControl,
   type UserIdAndName,
 } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
@@ -79,24 +78,30 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
 
   const { currentUser } = useCurrentUser();
   const { isAdmin } = useUiPrivileges();
+  const currentVisibility = useWatch({ control, name: 'accessControl.scope' });
+  const currentEntries = useWatch({ control, name: 'accessControl.entries' }) ?? [];
 
   const canChangeVisibility =
     isCreateMode ||
-    canChangeAgentVisibility({
+    canChangeAgentAccessControl({
       agentId,
+      accessControl: {
+        scope: currentVisibility,
+        entries: currentEntries,
+      },
       owner,
       currentUser,
       isAdmin,
     });
 
-  const currentVisibility = useWatch({ control, name: 'visibility' });
-
-  // Lightweight projection used only by AccessForm — it reads `visibility` to filter
-  // selectable ACL roles. The real entries come from the form's `acl` field via Controller
+  // Lightweight projection used only by AccessForm to filter selectable access-control roles.
+  // The real entries come from the form's `accessControl.entries` field via Controller
   // (seeded from the loaded agent in `useAgentEdit`), not from local state.
   const accessFormAgent = useMemo(
-    () => ({ id: agentId ?? '', visibility: currentVisibility } as AgentDefinition),
-    [agentId, currentVisibility]
+    () => ({
+      accessControl: { scope: currentVisibility, entries: [] },
+    }),
+    [currentVisibility]
   );
 
   const showAgentWorkflowsSection = useMemo(() => {
@@ -117,24 +122,24 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
   );
   const visibilityOptions = [
     {
-      value: AgentVisibility.Public,
+      value: AgentAccessControlScope.Public,
       inputDisplay: renderVisibilityOption({
-        icon: VISIBILITY_ICON[AgentVisibility.Public],
-        label: VISIBILITY_LABELS[AgentVisibility.Public],
+        icon: ACCESS_CONTROL_SCOPE_ICON[AgentAccessControlScope.Public],
+        label: VISIBILITY_LABELS[AgentAccessControlScope.Public],
       }),
     },
     {
-      value: AgentVisibility.Shared,
+      value: AgentAccessControlScope.Shared,
       inputDisplay: renderVisibilityOption({
-        icon: VISIBILITY_ICON[AgentVisibility.Shared],
-        label: VISIBILITY_LABELS[AgentVisibility.Shared],
+        icon: ACCESS_CONTROL_SCOPE_ICON[AgentAccessControlScope.Shared],
+        label: VISIBILITY_LABELS[AgentAccessControlScope.Shared],
       }),
     },
     {
-      value: AgentVisibility.Private,
+      value: AgentAccessControlScope.Private,
       inputDisplay: renderVisibilityOption({
-        icon: VISIBILITY_ICON[AgentVisibility.Private],
-        label: VISIBILITY_LABELS[AgentVisibility.Private],
+        icon: ACCESS_CONTROL_SCOPE_ICON[AgentAccessControlScope.Private],
+        label: VISIBILITY_LABELS[AgentAccessControlScope.Private],
       }),
     },
   ];
@@ -517,11 +522,11 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                   })
                 : undefined
             }
-            isInvalid={!!formState.errors.visibility}
-            error={formState.errors.visibility?.message}
+            isInvalid={!!formState.errors.accessControl?.scope}
+            error={formState.errors.accessControl?.scope?.message}
           >
             <Controller
-              name="visibility"
+              name="accessControl.scope"
               control={control}
               render={({ field: { onChange, value } }) => (
                 <EuiSuperSelect
@@ -543,7 +548,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
             <>
               <EuiSpacer size="m" />
               <Controller
-                name="acl.entries"
+                name="accessControl.entries"
                 control={control}
                 render={({ field }) => (
                   <AccessForm

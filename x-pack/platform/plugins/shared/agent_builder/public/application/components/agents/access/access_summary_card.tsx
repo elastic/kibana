@@ -21,7 +21,7 @@ import {
   type EuiThemeComputed,
 } from '@elastic/eui';
 import { agentBuilderDefaultAgentId, type AgentDefinition } from '@kbn/agent-builder-common';
-import { useAgentAcl } from '../../../hooks/agents/use_agent_acl';
+import { useAgentAccessControl } from '../../../hooks/agents/use_agent_acl';
 import { useCanManageAgentAccess } from '../../../hooks/agents/use_can_manage_agent_access';
 import { ROLE_LABEL } from './role_to_capabilities';
 import {
@@ -57,16 +57,18 @@ export const AccessSummaryCard: React.FC<AccessSummaryCardProps> = ({ agent, onM
   const isDefaultAgent = agent.id === agentBuilderDefaultAgentId;
   const { canManage } = useCanManageAgentAccess(agent);
 
-  const { data, isLoading } = useAgentAcl(agent.id, { enabled: canManage && !isDefaultAgent });
+  const { data, isLoading } = useAgentAccessControl(agent.id, {
+    enabled: canManage && !isDefaultAgent,
+  });
 
-  const userCount = data?.acl.entries.filter((e) => e.type === 'user').length ?? 0;
+  const userCount = data?.access_control.entries.filter((e) => e.type === 'user').length ?? 0;
   const hasCustom = userCount > 0;
 
   const previewEntries = useMemo(
-    () => (data?.acl.entries ?? []).slice(0, PRINCIPAL_PREVIEW_LIMIT),
+    () => (data?.access_control.entries ?? []).slice(0, PRINCIPAL_PREVIEW_LIMIT),
     [data]
   );
-  const overflow = (data?.acl.entries.length ?? 0) - previewEntries.length;
+  const overflow = (data?.access_control.entries.length ?? 0) - previewEntries.length;
 
   if (isDefaultAgent) {
     return null;

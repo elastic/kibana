@@ -165,7 +165,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
   const canEditAgent = !manageAgents
     ? false
     : hasAgentWriteAccess({
-        visibility: agentState?.visibility,
+        accessControl: agentState?.accessControl,
         owner: agentState?.created_by,
         currentUser: currentUser ?? undefined,
         isAdmin,

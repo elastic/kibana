@@ -6,7 +6,7 @@
  */
 
 import type { AgentDefinition } from '@kbn/agent-builder-common';
-import { AgentType, AgentVisibility } from '@kbn/agent-builder-common';
+import { AgentType, AgentAccessControlScope } from '@kbn/agent-builder-common';
 import type { AgentsServiceStart, AgentRegistry } from '../services/agents';
 import type { InternalAgentDefinition } from '../services/agents/agent_registry';
 
@@ -23,8 +23,8 @@ export const createMockedAgentRegistry = (): AgentRegistryMock => {
     update: jest.fn(),
     list: jest.fn(),
     delete: jest.fn(),
-    getAcl: jest.fn(),
-    updateAcl: jest.fn(),
+    getAccessControl: jest.fn(),
+    updateAccessControl: jest.fn(),
   };
 };
 
@@ -37,7 +37,7 @@ export const createMockedAgent = (parts: Partial<AgentDefinition> = {}): MockedA
     configuration: {
       tools: [],
     },
-    visibility: AgentVisibility.Public,
+    accessControl: { scope: AgentAccessControlScope.Public, entries: [] },
     created_by: { username: 'test-user' },
     readonly: false,
     ...parts,
@@ -55,7 +55,7 @@ export const createMockedInternalAgent = (
     configuration: {
       tools: [],
     },
-    visibility: AgentVisibility.Public,
+    accessControl: { scope: AgentAccessControlScope.Public, entries: [] },
     created_by: { username: 'test-user' },
     readonly: false,
     isAvailable: jest.fn() as any,

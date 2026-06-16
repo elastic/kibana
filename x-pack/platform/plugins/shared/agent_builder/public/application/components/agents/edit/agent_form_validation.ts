@@ -92,7 +92,16 @@ export const agentFormSchema = z.object({
       defaultMessage: 'Agent description is required.',
     }),
   }),
-  visibility: z.enum(['private', 'public', 'shared']),
+  accessControl: z.object({
+    scope: z.enum(['private', 'public', 'shared']),
+    entries: z.array(
+      z.object({
+        type: z.literal('user'),
+        name: z.string().min(1),
+        role: z.enum(['user', 'editor', 'manager']),
+      })
+    ),
+  }),
   labels: z.array(z.string()).optional(),
   avatar_color: z
     .string()
@@ -129,15 +138,4 @@ export const agentFormSchema = z.object({
     workflow_ids: z.array(z.string()).optional(),
     plugin_ids: z.array(z.string()).optional(),
   }),
-  acl: z
-    .object({
-      entries: z.array(
-        z.object({
-          type: z.literal('user'),
-          name: z.string().min(1),
-          role: z.enum(['user', 'editor', 'manager']),
-        })
-      ),
-    })
-    .optional(),
 });
