@@ -9,10 +9,10 @@
 
 import type { HTMLAttributes } from 'react';
 import React, { useEffect } from 'react';
+import { css } from '@emotion/react';
 import { css as cssString } from '@emotion/css';
 import { useEuiTheme } from '@elastic/eui';
 import type { TabsServices } from '../../types';
-import { getTabsBarWithBackgroundStyles } from './tab_visual_variant_styles';
 
 const globalCss = cssString`
   // Disables the overscroll behavior to prevent the page from bouncing when scrolling
@@ -49,8 +49,10 @@ export const TabsBarWithBackground: React.FC<TabsBarWithBackgroundProps> = ({
   return (
     <div
       {...otherProps}
-      className="unifiedTabs__tabsBar"
-      css={getTabsBarWithBackgroundStyles(euiTheme)}
+      css={css`
+        // tabs bar background
+        background: ${euiTheme.colors.backgroundBasePlain};
+      `}
     >
       {children}
     </div>
