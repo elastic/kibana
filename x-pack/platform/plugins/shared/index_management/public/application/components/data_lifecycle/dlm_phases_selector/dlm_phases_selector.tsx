@@ -171,7 +171,7 @@ export const DlmPhasesSelector = ({
           hasManageSubscriptionPermission={
             enterprise.isCloudEnabled ? true : enterprise.canManageLicense
           }
-          trialStatus={enterprise.trialDaysLeft !== undefined ? 'expired' : 'notStarted'}
+          trialStatus={enterprise.trialDaysLeft === 0 ? 'expired' : 'notStarted'}
           subscriptionFeaturesUrl={enterprise.subscriptionFeaturesUrl}
           onPrimaryAction={enterprise.onUpgrade}
           onCancel={closeModal}

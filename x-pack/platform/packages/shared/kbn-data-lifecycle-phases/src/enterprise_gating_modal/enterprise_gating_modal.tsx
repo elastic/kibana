@@ -81,8 +81,6 @@ export const EnterpriseGatingModal = ({
   const modalTitleId = useGeneratedHtmlId({ prefix: 'enterpriseGatingModalTitle' });
   const { euiTheme } = useEuiTheme();
 
-  const resolvedSubscriptionFeaturesUrl = subscriptionFeaturesUrl;
-
   const primaryAction = getPrimaryAction({
     environment,
     hasManageSubscriptionPermission,
@@ -161,7 +159,7 @@ export const EnterpriseGatingModal = ({
               <EuiFlexItem grow={false}>
                 <EuiLink
                   data-test-subj={`${dataTestSubj}ReviewSubscriptionFeaturesButton`}
-                  href={resolvedSubscriptionFeaturesUrl}
+                  href={subscriptionFeaturesUrl}
                   target="_blank"
                 >
                   {enterpriseGatingModalStrings.reviewSubscriptionFeaturesButtonLabel}
