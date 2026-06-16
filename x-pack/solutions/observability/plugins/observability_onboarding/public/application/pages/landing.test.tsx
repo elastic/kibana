@@ -91,9 +91,10 @@ const renderWithFlag = (enabled: boolean, initialPath: string = '/') => {
   coreStart.featureFlags.getBooleanValue.mockImplementation((id, fallback) =>
     id === IS_ADD_DATA_PAGE_V2_ENABLED ? enabled : fallback
   );
+  const services = createObservabilityServices(coreStart);
   return render(
     <I18nProvider>
-      <KibanaContextProvider services={coreStart}>
+      <KibanaContextProvider services={services}>
         <MemoryRouter initialEntries={[initialPath]}>
           <CompatRouter>
             <LandingPage />
@@ -109,9 +110,10 @@ const renderLandingWithRouter = (enabled: boolean) => {
   coreStart.featureFlags.getBooleanValue.mockImplementation((id, fallback) =>
     id === IS_ADD_DATA_PAGE_V2_ENABLED ? enabled : fallback
   );
+  const services = createObservabilityServices(coreStart);
   return render(
     <I18nProvider>
-      <KibanaContextProvider services={coreStart}>
+      <KibanaContextProvider services={services}>
         <MemoryRouter initialEntries={['/']}>
           <CompatRouter>
             <LandingPage />
@@ -153,6 +155,12 @@ describe('LandingPage', () => {
 
   it('does not render the V2 layout when the flag is off', () => {
     expect(renderWithFlag(false).queryByTestId('addDataPageV2')).not.toBeInTheDocument();
+  });
+
+  it('renders the API endpoints section in the V2 layout', () => {
+    expect(
+      renderWithFlag(true).queryByTestId('observabilityOnboardingApiEndpointTab-elasticsearch')
+    ).toBeInTheDocument();
   });
 });
 
