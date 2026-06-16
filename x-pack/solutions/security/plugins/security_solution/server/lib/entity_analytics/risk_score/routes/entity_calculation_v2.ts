@@ -31,6 +31,7 @@ import { RiskScoreAuditActions } from '../audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
 import { getFieldForIdentifier } from '../helpers';
 import { withRiskEnginePrivilegeCheck } from '../../risk_engine/risk_engine_privileges';
+import { withMinimumLicense } from '../../utils/with_minimum_license';
 import { getConfiguration } from '../../risk_engine/utils/saved_object_configuration';
 import { buildAlertFilters } from '../maintainer/steps/build_alert_filters';
 import { getLookupIndexName } from '../maintainer/lookup/lookup_index';
@@ -241,6 +242,9 @@ export const riskScoreEntityCalculationRouteV2 = (
           },
         },
       },
-      withRiskEnginePrivilegeCheck(getStartServices, handler(logger))
+      withMinimumLicense(
+        withRiskEnginePrivilegeCheck(getStartServices, handler(logger)),
+        'platinum'
+      )
     );
 };
