@@ -857,6 +857,195 @@ describe('generateOtelcolConfig', () => {
     expect(result.service?.extensions).toContain(`file_storage/${expectedSuffix}`);
   });
 
+  it('should suffix a receiver storage reference to match a stream-declared file_storage extension (akamai SIEM pattern)', () => {
+    const inputId = 'otelcol-akamai-1';
+    const streamId = 'otelcol-akamai-siem_otel-1';
+    const expectedSuffix = `${inputId}-${streamId}`;
+
+    const otelInputWithStorage: FullAgentPolicyInput = {
+      type: OTEL_COLLECTOR_INPUT_TYPE,
+      id: inputId,
+      name: inputId,
+      revision: 0,
+      data_stream: { namespace: 'default' },
+      use_output: 'default',
+      package_policy_id: 'akamai-policy',
+      streams: [
+        {
+          id: streamId,
+          data_stream: { dataset: 'akamai.siem', type: 'logs' },
+          extensions: {
+            file_storage: { directory: '/usr/share/elastic-agent/state' },
+          },
+          receivers: {
+            akamai_siem: {
+              storage: 'file_storage',
+              config_id: 'abc',
+            },
+          },
+          service: {
+            extensions: ['file_storage'],
+            pipelines: {
+              logs: { receivers: ['akamai_siem'] },
+            },
+          },
+        },
+      ],
+    };
+
+    const result = generateOtelcolConfig({
+      inputs: [otelInputWithStorage],
+      dataOutput: defaultOutput,
+    });
+
+    expect(result.extensions?.[`file_storage/${expectedSuffix}`]).toEqual({
+      directory: '/usr/share/elastic-agent/state',
+    });
+    expect(result.extensions?.file_storage).toBeUndefined();
+
+    expect(result.service?.extensions).toContain(`file_storage/${expectedSuffix}`);
+    expect(result.service?.extensions).not.toContain('file_storage');
+
+    const suffixedReceiver = result.receivers?.[`akamai_siem/${expectedSuffix}`];
+    expect(suffixedReceiver?.storage).toBe(`file_storage/${expectedSuffix}`);
+    expect(suffixedReceiver?.config_id).toBe('abc');
+  });
+
+  it('should leave a receiver storage reference untouched when it points at a globally-injected extension', () => {
+    const inputId = 'otelcol-akamai-2';
+    const streamId = 'otelcol-akamai-siem_otel-1';
+    const expectedSuffix = `${inputId}-${streamId}`;
+
+    // elasticsearch_storage is injected externally by elastic-agent with a stable,
+    // un-suffixed ID; it is never declared in the stream's component map.
+    const otelInputExternalStorage: FullAgentPolicyInput = {
+      type: OTEL_COLLECTOR_INPUT_TYPE,
+      id: inputId,
+      name: inputId,
+      revision: 0,
+      data_stream: { namespace: 'default' },
+      use_output: 'default',
+      package_policy_id: 'akamai-policy-2',
+      streams: [
+        {
+          id: streamId,
+          data_stream: { dataset: 'akamai.siem', type: 'logs' },
+          receivers: {
+            akamai_siem: {
+              storage: 'elasticsearch_storage',
+            },
+          },
+          service: {
+            pipelines: {
+              logs: { receivers: ['akamai_siem'] },
+            },
+          },
+        },
+      ],
+    };
+
+    const result = generateOtelcolConfig({
+      inputs: [otelInputExternalStorage],
+      dataOutput: defaultOutput,
+    });
+
+    const suffixedReceiver = result.receivers?.[`akamai_siem/${expectedSuffix}`];
+    expect(suffixedReceiver?.storage).toBe('elasticsearch_storage');
+  });
+
+  it('should leave a receiver storage reference untouched when the extension is not declared at all', () => {
+    const inputId = 'otelcol-akamai-3';
+    const streamId = 'otelcol-akamai-siem_otel-1';
+    const expectedSuffix = `${inputId}-${streamId}`;
+
+    const otelInputUnknownStorage: FullAgentPolicyInput = {
+      type: OTEL_COLLECTOR_INPUT_TYPE,
+      id: inputId,
+      name: inputId,
+      revision: 0,
+      data_stream: { namespace: 'default' },
+      use_output: 'default',
+      package_policy_id: 'akamai-policy-3',
+      streams: [
+        {
+          id: streamId,
+          data_stream: { dataset: 'akamai.siem', type: 'logs' },
+          receivers: {
+            akamai_siem: {
+              storage: 'nonexistent_extension',
+            },
+          },
+          service: {
+            pipelines: {
+              logs: { receivers: ['akamai_siem'] },
+            },
+          },
+        },
+      ],
+    };
+
+    const result = generateOtelcolConfig({
+      inputs: [otelInputUnknownStorage],
+      dataOutput: defaultOutput,
+    });
+
+    // Validating extension existence is the collector's job at startup, not the renderer's.
+    const suffixedReceiver = result.receivers?.[`akamai_siem/${expectedSuffix}`];
+    expect(suffixedReceiver?.storage).toBe('nonexistent_extension');
+  });
+
+  it('should suffix both storage and auth.authenticator references independently in the same receiver', () => {
+    const inputId = 'otelcol-akamai-4';
+    const streamId = 'otelcol-akamai-siem_otel-1';
+    const expectedSuffix = `${inputId}-${streamId}`;
+
+    const otelInputBoth: FullAgentPolicyInput = {
+      type: OTEL_COLLECTOR_INPUT_TYPE,
+      id: inputId,
+      name: inputId,
+      revision: 0,
+      data_stream: { namespace: 'default' },
+      use_output: 'default',
+      package_policy_id: 'akamai-policy-4',
+      streams: [
+        {
+          id: streamId,
+          data_stream: { dataset: 'akamai.siem', type: 'logs' },
+          extensions: {
+            file_storage: { directory: '/usr/share/elastic-agent/state' },
+            bearertokenauth: { token: 'secret' },
+          },
+          receivers: {
+            akamai_siem: {
+              storage: 'file_storage',
+              auth: { authenticator: 'bearertokenauth' },
+            },
+          },
+          service: {
+            extensions: ['file_storage', 'bearertokenauth'],
+            pipelines: {
+              logs: { receivers: ['akamai_siem'] },
+            },
+          },
+        },
+      ],
+    };
+
+    const result = generateOtelcolConfig({
+      inputs: [otelInputBoth],
+      dataOutput: defaultOutput,
+    });
+
+    const suffixedReceiver = result.receivers?.[`akamai_siem/${expectedSuffix}`];
+    expect(suffixedReceiver?.storage).toBe(`file_storage/${expectedSuffix}`);
+    expect(suffixedReceiver?.auth?.authenticator).toBe(`bearertokenauth/${expectedSuffix}`);
+
+    expect(result.extensions?.[`file_storage/${expectedSuffix}`]).toEqual({
+      directory: '/usr/share/elastic-agent/state',
+    });
+    expect(result.extensions?.[`bearertokenauth/${expectedSuffix}`]).toEqual({ token: 'secret' });
+  });
+
   it('should rewrite extension references that appear in an array value', () => {
     const inputId = 'multi-ext-input';
     const streamId = 'stream-id-1';
