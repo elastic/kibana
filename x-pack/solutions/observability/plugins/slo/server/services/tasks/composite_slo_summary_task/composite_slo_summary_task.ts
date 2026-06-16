@@ -21,6 +21,7 @@ import type { SLOConfig, SLOPluginStartDependencies } from '../../../types';
 import { SO_SLO_COMPOSITE_TYPE } from '../../../saved_objects/slo_composite';
 import { computeAndPersistCompositeSummaries } from './compute_and_persist_composite_summaries';
 import { COMPOSITE_SLO_SUMMARY_TASK_SKIP_REASON } from './constants';
+import { isCompositeSloEnabled } from '../../../utils/is_composite_slo_enabled';
 
 export const TYPE = 'slo:composite-slo-summary-task';
 
@@ -84,11 +85,6 @@ export class CompositeSloSummaryTask {
       return;
     }
 
-    if (!this.config.experimental?.compositeSlo?.enabled) {
-      this.logger.debug('Composite SLO experimental flag is not enabled, skipping');
-      return;
-    }
-
     if (!this.config.compositeSloSummaryTaskEnabled) {
       this.logger.debug('Unscheduling task');
       return await plugins.taskManager.removeIfExists(this.taskId);
@@ -142,6 +138,11 @@ export class CompositeSloSummaryTask {
     }
 
     const [coreStart] = await core.getStartServices();
+    if (!(await isCompositeSloEnabled(coreStart.featureFlags))) {
+      this.logger.debug('Composite SLO feature flag is not enabled, skipping');
+      return;
+    }
+
     const esClient = coreStart.elasticsearch.client.asInternalUser;
     const internalSoClient = new SavedObjectsClient(
       coreStart.savedObjects.createInternalRepository([SO_SLO_COMPOSITE_TYPE])

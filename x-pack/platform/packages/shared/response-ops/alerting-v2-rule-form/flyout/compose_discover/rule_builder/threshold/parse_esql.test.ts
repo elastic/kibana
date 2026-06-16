@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { parseThresholdEsql } from './parse_esql';
-import { buildThresholdEsql } from './build_esql';
+import { parseThresholdEsql, parseRecoveryBlock } from './parse_esql';
+import { buildThresholdEsql, buildRecoveryBlock } from './build_esql';
 import { Aggregation, Comparator } from './form_types';
 import type { ThresholdFormValues } from './form_types';
 
@@ -28,6 +28,14 @@ const stripIds = (values: ThresholdFormValues | null) => {
     stats: values.stats.map(({ id, ...rest }) => rest),
     evaluations: values.evaluations.map(({ id, ...rest }) => rest),
     alertConditions: values.alertConditions.map(({ id, ...rest }) => rest),
+    ...(values.recovery
+      ? {
+          recovery: {
+            ...values.recovery,
+            conditions: values.recovery.conditions.map(({ id, ...rest }) => rest),
+          },
+        }
+      : {}),
   };
 };
 
@@ -759,6 +767,20 @@ describe('parseThresholdEsql', () => {
       expect(parsed!.groupByFields).toEqual(['region']);
     });
 
+    it('round-trips stat labels containing spaces', () => {
+      const original = makeValues({
+        stats: [{ id: '1', label: 'error count', aggregation: Aggregation.COUNT }],
+        alertConditions: [
+          { id: '1', metric: 'error count', comparator: Comparator.GT, threshold: [100] },
+        ],
+      });
+      const { esql, parsed } = roundTrip(original);
+      expect(esql).toContain('`error count` = COUNT(*)');
+      expect(parsed).not.toBeNull();
+      expect(parsed!.stats[0].label).toBe('error count');
+      expect(parsed!.alertConditions[0].metric).toBe('error count');
+    });
+
     it('round-trips with no alert conditions (STATS only)', () => {
       const original = makeValues({
         alertConditions: [],
@@ -768,5 +790,109 @@ describe('parseThresholdEsql', () => {
       expect(parsed).not.toBeNull();
       expect(parsed!.alertConditions[0].metric).toBe('');
     });
+  });
+});
+
+describe('parseRecoveryBlock', () => {
+  it('returns null for empty string', () => {
+    expect(parseRecoveryBlock('')).toBeNull();
+  });
+
+  it('parses simple recovery condition', () => {
+    const result = parseRecoveryBlock('| WHERE count <= 100');
+    expect(result).not.toBeNull();
+    expect(result!.conditions).toHaveLength(1);
+    expect(result!.conditions[0].metric).toBe('count');
+    expect(result!.conditions[0].comparator).toBe(Comparator.LTE);
+    expect(result!.conditions[0].threshold).toEqual([100]);
+  });
+
+  it('parses multiple conditions with AND', () => {
+    const result = parseRecoveryBlock('| WHERE count <= 100 AND errors < 5');
+    expect(result).not.toBeNull();
+    expect(result!.conditions).toHaveLength(2);
+    expect(result!.conditionOperator).toBe('AND');
+  });
+
+  it('parses multiple conditions with OR', () => {
+    const result = parseRecoveryBlock('| WHERE a < 10 OR b > 20');
+    expect(result).not.toBeNull();
+    expect(result!.conditions).toHaveLength(2);
+    expect(result!.conditionOperator).toBe('OR');
+  });
+
+  it('returns null for invalid ES|QL', () => {
+    expect(parseRecoveryBlock('| WHERE (((')).toBeNull();
+  });
+});
+
+describe('recovery round-trip', () => {
+  it('round-trips threshold recovery conditions through build and parse', () => {
+    const original = makeValues({
+      recovery: {
+        conditions: [{ id: '1', metric: 'count', comparator: Comparator.LTE, threshold: [100] }],
+        conditionOperator: 'AND',
+      },
+    });
+
+    const block = buildRecoveryBlock(original);
+    expect(block).toBeDefined();
+
+    const parsed = parseRecoveryBlock(block!);
+    expect(parsed).not.toBeNull();
+    expect(parsed!.conditions).toHaveLength(1);
+    expect(parsed!.conditions[0].metric).toBe('count');
+    expect(parsed!.conditions[0].comparator).toBe(Comparator.LTE);
+    expect(parsed!.conditions[0].threshold).toEqual([100]);
+  });
+
+  it('round-trips multi-condition recovery through build and parse', () => {
+    const original = makeValues({
+      recovery: {
+        conditions: [
+          { id: '1', metric: 'count', comparator: Comparator.LTE, threshold: [100] },
+          { id: '2', metric: 'errors', comparator: Comparator.LT, threshold: [5] },
+        ],
+        conditionOperator: 'AND',
+      },
+    });
+
+    const block = buildRecoveryBlock(original);
+    expect(block).toBeDefined();
+
+    const parsed = parseRecoveryBlock(block!);
+    expect(parsed).not.toBeNull();
+    expect(parsed!.conditions).toHaveLength(2);
+    expect(parsed!.conditionOperator).toBe('AND');
+  });
+
+  it('parseThresholdEsql includes recovery from full recovery query', () => {
+    const alertQuery = 'FROM logs-*\n  | STATS count = COUNT(*)\n  | WHERE count > 100';
+    const recoveryQuery = 'FROM logs-*\n  | STATS count = COUNT(*)\n  | WHERE count <= 50';
+
+    const result = parseThresholdEsql(alertQuery, recoveryQuery);
+    expect(result).not.toBeNull();
+    expect(result!.recovery).toBeDefined();
+    expect(result!.recovery!.conditions).toHaveLength(1);
+    expect(result!.recovery!.conditions[0].metric).toBe('count');
+    expect(result!.recovery!.conditions[0].comparator).toBe(Comparator.LTE);
+    expect(result!.recovery!.conditions[0].threshold).toEqual([50]);
+  });
+
+  it('parseThresholdEsql ignores unparseable recovery query', () => {
+    const alertQuery = 'FROM logs-*\n  | STATS count = COUNT(*)\n  | WHERE count > 100';
+    const recoveryQuery = 'FROM logs-*\n  | STATS count = COUNT(*)\n  | EVAL x = 1';
+
+    const result = parseThresholdEsql(alertQuery, recoveryQuery);
+    expect(result).not.toBeNull();
+    expect(result!.recovery).toBeUndefined();
+  });
+
+  it('parseThresholdEsql has no recovery when no recovery query is provided', () => {
+    const alertQuery = 'FROM logs-*\n  | STATS count = COUNT(*)\n  | WHERE count > 100';
+
+    const result = parseThresholdEsql(alertQuery);
+    expect(result).not.toBeNull();
+    expect(result!.recovery).toBeUndefined();
   });
 });

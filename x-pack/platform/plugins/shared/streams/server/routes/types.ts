@@ -29,7 +29,8 @@ import type { TaskClient } from '../lib/tasks/task_client';
 import type { StreamsTaskType } from '../lib/tasks/task_definitions';
 import type { InsightClient } from '../lib/sig_events/insights/client/insight_client';
 import type { StreamsSettingsStorageClient } from '../lib/streams/storage/streams_settings_storage_client';
-import type { ContinuousKiExtractionWorkflowService } from '../lib/workflows/continuous_extraction_workflow';
+import type { ContinuousKiOnboardingWorkflowService } from '../lib/workflows/continuous_onboarding_workflow';
+import type { WorkflowClients } from '../lib/workflows/create_workflow_clients';
 import type { SigEventsTuningConfig } from '../../common/sig_events_tuning_config';
 
 export type GetScopedClients = (params: {
@@ -64,7 +65,9 @@ export interface RouteDependencies {
   getScopedClients: GetScopedClients;
   processorSuggestions: ProcessorSuggestionsService;
   patternExtractionService: IPatternExtractionService;
-  continuousKiExtractionWorkflowService?: ContinuousKiExtractionWorkflowService;
+  continuousKiOnboardingWorkflowService?: ContinuousKiOnboardingWorkflowService;
+  workflowClients: WorkflowClients;
+  getSpaceId: (request: KibanaRequest) => Promise<string>;
 }
 
 export type StreamsRouteHandlerResources = RouteDependencies & DefaultRouteHandlerResources;
