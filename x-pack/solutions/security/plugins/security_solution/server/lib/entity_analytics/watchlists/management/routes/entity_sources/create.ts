@@ -101,6 +101,7 @@ export const createEntitySourceRoute = (
                   logger,
                   namespace,
                   getStartServices,
+                  hasEncryptionKey,
                 });
                 await entitySourcesService.syncWatchlist(request.params.watchlist_id);
                 logger.info(

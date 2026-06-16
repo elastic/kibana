@@ -96,12 +96,14 @@ export const createEntitySourcesService = ({
   logger,
   namespace,
   getStartServices,
+  hasEncryptionKey,
 }: {
   esClient: ElasticsearchClient;
   soClient: SavedObjectsClientContract;
   logger: Logger;
   namespace: string;
   getStartServices: StartServicesAccessor<StartPlugins>;
+  hasEncryptionKey: boolean;
 }) => {
   const watchlistClient = new WatchlistConfigClient({ esClient, soClient, logger, namespace });
   const descriptorClient = new WatchlistEntitySourceClient({
@@ -110,6 +112,7 @@ export const createEntitySourcesService = ({
     esClient,
     getStartServices,
     logger,
+    hasEncryptionKey,
   });
   const crudClient = new CRUDClient({ logger, esClient, namespace });
   const watchlistEntitiesService = createWatchlistEntitiesService({
@@ -309,7 +312,6 @@ export const createEntitySourcesService = ({
         .filter((s) => sourceIds.includes(s.id))
         .map(async (source) => {
           const dataEsClient = source.type === 'index' ? await getSourceEsClient(source) : esClient;
-          logger.info(`>>>>> Data ES client for source ${source.id}: ${dataEsClient}`);
           if (!dataEsClient) {
             logger.warn(`[WatchlistSync] Skipping index source ${source.id}: no API key stored.`);
             return;

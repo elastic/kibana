@@ -10,7 +10,6 @@ import type {
   KibanaRequest,
   Logger,
   SavedObjectsClientContract,
-  SecurityServiceStart,
   StartServicesAccessor,
 } from '@kbn/core/server';
 import _ from 'lodash';
@@ -25,15 +24,20 @@ import type {
 } from '../../../../../../common/api/entity_analytics/watchlists/data_source/list.gen';
 import type { StartPlugins } from '../../../../../plugin';
 import { watchlistEntitySourceTypeName } from './entity_source_type';
-import { invalidateEntitySourceApiKey, validateIndexPermissions } from '../entity_source_api_key';
+import {
+  grantEntitySourceApiKey,
+  invalidateEntitySourceApiKey,
+  validateIndexPermissions,
+} from '../entity_source_api_key';
 
 export interface WatchlistEntitySourceClientDependencies {
   soClient: SavedObjectsClientContract;
   namespace: string;
+  // user's scoped client (`core.elasticsearch.client.asCurrentUser`) - used to validate index read privileges
   esClient: ElasticsearchClient;
   getStartServices: StartServicesAccessor<StartPlugins>;
   logger: Logger;
-  hasEncryptionKey?: boolean;
+  hasEncryptionKey: boolean;
 }
 
 interface UpsertResult {
@@ -50,15 +54,20 @@ export class WatchlistEntitySourceClient {
   ): Promise<MonitoringEntitySource> {
     await this.assertNameUniqueness(attributes);
 
-    let apiKey;
-    if (attributes.type === 'index' && request) {
+    let apiKey = {};
+    if (attributes.type === 'index') {
       if (!this.dependencies.hasEncryptionKey) {
         throw new Error(
           'Index-type entity sources require encrypted saved objects. Ensure xpack.encryptedSavedObjects.encryptionKey is configured.'
         );
       }
-      const [coreStart] = await this.dependencies.getStartServices();
-      apiKey = await grantEntitySourceApiKey(coreStart.security, request, attributes.name);
+      if (!request) {
+        throw new Error('Cannot create index-type entity source without a request.');
+      } else {
+        const [coreStart] = await this.dependencies.getStartServices();
+        apiKey =
+          (await grantEntitySourceApiKey(coreStart.security, request, attributes.name)) ?? {};
+      }
     }
 
     const { id, attributes: created } =
@@ -114,7 +123,7 @@ export class WatchlistEntitySourceClient {
       entitySource.indexPattern !== undefined &&
       entitySource.indexPattern !== currentSource.indexPattern;
 
-    let apiKey;
+    let apiKey = {};
     // Invalidates old API key: index pattern changed or type changed from index to non-index
     if ((indexPatternChanged || (wasIndex && !isNowIndex)) && currentSource.apiKeyId) {
       await invalidateEntitySourceApiKey(coreStart.security, currentSource.apiKeyId, logger);
@@ -127,7 +136,8 @@ export class WatchlistEntitySourceClient {
             'Index-type entity sources require encrypted saved objects. Ensure xpack.encryptedSavedObjects.encryptionKey is configured.'
           );
         }
-        apiKey = await grantEntitySourceApiKey(coreStart.security, request, entitySource.name);
+        apiKey =
+          (await grantEntitySourceApiKey(coreStart.security, request, entitySource.name)) ?? {};
       } else {
         logger.warn(
           '[WatchlistEntitySourceClient] Could not grant and store index source API key.'
@@ -289,39 +299,3 @@ export class WatchlistEntitySourceClient {
     });
   }
 }
-
-const grantEntitySourceApiKey = async (
-  securityService: SecurityServiceStart,
-  request: KibanaRequest,
-  sourceName?: string
-) => {
-  const isApiKeyAuthentication = () => {
-    const user = securityService.authc.getCurrentUser(request);
-    return user?.authentication_type === 'api_key';
-  };
-
-  const keyName = sourceName ? `watchlist-entity-source:${sourceName}` : 'watchlist-entity-source';
-  const metadata = {
-    description: 'API key used to scope watchlist entity source index sync.',
-    managed: true,
-  };
-
-  // The grant endpoint only supports password/access_token auth and throws on API key auth
-  // (the case in serverless). Use cloneAsInternalUser when the request uses API key auth.
-  if (isApiKeyAuthentication()) {
-    const result = await securityService.authc.apiKeys.cloneAsInternalUser(request, {
-      name: keyName,
-      metadata,
-    });
-    if (!result) return;
-    return { apiKeyId: result.id, apiKey: result.api_key };
-  }
-
-  const result = await securityService.authc.apiKeys.grantAsInternalUser(request, {
-    name: keyName,
-    role_descriptors: {},
-    metadata,
-  });
-  if (!result) return;
-  return { apiKeyId: result.id, apiKey: result.api_key };
-};

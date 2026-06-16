@@ -89,6 +89,7 @@ export const ensurePrebuiltWatchlists = async ({
   logger,
   esClient,
   getStartServices,
+  hasEncryptionKey,
 }: {
   watchlistClient: WatchlistConfigClient;
   soClient: SavedObjectsClientContract;
@@ -96,6 +97,7 @@ export const ensurePrebuiltWatchlists = async ({
   logger: Logger;
   esClient: ElasticsearchClient;
   getStartServices: StartServicesAccessor<StartPlugins>;
+  hasEncryptionKey: boolean;
 }) => {
   for (const watchlist of getPrebuiltWatchlists(namespace)) {
     const { id, entitySources, ...attrs } = watchlist;
@@ -116,6 +118,7 @@ export const ensurePrebuiltWatchlists = async ({
         entitySources,
         esClient,
         getStartServices,
+        hasEncryptionKey,
       });
     }
 
@@ -162,6 +165,7 @@ const ensureEntitySources = async ({
   entitySources,
   esClient,
   getStartServices,
+  hasEncryptionKey,
 }: {
   watchlistClient: WatchlistConfigClient;
   soClient: SavedObjectsClientContract;
@@ -171,6 +175,7 @@ const ensureEntitySources = async ({
   entitySources: PrebuiltWatchlistDefinition['entitySources'];
   esClient: ElasticsearchClient;
   getStartServices: StartServicesAccessor<StartPlugins>;
+  hasEncryptionKey: boolean;
 }) => {
   const sourceClient = new WatchlistEntitySourceClient({
     soClient,
@@ -178,6 +183,7 @@ const ensureEntitySources = async ({
     esClient,
     getStartServices,
     logger,
+    hasEncryptionKey,
   });
 
   for (const entitySourceInput of entitySources) {
@@ -204,6 +210,7 @@ const ensureEntitySources = async ({
 export const installPrebuiltWatchlists = async ({
   logger,
   getStartServices,
+  hasEncryptionKey,
 }: EntityAnalyticsMigrationsParams) => {
   const [coreStart] = await getStartServices();
   const internalRepo = coreStart.savedObjects.createInternalRepository();
@@ -237,6 +244,7 @@ export const installPrebuiltWatchlists = async ({
       logger,
       esClient,
       getStartServices,
+      hasEncryptionKey,
     });
   }
 };

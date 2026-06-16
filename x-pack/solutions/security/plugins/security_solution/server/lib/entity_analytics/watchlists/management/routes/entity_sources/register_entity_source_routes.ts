@@ -19,8 +19,8 @@ export const registerEntitySourceRoutes = (
   hasEncryptionKey: EntityAnalyticsRoutesDeps['hasEncryptionKey']
 ) => {
   createEntitySourceRoute(router, logger, getStartServices, hasEncryptionKey);
-  getEntitySourceRoute(router, logger, getStartServices);
+  getEntitySourceRoute(router, logger, getStartServices, hasEncryptionKey);
   updateEntitySourceRoute(router, logger, getStartServices, hasEncryptionKey);
-  deleteEntitySourceRoute(router, logger, getStartServices);
-  listEntitySourcesRoute(router, logger, getStartServices);
+  deleteEntitySourceRoute(router, logger, getStartServices, hasEncryptionKey);
+  listEntitySourcesRoute(router, logger, getStartServices, hasEncryptionKey);
 };

@@ -20,10 +20,12 @@ import { watchlistEntitySourceTypeName } from './entity_source_type';
 
 const mockValidateIndexPermissions = jest.fn();
 const mockInvalidateEntitySourceApiKey = jest.fn();
+const mockGrantEntitySourceApiKey = jest.fn();
 
 jest.mock('../entity_source_api_key', () => ({
   validateIndexPermissions: (...args: unknown[]) => mockValidateIndexPermissions(...args),
   invalidateEntitySourceApiKey: (...args: unknown[]) => mockInvalidateEntitySourceApiKey(...args),
+  grantEntitySourceApiKey: (...args: unknown[]) => mockGrantEntitySourceApiKey(...args),
 }));
 
 describe('WatchlistEntitySourceClient', () => {
@@ -43,7 +45,7 @@ describe('WatchlistEntitySourceClient', () => {
   let mockGetStartServices: jest.Mock;
   let client: WatchlistEntitySourceClient;
 
-  const mockedApiKey = { id: 'new-kid', api_key: 'new-secret' };
+  const mockedApiKey = { apiKeyId: 'new-kid', apiKey: 'new-secret' };
 
   beforeEach(() => {
     soClient = savedObjectsClientMock.create();
@@ -54,7 +56,7 @@ describe('WatchlistEntitySourceClient', () => {
       authc: {
         getCurrentUser: jest.fn().mockReturnValue({ authentication_type: 'token' }),
         apiKeys: {
-          grantAsInternalUser: jest.fn().mockResolvedValue(mockedApiKey),
+          grantAsInternalUser: jest.fn(),
           cloneAsInternalUser: jest.fn(),
           invalidateAsInternalUser: jest.fn(),
         },
@@ -64,6 +66,7 @@ describe('WatchlistEntitySourceClient', () => {
 
     mockValidateIndexPermissions.mockReset().mockResolvedValue(undefined);
     mockInvalidateEntitySourceApiKey.mockReset().mockResolvedValue(undefined);
+    mockGrantEntitySourceApiKey.mockReset().mockResolvedValue(mockedApiKey);
 
     // Default get mock: returns a non-index source without an API key
     soClient.get.mockResolvedValue({
@@ -88,11 +91,11 @@ describe('WatchlistEntitySourceClient', () => {
       soClient.find.mockResolvedValue({ saved_objects: [], total: 0 } as never);
       soClient.create.mockResolvedValue({
         id: 'new-id',
-        attributes: { type: 'index', name: 'Test', managed: false },
+        attributes: { type: 'store', name: 'Test', managed: false },
       } as never);
 
       const attrs: MonitoringEntitySourceAttributes = {
-        type: 'index',
+        type: 'store',
         name: 'Test',
       };
 
@@ -133,12 +136,24 @@ describe('WatchlistEntitySourceClient', () => {
 
       await client.create(sourceAttributes, mockRequest);
 
-      expect(mockSecurity.authc.apiKeys.grantAsInternalUser).toHaveBeenCalled();
+      expect(mockGrantEntitySourceApiKey).toHaveBeenCalled();
       expect(soClient.create).toHaveBeenCalledWith(
         watchlistEntitySourceTypeName,
-        expect.objectContaining({ apiKeyId: mockedApiKey.id, apiKey: mockedApiKey.api_key }),
+        expect.objectContaining({ apiKeyId: mockedApiKey.apiKeyId, apiKey: mockedApiKey.apiKey }),
         { refresh: 'wait_for' }
       );
+    });
+
+    it('throws when creating an index-type source without a request', async () => {
+      const sourceAttributes = { type: 'index' as const, name: 'My Index Source' };
+      soClient.find.mockResolvedValue({ saved_objects: [], total: 0 } as never);
+
+      await expect(client.create(sourceAttributes)).rejects.toThrow(
+        'Cannot create index-type entity source without a request.'
+      );
+
+      expect(mockGrantEntitySourceApiKey).not.toHaveBeenCalled();
+      expect(soClient.create).not.toHaveBeenCalled();
     });
 
     it('does not grant an API key when creating a source with type other than index', async () => {
@@ -151,7 +166,7 @@ describe('WatchlistEntitySourceClient', () => {
 
       await client.create(sourceAttributes);
 
-      expect(mockSecurity.authc.apiKeys.grantAsInternalUser).not.toHaveBeenCalled();
+      expect(mockGrantEntitySourceApiKey).not.toHaveBeenCalled();
     });
 
     it('throws before granting an API key when hasEncryptionKey is false', async () => {
@@ -170,7 +185,7 @@ describe('WatchlistEntitySourceClient', () => {
         noEncryptClient.create({ type: 'index', name: 'My Index Source' }, mockRequest)
       ).rejects.toThrow('Index-type entity sources require encrypted saved objects');
 
-      expect(mockSecurity.authc.apiKeys.grantAsInternalUser).not.toHaveBeenCalled();
+      expect(mockGrantEntitySourceApiKey).not.toHaveBeenCalled();
     });
   });
 
@@ -179,11 +194,11 @@ describe('WatchlistEntitySourceClient', () => {
       soClient.find.mockResolvedValue({ saved_objects: [], total: 0 } as never);
       soClient.create.mockResolvedValue({
         id: 'new-id',
-        attributes: { type: 'index', name: 'New Source', managed: false },
+        attributes: { type: 'store', name: 'New Source', managed: false },
       } as never);
 
       const attrs: MonitoringEntitySourceAttributes = {
-        type: 'index',
+        type: 'store',
         name: 'New Source',
       };
 
@@ -328,11 +343,11 @@ describe('WatchlistEntitySourceClient', () => {
           sourceAttributes.apiKeyId,
           logger
         );
-        expect(mockSecurity.authc.apiKeys.grantAsInternalUser).toHaveBeenCalled();
+        expect(mockGrantEntitySourceApiKey).toHaveBeenCalled();
         const [, , savedAttrs] = (soClient.update as jest.Mock).mock.calls[0];
         expect(savedAttrs).toMatchObject({
-          apiKeyId: mockedApiKey.id,
-          apiKey: mockedApiKey.api_key,
+          apiKeyId: mockedApiKey.apiKeyId,
+          apiKey: mockedApiKey.apiKey,
         });
       });
 
@@ -361,11 +376,11 @@ describe('WatchlistEntitySourceClient', () => {
         await client.update({ id: sourceId }, mockRequest);
 
         expect(mockInvalidateEntitySourceApiKey).not.toHaveBeenCalled();
-        expect(mockSecurity.authc.apiKeys.grantAsInternalUser).toHaveBeenCalled();
+        expect(mockGrantEntitySourceApiKey).toHaveBeenCalled();
         const [, , savedAttrs] = (soClient.update as jest.Mock).mock.calls[0];
         expect(savedAttrs).toMatchObject({
-          apiKeyId: mockedApiKey.id,
-          apiKey: mockedApiKey.api_key,
+          apiKeyId: mockedApiKey.apiKeyId,
+          apiKey: mockedApiKey.apiKey,
         });
       });
 
@@ -392,7 +407,7 @@ describe('WatchlistEntitySourceClient', () => {
         await client.update({ id: sourceId, name: newName });
 
         expect(mockInvalidateEntitySourceApiKey).not.toHaveBeenCalled();
-        expect(mockSecurity.authc.apiKeys.grantAsInternalUser).not.toHaveBeenCalled();
+        expect(mockGrantEntitySourceApiKey).not.toHaveBeenCalled();
       });
     });
 
@@ -424,7 +439,7 @@ describe('WatchlistEntitySourceClient', () => {
           sourceAttributes.apiKeyId,
           logger
         );
-        expect(mockSecurity.authc.apiKeys.grantAsInternalUser).not.toHaveBeenCalled();
+        expect(mockGrantEntitySourceApiKey).not.toHaveBeenCalled();
         const [, , savedAttrs] = (soClient.update as jest.Mock).mock.calls[0];
         expect(savedAttrs).toMatchObject({ apiKeyId: null, apiKey: null });
       });
@@ -445,11 +460,11 @@ describe('WatchlistEntitySourceClient', () => {
         await client.update({ id: sourceId, type: 'index', indexPattern }, mockRequest);
 
         expect(mockInvalidateEntitySourceApiKey).not.toHaveBeenCalled();
-        expect(mockSecurity.authc.apiKeys.grantAsInternalUser).toHaveBeenCalled();
+        expect(mockGrantEntitySourceApiKey).toHaveBeenCalled();
         const [, , savedAttrs] = (soClient.update as jest.Mock).mock.calls[0];
         expect(savedAttrs).toMatchObject({
-          apiKeyId: mockedApiKey.id,
-          apiKey: mockedApiKey.api_key,
+          apiKeyId: mockedApiKey.apiKeyId,
+          apiKey: mockedApiKey.apiKey,
         });
       });
 
@@ -471,7 +486,7 @@ describe('WatchlistEntitySourceClient', () => {
           )
         ).rejects.toThrow('Index-type entity sources require encrypted saved objects');
 
-        expect(mockSecurity.authc.apiKeys.grantAsInternalUser).not.toHaveBeenCalled();
+        expect(mockGrantEntitySourceApiKey).not.toHaveBeenCalled();
       });
     });
   });

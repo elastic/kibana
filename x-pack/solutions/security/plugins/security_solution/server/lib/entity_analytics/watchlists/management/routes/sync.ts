@@ -20,7 +20,8 @@ import { createEntitySourcesService } from '../../entity_sources/entity_sources_
 export const syncWatchlistRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
   logger: Logger,
-  getStartServices: EntityAnalyticsRoutesDeps['getStartServices']
+  getStartServices: EntityAnalyticsRoutesDeps['getStartServices'],
+  hasEncryptionKey: EntityAnalyticsRoutesDeps['hasEncryptionKey']
 ) => {
   router.versioned
     .post({
@@ -54,6 +55,7 @@ export const syncWatchlistRoute = (
             logger,
             namespace: secSol.getSpaceId(),
             getStartServices,
+            hasEncryptionKey,
           });
 
           await entitySourcesService.syncWatchlist(request.params.watchlist_id);

@@ -17,7 +17,8 @@ import { ensurePrebuiltWatchlists } from '../../migrations/install_prebuilt_watc
 export const installPrebuiltWatchlistsRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
   logger: Logger,
-  getStartServices: EntityAnalyticsRoutesDeps['getStartServices']
+  getStartServices: EntityAnalyticsRoutesDeps['getStartServices'],
+  hasEncryptionKey: EntityAnalyticsRoutesDeps['hasEncryptionKey']
 ) => {
   router.versioned
     .post({
@@ -62,6 +63,7 @@ export const installPrebuiltWatchlistsRoute = (
             logger,
             esClient,
             getStartServices,
+            hasEncryptionKey,
           });
 
           return response.ok({

@@ -23,7 +23,8 @@ interface DeleteWatchlistResponse {
 export const deleteWatchlistRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
   logger: Logger,
-  getStartServices: EntityAnalyticsRoutesDeps['getStartServices']
+  getStartServices: EntityAnalyticsRoutesDeps['getStartServices'],
+  hasEncryptionKey: EntityAnalyticsRoutesDeps['hasEncryptionKey']
 ) => {
   router.versioned
     .delete({
@@ -61,6 +62,7 @@ export const deleteWatchlistRoute = (
               esClient,
               logger,
               getStartServices,
+              hasEncryptionKey,
             });
 
             // Clean up entities from the watchlist index and entity store before

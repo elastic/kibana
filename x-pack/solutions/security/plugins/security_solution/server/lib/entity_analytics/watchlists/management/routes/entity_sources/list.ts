@@ -23,7 +23,8 @@ import { WatchlistEntitySourceClient } from '../../../entity_sources/infra';
 export const listEntitySourcesRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
   logger: Logger,
-  getStartServices: EntityAnalyticsRoutesDeps['getStartServices']
+  getStartServices: EntityAnalyticsRoutesDeps['getStartServices'],
+  hasEncryptionKey: EntityAnalyticsRoutesDeps['hasEncryptionKey']
 ) => {
   router.versioned
     .get({
@@ -64,6 +65,7 @@ export const listEntitySourcesRoute = (
               esClient: core.elasticsearch.client.asCurrentUser,
               getStartServices,
               logger,
+              hasEncryptionKey,
             });
 
             const watchlistClient = new WatchlistConfigClient({

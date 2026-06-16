@@ -22,7 +22,8 @@ import { WatchlistEntitySourceClient } from '../../../entity_sources/infra';
 export const deleteEntitySourceRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
   logger: Logger,
-  getStartServices: EntityAnalyticsRoutesDeps['getStartServices']
+  getStartServices: EntityAnalyticsRoutesDeps['getStartServices'],
+  hasEncryptionKey: EntityAnalyticsRoutesDeps['hasEncryptionKey']
 ) => {
   router.versioned
     .delete({
@@ -55,6 +56,7 @@ export const deleteEntitySourceRoute = (
             getStartServices,
             esClient: core.elasticsearch.client.asCurrentUser,
             logger,
+            hasEncryptionKey,
           });
 
           // Get the source first so we can pass it for validation

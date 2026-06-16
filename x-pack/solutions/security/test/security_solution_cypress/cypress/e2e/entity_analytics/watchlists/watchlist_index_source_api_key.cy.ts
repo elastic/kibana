@@ -19,16 +19,7 @@ const ENTITY_ANALYTICS_WATCHLISTS_TAB_URL = `${ENTITY_ANALYTICS_MANAGEMENT_URL}/
 describe(
   'Watchlist index source API key warning',
   {
-    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
-    env: {
-      ftrConfig: {
-        kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'entityAnalyticsWatchlistEnabled',
-          ])}`,
-        ],
-      },
-    },
+    tags: ['@ess', '@serverless'],
   },
   () => {
     const WATCHLIST_ID = 'watchlist-1';
