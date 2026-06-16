@@ -184,24 +184,11 @@ export class ProjectNavigationService {
       },
       initNavigation: <LinkId extends AppDeepLinkId = AppDeepLinkId>(
         id: SolutionId,
-        navTreeDefinition$: Observable<NavigationTreeDefinition<LinkId>>,
-        options?: { customization?: NavigationCustomization }
+        navTreeDefinition$: Observable<NavigationTreeDefinition<LinkId>>
       ) => {
         if (currentNavSource$.getValue()?.id === id) return;
-        // Only override the active customization when the caller explicitly provides one.
-        //
-        // Race-condition guard: the navigation plugin and solution plugins (or the
-        // serverless bootstrap) both touch this state during startup, and their
-        // relative order is not contractually guaranteed. The navigation plugin
-        // seeds `customization$` from user-storage via setNavigationCustomization().
-        // If initNavigation unconditionally wrote to customization$ here, a startup
-        // ordering where initNavigation runs after the seed would silently wipe the
-        // user's saved customization — visible as "my layout reverts on solution
-        // switch / refresh". Keeping this conditional means initNavigation is a
-        // no-op for customization unless the caller has an explicit value to set.
-        if (options?.customization !== undefined) {
-          this.customization$.next(options.customization);
-        }
+        // Customization has a single writer: the navigation plugin, which seeds
+        // `customization$` from user-storage via setNavigationCustomization().
         currentNavSource$.next({
           id,
           navTreeDefinition$: navTreeDefinition$ as Observable<NavigationTreeDefinition>,

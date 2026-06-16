@@ -70,9 +70,9 @@ export function createChromeApi({
   const project: InternalChromeStart['project'] = {
     setCloudUrls: projectNavigation.setCloudUrls.bind(projectNavigation),
     setKibanaName: projectNavigation.setKibanaName.bind(projectNavigation),
-    initNavigation: (id, navigationTree$, options) => {
+    initNavigation: (id, navigationTree$) => {
       validateProjectStyle();
-      projectNavigation.initNavigation(id, navigationTree$, options);
+      projectNavigation.initNavigation(id, navigationTree$);
     },
     getNavigation$: () => projectNavigation.getNavigation$(),
     setBreadcrumbs: (breadcrumbs, params) =>

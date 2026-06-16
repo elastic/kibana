@@ -100,8 +100,7 @@ export interface InternalChromeStart extends ChromeStart {
       ChildrenId extends string = Id
     >(
       id: SolutionId,
-      navigationTree$: Observable<NavigationTreeDefinition<LinkId, Id, ChildrenId>>,
-      options?: { customization?: NavigationCustomization }
+      navigationTree$: Observable<NavigationTreeDefinition<LinkId, Id, ChildrenId>>
     ): void;
 
     /** Get an observable of the resolved project navigation tree and active nodes. */
