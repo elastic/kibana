@@ -323,12 +323,14 @@ describe('Segment Utilities', () => {
       expect(result).toBe(dslSegments.downsamplingSegments);
     });
 
-    it('should return null when no downsampling', () => {
+    it('should return segments even when no downsampling (empty state)', () => {
       const phases: SegmentPhase[] = [{ grow: true }, { grow: false, isDelete: true }];
 
       const result = buildDownsamplingSegments(phases, null);
 
-      expect(result).toBeNull();
+      expect(result).toHaveLength(2);
+      expect(result[0]).toMatchObject({ grow: true });
+      expect(result[1]).toMatchObject({ grow: false, isDelete: true });
     });
 
     it('should build ILM downsampling segments with correct step indices', () => {
@@ -342,13 +344,13 @@ describe('Segment Utilities', () => {
       const result = buildDownsamplingSegments(phases, null);
 
       expect(result).toHaveLength(4);
-      expect(result![0].stepIndex).toBe(0);
-      expect(result![0].phaseName).toBe('hot');
-      expect(result![1].stepIndex).toBeUndefined();
-      expect(result![1].phaseName).toBeUndefined();
-      expect(result![2].stepIndex).toBe(1);
-      expect(result![2].phaseName).toBe('cold');
-      expect(result![3].isDelete).toBe(true);
+      expect(result[0].stepIndex).toBe(0);
+      expect(result[0].phaseName).toBe('hot');
+      expect(result[1].stepIndex).toBeUndefined();
+      expect(result[1].phaseName).toBeUndefined();
+      expect(result[2].stepIndex).toBe(1);
+      expect(result[2].phaseName).toBe('cold');
+      expect(result[3].isDelete).toBe(true);
     });
   });
 });

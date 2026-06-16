@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useLayoutUpdate } from '@kbn/core-chrome-layout-components';
+import { useLayoutUpdate } from '@kbn/ui-chrome-layout';
 import React, { useCallback } from 'react';
 import type { Observable } from 'rxjs';
 import type { DeveloperToolbarItemProps, DeveloperToolbarProps } from '@kbn/developer-toolbar';

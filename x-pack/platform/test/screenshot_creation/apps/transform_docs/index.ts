@@ -24,11 +24,6 @@ export default function ({ getPageObject, getService, loadTestFile }: FtrProvide
       );
     });
 
-    after(async () => {
-      await securityPage.forceLogout();
-      await ml.testResources.resetKibanaTimeZone();
-    });
-
     loadTestFile(require.resolve('./transform_alerts'));
   });
 }

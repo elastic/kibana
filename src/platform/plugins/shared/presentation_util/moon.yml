@@ -33,7 +33,6 @@ dependsOn:
   - '@kbn/calculate-width-from-char-count'
   - '@kbn/field-utils'
   - '@kbn/core-ui-settings-browser'
-  - '@kbn/utility-types'
 tags:
   - plugin
   - prod

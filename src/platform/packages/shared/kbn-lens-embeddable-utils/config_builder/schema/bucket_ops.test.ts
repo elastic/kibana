@@ -189,6 +189,60 @@ describe('Bucket Operation Schemas', () => {
         rank: LENS_PERCENTILE_RANK_DEFAULT_VALUE,
       });
     });
+
+    it('validates rank_by custom count without a field', () => {
+      const input = {
+        operation: 'terms',
+        fields: ['category'],
+        rank_by: {
+          type: 'custom',
+          operation: 'count',
+          direction: 'desc',
+        },
+      };
+
+      const validated = bucketTermsOperationSchema.validate(input);
+      expect(validated.rank_by).toEqual(input.rank_by);
+    });
+
+    it('validates rank_by custom count with a field', () => {
+      const input = {
+        operation: 'terms',
+        fields: ['category'],
+        rank_by: {
+          type: 'custom',
+          operation: 'count',
+          field: 'bytes',
+          direction: 'asc',
+        },
+      };
+
+      const validated = bucketTermsOperationSchema.validate(input);
+      expect(validated.rank_by).toEqual(input.rank_by);
+    });
+
+    it('rejects rank_by custom non-count operation without a field', () => {
+      const operations = [
+        'average',
+        'median',
+        'standard_deviation',
+        'unique_count',
+        'sum',
+        'last_value',
+      ];
+      operations.forEach((operation) => {
+        const input = {
+          operation: 'terms',
+          fields: ['category'],
+          rank_by: {
+            type: 'custom',
+            operation,
+            direction: 'desc',
+          },
+        };
+        expect(() => bucketTermsOperationSchema.validate(input)).toThrow();
+      });
+    });
   });
 
   describe('filter operation', () => {

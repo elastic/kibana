@@ -12,7 +12,7 @@
  */
 
 import type { ScoutPage } from '@kbn/scout';
-import { spaceTest } from '@kbn/scout';
+import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { testData } from '../../fixtures/common';
 
@@ -22,7 +22,7 @@ const EXPECTED_FIRST_ROW_ID = 'AU_x3_g4GFA8no6QjkYX';
 const firstRowTimestampCell = (page: ScoutPage) =>
   page.locator('[data-grid-visible-row-index="0"] [data-gridcell-column-id="@timestamp"]');
 
-spaceTest.describe('Discover data grid - doc viewer', { tag: testData.DISCOVER_CORE_TAGS }, () => {
+spaceTest.describe('Discover data grid - doc viewer', { tag: tags.stateful.all }, () => {
   // EUI DataGrid hides/truncates inline cellActions at narrow widths. The FTR
   // equivalent ran at 1600x1200 via `browser.setWindowSize`; match that here so
   // the doc-viewer flyout has room to render its "toggle column" actions.
@@ -38,6 +38,7 @@ spaceTest.describe('Discover data grid - doc viewer', { tag: testData.DISCOVER_C
   spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
     // Privileged user is needed to save the search used by the embeddable test.
     await browserAuth.loginAsPrivilegedUser();
+    await pageObjects.discover.setQueryMode('classic');
     await pageObjects.discover.goto();
     await pageObjects.discover.waitUntilSearchingHasFinished();
     await pageObjects.discover.waitForDocTableRendered();

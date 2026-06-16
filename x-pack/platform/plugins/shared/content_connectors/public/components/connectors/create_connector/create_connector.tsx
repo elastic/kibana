@@ -86,10 +86,10 @@ const CreateConnector: React.FC = () => {
   useBreadcrumbs(createConnectorBreadcrumbs, appParams, chrome);
 
   const { selectedConnector, currentStep, isFormDirty, connectorId } = useValues(
-    NewConnectorLogic({ http, navigateToUrl: application?.navigateToUrl })
+    NewConnectorLogic({ http, navigateToApp: application?.navigateToApp })
   );
   const { setCurrentStep } = useActions(
-    NewConnectorLogic({ http, navigateToUrl: application?.navigateToUrl })
+    NewConnectorLogic({ http, navigateToApp: application?.navigateToApp })
   );
   const stepStates = generateStepState(currentStep);
   useEffect(() => {
@@ -292,6 +292,7 @@ const CreateConnector: React.FC = () => {
                             <EuiIcon
                               size="l"
                               type={selectedConnector?.iconPath ?? ''}
+                              aria-hidden={true}
                               css={css`
                                 margin-right: ${euiTheme.size.m};
                               `}

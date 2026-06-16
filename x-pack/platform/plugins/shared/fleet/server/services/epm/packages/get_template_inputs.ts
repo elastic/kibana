@@ -96,7 +96,10 @@ export const templatePackagePolicyToFullInputStreams = (
       // @ts-ignore-next-line the following id is actually one level above the one in fullInputStream, but the linter thinks it gets overwritten
       id: inputId,
       type: input.type,
-      ...getFullInputStreams(input, true, streamsIdsMap),
+      ...getFullInputStreams(input, {
+        allStreamEnabled: true,
+        streamsOriginalIdsMap: streamsIdsMap,
+      }),
     };
 
     inputAndStreamsIdsMap?.set(fullInputStream.id, {
@@ -265,6 +268,13 @@ export async function getTemplateInputs(
       sortMapEntries: _sortYamlKeys as (a: Pair, b: Pair) => number,
       strict: false,
     });
+    yaml.visit(doc, {
+      Scalar(_key, node) {
+        if (typeof node.value === 'string' && node.value.includes('\n')) {
+          node.type = 'BLOCK_LITERAL';
+        }
+      },
+    });
     const yamlStr = doc.toString({ singleQuote: true });
     return addCommentsToYaml(yamlStr, buildIndexedPackage(packageInfo), inputIdsDestinationMap);
   }
@@ -386,6 +396,13 @@ function addCommentsToYaml(
     });
   }
 
+  yaml.visit(doc, {
+    Scalar(_key, node) {
+      if (typeof node.value === 'string' && node.value.includes('\n')) {
+        node.type = 'BLOCK_LITERAL';
+      }
+    },
+  });
   return doc.toString({ singleQuote: true });
 }
 

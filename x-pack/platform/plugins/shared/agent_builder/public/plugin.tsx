@@ -40,6 +40,7 @@ import {
   ToolsService,
   SkillsService,
   SmlService,
+  OAuthClientsService,
   PluginsService,
   EventsService,
   type AgentBuilderInternalService,
@@ -58,13 +59,15 @@ import type {
   ConversationSidebarRef,
 } from './types';
 import type { EmbeddableConversationProps } from './embeddable/types';
-import type { OpenConversationSidebarOptions } from './sidebar/types';
+import type { PublicEmbeddableConversationProps } from './types';
+import type { OpenConversationSidebarOptions, OpenSidebarInternalOptions } from './sidebar/types';
 import {
   setSidebarServices,
   setSidebarRuntimeContext,
   clearSidebarRuntimeContext,
 } from './sidebar';
 import { createVisualizationAttachmentDefinition } from './application/components/attachments/visualization_attachment';
+import { storageKeys } from './application/storage_keys';
 
 export class AgentBuilderPlugin
   implements
@@ -90,6 +93,7 @@ export class AgentBuilderPlugin
   } | null = null;
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private isEarsEnabled = false;
+  private isEarsExperimentalEnabled = false;
   private experimentalDeepLinksSubscription?: Subscription;
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {
@@ -106,6 +110,7 @@ export class AgentBuilderPlugin
 
     this.setupServices = { navigationService, usageCollection: deps.usageCollection };
     this.isEarsEnabled = deps.actions.isEarsEnabled;
+    this.isEarsExperimentalEnabled = deps.actions.isEarsExperimentalEnabled;
 
     registerApp({
       core,
@@ -158,6 +163,7 @@ export class AgentBuilderPlugin
     const skillsService = new SkillsService({ http });
     const smlService = new SmlService({ http });
     const pluginsService = new PluginsService({ http });
+    const oauthClientsService = new OAuthClientsService({ http });
     const accessChecker = new AgentBuilderAccessChecker({ licensing, inference });
 
     if (!this.setupServices) {
@@ -169,8 +175,15 @@ export class AgentBuilderPlugin
     const hasAgentBuilder = core.application.capabilities.agentBuilder?.show === true;
     const sidebar = core.chrome.sidebar.getApp('agentBuilder');
 
-    const openSidebarInternal = (options?: OpenConversationSidebarOptions) => {
-      const config = options ?? this.conversationActiveConfig;
+    const openSidebarInternal = (options?: OpenSidebarInternalOptions) => {
+      const { conversationId, ...openOptions } = options ?? {};
+      const config =
+        Object.keys(openOptions).length > 0 ? openOptions : this.conversationActiveConfig;
+
+      if (conversationId) {
+        const storageKey = storageKeys.getLastConversationKey(config.sessionTag, config.agentId);
+        window?.localStorage?.setItem(storageKey, JSON.stringify(conversationId));
+      }
 
       // If already open, update props instead of creating new
       if (this.activeSidebarRef && this.sidebarCallbacks) {
@@ -217,12 +230,14 @@ export class AgentBuilderPlugin
       skillsService,
       smlService,
       pluginsService,
+      oauthClientsService,
       startDependencies,
       usageCollection,
       accessChecker,
       eventsService,
       isEarsEnabled: this.isEarsEnabled,
-      openSidebarConversation: (options?: OpenConversationSidebarOptions) => {
+      isEarsExperimentalEnabled: this.isEarsExperimentalEnabled,
+      openSidebarConversation: (options?: OpenSidebarInternalOptions) => {
         return openSidebarInternal(options);
       },
     };
@@ -230,6 +245,33 @@ export class AgentBuilderPlugin
     this.internalServices = internalServices;
 
     setSidebarServices(core, internalServices);
+
+    const LazyConfiguredEmbeddableConversation = React.lazy(async () => {
+      const { createEmbeddableConversation } = await import(
+        './embeddable/create_embeddable_conversation'
+      );
+
+      return {
+        default: createEmbeddableConversation({
+          services: internalServices,
+          coreStart: core,
+        }),
+      };
+    });
+
+    const PublicEmbeddableConversation: React.FC<PublicEmbeddableConversationProps> = ({
+      onClose,
+      ariaLabelledBy,
+      ...rest
+    }) => (
+      <React.Suspense fallback={null}>
+        <LazyConfiguredEmbeddableConversation
+          {...rest}
+          onClose={onClose}
+          ariaLabelledBy={ariaLabelledBy ?? 'agent-builder-embeddable-conversation'}
+        />
+      </React.Suspense>
+    );
 
     this.experimentalDeepLinksSubscription = core.uiSettings
       .get$<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID)
@@ -285,6 +327,7 @@ export class AgentBuilderPlugin
       updateAttachmentOrigin: (conversationId: string, attachmentId: string, origin: string) => {
         return attachmentsService.updateOrigin(conversationId, attachmentId, origin);
       },
+      EmbeddableConversation: PublicEmbeddableConversation,
     };
 
     if (hasAgentBuilder) {
@@ -324,6 +367,21 @@ export class AgentBuilderPlugin
         },
         // right before the user profile
         order: 1001,
+      });
+
+      // Chrome Next transition: also expose this control as an AI button so it renders in the
+      // Chrome Next global header (behind the `core.chrome.next` feature flag). Chrome Next does
+      // not render HeaderNavControls (`registerRight` mount points), so we dual-register for now.
+      // Remove the `registerRight` registration once Chrome Next is the only chrome.
+      // See https://github.com/elastic/kibana/issues/260010
+      core.chrome.next.aiButton.register({
+        content: (
+          <AgentBuilderNavControlInitiator
+            coreStart={core}
+            pluginsStart={startDependencies}
+            agentBuilderService={agentBuilderService}
+          />
+        ),
       });
     }
 

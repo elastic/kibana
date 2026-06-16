@@ -30,11 +30,12 @@ import {
   EuiFormRow,
   EuiFieldText,
   EuiTextArea,
+  EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import {
   sendGetOneAgentPolicy,
@@ -47,6 +48,8 @@ import {
 } from '../../../../hooks';
 import { AgentEnrollmentConfirmationStep, usePollingAgentCount } from '../../../../components';
 import { useGetCreateApiKey } from '../../../../../../components/agent_enrollment_flyout/hooks';
+
+import { useManagedOtlp } from './use_managed_otlp';
 
 interface AddCollectorFlyoutProps {
   onClose: () => void;
@@ -81,6 +84,12 @@ async function fetchOpampPolicy(spaceId?: string): Promise<any | null> {
   return res?.data?.item || null;
 }
 
+// OpAMP collectors run as a managed service; default to a 1-day inactivity timeout so
+// disconnected collectors flip to inactive promptly even if they don't cleanly report
+// AgentDisconnect. The Elastic Agent default of 2 weeks is too long for the collector
+// lifecycle. Tracking: https://github.com/elastic/ingest-dev/issues/7567
+const OPAMP_INACTIVITY_TIMEOUT_SECONDS = 24 * 60 * 60;
+
 async function createOpampPolicyWithHook(spaceId?: string): Promise<any> {
   return sendCreateAgentPolicyForRq({
     name: OPAMP_POLICY_NAME,
@@ -88,6 +97,7 @@ async function createOpampPolicyWithHook(spaceId?: string): Promise<any> {
     namespace: 'default',
     description: 'Agent policy for OpAMP collectors',
     is_managed: true,
+    inactivity_timeout: OPAMP_INACTIVITY_TIMEOUT_SECONDS,
   });
 }
 
@@ -122,6 +132,9 @@ const SLUG_FORMAT_ERROR = i18n.translate('xpack.fleet.addCollectorFlyout.slugFor
     'Must contain only lowercase letters, numbers, and hyphens, with no leading or trailing hyphens.',
 });
 
+const OTLP_MANAGED_EXPORTER = 'otlp/managed';
+const ELASTICSEARCH_OTEL_EXPORTER = 'elasticsearch/otel';
+
 // Validates that a value matches the slug format produced by slugify().
 function isValidSlug(value: string): boolean {
   return /^[a-z0-9]+([a-z0-9-]*[a-z0-9])?$/.test(value);
@@ -134,13 +147,23 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
   onClickViewAgents,
 }) => {
   const instanceUid = useRef(uuidv4());
-  const { cloud } = useStartServices();
+  const { cloud, docLinks } = useStartServices();
 
-  const {
-    apiKeyEncoded: esApiKeyEncoded,
-    isLoading: isCreatingApiKey,
-    onCreateApiKey,
-  } = useGetCreateApiKey();
+  const esApiKey = useGetCreateApiKey();
+  const motlp = useManagedOtlp();
+  const { available: motlpAvailable, endpoint: motlpEndpoint } = motlp;
+
+  const { apiKeyEncoded, isCreatingApiKey, onCreateApiKey } = motlpAvailable
+    ? {
+        apiKeyEncoded: motlp.apiKeyEncoded,
+        isCreatingApiKey: motlp.isCreatingApiKey,
+        onCreateApiKey: motlp.onCreateApiKey,
+      }
+    : {
+        apiKeyEncoded: esApiKey.apiKeyEncoded,
+        isCreatingApiKey: esApiKey.isLoading,
+        onCreateApiKey: esApiKey.onCreateApiKey,
+      };
 
   const fleetServerHosts = useGetFleetServerHosts();
   const defaultFleetServerHost =
@@ -171,6 +194,7 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
   const [serviceName, setServiceName] = useState('otel-collector-group');
   const [serviceNameOverridden, setServiceNameOverridden] = useState(false);
   const [collectorDisplayName, setCollectorDisplayName] = useState('${env:HOSTNAME}');
+  const [configName, setConfigName] = useState('');
   const [configDescription, setConfigDescription] = useState('');
   const [tags, setTags] = useState('');
   const [environment, setEnvironment] = useState('');
@@ -207,6 +231,7 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
       'elastic.collector.group_name': groupDisplayName,
       'elastic.collector.group': collectorGroup,
       'elastic.display.name': collectorDisplayName,
+      ...(configName ? { 'config.name': configName } : {}),
       ...(configDescription ? { 'config.description': configDescription } : {}),
       ...(tags.trim() ? { tags } : {}),
       ...(environment ? { 'deployment.environment.name': environment } : {}),
@@ -230,6 +255,8 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
         },
       },
     };
+
+    const primaryExporter = motlpAvailable ? OTLP_MANAGED_EXPORTER : ELASTICSEARCH_OTEL_EXPORTER;
 
     const config = {
       extensions: {
@@ -257,11 +284,22 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
         },
       },
       exporters: {
-        'elasticsearch/otel': {
-          endpoints: [defaultEsHost],
-          api_key: esApiKeyEncoded ? esApiKeyEncoded : '${API_KEY}',
-          mapping: { mode: 'otel' },
-        },
+        ...(motlpAvailable
+          ? {
+              [OTLP_MANAGED_EXPORTER]: {
+                endpoint: motlpEndpoint,
+                headers: {
+                  Authorization: `ApiKey ${apiKeyEncoded || '${API_KEY}'}`,
+                },
+              },
+            }
+          : {
+              [ELASTICSEARCH_OTEL_EXPORTER]: {
+                endpoints: [defaultEsHost],
+                api_key: apiKeyEncoded || '${API_KEY}',
+                mapping: { mode: 'otel' },
+              },
+            }),
         otlp: {
           endpoint: 'http://localhost:4317',
           tls: { insecure: true },
@@ -270,9 +308,9 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
       service: {
         extensions: ['opamp'],
         pipelines: {
-          logs: { receivers: ['otlp'], exporters: ['elasticsearch/otel'] },
-          metrics: { receivers: ['otlp'], exporters: ['elasticsearch/otel'] },
-          traces: { receivers: ['otlp'], exporters: ['elasticsearch/otel'] },
+          logs: { receivers: ['otlp'], exporters: [primaryExporter] },
+          metrics: { receivers: ['otlp'], exporters: [primaryExporter] },
+          traces: { receivers: ['otlp'], exporters: [primaryExporter] },
         },
         telemetry: {
           resource: telemetryResource,
@@ -294,13 +332,16 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
     collectorGroup,
     serviceName,
     collectorDisplayName,
+    configName,
     configDescription,
     tags,
     environment,
     defaultFleetServerHost,
     defaultEsHost,
     token,
-    esApiKeyEncoded,
+    apiKeyEncoded,
+    motlpAvailable,
+    motlpEndpoint,
     cloud?.isCloudEnabled,
   ]);
 
@@ -421,6 +462,24 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
             </EuiFormRow>
             <EuiFormRow
               fullWidth
+              label={i18n.translate('xpack.fleet.addCollectorFlyout.form.configNameLabel', {
+                defaultMessage: 'Config name',
+              })}
+              helpText={i18n.translate('xpack.fleet.addCollectorFlyout.form.configNameHelpText', {
+                defaultMessage:
+                  'Optional. Short name for this collector configuration, e.g. "webserver-logs". Used as the config label in Fleet.',
+              })}
+            >
+              <EuiFieldText
+                fullWidth
+                prepend="config.name:"
+                value={configName}
+                onChange={(e) => setConfigName(e.target.value)}
+                data-test-subj="configNameInput"
+              />
+            </EuiFormRow>
+            <EuiFormRow
+              fullWidth
               label={i18n.translate('xpack.fleet.addCollectorFlyout.form.configDescriptionLabel', {
                 defaultMessage: 'Config description',
               })}
@@ -491,14 +550,37 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
             <>
               <EuiText>
                 <p>
-                  <FormattedMessage
-                    id="xpack.fleet.addCollectorFlyout.apiKeyDescription"
-                    defaultMessage="Either use an existing API key and replace {apiKeyPlaceholder} in the {apiKeyField} field of the config below, or click the button to generate a new one."
-                    values={{
-                      apiKeyPlaceholder: <EuiCode>{'${API_KEY}'}</EuiCode>,
-                      apiKeyField: <EuiCode>api_key</EuiCode>,
-                    }}
-                  />
+                  {motlpAvailable ? (
+                    <FormattedMessage
+                      id="xpack.fleet.addCollectorFlyout.managedOtlpApiKeyDescription"
+                      defaultMessage="Either use an existing managed OTLP API key and replace {apiKeyPlaceholder} in the {apiKeyField} header of the config below, or click the button to generate a new one. Refer to the {motlpDocumentation} for more details."
+                      values={{
+                        apiKeyPlaceholder: <EuiCode>{'${API_KEY}'}</EuiCode>,
+                        apiKeyField: <EuiCode>Authorization</EuiCode>,
+                        motlpDocumentation: (
+                          <EuiLink
+                            data-test-subj="addCollectorManagedOtlpDocsLink"
+                            target="_blank"
+                            href={docLinks.links.fleet.managedOtlp}
+                          >
+                            <FormattedMessage
+                              id="xpack.fleet.addCollectorFlyout.managedOtlpDocsLinkLabel"
+                              defaultMessage="Managed OTLP Endpoint (mOTLP) documentation"
+                            />
+                          </EuiLink>
+                        ),
+                      }}
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="xpack.fleet.addCollectorFlyout.apiKeyDescription"
+                      defaultMessage="Either use an existing API key and replace {apiKeyPlaceholder} in the {apiKeyField} field of the config below, or click the button to generate a new one."
+                      values={{
+                        apiKeyPlaceholder: <EuiCode>{'${API_KEY}'}</EuiCode>,
+                        apiKeyField: <EuiCode>api_key</EuiCode>,
+                      }}
+                    />
+                  )}
                 </p>
               </EuiText>
               <EuiSpacer size="s" />
@@ -507,8 +589,9 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
                   <EuiButton
                     onClick={onCreateApiKey}
                     isLoading={isCreatingApiKey}
-                    isDisabled={!!esApiKeyEncoded}
-                    iconType={esApiKeyEncoded ? 'check' : undefined}
+                    isDisabled={!!apiKeyEncoded}
+                    iconType={apiKeyEncoded ? 'check' : undefined}
+                    color={apiKeyEncoded ? 'success' : 'primary'}
                   >
                     <FormattedMessage
                       id="xpack.fleet.addCollectorFlyout.createApiKeyButton"

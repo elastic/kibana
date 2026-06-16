@@ -12,9 +12,12 @@ import type {
   CoreSetup,
   CoreStart,
 } from '@kbn/core/server';
+import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { VECTORDB_PROJECT_SETTINGS } from '@kbn/serverless-vectordb-settings';
 
 import type { ServerlessVectordbConfig } from './config';
+import { registerCreateApiKeyRoute } from './routes/api_key';
+import { registerDeploymentStatsRoute } from './routes/deployment_stats';
 import type {
   ServerlessVectordbPluginSetup,
   ServerlessVectordbPluginStart,
@@ -33,7 +36,6 @@ export class ServerlessVectordbPlugin
 {
   // @ts-ignore config is not used for now
   private readonly config: ServerlessVectordbConfig;
-  // @ts-ignore logger is not used for now
   private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {
@@ -43,11 +45,38 @@ export class ServerlessVectordbPlugin
 
   public setup(core: CoreSetup<StartDependencies>, { serverless }: SetupDependencies) {
     serverless.setupProjectSettings(VECTORDB_PROJECT_SETTINGS);
+
+    const router = core.http.createRouter();
+    registerDeploymentStatsRoute(router, this.logger);
+    registerCreateApiKeyRoute(router, this.logger);
+
     return {};
   }
 
-  public start(core: CoreStart) {
+  public start(core: CoreStart, { dataViews }: StartDependencies) {
+    this.createDefaultDataView(core, dataViews).catch(() => {});
     return {};
+  }
+
+  private async createDefaultDataView(core: CoreStart, dataViews: DataViewsServerPluginStart) {
+    const dataViewsService = await dataViews.dataViewsServiceFactory(
+      core.savedObjects.createInternalRepository(),
+      core.elasticsearch.client.asInternalUser,
+      undefined,
+      true
+    );
+    const dataViewExists = await dataViewsService.get('default_all_data_id').catch(() => false);
+    if (!dataViewExists) {
+      const defaultDataViewExists = await dataViewsService.defaultDataViewExists();
+      if (!defaultDataViewExists) {
+        await dataViewsService.createAndSave({
+          allowNoIndex: false,
+          name: 'default:all-data',
+          title: '*,-.*',
+          id: 'default_all_data_id',
+        });
+      }
+    }
   }
 
   public stop() {}

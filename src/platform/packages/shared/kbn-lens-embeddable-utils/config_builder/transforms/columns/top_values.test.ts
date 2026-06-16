@@ -214,6 +214,55 @@ describe('Top Values Transforms', () => {
         params: { value: 500 },
       });
     });
+
+    it('should handle custom rank_by with count operation without a field', () => {
+      const input: LensApiTermsOperation = {
+        operation: 'terms',
+        fields: ['status'],
+        limit: 5,
+        rank_by: {
+          type: 'custom',
+          operation: 'count',
+          direction: 'desc',
+        },
+      };
+
+      const result = fromTermsLensApiToLensState(input, getMetricColumnIdByIndex);
+      expect(result.params.orderBy).toEqual({ type: 'custom' });
+      expect(result.params.orderDirection).toBe('desc');
+      expect(result.params.orderAgg).toEqual({
+        operationType: 'count',
+        sourceField: '___records___',
+        dataType: 'number',
+        isBucketed: false,
+        label: '',
+      });
+    });
+
+    it('should handle custom rank_by with count operation with a field', () => {
+      const input: LensApiTermsOperation = {
+        operation: 'terms',
+        fields: ['status'],
+        limit: 5,
+        rank_by: {
+          type: 'custom',
+          operation: 'count',
+          field: 'bytes',
+          direction: 'asc',
+        },
+      };
+
+      const result = fromTermsLensApiToLensState(input, getMetricColumnIdByIndex);
+      expect(result.params.orderBy).toEqual({ type: 'custom' });
+      expect(result.params.orderDirection).toBe('asc');
+      expect(result.params.orderAgg).toEqual({
+        operationType: 'count',
+        sourceField: 'bytes',
+        dataType: 'number',
+        isBucketed: false,
+        label: '',
+      });
+    });
   });
 
   describe('fromTermsLensStateToAPI', () => {
@@ -466,6 +515,69 @@ describe('Top Values Transforms', () => {
         field: 'latency',
         direction: 'asc',
         rank: 500,
+      });
+    });
+
+    it('should handle custom orderBy with count operation on all documents', () => {
+      const input: TermsIndexPatternColumn = {
+        operationType: 'terms',
+        sourceField: 'status',
+        customLabel: false,
+        label: 'Top 5 values for status',
+        isBucketed: true,
+        dataType: 'string',
+        params: {
+          size: 5,
+          orderBy: { type: 'custom' },
+          orderDirection: 'desc',
+          orderAgg: {
+            operationType: 'count',
+            sourceField: '___records___',
+            dataType: 'number',
+            isBucketed: false,
+            label: '',
+          },
+          parentFormat: { id: 'terms' },
+        },
+      };
+
+      const result = fromTermsLensStateToAPI(input, columns);
+      expect(result.rank_by).toEqual({
+        type: 'custom',
+        operation: 'count',
+        direction: 'desc',
+      });
+    });
+
+    it('should handle custom orderBy with count operation on a specific field', () => {
+      const input: TermsIndexPatternColumn = {
+        operationType: 'terms',
+        sourceField: 'status',
+        customLabel: false,
+        label: 'Top 5 values for status',
+        isBucketed: true,
+        dataType: 'string',
+        params: {
+          size: 5,
+          orderBy: { type: 'custom' },
+          orderDirection: 'asc',
+          orderAgg: {
+            operationType: 'count',
+            sourceField: 'bytes',
+            dataType: 'number',
+            isBucketed: false,
+            label: '',
+          },
+          parentFormat: { id: 'terms' },
+        },
+      };
+
+      const result = fromTermsLensStateToAPI(input, columns);
+      expect(result.rank_by).toEqual({
+        type: 'custom',
+        operation: 'count',
+        field: 'bytes',
+        direction: 'asc',
       });
     });
 

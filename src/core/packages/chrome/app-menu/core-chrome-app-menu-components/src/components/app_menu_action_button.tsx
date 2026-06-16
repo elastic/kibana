@@ -56,6 +56,7 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
   const showTooltip = Boolean(content || title);
 
   const splitButtonProps = 'splitButtonProps' in props ? props.splitButtonProps : undefined;
+  const items = 'items' in props ? props.items : undefined;
 
   const {
     items: splitButtonItems,
@@ -63,11 +64,18 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
     ...otherSplitButtonProps
   } = splitButtonProps || ({} as AppMenuSplitButtonProps);
 
+  const hasItems = items && items.length > 0;
   const hasSplitItems = splitButtonItems && splitButtonItems.length > 0;
+  const hasPopover = hasItems || hasSplitItems;
   const anchorDomElementRef = useRef<HTMLElement | null>(null);
 
   const handleClick = (event: MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => {
     if (isDisabled(disableButton)) return;
+
+    if (hasItems) {
+      onPopoverToggle();
+      return;
+    }
 
     const triggerElement = event.currentTarget;
     run?.({
@@ -104,7 +112,7 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
     href,
     target: href ? target : undefined,
     isLoading,
-    'aria-haspopup': (hasSplitItems ? 'menu' : undefined) as 'menu' | undefined,
+    'aria-haspopup': (hasPopover ? 'menu' : undefined) as 'menu' | undefined,
     fullWidth,
   };
 
@@ -150,13 +158,31 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
    * So we only wrap in tooltip if there are no items (no popover).
    */
   const button =
-    showTooltip && !hasSplitItems ? (
-      <EuiToolTip content={content} title={title} delay="long">
+    showTooltip && !hasPopover ? (
+      <EuiToolTip content={content} title={title}>
         {buttonComponent}
       </EuiToolTip>
     ) : (
       buttonComponent
     );
+
+  if (hasItems) {
+    return (
+      <AppMenuPopover
+        items={items}
+        tooltipContent={content}
+        tooltipTitle={title}
+        anchorElement={button}
+        isOpen={isPopoverOpen}
+        popoverWidth={popoverWidth}
+        popoverTestId={popoverTestId}
+        anchorPosition="downRight"
+        repositionToCrossAxis={false}
+        onClose={onPopoverClose}
+        onCloseOverflowButton={onCloseOverflowButton}
+      />
+    );
+  }
 
   if (hasSplitItems) {
     return (
@@ -169,6 +195,8 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
         isOpen={isPopoverOpen}
         popoverWidth={popoverWidth}
         popoverTestId={popoverTestId}
+        anchorPosition="downRight"
+        repositionToCrossAxis={false}
         onClose={onPopoverClose}
         onCloseOverflowButton={onCloseOverflowButton}
       />

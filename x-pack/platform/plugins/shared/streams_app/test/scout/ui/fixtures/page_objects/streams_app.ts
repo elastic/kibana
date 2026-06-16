@@ -43,6 +43,7 @@ export class StreamsApp {
   public readonly deleteQueryStreamModalInput;
   public readonly queryStreamDeletedSuccessToast;
   public readonly queryStreamCreateErrorToast;
+  public readonly fetchMoreMatchingSamplesButton;
 
   constructor(private readonly page: ScoutPage) {
     this.processorFieldComboBox = new EuiComboBoxWrapper(
@@ -99,6 +100,9 @@ export class StreamsApp {
     );
     this.queryStreamDeletedSuccessToast = this.page.getByText('Stream deleted');
     this.queryStreamCreateErrorToast = this.page.getByText('Error creating query stream');
+    this.fetchMoreMatchingSamplesButton = this.page.getByTestId(
+      'streamsAppFetchMoreMatchingSamplesButton'
+    );
   }
 
   async goto() {
@@ -118,7 +122,7 @@ export class StreamsApp {
   }
 
   async gotoDataRetentionTab(streamName: string) {
-    await this.gotoStreamManagementTab(streamName, 'retention');
+    await this.gotoStreamManagementTab(streamName, 'lifecycle');
   }
 
   async gotoDataQualityTab(streamName: string) {
@@ -173,6 +177,7 @@ export class StreamsApp {
       .locator('a[data-test-subj^="breadcrumb"]')
       .filter({ hasText: /^Streams$/ })
       .click();
+    await this.expectStreamsTableVisible();
   }
 
   // Streams table utility methods
@@ -361,7 +366,8 @@ export class StreamsApp {
   }
 
   async switchToColumnsView() {
-    await this.page.getByTestId('streamsAppPreviewTableViewModeToggle').click();
+    // Draft streams fetch samples via ES|QL from the parent, which can be slow
+    await this.page.getByTestId('streamsAppPreviewTableViewModeToggle').click({ timeout: 60_000 });
   }
 
   async saveRoutingRule() {
@@ -1344,7 +1350,20 @@ export class StreamsApp {
   }
 
   async clickDeleteQueryStreamModalDeleteButton() {
+    // Toast notifications rendered in the globalToastList can overlap the confirm
+    // button and intercept pointer events. Wait until the list is empty before clicking.
+    await this.waitForEmptyGlobalToastList();
     await this.page.getByTestId('streamsAppDeleteStreamModalDeleteButton').click();
+  }
+
+  // Toasts rendered in the globalToastList can overlay buttons (Save / Delete) and
+  // intercept pointer events, causing flaky click timeouts. Use before clicking a
+  // primary action that lives near the bottom of the viewport.
+  async waitForEmptyGlobalToastList(timeout: number = 15_000) {
+    await expect(this.page.testSubj.locator('globalToastList').locator(':scope > *')).toHaveCount(
+      0,
+      { timeout }
+    );
   }
 
   async clickQueryStreamEditButton(streamName: string) {
@@ -1361,11 +1380,13 @@ export class StreamsApp {
   }
 
   async saveFlyoutQueryStreamCreate() {
+    await this.waitForEmptyGlobalToastList();
     await this.clickQueryStreamFlyoutSaveButton();
     await this.queryStreamCreatedSuccessToast.waitFor({ state: 'visible' });
   }
 
   async saveFlyoutQueryStreamEdit() {
+    await this.waitForEmptyGlobalToastList();
     await this.clickQueryStreamFlyoutSaveButton();
     await this.queryStreamUpdatedSuccessToast.waitFor({ state: 'visible' });
   }
@@ -1401,6 +1422,24 @@ export class StreamsApp {
     await this.openCreateChildQueryStreamForm();
     await this.fillChildQueryStreamForm(childName, esqlQuery);
     await this.saveChildQueryStream();
+  }
+
+  async clickFetchMoreUntilThresholdReached({ maxClicks = 10 } = {}) {
+    let clicks = 0;
+    while (await this.fetchMoreMatchingSamplesButton.isVisible()) {
+      if (clicks >= maxClicks) {
+        throw new Error(
+          `Fetch more button still visible after ${maxClicks} clicks. ` +
+            `The match rate may not have crossed the threshold — check that enough matching data exists in ES.`
+        );
+      }
+      await this.fetchMoreMatchingSamplesButton.click();
+      clicks++;
+      // Wait for the button to either disappear or become clickable again
+      await this.fetchMoreMatchingSamplesButton
+        .waitFor({ state: 'hidden', timeout: 10000 })
+        .catch(() => {});
+    }
   }
 
   async deleteQueryStreamFromAdvancedTab(streamName: string) {

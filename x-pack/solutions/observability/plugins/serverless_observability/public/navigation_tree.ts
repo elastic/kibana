@@ -22,12 +22,14 @@ export function filterForFeatureAvailability(
 export const createNavigationTree = ({
   streamsAvailable,
   overviewAvailable = true,
+  genAiSettingsAvailable = true,
   isCasesAvailable = true,
   showAiAssistant = true,
   showAlertingV2 = false,
 }: {
   streamsAvailable?: boolean;
   overviewAvailable?: boolean;
+  genAiSettingsAvailable?: boolean;
   isCasesAvailable?: boolean;
   showAiAssistant?: boolean;
   showAlertingV2?: boolean;
@@ -286,10 +288,6 @@ export const createNavigationTree = ({
                   link: 'ml:indexDataVisualizer',
                   sideNavStatus: 'hidden',
                 },
-                {
-                  link: 'ml:indexDataVisualizerPage',
-                  sideNavStatus: 'hidden',
-                },
               ],
             },
             {
@@ -480,7 +478,11 @@ export const createNavigationTree = ({
               defaultMessage: 'Access',
             }),
             breadcrumbStatus: 'hidden',
-            children: [{ link: 'management:api_keys' }, { link: 'management:roles' }],
+            children: [
+              { link: 'management:api_keys' },
+              { link: 'management:application_connections' },
+              { link: 'management:roles' },
+            ],
           },
           {
             id: 'cloud_link_org_settings',
@@ -514,6 +516,7 @@ export const createNavigationTree = ({
                 { link: 'management:rules', breadcrumbStatus: 'hidden' },
                 { link: 'management:episodes', breadcrumbStatus: 'hidden' },
                 { link: 'management:action_policies', breadcrumbStatus: 'hidden' },
+                { link: 'management:execution_history', breadcrumbStatus: 'hidden' },
               ],
             },
             showAlertingV2
@@ -529,7 +532,7 @@ export const createNavigationTree = ({
             breadcrumbStatus: 'hidden',
             children: [
               { link: 'management:triggersActionsAlerts' },
-              { link: 'rules' },
+              { link: 'management:triggersActions' },
               { link: 'management:triggersActionsConnectors', breadcrumbStatus: 'hidden' },
               { link: 'management:maintenanceWindows', breadcrumbStatus: 'hidden' },
             ],
@@ -565,43 +568,49 @@ export const createNavigationTree = ({
             },
             overviewAvailable
           ),
-          {
-            id: 'model_management',
-            title: i18n.translate(
-              'xpack.serverlessObservability.nav.projectSettings.modelManagement',
-              {
-                defaultMessage: 'Model Management',
-              }
-            ),
-            children: [
-              { link: 'management:elastic_inference_service' },
-              { link: 'management:inference_endpoints' },
-              { link: 'management:model_settings' },
-            ],
-          },
-          {
-            title: i18n.translate('xpack.serverlessObservability.nav.projectSettings.ai', {
-              defaultMessage: 'AI',
-            }),
-            children: [
-              {
-                link: 'management:genAiSettings' as const,
-                breadcrumbStatus: 'hidden' as const,
-              },
-              {
-                link: 'management:evals' as const,
-                breadcrumbStatus: 'hidden' as const,
-              },
-              ...(showAiAssistant
-                ? [
-                    {
-                      link: 'management:observabilityAiAssistantManagement' as const,
-                      breadcrumbStatus: 'hidden' as const,
-                    },
-                  ]
-                : []),
-            ],
-          },
+          ...filterForFeatureAvailability(
+            {
+              id: 'model_management',
+              title: i18n.translate(
+                'xpack.serverlessObservability.nav.projectSettings.modelManagement',
+                {
+                  defaultMessage: 'Model Management',
+                }
+              ),
+              children: [
+                { link: 'management:elastic_inference_service' },
+                { link: 'management:inference_endpoints' },
+                { link: 'management:model_settings' },
+              ],
+            },
+            genAiSettingsAvailable
+          ),
+          ...filterForFeatureAvailability(
+            {
+              title: i18n.translate('xpack.serverlessObservability.nav.projectSettings.ai', {
+                defaultMessage: 'AI',
+              }),
+              children: [
+                {
+                  link: 'management:genAiSettings' as const,
+                  breadcrumbStatus: 'hidden' as const,
+                },
+                {
+                  link: 'management:evals' as const,
+                  breadcrumbStatus: 'hidden' as const,
+                },
+                ...(showAiAssistant
+                  ? [
+                      {
+                        link: 'management:observabilityAiAssistantManagement' as const,
+                        breadcrumbStatus: 'hidden' as const,
+                      },
+                    ]
+                  : []),
+              ],
+            },
+            genAiSettingsAvailable
+          ),
           {
             id: 'content',
             title: i18n.translate('xpack.serverlessObservability.nav.projectSettings.content', {

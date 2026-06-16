@@ -11,19 +11,34 @@ export const pruneLookupIndex = async ({
   esClient,
   index,
   riskWindowStart,
+  calculationRunId,
 }: {
   esClient: ElasticsearchClient;
   index: string;
   riskWindowStart: string;
+  calculationRunId: string;
 }): Promise<number> => {
   const response = await esClient.deleteByQuery({
     index,
     refresh: true,
     query: {
-      range: {
-        '@timestamp': {
-          lt: riskWindowStart,
-        },
+      bool: {
+        should: [
+          {
+            range: {
+              '@timestamp': {
+                lt: riskWindowStart,
+              },
+            },
+          },
+          {
+            bool: {
+              must: [{ exists: { field: 'calculation_run_id' } }],
+              must_not: [{ term: { calculation_run_id: calculationRunId } }],
+            },
+          },
+        ],
+        minimum_should_match: 1,
       },
     },
   });

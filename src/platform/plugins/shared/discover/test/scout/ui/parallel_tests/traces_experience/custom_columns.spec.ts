@@ -8,12 +8,12 @@
  */
 
 import { tags } from '@kbn/scout';
-import { expect } from '@kbn/scout/ui';
 import {
   spaceTest,
   TRACES,
   setupTracesExperience,
   teardownTracesExperience,
+  expectTracesExperienceEnabled,
 } from '../../fixtures/traces_experience';
 
 spaceTest.describe(
@@ -26,9 +26,8 @@ spaceTest.describe(
       await setupTracesExperience(scoutSpace, config);
     });
 
-    spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
+    spaceTest.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginAsViewer();
-      await pageObjects.discover.goto();
     });
 
     spaceTest.afterAll(async ({ scoutSpace }) => {
@@ -38,25 +37,23 @@ spaceTest.describe(
     spaceTest(
       'should display trace-specific columns in data view mode',
       async ({ pageObjects }) => {
+        await pageObjects.discover.goto({ queryMode: 'classic' });
+
         await spaceTest.step('verify trace-specific column headers', async () => {
-          await pageObjects.discover.waitForDocTableRendered();
-          for (const column of pageObjects.tracesExperience.grid.expectedColumns) {
-            await expect(pageObjects.discover.getColumnHeader(column)).toBeVisible();
-          }
+          await expectTracesExperienceEnabled(pageObjects, false);
         });
       }
     );
 
     spaceTest('should display trace-specific columns in ESQL mode', async ({ pageObjects }) => {
+      await pageObjects.discover.goto({ queryMode: 'esql' });
+
       await spaceTest.step('switch to ESQL mode with a different index pattern', async () => {
         await pageObjects.discover.writeAndSubmitEsqlQuery(TRACES.ESQL_QUERY);
       });
 
       await spaceTest.step('verify trace-specific column headers', async () => {
-        await pageObjects.discover.waitForDocTableRendered();
-        for (const column of pageObjects.tracesExperience.grid.expectedColumns) {
-          await expect(pageObjects.discover.getColumnHeader(column)).toBeVisible();
-        }
+        await expectTracesExperienceEnabled(pageObjects);
       });
     });
   }

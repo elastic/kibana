@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errorResponseSchema, ID_MAX_LENGTH } from '@kbn/alerting-v2-schemas';
 import { Request } from '@kbn/core-di-server';
 import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { z } from '@kbn/zod/v4';
@@ -14,10 +15,9 @@ import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
-import { buildRouteValidationWithZod } from '../route_validation';
 
 const updateActionPolicyApiKeyParamsSchema = z.object({
-  id: z.string().describe('The action policy identifier.'),
+  id: z.string().min(1).max(ID_MAX_LENGTH).describe('The action policy identifier.'),
 });
 
 @injectable()
@@ -33,16 +33,21 @@ export class UpdateActionPolicyApiKeyRoute extends BaseAlertingRoute {
     summary: 'Update an action policy API key',
     description: 'Rotate the API key for an action policy.',
   } as const;
-  static validate = {
+  static schemas = {
     request: {
-      params: buildRouteValidationWithZod(updateActionPolicyApiKeyParamsSchema),
+      params: updateActionPolicyApiKeyParamsSchema,
     },
     response: {
       204: {
-        description: 'Indicates a successful call.',
+        description: 'Returns the action policy with the updated API key.',
       },
       404: {
+        body: () => errorResponseSchema,
         description: 'Indicates an action policy with the given ID does not exist.',
+      },
+      409: {
+        body: () => errorResponseSchema,
+        description: 'Indicates the action policy was concurrently updated by another caller.',
       },
     },
   };

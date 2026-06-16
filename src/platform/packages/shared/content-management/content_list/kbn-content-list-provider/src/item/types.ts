@@ -98,6 +98,100 @@ export type ContentListItem<T = Record<string, unknown>> = T & {
 };
 
 /**
+ * Action identifiers known to the package.
+ *
+ * The package owns built-in action presets keyed by these IDs
+ * ({@link ContentListActions.edit}, {@link ContentListActions.delete}).
+ * The content editor (`<Action.ContentEditor />`) does not appear here —
+ * its handler lives on `features.contentEditor.open` rather than on
+ * `item.actions`. Consumers may also invent custom IDs; see {@link ActionId}.
+ */
+export type KnownActionId = 'edit' | 'delete';
+
+/**
+ * Identifier for an action.
+ *
+ * `KnownActionId | (string & {})` keeps IDE autocomplete on the known
+ * IDs while still accepting any consumer-invented string (e.g.
+ * `'archive'`). The opaque `string & {}` is the standard TypeScript
+ * trick that prevents the union from collapsing to plain `string`.
+ */
+export type ActionId = KnownActionId | (string & {});
+
+interface ActionConfigBase {
+  /**
+   * Per-item restriction. Returns a reason string when the action is
+   * not permitted on the item; `undefined` otherwise. Drives row icon
+   * disabling and tooltip reasons.
+   */
+  restriction?: ActionRestriction;
+}
+
+/** Per-item action guard. Returns a reason when the action is not permitted. */
+export type ActionRestriction = (item: ContentListItem) => string | undefined;
+
+/** Per-item href getter for link-style row actions. */
+export type ItemActionHref = (item: ContentListItem) => string;
+
+/** Single-item action handler. */
+export type ItemActionHandler = (item: ContentListItem) => void;
+
+/** Bulk-action handler. */
+export type BulkActionHandler = (items: ContentListItem[]) => Promise<void>;
+
+/**
+ * Configuration for a single action.
+ *
+ * Row click behavior is **either** a callback (`onItemAction`) **or**
+ * an href (`getItemActionHref`) — never both. An action that only acts
+ * in bulk (e.g. delete) may omit both and supply only `onBulkAction`.
+ *
+ * The discriminated union enforces that at least one of `onItemAction`,
+ * `getItemActionHref`, or `onBulkAction` is supplied.
+ */
+export type ActionConfig = ActionConfigBase &
+  (
+    | {
+        /** Single-item click handler. */
+        onItemAction: ItemActionHandler;
+        getItemActionHref?: never;
+        /** Optional bulk handler. */
+        onBulkAction?: BulkActionHandler;
+      }
+    | {
+        onItemAction?: never;
+        /**
+         * Per-item href. When set, the row icon renders as an `<a>`
+         * link, preserving native link affordances (right-click,
+         * middle-click, keyboard activation, screen reader URL).
+         */
+        getItemActionHref: ItemActionHref;
+        /** Optional bulk handler. */
+        onBulkAction?: BulkActionHandler;
+      }
+    | {
+        onItemAction?: never;
+        getItemActionHref?: never;
+        /** Bulk-only handler (e.g. delete). */
+        onBulkAction: BulkActionHandler;
+      }
+  );
+
+/**
+ * Action configuration map.
+ *
+ * Known IDs ({@link KnownActionId}) are first-class fields; consumers
+ * can also add custom action IDs via the index signature. The named
+ * fields are tied to {@link KnownActionId} so the two stay in sync.
+ */
+export type ContentListActions = {
+  [Id in KnownActionId]?: ActionConfig;
+} & {
+  /** Custom actions, identified by a consumer-chosen string ID. */
+  [customId: string]: ActionConfig | undefined;
+};
+
+/**
  * Per-item configuration for link behavior and actions.
  */
 export interface ContentListItemConfig {
@@ -108,42 +202,7 @@ export interface ContentListItemConfig {
   getHref?: (item: ContentListItem) => string;
 
   /**
-   * Function to generate the edit URL for an item.
-   * When provided, the edit action renders as an `<a>` link with this `href`,
-   * preserving native link behavior (right-click, middle-click, screen reader
-   * announcement).
-   *
-   * Composable with `onEdit`: when both are provided, the action renders as a
-   * link (`href`) and also calls `onEdit` on click (e.g., for analytics tracking).
+   * Action handlers and per-item restrictions, keyed by action ID.
    */
-  getEditUrl?: (item: ContentListItem) => string;
-
-  /**
-   * Callback invoked when the edit action is clicked.
-   * Use this for side effects such as opening a flyout, tracking analytics,
-   * or programmatic navigation.
-   *
-   * When provided alone, the action renders as a button with an `onClick` handler.
-   * When provided alongside `getEditUrl`, both are applied: the action renders
-   * as a link and the callback fires on click.
-   */
-  onEdit?: (item: ContentListItem) => void;
-
-  /**
-   * Callback invoked to delete one or more items.
-   * When provided, enables the delete action on rows and the bulk-delete flow.
-   * The callback should handle the actual deletion and return a resolved promise on success.
-   */
-  onDelete?: (items: ContentListItem[]) => Promise<void>;
-
-  /**
-   * Callback invoked to inspect an item (view/edit its metadata).
-   * When provided, enables the "View details" row action.
-   *
-   * This is a simple, UI-agnostic callback — the implementation decides what
-   * happens when the action fires (e.g., opening a flyout, navigating to a
-   * detail page). The Kibana content editor integration is handled by
-   * `ContentListClientProvider` in `@kbn/content-list-provider-client`.
-   */
-  onInspect?: (item: ContentListItem) => void;
+  actions?: ContentListActions;
 }

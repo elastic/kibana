@@ -6,11 +6,17 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiBasicTable, EuiCodeBlock, EuiButtonIcon } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiBadge,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
-import { PlatformIcons } from './queries/platforms';
 import type { PackQueryFormData } from './queries/use_pack_query_form';
+import { OS_LABELS, PLATFORM_IDS, isPlatformId } from './queries/platforms';
 
 export interface PackQueriesTableProps {
   data: PackQueryFormData[];
@@ -31,53 +37,78 @@ const PackQueriesTableComponent: React.FC<PackQueriesTableProps> = ({
 }) => {
   const renderDeleteAction = useCallback(
     (item: PackQueryFormData) => (
-      <EuiButtonIcon
-        color="danger"
-        // eslint-disable-next-line react/jsx-no-bind, react-perf/jsx-no-new-function-as-prop
-        onClick={() => onDeleteClick && onDeleteClick(item)}
-        iconType="trash"
-        aria-label={i18n.translate('xpack.osquery.pack.queriesTable.deleteActionAriaLabel', {
+      <EuiToolTip
+        content={i18n.translate('xpack.osquery.pack.queriesTable.deleteActionAriaLabel', {
           defaultMessage: 'Delete {queryName}',
           values: {
             queryName: item.id,
           },
         })}
-      />
+        disableScreenReaderOutput
+      >
+        <EuiButtonIcon
+          color="danger"
+          // eslint-disable-next-line react/jsx-no-bind, react-perf/jsx-no-new-function-as-prop
+          onClick={() => onDeleteClick && onDeleteClick(item)}
+          iconType="trash"
+          aria-label={i18n.translate('xpack.osquery.pack.queriesTable.deleteActionAriaLabel', {
+            defaultMessage: 'Delete {queryName}',
+            values: {
+              queryName: item.id,
+            },
+          })}
+        />
+      </EuiToolTip>
     ),
     [onDeleteClick]
   );
 
   const renderEditAction = useCallback(
     (item: PackQueryFormData) => (
-      <EuiButtonIcon
-        color="primary"
-        // eslint-disable-next-line react/jsx-no-bind, react-perf/jsx-no-new-function-as-prop
-        onClick={() => onEditClick && onEditClick(item)}
-        iconType="pencil"
-        aria-label={i18n.translate('xpack.osquery.pack.queriesTable.editActionAriaLabel', {
+      <EuiToolTip
+        content={i18n.translate('xpack.osquery.pack.queriesTable.editActionAriaLabel', {
           defaultMessage: 'Edit {queryName}',
           values: {
             queryName: item.id,
           },
         })}
-      />
+        disableScreenReaderOutput
+      >
+        <EuiButtonIcon
+          color="primary"
+          // eslint-disable-next-line react/jsx-no-bind, react-perf/jsx-no-new-function-as-prop
+          onClick={() => onEditClick && onEditClick(item)}
+          iconType="pencil"
+          aria-label={i18n.translate('xpack.osquery.pack.queriesTable.editActionAriaLabel', {
+            defaultMessage: 'Edit {queryName}',
+            values: {
+              queryName: item.id,
+            },
+          })}
+        />
+      </EuiToolTip>
     ),
     [onEditClick]
   );
 
-  const renderQueryColumn = useCallback(
-    (query: string) => (
-      <EuiCodeBlock language="sql" fontSize="s" paddingSize="none" transparentBackground>
-        {query}
-      </EuiCodeBlock>
-    ),
-    []
-  );
+  const renderPlatformColumn = useCallback((platform: string) => {
+    const ids = platform
+      ? platform
+          .split(',')
+          .map((s) => s.trim())
+          .filter(Boolean)
+      : [...PLATFORM_IDS];
 
-  const renderPlatformColumn = useCallback(
-    (platform: string) => <PlatformIcons platform={platform} />,
-    []
-  );
+    return (
+      <EuiFlexGroup gutterSize="xs" wrap>
+        {ids.map((id) => (
+          <EuiFlexItem key={id} grow={false}>
+            <EuiBadge color="hollow">{isPlatformId(id) ? OS_LABELS[id] : id}</EuiBadge>
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+    );
+  }, []);
 
   const renderVersionColumn = useCallback(
     (version: string) =>
@@ -106,16 +137,9 @@ const PackQueriesTableComponent: React.FC<PackQueriesTableProps> = ({
         width: '100px',
       },
       {
-        field: 'query',
-        name: i18n.translate('xpack.osquery.pack.queriesTable.queryColumnTitle', {
-          defaultMessage: 'Query',
-        }),
-        render: renderQueryColumn,
-      },
-      {
         field: 'platform',
-        name: i18n.translate('xpack.osquery.pack.queriesTable.platformColumnTitle', {
-          defaultMessage: 'Platform',
+        name: i18n.translate('xpack.osquery.pack.queriesTable.osColumnTitle', {
+          defaultMessage: 'Operating systems',
         }),
         render: renderPlatformColumn,
       },
@@ -145,14 +169,7 @@ const PackQueriesTableComponent: React.FC<PackQueriesTableProps> = ({
           ]
         : []),
     ],
-    [
-      isReadOnly,
-      renderDeleteAction,
-      renderEditAction,
-      renderPlatformColumn,
-      renderQueryColumn,
-      renderVersionColumn,
-    ]
+    [isReadOnly, renderDeleteAction, renderEditAction, renderPlatformColumn, renderVersionColumn]
   );
 
   const sorting = useMemo(
