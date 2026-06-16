@@ -21,6 +21,7 @@ import { ServerlessProjectChromePage } from './serverless_project_chrome_page';
 import { GraphFlyoutPage } from './graph_flyout_page';
 import { DocumentFlyout } from './flyout_v2/document/main/document_flyout';
 import { RuleFlyout } from './flyout_v2/rule/rule_flyout';
+import { NetworkFlyout } from './flyout_v2/network/network_flyout';
 import { ThreatIntelligenceTool } from './flyout_v2/document/tools/threat_intelligence_tool';
 import { CorrelationsTool } from './flyout_v2/document/tools/correlations_tool';
 import { PrevalenceTool } from './flyout_v2/document/tools/prevalence_tool';
@@ -49,6 +50,8 @@ export interface SecurityPageObjects extends PageObjects {
   documentFlyout: DocumentFlyout;
   /** v2 rule flyout — opened from the alerts table rule column or the document flyout About section. */
   ruleFlyout: RuleFlyout;
+  /** v2 network flyout — opened from an IP value (alerts table source.ip cell / document flyout IP field). */
+  networkFlyout: NetworkFlyout;
   /** Threat intelligence tool overlay inside the flyout v2 document flyout. */
   threatIntelligenceTool: ThreatIntelligenceTool;
   /** Correlations tool overlay inside the flyout v2 document flyout. */
@@ -88,6 +91,7 @@ export function extendPageObjects(
     graphFlyoutPage: createLazyPageObject(GraphFlyoutPage, page),
     documentFlyout: createLazyPageObject(DocumentFlyout, page),
     ruleFlyout: createLazyPageObject(RuleFlyout, page),
+    networkFlyout: createLazyPageObject(NetworkFlyout, page),
     threatIntelligenceTool: createLazyPageObject(ThreatIntelligenceTool, page),
     correlationsTool: createLazyPageObject(CorrelationsTool, page),
     prevalenceTool: createLazyPageObject(PrevalenceTool, page),

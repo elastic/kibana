@@ -23,6 +23,7 @@ import {
   getCorrelationsApiService,
   getPrevalenceApiService,
   getAnalyzerApiService,
+  getNetworkApiService,
   getResponseActionsApiService,
 } from './worker';
 import { extendPageObjects, securityBrowserAuthFixture } from './test';
@@ -112,6 +113,10 @@ export const spaceTest = securityParallelFixtures.extend<
         log,
       });
       extendedApiServices.analyzer = getAnalyzerApiService({
+        esClient,
+        log,
+      });
+      extendedApiServices.network = getNetworkApiService({
         esClient,
         log,
       });
