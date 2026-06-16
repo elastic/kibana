@@ -23,6 +23,8 @@ import { taskActionSchema } from '../../../../lib/tasks/task_action_schema';
 import { handleTaskAction } from '../../../utils/task_helpers';
 import type { KIBulkOperation } from '../../../../lib/streams/ki';
 
+const MAX_INPUT_STRING_LENGTH = 255;
+
 export type FeaturesIdentificationTaskResult = TaskResult<IdentifyFeaturesResult>;
 
 const dateFromString = z.string().transform((input) => new Date(input));
@@ -100,7 +102,10 @@ export const deleteFeatureRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ name: z.string(), id: z.string() }),
+    path: z.object({
+      name: z.string().max(MAX_INPUT_STRING_LENGTH),
+      id: z.string().max(MAX_INPUT_STRING_LENGTH),
+    }),
   }),
   handler: async ({
     params,
@@ -136,7 +141,7 @@ export const listFeaturesRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ name: z.string().max(255) }),
+    path: z.object({ name: z.string().max(MAX_INPUT_STRING_LENGTH) }),
     query: z.optional(
       z.object({
         query: z.string().optional(),
