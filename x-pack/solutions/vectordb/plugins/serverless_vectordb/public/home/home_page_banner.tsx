@@ -21,6 +21,7 @@ import { useKibana } from '../hooks/use_kibana';
 import { useLocalStorage } from '../hooks/use_local_storage';
 import searchRocketIcon from './assets/search-rocket.svg';
 import { BANNER_DISMISSED_KEY, HOME_PAGE_BANNER_COPY } from '../constants';
+import { bannerCallOutStyle, bannerButtonFlexItemStyle } from './home_page_banner_styles';
 
 interface HomePageBannerProps {
   hasData: boolean;
@@ -63,11 +64,7 @@ export const HomePageBanner = ({ hasData, isLoading }: HomePageBannerProps) => {
       <EuiSpacer size="xxl" />
       <EuiCallOut
         announceOnMount={false}
-        css={({ euiTheme }) => ({
-          backgroundColor: `${euiTheme.colors.backgroundBasePlain}`,
-          border: `${euiTheme.border.thin}`,
-          borderRadius: `${euiTheme.border.radius.medium}`,
-        })}
+        css={bannerCallOutStyle}
         onDismiss={hasData ? handleDismiss : undefined}
         data-test-subj="homePageBanner"
       >
@@ -76,19 +73,18 @@ export const HomePageBanner = ({ hasData, isLoading }: HomePageBannerProps) => {
             <EuiImage src={searchRocketIcon} alt="" size="original" />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiTitle size={'s'}>
+            <EuiTitle size="s">
               <h3>{title}</h3>
             </EuiTitle>
             <EuiText size="s" color="subdued">
               <p>{description}</p>
             </EuiText>
           </EuiFlexItem>
-          <EuiFlexItem grow={false} css={({ euiTheme }) => ({ marginRight: euiTheme.size.l })}>
+          <EuiFlexItem grow={false} css={bannerButtonFlexItemStyle}>
             {hasData ? (
               <EuiButton
                 href={docLinks.links.enterpriseSearch.elasticInferenceServiceSupportedModels}
                 target="_blank"
-                rel="noopener noreferrer"
                 data-test-subj="homePageBannerViewSupportedModelsBtn"
                 data-telemetry-id="serverlessVectordb-home-banner-viewSupportedModels-btn"
               >

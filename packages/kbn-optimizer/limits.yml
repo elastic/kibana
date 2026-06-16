@@ -5,7 +5,7 @@ pageLoadAssetSize:
   agentBuilderDashboards: 7786
   agentBuilderPlatform: 15544
   agentBuilderWorkflows: 24405
-  agentContextLayer: 1883
+  agentContextLayer: 7773
   aiAssistantManagementSelection: 11569
   aiops: 15227
   alerting: 22371
@@ -167,7 +167,7 @@ pageLoadAssetSize:
   searchSynonyms: 6371
   security: 79627
   securitySolution: 171101
-  securitySolutionEss: 38689
+  securitySolutionEss: 42592
   securitySolutionServerless: 52082
   serverless: 7412
   serverlessObservability: 21437
@@ -206,7 +206,7 @@ pageLoadAssetSize:
   visTypeTable: 18999
   visTypeTagcloud: 7876
   visTypeTimelion: 12512
-  visTypeTimeseries: 20000
+  visTypeTimeseries: 21819
   visTypeVega: 11562
   visTypeVislib: 14679
   visTypeXy: 32342
