@@ -291,7 +291,7 @@ isarray@1.0.0
 isarray@2.0.5
 isomorphic-timers-promises@1.0.1
 jest-worker@27.5.1
-jquery@3.7.1
+jquery@4.0.0
 js-tokens@4.0.0
 jsesc@3.1.0
 json-parse-even-better-errors@2.3.1
