@@ -15,7 +15,9 @@ describe('isOccConflictError', () => {
   });
 
   it('returns false for duck-typed 409 errors', () => {
-    expect(isOccConflictError(Object.assign(new Error('conflict'), { statusCode: 409 }))).toBe(false);
+    expect(isOccConflictError(Object.assign(new Error('conflict'), { statusCode: 409 }))).toBe(
+      false
+    );
   });
 });
 
