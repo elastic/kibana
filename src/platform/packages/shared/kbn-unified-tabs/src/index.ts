@@ -9,7 +9,3 @@
 
 export { TabbedContent, type TabbedContentProps } from './components/tabbed_content';
 export { type TabsEBTEvent, TabsEventName } from './types';
-export {
-  DEFAULT_TABS_BAR_VISUAL_VARIANT,
-  type TabsBarVisualVariant,
-} from './tabs_bar_visual_variant';

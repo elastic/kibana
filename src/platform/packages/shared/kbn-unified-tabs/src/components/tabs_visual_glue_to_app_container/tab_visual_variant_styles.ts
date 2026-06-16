@@ -9,10 +9,8 @@
 
 import { css } from '@emotion/react';
 import { euiSlightShadowHover, type EuiThemeComputed, type UseEuiTheme } from '@elastic/eui';
-import type { TabsBarVisualVariant } from '../../tabs_bar_visual_variant';
 
 interface TabWithBackgroundStyleParams {
-  visualVariant: TabsBarVisualVariant;
   isSelected: boolean;
   isDragging: boolean;
   hideRightSeparator: boolean;
@@ -21,67 +19,21 @@ interface TabWithBackgroundStyleParams {
 }
 
 export const getTabWithBackgroundStyles = ({
-  visualVariant,
   isSelected,
   isDragging,
   hideRightSeparator,
   euiTheme,
   euiThemeContext,
 }: TabWithBackgroundStyleParams) => {
-  if (visualVariant === 'inlineAppHeader') {
-    return {
-      wrapper: css`
-        position: relative;
-        display: inline-flex;
-        flex-shrink: 0;
-        border-radius: ${euiTheme.border.radius.small};
-        background: ${isSelected || isDragging
-          ? euiTheme.colors.backgroundBaseFormsPrepend
-          : euiTheme.colors.backgroundBasePlain};
-        transition: background ${euiTheme.animation.fast};
-        margin-inline: ${euiTheme.size.s};
-        padding: 0;
-
-        ${isDragging ? euiSlightShadowHover(euiThemeContext) : ''}
-
-        &::after {
-          content: '';
-          position: absolute;
-          right: calc(-1 * ${euiTheme.size.s});
-          top: 50%;
-          transform: translateY(-50%);
-          width: 1px;
-          height: ${euiTheme.size.m};
-          background-color: ${euiTheme.colors.borderBasePlain};
-          transition: opacity ${euiTheme.animation.fast};
-          opacity: ${hideRightSeparator || isDragging ? '0' : '1'};
-          pointer-events: none;
-        }
-      `,
-      inner: css`
-        border-radius: ${euiTheme.border.radius.small};
-
-        ${!isSelected && !isDragging
-          ? `
-          &:hover {
-            background-color: ${euiTheme.colors.lightShade};
-          }
-        `
-          : ''}
-      `,
-      showAccents: false,
-    };
-  }
-
   return {
     // tab main background and another background color on hover
     wrapper: css`
       position: relative;
       display: inline-block;
       border-radius: ${euiTheme.border.radius.small};
-      background: ${isSelected || isDragging
-        ? euiTheme.colors.backgroundBasePlain
-        : euiTheme.colors.lightestShade};
+      // reserve space for the active-tab accent so selecting a tab doesn't shift its height
+      border-top: ${euiTheme.size.xxs} solid transparent;
+      background: ${isSelected || isDragging ? euiTheme.colors.backgroundBasePlain : 'transparent'};
       transition: background ${euiTheme.animation.fast};
       margin: ${euiTheme.size.xs};
       margin-bottom: 0;
@@ -90,6 +42,8 @@ export const getTabWithBackgroundStyles = ({
       ${isSelected
         ? `
           position: relative;
+          // colored accent on top of the active tab card
+          border-top-color: ${euiTheme.colors.primary};
           border-bottom-left-radius: 0;
           border-bottom-right-radius: 0;
           filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.06))
@@ -135,21 +89,8 @@ export const getTabWithBackgroundStyles = ({
   };
 };
 
-export const getTabsBarWithBackgroundStyles = (
-  visualVariant: TabsBarVisualVariant,
-  euiTheme: EuiThemeComputed
-) => {
-  if (visualVariant === 'inlineAppHeader') {
-    return css`
-      background: transparent;
-    `;
-  }
-
-  return css`
+export const getTabsBarWithBackgroundStyles = (euiTheme: EuiThemeComputed) =>
+  css`
     // tabs bar background
-    background: ${euiTheme.colors.lightestShade};
+    background: ${euiTheme.colors.backgroundBasePlain};
   `;
-};
-
-export const shouldApplyTabsBarGlobalChromeStyles = (visualVariant: TabsBarVisualVariant) =>
-  visualVariant === 'appContainer';

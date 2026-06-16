@@ -132,8 +132,6 @@ export const TabsView = (props: SingleTabViewProps) => {
         <div ref={resizeRef} className="eui-fullHeight">
           <UnifiedTabs
             services={services}
-            // tabsBarVisualVariant={isChromeNextProjectHeader ? 'inlineAppHeader' : 'appContainer'} //HD
-            tabsBarVisualVariant="inlineAppHeader"
             items={items}
             selectedItemId={currentTabId}
             recentlyClosedItems={recentlyClosedItems}

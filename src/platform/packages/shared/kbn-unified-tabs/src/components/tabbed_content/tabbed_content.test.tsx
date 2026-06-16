@@ -628,7 +628,7 @@ describe('TabbedContent', () => {
       expect(screen.getByTestId('unifiedTabs_selectTabBtn_tab2')).toBeInTheDocument();
     });
 
-    it('passes tabsBarVisualVariant to the tabs bar', () => {
+    it('renders the tabs bar with the unified styling class', () => {
       render(
         <TabbedContent
           items={[
@@ -640,16 +640,13 @@ describe('TabbedContent', () => {
           createItem={() => NEW_TAB}
           getPreviewData={getPreviewDataMock}
           services={servicesMock}
-          tabsBarVisualVariant="inlineAppHeader"
           onChanged={jest.fn()}
           onEBTEvent={jest.fn()}
           onClearRecentlyClosed={jest.fn()}
         />
       );
 
-      expect(screen.getByTestId('unifiedTabs_tabsBar')).toHaveClass(
-        'unifiedTabs__tabsBar--inlineAppHeader'
-      );
+      expect(screen.getByTestId('unifiedTabs_tabsBar')).toHaveClass('unifiedTabs__tabsBar');
       expect(screen.getAllByTestId(/unifiedTabs_tab_/)).toHaveLength(2);
     });
 

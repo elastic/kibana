@@ -36,7 +36,6 @@ import { TabsEventName } from '../../types';
 import { getTabIdAttribute } from '../../utils/get_tab_attributes';
 import { useResponsiveTabs } from '../../hooks/use_responsive_tabs';
 import { TabsBarWithBackground } from '../tabs_visual_glue_to_app_container/tabs_bar_with_background';
-import { DEFAULT_TABS_BAR_VISUAL_VARIANT } from '../../tabs_bar_visual_variant';
 import { TabsBarMenu, type TabsBarMenuProps } from '../tabs_bar_menu';
 import { TabsEventDataKeys } from '../../event_data_keys';
 import { OptionalDraggable } from './optional_draggable';
@@ -65,7 +64,6 @@ export type TabsBarProps = Pick<
   | 'disableCloseButton'
   | 'disableInlineLabelEditing'
   | 'disableDragAndDrop'
-  | 'visualVariant'
 > & {
   items: TabItem[];
   selectedItem: TabItem | null;
@@ -113,7 +111,6 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
       disableInlineLabelEditing = false,
       disableDragAndDrop = false,
       disableTabsBarMenu = false,
-      visualVariant = DEFAULT_TABS_BAR_VISUAL_VARIANT,
     },
     componentRef
   ) => {
@@ -284,8 +281,6 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
       [items]
     );
 
-    const isInlineAppHeader = visualVariant === 'inlineAppHeader';
-
     const mainTabsBarContent = (
       <EuiFlexGroup
         responsive={false}
@@ -319,12 +314,11 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
                   {/* Render each tab, optionally wrapped with drag functionality */}
                   {items.map((item, index) => {
                     const nextItem = items[index + 1];
-                    const hideRightSeparator = isInlineAppHeader
-                      ? false
-                      : item.id === hoveredTabId || // hide own separator if hovered
-                        item.id === selectedItem?.id || // hide own separator if selected
-                        nextItem?.id === selectedItem?.id || // hide left sibling separator if next is selected
-                        nextItem?.id === hoveredTabId; // hide left sibling separator if next is hovered
+                    const hideRightSeparator =
+                      item.id === hoveredTabId || // hide own separator if hovered
+                      item.id === selectedItem?.id || // hide own separator if selected
+                      nextItem?.id === selectedItem?.id || // hide left sibling separator if next is selected
+                      nextItem?.id === hoveredTabId; // hide left sibling separator if next is hovered
 
                     return (
                       /*
@@ -359,7 +353,6 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
                             disableCloseButton={disableCloseButton}
                             disableInlineLabelEditing={disableInlineLabelEditing}
                             disableDragAndDrop={disableDragAndDrop}
-                            visualVariant={visualVariant}
                           />
                         )}
                       </OptionalDraggable>
@@ -407,11 +400,7 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
     );
 
     return (
-      <TabsBarWithBackground
-        data-test-subj="unifiedTabs_tabsBar"
-        services={services}
-        visualVariant={visualVariant}
-      >
+      <TabsBarWithBackground data-test-subj="unifiedTabs_tabsBar" services={services}>
         {mainTabsBarContent}
       </TabsBarWithBackground>
     );

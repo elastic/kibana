@@ -34,10 +34,6 @@ import { TabStatus, type TabPreviewData } from '../../types';
 import { TabWithBackground } from '../tabs_visual_glue_to_app_container/tab_with_background';
 import { TabPreview } from '../tab_preview';
 import { useTabLabelWidth } from './use_tab_label_width';
-import {
-  DEFAULT_TABS_BAR_VISUAL_VARIANT,
-  type TabsBarVisualVariant,
-} from '../../tabs_bar_visual_variant';
 
 export interface TabProps {
   item: TabItem;
@@ -60,7 +56,6 @@ export interface TabProps {
   disableCloseButton?: boolean;
   disableInlineLabelEditing?: boolean;
   disableDragAndDrop?: boolean;
-  visualVariant?: TabsBarVisualVariant;
 }
 
 const closeButtonLabel = i18n.translate('unifiedTabs.closeTabButton', {
@@ -93,7 +88,6 @@ export const Tab: React.FC<TabProps> = (props) => {
     disableCloseButton = false,
     disableInlineLabelEditing = false,
     disableDragAndDrop = false,
-    visualVariant = DEFAULT_TABS_BAR_VISUAL_VARIANT,
   } = props;
   const { euiTheme } = useEuiTheme();
   const tabLabelId = useGeneratedHtmlId({ prefix: 'tabLabel' });
@@ -210,7 +204,7 @@ export const Tab: React.FC<TabProps> = (props) => {
   }, [selectedItemId, isSelected, isActionPopoverOpen]);
 
   const mainTabContent = (
-    <div css={getTabContainerCss(euiTheme, tabsSizeConfig, isSelected, isDragging, visualVariant)}>
+    <div css={getTabContainerCss(euiTheme, tabsSizeConfig, isSelected, isDragging)}>
       <div
         ref={tabInteractiveElementRef}
         {...(!disableDragAndDrop ? dragHandleProps : {})}
@@ -329,7 +323,6 @@ export const Tab: React.FC<TabProps> = (props) => {
       isDragging={isDragging}
       hideRightSeparator={hideRightSeparator}
       services={services}
-      visualVariant={visualVariant}
       onMouseEnter={() => onHoverChange?.(item.id, true)}
       onMouseLeave={() => onHoverChange?.(item.id, false)}
     >
@@ -358,8 +351,7 @@ function getTabContainerCss(
   euiTheme: EuiThemeComputed,
   tabsSizeConfig: TabsSizeConfig,
   isSelected: boolean,
-  isDragging?: boolean,
-  visualVariant: TabsBarVisualVariant = DEFAULT_TABS_BAR_VISUAL_VARIANT
+  isDragging?: boolean
 ) {
   // TODO: remove the usage of deprecated colors
 
@@ -378,9 +370,7 @@ function getTabContainerCss(
 
     .unifiedTabs__tabLabelText {
       color: ${isSelected || isDragging ? euiTheme.colors.text : euiTheme.colors.subduedText};
-      font-weight: ${visualVariant === 'inlineAppHeader' && isSelected
-        ? euiTheme.font.weight.semiBold
-        : euiTheme.font.weight.regular};
+      font-weight: ${isSelected ? euiTheme.font.weight.semiBold : euiTheme.font.weight.regular};
     }
 
     &:hover .unifiedTabs__tabLabelText {

@@ -12,10 +12,6 @@ import { css } from '@emotion/react';
 import { useEuiTheme, type EuiThemeComputed } from '@elastic/eui';
 import classNames from 'classnames';
 import type { TabsServices } from '../../types';
-import {
-  DEFAULT_TABS_BAR_VISUAL_VARIANT,
-  type TabsBarVisualVariant,
-} from '../../tabs_bar_visual_variant';
 import { getTabWithBackgroundStyles } from './tab_visual_variant_styles';
 
 export interface TabWithBackgroundProps extends HTMLAttributes<HTMLElement> {
@@ -23,7 +19,6 @@ export interface TabWithBackgroundProps extends HTMLAttributes<HTMLElement> {
   isDragging?: boolean;
   hideRightSeparator?: boolean;
   services: TabsServices;
-  visualVariant?: TabsBarVisualVariant;
   children: React.ReactNode;
 }
 
@@ -34,7 +29,6 @@ export const TabWithBackground = React.forwardRef<HTMLDivElement, TabWithBackgro
       isDragging = false,
       hideRightSeparator = false,
       services,
-      visualVariant = DEFAULT_TABS_BAR_VISUAL_VARIANT,
       children,
       ...otherProps
     },
@@ -44,7 +38,6 @@ export const TabWithBackground = React.forwardRef<HTMLDivElement, TabWithBackgro
     const { euiTheme } = euiThemeContext;
 
     const { wrapper, inner, showAccents } = getTabWithBackgroundStyles({
-      visualVariant,
       isSelected,
       isDragging,
       hideRightSeparator,
@@ -58,7 +51,6 @@ export const TabWithBackground = React.forwardRef<HTMLDivElement, TabWithBackgro
         ref={ref}
         className={classNames('unifiedTabs__tabWithBackground', {
           'unifiedTabs__tabWithBackground--selected': isSelected,
-          'unifiedTabs__tabWithBackground--inlineAppHeader': visualVariant === 'inlineAppHeader',
         })}
         css={wrapper}
       >

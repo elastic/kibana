@@ -12,10 +12,6 @@ import React, { useEffect } from 'react';
 import { css as cssString } from '@emotion/css';
 import { useEuiTheme } from '@elastic/eui';
 import type { TabsServices } from '../../types';
-import {
-  DEFAULT_TABS_BAR_VISUAL_VARIANT,
-  type TabsBarVisualVariant,
-} from '../../tabs_bar_visual_variant';
 import { getTabsBarWithBackgroundStyles } from './tab_visual_variant_styles';
 
 const globalCss = cssString`
@@ -31,13 +27,11 @@ const globalCss = cssString`
 
 export interface TabsBarWithBackgroundProps extends HTMLAttributes<HTMLElement> {
   services: TabsServices;
-  visualVariant?: TabsBarVisualVariant;
   children: React.ReactNode;
 }
 
 export const TabsBarWithBackground: React.FC<TabsBarWithBackgroundProps> = ({
   services,
-  visualVariant = DEFAULT_TABS_BAR_VISUAL_VARIANT,
   children,
   ...otherProps
 }) => {
@@ -55,12 +49,8 @@ export const TabsBarWithBackground: React.FC<TabsBarWithBackgroundProps> = ({
   return (
     <div
       {...otherProps}
-      className={
-        visualVariant === 'inlineAppHeader'
-          ? 'unifiedTabs__tabsBar--inlineAppHeader'
-          : 'unifiedTabs__tabsBar--appContainer'
-      }
-      css={getTabsBarWithBackgroundStyles(visualVariant, euiTheme)}
+      className="unifiedTabs__tabsBar"
+      css={getTabsBarWithBackgroundStyles(euiTheme)}
     >
       {children}
     </div>
