@@ -535,7 +535,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       eql: `${ELASTIC_DOCS}explore-analyze/query-filter/languages/eql`,
       kueryQuerySyntax: `${ELASTIC_DOCS}explore-analyze/query-filter/languages/kql`,
       luceneQuery: `${ELASTIC_DOCS}reference/query-languages/query-dsl/query-dsl-query-string-query`,
-      luceneQuerySyntax: `${ELASTIC_DOCS}reference/query-languages/query-dsl/query-dsl-query-string-query#query-string-syntax`,
+      luceneQuerySyntax: `${ELASTIC_DOCS}explore-analyze/query-filter/languages/lucene-query-syntax`,
       percolate: `${ELASTIC_DOCS}reference/query-languages/query-dsl/query-dsl-percolate-query`,
       queryDsl: `${ELASTIC_DOCS}explore-analyze/query-filter/languages/querydsl`,
       queryESQL: `${ELASTIC_DOCS}explore-analyze/query-filter/languages/esql`,

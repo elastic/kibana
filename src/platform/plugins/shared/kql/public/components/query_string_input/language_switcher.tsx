@@ -58,7 +58,6 @@ export const QueryLanguageSwitcher = React.memo(function QueryLanguageSwitcher({
   isDisabled,
   deps: { docLinks },
 }: QueryLanguageSwitcherProps) {
-  const kueryQuerySyntaxDocs = docLinks.links.query.kueryQuerySyntax;
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const button = (
@@ -74,6 +73,10 @@ export const QueryLanguageSwitcher = React.memo(function QueryLanguageSwitcher({
   );
 
   const isKqlSelected = language === 'kuery';
+  const isLuceneSelected = language === 'lucene';
+  const documentationHref = isLuceneSelected
+    ? docLinks.links.query.luceneQuerySyntax
+    : docLinks.links.query.kueryQuerySyntax;
 
   const languageMenuItem = (
     <>
@@ -109,7 +112,7 @@ export const QueryLanguageSwitcher = React.memo(function QueryLanguageSwitcher({
       <EuiContextMenuItem
         key={'documentation'}
         icon={'documentation'}
-        href={kueryQuerySyntaxDocs}
+        href={documentationHref}
         target="_blank"
       >
         {strings.documentationLabel()}
