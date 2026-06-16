@@ -229,7 +229,7 @@ describe('PackagePolicyInputConfig', () => {
       expect(mockOnChange).toHaveBeenCalledWith({ condition: "${host.os.type} == 'linux'" });
     });
 
-    it('calls updatePackagePolicyInput with undefined when field is cleared', () => {
+    it('calls updatePackagePolicyInput with null when field is cleared', () => {
       const { utils, mockOnChange } = renderCondition({
         condition: "${host.os.type} == 'linux'",
       });
@@ -237,7 +237,7 @@ describe('PackagePolicyInputConfig', () => {
       fireEvent.change(utils.getByTestId('packagePolicyInputConditionInput'), {
         target: { value: '' },
       });
-      expect(mockOnChange).toHaveBeenCalledWith({ condition: undefined });
+      expect(mockOnChange).toHaveBeenCalledWith({ condition: null });
     });
   });
 

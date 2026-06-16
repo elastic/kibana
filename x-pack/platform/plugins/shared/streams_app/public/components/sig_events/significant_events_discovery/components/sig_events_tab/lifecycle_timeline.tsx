@@ -99,13 +99,12 @@ const buildEventDescription = ({
   const description = i18n.translate('xpack.streams.lifecycle.eventDesc', {
     defaultMessage: 'Status: {status}, Criticality: {criticality}',
     values: {
-      // TODO: rename to event.status once the data stream field is renamed
-      status: event.verdict ?? '-',
+      status: event.status ?? '-',
       criticality: event.criticality != null ? String(event.criticality) : '-',
     },
   });
   const detail =
-    [event.verdict_summary, event.assessment_note].filter(Boolean).join(' — ') || undefined;
+    [event.analysis_summary, event.assessment_note].filter(Boolean).join(' — ') || undefined;
   return { description, detail };
 };
 
