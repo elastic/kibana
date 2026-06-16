@@ -92,7 +92,7 @@ safe-outputs:
   create-pull-request:
     draft: true
     max: 1
-    labels: [ai:flaky-fix-ready]
+    labels: [ai:flaky-fix-pr]
     base-branch: main
     allowed-base-branches: [main]
     if-no-changes: 'ignore'

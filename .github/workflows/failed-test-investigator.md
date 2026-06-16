@@ -114,6 +114,16 @@ safe-outputs:
     max: 1
     target: *issue_number
     hide-older-comments: true
+  add-labels:
+    allowed:
+      - failure:ai-fixable
+      - failure:test-design
+      - failure:test-environment
+      - failure:application
+      - failure:ci-environment
+      - failure:inconclusive
+    max: 2
+    target: *issue_number
 
 strict: false
 timeout-minutes: 20
@@ -138,15 +148,13 @@ Every conclusion must cite specific evidence. Do not guess.
 
 Set `classification` based on where the evidence points:
 
-- **`test-design`**: issue lives in the test code — timing/waits, selectors, fixtures, helpers, setup/teardown, assertion shape.
-- **`test-environment`**: test code is fine, but its surroundings are wrong — leaked state from prior tests, flaky fixture init, missing `data-test-subj` the test relies on, parallel-slot interference.
-- **`application`**: real product bug exposed by the test — race, regression, broken contract, feature-flag bug.
-- **`external`**: outside test + app — CI agent, downed dependency (e.g., ES failed to start), network, credentials, registry. Failures on `local-*` targets are less likely to be external; weigh that when classifying.
+- **`test-design`**: issue lives in the test code (e.g., timing/waits, selectors, fixtures, helpers, setup/teardown, assertion shape).
+- **`test-environment`**: test code is fine, but its surroundings are problematic (e.g., leaked state from prior tests, flaky fixture init, missing `data-test-subj` the test relies on, parallel-slot interference).
+- **`application`**: real product bug exposed by the test (e.g., race, regression, broken contract, feature-flag bug).
+- **`ci-environment`**: outside test + app — CI agent, downed dependency (e.g., ES failed to start), network, credentials, registry.
 - **`inconclusive`**: evidence does not support a defensible call.
 
 Set `confidence` to `high` (direct evidence pins the cause), `medium` (strong inference from converging signals), or `low` (plausible but underspecified).
-
-No other side-effects beyond posting the comment.
 
 ## Fix proposal
 
@@ -155,6 +163,22 @@ No other side-effects beyond posting the comment.
 - For test fixes: name the assertion, wait, fixture, setup/teardown, or helper to change.
 - For code fixes: name the module, API, or behavior that looks wrong and why.
 - If you cannot justify a concrete fix, say what additional evidence would change the conclusion.
+
+## Labels
+
+### Classification label
+
+Add exactly one classification label to the issue that matches the chosen `classification`:
+
+- `failure:test-design`: when `classification` is `test-design`
+- `failure:test-environment`: when `classification` is `test-environment`
+- `failure:application`: when `classification` is `application`
+- `failure:ci-environment`: when `classification` is `ci-environment`
+- `failure:inconclusive`: when `classification` is `inconclusive`
+
+### "Is the issue fixable?" label
+
+Add `failure:ai-fixable` to the issue if we are confident that a fix is available (it would imply opening a PR against the codebase).
 
 ## Attribution
 
