@@ -76,10 +76,6 @@ export interface ServiceMapEmbeddableProps {
   viewFilters?: ServiceMapViewFilters;
   /** Push in-panel filter edits back to the state manager so the embeddable's controlled value updates. */
   onViewFiltersChange?: (next: ServiceMapViewFilters) => void;
-  /** Persisted find-in-page query captured at "Copy to dashboard" time. */
-  searchQuery?: string;
-  /** Push in-panel search edits back to the state manager. */
-  onSearchQueryChange?: (next: string) => void;
 }
 
 function LoadingSpinner() {
@@ -115,8 +111,6 @@ export function ServiceMapEmbeddable({
   parentQuery,
   viewFilters,
   onViewFiltersChange,
-  searchQuery,
-  onSearchQueryChange,
 }: ServiceMapEmbeddableProps) {
   const license = useLicenseContext();
   const { config } = useApmPluginContext();
@@ -165,24 +159,30 @@ export function ServiceMapEmbeddable({
   const { dataView } = useAdHocApmDataView();
   const kibanaQuerySettings = useKibanaQuerySettings();
   const esQuery = useMemo(() => {
-    const hasParentFilters = Boolean(parentFilters && parentFilters.length > 0);
-    const parentQueryText =
-      parentQuery && 'query' in parentQuery && typeof parentQuery.query === 'string'
-        ? parentQuery.query.trim()
-        : undefined;
-    const hasParentQuery =
-      parentQueryText !== undefined ? parentQueryText.length > 0 : Boolean(parentQuery);
-    const hasParentSearchState = hasParentFilters || hasParentQuery;
-    if (!dataView || !hasParentSearchState) {
-      return undefined;
-    }
+    // Environment is applied via the dedicated server param, so it never contributes to the
+    // dashboard-derived es-query.
     const filtersWithoutEnv = (parentFilters ?? []).filter(
       (f) => f.meta?.key !== 'service.environment'
     );
-    const queries: Query[] =
-      parentQuery && 'query' in parentQuery
-        ? [{ query: String(parentQuery.query ?? ''), language: parentQuery.language ?? 'kuery' }]
-        : [{ query: '', language: 'kuery' }];
+    const hasParentFilters = filtersWithoutEnv.length > 0;
+    // Only treat the parent query as present when it's an actual non-empty KQL/Lucene string.
+    // Feeding an empty string (or a query object with no string) into buildEsQuery would match
+    // everything and over-broaden the panel's results (review #17).
+    const parentQueryText =
+      parentQuery && 'query' in parentQuery && typeof parentQuery.query === 'string'
+        ? parentQuery.query.trim()
+        : '';
+    const hasParentQuery = parentQueryText.length > 0;
+    if (!dataView || (!hasParentFilters && !hasParentQuery)) {
+      return undefined;
+    }
+    const parentQueryLanguage =
+      parentQuery && 'language' in parentQuery && typeof parentQuery.language === 'string'
+        ? parentQuery.language
+        : 'kuery';
+    const queries: Query[] = hasParentQuery
+      ? [{ query: parentQueryText, language: parentQueryLanguage }]
+      : [];
     return buildEsQuery(dataView, queries, filtersWithoutEnv, kibanaQuerySettings);
   }, [dataView, parentFilters, parentQuery, kibanaQuerySettings]);
 
@@ -213,12 +213,12 @@ export function ServiceMapEmbeddable({
     nodesStatus: status,
   });
 
-  // The alert / SLO / anomaly-severity filters depend on badge data. Until badges arrive,
-  // node fields like `alertsCount` / `sloStatus` are undefined and the visibility helper
-  // would hide every service — producing a flash of empty map on dashboard load whenever
-  // a persisted filter is set. Strip those filters until badges resolve; the connection
-  // filter stays since it only needs topology. On a badges failure we deliberately stay
-  // stripped (fail open: show all services rather than nothing).
+  // The alert / SLO / anomaly-severity filters depend on badge data (node fields like
+  // `alertsCount` / `sloStatus`). Until badges resolve we strip those filters; the connection
+  // filter stays since it only needs topology. Loading is covered by `isLoading` below (spinner,
+  // not a stripped map), so there's no flash. On a badges *failure* we keep showing all services
+  // (fail open) but surface a warning so the user knows those filters couldn't be applied
+  // (review #7) — silently dropping them looked like the filters were ignored.
   const viewFiltersForGraph = useMemo<ServiceMapViewFilters | undefined>(() => {
     if (!viewFilters) return viewFilters;
     if (badgesStatus === FETCH_STATUS.SUCCESS) return viewFilters;
@@ -229,6 +229,13 @@ export function ServiceMapEmbeddable({
       anomalySeverityFilter: [],
     };
   }, [viewFilters, badgesStatus]);
+
+  const badgeDependentFiltersActive =
+    (viewFilters?.alertStatusFilter?.length ?? 0) > 0 ||
+    (viewFilters?.sloStatusFilter?.length ?? 0) > 0 ||
+    (viewFilters?.anomalySeverityFilter?.length ?? 0) > 0;
+  const showBadgesFailedWarning =
+    badgeDependentFiltersActive && badgesStatus === FETCH_STATUS.FAILURE;
 
   if (!license || !isActivePlatinumLicense(license) || !config.serviceMapEnabled) {
     return (
@@ -329,6 +336,20 @@ export function ServiceMapEmbeddable({
         }}
       >
         {isLoading && <LoadingSpinner />}
+        {showBadgesFailedWarning && (
+          <EuiCallOut
+            announceOnMount
+            size="s"
+            color="warning"
+            iconType="warning"
+            title={i18n.translate('xpack.apm.serviceMapEmbeddable.badgesFailedWarning', {
+              defaultMessage:
+                "Alert, SLO and anomaly filters couldn't be applied because their data failed to load. Showing all services.",
+            })}
+            data-test-subj="apmServiceMapEmbeddableBadgesFailedWarning"
+            css={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 1 }}
+          />
+        )}
         <ServiceMapGraph
           height="100%"
           nodes={isLoading ? [] : nodesForGraph}
@@ -349,8 +370,6 @@ export function ServiceMapEmbeddable({
           onMapOrientationChange={onMapOrientationChange}
           viewFilters={viewFiltersForGraph}
           onViewFiltersChange={onViewFiltersChange}
-          searchQuery={searchQuery}
-          onSearchQueryChange={onSearchQueryChange}
         />
       </div>
       {sloOverviewFlyout && (

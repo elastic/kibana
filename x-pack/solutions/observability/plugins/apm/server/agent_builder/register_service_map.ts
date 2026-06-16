@@ -7,6 +7,7 @@
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import { createServiceMapSkill } from './skills/service_map';
+import { createSetupManagedOtlpSkill } from './skills/setup_managed_otlp';
 import { createServiceMapAttachmentType } from './attachments/service_map';
 
 export const registerServiceMapAgentBuilder = ({
@@ -15,6 +16,7 @@ export const registerServiceMapAgentBuilder = ({
   agentBuilder: AgentBuilderPluginSetup;
 }) => {
   agentBuilder.skills.register(createServiceMapSkill());
+  agentBuilder.skills.register(createSetupManagedOtlpSkill());
   agentBuilder.attachments.registerType(
     createServiceMapAttachmentType() as Parameters<typeof agentBuilder.attachments.registerType>[0]
   );

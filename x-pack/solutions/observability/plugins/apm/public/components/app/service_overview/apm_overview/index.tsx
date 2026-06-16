@@ -34,6 +34,7 @@ import { ServiceOverviewErrorsTable } from '../service_overview_errors_table';
 import { ServiceOverviewInstancesChartAndTable } from '../service_overview_instances_chart_and_table';
 import { ServiceOverviewThroughputChart } from '../service_overview_throughput_chart';
 import { SloCallout } from '../../../shared/slo_callout';
+import { MissingDataCallout } from '../../service_inventory/missing_data_callout';
 import { useLocalStorage } from '../../../../hooks/use_local_storage';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 
@@ -118,6 +119,8 @@ export function ApmOverview() {
 
   return (
     <>
+      <MissingDataCallout />
+      <EuiSpacer size="m" />
       {shouldRenderCallout && (
         <>
           <SloCallout

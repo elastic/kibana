@@ -26,6 +26,7 @@ import {
 } from '@elastic/eui';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SERVICE_NAME, SERVICE_ENVIRONMENT } from '@kbn/apm-types';
@@ -39,7 +40,7 @@ import {
   getEnvironmentLabel,
 } from '../../../common/environment_filter_values';
 import type { Environment } from '../../../common/environment_rt';
-import type { ServiceMapEmbeddableState } from '../../../server/lib/embeddables/service_map_embeddable_schema';
+import type { ServiceMapEmbeddableState } from '../../../common/embeddable/service_map_embeddable_schema';
 import type { EmbeddableDeps } from '../types';
 import { useSuggestions } from './use_suggestions';
 import { useAdHocApmDataView } from '../../hooks/use_adhoc_apm_data_view';
@@ -185,6 +186,9 @@ function getEnvironmentOptions(environments: string[]) {
 const DEFAULT_RANGE_FROM = 'now-15m';
 const DEFAULT_RANGE_TO = 'now';
 
+/** Debounce window for applying the KQL draft to the live preview + filter counts. */
+const KUERY_PREVIEW_DEBOUNCE_MS = 300;
+
 /** Flex shell so header/body/footer lay out inside Core flyouts without changing `OverlayMountWrapper`. */
 const serviceMapFlyoutShellStyle: React.CSSProperties = {
   display: 'flex',
@@ -266,9 +270,11 @@ export function ServiceMapEditorFlyout({
     initialState?.environment ?? ENVIRONMENT_ALL.value
   );
   const [kuery, setKuery] = useState(initialState?.kuery ?? '');
-  // KQL applied to the live preview — only updated on submit / auto-submit (not per
-  // keystroke) so typing doesn't trigger a service-map refetch on every character.
+  // KQL applied to the live preview AND the filter-count resolver. Debounced from the draft
+  // `kuery` so typing previews (and counts) like every other control, but without a
+  // service-map refetch on every keystroke (review #8, #9).
   const [previewKuery, setPreviewKuery] = useState(initialState?.kuery ?? '');
+  useDebounce(() => setPreviewKuery(kuery), KUERY_PREVIEW_DEBOUNCE_MS, [kuery]);
   const [serviceName, setServiceName] = useState(initialState?.service_name ?? '');
   const [syncWithDashboardFilters, setSyncWithDashboardFilters] = useState<boolean>(
     initialState?.sync_with_dashboard_filters ?? false
@@ -394,8 +400,9 @@ export function ServiceMapEditorFlyout({
       setServiceName(changedOptions[0].value);
       setSelectedServiceOption(changedOptions);
     }
-    setEnvironment(ENVIRONMENT_ALL.value);
-    setSelectedEnvironmentOption([ENVIRONMENT_ALL]);
+    // Keep the current environment selection rather than silently resetting it to "all" — the
+    // environment combobox re-fetches its suggestions scoped to the new service, and ENVIRONMENT_ALL
+    // is always valid, so there's no need to broaden the user's choice for them (review #10).
   };
 
   const onServiceNameCreateOption = (searchValue: string) => {
@@ -450,7 +457,7 @@ export function ServiceMapEditorFlyout({
   }, [buildState, kuery, onSave]);
 
   // Preview-until-save: push the in-progress state onto the panel live whenever a control
-  // changes (KQL only on submit, via `previewKuery`). Skip the initial mount so opening the
+  // changes (KQL via the debounced `previewKuery`). Skip the initial mount so opening the
   // flyout doesn't re-apply the unchanged state.
   const didApplyInitialRef = useRef(false);
   useEffect(() => {
@@ -752,7 +759,9 @@ export function ServiceMapEditorFlyout({
         {filterCountsEnabled && (
           <FlyoutFilterOptionCountsResolver
             environment={environment}
-            kuery={kuery}
+            // Use the same debounced/applied KQL as the preview map so the option counts and the
+            // preview never disagree mid-typing (review #8).
+            kuery={previewKuery}
             start={start}
             end={end}
             serviceName={serviceName}

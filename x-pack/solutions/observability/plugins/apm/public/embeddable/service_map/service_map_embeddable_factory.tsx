@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo } from 'react';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
@@ -37,7 +38,7 @@ import {
 import type {
   ServiceMapCustomState,
   ServiceMapEmbeddableState,
-} from '../../../server/lib/embeddables/service_map_embeddable_schema';
+} from '../../../common/embeddable/service_map_embeddable_schema';
 
 import type { EmbeddableDeps } from '../types';
 import { ApmEmbeddableContext } from '../embeddable_context';
@@ -45,8 +46,6 @@ import type { ServiceMapViewFilters } from '../../components/app/service_map/app
 import { ServiceMapEmbeddable } from './service_map_embeddable';
 import { ServiceMapEditorFlyout } from './service_map_editor_flyout';
 import { APM_SERVICE_MAP_EMBEDDABLE } from './constants';
-
-const DEFAULT_TIME_RANGE: TimeRange = { from: 'now-15m', to: 'now' };
 
 const defaultCustomState: WithAllKeys<ServiceMapCustomState> = {
   environment: ENVIRONMENT_ALL.value,
@@ -62,7 +61,6 @@ const defaultCustomState: WithAllKeys<ServiceMapCustomState> = {
   slo_status_filter: undefined,
   connection_filter: undefined,
   anomaly_severity_filter: undefined,
-  find_query: undefined,
 };
 
 const customStateComparators: StateComparators<ServiceMapCustomState> = {
@@ -79,7 +77,6 @@ const customStateComparators: StateComparators<ServiceMapCustomState> = {
   slo_status_filter: 'deepEquality',
   connection_filter: 'deepEquality',
   anomaly_severity_filter: 'deepEquality',
-  find_query: 'referenceEquality',
 };
 
 export type ServiceMapEmbeddableApi = DefaultEmbeddableApi<ServiceMapEmbeddableState> &
@@ -157,7 +154,6 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
           slo_status_filter: state.slo_status_filter,
           connection_filter: state.connection_filter,
           anomaly_severity_filter: state.anomaly_severity_filter,
-          find_query: state.find_query,
         },
         defaultCustomState
       );
@@ -296,7 +292,6 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
             sloStatusFilter,
             connectionFilter,
             anomalySeverityFilter,
-            findQuery,
           ] = useBatchedPublishingSubjects(
             customStateManager.api.environment$,
             customStateManager.api.kuery$,
@@ -307,8 +302,7 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
             customStateManager.api.alertStatusFilter$,
             customStateManager.api.sloStatusFilter$,
             customStateManager.api.connectionFilter$,
-            customStateManager.api.anomalySeverityFilter$,
-            customStateManager.api.findQuery$
+            customStateManager.api.anomalySeverityFilter$
           );
 
           // Schema literals (`'critical' | 'major' | ...`) and the runtime enums consumed by
@@ -324,9 +318,9 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
             [alertStatusFilter, sloStatusFilter, connectionFilter, anomalySeverityFilter]
           );
 
-          // Push in-panel edits back to the state manager so the controlled `viewFilters` /
-          // `searchQuery` reflect changes; without these the chips/search would feel locked.
-          // Empty arrays / empty strings are normalized to `undefined` so saved state stays tidy.
+          // Push in-panel edits back to the state manager so the controlled `viewFilters`
+          // reflect changes; without these the chips would feel locked.
+          // Empty arrays are normalized to `undefined` so saved state stays tidy.
           const onViewFiltersChange = useCallback((next: ServiceMapViewFilters) => {
             customStateManager.api.setAlertStatusFilter(
               next.alertStatusFilter.length ? next.alertStatusFilter : undefined
@@ -342,12 +336,26 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
             );
           }, []);
 
-          const onSearchQueryChange = useCallback((next: string) => {
-            customStateManager.api.setFindQuery(next.trim() ? next : undefined);
-          }, []);
-
           const fetchContext = useFetchContext(api);
-          const effectiveTimeRange = fetchContext.timeRange ?? DEFAULT_TIME_RANGE;
+          // When neither the panel nor the dashboard has resolved a time range yet, wait rather
+          // than querying a guessed window (which would look empty/wrong) — review #16.
+          const effectiveTimeRange = fetchContext.timeRange;
+          if (!effectiveTimeRange) {
+            return (
+              <div
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+                data-test-subj="apmServiceMapEmbeddableWaitingForTimeRange"
+              >
+                <EuiLoadingSpinner size="xl" />
+              </div>
+            );
+          }
 
           // Parent dashboard filters/query are merged into fetchContext by `useFetchContext`.
           // `sync_with_dashboard_filters` defaults false (panel uses only its own captured
@@ -378,8 +386,6 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
                   parentQuery={parentQuery}
                   viewFilters={viewFilters}
                   onViewFiltersChange={onViewFiltersChange}
-                  searchQuery={findQuery ?? undefined}
-                  onSearchQueryChange={onSearchQueryChange}
                 />
               </ApmEmbeddableContext>
             </div>

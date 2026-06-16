@@ -144,6 +144,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'observability.rca',
   'observability.investigation',
   'observability.service-map',
+  'observability.setup-managed-otlp',
 
   // Search
   `${internalNamespaces.search}.keyword-search`,
