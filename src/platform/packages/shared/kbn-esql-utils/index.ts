@@ -87,6 +87,7 @@ export {
   convertQueryToESQLExpression,
   injectWhereClauseAfterSourceCommand,
   type ESQLStatsQueryMeta,
+  getVariableNamePrefix,
   type ESQLColumnsWithHighlights,
   type ESQLHighlightTags,
 } from './src';

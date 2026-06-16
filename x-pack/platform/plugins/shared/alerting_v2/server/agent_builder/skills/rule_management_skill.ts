@@ -190,10 +190,41 @@ For an existing rule, pass the \`ruleAttachmentId\` and only include the operati
 - If grouping fields are set after a query, they are validated against the query's
   output columns. Use fields that appear in the query results.
 
-## State Transition and Recovery
+## State Transition
 
 - \`set_state_transition\` with \`consecutive_breaches: N\` means the rule fires only after N consecutive evaluation cycles breach the threshold. Use this when the user wants to reduce noise.
-- \`set_recovery_policy\` with \`type: "no_breach"\` recovers when a cycle produces no rows. Use \`type: "query"\` with a separate recovery query when the user needs explicit recovery detection.
+
+## Recovery Strategy
+
+\`recovery_strategy\` is a **top-level rule field** (not inside the query). It controls how episodes transition from active to recovering/inactive.
+
+| Value | Behaviour |
+|---|---|
+| \`'no_breach'\` | Recovers episodes automatically when a breaching group stops appearing in breach query results. **Default for most alert rules.** |
+| \`'query'\` | Runs a separate recovery query each cycle. Requires a \`recovery\` block inside \`set_query\` (\`{ segment }\` for composed, \`{ query }\` for standalone). Use when recovery needs different criteria than "not breaching". |
+| \`'none'\` | Disables recovery entirely — episodes never transition to recovering/inactive. Use only when lifecycle tracking is not needed. |
+
+Signal rules (\`kind: signal\`) cannot set \`recovery_strategy\`.
+
+When using \`recovery_strategy: 'query'\`, add a \`set_query\` operation that includes a \`recovery\` block alongside \`breach\`:
+- **Composed**: \`recovery: { segment: 'WHERE cpu < 0.5' }\`
+- **Standalone**: \`recovery: { query: 'FROM metrics-* | WHERE cpu < 0.5' }\`
+
+## No-Data Strategy
+
+\`no_data_strategy\` is a **top-level rule field** that controls behaviour when no data is present. Only meaningful for standalone queries with a \`no_data\` block.
+
+| Value | Behaviour |
+|---|---|
+| \`'none'\` | No-data situations are ignored (default). |
+| \`'emit'\` | Emits a \`no_data\` alert event when \`no_data\` query returns no rows. |
+| \`'last_known_status'\` | Holds the last known episode status when no data is present. |
+| \`'recover'\` | Forces recovery when no data is present. |
+
+When setting \`no_data_strategy\` to anything other than \`'none'\`, add a \`no_data\` block to the standalone query:
+\`no_data: { query: 'FROM heartbeat-* | STATS count = COUNT(*) BY host.name | WHERE count >= 1' }\`
+
+Signal rules cannot set \`no_data_strategy\`. Composed queries do not support \`no_data\`.
 
 ## Final Validation
 
