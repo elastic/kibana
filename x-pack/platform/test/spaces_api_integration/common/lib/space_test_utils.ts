@@ -8,7 +8,7 @@
 import type { Client } from '@elastic/elasticsearch';
 
 import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import { SPACE_1, SPACE_2, SPACE_3 } from './spaces';
 import type { SpacesServiceProvider } from '../../../api_integration/services/spaces';

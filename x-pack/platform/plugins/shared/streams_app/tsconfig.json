@@ -116,5 +116,8 @@
     "@kbn/core-ui-settings-browser",
     "@kbn/inference-connectors",
     "@kbn/safer-lodash-set",
+    "@kbn/agent-builder-plugin",
+    "@kbn/agent-builder-browser",
+    "@kbn/agent-builder-common",
   ]
 }

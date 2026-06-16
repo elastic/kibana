@@ -19,6 +19,7 @@ import type {
 import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 
 import { useEndpointActions } from '../../hooks/use_endpoint_actions';
+import { useInferenceCapabilities } from '../../hooks/use_inference_capabilities';
 import { type FilterOptions, GroupByOptions } from '../../types';
 import { getModelId } from '../../utils/get_model_id';
 import { isEndpointPreconfigured } from '../../utils/preconfigured_endpoint_helper';
@@ -66,6 +67,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
   const [searchKey, setSearchKey] = useState('');
   const [groupBy, setGroupBy] = useState<GroupByOptions>(initializeGroupBy);
   const [filterOptions, setFilterOptions] = useState<FilterOptions>(DEFAULT_FILTER_OPTIONS);
+  const { canManage } = useInferenceCapabilities();
 
   const {
     showDeleteAction,
@@ -157,6 +159,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
             }),
             icon: 'eye',
             type: 'icon',
+            available: () => canManage,
             onClick: (item) => displayInferenceFlyout(item),
             'data-test-subj': 'inference-endpoints-action-view-endpoint-label',
           },
@@ -181,6 +184,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
             }),
             icon: 'trash',
             type: 'icon',
+            available: () => canManage,
             enabled: (item) => !isEndpointPreconfigured(item.inference_id),
             onClick: (item) => displayDeleteActionItem(item),
             'data-test-subj': (item) =>
@@ -192,7 +196,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
         width: '165px',
       },
     ],
-    [copyContent, displayDeleteActionItem, displayInferenceFlyout]
+    [canManage, copyContent, displayDeleteActionItem, displayInferenceFlyout]
   );
 
   return (
