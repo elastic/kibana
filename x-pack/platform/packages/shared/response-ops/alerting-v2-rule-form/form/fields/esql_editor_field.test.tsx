@@ -47,9 +47,9 @@ jest.mock('@kbn/esql/public', () => ({
 
 describe('EsqlEditorField', () => {
   it('renders with form context value', () => {
-    render(<EsqlEditorField name="evaluation.query.base" dataTestSubj="test-editor" />, {
+    render(<EsqlEditorField name="query.breach" dataTestSubj="test-editor" />, {
       wrapper: createFormWrapper({
-        evaluation: { query: { base: 'FROM logs-*' } },
+        query: { breach: 'FROM logs-*' },
       }),
     });
 
@@ -57,9 +57,9 @@ describe('EsqlEditorField', () => {
   });
 
   it('renders with empty value when form field is empty', () => {
-    render(<EsqlEditorField name="evaluation.query.base" dataTestSubj="test-editor" />, {
+    render(<EsqlEditorField name="query.breach" dataTestSubj="test-editor" />, {
       wrapper: createFormWrapper({
-        evaluation: { query: { base: '' } },
+        query: { breach: '' },
       }),
     });
 
@@ -67,7 +67,7 @@ describe('EsqlEditorField', () => {
   });
 
   it('renders label', () => {
-    render(<EsqlEditorField name="evaluation.query.base" label="ES|QL Query" />, {
+    render(<EsqlEditorField name="query.breach" label="ES|QL Query" />, {
       wrapper: createFormWrapper({}),
     });
 
@@ -75,23 +75,16 @@ describe('EsqlEditorField', () => {
   });
 
   it('renders label with tooltip when labelTooltip is provided', () => {
-    render(
-      <EsqlEditorField
-        name="evaluation.query.base"
-        label="Query"
-        labelTooltip="This is a tooltip"
-      />,
-      {
-        wrapper: createFormWrapper({}),
-      }
-    );
+    render(<EsqlEditorField name="query.breach" label="Query" labelTooltip="This is a tooltip" />, {
+      wrapper: createFormWrapper({}),
+    });
 
     expect(screen.getByText('Query')).toBeInTheDocument();
     expect(screen.getByText('Info')).toBeInTheDocument();
   });
 
   it('renders help text when provided', () => {
-    render(<EsqlEditorField name="evaluation.query.base" helpText="Enter an ES|QL query" />, {
+    render(<EsqlEditorField name="query.breach" helpText="Enter an ES|QL query" />, {
       wrapper: createFormWrapper({}),
     });
 
@@ -99,9 +92,9 @@ describe('EsqlEditorField', () => {
   });
 
   it('updates form value on change', () => {
-    render(<EsqlEditorField name="evaluation.query.base" dataTestSubj="test-editor" />, {
+    render(<EsqlEditorField name="query.breach" dataTestSubj="test-editor" />, {
       wrapper: createFormWrapper({
-        evaluation: { query: { base: 'FROM logs-*' } },
+        query: { breach: 'FROM logs-*' },
       }),
     });
 
@@ -114,14 +107,10 @@ describe('EsqlEditorField', () => {
   it('displays server errors when provided', () => {
     const serverError = new Error('Query execution failed');
     render(
-      <EsqlEditorField
-        name="evaluation.query.base"
-        dataTestSubj="test-editor"
-        errors={[serverError]}
-      />,
+      <EsqlEditorField name="query.breach" dataTestSubj="test-editor" errors={[serverError]} />,
       {
         wrapper: createFormWrapper({
-          evaluation: { query: { base: 'FROM logs-*' } },
+          query: { breach: 'FROM logs-*' },
         }),
       }
     );
@@ -134,13 +123,13 @@ describe('EsqlEditorField', () => {
   it('displays server warnings when provided', () => {
     render(
       <EsqlEditorField
-        name="evaluation.query.base"
+        name="query.breach"
         dataTestSubj="test-editor"
         warning="Query is deprecated"
       />,
       {
         wrapper: createFormWrapper({
-          evaluation: { query: { base: 'FROM logs-*' } },
+          query: { breach: 'FROM logs-*' },
         }),
       }
     );
@@ -151,27 +140,21 @@ describe('EsqlEditorField', () => {
   });
 
   it('disables editor when disabled prop is true', () => {
-    render(
-      <EsqlEditorField name="evaluation.query.base" dataTestSubj="test-editor" disabled={true} />,
-      {
-        wrapper: createFormWrapper({
-          evaluation: { query: { base: 'FROM logs-*' } },
-        }),
-      }
-    );
+    render(<EsqlEditorField name="query.breach" dataTestSubj="test-editor" disabled={true} />, {
+      wrapper: createFormWrapper({
+        query: { breach: 'FROM logs-*' },
+      }),
+    });
 
     expect(screen.getByTestId('test-editor-editor-input')).toBeDisabled();
   });
 
   it('disables editor when readOnly prop is true', () => {
-    render(
-      <EsqlEditorField name="evaluation.query.base" dataTestSubj="test-editor" readOnly={true} />,
-      {
-        wrapper: createFormWrapper({
-          evaluation: { query: { base: 'FROM logs-*' } },
-        }),
-      }
-    );
+    render(<EsqlEditorField name="query.breach" dataTestSubj="test-editor" readOnly={true} />, {
+      wrapper: createFormWrapper({
+        query: { breach: 'FROM logs-*' },
+      }),
+    });
 
     expect(screen.getByTestId('test-editor-editor-input')).toBeDisabled();
   });
