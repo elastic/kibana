@@ -19,15 +19,14 @@ import { schema } from '@kbn/config-schema';
 import { getControlsGroupSchema } from '@kbn/controls-schemas';
 import { refreshIntervalSchema } from '@kbn/data-service-server';
 import { timeRangeSchema } from '@kbn/es-query-server';
+import { isDashboardSection } from '../../common';
 import {
   DEFAULT_DASHBOARD_OPTIONS,
   DEFAULT_PANEL_HEIGHT,
-  
   DEFAULT_PANEL_WIDTH,
 } from '../../common/constants';
 import { DASHBOARD_GRID_COLUMN_COUNT } from '../../common/page_bundle_constants';
 import { embeddableService } from '../kibana_services';
-import { isDashboardSection } from '../../common';
 import type { DashboardPanel, DashboardSection } from './types';
 
 const MAX_PANELS = 1000;
