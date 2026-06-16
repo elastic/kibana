@@ -321,7 +321,7 @@ export function ServiceMapOptionsPanel({
 
       <EuiComboBox
         placeholder={i18n.translate('xpack.apm.serviceMap.controls.sloStatusFilter', {
-          defaultMessage: 'SLO Status',
+          defaultMessage: 'SLO status',
         })}
         options={sloStatusComboBoxOptions}
         selectedOptions={sloStatusFilter.map((value) => {
