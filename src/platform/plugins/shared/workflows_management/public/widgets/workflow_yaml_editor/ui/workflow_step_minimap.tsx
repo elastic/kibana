@@ -18,12 +18,13 @@ import {
   selectEditorFocusedStepInfo,
   selectEditorWorkflowLookup,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
-import { EDITOR_PADDING_TOP_PX, MINIMAP_WIDTH_PX } from '../styles/constants';
+import { EDITOR_PADDING_TOP_PX, MINIMAP_PADDING_RIGHT_PX, MINIMAP_WIDTH_PX } from '../styles/constants';
 
 const ITEM_HEIGHT = 32;
 const DOT_R = 4;
 const TRACK_W = 24;
-const MAX_LABEL_W = MINIMAP_WIDTH_PX - TRACK_W;
+const PILL_TRACK_GAP = 6;
+const MAX_LABEL_W = MINIMAP_WIDTH_PX - TRACK_W - PILL_TRACK_GAP;
 const PILL_H = 22;
 const PILL_RADIUS = 11;
 
@@ -34,14 +35,6 @@ const OUTER_TRACK_X = 18; // top-level steps
 const INNER_TRACK_X = 6; // nested steps
 // Nested pills are slightly narrower so they visually indent from parent pills
 const NESTED_PILL_INDENT = 10;
-
-// Branch keys that represent an alternate / error path (vs the primary 'steps' path)
-const ALTERNATE_BRANCH_KEYS: ReadonlySet<NestedStepKey> = new Set([
-  'else',
-  'on-failure',
-  'iteration-on-failure',
-  'fallback',
-]);
 
 type StepSeverity = 'error' | 'warning' | null;
 
@@ -300,23 +293,18 @@ export const WorkflowStepMinimap = ({
   const railColor = euiTheme.colors.lightShade;
   const dotBgColor = euiTheme.colors.plainLight;
   const activeColor = euiTheme.colors.primary;
-  // Both connector types use the same muted grey — dash pattern is the differentiator
-  const primaryConnectorColor = euiTheme.colors.mediumShade;
-  const altConnectorColor = transparentize(euiTheme.colors.mediumShade, 0.4);
 
   const inactiveBg = transparentize(euiTheme.colors.primary, 0.12);
   const inactiveBgHover = transparentize(euiTheme.colors.primary, 0.2);
-  const inactiveText = euiTheme.colors.primaryText;
+const inactiveText = euiTheme.colors.primaryText;
   const activeBg = activeColor;
   const activeBgHover = shade(activeColor, 0.1);
   const activeText = euiTheme.colors.plainLight;
 
-  const mainTrackX = hasNesting ? OUTER_TRACK_X : TRACK_X;
-
   return (
-    <div css={css({ paddingTop: EDITOR_PADDING_TOP_PX })}>
+    <div css={css({ paddingTop: EDITOR_PADDING_TOP_PX, paddingRight: MINIMAP_PADDING_RIGHT_PX })}>
     <div css={css({ position: 'relative', width: MAX_LABEL_W + TRACK_W, height: totalHeight })}>
-      {/* Viewport band — highlights the steps currently visible in the editor */}
+      {/* Viewport indicator — shows which steps are currently visible in the editor */}
       {viewportSteps && (
         <div
           aria-hidden="true"
@@ -326,7 +314,8 @@ export const WorkflowStepMinimap = ({
             left: 0,
             right: 0,
             height: (viewportSteps.last - viewportSteps.first + 1) * ITEM_HEIGHT,
-            backgroundColor: transparentize(euiTheme.colors.primary, 0.08),
+            backgroundColor: transparentize(euiTheme.colors.primary, 0.14),
+            border: `1px solid ${transparentize(euiTheme.colors.primary, 0.4)}`,
             borderRadius: 6,
             pointerEvents: 'none',
             zIndex: 0,
@@ -341,18 +330,44 @@ export const WorkflowStepMinimap = ({
         style={{ pointerEvents: 'none' }}
         aria-hidden="true"
       >
-        {/* Outer rail — continuous from first to last step */}
-        {stepEntries.length > 1 && (
+        {/* No-nesting: single continuous solid line */}
+        {!hasNesting && stepEntries.length > 1 && (
           <line
-            x1={mainTrackX}
+            x1={TRACK_X}
             y1={ITEM_HEIGHT / 2}
-            x2={mainTrackX}
+            x2={TRACK_X}
             y2={totalHeight - ITEM_HEIGHT / 2}
             stroke={railColor}
             strokeWidth={2}
             strokeLinecap="round"
           />
         )}
+
+        {/* With nesting: outer rail drawn as segments — solid where no branch exists between
+            two consecutive top-level steps, dashed where nested children occupy those rows */}
+        {hasNesting &&
+          stepEntries
+            .reduce<number[]>((acc, [id], i) => {
+              if ((depths.get(id) ?? 0) === 0) acc.push(i);
+              return acc;
+            }, [])
+            .flatMap((fromIdx, j, topLevel) => {
+              if (j === topLevel.length - 1) return [];
+              const toIdx = topLevel[j + 1];
+              return [
+                <line
+                  key={`outer-seg-${j}`}
+                  x1={OUTER_TRACK_X}
+                  y1={fromIdx * ITEM_HEIGHT + ITEM_HEIGHT / 2}
+                  x2={OUTER_TRACK_X}
+                  y2={toIdx * ITEM_HEIGHT + ITEM_HEIGHT / 2}
+                  stroke={railColor}
+                  strokeWidth={2}
+                  strokeLinecap="round"
+                  strokeDasharray={toIdx > fromIdx + 1 ? '5 4' : undefined}
+                />,
+              ];
+            })}
 
         {/* Inner rails — one segment per parent's full nested span */}
         {hasNesting &&
@@ -375,22 +390,16 @@ export const WorkflowStepMinimap = ({
             const parentCy = parentIndex * ITEM_HEIGHT + ITEM_HEIGHT / 2;
             return branches.map(({ branchKey, firstIndex }) => {
               const childCy = firstIndex * ITEM_HEIGHT + ITEM_HEIGHT / 2;
-              const isAlternate = ALTERNATE_BRANCH_KEYS.has(branchKey);
               const startY = parentCy + DOT_R + 2;
               const midY = (startY + childCy) / 2;
-              // Cubic bezier with symmetric midpoint control points: smooth S-curve from
-              // outer track straight down, gradually shifting left, arriving at inner track
-              // straight down. Avoids the harsh right-angle turn of a quadratic bezier.
               const d = `M ${OUTER_TRACK_X} ${startY} C ${OUTER_TRACK_X} ${midY} ${INNER_TRACK_X} ${midY} ${INNER_TRACK_X} ${childCy}`;
               return (
                 <path
                   key={`connector-${parentIndex}-${branchKey}`}
                   d={d}
                   fill="none"
-                  stroke={isAlternate ? altConnectorColor : primaryConnectorColor}
+                  stroke={railColor}
                   strokeWidth={1.5}
-                  // Primary: evenly spaced dashes. Alternate (else/on-failure): small dots with wider gap.
-                  strokeDasharray={isAlternate ? '2 5' : '4 3'}
                   strokeLinecap="round"
                 />
               );
@@ -400,6 +409,8 @@ export const WorkflowStepMinimap = ({
         {/* Dots — outer track for top-level, inner for nested */}
         {stepEntries.map(([stepId], index) => {
           const isFocused = stepId === focusedStepInfo?.stepId;
+          const isInViewport =
+            viewportSteps !== null && index >= viewportSteps.first && index <= viewportSteps.last;
           const cy = index * ITEM_HEIGHT + ITEM_HEIGHT / 2;
           const isNested = hasNesting && (depths.get(stepId) ?? 0) > 0;
           const cx = hasNesting ? (isNested ? INNER_TRACK_X : OUTER_TRACK_X) : TRACK_X;
@@ -441,7 +452,7 @@ export const WorkflowStepMinimap = ({
               position: 'absolute',
               top: index * ITEM_HEIGHT,
               left: 0,
-              right: TRACK_W,
+              right: TRACK_W + PILL_TRACK_GAP,
               height: ITEM_HEIGHT,
               display: 'flex',
               alignItems: 'center',

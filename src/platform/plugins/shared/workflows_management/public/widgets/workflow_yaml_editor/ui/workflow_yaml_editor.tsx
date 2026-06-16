@@ -119,7 +119,7 @@ const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
   minimap: { enabled: false },
   overviewRulerBorder: false,
   overviewRulerLanes: 0,
-  scrollbar: { useShadows: false },
+  scrollbar: { useShadows: false, vertical: 'hidden', verticalScrollbarSize: 0 },
   automaticLayout: true,
   lineNumbers: 'on',
   glyphMargin: true,

@@ -11,11 +11,7 @@ import type { UseEuiTheme } from '@elastic/eui';
 import { transparentize } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import {
-  EDITOR_SCROLLBAR_WIDTH_PX,
-  FOCUSED_STEP_DECORATION_INSET_PX,
-  MINIMAP_RESERVE_PX,
-} from './constants';
+import { FOCUSED_STEP_DECORATION_INSET_PX, MINIMAP_RESERVE_PX } from './constants';
 
 export const EXECUTION_YAML_SNAPSHOT_CLASS = 'execution-yaml-snapshot';
 
@@ -215,8 +211,8 @@ const editorStyleMap = {
     position: 'absolute',
     zIndex: 1002, // above the highlighting and pseudo-element
     transform: `translateY(${FOCUSED_STEP_DECORATION_INSET_PX}px) translateX(-${
-      EDITOR_SCROLLBAR_WIDTH_PX + 2 * FOCUSED_STEP_DECORATION_INSET_PX
-    }px)`, // scrollbar + twice decoration inset (outside and inside)
+      2 * FOCUSED_STEP_DECORATION_INSET_PX
+    }px)`, // twice decoration inset (outside and inside); no scrollbar offset since scrollbar is hidden
   }),
 
   agentBuilderSectionCss: (euiThemeContext: UseEuiTheme) =>
@@ -239,7 +235,7 @@ const editorStyleMap = {
       position: 'absolute',
       top: 0,
       bottom: 0,
-      right: EDITOR_SCROLLBAR_WIDTH_PX + 8,
+      right: 0,
       zIndex: 9,
       overflowY: 'auto',
       overflowX: 'visible',
