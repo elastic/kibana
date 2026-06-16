@@ -24,6 +24,7 @@ export class AlertsPageObject extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly pageObjects = this.ctx.getPageObjects(['common', 'header']);
   private readonly testSubjects = this.ctx.getService('testSubjects');
+  private readonly queryBar = this.ctx.getService('queryBar');
   private readonly defaultTimeoutMs = this.ctx.getService('config').get('timeouts.waitFor');
 
   async navigateToAlertsPage(urlQueryParams: string = ''): Promise<void> {
@@ -47,12 +48,17 @@ export class AlertsPageObject extends FtrService {
   }
 
   /**
-   * Clicks the refresh button on the Alerts page and waits for it to complete
+   * Refreshes the Alerts page query and waits for it to complete.
+   *
+   * Submits via the query input + Enter rather than clicking the `querySubmitButton`
+   * directly. When the alert flyout is open its fixed-position header (e.g. the Share
+   * button) overlaps the refresh button at the top of the viewport and intercepts the
+   * click, causing flaky ElementClickInterceptedError failures. The query input sits on
+   * the opposite (left) side of the bar and is never covered by the flyout header.
    */
   async clickRefresh(): Promise<void> {
     await this.ensureOnAlertsPage();
-    await this.testSubjects.scrollIntoView('querySubmitButton');
-    await this.testSubjects.clickWhenNotDisabled('querySubmitButton');
+    await this.queryBar.submitQuery();
 
     // wait for refresh to complete
     await this.retry.waitFor(
