@@ -107,8 +107,7 @@ export class WorkflowExecutionService<TInput extends object = {}> {
 
   /**
    * Maps an existing execution to a status result, attaching the failure message
-   * for failed runs. The completed output (features/queries) is not included;
-   * callers that need it must fetch the full execution separately.
+   * for failed runs.
    */
   static toStatusResult({
     execution,
@@ -125,10 +124,6 @@ export class WorkflowExecutionService<TInput extends object = {}> {
         executionId: execution.id,
         error: WorkflowExecutionService.getFailureMessage({ execution, workflowId }),
       };
-    }
-
-    if (status === SigEventsWorkflowStatus.Completed) {
-      return { status: SigEventsWorkflowStatus.Completed, executionId: execution.id };
     }
 
     return { status, executionId: execution.id };
