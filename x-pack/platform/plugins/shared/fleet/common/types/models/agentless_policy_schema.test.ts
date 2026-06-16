@@ -242,9 +242,7 @@ describe('AgentlessPolicySchema', () => {
 
 describe('AgentlessPolicyResponseSchema', () => {
   it('should accept a valid response wrapper', () => {
-    expect(() =>
-      AgentlessPolicyResponseSchema.validate({ item: validFullPolicy })
-    ).not.toThrow();
+    expect(() => AgentlessPolicyResponseSchema.validate({ item: validFullPolicy })).not.toThrow();
   });
 
   it('should reject a response without item', () => {

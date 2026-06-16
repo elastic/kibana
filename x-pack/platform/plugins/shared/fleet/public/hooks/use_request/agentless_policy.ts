@@ -17,9 +17,7 @@ import type {
 
 import { sendRequestForRq } from './use_request';
 
-export const sendCreateAgentlessPolicy = (
-  body: CreateAgentlessPolicyRequest['body']
-) => {
+export const sendCreateAgentlessPolicy = (body: CreateAgentlessPolicyRequest['body']) => {
   return sendRequestForRq<CreateAgentlessPolicyResponse>({
     path: agentlessPolicyRouteService.getCreatePath(),
     method: 'post',

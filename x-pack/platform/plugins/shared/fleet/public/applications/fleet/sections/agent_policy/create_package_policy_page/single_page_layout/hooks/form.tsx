@@ -783,7 +783,9 @@ export function useOnSubmit({
           hasCloudFormation = Boolean(
             getCloudFormationPropsFromPackagePolicy(savedPolicyResult.policy).templateUrl
           );
-          hasGoogleCloudShell = Boolean(getCloudShellUrlFromPackagePolicy(savedPolicyResult.policy));
+          hasGoogleCloudShell = Boolean(
+            getCloudShellUrlFromPackagePolicy(savedPolicyResult.policy)
+          );
         }
 
         if (hasFleetAddAgentsPrivileges && !isAgentlessConfigured && !skipConfirmModal) {

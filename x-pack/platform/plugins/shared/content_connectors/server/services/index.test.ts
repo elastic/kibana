@@ -23,11 +23,7 @@ import type {
   AgentService,
   PackagePolicyClient,
 } from '@kbn/fleet-plugin/server';
-import type {
-  AgentlessPolicy,
-  PackagePolicy,
-  PackagePolicyInput,
-} from '@kbn/fleet-plugin/common';
+import type { AgentlessPolicy, PackagePolicy, PackagePolicyInput } from '@kbn/fleet-plugin/common';
 import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 
 jest.mock('@kbn/fleet-plugin/server/services/epm/packages', () => {
