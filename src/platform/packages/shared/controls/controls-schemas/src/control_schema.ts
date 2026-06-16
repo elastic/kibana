@@ -34,9 +34,23 @@ const sharedDataControlProps = {
   }),
 };
 
+/**
+ * This uses a oneOf with only one option so we can provide a default value for backwards compat
+ */
+export const dataControlFieldValuesSourceSchema = schema.oneOf(
+  [schema.literal(ControlValuesSource.FIELD)],
+  {
+    defaultValue: ControlValuesSource.FIELD,
+    meta: {
+      description:
+        'The source of the field options for this control. Defaults to `field` for legacy controls.',
+    },
+  }
+);
+
 export const dataControlFieldVariantProps = {
   ...sharedDataControlProps,
-  values_source: schema.literal(ControlValuesSource.FIELD),
+  values_source: dataControlFieldValuesSourceSchema,
   data_view_id: schema.string({
     meta: { description: 'The ID of the data view that provides field options for this control.' }, // this will generate a reference
     minLength: 1,
@@ -60,7 +74,7 @@ export const dataControlEsqlVariantProps = {
 
 export const dataControlSchema = schema.discriminatedUnion(
   'values_source',
-  [schema.object(dataControlFieldVariantProps), schema.object(dataControlEsqlVariantProps)],
+  [schema.object(dataControlEsqlVariantProps), schema.object(dataControlFieldVariantProps)],
   {
     meta: {
       description:
@@ -91,22 +105,22 @@ export const extendDataControlSchema = <Extras extends Record<string, Type<unkno
 ) =>
   schema.discriminatedUnion('values_source', [
     schema.object(
-      { ...dataControlFieldVariantProps, ...extras },
-      {
-        meta: {
-          id: fieldVariantId,
-          ...(fieldVariantTitle && { title: fieldVariantTitle }),
-          ...(fieldVariantDescription && { description: fieldVariantDescription }),
-        },
-      }
-    ),
-    schema.object(
       { ...dataControlEsqlVariantProps, ...extras },
       {
         meta: {
           id: esqlVariantId,
           ...(esqlVariantTitle && { title: esqlVariantTitle }),
           ...(esqlVariantDescription && { description: esqlVariantDescription }),
+        },
+      }
+    ),
+    schema.object(
+      { ...dataControlFieldVariantProps, ...extras },
+      {
+        meta: {
+          id: fieldVariantId,
+          ...(fieldVariantTitle && { title: fieldVariantTitle }),
+          ...(fieldVariantDescription && { description: fieldVariantDescription }),
         },
       }
     ),

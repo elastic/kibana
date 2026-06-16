@@ -13,11 +13,7 @@ import {
   DEFAULT_ESQL_OPTIONS_LIST_STATE,
   MAX_OPTIONS_LIST_REQUEST_SIZE,
 } from '@kbn/controls-constants';
-import {
-  controlTitleSchema,
-  dataControlEsqlVariantProps,
-  dataControlFieldVariantProps,
-} from './control_schema';
+import { controlTitleSchema, extendDataControlSchema } from './control_schema';
 
 const SELECTIONS_MAX = 10000;
 
@@ -145,29 +141,16 @@ const optionsListDSLExtras = {
   sort: optionsListSortSchema,
 };
 
-export const optionsListDSLControlSchema = schema.discriminatedUnion('values_source', [
-  schema.object(
-    { ...dataControlFieldVariantProps, ...optionsListDSLExtras },
-    {
-      meta: {
-        id: 'kbn-controls-schemas-options-list-dsl-control-schema-field',
-        title: 'FieldOptionsListControl',
-        description: 'An options list control whose available options come from a data view field.',
-      },
-    }
-  ),
-  schema.object(
-    { ...dataControlEsqlVariantProps, ...optionsListDSLExtras },
-    {
-      meta: {
-        id: 'kbn-controls-schemas-options-list-dsl-control-schema-esql',
-        title: 'EsqlOptionsListControl',
-        description:
-          "An options list control whose available options come from an ES|QL query's results.",
-      },
-    }
-  ),
-]);
+export const optionsListDSLControlSchema = extendDataControlSchema(optionsListDSLExtras, {
+  fieldVariantId: 'kbn-controls-schemas-options-list-dsl-control-schema-field',
+  esqlVariantId: 'kbn-controls-schemas-options-list-dsl-control-schema-esql',
+  fieldVariantTitle: 'FieldOptionsListControl',
+  esqlVariantTitle: 'EsqlOptionsListControl',
+  fieldVariantDescription:
+    'An options list control whose available options come from a data view field.',
+  esqlVariantDescription:
+    "An options list control whose available options come from an ES|QL query's results.",
+});
 
 const baseEsqlControl = {
   ...controlTitleSchema.getPropSchemas(),
