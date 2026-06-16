@@ -47,6 +47,7 @@ dependsOn:
   - '@kbn/core-spaces-common'
   - '@kbn/agent-context-layer-plugin'
   - '@kbn/actions-plugin'
+  - '@kbn/code-editor'
 tags:
   - plugin
   - prod
