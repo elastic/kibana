@@ -11,7 +11,7 @@ import type { Logger } from '@kbn/core/server';
 import type { JsonValue } from '@kbn/utility-types';
 import type { EsWorkflowStepExecution, SerializedError } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
-import { scanForTemplateVariables } from '@kbn/workflows/common/utils';
+import { extractPropertyPathsFromKql, scanForTemplateVariables } from '@kbn/workflows/common/utils';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import {
   extractReferencedStepIds,
@@ -605,19 +605,36 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
   }
 
   /**
-   * Pins the source outputs referenced by a loop's source value for the
-   * lifetime of the loop, keyed by the loop's `stepId`. Called unconditionally
-   * when a loop is entered (before any eviction has happened) so the source
-   * stays resident across the per-iteration source re-evaluation — the
-   * eviction-gated rehydration path ({@link computeRehydrationTargets}) cannot
-   * be relied on, because it is skipped entirely until something is evicted.
+   * Pins the outputs referenced by a loop's source value (foreach `foreach:`
+   * expression or while `condition`) for the lifetime of the loop, keyed by the
+   * loop's `stepId`. Called unconditionally when a loop is entered (before any
+   * eviction has happened) so the referenced outputs stay resident across the
+   * per-iteration source/condition re-evaluation — the eviction-gated
+   * rehydration path ({@link computeRehydrationTargets}) cannot be relied on,
+   * because it is skipped entirely until something is evicted.
    */
-  public pinForeachSource(foreachStepId: string, sourceValue: unknown): void {
-    const referencedStepIds = this.extractReferencedStepIdsFromValue(sourceValue);
+  public pinLoopSource(loopStepId: string, sourceValue: unknown): void {
+    // A loop source is either a foreach `foreach:` expression (Liquid `{{ }}`)
+    // or a while `condition` (frequently bare KQL with no Liquid markers).
+    // `extractReferencedStepIdsFromValue` only sees Liquid expressions, so a
+    // bare-KQL condition would resolve to an empty set and pin nothing —
+    // KQL-parse string values too so while conditions are actually pinned.
+    const referencedStepIds =
+      typeof sourceValue === 'string'
+        ? this.extractReferencedStepIdsFromConditionValue(sourceValue)
+        : this.extractReferencedStepIdsFromValue(sourceValue);
     if (referencedStepIds === null) {
       return;
     }
-    this.pinLatestExecutionIdsForScope(foreachStepId, referencedStepIds);
+    this.pinLatestExecutionIdsForScope(loopStepId, referencedStepIds);
+  }
+
+  /**
+   * @deprecated Use {@link pinLoopSource}. Retained so foreach call sites keep
+   * compiling; foreach and while share the same loop-source pinning mechanism.
+   */
+  public pinForeachSource(foreachStepId: string, sourceValue: unknown): void {
+    this.pinLoopSource(foreachStepId, sourceValue);
   }
 
   /** True if any active loop scope has pinned this output. */
@@ -632,11 +649,19 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
 
   /**
    * Clears all pins recorded for the given loop `stepId`. Called when a loop
-   * exits ({@link ExitForeachNodeImpl}) so its source output becomes evictable
-   * again. Idempotent.
+   * exits ({@link ExitForeachNodeImpl} / {@link ExitWhileNodeImpl}) so its
+   * pinned outputs become evictable again. Idempotent.
+   */
+  public unpinLoopScope(loopStepId: string): void {
+    this.pinnedOutputIdsByScope.delete(loopStepId);
+  }
+
+  /**
+   * @deprecated Use {@link unpinLoopScope}. Retained so foreach call sites keep
+   * compiling.
    */
   public unpinForeachScope(foreachStepId: string): void {
-    this.pinnedOutputIdsByScope.delete(foreachStepId);
+    this.unpinLoopScope(foreachStepId);
   }
 
   /**
@@ -701,18 +726,24 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
       neededIds.add(scopeStepExecutionId);
 
       const scopeStepExecution = this.state.getStepExecution(scopeStepExecutionId);
-      if (scopeStepExecution?.stepType === 'foreach') {
-        const scopeInputStepIds = this.extractReferencedStepIdsFromValue(
-          this.getStepInput(scopeStepExecutionId)
-        );
+      const scopeStepType = scopeStepExecution?.stepType;
+      if (scopeStepType === 'foreach' || scopeStepType === 'while') {
+        // foreach stores its source under input.foreach (an expression);
+        // while stores its source under input.condition (a KQL/template
+        // string). The KQL-aware extraction below handles both — a while
+        // condition is frequently bare KQL with no Liquid markers.
+        const scopeInputStepIds =
+          scopeStepType === 'while'
+            ? this.extractReferencedStepIdsFromCondition(scopeStepExecutionId)
+            : this.extractReferencedStepIdsFromValue(this.getStepInput(scopeStepExecutionId));
         if (scopeInputStepIds === null) {
           fallbackToPredecessors();
         } else {
           this.addLatestExecutionIdsForStepIds(neededIds, scopeInputStepIds);
           // Re-pin the loop's source outputs while the loop scope is active.
           // Primary pinning happens unconditionally at loop entry
-          // (pinForeachSource); this re-pin covers resume, where the loop is
-          // re-entered mid-iteration without going through enterForeach.
+          // (pinLoopSource); this re-pin covers resume, where the loop is
+          // re-entered mid-iteration without going through the enter node.
           this.pinLatestExecutionIdsForScope(frame.stepId, scopeInputStepIds);
         }
       }
@@ -751,6 +782,37 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
         }
         pinned.add(latestExec.id);
       }
+    }
+  }
+
+  /**
+   * Extracts the step ids referenced by a while loop's stored condition input.
+   * A while condition is frequently bare KQL (no Liquid markers), which
+   * {@link extractReferencedStepIdsFromValue} would miss — so we KQL-parse it.
+   * Mirrors the static analysis in `extractReferencedStepIds`. Returns `null`
+   * on dynamic bracket access so the caller falls back conservatively.
+   */
+  private extractReferencedStepIdsFromCondition(scopeStepExecutionId: string): Set<string> | null {
+    const input = this.getStepInput(scopeStepExecutionId) as { condition?: unknown } | undefined;
+    const condition = input?.condition;
+    if (typeof condition !== 'string') {
+      return this.extractReferencedStepIdsFromValue(input);
+    }
+    return this.extractReferencedStepIdsFromConditionValue(condition);
+  }
+
+  /**
+   * KQL-aware step-id extraction for a condition string. A while condition is
+   * frequently bare KQL (`steps.x.output.y: "z"`) with no Liquid markers, which
+   * {@link extractReferencedStepIdsFromValue} (Liquid-only) would miss.
+   * `extractPropertyPathsFromKql` handles both KQL field paths and embedded
+   * `{{ }}` templates. Returns `null` on dynamic bracket access.
+   */
+  private extractReferencedStepIdsFromConditionValue(condition: string): Set<string> | null {
+    try {
+      return extractReferencedStepIdsFromVariables(extractPropertyPathsFromKql(condition));
+    } catch {
+      return null;
     }
   }
 

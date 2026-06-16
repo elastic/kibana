@@ -49,6 +49,7 @@ describe('ExitWhileNodeImpl', () => {
 
     stepIoService = {
       evictStaleLoopOutputs: jest.fn(),
+      unpinLoopScope: jest.fn(),
     } as unknown as StepIoService;
 
     workflowGraph = {
@@ -99,6 +100,12 @@ describe('ExitWhileNodeImpl', () => {
 
       expect(stepExecutionRuntime.finishStep).not.toHaveBeenCalled();
     });
+
+    it('should not unpin the loop scope (loop continues)', () => {
+      underTest.run();
+
+      expect(stepIoService.unpinLoopScope).not.toHaveBeenCalled();
+    });
   });
 
   describe('when condition evaluates to false', () => {
@@ -115,6 +122,12 @@ describe('ExitWhileNodeImpl', () => {
       underTest.run();
 
       expect(stepExecutionRuntime.finishStep).toHaveBeenCalled();
+    });
+
+    it('should unpin the loop scope on exit', () => {
+      underTest.run();
+
+      expect(stepIoService.unpinLoopScope).toHaveBeenCalledWith(node.stepId);
     });
 
     it('should navigate to the next node', () => {
@@ -189,6 +202,16 @@ describe('ExitWhileNodeImpl', () => {
         }
 
         expect(stepExecutionRuntime.finishStep).not.toHaveBeenCalled();
+      });
+
+      it('should unpin the loop scope before throwing', () => {
+        try {
+          underTest.run();
+        } catch {
+          // expected
+        }
+
+        expect(stepIoService.unpinLoopScope).toHaveBeenCalledWith(node.stepId);
       });
     });
   });

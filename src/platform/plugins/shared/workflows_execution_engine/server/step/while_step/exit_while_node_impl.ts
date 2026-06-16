@@ -63,6 +63,9 @@ export class ExitWhileNodeImpl implements NodeImplementation {
     }
 
     if (maxReached && this.node.onLimit === 'fail') {
+      // Loop is terminating — release the condition-source pin taken at
+      // enter-while so those outputs become evictable again.
+      this.stepIoService.unpinLoopScope(this.node.stepId);
       // Evict before throwing — high-iteration loops that fail at the limit
       // are precisely the scenario most likely to cause memory pressure.
       const innerStepIds = this.workflowGraph.getInnerStepIds(this.node.stepId);
@@ -73,6 +76,9 @@ export class ExitWhileNodeImpl implements NodeImplementation {
       );
     }
 
+    // Loop is terminating normally (condition false or max-iterations reached)
+    // — release the condition-source pin taken at enter-while.
+    this.stepIoService.unpinLoopScope(this.node.stepId);
     this.stepExecutionRuntime.finishStep({
       exitReason: maxReached ? 'max-iterations' : 'condition',
     });
