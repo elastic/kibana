@@ -18,9 +18,19 @@ interface Props {
   configId: string;
   locationId?: string;
   updateUrl?: boolean;
+  // Forwarded to the breadcrumb URL so the monitor detail page knows the
+  // monitor lives on a remote (CCS) cluster and skips the local saved-object
+  // fetch that would otherwise 404.
+  remoteName?: string;
 }
 
-export const MonitorDetailsLinkPortal = ({ name, configId, locationId, updateUrl }: Props) => {
+export const MonitorDetailsLinkPortal = ({
+  name,
+  configId,
+  locationId,
+  updateUrl,
+  remoteName,
+}: Props) => {
   return (
     <InPortal node={MonitorDetailsLinkPortalNode}>
       {locationId ? (
@@ -29,15 +39,22 @@ export const MonitorDetailsLinkPortal = ({ name, configId, locationId, updateUrl
           configId={configId}
           locationId={locationId}
           updateUrl={updateUrl}
+          remoteName={remoteName}
         />
       ) : (
-        <MonitorDetailsLink name={name} configId={configId} />
+        <MonitorDetailsLink name={name} configId={configId} remoteName={remoteName} />
       )}
     </InPortal>
   );
 };
 
-const MonitorDetailsLinkWithLocation = ({ name, configId, locationId, updateUrl }: Props) => {
+const MonitorDetailsLinkWithLocation = ({
+  name,
+  configId,
+  locationId,
+  updateUrl,
+  remoteName,
+}: Props) => {
   const selectedLocation = useSelectedLocation({ updateUrl });
   const spaceId = useUrlSpaceId();
 
@@ -50,17 +67,17 @@ const MonitorDetailsLinkWithLocation = ({ name, configId, locationId, updateUrl 
   const history = useHistory();
   const href = history.createHref({
     pathname: `monitor/${configId}`,
-    search: buildSearch({ locationId: locId, spaceId }),
+    search: buildSearch({ locationId: locId, spaceId, remoteName }),
   });
   return <MonitorLink href={href} name={name} />;
 };
 
-const MonitorDetailsLink = ({ name, configId }: Props) => {
+const MonitorDetailsLink = ({ name, configId, remoteName }: Props) => {
   const spaceId = useUrlSpaceId();
   const history = useHistory();
   const href = history.createHref({
     pathname: `monitor/${configId}`,
-    search: buildSearch({ spaceId }),
+    search: buildSearch({ spaceId, remoteName }),
   });
   return <MonitorLink href={href} name={name} />;
 };
@@ -68,13 +85,16 @@ const MonitorDetailsLink = ({ name, configId }: Props) => {
 const buildSearch = ({
   locationId,
   spaceId,
+  remoteName,
 }: {
   locationId?: string;
   spaceId?: string;
+  remoteName?: string;
 }): string | undefined => {
   const params = new URLSearchParams();
   if (locationId) params.set('locationId', locationId);
   if (spaceId) params.set('spaceId', spaceId);
+  if (remoteName) params.set('remoteName', remoteName);
   const qs = params.toString();
   return qs ? `?${qs}` : undefined;
 };

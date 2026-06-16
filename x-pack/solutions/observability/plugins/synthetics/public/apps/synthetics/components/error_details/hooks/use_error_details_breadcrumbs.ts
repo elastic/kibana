@@ -9,6 +9,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useSelectedLocation } from '../../monitor_details/hooks/use_selected_location';
 import { useTestRunDetailsBreadcrumbs } from '../../test_run_details/hooks/use_test_run_details_breadcrumbs';
 import { useSelectedMonitor } from '../../monitor_details/hooks/use_selected_monitor';
+import { useGetUrlParams } from '../../../hooks';
 import { ConfigKey } from '../../../../../../common/runtime_types';
 import { PLUGIN } from '../../../../../../common/constants/plugin';
 import { useUrlSpaceId } from '../../../hooks/use_url_space_id';
@@ -23,14 +24,22 @@ export const useErrorDetailsBreadcrumbs = (
 
   const selectedLocation = useSelectedLocation();
   const spaceId = useUrlSpaceId();
+  // Carry `remoteName` so the errors crumb stays on the remote (CCS) cluster
+  // path; otherwise the local errors page 404s against missing saved objects.
+  const { remoteName } = useGetUrlParams();
 
-  const spaceIdQuery = spaceId ? `&spaceId=${spaceId}` : '';
+  const errorsHrefParams = new URLSearchParams();
+  if (selectedLocation?.id) errorsHrefParams.set('locationId', selectedLocation.id);
+  if (spaceId) errorsHrefParams.set('spaceId', spaceId);
+  if (remoteName) errorsHrefParams.set('remoteName', remoteName);
+  const errorsHrefSearch = errorsHrefParams.toString();
+
   const errorsBreadcrumbs = [
     {
       text: ERRORS_CRUMB,
-      href: `${appPath}/monitor/${monitor?.[ConfigKey.CONFIG_ID]}/errors?locationId=${
-        selectedLocation?.id
-      }${spaceIdQuery}`,
+      href: `${appPath}/monitor/${monitor?.[ConfigKey.CONFIG_ID]}/errors${
+        errorsHrefSearch ? `?${errorsHrefSearch}` : ''
+      }`,
     },
     ...(extraCrumbs ?? []),
   ];
