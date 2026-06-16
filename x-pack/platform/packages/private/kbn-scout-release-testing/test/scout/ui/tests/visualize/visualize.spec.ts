@@ -9,12 +9,7 @@ import { expect } from '@kbn/scout/ui';
 import { test, tags } from '@kbn/scout';
 import fs from 'fs';
 import os from 'os';
-import {
-  SavedObjectsTracker,
-  cleanupDownloadedFile,
-  installLogsSampleData,
-  removeLogsSampleData,
-} from '../../helpers';
+import { SavedObjectsTracker, cleanupDownloadedFile } from '../../helpers';
 
 const defaultSettings = {
   defaultIndex: 'kibana_sample_data_logs',
@@ -28,10 +23,6 @@ const tracker = new SavedObjectsTracker();
 let downloadedFilePath: string | null = null;
 
 test.describe('Visualize app', { tag: tags.stateful.classic }, () => {
-  test.beforeAll(async ({ kbnClient, apiServices }) => {
-    await installLogsSampleData({ apiServices, kbnClient, settings: defaultSettings });
-  });
-
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsAdmin();
   });
@@ -39,10 +30,6 @@ test.describe('Visualize app', { tag: tags.stateful.classic }, () => {
   test.afterEach(async ({ kbnClient }) => {
     downloadedFilePath = cleanupDownloadedFile(downloadedFilePath);
     await tracker.cleanup(kbnClient);
-  });
-
-  test.afterAll(async ({ kbnClient, apiServices }) => {
-    await removeLogsSampleData({ apiServices, kbnClient });
   });
 
   test('should create and save an aggregation-based visualization', async ({ pageObjects }) => {

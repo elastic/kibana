@@ -7,7 +7,7 @@
 
 import { expect } from '@kbn/scout/ui';
 import { test, tags } from '@kbn/scout';
-import { SavedObjectsTracker, installLogsSampleData, removeLogsSampleData } from '../../helpers';
+import { SavedObjectsTracker } from '../../helpers';
 
 const defaultSettings = {
   defaultIndex: 'kibana_sample_data_logs',
@@ -47,10 +47,6 @@ const CONTROLS_GROUP_WRAPPER = 'controls-group-wrapper';
 const tracker = new SavedObjectsTracker();
 
 test.describe('Discover ES|QL', { tag: tags.stateful.classic }, () => {
-  test.beforeAll(async ({ kbnClient, apiServices }) => {
-    await installLogsSampleData({ apiServices, kbnClient, settings: defaultSettings });
-  });
-
   test.beforeEach(async ({ browserAuth, pageObjects, uiSettings }) => {
     await browserAuth.loginAsAdmin();
     await uiSettings.set({
@@ -61,10 +57,6 @@ test.describe('Discover ES|QL', { tag: tags.stateful.classic }, () => {
 
   test.afterEach(async ({ kbnClient }) => {
     await tracker.cleanup(kbnClient);
-  });
-
-  test.afterAll(async ({ kbnClient, apiServices }) => {
-    await removeLogsSampleData({ apiServices, kbnClient });
   });
 
   test('should switch the query bar to ES|QL and display the default sample query', async ({
