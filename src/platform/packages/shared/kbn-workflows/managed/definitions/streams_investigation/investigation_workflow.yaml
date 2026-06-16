@@ -32,12 +32,41 @@ steps:
     with:
       timeout: 600s
       message: |
-        Investigate this significant event and propose root cause hypotheses.
-        Generate as many hypotheses as are genuinely distinct and worth investigating —
-        up to 5 maximum. Do not pad to 5; fewer strong hypotheses are better than many
-        weak ones. Order them by your prior confidence, highest first.
+        {{ inputs.question }}
 
-        Event: {{ inputs | json }}
+        Data streams (use get_index_info to discover available fields in each):
+        - Logs:    {{ inputs.stream_names[0] }}
+        - Traces:  {{ inputs.stream_names[1] }}
+        - Metrics: {{ inputs.stream_names[2] }}
+        Event metadata: {{ inputs | json }}
+
+        Before generating hypotheses, do a thorough investigation. Start with memory — prior
+        incidents and system context may already indicate which components or signals matter most.
+        Then explore what data and tools are available and use whichever are relevant:
+        - If service topology / trace data exists: get_service_topology, get_services,
+          get_trace_metrics to map the call graph and identify anomalous vs victim services.
+        - If metrics or logs exist: get_metric_change_points, get_log_change_points to find
+          what deviated and when. Also run ES|QL STATS queries to quantify specific anomalies.
+        - If code, deployment, or configuration signals are accessible: check changelogs,
+          recent deployments, or config diffs.
+        Not all signals will be present — if a tool returns nothing useful, note it and move on.
+
+        Key principles:
+
+        - A service is a VICTIM (not root cause) if its degradation fully matches the pattern
+          of a dependency it calls: errors start when the dependency started failing, error types
+          match the dependency's failure mode.
+        - Separate an independent fault from load amplification: a component can show elevated
+          load simply because a neighbor changed. Don't attribute root cause to it on load alone —
+          confirm it has a fault of its own that the load doesn't explain.
+        - Look for the component whose anomaly is NOT explained by upstream or downstream effects.
+        - The cause may surface in any signal and may be of any kind — a code or config change,
+          a dependency failure, a resource problem, bad data, etc.
+          Don't presuppose the failure mode; follow the evidence.
+
+        Generate up to 5 targeted hypotheses ordered by prior confidence (highest first).
+        Each hypothesis should name a specific service AND a specific mechanism.
+        Fewer strong hypotheses beat many weak ones.
       schema:
         type: object
         properties:
