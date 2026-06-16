@@ -42,6 +42,11 @@ interface ListTemplateSearchConfig {
   placeholder?: string;
 }
 
+interface ListTemplateAddItemConfig {
+  enabled: boolean;
+  onClick: () => void;
+}
+
 export type ListTemplateConfig<Data = SerializableRecord> = {
   item: {
     /** field property path of the data record, mapped as the displayed item's id */
@@ -55,10 +60,8 @@ export type ListTemplateConfig<Data = SerializableRecord> = {
     /** field property path of the data record, mapped as the displayed item's badge */
     badgeField?: keyof Data;
   };
-  // /** Optional client-side search box. */
-  // search?: ListTemplateSearchConfig;
   /** Optional section-level actions. */
-  actions?: NavTemplateActionConfig[];
+  actions?: NavTemplateActionConfig<Data>[];
   /** Message shown when the data source emits no rows. */
   emptyMessage?: string;
   /** Cap the number of rows rendered to this value. */
@@ -71,24 +74,18 @@ export type ListTemplateConfig<Data = SerializableRecord> = {
     }
   | {
       /** Whether to support the add item button. */
-      supportAddItem?: true;
+      supportAddItem?: ListTemplateAddItemConfig;
+      /** Optional client-side search box. */
       search: ListTemplateSearchConfig;
       /** The heading of the list template. This is required when either supportAddItem or search is provided. */
       heading: string;
     }
 );
 
-export interface NavListTemplateProps<Data = SerializableRecord>
-  extends NavExtensionPointBaseComponentProps<Data, ListTemplateConfig<Data>> {
-  /**
-   * Handler for the 'add' action.
-   */
-  onAction(actionId: 'add', extensionId: string, itemData: null): void;
-  /**
-   * Generic handler for non-link actions.
-   */
-  onAction(actionId: string, extensionId: string, itemData: Data): void;
-}
+export type NavListTemplateProps<Data = SerializableRecord> = NavExtensionPointBaseComponentProps<
+  Data,
+  ListTemplateConfig<Data>
+>;
 
 function normalizeRows<Data = SerializableRecord>(
   data: Data[] | undefined,
@@ -144,7 +141,6 @@ export function ListTemplate<Data = SerializableRecord>({
   data,
   config,
   context,
-  onAction,
 }: NavListTemplateProps<Data>): JSX.Element | null {
   const listConfig = config as ListTemplateConfig<Data>;
   const [query, setQuery] = useState<string>('');
@@ -166,10 +162,6 @@ export function ListTemplate<Data = SerializableRecord>({
     setSearchTextFieldOpen(true);
   }, [setSearchTextFieldOpen]);
 
-  const onAddItemButtonClick = useCallback(() => {
-    onAction('add', context.extensionId, null);
-  }, [context.extensionId, onAction]);
-
   const renderRowActionPopover = useCallback(() => {
     return popoverRowData ? (
       <EuiWrappingPopover
@@ -190,7 +182,7 @@ export function ListTemplate<Data = SerializableRecord>({
             <EuiContextMenuItem
               key={action.id}
               icon={action.icon}
-              onClick={() => onAction(action.id, context.extensionId, popoverRowData)}
+              onClick={action.onClick.bind(null, context.slotId, popoverRowData)}
               data-test-subj={String(`nav-extension-${context.extensionId}-action-${action.id}`)}
             >
               {action.label}
@@ -199,7 +191,7 @@ export function ListTemplate<Data = SerializableRecord>({
         />
       </EuiWrappingPopover>
     ) : null;
-  }, [context.extensionId, listConfig?.actions, onAction, popoverRowData]);
+  }, [context.extensionId, context.slotId, listConfig?.actions, popoverRowData]);
 
   const wrapperStyles = css`
     list-style: none;
@@ -274,7 +266,7 @@ export function ListTemplate<Data = SerializableRecord>({
                   )}
                 </EuiFlexGroup>
               </EuiFlexItem>
-              {listConfig.supportAddItem && (
+              {listConfig.supportAddItem?.enabled && (
                 <EuiFlexItem grow={false}>
                   <EuiToolTip
                     content={i18n.translate(
@@ -287,7 +279,7 @@ export function ListTemplate<Data = SerializableRecord>({
                       color="text"
                       iconType="plus"
                       aria-labelledby="add-item-button"
-                      onClick={onAddItemButtonClick}
+                      onClick={listConfig.supportAddItem.onClick}
                     />
                   </EuiToolTip>
                 </EuiFlexItem>

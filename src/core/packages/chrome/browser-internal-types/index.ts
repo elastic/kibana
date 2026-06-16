@@ -31,7 +31,6 @@ import type {
   CloudURLs,
   SolutionId,
   SlotDataSources,
-  NavExtensionActionEvent,
   NavExtensionDefinitionMap,
 } from '@kbn/core-chrome-browser';
 
@@ -137,12 +136,6 @@ export interface InternalChromeStart extends ChromeStart {
 
     /** Get the global extension-definition registry. */
     getExtensionRegistry$(): Observable<NavExtensionDefinitionMap>;
-
-    /** Dispatch a non-link extension action so the registering plugin can handle it. */
-    dispatchExtensionAction(event: NavExtensionActionEvent): void;
-
-    /** Stream of non-link extension actions fired by templates. */
-    getExtensionActions$(): Observable<NavExtensionActionEvent>;
   };
 
   /** @internal Extends public `next` with `get$` for Chrome layout components. */

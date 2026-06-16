@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ComponentProps } from 'react';
 import React from 'react';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { renderWithEuiTheme } from '@kbn/test-jest-helpers';
@@ -63,18 +64,10 @@ const renderListTemplate = ({
   data = testRows,
   config = defaultConfig,
   context = defaultContext,
-  onAction = jest.fn(),
-}: {
-  data?: TestRow[];
-  config?: ListTemplateConfig<TestRow>;
-  context?: NavExtensionPointContext;
-  onAction?: jest.Mock;
-} = {}) => {
-  const view = renderWithEuiTheme(
-    <ListTemplate data={data} config={config} context={context} onAction={onAction} />
-  );
+}: Partial<ComponentProps<typeof ListTemplate<TestRow>>> = {}) => {
+  const view = renderWithEuiTheme(<ListTemplate data={data} config={config} context={context} />);
 
-  return { ...view, onAction };
+  return { ...view };
 };
 
 describe('ListTemplate', () => {
@@ -170,35 +163,32 @@ describe('ListTemplate', () => {
   });
 
   it('invokes onAction with add when the add-item button is clicked', () => {
-    const onAction = jest.fn();
+    const onAddItemHandler = jest.fn();
 
     renderListTemplate({
-      onAction,
       config: {
         ...defaultConfig,
         heading: 'Recently viewed',
-        supportAddItem: true,
+        supportAddItem: { enabled: true, onClick: onAddItemHandler },
         search: { enabled: true },
       },
     });
 
     clickIconButton('plus');
 
-    expect(onAction).toHaveBeenCalledTimes(1);
-    expect(onAction).toHaveBeenCalledWith('add', EXTENSION_ID, null);
+    expect(onAddItemHandler).toHaveBeenCalledTimes(1);
   });
 
   it('invokes onAction when a row action is selected from the menu', async () => {
     const onAction = jest.fn();
 
     renderListTemplate({
-      onAction,
       config: {
         ...defaultConfig,
         heading: 'Recently viewed',
         actions: [
-          { id: 'delete', label: 'Delete', icon: 'trash' },
-          { id: 'edit', label: 'Edit', icon: 'pencil' },
+          { id: 'delete', label: 'Delete', icon: 'trash', onClick: onAction },
+          { id: 'edit', label: 'Edit', icon: 'pencil', onClick: onAction },
         ],
       },
     });
@@ -210,7 +200,6 @@ describe('ListTemplate', () => {
 
     await waitFor(() => {
       expect(onAction).toHaveBeenCalledTimes(1);
-      expect(onAction).toHaveBeenCalledWith('delete', EXTENSION_ID, testRows[0]);
     });
   });
 

@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Suspense, useEffect, useState } from 'react';
-import type { Observable } from 'rxjs';
-
+import React, { Suspense, useEffect, useState, useCallback } from 'react';
+import { type Observable } from 'rxjs';
+import { useObservable } from '@kbn/use-observable';
+import { useChromeService } from '@kbn/core-chrome-browser-context';
+import type { NavExtensionRenderContext } from '@kbn/ui-side-navigation';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { NavExtensionRuntimeDefinition } from '@kbn/core-chrome-browser';
 import {
@@ -27,8 +29,6 @@ export interface NavExtensionTemplateHostProps {
   data$: Observable<SerializableRecord>;
   /** Rendering context (surface, active item, slot/extension ids). */
   context: NavExtensionPointContext;
-  /** Forwarded to the registering plugin for non-link actions. */
-  onAction: (actionId: string, itemId: string) => void;
 }
 
 const useLatest = <T,>(source$: Observable<T>): T | undefined => {
@@ -46,11 +46,10 @@ const useLatest = <T,>(source$: Observable<T>): T | undefined => {
  * Subscribes to a slot's `data$` and renders the template named by the extension
  * definition.
  */
-export const NavExtensionTemplateHost = ({
+const NavExtensionTemplateHost = ({
   definition,
   data$,
   context,
-  onAction,
 }: NavExtensionTemplateHostProps) => {
   const data = useLatest(data$);
   const LazyExtensionTemplate = TEMPLATES[definition.templateId as NavTemplateId];
@@ -61,12 +60,35 @@ export const NavExtensionTemplateHost = ({
 
   return (
     <Suspense fallback={null}>
-      <LazyExtensionTemplate
-        data={data}
-        config={definition.config}
-        context={context}
-        onAction={onAction}
-      />
+      <LazyExtensionTemplate data={data} config={definition.config} context={context} />
     </Suspense>
   );
+};
+
+export const useRenderNavExtensionPoint = () => {
+  const chrome = useChromeService();
+  const extensionRegistry = useObservable(chrome.project.getExtensionRegistry$(), undefined);
+  const slotDataSources = useObservable(chrome.project.getActiveSlotDataSources$(), undefined);
+
+  const renderExtensionPoint = useCallback(
+    (slotId: string, extensionId: string, context: NavExtensionRenderContext) => {
+      const definition = extensionRegistry?.[extensionId];
+      const data$ = slotDataSources?.[slotId];
+
+      if (!definition || !data$) {
+        return null;
+      }
+
+      return (
+        <NavExtensionTemplateHost
+          definition={definition}
+          data$={data$}
+          context={{ ...context, slotId, extensionId }}
+        />
+      );
+    },
+    [extensionRegistry, slotDataSources]
+  );
+
+  return renderExtensionPoint;
 };

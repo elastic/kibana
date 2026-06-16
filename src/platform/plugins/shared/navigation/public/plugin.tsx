@@ -8,7 +8,7 @@
  */
 
 import type { Observable } from 'rxjs';
-import { of, ReplaySubject, take, map, switchMap, filter } from 'rxjs';
+import { of, ReplaySubject, take, map, switchMap } from 'rxjs';
 import type {
   PluginInitializerContext,
   CoreSetup,
@@ -124,9 +124,6 @@ export class NavigationPublicPlugin
       activeSpace$.pipe(take(1)).subscribe(initSolutionNavigation);
     }
 
-    const getExtensionSlotActions$ = (slotId: string) =>
-      chrome.project.getExtensionActions$().pipe(filter((action) => action.slotId === slotId));
-
     return {
       ui: {
         /**
@@ -156,7 +153,6 @@ export class NavigationPublicPlugin
           );
         })
       ),
-      getExtensionSlotActions$,
     };
   }
 

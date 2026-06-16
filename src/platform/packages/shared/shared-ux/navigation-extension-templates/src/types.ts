@@ -11,12 +11,11 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import type { NavExtensionRenderContext } from '@kbn/ui-side-navigation';
 
 /** A declarative action descriptor rendered by the `list` template. */
-export interface NavTemplateActionConfig {
+export interface NavTemplateActionConfig<Data = SerializableRecord> {
   id: string;
   label: string;
-  icon?: string;
-  /** When provided the action navigates directly; otherwise `onAction` is invoked. */
-  href?: string;
+  icon: string;
+  onClick: (slotId: string, itemData: Data) => void;
 }
 
 export interface NavExtensionPointContext extends NavExtensionRenderContext {

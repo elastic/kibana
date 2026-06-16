@@ -31,23 +31,26 @@ export const ListTemplateRobustUsage: StoryObj<typeof ListTemplate<ListTemplateD
     })),
     config: {
       heading: 'List Template Robust Usage',
-      supportAddItem: true,
+      supportAddItem: { enabled: true, onClick: action('addItemAction') },
       search: { enabled: true, placeholder: 'Search the list' },
       actions: [
         {
           id: 'delete',
           label: 'Delete',
           icon: 'trash',
+          onClick: action('deleteAction'),
         },
         {
           id: 'edit',
           label: 'Edit',
           icon: 'pencil',
+          onClick: action('editAction'),
         },
         {
           id: 'copy',
           label: 'Copy',
           icon: 'copy',
+          onClick: action('copyAction'),
         },
       ],
       item: {
@@ -63,7 +66,6 @@ export const ListTemplateRobustUsage: StoryObj<typeof ListTemplate<ListTemplateD
       sectionId: 'sectionId',
       surface: 'sidePanel',
     },
-    onAction: action('onAction'),
   },
 };
 

@@ -85,8 +85,6 @@ export function createChromeApi({
     getActiveSlotDataSources$: () => projectNavigation.getActiveSlotDataSources$(),
     setExtensionRegistry: (registry) => projectNavigation.setExtensionRegistry(registry),
     getExtensionRegistry$: () => projectNavigation.getExtensionRegistry$(),
-    dispatchExtensionAction: (event) => projectNavigation.dispatchExtensionAction(event),
-    getExtensionActions$: () => projectNavigation.getExtensionActions$(),
   };
 
   let appHeaderRegistrationId = 0;

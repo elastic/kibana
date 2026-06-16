@@ -13,7 +13,6 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type {
   NavigationTreeDefinition,
   SolutionNavigationDefinition,
-  NavExtensionActionEvent,
   NavExtensionId,
 } from '@kbn/core-chrome-browser';
 import type { NavExtensionDefinition } from '@kbn/shared-ux-navigation-extension-templates';
@@ -79,11 +78,6 @@ export interface NavigationPublicStart {
   ) => void;
   /** Flag to indicate if the solution navigation is enabled.*/
   isSolutionNavEnabled$: Observable<boolean>;
-  /**
-   * Stream of non-link extension slot actions fired by templates. Registering plugins
-   * subscribe to handle behavior, using `slotId` to disambiguate placements.
-   */
-  getExtensionSlotActions$: (slotId: string) => Observable<NavExtensionActionEvent>;
 }
 
 export interface NavigationPublicSetupDependencies {

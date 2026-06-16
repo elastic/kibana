@@ -43,7 +43,6 @@ export const ListTemplateUsage: StoryObj<typeof ListTemplate<ListTemplateData>> 
       sectionId: 'sectionId',
       surface: 'sidePanel',
     },
-    onAction: () => {},
   },
 };
 

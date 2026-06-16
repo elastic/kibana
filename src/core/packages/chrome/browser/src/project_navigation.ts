@@ -370,14 +370,6 @@ export type SolutionNavigationDefinitions = {
  */
 export type SlotDataSources = Record<string, Observable<SerializableRecord>>;
 
-/** Event emitted when an extension template fires a non-link (callback) action. */
-export interface NavExtensionActionEvent {
-  slotId: string;
-  extensionId: string;
-  actionId: string;
-  itemId: string;
-}
-
 /**
  * Temporary helper interface while we have to maintain both the legacy side navigation
  * and the new "solution view" one. The legacy uses EuiSideNavItemType and its properties are not fully compatible

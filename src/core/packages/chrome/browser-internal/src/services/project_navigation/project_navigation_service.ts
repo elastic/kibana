@@ -20,13 +20,11 @@ import type {
   CloudLinks,
   SolutionId,
   SlotDataSources,
-  NavExtensionActionEvent,
   NavExtensionDefinitionMap,
 } from '@kbn/core-chrome-browser';
 import {
   BehaviorSubject,
   Observable,
-  Subject,
   combineLatest,
   map,
   takeUntil,
@@ -85,7 +83,6 @@ export class ProjectNavigationService {
     } | null>(null);
     const slotDataSourcesBySolutionId = new Map<SolutionId, SlotDataSources>();
     const extensionRegistry$ = new BehaviorSubject<NavExtensionDefinitionMap>({});
-    const extensionActions$ = new Subject<NavExtensionActionEvent>();
     const kibanaName$ = new BehaviorSubject<string | undefined>(undefined);
     const cloudLinks$ = new BehaviorSubject<CloudLinks>({});
     const projectBreadcrumbs$ = new BehaviorSubject<{
@@ -215,10 +212,6 @@ export class ProjectNavigationService {
         extensionRegistry$.next(registry);
       },
       getExtensionRegistry$: () => extensionRegistry$.asObservable(),
-      dispatchExtensionAction: (event: NavExtensionActionEvent) => {
-        extensionActions$.next(event);
-      },
-      getExtensionActions$: () => extensionActions$.asObservable(),
       getNavigation$: () => navigation$,
       setProjectBreadcrumbs: (
         breadcrumbs: ChromeBreadcrumb | ChromeBreadcrumb[],
