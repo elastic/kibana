@@ -15,11 +15,9 @@ import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { testData } from '../../fixtures/common';
 
-spaceTest.describe('Discover ES|QL panel edit flow', { tag: tags.deploymentAgnostic }, () => {
+spaceTest.describe('Discover panel edit flow', { tag: tags.deploymentAgnostic }, () => {
   const panelName = 'ES|QL Discover Session';
   const savedAsTitle = 'ES|QL Discover Session Saved As';
-
-  spaceTest.use({ viewport: { width: 1600, height: 1200 } });
 
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     await scoutSpace.savedObjects.load(testData.DASHBOARDS_KBN_ARCHIVE);
