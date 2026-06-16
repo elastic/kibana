@@ -18,6 +18,7 @@ export interface LocationState {
   shouldStickToBottom?: boolean;
   initialMessage?: string;
   attachments?: ConversationAttachment[];
+  autoSendInitialMessage?: boolean;
   mcpClientCreated?: CreateOAuthClientResponse;
   entryPointSource?: FullscreenEntryPointSource;
 }
