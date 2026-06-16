@@ -6,6 +6,8 @@
  */
 
 import expect from '@kbn/expect';
+import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
+import { ROLES as SERVERLESS_ROLES } from '@kbn/security-solution-plugin/common/test';
 import { SECURITY_FEATURE_ID } from '@kbn/security-solution-plugin/common/constants';
 import {
   cleanUpWatchlists,
@@ -49,29 +51,48 @@ export default ({ getService }: FtrProviderContext) => {
   const userHelper = usersAndRolesFactory(getService('security'));
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const config = getService('config');
+  const isServerless = config.get('serverless');
+  const samlAuth = isServerless ? getService('samlAuth') : null;
   const watchlistRoutes = watchlistRouteHelpersFactory(supertest);
   const watchlistRoutesNoAuth = watchlistRouteHelpersFactoryNoAuth(supertestWithoutAuth);
 
-  const allCreds = { username: ALL_USER, password: USER_PASSWORD };
-  const readCreds = { username: READ_USER, password: USER_PASSWORD };
+  let allCreds: { username: string; password: string } | { apiKeyHeader: Record<string, string> };
+  let readCreds: { username: string; password: string } | { apiKeyHeader: Record<string, string> };
+  let allRoleAuthc: RoleCredentials | undefined;
+  let readRoleAuthc: RoleCredentials | undefined;
 
   describe('@ess @serverless @skipInServerlessMKI Entity Analytics - Watchlist Privileges', () => {
     before(async () => {
-      await Promise.all(ROLES.map((role) => userHelper.createRole(role)));
-      await Promise.all(
-        USERS.map((user) =>
-          userHelper.createUser({
-            username: user,
-            password: USER_PASSWORD,
-            roles: [`${user}_role`],
-          })
-        )
-      );
+      if (isServerless) {
+        allRoleAuthc = await samlAuth!.createM2mApiKeyWithRoleScope(SERVERLESS_ROLES.t3_analyst);
+        readRoleAuthc = await samlAuth!.createM2mApiKeyWithRoleScope(SERVERLESS_ROLES.t1_analyst);
+        allCreds = { apiKeyHeader: allRoleAuthc.apiKeyHeader };
+        readCreds = { apiKeyHeader: readRoleAuthc.apiKeyHeader };
+      } else {
+        await Promise.all(ROLES.map((role) => userHelper.createRole(role)));
+        await Promise.all(
+          USERS.map((user) =>
+            userHelper.createUser({
+              username: user,
+              password: USER_PASSWORD,
+              roles: [`${user}_role`],
+            })
+          )
+        );
+        allCreds = { username: ALL_USER, password: USER_PASSWORD };
+        readCreds = { username: READ_USER, password: USER_PASSWORD };
+      }
     });
 
     after(async () => {
-      await Promise.all(USERS.map((user) => userHelper.deleteUser(user)));
-      await Promise.all(ROLES.map((role) => userHelper.deleteRole(role.name)));
+      if (isServerless) {
+        await samlAuth!.invalidateM2mApiKeyWithRoleScope(allRoleAuthc!);
+        await samlAuth!.invalidateM2mApiKeyWithRoleScope(readRoleAuthc!);
+      } else {
+        await Promise.all(USERS.map((user) => userHelper.deleteUser(user)));
+        await Promise.all(ROLES.map((role) => userHelper.deleteRole(role.name)));
+      }
     });
 
     afterEach(async () => {

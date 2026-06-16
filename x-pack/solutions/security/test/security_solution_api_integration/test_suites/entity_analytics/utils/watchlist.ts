@@ -26,10 +26,19 @@ import type { CreateWatchlistEntitySourceRequestBody } from '@kbn/security-solut
 import type { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
 import { routeWithNamespace } from '@kbn/detections-response-ftr-services';
 
-interface Credentials {
+interface PasswordBasedCredentials {
   username: string;
   password: string;
 }
+
+interface ApiKeyCredentials {
+  apiKeyHeader: Record<string, string>;
+}
+
+type Credentials = PasswordBasedCredentials | ApiKeyCredentials;
+
+const isApiKeyCredentials = (credentials: Credentials): credentials is ApiKeyCredentials =>
+  'apiKeyHeader' in credentials;
 
 const assertStatusCode = (statusCode: number, response: SuperTest.Response) => {
   if (response.status !== statusCode) {
@@ -106,12 +115,16 @@ export const watchlistRouteHelpersFactoryNoAuth = (
   supertestWithoutAuth: SupertestWithoutAuthProviderType,
   namespace?: string
 ) => {
-  const withDefaults = (req: SuperTest.Test, { username, password }: Credentials) =>
-    req
-      .auth(username, password)
+  const withDefaults = (req: SuperTest.Test, credentials: Credentials) => {
+    const authedReq = isApiKeyCredentials(credentials)
+      ? req.set(credentials.apiKeyHeader)
+      : req.auth(credentials.username, credentials.password);
+
+    return authedReq
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.public.v1)
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  };
 
   const resolveDataSourceUrl = (watchlistId: string) =>
     WATCHLISTS_DATA_SOURCE_URL.replace('{watchlist_id}', watchlistId);
