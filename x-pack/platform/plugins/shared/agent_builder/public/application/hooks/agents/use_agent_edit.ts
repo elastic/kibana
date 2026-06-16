@@ -15,6 +15,7 @@ import {
   defaultAgentToolIds,
 } from '@kbn/agent-builder-common';
 import { useSearchParams } from 'react-router-dom-v5-compat';
+import type { AgentCreateRequest } from '../../../../common/agents';
 import { useAgentBuilderServices } from '../use_agent_builder_service';
 import { useAgentBuilderAgentById } from './use_agent_by_id';
 import { useToolsService } from '../tools/use_tools';
@@ -75,7 +76,7 @@ export function useAgentEdit({
   const { agent, isLoading: agentLoading, error: agentError } = useAgentBuilderAgentById(agentId);
 
   const createMutation = useMutation({
-    mutationFn: (data: AgentEditState) => agentService.create(data),
+    mutationFn: (data: AgentCreateRequest) => agentService.create(data),
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.agentProfiles.all });
       onSaveSuccess(result);
@@ -146,7 +147,8 @@ export function useAgentEdit({
           await updateAclMutation.mutateAsync({ id: editingAgentId, entries: nextEntries });
         }
       } else {
-        await createMutation.mutateAsync(requestData);
+        const { acl, created_by: _createdBy, avatar_icon, ...createData } = requestData;
+        await createMutation.mutateAsync(createData);
       }
     },
     [editingAgentId, createMutation, updateMutation, updateAclMutation, tools, agent]
