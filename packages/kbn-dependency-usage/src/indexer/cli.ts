@@ -14,7 +14,7 @@ import nodePath from 'path';
 import yargs from 'yargs';
 import chalk from 'chalk';
 
-// @ts-ignore
+// @ts-expect-error
 import { REPO_ROOT } from '@kbn/repo-info';
 
 import {
@@ -35,10 +35,27 @@ const today = new Date().toISOString().slice(0, 10);
 // ---------------------------------------------------------------------------
 
 const PLATFORM_PATHS = [
+  // x-pack/platform
   'x-pack/platform/plugins/shared',
   'x-pack/platform/plugins/private',
   'x-pack/platform/packages/shared',
   'x-pack/platform/packages/private',
+  // x-pack/packages — platform packages not under the x-pack/platform subtree
+  'x-pack/packages',
+  // src/platform
+  'src/platform/plugins/shared',
+  'src/platform/plugins/private',
+  'src/platform/packages/shared',
+  'src/platform/packages/private',
+  // src/platform/kbn-ui — platform UI packages outside the plugins/packages subdirs
+  'src/platform/kbn-ui',
+  // Root-level packages/ — all carry group "platform" in their kibana.jsonc.
+  // Note: src/dev and src/cli are excluded because they lack kibana.jsonc manifests.
+  'packages',
+  // src/core has kibana.jsonc at its root, so discoverPackages() would short-circuit
+  // there and never recurse into the 247 individual sub-packages. We point directly at
+  // src/core/packages to get granular per-package data instead of one monolithic entry.
+  'src/core/packages',
 ];
 
 function resolveGroupPaths(group: string): string[] {

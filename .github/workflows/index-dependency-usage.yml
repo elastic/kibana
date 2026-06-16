@@ -54,6 +54,8 @@ jobs:
           restore-keys: dep-usage-node-modules-
 
       - name: Install dependencies
+        # --ignore-scripts skips lifecycle hooks, package manifests, and symlink
+        # setup — faster than `yarn kbn bootstrap` for this read-only scan job.
         run: yarn install --frozen-lockfile --ignore-scripts
 
       - name: Index ${{ matrix.group }}

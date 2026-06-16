@@ -40,7 +40,7 @@ export const NODE_MODULES_COLLAPSE_REGEX = '^node_modules/(@[^/]+/[^/]+|[^/]+)';
 export async function cruiseExternalDeps(paths: PathsToAnalyze) {
   return cruise(paths, {
     ruleSet: {
-      // @ts-ignore
+      // @ts-expect-error
       forbidden: [
         {
           name: 'external-deps',
@@ -51,7 +51,7 @@ export async function cruiseExternalDeps(paths: PathsToAnalyze) {
       ],
     },
     doNotFollow: { path: 'node_modules' },
-    // @ts-ignore wrongly typed in dependency-cruiser, see https://github.com/sverweij/dependency-cruiser/blob/main/doc/options-reference.md#extensions
+    // @ts-expect-error wrongly typed in dependency-cruiser, see https://github.com/sverweij/dependency-cruiser/blob/main/doc/options-reference.md#extensions
     extensions: ['.ts', '.tsx'],
     focus: '^node_modules',
     exclude: { path: excludePaths },
@@ -90,7 +90,7 @@ const invokeDependencyCruiser = async (
 
   const result = await cruise(paths, {
     ruleSet: {
-      // @ts-ignore
+      // @ts-expect-error
       forbidden: [captureRule],
     },
     doNotFollow: {
