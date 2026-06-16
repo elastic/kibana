@@ -110,7 +110,7 @@ baseline-browser-mapping@2.9.14
 bezier-easing@2.1.0
 bn.js@4.11.9
 bn.js@5.2.3
-brace-expansion@1.1.13
+brace-expansion@1.1.14
 brorand@1.1.0
 browser-resolve@2.0.0
 browserify-aes@1.2.0
@@ -517,6 +517,6 @@ webpack@5.96.1
 which-typed-array@1.1.18
 wrappy@1.0.2
 xtend@4.0.2
-yaml@1.10.2
+yaml@1.10.3
 yocto-queue@0.1.0
 zwitch@1.0.5

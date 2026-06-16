@@ -104,5 +104,5 @@ vscode-uri@3.0.8
 watchpack@2.4.1
 webpack-sources@3.2.3
 webpack@5.96.1
-yaml@2.3.4
+yaml@2.9.0
 yocto-queue@1.1.1
