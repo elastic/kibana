@@ -499,10 +499,15 @@ function alignPipelineSignalType(
   return { [newKey]: pipeline };
 }
 
-// Recursively walks a component config body and rewrites auth.authenticator
-// references whose bare ID appears in originalToSuffixedExtensionIds.
-// This covers the OTel configauth convention where receivers/exporters/etc.
-// reference extensions via `auth: { authenticator: <extension-id> }`.
+// Recursively walks a component config body and rewrites extension references
+// whose bare ID appears in originalToSuffixedExtensionIds. This covers two OTel
+// conventions for referencing an in-stream extension:
+//   - configauth: `auth: { authenticator: <extension-id> }` on receivers/exporters/etc.
+//   - storage: `storage: <extension-id>` on receivers (e.g. akamai_siem).
+// Both rewrites share the same guard: only references whose bare name was declared
+// as an extension in this stream are suffixed. Globally-injected extensions (e.g.
+// `elasticsearch_storage`, `beatsauth/default`) are not in the map, so the `?? val`
+// fallback leaves them untouched — no special-casing by extension type.
 function rewriteOtelcolExtensionReferences(
   value: unknown,
   originalToSuffixedExtensionIds: Record<string, string>
@@ -526,6 +531,8 @@ function rewriteOtelcolExtensionReferences(
         ...authObj,
         authenticator: originalToSuffixedExtensionIds[authenticator] ?? authenticator,
       };
+    } else if (key === 'storage' && typeof val === 'string') {
+      result[key] = originalToSuffixedExtensionIds[val] ?? val;
     } else {
       result[key] = rewriteOtelcolExtensionReferences(val, originalToSuffixedExtensionIds);
     }

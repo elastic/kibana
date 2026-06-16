@@ -6,7 +6,14 @@
  */
 
 import React, { useState } from 'react';
-import { EuiButtonIcon, EuiExpression, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiExpression,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiToolTip,
+} from '@elastic/eui';
 import { FieldValueSuggestions } from '@kbn/observability-shared-plugin/public';
 import { filterLabels } from '../../filter_group/translations';
 import { alertFilterLabels, filterAriaLabels } from './translations';
@@ -163,16 +170,21 @@ export const FiltersExpressionsSelect: React.FC<FilterExpressionsSelectProps> = 
               )}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                data-test-subj="observabilitySolutionFiltersExpressionsSelectButton"
-                aria-label={alertFilterLabels.REMOVE_FILTER_LABEL(title)}
-                iconType="trash"
-                color="danger"
-                onClick={() => {
-                  onRemoveFilter(fieldName);
-                  onFilterFieldChange(fieldName, []);
-                }}
-              />
+              <EuiToolTip
+                content={alertFilterLabels.REMOVE_FILTER_LABEL(title)}
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  data-test-subj="observabilitySolutionFiltersExpressionsSelectButton"
+                  aria-label={alertFilterLabels.REMOVE_FILTER_LABEL(title)}
+                  iconType="trash"
+                  color="danger"
+                  onClick={() => {
+                    onRemoveFilter(fieldName);
+                    onFilterFieldChange(fieldName, []);
+                  }}
+                />
+              </EuiToolTip>
             </EuiFlexItem>
             <EuiSpacer size="xs" />
           </EuiFlexGroup>
