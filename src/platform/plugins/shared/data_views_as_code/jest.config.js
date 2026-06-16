@@ -7,11 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PluginInitializer } from '@kbn/core/public';
-import type { SampelPanelActionTestPluginSetup, SampelPanelActionTestPluginStart } from './plugin';
-import { SampelPanelActionTestPlugin } from './plugin';
-
-export const plugin: PluginInitializer<
-  SampelPanelActionTestPluginSetup,
-  SampelPanelActionTestPluginStart
-> = () => new SampelPanelActionTestPlugin();
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/plugins/shared/data_views_as_code'],
+  coverageDirectory:
+    '<rootDir>/target/kibana-coverage/jest/src/platform/plugins/shared/data_views_as_code',
+  coverageReporters: ['text', 'html'],
+  collectCoverageFrom: [
+    '<rootDir>/src/platform/plugins/shared/data_views_as_code/{common,public,server}/**/*.{ts,tsx}',
+  ],
+};

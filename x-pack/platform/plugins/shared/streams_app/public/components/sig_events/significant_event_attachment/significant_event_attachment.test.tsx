@@ -16,6 +16,7 @@ import {
   registerSignificantEventAttachment,
   significantEventAttachmentDefinition,
 } from './significant_event_attachment';
+import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 
 const attachment: SignificantEventAttachment = {
   id: 'attachment-1',
@@ -63,21 +64,90 @@ describe('significantEventAttachmentDefinition', () => {
     );
   });
 
-  it('renders an inline significant event card', () => {
+  it('returns the event title as label', () => {
+    expect(significantEventAttachmentDefinition.getLabel(attachment)).toBe('Payment outage');
+  });
+
+  it('falls back to "Significant event" when title is empty', () => {
+    const noTitle = { ...attachment, data: { ...attachment.data, title: '' } };
+    expect(significantEventAttachmentDefinition.getLabel(noTitle)).toBe('Significant event');
+  });
+
+  it('returns "Significant event" as the header subtitle', () => {
+    const header = significantEventAttachmentDefinition.getHeader?.({ attachment });
+    expect(header?.subtitle).toBe('Significant event');
+  });
+
+  describe('getActionButtons', () => {
+    const baseParams = {
+      attachment,
+      isSidebar: false,
+      updateOrigin: jest.fn(),
+    };
+
+    it('returns an "Open" SECONDARY button when openCanvas is provided and not in canvas', () => {
+      const openCanvas = jest.fn();
+      const buttons =
+        significantEventAttachmentDefinition.getActionButtons?.({
+          ...baseParams,
+          isCanvas: false,
+          openCanvas,
+        }) ?? [];
+
+      expect(buttons).toHaveLength(1);
+      expect(buttons[0].label).toBe('Open');
+      expect(buttons[0].type).toBe(ActionButtonType.SECONDARY);
+
+      buttons[0].handler();
+      expect(openCanvas).toHaveBeenCalledTimes(1);
+    });
+
+    it('returns no buttons when already in canvas', () => {
+      const buttons =
+        significantEventAttachmentDefinition.getActionButtons?.({
+          ...baseParams,
+          isCanvas: true,
+          openCanvas: jest.fn(),
+        }) ?? [];
+
+      expect(buttons).toHaveLength(0);
+    });
+
+    it('returns no buttons when openCanvas is undefined', () => {
+      const buttons =
+        significantEventAttachmentDefinition.getActionButtons?.({
+          ...baseParams,
+          isCanvas: false,
+          openCanvas: undefined,
+        }) ?? [];
+
+      expect(buttons).toHaveLength(0);
+    });
+  });
+
+  it('renders the canvas content with static event details', () => {
     render(
       <I18nProvider>
         <>
-          {significantEventAttachmentDefinition.renderInlineContent?.({
-            attachment,
-            isSidebar: false,
-          })}
+          {significantEventAttachmentDefinition.renderCanvasContent?.(
+            { attachment, isSidebar: false },
+            {
+              registerActionButtons: jest.fn(),
+              updateOrigin: jest.fn(),
+              closeCanvas: jest.fn(),
+            }
+          )}
         </>
       </I18nProvider>
     );
 
-    expect(screen.getByText('Payment outage')).toBeInTheDocument();
     expect(screen.getByText('Payments are failing.')).toBeInTheDocument();
     expect(screen.getByText('Payment gateway timeout.')).toBeInTheDocument();
     expect(screen.getByText('logs.payment')).toBeInTheDocument();
+    expect(screen.getByText('1. Restart gateway client')).toBeInTheDocument();
+  });
+
+  it('does not render inline content', () => {
+    expect(significantEventAttachmentDefinition.renderInlineContent).toBeUndefined();
   });
 });
