@@ -147,7 +147,7 @@ export function useAgentEdit({
           await updateAclMutation.mutateAsync({ id: editingAgentId, entries: nextEntries });
         }
       } else {
-        const { acl, created_by: _createdBy, avatar_icon, ...createData } = requestData;
+        const { acl, created_by, avatar_icon, ...createData } = requestData;
         await createMutation.mutateAsync(createData);
       }
     },
