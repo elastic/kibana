@@ -25,7 +25,8 @@ export const OutputFilterControls = () => {
   const { setIsExpanded } = useOutputFilterActionContext();
   const { euiTheme } = useEuiTheme();
 
-  if (!data || data.length !== 1 || !isFilterableStatusCode(data[0].response.statusCode)) return null;
+  if (!data || data.length !== 1 || !isFilterableStatusCode(data[0].response.statusCode))
+    return null;
 
   const isActive = appliedExpression.length > 0;
 

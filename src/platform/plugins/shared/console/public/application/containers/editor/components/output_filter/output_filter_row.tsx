@@ -208,7 +208,13 @@ export const OutputFilterExpandedPanel = () => {
   } = useRequestReadContext();
   const { euiTheme } = useEuiTheme();
 
-  if (!isExpanded || !data || data.length !== 1 || !isFilterableStatusCode(data[0].response.statusCode)) return null;
+  if (
+    !isExpanded ||
+    !data ||
+    data.length !== 1 ||
+    !isFilterableStatusCode(data[0].response.statusCode)
+  )
+    return null;
 
   return (
     <EuiSplitPanel.Inner
