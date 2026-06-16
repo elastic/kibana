@@ -56,6 +56,11 @@ const RCAEVAL_MAX_SCENARIOS = process.env.RCAEVAL_MAX_SCENARIOS
 const SINGLE_AGENT_WORKFLOW_ID = 'system-streams-sigevents-investigation-single';
 const ADVERSARIAL_WORKFLOW_ID = 'system-streams-sigevents-investigation-adversarial';
 
+// Optional override for the workflow's agent model (an ES inference endpoint id, e.g.
+// `.anthropic-claude-4.6-sonnet-chat_completion`). When unset, the workflow uses its
+// YAML default connector (Haiku). Lets us run the same workflow on Sonnet for comparison.
+const WORKFLOW_AGENT_CONNECTOR_ID = process.env.WORKFLOW_AGENT_CONNECTOR_ID;
+
 interface ScenarioToRun {
   scenario: RcaScenario;
   caseDir: string;
@@ -123,6 +128,7 @@ function createWorkflowExperiment(
               scenarioTitle: `${scenario.service} / ${scenario.faultType}`,
               service: scenario.service,
               faultType: scenario.faultType,
+              connectorId: WORKFLOW_AGENT_CONNECTOR_ID,
             });
             return {
               errors: response.errors,

@@ -242,8 +242,11 @@ steps:
     type: data.set
     if: "${{ steps.check_done_r1.output.done == false }}"
     with:
-      done: "${{ steps.critique_r2.output.structured_output.satisfied == true || steps.check_done_r1.output.done == true }}"
-      final_result: "${{ steps.check_done_r1.output.done == true ? steps.check_done_r1.output.final_result : steps.investigate_r2.output.structured_output }}"
+      # This step only runs when round 1 was NOT done (see `if` above). So done/
+      # final_result reflect round 2 directly — no need to fold round 1 back in
+      # (the liquid expression engine has no ternary / `||`, only filters).
+      done: "${{ steps.critique_r2.output.structured_output.satisfied == true }}"
+      final_result: "${{ steps.investigate_r2.output.structured_output }}"
       round: 2
 
   # ── Round 3 (last resort if still not satisfied) ──────────────────────────────
@@ -312,16 +315,10 @@ steps:
   - name: emit_result
     type: workflow.output
     with:
-      result: |
-        ${{
-          steps.investigate_r3.output != null
-            ? steps.investigate_r3.output.structured_output
-            : (steps.check_done_r2.output.done == true
-                ? steps.check_done_r2.output.final_result
-                : steps.check_done_r1.output.final_result)
-        }}
-      rounds_used: |
-        ${{
-          steps.investigate_r3.output != null ? 3
-            : (steps.investigate_r2.output != null ? 2 : 1)
-        }}
+      # Pick the last round that actually ran. Skipped steps render as nil, so the
+      # `default` filter chain falls through to the most recent completed round
+      # (r3 → r2 → r1). The liquid engine has no ternary / null-check operators,
+      # only filters, so `default` is the idiom for fallback selection.
+      # Named `structured_output` so the eval client extracts it the same way it
+      # does the single-agent agent step output.
+      structured_output: "${{ steps.investigate_r3.output.structured_output | default: steps.check_done_r2.output.final_result | default: steps.check_done_r1.output.final_result }}"
