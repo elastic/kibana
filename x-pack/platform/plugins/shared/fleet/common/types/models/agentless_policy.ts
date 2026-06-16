@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import type { GlobalDataTag } from './agent_policy';
 import type {
   SimplifiedInputs,
   SimplifiedVars,
 } from '../../services/simplified_package_policy_helper';
+
+import type { GlobalDataTag } from './agent_policy';
 
 /** Cloud connector as returned in an agentless policy response (always resolved to an id). */
 export interface AgentlessCloudConnector {

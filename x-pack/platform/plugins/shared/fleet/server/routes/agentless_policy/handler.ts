@@ -6,6 +6,7 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
+
 import type { CreateAgentlessPolicyRequestSchema } from '../../../common/types';
 import type { FleetRequestHandler } from '../../types';
 import { appContextService } from '../../services';
