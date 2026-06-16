@@ -8,7 +8,7 @@
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { BuiltInAgentDefinition } from '@kbn/agent-builder-server/agents';
 import { platformCoreTools, platformStreamsSigEventsTools } from '@kbn/agent-builder-common/tools';
-import { OBSERVABILITY_GET_LOGS_TOOL_ID } from '../discovery/constants';
+import { OBSERVABILITY_GET_LOGS_TOOL_ID, OBSERVABILITY_GET_INDEX_INFO_TOOL_ID } from '../discovery/constants';
 
 export const SIGEVENTS_INVESTIGATION_CONTEXT_AGENT_ID = 'sigevents.investigation.context';
 export const SIGEVENTS_INVESTIGATION_GATHER_AGENT_ID = 'sigevents.investigation.gather';
@@ -29,6 +29,8 @@ const investigationContextAgent = {
         tool_ids: [
           platformStreamsSigEventsTools.searchKnowledgeIndicators,
           platformCoreTools.executeEsql,
+          platformCoreTools.generateEsql,
+          OBSERVABILITY_GET_INDEX_INFO_TOOL_ID,
         ],
       },
     ],
@@ -49,6 +51,8 @@ const investigationGatherAgent = {
         tool_ids: [
           platformStreamsSigEventsTools.searchKnowledgeIndicators,
           platformCoreTools.executeEsql,
+          platformCoreTools.generateEsql,
+          OBSERVABILITY_GET_INDEX_INFO_TOOL_ID,
           OBSERVABILITY_GET_LOGS_TOOL_ID,
         ],
       },

@@ -7,3 +7,4 @@
 
 // Not available in platformCoreTools, but exported from @kbn/observability-agent-builder-plugin
 export const OBSERVABILITY_GET_LOGS_TOOL_ID = 'observability.get_logs';
+export const OBSERVABILITY_GET_INDEX_INFO_TOOL_ID = 'observability.get_index_info';

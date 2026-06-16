@@ -30,27 +30,25 @@ steps:
         The data is in these specific Elasticsearch indices:
         - Logs:    {{ inputs.stream_names[0] }}
         - Traces:  {{ inputs.stream_names[1] }}
-        - Metrics: {{ inputs.stream_names[2] }}
+        - Metrics: {{ inputs.stream_names[2] }} (infrastructure signals: CPU, memory, network, latency)
+
+        Use get_index_info to discover available fields in any index before querying.
 
         Query rules:
-        - Use executeEsql with FROM <index> to scope queries to these indices only.
+        - Use executeEsql or generateEsql with FROM <index> to scope queries to these indices only.
           Do NOT use KQL index-name filters and do NOT use broad patterns like logs-*.
         - Prefer STATS aggregations over raw rows; always add | LIMIT 20 on row-level queries.
         - Stop after 6–8 queries. Targeted queries beat exhaustive scanning.
         - Record every attempt including failed lookups and access blockers.
         - 0 rows means the condition is not currently firing — move on rather than retrying
           with the same parameters.
-        - For infrastructure hypotheses (CPU stress, memory pressure, socket exhaustion,
-          network saturation), query the metrics index first — these faults produce minimal
-          APM trace signal. Fields: system.cpu.pct, system.memory.bytes, system.socket.count,
-          system.diskio.bytes, service.latency.p50_ms, service.latency.p90_ms, service.error_rate.
+        - For infrastructure hypotheses (CPU stress, memory pressure, socket/network saturation),
+          query the metrics index first — these faults produce minimal APM trace signal.
 
         Key investigation principle: a service showing errors or latency is often a
         downstream victim of a failing dependency, not the source of the problem.
         When evidence points at a service, also check what that service depends on —
         a dependency with a high error rate is the more likely root cause.
-        For resource faults, the affected service's CPU or memory will spike independently
-        of its callers' behavior — this is the key distinguishing signal.
 
         Hypothesis: {{ inputs.hypothesis | json }}
         Event context: {{ inputs.context_summary }}
