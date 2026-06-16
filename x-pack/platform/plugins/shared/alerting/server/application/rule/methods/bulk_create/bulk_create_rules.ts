@@ -13,7 +13,11 @@ import { SavedObjectsUtils } from '@kbn/core/server';
 import { RuleChangeTrackingAction, type RuleChangeTracking } from '@kbn/alerting-types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { getRuleCircuitBreakerErrorMessage, parseDuration } from '../../../../../common';
-import { addGeneratedActionValues, bulkScheduleTask, updateMeta } from '../../../../rules_client/lib';
+import {
+  addGeneratedActionValues,
+  bulkScheduleTask,
+  updateMeta,
+} from '../../../../rules_client/lib';
 import { validateRuleTypeParams } from '../../../../lib';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import {
@@ -38,10 +42,7 @@ import type {
   BulkCreateRulesResult,
   PreparedRule,
 } from './types';
-import {
-  invalidateKeys,
-  prepareRule,
-} from './utils';
+import { invalidateKeys, prepareRule } from './utils';
 import { logRuleChanges } from '../common_utils/log_rule_changes';
 
 export async function bulkCreateRules<Params extends RuleParams = never>(
@@ -332,9 +333,7 @@ async function runBatch<Params extends RuleParams>({
       }
     } catch (error) {
       // Whole-call TM throw: exclude enabled subset from the batch, continue.
-      logger.debug(
-        `Excluding ${enabledRules.length} rule(s) from batch: task scheduling failed.`
-      );
+      logger.debug(`Excluding ${enabledRules.length} rule(s) from batch: task scheduling failed.`);
       const message = `Failed to schedule tasks: ${error.message}`;
       const status = error.output?.statusCode;
       for (const { id, name } of enabledRules) {
