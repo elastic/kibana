@@ -47,7 +47,7 @@ export const waitForTaskToComplete = async <T>({
         { task_id: String(taskId), wait_for_completion: false },
         { signal }
       );
-      
+
       if (taskResponse.error) {
         throw new pRetry.AbortError(
           `Task "${taskId}" failed: ${
