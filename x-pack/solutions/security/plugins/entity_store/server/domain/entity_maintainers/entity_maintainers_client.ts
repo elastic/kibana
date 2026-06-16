@@ -71,6 +71,7 @@ interface SyncExecutionContext {
   logger: Logger;
   fakeRequest: KibanaRequest;
   esClient: ElasticsearchClient;
+  cpsEsClient: ElasticsearchClient;
   crudClient: CRUDClient;
 }
 
@@ -315,6 +316,9 @@ export class EntityMaintainersClient {
       initialState,
     });
     const esClient = this.coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
+    const cpsEsClient = this.coreStart.elasticsearch.client.asScoped(request, {
+      projectRouting: 'space',
+    }).asCurrentUser;
     const crudClient = new CRUDClient({
       logger: this.logger,
       esClient,
@@ -330,6 +334,7 @@ export class EntityMaintainersClient {
       logger,
       abortController,
       esClient,
+      cpsEsClient,
       crudClient,
     };
   }

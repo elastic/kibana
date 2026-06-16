@@ -52,6 +52,11 @@ describe('getGhostHintKind', () => {
     expect(getGhostHintKind(model, 1)).toBeNull();
   });
 
+  it('returns null on a whitespace-only line so the hint does not clash with suggestions', () => {
+    const { model } = buildModel(['FROM logs', ' ']);
+    expect(getGhostHintKind(model, 2)).toBeNull();
+  });
+
   it('returns null in an entirely empty editor (so it does not clash with the placeholder)', () => {
     const { model } = buildModel(['']);
     expect(getGhostHintKind(model, 1)).toBeNull();
