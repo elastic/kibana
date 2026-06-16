@@ -323,25 +323,8 @@ function mapTraceRow(
   return doc;
 }
 
-async function createMetricsIndex(esClient: Client, index: string): Promise<void> {
-  await esClient.indices.create({
-    index,
-    mappings: {
-      dynamic: true,
-      properties: {
-        '@timestamp': { type: 'date' },
-        service: { properties: { name: { type: 'keyword' } } },
-        system: {
-          properties: {
-            cpu: { properties: { pct: { type: 'float' } } },
-            memory: { properties: { bytes: { type: 'long' } } },
-            diskio: { properties: { bytes: { type: 'float' } } },
-            socket: { properties: { count: { type: 'float' } } },
-          },
-        },
-      },
-    },
-  });
+async function createMetricsDataStream(esClient: Client, name: string): Promise<void> {
+  await esClient.indices.createDataStream({ name });
 }
 
 async function createTracesIndex(esClient: Client, index: string): Promise<void> {
@@ -390,7 +373,7 @@ export async function indexLocalScenario(
 
   await Promise.all([
     createTracesIndex(esClient, tracesIndex),
-    createMetricsIndex(esClient, metricsIndex),
+    createMetricsDataStream(esClient, metricsIndex),
   ]);
 
   const [logsIndexed, tracesIndexed, metricsIndexed] = await Promise.all([
@@ -413,11 +396,16 @@ export async function cleanLocalScenario(
   handle: LocalReplayHandle,
   log: ToolingLog
 ): Promise<void> {
-  for (const index of [handle.logsIndex, handle.tracesIndex, handle.metricsIndex]) {
+  for (const index of [handle.logsIndex, handle.tracesIndex]) {
     try {
       await esClient.indices.delete({ index, ignore_unavailable: true });
     } catch (err) {
       log.warning(`Cleanup failed for ${index}: ${(err as Error).message}`);
     }
+  }
+  try {
+    await esClient.indices.deleteDataStream({ name: handle.metricsIndex });
+  } catch (err) {
+    log.warning(`Cleanup failed for data stream ${handle.metricsIndex}: ${(err as Error).message}`);
   }
 }

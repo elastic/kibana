@@ -24,6 +24,7 @@ import { createPlaywrightEvalsConfig } from '@kbn/evals';
 
 export default createPlaywrightEvalsConfig({
   testDir: Path.resolve(__dirname, './evals'),
+  testIgnore: /re2ob_local\.spec\.ts|re2ob\.spec\.ts/,
   timeout: 45 * 60_000,
   singleProject: true,
 });
