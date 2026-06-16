@@ -134,6 +134,15 @@ export interface CreateAgentlessPolicyRequest {
   body: TypeOf<typeof CreateAgentlessPolicyRequestSchema.body>;
 }
 
+/**
+ * Request body for creating an agentless policy.
+ *
+ * Derived from the route schema so it always reflects the accepted contract: a
+ * `cloud_connector` may carry `name`/`target_csp` when creating a new connector
+ * (instead of `cloud_connector_id`), and `package.title` is not required.
+ */
+export type NewAgentlessPolicy = CreateAgentlessPolicyRequest['body'];
+
 export type DeleteAgentlessPolicyResponse = TypeOf<typeof DeleteAgentlessPolicyResponseSchema>;
 
 export interface DeleteAgentlessPolicyRequest {

@@ -11,20 +11,27 @@ import type {
   SimplifiedVars,
 } from '../../services/simplified_package_policy_helper';
 
+/** Cloud connector as returned in an agentless policy response (always resolved to an id). */
 export interface AgentlessCloudConnector {
   enabled: boolean;
   cloud_connector_id: string;
 }
 
+/** Integration package as returned in an agentless policy response. */
 export interface AgentlessPackage {
   name: string;
   title: string;
   version: string;
 }
 
-/** Request body for creating an agentless policy via the agentless policies API. */
-export interface NewAgentlessPolicy {
-  id?: string;
+/**
+ * Response DTO returned by the agentless policies API.
+ *
+ * This models the response only; the create-request contract is derived from the
+ * route schema, see `NewAgentlessPolicy` in `../rest_spec/agentless_policy`.
+ */
+export interface AgentlessPolicy {
+  id: string;
   name: string;
   namespace?: string;
   vars?: SimplifiedVars;
@@ -32,11 +39,6 @@ export interface NewAgentlessPolicy {
   cloud_connector?: AgentlessCloudConnector | null;
   package?: AgentlessPackage;
   inputs?: SimplifiedInputs;
-}
-
-/** Response DTO returned by the agentless policies API (simplified inputs, no policy_ids). */
-export interface AgentlessPolicy extends NewAgentlessPolicy {
-  id: string;
   created_at: string;
   created_by: string;
   updated_at: string;
