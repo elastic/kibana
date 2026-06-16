@@ -80,15 +80,34 @@ export function registerChatRoutes({
         },
       })
     ),
+    execution_id: schema.maybe(
+      schema.string({
+        validate: (v) => (uuidValidate(v) ? undefined : 'execution_id must be a valid UUID'),
+        meta: {
+          description:
+            'Optional client-generated execution ID. Provide it to address this execution later (for example, to abort it). Must be unique; defaults to a server-generated ID.',
+        },
+      })
+    ),
     input: schema.maybe(
       schema.string({
         meta: { description: 'The user input message to send to the agent.' },
       })
     ),
     prompts: schema.maybe(
-      schema.recordOf(schema.string(), schema.object({ allow: schema.boolean() }), {
-        meta: { description: 'Can be used to respond to a confirmation prompt.' },
-      })
+      schema.recordOf(
+        schema.string({ minLength: 1, maxLength: 512 }),
+        schema.oneOf([
+          schema.object({ allow: schema.boolean() }),
+          schema.object({ authorized: schema.boolean() }),
+        ]),
+        {
+          meta: {
+            description:
+              'Use this field to respond to a confirmation or authorization prompt. Send an `allow` boolean to answer a confirmation prompt, or an `authorized` boolean to answer an authorization prompt.',
+          },
+        }
+      )
     ),
     attachments: schema.maybe(
       schema.arrayOf(
@@ -283,17 +302,16 @@ export function registerChatRoutes({
   const executeAgent = async ({
     payload,
     request,
-    abortSignal,
     executionService,
   }: {
     payload: ChatRequestBodyPayload;
     request: KibanaRequest;
-    abortSignal: AbortSignal;
     executionService: AgentExecutionService;
   }) => {
     const {
       agent_id: agentId,
       conversation_id: conversationId,
+      execution_id: executionId,
       input,
       prompts,
       attachments,
@@ -312,7 +330,7 @@ export function registerChatRoutes({
     const { events$ } = await executionService.executeAgent({
       mode: AgentExecutionMode.conversation,
       request,
-      abortSignal,
+      executionId,
       useTaskManager,
       params: {
         agentId,
@@ -371,15 +389,9 @@ export function registerChatRoutes({
         await validateConfigurationOverrides({ payload, request });
         validateAction(payload);
 
-        const abortController = new AbortController();
-        request.events.aborted$.subscribe(() => {
-          abortController.abort();
-        });
-
         const chatEvents$ = await executeAgent({
           payload,
           request,
-          abortSignal: abortController.signal,
           executionService,
         });
 
@@ -452,7 +464,6 @@ export function registerChatRoutes({
         const chatEvents$ = await executeAgent({
           payload,
           request,
-          abortSignal: abortController.signal,
           executionService,
         });
 

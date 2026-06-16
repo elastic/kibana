@@ -24,8 +24,10 @@ jest.mock('@kbn/ebt-tools', () => ({
   }),
 }));
 
+const mockUseCustomCards = jest.fn<IntegrationCardItem[], []>(() => []);
+
 jest.mock('./use_custom_cards', () => ({
-  useCustomCards: () => [],
+  useCustomCards: () => mockUseCustomCards(),
 }));
 
 jest.mock('../package_list/package_list', () => ({
@@ -61,6 +63,7 @@ const renderWithProviders = (children: React.ReactNode, initialEntries: string[]
 describe('OnboardingFlowForm', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseCustomCards.mockReturnValue([]);
 
     mockUseKibana.mockReturnValue({
       services: {
@@ -114,6 +117,18 @@ describe('OnboardingFlowForm', () => {
 
       const grid = screen.getByTestId('observabilityOnboardingUseCaseGrid');
       expect(grid).toBeInTheDocument();
+    });
+
+    it('should show only OpenTelemetry as the Kubernetes featured quickstart', () => {
+      mockUseCustomCards.mockReturnValue([
+        { id: 'kubernetes-quick-start', title: 'Kubernetes Quickstart' } as IntegrationCardItem,
+        { id: 'otel-kubernetes', title: 'OpenTelemetry Kubernetes' } as IntegrationCardItem,
+      ]);
+
+      renderWithProviders(<OnboardingFlowForm />, ['/?category=kubernetes']);
+
+      expect(screen.queryByTestId('package-item-kubernetes-quick-start')).not.toBeInTheDocument();
+      expect(screen.getByTestId('package-item-otel-kubernetes')).toBeInTheDocument();
     });
   });
 

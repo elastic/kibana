@@ -105,7 +105,15 @@ const workflowTestRunInitiatedSchema: RootSchema<ReportWorkflowTestRunInitiatedA
     type: 'keyword',
     _meta: {
       description:
-        'The trigger tab selected in the Test Workflow modal: manual, alert, index, or historical',
+        'The trigger tab selected in the Test Workflow modal: manual, alert, index, event, or historical',
+      optional: true,
+    },
+  },
+  hasCustomEventTrigger: {
+    type: 'boolean',
+    _meta: {
+      description:
+        'Whether the workflow defines extension (event-driven) triggers at test-run time',
       optional: true,
     },
   },
@@ -182,7 +190,15 @@ const workflowRunInitiatedSchema: RootSchema<ReportWorkflowRunInitiatedActionPar
   triggerTab: {
     type: 'keyword',
     _meta: {
-      description: 'The trigger tab selected in the Test Workflow modal: manual, alert, or index',
+      description:
+        'The trigger tab selected in the Run Workflow modal: manual, alert, index, event, or historical',
+      optional: true,
+    },
+  },
+  hasCustomEventTrigger: {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether the workflow defines extension (event-driven) triggers at run time',
       optional: true,
     },
   },
