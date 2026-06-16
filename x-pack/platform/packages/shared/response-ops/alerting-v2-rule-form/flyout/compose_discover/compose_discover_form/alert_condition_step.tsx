@@ -131,6 +131,14 @@ export function AlertConditionStep({
 
   return (
     <>
+      <ModeSelect
+        value={isAlert ? 'alert' : 'signal'}
+        onChange={onKindChange}
+        disabled={!state.queryCommitted || isEditing}
+        compressed
+        data-test-subj="composeDiscoverModeSelect"
+      />
+      <EuiSpacer size="m" />
       <EuiTitle size="xs">
         <h3>
           <FormattedMessage
@@ -298,15 +306,6 @@ export function AlertConditionStep({
           data-test-subj="composeDiscoverGroupFields"
         />
       </EuiFormRow>
-
-      <EuiSpacer size="m" />
-      <ModeSelect
-        value={isAlert ? 'alert' : 'signal'}
-        onChange={onKindChange}
-        disabled={!state.queryCommitted || isEditing}
-        compressed
-        data-test-subj="composeDiscoverModeSelect"
-      />
 
       {isAlert && (
         <>
