@@ -16,6 +16,8 @@ import {
   DOCUMENT_TYPE_ENTITY,
   INDEX_PATTERN_REGEX,
 } from '@kbn/cloud-security-posture-common/schema/graph/v1';
+import type { ProjectRouting } from '@kbn/cloud-security-posture-common/schema/graph/v1';
+
 import { ALL_ENTITY_TYPES } from '@kbn/entity-store/common';
 import {
   getEuidEsqlEvaluation,
@@ -53,6 +55,11 @@ interface BuildEsqlQueryParams {
 /**
  * Fetches events/alerts from logs and alerts indices.
  * This is the core event fetching logic used by fetchGraph.
+ *
+ * CPS: the caller-supplied `projectRouting` is forwarded as-is to ES|QL, so both
+ * logs and alerts fan out across linked projects under the same routing. This
+ * matches the rest of the alert flyout (Analyzer, Prevalence, Correlations),
+ * which already show remote alerts as contextual data.
  */
 export const fetchEvents = async ({
   esClient,
@@ -65,6 +72,7 @@ export const fetchEvents = async ({
   spaceId,
   esQuery,
   pinnedIds,
+  projectRouting,
 }: {
   esClient: IScopedClusterClient;
   logger: Logger;
@@ -76,6 +84,7 @@ export const fetchEvents = async ({
   spaceId: string;
   esQuery?: EsQuery;
   pinnedIds?: string[];
+  projectRouting?: ProjectRouting;
 }): Promise<EsqlToRecords<EventEsqlRow>> => {
   const originAlertIds = originEventIds.filter((originEventId) => originEventId.isAlert);
 
@@ -93,6 +102,20 @@ export const fetchEvents = async ({
     indexPattern.includes(SECURITY_ALERTS_PARTIAL_IDENTIFIER)
   );
 
+  const filter = buildDslFilter(
+    originEventIds.map((originEventId) => originEventId.id),
+    showUnknownTarget,
+    start,
+    end,
+    esQuery
+  );
+
+  const params = [
+    ...originEventIds.map((originEventId, idx) => ({ [`og_id${idx}`]: originEventId.id })),
+    ...originAlertIds.map((originEventId, idx) => ({ [`og_alrt_id${idx}`]: originEventId.id })),
+    ...(pinnedIds ?? []).map((id, idx) => ({ [`pinned_id${idx}`]: id })),
+  ];
+
   const query = buildEsqlQuery({
     indexPatterns,
     originEventIds,
@@ -101,21 +124,15 @@ export const fetchEvents = async ({
     pinnedIds,
   });
 
-  logger.trace(`Executing query [${query}]`);
+  logger.trace(`Executing events query [project_routing: ${projectRouting ?? 'default'}]`);
 
-  const eventIds = originEventIds.map((originEventId) => originEventId.id);
-  return await esClient.asCurrentUser.helpers
+  return esClient.asCurrentUser.helpers
     .esql({
       columnar: false,
-      filter: buildDslFilter(eventIds, showUnknownTarget, start, end, esQuery),
+      filter,
       query,
-      params: [
-        ...originEventIds.map((originEventId, idx) => ({ [`og_id${idx}`]: originEventId.id })),
-        ...originEventIds
-          .filter((originEventId) => originEventId.isAlert)
-          .map((originEventId, idx) => ({ [`og_alrt_id${idx}`]: originEventId.id })),
-        ...(pinnedIds ?? []).map((id, idx) => ({ [`pinned_id${idx}`]: id })),
-      ],
+      params,
+      ...(projectRouting ? { project_routing: projectRouting } : {}),
     })
     .toRecords<EventEsqlRow>();
 };
@@ -433,14 +450,14 @@ ${buildPinnedEsql(pinnedIds)}
 // Origin event and alerts allow us to identify the start position of graph traversal
 | EVAL isOrigin = ${
     originEventIds.length > 0
-      ? `COALESCE(event.id in (${originEventIds
+      ? `CASE (event.id IS NOT NULL AND event.id != "", event.id in (${originEventIds
           .map((_id, idx) => `?og_id${idx}`)
           .join(', ')}), false)`
       : 'false'
   }
 | EVAL isOriginAlert = ${
     originAlertIds.length > 0
-      ? `COALESCE(isOrigin AND event.id in (${originAlertIds
+      ? `CASE (event.id IS NOT NULL AND event.id != "", isOrigin AND event.id in (${originAlertIds
           .map((_id, idx) => `?og_alrt_id${idx}`)
           .join(', ')}), false)`
       : 'false'
