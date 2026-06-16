@@ -17,9 +17,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { ExperimentalBadge } from '../../components/experimental_badge';
 import { ActionPolicyDetailsFlyoutContainer } from '../../components/action_policy/details_flyout/action_policy_details_flyout_container';
 import { RuleSummaryFlyoutContainer } from '../../components/rule/flyouts/rule_summary_flyout_container';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
+import { useComposeDiscoverFlyout } from '../../hooks/use_compose_discover_flyout';
 import { PoliciesTabContent, RulesPlaceholder } from './components';
 
 const POLICIES_TAB_ID = 'policies';
@@ -33,6 +35,7 @@ export const ExecutionHistoryPage = () => {
   const [selectedTabId, setSelectedTabId] = useState<TabId>(POLICIES_TAB_ID);
   const [policyToViewId, setPolicyToViewId] = useState<string | null>(null);
   const [ruleToViewId, setRuleToViewId] = useState<string | null>(null);
+  const { flyout: composeFlyout, openEditFlyout, openCloneFlyout } = useComposeDiscoverFlyout();
 
   const tabs: Array<{ id: TabId; label: string }> = [
     {
@@ -53,14 +56,14 @@ export const ExecutionHistoryPage = () => {
     <>
       <EuiPageHeader
         pageTitle={
-          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-            <EuiFlexItem grow={false}>
+          <EuiFlexGroup component="span" alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false} component="span">
               <FormattedMessage
                 id="xpack.alertingV2.executionHistory.pageTitle"
                 defaultMessage="Execution history"
               />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={false} component="span">
               <span data-test-subj="executionHistoryDenormalizationTip">
                 <EuiIconTip
                   type="info"
@@ -73,6 +76,9 @@ export const ExecutionHistoryPage = () => {
                   )}
                 />
               </span>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false} component="span">
+              <ExperimentalBadge />
             </EuiFlexItem>
           </EuiFlexGroup>
         }
@@ -105,8 +111,20 @@ export const ExecutionHistoryPage = () => {
         />
       )}
       {ruleToViewId && (
-        <RuleSummaryFlyoutContainer ruleId={ruleToViewId} onClose={() => setRuleToViewId(null)} />
+        <RuleSummaryFlyoutContainer
+          ruleId={ruleToViewId}
+          onClose={() => setRuleToViewId(null)}
+          onEdit={(r) => {
+            setRuleToViewId(null);
+            openEditFlyout(r);
+          }}
+          onClone={(r) => {
+            setRuleToViewId(null);
+            openCloneFlyout(r);
+          }}
+        />
       )}
+      {composeFlyout}
     </>
   );
 };

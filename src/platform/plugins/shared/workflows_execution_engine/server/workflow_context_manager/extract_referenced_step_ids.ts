@@ -29,6 +29,8 @@ const referencedStepIdsCache = new WeakMap<GraphNodeUnion, Set<string> | null>()
  *    `steps[variables.x].output`) — caller should fall back to all predecessors
  *
  * For `enter-if` nodes, KQL condition strings are also analyzed via `extractPropertyPathsFromKql`.
+ * The full node is scanned, not just `configuration`, because some graph nodes render
+ * top-level fields or declare `templateDependencies` for values rendered by their implementation.
  *
  * Result is memoised per-node — see {@link referencedStepIdsCache}.
  */
@@ -57,36 +59,18 @@ function computeReferencedStepIds(node: GraphNodeUnion): Set<string> | null {
       }
     }
 
-    // Scan the entire node's configuration for template variables
-    // This covers `with`, `condition`, `foreach`, `expression`, `match`, etc.
-    if ('configuration' in node) {
-      variables.push(...scanForTemplateVariables(node.configuration));
-    }
+    // Scan the full graph node so template-bearing fields outside `configuration`
+    // (for example exit-while.condition) are included automatically.
+    variables.push(...scanForTemplateVariables(node));
 
-    return collectReferencedStepIdsFromVariables(variables);
+    return extractReferencedStepIdsFromVariables(variables);
   } catch {
     // If template parsing fails for any reason, fall back to all predecessors
     return null;
   }
 }
 
-/**
- * Variant of {@link extractReferencedStepIds} that operates on an arbitrary
- * value (string / object / array) instead of a graph node. Used for surfaces
- * that hold a template expression outside the static node configuration —
- * notably the `foreach` expression captured into the foreach step's input at
- * loop-entry time. Same semantics: returns `null` when bracket access defeats
- * static analysis, otherwise the set of statically resolvable step IDs.
- */
-export function extractReferencedStepIdsFromValue(value: unknown): Set<string> | null {
-  try {
-    return collectReferencedStepIdsFromVariables(scanForTemplateVariables(value));
-  } catch {
-    return null;
-  }
-}
-
-function collectReferencedStepIdsFromVariables(variables: readonly string[]): Set<string> | null {
+export function extractReferencedStepIdsFromVariables(variables: string[]): Set<string> | null {
   const referencedStepIds = new Set<string>();
 
   for (const variable of variables) {

@@ -11,9 +11,10 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { MemoryRouter } from 'react-router-dom';
 import { RulesListPage, SEARCH_DEBOUNCE_MS } from './rules_list_page';
-import { paths } from '../../constants';
+import { CREATE_WITH_AGENT_INITIAL_PROMPT } from '../../constants';
 
 const mockNavigateToUrl = jest.fn();
+const mockNavigateToApp = jest.fn();
 const mockGetUrlForApp = jest.fn((appId: string, options?: { path?: string }) => {
   const path = options?.path ?? '';
   return `/app/${appId}${path}`;
@@ -27,7 +28,11 @@ jest.mock('../../application/breadcrumb_context', () => ({
 jest.mock('@kbn/core-di-browser', () => ({
   useService: (token: unknown) => {
     if (token === 'application') {
-      return { navigateToUrl: mockNavigateToUrl, getUrlForApp: mockGetUrlForApp };
+      return {
+        navigateToUrl: mockNavigateToUrl,
+        navigateToApp: mockNavigateToApp,
+        getUrlForApp: mockGetUrlForApp,
+      };
     }
     if (token === 'chrome') {
       return { docTitle: { change: mockDocTitleChange } };
@@ -36,9 +41,18 @@ jest.mock('@kbn/core-di-browser', () => ({
       return { basePath: { prepend: (p: string) => p } };
     }
     if (token === 'notifications') {
+      return { toasts: { addSuccess: jest.fn(), addError: jest.fn() } };
+    }
+    if (
+      token === 'data' ||
+      token === 'dataViews' ||
+      token === 'lens' ||
+      token === 'uiActions' ||
+      token === 'dashboard'
+    ) {
       return {};
     }
-    if (token === 'data' || token === 'dataViews' || token === 'lens') {
+    if (typeof token === 'function') {
       return {};
     }
     throw new Error(`Unexpected token in useService mock: ${String(token)}`);
@@ -51,7 +65,11 @@ jest.mock('@kbn/core-di', () => ({
 }));
 
 jest.mock('@kbn/alerting-v2-rule-form', () => ({
-  ComposeDiscoverFlyout: () => <div data-test-subj="composeDiscoverFlyout" />,
+  ComposeDiscoverFlyout: ({ onCreateRule }: { onCreateRule: (payload: unknown) => void }) => (
+    <button data-test-subj="composeDiscoverFlyout" onClick={() => onCreateRule({})}>
+      Compose Discover flyout
+    </button>
+  ),
 }));
 
 const mockUseFetchRules = jest.fn();
@@ -148,6 +166,19 @@ describe('RulesListPage', () => {
 
   afterEach(() => {
     jest.useRealTimers();
+  });
+
+  it('renders the experimental badge in the page header', () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    expect(screen.getByTestId('alertingV2ExperimentalBadge')).toBeInTheDocument();
   });
 
   it('renders loading state', () => {
@@ -258,7 +289,7 @@ describe('RulesListPage', () => {
     renderPage();
 
     expect(
-      screen.getByRole('heading', { level: 2, name: /welcome to the new alerting experience/i })
+      screen.getByRole('heading', { level: 2, name: /no rules yet\. let's get started!/i })
     ).toBeInTheDocument();
     expect(screen.queryByRole('table')).not.toBeInTheDocument();
   });
@@ -273,7 +304,7 @@ describe('RulesListPage', () => {
 
     renderPage();
 
-    fireEvent.click(screen.getByRole('button', { name: /create es\|ql rule/i }));
+    fireEvent.click(screen.getByTestId('createEsqlRuleCard'));
 
     expect(screen.getByTestId('composeDiscoverFlyout')).toBeInTheDocument();
   });
@@ -663,7 +694,7 @@ describe('RulesListPage', () => {
     });
   });
 
-  it('navigates to rule selector page when create button is clicked', () => {
+  it('opens create rule options in a flyout when create button is clicked', () => {
     mockUseFetchRules.mockReturnValue({
       data: { items: mockRules, total: 2, page: 1, perPage: 20 },
       isLoading: false,
@@ -673,7 +704,118 @@ describe('RulesListPage', () => {
 
     renderPage();
 
-    expect(screen.getByTestId('createRuleButton')).toHaveAttribute('href', paths.ruleCreateOptions);
+    fireEvent.click(screen.getByTestId('createRuleButton'));
+
+    expect(screen.getByTestId('ruleCreateOptionsFlyout')).toBeInTheDocument();
+    expect(screen.getByText('Create ES|QL rule')).toBeInTheDocument();
+    expect(mockNavigateToUrl).not.toHaveBeenCalled();
+  });
+
+  it('closes create rule options flyout without navigating', () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    fireEvent.click(screen.getByTestId('createRuleButton'));
+    fireEvent.click(screen.getByTestId('ruleCreateOptionsFlyoutCloseButton'));
+
+    expect(screen.queryByTestId('ruleCreateOptionsFlyout')).not.toBeInTheDocument();
+    expect(screen.getByTestId('rulesListTable')).toBeInTheDocument();
+    expect(mockNavigateToUrl).not.toHaveBeenCalled();
+  });
+
+  it('opens the rule creation flow from the create rule options flyout', () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    fireEvent.click(screen.getByTestId('createRuleButton'));
+    fireEvent.click(screen.getByRole('button', { name: /create es\|ql rule/i }));
+
+    expect(screen.queryByTestId('ruleCreateOptionsFlyout')).not.toBeInTheDocument();
+    expect(screen.getByTestId('composeDiscoverFlyout')).toBeInTheDocument();
+    expect(mockNavigateToUrl).not.toHaveBeenCalled();
+  });
+
+  it('stays on the rules list after creating a rule from the flyout', () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+    mockCreateRuleMutate.mockImplementationOnce((_payload, options) =>
+      options?.onSuccess?.({ id: 'rule-1', metadata: { name: 'Test Rule' } })
+    );
+
+    renderPage();
+
+    fireEvent.click(screen.getByTestId('createRuleButton'));
+    fireEvent.click(screen.getByRole('button', { name: /create es\|ql rule/i }));
+    fireEvent.click(screen.getByTestId('composeDiscoverFlyout'));
+
+    expect(mockCreateRuleMutate).toHaveBeenCalledWith(
+      {},
+      expect.objectContaining({ onSuccess: expect.any(Function) })
+    );
+    expect(screen.queryByTestId('composeDiscoverFlyout')).not.toBeInTheDocument();
+    expect(screen.getByTestId('rulesListTable')).toBeInTheDocument();
+    expect(mockNavigateToUrl).not.toHaveBeenCalled();
+  });
+
+  it('opens the rule creation flow from the split button dropdown', async () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    fireEvent.click(screen.getByTestId('createRulePopoverButton'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('createEsqlRuleButton')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId('createEsqlRuleButton'));
+
+    expect(screen.getByTestId('composeDiscoverFlyout')).toBeInTheDocument();
+  });
+
+  it('opens agent chat when "Create with agent" is clicked in the split button dropdown', async () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    fireEvent.click(screen.getByTestId('createRulePopoverButton'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('createWithAgentButton')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId('createWithAgentButton'));
+
+    expect(mockNavigateToApp).toHaveBeenCalledWith('agent_builder', {
+      path: '/agents/elastic-ai-agent/conversations/new',
+      state: { initialMessage: CREATE_WITH_AGENT_INITIAL_PROMPT },
+    });
   });
 
   it('shows delete confirmation modal when delete action is clicked', async () => {
@@ -722,7 +864,7 @@ describe('RulesListPage', () => {
     fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
 
     expect(mockDeleteMutate).toHaveBeenCalledWith(
-      'rule-1',
+      { id: 'rule-1', name: 'Rule One' },
       expect.objectContaining({
         onSettled: expect.any(Function),
       })
@@ -797,7 +939,7 @@ describe('RulesListPage', () => {
     });
   });
 
-  it('navigates to the create page with cloneFrom query param when clone is clicked', async () => {
+  it('opens the clone flyout when clone is clicked', async () => {
     mockUseFetchRules.mockReturnValue({
       data: { items: mockRules, total: 2, page: 1, perPage: 20 },
       isLoading: false,
@@ -810,9 +952,7 @@ describe('RulesListPage', () => {
     fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
     fireEvent.click(screen.getByTestId('cloneRule-rule-1'));
 
-    expect(mockNavigateToUrl).toHaveBeenCalledWith(
-      '/app/management/alertingV2/rules/create?cloneFrom=rule-1'
-    );
+    expect(screen.getByTestId('composeDiscoverFlyout')).toBeInTheDocument();
   });
 
   describe('selection', () => {

@@ -11,11 +11,17 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { RuleCreateOptionsPanel } from './rule_create_options_panel';
 
 const onCreateEsqlRule = jest.fn();
+const onCreateWithAgent = jest.fn();
+const onCreateThresholdAlert = jest.fn();
 
 const renderPanel = () =>
   render(
     <I18nProvider>
-      <RuleCreateOptionsPanel onCreateEsqlRule={onCreateEsqlRule} />
+      <RuleCreateOptionsPanel
+        onCreateEsqlRule={onCreateEsqlRule}
+        onCreateWithAgent={onCreateWithAgent}
+        onCreateThresholdAlert={onCreateThresholdAlert}
+      />
     </I18nProvider>
   );
 
@@ -24,38 +30,48 @@ describe('RuleCreateOptionsPanel', () => {
     jest.clearAllMocks();
   });
 
-  it('renders the welcome title', () => {
+  it('renders the empty state title', () => {
     renderPanel();
 
     expect(
-      screen.getByRole('heading', { level: 2, name: /welcome to the new alerting experience/i })
+      screen.getByRole('heading', { level: 2, name: /no rules yet\. let's get started!/i })
     ).toBeInTheDocument();
-  });
-
-  it('renders the description text', () => {
-    renderPanel();
-
-    expect(screen.getByText(/powerful es\|ql-driven rules/i)).toBeInTheDocument();
   });
 
   it('calls onCreateEsqlRule when the "Create ES|QL rule" card is clicked', () => {
     renderPanel();
 
-    fireEvent.click(screen.getByRole('button', { name: /create es\|ql rule/i }));
+    fireEvent.click(screen.getByTestId('createEsqlRuleCard'));
 
     expect(onCreateEsqlRule).toHaveBeenCalledTimes(1);
   });
 
-  it('renders the "Create with AI Agent" card as disabled and non-interactive', () => {
+  it('calls onCreateWithAgent when the "Create with AI Agent" card is clicked', () => {
     renderPanel();
 
-    expect(screen.getByText('Create with AI Agent')).toBeInTheDocument();
-    expect(screen.getAllByText('Coming soon').length).toBeGreaterThanOrEqual(1);
+    fireEvent.click(screen.getByTestId('createWithAgentCard'));
+
+    expect(onCreateWithAgent).toHaveBeenCalledTimes(1);
   });
 
-  it('renders the "Threshold Alert" card as coming soon', () => {
+  it('renders the rule builder divider between the second and third options', () => {
+    renderPanel();
+
+    expect(screen.getByText('Or start from a builder')).toBeInTheDocument();
+    expect(screen.queryByText('Start from a rule builder')).not.toBeInTheDocument();
+  });
+
+  it('renders the "Threshold Alert" card', () => {
     renderPanel();
 
     expect(screen.getByText('Threshold Alert')).toBeInTheDocument();
+  });
+
+  it('calls onCreateThresholdAlert when the "Threshold Alert" card is clicked', () => {
+    renderPanel();
+
+    fireEvent.click(screen.getByTestId('createThresholdAlertCard'));
+
+    expect(onCreateThresholdAlert).toHaveBeenCalledTimes(1);
   });
 });

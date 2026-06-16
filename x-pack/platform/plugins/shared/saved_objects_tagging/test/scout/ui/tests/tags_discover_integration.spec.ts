@@ -120,13 +120,13 @@ test.describe('Tags - discover integration', { tag: tags.stateful.classic }, () 
     await expect(page.testSubj.locator('confirmSaveSavedObjectButton')).toBeEnabled();
     await page.testSubj.click('savedObjectTagSelector');
     await page.testSubj.click('tagSelectorOption-action__create');
-    await pageObjects.tagManagement.fillForm({
+    await pageObjects.tagManagement.tagModal.fillForm({
       name: 'my-new-tag',
       color: '#FFCC33',
       description: '',
     });
     await page.testSubj.click('createModalConfirmButton');
-    await pageObjects.tagManagement.getTagModalForm().waitFor({ state: 'hidden' });
+    await pageObjects.tagManagement.tagModal.form.waitFor({ state: 'hidden' });
     await page.testSubj.click('confirmSaveSavedObjectButton');
     await page.testSubj.waitForSelector('savedObjectSaveModal', { state: 'hidden' });
 

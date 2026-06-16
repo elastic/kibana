@@ -5,6 +5,7 @@ on:
     paths:
       - '.github/workflows/*.md'
       - '.github/workflows/*.lock.yml'
+      - '.github/actionlint.yaml'
       - '.github/aw/actions-lock.json'
       - '.github/workflows/validate-agentic-workflow-locks.yml'
 
@@ -15,7 +16,7 @@ permissions:
 # github/gh-aw-actions/setup entry in .github/aw/actions-lock.json;
 # the verify step below enforces that.
 env:
-  GH_AW_VERSION: v0.71.5
+  GH_AW_VERSION: v0.76.1
 
 concurrency:
   group: validate-agentic-workflow-locks-${{ github.event.pull_request.number || github.ref }}
@@ -50,9 +51,12 @@ jobs:
           fi
 
       - name: Install gh-aw CLI
-        uses: github/gh-aw/actions/setup-cli@489dbab88cc78e35506b5ccbf08a4037166824ac # v0.72.1
+        uses: github/gh-aw/actions/setup-cli@58d1bedbb7200f59c2d224151339e38fd8687d05 # v0.76.1
         with:
           version: ${{ env.GH_AW_VERSION }}
+
+      - name: Lint generated workflow locks
+        run: gh aw lint
 
       - name: Compile and validate all agentic workflows
         run: gh aw compile --purge --validate --no-check-update
@@ -63,6 +67,7 @@ jobs:
           status=$(git status --porcelain -- '.github/workflows/*.lock.yml' '.github/aw/actions-lock.json')
           if [[ -n "${status}" ]]; then
             echo "::error::Compiled output is out of date. Run 'gh aw compile --purge --validate' with gh-aw ${GH_AW_VERSION} and commit the resulting lock changes."
+            echo "To install the repo-pinned gh-aw locally, run: node scripts/ensure_gh_aw_version.js"
             echo "Files that differ:"
             echo "${status}"
             echo

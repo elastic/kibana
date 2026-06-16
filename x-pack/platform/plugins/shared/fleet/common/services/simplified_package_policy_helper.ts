@@ -16,7 +16,7 @@ import type {
   PackageInfo,
   ExperimentalDataStreamFeature,
 } from '../types';
-import { DATASET_VAR_NAME } from '../constants';
+import { DATASET_VAR_NAME, DATA_STREAM_TYPE_VAR_NAME } from '../constants';
 
 import { PackagePolicyValidationError } from '../errors';
 
@@ -42,7 +42,7 @@ export type SimplifiedPackagePolicyStreams = Record<
   {
     enabled?: undefined | boolean;
     vars?: SimplifiedVars;
-    condition?: AgentConditionExpression;
+    condition?: AgentConditionExpression | null;
   }
 >;
 
@@ -52,7 +52,7 @@ export type SimplifiedInputs = Record<
     enabled?: boolean | undefined;
     vars?: SimplifiedVars;
     streams?: SimplifiedPackagePolicyStreams;
-    condition?: AgentConditionExpression;
+    condition?: AgentConditionExpression | null;
   }
 >;
 
@@ -74,7 +74,7 @@ export interface SimplifiedPackagePolicy {
   // Only available for agentless integration policies.
   // On standard package policies this field is rejected by server-side validation.
   global_data_tags?: Array<{ name: string; value: string | number }> | null;
-  condition?: AgentConditionExpression;
+  condition?: AgentConditionExpression | null;
 }
 
 export interface FormattedPackagePolicy extends Omit<PackagePolicy, 'inputs' | 'vars'> {
@@ -165,6 +165,17 @@ function formatStreams(streams: NewPackagePolicy['inputs'][number]['streams']) {
   }, {} as SimplifiedPackagePolicyStreams);
 }
 
+export function syncDataStreamTypeFromVar(packagePolicy: NewPackagePolicy): void {
+  for (const input of packagePolicy.inputs) {
+    for (const stream of input.streams) {
+      const typeVal = stream.vars?.[DATA_STREAM_TYPE_VAR_NAME]?.value;
+      if (typeof typeVal === 'string' && typeVal && typeVal !== stream.data_stream.type) {
+        stream.data_stream.type = typeVal;
+      }
+    }
+  }
+}
+
 function assignVariables(
   userProvidedVars: SimplifiedVars,
   varsRecord?: PackagePolicyConfigRecord,
@@ -237,6 +248,18 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
       options.experimental_data_stream_features;
   }
 
+  // Disable agentless-only inputs for non-agentless policies; the reverse is unnecessary as the agentless API always passes an explicit policy_template.
+  if (!supportsAgentless) {
+    packagePolicy.inputs.forEach((input) => {
+      if (!isInputAllowedForDeploymentMode(input, 'default', packageInfo)) {
+        input.enabled = false;
+        input.streams.forEach((stream) => {
+          stream.enabled = false;
+        });
+      }
+    });
+  }
+
   // Build a input and streams Map to easily find package policy stream
   const inputMap: InputMap = new Map();
   packagePolicy.inputs.forEach((input) => {
@@ -301,6 +324,8 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
       }
     });
   });
+
+  syncDataStreamTypeFromVar(packagePolicy);
 
   return packagePolicy;
 }

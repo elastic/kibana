@@ -960,7 +960,7 @@ export default ({ getService }: FtrProviderContext) => {
       );
     });
 
-    describe('with host risk index', () => {
+    describe('@skipInServerlessMKI with host risk index', () => {
       before(async () => {
         await esArchiver.load('x-pack/solutions/security/test/fixtures/es_archives/entity/risks');
       });
@@ -993,7 +993,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('with asset criticality', () => {
+    describe('@skipInServerlessMKI with asset criticality', () => {
       before(async () => {
         await esArchiver.load(
           'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'

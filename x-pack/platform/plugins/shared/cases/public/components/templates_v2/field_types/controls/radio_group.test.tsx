@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { useForm, FormProvider } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { useForm, FormProvider } from 'react-hook-form';
 import { CASE_EXTENDED_FIELDS } from '../../../../../common/constants';
 import { RadioGroup } from './radio_group';
 
@@ -27,21 +27,24 @@ const FormWrapper: React.FC<FormWrapperProps> = ({
   defaultOption,
   onSubmitResult,
 }) => {
-  const { form } = useForm<{}>({
-    defaultValue: {
+  const form = useForm({
+    defaultValues: {
       [CASE_EXTENDED_FIELDS]:
         initialValue !== undefined ? { severity_as_keyword: initialValue } : {},
     },
-    options: { stripEmptyFields: false },
   });
 
-  const handleSubmit = async () => {
-    const { isValid, data } = await form.submit();
-    onSubmitResult({ isValid: isValid ?? false, data: data as Record<string, unknown> });
-  };
+  const handleSubmit = form.handleSubmit(
+    (data) => onSubmitResult({ isValid: true, data: data as Record<string, unknown> }),
+    () =>
+      onSubmitResult({
+        isValid: false,
+        data: form.getValues() as Record<string, unknown>,
+      })
+  );
 
   return (
-    <FormProvider form={form}>
+    <FormProvider {...form}>
       <RadioGroup
         name="severity"
         control="RADIO_GROUP"

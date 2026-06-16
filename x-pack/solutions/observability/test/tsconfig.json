@@ -78,7 +78,6 @@
     "@kbn/slo-plugin",
     "@kbn/slo-schema",
     "@kbn/cases-plugin",
-    "@kbn/infra-forge",
     "@kbn/test-suites-src",
     "@kbn/ftr-common-functional-ui-services",
     "@kbn/config-schema",
@@ -98,6 +97,6 @@
     "@kbn/maintenance-windows-plugin",
     "@kbn/product-doc-common",
     "@kbn/kbn-client",
-    "@kbn/spaces-plugin"
+    "@kbn/apm-types"
   ]
 }

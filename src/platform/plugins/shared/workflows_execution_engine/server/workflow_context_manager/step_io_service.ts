@@ -11,10 +11,11 @@ import type { Logger } from '@kbn/core/server';
 import type { JsonValue } from '@kbn/utility-types';
 import type { EsWorkflowStepExecution, SerializedError } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
+import { scanForTemplateVariables } from '@kbn/workflows/common/utils';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import {
   extractReferencedStepIds,
-  extractReferencedStepIdsFromValue,
+  extractReferencedStepIdsFromVariables,
 } from './extract_referenced_step_ids';
 import { EVICTION_EXEMPT_STEP_TYPES, LOOP_STEP_TYPES } from './step_io_pinned_types';
 import type { StepExecutionMetadata, StepIoStateAccessor } from './workflow_execution_state';
@@ -326,6 +327,11 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
     output: JsonValue | null,
     sizeBytes?: number
   ): void {
+    // Fresh in-memory output is authoritative — do not let a subsequent
+    // prepareForRead rehydrate from ES and overwrite with a stale doc
+    // (common when a deferred step completes on resume before flush).
+    this.clearEvicted(stepExecutionId);
+
     if (this.state.getStepExecution(stepExecutionId)?.stepType === 'data.set') {
       this.recordDataSetOutput(stepExecutionId, output);
     }
@@ -616,12 +622,7 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
       // Static analysis ambiguous (dynamic bracket access).
       fallbackToPredecessors();
     } else {
-      for (const stepId of referencedStepIds) {
-        const latestExec = this.state.getLatestStepExecution(stepId);
-        if (latestExec) {
-          neededIds.add(latestExec.id);
-        }
-      }
+      this.addLatestExecutionIdsForStepIds(neededIds, referencedStepIds);
       // If the analysis found nothing but a predecessor is actually evicted,
       // the analysis missed a reference. Fall back conservatively rather
       // than trust an empty set.
@@ -645,43 +646,50 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
     let currentScope = WorkflowScopeStack.fromStackFrames(
       this.state.getWorkflowExecutionScopeStack()
     );
-    let foreachFallbackPending = false;
     while (!currentScope.isEmpty()) {
       const frame = currentScope.getCurrentScope();
       currentScope = currentScope.exitScope();
-      const frameStepExecId = buildStepExecutionId(
+      const scopeStepExecutionId = buildStepExecutionId(
         executionId,
         frame.stepId,
         currentScope.stackFrames
       );
-      neededIds.add(frameStepExecId);
+      neededIds.add(scopeStepExecutionId);
 
-      if (frame.nodeType === 'enter-foreach') {
-        const foreachInput = this.inputs.get(frameStepExecId);
-        const foreachExpression = extractForeachExpressionFromInput(foreachInput);
-        if (foreachExpression !== undefined) {
-          const referenced = extractReferencedStepIdsFromValue(foreachExpression);
-          if (referenced === null) {
-            // Dynamic bracket access in the foreach expression — defer to
-            // the predecessor fallback once we have the concrete node.
-            foreachFallbackPending = true;
-          } else {
-            for (const stepId of referenced) {
-              const latestExec = this.state.getLatestStepExecution(stepId);
-              if (latestExec) {
-                neededIds.add(latestExec.id);
-              }
-            }
-          }
+      const scopeStepExecution = this.state.getStepExecution(scopeStepExecutionId);
+      if (scopeStepExecution?.stepType === 'foreach') {
+        const scopeInputStepIds = this.extractReferencedStepIdsFromValue(
+          this.getStepInput(scopeStepExecutionId)
+        );
+        if (scopeInputStepIds === null) {
+          fallbackToPredecessors();
+        } else {
+          this.addLatestExecutionIdsForStepIds(neededIds, scopeInputStepIds);
         }
       }
     }
 
-    if (foreachFallbackPending) {
-      fallbackToPredecessors();
-    }
-
     return neededIds;
+  }
+
+  private addLatestExecutionIdsForStepIds(
+    neededIds: Set<string>,
+    referencedStepIds: ReadonlySet<string>
+  ): void {
+    for (const stepId of referencedStepIds) {
+      const latestExec = this.state.getLatestStepExecution(stepId);
+      if (latestExec) {
+        neededIds.add(latestExec.id);
+      }
+    }
+  }
+
+  private extractReferencedStepIdsFromValue(value: unknown): Set<string> | null {
+    try {
+      return extractReferencedStepIdsFromVariables(scanForTemplateVariables(value));
+    } catch {
+      return null;
+    }
   }
 
   private hasEvictedPredecessor(

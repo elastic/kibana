@@ -548,6 +548,17 @@ describe('SubFeatureCard', () => {
     });
   });
 
+  describe('ignoreGlobalDefault — globalDefaultId set to NO_DEFAULT_MODEL', () => {
+    it('does not render the global default locked row when globalDefaultId is NO_DEFAULT_MODEL', () => {
+      renderCard(['ep-1'], undefined, new Set(), ['__different__'], {
+        hasSavedObject: false,
+        globalDefaultId: NO_DEFAULT_MODEL,
+      });
+
+      expect(screen.queryByTestId('global-default-row-test_feature')).not.toBeInTheDocument();
+    });
+  });
+
   describe('deprecation badges', () => {
     const deprecatedInfo: EndpointDeprecationInfo = {
       name: 'Claude 2',

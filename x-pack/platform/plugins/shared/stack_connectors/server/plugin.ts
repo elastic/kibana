@@ -15,7 +15,11 @@ import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-obje
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import { registerInferenceConnectorsUsageCollector } from './usage/inference/inference_connectors_usage_collector';
 import { registerConnectorTypes } from './connector_types';
-import { getWellKnownEmailServiceRoute, getWebhookSecretHeadersKeyRoute } from './routes';
+import {
+  getWellKnownEmailServiceRoute,
+  getWebhookSecretHeadersKeyRoute,
+  getHttpSecretQueryParamsKeyRoute,
+} from './routes';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import type { ConfigSchema as StackConnectorsConfigType } from './config';
@@ -51,6 +55,7 @@ export class StackConnectorsPlugin
 
     getWellKnownEmailServiceRoute(router, awsSesConfig);
     getWebhookSecretHeadersKeyRoute(router, core.getStartServices);
+    getHttpSecretQueryParamsKeyRoute(router, core.getStartServices);
 
     registerConnectorTypes({
       actions,

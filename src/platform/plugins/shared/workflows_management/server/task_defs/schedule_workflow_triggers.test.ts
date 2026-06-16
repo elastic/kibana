@@ -38,6 +38,8 @@ describe('scheduleWorkflowTriggers', () => {
     await scheduleWorkflowTriggers({
       workflowId: 'wf-1',
       definition: baseDefinition,
+      enabled: true,
+      valid: true,
       spaceId: 'default',
       request: mockRequest,
       taskScheduler: scheduler,
@@ -53,10 +55,46 @@ describe('scheduleWorkflowTriggers', () => {
     );
   });
 
+  it('does not schedule when workflow is disabled', async () => {
+    const scheduler = makeMockScheduler();
+
+    await scheduleWorkflowTriggers({
+      workflowId: 'wf-1',
+      definition: baseDefinition,
+      enabled: false,
+      valid: true,
+      spaceId: 'default',
+      request: mockRequest,
+      taskScheduler: scheduler,
+      logger,
+    });
+
+    expect(scheduler.scheduleWorkflowTask).not.toHaveBeenCalled();
+  });
+
+  it('does not schedule when workflow is invalid', async () => {
+    const scheduler = makeMockScheduler();
+
+    await scheduleWorkflowTriggers({
+      workflowId: 'wf-1',
+      definition: baseDefinition,
+      enabled: true,
+      valid: false,
+      spaceId: 'default',
+      request: mockRequest,
+      taskScheduler: scheduler,
+      logger,
+    });
+
+    expect(scheduler.scheduleWorkflowTask).not.toHaveBeenCalled();
+  });
+
   it('does nothing when taskScheduler is null', async () => {
     await scheduleWorkflowTriggers({
       workflowId: 'wf-1',
       definition: baseDefinition,
+      enabled: true,
+      valid: true,
       spaceId: 'default',
       request: mockRequest,
       taskScheduler: null,
@@ -72,6 +110,8 @@ describe('scheduleWorkflowTriggers', () => {
     await scheduleWorkflowTriggers({
       workflowId: 'wf-1',
       definition: undefined,
+      enabled: true,
+      valid: true,
       spaceId: 'default',
       request: mockRequest,
       taskScheduler: scheduler,
@@ -87,6 +127,8 @@ describe('scheduleWorkflowTriggers', () => {
     await scheduleWorkflowTriggers({
       workflowId: 'wf-1',
       definition: { ...baseDefinition, triggers: undefined } as any,
+      enabled: true,
+      valid: true,
       spaceId: 'default',
       request: mockRequest,
       taskScheduler: scheduler,
@@ -103,6 +145,8 @@ describe('scheduleWorkflowTriggers', () => {
     await scheduleWorkflowTriggers({
       workflowId: 'wf-1',
       definition: baseDefinition,
+      enabled: true,
+      valid: true,
       spaceId: 'default',
       request: mockRequest,
       taskScheduler: scheduler,
@@ -127,6 +171,8 @@ describe('scheduleWorkflowTriggers', () => {
     await scheduleWorkflowTriggers({
       workflowId: 'wf-1',
       definition,
+      enabled: true,
+      valid: true,
       spaceId: 'default',
       request: mockRequest,
       taskScheduler: scheduler,
@@ -152,6 +198,8 @@ describe('scheduleWorkflowTriggers', () => {
     await scheduleWorkflowTriggers({
       workflowId: 'wf-1',
       definition,
+      enabled: true,
+      valid: true,
       spaceId: 'default',
       request: mockRequest,
       taskScheduler: scheduler,

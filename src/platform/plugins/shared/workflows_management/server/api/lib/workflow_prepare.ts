@@ -8,12 +8,7 @@
  */
 
 import { transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
-import type {
-  CreateWorkflowCommand,
-  EsWorkflow,
-  EsWorkflowCreate,
-  WorkflowYaml,
-} from '@kbn/workflows';
+import type { EsWorkflow, EsWorkflowCreate, WorkflowYaml } from '@kbn/workflows';
 import { parseYamlToJSONWithoutValidation } from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
 
@@ -70,17 +65,26 @@ const readWorkflowHeaderFromYaml = (
 
 /**
  * Validates YAML and builds a WorkflowProperties document ready for indexing.
- * Shared by createWorkflow and bulkCreateWorkflows.
+ * Shared by user-created and managed workflow creation paths.
  */
-export const prepareWorkflowDocument = (params: {
-  workflow: CreateWorkflowCommand;
+export const prepareWorkflowDocumentFromYaml = (params: {
+  id?: string;
+  yaml: string;
   zodSchema: z.ZodType;
   authenticatedUser: string;
   now: Date;
   spaceId: string;
   triggerDefinitions?: Array<{ id: string; eventSchema: z.ZodType }>;
 }): { id: string; workflowData: WorkflowProperties; definition?: WorkflowYaml } => {
-  const { workflow, zodSchema, authenticatedUser, now, spaceId, triggerDefinitions } = params;
+  const {
+    id: providedId,
+    yaml,
+    zodSchema,
+    authenticatedUser,
+    now,
+    spaceId,
+    triggerDefinitions,
+  } = params;
 
   let workflowToCreate: EsWorkflowCreate = {
     name: 'Untitled workflow',
@@ -91,7 +95,7 @@ export const prepareWorkflowDocument = (params: {
     valid: false,
   };
 
-  const validation = validateWorkflowYaml(workflow.yaml, zodSchema, { triggerDefinitions });
+  const validation = validateWorkflowYaml(yaml, zodSchema, { triggerDefinitions });
   if (validation.valid && validation.parsedWorkflow) {
     workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(validation.parsedWorkflow);
   } else if (validation.parsedWorkflow) {
@@ -109,7 +113,7 @@ export const prepareWorkflowDocument = (params: {
     if (rawHeader.tags) workflowToCreate.tags = rawHeader.tags;
   }
 
-  const id = workflow.id || generateWorkflowId(workflowToCreate.name);
+  const id = providedId || generateWorkflowId(workflowToCreate.name);
 
   const workflowData: WorkflowProperties = {
     name: workflowToCreate.name,
@@ -117,11 +121,16 @@ export const prepareWorkflowDocument = (params: {
     enabled: workflowToCreate.enabled,
     tags: workflowToCreate.tags || [],
     triggerTypes: getTriggerTypesFromDefinition(workflowToCreate.definition),
-    yaml: workflow.yaml,
+    yaml,
     definition: workflowToCreate.definition ?? null,
     createdBy: authenticatedUser,
     lastUpdatedBy: authenticatedUser,
     spaceId,
+    managed: false,
+    managedBy: null,
+    definitionHash: null,
+    originManagedWorkflowId: null,
+    lifecycle: null,
     valid: workflowToCreate.valid,
     deleted_at: null,
     created_at: now.toISOString(),

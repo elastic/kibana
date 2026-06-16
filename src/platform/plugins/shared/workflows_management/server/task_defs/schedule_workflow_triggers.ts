@@ -23,13 +23,16 @@ import type { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
 export const scheduleWorkflowTriggers = async (params: {
   workflowId: string;
   definition: WorkflowYaml | undefined;
+  enabled: boolean;
+  valid: boolean;
   spaceId: string;
   request?: KibanaRequest;
   taskScheduler: WorkflowTaskScheduler | null;
   logger: Logger;
 }): Promise<void> => {
-  const { workflowId, definition, spaceId, request, taskScheduler, logger } = params;
-  if (!taskScheduler || !definition?.triggers) {
+  const { workflowId, definition, enabled, valid, spaceId, request, taskScheduler, logger } =
+    params;
+  if (!taskScheduler || !definition?.triggers || !enabled || !valid) {
     return;
   }
 

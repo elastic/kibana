@@ -73,7 +73,7 @@ setup(core, { agentContextLayer }) {
 | Plugin | Types registered |
 |--------|-----------------|
 | `agentBuilderPlatform` | `visualization`, `connector` |
-| `dashboardAgent` | `dashboard` |
+| `agentBuilderDashboards` | `dashboard` |
 | `workflowsManagement` | `workflow` |
 
 ## Feature gating

@@ -49,9 +49,9 @@ function sanitizeFilename(name) {
 /**
  * Get Kibana configuration
  */
-function getKibanaConfig(useSsl = true) {
+function getKibanaConfig(useSsl = false) {
   const protocol = useSsl ? 'https' : 'http';
-  const kibanaUrl = process.env.KIBANA_URL || `${protocol}://localhost:5601`;
+  const kibanaUrl = process.env.KIBANA_URL || `${protocol}://localhost:5601/kbn`;
   const username = process.env.KIBANA_USERNAME || 'elastic';
   const password = process.env.KIBANA_PASSWORD || 'changeme';
 
@@ -71,6 +71,7 @@ function makeKibanaRequest(url, options, body) {
         'Content-Type': 'application/json',
         'kbn-xsrf': 'true',
         'x-elastic-internal-origin': 'Kibana',
+        'elastic-api-version': '2023-10-31',
         ...options.headers,
       },
       rejectUnauthorized: false,
@@ -139,20 +140,13 @@ async function exportWorkflows(options) {
 
     // Fetch all workflows using Kibana API
     const spacePrefix = space === 'default' ? '' : `/s/${space}`;
-    const searchUrl = `${kibanaUrl}${spacePrefix}/api/workflows/search`;
+    const listUrl = `${kibanaUrl}${spacePrefix}/api/workflows?size=10000&page=1`;
 
     console.log(`Fetching workflows from space: ${space}`);
-    const result = await makeKibanaRequest(
-      searchUrl,
-      {
-        method: 'POST',
-        headers,
-      },
-      {
-        page: 1,
-        limit: 10000,
-      }
-    );
+    const result = await makeKibanaRequest(listUrl, {
+      method: 'GET',
+      headers,
+    });
 
     const workflows = result.results || [];
 
@@ -264,21 +258,14 @@ async function importWorkflows(options) {
 
     // Fetch existing workflows to check for duplicates
     const spacePrefix = space === 'default' ? '' : `/s/${space}`;
-    const searchUrl = `${kibanaUrl}${spacePrefix}/api/workflows/search`;
+    const listUrl = `${kibanaUrl}${spacePrefix}/api/workflows?size=10000&page=1`;
 
     let existingByName = new Map();
     try {
-      const searchResult = await makeKibanaRequest(
-        searchUrl,
-        {
-          method: 'POST',
-          headers,
-        },
-        {
-          page: 1,
-          limit: 10000,
-        }
-      );
+      const searchResult = await makeKibanaRequest(listUrl, {
+        method: 'GET',
+        headers,
+      });
 
       if (searchResult.results) {
         for (const workflow of searchResult.results) {
@@ -288,12 +275,14 @@ async function importWorkflows(options) {
         }
       }
     } catch (error) {
-      console.warn('⚠️  Could not fetch existing workflows:', error.message);
+      console.error('❌ Could not connect to Kibana:', error.message);
+      process.exit(1);
     }
 
     let importCount = 0;
     let skipCount = 0;
     let updateCount = 0;
+    let errorCount = 0;
 
     for (const file of files) {
       const filepath = path.join(dir, file);
@@ -353,28 +342,14 @@ async function importWorkflows(options) {
 
         if (existingId && overwrite) {
           // Update existing workflow using PUT
-          const updateUrl = `${kibanaUrl}${spacePrefix}/api/workflows/${existingId}`;
-          await makeKibanaRequest(
-            updateUrl,
-            {
-              method: 'PUT',
-              headers,
-            },
-            workflowData
-          );
+          const updateUrl = `${kibanaUrl}${spacePrefix}/api/workflows/workflow/${existingId}`;
+          await makeKibanaRequest(updateUrl, { method: 'PUT', headers }, workflowData);
           console.log(`↻ Updated: ${file} → "${workflowName}"`);
           updateCount++;
         } else {
           // Create new workflow using POST
-          const createUrl = `${kibanaUrl}${spacePrefix}/api/workflows`;
-          await makeKibanaRequest(
-            createUrl,
-            {
-              method: 'POST',
-              headers,
-            },
-            workflowData
-          );
+          const createUrl = `${kibanaUrl}${spacePrefix}/api/workflows/workflow`;
+          await makeKibanaRequest(createUrl, { method: 'POST', headers }, workflowData);
           console.log(`✓ Imported: ${file} → "${workflowName}"`);
           importCount++;
         }
@@ -383,12 +358,17 @@ async function importWorkflows(options) {
         if (error.body) {
           console.error('  Details:', JSON.stringify(error.body, null, 2));
         }
+        errorCount++;
       }
     }
 
+    const status = errorCount > 0 ? '⚠️ ' : '✅';
     console.log(
-      `\n✅ Import complete: ${importCount} created, ${updateCount} updated, ${skipCount} skipped`
+      `\n${status} Import complete: ${importCount} created, ${updateCount} updated, ${skipCount} skipped, ${errorCount} failed`
     );
+    if (errorCount > 0) {
+      process.exit(1);
+    }
   } catch (error) {
     console.error('❌ Import failed:', error.message);
     if (error.body) {
@@ -424,20 +404,10 @@ async function deleteAllWorkflows(options) {
     };
 
     const spacePrefix = space === 'default' ? '' : `/s/${space}`;
-    const searchUrl = `${kibanaUrl}${spacePrefix}/api/workflows/search`;
+    const listUrl = `${kibanaUrl}${spacePrefix}/api/workflows?size=10000&page=1`;
 
     console.log(`Fetching workflows from space: ${space}`);
-    const result = await makeKibanaRequest(
-      searchUrl,
-      {
-        method: 'POST',
-        headers,
-      },
-      {
-        page: 1,
-        limit: 10000,
-      }
-    );
+    const result = await makeKibanaRequest(listUrl, { method: 'GET', headers });
 
     const workflows = result.results || [];
 
@@ -448,30 +418,22 @@ async function deleteAllWorkflows(options) {
 
     console.log(`Found ${workflows.length} workflow(s) to delete`);
 
-    const workflowIds = workflows.map((w) => w.id);
-
-    // Delete workflows in batches (max 1000 per request)
-    const batchSize = 100;
     let totalDeleted = 0;
+    let totalFailed = 0;
 
-    for (let i = 0; i < workflowIds.length; i += batchSize) {
-      const batch = workflowIds.slice(i, i + batchSize);
-      const deleteUrl = `${kibanaUrl}${spacePrefix}/api/workflows`;
-      const result = await makeKibanaRequest(
-        deleteUrl,
-        {
-          method: 'DELETE',
-          headers,
-        },
-        { ids: batch }
-      );
-      totalDeleted += result.deleted || 0;
-      if (result.failures && result.failures.length > 0) {
-        console.warn(`⚠️  ${result.failures.length} failure(s) in batch`);
+    for (const workflow of workflows) {
+      const deleteUrl = `${kibanaUrl}${spacePrefix}/api/workflows/workflow/${workflow.id}`;
+      try {
+        await makeKibanaRequest(deleteUrl, { method: 'DELETE', headers });
+        totalDeleted++;
+      } catch (error) {
+        console.warn(`⚠️  Failed to delete "${workflow.name}" (${workflow.id}): ${error.message}`);
+        totalFailed++;
       }
     }
 
-    console.log(`\n✅ Successfully deleted ${totalDeleted} workflow(s)`);
+    const status = totalFailed > 0 ? '⚠️ ' : '✅';
+    console.log(`\n${status} Deleted ${totalDeleted} workflow(s), ${totalFailed} failed`);
   } catch (error) {
     console.error('❌ Delete failed:', error.message);
     if (error.body) {
@@ -508,7 +470,7 @@ Options:
   --help        Show this help message
 
 Environment Variables:
-  KIBANA_URL       Kibana URL (default: https://localhost:5601)
+  KIBANA_URL       Kibana URL (default: http://localhost:5601)
   KIBANA_USERNAME  Username (default: elastic)
   KIBANA_PASSWORD  Password (default: changeme)
 
@@ -556,7 +518,7 @@ async function main() {
       dir: DEFAULT_DIR,
       space: DEFAULT_SPACE,
       overwrite: false,
-      ssl: true,
+      ssl: false,
     },
   });
 

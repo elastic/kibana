@@ -35,6 +35,7 @@ export type AgentBuilderPluginStartMock = jest.Mocked<AgentBuilderPluginStart> &
 const createAgentStartMock = (): AgentsServiceStartContractMock => {
   return {
     list: jest.fn(),
+    addSkillToAgent: jest.fn(),
   };
 };
 
@@ -79,6 +80,7 @@ const createStartContractMock = (): AgentBuilderPluginStartMock => {
     }),
     addAttachment: jest.fn(),
     updateAttachmentOrigin: jest.fn(),
+    EmbeddableConversation: () => null,
   };
 };
 

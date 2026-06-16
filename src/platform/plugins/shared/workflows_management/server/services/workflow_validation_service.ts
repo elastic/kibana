@@ -10,6 +10,7 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import type { ValidateWorkflowResponseDto } from '@kbn/workflows';
 import type { GetAvailableConnectorsResponse } from '@kbn/workflows/types/v1';
+import type { ServerTriggerDefinition } from '@kbn/workflows-extensions/server';
 import type { z } from '@kbn/zod/v4';
 
 import type { WorkflowValidationDeps } from './types';
@@ -32,13 +33,17 @@ export class WorkflowValidationService {
     });
   }
 
+  getRegisteredCustomTriggerDefinitions(): ServerTriggerDefinition[] {
+    return this.deps.workflowsExtensions?.getAllTriggerDefinitions() ?? [];
+  }
+
   async validateWorkflow(
     yaml: string,
     spaceId: string,
     request: KibanaRequest
   ): Promise<ValidateWorkflowResponseDto> {
     const zodSchema = await this.getWorkflowZodSchema({ loose: false }, spaceId, request);
-    const triggerDefinitions = this.deps.workflowsExtensions?.getAllTriggerDefinitions() ?? [];
+    const triggerDefinitions = this.getRegisteredCustomTriggerDefinitions();
     return validateWorkflowYaml(yaml, zodSchema, { triggerDefinitions });
   }
 
@@ -48,8 +53,7 @@ export class WorkflowValidationService {
     request: KibanaRequest
   ): Promise<z.ZodType> {
     const { connectorTypes } = await this.getAvailableConnectors(spaceId, request);
-    const registeredTriggerIds =
-      this.deps.workflowsExtensions?.getAllTriggerDefinitions().map((t) => t.id) ?? [];
+    const registeredTriggerIds = this.getRegisteredCustomTriggerDefinitions().map((t) => t.id);
     return getWorkflowZodSchema(connectorTypes, registeredTriggerIds);
   }
 

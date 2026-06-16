@@ -208,11 +208,16 @@ export function validateAllMappingsInModelVersion(
   });
 
   if (undeclaredFields.length > 0) {
-    throw new Error(
-      `❌ The SO type '${name}' has mapping fields not present in the latest model version schema: ${undeclaredFields.join(
+    throw new SavedObjectsCheckError({
+      ruleId: RULE_IDS.MODEL_VERSION_MAPPINGS_NOT_IN_SCHEMA,
+      severity: 'error',
+      typeName: name,
+      message: `The SO type '${name}' has mapping fields not present in the latest model version schema: ${undeclaredFields.join(
         ', '
-      )}. ` + `All mapping fields must be declared in the latest model version's 'create' schema.`
-    );
+      )}.`,
+      fixHint: `Add the missing fields to the 'create' schema of the latest model version.`,
+      docsAnchor: '#defining-model-versions',
+    });
   }
 }
 
@@ -222,21 +227,29 @@ function throwIfIndexOrEnabledFalse(
   fieldsWithEnabledFalse: string[]
 ): void {
   if (fieldsWithIndexFalse.length > 0) {
-    throw new Error(
-      `❌ The SO type '${name}' has new mapping fields with 'index: false': ${fieldsWithIndexFalse.join(
+    throw new SavedObjectsCheckError({
+      ruleId: RULE_IDS.MODEL_VERSION_MAPPING_INDEX_FALSE,
+      severity: 'error',
+      typeName: name,
+      message: `The SO type '${name}' has new mapping fields with 'index: false': ${fieldsWithIndexFalse.join(
         ', '
-      )}. ` +
-        `This option cannot be updated without reindexing. Use 'dynamic: false' instead or omit the mapping.`
-    );
+      )}.`,
+      fixHint: `Use 'dynamic: false' instead or omit the mapping entirely. The 'index: false' option cannot be updated without reindexing.`,
+      docsAnchor: '#defining-model-versions',
+    });
   }
 
   if (fieldsWithEnabledFalse.length > 0) {
-    throw new Error(
-      `❌ The SO type '${name}' has new mapping fields with 'enabled: false': ${fieldsWithEnabledFalse.join(
+    throw new SavedObjectsCheckError({
+      ruleId: RULE_IDS.MODEL_VERSION_MAPPING_ENABLED_FALSE,
+      severity: 'error',
+      typeName: name,
+      message: `The SO type '${name}' has new mapping fields with 'enabled: false': ${fieldsWithEnabledFalse.join(
         ', '
-      )}. ` +
-        `This option cannot be updated without reindexing. Use 'dynamic: false' instead or omit the mapping.`
-    );
+      )}.`,
+      fixHint: `Use 'dynamic: false' instead or omit the mapping entirely. The 'enabled: false' option cannot be updated without reindexing.`,
+      docsAnchor: '#defining-model-versions',
+    });
   }
 }
 
@@ -250,10 +263,14 @@ export function validateNoIndexOrEnabledFalse(
   const fieldsWithEnabledFalse: string[] = [];
 
   modelVersionsToCheck.forEach((modelVersion) => {
-    modelVersion.newMappings.forEach((mapping) => {
-      const lastDot = mapping.lastIndexOf('.');
-      const fieldPath = lastDot > 0 ? mapping.slice(0, lastDot) : mapping;
+    const fieldPaths = new Set(
+      modelVersion.newMappings.map((mapping) => {
+        const lastDot = mapping.lastIndexOf('.');
+        return lastDot > 0 ? mapping.slice(0, lastDot) : mapping;
+      })
+    );
 
+    fieldPaths.forEach((fieldPath) => {
       if (to.mappings[`properties.${fieldPath}.index`] === false) {
         fieldsWithIndexFalse.push(fieldPath);
       }

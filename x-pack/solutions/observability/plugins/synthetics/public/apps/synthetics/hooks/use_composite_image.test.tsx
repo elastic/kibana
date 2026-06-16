@@ -15,6 +15,11 @@ import { fetchBlocksAction } from '../state';
 import { shouldCompose, useComposeImageFromRef } from './use_composite_image';
 import * as compose from '../utils/monitor_test_result/compose_screenshot_images';
 
+const mockUrlParams = jest.fn();
+jest.mock('./use_url_params', () => ({
+  useGetUrlParams: () => mockUrlParams(),
+}));
+
 const MIME = 'image/jpeg';
 
 describe('use composite image', () => {
@@ -187,6 +192,7 @@ describe('use composite image', () => {
       composeSpy = jest
         .spyOn(compose, 'composeScreenshotRef')
         .mockReturnValue(new Promise((r) => r([])));
+      mockUrlParams.mockReturnValue({});
     });
 
     afterEach(() => {
@@ -197,7 +203,19 @@ describe('use composite image', () => {
       blocks = {};
       renderHook(() => useComposeImageFromRef(imgRef));
 
-      expect(useDispatchMock).toHaveBeenCalledWith(fetchBlocksAction(['hash1', 'hash2']));
+      expect(useDispatchMock).toHaveBeenCalledWith(
+        fetchBlocksAction({ hashes: ['hash1', 'hash2'], remoteName: undefined })
+      );
+    });
+
+    it('forwards the URL remoteName to fetchBlocksAction for remote monitors', () => {
+      blocks = {};
+      mockUrlParams.mockReturnValue({ remoteName: 'remote-a' });
+      renderHook(() => useComposeImageFromRef(imgRef));
+
+      expect(useDispatchMock).toHaveBeenCalledWith(
+        fetchBlocksAction({ hashes: ['hash1', 'hash2'], remoteName: 'remote-a' })
+      );
     });
 
     it('composes when all required blocks are loaded 2', async () => {

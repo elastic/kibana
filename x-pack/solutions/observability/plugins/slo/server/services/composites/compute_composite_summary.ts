@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CompositeSLOMemberSummary, CompositeSLOSummary, SLOStatus } from '@kbn/slo-schema';
+import type { CompositeSLOMemberWithSummary, CompositeSLOSummary } from '@kbn/slo-schema';
 import {
   computeNormalisedWeights,
   computeWeightedSli,
@@ -13,26 +13,28 @@ import {
   toErrorBudget,
 } from '../../domain/services';
 import { toHighPrecision } from '../../utils/number';
-import type { CompositeSLODefinition } from '../../domain/models';
+import type { CompositeSLODefinition, Summary } from '../../domain/models';
 import type { BurnRateWindow } from '../summary_client';
 
 export interface MemberSummaryData {
   member: { sloId: string; weight: number; instanceId?: string };
   sloName: string;
-  summary: {
-    sliValue: number;
-    status: SLOStatus;
-    fiveMinuteBurnRate: number;
-    oneHourBurnRate: number;
-    oneDayBurnRate: number;
-  };
+  summary: Pick<
+    Summary,
+    | 'sliValue'
+    | 'status'
+    | 'errorBudget'
+    | 'fiveMinuteBurnRate'
+    | 'oneHourBurnRate'
+    | 'oneDayBurnRate'
+  >;
   burnRateWindows: BurnRateWindow[];
 }
 
 export function computeCompositeSummary(
   compositeSlo: CompositeSLODefinition,
   memberSummaries: MemberSummaryData[]
-): { compositeSummary: CompositeSLOSummary; members: CompositeSLOMemberSummary[] } {
+): { compositeSummary: CompositeSLOSummary; members: CompositeSLOMemberWithSummary[] } {
   const sliDataPoints = memberSummaries.map((ms) => ({
     weight: ms.member.weight,
     sliValue: ms.summary.sliValue,
@@ -92,24 +94,22 @@ export function computeCompositeSummary(
 }
 
 function buildMemberSummary(
-  ms: {
-    member: { sloId: string; weight: number; instanceId?: string };
-    sloName: string;
-    summary: { sliValue: number; status: SLOStatus };
-  },
+  ms: MemberSummaryData,
   normalisedWeight: number
-): CompositeSLOMemberSummary {
+): CompositeSLOMemberWithSummary {
   const { sliValue } = ms.summary;
-  const contribution = sliValue === NO_DATA ? 0 : toHighPrecision(normalisedWeight * sliValue);
 
   return {
-    id: ms.member.sloId,
+    sloId: ms.member.sloId,
     name: ms.sloName,
     weight: ms.member.weight,
     normalisedWeight,
     sliValue,
     status: ms.summary.status,
-    contribution,
+    errorBudget: ms.summary.errorBudget,
+    fiveMinuteBurnRate: ms.summary.fiveMinuteBurnRate,
+    oneHourBurnRate: ms.summary.oneHourBurnRate,
+    oneDayBurnRate: ms.summary.oneDayBurnRate,
     ...(ms.member.instanceId !== undefined ? { instanceId: ms.member.instanceId } : {}),
   };
 }

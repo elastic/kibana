@@ -29,6 +29,7 @@ import {
   type GetPipelineOptions,
   prHasFIPSLabel,
   doAllChangesMatch,
+  isAutomatedVersionBumpPR,
 } from '#pipeline-utils';
 
 const prConfig = prConfigs.jobs.find((job) => job.pipelineSlug === 'kibana-pull-request');
@@ -49,6 +50,11 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
   const pipeline: string[] = [];
 
   try {
+    if (await isAutomatedVersionBumpPR()) {
+      emitPipeline([emptyStep]);
+      return;
+    }
+
     const skippable = await areChangesSkippable(SKIPPABLE_PR_MATCHERS, REQUIRED_PATHS);
 
     if (skippable) {
@@ -641,20 +647,10 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       );
     }
 
-    // Run Saved Objects checks conditionally
-    if (
-      await doAnyChangesMatch([
-        /^packages\/kbn-check-saved-objects-cli\/current_fields.json/,
-        /^packages\/kbn-check-saved-objects-cli\/current_mappings.json/,
-        /^src\/core\/server\/integration_tests\/ci_checks\/saved_objects\/check_registered_types.test.ts/,
-        /^\.buildkite\/pipelines\/pull_request\/check_saved_objects\.yml/,
-        /^src\/core\/packages\/saved-objects\/server-internal\/wip_types\.json/,
-      ])
-    ) {
-      pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/check_saved_objects.yml', cancelable)
-      );
-    }
+    // Run Saved Objects checks systematically
+    pipeline.push(
+      getPipeline('.buildkite/pipelines/pull_request/check_saved_objects.yml', cancelable)
+    );
 
     // Run Workflow Schema OOM prevention test when schema or connector whitelist changes
     if (

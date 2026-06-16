@@ -35,7 +35,11 @@ jest.mock('./feature_section', () => ({
   ),
 }));
 jest.mock('./default_model_section', () => ({
-  DefaultModelSection: () => <div data-test-subj="defaultModelSection">DefaultModelSection</div>,
+  DefaultModelSection: ({ disabled }: { disabled?: boolean }) => (
+    <div data-test-subj="defaultModelSection" data-disabled={String(Boolean(disabled))}>
+      DefaultModelSection
+    </div>
+  ),
 }));
 
 const mockUseModelSettingsForm = useModelSettingsForm as jest.Mock;
@@ -54,6 +58,16 @@ const childFeature: InferenceFeatureConfig = {
   featureDescription: 'desc',
   taskType: 'chat_completion',
   recommendedEndpoints: ['ep-1'],
+};
+
+const optOutChildFeature: InferenceFeatureConfig = {
+  featureId: 'child_opt_out',
+  parentFeatureId: 'workflows',
+  featureName: 'Workflow Feature',
+  featureDescription: 'runs in background',
+  taskType: 'chat_completion',
+  recommendedEndpoints: [],
+  ignoreGlobalDefault: true,
 };
 
 const defaultFormState = {
@@ -114,7 +128,10 @@ describe('ModelSettings', () => {
     });
     mockUseKibana.mockReturnValue({
       services: {
-        application: { navigateToUrl: mockNavigateToUrl },
+        application: {
+          navigateToUrl: mockNavigateToUrl,
+          capabilities: { advancedSettings: { save: true } },
+        },
         http: { basePath: mockBasePath },
       },
     });
@@ -536,6 +553,146 @@ describe('ModelSettings', () => {
     expect(mockNavigateToUrl).not.toHaveBeenCalled();
     await waitFor(() => {
       expect(screen.queryByTestId('unsavedChangesModal')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('ignoreGlobalDefault sections', () => {
+    const optOutFormState = {
+      ...defaultFormState,
+      sections: [
+        {
+          featureId: 'workflows',
+          featureName: 'Workflows',
+          featureDescription: 'Background workflows',
+          taskType: '',
+          recommendedEndpoints: [],
+          children: [optOutChildFeature],
+        },
+      ],
+    };
+
+    it('hides opt-out sections when featureSpecificModels is off', () => {
+      mockUseModelSettingsForm.mockReturnValue(optOutFormState);
+      mockUseDefaultModelSettings.mockReturnValue({
+        ...defaultModelSettingsState,
+        state: { enableAi: true, defaultModelId: 'pre-1', featureSpecificModels: false },
+      });
+
+      render(
+        <Wrapper>
+          <ModelSettings />
+        </Wrapper>
+      );
+
+      expect(screen.queryByTestId('featureSection-Workflows')).not.toBeInTheDocument();
+    });
+
+    it('renders opt-out sections when featureSpecificModels is on', () => {
+      mockUseModelSettingsForm.mockReturnValue(optOutFormState);
+
+      render(
+        <Wrapper>
+          <ModelSettings />
+        </Wrapper>
+      );
+
+      expect(screen.getByTestId('featureSection-Workflows')).toBeInTheDocument();
+    });
+
+    it('hides opt-out sections when enableAi is off', () => {
+      mockUseModelSettingsForm.mockReturnValue(optOutFormState);
+      mockUseDefaultModelSettings.mockReturnValue({
+        ...defaultModelSettingsState,
+        state: { enableAi: false, defaultModelId: 'pre-1', featureSpecificModels: false },
+      });
+
+      render(
+        <Wrapper>
+          <ModelSettings />
+        </Wrapper>
+      );
+
+      expect(screen.queryByTestId('featureSection-Workflows')).not.toBeInTheDocument();
+    });
+
+    it('does not render regular sections in default-only mode', () => {
+      mockUseDefaultModelSettings.mockReturnValue({
+        ...defaultModelSettingsState,
+        state: { enableAi: true, defaultModelId: 'pre-1', featureSpecificModels: false },
+      });
+
+      render(
+        <Wrapper>
+          <ModelSettings />
+        </Wrapper>
+      );
+
+      expect(screen.queryByTestId('featureSection-Search')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Advanced Settings permission', () => {
+    it('does not show the permission callout when advancedSettings.save is true', () => {
+      render(
+        <Wrapper>
+          <ModelSettings />
+        </Wrapper>
+      );
+
+      expect(screen.queryByTestId('noAdvancedSettingsPermissionCallout')).not.toBeInTheDocument();
+    });
+
+    it('shows the permission callout when advancedSettings.save is false', () => {
+      mockUseKibana.mockReturnValue({
+        services: {
+          application: {
+            navigateToUrl: mockNavigateToUrl,
+            capabilities: { advancedSettings: { save: false } },
+          },
+          http: { basePath: mockBasePath },
+        },
+      });
+
+      render(
+        <Wrapper>
+          <ModelSettings />
+        </Wrapper>
+      );
+
+      expect(screen.getByTestId('noAdvancedSettingsPermissionCallout')).toBeInTheDocument();
+      expect(
+        screen.getByTestId('noAdvancedSettingsPermissionCalloutDescription')
+      ).toHaveTextContent(/Advanced Settings: All privilege/);
+    });
+
+    it('passes disabled={true} to DefaultModelSection when advancedSettings.save is false', () => {
+      mockUseKibana.mockReturnValue({
+        services: {
+          application: {
+            navigateToUrl: mockNavigateToUrl,
+            capabilities: { advancedSettings: { save: false } },
+          },
+          http: { basePath: mockBasePath },
+        },
+      });
+
+      render(
+        <Wrapper>
+          <ModelSettings />
+        </Wrapper>
+      );
+
+      expect(screen.getByTestId('defaultModelSection')).toHaveAttribute('data-disabled', 'true');
+    });
+
+    it('passes disabled={false} to DefaultModelSection when advancedSettings.save is true', () => {
+      render(
+        <Wrapper>
+          <ModelSettings />
+        </Wrapper>
+      );
+
+      expect(screen.getByTestId('defaultModelSection')).toHaveAttribute('data-disabled', 'false');
     });
   });
 });

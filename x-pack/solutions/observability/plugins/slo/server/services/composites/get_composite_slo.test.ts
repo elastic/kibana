@@ -152,16 +152,22 @@ describe('GetCompositeSLO', () => {
 
     expect(result.members).toHaveLength(2);
     expect(result.members[0]).toMatchObject({
-      id: sloA.id,
+      sloId: sloA.id,
       name: 'Service A',
       weight: 6,
       normalisedWeight: 0.6,
+      fiveMinuteBurnRate: 1.0,
+      oneHourBurnRate: 0.8,
+      oneDayBurnRate: 0.5,
     });
     expect(result.members[1]).toMatchObject({
-      id: sloB.id,
+      sloId: sloB.id,
       name: 'Service B',
       weight: 4,
       normalisedWeight: 0.4,
+      fiveMinuteBurnRate: 2.0,
+      oneHourBurnRate: 1.5,
+      oneDayBurnRate: 1.0,
     });
   });
 
@@ -334,7 +340,6 @@ describe('GetCompositeSLO', () => {
     expect(result.members[0].normalisedWeight).toBe(1);
     expect(result.members[1].normalisedWeight).toBe(0);
     expect(result.members[1].sliValue).toBe(-1);
-    expect(result.members[1].contribution).toBe(0);
   });
 
   it('returns NO_DATA status when all members lack data', async () => {
@@ -433,7 +438,7 @@ describe('GetCompositeSLO', () => {
     // Only sloA participates
     expect(result.summary).toEqual(persistedSummary);
     expect(result.members).toHaveLength(1);
-    expect(result.members[0].id).toBe(sloA.id);
+    expect(result.members[0].sloId).toBe(sloA.id);
     expect(result.members[0].normalisedWeight).toBe(1);
   });
 

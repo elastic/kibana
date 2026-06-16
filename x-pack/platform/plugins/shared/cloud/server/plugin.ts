@@ -20,6 +20,7 @@ import type { CloudConfigType } from './config';
 import { registerCloudDeploymentMetadataAnalyticsContext } from '../common/register_cloud_deployment_id_analytics_context';
 import { registerCloudUsageCollector } from './collectors';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
+import { getIsEce } from '../common/get_is_ece';
 import { parseDeploymentIdFromDeploymentUrl } from '../common/parse_deployment_id_from_deployment_url';
 import type { DecodedCloudId } from '../common/decode_cloud_id';
 import { decodeCloudId } from '../common/decode_cloud_id';
@@ -113,6 +114,16 @@ export interface CloudSetup {
     secretToken?: string;
   };
   /**
+   * Managed OTLP service configuration. Only present when the deployment is configured to use the
+   * managed OTLP service (always on observability serverless projects, and feature-flagged on ECH).
+   */
+  managedOtlp?: {
+    /**
+     * URL of the managed OTLP endpoint.
+     */
+    url?: string;
+  };
+  /**
    * Onboarding configuration.
    */
   onboarding: {
@@ -123,7 +134,8 @@ export interface CloudSetup {
   };
   /**
    * `true` when running on ECE (Elastic Cloud Enterprise).
-   * `false` or `undefined` on ESS or self-managed.
+   * When `isSaasContainer` is missing, cloud-enabled non-serverless deployments are assumed to
+   * be ECE. Self-managed and serverless deployments remain `undefined` unless explicitly set.
    */
   isEce?: boolean;
   /**
@@ -234,6 +246,11 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
     const productTier = this.config.serverless?.product_tier;
     const orchestratorTarget = this.config.serverless?.orchestrator_target;
     const isServerlessEnabled = !!projectId;
+    const isEce = getIsEce({
+      isCloudEnabled,
+      isServerlessEnabled,
+      isSaasContainer: this.config.isSaasContainer,
+    });
     const deploymentId = parseDeploymentIdFromDeploymentUrl(this.config.deployment_url);
 
     registerCloudDeploymentMetadataAnalyticsContext(core.analytics, this.config);
@@ -391,12 +408,15 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       cloudHost: decodedId?.host,
       cloudDefaultPort: decodedId?.defaultPort,
       isCloudEnabled,
-      isEce: this.config.isSaasContainer != null ? !this.config.isSaasContainer : undefined,
+      isEce,
       trialEndDate: this.trialEndDate,
       isElasticStaffOwned: this.config.is_elastic_staff_owned,
       apm: {
         url: this.config.apm?.url,
         secretToken: this.config.apm?.secret_token,
+      },
+      managedOtlp: {
+        url: this.config.managed_otlp?.url,
       },
       onboarding: {
         defaultSolution: parseOnboardingSolution(this.config.onboarding?.default_solution),

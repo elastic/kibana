@@ -26,10 +26,10 @@ export interface LogFlyoutData extends BaseFlyoutData {
 }
 
 export function useLogFlyoutData({ id, index }: UseLogFlyoutDataParams): LogFlyoutData {
-  const { loading, log, index: resolvedIndex } = useFetchLog({ id, index });
+  const { loading, log, index: resolvedIndex, error: fetchError } = useFetchLog({ id, index });
   const {
     dataView: logDataView,
-    error,
+    error: dataViewError,
     loading: loadingDataView,
   } = useAdhocDataView({ index: resolvedIndex ?? null });
 
@@ -56,7 +56,7 @@ export function useLogFlyoutData({ id, index }: UseLogFlyoutDataParams): LogFlyo
     hit,
     loading: loading || loadingDataView,
     title,
-    error,
+    error: fetchError?.message ?? dataViewError,
     logDataView,
   };
 }

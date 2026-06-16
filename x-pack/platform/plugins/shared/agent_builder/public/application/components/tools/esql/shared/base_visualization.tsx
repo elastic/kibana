@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { EuiLoadingSpinner, EuiSuperDatePicker } from '@elastic/eui';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import type { InlineEditLensEmbeddableContext, LensPublicStart } from '@kbn/lens-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
@@ -22,7 +21,9 @@ import {
   visualizationTimePickerContainerClassName,
   visualizationHeaderStyles,
 } from './styles';
-import { useTimeRange } from './use_time_range';
+import { DEFAULT_VISUALIZATION_HEIGHT } from './get_visualization_dimensions';
+import { useKibana } from '../../../../hooks/use_kibana';
+import { useVisPreviewUnifiedSearch } from './use_vis_preview_unified_search';
 
 const saveButtonLabel = i18n.translate(
   'xpack.agentBuilder.conversation.visualization.saveToDashboard',
@@ -46,8 +47,6 @@ const viewConfigurationLabel = i18n.translate(
   }
 );
 
-const VISUALIZATION_HEIGHT = 240;
-
 interface BaseVisualizationProps {
   lens: LensPublicStart;
   uiActions: UiActionsStart;
@@ -55,6 +54,7 @@ interface BaseVisualizationProps {
   setLensInput: (input: TypedLensByValueInput) => void;
   isLoading: boolean;
   registerActionButtons: InlineRenderCallbacks['registerActionButtons'];
+  height?: number;
 }
 
 export function BaseVisualization({
@@ -64,6 +64,7 @@ export function BaseVisualization({
   setLensInput,
   isLoading,
   registerActionButtons,
+  height = DEFAULT_VISUALIZATION_HEIGHT,
 }: BaseVisualizationProps) {
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const [lensLoadEvent, setLensLoadEvent] = useState<
@@ -71,15 +72,19 @@ export function BaseVisualization({
   >(null);
 
   const {
-    services: { application },
+    services: { application, plugins },
   } = useKibana();
+  const SearchBar = plugins.unifiedSearch.ui.SearchBar;
   const canWriteDashboards = application?.capabilities.dashboard_v2?.showWriteControls === true;
-  const timeRangeControl = useTimeRange({ timeRange: lensInput?.timeRange });
-  const selectedTimeRange = timeRangeControl?.selectedTimeRange;
+
+  const { searchBarProps, effectiveTimeRange, onBrushEnd } = useVisPreviewUnifiedSearch({
+    lensTimeRange: lensInput?.timeRange,
+  });
+
   const lensInputWithTimeRange = useMemo(
     () =>
-      lensInput && selectedTimeRange ? { ...lensInput, timeRange: selectedTimeRange } : lensInput,
-    [lensInput, selectedTimeRange]
+      lensInput && effectiveTimeRange ? { ...lensInput, timeRange: effectiveTimeRange } : lensInput,
+    [lensInput, effectiveTimeRange]
   );
 
   const onLoad = useCallback(
@@ -156,21 +161,10 @@ export function BaseVisualization({
   return (
     <>
       <div css={visualizationHeaderStyles} className={visualizationTimePickerContainerClassName}>
-        {timeRangeControl && (
-          <EuiSuperDatePicker
-            data-test-subj="agentBuilderVisualizeLensTimeRangePicker"
-            start={timeRangeControl.selectedTimeRange.from}
-            end={timeRangeControl.selectedTimeRange.to}
-            onTimeChange={timeRangeControl.onTimeChange}
-            onRefresh={() => undefined}
-            showUpdateButton={false}
-            compressed
-            width="auto"
-          />
-        )}
+        <SearchBar {...searchBarProps} />
       </div>
 
-      <div css={visualizationEmbeddableStyles(VISUALIZATION_HEIGHT)}>
+      <div css={visualizationEmbeddableStyles(height)}>
         {isLoading ? (
           <EuiLoadingSpinner />
         ) : (
@@ -178,7 +172,7 @@ export function BaseVisualization({
             <lens.EmbeddableComponent
               {...lensInputWithTimeRange}
               style={{ height: '100%' }}
-              onBrushEnd={timeRangeControl?.onBrushEnd}
+              onBrushEnd={onBrushEnd}
               onLoad={onLoad}
             />
           )
