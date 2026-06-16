@@ -37,6 +37,8 @@ const FALLBACK: PreferredTransactionDataSource = {
 // The main_statistics endpoint uses transactionDataSourceRt which only accepts
 // transactionMetric and transactionEvent — not serviceTransactionMetric, which
 // aggregates at service level and has no per-transaction-name breakdown.
+// Order is intentional: pickPreferredTransactionSource sorts by indexOf() on this array,
+// so earlier entries are preferred. transactionMetric (pre-aggregated) takes priority over transactionEvent (raw).
 const DOCUMENT_TYPE_PREFERENCE = ['transactionMetric', 'transactionEvent'];
 
 // Matches the numBuckets value used by APM's transactions table.
