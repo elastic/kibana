@@ -16,7 +16,7 @@ export const singleMetricViewerEmbeddableStateSchema = schema.object(
   {
     ...serializedTitlesSchema.getPropSchemas(),
     ...serializedTimeRangeSchema.getPropSchemas(),
-    job_ids: schema.arrayOf(schema.string({ minLength: 1 }), {
+    job_ids: schema.arrayOf(schema.string({ minLength: 1, maxLength: 1000 }), {
       minSize: 1,
       maxSize: 1,
       meta: {
@@ -33,7 +33,7 @@ export const singleMetricViewerEmbeddableStateSchema = schema.object(
       },
     }),
     selected_entities: schema.maybe(
-      schema.recordOf(schema.string(), schema.maybe(mlEntityFieldValueSchema), {
+      schema.recordOf(schema.string({ maxLength: 1000 }), schema.maybe(mlEntityFieldValueSchema), {
         meta: {
           description:
             'Values of the partition, by, or over fields that identify the single time series to display.',
@@ -46,11 +46,13 @@ export const singleMetricViewerEmbeddableStateSchema = schema.object(
           description:
             'For detectors that use the `metric` function, selects which value to plot — `min`, `max`, or `mean`. Ignored for other detector functions; when omitted the viewer derives a default from the highest-scoring anomaly record.',
         },
+        maxLength: 1000,
       })
     ),
     forecast_id: schema.maybe(
       schema.string({
         meta: { description: 'Identifier of a forecast to overlay on the chart.' },
+        maxLength: 1000,
       })
     ),
   },
