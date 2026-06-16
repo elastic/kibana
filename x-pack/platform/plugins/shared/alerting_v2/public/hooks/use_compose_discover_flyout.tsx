@@ -11,6 +11,7 @@ import type {
   BuilderState,
 } from '@kbn/alerting-v2-rule-form';
 import { ComposeDiscoverFlyout, RULE_BUILDER_REGISTRY } from '@kbn/alerting-v2-rule-form';
+import { getBreachEsqlQuery, getRecoverEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { PluginStart } from '@kbn/core-di';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import type { CPSPluginStart } from '@kbn/cps/public';
@@ -137,9 +138,10 @@ export const useComposeDiscoverFlyout = ({
       setFlyoutMode(mode);
 
       if (rule.metadata.builder_type) {
-        const query = rule.evaluation?.query?.base;
-        const recoveryQuery =
-          rule.recovery_policy?.type === 'query' ? rule.recovery_policy.query?.base : undefined;
+        const query = rule.query ? getBreachEsqlQuery(rule.query) : '';
+        const recoveryQuery = rule.query
+          ? getRecoverEsqlQuery(rule.query, rule.recovery_strategy)
+          : undefined;
         const state = query
           ? tryParseBuilderState(rule.metadata.builder_type, query, recoveryQuery)
           : null;
