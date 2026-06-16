@@ -6,14 +6,18 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { AnomalyDetectorType } from '@kbn/apm-types';
 import type { ServiceNodeData } from '../../../../common/service_map';
 import { ServiceMapPopoverTitleBadges } from './service_map_popover_title_badges';
 
+const mockNavigateToUrl = jest.fn();
+
 jest.mock('../../../context/apm_plugin/use_apm_plugin_context', () => ({
   useApmPluginContext: () => ({
-    core: { application: { capabilities: { slo: { read: true } } } },
+    core: {
+      application: { capabilities: { slo: { read: true } }, navigateToUrl: mockNavigateToUrl },
+    },
   }),
 }));
 
@@ -58,12 +62,16 @@ function serviceNodeData(overrides?: Partial<ServiceNodeData>): ServiceNodeData 
 }
 
 describe('ServiceMapPopoverTitleBadges', () => {
+  beforeEach(() => {
+    mockNavigateToUrl.mockClear();
+  });
+
   it('renders nothing when there are no alerts, SLO issues, or anomalies', () => {
     const { container } = render(<ServiceMapPopoverTitleBadges nodeData={serviceNodeData()} />);
     expect(container).toBeEmptyDOMElement();
   });
 
-  it('renders the anomalies badge linking to the service overview tab when anomaly stats are present', () => {
+  it('navigates to the service overview tab via SPA navigation when the anomalies badge is clicked', () => {
     render(
       <ServiceMapPopoverTitleBadges
         nodeData={serviceNodeData({
@@ -77,8 +85,9 @@ describe('ServiceMapPopoverTitleBadges', () => {
 
     const badge = screen.getByTestId('apmAnomaliesBadge');
     expect(badge).toBeInTheDocument();
-    expect(badge.closest('a')).toHaveAttribute(
-      'href',
+
+    fireEvent.click(badge);
+    expect(mockNavigateToUrl).toHaveBeenCalledWith(
       expect.stringContaining('/app/apm/services/{serviceName}/overview')
     );
   });

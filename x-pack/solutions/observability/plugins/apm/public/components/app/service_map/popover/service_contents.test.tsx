@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ServiceContents } from './service_contents';
-import type { ServiceMapNode, ServiceNodeData } from '../../../../../common/service_map';
+import type { ServiceMapNode } from '../../../../../common/service_map';
 
 jest.mock('../../../../hooks/use_apm_params', () => ({
   useAnyOfApmParams: () => ({
@@ -63,7 +63,7 @@ jest.mock('./stats_list', () => ({
   StatsList: () => <div data-testid="stats-list" />,
 }));
 
-function serviceNode(serviceName: string, data?: Partial<ServiceNodeData>): ServiceMapNode {
+function serviceNode(serviceName: string): ServiceMapNode {
   return {
     id: serviceName,
     type: 'service',
@@ -72,7 +72,6 @@ function serviceNode(serviceName: string, data?: Partial<ServiceNodeData>): Serv
       id: serviceName,
       label: serviceName,
       isService: true,
-      ...data,
     },
   };
 }

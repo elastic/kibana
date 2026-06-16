@@ -28,6 +28,7 @@ interface Props {
 export function ServiceMapPopoverTitleBadges({ nodeData }: Props) {
   const { core } = useApmPluginContext();
   const canReadSlos = !!core.application?.capabilities?.slo?.read;
+  const navigateToUrl = core.application?.navigateToUrl;
   const { onSloBadgeClick } = useServiceMapSloFlyout();
 
   const apmRouter = useApmRouter();
@@ -55,6 +56,11 @@ export function ServiceMapPopoverTitleBadges({ nodeData }: Props) {
     path: { serviceName },
     query: { ...query },
   });
+  const navigateToAnomaliesOverview: React.MouseEventHandler<HTMLButtonElement> = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    navigateToUrl?.(anomaliesOverviewHref);
+  };
 
   const alertsTooltip = i18n.translate('xpack.apm.serviceHeader.alertsBadge.tooltip', {
     defaultMessage: '{count, plural, one {# active alert} other {# active alerts}}. Click to view.',
@@ -108,7 +114,7 @@ export function ServiceMapPopoverTitleBadges({ nodeData }: Props) {
             <AnomaliesBadge
               score={serviceAnomalyStats.anomalyScore}
               detectorType={serviceAnomalyStats.detectorType}
-              href={anomaliesOverviewHref}
+              onClick={navigateToAnomaliesOverview}
             />
           </span>
         </EuiFlexItem>
