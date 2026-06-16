@@ -74,10 +74,12 @@ Get conversation info
     - `channel` (required): Conversation ID.
     - `includeNumMembers` (optional): Set to `true` to include the member count in the channel object.
     - `includeLocale` (optional): Set to `true` to include the channel locale.
+    - `raw` (optional): If `true`, returns the full raw Slack response instead of just the channel object. Defaults to `false`.
 
 Look up user by email
 :   Find a Slack user by email address using Slack `users.lookupByEmail`. Throws if no user has that email.
     - `email` (required): Email address of the user to look up.
+    - `raw` (optional): If `true`, returns the full raw Slack response instead of just the user object. Defaults to `false`.
 
 List users
 :   List Slack workspace users (one page per call) using Slack `users.list`. When the response includes `hasMore: true`, call **List users** again with `nextCursor` from the previous response.
@@ -89,7 +91,7 @@ List users
 List user conversations
 :   List the channels a Slack user is a member of (one page per call) using Slack `users.conversations`. Omit `user` to list for the authenticated user.
     - `user` (optional): User ID (for example, `U...`) whose conversations to list.
-    - `types` (optional): Conversation types to list (`public_channel`, `private_channel`, `im`, `mpim`). Defaults to `public_channel`.
+    - `types` (optional): Conversation types to list (`public_channel`, `private_channel`, `im`, `mpim`). Defaults to all four — DMs and private channels are usually the more interesting answer for a per-user query.
     - `excludeArchived` (optional): Exclude archived channels. Defaults to `true`.
     - `limit` (optional): Channels per page (1 to 1000). Defaults to `1000`.
     - `cursor` (optional): Pagination cursor from a previous response.

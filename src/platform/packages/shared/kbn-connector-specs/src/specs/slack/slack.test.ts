@@ -605,9 +605,13 @@ describe('Slack', () => {
             subtype: undefined,
             user: 'U1',
             bot_id: undefined,
+            username: undefined,
             text: 'hi',
             thread_ts: undefined,
             reply_count: undefined,
+            blocks: undefined,
+            attachments: undefined,
+            files: undefined,
           },
           {
             ts: '2.2',
@@ -615,14 +619,51 @@ describe('Slack', () => {
             subtype: undefined,
             user: 'U2',
             bot_id: undefined,
+            username: undefined,
             text: 'bye',
             thread_ts: undefined,
             reply_count: undefined,
+            blocks: undefined,
+            attachments: undefined,
+            files: undefined,
           },
         ],
         nextCursor: undefined,
         hasMore: false,
       });
+    });
+
+    it('should fall back to attachment text/fallback when message text is empty (bot posts)', async () => {
+      mockClient.get.mockResolvedValue({
+        data: {
+          ok: true,
+          messages: [
+            {
+              type: 'message',
+              bot_id: 'B1',
+              username: 'alertbot',
+              text: '',
+              ts: '3.3',
+              attachments: [
+                { fallback: 'Alert: prod CPU high', text: 'CPU at 95%', title: 'CPU alert' },
+              ],
+            },
+          ],
+          has_more: false,
+          response_metadata: { next_cursor: '' },
+        },
+      });
+
+      const result = await Slack.actions.getConversationHistory.handler(
+        mockContext,
+        SlackGetConversationHistoryInputSchema.parse({ channel: 'C1' })
+      );
+
+      expect(result.messages?.[0]?.text).toBe('Alert: prod CPU high');
+      expect(result.messages?.[0]?.attachments).toEqual([
+        { fallback: 'Alert: prod CPU high', text: 'CPU at 95%', title: 'CPU alert' },
+      ]);
+      expect(result.messages?.[0]?.username).toBe('alertbot');
     });
 
     it('should pass oldest, latest, inclusive, cursor', async () => {
@@ -698,11 +739,9 @@ describe('Slack', () => {
   });
 
   describe('getConversationInfo action', () => {
-    it('should fetch info for a channel', async () => {
-      const mockResponse = {
-        data: { ok: true, channel: { id: 'C1', name: 'general', is_private: false } },
-      };
-      mockClient.get.mockResolvedValue(mockResponse);
+    it('should return just the channel object by default', async () => {
+      const channel = { id: 'C1', name: 'general', is_private: false };
+      mockClient.get.mockResolvedValue({ data: { ok: true, channel } });
 
       const result = await Slack.actions.getConversationInfo.handler(mockContext, {
         channel: 'C1',
@@ -711,6 +750,20 @@ describe('Slack', () => {
       expect(mockClient.get).toHaveBeenCalledWith('https://slack.com/api/conversations.info', {
         params: { channel: 'C1' },
       });
+      expect(result).toEqual(channel);
+    });
+
+    it('should return the full response when raw=true', async () => {
+      const mockResponse = {
+        data: { ok: true, channel: { id: 'C1', name: 'general' } },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await Slack.actions.getConversationInfo.handler(mockContext, {
+        channel: 'C1',
+        raw: true,
+      });
+
       expect(result).toEqual(mockResponse.data);
     });
 
@@ -738,14 +791,9 @@ describe('Slack', () => {
   });
 
   describe('lookupUserByEmail action', () => {
-    it('should look up a user by email', async () => {
-      const mockResponse = {
-        data: {
-          ok: true,
-          user: { id: 'U1', name: 'kir', profile: { email: 'kir@elastic.co' } },
-        },
-      };
-      mockClient.get.mockResolvedValue(mockResponse);
+    it('should return just the user object by default', async () => {
+      const user = { id: 'U1', name: 'kir', profile: { email: 'kir@elastic.co' } };
+      mockClient.get.mockResolvedValue({ data: { ok: true, user } });
 
       const result = await Slack.actions.lookupUserByEmail.handler(mockContext, {
         email: 'kir@elastic.co',
@@ -754,6 +802,20 @@ describe('Slack', () => {
       expect(mockClient.get).toHaveBeenCalledWith('https://slack.com/api/users.lookupByEmail', {
         params: { email: 'kir@elastic.co' },
       });
+      expect(result).toEqual(user);
+    });
+
+    it('should return the full response when raw=true', async () => {
+      const mockResponse = {
+        data: { ok: true, user: { id: 'U1', name: 'kir' } },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await Slack.actions.lookupUserByEmail.handler(mockContext, {
+        email: 'kir@elastic.co',
+        raw: true,
+      });
+
       expect(result).toEqual(mockResponse.data);
     });
 
@@ -859,7 +921,7 @@ describe('Slack', () => {
 
       expect(mockClient.get).toHaveBeenCalledWith('https://slack.com/api/users.conversations', {
         params: {
-          types: 'public_channel',
+          types: 'public_channel,private_channel,im,mpim',
           exclude_archived: true,
           limit: 1000,
           user: 'U123',
@@ -887,7 +949,11 @@ describe('Slack', () => {
       );
 
       expect(mockClient.get).toHaveBeenCalledWith('https://slack.com/api/users.conversations', {
-        params: { types: 'public_channel', exclude_archived: true, limit: 1000 },
+        params: {
+          types: 'public_channel,private_channel,im,mpim',
+          exclude_archived: true,
+          limit: 1000,
+        },
       });
     });
 

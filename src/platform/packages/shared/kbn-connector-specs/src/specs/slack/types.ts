@@ -267,6 +267,14 @@ export const SlackInviteToConversationInputSchema = lazySchema(() =>
 );
 export type SlackInviteToConversationInput = z.infer<typeof SlackInviteToConversationInputSchema>;
 
+// Conservative upper bounds on user-supplied strings to keep schema validation
+// cheap and prevent unbounded input. Slack IDs/timestamps are short; cursors
+// are opaque tokens kept generous; email follows RFC 5321.
+const SLACK_MAX_ID_LENGTH = 64;
+const SLACK_MAX_TIMESTAMP_LENGTH = 32;
+const SLACK_MAX_CURSOR_LENGTH = 1024;
+const SLACK_MAX_EMAIL_LENGTH = 320;
+
 const SLACK_MAX_HISTORY_LIMIT = 1000;
 const SLACK_DEFAULT_HISTORY_LIMIT = 100;
 
@@ -275,17 +283,20 @@ export const SlackGetConversationHistoryInputSchema = lazySchema(() =>
     channel: z
       .string()
       .min(1)
+      .max(SLACK_MAX_ID_LENGTH)
       .describe(
         'Conversation ID to fetch history for (e.g. C... for channels, G... for private channels, D... for DMs).'
       ),
     oldest: z
       .string()
+      .max(SLACK_MAX_TIMESTAMP_LENGTH)
       .optional()
       .describe(
         'Only messages after this Unix timestamp (inclusive). String form, e.g. "1234567890.123456".'
       ),
     latest: z
       .string()
+      .max(SLACK_MAX_TIMESTAMP_LENGTH)
       .optional()
       .describe('Only messages before this Unix timestamp. String form, e.g. "1234567890.123456".'),
     inclusive: z
@@ -303,6 +314,7 @@ export const SlackGetConversationHistoryInputSchema = lazySchema(() =>
       ),
     cursor: z
       .string()
+      .max(SLACK_MAX_CURSOR_LENGTH)
       .optional()
       .describe(
         'Pagination cursor from a previous getConversationHistory response (nextCursor). Omit for the first page.'
@@ -319,15 +331,34 @@ export type SlackGetConversationHistoryInput = z.infer<
   typeof SlackGetConversationHistoryInputSchema
 >;
 
+export interface SlackConversationsHistoryAttachment {
+  fallback?: string;
+  text?: string;
+  title?: string;
+  pretext?: string;
+}
+
+export interface SlackConversationsHistoryFile {
+  id?: string;
+  name?: string;
+  mimetype?: string;
+  url_private?: string;
+  permalink?: string;
+}
+
 export interface SlackConversationsHistoryMessage {
   type?: string;
   subtype?: string;
   user?: string;
   bot_id?: string;
+  username?: string;
   text?: string;
   ts?: string;
   thread_ts?: string;
   reply_count?: number;
+  blocks?: unknown[];
+  attachments?: SlackConversationsHistoryAttachment[];
+  files?: SlackConversationsHistoryFile[];
 }
 
 export interface SlackConversationsHistoryResponse extends SlackErrorFields {
@@ -342,6 +373,7 @@ export const SlackGetConversationInfoInputSchema = lazySchema(() =>
     channel: z
       .string()
       .min(1)
+      .max(SLACK_MAX_ID_LENGTH)
       .describe(
         'Conversation ID to look up (e.g. C... for channels, G... for private channels, D... for DMs).'
       ),
@@ -350,6 +382,12 @@ export const SlackGetConversationInfoInputSchema = lazySchema(() =>
       .optional()
       .describe('Set to true to include the member count in the channel object.'),
     includeLocale: z.boolean().optional().describe('Set to true to include the channel locale.'),
+    raw: z
+      .boolean()
+      .optional()
+      .describe(
+        'Return the full raw Slack API response instead of just the channel object. Defaults to false.'
+      ),
   })
 );
 export type SlackGetConversationInfoInput = z.infer<typeof SlackGetConversationInfoInputSchema>;
@@ -359,8 +397,15 @@ export const SlackLookupUserByEmailInputSchema = lazySchema(() =>
     email: z
       .string()
       .min(1)
+      .max(SLACK_MAX_EMAIL_LENGTH)
       .describe(
         'Email address of the user to look up. Returns the matching Slack user or an error if no user has that email.'
+      ),
+    raw: z
+      .boolean()
+      .optional()
+      .describe(
+        'Return the full raw Slack API response instead of just the user object. Defaults to false.'
       ),
   })
 );
@@ -382,6 +427,7 @@ export const SlackListUsersInputSchema = lazySchema(() =>
       ),
     cursor: z
       .string()
+      .max(SLACK_MAX_CURSOR_LENGTH)
       .optional()
       .describe(
         'Pagination cursor from a previous listUsers response (nextCursor). Omit for the first page.'
@@ -397,16 +443,29 @@ export const SlackListUsersInputSchema = lazySchema(() =>
 );
 export type SlackListUsersInput = z.infer<typeof SlackListUsersInputSchema>;
 
+// For "what conversations is this user in?", DMs and private channels are usually
+// the more interesting answer. Unlike listChannels (a discovery action), this
+// defaults to all four conversation types.
+const slackConversationTypesAllDefault = () =>
+  z
+    .array(z.enum(SLACK_CONVERSATION_TYPES))
+    .optional()
+    .transform(
+      (val): Array<(typeof SLACK_CONVERSATION_TYPES)[number]> =>
+        val && val.length > 0 ? val : ['public_channel', 'private_channel', 'im', 'mpim']
+    );
+
 export const SlackListUserConversationsInputSchema = lazySchema(() =>
   z.object({
     user: z
       .string()
+      .max(SLACK_MAX_ID_LENGTH)
       .optional()
       .describe(
         'User ID (e.g. U...) whose conversations to list. Omit to list conversations for the authenticated user.'
       ),
-    types: slackConversationTypesWithPublicDefault().describe(
-      'Conversation types to list. Defaults to public_channel. Valid: public_channel, private_channel, im, mpim.'
+    types: slackConversationTypesAllDefault().describe(
+      'Conversation types to list. Defaults to all four (public_channel, private_channel, im, mpim) since most "what is this user in" questions expect DMs and private channels too.'
     ),
     excludeArchived: z.boolean().default(true).describe('Exclude archived channels (default true)'),
     limit: z
@@ -420,6 +479,7 @@ export const SlackListUserConversationsInputSchema = lazySchema(() =>
       ),
     cursor: z
       .string()
+      .max(SLACK_MAX_CURSOR_LENGTH)
       .optional()
       .describe(
         'Pagination cursor from a previous listUserConversations response (nextCursor). Omit for the first page.'

@@ -507,9 +507,22 @@ export const Slack: ConnectorSpec = {
             subtype: m.subtype,
             user: m.user,
             bot_id: m.bot_id,
-            text: m.text,
+            username: m.username,
+            // Bot/app posts (alert webhooks, GitHub/Jira notifications, etc.) frequently
+            // have empty `text` and put their content in `blocks` or `attachments`.
+            // Fall back to the first attachment's fallback/text so workflows do not
+            // have to opt into `raw` for bot-heavy channels.
+            text:
+              m.text && m.text.length > 0
+                ? m.text
+                : m.attachments?.find((a) => a.fallback)?.fallback ??
+                  m.attachments?.find((a) => a.text)?.text ??
+                  m.text,
             thread_ts: m.thread_ts,
             reply_count: m.reply_count,
+            blocks: m.blocks,
+            attachments: m.attachments,
+            files: m.files,
           })),
           nextCursor: nextCursor && nextCursor.length > 0 ? nextCursor : undefined,
           hasMore,
@@ -554,7 +567,7 @@ export const Slack: ConnectorSpec = {
           );
         }
 
-        return response.data;
+        return typedInput.raw ? response.data : response.data.channel;
       },
     },
 
@@ -588,7 +601,7 @@ export const Slack: ConnectorSpec = {
           );
         }
 
-        return response.data;
+        return typedInput.raw ? response.data : response.data.user;
       },
     },
 
