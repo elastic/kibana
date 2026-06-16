@@ -42,14 +42,16 @@ export function CalendarPanel() {
     endDate: timeRange.endDate,
   });
 
-  // Derived range: pending single-click selection takes priority, otherwise derive from text
+  // Derived range: pending single-click selection takes priority, otherwise derive from text.
+  // Invalid ranges e.g. end date in the future, are left unselected so the calendar doesn't
+  // highlight a range that contradicts the input.
   const calendarRange: DateRange | undefined = useMemo(() => {
     if (pendingFrom) return { from: pendingFrom, to: undefined };
-    if (timeRange.startDate && timeRange.endDate)
+    if (!timeRange.isInvalid && timeRange.startDate && timeRange.endDate)
       return { from: timeRange.startDate, to: timeRange.endDate };
 
     return undefined;
-  }, [pendingFrom, timeRange.startDate, timeRange.endDate]);
+  }, [pendingFrom, timeRange.isInvalid, timeRange.startDate, timeRange.endDate]);
 
   // On mount: convert to absolute format so user sees resolved dates
   useEffect(() => {
