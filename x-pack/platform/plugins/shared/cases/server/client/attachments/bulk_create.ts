@@ -98,7 +98,6 @@ export const bulkCreate = async (
       emitAttachmentsAddedEvent(clientArgs, updatedCase, ids, type);
     }
 
-    // Best-effort: extract observables from alert/event attachments if the case setting is on.
     // This call never throws — failures are logged and do not abort the attachment creation.
     await extractAndAddObservables(caseId, attachments, updatedCase, clientArgs);
 

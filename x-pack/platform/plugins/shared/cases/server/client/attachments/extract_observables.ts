@@ -98,14 +98,7 @@ export const extractAndAddObservables = async (
   } = clientArgs;
 
   try {
-    // Collect AlertInfo for all alert and event attachments
-    const alertInfos = attachments.flatMap(getAlertInfoFromAttachment);
-
-    if (alertInfos.length === 0) {
-      return;
-    }
-
-    // License gate — best-effort: skip rather than throw
+    // License gate
     const hasPlatinumLicenseOrGreater = await licensingService.isAtLeastPlatinum();
 
     if (!hasPlatinumLicenseOrGreater) {
@@ -117,6 +110,13 @@ export const extractAndAddObservables = async (
 
     licensingService.notifyUsage(LICENSING_CASE_OBSERVABLES_FEATURE);
 
+    // Collect AlertInfo for all alert and event attachments
+    const alertInfos = attachments.flatMap(getAlertInfoFromAttachment);
+
+    if (alertInfos.length === 0) {
+      return;
+    }
+
     // Fetch the ECS source documents
     const mgetResponse = await alertsService.getAlerts(alertInfos);
 
@@ -125,12 +125,15 @@ export const extractAndAddObservables = async (
     }
 
     // Flatten each _source into FlattedEcsData[] for the extractor
-    const ecsDataArray: FlattedEcsData[][] = mgetResponse.docs
-      .filter(
-        (doc): doc is typeof doc & { _source: Record<string, unknown> } =>
-          '_source' in doc && doc._source != null && typeof doc._source === 'object'
-      )
-      .map((doc) => toFlattedEcsData(getFlattenedObject(doc._source)));
+    const ecsDataArray: FlattedEcsData[][] = mgetResponse.docs.reduce<FlattedEcsData[][]>(
+      (allDocs, doc) => {
+        if ('_source' in doc && doc._source != null && typeof doc._source === 'object') {
+          allDocs.push(toFlattedEcsData(getFlattenedObject(doc._source)));
+        }
+        return allDocs;
+      },
+      []
+    );
 
     if (ecsDataArray.length === 0) {
       return;
