@@ -1536,8 +1536,6 @@
       "@kbn/kbn-genai-cli/*": ["x-pack/solutions/observability/packages/kbn-genai-cli/*"],
       "@kbn/kbn-health-gateway-status-plugin": ["src/platform/test/health_gateway/plugins/status"],
       "@kbn/kbn-health-gateway-status-plugin/*": ["src/platform/test/health_gateway/plugins/status/*"],
-      "@kbn/kbn-sample-panel-action-plugin": ["src/platform/test/plugin_functional/plugins/kbn_sample_panel_action"],
-      "@kbn/kbn-sample-panel-action-plugin/*": ["src/platform/test/plugin_functional/plugins/kbn_sample_panel_action/*"],
       "@kbn/kbn-top-nav-plugin": ["src/platform/test/plugin_functional/plugins/kbn_top_nav"],
       "@kbn/kbn-top-nav-plugin/*": ["src/platform/test/plugin_functional/plugins/kbn_top_nav/*"],
       "@kbn/kbn-tp-custom-visualizations-plugin": ["src/platform/test/plugin_functional/plugins/kbn_tp_custom_visualizations"],
