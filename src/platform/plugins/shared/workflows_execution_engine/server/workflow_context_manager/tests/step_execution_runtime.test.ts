@@ -79,6 +79,10 @@ describe('StepExecutionRuntime', () => {
     stepType: 'fakeStepType1',
   } as GraphNodeUnion;
   const fakeStackFrames: StackFrame[] = [];
+  const defaultTestStackFrames: StackFrame[] = [
+    { stepId: 'firstScope', nestedScopes: [{ nodeId: 'node1' }] },
+    { stepId: 'secondScope', nestedScopes: [{ nodeId: 'node2' }] },
+  ];
   const originalDateCtor = global.Date;
   let mockDateNow: Date;
 
@@ -254,13 +258,19 @@ describe('StepExecutionRuntime', () => {
       (workflowExecutionState.getStepExecutionsByStepId as jest.Mock).mockReturnValue([]);
       (workflowExecutionState.getWorkflowExecution as jest.Mock).mockReturnValue({
         id: 'testWorkflowExecutionId',
-        scopeStack: [
-          { stepId: 'firstScope', nestedScopes: [{ nodeId: 'node1' }] },
-          { stepId: 'secondScope', nestedScopes: [{ nodeId: 'node2' }] },
-        ] as StackFrame[],
         currentNodeId: 'node1',
       } as Partial<EsWorkflowExecution>);
       mockDateNow = new Date('2023-01-01T00:00:00.000Z');
+      underTest = new StepExecutionRuntime({
+        node: fakeNode,
+        stackFrames: defaultTestStackFrames,
+        stepExecutionId: fakeStepExecutionId,
+        contextManager: workflowContextManager,
+        workflowExecutionGraph,
+        stepLogger: workflowLogger,
+        workflowExecutionState,
+        stepIoService,
+      });
     });
 
     it('should upsertStep with the fake step execution id', () => {
@@ -304,7 +314,7 @@ describe('StepExecutionRuntime', () => {
       });
     });
 
-    it('should save step path from the workflow execution stack', () => {
+    it('should save step path from the stack frames', () => {
       underTest.startStep();
       expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
         expect.objectContaining({
