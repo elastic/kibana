@@ -198,7 +198,12 @@ export async function autocomplete(
       const { expressionType, isComplete } = computed;
 
       if (expressionType === 'boolean' && isComplete) {
-        suggestions.push(newLineCompleteItem, pipeCompleteItem, { ...commaCompleteItem, text: ', ' }, byCompleteItem);
+        suggestions.push(
+          newLineCompleteItem,
+          pipeCompleteItem,
+          { ...commaCompleteItem, text: ', ' },
+          byCompleteItem
+        );
       }
 
       return suggestions;

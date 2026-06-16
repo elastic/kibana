@@ -197,7 +197,6 @@ describe('Custom Editor Commands', () => {
         column: 23,
       });
     });
-
   });
 
   describe('addEditorKeyBindings', () => {

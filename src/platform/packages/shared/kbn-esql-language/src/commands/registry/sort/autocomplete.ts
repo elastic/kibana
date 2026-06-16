@@ -115,7 +115,11 @@ export async function autocomplete(
     }
 
     case 'after_nulls': {
-      return [newLineCompleteItem, pipeCompleteItem, withAutoSuggest({ ...commaCompleteItem, text: ', ' })];
+      return [
+        newLineCompleteItem,
+        pipeCompleteItem,
+        withAutoSuggest({ ...commaCompleteItem, text: ', ' }),
+      ];
     }
 
     default: {

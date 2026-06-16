@@ -47,7 +47,6 @@ function buildCharCompleteItem(
   return advanceCursorAndOpenSuggestions ? withAutoSuggest(suggestion) : suggestion;
 }
 
-
 export const pipeCompleteItem: ISuggestionItem = withAutoSuggest({
   label: '|',
   text: '| ',
