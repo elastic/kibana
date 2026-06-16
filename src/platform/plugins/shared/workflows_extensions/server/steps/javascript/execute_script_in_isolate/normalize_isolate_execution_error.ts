@@ -7,7 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const SCRIPT_OUT_OF_MEMORY_MESSAGE = 'Script failed due to out of memory';
+export const createScriptOutOfMemoryMessage = (memoryLimitMb: number): string =>
+  `Script failed due to out of memory. The script exceeded the ${memoryLimitMb} MB memory limit.`;
+
+export const createScriptExecutionTimeoutMessage = (executionTimeoutMs: number): string =>
+  `Script execution timed out. The script exceeded the ${
+    executionTimeoutMs / 1_000
+  } s execution timeout limit.`;
 
 const CATASTROPHIC_ERROR_PREFIX = 'Script isolate encountered a catastrophic error';
 
@@ -16,10 +22,20 @@ const isOutOfMemoryErrorMessage = (message: string): boolean =>
   message.includes('Array buffer allocation failed') ||
   (message.startsWith(CATASTROPHIC_ERROR_PREFIX) && /out of memory/i.test(message));
 
-export const normalizeIsolateExecutionError = (error: unknown): Error => {
+const isExecutionTimeoutErrorMessage = (message: string): boolean =>
+  message.includes('Script execution timed out');
+
+export const normalizeIsolateExecutionError = (
+  error: unknown,
+  { memoryLimitMb, executionTimeoutMs }: { memoryLimitMb: number; executionTimeoutMs: number }
+): Error => {
   if (error instanceof Error) {
     if (isOutOfMemoryErrorMessage(error.message)) {
-      return new Error(SCRIPT_OUT_OF_MEMORY_MESSAGE);
+      return new Error(createScriptOutOfMemoryMessage(memoryLimitMb));
+    }
+
+    if (isExecutionTimeoutErrorMessage(error.message)) {
+      return new Error(createScriptExecutionTimeoutMessage(executionTimeoutMs));
     }
 
     return error;
@@ -32,7 +48,11 @@ export const normalizeIsolateExecutionError = (error: unknown): Error => {
     typeof error.message === 'string'
   ) {
     if (isOutOfMemoryErrorMessage(error.message)) {
-      return new Error(SCRIPT_OUT_OF_MEMORY_MESSAGE);
+      return new Error(createScriptOutOfMemoryMessage(memoryLimitMb));
+    }
+
+    if (isExecutionTimeoutErrorMessage(error.message)) {
+      return new Error(createScriptExecutionTimeoutMessage(executionTimeoutMs));
     }
 
     return new Error(error.message);

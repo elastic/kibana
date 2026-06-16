@@ -9,6 +9,7 @@
 
 import { createSHA256Hash } from '@kbn/crypto';
 import type { ScriptLogger } from './execute_script_in_isolate';
+import { createScriptExecutionTimeoutMessage } from './execute_script_in_isolate/normalize_isolate_execution_error';
 import { scriptsJavaScriptStepDefinition } from './javascript_step';
 import {
   SCRIPT_EXECUTION_TIMEOUT_MS,
@@ -95,7 +96,9 @@ describe('scriptsJavaScriptStepDefinition', () => {
 
       const result = await scriptsJavaScriptStepDefinition.handler(context);
 
-      expect(result.error?.message).toBe('Script execution timed out.');
+      expect(result.error?.message).toBe(
+        createScriptExecutionTimeoutMessage(SCRIPT_EXECUTION_TIMEOUT_MS)
+      );
     },
     SCRIPT_EXECUTION_TIMEOUT_MS + 2_000
   );

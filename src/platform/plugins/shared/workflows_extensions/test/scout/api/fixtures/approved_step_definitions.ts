@@ -89,7 +89,7 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
     handlerHash: '2bdde599ac1b8f38faecbd72a2d17a3d7b2740b874e047e92e9c30ba0ff01a4f',
   },
   {
-    id: 'scripts.javascript',
+    id: 'code.javascript',
     handlerHash: '499f4cd443f8c27bf9ed365c9399abd4b82d34dacb89775207c34602ae2c396b',
   },
   {

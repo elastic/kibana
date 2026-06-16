@@ -12,7 +12,7 @@ import { StepCategory } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '../../step_registry/types';
 
-export const ScriptsJavaScriptStepTypeId = 'scripts.javascript' as const;
+export const ScriptsJavaScriptStepTypeId = 'code.javascript' as const;
 
 export const ConfigSchema = z.object({});
 
@@ -59,7 +59,7 @@ Execute a JavaScript script in a sandboxed runtime and return its result to down
 
 \`\`\`yaml
 - name: compute-value
-  type: scripts.javascript
+  type: code.javascript
   with:
     script: |
       return { greeting: 'Hello, World' };
@@ -69,7 +69,7 @@ Scripts run in an isolated sandbox with no runtime context object. Embed workflo
 
 \`\`\`yaml
   - name: transform
-    type: scripts.javascript
+    type: code.javascript
     with:
       script: |
         const users = {{ steps.fetch_users.output | json }};
@@ -83,7 +83,7 @@ Scripts run in an isolated sandbox with no runtime context object. Embed workflo
 | Template size (\`with.script\` in YAML) | ${SCRIPT_TEMPLATE_MAX_KB} KB |
 | Rendered script size (after Liquid) | ${SCRIPT_MAX_LENGTH_MB} MB |
 | Execution timeout | ${SCRIPT_EXECUTION_TIMEOUT_SECONDS} s |
-| Isolate memory | ${SCRIPT_MEMORY_LIMIT_MB} MB |
+| Execution memory limit | ${SCRIPT_MEMORY_LIMIT_MB} MB |
 | \`console.*\` calls per run | ${MAX_CONSOLE_LOG_COUNT} (additional logs are dropped) |
 
 The template limit applies to the script as written in the workflow YAML (including \`{{ ... }}\` placeholders). Liquid can expand the script beyond ${SCRIPT_TEMPLATE_MAX_KB} KB at execution time; the rendered script must stay within ${SCRIPT_MAX_LENGTH_MB} MB.

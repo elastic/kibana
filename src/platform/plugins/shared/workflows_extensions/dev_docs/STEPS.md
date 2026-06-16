@@ -11,7 +11,7 @@
 1. **Create steps in their own plugin** - Steps should be implemented in a plugin owned and maintained by the team that will maintain the step
 2. **Register via plugin contract** - Use the `workflows_extensions` plugin contract to register steps from your external plugin, just like the example in `examples/workflows_extensions_example/README.md`
 
-Internal experimental steps shipped by workflows-eng (for example `scripts.javascript`) are opt-in via `workflowsExtensions.experimentalSteps` in `kibana.yml` (see `server/config.ts`). Set it to `true` to enable all experimental steps, `false` to disable all, or use a nested object (for example `experimentalSteps.javaScriptStep: true`) to enable steps individually.
+Internal experimental steps shipped by workflows-eng (for example `code.javascript`) are opt-in via `workflowsExtensions.experimentalSteps` in `kibana.yml` (see `server/config.ts`). Set it to `true` to enable all experimental steps, `false` to disable all, or use a nested object (for example `experimentalSteps.javaScriptStep: true`) to enable steps individually.
 
 This separation ensures:
 - Clear ownership boundaries

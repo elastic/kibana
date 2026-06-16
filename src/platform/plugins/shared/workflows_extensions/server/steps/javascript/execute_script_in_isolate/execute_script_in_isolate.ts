@@ -61,7 +61,7 @@ export const executeScriptInIsolate = async ({
 
     return await resultPromise;
   } catch (error) {
-    throw normalizeIsolateExecutionError(error);
+    throw normalizeIsolateExecutionError(error, { memoryLimitMb, executionTimeoutMs });
   } finally {
     if (!isolate.isDisposed) {
       isolate.dispose();

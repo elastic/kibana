@@ -60,10 +60,12 @@ jest.mock('isolated-vm', () => {
 });
 
 import { executeScriptInIsolate } from '.';
+import { createScriptOutOfMemoryMessage } from './normalize_isolate_execution_error';
 import {
   MAX_CONSOLE_LOG_COUNT,
   SCRIPT_EXECUTION_TIMEOUT_MS,
   SCRIPT_MEMORY_LIMIT_MB,
+  ScriptsJavaScriptStepTypeId,
 } from '../../../../common/steps/javascript';
 import type { StepHandlerContext } from '../../../step_registry/types';
 import { scriptsJavaScriptStepDefinition } from '../javascript_step';
@@ -137,7 +139,7 @@ describe('executeScriptInIsolate catastrophic OOM handling', () => {
 
     mockCapturedOnCatastrophicError?.('out of memory');
 
-    await expect(execution).rejects.toThrow('Script failed due to out of memory');
+    await expect(execution).rejects.toThrow(createScriptOutOfMemoryMessage(SCRIPT_MEMORY_LIMIT_MB));
     expect(logger.error).toHaveBeenCalledWith(
       'JavaScript step isolate catastrophic error',
       expect.objectContaining({
@@ -175,7 +177,7 @@ describe('scriptsJavaScriptStepDefinition catastrophic OOM handling', () => {
       logger: createLogger(),
       abortSignal: new AbortController().signal,
       stepId: 'test-step',
-      stepType: 'scripts.javascript',
+      stepType: ScriptsJavaScriptStepTypeId,
     };
 
     const execution = scriptsJavaScriptStepDefinition.handler(context);

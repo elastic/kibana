@@ -8,7 +8,10 @@
  */
 
 import { executeScriptInIsolate, type ScriptLogger } from '.';
-import { SCRIPT_OUT_OF_MEMORY_MESSAGE } from './normalize_isolate_execution_error';
+import {
+  createScriptExecutionTimeoutMessage,
+  createScriptOutOfMemoryMessage,
+} from './normalize_isolate_execution_error';
 import {
   MAX_CONSOLE_LOG_COUNT,
   SCRIPT_EXECUTION_TIMEOUT_MS,
@@ -153,7 +156,7 @@ describe('executeScriptInIsolate', () => {
           abortSignal: new AbortController().signal,
           ...defaultIsolateParams,
         })
-      ).rejects.toThrow('Script execution timed out.');
+      ).rejects.toThrow(createScriptExecutionTimeoutMessage(SCRIPT_EXECUTION_TIMEOUT_MS));
     },
     SCRIPT_EXECUTION_TIMEOUT_MS + 2_000
   );
@@ -183,6 +186,6 @@ describe('executeScriptInIsolate', () => {
         abortSignal: new AbortController().signal,
         ...defaultIsolateParams,
       })
-    ).rejects.toThrow(SCRIPT_OUT_OF_MEMORY_MESSAGE);
+    ).rejects.toThrow(createScriptOutOfMemoryMessage(SCRIPT_MEMORY_LIMIT_MB));
   });
 });
