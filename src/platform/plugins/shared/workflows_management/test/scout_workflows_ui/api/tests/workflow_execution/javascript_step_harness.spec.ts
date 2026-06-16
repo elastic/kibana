@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ScriptsJavaScriptStepTypeId } from '@kbn/workflows-extensions/common';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { isTerminalStatus } from '@kbn/workflows';
 import type { WorkflowExecutionDto, WorkflowStepExecutionDto } from '@kbn/workflows/types/latest';
 import { ExecutionStatus } from '@kbn/workflows/types/latest';
+import { ScriptsJavaScriptStepTypeId } from '@kbn/workflows-extensions/common';
 import type { WorkflowsApiService } from '../../../common/apis/workflows';
 import { waitForConditionOrThrow } from '../../../common/utils/wait_for_condition';
 import { spaceTest } from '../../fixtures';
