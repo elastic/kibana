@@ -41,7 +41,6 @@ jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invali
   bulkMarkApiKeysForInvalidation: jest.fn(),
 }));
 
-
 jest.mock('../get_schedule_frequency', () => ({
   validateScheduleLimit: jest.fn(),
 }));
@@ -950,7 +949,10 @@ describe('bulkCreateRules', () => {
 
       const result = await rulesClient.bulkCreateRules({
         rules: Array.from({ length: 10 }, (_, i) => ({
-          data: baseRule({ name: i === 0 ? 'kept' : i === 1 ? 'dropped' : `filler-${i}`, enabled: i < 2 }),
+          data: baseRule({
+            name: i === 0 ? 'kept' : i === 1 ? 'dropped' : `filler-${i}`,
+            enabled: i < 2,
+          }),
         })),
         exitEarlyOnError: true,
       });

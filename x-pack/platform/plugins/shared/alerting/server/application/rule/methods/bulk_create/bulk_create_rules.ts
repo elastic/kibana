@@ -13,7 +13,11 @@ import { SavedObjectsUtils } from '@kbn/core/server';
 import { RuleChangeTrackingAction, type RuleChangeTracking } from '@kbn/alerting-types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { getRuleCircuitBreakerErrorMessage, parseDuration } from '../../../../../common';
-import { addGeneratedActionValues, bulkScheduleTask, updateMeta } from '../../../../rules_client/lib';
+import {
+  addGeneratedActionValues,
+  bulkScheduleTask,
+  updateMeta,
+} from '../../../../rules_client/lib';
 import { validateRuleTypeParams } from '../../../../lib';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import {
@@ -38,11 +42,7 @@ import type {
   BulkCreateRulesResult,
   PreparedRule,
 } from './types';
-import {
-  collectNewKeysToInvalidate,
-  flushKeysToInvalidate,
-  prepareRule,
-} from './utils';
+import { collectNewKeysToInvalidate, flushKeysToInvalidate, prepareRule } from './utils';
 import { logRuleChanges } from '../common_utils/log_rule_changes';
 
 export async function bulkCreateRules<Params extends RuleParams = never>(
