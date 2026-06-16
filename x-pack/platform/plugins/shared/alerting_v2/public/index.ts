@@ -19,7 +19,6 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 import { WorkflowApi } from '@kbn/workflows-ui';
 import React from 'react';
-import { EuiErrorBoundary } from '@elastic/eui';
 import {
   ALERTING_V2_SECTION_ID,
   ALERTING_V2_RULES_APP_ID,
@@ -33,14 +32,17 @@ import { RulesApi } from './services/rules_api';
 import { registerTriggerDefinitions } from './lib/workflow_extensions/register_trigger_definitions';
 import { setKibanaServices } from './kibana_services';
 import type { AlertingV2PublicStart } from './types';
-import { CreateRuleOptionsFlyout as CreateRuleOptionsFlyoutComponent } from './create_rule_options_flyout';
 import type { CreateRuleOptionsFlyoutProps } from './create_rule_options_flyout';
+
+const LazyCreateRuleOptionsFlyout = React.lazy(() =>
+  import('./create_rule_options_flyout').then((m) => ({ default: m.CreateRuleOptionsFlyout }))
+);
 
 const CreateRuleOptionsFlyout = (props: CreateRuleOptionsFlyoutProps) =>
   React.createElement(
-    EuiErrorBoundary,
-    null,
-    React.createElement(CreateRuleOptionsFlyoutComponent, props)
+    React.Suspense,
+    { fallback: null },
+    React.createElement(LazyCreateRuleOptionsFlyout, props)
   );
 
 export type { AlertingV2PublicStart, CreateRuleOptionsFlyoutLegacyItem } from './types';

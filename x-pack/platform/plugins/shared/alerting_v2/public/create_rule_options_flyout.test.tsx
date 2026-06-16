@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, screen, waitFor, fireEvent, act } from '@testing-library/react';
+import { createMemoryHistory } from 'history';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { RuleFormServices } from '@kbn/alerting-v2-rule-form';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
@@ -56,11 +57,17 @@ jest.mock('@kbn/alerting-v2-rule-form', () => ({
   },
 }));
 
-let resolveServices: (services: RuleFormServices) => void;
+// Collects all pending resolvers from untilPluginStartServicesReady calls so the test
+// can resolve both the useAsync call and the currentAppId$ effect in one go.
+const pendingResolvers: Array<(services: RuleFormServices) => void> = [];
+const resolveServices = (services: RuleFormServices) => {
+  [...pendingResolvers].forEach((r) => r(services));
+  pendingResolvers.length = 0;
+};
 jest.mock('./kibana_services', () => ({
   untilPluginStartServicesReady: () =>
     new Promise<RuleFormServices>((resolve) => {
-      resolveServices = resolve;
+      pendingResolvers.push(resolve);
     }),
 }));
 
@@ -87,6 +94,7 @@ describe('CreateRuleOptionsFlyout', () => {
     jest.clearAllMocks();
     capturedSelectorProps = {};
     capturedComposeProps = {};
+    pendingResolvers.length = 0;
     mockServices = createMockServices();
   });
 
@@ -237,6 +245,32 @@ describe('CreateRuleOptionsFlyout', () => {
         expect(screen.getByTestId('mockLegacyFlyout')).toBeInTheDocument();
       });
       expect(legacyRender).toHaveBeenCalled();
+    });
+  });
+
+  describe('navigation guard', () => {
+    it('closes flyout when pathname changes', () => {
+      const onClose = jest.fn();
+      const history = createMemoryHistory({ initialEntries: ['/app/discover'] });
+      renderFlyout({ onClose, history });
+
+      act(() => {
+        history.push('/app/dashboards');
+      });
+
+      expect(onClose).toHaveBeenCalledTimes(1);
+    });
+
+    it('does NOT close flyout when only query parameters change', () => {
+      const onClose = jest.fn();
+      const history = createMemoryHistory({ initialEntries: ['/app/discover'] });
+      renderFlyout({ onClose, history });
+
+      act(() => {
+        history.push('/app/discover?q=newQuery');
+      });
+
+      expect(onClose).not.toHaveBeenCalled();
     });
   });
 

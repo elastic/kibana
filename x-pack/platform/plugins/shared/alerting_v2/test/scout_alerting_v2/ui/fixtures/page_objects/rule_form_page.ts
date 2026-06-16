@@ -14,9 +14,20 @@ const RULE_FORM_ID = 'ruleV2Form';
 export class RuleFormPage {
   public readonly nameInput: Locator;
   public readonly submitButton: Locator;
+  /**
+   * The primary "proceed" button in the compose flyout opened from Discover.
+   * On steps 0–N-1 this is the "Next" button; on the last step it is "Create
+   * rule". The validation tests use it to check whether the user can advance
+   * (ES|QL param errors disable it) or to trigger per-step validation (e.g.
+   * name validation on the Details step).
+   */
   public readonly flyoutSaveButton: Locator;
   public readonly cancelButton: Locator;
-  public readonly errorCallout: Locator;
+  /**
+   * Inline field-level error shown below the rule name input when the name
+   * field fails validation (empty or equals the default placeholder).
+   */
+  public readonly nameFieldError: Locator;
   public readonly flyout: Locator;
   public readonly flyoutValidationCallout: Locator;
   public readonly form: Locator;
@@ -30,14 +41,17 @@ export class RuleFormPage {
 
     this.nameInput = this.page.testSubj.locator('ruleNameInput');
     this.submitButton = this.page.testSubj.locator('ruleV2FormSubmitButton');
-    this.flyoutSaveButton = this.page.testSubj.locator('ruleV2FlyoutSaveButton');
-    this.cancelButton = this.page.testSubj.locator('ruleV2FormCancelButton');
-    // The form-level error callout doesn't have a dedicated `data-test-subj`;
-    // scope to the EUI danger callout class until one is added in source.
-    this.errorCallout = this.page.locator('.euiCallOut--danger');
-    // The rule flyout doesn't have a dedicated `data-test-subj`; locate it via
-    // its labelled-by attribute on the flyout title.
-    this.flyout = this.page.locator('[aria-labelledby="ruleV2FormFlyoutTitle"]');
+    // In ComposeDiscoverFlyout the per-step advance button is "Next" on all
+    // intermediate steps and "Create rule" on the last step. For the Discover
+    // flyout tests the Next button doubles as the "proceed / save" gate.
+    this.flyoutSaveButton = this.page.testSubj.locator('composeDiscoverNext');
+    this.cancelButton = this.page.testSubj.locator('composeDiscoverCancel');
+    // Inline name validation error rendered by EUI inside the name field's form row.
+    this.nameFieldError = this.page
+      .locator('#ruleV2FormNameField')
+      .getByText('Name is required', { exact: false });
+    // The ComposeDiscoverFlyout title ID.
+    this.flyout = this.page.locator('[aria-labelledby="composeDiscoverFlyoutTitle"]');
     this.flyoutValidationCallout = this.page.testSubj.locator('ruleV2FlyoutValidationErrors');
     this.form = this.page.locator(`#${RULE_FORM_ID}`);
     this.esqlModeButton = this.page.testSubj.locator('select-text-based-language-btn');
@@ -85,6 +99,21 @@ export class RuleFormPage {
 
   async clickFlyoutSave() {
     await this.flyoutSaveButton.click();
+  }
+
+  /**
+   * Advances through the ComposeDiscoverFlyout steps until the Details step
+   * (where the rule name input appears). Assumes the flyout is already open
+   * with a pre-populated query (queryCommitted = true) so that the Next button
+   * is enabled from the very first step.
+   */
+  async navigateToDetailsStep() {
+    const nextButton = this.page.testSubj.locator('composeDiscoverNext');
+    // alertCondition → recoveryCondition
+    await nextButton.click();
+    // recoveryCondition → details
+    await nextButton.click();
+    await this.nameInput.waitFor({ state: 'visible' });
   }
 
   async switchToEsqlMode() {

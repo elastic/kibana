@@ -13,7 +13,7 @@ import React, {
   useState,
   useSyncExternalStore,
 } from 'react';
-import { EuiFlyout, EuiFlyoutBody, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiFlyout, EuiFlyoutBody, EuiLoadingSpinner, EuiErrorBoundary } from '@elastic/eui';
 import useAsync from 'react-use/lib/useAsync';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
@@ -88,29 +88,27 @@ const CreateRuleOptionsFlyoutInner = ({
     esqlVariables: getEsqlVariables?.() ?? staticEsqlVariables,
   });
 
+  // getSnapshot reads the current external values directly and memoises the
+  // returned object so that referential stability is preserved when nothing
+  // has changed — preventing spurious useSyncExternalStore re-renders.
+  const getDiscoverQuerySnapshot = useCallback((): DiscoverQuerySnapshot => {
+    const query = getQuery?.() ?? initialQuery;
+    const esqlVariables = getEsqlVariables?.() ?? staticEsqlVariables;
+    const prev = snapshotRef.current;
+    if (prev.query === query && prev.esqlVariables === esqlVariables) {
+      return prev;
+    }
+    const next: DiscoverQuerySnapshot = { query, esqlVariables };
+    snapshotRef.current = next;
+    return next;
+  }, [getQuery, getEsqlVariables, initialQuery, staticEsqlVariables]);
+
+  // subscribe only registers the listener — no side-effects, as required by
+  // useSyncExternalStore's concurrent-mode contract.
   const wrappedSubscribe = useCallback(
-    (listener: () => void) => {
-      const query = getQuery?.() ?? initialQuery;
-      const esqlVariables = getEsqlVariables?.() ?? staticEsqlVariables;
-      const prev = snapshotRef.current;
-      if (prev.query !== query || prev.esqlVariables !== esqlVariables) {
-        snapshotRef.current = { query, esqlVariables };
-      }
-
-      return (subscribe ?? noopSubscribe)(() => {
-        const nextQuery = getQuery?.() ?? initialQuery;
-        const nextVariables = getEsqlVariables?.() ?? staticEsqlVariables;
-        const current = snapshotRef.current;
-        if (current.query !== nextQuery || current.esqlVariables !== nextVariables) {
-          snapshotRef.current = { query: nextQuery, esqlVariables: nextVariables };
-        }
-        listener();
-      });
-    },
-    [subscribe, getQuery, getEsqlVariables, initialQuery, staticEsqlVariables]
+    (listener: () => void) => (subscribe ?? noopSubscribe)(listener),
+    [subscribe]
   );
-
-  const getDiscoverQuerySnapshot = useCallback(() => snapshotRef.current, []);
 
   const { query, esqlVariables } = useSyncExternalStore(wrappedSubscribe, getDiscoverQuerySnapshot);
 
@@ -145,28 +143,28 @@ const CreateRuleOptionsFlyoutInner = ({
     };
   }, [history]);
 
+  // Subscribe to currentAppId$ as soon as plugin services are ready — independently
+  // of the ComposeDiscoverFlyout module import so the guard fires without delay.
   useEffect(() => {
-    if (!value?.services) {
-      return;
-    }
+    let appChangeSub: { unsubscribe: () => void } | undefined;
 
-    const { application } = value.services;
-    let initialAppId: string | undefined;
-
-    const appChangeSubscription = application.currentAppId$.subscribe((appId) => {
-      if (initialAppId === undefined) {
-        initialAppId = appId;
-        return;
-      }
-      if (appId !== initialAppId) {
-        onCloseRef.current();
-      }
+    untilPluginStartServicesReady().then((services) => {
+      let initialAppId: string | undefined;
+      appChangeSub = services.application.currentAppId$.subscribe((appId) => {
+        if (initialAppId === undefined) {
+          initialAppId = appId;
+          return;
+        }
+        if (appId !== initialAppId) {
+          onCloseRef.current();
+        }
+      });
     });
 
     return () => {
-      appChangeSubscription.unsubscribe();
+      appChangeSub?.unsubscribe();
     };
-  }, [value?.services]);
+  }, []);
 
   const navigateToAgentBuilder = useCallback(() => {
     if (!value?.services) return;
@@ -203,7 +201,6 @@ const CreateRuleOptionsFlyoutInner = ({
             defaultMessage: 'Failed to create rule',
           })
         );
-      } finally {
         setIsSaving(false);
       }
     },
@@ -289,8 +286,10 @@ const CreateRuleOptionsFlyoutInner = ({
 export const CreateRuleOptionsFlyout = (props: CreateRuleOptionsFlyoutProps) => {
   const queryClient = useMemo(() => new QueryClient(), []);
   return (
-    <QueryClientProvider client={queryClient}>
-      <CreateRuleOptionsFlyoutInner {...props} />
-    </QueryClientProvider>
+    <EuiErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <CreateRuleOptionsFlyoutInner {...props} />
+      </QueryClientProvider>
+    </EuiErrorBoundary>
   );
 };
