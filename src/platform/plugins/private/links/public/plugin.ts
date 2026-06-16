@@ -153,12 +153,10 @@ export class LinksPlugin
     );
 
     if (plugins.share) {
-      console.log('SHARE');
       plugins.share.registerShareIntegration<ExportShareDerivatives>(LINKS_EMBEDDABLE_TYPE, {
         id: 'exportJson',
         groupId: 'exportDerivatives',
         getShareIntegrationConfig: async () => {
-          console.log('GET CONFIG');
           const { exportJsonConfig } = await import('./share/export_json_config');
           return exportJsonConfig;
         },

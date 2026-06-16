@@ -13,6 +13,7 @@ import {
   EuiBetaBadge,
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutBody,
@@ -99,27 +100,47 @@ export const ExportJsonFlyout = <State extends object, SanitizedState extends ob
           {isByReference && (
             <EuiFlexItem>
               <EuiSwitch
-                label="View full state"
+                label={i18n.translate('asCode.exportJson.showFullConfigSwitch', {
+                  defaultMessage: 'Show full configuration',
+                })}
                 checked={exportFullState}
                 onChange={() => setExportFullState(!exportFullState)}
               />
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
-        <React.Fragment>
-          <EuiSpacer size="s" />
-          <EuiBetaBadge
-            label={i18n.translate('asCode.exportJson.technicalPreviewBadgeLabel', {
-              defaultMessage: 'TECHNICAL PREVIEW',
-            })}
-            tooltipContent={i18n.translate('asCode.exportJson.technicalPreviewBadgeTooltip', {
-              defaultMessage:
-                'This functionality is experimental and not supported. It may change or be removed at any time.',
-            })}
-            size="s"
-            data-test-subj="dashboardExportJsonTechnicalPreviewBadge"
-          />
-        </React.Fragment>
+        <EuiSpacer size="s" />
+        <EuiBetaBadge
+          label={i18n.translate('asCode.exportJson.technicalPreviewBadgeLabel', {
+            defaultMessage: 'TECHNICAL PREVIEW',
+          })}
+          tooltipContent={i18n.translate('asCode.exportJson.technicalPreviewBadgeTooltip', {
+            defaultMessage:
+              'This functionality is experimental and not supported. It may change or be removed at any time.',
+          })}
+          size="s"
+          data-test-subj="dashboardExportJsonTechnicalPreviewBadge"
+        />
+        {isByReference && !exportFullState && (
+          <>
+            <EuiSpacer size="s" />
+            <EuiCallOut iconType="magnify" announceOnMount>
+              <FormattedMessage
+                id="asCode.exportJson.showFullConfigCallout"
+                defaultMessage="This panel is linked to the library, so this dashboard stores only a reference to it. Select {buttonLabel} to see its complete definition."
+                values={{
+                  buttonLabel: (
+                    <i>
+                      {i18n.translate('asCode.exportJson.showFullConfigSwitch', {
+                        defaultMessage: 'Show full configuration',
+                      })}
+                    </i>
+                  ),
+                }}
+              />
+            </EuiCallOut>
+          </>
+        )}
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody data-test-subj="exportItemDetailsFlyoutBody" css={flyoutBodyCss}>
