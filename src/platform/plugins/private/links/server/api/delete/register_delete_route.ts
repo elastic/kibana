@@ -21,7 +21,7 @@ export const LINKS_DELETE_DESCRIPTION = 'Permanently deletes a links library ite
 export function registerDeleteRoute(router: VersionedRouter<RequestHandlerContext>) {
   const deleteRoute = router.delete({
     path: `${LINKS_API_PATH}/{id}`,
-    summary: `Delete a links library item.`,
+    summary: `Delete a links library item`,
     ...commonRouteConfig,
     description: LINKS_DELETE_DESCRIPTION,
   });

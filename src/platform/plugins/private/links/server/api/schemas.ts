@@ -27,7 +27,7 @@ const baseLinkSchema = {
   label: schema.maybe(
     schema.string({
       maxLength: MAX_TITLE_LENGTH,
-      meta: { description: 'The label of the link to be displayed in the UI' },
+      meta: { description: 'The label of the link displayed in the UI.' },
     })
   ),
 };
@@ -38,7 +38,7 @@ export const dashboardLinkSchema = schema.object(
     type: schema.literal(DASHBOARD_LINK_TYPE),
     destination: schema.string({
       maxLength: MAX_ID_LENGTH,
-      meta: { description: 'Linked dashboard saved object id' },
+      meta: { description: 'Linked dashboard saved object ID.' },
     }),
     options: dashboardNavigationOptionsSchema,
   },
@@ -53,7 +53,7 @@ export const externalLinkOptionsSchema = schema.object(
   {
     open_in_new_tab: schema.boolean({
       meta: {
-        description: 'Whether to open this link in a new tab when clicked',
+        description: 'Whether to open this link in a new tab when clicked.',
       },
       defaultValue: DEFAULT_EXTERNAL_LINK_OPTIONS.open_in_new_tab,
     }),
@@ -73,7 +73,7 @@ export const externalLinkSchema = schema.object(
     type: schema.literal(EXTERNAL_LINK_TYPE),
     destination: schema.string({
       maxLength: 250,
-      meta: { description: 'The external URL to link to' },
+      meta: { description: 'The external URL to link to.' },
     }),
     options: externalLinkOptionsSchema,
   },
@@ -87,7 +87,7 @@ export const externalLinkSchema = schema.object(
 export const linksArraySchema = schema.arrayOf(
   schema.discriminatedUnion('type', [dashboardLinkSchema, externalLinkSchema]),
   {
-    meta: { description: 'The list of links to display' },
+    meta: { description: 'The list of links to display.' },
     maxSize: 100,
   }
 );
@@ -96,7 +96,7 @@ export const linksArraySchema = schema.arrayOf(
 export const layoutSchema = schema.maybe(
   schema.oneOf([schema.literal(LINKS_HORIZONTAL_LAYOUT), schema.literal(LINKS_VERTICAL_LAYOUT)], {
     meta: {
-      description: 'Denote whether to display the links in a horizontal or vertical layout',
+      description: 'Whether to display the links in a horizontal or vertical layout.',
     },
   })
 );
@@ -115,7 +115,7 @@ export const linksByReferenceSchema = serializedTitlesSchema.extends(
       maxLength: MAX_ID_LENGTH + 50, // accounts for prefix
       meta: {
         title: 'Reference ID',
-        description: 'The unique identifier of the Links library item',
+        description: 'The unique identifier of the links library item.',
       },
     }),
   },
