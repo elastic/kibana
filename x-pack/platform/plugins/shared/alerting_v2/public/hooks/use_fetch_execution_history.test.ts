@@ -41,7 +41,13 @@ describe('useFetchExecutionHistory', () => {
   });
 
   it('calls listExecutionHistory with the provided params (page, perPage, search, outcome)', async () => {
-    mockListExecutionHistory.mockResolvedValue({ items: [], page: 2, perPage: 25, totalEvents: 0 });
+    mockListExecutionHistory.mockResolvedValue({
+      items: [],
+      page: 2,
+      perPage: 25,
+      totalEvents: 0,
+      searchMatches: null,
+    });
 
     renderHook(
       () => useFetchExecutionHistory({ page: 2, perPage: 25, search: 'foo', outcome: 'throttled' }),
@@ -66,6 +72,7 @@ describe('useFetchExecutionHistory', () => {
       page: 1,
       perPage: 50,
       totalEvents: 1,
+      searchMatches: null,
     };
     mockListExecutionHistory.mockResolvedValue(fakeResponse);
 
@@ -90,7 +97,13 @@ describe('useFetchExecutionHistory', () => {
   });
 
   it('uses a query key derived from page and perPage', async () => {
-    mockListExecutionHistory.mockResolvedValue({ items: [], page: 1, perPage: 50, totalEvents: 0 });
+    mockListExecutionHistory.mockResolvedValue({
+      items: [],
+      page: 1,
+      perPage: 50,
+      totalEvents: 0,
+      searchMatches: null,
+    });
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     const wrapper = ({ children }: { children: React.ReactNode }) =>
       React.createElement(QueryClientProvider, { client: queryClient }, children);
@@ -103,11 +116,18 @@ describe('useFetchExecutionHistory', () => {
       page: 1,
       perPage: 50,
       totalEvents: 0,
+      searchMatches: null,
     });
   });
 
   it('refetches when page or perPage change', async () => {
-    mockListExecutionHistory.mockResolvedValue({ items: [], page: 1, perPage: 50, totalEvents: 0 });
+    mockListExecutionHistory.mockResolvedValue({
+      items: [],
+      page: 1,
+      perPage: 50,
+      totalEvents: 0,
+      searchMatches: null,
+    });
 
     const { rerender } = renderHook(
       ({ page, perPage }) => useFetchExecutionHistory({ page, perPage }),

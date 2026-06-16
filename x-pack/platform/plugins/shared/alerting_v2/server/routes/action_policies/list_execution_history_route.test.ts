@@ -21,6 +21,7 @@ const createMocks = () => {
       page: 1,
       perPage: 100,
       totalEvents: 0,
+      searchMatches: null,
     }),
     countNewEventsSince: jest.fn(),
   };

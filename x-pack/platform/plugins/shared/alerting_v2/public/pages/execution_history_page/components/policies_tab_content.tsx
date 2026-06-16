@@ -28,6 +28,7 @@ import { ExecutionHistorySearchBar } from './execution_history_search_bar';
 import { FilteredEmptyState, PoliciesEmptyState } from './empty_state';
 import { ExecutionHistoryErrorState } from './error_state';
 import { NewEventsBanner } from './new_events_banner';
+import { TruncatedCallout } from './truncated_callout';
 
 const DEFAULT_PER_PAGE = 100;
 const DEFAULT_OUTCOME: PolicyExecutionOutcomeFilter = 'all';
@@ -215,6 +216,7 @@ export const PoliciesTabContent = ({ onPolicyClick, onRuleClick }: Props) => {
           <EuiSpacer size="m" />
         </>
       )}
+      <TruncatedCallout data={data} searchParam={searchParam} />
       <EuiBasicTable<PolicyExecutionHistoryItem>
         items={items}
         columns={columns}

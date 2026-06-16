@@ -109,13 +109,14 @@ const mockFetchResult = (
       page: number;
       perPage: number;
       totalEvents: number;
+      searchMatches: { policies: number; rules: number; cap: number } | null;
     };
     isFetching: boolean;
     isError: boolean;
   }> = {}
 ) => {
   mockUseFetchExecutionHistory.mockReturnValue({
-    data: { items: [], page: 1, perPage: 50, totalEvents: 0 },
+    data: { items: [], page: 1, perPage: 50, totalEvents: 0, searchMatches: null },
     isFetching: false,
     isError: false,
     refetch: mockRefetch,
@@ -183,6 +184,7 @@ describe('ExecutionHistoryPage', () => {
         page: 1,
         perPage: 50,
         totalEvents: 1,
+        searchMatches: null,
       },
     });
     renderPage();
@@ -199,6 +201,7 @@ describe('ExecutionHistoryPage', () => {
         page: 1,
         perPage: 50,
         totalEvents: 1,
+        searchMatches: null,
       },
     });
     renderPage();
@@ -222,6 +225,7 @@ describe('ExecutionHistoryPage', () => {
         page: 1,
         perPage: 50,
         totalEvents: 1,
+        searchMatches: null,
       },
     });
     renderPage();
@@ -255,6 +259,7 @@ describe('ExecutionHistoryPage', () => {
         page: 1,
         perPage: 50,
         totalEvents: 1,
+        searchMatches: null,
       },
     });
     renderPage();
@@ -275,6 +280,7 @@ describe('ExecutionHistoryPage', () => {
         page: 1,
         perPage: 50,
         totalEvents: 1,
+        searchMatches: null,
       },
     });
     renderPage();
@@ -295,6 +301,7 @@ describe('ExecutionHistoryPage', () => {
         page: 1,
         perPage: 50,
         totalEvents: 1,
+        searchMatches: null,
       },
     });
     renderPage();
