@@ -40,6 +40,7 @@ import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../services/logger_service/logger_service';
+import { buildSoSearch } from '../build_so_search';
 import type { RulesSavedObjectServiceContract } from '../services/rules_saved_object_service/rules_saved_object_service';
 import { RulesSavedObjectServiceScopedToken } from '../services/rules_saved_object_service/tokens';
 import type { UserServiceContract } from '../services/user_service/user_service';
@@ -315,10 +316,12 @@ export class ActionPolicyClient {
     const filter = this.buildFindFilter(params);
     const sortField = this.mapSortField(params.sortField);
 
+    const search = buildSoSearch(params.search);
+
     const res = await this.actionPolicySavedObjectService.find({
       page,
       perPage,
-      search: params.search,
+      search,
       filter,
       sortField,
       sortOrder: params.sortOrder,
