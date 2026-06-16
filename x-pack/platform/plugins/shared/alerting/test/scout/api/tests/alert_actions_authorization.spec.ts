@@ -7,7 +7,7 @@
 
 import { apiTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import type { RoleApiCredentials } from '@kbn/scout';
+import type { RoleApiCredentials, ScoutTestConfig } from '@kbn/scout';
 import { COMMON_HEADERS } from '../fixtures/constants';
 import { waitForSuccessfulEventLogEntry } from '../lib/wait_for_successful_event_log';
 
@@ -29,21 +29,35 @@ const ES_QUERY_PARAMS = {
 // .es-query rule type uses instance ID 'query matched' to identify the alert instance when group by is 'all'
 const ENCODED_ALERT_INSTANCE_ID = 'query%20matched';
 
+/**
+ * Returns the feature privilege and rule consumer appropriate for the current
+ * deployment. `stackAlerts` is hidden in serverless observability, so we fall
+ * back to the `logs` feature (which registers `.es-query` with consumer `logs`).
+ */
+const getDeploymentConfig = (
+  config: ScoutTestConfig
+): { feature: Record<string, string[]>; consumer: string } => {
+  if (config.serverless && config.projectType === 'oblt') {
+    return { feature: { logs: ['all'] }, consumer: 'logs' };
+  }
+  return { feature: { stackAlerts: ['all'] }, consumer: 'alerts' };
+};
+
 apiTest.describe(
   'Per-alert mute/unmute without connector privilege',
-  { tag: tags.stateful.classic },
+  { tag: tags.deploymentAgnostic },
   () => {
     let adminCreds: RoleApiCredentials;
     let restrictedCreds: RoleApiCredentials;
     let ruleId: string;
     let connectorId: string;
 
-    apiTest.beforeAll(async ({ apiClient, requestAuth, samlAuth }) => {
+    apiTest.beforeAll(async ({ apiClient, requestAuth, samlAuth, config }) => {
+      const { feature, consumer } = getDeploymentConfig(config);
       adminCreds = await requestAuth.getApiKey('admin');
 
-      // does not include alert actions privilege
       restrictedCreds = await requestAuth.getApiKeyForCustomRole({
-        kibana: [{ base: [], feature: { stackAlerts: ['all'] }, spaces: ['*'] }],
+        kibana: [{ base: [], feature, spaces: ['*'] }],
         elasticsearch: { cluster: [], indices: [{ names: ['.alerts-*'], privileges: ['read'] }] },
       });
 
@@ -79,7 +93,7 @@ apiTest.describe(
         body: {
           name: 'Scout mute-instance-authz test rule',
           rule_type_id: '.es-query',
-          consumer: 'alerts',
+          consumer,
           schedule: { interval: '1m' },
           enabled: true,
           params: ES_QUERY_PARAMS,
@@ -232,7 +246,9 @@ apiTest.describe(
 
     apiTest(
       'snooze/unsnooze by restricted user does not rotate the rule API key',
-      async ({ apiClient, samlAuth, esClient }) => {
+      async ({ apiClient, samlAuth, esClient, config }) => {
+        const { feature } = getDeploymentConfig(config);
+
         const getAlertAttrs = async () => {
           const result = await esClient.search({
             index: '.kibana_alerting_cases*',
@@ -245,7 +261,7 @@ apiTest.describe(
         };
 
         const { cookieHeader } = await samlAuth.asInteractiveUser({
-          kibana: [{ base: [], feature: { stackAlerts: ['all'] }, spaces: ['*'] }],
+          kibana: [{ base: [], feature, spaces: ['*'] }],
           elasticsearch: {
             cluster: [],
             indices: [{ names: ['.alerts-*'], privileges: ['read'] }],
