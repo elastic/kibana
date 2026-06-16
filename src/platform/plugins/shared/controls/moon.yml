@@ -48,6 +48,7 @@ dependsOn:
   - '@kbn/es-types'
   - '@kbn/esql'
   - '@kbn/presentation-publishing-schemas'
+  - '@kbn/controls-renderer'
 tags:
   - plugin
   - prod

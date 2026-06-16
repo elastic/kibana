@@ -34,6 +34,8 @@ import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import {
   apiHasPinnedPanels,
   apiHasSections,
+  panelIsRelatedByGlobalFilters,
+  initializeRelatedPanels,
   initializeStateApi,
   type PublishingSubject,
 } from '@kbn/presentation-publishing';
@@ -300,6 +302,12 @@ export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
         },
       });
 
+      const relatedPanelsApi = initializeRelatedPanels({
+        uuid,
+        parentApi,
+        ...panelIsRelatedByGlobalFilters(dataControlManager.api.useGlobalFilters$),
+      });
+
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
       const errorsSubscription = combineLatest([
         dataControlManager.api.blockingError$,
@@ -315,6 +323,7 @@ export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
       const api = finalizeApi({
         ...stateApi,
         ...dataControlManager.api,
+        ...relatedPanelsApi,
         blockingError$,
         dataLoading$: temporaryStateManager.api.dataLoading$,
         getTypeDisplayName: OptionsListStrings.control.getDisplayName,

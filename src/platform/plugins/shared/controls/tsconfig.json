@@ -42,7 +42,8 @@
     "@kbn/esql-language",
     "@kbn/es-types",
     "@kbn/esql",
-    "@kbn/presentation-publishing-schemas"
+    "@kbn/presentation-publishing-schemas",
+    "@kbn/controls-renderer"
   ],
   "exclude": ["target/**/*"]
 }
