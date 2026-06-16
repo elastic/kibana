@@ -78,6 +78,7 @@ export function transformDataControlOut<
       ...(typeof ignore_validations === 'boolean' && { ignore_validations }),
     };
 
+    ensureRequiredFields(convertedState);
     return convertedState;
   }
 
@@ -116,9 +117,28 @@ export function transformDataControlOut<
     ...(typeof ignore_validations === 'boolean' && { ignore_validations }),
   };
 
+  ensureRequiredFields(convertedState);
   return convertedState;
 }
 
 function getLegacyReferenceName(controlId: string, refName: string) {
   return `controlGroup_${controlId}:${refName}`;
 }
+
+const ensureRequiredFields = (state: StrictDataControlState) => {
+  if (isEsqlDataControl(state)) {
+    if (!state.esql_query.length) {
+      throw new Error('Must include a non-empty ES|QL query');
+    }
+    return;
+  }
+
+  if (isFieldDataControl(state)) {
+    if (!state.data_view_id.length) {
+      throw new Error('Must include a non-empty data view ID');
+    }
+    if (!state.field_name.length) {
+      throw new Error('Must include a non-empty field name');
+    }
+  }
+};
