@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PageObjects, ScoutParallelTestFixtures, ScoutParallelWorkerFixtures } from '@kbn/scout';
+import type {
+  PageObjects,
+  ScoutParallelTestFixtures,
+  ScoutParallelWorkerFixtures,
+} from '@kbn/scout';
 import { spaceTest as spaceBaseTest, createLazyPageObject } from '@kbn/scout';
 import { SavedQueryManagementMenu } from './page_objects';
 

@@ -7,9 +7,9 @@
 
 import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
-import { test } from '../../fixtures';
 import fs from 'fs';
 import os from 'os';
+import { test } from '../../fixtures';
 import {
   SavedObjectsTracker,
   cleanupDownloadedFile,
