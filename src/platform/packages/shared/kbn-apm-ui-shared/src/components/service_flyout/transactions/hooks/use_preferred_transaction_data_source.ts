@@ -8,7 +8,7 @@
  */
 
 // This file re-implements the data source selection logic from
-// apm_data_access/common/utils/get_preferred_bucket_size_and_data_source.ts.
+// https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/apm_data_access/common/utils/get_preferred_bucket_size_and_data_source.ts
 // That module lives in an x-pack plugin and should not be imported from a platform package.
 import type { HttpStart } from '@kbn/core-http-browser';
 import { useAbortableAsync } from '@kbn/react-hooks';
