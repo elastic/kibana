@@ -453,7 +453,9 @@ export class TaskRunner<
 
     const alertAsDataByInstanceId = new Map<string, Record<string, unknown>>();
     for (const instance of activeInstances) {
-      if (!instance.conditions?.length) continue;
+      if (!instance.conditions?.length) {
+        continue;
+      }
       const data = alertsClient.getBuiltActiveAlertDataByInstanceId(instance.instanceId);
       if (data) {
         alertAsDataByInstanceId.set(instance.instanceId, data);
@@ -470,6 +472,15 @@ export class TaskRunner<
       conditionExpiredInstances.length > 0
         ? activeInstances.filter((i) => !conditionExpiredIds.has(i.instanceId))
         : activeInstances;
+
+    // Condition evaluation happens after persistAlerts(), so alerts for condition-expired
+    // instances were already written with kibana.alert.snoozed: true. Correct that now.
+    if (conditionExpiredInstances.length > 0) {
+      await alertsClient.clearSnoozedStatusForAlerts(
+        conditionExpiredInstances.map((i) => i.instanceId)
+      );
+    }
+
     const actionScheduler = new ActionScheduler({
       rule,
       ruleType: this.ruleType,
@@ -546,7 +557,7 @@ export class TaskRunner<
         summaryActions: actionSchedulerResult.throttledSummaryActions,
       },
       prunedSnoozedInstances:
-        updatedActiveInstances.length < rule.snoozedInstances.length
+        updatedActiveInstances.length < (rule.snoozedInstances?.length ?? 0)
           ? updatedActiveInstances
           : undefined,
       ...(expiredInstances.length > 0 || conditionExpiredInstances.length > 0

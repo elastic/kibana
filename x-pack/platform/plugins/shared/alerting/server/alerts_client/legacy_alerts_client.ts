@@ -336,6 +336,8 @@ export class LegacyAlertsClient<
 
   public async updatePersistedAlerts() {}
 
+  public async clearSnoozedStatusForAlerts(_conditionExpiredInstanceIds: string[]): Promise<void> {}
+
   public async setAlertStatusToUntracked() {
     return;
   }
