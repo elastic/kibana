@@ -113,20 +113,15 @@ spaceTest.describe('Discover saved search embeddable', { tag: tags.deploymentAgn
     expect(first).toStrictEqual(last);
   });
 
-  // This test is very flaky and doesn't work well on CI, but works on local dev.
-  // eslint-disable-next-line playwright/no-skipped-test
-  spaceTest.skip(
-    'filters are added when a cell filter is clicked',
-    async ({ page, pageObjects }) => {
-      await addSearchEmbeddableToDashboard(page, pageObjects);
-      await page.testSubj.locator('dataGridRowCell').filter({ hasText: '8,788' }).click();
-      await page.getByTestId('filterOutButton').click({ delay: 100 });
-      await expect(page.testSubj.locator('~filter')).toHaveCount(1);
-      await page.testSubj.locator('dataGridRowCell').filter({ hasText: '7,124' }).click();
-      await page.getByTestId('filterForButton').click({ delay: 100 });
-      await expect(page.testSubj.locator('~filter')).toHaveCount(2);
-    }
-  );
+  spaceTest('filters are added when a cell filter is clicked', async ({ page, pageObjects }) => {
+    await addSearchEmbeddableToDashboard(page, pageObjects);
+    await page.testSubj.locator('dataGridRowCell').filter({ hasText: '8,788' }).click();
+    await page.getByTestId('filterOutButton').click({ delay: 100 });
+    await expect(page.testSubj.locator('~filter')).toHaveCount(1);
+    await page.testSubj.locator('dataGridRowCell').filter({ hasText: '7,124' }).click();
+    await page.getByTestId('filterForButton').click({ delay: 100 });
+    await expect(page.testSubj.locator('~filter')).toHaveCount(2);
+  });
 
   spaceTest(
     'can cancel a By Value edit and return to the dashboard',
