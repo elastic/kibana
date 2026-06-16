@@ -11,6 +11,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   BehaviorSubject,
   Subject,
+  Subscription,
   combineLatest,
   combineLatestWith,
   filter,
@@ -26,6 +27,7 @@ import type { ESQLControlVariable } from '@kbn/esql-types';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   apiHasSerializableState,
+  PublishingSubject,
   useSearchApi,
   type EmbeddableApiContext,
   type ViewMode,
@@ -46,6 +48,8 @@ import { useChildrenApi } from './use_children_api';
 import { useInitialControlGroupState } from './use_initial_control_group_state';
 import { useLayoutApi } from './use_layout_api';
 import { usePropsApi } from './use_props_api';
+import { T } from 'lodash/fp';
+import { id } from 'zod/v4/locales';
 
 export interface ControlGroupRendererProps {
   onApiAvailable: (api: ControlGroupRendererApi) => void;
@@ -166,19 +170,16 @@ export const ControlGroupRenderer = ({
 
     // Pipe these parent subjects into fresh BehaviorSubjects so we can pipe them through `ignoreWhileLoading` without
     // breaking the BehaviorSubject contract; some consumers use `.value` or `.getValue()` downstream
-    const esqlVariables$ = new BehaviorSubject<ESQLControlVariable[]>([]);
-    const appliedFilters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
-    const appliedTimeslice$ = new BehaviorSubject<TimeSlice | undefined>(undefined);
+    const subscriptions = new Subscription();
+    function bridge<T>(source$: PublishingSubject<T>): BehaviorSubject<T> {
+      const out = new BehaviorSubject(source$.getValue());
+      subscriptions.add(source$.pipe(ignoreWhileLoading()).subscribe((v) => out.next(v)));
+      return out;
+    }
 
-    const esqlVariablesSubscription = parentApi.esqlVariables$
-      .pipe(ignoreWhileLoading())
-      .subscribe((value) => esqlVariables$.next(value));
-    const appliedFiltersSubscription = parentApi.appliedFilters$
-      .pipe(ignoreWhileLoading())
-      .subscribe((value) => appliedFilters$.next(value));
-    const appliedTimesliceSubscription = parentApi.appliedTimeslice$
-      .pipe(ignoreWhileLoading())
-      .subscribe((value) => appliedTimeslice$.next(value));
+    const esqlVariables$ = bridge(parentApi.esqlVariables$);
+    const appliedFilters$ = bridge(parentApi.appliedFilters$);
+    const appliedTimeslice$ = bridge(parentApi.appliedTimeslice$);
 
     const publicApi = {
       ...parentApi,
@@ -229,9 +230,7 @@ export const ControlGroupRenderer = ({
     } as unknown as ControlGroupRendererApi);
 
     return () => {
-      esqlVariablesSubscription.unsubscribe();
-      appliedFiltersSubscription.unsubscribe();
-      appliedTimesliceSubscription.unsubscribe();
+      subscriptions.unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [parentApi, input$, uiActions]);
