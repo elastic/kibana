@@ -12,11 +12,6 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import {
-  NOTIFICATION_TYPE_FLAGS,
-  NOTIFICATION_CENTER_UI_ENABLED_DEFAULT,
-  NOTIFICATION_CENTER_UI_ENABLED_FLAG,
-} from '../common';
 import type { NotificationCenterConfig } from './config';
 import type {
   NotificationCenterPluginSetup,
@@ -49,36 +44,8 @@ export class NotificationCenterPlugin
   }
 
   public start(core: CoreStart): NotificationCenterPluginStart {
-    // Per the feature-flags service contract, evaluation
-    // must never gate plugin setup — it is purely observational here.
-    this.logResolvedFeatureFlags(core.featureFlags);
     return {};
   }
 
   public stop() {}
-
-  /**
-   * Provide visibility to the resolved feature flags values for debugging purposes
-   * @param featureFlags
-   */
-  private async logResolvedFeatureFlags(featureFlags: CoreStart['featureFlags']): Promise<void> {
-    try {
-      const uiEnabled = await featureFlags.getBooleanValue(
-        NOTIFICATION_CENTER_UI_ENABLED_FLAG,
-        NOTIFICATION_CENTER_UI_ENABLED_DEFAULT
-      );
-      this.logger.debug(`Search notification center UI enabled: ${uiEnabled}`);
-      await Promise.all(
-        Object.values(NOTIFICATION_TYPE_FLAGS).map((flag) =>
-          featureFlags.getBooleanValue(flag, false).then((value) => {
-            this.logger.debug(`Search notification center type ${flag} resolved to: ${value}`);
-          })
-        )
-      );
-    } catch (error) {
-      this.logger.warn(`Failed to resolve Notification Center feature flags`, {
-        error,
-      });
-    }
-  }
 }

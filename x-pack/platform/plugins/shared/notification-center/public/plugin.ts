@@ -12,7 +12,6 @@ export class NotificationCenterPlugin
   implements Plugin<NotificationCenterPublicSetup, NotificationCenterPublicStart>
 {
   public setup(_core: CoreSetup): NotificationCenterPublicSetup {
-    // Gated by `notificationCenter.uiEnabled` feature flag
     return {};
   }
 
