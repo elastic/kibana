@@ -20,9 +20,11 @@
       "cloud",
       "console",
       "searchNavigation",
+      "spaces",
       "usageCollection"
     ],
     "requiredBundles": [
+      "agentBuilder",
       "kibanaReact"
     ]
   }

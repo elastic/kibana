@@ -7,6 +7,7 @@
 
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import { noop } from 'lodash';
 import {
   EuiButtonEmpty,
@@ -16,6 +17,7 @@ import {
   EuiHorizontalRule,
   EuiPopover,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { AlertStatus } from '@kbn/rule-data-utils';
 import {
@@ -37,6 +39,7 @@ import {
 import { ObsCasesContext } from './obs_cases_context';
 import { AddToCaseButton } from './add_to_case_button';
 import { useDiscoverUrl } from '../hooks/use_discover_url/use_discover_url';
+import { ALERT_DETAILS_EBT_ELEMENTS } from '../ebt_constants';
 
 export interface HeaderActionsProps extends AlertDetailsRuleFormFlyoutBaseProps {
   alert: TopAlert | null;
@@ -107,6 +110,11 @@ export function HeaderActions({
               iconType="discoverApp"
               target="_blank"
               data-test-subj={`alertDetailsPage_viewInDiscover${rule ? `_${rule.ruleTypeId}` : ''}`}
+              {...getEbtProps({
+                action: EBT_CLICK_ACTIONS.OPEN_IN_DISCOVER,
+                element: ALERT_DETAILS_EBT_ELEMENTS.HEADER,
+                detail: rule?.ruleTypeId,
+              })}
             >
               <EuiText size="s">
                 {i18n.translate('xpack.observability.alertDetails.viewInDiscover', {
@@ -135,16 +143,26 @@ export function HeaderActions({
             isOpen={isPopoverOpen}
             closePopover={handleClosePopover}
             button={
-              <EuiButtonIcon
-                display="base"
-                size="m"
-                iconType="boxesVertical"
-                data-test-subj="alert-details-header-actions-menu-button"
-                onClick={handleTogglePopover}
-                aria-label={i18n.translate('xpack.observability.alertDetails.actionsButtonLabel', {
+              <EuiToolTip
+                content={i18n.translate('xpack.observability.alertDetails.actionsButtonLabel', {
                   defaultMessage: 'Actions',
                 })}
-              />
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  display="base"
+                  size="m"
+                  iconType="boxesVertical"
+                  data-test-subj="alert-details-header-actions-menu-button"
+                  onClick={handleTogglePopover}
+                  aria-label={i18n.translate(
+                    'xpack.observability.alertDetails.actionsButtonLabel',
+                    {
+                      defaultMessage: 'Actions',
+                    }
+                  )}
+                />
+              </EuiToolTip>
             }
           >
             <div style={{ width: '220px' }}>

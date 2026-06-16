@@ -14,7 +14,8 @@ const detectionEvidenceSchema = z.object({
 
 export const detectionSchema = z.object({
   '@timestamp': z.iso.datetime(),
-  silent: z.boolean(),
+  detected_at: z.iso.datetime().optional(),
+  kind: z.enum(['detection', 'quiet', 'handled']),
   processed: z.boolean(),
   detection_id: z.string().optional(),
   rule_uuid: z.string(),
@@ -24,7 +25,7 @@ export const detectionSchema = z.object({
   alert_index: z.string().optional(),
   workflow_execution_id: z.string().optional(),
   resolution_lookback_minutes: z.number().optional(),
-  peak_30m_alert_count: z.number().optional(),
+  peak_alert_count: z.number().optional(),
   detection_evidence: detectionEvidenceSchema.optional(),
   alert_samples: z.array(z.record(z.string(), z.unknown())).optional(),
   rules_activity: z.array(z.record(z.string(), z.unknown())).optional(),

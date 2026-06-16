@@ -9,7 +9,7 @@
 
 import { FULL_HANDLE_DIM, MIN_HANDLE_DIM, RESIZE_HANDLE_SIZE } from '../lib/constants';
 import type { ResizeHandle } from '../lib/constants';
-import { setImportant } from './clone_element';
+import { setImportant } from '../lib/dom/set_important';
 import type { ElementSession } from './element_registry';
 import type { ResizeState } from './interaction_state';
 

@@ -37,7 +37,10 @@ import { createRemoteMonitorDetailUrl } from '../../../../utils/remote/remote_mo
 import type { ClientPluginsStart } from '../../../../../../plugin';
 import { useMonitorDetail } from '../../../../hooks/use_monitor_detail';
 import { useMonitorDetailLocator } from '../../../../hooks/use_monitor_detail_locator';
-import { useEditMonitorLocator } from '../../../../hooks/use_edit_monitor_locator';
+import {
+  getMonitorSpaceToAppend,
+  useEditMonitorLocator,
+} from '../../../../hooks/use_edit_monitor_locator';
 import { useMonitorHealthColor } from '../../hooks/use_monitor_health_color';
 import {
   getMonitorAction,
@@ -53,7 +56,7 @@ import { MonitorDetailsPanel } from '../../../common/components/monitor_details_
 import { ErrorCallout } from '../../../common/components/error_callout';
 import { useOverviewStatusState } from '../../hooks/use_overview_status';
 import { useMonitorAttachmentConfigWithMonitor } from '../../../monitor_details/hooks/use_monitor_attachment_config';
-import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../../common/constants';
+import { getSyntheticsCcsIndex } from '../../../../../../../common/get_synthetics_indices';
 import type { OverviewStatusMetaData } from '../types';
 import { ConfigKey } from '../types';
 import { ActionsPopover } from './actions_popover';
@@ -169,7 +172,7 @@ function DetailFlyoutDurationChart({
   }, [showAllLocations, allLocations, id, location, euiTheme.colors.vis]);
 
   const dataTypesIndexPatterns = useMemo(
-    () => (remoteName ? { synthetics: `${remoteName}:${SYNTHETICS_INDEX_PATTERN}` } : undefined),
+    () => (remoteName ? { synthetics: getSyntheticsCcsIndex(remoteName) } : undefined),
     [remoteName]
   );
 
@@ -272,11 +275,29 @@ export function MonitorDetailFlyout(props: Props) {
     configId,
     locationId,
     spaces,
+    remoteName: monitor?.remote?.remoteName,
   });
 
   const editLink = useEditMonitorLocator({ configId, spaces });
 
   const { space } = useKibanaSpace();
+
+  // If the monitor lives outside the active space, thread `spaceId` through
+  // sub-route URLs (and the saved-object fetch) so links land on the correct
+  // space and don't 404. Reuses the helper that powers the locator-based links.
+  const { spaceId: crossSpaceId } = getMonitorSpaceToAppend(space, spaces);
+
+  const monitorDetail = useMonitorDetail(configId, props.location, monitor?.remote?.remoteName);
+
+  // The overview-status metadata only carries `remote.kibanaUrl` when the
+  // remote heartbeat docs expose it via the `top_metrics` aggregation, which
+  // silently drops `text`-mapped fields. The latest ping reads `kibanaUrl`
+  // straight from `_source`, so fall back to it for the "View on remote
+  // cluster" deep link when the overview metadata didn't capture it.
+  const remoteKibanaUrl =
+    monitor?.remote?.kibanaUrl ??
+    monitorDetail.data?.remote?.kibanaUrl ??
+    monitorDetail.data?.kibanaUrl;
 
   const remoteMonitorUrl = useMemo(
     () =>
@@ -285,9 +306,10 @@ export function MonitorDetailFlyout(props: Props) {
             monitor,
             locationId,
             spaceId: space?.id,
+            kibanaUrl: remoteKibanaUrl,
           })
         : undefined,
-    [monitor, locationId, space?.id]
+    [monitor, locationId, space?.id, remoteKibanaUrl]
   );
 
   const dispatch = useDispatch();
@@ -309,17 +331,23 @@ export function MonitorDetailFlyout(props: Props) {
   // local SO and the request would 404.
   useEffect(() => {
     if (isRemote) return;
+    // `useKibanaSpace` resolves asynchronously, so `space` is undefined on
+    // the first render. `getMonitorSpaceToAppend` short-circuits to `{}` in
+    // that case, which means an early dispatch would fetch the SO from the
+    // active space and 404 for cross-space monitors. The follow-up dispatch
+    // (after `space` resolves) is silently dropped by the `takeLeading`
+    // saga while the first request is still in flight, leaving the 404 in
+    // Redux state forever. Wait for the active space before dispatching.
+    if (!space) return;
     dispatch(
       getMonitorAction.get({
         monitorId: configId,
-        ...(space && spaces?.length && !spaces?.includes(space?.id) ? { spaceId: spaces[0] } : {}),
+        ...(crossSpaceId ? { spaceId: crossSpaceId } : {}),
       })
     );
-  }, [configId, dispatch, isRemote, space, space?.id, spaces, upsertSuccess]);
+  }, [configId, crossSpaceId, dispatch, isRemote, space, upsertSuccess]);
 
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
-
-  const monitorDetail = useMonitorDetail(configId, props.location, monitor?.remote?.remoteName);
 
   const getColor = useMonitorHealthColor();
 
@@ -356,7 +384,15 @@ export function MonitorDetailFlyout(props: Props) {
       paddingSize="none"
       resizable
     >
-      {error && !isLoading && !isRemote && <ErrorCallout {...error} />}
+      {/*
+        For cross-space monitors the saved-object fetch may legitimately 404
+        when the user can't read the SO from the active space, even though the
+        heartbeat-based `monitor` metadata renders the flyout fine. Don't
+        alarm the user with a "fetch failed" callout if we already have the
+        overview metadata to render — only surface real errors when there's
+        nothing else to show.
+      */}
+      {error && !isLoading && !isRemote && !monitor && <ErrorCallout {...error} />}
       <EuiFlyoutHeader hasBorder>
         <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l">
           <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
@@ -457,6 +493,7 @@ export function MonitorDetailFlyout(props: Props) {
               configId={configId}
               locationId={locationId}
               remoteName={monitor?.remote?.remoteName}
+              spaceId={crossSpaceId}
             />
             <FlyoutSummaryKPIs
               monitorId={id}
@@ -516,19 +553,36 @@ export function MonitorDetailFlyout(props: Props) {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               {isRemote ? (
-                <EuiToolTip content={!remoteMonitorUrl ? REMOTE_URL_UNAVAILABLE_TEXT : undefined}>
-                  <EuiButton
-                    data-test-subj="syntheticsMonitorDetailFlyoutViewRemoteButton"
-                    isDisabled={!remoteMonitorUrl}
-                    href={remoteMonitorUrl}
-                    target="_blank"
-                    iconType="popout"
-                    iconSide="right"
-                    fill
-                  >
-                    {VIEW_ON_REMOTE_CLUSTER_TEXT}
-                  </EuiButton>
-                </EuiToolTip>
+                <EuiFlexGroup gutterSize="s">
+                  <EuiFlexItem grow={false}>
+                    <EuiToolTip
+                      content={!remoteMonitorUrl ? REMOTE_URL_UNAVAILABLE_TEXT : undefined}
+                    >
+                      <EuiButton
+                        data-test-subj="syntheticsMonitorDetailFlyoutViewRemoteButton"
+                        isDisabled={!remoteMonitorUrl}
+                        href={remoteMonitorUrl}
+                        target="_blank"
+                        iconType="popout"
+                        iconSide="right"
+                      >
+                        {VIEW_ON_REMOTE_CLUSTER_TEXT}
+                      </EuiButton>
+                    </EuiToolTip>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      data-test-subj="syntheticsMonitorDetailFlyoutButton"
+                      isDisabled={!detailLink}
+                      href={detailLink}
+                      iconType="sortRight"
+                      iconSide="right"
+                      fill
+                    >
+                      {GO_TO_MONITOR_LINK_TEXT}
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               ) : (
                 <EuiFlexGroup gutterSize="s">
                   <EuiFlexItem grow={false}>

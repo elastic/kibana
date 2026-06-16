@@ -9,6 +9,11 @@
 
 import { Parser } from 'xml2js';
 import type { ActionContext } from '../../connector_spec';
+import {
+  setConnectorActionErrorMeta,
+  getEstimatedBase64OutputBytes,
+  getResponseContentLengthBytes,
+} from '../../connector_utils';
 import { calculateAWSA4Signature, sha256Hash } from '../../auth_types/aws_crypto_helpers';
 import type {
   AmazonS3BucketObjectListing,
@@ -40,13 +45,24 @@ function createAwsS3Error(error: unknown): Error {
     message?: string;
     $metadata?: { httpStatusCode?: number };
   };
+  let s3Error: Error;
   if (awsError.name && awsError.message) {
-    return new Error(`AWS S3 error (${awsError.name}): ${awsError.message}`);
+    s3Error = new Error(`AWS S3 error (${awsError.name}): ${awsError.message}`);
   } else if (awsError.message) {
-    return new Error(`AWS S3 error: ${awsError.message}`);
+    s3Error = new Error(`AWS S3 error: ${awsError.message}`);
   } else {
-    return new Error(`Unknown AWS S3 error: ${JSON.stringify(error)}`);
+    s3Error = new Error(`Unknown AWS S3 error: ${JSON.stringify(error)}`);
   }
+
+  const contentLengthBytes = getResponseContentLengthBytes(error);
+  if (contentLengthBytes !== undefined) {
+    setConnectorActionErrorMeta(s3Error, {
+      contentLengthBytes,
+      estimatedOutputBytes: getEstimatedBase64OutputBytes(contentLengthBytes),
+    });
+  }
+
+  return s3Error;
 }
 
 function getJsObjectOrValue(

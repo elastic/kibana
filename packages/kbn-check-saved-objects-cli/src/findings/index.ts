@@ -13,6 +13,7 @@ export type {
   FindingSeverity,
   SavedObjectsCheckFinding,
   SavedObjectsCheckReport,
+  TypeChangeDetails,
 } from './types';
 export { SavedObjectsCheckError, isSavedObjectsCheckError } from './error';
 export { FindingsCollector } from './collector';

@@ -146,6 +146,17 @@ The edit modal uses a **draft history** system — a local `UndoRedoStack` insta
 | `DraftTextEdit` | `index`, `originalNode`, `cloneNode`, `field`, `before`, `after` | Text content, color, font-size, font-weight |
 | `DraftMediaEdit` | `index`, `originalElement`, `cloneElement`, `attribute`, `before`, `after` | Image src, SVG href, icon type |
 
+#### Truncation And Text Reflow
+
+Preview and managed edit flows intentionally remove layout freezing after text and size edits so containers can grow to fit content.
+
+- Text reflow unfreezes width and height on the edited text parent and descendants.
+- Text reflow also unfreezes ancestor chains toward the managed/preview root with context-aware root behavior: root height is unfrozen for growth; root width is unfrozen only for no-wrap text contexts; root width remains fixed for wrapping text contexts.
+- Style reflow (`width`, `height`, `padding`, `margin`) unfreezes descendants and ancestor chains to keep implicit hug-like growth.
+- Truncation detection includes class-based and computed-style checks (`text-overflow: ellipsis`, `-webkit-line-clamp`).
+- Clone truncation neutralization strips truncation classes and applies inline overrides (`text-overflow: clip`, line-clamp reset); `overflow: visible` is only forced when truncation is detected by stripped classes or connected computed styles.
+- Truncation measurement expands clone bounds in both axes (`scrollWidth` and `scrollHeight`) before the preview wrapper min-size is computed.
+
 #### Component Library
 
 The library (`components/edit/library/`) provides pre-built EUI component descriptors (buttons, switches, cards, accordions, etc.) as `ReactElement` values. When the user inserts one, it's rendered live via `renderEuiComponentLive()`, making it fully interactive on the canvas. Each library entry uses `useSerializableState` for any toggleable state so it survives duplication and export/import.

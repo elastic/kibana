@@ -112,7 +112,6 @@ export const MetricsNodeDetailsLink = ({
   ]);
 
   return (
-    // eslint-disable-next-line @elastic/eui/href-or-on-click -- onClick for programmatic navigation; href for "Open in new tab" and fallback
     <EuiLink
       data-test-subj="infraMetricsNodeDetailsLinkLink"
       href={linkProps.href}

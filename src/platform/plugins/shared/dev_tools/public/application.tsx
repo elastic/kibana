@@ -108,7 +108,7 @@ function DevToolsWrapper({
 
   return (
     <main css={styles.devApp}>
-      <EuiTabs css={styles.tabs} size="l">
+      <EuiTabs css={styles.tabs}>
         {devTools.map((currentDevTool) => (
           <EuiTab
             key={currentDevTool.id}

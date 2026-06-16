@@ -1,5 +1,5 @@
 {
-  "sha1": "9d642fd55c209e8ab02463d4fe206c0d7437534c",
+  "sha1": "0763a0eb3c5c0e0e555dc0e23706c230ac7b92f8",
   "tests": [
     {
       "id": "9932666685095b3-d8099f4a61f66f4",
@@ -689,8 +689,3895 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/matcher_data_fields_suggestions.spec.ts",
-        "line": 184,
+        "line": 186,
         "column": 10
+      }
+    },
+    {
+      "id": "6bb2d36e1aa8803-1e98ff14d4f42e9",
+      "title": "Bulk action policies API bulk: enables disabled policies",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/bulk_action_policies.spec.ts",
+        "line": 43,
+        "column": 10
+      }
+    },
+    {
+      "id": "6bb2d36e1aa8803-a0f04891adc609e",
+      "title": "Bulk action policies API bulk: disables enabled policies",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/bulk_action_policies.spec.ts",
+        "line": 74,
+        "column": 10
+      }
+    },
+    {
+      "id": "6bb2d36e1aa8803-055f3c1d0e120ee",
+      "title": "Bulk action policies API bulk: snoozes policies with snoozedUntil",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/bulk_action_policies.spec.ts",
+        "line": 101,
+        "column": 10
+      }
+    },
+    {
+      "id": "6bb2d36e1aa8803-fb569f2368ebf74",
+      "title": "Bulk action policies API bulk: unsnoozes snoozed policies",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/bulk_action_policies.spec.ts",
+        "line": 129,
+        "column": 10
+      }
+    },
+    {
+      "id": "6bb2d36e1aa8803-0a1afa7abf64ceb",
+      "title": "Bulk action policies API bulk: deletes policies",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/bulk_action_policies.spec.ts",
+        "line": 159,
+        "column": 10
+      }
+    },
+    {
+      "id": "6bb2d36e1aa8803-3a29b8f66014964",
+      "title": "Bulk action policies API bulk: rotates API keys",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/bulk_action_policies.spec.ts",
+        "line": 188,
+        "column": 10
+      }
+    },
+    {
+      "id": "6bb2d36e1aa8803-a01b6c631caaa46",
+      "title": "Bulk action policies API mixed: enable + disable + snooze + unsnooze in one request",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/bulk_action_policies.spec.ts",
+        "line": 222,
+        "column": 10
+      }
+    },
+    {
+      "id": "6bb2d36e1aa8803-92ef13840e85432",
+      "title": "Bulk action policies API mixed: enable + delete in one request",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/bulk_action_policies.spec.ts",
+        "line": 271,
+        "column": 10
+      }
+    },
+    {
+      "id": "6bb2d36e1aa8803-4e6810634d865ee",
+      "title": "Bulk action policies API partial failure: reports errors for non-existent ids",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/bulk_action_policies.spec.ts",
+        "line": 302,
+        "column": 10
+      }
+    },
+    {
+      "id": "6bb2d36e1aa8803-61e31b1f66453fa",
+      "title": "Bulk action policies API partial failure: reports errors for non-existent ids in delete",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/bulk_action_policies.spec.ts",
+        "line": 327,
+        "column": 10
+      }
+    },
+    {
+      "id": "6bb2d36e1aa8803-c71cbbae2cc4437",
+      "title": "Bulk action policies API partial failure: reports errors for non-existent ids in update_api_key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/bulk_action_policies.spec.ts",
+        "line": 355,
+        "column": 10
+      }
+    },
+    {
+      "id": "6bb2d36e1aa8803-ba5f1a09b9f21d5",
+      "title": "Bulk action policies API validation: rejects empty actions array",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/bulk_action_policies.spec.ts",
+        "line": 380,
+        "column": 10
+      }
+    },
+    {
+      "id": "6bb2d36e1aa8803-e13f7ab037659f3",
+      "title": "Bulk action policies API validation: rejects invalid snoozedUntil in snooze action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/bulk_action_policies.spec.ts",
+        "line": 389,
+        "column": 10
+      }
+    },
+    {
+      "id": "6bb2d36e1aa8803-934f654cf193cbb",
+      "title": "Bulk action policies API validation: rejects unknown action type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/bulk_action_policies.spec.ts",
+        "line": 407,
+        "column": 10
+      }
+    },
+    {
+      "id": "6bb2d36e1aa8803-bbc0746db40f5a9",
+      "title": "Bulk action policies API validation: rejects snooze action without snoozedUntil",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/bulk_action_policies.spec.ts",
+        "line": 422,
+        "column": 10
+      }
+    },
+    {
+      "id": "6bb2d36e1aa8803-633a1bbceb7d5d3",
+      "title": "Bulk action policies API validation: rejects empty action id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/bulk_action_policies.spec.ts",
+        "line": 440,
+        "column": 10
+      }
+    },
+    {
+      "id": "6bb2d36e1aa8803-e175a39889dbc30",
+      "title": "Bulk action policies API validation: rejects action id over the maximum length",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/bulk_action_policies.spec.ts",
+        "line": 449,
+        "column": 10
+      }
+    },
+    {
+      "id": "6bb2d36e1aa8803-838d9b8f75bdd37",
+      "title": "Bulk action policies API validation: rejects more than the maximum number of actions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/bulk_action_policies.spec.ts",
+        "line": 460,
+        "column": 10
+      }
+    },
+    {
+      "id": "6bb2d36e1aa8803-e83056725dcf8ee",
+      "title": "Bulk action policies API authorization: 200 with full alerting_v2 privileges (write)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/bulk_action_policies.spec.ts",
+        "line": 474,
+        "column": 10
+      }
+    },
+    {
+      "id": "6bb2d36e1aa8803-08a766ddf156e6d",
+      "title": "Bulk action policies API authorization: 403 with read-only alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/bulk_action_policies.spec.ts",
+        "line": 491,
+        "column": 10
+      }
+    },
+    {
+      "id": "6bb2d36e1aa8803-0ca1e3db909fb52",
+      "title": "Bulk action policies API authorization: 403 without alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/bulk_action_policies.spec.ts",
+        "line": 510,
+        "column": 10
+      }
+    },
+    {
+      "id": "717b1d5dd795212-752fbd44a6592f7",
+      "title": "Create action policy API create: creates with auto-generated id and full response shape",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/create_action_policy.spec.ts",
+        "line": 49,
+        "column": 10
+      }
+    },
+    {
+      "id": "717b1d5dd795212-1dad44d344567a1",
+      "title": "Create action policy API create: only required fields returns documented defaults",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/create_action_policy.spec.ts",
+        "line": 75,
+        "column": 10
+      }
+    },
+    {
+      "id": "717b1d5dd795212-0b8f152e54c9880",
+      "title": "Create action policy API create: per_field grouping with time_interval strategy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/create_action_policy.spec.ts",
+        "line": 100,
+        "column": 10
+      }
+    },
+    {
+      "id": "717b1d5dd795212-49e176b545fa646",
+      "title": "Create action policy API create: per_episode grouping with on_status_change strategy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/create_action_policy.spec.ts",
+        "line": 119,
+        "column": 10
+      }
+    },
+    {
+      "id": "717b1d5dd795212-407e8a5fa01b858",
+      "title": "Create action policy API create: all grouping with every_time strategy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/create_action_policy.spec.ts",
+        "line": 136,
+        "column": 10
+      }
+    },
+    {
+      "id": "717b1d5dd795212-58caea30a2db994",
+      "title": "Create action policy API type: defaults to \"global\" when omitted",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/create_action_policy.spec.ts",
+        "line": 153,
+        "column": 10
+      }
+    },
+    {
+      "id": "717b1d5dd795212-fc091537eb2acc8",
+      "title": "Create action policy API type: creates with type:\"single_rule\" linked to an existing rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/create_action_policy.spec.ts",
+        "line": 163,
+        "column": 10
+      }
+    },
+    {
+      "id": "717b1d5dd795212-3a7dc995e4f5007",
+      "title": "Create action policy API validation: rejects missing name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/create_action_policy.spec.ts",
+        "line": 187,
+        "column": 10
+      }
+    },
+    {
+      "id": "717b1d5dd795212-67ea6a60bb0f493",
+      "title": "Create action policy API validation: rejects empty name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/create_action_policy.spec.ts",
+        "line": 200,
+        "column": 10
+      }
+    },
+    {
+      "id": "717b1d5dd795212-e7f4533817f46e2",
+      "title": "Create action policy API validation: rejects name over the maximum length",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/create_action_policy.spec.ts",
+        "line": 209,
+        "column": 10
+      }
+    },
+    {
+      "id": "717b1d5dd795212-d0090cfe4ca663b",
+      "title": "Create action policy API validation: rejects missing description",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/create_action_policy.spec.ts",
+        "line": 218,
+        "column": 10
+      }
+    },
+    {
+      "id": "717b1d5dd795212-6c221d29da9d9bc",
+      "title": "Create action policy API validation: rejects description over the maximum length",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/create_action_policy.spec.ts",
+        "line": 230,
+        "column": 10
+      }
+    },
+    {
+      "id": "717b1d5dd795212-f4c000596a28b47",
+      "title": "Create action policy API validation: rejects missing destinations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/create_action_policy.spec.ts",
+        "line": 241,
+        "column": 10
+      }
+    },
+    {
+      "id": "717b1d5dd795212-2c5c4130e3b0811",
+      "title": "Create action policy API validation: rejects empty destinations array",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/create_action_policy.spec.ts",
+        "line": 250,
+        "column": 10
+      }
+    },
+    {
+      "id": "717b1d5dd795212-52be36e9a5d56c5",
+      "title": "Create action policy API validation: rejects more than the maximum number of destinations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/create_action_policy.spec.ts",
+        "line": 259,
+        "column": 10
+      }
+    },
+    {
+      "id": "717b1d5dd795212-1d8d95b7b380963",
+      "title": "Create action policy API validation: rejects destination with unknown type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/create_action_policy.spec.ts",
+        "line": 273,
+        "column": 10
+      }
+    },
+    {
+      "id": "717b1d5dd795212-a94d9958ba17153",
+      "title": "Create action policy API validation: rejects destination with empty id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/create_action_policy.spec.ts",
+        "line": 287,
+        "column": 10
+      }
+    },
+    {
+      "id": "717b1d5dd795212-66773e48da130be",
+      "title": "Create action policy API validation: rejects destination with id over max length",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/create_action_policy.spec.ts",
+        "line": 298,
+        "column": 10
+      }
+    },
+    {
+      "id": "717b1d5dd795212-cc8a838386de2d8",
+      "title": "Create action policy API validation: rejects matcher over the maximum length",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/create_action_policy.spec.ts",
+        "line": 309,
+        "column": 10
+      }
+    },
+    {
+      "id": "717b1d5dd795212-d5eebcbb1f93692",
+      "title": "Create action policy API validation: rejects groupBy with too many fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/create_action_policy.spec.ts",
+        "line": 318,
+        "column": 10
+      }
+    },
+    {
+      "id": "717b1d5dd795212-5acc6f0f6e96536",
+      "title": "Create action policy API validation: rejects groupBy with empty field name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/create_action_policy.spec.ts",
+        "line": 329,
+        "column": 10
+      }
+    },
+    {
+      "id": "717b1d5dd795212-44e7c671027ed12",
+      "title": "Create action policy API validation: rejects groupBy field name over max length",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/create_action_policy.spec.ts",
+        "line": 338,
+        "column": 10
+      }
+    },
+    {
+      "id": "717b1d5dd795212-9cde131d1cacce3",
+      "title": "Create action policy API validation: rejects unknown groupingMode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/create_action_policy.spec.ts",
+        "line": 349,
+        "column": 10
+      }
+    },
+    {
+      "id": "717b1d5dd795212-cafb37e71590901",
+      "title": "Create action policy API validation: rejects unknown throttle.strategy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/create_action_policy.spec.ts",
+        "line": 361,
+        "column": 10
+      }
+    },
+    {
+      "id": "717b1d5dd795212-2288c4cde5a772f",
+      "title": "Create action policy API validation: rejects invalid throttle.interval format",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/create_action_policy.spec.ts",
+        "line": 373,
+        "column": 10
+      }
+    },
+    {
+      "id": "717b1d5dd795212-bf0dc4989add1c8",
+      "title": "Create action policy API validation: rejects time_interval strategy without interval",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/create_action_policy.spec.ts",
+        "line": 384,
+        "column": 10
+      }
+    },
+    {
+      "id": "717b1d5dd795212-ce6cada8bef0034",
+      "title": "Create action policy API validation: rejects per_status_interval strategy without interval",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/create_action_policy.spec.ts",
+        "line": 396,
+        "column": 10
+      }
+    },
+    {
+      "id": "717b1d5dd795212-285e63ace05f3fe",
+      "title": "Create action policy API validation: rejects strategy/groupingMode combo mismatch",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/create_action_policy.spec.ts",
+        "line": 411,
+        "column": 10
+      }
+    },
+    {
+      "id": "717b1d5dd795212-10f584cf4514556",
+      "title": "Create action policy API validation: rejects unknown type enum value",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/create_action_policy.spec.ts",
+        "line": 423,
+        "column": 10
+      }
+    },
+    {
+      "id": "717b1d5dd795212-46f4b2f5ed5abed",
+      "title": "Create action policy API validation: rejects type:\"single_rule\" without ruleId",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/create_action_policy.spec.ts",
+        "line": 435,
+        "column": 10
+      }
+    },
+    {
+      "id": "717b1d5dd795212-e5a954e391543f7",
+      "title": "Create action policy API validation: rejects type:\"global\" with ruleId",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/create_action_policy.spec.ts",
+        "line": 444,
+        "column": 10
+      }
+    },
+    {
+      "id": "717b1d5dd795212-48672a9cac77d5f",
+      "title": "Create action policy API authorization: 201 with full alerting_v2 privileges (write)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/create_action_policy.spec.ts",
+        "line": 453,
+        "column": 10
+      }
+    },
+    {
+      "id": "717b1d5dd795212-d7a7638f428fb1b",
+      "title": "Create action policy API authorization: 403 with read-only alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/create_action_policy.spec.ts",
+        "line": 462,
+        "column": 10
+      }
+    },
+    {
+      "id": "717b1d5dd795212-a2afab892bff2dd",
+      "title": "Create action policy API authorization: 403 without alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/create_action_policy.spec.ts",
+        "line": 478,
+        "column": 10
+      }
+    },
+    {
+      "id": "24d6c5455389a83-66a7a1b49fe2fbf",
+      "title": "Delete action policy API delete: deletes an action policy and returns 204",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/delete_action_policy.spec.ts",
+        "line": 40,
+        "column": 10
+      }
+    },
+    {
+      "id": "24d6c5455389a83-f543693b6bcbe4a",
+      "title": "Delete action policy API not found: returns 404 for a non-existent id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/delete_action_policy.spec.ts",
+        "line": 62,
+        "column": 10
+      }
+    },
+    {
+      "id": "24d6c5455389a83-4c77b7ff62d103d",
+      "title": "Delete action policy API idempotency: returns 404 on a second delete of the same policy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/delete_action_policy.spec.ts",
+        "line": 70,
+        "column": 10
+      }
+    },
+    {
+      "id": "24d6c5455389a83-a5091d81e9544fb",
+      "title": "Delete action policy API validation: rejects id over the maximum length",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/delete_action_policy.spec.ts",
+        "line": 89,
+        "column": 10
+      }
+    },
+    {
+      "id": "24d6c5455389a83-a2401d4e8eb5dce",
+      "title": "Delete action policy API authorization: 204 with full alerting_v2 privileges (write)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/delete_action_policy.spec.ts",
+        "line": 97,
+        "column": 10
+      }
+    },
+    {
+      "id": "24d6c5455389a83-bf938059ad0a935",
+      "title": "Delete action policy API authorization: 403 with read-only alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/delete_action_policy.spec.ts",
+        "line": 112,
+        "column": 10
+      }
+    },
+    {
+      "id": "24d6c5455389a83-f4dfb47f81d6b39",
+      "title": "Delete action policy API authorization: 403 without alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/delete_action_policy.spec.ts",
+        "line": 130,
+        "column": 10
+      }
+    },
+    {
+      "id": "0255653167a0134-4e6cd68c2f23310",
+      "title": "Disable action policy API disable: disables an enabled action policy and returns enabled=false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/disable_action_policy.spec.ts",
+        "line": 40,
+        "column": 10
+      }
+    },
+    {
+      "id": "0255653167a0134-b8f8f4045a5225f",
+      "title": "Disable action policy API idempotency: disabling an already-disabled policy returns enabled=false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/disable_action_policy.spec.ts",
+        "line": 57,
+        "column": 10
+      }
+    },
+    {
+      "id": "0255653167a0134-c1de3282ed94439",
+      "title": "Disable action policy API state: preserves snoozedUntil and all other fields when disabling a snoozed policy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/disable_action_policy.spec.ts",
+        "line": 74,
+        "column": 10
+      }
+    },
+    {
+      "id": "0255653167a0134-a066fa2e33f37ef",
+      "title": "Disable action policy API not found: returns 404 for a non-existent id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/disable_action_policy.spec.ts",
+        "line": 102,
+        "column": 10
+      }
+    },
+    {
+      "id": "0255653167a0134-f68d742158ab273",
+      "title": "Disable action policy API validation: rejects id over the maximum length",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/disable_action_policy.spec.ts",
+        "line": 110,
+        "column": 10
+      }
+    },
+    {
+      "id": "0255653167a0134-3831e2af454532d",
+      "title": "Disable action policy API authorization: 200 with full alerting_v2 privileges (write)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/disable_action_policy.spec.ts",
+        "line": 121,
+        "column": 10
+      }
+    },
+    {
+      "id": "0255653167a0134-e7ccced4861935e",
+      "title": "Disable action policy API authorization: 403 with read-only alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/disable_action_policy.spec.ts",
+        "line": 137,
+        "column": 10
+      }
+    },
+    {
+      "id": "0255653167a0134-ef203adb331aa55",
+      "title": "Disable action policy API authorization: 403 without alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/disable_action_policy.spec.ts",
+        "line": 155,
+        "column": 10
+      }
+    },
+    {
+      "id": "acb54993164fe81-00570f953584f62",
+      "title": "Enable action policy API enable: enables a disabled action policy and returns enabled=true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/enable_action_policy.spec.ts",
+        "line": 40,
+        "column": 10
+      }
+    },
+    {
+      "id": "acb54993164fe81-41c77ffe3ac2b14",
+      "title": "Enable action policy API idempotency: enabling an already-enabled policy returns enabled=true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/enable_action_policy.spec.ts",
+        "line": 58,
+        "column": 10
+      }
+    },
+    {
+      "id": "acb54993164fe81-13b95f0e706af07",
+      "title": "Enable action policy API state: preserves snoozedUntil and all other fields after a disable → enable round-trip",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/enable_action_policy.spec.ts",
+        "line": 74,
+        "column": 10
+      }
+    },
+    {
+      "id": "acb54993164fe81-9052eb7eb6539fb",
+      "title": "Enable action policy API not found: returns 404 for a non-existent id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/enable_action_policy.spec.ts",
+        "line": 104,
+        "column": 10
+      }
+    },
+    {
+      "id": "acb54993164fe81-52e188835648d44",
+      "title": "Enable action policy API validation: rejects id over the maximum length",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/enable_action_policy.spec.ts",
+        "line": 112,
+        "column": 10
+      }
+    },
+    {
+      "id": "acb54993164fe81-b24aadf01f37cb4",
+      "title": "Enable action policy API authorization: 200 with full alerting_v2 privileges (write)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/enable_action_policy.spec.ts",
+        "line": 120,
+        "column": 10
+      }
+    },
+    {
+      "id": "acb54993164fe81-f2977ea0f90a625",
+      "title": "Enable action policy API authorization: 403 with read-only alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/enable_action_policy.spec.ts",
+        "line": 137,
+        "column": 10
+      }
+    },
+    {
+      "id": "acb54993164fe81-2e9939c1fabd50f",
+      "title": "Enable action policy API authorization: 403 without alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/enable_action_policy.spec.ts",
+        "line": 156,
+        "column": 10
+      }
+    },
+    {
+      "id": "476b65a9f158d82-4110715f02797d7",
+      "title": "Get action policy API get: returns full action policy by id with all schema fields populated",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/get_action_policy.spec.ts",
+        "line": 40,
+        "column": 10
+      }
+    },
+    {
+      "id": "476b65a9f158d82-b7c33ac52ca7535",
+      "title": "Get action policy API get: returns documented defaults for a minimally-created policy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/get_action_policy.spec.ts",
+        "line": 76,
+        "column": 10
+      }
+    },
+    {
+      "id": "476b65a9f158d82-fb4edfc2a56929f",
+      "title": "Get action policy API get: returns type:\"single_rule\" with ruleId for a single-rule policy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/get_action_policy.spec.ts",
+        "line": 103,
+        "column": 10
+      }
+    },
+    {
+      "id": "476b65a9f158d82-98ad92e1811c9ed",
+      "title": "Get action policy API not found: returns 404 for a non-existent id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/get_action_policy.spec.ts",
+        "line": 127,
+        "column": 10
+      }
+    },
+    {
+      "id": "476b65a9f158d82-282167b98624ea0",
+      "title": "Get action policy API validation: rejects id over the maximum length",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/get_action_policy.spec.ts",
+        "line": 135,
+        "column": 10
+      }
+    },
+    {
+      "id": "476b65a9f158d82-0b67f1e31503a48",
+      "title": "Get action policy API authorization: 200 with read-only alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/get_action_policy.spec.ts",
+        "line": 143,
+        "column": 10
+      }
+    },
+    {
+      "id": "476b65a9f158d82-07b34759a2f75b0",
+      "title": "Get action policy API authorization: 200 with full alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/get_action_policy.spec.ts",
+        "line": 159,
+        "column": 10
+      }
+    },
+    {
+      "id": "476b65a9f158d82-c85783c58aa0065",
+      "title": "Get action policy API authorization: 403 without alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/get_action_policy.spec.ts",
+        "line": 178,
+        "column": 10
+      }
+    },
+    {
+      "id": "ea6f631a7596dfa-0f6e8df04ba818e",
+      "title": "List action policies API list: returns empty list with documented defaults when no policies exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/list_action_policies.spec.ts",
+        "line": 71,
+        "column": 10
+      }
+    },
+    {
+      "id": "ea6f631a7596dfa-222537166614277",
+      "title": "List action policies API list: returns created policies with full schema fields per item",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/list_action_policies.spec.ts",
+        "line": 86,
+        "column": 10
+      }
+    },
+    {
+      "id": "ea6f631a7596dfa-4418c5820a4b919",
+      "title": "List action policies API pagination: paginates with page+perPage",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/list_action_policies.spec.ts",
+        "line": 129,
+        "column": 10
+      }
+    },
+    {
+      "id": "ea6f631a7596dfa-dd9a824440074ef",
+      "title": "List action policies API search: matches by name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/list_action_policies.spec.ts",
+        "line": 159,
+        "column": 10
+      }
+    },
+    {
+      "id": "ea6f631a7596dfa-f6df2ff697536b5",
+      "title": "List action policies API search: matches by description",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/list_action_policies.spec.ts",
+        "line": 170,
+        "column": 10
+      }
+    },
+    {
+      "id": "ea6f631a7596dfa-3c23eb3ed9c52cd",
+      "title": "List action policies API search: matches by destination id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/list_action_policies.spec.ts",
+        "line": 181,
+        "column": 10
+      }
+    },
+    {
+      "id": "ea6f631a7596dfa-8a516286dc552ab",
+      "title": "List action policies API search: returns multiple matching items for partial term",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/list_action_policies.spec.ts",
+        "line": 192,
+        "column": 10
+      }
+    },
+    {
+      "id": "ea6f631a7596dfa-5a9a21b7624a40d",
+      "title": "List action policies API search: returns empty result for non-matching term",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/list_action_policies.spec.ts",
+        "line": 208,
+        "column": 10
+      }
+    },
+    {
+      "id": "ea6f631a7596dfa-6afeb5f0cfdcebf",
+      "title": "List action policies API filter: by destinationType=workflow",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/list_action_policies.spec.ts",
+        "line": 222,
+        "column": 10
+      }
+    },
+    {
+      "id": "ea6f631a7596dfa-b5a0268c8b81d8f",
+      "title": "List action policies API filter: by createdBy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/list_action_policies.spec.ts",
+        "line": 235,
+        "column": 10
+      }
+    },
+    {
+      "id": "ea6f631a7596dfa-18a45a88bacb941",
+      "title": "List action policies API filter: by enabled=true and enabled=false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/list_action_policies.spec.ts",
+        "line": 249,
+        "column": 10
+      }
+    },
+    {
+      "id": "ea6f631a7596dfa-402632abd09e68b",
+      "title": "List action policies API filter by tags: by a single tag (string)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/list_action_policies.spec.ts",
+        "line": 269,
+        "column": 10
+      }
+    },
+    {
+      "id": "ea6f631a7596dfa-6d4dcf1beaecae4",
+      "title": "List action policies API filter by tags: by multiple tags (array)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/list_action_policies.spec.ts",
+        "line": 281,
+        "column": 10
+      }
+    },
+    {
+      "id": "ea6f631a7596dfa-d25c410c5a895e3",
+      "title": "List action policies API filter by tags: returns empty when no policies match",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/list_action_policies.spec.ts",
+        "line": 297,
+        "column": 10
+      }
+    },
+    {
+      "id": "ea6f631a7596dfa-abec28c63349d80",
+      "title": "List action policies API filter by tags: accepts a single tag wrapped in array",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/list_action_policies.spec.ts",
+        "line": 311,
+        "column": 10
+      }
+    },
+    {
+      "id": "ea6f631a7596dfa-a834953eff11175",
+      "title": "List action policies API sort: by name ascending",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/list_action_policies.spec.ts",
+        "line": 325,
+        "column": 10
+      }
+    },
+    {
+      "id": "ea6f631a7596dfa-f2cc00376ab68df",
+      "title": "List action policies API sort: by name descending",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/list_action_policies.spec.ts",
+        "line": 339,
+        "column": 10
+      }
+    },
+    {
+      "id": "ea6f631a7596dfa-4cd921332f9ea07",
+      "title": "List action policies API sort: by createdAt ascending",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/list_action_policies.spec.ts",
+        "line": 353,
+        "column": 10
+      }
+    },
+    {
+      "id": "ea6f631a7596dfa-55225f9e866d8c9",
+      "title": "List action policies API sort: by createdAt descending",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/list_action_policies.spec.ts",
+        "line": 368,
+        "column": 10
+      }
+    },
+    {
+      "id": "ea6f631a7596dfa-f2d7184c2184ddd",
+      "title": "List action policies API combined: search + sort",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/list_action_policies.spec.ts",
+        "line": 383,
+        "column": 10
+      }
+    },
+    {
+      "id": "ea6f631a7596dfa-f399f0a33f5957d",
+      "title": "List action policies API combined: search + pagination",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/list_action_policies.spec.ts",
+        "line": 396,
+        "column": 10
+      }
+    },
+    {
+      "id": "ea6f631a7596dfa-4eaed4cca06b7f4",
+      "title": "List action policies API validation: rejects page=0",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/list_action_policies.spec.ts",
+        "line": 412,
+        "column": 10
+      }
+    },
+    {
+      "id": "ea6f631a7596dfa-3ae0ff738ed8705",
+      "title": "List action policies API validation: rejects perPage=0",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/list_action_policies.spec.ts",
+        "line": 419,
+        "column": 10
+      }
+    },
+    {
+      "id": "ea6f631a7596dfa-d65a2af23520ebf",
+      "title": "List action policies API validation: rejects perPage over the maximum",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/list_action_policies.spec.ts",
+        "line": 426,
+        "column": 10
+      }
+    },
+    {
+      "id": "ea6f631a7596dfa-8e96c6cc15bd275",
+      "title": "List action policies API validation: rejects empty search",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/list_action_policies.spec.ts",
+        "line": 436,
+        "column": 10
+      }
+    },
+    {
+      "id": "ea6f631a7596dfa-012de1dcc245967",
+      "title": "List action policies API validation: rejects search over the maximum length",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/list_action_policies.spec.ts",
+        "line": 443,
+        "column": 10
+      }
+    },
+    {
+      "id": "ea6f631a7596dfa-88815d67c83dedc",
+      "title": "List action policies API validation: rejects unknown destinationType",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/list_action_policies.spec.ts",
+        "line": 453,
+        "column": 10
+      }
+    },
+    {
+      "id": "ea6f631a7596dfa-2bd728b3dd8ec2a",
+      "title": "List action policies API validation: rejects createdBy over the maximum length",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/list_action_policies.spec.ts",
+        "line": 460,
+        "column": 10
+      }
+    },
+    {
+      "id": "ea6f631a7596dfa-6f775eaae6db42c",
+      "title": "List action policies API validation: rejects unknown enabled value",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/list_action_policies.spec.ts",
+        "line": 468,
+        "column": 10
+      }
+    },
+    {
+      "id": "ea6f631a7596dfa-1f0a97734c0645a",
+      "title": "List action policies API validation: rejects unknown sortField",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/list_action_policies.spec.ts",
+        "line": 475,
+        "column": 10
+      }
+    },
+    {
+      "id": "ea6f631a7596dfa-d7b087366a4408b",
+      "title": "List action policies API validation: rejects unknown sortOrder",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/list_action_policies.spec.ts",
+        "line": 482,
+        "column": 10
+      }
+    },
+    {
+      "id": "ea6f631a7596dfa-77a2e93d13c043a",
+      "title": "List action policies API validation: rejects more than the maximum number of tags",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/list_action_policies.spec.ts",
+        "line": 489,
+        "column": 10
+      }
+    },
+    {
+      "id": "ea6f631a7596dfa-6d08f436657bdfd",
+      "title": "List action policies API validation: rejects tag over the maximum length",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/list_action_policies.spec.ts",
+        "line": 500,
+        "column": 10
+      }
+    },
+    {
+      "id": "ea6f631a7596dfa-af9c00a34bc2353",
+      "title": "List action policies API authorization: 200 with read-only alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/list_action_policies.spec.ts",
+        "line": 510,
+        "column": 10
+      }
+    },
+    {
+      "id": "ea6f631a7596dfa-e10a91a04a474a6",
+      "title": "List action policies API authorization: 200 with full alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/list_action_policies.spec.ts",
+        "line": 517,
+        "column": 10
+      }
+    },
+    {
+      "id": "ea6f631a7596dfa-667090155469fd7",
+      "title": "List action policies API authorization: 403 without alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/list_action_policies.spec.ts",
+        "line": 530,
+        "column": 10
+      }
+    },
+    {
+      "id": "3609c5982fa4d4d-240cc2406cd890a",
+      "title": "Snooze action policy API snooze: snoozes a policy with a future ISO date and returns snoozedUntil",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/snooze_action_policy.spec.ts",
+        "line": 43,
+        "column": 10
+      }
+    },
+    {
+      "id": "3609c5982fa4d4d-fcd7640545e7326",
+      "title": "Snooze action policy API state: preserves enabled=false and all other fields when snoozing a disabled policy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/snooze_action_policy.spec.ts",
+        "line": 63,
+        "column": 10
+      }
+    },
+    {
+      "id": "3609c5982fa4d4d-ef2138b94dfc20b",
+      "title": "Snooze action policy API idempotency: updates snoozedUntil when snoozing an already-snoozed policy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/snooze_action_policy.spec.ts",
+        "line": 92,
+        "column": 10
+      }
+    },
+    {
+      "id": "3609c5982fa4d4d-d5789c1eed1fb1c",
+      "title": "Snooze action policy API not found: returns 404 for a non-existent id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/snooze_action_policy.spec.ts",
+        "line": 113,
+        "column": 10
+      }
+    },
+    {
+      "id": "3609c5982fa4d4d-57c76934d744da7",
+      "title": "Snooze action policy API validation: rejects an invalid date string",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/snooze_action_policy.spec.ts",
+        "line": 122,
+        "column": 10
+      }
+    },
+    {
+      "id": "3609c5982fa4d4d-3aec773c67f55c3",
+      "title": "Snooze action policy API validation: rejects a date-only string (must include time component)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/snooze_action_policy.spec.ts",
+        "line": 135,
+        "column": 10
+      }
+    },
+    {
+      "id": "3609c5982fa4d4d-00f1bab19c97624",
+      "title": "Snooze action policy API validation: rejects empty snoozedUntil",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/snooze_action_policy.spec.ts",
+        "line": 151,
+        "column": 10
+      }
+    },
+    {
+      "id": "3609c5982fa4d4d-739993bd5dcf4dd",
+      "title": "Snooze action policy API validation: rejects missing snoozedUntil",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/snooze_action_policy.spec.ts",
+        "line": 164,
+        "column": 10
+      }
+    },
+    {
+      "id": "3609c5982fa4d4d-ff8ea86995f252f",
+      "title": "Snooze action policy API validation: rejects id over the maximum length",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/snooze_action_policy.spec.ts",
+        "line": 177,
+        "column": 10
+      }
+    },
+    {
+      "id": "3609c5982fa4d4d-a3f50f17df8c8f7",
+      "title": "Snooze action policy API authorization: 200 with full alerting_v2 privileges (write)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/snooze_action_policy.spec.ts",
+        "line": 186,
+        "column": 10
+      }
+    },
+    {
+      "id": "3609c5982fa4d4d-126776c99c85a88",
+      "title": "Snooze action policy API authorization: 403 with read-only alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/snooze_action_policy.spec.ts",
+        "line": 204,
+        "column": 10
+      }
+    },
+    {
+      "id": "3609c5982fa4d4d-7b0cc20ffff16ad",
+      "title": "Snooze action policy API authorization: 403 without alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/snooze_action_policy.spec.ts",
+        "line": 223,
+        "column": 10
+      }
+    },
+    {
+      "id": "3143a5fd4040ef3-2618bbbcdb8a8f2",
+      "title": "Unsnooze action policy API unsnooze: unsnoozes a snoozed policy and returns snoozedUntil=null",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/unsnooze_action_policy.spec.ts",
+        "line": 43,
+        "column": 10
+      }
+    },
+    {
+      "id": "3143a5fd4040ef3-4571bf366f3c733",
+      "title": "Unsnooze action policy API state: preserves enabled=false and all other fields when unsnoozing a disabled snoozed policy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/unsnooze_action_policy.spec.ts",
+        "line": 62,
+        "column": 10
+      }
+    },
+    {
+      "id": "3143a5fd4040ef3-1bdaf970f7b9e66",
+      "title": "Unsnooze action policy API idempotency: unsnoozing an already-unsnoozed policy returns snoozedUntil=null",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/unsnooze_action_policy.spec.ts",
+        "line": 90,
+        "column": 10
+      }
+    },
+    {
+      "id": "3143a5fd4040ef3-396e9e73b74f509",
+      "title": "Unsnooze action policy API not found: returns 404 for a non-existent id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/unsnooze_action_policy.spec.ts",
+        "line": 106,
+        "column": 10
+      }
+    },
+    {
+      "id": "3143a5fd4040ef3-9fef0d1ddbfcfba",
+      "title": "Unsnooze action policy API validation: rejects id over the maximum length",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/unsnooze_action_policy.spec.ts",
+        "line": 114,
+        "column": 10
+      }
+    },
+    {
+      "id": "3143a5fd4040ef3-15d880b8d9dc5b6",
+      "title": "Unsnooze action policy API authorization: 200 with full alerting_v2 privileges (write)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/unsnooze_action_policy.spec.ts",
+        "line": 125,
+        "column": 10
+      }
+    },
+    {
+      "id": "3143a5fd4040ef3-d506c6084a2e31b",
+      "title": "Unsnooze action policy API authorization: 403 with read-only alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/unsnooze_action_policy.spec.ts",
+        "line": 142,
+        "column": 10
+      }
+    },
+    {
+      "id": "3143a5fd4040ef3-f6fe7fdc56d9483",
+      "title": "Unsnooze action policy API authorization: 403 without alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/unsnooze_action_policy.spec.ts",
+        "line": 161,
+        "column": 10
+      }
+    },
+    {
+      "id": "1a291f05edca462-cf58298a6445c32",
+      "title": "Update action policy API key API update: rotates the API key and returns 204",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/update_action_policy_api_key.spec.ts",
+        "line": 40,
+        "column": 10
+      }
+    },
+    {
+      "id": "1a291f05edca462-c074795ada18178",
+      "title": "Update action policy API key API state: preserves all policy attributes after rotating the API key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/update_action_policy_api_key.spec.ts",
+        "line": 60,
+        "column": 10
+      }
+    },
+    {
+      "id": "1a291f05edca462-3df1ffd3ec16a13",
+      "title": "Update action policy API key API not found: returns 404 for a non-existent id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/update_action_policy_api_key.spec.ts",
+        "line": 93,
+        "column": 10
+      }
+    },
+    {
+      "id": "1a291f05edca462-707e3a651284f86",
+      "title": "Update action policy API key API validation: rejects id over the maximum length",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/update_action_policy_api_key.spec.ts",
+        "line": 101,
+        "column": 10
+      }
+    },
+    {
+      "id": "1a291f05edca462-94977b8d1865081",
+      "title": "Update action policy API key API authorization: 204 with full alerting_v2 privileges (write)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/update_action_policy_api_key.spec.ts",
+        "line": 112,
+        "column": 10
+      }
+    },
+    {
+      "id": "1a291f05edca462-50d7135da4d280a",
+      "title": "Update action policy API key API authorization: 403 with read-only alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/update_action_policy_api_key.spec.ts",
+        "line": 127,
+        "column": 10
+      }
+    },
+    {
+      "id": "1a291f05edca462-f72cc12d12826a1",
+      "title": "Update action policy API key API authorization: 403 without alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/update_action_policy_api_key.spec.ts",
+        "line": 145,
+        "column": 10
+      }
+    },
+    {
+      "id": "a8fc5210d033b5a-bc92b37ba9f3a80",
+      "title": "Update action policy API update: patches all mutable fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/update_action_policy.spec.ts",
+        "line": 40,
+        "column": 10
+      }
+    },
+    {
+      "id": "a8fc5210d033b5a-a16be2f5e8608b7",
+      "title": "Update action policy API partial: updates only name and preserves other fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/update_action_policy.spec.ts",
+        "line": 81,
+        "column": 10
+      }
+    },
+    {
+      "id": "a8fc5210d033b5a-c1591b3aba4da1d",
+      "title": "Update action policy API partial: updates only description and preserves other fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/update_action_policy.spec.ts",
+        "line": 112,
+        "column": 10
+      }
+    },
+    {
+      "id": "a8fc5210d033b5a-706dacc0a5c89bc",
+      "title": "Update action policy API partial: updates matcher/groupBy/throttle and preserves name/description/destinations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/update_action_policy.spec.ts",
+        "line": 143,
+        "column": 10
+      }
+    },
+    {
+      "id": "a8fc5210d033b5a-64c4d3294d80708",
+      "title": "Update action policy API partial: updates only destinations and preserves other fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/update_action_policy.spec.ts",
+        "line": 179,
+        "column": 10
+      }
+    },
+    {
+      "id": "a8fc5210d033b5a-ec31a73a541792f",
+      "title": "Update action policy API partial: updates groupingMode and throttle strategy together",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/update_action_policy.spec.ts",
+        "line": 213,
+        "column": 10
+      }
+    },
+    {
+      "id": "a8fc5210d033b5a-2f987a9c63b8b2d",
+      "title": "Update action policy API transition: clears throttle.interval when moving to an intervalless strategy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/update_action_policy.spec.ts",
+        "line": 245,
+        "column": 10
+      }
+    },
+    {
+      "id": "a8fc5210d033b5a-18be1b4781cfd7b",
+      "title": "Update action policy API nullable: clears groupingMode/groupBy/throttle when set to null",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/update_action_policy.spec.ts",
+        "line": 278,
+        "column": 10
+      }
+    },
+    {
+      "id": "a8fc5210d033b5a-1c4f4edab7658fb",
+      "title": "Update action policy API nullable: clears matcher/groupBy/throttle when set to null",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/update_action_policy.spec.ts",
+        "line": 309,
+        "column": 10
+      }
+    },
+    {
+      "id": "a8fc5210d033b5a-e201559d6dd0f5b",
+      "title": "Update action policy API concurrency: returns 409 when version is stale",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/update_action_policy.spec.ts",
+        "line": 344,
+        "column": 10
+      }
+    },
+    {
+      "id": "a8fc5210d033b5a-2d95e6fa748ce2b",
+      "title": "Update action policy API not found: returns 404 for a non-existent id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/update_action_policy.spec.ts",
+        "line": 367,
+        "column": 10
+      }
+    },
+    {
+      "id": "a8fc5210d033b5a-ee74b5ac82d201e",
+      "title": "Update action policy API validation: rejects empty destinations array",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/update_action_policy.spec.ts",
+        "line": 381,
+        "column": 10
+      }
+    },
+    {
+      "id": "a8fc5210d033b5a-cc1d5cc0f53866f",
+      "title": "Update action policy API validation: rejects missing version",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/update_action_policy.spec.ts",
+        "line": 394,
+        "column": 10
+      }
+    },
+    {
+      "id": "a8fc5210d033b5a-1f7b868ed0e2bfd",
+      "title": "Update action policy API validation: rejects empty version",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/update_action_policy.spec.ts",
+        "line": 407,
+        "column": 10
+      }
+    },
+    {
+      "id": "a8fc5210d033b5a-b5eae8a769fd505",
+      "title": "Update action policy API validation: rejects version over the maximum length",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/update_action_policy.spec.ts",
+        "line": 420,
+        "column": 10
+      }
+    },
+    {
+      "id": "a8fc5210d033b5a-573a59b19e72ce8",
+      "title": "Update action policy API validation: rejects empty name (when name is provided)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/update_action_policy.spec.ts",
+        "line": 439,
+        "column": 10
+      }
+    },
+    {
+      "id": "a8fc5210d033b5a-fc1f9724f13e296",
+      "title": "Update action policy API validation: rejects name over the maximum length",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/update_action_policy.spec.ts",
+        "line": 455,
+        "column": 10
+      }
+    },
+    {
+      "id": "a8fc5210d033b5a-a774d238664ea04",
+      "title": "Update action policy API validation: rejects immutable field \"type\" (.strict() schema)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/update_action_policy.spec.ts",
+        "line": 474,
+        "column": 10
+      }
+    },
+    {
+      "id": "a8fc5210d033b5a-0c647a4de4838fa",
+      "title": "Update action policy API validation: rejects immutable field \"ruleId\" (.strict() schema)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/update_action_policy.spec.ts",
+        "line": 490,
+        "column": 10
+      }
+    },
+    {
+      "id": "a8fc5210d033b5a-1c9c8f99174e181",
+      "title": "Update action policy API validation: rejects unknown extra field (.strict() schema)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/update_action_policy.spec.ts",
+        "line": 506,
+        "column": 10
+      }
+    },
+    {
+      "id": "a8fc5210d033b5a-d714948d4067473",
+      "title": "Update action policy API validation: rejects id over the maximum length",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/update_action_policy.spec.ts",
+        "line": 522,
+        "column": 10
+      }
+    },
+    {
+      "id": "a8fc5210d033b5a-6abfb5301e238f6",
+      "title": "Update action policy API authorization: 200 with full alerting_v2 privileges (write)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/update_action_policy.spec.ts",
+        "line": 534,
+        "column": 10
+      }
+    },
+    {
+      "id": "a8fc5210d033b5a-37f001a762f916f",
+      "title": "Update action policy API authorization: 403 with read-only alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/update_action_policy.spec.ts",
+        "line": 551,
+        "column": 10
+      }
+    },
+    {
+      "id": "a8fc5210d033b5a-250c026435f9056",
+      "title": "Update action policy API authorization: 403 without alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/update_action_policy.spec.ts",
+        "line": 570,
+        "column": 10
+      }
+    },
+    {
+      "id": "8df59c544b9f3ba-805847d0d774101",
+      "title": "Upsert action policy API upsert: 201 creates with the supplied id when it does not exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/upsert_action_policy.spec.ts",
+        "line": 41,
+        "column": 10
+      }
+    },
+    {
+      "id": "8df59c544b9f3ba-ebb223840750ff7",
+      "title": "Upsert action policy API type: defaults to \"global\" on create-via-PUT",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/upsert_action_policy.spec.ts",
+        "line": 69,
+        "column": 10
+      }
+    },
+    {
+      "id": "8df59c544b9f3ba-510abe7dfcdf47c",
+      "title": "Upsert action policy API type: creates with type:\"single_rule\" linked to an existing rule via PUT",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/upsert_action_policy.spec.ts",
+        "line": 81,
+        "column": 10
+      }
+    },
+    {
+      "id": "8df59c544b9f3ba-f16ccd99eb0d2e7",
+      "title": "Upsert action policy API upsert: 200 replaces and rotates version+updatedAt, preserves createdAt/createdBy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/upsert_action_policy.spec.ts",
+        "line": 103,
+        "column": 10
+      }
+    },
+    {
+      "id": "8df59c544b9f3ba-816fd9a5006b283",
+      "title": "Upsert action policy API upsert: replace drops fields not present in the new body",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/upsert_action_policy.spec.ts",
+        "line": 142,
+        "column": 10
+      }
+    },
+    {
+      "id": "8df59c544b9f3ba-a7aa00b3b491d6e",
+      "title": "Upsert action policy API upsert: preserves enabled=false on replace",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/upsert_action_policy.spec.ts",
+        "line": 169,
+        "column": 10
+      }
+    },
+    {
+      "id": "8df59c544b9f3ba-415d3556d9845d4",
+      "title": "Upsert action policy API upsert: preserves snoozedUntil on replace",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/upsert_action_policy.spec.ts",
+        "line": 186,
+        "column": 10
+      }
+    },
+    {
+      "id": "8df59c544b9f3ba-36ee3e908395c38",
+      "title": "Upsert action policy API validation: rejects missing name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/upsert_action_policy.spec.ts",
+        "line": 205,
+        "column": 10
+      }
+    },
+    {
+      "id": "8df59c544b9f3ba-c992e82524d541f",
+      "title": "Upsert action policy API validation: rejects missing description",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/upsert_action_policy.spec.ts",
+        "line": 217,
+        "column": 10
+      }
+    },
+    {
+      "id": "8df59c544b9f3ba-095705cbdab647b",
+      "title": "Upsert action policy API validation: rejects missing destinations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/upsert_action_policy.spec.ts",
+        "line": 229,
+        "column": 10
+      }
+    },
+    {
+      "id": "8df59c544b9f3ba-15021fdec2db164",
+      "title": "Upsert action policy API validation: rejects empty destinations array",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/upsert_action_policy.spec.ts",
+        "line": 238,
+        "column": 10
+      }
+    },
+    {
+      "id": "8df59c544b9f3ba-fb9f8bfd051f210",
+      "title": "Upsert action policy API validation: rejects name over the maximum length",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/upsert_action_policy.spec.ts",
+        "line": 247,
+        "column": 10
+      }
+    },
+    {
+      "id": "8df59c544b9f3ba-1213d7779379485",
+      "title": "Upsert action policy API validation: rejects destination with unknown type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/upsert_action_policy.spec.ts",
+        "line": 256,
+        "column": 10
+      }
+    },
+    {
+      "id": "8df59c544b9f3ba-a6c3dbe8b0f6d53",
+      "title": "Upsert action policy API validation: rejects strategy/groupingMode combo mismatch",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/upsert_action_policy.spec.ts",
+        "line": 270,
+        "column": 10
+      }
+    },
+    {
+      "id": "8df59c544b9f3ba-6c9bf2e26e5d953",
+      "title": "Upsert action policy API validation: rejects time_interval strategy without interval",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/upsert_action_policy.spec.ts",
+        "line": 282,
+        "column": 10
+      }
+    },
+    {
+      "id": "8df59c544b9f3ba-1c7429cf1685fe5",
+      "title": "Upsert action policy API validation: rejects type:\"single_rule\" without ruleId",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/upsert_action_policy.spec.ts",
+        "line": 294,
+        "column": 10
+      }
+    },
+    {
+      "id": "8df59c544b9f3ba-ebb053400bc9f14",
+      "title": "Upsert action policy API validation: rejects type:\"global\" with ruleId",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/upsert_action_policy.spec.ts",
+        "line": 303,
+        "column": 10
+      }
+    },
+    {
+      "id": "8df59c544b9f3ba-0ab4f282cccb598",
+      "title": "Upsert action policy API authorization: 201 with full alerting_v2 privileges (write)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/upsert_action_policy.spec.ts",
+        "line": 312,
+        "column": 10
+      }
+    },
+    {
+      "id": "8df59c544b9f3ba-1a9ff99982024a4",
+      "title": "Upsert action policy API authorization: 403 with read-only alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/upsert_action_policy.spec.ts",
+        "line": 321,
+        "column": 10
+      }
+    },
+    {
+      "id": "8df59c544b9f3ba-8178836cc840dbf",
+      "title": "Upsert action policy API authorization: 403 without alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/upsert_action_policy.spec.ts",
+        "line": 337,
+        "column": 10
+      }
+    },
+    {
+      "id": "7f265c4c979f2ab-45b3c8c41811a8e",
+      "title": "Bulk create alert actions API bulk: processes a single valid item and returns counts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/bulk_create_alert_action.spec.ts",
+        "line": 39,
+        "column": 10
+      }
+    },
+    {
+      "id": "7f265c4c979f2ab-5fc3e1026b2bfac",
+      "title": "Bulk create alert actions API bulk: processes mixed action types and persists each side effect",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/bulk_create_alert_action.spec.ts",
+        "line": 76,
+        "column": 10
+      }
+    },
+    {
+      "id": "7f265c4c979f2ab-a9c7bc7fe8d6898",
+      "title": "Bulk create alert actions API partial success: returns processed < total when some group_hashes are unknown",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/bulk_create_alert_action.spec.ts",
+        "line": 137,
+        "column": 10
+      }
+    },
+    {
+      "id": "7f265c4c979f2ab-c96fba54e0af6b5",
+      "title": "Bulk create alert actions API partial success: returns processed=0 when every group_hash is unknown",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/bulk_create_alert_action.spec.ts",
+        "line": 180,
+        "column": 10
+      }
+    },
+    {
+      "id": "7f265c4c979f2ab-c55706ee9bd2e93",
+      "title": "Bulk create alert actions API schema: rejects an empty array with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/bulk_create_alert_action.spec.ts",
+        "line": 208,
+        "column": 10
+      }
+    },
+    {
+      "id": "7f265c4c979f2ab-35fd004f301115e",
+      "title": "Bulk create alert actions API schema: rejects more than 100 items with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/bulk_create_alert_action.spec.ts",
+        "line": 217,
+        "column": 10
+      }
+    },
+    {
+      "id": "7f265c4c979f2ab-de12af21c288402",
+      "title": "Bulk create alert actions API schema: rejects an item missing group_hash with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/bulk_create_alert_action.spec.ts",
+        "line": 232,
+        "column": 10
+      }
+    },
+    {
+      "id": "7f265c4c979f2ab-51b9f472502ef1b",
+      "title": "Bulk create alert actions API schema: rejects an item with unknown action_type with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/bulk_create_alert_action.spec.ts",
+        "line": 241,
+        "column": 10
+      }
+    },
+    {
+      "id": "7f265c4c979f2ab-0d2d20b069962e9",
+      "title": "Bulk create alert actions API schema: rejects an item with an invalid per-action body with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/bulk_create_alert_action.spec.ts",
+        "line": 250,
+        "column": 10
+      }
+    },
+    {
+      "id": "7f265c4c979f2ab-e634706f03876a8",
+      "title": "Bulk create alert actions API schema: rejects an item with empty group_hash with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/bulk_create_alert_action.spec.ts",
+        "line": 264,
+        "column": 10
+      }
+    },
+    {
+      "id": "7f265c4c979f2ab-7a8a541a4ec37e7",
+      "title": "Bulk create alert actions API schema: rejects an item with group_hash over 256 chars with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/bulk_create_alert_action.spec.ts",
+        "line": 273,
+        "column": 10
+      }
+    },
+    {
+      "id": "7f265c4c979f2ab-df676190a5bc5c1",
+      "title": "Bulk create alert actions API schema: rejects a non-array body with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/bulk_create_alert_action.spec.ts",
+        "line": 285,
+        "column": 10
+      }
+    },
+    {
+      "id": "7f265c4c979f2ab-13da9c7e8f8ad00",
+      "title": "Bulk create alert actions API authorization: returns 403 for a user with read-only alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/bulk_create_alert_action.spec.ts",
+        "line": 294,
+        "column": 10
+      }
+    },
+    {
+      "id": "7f265c4c979f2ab-1f6d426ead65ee3",
+      "title": "Bulk create alert actions API authorization: returns 403 for a user without alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/bulk_create_alert_action.spec.ts",
+        "line": 316,
+        "column": 10
+      }
+    },
+    {
+      "id": "a14489fc8c23d82-a57eaa7b3356fdf",
+      "title": "Create ack alert action API ack: writes an ack action and returns 204",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_ack_alert_action.spec.ts",
+        "line": 45,
+        "column": 10
+      }
+    },
+    {
+      "id": "a14489fc8c23d82-ae6edbc3e7f1f41",
+      "title": "Create ack alert action API schema: rejects body missing episode_id with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_ack_alert_action.spec.ts",
+        "line": 75,
+        "column": 10
+      }
+    },
+    {
+      "id": "a14489fc8c23d82-c82f814f625b21f",
+      "title": "Create ack alert action API schema: rejects empty episode_id with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_ack_alert_action.spec.ts",
+        "line": 83,
+        "column": 10
+      }
+    },
+    {
+      "id": "a14489fc8c23d82-b33e8b147dfe956",
+      "title": "Create ack alert action API schema: rejects episode_id over 150 chars with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_ack_alert_action.spec.ts",
+        "line": 91,
+        "column": 10
+      }
+    },
+    {
+      "id": "a14489fc8c23d82-0e3dac89f489830",
+      "title": "Create ack alert action API schema: rejects unknown body fields (strict mode) with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_ack_alert_action.spec.ts",
+        "line": 99,
+        "column": 10
+      }
+    },
+    {
+      "id": "a14489fc8c23d82-f74b001cd15f206",
+      "title": "Create ack alert action API schema: rejects group_hash over 256 chars with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_ack_alert_action.spec.ts",
+        "line": 107,
+        "column": 10
+      }
+    },
+    {
+      "id": "a14489fc8c23d82-facd4d7fed2ad66",
+      "title": "Create ack alert action API returns 404 when group_hash matches no events",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_ack_alert_action.spec.ts",
+        "line": 115,
+        "column": 10
+      }
+    },
+    {
+      "id": "a14489fc8c23d82-b9150b1d7ce3819",
+      "title": "Create ack alert action API returns 404 when episode_id matches no events for the group",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_ack_alert_action.spec.ts",
+        "line": 123,
+        "column": 10
+      }
+    },
+    {
+      "id": "a14489fc8c23d82-fa41f1ec8084501",
+      "title": "Create ack alert action API authorization: returns 403 for a user with read-only alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_ack_alert_action.spec.ts",
+        "line": 143,
+        "column": 10
+      }
+    },
+    {
+      "id": "a14489fc8c23d82-a81a62422659419",
+      "title": "Create ack alert action API authorization: returns 403 for a user without alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_ack_alert_action.spec.ts",
+        "line": 157,
+        "column": 10
+      }
+    },
+    {
+      "id": "01393b66d46e76a-bc454278ec1a979",
+      "title": "Create activate alert action API activate: writes an activate action and returns 204",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_activate_alert_action.spec.ts",
+        "line": 39,
+        "column": 10
+      }
+    },
+    {
+      "id": "01393b66d46e76a-f761fefd7afc051",
+      "title": "Create activate alert action API schema: rejects body missing reason with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_activate_alert_action.spec.ts",
+        "line": 72,
+        "column": 10
+      }
+    },
+    {
+      "id": "01393b66d46e76a-46ab3746c0c8158",
+      "title": "Create activate alert action API schema: rejects empty reason with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_activate_alert_action.spec.ts",
+        "line": 80,
+        "column": 10
+      }
+    },
+    {
+      "id": "01393b66d46e76a-21e56ef81589cba",
+      "title": "Create activate alert action API schema: rejects reason over 1024 chars with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_activate_alert_action.spec.ts",
+        "line": 88,
+        "column": 10
+      }
+    },
+    {
+      "id": "01393b66d46e76a-3de3c0e389624d0",
+      "title": "Create activate alert action API schema: rejects unknown body fields (strict mode) with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_activate_alert_action.spec.ts",
+        "line": 96,
+        "column": 10
+      }
+    },
+    {
+      "id": "01393b66d46e76a-d1349a8d9265c13",
+      "title": "Create activate alert action API schema: rejects group_hash over 256 chars with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_activate_alert_action.spec.ts",
+        "line": 104,
+        "column": 10
+      }
+    },
+    {
+      "id": "01393b66d46e76a-f19d227f4d55353",
+      "title": "Create activate alert action API returns 404 when group_hash matches no events",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_activate_alert_action.spec.ts",
+        "line": 112,
+        "column": 10
+      }
+    },
+    {
+      "id": "01393b66d46e76a-717bde11704c2e0",
+      "title": "Create activate alert action API authorization: returns 403 for a user with read-only alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_activate_alert_action.spec.ts",
+        "line": 120,
+        "column": 10
+      }
+    },
+    {
+      "id": "01393b66d46e76a-8435c4bbc21382e",
+      "title": "Create activate alert action API authorization: returns 403 for a user without alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_activate_alert_action.spec.ts",
+        "line": 137,
+        "column": 10
+      }
+    },
+    {
+      "id": "36936856b615a46-d650fb82bcba425",
+      "title": "Create assign alert action API assign: writes an assign action with assignee_uid and returns 204",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_assign_alert_action.spec.ts",
+        "line": 39,
+        "column": 10
+      }
+    },
+    {
+      "id": "36936856b615a46-75a5ca1dec303c5",
+      "title": "Create assign alert action API assign: null assignee_uid clears the assignee and returns 204",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_assign_alert_action.spec.ts",
+        "line": 74,
+        "column": 10
+      }
+    },
+    {
+      "id": "36936856b615a46-5c6d1ef765a457f",
+      "title": "Create assign alert action API schema: rejects body missing episode_id with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_assign_alert_action.spec.ts",
+        "line": 107,
+        "column": 10
+      }
+    },
+    {
+      "id": "36936856b615a46-a68a24c5b76cb6f",
+      "title": "Create assign alert action API schema: rejects body missing assignee_uid with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_assign_alert_action.spec.ts",
+        "line": 115,
+        "column": 10
+      }
+    },
+    {
+      "id": "36936856b615a46-0548b04982f639a",
+      "title": "Create assign alert action API schema: rejects empty episode_id with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_assign_alert_action.spec.ts",
+        "line": 123,
+        "column": 10
+      }
+    },
+    {
+      "id": "36936856b615a46-6a197aaa0e0a77a",
+      "title": "Create assign alert action API schema: rejects episode_id over 150 chars with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_assign_alert_action.spec.ts",
+        "line": 131,
+        "column": 10
+      }
+    },
+    {
+      "id": "36936856b615a46-6b8f80f1551894a",
+      "title": "Create assign alert action API schema: rejects assignee_uid over 256 chars with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_assign_alert_action.spec.ts",
+        "line": 140,
+        "column": 10
+      }
+    },
+    {
+      "id": "36936856b615a46-fc757b6c24da49a",
+      "title": "Create assign alert action API schema: rejects assignee_uid that is neither string nor null with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_assign_alert_action.spec.ts",
+        "line": 148,
+        "column": 10
+      }
+    },
+    {
+      "id": "36936856b615a46-e6e3823e24a1551",
+      "title": "Create assign alert action API schema: rejects unknown body fields (strict mode) with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_assign_alert_action.spec.ts",
+        "line": 159,
+        "column": 10
+      }
+    },
+    {
+      "id": "36936856b615a46-8b4a72435223e0a",
+      "title": "Create assign alert action API schema: rejects group_hash over 256 chars with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_assign_alert_action.spec.ts",
+        "line": 167,
+        "column": 10
+      }
+    },
+    {
+      "id": "36936856b615a46-c5fa3c3e3921814",
+      "title": "Create assign alert action API returns 404 when group_hash matches no events",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_assign_alert_action.spec.ts",
+        "line": 175,
+        "column": 10
+      }
+    },
+    {
+      "id": "36936856b615a46-552dff4b19e052e",
+      "title": "Create assign alert action API returns 404 when episode_id matches no events for the group",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_assign_alert_action.spec.ts",
+        "line": 183,
+        "column": 10
+      }
+    },
+    {
+      "id": "36936856b615a46-1d6c48fcffd46bf",
+      "title": "Create assign alert action API authorization: returns 403 for a user with read-only alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_assign_alert_action.spec.ts",
+        "line": 203,
+        "column": 10
+      }
+    },
+    {
+      "id": "36936856b615a46-6306333415e9f80",
+      "title": "Create assign alert action API authorization: returns 403 for a user without alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_assign_alert_action.spec.ts",
+        "line": 217,
+        "column": 10
+      }
+    },
+    {
+      "id": "a7e7965b0f2cbf1-98686cb3a728e68",
+      "title": "Create deactivate alert action API deactivate: writes a deactivate action and returns 204",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_deactivate_alert_action.spec.ts",
+        "line": 39,
+        "column": 10
+      }
+    },
+    {
+      "id": "a7e7965b0f2cbf1-487e1bf243ad021",
+      "title": "Create deactivate alert action API schema: rejects body missing reason with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_deactivate_alert_action.spec.ts",
+        "line": 76,
+        "column": 10
+      }
+    },
+    {
+      "id": "a7e7965b0f2cbf1-4a316ad8b262c8f",
+      "title": "Create deactivate alert action API schema: rejects empty reason with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_deactivate_alert_action.spec.ts",
+        "line": 85,
+        "column": 10
+      }
+    },
+    {
+      "id": "a7e7965b0f2cbf1-eb9efa862a043f9",
+      "title": "Create deactivate alert action API schema: rejects reason over 1024 chars with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_deactivate_alert_action.spec.ts",
+        "line": 94,
+        "column": 10
+      }
+    },
+    {
+      "id": "a7e7965b0f2cbf1-2d3e06701f9306e",
+      "title": "Create deactivate alert action API schema: rejects unknown body fields (strict mode) with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_deactivate_alert_action.spec.ts",
+        "line": 103,
+        "column": 10
+      }
+    },
+    {
+      "id": "a7e7965b0f2cbf1-5cbce64da2c4462",
+      "title": "Create deactivate alert action API schema: rejects group_hash over 256 chars with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_deactivate_alert_action.spec.ts",
+        "line": 112,
+        "column": 10
+      }
+    },
+    {
+      "id": "a7e7965b0f2cbf1-9588ef9eddb155f",
+      "title": "Create deactivate alert action API returns 404 when group_hash matches no events",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_deactivate_alert_action.spec.ts",
+        "line": 121,
+        "column": 10
+      }
+    },
+    {
+      "id": "a7e7965b0f2cbf1-f6561442bc9621b",
+      "title": "Create deactivate alert action API authorization: returns 403 for a user with read-only alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_deactivate_alert_action.spec.ts",
+        "line": 130,
+        "column": 10
+      }
+    },
+    {
+      "id": "a7e7965b0f2cbf1-787d9672ac4fbc9",
+      "title": "Create deactivate alert action API authorization: returns 403 for a user without alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_deactivate_alert_action.spec.ts",
+        "line": 149,
+        "column": 10
+      }
+    },
+    {
+      "id": "56d52f61f45a190-6ddb4f565b4e260",
+      "title": "Create snooze alert action API snooze: writes a snooze action with expiry and returns 204",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_snooze_alert_action.spec.ts",
+        "line": 39,
+        "column": 10
+      }
+    },
+    {
+      "id": "56d52f61f45a190-1351bbe43fd26ef",
+      "title": "Create snooze alert action API snooze: writes a snooze action without expiry and returns 204",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_snooze_alert_action.spec.ts",
+        "line": 72,
+        "column": 10
+      }
+    },
+    {
+      "id": "56d52f61f45a190-beb1b6a014259c2",
+      "title": "Create snooze alert action API schema: rejects expiry that is not ISO 8601 with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_snooze_alert_action.spec.ts",
+        "line": 103,
+        "column": 10
+      }
+    },
+    {
+      "id": "56d52f61f45a190-56c3a01cc9fbed8",
+      "title": "Create snooze alert action API schema: rejects expiry without the time component with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_snooze_alert_action.spec.ts",
+        "line": 111,
+        "column": 10
+      }
+    },
+    {
+      "id": "56d52f61f45a190-051a9fa74ae6e2e",
+      "title": "Create snooze alert action API schema: rejects unknown body fields (strict mode) with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_snooze_alert_action.spec.ts",
+        "line": 121,
+        "column": 10
+      }
+    },
+    {
+      "id": "56d52f61f45a190-0bea23eebbbd8ab",
+      "title": "Create snooze alert action API schema: rejects group_hash over 256 chars with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_snooze_alert_action.spec.ts",
+        "line": 129,
+        "column": 10
+      }
+    },
+    {
+      "id": "56d52f61f45a190-8121de32545b23f",
+      "title": "Create snooze alert action API returns 404 when group_hash matches no events",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_snooze_alert_action.spec.ts",
+        "line": 137,
+        "column": 10
+      }
+    },
+    {
+      "id": "56d52f61f45a190-4b51fecc4e78d94",
+      "title": "Create snooze alert action API authorization: returns 403 for a user with read-only alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_snooze_alert_action.spec.ts",
+        "line": 145,
+        "column": 10
+      }
+    },
+    {
+      "id": "56d52f61f45a190-fe9a02eda032581",
+      "title": "Create snooze alert action API authorization: returns 403 for a user without alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_snooze_alert_action.spec.ts",
+        "line": 159,
+        "column": 10
+      }
+    },
+    {
+      "id": "3891a216d7f0f80-d117fbd1bb632ee",
+      "title": "Create tag alert action API tag: writes a tag action and returns 204",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_tag_alert_action.spec.ts",
+        "line": 39,
+        "column": 10
+      }
+    },
+    {
+      "id": "3891a216d7f0f80-763b9c828ac3b2d",
+      "title": "Create tag alert action API tag: accepts an empty tags array and returns 204",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_tag_alert_action.spec.ts",
+        "line": 69,
+        "column": 10
+      }
+    },
+    {
+      "id": "3891a216d7f0f80-23866ebe8a575a7",
+      "title": "Create tag alert action API schema: rejects body missing tags with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_tag_alert_action.spec.ts",
+        "line": 102,
+        "column": 10
+      }
+    },
+    {
+      "id": "3891a216d7f0f80-1a7b0ba8bb0c7ad",
+      "title": "Create tag alert action API schema: rejects more than 20 tags with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_tag_alert_action.spec.ts",
+        "line": 110,
+        "column": 10
+      }
+    },
+    {
+      "id": "3891a216d7f0f80-3a86f35b1f75dde",
+      "title": "Create tag alert action API schema: rejects an empty tag string with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_tag_alert_action.spec.ts",
+        "line": 118,
+        "column": 10
+      }
+    },
+    {
+      "id": "3891a216d7f0f80-8a80bfaf73053e6",
+      "title": "Create tag alert action API schema: rejects a tag over 128 chars with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_tag_alert_action.spec.ts",
+        "line": 126,
+        "column": 10
+      }
+    },
+    {
+      "id": "3891a216d7f0f80-9571ab0bf4e8280",
+      "title": "Create tag alert action API schema: rejects non-string tag elements with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_tag_alert_action.spec.ts",
+        "line": 134,
+        "column": 10
+      }
+    },
+    {
+      "id": "3891a216d7f0f80-f81e7f2d1741058",
+      "title": "Create tag alert action API schema: rejects unknown body fields (strict mode) with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_tag_alert_action.spec.ts",
+        "line": 142,
+        "column": 10
+      }
+    },
+    {
+      "id": "3891a216d7f0f80-c481ce7af8f6b0e",
+      "title": "Create tag alert action API schema: rejects group_hash over 256 chars with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_tag_alert_action.spec.ts",
+        "line": 150,
+        "column": 10
+      }
+    },
+    {
+      "id": "3891a216d7f0f80-a660d2d019b829b",
+      "title": "Create tag alert action API returns 404 when group_hash matches no events",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_tag_alert_action.spec.ts",
+        "line": 158,
+        "column": 10
+      }
+    },
+    {
+      "id": "3891a216d7f0f80-ce7af2912a99812",
+      "title": "Create tag alert action API authorization: returns 403 for a user with read-only alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_tag_alert_action.spec.ts",
+        "line": 166,
+        "column": 10
+      }
+    },
+    {
+      "id": "3891a216d7f0f80-4d75b9257dd367d",
+      "title": "Create tag alert action API authorization: returns 403 for a user without alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_tag_alert_action.spec.ts",
+        "line": 180,
+        "column": 10
+      }
+    },
+    {
+      "id": "854ae3d69d4449e-ac5eb43c121bcb4",
+      "title": "Create unack alert action API unack: writes an unack action and returns 204",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_unack_alert_action.spec.ts",
+        "line": 38,
+        "column": 10
+      }
+    },
+    {
+      "id": "854ae3d69d4449e-50ef3d5201ca969",
+      "title": "Create unack alert action API schema: rejects body missing episode_id with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_unack_alert_action.spec.ts",
+        "line": 68,
+        "column": 10
+      }
+    },
+    {
+      "id": "854ae3d69d4449e-82dfab928fc6f1f",
+      "title": "Create unack alert action API schema: rejects empty episode_id with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_unack_alert_action.spec.ts",
+        "line": 76,
+        "column": 10
+      }
+    },
+    {
+      "id": "854ae3d69d4449e-81e00e4906a5c73",
+      "title": "Create unack alert action API schema: rejects episode_id over 150 chars with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_unack_alert_action.spec.ts",
+        "line": 84,
+        "column": 10
+      }
+    },
+    {
+      "id": "854ae3d69d4449e-177568c80d303ed",
+      "title": "Create unack alert action API schema: rejects unknown body fields (strict mode) with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_unack_alert_action.spec.ts",
+        "line": 92,
+        "column": 10
+      }
+    },
+    {
+      "id": "854ae3d69d4449e-ccd38f2956de307",
+      "title": "Create unack alert action API schema: rejects group_hash over 256 chars with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_unack_alert_action.spec.ts",
+        "line": 100,
+        "column": 10
+      }
+    },
+    {
+      "id": "854ae3d69d4449e-514dd70b61cb658",
+      "title": "Create unack alert action API returns 404 when group_hash matches no events",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_unack_alert_action.spec.ts",
+        "line": 108,
+        "column": 10
+      }
+    },
+    {
+      "id": "854ae3d69d4449e-75ce0e2fd073206",
+      "title": "Create unack alert action API returns 404 when episode_id matches no events for the group",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_unack_alert_action.spec.ts",
+        "line": 116,
+        "column": 10
+      }
+    },
+    {
+      "id": "854ae3d69d4449e-5865f412a128ba7",
+      "title": "Create unack alert action API authorization: returns 403 for a user with read-only alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_unack_alert_action.spec.ts",
+        "line": 136,
+        "column": 10
+      }
+    },
+    {
+      "id": "854ae3d69d4449e-eb9766fe2b128b2",
+      "title": "Create unack alert action API authorization: returns 403 for a user without alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_unack_alert_action.spec.ts",
+        "line": 150,
+        "column": 10
+      }
+    },
+    {
+      "id": "639b28ea29e5c25-419840b1e744371",
+      "title": "Create unsnooze alert action API happy path: writes an unsnooze action and returns 204",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_unsnooze_alert_action.spec.ts",
+        "line": 39,
+        "column": 10
+      }
+    },
+    {
+      "id": "639b28ea29e5c25-19f7d5b79e00b75",
+      "title": "Create unsnooze alert action API schema: rejects unknown body fields (strict mode) with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_unsnooze_alert_action.spec.ts",
+        "line": 74,
+        "column": 10
+      }
+    },
+    {
+      "id": "639b28ea29e5c25-62d468712a45fe4",
+      "title": "Create unsnooze alert action API schema: rejects group_hash over 256 chars with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_unsnooze_alert_action.spec.ts",
+        "line": 83,
+        "column": 10
+      }
+    },
+    {
+      "id": "639b28ea29e5c25-ab5c7412a8b8649",
+      "title": "Create unsnooze alert action API returns 404 when group_hash matches no events",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_unsnooze_alert_action.spec.ts",
+        "line": 92,
+        "column": 10
+      }
+    },
+    {
+      "id": "639b28ea29e5c25-e2b967321c2d40c",
+      "title": "Create unsnooze alert action API authorization: returns 403 for a user with read-only alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_unsnooze_alert_action.spec.ts",
+        "line": 101,
+        "column": 10
+      }
+    },
+    {
+      "id": "639b28ea29e5c25-ade61fe5089d372",
+      "title": "Create unsnooze alert action API authorization: returns 403 for a user without alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_unsnooze_alert_action.spec.ts",
+        "line": 120,
+        "column": 10
+      }
+    },
+    {
+      "id": "a0345db0bf45ea2-64e3251c74944b7",
+      "title": "Count new action policy execution events API validation: rejects missing since",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/count_new_execution_history_events.spec.ts",
+        "line": 36,
+        "column": 12
+      }
+    },
+    {
+      "id": "a0345db0bf45ea2-0e6cbf6c84c3db0",
+      "title": "Count new action policy execution events API authorization: 200 with alerting_v2_execution_history read privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/count_new_execution_history_events.spec.ts",
+        "line": 44,
+        "column": 12
+      }
+    },
+    {
+      "id": "a0345db0bf45ea2-b6eb46719bf8e7e",
+      "title": "Count new action policy execution events API authorization: 200 with alerting_v2_execution_history all privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/count_new_execution_history_events.spec.ts",
+        "line": 55,
+        "column": 12
+      }
+    },
+    {
+      "id": "a0345db0bf45ea2-d827b87a9dd2102",
+      "title": "Count new action policy execution events API authorization: 403 without any alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/count_new_execution_history_events.spec.ts",
+        "line": 69,
+        "column": 12
+      }
+    },
+    {
+      "id": "1e38d3a6f95185b-36a81457fa3a0b8",
+      "title": "List action policy execution history API validation: rejects page=0",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/list_execution_history.spec.ts",
+        "line": 35,
+        "column": 12
+      }
+    },
+    {
+      "id": "1e38d3a6f95185b-5ebd7738a8f9927",
+      "title": "List action policy execution history API validation: rejects perPage=0",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/list_execution_history.spec.ts",
+        "line": 42,
+        "column": 12
+      }
+    },
+    {
+      "id": "1e38d3a6f95185b-d6dfb71cdafb301",
+      "title": "List action policy execution history API validation: accepts perPage at the maximum",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/list_execution_history.spec.ts",
+        "line": 49,
+        "column": 12
+      }
+    },
+    {
+      "id": "1e38d3a6f95185b-fc55d016cdaa50f",
+      "title": "List action policy execution history API validation: rejects perPage above the maximum",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/list_execution_history.spec.ts",
+        "line": 58,
+        "column": 12
+      }
+    },
+    {
+      "id": "1e38d3a6f95185b-6b910f3060af188",
+      "title": "List action policy execution history API validation: rejects non-numeric perPage",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/list_execution_history.spec.ts",
+        "line": 66,
+        "column": 12
+      }
+    },
+    {
+      "id": "1e38d3a6f95185b-e8b3c545002c624",
+      "title": "List action policy execution history API validation: rejects non-numeric page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/list_execution_history.spec.ts",
+        "line": 74,
+        "column": 12
+      }
+    },
+    {
+      "id": "1e38d3a6f95185b-5b875229280a9b5",
+      "title": "List action policy execution history API authorization: 200 with alerting_v2_execution_history read privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/list_execution_history.spec.ts",
+        "line": 82,
+        "column": 12
+      }
+    },
+    {
+      "id": "1e38d3a6f95185b-ae43868df72210a",
+      "title": "List action policy execution history API authorization: 200 with alerting_v2_execution_history all privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/list_execution_history.spec.ts",
+        "line": 92,
+        "column": 12
+      }
+    },
+    {
+      "id": "1e38d3a6f95185b-151dcfebdcd6818",
+      "title": "List action policy execution history API authorization: 403 without any alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/list_execution_history.spec.ts",
+        "line": 105,
+        "column": 12
       }
     },
     {
@@ -871,7 +4758,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/bulk_delete_rules.spec.ts",
-        "line": 241,
+        "line": 243,
         "column": 10
       }
     },
@@ -1092,7 +4979,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/bulk_disable_rules.spec.ts",
-        "line": 322,
+        "line": 324,
         "column": 10
       }
     },
@@ -1287,7 +5174,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/bulk_enable_rules.spec.ts",
-        "line": 275,
+        "line": 277,
         "column": 10
       }
     },
@@ -1560,7 +5447,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/create_rule.spec.ts",
-        "line": 325,
+        "line": 327,
         "column": 10
       }
     },
@@ -1638,7 +5525,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/delete_rule.spec.ts",
-        "line": 98,
+        "line": 100,
         "column": 10
       }
     },
@@ -1937,7 +5824,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/find_rules.spec.ts",
-        "line": 443,
+        "line": 445,
         "column": 10
       }
     },
@@ -1950,7 +5837,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/find_rules.spec.ts",
-        "line": 461,
+        "line": 465,
         "column": 10
       }
     },
@@ -1963,7 +5850,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rule_tags.spec.ts",
-        "line": 38,
+        "line": 47,
         "column": 10
       }
     },
@@ -1976,7 +5863,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rule_tags.spec.ts",
-        "line": 47,
+        "line": 56,
         "column": 10
       }
     },
@@ -1989,7 +5876,33 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rule_tags.spec.ts",
-        "line": 75,
+        "line": 84,
+        "column": 10
+      }
+    },
+    {
+      "id": "b7a922248ef62f9-fdaa3febd09601a",
+      "title": "Get rule tags API filter: should only return tags from rules matching the filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rule_tags.spec.ts",
+        "line": 109,
+        "column": 10
+      }
+    },
+    {
+      "id": "b7a922248ef62f9-dc9caa1fe588586",
+      "title": "Get rule tags API filter: should return 400 for an invalid filter field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rule_tags.spec.ts",
+        "line": 145,
         "column": 10
       }
     },
@@ -2002,7 +5915,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rule_tags.spec.ts",
-        "line": 100,
+        "line": 160,
         "column": 10
       }
     },
@@ -2015,7 +5928,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rule_tags.spec.ts",
-        "line": 116,
+        "line": 176,
         "column": 10
       }
     },
@@ -2028,7 +5941,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rule_tags.spec.ts",
-        "line": 133,
+        "line": 195,
         "column": 10
       }
     },
@@ -2106,13 +6019,26 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rule.spec.ts",
-        "line": 103,
+        "line": 105,
         "column": 10
       }
     },
     {
-      "id": "2c8eab60b1651ac-53398d6314680b9",
-      "title": "Get rules bulk API bulk: should return the requested rules when given multiple ids",
+      "id": "2c8eab60b1651ac-5aeca6d425fd12b",
+      "title": "Bulk get rules API bulk-get: should return the requested rules when given multiple ids",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rules_bulk.spec.ts",
+        "line": 38,
+        "column": 10
+      }
+    },
+    {
+      "id": "2c8eab60b1651ac-0a8b4119975d3a0",
+      "title": "Bulk get rules API bulk-get: should return rules in the exact order of the requested ids",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -2124,47 +6050,47 @@
       }
     },
     {
-      "id": "2c8eab60b1651ac-b72843b71714e5e",
-      "title": "Get rules bulk API bulk: should return a single rule when given a single id",
+      "id": "2c8eab60b1651ac-44ab7f668a12673",
+      "title": "Bulk get rules API bulk-get: should return a single rule when given a single id",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rules_bulk.spec.ts",
-        "line": 94,
+        "line": 95,
         "column": 10
       }
     },
     {
-      "id": "2c8eab60b1651ac-ebf45a145d9e8f2",
-      "title": "Get rules bulk API bulk: should silently drop ids that do not exist",
+      "id": "2c8eab60b1651ac-5e10957aa7efecd",
+      "title": "Bulk get rules API bulk-get: should return 404 when one or more requested ids are missing",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rules_bulk.spec.ts",
-        "line": 110,
+        "line": 113,
         "column": 10
       }
     },
     {
-      "id": "2c8eab60b1651ac-14f5325ae31d4cf",
-      "title": "Get rules bulk API bulk: should return an empty result set when none of the ids exist",
+      "id": "2c8eab60b1651ac-ff3689aedd0f8fa",
+      "title": "Bulk get rules API bulk-get: should return 404 when all requested ids are missing",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rules_bulk.spec.ts",
-        "line": 125,
+        "line": 129,
         "column": 10
       }
     },
     {
-      "id": "2c8eab60b1651ac-818ddb5c34b7a1e",
-      "title": "Get rules bulk API bulk: should treat a missing ids query param as an empty request",
+      "id": "2c8eab60b1651ac-ee356fea37bbf27",
+      "title": "Bulk get rules API validation: should reject an empty ids array",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -2176,67 +6102,93 @@
       }
     },
     {
-      "id": "2c8eab60b1651ac-8b922406df2e346",
-      "title": "Get rules bulk API validation: should reject ids longer than ID_MAX_LENGTH",
+      "id": "2c8eab60b1651ac-b8dbc010733b069",
+      "title": "Bulk get rules API validation: should reject more than MAX_BULK_ITEMS ids",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rules_bulk.spec.ts",
-        "line": 157,
+        "line": 149,
         "column": 10
       }
     },
     {
-      "id": "2c8eab60b1651ac-9ed6b487c7879a6",
-      "title": "Get rules bulk API bulk: documents that ids past the qs parameter limit are silently dropped",
+      "id": "2c8eab60b1651ac-3c91f3b5bed54f2",
+      "title": "Bulk get rules API validation: should reject ids longer than ID_MAX_LENGTH",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rules_bulk.spec.ts",
-        "line": 165,
+        "line": 158,
         "column": 10
       }
     },
     {
-      "id": "2c8eab60b1651ac-512d8786a12e482",
-      "title": "Get rules bulk API authorization: should return 200 for a user with read-only alerting_v2 privileges",
+      "id": "2c8eab60b1651ac-3ac25f10e459df9",
+      "title": "Bulk get rules API validation: should reject an empty body",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rules_bulk.spec.ts",
-        "line": 182,
+        "line": 167,
         "column": 10
       }
     },
     {
-      "id": "2c8eab60b1651ac-0933b784770b5bd",
-      "title": "Get rules bulk API authorization: should return 200 for a user with full alerting_v2 privileges",
+      "id": "2c8eab60b1651ac-e4c280fa294f026",
+      "title": "Bulk get rules API validation: should reject unknown top-level body fields (strict)",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rules_bulk.spec.ts",
-        "line": 196,
+        "line": 175,
         "column": 10
       }
     },
     {
-      "id": "2c8eab60b1651ac-abb1ac85403c92c",
-      "title": "Get rules bulk API authorization: should return 403 for a user without alerting_v2 privileges",
+      "id": "2c8eab60b1651ac-dcdcdc9084bb133",
+      "title": "Bulk get rules API authorization: should return 200 for a user with read-only alerting_v2 privileges",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rules_bulk.spec.ts",
-        "line": 211,
+        "line": 189,
+        "column": 10
+      }
+    },
+    {
+      "id": "2c8eab60b1651ac-5d3ff3a4895f19f",
+      "title": "Bulk get rules API authorization: should return 200 for a user with full alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rules_bulk.spec.ts",
+        "line": 204,
+        "column": 10
+      }
+    },
+    {
+      "id": "2c8eab60b1651ac-edfc88feb5849a9",
+      "title": "Bulk get rules API authorization: should return 403 for a user without alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rules_bulk.spec.ts",
+        "line": 222,
         "column": 10
       }
     },
@@ -2293,6 +6245,19 @@
       }
     },
     {
+      "id": "b6357d3d7fe0fc8-4e872c2d608da57",
+      "title": "Update rule API update: should return 409 when the request body version is stale",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
+        "line": 125,
+        "column": 10
+      }
+    },
+    {
       "id": "b6357d3d7fe0fc8-14064924f25bb18",
       "title": "Update rule API update: should clear an optional field when set to null",
       "expectedStatus": "passed",
@@ -2301,7 +6266,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
-        "line": 125,
+        "line": 146,
         "column": 10
       }
     },
@@ -2314,7 +6279,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
-        "line": 149,
+        "line": 170,
         "column": 10
       }
     },
@@ -2327,7 +6292,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
-        "line": 157,
+        "line": 178,
         "column": 10
       }
     },
@@ -2340,7 +6305,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
-        "line": 169,
+        "line": 190,
         "column": 10
       }
     },
@@ -2353,7 +6318,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
-        "line": 183,
+        "line": 204,
         "column": 10
       }
     },
@@ -2366,7 +6331,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
-        "line": 197,
+        "line": 218,
         "column": 10
       }
     },
@@ -2379,7 +6344,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
-        "line": 211,
+        "line": 232,
         "column": 10
       }
     },
@@ -2392,7 +6357,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
-        "line": 225,
+        "line": 246,
         "column": 10
       }
     },
@@ -2405,7 +6370,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
-        "line": 239,
+        "line": 260,
         "column": 10
       }
     },
@@ -2418,7 +6383,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
-        "line": 253,
+        "line": 274,
         "column": 10
       }
     },
@@ -2431,7 +6396,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
-        "line": 273,
+        "line": 294,
         "column": 10
       }
     },
@@ -2444,7 +6409,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
-        "line": 288,
+        "line": 309,
         "column": 10
       }
     },
@@ -2457,7 +6422,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
-        "line": 306,
+        "line": 329,
         "column": 10
       }
     },
@@ -2678,91 +6643,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/upsert_rule.spec.ts",
-        "line": 288,
-        "column": 10
-      }
-    },
-    {
-      "id": "0279d59e2a21a9f-ddebf96dc384bd8",
-      "title": "Rule Doctor insights API should list insights with pagination",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_doctor_insights.spec.ts",
-        "line": 35,
-        "column": 10
-      }
-    },
-    {
-      "id": "0279d59e2a21a9f-a6fa6908c6c9c51",
-      "title": "Rule Doctor insights API should filter insights by status",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_doctor_insights.spec.ts",
-        "line": 51,
-        "column": 10
-      }
-    },
-    {
-      "id": "0279d59e2a21a9f-3f2325366461873",
-      "title": "Rule Doctor insights API should get an insight by ID",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_doctor_insights.spec.ts",
-        "line": 64,
-        "column": 10
-      }
-    },
-    {
-      "id": "0279d59e2a21a9f-2ad7feca01bd359",
-      "title": "Rule Doctor insights API should return 404 for an unknown insight ID",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_doctor_insights.spec.ts",
-        "line": 78,
-        "column": 10
-      }
-    },
-    {
-      "id": "0279d59e2a21a9f-38f2a9fa2521b1e",
-      "title": "Rule Doctor insights API should update insight status from open to dismissed",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_doctor_insights.spec.ts",
-        "line": 87,
-        "column": 10
-      }
-    },
-    {
-      "id": "0279d59e2a21a9f-d576e7c3f330958",
-      "title": "Rule Doctor insights API should return 404 when updating status of unknown insight",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_doctor_insights.spec.ts",
-        "line": 108,
+        "line": 290,
         "column": 10
       }
     },
