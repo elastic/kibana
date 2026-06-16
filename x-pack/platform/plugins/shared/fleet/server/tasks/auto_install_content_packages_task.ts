@@ -291,12 +291,13 @@ export class AutoInstallContentPackagesTask {
     esClient: ElasticsearchClient,
     datasetsOfInstalledContentPackages: string[]
   ): Promise<string[]> {
-    const allFleetDataStreams = await dataStreamService.getAllFleetDataStreams(esClient);
-    const datasetsWithData: string[] = allFleetDataStreams
-      .map((dataStream: any) => dataStream.name.split('-')[1])
-      .filter((dataset) => !datasetsOfInstalledContentPackages.includes(dataset));
+    const installedSet = new Set(datasetsOfInstalledContentPackages);
+    const allDataStreamNames = await dataStreamService.getAllFleetDataStreamNames(esClient);
+    const datasetsWithData = [
+      ...new Set(allDataStreamNames.map((name) => name.split('-')[1])),
+    ].filter((dataset) => !installedSet.has(dataset));
     this.logger.info(
-      `[AutoInstallContentPackagesTask] Found datasets with data: ${datasetsWithData.join(', ')}`
+      `[AutoInstallContentPackagesTask] Found ${datasetsWithData.length} datasets with data`
     );
     return datasetsWithData;
   }
