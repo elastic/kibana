@@ -126,6 +126,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
             'https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/drive.metadata.readonly',
         },
       },
+      { type: 'bearer', hidden: true, defaults: {} },
     ],
     headers: {
       Accept: 'application/json',

@@ -78,6 +78,7 @@ export const GoogleCalendar: ConnectorSpec = {
           scope: 'https://www.googleapis.com/auth/calendar.readonly',
         },
       },
+      { type: 'bearer', hidden: true, defaults: {} },
     ],
     headers: {
       Accept: 'application/json',

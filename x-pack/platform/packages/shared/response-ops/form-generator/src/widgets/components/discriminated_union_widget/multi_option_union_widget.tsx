@@ -133,7 +133,13 @@ export const MultiOptionUnionWidget: React.FC<DiscriminatedUnionWidgetProps> = (
         const optionMeta = getMeta(option);
         const label = optionMeta.label;
         const isWarn = Boolean((optionMeta as Record<string, unknown>).warn);
+        const isHidden = Boolean((optionMeta as Record<string, unknown>).hidden);
         const isChecked = selectedOption === discriminatorValue;
+
+        // Hidden auth types are legacy options kept only for existing connectors.
+        // Don't render them as selectable choices, but do render if currently active
+        // so the user can still view/edit credentials on an existing connector.
+        if (isHidden && !isChecked) return null;
 
         // if the entire fieldset is disabled, ensure each option is also marked as disabled
         if (isFieldsetDisabled && optionMeta.disabled !== false) {

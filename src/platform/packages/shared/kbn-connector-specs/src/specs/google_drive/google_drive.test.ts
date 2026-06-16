@@ -11,7 +11,8 @@ import {
   getConnectorActionErrorMeta,
   ESTIMATED_JSON_OUTPUT_OVERHEAD_BYTES,
 } from '../../connector_utils';
-import type { ActionContext } from '../../connector_spec';
+import type { ActionContext, AuthTypeDef } from '../../connector_spec';
+import { generateSecretsSchemaFromSpec } from '../../lib/generate_secrets_schema_from_spec';
 import { GoogleDriveConnector } from './google_drive';
 
 describe('GoogleDriveConnector', () => {
@@ -30,10 +31,30 @@ describe('GoogleDriveConnector', () => {
   });
 
   describe('auth', () => {
-    it('supports ears auth type as first option with Quick Connect label', () => {
-      expect(GoogleDriveConnector.auth?.types[0]).toEqual(
+    it('supports ears auth type as first visible option with Quick Connect label', () => {
+      const visibleTypes = GoogleDriveConnector.auth?.types.filter(
+        (t) => typeof t === 'string' || !(t as AuthTypeDef).hidden
+      );
+      expect(visibleTypes?.[0]).toEqual(
         expect.objectContaining({ type: 'ears', label: 'Quick Connect OAuth 2.0' })
       );
+    });
+
+    it('bearer auth is hidden (not shown in picker) but retained for existing connectors', () => {
+      const bearerDef = GoogleDriveConnector.auth?.types.find(
+        (t): t is AuthTypeDef => typeof t === 'object' && t.type === 'bearer'
+      );
+      expect(bearerDef).toBeDefined();
+      expect(bearerDef?.hidden).toBe(true);
+    });
+
+    it('existing connectors with bearer auth still pass schema validation', () => {
+      const schema = generateSecretsSchemaFromSpec(GoogleDriveConnector.auth, {
+        isEarsEnabled: true,
+        isEarsExperimentalEnabled: true,
+      });
+      const result = schema.safeParse({ authType: 'bearer', token: 'some-legacy-token' });
+      expect(result.success).toBe(true);
     });
 
     it('supports oauth_authorization_code with correct Google defaults', () => {

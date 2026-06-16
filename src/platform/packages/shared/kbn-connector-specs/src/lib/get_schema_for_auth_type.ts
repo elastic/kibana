@@ -31,6 +31,7 @@ export const getSchemaForAuthType = (authTypeDef: string | AuthTypeDef) => {
 
   let labelOverride: string | undefined;
   let warnOverride: boolean | undefined;
+  let hiddenOverride: boolean | undefined;
 
   if (isString(authTypeDef)) {
     authTypeId = authTypeDef as string;
@@ -41,6 +42,7 @@ export const getSchemaForAuthType = (authTypeDef: string | AuthTypeDef) => {
     meta = def?.overrides?.meta;
     labelOverride = def.label;
     warnOverride = def.warn;
+    hiddenOverride = def.hidden;
   }
 
   if (!authTypeId) {
@@ -88,6 +90,7 @@ export const getSchemaForAuthType = (authTypeDef: string | AuthTypeDef) => {
     ...existingMeta,
     ...(labelOverride !== undefined ? { label: labelOverride } : {}),
     ...(warnOverride !== undefined ? { warn: warnOverride } : {}),
+    ...(hiddenOverride !== undefined ? { hidden: hiddenOverride } : {}),
   };
 
   return {

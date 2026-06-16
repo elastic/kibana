@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ActionContext } from '../../connector_spec';
+import type { ActionContext, AuthTypeDef } from '../../connector_spec';
+import { generateSecretsSchemaFromSpec } from '../../lib/generate_secrets_schema_from_spec';
 import { GoogleCalendar } from './google_calendar';
 
 const API_BASE = 'https://www.googleapis.com/calendar/v3';
@@ -35,10 +36,30 @@ describe('GoogleCalendar', () => {
     expect(GoogleCalendar.metadata.supportedFeatureIds).toContain('workflows');
   });
 
-  it('should support ears auth type as first option with Quick Connect label', () => {
-    expect(GoogleCalendar.auth?.types[0]).toEqual(
+  it('should support ears auth type as first visible option with Quick Connect label', () => {
+    const visibleTypes = GoogleCalendar.auth?.types.filter(
+      (t) => typeof t === 'string' || !(t as AuthTypeDef).hidden
+    );
+    expect(visibleTypes?.[0]).toEqual(
       expect.objectContaining({ type: 'ears', label: 'Quick Connect OAuth 2.0' })
     );
+  });
+
+  it('bearer auth is hidden (not shown in picker) but retained for existing connectors', () => {
+    const bearerDef = GoogleCalendar.auth?.types.find(
+      (t): t is AuthTypeDef => typeof t === 'object' && t.type === 'bearer'
+    );
+    expect(bearerDef).toBeDefined();
+    expect(bearerDef?.hidden).toBe(true);
+  });
+
+  it('existing connectors with bearer auth still pass schema validation', () => {
+    const schema = generateSecretsSchemaFromSpec(GoogleCalendar.auth, {
+      isEarsEnabled: true,
+      isEarsExperimentalEnabled: true,
+    });
+    const result = schema.safeParse({ authType: 'bearer', token: 'some-legacy-token' });
+    expect(result.success).toBe(true);
   });
 
   it('should support oauth_authorization_code with correct Google defaults', () => {

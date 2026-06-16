@@ -118,6 +118,7 @@ export const Zoom: ConnectorSpec = {
             'user:read:user meeting:read:meeting meeting:read:list_meetings meeting:read:past_meeting meeting:read:list_past_participants meeting:read:list_registrants cloud_recording:read:list_recording_files cloud_recording:read:list_user_recordings',
         },
       },
+      { type: 'bearer', hidden: true, defaults: {} },
     ],
   },
 

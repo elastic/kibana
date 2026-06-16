@@ -38,6 +38,7 @@ export const NotionConnector: ConnectorSpec = {
           tokenUrl: 'https://api.notion.com/v1/oauth/token',
         },
       },
+      { type: 'bearer', hidden: true, defaults: {} },
     ],
     headers: {
       'Notion-Version': '2025-09-03',

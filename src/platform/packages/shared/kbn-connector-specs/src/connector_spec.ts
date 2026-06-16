@@ -271,6 +271,8 @@ export interface AuthTypeDef {
   label?: string;
   /** When true, renders a caution indicator — use for deprecated or less-preferred auth options. */
   warn?: boolean;
+  /** When true, excluded from the UI picker but kept in the validation schema for backwards compatibility with existing connectors. */
+  hidden?: boolean;
   isExperimental?: boolean;
   defaults: Record<string, unknown>;
   overrides?: {
