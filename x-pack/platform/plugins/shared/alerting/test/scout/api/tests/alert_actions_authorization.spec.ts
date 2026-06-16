@@ -245,6 +245,62 @@ apiTest.describe(
     );
 
     apiTest(
+      'restricted user can snooze without connector privilege',
+      async ({ apiClient, samlAuth, config }) => {
+        const { feature } = getDeploymentConfig(config);
+        const { cookieHeader } = await samlAuth.asInteractiveUser({
+          kibana: [{ base: [], feature, spaces: ['*'] }],
+          elasticsearch: {
+            cluster: [],
+            indices: [{ names: ['.alerts-*'], privileges: ['read'] }],
+          },
+        });
+
+        const response = await apiClient.post(
+          `internal/alerting/rule/${ruleId}/_snooze`,
+          {
+            headers: { ...COMMON_HEADERS, ...cookieHeader },
+            body: {
+              snooze_schedule: {
+                duration: 60000,
+                rRule: {
+                  dtstart: new Date().toISOString(),
+                  tzid: 'UTC',
+                  count: 1,
+                  freq: 0,
+                },
+              },
+            },
+          }
+        );
+        expect(response).toHaveStatusCode(204);
+      }
+    );
+
+    apiTest(
+      'restricted user can unsnooze without connector privilege',
+      async ({ apiClient, samlAuth, config }) => {
+        const { feature } = getDeploymentConfig(config);
+        const { cookieHeader } = await samlAuth.asInteractiveUser({
+          kibana: [{ base: [], feature, spaces: ['*'] }],
+          elasticsearch: {
+            cluster: [],
+            indices: [{ names: ['.alerts-*'], privileges: ['read'] }],
+          },
+        });
+
+        const response = await apiClient.post(
+          `internal/alerting/rule/${ruleId}/_unsnooze`,
+          {
+            headers: { ...COMMON_HEADERS, ...cookieHeader },
+            body: { schedule_ids: [] },
+          }
+        );
+        expect(response).toHaveStatusCode(204);
+      }
+    );
+
+    apiTest(
       'snooze/unsnooze by restricted user does not rotate the rule API key',
       async ({ apiClient, samlAuth, esClient, config }) => {
         const { feature } = getDeploymentConfig(config);
