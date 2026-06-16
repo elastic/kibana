@@ -7,7 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import {
-  createAskUserQuestionAnsweredStepEvent,
+  createUserQuestionAnsweredEvent,
   internalTools,
   isAskUserQuestionStep,
   type AskUserQuestionStep,
@@ -51,10 +51,10 @@ export const pendingAskUserQuestionStepsToActions = ({
     .filter((step) => step.answers === undefined);
 
   for (const step of pendingSteps) {
-    const stored = promptState.responses[step.step_id];
+    const stored = promptState.responses[step.prompt_id];
     if (!stored || stored.type !== AgentPromptType.ask_user_question) {
       throw new Error(
-        `No ask_user_question response found in prompt state for step_id ${step.step_id}`
+        `No ask_user_question response found in prompt state for prompt_id ${step.prompt_id}`
       );
     }
     const response = stored.response;
@@ -86,13 +86,13 @@ export const pendingAskUserQuestionStepsToActions = ({
     );
 
     eventEmitter(
-      createAskUserQuestionAnsweredStepEvent({
-        step_id: step.step_id,
+      createUserQuestionAnsweredEvent({
+        prompt_id: step.prompt_id,
         answers: response.answers,
       })
     );
 
-    consumedPromptIds.push(step.step_id);
+    consumedPromptIds.push(step.prompt_id);
   }
 
   return { actions, consumedPromptIds };
@@ -107,11 +107,11 @@ const validateResponse = ({
 }): void => {
   if (response.answers.length !== step.questions.length) {
     throw new Error(
-      `ask_user_question response answer length (${response.answers.length}) does not match question length (${step.questions.length}) for step_id ${step.step_id}`
+      `ask_user_question response answer length (${response.answers.length}) does not match question length (${step.questions.length}) for prompt_id ${step.prompt_id}`
     );
   }
   step.questions.forEach((question, idx) => {
-    validateAnswer({ question, answer: response.answers[idx], idx, stepId: step.step_id });
+    validateAnswer({ question, answer: response.answers[idx], idx, promptId: step.prompt_id });
   });
 };
 
@@ -119,12 +119,12 @@ const validateAnswer = ({
   question,
   answer,
   idx,
-  stepId,
+  promptId,
 }: {
   question: AskUserQuestionItem;
   answer: AskUserQuestionAnswer;
   idx: number;
-  stepId: string;
+  promptId: string;
 }): void => {
   const hasChoice = (answer.choice?.length ?? 0) > 0;
   const hasCustom = answer.custom != null && answer.custom !== '';
@@ -132,7 +132,7 @@ const validateAnswer = ({
   if (answer.skipped === true) {
     if (hasChoice || hasCustom) {
       throw new Error(
-        `step_id ${stepId} answer[${idx}]: skipped must be exclusive with choice/custom`
+        `prompt_id ${promptId} answer[${idx}]: skipped must be exclusive with choice/custom`
       );
     }
     return;
@@ -140,7 +140,7 @@ const validateAnswer = ({
 
   if (!hasChoice && !hasCustom) {
     throw new Error(
-      `step_id ${stepId} answer[${idx}]: empty answer (no choice, custom, or skipped)`
+      `prompt_id ${promptId} answer[${idx}]: empty answer (no choice, custom, or skipped)`
     );
   }
 
@@ -148,13 +148,13 @@ const validateAnswer = ({
     for (const c of answer.choice) {
       if (c < 0 || c >= question.options.length) {
         throw new Error(
-          `step_id ${stepId} answer[${idx}]: choice index ${c} out of bounds (options: ${question.options.length})`
+          `prompt_id ${promptId} answer[${idx}]: choice index ${c} out of bounds (options: ${question.options.length})`
         );
       }
     }
     if (!question.multi_select && answer.choice.length > 1) {
       throw new Error(
-        `step_id ${stepId} answer[${idx}]: question is not multi_select; choice.length must be <= 1`
+        `prompt_id ${promptId} answer[${idx}]: question is not multi_select; choice.length must be <= 1`
       );
     }
   }

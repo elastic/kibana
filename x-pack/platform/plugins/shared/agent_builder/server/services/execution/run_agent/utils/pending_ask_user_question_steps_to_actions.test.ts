@@ -40,7 +40,7 @@ const makeRound = (...steps: any[]): ConversationRound =>
 describe('pendingAskUserQuestionStepsToActions', () => {
   it('emits a toolCall + executeTool action pair for each pending ask_user_question step', () => {
     const step = createAskUserQuestionStep({
-      step_id: 's1',
+      prompt_id: 's1',
       questions: [sampleQuestion],
     });
     const round = makeRound(step);
@@ -71,8 +71,8 @@ describe('pendingAskUserQuestionStepsToActions', () => {
     expect(result.consumedPromptIds).toEqual(['s1']);
   });
 
-  it('emits an askUserQuestionAnsweredStepEvent per step via eventEmitter', () => {
-    const step = createAskUserQuestionStep({ step_id: 's1', questions: [sampleQuestion] });
+  it('emits a userQuestionAnsweredEvent per step via eventEmitter', () => {
+    const step = createAskUserQuestionStep({ prompt_id: 's1', questions: [sampleQuestion] });
     const round = makeRound(step);
     const promptState: PromptStorageState = {
       responses: {
@@ -88,13 +88,13 @@ describe('pendingAskUserQuestionStepsToActions', () => {
 
     expect(eventEmitter).toHaveBeenCalledTimes(1);
     const event = eventEmitter.mock.calls[0][0];
-    expect(event.type).toBe(ChatEventType.askUserQuestionAnsweredStep);
-    expect(event.data).toEqual({ step_id: 's1', answers: [{ choice: [1] }] });
+    expect(event.type).toBe(ChatEventType.userQuestionAnswered);
+    expect(event.data).toEqual({ prompt_id: 's1', answers: [{ choice: [1] }] });
   });
 
   it('skips already-answered steps', () => {
     const answered = createAskUserQuestionStep({
-      step_id: 's1',
+      prompt_id: 's1',
       questions: [sampleQuestion],
       answers: [{ choice: [0] }],
     });
@@ -110,7 +110,7 @@ describe('pendingAskUserQuestionStepsToActions', () => {
   });
 
   it('accepts a { skipped: true } answer', () => {
-    const step = createAskUserQuestionStep({ step_id: 's1', questions: [sampleQuestion] });
+    const step = createAskUserQuestionStep({ prompt_id: 's1', questions: [sampleQuestion] });
     const round = makeRound(step);
     const promptState: PromptStorageState = {
       responses: {
@@ -131,7 +131,7 @@ describe('pendingAskUserQuestionStepsToActions', () => {
 
   describe('validation', () => {
     const setup = (response: any) => ({
-      round: makeRound(createAskUserQuestionStep({ step_id: 's1', questions: [sampleQuestion] })),
+      round: makeRound(createAskUserQuestionStep({ prompt_id: 's1', questions: [sampleQuestion] })),
       promptState: {
         responses: { s1: { type: AgentPromptType.ask_user_question, response } },
       } as PromptStorageState,
@@ -171,7 +171,7 @@ describe('pendingAskUserQuestionStepsToActions', () => {
   });
 
   it('does NOT mutate promptState.responses', () => {
-    const step = createAskUserQuestionStep({ step_id: 's1', questions: [sampleQuestion] });
+    const step = createAskUserQuestionStep({ prompt_id: 's1', questions: [sampleQuestion] });
     const round = makeRound(step);
     const promptState: PromptStorageState = {
       responses: {

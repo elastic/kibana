@@ -18,8 +18,7 @@ import type { ToolHandlerPromptReturn } from '../tools/handler';
 export interface PromptManager {
   set(promptId: string, response: PromptResponseState): void;
   get(promptId: string): PromptResponseState | undefined;
-  /** Remove the stored response for a given prompt id. No-op if not present. */
-  deleteResponse(promptId: string): void;
+  delete(promptId: string): void;
   dump(): PromptStorageState;
   getConfirmationStatus(promptId: string): ConfirmationInfo;
   getAuthorizationStatus(promptId: string): AuthorizationInfo;

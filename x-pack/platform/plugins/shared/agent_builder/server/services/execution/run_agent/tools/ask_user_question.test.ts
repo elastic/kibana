@@ -19,7 +19,7 @@ describe('createAskUserQuestionTool', () => {
     },
   ];
 
-  it('returns a question_list prompt with a fresh step_id in interactive mode', async () => {
+  it('returns an ask_user_question prompt with a fresh prompt_id in interactive mode', async () => {
     const ctx: any = { executionMode: AgentExecutionMode.conversation };
     const result = await tool.handler({ questions: sampleQuestions }, ctx);
 
@@ -33,7 +33,7 @@ describe('createAskUserQuestionTool', () => {
     expect((result as any).prompt.id.length).toBeGreaterThan(0);
   });
 
-  it('returns a different step_id on each call', async () => {
+  it('returns a different prompt_id on each call', async () => {
     const ctx: any = { executionMode: AgentExecutionMode.conversation };
     const a = await tool.handler({ questions: sampleQuestions }, ctx);
     const b = await tool.handler({ questions: sampleQuestions }, ctx);

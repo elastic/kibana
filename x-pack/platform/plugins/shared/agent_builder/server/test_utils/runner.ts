@@ -131,7 +131,7 @@ export const createPromptManagerMock = (): PromptManagerMock => {
   return {
     set: jest.fn(),
     get: jest.fn(),
-    deleteResponse: jest.fn(),
+    delete: jest.fn(),
     dump: jest.fn(),
     getConfirmationStatus: jest.fn(),
     getAuthorizationStatus: jest.fn(),

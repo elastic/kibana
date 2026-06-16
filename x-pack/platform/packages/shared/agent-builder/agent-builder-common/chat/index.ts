@@ -109,14 +109,14 @@ export {
   isTodosUpdatedEvent,
   TODOS_UPDATED_UI_EVENT,
   type TodosUpdatedUiEventData,
-  type AskUserQuestionPendingStepEvent,
-  type AskUserQuestionPendingStepEventData,
-  type AskUserQuestionAnsweredStepEvent,
-  type AskUserQuestionAnsweredStepEventData,
-  isAskUserQuestionPendingStepEvent,
-  isAskUserQuestionAnsweredStepEvent,
-  createAskUserQuestionPendingStepEvent,
-  createAskUserQuestionAnsweredStepEvent,
+  type UserQuestionAskedEvent,
+  type UserQuestionAskedEventData,
+  type UserQuestionAnsweredEvent,
+  type UserQuestionAnsweredEventData,
+  isUserQuestionAskedEvent,
+  isUserQuestionAnsweredEvent,
+  createUserQuestionAskedEvent,
+  createUserQuestionAnsweredEvent,
 } from './events';
 export type { RoundState } from './round_state';
 export type { ConversationListOptions } from './conversation_list';

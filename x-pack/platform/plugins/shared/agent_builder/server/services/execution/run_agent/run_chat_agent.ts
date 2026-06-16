@@ -414,7 +414,7 @@ const createInitializerCommand = ({
     initialState.mainActions = actions;
     // G20 cleanup: question-list responses are consumed once per round.
     for (const id of consumedPromptIds) {
-      promptManager.deleteResponse(id);
+      promptManager.delete(id);
     }
     // If any tool-call step is still pending (empty results), executeTool must
     // run it. Otherwise the only thing that was paused was ask_user_question —

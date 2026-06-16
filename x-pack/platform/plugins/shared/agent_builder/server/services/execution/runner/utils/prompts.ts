@@ -101,7 +101,7 @@ export const createPromptManager = ({
     get: (promptId) => {
       return promptMap.get(promptId);
     },
-    deleteResponse: (promptId) => {
+    delete: (promptId) => {
       promptMap.delete(promptId);
     },
     getConfirmationStatus: (promptId) => {

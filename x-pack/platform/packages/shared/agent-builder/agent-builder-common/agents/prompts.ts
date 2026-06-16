@@ -77,9 +77,9 @@ export interface AuthorizationPromptDefinition {
 
 // Ask user question
 
-export interface AskUserQuestionOption {
-  label: string;
-  description?: string;
+export interface AskUserQuestionPromptDefinition {
+  id: string;
+  questions: AskUserQuestionItem[];
 }
 
 export interface AskUserQuestionItem {
@@ -88,9 +88,9 @@ export interface AskUserQuestionItem {
   multi_select: boolean;
 }
 
-export interface AskUserQuestionPromptDefinition {
-  id: string;
-  questions: AskUserQuestionItem[];
+export interface AskUserQuestionOption {
+  label: string;
+  description?: string;
 }
 
 export interface AskUserQuestionAnswer {

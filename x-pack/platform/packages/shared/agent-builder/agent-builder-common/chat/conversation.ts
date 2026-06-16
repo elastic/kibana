@@ -235,8 +235,8 @@ export const isTodosStep = (step: ConversationRoundStep): step is TodosStep => {
 // ask_user_question step
 
 export interface AskUserQuestionStepData {
-  /** Step identifier — also serves as the prompt id for matching the response. */
-  step_id: string;
+  /** Id of the prompt that produced this step. Matches the entry in `state.prompt.responses` and the prompt request's `id`. */
+  prompt_id: string;
   /** The questions presented to the user. */
   questions: AskUserQuestionItem[];
   /** Undefined while the step is pending; populated on resume back-fill. */

@@ -40,8 +40,8 @@ export enum ChatEventType {
   compactionStarted = 'compaction_started',
   compactionCompleted = 'compaction_completed',
   backgroundAgentComplete = 'background_agent_complete',
-  askUserQuestionPendingStep = 'ask_user_question_pending_step',
-  askUserQuestionAnsweredStep = 'ask_user_question_answered_step',
+  userQuestionAsked = 'user_question_asked',
+  userQuestionAnswered = 'user_question_answered',
 }
 
 export type ChatEventBase<
@@ -154,54 +154,54 @@ export const isPromptRequestEvent = (
   return event.type === ChatEventType.promptRequest;
 };
 
-// Ask-user-question step lifecycle
+// Ask-user-question lifecycle
 
-export interface AskUserQuestionPendingStepEventData {
-  step_id: string;
+export interface UserQuestionAskedEventData {
+  prompt_id: string;
   questions: AskUserQuestionItem[];
 }
 
-export type AskUserQuestionPendingStepEvent = ChatEventBase<
-  ChatEventType.askUserQuestionPendingStep,
-  AskUserQuestionPendingStepEventData
+export type UserQuestionAskedEvent = ChatEventBase<
+  ChatEventType.userQuestionAsked,
+  UserQuestionAskedEventData
 >;
 
-export const isAskUserQuestionPendingStepEvent = (
+export const isUserQuestionAskedEvent = (
   event: AgentBuilderEvent<string, any>
-): event is AskUserQuestionPendingStepEvent => {
-  return event.type === ChatEventType.askUserQuestionPendingStep;
+): event is UserQuestionAskedEvent => {
+  return event.type === ChatEventType.userQuestionAsked;
 };
 
-export const createAskUserQuestionPendingStepEvent = (
-  data: AskUserQuestionPendingStepEventData
-): AskUserQuestionPendingStepEvent => {
+export const createUserQuestionAskedEvent = (
+  data: UserQuestionAskedEventData
+): UserQuestionAskedEvent => {
   return {
-    type: ChatEventType.askUserQuestionPendingStep,
+    type: ChatEventType.userQuestionAsked,
     data,
   };
 };
 
-export interface AskUserQuestionAnsweredStepEventData {
-  step_id: string;
+export interface UserQuestionAnsweredEventData {
+  prompt_id: string;
   answers: AskUserQuestionAnswer[];
 }
 
-export type AskUserQuestionAnsweredStepEvent = ChatEventBase<
-  ChatEventType.askUserQuestionAnsweredStep,
-  AskUserQuestionAnsweredStepEventData
+export type UserQuestionAnsweredEvent = ChatEventBase<
+  ChatEventType.userQuestionAnswered,
+  UserQuestionAnsweredEventData
 >;
 
-export const isAskUserQuestionAnsweredStepEvent = (
+export const isUserQuestionAnsweredEvent = (
   event: AgentBuilderEvent<string, any>
-): event is AskUserQuestionAnsweredStepEvent => {
-  return event.type === ChatEventType.askUserQuestionAnsweredStep;
+): event is UserQuestionAnsweredEvent => {
+  return event.type === ChatEventType.userQuestionAnswered;
 };
 
-export const createAskUserQuestionAnsweredStepEvent = (
-  data: AskUserQuestionAnsweredStepEventData
-): AskUserQuestionAnsweredStepEvent => {
+export const createUserQuestionAnsweredEvent = (
+  data: UserQuestionAnsweredEventData
+): UserQuestionAnsweredEvent => {
   return {
-    type: ChatEventType.askUserQuestionAnsweredStep,
+    type: ChatEventType.userQuestionAnswered,
     data,
   };
 };
@@ -444,8 +444,8 @@ export type ChatAgentEvent =
   | CompactionStartedEvent
   | CompactionCompletedEvent
   | BackgroundAgentCompleteEvent
-  | AskUserQuestionPendingStepEvent
-  | AskUserQuestionAnsweredStepEvent;
+  | UserQuestionAskedEvent
+  | UserQuestionAnsweredEvent;
 
 /**
  * All types of events that can be emitted from the chat API.

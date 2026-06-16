@@ -26,7 +26,7 @@ describe('buildPendingRoundActions', () => {
 
   it('concatenates roundToActions output and pending ask_user_question actions, and returns consumedPromptIds', () => {
     const askStep = createAskUserQuestionStep({
-      step_id: 's1',
+      prompt_id: 's1',
       questions: [
         {
           question: 'Pick color',

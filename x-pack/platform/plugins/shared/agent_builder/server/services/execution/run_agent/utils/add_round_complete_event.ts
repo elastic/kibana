@@ -24,7 +24,7 @@ import type {
   BackgroundAgentCompleteEvent,
   BackgroundAgentCompleteStep,
   TodosStep,
-  AskUserQuestionPendingStepEvent,
+  UserQuestionAskedEvent,
 } from '@kbn/agent-builder-common';
 import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
@@ -48,8 +48,8 @@ import {
   carriedOverTodos,
   TODOS_UPDATED_UI_EVENT,
   type TodosUpdatedUiEventData,
-  isAskUserQuestionPendingStepEvent,
-  isAskUserQuestionAnsweredStepEvent,
+  isUserQuestionAskedEvent,
+  isUserQuestionAnsweredEvent,
   isAskUserQuestionStep,
   createAskUserQuestionStep,
 } from '@kbn/agent-builder-common';
@@ -74,14 +74,14 @@ type StepEvents =
   | ReasoningEvent
   | ToolCallEvent
   | BackgroundAgentCompleteEvent
-  | AskUserQuestionPendingStepEvent;
+  | UserQuestionAskedEvent;
 
 const isStepEvent = (event: SourceEvents): event is StepEvents => {
   return (
     isReasoningEvent(event) ||
     isToolCallEvent(event) ||
     isBackgroundAgentCompleteEvent(event) ||
-    isAskUserQuestionPendingStepEvent(event)
+    isUserQuestionAskedEvent(event)
   );
 };
 
@@ -206,15 +206,15 @@ const resumeRound = ({
     step.progression = [...(step.progression ?? []), ...toolProgressions.map(({ data }) => data)];
   }
 
-  // Back-fill pending ask_user_question steps from answered events (matched by step_id)
+  // Back-fill pending ask_user_question steps from answered events (matched by prompt_id)
   const pendingAskUserQuestionSteps = pendingRound.steps
     .filter(isAskUserQuestionStep)
     .filter((step) => step.answers === undefined);
 
   for (const step of pendingAskUserQuestionSteps) {
     const answeredEvent = events
-      .filter(isAskUserQuestionAnsweredStepEvent)
-      .find((e) => e.data.step_id === step.step_id);
+      .filter(isUserQuestionAnsweredEvent)
+      .find((e) => e.data.prompt_id === step.prompt_id);
     if (answeredEvent) {
       step.answers = answeredEvent.data.answers;
     }
@@ -362,12 +362,12 @@ const createRound = ({
     if (isBackgroundAgentCompleteEvent(event)) {
       return [createBackgroundAgentStep(event)];
     }
-    if (isAskUserQuestionPendingStepEvent(event)) {
+    if (isUserQuestionAskedEvent(event)) {
       return [
         createAskUserQuestionStep({
-          step_id: event.data.step_id,
+          prompt_id: event.data.prompt_id,
           questions: event.data.questions,
-          // answers remain undefined; back-filled at resume by askUserQuestionAnsweredStepEvent
+          // answers remain undefined; back-filled at resume by userQuestionAnsweredEvent
         }),
       ];
     }
