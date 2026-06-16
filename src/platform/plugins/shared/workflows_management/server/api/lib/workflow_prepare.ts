@@ -107,7 +107,7 @@ export const prepareWorkflowDocumentFromYaml = (params: {
     // schema's discriminated union). The workflow is still indexed as invalid,
     // but we surface its `name` / `description` / `tags` so it remains
     // identifiable in the UI listing instead of showing as "Untitled workflow".
-    const rawHeader = readWorkflowHeaderFromYaml(workflow.yaml);
+    const rawHeader = readWorkflowHeaderFromYaml(yaml);
     if (rawHeader.name) workflowToCreate.name = rawHeader.name;
     if (rawHeader.description !== undefined) workflowToCreate.description = rawHeader.description;
     if (rawHeader.tags) workflowToCreate.tags = rawHeader.tags;

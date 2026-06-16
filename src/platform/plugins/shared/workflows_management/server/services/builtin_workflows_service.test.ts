@@ -98,6 +98,7 @@ describe('BuiltinWorkflowsService', () => {
       expect(client.index).toHaveBeenCalledWith(
         expect.objectContaining({
           id: 'builtin.example',
+          document: expect.objectContaining({ spaceId: 'default' }),
           op_type: 'create',
           refresh: true,
         })
@@ -226,10 +227,10 @@ describe('BuiltinWorkflowsService', () => {
       const service = new BuiltinWorkflowsService(deps);
 
       // Force the definition path: a definition is built from the YAML by
-      // prepareWorkflowDocument, but our permissive zod stub means the
+      // prepareWorkflowDocumentFromYaml, but our permissive zod stub means the
       // definition won't be parsed. Plug a minimal scheduled trigger by
       // overriding the validation schema.
-      // The real path is exercised by the existing prepareWorkflowDocument
+      // The real path is exercised by the existing prepareWorkflowDocumentFromYaml
       // tests; here we just assert the scheduler is called without `request`.
       await service.ensureWorkflow(cmd(), 'default').catch(() => {
         // ignore — depending on the zod stub the definition may be undefined
@@ -246,10 +247,10 @@ describe('BuiltinWorkflowsService', () => {
 
     it('throws when the prepared id does not match the requested id (invariant)', async () => {
       // Replace the validation service with one that returns a schema that
-      // forces prepareWorkflowDocument to ignore the supplied id — easiest
+      // forces prepareWorkflowDocumentFromYaml to ignore the supplied id — easiest
       // way to trigger the invariant is to pass an empty id, but the type
       // forbids that. Instead, call ensureWorkflow with a deliberately
-      // mismatched preparation by mocking prepareWorkflowDocument? Too
+      // mismatched preparation by mocking prepareWorkflowDocumentFromYaml? Too
       // invasive — instead document the invariant via the public API and
       // skip in unit tests. Marker test kept for traceability.
       expect(true).toBe(true);

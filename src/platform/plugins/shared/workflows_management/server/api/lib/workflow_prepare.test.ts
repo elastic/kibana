@@ -13,7 +13,7 @@ import {
   applyFieldUpdates,
   applyYamlUpdate,
   getTriggerTypesFromDefinition,
-  prepareWorkflowDocument,
+  prepareWorkflowDocumentFromYaml,
   workflowYamlDeclaresTopLevelEnabled,
 } from './workflow_prepare';
 import type { WorkflowProperties } from '../../storage/workflow_storage';
@@ -142,7 +142,7 @@ describe('applyFieldUpdates', () => {
   });
 });
 
-describe('prepareWorkflowDocument', () => {
+describe('prepareWorkflowDocumentFromYaml', () => {
   const failingSchema = {
     parse: () => {
       throw new Error('invalid');
@@ -179,8 +179,9 @@ describe('prepareWorkflowDocument', () => {
       '',
     ].join('\n');
 
-    const { workflowData } = prepareWorkflowDocument({
-      workflow: { id: 'wf-1', yaml },
+    const { workflowData } = prepareWorkflowDocumentFromYaml({
+      id: 'wf-1',
+      yaml,
       zodSchema: failingSchema,
       authenticatedUser: 'tester',
       now: new Date('2024-01-01T00:00:00.000Z'),
@@ -198,8 +199,9 @@ describe('prepareWorkflowDocument', () => {
   it('keeps the "Untitled workflow" default when raw YAML has no name and zod parse fails', () => {
     const yaml = 'steps:\n  - name: x\n    type: unknown.step.type\n';
 
-    const { workflowData } = prepareWorkflowDocument({
-      workflow: { id: 'wf-2', yaml },
+    const { workflowData } = prepareWorkflowDocumentFromYaml({
+      id: 'wf-2',
+      yaml,
       zodSchema: failingSchema,
       authenticatedUser: 'tester',
       now: new Date('2024-01-01T00:00:00.000Z'),
@@ -223,8 +225,9 @@ describe('prepareWorkflowDocument', () => {
     };
     const yaml = 'name: Raw name\n';
 
-    const { workflowData } = prepareWorkflowDocument({
-      workflow: { id: 'wf-3', yaml },
+    const { workflowData } = prepareWorkflowDocumentFromYaml({
+      id: 'wf-3',
+      yaml,
       zodSchema: passingSchemaForYaml(parsed),
       authenticatedUser: 'tester',
       now: new Date('2024-01-01T00:00:00.000Z'),

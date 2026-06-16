@@ -13,7 +13,7 @@ import type { WorkflowYaml } from '@kbn/workflows';
 import type { WorkflowCrudDeps } from './types';
 import {
   getTriggerTypesFromDefinition,
-  prepareWorkflowDocument,
+  prepareWorkflowDocumentFromYaml,
 } from '../api/lib/workflow_prepare';
 import type { WorkflowProperties } from '../storage/workflow_storage';
 import { scheduleWorkflowTriggers } from '../task_defs/schedule_workflow_triggers';
@@ -88,8 +88,9 @@ export class BuiltinWorkflowsService {
       id: preparedId,
       workflowData,
       definition,
-    } = prepareWorkflowDocument({
-      workflow: { id: workflow.id, yaml: workflow.yaml },
+    } = prepareWorkflowDocumentFromYaml({
+      id: workflow.id,
+      yaml: workflow.yaml,
       zodSchema,
       authenticatedUser: workflow.owner,
       now,
@@ -98,7 +99,7 @@ export class BuiltinWorkflowsService {
     });
 
     if (preparedId !== workflow.id) {
-      // prepareWorkflowDocument only changes the id when the caller didn't
+      // prepareWorkflowDocumentFromYaml only changes the id when the caller didn't
       // supply one. Built-ins always supply `id`; mismatch means a bug.
       throw new Error(
         `BuiltinWorkflowsService: prepared id '${preparedId}' does not match requested id '${workflow.id}'`
