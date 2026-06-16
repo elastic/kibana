@@ -65,7 +65,9 @@ export class NetworkEventsPageObject extends FtrService {
   }
 
   async ensureOnNetworkEventsPage(): Promise<void> {
-    await this.testSubjects.existOrFail('network-details-headline');
+    // The network events page exposes no dedicated page-level test subject, so
+    // anchor on the search bar refresh control that `clickRefresh` clicks next.
+    await this.testSubjects.existOrFail('querySubmitButton');
   }
 
   async waitForListToHaveEvents(timeoutMs?: number): Promise<void> {
