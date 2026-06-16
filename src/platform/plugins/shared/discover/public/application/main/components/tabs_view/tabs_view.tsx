@@ -91,9 +91,6 @@ export const TabsView = (props: SingleTabViewProps) => {
     }
 
     const tabsBarShellCss = css`
-      min-height: ${euiTheme.size.xxxl};
-      padding: ${euiTheme.size.s};
-      background-color: ${euiTheme.colors.backgroundBasePlain};
       border-bottom: ${euiTheme.border.thin};
     `;
     return (tabsBar) => (tabsBar ? <div css={tabsBarShellCss}>{tabsBar}</div> : null);

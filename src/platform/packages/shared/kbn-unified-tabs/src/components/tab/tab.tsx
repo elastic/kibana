@@ -203,6 +203,8 @@ export const Tab: React.FC<TabProps> = (props) => {
     prevSelectedItemIdRef.current = selectedItemId;
   }, [selectedItemId, isSelected, isActionPopoverOpen]);
 
+  const isLoading = previewData?.status === TabStatus.RUNNING;
+
   const mainTabContent = (
     <div css={getTabContainerCss(euiTheme, tabsSizeConfig, isSelected, isDragging)}>
       <div
@@ -231,7 +233,7 @@ export const Tab: React.FC<TabProps> = (props) => {
             />
           ) : (
             <div css={getTabLabelContainerCss(euiTheme)} className="unifiedTabs__tabLabel">
-              {previewData?.status === TabStatus.RUNNING && (
+              {isLoading && (
                 <EuiProgress
                   size="xs"
                   color="accent"
@@ -240,6 +242,8 @@ export const Tab: React.FC<TabProps> = (props) => {
                     // we can't simply use overflow: hidden; because then curved notches are not visible
                     border-top-left-radius: ${euiTheme.border.radius.small};
                     border-top-right-radius: ${euiTheme.border.radius.small};
+                    // lift the loading bar onto the tab's top edge so it replaces the selected accent line
+                    transform: translateY(-${euiTheme.size.xxs});
                   `}
                 />
               )}
@@ -321,6 +325,7 @@ export const Tab: React.FC<TabProps> = (props) => {
       data-test-subj={`unifiedTabs_tab_${item.id}`}
       isSelected={isSelected}
       isDragging={isDragging}
+      isLoading={isLoading}
       hideRightSeparator={hideRightSeparator}
       services={services}
       onMouseEnter={() => onHoverChange?.(item.id, true)}
@@ -362,7 +367,7 @@ function getTabContainerCss(
 
     .unifiedTabs__tabActions {
       position: absolute;
-      top: ${euiTheme.size.xs};
+      top: ${euiTheme.size.s};
       right: ${euiTheme.size.xs};
       opacity: 0;
       transition: opacity ${euiTheme.animation.fast};
