@@ -183,7 +183,7 @@ export class DiscoverPlugin
       euiIconType: 'logoKibana',
       defaultPath: '#/',
       category: DEFAULT_APP_CATEGORIES.kibana,
-      visibleIn: ['globalSearch', 'sideNav', 'kibanaOverview'],
+      visibleIn: ['globalSearch', 'classicSideNav', 'projectSideNav', 'kibanaOverview'],
       mount: async (params: AppMountParameters) => {
         const [[coreStart, discoverStartPlugins], historyService, ebtManager, { renderApp }] =
           await Promise.all([
