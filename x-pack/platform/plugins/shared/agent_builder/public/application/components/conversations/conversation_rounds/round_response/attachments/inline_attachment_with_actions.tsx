@@ -128,6 +128,7 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
 
   const title = uiDefinition?.getLabel?.(attachment) ?? attachment.type.toUpperCase();
   const header = uiDefinition?.getHeader?.({ attachment });
+  const maxWidth = uiDefinition?.getMaxWidth?.(attachment);
 
   return (
     <EuiSplitPanel.Outer
@@ -136,6 +137,7 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
       hasBorder={true}
       css={css`
         overflow: visible; // allow vis actions to overflow
+        ${maxWidth !== undefined ? `max-width: ${maxWidth}px;` : ''}
       `}
     >
       <AttachmentHeader
