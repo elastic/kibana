@@ -52,8 +52,8 @@ const formatMetricSection = (
 ): string => {
   return [
     `**${metricLabel}**`,
-    `- baseline: ${formatBytes(metric.baselineRssBytes)}`,
-    `- target: ${formatBytes(metric.targetRssBytes)}`,
+    `- baseline: ${formatBytes(metric.baselineBytes)}`,
+    `- target: ${formatBytes(metric.targetBytes)}`,
     `- delta: ${formatBytes(metric.deltaBytes)} (allowed: ${formatBytes(
       metric.allowedDeltaBytes
     )})`,
@@ -62,7 +62,6 @@ const formatMetricSection = (
 };
 
 const DIAGNOSTIC_METRIC_LABELS = {
-  tailHeapUsed: 'Tail heap used',
   tailHeapTotal: 'Tail heap total',
   tailExternal: 'Tail external memory',
   tailArrayBuffers: 'Tail array buffers',
@@ -116,6 +115,9 @@ export const buildRegressionAnnotation = (report: WarmStartMemoryRegressionRepor
         })
         .flatMap(([metricName, metric]) => ['', formatDiagnosticMetricSection(metricName, metric)])
     : [];
+  const tailHeapUsedMetricLines = report.metrics.tailHeapUsed
+    ? ['', formatMetricSection('Tail heap used', report.metrics.tailHeapUsed)]
+    : [];
 
   return [
     '### Warm-start memory regression detected',
@@ -125,6 +127,7 @@ export const buildRegressionAnnotation = (report: WarmStartMemoryRegressionRepor
     formatMetricSection('Tail RSS', report.metrics.tailRss),
     '',
     formatMetricSection('Max RSS', report.metrics.maxRss),
+    ...tailHeapUsedMetricLines,
     ...(diagnosticMetricLines.length
       ? ['', '**Diagnostic memory context**', ...diagnosticMetricLines]
       : []),

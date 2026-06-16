@@ -16,7 +16,7 @@ import {
 } from './memory_regression_threshold';
 
 describe('getAllowedRegressionDeltaBytes', () => {
-  it('uses the fixed 150 MiB floor for small baselines', () => {
+  it('uses the fixed 50 MiB floor for small baselines', () => {
     const baselineMedianRssBytes = 500 * 1024 * 1024;
 
     expect(getAllowedRegressionDeltaBytes(baselineMedianRssBytes)).toBe(
@@ -24,15 +24,15 @@ describe('getAllowedRegressionDeltaBytes', () => {
     );
   });
 
-  it('uses 8% of the baseline median when that exceeds 150 MiB', () => {
-    const baselineMedianRssBytes = 3 * 1024 * 1024 * 1024;
+  it('uses 0.05% of the baseline median when that exceeds 50 MiB', () => {
+    const baselineMedianRssBytes = 200 * 1024 * 1024 * 1024;
 
     expect(getAllowedRegressionDeltaBytes(baselineMedianRssBytes)).toBe(
-      baselineMedianRssBytes * 0.08
+      baselineMedianRssBytes * 0.05
     );
   });
 
-  it('supports the looser Max RSS threshold policy', () => {
+  it('supports the Max RSS threshold policy', () => {
     const baselineMedianRssBytes = 500 * 1024 * 1024;
 
     expect(

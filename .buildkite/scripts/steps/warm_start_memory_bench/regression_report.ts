@@ -17,8 +17,8 @@
  */
 
 export interface WarmStartMemoryRegressionMetricReport {
-  readonly baselineRssBytes: number;
-  readonly targetRssBytes: number;
+  readonly baselineBytes: number;
+  readonly targetBytes: number;
   readonly deltaBytes: number;
   readonly allowedDeltaBytes: number;
   readonly regressed: boolean;
@@ -34,14 +34,14 @@ export interface WarmStartMemoryRegressionReport {
   readonly metrics: {
     readonly tailRss: WarmStartMemoryRegressionMetricReport;
     readonly maxRss: WarmStartMemoryRegressionMetricReport;
+    readonly tailHeapUsed?: WarmStartMemoryRegressionMetricReport;
   };
   readonly diagnosticMetrics?: Partial<{
-    readonly tailHeapUsed: WarmStartMemoryDiagnosticMetricReport;
     readonly tailHeapTotal: WarmStartMemoryDiagnosticMetricReport;
     readonly tailExternal: WarmStartMemoryDiagnosticMetricReport;
     readonly tailArrayBuffers: WarmStartMemoryDiagnosticMetricReport;
   }>;
-  readonly triggeredMetrics: Array<'tailRss' | 'maxRss'>;
+  readonly triggeredMetrics: Array<'tailRss' | 'maxRss' | 'tailHeapUsed'>;
   readonly context?: {
     readonly baselineCommit?: string;
     readonly targetCommit?: string;

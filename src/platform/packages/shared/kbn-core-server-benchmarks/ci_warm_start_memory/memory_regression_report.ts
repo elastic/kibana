@@ -21,16 +21,15 @@ export interface WarmStartMemoryRegressionReportContext {
   readonly targetBuildId?: string;
 }
 
-export type WarmStartMemoryRegressionMetricName = 'tailRss' | 'maxRss';
+export type WarmStartMemoryRegressionMetricName = 'tailRss' | 'maxRss' | 'tailHeapUsed';
 export type WarmStartMemoryDiagnosticMetricName =
-  | 'tailHeapUsed'
   | 'tailHeapTotal'
   | 'tailExternal'
   | 'tailArrayBuffers';
 
 export interface WarmStartMemoryRegressionMetricReport {
-  readonly baselineRssBytes: number;
-  readonly targetRssBytes: number;
+  readonly baselineBytes: number;
+  readonly targetBytes: number;
   readonly deltaBytes: number;
   readonly allowedDeltaBytes: number;
   readonly regressed: boolean;
@@ -43,10 +42,11 @@ export interface WarmStartMemoryDiagnosticMetricReport {
 }
 
 export interface WarmStartMemoryRegressionReport {
-  readonly metrics: Record<
-    WarmStartMemoryRegressionMetricName,
-    WarmStartMemoryRegressionMetricReport
-  >;
+  readonly metrics: {
+    readonly tailRss: WarmStartMemoryRegressionMetricReport;
+    readonly maxRss: WarmStartMemoryRegressionMetricReport;
+    readonly tailHeapUsed?: WarmStartMemoryRegressionMetricReport;
+  };
   readonly diagnosticMetrics?: Partial<
     Record<WarmStartMemoryDiagnosticMetricName, WarmStartMemoryDiagnosticMetricReport>
   >;
@@ -60,10 +60,11 @@ export const buildWarmStartMemoryRegressionReport = ({
   context,
   diagnosticMetrics,
 }: {
-  metrics: Record<
-    WarmStartMemoryRegressionMetricName,
-    Omit<WarmStartMemoryRegressionMetricReport, 'deltaBytes'>
-  >;
+  metrics: {
+    readonly tailRss: Omit<WarmStartMemoryRegressionMetricReport, 'deltaBytes'>;
+    readonly maxRss: Omit<WarmStartMemoryRegressionMetricReport, 'deltaBytes'>;
+    readonly tailHeapUsed?: Omit<WarmStartMemoryRegressionMetricReport, 'deltaBytes'>;
+  };
   triggeredMetrics: WarmStartMemoryRegressionMetricName[];
   context?: WarmStartMemoryRegressionReportContext;
   diagnosticMetrics?: Partial<
@@ -79,7 +80,7 @@ export const buildWarmStartMemoryRegressionReport = ({
         metricName,
         {
           ...metric,
-          deltaBytes: metric.targetRssBytes - metric.baselineRssBytes,
+          deltaBytes: metric.targetBytes - metric.baselineBytes,
         },
       ])
     ) as WarmStartMemoryRegressionReport['metrics'],

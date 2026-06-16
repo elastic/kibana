@@ -169,15 +169,15 @@ describe('runWarmStartMemoryBench', () => {
     const report: WarmStartMemoryRegressionReport = {
       metrics: {
         tailRss: {
-          baselineRssBytes: 1,
-          targetRssBytes: 2,
+          baselineBytes: 1,
+          targetBytes: 2,
           deltaBytes: 1,
           allowedDeltaBytes: 0,
           regressed: true,
         },
         maxRss: {
-          baselineRssBytes: 1,
-          targetRssBytes: 1,
+          baselineBytes: 1,
+          targetBytes: 1,
           deltaBytes: 0,
           allowedDeltaBytes: 0,
           regressed: false,

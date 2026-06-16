@@ -21,6 +21,7 @@ import {
   getAllowedRegressionDeltaBytes,
   isMemoryRegression,
   MAX_RSS_REGRESSION_THRESHOLD_POLICY,
+  TAIL_HEAP_USED_REGRESSION_THRESHOLD_POLICY,
   TAIL_RSS_REGRESSION_THRESHOLD_POLICY,
 } from './memory_regression_threshold';
 import {
@@ -39,7 +40,6 @@ const DIAGNOSTIC_METRICS: Array<{
   readonly name: WarmStartMemoryDiagnosticMetricName;
   readonly metricKey: string;
 }> = [
-  { name: 'tailHeapUsed', metricKey: TAIL_HEAP_USED_METRIC_KEY },
   { name: 'tailHeapTotal', metricKey: TAIL_HEAP_TOTAL_METRIC_KEY },
   { name: 'tailExternal', metricKey: TAIL_EXTERNAL_MEMORY_METRIC_KEY },
   { name: 'tailArrayBuffers', metricKey: TAIL_ARRAY_BUFFERS_METRIC_KEY },
@@ -50,6 +50,14 @@ export const compareWarmStartMemory: OnCompareCallback = async ({ leftSummary, r
   const targetMedianTailRssBytes = getMedianTailRssBytes(rightSummary);
   const baselineMedianMaxRssBytes = getMedianMaxRssBytes(leftSummary);
   const targetMedianMaxRssBytes = getMedianMaxRssBytes(rightSummary);
+  const baselineMedianTailHeapUsedBytes = getOptionalMedianMemoryMetricBytes(
+    leftSummary,
+    TAIL_HEAP_USED_METRIC_KEY
+  );
+  const targetMedianTailHeapUsedBytes = getOptionalMedianMemoryMetricBytes(
+    rightSummary,
+    TAIL_HEAP_USED_METRIC_KEY
+  );
 
   const allowedTailRssDeltaBytes = getAllowedRegressionDeltaBytes(
     baselineMedianTailRssBytes,
@@ -59,6 +67,13 @@ export const compareWarmStartMemory: OnCompareCallback = async ({ leftSummary, r
     baselineMedianMaxRssBytes,
     MAX_RSS_REGRESSION_THRESHOLD_POLICY
   );
+  const allowedTailHeapUsedDeltaBytes =
+    baselineMedianTailHeapUsedBytes !== undefined
+      ? getAllowedRegressionDeltaBytes(
+          baselineMedianTailHeapUsedBytes,
+          TAIL_HEAP_USED_REGRESSION_THRESHOLD_POLICY
+        )
+      : undefined;
   const tailRssRegressed = isMemoryRegression(
     baselineMedianTailRssBytes,
     targetMedianTailRssBytes,
@@ -69,10 +84,19 @@ export const compareWarmStartMemory: OnCompareCallback = async ({ leftSummary, r
     targetMedianMaxRssBytes,
     MAX_RSS_REGRESSION_THRESHOLD_POLICY
   );
+  const tailHeapUsedRegressed =
+    baselineMedianTailHeapUsedBytes !== undefined && targetMedianTailHeapUsedBytes !== undefined
+      ? isMemoryRegression(
+          baselineMedianTailHeapUsedBytes,
+          targetMedianTailHeapUsedBytes,
+          TAIL_HEAP_USED_REGRESSION_THRESHOLD_POLICY
+        )
+      : false;
 
   const triggeredMetrics: WarmStartMemoryRegressionMetricName[] = [
     ...(tailRssRegressed ? (['tailRss'] as const) : []),
     ...(maxRssRegressed ? (['maxRss'] as const) : []),
+    ...(tailHeapUsedRegressed ? (['tailHeapUsed'] as const) : []),
   ];
 
   if (!triggeredMetrics.length) {
@@ -95,17 +119,29 @@ export const compareWarmStartMemory: OnCompareCallback = async ({ leftSummary, r
   const report = buildWarmStartMemoryRegressionReport({
     metrics: {
       tailRss: {
-        baselineRssBytes: baselineMedianTailRssBytes,
-        targetRssBytes: targetMedianTailRssBytes,
+        baselineBytes: baselineMedianTailRssBytes,
+        targetBytes: targetMedianTailRssBytes,
         allowedDeltaBytes: allowedTailRssDeltaBytes,
         regressed: tailRssRegressed,
       },
       maxRss: {
-        baselineRssBytes: baselineMedianMaxRssBytes,
-        targetRssBytes: targetMedianMaxRssBytes,
+        baselineBytes: baselineMedianMaxRssBytes,
+        targetBytes: targetMedianMaxRssBytes,
         allowedDeltaBytes: allowedMaxRssDeltaBytes,
         regressed: maxRssRegressed,
       },
+      ...(baselineMedianTailHeapUsedBytes !== undefined &&
+      targetMedianTailHeapUsedBytes !== undefined &&
+      allowedTailHeapUsedDeltaBytes !== undefined
+        ? {
+            tailHeapUsed: {
+              baselineBytes: baselineMedianTailHeapUsedBytes,
+              targetBytes: targetMedianTailHeapUsedBytes,
+              allowedDeltaBytes: allowedTailHeapUsedDeltaBytes,
+              regressed: tailHeapUsedRegressed,
+            },
+          }
+        : {}),
     },
     diagnosticMetrics,
     triggeredMetrics,
@@ -128,6 +164,17 @@ export const compareWarmStartMemory: OnCompareCallback = async ({ leftSummary, r
       `Max RSS delta: ${formatBytes(
         targetMedianMaxRssBytes - baselineMedianMaxRssBytes
       )} (allowed: ${formatBytes(allowedMaxRssDeltaBytes)})`,
+      ...(baselineMedianTailHeapUsedBytes !== undefined &&
+      targetMedianTailHeapUsedBytes !== undefined &&
+      allowedTailHeapUsedDeltaBytes !== undefined
+        ? [
+            `Tail heap used baseline: ${formatBytes(baselineMedianTailHeapUsedBytes)}`,
+            `Tail heap used target: ${formatBytes(targetMedianTailHeapUsedBytes)}`,
+            `Tail heap used delta: ${formatBytes(
+              targetMedianTailHeapUsedBytes - baselineMedianTailHeapUsedBytes
+            )} (allowed: ${formatBytes(allowedTailHeapUsedDeltaBytes)})`,
+          ]
+        : []),
       `Report: ${reportPath}`,
     ].join(' ')
   );

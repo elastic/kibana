@@ -38,33 +38,35 @@ const unavailableBaseline = (): UnavailableBaselineBuild => ({
 const regressionReport = (): WarmStartMemoryRegressionReport => ({
   metrics: {
     tailRss: {
-      baselineRssBytes: 1_000_000_000,
-      targetRssBytes: 1_200_000_000,
+      baselineBytes: 1_000_000_000,
+      targetBytes: 1_200_000_000,
       deltaBytes: 200_000_000,
       allowedDeltaBytes: 150_000_000,
       regressed: true,
     },
     maxRss: {
-      baselineRssBytes: 2_000_000_000,
-      targetRssBytes: 2_500_000_000,
+      baselineBytes: 2_000_000_000,
+      targetBytes: 2_500_000_000,
       deltaBytes: 500_000_000,
       allowedDeltaBytes: 300_000_000,
       regressed: true,
     },
-  },
-  diagnosticMetrics: {
     tailHeapUsed: {
       baselineBytes: 300_000_000,
       targetBytes: 350_000_000,
       deltaBytes: 50_000_000,
+      allowedDeltaBytes: 40_000_000,
+      regressed: true,
     },
+  },
+  diagnosticMetrics: {
     tailExternal: {
       baselineBytes: 100_000_000,
       targetBytes: 120_000_000,
       deltaBytes: 20_000_000,
     },
   },
-  triggeredMetrics: ['tailRss', 'maxRss'],
+  triggeredMetrics: ['tailRss', 'maxRss', 'tailHeapUsed'],
   context: {
     baselineCommit: 'baseline-sha',
     targetCommit: 'target-sha',
@@ -99,7 +101,7 @@ describe('warm start memory bench annotations', () => {
     expect(body).toContain('Diagnostic memory context');
     expect(body).toContain('Tail heap used');
     expect(body).toContain('Tail external memory');
-    expect(body).toContain('tailRss, maxRss');
+    expect(body).toContain('tailRss, maxRss, tailHeapUsed');
     expect(body).toContain('baseline-sha');
     expect(body).toContain('target-sha');
   });

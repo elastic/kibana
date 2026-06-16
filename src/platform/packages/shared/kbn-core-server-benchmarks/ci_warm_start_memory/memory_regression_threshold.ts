@@ -12,10 +12,12 @@ export interface MemoryRegressionThresholdPolicy {
   readonly relativeDeltaRatio: number;
 }
 
-export const MIN_TAIL_RSS_REGRESSION_DELTA_BYTES = 150 * 1024 * 1024; // 150MB
-export const TAIL_RSS_RELATIVE_REGRESSION_DELTA_RATIO = 0.08;
-export const MIN_MAX_RSS_REGRESSION_DELTA_BYTES = 300 * 1024 * 1024; // 300MB
-export const MAX_RSS_RELATIVE_REGRESSION_DELTA_RATIO = 0.12;
+export const MIN_TAIL_RSS_REGRESSION_DELTA_BYTES = 50 * 1024 * 1024; // 50MB
+export const TAIL_RSS_RELATIVE_REGRESSION_DELTA_RATIO = 0.05;
+export const MIN_MAX_RSS_REGRESSION_DELTA_BYTES = 50 * 1024 * 1024; // 50MB
+export const MAX_RSS_RELATIVE_REGRESSION_DELTA_RATIO = 0.05;
+export const MIN_TAIL_HEAP_USED_REGRESSION_DELTA_BYTES = 50 * 1024 * 1024; // 50MB
+export const TAIL_HEAP_USED_RELATIVE_REGRESSION_DELTA_RATIO = 0.05;
 
 export const TAIL_RSS_REGRESSION_THRESHOLD_POLICY: MemoryRegressionThresholdPolicy = {
   minDeltaBytes: MIN_TAIL_RSS_REGRESSION_DELTA_BYTES,
@@ -25,6 +27,11 @@ export const TAIL_RSS_REGRESSION_THRESHOLD_POLICY: MemoryRegressionThresholdPoli
 export const MAX_RSS_REGRESSION_THRESHOLD_POLICY: MemoryRegressionThresholdPolicy = {
   minDeltaBytes: MIN_MAX_RSS_REGRESSION_DELTA_BYTES,
   relativeDeltaRatio: MAX_RSS_RELATIVE_REGRESSION_DELTA_RATIO,
+};
+
+export const TAIL_HEAP_USED_REGRESSION_THRESHOLD_POLICY: MemoryRegressionThresholdPolicy = {
+  minDeltaBytes: MIN_TAIL_HEAP_USED_REGRESSION_DELTA_BYTES,
+  relativeDeltaRatio: TAIL_HEAP_USED_RELATIVE_REGRESSION_DELTA_RATIO,
 };
 
 export const getAllowedRegressionDeltaBytes = (

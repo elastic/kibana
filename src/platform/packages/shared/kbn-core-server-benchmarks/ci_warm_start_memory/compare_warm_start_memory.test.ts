@@ -13,6 +13,7 @@ import path from 'path';
 import { compareWarmStartMemory } from './compare_warm_start_memory';
 import {
   MIN_MAX_RSS_REGRESSION_DELTA_BYTES,
+  MIN_TAIL_HEAP_USED_REGRESSION_DELTA_BYTES,
   MIN_TAIL_RSS_REGRESSION_DELTA_BYTES,
 } from './memory_regression_threshold';
 import { WARM_START_MEMORY_REPORT_PATH_ENV } from './memory_regression_report';
@@ -101,26 +102,28 @@ describe('compareWarmStartMemory', () => {
       expect(writtenReport).toEqual({
         metrics: {
           tailRss: {
-            baselineRssBytes: baselineMedianRssBytes,
-            targetRssBytes: targetMedianRssBytes,
+            baselineBytes: baselineMedianRssBytes,
+            targetBytes: targetMedianRssBytes,
             deltaBytes: MIN_TAIL_RSS_REGRESSION_DELTA_BYTES + 1,
             allowedDeltaBytes: MIN_TAIL_RSS_REGRESSION_DELTA_BYTES,
             regressed: true,
           },
           maxRss: {
-            baselineRssBytes: baselineMedianRssBytes,
-            targetRssBytes: baselineMedianRssBytes,
+            baselineBytes: baselineMedianRssBytes,
+            targetBytes: baselineMedianRssBytes,
             deltaBytes: 0,
             allowedDeltaBytes: MIN_MAX_RSS_REGRESSION_DELTA_BYTES,
             regressed: false,
           },
-        },
-        diagnosticMetrics: {
           tailHeapUsed: {
             baselineBytes: 200,
             targetBytes: 250,
             deltaBytes: 50,
+            allowedDeltaBytes: MIN_TAIL_HEAP_USED_REGRESSION_DELTA_BYTES,
+            regressed: false,
           },
+        },
+        diagnosticMetrics: {
           tailHeapTotal: {
             baselineBytes: 500,
             targetBytes: 550,
@@ -172,5 +175,41 @@ describe('compareWarmStartMemory', () => {
     });
 
     await expect(compareWarmStartMemory(context)).rejects.toThrow('Triggered metric(s): maxRss');
+  });
+
+  it('throws when Tail heap used exceeds its threshold even if RSS is stable', async () => {
+    const baselineMedianRssBytes = 500 * 1024 * 1024;
+    const baselineMedianHeapUsedBytes = 100 * 1024 * 1024;
+    const targetMedianHeapUsedBytes =
+      baselineMedianHeapUsedBytes + MIN_TAIL_HEAP_USED_REGRESSION_DELTA_BYTES + 1;
+
+    const context = makeWarmStartMemoryCompareContext({
+      baselineMaxRssValues: [
+        baselineMedianRssBytes,
+        baselineMedianRssBytes,
+        baselineMedianRssBytes,
+      ],
+      baselineTailRssValues: [
+        baselineMedianRssBytes,
+        baselineMedianRssBytes,
+        baselineMedianRssBytes,
+      ],
+      baselineTailHeapUsedValues: [
+        baselineMedianHeapUsedBytes,
+        baselineMedianHeapUsedBytes,
+        baselineMedianHeapUsedBytes,
+      ],
+      targetMaxRssValues: [baselineMedianRssBytes, baselineMedianRssBytes, baselineMedianRssBytes],
+      targetTailRssValues: [baselineMedianRssBytes, baselineMedianRssBytes, baselineMedianRssBytes],
+      targetTailHeapUsedValues: [
+        targetMedianHeapUsedBytes,
+        targetMedianHeapUsedBytes,
+        targetMedianHeapUsedBytes,
+      ],
+    });
+
+    await expect(compareWarmStartMemory(context)).rejects.toThrow(
+      'Triggered metric(s): tailHeapUsed'
+    );
   });
 });

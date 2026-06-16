@@ -21,25 +21,31 @@ describe('buildWarmStartMemoryRegressionReport', () => {
     const report = buildWarmStartMemoryRegressionReport({
       metrics: {
         tailRss: {
-          baselineRssBytes: 1_000,
-          targetRssBytes: 1_500,
+          baselineBytes: 1_000,
+          targetBytes: 1_500,
           allowedDeltaBytes: 200,
           regressed: true,
         },
         maxRss: {
-          baselineRssBytes: 2_000,
-          targetRssBytes: 2_100,
+          baselineBytes: 2_000,
+          targetBytes: 2_100,
           allowedDeltaBytes: 300,
           regressed: false,
         },
-      },
-      diagnosticMetrics: {
         tailHeapUsed: {
           baselineBytes: 400,
           targetBytes: 450,
+          allowedDeltaBytes: 100,
+          regressed: true,
         },
       },
-      triggeredMetrics: ['tailRss'],
+      diagnosticMetrics: {
+        tailHeapTotal: {
+          baselineBytes: 500,
+          targetBytes: 550,
+        },
+      },
+      triggeredMetrics: ['tailRss', 'tailHeapUsed'],
       context: {
         baselineCommit: 'baseline-sha',
         targetCommit: 'target-sha',
@@ -49,28 +55,35 @@ describe('buildWarmStartMemoryRegressionReport', () => {
     expect(report).toEqual({
       metrics: {
         tailRss: {
-          baselineRssBytes: 1_000,
-          targetRssBytes: 1_500,
+          baselineBytes: 1_000,
+          targetBytes: 1_500,
           deltaBytes: 500,
           allowedDeltaBytes: 200,
           regressed: true,
         },
         maxRss: {
-          baselineRssBytes: 2_000,
-          targetRssBytes: 2_100,
+          baselineBytes: 2_000,
+          targetBytes: 2_100,
           deltaBytes: 100,
           allowedDeltaBytes: 300,
           regressed: false,
         },
-      },
-      diagnosticMetrics: {
         tailHeapUsed: {
           baselineBytes: 400,
           targetBytes: 450,
           deltaBytes: 50,
+          allowedDeltaBytes: 100,
+          regressed: true,
         },
       },
-      triggeredMetrics: ['tailRss'],
+      diagnosticMetrics: {
+        tailHeapTotal: {
+          baselineBytes: 500,
+          targetBytes: 550,
+          deltaBytes: 50,
+        },
+      },
+      triggeredMetrics: ['tailRss', 'tailHeapUsed'],
       context: {
         baselineCommit: 'baseline-sha',
         targetCommit: 'target-sha',
@@ -112,14 +125,14 @@ describe('writeWarmStartMemoryRegressionReport', () => {
       const report = buildWarmStartMemoryRegressionReport({
         metrics: {
           tailRss: {
-            baselineRssBytes: 1_000,
-            targetRssBytes: 2_000,
+            baselineBytes: 1_000,
+            targetBytes: 2_000,
             allowedDeltaBytes: 150,
             regressed: true,
           },
           maxRss: {
-            baselineRssBytes: 1_500,
-            targetRssBytes: 1_600,
+            baselineBytes: 1_500,
+            targetBytes: 1_600,
             allowedDeltaBytes: 300,
             regressed: false,
           },
