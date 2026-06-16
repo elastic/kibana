@@ -14,10 +14,8 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
 import {
   AutoDetectPage,
-  KubernetesPage,
   LandingPage,
   OtelLogsPage,
-  OtelKubernetesPage,
   FirehosePage,
   OtelApmPage,
   CloudForwarderPage,
@@ -86,31 +84,18 @@ export function ObservabilityOnboardingFlow() {
         </Route>,
       ];
 
-  const kubernetesRoutes = isAddDataPageV2Enabled
-    ? [
-        <Route key="kubernetes-otel" exact path="/kubernetes">
-          <KubernetesOtelPage />
-        </Route>,
-        <Route key="otel-kubernetes-redirect" exact path="/otel-kubernetes">
-          <Redirect to={`/kubernetes${kubernetesRedirectSearch}`} />
-        </Route>,
-      ]
-    : [
-        <Route key="kubernetes-v1" exact path="/kubernetes">
-          <KubernetesPage />
-        </Route>,
-        <Route key="otel-kubernetes-v1" exact path="/otel-kubernetes">
-          <OtelKubernetesPage />
-        </Route>,
-      ];
-
   return (
     <QueryClientProvider client={queryClient}>
       <Routes>
         <Route path="/auto-detect">
           <AutoDetectPage />
         </Route>
-        {kubernetesRoutes}
+        <Route key="kubernetes-otel" exact path="/kubernetes">
+          <KubernetesOtelPage />
+        </Route>
+        <Route key="otel-kubernetes-redirect" exact path="/otel-kubernetes">
+          <Redirect to={`/kubernetes${kubernetesRedirectSearch}`} />
+        </Route>
         <Route path="/otel-logs">
           <OtelLogsPage />
         </Route>

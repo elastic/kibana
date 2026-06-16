@@ -41,8 +41,7 @@ test('Otel Kubernetes', async ({ page, onboardingHomePage, otelKubernetesFlowPag
   await onboardingHomePage.selectKubernetesUseCase();
   await onboardingHomePage.selectOtelKubernetesQuickstart();
 
-  await otelKubernetesFlowPage.copyHelmRepositorySnippetToClipboard();
-  const helmRepoSnippet = (await page.evaluate('navigator.clipboard.readText()')) as string;
+  const helmRepoSnippet = (await otelKubernetesFlowPage.getHelmRepositorySnippet()) ?? '';
 
   await otelKubernetesFlowPage.copyInstallStackSnippetToClipboard();
   const installStackSnippet = (await page.evaluate('navigator.clipboard.readText()')) as string;
@@ -55,6 +54,7 @@ test('Otel Kubernetes', async ({ page, onboardingHomePage, otelKubernetesFlowPag
      * with the values used by Ensemble
      */
     await otelKubernetesFlowPage.switchInstrumentationInstructions('java');
+    await otelKubernetesFlowPage.selectNamespaceInstrumentationInstructions();
     const annotateAllResourceSnippet = (
       await otelKubernetesFlowPage.getAnnotateAllResourceSnippet()
     )?.replace('my-namespace', INSTRUMENTED_APP_CONTAINER_NAMESPACE);

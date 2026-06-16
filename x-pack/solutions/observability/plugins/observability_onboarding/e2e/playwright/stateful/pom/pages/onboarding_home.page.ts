@@ -63,10 +63,6 @@ export class OnboardingHomePage {
     await this.autoDetectElasticAgent.click();
   }
 
-  public async gotoKubernetesElasticAgentFlow() {
-    await this.page.goto(`${process.env.KIBANA_BASE_URL}/app/observabilityOnboarding/kubernetes`);
-  }
-
   public async selectOtelKubernetesQuickstart() {
     await this.otelKubernetesQuickStartCard.click();
   }

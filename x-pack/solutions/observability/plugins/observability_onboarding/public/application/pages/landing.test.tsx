@@ -33,8 +33,6 @@ jest.mock('./host', () => ({
 }));
 
 jest.mock('./auto_detect', () => ({ AutoDetectPage: () => null }));
-jest.mock('./kubernetes', () => ({ KubernetesPage: () => null }));
-jest.mock('./otel_kubernetes', () => ({ OtelKubernetesPage: () => null }));
 jest.mock('./otel_logs', () => ({ OtelLogsPage: () => null }));
 jest.mock('./firehose', () => ({ FirehosePage: () => null }));
 jest.mock('./otel_apm', () => ({ OtelApmPage: () => null }));

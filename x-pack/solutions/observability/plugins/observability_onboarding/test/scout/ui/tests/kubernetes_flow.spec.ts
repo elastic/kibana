@@ -9,31 +9,18 @@ import { expect } from '@kbn/scout-oblt/ui';
 import { tags } from '@kbn/scout-oblt';
 import { test } from '../fixtures';
 
-const V2_FF_ID = 'observability.addDataPageV2Enabled';
-
 test.describe.serial(
   'Kubernetes Onboarding',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    test.beforeAll(async ({ apiServices }) => {
-      await apiServices.core.settings({
-        'feature_flags.overrides': { [V2_FF_ID]: true },
-      });
-    });
-
     test.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginAsAdmin();
     });
 
-    test.afterAll(async ({ apiServices }) => {
-      await apiServices.core.settings({
-        'feature_flags.overrides': { [V2_FF_ID]: false },
-      });
-    });
-
-    test('Kubernetes tile navigates to the OTel Kubernetes flow', async ({ pageObjects, page }) => {
-      await pageObjects.kubernetes.gotoLanding();
-      await pageObjects.kubernetes.kubernetesTile().click();
+    test('Kubernetes card navigates to the OTel Kubernetes flow', async ({ pageObjects, page }) => {
+      await pageObjects.onboarding.goto();
+      await pageObjects.onboarding.selectKubernetesUseCase();
+      await pageObjects.onboarding.clickIntegrationCard('integration-card:otel-kubernetes');
 
       await expect(pageObjects.kubernetes.layout('otel')).toBeVisible();
       await expect(page).toHaveURL(/\/kubernetes(\?|$|#)/);
@@ -76,22 +63,6 @@ test.describe.serial(
         await expect(pageObjects.kubernetes.otelInstrumentationNamespaceSnippet()).toBeVisible();
         await expect(pageObjects.kubernetes.otelInstrumentationPodsSnippet()).toHaveCount(0);
       });
-    });
-
-    test('navigating to /kubernetes renders the V1 experience when V2 is disabled', async ({
-      apiServices,
-      page,
-      pageObjects,
-    }) => {
-      await apiServices.core.settings({
-        'feature_flags.overrides': { [V2_FF_ID]: false },
-      });
-      await pageObjects.kubernetes.gotoPath('/kubernetes');
-
-      await expect(pageObjects.kubernetes.layout('otel')).toHaveCount(0);
-      await expect(pageObjects.kubernetes.collectionMethodSelector()).toHaveCount(0);
-      await expect(page).toHaveURL(/\/kubernetes/);
-      await expect(pageObjects.onboarding.kubernetesCodeSnippet).toBeVisible();
     });
   }
 );

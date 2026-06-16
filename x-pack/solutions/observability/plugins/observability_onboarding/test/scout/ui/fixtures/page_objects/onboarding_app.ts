@@ -40,10 +40,6 @@ export class OnboardingApp {
     return this.page.getByTestId('integration-card:otel-logs');
   }
 
-  public get kubernetesQuickStartCard() {
-    return this.page.getByTestId('integration-card:kubernetes-quick-start');
-  }
-
   public get otelKubernetesCard() {
     return this.page.getByTestId('integration-card:otel-kubernetes');
   }
@@ -226,16 +222,8 @@ export class OnboardingApp {
     return this.page.getByTestId('observabilityOnboardingAutoDetectPanelCodeSnippet');
   }
 
-  public get kubernetesCodeSnippet() {
-    return this.page.getByTestId('observabilityOnboardingKubernetesPanelCodeSnippet');
-  }
-
   async getAutoDetectCommandContent(): Promise<string> {
     return (await this.autoDetectCodeSnippet.textContent()) ?? '';
-  }
-
-  async getKubernetesCommandContent(): Promise<string> {
-    return (await this.kubernetesCodeSnippet.textContent()) ?? '';
   }
 
   // Enable Wired Streams Modal

@@ -10,22 +10,9 @@ import type { ScoutPage } from '@kbn/scout-oblt';
 export class KubernetesPage {
   constructor(private readonly page: ScoutPage) {}
 
-  async gotoLanding() {
-    await this.page.gotoApp('observabilityOnboarding');
-    await this.landingWrapper.waitFor({ state: 'visible', timeout: 20_000 });
-  }
-
   async gotoPath(path: string) {
     const normalized = path.replace(/^\//, '');
     await this.page.gotoApp(`observabilityOnboarding/${normalized}`);
-  }
-
-  public get landingWrapper() {
-    return this.page.getByTestId('addDataPageV2');
-  }
-
-  kubernetesTile() {
-    return this.page.getByTestId('observabilityOnboardingIntegrationTile-kubernetes');
   }
 
   layout(method: 'otel') {

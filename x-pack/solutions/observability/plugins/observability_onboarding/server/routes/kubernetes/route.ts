@@ -45,7 +45,7 @@ export interface HasKubernetesDataRouteResponse {
 const createKubernetesOnboardingFlowRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'POST /internal/observability_onboarding/kubernetes/flow',
   params: t.type({
-    body: t.type({ pkgName: t.union([t.literal('kubernetes'), t.literal('kubernetes_otel')]) }),
+    body: t.type({ pkgName: t.literal('kubernetes_otel') }),
   }),
   security: {
     authz: {
@@ -55,7 +55,7 @@ const createKubernetesOnboardingFlowRoute = createObservabilityOnboardingServerR
     },
   },
   async handler(resources): Promise<CreateKubernetesOnboardingFlowRouteResponse> {
-    const { context, request, params, plugins, services, kibanaVersion, config } = resources;
+    const { context, request, plugins, services, kibanaVersion, config } = resources;
     const {
       elasticsearch: { client },
       featureFlags,
@@ -87,14 +87,9 @@ const createKubernetesOnboardingFlowRoute = createObservabilityOnboardingServerR
       ((await featureFlags.getBooleanValue(IS_MANAGED_OTLP_SERVICE_ENABLED, false)) &&
         Boolean(managedOtlpServiceUrl));
 
-    const apiKeyPromise =
-      isManagedOtlpServiceAvailable && params.body.pkgName === 'kubernetes_otel'
-        ? createManagedOtlpServiceApiKey(client.asCurrentUser, `ingest-otel-k8s`)
-        : createShipperApiKey(
-            client.asCurrentUser,
-            params.body.pkgName === 'kubernetes_otel' ? 'otel-kubernetes' : 'kubernetes',
-            true
-          );
+    const apiKeyPromise = isManagedOtlpServiceAvailable
+      ? createManagedOtlpServiceApiKey(client.asCurrentUser, `ingest-otel-k8s`)
+      : createShipperApiKey(client.asCurrentUser, 'otel-kubernetes', true);
 
     const [{ encoded: apiKeyEncoded }, elasticAgentVersionInfo] = await Promise.all([
       apiKeyPromise,
@@ -103,10 +98,7 @@ const createKubernetesOnboardingFlowRoute = createObservabilityOnboardingServerR
       packageClient.ensureInstalledPackage({ pkgName: 'system' }),
       // Kubernetes package is required for both classic kubernetes and otel
       packageClient.ensureInstalledPackage({ pkgName: 'kubernetes' }),
-      // Kubernetes otel package is required only for otel
-      params.body.pkgName === 'kubernetes_otel'
-        ? packageClient.ensureInstalledPackage({ pkgName: 'kubernetes_otel' })
-        : undefined,
+      packageClient.ensureInstalledPackage({ pkgName: 'kubernetes_otel' }),
     ]);
 
     const elasticsearchUrlList = plugins.cloud?.setup?.elasticsearchUrl

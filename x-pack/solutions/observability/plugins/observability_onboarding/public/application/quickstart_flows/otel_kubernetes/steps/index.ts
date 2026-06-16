@@ -9,6 +9,5 @@ export { OtelKubernetesAddRepositoryStep } from './add_repository_step';
 export type { OtelKubernetesAddRepositoryStepProps } from './add_repository_step';
 export { OtelKubernetesInstallStep } from './install_step';
 export type { OtelKubernetesInstallStepProps } from './install_step';
-export { OtelKubernetesInstrumentStep } from './instrument_step';
 export { OtelKubernetesVisualizeStep } from './visualize_step';
 export type { OtelKubernetesVisualizeStepProps } from './visualize_step';

@@ -58,7 +58,12 @@ export const OtelKubernetesAddRepositoryStep: React.FC<OtelKubernetesAddReposito
       />
     </p>
     <EuiSpacer />
-    <EuiCodeBlock paddingSize="m" language="bash" isCopyable={useInlineCopyOnly}>
+    <EuiCodeBlock
+      paddingSize="m"
+      language="bash"
+      isCopyable={useInlineCopyOnly}
+      data-test-subj="observabilityOnboardingOtelKubernetesAddRepositorySnippet"
+    >
       {addRepoCommand}
     </EuiCodeBlock>
     {!useInlineCopyOnly ? (

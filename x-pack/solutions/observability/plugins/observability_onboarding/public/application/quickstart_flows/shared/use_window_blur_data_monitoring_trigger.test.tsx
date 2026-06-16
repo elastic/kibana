@@ -12,6 +12,10 @@ import { OBSERVABILITY_ONBOARDING_FLOW_PROGRESS_TELEMETRY_EVENT } from '../../..
 import { buildHostPageServices } from '../../pages/host/__tests__/test_helpers';
 import { useWindowBlurDataMonitoringTrigger } from './use_window_blur_data_monitoring_trigger';
 
+type WindowBlurDataMonitoringTriggerProps = Parameters<
+  typeof useWindowBlurDataMonitoringTrigger
+>[0];
+
 describe('useWindowBlurDataMonitoringTrigger', () => {
   it('keeps monitoring active when the window blurs before onboarding setup finishes', () => {
     const services = buildHostPageServices();
@@ -19,9 +23,8 @@ describe('useWindowBlurDataMonitoringTrigger', () => {
       <KibanaContextProvider services={services}>{children}</KibanaContextProvider>
     );
 
-    const { result, rerender } = renderHook(
-      (props: Parameters<typeof useWindowBlurDataMonitoringTrigger>[0]) =>
-        useWindowBlurDataMonitoringTrigger(props),
+    const { result, rerender } = renderHook<boolean, WindowBlurDataMonitoringTriggerProps>(
+      (props) => useWindowBlurDataMonitoringTrigger(props),
       {
         wrapper,
         initialProps: {
@@ -53,9 +56,8 @@ describe('useWindowBlurDataMonitoringTrigger', () => {
       <KibanaContextProvider services={services}>{children}</KibanaContextProvider>
     );
 
-    const { result, rerender } = renderHook(
-      (props: Parameters<typeof useWindowBlurDataMonitoringTrigger>[0]) =>
-        useWindowBlurDataMonitoringTrigger(props),
+    const { result, rerender } = renderHook<boolean, WindowBlurDataMonitoringTriggerProps>(
+      (props) => useWindowBlurDataMonitoringTrigger(props),
       {
         wrapper,
         initialProps: {
@@ -89,9 +91,8 @@ describe('useWindowBlurDataMonitoringTrigger', () => {
       <KibanaContextProvider services={services}>{children}</KibanaContextProvider>
     );
 
-    const { rerender } = renderHook(
-      (props: Parameters<typeof useWindowBlurDataMonitoringTrigger>[0]) =>
-        useWindowBlurDataMonitoringTrigger(props),
+    const { rerender } = renderHook<boolean, WindowBlurDataMonitoringTriggerProps>(
+      (props) => useWindowBlurDataMonitoringTrigger(props),
       {
         wrapper,
         initialProps: {

@@ -31,8 +31,6 @@ const LocationProbe: React.FC = () => {
 
 jest.mock('../..', () => ({
   AutoDetectPage: () => null,
-  KubernetesPage: () => <div data-test-subj="kubernetesPageStub" />,
-  OtelKubernetesPage: () => <div data-test-subj="otelKubernetesPageStub" />,
   LandingPage: () => <div data-test-subj="landingPageStub" />,
   OtelLogsPage: () => null,
   FirehosePage: () => null,
@@ -109,46 +107,36 @@ const renderFlow = (flagEnabled: boolean, path: string) => {
   );
 };
 
-describe('Feature-flag gate on Kubernetes routes', () => {
-  describe('when the flag is off', () => {
-    it('renders KubernetesPage at /kubernetes', () => {
+describe('Kubernetes routes', () => {
+  describe('when the add data page V2 flag is off', () => {
+    it('renders KubernetesOtelPage at /kubernetes', () => {
       renderFlow(false, '/kubernetes');
-      expect(screen.getByTestId('kubernetesPageStub')).toBeInTheDocument();
-      expect(screen.queryByTestId('kubernetesOtelPageStub')).toBeNull();
+      expect(screen.getByTestId('kubernetesOtelPageStub')).toBeInTheDocument();
     });
 
-    it('renders OtelKubernetesPage at /otel-kubernetes', () => {
-      renderFlow(false, '/otel-kubernetes');
-      expect(screen.getByTestId('otelKubernetesPageStub')).toBeInTheDocument();
-      expect(screen.queryByTestId('kubernetesOtelPageStub')).toBeNull();
-    });
-
-    it('falls through to the landing page at /kubernetes/elastic-agent', () => {
-      renderFlow(false, '/kubernetes/elastic-agent');
-      expect(screen.getByTestId('landingPageStub')).toBeInTheDocument();
-      expect(screen.queryByTestId('kubernetesPageStub')).toBeNull();
+    it('redirects /otel-kubernetes to /kubernetes without the deprecated ingestion param', () => {
+      renderFlow(false, '/otel-kubernetes?ingestion=wired&foo=bar');
+      expect(screen.getByTestId('locationProbe')).toHaveTextContent('/kubernetes?foo=bar');
+      expect(screen.getByTestId('kubernetesOtelPageStub')).toBeInTheDocument();
     });
   });
 
-  describe('when the flag is on', () => {
+  describe('when the add data page V2 flag is on', () => {
     it('renders KubernetesOtelPage at /kubernetes', () => {
       renderFlow(true, '/kubernetes');
       expect(screen.getByTestId('kubernetesOtelPageStub')).toBeInTheDocument();
-      expect(screen.queryByTestId('kubernetesPageStub')).toBeNull();
-    });
-
-    it('falls through to the landing page at /kubernetes/elastic-agent', () => {
-      renderFlow(true, '/kubernetes/elastic-agent');
-      expect(screen.getByTestId('landingPageStub')).toBeInTheDocument();
-      expect(screen.queryByTestId('kubernetesPageStub')).toBeNull();
-      expect(screen.queryByTestId('kubernetesOtelPageStub')).toBeNull();
     });
 
     it('redirects /otel-kubernetes to /kubernetes without the deprecated ingestion param', () => {
       renderFlow(true, '/otel-kubernetes?ingestion=wired&foo=bar');
       expect(screen.getByTestId('locationProbe')).toHaveTextContent('/kubernetes?foo=bar');
       expect(screen.getByTestId('kubernetesOtelPageStub')).toBeInTheDocument();
-      expect(screen.queryByTestId('otelKubernetesPageStub')).toBeNull();
     });
+  });
+
+  it('falls through to the landing page at /kubernetes/elastic-agent', () => {
+    renderFlow(false, '/kubernetes/elastic-agent');
+    expect(screen.getByTestId('landingPageStub')).toBeInTheDocument();
+    expect(screen.queryByTestId('kubernetesOtelPageStub')).toBeNull();
   });
 });
