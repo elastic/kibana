@@ -43,22 +43,24 @@ steps:
         Data streams (use get_index_info to discover available fields in each):
         - Logs:    {{ inputs.stream_names[0] }}
         - Traces:  {{ inputs.stream_names[1] }}
-        - Metrics: {{ inputs.stream_names[2] }} (infrastructure signals: CPU, memory, network, latency)
+        - Metrics: {{ inputs.stream_names[2] }}
         Event metadata: {{ inputs | json }}
 
         Investigate the root cause of this incident. Use all available observability tools:
         - get_service_topology to map the call graph (mandatory — required to distinguish root cause from victim)
-        - get_services and get_trace_metrics to identify which services are anomalous
+        - get_services and get_trace_metrics to identify which entities are anomalous
         - get_log_change_points and get_metric_change_points to find what changed and when
-        - ES|QL STATS queries scoped to the indices above for detailed metrics
+        - ES|QL queries scoped to the indices above for detailed evidence
 
-        Key principles:
-        - A service that appears degraded may be a downstream victim of a dependency that's failing.
-          Use the call graph to trace causality direction.
-        - The service that degraded FIRST is a stronger root cause candidate.
-        - A heavily-called central service always shows high load during any fault — don't attribute
-          root cause based solely on high absolute load without confirming an independent fault.
-        - Infrastructure faults (CPU stress, memory, socket exhaustion) appear in metrics, not APM.
+        General root-cause principles (do not presuppose a particular kind of fault):
+        - A component that looks degraded may be a downstream victim of a failing dependency.
+          Use the call graph to trace the direction of causality, not just where symptoms are loudest.
+        - The component that deviated from its baseline FIRST is a stronger root-cause candidate.
+        - Separate an independent fault from load amplification: something can look worse simply
+          because a neighbor changed, not because it is itself the cause.
+        - The cause may appear in any signal (logs, traces, or metrics) and may be of any kind —
+          a code or config change, a dependency failure, a resource problem, bad data, etc.
+          Follow the evidence rather than assuming the failure mode in advance.
 
         Return your findings as structured output.
       schema:
@@ -96,24 +98,29 @@ steps:
     with:
       timeout: 300s
       message: |
-        You are a skeptical reviewer of a root cause analysis. Your job is to find flaws.
+        You are a skeptical reviewer of a root cause analysis. Your job is to find flaws that
+        would change the conclusion — not to demand exhaustive verification of every detail.
 
         The investigator concluded: {{ steps.investigate_r1.output.structured_output | json }}
 
-        Try to disprove this conclusion. Specifically check:
-        1. Is the identified service actually a downstream victim? Could it be degraded because
-           something it calls is failing, not because it itself has a fault?
-        2. Is there a service that showed anomalies EARLIER than the identified service?
-           That earlier service is a stronger root cause candidate.
-        3. Is the identified service a heavily-used central hub that would naturally show elevated
-           load during ANY fault? If so, is there evidence of an independent fault (not just load)?
-        4. Does the failure mechanism described match the evidence? Are there alternative mechanisms
-           that better explain what was observed?
+        Try to disprove the conclusion. Check the things most likely to make it wrong:
+        1. Could the identified component be a downstream victim rather than the cause — degraded
+           because a dependency it relies on is failing?
+        2. Did another component deviate from its baseline EARLIER? An earlier deviation is a
+           stronger root-cause candidate.
+        3. Is the conclusion based on load amplification rather than an independent fault (i.e. the
+           component looks busy/worse only because a neighbor changed)?
+        4. Does the stated mechanism actually fit the evidence, or does an alternative explain it better?
 
         Data context: {{ inputs | json }}
 
-        If you find significant flaws, return satisfied=false with specific critique.
-        If the conclusion is well-supported and you cannot find significant flaws, return satisfied=true.
+        Decide satisfied:
+        - Return satisfied=false ONLY for a flaw that would change the conclusion or materially change
+          its confidence — wrong component, reversed causality, an unsupported mechanism, or a
+          contradicted fact. Give a specific, actionable critique.
+        - Return satisfied=true if the conclusion is well-supported and its main claims hold, EVEN IF
+          minor details could be checked further. Do not withhold approval over nitpicks or
+          additional verification that would not change the answer.
       schema:
         type: object
         properties:
@@ -215,10 +222,17 @@ steps:
         Original critique: {{ steps.critique_r1.output.structured_output.critique }}
         Revised conclusion: {{ steps.investigate_r2.output.structured_output | json }}
 
-        Is the revised analysis convincing? Does it adequately address your previous concerns?
-        Apply the same critical checks: victim vs root cause, temporal ordering, hub-service bias.
+        Does the revised analysis adequately address your previous concerns? Apply the same
+        checks: victim vs root cause, temporal ordering, and load amplification vs an independent fault.
 
         Data context: {{ inputs | json }}
+
+        Decide satisfied:
+        - Return satisfied=false ONLY for a flaw that would change the conclusion or materially change
+          its confidence. Give a specific, actionable critique.
+        - Return satisfied=true if the revised conclusion is well-supported and its main claims hold,
+          EVEN IF minor details could be checked further. Do not withhold approval over nitpicks —
+          especially once your earlier concerns have been addressed.
       schema:
         type: object
         properties:
