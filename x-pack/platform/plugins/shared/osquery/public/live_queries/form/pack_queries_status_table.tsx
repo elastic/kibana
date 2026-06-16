@@ -384,14 +384,21 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   const renderToggleResultsAction = useCallback(
     (item: any) =>
       item?.action_id && data?.length && data.length > 1 ? (
-        <EuiButtonIcon
-          data-test-subj={`toggleIcon-${item.id}`}
-          onClick={getHandleErrorsToggle(item)}
-          iconType={itemIdToExpandedRowMap[item.id] ? 'chevronSingleUp' : 'chevronSingleDown'}
-          aria-label={i18n.translate('xpack.osquery.pack.queriesTable.toggleResultsAriaLabel', {
+        <EuiToolTip
+          content={i18n.translate('xpack.osquery.pack.queriesTable.toggleResultsAriaLabel', {
             defaultMessage: 'Toggle results',
           })}
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            data-test-subj={`toggleIcon-${item.id}`}
+            onClick={getHandleErrorsToggle(item)}
+            iconType={itemIdToExpandedRowMap[item.id] ? 'chevronSingleUp' : 'chevronSingleDown'}
+            aria-label={i18n.translate('xpack.osquery.pack.queriesTable.toggleResultsAriaLabel', {
+              defaultMessage: 'Toggle results',
+            })}
+          />
+        </EuiToolTip>
       ) : (
         <></>
       ),
@@ -452,13 +459,20 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
         },
         {
           render: (item: PackQueryStatusItem) => (
-            <EuiButtonIcon
-              iconType={'expand'}
-              onClick={handleQueryFlyoutOpen(item)}
-              aria-label={i18n.translate('xpack.osquery.pack.queriesTable.viewQueryAriaLabel', {
+            <EuiToolTip
+              content={i18n.translate('xpack.osquery.pack.queriesTable.viewQueryAriaLabel', {
                 defaultMessage: 'View query',
               })}
-            />
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                iconType={'expand'}
+                onClick={handleQueryFlyoutOpen(item)}
+                aria-label={i18n.translate('xpack.osquery.pack.queriesTable.viewQueryAriaLabel', {
+                  defaultMessage: 'View query',
+                })}
+              />
+            </EuiToolTip>
           ),
         },
       ];
@@ -485,13 +499,20 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
 
   const renderViewQueryColumn = useCallback(
     (row: PackQueryStatusItem) => (
-      <EuiButtonIcon
-        iconType="expand"
-        onClick={handleQueryFlyoutOpen(row)}
-        aria-label={i18n.translate('xpack.osquery.pack.queriesTable.viewQueryAriaLabel', {
+      <EuiToolTip
+        content={i18n.translate('xpack.osquery.pack.queriesTable.viewQueryAriaLabel', {
           defaultMessage: 'View query',
         })}
-      />
+        disableScreenReaderOutput
+      >
+        <EuiButtonIcon
+          iconType="expand"
+          onClick={handleQueryFlyoutOpen(row)}
+          aria-label={i18n.translate('xpack.osquery.pack.queriesTable.viewQueryAriaLabel', {
+            defaultMessage: 'View query',
+          })}
+        />
+      </EuiToolTip>
     ),
     [handleQueryFlyoutOpen]
   );
@@ -499,14 +520,21 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   const renderExpanderColumn = useCallback(
     (item: PackQueryStatusItem) =>
       item?.action_id && item?.id ? (
-        <EuiButtonIcon
-          data-test-subj={`toggleIcon-${item.id}`}
-          onClick={getHandleErrorsToggle(item)}
-          iconType={itemIdToExpandedRowMap[item.id] ? 'arrowDown' : 'arrowRight'}
-          aria-label={i18n.translate('xpack.osquery.pack.queriesTable.toggleResultsAriaLabel', {
+        <EuiToolTip
+          content={i18n.translate('xpack.osquery.pack.queriesTable.toggleResultsAriaLabel', {
             defaultMessage: 'Toggle results',
           })}
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            data-test-subj={`toggleIcon-${item.id}`}
+            onClick={getHandleErrorsToggle(item)}
+            iconType={itemIdToExpandedRowMap[item.id] ? 'arrowDown' : 'arrowRight'}
+            aria-label={i18n.translate('xpack.osquery.pack.queriesTable.toggleResultsAriaLabel', {
+              defaultMessage: 'Toggle results',
+            })}
+          />
+        </EuiToolTip>
       ) : null,
     [getHandleErrorsToggle, itemIdToExpandedRowMap]
   );
