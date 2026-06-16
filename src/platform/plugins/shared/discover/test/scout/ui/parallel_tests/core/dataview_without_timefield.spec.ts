@@ -97,8 +97,9 @@ spaceTest.describe('Data view without timefield', { tag: tags.stateful.classic }
         await page.goBack();
         await pageObjects.discover.waitForDocTableRendered();
 
-        const dataViewText = await page.testSubj.innerText('discover-dataView-switch-link');
-        return dataViewText === 'without-timefield';
+        await expect(page.testSubj.locator('discover-dataView-switch-link')).toHaveText(
+          'without-timefield'
+        );
       }).toPass();
 
       // Verify timepicker disappeared again
@@ -145,7 +146,7 @@ spaceTest.describe('Data view without timefield', { tag: tags.stateful.classic }
       // Create saved search without timefield
       await pageObjects.discover.selectDataView('without-timefield');
       await pageObjects.discover.waitUntilSearchingHasFinished();
-      await pageObjects.discover.saveSearch('without-timefield', true);
+      await pageObjects.discover.saveSearchAsNew('without-timefield');
 
       // Load saved search with timefield
       await pageObjects.discover.loadSavedSearch('with-timefield');
