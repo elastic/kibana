@@ -174,10 +174,7 @@ describe('StorageIndexAdapter - transport options forwarding', () => {
 
     expect(esClient.bulk).toHaveBeenCalledWith(
       expect.objectContaining({
-        operations: [
-          { index: { _id: 'doc1', if_seq_no: 7, if_primary_term: 2 } },
-          { foo: 'bar' },
-        ],
+        operations: [{ index: { _id: 'doc1', if_seq_no: 7, if_primary_term: 2 } }, { foo: 'bar' }],
       })
     );
   });
