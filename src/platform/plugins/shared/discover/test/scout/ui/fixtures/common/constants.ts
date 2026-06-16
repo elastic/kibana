@@ -13,6 +13,9 @@
  */
 export const DISCOVER_KBN_ARCHIVE = 'src/platform/test/functional/fixtures/kbn_archiver/discover';
 
+export const DASHBOARDS_KBN_ARCHIVE =
+  'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/kibana';
+
 export const DEFAULT_DATA_VIEW = 'logstash-*';
 
 /**
@@ -22,4 +25,9 @@ export const DEFAULT_DATA_VIEW = 'logstash-*';
 export const DEFAULT_TIME_RANGE = {
   from: '2015-09-19T06:31:44.000Z',
   to: '2015-09-23T18:31:44.000Z',
+};
+
+export const DASHBOARDS_TIME_RANGE = {
+  from: '2015-08-22T00:00:00.000Z',
+  to: '2015-08-23T00:00:00.000Z',
 };

@@ -25,4 +25,8 @@ export class QueryBar {
   async clearQuery(): Promise<void> {
     await this.page.testSubj.clearInput('queryInput');
   }
+
+  async submitQuery(): Promise<void> {
+    await this.page.getByTestId('querySubmitButton').click();
+  }
 }

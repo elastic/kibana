@@ -150,6 +150,14 @@ export class DiscoverApp {
     await this.page.testSubj.waitForSelector('savedObjectSaveModal', { state: 'hidden' });
   }
 
+  async saveAsSearch(name: string) {
+    await this.page.testSubj.click('discoverSaveButton-secondary-button');
+    await this.page.testSubj.click('interactiveSaveMenuItem');
+    await this.page.testSubj.fill('savedObjectTitle', name);
+    await this.page.testSubj.click('confirmSaveSavedObjectButton');
+    await this.page.testSubj.waitForSelector('savedObjectSaveModal', { state: 'hidden' });
+  }
+
   /**
    * Save the currently rendered inline visualization (e.g. an ES|QL chart) to a
    * brand-new dashboard via the "Save visualization" flow in the unified
