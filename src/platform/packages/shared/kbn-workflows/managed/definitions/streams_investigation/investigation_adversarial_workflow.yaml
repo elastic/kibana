@@ -43,14 +43,13 @@ steps:
         Data streams (use get_index_info to discover available fields in each):
         - Logs:    {{ inputs.stream_names[0] }}
         - Traces:  {{ inputs.stream_names[1] }}
-        - Metrics: {{ inputs.stream_names[2] }} (infrastructure signals: CPU, memory, network, latency)
+        - Metrics: {{ inputs.stream_names[2] }}
         Event metadata: {{ inputs | json }}
 
-        Investigate the root cause of this incident. Use all available observability tools:
-        - get_service_topology to map the call graph (mandatory — required to distinguish root cause from victim)
-        - get_services and get_trace_metrics to identify which services are anomalous
-        - get_log_change_points and get_metric_change_points to find what changed and when
-        - ES|QL STATS queries scoped to the indices above for detailed metrics
+        Investigate the root cause of this incident. Start with memory — prior incidents or system
+        context may already point at the likely cause. Then use whatever signals and tools are
+        available: service topology and trace data if present, metric and log change points,
+        ES|QL queries, code or deployment signals. Not all signals will exist — use what's there.
 
         Key principles:
         - A service that appears degraded may be a downstream victim of a dependency that's failing.

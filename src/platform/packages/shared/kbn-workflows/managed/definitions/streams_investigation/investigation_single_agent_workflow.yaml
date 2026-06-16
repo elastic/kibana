@@ -45,11 +45,10 @@ steps:
         - Metrics: {{ inputs.stream_names[2] }}
         Event metadata: {{ inputs | json }}
 
-        Investigate the root cause of this incident. Use all available tools:
-        - get_service_topology to understand the call graph and service dependencies
-        - get_services and get_trace_metrics to identify anomalous services
-        - get_log_change_points and get_metric_change_points to find what changed and when
-        - ES|QL queries scoped to the indices above for detailed evidence
+        Investigate the root cause of this incident. Start with memory — prior incidents or system
+        context may already point at the likely cause. Then use whatever signals and tools are
+        available: service topology and trace data if present, metric and log change points,
+        ES|QL queries, code or deployment signals. Not all signals will exist — use what's there.
 
         General root-cause principles (do not presuppose a particular kind of fault):
         - A component that appears degraded may be a downstream victim of a failing dependency.
