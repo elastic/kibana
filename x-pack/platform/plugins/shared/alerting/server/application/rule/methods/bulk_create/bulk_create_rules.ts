@@ -13,12 +13,13 @@ import { SavedObjectsUtils } from '@kbn/core/server';
 import { RuleChangeTrackingAction, type RuleChangeTracking } from '@kbn/alerting-types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { getRuleCircuitBreakerErrorMessage, parseDuration } from '../../../../../common';
-import { addGeneratedActionValues, updateMeta } from '../../../../rules_client/lib';
+import { addGeneratedActionValues, bulkScheduleTask, updateMeta } from '../../../../rules_client/lib';
 import { validateRuleTypeParams } from '../../../../lib';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import {
   API_KEY_GENERATE_CONCURRENCY,
   DEFAULT_BULK_CREATE_BATCH_SIZE,
+  MIN_BULK_CREATE_BATCH_SIZE,
   MAX_BULK_CREATE_BATCH_SIZE,
   MAX_RULES_NUMBER_FOR_BULK_OPERATION,
 } from '../../../../rules_client/common/constants';
@@ -38,7 +39,6 @@ import type {
   PreparedRule,
 } from './types';
 import {
-  buildTaskInstance,
   collectNewKeysToInvalidate,
   flushKeysToInvalidate,
   prepareRule,
@@ -64,12 +64,16 @@ export async function bulkCreateRules<Params extends RuleParams = never>(
     );
   }
 
-  const requestedBatchSize = params.batchSize ?? DEFAULT_BULK_CREATE_BATCH_SIZE;
-  const batchSize = Math.max(1, Math.min(MAX_BULK_CREATE_BATCH_SIZE, requestedBatchSize));
+  const batchSize = params.batchSize ?? DEFAULT_BULK_CREATE_BATCH_SIZE;
 
-  if (requestedBatchSize !== batchSize) {
-    logger.warn(
-      `bulkCreateRules: batchSize ${requestedBatchSize} clamped to ${batchSize} (hard cap ${MAX_BULK_CREATE_BATCH_SIZE}).`
+  if (batchSize < MIN_BULK_CREATE_BATCH_SIZE) {
+    throw Boom.badRequest(
+      `bulkCreateRules: batchSize ${batchSize} is below the minimum of ${MIN_BULK_CREATE_BATCH_SIZE}.`
+    );
+  }
+  if (batchSize > MAX_BULK_CREATE_BATCH_SIZE) {
+    throw Boom.badRequest(
+      `bulkCreateRules: batchSize ${batchSize} exceeds the maximum of ${MAX_BULK_CREATE_BATCH_SIZE}.`
     );
   }
 
@@ -83,7 +87,7 @@ export async function bulkCreateRules<Params extends RuleParams = never>(
     rule,
   }));
 
-  // Phase A: Validate in-memory (schema, rule type enabled, check params, etc...). Then authorize consumer/alertTypeId pairs.
+  // Phase A: Validate in-memory (schema, rule type enabled, check params, etc...). Then authorize and validate schedule limits.
   const { validated, errors: validationErrors } = await preValidate({ context, inputs });
   errors.push(...validationErrors);
 
@@ -120,7 +124,7 @@ export async function bulkCreateRules<Params extends RuleParams = never>(
     errors.push(...result.errors);
 
     if (exitEarlyOnError && result.errors.length > 0) {
-      logger.warn(`bulkCreateRules: exiting early at batch ${i + 1}/${totalBatches}.`);
+      logger.debug(`bulkCreateRules: exiting early at batch ${i + 1}/${totalBatches}.`);
       break;
     }
   }
@@ -138,6 +142,7 @@ async function preValidate<Params extends RuleParams>({
   validated: Array<{ id: string; rule: BulkCreateRulesItem<Params> }>;
   errors: BulkOperationError[];
 }> {
+  const { logger } = context;
   const validated = new Map<string, { id: string; rule: BulkCreateRulesItem<Params> }>();
   const errors: BulkOperationError[] = [];
   const authPairs = new Map<string, { ruleTypeId: string; consumer: string }>();
@@ -174,7 +179,7 @@ async function preValidate<Params extends RuleParams>({
           intervalInMs < context.minimumScheduleIntervalInMs &&
           !context.minimumScheduleInterval.enforce
         ) {
-          context.logger.warn(
+          logger.warn(
             `Rule schedule interval (${data.schedule.interval}) for "${ruleType.id}" rule type with ID "${id}" is less than the minimum value (${context.minimumScheduleInterval.value}). Running rules at this interval may impact alerting performance. Set "xpack.alerting.rules.minimumScheduleInterval.enforce" to true to prevent creation of these rules.`
           );
         }
@@ -199,7 +204,7 @@ async function preValidate<Params extends RuleParams>({
     return { validated: [], errors };
   }
 
-  // Phase A2: bulk authz. Phase A2: bulk authz fails the whole request on any unauthorized pair.
+  // Phase A2: bulk authz fails the whole request on any unauthorized pair.
   await withSpan({ name: 'preValidate.bulkEnsureAuthorized', type: 'rules' }, async () => {
     try {
       // Runs after A1 intentionally. A1 removes invalid/unregistered ruleTypeIds,
@@ -219,6 +224,28 @@ async function preValidate<Params extends RuleParams>({
       throw authzError;
     }
   });
+
+  // Phase A3: schedule-limit circuit breaker across all enabled rules upfront.
+  const updatedInterval = [...validated.values()]
+    .filter((v) => v.rule.data.enabled)
+    .map((v) => v.rule.data.schedule.interval);
+
+  if (updatedInterval.length > 0) {
+    const overflow = await withSpan(
+      { name: 'preValidate.validateScheduleLimit', type: 'rules' },
+      () => validateScheduleLimit({ context, updatedInterval })
+    );
+    if (overflow) {
+      throw Boom.badRequest(
+        getRuleCircuitBreakerErrorMessage({
+          interval: overflow.interval,
+          intervalAvailable: overflow.intervalAvailable,
+          action: 'bulkCreate',
+          rules: updatedInterval.length,
+        })
+      );
+    }
+  }
 
   return { validated: [...validated.values()], errors };
 }
@@ -281,62 +308,20 @@ async function runBatch<Params extends RuleParams>({
     return { successfulIds: [], errors };
   }
 
-  // Phase B2: check schedule-limit on the enabled subset; exclude on overflow.
-  const enabled = [...preparedRules.values()].filter((p) => p.enabled);
-
-  if (enabled.length > 0) {
-    const validationPayload = await withSpan(
-      { name: 'runBatch.validateScheduleLimit', type: 'rules' },
-      () =>
-        validateScheduleLimit({
-          context,
-          updatedInterval: enabled.map((r) => r.schedule.interval),
-        })
-    );
-    if (validationPayload) {
-      const message = getRuleCircuitBreakerErrorMessage({
-        interval: validationPayload.interval,
-        intervalAvailable: validationPayload.intervalAvailable,
-        action: 'bulkCreate',
-        rules: enabled.length,
-      });
-      logger.debug(`Excluding ${enabled.length} rule(s) from batch: schedule limit exceeded.`);
-      for (const { id, name } of enabled) {
-        const apiKey = apiKeysMap.get(id);
-        if (apiKey) {
-          for (const k of collectNewKeysToInvalidate([apiKey])) keysToInvalidate.add(k);
-          apiKeysMap.delete(id);
-        }
-        preparedRules.delete(id);
-        errors.push({ message, rule: { id, name } });
-      }
-    }
-  }
-
-  if (strict && errors.length > 0) {
-    for (const k of collectNewKeysToInvalidate(apiKeysMap.values())) keysToInvalidate.add(k);
-    await flushKeysToInvalidate(keysToInvalidate, context);
-    return { successfulIds: [], errors };
-  }
-
-  // Phase B3: schedule tasks for the surviving enabled subset.
+  // Phase B2: schedule tasks for the surviving enabled subset.
   const survivingEnabled = [...preparedRules.values()].filter((p) => p.enabled);
   const newlyScheduledTaskIds = new Set<string>();
 
   if (survivingEnabled.length > 0) {
-    const tasksToSchedule = survivingEnabled.map((p) => buildTaskInstance(context, p));
-
     try {
-      const scheduledTasks = await withSpan({ name: 'runBatch.bulkSchedule', type: 'tasks' }, () =>
-        context.taskManager.bulkSchedule(tasksToSchedule)
-      );
+      const scheduledTasks = await bulkScheduleTask(context, survivingEnabled);
       scheduledTasks.forEach((t) => newlyScheduledTaskIds.add(t.id));
 
       // Silent per-task drops: bulkSchedule's `taskInstanceToAttributes` logs+skips
       // invalid instances. Diff requested vs returned and exclude the missing ones.
       const dropped = survivingEnabled.filter((p) => !newlyScheduledTaskIds.has(p.id));
       if (dropped.length > 0) {
-        logger.warn(`Excluding ${dropped.length} rule(s) from batch: task validation failed.`);
+        logger.debug(`Excluding ${dropped.length} rule(s) from batch: task validation failed.`);
         const message =
           'Task scheduling silently dropped this rule (validation failure in task store)';
         for (const { id, name } of dropped) {
@@ -351,7 +336,7 @@ async function runBatch<Params extends RuleParams>({
       }
     } catch (error) {
       // Whole-call TM throw: exclude enabled subset from the batch, continue.
-      logger.warn(
+      logger.debug(
         `Excluding ${survivingEnabled.length} rule(s) from batch: task scheduling failed.`
       );
       const message = `Failed to schedule tasks: ${error.message}`;
@@ -457,27 +442,13 @@ async function runBatch<Params extends RuleParams>({
     } else {
       batchSuccessfulIds.push(so.id);
       successfulSavedObjects.push(so as SavedObject<RawRule>);
-      if (newlyScheduledTaskIds.has(so.id)) {
-        // Audit per-rule ENABLE for the enabled subset (mirrors single-rule semantics).
-        context.auditLogger?.log(
-          ruleAuditEvent({
-            action: RuleAuditAction.ENABLE,
-            outcome: 'unknown',
-            savedObject: {
-              type: RULE_SAVED_OBJECT_TYPE,
-              id: so.id,
-              name: preparedRules.get(so.id)?.name,
-            },
-          })
-        );
-      }
     }
   }
 
   // Single batched TM cleanup for per-row failures.
   if (taskIdsToCleanUp.length > 0) {
     try {
-      logger.warn(`Cleaning up ${taskIdsToCleanUp.length} tasks where SO creation failed.`);
+      logger.debug(`Cleaning up ${taskIdsToCleanUp.length} tasks where SO creation failed.`);
       await context.taskManager.bulkRemove(taskIdsToCleanUp);
     } catch (cleanupError) {
       logger.error(

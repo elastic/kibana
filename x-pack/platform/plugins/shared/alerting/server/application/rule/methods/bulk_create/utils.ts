@@ -6,7 +6,6 @@
  */
 
 import Semver from 'semver';
-import type { TaskInstanceWithDeprecatedFields } from '@kbn/task-manager-plugin/server/task';
 
 import { validateAndAuthorizeSystemActions } from '../../../../lib/validate_authorize_system_actions';
 import {
@@ -39,29 +38,6 @@ export const collectNewKeysToInvalidate = (entries: Iterable<ApiKeyEntry>): stri
   }
   return keys;
 };
-
-// Create tasks `enabled:true`, runAt / scheduledAt intentionally omitted.
-// TM addJitter (PR# 269991) applies on bulkSchedule(), significantly speeding up the process.
-export const buildTaskInstance = (
-  context: RulesClientContext,
-  prepared: PreparedRule
-): TaskInstanceWithDeprecatedFields => ({
-  id: prepared.id,
-  taskType: `alerting:${prepared.ruleTypeId}`,
-  schedule: prepared.schedule,
-  params: {
-    alertId: prepared.id,
-    spaceId: context.spaceId,
-    consumer: prepared.consumer,
-  },
-  state: {
-    previousStartedAt: null,
-    alertTypeState: {},
-    alertInstances: {},
-  },
-  scope: ['alerting'],
-  enabled: true,
-});
 
 export const prepareRule = async <Params extends RuleParams>({
   context,
@@ -182,6 +158,7 @@ export const prepareRule = async <Params extends RuleParams>({
     };
     return { prepared };
   } catch (err) {
+    apiKeysMap.delete(id);
     const error = {
       message: err.message,
       status: err.output?.statusCode,

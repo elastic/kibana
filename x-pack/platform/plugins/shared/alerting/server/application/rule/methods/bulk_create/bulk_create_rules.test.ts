@@ -32,6 +32,7 @@ import { validateScheduleLimit } from '../get_schedule_frequency';
 import { RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import {
   DEFAULT_BULK_CREATE_BATCH_SIZE,
+  MIN_BULK_CREATE_BATCH_SIZE,
   MAX_BULK_CREATE_BATCH_SIZE,
   MAX_RULES_NUMBER_FOR_BULK_OPERATION,
 } from '../../../../rules_client/common/constants';
@@ -39,6 +40,7 @@ import {
 jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
 }));
+
 
 jest.mock('../get_schedule_frequency', () => ({
   validateScheduleLimit: jest.fn(),
@@ -322,10 +324,39 @@ describe('bulkCreateRules', () => {
     expect(result.errors[0].message).toContain('keys disabled');
   });
 
-  test('Phase B2 schedule-limit trip: enabled rule excluded from batch, disabled rule still persisted', async () => {
-    (validateScheduleLimit as jest.Mock).mockResolvedValue({
-      interval: 100,
-      intervalAvailable: 50,
+  test('Phase B1: prepareRule failure after API key creation removes key from map (no dangling keys)', async () => {
+    let getCalls = 0;
+    ruleTypeRegistry.get.mockImplementation((typeId: string) => {
+      getCalls += 1;
+      // getCalls 1,2 = preValidate (both pass); getCalls 3 = prepareRule for first rule (throws)
+      const throwOnExtract = getCalls === 3;
+      return {
+        id: typeId,
+        name: 'Test',
+        actionGroups: [{ id: 'default', name: 'Default' }],
+        recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
+        defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
+        isExportable: true,
+        async executor() {
+          return { state: {} };
+        },
+        category: 'test',
+        producer: 'alerts',
+        solution: 'stack',
+        validate: { params: { validate: (p: unknown) => p } },
+        validLegacyConsumers: [],
+        ...(throwOnExtract
+          ? {
+              useSavedObjectReferences: {
+                extractReferences: () => {
+                  throw new Error('extractReferences boom');
+                },
+                injectReferences: () => {},
+              },
+            }
+          : {}),
+      } as never;
     });
     unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue(
       buildBulkResponse([{ id: 'mock-id-2' }])
@@ -333,42 +364,57 @@ describe('bulkCreateRules', () => {
 
     const result = await rulesClient.bulkCreateRules({
       rules: [
-        { data: baseRule({ name: 'enabled', enabled: true }) },
-        { data: baseRule({ name: 'disabled' }) },
+        { data: baseRule({ name: 'key-then-fail', enabled: true }) },
+        { data: baseRule({ name: 'ok', enabled: true }) },
       ],
     });
 
-    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalled();
-    expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
-    expect(unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0]).toHaveLength(1);
-    const persistedNames = (
-      unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0] as Array<{
-        attributes: { name: string };
-      }>
-    ).map((o) => o.attributes.name);
-    expect(persistedNames).toEqual(['disabled']);
-    expect(taskManager.bulkSchedule).not.toHaveBeenCalled();
-    expect(result.successfulIds).toEqual(['mock-id-2']);
+    expect(rulesClientParams.createAPIKey).toHaveBeenCalledTimes(2);
     expect(result.errors).toHaveLength(1);
-    expect(result.errors[0].rule.name).toBe('enabled');
+    expect(result.errors[0].rule.name).toBe('key-then-fail');
+    expect(result.errors[0].message).toContain('extractReferences boom');
+    expect(result.successfulIds).toEqual(['mock-id-2']);
+    // The failed rule's key was removed from the map so it won't be flushed as dangling
+    expect(bulkMarkApiKeysForInvalidation).not.toHaveBeenCalled();
   });
 
-  test('Phase B2: validateScheduleLimit called exactly once per batch', async () => {
+  test('Phase A3 schedule-limit overflow: throws 400, zero ES writes', async () => {
+    (validateScheduleLimit as jest.Mock).mockResolvedValue({
+      interval: 100,
+      intervalAvailable: 50,
+    });
+
+    await expect(
+      rulesClient.bulkCreateRules({
+        rules: [
+          { data: baseRule({ name: 'enabled', enabled: true }) },
+          { data: baseRule({ name: 'disabled' }) },
+        ],
+      })
+    ).rejects.toThrow(/circuit breaker/i);
+
+    expect(unsecuredSavedObjectsClient.bulkCreate).not.toHaveBeenCalled();
+    expect(taskManager.bulkSchedule).not.toHaveBeenCalled();
+  });
+
+  test('Phase A3: validateScheduleLimit called once for all enabled rules (not per batch)', async () => {
     unsecuredSavedObjectsClient.bulkCreate.mockImplementation(async (objects) =>
       buildBulkResponse((objects as Array<{ id: string }>).map((o) => ({ id: o.id })))
     );
 
     await rulesClient.bulkCreateRules({
-      rules: Array.from({ length: 4 }, (_, i) => ({
+      rules: Array.from({ length: 20 }, (_, i) => ({
         data: baseRule({ name: `r-${i}`, enabled: true }),
       })),
-      batchSize: 2,
+      batchSize: 10,
     });
 
-    expect(validateScheduleLimit).toHaveBeenCalledTimes(2);
+    expect(validateScheduleLimit).toHaveBeenCalledTimes(1);
+    const callArg = (validateScheduleLimit as jest.Mock).mock.calls[0][0];
+    expect(callArg.updatedInterval).toHaveLength(20);
   });
 
-  test('Phase B3 whole TM throw: enabled subset excluded from batch, disabled subset still persisted', async () => {
+  test('Phase B2 whole TM throw: enabled subset excluded from batch, disabled subset still persisted', async () => {
     taskManager.bulkSchedule.mockRejectedValueOnce(new Error('cluster unavailable'));
     unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue(
       buildBulkResponse([{ id: 'mock-id-2' }])
@@ -396,7 +442,7 @@ describe('bulkCreateRules', () => {
     expect(result.errors[0].message).toContain('cluster unavailable');
   });
 
-  test('Phase B3 silent per-task drop: dropped rule excluded from batch, kept rule still persisted', async () => {
+  test('Phase B2 silent per-task drop: dropped rule excluded from batch, kept rule still persisted', async () => {
     taskManager.bulkSchedule.mockImplementationOnce(async (tasks) => {
       return [tasks[0]] as never;
     });
@@ -474,7 +520,7 @@ describe('bulkCreateRules', () => {
     expect(result.errors.every((e) => e.message.includes('SO down'))).toBe(true);
   });
 
-  test('emits per-rule CREATE audit event for surviving rules and ENABLE for the enabled subset', async () => {
+  test('emits per-rule CREATE audit event for surviving rules (no ENABLE event)', async () => {
     unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue(
       buildBulkResponse([{ id: 'mock-id-1' }, { id: 'mock-id-2' }])
     );
@@ -490,7 +536,7 @@ describe('bulkCreateRules', () => {
       .map(([event]) => event?.event?.action)
       .filter(Boolean);
     expect(actions.filter((a) => a === RuleAuditAction.CREATE)).toHaveLength(2);
-    expect(actions.filter((a) => a === RuleAuditAction.ENABLE)).toHaveLength(1);
+    expect(actions.filter((a) => a === RuleAuditAction.ENABLE)).toHaveLength(0);
   });
 
   describe('preValidate', () => {
@@ -713,34 +759,35 @@ describe('bulkCreateRules', () => {
       );
 
       await rulesClient.bulkCreateRules({
-        rules: Array.from({ length: 10 }, (_, i) => ({ data: baseRule({ name: `r-${i}` }) })),
-        batchSize: 4,
+        rules: Array.from({ length: 25 }, (_, i) => ({ data: baseRule({ name: `r-${i}` }) })),
+        batchSize: 10,
       });
 
-      // 10 rules, batchSize 4 → 3 batches (4, 4, 2)
+      // 25 rules, batchSize 10 → 3 batches (10, 10, 5)
       expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(3);
-      expect(unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0]).toHaveLength(4);
-      expect(unsecuredSavedObjectsClient.bulkCreate.mock.calls[1][0]).toHaveLength(4);
-      expect(unsecuredSavedObjectsClient.bulkCreate.mock.calls[2][0]).toHaveLength(2);
+      expect(unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0]).toHaveLength(10);
+      expect(unsecuredSavedObjectsClient.bulkCreate.mock.calls[1][0]).toHaveLength(10);
+      expect(unsecuredSavedObjectsClient.bulkCreate.mock.calls[2][0]).toHaveLength(5);
     });
 
-    test('clamps batchSize above hard cap and logs a warn', async () => {
-      unsecuredSavedObjectsClient.bulkCreate.mockImplementation(async (objects) =>
-        buildBulkResponse((objects as Array<{ id: string }>).map((o) => ({ id: o.id })))
-      );
+    test('throws 400 when batchSize exceeds MAX_BULK_CREATE_BATCH_SIZE', async () => {
+      await expect(
+        rulesClient.bulkCreateRules({
+          rules: [{ data: baseRule({ name: 'a' }) }],
+          batchSize: MAX_BULK_CREATE_BATCH_SIZE + 1,
+        })
+      ).rejects.toThrow(`batchSize ${MAX_BULK_CREATE_BATCH_SIZE + 1} exceeds the maximum`);
+      expect(unsecuredSavedObjectsClient.bulkCreate).not.toHaveBeenCalled();
+    });
 
-      // 1 rule with absurd batchSize; we just verify the warn + that the batch still runs.
-      await rulesClient.bulkCreateRules({
-        rules: [{ data: baseRule({ name: 'a' }) }],
-        batchSize: 999_999,
-      });
-
-      const warnCalls = (rulesClientParams.logger.warn as jest.Mock).mock.calls
-        .map((c) => c[0])
-        .filter((m: string) =>
-          m?.includes?.(`batchSize 999999 clamped to ${MAX_BULK_CREATE_BATCH_SIZE}`)
-        );
-      expect(warnCalls).toHaveLength(1);
+    test('throws 400 when batchSize is below MIN_BULK_CREATE_BATCH_SIZE', async () => {
+      await expect(
+        rulesClient.bulkCreateRules({
+          rules: [{ data: baseRule({ name: 'a' }) }],
+          batchSize: MIN_BULK_CREATE_BATCH_SIZE - 1,
+        })
+      ).rejects.toThrow(`is below the minimum of ${MIN_BULK_CREATE_BATCH_SIZE}`);
+      expect(unsecuredSavedObjectsClient.bulkCreate).not.toHaveBeenCalled();
     });
 
     test(`rejects with 400 when rules.length exceeds MAX_RULES_NUMBER_FOR_BULK_OPERATION (${MAX_RULES_NUMBER_FOR_BULK_OPERATION})`, async () => {
@@ -762,10 +809,10 @@ describe('bulkCreateRules', () => {
       );
 
       await rulesClient.bulkCreateRules({
-        rules: Array.from({ length: 4 }, (_, i) => ({
+        rules: Array.from({ length: 20 }, (_, i) => ({
           data: baseRule({ name: `r-${i}`, enabled: true }),
         })),
-        batchSize: 2,
+        batchSize: 10,
       });
 
       expect(taskManager.bulkSchedule).toHaveBeenCalledTimes(2);
@@ -780,68 +827,66 @@ describe('bulkCreateRules', () => {
 
   describe('exitEarlyOnError', () => {
     test('default (false): keeps processing subsequent batches even after an SO per-row error', async () => {
+      const batch1Ids = Array.from({ length: 10 }, (_, i) => ({ id: `b1-${i}` }));
+      batch1Ids[0] = { id: 'b1-0', error: { message: 'conflict', statusCode: 409 } } as any;
+      const batch2Ids = Array.from({ length: 10 }, (_, i) => ({ id: `b2-${i}` }));
       unsecuredSavedObjectsClient.bulkCreate
-        .mockResolvedValueOnce(
-          buildBulkResponse([
-            { id: 'mock-id-1', error: { message: 'conflict', statusCode: 409 } },
-            { id: 'mock-id-2' },
-          ])
-        )
-        .mockResolvedValueOnce(buildBulkResponse([{ id: 'mock-id-3' }, { id: 'mock-id-4' }]));
+        .mockResolvedValueOnce(buildBulkResponse(batch1Ids))
+        .mockResolvedValueOnce(buildBulkResponse(batch2Ids));
 
       const result = await rulesClient.bulkCreateRules({
-        rules: Array.from({ length: 4 }, (_, i) => ({ data: baseRule({ name: `r-${i}` }) })),
-        batchSize: 2,
+        rules: Array.from({ length: 20 }, (_, i) => ({ data: baseRule({ name: `r-${i}` }) })),
+        batchSize: 10,
       });
 
       expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(2);
-      expect(result.successfulIds).toEqual(['mock-id-2', 'mock-id-3', 'mock-id-4']);
+      expect(result.successfulIds).toContain('b1-1');
+      expect(result.successfulIds).toContain('b2-0');
       expect(result.errors).toHaveLength(1);
-      expect(result.errors[0].rule.id).toBe('mock-id-1');
+      expect(result.errors[0].rule.id).toBe('b1-0');
     });
 
     test('true: stops at the first SO per-row failure, returns prior successes', async () => {
+      const batch1Ids = Array.from({ length: 10 }, (_, i) => ({ id: `b1-${i}` }));
+      const batch2Ids = Array.from({ length: 10 }, (_, i) => ({ id: `b2-${i}` }));
+      batch2Ids[0] = { id: 'b2-0', error: { message: 'conflict', statusCode: 409 } } as any;
       unsecuredSavedObjectsClient.bulkCreate
-        .mockResolvedValueOnce(buildBulkResponse([{ id: 'mock-id-1' }, { id: 'mock-id-2' }]))
-        .mockResolvedValueOnce(
-          buildBulkResponse([
-            { id: 'mock-id-3', error: { message: 'conflict', statusCode: 409 } },
-            { id: 'mock-id-4' },
-          ])
-        );
+        .mockResolvedValueOnce(buildBulkResponse(batch1Ids))
+        .mockResolvedValueOnce(buildBulkResponse(batch2Ids));
 
       const result = await rulesClient.bulkCreateRules({
-        rules: Array.from({ length: 6 }, (_, i) => ({ data: baseRule({ name: `r-${i}` }) })),
-        batchSize: 2,
+        rules: Array.from({ length: 30 }, (_, i) => ({ data: baseRule({ name: `r-${i}` }) })),
+        batchSize: 10,
         exitEarlyOnError: true,
       });
 
       // Only batches 1 and 2 should have executed; batch 3 is skipped.
       expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(2);
-      expect(result.successfulIds).toEqual(['mock-id-1', 'mock-id-2', 'mock-id-4']);
+      expect(result.successfulIds).toContain('b1-0');
+      expect(result.successfulIds).toContain('b2-1');
       expect(result.errors).toHaveLength(1);
-      expect(result.errors[0].rule.id).toBe('mock-id-3');
+      expect(result.errors[0].rule.id).toBe('b2-0');
     });
 
     test('true: stops on whole-call SO throw and emits one error per failed-batch rule', async () => {
+      const batch1Ids = Array.from({ length: 10 }, (_, i) => ({ id: `b1-${i}` }));
       unsecuredSavedObjectsClient.bulkCreate
-        .mockResolvedValueOnce(buildBulkResponse([{ id: 'mock-id-1' }, { id: 'mock-id-2' }]))
+        .mockResolvedValueOnce(buildBulkResponse(batch1Ids))
         .mockRejectedValueOnce(new Error('SO down'));
 
       const result = await rulesClient.bulkCreateRules({
-        rules: Array.from({ length: 6 }, (_, i) => ({ data: baseRule({ name: `r-${i}` }) })),
-        batchSize: 2,
+        rules: Array.from({ length: 20 }, (_, i) => ({ data: baseRule({ name: `r-${i}` }) })),
+        batchSize: 10,
         exitEarlyOnError: true,
       });
 
       expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(2);
-      expect(result.successfulIds).toEqual(['mock-id-1', 'mock-id-2']);
+      expect(result.successfulIds).toEqual(batch1Ids.map((b) => b.id));
       const soDownErrors = result.errors.filter((e) => e.message.includes('SO down'));
-      expect(soDownErrors).toHaveLength(2);
-      expect(soDownErrors.map((e) => e.rule.name).sort()).toEqual(['r-2', 'r-3']);
+      expect(soDownErrors).toHaveLength(10);
     });
 
-    test('true + Phase B1 api-key-mint failure: aborts batch (no SO write, key cleanup runs, no further batches)', async () => {
+    test('true + Phase B1 api-key-mint failure: aborts batch (no SO write, key cleanup runs)', async () => {
       rulesClientParams.createAPIKey.mockRejectedValueOnce(new Error('keys disabled'));
 
       const result = await rulesClient.bulkCreateRules({
@@ -850,12 +895,9 @@ describe('bulkCreateRules', () => {
           { data: baseRule({ name: 'b' }) },
           { data: baseRule({ name: 'c' }) },
         ],
-        batchSize: 1,
         exitEarlyOnError: true,
       });
 
-      // Batch 1 (the enabled rule) is excluded on api-key failure → strict aborts before SO write.
-      // Batches 2 and 3 are skipped entirely.
       expect(unsecuredSavedObjectsClient.bulkCreate).not.toHaveBeenCalled();
       expect(taskManager.bulkSchedule).not.toHaveBeenCalled();
       expect(result.successfulIds).toEqual([]);
@@ -864,30 +906,27 @@ describe('bulkCreateRules', () => {
       expect(result.errors[0].message).toContain('keys disabled');
     });
 
-    test('true + Phase B2 schedule-limit overflow: aborts batch (no SO write, key invalidation runs, no further batches)', async () => {
+    test('true + Phase A3 schedule-limit overflow: throws before any ES writes', async () => {
       (validateScheduleLimit as jest.Mock).mockResolvedValueOnce({
         interval: 100,
         intervalAvailable: 50,
       });
 
-      const result = await rulesClient.bulkCreateRules({
-        rules: [
-          { data: baseRule({ name: 'a', enabled: true }) },
-          { data: baseRule({ name: 'b' }) },
-        ],
-        batchSize: 1,
-        exitEarlyOnError: true,
-      });
+      await expect(
+        rulesClient.bulkCreateRules({
+          rules: [
+            { data: baseRule({ name: 'a', enabled: true }) },
+            { data: baseRule({ name: 'b' }) },
+          ],
+          exitEarlyOnError: true,
+        })
+      ).rejects.toThrow(/circuit breaker/i);
 
       expect(unsecuredSavedObjectsClient.bulkCreate).not.toHaveBeenCalled();
       expect(taskManager.bulkSchedule).not.toHaveBeenCalled();
-      expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalled();
-      expect(result.successfulIds).toEqual([]);
-      expect(result.errors).toHaveLength(1);
-      expect(result.errors[0].rule.name).toBe('a');
     });
 
-    test('true + Phase B3 whole-call TM throw: aborts batch (no SO write, key invalidation runs, no further batches)', async () => {
+    test('true + Phase B2 whole-call TM throw: aborts batch (no SO write, key invalidation runs, no further batches)', async () => {
       taskManager.bulkSchedule.mockRejectedValueOnce(new Error('cluster unavailable'));
 
       const result = await rulesClient.bulkCreateRules({
@@ -895,7 +934,6 @@ describe('bulkCreateRules', () => {
           { data: baseRule({ name: 'a', enabled: true }) },
           { data: baseRule({ name: 'b' }) },
         ],
-        batchSize: 1,
         exitEarlyOnError: true,
       });
 
@@ -907,16 +945,13 @@ describe('bulkCreateRules', () => {
       expect(result.errors[0].message).toContain('cluster unavailable');
     });
 
-    test('true + Phase B3 silent per-task drop: aborts batch and removes the partially scheduled tasks', async () => {
+    test('true + Phase B2 silent per-task drop: aborts batch and removes the partially scheduled tasks', async () => {
       taskManager.bulkSchedule.mockImplementationOnce(async (tasks) => [tasks[0]] as never);
 
       const result = await rulesClient.bulkCreateRules({
-        rules: [
-          { data: baseRule({ name: 'kept', enabled: true }) },
-          { data: baseRule({ name: 'dropped', enabled: true }) },
-          { data: baseRule({ name: 'next-batch' }) },
-        ],
-        batchSize: 2,
+        rules: Array.from({ length: 10 }, (_, i) => ({
+          data: baseRule({ name: i === 0 ? 'kept' : i === 1 ? 'dropped' : `filler-${i}`, enabled: i < 2 }),
+        })),
         exitEarlyOnError: true,
       });
 
