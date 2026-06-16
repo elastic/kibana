@@ -13,9 +13,10 @@ import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import { getKbnServerError, reportServerError } from '@kbn/kibana-utils-plugin/server';
 import type { PluginSetup as KqlPluginSetup } from '@kbn/kql/server';
+
+import type { StartDeps } from '../plugin';
 
 import { getESQLSingleColumnValues } from '../../common/options_list/get_esql_single_column_values';
 import type {
@@ -76,7 +77,7 @@ const esqlFetchBodySchema = schema.object(
 );
 
 export const setupOptionsListSuggestionsRoute = (
-  core: CoreSetup,
+  core: CoreSetup<StartDeps>,
   getAutocompleteSettings: KqlPluginSetup['autocomplete']['getAutocompleteSettings']
 ) => {
   const router = core.http.createRouter();
@@ -104,8 +105,7 @@ export const setupOptionsListSuggestionsRoute = (
       },
       async (context, request, response) => {
         try {
-          const [, plugins] = await core.getStartServices();
-          const data = (plugins as { data: DataPluginStart }).data;
+          const [, { data }] = await core.getStartServices();
 
           const suggestionsResponse =
             request.body.kind === 'dsl'
@@ -124,7 +124,7 @@ export const setupOptionsListSuggestionsRoute = (
 
           return response.ok({ body: suggestionsResponse });
         } catch (e) {
-          const kbnErr = getKbnServerError(e);
+          const kbnErr = getKbnServerError(e as Error);
           return reportServerError(response, kbnErr);
         }
       }
