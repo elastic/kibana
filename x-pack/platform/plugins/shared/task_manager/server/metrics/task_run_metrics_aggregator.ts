@@ -64,7 +64,12 @@ export interface TaskRunMetric extends JsonObject {
     duration: SerializedHistogram;
     duration_values: number[];
   };
-  by_type: TaskRunMetrics['by_type'];
+  by_type: {
+    [key: string]: TaskRunCounts & {
+      duration: SerializedHistogram;
+      duration_values: number[];
+    };
+  };
 }
 
 export class TaskRunMetricsAggregator implements ITaskMetricsAggregator<TaskRunMetric> {
@@ -78,10 +83,12 @@ export class TaskRunMetricsAggregator implements ITaskMetricsAggregator<TaskRunM
     DURATION_HDR_HISTOGRAM_MAX,
     DURATION_HDR_HISTOGRAM_BUCKET_SIZE
   );
+  private typeHistograms = new Map<string, SimpleHistogram>();
 
   constructor(logger: Logger) {
     this.logger = logger;
   }
+
   public initialMetric(): TaskRunMetric {
     return merge(this.counter.initialMetrics(), {
       by_type: {},
@@ -95,20 +102,34 @@ export class TaskRunMetricsAggregator implements ITaskMetricsAggregator<TaskRunM
   }
 
   public collect(): TaskRunMetric {
-    return merge(this.counter.collect(), {
+    const metrics = merge(this.counter.collect(), {
       overall: {
         delay: this.delayHistogram.serialize(),
         delay_values: this.delayHistogram.getAllValues(),
         duration: this.durationHistogram.serialize(),
         duration_values: this.durationHistogram.getAllValues(),
       },
-    });
+    }) as TaskRunMetric;
+
+    for (const [key, value] of Object.entries(metrics.by_type ?? {})) {
+      const histogram = this.typeHistograms.get(key);
+      metrics.by_type[key] = {
+        ...value,
+        duration: histogram?.serialize() ?? { counts: [], values: [] },
+        duration_values: histogram?.getAllValues() ?? [],
+      };
+    }
+
+    return metrics;
   }
 
   public reset() {
     this.counter.reset();
     this.delayHistogram.reset();
     this.durationHistogram.reset();
+    for (const histogram of this.typeHistograms.values()) {
+      histogram.reset();
+    }
   }
 
   public processTaskLifecycleEvent(taskEvent: TaskLifecycleEvent) {
@@ -134,6 +155,10 @@ export class TaskRunMetricsAggregator implements ITaskMetricsAggregator<TaskRunM
     if (taskEvent.timing) {
       const durationInMs = taskEvent.timing.stop - taskEvent.timing.start;
       this.durationHistogram.record(durationInMs);
+      this.recordTypeDuration(taskType, durationInMs);
+      if (taskTypeGroup) {
+        this.recordTypeDuration(taskTypeGroup, durationInMs);
+      }
     }
 
     // increment the total counters
@@ -172,6 +197,18 @@ export class TaskRunMetricsAggregator implements ITaskMetricsAggregator<TaskRunM
       const delayInSec = Math.round((taskEvent.event as Ok<number>).value);
       this.delayHistogram.record(delayInSec);
     }
+  }
+
+  private recordTypeDuration(key: string, durationInMs: number) {
+    let histogram = this.typeHistograms.get(key);
+    if (!histogram) {
+      histogram = new SimpleHistogram(
+        DURATION_HDR_HISTOGRAM_MAX,
+        DURATION_HDR_HISTOGRAM_BUCKET_SIZE
+      );
+      this.typeHistograms.set(key, histogram);
+    }
+    histogram.record(durationInMs);
   }
 
   private incrementCounters(key: TaskRunKeys, taskType: string, group?: string) {

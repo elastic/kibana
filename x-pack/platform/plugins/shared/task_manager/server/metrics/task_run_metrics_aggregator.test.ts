@@ -16,6 +16,8 @@ import { TaskRunMetricsAggregator } from './task_run_metrics_aggregator';
 
 const logger = loggingSystemMock.createLogger();
 
+const EMPTY_DURATION = { duration: { counts: [], values: [] }, duration_values: [] };
+
 export const getTaskRunSuccessEvent = (type: string, isExpired: boolean = false) => {
   const id = uuid.v4();
   return asTaskRunEvent(
@@ -150,6 +152,8 @@ describe('TaskRunMetricsAggregator', () => {
           user_errors: 0,
           total_errors: 0,
           rescheduled_failures: 0,
+          duration: { counts: [2], values: [10000] },
+          duration_values: [10, 10],
         },
       },
     });
@@ -221,6 +225,8 @@ describe('TaskRunMetricsAggregator', () => {
           user_errors: 0,
           total_errors: 0,
           rescheduled_failures: 0,
+          duration: { counts: [2], values: [10000] },
+          duration_values: [10, 10],
         },
       },
     });
@@ -252,6 +258,7 @@ describe('TaskRunMetricsAggregator', () => {
           user_errors: 0,
           total_errors: 2,
           rescheduled_failures: 0,
+          ...EMPTY_DURATION,
         },
       },
     });
@@ -287,6 +294,7 @@ describe('TaskRunMetricsAggregator', () => {
           user_errors: 0,
           total_errors: 2,
           rescheduled_failures: 2,
+          ...EMPTY_DURATION,
         },
       },
     });
@@ -318,6 +326,7 @@ describe('TaskRunMetricsAggregator', () => {
           user_errors: 0,
           total_errors: 2,
           rescheduled_failures: 0,
+          ...EMPTY_DURATION,
         },
       },
     });
@@ -351,6 +360,8 @@ describe('TaskRunMetricsAggregator', () => {
           user_errors: 0,
           total_errors: 0,
           rescheduled_failures: 0,
+          duration: { counts: [2], values: [10000] },
+          duration_values: [10, 10],
         },
         telemetry: {
           success: 1,
@@ -360,6 +371,8 @@ describe('TaskRunMetricsAggregator', () => {
           user_errors: 0,
           total_errors: 1,
           rescheduled_failures: 0,
+          duration: { counts: [1], values: [10000] },
+          duration_values: [10],
         },
       },
     });
@@ -409,6 +422,8 @@ describe('TaskRunMetricsAggregator', () => {
           user_errors: 0,
           total_errors: 0,
           rescheduled_failures: 0,
+          duration: { counts: [3], values: [10000] },
+          duration_values: [10, 10, 10],
         },
         'actions:__email': {
           success: 1,
@@ -418,6 +433,8 @@ describe('TaskRunMetricsAggregator', () => {
           user_errors: 0,
           total_errors: 0,
           rescheduled_failures: 0,
+          duration: { counts: [1], values: [10000] },
+          duration_values: [10],
         },
         'actions:webhook': {
           success: 2,
@@ -427,6 +444,8 @@ describe('TaskRunMetricsAggregator', () => {
           user_errors: 0,
           total_errors: 0,
           rescheduled_failures: 0,
+          duration: { counts: [2], values: [10000] },
+          duration_values: [10, 10],
         },
         alerting: {
           success: 5,
@@ -436,6 +455,8 @@ describe('TaskRunMetricsAggregator', () => {
           user_errors: 0,
           total_errors: 2,
           rescheduled_failures: 0,
+          duration: { counts: [5], values: [10000] },
+          duration_values: [10, 10, 10, 10, 10],
         },
         'alerting:example': {
           success: 3,
@@ -445,6 +466,8 @@ describe('TaskRunMetricsAggregator', () => {
           user_errors: 0,
           total_errors: 2,
           rescheduled_failures: 0,
+          duration: { counts: [3], values: [10000] },
+          duration_values: [10, 10, 10],
         },
         'alerting:__index-threshold': {
           success: 2,
@@ -454,6 +477,8 @@ describe('TaskRunMetricsAggregator', () => {
           user_errors: 0,
           total_errors: 0,
           rescheduled_failures: 0,
+          duration: { counts: [2], values: [10000] },
+          duration_values: [10, 10],
         },
         report: {
           success: 2,
@@ -463,6 +488,8 @@ describe('TaskRunMetricsAggregator', () => {
           user_errors: 0,
           total_errors: 0,
           rescheduled_failures: 0,
+          duration: { counts: [2], values: [10000] },
+          duration_values: [10, 10],
         },
         telemetry: {
           success: 1,
@@ -472,9 +499,35 @@ describe('TaskRunMetricsAggregator', () => {
           user_errors: 0,
           total_errors: 1,
           rescheduled_failures: 0,
+          duration: { counts: [1], values: [10000] },
+          duration_values: [10],
         },
       },
     });
+  });
+
+  test('should correctly track duration by task type', () => {
+    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('telemetry'));
+    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunSuccessEvent('report'));
+    taskRunMetricsAggregator.processTaskLifecycleEvent(getTaskRunFailedEvent('telemetry'));
+    expect(taskRunMetricsAggregator.collect()).toEqual(
+      expect.objectContaining({
+        overall: expect.objectContaining({
+          duration: { counts: [2], values: [10000] },
+          duration_values: [10, 10],
+        }),
+        by_type: expect.objectContaining({
+          telemetry: expect.objectContaining({
+            duration: { counts: [1], values: [10000] },
+            duration_values: [10],
+          }),
+          report: expect.objectContaining({
+            duration: { counts: [1], values: [10000] },
+            duration_values: [10],
+          }),
+        }),
+      })
+    );
   });
 
   test('should correctly reset counter', () => {
@@ -526,6 +579,8 @@ describe('TaskRunMetricsAggregator', () => {
           user_errors: 0,
           total_errors: 0,
           rescheduled_failures: 0,
+          duration: { counts: [3], values: [10000] },
+          duration_values: [10, 10, 10],
         },
         'actions:__email': {
           success: 1,
@@ -535,6 +590,8 @@ describe('TaskRunMetricsAggregator', () => {
           user_errors: 0,
           total_errors: 0,
           rescheduled_failures: 0,
+          duration: { counts: [1], values: [10000] },
+          duration_values: [10],
         },
         'actions:webhook': {
           success: 2,
@@ -544,6 +601,8 @@ describe('TaskRunMetricsAggregator', () => {
           user_errors: 0,
           total_errors: 0,
           rescheduled_failures: 0,
+          duration: { counts: [2], values: [10000] },
+          duration_values: [10, 10],
         },
         alerting: {
           success: 5,
@@ -553,6 +612,8 @@ describe('TaskRunMetricsAggregator', () => {
           user_errors: 0,
           total_errors: 2,
           rescheduled_failures: 0,
+          duration: { counts: [5], values: [10000] },
+          duration_values: [10, 10, 10, 10, 10],
         },
         'alerting:example': {
           success: 3,
@@ -562,6 +623,8 @@ describe('TaskRunMetricsAggregator', () => {
           user_errors: 0,
           total_errors: 2,
           rescheduled_failures: 0,
+          duration: { counts: [3], values: [10000] },
+          duration_values: [10, 10, 10],
         },
         'alerting:__index-threshold': {
           success: 2,
@@ -571,6 +634,8 @@ describe('TaskRunMetricsAggregator', () => {
           user_errors: 0,
           total_errors: 0,
           rescheduled_failures: 0,
+          duration: { counts: [2], values: [10000] },
+          duration_values: [10, 10],
         },
         report: {
           success: 2,
@@ -580,6 +645,8 @@ describe('TaskRunMetricsAggregator', () => {
           user_errors: 0,
           total_errors: 0,
           rescheduled_failures: 0,
+          duration: { counts: [2], values: [10000] },
+          duration_values: [10, 10],
         },
         telemetry: {
           success: 1,
@@ -589,6 +656,8 @@ describe('TaskRunMetricsAggregator', () => {
           user_errors: 0,
           total_errors: 1,
           rescheduled_failures: 0,
+          duration: { counts: [1], values: [10000] },
+          duration_values: [10],
         },
       },
     });
@@ -617,6 +686,7 @@ describe('TaskRunMetricsAggregator', () => {
           user_errors: 0,
           total_errors: 0,
           rescheduled_failures: 0,
+          ...EMPTY_DURATION,
         },
         'actions:__email': {
           success: 0,
@@ -626,6 +696,7 @@ describe('TaskRunMetricsAggregator', () => {
           user_errors: 0,
           total_errors: 0,
           rescheduled_failures: 0,
+          ...EMPTY_DURATION,
         },
         'actions:webhook': {
           success: 0,
@@ -635,6 +706,7 @@ describe('TaskRunMetricsAggregator', () => {
           user_errors: 0,
           total_errors: 0,
           rescheduled_failures: 0,
+          ...EMPTY_DURATION,
         },
         alerting: {
           success: 0,
@@ -644,6 +716,7 @@ describe('TaskRunMetricsAggregator', () => {
           user_errors: 0,
           total_errors: 0,
           rescheduled_failures: 0,
+          ...EMPTY_DURATION,
         },
         'alerting:example': {
           success: 0,
@@ -653,6 +726,7 @@ describe('TaskRunMetricsAggregator', () => {
           user_errors: 0,
           total_errors: 0,
           rescheduled_failures: 0,
+          ...EMPTY_DURATION,
         },
         'alerting:__index-threshold': {
           success: 0,
@@ -662,6 +736,7 @@ describe('TaskRunMetricsAggregator', () => {
           user_errors: 0,
           total_errors: 0,
           rescheduled_failures: 0,
+          ...EMPTY_DURATION,
         },
         report: {
           success: 0,
@@ -671,6 +746,7 @@ describe('TaskRunMetricsAggregator', () => {
           user_errors: 0,
           total_errors: 0,
           rescheduled_failures: 0,
+          ...EMPTY_DURATION,
         },
         telemetry: {
           success: 0,
@@ -680,6 +756,7 @@ describe('TaskRunMetricsAggregator', () => {
           user_errors: 0,
           total_errors: 0,
           rescheduled_failures: 0,
+          ...EMPTY_DURATION,
         },
       },
     });
