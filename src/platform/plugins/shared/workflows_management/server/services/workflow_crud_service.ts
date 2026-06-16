@@ -52,6 +52,7 @@ import {
 } from '../lib/bulk_id_helpers';
 import { getAuthenticatedUser } from '../lib/get_user';
 import { resolveUniqueWorkflowIds, validateWorkflowId } from '../lib/workflow_id_resolver';
+import { applyWorkflowVersion } from '../lib/workflow_version';
 import type { WorkflowProperties } from '../storage/workflow_storage';
 import { scheduleWorkflowTriggers } from '../task_defs/schedule_workflow_triggers';
 import { syncSchedulerAfterSave } from '../task_defs/sync_scheduler_after_save';
@@ -176,12 +177,13 @@ export class WorkflowCrudService {
     params: WriteWorkflowDocumentParams
   ): Promise<WorkflowProperties> {
     const writer = this.getOccWriter(spaceId, params.maxRetries);
+    const { mutate: callerMutate, create } = params;
 
     try {
       const { document } = await writer.write({
         id,
-        create: params.create,
-        mutate: params.mutate,
+        create,
+        mutate: (existing) => applyWorkflowVersion(callerMutate(existing), existing),
       });
       return document;
     } catch (error) {
@@ -506,7 +508,19 @@ export class WorkflowCrudService {
     const successfullyWritten: BulkWorkflowEntry[] = [];
 
     for (let attempt = 0; attempt <= TOCTOU_MAX_RETRIES && pending.length > 0; attempt++) {
-      const bulkOperations = pending.map((vw) =>
+      const entriesForBulk = overwrite
+        ? await Promise.all(
+            pending.map(async (entry) => {
+              const existing = await this.getWorkflowDocumentSource(entry.id, spaceId);
+              return {
+                ...entry,
+                workflowData: applyWorkflowVersion(entry.workflowData, existing ?? undefined),
+              };
+            })
+          )
+        : pending;
+
+      const bulkOperations = entriesForBulk.map((vw) =>
         overwrite
           ? { index: { _id: vw.id, document: vw.workflowData } }
           : { create: { _id: vw.id, document: vw.workflowData } }

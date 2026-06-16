@@ -6,11 +6,11 @@ Platform primitives and bulk patterns: [`@kbn/occ` README](../../../../packages/
 
 ## Entry points
 
-| Path | Mechanism | Default retries |
-|------|-----------|-----------------|
-| `WorkflowCrudService.updateWorkflow` → `writeWorkflowDocument` | `OccWriter` (`workflow_occ_writer.ts`) | `3` (`DEFAULT_MAX_RETRIES`) |
-| `ManagedWorkflowsService.installManagedWorkflow` → `writeWorkflowDocument` | `OccWriter` with `maxRetries: 0` on **updates**; outer install loop retries | `0` on update; create uses `create: true` (no OCC retry) |
-| `disableAllWorkflows` | `bulkIndexWithOccRetry` (`bulk_occ_index.ts`) | `3` |
+| Path | Mechanism | Default retries | Version |
+|------|-----------|-----------------|--------|
+| `WorkflowCrudService.updateWorkflow` → `writeWorkflowDocument` | `OccWriter` (`workflow_occ_writer.ts`) | `3` (`DEFAULT_MAX_RETRIES`) | `applyWorkflowVersion` in composed `mutate` |
+| `ManagedWorkflowsService.installManagedWorkflow` → `writeWorkflowDocument` | `OccWriter` with `maxRetries: 0` on **updates**; outer install loop retries | `0` on update; create uses `create: true` (no OCC retry) | same wrapper |
+| `disableAllWorkflows` | `bulkIndexWithOccRetry` (`bulk_occ_index.ts`) | `3` | `applyWorkflowVersion` per bulk item |
 
 ## When to use `maxRetries: 0` vs default
 

@@ -788,26 +788,37 @@ describe('WorkflowCrudService', () => {
       (deps as any).getTaskScheduler = () => taskScheduler;
 
       client.bulk.mockResolvedValue({ items: [{ index: { _id: 'wf-1', status: 200 } }] });
-      // Post-write re-read: persisted document has only a manual trigger.
-      client.search.mockResolvedValueOnce({
-        hits: {
-          hits: [
-            {
-              _id: 'wf-1',
-              _source: makeSource({
-                enabled: true,
-                valid: true,
-                definition: {
-                  name: 'A',
+      // Pre-bulk read for overwrite version bump, then post-write re-read for scheduler sync.
+      client.search
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [
+              {
+                _id: 'wf-1',
+                _source: makeSource({ version: 4 }),
+              },
+            ],
+          },
+        })
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [
+              {
+                _id: 'wf-1',
+                _source: makeSource({
                   enabled: true,
-                  triggers: [{ type: 'manual' }],
-                  steps: [],
-                } as any,
-              }),
-            },
-          ],
-        },
-      });
+                  valid: true,
+                  definition: {
+                    name: 'A',
+                    enabled: true,
+                    triggers: [{ type: 'manual' }],
+                    steps: [],
+                  } as any,
+                }),
+              },
+            ],
+          },
+        });
 
       const service = new WorkflowCrudService(deps);
       await service.bulkCreateWorkflows(
@@ -827,25 +838,36 @@ describe('WorkflowCrudService', () => {
       (deps as any).getTaskScheduler = () => taskScheduler;
 
       client.bulk.mockResolvedValue({ items: [{ index: { _id: 'wf-1', status: 200 } }] });
-      client.search.mockResolvedValueOnce({
-        hits: {
-          hits: [
-            {
-              _id: 'wf-1',
-              _source: makeSource({
-                enabled: true,
-                valid: true,
-                definition: {
-                  name: 'A',
+      client.search
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [
+              {
+                _id: 'wf-1',
+                _source: makeSource({ version: 2 }),
+              },
+            ],
+          },
+        })
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [
+              {
+                _id: 'wf-1',
+                _source: makeSource({
                   enabled: true,
-                  triggers: [{ type: 'scheduled', with: { every: '5m' } }],
-                  steps: [],
-                } as any,
-              }),
-            },
-          ],
-        },
-      });
+                  valid: true,
+                  definition: {
+                    name: 'A',
+                    enabled: true,
+                    triggers: [{ type: 'scheduled', with: { every: '5m' } }],
+                    steps: [],
+                  } as any,
+                }),
+              },
+            ],
+          },
+        });
 
       const service = new WorkflowCrudService(deps);
       await service.bulkCreateWorkflows(
@@ -870,25 +892,36 @@ describe('WorkflowCrudService', () => {
       (deps as any).getTaskScheduler = () => taskScheduler;
 
       client.bulk.mockResolvedValue({ items: [{ index: { _id: 'wf-1', status: 200 } }] });
-      client.search.mockResolvedValueOnce({
-        hits: {
-          hits: [
-            {
-              _id: 'wf-1',
-              _source: makeSource({
-                enabled: false,
-                valid: true,
-                definition: {
-                  name: 'A',
+      client.search
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [
+              {
+                _id: 'wf-1',
+                _source: makeSource({ version: 1 }),
+              },
+            ],
+          },
+        })
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [
+              {
+                _id: 'wf-1',
+                _source: makeSource({
                   enabled: false,
-                  triggers: [{ type: 'scheduled', with: { every: '5m' } }],
-                  steps: [],
-                } as any,
-              }),
-            },
-          ],
-        },
-      });
+                  valid: true,
+                  definition: {
+                    name: 'A',
+                    enabled: false,
+                    triggers: [{ type: 'scheduled', with: { every: '5m' } }],
+                    steps: [],
+                  } as any,
+                }),
+              },
+            ],
+          },
+        });
 
       const service = new WorkflowCrudService(deps);
       await service.bulkCreateWorkflows(
@@ -1110,6 +1143,7 @@ describe('WorkflowCrudService', () => {
           document: expect.objectContaining({
             tags: ['t1', 't2'],
             lastUpdatedBy: 'alice',
+            version: 1,
           }),
         })
       );
@@ -1144,7 +1178,7 @@ describe('WorkflowCrudService', () => {
             hits: [
               {
                 _id: 'wf-1',
-                _source: makeSource({ name: 'Before', tags: ['t1'] }),
+                _source: makeSource({ name: 'Before', tags: ['t1'], version: 5 }),
                 _seq_no: 5,
                 _primary_term: 1,
               },
@@ -1156,7 +1190,11 @@ describe('WorkflowCrudService', () => {
             hits: [
               {
                 _id: 'wf-1',
-                _source: makeSource({ name: 'Concurrent Name', tags: ['t1'] }),
+                _source: makeSource({
+                  name: 'Concurrent Name',
+                  tags: ['t1'],
+                  version: 6,
+                }),
                 _seq_no: 8,
                 _primary_term: 1,
               },
@@ -1192,6 +1230,7 @@ describe('WorkflowCrudService', () => {
           id: 'wf-1',
           if_seq_no: 5,
           if_primary_term: 1,
+          document: expect.objectContaining({ version: 6 }),
         })
       );
       expect(client.index).toHaveBeenNthCalledWith(
@@ -1204,7 +1243,33 @@ describe('WorkflowCrudService', () => {
             name: 'Concurrent Name',
             tags: ['t1', 't2'],
             lastUpdatedBy: 'alice',
+            version: 7,
           }),
+        })
+      );
+    });
+
+    it('increments version from the existing document on update', async () => {
+      const { deps, client } = makeDeps();
+      client.search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'wf-1',
+              _source: makeSource({ version: 12 }),
+              _seq_no: 2,
+              _primary_term: 1,
+            },
+          ],
+        },
+      });
+
+      const service = new WorkflowCrudService(deps);
+      await service.updateWorkflow('wf-1', { enabled: false }, 'default', request);
+
+      expect(client.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({ version: 13, enabled: false }),
         })
       );
     });

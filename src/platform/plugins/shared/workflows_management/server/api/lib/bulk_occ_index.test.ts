@@ -113,7 +113,7 @@ describe('bulkIndexWithOccRetry', () => {
             _id: 'wf-1',
             if_seq_no: 7,
             if_primary_term: 2,
-            document: expect.objectContaining({ enabled: false }),
+            document: expect.objectContaining({ enabled: false, version: 1 }),
           },
         },
       ],
@@ -140,7 +140,7 @@ describe('bulkIndexWithOccRetry', () => {
         items: [{ index: { _id: 'wf-1', status: 200 } }],
       });
     client.search.mockResolvedValue({
-      hits: { hits: [makeSearchHit('wf-1', 3, 1, { enabled: false })] },
+      hits: { hits: [makeSearchHit('wf-1', 3, 1, { enabled: false, version: 2 })] },
     });
 
     const mutate = jest.fn((source: WorkflowProperties) => ({
@@ -168,7 +168,10 @@ describe('bulkIndexWithOccRetry', () => {
       expect.objectContaining({ if_seq_no: 3, if_primary_term: 1 })
     );
     expect(mutate).toHaveBeenNthCalledWith(1, makeSource('wf-1'));
-    expect(mutate).toHaveBeenNthCalledWith(2, makeSource('wf-1', { enabled: false }));
+    expect(mutate).toHaveBeenNthCalledWith(2, makeSource('wf-1', { enabled: false, version: 2 }));
+    expect(client.bulk.mock.calls[1][0].operations[0].index.document).toEqual(
+      expect.objectContaining({ tags: ['patched'], version: 3 })
+    );
     expect(logger.debug).toHaveBeenCalledWith(
       expect.stringContaining('Bulk OCC conflict for 1 workflow(s)')
     );
@@ -333,6 +336,43 @@ describe('bulkIndexWithOccRetry', () => {
     expect(client.bulk).toHaveBeenCalledTimes(2);
     expect(client.bulk.mock.calls[1][0].operations).toHaveLength(1);
     expect(client.bulk.mock.calls[1][0].operations[0].index._id).toBe('wf-2');
+    expect(client.bulk.mock.calls[1][0].operations[0].index.document).toEqual(
+      expect.objectContaining({ enabled: false, version: 1 })
+    );
     expect(client.search).toHaveBeenCalledTimes(1);
+  });
+
+  it('increments version from the refreshed document on bulk OCC retry', async () => {
+    const client = makeClient();
+    client.bulk
+      .mockResolvedValueOnce({
+        items: [
+          {
+            index: {
+              _id: 'wf-1',
+              status: OCC_CONFLICT_STATUS_CODE,
+              error: { reason: 'conflict' },
+            },
+          },
+        ],
+      })
+      .mockResolvedValueOnce({
+        items: [{ index: { _id: 'wf-1', status: 200 } }],
+      });
+    client.search.mockResolvedValue({
+      hits: { hits: [makeSearchHit('wf-1', 4, 1, { version: 9 })] },
+    });
+
+    const result = await bulkIndexWithOccRetry({
+      client: client as any,
+      hits: [makeOccHit('wf-1', 1, 1, { version: 8 })],
+      mutate: (source) => ({ ...source, enabled: false }),
+      retryDelayMs: 0,
+    });
+
+    expect(result).toEqual({ successIds: ['wf-1'], failures: [] });
+    expect(client.bulk.mock.calls[1][0].operations[0].index.document).toEqual(
+      expect.objectContaining({ enabled: false, version: 10 })
+    );
   });
 });

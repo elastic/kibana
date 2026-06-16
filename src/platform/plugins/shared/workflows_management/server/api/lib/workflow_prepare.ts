@@ -15,6 +15,7 @@ import type { z } from '@kbn/zod/v4';
 import { generateWorkflowId } from '../../../common/lib/import';
 import { validateWorkflowYaml } from '../../../common/lib/validate_workflow_yaml';
 import { updateWorkflowYamlFields } from '../../../common/lib/yaml';
+import { INITIAL_WORKFLOW_VERSION } from '../../lib/workflow_version';
 import type { WorkflowProperties } from '../../storage/workflow_storage';
 
 /** Derives a list of trigger type ids from a workflow definition. */
@@ -97,6 +98,7 @@ export const prepareWorkflowDocumentFromYaml = (params: {
     lifecycle: null,
     valid: workflowToCreate.valid,
     deleted_at: null,
+    version: INITIAL_WORKFLOW_VERSION,
     created_at: now.toISOString(),
     updated_at: now.toISOString(),
   };

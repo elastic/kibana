@@ -17,6 +17,7 @@ import {
 } from '@kbn/occ';
 
 import { extractBulkItemError } from './bulk_response_helpers';
+import { applyWorkflowVersion } from '../../lib/workflow_version';
 import type { WorkflowProperties, WorkflowStorage } from '../../storage/workflow_storage';
 
 export interface OccWorkflowHit {
@@ -59,7 +60,7 @@ const buildBulkIndexOperations = (
       _id: hit._id,
       if_seq_no: hit.seqNo,
       if_primary_term: hit.primaryTerm,
-      document: mutate(hit._source),
+      document: applyWorkflowVersion(mutate(hit._source), hit._source),
     },
   }));
 
