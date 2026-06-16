@@ -1986,13 +1986,30 @@ describe('current status route', () => {
     });
 
     const upConfigs: Record<string, any> = {
-      m1: makeMeta('m1', { name: 'Alpha', urls: 'https://alpha.io', updated_at: '2025-01-01T00:00:00Z' }),
-      m2: makeMeta('m2', { name: 'Beta', urls: 'https://beta.io', updated_at: '2025-03-01T00:00:00Z' }),
+      m1: makeMeta('m1', {
+        name: 'Alpha',
+        urls: 'https://alpha.io',
+        updated_at: '2025-01-01T00:00:00Z',
+      }),
+      m2: makeMeta('m2', {
+        name: 'Beta',
+        urls: 'https://beta.io',
+        updated_at: '2025-03-01T00:00:00Z',
+      }),
       m3: makeMeta('m3', { name: 'Gamma', updated_at: '2025-02-01T00:00:00Z' }),
     };
     const downConfigs: Record<string, any> = {
-      m4: makeMeta('m4', { overallStatus: 'down', name: 'Delta', urls: 'https://delta.io', updated_at: '2025-04-01T00:00:00Z' }),
-      m5: makeMeta('m5', { overallStatus: 'down', name: 'Epsilon', updated_at: '2025-05-01T00:00:00Z' }),
+      m4: makeMeta('m4', {
+        overallStatus: 'down',
+        name: 'Delta',
+        urls: 'https://delta.io',
+        updated_at: '2025-04-01T00:00:00Z',
+      }),
+      m5: makeMeta('m5', {
+        overallStatus: 'down',
+        name: 'Epsilon',
+        updated_at: '2025-05-01T00:00:00Z',
+      }),
     };
     const pendingConfigs: Record<string, any> = {
       m6: makeMeta('m6', { overallStatus: 'pending', name: 'Zeta' }),
@@ -2047,7 +2064,12 @@ describe('current status route', () => {
     });
 
     it('sorts by status asc: down first, then up, disabled, pending', () => {
-      const service = createService({ page: 1, perPage: 20, sortField: 'status', sortOrder: 'asc' });
+      const service = createService({
+        page: 1,
+        perPage: 20,
+        sortField: 'status',
+        sortOrder: 'asc',
+      });
       const result = service.paginateConfigs(allBuckets);
 
       const statuses = result.configs.map((c: any) => c.overallStatus);
@@ -2055,7 +2077,12 @@ describe('current status route', () => {
     });
 
     it('sorts by status desc: up first, then down, disabled, pending', () => {
-      const service = createService({ page: 1, perPage: 20, sortField: 'status', sortOrder: 'desc' });
+      const service = createService({
+        page: 1,
+        perPage: 20,
+        sortField: 'status',
+        sortOrder: 'desc',
+      });
       const result = service.paginateConfigs(allBuckets);
 
       const statuses = result.configs.map((c: any) => c.overallStatus);
@@ -2063,7 +2090,12 @@ describe('current status route', () => {
     });
 
     it('sorts by name ascending', () => {
-      const service = createService({ page: 1, perPage: 20, sortField: 'name.keyword', sortOrder: 'asc' });
+      const service = createService({
+        page: 1,
+        perPage: 20,
+        sortField: 'name.keyword',
+        sortOrder: 'asc',
+      });
       const result = service.paginateConfigs(allBuckets);
 
       const names = result.configs.map((c: any) => c.name);
@@ -2071,7 +2103,12 @@ describe('current status route', () => {
     });
 
     it('sorts by name descending', () => {
-      const service = createService({ page: 1, perPage: 20, sortField: 'name.keyword', sortOrder: 'desc' });
+      const service = createService({
+        page: 1,
+        perPage: 20,
+        sortField: 'name.keyword',
+        sortOrder: 'desc',
+      });
       const result = service.paginateConfigs(allBuckets);
 
       const names = result.configs.map((c: any) => c.name);
@@ -2079,7 +2116,12 @@ describe('current status route', () => {
     });
 
     it('sorts by updated_at ascending', () => {
-      const service = createService({ page: 1, perPage: 20, sortField: 'updated_at', sortOrder: 'asc' });
+      const service = createService({
+        page: 1,
+        perPage: 20,
+        sortField: 'updated_at',
+        sortOrder: 'asc',
+      });
       const result = service.paginateConfigs(allBuckets);
 
       const names = result.configs.map((c: any) => c.name);
@@ -2099,7 +2141,9 @@ describe('current status route', () => {
       expect(withUrls).toEqual(['https://alpha.io', 'https://beta.io', 'https://delta.io']);
       expect(withoutUrls).toHaveLength(4);
       // All url-less entries are at the end
-      expect(urls.indexOf(withoutUrls[0])).toBeGreaterThan(urls.lastIndexOf(withUrls[withUrls.length - 1]));
+      expect(urls.indexOf(withoutUrls[0])).toBeGreaterThan(
+        urls.lastIndexOf(withUrls[withUrls.length - 1])
+      );
     });
 
     it('sorts by type ascending', () => {
@@ -2114,7 +2158,12 @@ describe('current status route', () => {
         pendingConfigs: {},
         disabledConfigs: {},
       };
-      const service = createService({ page: 1, perPage: 20, sortField: 'type.keyword', sortOrder: 'asc' });
+      const service = createService({
+        page: 1,
+        perPage: 20,
+        sortField: 'type.keyword',
+        sortOrder: 'asc',
+      });
       const result = service.paginateConfigs(mixedTypes);
 
       const types = result.configs.map((c: any) => c.type);
@@ -2177,7 +2226,11 @@ describe('current status route', () => {
 
     it('combines statusFilter with sort by name', () => {
       const service = createService({
-        page: 1, perPage: 20, statusFilter: 'up', sortField: 'name.keyword', sortOrder: 'asc',
+        page: 1,
+        perPage: 20,
+        statusFilter: 'up',
+        sortField: 'name.keyword',
+        sortOrder: 'asc',
       });
       const result = service.paginateConfigs(allBuckets);
 
