@@ -101,11 +101,14 @@ export function AlertConditionStep({
   // Auto-populate group fields from the STATS BY clause whenever the committed
   // query changes. Re-derives on every new Apply so switching indices updates
   // the group fields instead of leaving stale values from the previous query.
+  // Skips the first run when editing to preserve API-seeded grouping defaults.
   const autoPopulatedForRef = useRef<string | null>(null);
   useEffect(() => {
     if (!state.queryCommitted || !committedQuery) return;
     if (autoPopulatedForRef.current === committedQuery) return;
+    const isFirstRun = autoPopulatedForRef.current === null;
     autoPopulatedForRef.current = committedQuery;
+    if (isFirstRun && isEditing) return;
     try {
       const { root } = Parser.parse(committedQuery);
       const statsCmd = [...root.commands].reverse().find((c) => c.name === 'stats');
@@ -122,7 +125,7 @@ export function AlertConditionStep({
     } catch {
       // Non-parseable query -- skip auto-populate
     }
-  }, [state.queryCommitted, committedQuery, setValue]);
+  }, [state.queryCommitted, committedQuery, setValue, isEditing]);
 
   // Callout when the heuristic split couldn't find a clear split point.
   // Only relevant after Apply (when the committed query is in composed format).
