@@ -41,7 +41,7 @@ export const LINKS_READ_DESCRIPTION =
   'Returns the complete state of a links library item by ID.' as const;
 
 export const LINKS_SEARCH_DESCRIPTION =
-  `Returns a paginated list of links library items. Each result includes title, description, and metadata, but not the content. ` +
+  `Returns a paginated list of links library items. Each result includes title, description, and metadata. ` +
   `Use \`GET ${LINKS_API_PATH}/{id}\` to retrieve the complete state.`;
 
 export const LINKS_UPDATE_DESCRIPTION =
