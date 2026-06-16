@@ -17,6 +17,7 @@ import { formatDateRange } from '../utils';
 import { textToTimeRange } from '../parse';
 
 const mockUseDateRangePickerContext = jest.fn();
+const mockCalendarRangeSpy = jest.fn();
 
 jest.mock('../date_range_picker_context', () => ({
   useDateRangePickerContext: () => mockUseDateRangePickerContext(),
@@ -66,6 +67,8 @@ jest.mock('../calendar', () => {
     range: { from?: Date; to?: Date } | undefined;
     onRangeChange: (r: { from?: Date; to?: Date } | undefined) => void;
   }) {
+    mockCalendarRangeSpy(range);
+
     const handleClick = (day: number) => {
       const date = new Date(2026, 1, day);
 
@@ -150,6 +153,7 @@ describe('CalendarPanel', () => {
     applyRange.mockClear();
     onPresetSave.mockClear();
     setText.mockClear();
+    mockCalendarRangeSpy.mockClear();
     mockUseDateRangePickerContext.mockReturnValue(
       makeContext([DATE_TYPE_ABSOLUTE, DATE_TYPE_ABSOLUTE])
     );
@@ -243,6 +247,25 @@ describe('CalendarPanel', () => {
       expect(setText).toHaveBeenCalledWith(
         formatDateRange(feb2026(20, 0, 0), feb2026(20, 23, 59, 59, 999))
       );
+    });
+  });
+
+  describe('invalid range', () => {
+    it('leaves the calendar unselected when the range is invalid', () => {
+      // End date in the future
+      mockUseDateRangePickerContext.mockReturnValue({
+        ...makeContext([DATE_TYPE_ABSOLUTE, DATE_TYPE_NOW]),
+        timeRange: {
+          startDate: feb2026(20, 0, 0),
+          endDate: feb2026(15, 23, 59, 59, 999),
+          type: [DATE_TYPE_ABSOLUTE, DATE_TYPE_NOW] as [string, string],
+          isInvalid: true,
+        },
+      });
+
+      renderWithEuiTheme(<CalendarPanel />);
+
+      expect(mockCalendarRangeSpy).toHaveBeenLastCalledWith(undefined);
     });
   });
 
