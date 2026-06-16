@@ -21,7 +21,7 @@ export interface RuleDataSnapshotConfig {
  */
 export const DEFAULT_RULE_DATA_SNAPSHOT_CONFIG: Required<RuleDataSnapshotConfig> = {
   bucket: 'security-ai-datasets',
-  basePath: 'rule-data/2026-06-05',
+  basePath: 'rule-data/2026-06-16',
   snapshotName: 'security-ai-rules-v1',
 };
 
