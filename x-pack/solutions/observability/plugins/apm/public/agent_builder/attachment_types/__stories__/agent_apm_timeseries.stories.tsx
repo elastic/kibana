@@ -51,9 +51,7 @@ const latencyValues: Array<number | null> = [
 ];
 
 // Error rate (0–100 %): mostly low, brief burst
-const errorRateValues: Array<number | null> = [
-  1, 1, 2, 1, 5, 12, 18, 25, 20, 10, 3, 1, 1,
-];
+const errorRateValues: Array<number | null> = [1, 1, 2, 1, 5, 12, 18, 25, 20, 10, 3, 1, 1];
 
 // Throughput: stable
 const throughputValues: Array<number | null> = [
@@ -62,7 +60,18 @@ const throughputValues: Array<number | null> = [
 
 // Sparse data: nulls in the middle
 const sparseValues: Array<number | null> = [
-  null, null, 200, 210, null, null, 250, 240, null, 230, null, null,
+  null,
+  null,
+  200,
+  210,
+  null,
+  null,
+  250,
+  240,
+  null,
+  230,
+  null,
+  null,
 ];
 
 // All null — should trigger the "no data" fallback
