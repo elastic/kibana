@@ -14,6 +14,11 @@ tags:
 
 triggers:
   - type: manual
+    inputs:
+      properties:
+        connector_id:
+          type: string
+          default: ".anthropic-claude-4.5-haiku-chat_completion"
 
 steps:
 
@@ -21,7 +26,7 @@ steps:
   - name: gather
     type: ai.agent
     agent-id: sigevents.investigation.gather
-    connector-id: ".anthropic-claude-4.5-haiku-chat_completion"
+    connector-id: '{{ inputs.connector_id }}'
     with:
       timeout: 360s
       message: |
@@ -99,7 +104,7 @@ steps:
   - name: review
     type: ai.agent
     agent-id: sigevents.investigation.review
-    connector-id: ".anthropic-claude-4.5-haiku-chat_completion"
+    connector-id: '{{ inputs.connector_id }}'
     with:
       timeout: 180s
       message: |

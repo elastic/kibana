@@ -20,6 +20,11 @@ tags:
 
 triggers:
   - type: manual
+    inputs:
+      properties:
+        connector_id:
+          type: string
+          default: ".anthropic-claude-4.5-haiku-chat_completion"
 
 steps:
 
@@ -27,7 +32,7 @@ steps:
   - name: build_context
     type: ai.agent
     agent-id: sigevents.investigation.context
-    connector-id: ".anthropic-claude-4.5-haiku-chat_completion"
+    connector-id: '{{ inputs.connector_id }}'
     create-conversation: true
     with:
       timeout: 180s
@@ -40,24 +45,31 @@ steps:
         - Metrics: {{ inputs.stream_names[2] }}
         Event metadata: {{ inputs | json }}
 
-        Before generating hypotheses, run exploratory queries across all three streams.
-        Check every stream — depending on the fault, the strongest signal may be in metrics,
-        logs, or traces. Don't assume a particular kind of fault up front.
+        Before generating hypotheses, do a thorough investigation using observability tools
+        in this order:
+        1. `get_service_topology` — map the call graph (who calls whom). This is mandatory:
+           you cannot reason about root cause vs victim without knowing call direction.
+        2. `get_services` — list all services with error rates and latency to identify which are anomalous.
+        3. `get_trace_metrics` — get per-service latency percentiles to see where latency originates.
+        4. `get_log_change_points` or `get_metric_change_points` — find what changed and when;
+           the service whose metrics changed first is a stronger root cause candidate.
+        5. ES|QL STATS queries — to quantify specific anomalies (use the streams listed above).
 
-        Key principles from observability investigation:
+        Key principles:
 
-        - Many problems originate in one service but surface as errors or latency spikes
-          in its callers. Check dependencies early: a service with high error rates may
-          be a downstream victim of a failing dependency, not the root cause itself.
-        - A fault may surface as degraded latency rather than hard errors, and in any stream —
-          check logs, traces, and metrics for the suspected service before concluding "no signal".
-        - A service having errors is a symptom, not a root cause. Investigate WHY it has
-          errors — which of its dependencies are healthy vs unhealthy?
-        - Match claims to evidence depth. Evidence from a caller's perspective does not
-          by itself tell you about the dependency's internal state.
+        - A service is a VICTIM (not root cause) if its degradation fully matches the pattern
+          of a dependency it calls: errors start when the dependency started failing, error types
+          match the dependency's failure mode.
+        - Separate an independent fault from load amplification: a component can show elevated
+          load simply because a neighbor changed. Don't attribute root cause to it on load alone —
+          confirm it has a fault of its own that the load doesn't explain.
+        - Look for the component whose anomaly is NOT explained by upstream or downstream effects.
+        - The cause may surface in any signal (logs, traces, or metrics) and may be of any kind —
+          a code or config change, a dependency failure, a resource problem, bad data, etc.
+          Don't presuppose the failure mode; follow the evidence.
 
         Generate up to 5 targeted hypotheses ordered by prior confidence (highest first).
-        Each hypothesis should name a specific mechanism, not just a symptom.
+        Each hypothesis should name a specific service AND a specific mechanism.
         Fewer strong hypotheses beat many weak ones.
       schema:
         type: object
@@ -113,6 +125,7 @@ steps:
         hypothesis: "${{ steps.build_context.output.structured_output.hypotheses[0] }}"
         context_summary: "{{ steps.build_context.output.structured_output.context_summary }}"
         stream_names: "${{ inputs.stream_names }}"
+        connector_id: "{{ inputs.connector_id }}"
 
   - name: launch_1
     type: workflow.executeAsync
@@ -123,6 +136,7 @@ steps:
         hypothesis: "${{ steps.build_context.output.structured_output.hypotheses[1] }}"
         context_summary: "{{ steps.build_context.output.structured_output.context_summary }}"
         stream_names: "${{ inputs.stream_names }}"
+        connector_id: "{{ inputs.connector_id }}"
 
   - name: launch_2
     type: workflow.executeAsync
@@ -133,6 +147,7 @@ steps:
         hypothesis: "${{ steps.build_context.output.structured_output.hypotheses[2] }}"
         context_summary: "{{ steps.build_context.output.structured_output.context_summary }}"
         stream_names: "${{ inputs.stream_names }}"
+        connector_id: "{{ inputs.connector_id }}"
 
   - name: launch_3
     type: workflow.executeAsync
@@ -143,6 +158,7 @@ steps:
         hypothesis: "${{ steps.build_context.output.structured_output.hypotheses[3] }}"
         context_summary: "{{ steps.build_context.output.structured_output.context_summary }}"
         stream_names: "${{ inputs.stream_names }}"
+        connector_id: "{{ inputs.connector_id }}"
 
   - name: launch_4
     type: workflow.executeAsync
@@ -153,6 +169,7 @@ steps:
         hypothesis: "${{ steps.build_context.output.structured_output.hypotheses[4] }}"
         context_summary: "{{ steps.build_context.output.structured_output.context_summary }}"
         stream_names: "${{ inputs.stream_names }}"
+        connector_id: "{{ inputs.connector_id }}"
 
   # ── Step 3: Initialize result variables (null for skipped hypotheses) ─────────
   - name: init_hyp_results
@@ -372,7 +389,7 @@ steps:
   - name: synthesize
     type: ai.agent
     agent-id: sigevents.investigation.synthesis
-    connector-id: ".anthropic-claude-4.5-haiku-chat_completion"
+    connector-id: '{{ inputs.connector_id }}'
     create-conversation: true
     with:
       timeout: 180s
@@ -530,7 +547,7 @@ steps:
       - name: build_context_r2
         type: ai.agent
         agent-id: sigevents.investigation.context
-        connector-id: ".anthropic-claude-4.5-haiku-chat_completion"
+        connector-id: '{{ inputs.connector_id }}'
         create-conversation: true
         with:
           timeout: 180s
@@ -598,6 +615,7 @@ steps:
             hypothesis: "${{ steps.build_context_r2.output.structured_output.hypotheses[0] }}"
             context_summary: "{{ steps.build_context_r2.output.structured_output.context_summary }}"
             stream_names: "${{ inputs.stream_names }}"
+        connector_id: "{{ inputs.connector_id }}"
 
       - name: launch_1_r2
         type: workflow.executeAsync
@@ -608,6 +626,7 @@ steps:
             hypothesis: "${{ steps.build_context_r2.output.structured_output.hypotheses[1] }}"
             context_summary: "{{ steps.build_context_r2.output.structured_output.context_summary }}"
             stream_names: "${{ inputs.stream_names }}"
+        connector_id: "{{ inputs.connector_id }}"
 
       - name: launch_2_r2
         type: workflow.executeAsync
@@ -618,6 +637,7 @@ steps:
             hypothesis: "${{ steps.build_context_r2.output.structured_output.hypotheses[2] }}"
             context_summary: "{{ steps.build_context_r2.output.structured_output.context_summary }}"
             stream_names: "${{ inputs.stream_names }}"
+        connector_id: "{{ inputs.connector_id }}"
 
       - name: launch_3_r2
         type: workflow.executeAsync
@@ -628,6 +648,7 @@ steps:
             hypothesis: "${{ steps.build_context_r2.output.structured_output.hypotheses[3] }}"
             context_summary: "{{ steps.build_context_r2.output.structured_output.context_summary }}"
             stream_names: "${{ inputs.stream_names }}"
+        connector_id: "{{ inputs.connector_id }}"
 
       - name: launch_4_r2
         type: workflow.executeAsync
@@ -638,6 +659,7 @@ steps:
             hypothesis: "${{ steps.build_context_r2.output.structured_output.hypotheses[4] }}"
             context_summary: "{{ steps.build_context_r2.output.structured_output.context_summary }}"
             stream_names: "${{ inputs.stream_names }}"
+        connector_id: "{{ inputs.connector_id }}"
 
       - name: init_hyp_results_r2
         type: data.set
@@ -850,7 +872,7 @@ steps:
       - name: synthesize_r2
         type: ai.agent
         agent-id: sigevents.investigation.synthesis
-        connector-id: ".anthropic-claude-4.5-haiku-chat_completion"
+        connector-id: '{{ inputs.connector_id }}'
         create-conversation: true
         with:
           timeout: 180s
@@ -988,7 +1010,7 @@ steps:
       - name: build_context_r3
         type: ai.agent
         agent-id: sigevents.investigation.context
-        connector-id: ".anthropic-claude-4.5-haiku-chat_completion"
+        connector-id: '{{ inputs.connector_id }}'
         create-conversation: true
         with:
           timeout: 180s
@@ -1058,6 +1080,7 @@ steps:
             hypothesis: "${{ steps.build_context_r3.output.structured_output.hypotheses[0] }}"
             context_summary: "{{ steps.build_context_r3.output.structured_output.context_summary }}"
             stream_names: "${{ inputs.stream_names }}"
+        connector_id: "{{ inputs.connector_id }}"
 
       - name: launch_1_r3
         type: workflow.executeAsync
@@ -1068,6 +1091,7 @@ steps:
             hypothesis: "${{ steps.build_context_r3.output.structured_output.hypotheses[1] }}"
             context_summary: "{{ steps.build_context_r3.output.structured_output.context_summary }}"
             stream_names: "${{ inputs.stream_names }}"
+        connector_id: "{{ inputs.connector_id }}"
 
       - name: launch_2_r3
         type: workflow.executeAsync
@@ -1078,6 +1102,7 @@ steps:
             hypothesis: "${{ steps.build_context_r3.output.structured_output.hypotheses[2] }}"
             context_summary: "{{ steps.build_context_r3.output.structured_output.context_summary }}"
             stream_names: "${{ inputs.stream_names }}"
+        connector_id: "{{ inputs.connector_id }}"
 
       - name: launch_3_r3
         type: workflow.executeAsync
@@ -1088,6 +1113,7 @@ steps:
             hypothesis: "${{ steps.build_context_r3.output.structured_output.hypotheses[3] }}"
             context_summary: "{{ steps.build_context_r3.output.structured_output.context_summary }}"
             stream_names: "${{ inputs.stream_names }}"
+        connector_id: "{{ inputs.connector_id }}"
 
       - name: launch_4_r3
         type: workflow.executeAsync
@@ -1098,6 +1124,7 @@ steps:
             hypothesis: "${{ steps.build_context_r3.output.structured_output.hypotheses[4] }}"
             context_summary: "{{ steps.build_context_r3.output.structured_output.context_summary }}"
             stream_names: "${{ inputs.stream_names }}"
+        connector_id: "{{ inputs.connector_id }}"
 
       - name: init_hyp_results_r3
         type: data.set
@@ -1310,7 +1337,7 @@ steps:
       - name: synthesize_r3
         type: ai.agent
         agent-id: sigevents.investigation.synthesis
-        connector-id: ".anthropic-claude-4.5-haiku-chat_completion"
+        connector-id: '{{ inputs.connector_id }}'
         create-conversation: true
         with:
           timeout: 180s

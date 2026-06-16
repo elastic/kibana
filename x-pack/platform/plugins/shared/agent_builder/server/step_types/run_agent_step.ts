@@ -110,6 +110,11 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
             message: outputMessage,
             structured_output: round.response.structured_output,
             ...(outputConversationId && { conversation_id: outputConversationId }),
+            usage: {
+              input_tokens: round.model_usage?.input_tokens ?? 0,
+              output_tokens: round.model_usage?.output_tokens ?? 0,
+              llm_calls: round.model_usage?.llm_calls ?? 0,
+            },
           },
         };
       } catch (error) {

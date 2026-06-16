@@ -8,12 +8,48 @@
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { BuiltInAgentDefinition } from '@kbn/agent-builder-server/agents';
 import { platformCoreTools, platformStreamsSigEventsTools } from '@kbn/agent-builder-common/tools';
-import { OBSERVABILITY_GET_LOGS_TOOL_ID, OBSERVABILITY_GET_INDEX_INFO_TOOL_ID } from '../discovery/constants';
+import {
+  OBSERVABILITY_GET_LOGS_TOOL_ID,
+  OBSERVABILITY_GET_INDEX_INFO_TOOL_ID,
+  OBSERVABILITY_GET_SERVICE_TOPOLOGY_TOOL_ID,
+  OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
+  OBSERVABILITY_GET_LOG_CHANGE_POINTS_TOOL_ID,
+  OBSERVABILITY_GET_TRACES_TOOL_ID,
+  OBSERVABILITY_GET_LOG_GROUPS_TOOL_ID,
+  OBSERVABILITY_GET_SERVICES_TOOL_ID,
+  OBSERVABILITY_GET_HOSTS_TOOL_ID,
+  OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
+  OBSERVABILITY_RUN_LOG_RATE_ANALYSIS_TOOL_ID,
+  OBSERVABILITY_GET_ALERTS_TOOL_ID,
+  OBSERVABILITY_GET_METRIC_CHANGE_POINTS_TOOL_ID,
+  OBSERVABILITY_GET_TRACE_CHANGE_POINTS_TOOL_ID,
+  OBSERVABILITY_GET_RUNTIME_METRICS_TOOL_ID,
+  OBSERVABILITY_GET_APM_CORRELATIONS_TOOL_ID,
+} from '../discovery/constants';
 
 export const SIGEVENTS_INVESTIGATION_CONTEXT_AGENT_ID = 'sigevents.investigation.context';
 export const SIGEVENTS_INVESTIGATION_GATHER_AGENT_ID = 'sigevents.investigation.gather';
 export const SIGEVENTS_INVESTIGATION_REVIEW_AGENT_ID = 'sigevents.investigation.review';
 export const SIGEVENTS_INVESTIGATION_SYNTHESIS_AGENT_ID = 'sigevents.investigation.synthesis';
+
+const ALL_OBSERVABILITY_TOOL_IDS = [
+  OBSERVABILITY_GET_LOGS_TOOL_ID,
+  OBSERVABILITY_GET_INDEX_INFO_TOOL_ID,
+  OBSERVABILITY_GET_SERVICE_TOPOLOGY_TOOL_ID,
+  OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
+  OBSERVABILITY_GET_LOG_CHANGE_POINTS_TOOL_ID,
+  OBSERVABILITY_GET_TRACES_TOOL_ID,
+  OBSERVABILITY_GET_LOG_GROUPS_TOOL_ID,
+  OBSERVABILITY_GET_SERVICES_TOOL_ID,
+  OBSERVABILITY_GET_HOSTS_TOOL_ID,
+  OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
+  OBSERVABILITY_RUN_LOG_RATE_ANALYSIS_TOOL_ID,
+  OBSERVABILITY_GET_ALERTS_TOOL_ID,
+  OBSERVABILITY_GET_METRIC_CHANGE_POINTS_TOOL_ID,
+  OBSERVABILITY_GET_TRACE_CHANGE_POINTS_TOOL_ID,
+  OBSERVABILITY_GET_RUNTIME_METRICS_TOOL_ID,
+  OBSERVABILITY_GET_APM_CORRELATIONS_TOOL_ID,
+] as const;
 
 const investigationContextAgent = {
   id: SIGEVENTS_INVESTIGATION_CONTEXT_AGENT_ID,
@@ -23,14 +59,18 @@ const investigationContextAgent = {
     'root cause hypotheses with prior confidence scores.',
   labels: ['observability', 'streams', 'significant-events', 'investigation', 'context'],
   configuration: {
-    skill_ids: ['significant-events-memory', 'significant-events-investigation-context'],
+    skill_ids: [
+      'significant-events-memory',
+      'significant-events-investigation-context',
+      'observability.investigation',
+    ],
     tools: [
       {
         tool_ids: [
           platformStreamsSigEventsTools.searchKnowledgeIndicators,
           platformCoreTools.executeEsql,
           platformCoreTools.generateEsql,
-          OBSERVABILITY_GET_INDEX_INFO_TOOL_ID,
+          ...ALL_OBSERVABILITY_TOOL_IDS,
         ],
       },
     ],
@@ -45,15 +85,18 @@ const investigationGatherAgent = {
     'tools. Does not render a verdict — records what was found and what was blocked.',
   labels: ['observability', 'streams', 'significant-events', 'investigation', 'gather'],
   configuration: {
-    skill_ids: ['significant-events-memory', 'significant-events-investigation-gather'],
+    skill_ids: [
+      'significant-events-memory',
+      'significant-events-investigation-gather',
+      'observability.investigation',
+    ],
     tools: [
       {
         tool_ids: [
           platformStreamsSigEventsTools.searchKnowledgeIndicators,
           platformCoreTools.executeEsql,
           platformCoreTools.generateEsql,
-          OBSERVABILITY_GET_INDEX_INFO_TOOL_ID,
-          OBSERVABILITY_GET_LOGS_TOOL_ID,
+          ...ALL_OBSERVABILITY_TOOL_IDS,
         ],
       },
     ],
