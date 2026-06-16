@@ -235,11 +235,20 @@ export const WorkflowStepMinimap = ({
     };
 
     update();
+    // Retry once after a short delay: getVisibleRanges() can return [] on the first
+    // call if Monaco hasn't finished its initial layout pass yet.
+    const retryTimer = setTimeout(update, 150);
+
     const d1 = editor.onDidScrollChange(update);
     const d2 = editor.onDidLayoutChange(update);
+    // Cursor movement fires without a scroll (e.g. clicking a step in the minimap),
+    // so we need this to keep the viewport indicator in sync in those cases.
+    const d3 = editor.onDidChangeCursorPosition(update);
     return () => {
+      clearTimeout(retryTimer);
       d1.dispose();
       d2.dispose();
+      d3.dispose();
     };
     // Re-subscribe when steps first appear (editor is guaranteed mounted by then)
     // eslint-disable-next-line react-hooks/exhaustive-deps
