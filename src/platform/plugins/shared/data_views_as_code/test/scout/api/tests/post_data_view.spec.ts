@@ -7,18 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { apiTest, tags, type RoleApiCredentials } from '@kbn/scout';
+import { apiTest, tags, type KibanaRole, type RoleApiCredentials } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { BASE_PATH, COMMON_HEADERS } from '../fixtures/constants';
 
+const INDEX_PATTERNS_READ_ROLE: KibanaRole = {
+  elasticsearch: {
+    cluster: [],
+  },
+  kibana: [
+    {
+      base: [],
+      feature: { indexPatterns: ['read'] },
+      spaces: ['*'],
+    },
+  ],
+};
+
 apiTest.describe('POST /api/data_views - as code', { tag: tags.deploymentAgnostic }, () => {
   let adminApiCredentials: RoleApiCredentials;
+  let readOnlyApiCredentials: RoleApiCredentials;
 
   // Track created data view IDs so we can clean them up
   const createdIds: string[] = [];
 
   apiTest.beforeAll(async ({ requestAuth }) => {
     adminApiCredentials = await requestAuth.getApiKeyForAdmin();
+    readOnlyApiCredentials = await requestAuth.getApiKeyForCustomRole(INDEX_PATTERNS_READ_ROLE);
   });
 
   apiTest.afterAll(async ({ apiServices }) => {
@@ -52,7 +67,6 @@ apiTest.describe('POST /api/data_views - as code', { tag: tags.deploymentAgnosti
     expect(response.body.id).toBe(uniqueId);
     expect(response.body.data).toMatchObject({
       index_pattern: 'logs-*',
-      id: uniqueId,
     });
     expect(response.body.meta.managed).toBe(false);
     expect(response.body.meta.version).toBeDefined();
@@ -84,7 +98,6 @@ apiTest.describe('POST /api/data_views - as code', { tag: tags.deploymentAgnosti
       expect(response.body.id).toBe(uniqueId);
       expect(response.body.data).toMatchObject({
         index_pattern: 'metrics-*',
-        id: uniqueId,
         name: 'My Metrics View',
         time_field: 'timestamp',
       });
@@ -110,6 +123,25 @@ apiTest.describe('POST /api/data_views - as code', { tag: tags.deploymentAgnosti
     expect(response.body.id).toBeDefined();
     expect(response.body.data.index_pattern).toBe('events-*');
   });
+
+  apiTest(
+    'returns 403 when user has indexPatterns read privilege but not manage privilege',
+    async ({ apiClient }) => {
+      const response = await apiClient.post(BASE_PATH, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...readOnlyApiCredentials.apiKeyHeader,
+        },
+        body: {
+          id: `dv-create-no-manage-${Date.now()}-${Math.random()}`,
+          index_pattern: 'forbidden-*',
+        },
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(403);
+    }
+  );
 
   apiTest('returns 400 when index_pattern is missing', async ({ apiClient }) => {
     const response = await apiClient.post(BASE_PATH, {
@@ -174,7 +206,8 @@ apiTest.describe('POST /api/data_views - as code', { tag: tags.deploymentAgnosti
     });
 
     expect(duplicateResponse).toHaveStatusCode(400);
-    expect(duplicateResponse.body.message).toContain('Duplicate data view');
+    expect(duplicateResponse.body.message).toContain(uniqueId);
+    expect(duplicateResponse.body.message.toLowerCase()).toContain('conflict');
   });
 
   apiTest('returns 400 when creating a data view with a duplicate name', async ({ apiClient }) => {
