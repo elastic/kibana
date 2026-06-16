@@ -8,6 +8,14 @@
  */
 
 export {
+  MAX_CONSOLE_LOG_COUNT,
+  SCRIPT_EXECUTION_TIMEOUT_MS,
+  SCRIPT_EXECUTION_TIMEOUT_SECONDS,
+  SCRIPT_MAX_LENGTH_CHARS,
+  SCRIPT_MAX_LENGTH_MB,
+  SCRIPT_MEMORY_LIMIT_MB,
+  SCRIPT_TEMPLATE_MAX_CHARS,
+  SCRIPT_TEMPLATE_MAX_KB,
   ScriptsJavaScriptStepTypeId,
   scriptsJavaScriptStepCommonDefinition,
   type ScriptsJavaScriptStepConfigSchema,

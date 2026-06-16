@@ -60,13 +60,13 @@ jest.mock('isolated-vm', () => {
 });
 
 import { executeScriptInIsolate } from '.';
-import type { StepHandlerContext } from '../../../step_registry/types';
 import {
   MAX_CONSOLE_LOG_COUNT,
   SCRIPT_EXECUTION_TIMEOUT_MS,
   SCRIPT_MEMORY_LIMIT_MB,
-  scriptsJavaScriptStepDefinition,
-} from '../javascript_step';
+} from '../../../../common/steps/javascript';
+import type { StepHandlerContext } from '../../../step_registry/types';
+import { scriptsJavaScriptStepDefinition } from '../javascript_step';
 
 const createLogger = (): ScriptLogger & {
   debug: jest.Mock;
@@ -175,7 +175,7 @@ describe('scriptsJavaScriptStepDefinition catastrophic OOM handling', () => {
       logger: createLogger(),
       abortSignal: new AbortController().signal,
       stepId: 'test-step',
-      stepType: 'scripts.javaScript',
+      stepType: 'scripts.javascript',
     };
 
     const execution = scriptsJavaScriptStepDefinition.handler(context);

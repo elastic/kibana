@@ -8,13 +8,15 @@
  */
 
 import { executeScriptInIsolate } from './execute_script_in_isolate';
-import { scriptsJavaScriptStepCommonDefinition } from '../../../common/steps/javascript';
+import {
+  MAX_CONSOLE_LOG_COUNT,
+  SCRIPT_EXECUTION_TIMEOUT_MS,
+  SCRIPT_MAX_LENGTH_CHARS,
+  SCRIPT_MAX_LENGTH_MB,
+  SCRIPT_MEMORY_LIMIT_MB,
+  scriptsJavaScriptStepCommonDefinition,
+} from '../../../common/steps/javascript';
 import { createServerStepDefinition } from '../../step_registry/types';
-
-export const SCRIPT_MEMORY_LIMIT_MB = 8;
-export const SCRIPT_EXECUTION_TIMEOUT_MS = 1_000; // 1 second timeout for the script execution
-export const MAX_CONSOLE_LOG_COUNT = 100;
-export const SCRIPT_MAX_LENGTH_CHARS = 1 * 1024 * 1024; // 1 MB after Liquid template rendering
 
 const toExecutionError = (error: unknown, aborted: boolean): Error => {
   if (aborted) {
@@ -49,11 +51,11 @@ export const scriptsJavaScriptStepDefinition = createServerStepDefinition({
     if (script.length > SCRIPT_MAX_LENGTH_CHARS) {
       return {
         error: new Error(
-          `Script exceeds maximum allowed size of ${
-            SCRIPT_MAX_LENGTH_CHARS / 1024 / 1024
-          } MB after template rendering. Current size: ${(script.length / 1024 / 1024).toFixed(
-            2
-          )} MB. Reduce interpolated data or split the workflow.`
+          `Script exceeds maximum allowed size of ${SCRIPT_MAX_LENGTH_MB} MB after template rendering. Current size: ${(
+            script.length /
+            1024 /
+            1024
+          ).toFixed(2)} MB. Reduce interpolated data or split the workflow.`
         ),
       };
     }

@@ -13,7 +13,7 @@ import {
   MAX_CONSOLE_LOG_COUNT,
   SCRIPT_EXECUTION_TIMEOUT_MS,
   SCRIPT_MEMORY_LIMIT_MB,
-} from '../javascript_step';
+} from '../../../../common/steps/javascript';
 
 const defaultIsolateParams = {
   memoryLimitMb: SCRIPT_MEMORY_LIMIT_MB,

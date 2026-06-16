@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ScriptsJavaScriptStepTypeId } from '@kbn/workflows-extensions/common';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { isTerminalStatus } from '@kbn/workflows';
@@ -16,13 +17,13 @@ import type { WorkflowsApiService } from '../../../common/apis/workflows';
 import { waitForConditionOrThrow } from '../../../common/utils/wait_for_condition';
 import { spaceTest } from '../../fixtures';
 
-const SCRIPTS_JAVA_SCRIPT_STEP_TYPE = 'scripts.javaScript';
+const SCRIPTS_JAVA_SCRIPT_STEP_TYPE = ScriptsJavaScriptStepTypeId;
 
 const JAVASCRIPT_STEP_HARNESS_YAML = `
 version: "1"
 name: JavaScript Step — Security & Performance Test Harness
 description: |
-  Manual test workflow for the experimental scripts.javaScript step.
+  Manual test workflow for the experimental ${ScriptsJavaScriptStepTypeId} step.
   Covers happy-path execution, sandbox isolation, CPU/memory limits, and console caps.
   Requires workflowsExtensions.experimentalSteps: true (or experimentalSteps.javaScriptStep: true) in kibana.yml.
 enabled: true
@@ -39,7 +40,7 @@ triggers:
 
 steps:
   - name: func-liquid-const-mutation
-    type: scripts.javaScript
+    type: ${ScriptsJavaScriptStepTypeId}
     with:
       script: |
         var array = {{consts.array | json}}
@@ -51,14 +52,14 @@ steps:
         return array;
 
   - name: func-async-await
-    type: scripts.javaScript
+    type: ${ScriptsJavaScriptStepTypeId}
     with:
       script: |
         const value = await Promise.resolve(42);
         return value;
 
   - name: func-complex-return-value
-    type: scripts.javaScript
+    type: ${ScriptsJavaScriptStepTypeId}
     with:
       script: |
         return {
@@ -67,7 +68,7 @@ steps:
         };
 
   - name: func-cpu-baseline
-    type: scripts.javaScript
+    type: ${ScriptsJavaScriptStepTypeId}
     with:
       script: |
         let sum = 0;
@@ -77,7 +78,7 @@ steps:
         return sum;
 
   - name: sec-no-host-or-node-globals
-    type: scripts.javaScript
+    type: ${ScriptsJavaScriptStepTypeId}
     with:
       script: |
         return {
@@ -90,7 +91,7 @@ steps:
         };
 
   - name: sec-wrapper-injection
-    type: scripts.javaScript
+    type: ${ScriptsJavaScriptStepTypeId}
     on-failure:
       continue: true
     with:
@@ -98,7 +99,7 @@ steps:
         })(); return { injected: true }; (function () {
 
   - name: sec-empty-script-rejected
-    type: scripts.javaScript
+    type: ${ScriptsJavaScriptStepTypeId}
     on-failure:
       continue: true
     with:
@@ -106,7 +107,7 @@ steps:
           
 
   - name: perf-infinite-loop-timeout
-    type: scripts.javaScript
+    type: ${ScriptsJavaScriptStepTypeId}
     on-failure:
       continue: true
     with:
@@ -115,7 +116,7 @@ steps:
         while (true) {}
 
   - name: perf-memory-bomb-objects
-    type: scripts.javaScript
+    type: ${ScriptsJavaScriptStepTypeId}
     on-failure:
       continue: true
     with:
@@ -128,7 +129,7 @@ steps:
         return chunks.length;
 
   - name: perf-memory-bomb-arraybuffer
-    type: scripts.javaScript
+    type: ${ScriptsJavaScriptStepTypeId}
     on-failure:
       continue: true
     with:
@@ -138,7 +139,7 @@ steps:
         return 'should not reach here';
 
   - name: perf-console-cpu-after-cap
-    type: scripts.javaScript
+    type: ${ScriptsJavaScriptStepTypeId}
     on-failure:
       continue: true
     with:
@@ -193,7 +194,7 @@ async function waitForExecution(workflowsApi: WorkflowsApiService, executionId: 
 }
 
 spaceTest.describe(
-  'scripts.javaScript harness workflow execution',
+  `${ScriptsJavaScriptStepTypeId} harness workflow execution`,
   { tag: tags.deploymentAgnostic },
   () => {
     let workflowsApi: WorkflowsApiService;

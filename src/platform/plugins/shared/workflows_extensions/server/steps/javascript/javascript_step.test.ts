@@ -9,12 +9,13 @@
 
 import { createSHA256Hash } from '@kbn/crypto';
 import type { ScriptLogger } from './execute_script_in_isolate';
+import { scriptsJavaScriptStepDefinition } from './javascript_step';
 import {
   SCRIPT_EXECUTION_TIMEOUT_MS,
   SCRIPT_MAX_LENGTH_CHARS,
   SCRIPT_MEMORY_LIMIT_MB,
-  scriptsJavaScriptStepDefinition,
-} from './javascript_step';
+  ScriptsJavaScriptStepTypeId,
+} from '../../../common/steps/javascript';
 import type { StepHandlerContext } from '../../step_registry/types';
 
 const createLogger = (): ScriptLogger & {
@@ -44,7 +45,7 @@ const createMockContext = (
   logger: createLogger(),
   abortSignal: options?.abortSignal ?? new AbortController().signal,
   stepId: 'test-step',
-  stepType: 'scripts.javaScript',
+  stepType: ScriptsJavaScriptStepTypeId,
 });
 
 describe('scriptsJavaScriptStepDefinition', () => {

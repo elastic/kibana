@@ -13,7 +13,7 @@ import { ScriptsJavaScriptStepTypeId } from '../../common/steps/javascript';
 import { ServerStepRegistry } from '../step_registry';
 
 describe('registerInternalStepDefinitions', () => {
-  it('does not register scripts.javaScript when javaScriptStep is disabled', () => {
+  it('does not register scripts.javascript when javaScriptStep is disabled', () => {
     const registry = new ServerStepRegistry(loggerMock.create());
 
     registerInternalStepDefinitions(registry, {
@@ -23,7 +23,7 @@ describe('registerInternalStepDefinitions', () => {
     expect(registry.has(ScriptsJavaScriptStepTypeId)).toBe(false);
   });
 
-  it('registers scripts.javaScript when javaScriptStep is enabled', () => {
+  it('registers scripts.javascript when javaScriptStep is enabled', () => {
     const registry = new ServerStepRegistry(loggerMock.create());
 
     registerInternalStepDefinitions(registry, {

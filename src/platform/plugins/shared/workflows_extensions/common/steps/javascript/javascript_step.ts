@@ -12,11 +12,19 @@ import { StepCategory } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '../../step_registry/types';
 
-export const ScriptsJavaScriptStepTypeId = 'scripts.javaScript' as const;
+export const ScriptsJavaScriptStepTypeId = 'scripts.javascript' as const;
 
 export const ConfigSchema = z.object({});
 
 export const SCRIPT_TEMPLATE_MAX_CHARS = 1024 * 32; // 32 KB template in workflow YAML
+export const SCRIPT_MAX_LENGTH_CHARS = 1 * 1024 * 1024; // 1 MB after Liquid template rendering
+export const SCRIPT_MEMORY_LIMIT_MB = 8;
+export const SCRIPT_EXECUTION_TIMEOUT_MS = 1_000;
+export const MAX_CONSOLE_LOG_COUNT = 100;
+
+export const SCRIPT_TEMPLATE_MAX_KB = SCRIPT_TEMPLATE_MAX_CHARS / 1024;
+export const SCRIPT_MAX_LENGTH_MB = SCRIPT_MAX_LENGTH_CHARS / 1024 / 1024;
+export const SCRIPT_EXECUTION_TIMEOUT_SECONDS = SCRIPT_EXECUTION_TIMEOUT_MS / 1_000;
 
 export const InputSchema = z.object({
   script: z.string().max(SCRIPT_TEMPLATE_MAX_CHARS),
@@ -51,7 +59,7 @@ Execute a JavaScript script in a sandboxed runtime and return its result to down
 
 \`\`\`yaml
 - name: compute-value
-  type: scripts.javaScript
+  type: scripts.javascript
   with:
     script: |
       return { greeting: 'Hello, World' };
@@ -61,21 +69,28 @@ Scripts run in an isolated sandbox with no runtime context object. Embed workflo
 
 \`\`\`yaml
   - name: transform
-    type: scripts.javaScript
+    type: scripts.javascript
     with:
       script: |
         const users = {{ steps.fetch_users.output | json }};
         return { label: '{{ consts.greeting }}', count: users.length };
 \`\`\`
 
-## Size limits
+## Limits
 
-- **Template (\`with.script\` in YAML):** max 32 KB — the script source as authored, including Liquid placeholders.
-- **After rendering:** max 1 MB — the script after Liquid expands \`{{ ... }}\` expressions at execution time. A short template can grow beyond 32 KB once rendered; the server rejects scripts larger than 1 MB before execution.
+| Limit | Value |
+|-------|-------|
+| Template size (\`with.script\` in YAML) | ${SCRIPT_TEMPLATE_MAX_KB} KB |
+| Rendered script size (after Liquid) | ${SCRIPT_MAX_LENGTH_MB} MB |
+| Execution timeout | ${SCRIPT_EXECUTION_TIMEOUT_SECONDS} s |
+| Isolate memory | ${SCRIPT_MEMORY_LIMIT_MB} MB |
+| \`console.*\` calls per run | ${MAX_CONSOLE_LOG_COUNT} (additional logs are dropped) |
+
+The template limit applies to the script as written in the workflow YAML (including \`{{ ... }}\` placeholders). Liquid can expand the script beyond ${SCRIPT_TEMPLATE_MAX_KB} KB at execution time; the rendered script must stay within ${SCRIPT_MAX_LENGTH_MB} MB.
 
 ## Inputs
 
-- **script** (required): JavaScript source code to execute (max 32 KB in the workflow definition; max 1 MB after template rendering).
+- **script** (required): JavaScript source code to execute (see limits above).
 
 ## Output
 
