@@ -7,18 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  DEFAULT_MAX_RETRIES,
-  DEFAULT_RETRY_DELAY_MS,
-  OCC_CONFLICT_STATUS_CODE,
-} from './src/constants';
-export { delayMs } from './src/delay';
-export { OccConflictError, isElasticsearchWriteConflict, isOccConflictError } from './src/errors';
-export { OccWriter } from './src/occ_writer';
-export type {
-  OccDocument,
-  OccMetadata,
-  OccWriteParams,
-  OccWriteResult,
-  OccWriterDeps,
-} from './src/types';
+export const delayMs = async (ms: number): Promise<void> => {
+  if (ms <= 0) {
+    return;
+  }
+  await new Promise((resolve) => setTimeout(resolve, ms));
+};

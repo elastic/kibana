@@ -8,15 +8,9 @@
  */
 
 import { DEFAULT_MAX_RETRIES, DEFAULT_RETRY_DELAY_MS } from './constants';
-import { OccConflictError, isOccConflictError } from './errors';
+import { delayMs } from './delay';
+import { OccConflictError, isElasticsearchWriteConflict } from './errors';
 import type { OccWriteParams, OccWriteResult, OccWriterDeps } from './types';
-
-const delay = async (ms: number): Promise<void> => {
-  if (ms <= 0) {
-    return;
-  }
-  await new Promise((resolve) => setTimeout(resolve, ms));
-};
 
 export class OccWriter<TSource extends object> {
   private readonly get: OccWriterDeps<TSource>['get'];
@@ -38,8 +32,16 @@ export class OccWriter<TSource extends object> {
 
     if (create) {
       const document = mutate(undefined);
-      const occ = await this.index({ id, document, create: true });
-      return { document, occ };
+      try {
+        const occ = await this.index({ id, document, create: true });
+        return { document, occ };
+      } catch (error) {
+        // `op_type: create` returns 409 when the id already exists — not an if_seq_no OCC conflict.
+        if (isElasticsearchWriteConflict(error)) {
+          throw new OccConflictError(`Document "${id}" already exists; create was rejected`);
+        }
+        throw error;
+      }
     }
 
     const maxAttempts = 1 + this.maxRetries;
@@ -61,8 +63,8 @@ export class OccWriter<TSource extends object> {
         });
         return { document, occ };
       } catch (error) {
-        if (!isOccConflictError(error) || attempt >= maxAttempts) {
-          if (isOccConflictError(error) && attempt >= maxAttempts) {
+        if (!isElasticsearchWriteConflict(error) || attempt >= maxAttempts) {
+          if (isElasticsearchWriteConflict(error) && attempt >= maxAttempts) {
             throw new OccConflictError(
               `Version conflict for document "${id}" after ${attempt} attempts`
             );
@@ -73,7 +75,7 @@ export class OccWriter<TSource extends object> {
         this.logger?.debug(
           `OCC write conflict for document "${id}", retrying (attempt ${attempt}/${maxAttempts})`
         );
-        await delay(this.retryDelayMs);
+        await delayMs(this.retryDelayMs);
       }
     }
 

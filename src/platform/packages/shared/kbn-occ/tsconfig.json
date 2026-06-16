@@ -6,5 +6,5 @@
   },
   "include": ["**/*.ts"],
   "exclude": ["target/**/*"],
-  "kbn_references": ["@kbn/core", "@kbn/es-errors", "@kbn/logging"]
+  "kbn_references": []
 }

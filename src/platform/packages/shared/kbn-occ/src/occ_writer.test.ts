@@ -49,6 +49,27 @@ describe('OccWriter', () => {
     expect(result.document).toEqual({ value: 1 });
   });
 
+  it('wraps op_type create 409 (id already exists) in OccConflictError', async () => {
+    const get = jest.fn();
+    const conflict = Object.assign(new Error('conflict'), { statusCode: 409 });
+    const index = jest.fn().mockRejectedValue(conflict);
+    const writer = createWriter({ get, index });
+
+    await expect(
+      writer.write({
+        id: 'doc-1',
+        create: true,
+        mutate: () => ({ value: 1 }),
+      })
+    ).rejects.toMatchObject({
+      name: 'OccConflictError',
+      message: 'Document "doc-1" already exists; create was rejected',
+    });
+
+    expect(get).not.toHaveBeenCalled();
+    expect(index).toHaveBeenCalledTimes(1);
+  });
+
   it('updates with if_seq_no and if_primary_term from get', async () => {
     const existing: OccDocument<TestDoc> = {
       id: 'doc-1',

@@ -9,7 +9,12 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/core/server';
-import { DEFAULT_MAX_RETRIES, DEFAULT_RETRY_DELAY_MS, OCC_CONFLICT_STATUS_CODE } from '@kbn/occ';
+import {
+  DEFAULT_MAX_RETRIES,
+  DEFAULT_RETRY_DELAY_MS,
+  delayMs,
+  OCC_CONFLICT_STATUS_CODE,
+} from '@kbn/occ';
 
 import { extractBulkItemError } from './bulk_response_helpers';
 import type { WorkflowProperties, WorkflowStorage } from '../../storage/workflow_storage';
@@ -26,13 +31,6 @@ type WorkflowStorageClient = ReturnType<WorkflowStorage['getClient']>;
 interface BulkIndexItem {
   index?: { _id?: string | null; status?: number; error?: estypes.ErrorCause };
 }
-
-const delay = async (ms: number): Promise<void> => {
-  if (ms <= 0) {
-    return;
-  }
-  await new Promise((resolve) => setTimeout(resolve, ms));
-};
 
 const toOccHit = (hit: {
   _id: string;
@@ -68,28 +66,52 @@ const buildBulkIndexOperations = (
 const refreshOccHits = async (
   client: WorkflowStorageClient,
   ids: string[]
-): Promise<OccWorkflowHit[]> => {
-  const refreshed = await Promise.all(
-    ids.map(async (id) => {
-      try {
-        const document = await client.get({ id, seq_no_primary_term: true });
-        return toOccHit({
-          _id: document._id,
-          _source: document._source as WorkflowProperties,
-          _seq_no: document._seq_no,
-          _primary_term: document._primary_term,
-        });
-      } catch {
-        return null;
-      }
-    })
-  );
+): Promise<{
+  refreshed: OccWorkflowHit[];
+  failures: Array<{ id: string; error: string }>;
+}> => {
+  if (ids.length === 0) {
+    return { refreshed: [], failures: [] };
+  }
 
-  return refreshed.filter((hit): hit is OccWorkflowHit => hit != null);
+  // Batch-read conflicted docs in one request. The storage adapter routes `get` through
+  // `search`, so an ids query preserves alias routing and source migration semantics.
+  const response = await client.search({
+    query: { ids: { values: ids } },
+    seq_no_primary_term: true,
+    size: ids.length,
+    track_total_hits: false,
+  });
+
+  const refreshed: OccWorkflowHit[] = [];
+  const failures: Array<{ id: string; error: string }> = [];
+
+  for (const hit of response.hits.hits) {
+    if (hit._id && hit._source) {
+      try {
+        refreshed.push(
+          toOccHit({
+            _id: hit._id,
+            _source: hit._source as WorkflowProperties,
+            _seq_no: hit._seq_no,
+            _primary_term: hit._primary_term,
+          })
+        );
+      } catch (error) {
+        failures.push({
+          id: hit._id,
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+    }
+  }
+
+  return { refreshed, failures };
 };
 
 /**
- * Bulk-indexes documents with per-item OCC, retrying only 409 conflicts after a fresh read.
+ * Bulk-indexes documents with per-item OCC, retrying only 409 conflicts after
+ * batched refresh via search(ids) + seq_no_primary_term.
  */
 export const bulkIndexWithOccRetry = async ({
   client,
@@ -149,13 +171,19 @@ export const bulkIndexWithOccRetry = async ({
     logger?.debug(
       `Bulk OCC conflict for ${conflictIds.length} workflow(s), retrying (attempt ${attempt}/${maxAttempts})`
     );
-    await delay(retryDelayMs);
+    await delayMs(retryDelayMs);
 
-    const refreshedHits = await refreshOccHits(client, conflictIds);
+    const { refreshed: refreshedHits, failures: refreshFailures } = await refreshOccHits(
+      client,
+      conflictIds
+    );
+    failures.push(...refreshFailures);
+
     const refreshedIds = new Set(refreshedHits.map((hit) => hit._id));
+    const failedRefreshIds = new Set(refreshFailures.map((failure) => failure.id));
 
     for (const conflictId of conflictIds) {
-      if (!refreshedIds.has(conflictId)) {
+      if (!refreshedIds.has(conflictId) && !failedRefreshIds.has(conflictId)) {
         failures.push({
           id: conflictId,
           error: `Workflow with id ${conflictId} not found during OCC retry`,

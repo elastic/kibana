@@ -18,8 +18,15 @@ export class OccConflictError extends Error {
   }
 }
 
-export const isOccConflictError = (error: unknown): error is OccConflictError => {
-  if (error instanceof OccConflictError) {
+export const isOccConflictError = (error: unknown): error is OccConflictError =>
+  error instanceof OccConflictError;
+
+/**
+ * True when an error looks like an Elasticsearch write conflict (HTTP 409),
+ * including raw client errors before they are wrapped as {@link OccConflictError}.
+ */
+export const isElasticsearchWriteConflict = (error: unknown): boolean => {
+  if (isOccConflictError(error)) {
     return true;
   }
   if (!error || typeof error !== 'object') {

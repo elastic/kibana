@@ -9,7 +9,11 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { isNotFoundError } from '@kbn/es-errors';
-import { isOccConflictError } from '@kbn/occ';
+import {
+  isElasticsearchWriteConflict,
+  isOccConflictError,
+  OCC_CONFLICT_STATUS_CODE,
+} from '@kbn/occ';
 import type {
   CreateWorkflowCommand,
   EsWorkflow,
@@ -52,18 +56,11 @@ import type { WorkflowProperties } from '../storage/workflow_storage';
 import { scheduleWorkflowTriggers } from '../task_defs/schedule_workflow_triggers';
 import { syncSchedulerAfterSave } from '../task_defs/sync_scheduler_after_save';
 
-const VERSION_CONFLICT_STATUS = 409;
 // How many times to re-resolve a server-generated ID after losing a TOCTOU race
 // against `op_type: 'create'`. The id resolver itself walks up to MAX_COLLISION_RETRIES
 // candidates per call, so the practical ceiling is far higher than this number;
 // this only bounds repeated round-trips when many concurrent writers share a base ID.
 const TOCTOU_MAX_RETRIES = 5;
-
-const isVersionConflictError = (error: unknown): boolean => {
-  if (!error || typeof error !== 'object') return false;
-  const e = error as { statusCode?: number; meta?: { statusCode?: number } };
-  return e.statusCode === VERSION_CONFLICT_STATUS || e.meta?.statusCode === VERSION_CONFLICT_STATUS;
-};
 
 export interface VersionedWorkflowDocument {
   source: WorkflowProperties;
@@ -78,6 +75,11 @@ export interface IndexWorkflowDocumentOptions {
 }
 
 export class WorkflowCrudService {
+  private readonly occWritersByCacheKey = new Map<
+    string,
+    ReturnType<typeof createWorkflowOccWriter>
+  >();
+
   constructor(private readonly deps: WorkflowCrudDeps) {}
 
   async getWorkflowDocumentSource(
@@ -153,16 +155,27 @@ export class WorkflowCrudService {
     return { seqNo: response._seq_no, primaryTerm: response._primary_term };
   }
 
+  private getOccWriter(spaceId: string, maxRetries?: number) {
+    const cacheKey = `${spaceId}:${maxRetries ?? 'default'}`;
+    let writer = this.occWritersByCacheKey.get(cacheKey);
+    if (!writer) {
+      writer = createWorkflowOccWriter({
+        crudService: this,
+        spaceId,
+        logger: this.deps.logger,
+        maxRetries,
+      });
+      this.occWritersByCacheKey.set(cacheKey, writer);
+    }
+    return writer;
+  }
+
   async writeWorkflowDocument(
     id: string,
     spaceId: string,
     params: WriteWorkflowDocumentParams
   ): Promise<WorkflowProperties> {
-    const writer = createWorkflowOccWriter({
-      crudService: this,
-      spaceId,
-      logger: this.deps.logger,
-    });
+    const writer = this.getOccWriter(spaceId, params.maxRetries);
 
     try {
       const { document } = await writer.write({
@@ -516,7 +529,7 @@ export class WorkflowCrudService {
           created.push(transformStorageDocumentToWorkflowDto(entry.id, entry.workflowData));
           successfullyWritten.push(entry);
         } else {
-          const isVersionConflict = operation.status === VERSION_CONFLICT_STATUS;
+          const isVersionConflict = operation.status === OCC_CONFLICT_STATUS_CODE;
           const canRetry = isVersionConflict && entry.idSource === 'server-generated';
 
           if (canRetry && attempt < TOCTOU_MAX_RETRIES) {
@@ -810,7 +823,7 @@ export class WorkflowCrudService {
         await this.indexWorkflowDocument(id, document, { create: true });
         return id;
       } catch (error) {
-        if (!isVersionConflictError(error)) {
+        if (!isElasticsearchWriteConflict(error)) {
           throw error;
         }
         if (isUserSupplied) {

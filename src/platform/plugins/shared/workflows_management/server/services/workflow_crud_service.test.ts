@@ -1135,5 +1135,78 @@ describe('WorkflowCrudService', () => {
 
       expect(client.index.mock.calls[0][0].document.lastUpdatedBy).toBe('alice');
     });
+
+    it('retries after a version conflict and merges against a fresh read', async () => {
+      const { deps, client } = makeDeps();
+      client.search
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [
+              {
+                _id: 'wf-1',
+                _source: makeSource({ name: 'Before', tags: ['t1'] }),
+                _seq_no: 5,
+                _primary_term: 1,
+              },
+            ],
+          },
+        })
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [
+              {
+                _id: 'wf-1',
+                _source: makeSource({ name: 'Concurrent Name', tags: ['t1'] }),
+                _seq_no: 8,
+                _primary_term: 1,
+              },
+            ],
+          },
+        });
+
+      const conflict = Object.assign(new Error('version conflict'), {
+        statusCode: 409,
+        meta: { statusCode: 409 },
+      });
+      client.index
+        .mockRejectedValueOnce(conflict)
+        .mockResolvedValueOnce({ result: 'updated', _seq_no: 9, _primary_term: 1 });
+
+      const service = new WorkflowCrudService(deps);
+      const result = await service.updateWorkflow(
+        'wf-1',
+        { tags: ['t1', 't2'] } as any,
+        'default',
+        request
+      );
+
+      expect(result.id).toBe('wf-1');
+      expect(client.search).toHaveBeenCalledTimes(2);
+      expect(client.search.mock.calls[0][0]).toEqual(
+        expect.objectContaining({ seq_no_primary_term: true })
+      );
+      expect(client.index).toHaveBeenCalledTimes(2);
+      expect(client.index).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          id: 'wf-1',
+          if_seq_no: 5,
+          if_primary_term: 1,
+        })
+      );
+      expect(client.index).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          id: 'wf-1',
+          if_seq_no: 8,
+          if_primary_term: 1,
+          document: expect.objectContaining({
+            name: 'Concurrent Name',
+            tags: ['t1', 't2'],
+            lastUpdatedBy: 'alice',
+          }),
+        })
+      );
+    });
   });
 });

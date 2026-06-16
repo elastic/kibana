@@ -169,7 +169,7 @@ const operations = hits.hits.hits.map((hit) => ({
 
 let bulkResponse = await client.bulk({ operations, refresh: true });
 
-// 3. Retry only 409 items: mget fresh seq_no, re-mutate, bulk again
+// 3. Retry only 409 items: mget fresh seq_no (raw ES), re-mutate, bulk again
 const conflictIds = bulkResponse.items
   .filter((item) => item.index?.status === 409)
   .map((item) => item.index!._id!);
@@ -179,6 +179,8 @@ if (conflictIds.length > 0) {
   // rebuild operations from fresh docs + same mutate, bulk retry (cap attempts)
 }
 ```
+
+**Storage-adapter consumers:** batch conflict refreshes via `search({ query: { ids: { values: conflictIds } }, seq_no_primary_term: true, size: conflictIds.length })` instead of `mget` — see `bulk_occ_index.ts` in workflows_management.
 
 **Rule of thumb:** reuse `OccWriter` when the set is small or conflicts are rare; use **bulk + conflict subset retry** when you process hundreds/thousands per request. `@kbn/occ` does not ship a bulk helper yet — both patterns compose the same primitives (`get` with `seq_no_primary_term`, `index` with `if_seq_no` / `if_primary_term`).
 
@@ -197,14 +199,14 @@ await esClient.bulk({
 Use `op_type: create` for “must not exist”, but handle TOCTOU separately (e.g. resolve a new id and retry).
 
 ```typescript
-// create path: single attempt, no conflict retry
+// create path: single attempt; 409 means id already exists (not if_seq_no OCC)
 await writer.write({
   id: candidateId,
   create: true,
   mutate: () => buildNewWorkflowDocument(),
 });
 
-// For id-collision races, catch 409 and pick another id at the call site — not inside OccWriter
+// For id-collision races, catch OccConflictError at the call site — not retried inside OccWriter
 ```
 
 ### Scripted partial updates — no full-document merge in app code
@@ -224,6 +226,7 @@ await esClient.update({
 
 - On conflict, the **entire** `mutate` runs again against a fresh read — keep `mutate` pure with respect to the passed `existing` source.
 - After retries are exhausted, `OccConflictError` (409) is thrown; map it to your domain error at the call site if needed.
+- Use `isOccConflictError` after `OccWriter` (strict `instanceof`). Use `isElasticsearchWriteConflict` for raw ES/client errors before wrapping.
 - Domain logic (validation, version counters, history logging) stays outside this package.
 
 ## Usage

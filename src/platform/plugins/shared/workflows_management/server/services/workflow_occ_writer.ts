@@ -8,12 +8,13 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { OccConflictError, OccWriter } from '@kbn/occ';
+import { OccWriter } from '@kbn/occ';
 import type { WorkflowCrudService } from './workflow_crud_service';
 import type { WorkflowProperties } from '../storage/workflow_storage';
 
 export interface WriteWorkflowDocumentParams {
   create?: boolean;
+  maxRetries?: number;
   mutate: (existing: WorkflowProperties | undefined) => WorkflowProperties;
 }
 
@@ -21,10 +22,12 @@ export const createWorkflowOccWriter = ({
   crudService,
   spaceId,
   logger,
+  maxRetries,
 }: {
   crudService: WorkflowCrudService;
   spaceId: string;
   logger: Logger;
+  maxRetries?: number;
 }): OccWriter<WorkflowProperties> =>
   new OccWriter<WorkflowProperties>({
     get: async (id) => {
@@ -41,6 +44,5 @@ export const createWorkflowOccWriter = ({
     index: async ({ id, document, create, ifSeqNo, ifPrimaryTerm }) =>
       crudService.indexWorkflowDocument(id, document, { create, ifSeqNo, ifPrimaryTerm }),
     logger,
+    maxRetries,
   });
-
-export { OccConflictError };

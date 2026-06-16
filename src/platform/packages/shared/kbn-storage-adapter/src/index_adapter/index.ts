@@ -525,15 +525,21 @@ export class StorageIndexAdapter<
 
     const bulkOperations = operations.flatMap((operation): BulkOperationContainer[] => {
       if ('index' in operation) {
+        const { if_seq_no: ifSeqNo, if_primary_term: ifPrimaryTerm } = operation.index;
+        const hasSeqNo = ifSeqNo != null;
+        const hasPrimaryTerm = ifPrimaryTerm != null;
+        if (hasSeqNo !== hasPrimaryTerm) {
+          throw new Error(
+            'Bulk index OCC requires both if_seq_no and if_primary_term to be set together'
+          );
+        }
+
         return [
           {
             index: {
               _id: operation.index._id,
-              ...(operation.index.if_seq_no != null
-                ? { if_seq_no: operation.index.if_seq_no }
-                : {}),
-              ...(operation.index.if_primary_term != null
-                ? { if_primary_term: operation.index.if_primary_term }
+              ...(hasSeqNo && hasPrimaryTerm
+                ? { if_seq_no: ifSeqNo, if_primary_term: ifPrimaryTerm }
                 : {}),
             },
           },

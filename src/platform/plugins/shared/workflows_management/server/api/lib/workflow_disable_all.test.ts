@@ -43,19 +43,6 @@ const makeStorageClient = (pages: Array<Array<ReturnType<typeof makeHit>>>) => {
   });
   searchMock.mockResolvedValue({ hits: { hits: [] } });
 
-  const getMock = jest.fn().mockImplementation(({ id }: { id: string }) => {
-    const hit = pages.flat().find((pageHit) => pageHit._id === id);
-    if (!hit) {
-      return Promise.reject(new Error('not found'));
-    }
-    return Promise.resolve({
-      _id: hit._id,
-      _source: hit._source,
-      _seq_no: hit._seq_no + 1,
-      _primary_term: hit._primary_term,
-    });
-  });
-
   const bulkMock = jest.fn().mockImplementation(({ operations }) => {
     const items = operations
       .filter((op: Record<string, unknown>) => 'index' in op)
@@ -65,7 +52,7 @@ const makeStorageClient = (pages: Array<Array<ReturnType<typeof makeHit>>>) => {
     return Promise.resolve({ items });
   });
 
-  const mockClient = { search: searchMock, bulk: bulkMock, get: getMock };
+  const mockClient = { search: searchMock, bulk: bulkMock };
   return {
     client: mockClient,
     storage: { getClient: () => mockClient } as any,
@@ -139,7 +126,21 @@ describe('disableAllWorkflows', () => {
   });
 
   it('retries bulk conflicts after refreshing OCC metadata', async () => {
-    const { storage, client } = makeStorageClient([[makeHit('wf-1')]]);
+    const hit = makeHit('wf-1');
+    const { storage, client } = makeStorageClient([[hit]]);
+    client.search
+      .mockReset()
+      .mockResolvedValueOnce({ hits: { hits: [hit] } })
+      .mockResolvedValueOnce({
+        hits: {
+          hits: [
+            {
+              ...hit,
+              _seq_no: 2,
+            },
+          ],
+        },
+      });
     client.bulk
       .mockResolvedValueOnce({
         items: [{ index: { _id: 'wf-1', status: 409, error: { reason: 'conflict' } } }],
@@ -152,7 +153,12 @@ describe('disableAllWorkflows', () => {
 
     expect(result.disabled).toBe(1);
     expect(result.failures).toEqual([]);
-    expect(client.get).toHaveBeenCalledWith({ id: 'wf-1', seq_no_primary_term: true });
+    expect(client.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: { ids: { values: ['wf-1'] } },
+        seq_no_primary_term: true,
+      })
+    );
     expect(client.bulk).toHaveBeenCalledTimes(2);
     expect(client.bulk.mock.calls[1][0].operations[0].index).toEqual(
       expect.objectContaining({ if_seq_no: 2, if_primary_term: 1 })

@@ -9,6 +9,7 @@
 
 import { createHash } from 'node:crypto';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import { isElasticsearchWriteConflict } from '@kbn/occ';
 import { pickManagedWorkflowFields } from '@kbn/workflows';
 import {
   getManagedWorkflowDefinition,
@@ -33,13 +34,6 @@ import type { WorkflowProperties } from '../storage/workflow_storage';
 
 const MANAGED_WORKFLOW_SYSTEM_USER = 'elastic/kibana';
 const MAX_MANAGED_INSTALL_RETRIES = 2;
-const VERSION_CONFLICT_STATUS = 409;
-
-const isVersionConflictError = (error: unknown): boolean => {
-  if (!error || typeof error !== 'object') return false;
-  const e = error as { statusCode?: number; meta?: { statusCode?: number } };
-  return e.statusCode === VERSION_CONFLICT_STATUS || e.meta?.statusCode === VERSION_CONFLICT_STATUS;
-};
 
 const computeDefinitionHash = (yaml: string): string => {
   return createHash('sha256').update(yaml.trim()).digest('hex');
@@ -139,7 +133,7 @@ export class ManagedWorkflowsService {
         await this.installManagedWorkflowOnce(id, options, registeredPluginId);
         return;
       } catch (error) {
-        if (!isVersionConflictError(error) || attempt === MAX_MANAGED_INSTALL_RETRIES) {
+        if (!isElasticsearchWriteConflict(error) || attempt === MAX_MANAGED_INSTALL_RETRIES) {
           throw error;
         }
 
@@ -231,6 +225,7 @@ export class ManagedWorkflowsService {
       createdAt: existing.created_at,
     });
     await this.deps.crudService.writeWorkflowDocument(workflowDocumentId, spaceId, {
+      maxRetries: 0,
       mutate: () => document,
     });
   }
