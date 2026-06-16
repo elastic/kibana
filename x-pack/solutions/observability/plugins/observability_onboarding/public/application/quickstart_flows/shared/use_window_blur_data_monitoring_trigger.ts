@@ -28,6 +28,8 @@ export function useWindowBlurDataMonitoringTrigger({
   const [windowLostFocus, setWindowLostFocus] = useState(false);
   const telemetrySentRef = useRef(false);
   const telemetryEventContextRef = useRef(telemetryEventContext);
+  const previousOnboardingFlowTypeRef = useRef(onboardingFlowType);
+  const previousOnboardingIdRef = useRef(onboardingId);
   const {
     services: { analytics },
   } = useKibana<ObservabilityOnboardingAppServices>();
@@ -41,8 +43,19 @@ export function useWindowBlurDataMonitoringTrigger({
   }, [telemetryEventContext]);
 
   useEffect(() => {
-    telemetrySentRef.current = false;
-    setWindowLostFocus(false);
+    const previousOnboardingFlowType = previousOnboardingFlowTypeRef.current;
+    const previousOnboardingId = previousOnboardingIdRef.current;
+    const onboardingFlowTypeChanged = previousOnboardingFlowType !== onboardingFlowType;
+    const resolvedOnboardingIdChanged =
+      previousOnboardingId !== undefined && previousOnboardingId !== onboardingId;
+
+    if (onboardingFlowTypeChanged || resolvedOnboardingIdChanged) {
+      telemetrySentRef.current = false;
+      setWindowLostFocus(false);
+    }
+
+    previousOnboardingFlowTypeRef.current = onboardingFlowType;
+    previousOnboardingIdRef.current = onboardingId;
   }, [onboardingFlowType, onboardingId]);
 
   useEffect(() => {

@@ -45,7 +45,7 @@ export const OtelKubernetesInstallStep: React.FC<OtelKubernetesInstallStepProps>
             <h3>
               {i18n.translate(
                 'xpack.observability_onboarding.otelKubernetesPanel.installCollectorTitle',
-                { defaultMessage: 'Install the Elastic Distribution for OTel Collector' }
+                { defaultMessage: 'Install the OpenTelemetry Operator' }
               )}
             </h3>
           </EuiTitle>

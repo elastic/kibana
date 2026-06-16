@@ -13,6 +13,74 @@ import { buildHostPageServices } from '../../pages/host/__tests__/test_helpers';
 import { useWindowBlurDataMonitoringTrigger } from './use_window_blur_data_monitoring_trigger';
 
 describe('useWindowBlurDataMonitoringTrigger', () => {
+  it('keeps monitoring active when the window blurs before onboarding setup finishes', () => {
+    const services = buildHostPageServices();
+    const wrapper: React.FC<React.PropsWithChildren> = ({ children }) => (
+      <KibanaContextProvider services={services}>{children}</KibanaContextProvider>
+    );
+
+    const { result, rerender } = renderHook(
+      (props: Parameters<typeof useWindowBlurDataMonitoringTrigger>[0]) =>
+        useWindowBlurDataMonitoringTrigger(props),
+      {
+        wrapper,
+        initialProps: {
+          isActive: false,
+          onboardingFlowType: 'kubernetes_otel',
+          onboardingId: undefined,
+        },
+      }
+    );
+
+    act(() => {
+      window.dispatchEvent(new Event('blur'));
+    });
+
+    expect(result.current).toBe(false);
+
+    rerender({
+      isActive: true,
+      onboardingFlowType: 'kubernetes_otel',
+      onboardingId: 'test-onboarding-id',
+    });
+
+    expect(result.current).toBe(true);
+  });
+
+  it('resets monitoring when a resolved onboarding id changes', () => {
+    const services = buildHostPageServices();
+    const wrapper: React.FC<React.PropsWithChildren> = ({ children }) => (
+      <KibanaContextProvider services={services}>{children}</KibanaContextProvider>
+    );
+
+    const { result, rerender } = renderHook(
+      (props: Parameters<typeof useWindowBlurDataMonitoringTrigger>[0]) =>
+        useWindowBlurDataMonitoringTrigger(props),
+      {
+        wrapper,
+        initialProps: {
+          isActive: true,
+          onboardingFlowType: 'kubernetes_otel',
+          onboardingId: 'first-onboarding-id',
+        },
+      }
+    );
+
+    act(() => {
+      window.dispatchEvent(new Event('blur'));
+    });
+
+    expect(result.current).toBe(true);
+
+    rerender({
+      isActive: true,
+      onboardingFlowType: 'kubernetes_otel',
+      onboardingId: 'second-onboarding-id',
+    });
+
+    expect(result.current).toBe(false);
+  });
+
   it('reports awaiting data only once when telemetry context changes after blur', () => {
     const services = buildHostPageServices();
     const reportEvent = jest.fn();

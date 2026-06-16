@@ -39,7 +39,7 @@ describe('OtelKubernetesInstallStep', () => {
     );
 
     expect(
-      screen.getByRole('heading', { name: 'Install the Elastic Distribution for OTel Collector' })
+      screen.getByRole('heading', { name: 'Install the OpenTelemetry Operator' })
     ).toBeInTheDocument();
     expect(
       screen.queryByTestId('observabilityOnboardingOtelKubernetesPanelInstallStackCopyToClipboard')
