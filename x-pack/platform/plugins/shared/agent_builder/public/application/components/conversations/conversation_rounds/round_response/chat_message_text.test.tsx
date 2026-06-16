@@ -126,6 +126,7 @@ describe('chat_message_text', () => {
         setToolCallResult: jest.fn(),
         setAssistantMessage: jest.fn(),
         addAssistantMessageChunk: jest.fn(),
+        clearAssistantMessage: jest.fn(),
         onConversationCreated: jest.fn(),
         deleteConversation: jest.fn(),
         renameConversation: jest.fn(),
@@ -138,6 +139,7 @@ describe('chat_message_text', () => {
         setCompactionStepComplete: jest.fn(),
         addOrUpdateTodosStep: jest.fn(),
         setAttachments: jest.fn(),
+        onRoundComplete: jest.fn(),
       },
     });
   });

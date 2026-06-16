@@ -340,7 +340,7 @@ describe('processResolutionCsvUpload', () => {
         });
     });
 
-    it('should call linkEntities with correct args and refresh: false', async () => {
+    it('should call linkEntities with correct args', async () => {
       mockResolutionClient.linkEntities.mockResolvedValue({
         linked: ['alias:1'],
         skipped: [],
@@ -350,9 +350,7 @@ describe('processResolutionCsvUpload', () => {
       const csv = 'type,user.email,resolved_to\nuser,alias@test.com,target:golden';
       await processResolutionCsvUpload(createMockStream(csv), deps());
 
-      expect(mockResolutionClient.linkEntities).toHaveBeenCalledWith('target:golden', ['alias:1'], {
-        refresh: false,
-      });
+      expect(mockResolutionClient.linkEntities).toHaveBeenCalledWith('target:golden', ['alias:1']);
     });
 
     it('should report success with linked and skipped counts', async () => {
