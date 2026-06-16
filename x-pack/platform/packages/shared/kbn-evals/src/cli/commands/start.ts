@@ -28,9 +28,10 @@ import {
   startService,
   stopService,
   connectorsHash,
+  scoutEnvHash,
   tailLog,
+  isEdotDockerRunning,
 } from '../services';
-import { safeExec } from '../utils';
 import { readCachedEisConnectors } from '../eis_connectors_cache';
 import {
   defaultExportProfile,
@@ -47,17 +48,6 @@ import { runConfigInit, runConnectorSetup, ensureVaultAuth, ensureLocalConfig } 
 const SCOUT_LOCAL_CONFIG = '.scout/servers/local.json';
 const SCOUT_READY_POLL_INTERVAL_MS = 3000;
 const SCOUT_READY_TIMEOUT_MS = 180_000;
-
-const isEdotRunningViaDocker = (): boolean => {
-  const result = safeExec('docker', [
-    'ps',
-    '--filter',
-    'name=kibana-edot-collector',
-    '--format',
-    '{{.Names}}',
-  ]);
-  return result !== null && result.length > 0;
-};
 
 const waitForScoutReady = async (repoRoot: string, log: ToolingLog): Promise<void> => {
   const configPath = Path.join(repoRoot, SCOUT_LOCAL_CONFIG);
@@ -438,7 +428,7 @@ export const startCmd: Command<void> = {
 
     if (!skipServer) {
       // --- Step 1: EDOT collector (exports traces to configured ES) ---
-      if (isServiceRunning(repoRoot, 'edot') || isEdotRunningViaDocker()) {
+      if (isServiceRunning(repoRoot, 'edot') || isEdotDockerRunning()) {
         log.info('[1/4] EDOT collector already running -- reusing');
       } else {
         log.info('[1/4] Starting EDOT collector (backgrounded)...');
@@ -455,7 +445,7 @@ export const startCmd: Command<void> = {
         await new Promise((r) => setTimeout(r, 5000));
         stopTail();
 
-        if (!isEdotRunningViaDocker()) {
+        if (!isEdotDockerRunning()) {
           log.warning(
             'EDOT collector may not have started. Check logs: node scripts/evals logs --service edot'
           );
@@ -466,8 +456,18 @@ export const startCmd: Command<void> = {
 
       // --- Step 2: Scout server ---
       const serverConfigSet = suite?.serverConfigSet ?? 'evals_tracing';
+      const scoutEnv: Record<string, string> = {};
+      if (profileEnvOverrides.GCS_CREDENTIALS) {
+        scoutEnv.GCS_CREDENTIALS = profileEnvOverrides.GCS_CREDENTIALS;
+      }
+      if (profileEnvOverrides.TRACING_EXPORTERS) {
+        scoutEnv.TRACING_EXPORTERS = profileEnvOverrides.TRACING_EXPORTERS;
+      }
+
       const scoutAlive = isServiceRunning(repoRoot, 'scout');
-      const staleCheck = scoutAlive ? isScoutStale(repoRoot, serverConfigSet) : { stale: false };
+      const staleCheck = scoutAlive
+        ? isScoutStale(repoRoot, serverConfigSet, scoutEnv)
+        : { stale: false };
 
       if (staleCheck.stale) {
         log.warning(`[2/4] Scout server is stale (${staleCheck.reason}). Restarting...`);
@@ -496,24 +496,6 @@ export const startCmd: Command<void> = {
         log.info(
           `[2/4] Starting Scout server (backgrounded, stateful/classic, ${serverConfigSet})...`
         );
-        // Forward the env overrides that the Scout server config consumes
-        // when launching ES / Kibana. Notably:
-        //   - GCS_CREDENTIALS  -> ES gcs.client.default.credentials_file
-        //                        secure setting (snapshot restore from GCS)
-        //   - TRACING_EXPORTERS -> Kibana --telemetry.tracing.exporters
-        //                         (fan-out OTLP destinations from config.json)
-        // Without TRACING_EXPORTERS, Scout falls back to the localhost:4318
-        // + phoenix defaults in `classic.stateful.config.ts`, so any custom
-        // tracing destinations declared in the vault profile are silently
-        // dropped.
-        const scoutEnv: Record<string, string> = {};
-        if (profileEnvOverrides.GCS_CREDENTIALS) {
-          scoutEnv.GCS_CREDENTIALS = profileEnvOverrides.GCS_CREDENTIALS;
-        }
-        if (profileEnvOverrides.TRACING_EXPORTERS) {
-          scoutEnv.TRACING_EXPORTERS = profileEnvOverrides.TRACING_EXPORTERS;
-        }
-
         startService(
           repoRoot,
           'scout',
@@ -523,6 +505,7 @@ export const startCmd: Command<void> = {
           {
             connectorsHash: connectorsHash(),
             serverConfigSet,
+            envHash: scoutEnvHash(scoutEnv),
             env: Object.keys(scoutEnv).length > 0 ? scoutEnv : undefined,
           }
         );
