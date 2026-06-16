@@ -72,7 +72,10 @@ test.describe(
       });
 
       await test.step('type query and apply', async () => {
-        await pageObjects.composeDiscover.setSandboxQuery(TEST_QUERY);
+        await pageObjects.composeDiscover.setSandboxQuery(
+          `FROM ${TEST_INDEX} | STATS count = COUNT(*)`
+        );
+        await pageObjects.composeDiscover.setSandboxAlertCondition('| WHERE count > 0');
         await pageObjects.composeDiscover.clickApply();
         await expect(pageObjects.composeDiscover.sandboxApplyButton).toBeHidden();
       });
