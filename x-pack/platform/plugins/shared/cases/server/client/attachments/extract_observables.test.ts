@@ -12,9 +12,17 @@ import { LICENSING_CASE_OBSERVABLES_FEATURE } from '../../common/constants';
 import { SECURITY_ALERT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
 import { createCasesClientMockArgs } from '../mocks';
 import { createCaseServiceMock, createLicensingServiceMock } from '../../services/mocks';
+import { mockCases } from '../../mocks';
 import { extractAndAddObservables } from './extract_observables';
 import type { Case } from '../../../common/types/domain';
 import type { AlertService } from '../../services';
+
+const caseSO = mockCases[0];
+
+type AlertMgetDoc = NonNullable<Awaited<ReturnType<AlertService['getAlerts']>>>['docs'][number];
+
+const makeEcsDoc = (source: Record<string, unknown>): AlertMgetDoc =>
+  ({ _source: source, _id: 'doc-1', _index: 'index-1' } as unknown as AlertMgetDoc);
 
 const makeCase = (extractObservables: boolean): Case =>
   ({
@@ -23,7 +31,7 @@ const makeCase = (extractObservables: boolean): Case =>
     settings: { syncAlerts: true, extractObservables },
     observables: [],
     total_observables: 0,
-  }) as unknown as Case;
+  } as unknown as Case);
 
 const legacyAlertAttachment: AttachmentRequestV2 = {
   type: AttachmentType.alert,
@@ -45,13 +53,6 @@ const commentAttachment: AttachmentRequestV2 = {
   comment: 'a comment',
   owner: SECURITY_SOLUTION_OWNER,
 };
-
-const makeEcsDoc = (source: Record<string, unknown>) =>
-  ({
-    _source: source,
-    _id: 'doc-1',
-    _index: 'index-1',
-  }) as any;
 
 describe('extractAndAddObservables', () => {
   let clientArgs: ReturnType<typeof createCasesClientMockArgs>;
@@ -110,9 +111,7 @@ describe('extractAndAddObservables', () => {
 
       await extractAndAddObservables('case-1', [legacyAlertAttachment], theCase, clientArgs);
 
-      expect(licensingService.notifyUsage).toHaveBeenCalledWith(
-        LICENSING_CASE_OBSERVABLES_FEATURE
-      );
+      expect(licensingService.notifyUsage).toHaveBeenCalledWith(LICENSING_CASE_OBSERVABLES_FEATURE);
     });
   });
 
@@ -138,11 +137,8 @@ describe('extractAndAddObservables', () => {
       alertsService.getAlerts.mockResolvedValue({
         docs: [makeEcsDoc({ 'source.ip': '1.2.3.4' })],
       });
-      caseService.getCase.mockResolvedValue({
-        id: 'case-1',
-        attributes: { observables: [], owner: SECURITY_SOLUTION_OWNER },
-      } as any);
-      caseService.patchCase.mockResolvedValue({} as any);
+      caseService.getCase.mockResolvedValue(caseSO);
+      caseService.patchCase.mockResolvedValue(caseSO);
       const theCase = makeCase(true);
 
       await extractAndAddObservables('case-1', [legacyAlertAttachment], theCase, clientArgs);
@@ -207,11 +203,8 @@ describe('extractAndAddObservables', () => {
       alertsService.getAlerts.mockResolvedValue({
         docs: [makeEcsDoc({ 'source.ip': '1.2.3.4' })],
       });
-      caseService.getCase.mockResolvedValue({
-        id: 'case-1',
-        attributes: { observables: [], owner: SECURITY_SOLUTION_OWNER },
-      } as any);
-      caseService.patchCase.mockResolvedValue({} as any);
+      caseService.getCase.mockResolvedValue(caseSO);
+      caseService.patchCase.mockResolvedValue(caseSO);
       const theCase = makeCase(true);
 
       await extractAndAddObservables(
@@ -256,22 +249,17 @@ describe('extractAndAddObservables', () => {
       alertsService.getAlerts.mockResolvedValue({
         docs: [makeEcsDoc({ 'source.ip': '1.2.3.4' })],
       });
-      caseService.getCase.mockResolvedValue({
-        id: 'case-1',
-        attributes: { observables: [], owner: SECURITY_SOLUTION_OWNER },
-      } as any);
-      caseService.patchCase.mockResolvedValue({} as any);
+      caseService.getCase.mockResolvedValue(caseSO);
+      caseService.patchCase.mockResolvedValue(caseSO);
       const theCase = makeCase(true);
 
       await extractAndAddObservables('case-1', [legacyAlertAttachment], theCase, clientArgs);
 
       expect(caseService.patchCase).toHaveBeenCalledWith(
         expect.objectContaining({
-          caseId: 'case-1',
+          caseId: caseSO.id,
           updatedAttributes: expect.objectContaining({
-            observables: expect.arrayContaining([
-              expect.objectContaining({ value: '1.2.3.4' }),
-            ]),
+            observables: expect.arrayContaining([expect.objectContaining({ value: '1.2.3.4' })]),
           }),
         })
       );
@@ -294,11 +282,8 @@ describe('extractAndAddObservables', () => {
       alertsService.getAlerts.mockResolvedValue({
         docs: [makeEcsDoc({ 'source.ip': '1.2.3.4' })],
       });
-      caseService.getCase.mockResolvedValue({
-        id: 'case-1',
-        attributes: { observables: [], owner: SECURITY_SOLUTION_OWNER },
-      } as any);
-      caseService.patchCase.mockResolvedValue({} as any);
+      caseService.getCase.mockResolvedValue(caseSO);
+      caseService.patchCase.mockResolvedValue(caseSO);
       const theCase = makeCase(true);
 
       await extractAndAddObservables('case-1', [legacyAlertAttachment], theCase, clientArgs);
