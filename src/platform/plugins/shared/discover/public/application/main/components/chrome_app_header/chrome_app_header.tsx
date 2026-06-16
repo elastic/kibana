@@ -72,7 +72,6 @@ export const ChromeAppHeader = ({ menu, titleAppend, isCollapsed }: ChromeAppHea
         sticky={false}
         padding="m"
         titleAppend={titleAppend}
-        inlineTabs
       />
     </div>
   );

@@ -133,7 +133,7 @@ const useHeaderStyles = (
       align-items: center;
       flex: 1;
       min-width: 0;
-      overflow: visible;
+      overflow: ${hasPrimaryContent ? 'visible' : 'hidden'};
     `;
 
     const titleGroup = css`

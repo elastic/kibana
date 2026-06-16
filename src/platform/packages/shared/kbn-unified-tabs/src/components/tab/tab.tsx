@@ -242,8 +242,6 @@ export const Tab: React.FC<TabProps> = (props) => {
                     // we can't simply use overflow: hidden; because then curved notches are not visible
                     border-top-left-radius: ${euiTheme.border.radius.small};
                     border-top-right-radius: ${euiTheme.border.radius.small};
-                    // lift the loading bar onto the tab's top edge so it replaces the selected accent line
-                    transform: translateY(-${euiTheme.size.xxs});
                   `}
                 />
               )}

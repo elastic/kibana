@@ -43,7 +43,7 @@ export const TabWithBackground = React.forwardRef<HTMLDivElement, TabWithBackgro
           display: inline-block;
           border-radius: ${euiTheme.border.radius.small};
           // reserve space for the active-tab accent and side borders so selecting a tab doesn't shift layout
-          border-top: ${euiTheme.size.xxs} solid transparent;
+          border-top: ${euiTheme.border.width.thick} solid transparent;
           border-left: ${euiTheme.border.width.thin} solid transparent;
           border-right: ${euiTheme.border.width.thin} solid transparent;
           background: ${isSelected || isDragging
@@ -59,12 +59,17 @@ export const TabWithBackground = React.forwardRef<HTMLDivElement, TabWithBackgro
               position: relative;
               // overlap the container's bottom border so the active tab connects to the content below
               margin-bottom: -${euiTheme.size.xxs};
-              // while loading, the red progress bar replaces the blue accent line
-              border-top-color: ${isLoading ? 'transparent' : euiTheme.colors.primary};
+              border-top: ${euiTheme.border.width.thick} solid ${euiTheme.colors.primary};
               border-left-color: ${euiTheme.colors.borderBaseSubdued};
               border-right-color: ${euiTheme.colors.borderBaseSubdued};
               border-bottom-left-radius: 0;
               border-bottom-right-radius: 0;
+            `
+            : ''}
+
+          ${isLoading
+            ? `
+              border-top: ${euiTheme.border.width.thick} solid ${euiTheme.colors.borderBaseSubdued};
             `
             : ''}
 
