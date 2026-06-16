@@ -26,11 +26,11 @@ export function useOnboardingStatusUpdateQueue(
   const { getOnboardingStatuses } = useOnboardingApi();
 
   const updateStatuses = useCallback(async (): Promise<void> => {
-    const streamNames = [...queue.current];
-
-    if (streamNames.length === 0) {
+    if (queue.current.size === 0) {
       return;
     }
+
+    const streamNames = [...queue.current];
 
     const statuses = await getOnboardingStatuses(streamNames);
 

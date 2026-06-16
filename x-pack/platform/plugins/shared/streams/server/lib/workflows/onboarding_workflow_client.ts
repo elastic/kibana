@@ -269,14 +269,14 @@ export class StreamsKIsOnboardingClient {
   }: {
     streamNames: string[];
   }): Promise<Record<string, SigEventsWorkflowStatusResult>> {
+    if (streamNames.length === 0) {
+      return {};
+    }
+
     const statuses: Record<string, SigEventsWorkflowStatusResult> = {};
 
     for (const streamName of streamNames) {
       statuses[streamName] = { status: SigEventsWorkflowStatus.NotStarted, executionId: null };
-    }
-
-    if (streamNames.length === 0) {
-      return statuses;
     }
 
     const requested = new Set(streamNames);

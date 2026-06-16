@@ -9,6 +9,7 @@ import { z } from '@kbn/zod/v4';
 import {
   StreamsKIsOnboardingStep,
   SigEventsWorkflowStatus,
+  MAX_STREAM_NAME_LENGTH,
   type StreamsKIsOnboardingStatusResult,
   type SigEventsWorkflowStatusResult,
 } from '@kbn/streams-schema';
@@ -187,7 +188,10 @@ export const onboardingBulkStatusRoute = createServerRoute({
   },
   params: z.object({
     body: z.object({
-      streamNames: z.array(z.string()).min(1).max(MAX_STREAMS_PER_QUERY),
+      streamNames: z
+        .array(z.string().max(MAX_STREAM_NAME_LENGTH))
+        .min(1)
+        .max(MAX_STREAMS_PER_QUERY),
     }),
   }),
   handler: async ({
