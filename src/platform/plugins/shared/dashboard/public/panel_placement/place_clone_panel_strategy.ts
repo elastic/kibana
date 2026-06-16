@@ -53,7 +53,7 @@ export function placeClonePanel({
   const beside = { ...panelToPlaceBeside.grid, panelId: placeBesideId };
   const otherPanelGridData: Array<GridData & { panelId: string }> = [];
   forOwn(currentLayout.panels, (panel: DashboardLayoutPanel, panelId: string) => {
-    if (panel.grid.sectionId === newPanelSection) {
+    if (panel.grid.sectionId === newPanelSectionId) {
       // only check against panels that are in the same section as the cloned panel
       otherPanelGridData.push({ ...panel.grid, panelId });
     }
