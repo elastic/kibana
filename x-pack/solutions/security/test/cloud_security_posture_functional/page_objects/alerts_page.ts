@@ -58,6 +58,7 @@ export class AlertsPageObject extends FtrService {
    */
   async clickRefresh(): Promise<void> {
     await this.ensureOnAlertsPage();
+    await this.testSubjects.existOrFail('queryInput', { timeout: 30000 });
     await this.queryBar.submitQuery();
 
     // wait for refresh to complete
