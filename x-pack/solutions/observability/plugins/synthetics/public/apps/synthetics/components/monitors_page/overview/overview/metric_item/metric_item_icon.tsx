@@ -244,5 +244,5 @@ const TEST_IN_PROGRESS = i18n.translate('xpack.synthetics.inProgress.label', {
 
 const STALE_TOOLTIP = i18n.translate('xpack.synthetics.metricItemIcon.staleTooltip', {
   defaultMessage:
-    'This monitor stopped reporting in the selected window. Its last known status may be stale — worth investigating.',
+    'This monitor has stopped reporting. Its last known status may be stale — worth investigating.',
 });

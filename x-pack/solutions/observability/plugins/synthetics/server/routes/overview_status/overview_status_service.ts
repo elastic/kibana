@@ -20,8 +20,11 @@ import { processMonitors } from '../../saved_objects/synthetics_monitor/process_
 import type { RouteContext } from '../types';
 import type {
   EncryptedSyntheticsMonitorAttributes,
+  OverviewStaleStatus,
+  OverviewStalePriorRun,
   OverviewStatusMetaData,
 } from '../../../common/runtime_types';
+import { isRunStale } from '../../../common/lib';
 import { isStatusEnabled } from '../../../common/runtime_types/monitor_management/alert_config';
 import {
   FINAL_SUMMARY_FILTER,
@@ -69,12 +72,20 @@ export const SUMMARIES_PAGE_SIZE = 5000;
 // (had a run, stopped reporting) is deliberately distinct from `pending` (no
 // run found in the window at all, e.g. a brand-new first-run monitor). This
 // only applies to the windowed overview view; the default (no-range) view
-// enforces freshness through the `monitor.timespan` filter instead.
-const STALE_FRESHNESS_FLOOR_MINUTES = 15;
+// enforces freshness through the `monitor.timespan` filter instead. The
+// schedule-aware threshold itself lives in `isRunStale` (common/lib) so the
+// server and client can't drift.
+//
 // How close a window's end must be to `now` for the freshness guard to kick in.
 // Windows that end clearly in the past are treated as historical, where the
 // latest in-window run is exactly the status the user asked to see.
 const LIVE_WINDOW_TOLERANCE_MINUTES = 5;
+// How far back the supplementary "stale before the window" lookup scans for a
+// monitor's last-known run. Bounds the query cost and keeps monitors that have
+// been dead far longer than anyone would call them "stale" out of the
+// promotion — they stay `pending` rather than reaching back through all of
+// history.
+const STALE_BEFORE_WINDOW_LOOKBACK_DAYS = 30;
 
 export class OverviewStatusService {
   filterData: {
@@ -159,6 +170,77 @@ export class OverviewStatusService {
       staleConfigs,
       disabledConfigs,
     };
+  }
+
+  /**
+   * Supplementary lookup that lets the client promote `pending` monitors which
+   * actually stopped reporting *before* the overview window started.
+   *
+   * The main overview query scopes status to the window, so a monitor whose last
+   * run predates the window has no in-window data and is reported as `pending`
+   * (indistinguishable from a brand-new monitor). The client calls this for the
+   * pending monitors (passing their `monitorQueryIds`) to find each one's latest
+   * run before the window.
+   *
+   * It deliberately returns only the raw "latest run before the window" facts
+   * (timestamp + last status per monitor/location) and does *not* reload saved
+   * objects or apply the staleness threshold here: a single bounded `terms`
+   * query over the requested monitor ids scales regardless of how many monitors
+   * are pending, whereas reloading SOs via an `id:(…)` filter would blow past
+   * Elasticsearch's `max_clause_count` once the pending set grows. The client
+   * applies {@link isRunStale} and rebuilds the metadata from the `pending`
+   * config it already holds.
+   *
+   * Only runs for live windows (staleness is a "stopped reporting as of now"
+   * concept) and is bounded to the requested monitors so it stays cheap.
+   */
+  async getStaleStatusBeforeWindow(): Promise<OverviewStaleStatus> {
+    this.filterData = await getMonitorFilters(this.routeContext);
+
+    if (!this.shouldApplyFreshnessGuard()) {
+      return { priorRuns: [] };
+    }
+
+    const { monitorQueryIds } = this.routeContext.request.query || {};
+    const monitorIds = (
+      Array.isArray(monitorQueryIds) ? monitorQueryIds : monitorQueryIds ? [monitorQueryIds] : []
+    ).filter(Boolean);
+    if (monitorIds.length === 0) {
+      return { priorRuns: [] };
+    }
+
+    const { from } = this.getStatusQueryRange();
+
+    const statusData = await this.getQueryResult({
+      // Latest final summary strictly before the window start, capped to a
+      // bounded lookback so the promotion doesn't reach back through all of
+      // history (a monitor dead longer than this stays `pending`).
+      rangeFilter: {
+        range: {
+          '@timestamp': { gte: `now-${STALE_BEFORE_WINDOW_LOOKBACK_DAYS}d`, lt: from },
+        },
+      },
+      monitorIds,
+    });
+
+    const queryLocIds = this.filterData?.locationIds;
+    const priorRuns: OverviewStalePriorRun[] = [];
+
+    statusData.forEach((locStatuses, monitorQueryId) => {
+      locStatuses.forEach((loc) => {
+        if (!isEmpty(queryLocIds) && !queryLocIds?.includes(loc.locationId)) {
+          return;
+        }
+        priorRuns.push({
+          monitorQueryId,
+          locationId: loc.locationId,
+          timestamp: loc.timestamp,
+          status: loc.status,
+        });
+      });
+    });
+
+    return { priorRuns };
   }
 
   async getEsDataFilters() {
@@ -362,14 +444,17 @@ export class OverviewStatusService {
    * stopped reporting and its last status can no longer be trusted as current.
    */
   isStaleRun(timestamp: string | undefined, scheduleMinutes: number): boolean {
-    if (!timestamp) {
-      return false;
-    }
-    const thresholdMinutes = Math.max(scheduleMinutes * 2, STALE_FRESHNESS_FLOOR_MINUTES);
-    return moment().diff(moment(timestamp), 'minutes') > thresholdMinutes;
+    return isRunStale(timestamp, scheduleMinutes);
   }
 
-  async getQueryResult() {
+  async getQueryResult(options?: {
+    // Overrides the default `[from, to]` window. Used by the stale-before-window
+    // lookup to fetch the latest run *before* the overview window starts.
+    rangeFilter?: QueryDslQueryContainer;
+    // Restricts the aggregation to specific `monitor.id`s so the supplementary
+    // lookup stays cheap (scoped to the pending monitors being probed).
+    monitorIds?: string[];
+  }) {
     const ccsEnabled = isCCSEnabled(this.routeContext.server);
 
     return withApmSpan('monitor_status_data', async () => {
@@ -410,6 +495,13 @@ export class OverviewStatusService {
       const { dateRangeStart, dateRangeEnd } = this.routeContext.request.query || {};
       const isUserSelectedRange = Boolean(dateRangeStart && dateRangeEnd);
 
+      const rangeFilter =
+        options?.rangeFilter ?? getRangeFilter({ from: range.from, to: range.to });
+      const monitorIdsFilter: QueryDslQueryContainer[] =
+        options?.monitorIds && options.monitorIds.length
+          ? [{ terms: { 'monitor.id': options.monitorIds } }]
+          : [];
+
       do {
         const result = await this.routeContext.syntheticsEsClient.search(
           {
@@ -418,10 +510,14 @@ export class OverviewStatusService {
               bool: {
                 filter: [
                   FINAL_SUMMARY_FILTER,
-                  getRangeFilter({ from: range.from, to: range.to }),
-                  ...(isUserSelectedRange
+                  rangeFilter,
+                  // The "currently fresh" timespan guard is anchored to `now`,
+                  // so it must be dropped whenever the caller scopes to an
+                  // explicit window (user range) or looks before it (override).
+                  ...(options?.rangeFilter || isUserSelectedRange
                     ? []
                     : [getTimespanFilter({ from: 'now-15m', to: 'now' })]),
+                  ...monitorIdsFilter,
                   ...(await this.getEsDataFilters()),
                 ] as QueryDslQueryContainer[],
               },
@@ -950,7 +1046,7 @@ export class OverviewStatusService {
   }
 }
 
-function movePendingToEnd(locations: Array<{ id: string; label: string; status: string }>) {
+function movePendingToEnd<T extends { status: string }>(locations: T[]): T[] {
   return locations.sort((a, b) => {
     if (a.status === MONITOR_STATUS_ENUM.PENDING && b.status !== MONITOR_STATUS_ENUM.PENDING) {
       return 1;

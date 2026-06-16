@@ -9,9 +9,10 @@ import type { MonitorOverviewPageState } from '..';
 import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 import type {
   FetchMonitorOverviewQueryArgs,
+  OverviewStaleStatus,
   OverviewStatus,
 } from '../../../../../common/runtime_types';
-import { OverviewStatusCodec } from '../../../../../common/runtime_types';
+import { OverviewStaleStatusCodec, OverviewStatusCodec } from '../../../../../common/runtime_types';
 import { apiService } from '../../../../utils/api_service';
 
 export function toStatusOverviewQueryArgs(
@@ -48,5 +49,25 @@ export const fetchOverviewStatus = async ({
     SYNTHETICS_API_URLS.OVERVIEW_STATUS,
     { ...params, scopeStatusByLocation },
     OverviewStatusCodec
+  );
+};
+
+/**
+ * Resolve the last-known run *before* the overview window for the given pending
+ * monitors, so the client can promote the genuinely stale ones from `pending`
+ * to `stale`. Scoped to `monitorQueryIds` to keep the lookup cheap.
+ */
+export const fetchStaleStatus = async ({
+  pageState,
+  monitorQueryIds,
+}: {
+  pageState: MonitorOverviewPageState;
+  monitorQueryIds: string[];
+}): Promise<OverviewStaleStatus> => {
+  const params = toStatusOverviewQueryArgs(pageState);
+  return apiService.get(
+    SYNTHETICS_API_URLS.OVERVIEW_STATUS_STALE,
+    { ...params, monitorQueryIds },
+    OverviewStaleStatusCodec
   );
 };

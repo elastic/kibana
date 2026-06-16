@@ -275,12 +275,12 @@ const staleDescription = i18n.translate('xpack.synthetics.overview.status.stale.
 
 const pendingTooltip = i18n.translate('xpack.synthetics.overview.status.pending.tooltip', {
   defaultMessage:
-    'No checks have run yet in the selected time range — typically a newly created monitor awaiting its first run.',
+    'No recent checks have run for this monitor, so there is no status to show yet — typically a newly created monitor awaiting its first run.',
 });
 
 const staleTooltip = i18n.translate('xpack.synthetics.overview.status.stale.tooltip', {
   defaultMessage:
-    'The monitor reported earlier but has stopped reporting in the selected time range. Its last known status may be stale and is worth investigating.',
+    'This monitor ran earlier but has stopped reporting. Its last known status may be stale and is worth investigating.',
 });
 
 const disabledDescription = i18n.translate(

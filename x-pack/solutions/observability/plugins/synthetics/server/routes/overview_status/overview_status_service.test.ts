@@ -2361,6 +2361,161 @@ describe('current status route', () => {
       });
     });
   });
+
+  describe('getStaleStatusBeforeWindow', () => {
+    const usLoc = { id: 'us_east', label: 'US East' };
+
+    const buildRouteContext = (query: Record<string, any>, syntheticsEsClient?: any): any => ({
+      request: { query },
+      syntheticsEsClient,
+      server: {
+        isElasticsearchServerless: false,
+        config: { experimental: { ccs: { enabled: false } } },
+      },
+    });
+
+    const liveWindowQuery = (extra: Record<string, any> = {}) => ({
+      dateRangeStart: 'now-24h',
+      dateRangeEnd: 'now',
+      monitorQueryIds: ['mon1'],
+      ...extra,
+    });
+
+    it('returns the latest run before the window for each probed monitor/location', async () => {
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+      const priorTs = moment().subtract(3, 'hours').toISOString();
+      esClient.search.mockResponseOnce(
+        getEsResponse({
+          buckets: [
+            {
+              key: { monitorId: 'mon1', locationId: usLoc.id },
+              status: { top: [{ metrics: { 'monitor.status': 'up' }, sort: [priorTs] }] },
+            },
+          ],
+        })
+      );
+
+      const service = new OverviewStatusService(
+        buildRouteContext(liveWindowQuery(), syntheticsEsClient)
+      );
+
+      const result = await service.getStaleStatusBeforeWindow();
+
+      // The endpoint returns only the raw prior-run facts — no saved-object
+      // reload, no staleness classification (the client applies the threshold).
+      expect(result.priorRuns).toEqual([
+        { monitorQueryId: 'mon1', locationId: usLoc.id, timestamp: priorTs, status: 'up' },
+      ]);
+    });
+
+    it('returns the prior run regardless of freshness (the client applies the threshold)', async () => {
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+      const freshTs = moment().subtract(2, 'minutes').toISOString();
+      esClient.search.mockResponseOnce(
+        getEsResponse({
+          buckets: [
+            {
+              key: { monitorId: 'mon1', locationId: usLoc.id },
+              status: { top: [{ metrics: { 'monitor.status': 'up' }, sort: [freshTs] }] },
+            },
+          ],
+        })
+      );
+
+      const service = new OverviewStatusService(
+        buildRouteContext(liveWindowQuery(), syntheticsEsClient)
+      );
+
+      const result = await service.getStaleStatusBeforeWindow();
+
+      expect(result.priorRuns).toEqual([
+        { monitorQueryId: 'mon1', locationId: usLoc.id, timestamp: freshTs, status: 'up' },
+      ]);
+    });
+
+    it('returns a prior run per location for a multi-location monitor', async () => {
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+      const priorTs = moment().subtract(3, 'hours').toISOString();
+      esClient.search.mockResponseOnce(
+        getEsResponse({
+          buckets: [
+            {
+              key: { monitorId: 'mon1', locationId: usLoc.id },
+              status: { top: [{ metrics: { 'monitor.status': 'down' }, sort: [priorTs] }] },
+            },
+            // euLoc has no prior run at all → not returned
+          ],
+        })
+      );
+
+      const service = new OverviewStatusService(
+        buildRouteContext(liveWindowQuery(), syntheticsEsClient)
+      );
+
+      const result = await service.getStaleStatusBeforeWindow();
+
+      expect(result.priorRuns).toEqual([
+        { monitorQueryId: 'mon1', locationId: usLoc.id, timestamp: priorTs, status: 'down' },
+      ]);
+    });
+
+    it('scopes the lookup to the requested monitors and queries strictly before the window', async () => {
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+      esClient.search.mockResponseOnce(getEsResponse({ buckets: [] }));
+
+      const service = new OverviewStatusService(
+        buildRouteContext(
+          liveWindowQuery({ monitorQueryIds: ['mon1', 'mon2'] }),
+          syntheticsEsClient
+        )
+      );
+
+      await service.getStaleStatusBeforeWindow();
+
+      const filters = (esClient.search.mock.calls[0][0] as any).query.bool.filter;
+      const idsFilter = filters.find((f: any) => f.terms?.['monitor.id']);
+      expect(idsFilter.terms['monitor.id']).toEqual(['mon1', 'mon2']);
+      // looks strictly *before* the window start, capped to a 30-day lookback
+      const tsFilter = filters.find((f: any) => f.range?.['@timestamp']);
+      expect(tsFilter.range['@timestamp'].lt).toBeDefined();
+      expect(tsFilter.range['@timestamp'].gte).toBe('now-30d');
+      // the "currently fresh" timespan guard must not be applied to old data
+      expect(filters.find((f: any) => f.range?.['monitor.timespan'])).toBeUndefined();
+    });
+
+    it('does not query ES for a historical window', async () => {
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+
+      const service = new OverviewStatusService(
+        buildRouteContext(
+          {
+            dateRangeStart: '2022-01-01T00:00:00.000Z',
+            dateRangeEnd: '2022-01-02T00:00:00.000Z',
+            monitorQueryIds: ['mon1'],
+          },
+          syntheticsEsClient
+        )
+      );
+
+      const result = await service.getStaleStatusBeforeWindow();
+
+      expect(result).toEqual({ priorRuns: [] });
+      expect(esClient.search).not.toHaveBeenCalled();
+    });
+
+    it('returns empty when no pending monitor ids are provided', async () => {
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+
+      const service = new OverviewStatusService(
+        buildRouteContext({ dateRangeStart: 'now-24h', dateRangeEnd: 'now' }, syntheticsEsClient)
+      );
+
+      const result = await service.getStaleStatusBeforeWindow();
+
+      expect(result).toEqual({ priorRuns: [] });
+      expect(esClient.search).not.toHaveBeenCalled();
+    });
+  });
 });
 
 function getEsResponse({ buckets, after }: { buckets: any[]; after?: any }) {
