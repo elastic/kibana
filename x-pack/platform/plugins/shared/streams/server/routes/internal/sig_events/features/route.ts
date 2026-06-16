@@ -136,7 +136,7 @@ export const listFeaturesRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ name: z.string() }),
+    path: z.object({ name: z.string().max(255) }),
     query: z.optional(
       z.object({
         query: z.string().optional(),
