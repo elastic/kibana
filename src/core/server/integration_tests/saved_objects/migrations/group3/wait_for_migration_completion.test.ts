@@ -123,6 +123,7 @@ function createRoot() {
     {
       migrations: {
         skip: false,
+        useCumulativeLogger: false,
       },
       node: {
         roles: ['background_tasks'],

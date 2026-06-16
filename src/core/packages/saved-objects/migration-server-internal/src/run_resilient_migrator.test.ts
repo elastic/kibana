@@ -150,6 +150,7 @@ const mockOptions = (): RunResilientMigratorParams => {
         metaPickupSyncDelaySec: 120,
         runOnRoles: ['migrator'],
       },
+      useCumulativeLogger: false,
     },
     typeRegistry: savedObjectTypeRegistryMock,
     docLinks: docLinksServiceMock.createSetupContract(),

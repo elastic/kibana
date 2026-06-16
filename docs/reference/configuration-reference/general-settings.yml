@@ -848,6 +848,16 @@ groups:
           ech: unavailable
           self: ga
 
+      - setting: migrations.useCumulativeLogger
+        description: |
+          When enabled, migration progress is only logged if the migration fails, reducing log volume during successful startups. When disabled (the default), migration steps are logged continuously, which keeps failing or stuck migrations visible. Set to `true` to reduce startup log volume.
+        datatype: bool
+        default: false
+        applies_to:
+          - "stack: ga 9.2"
+          - "ech: unavailable"
+          - "self: ga"
+
   - group: Saved Objects settings
     id: saved-objects-settings
     settings:
