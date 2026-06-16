@@ -83,7 +83,9 @@ export const getESQLSingleColumnValues = async ({
 
     if (columns.length === 1) {
       const [column] = results.response.columns;
-      const rawValues = results.response.values.map((value) => value[0]).filter(Boolean);
+      const rawValues = results.response.values
+        .map((value) => value[0])
+        .filter((value) => value !== null && value !== undefined);
       return isNumericType(column.type)
         ? { values: rawValues.map((option) => Number(option)), column, indexPattern }
         : { values: rawValues.map((option) => String(option)), column, indexPattern };

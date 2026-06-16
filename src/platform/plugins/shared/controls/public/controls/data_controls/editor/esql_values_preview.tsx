@@ -29,6 +29,7 @@ import type { ESQLColumn } from '@kbn/es-types';
 import { isNumericType } from '@kbn/esql-language';
 import { ChooseColumnPopover } from './choose_column_popover';
 import { DataControlEditorStrings } from '../data_control_constants';
+import { EMPTY_LABEL } from '@kbn/field-formats-common';
 
 export const ESQLValuesPreview: React.FC<{
   previewOptions: string[] | number[];
@@ -149,7 +150,7 @@ export const ESQLValuesPreview: React.FC<{
     >
       <EuiBadgeGroup data-test-subj="esqlValuesPreviewStrings">
         {previewOptions.map((option, i) => (
-          <EuiBadge key={`${i}-${option}`}>{option}</EuiBadge>
+          <EuiBadge key={`${i}-${option}`}>{option === '' ? EMPTY_LABEL : option}</EuiBadge>
         ))}
       </EuiBadgeGroup>
     </div>
