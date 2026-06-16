@@ -77,11 +77,12 @@ export class HistorySnapshotClient {
         source: { index: latestIndex },
         dest: { index: historySnapshotIndex },
         signal: abortSignal,
-        waitForCompletion: false,
-        logger: this.logger,
-        minTimeout: POLL_INTERVAL_MS,
-        maxTimeout: POLL_INTERVAL_MS,
-        forever: true,
+        waitForTask: {
+          logger: this.logger,
+          minTimeout: POLL_INTERVAL_MS,
+          maxTimeout: POLL_INTERVAL_MS,
+          forever: true,
+        },
       });
       const docCount = reindexResult.total;
       if (docCount === 0) {
@@ -95,11 +96,12 @@ export class HistorySnapshotClient {
         script: HISTORY_SNAPSHOT_RESET_SCRIPT,
         params: { timestampNow },
         signal: abortSignal,
-        waitForCompletion: false,
-        logger: this.logger,
-        minTimeout: POLL_INTERVAL_MS,
-        maxTimeout: POLL_INTERVAL_MS,
-        forever: true,
+        waitForTask: {
+          logger: this.logger,
+          minTimeout: POLL_INTERVAL_MS,
+          maxTimeout: POLL_INTERVAL_MS,
+          forever: true,
+        },
       });
       await this.updateGlobalStateOnSuccess(globalState);
       return {
@@ -110,9 +112,7 @@ export class HistorySnapshotClient {
       };
     } catch (err) {
       const caughtError = err instanceof Error ? err : new Error(String(err));
-      this.logger.error(
-        `history snapshot failed: ${caughtError.message}, stack: ${caughtError.stack}`
-      );
+      this.logger.error(`history snapshot failed: ${caughtError.message}`, { error: caughtError });
       await this.updateGlobalStateOnError(globalState, caughtError);
       return { ok: false, error: new Error('History snapshot failed') };
     }

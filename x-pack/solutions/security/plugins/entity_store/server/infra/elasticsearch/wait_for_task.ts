@@ -39,6 +39,10 @@ export const waitForTaskToComplete = async <T>({
 }: WaitForTaskOptions): Promise<T> => {
   return pRetry(
     async () => {
+      if (signal?.aborted) {
+        throw new pRetry.AbortError('Task polling aborted');
+      }
+
       const taskResponse = await esClient.tasks.get(
         { task_id: String(taskId), wait_for_completion: false },
         { signal }
@@ -55,6 +59,11 @@ export const waitForTaskToComplete = async <T>({
       if (!taskResponse.completed) {
         logger?.debug(`Waiting for task "${taskId}" to complete...`);
         throw new Error(`Waiting for task "${taskId}" to complete...`);
+      }
+
+      const failures = (taskResponse.response as { failures?: unknown[] } | undefined)?.failures;
+      if (failures?.length) {
+        logger?.warn(`Task "${taskId}" completed with ${failures.length} document failures`);
       }
 
       return taskResponse.response as T;

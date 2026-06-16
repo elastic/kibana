@@ -13,6 +13,7 @@ import type {
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { waitForTaskToComplete } from './wait_for_task';
+import type { WaitForTaskOptions } from './wait_for_task';
 
 const BATCH_SIZE = 5 * 1024 * 1024; // 5MB
 const RETRY_ON_CONFLICT = 3;
@@ -23,18 +24,14 @@ export interface UpdateByQueryWithScriptOptions {
   script: string;
   params: Record<string, unknown>;
   signal?: AbortSignal;
-  waitForCompletion?: boolean;
-  logger?: Logger;
-  minTimeout?: number;
-  maxTimeout?: number;
-  forever?: boolean;
+  waitForTask?: Omit<WaitForTaskOptions, 'esClient' | 'taskId' | 'signal'>;
 }
 
 export const updateByQueryWithScript = async (
   esClient: ElasticsearchClient,
   options: UpdateByQueryWithScriptOptions
 ): Promise<{ updated: number; total: number }> => {
-  const { index, query, script, params, signal } = options;
+  const { index, query, script, params, signal, waitForTask } = options;
   const body = {
     index,
     query,
@@ -42,7 +39,7 @@ export const updateByQueryWithScript = async (
     // Uses conflicts: 'proceed' so Elasticsearch continues on version conflicts.
     // Conflicted documents are not updated.
     conflicts: 'proceed' as const,
-    wait_for_completion: options.waitForCompletion ?? true,
+    wait_for_completion: waitForTask === undefined,
     script: {
       source: script,
       lang: 'painless' as const,
@@ -50,19 +47,16 @@ export const updateByQueryWithScript = async (
     },
   };
 
-  if (options.waitForCompletion === false) {
+  if (waitForTask !== undefined) {
     const { task } = await esClient.updateByQuery(body, { signal });
     if (task == null) {
       throw new Error('updateByQuery did not return a task id');
     }
     const response = await waitForTaskToComplete<UpdateByQueryResponse>({
+      ...waitForTask,
       esClient,
       taskId: task,
-      logger: options.logger,
       signal,
-      minTimeout: options.minTimeout,
-      maxTimeout: options.maxTimeout,
-      forever: options.forever,
     });
     return { updated: response.updated ?? 0, total: response.total ?? 0 };
   }
