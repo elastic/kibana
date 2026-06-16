@@ -7,4 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Warnings } from '@kbn/dashboard-plugin/server/api/types';
+import type { LinksItem } from '../../common/content_management';
+
 export type ExportJsonStatus = 'loading' | 'success' | 'error';
+
+/** The response body type for sanitizing a dashboard. */
+export interface LinksSanitizeResponseBody {
+  data: LinksItem;
+  warnings: Warnings;
+}

@@ -34,7 +34,7 @@ import type { ExportJsonSanitizedState } from './types';
 
 export type ExportJsonPanelProps<SanitizedState extends object> =
   ExportJsonSanitizedState<SanitizedState> & {
-    apiPath: string;
+    apiPath?: string;
     onRetry: () => void;
   };
 
@@ -344,7 +344,7 @@ export const ExportJsonPanel = <State extends object, SanitizedState extends obj
   );
 
   const openInConsoleRequest = useMemo(
-    () => `POST kbn:${apiPath}\n${jsonValue}`,
+    () => (apiPath ? `POST kbn:${apiPath}\n${jsonValue}` : undefined),
     [apiPath, jsonValue]
   );
 

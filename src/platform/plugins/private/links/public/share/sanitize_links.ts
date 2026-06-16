@@ -7,18 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DashboardSanitizeResponseBody, DashboardState, LinksState } from '../../server';
-import { DASHBOARD_INTERNAL_API_PATH } from '../../common/constants';
+import type { LinksState } from '../../server';
 import { coreServices } from '../services/kibana_services';
+import type { LinksSanitizeResponseBody } from './types';
 
 export async function sanitizeLinks(state: LinksState) {
-  const result = await coreServices.http.post<DashboardSanitizeResponseBody>(
-    `/api/links/_sanitize`,
-    {
-      version: '1',
-      body: JSON.stringify(state),
-    }
-  );
+  const result = await coreServices.http.post<LinksSanitizeResponseBody>(`/api/links/_sanitize`, {
+    version: '1',
+    body: JSON.stringify(state),
+  });
 
   return {
     data: result.data,
