@@ -13,8 +13,8 @@ import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
 import { getAvailableConnectors } from '@kbn/gen-ai-functional-testing';
 
 export interface EvaluationTestOptions extends ScoutTestOptions {
-  connector: AvailableConnectorWithId;
-  evaluationConnector: AvailableConnectorWithId;
+  connectorParam: AvailableConnectorWithId;
+  evaluationConnectorParam: AvailableConnectorWithId;
   repetitions: number;
   timeout?: number;
 }
@@ -91,8 +91,8 @@ export function createPlaywrightEvalsConfig({
             name: connector.id,
             use: {
               ...project.use,
-              connector,
-              evaluationConnector,
+              connectorParam: connector,
+              evaluationConnectorParam: evaluationConnector,
               repetitions: experimentRepetitions,
             },
           };
