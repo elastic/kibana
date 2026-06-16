@@ -8,6 +8,7 @@
  */
 
 import type { ActionContext } from '../../connector_spec';
+import { generateSecretsSchemaFromSpec } from '../../lib/generate_secrets_schema_from_spec';
 import { GithubConnector } from './github';
 
 // Mock withMcpClient so action handlers don't need a real MCP transport.
@@ -52,6 +53,15 @@ describe('GithubConnector', () => {
       expect(bearerType).toEqual(
         expect.objectContaining({ type: 'bearer', label: 'Personal Access Token (PAT)' })
       );
+    });
+
+    it('existing connectors with bearer auth still pass schema validation', () => {
+      const schema = generateSecretsSchemaFromSpec(GithubConnector.auth, {
+        isEarsEnabled: true,
+        isEarsExperimentalEnabled: true,
+      });
+      const result = schema.safeParse({ authType: 'bearer', token: 'some-legacy-token' });
+      expect(result.success).toBe(true);
     });
 
     it('supports oauth_authorization_code with correct GitHub defaults', () => {

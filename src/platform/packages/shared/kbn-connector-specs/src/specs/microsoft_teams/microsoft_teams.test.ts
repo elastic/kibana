@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ActionContext } from '../../connector_spec';
+import type { ActionContext, AuthTypeDef } from '../../connector_spec';
+import { generateSecretsSchemaFromSpec } from '../../lib/generate_secrets_schema_from_spec';
 import { MicrosoftTeams } from './microsoft_teams';
 
 interface GraphCollectionResponse<T = unknown> {
@@ -66,20 +67,42 @@ describe('MicrosoftTeams', () => {
   });
 
   describe('auth', () => {
-    it('should support ears, oauth_authorization_code, oauth_client_credentials, and oauth_client_credentials_private_key_jwt', () => {
+    it('should support ears, oauth_authorization_code, oauth_client_credentials, and oauth_client_credentials_private_key_jwt as visible options', () => {
       const { auth } = MicrosoftTeams;
       expect(auth).toBeDefined();
-      expect(auth?.types).toHaveLength(4);
-      expect(auth?.types[0]).toEqual(
+      const visibleTypes = auth?.types.filter(
+        (t) => typeof t === 'string' || !(t as AuthTypeDef).hidden
+      );
+      expect(visibleTypes).toHaveLength(4);
+      expect(visibleTypes?.[0]).toEqual(
         expect.objectContaining({ type: 'ears', label: 'Quick Connect OAuth 2.0' })
       );
-      expect(auth?.types[1]).toEqual(expect.objectContaining({ type: 'oauth_authorization_code' }));
-      expect(auth?.types[2]).toEqual(
+      expect(visibleTypes?.[1]).toEqual(
+        expect.objectContaining({ type: 'oauth_authorization_code' })
+      );
+      expect(visibleTypes?.[2]).toEqual(
         expect.objectContaining({ type: 'oauth_client_credentials', warn: true })
       );
-      expect(auth?.types[3]).toEqual(
+      expect(visibleTypes?.[3]).toEqual(
         expect.objectContaining({ type: 'oauth_client_credentials_private_key_jwt', warn: true })
       );
+    });
+
+    it('bearer auth is hidden (not shown in picker) but retained for existing connectors', () => {
+      const bearerDef = MicrosoftTeams.auth?.types.find(
+        (t): t is AuthTypeDef => typeof t === 'object' && t.type === 'bearer'
+      );
+      expect(bearerDef).toBeDefined();
+      expect(bearerDef?.hidden).toBe(true);
+    });
+
+    it('existing connectors with bearer auth still pass schema validation', () => {
+      const schema = generateSecretsSchemaFromSpec(MicrosoftTeams.auth, {
+        isEarsEnabled: true,
+        isEarsExperimentalEnabled: true,
+      });
+      const result = schema.safeParse({ authType: 'bearer', token: 'some-legacy-token' });
+      expect(result.success).toBe(true);
     });
 
     it('should have correct oauth_authorization_code defaults', () => {

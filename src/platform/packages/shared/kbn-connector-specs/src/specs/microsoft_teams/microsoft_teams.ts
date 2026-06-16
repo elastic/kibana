@@ -163,6 +163,10 @@ export const MicrosoftTeams: ConnectorSpec = {
           },
         },
       },
+      // Hidden, but retained so existing connectors created with bearer (delegated)
+      // auth continue to pass schema validation. The runtime handler still supports
+      // bearer as a delegated auth mode; it is no longer offered in the picker.
+      { type: 'bearer', hidden: true, defaults: {} },
     ],
   },
 
