@@ -157,7 +157,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/kubernetes_flow.spec.ts",
-        "line": 34,
+        "line": 20,
         "column": 9
       }
     },
@@ -173,7 +173,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/kubernetes_flow.spec.ts",
-        "line": 43,
+        "line": 30,
         "column": 9
       }
     },
@@ -189,23 +189,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/kubernetes_flow.spec.ts",
-        "line": 53,
-        "column": 9
-      }
-    },
-    {
-      "id": "ac68e3762339a89-41c48861e2508e0",
-      "title": "Kubernetes Onboarding navigating to /kubernetes renders the V1 experience when V2 is disabled",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/kubernetes_flow.spec.ts",
-        "line": 81,
+        "line": 40,
         "column": 9
       }
     },

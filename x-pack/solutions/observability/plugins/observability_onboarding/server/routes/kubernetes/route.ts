@@ -45,7 +45,7 @@ export interface HasKubernetesDataRouteResponse {
 const createKubernetesOnboardingFlowRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'POST /internal/observability_onboarding/kubernetes/flow',
   params: t.type({
-    body: t.type({ pkgName: t.literal('kubernetes_otel') }),
+    body: t.type({ pkgName: t.union([t.literal('kubernetes'), t.literal('kubernetes_otel')]) }),
   }),
   security: {
     authz: {
@@ -55,7 +55,7 @@ const createKubernetesOnboardingFlowRoute = createObservabilityOnboardingServerR
     },
   },
   async handler(resources): Promise<CreateKubernetesOnboardingFlowRouteResponse> {
-    const { context, request, plugins, services, kibanaVersion, config } = resources;
+    const { context, request, plugins, services, kibanaVersion, config, params } = resources;
     const {
       elasticsearch: { client },
       featureFlags,
@@ -87,18 +87,23 @@ const createKubernetesOnboardingFlowRoute = createObservabilityOnboardingServerR
       ((await featureFlags.getBooleanValue(IS_MANAGED_OTLP_SERVICE_ENABLED, false)) &&
         Boolean(managedOtlpServiceUrl));
 
-    const apiKeyPromise = isManagedOtlpServiceAvailable
-      ? createManagedOtlpServiceApiKey(client.asCurrentUser, `ingest-otel-k8s`)
-      : createShipperApiKey(client.asCurrentUser, 'otel-kubernetes', true);
+    const apiKeyPromise =
+      params.body.pkgName === 'kubernetes'
+        ? createShipperApiKey(client.asCurrentUser, 'kubernetes_onboarding', true)
+        : isManagedOtlpServiceAvailable
+        ? createManagedOtlpServiceApiKey(client.asCurrentUser, `ingest-otel-k8s`)
+        : createShipperApiKey(client.asCurrentUser, 'otel-kubernetes', true);
 
     const [{ encoded: apiKeyEncoded }, elasticAgentVersionInfo] = await Promise.all([
       apiKeyPromise,
       getAgentVersionInfo(fleetPluginStart, kibanaVersion),
       // System package is always required
       packageClient.ensureInstalledPackage({ pkgName: 'system' }),
-      // Kubernetes package is required for both classic kubernetes and otel
+      // The EA flow uses this package directly; EDOT stack values also reference its assets.
       packageClient.ensureInstalledPackage({ pkgName: 'kubernetes' }),
-      packageClient.ensureInstalledPackage({ pkgName: 'kubernetes_otel' }),
+      params.body.pkgName === 'kubernetes_otel'
+        ? packageClient.ensureInstalledPackage({ pkgName: 'kubernetes_otel' })
+        : undefined,
     ]);
 
     const elasticsearchUrlList = plugins.cloud?.setup?.elasticsearchUrl

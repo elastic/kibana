@@ -19,6 +19,7 @@ import {
   FirehosePage,
   OtelApmPage,
   CloudForwarderPage,
+  KubernetesPage,
   KubernetesOtelPage,
 } from './pages';
 import {
@@ -92,6 +93,9 @@ export function ObservabilityOnboardingFlow() {
         </Route>
         <Route key="kubernetes-otel" exact path="/kubernetes">
           <KubernetesOtelPage />
+        </Route>
+        <Route key="kubernetes-elastic-agent" exact path="/kubernetes/elastic-agent">
+          <KubernetesPage />
         </Route>
         <Route key="otel-kubernetes-redirect" exact path="/otel-kubernetes">
           <Redirect to={`/kubernetes${kubernetesRedirectSearch}`} />

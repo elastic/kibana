@@ -37,6 +37,7 @@ jest.mock('../..', () => ({
   OtelApmPage: () => null,
   CloudForwarderPage: () => null,
   KubernetesOtelPage: () => <div data-test-subj="kubernetesOtelPageStub" />,
+  KubernetesPage: () => <div data-test-subj="kubernetesEaPageStub" />,
 }));
 
 jest.mock('../../../shared/use_flow_breadcrumbs', () => ({
@@ -134,9 +135,9 @@ describe('Kubernetes routes', () => {
     });
   });
 
-  it('falls through to the landing page at /kubernetes/elastic-agent', () => {
+  it('renders the hidden Kubernetes Elastic Agent flow at /kubernetes/elastic-agent', () => {
     renderFlow(false, '/kubernetes/elastic-agent');
-    expect(screen.getByTestId('landingPageStub')).toBeInTheDocument();
+    expect(screen.getByTestId('kubernetesEaPageStub')).toBeInTheDocument();
     expect(screen.queryByTestId('kubernetesOtelPageStub')).toBeNull();
   });
 });

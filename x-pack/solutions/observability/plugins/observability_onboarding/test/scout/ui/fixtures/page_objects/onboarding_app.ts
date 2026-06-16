@@ -140,7 +140,7 @@ export class OnboardingApp {
       /(aws-logs-virtual|azure-logs-virtual|gcp-logs-virtual|firehose-quick-start)/;
     if (!nonRouting.test(cardSelector)) {
       const urlPattern =
-        /.*\/(auto-detect|kubernetes|otel-logs|otel-kubernetes|apm-virtual|otel-virtual|synthetics-virtual)/;
+        /.*\/(auto-detect|kubernetes|otel-logs|apm-virtual|otel-virtual|synthetics-virtual)/;
 
       // Retry click + URL check to handle race conditions where the card
       // is rendered but React click handlers aren't yet attached after a re-render
