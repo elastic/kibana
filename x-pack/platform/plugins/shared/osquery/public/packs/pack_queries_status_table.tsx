@@ -581,14 +581,21 @@ const ErrorsColumnResults: React.FC<ScheduledQueryErrorsProps> = ({
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            isDisabled={!errorsData?.total}
-            onClick={handleErrorsToggle}
-            iconType={expanded ? 'chevronSingleUp' : 'chevronSingleDown'}
-            aria-label={i18n.translate('xpack.osquery.pack.queriesTable.errorsAriaLabel', {
+          <EuiToolTip
+            content={i18n.translate('xpack.osquery.pack.queriesTable.errorsAriaLabel', {
               defaultMessage: 'Error details',
             })}
-          />
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              isDisabled={!errorsData?.total}
+              onClick={handleErrorsToggle}
+              iconType={expanded ? 'chevronSingleUp' : 'chevronSingleDown'}
+              aria-label={i18n.translate('xpack.osquery.pack.queriesTable.errorsAriaLabel', {
+                defaultMessage: 'Error details',
+              })}
+            />
+          </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlexItem>
