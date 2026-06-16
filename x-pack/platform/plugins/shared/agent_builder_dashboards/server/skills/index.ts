@@ -7,3 +7,4 @@
 
 export { registerSkills } from './register_skills';
 export { dashboardManagementSkill } from './dashboard_management_skill';
+export { vegaVisualizationSkill } from './vega_visualization_skill';

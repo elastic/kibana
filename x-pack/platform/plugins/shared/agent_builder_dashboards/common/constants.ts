@@ -23,4 +23,5 @@ const dashboardTool = (toolName: string) => {
  */
 export const dashboardTools = {
   manageDashboard: dashboardTool('manage_dashboard'),
+  createVegaVisualization: dashboardTool('create_vega_visualization'),
 } as const;

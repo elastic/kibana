@@ -14,12 +14,15 @@ import type {
 } from '@kbn/agent-builder-dashboards-common';
 import {
   DASHBOARD_ATTACHMENT_TYPE,
+  VEGA_VISUALIZATION_ATTACHMENT_TYPE,
   isDashboardAttachment,
+  vegaVisualizationAttachmentDataSchema,
 } from '@kbn/agent-builder-dashboards-common';
 import type { Logger } from '@kbn/core/server';
 import { type AttachmentVersion, getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import { z } from '@kbn/zod/v4';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
+import { VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
 import type { DashboardOperation } from './operations';
 import {
   DASHBOARD_OPERATION_FAILURE_TYPES,
@@ -83,8 +86,30 @@ const resolvePanelsFromAttachment = (
     ];
   }
 
+  if (type === VEGA_VISUALIZATION_ATTACHMENT_TYPE) {
+    const parseResult = vegaVisualizationAttachmentDataSchema.safeParse(data);
+    if (!parseResult.success) {
+      throw new Error('Vega attachment does not contain a valid Vega payload.');
+    }
+    const { title, spec } = parseResult.data;
+    return [
+      {
+        type: VISUALIZE_EMBEDDABLE_TYPE,
+        config: {
+          title,
+          savedVis: {
+            title,
+            type: 'vega',
+            params: { spec: JSON.stringify(spec) },
+            data: { aggs: [], searchSource: {} },
+          },
+        },
+      },
+    ];
+  }
+
   throw new Error(
-    `Attachment type "${type}" is not supported in add_panels. Only "${AttachmentType.visualization}" is supported.`
+    `Attachment type "${type}" is not supported in add_panels. Supported types: "${AttachmentType.visualization}", "${VEGA_VISUALIZATION_ATTACHMENT_TYPE}".`
   );
 };
 

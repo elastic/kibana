@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { DASHBOARD_ATTACHMENT_TYPE } from './constants';
+export { DASHBOARD_ATTACHMENT_TYPE, VEGA_VISUALIZATION_ATTACHMENT_TYPE } from './constants';
 
 export {
   panelGridSchema,
@@ -27,3 +27,16 @@ export { dashboardStateToAttachmentData, attachmentDataToDashboardState } from '
 export { DEFAULT_TIME_RANGE, EMPTY_DASHBOARD_STATE } from './dashboard_state_helpers';
 
 export { isDashboardAttachment } from './is_dashboard_attachment';
+
+export {
+  VEGA_DIALECTS,
+  vegaVisualizationAttachmentDataSchema,
+  isVegaVisualizationAttachment,
+} from './vega_visualization_types';
+
+export type {
+  VegaDialect,
+  VegaVisualizationAttachmentData,
+  VegaVisualizationAttachment,
+  PendingVegaVisualizationAttachment,
+} from './vega_visualization_types';

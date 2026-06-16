@@ -10,6 +10,8 @@ import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments'
 import type { Logger } from '@kbn/core/server';
 import { resolvePanelsFromAttachments } from './manage_dashboard/utils';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
+import { VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
+import { VEGA_VISUALIZATION_ATTACHMENT_TYPE } from '@kbn/agent-builder-dashboards-common';
 
 const createMockLogger = (): Logger =>
   ({
@@ -79,6 +81,38 @@ describe('resolvePanelsFromAttachments', () => {
         type: 'metric',
       },
     });
+  });
+
+  it('resolves vega-visualization attachments into legacy_vis panels', async () => {
+    const spec = {
+      $schema: 'https://vega.github.io/schema/vega-lite/v6.json',
+      mark: 'bar',
+    };
+    const attachments = createAttachmentManager({
+      'vega-1': toVersionedAttachment({
+        id: 'vega-1',
+        type: VEGA_VISUALIZATION_ATTACHMENT_TYPE,
+        data: { title: 'Top errors', spec, dialect: 'vega-lite' },
+      }),
+    });
+
+    const result = resolvePanelsFromAttachments({
+      attachmentInputs: [{ attachmentId: 'vega-1', grid: { x: 0, y: 0, w: 24, h: 12 } }],
+      attachments,
+      logger: createMockLogger(),
+    });
+
+    expect(result.failures).toEqual([]);
+    expect(result.panels).toHaveLength(1);
+    const panel = result.panels[0];
+    expect(panel.type).toBe(VISUALIZE_EMBEDDABLE_TYPE);
+    const config = panel.config as {
+      title: string;
+      savedVis: { type: string; params: { spec: string } };
+    };
+    expect(config.title).toBe('Top errors');
+    expect(config.savedVis.type).toBe('vega');
+    expect(JSON.parse(config.savedVis.params.spec)).toEqual(spec);
   });
 
   it('treats unsupported attachment types as panel-resolution failures', async () => {

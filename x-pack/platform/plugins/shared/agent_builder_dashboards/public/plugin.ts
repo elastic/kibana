@@ -7,6 +7,7 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
+import { VEGA_VISUALIZATION_ATTACHMENT_TYPE } from '@kbn/agent-builder-dashboards-common';
 import type {
   AgentBuilderDashboardsPluginPublicSetup,
   AgentBuilderDashboardsPluginPublicStart,
@@ -14,6 +15,7 @@ import type {
   AgentBuilderDashboardsPluginPublicStartDependencies,
 } from './types';
 import { registerDashboardAttachmentUiDefinition } from './attachment_types';
+import { vegaVisualizationAttachmentDefinition } from './components/vega_visualization_attachment';
 
 export class AgentBuilderDashboardsPlugin
   implements
@@ -51,6 +53,11 @@ export class AgentBuilderDashboardsPlugin
       data: plugins.data,
       dashboardPlugin: plugins.dashboard,
     });
+
+    plugins.agentBuilder.attachments.addAttachmentType(
+      VEGA_VISUALIZATION_ATTACHMENT_TYPE,
+      vegaVisualizationAttachmentDefinition
+    );
 
     return {};
   }
