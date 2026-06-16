@@ -7,6 +7,7 @@
 
 import type { Logger, IScopedClusterClient } from '@kbn/core/server';
 import type { EsqlToRecords } from '@elastic/elasticsearch/lib/helpers';
+import type { ProjectRouting } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import { fetchEvents, regroupEvents, enrichEventDocData } from './fetch_events_graph';
 import {
   fetchEntities,
@@ -40,6 +41,7 @@ export interface FetchGraphParams {
   esQuery?: EsQuery;
   entityIds?: EntityId[];
   pinnedIds?: string[];
+  projectRouting?: ProjectRouting;
 }
 
 export interface FetchGraphResult {
@@ -70,6 +72,7 @@ export const fetchGraph = async ({
   esQuery,
   entityIds,
   pinnedIds,
+  projectRouting,
 }: FetchGraphParams): Promise<FetchGraphResult> => {
   // Only fetch events when originEventIds or esQuery are provided
   const hasOriginEventIds = originEventIds.length > 0;
@@ -97,6 +100,7 @@ export const fetchGraph = async ({
           spaceId,
           esQuery,
           pinnedIds,
+          projectRouting,
         }).catch((error) => {
           logger.error(`Failed to fetch events: ${error.message}`);
           throw error;

@@ -6,7 +6,7 @@
  */
 
 import type { UserIdAndName } from '../base/users';
-import type { ToolOrigin } from '../tools/definition';
+import type { ToolOrigin, ToolType } from '../tools/definition';
 import type { ToolResult } from '../tools/tool_result';
 import type { ExecutionStatus, SerializedExecutionError } from '../agents/execution_status';
 import type {
@@ -130,6 +130,7 @@ export interface ToolCallWithResult {
    */
   tool_call_group_id?: string;
   tool_origin?: ToolOrigin;
+  tool_type?: ToolType;
 }
 
 export type ToolCallStep = ConversationRoundStepMixin<
@@ -259,6 +260,24 @@ export enum ConversationRoundStatus {
   completed = 'completed',
   /** round has been interrupted and is awaiting user input */
   awaitingPrompt = 'awaiting_prompt',
+}
+
+/**
+ * Frontend-only derived status for a conversation in the sidebar list.
+ * Computed client-side from the backend `read` flag, `ConversationRoundStatus`,
+ * and the active-streams map — never returned directly by any API endpoint.
+ */
+export enum ConversationDisplayStatus {
+  /** conversation has been read, no pending activity */
+  read = 'read',
+  /** conversation has new content the user hasn't seen */
+  unread = 'unread',
+  /** agent is actively streaming a response */
+  inProgress = 'in_progress',
+  /** agent is paused and waiting for user confirmation (HITL) */
+  awaitingPrompt = 'awaiting_prompt',
+  /** last round ended with an error */
+  error = 'error',
 }
 
 /**

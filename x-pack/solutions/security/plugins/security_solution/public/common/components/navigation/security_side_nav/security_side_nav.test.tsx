@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { AGENT_BUILDER_NAV_AT_TOP_FLAG } from '@kbn/navigation-plugin/public';
 import { render } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 import { SecurityPageName } from '../../../../app/types';
@@ -18,6 +19,7 @@ import { track } from '../../../lib/telemetry';
 import { useKibana } from '../../../lib/kibana';
 import { getNavCategories } from './categories';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
+import { SecurityGroupName } from '@kbn/security-solution-navigation';
 
 const settingsNavLink: NavigationLink = {
   id: SecurityPageName.administration,
@@ -33,6 +35,24 @@ const settingsNavLink: NavigationLink = {
     },
   ],
 };
+
+const launchpadNavLink: NavigationLink = {
+  id: SecurityPageName.launchpad,
+  title: 'Launchpad',
+  description: 'Launchpad',
+  categories: [{ label: 'Launchpad category', linkIds: [] }],
+  links: [
+    {
+      id: SecurityPageName.landing,
+      title: 'Get started',
+    },
+    {
+      id: SecurityPageName.siemReadiness,
+      title: 'SIEM Readiness',
+    },
+  ],
+};
+
 const alertsNavLink: NavigationLink = {
   id: SecurityPageName.alerts,
   title: 'alerts',
@@ -114,7 +134,7 @@ describe('SecuritySideNav', () => {
             position: 'top',
           },
         ],
-        categories: getNavCategories(AIChatExperience.Classic, false, false, false),
+        categories: getNavCategories(AIChatExperience.Classic, false, false, false, false),
         tracker: track,
       })
     );
@@ -177,18 +197,15 @@ describe('SecuritySideNav', () => {
     );
   });
 
-  it('should render launchpad item', () => {
-    mockUseNavLinks.mockReturnValue([
-      { id: SecurityPageName.launchpad, title: 'Launchpad', sideNavIcon: 'rocket' },
-    ]);
+  it('should render launchpad item in footer', () => {
+    mockUseNavLinks.mockReturnValue([alertsNavLink, launchpadNavLink, settingsNavLink]);
     renderNav();
     expect(mockSolutionSideNav).toHaveBeenCalledWith(
       expect.objectContaining({
         items: expect.arrayContaining([
           expect.objectContaining({
-            id: SecurityPageName.launchpad,
-            label: 'Launchpad',
-            position: 'top',
+            id: SecurityGroupName.launchpad,
+            position: 'bottom',
           }),
         ]),
       })
@@ -196,7 +213,7 @@ describe('SecuritySideNav', () => {
   });
 
   it('should place administration item in footer', () => {
-    mockUseNavLinks.mockReturnValue([alertsNavLink, settingsNavLink]);
+    mockUseNavLinks.mockReturnValue([alertsNavLink, launchpadNavLink, settingsNavLink]);
     renderNav();
     expect(mockSolutionSideNav).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -322,7 +339,7 @@ describe('SecuritySideNav', () => {
       renderNav();
       expect(mockSolutionSideNav).toHaveBeenCalledWith(
         expect.objectContaining({
-          categories: getNavCategories(AIChatExperience.Classic, true, false, false),
+          categories: getNavCategories(AIChatExperience.Classic, true, false, false, false),
         })
       );
     });
@@ -332,7 +349,7 @@ describe('SecuritySideNav', () => {
       renderNav();
       expect(mockSolutionSideNav).toHaveBeenCalledWith(
         expect.objectContaining({
-          categories: getNavCategories(AIChatExperience.Classic, false, false, false),
+          categories: getNavCategories(AIChatExperience.Classic, false, false, false, false),
         })
       );
     });
@@ -346,7 +363,7 @@ describe('SecuritySideNav', () => {
       renderNav();
       expect(mockSolutionSideNav).toHaveBeenCalledWith(
         expect.objectContaining({
-          categories: getNavCategories(AIChatExperience.Classic, false, true, false),
+          categories: getNavCategories(AIChatExperience.Classic, false, true, false, false),
         })
       );
     });
@@ -356,7 +373,7 @@ describe('SecuritySideNav', () => {
       renderNav();
       expect(mockSolutionSideNav).toHaveBeenCalledWith(
         expect.objectContaining({
-          categories: getNavCategories(AIChatExperience.Classic, false, false, false),
+          categories: getNavCategories(AIChatExperience.Classic, false, false, false, false),
         })
       );
     });
@@ -391,7 +408,7 @@ describe('SecuritySideNav', () => {
               position: 'top',
             }),
           ],
-          categories: getNavCategories(AIChatExperience.Classic, false, false, true),
+          categories: getNavCategories(AIChatExperience.Classic, false, false, true, false),
           tracker: track,
         })
       );
@@ -421,7 +438,47 @@ describe('SecuritySideNav', () => {
               position: 'top',
             }),
           ],
-          categories: getNavCategories(AIChatExperience.Classic, false, false, true),
+          categories: getNavCategories(AIChatExperience.Classic, false, false, true, false),
+        })
+      );
+    });
+
+    it('should render agentBuilder external link at top when chat experience is Agent and isAgentBuilderNavAtTop is true', () => {
+      (useKibana().services.settings.client.get$ as jest.Mock).mockImplementation(() =>
+        new BehaviorSubject(AIChatExperience.Agent).asObservable()
+      );
+      (useKibana().services.featureFlags.getBooleanValue as jest.Mock).mockImplementation(
+        (flag: string) => flag === AGENT_BUILDER_NAV_AT_TOP_FLAG
+      );
+      mockUseNavLinks.mockReturnValue([alertsNavLink]);
+      renderNav();
+      expect(mockSolutionSideNav).toHaveBeenCalledWith(
+        expect.objectContaining({
+          selectedId: SecurityPageName.alerts,
+          items: [
+            expect.objectContaining({
+              id: SecurityPageName.externalLinkAgentBuilder,
+              label: 'Agents',
+              position: 'top',
+            }),
+            expect.objectContaining({
+              id: SecurityPageName.externalLinkDiscover,
+              label: 'Discover',
+              position: 'top',
+            }),
+            expect.objectContaining({
+              id: SecurityPageName.externalLinkWorkflows,
+              label: 'Workflows',
+              position: 'top',
+            }),
+            expect.objectContaining({
+              href: '/alerts',
+              id: SecurityPageName.alerts,
+              label: 'alerts',
+              position: 'top',
+            }),
+          ],
+          categories: getNavCategories(AIChatExperience.Agent, false, false, true, true),
         })
       );
     });

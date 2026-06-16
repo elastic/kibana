@@ -226,7 +226,7 @@ export const OverviewPage: FC = () => {
                         <EuiButton
                           color="text"
                           target="_self"
-                          onClick={() => navigateToPath('/aiops/log_categorization_index_select')}
+                          onClick={() => navigateToPath('/aiops/log_categorization')}
                           data-test-subj="mlOverviewCardLogPatternAnalysisButton"
                         >
                           <EuiIcon aria-hidden={true} type="pattern" />
@@ -265,7 +265,7 @@ export const OverviewPage: FC = () => {
                         <EuiButton
                           color="text"
                           target="_self"
-                          onClick={() => navigateToPath('/aiops/log_rate_analysis_index_select')}
+                          onClick={() => navigateToPath('/aiops/log_rate_analysis')}
                           data-test-subj="mlOverviewCardLogRateAnalysisButton"
                         >
                           <EuiIcon aria-hidden={true} type="chartBarVertical" />
@@ -304,9 +304,7 @@ export const OverviewPage: FC = () => {
                         <EuiButton
                           color="text"
                           target="_self"
-                          onClick={() =>
-                            navigateToPath('/aiops/change_point_detection_index_select')
-                          }
+                          onClick={() => navigateToPath('/aiops/change_point_detection')}
                           data-test-subj="mlOverviewCardChangePointDetectionButton"
                           aria-label={i18n.translate(
                             'xpack.ml.overview.changePointDetection.findChangesButton',
