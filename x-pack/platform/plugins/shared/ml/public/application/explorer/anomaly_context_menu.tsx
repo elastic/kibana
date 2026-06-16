@@ -142,8 +142,6 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
     (timeRange?: TimeRange): Partial<AnomalyChartsEmbeddableState> => {
       const config = getDefaultEmbeddablePanelConfig(mergedGroupsAndJobsIds, queryString);
 
-      // When adding anomaly charts to Dashboard, we want to respect the Dashboard's time range
-      // so we are not passing the time range here
       return {
         ...config,
         ...(timeRange ? { time_range: timeRange } : {}),
@@ -186,6 +184,7 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
       const stateTransfer = embeddable!.getStateTransfer();
 
       const embeddableInput: Partial<AnomalyChartsEmbeddableState> = {
+        // Dashboard panels should inherit the dashboard time range, so do not serialize time_range.
         ...getEmbeddableInput(),
         title: newTitle,
         description: newDescription,
