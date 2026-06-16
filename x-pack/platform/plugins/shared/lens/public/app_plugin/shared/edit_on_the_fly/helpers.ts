@@ -24,7 +24,7 @@ import { getTime } from '@kbn/data-plugin/common';
 import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type {
   TypedLensSerializedState,
-  TextBasedPrivateState,
+  TextBasedPersistedState,
   TextBasedLayerColumn,
   MetricVisualizationState,
   DatasourceMap,
@@ -246,34 +246,30 @@ export const getSuggestions = async (
  * trendline layer from the previous attributes and updates its query and
  * metric columns to match the new main layer.
  */
+type LensAttributes = TypedLensSerializedState['attributes'];
 type PartialMetricVis = Partial<MetricVisualizationState>;
 
-const getMetricVis = (attributes: TypedLensSerializedState['attributes']): PartialMetricVis =>
+const getMetricVis = (attributes: LensAttributes): PartialMetricVis =>
   attributes.state.visualization as PartialMetricVis;
 
-const getTextBasedDsState = (
-  attributes: TypedLensSerializedState['attributes']
-): { dsId: string; dsState: TextBasedPrivateState } | undefined => {
-  const dsId = Object.keys(attributes.state.datasourceStates)[0];
-  const dsState = attributes.state.datasourceStates[dsId];
-  return dsId && dsState ? { dsId, dsState: dsState as TextBasedPrivateState } : undefined;
-};
+const getTextBasedDsState = (attributes: LensAttributes): TextBasedPersistedState | undefined =>
+  attributes.state.datasourceStates.textBased;
 
 const preserveTrendlineLayer = (
-  attrs: TypedLensSerializedState['attributes'],
-  prevAttributes: TypedLensSerializedState['attributes'],
+  attrs: LensAttributes,
+  prevAttributes: LensAttributes,
   query: AggregateQuery
 ): void => {
   const prevVis = getMetricVis(prevAttributes);
   const { trendlineLayerId } = prevVis;
   if (!trendlineLayerId) return;
 
-  const prevDs = getTextBasedDsState(prevAttributes);
-  const prevTrendlineLayer = prevDs?.dsState.layers[trendlineLayerId];
+  const prevDsState = getTextBasedDsState(prevAttributes);
+  const prevTrendlineLayer = prevDsState?.layers[trendlineLayerId];
   if (!prevTrendlineLayer) return;
 
-  const newDs = getTextBasedDsState(attrs);
-  if (!newDs) return;
+  const newDsState = getTextBasedDsState(attrs);
+  if (!newDsState) return;
 
   const trendlineQuery = prevTrendlineLayer.timeField
     ? { esql: appendTimeBucketToEsqlQuery(query.esql, prevTrendlineLayer.timeField) }
@@ -284,7 +280,7 @@ const preserveTrendlineLayer = (
   // (e.g. metricAccessor → trendlineMetricAccessor). We update the
   // trendline columns to reflect any field changes in the new query.
   const newVis = getMetricVis(attrs);
-  const newMainLayer = newVis.layerId ? newDs.dsState.layers[newVis.layerId] : undefined;
+  const newMainLayer = newVis.layerId ? newDsState.layers[newVis.layerId] : undefined;
 
   const accessorPairs = [
     { from: newVis.metricAccessor, to: prevVis.trendlineMetricAccessor },
@@ -306,10 +302,10 @@ const preserveTrendlineLayer = (
     }
   }
 
-  attrs.state.datasourceStates[newDs.dsId] = {
-    ...newDs.dsState,
+  attrs.state.datasourceStates.textBased = {
+    ...newDsState,
     layers: {
-      ...newDs.dsState.layers,
+      ...newDsState.layers,
       [trendlineLayerId]: {
         ...prevTrendlineLayer,
         query: trendlineQuery,
