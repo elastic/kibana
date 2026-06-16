@@ -53,7 +53,9 @@ export const getContinuity = async ({
       // so the operator sees both facts in one finding rather than two separate bullets.
       const volumeContext =
         hasVolumeDrop && p.baseline7dAvg != null
-          ? ` (${p.volumeDropPct}% volume drop vs ~${Math.round(p.baseline7dAvg)} docs/day baseline)`
+          ? ` (${p.volumeDropPct}% volume drop vs ~${Math.round(
+              p.baseline7dAvg
+            )} docs/day baseline)`
           : '';
       actionableFindings.push({
         severity: 'CRITICAL' as const,
@@ -65,14 +67,18 @@ export const getContinuity = async ({
       actionableFindings.push({
         severity: 'CRITICAL' as const,
         type: 'volume_drop_critical' as const,
-        message: `Pipeline ${p.name} volume dropped ${p.volumeDropPct}% vs 7-day baseline (~${Math.round(p.baseline7dAvg!)} docs/day)`,
+        message: `Pipeline ${p.name} volume dropped ${
+          p.volumeDropPct
+        }% vs 7-day baseline (~${Math.round(p.baseline7dAvg!)} docs/day)`,
         resource: p.name,
       });
     } else if (isVolumeWarning) {
       actionableFindings.push({
         severity: 'WARNING' as const,
         type: 'volume_drop_warning' as const,
-        message: `Pipeline ${p.name} volume dropped ${p.volumeDropPct}% vs 7-day baseline (~${Math.round(p.baseline7dAvg!)} docs/day)`,
+        message: `Pipeline ${p.name} volume dropped ${
+          p.volumeDropPct
+        }% vs 7-day baseline (~${Math.round(p.baseline7dAvg!)} docs/day)`,
         resource: p.name,
       });
     }
