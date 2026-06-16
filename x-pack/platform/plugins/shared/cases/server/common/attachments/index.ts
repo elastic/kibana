@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { isPlainObject } from 'lodash';
 import {
   COMMENT_ATTACHMENT_TYPE,
   SECURITY_EVENT_ATTACHMENT_TYPE,
@@ -18,7 +17,6 @@ import {
   toUnifiedAttachmentType,
   toUnifiedPersistableStateAttachmentType,
 } from '../../../common/utils/attachments';
-import { AttachmentType } from '../../../common/types/domain';
 import type {
   AttachmentPersistedAttributes,
   UnifiedAttachmentAttributes,
@@ -37,40 +35,8 @@ export {
   getAttachmentSavedObjectType,
   resolveAttachmentSavedObjectType,
 } from './saved_object_type';
-
-/**
- * Returns a routing key for transformer selection (not necessarily a normalized unified type).
- * For legacy `persistableState` attachments this is `persistableStateAttachmentTypeId` (e.g. `.lens`);
- * for legacy `externalReference` attachments with a migrated subtype this resolves to the unified
- * type name (e.g., externalReference + typeId 'endpoint' → 'security.endpoint');
- * for all other shapes it is the top-level `type` (e.g. `user`, `alert`, unified `lens`).
- * Use `toUnifiedAttachmentType` / `toUnifiedPersistableStateAttachmentType` from migration utils to normalize.
- * @throws Error if attributes is null or not an object
- */
-export function getAttachmentTypeFromAttributes(attributes: unknown): string {
-  if (!isPlainObject(attributes) || attributes === null) {
-    throw new Error('Invalid attributes: expected non-null object');
-  }
-  const { type, persistableStateAttachmentTypeId, externalReferenceAttachmentTypeId } =
-    attributes as Record<string, unknown>;
-  if (typeof type !== 'string') {
-    throw new Error('Invalid attributes: missing attachment type');
-  }
-  if (
-    type === AttachmentType.persistableState &&
-    typeof persistableStateAttachmentTypeId === 'string'
-  ) {
-    return persistableStateAttachmentTypeId;
-  }
-  // For legacy external references, resolve to unified type if the subtype is migrated
-  if (
-    type === AttachmentType.externalReference &&
-    typeof externalReferenceAttachmentTypeId === 'string'
-  ) {
-    return EXTERNAL_REFERENCE_TYPE_MAP[externalReferenceAttachmentTypeId] ?? type;
-  }
-  return type;
-}
+// Re-exported so existing server call sites keep their `from '.'` import path.
+export { getAttachmentTypeFromAttributes } from '../../../common/utils/attachments';
 
 /** Set of all unified type names that map to external references */
 const UNIFIED_EXTERNAL_REFERENCE_TYPES = new Set(Object.values(EXTERNAL_REFERENCE_TYPE_MAP));
