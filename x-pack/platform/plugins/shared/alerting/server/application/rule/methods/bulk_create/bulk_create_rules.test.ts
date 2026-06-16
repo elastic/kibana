@@ -826,8 +826,11 @@ describe('bulkCreateRules', () => {
 
   describe('exitEarlyOnError', () => {
     test('default (false): keeps processing subsequent batches even after an SO per-row error', async () => {
-      const batch1Ids = Array.from({ length: 10 }, (_, i) => ({ id: `b1-${i}` }));
-      batch1Ids[0] = { id: 'b1-0', error: { message: 'conflict', statusCode: 409 } } as any;
+      const batch1Ids: Parameters<typeof buildBulkResponse>[0] = Array.from(
+        { length: 10 },
+        (_, i) => ({ id: `b1-${i}` })
+      );
+      batch1Ids[0] = { id: 'b1-0', error: { message: 'conflict', statusCode: 409 } };
       const batch2Ids = Array.from({ length: 10 }, (_, i) => ({ id: `b2-${i}` }));
       unsecuredSavedObjectsClient.bulkCreate
         .mockResolvedValueOnce(buildBulkResponse(batch1Ids))
@@ -847,8 +850,11 @@ describe('bulkCreateRules', () => {
 
     test('true: stops at the first SO per-row failure, returns prior successes', async () => {
       const batch1Ids = Array.from({ length: 10 }, (_, i) => ({ id: `b1-${i}` }));
-      const batch2Ids = Array.from({ length: 10 }, (_, i) => ({ id: `b2-${i}` }));
-      batch2Ids[0] = { id: 'b2-0', error: { message: 'conflict', statusCode: 409 } } as any;
+      const batch2Ids: Parameters<typeof buildBulkResponse>[0] = Array.from(
+        { length: 10 },
+        (_, i) => ({ id: `b2-${i}` })
+      );
+      batch2Ids[0] = { id: 'b2-0', error: { message: 'conflict', statusCode: 409 } };
       unsecuredSavedObjectsClient.bulkCreate
         .mockResolvedValueOnce(buildBulkResponse(batch1Ids))
         .mockResolvedValueOnce(buildBulkResponse(batch2Ids));

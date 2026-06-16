@@ -37,7 +37,7 @@ export interface PrepareRuleArgs<Params extends RuleParams> {
   username: string | null;
   id: string;
   rule: BulkCreateRulesItem<Params>;
-  apiKeysMap: Map<string, ApiKeyEntry>;
+  apiKeys: Map<string, ApiKeyEntry>;
 }
 
 export interface BulkCreateRulesItem<Params extends RuleParams = never> {

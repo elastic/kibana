@@ -13,11 +13,7 @@ import { SavedObjectsUtils } from '@kbn/core/server';
 import { RuleChangeTrackingAction, type RuleChangeTracking } from '@kbn/alerting-types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { getRuleCircuitBreakerErrorMessage, parseDuration } from '../../../../../common';
-import {
-  addGeneratedActionValues,
-  bulkScheduleTask,
-  updateMeta,
-} from '../../../../rules_client/lib';
+import { addGeneratedActionValues, bulkScheduleTask, updateMeta } from '../../../../rules_client/lib';
 import { validateRuleTypeParams } from '../../../../lib';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import {
@@ -42,7 +38,10 @@ import type {
   BulkCreateRulesResult,
   PreparedRule,
 } from './types';
-import { collectNewKeysToInvalidate, flushKeysToInvalidate, prepareRule } from './utils';
+import {
+  invalidateKeys,
+  prepareRule,
+} from './utils';
 import { logRuleChanges } from '../common_utils/log_rule_changes';
 
 export async function bulkCreateRules<Params extends RuleParams = never>(
@@ -92,7 +91,7 @@ export async function bulkCreateRules<Params extends RuleParams = never>(
   errors.push(...validationErrors);
 
   if (validationErrors.length > 0 && exitEarlyOnError) {
-    logger.warn(
+    logger.debug(
       `bulkCreateRules: exiting early on preValidate; ${validationErrors.length} rule(s) failed pre-flight, zero ES writes.`
     );
     return { successfulIds, errors, total };
@@ -272,8 +271,7 @@ async function runBatch<Params extends RuleParams>({
   // NOTE: the values below get mutated at different stages
   // in the process (ie if we fail schedule creation).
   const preparedRules = new Map<string, PreparedRule>();
-  const keysToInvalidate = new Set<string>();
-  const apiKeysMap = new Map<string, ApiKeyEntry>();
+  const apiKeys = new Map<string, ApiKeyEntry>();
   const errors: BulkOperationError[] = [];
 
   // Phase B1: per-rule prepare (high latency validation + API key generation).
@@ -287,7 +285,7 @@ async function runBatch<Params extends RuleParams>({
           username,
           id,
           rule,
-          apiKeysMap,
+          apiKeys,
         });
         if (prepared) preparedRules.set(id, prepared);
         else if (error) errors.push(error);
@@ -297,38 +295,36 @@ async function runBatch<Params extends RuleParams>({
   );
 
   if (strict && errors.length > 0) {
-    for (const k of collectNewKeysToInvalidate(apiKeysMap.values())) keysToInvalidate.add(k);
-    await flushKeysToInvalidate(keysToInvalidate, context);
+    await invalidateKeys(apiKeys.values(), context);
     return { successfulIds: [], errors };
   }
 
-  // No survivors? Flush any keys created and return.
+  // No survivors? Return early.
   if (preparedRules.size === 0) {
-    await flushKeysToInvalidate(keysToInvalidate, context);
     return { successfulIds: [], errors };
   }
 
   // Phase B2: schedule tasks for the surviving enabled subset.
-  const survivingEnabled = [...preparedRules.values()].filter((p) => p.enabled);
-  const newlyScheduledTaskIds = new Set<string>();
+  const enabledRules = [...preparedRules.values()].filter((p) => p.enabled);
+  const taskIds = new Set<string>();
 
-  if (survivingEnabled.length > 0) {
+  if (enabledRules.length > 0) {
+    const invalidApiKeys: ApiKeyEntry[] = [];
     try {
-      const scheduledTasks = await bulkScheduleTask(context, survivingEnabled);
-      scheduledTasks.forEach((t) => newlyScheduledTaskIds.add(t.id));
+      const scheduledTasks = await bulkScheduleTask(context, enabledRules);
+      scheduledTasks.forEach((t) => taskIds.add(t.id));
 
       // Silent per-task drops: bulkSchedule's `taskInstanceToAttributes` logs+skips
       // invalid instances. Diff requested vs returned and exclude the missing ones.
-      const dropped = survivingEnabled.filter((p) => !newlyScheduledTaskIds.has(p.id));
-      if (dropped.length > 0) {
-        logger.debug(`Excluding ${dropped.length} rule(s) from batch: task validation failed.`);
-        const message =
-          'Task scheduling silently dropped this rule (validation failure in task store)';
-        for (const { id, name } of dropped) {
-          const apiKey = apiKeysMap.get(id);
+      const skipped = enabledRules.filter((p) => !taskIds.has(p.id));
+      if (skipped.length > 0) {
+        logger.debug(`Excluding ${skipped.length} rule(s) from batch: task validation failed.`);
+        const message = 'Unable to schedule a task for this rule. Validation failure.';
+        for (const { id, name } of skipped) {
+          const apiKey = apiKeys.get(id);
           if (apiKey) {
-            for (const k of collectNewKeysToInvalidate([apiKey])) keysToInvalidate.add(k);
-            apiKeysMap.delete(id);
+            invalidApiKeys.push(apiKey);
+            apiKeys.delete(id);
           }
           preparedRules.delete(id);
           errors.push({ message, rule: { id, name } });
@@ -337,28 +333,28 @@ async function runBatch<Params extends RuleParams>({
     } catch (error) {
       // Whole-call TM throw: exclude enabled subset from the batch, continue.
       logger.debug(
-        `Excluding ${survivingEnabled.length} rule(s) from batch: task scheduling failed.`
+        `Excluding ${enabledRules.length} rule(s) from batch: task scheduling failed.`
       );
       const message = `Failed to schedule tasks: ${error.message}`;
       const status = error.output?.statusCode;
-      for (const { id, name } of survivingEnabled) {
-        const apiKey = apiKeysMap.get(id);
+      for (const { id, name } of enabledRules) {
+        const apiKey = apiKeys.get(id);
         if (apiKey) {
-          for (const k of collectNewKeysToInvalidate([apiKey])) keysToInvalidate.add(k);
-          apiKeysMap.delete(id);
+          invalidApiKeys.push(apiKey);
+          apiKeys.delete(id);
         }
         preparedRules.delete(id);
         errors.push({ message, status, rule: { id, name } });
       }
     }
+    await invalidateKeys(invalidApiKeys, context);
   }
 
   if (strict && errors.length > 0) {
-    for (const k of collectNewKeysToInvalidate(apiKeysMap.values())) keysToInvalidate.add(k);
-    if (newlyScheduledTaskIds.size > 0) {
-      await context.taskManager.bulkRemove([...newlyScheduledTaskIds]);
+    if (taskIds.size > 0) {
+      await context.taskManager.bulkRemove([...taskIds]);
     }
-    await flushKeysToInvalidate(keysToInvalidate, context);
+    await invalidateKeys(apiKeys.values(), context);
     return { successfulIds: [], errors };
   }
 
@@ -392,21 +388,20 @@ async function runBatch<Params extends RuleParams>({
       })
     );
   } catch (error) {
-    // Whole-call SO failure: invalidate keys, best-effort task cleanup.
+    // Whole-call SO failure: best-effort task cleanup, invalidate keys.
     // Surface as batch-wide SO failure so exitEarlyOnError can honour it.
-    for (const k of collectNewKeysToInvalidate(apiKeysMap.values())) keysToInvalidate.add(k);
-    if (newlyScheduledTaskIds.size > 0) {
+    if (taskIds.size > 0) {
       try {
-        await context.taskManager.bulkRemove([...newlyScheduledTaskIds]);
+        await context.taskManager.bulkRemove([...taskIds]);
       } catch (cleanupError) {
         logger.error(
-          `bulkCreateRules: failed to clean up tasks ${[...newlyScheduledTaskIds].join(
+          `bulkCreateRules: failed to clean up tasks ${[...taskIds].join(
             ', '
           )} after SO bulkCreate threw: ${cleanupError.message}`
         );
       }
     }
-    await flushKeysToInvalidate(keysToInvalidate, context);
+    await invalidateKeys(apiKeys.values(), context);
     const message = `Failed to bulk create rule saved objects: ${error.message}`;
     const status = error.output?.statusCode;
     for (const { id, name } of preparedRules.values()) {
@@ -421,6 +416,7 @@ async function runBatch<Params extends RuleParams>({
   const taskIdsToCleanUp: string[] = [];
   const successfulSavedObjects: Array<SavedObject<RawRule>> = [];
 
+  const failedEntries: ApiKeyEntry[] = [];
   for (const so of bulkResponse.saved_objects) {
     if (so.error) {
       errors.push({
@@ -429,14 +425,14 @@ async function runBatch<Params extends RuleParams>({
         rule: { id: so.id, name: preparedRules.get(so.id)?.name ?? 'n/a' },
       });
 
-      const apiKey = apiKeysMap.get(so.id);
+      const apiKey = apiKeys.get(so.id);
       if (apiKey) {
-        for (const k of collectNewKeysToInvalidate([apiKey])) keysToInvalidate.add(k);
+        failedEntries.push(apiKey);
       }
 
-      // Only ids we scheduled in Phase B3. Skipping caller-supplied id collisions
+      // Only ids we scheduled in Phase B2. Skipping caller-supplied id collisions
       // avoids nuking a pre-existing rule's task on a 409.
-      if (newlyScheduledTaskIds.has(so.id)) {
+      if (taskIds.has(so.id)) {
         taskIdsToCleanUp.push(so.id);
       }
     } else {
@@ -445,7 +441,7 @@ async function runBatch<Params extends RuleParams>({
     }
   }
 
-  // Single batched TM cleanup for per-row failures.
+  // Batched TM cleanup for per-row SO failures.
   if (taskIdsToCleanUp.length > 0) {
     try {
       logger.debug(`Cleaning up ${taskIdsToCleanUp.length} tasks where SO creation failed.`);
@@ -459,8 +455,7 @@ async function runBatch<Params extends RuleParams>({
     }
   }
 
-  // Single per-batch flush for all collected key invalidations.
-  await flushKeysToInvalidate(keysToInvalidate, context);
+  await invalidateKeys(failedEntries, context);
 
   // Per-rule change-history entries for SOs that actually persisted.
   if (successfulSavedObjects.length > 0) {

@@ -26,18 +26,9 @@ import {
 } from '../../../../rules_client/common';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import type { BulkOperationError, RulesClientContext } from '../../../../rules_client/types';
-import type { RuleDomain, RuleParams } from '../../types';
+import type { RuleParams } from '../../types';
 import { transformRuleDomainToRuleAttributes } from '../../transforms';
 import type { PreparedRule, PrepareRuleArgs, ApiKeyEntry } from './types';
-
-export const collectNewKeysToInvalidate = (entries: Iterable<ApiKeyEntry>): string[] => {
-  const keys: string[] = [];
-  for (const { apiKey, uiamApiKey, apiKeyCreatedByUser } of entries) {
-    if (apiKey && !apiKeyCreatedByUser) keys.push(apiKey);
-    if (uiamApiKey && !apiKeyCreatedByUser) keys.push(uiamApiKey);
-  }
-  return keys;
-};
 
 export const prepareRule = async <Params extends RuleParams>({
   context,
@@ -45,7 +36,7 @@ export const prepareRule = async <Params extends RuleParams>({
   username,
   id,
   rule,
-  apiKeysMap,
+  apiKeys,
 }: PrepareRuleArgs<Params>): Promise<{ prepared?: PreparedRule; error?: BulkOperationError }> => {
   const { allowMissingConnectorSecrets } = rule;
 
@@ -84,7 +75,7 @@ export const prepareRule = async <Params extends RuleParams>({
         shouldUpdateApiKey: true,
         errorMessage: 'Error creating rule: could not create API key',
       });
-      apiKeysMap.set(id, {
+      apiKeys.set(id, {
         apiKey: apiKeyProps.apiKey ?? null,
         uiamApiKey: apiKeyProps.uiamApiKey ?? null,
         apiKeyCreatedByUser: apiKeyProps.apiKeyCreatedByUser ?? null,
@@ -137,7 +128,7 @@ export const prepareRule = async <Params extends RuleParams>({
         monitoring: getDefaultMonitoringRuleDomainProperties(lastRunTimestamp.toISOString()),
         revision: 0,
         running: false,
-      } as unknown as RuleDomain<Params>,
+      },
       params: { legacyId, paramsWithRefs: updatedParams },
     });
 
@@ -158,7 +149,7 @@ export const prepareRule = async <Params extends RuleParams>({
     };
     return { prepared };
   } catch (err) {
-    apiKeysMap.delete(id);
+    apiKeys.delete(id);
     const error = {
       message: err.message,
       status: err.output?.statusCode,
@@ -168,16 +159,20 @@ export const prepareRule = async <Params extends RuleParams>({
   }
 };
 
-export const flushKeysToInvalidate = async (
-  keysToInvalidate: Set<string>,
+export const invalidateKeys = async (
+  entries: Iterable<ApiKeyEntry>,
   context: RulesClientContext
 ): Promise<void> => {
-  if (keysToInvalidate.size === 0) return;
-  // Note: ES Call via savedObjectsClient.bulkCreate() under the hood
+  const keys: string[] = [];
+  for (const { apiKey, uiamApiKey, apiKeyCreatedByUser } of entries) {
+    if (apiKey && !apiKeyCreatedByUser) keys.push(apiKey);
+    if (uiamApiKey && !apiKeyCreatedByUser) keys.push(uiamApiKey);
+  }
+  if (keys.length === 0) return;
+  // Writes pending-invalidation SOs; logs errors internally, never throws.
   await bulkMarkApiKeysForInvalidation(
-    { apiKeys: [...keysToInvalidate] },
+    { apiKeys: [...new Set(keys)] },
     context.logger,
     context.unsecuredSavedObjectsClient
   );
-  keysToInvalidate.clear();
 };
