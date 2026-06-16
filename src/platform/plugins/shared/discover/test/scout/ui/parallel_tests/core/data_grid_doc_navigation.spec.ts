@@ -19,6 +19,8 @@ spaceTest.describe(
   'Discover data grid - document navigation',
   { tag: tags.deploymentAgnostic },
   () => {
+    spaceTest.use({ viewport: { width: 1600, height: 1200 } });
+
     spaceTest.beforeAll(async ({ scoutSpace }) => {
       await scoutSpace.savedObjects.load(testData.DISCOVER_KBN_ARCHIVE);
       await scoutSpace.uiSettings.setDefaultIndex(testData.DEFAULT_DATA_VIEW);
@@ -56,6 +58,7 @@ spaceTest.describe(
           '@timestamp',
           'addExistsFilterButton'
         );
+        await pageObjects.discover.waitUntilSearchingHasFinished();
 
         await expect
           .poll(() =>

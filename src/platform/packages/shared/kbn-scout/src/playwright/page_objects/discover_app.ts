@@ -412,19 +412,21 @@ export class DiscoverApp {
    * Click a field action in the document-viewer table, e.g. `addExistsFilterButton`.
    */
   async clickFieldActionInDocViewer(fieldName: string, actionName: string) {
-    const flyout = this.page.testSubj.locator('docViewerFlyout');
     await this.page.testSubj.click('docViewerTab-doc_view_table');
 
+    const actionTestSubj = `${actionName}-${fieldName}`;
+
     await expect(async () => {
-      const nameElement = flyout.locator(`[data-test-subj="tableDocViewRow-${fieldName}-name"]`);
-      await nameElement.evaluate((el) => {
+      const nameCell = this.page.testSubj.locator(`tableDocViewRow-${fieldName}-name`);
+      await nameCell.evaluate((el) => {
         el.scrollIntoView({ block: 'center', inline: 'nearest' });
       });
-      await nameElement.hover();
-      await nameElement.click();
+      await nameCell.hover();
 
-      const action = flyout.locator(`[data-test-subj="${actionName}-${fieldName}"]`);
-      await action.waitFor({ state: 'visible' });
+      const action = this.page.testSubj.locator(actionTestSubj);
+      await expect(action).toBeVisible();
+      await action.scrollIntoViewIfNeeded();
+      await action.hover();
       await action.click();
     }).toPass({ timeout: 15_000 });
   }
