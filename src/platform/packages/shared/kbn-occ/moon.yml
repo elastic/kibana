@@ -16,10 +16,7 @@ project:
   channel: ''
   owner: '@elastic/workflows-eng'
   sourceRoot: src/platform/packages/shared/kbn-occ
-dependsOn:
-  - '@kbn/core'
-  - '@kbn/es-errors'
-  - '@kbn/logging'
+dependsOn: []
 tags:
   - shared-server
   - package
