@@ -166,6 +166,71 @@ describe('AssetManagerClient', () => {
     expect(mockEngineDescriptorClient.update).not.toHaveBeenCalled();
   });
 
+  describe('getPrivileges', () => {
+    let checkPrivilegesWithRequestMock: jest.Mock;
+    let getLocalIndexPatternsMock: jest.Mock;
+    let getPrivilegesClient: AssetManagerClient;
+
+    beforeEach(() => {
+      checkPrivilegesWithRequestMock = jest.fn().mockResolvedValue({});
+      getLocalIndexPatternsMock = jest.fn();
+
+      getPrivilegesClient = new AssetManagerClient({
+        logger: loggerMock.create(),
+        esClient: {} as jest.Mocked<ElasticsearchClient>,
+        taskManager: {} as jest.Mocked<TaskManagerStartContract>,
+        engineDescriptorClient:
+          mockEngineDescriptorClient as unknown as import('../saved_objects').EngineDescriptorClient,
+        globalStateClient:
+          mockGlobalStateClient as unknown as import('../saved_objects').EntityStoreGlobalStateClient,
+        ccsLogExtractionStateClient: {
+          delete: jest.fn().mockResolvedValue(undefined),
+        } as unknown as import('../saved_objects/ccs_log_extraction_state').CcsLogExtractionStateClient,
+        namespace,
+        isServerless: false,
+        logsExtractionClient: {
+          getLocalIndexPatterns: getLocalIndexPatternsMock,
+        } as unknown as import('../logs_extraction').LogsExtractionClient,
+        security: {
+          authz: {
+            checkPrivilegesDynamicallyWithRequest: jest
+              .fn()
+              .mockReturnValue(checkPrivilegesWithRequestMock),
+            actions: {
+              savedObject: {
+                get: jest.fn().mockReturnValue('some-kibana-privilege'),
+              },
+            },
+          },
+        } as unknown as SecurityPluginStart,
+        analytics: {
+          reportEvent: jest.fn(),
+        } as unknown as import('../../telemetry/events').TelemetryReporter,
+        savedObjectsClient: {} as SavedObjectsClientContract,
+      });
+    });
+
+    it('strips negative index patterns before forwarding to _has_privileges', async () => {
+      getLocalIndexPatternsMock.mockResolvedValue([
+        'logs-*',
+        '-logs-cloud_security_posture.*',
+        '.entities.entities-default',
+        '-logs-excluded-*',
+      ]);
+
+      await getPrivilegesClient.getPrivileges({} as KibanaRequest);
+
+      const [calledWith] = checkPrivilegesWithRequestMock.mock.calls[0];
+      const indexKeys = Object.keys(calledWith.elasticsearch.index);
+
+      expect(indexKeys.every((key) => !key.startsWith('-'))).toBe(true);
+      expect(indexKeys).toContain('logs-*');
+      expect(indexKeys).toContain('.entities.entities-default');
+      expect(indexKeys).not.toContain('-logs-cloud_security_posture.*');
+      expect(indexKeys).not.toContain('-logs-excluded-*');
+    });
+  });
+
   describe('logsExtraction resolution on install', () => {
     const existingLogsExtraction = {
       additionalIndexPatterns: ['existing-*'],

@@ -901,6 +901,7 @@ export const waitForAlertsToPopulate = (alertCountThreshold = 1) => {
     () => {
       cy.log('Waiting for alerts to appear');
       refreshPage();
+      cy.waitForNetworkIdle('/internal/search/privateRuleRegistryAlertsSearchStrategy', 500);
       cy.get([EMPTY_ALERT_TABLE, ALERTS_TABLE_COUNT].join(', '));
       return cy.root().then(($el) => {
         const emptyTableState = $el.find(EMPTY_ALERT_TABLE);

@@ -2747,6 +2747,75 @@ describe('EPM template', () => {
         })
       );
     });
+
+    it('should complete successfully when packageInstallation.maxConcurrentDatastreamOperations is set in config', async () => {
+      appContextService.start(
+        createAppContextStartContractMock({
+          packageInstallation: { maxConcurrentDatastreamOperations: 5 },
+        })
+      );
+
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.indices.getDataStream.mockResponse({
+        data_streams: [{ name: 'logs.prefix1-default' }],
+      } as any);
+      esClient.indices.simulateTemplate.mockResponse({
+        template: {
+          settings: { index: {} },
+          mappings: { properties: {} },
+        },
+      } as any);
+
+      const logger = loggerMock.create();
+      await updateCurrentWriteIndices(esClient, logger, [
+        {
+          templateName: 'logs.prefix1',
+          indexTemplate: {
+            index_patterns: ['logs.prefix1-*'],
+            template: {
+              settings: { index: {} },
+              mappings: { properties: {} },
+            },
+          } as any,
+        },
+      ]);
+
+      const putMappingsCall = esClient.indices.putMapping.mock.calls.map(([{ index }]) => index);
+      expect(putMappingsCall).toHaveLength(1);
+      expect(putMappingsCall[0]).toBe('logs.prefix1-default');
+    });
+
+    it('should complete successfully when packageInstallation config is absent (falls back to constant)', async () => {
+      appContextService.start(createAppContextStartContractMock());
+
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.indices.getDataStream.mockResponse({
+        data_streams: [{ name: 'logs.prefix1-default' }],
+      } as any);
+      esClient.indices.simulateTemplate.mockResponse({
+        template: {
+          settings: { index: {} },
+          mappings: { properties: {} },
+        },
+      } as any);
+
+      const logger = loggerMock.create();
+      await updateCurrentWriteIndices(esClient, logger, [
+        {
+          templateName: 'logs.prefix1',
+          indexTemplate: {
+            index_patterns: ['logs.prefix1-*'],
+            template: {
+              settings: { index: {} },
+              mappings: { properties: {} },
+            },
+          } as any,
+        },
+      ]);
+
+      const putMappingsCall = esClient.indices.putMapping.mock.calls.map(([{ index }]) => index);
+      expect(putMappingsCall).toHaveLength(1);
+    });
   });
 
   describe('getTemplate — event-ingested suppression when agentIdVerification is enabled', () => {

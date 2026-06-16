@@ -6,6 +6,7 @@
  */
 
 import type { QueryClient } from '@kbn/react-query';
+import { isCancelledError } from '@kbn/react-query';
 import { parseEsqlQuery, injectMetadataId } from '@kbn/securitysolution-utils';
 import type { FormData, ValidationError, ValidationFunc } from '../../../../../shared_imports';
 import type { FieldValueQueryBar } from '../../../../rule_creation_ui/components/query_bar_field';
@@ -13,12 +14,20 @@ import { fetchEsqlQueryColumns } from '../../../logic/esql_query_columns';
 import { ESQL_ERROR_CODES } from './error_codes';
 import * as i18n from './translations';
 
+interface AbortControllerRef {
+  current: AbortController | null;
+}
+
 interface EsqlQueryValidatorFactoryParams {
   queryClient: QueryClient;
+  abortControllerRef?: AbortControllerRef;
+  isUnmountedRef?: { current: boolean };
 }
 
 export function esqlQueryValidatorFactory({
   queryClient,
+  abortControllerRef,
+  isUnmountedRef,
 }: EsqlQueryValidatorFactoryParams): ValidationFunc<FormData, string, FieldValueQueryBar> {
   return async (...args) => {
     const [{ value }] = args;
@@ -39,6 +48,14 @@ export function esqlQueryValidatorFactory({
         return;
       }
 
+      if (isUnmountedRef?.current) return;
+
+      abortControllerRef?.current?.abort();
+      const abortController = new AbortController();
+      if (abortControllerRef) {
+        abortControllerRef.current = abortController;
+      }
+
       let queryToValidate = esqlQuery;
       try {
         queryToValidate = injectMetadataId(esqlQuery);
@@ -46,13 +63,22 @@ export function esqlQueryValidatorFactory({
         // injection failed — validate with original query
       }
 
-      const columns = await fetchEsqlQueryColumns({ esqlQuery: queryToValidate, queryClient });
+      const columns = await fetchEsqlQueryColumns({
+        esqlQuery: queryToValidate,
+        queryClient,
+        signal: abortController.signal,
+      });
 
       const hasIdColumn = columns.some((col) => col.id === '_id');
       if (!hasIdColumn) {
         return constructMissingIdFieldWarning();
       }
     } catch (error) {
+      // Ignore errors caused by request cancellation (navigating away or a newer
+      // validation superseding this one). These are not user-facing problems.
+      if (isCancelledError(error) || error?.name === 'AbortError') {
+        return;
+      }
       return constructValidationError(error);
     }
   };

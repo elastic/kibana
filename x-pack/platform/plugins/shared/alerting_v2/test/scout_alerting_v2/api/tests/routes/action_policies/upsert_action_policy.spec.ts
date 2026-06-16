@@ -9,13 +9,13 @@ import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
 import { MAX_NAME_LENGTH } from '@kbn/alerting-v2-schemas';
 import {
-  ALL_ROLE,
+  ALERTING_V2_ACTION_POLICIES_ALL_AND_RULES_READ_ROLE,
+  ALERTING_V2_ACTION_POLICIES_READ_ROLE,
   apiTest,
   buildCreateActionPolicyData,
   buildCreateRuleData,
   getActionPolicyUrl,
   NO_ACCESS_ROLE,
-  READ_ROLE,
   testData,
 } from '../../../fixtures';
 
@@ -24,7 +24,9 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
   let writerHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ requestAuth }) => {
-    writerCredentials = await requestAuth.getApiKeyForCustomRole(ALL_ROLE);
+    writerCredentials = await requestAuth.getApiKeyForCustomRole(
+      ALERTING_V2_ACTION_POLICIES_ALL_AND_RULES_READ_ROLE
+    );
     writerHeaders = { ...writerCredentials.apiKeyHeader };
   });
 
@@ -319,7 +321,9 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
   apiTest(
     'authorization: 403 with read-only alerting_v2 privileges',
     async ({ apiClient, requestAuth }) => {
-      const readerCredentials = await requestAuth.getApiKeyForCustomRole(READ_ROLE);
+      const readerCredentials = await requestAuth.getApiKeyForCustomRole(
+        ALERTING_V2_ACTION_POLICIES_READ_ROLE
+      );
 
       const response = await apiClient.put(getActionPolicyUrl('upsert-unauthorized-write'), {
         headers: { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader },

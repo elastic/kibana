@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import useInterval from 'react-use/lib/useInterval';
 import {
   EuiBasicTable,
   EuiBadge,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSuperDatePicker,
@@ -17,26 +19,40 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { Discovery } from '@kbn/streams-schema';
+import { RUNNING_POLL_INTERVAL_MS } from '../../../constants';
 import {
   useFetchDiscoveriesEntities,
   useFetchDiscoveryHistory,
 } from '../../../../../hooks/sig_events/use_fetch_discoveries_entities';
-import { useTimefilter } from '../../../../../hooks/use_timefilter';
-import { useTimeRange } from '../../../../../hooks/use_time_range';
-import { useTimeRangeUpdate } from '../../../../../hooks/use_time_range_update';
-import { EntityDetailFlyout } from '../entity_detail_flyout';
+import { useTabTimeRange } from '../../../../../hooks/sig_events/use_tab_time_range';
+import { useSignificantEventsDiscoveryContext } from '../../context/significant_events_discovery_context';
+import { DiscoveryFlyout } from './discovery_flyout';
+import { FindSignificantEventsButton } from '../streams_view/find_significant_events_button';
 import { formatTimestamp } from '../../../../../util/formatters';
+import { DISCOVERY_KIND_LABELS } from '../shared/translations';
+import { DISCOVERY_KIND_COLORS } from '../shared/constants';
 
 const MAX_VISIBLE_STREAMS = 3;
 
 const columns: Array<EuiBasicTableColumn<Discovery>> = [
   {
-    field: '@timestamp',
+    field: 'discovered_at',
     name: i18n.translate('xpack.streams.discoveriesTab.timestampColumn', {
       defaultMessage: 'Timestamp',
     }),
-    sortable: true,
-    render: (timestamp: string) => formatTimestamp(timestamp),
+    width: '200px',
+    render: (discoveredAt: string | undefined, discovery: Discovery) =>
+      formatTimestamp(discoveredAt ?? discovery['@timestamp']),
+  },
+  {
+    field: 'kind',
+    name: i18n.translate('xpack.streams.discoveriesTab.kindColumn', {
+      defaultMessage: 'Kind',
+    }),
+    width: '90px',
+    render: (kind: Discovery['kind']) => (
+      <EuiBadge color={DISCOVERY_KIND_COLORS[kind]}>{DISCOVERY_KIND_LABELS[kind]}</EuiBadge>
+    ),
   },
   {
     field: 'title',
@@ -46,53 +62,81 @@ const columns: Array<EuiBasicTableColumn<Discovery>> = [
     truncateText: true,
   },
   {
-    field: 'kind',
-    name: i18n.translate('xpack.streams.discoveriesTab.kindColumn', {
-      defaultMessage: 'Kind',
+    name: i18n.translate('xpack.streams.discoveriesTab.streamsColumn', {
+      defaultMessage: 'Streams',
     }),
+    width: '160px',
+    render: (discovery: Discovery) => {
+      const streamNames = [
+        ...new Set(
+          (discovery.detections ?? []).map((d) => d.stream_name).filter((s): s is string => !!s)
+        ),
+      ];
+      return (
+        <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+          {streamNames.slice(0, MAX_VISIBLE_STREAMS).map((name) => (
+            <EuiFlexItem key={name} grow={false} style={{ maxWidth: '200px' }}>
+              <EuiBadge color="hollow">{name}</EuiBadge>
+            </EuiFlexItem>
+          ))}
+          {streamNames.length > MAX_VISIBLE_STREAMS && (
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="hollow">+{streamNames.length - MAX_VISIBLE_STREAMS}</EuiBadge>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      );
+    },
   },
   {
     field: 'criticality',
     name: i18n.translate('xpack.streams.discoveriesTab.criticalityColumn', {
       defaultMessage: 'Criticality',
     }),
-    render: (value: number | undefined) => (value ? String(value) : '-'),
+    width: '100px',
+    render: (value: number | undefined) => (value != null ? String(value) : '-'),
   },
   {
-    field: 'stream_names',
-    name: i18n.translate('xpack.streams.discoveriesTab.streamsColumn', {
-      defaultMessage: 'Streams',
+    field: 'confidence',
+    name: i18n.translate('xpack.streams.discoveriesTab.confidenceColumn', {
+      defaultMessage: 'Confidence',
     }),
-    render: (streamNames: string[]) => (
-      <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-        {(streamNames ?? []).slice(0, MAX_VISIBLE_STREAMS).map((name) => (
-          <EuiFlexItem key={name} grow={false} style={{ maxWidth: '200px' }}>
-            <EuiBadge color="hollow">{name}</EuiBadge>
-          </EuiFlexItem>
-        ))}
-        {(streamNames ?? []).length > MAX_VISIBLE_STREAMS && (
-          <EuiFlexItem grow={false}>
-            <EuiBadge color="hollow">+{streamNames.length - MAX_VISIBLE_STREAMS}</EuiBadge>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-    ),
+    width: '100px',
+    render: (value: number | undefined) => (value != null ? `${value}%` : '-'),
   },
 ];
 
-export const DiscoveriesTab = () => {
-  const { timeState } = useTimefilter();
-  const { rangeFrom, rangeTo } = useTimeRange();
-  const { updateTimeRange } = useTimeRangeUpdate();
+const DEFAULT_DISCOVERIES_RANGE = { from: 'now-7d', to: 'now' };
 
-  const { data, isLoading, refetch, pagination, setPagination } = useFetchDiscoveriesEntities({
-    from: timeState.start,
-    to: timeState.end,
-  });
+export const DiscoveriesTab = () => {
+  const { pickerRange, absoluteRange, handleTimeChange, refreshAbsoluteRange } =
+    useTabTimeRange(DEFAULT_DISCOVERIES_RANGE);
+
+  const { isRunning, isCanceling, handleRun, handleCancel } =
+    useSignificantEventsDiscoveryContext();
+
+  // Discovery state is shared at the provider level, so re-resolve this tab's
+  // locked time range locally when a run finishes (isRunning true -> false) to
+  // surface documents generated after the range was frozen.
+  const wasRunningRef = useRef(isRunning);
+  useEffect(() => {
+    if (wasRunningRef.current && !isRunning) {
+      refreshAbsoluteRange();
+    }
+    wasRunningRef.current = isRunning;
+  }, [isRunning, refreshAbsoluteRange]);
+
+  const { data, isLoading, isError, refetch, pagination, setPagination } =
+    useFetchDiscoveriesEntities({
+      from: absoluteRange.from,
+      to: absoluteRange.to,
+    });
+  useInterval(refetch, isRunning ? RUNNING_POLL_INTERVAL_MS : null);
+
   const [selectedDiscovery, setSelectedDiscovery] = useState<Discovery | undefined>();
 
   const { data: historyData, isLoading: isHistoryLoading } = useFetchDiscoveryHistory(
-    selectedDiscovery?.discovery_id
+    selectedDiscovery?.discovery_slug
   );
 
   const onTableChange = ({ page }: { page?: { index: number; size: number } }) => {
@@ -108,96 +152,50 @@ export const DiscoveriesTab = () => {
     pageSizeOptions: [10, 25, 50],
   };
 
-  const flyoutDetails = selectedDiscovery
-    ? [
-        {
-          title: i18n.translate('xpack.streams.discoveriesTab.flyout.discoveryId', {
-            defaultMessage: 'Discovery ID',
-          }),
-          description: selectedDiscovery.discovery_id,
-        },
-        {
-          title: i18n.translate('xpack.streams.discoveriesTab.flyout.title', {
-            defaultMessage: 'Title',
-          }),
-          description: selectedDiscovery.title,
-        },
-        {
-          title: i18n.translate('xpack.streams.discoveriesTab.flyout.kind', {
-            defaultMessage: 'Kind',
-          }),
-          description: selectedDiscovery.kind,
-        },
-        {
-          title: i18n.translate('xpack.streams.discoveriesTab.flyout.criticality', {
-            defaultMessage: 'Criticality',
-          }),
-          description: selectedDiscovery.criticality ? String(selectedDiscovery.criticality) : '-',
-        },
-        {
-          title: i18n.translate('xpack.streams.discoveriesTab.flyout.confidence', {
-            defaultMessage: 'Confidence',
-          }),
-          description: selectedDiscovery.confidence ? String(selectedDiscovery.confidence) : '-',
-        },
-        {
-          title: i18n.translate('xpack.streams.discoveriesTab.flyout.summary', {
-            defaultMessage: 'Summary',
-          }),
-          description: selectedDiscovery.summary,
-        },
-        {
-          title: i18n.translate('xpack.streams.discoveriesTab.flyout.rootCause', {
-            defaultMessage: 'Root Cause',
-          }),
-          description: selectedDiscovery.root_cause,
-        },
-        {
-          title: i18n.translate('xpack.streams.discoveriesTab.flyout.streams', {
-            defaultMessage: 'Streams',
-          }),
-          description: (selectedDiscovery.stream_names ?? []).join(', ') || '-',
-        },
-        {
-          title: i18n.translate('xpack.streams.discoveriesTab.flyout.rules', {
-            defaultMessage: 'Rules',
-          }),
-          description: (selectedDiscovery.rule_names ?? []).join(', ') || '-',
-        },
-      ]
-    : [];
-
-  const historyEntries = useMemo(
-    () =>
-      (historyData?.hits ?? []).map((entry) => ({
-        timestamp: formatTimestamp(entry['@timestamp']),
-        summary: entry.criticality
-          ? i18n.translate('xpack.streams.discoveriesTab.historySummaryWithCriticality', {
-              defaultMessage: '{title} (criticality: {criticality})',
-              values: { title: entry.title, criticality: String(entry.criticality) },
-            })
-          : entry.title,
-      })),
-    [historyData]
-  );
-
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup justifyContent="flexEnd">
-          <EuiFlexItem grow={false}>
+        <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
+          <EuiFlexItem>
             <EuiSuperDatePicker
-              start={rangeFrom}
-              end={rangeTo}
-              onTimeChange={({ start: s, end: e }) => updateTimeRange({ from: s, to: e })}
-              onRefresh={() => refetch()}
+              start={pickerRange.from}
+              end={pickerRange.to}
+              onTimeChange={handleTimeChange}
+              onRefresh={() => {
+                refreshAbsoluteRange();
+                refetch();
+              }}
               compressed
+              width="full"
               showUpdateButton="iconOnly"
               updateButtonProps={{ size: 's', fill: false }}
             />
           </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <FindSignificantEventsButton
+              onRun={handleRun}
+              onCancel={handleCancel}
+              isRunning={isRunning}
+              isCanceling={isCanceling}
+              isDisabled={isRunning}
+              size="s"
+            />
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
+      {isError && (
+        <EuiFlexItem grow={false}>
+          <EuiCallOut
+            announceOnMount
+            title={i18n.translate('xpack.streams.discoveriesTab.fetchError', {
+              defaultMessage: 'Failed to load discoveries',
+            })}
+            color="danger"
+            iconType="error"
+            size="s"
+          />
+        </EuiFlexItem>
+      )}
       <EuiFlexItem grow={false}>
         <EuiBasicTable
           tableCaption={i18n.translate('xpack.streams.discoveriesTab.tableCaption', {
@@ -220,11 +218,9 @@ export const DiscoveriesTab = () => {
         />
       </EuiFlexItem>
       {selectedDiscovery && (
-        <EntityDetailFlyout
-          title={selectedDiscovery.title}
-          entityId={selectedDiscovery.discovery_id}
-          details={flyoutDetails}
-          history={historyEntries}
+        <DiscoveryFlyout
+          discovery={selectedDiscovery}
+          history={historyData?.hits ?? []}
           isHistoryLoading={isHistoryLoading}
           onClose={() => setSelectedDiscovery(undefined)}
         />

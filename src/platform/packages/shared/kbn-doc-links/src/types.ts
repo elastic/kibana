@@ -47,6 +47,7 @@ export interface DocLinks {
     readonly tailSamplingPolicies: string;
     readonly elasticAgent: string;
     readonly storageExplorer: string;
+    readonly infrastructureTab: string;
     readonly spanCompression: string;
     readonly transactionSampling: string;
     readonly indexLifecycleManagement: string;
@@ -162,6 +163,7 @@ export interface DocLinks {
     readonly e5Model: string;
     readonly elasticInferenceService: string;
     readonly elasticInferenceServicePricing: string;
+    readonly elasticInferenceServiceSupportedModels: string;
     readonly elser: string;
     readonly engines: string;
     readonly indexApi: string;
@@ -171,6 +173,7 @@ export interface DocLinks {
     readonly ingestPipelines: string;
     readonly knnSearch: string;
     readonly knnSearchCombine: string;
+    readonly knnSearchTuneForSpeedAccuracy: string;
     readonly languageAnalyzers: string;
     readonly languageClients: string;
     readonly licenseManagement: string;
@@ -184,8 +187,15 @@ export interface DocLinks {
     readonly searchLabs: string;
     readonly searchLabsRepo: string;
     readonly semanticSearch: string;
+    readonly semanticSearchGetStarted: string;
     readonly searchTemplates: string;
     readonly semanticTextField: string;
+    readonly esAsVectorDatabase: string;
+    readonly vectorSearch: string;
+    readonly vectorSearchEmbeddingModels: string;
+    readonly vectorSearchBringOwnVectors: string;
+    readonly vectorSearchStorageOptimization: string;
+    readonly vectorSearchVectorsAndEmbeddings: string;
     readonly start: string;
     readonly supportedNlpModels: string;
     readonly syncRules: string;
@@ -577,9 +587,11 @@ export interface DocLinks {
     agentPolicy: string;
     agentlessIntegrations: string;
     api: string;
+    managedOtlp: string;
     uninstallAgent: string;
     installAndUninstallIntegrationAssets: string;
     elasticAgentInputConfiguration: string;
+    elasticAgentInputConditions: string;
     policySecrets: string;
     remoteESOoutput: string;
     performancePresets: string;

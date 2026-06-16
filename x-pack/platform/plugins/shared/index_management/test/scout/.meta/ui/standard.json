@@ -1,5 +1,5 @@
 {
-  "sha1": "d9178629ffe494abb7bfc638dff00db4a4f6bf03",
+  "sha1": "1f64f92def0d9b9bad1301449ea6972489da50e1",
   "tests": [
     {
       "id": "e7ca8c886a58426-d57f60fe1d6db3b",
@@ -194,6 +194,20 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_template_wizard.spec.ts",
         "line": 25,
+        "column": 7
+      }
+    },
+    {
+      "id": "334b2c159a85a53-5c9af8158963588",
+      "title": "Index Management — management sidebar smoke data section contains index_management and transform for index_management_user role",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/management_sidebar_smoke.spec.ts",
+        "line": 32,
         "column": 7
       }
     }

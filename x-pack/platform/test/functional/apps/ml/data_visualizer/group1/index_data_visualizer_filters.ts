@@ -20,7 +20,6 @@ const PINNED_FILTER = {
   negated: false,
 };
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const ml = getService('ml');
   const dataViews = getService('dataViews');
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'settings', 'header']);
@@ -60,7 +59,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         `${testData.suiteTitle} loads the index data visualizer page`
       );
       await ml.jobSourceSelection.selectSourceForIndexBasedDataVisualizer(
-        testData.sourceIndexOrSavedSearch
+        testData.sourceIndexOrSavedSearch,
+        testData.isSavedSearch
       );
 
       await ml.testExecution.logTestStep(`${testData.suiteTitle} loads data for full time range`);
@@ -101,7 +101,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         `${testData.suiteTitle} loads the index data visualizer page`
       );
       await ml.jobSourceSelection.selectSourceForIndexBasedDataVisualizer(
-        testData.sourceIndexOrSavedSearch
+        testData.sourceIndexOrSavedSearch,
+        testData.isSavedSearch
       );
 
       await ml.testExecution.logTestStep(`${testData.suiteTitle} loads data for full time range`);
@@ -127,7 +128,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   }
   describe('data visualizer with pinned global filters', function () {
     before(async function () {
-      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
       await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
       await ml.testResources.createSavedSearchFarequoteFilterAndLuceneIfNeeded();
       await ml.testResources.createSavedSearchFarequoteFilterAndKueryIfNeeded();
