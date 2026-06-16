@@ -7,9 +7,9 @@
 
 import { Logger, OnSetup, PluginSetup, PluginStart } from '@kbn/core-di';
 import type { PluginInitializerContext } from '@kbn/core/server';
-import type { PluginConfig } from '../config';
 import { CoreSetup, PluginInitializer } from '@kbn/core-di-server';
 import type { ContainerModuleLoadOptions } from 'inversify';
+import type { PluginConfig } from '../config';
 import type { AlertingServerSetupDependencies, AlertingServerStartDependencies } from '../types';
 import { registerFeaturePrivileges } from '../lib/security/privileges';
 import { registerSavedObjects } from '../saved_objects';
