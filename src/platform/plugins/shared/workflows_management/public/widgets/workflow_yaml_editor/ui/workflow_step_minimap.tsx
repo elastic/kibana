@@ -247,7 +247,8 @@ export const WorkflowStepMinimap = ({
 
   // First and last index of steps currently in the visible viewport
   const viewportSteps = useMemo(() => {
-    if (!visibleLineRange) return null;
+    if (!visibleLineRange || stepEntries.length === 0) return null;
+
     let first = -1;
     let last = -1;
     stepEntries.forEach(([, step], index) => {
@@ -256,7 +257,17 @@ export const WorkflowStepMinimap = ({
         last = index;
       }
     });
-    return first !== -1 ? { first, last } : null;
+    if (first !== -1) return { first, last };
+
+    // Viewport doesn't overlap any step (e.g. looking at the YAML header above `steps:`).
+    // Clamp to the nearest step boundary so the indicator is always visible.
+    const lastIdx = stepEntries.length - 1;
+    if (visibleLineRange.end < stepEntries[0][1].lineStart) return { first: 0, last: 0 };
+    if (visibleLineRange.start > stepEntries[lastIdx][1].lineEnd) return { first: lastIdx, last: lastIdx };
+    // Between two consecutive steps — span both neighbours.
+    const belowIdx = stepEntries.findIndex(([, s]) => s.lineStart > visibleLineRange.end);
+    const idx = belowIdx > 0 ? belowIdx - 1 : 0;
+    return { first: idx, last: Math.min(idx + 1, lastIdx) };
   }, [stepEntries, visibleLineRange]);
 
   // Scroll the minimap container to keep the viewport band centred.
