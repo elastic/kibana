@@ -115,7 +115,8 @@
     "@kbn/workflows-ui",
     "@kbn/core-spaces-common",
     "@kbn/datemath",
-    "@kbn/css-utils"
+    "@kbn/css-utils",
+    "@kbn/cps"
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"]
 }
