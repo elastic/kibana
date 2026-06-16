@@ -40,3 +40,11 @@ export interface AgentlessPolicy extends NewAgentlessPolicy {
   updated_at: string;
   updated_by: string;
 }
+
+/**
+ * Type guard distinguishing an AgentlessPolicy response (simplified inputs,
+ * no policy_ids) from a PackagePolicy response.
+ */
+export const isAgentlessPolicyResponse = (
+  item: { policy_ids?: string[] } | AgentlessPolicy
+): item is AgentlessPolicy => !('policy_ids' in item);

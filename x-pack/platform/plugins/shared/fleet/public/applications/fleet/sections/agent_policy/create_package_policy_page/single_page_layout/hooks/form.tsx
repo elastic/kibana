@@ -53,6 +53,7 @@ import {
 } from '../../../../../services';
 import type { CreatePackagePolicyResponse, AgentlessPolicy } from '../../../../../../../../common';
 import {
+  isAgentlessPolicyResponse,
   FLEET_ELASTIC_AGENT_PACKAGE,
   FLEET_SYSTEM_PACKAGE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
@@ -327,7 +328,7 @@ export function useOnSubmit({
     enableVarGroups && packageInfo?.var_groups ? packageInfo?.var_groups : undefined;
 
   // only used to store the resulting package policy once saved
-  const [savedPackagePolicy, setSavedPackagePolicy] = useState<PackagePolicy>();
+  const [savedPackagePolicy, setSavedPackagePolicy] = useState<PackagePolicy | AgentlessPolicy>();
   // Create dataset templates toggle (checked/recommended by default)
   const [createDatasetTemplates, setCreateDatasetTemplates] = useState<boolean>(true);
   // Form state
@@ -473,6 +474,7 @@ export function useOnSubmit({
         isFetchingBasePackage.current = false;
       }
     }
+
     if (!isInitialized || isAddIntegrationFlyout) {
       // Fetch agent policies
       init();
@@ -612,10 +614,10 @@ export function useOnSubmit({
     queryParamsPolicyId,
   });
 
-  const navigateAddAgent = (policy: PackagePolicy) =>
+  const navigateAddAgent = (policy: PackagePolicy | AgentlessPolicy) =>
     onSaveNavigate(policy, ['openEnrollmentFlyout']);
 
-  const navigateAddAgentHelp = (policy: PackagePolicy) =>
+  const navigateAddAgentHelp = (policy: PackagePolicy | AgentlessPolicy) =>
     onSaveNavigate(policy, ['showAddAgentHelp']);
 
   const onSubmit = useCallback(
@@ -766,26 +768,24 @@ export function useOnSubmit({
             toasts: notifications.toasts,
           });
         }
+        const savedItem = data!.item;
         const isAgentlessConfigured = createdPolicy
           ? isAgentlessAgentPolicy(createdPolicy)
-          : data?.item?.supports_agentless ?? !('policy_ids' in (data?.item ?? {}));
+          : isAgentlessPolicyResponse(savedItem);
 
         // Cloud template helpers expect PackagePolicy with array-based inputs;
         // they are irrelevant for agentless policies where inputs are simplified.
-        const hasAzureArmTemplate =
-          !isAgentlessConfigured && data?.item
-            ? getAzureArmPropsFromPackagePolicy(data.item as PackagePolicy).templateUrl
-            : false;
+        let hasAzureArmTemplate = false;
+        let hasCloudFormation = false;
+        let hasGoogleCloudShell = false;
 
-        const hasCloudFormation =
-          !isAgentlessConfigured && data?.item
-            ? getCloudFormationPropsFromPackagePolicy(data.item as PackagePolicy).templateUrl
-            : false;
-
-        const hasGoogleCloudShell =
-          !isAgentlessConfigured && data?.item
-            ? getCloudShellUrlFromPackagePolicy(data.item as PackagePolicy)
-            : false;
+        if (!isAgentlessConfigured && !isAgentlessPolicyResponse(savedItem)) {
+          hasAzureArmTemplate = Boolean(getAzureArmPropsFromPackagePolicy(savedItem).templateUrl);
+          hasCloudFormation = Boolean(
+            getCloudFormationPropsFromPackagePolicy(savedItem).templateUrl
+          );
+          hasGoogleCloudShell = Boolean(getCloudShellUrlFromPackagePolicy(savedItem));
+        }
 
         if (hasFleetAddAgentsPrivileges && !isAgentlessConfigured && !skipConfirmModal) {
           if (agentCount) {
@@ -800,7 +800,7 @@ export function useOnSubmit({
             setFormState('SUBMITTED_NO_AGENTS');
           }
         }
-        setSavedPackagePolicy(data!.item as PackagePolicy);
+        setSavedPackagePolicy(savedItem);
 
         const promptForAgentEnrollment =
           (createdPolicy || (agentPolicies.length > 0 && !agentCount)) &&
@@ -826,9 +826,9 @@ export function useOnSubmit({
           }
 
           if (isAgentlessConfigured) {
-            onSaveNavigate(data!.item, ['openEnrollmentFlyout']);
+            onSaveNavigate(savedItem, ['openEnrollmentFlyout']);
           } else {
-            onSaveNavigate(data!.item);
+            onSaveNavigate(savedItem);
           }
         }
 

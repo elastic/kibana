@@ -26,6 +26,7 @@ import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
 import { useSpaceSettingsContext } from '../../../../../../hooks/use_space_settings_context';
 import { SECRETS_MINIMUM_FLEET_SERVER_VERSION } from '../../../../../../../common/constants';
+import { isAgentlessPolicyResponse } from '../../../../../../../common';
 
 import {
   getNumTransformAssets,
@@ -852,7 +853,8 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
               )}
             {formState === 'SUBMITTED_AZURE_ARM_TEMPLATE' &&
               agentPolicies.length > 0 &&
-              savedPackagePolicy && (
+              savedPackagePolicy &&
+              !isAgentlessPolicyResponse(savedPackagePolicy) && (
                 <PostInstallAzureArmTemplateModal
                   agentPolicy={agentPolicies[0]}
                   packagePolicy={savedPackagePolicy}
@@ -862,7 +864,8 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
               )}
             {formState === 'SUBMITTED_CLOUD_FORMATION' &&
               agentPolicies.length > 0 &&
-              savedPackagePolicy && (
+              savedPackagePolicy &&
+              !isAgentlessPolicyResponse(savedPackagePolicy) && (
                 <PostInstallCloudFormationModal
                   agentPolicy={agentPolicies[0]}
                   packagePolicy={savedPackagePolicy}
@@ -872,7 +875,8 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
               )}
             {formState === 'SUBMITTED_GOOGLE_CLOUD_SHELL' &&
               agentPolicies.length > 0 &&
-              savedPackagePolicy && (
+              savedPackagePolicy &&
+              !isAgentlessPolicyResponse(savedPackagePolicy) && (
                 <PostInstallGoogleCloudShellModal
                   agentPolicy={agentPolicies[0]}
                   packagePolicy={savedPackagePolicy}
