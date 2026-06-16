@@ -6,8 +6,8 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { CompositeSLOSummaryResponse } from '@kbn/slo-schema';
-import { ALL_VALUE, compositeSloSummaryResponseSchema } from '@kbn/slo-schema';
+import type { CompositeSLOWithSummaryResponse } from '@kbn/slo-schema';
+import { ALL_VALUE, compositeSloWithSummaryResponseSchema } from '@kbn/slo-schema';
 import { z } from '@kbn/zod';
 import { toRichRollingTimeWindow } from '../../domain/models';
 import type { SLODefinitionRepository } from '../slo_definition_repository';
@@ -30,16 +30,16 @@ export class GetCompositeSLO {
   public async executeBatch(
     ids: string[],
     spaceId: string
-  ): Promise<CompositeSLOSummaryResponse[]> {
+  ): Promise<CompositeSLOWithSummaryResponse[]> {
     const persistedSummaryById = await this.loadPersistedSummaries(ids, spaceId);
     const results = await Promise.all(ids.map((id) => this.executeOne(id, persistedSummaryById)));
-    return z.array(compositeSloSummaryResponseSchema).encode(results);
+    return z.array(compositeSloWithSummaryResponseSchema).encode(results);
   }
 
-  public async execute(id: string, spaceId: string): Promise<CompositeSLOSummaryResponse> {
+  public async execute(id: string, spaceId: string): Promise<CompositeSLOWithSummaryResponse> {
     const persistedSummaryById = await this.loadPersistedSummaries([id], spaceId);
     const result = await this.executeOne(id, persistedSummaryById);
-    return compositeSloSummaryResponseSchema.encode(result);
+    return compositeSloWithSummaryResponseSchema.encode(result);
   }
 
   private async loadPersistedSummaries(
