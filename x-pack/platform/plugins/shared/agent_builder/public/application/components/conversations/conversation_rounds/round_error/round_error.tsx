@@ -10,6 +10,7 @@ import type { ConversationRoundStep } from '@kbn/agent-builder-common';
 import {
   isContextLengthExceededAgentError,
   isHooksExecutionError,
+  isRequestAbortedError,
   isWorkflowAbortedError,
   isWorkflowExecutionError,
 } from '@kbn/agent-builder-common';
@@ -17,6 +18,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { ContextExceededRoundError } from './context_exceeded_round_error';
+import { RequestAbortedRoundError } from './request_aborted_round_error';
 import { WorkflowError } from './workflow_error';
 import { HookError } from './hook_error';
 import { GenericRoundError } from './generic_round_error';
@@ -33,6 +35,7 @@ const shouldShowThinkingPanel = (error: unknown): boolean => {
 
 const renderErrorContent = (error: unknown): React.ReactNode => {
   if (isContextLengthExceededAgentError(error)) return <ContextExceededRoundError />;
+  if (isRequestAbortedError(error)) return <RequestAbortedRoundError />;
   if (isHooksExecutionError(error)) return <HookError error={error} />;
   if (isWorkflowExecutionError(error)) {
     return (

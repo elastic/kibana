@@ -28,6 +28,34 @@ const formatField = (field: MappingField): string => {
   return `- ${field.path} [${field.type}]${description}`;
 };
 
+const toFlatField = ({ path, type, tsDimension, tsMetric }: MappingField) => ({
+  path,
+  type,
+  ...(tsDimension === true ? { tsDimension: true } : {}),
+  ...(tsMetric != null ? { tsMetric } : {}),
+});
+
+const FIELD_LIMIT = 500;
+
+const truncationNote = (totalFields: number): string =>
+  `Truncated: showing ${FIELD_LIMIT} of ${totalFields} fields. Use a more specific index pattern to retrieve full mappings.`;
+
+interface MappingNodeProps {
+  properties?: Record<string, MappingNodeProps>;
+  fields?: Record<string, MappingNodeProps>;
+}
+
+const countMappingNodes = (properties: Record<string, MappingNodeProps> | undefined): number => {
+  if (!properties) return 0;
+  let count = 0;
+  for (const value of Object.values(properties)) {
+    count++;
+    count += countMappingNodes(value.properties);
+    count += countMappingNodes(value.fields);
+  }
+  return count;
+};
+
 export const getIndexMappingsTool = (): BuiltinToolDefinition<typeof getIndexMappingsSchema> => {
   return {
     id: platformCoreTools.getIndexMapping,
@@ -45,16 +73,45 @@ export const getIndexMappingsTool = (): BuiltinToolDefinition<typeof getIndexMap
 
       const resources = Object.fromEntries(
         Object.entries(indexFields).map(([name, v]) => {
-          if (raw && v.rawMapping) {
-            return [name, { type: v.type, mappings: v.rawMapping }];
-          }
+          const totalFields = v.fields.length;
+          const truncated = totalFields > FIELD_LIMIT;
+          const cappedFields = truncated ? v.fields.slice(0, FIELD_LIMIT) : v.fields;
+
           if (raw) {
+            if (v.rawMapping) {
+              const rawNodeCount = countMappingNodes(
+                v.rawMapping.properties as Record<string, MappingNodeProps>
+              );
+              if (rawNodeCount <= FIELD_LIMIT) {
+                return [name, { type: v.type, mappings: v.rawMapping }];
+              }
+              return [
+                name,
+                {
+                  type: v.type,
+                  fields: cappedFields.map(toFlatField),
+                  warning: truncated
+                    ? truncationNote(totalFields)
+                    : `Raw mapping tree has ${rawNodeCount} nodes (limit: ${FIELD_LIMIT}). Showing flat field list instead.`,
+                },
+              ];
+            }
+
             return [
               name,
-              { type: v.type, fields: v.fields.map(({ path, type }) => ({ path, type })) },
+              {
+                type: v.type,
+                fields: v.fields.map(({ path, type }) => ({ path, type })),
+                ...(truncated ? { warning: truncationNote(totalFields) } : {}),
+              },
             ];
           }
-          return [name, { type: v.type, fields: v.fields.map(formatField).join('\n') }];
+
+          const formatted = cappedFields.map(formatField).join('\n');
+          const fieldString = truncated
+            ? `${formatted}\n[${truncationNote(totalFields)}]`
+            : formatted;
+          return [name, { type: v.type, fields: fieldString }];
         })
       );
 
