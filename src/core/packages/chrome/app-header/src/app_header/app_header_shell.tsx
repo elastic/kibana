@@ -140,7 +140,6 @@ const useHeaderStyles = (
       flex: 1;
       min-width: 0;
       overflow: visible;
-      align-self: stretch;
     `;
 
     const titleGroup = css`
@@ -167,7 +166,6 @@ const useHeaderStyles = (
       flex: 1 1 0;
       min-width: 0;
       overflow: visible;
-      align-self: stretch;
     `;
 
     const trailingSlot = css`

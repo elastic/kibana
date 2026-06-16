@@ -400,7 +400,7 @@ function getTabContentCss(euiTheme: EuiThemeComputed) {
     display: inline-flex;
     align-items: center;
     width: 100%;
-    height: ${euiTheme.size.xl};
+    height: ${euiTheme.size.xxl};
     padding-inline: ${euiTheme.size.xs};
   `;
 }
