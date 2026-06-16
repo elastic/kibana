@@ -50,7 +50,7 @@ const actionableFindingSchema = z.object({
   affectedTactics: z.array(affectedTacticSchema).optional(),
   affectedPlatform: z.string().max(200).optional(),
   recommendedActions: z.array(recommendedActionSchema).optional(),
-  blastRadiusStatus: z.enum(['partial', 'unavailable']).optional(),
+  blastRadiusStatus: z.enum(['healthy', 'partial', 'unavailable']).optional(),
 });
 
 // ---- Coverage ----

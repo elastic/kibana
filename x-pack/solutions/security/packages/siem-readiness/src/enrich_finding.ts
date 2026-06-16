@@ -184,21 +184,21 @@ const buildRecommendedActionsForFinding = (
 /**
  * Derives the blast radius status for a finding based on which reverse-map lookups failed.
  *
+ * - 'healthy': blast radius is complete and trustworthy.
  * - 'unavailable': the primary lookup for this dimension failed entirely (pipeline map for
  *   continuity, category map for coverage). The affected* fields must be omitted because the
  *   empty map is not trustworthy — returning "none" would be a false signal.
  * - 'partial': at least one rule's index resolution failed, so indexToRules is incomplete.
  *   The affected* fields are still populated from what did resolve, but may be undercounted.
- * - undefined: blast radius is complete and trustworthy.
  */
 const deriveBlastRadiusStatus = (
   dimension: Dimension,
   errors: ReverseMapErrors
-): 'unavailable' | 'partial' | undefined => {
+): 'healthy' | 'unavailable' | 'partial' => {
   if (dimension === 'continuity' && errors.pipelineMap) return 'unavailable';
   if (dimension === 'coverage' && errors.categoryMap) return 'unavailable';
   if (errors.rulesPartial) return 'partial';
-  return undefined;
+  return 'healthy';
 };
 
 /**
@@ -208,6 +208,7 @@ const deriveBlastRadiusStatus = (
  * When a reverse-map lookup failed, blastRadiusStatus is set to 'unavailable' or 'partial'
  * and affected* fields are omitted (unavailable) or flagged as potentially incomplete (partial),
  * to avoid presenting a confident "none" when the truth is "we couldn't determine this."
+ * When all lookups succeed, blastRadiusStatus is 'healthy'.
  *
  * Fields are omitted (set to undefined) when empty to keep the AI tool payload concise.
  */

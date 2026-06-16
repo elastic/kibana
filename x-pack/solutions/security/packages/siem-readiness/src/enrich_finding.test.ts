@@ -379,7 +379,7 @@ describe('enrichFinding', () => {
       const finding = createMockFinding({ resource: 'logs-test' });
       const result = enrichFinding(finding, ctx);
 
-      expect(result.blastRadiusStatus).toBeUndefined();
+      expect(result.blastRadiusStatus).toBe('healthy');
       expect(result.affectedRules).toHaveLength(1);
     });
 
@@ -415,16 +415,16 @@ describe('enrichFinding', () => {
       expect(result.affectedRules).toHaveLength(1);
     });
 
-    it('should leave blastRadiusStatus undefined when errors is omitted (backward compat)', () => {
+    it('should set blastRadiusStatus to "healthy" when errors is omitted (backward compat)', () => {
       const ctx = createMockContext({ dimension: 'quality' });
       // No `errors` field in context — defaults to all-false
       const finding = createMockFinding({ resource: 'logs-test' });
       const result = enrichFinding(finding, ctx);
 
-      expect(result.blastRadiusStatus).toBeUndefined();
+      expect(result.blastRadiusStatus).toBe('healthy');
     });
 
-    it('should leave blastRadiusStatus undefined when all errors are false', () => {
+    it('should set blastRadiusStatus to "healthy" when all errors are false', () => {
       const ctx = createMockContext({
         dimension: 'quality',
         errors: { pipelineMap: false, categoryMap: false, rulesPartial: false },
@@ -433,7 +433,7 @@ describe('enrichFinding', () => {
       const finding = createMockFinding({ resource: 'logs-test' });
       const result = enrichFinding(finding, ctx);
 
-      expect(result.blastRadiusStatus).toBeUndefined();
+      expect(result.blastRadiusStatus).toBe('healthy');
     });
   });
 });

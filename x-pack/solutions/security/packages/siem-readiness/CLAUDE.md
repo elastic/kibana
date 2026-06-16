@@ -95,7 +95,7 @@ A two-step lookup handles backing indices: if the direct lookup misses, the back
 
 | Value | Cause | `affected*` fields |
 |---|---|---|
-| `undefined` (omitted) | All lookups succeeded | Complete and trustworthy |
+| `'healthy'` | All lookups succeeded | Complete and trustworthy |
 | `'partial'` | At least one rule's index resolution failed (`rulesPartial` error flag) | Present but may be undercounted |
 | `'unavailable'` | The primary map for the dimension failed entirely (pipeline map for continuity; category map for coverage) | Intentionally omitted |
 

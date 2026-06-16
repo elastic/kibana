@@ -103,10 +103,10 @@ Every \`actionableFinding\` includes pre-computed blast radius fields. These MUS
 - \`affectedPlatform\`: the platform derived from ECS fields in the actual data (e.g. "AWS account 123456789012", "Windows Endpoints", "Okta (Identity)"). Show as **Affected Platform**.
 - \`affectedRules\`: array of \`{ id, name }\` — the detection rules that monitor this index. Show as **Affected Rules** (list rule names).
 - \`affectedTactics\`: array of \`{ id, name, totalRules, affectedRulesCount }\` — MITRE ATT&CK tactics exposed. Show as **Affected Tactics** (list tactic names with rule counts).
-- \`blastRadiusStatus\` (optional): reliability signal for the blast radius fields:
+- \`blastRadiusStatus\`: reliability signal for the blast radius fields:
+  - \`'healthy'\`: blast radius is complete and trustworthy.
   - \`'unavailable'\`: a required data lookup failed. The \`affectedRules\`, \`affectedTactics\`, and \`affectedPlatform\` fields are intentionally absent. You MUST show "unavailable (lookup failed)" for all three — NEVER show "none", which would imply there genuinely are no affected rules.
   - \`'partial'\`: at least one rule's index resolution failed, so the lists may be undercounted. Show the lists but append "(may be incomplete)" after the label.
-  - omitted/undefined: blast radius is complete.
 
 Required format per finding:
 
