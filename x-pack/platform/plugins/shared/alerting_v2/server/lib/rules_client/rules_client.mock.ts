@@ -27,16 +27,14 @@ export function createRulesClient(): {
       .mockResolvedValue({ processed: 0, total: 0, errors: [] }),
   } as unknown as ActionPolicyClient;
 
-  const rulesClient = new RulesClient({
-    services: {
-      request,
-      rulesSavedObjectService,
-      taskManager,
-      userService,
-      actionPolicyClient,
-    },
-    options: { spaceId: 'default' },
-  });
+  const rulesClient = new RulesClient(
+    request,
+    rulesSavedObjectService,
+    taskManager,
+    userService,
+    actionPolicyClient,
+    'default'
+  );
 
   return { rulesClient, mockSavedObjectsClient };
 }

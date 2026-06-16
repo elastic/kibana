@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+// Import and re-export RuleKind and RecoveryPolicyType from schema
 import type { RuleKind } from '@kbn/alerting-v2-schemas';
+import type { ActionFormValue } from '../actions_form';
 
 /** Alert / recovery delay segment control (matches `AlertDelayField` / `RecoveryDelayField`). */
 export const DELAY_MODE = {
@@ -53,15 +55,8 @@ export interface RuleArtifact {
   value: string;
 }
 
-export interface WorkflowFormComponentProps<TWorkflow extends object = object> {
-  value: TWorkflow;
-  onChange: (next: TWorkflow) => void;
-  isInvalid?: boolean;
-  errorMessage?: string;
-}
-
-export interface RuleNotificationsValue<TWorkflow extends object = object> {
-  workflow: TWorkflow;
+export interface RuleNotificationsValue {
+  workflows: ActionFormValue;
 }
 
 /**

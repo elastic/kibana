@@ -36,7 +36,7 @@ const BASE_COMPOSE_VALUES: ComposeFormValues = {
   metadata: { name: '', enabled: true },
   timeField: '@timestamp',
   schedule: { every: '1m', lookback: '5m' },
-  query: { format: 'standalone', breach: { query: '' } },
+  query: { format: 'composed', base: '', breach: { segment: '' } },
   stateTransitionAlertDelayMode: 'immediate',
   stateTransitionRecoveryDelayMode: 'immediate',
 };

@@ -13,13 +13,14 @@ import {
   ruleAttachmentDataSchema,
   getBreachEsqlQuery,
 } from '@kbn/alerting-v2-schemas';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import type { RuleSavedObjectAttributes } from '../../saved_objects';
-import type { GetScopedRulesClient } from '../scoped_rules_client_factory';
+import type { RulesClient } from '../../lib/rules_client';
 
 interface CreateRuleSmlTypeOptions {
-  getScopedRulesClient: GetScopedRulesClient;
+  getScopedRulesClient: (request: KibanaRequest) => RulesClient;
   getInternalRepository: () => ISavedObjectsRepository;
 }
 
@@ -71,7 +72,10 @@ export const createRuleSmlType = ({
             type: RULE_SML_TYPE,
             title: name,
             content: contentParts.join('\n'),
-            permissions: [`api:${ALERTING_V2_API_PRIVILEGES.rules.read}`],
+            permissions: {
+              kibana: { privileges: [{ name: `api:${ALERTING_V2_API_PRIVILEGES.rules.read}` }] },
+              elasticsearch: { indices: [] },
+            },
           },
         ],
       };
@@ -86,7 +90,7 @@ export const createRuleSmlType = ({
   toAttachment: async (item, context) => {
     try {
       const rulesClient = getScopedRulesClient(context.request);
-      const rule = await rulesClient.getRule({ id: item.origin_id });
+      const rule = await rulesClient.getRule({ id: item.origin_id ?? '' });
       return {
         type: RULE_ATTACHMENT_TYPE,
         data: ruleAttachmentDataSchema.parse(rule),
