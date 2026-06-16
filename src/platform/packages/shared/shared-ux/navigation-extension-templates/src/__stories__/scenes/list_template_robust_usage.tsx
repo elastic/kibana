@@ -30,6 +30,8 @@ export const ListTemplateRobustUsage: StoryObj<typeof ListTemplate<ListTemplateD
       href: faker.internet.url(),
     })),
     config: {
+      heading: 'List Template Robust Usage',
+      supportAddItem: true,
       search: { enabled: true, placeholder: 'Search the list' },
       actions: [
         {

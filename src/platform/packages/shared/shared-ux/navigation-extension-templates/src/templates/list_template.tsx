@@ -14,10 +14,11 @@ import {
   EuiFieldSearch,
   EuiFlexGroup,
   EuiText,
-  useEuiTheme,
   EuiWrappingPopover,
   type IconType,
   EuiListGroup,
+  EuiButtonIcon,
+  EuiToolTip,
   EuiListGroupItem,
   EuiFlexItem,
   EuiContextMenuItem,
@@ -36,7 +37,12 @@ interface NormalizedRow {
   iconType?: IconType;
 }
 
-export interface ListTemplateConfig<Data = SerializableRecord> {
+interface ListTemplateSearchConfig {
+  enabled: boolean;
+  placeholder?: string;
+}
+
+export type ListTemplateConfig<Data = SerializableRecord> = {
   item: {
     /** field property path of the data record, mapped as the displayed item's id */
     idField: keyof Data;
@@ -49,22 +55,39 @@ export interface ListTemplateConfig<Data = SerializableRecord> {
     /** field property path of the data record, mapped as the displayed item's badge */
     badgeField?: keyof Data;
   };
-  /** Optional client-side search box. */
-  search?: { enabled: boolean; placeholder?: string };
+  // /** Optional client-side search box. */
+  // search?: ListTemplateSearchConfig;
   /** Optional section-level actions. */
   actions?: NavTemplateActionConfig[];
   /** Message shown when the data source emits no rows. */
   emptyMessage?: string;
   /** Cap the number of rows rendered to this value. */
   max?: number;
-}
+} & (
+  | {
+      supportAddItem?: never;
+      search?: never;
+      heading?: string;
+    }
+  | {
+      /** Whether to support the add item button. */
+      supportAddItem?: true;
+      search: ListTemplateSearchConfig;
+      /** The heading of the list template. This is required when either supportAddItem or search is provided. */
+      heading: string;
+    }
+);
 
-export interface NavListTemplateProps<Data = Record<string, string>>
+export interface NavListTemplateProps<Data = SerializableRecord>
   extends NavExtensionPointBaseComponentProps<Data, ListTemplateConfig<Data>> {
   /**
-   * Handler for non-link actions.
+   * Handler for the 'add' action.
    */
-  onAction: (actionId: string, extensionId: string, itemData: Data) => void;
+  onAction(actionId: 'add', extensionId: string, itemData: null): void;
+  /**
+   * Generic handler for non-link actions.
+   */
+  onAction(actionId: string, extensionId: string, itemData: Data): void;
 }
 
 function normalizeRows<Data = SerializableRecord>(
@@ -98,6 +121,21 @@ function normalizeRows<Data = SerializableRecord>(
   }, new Map() as Map<string, NormalizedRow>);
 }
 
+const listTemplateStyles = {
+  get topBarLeftContainer() {
+    return css({
+      // empty style to allow scoping child styles
+    });
+  },
+  get headingContainerModifier() {
+    return css`
+      ${this.topBarLeftContainer}[data-search-text-field-open="true"] & {
+        display: none;
+      }
+    `;
+  },
+};
+
 /**
  * Renders a list of links from an array data source, with optional client-side
  * search and declarative section actions. Field names are read from config.
@@ -109,8 +147,8 @@ export function ListTemplate<Data = SerializableRecord>({
   onAction,
 }: NavListTemplateProps<Data>): JSX.Element | null {
   const listConfig = config as ListTemplateConfig<Data>;
-  const { euiTheme } = useEuiTheme();
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState<string>('');
+  const [searchTextFieldOpen, setSearchTextFieldOpen] = useState(false);
   const popoverRef = useRef<HTMLButtonElement | null>(null);
   const [popoverRowData, setPopoverRowData] = useState<Data | null>(null);
 
@@ -123,6 +161,14 @@ export function ListTemplate<Data = SerializableRecord>({
       row.label.toLowerCase().includes(normalizedQuery)
     );
   }, [rows, query]);
+
+  const onSearchButtonClick = useCallback(() => {
+    setSearchTextFieldOpen(true);
+  }, [setSearchTextFieldOpen]);
+
+  const onAddItemButtonClick = useCallback(() => {
+    onAction('add', context.extensionId, null);
+  }, [context.extensionId, onAction]);
 
   const renderRowActionPopover = useCallback(() => {
     return popoverRowData ? (
@@ -159,10 +205,6 @@ export function ListTemplate<Data = SerializableRecord>({
     list-style: none;
   `;
 
-  const searchStyles = css`
-    padding-bottom: ${euiTheme.size.xs};
-  `;
-
   if (rows.size === 0) {
     if (listConfig.emptyMessage) {
       return (
@@ -183,17 +225,74 @@ export function ListTemplate<Data = SerializableRecord>({
   return (
     <>
       {renderRowActionPopover()}
-      <EuiFlexGroup direction="column" gutterSize="s">
-        {listConfig.search?.enabled && (
-          <EuiFlexItem css={[wrapperStyles, searchStyles]}>
-            <EuiFieldSearch
-              compressed
-              fullWidth
-              placeholder={listConfig.search.placeholder}
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              data-test-subj={`nav-extension-${context.slotId}-search`}
-            />
+      <EuiFlexGroup direction="column" gutterSize="m">
+        {listConfig.heading && (
+          <EuiFlexItem>
+            <EuiFlexGroup alignItems="center">
+              <EuiFlexItem
+                css={listTemplateStyles.topBarLeftContainer}
+                data-search-text-field-open={searchTextFieldOpen}
+              >
+                <EuiFlexGroup alignItems="center">
+                  <EuiFlexItem
+                    grow={!searchTextFieldOpen}
+                    css={listTemplateStyles.headingContainerModifier}
+                  >
+                    <EuiText size="s" color="subdued">
+                      <h4>{listConfig.heading}</h4>
+                    </EuiText>
+                  </EuiFlexItem>
+                  {listConfig.search?.enabled && (
+                    <EuiFlexItem grow={searchTextFieldOpen}>
+                      {searchTextFieldOpen ? (
+                        <EuiFieldSearch
+                          placeholder={listConfig.search.placeholder}
+                          value={query}
+                          onChange={(event) => setQuery(event.target.value)}
+                          data-test-subj={`nav-extension-${context.slotId}-search`}
+                          compressed
+                          fullWidth
+                          isClearable
+                        />
+                      ) : (
+                        <EuiToolTip
+                          content={i18n.translate(
+                            'sharedUXPackages.navigationExtensionTemplates.listTemplate.toggleSearchFieldTooltip',
+                            { defaultMessage: 'Toggle search field' }
+                          )}
+                          id="toggle-search-field-button"
+                        >
+                          <EuiButtonIcon
+                            color="text"
+                            iconType="search"
+                            aria-labelledby="toggle-search-field-button"
+                            onClick={onSearchButtonClick}
+                          />
+                        </EuiToolTip>
+                      )}
+                    </EuiFlexItem>
+                  )}
+                </EuiFlexGroup>
+              </EuiFlexItem>
+              {listConfig.supportAddItem && (
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip
+                    content={i18n.translate(
+                      'sharedUXPackages.navigationExtensionTemplates.listTemplate.addItemButtonTooltip',
+                      { defaultMessage: 'Add item' }
+                    )}
+                    id="add-item-button"
+                  >
+                    <EuiButtonIcon
+                      color="text"
+                      iconType="plus"
+                      aria-labelledby="add-item-button"
+                      onClick={onAddItemButtonClick}
+                    />
+                  </EuiToolTip>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
           </EuiFlexItem>
         )}
         <EuiFlexItem>
