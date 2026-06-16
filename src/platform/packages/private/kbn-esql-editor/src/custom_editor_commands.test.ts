@@ -8,7 +8,7 @@
  */
 
 import { monaco } from '@kbn/code-editor';
-import { ESQL_APPLY_TEXT_REPLACEMENT_COMMAND, ESQL_NEW_LINE_COMMAND } from '@kbn/esql-language';
+import { ESQL_APPLY_TEXT_REPLACEMENT_COMMAND } from '@kbn/esql-language';
 import { coreMock } from '@kbn/core/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { ESQLVariableType, ControlTriggerSource } from '@kbn/esql-types';
@@ -198,30 +198,6 @@ describe('Custom Editor Commands', () => {
       });
     });
 
-    it('inserts a newline when the "New line" command is executed', () => {
-      const deps = {
-        application: coreMock.createStart().application,
-        uiActions: mockUiActions,
-        telemetryService: mockTelemetryService,
-        editorRef: { current: mockEditor },
-        getCurrentQuery: jest.fn(),
-        esqlVariables: { current: [] },
-        controlsContext: { current: null },
-        openTimePickerPopover: jest.fn(),
-      } as unknown as MonacoCommandDependencies;
-
-      registerCustomCommands(deps);
-
-      const registerCommandCalls = (monaco.editor.registerCommand as jest.Mock).mock.calls;
-      const newLineCommandCall = registerCommandCalls.find(
-        ([commandId]) => commandId === ESQL_NEW_LINE_COMMAND
-      );
-      expect(newLineCommandCall).toBeDefined();
-
-      newLineCommandCall[1]();
-
-      expect(mockEditor.trigger).toHaveBeenCalledWith('keyboard', 'type', { text: '\n' });
-    });
   });
 
   describe('addEditorKeyBindings', () => {

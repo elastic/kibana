@@ -9,4 +9,4 @@
 
 export const ESQL_VARIABLES_PREFIX = '?';
 export const ESQL_APPLY_TEXT_REPLACEMENT_COMMAND = 'esql.applyTextReplacement';
-export const ESQL_NEW_LINE_COMMAND = 'esql.newLine';
+

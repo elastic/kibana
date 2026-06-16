@@ -8,7 +8,7 @@
  */
 
 import { monaco } from '@kbn/code-editor';
-import { ESQL_APPLY_TEXT_REPLACEMENT_COMMAND, ESQL_NEW_LINE_COMMAND } from '@kbn/esql-language';
+import { ESQL_APPLY_TEXT_REPLACEMENT_COMMAND } from '@kbn/esql-language';
 import {
   ESQLVariableType,
   QuerySource,
@@ -140,16 +140,6 @@ export const registerCustomCommands = (deps: MonacoCommandDependencies): monaco.
   commandDisposables.push(
     monaco.editor.registerCommand('esql.timepicker.choose', (...args) => {
       openTimePickerPopover();
-    })
-  );
-
-  // "New line" suggestion command
-  commandDisposables.push(
-    monaco.editor.registerCommand(ESQL_NEW_LINE_COMMAND, () => {
-      const editor = editorRef.current;
-      if (editor) {
-        insertNewLine(editor);
-      }
     })
   );
 
