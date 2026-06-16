@@ -93,7 +93,7 @@ test.describe(
           (r: { name: string }) => r.name === testRuleName
         );
         expect(rule).toBeDefined();
-        expect(rule.tags).toEqual(['tag1']);
+        expect(rule.tags).toStrictEqual(['tag1']);
         expect(rule.params.criteria[0]).toMatchObject({
           comparator: 'notBetween',
           label: 'test equation',
@@ -109,7 +109,7 @@ test.describe(
           filter: 'kibana.alert.status: "active"',
           name: 'B',
         });
-        expect(rule.params.groupBy).toEqual(['kibana.alert.rule.name']);
+        expect(rule.params.groupBy).toStrictEqual(['kibana.alert.rule.name']);
         expect(rule.params.searchConfiguration).toBeDefined();
       });
     });
