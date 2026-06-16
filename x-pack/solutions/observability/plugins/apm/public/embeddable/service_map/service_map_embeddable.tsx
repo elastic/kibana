@@ -47,34 +47,21 @@ export interface ServiceMapEmbeddableProps {
   serviceGroupId?: string;
   core: CoreStart;
   onBlockingError?: (error: Error | undefined) => void;
-  /** Separate range for the badges query. Defaults to `[rangeFrom, rangeTo]`. */
   badgesRangeFrom?: string;
   badgesRangeTo?: string;
-  /** KQL for the badges query only. Defaults to `kuery`. Pass `""` to aggregate across all nodes. */
   badgesKuery?: string;
-  /** Show the popover's "Focus map" button in embedded contexts. Defaults to `!isEmbedded`. */
   showFocusMapInPopover?: boolean;
-  /** Strip `kuery` from popover-built URLs ("Service Details" / "Focus map"); env still flows through. */
   clearKueryOnPopoverNavigation?: boolean;
-  /** Focus button always navigates to standalone APM, even for the currently focused service. */
   alwaysNavigateOnPopoverFocus?: boolean;
-  /** Drop cross-env spans before rendering when env is set. */
   strictEnvironmentScope?: boolean;
-  /** Fires when the topology is definitively empty (`SUCCESS && nodes.length === 0`). */
   onEmptyStateChange?: (isEmpty: boolean) => void;
-  /** Field-value pairs to pass as filter bar pills in the "View full map" link instead of kuery. */
   filterPills?: Array<{ field: string; value: string }>;
-  /** Initial layout orientation; if `onMapOrientationChange` is also provided, becomes controlled. */
   mapOrientation?: ServiceMapOrientation;
-  /** Called when the user (or the host) changes orientation. */
   onMapOrientationChange?: (next: ServiceMapOrientation) => void;
-  /** Parent dashboard filters when the panel opts in to sync. Excludes `service.environment` (handled server-side). */
+  /** Parent dashboard filters/query forwarded when sync_with_dashboard_filters is on. */
   parentFilters?: Filter[];
-  /** Parent dashboard query when the panel opts in to sync. */
   parentQuery?: Query | AggregateQuery;
-  /** Persisted view filters (alerts / SLOs / connection / anomaly severity) captured at "Copy to dashboard" time. */
   viewFilters?: ServiceMapViewFilters;
-  /** Push in-panel filter edits back to the state manager so the embeddable's controlled value updates. */
   onViewFiltersChange?: (next: ServiceMapViewFilters) => void;
 }
 
@@ -153,21 +140,14 @@ export function ServiceMapEmbeddable({
   const { sloOverviewFlyout, openSloOverviewFlyout, closeSloOverviewFlyout } =
     useSloOverviewFlyout();
 
-  // Build an ES query from dashboard-level filters/query when the panel opts in to
-  // sync_with_dashboard_filters. Environment is excluded — it's still passed via the
-  // dedicated server param, mirroring service_map_search_bar.tsx.
   const { dataView } = useAdHocApmDataView();
   const kibanaQuerySettings = useKibanaQuerySettings();
   const esQuery = useMemo(() => {
-    // Environment is applied via the dedicated server param, so it never contributes to the
-    // dashboard-derived es-query.
+    // Environment is applied via the dedicated server param, so skip it here.
     const filtersWithoutEnv = (parentFilters ?? []).filter(
       (f) => f.meta?.key !== 'service.environment'
     );
     const hasParentFilters = filtersWithoutEnv.length > 0;
-    // Only treat the parent query as present when it's an actual non-empty KQL/Lucene string.
-    // Feeding an empty string (or a query object with no string) into buildEsQuery would match
-    // everything and over-broaden the panel's results (review #17).
     const parentQueryText =
       parentQuery && 'query' in parentQuery && typeof parentQuery.query === 'string'
         ? parentQuery.query.trim()
@@ -197,7 +177,6 @@ export function ServiceMapEmbeddable({
     esQuery,
   });
 
-  // Only fire on SUCCESS — loading/error states carry no emptiness signal.
   useEffect(() => {
     if (!onEmptyStateChange) return;
     if (status !== FETCH_STATUS.SUCCESS) return;
@@ -213,12 +192,8 @@ export function ServiceMapEmbeddable({
     nodesStatus: status,
   });
 
-  // The alert / SLO / anomaly-severity filters depend on badge data (node fields like
-  // `alertsCount` / `sloStatus`). Until badges resolve we strip those filters; the connection
-  // filter stays since it only needs topology. Loading is covered by `isLoading` below (spinner,
-  // not a stripped map), so there's no flash. On a badges *failure* we keep showing all services
-  // (fail open) but surface a warning so the user knows those filters couldn't be applied
-  // (review #7) — silently dropping them looked like the filters were ignored.
+  // Strip badge-dependent filters (alert/SLO/anomaly) until badge data resolves. On failure,
+  // keep showing all services but warn that those filters couldn't be applied.
   const viewFiltersForGraph = useMemo<ServiceMapViewFilters | undefined>(() => {
     if (!viewFilters) return viewFilters;
     if (badgesStatus === FETCH_STATUS.SUCCESS) return viewFilters;

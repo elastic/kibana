@@ -53,9 +53,6 @@ const defaultCustomState: WithAllKeys<ServiceMapCustomState> = {
   service_name: undefined,
   service_group_id: undefined,
   map_orientation: 'horizontal',
-  // Default OFF: the panel uses only its own captured filters and ignores the
-  // dashboard's KQL/Controls. Dashboards usually have broader filter contexts
-  // that don't make sense for a service map.
   sync_with_dashboard_filters: false,
   alert_status_filter: undefined,
   slo_status_filter: undefined,
@@ -70,9 +67,7 @@ const customStateComparators: StateComparators<ServiceMapCustomState> = {
   service_group_id: 'referenceEquality',
   map_orientation: 'referenceEquality',
   sync_with_dashboard_filters: 'referenceEquality',
-  // Array fields use deepEquality: the editor flyout's handleSave + the in-graph options
-  // panel both produce fresh arrays on every save, which would otherwise mark the panel
-  // dirty regardless of whether the selected values actually changed.
+  // Fresh arrays on every save would mark the panel dirty even without value changes.
   alert_status_filter: 'deepEquality',
   slo_status_filter: 'deepEquality',
   connection_filter: 'deepEquality',
@@ -133,11 +128,6 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
       const state = initialState;
 
       const titleManager = initializeTitleManager(state);
-      // Pass `time_range` through as-is — undefined when the user hasn't customized it.
-      // The published `timeRange$` then emits undefined too, which makes Kibana's
-      // `fetch$()` fall back to the dashboard's global time. When the built-in
-      // "Customize time range" panel-menu action sets a value via `setTimeRange`, the
-      // subject emits the new range and the panel uses it.
       const timeRangeManager = initializeTimeRangeManager({
         time_range: state.time_range,
       });
@@ -186,8 +176,6 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
         }),
         applySerializedState: (nextState) => {
           titleManager.reinitializeState(nextState);
-          // Pass `time_range` through as-is; undefined keeps the panel inheriting
-          // the dashboard's global time range.
           timeRangeManager.reinitializeState({ time_range: nextState.time_range });
           customStateManager.reinitializeState(nextState);
         },
@@ -216,11 +204,7 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
               focusedPanelId: uuid,
             },
             loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
-              // Snapshot of the panel's state when the editor opens, used to revert any
-              // live-preview changes if the flyout is closed without saving.
               const editorInitialState = stateApi.serializeState();
-              // Push a full state onto the panel via the live setters so the map updates
-              // immediately. Shared by the live preview (`onPreview`) and `onSave`.
               const applyCustomState = (newState: ServiceMapEmbeddableState) => {
                 if (newState.environment !== undefined) {
                   customStateManager.api.setEnvironment(newState.environment);
@@ -231,8 +215,6 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
                 customStateManager.api.setSyncWithDashboardFilters(
                   newState.sync_with_dashboard_filters
                 );
-                // View filters live in the edit flyout per product direction: the
-                // in-graph options panel only renders layout controls in dashboard panels.
                 customStateManager.api.setAlertStatusFilter(newState.alert_status_filter);
                 customStateManager.api.setSloStatusFilter(newState.slo_status_filter);
                 customStateManager.api.setConnectionFilter(newState.connection_filter);
@@ -246,8 +228,6 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
                     timeRange={timeRangeManager.api.timeRange$.getValue()}
                     initialState={editorInitialState}
                     onCancel={closeFlyout}
-                    // Preview-until-save: apply changes to the panel live while editing,
-                    // and revert to the pre-edit snapshot if the flyout closes unsaved.
                     onPreview={applyCustomState}
                     onRevert={() => stateApi.applySerializedState(editorInitialState)}
                     onSave={(newState: ServiceMapEmbeddableState) => {
@@ -305,8 +285,6 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
             customStateManager.api.anomalySeverityFilter$
           );
 
-          // Schema literals (`'critical' | 'major' | ...`) and the runtime enums consumed by
-          // ServiceMapViewFilters share string values, so a single cast preserves the shape.
           const viewFilters = useMemo(
             () =>
               ({
@@ -318,9 +296,6 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
             [alertStatusFilter, sloStatusFilter, connectionFilter, anomalySeverityFilter]
           );
 
-          // Push in-panel edits back to the state manager so the controlled `viewFilters`
-          // reflect changes; without these the chips would feel locked.
-          // Empty arrays are normalized to `undefined` so saved state stays tidy.
           const onViewFiltersChange = useCallback((next: ServiceMapViewFilters) => {
             customStateManager.api.setAlertStatusFilter(
               next.alertStatusFilter.length ? next.alertStatusFilter : undefined
@@ -337,8 +312,6 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
           }, []);
 
           const fetchContext = useFetchContext(api);
-          // When neither the panel nor the dashboard has resolved a time range yet, wait rather
-          // than querying a guessed window (which would look empty/wrong) — review #16.
           const effectiveTimeRange = fetchContext.timeRange;
           if (!effectiveTimeRange) {
             return (
@@ -357,9 +330,6 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
             );
           }
 
-          // Parent dashboard filters/query are merged into fetchContext by `useFetchContext`.
-          // `sync_with_dashboard_filters` defaults false (panel uses only its own captured
-          // filters). Forward parent filters only when the user opted in to syncing.
           const parentFilters = syncWithDashboardFilters ? fetchContext.filters : undefined;
           const parentQuery = syncWithDashboardFilters ? fetchContext.query : undefined;
 

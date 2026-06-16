@@ -14,10 +14,6 @@ import {
 import { APM_SERVICE_MAP_EMBEDDABLE } from '@kbn/apm-embeddable-common';
 import { serviceMapCustomStateSchema } from '../../../common/embeddable/service_map_embeddable_schema';
 
-// The custom-state schema + state type live in `common/` so client code can import the type
-// without reaching into `server/` (review #15). The titles / time-range schemas come from a
-// server package, so the full `allOf` is assembled here. Drilldowns aren't part of this
-// embeddable's state, so the registration hook ignores the drilldowns schema.
 const getServiceMapEmbeddableSchema = (_getDrilldownsSchema: GetDrilldownsSchemaFnType) =>
   schema.allOf([serializedTitlesSchema, serializedTimeRangeSchema, serviceMapCustomStateSchema], {
     meta: {
