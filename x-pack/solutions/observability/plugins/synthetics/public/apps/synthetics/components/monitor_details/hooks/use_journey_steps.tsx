@@ -20,7 +20,8 @@ import { useGetUrlParams } from '../../../hooks';
 export const useJourneySteps = (
   checkGroup?: string,
   lastRefresh?: number,
-  stepIndexArg?: number
+  stepIndexArg?: number,
+  timestamp?: string
 ) => {
   const { stepIndex: stepIndexUrl, checkGroupId: urlCheckGroup } = useParams<{
     stepIndex: string;
@@ -42,10 +43,12 @@ export const useJourneySteps = (
     if (checkGroupId) {
       // For remote monitors we forward `remoteName` so the server-side
       // journey query targets `${remoteName}:synthetics-*` via CCS instead
-      // of the local heartbeat indices.
-      dispatch(fetchJourneyAction.get({ checkGroup: checkGroupId, remoteName }));
+      // of the local heartbeat indices. When the run `timestamp` is known we
+      // forward it too so the steps query can be bounded to that run and prune
+      // frozen-tier shards.
+      dispatch(fetchJourneyAction.get({ checkGroup: checkGroupId, remoteName, timestamp }));
     }
-  }, [checkGroupId, dispatch, lastRefresh, remoteName]);
+  }, [checkGroupId, dispatch, lastRefresh, remoteName, timestamp]);
 
   const stepEnds: JourneyStep[] = (journeyData?.steps ?? []).filter(isStepEnd);
   const failedStep = journeyData?.steps.find((step) => step.synthetics?.step?.status === 'failed');

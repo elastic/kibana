@@ -81,6 +81,35 @@ export const getTimespanFilter = ({ from, to }: { from: string; to: string }) =>
   },
 });
 
+/**
+ * All documents of a single Synthetics check run (summary, steps, screenshots,
+ * network events) are written at essentially the same instant. Queries that
+ * target a specific `monitor.check_group` therefore only need to look at a
+ * narrow window around the run's `@timestamp`.
+ *
+ * Bounding such queries lets Elasticsearch prune shards during the `can_match`
+ * phase — including slow, throttled frozen-tier searchable snapshots — instead
+ * of fanning out across every backing index. The buffer is intentionally far
+ * larger than any realistic journey duration so it can never drop a run's
+ * documents.
+ */
+export const CHECK_GROUP_TIME_RANGE_BUFFER_MS = 60 * 60 * 1000; // 1 hour
+
+export const getCheckGroupTimeRangeFilter = (
+  timestamp: string,
+  bufferMs: number = CHECK_GROUP_TIME_RANGE_BUFFER_MS
+) => {
+  const runTime = new Date(timestamp).getTime();
+  return {
+    range: {
+      '@timestamp': {
+        gte: new Date(runTime - bufferMs).toISOString(),
+        lte: new Date(runTime + bufferMs).toISOString(),
+      },
+    },
+  };
+};
+
 export const SUMMARY_FILTER = { exists: { field: 'summary' } };
 
 export const getLocationFilter = ({

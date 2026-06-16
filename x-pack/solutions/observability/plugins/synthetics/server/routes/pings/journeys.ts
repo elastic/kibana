@@ -21,6 +21,7 @@ export const createJourneyRoute: SyntheticsRestApiRouteFactory = () => ({
     }),
     query: schema.object({
       remoteName: schema.maybe(schema.string({ maxLength: 256 })),
+      timestamp: schema.maybe(schema.string({ maxLength: 30 })),
     }),
   },
   handler: async ({
@@ -29,13 +30,14 @@ export const createJourneyRoute: SyntheticsRestApiRouteFactory = () => ({
     response,
   }): Promise<SyntheticsJourneyApiResponse> => {
     const { checkGroup } = request.params;
-    const { remoteName } = request.query;
+    const { remoteName, timestamp } = request.query;
 
     const [steps, details] = await Promise.all([
       getJourneySteps({
         syntheticsEsClient,
         checkGroup,
         remoteName,
+        timestamp,
       }),
       getJourneyDetails({
         syntheticsEsClient,

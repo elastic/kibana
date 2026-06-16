@@ -46,7 +46,11 @@ export const fetchMonitorRecentPings = async ({
     SYNTHETICS_API_URLS.PINGS,
     {
       monitorId,
-      from: from ?? moment().subtract(30, 'days').toISOString(),
+      // Callers normally pass an explicit UI date range; this fallback is only
+      // used when none is provided. Default to the last 24h (instead of 30
+      // days) so the query doesn't fan out across long-retention frozen-tier
+      // indices when no range is supplied.
+      from: from ?? moment().subtract(24, 'hours').toISOString(),
       to: to ?? moment().toISOString(),
       locations,
       sort,

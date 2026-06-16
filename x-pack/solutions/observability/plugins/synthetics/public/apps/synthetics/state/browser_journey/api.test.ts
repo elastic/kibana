@@ -194,6 +194,30 @@ describe('fetchBrowserJourney remoteName plumbing', () => {
       expect.anything()
     );
   });
+
+  it('forwards the run timestamp to apiService.get when present', async () => {
+    await fetchBrowserJourney({ checkGroup: 'cg-1', timestamp: '2023-01-01T00:00:00.000Z' });
+
+    expect(mockGet).toHaveBeenCalledWith(
+      SYNTHETICS_API_URLS.JOURNEY.replace('{checkGroup}', 'cg-1'),
+      { timestamp: '2023-01-01T00:00:00.000Z' },
+      expect.anything()
+    );
+  });
+
+  it('forwards both remoteName and timestamp when present', async () => {
+    await fetchBrowserJourney({
+      checkGroup: 'cg-1',
+      remoteName: 'remote-a',
+      timestamp: '2023-01-01T00:00:00.000Z',
+    });
+
+    expect(mockGet).toHaveBeenCalledWith(
+      SYNTHETICS_API_URLS.JOURNEY.replace('{checkGroup}', 'cg-1'),
+      { remoteName: 'remote-a', timestamp: '2023-01-01T00:00:00.000Z' },
+      expect.anything()
+    );
+  });
 });
 
 describe('fetchScreenshotBlockSet remoteName plumbing', () => {

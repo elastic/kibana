@@ -19,6 +19,7 @@ import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 export interface FetchJourneyStepsParams {
   checkGroup: string;
   remoteName?: string;
+  timestamp?: string;
 }
 
 export async function fetchScreenshotBlockSet(
@@ -38,9 +39,13 @@ export async function fetchScreenshotBlockSet(
 export async function fetchBrowserJourney(
   params: FetchJourneyStepsParams
 ): Promise<SyntheticsJourneyApiResponse> {
+  const query = {
+    ...(params.remoteName ? { remoteName: params.remoteName } : {}),
+    ...(params.timestamp ? { timestamp: params.timestamp } : {}),
+  };
   return apiService.get(
     SYNTHETICS_API_URLS.JOURNEY.replace('{checkGroup}', params.checkGroup),
-    params.remoteName ? { remoteName: params.remoteName } : undefined,
+    Object.keys(query).length ? query : undefined,
     SyntheticsJourneyApiResponseType
   );
 }

@@ -49,7 +49,8 @@ export const ResultDetailsSuccessful = ({
   const { currentStep } = useJourneySteps(
     data?.monitor.check_group,
     0,
-    Number(step.synthetics.step?.index)
+    Number(step.synthetics.step?.index),
+    data?.['@timestamp']
   );
 
   return (

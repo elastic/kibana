@@ -52,7 +52,9 @@ export const LastTestRun = () => {
 
   const { data: stepsData, loading: stepsLoading } = useJourneySteps(
     latestPing?.monitor?.check_group,
-    lastRefresh
+    lastRefresh,
+    undefined,
+    latestPing?.['@timestamp']
   );
 
   const loading = stepsLoading || pingsLoading;
