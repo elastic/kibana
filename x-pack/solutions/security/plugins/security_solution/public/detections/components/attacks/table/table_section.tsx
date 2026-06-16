@@ -41,7 +41,11 @@ import { AlertsTab } from './attack_details/alerts_tab';
 import { EmptyResultsPrompt } from './empty_results_prompt';
 import { dsl } from '../utils/dsl';
 import { groupingOptions, groupingSettings } from './grouping_settings/grouping_configs';
-import { buildAttacksOnlyFilter, buildConnectorIdFilter } from './filtering_configs';
+import {
+  buildAttacksOnlyFilter,
+  buildConnectorIdFilter,
+  buildAttackTypeFilter,
+} from './filtering_configs';
 import type { GroupTakeActionItems } from '../../alerts_table/types';
 import { AttacksGroupTakeActionItems } from './attacks_group_take_action_items';
 import { useGroupStats } from './grouping_settings/use_group_stats';
@@ -80,6 +84,11 @@ export interface TableSectionProps {
   selectedConnectorNames: string[];
 
   /**
+   * The list of selected types to filter the table
+   */
+  selectedTypes: string[];
+
+  /**
    * Callback to open the schedules flyout
    */
   openSchedulesFlyout: () => void;
@@ -95,6 +104,7 @@ export const TableSection = React.memo(
     pageFilters,
     assignees,
     selectedConnectorNames,
+    selectedTypes,
     openSchedulesFlyout,
   }: TableSectionProps) => {
     const getGlobalFiltersQuerySelector = useMemo(
@@ -198,6 +208,7 @@ export const TableSection = React.memo(
         ...(pageFilters ?? []),
         ...buildAlertAssigneesFilter(assignees),
         ...buildConnectorIdFilter(selectedConnectorNames),
+        ...buildAttackTypeFilter(selectedTypes),
         ...(showAttacksOnly ? buildAttacksOnlyFilter() : []),
       ];
     }, [
@@ -205,6 +216,7 @@ export const TableSection = React.memo(
       pageFilters,
       assignees,
       selectedConnectorNames,
+      selectedTypes,
       showAttacksOnly,
     ]);
 
@@ -227,7 +239,6 @@ export const TableSection = React.memo(
           return (
             <AlertsTab
               attackAlertIds={[]}
-              groupingFilters={groupingFilters}
               defaultFilters={defaultFilters}
               isTableLoading={isLoading}
             />
@@ -238,7 +249,6 @@ export const TableSection = React.memo(
           <AttackDetailsContainer
             attack={attack}
             showAnonymized={showAnonymized}
-            groupingFilters={groupingFilters}
             defaultFilters={defaultFilters}
             isTableLoading={isLoading}
           />

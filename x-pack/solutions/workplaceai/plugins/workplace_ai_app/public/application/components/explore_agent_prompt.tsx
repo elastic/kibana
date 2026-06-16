@@ -7,15 +7,16 @@
 
 import React, { useState, useEffect } from 'react';
 import {
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiTitle,
   EuiTextArea,
-  EuiButtonIcon,
-  useEuiTheme,
+  EuiTitle,
+  EuiToolTip,
   euiShadow,
   euiShadowHover,
   type UseEuiTheme,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -173,21 +174,31 @@ export const ExploreAgentPrompt: React.FC = () => {
                     />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiButtonIcon
-                      iconType="chevronSingleUp"
-                      aria-label={i18n.translate(
+                    <EuiToolTip
+                      content={i18n.translate(
                         'xpack.workplaceai.exploreAgentPrompt.submitAriaLabel',
                         {
                           defaultMessage: 'Submit',
                         }
                       )}
-                      color="primary"
-                      display="fill"
-                      size="m"
-                      disabled={chatInput.trim() === ''}
-                      onClick={handleSubmit}
-                      data-test-subj="workplaceAIExploreAgentSubmit"
-                    />
+                      disableScreenReaderOutput
+                    >
+                      <EuiButtonIcon
+                        iconType="chevronSingleUp"
+                        aria-label={i18n.translate(
+                          'xpack.workplaceai.exploreAgentPrompt.submitAriaLabel',
+                          {
+                            defaultMessage: 'Submit',
+                          }
+                        )}
+                        color="primary"
+                        display="fill"
+                        size="m"
+                        disabled={chatInput.trim() === ''}
+                        onClick={handleSubmit}
+                        data-test-subj="workplaceAIExploreAgentSubmit"
+                      />
+                    </EuiToolTip>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
