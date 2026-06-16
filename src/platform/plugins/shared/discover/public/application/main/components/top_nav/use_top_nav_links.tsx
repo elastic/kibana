@@ -158,6 +158,11 @@ export const useTopNavLinks = ({
     return getAppMenu(discoverParams);
   }, [getAppMenuAccessor, discoverParams]);
 
+  const additionalLegacyRuleTypes = useMemo(
+    () => profileAppMenuExtension.getAlertsLegacyRuleTypes?.() ?? [],
+    [profileAppMenuExtension]
+  );
+
   const appMenuItems: DiscoverAppMenuItemType[] = useMemo(() => {
     const items: DiscoverAppMenuItemType[] = [];
 
@@ -173,6 +178,7 @@ export const useTopNavLinks = ({
         dispatch,
         showCreateRuleV2,
         subscribe,
+        additionalLegacyRuleTypes,
       });
       items.push(alertsAppMenuItem);
     }
@@ -307,6 +313,7 @@ export const useTopNavLinks = ({
     intl,
     showCreateRuleV2,
     switchLanguageMode,
+    additionalLegacyRuleTypes,
   ]);
 
   const appMenuRegistry = useMemo(() => {

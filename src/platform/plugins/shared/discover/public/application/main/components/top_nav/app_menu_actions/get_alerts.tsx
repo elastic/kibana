@@ -19,6 +19,7 @@ import { isValidRuleFormPlugins } from '@kbn/response-ops-rule-form/lib';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { DiscoverAppMenuItemType, DiscoverAppMenuPopoverItem } from '@kbn/discover-utils';
 import type { CreateRuleOptionsFlyoutLegacyItem } from '@kbn/alerting-v2-plugin/public';
+import type { AlertsLegacyRuleType } from '../../../../../context_awareness/types';
 import type { AppMenuDiscoverParams } from './types';
 import type { DiscoverServices } from '../../../../../build_services';
 import { internalStateActions } from '../../../state_management/redux';
@@ -124,6 +125,7 @@ export const getAlertsAppMenuItem = ({
   dispatch,
   showCreateRuleV2,
   subscribe,
+  additionalLegacyRuleTypes = [],
 }: {
   discoverParams: AppMenuDiscoverParams;
   services: DiscoverServices;
@@ -132,6 +134,7 @@ export const getAlertsAppMenuItem = ({
   dispatch: InternalStateDispatch;
   showCreateRuleV2?: boolean;
   subscribe?: (listener: () => void) => () => void;
+  additionalLegacyRuleTypes?: AlertsLegacyRuleType[];
 }): DiscoverAppMenuItemType => {
   const { dataView, isEsqlMode } = discoverParams;
   const timeField = getTimeField(dataView);
@@ -163,6 +166,8 @@ export const getAlertsAppMenuItem = ({
         ),
       });
     }
+
+    legacyRuleTypes.push(...additionalLegacyRuleTypes);
 
     if (CreateRuleOptionsFlyout) {
       return {

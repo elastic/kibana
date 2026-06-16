@@ -234,6 +234,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('discoverCreateAlertButton');
     } else if (await testSubjects.exists('discoverLegacySearchThresholdRule')) {
       await testSubjects.click('discoverLegacySearchThresholdRule');
+    } else if (await testSubjects.exists('discoverAppMenuCustomThresholdRule')) {
+      await testSubjects.click('discoverAppMenuCustomThresholdRule');
     } else {
       throw new Error('No discover alert rule option found in the app menu');
     }
