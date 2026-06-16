@@ -21,6 +21,7 @@ const createAlertsClientMock = () => {
       getMaxAlertLimit: jest.fn().mockReturnValue(1000),
       checkLimitUsage: jest.fn(),
       persistAlerts: jest.fn(),
+      clearSnoozedStatusForAlerts: jest.fn(),
       getSummarizedAlerts: jest.fn(),
       factory: jest.fn(),
       client: jest.fn(),

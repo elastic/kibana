@@ -63,6 +63,7 @@ export interface AlertRuleData {
   alertDelay: number;
   muteAll: boolean;
   mutedInstanceIds: string[];
+  snoozedInstances?: RawRuleSnoozedInstance[];
 }
 
 export interface AlertRule {
@@ -109,6 +110,7 @@ export interface IAlertsClient<
     type: 'recovered' | 'trackedRecoveredAlerts'
   ): Record<string, LegacyAlert<State, Context, RecoveryActionGroupId>> | {};
   persistAlerts(): Promise<void>;
+  clearSnoozedStatusForAlerts(conditionExpiredInstanceIds: string[]): Promise<void>;
   getAlertsToUpdateWithMaintenanceWindows(): Promise<AlertsToUpdateWithMaintenanceWindows>;
   getAlertsToUpdateWithLastScheduledActions(): AlertsToUpdateWithLastScheduledActions;
   updatePersistedAlerts({

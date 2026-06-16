@@ -115,6 +115,7 @@ export const initializeAlertsClient = async <
           alertDelay: rule.alertDelay?.active ?? 0,
           muteAll: rule.muteAll,
           mutedInstanceIds: rule.mutedInstanceIds,
+          snoozedInstances: rule.snoozedInstances,
         },
       })) ?? null;
 
