@@ -25,11 +25,6 @@ export interface AppHeaderShellProps {
   tabs?: ReactNode;
   sticky?: boolean;
   padding?: AppHeaderPadding;
-  /**
-   * When true, the `titleAppend` slot hosts inline tabs that should fill the row height and
-   * bottom-align so the active "folder" tab can overlap the header's bottom border.
-   */
-  inlineTabs?: boolean;
 }
 
 const resolveLayoutProps = (
@@ -72,8 +67,7 @@ const useHeaderStyles = (
   padding: AppHeaderPadding | undefined,
   hasTabs: boolean,
   hasPrimaryContent: boolean,
-  hasMetadata: boolean,
-  inlineTabs: boolean
+  hasMetadata: boolean
 ) => {
   const { euiTheme } = useEuiTheme();
 
@@ -226,10 +220,9 @@ export const AppHeaderShell = React.memo<AppHeaderShellProps>(
     tabs,
     sticky = true,
     padding,
-    inlineTabs = false,
   }) => {
     const hasTitleAppend = titleAppend != null;
-    const styles = useHeaderStyles(sticky, padding, !!tabs, hasTitleAppend, !!metadata, inlineTabs);
+    const styles = useHeaderStyles(sticky, padding, !!tabs, hasTitleAppend, !!metadata);
 
     return (
       <div css={styles.root} data-test-subj="appHeader">

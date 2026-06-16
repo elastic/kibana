@@ -41,11 +41,6 @@ export interface AppHeaderViewProps {
   padding?: AppHeaderPadding;
   docLink?: string;
   showAddIntegrations?: boolean;
-  /**
-   * When true, the `titleAppend` slot hosts inline tabs that fill the row height and bottom-align
-   * so the active "folder" tab can overlap the header's bottom border.
-   */
-  inlineTabs?: boolean;
 }
 
 export const AppHeaderView = React.memo<AppHeaderViewProps>(
@@ -62,7 +57,6 @@ export const AppHeaderView = React.memo<AppHeaderViewProps>(
     padding,
     docLink,
     showAddIntegrations,
-    inlineTabs,
   }) => {
     const hasLegacyActionMenu = useHasLegacyActionMenu();
     const shareAction = useShareAction(menu);
@@ -98,7 +92,6 @@ export const AppHeaderView = React.memo<AppHeaderViewProps>(
         tabs={tabs?.length ? <AppTabs tabs={tabs} /> : undefined}
         sticky={sticky}
         padding={padding}
-        inlineTabs={inlineTabs}
       />
     );
   }
