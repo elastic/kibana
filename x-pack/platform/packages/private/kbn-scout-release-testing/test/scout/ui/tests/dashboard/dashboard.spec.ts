@@ -6,7 +6,8 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { test, tags } from '@kbn/scout';
+import { tags } from '@kbn/scout';
+import { test } from '../../fixtures';
 import fs from 'fs';
 import os from 'os';
 import {
