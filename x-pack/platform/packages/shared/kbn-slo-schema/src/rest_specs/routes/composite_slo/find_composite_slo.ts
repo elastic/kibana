@@ -10,7 +10,7 @@ import {
   compositeSloWithSummaryResponseSchema,
 } from '../../../schema/composite_slo';
 
-const findCompositeSLODefinitionsQuerySchema = z.object({
+const findCompositeSLOQuerySchema = z.object({
   search: z.string().optional(),
   page: z.coerce.number().min(1).optional(),
   perPage: z.coerce.number().min(1).max(1000).optional(),
@@ -27,8 +27,8 @@ const findCompositeSLODefinitionsQuerySchema = z.object({
     .optional(),
 });
 
-const findCompositeSLODefinitionsParamsSchema = z.object({
-  query: findCompositeSLODefinitionsQuerySchema.optional(),
+const findCompositeSLOParamsSchema = z.object({
+  query: findCompositeSLOQuerySchema.optional(),
 });
 
 // The list endpoint returns summary responses (definition + summary), mirroring the SLO
@@ -40,8 +40,8 @@ const findCompositeSLOResponseSchema = z.object({
   results: z.array(compositeSloWithSummaryResponseSchema),
 });
 
-type FindCompositeSLODefinitionsParams = z.infer<typeof findCompositeSLODefinitionsQuerySchema>;
+type FindCompositeSLOParams = z.infer<typeof findCompositeSLOQuerySchema>;
 type FindCompositeSLOResponse = z.output<typeof findCompositeSLOResponseSchema>;
 
-export { findCompositeSLODefinitionsParamsSchema, findCompositeSLOResponseSchema };
-export type { FindCompositeSLODefinitionsParams, FindCompositeSLOResponse };
+export { findCompositeSLOParamsSchema, findCompositeSLOResponseSchema };
+export type { FindCompositeSLOParams, FindCompositeSLOResponse };
