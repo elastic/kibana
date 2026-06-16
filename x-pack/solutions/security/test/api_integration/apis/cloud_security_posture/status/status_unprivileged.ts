@@ -26,13 +26,9 @@ import {
   CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
   CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
   FINDINGS_INDEX_PATTERN,
-  CLOUD_SECURITY_PLUGIN_VERSION,
 } from '@kbn/cloud-security-posture-common';
 import type { CspSetupStatus } from '@kbn/cloud-security-posture-common';
-import {
-  BENCHMARK_SCORE_INDEX_DEFAULT_NS,
-  CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
-} from '@kbn/cloud-security-posture-plugin/common/constants';
+import { BENCHMARK_SCORE_INDEX_DEFAULT_NS } from '@kbn/cloud-security-posture-plugin/common/constants';
 import { find, without } from 'lodash';
 import { createPackagePolicy } from '@kbn/cloud-security-posture-common/test_helper';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
@@ -68,25 +64,34 @@ export default function (providerContext: FtrProviderContext) {
   describe('GET /internal/cloud_security_posture/status', () => {
     let agentPolicyId: string;
 
-    // Installing the CSP integration package reaches the package registry over
-    // the network. The cases below install it lazily via `createPackagePolicy`
-    // (which expects 200), so whichever test runs first in this config absorbs
-    // that cold install — and a transient registry error there fails an
-    // otherwise-unrelated assertion with a 404. Pull the install once to the
-    // front and retry it, so the registry flake is contained here and the suite
-    // no longer depends on an earlier-loaded file having installed the package.
-    before(async () => {
+    // This is the first file loaded by the CSP API config, so it absorbs the
+    // cold start. `fleet/setup` is idempotent but heavy; on a cold Kibana/ES it
+    // can exceed the 120s socket timeout or hit a transient connection drop,
+    // surfacing as `socket hang up`. Retry it so the warmer next attempt wins.
+    // The CSP package is preconfigured in config.ts, so its archive is cached
+    // at startup and no case pays a cold registry download.
+    const setupFleetAndAgentPolicy = async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
+
       await retry.try(async () => {
         await supertest
-          .post(
-            `/api/fleet/epm/packages/${CLOUD_SECURITY_POSTURE_PACKAGE_NAME}/${CLOUD_SECURITY_PLUGIN_VERSION}`
-          )
+          .post(`/api/fleet/setup`)
           .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
           .set('kbn-xsrf', 'xxxx')
-          .send({ force: true })
           .expect(200);
       });
-    });
+
+      const { body: agentPolicyResponse } = await supertest
+        .post(`/api/fleet/agent_policies`)
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'Test policy',
+          namespace: 'default',
+        });
+
+      return agentPolicyResponse.item.id;
+    };
 
     describe('STATUS = UNPRIVILEGED TEST', () => {
       before(async () => {
@@ -106,24 +111,7 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       beforeEach(async () => {
-        await kibanaServer.savedObjects.cleanStandardList();
-
-        await supertest
-          .post(`/api/fleet/setup`)
-          .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-          .set('kbn-xsrf', 'xxxx')
-          .expect(200);
-
-        const { body: agentPolicyResponse } = await supertest
-          .post(`/api/fleet/agent_policies`)
-          .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-          .set('kbn-xsrf', 'xxxx')
-          .send({
-            name: 'Test policy',
-            namespace: 'default',
-          });
-
-        agentPolicyId = agentPolicyResponse.item.id;
+        agentPolicyId = await setupFleetAndAgentPolicy();
       });
 
       afterEach(async () => {
@@ -195,24 +183,7 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('status = unprivileged test indices', () => {
       beforeEach(async () => {
-        await kibanaServer.savedObjects.cleanStandardList();
-
-        await supertest
-          .post(`/api/fleet/setup`)
-          .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-          .set('kbn-xsrf', 'xxxx')
-          .expect(200);
-
-        const { body: agentPolicyResponse } = await supertest
-          .post(`/api/fleet/agent_policies`)
-          .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-          .set('kbn-xsrf', 'xxxx')
-          .send({
-            name: 'Test policy',
-            namespace: 'default',
-          });
-
-        agentPolicyId = agentPolicyResponse.item.id;
+        agentPolicyId = await setupFleetAndAgentPolicy();
       });
 
       afterEach(async () => {
