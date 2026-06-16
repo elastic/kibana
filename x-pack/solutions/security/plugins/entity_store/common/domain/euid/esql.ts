@@ -9,13 +9,14 @@ import { entityStoreConditionToESQL as conditionToESQL } from '../../esql/condit
 import { castField } from '../../esql/cast';
 import type {
   EntityDefinitionWithoutId,
+  EuidRankingBranch,
   FieldEvaluation,
   EntityType,
   EuidAttribute,
 } from '../definitions/entity_schema';
 import { isSingleFieldIdentity } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
-import { esqlIsNotNullOrEmpty, esqlIsNullOrEmpty } from '../../esql/strings';
+import { esqlIsNotNullOrEmpty, esqlIsNullOrEmpty, esqlPresentColumnName } from '../../esql/strings';
 import {
   applyWhenConditionTrueSetFields,
   documentPassesCalculatedIdentityPipelineGate,
@@ -30,34 +31,36 @@ import {
 } from './commons';
 import {
   applyFieldEvaluations,
-  getFieldEvaluationsFromDefinition,
   getSourceMatchSpec,
   type SourceMatchSpec,
 } from './field_evaluations';
 
+// ---------------------------------------------------------------------------
+// Helpers for the optimized pipeline (getEuidEsqlEvaluationParts)
+// ---------------------------------------------------------------------------
+
 /**
- * Constructs an ESQL filter for the provided entity type and document.
- *
- * It supports both flattened and nested document shapes.
- * If a document contains `_source` property, it will be unwrapped before processing.
- *
- * Example usage:
- * ```ts
- * import { getEuidEsqlFilterBasedOnDocument } from './esql';
- *
- * const doc = { host: { name: 'server1', domain: 'example.com' } };
- * const filter = getEuidEsqlFilterBasedOnDocument('host', doc);
- * // filter may look like:
- * // '((host.name == "server1") AND (host.domain == "example.com") AND (host.entity.id IS NULL OR host.entity.id == ""))'
- * ```
- *
- * @param entityType - The entity type string (e.g. 'host', 'user', 'generic')
- * @param doc - The document to derive entity filter fields from. May be a flattened or nested shape.
- * @returns An ESQL filter string, or `undefined` if the document does not contain enough identifying
- *   information, or if it would not pass the entity's `documentsFilter` ∧ `postAggFilter` (same gate
- *   as logs extraction) after field evaluations, `whenConditionTrueSetFieldsPreAgg`, and single-doc
- *   simulation of `whenConditionTrueSetFieldsAfterStats`.
+ * Collects the set of unique identity fields across all branches of an euidRanking.
+ * Single-field branches (ranking.length === 1, single EuidField) are skipped because
+ * they short-circuit before the CASE and do not need `_present` aliases.
  */
+function collectRankingFields(branches: EuidRankingBranch[]): Set<string> {
+  const fields = new Set<string>();
+  for (const { ranking } of branches) {
+    if (ranking.length === 1 && ranking[0].length === 1 && isEuidField(ranking[0][0])) {
+      continue;
+    }
+    for (const composedField of ranking) {
+      for (const attr of composedField) {
+        if (isEuidField(attr)) {
+          fields.add(attr.field);
+        }
+      }
+    }
+  }
+  return fields;
+}
+
 export function getEuidEsqlFilterBasedOnDocument(
   entityType: EntityType,
   doc: any
@@ -135,6 +138,65 @@ function sourceToEsqlExpression(source: FieldEvaluation['sources'][number]): str
   return `MV_FIRST(SPLIT(MV_FIRST(${castField(source.firstChunkOfField)}), "${escapeEsqlString(
     source.splitBy
   )}"))`;
+}
+
+/**
+ * Builds an optimized ranking CASE expression where condition guards reference
+ * pre-computed `<field>_present` boolean columns emitted by {@link buildPresentPrelude}.
+ * The value expressions (TO_STRING / CONCAT) are unchanged — only conditions differ.
+ * Used exclusively by {@link getEuidEsqlEvaluationParts}.
+ *
+ * @param presentAliases - Map from field name to its `_present` column name.
+ */
+function buildRankingCaseEsql(
+  ranking: EuidAttribute[][],
+  presentAliases: ReadonlyMap<string, string>
+): string {
+  if (ranking.length === 0) {
+    throw new Error('No euid fields found, invalid euid logic definition');
+  }
+
+  if (ranking.length === 1) {
+    const comp = ranking[0];
+    const firstAttr = comp[0];
+    if (isEuidSeparator(firstAttr)) {
+      throw new Error('Separator found in single field, invalid euid logic definition');
+    }
+    if (comp.length === 1 && isEuidField(firstAttr)) {
+      return `TO_STRING(${(firstAttr as { field: string }).field})`;
+    }
+  }
+
+  const euidLogic = ranking.map((composedField) => {
+    if (composedField.length === 1 && isEuidSeparator(composedField[0])) {
+      throw new Error('Separator found in single field, invalid euid logic definition');
+    }
+
+    const compositionConditions = composedField
+      .filter(isEuidField)
+      .map((f) => presentAliases.get(f.field) ?? esqlIsNotNullOrEmpty(f.field))
+      .join(' AND ');
+
+    if (isEuidSeparator(composedField[0])) {
+      throw new Error('The first field of a composed field cannot be a separator');
+    }
+
+    if (composedField.length === 1) {
+      return `(${compositionConditions}), TO_STRING(${
+        (composedField[0] as { field: string }).field
+      })`;
+    }
+
+    const evaluations = composedField
+      .map((attr) =>
+        isEuidField(attr) ? `TO_STRING(${attr.field})` : `"${escapeEsqlString(attr.sep)}"`
+      )
+      .join(', ');
+
+    return `(${compositionConditions}), CONCAT(${evaluations})`;
+  });
+
+  return `CASE(${euidLogic.join(',\n')}, NULL)`;
 }
 
 /**
@@ -232,8 +294,11 @@ export function getFieldEvaluationsEsql(entityType: EntityType): string | undefi
 export function getFieldEvaluationsEsqlFromDefinition(
   definition: EntityDefinitionWithoutId
 ): string | undefined {
-  const evaluations = getFieldEvaluationsFromDefinition(definition);
-  if (!evaluations || evaluations.length === 0) {
+  // Use only top-level shared evaluations (e.g. entity.source).
+  // Identity-specific evaluations (e.g. entity.namespace) are emitted by
+  // getEuidEsqlEvaluation directly, co-located with the EUID expression.
+  const evaluations = definition.fieldEvaluations ?? [];
+  if (evaluations.length === 0) {
     return undefined;
   }
   return evaluations.map((e) => buildOneFieldEvaluationEsql(e)).join(',\n ');
@@ -268,117 +333,73 @@ export function getEuidEsqlDocumentsContainsIdFilter(entityType: EntityType) {
 }
 
 /**
- * Constructs an ESQL evaluation for the provided entity type to generate the entity id.
+ * Returns a comma-separated ES|QL EVAL assignments fragment that computes the entity id for
+ * the given entity type and assigns it to `outputColumn`.
  *
- * You will need to prepend the result with a `| EVAL` clause, or just add to your existing EVAL clause.
+ * For multi-field identities the fragment also pre-computes `<field>_present` boolean columns
+ * as sequential assignments in the same `| EVAL` stage.  Because ES|QL materialises sequential
+ * EVAL assignments in order, those columns are plain `Attribute` references by the time the
+ * CASE expression is evaluated — enabling `CaseEagerEvaluator` (vectorised) instead of
+ * `CaseLazyEvaluator`.
  *
- * Example usage:
+ * Wrap the returned string with `| EVAL`:
  * ```ts
- * import { getEuidEsqlEvaluation } from './esql';
- *
- * const evaluation = getEuidEsqlEvaluation('host');
- * // evaluation may look like:
- * // 'CONCAT("host:", CASE((host.entity.id IS NOT NULL AND host.entity.id != ""), host.entity.id,
- * //                      (host.id IS NOT NULL AND host.id != ""), host.id,
- * //                      (host.name IS NOT NULL AND host.name != "" AND host.domain IS NOT NULL AND host.domain != ""), CONCAT(host.name, ".", host.domain),
- * //                      (host.hostname IS NOT NULL AND host.hostname != "" AND host.domain IS NOT NULL AND host.domain != ""), CONCAT(host.hostname, ".", host.domain),
- * //                      (host.name IS NOT NULL AND host.name != ""), host.name,
- * //                      (host.hostname IS NOT NULL AND host.hostname != ""), host.hostname, NULL))'
+ * parts.push(`| EVAL ${getEuidEsqlEvaluation(type, 'entity.id')}`);
  * ```
- *
- * @param entityType - The entity type string (e.g. 'host', 'user', 'generic')
- * @param withTypeId - Whether to prepend the entity type to the evaluation. Defaults to true.
- * @returns An ESQL evaluation string that computes the entity id.
  */
-function buildRankingCaseEsql(ranking: EuidAttribute[][]): string {
-  if (ranking.length === 0) {
-    throw new Error('No euid fields found, invalid euid logic definition');
-  }
-
-  if (ranking.length === 1) {
-    const comp = ranking[0];
-    const firstAttr = comp[0];
-    if (isEuidSeparator(firstAttr)) {
-      throw new Error('Separator found in single field, invalid euid logic definition');
-    }
-    if (comp.length === 1 && isEuidField(firstAttr)) {
-      // Entity IDs are always strings — always cast the single-field value to string.
-      return `TO_STRING(${(firstAttr as { field: string }).field})`;
-    }
-  }
-
-  const euidLogic = ranking.map((composedField) => {
-    if (composedField.length === 1 && isEuidSeparator(composedField[0])) {
-      throw new Error('Separator found in single field, invalid euid logic definition');
-    }
-
-    const compositionConditions = composedField
-      .filter(isEuidField)
-      .map((f) => `${esqlIsNotNullOrEmpty(f.field)}`)
-      .join(' AND ');
-
-    if (isEuidSeparator(composedField[0])) {
-      throw new Error('The first field of a composed field cannot be a separator');
-    }
-
-    if (composedField.length === 1) {
-      // Entity IDs are always strings — cast to string for safety.
-      return `(${compositionConditions}), TO_STRING(${
-        (composedField[0] as { field: string }).field
-      })`;
-    }
-
-    // CONCAT requires string arguments — always wrap fields with TO_STRING.
-    const evaluations = composedField
-      .map((attr) =>
-        isEuidField(attr) ? `TO_STRING(${attr.field})` : `"${escapeEsqlString(attr.sep)}"`
-      )
-      .join(', ');
-
-    const concatLogic = `CONCAT(${evaluations})`;
-
-    return `(${compositionConditions}), ${concatLogic}`;
-  });
-
-  return `CASE(${euidLogic.join(',\n')}, NULL)`;
-}
-
 export function getEuidEsqlEvaluation(
   entityType: EntityType,
+  outputColumn: string,
   { withTypeId = true }: { withTypeId?: boolean } = {}
-) {
+): string {
   const entityDefinition = getEntityDefinitionWithoutId(entityType);
   const { identityField } = entityDefinition;
   const mustPrependTypeId = withTypeId && !identityField.skipTypePrepend;
 
   if (isSingleFieldIdentity(identityField)) {
-    return appendTypeIdIfNeeded(
+    const expression = appendTypeIdIfNeeded(
       entityType,
       castField(identityField.singleField),
       mustPrependTypeId
     );
+    return `${outputColumn} = ${expression}`;
   }
 
   const { euidRanking } = identityField;
   const branches = euidRanking.branches;
+  const presentFields = collectRankingFields(branches);
+  const presentAliases = new Map([...presentFields].map((f) => [f, esqlPresentColumnName(f)]));
+  const assignments: string[] = [];
+
+  // Prepend identity-specific field evaluations (e.g. entity.namespace for user).
+  // These are prerequisites of the EUID expression and must precede the _present
+  // booleans that may reference their output columns.
+  for (const evaluation of identityField.fieldEvaluations ?? []) {
+    assignments.push(buildOneFieldEvaluationEsql(evaluation));
+  }
+  for (const f of presentFields) {
+    assignments.push(`${esqlPresentColumnName(f)} = ${esqlIsNotNullOrEmpty(f)}`);
+  }
+
   const hasConditionalBranch = branches.some((b) => b.when != null);
+  let idLogic: string;
   if (!hasConditionalBranch && branches.length === 1) {
-    const idLogic = buildRankingCaseEsql(branches[0].ranking);
-    return appendTypeIdIfNeeded(entityType, idLogic, mustPrependTypeId);
-  }
-  const branchCaseParts: string[] = [];
-  for (const branch of branches) {
-    const rankingCase = buildRankingCaseEsql(branch.ranking);
-    if (branch.when) {
-      const whenCondition = conditionToESQL(branch.when);
-      branchCaseParts.push(`(${whenCondition}), ${rankingCase}`);
-    } else {
-      branchCaseParts.push(`true, ${rankingCase}`);
+    idLogic = buildRankingCaseEsql(branches[0].ranking, presentAliases);
+  } else {
+    const branchCaseParts: string[] = [];
+    for (const branch of branches) {
+      const rankingCase = buildRankingCaseEsql(branch.ranking, presentAliases);
+      branchCaseParts.push(
+        branch.when ? `(${conditionToESQL(branch.when)}), ${rankingCase}` : `true, ${rankingCase}`
+      );
     }
+    idLogic = branchCaseParts.length > 0 ? `CASE(${branchCaseParts.join(',\n')}, NULL)` : 'NULL';
   }
-  const idLogic =
-    branchCaseParts.length > 0 ? `CASE(${branchCaseParts.join(',\n')}, NULL)` : 'NULL';
-  return appendTypeIdIfNeeded(entityType, idLogic, mustPrependTypeId);
+
+  assignments.push(
+    `${outputColumn} = ${appendTypeIdIfNeeded(entityType, idLogic, mustPrependTypeId)}`
+  );
+  return assignments.join(',\n ');
 }
 
 function appendTypeIdIfNeeded(
