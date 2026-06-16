@@ -91,26 +91,23 @@ export function usePreferredTransactionDataSource({
   http: HttpStart;
   start: string;
   end: string;
-}): { dataSource: PreferredTransactionDataSource | undefined; isLoading: boolean } {
-  const { value: dataSource, loading: isLoading } = useAbortableAsync(
+}): { dataSource: PreferredTransactionDataSource | undefined; isLoading: boolean; error: unknown } {
+  const {
+    value,
+    loading: isLoading,
+    error,
+  } = useAbortableAsync(
     async ({ signal }) => {
       const bucketSizeInSeconds =
         (new Date(end).getTime() - new Date(start).getTime()) / 1000 / NUM_BUCKETS;
-      try {
-        const meta = await http.get<TimeRangeMetadataResponse>(
-          '/internal/apm/time_range_metadata',
-          {
-            signal,
-            query: { start, end, kuery: '', useSpanName: false },
-          }
-        );
-        return pickPreferredTransactionSource(meta.sources, bucketSizeInSeconds);
-      } catch {
-        return FALLBACK;
-      }
+      const meta = await http.get<TimeRangeMetadataResponse>('/internal/apm/time_range_metadata', {
+        signal,
+        query: { start, end, kuery: '', useSpanName: false },
+      });
+      return pickPreferredTransactionSource(meta.sources, bucketSizeInSeconds);
     },
     [http, start, end]
   );
 
-  return { dataSource, isLoading };
+  return { dataSource: value, isLoading, error };
 }

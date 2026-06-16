@@ -145,20 +145,19 @@ describe('usePreferredTransactionDataSource', () => {
     );
   });
 
-  it('falls back to transactionMetric/1m when the metadata call fails', async () => {
+  it('returns undefined dataSource and exposes the error when the metadata call fails', async () => {
+    const fetchError = new Error('network error');
     const http = {
-      get: jest.fn().mockRejectedValue(new Error('network error')),
+      get: jest.fn().mockRejectedValue(fetchError),
     } as unknown as HttpStart;
 
     const { result } = renderHook(() =>
       usePreferredTransactionDataSource({ http, start: START_1H, end: END_1H })
     );
 
-    await waitFor(() => expect(result.current.dataSource).toBeDefined());
-    expect(result.current.dataSource).toEqual({
-      documentType: 'transactionMetric',
-      rollupInterval: '1m',
-    });
+    await waitFor(() => expect(result.current.error).toBeDefined());
+    expect(result.current.dataSource).toBeUndefined();
+    expect(result.current.error).toBe(fetchError);
   });
 
   it('returns undefined dataSource with isLoading true before the response arrives', () => {
