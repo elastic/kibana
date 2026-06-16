@@ -25,15 +25,18 @@ jest.mock('../../form/contexts/rule_form_context', () => ({
   }),
 }));
 
+const mockColumns: never[] = [];
+const mockRows: never[] = [];
+const mockRun = jest.fn();
 jest.mock('./use_query_execution', () => ({
   useQueryExecution: () => ({
-    columns: [],
-    rows: [],
+    columns: mockColumns,
+    rows: mockRows,
     totalRowCount: 0,
     isLoading: false,
     isError: false,
     error: null,
-    run: jest.fn(),
+    run: mockRun,
     hasRun: false,
     lastExecutedQuery: null,
   }),
