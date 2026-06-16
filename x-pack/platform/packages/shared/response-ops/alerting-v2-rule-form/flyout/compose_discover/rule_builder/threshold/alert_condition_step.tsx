@@ -119,7 +119,6 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
 
   const esqlQuery = useMemo(() => buildThresholdEsql(thresholdValues), [thresholdValues]);
   const recoveryBlock = useMemo(() => buildRecoveryBlock(thresholdValues), [thresholdValues]);
-  const hasValidQuery = Boolean(esqlQuery);
 
   // Rebuild and commit ES|QL whenever form values change
   useEffect(() => {
@@ -350,7 +349,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
                 'xpack.alertingV2.ruleBuilder.alertCondition.previewAriaLabel',
                 { defaultMessage: 'Preview results' }
               )}
-              isDisabled={!hasValidQuery || state.childOpen}
+              isDisabled={state.childOpen}
               onClick={() => dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: state.step, isAlert })}
               data-test-subj="ruleBuilderOpenPreview"
             />
