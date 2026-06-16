@@ -79,6 +79,7 @@ export interface CloudConnectors {
   target_csp?: CloudProvider;
   enabled?: boolean;
 }
+/** Agentless-specific configuration embedded in an AgentPolicy (cloud connectors, resources). */
 export interface AgentlessPolicyConfig {
   cloud_connectors?: CloudConnectors;
   resources?: {

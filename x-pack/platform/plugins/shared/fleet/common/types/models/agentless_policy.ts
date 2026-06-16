@@ -22,6 +22,7 @@ export interface AgentlessPackage {
   version: string;
 }
 
+/** Request body for creating an agentless policy via the agentless policies API. */
 export interface NewAgentlessPolicy {
   id?: string;
   name: string;
@@ -33,6 +34,7 @@ export interface NewAgentlessPolicy {
   inputs?: SimplifiedInputs;
 }
 
+/** Response DTO returned by the agentless policies API (simplified inputs, no policy_ids). */
 export interface AgentlessPolicy extends NewAgentlessPolicy {
   id: string;
   created_at: string;
