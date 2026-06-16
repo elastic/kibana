@@ -111,6 +111,12 @@ test.describe('General connector functionality', { tag: tags.stateful.classic },
     createdConnectorIds.push(customId);
 
     await page.testSubj.click('createConnectorButton');
+
+    await page.testSubj.locator('.slack-card').waitFor({ state: 'visible', timeout: 30_000 });
+    await page.testSubj.click('.index-card');
+    const backBtn = page.testSubj.locator('create-connector-flyout-back-btn');
+    await backBtn.waitFor({ state: 'visible', timeout: 30_000 });
+    await backBtn.click();
     await page.testSubj.click('.slack-card');
 
     await waitForConnectorForm(page);
@@ -136,6 +142,12 @@ test.describe('General connector functionality', { tag: tags.stateful.classic },
     await navigateToConnectors(page, kbnUrl);
 
     await page.testSubj.click('createConnectorButton');
+
+    await page.testSubj.locator('.slack-card').waitFor({ state: 'visible', timeout: 30_000 });
+    await page.testSubj.click('.index-card');
+    const backBtn2 = page.testSubj.locator('create-connector-flyout-back-btn');
+    await backBtn2.waitFor({ state: 'visible', timeout: 30_000 });
+    await backBtn2.click();
     await page.testSubj.click('.slack-card');
 
     await waitForConnectorForm(page);
@@ -231,9 +243,9 @@ test.describe('General connector functionality', { tag: tags.stateful.classic },
     // tab switch can race the flyout body's mount and the Test tab content never renders.
     await waitForConnectorForm(page);
     await page.testSubj.click('testConnectorTab');
-    await page.testSubj
-      .locator('executeActionButton')
-      .waitFor({ state: 'visible', timeout: 30_000 });
+    // Wait for the test-tab panel itself (same guard used by the email openTestTab helper).
+    // executeActionButton lives inside this panel and is reliable once the panel is mounted.
+    await page.testSubj.locator('test-connector-form').waitFor({ state: 'visible' });
 
     await setMonacoValue(page, '{ "key": "value" }');
     await expect(page.testSubj.locator('executeActionButton')).toBeEnabled();
@@ -271,9 +283,7 @@ test.describe('General connector functionality', { tag: tags.stateful.classic },
     // tab switch can race the flyout body's mount and the Test tab content never renders.
     await waitForConnectorForm(page);
     await page.testSubj.click('testConnectorTab');
-    await page.testSubj
-      .locator('executeActionButton')
-      .waitFor({ state: 'visible', timeout: 30_000 });
+    await page.testSubj.locator('test-connector-form').waitFor({ state: 'visible' });
 
     await setMonacoValue(page, '"test"');
     await expect(page.testSubj.locator('executeActionButton')).toBeEnabled();
