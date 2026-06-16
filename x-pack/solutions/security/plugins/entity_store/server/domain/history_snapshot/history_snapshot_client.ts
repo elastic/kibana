@@ -79,7 +79,6 @@ export class HistorySnapshotClient {
         signal: abortSignal,
         waitForTask: {
           logger: this.logger,
-          minTimeout: POLL_INTERVAL_MS,
           maxTimeout: POLL_INTERVAL_MS,
           forever: true,
         },
@@ -98,7 +97,6 @@ export class HistorySnapshotClient {
         signal: abortSignal,
         waitForTask: {
           logger: this.logger,
-          minTimeout: POLL_INTERVAL_MS,
           maxTimeout: POLL_INTERVAL_MS,
           forever: true,
         },

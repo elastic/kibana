@@ -81,7 +81,6 @@ describe('HistorySnapshotClient', () => {
           dest: { index: expect.stringMatching(/\.entities\.v2\.history\.security_default\./) },
           waitForTask: {
             logger: expect.anything(),
-            minTimeout: 30 * 1000,
             maxTimeout: 30 * 1000,
             forever: true,
           },
@@ -96,7 +95,6 @@ describe('HistorySnapshotClient', () => {
           params: expect.objectContaining({ timestampNow: expect.any(String) }),
           waitForTask: {
             logger: expect.anything(),
-            minTimeout: 30 * 1000,
             maxTimeout: 30 * 1000,
             forever: true,
           },
