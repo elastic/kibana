@@ -8,6 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { castArray } from 'lodash';
 import type { ObservablePost } from '../types/api';
 import {
+  AUTO_EXTRACT_OBSERVABLE_DESCRIPTION,
   OBSERVABLE_TYPE_DOMAIN,
   OBSERVABLE_TYPE_FILE_HASH,
   OBSERVABLE_TYPE_FILE_PATH,
@@ -69,7 +70,7 @@ export const getObservablesFromEcs = (ecsDataArray: FlattedEcsData[][]): Observa
   const observablesMap = new Map<string, ObservablePost>();
 
   const description = i18n.translate('xpack.cases.caseView.observables.autoExtract.description', {
-    defaultMessage: 'Auto extracted observable',
+    defaultMessage: AUTO_EXTRACT_OBSERVABLE_DESCRIPTION,
   });
   const hashFields = getHashFields();
   for (const ecsData of ecsDataArray) {

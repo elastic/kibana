@@ -502,7 +502,7 @@ describe('applyObservablesToCase', () => {
     );
   });
 
-  it('deduplicates observables — does not add an observable already on the case', async () => {
+  it('deduplicates observables — skips both patchCase and user action when all incoming observables already exist', async () => {
     mockCaseService.getCase.mockResolvedValue({
       ...caseSO,
       attributes: { ...caseSO.attributes, observables: [mockObservable] },
@@ -510,24 +510,8 @@ describe('applyObservablesToCase', () => {
 
     await applyObservablesToCase(caseSO.id, [mockObservablePost], mockClientArgs);
 
-    // patchCase still called (the existing observable set is rewritten) but count unchanged
-    expect(mockCaseService.patchCase).toHaveBeenCalledWith(
-      expect.objectContaining({
-        updatedAttributes: expect.objectContaining({ total_observables: 1 }),
-      })
-    );
-    // No user action written because newObservablesCount === 0
-    expect(mockUserActionService.creator.createUserAction).not.toHaveBeenCalled();
-  });
-
-  it('skips the user action write when no new observables are added (idempotent re-run)', async () => {
-    mockCaseService.getCase.mockResolvedValue({
-      ...caseSO,
-      attributes: { ...caseSO.attributes, observables: [mockObservable] },
-    });
-
-    await applyObservablesToCase(caseSO.id, [mockObservablePost], mockClientArgs);
-
+    // No SO write and no user action because newObservablesCount === 0
+    expect(mockCaseService.patchCase).not.toHaveBeenCalled();
     expect(mockUserActionService.creator.createUserAction).not.toHaveBeenCalled();
   });
 

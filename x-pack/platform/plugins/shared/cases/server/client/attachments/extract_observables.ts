@@ -81,6 +81,12 @@ const toFlattedEcsData = (flatDoc: Record<string, unknown>): FlattedEcsData[] =>
  * - Gated on case.settings.extractObservables === true.
  * - Requires a Platinum license; skips (debug-log) if the license is insufficient.
  * - Never throws — a failure here must not abort the attachment creation.
+ *
+ * Authorization note: the resulting write to `observables` / `total_observables`
+ * is a side effect of an already-authorized bulkCreateAttachments operation and
+ * intentionally does NOT re-check ensureAuthorized(updateCase). This mirrors the
+ * existing pattern for total_alerts increments triggered by alert attachment
+ * creation — the attachment-level authorization is considered sufficient.
  */
 export const extractAndAddObservables = async (
   caseId: string,

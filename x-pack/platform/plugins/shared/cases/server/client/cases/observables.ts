@@ -56,12 +56,18 @@ const ensureUpdateAuthorized = async (
  * for a set of observables on a case. Callers MUST enforce the Platinum license
  * gate and call notifyUsage themselves.
  *
- * Skips the user action write when no new observables were added (idempotency).
+ * Skips both the patchCase write and the user action write when no new
+ * observables were added (idempotency — avoids a no-op SO write on every
+ * re-extraction of the same alert).
+ *
+ * @param prefetchedCase - Optional already-fetched SO to avoid an extra getCase
+ *   round-trip. When provided, `caseId` is ignored for the initial fetch.
  */
 export const applyObservablesToCase = async (
   caseId: string,
   observables: ObservablePost[],
-  clientArgs: CasesClientArgs
+  clientArgs: CasesClientArgs,
+  prefetchedCase?: CaseSavedObjectTransformed
 ): Promise<void> => {
   const {
     services: { caseService, userActionService },
@@ -72,7 +78,7 @@ export const applyObservablesToCase = async (
     return;
   }
 
-  const retrievedCase = await caseService.getCase({ id: caseId });
+  const retrievedCase = prefetchedCase ?? (await caseService.getCase({ id: caseId }));
 
   const currentObservables = retrievedCase.attributes.observables ?? [];
   const updatedObservablesMap = new Map<string, Observable>();
@@ -87,6 +93,15 @@ export const applyObservablesToCase = async (
     MAX_OBSERVABLES_PER_CASE
   );
 
+  const newObservablesCount = finalObservables.length - currentObservables.length;
+
+  // Nothing new was added — skip both the patch write and the user action to
+  // avoid a no-op SO write on every idempotent re-extraction (e.g. the same
+  // alert being attached multiple times).
+  if (newObservablesCount <= 0) {
+    return;
+  }
+
   await caseService.patchCase({
     caseId: retrievedCase.id,
     originalCase: retrievedCase,
@@ -95,13 +110,6 @@ export const applyObservablesToCase = async (
       total_observables: finalObservables.length,
     },
   });
-
-  const newObservablesCount = finalObservables.length - currentObservables.length;
-
-  // Skip user action write when nothing new was added (prevents noise on idempotent re-extraction).
-  if (newObservablesCount === 0) {
-    return;
-  }
 
   await userActionService.creator.createUserAction({
     userAction: {
@@ -389,7 +397,15 @@ export const bulkAddObservables = async (
       )
     );
 
-    await applyObservablesToCase(paramArgs.caseId, paramArgs.observables, clientArgs);
+    // Pass the already-fetched SO so applyObservablesToCase does not issue
+    // another getCase round-trip. We still re-fetch after the patch to get the
+    // fully updated SO for the response.
+    await applyObservablesToCase(
+      paramArgs.caseId,
+      paramArgs.observables,
+      clientArgs,
+      retrievedCase
+    );
 
     const freshCase = await caseService.getCase({ id: paramArgs.caseId });
 
