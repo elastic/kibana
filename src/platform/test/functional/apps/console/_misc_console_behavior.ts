@@ -194,7 +194,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.console.enterText(invalidRequestText);
         await PageObjects.console.clickPlay();
 
+        expect(await toasts.getCount()).to.be(1);
+
         const toastText = await toasts.getTitleAndDismiss();
+
         expect(toastText).to.be(
           'The selected request contains an error. Please resolve it and try again.'
         );
@@ -204,6 +207,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.console.clearEditorText();
         await PageObjects.console.enterText('OPTIONS /');
         await PageObjects.console.clickPlay();
+
+        expect(await toasts.getCount()).to.be(1);
+
         const toastText = await toasts.getTitleAndDismiss();
 
         expect(toastText).to.be(
