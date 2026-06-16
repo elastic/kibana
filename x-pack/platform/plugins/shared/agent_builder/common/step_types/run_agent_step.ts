@@ -149,6 +149,7 @@ export const ConfigSchema = z
      */
     'plugin-id': z
       .string()
+      .max(255)
       .optional()
       .describe(
         "The feature id to attribute this step's LLM calls to for billing (connector telemetry pluginId)."
@@ -159,6 +160,7 @@ export const ConfigSchema = z
      */
     'aggregate-by': z
       .string()
+      .max(255)
       .optional()
       .describe(
         "The parent feature id to group this step's LLM token usage under (connector telemetry aggregateBy)."
