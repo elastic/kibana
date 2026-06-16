@@ -92,6 +92,7 @@ spaceTest.describe('Discover data grid - context view', { tag: tags.deploymentAg
       }
 
       await pageObjects.discover.openAnchorDocumentDetails();
+      await page.testSubj.click('docViewerTab-doc_view_table');
       await expect(page.testSubj.locator('tableDocViewRow-@timestamp-value')).toHaveText(
         firstTimestamp
       );
