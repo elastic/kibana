@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { isPlainObject } from 'lodash';
 import {
+  EXTERNAL_REFERENCE_TYPE_MAP,
   LEGACY_TO_UNIFIED_MAP,
   MIGRATED_ATTACHMENT_TYPES,
   PERSISTABLE_STATE_LEGACY_TO_UNIFIED_MAP,
@@ -17,6 +19,8 @@ import {
   LEGACY_EVENT_TYPE,
   LEGACY_ALERT_TYPE,
 } from '../../constants/attachments';
+import { AttachmentType } from '../../types/domain';
+import type { AttachmentRequestV2 } from '../../types/api';
 
 export const isMigratedAttachmentType = (type: string, owner: string): boolean => {
   return (
@@ -74,4 +78,50 @@ export const toUnifiedPersistableStateAttachmentType = (type: string): string =>
 
 export const toLegacyPersistableStateAttachmentType = (type: string): string => {
   return PERSISTABLE_STATE_UNIFIED_TO_LEGACY_MAP[type] ?? type;
+};
+
+/**
+ * Returns a routing key derived from raw attachment attributes — useful when working
+ * with persisted SO data of unknown shape.
+ *
+ * Not a fully-normalized unified type — for that compose with
+ * {@link toUnifiedAttachmentType} / {@link toUnifiedPersistableStateAttachmentType}
+ * (or use {@link resolveUnifiedAttachmentType}).
+ *
+ * @throws Error if attributes is null or not an object, or if `type` is missing.
+ */
+export const getAttachmentTypeFromAttributes = (attributes: unknown): string => {
+  if (!isPlainObject(attributes)) {
+    throw new Error('Invalid attributes: expected non-null object');
+  }
+  const { type, persistableStateAttachmentTypeId, externalReferenceAttachmentTypeId } =
+    attributes as Record<string, unknown>;
+  if (typeof type !== 'string') {
+    throw new Error('Invalid attributes: missing attachment type');
+  }
+  if (
+    type === AttachmentType.persistableState &&
+    typeof persistableStateAttachmentTypeId === 'string'
+  ) {
+    return persistableStateAttachmentTypeId;
+  }
+  if (
+    type === AttachmentType.externalReference &&
+    typeof externalReferenceAttachmentTypeId === 'string'
+  ) {
+    return EXTERNAL_REFERENCE_TYPE_MAP[externalReferenceAttachmentTypeId] ?? type;
+  }
+  return type;
+};
+
+/**
+ * Resolves a typed V2 attachment to its fully-normalized unified type
+ * (`security.alert`, `lens`, `file`, …).
+ */
+export const resolveUnifiedAttachmentType = (
+  attachment: AttachmentRequestV2,
+  owner: string
+): string => {
+  const routingKey = getAttachmentTypeFromAttributes(attachment);
+  return toUnifiedAttachmentType(toUnifiedPersistableStateAttachmentType(routingKey), owner);
 };
