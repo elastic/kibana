@@ -49,7 +49,7 @@ export function placeClonePanel({
   if (!panelToPlaceBeside) {
     throw new PanelNotFoundError();
   }
-  const { w: width, h: height, sectionId: newPanelSection } = newPanel.grid;
+  const { w: width, h: height, sectionId: newPanelSectionId } = newPanel.grid;
   const beside = { ...panelToPlaceBeside.grid, panelId: placeBesideId };
   const otherPanelGridData: Array<GridData & { panelId: string }> = [];
   forOwn(currentLayout.panels, (panel: DashboardLayoutPanel, panelId: string) => {
