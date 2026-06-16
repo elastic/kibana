@@ -567,6 +567,8 @@ export const correlateThreat = async ({
       : (await fetchSourceBodyText(esClient, input.report_id)) ??
         buildCaseContextFromDiamond(queryDiamond);
 
+  // groups is intentionally NOT passed — it is a UI diagnostic artifact only and must
+  // never become an input to the independent synthesis judge (firewall against rank-leak).
   const findings = await synthesizeCorrelations({
     synthesisModel,
     logger,

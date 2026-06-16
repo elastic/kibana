@@ -74,6 +74,10 @@ export interface TriagedOutCandidate {
   /** LLM confidence if scored below the confidence floor; retrieval headline score otherwise. */
   score: number;
   reason: 'below_floor' | 'not_selected';
+  /** LLM-assigned confidence (present when the LLM scored this candidate). */
+  confidence?: number;
+  /** LLM-assigned justification phrase (present when the LLM scored this candidate). */
+  justification?: string;
   vertex_scores: DiamondVertexScore;
   overlap: number;
   match_breakdown?: AnchorMatchBreakdown;
@@ -119,9 +123,16 @@ const triageLlmGroupSchema = z.object({
   candidates: z.array(triageLlmCandidateSchema),
 });
 
+const triageLlmTriagedOutSchema = z.object({
+  candidate_id: z.string(),
+  confidence: z.number().min(0).max(1),
+  justification: z.string(),
+});
+
 export const triageLlmOutputSchema = z.object({
   groups: z.array(triageLlmGroupSchema),
   total_selected: z.number().int().nullish(),
+  triaged_out: z.array(triageLlmTriagedOutSchema).nullish(),
 });
 
 type TriageLlmOutput = z.infer<typeof triageLlmOutputSchema>;
@@ -156,8 +167,19 @@ Your output must be a JSON object with this exact structure:
       ]
     }
   ],
-  "total_selected": <integer>
+  "total_selected": <integer>,
+  "triaged_out": [
+    {
+      "candidate_id": "<candidate_id exactly as provided>",
+      "confidence": <float 0.0-1.0>,
+      "justification": "<one phrase: why this candidate was not advanced>"
+    }
+  ]
 }
+
+Accounting rule: every candidate you receive must appear exactly once — either in a group (advanced) or in triaged_out (not advanced). \
+Do not omit any candidate. For triaged_out entries assign a real confidence (how likely this candidate correlates to the case) \
+and a short justification phrase explaining why it was not advanced.
 
 Confidence scale:
 - 0.9–1.0: Strong multi-vertex overlap, high correlation likelihood
@@ -531,27 +553,63 @@ export const triageDiamondCandidates = async ({
   }
 
   // 9. Build triaged-out list — candidates fed but not in final picks.
+  //
+  // Three sources of confidence/justification data (in priority order):
+  //   a) LLM triaged_out array  — candidates the LLM explicitly did not advance
+  //   b) rawPicks below floor   — candidates the LLM scored but confidence < floor
+  //   c) retrieval score        — fallback when the LLM produced no data for this candidate
   const finalPickIds = new Set(picks.map((p) => p.candidate_id));
-  const llmScoredMap = new Map<string, number>();
-  for (const p of rawPicks) {
-    llmScoredMap.set(p.candidate_id, p.confidence);
+
+  // Map from report_id → {confidence, justification} for LLM-explicit triaged_out entries.
+  const llmTriagedOutMap = new Map<string, { confidence: number; justification: string }>();
+  for (const entry of llmOutput.triaged_out ?? []) {
+    const reportId = labelMap.get(entry.candidate_id);
+    if (reportId) {
+      llmTriagedOutMap.set(reportId, {
+        confidence: entry.confidence,
+        justification: entry.justification,
+      });
+    }
   }
+
+  // Map from report_id → {confidence, justification} for below-floor rawPicks.
+  const belowFloorMap = new Map<string, { confidence: number; justification: string }>();
+  for (const p of rawPicks) {
+    if (!finalPickIds.has(p.candidate_id)) {
+      belowFloorMap.set(p.candidate_id, {
+        confidence: p.confidence,
+        justification: p.justification,
+      });
+    }
+  }
+
   const triagedOut: TriagedOutCandidate[] = capped
     .filter((c) => !finalPickIds.has(c.report_id))
     .map((c) => {
-      const llmConf = llmScoredMap.get(c.report_id);
+      const belowFloor = belowFloorMap.get(c.report_id);
+      const llmEntry = belowFloor ?? llmTriagedOutMap.get(c.report_id);
       return {
         candidate_id: c.report_id,
-        score: llmConf !== undefined ? llmConf : c.score,
-        reason: (llmConf !== undefined
+        score: llmEntry !== undefined ? llmEntry.confidence : c.score,
+        reason: (belowFloor !== undefined
           ? 'below_floor'
           : 'not_selected') as TriagedOutCandidate['reason'],
+        confidence: llmEntry?.confidence,
+        justification: llmEntry?.justification,
         vertex_scores: c.vertex_scores,
         overlap: c.overlap,
         match_breakdown: c.match_breakdown,
         retrieval_source: c.retrieval_source,
       };
     });
+
+  const unscored = triagedOut.filter((t) => t.confidence === undefined).length;
+  if (unscored > 0) {
+    logger.warn(
+      `[ti:triage] accounting-rule violation — ${unscored}/${triagedOut.length} triaged-out ` +
+        `candidates had no LLM score (model omitted them; fell back to retrieval score)`
+    );
+  }
 
   logger.debug(
     `[ti:triage] complete — fed=${guarded.length} picks=${picks.length} ` +

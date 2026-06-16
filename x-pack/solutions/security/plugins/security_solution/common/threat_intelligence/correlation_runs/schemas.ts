@@ -116,6 +116,8 @@ const triagedOutCandidateSchema = z.object({
   candidate_id: z.string(),
   score: z.number(),
   reason: z.enum(['below_floor', 'not_selected']),
+  confidence: z.number().optional(),
+  justification: z.string().optional(),
   vertex_scores: z.record(z.string(), z.number()).optional(),
   overlap: z.number().optional(),
   match_breakdown: z.record(z.string(), z.unknown()).optional(),

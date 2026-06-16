@@ -239,6 +239,10 @@ export const i18nText = {
     i18n.translate(`${ns}.triageReasonBelowFloor`, { defaultMessage: 'below floor' }),
   triageReasonNotSelected: () =>
     i18n.translate(`${ns}.triageReasonNotSelected`, { defaultMessage: 'not selected' }),
+  triageColConfidenceOut: () =>
+    i18n.translate(`${ns}.triageColConfidenceOut`, { defaultMessage: 'Confidence' }),
+  triageColJustificationOut: () =>
+    i18n.translate(`${ns}.triageColJustificationOut`, { defaultMessage: 'Justification' }),
 
   // kNN — anchor-only row placeholder
   knnAnchorOnly: () => i18n.translate(`${ns}.knnAnchorOnly`, { defaultMessage: 'anchor-only' }),

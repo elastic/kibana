@@ -492,10 +492,10 @@ const TriageResultView: FC<{ result: TriageDepthResult }> = ({ result }) => {
         render: (item: TriagedOut) => renderCandidateCell(item.candidate_id),
       },
       {
-        field: 'score',
-        name: i18nText.triageColScore(),
-        width: '80px',
-        render: (value: number) => (value > 0 ? value.toFixed(2) : '—'),
+        field: 'confidence',
+        name: i18nText.triageColConfidenceOut(),
+        width: '90px',
+        render: (value: number | undefined) => (value !== undefined ? value.toFixed(2) : '—'),
       },
       {
         name: i18nText.knnColVertexScores(),
@@ -508,13 +508,9 @@ const TriageResultView: FC<{ result: TriageDepthResult }> = ({ result }) => {
         ),
       },
       {
-        field: 'reason',
-        name: i18nText.triageColReason(),
-        width: '120px',
-        render: (value: string) =>
-          value === 'below_floor'
-            ? i18nText.triageReasonBelowFloor()
-            : i18nText.triageReasonNotSelected(),
+        field: 'justification',
+        name: i18nText.triageColJustificationOut(),
+        render: (value: string | undefined) => value ?? '—',
       },
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps
