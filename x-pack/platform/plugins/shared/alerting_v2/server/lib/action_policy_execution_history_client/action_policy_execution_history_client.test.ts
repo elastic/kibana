@@ -363,7 +363,73 @@ describe('ActionPolicyExecutionHistoryClient', () => {
         });
 
         expect(eventLogService.findActionPolicyExecutionEvents).not.toHaveBeenCalled();
-        expect(result).toEqual({ items: [], page: 1, perPage: 100, totalEvents: 0 });
+        expect(result).toEqual({
+          items: [],
+          page: 1,
+          perPage: 100,
+          totalEvents: 0,
+          searchMatches: { policies: 0, rules: 0, cap: 500 },
+        });
+      });
+
+      it('reports the policy total when matches exceed the cap', async () => {
+        const { client, actionPolicyClient } = createMocks();
+        (actionPolicyClient.findActionPolicies as jest.Mock).mockResolvedValue({
+          items: [{ id: 'p-1' } as any],
+          total: 823,
+          page: 1,
+          perPage: 500,
+        });
+        const request = httpServerMock.createKibanaRequest();
+
+        const result = await client.listExecutionHistory({ request, search: 'something' });
+
+        expect(result.searchMatches).toEqual({ policies: 823, rules: 0, cap: 500 });
+      });
+
+      it('reports the rule total when matches exceed the cap', async () => {
+        const { client, rulesClient } = createMocks();
+        (rulesClient.findRules as jest.Mock).mockResolvedValue({
+          items: [{ id: 'r-1' } as any],
+          total: 612,
+          page: 1,
+          perPage: 500,
+        });
+        const request = httpServerMock.createKibanaRequest();
+
+        const result = await client.listExecutionHistory({ request, search: 'something' });
+
+        expect(result.searchMatches).toEqual({ policies: 0, rules: 612, cap: 500 });
+      });
+
+      it('reports counts within the cap (no truncation derived)', async () => {
+        const { client, actionPolicyClient, rulesClient } = createMocks();
+        (actionPolicyClient.findActionPolicies as jest.Mock).mockResolvedValue({
+          items: [{ id: 'p-1' } as any],
+          total: 1,
+          page: 1,
+          perPage: 500,
+        });
+        (rulesClient.findRules as jest.Mock).mockResolvedValue({
+          items: [{ id: 'r-1' } as any],
+          total: 500,
+          page: 1,
+          perPage: 500,
+        });
+        const request = httpServerMock.createKibanaRequest();
+
+        const result = await client.listExecutionHistory({ request, search: 'something' });
+
+        expect(result.searchMatches).toEqual({ policies: 1, rules: 500, cap: 500 });
+      });
+
+      it('returns searchMatches=null when no search is provided', async () => {
+        const { client } = createMocks();
+        const request = httpServerMock.createKibanaRequest();
+
+        const result = await client.listExecutionHistory({ request });
+
+        expect(result.searchMatches).toBeNull();
       });
     });
 

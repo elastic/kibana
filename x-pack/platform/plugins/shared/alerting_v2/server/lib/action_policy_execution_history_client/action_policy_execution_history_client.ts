@@ -42,11 +42,18 @@ export interface ListExecutionHistoryParams {
   outcome?: PolicyExecutionOutcomeFilter;
 }
 
+export interface SearchMatchCounts {
+  policies: number;
+  rules: number;
+  cap: number;
+}
+
 export interface ListExecutionHistoryResult {
   items: PolicyExecutionHistoryItem[];
   page: number;
   perPage: number;
   totalEvents: number;
+  searchMatches: SearchMatchCounts | null;
 }
 
 export interface CountNewEventsSinceParams {
@@ -64,6 +71,7 @@ interface ResolvedSearchIds {
   policyIds: string[];
   ruleIds: string[];
   hasMatches: boolean;
+  matches: SearchMatchCounts | null;
 }
 
 @injectable()
@@ -92,7 +100,7 @@ export class ActionPolicyExecutionHistoryClient {
     const searchIds = await this.resolveSearchIds(search);
 
     if (search !== undefined && !searchIds.hasMatches) {
-      return { items: [], page, perPage, totalEvents: 0 };
+      return { items: [], page, perPage, totalEvents: 0, searchMatches: searchIds.matches };
     }
 
     const result = await this.eventLogService.findActionPolicyExecutionEvents({
@@ -114,6 +122,7 @@ export class ActionPolicyExecutionHistoryClient {
       page: result.page,
       perPage: result.perPage,
       totalEvents: result.total,
+      searchMatches: searchIds.matches,
     };
   }
 
@@ -141,21 +150,21 @@ export class ActionPolicyExecutionHistoryClient {
   }
 
   private async resolveSearchIds(search: string | undefined): Promise<ResolvedSearchIds> {
-    if (!search) return { policyIds: [], ruleIds: [], hasMatches: true };
+    if (!search) return { policyIds: [], ruleIds: [], hasMatches: true, matches: null };
 
     const [policiesRes, rulesRes] = await Promise.allSettled([
       this.actionPolicyClient.findActionPolicies({ search, perPage: SEARCH_ID_CAP }),
       this.rulesClient.findRules({ search, perPage: SEARCH_ID_CAP }),
     ]);
 
-    const policyIds = new Set<string>(
-      this.unwrapItems(policiesRes, 'EXECUTION_HISTORY_SEARCH_POLICY_LOOKUP_FAILED').map(
-        (p) => p.id
-      )
+    const policies = this.unwrapFindResult(
+      policiesRes,
+      'EXECUTION_HISTORY_SEARCH_POLICY_LOOKUP_FAILED'
     );
-    const ruleIds = new Set<string>(
-      this.unwrapItems(rulesRes, 'EXECUTION_HISTORY_SEARCH_RULE_LOOKUP_FAILED').map((r) => r.id)
-    );
+    const rules = this.unwrapFindResult(rulesRes, 'EXECUTION_HISTORY_SEARCH_RULE_LOOKUP_FAILED');
+
+    const policyIds = new Set<string>(policies.items.map((p) => p.id));
+    const ruleIds = new Set<string>(rules.items.map((r) => r.id));
 
     if (looksLikeSavedObjectId(search)) {
       policyIds.add(search);
@@ -166,6 +175,7 @@ export class ActionPolicyExecutionHistoryClient {
       policyIds: [...policyIds],
       ruleIds: [...ruleIds],
       hasMatches: policyIds.size > 0 || ruleIds.size > 0,
+      matches: { policies: policies.total, rules: rules.total, cap: SEARCH_ID_CAP },
     };
   }
 
@@ -195,10 +205,13 @@ export class ActionPolicyExecutionHistoryClient {
     return [];
   }
 
-  private unwrapItems<T>(result: PromiseSettledResult<{ items: T[] }>, code: string): T[] {
-    if (result.status === 'fulfilled') return result.value.items;
+  private unwrapFindResult<T>(
+    result: PromiseSettledResult<{ items: T[]; total: number }>,
+    code: string
+  ): { items: T[]; total: number } {
+    if (result.status === 'fulfilled') return result.value;
     this.logFailure(result.reason, code);
-    return [];
+    return { items: [], total: 0 };
   }
 
   private logFailure(reason: unknown, code: string): void {

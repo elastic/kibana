@@ -74,11 +74,23 @@ export const policyExecutionHistoryItemSchema = z.object({
 });
 export type PolicyExecutionHistoryItem = z.infer<typeof policyExecutionHistoryItemSchema>;
 
+export const searchMatchCountsSchema = z.object({
+  policies: z.number().describe('Total policies matching the search.'),
+  rules: z.number().describe('Total rules matching the search.'),
+  cap: z.number().describe('Maximum number of policy/rule ids the server uses as a filter.'),
+});
+export type SearchMatchCounts = z.infer<typeof searchMatchCountsSchema>;
+
 export const listPolicyExecutionHistoryResponseSchema = z.object({
   items: z.array(policyExecutionHistoryItemSchema),
   page: z.number(),
   perPage: z.number(),
   totalEvents: z.number(),
+  searchMatches: searchMatchCountsSchema
+    .nullable()
+    .describe(
+      'Per-type match counts for the active search, plus the cap used as filter. Null when no search was provided. When policies > cap or rules > cap the result is truncated.'
+    ),
 });
 export type ListPolicyExecutionHistoryResponse = z.infer<
   typeof listPolicyExecutionHistoryResponseSchema
