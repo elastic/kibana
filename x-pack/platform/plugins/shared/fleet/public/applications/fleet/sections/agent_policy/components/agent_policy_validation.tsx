@@ -7,7 +7,7 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { isValidNamespace } from '../../../services';
+import { isValidDuration, isValidNamespace } from '../../../services';
 import type { NewAgentPolicy, AgentPolicy } from '../../../types';
 
 export interface ValidationResults {
@@ -103,7 +103,6 @@ export const agentPolicyFormValidation = (
     ];
   }
 
-  const durationRegex = /^\d+(ms|s|m|h)$/;
   const durationErrorMessage = (
     <FormattedMessage
       id="xpack.fleet.agentPolicyForm.invalidDurationFormatErrorMessage"
@@ -113,21 +112,21 @@ export const agentPolicyFormValidation = (
 
   if (
     agentPolicy.monitoring_diagnostics?.limit?.interval &&
-    !durationRegex.test(agentPolicy.monitoring_diagnostics.limit.interval)
+    !isValidDuration(agentPolicy.monitoring_diagnostics.limit.interval)
   ) {
     errors['monitoring_diagnostics.limit.interval'] = [durationErrorMessage];
   }
 
   if (
     agentPolicy.monitoring_diagnostics?.uploader?.init_dur &&
-    !durationRegex.test(agentPolicy.monitoring_diagnostics.uploader.init_dur)
+    !isValidDuration(agentPolicy.monitoring_diagnostics.uploader.init_dur)
   ) {
     errors['monitoring_diagnostics.uploader.init_dur'] = [durationErrorMessage];
   }
 
   if (
     agentPolicy.monitoring_diagnostics?.uploader?.max_dur &&
-    !durationRegex.test(agentPolicy.monitoring_diagnostics.uploader.max_dur)
+    !isValidDuration(agentPolicy.monitoring_diagnostics.uploader.max_dur)
   ) {
     errors['monitoring_diagnostics.uploader.max_dur'] = [durationErrorMessage];
   }
