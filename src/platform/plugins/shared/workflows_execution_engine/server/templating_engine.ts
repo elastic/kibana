@@ -9,10 +9,15 @@
 
 import type { Template } from 'liquidjs';
 import { i18n } from '@kbn/i18n';
+import type { LiquidSettings } from '@kbn/workflows';
 import { createWorkflowLiquidEngine } from '@kbn/workflows';
 
 type TemplateVariableSegment = string | number;
 type TemplateVariableSegments = TemplateVariableSegment[];
+
+interface WorkflowTemplatingEngineOptions {
+  liquidSettings?: LiquidSettings;
+}
 
 export class WorkflowTemplatingEngine {
   /**
@@ -31,7 +36,7 @@ export class WorkflowTemplatingEngine {
     'workflowsExecutionEngine.templatingEngine.liquidLimitExceededErrorMessage',
     {
       defaultMessage:
-        'Liquid template rendering exceeded a workflow limit. Reduce the template size, simplify loops or filters, or reduce the rendered output size and try again.',
+        'Liquid template rendering exceeded a workflow limit. Reduce the template size, simplify loops or filters, reduce the rendered output size, or override the limit in workflow settings and try again.',
     }
   );
 
@@ -39,10 +44,15 @@ export class WorkflowTemplatingEngine {
   private readonly parsedTemplateCache = new Map<string, Template[]>();
   private readonly variableSegmentsCache = new Map<string, TemplateVariableSegments[] | null>();
 
-  constructor() {
+  constructor(options?: WorkflowTemplatingEngineOptions) {
+    const { liquidSettings } = options ?? {};
+
     this.engine = createWorkflowLiquidEngine({
       strictFilters: true,
       strictVariables: false,
+      parseLimit: liquidSettings?.parseLimit,
+      renderLimit: liquidSettings?.renderLimit,
+      memoryLimit: liquidSettings?.memoryLimit,
     });
 
     // register json_parse filter that converts JSON string to object

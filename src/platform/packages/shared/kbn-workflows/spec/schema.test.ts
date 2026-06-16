@@ -538,6 +538,39 @@ describe('WorkflowSettingsSchema', () => {
     });
   });
 
+  describe('liquid', () => {
+    it('should accept valid liquid limit settings', () => {
+      const result = WorkflowSettingsSchema.safeParse({
+        liquid: {
+          parseLimit: 200_000,
+          renderLimit: 2_000,
+          memoryLimit: 30_000_000,
+        },
+      });
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.liquid).toEqual({
+          parseLimit: 200_000,
+          renderLimit: 2_000,
+          memoryLimit: 30_000_000,
+        });
+      }
+    });
+
+    it('should validate liquid limits as positive integers', () => {
+      const result = WorkflowSettingsSchema.safeParse({
+        liquid: {
+          parseLimit: 0,
+          renderLimit: 1.5,
+          memoryLimit: -1,
+        },
+      });
+
+      expect(result.success).toBe(false);
+    });
+  });
+
   describe('CollisionStrategySchema', () => {
     it('should accept all valid strategy values', () => {
       expect(CollisionStrategySchema.safeParse('cancel-in-progress').success).toBe(true);

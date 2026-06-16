@@ -12,7 +12,7 @@ import { WorkflowTemplatingEngine } from './templating_engine';
 describe('WorkflowTemplatingEngine', () => {
   let templatingEngine: WorkflowTemplatingEngine;
   const liquidLimitErrorMessage =
-    'Liquid template rendering exceeded a workflow limit. Reduce the template size, simplify loops or filters, or reduce the rendered output size and try again.';
+    'Liquid template rendering exceeded a workflow limit. Reduce the template size, simplify loops or filters, reduce the rendered output size, or override the limit in workflow settings and try again.';
 
   beforeEach(() => {
     templatingEngine = new WorkflowTemplatingEngine();
@@ -842,6 +842,17 @@ describe('WorkflowTemplatingEngine', () => {
         expect(() => {
           templatingEngine.render('{% for i in (1..20000000) %}{{ i }}{% endfor %}', {});
         }).toThrow(liquidLimitErrorMessage);
+      });
+
+      it('should use workflow liquid settings when provided', () => {
+        const template = 'x'.repeat(160_000);
+        const engine = new WorkflowTemplatingEngine({
+          liquidSettings: {
+            parseLimit: 200_000,
+          },
+        });
+
+        expect(engine.render(template, {})).toBe(template);
       });
     });
 
