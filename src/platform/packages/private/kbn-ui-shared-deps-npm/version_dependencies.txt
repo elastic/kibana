@@ -517,6 +517,6 @@ webpack@5.96.1
 which-typed-array@1.1.18
 wrappy@1.0.2
 xtend@4.0.2
-yaml@1.10.2
+yaml@1.10.3
 yocto-queue@0.1.0
 zwitch@1.0.5
