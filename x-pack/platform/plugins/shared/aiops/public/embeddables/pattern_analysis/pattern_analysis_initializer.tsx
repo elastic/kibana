@@ -24,13 +24,13 @@ import { i18n } from '@kbn/i18n';
 import type { FC } from 'react';
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { pick } from 'lodash';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import useObservable from 'react-use/lib/useObservable';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import useMountedState from 'react-use/lib/useMountedState';
 import { getCategorizationDataViewField } from '@kbn/aiops-utils';
 import { RANDOM_SAMPLER_OPTION } from '@kbn/ml-random-sampler-utils';
+import type { PatternAnalysisEmbeddableState } from '@kbn/aiops-server-schemas/embeddables/pattern_analysis';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { DataSourceContextProvider } from '../../hooks/use_data_source';
 import { PatternAnalysisSettings } from '../../components/log_categorization/log_categorization_for_embeddable/embeddable_menu';
@@ -41,16 +41,35 @@ import { DEFAULT_MINIMUM_TIME_RANGE_OPTION } from '../../components/log_categori
 
 import { FieldSelector } from '../../components/log_categorization/log_categorization_for_embeddable/field_selector';
 import { SamplingPanel } from '../../components/log_categorization/sampling_menu/sampling_panel';
-import type {
-  MinimumTimeRangeOption,
-  PatternAnalysisEmbeddableState,
-} from '../../../common/embeddables/pattern_analysis/types';
+import type { MinimumTimeRangeOption } from '../../../common/embeddables/pattern_analysis/types';
+import {
+  toStoredMinimumTimeRange,
+  toUiMinimumTimeRange,
+} from '../../../common/embeddables/pattern_analysis/normalize_legacy_state';
+
+interface PatternAnalysisFormInput {
+  fieldName?: string;
+  minimumTimeRangeOption: MinimumTimeRangeOption;
+  randomSamplerMode: PatternAnalysisEmbeddableState['random_sampler_mode'];
+  randomSamplerProbability: PatternAnalysisEmbeddableState['random_sampler_probability'];
+}
+
+const getInitialFormInput = (
+  initialInput?: Partial<PatternAnalysisEmbeddableState>
+): PatternAnalysisFormInput => ({
+  fieldName: initialInput?.field_name,
+  minimumTimeRangeOption: initialInput?.minimum_time_range
+    ? toUiMinimumTimeRange(initialInput.minimum_time_range)
+    : DEFAULT_MINIMUM_TIME_RANGE_OPTION,
+  randomSamplerMode: initialInput?.random_sampler_mode ?? RANDOM_SAMPLER_OPTION.ON_AUTOMATIC,
+  randomSamplerProbability: initialInput?.random_sampler_probability ?? DEFAULT_PROBABILITY,
+});
 
 export interface PatternAnalysisInitializerProps {
   initialInput?: Partial<PatternAnalysisEmbeddableState>;
   onCreate: (props: PatternAnalysisEmbeddableState) => void;
   onCancel: () => void;
-  onPreview: (update: PatternAnalysisEmbeddableState) => Promise<void>;
+  onPreview?: (update: PatternAnalysisEmbeddableState) => Promise<void>;
   isNewPanel: boolean;
 }
 
@@ -69,58 +88,45 @@ export const PatternAnalysisEmbeddableInitializer: FC<PatternAnalysisInitializer
     },
   } = useAiopsAppContext();
 
-  const [formInput, setFormInput] = useState<PatternAnalysisEmbeddableState>(
-    pick(
-      initialInput ?? {
-        minimumTimeRangeOption: DEFAULT_MINIMUM_TIME_RANGE_OPTION,
-        randomSamplerMode: RANDOM_SAMPLER_OPTION.ON_AUTOMATIC,
-        randomSamplerProbability: DEFAULT_PROBABILITY,
-      },
-      [
-        'dataViewId',
-        'fieldName',
-        'minimumTimeRangeOption',
-        'randomSamplerMode',
-        'randomSamplerProbability',
-      ]
-    ) as PatternAnalysisEmbeddableState
+  const [dataViewId, setDataViewId] = useState(initialInput?.data_view_id ?? '');
+  const [formInput, setFormInput] = useState<PatternAnalysisFormInput>(() =>
+    getInitialFormInput(initialInput)
   );
   const [isFormValid, setIsFormValid] = useState(true);
 
-  const updatedProps = useMemo(() => {
+  const updatedProps = useMemo<PatternAnalysisEmbeddableState>(() => {
     return {
-      ...formInput,
-      title: isPopulatedObject(formInput)
-        ? i18n.translate('xpack.aiops.embeddablePatternAnalysis.attachmentTitle', {
-            defaultMessage: 'Pattern analysis: {fieldName}',
-            values: {
-              fieldName: (formInput as PatternAnalysisEmbeddableState).fieldName,
-            },
-          })
-        : '',
+      data_view_id: dataViewId,
+      field_name: formInput.fieldName ?? '',
+      minimum_time_range: toStoredMinimumTimeRange(formInput.minimumTimeRangeOption),
+      random_sampler_mode: formInput.randomSamplerMode,
+      random_sampler_probability: formInput.randomSamplerProbability,
+      title:
+        isPopulatedObject(formInput) && formInput.fieldName
+          ? i18n.translate('xpack.aiops.embeddablePatternAnalysis.attachmentTitle', {
+              defaultMessage: 'Pattern analysis: {fieldName}',
+              values: {
+                fieldName: formInput.fieldName,
+              },
+            })
+          : '',
     };
-  }, [formInput]);
+  }, [dataViewId, formInput]);
 
   useEffect(
     function previewChanges() {
-      if (isFormValid && updatedProps.fieldName !== undefined) {
+      if (onPreview && isFormValid && formInput.fieldName !== undefined) {
         onPreview(updatedProps);
       }
     },
-    [isFormValid, onPreview, updatedProps]
+    [isFormValid, onPreview, updatedProps, formInput.fieldName]
   );
 
-  const setDataViewId = useCallback(
-    (dataViewId: string | undefined) => {
-      setFormInput({
-        ...formInput,
-        dataViewId: dataViewId ?? '',
-        fieldName: undefined,
-      });
-      setIsFormValid(false);
-    },
-    [formInput]
-  );
+  const handleDataViewChange = useCallback((newId: string | undefined) => {
+    setDataViewId(newId ?? '');
+    setFormInput((prev) => ({ ...prev, fieldName: undefined }));
+    setIsFormValid(false);
+  }, []);
 
   return (
     <>
@@ -153,10 +159,10 @@ export const PatternAnalysisEmbeddableInitializer: FC<PatternAnalysisInitializer
             })}
           >
             <IndexPatternSelect
-              autoFocus={!formInput.dataViewId}
+              autoFocus={!dataViewId}
               fullWidth
               compressed
-              indexPatternId={formInput.dataViewId ?? ''}
+              indexPatternId={dataViewId}
               placeholder={i18n.translate(
                 'xpack.aiops.embeddablePatternAnalysis.config.dataViewSelectorPlaceholder',
                 {
@@ -164,14 +170,15 @@ export const PatternAnalysisEmbeddableInitializer: FC<PatternAnalysisInitializer
                 }
               )}
               onChange={(newId) => {
-                setDataViewId(newId ?? '');
+                handleDataViewChange(newId ?? '');
               }}
             />
           </EuiFormRow>
-          <DataSourceContextProvider dataViews={dataViews} dataViewId={formInput.dataViewId}>
+          <DataSourceContextProvider dataViews={dataViews} dataViewId={dataViewId}>
             <EuiSpacer />
 
             <FormControls
+              dataViewId={dataViewId}
               formInput={formInput}
               onChange={setFormInput}
               onValidationChange={setIsFormValid}
@@ -222,11 +229,11 @@ export const PatternAnalysisEmbeddableInitializer: FC<PatternAnalysisInitializer
 };
 
 export const FormControls: FC<{
-  formInput: PatternAnalysisEmbeddableState;
-  onChange: (update: PatternAnalysisEmbeddableState) => void;
+  dataViewId: string;
+  formInput: PatternAnalysisFormInput;
+  onChange: (update: PatternAnalysisFormInput) => void;
   onValidationChange: (isValid: boolean) => void;
-}> = ({ formInput, onChange, onValidationChange }) => {
-  const dataViewId = formInput.dataViewId;
+}> = ({ dataViewId, formInput, onChange, onValidationChange }) => {
   const {
     data: { dataViews },
   } = useAiopsAppContext();
@@ -236,7 +243,7 @@ export const FormControls: FC<{
 
   const randomSampler = useMemo(() => {
     return new RandomSampler({
-      randomSamplerMode: formInput.randomSamplerMode ?? RANDOM_SAMPLER_OPTION.ON_AUTOMATIC,
+      randomSamplerMode: formInput.randomSamplerMode,
       setRandomSamplerMode: () => {},
       randomSamplerProbability: formInput.randomSamplerProbability ?? DEFAULT_PROBABILITY,
       setRandomSamplerProbability: () => {},
@@ -275,11 +282,9 @@ export const FormControls: FC<{
           setFields(dataViewFields);
           const field = dataViewFields.find((f) => f.name === formInput.fieldName);
           if (formInput.fieldName === undefined) {
-            // form input does not contain a field name, select the found message field
             setSelectedField(messageField ?? null);
             return;
           }
-          // otherwise, select the field from the form input
           setSelectedField(field ?? messageField ?? null);
         })
         .catch(() => {
@@ -287,14 +292,15 @@ export const FormControls: FC<{
           setSelectedField(null);
         });
     },
-    [dataViewId, dataViews, formInput, isMounted, onChange]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [dataViewId, dataViews, isMounted]
   );
 
   useEffect(
     function validateForm() {
-      onValidationChange(selectedField !== null && formInput.dataViewId !== undefined);
+      onValidationChange(selectedField !== null && dataViewId !== '');
     },
-    [selectedField, formInput, onValidationChange]
+    [selectedField, dataViewId, onValidationChange]
   );
 
   useEffect(
@@ -310,7 +316,7 @@ export const FormControls: FC<{
   );
 
   useEffect(
-    function samplerChange() {
+    function fieldChange() {
       if (selectedField === null) {
         return;
       }

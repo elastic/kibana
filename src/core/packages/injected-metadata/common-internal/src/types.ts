@@ -56,6 +56,7 @@ export interface InjectedMetadata {
   branch: string;
   basePath: string;
   serverBasePath: string;
+  spaceId: string;
   publicBaseUrl?: string;
   assetsHrefBase: string;
   clusterInfo: InjectedMetadataClusterInfo;

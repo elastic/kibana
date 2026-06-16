@@ -7,21 +7,35 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiComboBox, EuiFormRow, EuiText, useGeneratedHtmlId } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiButtonIcon,
+  EuiCallOut,
+  EuiComboBox,
+  EuiCode,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiSpacer,
+  EuiText,
+  EuiToolTip,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DASHBOARD_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
-import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { useDebounceFn } from '@kbn/react-hooks';
 import { useController, useFormContext } from 'react-hook-form';
 import { useRuleFormServices } from '../contexts';
 import type { FormValues } from '../types';
-import { getDashboardsById, searchRelatedDashboard } from './search_related_dashboards';
+import {
+  resolveDashboardsByIds,
+  searchRelatedDashboard,
+  type MissingDashboard,
+} from './search_related_dashboards';
 
 const SEARCH_DEBOUNCE_MS = 300;
-
-const getOptionIds = (options: Array<EuiComboBoxOptionOption<string>>) =>
-  options.flatMap((option) => (option.value ? [option.value] : []));
 
 const haveSameDashboardIds = (left: string[], right: string[]) => {
   if (left.length !== right.length) {
@@ -33,15 +47,17 @@ const haveSameDashboardIds = (left: string[], right: string[]) => {
 };
 
 const RelatedDashboardsComboBox = ({
-  uiActions,
+  dashboard,
   dashboardsFormData,
   onChange,
+  onMissingChange,
   placeholder,
   labelId,
 }: {
-  uiActions: UiActionsStart;
+  dashboard: DashboardStart;
   dashboardsFormData: Array<{ id: string }>;
   onChange: (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => void;
+  onMissingChange: (missing: MissingDashboard[]) => void;
   placeholder: string;
   labelId: string;
 }) => {
@@ -53,44 +69,43 @@ const RelatedDashboardsComboBox = ({
   >([]);
   const [isLoading, setIsLoading] = useState(false);
   const hasLoadedDashboardOptions = useRef(false);
-  const selectedDashboardIds = useRef<string[]>([]);
+  // Tracks the artifact ids we last resolved against so the effect doesn't re-fetch
+  // when the form value's identity changes but the underlying id set does not.
+  const resolvedIds = useRef<string[]>([]);
 
   useEffect(() => {
     let ignore = false;
     const loadSelectedDashboards = async () => {
+      const dashboardIds = dashboardsFormData.map((entry) => entry.id);
+      if (haveSameDashboardIds(dashboardIds, resolvedIds.current)) {
+        return;
+      }
+
+      if (!dashboardIds.length) {
+        resolvedIds.current = [];
+        setSelectedDashboards([]);
+        onMissingChange([]);
+        return;
+      }
+
       try {
-        const dashboardIds = dashboardsFormData.map((dashboard) => dashboard.id);
-        if (haveSameDashboardIds(dashboardIds, selectedDashboardIds.current)) {
-          return;
-        }
-
-        if (!dashboardIds.length) {
-          selectedDashboardIds.current = [];
-          setSelectedDashboards([]);
-          return;
-        }
-
-        const dashboards = await getDashboardsById(uiActions, dashboardIds);
+        const { resolved, missing } = await resolveDashboardsByIds(dashboard, dashboardIds);
         if (ignore) {
           return;
         }
-
-        const selectedOptions = dashboards.map((dashboard) => ({
-          label: dashboard.title,
-          value: dashboard.id,
-        }));
-        selectedDashboardIds.current = getOptionIds(selectedOptions);
-        setSelectedDashboards(selectedOptions);
-
-        if (selectedOptions.length !== dashboardsFormData.length) {
-          onChange(selectedOptions);
-        }
+        resolvedIds.current = dashboardIds;
+        setSelectedDashboards(resolved.map((entry) => ({ label: entry.title, value: entry.id })));
+        onMissingChange(missing);
       } catch {
-        if (!ignore) {
-          selectedDashboardIds.current = [];
-          setSelectedDashboards([]);
-          onChange([]);
+        if (ignore) {
+          return;
         }
+        // On a total fetch failure, surface every attachment as unavailable rather
+        // than silently dropping them — the user can still see and remove them.
+        // Leave `resolvedIds.current` unadvanced so a later render can retry instead
+        // of permanently stranding the ids as unavailable after a transient error.
+        setSelectedDashboards([]);
+        onMissingChange(dashboardIds.map((id) => ({ id, notFound: false })));
       }
     };
 
@@ -98,23 +113,21 @@ const RelatedDashboardsComboBox = ({
     return () => {
       ignore = true;
     };
-  }, [dashboardsFormData, onChange, uiActions]);
+  }, [dashboardsFormData, dashboard, onMissingChange]);
 
   const loadDashboards = useCallback(
     async (search?: string) => {
       setIsLoading(true);
       try {
-        const dashboards = await searchRelatedDashboard(uiActions, { search: search?.trim() });
-        setDashboardOptions(
-          dashboards.map((dashboard) => ({ label: dashboard.title, value: dashboard.id }))
-        );
+        const dashboards = await searchRelatedDashboard(dashboard, { search: search?.trim() });
+        setDashboardOptions(dashboards.map((entry) => ({ label: entry.title, value: entry.id })));
       } catch {
         setDashboardOptions([]);
       } finally {
         setIsLoading(false);
       }
     },
-    [uiActions]
+    [dashboard]
   );
   const { run: debouncedLoadDashboards } = useDebounceFn(loadDashboards, {
     wait: SEARCH_DEBOUNCE_MS,
@@ -133,7 +146,6 @@ const RelatedDashboardsComboBox = ({
   );
 
   const onSelectionChange = (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
-    selectedDashboardIds.current = getOptionIds(selectedOptions);
     setSelectedDashboards(selectedOptions);
     onChange(selectedOptions);
   };
@@ -155,10 +167,100 @@ const RelatedDashboardsComboBox = ({
   );
 };
 
+const MissingDashboardsCallout = ({
+  missing,
+  onRemove,
+}: {
+  missing: MissingDashboard[];
+  onRemove: (dashboardId: string) => void;
+}) => (
+  <>
+    <EuiSpacer size="s" />
+    <EuiCallOut
+      color="warning"
+      size="s"
+      iconType="warning"
+      data-test-subj="missingDashboardsCallout"
+      title={i18n.translate('xpack.alertingV2.ruleForm.missingDashboardsCalloutTitle', {
+        defaultMessage:
+          '{count, plural, one {# linked dashboard is} other {# linked dashboards are}} unavailable',
+        values: { count: missing.length },
+      })}
+    >
+      <p>
+        <FormattedMessage
+          id="xpack.alertingV2.ruleForm.missingDashboardsCalloutBody"
+          defaultMessage="These dashboards may have been deleted or are no longer accessible. Remove them to save a clean rule."
+        />
+      </p>
+      <EuiFlexGroup direction="column" gutterSize="xs">
+        {missing.map((missingDashboard) => (
+          <EuiFlexItem key={missingDashboard.id} grow={false}>
+            <EuiFlexGroup
+              alignItems="center"
+              gutterSize="s"
+              responsive={false}
+              data-test-subj={`missingDashboardArtifact-${missingDashboard.id}`}
+            >
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="warning" iconType="warning">
+                  {missingDashboard.notFound
+                    ? i18n.translate('xpack.alertingV2.ruleForm.missingDashboardDeletedBadge', {
+                        defaultMessage: 'Dashboard deleted',
+                      })
+                    : i18n.translate('xpack.alertingV2.ruleForm.missingDashboardUnavailableBadge', {
+                        defaultMessage: 'Dashboard unavailable',
+                      })}
+                </EuiBadge>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiText size="xs" color="subdued">
+                  <FormattedMessage
+                    id="xpack.alertingV2.ruleForm.missingDashboardUnknownLabel"
+                    defaultMessage="Unknown dashboard"
+                  />{' '}
+                  <EuiCode>{missingDashboard.id}</EuiCode>
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiToolTip
+                  content={i18n.translate(
+                    'xpack.alertingV2.ruleForm.removeMissingDashboardAriaLabel',
+                    {
+                      defaultMessage: 'Remove unavailable dashboard {dashboardId}',
+                      values: { dashboardId: missingDashboard.id },
+                    }
+                  )}
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    iconType="trash"
+                    color="danger"
+                    data-test-subj={`removeMissingDashboardButton-${missingDashboard.id}`}
+                    aria-label={i18n.translate(
+                      'xpack.alertingV2.ruleForm.removeMissingDashboardAriaLabel',
+                      {
+                        defaultMessage: 'Remove unavailable dashboard {dashboardId}',
+                        values: { dashboardId: missingDashboard.id },
+                      }
+                    )}
+                    onClick={() => onRemove(missingDashboard.id)}
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+    </EuiCallOut>
+  </>
+);
+
 export const RelatedDashboardSelector: React.FC = () => {
   const { control } = useFormContext<FormValues>();
-  const { uiActions } = useRuleFormServices();
+  const { dashboard } = useRuleFormServices();
   const relatedDashboardsLabelId = useGeneratedHtmlId({ prefix: 'relatedDashboardsLabel' });
+  const [missingDashboards, setMissingDashboards] = useState<MissingDashboard[]>([]);
   const {
     field: { value: dashboardArtifacts = [], onChange },
   } = useController<FormValues, 'dashboardArtifacts'>({
@@ -173,7 +275,14 @@ export const RelatedDashboardSelector: React.FC = () => {
 
   const updateDashboardArtifacts = useCallback(
     (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
-      const nextDashboardArtifacts = selectedOptions.flatMap((selectedOption) => {
+      const missingIds = new Set(missingDashboards.map((entry) => entry.id));
+      // Preserve unresolved (missing) artifacts — they are not represented in the
+      // combo box, so rebuilding solely from the selection would silently drop them.
+      const preservedMissingArtifacts = dashboardArtifacts.filter((artifact) =>
+        missingIds.has(artifact.value)
+      );
+
+      const selectedArtifacts = selectedOptions.flatMap((selectedOption) => {
         const dashboardId = selectedOption.value;
         if (!dashboardId) {
           return [];
@@ -192,45 +301,59 @@ export const RelatedDashboardSelector: React.FC = () => {
         ];
       });
 
-      onChange(nextDashboardArtifacts);
+      onChange([...selectedArtifacts, ...preservedMissingArtifacts]);
+    },
+    [dashboardArtifacts, missingDashboards, onChange]
+  );
+
+  const removeMissingArtifact = useCallback(
+    (dashboardId: string) => {
+      onChange(dashboardArtifacts.filter((artifact) => artifact.value !== dashboardId));
     },
     [dashboardArtifacts, onChange]
   );
 
-  if (!uiActions) {
-    // Compose Discover always provides uiActions; this guard protects non-Compose/custom consumers
-    // of the shared RuleFormServices type where uiActions is optional.
+  if (!dashboard) {
+    // Compose Discover always provides the dashboard contract; this guard protects
+    // consumers of the shared RuleFormServices type where dashboard is optional
+    // (e.g. when the dashboard plugin is disabled).
     return null;
   }
 
   return (
-    <EuiFormRow
-      label={
-        <span id={relatedDashboardsLabelId}>
-          {i18n.translate('xpack.alertingV2.ruleForm.relatedDashboardsLabel', {
-            defaultMessage: 'Related dashboards',
+    <>
+      <EuiFormRow
+        label={
+          <span id={relatedDashboardsLabelId}>
+            {i18n.translate('xpack.alertingV2.ruleForm.relatedDashboardsLabel', {
+              defaultMessage: 'Related dashboards',
+            })}
+          </span>
+        }
+        fullWidth
+        labelAppend={
+          <EuiText size="xs">
+            <FormattedMessage
+              id="xpack.alertingV2.ruleForm.artifactFieldOptional"
+              defaultMessage="optional"
+            />
+          </EuiText>
+        }
+      >
+        <RelatedDashboardsComboBox
+          dashboard={dashboard}
+          dashboardsFormData={dashboardsFormData}
+          onChange={updateDashboardArtifacts}
+          onMissingChange={setMissingDashboards}
+          labelId={relatedDashboardsLabelId}
+          placeholder={i18n.translate('xpack.alertingV2.ruleForm.relatedDashboardsPlaceholder', {
+            defaultMessage: 'Link related dashboards for investigation',
           })}
-        </span>
-      }
-      fullWidth
-      labelAppend={
-        <EuiText size="xs">
-          <FormattedMessage
-            id="xpack.alertingV2.ruleForm.artifactFieldOptional"
-            defaultMessage="optional"
-          />
-        </EuiText>
-      }
-    >
-      <RelatedDashboardsComboBox
-        uiActions={uiActions}
-        dashboardsFormData={dashboardsFormData}
-        onChange={updateDashboardArtifacts}
-        labelId={relatedDashboardsLabelId}
-        placeholder={i18n.translate('xpack.alertingV2.ruleForm.relatedDashboardsPlaceholder', {
-          defaultMessage: 'Link related dashboards for investigation',
-        })}
-      />
-    </EuiFormRow>
+        />
+      </EuiFormRow>
+      {missingDashboards.length > 0 && (
+        <MissingDashboardsCallout missing={missingDashboards} onRemove={removeMissingArtifact} />
+      )}
+    </>
   );
 };

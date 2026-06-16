@@ -42,7 +42,7 @@ export const registerListRoute = ({
             max: SML_HTTP_LIST_PER_PAGE_MAX,
           }),
           type: schema.maybe(schema.string({ minLength: 1 })),
-          origin_id: schema.maybe(schema.string({ minLength: 1 })),
+          origin_uri: schema.maybe(schema.string({ minLength: 1, maxLength: 512 })),
         }),
       },
       options: { access: 'internal' },
@@ -55,12 +55,12 @@ export const registerListRoute = ({
           page,
           per_page: perPage,
           type,
-          origin_id: originId,
+          origin_uri: originUri,
         } = request.query as {
           page: number;
           per_page: number;
           type?: string;
-          origin_id?: string;
+          origin_uri?: string;
         };
         const coreContext = await ctx.core;
         const esClient = coreContext.elasticsearch.client;
@@ -74,7 +74,7 @@ export const registerListRoute = ({
           page,
           perPage,
           type,
-          originId,
+          originUri,
         });
 
         // TODO: Push permission filtering into the ES query for accurate pagination.

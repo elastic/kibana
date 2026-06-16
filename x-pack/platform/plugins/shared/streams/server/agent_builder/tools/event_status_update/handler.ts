@@ -21,7 +21,7 @@ export async function updateEventStatusToolHandler({
   const { hits } = await eventClient.findById(eventId);
   const latest = hits[hits.length - 1];
 
-  if (!latest || latest.verdict === status) {
+  if (!latest || latest.status === status) {
     return { event_id: eventId, updated: 0, ignored: 1, status };
   }
 
@@ -33,7 +33,7 @@ export async function updateEventStatusToolHandler({
     created_at: now,
     event_id: nextEventId,
     previous_event_id: latest.event_id,
-    verdict: status,
+    status,
   };
 
   await eventClient.bulkCreate([updatedEvent], { throwOnFail: true });

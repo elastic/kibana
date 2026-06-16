@@ -154,6 +154,62 @@ describe('buildWorkflowContext', () => {
       });
     });
 
+    it('should leave templated default input values raw when inputs are not provided', () => {
+      setInputsSchema({
+        properties: {
+          inputWithDefault: { type: 'string', default: '{{ consts.default_input }}' },
+        },
+      });
+
+      const execution: EsWorkflowExecution = {
+        ...baseExecution,
+        workflowDefinition: {
+          ...baseExecution.workflowDefinition,
+          consts: {
+            default_input: 'renderedValue',
+          },
+        },
+        context: {
+          inputs: {},
+        },
+      };
+
+      const context = buildWorkflowContext(execution, undefined, dependencies);
+
+      expect(context.inputs).toEqual({
+        inputWithDefault: '{{ consts.default_input }}',
+      });
+    });
+
+    it('should leave provided templated input values raw', () => {
+      setInputsSchema({
+        properties: {
+          inputWithDefault: { type: 'string', default: 'defaultValue' },
+        },
+      });
+
+      const execution: EsWorkflowExecution = {
+        ...baseExecution,
+        workflowDefinition: {
+          ...baseExecution.workflowDefinition,
+          consts: {
+            default_input: 'renderedValue',
+          },
+        },
+        context: {
+          inputs: {
+            inputWithDefault: '{{ consts.default_input }}',
+          },
+        },
+      };
+
+      const context = buildWorkflowContext(execution, undefined, dependencies);
+
+      expect(context.inputs).toEqual({
+        inputWithDefault: '{{ consts.default_input }}',
+      });
+    });
+
     it('should override default values with provided inputs', () => {
       setInputsSchema({
         properties: {

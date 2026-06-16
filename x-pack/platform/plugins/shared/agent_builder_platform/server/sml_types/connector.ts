@@ -73,7 +73,10 @@ export const createConnectorSmlType = (deps: ConnectorSmlTypeDeps): SmlTypeDefin
               type: CONNECTOR_SML_TYPE,
               title: name,
               content: contentParts.join('\n'),
-              permissions: ['action:execute'],
+              permissions: {
+                kibana: { privileges: [{ name: 'action:execute' }] },
+                elasticsearch: { indices: [] },
+              },
             },
           ],
         };
@@ -88,13 +91,14 @@ export const createConnectorSmlType = (deps: ConnectorSmlTypeDeps): SmlTypeDefin
     toAttachment: async (item, context) => {
       try {
         const soClient = await getActionSavedObjectsClient(context.request);
-        const so = await soClient.get('action', item.origin_id);
+        const originId = item.origin_id ?? '';
+        const so = await soClient.get('action', originId);
         const attrs = so.attributes as { name?: string; actionTypeId?: string };
-        const connectorName = attrs.name ?? item.origin_id;
+        const connectorName = attrs.name ?? originId;
         const connectorType = attrs.actionTypeId ?? '';
 
         const data: ConnectorAttachmentData = {
-          connector_id: item.origin_id,
+          connector_id: originId,
           connector_name: connectorName,
           connector_type: connectorType,
         };

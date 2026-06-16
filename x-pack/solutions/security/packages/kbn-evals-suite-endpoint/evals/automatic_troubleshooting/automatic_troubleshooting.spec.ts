@@ -18,6 +18,178 @@ import { cleanupSeededData } from '../../src/data_generators/cleanup';
 
 const SKILL_PATH = 'skills/security/endpoint/elastic-defend-configuration-troubleshooting/SKILL.md';
 const UNITED_TRANSFORM_WILDCARD = `${METADATA_UNITED_TRANSFORM}*`;
+const ALL_SCENARIO_COUNT = Object.keys(SCENARIOS).length;
+
+const COMMON_CRITERIA = [
+  `Activated the troubleshooting skill by reading ${SKILL_PATH}`,
+  'Called automatic_troubleshooting.check_endpoint_package_freshness before the final diagnosis',
+  'Called generate_insight to persist structured findings',
+] as const;
+
+const P0_EVALS = [
+  {
+    name: 'endpoint_alerts_missing_output_shipping_failure_explicit_prompt',
+    description:
+      'Validates that the agent identifies missing endpoint alerts caused by failed Logstash output shipping.',
+    question:
+      'Why are endpoint alerts missing for host eval-endpoint-alerts-missing-output-s? The policy looks successful.',
+    criteria: [
+      ...COMMON_CRITERIA,
+      'Queried evidence for eval-endpoint-alerts-missing-output-s in endpoint metadata, policy response, or endpoint security logs',
+      'Identified the Logstash output SSL handshake or output connectivity failure as the reason alert documents are not reaching Elasticsearch',
+      'Explained that the policy response is successful and the missing alerts are caused by telemetry shipping, not policy application',
+      'Recommended checking Fleet output or Logstash SSL configuration and verifying event flow after the output is fixed',
+    ],
+  },
+  {
+    name: 'endpoint_exception_field_mismatch_explicit_prompt',
+    description:
+      'Validates that the agent detects an Endpoint Alert Exception field/value mismatch.',
+    question:
+      'Why is my Elastic Defend endpoint exception not suppressing alerts on endpoint eval-endpoint-exception-field-mismatc?',
+    criteria: [
+      ...COMMON_CRITERIA,
+      'Queried endpoint alert evidence for eval-endpoint-exception-field-mismatc',
+      'Identified that the exception used file.path while the alert value that should match is process.executable',
+      'Explained that Endpoint Alert Exceptions require literal field matching against the alert document',
+      'Recommended recreating the endpoint exception with process.executable = C:\\Program Files\\GoodApp\\good.exe or comparing entries to the alert fields',
+    ],
+  },
+  {
+    name: 'endpoint_alert_needs_endpoint_exception_not_siem_explicit_prompt',
+    description:
+      'Validates that the agent distinguishes SIEM rule exceptions from Endpoint Alert Exceptions.',
+    question:
+      'I added a SIEM rule exception, so why does Elastic Defend still block on eval-endpoint-alert-needs-endpoint-ex?',
+    criteria: [
+      ...COMMON_CRITERIA,
+      'Queried evidence for eval-endpoint-alert-needs-endpoint-ex and its endpoint alert or artifact state',
+      'Identified that a SIEM Rule Exception does not reach the Elastic Defend endpoint agent',
+      'Explained that endpoint blocking requires an Endpoint Alert Exception rather than only a detection rule exception',
+      'Recommended creating an Endpoint Alert Exception assigned to the affected policy or using alert fields such as file hash, signature, or path',
+    ],
+  },
+  {
+    name: 'trusted_app_wrong_condition_field',
+    description:
+      'Validates that the agent identifies a Trusted Application condition field mismatch.',
+    question:
+      'Why is my trusted app not working on endpoint eval-trusted-app-wrong-condition-fiel?',
+    criteria: [
+      ...COMMON_CRITERIA,
+      'Queried process or artifact evidence for eval-trusted-app-wrong-condition-fiel',
+      'Identified that the Trusted Application condition used the wrong field, such as file.path, while the process event shows process.executable',
+      'Recommended using process.executable = C:\\Program Files\\NoisyApp\\noisy.exe for the Trusted Application entry',
+      'Explained that field/operator mismatches silently prevent Trusted Applications from matching the running process',
+    ],
+  },
+  {
+    name: 'linux_high_cpu_monitoring_scripts',
+    description:
+      'Validates that the agent diagnoses Linux high CPU from monitoring script process churn.',
+    question: 'Why is Elastic Defend using high CPU on eval-linux-high-cpu-monitoring-script?',
+    criteria: [
+      ...COMMON_CRITERIA,
+      'Queried endpoint metrics or process events for eval-linux-high-cpu-monitoring-script',
+      'Identified process_events as the dominant CPU impact category',
+      'Identified /opt/monitoring/check_database.sh or its short-lived child processes as the source of process churn',
+      'Recommended a targeted Trusted Application, Event Filter, or event reduction strategy rather than treating this as a policy response failure',
+    ],
+  },
+  {
+    name: 'windows_high_cpu_authentication_events',
+    description:
+      'Validates that the agent diagnoses Windows high CPU from authentication event volume.',
+    question: 'Why is Elastic Defend causing high CPU on eval-windows-high-cpu-authentication-?',
+    criteria: [
+      ...COMMON_CRITERIA,
+      'Queried endpoint metrics for eval-windows-high-cpu-authentication-',
+      'Identified authentication_events or Windows Security event IDs 4624 and 4634 as the dominant CPU source',
+      'Recognized the policy response is successful and the degraded state is caused by event processing load',
+      'Recommended event filters, Trusted Applications for noisy sources, or disabling Malicious Behavior Protection only when acceptable',
+    ],
+  },
+  {
+    name: 'linux_missed_checkins_selinux_203_exec',
+    description:
+      'Validates that the agent diagnoses Linux missed check-ins caused by SELinux 203/EXEC denial.',
+    question: 'Why is endpoint eval-linux-missed-checkins-selinux-20 unhealthy?',
+    criteria: [
+      ...COMMON_CRITERIA,
+      'Queried current endpoint or agent health evidence for eval-linux-missed-checkins-selinux-20',
+      'Identified missed check-ins with systemd status 203/EXEC',
+      'Identified SELinux denied execute on /opt/Elastic/Endpoint/elastic-endpoint with an unlabeled_t context as the cause',
+      'Recommended fixing the SELinux file context with semanage or restorecon and restarting ElasticEndpoint.service',
+    ],
+  },
+  {
+    name: 'windows_missed_checkins_crash_dump',
+    description:
+      'Validates that the agent diagnoses Windows missed check-ins caused by repeated Endpoint crashes.',
+    question: 'Why is endpoint eval-windows-missed-checkins-crash-du unhealthy?',
+    criteria: [
+      ...COMMON_CRITERIA,
+      'Queried current endpoint or agent health evidence for eval-windows-missed-checkins-crash-du',
+      'Identified missed check-ins caused by repeated elastic-endpoint.exe crashes rather than a policy response failure',
+      'Mentioned the crash dump path C:\\Program Files\\Elastic\\Endpoint\\cache\\CrashDumps\\elasticendpoint.dmp',
+      'Recommended collecting the crash dump or diagnostics and restarting the service or rebooting as recovery steps',
+    ],
+  },
+  {
+    name: 'output_kafka_message_size_rejection_explicit_prompt',
+    description:
+      'Validates that the agent diagnoses Kafka output rejection from oversized messages.',
+    question:
+      'Why is endpoint eval-output-kafka-message-size-reject degraded with Kafka output errors?',
+    criteria: [
+      ...COMMON_CRITERIA,
+      'Queried endpoint security log evidence for eval-output-kafka-message-size-reject',
+      'Identified Kafka Broker: Message size too large or max.message.bytes as the root cause',
+      'Explained the version-aware behavior that newer versions drop non-retriable oversized messages instead of retrying indefinitely',
+      'Recommended increasing Kafka topic or broker message-size limits or reducing event sizes with filters or Trusted Applications',
+    ],
+  },
+  {
+    name: 'windows_bsod_network_driver_regression_explicit_prompt',
+    description: 'Validates that the agent diagnoses the Windows network driver BSOD regression.',
+    question:
+      'Why did eval-windows-bsod-network-driver-regr blue screen after installing Elastic Defend?',
+    criteria: [
+      ...COMMON_CRITERIA,
+      'Queried BSOD or endpoint security log evidence for eval-windows-bsod-network-driver-regr',
+      'Identified KERNEL_MODE_HEAP_CORRUPTION with elastic_endpoint_driver.sys on Elastic Defend 8.18.3',
+      'Recognized this as the known network driver pool corruption regression involving long-lived idle network connections',
+      'Recommended upgrading to 8.18.4 or disabling advanced.kernel.network as an immediate mitigation with the host-isolation tradeoff',
+    ],
+  },
+  {
+    name: 'incompatible_aws_vpc_cni_ebpf_conflict',
+    description:
+      'Validates that the agent diagnoses AWS VPC CNI network policy failures caused by TC eBPF conflicts.',
+    question:
+      'Why did network policies stop working on Elastic Defend endpoint eval-incompatible-aws-vpc-cni-ebpf-co?',
+    criteria: [
+      ...COMMON_CRITERIA,
+      'Queried endpoint or endpoint security log evidence for eval-incompatible-aws-vpc-cni-ebpf-co',
+      'Identified a TC eBPF conflict between Elastic Defend host isolation probes and AWS VPC CNI aws-network-policy-agent',
+      'Explained that disabling Linux network event collection does not fix the host isolation TC probe conflict',
+      'Recommended setting linux.advanced.host_isolation.allowed to false if host isolation is not required',
+    ],
+  },
+  {
+    name: 'currently_healthy_endpoint_no_active_issue',
+    description:
+      'Validates that the agent reports a currently healthy endpoint and asks for a specific symptom instead of mining logs or inventing a root cause.',
+    question: 'Why is endpoint eval-currently-healthy-endpoint unhealthy?',
+    criteria: [
+      ...COMMON_CRITERIA,
+      'Queried current endpoint and agent state and the newest policy response for eval-currently-healthy-endpoint',
+      'Concluded the endpoint is currently healthy based on the successful newest policy response and current endpoint metadata, instead of asserting a root cause',
+      'Did not call integration_knowledge or search warning/error logs to manufacture a root cause for the healthy endpoint',
+      'Asked the user for a specific symptom, time range, alert, or behavior to investigate instead of reporting a root cause',
+    ],
+  },
+] as const;
 
 evaluate.describe('Automatic Troubleshooting', { tag: tags.stateful.classic }, () => {
   let unitedTransformId: string;
@@ -37,14 +209,16 @@ evaluate.describe('Automatic Troubleshooting', { tag: tags.stateful.classic }, (
     }
 
     const clients = { esClient, internalEsClient };
+    await cleanupSeededData(clients);
+
     // waiting for transforms takes a while so seed all scenarios here
-    await seedScenario(clients, SCENARIOS.incompatibleAntivirus);
-    await seedScenario(clients, SCENARIOS.policyResponseFailure);
-    await seedScenario(clients, SCENARIOS.stoppedUnitedTransform);
+    for (const scenario of Object.values(SCENARIOS)) {
+      await seedScenario(clients, scenario);
+    }
 
     await waitForTransformPropagation(esClient, log, {
-      metadataCurrent: 3,
-      metadataUnited: 3,
+      metadataCurrent: ALL_SCENARIO_COUNT,
+      metadataUnited: ALL_SCENARIO_COUNT,
     });
   });
 
@@ -99,6 +273,27 @@ evaluate.describe('Automatic Troubleshooting', { tag: tags.stateful.classic }, (
     });
   });
 
+  for (const evalDefinition of P0_EVALS) {
+    evaluate(evalDefinition.name, async ({ evaluateDataset }) => {
+      await evaluateDataset({
+        dataset: {
+          name: `endpoint: ${evalDefinition.name}`,
+          description: evalDefinition.description,
+          examples: [
+            {
+              input: {
+                question: evalDefinition.question,
+              },
+              output: {
+                criteria: [...evalDefinition.criteria],
+              },
+            },
+          ],
+        },
+      });
+    });
+  }
+
   evaluate.describe('with stopped united transform', () => {
     evaluate.beforeAll(async ({ esClient }) => {
       await esClient.transform.stopTransform({
@@ -107,10 +302,10 @@ evaluate.describe('Automatic Troubleshooting', { tag: tags.stateful.classic }, (
       });
     });
 
-    evaluate('stopped united transform', async ({ evaluateDataset }) => {
+    evaluate('missing_endpoint_list_stopped_united_transform', async ({ evaluateDataset }) => {
       await evaluateDataset({
         dataset: {
-          name: 'endpoint: stopped united transform',
+          name: 'endpoint: missing_endpoint_list_stopped_united_transform',
           description:
             'Validates that the agent detects a stopped united metadata transform and recommends restarting it.',
           examples: [

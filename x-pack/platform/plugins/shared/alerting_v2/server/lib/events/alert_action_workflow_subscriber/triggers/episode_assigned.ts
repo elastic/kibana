@@ -15,12 +15,13 @@ import {
   type EpisodeAssignedEvent,
 } from '../../alert_action_event_publisher/events';
 import type { AlertActionWorkflowTriggerBinding } from './types';
+import { toEnvelopePayload } from './to_envelope_payload';
 
 export { EPISODE_ASSIGNED_TRIGGER_ID } from '../../../../../common/workflows/triggers';
 
 /**
  * Binding from the bus `episode.assigned` event to the
- * `alertingV2.episodeAssigned` workflow trigger.
+ * `alerting.episodeAssigned` workflow trigger.
  *
  * Adding a new field to either side requires updating
  * {@link episodeAssignedPayloadSchema} and {@link episodeAssignedTrigger.toPayload}
@@ -33,13 +34,5 @@ export const episodeAssignedTrigger: AlertActionWorkflowTriggerBinding<
   eventType: EPISODE_ASSIGNED_EVENT_TYPE,
   triggerId: EPISODE_ASSIGNED_TRIGGER_ID,
   definition: episodeAssignedTriggerCommonDefinition,
-  toPayload: (event) => ({
-    occurredAt: event.occurredAt,
-    groupHash: event.groupHash,
-    episodeId: event.episodeId,
-    ruleId: event.ruleId,
-    spaceId: event.spaceId,
-    actorUid: event.actorUid,
-    assigneeUid: event.payload.assigneeUid,
-  }),
+  toPayload: (event) => ({ ...toEnvelopePayload(event), assigneeUid: event.payload.assigneeUid }),
 };

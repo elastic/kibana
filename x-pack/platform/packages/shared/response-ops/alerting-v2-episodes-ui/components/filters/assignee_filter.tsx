@@ -30,7 +30,9 @@ export function AlertEpisodesAssigneeFilter({
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
 
-  const { data: profiles = [], isLoading } = useBulkGetProfiles({
+  // Here we use `isFetching` instead of `isLoading` to avoid showing an infinite loading state when
+  // the query is disabled (when no episode in the table has an assignee and no textual search is performed)
+  const { data: profiles = [], isFetching } = useBulkGetProfiles({
     userProfile,
     uids: assigneeUids,
     toasts: notifications.toasts,
@@ -91,7 +93,7 @@ export function AlertEpisodesAssigneeFilter({
         onSearchChange={setSearch}
         searchPlaceholder={i18n.ASSIGNEE_FILTER_SEARCH_PLACEHOLDER}
         emptyMessage={i18n.ASSIGNEE_FILTER_NO_MATCH}
-        isLoading={isLoading}
+        isLoading={isFetching}
         data-test-subj={`${dataTestSubj}-popover`}
       />
     </EuiPopover>

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CompositeSLOMemberSummary, CompositeSLOSummary } from '@kbn/slo-schema';
+import type { CompositeSLOMemberWithSummary, CompositeSLOSummary } from '@kbn/slo-schema';
 import {
   computeNormalisedWeights,
   computeWeightedSli,
@@ -34,7 +34,7 @@ export interface MemberSummaryData {
 export function computeCompositeSummary(
   compositeSlo: CompositeSLODefinition,
   memberSummaries: MemberSummaryData[]
-): { compositeSummary: CompositeSLOSummary; members: CompositeSLOMemberSummary[] } {
+): { compositeSummary: CompositeSLOSummary; members: CompositeSLOMemberWithSummary[] } {
   const sliDataPoints = memberSummaries.map((ms) => ({
     weight: ms.member.weight,
     sliValue: ms.summary.sliValue,
@@ -96,11 +96,11 @@ export function computeCompositeSummary(
 function buildMemberSummary(
   ms: MemberSummaryData,
   normalisedWeight: number
-): CompositeSLOMemberSummary {
+): CompositeSLOMemberWithSummary {
   const { sliValue } = ms.summary;
 
   return {
-    id: ms.member.sloId,
+    sloId: ms.member.sloId,
     name: ms.sloName,
     weight: ms.member.weight,
     normalisedWeight,

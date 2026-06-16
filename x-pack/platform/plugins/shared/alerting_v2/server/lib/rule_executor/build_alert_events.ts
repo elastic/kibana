@@ -95,6 +95,7 @@ export function createAlertEventsBatchBuilder({
   // Timestamp when the alert event is written to the index.
   const wroteAt = new Date().toISOString();
   const source = 'internal';
+  const groupingFields = ruleAttributes.grouping?.fields ?? [];
   let index = 0;
 
   return (batch: Array<Record<string, unknown>>): AlertEvent[] => {
@@ -103,7 +104,7 @@ export function createAlertEventsBatchBuilder({
     for (const rowDoc of batch) {
       const groupHash = buildGroupHash({
         rowDoc,
-        groupKeyFields: ruleAttributes.grouping?.fields ?? [],
+        groupKeyFields: groupingFields,
         get fallbackSeed(): string {
           return `${executionUuid}|row:${index}|${stableStringify(rowDoc)}`;
         },
@@ -221,6 +222,7 @@ export function buildQueryRecoveryAlertEvents({
   }
 
   const executionUuid = sha256(`${ruleId}|${spaceId}|${scheduledTimestamp}|recovery`);
+  const groupingFields = ruleAttributes.grouping?.fields ?? [];
   const activeGroupHashSet = new Set(activeGroupHashes.map(({ group_hash }) => group_hash));
 
   // Keep the first matching row's data per group hash.
@@ -230,7 +232,7 @@ export function buildQueryRecoveryAlertEvents({
     const rowDoc = rowToDocument(columns, values[i]);
     const groupHash = buildGroupHash({
       rowDoc,
-      groupKeyFields: ruleAttributes.grouping?.fields ?? [],
+      groupKeyFields: groupingFields,
       get fallbackSeed(): string {
         return `${executionUuid}|row:${i}|${stableStringify(rowDoc)}`;
       },

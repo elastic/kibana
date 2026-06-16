@@ -156,7 +156,7 @@
     "@kbn/cps",
     "@kbn/expressions-plugin",
     "@kbn/ingest-hub-plugin",
-    "@kbn/zod",
+    "@kbn/core-spaces-common",
     "@kbn/nightshift"
   ],
   "exclude": ["target/**/*"]

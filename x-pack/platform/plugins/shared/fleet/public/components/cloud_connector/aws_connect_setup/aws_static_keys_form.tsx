@@ -6,19 +6,8 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import {
-  EuiAccordion,
-  EuiButton,
-  EuiFieldPassword,
-  EuiFieldText,
-  EuiFormRow,
-  EuiLink,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiFieldPassword, EuiFieldText, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-
-import { CloudFormationCloudCredentialsGuide } from '../aws_cloud_connector/aws_cloud_formation_guide';
 
 export const AWS_STATIC_KEYS_FORM_TEST_SUBJ = 'awsStaticKeysForm';
 
@@ -30,7 +19,6 @@ export interface AwsStaticKeyCredentials {
 export interface AwsStaticKeysFormProps {
   hasInvalidRequiredVars?: boolean;
   initialValues?: Partial<AwsStaticKeyCredentials>;
-  iacTemplateUrl?: string;
   onReadyChange?: (isReady: boolean) => void;
   onFieldsChange?: (fields: AwsStaticKeyCredentials | undefined) => void;
 }
@@ -38,7 +26,6 @@ export interface AwsStaticKeysFormProps {
 export const AwsStaticKeysForm: React.FC<AwsStaticKeysFormProps> = ({
   hasInvalidRequiredVars = false,
   initialValues,
-  iacTemplateUrl,
   onReadyChange,
   onFieldsChange,
 }) => {
@@ -62,36 +49,6 @@ export const AwsStaticKeysForm: React.FC<AwsStaticKeysFormProps> = ({
 
   return (
     <div data-test-subj={AWS_STATIC_KEYS_FORM_TEST_SUBJ}>
-      <EuiAccordion
-        id="awsStaticKeysGuide"
-        buttonContent={
-          <EuiLink>
-            <FormattedMessage
-              id="xpack.fleet.awsStaticKeysForm.stepsToCreateKeys"
-              defaultMessage="Steps to Generate AWS Account Credentials"
-            />
-          </EuiLink>
-        }
-        paddingSize="l"
-      >
-        <CloudFormationCloudCredentialsGuide credentialType="direct_access_keys" />
-      </EuiAccordion>
-      <EuiSpacer size="l" />
-      <EuiButton
-        target="_blank"
-        iconSide="left"
-        iconType="rocket"
-        href={iacTemplateUrl}
-        isDisabled={!iacTemplateUrl}
-        data-test-subj={`${AWS_STATIC_KEYS_FORM_TEST_SUBJ}-launchCloudFormation`}
-      >
-        <FormattedMessage
-          id="xpack.fleet.awsStaticKeysForm.launchCloudFormation"
-          defaultMessage="Launch CloudFormation"
-        />
-      </EuiButton>
-      <EuiSpacer size="m" />
-
       <EuiFormRow
         label={i18n.translate('xpack.fleet.awsStaticKeysForm.accessKeyIdLabel', {
           defaultMessage: 'Access key ID',

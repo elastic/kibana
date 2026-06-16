@@ -75,7 +75,7 @@ export async function updateWiredIngest({
   const {
     name: _name,
     updated_at: _updatedAt,
-    query_streams: _queryStreams,
+    query_streams: queryStreams,
     ...stream
   } = definition;
 
@@ -84,6 +84,7 @@ export async function updateWiredIngest({
     queries,
     stream: {
       ...stream,
+      ...(queryStreams !== undefined && { query_streams: queryStreams }),
       ...(description !== undefined && { description }),
       ingest,
     },
@@ -126,7 +127,7 @@ export async function updateClassicIngest({
   const {
     name: _name,
     updated_at: _updatedAt,
-    query_streams: _queryStreams,
+    query_streams: queryStreams,
     ...stream
   } = definition;
 
@@ -135,6 +136,7 @@ export async function updateClassicIngest({
     queries,
     stream: {
       ...stream,
+      ...(queryStreams !== undefined && { query_streams: queryStreams }),
       ...(description !== undefined && { description }),
       ingest,
     },

@@ -6,219 +6,171 @@
  */
 
 import React from 'react';
+import { css } from '@emotion/react';
 import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiCode,
-  EuiCopy,
-  EuiFieldText,
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiPageTemplate,
   EuiPanel,
+  EuiShowFor,
   EuiSpacer,
   EuiStat,
   EuiText,
+  EuiTextColor,
   EuiTitle,
+  type UseEuiTheme,
 } from '@elastic/eui';
+import { TrialUsageBadge, CloudLinks } from '@kbn/shared-components';
+import { ConnectToProject, useOnboardingCredentials } from '@kbn/vectordb-onboarding';
 import { i18n } from '@kbn/i18n';
-import { useOnboardingCredentials } from '@kbn/vectordb-onboarding';
+import { formatBytes, formatNumber, useDeploymentStats } from '../hooks/use_deployment_stats';
+import { useAgentsCount } from '../hooks/use_agents_count';
+import { HomePageBanner } from './home_page_banner';
+import { DocumentationQuickLinks } from './documentation_quick_links';
 import { useKibana } from '../hooks/use_kibana';
-import { NewConversationPrompt } from './new_conversation_prompt';
-import { formatBytes, formatNumber, useDeploymentStats } from './use_deployment_stats';
+import { STAT_TILE_LABELS } from '../constants';
 
-const StatTile: React.FC<{ label: string; value: string; isLoading: boolean }> = ({
-  label,
-  value,
-  isLoading,
-}) => (
+interface StatTileProps {
+  label: string;
+  value: string;
+  isLoading: boolean;
+}
+
+const VerticalSeparatorStyle = ({ euiTheme }: UseEuiTheme) => css`
+  border-left: ${euiTheme.border.thin};
+  height: ${euiTheme.size.l};
+`;
+
+const StatTile = ({ label, value, isLoading }: StatTileProps) => (
   <EuiPanel hasBorder paddingSize="m">
     <EuiStat
       title={isLoading ? <EuiLoadingSpinner size="m" /> : value}
-      description={label}
+      description={
+        <>
+          <EuiText size="xs" color="subdued">
+            <strong>{label}</strong>
+          </EuiText>
+          <EuiSpacer size="s" />
+        </>
+      }
+      descriptionElement="div"
       titleSize="m"
-      reverse
     />
   </EuiPanel>
 );
 
-export const HomePage: React.FC = () => {
+export const HomePage = () => {
   const {
-    services: { application },
+    services: { cloud },
   } = useKibana();
   const { stats, isLoading } = useDeploymentStats();
-  const elasticsearchUrl = stats.elasticsearchUrl ?? '';
-  const { apiKey, isLoading: isApiKeyLoading } = useOnboardingCredentials();
+  const { agentsCount, isLoading: isAgentsCountLoading } = useAgentsCount();
+  const { elasticsearchUrl, apiKey, isLoading: isCredentialsLoading } = useOnboardingCredentials();
+  const hasData = (stats.vectorDocsCount ?? 0) > 0 || (stats.indicesCount ?? 0) > 0;
 
-  const goToApiKeys = () =>
-    application.navigateToApp('management', { path: '/security/api_keys/create' });
+  const statTiles = [
+    {
+      key: 'indices',
+      label: STAT_TILE_LABELS.indices,
+      value: formatNumber(stats.indicesCount),
+      isLoading,
+    },
+    {
+      key: 'vectors',
+      label: STAT_TILE_LABELS.vectors,
+      value: formatNumber(stats.vectorDocsCount),
+      isLoading,
+    },
+    {
+      key: 'storage',
+      label: STAT_TILE_LABELS.storage,
+      value: formatBytes(stats.storeSizeBytes),
+      isLoading,
+    },
+    {
+      key: 'dashboards',
+      label: STAT_TILE_LABELS.dashboards,
+      value: formatNumber(stats.dashboardsCount),
+      isLoading,
+    },
+    {
+      key: 'agents',
+      label: STAT_TILE_LABELS.agents,
+      value: formatNumber(agentsCount),
+      isLoading: isAgentsCountLoading,
+    },
+    {
+      key: 'workflows',
+      label: STAT_TILE_LABELS.workflows,
+      value: formatNumber(stats.workflowsCount),
+      isLoading,
+    },
+  ];
 
   return (
-    <EuiPageTemplate restrictWidth="1100px" panelled={false} grow={false}>
+    <EuiPageTemplate restrictWidth panelled={false} grow={false}>
       <EuiPageTemplate.Section paddingSize="xl" grow={false}>
-        <EuiTitle size="l">
-          <h1>
-            {i18n.translate('xpack.serverlessVectordb.home.heading', {
-              defaultMessage: 'Vector DB',
-            })}
-          </h1>
-        </EuiTitle>
-        <EuiSpacer size="xs" />
-        <EuiText color="subdued" size="s">
-          <p>
-            {i18n.translate('xpack.serverlessVectordb.home.subheading', {
-              defaultMessage: 'Your project at a glance.',
-            })}
-          </p>
-        </EuiText>
-
-        <EuiSpacer size="xl" />
-
-        <EuiFlexGrid columns={3} gutterSize="m">
-          <StatTile
-            label={i18n.translate('xpack.serverlessVectordb.home.stats.vectors', {
-              defaultMessage: 'Vector documents',
-            })}
-            value={formatNumber(stats.vectorDocsCount)}
-            isLoading={isLoading}
-          />
-          <StatTile
-            label={i18n.translate('xpack.serverlessVectordb.home.stats.indices', {
-              defaultMessage: 'Indices',
-            })}
-            value={formatNumber(stats.indicesCount)}
-            isLoading={isLoading}
-          />
-          <StatTile
-            label={i18n.translate('xpack.serverlessVectordb.home.stats.storage', {
-              defaultMessage: 'Storage',
-            })}
-            value={formatBytes(stats.storeSizeBytes)}
-            isLoading={isLoading}
-          />
-          <StatTile
-            label={i18n.translate('xpack.serverlessVectordb.home.stats.agents', {
-              defaultMessage: 'Agents',
-            })}
-            value={formatNumber(stats.agentsCount)}
-            isLoading={isLoading}
-          />
-          <StatTile
-            label={i18n.translate('xpack.serverlessVectordb.home.stats.workflows', {
-              defaultMessage: 'Workflows',
-            })}
-            value={formatNumber(stats.workflowsCount)}
-            isLoading={isLoading}
-          />
-        </EuiFlexGrid>
-
-        <EuiSpacer size="xl" />
-
-        <EuiPanel hasBorder paddingSize="l">
-          <EuiTitle size="xs">
-            <h2>
-              {i18n.translate('xpack.serverlessVectordb.home.connect.heading', {
-                defaultMessage: 'Connect to your project',
-              })}
-            </h2>
-          </EuiTitle>
-          <EuiSpacer size="m" />
-          <EuiFlexGroup gutterSize="m" alignItems="flexEnd">
-            <EuiFlexItem>
-              <EuiText size="xs" color="subdued">
-                <label htmlFor="vectordbHomeEsUrl">
-                  {i18n.translate('xpack.serverlessVectordb.home.connect.urlLabel', {
-                    defaultMessage: 'Elasticsearch endpoint',
-                  })}
-                </label>
-              </EuiText>
-              <EuiSpacer size="xs" />
-              {elasticsearchUrl ? (
-                <EuiFieldText
-                  id="vectordbHomeEsUrl"
-                  readOnly
-                  value={elasticsearchUrl}
-                  data-test-subj="vectordbHomeEsUrl"
-                  append={
-                    <EuiCopy textToCopy={elasticsearchUrl}>
-                      {(copy) => (
-                        <EuiButtonEmpty
-                          iconType="copyClipboard"
-                          size="xs"
-                          onClick={copy}
-                          aria-label={i18n.translate(
-                            'xpack.serverlessVectordb.home.connect.copyUrl',
-                            {
-                              defaultMessage: 'Copy endpoint URL',
-                            }
-                          )}
-                        />
-                      )}
-                    </EuiCopy>
-                  }
-                />
-              ) : (
-                <EuiText size="s" color="subdued">
-                  <EuiCode>—</EuiCode>
-                </EuiText>
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup alignItems="center">
+              {cloud?.isInTrial() && (
+                <>
+                  <EuiFlexItem grow={false}>
+                    <TrialUsageBadge cloud={cloud} />
+                  </EuiFlexItem>
+                  <EuiShowFor sizes={['m', 'l', 'xl']}>
+                    <EuiFlexItem grow={false}>
+                      <span css={VerticalSeparatorStyle} />
+                    </EuiFlexItem>
+                  </EuiShowFor>
+                </>
               )}
-            </EuiFlexItem>
-            {isApiKeyLoading ? (
-              <EuiFlexItem grow={false}>
-                <EuiLoadingSpinner size="m" />
-              </EuiFlexItem>
-            ) : apiKey ? (
-              <EuiFlexItem>
-                <EuiText size="xs" color="subdued">
-                  <label htmlFor="vectordbHomeApiKey">
-                    {i18n.translate('xpack.serverlessVectordb.home.connect.apiKeyLabel', {
-                      defaultMessage: 'API key',
-                    })}
-                  </label>
-                </EuiText>
-                <EuiSpacer size="xs" />
-                <EuiFieldText
-                  id="vectordbHomeApiKey"
-                  readOnly
-                  value={apiKey}
-                  data-test-subj="vectordbHomeApiKey"
-                  append={
-                    <EuiCopy textToCopy={apiKey}>
-                      {(copy) => (
-                        <EuiButtonEmpty
-                          iconType="copyClipboard"
-                          size="xs"
-                          onClick={copy}
-                          aria-label={i18n.translate(
-                            'xpack.serverlessVectordb.home.connect.copyApiKey',
-                            { defaultMessage: 'Copy API key' }
-                          )}
-                        />
-                      )}
-                    </EuiCopy>
-                  }
-                />
-              </EuiFlexItem>
-            ) : (
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  iconType="key"
-                  onClick={goToApiKeys}
-                  data-test-subj="vectordbHomeCreateApiKey"
-                >
-                  {i18n.translate('xpack.serverlessVectordb.home.connect.createApiKey', {
-                    defaultMessage: 'Create API key',
+              <EuiShowFor sizes={['m', 'l', 'xl']}>
+                <EuiFlexItem grow={false}>
+                  <CloudLinks cloud={cloud} CloudBaseOnly />
+                </EuiFlexItem>
+              </EuiShowFor>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <ConnectToProject
+              elasticsearchUrl={elasticsearchUrl}
+              apiKey={apiKey}
+              isLoading={isCredentialsLoading}
+              showLabel={false}
+              isCompact
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiFlexGroup gutterSize="l" direction="column">
+          <EuiFlexItem>
+            <HomePageBanner hasData={hasData} isLoading={isLoading} />
+          </EuiFlexItem>
+          <EuiSpacer size="s" />
+          <EuiFlexItem>
+            <EuiTitle size="xxxs">
+              <h2>
+                <EuiTextColor color="subdued">
+                  {i18n.translate('xpack.serverlessVectordb.home.stats.heading', {
+                    defaultMessage: 'Your vector database overview',
                   })}
-                </EuiButton>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        </EuiPanel>
-
-        <EuiSpacer size="xxl" />
-        <NewConversationPrompt />
+                </EuiTextColor>
+              </h2>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            <EuiFlexGrid columns={3} gutterSize="m">
+              {statTiles.map(({ key, label, value, isLoading: tileIsLoading }) => (
+                <StatTile key={key} label={label} value={value} isLoading={tileIsLoading} />
+              ))}
+            </EuiFlexGrid>
+          </EuiFlexItem>
+          <EuiSpacer size="s" />
+          <EuiFlexItem>
+            <DocumentationQuickLinks />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiPageTemplate.Section>
     </EuiPageTemplate>
   );

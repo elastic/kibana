@@ -15,19 +15,16 @@ This README covers the **public** side. For the server side (where runtime emiss
 
 Add public trigger definitions in [`register_trigger_definitions.ts`](register_trigger_definitions.ts).
 
-The helper receives the `workflowsExtensions` setup contract and registers every `PublicTriggerDefinition`:
+The helper receives the `workflowsExtensions` setup contract and registers every trigger as a **loader** (an async `import`). The workflows app awaits `workflowsExtensions.isReady()` before rendering, so definitions are available when the UI needs them while staying out of the plugin's page-load bundle (including the lazily-imported EUI icons):
 
 ```ts
 export function registerTriggerDefinitions(
   workflowsExtensions: WorkflowsExtensionsPublicPluginSetup
 ): void {
-  const triggerDefinitions: PublicTriggerDefinition[] = [
-    // Add trigger UI metadata here.
-  ];
-
-  for (const definition of triggerDefinitions) {
-    workflowsExtensions.registerTriggerDefinition(definition);
-  }
+  workflowsExtensions.registerTriggerDefinition(() =>
+    import('./triggers/episode_assigned').then((m) => m.episodeAssignedTriggerPublicDefinition)
+  );
+  // Add more trigger loaders here.
 }
 ```
 
@@ -35,6 +32,6 @@ When adding a trigger:
 
 1. Define the shared trigger (`id` + Zod `eventSchema`) in `common/`.
 2. Register it on the **server** via the server-side `registerTriggerDefinitions` helper (so the runtime validates and dispatches it).
-3. Add the public `PublicTriggerDefinition` to this file's `triggerDefinitions` array.
+3. Add a public `PublicTriggerDefinition` module under `triggers/` and register it as a loader in this file.
 4. Update the trigger schema hash fixture in `src/platform/plugins/shared/workflows_extensions/test/scout/api/fixtures/approved_trigger_definitions.ts`.
 5. Keep the server and public trigger ids aligned.

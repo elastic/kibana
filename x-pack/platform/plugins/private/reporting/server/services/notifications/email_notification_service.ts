@@ -6,7 +6,7 @@
  */
 
 import type { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { NotificationService, NotifyArgs } from './types';
 import type { ReportingCore } from '../..';
 import { getContentStream } from '../../lib';

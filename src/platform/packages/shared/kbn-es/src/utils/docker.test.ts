@@ -153,52 +153,56 @@ const volumeCmdTest = async (volumeCmd: string[]) => {
 describe('getServerlessNodes()', () => {
   test('should return default node names and ports with no arguments', () => {
     const nodes = getServerlessNodes();
-    expect(nodes).toHaveLength(3);
+    expect(nodes).toHaveLength(2);
     expect(nodes[0].name).toBe('es01');
     expect(nodes[1].name).toBe('es02');
-    expect(nodes[2].name).toBe('es03');
     expect(nodes[0].params).toEqual(expect.arrayContaining(['127.0.0.1:9300:9300']));
     expect(nodes[1].params).toEqual(expect.arrayContaining(['127.0.0.1:9202:9202']));
-    expect(nodes[2].params).toEqual(expect.arrayContaining(['127.0.0.1:9203:9203']));
+    expect(nodes[1].params).toEqual(expect.arrayContaining(['127.0.0.1:9302:9302']));
+    expect(nodes[0].params).toEqual(
+      expect.arrayContaining([
+        'node.roles=["master","remote_cluster_client","ingest","index","ml","transform"]',
+      ])
+    );
+    expect(nodes[1].params).toEqual(
+      expect.arrayContaining(['node.roles=["master","remote_cluster_client","search"]'])
+    );
+    expect(nodes[0].esArgs).toEqual(
+      expect.arrayContaining([
+        ['xpack.searchable.snapshot.shared_cache.size', '16MB'],
+        ['xpack.searchable.snapshot.shared_cache.region_size', '256K'],
+        ['ES_JAVA_OPTS', '-Xms1536m -Xmx1536m'],
+      ])
+    );
   });
 
   test('should apply name suffix and port offset for linked cluster', () => {
     const nodes = getServerlessNodes('-linked', 10);
-    expect(nodes).toHaveLength(3);
+    expect(nodes).toHaveLength(2);
     expect(nodes[0].name).toBe('es01-linked');
     expect(nodes[1].name).toBe('es02-linked');
-    expect(nodes[2].name).toBe('es03-linked');
     expect(nodes[0].params).toEqual(expect.arrayContaining(['127.0.0.1:9310:9310']));
     expect(nodes[1].params).toEqual(expect.arrayContaining(['127.0.0.1:9212:9212']));
     expect(nodes[1].params).toEqual(expect.arrayContaining(['127.0.0.1:9312:9312']));
-    expect(nodes[2].params).toEqual(expect.arrayContaining(['127.0.0.1:9213:9213']));
-    expect(nodes[2].params).toEqual(expect.arrayContaining(['127.0.0.1:9313:9313']));
   });
 
   test('should configure discovery hosts with suffixed names', () => {
     const nodes = getServerlessNodes('-linked', 10);
-    expect(nodes[0].params).toEqual(
-      expect.arrayContaining([`discovery.seed_hosts=es02-linked,es03-linked`])
-    );
-    expect(nodes[1].params).toEqual(
-      expect.arrayContaining([`discovery.seed_hosts=es01-linked,es03-linked`])
-    );
-    expect(nodes[2].params).toEqual(
-      expect.arrayContaining([`discovery.seed_hosts=es01-linked,es02-linked`])
-    );
+    expect(nodes[0].params).toEqual(expect.arrayContaining([`discovery.seed_hosts=es02-linked`]));
+    expect(nodes[1].params).toEqual(expect.arrayContaining([`discovery.seed_hosts=es01-linked`]));
   });
 });
 
 describe('getSharedServerlessParams()', () => {
   test('should return default master nodes with no arguments', () => {
     const params = getSharedServerlessParams();
-    expect(params).toEqual(expect.arrayContaining(['cluster.initial_master_nodes=es01,es02,es03']));
+    expect(params).toEqual(expect.arrayContaining(['cluster.initial_master_nodes=es01,es02']));
   });
 
   test('should return suffixed master nodes for linked cluster', () => {
     const params = getSharedServerlessParams('-linked');
     expect(params).toEqual(
-      expect.arrayContaining(['cluster.initial_master_nodes=es01-linked,es02-linked,es03-linked'])
+      expect.arrayContaining(['cluster.initial_master_nodes=es01-linked,es02-linked'])
     );
   });
 });
@@ -933,7 +937,7 @@ describe('runServerlessCluster()', () => {
     >;
   });
 
-  test('should start 3 serverless nodes', async () => {
+  test('should start 2 serverless nodes', async () => {
     waitUntilClusterReadyMock.mockResolvedValue();
     mockFs({
       [baseEsPath]: {},
@@ -944,20 +948,20 @@ describe('runServerlessCluster()', () => {
 
     // docker version (1)
     // docker ps (1)
-    // docker container rm (8 = 3 for ES nodes, 3 for linked ES nodes, 2 for UIAM containers)
+    // docker container rm (7 = 2 ES nodes, 2 linked ES nodes, 3 UIAM containers)
     // docker network create (1)
     // docker pull (1)
     // docker inspect (1)
-    // docker run (3)
+    // docker run (2)
     // docker logs (1)
-    expect(execa.mock.calls).toHaveLength(18);
+    expect(execa.mock.calls).toHaveLength(15);
 
     // UIAM containers should not be started when `--uiam` is not passed
     expect(runUiamContainerMock).not.toHaveBeenCalled();
     expect(initializeUiamContainersMock).not.toHaveBeenCalled();
   });
 
-  test('should start 3 serverless ES nodes and two UIAM containers when in UIAM mode', async () => {
+  test('should start 2 serverless ES nodes and two UIAM containers when in UIAM mode', async () => {
     waitUntilClusterReadyMock.mockResolvedValue();
     mockFs({
       [baseEsPath]: {},
@@ -968,13 +972,13 @@ describe('runServerlessCluster()', () => {
 
     // docker version (1)
     // docker ps (1)
-    // docker container rm (8 = 3 for ES nodes, 3 for linked ES nodes, 2 for UIAM containers)
+    // docker container rm (7 = 2 ES nodes, 2 linked ES nodes, 3 UIAM containers)
     // docker network create (1)
     // docker pull (3 = 1 for ES nodes, 2 for UIAM containers)
     // docker inspect (2 = image info call for ES nodes is memoized in the previous test, 2 for UIAM containers)
-    // docker run (3)
+    // docker run (2)
     // docker logs (1)
-    expect(execa.mock.calls).toHaveLength(21);
+    expect(execa.mock.calls).toHaveLength(18);
 
     expect(runUiamContainerMock).toHaveBeenCalledTimes(2);
     expect(runUiamContainerMock).toHaveBeenCalledWith(
@@ -1135,12 +1139,12 @@ describe('runDockerContainer()', () => {
     await expect(runDockerContainer(log, {})).resolves.toBeUndefined();
     // docker version (1)
     // docker ps (1)
-    // docker container rm (8 = 3 for ES nodes, 3 for linked ES nodes, 2 for UIAM containers)
+    // docker container rm (7 = 2 ES nodes, 2 linked ES nodes, 3 UIAM containers)
     // docker network create (1)
     // docker pull (1)
     // docker inspect (1)
     // docker run (1)
-    expect(execa.mock.calls).toHaveLength(15);
+    expect(execa.mock.calls).toHaveLength(13);
   });
 });
 

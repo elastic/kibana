@@ -12,7 +12,6 @@ import { DynamicRuleFormFlyout } from '../dynamic_rule_form_flyout';
 import { RuleFormFlyout } from '../rule_form_flyout';
 import { DynamicRuleForm } from '../../form/dynamic_rule_form';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
-import { NOOP_WORKFLOW_FORM } from '../../form/contexts/rule_form_context';
 
 const mockServices = {
   http: {
@@ -60,7 +59,6 @@ const mockServices = {
     EmbeddableComponent: () => null,
     stateHelperApi: () => ({}),
   } as any,
-  workflowForm: NOOP_WORKFLOW_FORM,
   uiActions: {
     getAction: async () => ({
       execute: ({ onResults }: { onResults: (results: unknown[]) => void }) => onResults([]),
@@ -75,7 +73,6 @@ const mockFormServices: RuleFormServices = {
   application: mockServices.application,
   notifications: mockServices.notifications,
   lens: mockServices.lens,
-  workflowForm: NOOP_WORKFLOW_FORM,
   uiActions: mockServices.uiActions,
 };
 

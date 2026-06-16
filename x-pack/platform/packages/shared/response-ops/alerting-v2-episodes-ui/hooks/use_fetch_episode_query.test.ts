@@ -8,7 +8,7 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { buildEpisodeQuery } from '../queries/episode_query';
 import { runEsqlAsyncSearch } from '../utils/run_esql_async_search';
 import { createMockSpaces, createQueryClientWrapper, createTestQueryClient } from './test_utils';

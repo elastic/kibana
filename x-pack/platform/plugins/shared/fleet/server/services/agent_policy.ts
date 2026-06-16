@@ -28,8 +28,7 @@ import { SavedObjectsUtils } from '@kbn/core/server';
 
 import type { estypes } from '@elastic/elasticsearch';
 
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
-
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 
 import { withSpan } from '@kbn/apm-utils';
@@ -149,6 +148,7 @@ import { bulkInstallPackages, getPackageInfo } from './epm/packages';
 import { ensureInstalledPackage } from './epm/packages/install';
 import { getAgentsByKuery, unenrollForAgentPolicyId } from './agents';
 import {
+  buildCurrentRevisionFilter,
   getCompiledVersionsForAgentPolicy,
   getPackagePolicySavedObjectType,
   packagePolicyService,
@@ -537,10 +537,14 @@ class AgentPolicyService {
         )
       );
 
-    await appContextService
-      .getUninstallTokenService()
-      ?.scoped(soClient.getCurrentNamespace())
-      ?.generateTokenForPolicyId(newSo.id);
+    if (!agentPolicy.supports_agentless) {
+      await appContextService
+        .getUninstallTokenService()
+        ?.scoped(soClient.getCurrentNamespace())
+        ?.generateTokenForPolicyId(newSo.id);
+    } else {
+      logger.debug('Skipping uninstall token generation for agentless policy');
+    }
     await this.triggerAgentPolicyUpdatedEvent(esClient, 'created', newSo.id, {
       skipDeploy: options.skipDeploy,
       spaceId: soClient.getCurrentNamespace(),
@@ -1095,10 +1099,15 @@ class AgentPolicyService {
     }
 
     const { space_ids: _, ...preparedAgentPolicySo } = agentPolicy;
+    const { hasAgentVersionConditions, minAgentVersion, packageAgentVersionConditions } =
+      await this.computeMinAgentVersionData(soClient, id);
     return this._update(soClient, esClient, id, { ...preparedAgentPolicySo }, options?.user, {
       bumpRevision: options?.bumpRevision ?? true,
       removeProtection: false,
       skipValidation: options?.skipValidation ?? false,
+      hasAgentVersionConditions,
+      minAgentVersion: minAgentVersion ?? null,
+      packageAgentVersionConditions: packageAgentVersionConditions ?? null,
     })
       .then((updatedAgentPolicy) => {
         return this.runExternalCallbacks(
@@ -1255,11 +1264,10 @@ class AgentPolicyService {
       removeProtection?: boolean;
       asyncDeploy?: boolean;
       skipValidation?: boolean;
-      hasAgentVersionConditions?: boolean;
     }
   ): Promise<void> {
     return withSpan('bump_agent_policy_revision', async () => {
-      const { minAgentVersion, packageAgentVersionConditions } =
+      const { hasAgentVersionConditions, minAgentVersion, packageAgentVersionConditions } =
         await this.computeMinAgentVersionData(soClient, id);
       await this._update(soClient, esClient, id, {}, options?.user, {
         bumpRevision: true,
@@ -1267,7 +1275,7 @@ class AgentPolicyService {
         skipValidation: options?.skipValidation ?? true,
         returnUpdatedPolicy: false,
         asyncDeploy: options?.asyncDeploy,
-        hasAgentVersionConditions: options?.hasAgentVersionConditions,
+        hasAgentVersionConditions,
         minAgentVersion: minAgentVersion ?? null,
         packageAgentVersionConditions: packageAgentVersionConditions ?? null,
       });
@@ -1278,6 +1286,7 @@ class AgentPolicyService {
     soClient: SavedObjectsClientContract,
     policyId: string
   ): Promise<{
+    hasAgentVersionConditions: boolean;
     minAgentVersion: string | undefined;
     packageAgentVersionConditions: AgentPolicyAgentVersionCondition[] | undefined;
   }> {
@@ -1312,8 +1321,35 @@ class AgentPolicyService {
       }
     }
 
+    // inputs_for_versions is stripped from the PackagePolicy type but is the only reliable
+    // indicator of template-level version conditions (HBS templates referencing _meta.agent.version).
+    // compilePackagePolicyForVersions only populates it when hasAgentVersionConditionInInputTemplate
+    // is true, so its presence means the policy requires version-specific behaviour.
+    const savedObjectType = await getPackagePolicySavedObjectType();
+    const rawResult = await Promise.resolve(
+      soClient.find<PackagePolicySOAttributes>({
+        type: savedObjectType,
+        filter: buildCurrentRevisionFilter(
+          savedObjectType,
+          `${savedObjectType}.attributes.policy_ids:${escapeSearchQueryPhrase(policyId)}`
+        ),
+        perPage: SO_SEARCH_LIMIT,
+      })
+    ).catch(() => undefined);
+    const hasTemplateConditions = (rawResult?.saved_objects ?? []).some(
+      (so) =>
+        so.attributes.inputs_for_versions &&
+        Object.keys(so.attributes.inputs_for_versions).length > 0
+    );
+
+    const hasAgentVersionConditions = conditions.length > 0 || hasTemplateConditions;
+
     if (conditions.length === 0) {
-      return { minAgentVersion: undefined, packageAgentVersionConditions: undefined };
+      return {
+        hasAgentVersionConditions,
+        minAgentVersion: undefined,
+        packageAgentVersionConditions: undefined,
+      };
     }
 
     let highestMinVersion: string | undefined;
@@ -1329,6 +1365,7 @@ class AgentPolicyService {
     }
 
     return {
+      hasAgentVersionConditions,
       minAgentVersion: highestMinVersion,
       packageAgentVersionConditions: conditions,
     };

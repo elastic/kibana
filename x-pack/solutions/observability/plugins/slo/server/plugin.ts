@@ -225,7 +225,7 @@ export class SLOPlugin
           ]);
 
           const repository = new DefaultSLODefinitionRepository(soClient, logger);
-          const compositeSloRepository = new DefaultCompositeSLORepository(soClient, logger);
+          const compositeRepository = new DefaultCompositeSLORepository(soClient, logger);
           const settingsRepository = new DefaultSLOSettingsRepository(soClient);
           const templateRepository = new DefaultSLOTemplateRepository(soClient);
 
@@ -248,7 +248,7 @@ export class SLOPlugin
             rulesClient,
             spaceId,
             repository,
-            compositeSloRepository,
+            compositeRepository,
             settingsRepository,
             templateRepository,
             transformManager,

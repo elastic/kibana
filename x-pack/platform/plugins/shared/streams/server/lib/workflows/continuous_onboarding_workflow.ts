@@ -7,7 +7,7 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { NonTerminalExecutionStatuses } from '@kbn/workflows';
 import { STREAMS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID } from '../../../common/constants';

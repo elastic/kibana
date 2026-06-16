@@ -1,5 +1,5 @@
 {
-  "sha1": "6d0dc9426e65bfda99274a64806b35d837491401",
+  "sha1": "0763a0eb3c5c0e0e555dc0e23706c230ac7b92f8",
   "tests": [
     {
       "id": "9932666685095b3-d8099f4a61f66f4",
@@ -4409,6 +4409,175 @@
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_actions/create_unsnooze_alert_action.spec.ts",
         "line": 120,
         "column": 10
+      }
+    },
+    {
+      "id": "a0345db0bf45ea2-64e3251c74944b7",
+      "title": "Count new action policy execution events API validation: rejects missing since",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/count_new_execution_history_events.spec.ts",
+        "line": 36,
+        "column": 12
+      }
+    },
+    {
+      "id": "a0345db0bf45ea2-0e6cbf6c84c3db0",
+      "title": "Count new action policy execution events API authorization: 200 with alerting_v2_execution_history read privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/count_new_execution_history_events.spec.ts",
+        "line": 44,
+        "column": 12
+      }
+    },
+    {
+      "id": "a0345db0bf45ea2-b6eb46719bf8e7e",
+      "title": "Count new action policy execution events API authorization: 200 with alerting_v2_execution_history all privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/count_new_execution_history_events.spec.ts",
+        "line": 55,
+        "column": 12
+      }
+    },
+    {
+      "id": "a0345db0bf45ea2-d827b87a9dd2102",
+      "title": "Count new action policy execution events API authorization: 403 without any alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/count_new_execution_history_events.spec.ts",
+        "line": 69,
+        "column": 12
+      }
+    },
+    {
+      "id": "1e38d3a6f95185b-36a81457fa3a0b8",
+      "title": "List action policy execution history API validation: rejects page=0",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/list_execution_history.spec.ts",
+        "line": 35,
+        "column": 12
+      }
+    },
+    {
+      "id": "1e38d3a6f95185b-5ebd7738a8f9927",
+      "title": "List action policy execution history API validation: rejects perPage=0",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/list_execution_history.spec.ts",
+        "line": 42,
+        "column": 12
+      }
+    },
+    {
+      "id": "1e38d3a6f95185b-d6dfb71cdafb301",
+      "title": "List action policy execution history API validation: accepts perPage at the maximum",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/list_execution_history.spec.ts",
+        "line": 49,
+        "column": 12
+      }
+    },
+    {
+      "id": "1e38d3a6f95185b-fc55d016cdaa50f",
+      "title": "List action policy execution history API validation: rejects perPage above the maximum",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/list_execution_history.spec.ts",
+        "line": 58,
+        "column": 12
+      }
+    },
+    {
+      "id": "1e38d3a6f95185b-6b910f3060af188",
+      "title": "List action policy execution history API validation: rejects non-numeric perPage",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/list_execution_history.spec.ts",
+        "line": 66,
+        "column": 12
+      }
+    },
+    {
+      "id": "1e38d3a6f95185b-e8b3c545002c624",
+      "title": "List action policy execution history API validation: rejects non-numeric page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/list_execution_history.spec.ts",
+        "line": 74,
+        "column": 12
+      }
+    },
+    {
+      "id": "1e38d3a6f95185b-5b875229280a9b5",
+      "title": "List action policy execution history API authorization: 200 with alerting_v2_execution_history read privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/list_execution_history.spec.ts",
+        "line": 82,
+        "column": 12
+      }
+    },
+    {
+      "id": "1e38d3a6f95185b-ae43868df72210a",
+      "title": "List action policy execution history API authorization: 200 with alerting_v2_execution_history all privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/list_execution_history.spec.ts",
+        "line": 92,
+        "column": 12
+      }
+    },
+    {
+      "id": "1e38d3a6f95185b-151dcfebdcd6818",
+      "title": "List action policy execution history API authorization: 403 without any alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/list_execution_history.spec.ts",
+        "line": 105,
+        "column": 12
       }
     },
     {

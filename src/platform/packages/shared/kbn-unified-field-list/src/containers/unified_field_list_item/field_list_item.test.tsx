@@ -7,18 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { act } from 'react-dom/test-utils';
-import { EuiButtonIcon, EuiPopover, EuiProgress, EuiThemeProvider } from '@elastic/eui';
-import React from 'react';
-import { findTestSubject } from '@elastic/eui/lib/test';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { DataViewField } from '@kbn/data-views-plugin/public';
-import { stubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import { getServicesMock } from '../../../__mocks__/services.mock';
 import type { UnifiedFieldListItemProps } from './field_list_item';
-import { UnifiedFieldListItem } from './field_list_item';
-import { FieldItemButton } from '../../components/field_item_button';
+import React from 'react';
+import userEvent from '@testing-library/user-event';
 import { createStateService } from '../services/state_service';
+import { DataViewField } from '@kbn/data-views-plugin/public';
+import { EuiThemeProvider } from '@elastic/eui';
+import { getServicesMock } from '../../../__mocks__/services.mock';
+import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
+import { screen, waitFor, within } from '@testing-library/react';
+import { stubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
+import { UnifiedFieldListItem } from './field_list_item';
 
 jest.mock('../../services/field_stats', () => ({
   loadFieldStats: jest.fn().mockResolvedValue({
@@ -40,29 +39,30 @@ jest.mock('../../services/field_stats', () => ({
   }),
 }));
 
-async function getComponent({
-  selected = false,
-  field,
+const renderComponent = async ({
   canFilter = true,
+  field,
   isBreakdownSupported = true,
+  selected = false,
 }: {
-  selected?: boolean;
-  field?: DataViewField;
   canFilter?: boolean;
+  field?: DataViewField;
   isBreakdownSupported?: boolean;
-}) {
+  selected?: boolean;
+}) => {
   const finalField =
     field ??
     new DataViewField({
-      name: 'bytes',
-      type: 'number',
-      esTypes: ['long'],
+      aggregatable: true,
       count: 10,
+      esTypes: ['long'],
+      name: 'bytes',
+      readFromDocValues: true,
       scripted: false,
       searchable: true,
-      aggregatable: true,
-      readFromDocValues: true,
+      type: 'number',
     });
+
   const dataView = stubDataView;
   dataView.toSpec = () => ({});
 
@@ -73,216 +73,210 @@ async function getComponent({
   });
 
   const props: UnifiedFieldListItemProps = {
-    services: getServicesMock(),
-    stateService,
-    searchMode: 'documents',
     dataView: stubDataView,
     field: finalField,
+    groupIndex: 1,
+    isEmpty: false,
+    isSelected: selected,
+    itemIndex: 0,
+    onAddFieldToWorkspace: jest.fn(),
+    onEditField: jest.fn(),
+    onRemoveFieldFromWorkspace: jest.fn(),
+    searchMode: 'documents',
+    services: getServicesMock(),
+    size: 'xs',
+    stateService,
+    workspaceSelectedFieldNames: [],
     ...(canFilter && { onAddFilter: jest.fn() }),
     ...(isBreakdownSupported && { onAddBreakdownField: jest.fn() }),
-    onAddFieldToWorkspace: jest.fn(),
-    onRemoveFieldFromWorkspace: jest.fn(),
-    onEditField: jest.fn(),
-    isSelected: selected,
-    isEmpty: false,
-    groupIndex: 1,
-    itemIndex: 0,
-    size: 'xs',
-    workspaceSelectedFieldNames: [],
   };
-  const comp = await mountWithIntl(
+
+  const user = userEvent.setup();
+
+  renderWithKibanaRenderContext(
     <EuiThemeProvider>
       <UnifiedFieldListItem {...props} />
     </EuiThemeProvider>
   );
-  // wait for lazy modules
-  await new Promise((resolve) => setTimeout(resolve, 0));
-  await comp.update();
-  return { comp, props };
-}
 
-describe('UnifiedFieldListItem', function () {
-  it('should allow selecting fields', async function () {
-    const { comp, props } = await getComponent({});
-    findTestSubject(comp, 'fieldToggle-bytes').simulate('click');
+  return { field: finalField, props, user };
+};
+
+describe('UnifiedFieldListItem', () => {
+  it('should allow selecting fields', async () => {
+    const { props, user } = await renderComponent({});
+
+    await user.click(screen.getByRole('button', { name: 'Add "bytes" field' }));
+
     expect(props.onAddFieldToWorkspace).toHaveBeenCalledWith(props.field);
   });
-  it('should allow deselecting fields', async function () {
-    const { comp, props } = await getComponent({ selected: true });
-    findTestSubject(comp, 'fieldToggle-bytes').simulate('click');
+
+  it('should allow deselecting fields', async () => {
+    const { props, user } = await renderComponent({ selected: true });
+
+    await user.click(screen.getByRole('button', { name: 'Remove "bytes" field' }));
+
     expect(props.onRemoveFieldFromWorkspace).toHaveBeenCalledWith(props.field);
   });
-  it('displays warning for conflicting fields', async function () {
+
+  it('displays warning for conflicting fields', async () => {
     const field = new DataViewField({
-      name: 'troubled_field',
-      type: 'conflict',
+      aggregatable: true,
       esTypes: ['integer', 'text'],
-      searchable: true,
-      aggregatable: true,
+      name: 'troubled_field',
       readFromDocValues: false,
-    });
-    const { comp } = await getComponent({
-      selected: true,
-      field,
+      searchable: true,
+      type: 'conflict',
     });
 
-    const fieldInfoIcon = findTestSubject(comp, 'kbnFieldButton_fieldInfoIcon');
-    expect(fieldInfoIcon.exists()).toBe(true);
+    await renderComponent({
+      field,
+      selected: true,
+    });
+
+    expect(await screen.findByText('Conflict')).toBeVisible();
+    expect(screen.getByText('troubled_field')).toBeVisible();
+    expect(screen.getByText('Info')).toBeVisible();
   });
-  it('should not enable the popover if onAddFilter is not provided', async function () {
+
+  it('should not enable the popover if onAddFilter is not provided', async () => {
     const field = new DataViewField({
-      name: '_source',
-      type: '_source',
+      aggregatable: true,
       esTypes: ['_source'],
-      searchable: true,
-      aggregatable: true,
+      name: '_source',
       readFromDocValues: true,
-    });
-    const { comp } = await getComponent({
-      selected: true,
-      field,
-      canFilter: false,
+      searchable: true,
+      type: '_source',
     });
 
-    expect(comp.find(FieldItemButton).prop('onClick')).toBeUndefined();
+    await renderComponent({
+      canFilter: false,
+      field,
+      selected: true,
+    });
+
+    await waitFor(() => {
+      expect(screen.getAllByText('_source')).toHaveLength(2);
+    });
+    expect(
+      screen.queryByRole('button', { name: 'Preview _source: _source' })
+    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId('fieldStats-title')).not.toBeInTheDocument();
   });
 
-  it('should not show addBreakdownField action button if not supported', async function () {
+  it('should not show addBreakdownField action button if not supported', async () => {
     const field = new DataViewField({
-      name: 'extension.keyword',
-      type: 'string',
-      esTypes: ['keyword'],
       aggregatable: true,
+      esTypes: ['keyword'],
+      name: 'extension.keyword',
       searchable: true,
+      type: 'string',
     });
-    const { comp } = await getComponent({
+
+    const { user } = await renderComponent({
       field,
       isBreakdownSupported: false,
     });
 
-    await act(async () => {
-      const fieldItem = findTestSubject(comp, 'field-extension.keyword-showDetails');
-      await fieldItem.simulate('click');
-      await comp.update();
+    await user.click(screen.getByText('extension.keyword'));
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: 'extension.keyword' })).toBeVisible();
     });
 
-    await comp.update();
-
-    expect(
-      comp
-        .find('[data-test-subj="fieldPopoverHeader_addBreakdownField-extension.keyword"]')
-        .exists()
-    ).toBeFalsy();
+    expect(screen.queryByRole('button', { name: 'Add breakdown' })).not.toBeInTheDocument();
   });
-  it('should request field stats', async function () {
+
+  it('should request field stats', async () => {
     const field = new DataViewField({
+      aggregatable: true,
+      esTypes: ['keyword'],
       name: 'machine.os.raw',
-      type: 'string',
-      esTypes: ['keyword'],
-      aggregatable: true,
       searchable: true,
+      type: 'string',
     });
 
-    const { comp } = await getComponent({ field, canFilter: true });
+    const { user } = await renderComponent({ canFilter: true, field });
 
-    await act(async () => {
-      const fieldItem = findTestSubject(comp, 'field-machine.os.raw-showDetails');
-      await fieldItem.simulate('click');
-      await comp.update();
+    await user.click(screen.getByText('machine.os.raw'));
+
+    await waitFor(() => {
+      expect(screen.getByText('Top values')).toBeVisible();
     });
 
-    await comp.update();
-
-    expect(comp.find(EuiPopover).prop('isOpen')).toBe(true);
-
-    await new Promise((resolve) => setTimeout(resolve, 0));
-    await comp.update();
-
-    expect(findTestSubject(comp, 'fieldStats-title').text()).toBe('Top values');
-    expect(findTestSubject(comp, 'fieldStats-topValues-bucket')).toHaveLength(2);
-    expect(findTestSubject(comp, 'fieldStats-topValues-formattedFieldValue').first().text()).toBe(
-      'osx'
+    expect(screen.getByRole('progressbar', { name: 'osx' })).toHaveAttribute(
+      'aria-valuetext',
+      '62.9%'
     );
-    expect(comp.find(EuiProgress)).toHaveLength(2);
-    expect(findTestSubject(comp, 'fieldStats-topValues').find(EuiButtonIcon)).toHaveLength(4);
+    expect(screen.getByRole('progressbar', { name: 'winx' })).toHaveAttribute(
+      'aria-valuetext',
+      '37.1%'
+    );
+    expect(screen.getAllByRole('progressbar')).toHaveLength(2);
+    expect(screen.getAllByRole('button', { name: /machine\.os\.raw: "(osx|winx)"/ })).toHaveLength(
+      4
+    );
   });
-  it('should include popover actions', async function () {
+
+  it('should include popover actions', async () => {
     const field = new DataViewField({
-      name: 'extension.keyword',
-      type: 'string',
-      esTypes: ['keyword'],
       aggregatable: true,
+      esTypes: ['keyword'],
+      name: 'extension.keyword',
       searchable: true,
+      type: 'string',
     });
 
-    const { comp, props } = await getComponent({ field, canFilter: true });
+    const { props, user } = await renderComponent({ field, canFilter: true });
 
-    await act(async () => {
-      const fieldItem = findTestSubject(comp, 'field-extension.keyword-showDetails');
-      await fieldItem.simulate('click');
-      await comp.update();
+    await user.click(screen.getByText('extension.keyword'));
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: 'extension.keyword' })).toBeVisible();
     });
 
-    await comp.update();
+    const popover = within(screen.getByRole('dialog'));
 
-    expect(comp.find(EuiPopover).prop('isOpen')).toBe(true);
+    expect(popover.getByRole('button', { name: 'Add breakdown' })).toBeVisible();
+    expect(popover.getByRole('button', { name: 'Add "extension.keyword" field' })).toBeVisible();
+    expect(popover.getByRole('button', { name: 'Filter for field present' })).toBeVisible();
+    expect(popover.getByRole('button', { name: 'Edit data view field' })).toBeVisible();
     expect(
-      comp
-        .find('[data-test-subj="fieldPopoverHeader_addBreakdownField-extension.keyword"]')
-        .exists()
-    ).toBeTruthy();
-    expect(
-      comp.find('[data-test-subj="fieldPopoverHeader_addField-extension.keyword"]').exists()
-    ).toBeTruthy();
-    expect(
-      comp.find('[data-test-subj="fieldPopoverHeader_addExistsFilter-extension.keyword"]').exists()
-    ).toBeTruthy();
-    expect(
-      comp.find('[data-test-subj="fieldPopoverHeader_editField-extension.keyword"]').exists()
-    ).toBeTruthy();
-    expect(
-      comp.find('[data-test-subj="fieldPopoverHeader_deleteField-extension.keyword"]').exists()
-    ).toBeFalsy();
+      popover.queryByRole('button', { name: 'Delete data view field' })
+    ).not.toBeInTheDocument();
 
-    await act(async () => {
-      const fieldItem = findTestSubject(comp, 'fieldPopoverHeader_addField-extension.keyword');
-      await fieldItem.simulate('click');
-      await comp.update();
-    });
+    await user.click(popover.getByRole('button', { name: 'Add "extension.keyword" field' }));
 
     expect(props.onAddFieldToWorkspace).toHaveBeenCalledWith(field);
 
-    await comp.update();
-
-    expect(comp.find(EuiPopover).prop('isOpen')).toBe(false);
+    await waitFor(() => {
+      expect(screen.queryByTestId('fieldStats-title')).not.toBeInTheDocument();
+    });
   });
 
-  it('should not include + action for selected fields', async function () {
+  it('should not include + action for selected fields', async () => {
     const field = new DataViewField({
-      name: 'extension.keyword',
-      type: 'string',
-      esTypes: ['keyword'],
       aggregatable: true,
+      esTypes: ['keyword'],
+      name: 'extension.keyword',
       searchable: true,
+      type: 'string',
     });
 
-    const { comp } = await getComponent({
-      field,
+    const { user } = await renderComponent({
       canFilter: true,
+      field,
       selected: true,
     });
 
-    await act(async () => {
-      const fieldItem = findTestSubject(comp, 'field-extension.keyword-showDetails');
-      await fieldItem.simulate('click');
-      await comp.update();
+    await user.click(screen.getByText('extension.keyword'));
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: 'extension.keyword' })).toBeVisible();
     });
 
-    await comp.update();
-
-    expect(comp.find(EuiPopover).prop('isOpen')).toBe(true);
     expect(
-      comp.find('[data-test-subj="fieldPopoverHeader_addField-extension.keyword"]').exists()
-    ).toBeFalsy();
+      screen.queryByRole('button', { name: 'Add "extension.keyword" field' })
+    ).not.toBeInTheDocument();
   });
 });

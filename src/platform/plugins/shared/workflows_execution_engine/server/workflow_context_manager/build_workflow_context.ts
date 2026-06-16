@@ -16,11 +16,15 @@ import {
 import type { ContextDependencies } from './types';
 import { buildWorkflowExecutionUrl, getKibanaUrl } from '../utils';
 
-export function buildWorkflowContext(
-  workflowExecution: EsWorkflowExecution,
+export type WorkflowExecutionForInputRendering = Partial<EsWorkflowExecution> &
+  Pick<EsWorkflowExecution, 'id' | 'workflowId' | 'spaceId' | 'createdAt'>;
+
+export function buildInputDefaultRenderContext(
+  workflowExecution: WorkflowExecutionForInputRendering,
   coreStart?: CoreStart,
   dependencies?: ContextDependencies
 ): WorkflowContext {
+  const startedAt = workflowExecution.startedAt ?? workflowExecution.createdAt;
   const kibanaUrl = getKibanaUrl(coreStart, dependencies?.cloudSetup);
   const executionUrl = buildWorkflowExecutionUrl(
     kibanaUrl,
@@ -28,21 +32,11 @@ export function buildWorkflowContext(
     workflowExecution.workflowId,
     workflowExecution.id
   );
-
-  const normalizedInputsSchema = getInputsFromDefinition(workflowExecution.workflowDefinition);
-
-  // Extract parent workflow information from context if available
   const parentWorkflowId = workflowExecution.context?.parentWorkflowId as string | undefined;
   const parentWorkflowExecutionId = workflowExecution.context?.parentWorkflowExecutionId as
     | string
     | undefined;
   const parentDepth = workflowExecution.context?.parentDepth as number | undefined;
-
-  const inputsWithDefaults = applyInputDefaults(
-    workflowExecution.context?.inputs as Record<string, unknown> | undefined,
-    normalizedInputsSchema
-  );
-
   const metadata = (workflowExecution.metadata ??
     (workflowExecution.context?.metadata as Record<string, unknown> | undefined)) as
     | Record<string, unknown>
@@ -52,7 +46,7 @@ export function buildWorkflowContext(
     execution: {
       id: workflowExecution.id,
       isTestRun: !!workflowExecution.isTestRun,
-      startedAt: new Date(workflowExecution.startedAt),
+      startedAt: new Date(startedAt),
       url: executionUrl,
       executedBy: workflowExecution.executedBy ?? 'unknown',
       triggeredBy: workflowExecution.triggeredBy,
@@ -66,7 +60,7 @@ export function buildWorkflowContext(
     kibanaUrl,
     consts: workflowExecution.workflowDefinition?.consts ?? {},
     event: workflowExecution.context?.event,
-    inputs: inputsWithDefaults,
+    inputs: workflowExecution.context?.inputs as Record<string, unknown> | undefined,
     output: workflowExecution.context?.output,
     now: new Date(),
     parent:
@@ -78,5 +72,20 @@ export function buildWorkflowContext(
           }
         : undefined,
     metadata,
+  };
+}
+
+export function buildWorkflowContext(
+  workflowExecution: EsWorkflowExecution,
+  coreStart?: CoreStart,
+  dependencies?: ContextDependencies
+): WorkflowContext {
+  const normalizedInputsSchema = getInputsFromDefinition(workflowExecution.workflowDefinition);
+  const renderContext = buildInputDefaultRenderContext(workflowExecution, coreStart, dependencies);
+  const inputsWithDefaults = applyInputDefaults(renderContext.inputs, normalizedInputsSchema);
+
+  return {
+    ...renderContext,
+    inputs: inputsWithDefaults,
   };
 }

@@ -95,6 +95,7 @@ const defaultProps: Parameters<typeof TableSection>[0] = {
   statusFilter: [],
   dataView,
   selectedConnectorNames: [],
+  selectedTypes: [],
   openSchedulesFlyout: jest.fn(),
 };
 

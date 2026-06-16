@@ -478,6 +478,7 @@ describe('When on the package policy create page', () => {
         ...newPackagePolicy,
         policy_ids: ['agent-policy-1'],
         force: false,
+        create_dataset_templates: true,
       });
       expect(sendCreateAgentPolicy as jest.MockedFunction<any>).not.toHaveBeenCalled();
 
@@ -633,6 +634,7 @@ describe('When on the package policy create page', () => {
           ...newPackagePolicy,
           policy_ids: ['agent-policy-2'],
           force: false,
+          create_dataset_templates: true,
         });
 
         await waitFor(() => {
@@ -696,6 +698,7 @@ describe('When on the package policy create page', () => {
             ...newPackagePolicy,
             policy_ids: ['agent-policy-1'],
             force: false,
+            create_dataset_templates: true,
           });
 
           await waitFor(() => {
@@ -769,6 +772,7 @@ describe('When on the package policy create page', () => {
               },
             ],
             force: false,
+            create_dataset_templates: true,
           });
         });
       });

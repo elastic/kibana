@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { StreamsKIsOnboardingStatus } from '@kbn/streams-schema';
+import { SigEventsWorkflowStatus } from '@kbn/streams-schema';
 import { ExecutionStatus } from '@kbn/workflows';
 import { StreamsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
 import { createKiIdentificationStatusTool } from './tool';
@@ -59,7 +59,7 @@ describe('createKiIdentificationStatusTool', () => {
       expect(result.results[0].data).toEqual(
         expect.objectContaining({
           stream_name: 'logs.nginx',
-          status: StreamsKIsOnboardingStatus.Completed,
+          status: SigEventsWorkflowStatus.Completed,
         })
       );
     }

@@ -6,23 +6,23 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { CompositeSLOWithSummaryResponse } from '@kbn/slo-schema';
+import { ALL_VALUE, compositeSloWithSummaryResponseSchema } from '@kbn/slo-schema';
 import { z } from '@kbn/zod';
-import { ALL_VALUE, compositeSloSummaryResponseSchema } from '@kbn/slo-schema';
-import type { CompositeSLOSummaryResponse } from '@kbn/slo-schema';
 import { toRichRollingTimeWindow } from '../../domain/models';
+import type { SLODefinitionRepository } from '../slo_definition_repository';
+import type { SummaryClient } from '../summary_client';
 import type { CompositeSLORepository } from './composite_slo_repository';
 import {
   fetchCompositeSloSummariesFromIndex,
   type PersistedCompositeSummary,
 } from './composite_slo_summary_index';
-import type { SLODefinitionRepository } from '../slo_definition_repository';
-import type { SummaryClient } from '../summary_client';
 import { computeCompositeSummary, type MemberSummaryData } from './compute_composite_summary';
 
 export class GetCompositeSLO {
   constructor(
-    private compositeSloRepository: CompositeSLORepository,
-    private sloDefinitionRepository: SLODefinitionRepository,
+    private compositeRepository: CompositeSLORepository,
+    private repository: SLODefinitionRepository,
     private summaryClient: SummaryClient,
     private esClient: ElasticsearchClient
   ) {}
@@ -30,16 +30,16 @@ export class GetCompositeSLO {
   public async executeBatch(
     ids: string[],
     spaceId: string
-  ): Promise<CompositeSLOSummaryResponse[]> {
+  ): Promise<CompositeSLOWithSummaryResponse[]> {
     const persistedSummaryById = await this.loadPersistedSummaries(ids, spaceId);
     const results = await Promise.all(ids.map((id) => this.executeOne(id, persistedSummaryById)));
-    return z.array(compositeSloSummaryResponseSchema).encode(results);
+    return z.array(compositeSloWithSummaryResponseSchema).encode(results);
   }
 
-  public async execute(id: string, spaceId: string): Promise<CompositeSLOSummaryResponse> {
+  public async execute(id: string, spaceId: string): Promise<CompositeSLOWithSummaryResponse> {
     const persistedSummaryById = await this.loadPersistedSummaries([id], spaceId);
     const result = await this.executeOne(id, persistedSummaryById);
-    return compositeSloSummaryResponseSchema.encode(result);
+    return compositeSloWithSummaryResponseSchema.encode(result);
   }
 
   private async loadPersistedSummaries(
@@ -56,7 +56,7 @@ export class GetCompositeSLO {
     id: string,
     persistedSummaryById: Map<string, PersistedCompositeSummary>
   ) {
-    const compositeSlo = await this.compositeSloRepository.findById(id);
+    const compositeSlo = await this.compositeRepository.findById(id);
     const persisted = persistedSummaryById.get(id);
 
     if (persisted?.members) {
@@ -68,7 +68,7 @@ export class GetCompositeSLO {
     }
 
     const memberSloIds = compositeSlo.members.map((m) => m.sloId);
-    const memberDefinitions = await this.sloDefinitionRepository.findAllByIds(memberSloIds);
+    const memberDefinitions = await this.repository.findAllByIds(memberSloIds);
 
     const memberDefinitionMap = new Map(memberDefinitions.map((slo) => [slo.id, slo]));
 

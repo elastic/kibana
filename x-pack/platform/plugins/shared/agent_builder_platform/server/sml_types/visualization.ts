@@ -88,7 +88,10 @@ export const visualizationSmlType: SmlTypeDefinition = {
             type: VISUALIZATION_SML_TYPE,
             title,
             content: contentParts.join('\n'),
-            permissions: ['saved_object:lens/get'],
+            permissions: {
+              kibana: { privileges: [{ name: 'saved_object:lens/get' }] },
+              elasticsearch: { indices: [] },
+            },
           },
         ],
       };
@@ -101,7 +104,7 @@ export const visualizationSmlType: SmlTypeDefinition = {
   },
 
   toAttachment: async (item, context) => {
-    const resolveResult = await context.savedObjectsClient.resolve('lens', item.origin_id);
+    const resolveResult = await context.savedObjectsClient.resolve('lens', item.origin_id ?? '');
     const savedObject = resolveResult.saved_object as { error?: { message?: string } };
     if (savedObject?.error) {
       return undefined;

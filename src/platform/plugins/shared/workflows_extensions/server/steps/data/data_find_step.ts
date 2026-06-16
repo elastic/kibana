@@ -53,7 +53,7 @@ export const dataFindStepDefinition = createServerStepDefinition({
   ...dataFindStepCommonDefinition,
   handler: async (context) => {
     try {
-      const items = context.contextManager.renderInputTemplate(context.config.items);
+      const items = context.config.items;
       const { condition, errorIfEmpty } = context.input;
 
       if (!Array.isArray(items)) {

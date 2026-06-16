@@ -48,16 +48,21 @@ const OPTIONS = [
 
 interface AwsAuthTypeSelectorProps {
   selectedAuthType: AwsAuthType;
+  showIdentityFederation?: boolean;
   onChange: (authType: AwsAuthType) => void;
 }
 
 export const AwsAuthTypeSelector: React.FC<AwsAuthTypeSelectorProps> = ({
   selectedAuthType,
+  showIdentityFederation = true,
   onChange,
 }) => {
+  const options = showIdentityFederation
+    ? OPTIONS
+    : OPTIONS.filter((o) => o.value !== 'identity_federation');
   return (
     <EuiSelect
-      options={OPTIONS}
+      options={options}
       value={selectedAuthType}
       onChange={(e) => onChange(e.target.value as AwsAuthType)}
       aria-label={i18n.translate('xpack.fleet.awsConnectSetup.authType.selectorAriaLabel', {

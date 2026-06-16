@@ -8,13 +8,11 @@
 import type {
   Logger,
   SecurityServiceStart,
-  IBasePath,
   KibanaRequest,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
 import { truncate } from 'lodash';
-import { getSpaceIdFromPath } from '@kbn/spaces-utils';
 import { ApiKeyType } from '../config';
 import type { ConcreteTaskInstance, TaskInstance } from '../task';
 import { createApiKey, requestHasApiKey, getApiKeyFromRequest } from '../lib/api_key_utils';
@@ -52,7 +50,6 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
     taskInstances: TaskInstance[],
     request: KibanaRequest,
     security: SecurityServiceStart,
-    basePath: IBasePath,
     opts?: GrantApiKeysOpts
   ): Promise<Map<string, ApiKeySOFields>> {
     const esKeys = await createApiKey(taskInstances, request, security);
@@ -61,8 +58,6 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
         ? new Map<string, UiamApiKeyResult>()
         : await this.grantUiamApiKeys(taskInstances, request, security);
 
-    const requestBasePath = basePath.get(request);
-    const space = getSpaceIdFromPath(requestBasePath, basePath.serverBasePath);
     // `apiKeyCreatedByUser` is derived from whether the incoming request is
     // authenticated with an API key (ES or UIAM). It is stored on `userScope`
     // and is used by `getApiKeyIdsForInvalidation` to short-circuit invalidation
@@ -92,7 +87,7 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
           userScope: {
             apiKeyId: esKey.apiKeyId,
             ...(uiamKey ? { uiamApiKeyId: uiamKey.apiKeyId } : {}),
-            spaceId: space?.spaceId || 'default',
+            spaceId: request.spaceId,
             apiKeyCreatedByUser,
           },
         });

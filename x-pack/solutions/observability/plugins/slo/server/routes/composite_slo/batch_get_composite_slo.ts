@@ -19,7 +19,7 @@ export const batchGetCompositeSLORoute = createCompositeSloServerRoute({
   },
   params: batchGetCompositeSLOParamsSchema,
   handler: async ({ context, params, logger, request, plugins, getScopedClients }) => {
-    const { scopedClusterClient, repository, compositeSloRepository, spaceId } =
+    const { scopedClusterClient, repository, compositeRepository, spaceId } =
       await getScopedClients({
         request,
         logger,
@@ -31,7 +31,7 @@ export const batchGetCompositeSLORoute = createCompositeSloServerRoute({
       burnRatesClient
     );
     const getCompositeSLO = new GetCompositeSLO(
-      compositeSloRepository,
+      compositeRepository,
       repository,
       summaryClient,
       scopedClusterClient.asCurrentUser

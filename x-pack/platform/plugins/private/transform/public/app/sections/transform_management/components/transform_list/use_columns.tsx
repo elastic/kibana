@@ -113,9 +113,8 @@ export const useColumns = (
       width: '40px',
       isExpander: true,
       render: (item: TransformListRow) => (
-        <EuiButtonIcon
-          onClick={() => toggleDetails(item)}
-          aria-label={
+        <EuiToolTip
+          content={
             expandedRowItemIds.includes(item.config.id)
               ? i18n.translate('xpack.transform.transformList.rowCollapse', {
                   defaultMessage: 'Hide details for {transformId}',
@@ -126,11 +125,29 @@ export const useColumns = (
                   values: { transformId: item.config.id },
                 })
           }
-          iconType={
-            expandedRowItemIds.includes(item.config.id) ? 'chevronSingleDown' : 'chevronSingleRight'
-          }
-          data-test-subj="transformListRowDetailsToggle"
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            onClick={() => toggleDetails(item)}
+            aria-label={
+              expandedRowItemIds.includes(item.config.id)
+                ? i18n.translate('xpack.transform.transformList.rowCollapse', {
+                    defaultMessage: 'Hide details for {transformId}',
+                    values: { transformId: item.config.id },
+                  })
+                : i18n.translate('xpack.transform.transformList.rowExpand', {
+                    defaultMessage: 'Show details for {transformId}',
+                    values: { transformId: item.config.id },
+                  })
+            }
+            iconType={
+              expandedRowItemIds.includes(item.config.id)
+                ? 'chevronSingleDown'
+                : 'chevronSingleRight'
+            }
+            data-test-subj="transformListRowDetailsToggle"
+          />
+        </EuiToolTip>
       ),
     },
     {
@@ -141,19 +158,24 @@ export const useColumns = (
       truncateText: { lines: TRUNCATE_TEXT_LINES },
       scope: 'row',
       render: (transformId, item) => {
-        if (!isManagedTransform(item)) return <span title={transformId}>{transformId}</span>;
+        if (!isManagedTransform(item))
+          return (
+            <EuiToolTip content={transformId}>
+              <span>{transformId}</span>
+            </EuiToolTip>
+          );
         return (
           <>
-            <span
-              title={`${transformId} (${i18n.translate(
+            <EuiToolTip
+              content={`${transformId} (${i18n.translate(
                 'xpack.transform.transformList.managedBadgeLabel',
                 {
                   defaultMessage: 'Managed',
                 }
               )})`}
             >
-              {transformId}
-            </span>
+              <span>{transformId}</span>
+            </EuiToolTip>
             &nbsp;
             <EuiToolTip
               content={i18n.translate('xpack.transform.transformList.managedBadgeTooltip', {
@@ -242,7 +264,11 @@ export const useColumns = (
       sortable: true,
       truncateText: { lines: TRUNCATE_TEXT_LINES },
       render(text: string) {
-        return <span title={text}>{text}</span>;
+        return (
+          <EuiToolTip content={text}>
+            <span>{text}</span>
+          </EuiToolTip>
+        );
       },
     },
     {

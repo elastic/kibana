@@ -38,7 +38,7 @@ export const getGhostHintKind = (
     return 'comment';
   }
 
-  if (trimmed === '' && model.getValueLength() > 0) {
+  if (model.getLineContent(lineNumber) === '' && model.getValueLength() > 0) {
     return 'empty';
   }
 

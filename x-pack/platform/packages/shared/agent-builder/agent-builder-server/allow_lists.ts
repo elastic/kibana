@@ -42,6 +42,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   // Security Solution
   `${internalNamespaces.security}.entity_risk_score`,
   `${internalNamespaces.security}.create_detection_rule`,
+  `${internalNamespaces.security}.run_rule_preview`,
   `${internalNamespaces.security}.attack_discovery_search`,
   `${internalNamespaces.security}.security_labs_search`,
   `${internalNamespaces.security}.alerts`,

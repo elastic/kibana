@@ -15,6 +15,7 @@ import {
   EuiPopover,
   EuiPopoverTitle,
   EuiText,
+  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import styled from '@emotion/styled';
@@ -50,13 +51,15 @@ export function HelpPopoverButton({
   }
 
   return (
-    <EuiButtonIcon
-      data-test-subj="apmHelpPopoverButtonButton"
-      className="apmHelpPopover__buttonIcon"
-      iconType="question"
-      aria-label={buttonText}
-      onClick={onClick}
-    />
+    <EuiToolTip content={buttonText} disableScreenReaderOutput>
+      <EuiButtonIcon
+        data-test-subj="apmHelpPopoverButtonButton"
+        className="apmHelpPopover__buttonIcon"
+        iconType="question"
+        aria-label={buttonText}
+        onClick={onClick}
+      />
+    </EuiToolTip>
   );
 }
 

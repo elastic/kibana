@@ -24,6 +24,13 @@ export const SPACE_PROJECT_ROUTING_ALL = '_alias:*';
 const ORIGIN_MARKER_FIELD = 'origin_marker';
 const LINKED_MARKER_FIELD = 'linked_marker';
 
+// Graph CPS fixture: distinguishable host names per project so the rendered graph
+// can be inspected for origin-vs-linked entity nodes. The index pattern is matched
+// by the Security data view's default `logs-*`.
+const GRAPH_CPS_LOGS_INDEX_PREFIX = 'logs-scout-cps-graph-';
+const GRAPH_CPS_ORIGIN_HOST_PREFIX = 'scout-cps-origin-host-';
+const GRAPH_CPS_LINKED_HOST_PREFIX = 'scout-cps-linked-host-';
+
 // ---------------------------------------------------------------------------
 // ES index helpers (private to the fixture)
 // ---------------------------------------------------------------------------
@@ -55,6 +62,51 @@ const createMarkerFieldIndex = async (
   });
 };
 
+/**
+ * Bulk-indexes graph-shaped events into a `logs-*` data stream so the Graph API's
+ * default pattern picks them up. Each event has the minimum field set the events
+ * query consumes: `event.id`, `event.action`, `host.name` (actor EUID), `@timestamp`.
+ *
+ * `logs-*` is reserved by the default `logs` index template (data-streams only) in
+ * serverless ES, so we use `op_type: create` against the data-stream name — ES
+ * auto-creates the data stream the first time a document is written.
+ */
+const createGraphEventsIndex = async (
+  esClient: EsClient,
+  dataStream: string,
+  hostName: string,
+  runId: string
+): Promise<void> => {
+  await esClient.indices.deleteDataStream({ name: dataStream }, { ignore: [404] });
+
+  // Seed exactly one event per cluster: the existing `alertsTablePage` page object
+  // requires exactly one alert per rule name (toHaveCount(1)), and the custom query
+  // rule fires one alert per matched source event.
+  //
+  // The seeded event carries both actor (`host.entity.id`) and target
+  // (`user.target.entity.id`) identity fields — `useGraphPreview` requires both
+  // to mark `hasGraphData=true`, which in turn renders the Graph tab button in
+  // the alert flyout's Visualize section.
+  await esClient.bulk(
+    {
+      refresh: 'wait_for',
+      operations: [
+        { create: { _index: dataStream } },
+        {
+          '@timestamp': new Date(Date.now() - 5 * 60_000).toISOString(),
+          event: { id: `${runId}-${hostName}-event-0`, action: 'graph-cps-action', kind: 'event' },
+          host: { name: hostName, entity: { id: `host-${hostName}` } },
+          user: { target: { entity: { id: `user-target-${hostName}` } } },
+        },
+      ],
+    },
+    // Bulk implicitly creates the data stream + backing index on first write.
+    // On a resource-constrained host that can take longer than the ES JS
+    // client's 30s default; bump to 3 minutes.
+    { requestTimeout: 180_000 }
+  );
+};
+
 // ---------------------------------------------------------------------------
 // Fixture types
 // ---------------------------------------------------------------------------
@@ -64,6 +116,16 @@ export interface CpsTestDataFixture {
   runId: string;
   originMarkerField: string;
   linkedMarkerField: string;
+}
+
+export interface GraphCpsTestDataFixture {
+  /** Index pattern + concrete name used on both clusters; matches `logs-*`. */
+  testIndex: string;
+  runId: string;
+  /** `host.name` value used by the events written to the origin cluster. */
+  originHostName: string;
+  /** `host.name` value used by the events written to the linked cluster. */
+  linkedHostName: string;
 }
 
 export interface CpsSpaceFixture {
@@ -76,7 +138,10 @@ export interface CpsSpaceFixture {
 
 export const test = baseTest.extend<
   SecurityTestFixtures & { cpsSpace: CpsSpaceFixture },
-  SecurityWorkerFixtures & { cpsTestData: CpsTestDataFixture }
+  SecurityWorkerFixtures & {
+    cpsTestData: CpsTestDataFixture;
+    graphCpsTestData: GraphCpsTestDataFixture;
+  }
 >({
   cpsTestData: [
     async ({ esClient, linkedProject }, use) => {
@@ -97,6 +162,27 @@ export const test = baseTest.extend<
       await linkedProject.esClient.indices.delete({ index: testIndex }, { ignore: [404] });
     },
     { scope: 'worker' },
+  ],
+
+  graphCpsTestData: [
+    async ({ esClient, linkedProject }, use) => {
+      const runId = randomUUID().slice(0, 8);
+      const testIndex = `${GRAPH_CPS_LOGS_INDEX_PREFIX}${runId}`;
+      const originHostName = `${GRAPH_CPS_ORIGIN_HOST_PREFIX}${runId}`;
+      const linkedHostName = `${GRAPH_CPS_LINKED_HOST_PREFIX}${runId}`;
+
+      await createGraphEventsIndex(esClient, testIndex, originHostName, runId);
+      await createGraphEventsIndex(linkedProject.esClient, testIndex, linkedHostName, runId);
+
+      await use({ testIndex, runId, originHostName, linkedHostName });
+
+      await esClient.indices.deleteDataStream({ name: testIndex }, { ignore: [404] });
+      await linkedProject.esClient.indices.deleteDataStream({ name: testIndex }, { ignore: [404] });
+    },
+    // Default Playwright fixture timeout is 60s. Creating a data stream on a fresh
+    // stateless cluster (template instantiation + backing index creation) can take
+    // longer on a resource-constrained host; budget 4 minutes.
+    { scope: 'worker', timeout: 240_000 },
   ],
 
   cpsSpace: [

@@ -38,7 +38,7 @@ import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-s
 
 import { decodeRequestVersion, encodeVersion } from '@kbn/core-saved-objects-base-server-internal';
 import { nodeBuilder } from '@kbn/es-query';
-import type { IBasePath, ExecutionContextStart } from '@kbn/core/server';
+import type { ExecutionContextStart } from '@kbn/core/server';
 
 import type { RequestTimeoutsConfig } from './config';
 import type { Result } from './lib/result_type';
@@ -86,7 +86,6 @@ export interface StoreOpts {
   canEncryptSavedObjects?: boolean;
   esoClient?: EncryptedSavedObjectsClient;
   getIsSecurityEnabled: () => boolean;
-  basePath: IBasePath;
   executionContext: ExecutionContextStart;
   apiKeyStrategy: ApiKeyStrategy;
 }
@@ -162,7 +161,6 @@ export class TaskStore {
   private canEncryptSavedObjects?: boolean;
   private getIsSecurityEnabled: () => boolean;
   private logger: Logger;
-  private basePath: IBasePath;
   private executionContextRunner: ExecutionContextRunner;
   private apiKeyStrategy: ApiKeyStrategy;
 
@@ -204,7 +202,6 @@ export class TaskStore {
     this.canEncryptSavedObjects = opts.canEncryptSavedObjects;
     this.getIsSecurityEnabled = opts.getIsSecurityEnabled;
     this.logger = opts.logger;
-    this.basePath = opts.basePath;
     this.apiKeyStrategy = opts.apiKeyStrategy;
     this.executionContextRunner = getExecutionContextRunner(opts.executionContext, {
       name: 'taskStore',
@@ -317,7 +314,6 @@ export class TaskStore {
         taskInstances,
         request,
         this.security,
-        this.basePath,
         options?.onEsKey === true ? { onEsKey: true } : undefined
       );
     } catch (e) {

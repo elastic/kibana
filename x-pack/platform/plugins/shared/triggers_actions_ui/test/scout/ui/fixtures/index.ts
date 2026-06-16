@@ -43,6 +43,8 @@ export {
 } from './constants';
 export {
   makeEsQueryRule,
+  makeIndexThresholdRule,
+  fillIndexThresholdForm,
   defineIndexThresholdRule,
   THRESHOLD_TEST_INDEX,
   findRuleIdByName,

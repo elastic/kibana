@@ -8,7 +8,13 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import type { EuiSelectableOption, EuiTableSortingType } from '@elastic/eui';
-import { EuiButtonIcon, EuiDescriptionList, EuiPageTemplate, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiDescriptionList,
+  EuiPageTemplate,
+  EuiSpacer,
+  EuiToolTip,
+} from '@elastic/eui';
 import type { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
 import { parseRuleCircuitBreakerErrorMessage } from '@kbn/alerting-plugin/common';
 import type { KueryNode } from '@kbn/es-query';
@@ -952,13 +958,18 @@ export const RulesList = ({
                   _executionStatus.error?.reason === RuleExecutionStatusErrorReasons.License;
 
                 return isLicenseError || hasErrorMessage ? (
-                  <EuiButtonIcon
-                    onClick={() => toggleErrorMessage(_executionStatus, rule)}
-                    aria-label={itemIdToExpandedRowMap[rule.id] ? 'Collapse' : 'Expand'}
-                    iconType={
-                      itemIdToExpandedRowMap[rule.id] ? 'chevronSingleUp' : 'chevronSingleDown'
-                    }
-                  />
+                  <EuiToolTip
+                    content={itemIdToExpandedRowMap[rule.id] ? 'Collapse' : 'Expand'}
+                    disableScreenReaderOutput
+                  >
+                    <EuiButtonIcon
+                      onClick={() => toggleErrorMessage(_executionStatus, rule)}
+                      aria-label={itemIdToExpandedRowMap[rule.id] ? 'Collapse' : 'Expand'}
+                      iconType={
+                        itemIdToExpandedRowMap[rule.id] ? 'chevronSingleUp' : 'chevronSingleDown'
+                      }
+                    />
+                  </EuiToolTip>
                 ) : null;
               }}
               renderSelectAllDropdown={() => {

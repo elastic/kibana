@@ -11,6 +11,7 @@ import { BehaviorSubject } from 'rxjs';
 import { type HttpService, BasePath } from '@kbn/core-http-browser-internal';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { basePathMock } from './base_path.mock';
 import { lazyObject } from '@kbn/lazy-object';
 
@@ -32,6 +33,7 @@ const createServiceMock = ({
     patch: jest.fn(),
     delete: jest.fn(),
     options: jest.fn(),
+    spaceId: DEFAULT_SPACE_ID,
     basePath: new BasePath({
       basePath,
       publicBaseUrl,

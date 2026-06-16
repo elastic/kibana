@@ -32,6 +32,11 @@ const MONITOR_SO_TYPES = [
   'ingest-package-policies',
 ];
 
+// Per-test cleanup must not wipe `synthetics-private-location`: the location is
+// created once in `beforeAll` and reused as a monitor target, so removing it
+// between tests would force an agent-policy recreation on every test.
+const PER_TEST_SO_TYPES = [syntheticsMonitorSavedObjectType, 'ingest-package-policies'];
+
 apiTest.describe(
   'DeleteProjectMonitors',
   { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
@@ -87,17 +92,20 @@ apiTest.describe(
       const { apiKeyHeader: adminKey } = await requestAuth.getApiKey('admin');
       adminHeaders = mergeSyntheticsApiHeaders(adminKey);
       await apiServices.syntheticsPrivateLocations.installSyntheticsPackage();
-    });
-
-    apiTest.beforeEach(async ({ apiClient, kbnClient, apiServices }) => {
-      await deleteAllSyntheticsPackagePolicies(apiClient, adminHeaders);
-      await kbnClient.savedObjects.clean({ types: MONITOR_SO_TYPES });
+      // Created once and reused across tests (see PER_TEST_SO_TYPES note).
       privateLocation = await apiServices.syntheticsPrivateLocations.addTestPrivateLocation();
     });
 
-    apiTest.afterAll(async ({ apiClient, kbnClient }) => {
+    apiTest.beforeEach(async ({ apiClient, kbnClient }) => {
+      await deleteAllSyntheticsPackagePolicies(apiClient, adminHeaders);
+      await kbnClient.savedObjects.clean({ types: PER_TEST_SO_TYPES });
+    });
+
+    apiTest.afterAll(async ({ apiClient, kbnClient, apiServices }) => {
       await deleteAllSyntheticsPackagePolicies(apiClient, adminHeaders);
       await kbnClient.savedObjects.clean({ types: MONITOR_SO_TYPES });
+      // Remove the shared agent policy created in `beforeAll`.
+      await apiServices.syntheticsPrivateLocations.cleanUpPrivateLocationsAndPolicies();
     });
 
     apiTest('only allows 500 requests at a time', async ({ apiClient }) => {

@@ -13,6 +13,7 @@ import {
   EuiFlexItem,
   EuiScreenReaderOnly,
   EuiText,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -53,15 +54,31 @@ function getAbsolutePosition(
 
 export interface ServiceMapFindInPageProps {
   nodes: ServiceMapNode[];
+  /** Controlled search query when supplied (e.g. embeddable hydrating from persisted state). */
+  searchQuery?: string;
+  /** Fires when the user types in the search field (use to mirror state up for snapshot persistence). */
+  onSearchQueryChange?: (next: string) => void;
 }
 
 /**
  * Find-in-page for the service map: filters visible service/dependency nodes, centers the canvas on
  * matches, and keeps `selectedIndex` aligned with the last centered match (so prev/next stay in sync).
  */
-export function ServiceMapFindInPage({ nodes }: ServiceMapFindInPageProps) {
+export function ServiceMapFindInPage({
+  nodes,
+  searchQuery: controlledSearchQuery,
+  onSearchQueryChange,
+}: ServiceMapFindInPageProps) {
   const { euiTheme } = useEuiTheme();
-  const [searchQuery, setSearchQuery] = useState('');
+  const [internalSearchQuery, setInternalSearchQuery] = useState(controlledSearchQuery ?? '');
+  const searchQuery = controlledSearchQuery ?? internalSearchQuery;
+  const setSearchQuery = useCallback(
+    (next: string) => {
+      setInternalSearchQuery(next);
+      onSearchQueryChange?.(next);
+    },
+    [onSearchQueryChange]
+  );
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isFocused, setIsFocused] = useState(false);
   const { setSearchHighlight } = useServiceMapSearchContext();
@@ -242,46 +259,60 @@ export function ServiceMapFindInPage({ nodes }: ServiceMapFindInPageProps) {
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType="chevronSingleUp"
-                  display="empty"
-                  color="text"
-                  size="s"
-                  aria-label={i18n.translate('xpack.apm.serviceMap.find.previousMatch', {
+                <EuiToolTip
+                  content={i18n.translate('xpack.apm.serviceMap.find.previousMatch', {
                     defaultMessage: 'Go to previous match on the map',
                   })}
-                  onMouseDown={(e: React.MouseEvent) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                  }}
-                  onClick={(e: React.MouseEvent) => {
-                    e.stopPropagation();
-                    goToPreviousMatch();
-                  }}
-                  isDisabled={searchResults.length === 0}
-                  data-test-subj="serviceMapFindPrevious"
-                />
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    iconType="chevronSingleUp"
+                    display="empty"
+                    color="text"
+                    size="s"
+                    aria-label={i18n.translate('xpack.apm.serviceMap.find.previousMatch', {
+                      defaultMessage: 'Go to previous match on the map',
+                    })}
+                    onMouseDown={(e: React.MouseEvent) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }}
+                    onClick={(e: React.MouseEvent) => {
+                      e.stopPropagation();
+                      goToPreviousMatch();
+                    }}
+                    isDisabled={searchResults.length === 0}
+                    data-test-subj="serviceMapFindPrevious"
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType="chevronSingleDown"
-                  display="empty"
-                  color="text"
-                  size="s"
-                  aria-label={i18n.translate('xpack.apm.serviceMap.find.nextMatch', {
+                <EuiToolTip
+                  content={i18n.translate('xpack.apm.serviceMap.find.nextMatch', {
                     defaultMessage: 'Go to next match on the map',
                   })}
-                  onMouseDown={(e: React.MouseEvent) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                  }}
-                  onClick={(e: React.MouseEvent) => {
-                    e.stopPropagation();
-                    goToNextMatch();
-                  }}
-                  isDisabled={searchResults.length === 0}
-                  data-test-subj="serviceMapFindNext"
-                />
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    iconType="chevronSingleDown"
+                    display="empty"
+                    color="text"
+                    size="s"
+                    aria-label={i18n.translate('xpack.apm.serviceMap.find.nextMatch', {
+                      defaultMessage: 'Go to next match on the map',
+                    })}
+                    onMouseDown={(e: React.MouseEvent) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }}
+                    onClick={(e: React.MouseEvent) => {
+                      e.stopPropagation();
+                      goToNextMatch();
+                    }}
+                    isDisabled={searchResults.length === 0}
+                    data-test-subj="serviceMapFindNext"
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
             </EuiFlexGroup>
           }

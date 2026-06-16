@@ -12,7 +12,7 @@ import type { PackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/commo
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import pRetry from 'p-retry';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { TelemetryConfigProvider } from '../../../../common/telemetry_config/telemetry_config_provider';
 import type { PolicyData } from '../../../../common/endpoint/types';
 import { getPolicyDataForUpdate } from '../../../../common/endpoint/service/policy';

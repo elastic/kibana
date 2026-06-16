@@ -55,7 +55,7 @@ export interface NewPackagePolicyInputStream {
   vars?: PackagePolicyConfigRecord;
   var_group_selections?: Record<string, string>;
   config?: PackagePolicyConfigRecord;
-  condition?: AgentConditionExpression;
+  condition?: AgentConditionExpression | null;
   migrate_from?: string;
 }
 
@@ -77,7 +77,7 @@ export interface NewPackagePolicyInput {
   var_group_selections?: Record<string, string>;
   config?: PackagePolicyConfigRecord;
   streams: NewPackagePolicyInputStream[];
-  condition?: AgentConditionExpression;
+  condition?: AgentConditionExpression | null;
   deprecated?: DeprecationInfo;
   migrate_from?: string;
 }
@@ -116,7 +116,7 @@ export interface NewPackagePolicy {
   supports_cloud_connector?: boolean | null;
   additional_datastreams_permissions?: string[];
   global_data_tags?: GlobalDataTag[];
-  condition?: AgentConditionExpression;
+  condition?: AgentConditionExpression | null;
 }
 
 export interface UpdatePackagePolicy extends NewPackagePolicy {

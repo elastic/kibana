@@ -13,8 +13,8 @@ import { createErrorResult, getAgentFromRunContext } from '@kbn/agent-builder-se
 import { WAIT_FOR_COMPLETION_TIMEOUT_SEC } from '@kbn/agent-builder-common/tools/types/workflow';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
 import { errorResult, otherResult } from '@kbn/agent-builder-genai-utils/tools/utils/results';
+import { executeWorkflow } from '@kbn/agent-builder-tools-base/workflows';
 import type { AnyToolTypeDefinition } from '../definitions';
-import { executeWorkflow } from '../../../workflow';
 import { generateSchema } from './generate_schema';
 import { configurationSchema, configurationUpdateSchema } from './schemas';
 import { validateWorkflowId } from './validation';

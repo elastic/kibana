@@ -220,6 +220,12 @@ describe('ListActionPoliciesPage', () => {
     });
   });
 
+  it('renders the experimental badge in the page header', () => {
+    renderPage();
+
+    expect(screen.getByTestId('alertingV2ExperimentalBadge')).toBeInTheDocument();
+  });
+
   it('formats updatedAt using the user date format setting', () => {
     renderPage();
 

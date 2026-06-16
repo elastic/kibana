@@ -558,7 +558,7 @@ describe('OtelAppender', () => {
     });
 
     describe('log.meta', () => {
-      it('with pattern layout (default): flattens meta fields into kibana.log.meta.* attributes', () => {
+      it('with pattern layout (default): flattens meta fields into attributes', () => {
         const appender = new OtelAppender(validConfig);
         const meta = { http: { method: 'GET' }, tags: ['api'] };
         appender.append(makeRecord({ meta }));
@@ -566,8 +566,8 @@ describe('OtelAppender', () => {
         expect(mockEmit).toHaveBeenCalledWith(
           expect.objectContaining({
             attributes: expect.objectContaining({
-              'kibana.log.meta.http.method': 'GET',
-              'kibana.log.meta.tags': ['api'],
+              'http.method': 'GET',
+              tags: ['api'],
             }),
           })
         );

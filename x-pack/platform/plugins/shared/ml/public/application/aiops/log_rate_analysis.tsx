@@ -13,11 +13,15 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { LogRateAnalysis } from '@kbn/aiops-plugin/public';
 import { AIOPS_EMBEDDABLE_ORIGIN } from '@kbn/aiops-common/constants';
 
+import { MlDataSourcePicker } from '@kbn/aiops-components';
+import { DataViewPicker } from '@kbn/unified-search-plugin/public';
+import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
+import { NoDataViewPrompt } from './no_data_view_prompt';
 import { useDataSource } from '../contexts/ml/data_source_context';
 import { useMlKibana } from '../contexts/kibana';
 import { HelpMenu } from '../components/help_menu';
-import { MlPageHeader } from '../components/page_header';
 import { useEnabledFeatures } from '../contexts/ml';
+import { MlPageHeader } from '../components/page_header';
 import { PageTitle } from '../components/page_title';
 
 export const LogRateAnalysisPage: FC = () => {
@@ -26,19 +30,26 @@ export const LogRateAnalysisPage: FC = () => {
 
   const { selectedDataView: dataView, selectedSavedSearch: savedSearch } = useDataSource();
 
+  const pageTitle = (
+    <FormattedMessage id="xpack.ml.logRateAnalysis.pageHeader" defaultMessage="Log rate analysis" />
+  );
+
   return (
     <>
       <MlPageHeader>
-        <PageTitle
-          title={
-            <FormattedMessage
-              id="xpack.ml.logRateAnalysis.pageHeader"
-              defaultMessage="Log rate analysis"
-            />
-          }
-        />
+        <PageTitle title={pageTitle} />
       </MlPageHeader>
-      {dataView && (
+      {!dataView ? (
+        <>
+          <MlDataSourcePicker
+            currentDataView={dataView ?? null}
+            services={services}
+            DataViewPickerComponent={DataViewPicker}
+            SavedObjectFinderComponent={SavedObjectFinder}
+          />
+          <NoDataViewPrompt />
+        </>
+      ) : (
         <LogRateAnalysis
           dataView={dataView}
           savedSearch={savedSearch}
@@ -50,7 +61,10 @@ export const LogRateAnalysisPage: FC = () => {
               'analytics',
               'application',
               'charts',
+              'contentManagement',
               'data',
+              'dataViewEditor',
+              'dataViewFieldEditor',
               'executionContext',
               'fieldFormats',
               'http',

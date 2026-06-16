@@ -12,7 +12,7 @@ import { pipe } from 'fp-ts/pipeable';
 import { map as mapOptional, none } from 'fp-ts/Option';
 import { tap } from 'rxjs';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import type { Logger, ExecutionContextStart, IBasePath } from '@kbn/core/server';
+import type { Logger, ExecutionContextStart } from '@kbn/core/server';
 
 import type { Result } from './lib/result_type';
 import { asErr, mapErr, asOk, map, mapOk, isOk } from './lib/result_type';
@@ -70,7 +70,6 @@ export interface ITaskEventEmitter<T> {
 }
 
 export interface TaskPollingLifecycleOpts {
-  basePathService: IBasePath;
   logger: Logger;
   definitions: TaskTypeDictionary;
   taskStore: TaskStore;
@@ -103,7 +102,6 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
   private store: TaskStore;
   private taskClaiming: TaskClaiming;
   private bufferedStore: BufferedTaskStore;
-  private readonly basePathService: IBasePath;
   private readonly executionContext: ExecutionContextStart;
 
   private logger: Logger;
@@ -134,7 +132,6 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
    * mechanism.
    */
   constructor({
-    basePathService,
     logger,
     middleware,
     config,
@@ -149,7 +146,6 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     apiKeyStrategy,
     eventLogger,
   }: TaskPollingLifecycleOpts) {
-    this.basePathService = basePathService;
     this.logger = logger;
     this.middleware = middleware;
     this.definitions = definitions;
@@ -269,7 +265,6 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
 
   private createTaskRunnerForTask = (instance: ConcreteTaskInstance) => {
     return new TaskManagerRunner({
-      basePathService: this.basePathService,
       logger: this.logger,
       instance,
       store: this.bufferedStore,

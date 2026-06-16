@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import type { IRouter, Logger } from '@kbn/core/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import { PLUGIN_ID } from '../../../common';
 import {

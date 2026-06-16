@@ -285,6 +285,7 @@ function IngestRateChartContent({ definition }: { definition: Streams.all.GetRes
         esqlSource={esqlSource}
         streamName={streamName}
         isQueryStream={isQueryStream}
+        isDraft={isDraft}
       />
     </EuiPanel>
   );

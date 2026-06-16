@@ -1203,9 +1203,17 @@ export const myAssetSmlType: SmlTypeDefinition = {
             type: 'my-asset',
             title: attrs.title ?? originId,
             content: [attrs.title, attrs.description].filter(Boolean).join('\n'),
-            // Kibana feature privileges required to access this item.
-            // Users without these privileges won't see the item in search results.
-            permissions: ['saved_object:my-saved-object-type/get'],
+            // Permissions required to access this item.
+            // - `kibana.privileges[]` lists Kibana feature privileges (e.g.,
+            //   `saved_object:my-saved-object-type/get`).
+            // - `elasticsearch.indices[]` lists concrete ES index/alias/data
+            //   stream names
+            // Users without all listed privileges/indices won't see the item
+            // in search results.
+            permissions: {
+              kibana: { privileges: [{ name: 'saved_object:my-saved-object-type/get' }] },
+              elasticsearch: { indices: [] },
+            },
           },
         ],
       };
@@ -1309,7 +1317,7 @@ The visualization SML type is registered in
 It:
 - Lists all `lens` saved objects across all spaces
 - Extracts title, description, chart type, and ES|QL query as searchable content
-- Sets `permissions: ['saved_object:lens/get']`
+- Sets `permissions: { kibana: { privileges: [{ name: 'saved_object:lens/get' }] }, elasticsearch: { indices: [] } }`
 - Converts results back to Lens API format for the attachment renderer
 - Uses a 1-hour crawl interval
 

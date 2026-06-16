@@ -102,6 +102,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         ml.testResources.deleteDataViewByTitle('ft_fare*,ft_fareq*'),
         ml.testResources.deleteDataViewByTitle('ft_farequote'),
         ml.testResources.deleteDataViewByTitle('ft_ihp_outlier'),
+        ml.testResources.deleteDataViewByTitle('ft_fare*_picker_test'),
       ]);
     });
 
@@ -126,7 +127,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           `${farequoteKQLFiltersSearchTestData.suiteTitle} loads the data drift view`
         );
         await ml.jobSourceSelection.selectSourceForDataDrift(
-          farequoteKQLFiltersSearchTestData.sourceIndexOrSavedSearch
+          farequoteKQLFiltersSearchTestData.sourceIndexOrSavedSearch,
+          farequoteKQLFiltersSearchTestData.isSavedSearch
         );
         await assertDataDriftPageContent(farequoteKQLFiltersSearchTestData);
 
@@ -232,6 +234,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           nonTimeSeriesTestData.sourceIndexOrSavedSearch
         );
         await ml.dataDrift.runAnalysis();
+      });
+    });
+
+    describe('creates a new data view via the MlDataSourcePicker', function () {
+      it('opens the data view editor from picker and loads drift after creation', async () => {
+        await ml.navigation.navigateToMl();
+        await elasticChart.setNewChartUiDebugFlag(true);
+        await ml.navigation.navigateToDataDrift();
+
+        await ml.testExecution.logTestStep('opens the create data view flyout from the picker');
+        await ml.dataDrift.openCreateDataViewFromPicker();
+
+        await ml.testExecution.logTestStep('creates a data view via the flyout');
+        await ml.dataDrift.createDataViewViaFlyout({
+          name: 'ft_fare*_picker_test',
+          indexPattern: 'ft_fare*',
+          timeField: '@timestamp',
+        });
+
+        await ml.testExecution.logTestStep('verifies data drift page loads with new data view');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await ml.dataDrift.assertDataViewTitle('ft_fare*_picker_test');
+        await ml.dataDrift.assertTimeRangeSelectorSectionExists();
       });
     });
   });

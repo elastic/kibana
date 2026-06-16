@@ -22,7 +22,7 @@ imports:
   - .github/agents/code-reviewer.md
 engine:
   id: claude
-  version: "2.1.111"
+  version: "2.1.165"
   model: opus
   max-turns: 120
   env:
@@ -30,9 +30,10 @@ engine:
     ANTHROPIC_BASE_URL: https://elastic.litellm-prod.ai
     ENABLE_PROMPT_CACHING_1H: "1"
     # Route Claude Code's 1M Opus alias through LiteLLM.
-    ANTHROPIC_DEFAULT_OPUS_MODEL: llm-gateway/claude-opus-4-7[1m]
+    ANTHROPIC_DEFAULT_OPUS_MODEL: llm-gateway/claude-opus-4-8[1m]
     ANTHROPIC_DEFAULT_HAIKU_MODEL: llm-gateway/claude-haiku-4-5
     ANTHROPIC_DEFAULT_SONNET_MODEL: llm-gateway/claude-sonnet-4-6
+    CLAUDE_CODE_EFFORT_LEVEL: high
     CLAUDE_CODE_SUBAGENT_MODEL: opus[1m]
 # Activation rules:
 # - Manual runs always activate.

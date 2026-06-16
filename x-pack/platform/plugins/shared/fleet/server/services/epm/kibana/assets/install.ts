@@ -8,7 +8,7 @@
 import { setTimeout } from 'timers/promises';
 
 import { v5 } from 'uuid';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type {
   SavedObject,
   SavedObjectsBulkCreateObject,

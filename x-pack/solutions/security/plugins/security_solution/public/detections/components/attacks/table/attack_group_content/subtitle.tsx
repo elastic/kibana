@@ -6,9 +6,11 @@
  */
 
 import React, { useMemo } from 'react';
+import { EuiAvatar, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import {
   replaceAnonymizedValuesWithOriginalValues,
   type AttackDiscoveryAlert,
+  ATTACK_DISCOVERY_AD_HOC_RULE_ID,
 } from '@kbn/elastic-assistant-common';
 import { i18n } from '@kbn/i18n';
 import { TableId } from '@kbn/securitysolution-data-table';
@@ -22,6 +24,20 @@ export const DETECTED_ON_LABEL = (timestamp: string) =>
     defaultMessage: 'Detected on {timestamp}',
     values: { timestamp },
   });
+
+export const RUN_BY_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.attacks.group.subtitle.runByLabel',
+  {
+    defaultMessage: 'Run by:',
+  }
+);
+
+export const UNKNOWN_USER_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.attacks.group.subtitle.unknownUserLabel',
+  {
+    defaultMessage: 'Unknown',
+  }
+);
 
 export interface SubtitleProps {
   /**
@@ -41,8 +57,8 @@ export interface SubtitleProps {
 export const Subtitle = React.memo<SubtitleProps>(({ attack, showAnonymized = false }) => {
   const dateFormat = useDateFormat();
 
-  const subtitleMarkdownText = useMemo(() => {
-    const summary = attack.entitySummaryMarkdown
+  const summary = useMemo(() => {
+    return attack.entitySummaryMarkdown
       ? showAnonymized
         ? attack.entitySummaryMarkdown
         : replaceAnonymizedValuesWithOriginalValues({
@@ -50,31 +66,78 @@ export const Subtitle = React.memo<SubtitleProps>(({ attack, showAnonymized = fa
             replacements: attack.replacements,
           })
       : null;
+  }, [attack.entitySummaryMarkdown, attack.replacements, showAnonymized]);
 
-    const formattedTimestamp = getFormattedDate({
+  const formattedTimestamp = useMemo(() => {
+    return getFormattedDate({
       date: attack.timestamp,
       dateFormat,
     });
+  }, [attack.timestamp, dateFormat]);
 
-    if (!formattedTimestamp) {
-      return summary ?? '';
-    }
-    const summaryText = summary ? ` • ${summary}` : '';
-    return `${DETECTED_ON_LABEL(formattedTimestamp)}${summaryText}`;
-  }, [
-    attack.entitySummaryMarkdown,
-    attack.replacements,
-    attack.timestamp,
-    dateFormat,
-    showAnonymized,
-  ]);
+  const isManual = attack.alertRuleUuid === ATTACK_DISCOVERY_AD_HOC_RULE_ID;
+  const separator = '|';
+  const userName = attack.userName || UNKNOWN_USER_LABEL;
 
   return (
-    <AttackDiscoveryMarkdownFormatter
-      scopeId={TableId.alertsOnAttacksPage}
-      disableActions={showAnonymized}
-      markdown={subtitleMarkdownText}
-    />
+    <EuiFlexGroup
+      alignItems="center"
+      gutterSize="s"
+      responsive={false}
+      wrap={true}
+      data-test-subj="attack-subtitle"
+    >
+      {formattedTimestamp && (
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued">
+            {DETECTED_ON_LABEL(formattedTimestamp)}
+          </EuiText>
+        </EuiFlexItem>
+      )}
+
+      {isManual && (
+        <>
+          {formattedTimestamp && (
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                {separator}
+              </EuiText>
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} wrap={false}>
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs" color="subdued">
+                  {RUN_BY_LABEL}
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiAvatar size="s" name={userName} data-test-subj="attack-run-by-avatar" />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </>
+      )}
+
+      {summary && (
+        <>
+          {(formattedTimestamp || isManual) && (
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                {separator}
+              </EuiText>
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem grow={false}>
+            <AttackDiscoveryMarkdownFormatter
+              scopeId={TableId.alertsOnAttacksPage}
+              disableActions={showAnonymized}
+              markdown={summary}
+            />
+          </EuiFlexItem>
+        </>
+      )}
+    </EuiFlexGroup>
   );
 });
 Subtitle.displayName = 'Subtitle';

@@ -404,18 +404,6 @@ export const getSignificantEventsResponse: SignificantEventsGetResponse = {
 };
 
 // ---------------------------------------------------------------------------
-// POST /api/streams/{name}/significant_events/_preview
-// ---------------------------------------------------------------------------
-
-export const previewSignificantEventsRequest = {
-  query: {
-    esql: {
-      query: 'FROM logs.nginx | WHERE log.level == "error" | STATS count = COUNT(*) BY host.name',
-    },
-  },
-};
-
-// ---------------------------------------------------------------------------
 // GET /api/streams  –  stream list response
 // ---------------------------------------------------------------------------
 

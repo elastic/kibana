@@ -11,6 +11,7 @@ import type {
   MetricsCalloutDateRangeSelectedParams,
   MetricsCalloutLoadedParams,
   SearchQuerySubmittedParams,
+  ServiceMapAddedToDashboardParams,
   ServiceMapDagreLayoutFallbackParams,
   SloOverviewFlyoutSearchQueriedParams,
   SloOverviewFlyoutStatusFilteredParams,
@@ -46,6 +47,10 @@ export class TelemetryClient implements ITelemetryClient {
     params: ServiceMapDagreLayoutFallbackParams
   ): void => {
     this.analytics.reportEvent(TelemetryEventTypes.SERVICE_MAP_DAGRE_LAYOUT_FALLBACK, params);
+  };
+
+  public reportServiceMapAddedToDashboard = (params: ServiceMapAddedToDashboardParams): void => {
+    this.analytics.reportEvent(TelemetryEventTypes.SERVICE_MAP_ADDED_TO_DASHBOARD, params);
   };
 
   public reportMetricsCalloutDateRangeSelected = (

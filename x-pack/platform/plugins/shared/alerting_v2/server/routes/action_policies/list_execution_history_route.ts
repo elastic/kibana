@@ -26,9 +26,7 @@ export class ListExecutionHistoryRoute extends BaseAlertingRoute {
   static path = ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH;
   static security: RouteSecurity = {
     authz: {
-      // TODO(rna-program#461): swap for the dedicated execution-history feature
-      // privilege once it lands. Until then we gate by actionPolicies.read.
-      requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.actionPolicies.read],
+      requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.executionHistory.read],
     },
   };
   static routeOptions = {

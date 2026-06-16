@@ -17,11 +17,13 @@ import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { QueryClientProvider } from '@kbn/react-query';
 import type { EmbeddableEditorBreadcrumb } from '@kbn/embeddable-plugin/public';
 
+import { AppHeader } from '@kbn/app-header';
+import type { AppMenuConfig, AppMenuPopoverItem } from '@kbn/core-chrome-app-menu-components';
 import { coreServices } from '../services/kibana_services';
 import { dashboardQueryClient } from '../services/dashboard_query_client';
 import { DASHBOARD_APP_ID, LANDING_PAGE_PATH } from '../../common/page_bundle_constants';
 import { getDashboardListingTabs } from './get_dashboard_listing_tabs';
-import type { DashboardListingProps } from './types';
+import type { DashboardListingProps, DashboardListingTab } from './types';
 
 export const DashboardListing = ({
   children,
@@ -86,19 +88,86 @@ export const DashboardListing = ({
     [tabs, activeTabId]
   );
 
+  const appMenu = useMemo<AppMenuConfig | undefined>(() => {
+    const tabsByIdMap = new Map((tabs as DashboardListingTab[]).map((tab) => [tab.id, tab]));
+    const createDashboardAction = tabsByIdMap.get('dashboards')?.createAction;
+    const createVisualizationAction = tabsByIdMap.get('visualizations')?.createAction;
+    const createAnnotationAction = tabsByIdMap.get('annotations')?.createAction;
+    const createMenuItems: AppMenuPopoverItem[] = [];
+
+    if (createVisualizationAction) {
+      createMenuItems.push({
+        id: 'createVisualization',
+        order: 1,
+        label: i18n.translate('dashboard.listing.createVisualizationButtonLabel', {
+          defaultMessage: 'Create visualization',
+        }),
+        iconType: 'chartBarVertical',
+        testId: 'createVisualizationButton',
+        run: createVisualizationAction,
+      });
+    }
+
+    if (createAnnotationAction) {
+      createMenuItems.push({
+        id: 'createAnnotation',
+        order: 2,
+        label: i18n.translate('dashboard.listing.createAnnotationButtonLabel', {
+          defaultMessage: 'Create annotation',
+        }),
+        iconType: 'flag',
+        testId: 'createAnnotationButton',
+        run: createAnnotationAction,
+      });
+    }
+
+    if (!createDashboardAction) {
+      return undefined;
+    }
+
+    return {
+      primaryActionItem: {
+        id: 'createDashboard',
+        testId: 'dashboardListingCreateButton',
+        iconType: 'plus',
+        label: i18n.translate('dashboard.listing.createButtonLabel', {
+          defaultMessage: 'Create dashboard',
+        }),
+        run: createDashboardAction,
+        popoverWidth: 200,
+        splitButtonProps:
+          createMenuItems.length > 0
+            ? {
+                secondaryButtonAriaLabel: i18n.translate(
+                  'dashboard.listing.createMoreActionsButtonAriaLabel',
+                  {
+                    defaultMessage: 'Create more dashboard content',
+                  }
+                ),
+                items: createMenuItems,
+              }
+            : undefined,
+      },
+    };
+  }, [tabs]);
+
   return (
     <I18nProvider>
       <QueryClientProvider client={dashboardQueryClient}>
         {children}
-        <TabbedTableListView
-          headingId="dashboardListingHeading"
+        <AppHeader
           title={i18n.translate('dashboard.listing.title', {
             defaultMessage: 'Dashboards',
           })}
+          menu={appMenu}
+        />
+        <TabbedTableListView
+          headingId="dashboardListingHeading"
           getBreadcrumbs={getBreadcrumbs}
           tabs={tabs}
           activeTabId={activeTabId}
           changeActiveTab={changeActiveTab}
+          showCreateButton={false}
         />
       </QueryClientProvider>
     </I18nProvider>

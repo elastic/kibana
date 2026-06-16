@@ -19,7 +19,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { expect } from '@kbn/scout-oblt/api';
-import type { ApiClientFixture, KbnClient, KibanaRole } from '@kbn/scout-oblt';
+import type { ApiClientFixture, KbnClient, KibanaRole, ScoutLogger } from '@kbn/scout-oblt';
 import { syntheticsMonitorSavedObjectType } from '../../../../common/types/saved_objects';
 import { ConfigKey } from '../../../../common/runtime_types';
 import { PROFILE_VALUES_ENUM, PROFILES_MAP } from '../../../../common/constants/monitor_defaults';
@@ -58,6 +58,7 @@ apiTest.describe(
     let testPolicyId: string;
     let testPrivateLocationName: string;
     let kibanaServerUrl: string;
+    let log: ScoutLogger;
     const createdSpaces: string[] = [];
 
     /**
@@ -128,8 +129,16 @@ apiTest.describe(
             spaceId: spaceId === 'default' ? undefined : spaceId,
           });
         }
-      } catch {
-        // best-effort cleanup (mirrors the FTR try/catch)
+      } catch (error) {
+        // Best-effort cleanup (mirrors the FTR try/catch). The `beforeEach`
+        // `savedObjects.clean` still guarantees a clean slate for the next test,
+        // so a failure here can't leak across tests — but surface it instead of
+        // swallowing it silently so a 500/auth/network error stays diagnosable.
+        log.warning(
+          `deleteByJourney cleanup failed for journey "${journeyId}" / project "${projectId}": ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
       }
     };
 
@@ -361,30 +370,33 @@ apiTest.describe(
       spaces: ['default'],
     });
 
-    apiTest.beforeAll(async ({ requestAuth, kbnClient, apiServices, apiClient, config }) => {
-      kibanaServerUrl = config.hosts.kibana;
+    apiTest.beforeAll(
+      async ({ requestAuth, kbnClient, apiServices, apiClient, config, log: workerLog }) => {
+        kibanaServerUrl = config.hosts.kibana;
+        log = workerLog;
 
-      const { apiKeyHeader: editorKey } = await requestAuth.getApiKey('editor');
-      editorHeaders = mergeSyntheticsApiHeaders(editorKey, { Accept: 'application/json' });
-      const { apiKeyHeader: viewerKey } = await requestAuth.getApiKey('viewer');
-      viewerHeaders = mergeSyntheticsApiHeaders(viewerKey, { Accept: 'application/json' });
-      const { apiKeyHeader: adminKey } = await requestAuth.getApiKey('admin');
-      adminHeaders = mergeSyntheticsApiHeaders(adminKey, { Accept: 'application/json' });
+        const { apiKeyHeader: editorKey } = await requestAuth.getApiKey('editor');
+        editorHeaders = mergeSyntheticsApiHeaders(editorKey, { Accept: 'application/json' });
+        const { apiKeyHeader: viewerKey } = await requestAuth.getApiKey('viewer');
+        viewerHeaders = mergeSyntheticsApiHeaders(viewerKey, { Accept: 'application/json' });
+        const { apiKeyHeader: adminKey } = await requestAuth.getApiKey('admin');
+        adminHeaders = mergeSyntheticsApiHeaders(adminKey, { Accept: 'application/json' });
 
-      await kbnClient.savedObjects.clean({ types: MONITOR_SO_TYPES });
-      await deleteAllSyntheticsPackagePolicies(apiClient, adminHeaders);
+        await kbnClient.savedObjects.clean({ types: MONITOR_SO_TYPES });
+        await deleteAllSyntheticsPackagePolicies(apiClient, adminHeaders);
 
-      testPrivateLocation = await apiServices.syntheticsPrivateLocations.addTestPrivateLocation();
-      testPolicyId = testPrivateLocation.agentPolicyId;
-      testPrivateLocationName = testPrivateLocation.label;
+        testPrivateLocation = await apiServices.syntheticsPrivateLocations.addTestPrivateLocation();
+        testPolicyId = testPrivateLocation.agentPolicyId;
+        testPrivateLocationName = testPrivateLocation.label;
 
-      // Global param referenced by the lightweight `comparePolicies` test body.
-      await apiClient.post('api/synthetics/params', {
-        headers: editorHeaders,
-        body: { key: 'testGlobalParam', value: 'testGlobalParamValue' },
-        responseType: 'json',
-      });
-    });
+        // Global param referenced by the lightweight `comparePolicies` test body.
+        await apiClient.post('api/synthetics/params', {
+          headers: editorHeaders,
+          body: { key: 'testGlobalParam', value: 'testGlobalParamValue' },
+          responseType: 'json',
+        });
+      }
+    );
 
     apiTest.beforeEach(async ({ kbnClient }) => {
       apiTest.setTimeout(150_000);

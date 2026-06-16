@@ -29,9 +29,8 @@ import { StreamsKIsOnboardingStep, TaskStatus } from '@kbn/streams-schema';
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { LogMeta } from '@kbn/logging';
-import { isSignificantEventsMemoryEnabled } from '../../memory/is_significant_events_memory_enabled';
 import type { StreamsTaskType, TaskContext } from '.';
-import { getErrorMessage, parseError } from '../../streams/errors/parse_error';
+import { parseError } from '../../streams/errors/parse_error';
 import { shouldIdentifyFeatures } from '../../sig_events/features/should_identify_features';
 import { persistQueries } from '../../sig_events/persist_queries';
 import { cancellableTask } from '../cancellable_task';
@@ -42,8 +41,6 @@ import {
   FEATURES_IDENTIFICATION_TASK_TYPE,
   getFeaturesIdentificationTaskId,
 } from './features_identification';
-import type { MemoryGenerationTaskParams } from './memory_generation';
-import { MEMORY_GENERATION_TASK_TYPE } from './memory_generation';
 import type { SignificantEventsQueriesGenerationTaskParams } from '../../sig_events/tasks/significant_events_queries_generation';
 import {
   getSignificantEventsQueriesGenerationTaskId,
@@ -184,53 +181,6 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                   },
                   { featuresTaskResult, queriesTaskResult }
                 );
-
-                // Schedule memory generation from discovered features and queries
-                const memoryParams: MemoryGenerationTaskParams = {};
-
-                if (
-                  featuresTaskResult?.status === TaskStatus.Completed &&
-                  featuresTaskResult.features.length > 0
-                ) {
-                  memoryParams.features = featuresTaskResult.features;
-                }
-
-                if (
-                  queriesTaskResult?.status === TaskStatus.Completed &&
-                  queriesTaskResult.queries.length > 0
-                ) {
-                  memoryParams.queries = queriesTaskResult.queries.map((query) => ({
-                    streamName,
-                    query,
-                  }));
-                }
-
-                const hasMemoryInputs =
-                  (memoryParams.features?.length ?? 0) > 0 ||
-                  (memoryParams.queries?.length ?? 0) > 0;
-
-                const onboardingUseMemory = await isSignificantEventsMemoryEnabled(
-                  taskContext.server.core.featureFlags
-                );
-                if (hasMemoryInputs && onboardingUseMemory && runContext.fakeRequest) {
-                  try {
-                    await taskClient.schedule<MemoryGenerationTaskParams>({
-                      task: {
-                        type: MEMORY_GENERATION_TASK_TYPE,
-                        id: MEMORY_GENERATION_TASK_TYPE,
-                        space: '*',
-                      },
-                      params: memoryParams,
-                      request: runContext.fakeRequest,
-                    });
-                  } catch (scheduleError) {
-                    taskContext.logger
-                      .get('onboarding')
-                      .warn(
-                        `Failed to schedule memory generation: ${getErrorMessage(scheduleError)}`
-                      );
-                  }
-                }
               } catch (error) {
                 // Errors here originate from waitForSubtask (plain Error), not from inference calls.
                 // isInferenceProviderError is always false, so no connector enrichment is needed.

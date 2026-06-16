@@ -10,11 +10,12 @@ import userEvent from '@testing-library/user-event';
 import React from 'react';
 
 import { coreMock } from '@kbn/core/public/mocks';
+import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 import { featuresPluginMock } from '@kbn/features-plugin/public/mocks';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 import { getSolutionViewSwitchCalloutComponent } from './solution_view_switch_callout';
-import { addSpaceIdToPath, ENTER_SPACE_PATH } from '../../../common';
+import { ENTER_SPACE_PATH } from '../../../common';
 import type { PluginsStart } from '../../plugin';
 import { spacesManagerMock } from '../../spaces_manager/mocks';
 import { SOLUTION_VIEW_SWITCH_STORAGE_KEY_PREFIX } from '../constants';

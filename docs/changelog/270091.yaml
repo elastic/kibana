@@ -1,0 +1,8 @@
+prs:
+- https://github.com/elastic/kibana/pull/270091
+type: feature
+products:
+- product: cloud-serverless
+  target: 2026-06-01
+title: Enable change history feature
+description: Enables the change history feature, which lets users view and compare historical changes to saved objects.

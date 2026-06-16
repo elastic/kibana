@@ -5,12 +5,11 @@
  * 2.0.
  */
 
+import type { UnifiedAttachmentTypeSetup } from '@kbn/cases-plugin/server';
 import { SECURITY_ALERT_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
-import { decodeSecurityAlert } from '../../../common/cases/attachments/alert';
+import { SecurityAlertAttachmentPayloadSchema } from '../../../common/cases/attachments/alert';
 
-export const securityAlertAttachmentType = {
+export const securityAlertAttachmentType: UnifiedAttachmentTypeSetup = {
   id: SECURITY_ALERT_ATTACHMENT_TYPE,
-  schemaValidator: (metadata: unknown) => {
-    decodeSecurityAlert(metadata);
-  },
+  schema: SecurityAlertAttachmentPayloadSchema,
 };

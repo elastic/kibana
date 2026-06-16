@@ -15,6 +15,7 @@ import {
   createMockWiredStreamDefinition,
 } from '../shared/mocks';
 import type { StreamsAppKibanaContext } from '../../../../hooks/use_kibana';
+import { FocusedSignificantEventService } from '../../../../services/significant_events/focused_significant_event_service';
 
 jest.mock('../../../../hooks/use_kibana');
 jest.mock('../../../../hooks/use_stream_detail');
@@ -109,6 +110,7 @@ describe('StreamDetailSchemaEditor', () => {
             ? T
             : never
         ),
+        focusedSignificantEventService: new FocusedSignificantEventService(),
         telemetryClient: {
           trackSchemaUpdated: jest.fn(),
         } as unknown as StreamsAppKibanaContext['services']['telemetryClient'],

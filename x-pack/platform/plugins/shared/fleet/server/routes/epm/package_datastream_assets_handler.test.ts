@@ -18,7 +18,7 @@ import { xpackMocks } from '../../mocks';
 import {
   checkExistingDataStreamsAreFromDifferentPackage,
   findDataStreamsFromDifferentPackages,
-  getDatasetName,
+  getCustomDatasetStreams,
   removeAssetsForInputPackagePolicy,
   isInputPackageDatasetUsedByMultiplePolicies,
 } from '../../services/epm/packages/input_type_packages';
@@ -42,7 +42,9 @@ jest.mock('../../services/package_policy', () => {
 
 const packagePolicyServiceMock = packagePolicyService as jest.Mocked<PackagePolicyClient>;
 const mockedGetPackageInfo = getPackageInfo as jest.Mock<ReturnType<typeof getPackageInfo>>;
-const mockedGetDatasetName = getDatasetName as jest.Mock<ReturnType<typeof getDatasetName>>;
+const mockedGetCustomDatasetStreams = getCustomDatasetStreams as jest.Mock<
+  ReturnType<typeof getCustomDatasetStreams>
+>;
 const mockedFindDataStreamsFromDifferentPackages =
   findDataStreamsFromDifferentPackages as jest.Mock<
     ReturnType<typeof findDataStreamsFromDifferentPackages>
@@ -122,7 +124,9 @@ describe('deletePackageDatastreamAssetsHandler', () => {
       items: [packagePolicy1, testPackagePolicy],
     } as any);
 
-    mockedGetDatasetName.mockReturnValue('custom');
+    mockedGetCustomDatasetStreams.mockReturnValue([
+      { datasetName: 'custom', dataStreamType: 'logs', inputType: 'logfile' },
+    ]);
     mockedFindDataStreamsFromDifferentPackages.mockResolvedValue({
       existingDataStreams: [],
       dataStream: {},
@@ -185,11 +189,11 @@ describe('deletePackageDatastreamAssetsHandler', () => {
     await expect(mockedRemoveAssetsForInputPackagePolicy).not.toHaveBeenCalled();
   });
 
-  it('should throw not found error if package is not an input type package', async () => {
+  it('should remove assets for integration packages', async () => {
     mockedGetPackageInfo.mockResolvedValue({
       name: 'logs',
       version: '1.0.0',
-      type: 'package',
+      type: 'integration',
       status: 'installed',
     } as any);
     const request = httpServerMock.createKibanaRequest({
@@ -197,15 +201,40 @@ describe('deletePackageDatastreamAssetsHandler', () => {
         pkgName: 'test',
         pkgVersion: '1.0.0',
       },
+      query: {
+        packagePolicyId: 'policy1',
+      },
+    });
+    packagePolicyServiceMock.list.mockResolvedValue({
+      items: [packagePolicy1, testPackagePolicy],
+    } as any);
+
+    mockedGetCustomDatasetStreams.mockReturnValue([
+      { datasetName: 'custom', dataStreamType: 'logs', inputType: 'logfile' },
+    ]);
+    mockedFindDataStreamsFromDifferentPackages.mockResolvedValue({
+      existingDataStreams: [],
+      dataStream: {},
+    } as any);
+    mockedCheckExistingDataStreamsAreFromDifferentPackage.mockReturnValue(false);
+
+    await deletePackageDatastreamAssetsHandler(context, request, response);
+    expect(response.ok).toHaveBeenCalledWith({
+      body: { success: true },
     });
 
-    await expect(
-      deletePackageDatastreamAssetsHandler(context, request, response)
-    ).rejects.toThrowError(
-      new FleetNotFoundError('Requested package test-1.0.0 is not an input package')
-    );
-
-    await expect(mockedRemoveAssetsForInputPackagePolicy).not.toHaveBeenCalled();
+    expect(mockedRemoveAssetsForInputPackagePolicy).toHaveBeenCalledWith({
+      packageInfo: {
+        name: 'logs',
+        version: '1.0.0',
+        type: 'integration',
+        status: 'installed',
+      },
+      logger: expect.anything(),
+      datasetName: 'custom',
+      esClient: expect.anything(),
+      savedObjectsClient: expect.anything(),
+    });
   });
 
   it('should throw not found error if package policy id does not exist', async () => {
@@ -253,7 +282,9 @@ describe('deletePackageDatastreamAssetsHandler', () => {
       items: [testPackagePolicy, packagePolicy1],
     } as any);
 
-    mockedGetDatasetName.mockReturnValue('custom');
+    mockedGetCustomDatasetStreams.mockReturnValue([
+      { datasetName: 'custom', dataStreamType: 'logs', inputType: 'logfile' },
+    ]);
     mockedFindDataStreamsFromDifferentPackages.mockResolvedValue({
       existingDataStreams: [
         { name: 'datastream1', _meta: { package: { name: 'integration-test' } } },
@@ -299,7 +330,9 @@ describe('deletePackageDatastreamAssetsHandler', () => {
       ],
     } as any);
 
-    mockedGetDatasetName.mockReturnValue('custom');
+    mockedGetCustomDatasetStreams.mockReturnValue([
+      { datasetName: 'custom', dataStreamType: 'logs', inputType: 'logfile' },
+    ]);
     mockedFindDataStreamsFromDifferentPackages.mockResolvedValue({
       existingDataStreams: [],
       dataStream: {},

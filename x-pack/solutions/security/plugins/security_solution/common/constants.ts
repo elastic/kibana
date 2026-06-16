@@ -485,11 +485,7 @@ export const MAX_RULES_TO_UPDATE_IN_PARALLEL = 20;
 export const LIMITED_CONCURRENCY_ROUTE_TAG_PREFIX = `${APP_ID}:limitedConcurrency`;
 
 /**
- * Max number of rules to display on UI in table, max number of rules that can be edited in a single bulk edit API request
- * We limit number of rules in bulk edit API, because rulesClient doesn't support bulkGet of rules by ids.
- * Given this limitation, current implementation fetches each rule separately through rulesClient.resolve method.
- * As max number of rules displayed on a page is 100, max 100 rules can be bulk edited by passing their ids to API.
- * We decided add this limit(number of ids less than 100) in bulk edit API as well, to prevent a huge number of single rule fetches
+ * Max number of rules to display on UI in table (one page of results).
  */
 export const RULES_TABLE_MAX_PAGE_SIZE = 100;
 
@@ -729,6 +725,7 @@ export enum SecurityAgentBuilderAttachments {
   entity = 'security.entity',
   entityAnalyticsDashboard = 'security.entity_analytics_dashboard',
   rule = 'security.rule',
+  rulePreview = 'security.rule.preview',
 }
 
 export const SECURITY_RULE_ATTACHMENT_ID = 'ai-rule-creation';

@@ -7,4 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { DEFAULT_ROUTES, DEFAULT_ROUTE_UI_SETTING_ID } from './constants';
+export {
+  DEFAULT_ROUTES,
+  DEFAULT_ROUTE_UI_SETTING_ID,
+  AGENT_BUILDER_NAV_AT_TOP_FLAG,
+} from './constants';

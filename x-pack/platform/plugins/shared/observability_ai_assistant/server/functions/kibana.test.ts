@@ -27,6 +27,7 @@ function registerFunction(overrides: {
   requestUrl?: URL;
   rewrittenUrl?: URL;
   headers?: Record<string, string>;
+  basePath?: string;
   serverInfo?: { hostname: string; port: number; protocol: 'http' | 'https' | 'socket' };
 }) {
   const logger = { info: jest.fn(), debug: jest.fn(), warn: jest.fn(), error: jest.fn() };
@@ -53,6 +54,7 @@ function registerFunction(overrides: {
       url:
         overrides.requestUrl ??
         new URL('https://source.example/internal/observability_ai_assistant/chat/complete'),
+      basePath: overrides.basePath ?? '',
       rewrittenUrl: overrides.rewrittenUrl,
       headers: {
         'content-type': 'application/json',
@@ -109,11 +111,9 @@ describe('kibana tool', () => {
     expect(forwardedRequest.url).not.toContain('malicious-host');
   });
 
-  it('builds the forwarded url using the space from the incoming request path', async () => {
+  it('builds the forwarded url using the base path from the incoming request', async () => {
     const { handler } = registerFunction({
-      requestUrl: new URL(
-        'https://source.example/s/my-space/internal/observability_ai_assistant/chat/complete'
-      ),
+      basePath: '/s/my-space',
     });
 
     await handler({

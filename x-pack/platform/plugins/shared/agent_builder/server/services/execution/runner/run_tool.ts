@@ -207,6 +207,7 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
     reportToolCallTelemetry({
       parentManager,
       toolId: tool.id,
+      toolType: tool.type,
       toolCallId,
       source,
       results: resultsWithIds,
@@ -335,6 +336,7 @@ const getAgentExecutionContext = (manager: RunnerManager) => {
 const reportToolCallTelemetry = ({
   parentManager,
   toolId,
+  toolType,
   toolCallId,
   source,
   results,
@@ -342,6 +344,7 @@ const reportToolCallTelemetry = ({
 }: {
   parentManager: RunnerManager;
   toolId: string;
+  toolType: ToolType;
   toolCallId: string;
   source: string;
   results: ToolResult[];
@@ -367,6 +370,7 @@ const reportToolCallTelemetry = ({
         conversationId: agentContext?.conversationId,
         executionId: agentContext?.executionId,
         toolId,
+        toolType,
         toolCallId,
         source,
         errorType: 'tool_error',
@@ -379,6 +383,7 @@ const reportToolCallTelemetry = ({
         conversationId: agentContext?.conversationId,
         executionId: agentContext?.executionId,
         toolId,
+        toolType,
         toolCallId,
         source,
         resultTypes: results.map((r) => r.type),

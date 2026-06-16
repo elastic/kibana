@@ -31,7 +31,7 @@ export function LogPatternAnalysisPageProvider({ getService, getPageObject }: Ft
 
     async navigateToDataViewSelection() {
       await testSubjects.click('mlMainTab logCategorization');
-      await testSubjects.existOrFail('mlPageSourceSelection');
+      await testSubjects.existOrFail('mlDataSourceSelectorButton');
     },
 
     async clickUseFullDataButton(expectedDocCount: number) {

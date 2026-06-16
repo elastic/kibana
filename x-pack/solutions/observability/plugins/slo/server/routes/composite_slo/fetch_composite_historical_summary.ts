@@ -19,14 +19,14 @@ export const fetchCompositeHistoricalSummaryRoute = createCompositeSloServerRout
   },
   params: fetchCompositeHistoricalSummaryParamsSchema,
   handler: async ({ context, request, logger, params, plugins, getScopedClients }) => {
-    const { scopedClusterClient, repository, compositeSloRepository } = await getScopedClients({
+    const { scopedClusterClient, repository, compositeRepository } = await getScopedClients({
       request,
       logger,
     });
 
     const client = new CompositeHistoricalSummaryClient(
       scopedClusterClient.asCurrentUser,
-      compositeSloRepository,
+      compositeRepository,
       repository
     );
 

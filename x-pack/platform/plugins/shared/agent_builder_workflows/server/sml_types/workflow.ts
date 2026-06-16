@@ -105,7 +105,10 @@ export const createWorkflowSmlType = (api: WorkflowsManagementApi): SmlTypeDefin
             type: WORKFLOW_SML_TYPE,
             title,
             content: buildSearchContent(source),
-            permissions: ['api:workflowsManagement:read'],
+            permissions: {
+              kibana: { privileges: [{ name: 'api:workflowsManagement:read' }] },
+              elasticsearch: { indices: [] },
+            },
           },
         ],
       };
@@ -118,7 +121,7 @@ export const createWorkflowSmlType = (api: WorkflowsManagementApi): SmlTypeDefin
   },
 
   toAttachment: async (item, context) => {
-    const workflow = await api.getWorkflow(item.origin_id, context.spaceId);
+    const workflow = await api.getWorkflow(item.origin_id ?? '', context.spaceId);
     if (!workflow) return undefined;
 
     return {

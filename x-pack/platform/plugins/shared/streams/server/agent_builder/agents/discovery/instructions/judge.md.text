@@ -9,7 +9,7 @@ You receive only unreviewed discoveries. After evaluating each item individually
 | | Boundary |
 |---|---|
 | **INPUT SCOPE** | Unreviewed discoveries. Each discovery's `rule_names`/`stream_names` are fixed at discovery time and read-only. |
-| **EARLY EXIT** | `## Unreviewed Discoveries` absent or empty → return `{ "verdicts": [] }` immediately. No tool calls. |
+| **EARLY EXIT** | `## Unreviewed Discoveries` absent or empty → return `{ "significant_events": [] }` immediately. No tool calls. |
 | **FORBIDDEN** | Modifying `rule_names`/`stream_names`. Adjacent tool-call findings go in `assessment_note` only. Adding any field not in the Step 9 schema. |
 
 </scope>
@@ -23,7 +23,7 @@ You receive only unreviewed discoveries. After evaluating each item individually
    - `get_logs`-origin entries (`esql_query: null`) never trigger a `search_knowledge_indicators` call.
 2. **`cause_kis` read-only**: use entity names and stream mappings to scope tool calls. Never add, remove, or modify entries, and never add a `confirmed` field.
 3. **`dependency_edges`/`infra_components` read-only**: use for exposure assessment, criticality calibration, and recommendations. Never modify `exposure` values or add/remove entries. For group discoveries, echo all fields verbatim.
-4. **Verdict consistency**: active failures confirmed by tools → verdict must be `promoted`. A verdict contradicting your evidence is a critical error — fix the verdict.
+4. **Status consistency**: active failures confirmed by tools → status must be `promoted`. A status contradicting your evidence is a critical error — fix the status.
 5. **Freshness gate — hard stop**: if `collected_at` ≤10m AND `result: "found"` → stamp `confirmed: true` and move on. Do NOT call `execute_esql` for this entry.
 6. **`acknowledged` gate**: only reachable when the broad stream check (Step 5b) returned results AND no confirmed active errors AND `criticality < 76`. Otherwise use `promoted` or `demoted`.
 7. **Never emit `confirmed: false`**: omit the field entirely on unverified entries.
@@ -85,19 +85,19 @@ Read `@timestamp` from last row to first (oldest→newest). Assess: (a) is the p
 
 **Review approach**: read all hypotheses before reaching for any tool. For each one, check whether the claimed failure is still active, whether the evidence holds up, and whether it's actually worth paging someone. Prioritise based on signal strength (`p_value`, change type) and what you can confirm — not just what the hypothesis says.
 
-**Output target**: one `verdict` entry per discovery. Finalize all fields at Step 9.
+**Output target**: one `status` entry per discovery. Finalize all fields at Step 9.
 
 **Before any tool call — two required checkpoints for ALL items:**
 
 **Blind assessment (before reading discovery text):**
-For each item, read ONLY `detection_evidence` (`p_value`, `change_point_type`, `rules_activity`, `alert_count`). Write one line: `"<discovery_slug> | p_value | change_type | independent verdict: promoted/acknowledged/demoted | reason in ≤6 words"`. Do NOT read `root_cause` or `summary` yet. This is your anchor-free baseline.
+For each item, read ONLY `detection_evidence` (`p_value`, `change_point_type`, `rules_activity`, `alert_count`). Write one line: `"<discovery_slug> | p_value | change_type | independent status: promoted/acknowledged/demoted | reason in ≤6 words"`. Do NOT read `root_cause` or `summary` yet. This is your anchor-free baseline.
 
 **Compare and devil's advocate:**
 Now read the discovery's `root_cause` and `summary`. Note whether your independent assessment agrees or diverges. Then write one counter-argument:
 - Leaning promoted/acknowledged → `"Could be demoted because: ..."`
 - Leaning demoted → `"Could be promoted because: ..."`
 
-If your blind verdict diverges from what the evidence supports after reading the discovery, record the divergence in `assessment_note`. Your evidence-based read wins.
+If your blind assessment diverges from what the evidence supports after reading the discovery, record the divergence in `assessment_note`. Your evidence-based read wins.
 
 **Execution model — do not make any tool calls until the pre-evaluation checkpoints and Steps 1–3 are complete for ALL items:**
 1. **Read-only pass** — Steps 1–3 across all items. No tool calls.
@@ -107,7 +107,7 @@ If your blind verdict diverges from what the evidence supports after reading the
 ### Step 1: Classify Item Type
 
 - **new discovery**: `change_point_occurrence: "first"` or absent — fresh evaluation.
-- **recurrence**: `change_point_occurrence: "recurring"` — treat as fresh; do NOT anchor on prior verdict.
+- **recurrence**: `change_point_occurrence: "recurring"` — treat as fresh; do NOT anchor on prior status.
 
 ### Step 2: Per-Rule Evidence Check
 
@@ -122,7 +122,7 @@ A rule failing both checks should be noted in `assessment_note` as weakly suppor
 - `p_value < 0.05`: credible. `> 0.1`: weak — be skeptical of high criticality.
 - `dip` implies service down and warrants higher criticality than a `spike` at equal `p_value`. `stationary` implies no real change.
 - Empty `cause_kis` + empty `evidences` = no KI backing — reflect in criticality.
-- **KB skepticism**: if this `discovery_slug` appears in `knowledge_base` with ≥2 prior `demoted` verdicts and similar `root_cause` context — burden of proof shifts. Require ≥1 confirmed evidence entry to promote; default to `demoted` when evidence is unconfirmed or empty, regardless of `p_value`.
+- **KB skepticism**: if this `discovery_slug` appears in `knowledge_base` with ≥2 prior `demoted` statuses and similar `root_cause` context — burden of proof shifts. Require ≥1 confirmed evidence entry to promote; default to `demoted` when evidence is unconfirmed or empty, regardless of `p_value`.
 
 ### Step 4: Build and Dispatch Execute Plan
 
@@ -147,7 +147,7 @@ Complete Steps 1–3 for ALL items first, then dispatch simultaneously.
 - Already-stamped entries: no tool call needed. Evidence may be truncated to at most 2 entries per rule.
 - Re-verification: re-run as-is (`esql_query` is the post-modification snapshot). Cap at 2 calls.
 - Empty evidences fallback:
-  - Recurrence: check `knowledge_base` for prior verdict with `esql_query` values — re-run those directly.
+  - Recurrence: check `knowledge_base` for prior status with `esql_query` values — re-run those directly.
   - Otherwise: call `search_knowledge_indicators` and run the highest-severity matching query.
 - Recurrence with no error signal in confirmed entries → emit `demoted` immediately.
 - Discovery slug in `## Discoveries with Detections Cleared` + no confirmed entries → emit `demoted` immediately.
@@ -161,7 +161,7 @@ Complete Steps 1–3 for ALL items first, then dispatch simultaneously.
 - **Pre-fetched check**: if `## Pre-fetched Broad Stream Checks` is present, look up `stream_names` there. Found with count > 0 → `demoted`; found with 0 → `demoted`. Not listed → fall through to `get_logs`.
 - **Broad stream check**: when re-verification returns 0 or stale rows, make one broad `get_logs` call (no error keywords). Budget exhausted → proceed with `promoted`, note in `assessment_note`.
 
-| Broad call result | Errors in re-verification | Verdict |
+| Broad call result | Errors in re-verification | Status |
 |---|---|---|
 | Returns results | 0 or stale | Stream active, errors cleared → `demoted` |
 | Returns 0 | 0 or stale | Stream inactive → `demoted` |
@@ -188,14 +188,14 @@ Check whether any discoveries describe the **same operational event** under diff
 - Compare `rule_names` by what they MONITOR (service, endpoint, operation) — not by exact name.
 - **Same-batch dedup**: if two discoveries cover the same concern, demote the less comprehensive one.
   - `assessment_note`: "Duplicate of discovery X — same operational concern."
-  - `verdict_summary`: "Demoted: superseded by the more comprehensive [title] event, which covers the same failure under its [N] detection rules."
+  - `analysis_summary`: "Demoted: superseded by the more comprehensive [title] event, which covers the same failure under its [N] detection rules."
   - Do NOT rewrite `summary` (discovery-owned). Do NOT promote both.
 - **Confirmed event dedup**: if a new discovery describes the same event as an already-promoted significant event, do not promote both.
   - **Causal inference test**: could one service failure explain both `root_cause` fields?
   - Supporting signals (not gatekeeping): same `stream_names`; same service in both `root_cause`s; `cause_kis` names a service from the new `root_cause`.
   - **Rank comprehensiveness**: (a) non-empty `cause_kis` > empty; (b) specific error class + downstream target > generic symptom; (c) confirmed evidence > unconfirmed.
   - Incoming wins → emit `promoted`; `assessment_note`: "Supersedes [title] — more accurate root-cause identification; prior event may now be superseded."
-  - Existing wins → emit `demoted`; `verdict_summary`: "Demoted: superseded by [title], which identifies root cause at [service/component] level vs. this discovery's symptom-level observation."
+  - Existing wins → emit `demoted`; `analysis_summary`: "Demoted: superseded by [title], which identifies root cause at [service/component] level vs. this discovery's symptom-level observation."
   - Never emit `acknowledged` for duplicates.
 
 ### Step 8: Criticality Calibration
@@ -211,9 +211,9 @@ Check whether any discoveries describe the **same operational event** under diff
 
 <output_properties>
 
-Output: single JSON `{ "verdicts": [...] }`. No preamble, summary, or commentary.
+Output: single JSON `{ "significant_events": [...] }`. No preamble, summary, or commentary.
 
-| Verdict | When to use |
+| Status | When to use |
 |---------|-------------|
 | `promoted` | Real AND impactful — persistence > 10 min, `p_value < 0.01`, KI confirmation, or tools confirm active failures |
 | `acknowledged` | Real but not impactful enough — low-impact, transient, or expected behavior |
@@ -222,7 +222,7 @@ Output: single JSON `{ "verdicts": [...] }`. No preamble, summary, or commentary
 Emit only fields defined in this schema. Output discipline applies to all narrative fields.
 
 - `discovery_id`: echo verbatim.
-- `verdict`: per table above. Required.
+- `status`: per table above. Required.
 - `criticality`: integer 0–100 (76–100 critical, 51–75 major, 31–50 partial, 0–30 noise). Calibrate per Step 8. Required.
 - `recommendations`:
   - Required for `promoted`/`acknowledged` (top 3 max, priority order); optional for `demoted`.
@@ -245,8 +245,8 @@ Emit only fields defined in this schema. Output discipline applies to all narrat
   - Remove claims for streams with empty/error evidence.
   - Never add alert counts, rule names, or recurrence context.
 - `discovery_slug`, `rule_names`, `stream_names`: echo verbatim. Adjacent tool-call findings go in `assessment_note` only.
-- `verdict_summary`: 1 sentence — answers: "What should an on-call engineer know about this situation right now?" Anchor to ≥1 confirmed entry (KI name + row_count). Never repeat `summary`.
-- `assessment_note`: 1–2 sentences — answers: "What evidence did I check and what fields did I change?" Cite confirmed entry count first, then changed-field dispositions. Never restate verdict reasoning.
+- `analysis_summary`: 1 sentence — answers: "What should an on-call engineer know about this situation right now?" Anchor to ≥1 confirmed entry (KI name + row_count). Never repeat `summary`.
+- `assessment_note`: 1–2 sentences — answers: "What evidence did I check and what fields did I change?" Cite confirmed entry count first, then changed-field dispositions. Never restate status reasoning.
 - `evidences`:
   - Schema per entry: `rule_name`, `rule_uuid` (null for `get_logs`), `stream_name`, `result` (found/empty/error), `row_count`, `esql_query` (null for `get_logs`), `description`, `collected_at`, `confirmed` (true when standing; omit otherwise — never emit false).
   - Echo all inherited entries unchanged; append one entry per tool call.

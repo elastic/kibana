@@ -24,27 +24,23 @@ import {
   EuiText,
   EuiTitle,
   EuiToolTip,
-  htmlIdGenerator,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useObservable from 'react-use/lib/useObservable';
 import useDebounce from 'react-use/lib/useDebounce';
-import type { Query } from '@kbn/es-query';
 import { formatHumanReadableDateTime } from '@kbn/ml-date-utils';
 import { isDefined } from '@kbn/ml-is-defined';
 import { useTimeRangeUpdates } from '@kbn/ml-date-picker';
-import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import type { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
 import { SavedObjectSaveModalDashboard } from '@kbn/presentation-util-plugin/public';
 import { useTimeBuckets } from '@kbn/ml-time-buckets';
 import type { AnomalySwimLaneEmbeddableState } from '@kbn/ml-server-schemas/embeddables/anomaly_swimlane';
 import type { SwimlaneType } from '@kbn/ml-server-schemas/embeddables/anomaly_swimlane';
 import { SWIMLANE_TYPE } from '@kbn/ml-common-types/embeddables/swimlane_type';
-import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '@kbn/ml-common-types/embeddables/anomaly_swimlane';
 import { getDefaultSwimlanePanelTitle } from '../../embeddables/anomaly_swimlane/anomaly_swimlane_embeddable';
 import { useCasesModal } from '../contexts/kibana/use_cases_modal';
-import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../..';
 import { OVERALL_LABEL, VIEW_BY_JOB_LABEL } from './explorer_constants';
 import { useMlKibana } from '../contexts/kibana';
 import { ExplorerNoInfluencersFound } from './components/explorer_no_influencers_found';
@@ -75,13 +71,6 @@ function mapSwimlaneOptionsToEuiOptions(options: string[]) {
     value: option,
     text: option,
   }));
-}
-
-function getDefaultEmbeddablePanelConfig(jobIds: JobId[], queryString?: string) {
-  return {
-    title: getDefaultSwimlanePanelTitle(jobIds).concat(queryString ? `- ${queryString}` : ''),
-    id: htmlIdGenerator()(),
-  };
 }
 
 export const AnomalyTimeline: FC = () => {
@@ -120,7 +109,7 @@ export const AnomalyTimeline: FC = () => {
     annotationsStateService.overallAnnotations
   );
 
-  const { filterActive, queryString } = useObservable(
+  const { filterActive } = useObservable(
     anomalyExplorerCommonStateService.filterSettings$,
     anomalyExplorerCommonStateService.filterSettings
   );
@@ -218,26 +207,18 @@ export const AnomalyTimeline: FC = () => {
   const openCasesModal = useCallback(
     (swimLaneType: SwimlaneType) => {
       openCasesModalCallback({
-        swimlaneType: swimLaneType,
+        swimlane_type: swimLaneType,
         ...(swimLaneType === SWIMLANE_TYPE.VIEW_BY
           ? {
-              viewBy: viewBySwimlaneFieldName,
+              view_by: viewBySwimlaneFieldName,
             }
           : {}),
         // For cases attachment, pass just the job IDs to maintain stale data
-        jobIds: selectedJobs?.map((v) => v.id),
+        job_ids: selectedJobs?.map((v) => v.id) ?? [],
         time_range: globalTimeRange,
-        ...(isDefined(queryString) && queryString !== ''
-          ? {
-              query: {
-                query: queryString,
-                language: SEARCH_QUERY_LANGUAGE.KUERY,
-              } as Query,
-            }
-          : {}),
       });
     },
-    [openCasesModalCallback, selectedJobs, globalTimeRange, viewBySwimlaneFieldName, queryString]
+    [openCasesModalCallback, selectedJobs, globalTimeRange, viewBySwimlaneFieldName]
   );
 
   const annotations = useMemo(() => overallAnnotations.annotationsData, [overallAnnotations]);
@@ -381,21 +362,15 @@ export const AnomalyTimeline: FC = () => {
 
       const stateTransfer = embeddable!.getStateTransfer();
 
-      const config = getDefaultEmbeddablePanelConfig(mergedGroupsAndJobsIds, queryString);
-
       const embeddableInput: Partial<AnomalySwimLaneEmbeddableState> = {
-        id: config.id,
         title: newTitle,
         description: newDescription,
-        jobIds: mergedGroupsAndJobsIds,
-        swimlaneType: selectedSwimlane,
+        job_ids: mergedGroupsAndJobsIds,
+        swimlane_type: selectedSwimlane,
         ...(selectedSwimlane === SWIMLANE_TYPE.VIEW_BY
           ? {
-              viewBy: viewBySwimlaneFieldName,
+              view_by: viewBySwimlaneFieldName,
             }
-          : {}),
-        ...(queryString !== undefined
-          ? { query: { query: queryString, language: SEARCH_QUERY_LANGUAGE.KUERY } as Query }
           : {}),
       };
 
@@ -411,14 +386,7 @@ export const AnomalyTimeline: FC = () => {
         path,
       });
     },
-    [
-      embeddable,
-      mergedGroupsAndJobsIds,
-      queryString,
-      selectedJobs,
-      selectedSwimlane,
-      viewBySwimlaneFieldName,
-    ]
+    [embeddable, mergedGroupsAndJobsIds, selectedJobs, selectedSwimlane, viewBySwimlaneFieldName]
   );
 
   return (

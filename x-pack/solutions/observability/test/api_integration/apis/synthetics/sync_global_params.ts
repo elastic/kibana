@@ -23,7 +23,7 @@ import {
   cleanSyntheticsTestData,
 } from './services/private_location_test_service';
 import { comparePolicies, getTestSyntheticsPolicy } from './sample_data/test_policy';
-import { omitMonitorKeys } from './add_monitor';
+import { omitMonitorKeys } from './helper/monitor_keys';
 
 export const LOCAL_LOCATION = {
   id: 'dev',

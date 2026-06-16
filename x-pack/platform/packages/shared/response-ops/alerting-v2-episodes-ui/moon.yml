@@ -55,6 +55,7 @@ dependsOn:
   - '@kbn/spaces-plugin'
   - '@kbn/user-profile-components'
   - '@kbn/unified-data-table'
+  - '@kbn/core-spaces-common'
   - '@kbn/coloring'
   - '@kbn/lens-plugin'
   - '@kbn/charts-plugin'

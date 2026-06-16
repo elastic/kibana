@@ -368,6 +368,21 @@ export class AgentBuilderPlugin
         // right before the user profile
         order: 1001,
       });
+
+      // Chrome Next transition: also expose this control as an AI button so it renders in the
+      // Chrome Next global header (behind the `core.chrome.next` feature flag). Chrome Next does
+      // not render HeaderNavControls (`registerRight` mount points), so we dual-register for now.
+      // Remove the `registerRight` registration once Chrome Next is the only chrome.
+      // See https://github.com/elastic/kibana/issues/260010
+      core.chrome.next.aiButton.register({
+        content: (
+          <AgentBuilderNavControlInitiator
+            coreStart={core}
+            pluginsStart={startDependencies}
+            agentBuilderService={agentBuilderService}
+          />
+        ),
+      });
     }
 
     return agentBuilderService;

@@ -32,8 +32,30 @@ export type {
   BaseAlertActionEvent,
   EpisodeAssignedEvent,
   EpisodeAssignedPayload,
+  EpisodeUnassignedEvent,
+  EpisodeAckedEvent,
+  EpisodeUnackedEvent,
+  EpisodeTaggedEvent,
+  EpisodeTaggedPayload,
+  EpisodeSnoozedEvent,
+  EpisodeSnoozedPayload,
+  EpisodeUnsnoozedEvent,
+  EpisodeActivatedEvent,
+  EpisodeActivatedPayload,
+  EpisodeDeactivatedEvent,
+  EpisodeDeactivatedPayload,
 } from '../alert_action_event_publisher/events';
-export { EPISODE_ASSIGNED_EVENT_TYPE } from '../alert_action_event_publisher/events';
+export {
+  EPISODE_ASSIGNED_EVENT_TYPE,
+  EPISODE_UNASSIGNED_EVENT_TYPE,
+  EPISODE_ACKED_EVENT_TYPE,
+  EPISODE_UNACKED_EVENT_TYPE,
+  EPISODE_TAGGED_EVENT_TYPE,
+  EPISODE_SNOOZED_EVENT_TYPE,
+  EPISODE_UNSNOOZED_EVENT_TYPE,
+  EPISODE_ACTIVATED_EVENT_TYPE,
+  EPISODE_DEACTIVATED_EVENT_TYPE,
+} from '../alert_action_event_publisher/events';
 
 /**
  * Discriminated union of every domain event the alerting framework publishes

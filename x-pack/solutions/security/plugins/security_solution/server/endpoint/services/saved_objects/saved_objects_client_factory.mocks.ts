@@ -8,14 +8,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
-import type { HttpServiceSetup } from '@kbn/core/server';
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
-import { coreMock } from '@kbn/core/server/mocks';
 import { SavedObjectsClientFactory } from './saved_objects_client_factory';
 
 interface CreateSavedObjectsClientFactoryMockOptions {
   savedObjectsServiceStart: jest.Mocked<SavedObjectsServiceStart>;
-  httpServiceSetup: HttpServiceSetup;
 }
 
 export const createSavedObjectsClientFactoryMock = (
@@ -24,11 +21,8 @@ export const createSavedObjectsClientFactoryMock = (
   service: SavedObjectsClientFactory;
   dependencies: CreateSavedObjectsClientFactoryMockOptions;
 } => {
-  const {
-    savedObjectsServiceStart = savedObjectsServiceMock.createStartContract(),
-    httpServiceSetup = coreMock.createSetup().http,
-  } = dependencies;
-  const service = new SavedObjectsClientFactory(savedObjectsServiceStart, httpServiceSetup);
+  const { savedObjectsServiceStart = savedObjectsServiceMock.createStartContract() } = dependencies;
+  const service = new SavedObjectsClientFactory(savedObjectsServiceStart);
   const soClient = service.createInternalUnscopedSoClient(false);
   const createInternalScopedSoClientSpy = jest.spyOn(service, 'createInternalScopedSoClient');
   const createInternalUnscopedSoClientSpy = jest.spyOn(service, 'createInternalUnscopedSoClient');
@@ -71,6 +65,6 @@ export const createSavedObjectsClientFactoryMock = (
 
   return {
     service,
-    dependencies: { savedObjectsServiceStart, httpServiceSetup },
+    dependencies: { savedObjectsServiceStart },
   };
 };

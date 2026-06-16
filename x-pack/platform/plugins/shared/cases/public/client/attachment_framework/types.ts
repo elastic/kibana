@@ -90,9 +90,10 @@ export interface RowContext {
  * These attachments reference external entities by ID
  */
 export interface UnifiedReferenceAttachmentViewProps<
-  Metadata = UnifiedReferenceAttachmentPayload['metadata']
+  Metadata = UnifiedReferenceAttachmentPayload['metadata'],
+  AttachmentId = UnifiedReferenceAttachmentPayload['attachmentId']
 > extends CommonAttachmentViewProps {
-  attachmentId: UnifiedReferenceAttachmentPayload['attachmentId'];
+  attachmentId: AttachmentId;
   metadata?: Metadata;
   data?: UnifiedReferenceAttachmentPayload['data'];
   createdBy: CaseUser;
@@ -132,8 +133,10 @@ interface UnifiedAttachmentSchema {
 export type ExternalReferenceAttachmentType = AttachmentType<ExternalReferenceAttachmentViewProps>;
 export type PersistableStateAttachmentType = AttachmentType<PersistableStateAttachmentViewProps>;
 export type UnifiedReferenceAttachmentType<
-  Metadata = UnifiedReferenceAttachmentPayload['metadata']
-> = AttachmentType<UnifiedReferenceAttachmentViewProps<Metadata>> & UnifiedAttachmentSchema;
+  Metadata = UnifiedReferenceAttachmentPayload['metadata'],
+  AttachmentId = UnifiedReferenceAttachmentPayload['attachmentId']
+> = AttachmentType<UnifiedReferenceAttachmentViewProps<Metadata, AttachmentId>> &
+  UnifiedAttachmentSchema;
 export type UnifiedValueAttachmentType<Data = UnifiedValueAttachmentPayload['data']> =
   AttachmentType<UnifiedValueAttachmentViewProps<Data>> & UnifiedAttachmentSchema;
 export interface AttachmentFramework {
@@ -149,13 +152,16 @@ export interface AttachmentFramework {
 }
 
 /** A payload with `attachmentId` is a reference attachment; otherwise it's value. */
-type IsReferenceSchema<S extends z.ZodType> = z.infer<S> extends { attachmentId: string }
+type IsReferenceSchema<S extends z.ZodType> = z.infer<S> extends { attachmentId: unknown }
   ? true
   : false;
 
-/** Narrow registration type — renderers see typed `data`/`metadata` from `schema`. */
+/** Narrow registration type — renderers see typed `data`/`metadata`/`attachmentId` from `schema`. */
 type UnifiedAttachmentTypeFromSchema<S extends z.ZodType> = IsReferenceSchema<S> extends true
-  ? UnifiedReferenceAttachmentType<z.infer<S> extends { metadata?: infer M } ? M : never>
+  ? UnifiedReferenceAttachmentType<
+      z.infer<S> extends { metadata?: infer M } ? M : never,
+      z.infer<S> extends { attachmentId: infer A } ? A : never
+    >
   : z.infer<S> extends { data: infer D }
   ? UnifiedValueAttachmentType<D>
   : never;

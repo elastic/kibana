@@ -10,7 +10,7 @@ import { map } from 'lodash';
 import { lastValueFrom, zip } from 'rxjs';
 import type { Observable } from 'rxjs';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { isFilters } from '@kbn/es-query';
 import type {
   GetLiveQueryResultsRequestQuerySchema,

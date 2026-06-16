@@ -59,7 +59,6 @@
     "@kbn/core-i18n-browser-mocks",
     "@kbn/core-lifecycle-browser-mocks",
     "@kbn/serverless",
-    "@kbn/field-types",
     "@kbn/data-views-plugin",
     "@kbn/kql",
     "@kbn/field-formats-plugin",

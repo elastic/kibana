@@ -15,8 +15,8 @@ import { DynamicRuleFormFlyout } from './dynamic_rule_form_flyout';
 import type { DynamicRuleFormFlyoutProps } from './dynamic_rule_form_flyout';
 
 jest.mock('../form/dynamic_rule_form', () => ({
-  DynamicRuleForm: (props: { query: string }) => (
-    <div data-test-subj="dynamicRuleFormMock" data-query={props.query} />
+  DynamicRuleForm: ({ query }: { query: string }) => (
+    <div data-test-subj="dynamicRuleFormMock" data-query={query} />
   ),
 }));
 

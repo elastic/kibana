@@ -31,6 +31,7 @@ import { getWorkflowExecutionStatusTool } from './tools/get_workflow_execution_s
 import { listWorkflowExecutionsTool } from './tools/list_workflow_executions';
 import { resumeWorkflowExecutionTool } from './tools/resume_workflow_execution';
 import { generateWorkflowTool } from './tools/generate_workflow';
+import { executeWorkflowTool } from './tools/execute_workflow';
 
 type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
 
@@ -84,6 +85,7 @@ export class AgentBuilderWorkflowsPlugin
       resumeWorkflowExecutionTool({ workflowsManagement }),
       listWorkflowExecutionsTool({ workflowsManagement }),
       generateWorkflowTool({ workflowsManagement, aiTelemetryClient }),
+      executeWorkflowTool({ workflowsManagement }),
     ];
     platformTools.forEach((tool) => agentBuilder.tools.register(tool));
 

@@ -81,6 +81,26 @@ describe('fetchEntityRelationships', () => {
       expect(esClient.asCurrentUser.helpers.esql).not.toHaveBeenCalled();
       expect(result).toEqual({ columns: [], records: [] });
     });
+
+    it('should never set project_routing — entity store queries are always origin-only', async () => {
+      const toRecordsMock = jest.fn().mockResolvedValue({ records: [] });
+      esClient.asCurrentUser.helpers.esql.mockReturnValue({
+        toRecords: toRecordsMock,
+        toArrowTable: jest.fn(),
+        toArrowReader: jest.fn(),
+      });
+
+      await fetchEntityRelationships({
+        esClient,
+        logger,
+        entityIds: [{ id: 'entity-1', isOrigin: false }],
+        spaceId: 'default',
+        entityStoreIndexExists: true,
+      });
+
+      const [args] = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+      expect(args).not.toHaveProperty('project_routing');
+    });
   });
 
   describe('DSL filter building', () => {

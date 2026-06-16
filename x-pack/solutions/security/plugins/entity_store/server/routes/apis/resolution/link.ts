@@ -6,9 +6,9 @@
  */
 
 import path from 'node:path';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { z } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
+import { buildStrictRouteValidationWithZod } from '../utils/build_strict_route_validation';
 import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../../common';
 import { RESOLUTION_ENTITY_STORE_PERMISSIONS } from '../../constants';
 import type { EntityStorePluginRouter } from '../../../types';
@@ -55,7 +55,7 @@ export function registerResolutionLink(router: EntityStorePluginRouter) {
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            body: buildRouteValidationWithZod(bodySchema),
+            body: buildStrictRouteValidationWithZod(bodySchema),
           },
         },
         options: {

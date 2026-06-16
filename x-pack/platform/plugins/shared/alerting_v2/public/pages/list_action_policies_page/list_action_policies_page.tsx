@@ -32,6 +32,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
 import React, { useCallback, useMemo, useState } from 'react';
+import { ExperimentalBadge } from '../../components/experimental_badge';
 import { ActionPolicyDestinationsSummary } from '../../components/action_policy/action_policy_destinations_summary';
 import { ActionPolicySnoozePopover } from '../../components/action_policy/action_policy_snooze_popover';
 import { ActionPolicyStateBadge } from '../../components/action_policy/action_policy_state_badge';
@@ -409,10 +410,17 @@ export const ListActionPoliciesPage = () => {
     <>
       <EuiPageHeader
         pageTitle={
-          <FormattedMessage
-            id="xpack.alertingV2.actionPoliciesList.pageTitle"
-            defaultMessage="Action Policies"
-          />
+          <EuiFlexGroup component="span" alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false} component="span">
+              <FormattedMessage
+                id="xpack.alertingV2.actionPoliciesList.pageTitle"
+                defaultMessage="Action Policies"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false} component="span">
+              <ExperimentalBadge />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         }
         rightSideItems={[
           <EuiButton key="create-policy" onClick={navigateToCreate} fill>

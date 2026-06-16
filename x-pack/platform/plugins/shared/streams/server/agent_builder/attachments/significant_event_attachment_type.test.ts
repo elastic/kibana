@@ -26,7 +26,7 @@ const event: SigEvent = {
   event_id: 'event-1',
   discovery_id: 'discovery-1',
   discovery_slug: 'payment-outage',
-  verdict: 'promoted',
+  status: 'promoted',
   workflow_execution_id: 'workflow-1',
   rule_names: ['Payment errors'],
   stream_names: ['logs.payment'],
@@ -89,7 +89,7 @@ describe('createSignificantEventAttachmentType', () => {
   });
 
   it('resolves the latest event by discovery slug', async () => {
-    const updatedEvent = { ...event, event_id: 'event-2', verdict: 'acknowledged' as const };
+    const updatedEvent = { ...event, event_id: 'event-2', status: 'acknowledged' as const };
     const type = createSignificantEventAttachmentType({
       logger: loggingSystemMock.createLogger(),
       getScopedClients: createGetScopedClients([event, updatedEvent]),
@@ -99,7 +99,7 @@ describe('createSignificantEventAttachmentType', () => {
   });
 
   it('reports stale when the latest event differs from the stored snapshot', async () => {
-    const updatedEvent = { ...event, event_id: 'event-2', verdict: 'acknowledged' as const };
+    const updatedEvent = { ...event, event_id: 'event-2', status: 'acknowledged' as const };
     const type = createSignificantEventAttachmentType({
       logger: loggingSystemMock.createLogger(),
       getScopedClients: createGetScopedClients([updatedEvent]),

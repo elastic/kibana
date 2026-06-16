@@ -1,0 +1,8 @@
+prs:
+- https://github.com/elastic/kibana/pull/271090
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-06-01
+title: Improve APM infrastructure tab empty state
+description: Improves the empty state shown on the APM infrastructure tab when no infrastructure data is available.

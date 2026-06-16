@@ -8,8 +8,7 @@
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import { manageDashboardTool } from '../tools';
 import { dashboardTools } from '../../common';
-import { gridLayoutPrompt } from './grid_layout_prompt';
-import { dashboardCompositionPrompt } from './dashboard_composition_prompt';
+import { dashboardDesignGuidancePrompt } from './design_guidance';
 
 export const dashboardManagementSkill = defineSkillType({
   id: 'dashboard-management',
@@ -91,9 +90,7 @@ After a successful call:
 - Use \`data.dashboardAttachment.id\` as \`dashboardAttachmentId\` when updating that dashboard later.
 - Never invent \`dashboardAttachmentId\`, \`id\`, or \`sectionId\`. Reuse the values returned by prior tool results.
 
-${dashboardCompositionPrompt}
-
-${gridLayoutPrompt}
+${dashboardDesignGuidancePrompt}
 
 ## Edge Cases
 

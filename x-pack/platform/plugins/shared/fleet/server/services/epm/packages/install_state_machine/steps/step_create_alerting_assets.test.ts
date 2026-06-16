@@ -8,7 +8,7 @@
 import { loggingSystemMock, savedObjectsClientMock, httpServerMock } from '@kbn/core/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import { appContextService } from '../../../../app_context';
 import type { ArchiveAsset } from '../../../kibana/assets/install';

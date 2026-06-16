@@ -1,5 +1,5 @@
 {
-  "sha1": "9a3bb69bd9cf60f883f62bd376ad569a53934f96",
+  "sha1": "c2adeded22f71218e1b84985838861c0edc8f7e5",
   "tests": [
     {
       "id": "2d983a450230de2-481578a854c377f",
@@ -283,7 +283,21 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/custom_threshold_rule_data_view.spec.ts",
-        "line": 153,
+        "line": 185,
+        "column": 10
+      }
+    },
+    {
+      "id": "edad46751593082-ff2f45beda0f6fa",
+      "title": "Custom Threshold rule data view should persist the full custom-threshold form payload",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/custom_threshold_rule_data_view.spec.ts",
+        "line": 196,
         "column": 10
       }
     },
@@ -297,7 +311,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/custom_threshold_rule_data_view.spec.ts",
-        "line": 164,
+        "line": 228,
         "column": 10
       }
     },
@@ -311,7 +325,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/custom_threshold_rule_data_view.spec.ts",
-        "line": 196,
+        "line": 260,
         "column": 10
       }
     },
@@ -325,7 +339,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/custom_threshold_rule_data_view.spec.ts",
-        "line": 210,
+        "line": 274,
         "column": 10
       }
     },
@@ -339,7 +353,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/custom_threshold_rule_data_view.spec.ts",
-        "line": 224,
+        "line": 288,
         "column": 10
       }
     },
@@ -353,7 +367,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/custom_threshold_rule_data_view.spec.ts",
-        "line": 238,
+        "line": 302,
         "column": 10
       }
     },

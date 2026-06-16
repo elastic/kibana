@@ -16,7 +16,7 @@ export const dataFilterStepDefinition = createServerStepDefinition({
   ...dataFilterStepCommonDefinition,
   handler: async (context) => {
     try {
-      const items = context.contextManager.renderInputTemplate(context.config.items);
+      const items = context.config.items;
       const { condition, limit } = context.input;
 
       if (!Array.isArray(items)) {

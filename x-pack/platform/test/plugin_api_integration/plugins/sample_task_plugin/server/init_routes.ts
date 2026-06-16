@@ -179,7 +179,6 @@ export function initRoutes(
         headers: {
           authorization: `ApiKey ${apiKeyCreateResult?.api_key}`,
         },
-        path: '/',
       };
       const fakeRequest = kibanaRequestFactory(fakeRawRequest);
       const task = {
@@ -289,7 +288,6 @@ export function initRoutes(
           headers: {
             authorization: `ApiKey ${apiKeyCreateResult?.api_key}`,
           },
-          path: '/',
         };
         const fakeRequest = kibanaRequestFactory(fakeRawRequest);
         return res.ok({

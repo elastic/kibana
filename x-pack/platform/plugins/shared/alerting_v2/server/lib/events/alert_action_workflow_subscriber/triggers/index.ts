@@ -6,10 +6,26 @@
  */
 
 import { episodeAssignedTrigger } from './episode_assigned';
+import { episodeUnassignedTrigger } from './episode_unassigned';
+import { episodeAckedTrigger } from './episode_acked';
+import { episodeUnackedTrigger } from './episode_unacked';
+import { episodeTaggedTrigger } from './episode_tagged';
+import { episodeSnoozedTrigger } from './episode_snoozed';
+import { episodeUnsnoozedTrigger } from './episode_unsnoozed';
+import { episodeActivatedTrigger } from './episode_activated';
+import { episodeDeactivatedTrigger } from './episode_deactivated';
 import type { AlertActionWorkflowTriggerBinding } from './types';
 
 export type { AlertActionWorkflowTriggerBinding } from './types';
 export { EPISODE_ASSIGNED_TRIGGER_ID, episodeAssignedTrigger } from './episode_assigned';
+export { EPISODE_UNASSIGNED_TRIGGER_ID, episodeUnassignedTrigger } from './episode_unassigned';
+export { EPISODE_ACKED_TRIGGER_ID, episodeAckedTrigger } from './episode_acked';
+export { EPISODE_UNACKED_TRIGGER_ID, episodeUnackedTrigger } from './episode_unacked';
+export { EPISODE_TAGGED_TRIGGER_ID, episodeTaggedTrigger } from './episode_tagged';
+export { EPISODE_SNOOZED_TRIGGER_ID, episodeSnoozedTrigger } from './episode_snoozed';
+export { EPISODE_UNSNOOZED_TRIGGER_ID, episodeUnsnoozedTrigger } from './episode_unsnoozed';
+export { EPISODE_ACTIVATED_TRIGGER_ID, episodeActivatedTrigger } from './episode_activated';
+export { EPISODE_DEACTIVATED_TRIGGER_ID, episodeDeactivatedTrigger } from './episode_deactivated';
 
 /**
  * Catalog of every alert-action → workflow-trigger mapping owned by `alerting_v2`.
@@ -33,4 +49,12 @@ export { EPISODE_ASSIGNED_TRIGGER_ID, episodeAssignedTrigger } from './episode_a
  */
 export const ALERT_ACTION_WORKFLOW_TRIGGERS: ReadonlyArray<AlertActionWorkflowTriggerBinding> = [
   episodeAssignedTrigger,
+  episodeUnassignedTrigger,
+  episodeAckedTrigger,
+  episodeUnackedTrigger,
+  episodeTaggedTrigger,
+  episodeSnoozedTrigger,
+  episodeUnsnoozedTrigger,
+  episodeActivatedTrigger,
+  episodeDeactivatedTrigger,
 ];

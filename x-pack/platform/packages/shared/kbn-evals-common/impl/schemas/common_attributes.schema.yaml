@@ -194,6 +194,10 @@ components:
         evaluator_name:
           type: string
           maxLength: 256
+        example_count:
+          type: integer
+          minimum: 0
+          description: Number of unique examples evaluated in this dataset
         stats:
           type: object
           properties:

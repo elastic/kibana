@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { buildEsQuery, isCombinedFilter } from '@kbn/es-query';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import type { ProjectRouting } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import { css } from '@emotion/react';
 import { Panel } from '@xyflow/react';
 import { getEsQueryConfig } from '@kbn/data-service';
@@ -188,6 +189,13 @@ export interface GraphInvestigationProps {
      * The initial timerange for the graph investigation view.
      */
     timeRange: TimeRange;
+
+    /**
+     * CPS project routing for the logs/events query. Forwarded as-is to the Graph API.
+     * Alerts and entity-store enrichment are always fetched from the origin project,
+     * regardless of this value. Leave undefined for non-CPS environments.
+     */
+    projectRouting?: ProjectRouting;
   };
 
   /**
@@ -236,6 +244,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       originEventIds,
       entityIds,
       timeRange: initialTimeRange,
+      projectRouting,
     },
     showInvestigateInTimeline = false,
     showToggleSearch = false,
@@ -315,6 +324,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
           end: timeRange.to,
           entityIds: entityIdsForApi,
           pinnedIds: pinnedEuids,
+          projectRouting,
         },
         nodesLimit: GRAPH_NODES_LIMIT,
       },

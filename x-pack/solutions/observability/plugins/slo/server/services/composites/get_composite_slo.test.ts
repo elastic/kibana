@@ -152,7 +152,7 @@ describe('GetCompositeSLO', () => {
 
     expect(result.members).toHaveLength(2);
     expect(result.members[0]).toMatchObject({
-      id: sloA.id,
+      sloId: sloA.id,
       name: 'Service A',
       weight: 6,
       normalisedWeight: 0.6,
@@ -161,7 +161,7 @@ describe('GetCompositeSLO', () => {
       oneDayBurnRate: 0.5,
     });
     expect(result.members[1]).toMatchObject({
-      id: sloB.id,
+      sloId: sloB.id,
       name: 'Service B',
       weight: 4,
       normalisedWeight: 0.4,
@@ -438,7 +438,7 @@ describe('GetCompositeSLO', () => {
     // Only sloA participates
     expect(result.summary).toEqual(persistedSummary);
     expect(result.members).toHaveLength(1);
-    expect(result.members[0].id).toBe(sloA.id);
+    expect(result.members[0].sloId).toBe(sloA.id);
     expect(result.members[0].normalisedWeight).toBe(1);
   });
 

@@ -18,7 +18,7 @@ import type {
 } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { SecurityPluginStart, SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import { SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';

@@ -8,6 +8,7 @@
 import React from 'react';
 import { useForm, FormProvider, useFormContext } from 'react-hook-form';
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { QueryClientProvider } from '@kbn/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { createTestQueryClient, createMockServices } from '../../../test_utils';
@@ -241,47 +242,49 @@ describe('AlertConditionStep', () => {
     });
   });
 
-  describe('tracking toggle', () => {
+  describe('mode select', () => {
     it('is enabled when queryCommitted is true and not editing', () => {
       renderStep({ queryCommitted: true }, { isEditing: false });
 
-      expect(screen.getByTestId('composeDiscoverTrackingToggle')).not.toBeDisabled();
+      expect(screen.getByTestId('composeDiscoverModeSelect')).not.toBeDisabled();
     });
 
     it('is disabled when editing an existing rule', () => {
       renderStep({ queryCommitted: true }, { isEditing: true });
 
-      expect(screen.getByTestId('composeDiscoverTrackingToggle')).toBeDisabled();
+      expect(screen.getByTestId('composeDiscoverModeSelect')).toBeDisabled();
     });
 
     it('is disabled when query is not committed', () => {
       renderStep({ queryCommitted: false }, { isEditing: false });
 
-      expect(screen.getByTestId('composeDiscoverTrackingToggle')).toBeDisabled();
+      expect(screen.getByTestId('composeDiscoverModeSelect')).toBeDisabled();
     });
 
-    it('is checked when kind is alert', () => {
+    it('shows Alert when kind is alert', () => {
       renderStep({ queryCommitted: true }, { formValueOverrides: { kind: 'alert' } });
 
-      expect(screen.getByTestId('composeDiscoverTrackingToggle')).toBeChecked();
+      expect(screen.getByTestId('composeDiscoverModeSelect')).toHaveTextContent('Alert');
     });
 
-    it('is unchecked when kind is signal', () => {
+    it('shows Signal when kind is signal', () => {
       renderStep(
         { queryCommitted: true },
         { formValueOverrides: { kind: 'signal', query: STANDALONE_QUERY } }
       );
 
-      expect(screen.getByTestId('composeDiscoverTrackingToggle')).not.toBeChecked();
+      expect(screen.getByTestId('composeDiscoverModeSelect')).toHaveTextContent('Signal');
     });
 
-    it('calls onKindChange when toggled', () => {
+    it('calls onKindChange when Signal is selected', async () => {
+      const user = userEvent.setup({ pointerEventsCheck: 0 });
       const { onKindChange } = renderStep(
         { queryCommitted: true },
         { formValueOverrides: { kind: 'alert' } }
       );
 
-      fireEvent.click(screen.getByTestId('composeDiscoverTrackingToggle'));
+      await user.click(screen.getByTestId('composeDiscoverModeSelect'));
+      await user.click(screen.getByRole('option', { name: /Signal/ }));
 
       expect(onKindChange).toHaveBeenCalledWith('signal');
     });

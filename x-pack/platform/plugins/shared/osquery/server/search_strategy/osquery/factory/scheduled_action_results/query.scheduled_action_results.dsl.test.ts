@@ -105,6 +105,44 @@ describe('buildScheduledActionResultsQuery', () => {
     expect(mustFilters).toContainEqual({ term: { space_id: 'my-space' } });
   });
 
+  it('matches default space OR missing space_id when spaceId is "default"', () => {
+    // osquerybeat-written scheduled responses may not carry a space_id field;
+    // in the default space we must match those legacy docs too (mirrors the
+    // history aggregation in buildScheduledResponsesQuery).
+    const options: ScheduledActionResultsRequestOptions = {
+      ...defaultOptions,
+      spaceId: 'default',
+    };
+
+    const result = buildScheduledActionResultsQuery(options);
+
+    const defaultSpaceClause = {
+      bool: {
+        should: [
+          { term: { space_id: 'default' } },
+          { bool: { must_not: { exists: { field: 'space_id' } } } },
+        ],
+      },
+    };
+
+    expect(result.query).toEqual({
+      bool: {
+        filter: [
+          { term: { schedule_id: 'test-schedule-id' } },
+          { term: { schedule_execution_count: 42 } },
+          defaultSpaceClause,
+        ],
+      },
+    });
+
+    const aggs = result.aggs as Record<string, Record<string, unknown>>;
+    const globalAggs = aggs.aggs as Record<string, Record<string, unknown>>;
+    const innerAggs = globalAggs.aggs as Record<string, Record<string, unknown>>;
+    const responsesBySchedule = innerAggs.responses_by_schedule as Record<string, unknown>;
+    const mustFilters = (responsesBySchedule.filter as { bool: { must: unknown[] } }).bool.must;
+    expect(mustFilters).toContainEqual(defaultSpaceClause);
+  });
+
   it('omits space_id filter when spaceId is not provided', () => {
     const result = buildScheduledActionResultsQuery(defaultOptions);
     const filterQuery = result.query as Record<string, Record<string, TermFilter[]>>;

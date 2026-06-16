@@ -6,6 +6,7 @@
  */
 
 import type { FtrConfigProviderContext } from '@kbn/test';
+import { getTinyElserServerArgs } from '../../utils/helpers';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(
@@ -28,6 +29,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
               )
           ),
         '--elasticsearch.hosts=http://localhost:9220',
+        // Point Kibana at the tiny ELSER model installed by `installTinyElser` so the KB index
+        // binds `semantic_text` to `pt_tiny_elser_elasticsearch` instead of the full default ELSER.
+        // Without this, the install in the `before` hook is orphaned and `setupKnowledgeBase`
+        // falls back to downloading + deploying real ELSER.
+        ...getTinyElserServerArgs(),
       ],
     },
     testFiles: [require.resolve('..')],

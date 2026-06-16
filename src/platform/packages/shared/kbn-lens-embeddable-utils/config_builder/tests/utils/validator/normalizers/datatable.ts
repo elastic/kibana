@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DatatableVisualizationState, FormBasedLayer, TextBasedLayer } from '@kbn/lens-common';
+import type {
+  DataType,
+  DatatableVisualizationState,
+  FormBasedLayer,
+  TextBasedLayer,
+} from '@kbn/lens-common';
 import { parseTransposeId, getTransposeId, TRANSPOSE_SEPARATOR } from '@kbn/transpose-utils';
 import { uniqBy } from 'lodash';
 import {
@@ -21,6 +26,7 @@ import type { AttributesNormalizer, NormalizerConfig } from './normalize';
 import type { IdRemapping } from './common';
 import {
   DEFAULT_LAYER_ID,
+  getColorMappingNormalizer,
   getCommonNormalizer,
   getFormBasedDatasourceState,
   getPaletteNormalizer,
@@ -28,9 +34,11 @@ import {
 } from './common';
 import {
   getAccessorName,
+  inferDatatypeFromColor,
   isMetricColumnNoESQL,
   isMetricColumnESQL,
 } from '../../../../transforms/charts/datatable/helpers';
+import { buildColorProps } from '../../../../transforms/charts/datatable/to_api/columns';
 
 type DatatableAttributes = Extract<LensAttributes, { visualizationType: 'lnsDatatable' }>;
 
@@ -93,6 +101,11 @@ const SPLIT_PREFIX = `${getAccessorName('split_metric_by')}_`;
 const METRIC_PREFIX = `${getAccessorName('metric')}_`;
 const METRIC_REF_PREFIX = `${getAccessorName('metric_ref')}_`;
 
+const isMetricColumnId = (id: string): boolean =>
+  id.startsWith(METRIC_PREFIX) && !id.startsWith(METRIC_REF_PREFIX);
+const isRowColumnId = (id: string): boolean => id.startsWith(ROW_PREFIX);
+const isSplitMetricColumnId = (id: string): boolean => id.startsWith(SPLIT_PREFIX);
+
 /**
  * A column id belongs to the visualization state (i.e. is rendered) when it
  * is a row, a split_metric_by, or a top-level metric.
@@ -100,18 +113,16 @@ const METRIC_REF_PREFIX = `${getAccessorName('metric_ref')}_`;
  * only in the datasource layer and are hidden at render time.
  */
 const isVisualizationStateColumnId = (id: string): boolean =>
-  id.startsWith(ROW_PREFIX) ||
-  id.startsWith(SPLIT_PREFIX) ||
-  (id.startsWith(METRIC_PREFIX) && !id.startsWith(METRIC_REF_PREFIX));
+  isRowColumnId(id) || isSplitMetricColumnId(id) || isMetricColumnId(id);
 
 /**
  * Canonical order for the original side: rows → split_metrics_by → metrics
  * → everything else (refs and any unknowns).
  */
 const sortVisualizationStateColumnsToCanonicalOrder = (ids: string[]): string[] => [
-  ...ids.filter((id) => id.startsWith(ROW_PREFIX)),
-  ...ids.filter((id) => id.startsWith(SPLIT_PREFIX)),
-  ...ids.filter((id) => id.startsWith(METRIC_PREFIX) && !id.startsWith(METRIC_REF_PREFIX)),
+  ...ids.filter((id) => isRowColumnId(id)),
+  ...ids.filter((id) => isSplitMetricColumnId(id)),
+  ...ids.filter((id) => isMetricColumnId(id)),
   ...ids.filter((id) => !isVisualizationStateColumnId(id)),
 ];
 
@@ -300,6 +311,31 @@ export const normalizeDatatable: AttributesNormalizer<DatatableAttributes> = (at
   // Map original column ID → new column ID
   const idMap = new Map(toIdRemapping(columnRemapping));
 
+  // Map post-remap column ID → visualization column state.
+  const visColumnByNewId = new Map<string, DatatableColumn>(
+    columnRemapping.flatMap(({ oldId, newId }) => {
+      const visCol = visualization.columns.find((c) => c.columnId === oldId);
+      return visCol ? [[newId, visCol]] : [];
+    })
+  );
+
+  // For DSL datatable, we infer the DSL metric column dataType from the color config.
+  // 'last_value' operation type can produce a number or a string, so we need to infer the dataType from the color config.
+
+  // Every other DSL operation type produces a fixed dataType regardless of color, so we let the common fallback handle them.
+  const inferColumnDataType = (newColumnId: string): DataType | undefined => {
+    if (!isMetricColumnId(newColumnId)) {
+      return;
+    }
+
+    const visCol = visColumnByNewId.get(newColumnId);
+    if (!visCol) {
+      return;
+    }
+
+    return inferDatatypeFromColor(buildColorProps(visCol).color, 'number');
+  };
+
   // Filter out visualization columns that only exist in the visualization state
   const filterOrphanColumns = getFilterOrphanColumns(datasourceStates);
 
@@ -433,6 +469,7 @@ export const normalizeDatatable: AttributesNormalizer<DatatableAttributes> = (at
         if (col.colorMapping === null) {
           delete col.colorMapping;
         }
+
         // When palette is null, delete it
         if (col.palette === null) {
           delete col.palette;
@@ -515,6 +552,7 @@ export const normalizeDatatable: AttributesNormalizer<DatatableAttributes> = (at
     getCommonNormalizer<DatatableAttributes>(() => ({
       layerRemapping,
       columnRemapping: toIdRemapping(columnRemapping),
+      inferColumnDataType,
     })),
     filterOrphanColumns,
     alignColumnTypes,
@@ -523,6 +561,7 @@ export const normalizeDatatable: AttributesNormalizer<DatatableAttributes> = (at
     sortColumns,
     sortDatasourceColumns,
     alignLegacyTypes,
+    getColorMappingNormalizer<DatatableAttributes>('state.visualization.columns.*.colorMapping'),
     getPaletteNormalizer<DatatableAttributes>('state.visualization.columns.*.palette'),
   ])(attributes);
 };

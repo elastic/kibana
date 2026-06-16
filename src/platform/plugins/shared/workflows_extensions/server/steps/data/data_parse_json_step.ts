@@ -16,7 +16,7 @@ export const dataParseJsonStepDefinition = createServerStepDefinition({
   ...dataParseJsonStepCommonDefinition,
   handler: async (context) => {
     try {
-      const source = context.contextManager.renderInputTemplate(context.config.source);
+      const source = context.config.source;
 
       if (source === null || source === undefined) {
         return { error: new Error('Source is null or undefined') };

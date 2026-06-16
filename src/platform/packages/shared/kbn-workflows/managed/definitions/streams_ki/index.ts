@@ -58,7 +58,7 @@ export const STREAMS_KI_QUERIES_GENERATION_WORKFLOW = {
 export const STREAMS_KI_ONBOARDING_WORKFLOW = {
   id: STREAMS_KI_ONBOARDING_WORKFLOW_ID,
   pluginId: 'streams',
-  version: 1,
+  version: 2,
   yaml: ONBOARDING_YAML,
   management: STREAMS_KI_WORKFLOW_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition;

@@ -228,7 +228,6 @@ module.exports = {
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]detection_engine[\/\\]rule_creation_ui[\/\\]components[\/\\]mitre[\/\\]technique_fields.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]detection_engine[\/\\]rule_creation_ui[\/\\]components[\/\\]risk_score_mapping[\/\\]risk_score_override.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]detection_engine[\/\\]rule_creation_ui[\/\\]components[\/\\]rule_preview[\/\\]loading_histogram.tsx/,
-    /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]detection_engine[\/\\]rule_creation_ui[\/\\]components[\/\\]rule_preview[\/\\]preview_histogram.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]detection_engine[\/\\]rule_creation_ui[\/\\]components[\/\\]rule_preview[\/\\]preview_table_control_columns.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]detection_engine[\/\\]rule_creation_ui[\/\\]components[\/\\]select_rule_type[\/\\]ml_card_description.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]detection_engine[\/\\]rule_creation_ui[\/\\]components[\/\\]status_icon[\/\\]index.tsx/,

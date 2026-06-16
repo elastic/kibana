@@ -12,7 +12,11 @@ import { useQuery } from '@kbn/react-query';
 import { useFetchErrorToast } from '../use_fetch_error_toast';
 import { useKibana } from '../use_kibana';
 
-export const useStreamFeatures = (definition: Streams.all.Definition, deps: unknown[] = []) => {
+export const useStreamFeatures = (
+  definition: Streams.all.Definition,
+  deps: unknown[] = [],
+  { enabled = true }: { enabled?: boolean } = {}
+) => {
   const { streamsRepositoryClient } = useKibana().dependencies.start.streams;
   const showFetchErrorToast = useFetchErrorToast();
 
@@ -36,6 +40,7 @@ export const useStreamFeatures = (definition: Streams.all.Definition, deps: unkn
     queryKey: ['features', streamName, ...deps],
     queryFn: fetchFeatures,
     onError: showFetchErrorToast,
+    enabled,
   });
 
   const allFeatures = useMemo(

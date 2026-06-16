@@ -22,7 +22,7 @@ const panels = JSON.parse(files || '[]') as Record<string, LensAttributes>[];
 
 const builder = new LensConfigBuilder(undefined, true);
 
-const stableChartTypes = new Set(['lnsHeatmap', 'lnsDatatable']);
+const stableChartTypes = new Set(['lnsHeatmap', 'lnsDatatable', 'lnsPie']);
 
 // These need special attention to be sure they are correctly handled in the transformations
 const skipList: Record<string, string[]> = {
@@ -32,11 +32,6 @@ const skipList: Record<string, string[]> = {
     'Node x pipeline hotspots - by time spent',
     'Events between Ports',
     'Top hosts by memory usage over time',
-  ],
-  lnsDatatable: [
-    // pre-v1 colorMapping format (singular 'rule' instead of 'rules'). Check convertToRawColorMappingsFn.
-    'Worker utilization by pipeline',
-    '[Metrics Logstash] Node Health Report (panel: 5)',
   ],
 };
 
@@ -61,7 +56,7 @@ describe('Integration panels', () => {
             it.each(active.map(({ panel_title: title, attributes }) => [title, attributes]))(
               'should convert the panel - %s',
               (_title, attributes) => {
-                const type = builder.getCompatibleType(chartType);
+                const type = builder.getCompatibleType(attributes);
                 const typeValidator = validator[type];
 
                 if (typeValidator) {
@@ -73,20 +68,16 @@ describe('Integration panels', () => {
             );
           }
 
-          if (skipped.length > 0) {
-            it.skip.each(skipped.map(({ panel_title: title, attributes }) => [title, attributes]))(
-              'should convert the panel - %s',
-              () => {}
-            );
-          }
+          skipped.forEach(({ panel_title: title }) => {
+            it.todo(`should convert the panel - ${title}`);
+          });
         });
       });
     } else {
       describe(`Type ${chartType}`, () => {
-        it.skip.each(panelsOfType.map(({ panel_title: title, attributes }) => [title, attributes]))(
-          'should convert the panel - %s',
-          () => {}
-        );
+        panelsOfType.forEach(({ panel_title: title }) => {
+          it.todo(`should convert the panel - ${title}`);
+        });
       });
     }
   }

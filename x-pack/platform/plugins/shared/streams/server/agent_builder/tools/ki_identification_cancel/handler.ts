@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import { StreamsKIsOnboardingStatus } from '@kbn/streams-schema';
+import { SigEventsWorkflowStatus } from '@kbn/streams-schema';
 import type { StreamsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
 
 interface CancelKiIdentificationHandlerParams {
@@ -18,7 +18,7 @@ interface CancelKiIdentificationHandlerParams {
 interface CancelKiIdentificationHandlerResult {
   stream_name: string;
   execution_id: string | null;
-  status: StreamsKIsOnboardingStatus.Canceled;
+  status: SigEventsWorkflowStatus.Canceled;
 }
 
 export async function cancelKiIdentificationToolHandler({
@@ -31,6 +31,6 @@ export async function cancelKiIdentificationToolHandler({
   return {
     stream_name: streamName,
     execution_id: executionId,
-    status: StreamsKIsOnboardingStatus.Canceled,
+    status: SigEventsWorkflowStatus.Canceled,
   };
 }

@@ -5,41 +5,23 @@
  * 2.0.
  */
 
-import React from 'react';
-import { useWatch } from 'react-hook-form';
-import { i18n } from '@kbn/i18n';
-import type { HttpStart } from '@kbn/core-http-browser';
-import type { MatchedActionPolicyCategory } from '@kbn/alerting-v2-schemas';
 import {
-  EuiBadge,
   EuiCallOut,
+  EuiIcon,
   EuiLoadingSpinner,
   EuiSelectable,
   EuiSpacer,
   EuiText,
   EuiTitle,
+  type EuiSelectableOption,
 } from '@elastic/eui';
+import type { MatchedActionPolicyCategory } from '@kbn/alerting-v2-schemas';
+import type { HttpStart } from '@kbn/core-http-browser';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
+import { useWatch } from 'react-hook-form';
 import type { ComposeFormValues } from '../compose_form_types';
 import { useMatchedActionPolicies } from './use_matched_action_policies';
-
-const CATEGORY_LABELS: Record<MatchedActionPolicyCategory, string> = {
-  direct: i18n.translate('xpack.responseOps.alertingV2RuleForm.linkedActionPolicies.directBadge', {
-    defaultMessage: 'direct',
-  }),
-  global: i18n.translate('xpack.responseOps.alertingV2RuleForm.linkedActionPolicies.globalBadge', {
-    defaultMessage: 'global',
-  }),
-  'global-filtered': i18n.translate(
-    'xpack.responseOps.alertingV2RuleForm.linkedActionPolicies.globalFilteredBadge',
-    { defaultMessage: 'global-filtered' }
-  ),
-};
-
-const CATEGORY_COLORS: Record<MatchedActionPolicyCategory, string> = {
-  direct: 'success',
-  global: 'default',
-  'global-filtered': 'primary',
-};
 
 const actionPoliciesTitle = i18n.translate(
   'xpack.responseOps.alertingV2RuleForm.linkedActionPolicies.title',
@@ -61,6 +43,48 @@ const errorTitle = i18n.translate(
   { defaultMessage: 'Failed to load linked action policies' }
 );
 
+// TODO: replace with paths.actionPolicyEdit from alerting_v2/public/constants.ts
+//       once exported from the plugin or moved to a shared package.
+const ACTION_POLICY_EDIT_BASE = '/app/management/alertingV2/action_policies/edit';
+
+const SECTION_CONFIG: Array<{
+  category: MatchedActionPolicyCategory;
+  title: string;
+  description: string;
+}> = [
+  {
+    category: 'global',
+    title: i18n.translate('xpack.responseOps.alertingV2RuleForm.linkedActionPolicies.globalTitle', {
+      defaultMessage: 'Global policies',
+    }),
+    description: i18n.translate(
+      'xpack.responseOps.alertingV2RuleForm.linkedActionPolicies.globalDescription',
+      { defaultMessage: 'Matching all rules' }
+    ),
+  },
+  {
+    category: 'global-filtered',
+    title: i18n.translate(
+      'xpack.responseOps.alertingV2RuleForm.linkedActionPolicies.globalFilteredTitle',
+      { defaultMessage: 'Matching global policies' }
+    ),
+    description: i18n.translate(
+      'xpack.responseOps.alertingV2RuleForm.linkedActionPolicies.globalFilteredGroupLabel',
+      { defaultMessage: 'Matching this rule' }
+    ),
+  },
+  {
+    category: 'direct',
+    title: i18n.translate('xpack.responseOps.alertingV2RuleForm.linkedActionPolicies.directTitle', {
+      defaultMessage: 'Linked policies',
+    }),
+    description: i18n.translate(
+      'xpack.responseOps.alertingV2RuleForm.linkedActionPolicies.directDescription',
+      { defaultMessage: 'Matching this rule only' }
+    ),
+  },
+];
+
 interface Props {
   http: HttpStart;
   ruleId?: string;
@@ -68,16 +92,10 @@ interface Props {
 
 export const LinkedActionPoliciesStep = ({ http, ruleId }: Props) => {
   const metadata = useWatch<ComposeFormValues, 'metadata'>({ name: 'metadata' });
-  const name = ruleId ? undefined : metadata?.name;
-  const tags = ruleId ? undefined : metadata?.tags;
+  const name = metadata?.name;
+  const tags = metadata?.tags;
 
   const { isLoading, error, items } = useMatchedActionPolicies({ http, ruleId, name, tags });
-
-  const options = items.map(({ actionPolicy, category }) => ({
-    key: actionPolicy.id,
-    label: actionPolicy.name,
-    append: <EuiBadge color={CATEGORY_COLORS[category]}>{CATEGORY_LABELS[category]}</EuiBadge>,
-  }));
 
   return (
     <>
@@ -100,24 +118,71 @@ export const LinkedActionPoliciesStep = ({ http, ruleId }: Props) => {
           iconType="error"
           data-test-subj="linkedActionPoliciesError"
         >
-          <p aria-label={error.message}>{error.message}</p>
+          <p>{error.message}</p>
         </EuiCallOut>
       )}
 
       {!isLoading && !error && (
-        <EuiSelectable
-          options={options}
-          onChange={() => {}}
-          color="subdued"
-          emptyMessage={
+        <>
+          {items.length === 0 && (
             <EuiText size="s" color="subdued" data-test-subj="linkedActionPoliciesEmpty">
               <p>{emptyStateLabel}</p>
             </EuiText>
-          }
-          listProps={{ showIcons: false, bordered: true, isVirtualized: false }}
-        >
-          {(list) => list}
-        </EuiSelectable>
+          )}
+          {SECTION_CONFIG.map(({ category, title, description }) => {
+            const sectionItems = items.filter((item) => item.category === category);
+            if (sectionItems.length === 0) return null;
+
+            const options: EuiSelectableOption[] = [
+              {
+                key: `${category}-header`,
+                label: title,
+                isGroupLabel: true,
+                append: (
+                  <EuiText size="xs" color="subdued">
+                    {description}
+                  </EuiText>
+                ),
+              },
+              ...sectionItems.map(({ actionPolicy }) => ({
+                key: actionPolicy.id,
+                label: actionPolicy.name,
+                append: (
+                  <a
+                    href={http.basePath.prepend(
+                      `${ACTION_POLICY_EDIT_BASE}/${encodeURIComponent(actionPolicy.id)}`
+                    )}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={i18n.translate(
+                      'xpack.responseOps.alertingV2RuleForm.linkedActionPolicies.editPolicyLink',
+                      {
+                        defaultMessage: 'Edit {name}',
+                        values: { name: actionPolicy.name },
+                      }
+                    )}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <EuiIcon type="popout" size="s" aria-hidden={true} />
+                  </a>
+                ),
+              })),
+            ];
+
+            return (
+              <React.Fragment key={category}>
+                <EuiSelectable
+                  options={options}
+                  onChange={() => {}}
+                  listProps={{ showIcons: false, bordered: true, isVirtualized: false }}
+                >
+                  {(list) => list}
+                </EuiSelectable>
+                <EuiSpacer size="s" />
+              </React.Fragment>
+            );
+          })}
+        </>
       )}
     </>
   );

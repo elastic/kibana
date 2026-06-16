@@ -33,9 +33,13 @@ export const useMatchedActionPolicies = ({
 }: UseMatchedActionPoliciesParams): UseMatchedActionPoliciesResult => {
   const enabled = Boolean(ruleId) || Boolean(name) || Boolean(tags?.length);
 
-  const body = ruleId
-    ? { rule: { id: ruleId } }
-    : { rule: { ...(name ? { name } : {}), ...(tags?.length ? { tags } : {}) } };
+  const body = {
+    rule: {
+      ...(ruleId ? { id: ruleId } : {}),
+      ...(name ? { name } : {}),
+      ...(tags?.length ? { tags } : {}),
+    },
+  };
 
   const { isLoading, error, data } = useQuery({
     queryKey: ['matchedActionPolicies', ruleId, name, tags],

@@ -79,7 +79,7 @@ describe('user activity injected context', () => {
     const router = httpSetup.createRouter('');
     router.post(
       {
-        path: '/s/{spaceId}/api/user_activity_injected_context/_track',
+        path: '/api/user_activity_injected_context/_track',
         security: {
           authz: {
             enabled: false,

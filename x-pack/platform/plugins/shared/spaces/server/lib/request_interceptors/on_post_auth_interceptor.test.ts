@@ -12,12 +12,12 @@ import {
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
 import type { OnPostAuthHandler } from '@kbn/core-http-server';
+import { addSpaceIdToPath, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 
 import { initSpacesOnPostAuthRequestInterceptor } from './on_post_auth_interceptor';
 import type { Space } from '../../../common';
-import { addSpaceIdToPath } from '../../../common';
-import { DEFAULT_SPACE_ID, ENTER_SPACE_PATH } from '../../../common/constants';
+import { ENTER_SPACE_PATH } from '../../../common/constants';
 import { getSpaceSelectorUrl } from '../get_space_selector_url';
 
 const serverBasePath = '';

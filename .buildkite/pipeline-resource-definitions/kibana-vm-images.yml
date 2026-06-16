@@ -26,7 +26,6 @@ spec:
       pipeline_file: vm-images/.buildkite/pipeline.yml
       provider_settings:
         trigger_mode: none
-      cancel_intermediate_builds: true
       schedules:
         "[ubuntu24.04] Weekly Base Image Build":
           branch: main

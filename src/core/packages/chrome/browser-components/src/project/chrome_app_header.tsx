@@ -8,6 +8,7 @@
  */
 
 import React, { Suspense, useMemo, useState, useLayoutEffect } from 'react';
+import { css } from '@emotion/react';
 import type { ChromeBreadcrumb, AppHeaderBack, AppHeaderConfig } from '@kbn/core-chrome-browser';
 import { useChromeService } from '@kbn/core-chrome-browser-context';
 import { useObservable } from '@kbn/use-observable';
@@ -20,6 +21,12 @@ const AppHeaderViewLazy = React.lazy(async () => {
   const { AppHeaderView } = await import('@kbn/app-header');
   return { default: AppHeaderView };
 });
+
+// Reserve the app-header's single-row height while the lazy chunk loads so the layout reserves the
+// space from the first paint and content doesn't jump down (0 → 48px) once the header renders.
+// Must stay in sync with the single-row bar height in @kbn/app-header (kept local to avoid eagerly
+// bundling that package and defeating the lazy import above).
+const RESERVED_APP_HEADER_MIN_HEIGHT_PX = 48;
 
 function getBreadcrumbText(crumb: ChromeBreadcrumb): string | undefined {
   if (typeof crumb.text === 'string') return crumb.text;
@@ -130,7 +137,12 @@ export const ChromeAppHeaderRenderer = React.memo(() => {
   if (!hasContent) return null;
 
   return (
-    <div ref={measureRef}>
+    <div
+      ref={measureRef}
+      css={css`
+        min-height: ${RESERVED_APP_HEADER_MIN_HEIGHT_PX}px;
+      `}
+    >
       <Suspense fallback={null}>
         <AppHeaderViewLazy
           title={config?.title}

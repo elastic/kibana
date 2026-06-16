@@ -358,7 +358,7 @@ export class TaskManagerPlugin
     core: CoreStart,
     { cloud, licensing }: TaskManagerPluginsStart
   ): TaskManagerStartContract {
-    const { http, savedObjects, elasticsearch, executionContext, security } = core;
+    const { savedObjects, elasticsearch, executionContext, security } = core;
     this.licenseSubscriber = new LicenseSubscriber(licensing.license$);
 
     const savedObjectsRepository = savedObjects.createInternalRepository([
@@ -401,7 +401,6 @@ export class TaskManagerPlugin
       security,
       canEncryptSavedObjects: this.canEncryptSavedObjects,
       getIsSecurityEnabled: this.licenseSubscriber?.getIsSecurityEnabled,
-      basePath: http.basePath,
       executionContext,
       apiKeyStrategy,
     });
@@ -449,7 +448,6 @@ export class TaskManagerPlugin
       });
 
       this.taskPollingLifecycle = new TaskPollingLifecycle({
-        basePathService: http.basePath,
         config: this.config!,
         definitions: this.definitions,
         logger: this.logger,

@@ -45,6 +45,15 @@ dependsOn:
   - '@kbn/esql-language'
   - '@kbn/core-http-browser'
   - '@kbn/ui-actions-plugin'
+  - '@kbn/workflows'
+  - '@kbn/workflows-ui'
+  - '@kbn/workflows-yaml'
+  - '@kbn/triggers-actions-ui-plugin'
+  - '@kbn/core-di-browser'
+  - '@kbn/core-di'
+  - '@kbn/announcement-banner'
+  - '@kbn/kibana-react-plugin'
+  - '@kbn/dashboard-plugin'
 tags:
   - shared-browser
   - package
@@ -56,6 +65,8 @@ fileGroups:
   src:
     - '**/*.ts'
     - '**/*.tsx'
+    - .storybook/**/*.ts
+    - .storybook/**/*.tsx
     - '!target/**/*'
   jest-config:
     - jest.config.js

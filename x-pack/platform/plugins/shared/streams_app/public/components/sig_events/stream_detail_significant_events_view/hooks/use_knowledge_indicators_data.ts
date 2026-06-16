@@ -13,10 +13,12 @@ import { useStreamFeatures } from '../../../../hooks/sig_events/use_stream_featu
 
 interface UseKnowledgeIndicatorsDataParams {
   definition: Streams.all.GetResponse;
+  /** When false, the features and queries are not fetched (e.g. significant events is unavailable). */
+  enabled?: boolean;
 }
 
 export function useFetchKnowledgeIndicators(
-  { definition }: UseKnowledgeIndicatorsDataParams,
+  { definition, enabled = true }: UseKnowledgeIndicatorsDataParams,
   deps: unknown[] = []
 ) {
   const queriesFetchState = useFetchDiscoveryQueries(
@@ -26,13 +28,15 @@ export function useFetchKnowledgeIndicators(
       page: 1,
       perPage: 1000,
       status: ['active', 'draft'],
+      enabled,
     },
     deps
   );
 
   const { features, excludedFeatures, featuresLoading, refreshFeatures } = useStreamFeatures(
     definition.stream,
-    deps
+    deps,
+    { enabled }
   );
 
   const knowledgeIndicators = useMemo<KnowledgeIndicator[]>(() => {
@@ -53,9 +57,12 @@ export function useFetchKnowledgeIndicators(
     ];
   }, [excludedFeatures, features, queriesFetchState.data?.queries]);
 
-  const isLoading = queriesFetchState.isLoading || featuresLoading;
+  // A disabled react-query stays in the `loading` status, so only report
+  // loading / empty while fetching is actually enabled.
+  const isLoading = enabled && (queriesFetchState.isLoading || featuresLoading);
 
   const isEmpty =
+    enabled &&
     !queriesFetchState.isLoading &&
     !featuresLoading &&
     features.length === 0 &&

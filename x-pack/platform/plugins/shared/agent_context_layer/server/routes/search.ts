@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, IRouter, Logger } from '@kbn/core/server';
-import type { SmlSearchHttpResponse } from '../../common/http_api/sml';
+import type { SmlSearchHttpResponse, SmlSearchHttpResultItem } from '../../common/http_api/sml';
 import { SML_HTTP_SEARCH_QUERY_MAX_LENGTH, SmlSearchFilterType } from '../../common/http_api/sml';
 import { smlSearchPath } from '../../common/constants';
 import type { SmlService } from '../services/sml/types';
@@ -15,6 +15,7 @@ import type { AgentContextLayerStartDependencies, AgentContextLayerPluginStart }
 import { READ_SECURITY, withSmlFeatureFlag } from './common';
 
 const SML_SEARCH_SIZE_MAX = 1000;
+const SML_SEARCH_FILTER_ARRAY_MAX = 100;
 
 export const registerSearchRoute = ({
   router,
@@ -34,13 +35,48 @@ export const registerSearchRoute = ({
         body: schema.object({
           query: schema.string({ minLength: 1, maxLength: SML_HTTP_SEARCH_QUERY_MAX_LENGTH }),
           size: schema.maybe(schema.number({ min: 1, max: SML_SEARCH_SIZE_MAX })),
-          skip_content: schema.maybe(schema.boolean()),
-          filters: schema.maybe(
+          // Runtime-imposed per-type id-allowlist (e.g. agent-centric connector
+          // allow-list). Renamed from `filters` to `constraints` to make the trust
+          // boundary explicit alongside the agent-discoverable `filters`.
+          constraints: schema.maybe(
             schema.recordOf(
               schema.literal(SmlSearchFilterType.connector),
               schema.object({
-                ids: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+                ids: schema.maybe(
+                  schema.arrayOf(schema.string({ maxLength: 100 }), {
+                    maxSize: SML_SEARCH_FILTER_ARRAY_MAX,
+                  })
+                ),
               })
+            )
+          ),
+          // Agent-discoverable filters: refinements the LLM tool path supplies.
+          // ANDed with `constraints`; agent filters cannot widen runtime scope.
+          filters: schema.maybe(
+            schema.object({
+              types: schema.maybe(
+                schema.arrayOf(schema.string({ maxLength: 200 }), {
+                  maxSize: SML_SEARCH_FILTER_ARRAY_MAX,
+                })
+              ),
+              tags: schema.maybe(
+                schema.arrayOf(schema.string({ maxLength: 200 }), {
+                  maxSize: SML_SEARCH_FILTER_ARRAY_MAX,
+                })
+              ),
+            })
+          ),
+          fields: schema.maybe(
+            schema.arrayOf(
+              schema.oneOf([
+                schema.literal('content'),
+                schema.literal('description'),
+                schema.literal('tags'),
+                schema.literal('references'),
+                schema.literal('spaces'),
+                schema.literal('permissions'),
+              ]),
+              { maxSize: 6 }
             )
           ),
         }),
@@ -51,43 +87,38 @@ export const registerSearchRoute = ({
     withSmlFeatureFlag(async (ctx, request, response) => {
       try {
         const sml = getSmlService();
-        const {
-          query,
-          size,
-          skip_content: skipContent,
-          filters,
-        } = request.body as {
-          query: string;
-          size?: number;
-          skip_content?: boolean;
-          filters?: Record<string, { ids?: string[] }>;
-        };
         const coreContext = await ctx.core;
+        const { query, size, fields, constraints, filters } = request.body;
         const esClient = coreContext.elasticsearch.client;
 
         const [, startDeps] = await coreSetup.getStartServices();
         const spaceId = startDeps.spaces?.spacesService?.getSpaceId(request) ?? 'default';
 
-        const { results, total } = await sml.search({
+        const { results } = await sml.search({
           query,
           size,
+          fields,
           spaceId,
           esClient,
           request,
-          skipContent,
+          constraints,
           filters,
         });
 
         const body: SmlSearchHttpResponse = {
-          total,
-          results: results.map(({ id, type, origin_id, title, score, content }) => ({
-            id,
-            type,
-            origin_id,
-            title,
-            score,
-            ...(skipContent ? {} : { content }),
-          })),
+          results: results.map((hit) => {
+            const item: SmlSearchHttpResultItem = {
+              id: hit.id,
+              type: hit.type,
+              origin: hit.origin,
+              title: hit.title,
+            };
+            if (hit.content !== undefined) item.content = hit.content;
+            if (hit.description !== undefined) item.description = hit.description;
+            if (hit.references !== undefined) item.references = hit.references;
+            if (hit.tags !== undefined) item.tags = hit.tags;
+            return item;
+          }),
         };
 
         return response.ok({ body });

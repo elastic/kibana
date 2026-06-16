@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, render, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { AlertEpisodesListPage } from './alert_episodes_list_page';
@@ -172,6 +172,10 @@ describe('AlertEpisodesListPage', () => {
       const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
       expect(lastCall?.rows?.length).toBeGreaterThan(0);
     });
+  });
+
+  it('renders the experimental badge in the page header', () => {
+    expect(screen.getByTestId('alertingV2ExperimentalBadge')).toBeInTheDocument();
   });
 
   it('passes customBulkActions derived from episode actions to UnifiedDataTable', () => {

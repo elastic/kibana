@@ -14,7 +14,7 @@ const RULE_API_PATH = '/api/alerting/v2/rules';
 const ACTION_POLICY_API_PATH = '/api/alerting/v2/action_policies';
 const RULE_SO_TYPE = 'alerting_rule';
 const ACTION_POLICY_SO_TYPE = 'alerting_action_policy';
-const TELEMETRY_TASK_ID = 'AlertingV2-alerting_v2_telemetry';
+const TELEMETRY_TASK_ID = 'AlertingV2-alerting_v2:telemetry';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const samlAuth = getService('samlAuth');

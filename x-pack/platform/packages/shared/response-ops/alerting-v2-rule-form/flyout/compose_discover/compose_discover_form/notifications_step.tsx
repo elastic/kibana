@@ -5,46 +5,34 @@
  * 2.0.
  */
 
-import React, { Suspense, useCallback, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
-import { EuiButton, EuiLoadingSpinner, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import type { RuleFormServices } from '../../../form/contexts/rule_form_context';
+import { EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { ActionForm, createInitialActionFormValue, isActionValid } from '../../../actions_form';
 import type { ComposeFormValues } from '../compose_form_types';
 
 const notificationsTitle = i18n.translate(
   'xpack.responseOps.alertingV2RuleForm.composeDiscover.notifications.title',
-  { defaultMessage: 'Simple actions' }
+  { defaultMessage: 'Simple action policy' }
 );
 
 const notificationsSubtext = i18n.translate(
   'xpack.responseOps.alertingV2RuleForm.composeDiscover.notifications.subtext',
   {
-    defaultMessage: "Send a notification when this rule's alerts change status.",
+    defaultMessage:
+      "Send a notification when this rule's alerts change status. A linked action policy will be created with this rule.",
   }
 );
 
-const createSingleActionLabel = i18n.translate(
-  'xpack.responseOps.alertingV2RuleForm.composeDiscover.notifications.createSingleActionLabel',
-  { defaultMessage: 'Create single action' }
-);
-
-interface Props {
-  services: RuleFormServices;
-}
-
-export const NotificationsStep = ({ services }: Props) => {
+export const NotificationsStep = () => {
   const { watch, setValue } = useFormContext<ComposeFormValues>();
   const notifications = watch('notifications');
-  const enabled = !!notifications;
-  const { workflowForm } = services;
   const [touched, setTouched] = useState(false);
-  const isWorkflowInvalid =
-    touched && enabled && !(workflowForm.isValid?.(notifications!.workflow) ?? true);
 
-  const handleCreate = useCallback(() => {
-    setValue('notifications', { workflow: workflowForm.defaultValue() }, { shouldDirty: true });
-  }, [setValue, workflowForm]);
+  const defaultWorkflows = useMemo(() => createInitialActionFormValue(), []);
+  const workflows = notifications?.workflows ?? defaultWorkflows;
+  const isWorkflowInvalid = touched && !workflows.every(isActionValid);
 
   return (
     <>
@@ -57,29 +45,17 @@ export const NotificationsStep = ({ services }: Props) => {
       </EuiText>
       <EuiSpacer size="m" />
 
-      {enabled ? (
-        <div onBlur={() => setTouched(true)}>
-          <Suspense fallback={<EuiLoadingSpinner size="m" />}>
-            <workflowForm.Component
-              value={notifications!.workflow}
-              onChange={(next) =>
-                setValue('notifications', { workflow: next }, { shouldDirty: true })
-              }
-              isInvalid={isWorkflowInvalid}
-            />
-          </Suspense>
-        </div>
-      ) : workflowForm.supported !== false ? (
-        <EuiButton
-          iconType="plusInCircle"
-          onClick={handleCreate}
-          size="s"
-          color="text"
-          data-test-subj="createSingleActionButton"
-        >
-          {createSingleActionLabel}
-        </EuiButton>
-      ) : null}
+      <div
+        onBlur={(e) => {
+          if (!e.currentTarget.contains(e.relatedTarget as Node)) setTouched(true);
+        }}
+      >
+        <ActionForm
+          value={workflows}
+          onChange={(next) => setValue('notifications', { workflows: next }, { shouldDirty: true })}
+          isInvalid={isWorkflowInvalid}
+        />
+      </div>
     </>
   );
 };

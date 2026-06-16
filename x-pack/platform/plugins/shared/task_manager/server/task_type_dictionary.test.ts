@@ -284,7 +284,7 @@ describe('taskTypeDictionary', () => {
         },
       });
       expect(logger.error).toHaveBeenCalledWith(
-        `Could not sanitize task definitions: Invalid cost \"23\". Cost must be one of Tiny => 1,Normal => 2,ExtraLarge => 10`
+        `Could not sanitize task definitions: Invalid cost \"23\". Cost must be one of Tiny => 1,Normal => 2,Large => 4,ExtraLarge => 10`
       );
       expect(definitions.get('foo')).toEqual(undefined);
     });

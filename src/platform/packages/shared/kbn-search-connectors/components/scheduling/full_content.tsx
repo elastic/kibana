@@ -11,14 +11,15 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiSwitchProps } from '@elastic/eui';
 import {
-  EuiSwitch,
   EuiAccordion,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
+  EuiSwitch,
   EuiText,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import type { Connector, SchedulingConfiguraton } from '../../types/connectors';
@@ -159,16 +160,26 @@ export const ConnectorContentScheduling: React.FC<ConnectorContentSchedulingProp
                     isPopoverOpen={isPlatinumPopoverOpen}
                     closePopover={() => setIsPlatinumPopoverOpen(!isPlatinumPopoverOpen)}
                     button={
-                      <EuiButtonIcon
-                        aria-label={i18n.translate(
+                      <EuiToolTip
+                        content={i18n.translate(
                           'searchConnectors.selectConnector.openPopoverLabel',
                           {
                             defaultMessage: 'Open licensing popover',
                           }
                         )}
-                        iconType="question"
-                        onClick={() => setIsPlatinumPopoverOpen(!isPlatinumPopoverOpen)}
-                      />
+                        disableScreenReaderOutput
+                      >
+                        <EuiButtonIcon
+                          aria-label={i18n.translate(
+                            'searchConnectors.selectConnector.openPopoverLabel',
+                            {
+                              defaultMessage: 'Open licensing popover',
+                            }
+                          )}
+                          iconType="question"
+                          onClick={() => setIsPlatinumPopoverOpen(!isPlatinumPopoverOpen)}
+                        />
+                      </EuiToolTip>
                     }
                   />
                 </EuiFlexItem>

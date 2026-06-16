@@ -26,7 +26,7 @@ import {
   PrivateLocationTestService,
   cleanSyntheticsTestData,
 } from './services/private_location_test_service';
-import { keyToOmitList, omitMonitorKeys } from './add_monitor';
+import { keyToOmitList, omitMonitorKeys } from './helper/monitor_keys';
 import { SyntheticsMonitorTestService } from './services/synthetics_monitor_test_service';
 
 export default function ({ getService }: FtrProviderContext) {

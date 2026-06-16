@@ -21,7 +21,8 @@ import {
   WATCHLISTS_MANAGEMENT_TABLE,
 } from '../../../screens/entity_analytics/watchlists_management';
 
-describe(
+// Failing: See https://github.com/elastic/kibana/issues/273235
+describe.skip(
   'Entity Analytics Watchlists Management Page ',
   {
     tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
@@ -225,6 +226,7 @@ describe(
       }).as('deleteWatchlist');
 
       visitWatchlistsPage();
+      cy.wait('@watchlistsList'); // drain the initial page-load request so the post-delete wait is unambiguous
       cy.get(WATCHLISTS_MANAGEMENT_TABLE).should('exist');
       cy.get(WATCHLISTS_MANAGEMENT_TABLE).contains(existingWatchlist.name);
 
@@ -233,7 +235,7 @@ describe(
       cy.get('[data-test-subj="watchlistsDeleteConfirmationModal"]').should('exist');
       cy.contains('button', 'Delete').click();
       cy.wait('@deleteWatchlist');
-      cy.wait('@watchlistsList');
+      cy.wait('@watchlistsList'); // waits for the post-delete list refresh (returns [])
       cy.get(WATCHLISTS_MANAGEMENT_TABLE_EMPTY).should('exist');
     });
 

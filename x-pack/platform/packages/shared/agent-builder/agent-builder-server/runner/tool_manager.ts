@@ -6,7 +6,7 @@
  */
 
 import type { StructuredTool } from '@langchain/core/tools';
-import type { BrowserApiToolMetadata, ToolOrigin } from '@kbn/agent-builder-common';
+import type { BrowserApiToolMetadata, ToolOrigin, ToolType } from '@kbn/agent-builder-common';
 import type { Logger } from '@kbn/logging';
 import type { ToolReturnSummarizerFn } from '../tools/builtin';
 import type { AgentEventEmitterFn, ExecutableTool } from '..';
@@ -81,10 +81,7 @@ export interface ToolManager {
    */
   getToolIdMapping(): Map<string, string>;
 
-  /**
-   * Returns the origin for an internal tool ID, if known.
-   */
-  getToolOrigin(toolId: string): ToolOrigin | undefined;
+  getToolMeta(toolId: string): { origin: ToolOrigin | undefined; type: ToolType | undefined };
 
   /**
    * Gets the internal tool IDs of all dynamic tools currently in the tool manager.

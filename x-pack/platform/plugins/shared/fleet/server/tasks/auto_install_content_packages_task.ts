@@ -6,14 +6,13 @@
  */
 import pMap from 'p-map';
 import semverGt from 'semver/functions/gt';
-import { type CoreSetup, type ElasticsearchClient, type Logger } from '@kbn/core/server';
+import type { CoreSetup, ElasticsearchClient, Logger, LoggerFactory } from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
-import type { LoggerFactory } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
 
 import type { DiscoveryDataset } from '../../common/types';
@@ -27,12 +26,14 @@ import { getInstalledPackages } from '../services/epm/packages';
 import { getPrereleaseFromSettings } from '../services/epm/packages/get_prerelease_setting';
 
 export const TYPE = 'fleet:auto-install-content-packages-task';
-export const VERSION = '1.0.3';
+export const VERSION = '1.1.0';
 const TITLE = 'Fleet Auto Install Content Packages Task';
 const SCOPE = ['fleet'];
-const DEFAULT_INTERVAL = '10m';
+const DEFAULT_INTERVAL = '1m';
 const TIMEOUT = '5m';
 const CONTENT_PACKAGES_CACHE_TTL = 1000 * 60 * 60; // 1 hour
+
+export const AUTO_INSTALL_CONTENT_PACKAGES_TASK_ID = `${TYPE}:${VERSION}`;
 
 interface AutoInstallContentPackagesTaskConfig {
   taskInterval?: string;
@@ -115,7 +116,7 @@ export class AutoInstallContentPackagesTask {
   };
 
   private get taskId(): string {
-    return `${TYPE}:${VERSION}`;
+    return AUTO_INSTALL_CONTENT_PACKAGES_TASK_ID;
   }
 
   private endRun(msg: string = '') {
@@ -291,12 +292,13 @@ export class AutoInstallContentPackagesTask {
     esClient: ElasticsearchClient,
     datasetsOfInstalledContentPackages: string[]
   ): Promise<string[]> {
-    const allFleetDataStreams = await dataStreamService.getAllFleetDataStreams(esClient);
-    const datasetsWithData: string[] = allFleetDataStreams
-      .map((dataStream: any) => dataStream.name.split('-')[1])
-      .filter((dataset) => !datasetsOfInstalledContentPackages.includes(dataset));
+    const installedSet = new Set(datasetsOfInstalledContentPackages);
+    const allDataStreamNames = await dataStreamService.getAllFleetDataStreamNames(esClient);
+    const datasetsWithData = [
+      ...new Set(allDataStreamNames.map((name) => name.split('-')[1])),
+    ].filter((dataset) => !installedSet.has(dataset));
     this.logger.info(
-      `[AutoInstallContentPackagesTask] Found datasets with data: ${datasetsWithData.join(', ')}`
+      `[AutoInstallContentPackagesTask] Found ${datasetsWithData.length} datasets with data`
     );
     return datasetsWithData;
   }

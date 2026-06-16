@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { postCompositeSloSummaryRefreshParamsSchema } from '@kbn/slo-schema';
 import { refreshCompositeSloSummaries } from '../../services/tasks/composite_slo_summary_task/refresh_composite_slo_summaries';
 import { createCompositeSloServerRoute } from './create_composite_slo_server_route';
 
@@ -17,8 +16,7 @@ export const postCompositeSloSummaryRefreshRoute = createCompositeSloServerRoute
       requiredPrivileges: ['slo_read'],
     },
   },
-  params: postCompositeSloSummaryRefreshParamsSchema,
-  handler: async ({ context, plugins, logger, config }) => {
+  handler: async ({ plugins, logger, config }) => {
     const taskManager = await plugins.taskManager.start();
 
     return refreshCompositeSloSummaries({

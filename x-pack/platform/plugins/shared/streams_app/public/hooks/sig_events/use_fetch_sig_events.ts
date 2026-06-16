@@ -52,8 +52,7 @@ export const useFetchSigEvents = ({
             perPage: pagination.perPage,
             from: new Date(from).toISOString(),
             to: new Date(to).toISOString(),
-            // TODO: rename to status once the data stream field and API param are renamed
-            ...(status?.length ? { verdict: status } : {}),
+            ...(status?.length ? { status } : {}),
             ...(stream?.length ? { stream } : {}),
             ...(search ? { search } : {}),
           },

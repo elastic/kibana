@@ -11,7 +11,7 @@ import type { HttpFetchOptions, HttpFetchQuery, HttpSetup } from '@kbn/core/publ
 import type { AddInspectorRequest } from '@kbn/observability-shared-plugin/public';
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import type { InspectorRequestProps } from '@kbn/observability-shared-plugin/public/contexts/inspector/inspector_context';
-import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 import { kibanaService } from '../kibana_service';
 
 type Params = HttpFetchQuery & { version?: string; spaceId?: string };

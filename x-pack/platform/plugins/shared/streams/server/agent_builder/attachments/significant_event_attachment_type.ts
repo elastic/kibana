@@ -36,7 +36,7 @@ export const formatSignificantEventAsText = (event: SigEvent): string => {
     `Significant Event "${event.title}"`,
     `Event ID: ${event.event_id}`,
     `Discovery slug: ${event.discovery_slug}`,
-    `Status: ${event.verdict}`,
+    `Status: ${event.status}`,
     `Impact: ${event.impact}`,
     `Criticality: ${event.criticality}`,
     `Confidence: ${event.confidence}`,

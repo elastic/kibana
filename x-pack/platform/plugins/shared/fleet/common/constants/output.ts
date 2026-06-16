@@ -173,6 +173,11 @@ export const OUTPUT_TYPES_WITH_PRESET_SUPPORT: Array<ValueOf<OutputType>> = [
   outputType.RemoteElasticsearch,
 ];
 
+export const OUTPUT_TYPES_WITH_OTEL_EXPORTER_SUPPORT: Array<ValueOf<OutputType>> = [
+  outputType.Elasticsearch,
+  outputType.RemoteElasticsearch,
+];
+
 export const OUTPUT_HEALTH_DATA_STREAM = 'logs-fleet_server.output_health-default';
 
 export const LOGSTASH_API_KEY_CLUSTER_PERMISSIONS = ['monitor', 'manage_own_api_key'];

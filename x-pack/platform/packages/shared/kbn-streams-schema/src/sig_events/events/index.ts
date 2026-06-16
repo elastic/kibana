@@ -29,8 +29,7 @@ export const sigEventSchema = z.object({
   discovery_id: z.string().max(255).optional(),
   discovery_slug: z.string().max(255),
   previous_event_id: z.string().max(255).optional(),
-  verdict: sigEventStatusSchema,
-  verdict_id: z.string().max(255).optional(),
+  status: sigEventStatusSchema,
   workflow_execution_id: z.string().max(255).optional(),
   rule_names: z.array(z.string().max(255)).max(100).optional(),
   stream_names: z.array(z.string().max(255)).max(100),
@@ -47,9 +46,7 @@ export const sigEventSchema = z.object({
   cause_kis: z.array(causeKiSchema).optional(),
   evidences: z.array(evidenceSchema).optional(),
   grouped_into: z.string().max(255).optional(),
-  // TODO: rename once the data stream fields are renamed
-  // Audit fields merged from verdict docs
-  verdict_summary: z.string().max(MAX_TEXT_LENGTH).optional(),
+  analysis_summary: z.string().max(MAX_TEXT_LENGTH).optional(),
   assessment_note: z.string().max(MAX_TEXT_LENGTH).optional(),
 });
 

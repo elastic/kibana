@@ -6,8 +6,8 @@
  */
 
 import path from 'node:path';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
+import { buildStrictRouteValidationWithZod } from '../utils/build_strict_route_validation';
 import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
 import type { EntityStorePluginRouter } from '../../../types';
 import { wrapMiddlewares } from '../../middleware';
@@ -39,7 +39,7 @@ export function registerInstall(router: EntityStorePluginRouter) {
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            body: buildRouteValidationWithZod(BodySchema),
+            body: buildStrictRouteValidationWithZod(BodySchema),
           },
         },
         options: {

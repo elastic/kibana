@@ -1,6 +1,17 @@
 {
-  "sha1": "faaf69206ec04dc841e27f8cca5aa5481630963b",
+  "sha1": "8d319a8855d2f4e921bc024614a1ef3565494c92",
   "tests": [
+    {
+      "id": "b26b2efa27acfba-7132d4e40af07dc",
+      "title": "Teardown environment for streams tests",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/parallel_tests/global.teardown.ts",
+        "line": 10,
+        "column": 19
+      }
+    },
     {
       "id": "a32deb51dbb353f-744ce32675c025c",
       "title": "Setup environment for streams tests",

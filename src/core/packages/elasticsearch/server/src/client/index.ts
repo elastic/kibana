@@ -9,7 +9,7 @@
 
 export type { ElasticsearchClient, ElasticsearchRequestLoggingOptions } from './client';
 export type { IClusterClient, ICustomClusterClient, AsScopedOptions } from './cluster_client';
-export type { ScopeableRequest, FakeRequest, UrlRequest, ScopeableUrlRequest } from './types';
+export type { ScopeableRequest, FakeRequest } from './types';
 export type { IScopedClusterClient } from './scoped_cluster_client';
 export type {
   UnauthorizedErrorHandler,

@@ -18,6 +18,7 @@ import {
   layerSettingsSchema,
   legendTruncateAfterLinesSchema,
   sharedPanelInfoSchema,
+  legendPositionSchema,
 } from '../shared';
 import { legendNestedSchema, valueDisplaySchema } from './partition_shared';
 import {
@@ -37,6 +38,7 @@ const mosaicConfigSharedSchema = {
         truncate_after_lines: legendTruncateAfterLinesSchema,
         visibility: legendVisibilitySchemaWithAuto,
         size: legendSizeSchema,
+        position: legendPositionSchema,
       },
       {
         meta: {

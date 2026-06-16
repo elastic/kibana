@@ -24,11 +24,25 @@ export const stateSchemaByVersion = {
       runs: schema.number(),
     }),
   },
+  2: {
+    up: (state: Record<string, unknown>) => ({
+      runs: (state.runs as number) ?? 0,
+      // One-time repair of `task` docs whose `uiamApiKey` was persisted unencrypted by the
+      // pre-fix provisioning run (see `repairPlaintextUiamKeysOnce`). Defaults to `false`
+      // on upgrade so the repair runs once and then latches to `true`.
+      plaintextUiamKeysRepaired: (state.plaintextUiamKeysRepaired as boolean) ?? false,
+    }),
+    schema: schema.object({
+      runs: schema.number(),
+      plaintextUiamKeysRepaired: schema.boolean(),
+    }),
+  },
 };
 
-const latestTaskStateSchema = stateSchemaByVersion[1].schema;
+const latestTaskStateSchema = stateSchemaByVersion[2].schema;
 export type LatestTaskStateSchema = TypeOf<typeof latestTaskStateSchema>;
 
 export const emptyState: LatestTaskStateSchema = {
   runs: 0,
+  plaintextUiamKeysRepaired: false,
 };

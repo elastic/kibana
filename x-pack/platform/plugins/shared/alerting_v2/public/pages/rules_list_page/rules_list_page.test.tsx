@@ -43,7 +43,13 @@ jest.mock('@kbn/core-di-browser', () => ({
     if (token === 'notifications') {
       return { toasts: { addSuccess: jest.fn(), addError: jest.fn() } };
     }
-    if (token === 'data' || token === 'dataViews' || token === 'lens' || token === 'uiActions') {
+    if (
+      token === 'data' ||
+      token === 'dataViews' ||
+      token === 'lens' ||
+      token === 'uiActions' ||
+      token === 'dashboard'
+    ) {
       return {};
     }
     if (typeof token === 'function') {
@@ -160,6 +166,19 @@ describe('RulesListPage', () => {
 
   afterEach(() => {
     jest.useRealTimers();
+  });
+
+  it('renders the experimental badge in the page header', () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    expect(screen.getByTestId('alertingV2ExperimentalBadge')).toBeInTheDocument();
   });
 
   it('renders loading state', () => {

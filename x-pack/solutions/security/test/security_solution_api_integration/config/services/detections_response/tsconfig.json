@@ -20,6 +20,7 @@
     "@kbn/alerting-plugin",
     "@kbn/task-manager-plugin",
     "@kbn/test",
-    "@kbn/spaces-plugin"
+    "@kbn/spaces-plugin",
+    "@kbn/core-spaces-common"
   ]
 }

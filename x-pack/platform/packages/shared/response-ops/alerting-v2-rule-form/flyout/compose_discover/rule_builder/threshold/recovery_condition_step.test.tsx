@@ -23,11 +23,11 @@ const makeBuilderState = (overrides: Partial<ThresholdFormValues> = {}): Thresho
 });
 
 const BASE_COMPOSE_VALUES: ComposeFormValues = {
-  kind: 'signal',
+  kind: 'alert',
   metadata: { name: 'Test rule', enabled: true },
   timeField: '@timestamp',
   schedule: { every: '1m', lookback: '5m' },
-  query: { format: 'standalone', breach: '' },
+  query: { format: 'composed', base: '', blocks: { breach: '' } },
   stateTransitionAlertDelayMode: 'immediate',
   stateTransitionRecoveryDelayMode: 'immediate',
   artifacts: [],

@@ -6325,6 +6325,7 @@ paths:
                   untrack: true
             schema:
               additionalProperties: false
+              default: null
               nullable: true
               type: object
               properties:
@@ -29059,6 +29060,8 @@ paths:
                         type: string
                       condition:
                         description: Agent condition expression to evaluate whether to apply this integration to its inputs.
+                        maxLength: 10000
+                        nullable: true
                         type: string
                       created_at:
                         type: string
@@ -29114,6 +29117,8 @@ paths:
                                   nullable: true
                                 condition:
                                   description: Agent condition expression to evaluate whether to apply this input.
+                                  maxLength: 10000
+                                  nullable: true
                                   type: string
                                 config:
                                   additionalProperties:
@@ -29153,6 +29158,8 @@ paths:
                                         nullable: true
                                       condition:
                                         description: Agent condition expression to evaluate whether to apply this stream.
+                                        maxLength: 10000
+                                        nullable: true
                                         type: string
                                       config:
                                         additionalProperties:
@@ -29273,6 +29280,8 @@ paths:
                               properties:
                                 condition:
                                   description: Agent condition expression to evaluate whether to apply this input.
+                                  maxLength: 10000
+                                  nullable: true
                                   type: string
                                 deprecated:
                                   $ref: '#/components/schemas/Kibana_HTTP_APIs_deprecation_info'
@@ -29286,6 +29295,8 @@ paths:
                                     properties:
                                       condition:
                                         description: Agent condition expression to evaluate whether to apply this stream.
+                                        maxLength: 10000
+                                        nullable: true
                                         type: string
                                       deprecated:
                                         $ref: '#/components/schemas/Kibana_HTTP_APIs_deprecation_info'
@@ -29321,6 +29332,7 @@ paths:
                                               required:
                                                 - id
                                                 - isSecretRef
+                                          default: null
                                           nullable: true
                                         description: Input/stream level variable. Refer to the integration documentation for more information.
                                         type: object
@@ -29350,6 +29362,7 @@ paths:
                                         required:
                                           - id
                                           - isSecretRef
+                                    default: null
                                     nullable: true
                                   description: Input/stream level variable. Refer to the integration documentation for more information.
                                   type: object
@@ -29412,12 +29425,10 @@ paths:
                         maxItems: 100
                         type: array
                       supports_agentless:
-                        default: false
                         description: Indicates whether the package policy belongs to an agentless agent policy.
                         nullable: true
                         type: boolean
                       supports_cloud_connector:
-                        default: false
                         description: Indicates whether the package policy supports cloud connectors.
                         nullable: true
                         type: boolean
@@ -29469,6 +29480,7 @@ paths:
                                   required:
                                     - id
                                     - isSecretRef
+                              default: null
                               nullable: true
                             description: Input/stream level variable. Refer to the integration documentation for more information.
                             type: object
@@ -31421,15 +31433,15 @@ paths:
                           type: object
                           properties:
                             log_level:
+                              default: null
                               enum:
                                 - debug
                                 - info
                                 - warning
                                 - error
+                                - null
                               nullable: true
                               type: string
-                          required:
-                            - log_level
                         type:
                           enum:
                             - SETTINGS
@@ -31781,6 +31793,7 @@ paths:
                     username: username
             schema:
               additionalProperties: false
+              default: null
               nullable: true
               type: object
               properties:
@@ -32017,6 +32030,7 @@ paths:
                     - CPU
             schema:
               additionalProperties: false
+              default: null
               nullable: true
               type: object
               properties:
@@ -32186,6 +32200,7 @@ paths:
                   revoke: false
             schema:
               additionalProperties: false
+              default: null
               nullable: true
               type: object
               properties:
@@ -35438,6 +35453,7 @@ paths:
                           type: string
                         serviceDetails:
                           additionalProperties: false
+                          default: null
                           nullable: true
                           type: object
                           properties:
@@ -35467,7 +35483,6 @@ paths:
                         - size_in_bytes
                         - size_in_bytes_formatted
                         - dashboards
-                        - serviceDetails
                     maxItems: 10000
                     type: array
                 required:
@@ -37480,6 +37495,7 @@ paths:
             schema:
               allOf:
                 - $ref: '#/components/schemas/Kibana_HTTP_APIs_install_package_from_registry_request'
+              default: null
               nullable: true
       responses:
         '200':
@@ -37882,6 +37898,7 @@ paths:
             schema:
               allOf:
                 - $ref: '#/components/schemas/Kibana_HTTP_APIs_install_package_from_registry_request'
+              default: null
               nullable: true
       responses:
         '200':
@@ -38114,7 +38131,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Delete datastream assets for a specific input package, by data stream name.<br/><br/>[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
+        Delete datastream assets for a specific package, by data stream name.<br/><br/>[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
       operationId: delete-fleet-epm-packages-pkgname-pkgversion-datastream-assets
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -38185,7 +38202,7 @@ paths:
                   - message
                   - attributes
           description: Bad Request
-      summary: Delete assets for an input package
+      summary: Delete assets for a package
       tags:
         - Elastic Package Manager (EPM)
       x-metaTags:
@@ -38388,6 +38405,7 @@ paths:
             schema:
               allOf:
                 - $ref: '#/components/schemas/Kibana_HTTP_APIs_install_kibana_assets_request'
+              default: null
               nullable: true
       responses:
         '200':
@@ -38479,6 +38497,7 @@ paths:
             schema:
               allOf:
                 - $ref: '#/components/schemas/Kibana_HTTP_APIs_install_rule_assets_request'
+              default: null
               nullable: true
       responses:
         '200':
@@ -40017,6 +40036,7 @@ paths:
                 name:
                   type: string
                 proxy_id:
+                  default: null
                   nullable: true
                   type: string
                 secrets:
@@ -40095,8 +40115,6 @@ paths:
                       type: string
                     key:
                       type: string
-              required:
-                - proxy_id
       responses:
         '200':
           content:
@@ -43024,12 +43042,15 @@ paths:
               type: object
               properties:
                 certificate:
+                  default: null
                   nullable: true
                   type: string
                 certificate_authorities:
+                  default: null
                   nullable: true
                   type: string
                 certificate_key:
+                  default: null
                   nullable: true
                   type: string
                 name:
@@ -43044,10 +43065,6 @@ paths:
                   type: object
                 url:
                   type: string
-              required:
-                - certificate_authorities
-                - certificate
-                - certificate_key
       responses:
         '200':
           content:
@@ -43536,6 +43553,7 @@ paths:
                   remote: true
             schema:
               additionalProperties: false
+              default: null
               nullable: true
               type: object
               properties:
@@ -43663,16 +43681,19 @@ paths:
                           logs:
                             enum:
                               - success
+                              - null
                             nullable: true
                             type: string
                           metrics:
                             enum:
                               - success
+                              - null
                             nullable: true
                             type: string
                           synthetics:
                             enum:
                               - success
+                              - null
                             nullable: true
                             type: string
                       integration_knowledge_enabled:
@@ -43873,16 +43894,19 @@ paths:
                           logs:
                             enum:
                               - success
+                              - null
                             nullable: true
                             type: string
                           metrics:
                             enum:
                               - success
+                              - null
                             nullable: true
                             type: string
                           synthetics:
                             enum:
                               - success
+                              - null
                             nullable: true
                             type: string
                       integration_knowledge_enabled:
@@ -64910,6 +64934,7 @@ paths:
           name: product_name
   /api/streams/{name}/queries:
     get:
+      deprecated: true
       description: |-
         **Spaces method and path for this operation:**
 
@@ -64969,6 +64994,7 @@ paths:
           name: product_name
   /api/streams/{name}/queries/_bulk:
     post:
+      deprecated: true
       description: |-
         **Spaces method and path for this operation:**
 
@@ -65075,6 +65101,7 @@ paths:
           name: product_name
   /api/streams/{name}/queries/{queryId}:
     delete:
+      deprecated: true
       description: |-
         **Spaces method and path for this operation:**
 
@@ -65126,6 +65153,7 @@ paths:
         - content: Kibana
           name: product_name
     put:
+      deprecated: true
       description: |-
         **Spaces method and path for this operation:**
 
@@ -65205,6 +65233,7 @@ paths:
           name: product_name
   /api/streams/{name}/significant_events:
     get:
+      deprecated: true
       description: |-
         **Spaces method and path for this operation:**
 
@@ -65305,159 +65334,6 @@ paths:
                         type: match
           description: Significant events for the stream.
       summary: Read the significant events
-      tags:
-        - streams
-      x-state: Experimental; added in 9.1.0
-      x-metaTags:
-        - content: Kibana
-          name: product_name
-  /api/streams/{name}/significant_events/_generate:
-    post:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/streams/{name}/significant_events/_generate</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Generate significant events queries based on the stream data<br/><br/>[Required authorization] Route required privileges: read_stream.
-      operationId: post-streams-name-significant-events-generate
-      parameters:
-        - description: A required header to protect against CSRF attacks
-          in: header
-          name: kbn-xsrf
-          required: true
-          schema:
-            example: 'true'
-            type: string
-        - description: The name of the stream.
-          in: path
-          name: name
-          required: true
-          schema:
-            type: string
-        - description: Optional connector ID. If not provided, the default AI connector from settings will be used.
-          in: query
-          name: connectorId
-          required: false
-          schema:
-            type: string
-        - description: Start of the time range as an ISO 8601 date string.
-          in: query
-          name: from
-          required: true
-          schema:
-            type: string
-        - description: End of the time range as an ISO 8601 date string.
-          in: query
-          name: to
-          required: true
-          schema:
-            type: string
-        - description: Number of sample documents to use for generation from the current data of stream
-          in: query
-          name: sampleDocsSize
-          required: false
-          schema:
-            type: number
-      requestBody:
-        content:
-          application/json:
-            examples: {}
-            schema:
-              anyOf:
-                - additionalProperties: false
-                  type: object
-                  properties: {}
-                - nullable: true
-                - {}
-      responses:
-        '200':
-          description: Generated significant event query definitions.
-      summary: Generate significant events
-      tags:
-        - streams
-      x-state: Experimental; added in 9.2.0
-      x-metaTags:
-        - content: Kibana
-          name: product_name
-  /api/streams/{name}/significant_events/_preview:
-    post:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/streams/{name}/significant_events/_preview</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Preview significant event results based on a given query<br/><br/>[Required authorization] Route required privileges: read_stream.
-      operationId: post-streams-name-significant-events-preview
-      parameters:
-        - description: A required header to protect against CSRF attacks
-          in: header
-          name: kbn-xsrf
-          required: true
-          schema:
-            example: 'true'
-            type: string
-        - description: The name of the stream.
-          in: path
-          name: name
-          required: true
-          schema:
-            type: string
-        - description: Start of the time range as an ISO 8601 date string.
-          in: query
-          name: from
-          required: true
-          schema:
-            type: string
-        - description: End of the time range as an ISO 8601 date string.
-          in: query
-          name: to
-          required: true
-          schema:
-            type: string
-        - description: The bucket size for aggregating events (e.g. "1m", "1h").
-          in: query
-          name: bucketSize
-          required: true
-          schema:
-            pattern: ^(\d+)([smhd])$
-            type: string
-      requestBody:
-        content:
-          application/json:
-            examples:
-              previewSignificantEvents:
-                value:
-                  query:
-                    esql:
-                      query: FROM logs.nginx | WHERE log.level == "error" | STATS count = COUNT(*) BY host.name
-            schema:
-              additionalProperties: false
-              type: object
-              properties:
-                query:
-                  additionalProperties: false
-                  type: object
-                  properties:
-                    esql:
-                      additionalProperties: false
-                      type: object
-                      properties:
-                        query:
-                          type: string
-                      required:
-                        - query
-                  required:
-                    - esql
-              required:
-                - query
-      responses:
-        '200':
-          description: Significant event preview results.
-      summary: Preview significant events
       tags:
         - streams
       x-state: Experimental; added in 9.1.0
@@ -81060,7 +80936,6 @@ components:
         is_verifier:
           type: boolean
         keep_monitoring_alive:
-          default: false
           description: When set to true, monitoring will be enabled but logs/metrics collection will be disabled
           nullable: true
           type: boolean
@@ -81197,7 +81072,6 @@ components:
             - inactive
           type: string
         supports_agentless:
-          default: false
           description: Indicates whether the agent policy supports agentless integrations.
           nullable: true
           type: boolean
@@ -81306,6 +81180,60 @@ components:
         - data_view_id
       title: aiops_log_rate_analysis
       type: object
+    Kibana_HTTP_APIs_aiops_pattern_analysis:
+      additionalProperties: false
+      description: Log Pattern Analysis embeddable schema
+      properties:
+        data_view_id:
+          description: The data view ID used for pattern analysis.
+          maxLength: 1000
+          minLength: 1
+          type: string
+        description:
+          type: string
+        field_name:
+          description: The text field on which to run pattern analysis.
+          maxLength: 1000
+          minLength: 1
+          type: string
+        hide_border:
+          type: boolean
+        hide_title:
+          type: boolean
+        minimum_time_range:
+          default: no_minimum
+          description: Minimum time range for pattern analysis.
+          enum:
+            - no_minimum
+            - 1_week
+            - 1_month
+            - 3_months
+            - 6_months
+          type: string
+        random_sampler_mode:
+          default: on_automatic
+          description: The random sampler mode.
+          enum:
+            - on_automatic
+            - on_manual
+            - 'off'
+          type: string
+        random_sampler_probability:
+          default: null
+          description: The probability to use for random sampling (between 0.00001 and 0.5).
+          maximum: 0.5
+          minimum: 0.00001
+          nullable: true
+          type: number
+        time_range:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
+        title:
+          type: string
+      required:
+        - data_view_id
+        - field_name
+      title: aiops_pattern_analysis
+      type: object
     Kibana_HTTP_APIs_alerts_filter_query:
       additionalProperties: false
       properties:
@@ -81413,6 +81341,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -81553,6 +81482,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -81649,10 +81579,43 @@ components:
       additionalProperties: false
       description: APM service map embeddable schema
       properties:
+        alert_status_filter:
+          items:
+            enum:
+              - active
+              - recovered
+              - untracked
+              - delayed
+            type: string
+          maxItems: 4
+          type: array
+        anomaly_severity_filter:
+          items:
+            enum:
+              - critical
+              - major
+              - minor
+              - warning
+              - low
+              - unknown
+            type: string
+          maxItems: 6
+          type: array
+        connection_filter:
+          items:
+            enum:
+              - orphaned
+              - connected
+            type: string
+          maxItems: 2
+          type: array
         description:
           type: string
         environment:
           default: ENVIRONMENT_ALL
+          type: string
+        find_query:
+          maxLength: 2048
           type: string
         hide_border:
           type: boolean
@@ -81660,10 +81623,27 @@ components:
           type: boolean
         kuery:
           type: string
+        map_orientation:
+          enum:
+            - horizontal
+            - vertical
+          type: string
         service_group_id:
           type: string
         service_name:
           type: string
+        slo_status_filter:
+          items:
+            enum:
+              - healthy
+              - degrading
+              - violated
+              - noData
+            type: string
+          maxItems: 4
+          type: array
+        sync_with_dashboard_filters:
+          type: boolean
         time_range:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
         title:
@@ -81732,6 +81712,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -81897,6 +81878,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -82051,6 +82033,7 @@ components:
               nullable: true
               type: boolean
             api_key_owner:
+              default: null
               nullable: true
               type: string
             consumer:
@@ -82058,6 +82041,7 @@ components:
             created_at:
               type: string
             created_by:
+              default: null
               nullable: true
               type: string
             enabled:
@@ -82090,6 +82074,7 @@ components:
             updated_at:
               type: string
             updated_by:
+              default: null
               nullable: true
               type: string
           required:
@@ -82098,12 +82083,9 @@ components:
             - tags
             - rule_type_id
             - params
-            - api_key_owner
             - consumer
             - enabled
             - schedule
-            - created_by
-            - updated_by
             - created_at
             - updated_at
             - revision
@@ -83634,7 +83616,12 @@ components:
           type: string
         condition:
           description: Agent condition expression to evaluate whether to apply this integration to its inputs.
+          maxLength: 10000
+          nullable: true
           type: string
+        create_dataset_templates:
+          description: When true, install dedicated index templates for streams with a custom data_stream.dataset. Defaults to true for input packages, false for integration packages.
+          type: boolean
         description:
           description: Package policy description
           type: string
@@ -83672,6 +83659,8 @@ components:
             properties:
               condition:
                 description: Agent condition expression to evaluate whether to apply this input.
+                maxLength: 10000
+                nullable: true
                 type: string
               config:
                 additionalProperties:
@@ -83711,6 +83700,8 @@ components:
                       nullable: true
                     condition:
                       description: Agent condition expression to evaluate whether to apply this stream.
+                      maxLength: 10000
+                      nullable: true
                       type: string
                     config:
                       additionalProperties:
@@ -83865,13 +83856,11 @@ components:
           maxItems: 100
           type: array
         supports_agentless:
-          default: false
           deprecated: true
           description: Indicates whether the package policy belongs to an agentless agent policy. Deprecated in favor of the Fleet agentless policies API.
           nullable: true
           type: boolean
         supports_cloud_connector:
-          default: false
           description: Indicates whether the package policy supports cloud connectors.
           nullable: true
           type: boolean
@@ -84019,6 +84008,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -86222,6 +86212,8 @@ components:
           type: string
         condition:
           description: Agent condition expression to evaluate whether to apply this integration to its inputs.
+          maxLength: 10000
+          nullable: true
           type: string
         created_at:
           type: string
@@ -86290,6 +86282,8 @@ components:
                 nullable: true
               condition:
                 description: Agent condition expression to evaluate whether to apply this input.
+                maxLength: 10000
+                nullable: true
                 type: string
               config:
                 additionalProperties:
@@ -86329,6 +86323,8 @@ components:
                       nullable: true
                     condition:
                       description: Agent condition expression to evaluate whether to apply this stream.
+                      maxLength: 10000
+                      nullable: true
                       type: string
                     config:
                       additionalProperties:
@@ -86498,12 +86494,10 @@ components:
           maxItems: 1000
           type: array
         supports_agentless:
-          default: false
           description: Indicates whether the package policy belongs to an agentless agent policy.
           nullable: true
           type: boolean
         supports_cloud_connector:
-          default: false
           description: Indicates whether the package policy supports cloud connectors.
           nullable: true
           type: boolean
@@ -86612,6 +86606,10 @@ components:
     Kibana_HTTP_APIs_es_asset_reference:
       additionalProperties: false
       properties:
+        customDataStreamOriginDataset:
+          type: string
+        customDataStreamOriginType:
+          type: string
         deferred:
           type: boolean
         id:
@@ -86698,6 +86696,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -89019,6 +89018,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -90995,6 +90995,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -92252,6 +92253,7 @@ components:
           items:
             anyOf:
               - anyOf:
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-ml_anomaly_swimlane'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-apm_service_map'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_change_point_chart'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-discover_session'
@@ -92261,6 +92263,7 @@ components:
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_log_rate_analysis'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-markdown'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-options_list_control'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_pattern_analysis'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-range_slider_control'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-slo_alerts'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-slo_burn_rate'
@@ -92477,6 +92480,26 @@ components:
         - type
         - config
       title: Log rate analysis
+      type: object
+    Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_pattern_analysis:
+      additionalProperties: false
+      properties:
+        config:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_aiops_pattern_analysis'
+        grid:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-grid'
+        id:
+          description: The unique ID of the panel.
+          type: string
+        type:
+          enum:
+            - aiops_pattern_analysis
+          type: string
+      required:
+        - grid
+        - type
+        - config
+      title: Pattern analysis
       type: object
     Kibana_HTTP_APIs_kbn-dashboard-panel-type-apm_service_map:
       additionalProperties: false
@@ -93209,6 +93232,26 @@ components:
         - type
         - config
       title: Markdown
+      type: object
+    Kibana_HTTP_APIs_kbn-dashboard-panel-type-ml_anomaly_swimlane:
+      additionalProperties: false
+      properties:
+        config:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_ml_anomaly_swimlane'
+        grid:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-grid'
+        id:
+          description: The unique ID of the panel.
+          type: string
+        type:
+          enum:
+            - ml_anomaly_swimlane
+          type: string
+      required:
+        - grid
+        - type
+        - config
+      title: Anomaly swim lane
       type: object
     Kibana_HTTP_APIs_kbn-dashboard-panel-type-options_list_control:
       additionalProperties: false
@@ -93985,12 +94028,14 @@ components:
               mapping:
                 aiops_change_point_chart: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_change_point_chart'
                 aiops_log_rate_analysis: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_log_rate_analysis'
+                aiops_pattern_analysis: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_pattern_analysis'
                 apm_service_map: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-apm_service_map'
                 discover_session: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-discover_session'
                 esql_control: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-esql_control'
                 image: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-image'
                 links: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-links'
                 markdown: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-markdown'
+                ml_anomaly_swimlane: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-ml_anomaly_swimlane'
                 options_list_control: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-options_list_control'
                 range_slider_control: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-range_slider_control'
                 slo_alerts: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-slo_alerts'
@@ -94003,6 +94048,7 @@ components:
                 vis: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-vis'
               propertyName: type
             oneOf:
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-ml_anomaly_swimlane'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-apm_service_map'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_change_point_chart'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-discover_session'
@@ -94012,6 +94058,7 @@ components:
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_log_rate_analysis'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-markdown'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-options_list_control'
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_pattern_analysis'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-range_slider_control'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-slo_alerts'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-slo_burn_rate'
@@ -95250,6 +95297,15 @@ components:
         - operation
       title: Unique Count Metric Operation
       type: object
+    Kibana_HTTP_APIs_legendPosition:
+      description: Legend Position.
+      enum:
+        - top
+        - bottom
+        - left
+        - right
+      title: Legend Position
+      type: string
     Kibana_HTTP_APIs_legendSize:
       description: Legend size.
       enum:
@@ -95364,6 +95420,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -95583,6 +95640,7 @@ components:
           description: The date and time when the maintenance window was created.
           type: string
         created_by:
+          default: null
           description: The identifier for the user that created the maintenance window.
           nullable: true
           type: string
@@ -95618,6 +95676,7 @@ components:
           description: The date and time when the maintenance window was last updated.
           type: string
         updated_by:
+          default: null
           description: The identifier for the user that last updated this maintenance window.
           nullable: true
           type: string
@@ -95625,8 +95684,6 @@ components:
         - id
         - title
         - enabled
-        - created_by
-        - updated_by
         - created_at
         - updated_at
         - status
@@ -97305,6 +97362,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -97472,6 +97530,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -98374,6 +98433,82 @@ components:
         - operation
       title: Stats Metric Operation
       type: object
+    Kibana_HTTP_APIs_ml_anomaly_swimlane:
+      anyOf:
+        - additionalProperties: false
+          type: object
+          properties:
+            description:
+              type: string
+            hide_border:
+              type: boolean
+            hide_title:
+              type: boolean
+            job_ids:
+              description: IDs of the anomaly detection jobs or groups whose results are shown in the swim lane.
+              items:
+                maxLength: 1000
+                minLength: 1
+                type: string
+              maxItems: 10000
+              minItems: 1
+              type: array
+            per_page:
+              description: Number of rows to display per page in a view-by swim lane. Ignored for overall swim lanes.
+              minimum: 1
+              type: number
+            swimlane_type:
+              enum:
+                - overall
+              type: string
+            time_range:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
+            title:
+              type: string
+          required:
+            - job_ids
+            - swimlane_type
+        - additionalProperties: false
+          type: object
+          properties:
+            description:
+              type: string
+            hide_border:
+              type: boolean
+            hide_title:
+              type: boolean
+            job_ids:
+              description: IDs of the anomaly detection jobs or groups whose results are shown in the swim lane.
+              items:
+                maxLength: 1000
+                minLength: 1
+                type: string
+              maxItems: 10000
+              minItems: 1
+              type: array
+            per_page:
+              description: Number of rows to display per page in a view-by swim lane. Ignored for overall swim lanes.
+              minimum: 1
+              type: number
+            swimlane_type:
+              enum:
+                - viewBy
+              type: string
+            time_range:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
+            title:
+              type: string
+            view_by:
+              description: Field name used to split anomalies into a view-by swim lane.
+              maxLength: 1000
+              minLength: 1
+              type: string
+          required:
+            - job_ids
+            - swimlane_type
+            - view_by
+      description: Anomaly Swim Lane embeddable
+      title: ml_anomaly_swimlane
     Kibana_HTTP_APIs_monitoring-alert-cluster-health-create-rule-body-alerting:
       additionalProperties: false
       properties:
@@ -98436,6 +98571,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -98550,6 +98686,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -98664,6 +98801,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -98778,6 +98916,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -98892,6 +99031,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -99006,6 +99146,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -99120,6 +99261,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -99234,6 +99376,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -99348,6 +99491,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -99462,6 +99606,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -99576,6 +99721,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -99688,6 +99834,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -99800,6 +99947,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -99914,6 +100062,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -100617,6 +100766,8 @@ components:
         nested:
           description: Show nested legend with hierarchical breakdown levels
           type: boolean
+        position:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_legendPosition'
         size:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_legendSize'
         truncate_after_lines:
@@ -101429,7 +101580,6 @@ components:
         is_verifier:
           type: boolean
         keep_monitoring_alive:
-          default: false
           description: When set to true, monitoring will be enabled but logs/metrics collection will be disabled
           nullable: true
           type: boolean
@@ -101546,7 +101696,6 @@ components:
           maxItems: 100
           type: array
         supports_agentless:
-          default: false
           deprecated: true
           description: Indicates whether the agent policy supports agentless integrations. Deprecated in favor of the Fleet agentless policies API.
           nullable: true
@@ -102224,6 +102373,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -102353,13 +102503,13 @@ components:
           description: Indicates whether the action is a summary.
           type: boolean
         throttle:
+          default: null
           description: The throttle interval defines how frequently rule actions are triggered. It is specified in seconds, minutes, hours, or days and only applies when `notify_when` is set to `onThrottleInterval`. You cannot set the throttle interval at both the rule and action level. The recommended approach is to set it for each action individually. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
           nullable: true
           type: string
       required:
         - summary
         - notify_when
-        - throttle
       title: new_rule_action_frequency
       type: object
     Kibana_HTTP_APIs_noColor:
@@ -102461,6 +102611,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -103464,46 +103615,45 @@ components:
       additionalProperties: true
       properties:
         compression_level:
+          default: null
           nullable: true
           type: number
         disk_queue_compression_enabled:
+          default: null
           nullable: true
           type: boolean
         disk_queue_enabled:
-          default: false
+          default: null
           nullable: true
           type: boolean
         disk_queue_encryption_enabled:
+          default: null
           nullable: true
           type: boolean
         disk_queue_max_size:
+          default: null
           nullable: true
           type: number
         disk_queue_path:
+          default: null
           nullable: true
           type: string
         loadbalance:
+          default: null
           nullable: true
           type: boolean
         max_batch_bytes:
+          default: null
           nullable: true
           type: number
         mem_queue_events:
+          default: null
           nullable: true
           type: number
         queue_flush_timeout:
+          default: null
           nullable: true
           type: number
-      required:
-        - disk_queue_path
-        - disk_queue_max_size
-        - disk_queue_encryption_enabled
-        - disk_queue_compression_enabled
-        - compression_level
-        - loadbalance
-        - mem_queue_events
-        - queue_flush_timeout
-        - max_batch_bytes
       title: output_shipper
       type: object
     Kibana_HTTP_APIs_output_ssl:
@@ -103833,6 +103983,8 @@ components:
           type: string
         condition:
           description: Agent condition expression to evaluate whether to apply this integration to its inputs.
+          maxLength: 10000
+          nullable: true
           type: string
         created_at:
           type: string
@@ -103887,6 +104039,8 @@ components:
                     nullable: true
                   condition:
                     description: Agent condition expression to evaluate whether to apply this input.
+                    maxLength: 10000
+                    nullable: true
                     type: string
                   config:
                     additionalProperties:
@@ -103926,6 +104080,8 @@ components:
                           nullable: true
                         condition:
                           description: Agent condition expression to evaluate whether to apply this stream.
+                          maxLength: 10000
+                          nullable: true
                           type: string
                         config:
                           additionalProperties:
@@ -104046,6 +104202,8 @@ components:
                 properties:
                   condition:
                     description: Agent condition expression to evaluate whether to apply this input.
+                    maxLength: 10000
+                    nullable: true
                     type: string
                   deprecated:
                     $ref: '#/components/schemas/Kibana_HTTP_APIs_deprecation_info'
@@ -104059,6 +104217,8 @@ components:
                       properties:
                         condition:
                           description: Agent condition expression to evaluate whether to apply this stream.
+                          maxLength: 10000
+                          nullable: true
                           type: string
                         deprecated:
                           $ref: '#/components/schemas/Kibana_HTTP_APIs_deprecation_info'
@@ -104094,6 +104254,7 @@ components:
                                 required:
                                   - id
                                   - isSecretRef
+                            default: null
                             nullable: true
                           description: Input/stream level variable. Refer to the integration documentation for more information.
                           type: object
@@ -104123,6 +104284,7 @@ components:
                           required:
                             - id
                             - isSecretRef
+                      default: null
                       nullable: true
                     description: Input/stream level variable. Refer to the integration documentation for more information.
                     type: object
@@ -104185,12 +104347,10 @@ components:
           maxItems: 100
           type: array
         supports_agentless:
-          default: false
           description: Indicates whether the package policy belongs to an agentless agent policy.
           nullable: true
           type: boolean
         supports_cloud_connector:
-          default: false
           description: Indicates whether the package policy supports cloud connectors.
           nullable: true
           type: boolean
@@ -104242,6 +104402,7 @@ components:
                     required:
                       - id
                       - isSecretRef
+                default: null
                 nullable: true
               description: Input/stream level variable. Refer to the integration documentation for more information.
               type: object
@@ -104776,6 +104937,8 @@ components:
         nested:
           description: Show nested legend with hierarchical breakdown levels
           type: boolean
+        position:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_legendPosition'
         size:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_legendSize'
         truncate_after_lines:
@@ -106425,13 +106588,13 @@ components:
                     description: Indicates whether the action is a summary.
                     type: boolean
                   throttle:
+                    default: null
                     description: The throttle interval defines how frequently rule actions are triggered. It is specified in seconds, minutes, hours, or days and only applies when 'notify_when' is set to 'onThrottleInterval'. You cannot set the throttle interval at both the rule and action level. The recommended approach is to set it for each action individually. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
                     nullable: true
                     type: string
                 required:
                   - summary
                   - notify_when
-                  - throttle
               group:
                 description: The group name, which affects when the action runs (for example, when the threshold is met or when the alert is recovered). Each rule type has a list of valid action group names. If you don't need to group actions, set to `default`.
                 type: string
@@ -106469,6 +106632,7 @@ components:
           nullable: true
           type: boolean
         api_key_owner:
+          default: null
           description: The owner of the API key that is associated with the rule and used to run background tasks.
           nullable: true
           type: string
@@ -106502,6 +106666,7 @@ components:
           description: The date and time that the rule was created.
           type: string
         created_by:
+          default: null
           description: The identifier for the user that created the rule.
           nullable: true
           type: string
@@ -106634,6 +106799,7 @@ components:
                 - maxAlerts
                 - maxQueuedActions
                 - ruleExecution
+                - null
               nullable: true
               type: string
           required:
@@ -106664,6 +106830,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -106707,6 +106874,7 @@ components:
           description: The date and time of the latest updates to the rule.
           type: string
         updated_by:
+          default: null
           description: The identifier for the user who was the last to update the rule.
           nullable: true
           type: string
@@ -106720,11 +106888,8 @@ components:
         - schedule
         - actions
         - params
-        - created_by
-        - updated_by
         - created_at
         - updated_at
-        - api_key_owner
         - mute_all
         - muted_alert_ids
         - execution_status
@@ -107249,7 +107414,12 @@ components:
               type: string
         condition:
           description: Agent condition expression to evaluate whether to apply this integration to its inputs.
+          maxLength: 10000
+          nullable: true
           type: string
+        create_dataset_templates:
+          description: When true, install dedicated index templates for streams with a custom data_stream.dataset. Defaults to true for input packages, false for integration packages.
+          type: boolean
         description:
           description: Policy description.
           type: string
@@ -107284,6 +107454,8 @@ components:
             properties:
               condition:
                 description: Agent condition expression to evaluate whether to apply this input.
+                maxLength: 10000
+                nullable: true
                 type: string
               deprecated:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_deprecation_info'
@@ -107297,6 +107469,8 @@ components:
                   properties:
                     condition:
                       description: Agent condition expression to evaluate whether to apply this stream.
+                      maxLength: 10000
+                      nullable: true
                       type: string
                     deprecated:
                       $ref: '#/components/schemas/Kibana_HTTP_APIs_deprecation_info'
@@ -107332,6 +107506,7 @@ components:
                             required:
                               - id
                               - isSecretRef
+                        default: null
                         nullable: true
                       description: Input/stream level variable. Refer to the integration documentation for more information.
                       type: object
@@ -107361,6 +107536,7 @@ components:
                       required:
                         - id
                         - isSecretRef
+                  default: null
                   nullable: true
                 description: Input/stream level variable. Refer to the integration documentation for more information.
                 type: object
@@ -107406,6 +107582,7 @@ components:
                 required:
                   - id
                   - isSecretRef
+            default: null
             nullable: true
           description: Input/stream level variable. Refer to the integration documentation for more information.
           type: object
@@ -107741,6 +107918,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -107787,6 +107965,7 @@ components:
                       - value
                       - unit
                   maxBurnRateThreshold:
+                    default: null
                     nullable: true
                     type: number
                   shortWindow:
@@ -107803,7 +107982,6 @@ components:
                 required:
                   - id
                   - burnRateThreshold
-                  - maxBurnRateThreshold
                   - longWindow
                   - shortWindow
                   - actionGroup
@@ -108913,6 +109091,59 @@ components:
                 - action
                 - policy_name
                 - to
+            - additionalProperties: false
+              description: User agent processor - Extract browser, OS, and device details from a user agent string
+              type: object
+              properties:
+                action:
+                  enum:
+                    - user_agent
+                  type: string
+                customIdentifier:
+                  description: Custom identifier to correlate this processor across outputs
+                  minLength: 1
+                  type: string
+                description:
+                  description: Human-readable notes about this processor step
+                  type: string
+                extract_device_type:
+                  description: Extracts device type from the user agent string
+                  type: boolean
+                from:
+                  description: The field containing the user agent string
+                  minLength: 1
+                  type: string
+                ignore_failure:
+                  description: Continue pipeline execution if this processor fails
+                  type: boolean
+                ignore_missing:
+                  description: Skip processing when source field is missing
+                  type: boolean
+                properties:
+                  description: Specific properties to extract (defaults to all)
+                  items:
+                    enum:
+                      - name
+                      - os
+                      - device
+                      - original
+                      - version
+                    type: string
+                  type: array
+                regex_file:
+                  description: Custom regex file name containing the regular expressions for parsing the user agent string
+                  minLength: 1
+                  type: string
+                to:
+                  description: The field that will be filled with the user agent details
+                  minLength: 1
+                  type: string
+                where:
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs_Condition'
+                  description: Conditional expression controlling whether this processor runs
+              required:
+                - action
+                - from
             - additionalProperties: false
               description: Registered domain processor - extracts domain, registered_domain, top_level_domain, subdomain from a FQDN
               type: object
@@ -110371,6 +110602,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -110378,7 +110610,7 @@ components:
           description: The parameters for the transform health rule. These parameters are appropriate when `rule_type_id` is `transform_health`.
           properties:
             excludeTransforms:
-              default: []
+              default: null
               items:
                 type: string
               nullable: true
@@ -110389,11 +110621,13 @@ components:
               type: array
             testsConfig:
               additionalProperties: false
+              default: null
               nullable: true
               type: object
               properties:
                 errorMessages:
                   additionalProperties: false
+                  default: null
                   nullable: true
                   type: object
                   properties:
@@ -110402,6 +110636,7 @@ components:
                       type: boolean
                 healthCheck:
                   additionalProperties: false
+                  default: null
                   nullable: true
                   type: object
                   properties:
@@ -110410,19 +110645,15 @@ components:
                       type: boolean
                 notStarted:
                   additionalProperties: false
+                  default: null
                   nullable: true
                   type: object
                   properties:
                     enabled:
                       default: true
                       type: boolean
-              required:
-                - notStarted
-                - errorMessages
-                - healthCheck
           required:
             - includeTransforms
-            - testsConfig
           title: Transform Health Rule Params
           type: object
         rule_type_id:
@@ -110876,6 +111107,8 @@ components:
         nested:
           description: Show nested legend with hierarchical breakdown levels
           type: boolean
+        position:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_legendPosition'
         size:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_legendSize'
         truncate_after_lines:
@@ -112180,6 +112413,8 @@ components:
           type: string
         condition:
           description: Agent condition expression to evaluate whether to apply this integration to its inputs.
+          maxLength: 10000
+          nullable: true
           type: string
         description:
           description: Package policy description
@@ -112214,6 +112449,8 @@ components:
             properties:
               condition:
                 description: Agent condition expression to evaluate whether to apply this input.
+                maxLength: 10000
+                nullable: true
                 type: string
               config:
                 additionalProperties:
@@ -112253,6 +112490,8 @@ components:
                       nullable: true
                     condition:
                       description: Agent condition expression to evaluate whether to apply this stream.
+                      maxLength: 10000
+                      nullable: true
                       type: string
                     config:
                       additionalProperties:
@@ -112406,12 +112645,10 @@ components:
           maxItems: 100
           type: array
         supports_agentless:
-          default: false
           description: Indicates whether the package policy belongs to an agentless agent policy.
           nullable: true
           type: boolean
         supports_cloud_connector:
-          default: false
           description: Indicates whether the package policy supports cloud connectors.
           nullable: true
           type: boolean
@@ -112516,6 +112753,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -112638,13 +112876,13 @@ components:
           description: Indicates whether the action is a summary.
           type: boolean
         throttle:
+          default: null
           description: The throttle interval defines how frequently rule actions are triggered. It is specified in seconds, minutes, hours, or days and only applies when `notify_when` is set to `onThrottleInterval`. You cannot set the throttle interval at both the rule and action level. The recommended approach is to set it for each action individually. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
           nullable: true
           type: string
       required:
         - summary
         - notify_when
-        - throttle
       title: update_rule_action_frequency
       type: object
     Kibana_HTTP_APIs_upgrade_package_policies_request:
@@ -113357,6 +113595,8 @@ components:
       additionalProperties: false
       description: Legend configuration for waffle chart
       properties:
+        position:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_legendPosition'
         size:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_legendSize'
         truncate_after_lines:
@@ -114278,6 +114518,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -114302,9 +114543,11 @@ components:
                     type: string
                   type: array
             kqlQueryString:
+              default: null
               nullable: true
               type: string
             lookbackInterval:
+              default: null
               nullable: true
               type: string
             resultType:
@@ -114318,6 +114561,7 @@ components:
               minimum: 0
               type: number
             topNBuckets:
+              default: null
               minimum: 1
               nullable: true
               type: number
@@ -114325,9 +114569,6 @@ components:
             - jobSelection
             - severity
             - resultType
-            - lookbackInterval
-            - topNBuckets
-            - kqlQueryString
           title: Anomaly Detection Rule Params
           type: object
         rule_type_id:
@@ -114424,6 +114665,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -114432,6 +114674,7 @@ components:
           properties:
             excludeJobs:
               additionalProperties: false
+              default: null
               nullable: true
               type: object
               properties:
@@ -114461,11 +114704,13 @@ components:
                   type: array
             testsConfig:
               additionalProperties: false
+              default: null
               nullable: true
               type: object
               properties:
                 behindRealtime:
                   additionalProperties: false
+                  default: null
                   nullable: true
                   type: object
                   properties:
@@ -114473,12 +114718,12 @@ components:
                       default: true
                       type: boolean
                     timeInterval:
+                      default: null
                       nullable: true
                       type: string
-                  required:
-                    - timeInterval
                 datafeed:
                   additionalProperties: false
+                  default: null
                   nullable: true
                   type: object
                   properties:
@@ -114487,10 +114732,12 @@ components:
                       type: boolean
                 delayedData:
                   additionalProperties: false
+                  default: null
                   nullable: true
                   type: object
                   properties:
                     docsCount:
+                      default: null
                       minimum: 1
                       nullable: true
                       type: number
@@ -114498,13 +114745,12 @@ components:
                       default: true
                       type: boolean
                     timeInterval:
+                      default: null
                       nullable: true
                       type: string
-                  required:
-                    - docsCount
-                    - timeInterval
                 errorMessages:
                   additionalProperties: false
+                  default: null
                   nullable: true
                   type: object
                   properties:
@@ -114513,22 +114759,15 @@ components:
                       type: boolean
                 mml:
                   additionalProperties: false
+                  default: null
                   nullable: true
                   type: object
                   properties:
                     enabled:
                       default: true
                       type: boolean
-              required:
-                - datafeed
-                - mml
-                - delayedData
-                - behindRealtime
-                - errorMessages
           required:
             - includeJobs
-            - excludeJobs
-            - testsConfig
           title: Anomaly Detection Jobs Health Rule Params
           type: object
         rule_type_id:
@@ -114625,6 +114864,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -114800,6 +115040,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -114930,6 +115171,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -115041,6 +115283,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -115216,6 +115459,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:

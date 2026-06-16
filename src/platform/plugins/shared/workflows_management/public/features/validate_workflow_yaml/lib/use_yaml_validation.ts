@@ -18,7 +18,7 @@ import { validateConnectorIds } from './validate_connector_ids';
 import { validateDeprecatedStepTypes } from './validate_deprecated_step_types';
 import { validateIfConditions } from './validate_if_conditions';
 import { validateJsonSchemaDefaults } from './validate_json_schema_defaults';
-import { validateLiquidTemplate } from './validate_liquid_template';
+import { validateLiquidYamlScalars } from './validate_liquid_yaml_scalars';
 import { validateStepNameUniqueness } from './validate_step_name_uniqueness';
 import { validateStepProperties } from './validate_step_properties';
 import { validateTriggerConditions } from './validate_trigger_conditions';
@@ -150,9 +150,20 @@ export function useYamlValidation(
       // (e.g. during editing when the YAML doesn't fully match the workflow schema yet)
       // so that connector-id, step-name, liquid-template, step-property, and
       // workflow-inputs validation still provide feedback.
+      const yamlString = model.getValue();
+      const liquidScalarResults =
+        workflowGraph && workflowDefinition
+          ? validateLiquidYamlScalars(
+              yamlString,
+              yamlDocument,
+              model,
+              workflowGraph,
+              workflowDefinition
+            )
+          : validateLiquidYamlScalars(yamlString, yamlDocument, null);
       const results: YamlValidationResult[] = [
         ...(lineCounter ? validateStepNameUniqueness(yamlDocument, lineCounter) : []),
-        ...validateLiquidTemplate(model.getValue(), yamlDocument),
+        ...liquidScalarResults.filter((result) => result.owner === 'liquid-template-validation'),
         ...validateConnectorIds(connectorIdItems, dynamicConnectorTypes, connectorsManagementUrl),
         ...validateWorkflowOutputsInYaml(yamlDocument, model, workflowDefinition?.outputs),
         ...(stepPropertyItems ? await validateStepProperties(stepPropertyItems) : []),
@@ -191,6 +202,7 @@ export function useYamlValidation(
             yamlDocument,
             model
           ),
+          ...liquidScalarResults.filter((result) => result.owner === 'variable-validation'),
           ...validateJsonSchemaDefaults(yamlDocument, workflowDefinition, model)
         );
       }

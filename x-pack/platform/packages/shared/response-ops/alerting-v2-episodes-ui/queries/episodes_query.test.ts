@@ -148,6 +148,45 @@ describe('buildEpisodesQuery', () => {
     expect(queryString).toContain('WHERE rule.id == "rule-123"');
   });
 
+  it('should apply groupHash filter', () => {
+    const query = buildEpisodesQuery(
+      SPACE_ID,
+      { sortField: '@timestamp', sortDirection: 'desc' },
+      { groupHash: 'abc123' }
+    );
+    const queryString = query.print('basic');
+
+    expect(queryString).toContain('WHERE group_hash == "abc123"');
+  });
+
+  it('should not apply groupHash filter when null', () => {
+    const query = buildEpisodesQuery(
+      SPACE_ID,
+      { sortField: '@timestamp', sortDirection: 'desc' },
+      { groupHash: null }
+    );
+    const queryString = query.print('basic');
+
+    expect(queryString).not.toContain('WHERE group_hash ==');
+  });
+
+  it('should treat groupingValues as display-only and not add a clause', () => {
+    const query = buildEpisodesQuery(
+      SPACE_ID,
+      { sortField: '@timestamp', sortDirection: 'desc' },
+      {
+        groupHash: 'abc123',
+        groupingValues: { 'host.name': 'web-01', 'service.name': 'checkout' },
+      }
+    );
+    const queryString = query.print('basic');
+
+    expect(queryString).toContain('WHERE group_hash == "abc123"');
+    expect(queryString).not.toContain('groupingValues');
+    expect(queryString).not.toContain('host.name');
+    expect(queryString).not.toContain('web-01');
+  });
+
   it('should apply queryString filter with QSTR', () => {
     const query = buildEpisodesQuery(
       SPACE_ID,
@@ -226,13 +265,14 @@ describe('buildEpisodesQuery', () => {
     const query = buildEpisodesQuery(
       SPACE_ID,
       { sortField: '@timestamp', sortDirection: 'desc' },
-      { queryString: null, status: null, ruleId: undefined, tags: null }
+      { queryString: null, status: null, ruleId: undefined, groupHash: null, tags: null }
     );
     const queryString = query.print('basic');
 
     expect(queryString).not.toContain('QSTR');
     expect(queryString).not.toContain('WHERE effective_status ==');
     expect(queryString).not.toContain('WHERE rule.id ==');
+    expect(queryString).not.toContain('WHERE group_hash ==');
     expect(queryString).not.toContain('MV_CONTAINS(last_tags');
   });
 

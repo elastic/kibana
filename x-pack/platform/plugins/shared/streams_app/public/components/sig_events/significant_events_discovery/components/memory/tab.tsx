@@ -35,6 +35,7 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import { CODE_EDITOR_DEFAULT_THEME_ID, defaultThemesResolvers, monaco } from '@kbn/monaco';
+import { useStreamsPrivileges } from '../../../../../hooks/use_streams_privileges';
 import {
   useMemoryTree,
   useMemorySearch,
@@ -45,6 +46,7 @@ import {
   useRecentChanges,
   useScrapeConversations,
   useConsolidateMemory,
+  useSynthesizeMemory,
 } from './use_memory';
 import type { MemoryCategoryNode, MemoryVersionRecord } from './types';
 
@@ -53,6 +55,10 @@ export function MemoryTab() {
   const [selectedEntryId, setSelectedEntryId] = useState<string | null>(null);
   const [showHistory, setShowHistory] = useState(false);
 
+  const {
+    ui: { manage: canManage },
+  } = useStreamsPrivileges();
+
   const { data: treeData, isLoading: isTreeLoading } = useMemoryTree();
   const { data: searchData, isLoading: isSearchLoading } = useMemorySearch(searchQuery);
 
@@ -60,6 +66,7 @@ export function MemoryTab() {
 
   const scrapeConversations = useScrapeConversations();
   const consolidateMemory = useConsolidateMemory();
+  const synthesizeMemory = useSynthesizeMemory();
 
   const isSearchActive = searchQuery.length >= 2;
 
@@ -101,8 +108,13 @@ export function MemoryTab() {
                 size="s"
                 iconType="refresh"
                 isLoading={scrapeConversations.isLoading}
+                isDisabled={!canManage}
                 onClick={() => scrapeConversations.mutate()}
                 data-test-subj="streamsMemoryScrapeButton"
+                title={i18n.translate('xpack.streams.memory.scrapeButtonTitle', {
+                  defaultMessage:
+                    'Scrape agent conversations and extract durable knowledge into memory pages.',
+                })}
               >
                 {i18n.translate('xpack.streams.memory.scrapeButton', {
                   defaultMessage: 'Scrape Conversations',
@@ -114,11 +126,34 @@ export function MemoryTab() {
                 size="s"
                 iconType="broom"
                 isLoading={consolidateMemory.isLoading}
+                isDisabled={!canManage}
                 onClick={() => consolidateMemory.mutate()}
                 data-test-subj="streamsMemoryConsolidateButton"
+                title={i18n.translate('xpack.streams.memory.consolidateButtonTitle', {
+                  defaultMessage:
+                    'Merge duplicate pages, remove stale entries, and improve categorization.',
+                })}
               >
                 {i18n.translate('xpack.streams.memory.consolidateButton', {
                   defaultMessage: 'Consolidate Memory',
+                })}
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                size="s"
+                iconType="sparkles"
+                isLoading={synthesizeMemory.isLoading}
+                isDisabled={!canManage}
+                onClick={() => synthesizeMemory.mutate()}
+                data-test-subj="streamsMemorySynthesizeButton"
+                title={i18n.translate('xpack.streams.memory.synthesizeButtonTitle', {
+                  defaultMessage:
+                    'Synthesize significant events knowledge indicators into new wiki pages.',
+                })}
+              >
+                {i18n.translate('xpack.streams.memory.synthesizeButton', {
+                  defaultMessage: 'Synthesize Memory',
                 })}
               </EuiButton>
             </EuiFlexItem>

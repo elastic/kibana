@@ -68,6 +68,15 @@ export interface EpisodesFilterState {
   status?: string | null;
   /** Rule ID or null */
   ruleId?: string | null;
+  /** Group hash — narrows to a single per-rule series (used for deep-links from rule details). */
+  groupHash?: string | null;
+  /**
+   * Display-only companion to `groupHash`. When a deep-link carries the
+   * resolved grouping field values (e.g. `{ "host.name": "web-01" }`), the
+   * destination chip can render `host=web-01` without re-running the DSL
+   * lookup. Does NOT affect the query — `buildEpisodesQuery` ignores it.
+   */
+  groupingValues?: Record<string, string | null> | null;
   /** Query string for full-text search */
   queryString?: string | null;
   /** Tag values — episodes matching any selected tag (OR) */
@@ -147,6 +156,9 @@ const applyFilterState = (query: ComposerQuery, filterState: EpisodesFilterState
   }
   if (filterState.ruleId) {
     query.where`rule.id == ${filterState.ruleId}`;
+  }
+  if (filterState.groupHash) {
+    query.where`group_hash == ${filterState.groupHash}`;
   }
   if (filterState.tags?.length) {
     addTagsFilter(query, filterState.tags);

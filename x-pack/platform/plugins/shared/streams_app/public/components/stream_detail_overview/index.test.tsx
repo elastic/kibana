@@ -80,4 +80,27 @@ describe('StreamOverview', () => {
     expect(screen.queryByText('Dataset quality')).not.toBeInTheDocument();
     expect(screen.getByTestId('mockIngestRateChart')).toBeInTheDocument();
   });
+
+  it('does not render dataset quality card for draft stream', () => {
+    const baseDefinition = createMockWiredStreamDefinition();
+    const definition = createMockWiredStreamDefinition({
+      stream: {
+        ...baseDefinition.stream,
+        ingest: {
+          ...baseDefinition.stream.ingest,
+          wired: {
+            ...baseDefinition.stream.ingest.wired,
+            draft: true,
+          },
+        },
+      },
+    });
+
+    mockUseStreamDetail.mockReturnValue({ definition });
+
+    renderWithI18n(<StreamOverview />);
+
+    expect(screen.queryByText('Dataset quality')).not.toBeInTheDocument();
+    expect(screen.getByTestId('mockIngestRateChart')).toBeInTheDocument();
+  });
 });

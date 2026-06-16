@@ -23,8 +23,6 @@ export type {
   UnauthorizedErrorHandlerNotHandledResult,
   UnauthorizedErrorHandlerOptions,
   FakeRequest,
-  UrlRequest,
-  ScopeableUrlRequest,
   ElasticsearchClientSslConfig,
   ElasticsearchClientConfig,
   ElasticsearchApiToRedactInLogs,

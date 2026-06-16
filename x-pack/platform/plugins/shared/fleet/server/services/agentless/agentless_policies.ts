@@ -17,7 +17,7 @@ import {
 import type { TypeOf } from '@kbn/config-schema';
 import { v4 as uuidv4 } from 'uuid';
 import { omit } from 'lodash';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import type { AgentlessPolicy, CreateAgentlessPolicyRequestSchema } from '../../../common/types';
 

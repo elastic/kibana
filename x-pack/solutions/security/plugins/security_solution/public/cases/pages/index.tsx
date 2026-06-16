@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef } from 'react';
+import React, { Suspense, lazy, useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import type { CaseViewRefreshPropInterface } from '@kbn/cases-plugin/common';
 import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
+import type { SelectTimelineModalProps } from '@kbn/cases-plugin/public';
 import { CaseDetailsRefreshContext } from '../../common/components/endpoint';
 import { TimelineId } from '../../../common/types/timeline';
 import { useKibana } from '../../common/lib/kibana';
@@ -22,6 +23,20 @@ import { useAlertsPrivileges } from '../../detections/containers/detection_engin
 import * as timelineMarkdownPlugin from '../../common/components/markdown_editor/plugins/timeline';
 import { useUpsellingMessage } from '../../common/hooks/use_upselling';
 import { CASES_FEATURES } from '..';
+
+const LazySelectTimelineModal = lazy(async () => {
+  const { SelectTimelineModal: Component } = await import(
+    '../attachments/timeline/select_timeline_modal'
+  );
+  return { default: Component };
+});
+
+const SuspendedSelectTimelineModal: React.FC<SelectTimelineModalProps> = (props) => (
+  <Suspense fallback={null}>
+    <LazySelectTimelineModal {...props} />
+  </Suspense>
+);
+SuspendedSelectTimelineModal.displayName = 'SuspendedSelectTimelineModal';
 
 const CaseContainerComponent: React.FC = () => {
   const { cases } = useKibana().services;
@@ -83,6 +98,9 @@ const CaseContainerComponent: React.FC = () => {
             },
             hooks: {
               useInsertTimeline,
+            },
+            components: {
+              SelectTimelineModal: SuspendedSelectTimelineModal,
             },
           },
           permissions: userCasesPermissions,

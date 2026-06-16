@@ -21,7 +21,7 @@ import {
   cleanSyntheticsTestData,
 } from './services/private_location_test_service';
 import { comparePolicies, getTestSyntheticsPolicy } from './sample_data/test_policy';
-import { omitMonitorKeys } from './add_monitor';
+import { omitMonitorKeys } from './helper/monitor_keys';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('SyncGlobalParamsSpaces', function () {

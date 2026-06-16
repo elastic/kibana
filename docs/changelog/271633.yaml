@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/271633
+issues:
+- https://github.com/elastic/obs-ai-team/issues/571
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-06-01
+title: "Add developer support for `kbn-evals` Vault"

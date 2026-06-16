@@ -8,17 +8,8 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { HttpStart } from '@kbn/core-http-browser';
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiImage,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiImage } from '@elastic/eui';
+import { AnnouncementBanner } from '@kbn/announcement-banner';
 import illustration from '../../../assets/centralized_action_policies.svg';
 
 // TODO: replace with paths.actionPolicyCreate from x-pack/platform/plugins/shared/alerting_v2/public/constants.ts
@@ -66,47 +57,32 @@ export const CentralizedActionPoliciesPanel = ({ http }: Props) => {
   const createUrl = http.basePath.prepend(ACTION_POLICY_CREATE_PATH);
 
   return (
-    <EuiPanel hasBorder hasShadow={false} paddingSize="m">
-      <EuiFlexGroup gutterSize="m" alignItems="flexStart" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiImage src={illustration} alt={illustrationAlt} width={96} height={96} />
-        </EuiFlexItem>
-        <EuiFlexItem grow>
-          <EuiTitle size="xs">
-            <h3>{title}</h3>
-          </EuiTitle>
-          <EuiSpacer size="xs" />
-          <EuiText size="s" color="subdued">
-            <p>{description}</p>
-          </EuiText>
-          <EuiSpacer size="m" />
-          <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                fill
-                href={createUrl}
-                target="_blank"
-                iconType="popout"
-                iconSide="right"
-                data-test-subj="centralizedActionPoliciesCreate"
-              >
-                {createCtaLabel}
-              </EuiButton>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                href={CENTRALIZED_ACTION_POLICIES_DOCS_URL}
-                target="_blank"
-                iconType="popout"
-                iconSide="right"
-                data-test-subj="centralizedActionPoliciesLearnMore"
-              >
-                {learnMoreLabel}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
+    <AnnouncementBanner
+      size="s"
+      color="plain"
+      headingElement="h3"
+      title={title}
+      text={description}
+      media={<EuiImage src={illustration} alt={illustrationAlt} />}
+      actionProps={{
+        primary: {
+          children: createCtaLabel,
+          fill: true,
+          href: createUrl,
+          target: '_blank',
+          iconType: 'popout',
+          iconSide: 'right',
+          'data-test-subj': 'centralizedActionPoliciesCreate',
+        },
+        secondary: {
+          children: learnMoreLabel,
+          href: CENTRALIZED_ACTION_POLICIES_DOCS_URL,
+          target: '_blank',
+          iconType: 'popout',
+          iconSide: 'right',
+          'data-test-subj': 'centralizedActionPoliciesLearnMore',
+        },
+      }}
+    />
   );
 };

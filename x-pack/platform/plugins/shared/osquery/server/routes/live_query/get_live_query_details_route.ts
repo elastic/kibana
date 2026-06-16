@@ -10,7 +10,7 @@ import { every, map, mapKeys, pick, reduce } from 'lodash';
 import type { Observable } from 'rxjs';
 import { lastValueFrom, zip } from 'rxjs';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type {
   GetLiveQueryDetailsRequestParamsSchema,
   GetLiveQueryDetailsRequestQuerySchema,

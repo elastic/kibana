@@ -6,12 +6,11 @@
  */
 
 import datemath from '@kbn/datemath';
-import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
 
-import type { KibanaRequest } from '@kbn/core-http-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { CoreStart } from '@kbn/core-lifecycle-server';
 import { SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import type { Range } from '../../../../../common/entity_analytics/risk_engine';
 
 export const convertDateToISOString = (dateString: string): string => {
@@ -29,26 +28,6 @@ export const convertRangeToISO = (range: Range): Range => ({
   end: convertDateToISOString(range.end),
 });
 
-export const buildFakeScopedRequest = ({
-  coreStart,
-  namespace,
-}: {
-  coreStart: CoreStart;
-  namespace: string;
-}): KibanaRequest => {
-  const rawRequest = {
-    headers: {},
-    path: '/',
-  };
-
-  const request = kibanaRequestFactory(rawRequest);
-  const scopedPath = addSpaceIdToPath('/', namespace);
-
-  coreStart.http.basePath.set(request, scopedPath);
-
-  return request;
-};
-
 /**
  *  Builds a SavedObjectsClient scoped to the given namespace. This should be used with caution, and only in cases where a real kibana request is not available to build a proper scoped client (e.g. a task manager task).
  *
@@ -64,7 +43,10 @@ export const buildScopedInternalSavedObjectsClientUnsafe = ({
   coreStart: CoreStart;
   namespace: string;
 }) => {
-  const fakeScopedRequest = buildFakeScopedRequest({ coreStart, namespace });
+  const fakeScopedRequest = kibanaRequestFactory({
+    headers: {},
+    spaceId: asSpaceId(namespace),
+  });
 
   return coreStart.savedObjects.getScopedClient(fakeScopedRequest, {
     excludedExtensions: [SECURITY_EXTENSION_ID],

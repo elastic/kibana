@@ -18,7 +18,6 @@ import {
 } from '@kbn/core-http-router-server-internal';
 import type {
   ScopeableRequest,
-  ScopeableUrlRequest,
   UnauthorizedErrorHandler,
   ICustomClusterClient,
   IScopedClusterClient,
@@ -48,12 +47,12 @@ const noop = () => undefined;
 
 interface CommonFactoryRoutingOpts {
   logger: Logger;
-  request?: ScopeableUrlRequest;
+  request?: ScopeableRequest;
 }
 
 interface ScopedFactoryRoutingOpts extends CommonFactoryRoutingOpts {
   projectRouting: 'space';
-  request: ScopeableUrlRequest;
+  request: ScopeableRequest;
 }
 
 /**
@@ -136,9 +135,7 @@ export class ClusterClient implements ICustomClusterClient {
     });
   }
 
-  asScoped(request: ScopeableRequest): IScopedClusterClient;
-  asScoped(request: ScopeableUrlRequest, opts: AsScopedOptions): IScopedClusterClient;
-  asScoped(request: ScopeableUrlRequest, opts?: AsScopedOptions): IScopedClusterClient {
+  asScoped(request: ScopeableRequest, opts?: AsScopedOptions): IScopedClusterClient {
     const createScopedClient = () => {
       const scopedHeaders = this.getScopedHeaders(request);
       const factoryOpts: FactoryRoutingOpts = opts

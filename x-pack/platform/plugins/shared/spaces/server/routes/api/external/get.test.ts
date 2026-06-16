@@ -53,9 +53,7 @@ describe('GET space', () => {
       .setClientRepositoryFactory(() => savedObjectsRepositoryMock);
 
     const service = new SpacesService();
-    service.setup({
-      basePath: httpService.basePath,
-    });
+    service.setup();
 
     const usageStatsServicePromise = Promise.resolve(usageStatsServiceMock.createSetupContract());
 
@@ -66,7 +64,6 @@ describe('GET space', () => {
     );
 
     const spacesServiceStart = service.start({
-      basePath: coreStart.http.basePath,
       spacesClientService: clientServiceStart,
     });
 

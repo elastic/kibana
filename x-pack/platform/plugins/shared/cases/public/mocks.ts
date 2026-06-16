@@ -72,6 +72,7 @@ export const mockCasesContract = (): CaseUiClientMock => ({
   helpers: helpersMock,
   config: {
     templatesEnabled: false,
+    attachmentsEnabled: false,
     casesRedesign: { list: false, details: false, settings: false },
   },
 });

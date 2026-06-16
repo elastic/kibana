@@ -7,7 +7,7 @@
 
 import expect from 'expect';
 import { deleteAllRules } from '@kbn/detections-response-ftr-services';
-import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 import { REVIEW_RULE_INSTALLATION_URL } from '@kbn/security-solution-plugin/common/api/detection_engine/prebuilt_rules/urls';
 import { RULES_FEATURE_ID } from '@kbn/security-solution-plugin/common/constants';
 import { MAX_SEARCH_RULES_SEARCH_TERM_LENGTH } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_management/api/rules/search_rules/request_schema_validation';

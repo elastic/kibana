@@ -9,7 +9,7 @@ import { isEmpty } from 'lodash';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { UserActionTitle } from '@kbn/cases-components';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { getRuleInfo } from '@kbn/cases-plugin/common';
+import { getRuleInfo, type AlertAttachmentMetadata } from '@kbn/cases-plugin/common';
 import { useFetchAlertData } from '../../../pages/use_fetch_alert_data';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import * as i18n from '../translations';
@@ -24,7 +24,12 @@ const SECURITY_EXTRA_RULE_NAME_PATHS = ['signal.rule.name'];
 
 export interface AlertEventProps {
   alertId: string;
-  rule: { id: string | null; name: string | null } | null | undefined;
+  /**
+   * Schema-inferred `metadata.rule` from `SecurityAlertAttachmentPayloadSchema`.
+   * The component reads `id` / `name` defensively so callers can pass it
+   * through without coercion.
+   */
+  rule: AlertAttachmentMetadata['rule'];
   savedObjectId: string;
   totalAlerts: number;
 }

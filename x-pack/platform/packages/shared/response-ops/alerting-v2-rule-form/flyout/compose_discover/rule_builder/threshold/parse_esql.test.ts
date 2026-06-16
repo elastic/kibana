@@ -767,6 +767,20 @@ describe('parseThresholdEsql', () => {
       expect(parsed!.groupByFields).toEqual(['region']);
     });
 
+    it('round-trips stat labels containing spaces', () => {
+      const original = makeValues({
+        stats: [{ id: '1', label: 'error count', aggregation: Aggregation.COUNT }],
+        alertConditions: [
+          { id: '1', metric: 'error count', comparator: Comparator.GT, threshold: [100] },
+        ],
+      });
+      const { esql, parsed } = roundTrip(original);
+      expect(esql).toContain('`error count` = COUNT(*)');
+      expect(parsed).not.toBeNull();
+      expect(parsed!.stats[0].label).toBe('error count');
+      expect(parsed!.alertConditions[0].metric).toBe('error count');
+    });
+
     it('round-trips with no alert conditions (STATS only)', () => {
       const original = makeValues({
         alertConditions: [],

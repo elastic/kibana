@@ -95,6 +95,8 @@ dependsOn:
   - '@kbn/scout'
   - '@kbn/core-http-common'
   - '@kbn/cps'
+  - '@kbn/core-ui-settings-server-mocks'
+  - '@kbn/task-manager-plugin'
 tags:
   - plugin
   - prod

@@ -53,3 +53,5 @@ export * from './src/storage_explorer_types';
 export type * from './src/time_range_metadata';
 export type * from './src/timeseries';
 export type * from './src/traces';
+export * from './src/privilege_type';
+export type * from './src/metrics_types';
