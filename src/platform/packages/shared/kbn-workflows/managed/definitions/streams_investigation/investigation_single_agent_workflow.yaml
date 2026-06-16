@@ -1,0 +1,85 @@
+version: "1"
+name: Investigation (Single Agent)
+description: >
+  Single-agent RCA workflow that mirrors the conversational Agent Builder baseline.
+  One ai.agent step with all observability tools — no parallel sub-workflows, no
+  hypothesis fan-out. Used to validate that the workflow wrapper adds no overhead
+  vs the conversational baseline, and as a foundation for the adversarial loop.
+enabled: true
+settings:
+  timeout: "60m"
+  concurrency:
+    key: "streams-sigevents-investigation-single-{{ inputs.discovery_id }}"
+    strategy: cancel-in-progress
+    max: 1
+tags:
+  - observability
+  - streams
+  - sigevents
+  - investigation
+
+triggers:
+  - type: manual
+
+steps:
+
+  # ── Single investigation agent ────────────────────────────────────────────────
+  - name: investigate
+    type: ai.agent
+    agent-id: elastic-ai-agent
+    connector-id: ".anthropic-claude-4.5-haiku-chat_completion"
+    create-conversation: true
+    with:
+      timeout: 1800s
+      message: |
+        {{ inputs.question }}
+
+        Data streams (use get_index_info to discover available fields in each):
+        - Logs:    {{ inputs.stream_names[0] }}
+        - Traces:  {{ inputs.stream_names[1] }}
+        - Metrics: {{ inputs.stream_names[2] }} (infrastructure signals: CPU, memory, network, latency)
+        Event metadata: {{ inputs | json }}
+
+        Investigate the root cause of this incident. Use all available tools:
+        - get_service_topology to understand the call graph and service dependencies
+        - get_services and get_trace_metrics to identify anomalous services
+        - get_log_change_points and get_metric_change_points to find what changed and when
+        - ES|QL queries scoped to the indices above for detailed evidence
+
+        Key principles:
+        - A service that appears degraded may be a downstream victim of a failing dependency.
+          Check the call graph. The root cause is the service with an independent fault, not one
+          that's degraded purely because something it depends on failed.
+        - A heavily-called central service always shows increased load during any fault.
+          Don't attribute root cause based solely on high absolute load.
+        - Infrastructure faults (CPU stress, memory, socket exhaustion) show in metrics,
+          not always in APM trace data.
+
+        Return your findings as structured output with:
+        - root_cause: a clear statement of the root cause service and failure mechanism
+        - confidence: your confidence level (0-1)
+        - evidence_summary: the key evidence supporting your conclusion
+        - mechanism: the specific failure mode (e.g. "CPU saturation", "memory leak", "connection pool exhaustion")
+      schema:
+        type: object
+        properties:
+          root_cause:
+            type: string
+          confidence:
+            type: number
+            minimum: 0
+            maximum: 1
+          evidence_summary:
+            type: string
+          mechanism:
+            type: string
+          gaps_found:
+            type: array
+            items:
+              type: string
+        required:
+          - root_cause
+          - confidence
+          - evidence_summary
+    on-failure:
+      continue: false
