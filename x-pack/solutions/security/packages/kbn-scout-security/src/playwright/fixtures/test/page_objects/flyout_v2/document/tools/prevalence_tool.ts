@@ -10,7 +10,7 @@ import type { ScoutPage, Locator } from '@kbn/scout';
 /**
  * Page object for the prevalence tool overlay inside the flyout v2 document flyout.
  */
-export class PrevalenceToolPage {
+export class PrevalenceTool {
   /** Title link in the insights prevalence panel that opens the tool overlay. */
   public readonly titleLink: Locator;
   /** Header row of the tools flyout — use to confirm the overlay is open. */
@@ -63,9 +63,7 @@ export class PrevalenceToolPage {
       '[data-test-subj="securitySolutionFlyoutPrevalenceDetailsTable"] tbody tr:first-child [data-test-subj^="cellActions-renderContent-"]'
     );
     this.hoverActionsPopover = page.testSubj.locator('hoverActionsPopover');
-    this.filterInAction = page.testSubj.locator(
-      'actionItem-security-default-cellActions-filterIn'
-    );
+    this.filterInAction = page.testSubj.locator('actionItem-security-default-cellActions-filterIn');
     this.filterOutAction = page.testSubj.locator(
       'actionItem-security-default-cellActions-filterOut'
     );

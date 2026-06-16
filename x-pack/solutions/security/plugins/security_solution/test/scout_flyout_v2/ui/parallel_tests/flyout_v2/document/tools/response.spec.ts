@@ -19,6 +19,7 @@ spaceTest.describe(
       await apiServices.detectionRule.createCustomQueryRule({
         ...CUSTOM_QUERY_RULE,
         name: ruleName,
+        index: ['auditbeat-*'],
       });
       // platform_engineer has `actions_log_management_read`, required (with a platinum+ license)
       // for the flyout to fetch and render automated response actions.
@@ -37,11 +38,11 @@ spaceTest.describe(
         await pageObjects.alertsTablePage.navigate();
         await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
         await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-        await pageObjects.documentFlyoutV2.waitForAlertFlyout();
+        await pageObjects.documentFlyout.waitForAlertFlyout();
 
         // The Response section is collapsed by default; expand it to reveal the details button.
-        await pageObjects.documentFlyoutV2.responseSection.click();
-        await pageObjects.documentFlyoutV2.responseButton.click();
+        await pageObjects.documentFlyout.responseSection.click();
+        await pageObjects.documentFlyout.responseButton.click();
 
         await expect(pageObjects.responseTool.content).toBeVisible({ timeout: 10_000 });
 
@@ -55,8 +56,8 @@ spaceTest.describe(
 
         // Clicking the header opens a child document flyout for the same alert
         await pageObjects.responseTool.toolsFlyoutTitle.click();
-        await pageObjects.documentFlyoutV2.waitForChildDocumentFlyout();
-        await expect(pageObjects.documentFlyoutV2.childDocumentAlertTitle).toContainText(ruleName);
+        await pageObjects.documentFlyout.waitForChildDocumentFlyout();
+        await expect(pageObjects.documentFlyout.childDocumentAlertTitle).toContainText(ruleName);
       }
     );
 
@@ -71,11 +72,11 @@ spaceTest.describe(
         await pageObjects.alertsTablePage.navigate();
         await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
         await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-        await pageObjects.documentFlyoutV2.waitForAlertFlyout();
+        await pageObjects.documentFlyout.waitForAlertFlyout();
 
         // The Response section is collapsed by default; expand it to reveal the details button.
-        await pageObjects.documentFlyoutV2.responseSection.click();
-        await pageObjects.documentFlyoutV2.responseButton.click();
+        await pageObjects.documentFlyout.responseSection.click();
+        await pageObjects.documentFlyout.responseButton.click();
 
         await expect(pageObjects.responseTool.content).toBeVisible({ timeout: 10_000 });
 

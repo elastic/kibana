@@ -46,17 +46,17 @@ spaceTest.describe(
         await pageObjects.alertsTablePage.navigate();
         await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
         await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-        await pageObjects.documentFlyoutV2.waitForAlertFlyout();
+        await pageObjects.documentFlyout.waitForAlertFlyout();
 
-        await pageObjects.documentFlyoutV2.visualizationsSection.click();
+        await pageObjects.documentFlyout.visualizationsSection.click();
         await pageObjects.analyzerTool.titleLink.click();
 
         await expect(pageObjects.analyzerTool.toolsFlyoutTitle).toContainText(ruleName);
         await expect(pageObjects.analyzerTool.toolsFlyoutTitleAlertIcon).toBeVisible();
 
         await pageObjects.analyzerTool.toolsFlyoutTitle.click();
-        await pageObjects.documentFlyoutV2.waitForChildDocumentFlyout();
-        await expect(pageObjects.documentFlyoutV2.childDocumentAlertTitle).toContainText(ruleName);
+        await pageObjects.documentFlyout.waitForChildDocumentFlyout();
+        await expect(pageObjects.documentFlyout.childDocumentAlertTitle).toContainText(ruleName);
       }
     );
 
@@ -66,9 +66,9 @@ spaceTest.describe(
         await pageObjects.alertsTablePage.navigate();
         await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
         await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-        await pageObjects.documentFlyoutV2.waitForAlertFlyout();
+        await pageObjects.documentFlyout.waitForAlertFlyout();
 
-        await pageObjects.documentFlyoutV2.visualizationsSection.click();
+        await pageObjects.documentFlyout.visualizationsSection.click();
         await pageObjects.analyzerTool.titleLink.click();
 
         await expect(pageObjects.analyzerTool.toolsFlyoutHeader).toBeVisible({ timeout: 10_000 });
@@ -90,9 +90,9 @@ spaceTest.describe(
         await pageObjects.alertsTablePage.navigate();
         await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
         await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-        await pageObjects.documentFlyoutV2.waitForAlertFlyout();
+        await pageObjects.documentFlyout.waitForAlertFlyout();
 
-        await pageObjects.documentFlyoutV2.visualizationsSection.click();
+        await pageObjects.documentFlyout.visualizationsSection.click();
         await pageObjects.analyzerTool.titleLink.click();
 
         await expect(pageObjects.analyzerTool.resolverLoading).toHaveCount(0, { timeout: 15_000 });
@@ -105,7 +105,7 @@ spaceTest.describe(
         // Pressing the node title opens the process document in a child flyout alongside the
         // original alert flyout, so two document titles are now present.
         await pageObjects.analyzerTool.nodeDetailTitleLink.click();
-        await expect(pageObjects.documentFlyoutV2.title).toHaveCount(2, { timeout: 15_000 });
+        await expect(pageObjects.documentFlyout.title).toHaveCount(2, { timeout: 15_000 });
       }
     );
 
@@ -115,9 +115,9 @@ spaceTest.describe(
         await pageObjects.alertsTablePage.navigate();
         await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
         await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-        await pageObjects.documentFlyoutV2.waitForAlertFlyout();
+        await pageObjects.documentFlyout.waitForAlertFlyout();
 
-        await pageObjects.documentFlyoutV2.visualizationsSection.click();
+        await pageObjects.documentFlyout.visualizationsSection.click();
         await pageObjects.analyzerTool.titleLink.click();
 
         await expect(pageObjects.analyzerTool.resolverLoading).toHaveCount(0, { timeout: 15_000 });
@@ -137,7 +137,7 @@ spaceTest.describe(
 
         // Clicking the rule opens the corresponding alert in a child flyout
         await pageObjects.analyzerTool.eventInCategoryLink.click();
-        await expect(pageObjects.documentFlyoutV2.title.filter({ hasText: ruleName })).toHaveCount(
+        await expect(pageObjects.documentFlyout.title.filter({ hasText: ruleName })).toHaveCount(
           2,
           { timeout: 15_000 }
         );

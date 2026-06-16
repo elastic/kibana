@@ -35,9 +35,9 @@ spaceTest.describe(
         await pageObjects.alertsTablePage.navigate();
         await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
         await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-        await pageObjects.documentFlyoutV2.waitForAlertFlyout();
+        await pageObjects.documentFlyout.waitForAlertFlyout();
 
-        await expect(pageObjects.documentFlyoutV2.insightsSection).toBeVisible();
+        await expect(pageObjects.documentFlyout.insightsSection).toBeVisible();
         await pageObjects.threatIntelligenceTool.titleLink.click();
 
         await expect(pageObjects.threatIntelligenceTool.detailsLoading).toHaveCount(0, {
@@ -50,8 +50,8 @@ spaceTest.describe(
 
         // Clicking the header opens a child document flyout for the same alert
         await pageObjects.threatIntelligenceTool.toolsFlyoutTitle.click();
-        await pageObjects.documentFlyoutV2.waitForAlertFlyout();
-        await expect(pageObjects.documentFlyoutV2.title).toContainText(ruleName);
+        await pageObjects.documentFlyout.waitForAlertFlyout();
+        await expect(pageObjects.documentFlyout.title).toContainText(ruleName);
       }
     );
 
@@ -61,9 +61,9 @@ spaceTest.describe(
         await pageObjects.alertsTablePage.navigate();
         await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
         await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-        await pageObjects.documentFlyoutV2.waitForAlertFlyout();
+        await pageObjects.documentFlyout.waitForAlertFlyout();
 
-        await expect(pageObjects.documentFlyoutV2.insightsSection).toBeVisible();
+        await expect(pageObjects.documentFlyout.insightsSection).toBeVisible();
         await pageObjects.threatIntelligenceTool.titleLink.click();
 
         await expect(pageObjects.threatIntelligenceTool.detailsLoading).toHaveCount(0, {
@@ -93,9 +93,9 @@ spaceTest.describe(
         await pageObjects.alertsTablePage.navigate();
         await pageObjects.alertsTablePage.waitForRuleAlert(tiRuleName);
         await pageObjects.alertsTablePage.expandAlertDetailsFlyout(tiRuleName);
-        await pageObjects.documentFlyoutV2.waitForAlertFlyout();
+        await pageObjects.documentFlyout.waitForAlertFlyout();
 
-        await expect(pageObjects.documentFlyoutV2.insightsSection).toBeVisible();
+        await expect(pageObjects.documentFlyout.insightsSection).toBeVisible();
 
         // "Fields enriched with threat intelligence" should show 1
         await expect(pageObjects.threatIntelligenceTool.enrichedButton).toBeVisible();

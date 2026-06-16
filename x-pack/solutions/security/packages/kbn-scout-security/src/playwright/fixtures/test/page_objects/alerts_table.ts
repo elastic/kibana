@@ -79,6 +79,32 @@ export class AlertsTablePage {
     await row.getByTestId('expand-event').click();
   }
 
+  async clickRuleName(ruleName: string) {
+    await this.alertsTable.waitFor({ state: 'visible' });
+    // The rule column renders the rule name as a link (data-test-subj="ruleName").
+    const ruleNameLink = this.alertsTable.getByTestId('ruleName').filter({ hasText: ruleName });
+
+    await expect(
+      ruleNameLink,
+      `Alert with rule '${ruleName}' is not displayed in the alerts table`
+    ).toHaveCount(1);
+
+    await ruleNameLink.click();
+  }
+
+  async clickNetworkIpCell(ip: string) {
+    await this.alertsTable.waitFor({ state: 'visible' });
+    // The source.ip / destination.ip columns sit at the far right of the grid and are
+    // column-virtualized, so their cells are not in the DOM until scrolled into view. Scroll the
+    // virtualized body fully right to mount them before clicking.
+    await this.alertsTable
+      .locator('.euiDataGrid__virtualized')
+      .evaluate((el) => el.scrollTo({ left: el.scrollWidth }));
+
+    const ipCell = this.alertsTable.getByTestId('network-details').filter({ hasText: ip });
+    await ipCell.click();
+  }
+
   async waitForDetectionsAlertsWrapper() {
     // Increased timeout to 20 seconds because this page sometimes takes longer to load
     return this.detectionsAlertsWrapper.waitFor({ state: 'visible', timeout: 20_000 });

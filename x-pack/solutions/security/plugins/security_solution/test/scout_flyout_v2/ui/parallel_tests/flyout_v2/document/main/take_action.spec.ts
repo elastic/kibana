@@ -42,6 +42,7 @@ spaceTest.describe(
       await apiServices.detectionRule.createCustomQueryRule({
         ...CUSTOM_QUERY_RULE,
         name: ruleName,
+        index: ['auditbeat-*'],
       });
       await browserAuth.loginAsPlatformEngineer();
     });
@@ -57,18 +58,18 @@ spaceTest.describe(
         await pageObjects.alertsTablePage.navigate();
         await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
         await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-        await pageObjects.documentFlyoutV2.waitForAlertFlyout();
+        await pageObjects.documentFlyout.waitForAlertFlyout();
 
-        await pageObjects.documentFlyoutV2.openTakeActionMenu();
-        await pageObjects.documentFlyoutV2.clickTakeActionItem(ALERT_CLOSE_MENU_ITEM_TEST_SUBJ);
+        await pageObjects.documentFlyout.openTakeActionMenu();
+        await pageObjects.documentFlyout.clickTakeActionItem(ALERT_CLOSE_MENU_ITEM_TEST_SUBJ);
 
         // Closing reason sub-panel opens inside the context menu
-        await pageObjects.documentFlyoutV2.selectClosingReason(
+        await pageObjects.documentFlyout.selectClosingReason(
           ClosingReasonOption.FALSE_POSITIVE.label
         );
-        await pageObjects.documentFlyoutV2.submitClosingReason();
+        await pageObjects.documentFlyout.submitClosingReason();
 
-        await expect(pageObjects.documentFlyoutV2.statusBadge).toContainText(
+        await expect(pageObjects.documentFlyout.statusBadge).toContainText(
           AlertWorkflowStatus.CLOSED,
           { timeout: 15_000 }
         );
@@ -81,10 +82,10 @@ spaceTest.describe(
         await pageObjects.alertsTablePage.navigate();
         await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
         await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-        await pageObjects.documentFlyoutV2.waitForAlertFlyout();
+        await pageObjects.documentFlyout.waitForAlertFlyout();
 
-        await pageObjects.documentFlyoutV2.openTakeActionMenu();
-        await pageObjects.documentFlyoutV2.clickTakeActionItem(ALERT_TAGS_MENU_ITEM_TEST_SUBJ);
+        await pageObjects.documentFlyout.openTakeActionMenu();
+        await pageObjects.documentFlyout.clickTakeActionItem(ALERT_TAGS_MENU_ITEM_TEST_SUBJ);
 
         // Tag management sub-panel should appear inside the context menu
         await expect(page.getByTestId(ALERT_TAGS_SELECTABLE_TEST_SUBJ)).toBeVisible({
@@ -97,10 +98,10 @@ spaceTest.describe(
       await pageObjects.alertsTablePage.navigate();
       await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
       await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-      await pageObjects.documentFlyoutV2.waitForAlertFlyout();
+      await pageObjects.documentFlyout.waitForAlertFlyout();
 
-      await pageObjects.documentFlyoutV2.openTakeActionMenu();
-      await pageObjects.documentFlyoutV2.clickTakeActionItem(ALERT_ASSIGNEES_MENU_ITEM_TEST_SUBJ);
+      await pageObjects.documentFlyout.openTakeActionMenu();
+      await pageObjects.documentFlyout.clickTakeActionItem(ALERT_ASSIGNEES_MENU_ITEM_TEST_SUBJ);
 
       // Assignees sub-panel should appear inside the context menu
       await expect(page.getByTestId(ALERT_ASSIGNEES_SELECTABLE_TEST_SUBJ)).toBeVisible({
@@ -112,10 +113,10 @@ spaceTest.describe(
       await pageObjects.alertsTablePage.navigate();
       await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
       await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-      await pageObjects.documentFlyoutV2.waitForAlertFlyout();
+      await pageObjects.documentFlyout.waitForAlertFlyout();
 
-      await pageObjects.documentFlyoutV2.openTakeActionMenu();
-      await pageObjects.documentFlyoutV2.clickTakeActionItem(ADD_TO_NEW_CASE_TEST_SUBJ);
+      await pageObjects.documentFlyout.openTakeActionMenu();
+      await pageObjects.documentFlyout.clickTakeActionItem(ADD_TO_NEW_CASE_TEST_SUBJ);
 
       // Target the heading specifically to avoid matching the submit button label
       await expect(
@@ -127,10 +128,10 @@ spaceTest.describe(
       await pageObjects.alertsTablePage.navigate();
       await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
       await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-      await pageObjects.documentFlyoutV2.waitForAlertFlyout();
+      await pageObjects.documentFlyout.waitForAlertFlyout();
 
-      await pageObjects.documentFlyoutV2.openTakeActionMenu();
-      await pageObjects.documentFlyoutV2.clickTakeActionItem(ADD_TO_EXISTING_CASE_TEST_SUBJ);
+      await pageObjects.documentFlyout.openTakeActionMenu();
+      await pageObjects.documentFlyout.clickTakeActionItem(ADD_TO_EXISTING_CASE_TEST_SUBJ);
 
       // Case selector (or empty-state) should appear
       await expect(page.getByTestId(ALL_CASES_MODAL_TEST_SUBJ)).toBeVisible({ timeout: 10_000 });
@@ -140,16 +141,14 @@ spaceTest.describe(
       await pageObjects.alertsTablePage.navigate();
       await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
       await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-      await pageObjects.documentFlyoutV2.waitForAlertFlyout();
+      await pageObjects.documentFlyout.waitForAlertFlyout();
 
-      await pageObjects.documentFlyoutV2.openTakeActionMenu();
-      await pageObjects.documentFlyoutV2.clickTakeActionItem(
-        RUN_ALERT_WORKFLOW_MENU_ITEM_TEST_SUBJ
-      );
+      await pageObjects.documentFlyout.openTakeActionMenu();
+      await pageObjects.documentFlyout.clickTakeActionItem(RUN_ALERT_WORKFLOW_MENU_ITEM_TEST_SUBJ);
 
       // Workflow sub-panel should open in the context menu
       await expect(
-        pageObjects.documentFlyoutV2.takeActionMenu.locator(
+        pageObjects.documentFlyout.takeActionMenu.locator(
           `[data-test-subj="${ALERT_WORKFLOW_PANEL_TEST_SUBJ}"]`
         )
       ).toBeVisible({ timeout: 10_000 });
@@ -161,10 +160,10 @@ spaceTest.describe(
         await pageObjects.alertsTablePage.navigate();
         await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
         await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-        await pageObjects.documentFlyoutV2.waitForAlertFlyout();
+        await pageObjects.documentFlyout.waitForAlertFlyout();
 
-        await pageObjects.documentFlyoutV2.openTakeActionMenu();
-        await pageObjects.documentFlyoutV2.clickTakeActionItem(
+        await pageObjects.documentFlyout.openTakeActionMenu();
+        await pageObjects.documentFlyout.clickTakeActionItem(
           INVESTIGATE_IN_TIMELINE_MENU_ITEM_TEST_SUBJ
         );
 

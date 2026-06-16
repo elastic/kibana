@@ -19,6 +19,7 @@ spaceTest.describe(
       await apiServices.detectionRule.createCustomQueryRule({
         ...CUSTOM_QUERY_RULE,
         name: ruleName,
+        index: ['auditbeat-*'],
       });
       await browserAuth.loginAsPlatformEngineer();
     });
@@ -34,9 +35,9 @@ spaceTest.describe(
         await pageObjects.alertsTablePage.navigate();
         await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
         await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-        await pageObjects.documentFlyoutV2.waitForAlertFlyout();
+        await pageObjects.documentFlyout.waitForAlertFlyout();
 
-        await pageObjects.documentFlyoutV2.openNotes();
+        await pageObjects.documentFlyout.openNotes();
         await expect(pageObjects.notesTool.content).toBeVisible({ timeout: 10_000 });
 
         // Fetch resolves to no notes, so the empty-state message is shown and no comments render.
@@ -49,8 +50,8 @@ spaceTest.describe(
 
         // Clicking the header opens a child document flyout for the same alert
         await pageObjects.notesTool.toolsFlyoutTitle.click();
-        await pageObjects.documentFlyoutV2.waitForChildDocumentFlyout();
-        await expect(pageObjects.documentFlyoutV2.childDocumentAlertTitle).toContainText(ruleName);
+        await pageObjects.documentFlyout.waitForChildDocumentFlyout();
+        await expect(pageObjects.documentFlyout.childDocumentAlertTitle).toContainText(ruleName);
       }
     );
 
@@ -62,9 +63,9 @@ spaceTest.describe(
         await pageObjects.alertsTablePage.navigate();
         await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
         await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-        await pageObjects.documentFlyoutV2.waitForAlertFlyout();
+        await pageObjects.documentFlyout.waitForAlertFlyout();
 
-        await pageObjects.documentFlyoutV2.openNotes();
+        await pageObjects.documentFlyout.openNotes();
         await expect(pageObjects.notesTool.content).toBeVisible({ timeout: 10_000 });
         await expect(pageObjects.notesTool.noNotesMessage).toBeVisible({ timeout: 10_000 });
 
@@ -76,7 +77,7 @@ spaceTest.describe(
         await expect(pageObjects.notesTool.noNotesMessage).toBeHidden();
 
         // The header notes count badge reflects the newly added note.
-        await expect(pageObjects.documentFlyoutV2.notesCount).toHaveText('1', { timeout: 15_000 });
+        await expect(pageObjects.documentFlyout.notesCount).toHaveText('1', { timeout: 15_000 });
       }
     );
 
@@ -88,9 +89,9 @@ spaceTest.describe(
         await pageObjects.alertsTablePage.navigate();
         await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
         await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-        await pageObjects.documentFlyoutV2.waitForAlertFlyout();
+        await pageObjects.documentFlyout.waitForAlertFlyout();
 
-        await pageObjects.documentFlyoutV2.openNotes();
+        await pageObjects.documentFlyout.openNotes();
         await expect(pageObjects.notesTool.content).toBeVisible({ timeout: 10_000 });
 
         // Seed two notes so a single deletion leaves a verifiable count behind.
@@ -108,9 +109,9 @@ spaceTest.describe(
         // Navigate back to the original document flyout; its header notes count shows the
         // remaining note.
         await pageObjects.notesTool.backButton.click();
-        await pageObjects.documentFlyoutV2.waitForAlertFlyout();
-        await expect(pageObjects.documentFlyoutV2.notesCount).toHaveText('1', { timeout: 15_000 });
-        await expect(pageObjects.documentFlyoutV2.notesAddButton).toBeHidden();
+        await pageObjects.documentFlyout.waitForAlertFlyout();
+        await expect(pageObjects.documentFlyout.notesCount).toHaveText('1', { timeout: 15_000 });
+        await expect(pageObjects.documentFlyout.notesAddButton).toBeHidden();
       }
     );
   }

@@ -6,10 +6,10 @@
  */
 
 /**
- * Scout UI tests for the flyout_v2 rule flyout opened from within the document flyout.
+ * Scout UI test for the flyout_v2 rule flyout.
  *
- * Entry path: Alerts table → row expand → document flyout About section → "View rule details"
- * button (securitySolutionFlyoutRuleSummaryButton) → rule flyout opens as stacked overlay.
+ * Entry path: Alerts page → alerts table "Rule" column → click the rule name → the v2 rule
+ * flyout opens.
  */
 
 import { spaceTest, tags, CUSTOM_QUERY_RULE } from '@kbn/scout-security';
@@ -26,6 +26,7 @@ spaceTest.describe(
       await apiServices.detectionRule.createCustomQueryRule({
         ...CUSTOM_QUERY_RULE,
         name: ruleName,
+        index: ['auditbeat-*'],
       });
       await browserAuth.loginAsPlatformEngineer();
     });
@@ -36,67 +37,40 @@ spaceTest.describe(
     });
 
     spaceTest(
-      'opens rule flyout from document About section and shows rule details',
+      'rule name in the alerts table opens the rule flyout v2, whose header link opens the rule page in a new tab',
       async ({ pageObjects, page }) => {
         await pageObjects.alertsTablePage.navigate();
         await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
-        await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-        await pageObjects.documentFlyoutV2.waitForAlertFlyout();
 
-        await spaceTest.step('open rule flyout from About section', async () => {
-          // Click the "View rule details" button in the About section
-          const ruleSummaryButton = page.getByTestId('securitySolutionFlyoutRuleSummaryButton');
-          await ruleSummaryButton.click();
+        await spaceTest.step('clicking the rule name opens the v2 rule flyout', async () => {
+          // Click the rule name link in the "Rule" column.
+          await pageObjects.alertsTablePage.clickRuleName(ruleName);
+
+          // The v2 rule flyout opens, titled with the rule name.
+          await expect(pageObjects.ruleFlyout.title).toBeVisible({
+            timeout: 15_000,
+          });
+          await expect(pageObjects.ruleFlyout.title).toContainText(ruleName);
         });
 
-        await spaceTest.step('verify rule details render', async () => {
-          // Rule flyout appears as stacked overlay
-          const ruleFlyoutTitle = page.getByTestId('securitySolutionFlyoutRuleDetailsTitle');
-          await expect(ruleFlyoutTitle).toBeVisible({ timeout: 10_000 });
+        await spaceTest.step('header link opens the correct rule page in a new tab', async () => {
+          const headerLink = pageObjects.ruleFlyout.titleLink;
+          await expect(headerLink).toBeVisible();
 
-          // Rule details sections should render
-          await expect(
-            page.getByTestId('securitySolutionFlyoutRuleDetailsAboutSection')
-          ).toBeVisible({ timeout: 10_000 });
+          // The header link points at the rule details page and is configured to open a new tab.
+          await expect(headerLink).toHaveAttribute('target', '_blank');
+          const href = await headerLink.getAttribute('href');
+          const ruleId = href?.match(/security\/rules\/id\/([^/?#]+)/)?.[1];
+          expect(ruleId).toBeTruthy();
+
+          // Clicking it opens a new browser tab navigated to that rule's details page.
+          const newTabPromise = page.context().waitForEvent('page');
+          await headerLink.click();
+          const newTab = await newTabPromise;
+          await newTab.waitForLoadState('domcontentloaded');
+          expect(newTab.url()).toContain(`security/rules/id/${ruleId}`);
         });
       }
     );
-
-    spaceTest(
-      'rule flyout definition and schedule sections render',
-      async ({ pageObjects, page }) => {
-        await pageObjects.alertsTablePage.navigate();
-        await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
-        await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-        await pageObjects.documentFlyoutV2.waitForAlertFlyout();
-
-        const ruleSummaryButton = page.getByTestId('securitySolutionFlyoutRuleSummaryButton');
-        await ruleSummaryButton.click();
-
-        // Expand the definition section to verify it renders
-        const definitionHeader = page.getByTestId(
-          'securitySolutionFlyoutRuleDetailsDefinitionSectionHeader'
-        );
-        await expect(definitionHeader).toBeVisible({ timeout: 10_000 });
-
-        // Parent flyout should still be in the DOM (stacked, not replaced)
-        await expect(pageObjects.documentFlyoutV2.title).toBeVisible();
-      }
-    );
-
-    spaceTest('rule link in alert title navigates to rule page', async ({ pageObjects }) => {
-      await pageObjects.alertsTablePage.navigate();
-      await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
-      await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-      await pageObjects.documentFlyoutV2.waitForAlertFlyout();
-
-      // The title link in the v2 flyout header navigates to the rule details page (new tab)
-      const titleLink = pageObjects.documentFlyoutV2.titleLink;
-      await expect(titleLink).toBeVisible();
-      await expect(titleLink).toContainText(ruleName);
-
-      const href = await titleLink.getAttribute('href');
-      expect(href).toContain('security/rules/id/');
-    });
   }
 );

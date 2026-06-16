@@ -8,13 +8,11 @@
 /**
  * Scout UI tests for the flyout_v2 network flyout.
  *
- * Entry path: Alerts table → click an IP cell (source.ip / destination.ip) →
- *   network flyout opens via the formatted-IP cell renderer.
- *
- * NOTE: Requires alert data with source.ip / destination.ip fields (auditbeat archive).
+ * Entry path: Alerts table → click an IP cell (source.ip) → network flyout opens via the
+ * formatted-IP cell renderer.
  */
 
-import { spaceTest, tags, CUSTOM_QUERY_RULE } from '@kbn/scout-security';
+import { spaceTest, tags, CUSTOM_QUERY_RULE, PREVALENCE_SOURCE_IP } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
 
 spaceTest.describe(
@@ -24,39 +22,39 @@ spaceTest.describe(
     let ruleName: string;
 
     spaceTest.beforeEach(async ({ browserAuth, apiServices, scoutSpace }) => {
+      // Index a source event carrying `source.ip` and scope the rule to that index, so the alert
+      // deterministically renders an IP cell (and isn't affected by other parallel-worker data).
+      const { sourceIndex } = await apiServices.prevalence.createPrevalenceFixture(scoutSpace.id);
+
       ruleName = `${CUSTOM_QUERY_RULE.name}_${scoutSpace.id}_${Date.now()}`;
       await apiServices.detectionRule.createCustomQueryRule({
         ...CUSTOM_QUERY_RULE,
         name: ruleName,
+        index: [sourceIndex],
       });
       await browserAuth.loginAsPlatformEngineer();
     });
 
-    spaceTest.afterEach(async ({ apiServices }) => {
+    spaceTest.afterEach(async ({ apiServices, scoutSpace }) => {
       await apiServices.detectionRule.deleteAll();
       await apiServices.detectionAlerts.deleteAll();
+      await apiServices.prevalence.cleanupPrevalenceFixture(scoutSpace.id);
     });
 
-    spaceTest('opens from IP cell click in alerts table', async ({ pageObjects, page, log }) => {
+    spaceTest('opens from IP cell click in alerts table', async ({ pageObjects, page }) => {
       await pageObjects.alertsTablePage.navigate();
       await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
 
-      // Find IP cells in the alerts table (source.ip or destination.ip)
-      const ipCells = await pageObjects.alertsTablePage.alertsTable
-        .getByTestId('network-details')
-        .all();
+      // The source.ip column renders the IP as a clickable network-details cell.
+      await pageObjects.alertsTablePage.clickNetworkIpCell(PREVALENCE_SOURCE_IP);
 
-      if (ipCells.length === 0) {
-        log.info('No IP cells in current alerts data');
-        spaceTest.skip(true, 'Alert data does not include source.ip / destination.ip fields');
-      }
-
-      await ipCells[0].click();
-
-      // Network flyout header should appear
-      await expect(page.getByTestId('network-details-flyout-header')).toBeVisible({
+      // Network flyout opens, titled with the clicked IP.
+      await expect(page.getByTestId('network-details-flyout-headerText')).toBeVisible({
         timeout: 10_000,
       });
+      await expect(page.getByTestId('network-details-flyout-headerText')).toContainText(
+        PREVALENCE_SOURCE_IP
+      );
     });
   }
 );

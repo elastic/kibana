@@ -11,7 +11,7 @@ import type { ScoutPage, Locator } from '@kbn/scout';
  * Page object for the flyout_v2 document flyout (alert / event) opened via
  * `services.overlays.openSystemFlyout` from the alerts table or Timeline.
  */
-export class DocumentFlyoutV2 {
+export class DocumentFlyout {
   /** Rule details title link when alert navigation is available. */
   public readonly titleLink: Locator;
   /** Header title text for alerts and events. */
@@ -42,10 +42,8 @@ export class DocumentFlyoutV2 {
   public readonly reasonPopover: Locator;
   /** Draggable host.name value rendered inside the reason popover (cell-actions enabled). */
   public readonly reasonHostNameValue: Locator;
-  /** "Show rule summary" button in the About section (opens the rule details flyout). */
+  /** "Show rule summary" button in the About section (opens the rule flyout). */
   public readonly ruleSummaryButton: Locator;
-  /** Rule name title text inside the rule details flyout opened from "Show rule summary". */
-  public readonly ruleDetailsTitle: Locator;
   /** About section header in the overview tab. */
   public readonly aboutSection: Locator;
   /** Investigation section header in the overview tab. */
@@ -165,9 +163,6 @@ export class DocumentFlyoutV2 {
       '[data-test-subj="render-content-host.name"]'
     );
     this.ruleSummaryButton = page.testSubj.locator('securitySolutionFlyoutRuleSummaryButton');
-    // The rule details flyout renders its title via FlyoutTitle, which suffixes the test
-    // subject with "Text" (the bare RuleDetailsTitle id is only used in the non-link branch).
-    this.ruleDetailsTitle = page.testSubj.locator('securitySolutionFlyoutRuleDetailsTitleText');
     this.aboutSection = page.testSubj.locator('securitySolutionFlyoutAboutSectionHeader');
     this.investigationSection = page.testSubj.locator(
       'securitySolutionFlyoutInvestigationSectionHeader'
@@ -290,12 +285,6 @@ export class DocumentFlyoutV2 {
       .locator('tr')
       .filter({ hasText: field })
       .locator('[data-test-subj="securitySolutionFlyoutChildLink"]');
-  }
-
-  /** Click the "Show rule summary" button and wait for the rule details flyout to appear. */
-  async openRuleSummary() {
-    await this.ruleSummaryButton.click();
-    await this.ruleDetailsTitle.waitFor({ state: 'visible', timeout: 15_000 });
   }
 
   /** Hover the status badge and wait for the cell-actions hover popover to appear. */

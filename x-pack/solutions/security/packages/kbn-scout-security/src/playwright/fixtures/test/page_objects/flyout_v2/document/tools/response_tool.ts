@@ -11,7 +11,7 @@ import type { ScoutPage, Locator } from '@kbn/scout';
  * Page object for the response tool overlay inside the flyout v2 document flyout.
  * Opened from the "View response details" button in the Response section.
  */
-export class ResponseToolPage {
+export class ResponseTool {
   /** Response details body — confirms the response overlay is open. */
   public readonly content: Locator;
   /** Clickable button in the tools flyout header showing the document icon and title. */

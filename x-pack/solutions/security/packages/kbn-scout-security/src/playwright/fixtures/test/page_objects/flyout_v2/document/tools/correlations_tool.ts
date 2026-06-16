@@ -11,7 +11,7 @@ import type { ScoutPage, Locator } from '@kbn/scout';
  * Page object for the correlations tool overlay inside the flyout v2 document flyout.
  * Covers both the summary row in the Insights section and the full tool overlay panel.
  */
-export class CorrelationsToolPage {
+export class CorrelationsTool {
   /** Title link in the insights correlations panel that opens the tool overlay. */
   public readonly titleLink: Locator;
   /** Header row of the tools flyout — use to confirm the overlay is open. */

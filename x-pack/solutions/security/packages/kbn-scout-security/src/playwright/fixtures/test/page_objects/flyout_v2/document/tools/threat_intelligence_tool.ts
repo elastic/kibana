@@ -11,7 +11,7 @@ import type { ScoutPage, Locator } from '@kbn/scout';
  * Page object for the threat intelligence tool overlay inside the flyout v2 document flyout.
  * Covers both the summary row in the Insights section and the full tool overlay panel.
  */
-export class ThreatIntelligenceToolPage {
+export class ThreatIntelligenceTool {
   /** Title link in the insights TI panel; only rendered when the alert has TI enrichments. */
   public readonly titleLink: Locator;
   /** Loading spinner while the insights TI panel's enrichment count query is in flight. */

@@ -46,9 +46,9 @@ spaceTest.describe(
         await pageObjects.alertsTablePage.navigate();
         await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
         await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-        await pageObjects.documentFlyoutV2.waitForAlertFlyout();
+        await pageObjects.documentFlyout.waitForAlertFlyout();
 
-        await expect(pageObjects.documentFlyoutV2.insightsSection).toBeVisible();
+        await expect(pageObjects.documentFlyout.insightsSection).toBeVisible();
         await pageObjects.prevalenceTool.titleLink.click();
 
         // Header shows the rule name and the alert (warning) icon
@@ -56,8 +56,8 @@ spaceTest.describe(
         await expect(pageObjects.prevalenceTool.toolsFlyoutTitleAlertIcon).toBeVisible();
 
         await pageObjects.prevalenceTool.toolsFlyoutTitle.click();
-        await pageObjects.documentFlyoutV2.waitForChildDocumentFlyout();
-        await expect(pageObjects.documentFlyoutV2.childDocumentAlertTitle).toContainText(ruleName);
+        await pageObjects.documentFlyout.waitForChildDocumentFlyout();
+        await expect(pageObjects.documentFlyout.childDocumentAlertTitle).toContainText(ruleName);
       }
     );
 
@@ -67,9 +67,9 @@ spaceTest.describe(
         await pageObjects.alertsTablePage.navigate();
         await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
         await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-        await pageObjects.documentFlyoutV2.waitForAlertFlyout();
+        await pageObjects.documentFlyout.waitForAlertFlyout();
 
-        await expect(pageObjects.documentFlyoutV2.insightsSection).toBeVisible();
+        await expect(pageObjects.documentFlyout.insightsSection).toBeVisible();
         await pageObjects.prevalenceTool.titleLink.click();
 
         await expect(pageObjects.prevalenceTool.toolsFlyoutHeader).toBeVisible({
@@ -102,9 +102,9 @@ spaceTest.describe(
         await pageObjects.alertsTablePage.navigate();
         await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
         await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-        await pageObjects.documentFlyoutV2.waitForAlertFlyout();
+        await pageObjects.documentFlyout.waitForAlertFlyout();
 
-        await expect(pageObjects.documentFlyoutV2.insightsSection).toBeVisible();
+        await expect(pageObjects.documentFlyout.insightsSection).toBeVisible();
         await pageObjects.prevalenceTool.titleLink.click();
 
         await expect(pageObjects.prevalenceTool.toolsFlyoutHeader).toBeVisible({
@@ -130,9 +130,9 @@ spaceTest.describe(
         await pageObjects.alertsTablePage.navigate();
         await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
         await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-        await pageObjects.documentFlyoutV2.waitForAlertFlyout();
+        await pageObjects.documentFlyout.waitForAlertFlyout();
 
-        await expect(pageObjects.documentFlyoutV2.insightsSection).toBeVisible();
+        await expect(pageObjects.documentFlyout.insightsSection).toBeVisible();
         await pageObjects.prevalenceTool.titleLink.click();
 
         await expect(pageObjects.prevalenceTool.toolsFlyoutHeader).toBeVisible({

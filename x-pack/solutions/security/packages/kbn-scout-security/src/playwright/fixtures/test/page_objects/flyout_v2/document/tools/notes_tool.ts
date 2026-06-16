@@ -12,7 +12,7 @@ import type { ScoutPage, Locator } from '@kbn/scout';
  * Opened from the header notes action; covers the notes list, the add-note editor
  * and the delete-note confirmation flow.
  */
-export class NotesToolPage {
+export class NotesTool {
   /** Tool overlay body — confirms the notes overlay is open. */
   public readonly content: Locator;
   /** Clickable button in the tools flyout header showing the document icon and title. */

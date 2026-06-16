@@ -46,9 +46,9 @@ spaceTest.describe(
         await pageObjects.alertsTablePage.navigate();
         await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
         await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-        await pageObjects.documentFlyoutV2.waitForAlertFlyout();
+        await pageObjects.documentFlyout.waitForAlertFlyout();
 
-        await expect(pageObjects.documentFlyoutV2.insightsSection).toBeVisible();
+        await expect(pageObjects.documentFlyout.insightsSection).toBeVisible();
         await pageObjects.correlationsTool.titleLink.click();
 
         // Header shows the rule name and the alert (warning) icon
@@ -56,8 +56,8 @@ spaceTest.describe(
         await expect(pageObjects.correlationsTool.toolsFlyoutTitleAlertIcon).toBeVisible();
 
         await pageObjects.correlationsTool.toolsFlyoutTitle.click();
-        await pageObjects.documentFlyoutV2.waitForChildDocumentFlyout();
-        await expect(pageObjects.documentFlyoutV2.childDocumentAlertTitle).toContainText(ruleName);
+        await pageObjects.documentFlyout.waitForChildDocumentFlyout();
+        await expect(pageObjects.documentFlyout.childDocumentAlertTitle).toContainText(ruleName);
       }
     );
 
@@ -67,9 +67,9 @@ spaceTest.describe(
         await pageObjects.alertsTablePage.navigate();
         await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
         await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-        await pageObjects.documentFlyoutV2.waitForAlertFlyout();
+        await pageObjects.documentFlyout.waitForAlertFlyout();
 
-        await expect(pageObjects.documentFlyoutV2.insightsSection).toBeVisible();
+        await expect(pageObjects.documentFlyout.insightsSection).toBeVisible();
 
         await pageObjects.correlationsTool.titleLink.waitFor({ state: 'visible' });
         await pageObjects.correlationsTool.titleLink.click();
@@ -80,16 +80,16 @@ spaceTest.describe(
 
         await expect(pageObjects.correlationsTool.sameSourceAlertsSectionTable).toBeVisible();
         await pageObjects.correlationsTool.sameSourceAlertsSectionFirstPreviewButton.click();
-        await pageObjects.documentFlyoutV2.waitForChildDocumentFlyout();
-        await expect(pageObjects.documentFlyoutV2.childDocumentAlertTitle).toContainText(ruleName);
+        await pageObjects.documentFlyout.waitForChildDocumentFlyout();
+        await expect(pageObjects.documentFlyout.childDocumentAlertTitle).toContainText(ruleName);
 
         // Close the child flyout
         await page.keyboard.press('Escape');
 
         await expect(pageObjects.correlationsTool.sessionAlertsSectionTable).toBeVisible();
         await pageObjects.correlationsTool.sessionAlertsSectionFirstPreviewButton.click();
-        await pageObjects.documentFlyoutV2.waitForChildDocumentFlyout();
-        await expect(pageObjects.documentFlyoutV2.childDocumentAlertTitle).toContainText(ruleName);
+        await pageObjects.documentFlyout.waitForChildDocumentFlyout();
+        await expect(pageObjects.documentFlyout.childDocumentAlertTitle).toContainText(ruleName);
 
         // TODO: Related Attacks
       }
@@ -101,9 +101,9 @@ spaceTest.describe(
         await pageObjects.alertsTablePage.navigate();
         await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
         await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-        await pageObjects.documentFlyoutV2.waitForAlertFlyout();
+        await pageObjects.documentFlyout.waitForAlertFlyout();
 
-        await expect(pageObjects.documentFlyoutV2.insightsSection).toBeVisible();
+        await expect(pageObjects.documentFlyout.insightsSection).toBeVisible();
 
         await pageObjects.correlationsTool.titleLink.waitFor({ state: 'visible' });
         await pageObjects.correlationsTool.titleLink.click();

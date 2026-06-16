@@ -32,6 +32,7 @@ spaceTest.describe(
       await apiServices.detectionRule.createCustomQueryRule({
         ...CUSTOM_QUERY_RULE,
         name: ruleName,
+        index: ['auditbeat-*'],
       });
       await browserAuth.loginAsPlatformEngineer();
     });
@@ -48,24 +49,24 @@ spaceTest.describe(
         await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
         await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
 
-        await pageObjects.documentFlyoutV2.waitForAlertFlyout();
+        await pageObjects.documentFlyout.waitForAlertFlyout();
 
         // Header
-        await expect(pageObjects.documentFlyoutV2.severity).toBeVisible();
-        await expect(pageObjects.documentFlyoutV2.statusBadge).toBeVisible();
-        await expect(pageObjects.documentFlyoutV2.riskScore).toBeVisible();
-        await expect(pageObjects.documentFlyoutV2.assigneesTitle).toBeVisible();
-        await expect(pageObjects.documentFlyoutV2.notesAddButton).toBeVisible();
+        await expect(pageObjects.documentFlyout.severity).toBeVisible();
+        await expect(pageObjects.documentFlyout.statusBadge).toBeVisible();
+        await expect(pageObjects.documentFlyout.riskScore).toBeVisible();
+        await expect(pageObjects.documentFlyout.assigneesTitle).toBeVisible();
+        await expect(pageObjects.documentFlyout.notesAddButton).toBeVisible();
 
         // Body sections
-        await expect(pageObjects.documentFlyoutV2.aboutSection).toBeVisible();
-        await expect(pageObjects.documentFlyoutV2.investigationSection).toBeVisible();
-        await expect(pageObjects.documentFlyoutV2.visualizationsSection).toBeVisible();
-        await expect(pageObjects.documentFlyoutV2.insightsSection).toBeVisible();
-        await expect(pageObjects.documentFlyoutV2.responseSection).toBeVisible();
+        await expect(pageObjects.documentFlyout.aboutSection).toBeVisible();
+        await expect(pageObjects.documentFlyout.investigationSection).toBeVisible();
+        await expect(pageObjects.documentFlyout.visualizationsSection).toBeVisible();
+        await expect(pageObjects.documentFlyout.insightsSection).toBeVisible();
+        await expect(pageObjects.documentFlyout.responseSection).toBeVisible();
 
         // Footer
-        await expect(pageObjects.documentFlyoutV2.takeActionButton).toBeVisible();
+        await expect(pageObjects.documentFlyout.takeActionButton).toBeVisible();
       }
     );
 
@@ -75,30 +76,28 @@ spaceTest.describe(
         await pageObjects.alertsTablePage.navigate();
         await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
         await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-        await pageObjects.documentFlyoutV2.waitForAlertFlyout();
+        await pageObjects.documentFlyout.waitForAlertFlyout();
 
         // Navigate to the closing reason sub-panel
-        await pageObjects.documentFlyoutV2.openStatusPopover();
-        await pageObjects.documentFlyoutV2.clickStatusPopoverAction(
-          ALERT_CLOSE_MENU_ITEM_TEST_SUBJ
-        );
+        await pageObjects.documentFlyout.openStatusPopover();
+        await pageObjects.documentFlyout.clickStatusPopoverAction(ALERT_CLOSE_MENU_ITEM_TEST_SUBJ);
 
         // Closing reason selectable must appear and the submit button must be disabled until a reason is chosen
-        await expect(pageObjects.documentFlyoutV2.closingReasonSelectable).toBeVisible();
-        await expect(pageObjects.documentFlyoutV2.closingReasonSubmitButton).toBeDisabled();
+        await expect(pageObjects.documentFlyout.closingReasonSelectable).toBeVisible();
+        await expect(pageObjects.documentFlyout.closingReasonSubmitButton).toBeDisabled();
 
         // Select "False Positive" and confirm the button becomes enabled
-        await pageObjects.documentFlyoutV2.selectClosingReason(
+        await pageObjects.documentFlyout.selectClosingReason(
           ClosingReasonOption.FALSE_POSITIVE.label
         );
-        await expect(pageObjects.documentFlyoutV2.closingReasonSubmitButton).toBeEnabled();
+        await expect(pageObjects.documentFlyout.closingReasonSubmitButton).toBeEnabled();
 
         // Wire up response listener before submit
         const statusApiCall = page.waitForResponse(
           (resp) =>
             resp.url().includes(SIGNALS_STATUS_API_PATH) && resp.request().method() === 'POST'
         );
-        await pageObjects.documentFlyoutV2.submitClosingReason();
+        await pageObjects.documentFlyout.submitClosingReason();
 
         // API must return 200 and the request body must carry the chosen reason
         const apiResponse = await statusApiCall;
@@ -109,7 +108,7 @@ spaceTest.describe(
 
         await pageObjects.toasts.waitFor();
         expect(await pageObjects.toasts.getHeaderText()).toContain(closedAlertsToastText(1));
-        await expect(pageObjects.documentFlyoutV2.statusBadge).toContainText(
+        await expect(pageObjects.documentFlyout.statusBadge).toContainText(
           AlertWorkflowStatus.CLOSED,
           { timeout: 15_000 }
         );
@@ -122,25 +121,25 @@ spaceTest.describe(
         await pageObjects.alertsTablePage.navigate();
         await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
         await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-        await pageObjects.documentFlyoutV2.waitForAlertFlyout();
+        await pageObjects.documentFlyout.waitForAlertFlyout();
 
         // Hover the status badge — both cell-action buttons must be visible
-        await pageObjects.documentFlyoutV2.hoverStatusBadge();
-        await expect(pageObjects.documentFlyoutV2.cellActionsFilterInButton).toBeVisible();
-        await expect(pageObjects.documentFlyoutV2.cellActionsAddToTimelineButton).toBeVisible();
+        await pageObjects.documentFlyout.hoverStatusBadge();
+        await expect(pageObjects.documentFlyout.cellActionsFilterInButton).toBeVisible();
+        await expect(pageObjects.documentFlyout.cellActionsAddToTimelineButton).toBeVisible();
 
         // Click "Add to Timeline" — a success toast must confirm the value was added
-        await pageObjects.documentFlyoutV2.cellActionsAddToTimelineButton.click();
+        await pageObjects.documentFlyout.cellActionsAddToTimelineButton.click();
         await pageObjects.toasts.waitFor();
         expect(await pageObjects.toasts.getHeaderText()).toContain(
           addedToTimelineToastText(AlertWorkflowStatus.OPEN)
         );
 
         // Re-hover to reopen the popover (it closed after the click above)
-        await pageObjects.documentFlyoutV2.hoverStatusBadge();
+        await pageObjects.documentFlyout.hoverStatusBadge();
 
         // Click "Filter for" — the flyout closes and a workflow-status filter chip appears
-        await pageObjects.documentFlyoutV2.cellActionsFilterInButton.click();
+        await pageObjects.documentFlyout.cellActionsFilterInButton.click();
         await expect(page.testSubj.locator(`~${WORKFLOW_STATUS_FILTER_KEY_TEST_SUBJ}`)).toBeVisible(
           { timeout: 10_000 }
         );
@@ -153,24 +152,24 @@ spaceTest.describe(
         await pageObjects.alertsTablePage.navigate();
         await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
         await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-        await pageObjects.documentFlyoutV2.waitForAlertFlyout();
+        await pageObjects.documentFlyout.waitForAlertFlyout();
 
         // Resolve the logged-in user's username to build the right selectable option selector
         const meResponse = await page.request.get(kbnUrl.get(CURRENT_USER_PROFILE_API_PATH));
         const { username } = await meResponse.json();
 
-        await pageObjects.documentFlyoutV2.openAssigneesPanel();
+        await pageObjects.documentFlyout.openAssigneesPanel();
 
         // Select the current user — Apply must become enabled
-        await pageObjects.documentFlyoutV2.selectAssignee(username);
-        await expect(pageObjects.documentFlyoutV2.assigneesApplyButton).toBeEnabled();
+        await pageObjects.documentFlyout.selectAssignee(username);
+        await expect(pageObjects.documentFlyout.assigneesApplyButton).toBeEnabled();
 
         // Wire up listener before applying
         const assigneesApiCall = page.waitForResponse(
           (resp) =>
             resp.url().includes(ALERT_ASSIGNEES_API_PATH) && resp.request().method() === 'POST'
         );
-        await pageObjects.documentFlyoutV2.applyAssignees();
+        await pageObjects.documentFlyout.applyAssignees();
 
         // API must succeed and the request must add exactly one user
         const apiResponse = await assigneesApiCall;
@@ -180,7 +179,7 @@ spaceTest.describe(
         expect(requestBody.assignees.remove).toHaveLength(0);
 
         // Avatar for the assigned user must appear in the flyout header
-        await expect(pageObjects.documentFlyoutV2.getAssigneeAvatar(username)).toBeVisible({
+        await expect(pageObjects.documentFlyout.getAssigneeAvatar(username)).toBeVisible({
           timeout: 10_000,
         });
       }

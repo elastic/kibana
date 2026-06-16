@@ -42,7 +42,7 @@ spaceTest.describe(
         await pageObjects.alertsTablePage.navigate();
         await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
         await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-        await pageObjects.documentFlyoutV2.waitForAlertFlyout();
+        await pageObjects.documentFlyout.waitForAlertFlyout();
 
         // CUSTOM_QUERY_RULE has no investigation guide; the callout message should render
         // and the "Show investigation guide" button should be absent.
@@ -61,25 +61,25 @@ spaceTest.describe(
         await pageObjects.alertsTablePage.navigate();
         await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
         await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-        await pageObjects.documentFlyoutV2.waitForAlertFlyout();
+        await pageObjects.documentFlyout.waitForAlertFlyout();
 
-        await expect(pageObjects.documentFlyoutV2.investigationSection).toBeVisible();
-        await expect(pageObjects.documentFlyoutV2.highlightedFieldsTable).toBeVisible();
+        await expect(pageObjects.documentFlyout.investigationSection).toBeVisible();
+        await expect(pageObjects.documentFlyout.highlightedFieldsTable).toBeVisible();
 
         // `source.ip` is a "special" highlighted field: it renders as a link that opens the
         // network details flyout. Other special fields (e.g. host.name, user.name) will be
         // added here as their child flyouts become available.
-        const sourceIpLink = pageObjects.documentFlyoutV2.highlightedFieldChildLink('source.ip');
+        const sourceIpLink = pageObjects.documentFlyout.highlightedFieldChildLink('source.ip');
         await expect(sourceIpLink).toBeVisible();
         await expect(sourceIpLink).toContainText(PREVALENCE_SOURCE_IP);
 
         await sourceIpLink.click();
 
         // The network details flyout opens as a child flyout, titled with the clicked IP.
-        await expect(pageObjects.documentFlyoutV2.networkDetailsFlyoutTitle).toBeVisible({
+        await expect(pageObjects.documentFlyout.networkDetailsFlyoutTitle).toBeVisible({
           timeout: 10_000,
         });
-        await expect(pageObjects.documentFlyoutV2.networkDetailsFlyoutTitle).toContainText(
+        await expect(pageObjects.documentFlyout.networkDetailsFlyoutTitle).toContainText(
           PREVALENCE_SOURCE_IP
         );
       }

@@ -19,13 +19,14 @@ import { ThreatMatchRuleCreatePage } from './threat_match_rule_create_page';
 import { AttackDetailsRightPanelPage } from './attack_details_right_panel';
 import { ServerlessProjectChromePage } from './serverless_project_chrome_page';
 import { GraphFlyoutPage } from './graph_flyout_page';
-import { DocumentFlyoutV2 } from './document_flyout_v2';
-import { ThreatIntelligenceToolPage } from './threat_intelligence_tool';
-import { CorrelationsToolPage } from './correlations_tool';
-import { PrevalenceToolPage } from './prevalence_tool';
-import { AnalyzerToolPage } from './analyzer_tool';
-import { NotesToolPage } from './notes_tool';
-import { ResponseToolPage } from './response_tool';
+import { DocumentFlyout } from './flyout_v2/document/main/document_flyout';
+import { RuleFlyout } from './flyout_v2/rule/rule_flyout';
+import { ThreatIntelligenceTool } from './flyout_v2/document/tools/threat_intelligence_tool';
+import { CorrelationsTool } from './flyout_v2/document/tools/correlations_tool';
+import { PrevalenceTool } from './flyout_v2/document/tools/prevalence_tool';
+import { AnalyzerTool } from './flyout_v2/document/tools/analyzer_tool';
+import { NotesTool } from './flyout_v2/document/tools/notes_tool';
+import { ResponseTool } from './flyout_v2/document/tools/response_tool';
 
 export type { ThreatMatchRuleCreatePage } from './threat_match_rule_create_page';
 
@@ -45,19 +46,21 @@ export interface SecurityPageObjects extends PageObjects {
   /** Graph Visualization tab inside the alert/event details left panel. */
   graphFlyoutPage: GraphFlyoutPage;
   /** v2 document flyout (alert / event) — requires `newFlyoutSystemEnabled` experimental feature. */
-  documentFlyoutV2: DocumentFlyoutV2;
+  documentFlyout: DocumentFlyout;
+  /** v2 rule flyout — opened from the alerts table rule column or the document flyout About section. */
+  ruleFlyout: RuleFlyout;
   /** Threat intelligence tool overlay inside the flyout v2 document flyout. */
-  threatIntelligenceTool: ThreatIntelligenceToolPage;
+  threatIntelligenceTool: ThreatIntelligenceTool;
   /** Correlations tool overlay inside the flyout v2 document flyout. */
-  correlationsTool: CorrelationsToolPage;
+  correlationsTool: CorrelationsTool;
   /** Prevalence tool overlay inside the flyout v2 document flyout. */
-  prevalenceTool: PrevalenceToolPage;
+  prevalenceTool: PrevalenceTool;
   /** Analyzer tool overlay (resolver process-tree graph) inside the flyout v2 document flyout. */
-  analyzerTool: AnalyzerToolPage;
+  analyzerTool: AnalyzerTool;
   /** Notes tool overlay inside the flyout v2 document flyout. */
-  notesTool: NotesToolPage;
+  notesTool: NotesTool;
   /** Response tool overlay (automated response actions) inside the flyout v2 document flyout. */
-  responseTool: ResponseToolPage;
+  responseTool: ResponseTool;
 }
 
 export function extendPageObjects(
@@ -83,12 +86,13 @@ export function extendPageObjects(
     attackDetailsRightPanelPage: createLazyPageObject(AttackDetailsRightPanelPage, page),
     serverlessProjectChromePage: createLazyPageObject(ServerlessProjectChromePage, page),
     graphFlyoutPage: createLazyPageObject(GraphFlyoutPage, page),
-    documentFlyoutV2: createLazyPageObject(DocumentFlyoutV2, page),
-    threatIntelligenceTool: createLazyPageObject(ThreatIntelligenceToolPage, page),
-    correlationsTool: createLazyPageObject(CorrelationsToolPage, page),
-    prevalenceTool: createLazyPageObject(PrevalenceToolPage, page),
-    analyzerTool: createLazyPageObject(AnalyzerToolPage, page),
-    notesTool: createLazyPageObject(NotesToolPage, page),
-    responseTool: createLazyPageObject(ResponseToolPage, page),
+    documentFlyout: createLazyPageObject(DocumentFlyout, page),
+    ruleFlyout: createLazyPageObject(RuleFlyout, page),
+    threatIntelligenceTool: createLazyPageObject(ThreatIntelligenceTool, page),
+    correlationsTool: createLazyPageObject(CorrelationsTool, page),
+    prevalenceTool: createLazyPageObject(PrevalenceTool, page),
+    analyzerTool: createLazyPageObject(AnalyzerTool, page),
+    notesTool: createLazyPageObject(NotesTool, page),
+    responseTool: createLazyPageObject(ResponseTool, page),
   };
 }

@@ -12,7 +12,7 @@ import type { ScoutPage, Locator } from '@kbn/scout';
  * Covers both the analyzer preview in the Visualizations section and the full tool overlay panel
  * that renders the resolver process-tree graph.
  */
-export class AnalyzerToolPage {
+export class AnalyzerTool {
   /**
    * Title link in the analyzer preview (Visualizations section) that opens the tool overlay.
    * Only rendered when the analyzer is enabled for the document.

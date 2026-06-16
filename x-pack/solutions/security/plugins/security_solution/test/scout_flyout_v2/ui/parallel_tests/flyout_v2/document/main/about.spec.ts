@@ -19,6 +19,7 @@ spaceTest.describe(
       await apiServices.detectionRule.createCustomQueryRule({
         ...CUSTOM_QUERY_RULE,
         name: ruleName,
+        index: ['auditbeat-*'],
       });
       await browserAuth.loginAsPlatformEngineer();
     });
@@ -34,17 +35,18 @@ spaceTest.describe(
         await pageObjects.alertsTablePage.navigate();
         await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
         await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-        await pageObjects.documentFlyoutV2.waitForAlertFlyout();
+        await pageObjects.documentFlyout.waitForAlertFlyout();
 
         // The About section and its "Show rule summary" button render for a readable rule.
-        await expect(pageObjects.documentFlyoutV2.aboutSection).toBeVisible();
-        await expect(pageObjects.documentFlyoutV2.ruleSummaryButton).toBeVisible();
-        await expect(pageObjects.documentFlyoutV2.ruleSummaryButton).toBeEnabled();
+        await expect(pageObjects.documentFlyout.aboutSection).toBeVisible();
+        await expect(pageObjects.documentFlyout.ruleSummaryButton).toBeVisible();
+        await expect(pageObjects.documentFlyout.ruleSummaryButton).toBeEnabled();
 
-        await pageObjects.documentFlyoutV2.openRuleSummary();
+        await pageObjects.documentFlyout.ruleSummaryButton.click();
 
         // The rule summary opens as a child flyout titled with the rule name.
-        await expect(pageObjects.documentFlyoutV2.ruleDetailsTitle).toContainText(ruleName);
+        await pageObjects.ruleFlyout.waitForRuleFlyout();
+        await expect(pageObjects.ruleFlyout.title).toContainText(ruleName);
       }
     );
 
@@ -54,25 +56,25 @@ spaceTest.describe(
         await pageObjects.alertsTablePage.navigate();
         await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
         await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-        await pageObjects.documentFlyoutV2.waitForAlertFlyout();
+        await pageObjects.documentFlyout.waitForAlertFlyout();
 
-        await expect(pageObjects.documentFlyoutV2.aboutSection).toBeVisible();
+        await expect(pageObjects.documentFlyout.aboutSection).toBeVisible();
 
         // "Show full reason" opens a popover that renders the reason as key-value pairs.
-        await pageObjects.documentFlyoutV2.openReasonPopover();
-        await expect(pageObjects.documentFlyoutV2.reasonHostNameValue).toBeVisible({
+        await pageObjects.documentFlyout.openReasonPopover();
+        await expect(pageObjects.documentFlyout.reasonHostNameValue).toBeVisible({
           timeout: 10_000,
         });
 
         // Hovering a key-value pair reveals its cell-action buttons.
-        await pageObjects.documentFlyoutV2.hoverReasonHostName();
-        await expect(pageObjects.documentFlyoutV2.cellActionsFilterInButton).toBeVisible();
-        await expect(pageObjects.documentFlyoutV2.cellActionsFilterOutButton).toBeVisible();
-        await expect(pageObjects.documentFlyoutV2.cellActionsAddToTimelineButton).toBeVisible();
+        await pageObjects.documentFlyout.hoverReasonHostName();
+        await expect(pageObjects.documentFlyout.cellActionsFilterInButton).toBeVisible();
+        await expect(pageObjects.documentFlyout.cellActionsFilterOutButton).toBeVisible();
+        await expect(pageObjects.documentFlyout.cellActionsAddToTimelineButton).toBeVisible();
 
         // "Filter for" works: clicking it adds a single filter pill to the page search bar.
-        await pageObjects.documentFlyoutV2.cellActionsFilterInButton.click();
-        await expect(pageObjects.documentFlyoutV2.pageFilterBadges).toHaveCount(1, {
+        await pageObjects.documentFlyout.cellActionsFilterInButton.click();
+        await expect(pageObjects.documentFlyout.pageFilterBadges).toHaveCount(1, {
           timeout: 10_000,
         });
       }
