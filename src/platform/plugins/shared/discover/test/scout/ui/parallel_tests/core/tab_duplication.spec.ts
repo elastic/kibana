@@ -44,7 +44,7 @@ spaceTest.describe('Discover tabs - tab duplication', { tag: tags.stateful.all }
   });
 
   spaceTest('should restore the previous ui state', async ({ pageObjects }) => {
-    const { discover } = pageObjects;
+    const { discover, unifiedTabs } = pageObjects;
 
     const expectSidebarFieldCount = (count: number) =>
       expect.poll(() => discover.getSidebarAvailableFieldCount()).toBe(count);
@@ -67,7 +67,7 @@ spaceTest.describe('Discover tabs - tab duplication', { tag: tags.stateful.all }
 
     await spaceTest.step('a new tab is unfiltered but inherits the histogram height', async () => {
       updatedHistogramHeight2 = updatedHistogramHeight + 50;
-      await discover.createNewTab();
+      await unifiedTabs.createNewTab();
       await discover.waitUntilTabIsLoaded();
       await discover.resizeHistogramBy(50);
       await expectHistogramHeight(updatedHistogramHeight2);
@@ -75,21 +75,21 @@ spaceTest.describe('Discover tabs - tab duplication', { tag: tags.stateful.all }
     });
 
     await spaceTest.step('switching back to the first tab restores its ui state', async () => {
-      await discover.selectTab(0);
+      await unifiedTabs.selectTab(0);
       await discover.waitUntilTabIsLoaded();
       await expectHistogramHeight(updatedHistogramHeight);
       await expectSidebarFieldCount(FILTERED_SIDEBAR_FIELD_COUNT);
     });
 
     await spaceTest.step('duplicating the first tab copies its ui state', async () => {
-      await discover.duplicateTab(0);
+      await unifiedTabs.duplicateTab(0);
       await discover.waitUntilTabIsLoaded();
       await expectHistogramHeight(updatedHistogramHeight);
       await expectSidebarFieldCount(FILTERED_SIDEBAR_FIELD_COUNT);
     });
 
     await spaceTest.step('duplicating the new tab copies its ui state', async () => {
-      await discover.duplicateTab(2);
+      await unifiedTabs.duplicateTab(2);
       await discover.waitUntilTabIsLoaded();
       await expectHistogramHeight(updatedHistogramHeight2);
       await expectSidebarFieldCount(INITIAL_SIDEBAR_FIELD_COUNT);
@@ -97,7 +97,7 @@ spaceTest.describe('Discover tabs - tab duplication', { tag: tags.stateful.all }
   });
 
   spaceTest('should restore the previous app and global states', async ({ pageObjects }) => {
-    const { discover, filterBar, datePicker } = pageObjects;
+    const { discover, filterBar, datePicker, unifiedTabs } = pageObjects;
 
     const expectHitCount = (count: number) =>
       expect.poll(() => discover.getHitCountInt()).toBe(count);
@@ -123,7 +123,7 @@ spaceTest.describe('Discover tabs - tab duplication', { tag: tags.stateful.all }
     });
 
     await spaceTest.step('a new tab starts with default app and global state', async () => {
-      await discover.createNewTab();
+      await unifiedTabs.createNewTab();
       await discover.waitUntilTabIsLoaded();
       await datePicker.setAbsoluteRange(testData.DEFAULT_TIME_RANGE_DISPLAY);
       await discover.waitUntilTabIsLoaded();
@@ -133,14 +133,14 @@ spaceTest.describe('Discover tabs - tab duplication', { tag: tags.stateful.all }
     });
 
     await spaceTest.step('duplicating the first tab copies its state', async () => {
-      await discover.duplicateTab(0);
+      await unifiedTabs.duplicateTab(0);
       await discover.waitUntilTabIsLoaded();
       await expectHitCount(FILTERED_HIT_COUNT);
       await expectBreakdownLabel(BREAKDOWN_SELECTED_LABEL);
     });
 
     await spaceTest.step('duplicating the new tab copies its state', async () => {
-      await discover.duplicateTab(2);
+      await unifiedTabs.duplicateTab(2);
       await discover.waitUntilTabIsLoaded();
       await expectHitCount(INITIAL_HIT_COUNT);
       await expectBreakdownLabel(BREAKDOWN_NONE_LABEL);

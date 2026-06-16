@@ -33,6 +33,7 @@ import { LoginPage } from './login_page';
 import { HomePage } from './home_page';
 import { OverlaysPage } from './overlays';
 import { VisualizeApp } from './visualize_app';
+import { UnifiedTabs } from './unified_tabs';
 import {
   ContentListWrapper,
   buildContentListSearch,
@@ -81,6 +82,7 @@ export interface PageObjects {
   lens: LensApp;
   login: LoginPage;
   overlays: OverlaysPage;
+  unifiedTabs: UnifiedTabs;
   visualize: VisualizeApp;
 }
 
@@ -120,6 +122,7 @@ export function createCorePageObjects(fixtures: PageObjectsFixtures): PageObject
     lens: createLazyPageObject(LensApp, fixtures.page),
     login: createLazyPageObject(LoginPage, fixtures.page, fixtures.kbnUrl),
     overlays: createLazyPageObject(OverlaysPage, fixtures.page),
+    unifiedTabs: createLazyPageObject(UnifiedTabs, fixtures.page),
     visualize: createLazyPageObject(VisualizeApp, fixtures.page),
   };
 }
