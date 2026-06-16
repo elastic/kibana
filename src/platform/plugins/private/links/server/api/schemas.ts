@@ -44,6 +44,7 @@ export const dashboardLinkSchema = schema.object(
   },
   {
     meta: {
+      description: 'Link type. Set to dashboardLink for a link to another dashboard.',
       id: `kbn-link-panel-type-${DASHBOARD_LINK_TYPE}`,
     },
   }
@@ -64,7 +65,10 @@ export const externalLinkOptionsSchema = schema.object(
       defaultValue: DEFAULT_EXTERNAL_LINK_OPTIONS.encode_url,
     }),
   },
-  { defaultValue: DEFAULT_EXTERNAL_LINK_OPTIONS, unknowns: 'forbid' }
+  {
+    defaultValue: DEFAULT_EXTERNAL_LINK_OPTIONS,
+    unknowns: 'forbid',
+  }
 );
 
 export const externalLinkSchema = schema.object(
@@ -80,6 +84,7 @@ export const externalLinkSchema = schema.object(
   {
     meta: {
       id: `kbn-link-type-${EXTERNAL_LINK_TYPE}`,
+      description: 'Link type. Set to externalLink for a URL outside Kibana.',
     },
   }
 );
