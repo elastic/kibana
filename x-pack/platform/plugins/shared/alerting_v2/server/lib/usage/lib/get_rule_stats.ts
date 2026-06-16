@@ -98,6 +98,60 @@ export async function getRuleStats(esClient: ElasticsearchClient): Promise<RuleS
           `,
         },
       },
+      rule_schedule_every: {
+        type: 'keyword',
+        script: {
+          source: `
+            def rule = params._source['${RULE_SAVED_OBJECT_TYPE}'];
+            if (rule != null) {
+              def schedule = rule['schedule'];
+              if (schedule != null) {
+                def v = schedule['every'];
+                if (v != null) emit(v);
+              }
+            }
+          `,
+        },
+      },
+      rule_schedule_lookback: {
+        type: 'keyword',
+        script: {
+          source: `
+            def rule = params._source['${RULE_SAVED_OBJECT_TYPE}'];
+            if (rule != null) {
+              def schedule = rule['schedule'];
+              if (schedule != null) {
+                def v = schedule['lookback'];
+                if (v != null) emit(v);
+              }
+            }
+          `,
+        },
+      },
+      rule_created_at: {
+        type: 'date',
+        script: {
+          source: `
+            def rule = params._source['${RULE_SAVED_OBJECT_TYPE}'];
+            if (rule != null) {
+              def v = rule['createdAt'];
+              if (v != null) emit(Instant.parse(v).toEpochMilli());
+            }
+          `,
+        },
+      },
+      rule_updated_at: {
+        type: 'date',
+        script: {
+          source: `
+            def rule = params._source['${RULE_SAVED_OBJECT_TYPE}'];
+            if (rule != null) {
+              def v = rule['updatedAt'];
+              if (v != null) emit(Instant.parse(v).toEpochMilli());
+            }
+          `,
+        },
+      },
     },
     aggs: {
       count_enabled: {
@@ -107,10 +161,10 @@ export async function getRuleStats(esClient: ElasticsearchClient): Promise<RuleS
         terms: { field: `${RULE_SAVED_OBJECT_TYPE}.kind`, size: TERMS_SIZE },
       },
       count_by_schedule: {
-        terms: { field: `${RULE_SAVED_OBJECT_TYPE}.schedule.every`, size: TERMS_SIZE },
+        terms: { field: 'rule_schedule_every', size: TERMS_SIZE },
       },
       count_by_lookback: {
-        terms: { field: `${RULE_SAVED_OBJECT_TYPE}.schedule.lookback`, size: TERMS_SIZE },
+        terms: { field: 'rule_schedule_lookback', size: TERMS_SIZE },
       },
       avg_pending_count: {
         avg: { field: 'rule_pending_count' },
@@ -125,13 +179,13 @@ export async function getRuleStats(esClient: ElasticsearchClient): Promise<RuleS
         terms: { field: 'rule_recovering_timeframe', size: TERMS_SIZE },
       },
       count_with_grouping: {
-        filter: { exists: { field: `${RULE_SAVED_OBJECT_TYPE}.grouping.fields` } },
+        filter: { exists: { field: 'rule_grouping_fields_count' } },
       },
       avg_grouping_fields_count: {
         avg: { field: 'rule_grouping_fields_count' },
       },
       min_created_at: {
-        min: { field: `${RULE_SAVED_OBJECT_TYPE}.createdAt`, format: 'strict_date_time' },
+        min: { field: 'rule_created_at', format: 'strict_date_time' },
       },
     },
   });
