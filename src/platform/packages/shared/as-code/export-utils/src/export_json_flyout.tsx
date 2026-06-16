@@ -124,7 +124,7 @@ export const ExportJsonFlyout = <State extends object, SanitizedState extends ob
         {isByReference && !exportFullState && (
           <>
             <EuiSpacer size="s" />
-            <EuiCallOut iconType="magnify" announceOnMount>
+            <EuiCallOut announceOnMount>
               <FormattedMessage
                 id="asCode.exportJson.showFullConfigCallout"
                 defaultMessage="This panel is linked to the library, so this dashboard stores only a reference to it. Select {buttonLabel} to see its complete definition."
