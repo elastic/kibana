@@ -13,8 +13,39 @@ import {
   KNOWN_SERVERLESS_ROLE_DEFINITIONS,
 } from '@kbn/security-solution-plugin/common/test';
 import { setupUsers } from './setup_users';
-import { CLOUD_SERVERLESS, IS_SERVERLESS } from '../env_var_names_constants';
-import { suppressGlobalAnnouncements } from '../tasks/api_calls/common';
+import {
+  CLOUD_SERVERLESS,
+  ELASTICSEARCH_PASSWORD,
+  ELASTICSEARCH_USERNAME,
+  IS_SERVERLESS,
+} from '../env_var_names_constants';
+
+const suppressGlobalAnnouncements = () => {
+  const headers = { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' };
+  if (Cypress.env(IS_SERVERLESS)) {
+    cy.task('getApiKeyForRole', 'admin').then((apiKey) => {
+      cy.request({
+        method: 'POST',
+        url: '/internal/kibana/global_settings',
+        headers: { ...headers, Authorization: `ApiKey ${apiKey}` },
+        body: { changes: { hideAnnouncements: true } },
+        failOnStatusCode: false,
+      });
+    });
+  } else {
+    cy.request({
+      method: 'POST',
+      url: '/internal/kibana/global_settings',
+      auth: {
+        user: Cypress.env(ELASTICSEARCH_USERNAME),
+        pass: Cypress.env(ELASTICSEARCH_PASSWORD),
+      },
+      headers,
+      body: { changes: { hideAnnouncements: true } },
+      failOnStatusCode: false,
+    });
+  }
+};
 
 before(() => {
   cy.task('esArchiverLoad', { archiveName: 'auditbeat_single' });
