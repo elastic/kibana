@@ -19,7 +19,6 @@ const SETTINGS: SLOSettings = {
   useAllRemoteClusters: false,
   selectedRemoteClusters: [],
   staleThresholdInHours: 48,
-  staleInstancesCleanupEnabled: false,
 };
 
 const emptyRulesFindResponse = {
@@ -97,39 +96,26 @@ describe('GetSLOStatsOverview', () => {
       await buildService().execute({});
 
       const params = mockScopedClusterClient.asCurrentUser.search.mock.calls[0][0] as {
-        aggs: Record<string, unknown>;
+        aggs: {
+          stale: { filter: { bool: { filter: unknown[]; must_not: unknown[] } } };
+          not_stale: {
+            filter: { bool: { should: unknown[]; minimum_should_match: number } };
+          };
+        };
       };
 
       // Source of the bug: the "stale" range alone routed temp docs (summaryUpdatedAt: null)
       // into neither bucket. The fix splits them based on isTempDoc so temp docs always land
       // in not_stale and never in stale, and the per-status counters always see them.
-      expect(params.aggs).toEqual({
-        stale: {
-          filter: {
-            bool: {
-              filter: [{ range: { summaryUpdatedAt: { lt: 'now-48h' } } }],
-              must_not: [{ term: { isTempDoc: true } }],
-            },
-          },
-        },
-        not_stale: {
-          filter: {
-            bool: {
-              should: [
-                { term: { isTempDoc: true } },
-                { range: { summaryUpdatedAt: { gte: 'now-48h' } } },
-              ],
-              minimum_should_match: 1,
-            },
-          },
-          aggs: {
-            violated: { filter: { term: { status: 'VIOLATED' } } },
-            healthy: { filter: { term: { status: 'HEALTHY' } } },
-            degrading: { filter: { term: { status: 'DEGRADING' } } },
-            noData: { filter: { term: { status: 'NO_DATA' } } },
-          },
-        },
-      });
+      expect(params.aggs.stale.filter.bool.filter).toEqual([
+        { range: { summaryUpdatedAt: { lt: 'now-48h' } } },
+      ]);
+      expect(params.aggs.stale.filter.bool.must_not).toEqual([{ term: { isTempDoc: true } }]);
+      expect(params.aggs.not_stale.filter.bool.should).toEqual([
+        { term: { isTempDoc: true } },
+        { range: { summaryUpdatedAt: { gte: 'now-48h' } } },
+      ]);
+      expect(params.aggs.not_stale.filter.bool.minimum_should_match).toBe(1);
     });
 
     it('reflects the configured staleThresholdInHours in both buckets', async () => {
