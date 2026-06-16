@@ -6,7 +6,7 @@
  */
 
 import type { ActionsClient } from '@kbn/actions-plugin/server';
-import { ActionsClientLlm } from '@kbn/langchain/server';
+import { ActionsClientLlm, InferenceClientLlm } from '@kbn/langchain/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { InferenceClient, InferenceConnector } from '@kbn/inference-common';
 import { InferenceConnectorType } from '@kbn/inference-common';
@@ -17,6 +17,7 @@ jest.mock('@kbn/langchain/server', () => ({
   ...jest.requireActual('@kbn/langchain/server'),
 
   ActionsClientLlm: jest.fn(),
+  InferenceClientLlm: jest.fn(),
 }));
 
 const connectorTimeout = 1000;
@@ -30,6 +31,16 @@ const evaluatorConnector: InferenceConnector = {
   capabilities: {},
   isInferenceEndpoint: false,
   isPreconfigured: true,
+};
+
+const inferenceEvaluatorConnector: InferenceConnector = {
+  connectorId: 'inferenceEvaluatorConnectorId',
+  type: '.inference' as InferenceConnectorType.Inference,
+  name: 'Inference Evaluator',
+  config: {},
+  capabilities: {},
+  isInferenceEndpoint: true,
+  isPreconfigured: false,
 };
 
 const experimentConnector: InferenceConnector = {
@@ -153,6 +164,31 @@ describe('getEvaluatorLlm', () => {
           projectName: 'evaluators',
           tracers: expect.any(Array),
         },
+      })
+    );
+  });
+
+  it('creates a new InferenceClientLlm instance when the evaluator connector type is .inference', async () => {
+    const actionsClient = {} as unknown as ActionsClient;
+    const getInferenceConnectorById = jest.fn().mockResolvedValue(inferenceEvaluatorConnector);
+    const inferenceClient = {} as InferenceClient;
+
+    await getEvaluatorLlm({
+      actionsClient,
+      connectorTimeout,
+      evaluatorConnectorId: inferenceEvaluatorConnector.connectorId,
+      experimentConnector,
+      getInferenceConnectorById,
+      inferenceClient,
+      langSmithApiKey: 'test-api-key',
+      logger,
+    });
+
+    expect(InferenceClientLlm).toHaveBeenCalledWith(
+      expect.objectContaining({
+        connectorId: inferenceEvaluatorConnector.connectorId,
+        inferenceClient,
+        timeout: connectorTimeout,
       })
     );
   });

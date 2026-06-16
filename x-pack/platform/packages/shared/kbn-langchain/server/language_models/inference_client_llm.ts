@@ -21,6 +21,8 @@ export interface InferenceClientLlmInput {
   model?: string;
   temperature?: number;
   timeout?: number;
+  systemPrompt?: string;
+  telemetryMetadata?: Record<string, string>;
 }
 
 /**
@@ -29,6 +31,14 @@ export interface InferenceClientLlmInput {
  * Use this for inference endpoint connectors (actionTypeId === '.inference').
  * It has no dependency on the Actions framework and is therefore immune to
  * Actions-layer changes that broke Attack Discovery in INC-2847.
+ *
+ * Note: InferenceClientLlm extends LLM (LangChain's completion base class string in, string out)
+ * but overrides `_modelType()` to return `'base_chat_model'`. This is borrowed from `ActionsClientLlm`
+ * where the same trick is used, but that class wraps the Actions layer which can behave as a chat model
+ * under the hood. Here, `chatComplete` is explicitly a chat API, which means the semantically correct
+ * base class is `BaseChatModel`. Using `LLM` + `_modelType()` override is a pragmatic workaround today,
+ * but it might mislead future contributors and could break silently when LangChain uses `_modelType()`
+ * for routing decisions in a future version.
  */
 export class InferenceClientLlm extends LLM<BaseLanguageModelCallOptions> {
   readonly #connectorId: string;
@@ -42,6 +52,8 @@ export class InferenceClientLlm extends LLM<BaseLanguageModelCallOptions> {
   readonly #model: string | undefined;
   readonly #temperature: number;
   readonly #timeout: number | undefined;
+  readonly #systemPrompt: string | undefined;
+  readonly #telemetryMetadata: Record<string, string> | undefined;
 
   constructor({
     connectorId,
@@ -51,6 +63,8 @@ export class InferenceClientLlm extends LLM<BaseLanguageModelCallOptions> {
     model,
     temperature = 0,
     timeout,
+    systemPrompt,
+    telemetryMetadata,
   }: InferenceClientLlmInput) {
     super({});
     this.#connectorId = connectorId;
@@ -60,14 +74,14 @@ export class InferenceClientLlm extends LLM<BaseLanguageModelCallOptions> {
     this.#model = model;
     this.#temperature = temperature;
     this.#timeout = timeout;
+    this.#systemPrompt = systemPrompt;
+    this.#telemetryMetadata = telemetryMetadata;
   }
 
   _llmType(): string {
     return this.llmType;
   }
 
-  // Model type needs to be `base_chat_model` to work with LangChain OpenAI Tools
-  // We may want to make this configurable (ala _llmType) if different agents end up requiring different model types
   _modelType() {
     return 'base_chat_model';
   }
@@ -77,14 +91,26 @@ export class InferenceClientLlm extends LLM<BaseLanguageModelCallOptions> {
       () => `${LLM_TYPE}: calling chatComplete for connector ${this.#connectorId}`
     );
 
-    const response = await this.#inferenceClient.chatComplete({
-      connectorId: this.#connectorId,
-      messages: [{ role: MessageRole.User, content: prompt }],
-      temperature: this.#temperature,
-      ...(this.#model ? { modelName: this.#model } : {}),
-      ...(this.#timeout ? { timeout: this.#timeout } : {}),
-    });
+    try {
+      const response = await this.#inferenceClient.chatComplete({
+        connectorId: this.#connectorId,
+        messages: [{ role: MessageRole.User, content: prompt }],
+        temperature: this.#temperature,
+        ...(this.#model ? { modelName: this.#model } : {}),
+        ...(this.#timeout ? { timeout: this.#timeout } : {}),
+        ...(this.#systemPrompt ? { system: this.#systemPrompt } : {}),
+        ...(this.#telemetryMetadata ? { metadata: this.#telemetryMetadata } : {}),
+      });
 
-    return response.content;
+      return response.content;
+    } catch (error: unknown) {
+      const err = error as Error & { code?: string };
+      this.#logger.error(
+        `${LLM_TYPE}: chatComplete failed for connector ${this.#connectorId}: ${err.code} - ${
+          err.message
+        }`
+      );
+      throw error;
+    }
   }
 }

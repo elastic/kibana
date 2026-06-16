@@ -31,7 +31,7 @@ export const getEvaluatorLlm = async ({
   evaluatorConnectorId: string | undefined;
   experimentConnector: InferenceConnector;
   getInferenceConnectorById: (id: string) => Promise<InferenceConnector>;
-  inferenceClient: InferenceClient;
+  inferenceClient?: InferenceClient;
   langSmithApiKey: string | undefined;
   logger: Logger;
 }): Promise<BaseLLM> => {
@@ -63,27 +63,40 @@ export const getEvaluatorLlm = async ({
   };
 
   const isInferenceConnector = evaluatorConnector.type === '.inference';
-  return isInferenceConnector
-    ? new InferenceClientLlm({
-        connectorId: evaluatorConnector.connectorId,
-        inferenceClient,
-        llmType: evaluatorLlmType,
-        logger,
-        model: getConnectorDefaultModel(evaluatorConnector),
-        temperature: 0,
-        timeout: connectorTimeout,
-      })
-    : new ActionsClientLlm({
-        actionsClient,
-        connectorId: evaluatorConnector.connectorId,
-        llmType: evaluatorLlmType,
-        logger,
-        model: getConnectorDefaultModel(evaluatorConnector),
-        temperature: 0, // zero temperature for evaluation
-        timeout: connectorTimeout,
-        traceOptions,
-        telemetryMetadata: {
-          pluginId: 'security_attack_discovery',
-        },
-      });
+
+  if (isInferenceConnector) {
+    if (inferenceClient == null) {
+      throw new Error(
+        `inferenceClient is required for connector "${evaluatorConnector.connectorId}" ` +
+          `(actionTypeId: ${evaluatorConnector.type}) but was not provided`
+      );
+    }
+
+    return new InferenceClientLlm({
+      connectorId: evaluatorConnector.connectorId,
+      inferenceClient,
+      llmType: evaluatorLlmType,
+      logger,
+      model: getConnectorDefaultModel(evaluatorConnector),
+      temperature: 0,
+      timeout: connectorTimeout,
+      telemetryMetadata: {
+        pluginId: 'security_attack_discovery',
+      },
+    });
+  }
+
+  return new ActionsClientLlm({
+    actionsClient,
+    connectorId: evaluatorConnector.connectorId,
+    llmType: evaluatorLlmType,
+    logger,
+    model: getConnectorDefaultModel(evaluatorConnector),
+    temperature: 0, // zero temperature for evaluation
+    timeout: connectorTimeout,
+    traceOptions,
+    telemetryMetadata: {
+      pluginId: 'security_attack_discovery',
+    },
+  });
 };

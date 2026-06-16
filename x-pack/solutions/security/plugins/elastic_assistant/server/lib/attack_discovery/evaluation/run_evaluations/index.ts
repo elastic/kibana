@@ -41,7 +41,7 @@ export const runEvaluations = async ({
   evaluatorConnectorId: string | undefined;
   datasetName: string;
   getInferenceConnectorById: (id: string) => Promise<InferenceConnector>;
-  inferenceClient: InferenceClient;
+  inferenceClient?: InferenceClient;
   graphs: Array<{
     connector: InferenceConnector;
     graph: DefaultAttackDiscoveryGraph;

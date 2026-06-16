@@ -107,6 +107,9 @@ export const invokeAttackDiscoveryGraph = async ({
           model,
           temperature: 0,
           timeout: connectorTimeout,
+          telemetryMetadata: {
+            pluginId: 'security_attack_discovery',
+          },
         })
       : new ActionsClientLlm({
           actionsClient,
@@ -121,10 +124,6 @@ export const invokeAttackDiscoveryGraph = async ({
             pluginId: 'security_attack_discovery',
           },
         });
-
-  if (llm == null) {
-    throw new Error('LLM is required for attack discoveries');
-  }
 
   const attackDiscoveryPrompts = await getAttackDiscoveryPrompts({
     connectorId: apiConfig.connectorId,

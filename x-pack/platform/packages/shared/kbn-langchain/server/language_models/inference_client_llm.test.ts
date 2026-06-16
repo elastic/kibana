@@ -21,6 +21,7 @@ describe('InferenceClientLlm', () => {
 
     mockLogger = {
       debug: jest.fn(),
+      error: jest.fn(),
     } as unknown as jest.Mocked<Logger>;
   });
 
@@ -40,7 +41,7 @@ describe('InferenceClientLlm', () => {
     });
   });
 
-  it('passes connectorId, temperature, model, timeout correctly', async () => {
+  it('passes connectorId, temperature, model, timeout, systemPrompt, and telemetryMetadata correctly', async () => {
     const llm = new InferenceClientLlm({
       connectorId: 'test-connector',
       inferenceClient: mockInferenceClient,
@@ -48,6 +49,8 @@ describe('InferenceClientLlm', () => {
       model: 'test-model',
       temperature: 0.5,
       timeout: 1000,
+      systemPrompt: 'test system prompt',
+      telemetryMetadata: { pluginId: 'test_plugin' },
     });
 
     await llm._call('test prompt');
@@ -57,6 +60,8 @@ describe('InferenceClientLlm', () => {
       temperature: 0.5,
       modelName: 'test-model',
       timeout: 1000,
+      system: 'test system prompt',
+      metadata: { pluginId: 'test_plugin' },
     });
   });
 
@@ -93,6 +98,23 @@ describe('InferenceClientLlm', () => {
     const logMessageFn = mockLogger.debug.mock.calls[0][0] as () => string;
     expect(logMessageFn()).toBe(
       'InferenceClientLlm: calling chatComplete for connector test-connector'
+    );
+  });
+
+  it('_call() logs an error message if chatComplete fails', async () => {
+    const error = new Error('test error');
+    Object.assign(error, { code: 'TEST_ERROR' });
+    mockInferenceClient.chatComplete.mockRejectedValueOnce(error);
+
+    const llm = new InferenceClientLlm({
+      connectorId: 'test-connector',
+      inferenceClient: mockInferenceClient,
+      logger: mockLogger,
+    });
+
+    await expect(llm._call('test prompt')).rejects.toThrow('test error');
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      'InferenceClientLlm: chatComplete failed for connector test-connector: TEST_ERROR - test error'
     );
   });
 });

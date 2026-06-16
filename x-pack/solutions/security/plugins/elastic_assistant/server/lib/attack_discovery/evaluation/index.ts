@@ -60,7 +60,7 @@ export const evaluateAttackDiscovery = async ({
   evaluationId: string;
   evaluatorConnectorId: string | undefined;
   getInferenceConnectorById: (id: string) => Promise<InferenceConnector>;
-  inferenceClient: InferenceClient;
+  inferenceClient?: InferenceClient;
   langSmithApiKey: string | undefined;
   langSmithProject: string | undefined;
   logger: Logger;
