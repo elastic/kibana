@@ -53,28 +53,30 @@ export const METRIC_ALERTING_FEATURES_WITH_SHARED = buildAlertingFeatureEntries(
   [AlertConsumers.INFRASTRUCTURE]
 );
 
-export const LOG_ALERTING_FEATURES = buildAlertingFeatureEntries([LOG_THRESHOLD_ALERT_TYPE_ID], [
-  AlertConsumers.LOGS,
-]);
+export const LOG_ALERTING_FEATURES = buildAlertingFeatureEntries(
+  [LOG_THRESHOLD_ALERT_TYPE_ID],
+  [AlertConsumers.LOGS]
+);
 
 export const LOG_ALERTING_FEATURES_WITH_SHARED = buildAlertingFeatureEntries(
   [LOG_THRESHOLD_ALERT_TYPE_ID, ...SHARED_OBS_RULE_TYPE_IDS],
   [AlertConsumers.LOGS]
 );
 
-export const SLO_ALERTING_FEATURES = buildAlertingFeatureEntries([SLO_BURN_RATE_RULE_TYPE_ID], [
-  AlertConsumers.SLO,
-]);
+export const SLO_ALERTING_FEATURES = buildAlertingFeatureEntries(
+  [SLO_BURN_RATE_RULE_TYPE_ID],
+  [AlertConsumers.SLO]
+);
 
 export const SYNTHETICS_ALERTING_FEATURES = buildAlertingFeatureEntries(
   [...UPTIME_RULE_TYPE_IDS, ...SYNTHETICS_RULE_TYPE_IDS],
   [AlertConsumers.UPTIME]
 );
 
-export const SHARED_OBS_ALERTING_FEATURES = buildAlertingFeatureEntries(
-  SHARED_OBS_RULE_TYPE_IDS,
-  [AlertConsumers.INFRASTRUCTURE, AlertConsumers.LOGS]
-);
+export const SHARED_OBS_ALERTING_FEATURES = buildAlertingFeatureEntries(SHARED_OBS_RULE_TYPE_IDS, [
+  AlertConsumers.INFRASTRUCTURE,
+  AlertConsumers.LOGS,
+]);
 
 export const OBS_ALERTING_FEATURES = [
   ...APM_ALERTING_FEATURES,
