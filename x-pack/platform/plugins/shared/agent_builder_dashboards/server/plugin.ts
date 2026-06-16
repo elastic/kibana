@@ -21,6 +21,7 @@ import type {
 import { registerSkills } from './skills';
 import { createDashboardAttachmentType } from './attachment_types';
 import { createDashboardSmlType } from './sml_types';
+import { registerManageDashboardRoute } from './routes/manage_dashboard';
 
 export class AgentBuilderDashboardsPlugin
   implements
@@ -57,6 +58,10 @@ export class AgentBuilderDashboardsPlugin
     );
     setupDeps.agentContextLayer.registerType(createDashboardSmlType({ getDashboardClient }));
     registerSkills(setupDeps.agentBuilder);
+
+    const router = coreSetup.http.createRouter();
+    registerManageDashboardRoute(router, this.logger, coreSetup);
+
     return {};
   }
 

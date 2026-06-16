@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
+import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { AgentContextLayerPluginSetup } from '@kbn/agent-context-layer-plugin/server';
 import type { DashboardPluginStart } from '@kbn/dashboard-plugin/server';
 
@@ -15,6 +15,7 @@ export interface AgentBuilderDashboardsSetupDependencies {
 }
 
 export interface AgentBuilderDashboardsStartDependencies {
+  agentBuilder: AgentBuilderPluginStart;
   dashboard: DashboardPluginStart;
 }
 
