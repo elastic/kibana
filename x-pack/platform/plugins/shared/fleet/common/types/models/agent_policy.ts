@@ -44,7 +44,7 @@ export interface NewAgentPolicy {
   keep_monitoring_alive?: boolean | null;
   supports_agentless?: boolean | null;
   global_data_tags?: GlobalDataTag[];
-  agentless?: AgentlessPolicyConfig;
+  agentless?: AgentlessAgentPolicyConfig;
   monitoring_pprof_enabled?: boolean;
   monitoring_http?: {
     enabled?: boolean;
@@ -80,7 +80,7 @@ export interface CloudConnectors {
   enabled?: boolean;
 }
 /** Agentless-specific configuration embedded in an AgentPolicy (cloud connectors, resources). */
-export interface AgentlessPolicyConfig {
+export interface AgentlessAgentPolicyConfig {
   cloud_connectors?: CloudConnectors;
   resources?: {
     requests?: {
@@ -95,7 +95,7 @@ export interface AgentlessPolicyConfig {
  * An agentless policy with cloud_connectors guaranteed to be present and enabled.
  * Used by verifier agent policies that target a specific cloud provider.
  */
-export interface VerifierAgentlessPolicyConfig extends AgentlessPolicyConfig {
+export interface VerifierAgentlessAgentPolicyConfig extends AgentlessAgentPolicyConfig {
   cloud_connectors: Required<CloudConnectors> & { enabled: true };
 }
 

@@ -17,7 +17,7 @@ import type {
   KafkaConnectionTypeType,
   AgentUpgradeDetails,
   OutputPreset,
-  AgentlessPolicyConfig,
+  AgentlessAgentPolicyConfig,
 } from '../../common/types';
 import type {
   AgentStatus,
@@ -82,7 +82,7 @@ export interface AgentPolicySOAttributes {
   agents?: number;
   overrides?: any | null;
   global_data_tags?: Array<{ name: string; value: string | number }>;
-  agentless?: AgentlessPolicyConfig;
+  agentless?: AgentlessAgentPolicyConfig;
   version?: string;
   has_agent_version_conditions?: boolean;
   is_verifier?: boolean;

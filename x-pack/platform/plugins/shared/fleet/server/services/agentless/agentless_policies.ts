@@ -21,7 +21,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import type {
   AgentlessPolicy,
-  AgentlessPolicyConfig,
+  AgentlessAgentPolicyConfig,
   CreateAgentlessPolicyRequestSchema,
   PackagePolicy,
 } from '../../../common/types';
@@ -64,9 +64,9 @@ export interface AgentlessPoliciesService {
   ) => Promise<void>;
 }
 
-const getAgentlessPolicyConfig = (
+const getAgentlessAgentPolicyConfig = (
   packageInfo?: PackageInfo
-): AgentlessPolicyConfig | undefined => {
+): AgentlessAgentPolicyConfig | undefined => {
   if (
     !packageInfo?.policy_templates &&
     !packageInfo?.policy_templates?.some((policy) => policy.deployment_modes)
@@ -161,7 +161,7 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
       const agentPolicyName = getAgentlessAgentPolicyNameFromPackagePolicyName(data.name);
 
       // Get base agentless config from package info
-      const baseAgentlessConfig = getAgentlessPolicyConfig(pkgInfo);
+      const baseAgentlessConfig = getAgentlessAgentPolicyConfig(pkgInfo);
 
       // Build agentless config with cloud connectors if provided
       let agentlessConfig = baseAgentlessConfig;
