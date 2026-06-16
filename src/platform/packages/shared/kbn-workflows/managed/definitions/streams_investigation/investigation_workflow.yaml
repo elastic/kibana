@@ -45,15 +45,16 @@ steps:
         - Metrics: {{ inputs.stream_names[2] }}
         Event metadata: {{ inputs | json }}
 
-        Before generating hypotheses, do a thorough investigation using observability tools
-        in this order:
-        1. `get_service_topology` — map the call graph (who calls whom). This is mandatory:
-           you cannot reason about root cause vs victim without knowing call direction.
-        2. `get_services` — list all services with error rates and latency to identify which are anomalous.
-        3. `get_trace_metrics` — get per-service latency percentiles to see where latency originates.
-        4. `get_log_change_points` or `get_metric_change_points` — find what changed and when;
-           the service whose metrics changed first is a stronger root cause candidate.
-        5. ES|QL STATS queries — to quantify specific anomalies (use the streams listed above).
+        Before generating hypotheses, do a thorough investigation. Start with memory — prior
+        incidents and system context may already indicate which components or signals matter most.
+        Then explore what data and tools are available and use whichever are relevant:
+        - If service topology / trace data exists: get_service_topology, get_services,
+          get_trace_metrics to map the call graph and identify anomalous vs victim services.
+        - If metrics or logs exist: get_metric_change_points, get_log_change_points to find
+          what deviated and when. Also run ES|QL STATS queries to quantify specific anomalies.
+        - If code, deployment, or configuration signals are accessible: check changelogs,
+          recent deployments, or config diffs.
+        Not all signals will be present — if a tool returns nothing useful, note it and move on.
 
         Key principles:
 
@@ -64,8 +65,8 @@ steps:
           load simply because a neighbor changed. Don't attribute root cause to it on load alone —
           confirm it has a fault of its own that the load doesn't explain.
         - Look for the component whose anomaly is NOT explained by upstream or downstream effects.
-        - The cause may surface in any signal (logs, traces, or metrics) and may be of any kind —
-          a code or config change, a dependency failure, a resource problem, bad data, etc.
+        - The cause may surface in any signal and may be of any kind — a code or config change,
+          a dependency failure, a resource problem, bad data, etc.
           Don't presuppose the failure mode; follow the evidence.
 
         Generate up to 5 targeted hypotheses ordered by prior confidence (highest first).
