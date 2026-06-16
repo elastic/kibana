@@ -8,7 +8,7 @@
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { Logger } from '@kbn/core/server';
-import { resolvePanelsFromAttachments } from './manage_dashboard/utils';
+import { resolvePanelsFromAttachments } from './generate/utils';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 
 const createMockLogger = (): Logger =>
