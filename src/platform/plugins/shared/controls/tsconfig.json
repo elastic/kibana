@@ -43,7 +43,8 @@
     "@kbn/es-types",
     "@kbn/esql",
     "@kbn/presentation-publishing-schemas",
-    "@kbn/controls-renderer"
+    "@kbn/controls-renderer",
+    "@kbn/field-formats-common"
   ],
   "exclude": ["target/**/*"]
 }
