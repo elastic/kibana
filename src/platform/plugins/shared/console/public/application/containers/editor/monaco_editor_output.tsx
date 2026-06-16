@@ -191,7 +191,12 @@ export const MonacoEditorOutput: FunctionComponent = () => {
 
   const displayValue = useMemo(() => {
     const statusCode = data?.length === 1 ? data[0].response.statusCode : undefined;
-    if (data && statusCode !== undefined && isFilterableStatusCode(statusCode) && filterState.expression) {
+    if (
+      data &&
+      statusCode !== undefined &&
+      isFilterableStatusCode(statusCode) &&
+      filterState.expression
+    ) {
       return applyResponseFilter({
         text: value,
         contentType: data[0].response.contentType,
