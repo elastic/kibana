@@ -294,6 +294,7 @@ describe('WHERE Autocomplete', () => {
         )
       );
       await whereExpectSuggestions('FROM index | WHERE NOT ENDS_WITH(keywordField, "foo") ', [
+        '\n',
         ...getOperatorSuggestions(logicalOperators),
         '| ',
       ]);
@@ -317,13 +318,14 @@ describe('WHERE Autocomplete', () => {
 
       await whereExpectSuggestions(
         'from index | WHERE doubleField in (FROM index | KEEP doubleField) ',
-        [...getOperatorSuggestions(logicalOperators), '| ']
+        ['\n', ...getOperatorSuggestions(logicalOperators), '| ']
       );
       await whereExpectSuggestions(
         'from index | WHERE doubleField not in (FROM index | KEEP doubleField) ',
-        [...getOperatorSuggestions(logicalOperators), '| ']
+        ['\n', ...getOperatorSuggestions(logicalOperators), '| ']
       );
       await whereExpectSuggestions('from index | WHERE doubleField in (ROW doubleField = 1) ', [
+        '\n',
         ...getOperatorSuggestions(logicalOperators),
         '| ',
       ]);

@@ -122,7 +122,7 @@ describe('TS Autocomplete', () => {
       const extensionsSuggestions = getRecommendedQueriesTemplatesFromExtensions(
         editorExtensions.recommendedQueries
       ).map((s) => s.text);
-      const expected = ['METADATA ', ',', '| ', ...extensionsSuggestions].sort();
+      const expected = ['\n', 'METADATA ', ',', '| ', ...extensionsSuggestions].sort();
 
       await tsExpectSuggestions('ts time_series_index ', expected);
     });
@@ -176,7 +176,13 @@ describe('TS Autocomplete', () => {
     );
 
     test('standalone suggestion appears after space alongside other suggestions', async () => {
-      const expected = ['METADATA ', ',', '| ', ...extensionSuggestions.map((s) => s.text)].sort();
+      const expected = [
+        '\n',
+        'METADATA ',
+        ',',
+        '| ',
+        ...extensionSuggestions.map((s) => s.text),
+      ].sort();
 
       await expectSuggestions(
         'ts timeseries_index ',

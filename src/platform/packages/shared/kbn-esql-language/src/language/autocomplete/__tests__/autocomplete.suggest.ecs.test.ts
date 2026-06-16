@@ -42,6 +42,7 @@ describe('ecs suggestions', () => {
     await assertSuggestions(
       'FROM index | KEEP ^',
       [
+        '\n',
         {
           text: 'ecs.field',
           category: SuggestionCategory.ECS_FIELD,
@@ -61,6 +62,7 @@ describe('ecs suggestions', () => {
     await assertSuggestions(
       'FROM index | KEEP ^',
       [
+        '\n',
         'ecs.field',
         'other.field',
         {

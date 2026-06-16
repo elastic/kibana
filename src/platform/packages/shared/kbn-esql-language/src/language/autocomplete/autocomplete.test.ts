@@ -216,21 +216,22 @@ describe('autocomplete', () => {
   });
 
   describe.each(['keep', 'drop'])('%s', (command) => {
-    testSuggestions(`from a | ${command} /`, getFieldNamesByType('any'));
-    testSuggestions(
-      `from a | ${command} keywordField, /`,
-      getFieldNamesByType('any').filter((name) => name !== 'keywordField')
-    );
+    testSuggestions(`from a | ${command} /`, ['\n', ...getFieldNamesByType('any')]);
+    testSuggestions(`from a | ${command} keywordField, /`, [
+      '\n',
+      ...getFieldNamesByType('any').filter((name) => name !== 'keywordField'),
+    ]);
 
     testSuggestions(
       `from a | ${command} keywordField,/`,
-      getFieldNamesByType('any').filter((name) => name !== 'keywordField'),
+      ['\n', ...getFieldNamesByType('any').filter((name) => name !== 'keywordField')],
       ','
     );
 
     testSuggestions(
       `from a_index | eval round(doubleField) + 1 | eval \`round(doubleField) + 1\` + 1 | eval \`\`\`round(doubleField) + 1\`\` + 1\` + 1 | eval \`\`\`\`\`\`\`round(doubleField) + 1\`\`\`\` + 1\`\` + 1\` + 1 | eval \`\`\`\`\`\`\`\`\`\`\`\`\`\`\`round(doubleField) + 1\`\`\`\`\`\`\`\` + 1\`\`\`\` + 1\`\` + 1\` + 1 | ${command} /`,
       [
+        '\n',
         ...getFieldNamesByType('any'),
         '`round(doubleField) + 1`',
         '```round(doubleField) + 1`` + 1`',
@@ -414,7 +415,7 @@ describe('autocomplete', () => {
     // FROM source
     testSuggestions(
       'FROM k/',
-      ['index1', 'index2', ...views.map((v) => v.name), ...datasets.map((d) => d.name)],
+      ['k\n', 'index1', 'index2', ...views.map((v) => v.name), ...datasets.map((d) => d.name)],
       undefined,
       [
         ,
@@ -452,10 +453,10 @@ describe('autocomplete', () => {
     );
 
     // DROP (first field)
-    testSuggestions('FROM index1 | DROP f/', getFieldNamesByType('any'));
+    testSuggestions('FROM index1 | DROP f/', ['\n', ...getFieldNamesByType('any')]);
 
     // DROP (subsequent field)
-    testSuggestions('FROM index1 | DROP field1, f/', getFieldNamesByType('any'));
+    testSuggestions('FROM index1 | DROP field1, f/', ['\n', ...getFieldNamesByType('any')]);
 
     // ENRICH policy
     testSuggestions(
@@ -464,7 +465,7 @@ describe('autocomplete', () => {
     );
 
     // ENRICH policy ON
-    testSuggestions('FROM index1 | ENRICH policy O/', ['ON ', 'WITH ', '| ']);
+    testSuggestions('FROM index1 | ENRICH policy O/', ['\n', 'ON ', 'WITH ', '| ']);
 
     // ENRICH policy ON field
     testSuggestions(
@@ -491,13 +492,13 @@ describe('autocomplete', () => {
     );
 
     // KEEP (first field)
-    testSuggestions('FROM index1 | KEEP f/', getFieldNamesByType('any'));
+    testSuggestions('FROM index1 | KEEP f/', ['\n', ...getFieldNamesByType('any')]);
 
     // KEEP (subsequent fields)
-    testSuggestions(
-      'FROM index1 | KEEP booleanField, f/',
-      getFieldNamesByType('any').filter((name) => name !== 'booleanField')
-    );
+    testSuggestions('FROM index1 | KEEP booleanField, f/', [
+      '\n',
+      ...getFieldNamesByType('any').filter((name) => name !== 'booleanField'),
+    ]);
 
     // LIMIT argument
     testSuggestions('FROM a | LIMIT 1/', ['10 ', '100 ', '1000 ']);
@@ -530,6 +531,7 @@ describe('autocomplete', () => {
 
     // STATS argument BY
     testSuggestions('FROM index1 | STATS AVG(doubleField) B/', [
+      '\n',
       'WHERE ',
       'BY ',
       ', ',
@@ -685,6 +687,7 @@ describe('autocomplete', () => {
 
     // PIPE (|)
     testSuggestions('FROM a /', [
+      '\n',
       attachTriggerCommand('| '),
       ',',
       attachTriggerCommand('METADATA '),
@@ -723,6 +726,7 @@ describe('autocomplete', () => {
       testSuggestions(
         'FROM index/',
         [
+          'index\n',
           withAutoSuggest({ text: 'index1' } as ISuggestionItem),
           withAutoSuggest({ text: 'index2' } as ISuggestionItem),
           ...views.map((v) => withAutoSuggest({ text: v.name } as ISuggestionItem)),
@@ -746,6 +750,7 @@ describe('autocomplete', () => {
       testSuggestions(
         'FROM index1/',
         [
+          'index1\n',
           withAutoSuggest({
             text: 'index1 | ',
             filterText: 'index1',
@@ -778,6 +783,7 @@ describe('autocomplete', () => {
       testSuggestions(
         'FROM index1, index2/',
         [
+          'index2\n',
           withAutoSuggest({ text: '(FROM $0)' } as ISuggestionItem),
           withAutoSuggest({ text: '(ROW $0)' } as ISuggestionItem),
           withAutoSuggest({ text: '(TS $0)' } as ISuggestionItem),
@@ -808,6 +814,7 @@ describe('autocomplete', () => {
       testSuggestions(
         'FROM foo$bar/',
         [
+          'foo$bar\n',
           withAutoSuggest({
             text: 'foo$bar | ',
             filterText: 'foo$bar',
@@ -838,6 +845,7 @@ describe('autocomplete', () => {
       testSuggestions(
         'FROM i*/',
         [
+          'i*\n',
           withAutoSuggest({ text: 'i* | ', filterText: 'i*' } as ISuggestionItem),
           withAutoSuggest({ text: 'i*, ', filterText: 'i*' } as ISuggestionItem),
           withAutoSuggest({
@@ -877,7 +885,10 @@ describe('autocomplete', () => {
           .map(attachTriggerCommand)
           .map((s) => ({ ...s, rangeToReplace: { start: 16, end: 19 } }))
       );
-      testSuggestions('FROM a | ENRICH policy /', ['ON ', 'WITH ', '| '].map(attachTriggerCommand));
+      testSuggestions('FROM a | ENRICH policy /', [
+        '\n',
+        ...['ON ', 'WITH ', '| '].map(attachTriggerCommand),
+      ]);
 
       testSuggestions(
         'FROM a | ENRICH policy ON /',
@@ -885,10 +896,10 @@ describe('autocomplete', () => {
           .map((name) => `${name} `)
           .map(attachTriggerCommand)
       );
-      testSuggestions(
-        'FROM a | ENRICH policy ON @timestamp /',
-        ['WITH ', '| '].map(attachTriggerCommand)
-      );
+      testSuggestions('FROM a | ENRICH policy ON @timestamp /', [
+        '\n',
+        ...['WITH ', '| '].map(attachTriggerCommand),
+      ]);
       // nothing fancy with this field list
       testSuggestions('FROM a | ENRICH policy ON @timestamp WITH /', [
         'col0 = ',
@@ -933,6 +944,7 @@ describe('autocomplete', () => {
 
     // STATS argument BY
     testSuggestions('FROM a | STATS AVG(integerField) /', [
+      '\n',
       ', ',
       attachTriggerCommand('WHERE '),
       attachTriggerCommand('BY '),
@@ -1046,23 +1058,23 @@ describe('autocomplete', () => {
 
       describe.each(['KEEP', 'DROP'])('%s <field>', (commandName) => {
         // KEEP field
-        testSuggestions(
-          `FROM a | ${commandName} /`,
-          getFieldNamesByType('any').map(attachTriggerCommand)
-        );
-        testSuggestions(
-          `FROM a | ${commandName} d/`,
-          getFieldNamesByType('any')
+        testSuggestions(`FROM a | ${commandName} /`, [
+          '\n',
+          ...getFieldNamesByType('any').map(attachTriggerCommand),
+        ]);
+        testSuggestions(`FROM a | ${commandName} d/`, [
+          '\n',
+          ...getFieldNamesByType('any')
             .map<PartialSuggestionWithText>((text) => ({
               text,
               rangeToReplace: { start: 14, end: 15 },
             }))
-            .map(attachTriggerCommand)
-        );
-        testSuggestions(
-          `FROM a | ${commandName} doubleFiel/`,
-          getFieldNamesByType('any').map(attachTriggerCommand)
-        );
+            .map(attachTriggerCommand),
+        ]);
+        testSuggestions(`FROM a | ${commandName} doubleFiel/`, [
+          '\n',
+          ...getFieldNamesByType('any').map(attachTriggerCommand),
+        ]);
         testSuggestions(
           `FROM a | ${commandName} doubleField/`,
           ['doubleField, ', 'doubleField | ']
@@ -1184,7 +1196,7 @@ describe('autocomplete', () => {
 
     testSuggestions(
       'FROM kibana_sample_data_logs | WHERE agent NOT IN (FROM kibana_sample_data_logs)/',
-      ['AND $0', 'OR $0', '| ']
+      ['\n', 'AND $0', 'OR $0', '| ']
     );
   });
 
@@ -1215,21 +1227,21 @@ describe('autocomplete', () => {
     describe('dot-separated field names', () => {
       testSuggestions(
         'FROM index_a | KEEP field.nam/',
-        [{ text: 'field.name', rangeToReplace: { start: 20, end: 29 } }],
+        ['\n', { text: 'field.name', rangeToReplace: { start: 20, end: 29 } }],
         undefined,
         [[{ name: 'field.name', type: 'double', userDefined: false }]]
       );
       // multi-line
       testSuggestions(
         'FROM index_a\n| KEEP field.nam/',
-        [{ text: 'field.name', rangeToReplace: { start: 20, end: 29 } }],
+        ['\n', { text: 'field.name', rangeToReplace: { start: 20, end: 29 } }],
         undefined,
         [[{ name: 'field.name', type: 'double', userDefined: false }]]
       );
       // triple separator
       testSuggestions(
         'FROM index_c\n| KEEP field.name.f/',
-        [{ text: 'field.name.foo', rangeToReplace: { start: 20, end: 32 } }],
+        ['\n', { text: 'field.name.foo', rangeToReplace: { start: 20, end: 32 } }],
         undefined,
         [[{ name: 'field.name.foo', type: 'double', userDefined: false }]]
       );
@@ -1247,16 +1259,18 @@ describe('autocomplete', () => {
   describe('Unmmapped fields', () => {
     describe('should suggest unmapped field after its first usage if unmapped is LOAD or NULLIFY', () => {
       testSuggestions('SET unmapped_fields = "LOAD"; FROM a | WHERE unmappedField > 0 | KEEP /', [
+        '\n',
         ...getFieldNamesByType('any'),
         { text: 'unmappedField' },
       ]);
       testSuggestions(
         'SET unmapped_fields = "NULLIFY"; FROM a | WHERE unmappedField > 0 | KEEP /',
-        [...getFieldNamesByType('any'), { text: 'unmappedField' }]
+        ['\n', ...getFieldNamesByType('any'), { text: 'unmappedField' }]
       );
     });
     describe('should not suggest unmapped field after its first usage if unmapped is FAIL', () => {
       testSuggestions('SET unmapped_fields = "FAIL"; FROM a | WHERE unmappedField > 0 | KEEP /', [
+        '\n',
         ...getFieldNamesByType('any'),
       ]);
     });
@@ -1264,17 +1278,17 @@ describe('autocomplete', () => {
       // Don't suggest unmappedField because it was dropped
       testSuggestions(
         'SET unmapped_fields = "LOAD"; FROM a | WHERE unmappedField > 0|  DROP unmappedField | KEEP /',
-        [...getFieldNamesByType('any')]
+        ['\n', ...getFieldNamesByType('any')]
       );
       // Suggest only the unmappedField because it was kept
       testSuggestions(
         'SET unmapped_fields = "LOAD"; FROM a | WHERE unmappedField > 0|  KEEP unmappedField | KEEP /',
-        [{ text: 'unmappedField' }]
+        ['\n', { text: 'unmappedField' }]
       );
       // Don't suggest unmappedField because STATS destroyed all fields
       testSuggestions(
         'SET unmapped_fields = "LOAD"; FROM a | WHERE unmappedField > 0 | STATS col0 = AVG(3) | KEEP /',
-        [{ text: 'col0' }]
+        ['\n', { text: 'col0' }]
       );
     });
   });
