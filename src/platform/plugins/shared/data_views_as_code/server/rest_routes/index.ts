@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { registerPostDataViewAsCodeRoute } from './post_data_view';
 import { registerGetDataViewAsCodeRoute } from './get_data_view';
 
-export const routes = [registerGetDataViewAsCodeRoute];
+export const routes = [registerPostDataViewAsCodeRoute, registerGetDataViewAsCodeRoute];

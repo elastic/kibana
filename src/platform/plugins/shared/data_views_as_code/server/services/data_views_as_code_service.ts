@@ -7,8 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { fromStoredDataViewToAsCodeSavedSchema } from '@kbn/as-code-data-views-transforms';
-import type { DataViewLazy } from '@kbn/data-views-plugin/common';
+import type { AsCodeSavedDataView } from '@kbn/as-code-data-views-schema';
+import {
+  fromStoredDataViewToAsCodeSavedSchema,
+  toStoredDataView,
+} from '@kbn/as-code-data-views-transforms';
+import type { DataViewLazy, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { DataViewsService } from '@kbn/data-views-plugin/server';
 import { omit } from 'lodash';
 
@@ -35,6 +39,16 @@ export class DataViewsAsCodeService {
 
   public async get(id: string) {
     const result = await this.dataViewsService.getDataViewLazy(id);
+    return this.mapDataView(result);
+  }
+
+  public async create(spec: AsCodeSavedDataView) {
+    // The type assertion is necessary because the toStoredDataView function returns a string or DataViewSpec, but we
+    // know for sure that in this case it will be a DataViewSpec, which is what the dataViewsService needs.
+    const dataViewSpec = toStoredDataView(spec) as DataViewSpec;
+
+    const result = await this.dataViewsService.createAndSaveDataViewLazy(dataViewSpec);
+
     return this.mapDataView(result);
   }
 }
