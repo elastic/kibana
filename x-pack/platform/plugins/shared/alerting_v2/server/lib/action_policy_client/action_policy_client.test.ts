@@ -830,7 +830,7 @@ describe('ActionPolicyClient', () => {
       expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
         expect.objectContaining({
           search: 'my\\-search*',
-          searchFields: ['name', 'description', 'destinations.id'],
+          searchFields: ['name', 'description'],
           defaultSearchOperator: 'AND',
         })
       );
@@ -844,7 +844,7 @@ describe('ActionPolicyClient', () => {
       expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
         expect.objectContaining({
           search: 'memory\\-alert\\-rule*',
-          searchFields: ['name', 'description', 'destinations.id'],
+          searchFields: ['name', 'description'],
           defaultSearchOperator: 'AND',
         })
       );
@@ -858,7 +858,7 @@ describe('ActionPolicyClient', () => {
       expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
         expect.objectContaining({
           search: 'prod* alerts*',
-          searchFields: ['name', 'description', 'destinations.id'],
+          searchFields: ['name', 'description'],
           defaultSearchOperator: 'AND',
         })
       );

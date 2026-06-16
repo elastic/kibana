@@ -417,7 +417,7 @@ describe('ActionPolicySavedObjectService', () => {
       expect(mockSoClient.find).toHaveBeenCalledWith(
         expect.objectContaining({
           search: 'my-policy',
-          searchFields: ['name', 'description', 'destinations.id'],
+          searchFields: ['name', 'description'],
           defaultSearchOperator: 'AND',
         })
       );

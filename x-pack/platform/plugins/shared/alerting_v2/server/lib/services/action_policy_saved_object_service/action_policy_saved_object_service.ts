@@ -238,7 +238,7 @@ export class ActionPolicySavedObjectService implements ActionPolicySavedObjectSe
       ...(search
         ? {
             search,
-            searchFields: ['name', 'description', 'destinations.id'],
+            searchFields: ['name', 'description'],
             defaultSearchOperator: 'AND' as const,
           }
         : {}),
