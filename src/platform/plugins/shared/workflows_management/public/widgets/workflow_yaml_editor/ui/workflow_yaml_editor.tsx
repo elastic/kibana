@@ -804,16 +804,14 @@ export const WorkflowYAMLEditor = ({
         </div>
       ) : null}
       <div css={styles.editorAreaWrapper}>
-        {!isExecutionYaml && (
-          <div css={styles.minimapContainer} ref={minimapContainerRef}>
-            <WorkflowStepMinimap
-              editorRef={editorRef}
-              validationErrors={validationErrors}
-              scrollContainerRef={minimapContainerRef}
-              isEditorMounted={isEditorMounted}
-            />
-          </div>
-        )}
+        <div css={styles.minimapContainer} ref={minimapContainerRef}>
+          <WorkflowStepMinimap
+            editorRef={editorRef}
+            validationErrors={validationErrors}
+            scrollContainerRef={minimapContainerRef}
+            isEditorMounted={isEditorMounted}
+          />
+        </div>
         <div
           css={styles.editorContainer}
           className={classnames({ [EXECUTION_YAML_SNAPSHOT_CLASS]: isExecutionYaml })}

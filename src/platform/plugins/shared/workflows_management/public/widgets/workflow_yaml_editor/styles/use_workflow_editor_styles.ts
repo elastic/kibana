@@ -195,7 +195,6 @@ const editorStyleMap = {
       paddingRight: MINIMAP_RESERVE_PX,
       backgroundColor: euiTheme.colors.backgroundBaseSubdued,
       [`&.${EXECUTION_YAML_SNAPSHOT_CLASS}`]: {
-        paddingRight: 0,
         backgroundColor: euiTheme.colors.backgroundBasePlain,
       },
     }),

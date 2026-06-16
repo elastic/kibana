@@ -352,7 +352,8 @@ const inactiveText = euiTheme.colors.primaryText;
       {/* Viewport indicator — shows which steps are currently visible in the editor.
           Negative left/right offsets extend the border into the outer padding zones so
           severity dots (left) and SVG track circles (right) sit inside the border. */}
-      {viewportSteps && (
+      {viewportSteps &&
+        !(viewportSteps.first === 0 && viewportSteps.last === stepEntries.length - 1) && (
         <div
           aria-hidden="true"
           css={css({
