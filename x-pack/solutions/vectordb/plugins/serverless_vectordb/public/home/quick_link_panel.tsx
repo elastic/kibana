@@ -13,10 +13,9 @@ import {
   EuiScreenReaderOnly,
   EuiText,
   EuiTitle,
-  useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { quickLinkInnerStyle, quickLinkBoldLabelStyle } from './quick_link_panel_styles';
 
 interface QuickLinkPanelProps {
   title: string;
@@ -26,8 +25,6 @@ interface QuickLinkPanelProps {
 }
 
 export const QuickLinkPanel = ({ title, href, telemetryId, testSubj }: QuickLinkPanelProps) => {
-  const { euiTheme } = useEuiTheme();
-
   return (
     <EuiCard
       title={
@@ -48,20 +45,11 @@ export const QuickLinkPanel = ({ title, href, telemetryId, testSubj }: QuickLink
         alignItems="flexStart"
         direction="column"
         responsive={false}
-        css={css`
-          height: 100%;
-          padding: 0 ${euiTheme.size.s} ${euiTheme.size.s} ${euiTheme.size.s};
-        `}
+        css={quickLinkInnerStyle}
       >
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           <EuiIcon size="m" type="documentation" aria-hidden={true} />
-          <EuiText
-            size="xs"
-            color="subdued"
-            css={css`
-              font-weight: ${euiTheme.font.weight.bold};
-            `}
-          >
+          <EuiText size="xs" color="subdued" css={quickLinkBoldLabelStyle}>
             <FormattedMessage
               id="xpack.serverlessVectordb.quickLinkPanel.topicLabel"
               defaultMessage="Topic"
@@ -69,7 +57,7 @@ export const QuickLinkPanel = ({ title, href, telemetryId, testSubj }: QuickLink
           </EuiText>
         </EuiFlexGroup>
         <EuiTitle size="xxs">
-          <span aria-hidden="true">{title}</span>
+          <h3>{title}</h3>
         </EuiTitle>
       </EuiFlexGroup>
     </EuiCard>
