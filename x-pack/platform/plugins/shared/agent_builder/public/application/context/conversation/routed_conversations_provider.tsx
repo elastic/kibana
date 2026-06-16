@@ -47,6 +47,9 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
   const location = useLocation<LocationState>();
   const shouldStickToBottom = location.state?.shouldStickToBottom ?? true;
   const initialMessage = location.state?.initialMessage;
+  // Defaults to true so existing deep-link auto-send keeps working; the abort bounce-back
+  // passes false to prefill the input without sending.
+  const autoSendInitialMessage = location.state?.autoSendInitialMessage ?? true;
   const entryPointSource = location.state?.entryPointSource ?? 'direct';
 
   const hasFiredEntryPointRef = useRef(false);
@@ -107,7 +110,7 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
       isEmbeddedContext: false,
       conversationActions,
       initialMessage,
-      autoSendInitialMessage: true,
+      autoSendInitialMessage,
       agentId: agentIdFromPath,
       attachments,
       upsertAttachments,
@@ -119,6 +122,7 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
       shouldStickToBottom,
       conversationActions,
       initialMessage,
+      autoSendInitialMessage,
       agentIdFromPath,
       attachments,
       upsertAttachments,
