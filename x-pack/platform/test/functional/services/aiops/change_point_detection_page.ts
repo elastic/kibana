@@ -32,7 +32,7 @@ export function ChangePointDetectionPageProvider(
   return {
     async navigateToDataViewSelection() {
       await testSubjects.click('mlMainTab changePointDetection');
-      await testSubjects.existOrFail('mlPageSourceSelection');
+      await testSubjects.existOrFail('mlDataSourceSelectorButton');
     },
 
     async assertChangePointDetectionPageExists() {

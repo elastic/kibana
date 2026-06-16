@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { coreWorkerFixtures } from './core_fixtures';
+import { coreWorkerFixtures } from './saml_auth';
 import type { ApiClientFixture } from './api_client';
 import type { DefaultRolesFixture } from './default_roles';
 import type { ElasticsearchRoleDescriptor, KibanaRole } from '../../../../common';
@@ -64,6 +64,18 @@ export interface RequestAuthFixture {
    * Elasticsearch projects, `editor` for all other deployments and project types.
    */
   getApiKeyForPrivilegedUser: () => Promise<RoleApiCredentials>;
+  /**
+   * Fetches the descriptor of the named ES role and creates an API key scoped
+   * to those privileges. Works for built-in ES roles (e.g. `'kibana_admin'`,
+   * `'superuser'`) without requiring an entry in `roles.yml`.
+   *
+   * The descriptor is embedded inline in the API key — no separate role is
+   * created in Elasticsearch.
+   *
+   * @example
+   * const { apiKeyHeader } = await requestAuth.getApiKeyForBuiltInRole('kibana_admin');
+   */
+  getApiKeyForBuiltInRole: (roleName: string) => Promise<RoleApiCredentials>;
 }
 
 export const requestAuthFixture = coreWorkerFixtures.extend<
@@ -204,12 +216,20 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
         );
       };
 
+      const getApiKeyForBuiltInRole = async (roleName: string): Promise<RoleApiCredentials> => {
+        // Use fetchBuiltInRoleDescriptor (not setBuiltInRole) — the API key embeds
+        // the descriptor inline so no ES role needs to be created.
+        const descriptor = await samlAuth.fetchBuiltInRoleDescriptor(roleName);
+        return createApiKeyWithAdminCredentials(roleName, { [roleName]: descriptor });
+      };
+
       await use({
         getApiKey,
         getApiKeyForCustomRole,
         getApiKeyForAdmin,
         getApiKeyForViewer,
         getApiKeyForPrivilegedUser,
+        getApiKeyForBuiltInRole,
       });
 
       // Invalidate all API Keys after tests
