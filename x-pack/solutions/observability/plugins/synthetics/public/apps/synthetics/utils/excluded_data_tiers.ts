@@ -6,7 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { searchExcludedDataTiers } from '@kbn/observability-plugin/common/ui_settings_keys';
+import { searchExcludedDataTiers } from '@kbn/observability-plugin/common';
 import type { DataTier } from '@kbn/observability-shared-plugin/common';
 import { excludeTiersQuery } from '@kbn/observability-utils-common/es/queries/exclude_tiers_query';
 import { kibanaService } from '../../../utils/kibana_service';
