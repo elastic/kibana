@@ -21,6 +21,7 @@ import {
   ADD_TO_NEW_CASE_TEST_ID,
   ADD_TO_EXISTING_CASE_TEST_ID,
 } from '../../../cases/attachments/entity/components/test_ids';
+import { useKibana } from '../../../common/lib/kibana';
 
 export const UserPanelFooter = ({
   identityFields,
@@ -47,10 +48,12 @@ export const UserPanelFooter = ({
   }, [euidApi?.euid, entity]);
 
   const entityAttachmentsEnabled = useIsExperimentalFeatureEnabled('entityAttachmentsEnabled');
+  const { cases } = useKibana().services;
+  const attachmentsEnabled = cases.config.attachmentsEnabled;
 
   const additionalItems = useCallback(
     (closePopover: () => void) => {
-      if (!entityAttachmentsEnabled || !userName) return [];
+      if (!entityAttachmentsEnabled || !attachmentsEnabled || !userName) return [];
       const entityToAttach = {
         id: userName,
         name: userName,
@@ -72,7 +75,7 @@ export const UserPanelFooter = ({
         />,
       ];
     },
-    [entityAttachmentsEnabled, userName, riskLevel]
+    [attachmentsEnabled, entityAttachmentsEnabled, userName, riskLevel]
   );
 
   return (
