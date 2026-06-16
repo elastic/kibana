@@ -46,10 +46,7 @@ describe('skill selection evaluators', () => {
     ]);
 
     expect(getSkillReadPaths(output)).toEqual(['skills/platform/dashboard/dashboard-management']);
-    expect(getToolIds(output)).toEqual([
-      'filestore.read',
-      'platform.dashboard.generate_dashboard',
-    ]);
+    expect(getToolIds(output)).toEqual(['filestore.read', 'platform.dashboard.generate_dashboard']);
   });
 
   it('passes when dashboard skill is loaded for dashboard requests', async () => {
