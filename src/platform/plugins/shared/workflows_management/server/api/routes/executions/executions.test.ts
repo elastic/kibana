@@ -89,6 +89,7 @@ describe('Execution Routes', () => {
       cancelAllActiveWorkflowExecutions: jest.fn(),
       getStepExecution: jest.fn(),
       resumeWorkflowExecution: jest.fn(),
+      resumeWorkflowExecutionExternally: jest.fn(),
       getChildWorkflowExecutions: jest.fn(),
     };
 
@@ -615,6 +616,91 @@ describe('Execution Routes', () => {
           message: 'Workflow resume scheduled',
         },
       });
+    });
+  });
+
+  describe('external resume routes', () => {
+    const path = '/api/workflows/executions/{executionId}/resume/external';
+
+    it('should register GET and POST route handlers', () => {
+      expect(handler('GET', path)).toBeDefined();
+      expect(handler('POST', path)).toBeDefined();
+    });
+
+    it('should pass GET query params as coerced input candidates', async () => {
+      mockApi.resumeWorkflowExecutionExternally.mockResolvedValue({ resumedBy: 'api_key:key-1' });
+      const h = handler('GET', path)!;
+      const request = {
+        params: { executionId: 'ex-1' },
+        query: {
+          apiKey: 'encoded-key',
+          approved: 'true',
+          comment: 'LGTM',
+        },
+      };
+
+      const result = await h(mockContext, request as any, mockResponse as any);
+
+      expect(mockApi.resumeWorkflowExecutionExternally).toHaveBeenCalledWith({
+        apiKey: 'encoded-key',
+        coerceInput: true,
+        executionId: 'ex-1',
+        input: {
+          approved: 'true',
+          comment: 'LGTM',
+        },
+        spaceId: 'default',
+      });
+      expect(result).toMatchObject({
+        type: 'ok',
+        body: {
+          success: true,
+          executionId: 'ex-1',
+          message: 'Workflow resume scheduled',
+        },
+      });
+    });
+
+    it('should support POST body input and query apiKey', async () => {
+      mockApi.resumeWorkflowExecutionExternally.mockResolvedValue({ resumedBy: 'api_key:key-1' });
+      const h = handler('POST', path)!;
+      const request = {
+        params: { executionId: 'ex-1' },
+        query: { apiKey: 'query-key' },
+        body: {
+          input: { approved: true },
+        },
+      };
+
+      await h(mockContext, request as any, mockResponse as any);
+
+      expect(mockApi.resumeWorkflowExecutionExternally).toHaveBeenCalledWith({
+        apiKey: 'query-key',
+        executionId: 'ex-1',
+        input: { approved: true },
+        spaceId: 'default',
+      });
+    });
+
+    it('should prefer POST body apiKey over query apiKey', async () => {
+      mockApi.resumeWorkflowExecutionExternally.mockResolvedValue({ resumedBy: 'api_key:key-1' });
+      const h = handler('POST', path)!;
+      const request = {
+        params: { executionId: 'ex-1' },
+        query: { apiKey: 'query-key' },
+        body: {
+          apiKey: 'body-key',
+          input: {},
+        },
+      };
+
+      await h(mockContext, request as any, mockResponse as any);
+
+      expect(mockApi.resumeWorkflowExecutionExternally).toHaveBeenCalledWith(
+        expect.objectContaining({
+          apiKey: 'body-key',
+        })
+      );
     });
   });
 

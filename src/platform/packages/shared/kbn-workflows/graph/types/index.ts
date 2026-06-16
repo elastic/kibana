@@ -16,6 +16,8 @@ export type {
   WaitGraphNodeSchema,
   WaitForInputGraphNode,
   WaitForInputGraphNodeSchema,
+  WaitForInputSetupGraphNode,
+  WaitForInputSetupGraphNodeSchema,
   ElasticsearchGraphNode,
   ElasticsearchGraphNodeSchema,
   KibanaGraphNode,

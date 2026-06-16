@@ -39,7 +39,10 @@ import { registerWorkflowRoutes } from '../workflows';
 interface CapturedRoute {
   method: string;
   path: string;
-  security: { authz: { requiredPrivileges: any[] } };
+  security: {
+    authc?: { enabled?: boolean };
+    authz?: { enabled?: boolean; requiredPrivileges?: any[] };
+  };
   handler: (...args: any[]) => Promise<any>;
 }
 
@@ -188,6 +191,11 @@ const CONDITIONAL_PRIVILEGE_TESTS: Array<{
   },
 ];
 
+const TOKEN_AUTHORIZED_ROUTES = new Set([
+  'GET:/api/workflows/executions/{executionId}/resume/external',
+  'POST:/api/workflows/executions/{executionId}/resume/external',
+]);
+
 // ─── Mock data ──────────────────────────────────────────────────────────────
 
 const mockWorkflowDocument = {
@@ -301,6 +309,15 @@ const ROUTE_REQUEST_FIXTURES: Record<string, { params?: any; body?: any; query?:
   'POST:/api/workflows/executions/{executionId}/resume': {
     params: { executionId: 'test-exec-id' },
     body: { input: {} },
+  },
+  'GET:/api/workflows/executions/{executionId}/resume/external': {
+    params: { executionId: 'test-exec-id' },
+    query: { apiKey: 'encoded-api-key', approved: 'true' },
+  },
+  'POST:/api/workflows/executions/{executionId}/resume/external': {
+    params: { executionId: 'test-exec-id' },
+    query: {},
+    body: { apiKey: 'encoded-api-key', input: {} },
   },
 };
 
@@ -585,9 +602,15 @@ describe('Route privilege/ES-operation consistency', () => {
   });
 
   it('should have security config on every route', () => {
-    for (const [, route] of capturedRoutes) {
-      expect(route.security?.authz?.requiredPrivileges).toBeDefined();
-      expect(route.security.authz.requiredPrivileges.length).toBeGreaterThan(0);
+    for (const [routeKey, route] of capturedRoutes) {
+      if (TOKEN_AUTHORIZED_ROUTES.has(routeKey)) {
+        expect(route.security?.authc?.enabled).toBe(false);
+        expect(route.security?.authz?.enabled).toBe(false);
+      } else {
+        const requiredPrivileges = route.security?.authz?.requiredPrivileges;
+        expect(requiredPrivileges).toBeDefined();
+        expect(requiredPrivileges?.length).toBeGreaterThan(0);
+      }
     }
   });
 
@@ -597,6 +620,9 @@ describe('Route privilege/ES-operation consistency', () => {
       async (routeKey) => {
         const route = capturedRoutes.get(routeKey);
         if (!route) {
+          return;
+        }
+        if (TOKEN_AUTHORIZED_ROUTES.has(routeKey)) {
           return;
         }
 

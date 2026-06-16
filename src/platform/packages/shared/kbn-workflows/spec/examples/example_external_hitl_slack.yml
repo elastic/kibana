@@ -1,0 +1,94 @@
+version: '1'
+name: External HITL Slack approval
+description: Sends an external resume URL to Slack and waits for approval input.
+enabled: true
+
+triggers:
+  - type: manual
+
+steps:
+  - name: approval
+    type: waitForInput
+    with:
+      external: true
+      ttl: 1h
+      message: Approve this workflow run from Slack.
+      schema:
+        properties:
+          approved:
+            type: boolean
+          comment:
+            type: string
+        required:
+          - approved
+    steps:
+      - name: send_slack_approval_link
+        type: slack_api
+        connector-id: slackybot
+        with:
+          subAction: postBlockkit
+          subActionParams:
+            channelIds:
+              - C09DMPU14DV
+            text: |
+              {
+                "blocks": [
+                  {
+                    "type": "header",
+                    "text": {
+                      "type": "plain_text",
+                      "text": "Workflow approval required",
+                      "emoji": true
+                    }
+                  },
+                  {
+                    "type": "section",
+                    "text": {
+                      "type": "mrkdwn",
+                      "text": "*External HITL Slack approval* is waiting for a decision."
+                    }
+                  },
+                  {
+                    "type": "context",
+                    "elements": [
+                      {
+                        "type": "mrkdwn",
+                        "text": "Token expires in {{ steps.approval.output.external.ttl }}. Choose Approve or Decline to resume the workflow."
+                      }
+                    ]
+                  },
+                  {
+                    "type": "actions",
+                    "elements": [
+                      {
+                        "type": "button",
+                        "text": {
+                          "type": "plain_text",
+                          "text": "Approve",
+                          "emoji": true
+                        },
+                        "style": "primary",
+                        "url": "{{ steps.approval.output.external.resumeUrl }}&approved=true&comment=Approved%20from%20Slack"
+                      },
+                      {
+                        "type": "button",
+                        "text": {
+                          "type": "plain_text",
+                          "text": "Decline",
+                          "emoji": true
+                        },
+                        "style": "danger",
+                        "url": "{{ steps.approval.output.external.resumeUrl }}&approved=false&comment=Declined%20from%20Slack"
+                      }
+                    ]
+                  }
+                ]
+              }
+
+  - name: record_resume
+    type: data.set
+    with:
+      resumedBy: '{{ steps.approval.output.resumedBy }}'
+      resumedAt: '{{ steps.approval.output.resumedAt }}'
+      approved: '{{ steps.approval.output.input.approved }}'
+      comment: '{{ steps.approval.output.input.comment }}'

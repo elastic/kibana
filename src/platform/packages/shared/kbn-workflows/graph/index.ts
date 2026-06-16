@@ -54,6 +54,8 @@ export type {
   WaitGraphNode,
   WaitForInputGraphNodeSchema,
   WaitForInputGraphNode,
+  WaitForInputSetupGraphNode,
+  WaitForInputSetupGraphNodeSchema,
   EnterTryBlockNode,
   ExitTryBlockNode,
   EnterNormalPathNode,

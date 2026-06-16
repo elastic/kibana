@@ -466,11 +466,44 @@ describe('getOutputSchemaForStepType', () => {
 
       const result = getOutputSchemaForStepType(mockNode as any);
 
-      // Should produce a typed Zod schema, not the permissive record fallback.
-      const valid = result.safeParse({ approved: true });
-      const invalid = result.safeParse({ approved: 'not-a-boolean' });
+      const valid = result.safeParse({
+        input: { approved: true },
+        resumedAt: '2026-01-01T00:00:00.000Z',
+        resumedBy: 'elastic',
+      });
+      const validExternalOnly = result.safeParse({
+        external: {
+          apiKeyId: 'key-1',
+          resumeUrl: 'https://kibana.example.com/resume',
+          ttl: '1h',
+        },
+      });
+      const invalid = result.safeParse({ input: { approved: 'not-a-boolean' } });
       expect(valid.success).toBe(true);
+      expect(validExternalOnly.success).toBe(true);
       expect(invalid.success).toBe(false);
+    });
+
+    it('should resolve waitForInput output.input fields when schema omits object type', () => {
+      const mockNode = {
+        id: 'test-id',
+        stepId: 'test-step-id',
+        stepType: 'waitForInput',
+        type: 'waitForInput' as const,
+        configuration: {
+          with: {
+            schema: {
+              properties: { approved: { type: 'boolean' } },
+              required: ['approved'],
+            },
+          },
+        },
+      };
+
+      const result = getOutputSchemaForStepType(mockNode as any);
+
+      expect(result.safeParse({ input: { approved: true } }).success).toBe(true);
+      expect(result.safeParse({ input: { approved: 'not-a-boolean' } }).success).toBe(false);
     });
 
     it('should return permissive record schema for waitForInput without a schema', () => {
@@ -484,7 +517,7 @@ describe('getOutputSchemaForStepType', () => {
 
       const result = getOutputSchemaForStepType(mockNode as any);
 
-      expect(result.safeParse({ anything: true }).success).toBe(true);
+      expect(result.safeParse({ input: { anything: true } }).success).toBe(true);
     });
   });
 });

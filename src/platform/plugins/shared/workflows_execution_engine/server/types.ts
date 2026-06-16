@@ -114,8 +114,14 @@ export type ResumeWorkflowExecution = (
   executionId: string,
   spaceId: string,
   input: Record<string, unknown>,
-  request: KibanaRequest
+  request: KibanaRequest,
+  metadata?: ResumeWorkflowExecutionMetadata
 ) => Promise<ResumeWorkflowExecutionResponse>;
+
+export interface ResumeWorkflowExecutionMetadata {
+  resumedAt: string;
+  resumedBy: string;
+}
 
 export type InternalResumeWorkflowExecution = (
   executionId: string,

@@ -1221,8 +1221,33 @@ export class WorkflowsExecutionEnginePlugin
       executionId,
       spaceId,
       input,
-      request
+      request,
+      metadata
     ) => {
+      const workflowExecution = await getResumableWorkflowExecution(executionId, spaceId);
+      const resumeMetadata =
+        metadata ??
+        ({
+          resumedAt: new Date().toISOString(),
+          resumedBy: await getAuthenticatedUser(
+            request,
+            coreStart.security,
+            coreStart.elasticsearch.client
+          ),
+        } as const);
+      const resumeContext = {
+        ...workflowExecution.context,
+        resumeInput: input,
+        resumedBy: resumeMetadata.resumedBy,
+        resumedAt: resumeMetadata.resumedAt,
+      };
+
+      await internalResumeWorkflowExecution(executionId, spaceId, resumeContext, request);
+
+      return { resumedBy: resumeMetadata.resumedBy };
+    };
+
+    const getResumableWorkflowExecution = async (executionId: string, spaceId: string) => {
       await checkLicense(plugins.licensing);
 
       await this.initialize(coreStart);
@@ -1257,22 +1282,7 @@ export class WorkflowsExecutionEnginePlugin
         );
       }
 
-      const resumedBy = await getAuthenticatedUser(
-        request,
-        coreStart.security,
-        coreStart.elasticsearch.client
-      );
-
-      const resumeContext = {
-        ...workflowExecution.context,
-        resumeInput: input,
-        resumedBy,
-        resumedAt: new Date().toISOString(),
-      };
-
-      await internalResumeWorkflowExecution(executionId, spaceId, resumeContext, request);
-
-      return { resumedBy };
+      return workflowExecution;
     };
 
     const internalResumeWorkflowExecution: InternalResumeWorkflowExecution = async (

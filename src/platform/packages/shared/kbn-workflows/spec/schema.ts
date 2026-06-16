@@ -197,17 +197,37 @@ export type WaitStep = z.infer<typeof WaitStepSchema>;
 
 export const WaitForInputStepInputSchema = z
   .object({
+    external: z
+      .boolean()
+      .optional()
+      .describe('Create an external resume URL backed by a short-lived API key'),
     message: z.string().optional().describe('Message displayed to the user when waiting for input'),
     schema: JsonModelSchema.optional().describe(
       'JSON Schema describing the expected input payload. Used for validation, autocomplete, and default values in the resume UI'
+    ),
+    ttl: DurationSchema.optional().describe(
+      'Time to live for the external resume URL. Defaults to 1h and is capped at 24h'
     ),
   })
   .optional();
 export const WaitForInputStepSchema = BaseStepSchema.extend({
   type: z.literal('waitForInput').describe('Pause execution until external input is provided'),
   with: WaitForInputStepInputSchema,
+  steps: z.array(BaseStepSchema).optional().describe('Steps to execute before pausing for input'),
 });
 export type WaitForInputStep = z.infer<typeof WaitForInputStepSchema>;
+
+export const getWaitForInputStepSchema = (stepSchema: z.ZodType, loose: boolean = false) => {
+  const schema = WaitForInputStepSchema.extend({
+    steps: z.array(stepSchema).optional(),
+  });
+
+  if (loose) {
+    return schema.partial().required({ type: true });
+  }
+
+  return schema;
+};
 
 export const DataSetStepInputSchema = z
   .record(z.string(), z.unknown())

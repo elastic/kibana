@@ -30,6 +30,7 @@ import type {
   LoopBreakNode,
   LoopContinueNode,
   WaitForInputGraphNode,
+  WaitForInputSetupGraphNode,
   WaitGraphNode,
   WorkflowExecuteAsyncGraphNode,
   WorkflowExecuteGraphNode,
@@ -80,6 +81,7 @@ import {
   ExitStepTimeoutZoneNodeImpl,
   ExitWorkflowTimeoutZoneNodeImpl,
 } from './timeout_zone_step';
+import { WaitForInputSetupStepImpl } from './wait_for_input_step/wait_for_input_setup_step';
 import { WaitForInputStepImpl } from './wait_for_input_step/wait_for_input_step';
 import { WaitStepImpl } from './wait_step/wait_step';
 import { EnterWhileNodeImpl, ExitWhileNodeImpl } from './while_step';
@@ -349,6 +351,13 @@ export class NodesFactory {
       case 'waitForInput':
         return new WaitForInputStepImpl(
           node as WaitForInputGraphNode,
+          stepExecutionRuntime,
+          this.workflowRuntime,
+          stepLogger
+        );
+      case 'waitForInputSetup':
+        return new WaitForInputSetupStepImpl(
+          node as WaitForInputSetupGraphNode,
           stepExecutionRuntime,
           this.workflowRuntime,
           stepLogger

@@ -9,12 +9,28 @@
 
 import type { GraphNodeUnion } from '@kbn/workflows/graph';
 import { isAtomic } from '@kbn/workflows/graph';
+import { buildFieldsZodValidator } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
+import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { z } from '@kbn/zod/v4';
-import { fromJSONSchema } from '@kbn/zod/v4/from_json_schema';
 import { structuralStepOutputSchemas } from './structural_step_output_schemas';
 import { stepSchemas } from '../../../../common/step_schemas';
 
-const waitForInputFallbackSchema: z.ZodSchema = z.record(z.string(), z.unknown());
+const waitForInputExternalSchema = z.object({
+  apiKeyId: z.string(),
+  expiresAt: z.string().optional(),
+  resumeUrl: z.string(),
+  ttl: z.string(),
+});
+
+const waitForInputFallbackInputSchema: z.ZodSchema = z.record(z.string(), z.unknown());
+
+const createWaitForInputOutputSchema = (inputSchema: z.ZodSchema): z.ZodSchema =>
+  z.object({
+    external: waitForInputExternalSchema.optional(),
+    input: inputSchema.optional(),
+    resumedAt: z.string().optional(),
+    resumedBy: z.string().optional(),
+  });
 
 export const getOutputSchemaForStepType = (node: GraphNodeUnion): z.ZodSchema => {
   // Handle internal actions with pattern matching first
@@ -32,13 +48,14 @@ export const getOutputSchemaForStepType = (node: GraphNodeUnion): z.ZodSchema =>
 
     if (jsonSchema) {
       try {
-        const zodSchema = fromJSONSchema(jsonSchema);
-        if (zodSchema) return zodSchema as z.ZodSchema;
+        return createWaitForInputOutputSchema(
+          buildFieldsZodValidator(jsonSchema as JsonModelSchemaType)
+        );
       } catch {
         // fall through to permissive fallback
       }
     }
-    return waitForInputFallbackSchema;
+    return createWaitForInputOutputSchema(waitForInputFallbackInputSchema);
   }
 
   if (isAtomic(node)) {

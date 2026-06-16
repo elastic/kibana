@@ -20,4 +20,4 @@ steps:
   - name: log_score
     type: console
     with:
-      message: "Severity = {{ steps.ask_severity_score.output.severity }}"
+      message: "Severity = {{ steps.ask_severity_score.output.input.severity }}"

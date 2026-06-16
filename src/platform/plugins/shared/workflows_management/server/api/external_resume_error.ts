@@ -7,14 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const INCLUDED_OPERATIONS = [
-  'search',
-  'index',
-  'update',
-  'indices.exists',
-  'indices.delete',
-  'indices.create',
-  'bulk',
-  'esql.query',
-  'security.create_api_key',
-];
+export class ExternalResumeError extends Error {
+  constructor(message: string, public readonly statusCode: 400 | 401 | 403 | 404 | 409) {
+    super(message);
+    this.name = 'ExternalResumeError';
+  }
+}

@@ -70,6 +70,7 @@ import type {
   LoopContinueNode,
   LoopEnterNode,
   WaitForInputGraphNode,
+  WaitForInputSetupGraphNode,
   WorkflowGraphType,
   WorkflowOutputGraphNode,
 } from '../types';
@@ -259,16 +260,63 @@ export function visitWaitForInputStep(
   context: GraphBuildContext
 ): WorkflowGraphType {
   const stepId = getStepId(currentStep, context);
+  const childSteps = currentStep.steps ?? [];
+  const hasChildSteps = childSteps.length > 0;
+  const isExternal = currentStep.with?.external === true;
   const graph = createTypedGraph({ directed: true });
+  const waitForInputConfiguration = omit(currentStep, ['steps']) as WaitForInputStep;
+
   const waitForInputNode: WaitForInputGraphNode = {
-    id: stepId,
+    id: isExternal ? `waitForInput_${stepId}` : stepId,
     type: 'waitForInput',
     stepId,
     stepType: currentStep.type,
-    configuration: {
-      ...currentStep,
-    },
+    configuration: waitForInputConfiguration,
   };
+
+  if (!isExternal && hasChildSteps) {
+    const childGraph = createStepsSequence(childSteps, context);
+
+    childGraph.nodes().forEach((nodeId) => {
+      graph.setNode(nodeId, childGraph.node(nodeId));
+    });
+    childGraph.edges().forEach((edgeObj) => {
+      graph.setEdge(edgeObj.v, edgeObj.w);
+    });
+
+    const childEndNodes = childGraph
+      .nodes()
+      .filter((nodeId) => childGraph.outEdges(nodeId)?.length === 0);
+
+    graph.setNode(waitForInputNode.id, waitForInputNode);
+    childEndNodes.forEach((nodeId) => graph.setEdge(nodeId, waitForInputNode.id));
+
+    return graph;
+  }
+
+  if (isExternal) {
+    const setupNode: WaitForInputSetupGraphNode = {
+      id: `setupWaitForInput_${stepId}`,
+      type: 'waitForInputSetup',
+      stepId,
+      stepType: currentStep.type,
+      configuration: waitForInputConfiguration,
+    };
+
+    graph.setNode(setupNode.id, setupNode);
+    graph.setNode(waitForInputNode.id, waitForInputNode);
+    context.stack.push(setupNode);
+    const childGraph = createStepsSequence(childSteps, context);
+    context.stack.pop();
+    insertGraphBetweenNodes(graph, childGraph, setupNode.id, waitForInputNode.id);
+
+    if (childGraph.nodeCount() === 0) {
+      graph.setEdge(setupNode.id, waitForInputNode.id);
+    }
+
+    return graph;
+  }
+
   graph.setNode(waitForInputNode.id, waitForInputNode);
 
   return graph;

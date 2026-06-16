@@ -43,7 +43,11 @@ import {
   isTerminalStatus,
 } from '@kbn/workflows';
 import type { StepExecutionTreeItem } from './build_step_executions_tree';
-import { buildStepExecutionsTree, injectChildWorkflowSteps } from './build_step_executions_tree';
+import {
+  buildStepExecutionsTree,
+  injectChildWorkflowSteps,
+  nestWaitForInputChildSteps,
+} from './build_step_executions_tree';
 import { StepExecutionTreeItemLabel } from './step_execution_tree_item_label';
 import {
   buildOverviewStepExecutionFromContext,
@@ -219,7 +223,7 @@ export const WorkflowStepExecutionTree = ({
     return (
       <EuiEmptyPrompt
         {...emptyPromptCommonProps}
-        icon={<EuiIcon type="listBullet" size="l" />}
+        icon={<EuiIcon type="listBullet" size="l" aria-hidden={true} />}
         title={
           <h2>
             <FormattedMessage
@@ -269,6 +273,7 @@ export const WorkflowStepExecutionTree = ({
       execution.status,
       execution.triggeredBy
     );
+    stepExecutionsTree = nestWaitForInputChildSteps(stepExecutionsTree, definition);
 
     const { tree: treeWithChildren, childStepExecutions } = injectChildWorkflowSteps(
       stepExecutionsTree,
@@ -359,7 +364,7 @@ export const WorkflowStepExecutionTree = ({
   return (
     <EuiEmptyPrompt
       {...emptyPromptCommonProps}
-      icon={<EuiIcon type="error" size="l" />}
+      icon={<EuiIcon type="error" size="l" aria-hidden={true} />}
       title={
         <h2>
           <FormattedMessage

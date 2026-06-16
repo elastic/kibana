@@ -20,11 +20,11 @@ import {
   getOnFailureStepSchema,
   getParallelStepSchema,
   getSwitchStepSchema,
+  getWaitForInputStepSchema,
   getWhileStepSchema,
   getWorkflowSettingsSchema,
   LoopBreakStepSchema,
   LoopContinueStepSchema,
-  WaitForInputStepSchema,
   WaitStepSchema,
   WorkflowExecuteAsyncStepSchema,
   WorkflowExecuteStepSchema,
@@ -113,6 +113,7 @@ function createRecursiveStepSchema(
     const forEachSchema = getForEachStepSchema(stepSchema, loose);
     const whileSchema = getWhileStepSchema(stepSchema, loose);
     const ifSchema = getIfStepSchema(stepSchema, loose);
+    const waitForInputSchema = getWaitForInputStepSchema(stepSchema, loose);
     const switchSchema = getSwitchStepSchema(stepSchema, loose);
     const parallelSchema = getParallelStepSchema(stepSchema, loose);
     const mergeSchema = getMergeStepSchema(stepSchema, loose);
@@ -133,7 +134,7 @@ function createRecursiveStepSchema(
       parallelSchema,
       mergeSchema,
       WaitStepSchema,
-      WaitForInputStepSchema,
+      waitForInputSchema,
       DataSetStepSchema,
       WorkflowExecuteStepSchema,
       WorkflowExecuteAsyncStepSchema,

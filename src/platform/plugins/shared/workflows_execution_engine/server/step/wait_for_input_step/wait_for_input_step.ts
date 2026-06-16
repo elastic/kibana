@@ -9,6 +9,7 @@
 
 import { ExecutionStatus } from '@kbn/workflows';
 import type { WaitForInputGraphNode } from '@kbn/workflows/graph';
+import type { WaitForInputExternalOutput } from './wait_for_input_setup_step';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
@@ -70,13 +71,26 @@ export class WaitForInputStepImpl implements NodeImplementation {
     const resumeInput = context?.resumeInput as Record<string, unknown> | undefined;
     const ctx = context as Record<string, unknown> | null | undefined;
     const resumedBy = typeof ctx?.resumedBy === 'string' ? ctx.resumedBy : 'unknown';
+    const resumedAt = typeof ctx?.resumedAt === 'string' ? ctx.resumedAt : new Date().toISOString();
     const executionId = execution.id;
+    const currentOutput = this.stepExecutionRuntime.getCurrentStepResult()?.output;
+    const external = getExternalOutput(currentOutput);
 
-    this.stepExecutionRuntime.finishStep(resumeInput);
+    this.stepExecutionRuntime.finishStep({
+      input: resumeInput ?? {},
+      resumedBy,
+      resumedAt,
+      ...(external ? { external } : {}),
+    });
 
-    // Clear resumeInput so subsequent waitForInput steps are not auto-completed.
+    // Clear resume context so subsequent waitForInput steps are not auto-completed.
     if (context != null && typeof context === 'object' && 'resumeInput' in context) {
-      const { resumeInput: _cleared, ...restContext } = context as Record<string, unknown>;
+      const {
+        resumeInput: _clearedInput,
+        resumedAt: _clearedResumedAt,
+        resumedBy: _clearedResumedBy,
+        ...restContext
+      } = context as Record<string, unknown>;
       this.stepExecutionRuntime.updateWorkflowExecution({ context: restContext });
     }
 
@@ -95,4 +109,12 @@ export class WaitForInputStepImpl implements NodeImplementation {
 
     this.workflowRuntime.navigateToNextNode();
   }
+}
+
+function getExternalOutput(output: unknown): WaitForInputExternalOutput | undefined {
+  if (output == null || typeof output !== 'object' || !('external' in output)) {
+    return undefined;
+  }
+
+  return (output as { external?: WaitForInputExternalOutput }).external;
 }

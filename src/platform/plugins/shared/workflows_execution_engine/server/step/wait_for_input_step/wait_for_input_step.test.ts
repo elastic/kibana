@@ -40,6 +40,7 @@ describe('WaitForInputStepImpl', () => {
     mockStepExecutionRuntime = {
       tryEnterWaitUntil: jest.fn().mockReturnValue(true),
       finishStep: jest.fn(),
+      getCurrentStepResult: jest.fn().mockReturnValue({ output: undefined }),
       setInput: jest.fn(),
       updateWorkflowExecution: jest.fn(),
       stepExecutionId: 'test-step-exec-id',
@@ -155,13 +156,43 @@ describe('WaitForInputStepImpl', () => {
       mockStepExecutionRuntime.tryEnterWaitUntil.mockReturnValue(false);
       mockWorkflowRuntime.getWorkflowExecution.mockReturnValue({
         id: 'exec-abc',
-        context: { resumeInput, resumedBy: 'jane.doe', otherKey: 'preserved' },
+        context: {
+          resumeInput,
+          resumedAt: '2026-01-01T00:00:00.000Z',
+          resumedBy: 'jane.doe',
+          otherKey: 'preserved',
+        },
       } as any);
     });
 
-    it('should call finishStep with the resumeInput from context', async () => {
+    it('should call finishStep with resume input and metadata from context', async () => {
       await underTest.run();
-      expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith(resumeInput);
+      expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith({
+        input: resumeInput,
+        resumedAt: '2026-01-01T00:00:00.000Z',
+        resumedBy: 'jane.doe',
+      });
+    });
+
+    it('should preserve external metadata from the setup output', async () => {
+      const external = {
+        apiKeyId: 'key-1',
+        expiresAt: '2026-01-01T01:00:00.000Z',
+        resumeUrl: 'https://kibana.example.com/api/workflows/executions/exec-abc/resume/external',
+        ttl: '1h',
+      };
+      mockStepExecutionRuntime.getCurrentStepResult.mockReturnValue({
+        output: { external },
+      } as any);
+
+      await underTest.run();
+
+      expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith({
+        external,
+        input: resumeInput,
+        resumedAt: '2026-01-01T00:00:00.000Z',
+        resumedBy: 'jane.doe',
+      });
     });
 
     it('should not call setInput on resume run', async () => {
@@ -172,7 +203,7 @@ describe('WaitForInputStepImpl', () => {
     it('should clear resumeInput from context while preserving other keys', async () => {
       await underTest.run();
       expect(mockStepExecutionRuntime.updateWorkflowExecution).toHaveBeenCalledWith({
-        context: { resumedBy: 'jane.doe', otherKey: 'preserved' },
+        context: { otherKey: 'preserved' },
       });
     });
 
@@ -223,9 +254,13 @@ describe('WaitForInputStepImpl', () => {
       } as any);
     });
 
-    it('should call finishStep with undefined when resumeInput is absent', async () => {
+    it('should call finishStep with an empty input object when resumeInput is absent', async () => {
       await underTest.run();
-      expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith(undefined);
+      expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith({
+        input: {},
+        resumedAt: expect.any(String),
+        resumedBy: 'unknown',
+      });
     });
 
     it('should not throw when resumeInput is absent', async () => {
@@ -290,9 +325,13 @@ describe('WaitForInputStepImpl', () => {
       await expect(underTest.run()).resolves.not.toThrow();
     });
 
-    it('should call finishStep with undefined', async () => {
+    it('should call finishStep with an empty input object and fallback metadata', async () => {
       await underTest.run();
-      expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith(undefined);
+      expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith({
+        input: {},
+        resumedAt: expect.any(String),
+        resumedBy: 'unknown',
+      });
     });
 
     it('should not call updateWorkflowExecution when context is null', async () => {
@@ -338,6 +377,29 @@ describe('WaitForInputStepSchema', () => {
     const result = WaitForInputStepSchema.safeParse({
       name: 'approve',
       type: 'waitForInput',
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('should accept external resume config and child steps', () => {
+    const result = WaitForInputStepSchema.safeParse({
+      name: 'approve',
+      type: 'waitForInput',
+      with: {
+        external: true,
+        ttl: '1h',
+        message: 'Approve?',
+      },
+      steps: [
+        {
+          name: 'send_message',
+          type: 'http',
+          with: {
+            url: 'https://example.com',
+            method: 'POST',
+          },
+        },
+      ],
     });
     expect(result.success).toBe(true);
   });

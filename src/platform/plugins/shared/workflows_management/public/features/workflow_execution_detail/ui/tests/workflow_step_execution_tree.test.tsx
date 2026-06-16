@@ -30,6 +30,7 @@ jest.mock('@kbn/workflows', () => {
 jest.mock('../build_step_executions_tree', () => ({
   buildStepExecutionsTree: jest.fn(),
   injectChildWorkflowSteps: jest.fn((tree) => ({ tree, childStepExecutions: [] })),
+  nestWaitForInputChildSteps: jest.fn((tree) => tree),
 }));
 
 // Mock child components

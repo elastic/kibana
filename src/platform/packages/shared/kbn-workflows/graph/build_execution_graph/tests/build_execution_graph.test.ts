@@ -17,6 +17,7 @@ import {
   type KibanaStep,
   type LoopBreakStep,
   type LoopContinueStep,
+  type WaitForInputStep,
   type WaitStep,
   type WhileStep,
   type WorkflowYaml,
@@ -33,6 +34,8 @@ import type {
   KibanaGraphNode,
   LoopBreakNode,
   LoopContinueNode,
+  WaitForInputGraphNode,
+  WaitForInputSetupGraphNode,
   WaitGraphNode,
 } from '../../types';
 import { convertToWorkflowGraph } from '../build_execution_graph';
@@ -150,6 +153,150 @@ describe('convertToWorkflowGraph', () => {
           with: { duration: '1s' },
         },
       } as WaitGraphNode);
+    });
+  });
+
+  describe('waitForInput step', () => {
+    it('keeps the existing no-child, non-external shape as a single waitForInput node', () => {
+      const workflowDefinition = {
+        steps: [
+          {
+            name: 'approval',
+            type: 'waitForInput',
+            with: {
+              message: 'Approve this workflow',
+            },
+          } as WaitForInputStep,
+        ],
+      } as Partial<WorkflowYaml>;
+
+      const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
+
+      expect(graphlib.alg.topsort(executionGraph)).toEqual(['approval']);
+      expect(executionGraph.node('approval')).toEqual({
+        id: 'approval',
+        type: 'waitForInput',
+        stepId: 'approval',
+        stepType: 'waitForInput',
+        configuration: {
+          name: 'approval',
+          type: 'waitForInput',
+          with: {
+            message: 'Approve this workflow',
+          },
+        },
+      } as WaitForInputGraphNode);
+    });
+
+    it('runs setup and child steps before pausing for external input', () => {
+      const workflowDefinition = {
+        steps: [
+          {
+            name: 'approval',
+            type: 'waitForInput',
+            with: {
+              external: true,
+              ttl: '1h',
+              message: 'Approve this workflow',
+            },
+            steps: [
+              {
+                name: 'sendSlackMessage',
+                type: 'slack',
+                connectorId: 'slack',
+                with: {
+                  message: '{{ steps.approval.output.external.resumeUrl }}',
+                },
+              } as ConnectorStep,
+            ],
+          } as WaitForInputStep,
+        ],
+      } as Partial<WorkflowYaml>;
+
+      const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
+
+      expect(graphlib.alg.topsort(executionGraph)).toEqual([
+        'setupWaitForInput_approval',
+        'sendSlackMessage',
+        'waitForInput_approval',
+      ]);
+      expect(executionGraph.edges()).toEqual([
+        { v: 'setupWaitForInput_approval', w: 'sendSlackMessage' },
+        { v: 'sendSlackMessage', w: 'waitForInput_approval' },
+      ]);
+      expect(executionGraph.node('setupWaitForInput_approval')).toEqual({
+        id: 'setupWaitForInput_approval',
+        type: 'waitForInputSetup',
+        stepId: 'approval',
+        stepType: 'waitForInput',
+        configuration: {
+          name: 'approval',
+          type: 'waitForInput',
+          with: {
+            external: true,
+            ttl: '1h',
+            message: 'Approve this workflow',
+          },
+        },
+      } as WaitForInputSetupGraphNode);
+      expect(executionGraph.node('waitForInput_approval')).toEqual({
+        id: 'waitForInput_approval',
+        type: 'waitForInput',
+        stepId: 'approval',
+        stepType: 'waitForInput',
+        configuration: {
+          name: 'approval',
+          type: 'waitForInput',
+          with: {
+            external: true,
+            ttl: '1h',
+            message: 'Approve this workflow',
+          },
+        },
+      } as WaitForInputGraphNode);
+    });
+
+    it('runs child steps directly before pausing when external input is disabled', () => {
+      const workflowDefinition = {
+        steps: [
+          {
+            name: 'approval',
+            type: 'waitForInput',
+            with: {
+              message: 'Approve this workflow',
+            },
+            steps: [
+              {
+                name: 'sendMessage',
+                type: 'slack',
+                connectorId: 'slack',
+                with: {
+                  message: 'Please approve',
+                },
+              } as ConnectorStep,
+            ],
+          } as WaitForInputStep,
+        ],
+      } as Partial<WorkflowYaml>;
+
+      const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
+
+      expect(graphlib.alg.topsort(executionGraph)).toEqual(['sendMessage', 'approval']);
+      expect(executionGraph.edges()).toEqual([{ v: 'sendMessage', w: 'approval' }]);
+      expect(executionGraph.node('setupWaitForInput_approval')).toBeUndefined();
+      expect(executionGraph.node('approval')).toEqual({
+        id: 'approval',
+        type: 'waitForInput',
+        stepId: 'approval',
+        stepType: 'waitForInput',
+        configuration: {
+          name: 'approval',
+          type: 'waitForInput',
+          with: {
+            message: 'Approve this workflow',
+          },
+        },
+      } as WaitForInputGraphNode);
     });
   });
 

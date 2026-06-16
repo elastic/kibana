@@ -10,7 +10,11 @@
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { ChildWorkflowExecutionsMap } from '../../model/use_child_workflow_executions';
-import { buildStepExecutionsTree, injectChildWorkflowSteps } from '../build_step_executions_tree';
+import {
+  buildStepExecutionsTree,
+  injectChildWorkflowSteps,
+  nestWaitForInputChildSteps,
+} from '../build_step_executions_tree';
 
 // Helper function to create a valid WorkflowStepExecutionDto with all required properties
 const createStepExecution = (
@@ -131,6 +135,64 @@ describe('buildStepExecutionsTree', () => {
         status: ExecutionStatus.RUNNING,
         children: [],
       });
+    });
+  });
+
+  describe('with waitForInput child steps', () => {
+    it('should nest configured child step executions under the waitForInput parent', () => {
+      const stepExecutions: WorkflowStepExecutionDto[] = [
+        createStepExecution({
+          id: 'exec-1',
+          stepId: 'approval',
+          stepType: 'waitForInput',
+          status: ExecutionStatus.WAITING_FOR_INPUT,
+          stepExecutionIndex: 0,
+        }),
+        createStepExecution({
+          id: 'exec-2',
+          stepId: 'send_slack_approval_link',
+          stepType: 'http',
+          status: ExecutionStatus.COMPLETED,
+          stepExecutionIndex: 1,
+        }),
+        createStepExecution({
+          id: 'exec-3',
+          stepId: 'record_approval',
+          stepType: 'data.set',
+          status: ExecutionStatus.PENDING,
+          stepExecutionIndex: 2,
+        }),
+      ];
+      const tree = buildStepExecutionsTree(stepExecutions);
+
+      const result = nestWaitForInputChildSteps(tree, {
+        version: '1',
+        name: 'test-workflow',
+        enabled: true,
+        triggers: [{ type: 'manual' }],
+        steps: [
+          {
+            name: 'approval',
+            type: 'waitForInput',
+            steps: [{ name: 'send_slack_approval_link', type: 'http' }],
+          },
+          { name: 'record_approval', type: 'data.set' },
+        ],
+      } as any);
+
+      expect(result).toHaveLength(2);
+      expect(result[0]).toEqual(
+        expect.objectContaining({
+          stepId: 'approval',
+          children: [
+            expect.objectContaining({
+              stepId: 'send_slack_approval_link',
+              stepExecutionId: 'exec-2',
+            }),
+          ],
+        })
+      );
+      expect(result[1]).toEqual(expect.objectContaining({ stepId: 'record_approval' }));
     });
   });
 

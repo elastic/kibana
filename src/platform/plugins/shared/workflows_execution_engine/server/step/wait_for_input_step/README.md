@@ -33,7 +33,7 @@ steps:
 2. A resume task is scheduled via Task Manager
 3. The workflow execution loop restarts at the `waitForInput` node
 4. `tryEnterWaitUntil` detects the existing `WAITING_FOR_INPUT` status and exits the wait
-5. The submitted `input` is read from `context.resumeInput`, passed as step output, then cleared
+5. The submitted `input` is read from `context.resumeInput`, wrapped with resume metadata as step output, then cleared
 6. Execution continues to the next step
 
 ## Statuses
@@ -41,11 +41,26 @@ steps:
 | Status | Description |
 |---|---|
 | `WAITING_FOR_INPUT` | Paused, waiting for human input via the resume API |
-| `COMPLETED` | Input received; step output contains the submitted payload |
+| `COMPLETED` | Input received; step output contains the submitted payload and resume metadata |
 
 ## Step Output
 
-After resumption the step output is the `input` body sent to the resume API. Downstream steps can reference it via `{{ steps.<name>.output }}`.
+After resumption the step output is an envelope:
+
+```json
+{
+  "input": {},
+  "resumedBy": "username-or-api-key",
+  "resumedAt": "2026-01-01T00:00:00.000Z",
+  "external": {
+    "apiKeyId": "optional external API key id",
+    "resumeUrl": "optional external resume URL",
+    "ttl": "1h"
+  }
+}
+```
+
+Downstream steps can reference human input via `{{ steps.<name>.output.input }}` and metadata via `{{ steps.<name>.output.resumedBy }}` / `{{ steps.<name>.output.resumedAt }}`.
 
 ## Examples
 
@@ -65,7 +80,7 @@ steps:
       method: POST
       body:
         hostname: "{{ inputs.hostname }}"
-        approvedBy: "{{ steps.request-approval.output.approvedBy }}"
+        approvedBy: "{{ steps.request-approval.output.resumedBy }}"
 ```
 
 ### Typed input with schema
@@ -90,11 +105,13 @@ steps:
   - name: log-ticket
     type: console
     with:
-      message: "Ticket: {{ steps.get-ticket-info.output.ticketNumber }} ({{ steps.get-ticket-info.output.severity }})"
+      message: "Ticket: {{ steps.get-ticket-info.output.input.ticketNumber }} ({{ steps.get-ticket-info.output.input.severity }})"
 ```
 
 ## Implementation Details
 
 **Resume input:** Stored in `workflowExecution.context.resumeInput` by the resume API handler and cleared by the step after reading it, so subsequent `waitForInput` steps are not auto-completed.
+
+**External setup:** External `waitForInput` runs a setup graph node before child steps execute. The setup node writes `output.external` to the same step execution record so child steps can reference `{{ steps.<name>.output.external.resumeUrl }}` before the workflow enters `WAITING_FOR_INPUT`.
 
 **Resume API:** [`post_resume_workflow_execution.ts`](../../../../workflows_management/server/workflows_management/routes/post_resume_workflow_execution.ts)

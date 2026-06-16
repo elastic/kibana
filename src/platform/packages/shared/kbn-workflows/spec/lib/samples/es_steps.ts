@@ -116,6 +116,24 @@ export const ES_VALID_SAMPLE_STEPS = [
       locale: 'en-US',
     },
   },
+  // Security operations
+  {
+    name: 'create-api-key',
+    type: 'elasticsearch.security.create_api_key',
+    with: {
+      name: 'workflow-generated-api-key',
+      expiration: '1h',
+      metadata: {
+        application: 'kibana-workflows',
+      },
+      role_descriptors: {
+        no_privileges: {
+          cluster: [],
+          indices: [],
+        },
+      },
+    },
+  },
   // Document operations
   {
     name: 'create-document',

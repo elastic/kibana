@@ -48,6 +48,13 @@ export const WaitForInputGraphNodeSchema = GraphNodeSchema.extend({
 });
 export type WaitForInputGraphNode = z.infer<typeof WaitForInputGraphNodeSchema>;
 
+export const WaitForInputSetupGraphNodeSchema = GraphNodeSchema.extend({
+  id: z.string(),
+  type: z.literal('waitForInputSetup'),
+  configuration: WaitForInputStepSchema,
+});
+export type WaitForInputSetupGraphNode = z.infer<typeof WaitForInputSetupGraphNodeSchema>;
+
 export const DataSetGraphNodeSchema = GraphNodeSchema.extend({
   id: z.string(),
   type: z.literal('data.set'),

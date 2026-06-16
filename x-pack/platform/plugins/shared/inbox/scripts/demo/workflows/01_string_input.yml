@@ -22,4 +22,4 @@ steps:
   - name: log_reason
     type: console
     with:
-      message: "Operator reason: {{ steps.ask_reason.output.reason }}"
+      message: "Operator reason: {{ steps.ask_reason.output.input.reason }}"

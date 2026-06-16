@@ -10,7 +10,7 @@
 // TODO: Remove the eslint-disable comments to use the proper types.
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-non-null-assertion */
 
-import type { StackFrame, WorkflowStepExecutionDto } from '@kbn/workflows';
+import type { StackFrame, Step, WorkflowStepExecutionDto, WorkflowYaml } from '@kbn/workflows';
 import { ExecutionStatus, isExecuteSyncStepType, isTerminalStatus } from '@kbn/workflows';
 import type { ChildWorkflowExecutionsMap } from '../model/use_child_workflow_executions';
 
@@ -298,4 +298,107 @@ export function injectChildWorkflowSteps(
 
   const processedTree = tree.map(processNode);
   return { tree: processedTree, childStepExecutions };
+}
+
+export function nestWaitForInputChildSteps(
+  tree: StepExecutionTreeItem[],
+  definition: WorkflowYaml
+): StepExecutionTreeItem[] {
+  const parentByChildStepId = collectWaitForInputChildStepParents(definition.steps);
+
+  if (parentByChildStepId.size === 0) {
+    return tree;
+  }
+
+  const clonedTree = cloneTree(tree);
+  const itemByStepId = new Map<string, StepExecutionTreeItem>();
+  indexTreeItems(clonedTree, itemByStepId);
+
+  for (const [childStepId, parentStepId] of parentByChildStepId) {
+    const child = itemByStepId.get(childStepId);
+    const parent = itemByStepId.get(parentStepId);
+
+    if (child && parent && !parent.children.includes(child)) {
+      removeTreeItem(clonedTree, child);
+      parent.children.push(child);
+    }
+  }
+
+  return clonedTree;
+}
+
+function collectWaitForInputChildStepParents(
+  steps: Step[],
+  result: Map<string, string> = new Map()
+): Map<string, string> {
+  for (const step of steps) {
+    const childSteps = 'steps' in step && Array.isArray(step.steps) ? step.steps : [];
+
+    if (step.type === 'waitForInput') {
+      for (const childStep of childSteps) {
+        result.set(childStep.name, step.name);
+      }
+    }
+
+    collectNestedSteps(step, result);
+  }
+
+  return result;
+}
+
+function collectNestedSteps(step: Step, result: Map<string, string>): void {
+  if ('steps' in step && Array.isArray(step.steps)) {
+    collectWaitForInputChildStepParents(step.steps, result);
+  }
+
+  if ('else' in step && Array.isArray(step.else)) {
+    collectWaitForInputChildStepParents(step.else, result);
+  }
+
+  if ('cases' in step && Array.isArray(step.cases)) {
+    for (const caseStep of step.cases) {
+      collectWaitForInputChildStepParents(caseStep.steps, result);
+    }
+  }
+
+  if ('default' in step && Array.isArray(step.default)) {
+    collectWaitForInputChildStepParents(step.default, result);
+  }
+
+  if ('branches' in step && Array.isArray(step.branches)) {
+    for (const branch of step.branches) {
+      collectWaitForInputChildStepParents(branch.steps, result);
+    }
+  }
+}
+
+function cloneTree(tree: StepExecutionTreeItem[]): StepExecutionTreeItem[] {
+  return tree.map((item) => ({
+    ...item,
+    children: cloneTree(item.children),
+  }));
+}
+
+function indexTreeItems(
+  tree: StepExecutionTreeItem[],
+  itemByStepId: Map<string, StepExecutionTreeItem>
+): void {
+  for (const item of tree) {
+    itemByStepId.set(item.stepId, item);
+    indexTreeItems(item.children, itemByStepId);
+  }
+}
+
+function removeTreeItem(
+  tree: StepExecutionTreeItem[],
+  itemToRemove: StepExecutionTreeItem
+): boolean {
+  const index = tree.indexOf(itemToRemove);
+
+  if (index >= 0) {
+    tree.splice(index, 1);
+    return true;
+  }
+
+  return tree.some((item) => removeTreeItem(item.children, itemToRemove));
 }
