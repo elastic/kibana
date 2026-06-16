@@ -607,6 +607,66 @@ describe('current status route', () => {
       expect(result.stale).toBe(1);
     });
 
+    // Documents the multi-location status precedence: `down > up > stale > pending`.
+    // `stale` is only surfaced as a monitor's *overall* status when no location is
+    // currently up/down (see the `stale` promotion, which only walks pendingConfigs).
+    // So a monitor with at least one fresh `up` location reads as `up` even if another
+    // location went stale — the stale location stays visible in `locations`. This is
+    // deterministic regardless of the order ES returned the buckets in.
+    it.each([
+      ['fresh up listed first', 'up_first' as const],
+      ['stale listed first', 'stale_first' as const],
+    ])(
+      'classifies a multi-location monitor as up when any location is fresh up, even with a stale location (%s)',
+      async (_label, order) => {
+        const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+        const freshTs = moment().subtract(2, 'minutes').toISOString();
+        const staleTs = moment().subtract(3, 'hours').toISOString();
+        const usBucket = {
+          key: { monitorId: 'mon1', locationId: usLoc.id },
+          status: { top: [{ metrics: { 'monitor.status': 'up' }, sort: [freshTs] }] },
+        };
+        const euBucket = {
+          key: { monitorId: 'mon1', locationId: euLoc.id },
+          status: { top: [{ metrics: { 'monitor.status': 'up' }, sort: [staleTs] }] },
+        };
+        esClient.search.mockResponseOnce(
+          getEsResponse({
+            buckets: order === 'up_first' ? [usBucket, euBucket] : [euBucket, usBucket],
+          })
+        );
+
+        const routeContext: any = {
+          request: { query: { dateRangeStart: 'now-24h', dateRangeEnd: 'now' } },
+          syntheticsEsClient,
+          server: {
+            isElasticsearchServerless: false,
+            config: { experimental: { ccs: { enabled: false } } },
+          },
+        };
+        const service = new OverviewStatusService(routeContext);
+        service.getMonitorConfigs = jest
+          .fn()
+          .mockResolvedValue([makeMonitor('mon1', [usLoc, euLoc])]);
+
+        const result = await service.getOverviewStatus();
+
+        // Overall status is `up`; the monitor is not promoted to stale/pending.
+        expect(result.upConfigs.mon1).toBeDefined();
+        expect(result.upConfigs.mon1.overallStatus).toBe('up');
+        expect(result.staleConfigs.mon1).toBeUndefined();
+        expect(result.pendingConfigs.mon1).toBeUndefined();
+        expect(result.up).toBe(1);
+        expect(result.stale).toBe(0);
+
+        // The stale location is still represented (its dot renders amber) and carries
+        // its last-known status, even though the monitor reads as up overall.
+        const euLocation = result.upConfigs.mon1.locations.find((l: any) => l.id === euLoc.id);
+        expect(euLocation?.status).toBe('stale');
+        expect(euLocation?.lastStatus).toBe('up');
+      }
+    );
+
     it('sets overallStatus to down when any location is down', async () => {
       const { esClient, syntheticsEsClient } = getUptimeESMockClient();
       esClient.search.mockResponseOnce(
