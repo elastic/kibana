@@ -173,6 +173,7 @@ async function savePackagePolicy(
       ...omit(
         pkgPolicy,
         'policy_ids',
+        'policy_id',
         'package',
         'enabled',
         'inputs',

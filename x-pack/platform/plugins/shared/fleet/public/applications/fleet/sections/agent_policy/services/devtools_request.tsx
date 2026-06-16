@@ -83,6 +83,7 @@ export function generateCreateAgentlessPolicyDevToolsRequest(
     ...omit(
       packagePolicy,
       'policy_ids',
+      'policy_id',
       'package',
       'enabled',
       'inputs',
