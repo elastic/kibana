@@ -74,6 +74,6 @@ describe('startKiIdentificationToolHandler', () => {
         streamsKIsOnboardingClient,
         request,
       })
-    ).rejects.toThrow(/Onboarding workflow .+ not found/);
+    ).rejects.toThrow(/Workflow .+ not found/);
   });
 });
