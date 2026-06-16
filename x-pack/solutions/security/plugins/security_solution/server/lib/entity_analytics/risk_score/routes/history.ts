@@ -14,6 +14,7 @@ import { RISK_SCORE_HISTORY_URL } from '../../../../../common/entity_analytics/r
 import type { RiskScoreHistoryResponse } from '../../../../../common/api/entity_analytics';
 import { GetRiskScoreHistoryRequestQuery } from '../../../../../common/api/entity_analytics';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
+import { withMinimumLicense } from '../../utils/with_minimum_license';
 
 const DEFAULT_FROM = 'now-90d';
 const DEFAULT_TO = 'now';
@@ -42,45 +43,48 @@ export const riskScoreHistoryRoute = (
           },
         },
       },
-      async (context, request, response): Promise<IKibanaResponse<RiskScoreHistoryResponse>> => {
-        const siemResponse = buildSiemResponse(response);
+      withMinimumLicense(
+        async (context, request, response): Promise<IKibanaResponse<RiskScoreHistoryResponse>> => {
+          const siemResponse = buildSiemResponse(response);
 
-        try {
-          const {
-            entity_type: entityType,
-            entity_id: entityId,
-            from,
-            to,
-            score_type: scoreType,
-            page_size: pageSize,
-          } = request.query;
-
-          const riskScoreDataClient = (await context.securitySolution).getRiskScoreDataClient();
-
-          const entries = await riskScoreDataClient.getRiskScoreHistory({
-            entityType,
-            entityId,
-            range: { gte: from ?? DEFAULT_FROM, lte: to ?? DEFAULT_TO },
-            scoreType,
-            pageSize: pageSize ?? DEFAULT_PAGE_SIZE,
-          });
-
-          return response.ok({
-            body: {
-              entity_id: entityId,
+          try {
+            const {
               entity_type: entityType,
-              entries,
-            },
-          });
-        } catch (e) {
-          const error = transformError(e);
+              entity_id: entityId,
+              from,
+              to,
+              score_type: scoreType,
+              page_size: pageSize,
+            } = request.query;
 
-          return siemResponse.error({
-            statusCode: error.statusCode,
-            body: { message: error.message, full_error: JSON.stringify(e) },
-            bypassErrorFormat: true,
-          });
-        }
-      }
+            const riskScoreDataClient = (await context.securitySolution).getRiskScoreDataClient();
+
+            const entries = await riskScoreDataClient.getRiskScoreHistory({
+              entityType,
+              entityId,
+              range: { gte: from ?? DEFAULT_FROM, lte: to ?? DEFAULT_TO },
+              scoreType,
+              pageSize: pageSize ?? DEFAULT_PAGE_SIZE,
+            });
+
+            return response.ok({
+              body: {
+                entity_id: entityId,
+                entity_type: entityType,
+                entries,
+              },
+            });
+          } catch (e) {
+            const error = transformError(e);
+
+            return siemResponse.error({
+              statusCode: error.statusCode,
+              body: { message: error.message, full_error: JSON.stringify(e) },
+              bypassErrorFormat: true,
+            });
+          }
+        },
+        'platinum'
+      )
     );
 };
