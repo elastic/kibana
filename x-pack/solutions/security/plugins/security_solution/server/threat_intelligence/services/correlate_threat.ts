@@ -328,6 +328,7 @@ const buildMergedCandidates = (
       score: hit.score,
       vertex_scores: hit.vertex_scores,
       match_breakdown: anchorBreakdownMap.get(hit.report_id),
+      retrieval_source: 'diamond',
     });
   }
 
@@ -340,6 +341,7 @@ const buildMergedCandidates = (
         score: 0,
         vertex_scores: {},
         match_breakdown: hit.match_breakdown,
+        retrieval_source: 'anchor',
       });
     }
   }

@@ -98,6 +98,7 @@ const triagePickSchema = z.object({
   vertex_scores: z.record(z.string(), z.number()).optional(),
   overlap: z.number().optional(),
   match_breakdown: z.record(z.string(), z.unknown()).optional(),
+  retrieval_source: z.enum(['anchor', 'diamond', 'gap_fill']).optional(),
 });
 
 const triageGroupSchema = z.object({
@@ -118,6 +119,7 @@ const triagedOutCandidateSchema = z.object({
   vertex_scores: z.record(z.string(), z.number()).optional(),
   overlap: z.number().optional(),
   match_breakdown: z.record(z.string(), z.unknown()).optional(),
+  retrieval_source: z.enum(['anchor', 'diamond', 'gap_fill']).optional(),
 });
 
 export const triageDepthResultSchema = z.object({

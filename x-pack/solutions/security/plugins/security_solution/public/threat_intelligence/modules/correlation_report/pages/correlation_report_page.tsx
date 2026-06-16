@@ -9,6 +9,7 @@ import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
+  EuiAccordion,
   EuiBadge,
   EuiBasicTable,
   EuiButton,
@@ -51,6 +52,11 @@ import type {
   KnnDepthResult,
   TriageDepthResult,
 } from '../../../../../common/threat_intelligence/correlation_runs';
+import {
+  KNN_STRONG_FLOOR,
+  KNN_MID_FLOOR,
+  KNN_BASE_FLOOR,
+} from '../../../../../common/threat_intelligence/hub';
 import type {
   CorrelationFindingsLead,
   CostTrace,
@@ -228,35 +234,58 @@ interface AnchorMatchBreakdownDisplay {
   actor_hits?: string[];
 }
 
+type RetrievalSourceDisplay = 'anchor' | 'diamond' | 'gap_fill' | undefined;
+
+const knnScoreBadgeColor = (score: number): string => {
+  if (score >= KNN_STRONG_FLOOR) return 'success';
+  if (score >= KNN_MID_FLOOR) return 'warning';
+  if (score >= KNN_BASE_FLOOR) return 'default';
+  return 'subdued';
+};
+
 const VertexScoresBadges: FC<{
   vertexScores: Record<string, number> | undefined;
   matchBreakdown?: Record<string, unknown>;
-}> = ({ vertexScores, matchBreakdown }) => {
+  retrievalSource?: RetrievalSourceDisplay;
+}> = ({ vertexScores, matchBreakdown, retrievalSource }) => {
   const entries = Object.entries(vertexScores ?? {});
   if (entries.length === 0) {
+    if (retrievalSource === 'gap_fill') {
+      return (
+        <EuiText size="xs" color="subdued">
+          {i18nText.knnKeywordMatch()}
+        </EuiText>
+      );
+    }
+
     const bd = matchBreakdown as AnchorMatchBreakdownDisplay | undefined;
     const hashHits = bd?.ioc_hash_hits ?? [];
     const actorHits = bd?.actor_hits ?? [];
     const iocSetMatch = bd?.ioc_set_hash_match ?? false;
+    const hasAnchorSignals = hashHits.length > 0 || actorHits.length > 0 || iocSetMatch;
     return (
       <div>
         <EuiText size="xs" color="subdued">
           {i18nText.knnAnchorOnly()}
         </EuiText>
-        {hashHits.map((h) => (
-          <EuiText key={h} size="xs" color="subdued">
-            {`${i18nText.anchorSignalHash()}: ${h}`}
-          </EuiText>
-        ))}
-        {actorHits.map((a) => (
-          <EuiText key={a} size="xs" color="subdued">
-            {`${i18nText.anchorSignalActor()}: ${a}`}
-          </EuiText>
-        ))}
-        {iocSetMatch ? (
-          <EuiText size="xs" color="subdued">
-            {i18nText.anchorSignalIdenticalIocSet()}
-          </EuiText>
+        {hasAnchorSignals ? (
+          <>
+            {hashHits.map((h) => (
+              <EuiText key={h} size="xs" color="subdued">
+                {`${i18nText.anchorSignalHash()}: ${h}`}
+              </EuiText>
+            ))}
+            {actorHits.map((a) => (
+              <EuiText key={a} size="xs" color="subdued">
+                {`${i18nText.anchorSignalActor()}: ${a}`}
+              </EuiText>
+            ))}
+            {iocSetMatch ? (
+              <EuiText size="xs" color="subdued">
+                {i18nText.anchorSignalIdenticalIocSet()}
+              </EuiText>
+            ) : null}
+          </>
         ) : null}
       </div>
     );
@@ -265,7 +294,9 @@ const VertexScoresBadges: FC<{
     <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
       {entries.map(([k, v]) => (
         <EuiFlexItem key={k} grow={false}>
-          <EuiBadge color="hollow">{`${k.slice(0, 3).toUpperCase()}: ${v.toFixed(2)}`}</EuiBadge>
+          <EuiBadge color={knnScoreBadgeColor(v)}>
+            {`${k.slice(0, 3).toUpperCase()}: ${v.toFixed(2)}`}
+          </EuiBadge>
         </EuiFlexItem>
       ))}
     </EuiFlexGroup>
@@ -321,7 +352,12 @@ const KnnResultView: FC<{ result: KnnDepthResult }> = ({ result }) => {
       },
       {
         name: i18nText.knnColVertexScores(),
-        render: (item: MergedCandidate) => <VertexScoresBadges vertexScores={item.vertex_scores} />,
+        render: (item: MergedCandidate) => (
+          <VertexScoresBadges
+            vertexScores={item.vertex_scores}
+            matchBreakdown={item.match_breakdown}
+          />
+        ),
       },
     ],
     [candidate_meta]
@@ -436,6 +472,7 @@ const TriageResultView: FC<{ result: TriageDepthResult }> = ({ result }) => {
           <VertexScoresBadges
             vertexScores={item.vertex_scores}
             matchBreakdown={item.match_breakdown}
+            retrievalSource={item.retrieval_source as RetrievalSourceDisplay}
           />
         ),
       },
@@ -466,6 +503,7 @@ const TriageResultView: FC<{ result: TriageDepthResult }> = ({ result }) => {
           <VertexScoresBadges
             vertexScores={item.vertex_scores}
             matchBreakdown={item.match_breakdown}
+            retrievalSource={item.retrieval_source as RetrievalSourceDisplay}
           />
         ),
       },
@@ -687,7 +725,14 @@ const ResultDispatch: FC<{
         {trace !== undefined ? (
           <>
             <EuiSpacer size="m" />
-            <CostTracePanel trace={trace} />
+            <EuiAccordion
+              id="cost-trace-full"
+              buttonContent={i18nText.costTraceSectionTitle()}
+              initialIsOpen={false}
+            >
+              <EuiSpacer size="s" />
+              <CostTracePanel trace={trace} />
+            </EuiAccordion>
           </>
         ) : null}
       </>
@@ -703,7 +748,14 @@ const ResultDispatch: FC<{
         {traceForDepth !== undefined ? (
           <>
             <EuiSpacer size="m" />
-            <CostTracePanel trace={traceForDepth} />
+            <EuiAccordion
+              id="cost-trace-extract"
+              buttonContent={i18nText.costTraceSectionTitle()}
+              initialIsOpen={false}
+            >
+              <EuiSpacer size="s" />
+              <CostTracePanel trace={traceForDepth} />
+            </EuiAccordion>
           </>
         ) : null}
       </>
@@ -717,7 +769,14 @@ const ResultDispatch: FC<{
         {traceForDepth !== undefined ? (
           <>
             <EuiSpacer size="m" />
-            <CostTracePanel trace={traceForDepth} />
+            <EuiAccordion
+              id="cost-trace-knn"
+              buttonContent={i18nText.costTraceSectionTitle()}
+              initialIsOpen={false}
+            >
+              <EuiSpacer size="s" />
+              <CostTracePanel trace={traceForDepth} />
+            </EuiAccordion>
           </>
         ) : null}
       </>
@@ -731,7 +790,14 @@ const ResultDispatch: FC<{
         {traceForDepth !== undefined ? (
           <>
             <EuiSpacer size="m" />
-            <CostTracePanel trace={traceForDepth} />
+            <EuiAccordion
+              id="cost-trace-triage"
+              buttonContent={i18nText.costTraceSectionTitle()}
+              initialIsOpen={false}
+            >
+              <EuiSpacer size="s" />
+              <CostTracePanel trace={traceForDepth} />
+            </EuiAccordion>
           </>
         ) : null}
       </>
@@ -960,7 +1026,7 @@ export const CorrelationReportPage: FC = () => {
           'xpack.securitySolution.threatIntelligence.correlationReport.pageDescription',
           {
             defaultMessage:
-              'Correlate a stored threat report against the knowledge base using the Diamond Model pipeline.',
+              'Correlate a report ID or free-text incident against the knowledge base.',
           }
         )}
       />
@@ -1105,12 +1171,19 @@ export const CorrelationReportPage: FC = () => {
         <EuiSpacer size="xl" />
 
         {/* ---- Recents ---- */}
-        <RecentsPanel
-          recents={recents}
-          loading={recentsLoading}
-          activeRunId={activeRun?.runId}
-          onLoadRun={handleLoadRun}
-        />
+        <EuiAccordion
+          id="correlation-recents"
+          buttonContent={i18nText.recentsTitle()}
+          initialIsOpen={false}
+        >
+          <EuiSpacer size="s" />
+          <RecentsPanel
+            recents={recents}
+            loading={recentsLoading}
+            activeRunId={activeRun?.runId}
+            onLoadRun={handleLoadRun}
+          />
+        </EuiAccordion>
       </EuiPageTemplate.Section>
     </EuiPageTemplate>
   );

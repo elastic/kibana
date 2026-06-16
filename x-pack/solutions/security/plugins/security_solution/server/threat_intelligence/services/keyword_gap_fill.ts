@@ -215,6 +215,7 @@ export const keywordGapFill = async ({
             score: 0,
             vertex_scores: {},
             match_breakdown: undefined,
+            retrieval_source: 'gap_fill',
           });
           logger.debug(`[ti:gap-fill] added "${title}" via keyword "${keyword}"`);
         }

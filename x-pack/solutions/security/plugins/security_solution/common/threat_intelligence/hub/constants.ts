@@ -266,6 +266,21 @@ export const SEARCH_BY_DIAMOND_API_PATH =
   `${THREAT_INTELLIGENCE_API_BASE}/search_by_diamond` as const;
 
 /**
+ * kNN similarity thresholds for Diamond Model vertex scoring.
+ *
+ * Mirrors the constants in `server/.../search_by_diamond.ts`.
+ * Defined here (common) so the frontend can colour-code badges by tier
+ * without importing from the server tree.
+ *
+ *   STRONG_FLOOR → single vertex at this level qualifies ("SHOULD: 1 vertex >= 0.88")
+ *   MID_FLOOR    → two vertices at this level qualify ("SHOULD: 2 vertices >= 0.83")
+ *   BASE_FLOOR   → three vertices at this level qualify; also the cut-off for overlap
+ */
+export const KNN_STRONG_FLOOR = 0.88 as const;
+export const KNN_MID_FLOOR = 0.83 as const;
+export const KNN_BASE_FLOOR = 0.75 as const;
+
+/**
  * Correlation pipeline — POST /api/threat_intelligence/correlate_threat.
  *
  * Accepts raw text or a stored report id, runs `search_by_anchors` +

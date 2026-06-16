@@ -6,24 +6,18 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { THREAT_REPORTS_INDEX_PATTERN } from '../../../common/threat_intelligence/hub';
+import {
+  THREAT_REPORTS_INDEX_PATTERN,
+  KNN_STRONG_FLOOR,
+  KNN_MID_FLOOR,
+  KNN_BASE_FLOOR,
+} from '../../../common/threat_intelligence/hub';
 import { buildSpaceFilterTerms } from '../lib/space_filter';
 
-// ---------------------------------------------------------------------------
-// Tiered similarity floors — calibrate against the corpus oracle post-deploy.
-//
-// Thresholds mirror Mustard's triage selection heuristics (mustard.py lines 585-595):
-//   STRONG_FLOOR → single vertex at this level qualifies ("SHOULD: 1 vertex >= 0.88 with
-//                  distinctive signal" — at retrieval we accept a single strong vertex
-//                  rather than deferring to the triage LLM)
-//   MID_FLOOR    → two vertices at this level qualify ("SHOULD: 2 vertices >= 0.83")
-//   BASE_FLOOR   → three vertices at this level qualify ("MUST: 3+ vertex overlaps"); also
-//                  the minimum score for a vertex to count toward the overlap ranking key
-// ---------------------------------------------------------------------------
-
-export const STRONG_FLOOR = 0.88;
-export const MID_FLOOR = 0.83;
-export const BASE_FLOOR = 0.75;
+// Re-export under the short names used throughout this file and its callers.
+export const STRONG_FLOOR = KNN_STRONG_FLOOR;
+export const MID_FLOOR = KNN_MID_FLOOR;
+export const BASE_FLOOR = KNN_BASE_FLOOR;
 
 // Number of top-K candidates fetched per vertex query. Kept generous so the
 // client-side reducer has a wide pool to qualify against.
@@ -313,9 +307,9 @@ const runSemanticSearch = async (
   // Executes the msearch and builds the score matrix from the responses.
   // Inference-unavailable errors are thrown so the caller's try/catch can degrade to BM25.
   const runMsearchAndBuildMatrix = async (): Promise<ScoreMatrix> => {
-    const msearchResponse = await esClient.msearch(
-      { searches } as Parameters<typeof esClient.msearch>[0]
-    );
+    const msearchResponse = await esClient.msearch({ searches } as Parameters<
+      typeof esClient.msearch
+    >[0]);
 
     const matrix: ScoreMatrix = new Map();
 

@@ -25,6 +25,9 @@ export interface QueryDiamondVertex {
 
 export type QueryDiamond = Record<DiamondVertex, QueryDiamondVertex>;
 
+/** Which retrieval path produced this candidate. */
+export type RetrievalSource = 'anchor' | 'diamond' | 'gap_fill';
+
 /** A candidate as ranked by the retrieval stage, ready for triage. */
 export interface TriageCandidateInput {
   report_id: string;
@@ -44,6 +47,8 @@ export interface TriageCandidateInput {
    * vertex scores are all zero.
    */
   match_breakdown?: AnchorMatchBreakdown;
+  /** Which retrieval path produced this candidate. */
+  retrieval_source?: RetrievalSource;
 }
 
 /** A single candidate selected by triage (post confidence floor). */
@@ -54,6 +59,7 @@ export interface TriagePick {
   vertex_scores: DiamondVertexScore;
   overlap: number;
   match_breakdown?: AnchorMatchBreakdown;
+  retrieval_source?: RetrievalSource;
 }
 
 /** A hypothesis group from the triage LLM (debug/diagnostic only). */
@@ -71,6 +77,7 @@ export interface TriagedOutCandidate {
   vertex_scores: DiamondVertexScore;
   overlap: number;
   match_breakdown?: AnchorMatchBreakdown;
+  retrieval_source?: RetrievalSource;
 }
 
 export interface TriageDiamondCandidatesParams {
@@ -491,6 +498,7 @@ export const triageDiamondCandidates = async ({
           vertex_scores: src?.vertex_scores ?? {},
           overlap: src?.overlap ?? 0,
           match_breakdown: src?.match_breakdown,
+          retrieval_source: src?.retrieval_source,
         };
         rawPicks.push(pick);
         mappedGroup.candidates.push({ ...pick });
@@ -517,6 +525,7 @@ export const triageDiamondCandidates = async ({
         vertex_scores: c.vertex_scores,
         overlap: c.overlap,
         match_breakdown: c.match_breakdown,
+        retrieval_source: c.retrieval_source,
       });
     }
   }
@@ -540,6 +549,7 @@ export const triageDiamondCandidates = async ({
         vertex_scores: c.vertex_scores,
         overlap: c.overlap,
         match_breakdown: c.match_breakdown,
+        retrieval_source: c.retrieval_source,
       };
     });
 

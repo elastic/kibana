@@ -242,6 +242,8 @@ export const i18nText = {
 
   // kNN — anchor-only row placeholder
   knnAnchorOnly: () => i18n.translate(`${ns}.knnAnchorOnly`, { defaultMessage: 'anchor-only' }),
+  knnKeywordMatch: () =>
+    i18n.translate(`${ns}.knnKeywordMatch`, { defaultMessage: 'keyword match' }),
 
   // Anchor match breakdown signal labels
   anchorSignalHash: () => i18n.translate(`${ns}.anchorSignalHash`, { defaultMessage: 'hash' }),
