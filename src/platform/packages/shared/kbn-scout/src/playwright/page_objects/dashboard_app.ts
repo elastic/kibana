@@ -540,11 +540,13 @@ export class DashboardApp {
   }
 
   /**
-   * Waits for all dashboard panels to finish rendering.
-   * Uses the data-render-complete attribute to determine completion.
+   * Waits for all dashboard controls and panels to finish rendering.
+   * Uses the data-render-complete attribute to determine panel rendering completion.
    */
   async waitForRenderComplete() {
     await expect(this.dashboardViewport).toBeVisible();
+
+    await this.waitForControlsReady();
 
     try {
       const count = await this.getSharedItemsCount();
@@ -560,6 +562,25 @@ export class DashboardApp {
     if (count > 0) {
       await this.waitForPanelsToLoad(count);
     }
+  }
+
+  private async waitForControlsReady(timeout: number = 60_000) {
+    const controlsReadyLocator = this.page.locator('[data-dashboard-controls-ready]');
+    await expect(controlsReadyLocator).toBeAttached({ timeout });
+
+    const requiredConsecutiveReadySamples = 3;
+    let consecutiveReadySamples = 0;
+    await expect
+      .poll(
+        async () => {
+          const isReady =
+            (await controlsReadyLocator.getAttribute('data-dashboard-controls-ready')) === 'true';
+          consecutiveReadySamples = isReady ? consecutiveReadySamples + 1 : 0;
+          return consecutiveReadySamples;
+        },
+        { timeout, intervals: [100] }
+      )
+      .toBeGreaterThanOrEqual(requiredConsecutiveReadySamples);
   }
 
   // ============================================================

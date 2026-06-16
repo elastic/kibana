@@ -11,22 +11,13 @@ import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
   DASHBOARD_DEFAULT_INDEX_TITLE,
-  DASHBOARD_SAVED_SEARCH_ARCHIVE,
   FEW_PANELS_DASHBOARD_TITLE,
+  FEW_PANELS_DASHBOARD_ID,
 } from '../constants';
-import { findImportedSavedObjectId } from '../../utils/migration_smoke_helpers';
-
-let fewPanelsDashboardId = '';
 
 spaceTest.describe('Dashboard clone', { tag: tags.deploymentAgnostic }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     await scoutSpace.savedObjects.cleanStandardList();
-    const imported = await scoutSpace.savedObjects.load(DASHBOARD_SAVED_SEARCH_ARCHIVE);
-    fewPanelsDashboardId = findImportedSavedObjectId(
-      imported,
-      'dashboard',
-      FEW_PANELS_DASHBOARD_TITLE
-    );
     await scoutSpace.uiSettings.setDefaultIndex(DASHBOARD_DEFAULT_INDEX_TITLE);
   });
 
@@ -42,7 +33,7 @@ spaceTest.describe('Dashboard clone', { tag: tags.deploymentAgnostic }, () => {
   spaceTest(
     'save as copy creates a numbered clone with the same panels',
     async ({ pageObjects, page }) => {
-      await pageObjects.dashboard.openDashboardWithId(fewPanelsDashboardId);
+      await pageObjects.dashboard.openDashboardWithId(FEW_PANELS_DASHBOARD_ID);
       await expect.poll(() => pageObjects.dashboard.getPanelCount()).toBeGreaterThan(1);
 
       const sourcePanelTitles = [...(await pageObjects.dashboard.getPanelTitles())].sort();
