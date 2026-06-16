@@ -138,6 +138,7 @@ export const getAlertsAppMenuItem = ({
   const hasTimeFieldName = !isEsqlMode ? Boolean(dataView?.timeFieldName) : Boolean(timeField);
 
   if (showCreateRuleV2) {
+    const CreateRuleOptionsFlyout = services.alertingVTwo?.CreateRuleOptionsFlyout;
     const legacyRuleTypes: CreateRuleOptionsFlyoutLegacyItem[] = [];
 
     if (
@@ -163,40 +164,42 @@ export const getAlertsAppMenuItem = ({
       });
     }
 
-    return {
-      id: AppMenuActionId.alerts,
-      label: i18n.translate('discover.localMenu.alertsTitle', {
-        defaultMessage: 'Create alert rule',
-      }),
-      testId: 'discoverAlertsButton',
-      order: 11,
-      iconType: 'warning',
-      run: ({ context: { onFinishAction } }) => {
-        const tab = selectTab(getState(), tabId);
-        const { query } = tab.appState;
-        const esqlQuery = isOfAggregateQueryType(query) ? query.esql : undefined;
-        const esqlVariables = tab.esqlVariables;
-        const V2Flyout = services.alertingVTwo!.CreateRuleOptionsFlyout;
+    if (CreateRuleOptionsFlyout) {
+      return {
+        id: AppMenuActionId.alerts,
+        label: i18n.translate('discover.localMenu.alertsTitle', {
+          defaultMessage: 'Create alert rule',
+        }),
+        testId: 'discoverAlertsButton',
+        order: 11,
+        iconType: 'warning',
+        run: ({ context: { onFinishAction } }) => {
+          const tab = selectTab(getState(), tabId);
+          const { query } = tab.appState;
+          const esqlQuery = isOfAggregateQueryType(query) ? query.esql : undefined;
+          const esqlVariables = tab.esqlVariables;
 
-        const getQuerySnapshot = () => {
-          const { query: q } = selectTab(getState(), tabId).appState;
-          return isOfAggregateQueryType(q) ? q.esql : undefined;
-        };
-        const getEsqlVariablesSnapshot = () => selectTab(getState(), tabId).esqlVariables;
+          const getQuerySnapshot = () => {
+            const { query: q } = selectTab(getState(), tabId).appState;
+            return isOfAggregateQueryType(q) ? q.esql : undefined;
+          };
+          const getEsqlVariablesSnapshot = () => selectTab(getState(), tabId).esqlVariables;
 
-        return (
-          <V2Flyout
-            onClose={onFinishAction}
-            initialQuery={esqlQuery}
-            esqlVariables={esqlVariables}
-            legacyRuleTypes={legacyRuleTypes}
-            subscribe={subscribe}
-            getQuery={getQuerySnapshot}
-            getEsqlVariables={getEsqlVariablesSnapshot}
-          />
-        );
-      },
-    };
+          return (
+            <CreateRuleOptionsFlyout
+              onClose={onFinishAction}
+              initialQuery={esqlQuery}
+              esqlVariables={esqlVariables}
+              legacyRuleTypes={legacyRuleTypes}
+              subscribe={subscribe}
+              getQuery={getQuerySnapshot}
+              getEsqlVariables={getEsqlVariablesSnapshot}
+              history={services.history}
+            />
+          );
+        },
+      };
+    }
   }
 
   const items: DiscoverAppMenuPopoverItem[] = [];

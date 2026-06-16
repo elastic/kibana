@@ -5,11 +5,19 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState, useSyncExternalStore } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from 'react';
 import { EuiFlyout, EuiFlyoutBody, EuiLoadingSpinner } from '@elastic/eui';
 import useAsync from 'react-use/lib/useAsync';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
+import type { History } from 'history';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { CreateRuleData } from '@kbn/alerting-v2-schemas';
 import { AGENT_BUILDER_APP_ID } from '@kbn/deeplinks-agent-builder';
@@ -33,12 +41,15 @@ export interface CreateRuleOptionsFlyoutProps {
   legacyRuleTypes?: CreateRuleOptionsFlyoutLegacyItem[];
   /**
    * When provided, the flyout reactively tracks the current ES|QL query
-   * via `useSyncExternalStore`. This keeps the rule form in sync when
-   * the user edits and submits the Discover query while the flyout is open.
+   * via `useSyncExternalStore`. Updates propagate into the compose form only
+   * while the form has not been edited; after that, use the sandbox to adjust
+   * the query.
    */
   subscribe?: (listener: () => void) => () => void;
   getQuery?: () => string | undefined;
   getEsqlVariables?: () => ESQLControlVariable[] | undefined;
+  /** Scoped history of the host app — used to close the flyout on in-app navigation. */
+  history?: History;
 }
 
 type Step =
@@ -54,6 +65,11 @@ interface LoadedModules {
 
 const noopSubscribe = () => () => {};
 
+interface DiscoverQuerySnapshot {
+  query: string | undefined;
+  esqlVariables: ESQLControlVariable[] | undefined;
+}
+
 const CreateRuleOptionsFlyoutInner = ({
   onClose,
   initialQuery,
@@ -62,21 +78,41 @@ const CreateRuleOptionsFlyoutInner = ({
   subscribe,
   getQuery,
   getEsqlVariables,
+  history,
 }: CreateRuleOptionsFlyoutProps) => {
   const [step, setStep] = useState<Step>({ type: 'selector' });
   const [isSaving, setIsSaving] = useState(false);
 
-  const reactiveQuery = useSyncExternalStore(
-    subscribe ?? noopSubscribe,
-    getQuery ?? (() => initialQuery)
-  );
-  const reactiveVariables = useSyncExternalStore(
-    subscribe ?? noopSubscribe,
-    getEsqlVariables ?? (() => staticEsqlVariables)
+  const snapshotRef = useRef<DiscoverQuerySnapshot>({
+    query: getQuery?.() ?? initialQuery,
+    esqlVariables: getEsqlVariables?.() ?? staticEsqlVariables,
+  });
+
+  const wrappedSubscribe = useCallback(
+    (listener: () => void) => {
+      const query = getQuery?.() ?? initialQuery;
+      const esqlVariables = getEsqlVariables?.() ?? staticEsqlVariables;
+      const prev = snapshotRef.current;
+      if (prev.query !== query || prev.esqlVariables !== esqlVariables) {
+        snapshotRef.current = { query, esqlVariables };
+      }
+
+      return (subscribe ?? noopSubscribe)(() => {
+        const nextQuery = getQuery?.() ?? initialQuery;
+        const nextVariables = getEsqlVariables?.() ?? staticEsqlVariables;
+        const current = snapshotRef.current;
+        if (current.query !== nextQuery || current.esqlVariables !== nextVariables) {
+          snapshotRef.current = { query: nextQuery, esqlVariables: nextVariables };
+        }
+        listener();
+      });
+    },
+    [subscribe, getQuery, getEsqlVariables, initialQuery, staticEsqlVariables]
   );
 
-  const query = reactiveQuery ?? initialQuery;
-  const esqlVariables = reactiveVariables ?? staticEsqlVariables;
+  const getDiscoverQuerySnapshot = useCallback(() => snapshotRef.current, []);
+
+  const { query, esqlVariables } = useSyncExternalStore(wrappedSubscribe, getDiscoverQuerySnapshot);
 
   const { loading, value } = useAsync(async (): Promise<LoadedModules> => {
     const [services, mod] = await Promise.all([
@@ -88,6 +124,49 @@ const CreateRuleOptionsFlyoutInner = ({
       ComposeDiscoverFlyout: mod.ComposeDiscoverFlyout,
     };
   }, []);
+
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+
+  useEffect(() => {
+    if (!history) {
+      return;
+    }
+
+    const initialPathname = history.location.pathname;
+    const unlistenHistory = history.listen((location) => {
+      if (location.pathname !== initialPathname) {
+        onCloseRef.current();
+      }
+    });
+
+    return () => {
+      unlistenHistory();
+    };
+  }, [history]);
+
+  useEffect(() => {
+    if (!value?.services) {
+      return;
+    }
+
+    const { application } = value.services;
+    let initialAppId: string | undefined;
+
+    const appChangeSubscription = application.currentAppId$.subscribe((appId) => {
+      if (initialAppId === undefined) {
+        initialAppId = appId;
+        return;
+      }
+      if (appId !== initialAppId) {
+        onCloseRef.current();
+      }
+    });
+
+    return () => {
+      appChangeSubscription.unsubscribe();
+    };
+  }, [value?.services]);
 
   const navigateToAgentBuilder = useCallback(() => {
     if (!value?.services) return;

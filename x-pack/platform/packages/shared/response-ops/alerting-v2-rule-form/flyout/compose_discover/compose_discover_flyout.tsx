@@ -10,16 +10,19 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonGroup,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiSpacer,
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useDebounceFn } from '@kbn/react-hooks';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -112,6 +115,13 @@ const NEXT_BUTTON_LABEL = i18n.translate(
 const NEXT_DISABLED_TOOLTIP = i18n.translate(
   'xpack.alertingV2.composeDiscover.flyout.nextDisabledTooltip',
   { defaultMessage: 'Define a query in the editor before continuing' }
+);
+
+const VALIDATION_ERRORS_NEXT_TOOLTIP = i18n.translate(
+  'xpack.alertingV2.composeDiscover.flyout.validationErrorsNextTooltip',
+  {
+    defaultMessage: 'Resolve ES|QL control placeholders before continuing',
+  }
 );
 
 const EDIT_MODE_OPTIONS = [
@@ -278,6 +288,17 @@ export function ComposeDiscoverFlyout({
     return definition ? definition.createDefaultState() : undefined;
   });
 
+  const inlineResult = useMemo(
+    () =>
+      initialQuery !== undefined
+        ? inlineEsqlVariables(initialQuery, esqlVariables)
+        : { query: '', unresolved: [] as string[] },
+    [initialQuery, esqlVariables]
+  );
+
+  const validationErrors = inlineResult.unresolved;
+  const hasValidationErrors = validationErrors.length > 0;
+
   // ── Form values (submitted to the API) ──
   const defaultValues = useMemo<ComposeFormValues>(() => {
     if (rule) {
@@ -293,15 +314,14 @@ export function ComposeDiscoverFlyout({
       }
       return mapped;
     }
-    if (initialQuery) {
-      const { query: inlinedQuery } = inlineEsqlVariables(initialQuery, esqlVariables);
+    if (initialQuery !== undefined) {
       return {
         ...EMPTY_FORM_VALUES,
-        query: { format: 'composed', base: inlinedQuery, blocks: { breach: '' } },
+        query: { format: 'composed', base: inlineResult.query, blocks: { breach: '' } },
       };
     }
     return EMPTY_FORM_VALUES;
-  }, [rule, mode, initialQuery, esqlVariables]);
+  }, [rule, mode, initialQuery, inlineResult.query]);
 
   const methods = useForm<ComposeFormValues>({ mode: 'onBlur', defaultValues });
   const [isConfirmCloseVisible, setIsConfirmCloseVisible] = useState(false);
@@ -342,6 +362,10 @@ export function ComposeDiscoverFlyout({
   // to re-dispatch OPEN_CHILD to restore it.
   const reopenChildRef = useRef(false);
 
+  const prevExternalQueryRef = useRef<
+    { query: string | undefined; esqlVariables: ESQLControlVariable[] | undefined } | undefined
+  >();
+
   const handleRequestClose = useCallback(() => {
     const yamlDirty =
       yamlBaselineRef.current !== null && yamlTextRef.current !== yamlBaselineRef.current;
@@ -376,6 +400,33 @@ export function ComposeDiscoverFlyout({
     methods.getValues('timeField')
   );
   const [dateRange, setDateRange] = useState({ dateStart: 'now-15m', dateEnd: 'now' });
+
+  useEffect(() => {
+    if (rule || initialQuery === undefined) {
+      return;
+    }
+
+    const prev = prevExternalQueryRef.current;
+    if (prev?.query === initialQuery && prev?.esqlVariables === esqlVariables) {
+      return;
+    }
+
+    const isFirstRun = prev === undefined;
+    prevExternalQueryRef.current = { query: initialQuery, esqlVariables };
+
+    if (isFirstRun || isDirtyRef.current || hasBeenEditedRef.current) {
+      return;
+    }
+
+    const composedQuery: RuleQuery = {
+      format: 'composed',
+      base: inlineResult.query,
+      blocks: { breach: '' },
+    };
+    methods.reset({ ...methods.getValues(), query: composedQuery });
+    setSandboxQuery(composedQuery);
+    dispatch({ type: inlineResult.query.trim() ? 'COMMIT_QUERY' : 'INVALIDATE_QUERY' });
+  }, [initialQuery, esqlVariables, inlineResult.query, rule, methods, dispatch]);
 
   const syncSandbox = useCallback(() => {
     setSandboxQuery(methods.getValues('query'));
@@ -608,6 +659,9 @@ export function ComposeDiscoverFlyout({
   }, [sandboxQuery, sandboxTimeField, uiState.yamlMode, methods, dispatch]);
 
   const handleSubmit = methods.handleSubmit((values) => {
+    if (hasValidationErrors) {
+      return;
+    }
     if (builderType) {
       const definition = RULE_BUILDER_REGISTRY[builderType];
       if (definition?.validate && !definition.validate(uiState, builderState)) {
@@ -624,6 +678,9 @@ export function ComposeDiscoverFlyout({
   // YAML "Save" — flush any pending debounce into RHF, then run the shared
   // handleSubmit path so validation + submission use a single pipeline.
   const handleYamlSave = useCallback(() => {
+    if (hasValidationErrors) {
+      return;
+    }
     cancelYamlParse();
     const result = parseYamlToFormValues(yamlText);
     if (result.values) {
@@ -633,23 +690,69 @@ export function ComposeDiscoverFlyout({
       // in YAML mode and handleToggleYamlMode(false) will resync when they switch back.
     }
     handleSubmit();
-  }, [cancelYamlParse, yamlText, methods, handleSubmit]);
+  }, [cancelYamlParse, yamlText, methods, handleSubmit, hasValidationErrors]);
 
   const handleNext = useCallback(async () => {
+    if (hasValidationErrors) {
+      return;
+    }
     if (currentStep?.validate) {
       const valid = await currentStep.validate(methods, uiState, baseServices, builderState);
       if (!valid) return;
     }
     dispatch({ type: 'GO_NEXT', isAlert });
-  }, [currentStep, methods, uiState, isAlert, dispatch, baseServices, builderState]);
+  }, [
+    hasValidationErrors,
+    currentStep,
+    methods,
+    uiState,
+    isAlert,
+    dispatch,
+    baseServices,
+    builderState,
+  ]);
 
   const handleFinalSubmit = useCallback(async () => {
+    if (hasValidationErrors) {
+      return;
+    }
     if (currentStep?.validate) {
       const valid = await currentStep.validate(methods, uiState, baseServices, builderState);
       if (!valid) return;
     }
     handleSubmit();
-  }, [currentStep, methods, uiState, baseServices, builderState, handleSubmit]);
+  }, [
+    currentStep,
+    methods,
+    uiState,
+    baseServices,
+    builderState,
+    handleSubmit,
+    hasValidationErrors,
+  ]);
+
+  const validationCallout = hasValidationErrors ? (
+    <>
+      <EuiCallOut
+        announceOnMount
+        color="danger"
+        iconType="alert"
+        data-test-subj="ruleV2FlyoutValidationErrors"
+        title={i18n.translate('xpack.alertingV2.ruleForm.validationErrors.title', {
+          defaultMessage: 'Resolve issues before saving',
+        })}
+      >
+        <p>
+          <FormattedMessage
+            id="xpack.alertingV2.ruleForm.validationErrors.description"
+            defaultMessage="The following items must be resolved before this rule can be saved: {names}"
+            values={{ names: validationErrors.join(', ') }}
+          />
+        </p>
+      </EuiCallOut>
+      <EuiSpacer size="m" />
+    </>
+  ) : null;
 
   // TODO: recoveryType drives whether the recovery tab appears in YAML mode.
   // Follow schema decisions in #268984 — if recoveryType is superseded by a
@@ -719,6 +822,7 @@ export function ComposeDiscoverFlyout({
           </EuiFlyoutHeader>
 
           <EuiFlyoutBody>
+            {validationCallout}
             {uiState.yamlMode ? (
               <React.Suspense fallback={null}>
                 <LazyYamlRuleForm
@@ -753,6 +857,7 @@ export function ComposeDiscoverFlyout({
                     fill
                     onClick={handleYamlSave}
                     isLoading={isSaving}
+                    isDisabled={hasValidationErrors}
                     data-test-subj="composeDiscoverYamlSubmit"
                   >
                     {isCreate ? CREATE_RULE_BUTTON_LABEL : SAVE_RULE_BUTTON_LABEL}
@@ -791,6 +896,7 @@ export function ComposeDiscoverFlyout({
                         <EuiButton
                           fill
                           isLoading={isSaving}
+                          isDisabled={hasValidationErrors}
                           onClick={handleFinalSubmit}
                           data-test-subj="composeDiscoverSubmit"
                         >
@@ -799,9 +905,11 @@ export function ComposeDiscoverFlyout({
                       ) : (
                         <EuiToolTip
                           content={
-                            (currentStep?.id === 'alertCondition' ||
-                              currentStep?.id === 'builderCondition') &&
-                            !uiState.queryCommitted
+                            hasValidationErrors
+                              ? VALIDATION_ERRORS_NEXT_TOOLTIP
+                              : (currentStep?.id === 'alertCondition' ||
+                                  currentStep?.id === 'builderCondition') &&
+                                !uiState.queryCommitted
                               ? NEXT_DISABLED_TOOLTIP
                               : undefined
                           }
@@ -812,6 +920,7 @@ export function ComposeDiscoverFlyout({
                             iconSide="right"
                             isDisabled={
                               uiState.childOpen ||
+                              hasValidationErrors ||
                               ((currentStep?.id === 'alertCondition' ||
                                 currentStep?.id === 'builderCondition') &&
                                 !uiState.queryCommitted)

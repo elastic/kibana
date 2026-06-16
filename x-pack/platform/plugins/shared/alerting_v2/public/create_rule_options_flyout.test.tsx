@@ -17,6 +17,8 @@ import { applicationServiceMock } from '@kbn/core/public/mocks';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { AGENT_BUILDER_APP_ID } from '@kbn/deeplinks-agent-builder';
+import { ESQLVariableType } from '@kbn/esql-types';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import { AGENT_BUILDER_NEW_CONVERSATION_PATH, CREATE_WITH_AGENT_INITIAL_PROMPT } from './constants';
 
 const createMockServices = (): RuleFormServices => ({
@@ -126,6 +128,25 @@ describe('CreateRuleOptionsFlyout', () => {
       expect(capturedComposeProps.mode).toBe('create');
       expect(capturedComposeProps.onClose).toBe(onClose);
       expect(capturedComposeProps.onCreateRule).toBeDefined();
+    });
+
+    it('passes esqlVariables through to ComposeDiscoverFlyout', async () => {
+      const esqlVariables: ESQLControlVariable[] = [
+        { key: 'host', value: 'web-1', type: ESQLVariableType.VALUES },
+      ];
+      renderFlyout({ initialQuery: 'FROM logs-* | WHERE host == ?host', esqlVariables });
+      resolveServices(mockServices);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('mockRuleCreateOptionsFlyout')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('esqlBtn'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('mockComposeDiscoverFlyout')).toBeInTheDocument();
+      });
+      expect(capturedComposeProps.esqlVariables).toBe(esqlVariables);
     });
 
     it('passes undefined initialQuery when initialQuery is not provided', async () => {

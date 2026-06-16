@@ -380,9 +380,7 @@ const RuleCreateOptionsFlyoutPanel: React.FC<RuleCreateOptionsPanelProps> = ({
         onClick={onCreateThresholdAlert ?? noop}
         icon={<EuiIcon type="chartThreshold" color="text" size="l" aria-hidden={true} />}
       />
-      {legacyRuleTypes && legacyRuleTypes.length > 0 && (
-        <LegacyRuleTypesSection items={legacyRuleTypes} />
-      )}
+      {legacyRuleTypes && <LegacyRuleTypesSection items={legacyRuleTypes} />}
     </>
   );
 };
