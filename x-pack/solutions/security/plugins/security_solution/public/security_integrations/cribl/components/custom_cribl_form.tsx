@@ -79,6 +79,11 @@ const RouteEntryComponent = React.memo<RouteEntryComponentProps>(
 
     const selectedOption = options.filter((o) => o.label === routeEntry.datastream);
 
+    const removeEntryLabel = i18n.translate(
+      'xpack.securitySolution.securityIntegration.cribl.removeEntry',
+      { defaultMessage: 'Remove entry' }
+    );
+
     return (
       <>
         <EuiFlexGroup>
@@ -140,13 +145,13 @@ const RouteEntryComponent = React.memo<RouteEntryComponentProps>(
             <span
               style={{ display: 'inline-flex', alignItems: 'center', blockSize: euiTheme.size.xxl }}
             >
-              <EuiToolTip content="entryDeleteButton" disableScreenReaderOutput>
+              <EuiToolTip content={removeEntryLabel} disableScreenReaderOutput>
                 <EuiButtonIcon
                   color="danger"
                   iconType="trash"
                   onClick={() => onDeleteEntry(index)}
                   isDisabled={routeEntries.length === 1}
-                  aria-label="entryDeleteButton"
+                  aria-label={removeEntryLabel}
                   className="itemEntryDeleteButton"
                   data-test-subj="itemEntryDeleteButton"
                 />
