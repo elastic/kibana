@@ -36,7 +36,7 @@ const MAX_GROUPS_TOOLTIP = (
       values={{
         docs: (
           <EuiLink
-            href="https://www.elastic.co/guide/en/kibana/8.7/troubleshooting.html#troubleshooting-too-many-transactions"
+            href="https://www.elastic.co/guide/en/kibana/current/troubleshooting.html#troubleshooting-too-many-transactions"
             target="_blank"
           >
             {i18n.translate('apmUiShared.serviceFlyout.transactions.maxGroupsDocsLink', {
