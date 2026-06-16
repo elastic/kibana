@@ -239,6 +239,12 @@ async function suggestAdditionalSources(
     suggestions.push(...subquerySuggestions);
   }
 
+  if (isTypingIndexName) {
+    // preserveTypedPrefix makes Monaco use the source name as the filter word and prepend
+    // it to the inserted text, so the source name isn't erased on acceptance.
+    suggestions.unshift({ ...newLineCompleteItem, filterText: undefined, preserveTypedPrefix: true });
+  }
+
   return suggestions;
 }
 
