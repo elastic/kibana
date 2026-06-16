@@ -7,7 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { ControlsRenderer } from './src/controls_renderer';
-export { ControlLabelTooltip } from './src/components/control_label_tooltip';
-export type { ControlsRendererParentApi, ControlsLayout } from './src/types';
-export { useIndicateRelatedPanelsSelector } from './src/hooks';
+export { useIndicateRelatedPanelsSelector } from './use_indicate_related_panels_selector';

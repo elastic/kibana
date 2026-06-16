@@ -8,13 +8,13 @@
  */
 
 import type { AggregateQuery, Query } from '@kbn/es-query';
+import { EMPTY } from 'rxjs';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import { EsqlControlType, ESQLVariableType } from '@kbn/esql-types';
 import type { PresentationContainer } from '@kbn/presentation-publishing';
 import { getMockPresentationContainer } from '@kbn/presentation-publishing/interfaces/containers/mocks';
 import { getAllEsqlControls, getEsqlControls } from './get_esql_controls';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
-import { of } from 'rxjs';
 
 const createPresentationContainer = (children: unknown[]) =>
   ({
@@ -41,9 +41,9 @@ const createControlApi = (
 ) => ({
   uuid,
   type,
-  anyStateChange$: of(),
   serializeState: () => state,
   applySerializedState: () => undefined,
+  anyStateChange$: EMPTY,
 });
 
 describe('getAllEsqlControls', () => {
