@@ -222,15 +222,43 @@ const ExtractResultView: FC<{ result: ExtractDepthResult }> = ({ result }) => {
 // VertexScoresBadges — shared between KnnResultView and TriageResultView
 // ---------------------------------------------------------------------------
 
-const VertexScoresBadges: FC<{ vertexScores: Record<string, number> | undefined }> = ({
-  vertexScores,
-}) => {
+interface AnchorMatchBreakdownDisplay {
+  ioc_hash_hits?: string[];
+  ioc_set_hash_match?: boolean;
+  actor_hits?: string[];
+}
+
+const VertexScoresBadges: FC<{
+  vertexScores: Record<string, number> | undefined;
+  matchBreakdown?: Record<string, unknown>;
+}> = ({ vertexScores, matchBreakdown }) => {
   const entries = Object.entries(vertexScores ?? {});
   if (entries.length === 0) {
+    const bd = matchBreakdown as AnchorMatchBreakdownDisplay | undefined;
+    const hashHits = bd?.ioc_hash_hits ?? [];
+    const actorHits = bd?.actor_hits ?? [];
+    const iocSetMatch = bd?.ioc_set_hash_match ?? false;
     return (
-      <EuiText size="xs" color="subdued">
-        {i18nText.knnAnchorOnly()}
-      </EuiText>
+      <div>
+        <EuiText size="xs" color="subdued">
+          {i18nText.knnAnchorOnly()}
+        </EuiText>
+        {hashHits.map((h) => (
+          <EuiText key={h} size="xs" color="subdued">
+            {`${i18nText.anchorSignalHash()}: ${h}`}
+          </EuiText>
+        ))}
+        {actorHits.map((a) => (
+          <EuiText key={a} size="xs" color="subdued">
+            {`${i18nText.anchorSignalActor()}: ${a}`}
+          </EuiText>
+        ))}
+        {iocSetMatch ? (
+          <EuiText size="xs" color="subdued">
+            {i18nText.anchorSignalIdenticalIocSet()}
+          </EuiText>
+        ) : null}
+      </div>
     );
   }
   return (
@@ -404,7 +432,12 @@ const TriageResultView: FC<{ result: TriageDepthResult }> = ({ result }) => {
       },
       {
         name: i18nText.knnColVertexScores(),
-        render: (item: TriagePick) => <VertexScoresBadges vertexScores={item.vertex_scores} />,
+        render: (item: TriagePick) => (
+          <VertexScoresBadges
+            vertexScores={item.vertex_scores}
+            matchBreakdown={item.match_breakdown}
+          />
+        ),
       },
       {
         field: 'justification',
@@ -429,7 +462,12 @@ const TriageResultView: FC<{ result: TriageDepthResult }> = ({ result }) => {
       },
       {
         name: i18nText.knnColVertexScores(),
-        render: (item: TriagedOut) => <VertexScoresBadges vertexScores={item.vertex_scores} />,
+        render: (item: TriagedOut) => (
+          <VertexScoresBadges
+            vertexScores={item.vertex_scores}
+            matchBreakdown={item.match_breakdown}
+          />
+        ),
       },
       {
         field: 'reason',

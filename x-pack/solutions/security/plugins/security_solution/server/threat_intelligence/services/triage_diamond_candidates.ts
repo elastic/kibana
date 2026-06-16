@@ -53,6 +53,7 @@ export interface TriagePick {
   justification: string;
   vertex_scores: DiamondVertexScore;
   overlap: number;
+  match_breakdown?: AnchorMatchBreakdown;
 }
 
 /** A hypothesis group from the triage LLM (debug/diagnostic only). */
@@ -69,6 +70,7 @@ export interface TriagedOutCandidate {
   reason: 'below_floor' | 'not_selected';
   vertex_scores: DiamondVertexScore;
   overlap: number;
+  match_breakdown?: AnchorMatchBreakdown;
 }
 
 export interface TriageDiamondCandidatesParams {
@@ -488,6 +490,7 @@ export const triageDiamondCandidates = async ({
           justification: entry.justification,
           vertex_scores: src?.vertex_scores ?? {},
           overlap: src?.overlap ?? 0,
+          match_breakdown: src?.match_breakdown,
         };
         rawPicks.push(pick);
         mappedGroup.candidates.push({ ...pick });
@@ -513,6 +516,7 @@ export const triageDiamondCandidates = async ({
         justification: '',
         vertex_scores: c.vertex_scores,
         overlap: c.overlap,
+        match_breakdown: c.match_breakdown,
       });
     }
   }
@@ -535,6 +539,7 @@ export const triageDiamondCandidates = async ({
           : 'not_selected') as TriagedOutCandidate['reason'],
         vertex_scores: c.vertex_scores,
         overlap: c.overlap,
+        match_breakdown: c.match_breakdown,
       };
     });
 

@@ -97,6 +97,7 @@ const triagePickSchema = z.object({
   justification: z.string(),
   vertex_scores: z.record(z.string(), z.number()).optional(),
   overlap: z.number().optional(),
+  match_breakdown: z.record(z.string(), z.unknown()).optional(),
 });
 
 const triageGroupSchema = z.object({
@@ -116,6 +117,7 @@ const triagedOutCandidateSchema = z.object({
   reason: z.enum(['below_floor', 'not_selected']),
   vertex_scores: z.record(z.string(), z.number()).optional(),
   overlap: z.number().optional(),
+  match_breakdown: z.record(z.string(), z.unknown()).optional(),
 });
 
 export const triageDepthResultSchema = z.object({

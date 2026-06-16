@@ -243,6 +243,12 @@ export const i18nText = {
   // kNN — anchor-only row placeholder
   knnAnchorOnly: () => i18n.translate(`${ns}.knnAnchorOnly`, { defaultMessage: 'anchor-only' }),
 
+  // Anchor match breakdown signal labels
+  anchorSignalHash: () => i18n.translate(`${ns}.anchorSignalHash`, { defaultMessage: 'hash' }),
+  anchorSignalActor: () => i18n.translate(`${ns}.anchorSignalActor`, { defaultMessage: 'actor' }),
+  anchorSignalIdenticalIocSet: () =>
+    i18n.translate(`${ns}.anchorSignalIdenticalIocSet`, { defaultMessage: 'identical IOC set' }),
+
   // Cost trace
   costTraceSectionTitle: () =>
     i18n.translate(`${ns}.costTraceSectionTitle`, { defaultMessage: 'Cost trace' }),
