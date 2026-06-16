@@ -105,6 +105,35 @@ export class WorkflowExecutionService<TInput extends object = {}> {
     return execution.error?.message ?? 'Unknown error';
   }
 
+  /**
+   * Maps an existing execution to a status result, attaching the failure message
+   * for failed runs. The completed output (features/queries) is not included;
+   * callers that need it must fetch the full execution separately.
+   */
+  static toStatusResult({
+    execution,
+    workflowId,
+  }: {
+    execution: WorkflowExecutionListItemDto;
+    workflowId: string;
+  }): SigEventsWorkflowStatusResult {
+    const status = WorkflowExecutionService.classifyExecutionStatus(execution.status);
+
+    if (status === SigEventsWorkflowStatus.Failed) {
+      return {
+        status: SigEventsWorkflowStatus.Failed,
+        executionId: execution.id,
+        error: WorkflowExecutionService.getFailureMessage({ execution, workflowId }),
+      };
+    }
+
+    if (status === SigEventsWorkflowStatus.Completed) {
+      return { status: SigEventsWorkflowStatus.Completed, executionId: execution.id };
+    }
+
+    return { status, executionId: execution.id };
+  }
+
   async getStatus({
     spaceId,
     queryParams,
@@ -118,24 +147,10 @@ export class WorkflowExecutionService<TInput extends object = {}> {
       return { status: SigEventsWorkflowStatus.NotStarted, executionId: null };
     }
 
-    const status = WorkflowExecutionService.classifyExecutionStatus(lastExecution.status);
-
-    if (status === SigEventsWorkflowStatus.Failed) {
-      return {
-        status: SigEventsWorkflowStatus.Failed,
-        executionId: lastExecution.id,
-        error: WorkflowExecutionService.getFailureMessage({
-          execution: lastExecution,
-          workflowId: this.workflowId,
-        }),
-      };
-    }
-
-    if (status === SigEventsWorkflowStatus.Completed) {
-      return { status: SigEventsWorkflowStatus.Completed, executionId: lastExecution.id };
-    }
-
-    return { status, executionId: lastExecution.id };
+    return WorkflowExecutionService.toStatusResult({
+      execution: lastExecution,
+      workflowId: this.workflowId,
+    });
   }
 
   /**

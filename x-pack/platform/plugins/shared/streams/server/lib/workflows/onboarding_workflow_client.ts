@@ -181,36 +181,7 @@ export const parseStreamNameFromConcurrencyKey = (key: string): string | null =>
   return key.slice(CONCURRENCY_KEY_PREFIX.length);
 };
 
-/**
- * Lightweight mapping of a workflow execution to a status result without the
- * completed output (features/queries). Used by the batch status endpoint, which
- * only conveys progress per stream and therefore avoids the extra per-stream
- * fetch that assembling the completed output would require.
- */
-const mapExecutionToStatusSummary = (
-  execution: WorkflowExecutionListItemDto
-): SigEventsWorkflowStatusResult => {
-  const status = WorkflowExecutionService.classifyExecutionStatus(execution.status);
-
-  if (status === SigEventsWorkflowStatus.Failed) {
-    return {
-      status: SigEventsWorkflowStatus.Failed,
-      executionId: execution.id,
-      error: WorkflowExecutionService.getFailureMessage({
-        execution,
-        workflowId: STREAMS_KI_ONBOARDING_WORKFLOW_ID,
-      }),
-    };
-  }
-
-  if (status === SigEventsWorkflowStatus.Completed) {
-    return { status: SigEventsWorkflowStatus.Completed, executionId: execution.id };
-  }
-
-  return { status, executionId: execution.id };
-};
-
-const MAX_STREAMS_PER_QUERY = 10000;
+export const MAX_STREAMS_PER_QUERY = 10000;
 /**
  * Client that wraps the workflows management API to provide a stream-centric
  * interface for running, querying, and canceling KI onboarding workflows.
@@ -308,6 +279,7 @@ export class StreamsKIsOnboardingClient {
       return statuses;
     }
 
+    const requested = new Set(streamNames);
     const executions = await this.getRecentExecutions();
 
     for (const execution of executions) {
@@ -315,10 +287,13 @@ export class StreamsKIsOnboardingClient {
         continue;
       }
       const streamName = parseStreamNameFromConcurrencyKey(execution.concurrencyGroupKey);
-      if (streamName === null || !(streamName in statuses)) {
+      if (streamName === null || !requested.has(streamName)) {
         continue;
       }
-      statuses[streamName] = mapExecutionToStatusSummary(execution);
+      statuses[streamName] = WorkflowExecutionService.toStatusResult({
+        execution,
+        workflowId: STREAMS_KI_ONBOARDING_WORKFLOW_ID,
+      });
     }
 
     return statuses;

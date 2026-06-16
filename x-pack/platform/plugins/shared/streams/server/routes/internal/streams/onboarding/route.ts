@@ -16,7 +16,10 @@ import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { FeatureNotEnabledError } from '../../../../lib/streams/errors/feature_not_enabled_error';
-import type { StreamsKIsOnboardingInputs } from '../../../../lib/workflows/onboarding_workflow_client';
+import {
+  MAX_STREAMS_PER_QUERY,
+  type StreamsKIsOnboardingInputs,
+} from '../../../../lib/workflows/onboarding_workflow_client';
 
 const timestampFromString = z.string().transform((input) => new Date(input).getTime());
 
@@ -184,7 +187,7 @@ export const onboardingBulkStatusRoute = createServerRoute({
   },
   params: z.object({
     body: z.object({
-      streamNames: z.array(z.string()).min(1).max(10000),
+      streamNames: z.array(z.string()).min(1).max(MAX_STREAMS_PER_QUERY),
     }),
   }),
   handler: async ({
