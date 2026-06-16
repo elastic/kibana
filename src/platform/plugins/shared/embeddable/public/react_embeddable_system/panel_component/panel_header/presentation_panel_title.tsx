@@ -53,16 +53,13 @@ export const PresentationPanelTitle = ({
   }, [api]);
 
   /**
-   * EuiLink renders as an <a> element without an href. Some browsers (e.g. Safari) do not fire
-   * click events when Enter is pressed on <a> elements without an href, making the title
-   * inaccessible via keyboard. The explicit onKeyDown handler ensures the flyout opens on Enter
-   * across all browsers. preventDefault() is called to prevent any browser-synthesised click
-   * event from also firing (which would open the flyout twice in browsers that do support it).
+   * Ensures the flyout opens on Enter across all browsers, since some browsers (e.g. Safari)
+   * do not fire click events when Enter is pressed on <a> elements without an href.
    */
   const onKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       if (e.key === 'Enter') {
-        e.preventDefault();
+        e.preventDefault(); // prevent `onClick` event from firing and causing a double flyout
         onClick();
       }
     },
