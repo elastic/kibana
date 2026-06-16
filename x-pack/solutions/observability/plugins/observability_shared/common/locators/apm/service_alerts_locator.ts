@@ -9,6 +9,7 @@ import { escapeKuery } from '@kbn/es-query';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 import type { ServiceAlertsLocatorParams } from '@kbn/deeplinks-observability';
 import { SERVICE_ALERTS_LOCATOR_ID } from '@kbn/deeplinks-observability';
+import { ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
 import { TRANSACTION_NAME, TRANSACTION_TYPE } from '../../field_names/elasticsearch';
 
 export { SERVICE_ALERTS_LOCATOR_ID, type ServiceAlertsLocatorParams };
@@ -38,7 +39,7 @@ export class ServiceAlertsLocatorDefinition
       kuery: filters.join(' and ') || undefined,
       rangeFrom,
       rangeTo,
-      alertStatus: 'active',
+      alertStatus: ALERT_STATUS_ACTIVE,
     };
 
     return {
