@@ -33,6 +33,8 @@ import {
   FlyoutOwnFocusSwitch,
   FlyoutTypeSwitch,
 } from '../utils';
+import { FlyoutDocument } from './_flyout_document';
+import { MOCK_DOCUMENTS } from './demo_documents';
 
 interface SessionFlyoutProps {
   historyKey: symbol;
@@ -194,43 +196,7 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
               )}
             />
             <EuiSpacer size="m" />
-            <EuiText>
-              <p>
-                Below is some filler content to demonstrate scrolling behavior. Scroll down to see
-                the button to <strong>open the child flyout</strong>.
-              </p>
-              <p>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque nisl eros, pulvinar
-                facilisis justo mollis, auctor consequat urna. Morbi a bibendum metus. Donec
-                scelerisque sollicitudin enim eu venenatis. Duis tincidunt laoreet ex, in pretium
-                orci vestibulum eget. Class aptent taciti sociosqu ad litora torquent per conubia
-                nostra, per inceptos himenaeos. Duis pharetra luctus lacus ut vestibulum. Maecenas
-                ipsum lacus, lacinia quis posuere ut, pulvinar vitae dolor. Integer eu nibh at nisi
-                ullamcorper sagittis id vel leo. Integer feugiat faucibus libero, at maximus nisl
-                suscipit posuere. Morbi nec enim nunc. Phasellus bibendum turpis ut ipsum egestas,
-                sed sollicitudin elit convallis. Cras pharetra mi tristique sapien vestibulum
-                lobortis. Nam eget bibendum metus, non dictum mauris. Nulla at tellus sagittis,
-                viverra est a, bibendum metus.
-              </p>
-              <p>
-                Sed non neque elit. Sed ut imperdiet nisi. Proin condimentum fermentum nunc. Etiam
-                pharetra, erat sed fermentum feugiat, velit mauris egestas quam, ut aliquam massa
-                nisl quis neque. Suspendisse in orci enim.
-              </p>
-              <p>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque nisl eros, pulvinar
-                facilisis justo mollis, auctor consequat urna. Morbi a bibendum metus. Donec
-                scelerisque sollicitudin enim eu venenatis. Duis tincidunt laoreet ex, in pretium
-                orci vestibulum eget. Class aptent taciti sociosqu ad litora torquent per conubia
-                nostra, per inceptos himenaeos. Duis pharetra luctus lacus ut vestibulum. Maecenas
-                ipsum lacus, lacinia quis posuere ut, pulvinar vitae dolor. Integer eu nibh at nisi
-                ullamcorper sagittis id vel leo. Integer feugiat faucibus libero, at maximus nisl
-                suscipit posuere. Morbi nec enim nunc. Phasellus bibendum turpis ut ipsum egestas,
-                sed sollicitudin elit convallis. Cras pharetra mi tristique sapien vestibulum
-                lobortis. Nam eget bibendum metus, non dictum mauris. Nulla at tellus sagittis,
-                viverra est a, bibendum metus.
-              </p>
-            </EuiText>
+            <FlyoutDocument document={MOCK_DOCUMENTS[0]} />
             <EuiSpacer size="m" />
             <EuiButton
               buttonRef={childTriggerARef}

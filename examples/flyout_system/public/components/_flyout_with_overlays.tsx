@@ -35,6 +35,8 @@ import {
   FlyoutOwnFocusSwitch,
   FlyoutTypeSwitch,
 } from '../utils';
+import { FlyoutDocument } from './_flyout_document';
+import { MOCK_DOCUMENTS } from './demo_documents';
 
 export interface FlyoutFromOverlaysProps {
   historyKey: symbol;
@@ -220,29 +222,7 @@ const FlyoutContent: React.FC<FlyoutContentProps> = React.memo((props) => {
           )}
         />
         <EuiSpacer size="m" />
-        <EuiText>
-          <p>
-            Below is some filler content to demonstrate scrolling behavior. Scroll down to access
-            the button to <strong>open the child flyout</strong>.
-          </p>
-          <p>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-            incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
-            exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-          </p>
-          <p>
-            Sed vel lacus id magna laoreet aliquam. Praesent aliquam in tellus eu pellentesque.
-            Nulla facilisi. Sed pulvinar, massa vitae interdum pulvinar, risus lectus porta nunc,
-            vel efficitur turpis odio nec nisi. Donec nec justo eget felis facilisis fermentum.
-            Aliquam porttitor mauris sit amet orci. Aenean dignissim pellentesque felis, non
-            volutpat arcu. Morbi a enim in magna semper bibendum. Etiam scelerisque, nunc ac egestas
-            consequat, odio nibh euismod nulla, eget auctor orci nibh vel nisi. Aliquam erat
-            volutpat. Mauris vel neque sit amet nunc gravida congue sed sit amet purus. Quisque
-            lacus quam, egestas ac tincidunt a, lacinia vel velit. Aenean facilisis nulla vitae urna
-            tincidunt congue sed ut dui. Morbi malesuada nulla nec purus convallis consequat.
-            Vivamus id mollis quam. Morbi ac commodo nulla.
-          </p>
-        </EuiText>
+        <FlyoutDocument document={MOCK_DOCUMENTS[0]} />
         <EuiSpacer />
         <EuiButton
           buttonRef={childTriggerARef}
@@ -321,7 +301,6 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
         />,
         {
           id: `mainFlyout-${title}`,
-          title,
           type: flyoutType,
           ownFocus: flyoutOwnFocus,
           size: mainSize,
