@@ -33,7 +33,7 @@ const searchTechniqueSchema = schema.maybe(
 
 const selectedOptionsSchema = schema.maybe(
   schema.oneOf([
-    schema.arrayOf(schema.string(), { maxSize: 999 }), // maxSize for DoS prevention
+    schema.arrayOf(schema.string({ maxLength: 999 }), { maxSize: 999 }), // maxSize for DoS prevention
     schema.arrayOf(schema.number(), { maxSize: 999 }),
   ])
 );
@@ -41,14 +41,14 @@ const selectedOptionsSchema = schema.maybe(
 const dslFetchBodySchema = schema.object(
   {
     kind: schema.literal('dsl'),
-    index: schema.string(),
+    index: schema.string({ maxLength: 999 }),
     size: schema.number(),
-    fieldName: schema.string(),
+    fieldName: schema.string({ maxLength: 999 }),
     sort: schema.maybe(schema.any()),
     filters: schema.maybe(schema.any()),
     fieldSpec: schema.maybe(schema.any()),
     ignoreValidations: schema.maybe(schema.boolean()),
-    searchString: schema.maybe(schema.string()),
+    searchString: schema.maybe(schema.string({ maxLength: 999 })),
     searchTechnique: searchTechniqueSchema,
     selectedOptions: selectedOptionsSchema,
     runtimeFieldMap: schema.maybe(schema.any()),
@@ -61,12 +61,12 @@ const dslFetchBodySchema = schema.object(
 const esqlFetchBodySchema = schema.object(
   {
     kind: schema.literal('esql'),
-    esql: schema.string(),
+    esql: schema.string({ maxLength: 999 }),
     timeRange: schema.maybe(schema.any()),
     filter: schema.maybe(schema.any()),
     sort: schema.maybe(schema.any()),
     esqlVariables: schema.maybe(schema.arrayOf(schema.any(), { maxSize: 999 })),
-    searchString: schema.maybe(schema.string()),
+    searchString: schema.maybe(schema.string({ maxLength: 999 })),
     searchTechnique: searchTechniqueSchema,
     selectedOptions: selectedOptionsSchema,
     ignoreValidations: schema.maybe(schema.boolean()),

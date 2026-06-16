@@ -12,7 +12,10 @@ import { ControlValuesSource, DEFAULT_DATA_CONTROL_STATE } from '@kbn/controls-c
 
 export const controlTitleSchema = schema.object({
   title: schema.maybe(
-    schema.string({ meta: { description: 'A human-readable title for the control.' } })
+    schema.string({
+      meta: { description: 'A human-readable title for the control.' },
+      maxLength: 999,
+    })
   ),
 });
 
@@ -54,10 +57,12 @@ export const dataControlFieldVariantProps = {
   data_view_id: schema.string({
     meta: { description: 'The ID of the data view that provides field options for this control.' }, // this will generate a reference
     minLength: 1,
+    maxLength: 999,
   }),
   field_name: schema.string({
     meta: { description: 'The name of the field in the data view that this control filters on.' },
     minLength: 1,
+    maxLength: 999,
   }),
   esql_query: schema.never(),
 };
@@ -70,6 +75,7 @@ export const dataControlEsqlVariantProps = {
   esql_query: schema.string({
     meta: { description: 'The ES|QL query that provides field options for this control' },
     minLength: 1,
+    maxLength: 99999, // ES|QL queries might be longer, use higher dos prevention ceiling
   }),
 };
 
