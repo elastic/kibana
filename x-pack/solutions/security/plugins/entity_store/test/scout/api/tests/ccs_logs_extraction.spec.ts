@@ -137,11 +137,7 @@ apiTest.describe(
       await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
         headers: defaultHeaders,
         responseType: 'json',
-        body: {
-          logExtraction: {
-            docsLimit: DOCS_LIMIT,
-          },
-        },
+        body: {},
       });
       await clearEntityStoreIndices(esClient);
     });
