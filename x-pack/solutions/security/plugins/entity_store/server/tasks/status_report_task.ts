@@ -174,7 +174,7 @@ export function registerStatusReportTask({
       [config.type]: {
         title: config.title,
         timeout: config.timeout,
-        createTaskRunner: ({ taskInstance, fakeRequest, abortController }) => ({
+        createTaskRunner: ({ taskInstance, fakeRequest, abortController, executionUuid }) => ({
           run: () =>
             wrapTaskRun({
               spanName: 'entityStore.task.status_report.run',
@@ -187,6 +187,7 @@ export function registerStatusReportTask({
                   taskInstance,
                   fakeRequest,
                   abortController,
+                  executionUuid,
                   logger: logger.get(taskInstance.id),
                   core,
                   telemetryReporter,

@@ -91,6 +91,48 @@ export default function ({ getService }: FtrProviderContext) {
         expect(event.event.outcome).to.eql('success');
         expect(event.kibana.task.id).to.eql(scheduledTask.id);
         expect(event.kibana.task.type).to.eql('sampleTask');
+        expect(event.kibana.task.execution.uuid).to.match(
+          /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
+        );
+      });
+    });
+
+    it('task-run-start and task-run share the same execution.uuid', async () => {
+      const scheduledTask = await scheduleTask({
+        taskType: 'sampleTask',
+        params: {},
+      });
+      currentTaskId = scheduledTask.id;
+
+      await runTaskSoon({ id: scheduledTask.id });
+
+      await retry.try(async () => {
+        const response = await es.search({
+          index: '.kibana-event-log*',
+          query: {
+            bool: {
+              filter: [
+                { term: { 'event.provider': 'taskManager' } },
+                { term: { 'kibana.task.id': scheduledTask.id } },
+              ],
+            },
+          },
+          sort: [{ '@timestamp': { order: 'asc' } }],
+        });
+        const events = response.hits.hits.map((h) => h._source as Record<string, any>);
+        const startEvent = events.find((e) => e.event.action === 'task-run-start');
+        const runEvent = events.find((e) => e.event.action === 'task-run');
+
+        expect(startEvent).not.to.be(undefined);
+        expect(runEvent).not.to.be(undefined);
+
+        const startUuid = startEvent!.kibana.task.execution.uuid;
+        const runUuid = runEvent!.kibana.task.execution.uuid;
+
+        expect(startUuid).to.match(
+          /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
+        );
+        expect(startUuid).to.eql(runUuid);
       });
     });
 

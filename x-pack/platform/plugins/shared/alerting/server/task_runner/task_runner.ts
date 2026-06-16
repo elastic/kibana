@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import apm from 'elastic-apm-node';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { v4 as uuidv4 } from 'uuid';
 import type { ISavedObjectsRepository, Logger } from '@kbn/core/server';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { addSpanLabels } from '@kbn/apm-utils';
@@ -103,6 +103,7 @@ interface TaskRunnerConstructorParams<
     AlertData
   >;
   taskInstance: ConcreteTaskInstance;
+  executionUuid?: string;
 }
 
 export class TaskRunner<
@@ -160,6 +161,7 @@ export class TaskRunner<
     internalSavedObjectsRepository,
     ruleType,
     taskInstance,
+    executionUuid,
   }: TaskRunnerConstructorParams<
     Params,
     ExtractedParams,
@@ -180,7 +182,7 @@ export class TaskRunner<
     this.ruleTypeRegistry = context.ruleTypeRegistry;
     this.searchAbortController = new AbortController();
     this.cancelled = false;
-    this.executionId = uuidv4();
+    this.executionId = executionUuid ?? uuidv4();
     this.inMemoryMetrics = inMemoryMetrics;
     this.internalSavedObjectsRepository = internalSavedObjectsRepository;
     this.timer = new TaskRunnerTimer({ logger: this.logger });

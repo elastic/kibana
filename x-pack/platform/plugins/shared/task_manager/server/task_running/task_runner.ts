@@ -427,6 +427,7 @@ export class TaskManagerRunner implements TaskRunner {
 
         const modifiedContext = await this.beforeRun({
           taskInstance: stateValidationResult.taskInstance,
+          executionUuid: this.uuid,
         });
 
         this.onTaskEvent(
@@ -459,6 +460,7 @@ export class TaskManagerRunner implements TaskRunner {
             taskInstance: sanitizedTaskInstance,
             fakeRequest,
             abortController,
+            executionUuid: this.uuid,
           });
 
           const originalTaskCancel = this.task.cancel;
@@ -597,6 +599,7 @@ export class TaskManagerRunner implements TaskRunner {
         try {
           const { taskInstance } = await this.beforeMarkRunning({
             taskInstance: this.instance.task,
+            executionUuid: this.uuid,
           });
 
           const attempts = taskInstance.attempts + 1;
@@ -1123,6 +1126,7 @@ export class TaskManagerRunner implements TaskRunner {
           type: this.taskType,
           scheduled: task.scheduledAt.toISOString(),
           ...(scheduleDelayNs != null ? { schedule_delay: scheduleDelayNs } : {}),
+          execution: { uuid: this.uuid },
         },
       },
       message: `Task ${this.taskType} "${this.id}" started.`,
@@ -1159,6 +1163,7 @@ export class TaskManagerRunner implements TaskRunner {
           type: this.taskType,
           scheduled: task.scheduledAt.toISOString(),
           schedule_delay: scheduleDelayNs,
+          execution: { uuid: this.uuid },
         },
       },
       message,
@@ -1180,6 +1185,7 @@ export class TaskManagerRunner implements TaskRunner {
           id: this.id,
           type: this.taskType,
           scheduled: task.scheduledAt.toISOString(),
+          execution: { uuid: this.uuid },
         },
       },
       message: `Task ${this.taskType} "${this.id}" has been cancelled.`,

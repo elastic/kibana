@@ -93,6 +93,15 @@ export interface RunContext {
    */
   fakeRequest?: KibanaRequest;
   abortController: AbortController;
+
+  /**
+   * A UUID that uniquely identifies this specific execution of the task.
+   * Task runners that log their own execution UUID (e.g. alerting, actions)
+   * should use this value rather than generating a new one, so that the UUID
+   * in their event log documents matches `kibana.task.execution.uuid` in the
+   * Task Manager event log documents for the same execution.
+   */
+  executionUuid?: string;
 }
 
 /**

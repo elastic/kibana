@@ -101,7 +101,11 @@ describe('task runner', () => {
     const taskDef = registeredDefinitions[USER_CONNECTOR_TOKEN_CLEANUP_TASK_TYPE];
 
     const abortController = new AbortController();
-    return taskDef.createTaskRunner({ taskInstance: {} as never, abortController });
+    return taskDef.createTaskRunner({
+      taskInstance: {} as never,
+      abortController,
+      executionUuid: 'test-execution-uuid',
+    });
   };
 
   test('calls cleanupStaleUserConnectorTokens and returns empty state', async () => {

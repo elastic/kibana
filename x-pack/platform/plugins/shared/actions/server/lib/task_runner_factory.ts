@@ -73,7 +73,7 @@ export class TaskRunnerFactory {
     this.taskRunnerContext = taskRunnerContext;
   }
 
-  public create({ taskInstance, abortController }: RunContext) {
+  public create({ taskInstance, abortController, executionUuid }: RunContext) {
     if (!this.isInitialized) {
       throw new Error('TaskRunnerFactory not initialized');
     }
@@ -86,7 +86,7 @@ export class TaskRunnerFactory {
       scheduled: taskInstance.runAt,
       attempts: taskInstance.attempts,
     };
-    const actionExecutionId = uuidv4();
+    const actionExecutionId = executionUuid ?? uuidv4();
     const actionTaskExecutorParams = taskInstance.params as ActionTaskExecutorParams;
 
     return {
