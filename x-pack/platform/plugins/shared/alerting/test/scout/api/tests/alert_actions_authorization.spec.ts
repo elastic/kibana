@@ -256,23 +256,20 @@ apiTest.describe(
           },
         });
 
-        const response = await apiClient.post(
-          `internal/alerting/rule/${ruleId}/_snooze`,
-          {
-            headers: { ...COMMON_HEADERS, ...cookieHeader },
-            body: {
-              snooze_schedule: {
-                duration: 60000,
-                rRule: {
-                  dtstart: new Date().toISOString(),
-                  tzid: 'UTC',
-                  count: 1,
-                  freq: 0,
-                },
+        const response = await apiClient.post(`internal/alerting/rule/${ruleId}/_snooze`, {
+          headers: { ...COMMON_HEADERS, ...cookieHeader },
+          body: {
+            snooze_schedule: {
+              duration: 60000,
+              rRule: {
+                dtstart: new Date().toISOString(),
+                tzid: 'UTC',
+                count: 1,
+                freq: 0,
               },
             },
-          }
-        );
+          },
+        });
         expect(response).toHaveStatusCode(204);
       }
     );
@@ -289,13 +286,10 @@ apiTest.describe(
           },
         });
 
-        const response = await apiClient.post(
-          `internal/alerting/rule/${ruleId}/_unsnooze`,
-          {
-            headers: { ...COMMON_HEADERS, ...cookieHeader },
-            body: { schedule_ids: [] },
-          }
-        );
+        const response = await apiClient.post(`internal/alerting/rule/${ruleId}/_unsnooze`, {
+          headers: { ...COMMON_HEADERS, ...cookieHeader },
+          body: { schedule_ids: [] },
+        });
         expect(response).toHaveStatusCode(204);
       }
     );
