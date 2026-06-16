@@ -5,7 +5,18 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiButton, EuiButtonIcon, EuiLink, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import type { IndicesIndexMode } from '@elastic/elasticsearch/lib/api/types';
+import {
+  EuiBadge,
+  EuiBetaBadge,
+  EuiButton,
+  EuiButtonIcon,
+  EuiLink,
+  EuiToolTip,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
+import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type { IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
 import { ILM_LOCATOR_ID } from '@kbn/index-lifecycle-management-common-shared';
@@ -18,10 +29,6 @@ import {
   isIlmLifecycle,
 } from '@kbn/streams-schema';
 import React from 'react';
-import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
-import { css } from '@emotion/react';
-import type { IndicesIndexMode } from '@elastic/elasticsearch/lib/api/types';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 
@@ -95,12 +102,7 @@ export function WiredStreamBadge() {
 
 export function DraftStreamBadge() {
   return (
-    <EuiBadge
-      color="hollow"
-      iconType="editorCodeBlock"
-      iconSide="left"
-      data-test-subj="draftStreamBadge"
-    >
+    <EuiBadge iconType="dashedCircle" color="default" data-test-subj="draftStreamBadge">
       {i18n.translate('xpack.streams.entityDetailViewWithoutParams.draftBadgeLabel', {
         defaultMessage: 'Draft',
       })}
@@ -109,11 +111,10 @@ export function DraftStreamBadge() {
 }
 
 export function QueryStreamBadge() {
-  const { euiTheme } = useEuiTheme();
   return (
-    <EuiBadge color={euiTheme.colors.backgroundLightAccent}>
+    <EuiBadge iconType="code" color="accent">
       {i18n.translate('xpack.streams.entityDetailViewWithoutParams.queryBadgeLabel', {
-        defaultMessage: 'Query stream',
+        defaultMessage: 'Query',
       })}
     </EuiBadge>
   );
@@ -340,3 +341,17 @@ export function TimeSeriesBadge() {
     </EuiToolTip>
   );
 }
+
+export const TechnicalPreviewBadge = () => (
+  <EuiBetaBadge
+    tooltipContent={i18n.translate('xpack.streams.technicalPreviewTooltip', {
+      defaultMessage: 'This feature is in technical preview. We are working on it...',
+    })}
+    label={i18n.translate('xpack.streams.technicalPreviewLabel', {
+      defaultMessage: 'Technical preview',
+    })}
+    iconType="flask"
+    size="s"
+    css={{ display: 'block' }}
+  />
+);
