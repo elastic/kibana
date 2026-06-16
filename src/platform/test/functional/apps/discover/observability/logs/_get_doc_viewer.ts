@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// Serverless test (remove during Scout migration): x-pack/solutions/observability/test/serverless/functional/test_suites/discover/logs/_get_doc_viewer.ts
 import moment from 'moment/moment';
 import { log, timerange } from '@kbn/synthtrace-client';
 import type { LogsSynthtraceEsClient } from '@kbn/synthtrace';

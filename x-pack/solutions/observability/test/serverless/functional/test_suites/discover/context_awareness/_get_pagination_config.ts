@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+// Original test (remove during Scout migration): src/platform/test/functional/apps/discover/observability/logs/_get_pagination_config.ts
 import kbnRison from '@kbn/rison';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
