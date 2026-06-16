@@ -9,6 +9,7 @@ import { escapeKuery } from '@kbn/es-query';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 import type { ServiceAlertsLocatorParams } from '@kbn/deeplinks-observability';
 import { SERVICE_ALERTS_LOCATOR_ID } from '@kbn/deeplinks-observability';
+import { TRANSACTION_NAME, TRANSACTION_TYPE } from '../../field_names/elasticsearch';
 
 export { SERVICE_ALERTS_LOCATOR_ID, type ServiceAlertsLocatorParams };
 
@@ -29,8 +30,8 @@ export class ServiceAlertsLocatorDefinition
   }: ServiceAlertsLocatorParams) => {
     const filters = [
       kuery,
-      transactionName ? `transaction.name: ${escapeKuery(transactionName)}` : undefined,
-      transactionType ? `transaction.type: ${escapeKuery(transactionType)}` : undefined,
+      transactionName ? `${TRANSACTION_NAME}: ${escapeKuery(transactionName)}` : undefined,
+      transactionType ? `${TRANSACTION_TYPE}: ${escapeKuery(transactionType)}` : undefined,
     ].filter(Boolean);
 
     const params = {
