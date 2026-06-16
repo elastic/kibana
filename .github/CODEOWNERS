@@ -1979,7 +1979,6 @@ x-pack/platform/plugins/shared/streams/common/sig_events_tuning_config.ts @elast
 /x-pack/solutions/observability/test/fixtures/es_archives/uptime @elastic/actionable-obs-team
 /x-pack/solutions/observability/test/functional/services/uptime @elastic/actionable-obs-team
 /x-pack/solutions/observability/test/api_integration/apis/uptime @elastic/actionable-obs-team
-/x-pack/solutions/observability/test/api_integration/apis/synthetics @elastic/actionable-obs-team
 /x-pack/solutions/observability/test/serverless/api_integration/test_suites/synthetics @elastic/actionable-obs-team
 
 # Observability-ui folder level permissions (need to be before individual files inside the folder)
