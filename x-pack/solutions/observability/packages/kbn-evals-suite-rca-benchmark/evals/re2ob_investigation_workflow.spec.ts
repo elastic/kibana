@@ -13,6 +13,12 @@
  * the 4-agent workflow (context → parallel gather+review × 5 → synthesis) and
  * evaluates the synthesis output with the same RCA criteria as re2ob_local.spec.ts.
  *
+ * Data isolation: each scenario is indexed immediately before its workflow run
+ * and cleaned up immediately after. With concurrency:1 this guarantees only one
+ * scenario's data is in Elasticsearch at a time, preventing MCP observability
+ * tools (get_services, get_service_topology, etc.) from picking up cross-scenario
+ * signals.
+ *
  * Prerequisites:
  *   - RCAEVAL_DATA_DIR set to the extracted RE2-OB dataset directory
  *   - Kibana running on branch obs/rca-bench-investigation-workflow-eval
@@ -22,13 +28,11 @@
  * Run:
  *   RCAEVAL_DATA_DIR=/home/beast/rcaeval-data \
  *   EVALUATION_CONNECTOR_ID=<judge-connector-id> \
- *   node scripts/evals run --suite rca-benchmark \
- *     --config playwright.workflow.config.ts \
- *     --spec evals/re2ob_investigation_workflow.spec.ts
+ *   node scripts/evals run --suite rca-benchmark --grep "investigates root cause via investigation workflow"
  */
 
 import { tags } from '@kbn/scout';
-import { createSpanLatencyEvaluator, createToolCallsEvaluator } from '@kbn/evals';
+import type { Evaluator } from '@kbn/evals';
 import { evaluate } from '../src/evaluate';
 import { RE2OB_SCENARIOS } from '../src/scenarios/re2ob_scenarios';
 import type { RcaScenario } from '../src/scenarios/types';
@@ -36,37 +40,54 @@ import {
   indexLocalScenario,
   cleanLocalScenario,
   resolveLocalCaseDir,
-  type LocalReplayHandle,
 } from '../src/data_generators/local_replay';
 import { createCriteriaEvaluator } from '../src/criteria_evaluator';
 import { InvestigationWorkflowClient } from '../src/investigation_workflow_client';
+import type { ConverseUsage } from '../src/agent_builder_client';
 
 const RCAEVAL_DATA_DIR = process.env.RCAEVAL_DATA_DIR;
 const RCAEVAL_MAX_SCENARIOS = process.env.RCAEVAL_MAX_SCENARIOS
   ? parseInt(process.env.RCAEVAL_MAX_SCENARIOS, 10)
   : undefined;
 
-interface LoadedScenario {
-  handle: LocalReplayHandle;
+interface ScenarioToRun {
+  scenario: RcaScenario;
+  caseDir: string;
+}
+
+function createUsageEvaluator(name: string, field: keyof ConverseUsage): Evaluator {
+  return {
+    name,
+    kind: 'CODE',
+    evaluate: async ({ output }) => {
+      const usage = (output as { usage?: ConverseUsage } | undefined)?.usage;
+      const value = usage?.[field] ?? null;
+      return { score: value };
+    },
+  };
 }
 
 evaluate.describe(
   'RE2-OB RCA Benchmark (investigation workflow)',
   { tag: tags.serverless.observability.complete },
   () => {
-    // Each workflow run takes ~20-30 minutes; 6 scenarios × 2 concurrent = ~60 min total.
-    evaluate.setTimeout(120 * 60_000);
+    // Each workflow run takes ~20-30 minutes; 6 scenarios sequential = ~2h total.
+    evaluate.setTimeout(180 * 60_000);
 
-    const loadedScenarios: LoadedScenario[] = [];
+    const scenariosToRun: ScenarioToRun[] = [];
 
-    evaluate.beforeAll(async ({ esClient, log }) => {
+    evaluate.beforeAll(async ({ log }) => {
       if (!RCAEVAL_DATA_DIR) {
         log.info('RCAEVAL_DATA_DIR not set — skipping investigation workflow RE2-OB suite');
         evaluate.skip();
         return;
       }
 
-      for (const scenario of RCAEVAL_MAX_SCENARIOS ? RE2OB_SCENARIOS.slice(0, RCAEVAL_MAX_SCENARIOS) : RE2OB_SCENARIOS) {
+      const scenarios = RCAEVAL_MAX_SCENARIOS
+        ? RE2OB_SCENARIOS.slice(0, RCAEVAL_MAX_SCENARIOS)
+        : RE2OB_SCENARIOS;
+
+      for (const scenario of scenarios) {
         const caseDir = resolveLocalCaseDir(RCAEVAL_DATA_DIR, scenario);
         if (!caseDir) {
           log.warning(
@@ -74,12 +95,10 @@ evaluate.describe(
           );
           continue;
         }
-
-        const handle = await indexLocalScenario(esClient, log, scenario, caseDir);
-        loadedScenarios.push({ handle });
+        scenariosToRun.push({ scenario, caseDir });
       }
 
-      if (loadedScenarios.length === 0) {
+      if (scenariosToRun.length === 0) {
         log.info('No local scenarios available — skipping');
         evaluate.skip();
       }
@@ -87,7 +106,7 @@ evaluate.describe(
 
     evaluate(
       'investigates root cause via investigation workflow across fault-injected Online Boutique scenarios',
-      async ({ executorClient, fetch, log, evaluators, traceEsClient }) => {
+      async ({ executorClient, esClient, fetch, log, evaluators }) => {
         const workflowClient = new InvestigationWorkflowClient(fetch, log);
 
         await executorClient.runExperiment(
@@ -100,86 +119,76 @@ evaluate.describe(
                   'scenarios from the RCAEval benchmark, using locally extracted CSV data. ' +
                   'Each example triggers the 4-agent managed investigation workflow ' +
                   '(context → parallel gather+review → synthesis). ' +
-                  'Results are compared against the single-agent Agent Builder baseline.',
-                examples: loadedScenarios.map(({ handle }) =>
-                  buildExample(handle.scenario, handle.logsIndex, handle.tracesIndex, handle.metricsIndex)
-                ),
+                  'Data is indexed fresh per scenario and cleaned up immediately after to ' +
+                  'prevent cross-scenario contamination in MCP observability tools.',
+                examples: scenariosToRun.map(({ scenario, caseDir }) => ({
+                  input: {
+                    scenario,
+                    caseDir,
+                  },
+                  output: {
+                    criteria: buildRcaCriteria(scenario),
+                  },
+                  metadata: {
+                    service: scenario.service,
+                    faultType: scenario.faultType,
+                    dataset: 're2ob-investigation-workflow',
+                  },
+                })),
               },
             ],
-            // Run 2 workflows concurrently: each takes ~20-30 min so 3 batches × 30 min = ~90 min.
-            // Higher concurrency risks overwhelming Task Manager's workflow execution queue.
-            concurrency: 2,
+            // concurrency:1 ensures only one scenario's data is in ES at a time.
+            // MCP tools (get_services, get_service_topology, etc.) query by default
+            // patterns; concurrent scenarios would bleed into each other's queries.
+            concurrency: 1,
             task: async ({ input }) => {
-              const { streamNames, scenarioId, scenarioTitle, service, faultType } =
-                input as {
-                  streamNames: string[];
-                  scenarioId: string;
-                  scenarioTitle: string;
-                  service: string;
-                  faultType: string;
+              const { scenario, caseDir } = input as ScenarioToRun;
+
+              // Index this scenario's data just before running the workflow.
+              const handle = await indexLocalScenario(esClient, log, scenario, caseDir);
+              const { logsIndex, tracesIndex, metricsIndex } = handle;
+
+              try {
+                const response = await workflowClient.run({
+                  streamNames: [logsIndex, tracesIndex, metricsIndex],
+                  scenarioId: scenario.snapshotName,
+                  scenarioTitle: `${scenario.service} / ${scenario.faultType}`,
+                  service: scenario.service,
+                  faultType: scenario.faultType,
+                });
+
+                return {
+                  errors: response.errors,
+                  messages: response.messages,
+                  steps: response.steps,
+                  traceId: response.traceId,
+                  usage: response.usage,
                 };
-
-              const response = await workflowClient.run({
-                streamNames,
-                scenarioId,
-                scenarioTitle,
-                service,
-                faultType,
-              });
-
-              return {
-                errors: response.errors,
-                messages: response.messages,
-                steps: response.steps,
-                traceId: response.traceId,
-              };
+              } finally {
+                // Clean up immediately — next scenario starts with a clean slate.
+                await cleanLocalScenario(esClient, handle, log);
+              }
             },
           },
           [
             createCriteriaEvaluator({ evaluators }),
-            createToolCallsEvaluator({ traceEsClient, log }),
-            evaluators.traceBasedEvaluators.inputTokens,
-            evaluators.traceBasedEvaluators.outputTokens,
-            evaluators.traceBasedEvaluators.cachedTokens,
-            createSpanLatencyEvaluator({ traceEsClient, log, spanName: 'ChatComplete' }),
+            createUsageEvaluator('Input Tokens', 'input_tokens'),
+            createUsageEvaluator('Output Tokens', 'output_tokens'),
+            createUsageEvaluator('LLM Calls', 'llm_calls'),
           ]
         );
       }
     );
 
-    evaluate.afterAll(async ({ esClient, log }) => {
-      for (const { handle } of loadedScenarios) {
-        await cleanLocalScenario(esClient, handle, log);
-      }
-    });
+    // No afterAll cleanup needed — each task cleans up its own data inline.
   }
 );
 
-function buildExample(scenario: RcaScenario, logsIndex: string, tracesIndex: string, metricsIndex: string) {
-  return {
-    input: {
-      streamNames: [logsIndex, tracesIndex, metricsIndex],
-      scenarioId: scenario.snapshotName,
-      scenarioTitle: `${scenario.service} / ${scenario.faultType}`,
-      service: scenario.service,
-      faultType: scenario.faultType,
-    },
-    output: {
-      criteria: buildRcaCriteria(scenario),
-    },
-    metadata: {
-      service: scenario.service,
-      faultType: scenario.faultType,
-      dataset: 're2ob-investigation-workflow',
-    },
-  };
-}
-
 function buildRcaCriteria(scenario: RcaScenario): string[] {
   return [
-    `Identifies "${scenario.service}" (or a recognizable variant of the name) as the root cause component`,
-    `Does NOT attribute the root cause solely to a frontend or gateway service unless that is the actual fault location`,
+    `The final conclusion identifies "${scenario.service}" (or a recognizable variant of the name) as the PRIMARY root cause component — FAIL if the service appears only as a downstream victim of another service, only in a hypothesis that is explicitly refuted or ranked below another conclusion, or if the output concludes that no fault was detected`,
+    `Does NOT name a frontend or gateway service (e.g. "frontend", "ingress", "API gateway") as the primary root cause — mentions of such services purely as downstream victims of a cascading failure do NOT violate this criterion`,
     `Cites at least one concrete piece of evidence (error log, anomalous trace latency, error rate spike, or specific tool output)`,
-    `Describes the failure mode consistent with: ${scenario.faultDescription}`,
+    `The failure mechanism described in the final conclusion is specifically consistent with "${scenario.faultDescription}" — a conclusion of "no fault detected" automatically FAILS; a description of an unrelated resource class (e.g. CPU/memory pressure when the fault is socket exhaustion, or resource exhaustion when the fault is packet loss) also FAILS`,
   ];
 }

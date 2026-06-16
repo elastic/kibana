@@ -1,0 +1,327 @@
+version: "1"
+name: Investigation (Adversarial Loop)
+description: >
+  Two-agent adversarial RCA workflow. An Investigator agent does a full investigation
+  and proposes a root cause. A Critic agent independently reviews it and tries to
+  disprove it. If the Critic is satisfied, the result is returned. If not, the
+  Investigator is called again with the Critic's feedback. Up to 3 iterations.
+enabled: true
+settings:
+  timeout: "90m"
+  concurrency:
+    key: "streams-sigevents-investigation-adversarial-{{ inputs.discovery_id }}"
+    strategy: cancel-in-progress
+    max: 1
+tags:
+  - observability
+  - streams
+  - sigevents
+  - investigation
+
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        connector_id:
+          type: string
+          default: ".anthropic-claude-4.5-haiku-chat_completion"
+
+steps:
+
+  # ── Round 1 ───────────────────────────────────────────────────────────────────
+
+  - name: investigate_r1
+    type: ai.agent
+    agent-id: elastic-ai-agent
+    connector-id: '{{ inputs.connector_id }}'
+    create-conversation: true
+    with:
+      timeout: 1800s
+      message: |
+        {{ inputs.question }}
+
+        Data streams (use get_index_info to discover available fields in each):
+        - Logs:    {{ inputs.stream_names[0] }}
+        - Traces:  {{ inputs.stream_names[1] }}
+        - Metrics: {{ inputs.stream_names[2] }} (infrastructure signals: CPU, memory, network, latency)
+        Event metadata: {{ inputs | json }}
+
+        Investigate the root cause of this incident. Use all available observability tools:
+        - get_service_topology to map the call graph (mandatory — required to distinguish root cause from victim)
+        - get_services and get_trace_metrics to identify which services are anomalous
+        - get_log_change_points and get_metric_change_points to find what changed and when
+        - ES|QL STATS queries scoped to the indices above for detailed metrics
+
+        Key principles:
+        - A service that appears degraded may be a downstream victim of a dependency that's failing.
+          Use the call graph to trace causality direction.
+        - The service that degraded FIRST is a stronger root cause candidate.
+        - A heavily-called central service always shows high load during any fault — don't attribute
+          root cause based solely on high absolute load without confirming an independent fault.
+        - Infrastructure faults (CPU stress, memory, socket exhaustion) appear in metrics, not APM.
+
+        Return your findings as structured output.
+      schema:
+        type: object
+        properties:
+          root_cause:
+            type: string
+          confidence:
+            type: number
+            minimum: 0
+            maximum: 1
+          evidence_summary:
+            type: string
+          mechanism:
+            type: string
+          temporal_sequence:
+            type: string
+            description: "Which service showed anomalies first and in what order"
+          gaps_found:
+            type: array
+            items:
+              type: string
+        required:
+          - root_cause
+          - confidence
+          - evidence_summary
+          - mechanism
+    on-failure:
+      continue: false
+
+  - name: critique_r1
+    type: ai.agent
+    agent-id: elastic-ai-agent
+    connector-id: '{{ inputs.connector_id }}'
+    with:
+      timeout: 300s
+      message: |
+        You are a skeptical reviewer of a root cause analysis. Your job is to find flaws.
+
+        The investigator concluded: {{ steps.investigate_r1.output.structured_output | json }}
+
+        Try to disprove this conclusion. Specifically check:
+        1. Is the identified service actually a downstream victim? Could it be degraded because
+           something it calls is failing, not because it itself has a fault?
+        2. Is there a service that showed anomalies EARLIER than the identified service?
+           That earlier service is a stronger root cause candidate.
+        3. Is the identified service a heavily-used central hub that would naturally show elevated
+           load during ANY fault? If so, is there evidence of an independent fault (not just load)?
+        4. Does the failure mechanism described match the evidence? Are there alternative mechanisms
+           that better explain what was observed?
+
+        Data context: {{ inputs | json }}
+
+        If you find significant flaws, return satisfied=false with specific critique.
+        If the conclusion is well-supported and you cannot find significant flaws, return satisfied=true.
+      schema:
+        type: object
+        properties:
+          satisfied:
+            type: boolean
+          critique:
+            type: string
+          alternative_hypothesis:
+            type: string
+          specific_checks_to_perform:
+            type: array
+            items:
+              type: string
+        required:
+          - satisfied
+          - critique
+    on-failure:
+      continue: true
+
+  - name: check_done_r1
+    type: data.set
+    with:
+      done: "${{ steps.critique_r1.output.structured_output.satisfied == true }}"
+      final_result: "${{ steps.investigate_r1.output.structured_output }}"
+      round: 1
+
+  # ── Round 2 (if critic not satisfied) ────────────────────────────────────────
+
+  - name: investigate_r2
+    type: ai.agent
+    agent-id: elastic-ai-agent
+    connector-id: '{{ inputs.connector_id }}'
+    if: "${{ steps.check_done_r1.output.done == false }}"
+    with:
+      timeout: 1800s
+      message: |
+        {{ inputs.question }}
+
+        Data streams:
+        - Logs:    {{ inputs.stream_names[0] }}
+        - Traces:  {{ inputs.stream_names[1] }}
+        - Metrics: {{ inputs.stream_names[2] }}
+
+        Your previous root cause analysis was reviewed and found to have issues.
+
+        Your previous conclusion: {{ steps.investigate_r1.output.structured_output | json }}
+
+        The reviewer's critique: {{ steps.critique_r1.output.structured_output.critique }}
+
+        Specific concerns to address:
+        {{ steps.critique_r1.output.structured_output.specific_checks_to_perform | json }}
+
+        Alternative hypothesis suggested by reviewer: {{ steps.critique_r1.output.structured_output.alternative_hypothesis }}
+
+        Re-investigate with these concerns in mind. Use observability tools to specifically
+        address the critique — check temporal ordering, verify call graph direction, confirm
+        that the identified service has an independent fault (not just downstream load amplification).
+      schema:
+        type: object
+        properties:
+          root_cause:
+            type: string
+          confidence:
+            type: number
+            minimum: 0
+            maximum: 1
+          evidence_summary:
+            type: string
+          mechanism:
+            type: string
+          temporal_sequence:
+            type: string
+          how_critique_was_addressed:
+            type: string
+          gaps_found:
+            type: array
+            items:
+              type: string
+        required:
+          - root_cause
+          - confidence
+          - evidence_summary
+          - mechanism
+          - how_critique_was_addressed
+    on-failure:
+      continue: true
+
+  - name: critique_r2
+    type: ai.agent
+    agent-id: elastic-ai-agent
+    connector-id: '{{ inputs.connector_id }}'
+    if: "${{ steps.check_done_r1.output.done == false }}"
+    with:
+      timeout: 300s
+      message: |
+        You are reviewing a revised root cause analysis. The investigator addressed your
+        previous critique.
+
+        Original critique: {{ steps.critique_r1.output.structured_output.critique }}
+        Revised conclusion: {{ steps.investigate_r2.output.structured_output | json }}
+
+        Is the revised analysis convincing? Does it adequately address your previous concerns?
+        Apply the same critical checks: victim vs root cause, temporal ordering, hub-service bias.
+
+        Data context: {{ inputs | json }}
+      schema:
+        type: object
+        properties:
+          satisfied:
+            type: boolean
+          critique:
+            type: string
+          alternative_hypothesis:
+            type: string
+          specific_checks_to_perform:
+            type: array
+            items:
+              type: string
+        required:
+          - satisfied
+          - critique
+    on-failure:
+      continue: true
+
+  - name: check_done_r2
+    type: data.set
+    if: "${{ steps.check_done_r1.output.done == false }}"
+    with:
+      done: "${{ steps.critique_r2.output.structured_output.satisfied == true || steps.check_done_r1.output.done == true }}"
+      final_result: "${{ steps.check_done_r1.output.done == true ? steps.check_done_r1.output.final_result : steps.investigate_r2.output.structured_output }}"
+      round: 2
+
+  # ── Round 3 (last resort if still not satisfied) ──────────────────────────────
+
+  - name: investigate_r3
+    type: ai.agent
+    agent-id: elastic-ai-agent
+    connector-id: '{{ inputs.connector_id }}'
+    if: "${{ steps.check_done_r2.output.done == false }}"
+    with:
+      timeout: 1800s
+      message: |
+        {{ inputs.question }}
+
+        Data streams:
+        - Logs:    {{ inputs.stream_names[0] }}
+        - Traces:  {{ inputs.stream_names[1] }}
+        - Metrics: {{ inputs.stream_names[2] }}
+
+        This is the final round of investigation. Two previous attempts were critiqued.
+
+        Round 1 conclusion: {{ steps.investigate_r1.output.structured_output | json }}
+        Round 1 critique: {{ steps.critique_r1.output.structured_output.critique }}
+
+        Round 2 conclusion: {{ steps.investigate_r2.output.structured_output | json }}
+        Round 2 critique: {{ steps.critique_r2.output.structured_output.critique }}
+
+        Make your final determination. Consider all evidence carefully, especially:
+        - The temporal order in which services degraded
+        - Whether the leading candidate has an independent fault or is amplifying load from elsewhere
+        - Which hypothesis best explains ALL the observed anomalies, not just the most visible ones
+
+        If you cannot determine the root cause with confidence, say "Undetermined" and explain why.
+      schema:
+        type: object
+        properties:
+          root_cause:
+            type: string
+          confidence:
+            type: number
+            minimum: 0
+            maximum: 1
+          evidence_summary:
+            type: string
+          mechanism:
+            type: string
+          temporal_sequence:
+            type: string
+          final_reasoning:
+            type: string
+          gaps_found:
+            type: array
+            items:
+              type: string
+        required:
+          - root_cause
+          - confidence
+          - evidence_summary
+          - mechanism
+          - final_reasoning
+    on-failure:
+      continue: true
+
+  # ── Emit final result ─────────────────────────────────────────────────────────
+
+  - name: emit_result
+    type: workflow.output
+    with:
+      result: |
+        ${{
+          steps.investigate_r3.output != null
+            ? steps.investigate_r3.output.structured_output
+            : (steps.check_done_r2.output.done == true
+                ? steps.check_done_r2.output.final_result
+                : steps.check_done_r1.output.final_result)
+        }}
+      rounds_used: |
+        ${{
+          steps.investigate_r3.output != null ? 3
+            : (steps.investigate_r2.output != null ? 2 : 1)
+        }}

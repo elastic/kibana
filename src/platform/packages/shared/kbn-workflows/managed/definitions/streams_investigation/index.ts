@@ -9,6 +9,8 @@
 
 import INVESTIGATION_WORKFLOW_YAML from './investigation_workflow.yaml';
 import INVESTIGATION_HYP_WORKFLOW_YAML from './investigation_hyp_workflow.yaml';
+import INVESTIGATION_SINGLE_AGENT_WORKFLOW_YAML from './investigation_single_agent_workflow.yaml';
+import INVESTIGATION_ADVERSARIAL_WORKFLOW_YAML from './investigation_adversarial_workflow.yaml';
 import type { ManagedWorkflowDefinition } from '../../types';
 
 export const STREAMS_INVESTIGATION_WORKFLOW_ID = 'system-streams-sigevents-investigation';
@@ -33,6 +35,36 @@ export const STREAMS_INVESTIGATION_HYP_WORKFLOW = {
   pluginId: 'streams',
   version: 14,
   yaml: INVESTIGATION_HYP_WORKFLOW_YAML,
+  management: {
+    lifecycle: 'static',
+    versionStrategy: 'auto',
+    enablement: 'restorable',
+  },
+} as const satisfies ManagedWorkflowDefinition;
+
+export const STREAMS_INVESTIGATION_SINGLE_AGENT_WORKFLOW_ID =
+  'system-streams-sigevents-investigation-single';
+
+export const STREAMS_INVESTIGATION_SINGLE_AGENT_WORKFLOW = {
+  id: STREAMS_INVESTIGATION_SINGLE_AGENT_WORKFLOW_ID,
+  pluginId: 'streams',
+  version: 1,
+  yaml: INVESTIGATION_SINGLE_AGENT_WORKFLOW_YAML,
+  management: {
+    lifecycle: 'static',
+    versionStrategy: 'auto',
+    enablement: 'restorable',
+  },
+} as const satisfies ManagedWorkflowDefinition;
+
+export const STREAMS_INVESTIGATION_ADVERSARIAL_WORKFLOW_ID =
+  'system-streams-sigevents-investigation-adversarial';
+
+export const STREAMS_INVESTIGATION_ADVERSARIAL_WORKFLOW = {
+  id: STREAMS_INVESTIGATION_ADVERSARIAL_WORKFLOW_ID,
+  pluginId: 'streams',
+  version: 1,
+  yaml: INVESTIGATION_ADVERSARIAL_WORKFLOW_YAML,
   management: {
     lifecycle: 'static',
     versionStrategy: 'auto',
