@@ -16,12 +16,11 @@ import {
 } from '../../src/data_generators/endpoint_data';
 import { cleanupSeededData } from '../../src/data_generators/cleanup';
 
-const SKILL_PATH = 'skills/security/endpoint/elastic-defend-configuration-troubleshooting/SKILL.md';
 const UNITED_TRANSFORM_WILDCARD = `${METADATA_UNITED_TRANSFORM}*`;
 const ALL_SCENARIO_COUNT = Object.keys(SCENARIOS).length;
 
 const COMMON_CRITERIA = [
-  `Activated the troubleshooting skill by reading ${SKILL_PATH}`,
+  'Activated the troubleshooting skill',
   'Called automatic_troubleshooting.check_endpoint_package_freshness before the final diagnosis',
   'Called automatic_troubleshooting.generate_insight to persist structured findings',
 ] as const;
@@ -41,12 +40,11 @@ const P0_EVALS = [
       'Recommended checking Fleet output or Logstash SSL configuration and verifying event flow after the output is fixed',
     ],
     expectedToolCalls: [
-      'filestore.read',
       'automatic_troubleshooting.check_endpoint_package_freshness',
       'platform.core.search',
       'automatic_troubleshooting.generate_insight',
     ],
-    maxToolCalls: 30,
+    maxToolCalls: 29,
   },
   {
     name: 'endpoint_exception_field_mismatch_explicit_prompt',
@@ -62,12 +60,11 @@ const P0_EVALS = [
       'Recommended recreating the endpoint exception with process.executable = C:\\Program Files\\GoodApp\\good.exe or comparing entries to the alert fields',
     ],
     expectedToolCalls: [
-      'filestore.read',
       'automatic_troubleshooting.check_endpoint_package_freshness',
       'automatic_troubleshooting.get_endpoint_artifacts',
       'automatic_troubleshooting.generate_insight',
     ],
-    maxToolCalls: 12,
+    maxToolCalls: 11,
   },
   {
     name: 'endpoint_alert_needs_endpoint_exception_not_siem_explicit_prompt',
@@ -83,12 +80,11 @@ const P0_EVALS = [
       'Recommended creating an Endpoint Alert Exception assigned to the affected policy or using alert fields such as file hash, signature, or path',
     ],
     expectedToolCalls: [
-      'filestore.read',
       'automatic_troubleshooting.check_endpoint_package_freshness',
       'platform.core.search',
       'automatic_troubleshooting.generate_insight',
     ],
-    maxToolCalls: 8,
+    maxToolCalls: 7,
   },
   {
     name: 'trusted_app_wrong_condition_field',
@@ -104,12 +100,11 @@ const P0_EVALS = [
       'Explained that field/operator mismatches silently prevent Trusted Applications from matching the running process',
     ],
     expectedToolCalls: [
-      'filestore.read',
       'automatic_troubleshooting.check_endpoint_package_freshness',
       'automatic_troubleshooting.get_endpoint_artifacts',
       'automatic_troubleshooting.generate_insight',
     ],
-    maxToolCalls: 22,
+    maxToolCalls: 21,
   },
   {
     name: 'linux_high_cpu_monitoring_scripts',
@@ -124,12 +119,11 @@ const P0_EVALS = [
       'Recommended a targeted Trusted Application, Event Filter, or event reduction strategy rather than treating this as a policy response failure',
     ],
     expectedToolCalls: [
-      'filestore.read',
       'automatic_troubleshooting.check_endpoint_package_freshness',
       'platform.core.integration_knowledge',
       'automatic_troubleshooting.generate_insight',
     ],
-    maxToolCalls: 32,
+    maxToolCalls: 31,
   },
   {
     name: 'windows_high_cpu_authentication_events',
@@ -144,12 +138,11 @@ const P0_EVALS = [
       'Recommended event filters, Trusted Applications for noisy sources, or disabling Malicious Behavior Protection only when acceptable',
     ],
     expectedToolCalls: [
-      'filestore.read',
       'automatic_troubleshooting.check_endpoint_package_freshness',
       'platform.core.search',
       'automatic_troubleshooting.generate_insight',
     ],
-    maxToolCalls: 28,
+    maxToolCalls: 27,
   },
   {
     name: 'linux_missed_checkins_selinux_203_exec',
@@ -164,12 +157,11 @@ const P0_EVALS = [
       'Recommended fixing the SELinux file context with semanage or restorecon and restarting ElasticEndpoint.service',
     ],
     expectedToolCalls: [
-      'filestore.read',
       'automatic_troubleshooting.check_endpoint_package_freshness',
       'platform.core.search',
       'automatic_troubleshooting.generate_insight',
     ],
-    maxToolCalls: 22,
+    maxToolCalls: 21,
   },
   {
     name: 'windows_missed_checkins_crash_dump',
@@ -184,12 +176,11 @@ const P0_EVALS = [
       'Recommended collecting the crash dump or diagnostics and restarting the service or rebooting as recovery steps',
     ],
     expectedToolCalls: [
-      'filestore.read',
       'automatic_troubleshooting.check_endpoint_package_freshness',
       'platform.core.search',
       'automatic_troubleshooting.generate_insight',
     ],
-    maxToolCalls: 20,
+    maxToolCalls: 19,
   },
   {
     name: 'output_kafka_message_size_rejection_explicit_prompt',
@@ -205,12 +196,11 @@ const P0_EVALS = [
       'Recommended increasing Kafka topic or broker message-size limits or reducing event sizes with filters or Trusted Applications',
     ],
     expectedToolCalls: [
-      'filestore.read',
       'automatic_troubleshooting.check_endpoint_package_freshness',
       'platform.core.search',
       'automatic_troubleshooting.generate_insight',
     ],
-    maxToolCalls: 25,
+    maxToolCalls: 24,
   },
   {
     name: 'windows_bsod_network_driver_regression_explicit_prompt',
@@ -225,13 +215,12 @@ const P0_EVALS = [
       'Recommended upgrading to 8.18.4 or disabling advanced.kernel.network as an immediate mitigation with the host-isolation tradeoff',
     ],
     expectedToolCalls: [
-      'filestore.read',
       'automatic_troubleshooting.check_endpoint_package_freshness',
       'platform.core.search',
       'platform.core.integration_knowledge',
       'automatic_troubleshooting.generate_insight',
     ],
-    maxToolCalls: 24,
+    maxToolCalls: 23,
   },
   {
     name: 'incompatible_aws_vpc_cni_ebpf_conflict',
@@ -247,12 +236,11 @@ const P0_EVALS = [
       'Recommended setting linux.advanced.host_isolation.allowed to false if host isolation is not required',
     ],
     expectedToolCalls: [
-      'filestore.read',
       'automatic_troubleshooting.check_endpoint_package_freshness',
       'platform.core.integration_knowledge',
       'automatic_troubleshooting.generate_insight',
     ],
-    maxToolCalls: 24,
+    maxToolCalls: 23,
   },
   {
     name: 'currently_healthy_endpoint_no_active_issue',
@@ -267,12 +255,11 @@ const P0_EVALS = [
       'Asked the user for a specific symptom, time range, alert, or behavior to investigate instead of reporting a root cause',
     ],
     expectedToolCalls: [
-      'filestore.read',
       'automatic_troubleshooting.check_endpoint_package_freshness',
       'platform.core.search',
       'automatic_troubleshooting.generate_insight',
     ],
-    maxToolCalls: 22,
+    maxToolCalls: 21,
   },
 ] as const;
 
@@ -321,18 +308,17 @@ evaluate.describe('Automatic Troubleshooting', { tag: tags.stateful.classic }, (
             },
             output: {
               criteria: [
-                `Activated the troubleshooting skill by reading ${SKILL_PATH}`,
+                'Activated the troubleshooting skill',
                 'Queried endpoint metadata or process events to investigate the issue',
                 'Identified incompatible antivirus software on the endpoint',
                 'Called automatic_troubleshooting.generate_insight to persist structured findings',
               ],
               expectedToolCalls: [
-                'filestore.read',
                 'automatic_troubleshooting.check_endpoint_package_freshness',
                 'platform.core.integration_knowledge',
                 'automatic_troubleshooting.generate_insight',
               ],
-              maxToolCalls: 26,
+              maxToolCalls: 25,
             },
           },
         ],
@@ -353,18 +339,17 @@ evaluate.describe('Automatic Troubleshooting', { tag: tags.stateful.classic }, (
             },
             output: {
               criteria: [
-                `Activated the troubleshooting skill by reading ${SKILL_PATH}`,
+                'Activated the troubleshooting skill',
                 'Queried policy response data to investigate the failure',
                 'Identified the policy application failure and its cause',
                 'Called automatic_troubleshooting.generate_insight to persist structured findings',
               ],
               expectedToolCalls: [
-                'filestore.read',
                 'automatic_troubleshooting.check_endpoint_package_freshness',
                 'automatic_troubleshooting.get_package_configurations',
                 'automatic_troubleshooting.generate_insight',
               ],
-              maxToolCalls: 23,
+              maxToolCalls: 22,
             },
           },
         ],
@@ -416,20 +401,19 @@ evaluate.describe('Automatic Troubleshooting', { tag: tags.stateful.classic }, (
               },
               output: {
                 criteria: [
-                  `Activated the troubleshooting skill by reading ${SKILL_PATH}`,
+                  'Activated the troubleshooting skill',
                   'Inspected transform settings and stats to identify why endpoints are missing from the list',
                   'Identified that the endpoint.metadata_united transform is stopped',
                   'Recommended restarting the stopped transform as a remediation step',
                   'Called automatic_troubleshooting.generate_insight to persist structured findings',
                 ],
                 expectedToolCalls: [
-                  'filestore.read',
                   'automatic_troubleshooting.check_endpoint_package_freshness',
                   'platform.core.search',
                   'automatic_troubleshooting.get_package_configurations',
                   'automatic_troubleshooting.generate_insight',
                 ],
-                maxToolCalls: 15,
+                maxToolCalls: 14,
               },
             },
           ],
