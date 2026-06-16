@@ -212,7 +212,7 @@ export const MetricItemIcon = ({
     if (monitor.urls) {
       return (
         <Container>
-          <EuiToolTip content={monitor.urls}>
+          <EuiToolTip content={monitor.urls} disableScreenReaderOutput>
             <EuiButtonIcon
               color="text"
               data-test-subj="syntheticsMetricItemIconButton"

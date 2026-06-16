@@ -436,7 +436,7 @@ queue:
         cy.get(`a[href="/app/fleet/settings/outputs/${kafkaOutputId}"]`)
           .parents('tr')
           .within(() => {
-            cy.get('[title="Delete"]').click();
+            cy.getBySel('deleteOutputBtn').click();
           });
         cy.getBySel(SETTINGS_CONFIRM_MODAL_BTN).click();
         cy.get(`a[href="app/fleet/settings/outputs/${kafkaOutputId}"]`).should('not.exist');
