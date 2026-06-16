@@ -2,43 +2,53 @@
 plugins:
   enabled:
     - advanced_settings
+    - agent_builder
     - alerting
     - alerting_v2
     - apm
-    - agent_builder
     - automatic_import
     - banners
+    - canvas
+    - cloud_integrations/cloud_links
     - cloud_security_posture
     - console
     - contentManagementExamples
+    - cross_cluster_replication
     - custom_branding
     - dashboard
     - dashboard_markdown
     - data
-    - data_views
+    - data_view_editor
     - data_view_management
+    - data_views
     - dev_tools
     - discover
     - discover_enhanced
     - entity_store
     - error_boundary_example
+    - event_annotation_listing
     - exploratory_view
     - fleet
     - flyoutSystemExamples
     - gen_ai_settings
     - global_search
+    - graph
     - grokdebugger
+    - home
+    - index_lifecycle_management
     - index_management
     - infra
     - ingest_hub
     - ingest_pipelines
     - intercepts
-    - home
     - kibana_overview
+    - kql
     - lens
     - logstash
+    - management
     - maps
     - ml
+    - monitoring
     - navigation
     - observability
     - observability_onboarding
@@ -68,6 +78,7 @@ plugins:
     - upgrade_assistant
     - uptime
     - ux
+    - watcher
     - workflows_extensions
     - workflows_management
   disabled:
@@ -76,6 +87,7 @@ packages:
   enabled:
     - core
     - kbn-scout
+    - kbn-security-hardening
     - kbn-streamlang-tests
     - user-storage
   disabled:
@@ -87,3 +99,4 @@ excluded_configs:
   - x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/playwright.config.ts
   - src/platform/plugins/shared/workflows_management/test/scout_workflows_oom_testing/api/playwright.config.ts
   - x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/ui/playwright.config.ts
+  - x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/playwright.config.ts

@@ -10,6 +10,8 @@ import type {
   ActionPolicyBulkAction,
   ActionPolicyResponse,
   CreateActionPolicyDataInput,
+  MatchedActionPolicy,
+  MatcherContext,
 } from '@kbn/alerting-v2-schemas';
 import {
   createActionPolicyDataSchema,
@@ -19,6 +21,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { KueryNode } from '@kbn/es-query';
 import { nodeBuilder } from '@kbn/es-query';
+import { evaluateKql } from '@kbn/eval-kql';
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
 import { treeifyError, type z } from '@kbn/zod/v4';
 import { inject, injectable } from 'inversify';
@@ -33,6 +36,10 @@ import { ActionPolicySavedObjectServiceScopedToken } from '../services/action_po
 import type { ActionPolicySavedObjectServiceContract } from '../services/action_policy_saved_object_service/types';
 import type { ApiKeyServiceContract } from '../services/api_key_service/api_key_service';
 import { ApiKeyService } from '../services/api_key_service/api_key_service';
+import {
+  LoggerServiceToken,
+  type LoggerServiceContract,
+} from '../services/logger_service/logger_service';
 import type { RulesSavedObjectServiceContract } from '../services/rules_saved_object_service/rules_saved_object_service';
 import { RulesSavedObjectServiceScopedToken } from '../services/rules_saved_object_service/tokens';
 import type { UserServiceContract } from '../services/user_service/user_service';
@@ -44,6 +51,8 @@ import type {
   CreateActionPolicyParams,
   FindActionPoliciesParams,
   FindActionPoliciesResponse,
+  MatchActionPoliciesForRuleParams,
+  MatchActionPoliciesForRuleResponse,
   SnoozeActionPolicyParams,
   UpdateActionPolicyApiKeyParams,
   UpdateActionPolicyParams,
@@ -85,7 +94,9 @@ export class ActionPolicyClient {
     @inject(EncryptedSavedObjectsClientToken)
     private readonly esoClient: EncryptedSavedObjectsClient,
     @inject(ActionPolicyNamespaceToken)
-    private readonly namespace: string | undefined
+    private readonly namespace: string | undefined,
+    @inject(LoggerServiceToken)
+    private readonly logger: LoggerServiceContract
   ) {}
 
   /**
@@ -325,6 +336,83 @@ export class ActionPolicyClient {
       page,
       perPage,
     };
+  }
+
+  public async matchActionPoliciesForRule(
+    params: MatchActionPoliciesForRuleParams
+  ): Promise<MatchActionPoliciesForRuleResponse> {
+    const { ruleId, ruleName, ruleTags } = params;
+
+    let resolvedName = ruleName ?? '';
+    let resolvedTags = ruleTags ?? [];
+
+    // If ruleId is provided but not name or tags, fetch the rule from the DB to get the current name and tags
+    if (ruleId && (ruleName === undefined || ruleTags === undefined)) {
+      try {
+        const rule = await this.rulesSavedObjectService.get(ruleId);
+        resolvedName = ruleName ?? rule.attributes.metadata.name;
+        resolvedTags = ruleTags ?? rule.attributes.metadata.tags ?? [];
+      } catch (e) {
+        if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+          return { items: [] };
+        }
+        throw e;
+      }
+    }
+
+    const context: MatcherContext = {
+      last_event_timestamp: '',
+      group_hash: '',
+      episode_id: '',
+      episode_status: 'active',
+      rule: {
+        id: ruleId ?? '',
+        name: resolvedName,
+        tags: resolvedTags,
+      },
+    };
+
+    const items: MatchedActionPolicy[] = [];
+
+    if (ruleId) {
+      const singleRuleResult = await this.findActionPolicies({
+        type: 'single_rule',
+        ruleId,
+        perPage: 100,
+      });
+      for (const actionPolicy of singleRuleResult.items) {
+        items.push({ actionPolicy, category: 'direct' });
+      }
+    }
+
+    const globalResult = await this.findActionPolicies({ type: 'global', perPage: 100 });
+    for (const actionPolicy of globalResult.items) {
+      if (!actionPolicy.matcher || actionPolicy.matcher.trim() === '') {
+        items.push({ actionPolicy, category: 'global' });
+        continue;
+      }
+
+      let isMatch = false;
+      try {
+        isMatch = evaluateKql(actionPolicy.matcher, context);
+      } catch (err) {
+        this.logger.warn({
+          message: () =>
+            `Failed to evaluate KQL matcher for action policy "${
+              actionPolicy.id
+            }" during pre-matching: ${
+              err instanceof Error ? err.message : String(err)
+            }. Treating as no-match.`,
+        });
+        continue;
+      }
+
+      if (isMatch) {
+        items.push({ actionPolicy, category: 'global-filtered' });
+      }
+    }
+
+    return { items };
   }
 
   public async enableActionPolicy({ id }: { id: string }): Promise<ActionPolicyResponse> {

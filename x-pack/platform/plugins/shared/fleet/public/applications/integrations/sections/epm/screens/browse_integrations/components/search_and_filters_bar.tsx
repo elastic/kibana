@@ -22,6 +22,7 @@ import {
   EuiScreenReaderOnly,
   EuiSelectable,
   EuiSpacer,
+  EuiToolTip,
   mathWithUnits,
   useEuiTheme,
 } from '@elastic/eui';
@@ -417,6 +418,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ categories, availableSubCategorie
                   </span>
                 </EuiScreenReaderOnly>
                 {categoryBadgeLabel}
+                {categoryBadgeLabel}
               </>
             }
             data-test-subj="epmList.categoryBadge"
@@ -587,16 +589,24 @@ export const SearchAndFiltersBar: React.FC<SearchAndFiltersBarProps> = ({
                   data-test-subj="browseIntegrations.showMoreSubCategoriesButton"
                   id="browseIntegrationsMoreSubCategories"
                   button={
-                    <EuiButtonIcon
-                      display="base"
-                      onClick={() => setIsSubCategoryPopoverOpen((prev) => !prev)}
-                      iconType="boxesHorizontal"
-                      aria-label={i18n.translate(
+                    <EuiToolTip
+                      content={i18n.translate(
                         'xpack.fleet.epm.browseIntegrations.searchAndFilterBar.showMoreSubCategories',
                         { defaultMessage: 'Show more subcategories' }
                       )}
-                      size="s"
-                    />
+                      disableScreenReaderOutput
+                    >
+                      <EuiButtonIcon
+                        display="base"
+                        onClick={() => setIsSubCategoryPopoverOpen((prev) => !prev)}
+                        iconType="boxesHorizontal"
+                        aria-label={i18n.translate(
+                          'xpack.fleet.epm.browseIntegrations.searchAndFilterBar.showMoreSubCategories',
+                          { defaultMessage: 'Show more subcategories' }
+                        )}
+                        size="s"
+                      />
+                    </EuiToolTip>
                   }
                   isOpen={isSubCategoryPopoverOpen}
                   closePopover={() => setIsSubCategoryPopoverOpen(false)}

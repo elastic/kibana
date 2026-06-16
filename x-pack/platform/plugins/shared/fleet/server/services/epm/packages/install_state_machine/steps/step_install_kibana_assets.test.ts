@@ -12,7 +12,7 @@ import type {
 } from '@kbn/core/server';
 import { savedObjectsClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../../common/constants';
 
@@ -412,6 +412,10 @@ describe('cleanUpUnusedKibanaAssetsStep', () => {
     appContextService.start(createAppContextStartContractMock());
   });
 
+  afterEach(() => {
+    mockedDeleteKibanaAssets.mockReset();
+  });
+
   it('should not clean up assets if they all present in the new package', async () => {
     const installedAssets = [{ type: KibanaSavedObjectType.dashboard, id: 'dashboard-1' }];
     await cleanUpUnusedKibanaAssetsStep({
@@ -453,5 +457,52 @@ describe('cleanUpUnusedKibanaAssetsStep', () => {
       packageSpecConditions: { kibana: { version: 'x.y.z' } },
       logger: expect.anything(),
     });
+  });
+
+  it('should never delete reserved Fleet index patterns (metrics-*, logs-*) even if absent from new package', async () => {
+    const previousAssets = [
+      { type: KibanaSavedObjectType.dashboard, id: 'dashboard-to-remove' },
+      { type: KibanaSavedObjectType.indexPattern, id: 'metrics-*' },
+      { type: KibanaSavedObjectType.indexPattern, id: 'logs-*' },
+    ];
+
+    await cleanUpUnusedKibanaAssetsStep({
+      ...installationContext,
+      installedPkg: {
+        ...mockInstalledPackageSo,
+        attributes: {
+          ...mockInstalledPackageSo.attributes,
+          installed_kibana: previousAssets,
+        },
+      },
+      installedKibanaAssetsRefs: [],
+    });
+
+    expect(mockedDeleteKibanaAssets).toBeCalledWith(
+      expect.objectContaining({
+        installedObjects: [{ type: KibanaSavedObjectType.dashboard, id: 'dashboard-to-remove' }],
+      })
+    );
+  });
+
+  it('should not call deleteKibanaAssets at all when only reserved index patterns would be removed', async () => {
+    const previousAssets = [
+      { type: KibanaSavedObjectType.indexPattern, id: 'metrics-*' },
+      { type: KibanaSavedObjectType.indexPattern, id: 'logs-*' },
+    ];
+
+    await cleanUpUnusedKibanaAssetsStep({
+      ...installationContext,
+      installedPkg: {
+        ...mockInstalledPackageSo,
+        attributes: {
+          ...mockInstalledPackageSo.attributes,
+          installed_kibana: previousAssets,
+        },
+      },
+      installedKibanaAssetsRefs: [],
+    });
+
+    expect(mockedDeleteKibanaAssets).not.toBeCalled();
   });
 });

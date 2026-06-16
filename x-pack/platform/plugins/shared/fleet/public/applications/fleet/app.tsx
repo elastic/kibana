@@ -61,8 +61,6 @@ import { CreatePackagePolicyPage } from './sections/agent_policy/create_package_
 import { EnrollmentTokenListPage } from './sections/agents/enrollment_token_list_page';
 import { UninstallTokenListPage } from './sections/agents/uninstall_token_list_page';
 import { SettingsApp } from './sections/settings';
-import { CollectorsApp } from './sections/collectors';
-import { ExperimentalFeaturesService } from './services';
 import { DebugPage } from './sections/debug';
 
 const FEEDBACK_URL = 'https://ela.st/fleet-feedback';
@@ -444,29 +442,6 @@ export const AppRoutes = memo(
               </ErrorLayout>
             )}
           </Route>
-
-          {ExperimentalFeaturesService.get().enableOtelUI && (
-            <Route path={FLEET_ROUTING_PATHS.collectors} key={FLEET_ROUTING_PATHS.collectors}>
-              {authz.fleet.readAgents ? (
-                <AppLayout
-                  setHeaderActionMenu={setHeaderActionMenu}
-                  isReadOnly={!authz.fleet.allAgents}
-                >
-                  <CollectorsApp />
-                </AppLayout>
-              ) : (
-                <AppLayout setHeaderActionMenu={setHeaderActionMenu}>
-                  <ErrorLayout isAddIntegrationsPath={false}>
-                    <PermissionsError
-                      callingApplication="Fleet"
-                      error="MISSING_PRIVILEGES"
-                      requiredFleetRole="Agents Read"
-                    />
-                  </ErrorLayout>
-                </AppLayout>
-              )}
-            </Route>
-          )}
 
           {/* TODO: Move this route to the Integrations app */}
           <Route path={FLEET_ROUTING_PATHS.add_integration_to_policy}>

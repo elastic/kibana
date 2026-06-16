@@ -47,8 +47,9 @@ jest.mock('../../../../context/chart_section_inspector', () => ({
     trackRequest: mockTrackRequest,
   }),
 }));
-jest.mock('../../../chart/utils/report_chart_section_error', () => ({
-  reportChartSectionError: jest.fn(),
+const mockReportError = jest.fn();
+jest.mock('../../../chart/hooks/use_report_chart_section_error', () => ({
+  useReportChartSectionError: jest.fn(() => mockReportError),
 }));
 
 import { renderHook, waitFor, act } from '@testing-library/react';
@@ -58,16 +59,13 @@ import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import type { Dimension, ParsedMetricsWithTelemetry } from '../../../../types';
 import { useFetchMetricsData } from './use_fetch_metrics_data';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
+import { EsqlResponseError } from '../../../../common/errors/esql_response_error';
 import { parseMetricsWithTelemetry } from '../utils/parse_metrics_response_with_telemetry';
-import { reportChartSectionError } from '../../../chart/utils/report_chart_section_error';
 import { getFetchParamsMock } from '@kbn/unified-histogram/__mocks__/fetch_params';
 
 const mockExecuteEsqlQuery = executeEsqlQuery as jest.MockedFunction<typeof executeEsqlQuery>;
 const mockParseMetricsWithTelemetry = parseMetricsWithTelemetry as jest.MockedFunction<
   typeof parseMetricsWithTelemetry
->;
-const mockReportChartSectionError = reportChartSectionError as jest.MockedFunction<
-  typeof reportChartSectionError
 >;
 
 const createDimension = (name: string): Dimension => ({ name });
@@ -81,7 +79,7 @@ const createMockParsedMetrics = (
 ): ParsedMetricsWithTelemetry => ({
   metricItems: metricNames.map((name) => ({
     metricName: name,
-    dataStream: 'metrics-*',
+    indexName: 'metrics-*',
     units: [null],
     metricTypes: ['gauge'],
     fieldTypes: [ES_FIELD_TYPES.DOUBLE],
@@ -93,7 +91,7 @@ const createMockParsedMetrics = (
     total_number_of_dimensions: dimensions.length,
     metrics_by_type: { gauge: metricNames.length },
     units: { none: metricNames.length },
-    multi_value_counts: { data_streams: 0, field_types: 0, metric_types: 0, units: 0 },
+    multi_value_counts: { index_names: 0, field_types: 0, metric_types: 0, units: 0 },
   },
 });
 
@@ -172,7 +170,7 @@ describe('useFetchMetricsData', () => {
       documents: [
         {
           metric_name: 'system.cpu.utilization',
-          data_stream: 'metrics-*',
+          index_name: 'metrics-*',
           unit: null,
           metric_type: 'gauge',
           field_type: 'double',
@@ -235,7 +233,7 @@ describe('useFetchMetricsData', () => {
           total_number_of_dimensions: 0,
           metrics_by_type: {},
           units: {},
-          multi_value_counts: { data_streams: 0, field_types: 0, metric_types: 0, units: 0 },
+          multi_value_counts: { index_names: 0, field_types: 0, metric_types: 0, units: 0 },
         },
       });
 
@@ -351,7 +349,7 @@ describe('useFetchMetricsData', () => {
           documents: [
             {
               metric_name: 'system.cpu.utilization',
-              data_stream: 'metrics-*',
+              index_name: 'metrics-*',
               unit: null,
               metric_type: 'gauge',
               field_type: 'double',
@@ -388,7 +386,7 @@ describe('useFetchMetricsData', () => {
         documents: [
           {
             metric_name: 'system.cpu.utilization',
-            data_stream: 'metrics-*',
+            index_name: 'metrics-*',
             unit: null,
             metric_type: 'gauge',
             field_type: 'double',
@@ -471,9 +469,38 @@ describe('useFetchMetricsData', () => {
         expect(result.current.error).toBeTruthy();
       });
 
+      expect(result.current.error).toBe(fetchError);
       expect(result.current.metricItems).toEqual([]);
       expect(result.current.allDimensions).toEqual([]);
       expect(result.current.activeDimensions).toEqual([]);
+    });
+
+    it('returns EsqlResponseError when ES|QL responds with HTTP 200 and embedded error', async () => {
+      const embeddedError = new EsqlResponseError(
+        {
+          type: 'remote_transport_exception',
+          reason: 'ccs query failed',
+          root_cause: [{ type: 'index_not_found_exception', reason: 'no such index [metrics-*]' }],
+        },
+        { status: 400 }
+      );
+      mockExecuteEsqlQuery.mockRejectedValue(embeddedError);
+
+      const params = createDefaultParams();
+      const { result } = renderHook(() => useFetchMetricsData(params));
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+        expect(result.current.error).toBe(embeddedError);
+      });
+
+      expect(result.current.error).toBeInstanceOf(EsqlResponseError);
+      expect(result.current.error).toMatchObject({
+        message: 'remote_transport_exception: ccs query failed',
+        status: 400,
+        rootCause: [{ type: 'index_not_found_exception', reason: 'no such index [metrics-*]' }],
+      });
+      expect(result.current.metricItems).toEqual([]);
     });
 
     it('returns empty arrays and null error in initial state', () => {
@@ -501,8 +528,8 @@ describe('useFetchMetricsData', () => {
         expect(result.current.error).toBeTruthy();
       });
 
-      expect(mockReportChartSectionError).toHaveBeenCalledTimes(1);
-      expect(mockReportChartSectionError).toHaveBeenCalledWith({
+      expect(mockReportError).toHaveBeenCalledTimes(1);
+      expect(mockReportError).toHaveBeenCalledWith({
         error: fetchError,
         source: 'useFetchMetricsData',
         labels: {
@@ -526,8 +553,8 @@ describe('useFetchMetricsData', () => {
       });
 
       // AbortError suppression lives in the reporter (see its own tests).
-      expect(mockReportChartSectionError).toHaveBeenCalledTimes(1);
-      expect(mockReportChartSectionError).toHaveBeenCalledWith({
+      expect(mockReportError).toHaveBeenCalledTimes(1);
+      expect(mockReportError).toHaveBeenCalledWith({
         error: abortError,
         source: 'useFetchMetricsData',
         labels: {
@@ -555,12 +582,12 @@ describe('useFetchMetricsData', () => {
         expect(result.current.error).toBeTruthy();
       });
 
-      expect(mockReportChartSectionError).toHaveBeenCalledTimes(1);
+      expect(mockReportError).toHaveBeenCalledTimes(1);
 
       rerender(params);
       rerender(params);
 
-      expect(mockReportChartSectionError).toHaveBeenCalledTimes(1);
+      expect(mockReportError).toHaveBeenCalledTimes(1);
     });
 
     it('re-reports when a subsequent fetch fails with a fresh error instance', async () => {
@@ -577,7 +604,7 @@ describe('useFetchMetricsData', () => {
       await waitFor(() => {
         expect(result.current.error).toBe(firstError);
       });
-      expect(mockReportChartSectionError).toHaveBeenCalledTimes(1);
+      expect(mockReportError).toHaveBeenCalledTimes(1);
 
       // Trigger a refetch by changing fetchParams.timeRange, then resolve the
       // next call with a different rejection so `error` references update.
@@ -590,8 +617,8 @@ describe('useFetchMetricsData', () => {
       await waitFor(() => {
         expect(result.current.error).toBe(secondError);
       });
-      expect(mockReportChartSectionError).toHaveBeenCalledTimes(2);
-      expect(mockReportChartSectionError).toHaveBeenLastCalledWith({
+      expect(mockReportError).toHaveBeenCalledTimes(2);
+      expect(mockReportError).toHaveBeenLastCalledWith({
         error: secondError,
         source: 'useFetchMetricsData',
         labels: {
