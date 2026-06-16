@@ -418,24 +418,81 @@ describe('mergeChunks', () => {
     });
   });
 
-  it('throws an error when a tool call has no toolCallId and no previous chunk set it for that index', async () => {
-    expect(() => {
-      mergeChunks([
-        {
-          content: '',
-          type: ChatCompletionEventType.ChatCompletionChunk,
-          tool_calls: [
-            {
-              function: {
-                name: 'myFunction',
-                arguments: '{ "foo": "bar" }',
-              },
-              index: 0,
-              toolCallId: '', // Empty toolCallId without a previous chunk setting it
+  it('generates a synthetic toolCallId when a tool call has no toolCallId and no previous chunk set it for that index', async () => {
+    const message = mergeChunks([
+      {
+        content: '',
+        type: ChatCompletionEventType.ChatCompletionChunk,
+        tool_calls: [
+          {
+            function: {
+              name: 'myFunction',
+              arguments: '{ "foo": "bar" }',
             },
-          ],
+            index: 0,
+            toolCallId: '', // Empty toolCallId without a previous chunk setting it
+          },
+        ],
+      },
+    ]);
+
+    expect(message).toEqual({
+      content: '',
+      tool_calls: [
+        {
+          function: {
+            name: 'myFunction',
+            arguments: '{ "foo": "bar" }',
+          },
+          toolCallId: '_generated_0',
         },
-      ]);
-    }).toThrow('Tool call key is missing for index 0');
+      ],
+    });
+  });
+
+  it('merges continuation chunks after a generated toolCallId', async () => {
+    const message = mergeChunks([
+      {
+        content: '',
+        type: ChatCompletionEventType.ChatCompletionChunk,
+        tool_calls: [
+          {
+            function: {
+              name: 'myFunction',
+              arguments: '{ "foo":',
+            },
+            index: 0,
+            toolCallId: '',
+          },
+        ],
+      },
+      {
+        content: '',
+        type: ChatCompletionEventType.ChatCompletionChunk,
+        tool_calls: [
+          {
+            function: {
+              name: '',
+              arguments: ' "bar" }',
+            },
+            index: 0,
+            toolCallId: '',
+          },
+        ],
+      },
+    ]);
+
+    expect(message).toEqual({
+      content: '',
+      tool_calls: [
+        {
+          function: {
+            name: 'myFunction',
+            arguments: '{ "foo": "bar" }',
+          },
+          toolCallId: '_generated_0',
+        },
+      ],
+    });
   });
 });
