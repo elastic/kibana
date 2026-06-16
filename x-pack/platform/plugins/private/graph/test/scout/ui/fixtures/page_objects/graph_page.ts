@@ -132,7 +132,7 @@ export class GraphPage {
     await this.fieldSearchInput.waitFor({ state: 'visible' });
     for (const field of fields) {
       await this.fieldSearchInput.fill(field);
-      const option = this.page.getByRole('option', { name: field, exact: true });
+      const option = this.page.testSubj.locator(`graph-field-option-${field}`);
       await option.waitFor({ state: 'visible' });
       await option.click();
     }
