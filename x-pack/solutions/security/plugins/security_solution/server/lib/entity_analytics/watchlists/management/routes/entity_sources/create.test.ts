@@ -31,10 +31,6 @@ jest.mock('../../../entity_sources/infra', () => ({
   WatchlistEntitySourceClient: jest.fn(),
 }));
 
-jest.mock('../../../shared/utils', () => ({
-  getRequestSavedObjectClient: jest.fn(() => 'mock-so-client'),
-}));
-
 jest.mock('../../../entity_sources/entity_source_api_key', () => ({
   validateIndexPermissions: (...args: unknown[]) => mockValidateIndexPermissions(...args),
 }));

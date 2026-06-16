@@ -21,9 +21,6 @@ jest.mock('../../watchlist_config', () => ({
 }));
 
 jest.mock('../../../entity_sources/infra/entity_source_client');
-jest.mock('../../../shared/utils', () => ({
-  getRequestSavedObjectClient: jest.fn(() => 'mock-so-client'),
-}));
 
 const { mockGetEntitySource, mockDeleteEntitySource } = jest.requireMock(
   '../../../entity_sources/infra/entity_source_client'

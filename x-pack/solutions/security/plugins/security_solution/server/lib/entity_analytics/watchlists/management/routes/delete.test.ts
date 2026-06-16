@@ -22,10 +22,6 @@ jest.mock('../watchlist_config', () => ({
   })),
 }));
 
-jest.mock('../../shared/utils', () => ({
-  getRequestSavedObjectClient: jest.fn(() => 'mock-so-client'),
-}));
-
 jest.mock('../../entity_sources/entity_sources_service', () => ({
   createEntitySourcesService: jest.fn().mockImplementation(() => ({
     deleteWatchlistEntities: jest.fn().mockResolvedValue(undefined),

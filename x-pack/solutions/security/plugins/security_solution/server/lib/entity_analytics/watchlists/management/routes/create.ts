@@ -18,7 +18,6 @@ import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { withMinimumLicense } from '../../../utils/with_minimum_license';
 import { WatchlistConfigClient } from '../watchlist_config';
 import { WatchlistEntitySourceClient } from '../../entity_sources/infra';
-import { getRequestSavedObjectClient } from '../../shared/utils';
 import { createEntitySourcesService } from '../../entity_sources/entity_sources_service';
 import {
   buildWatchlistApiCallSuccessFields,
@@ -59,7 +58,7 @@ export const createWatchlistRoute = (
             const secSol = await context.securitySolution;
             const core = await context.core;
             const namespace = secSol.getSpaceId();
-            const soClient = getRequestSavedObjectClient(core);
+            const soClient = core.savedObjects.client;
 
             const watchlistClient = new WatchlistConfigClient({
               logger,

@@ -17,7 +17,6 @@ import { WatchlistDataSources } from '../../../../../../../common/api/entity_ana
 import type { EntityAnalyticsRoutesDeps } from '../../../../types';
 import { withMinimumLicense } from '../../../../utils/with_minimum_license';
 import { WatchlistConfigClient } from '../../watchlist_config';
-import { getRequestSavedObjectClient } from '../../../shared/utils';
 import { createEntitySourcesService } from '../../../entity_sources/entity_sources_service';
 import {
   WatchlistEntitySourceClient,
@@ -68,7 +67,7 @@ export const createEntitySourceRoute = (
             const core = await context.core;
             const namespace = secSol.getSpaceId();
             const client = new WatchlistEntitySourceClient({
-              soClient: getRequestSavedObjectClient(core),
+              soClient: core.savedObjects.client,
               namespace,
               getStartServices,
               esClient: core.elasticsearch.client.asCurrentUser,
@@ -88,7 +87,7 @@ export const createEntitySourceRoute = (
             const watchlistClient = new WatchlistConfigClient({
               logger,
               namespace,
-              soClient: getRequestSavedObjectClient(core),
+              soClient: core.savedObjects.client,
               esClient: core.elasticsearch.client.asCurrentUser,
             });
             await watchlistClient.addEntitySourceReference(request.params.watchlist_id, body.id);
@@ -98,7 +97,7 @@ export const createEntitySourceRoute = (
               try {
                 const entitySourcesService = createEntitySourcesService({
                   esClient: core.elasticsearch.client.asCurrentUser,
-                  soClient: getRequestSavedObjectClient(core),
+                  soClient: core.savedObjects.client,
                   logger,
                   namespace,
                   getStartServices,

@@ -14,9 +14,6 @@ import {
 } from '../../../../../detection_engine/routes/__mocks__';
 
 jest.mock('../../../entity_sources/infra/entity_source_client');
-jest.mock('../../../shared/utils', () => ({
-  getRequestSavedObjectClient: jest.fn(() => 'mock-so-client'),
-}));
 
 const { mockUpdateEntitySource } = jest.requireMock(
   '../../../entity_sources/infra/entity_source_client'
