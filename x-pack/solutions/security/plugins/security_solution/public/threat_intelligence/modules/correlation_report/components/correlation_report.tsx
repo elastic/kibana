@@ -805,9 +805,9 @@ export const CorrelationReport: React.FC<CorrelationReportProps> = ({
               size="m"
               inputAriaLabel={i18nText.editTitleAriaLabel()}
               value={localTitle}
-              onChange={(e) => setLocalTitle(e.target.value)}
-              onConfirm={() => {
-                void onTitleSave(localTitle);
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLocalTitle(e.target.value)}
+              onSave={(value) => {
+                void onTitleSave(value);
               }}
               onCancel={(prev) => setLocalTitle(prev)}
             />

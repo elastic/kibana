@@ -205,10 +205,10 @@ const KnnResultView: FC<{ result: KnnDepthResult }> = ({ result }) => {
   const { candidate_meta } = result;
 
   const mergedColumns: Array<EuiBasicTableColumn<MergedCandidate>> = useMemo(
-    () => [
+    (): Array<EuiBasicTableColumn<MergedCandidate>> => [
       {
         name: i18nText.knnColTitle(),
-        render: (_: unknown, item: MergedCandidate) => {
+        render: (item: MergedCandidate) => {
           const meta = candidate_meta?.[item.report_id];
           const title = meta?.title ?? item.title;
           return (
@@ -243,7 +243,7 @@ const KnnResultView: FC<{ result: KnnDepthResult }> = ({ result }) => {
       },
       {
         name: i18nText.knnColVertexScores(),
-        render: (_: unknown, item: MergedCandidate) => {
+        render: (item: MergedCandidate) => {
           const entries = Object.entries(item.vertex_scores ?? {});
           if (entries.length === 0) {
             return (
@@ -361,10 +361,10 @@ const TriageResultView: FC<{ result: TriageDepthResult }> = ({ result }) => {
   };
 
   const picksColumns: Array<EuiBasicTableColumn<TriagePick>> = useMemo(
-    () => [
+    (): Array<EuiBasicTableColumn<TriagePick>> => [
       {
         name: i18nText.triageColCandidate(),
-        render: (_: unknown, item: TriagePick) => renderCandidateCell(item.candidate_id),
+        render: (item: TriagePick) => renderCandidateCell(item.candidate_id),
       },
       {
         field: 'confidence',
@@ -382,10 +382,10 @@ const TriageResultView: FC<{ result: TriageDepthResult }> = ({ result }) => {
   );
 
   const triagedOutColumns: Array<EuiBasicTableColumn<TriagedOut>> = useMemo(
-    () => [
+    (): Array<EuiBasicTableColumn<TriagedOut>> => [
       {
         name: i18nText.triageColCandidate(),
-        render: (_: unknown, item: TriagedOut) => renderCandidateCell(item.candidate_id),
+        render: (item: TriagedOut) => renderCandidateCell(item.candidate_id),
       },
       {
         field: 'score',
@@ -541,7 +541,7 @@ const CostTracePanel: FC<{ trace: CostTrace }> = ({ trace }) => {
     },
     {
       name: i18nText.costTraceTokensCol(),
-      render: (_: unknown, row: CostTrace['stages'][number]) =>
+      render: (row: CostTrace['stages'][number]) =>
         `${row.input_tokens.toLocaleString()} / ${row.output_tokens.toLocaleString()}`,
     },
     {
@@ -693,11 +693,10 @@ const RecentsPanel: FC<{
           {i18nText.recentsEmpty()}
         </EuiText>
       ) : (
-        <EuiListGroup flush bordered maxWidth={false} gutterSize="none">
+        <EuiListGroup bordered maxWidth={false}>
           {sorted.map((run) => (
             <EuiListGroupItem
               key={run.runId}
-              size="s"
               isActive={run.runId === activeRunId}
               wrapText
               onClick={() => onLoadRun(run.runId)}
