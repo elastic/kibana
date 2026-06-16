@@ -5,9 +5,14 @@
  * 2.0.
  */
 import type { TransportRequestOptions } from '@elastic/elasticsearch';
-import type { IndexName, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  IndexName,
+  QueryDslQueryContainer,
+  UpdateByQueryResponse,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
+import { waitForTaskToComplete } from './wait_for_task';
 
 const BATCH_SIZE = 5 * 1024 * 1024; // 5MB
 const RETRY_ON_CONFLICT = 3;
@@ -18,34 +23,52 @@ export interface UpdateByQueryWithScriptOptions {
   script: string;
   params: Record<string, unknown>;
   signal?: AbortSignal;
-  requestTimeout?: number;
+  waitForCompletion?: boolean;
+  logger?: Logger;
+  minTimeout?: number;
+  maxTimeout?: number;
+  forever?: boolean;
 }
 
 export const updateByQueryWithScript = async (
   esClient: ElasticsearchClient,
   options: UpdateByQueryWithScriptOptions
 ): Promise<{ updated: number; total: number }> => {
-  const { index, query, script, params, signal, requestTimeout } = options;
-  const response = await esClient.updateByQuery(
-    {
-      index,
-      query,
-      refresh: true,
-      // Uses conflicts: 'proceed' so Elasticsearch continues on version conflicts.
-      // Conflicted documents are not updated.
-      conflicts: 'proceed',
-      wait_for_completion: true,
-      script: {
-        source: script,
-        lang: 'painless',
-        params,
-      },
+  const { index, query, script, params, signal } = options;
+  const body = {
+    index,
+    query,
+    refresh: true,
+    // Uses conflicts: 'proceed' so Elasticsearch continues on version conflicts.
+    // Conflicted documents are not updated.
+    conflicts: 'proceed' as const,
+    wait_for_completion: options.waitForCompletion ?? true,
+    script: {
+      source: script,
+      lang: 'painless' as const,
+      params,
     },
-    { signal, requestTimeout }
-  );
-  const updated = response.updated ?? 0;
-  const total = response.total ?? 0;
-  return { updated, total };
+  };
+
+  if (options.waitForCompletion === false) {
+    const { task } = await esClient.updateByQuery(body, { signal });
+    if (task == null) {
+      throw new Error('updateByQuery did not return a task id');
+    }
+    const response = await waitForTaskToComplete<UpdateByQueryResponse>({
+      esClient,
+      taskId: task,
+      logger: options.logger,
+      signal,
+      minTimeout: options.minTimeout,
+      maxTimeout: options.maxTimeout,
+      forever: options.forever,
+    });
+    return { updated: response.updated ?? 0, total: response.total ?? 0 };
+  }
+
+  const response = await esClient.updateByQuery(body, { signal });
+  return { updated: response.updated ?? 0, total: response.total ?? 0 };
 };
 
 export type IngestEntitiesTransformDocument = (
