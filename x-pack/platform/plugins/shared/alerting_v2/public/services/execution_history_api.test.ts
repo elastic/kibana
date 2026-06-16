@@ -6,7 +6,7 @@
  */
 
 import type { HttpStart } from '@kbn/core/public';
-import { ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH } from '../constants';
+import { ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH, ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_COUNT_API_PATH } from '../constants';
 import { ExecutionHistoryApi } from './execution_history_api';
 
 describe('ExecutionHistoryApi', () => {
@@ -73,4 +73,13 @@ describe('ExecutionHistoryApi', () => {
 
     await expect(api.listExecutionHistory()).rejects.toThrow('boom');
   });
+
+  it('forwards search and outcome to countNewSince', async () => {
+  const { api, http } = buildApi();
+  await api.countNewSince('2026-01-01T00:00:00.000Z', { search: 'foo', outcome: 'throttled' });
+  expect(http.get).toHaveBeenCalledWith(
+    ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_COUNT_API_PATH,
+    { query: { since: '2026-01-01T00:00:00.000Z', search: 'foo', outcome: 'throttled' } }
+  );
+});
 });
