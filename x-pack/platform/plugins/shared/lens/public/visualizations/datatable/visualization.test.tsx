@@ -184,6 +184,44 @@ describe('Datatable Visualization', () => {
       expect(suggestions.length).toBeGreaterThan(0);
     });
 
+    it('should surface the suggestion in the suggestion bar when a field is dropped', () => {
+      const suggestions = datatableVisualization.getSuggestions({
+        state: {
+          layerId: 'first',
+          layerType: LayerTypes.DATA,
+          columns: [{ columnId: 'col1' }],
+        },
+        table: {
+          isMultiRow: true,
+          layerId: 'first',
+          changeType: 'initial',
+          columns: [numCol('col1'), strCol('col2')],
+        },
+        keptLayerIds: [],
+      });
+
+      expect(suggestions[0].hide).toBeFalsy();
+    });
+
+    it('should hide the suggestion for non-additive change types', () => {
+      const suggestions = datatableVisualization.getSuggestions({
+        state: {
+          layerId: 'first',
+          layerType: LayerTypes.DATA,
+          columns: [{ columnId: 'col1' }],
+        },
+        table: {
+          isMultiRow: true,
+          layerId: 'first',
+          changeType: 'reduced',
+          columns: [numCol('col1'), strCol('col2')],
+        },
+        keptLayerIds: [],
+      });
+
+      expect(suggestions[0].hide).toBe(true);
+    });
+
     it('should force table as suggestion when there are no number fields', () => {
       const suggestions = datatableVisualization.getSuggestions({
         state: {

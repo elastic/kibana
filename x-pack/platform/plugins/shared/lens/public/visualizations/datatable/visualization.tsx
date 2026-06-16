@@ -297,6 +297,14 @@ export const getDatatableVisualization = ({
     // forcing datatable as a suggestion when there are no metrics (number fields)
     const forceSuggestion = Boolean(table?.notAssignedMetrics);
 
+    // hide from the suggestion bar for non-additive change types (chart switch / refresh / reorder),
+    // but surface it when a field is dropped (initial / extended) — fixes the table no longer
+    // appearing as a suggestion
+    const hide =
+      table.changeType === 'unchanged' ||
+      table.changeType === 'reduced' ||
+      table.changeType === 'reorder';
+
     return [
       {
         title,
@@ -315,8 +323,9 @@ export const getDatatableVisualization = ({
           })),
         },
         previewIcon: IconChartDatatable,
-        // tables are hidden from suggestion bar, but used for drag & drop and chart switching
-        hide: true,
+        // surfaced in the suggestion bar on field drops (initial / extended) and used for
+        // drag & drop and chart switching; hidden for non-additive change types
+        hide,
       },
     ];
   },
