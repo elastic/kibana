@@ -23,7 +23,7 @@ const makeCase = (extractObservables: boolean): Case =>
     settings: { syncAlerts: true, extractObservables },
     observables: [],
     total_observables: 0,
-  }) as unknown as Case;
+  } as unknown as Case);
 
 const legacyAlertAttachment: AttachmentRequestV2 = {
   type: AttachmentType.alert,
@@ -51,7 +51,7 @@ const makeEcsDoc = (source: Record<string, unknown>) =>
     _source: source,
     _id: 'doc-1',
     _index: 'index-1',
-  }) as any;
+  } as any);
 
 describe('extractAndAddObservables', () => {
   let clientArgs: ReturnType<typeof createCasesClientMockArgs>;
@@ -110,9 +110,7 @@ describe('extractAndAddObservables', () => {
 
       await extractAndAddObservables('case-1', [legacyAlertAttachment], theCase, clientArgs);
 
-      expect(licensingService.notifyUsage).toHaveBeenCalledWith(
-        LICENSING_CASE_OBSERVABLES_FEATURE
-      );
+      expect(licensingService.notifyUsage).toHaveBeenCalledWith(LICENSING_CASE_OBSERVABLES_FEATURE);
     });
   });
 
@@ -269,9 +267,7 @@ describe('extractAndAddObservables', () => {
         expect.objectContaining({
           caseId: 'case-1',
           updatedAttributes: expect.objectContaining({
-            observables: expect.arrayContaining([
-              expect.objectContaining({ value: '1.2.3.4' }),
-            ]),
+            observables: expect.arrayContaining([expect.objectContaining({ value: '1.2.3.4' })]),
           }),
         })
       );
