@@ -12,10 +12,10 @@
  *
  * This list must be kept up-to-date with all registered step definitions.
  * When a new step is registered, developers must:
- * 1. Add the step ID and handler hash to this list (alphabetically sorted)
+ * 1. Add the step ID and definition hash to this list (alphabetically sorted)
  * 2. Get approval from the workflows-eng team
  *
- * If the handler implementation changes, the handler hash must be updated, and get the approval again.
+ * If the definition changes, the definitionHash must be updated and get the approval again.
  *
  * Example of an approved step definition entry:
  * {

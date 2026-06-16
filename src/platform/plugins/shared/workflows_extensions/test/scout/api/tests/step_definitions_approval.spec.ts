@@ -57,7 +57,7 @@ apiTest.describe(
               stepEntriesToUpdate.push({ id: step.id, definitionHash: step.definitionHash });
             } else if (step.definitionHash !== approvedStep.definitionHash) {
               acc.push(
-                `Step "${step.id}" has an invalid handler hash (expected "${approvedStep.definitionHash}", got "${step.definitionHash}").`
+                `Step "${step.id}" has an invalid definition hash (expected "${approvedStep.definitionHash}", got "${step.definitionHash}").`
               );
               stepEntriesToUpdate.push({ id: step.id, definitionHash: step.definitionHash });
             }
