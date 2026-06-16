@@ -14,8 +14,12 @@ import { WorkflowExecutionsPage } from './executions_page';
 import { createStartServicesMock } from '../../mocks';
 import { getTestProvider } from '../../shared/mocks/test_providers';
 
-jest.mock('@kbn/alerts-ui-shared/src/alert_filter_controls', () => ({
-  AlertFilterControls: () => <div data-test-subj="alertFilterControlsStub" />,
+jest.mock('@kbn/alerts-ui-shared/src/alert_filter_controls/filter_group', () => ({
+  FilterGroup: () => <div data-test-subj="filterGroupStub" />,
+}));
+
+jest.mock('@kbn/alerts-ui-shared/src/alert_filter_controls/loading', () => ({
+  FilterGroupLoading: () => <div data-test-subj="filterGroupLoadingStub" />,
 }));
 
 jest.mock('@kbn/unified-data-table', () => {
@@ -49,7 +53,7 @@ describe('WorkflowExecutionsPage', () => {
     await waitFor(() => {
       expect(screen.getByTestId('workflowExecutionsFilters')).toBeInTheDocument();
     });
-    expect(screen.getByTestId('alertFilterControlsStub')).toBeInTheDocument();
+    expect(screen.getByTestId('filterGroupStub')).toBeInTheDocument();
     await waitFor(() => {
       expect(screen.getByTestId('workflowExecutionsTableEmpty')).toBeInTheDocument();
     });

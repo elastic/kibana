@@ -7,14 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { AlertFilterControls } from '@kbn/alerts-ui-shared/src/alert_filter_controls';
+import { FilterGroup } from '@kbn/alerts-ui-shared/src/alert_filter_controls/filter_group';
+import { FilterGroupLoading } from '@kbn/alerts-ui-shared/src/alert_filter_controls/loading';
 import type { FilterControlConfig } from '@kbn/alerts-ui-shared/src/alert_filter_controls/types';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { createKbnUrlStateStorage, Storage } from '@kbn/kibana-utils-plugin/public';
 import { convertCamelCasedKeysToSnakeCase } from '@kbn/presentation-publishing';
-import { WORKFLOW_EXECUTIONS_DATA_VIEW_CREATE_SPEC } from './workflow_executions_data_view';
+import {
+  WORKFLOW_EXECUTIONS_DATA_VIEW_CREATE_SPEC,
+  WORKFLOW_EXECUTIONS_DATA_VIEW_ID,
+} from './workflow_executions_data_view';
 import {
   DEFAULT_EXECUTION_PAGE_FILTERS,
   EXECUTION_FILTERS_STORAGE_KEY,
@@ -32,10 +36,11 @@ export interface WorkflowExecutionsFiltersProps {
 
 export const WorkflowExecutionsFilters = React.memo<WorkflowExecutionsFiltersProps>(
   ({ filters, query, timeRange, onFiltersChange }) => {
-    const { http, notifications, dataViews } = useKibana().services;
+    const { dataViews } = useKibana().services;
     const spaceId = useSpaceId();
     const history = useHistory();
     const location = useLocation();
+    const [isDataViewReady, setIsDataViewReady] = useState(false);
 
     const urlStorage = useMemo(
       () =>
@@ -73,35 +78,64 @@ export const WorkflowExecutionsFilters = React.memo<WorkflowExecutionsFiltersPro
       [dataViews]
     );
 
-    const services = useMemo(
-      () => ({
-        http,
-        notifications,
-        dataViews: scopedDataViews,
-        storage: Storage,
-      }),
-      [http, notifications, scopedDataViews]
+    useEffect(() => {
+      let cancelled = false;
+
+      (async () => {
+        await scopedDataViews.create(WORKFLOW_EXECUTIONS_DATA_VIEW_CREATE_SPEC);
+        if (!cancelled) {
+          setIsDataViewReady(true);
+        }
+      })();
+
+      return () => {
+        cancelled = true;
+        dataViews.clearInstanceCache();
+      };
+    }, [dataViews, scopedDataViews]);
+
+    const handleFilterChanges = useCallback(
+      (newFilters: Filter[]) => {
+        onFiltersChange(
+          newFilters.map((filter) => ({
+            ...filter,
+            meta: {
+              ...filter.meta,
+              disabled: false,
+            },
+          }))
+        );
+      },
+      [onFiltersChange]
     );
 
     if (!spaceId) {
       return null;
     }
 
+    if (!isDataViewReady) {
+      return (
+        <div data-test-subj="workflowExecutionsFilters" key={location.search}>
+          <FilterGroupLoading />
+        </div>
+      );
+    }
+
     return (
       <div data-test-subj="workflowExecutionsFilters" key={location.search}>
-        <AlertFilterControls
+        <FilterGroup
           controlsUrlState={controlsUrlState}
-          dataViewSpec={WORKFLOW_EXECUTIONS_DATA_VIEW_CREATE_SPEC}
+          dataViewId={WORKFLOW_EXECUTIONS_DATA_VIEW_ID}
           defaultControls={DEFAULT_EXECUTION_PAGE_FILTERS}
           filters={filters}
           maxControls={4}
-          onFiltersChange={onFiltersChange}
+          onFiltersChange={handleFilterChanges}
           query={query}
           ruleTypeIds={[]}
-          services={services}
           setControlsUrlState={setControlsUrlState}
           spaceId={spaceId}
           storageKey={EXECUTION_FILTERS_STORAGE_KEY}
+          Storage={Storage}
           timeRange={timeRange}
         />
       </div>
