@@ -100,7 +100,7 @@ describe('unisolateHostTool', () => {
 
         expect(mockAgentService.listAgents).toHaveBeenCalledWith({
           showInactive: true,
-          kuery: 'host.name: my-host',
+          kuery: 'local_metadata.host.name: my-host',
           page: 1,
           perPage: 1,
         });

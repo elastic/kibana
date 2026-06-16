@@ -47,7 +47,7 @@ export const isolateHostTool = (
         const agent = fleetServices.agent;
         const agents = await agent.listAgents({
           showInactive: true,
-          kuery: `host.name: ${hostName}`,
+          kuery: `local_metadata.host.name: ${hostName}`,
           page: 1,
           perPage: 1,
         });
