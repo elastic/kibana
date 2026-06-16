@@ -253,7 +253,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       externalCustomRenderers={externalCustomRenderers}
       renderCellPopover={indexUpdateService.canEditIndex ? renderCellPopover : undefined}
       isPlainRecord
-      isSortEnabled={false} // Sort is temporarily disabled, see https://github.com/elastic/kibana/issues/235070
+      isSortEnabled={true}
       showMultiFields={false}
       showColumnTokens
       showTimeCol
@@ -269,6 +269,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       onSetColumns={setActiveColumns}
       onUpdateRowsPerPage={setRowsPerPage}
       sort={sortOrder}
+      onSort={(sort) => indexUpdateService.setSort(sort)}
       ariaLabelledBy="lookupIndexDataGrid"
       maxDocFieldsDisplayed={100}
       showFullScreenButton={false}

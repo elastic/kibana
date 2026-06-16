@@ -37,7 +37,7 @@ export const useSorting = ({
   isPlainRecord: boolean;
   isSortEnabled: boolean;
   defaultColumns: boolean;
-  onSort: ((sort: string[][]) => void) | undefined;
+  onSort: ((sort: SortOrder[]) => void) | undefined;
 }) => {
   const sortingColumns = useMemo(() => {
     return sort
@@ -108,7 +108,7 @@ export const useSorting = ({
     return {
       columns: sortingColumns,
       onSort: (sortingColumnsData) => {
-        onSort?.(sortingColumnsData.map(({ id, direction }) => [id, direction]));
+        onSort?.(sortingColumnsData.map(({ id, direction }): SortOrder => [id, direction]));
       },
     };
   }, [isSortEnabled, isPlainRecord, defaultColumns, sortingColumns, onSort]);
