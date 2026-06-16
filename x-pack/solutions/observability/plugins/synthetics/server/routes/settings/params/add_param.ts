@@ -27,7 +27,7 @@ const ParamsObjectSchema = schema.object({
     minLength: 1,
   }),
   description: schema.maybe(schema.string()),
-  tags: schema.maybe(schema.arrayOf(schema.string())),
+  tags: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
   share_across_spaces: schema.maybe(schema.boolean()),
 });
 
@@ -39,7 +39,10 @@ export const addSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
   validate: {},
   validation: {
     request: {
-      body: schema.oneOf([ParamsObjectSchema, schema.arrayOf(ParamsObjectSchema)]),
+      body: schema.oneOf([
+        ParamsObjectSchema,
+        schema.arrayOf(ParamsObjectSchema, { maxSize: 500 }),
+      ]),
     },
   },
   handler: async ({ request, response, server, savedObjectsClient }) => {

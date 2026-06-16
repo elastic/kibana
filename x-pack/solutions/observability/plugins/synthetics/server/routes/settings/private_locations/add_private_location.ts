@@ -23,7 +23,7 @@ import type { PrivateLocation } from '../../../../common/runtime_types';
 export const PrivateLocationSchema = schema.object({
   label: schema.string(),
   agentPolicyId: schema.string(),
-  tags: schema.maybe(schema.arrayOf(schema.string())),
+  tags: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
   geo: schema.maybe(
     schema.object({
       lat: schema.number(),
