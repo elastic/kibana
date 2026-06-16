@@ -117,7 +117,7 @@ export function placeClonePanel({
   for (let j = position + 1; j < sortedGrid.length; j++) {
     originalPositionInTheGrid = sortedGrid[j].panelId;
     const { grid, ...movedPanel } = cloneDeep(otherPanels[originalPositionInTheGrid]);
-    if (grid.sectionId === newPanelSection) {
+    if (grid.sectionId === newPanelSectionId) {
       // only move panels in the cloned panel's section
       const newGridData = { ...grid, y: grid.y + diff };
       otherPanels[originalPositionInTheGrid] = { ...movedPanel, grid: newGridData };
