@@ -45,7 +45,9 @@ export type DataControlApi = StateManager<Omit<DataControlRuntimeState, 'title'>
     setBlockingError: (error: Error | undefined) => void;
   };
 
-export interface CustomOptionsComponentProps<State extends DataControlRuntimeState = DataControlRuntimeState> {
+export interface CustomOptionsComponentProps<
+  State extends DataControlRuntimeState = DataControlRuntimeState
+> {
   initialState: Partial<State>;
   field?: DataViewField;
   updateState: (newState: Partial<State>) => void;

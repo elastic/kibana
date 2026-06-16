@@ -16,7 +16,9 @@ import type { DataControlRuntimeState } from '@kbn/controls-schemas';
 
 import { coreServices } from '../../services/kibana_services';
 
-export interface OpenDataControlEditorParams<State extends DataControlRuntimeState = DataControlRuntimeState> {
+export interface OpenDataControlEditorParams<
+  State extends DataControlRuntimeState = DataControlRuntimeState
+> {
   initialState: Partial<State>;
   parentApi: unknown;
   setLastUsedDataViewId?: (dataViewId: string) => void;
@@ -35,7 +37,9 @@ export interface ReopenDataControlEditorOverrides<
   initialDefaultPanelTitle?: string;
 }
 
-export const openDataControlEditor = <State extends DataControlRuntimeState = DataControlRuntimeState>(
+export const openDataControlEditor = <
+  State extends DataControlRuntimeState = DataControlRuntimeState
+>(
   params: OpenDataControlEditorParams<State>
 ) => {
   const {

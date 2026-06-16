@@ -79,10 +79,8 @@ export interface ControlGroupEditorConfig {
   controlStateTransform?: ControlStateTransform;
 }
 
-export type ControlStateTransform<State extends DataControlRuntimeState = DataControlRuntimeState> = (
-  newState: Partial<State>,
-  controlType: string
-) => Partial<State>;
+export type ControlStateTransform<State extends DataControlRuntimeState = DataControlRuntimeState> =
+  (newState: Partial<State>, controlType: string) => Partial<State>;
 
 export type FieldFilterPredicate = (f: DataViewField) => boolean;
 

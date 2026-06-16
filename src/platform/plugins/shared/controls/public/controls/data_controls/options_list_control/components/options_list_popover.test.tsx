@@ -12,7 +12,10 @@ import { BehaviorSubject, first } from 'rxjs';
 
 import { EuiThemeProvider } from '@elastic/eui';
 import { ControlValuesSource, DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
-import type { OptionsListDisplaySettings, OptionsListDSLControlRuntimeState } from '@kbn/controls-schemas';
+import type {
+  OptionsListDisplaySettings,
+  OptionsListDSLControlRuntimeState,
+} from '@kbn/controls-schemas';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import type { PublishingSubject } from '@kbn/presentation-publishing';

@@ -95,7 +95,8 @@ export const controlGroupStateBuilder = {
   addRangeSliderControl: (
     controlGroupState: Partial<ControlGroupRuntimeState>,
     controlState: Omit<
-      Omit<PinnedControlState, keyof RangeSliderControlRuntimeState> & RangeSliderControlRuntimeState,
+      Omit<PinnedControlState, keyof RangeSliderControlRuntimeState> &
+        RangeSliderControlRuntimeState,
       'type'
     > &
       Required<Pick<RangeSliderControlRuntimeState, 'data_view_id' | 'field_name'>>,

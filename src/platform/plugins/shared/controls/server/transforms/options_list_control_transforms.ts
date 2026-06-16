@@ -87,7 +87,8 @@ export const registerOptionsListControlTransforms = (embeddable: EmbeddableSetup
           ...(display_settings && { display_settings }),
           ...(typeof run_past_timeout === 'boolean' && { run_past_timeout }),
           ...(search_technique && {
-            search_technique: search_technique as OptionsListDSLControlRuntimeState['search_technique'],
+            search_technique:
+              search_technique as OptionsListDSLControlRuntimeState['search_technique'],
           }),
           ...(selected_options && { selected_options }),
           ...(typeof single_select === 'boolean' && { single_select }),

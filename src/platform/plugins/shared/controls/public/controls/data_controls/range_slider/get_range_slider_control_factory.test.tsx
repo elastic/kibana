@@ -19,7 +19,10 @@ import { DEFAULT_RANGE_SLIDER_STATE } from '@kbn/controls-constants';
 import { dataService, dataViewsService } from '../../../services/kibana_services';
 import { getMockedFinalizeApi } from '../../mocks/control_mocks';
 import { getRangesliderControlFactory } from './get_range_slider_control_factory';
-import { rangeSliderControlSchema, type RangeSliderControlRuntimeState } from '@kbn/controls-schemas';
+import {
+  rangeSliderControlSchema,
+  type RangeSliderControlRuntimeState,
+} from '@kbn/controls-schemas';
 import { ControlValuesSource } from '@kbn/controls-constants';
 import type { Filter, AggregateQuery, TimeRange } from '@kbn/es-query';
 import type { RangeSliderControlApi } from './types';

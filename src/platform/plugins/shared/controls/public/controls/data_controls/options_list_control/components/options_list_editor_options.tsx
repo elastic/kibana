@@ -11,7 +11,10 @@ import React, { useEffect, useMemo, useState } from 'react';
 
 import { EuiFormRow, EuiRadioGroup, EuiSwitch } from '@elastic/eui';
 import { DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
-import type { OptionsListDSLControlRuntimeState, OptionsListSearchTechnique } from '@kbn/controls-schemas';
+import type {
+  OptionsListDSLControlRuntimeState,
+  OptionsListSearchTechnique,
+} from '@kbn/controls-schemas';
 
 import { getCompatibleSearchTechniques } from '../../../../../common/options_list/suggestions_searching';
 import { ControlSettingTooltipLabel } from '../../../../control_group/components/control_setting_tooltip_label';

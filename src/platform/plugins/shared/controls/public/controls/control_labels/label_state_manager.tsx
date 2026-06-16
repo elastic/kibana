@@ -24,7 +24,9 @@ import type { StateManager, SubjectsOf } from '@kbn/presentation-publishing/stat
  * the other properties (description, hide title, default title, etc.) are not applicable for controls.
  */
 
-export const defaultControlLabelComparators: StateComparators<Pick<DataControlRuntimeState, 'title'>> = {
+export const defaultControlLabelComparators: StateComparators<
+  Pick<DataControlRuntimeState, 'title'>
+> = {
   title: titleComparators.title,
 };
 

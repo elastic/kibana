@@ -19,7 +19,9 @@ export const getPanelsInOrderFromControlsState = (controlState: ControlGroupRunt
 };
 
 export const getFilterItemObjListFromControlState = (controlState: ControlGroupRuntimeState) => {
-  const panels = getPanelsInOrderFromControlsState(controlState) as OptionsListDSLControlRuntimeState[];
+  const panels = getPanelsInOrderFromControlsState(
+    controlState
+  ) as OptionsListDSLControlRuntimeState[];
   return panels
     .filter((panel) => panel.field_name)
     .map((panel) => {

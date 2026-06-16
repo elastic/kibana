@@ -69,7 +69,9 @@ export const createDataControlPanelAction = (): ActionDefinition<EmbeddableApiCo
     }),
 });
 
-export const createDataControlOfType = <State extends DataControlRuntimeState = DataControlRuntimeState>(
+export const createDataControlOfType = <
+  State extends DataControlRuntimeState = DataControlRuntimeState
+>(
   type: string,
   { embeddable, state, controlId }: CreateControlTypeContext<State>
 ) => {

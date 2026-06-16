@@ -9,7 +9,10 @@
 
 import deepEqual from 'react-fast-compare';
 
-import type { OptionsListDSLControlRuntimeState, OptionsListSelection } from '@kbn/controls-schemas';
+import type {
+  OptionsListDSLControlRuntimeState,
+  OptionsListSelection,
+} from '@kbn/controls-schemas';
 import type { StateComparators } from '@kbn/presentation-publishing';
 import { initializeStateManager } from '@kbn/presentation-publishing/state_manager';
 import { DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
@@ -22,7 +25,10 @@ function areSelectedOptionsEqual(
 }
 
 export const selectionComparators: StateComparators<
-  Pick<OptionsListDSLControlRuntimeState, 'exclude' | 'exists_selected' | 'selected_options' | 'sort'>
+  Pick<
+    OptionsListDSLControlRuntimeState,
+    'exclude' | 'exists_selected' | 'selected_options' | 'sort'
+  >
 > = {
   exclude: 'referenceEquality',
   exists_selected: 'referenceEquality',

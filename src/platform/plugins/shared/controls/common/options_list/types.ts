@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { OptionsListDSLControlRuntimeState, OptionsListSelection } from '@kbn/controls-schemas';
+import type {
+  OptionsListDSLControlRuntimeState,
+  OptionsListSelection,
+} from '@kbn/controls-schemas';
 import type { FieldSpec, RuntimeFieldSpec } from '@kbn/data-views-plugin/common';
 import type { BoolQuery, TimeRange } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';

@@ -13,12 +13,15 @@ import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { DataControlRuntimeState } from '@kbn/controls-schemas';
 import type { CustomOptionsComponentProps } from '../controls/data_controls/types';
 
-export type CreateControlTypeContext<State extends DataControlRuntimeState> = EmbeddableApiContext & {
-  state: Partial<State>;
-  controlId?: string;
-};
+export type CreateControlTypeContext<State extends DataControlRuntimeState> =
+  EmbeddableApiContext & {
+    state: Partial<State>;
+    controlId?: string;
+  };
 
-export type CreateControlTypeAction<State extends DataControlRuntimeState = DataControlRuntimeState> = Action<
+export type CreateControlTypeAction<
+  State extends DataControlRuntimeState = DataControlRuntimeState
+> = Action<
   CreateControlTypeContext<State>,
   {
     CustomOptionsComponent?: React.FC<CustomOptionsComponentProps<State>>;
