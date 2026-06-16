@@ -27,7 +27,7 @@ test.describe('Ingest pipelines Manage Processors', { tag: tags.stateful.classic
           return [testData.MAXMIND_DATABASE_ID, testData.IPINFO_DATABASE_ID].some((id) =>
             ids.includes(id)
           );
-        } catch (e) {
+        } catch {
           // ES returns 404 when there are no databases — none of ours remain
           return false;
         }
