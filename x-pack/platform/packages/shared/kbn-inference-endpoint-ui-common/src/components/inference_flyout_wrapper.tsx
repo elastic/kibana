@@ -101,6 +101,7 @@ interface InferenceFlyoutWrapperProps {
   http: HttpSetup;
   toasts: IToasts;
   isEdit?: boolean;
+  isView?: boolean;
   enforceAdaptiveAllocations?: boolean;
   onSubmitSuccess?: (inferenceId: string) => void;
   inferenceEndpoint?: InferenceEndpoint;
@@ -116,6 +117,7 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutWrapperProps> = ({
   http,
   toasts,
   isEdit,
+  isView,
   enforceAdaptiveAllocations = false,
   onSubmitSuccess,
   inferenceEndpoint,
@@ -176,7 +178,11 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutWrapperProps> = ({
       <EuiFlyoutHeader hasBorder data-test-subj="inference-flyout-header">
         <EuiTitle size="m">
           <h2 id={inferenceCreationFlyoutId}>
-            {isEdit ? LABELS.EDIT_ENDPOINT_TITLE : LABELS.ADD_ENDPOINT_TITLE}
+            {isView
+              ? LABELS.VIEW_ENDPOINT_TITLE
+              : isEdit
+              ? LABELS.EDIT_ENDPOINT_TITLE
+              : LABELS.ADD_ENDPOINT_TITLE}
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
@@ -204,10 +210,10 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutWrapperProps> = ({
               onClick={onFlyoutClose}
               flush="left"
             >
-              {LABELS.CANCEL}
+              {isView ? LABELS.CLOSE : LABELS.CANCEL}
             </EuiButtonEmpty>
           </EuiFlexItem>
-          {!isPreconfigured && (
+          {!isPreconfigured && !isView && (
             <EuiFlexItem grow={false}>
               <EuiButton
                 fill

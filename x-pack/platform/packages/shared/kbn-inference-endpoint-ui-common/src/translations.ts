@@ -157,6 +157,13 @@ export const EDIT_ENDPOINT_TITLE = i18n.translate(
   }
 );
 
+export const VIEW_ENDPOINT_TITLE = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.viewEndpointTitle',
+  {
+    defaultMessage: 'View inference endpoint',
+  }
+);
+
 export const TASK_TYPE_DESCRIPTIONS: Partial<Record<InferenceTaskType, string>> = {
   text_embedding: i18n.translate(
     'xpack.inferenceEndpointUICommon.components.taskType.textEmbeddingDescription',
@@ -189,6 +196,10 @@ export const TASK_TYPE_DESCRIPTIONS: Partial<Record<InferenceTaskType, string>> 
 
 export const CANCEL = i18n.translate('xpack.inferenceEndpointUICommon.components.cancelBtnLabel', {
   defaultMessage: 'Cancel',
+});
+
+export const CLOSE = i18n.translate('xpack.inferenceEndpointUICommon.components.closeBtnLabel', {
+  defaultMessage: 'Close',
 });
 
 export const SAVE = i18n.translate('xpack.inferenceEndpointUICommon.components.saveBtnLabel', {

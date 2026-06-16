@@ -75,7 +75,7 @@ describe('EditInferenceFlyout', () => {
         onFlyoutClose: mockOnFlyoutClose,
         http: mockHttp,
         toasts: mockToasts,
-        isEdit: true,
+        isView: true,
         onSubmitSuccess: expect.any(Function),
         inferenceEndpoint: {
           config: {
