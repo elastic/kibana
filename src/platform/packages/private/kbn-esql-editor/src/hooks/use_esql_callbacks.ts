@@ -218,8 +218,13 @@ export const useEsqlCallbacks = ({
   }, [core.http]);
 
   const getViewsCallback = useCallback(async () => {
-    return await getViews(core.http);
-  }, [core.http]);
+    const views = await getViews(core.http);
+    const enrichViews = esqlService?.enrichViews;
+    if (!enrichViews) {
+      return views;
+    }
+    return { ...views, views: await enrichViews(views.views) };
+  }, [core.http, esqlService]);
 
   const getDatasetsCallback = useCallback(async () => {
     return await getDatasets(core.http);
