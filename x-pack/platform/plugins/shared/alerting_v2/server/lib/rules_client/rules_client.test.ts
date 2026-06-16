@@ -1181,7 +1181,7 @@ describe('RulesClient', () => {
         type: RULE_SAVED_OBJECT_TYPE,
         page: 2,
         perPage: 50,
-        sortField: 'updatedAt',
+        sortField: 'updated_at',
         sortOrder: 'desc',
       });
 
@@ -1229,7 +1229,7 @@ describe('RulesClient', () => {
         type: RULE_SAVED_OBJECT_TYPE,
         page: 1,
         perPage: 20,
-        sortField: 'updatedAt',
+        sortField: 'updated_at',
         sortOrder: 'desc',
       });
       expect(mockSavedObjectsClient.bulkGet).not.toHaveBeenCalled();
@@ -1255,7 +1255,7 @@ describe('RulesClient', () => {
         type: RULE_SAVED_OBJECT_TYPE,
         page: 1,
         perPage: 20,
-        sortField: 'updatedAt',
+        sortField: 'updated_at',
         sortOrder: 'desc',
         filter: `${RULE_SAVED_OBJECT_TYPE}.attributes.enabled: true`,
       });
@@ -1277,7 +1277,7 @@ describe('RulesClient', () => {
         type: RULE_SAVED_OBJECT_TYPE,
         page: 2,
         perPage: 10,
-        sortField: 'updatedAt',
+        sortField: 'updated_at',
         sortOrder: 'desc',
         search: 'prod* alerts*',
         searchFields: ['metadata.name', 'metadata.description'],
@@ -1342,7 +1342,7 @@ describe('RulesClient', () => {
         type: RULE_SAVED_OBJECT_TYPE,
         page: 1,
         perPage: 20,
-        sortField: 'updatedAt',
+        sortField: 'updated_at',
         sortOrder: 'desc',
       });
     });
