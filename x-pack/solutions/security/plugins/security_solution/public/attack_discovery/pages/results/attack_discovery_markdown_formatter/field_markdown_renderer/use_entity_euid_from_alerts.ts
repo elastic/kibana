@@ -7,11 +7,11 @@
 
 import { lastValueFrom } from 'rxjs';
 import { useEffect, useState } from 'react';
-import type { EntityType } from '@kbn/entity-store/public';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 
 import { DEFAULT_ALERTS_INDEX } from '../../../../../../common/constants';
 import { useKibana } from '../../../../../common/lib/kibana';
+import { ENTITY_TYPE_BY_FIELD } from './helpers';
 
 interface Params {
   alertIds: string[]; // original (de-anonymized) alert document IDs
@@ -25,12 +25,6 @@ interface Result {
   isLoading: boolean;
 }
 
-export const ENTITY_TYPE_BY_FIELD: Record<string, EntityType> = {
-  'host.name': 'host',
-  'host.hostname': 'host',
-  'user.name': 'user',
-};
-
 export const useEntityEuidFromAlerts = ({
   alertIds,
   fieldName,
@@ -40,13 +34,17 @@ export const useEntityEuidFromAlerts = ({
   const { data } = useKibana().services;
   const euidApi = useEntityStoreEuidApi();
   const getEuidRuntimeMapping = euidApi?.euid?.painless?.getEuidRuntimeMapping;
-  const [euid, setEuid] = useState<string | undefined>(undefined);
-  const [isLoading, setIsLoading] = useState(false);
-
   const entityType = ENTITY_TYPE_BY_FIELD[fieldName];
 
+  const willFetch = enabled && !!entityType && alertIds.length > 0 && !!getEuidRuntimeMapping;
+  const [euid, setEuid] = useState<string | undefined>(undefined);
+  const [isLoading, setIsLoading] = useState(willFetch);
+
+  const alertIdsKey = alertIds.join(',');
+
   useEffect(() => {
-    if (!enabled || !entityType || alertIds.length === 0 || !getEuidRuntimeMapping) {
+    if (!willFetch || !getEuidRuntimeMapping || !entityType) {
+      setIsLoading(false);
       return;
     }
 
@@ -100,7 +98,16 @@ export const useEntityEuidFromAlerts = ({
     return () => {
       cancelled = true;
     };
-  }, [alertIds, data.search, getEuidRuntimeMapping, entityType, fieldName, fieldValue, enabled]);
+  }, [
+    alertIdsKey,
+    alertIds,
+    data.search,
+    getEuidRuntimeMapping,
+    entityType,
+    fieldName,
+    fieldValue,
+    willFetch,
+  ]);
 
   return { euid, isLoading };
 };

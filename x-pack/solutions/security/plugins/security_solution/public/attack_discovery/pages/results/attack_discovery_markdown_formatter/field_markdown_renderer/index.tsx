@@ -11,8 +11,8 @@ import React, { useCallback, useMemo } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
 import { DraggableBadge } from '../../../../../common/components/draggables';
-import { getFlyoutPanelProps } from './helpers';
-import { useEntityEuidFromAlerts, ENTITY_TYPE_BY_FIELD } from './use_entity_euid_from_alerts';
+import { getFlyoutPanelProps, ENTITY_TYPE_BY_FIELD } from './helpers';
+import { useEntityEuidFromAlerts } from './use_entity_euid_from_alerts';
 import { useMarkdownFormatterContext } from '../context';
 import type { ParsedField } from '../types';
 

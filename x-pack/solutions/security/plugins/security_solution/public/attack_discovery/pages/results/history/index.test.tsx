@@ -84,11 +84,9 @@ jest.mock(
   '../attack_discovery_markdown_formatter/field_markdown_renderer/use_entity_euid_from_alerts',
   () => ({
     useEntityEuidFromAlerts: jest.fn(() => ({ euid: undefined, isLoading: false })),
-    ENTITY_TYPE_BY_FIELD: {
-      'host.name': 'host',
-      'host.hostname': 'host',
-      'user.name': 'user',
-    },
+    ENTITY_TYPE_BY_FIELD: jest.requireActual(
+      '../attack_discovery_markdown_formatter/field_markdown_renderer/helpers'
+    ).ENTITY_TYPE_BY_FIELD,
   })
 );
 

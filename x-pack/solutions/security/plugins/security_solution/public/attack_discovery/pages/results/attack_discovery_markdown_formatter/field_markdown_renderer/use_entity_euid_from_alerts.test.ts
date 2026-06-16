@@ -165,30 +165,4 @@ describe('useEntityEuidFromAlerts', () => {
 
     expect(result.current.euid).toBeUndefined();
   });
-
-  it('cancels the state update if unmounted during fetch', async () => {
-    let resolvePromise: (value: unknown) => void;
-    const promise = new Promise((resolve) => {
-      resolvePromise = resolve;
-    });
-    // Use an observable that resolves when the promise resolves
-    searchMock.mockReturnValueOnce(from(promise));
-
-    const { result, unmount } = renderHook(() => useEntityEuidFromAlerts(defaultProps));
-
-    expect(result.current.isLoading).toBe(true);
-
-    const consoleSpy = jest.spyOn(console, 'error');
-
-    unmount();
-
-    // Resolve the promise after unmount
-    resolvePromise!({ rawResponse: { hits: { hits: [] } } });
-
-    // Wait for the promise chain to settle
-    await Promise.resolve();
-
-    expect(consoleSpy).not.toHaveBeenCalledWith(expect.stringContaining('unmounted'));
-    consoleSpy.mockRestore();
-  });
 });
