@@ -10,12 +10,10 @@
 import type { DeleteResult } from '@kbn/content-management-plugin/common';
 import { buildPath } from '@kbn/core-http-browser';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
-import type {
-  SerializableAttributes,
-  VisualizationClient,
-} from '@kbn/visualizations-plugin/public';
+import type { VisualizationClient } from '@kbn/visualizations-plugin/public';
 
 import { LINKS_API_PATH, LINKS_LIBRARY_TYPE, PUBLIC_API_VERSION } from '../../common/constants';
+import type { LinksState } from '../../server';
 import type { LinksCreateRequestBody, LinksCreateResponseBody } from '../../server/api/create';
 import type { LinksReadResponseBody } from '../../server/api/read';
 import type { LinksSearchRequestQuery, LinksSearchResponseBody } from '../../server/api/search';
@@ -70,8 +68,36 @@ export const linksClient = {
   },
 };
 
-export function getLinksClient<
-  Attr extends SerializableAttributes = SerializableAttributes
->(): VisualizationClient<typeof LINKS_LIBRARY_TYPE, Attr> {
-  return linksClient as unknown as VisualizationClient<typeof LINKS_LIBRARY_TYPE, Attr>;
+export function getLinksClient<Attr extends LinksState = LinksState>(): VisualizationClient<
+  typeof LINKS_LIBRARY_TYPE,
+  Attr
+> {
+  return {
+    get: async (id: string) => {
+      const result = await linksClient.get(id);
+      return {
+        item: {
+          id,
+          type: LINKS_LIBRARY_TYPE,
+          ...result.meta,
+          attributes: result.data,
+        },
+        meta: { outcome: 'exactMatch' },
+      };
+    },
+    create: async ({ data }) => {
+      const result = await linksClient.create(data);
+      return { item: { id: result.id, attributes: result.data } };
+    },
+    update: async ({ id, data }) => {
+      const original = await linksClient.get(id); // get the original library item so we can perform a full update
+      const result = await linksClient.update(id, { ...original.data, ...data });
+      return { item: { id: result.id, attributes: result.data } };
+    },
+    delete: linksClient.delete,
+    search: async ({ text: query }) => {
+      const result = await linksClient.search({ query });
+      return { pagination: { total: result.meta.total } };
+    },
+  } as VisualizationClient<typeof LINKS_LIBRARY_TYPE, Attr>;
 }
