@@ -25,6 +25,11 @@ export interface AppHeaderShellProps {
   tabs?: ReactNode;
   sticky?: boolean;
   padding?: AppHeaderPadding;
+  /**
+   * When true, the `titleAppend` slot hosts inline tabs that should fill the row height and
+   * bottom-align so the active "folder" tab can overlap the header's bottom border.
+   */
+  inlineTabs?: boolean;
 }
 
 const resolveLayoutProps = (
@@ -67,7 +72,8 @@ const useHeaderStyles = (
   padding: AppHeaderPadding | undefined,
   hasTabs: boolean,
   hasPrimaryContent: boolean,
-  hasMetadata: boolean
+  hasMetadata: boolean,
+  inlineTabs: boolean
 ) => {
   const { euiTheme } = useEuiTheme();
 
@@ -117,9 +123,11 @@ const useHeaderStyles = (
       align-items: center;
       gap: ${euiTheme.size.m};
       min-width: 0;
-      overflow: hidden;
+      // inline tabs need to reach the bottom border, so don't clip them or pad them off the edge
+      overflow: ${hasPrimaryContent ? 'visible' : 'hidden'};
       min-height: ${APPLICATION_TOP_BAR_MIN_HEIGHT_PX}px;
       ${paddingBlock &&
+      !hasPrimaryContent &&
       css`
         padding-block-start: ${paddingBlock};
         padding-block-end: ${hasTabs || hasMetadata ? euiTheme.size.xs : paddingBlock};
@@ -131,7 +139,8 @@ const useHeaderStyles = (
       align-items: center;
       flex: 1;
       min-width: 0;
-      overflow: hidden;
+      overflow: visible;
+      align-self: stretch;
     `;
 
     const titleGroup = css`
@@ -157,7 +166,8 @@ const useHeaderStyles = (
       align-items: center;
       flex: 1 1 0;
       min-width: 0;
-      overflow: hidden;
+      overflow: visible;
+      align-self: stretch;
     `;
 
     const trailingSlot = css`
@@ -218,9 +228,10 @@ export const AppHeaderShell = React.memo<AppHeaderShellProps>(
     tabs,
     sticky = true,
     padding,
+    inlineTabs = false,
   }) => {
     const hasTitleAppend = titleAppend != null;
-    const styles = useHeaderStyles(sticky, padding, !!tabs, hasTitleAppend, !!metadata);
+    const styles = useHeaderStyles(sticky, padding, !!tabs, hasTitleAppend, !!metadata, inlineTabs);
 
     return (
       <div css={styles.root} data-test-subj="appHeader">

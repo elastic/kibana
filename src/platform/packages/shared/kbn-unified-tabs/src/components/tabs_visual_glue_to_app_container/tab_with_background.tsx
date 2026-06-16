@@ -51,6 +51,8 @@ export const TabWithBackground = React.forwardRef<HTMLDivElement, TabWithBackgro
           ${isSelected
             ? `
               position: relative;
+              // overlap the container's bottom border so the active tab connects to the content below
+              margin-bottom: -${euiTheme.size.xxs};
               border-top-color: ${euiTheme.colors.primary};
               border-bottom-left-radius: 0;
               border-bottom-right-radius: 0;
