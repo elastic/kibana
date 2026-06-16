@@ -1874,7 +1874,6 @@
         "node-forge",
         "formik",
         "handlebars",
-        "js-sha256",
         "js-yaml",
         "knip",
         "magic-bytes.js",
@@ -2400,7 +2399,7 @@
     {
       "groupName": "re2js",
       "matchDepNames": ["re2js"],
-      "reviewers": ["team:kibana-visualizations", "dej611"],
+      "reviewers": ["team:kibana-visualizations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Visualizations"],
       "enabled": true,

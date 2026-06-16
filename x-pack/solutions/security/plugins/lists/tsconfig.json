@@ -45,7 +45,8 @@
     "@kbn/core-http-server-utils",
     "@kbn/react-query",
     "@kbn/security-solution-features",
-    "@kbn/kql"
+    "@kbn/kql",
+    "@kbn/core-spaces-common"
   ],
   "exclude": ["target/**/*"]
 }

@@ -68,6 +68,7 @@ dependsOn:
   - '@kbn/response-ops-rule-params'
   - '@kbn/kql'
   - '@kbn/cloud-connect-plugin'
+  - '@kbn/scout'
 tags:
   - plugin
   - prod
@@ -80,6 +81,7 @@ fileGroups:
     - public/**/*
     - server/**/*
     - server/**/*.json
+    - test/scout/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js
