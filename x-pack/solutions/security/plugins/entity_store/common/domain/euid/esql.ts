@@ -31,7 +31,6 @@ import {
 } from './commons';
 import {
   applyFieldEvaluations,
-  getFieldEvaluationsFromDefinition,
   getSourceMatchSpec,
   type SourceMatchSpec,
 } from './field_evaluations';
@@ -295,8 +294,11 @@ export function getFieldEvaluationsEsql(entityType: EntityType): string | undefi
 export function getFieldEvaluationsEsqlFromDefinition(
   definition: EntityDefinitionWithoutId
 ): string | undefined {
-  const evaluations = getFieldEvaluationsFromDefinition(definition);
-  if (!evaluations || evaluations.length === 0) {
+  // Use only top-level shared evaluations (e.g. entity.source).
+  // Identity-specific evaluations (e.g. entity.namespace) are emitted by
+  // getEuidEsqlEvaluation directly, co-located with the EUID expression.
+  const evaluations = definition.fieldEvaluations ?? [];
+  if (evaluations.length === 0) {
     return undefined;
   }
   return evaluations.map((e) => buildOneFieldEvaluationEsql(e)).join(',\n ');

@@ -13,6 +13,7 @@ import type {
   FieldEvaluationSource,
   FieldEvaluationWhenClause,
 } from '../definitions/entity_schema';
+import { isSingleFieldIdentity } from '../definitions/entity_schema';
 import { evaluateStreamlangCondition } from './commons';
 
 /** Result of resolving document + field evaluation into a filter-friendly spec (no EVAL). */
@@ -176,18 +177,22 @@ export function applyFieldEvaluations(
 }
 
 /**
- * Returns the top-level (shared) field evaluations for an entity definition.
- * These are pre-STATS computations like `entity.source` that are not specific
- * to the identity computation.
+ * Returns all field evaluations for an entity definition: shared (top-level) evaluations
+ * such as `entity.source`, plus identity-specific ones such as `entity.namespace` for user.
  *
- * Identity-specific field evaluations (e.g. `entity.namespace` for user) are
- * handled by {@link getEuidEsqlEvaluation} directly, since they are prerequisites
- * of the entity-id expression and must be co-located with it.
+ * Use this for in-memory pipeline simulations (memory.ts, dsl.ts, kql.ts, tests).
+ * The ES|QL extraction pipeline splits these: shared evals are emitted by
+ * {@link getFieldEvaluationsEsqlFromDefinition} and identity-specific evals are co-located
+ * with the EUID expression inside {@link getEuidEsqlEvaluation}.
  */
 export function getFieldEvaluationsFromDefinition(
   entityDefinition: Pick<EntityDefinitionWithoutId, 'fieldEvaluations' | 'identityField'>
 ): FieldEvaluation[] {
-  return entityDefinition.fieldEvaluations ?? [];
+  const sharedEvaluations = entityDefinition.fieldEvaluations ?? [];
+  if (isSingleFieldIdentity(entityDefinition.identityField)) {
+    return sharedEvaluations;
+  }
+  return [...sharedEvaluations, ...(entityDefinition.identityField.fieldEvaluations ?? [])];
 }
 
 function isNotEmpty(value: string): boolean {
