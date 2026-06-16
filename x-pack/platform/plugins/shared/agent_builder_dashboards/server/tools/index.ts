@@ -6,3 +6,4 @@
  */
 
 export { manageDashboardTool } from './manage_dashboard';
+export { attachDashboardDataTool } from './attach_dashboard_data';

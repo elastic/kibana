@@ -7,3 +7,5 @@
 
 export { registerSkills } from './register_skills';
 export { dashboardManagementSkill } from './dashboard_management_skill';
+export { abDashboardAuthoringSkill } from './ab_dashboard_authoring_skill';
+export { thirdPartyDashboardAuthoringSkill } from './third_party_dashboard_authoring_skill';

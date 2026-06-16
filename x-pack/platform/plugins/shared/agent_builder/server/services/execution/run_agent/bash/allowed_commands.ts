@@ -17,7 +17,9 @@ import type { CommandName } from 'just-bash';
  *  - sqlite3 — depends on sql.js WASM (import.meta.url) which doesn't load via CJS
  *  - python, python3 — Python via CPython WASM; same WASM issue + security surface
  *  - js-exec, node — JS/TS via QuickJS; security surface, not needed
- *  - curl, html-to-markdown — network access, needs explicit security model
+ *  - curl — enabled as a PoC proxy for future Elastic CLI support (same HTTP-to-Kibana-API
+ *    interaction pattern); needs a proper security model before shipping
+ *  - html-to-markdown — network access, needs explicit security model
  *  - ln, readlink — symlinks aren't supported by workspace volume / persistence
  *  - tar — pulls in `node-liblzma` (LGPL-3.0) and `@mongodb-js/zstd` for
  *    compressed-archive support; disabled until those deps are reviewed
@@ -80,6 +82,9 @@ export const ALLOWED_BASH_COMMANDS: readonly CommandName[] = [
   'gzip',
   'gunzip',
   'zcat',
+
+  // Network (PoC — proxy for future Elastic CLI support)
+  'curl',
 
   // Navigation & environment
   'basename',

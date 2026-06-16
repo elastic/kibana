@@ -100,6 +100,9 @@ export class BashService implements IBashService {
       commands: [...ALLOWED_BASH_COMMANDS],
       customCommands: [execToolCommand],
       defenseInDepth: false,
+      // PoC: unrestricted network access to enable curl. Replace with
+      // allowedUrlPrefixes scoped to the Kibana origin before shipping.
+      network: { dangerouslyAllowFullInternetAccess: true },
     });
 
     const timeoutMs = this.deps.timeoutMs ?? DEFAULT_BASH_TIMEOUT_MS;
