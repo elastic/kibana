@@ -53,6 +53,53 @@ The filtering logic for continuity and retention is extracted into pure function
 - **Retention**: FedRAMP minimum is 365 days. `retentionDays: null` means no explicit delete policy — data is kept forever — which is **compliant**. Only indices with an explicit retention shorter than 365 days are flagged.
 - **ECS quality**: any index with `incompatibleFieldCount > 0` is flagged as having ECS mapping issues.
 - **Coverage**: a category is considered covered if at least one of its indices has ingested documents.
+- **Platform lookback window**: `fetchIndexPlatforms` queries the last 7 days (`now-7d`). This window must always exceed the silence-detection threshold used by any future "volume drop / silence" finding type — a silent stream must still resolve its platform label from when it last had data. Do not tighten this window without checking the silence-detection lookback first.
+
+### Blast radius enrichment
+
+Every `ActionableFinding` is enriched with downstream-impact fields before it reaches the agent or UI. This is done by `enrichFinding` / `enrichFindings` in `src/enrich_finding.ts`, using pre-built reverse maps from `src/reverse_map_types.ts`.
+
+**Fields added to each finding:**
+
+| Field | Type | Meaning |
+|---|---|---|
+| `affectedRules` | `AffectedRule[]` | Detection rules that query the affected index, pipeline, or category |
+| `affectedTactics` | `AffectedTactic[]` | MITRE ATT&CK tactics covered by those rules, with rule counts |
+| `affectedPlatform` | `string` | Human-readable platform label derived from ECS fields in the actual data |
+| `recommendedActions` | `RecommendedAction[]` | Dimension-specific links (ILM, Data Quality, ingest pipelines, etc.) |
+| `blastRadiusStatus` | `'unavailable' \| 'partial' \| undefined` | Reliability signal — see below |
+
+**Reverse-map lookup paths per dimension:**
+
+| Dimension | `finding.resource` is | Lookup chain |
+|---|---|---|
+| `quality` / `retention` | index / data stream name | direct → `indexToRules` |
+| `continuity` | ingest pipeline name | pipeline → indices → rules (`pipelineToIndices` then `indexToRules`) |
+| `coverage` | SIEM category name | category → indices → rules (`categoryToIndices` then `indexToRules`) |
+| `coverage` (`detection_rules`) | literal `"detection_rules"` | resolves to nothing (no index to look up) |
+
+**Platform derivation (`fetch_index_platforms.ts`):**
+
+Queries `logs-*` and `metrics-*` over the last 7 days and runs a terms aggregation on `_index` with sub-aggregations for five ECS fields. Priority order (highest specificity first):
+
+1. `cloud.provider` + `cloud.account.id` → e.g. `"AWS account 123456789012"`
+2. `cloud.provider` only → `"AWS"` / `"GCP"` / `"Azure"` (uppercased)
+3. `host.os.family` → e.g. `"windows Endpoints"`
+4. `event.module` → e.g. `"okta"`
+5. `observer.vendor` → e.g. `"Palo Alto Networks"`
+6. Dataset extracted from the index name → generic fallback
+
+A two-step lookup handles backing indices: if the direct lookup misses, the backing-index name (`.ds-{stream}-YYYY.MM.DD-NNNNNN`) is converted to its parent data stream name and tried again.
+
+**`blastRadiusStatus` semantics:**
+
+| Value | Cause | `affected*` fields |
+|---|---|---|
+| `undefined` (omitted) | All lookups succeeded | Complete and trustworthy |
+| `'partial'` | At least one rule's index resolution failed (`rulesPartial` error flag) | Present but may be undercounted |
+| `'unavailable'` | The primary map for the dimension failed entirely (pipeline map for continuity; category map for coverage) | Intentionally omitted |
+
+**Skill enforcement:** `siem_readiness_skill.ts` mandates that the agent renders all three blast-radius fields (`affectedPlatform`, `affectedRules`, `affectedTactics`) as explicit sub-bullets for every finding, and specifies the exact wording for each degraded state. If you change field names, add new `blastRadiusStatus` values, or modify what "unavailable" / "partial" means, the skill content must be updated in sync.
 
 ### Serverless differences
 
@@ -90,10 +137,11 @@ In serverless Kibana, ingest pipeline node stats are unavailable. `PipelineStats
 ┌──────────────────────┐   ┌──────────────────────────────────────────────┐
 │  routes/  (HTTP)     │   │  agent_builder/tools/siem_readiness/         │
 │                      │   │                                              │
-│  Thin wrappers that  │   │  Each tool calls its get_x orchestrator AND  │
-│  call get_x and      │   │  fetch_categories in parallel, then filters  │
-│  return the payload  │   │  items + enriches findings with categories   │
-│  as-is over HTTP     │   │  before returning to the agent               │
+│  Thin wrappers that  │   │  Each tool gets the per-request shared       │
+│  call get_x and      │   │  context (WeakMap-cached: categories +       │
+│  return the payload  │   │  reverse maps + platform map), calls get_x,  │
+│  as-is over HTTP     │   │  filters + calls enrichFindings to attach    │
+│                      │   │  blast-radius fields before returning        │
 └──────────┬───────────┘   └──────────────────┬───────────────────────────┘
            │                                  │
            ▼                                  ▼
@@ -125,6 +173,15 @@ When adding new data to SIEM Readiness — whether for a new UI column, a new ag
 A new field in `PipelineStats` automatically flows through to the UI table, the HTTP route, and the agent tool. No new route, no new tool, no duplicated ES query, no second type to keep in sync.
 
 **Signal that you're on the wrong path:** you're about to add a new route, a new agent tool, or a new attachment type to surface data that an existing dimension almost covers — it just doesn't have the right field yet.
+
+### Canonical example — blast radius enrichment
+
+Blast radius is the reference implementation of "enrich, don't multiply":
+
+- No new routes, tools, or attachment types were added.
+- `enrichFinding` / `enrichFindings` in `src/enrich_finding.ts` attach `affectedRules`, `affectedTactics`, `affectedPlatform`, and `recommendedActions` to every existing `ActionableFinding`.
+- Reverse maps (`fetch_rules_reverse_map.ts`) and platform labels (`fetch_index_platforms.ts`) are built once per request by `fetchSiemReadinessSharedContext` and passed as an `EnrichmentContext` to `enrichFindings`. All four dimension tools benefit automatically.
+- The only changes needed: new fields on `ActionableFinding` in `src/types.ts`, new pure logic in `src/enrich_finding.ts`, and wiring in the shared context.
 
 ### Concrete example — adding volume drop detection to continuity
 
@@ -175,7 +232,9 @@ The same pattern applies to all four dimensions: **Coverage**, **Quality**, **Co
 
 **`routes/`** — Thin HTTP wrappers (~20 lines) that call the matching dimension orchestrator and return the payload over HTTP. No filtering. The UI handles category grouping client-side using its cached categories response.
 
-**Agent tools** — Call dimension orchestrators AND `fetchCategories` in parallel. Filter items to categorized-only and enrich `actionableFindings` with category before returning to the agent. New fields in a payload flow through automatically once added to the orchestrator.
+**`fetchers/fetch_siem_readiness_shared_context.ts`** — Builds the per-request shared context (SIEM categories + reverse maps + platform map) and caches it in a WeakMap keyed on the Kibana `KibanaRequest` object. The cache is evicted on failure so a later tool call in the same request can retry. All agent tools obtain this context before calling their dimension orchestrator.
+
+**Agent tools** — Obtain the shared context via `getSiemReadinessSharedContext`, call the dimension orchestrator, filter items to categorized-only, and call `enrichFindings` (from `src/enrich_finding.ts`) with the shared context to attach blast-radius fields before returning to the agent. New fields in a payload flow through automatically once added to the orchestrator.
 
 ---
 
@@ -197,13 +256,18 @@ Only when the data has its own entity type and query scope that doesn't fit any 
 
 | Path | Purpose |
 |---|---|
-| `src/types.ts` | Shared types for all four dimensions |
+| `src/types.ts` | Shared types for all four dimensions, including blast-radius types: `ActionableFinding`, `AffectedRule`, `AffectedTactic`, `RecommendedAction`, `blastRadiusStatus` |
+| `src/reverse_map_types.ts` | Reverse-map and error types: `IndexToRulesMap`, `PipelineToIndicesMap`, `CategoryToIndicesMap`, `TacticTotals`, `ReverseMapErrors`, `ReverseMapResult` |
+| `src/enrich_finding.ts` | `enrichFinding` / `enrichFindings` — attaches blast-radius fields to findings; `deriveBlastRadiusStatus` — maps error flags to `unavailable`/`partial`/complete |
 | `src/constants.ts` | Thresholds, category order, API paths |
 | `src/get_siem_readiness_statuses/` | Pure status functions — shared by UI and server |
-| `server/lib/siem_readiness/fetchers/` | Raw ES fetchers, one per query |
+| `server/lib/siem_readiness/fetchers/fetch_rules_reverse_map.ts` | Builds `indexToRules`, `pipelineToIndices`, `categoryToIndices`, `tacticTotals` maps from the rules client; sets error flags on partial failures |
+| `server/lib/siem_readiness/fetchers/fetch_index_platforms.ts` | Queries `logs-*`/`metrics-*` over the last 7 days to derive a platform label per index from ECS fields |
+| `server/lib/siem_readiness/fetchers/fetch_siem_readiness_shared_context.ts` | Per-request WeakMap-cached shared context (categories + reverse maps + platform map); evicted on failure so retries work |
+| `server/lib/siem_readiness/fetchers/` | All other raw ES fetchers, one per query |
 | `server/lib/siem_readiness/dimensions/` | Per-dimension orchestrators |
 | `server/lib/siem_readiness/routes/` | Thin HTTP wrappers for the UI |
-| `server/agent_builder/tools/siem_readiness/` | Agent tools, one per dimension |
+| `server/agent_builder/tools/siem_readiness/` | Agent tools — obtain shared context, call orchestrator, filter, enrich findings, return to agent |
 | `server/agent_builder/attachments/siem_readiness.ts` | Zod schemas + text formatters for all 4 dimensions |
-| `server/agent_builder/skills/siem_readiness/siem_readiness_skill.ts` | Skill content and response structure |
+| `server/agent_builder/skills/siem_readiness/siem_readiness_skill.ts` | Skill content, response structure, and mandatory blast-radius rendering rules |
 | `public/siem_readiness/` | UI tabs and hooks |
