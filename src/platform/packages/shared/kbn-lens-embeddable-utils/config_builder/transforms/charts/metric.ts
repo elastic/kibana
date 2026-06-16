@@ -766,7 +766,10 @@ function buildEsqlTrendlineLayer(
 }
 
 export function fromAPItoLensState(config: MetricConfig): MetricAttributesWithoutFiltersAndQuery {
-  const _buildDataLayer = (cfg: unknown, i: number) =>
+  // buildDatasourceStates passes layer configs as `unknown` since it's shared across all chart
+  // types. The cast is safe here because this callback is only invoked for form-based (non-ES|QL)
+  // data sources, which are always MetricConfigNoESQL for metric charts.
+  const _buildDataLayer = (cfg: unknown, _i: number) =>
     buildFormBasedLayer(cfg as MetricConfigNoESQL);
 
   const { layers, usedDataviews } = buildDatasourceStates(config, _buildDataLayer, getValueColumns);
