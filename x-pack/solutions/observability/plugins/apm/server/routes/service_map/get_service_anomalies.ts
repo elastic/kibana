@@ -183,10 +183,13 @@ export async function getServiceAnomalies({
       };
     });
 
-    // AD jobs are configured per environment, so a single service can have more
-    // than one entry (one per job/environment) when no specific environment is
-    // selected. Deduplicate by keeping the entry with the highest anomaly score
-    // so the most critical anomaly across environments is always surfaced.
+    // A single service can produce more than one entry above: one per job (i.e.
+    // per environment, since AD jobs are configured per environment) when no
+    // specific environment is selected, and each of those entries already
+    // carries the single top-scoring detector for that job (see the `size: 1`
+    // `top_metrics` aggs sorted by `record_score`). Collapse to one entry per
+    // service by keeping the highest anomaly score, so the surfaced anomaly is
+    // the most critical one across all environments and detector types.
     const relevantAnomaliesByService = new Map<string, (typeof serviceAnomalies)[number]>();
     for (const anomaly of serviceAnomalies) {
       const existing = relevantAnomaliesByService.get(anomaly.serviceName);

@@ -63,13 +63,15 @@ const anomaliesBadgeHealthCss = css`
 
 interface AnomaliesBadgeProps {
   score?: number;
-  /** When set, the badge links to this URL (e.g. the service overview tab). */
+  /** When set, the badge renders as an anchor linking to this URL (e.g. the service overview tab). */
   href?: string;
+  /** When set, the badge renders as a button using this handler for SPA navigation (avoids a full page reload). Mutually exclusive with `href`. */
+  onClick?: React.MouseEventHandler<HTMLButtonElement>;
   /** Detector that produced the surfaced score, used to name the anomalous signal in the tooltip. */
   detectorType?: AnomalyDetectorType;
 }
 
-export function AnomaliesBadge({ score, href, detectorType }: AnomaliesBadgeProps) {
+export function AnomaliesBadge({ score, href, onClick, detectorType }: AnomaliesBadgeProps) {
   const severity = getSeverity(score);
   const text = formatLabelWithScore(getI18nLabel(severity), score);
 
@@ -88,38 +90,27 @@ export function AnomaliesBadge({ score, href, detectorType }: AnomaliesBadgeProp
           values: { score: score.toFixed(2) },
         });
 
-  const health = (
-    <EuiHealth
-      textSize="inherit"
-      color={score === undefined ? 'subdued' : getSeverityColor(score)}
-      css={anomaliesBadgeHealthCss}
-    >
-      {text}
-    </EuiHealth>
-  );
+  // `EuiBadge` exposes anchor (`href`) and button (`onClick`) variants as a
+  // mutually exclusive union, so the interaction props are resolved up front.
+  const interactionProps = onClick ? { onClick, onClickAriaLabel: text } : href ? { href } : {};
 
   return (
     <EuiToolTip position="bottom" content={tooltipContent}>
-      {href ? (
-        <EuiBadge
-          tabIndex={0}
-          color="hollow"
-          css={anomaliesBadgeCss}
-          data-test-subj="apmAnomaliesBadge"
-          href={href}
+      <EuiBadge
+        tabIndex={0}
+        color="hollow"
+        css={anomaliesBadgeCss}
+        data-test-subj="apmAnomaliesBadge"
+        {...interactionProps}
+      >
+        <EuiHealth
+          textSize="inherit"
+          color={score === undefined ? 'subdued' : getSeverityColor(score)}
+          css={anomaliesBadgeHealthCss}
         >
-          {health}
-        </EuiBadge>
-      ) : (
-        <EuiBadge
-          tabIndex={0}
-          color="hollow"
-          css={anomaliesBadgeCss}
-          data-test-subj="apmAnomaliesBadge"
-        >
-          {health}
-        </EuiBadge>
-      )}
+          {text}
+        </EuiHealth>
+      </EuiBadge>
     </EuiToolTip>
   );
 }
