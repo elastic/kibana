@@ -279,9 +279,7 @@ function buildIndexedPackage(packageInfo: PackageInfo): PackageWithInputAndStrea
           const streams = getStreamsForInputType(
             inputEffectiveName,
             packageInfo,
-            isIntegrationPolicyTemplate(policyTemplate) && policyTemplate.data_streams
-              ? policyTemplate.data_streams
-              : []
+            getPolicyTemplateDataStreamPaths(packageInfo, policyTemplate)
           ).reduce<
             Record<
               string,
