@@ -9,8 +9,8 @@ import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonIcon,
-  EuiContextMenuPanel,
   EuiContextMenuItem,
+  EuiContextMenuPanel,
   EuiFieldSearch,
   EuiFilterButton,
   EuiFilterGroup,
