@@ -9,6 +9,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { isNotFoundError } from '@kbn/es-errors';
+import { isOccConflictError } from '@kbn/occ';
 import type {
   CreateWorkflowCommand,
   EsWorkflow,
@@ -22,6 +23,7 @@ import type { WorkflowPartialDetailDto } from '@kbn/workflows/types/v1';
 import { WorkflowConflictError } from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
 import type { WorkflowCrudDeps } from './types';
+import { createWorkflowOccWriter, type WriteWorkflowDocumentParams } from './workflow_occ_writer';
 import { getWorkflowZodSchema } from '../../common/schema';
 import { extractBulkItemError } from '../api/lib/bulk_response_helpers';
 import { deleteWorkflows } from '../api/lib/workflow_deletion';
@@ -131,8 +133,8 @@ export class WorkflowCrudService {
     id: string,
     document: WorkflowProperties,
     options?: IndexWorkflowDocumentOptions
-  ): Promise<void> {
-    await this.deps.workflowStorage.getClient().index({
+  ): Promise<{ seqNo: number; primaryTerm: number }> {
+    const response = await this.deps.workflowStorage.getClient().index({
       id,
       document,
       ...(options?.create ? { op_type: 'create' as const } : {}),
@@ -141,6 +143,43 @@ export class WorkflowCrudService {
         : {}),
       refresh: true,
     });
+
+    if (response._seq_no == null || response._primary_term == null) {
+      throw new Error(
+        `Elasticsearch index response missing seq_no/primary_term for workflow ${id}`
+      );
+    }
+
+    return { seqNo: response._seq_no, primaryTerm: response._primary_term };
+  }
+
+  async writeWorkflowDocument(
+    id: string,
+    spaceId: string,
+    params: WriteWorkflowDocumentParams
+  ): Promise<WorkflowProperties> {
+    const writer = createWorkflowOccWriter({
+      crudService: this,
+      spaceId,
+      logger: this.deps.logger,
+    });
+
+    try {
+      const { document } = await writer.write({
+        id,
+        create: params.create,
+        mutate: params.mutate,
+      });
+      return document;
+    } catch (error) {
+      if (isOccConflictError(error)) {
+        throw new WorkflowConflictError(
+          `Workflow with id '${id}' was updated concurrently. Please retry.`,
+          id
+        );
+      }
+      throw error;
+    }
   }
 
   async prepareWorkflowDocumentForStorage(params: {
@@ -550,60 +589,71 @@ export class WorkflowCrudService {
     request: KibanaRequest
   ): Promise<UpdatedWorkflowResponseDto> {
     try {
-      const { source: existingSource } = await this.getExistingWorkflowDocument(id, spaceId);
       const authenticatedUser = getAuthenticatedUser(request, this.deps.getSecurity());
       const now = new Date();
       const validationErrors: string[] = [];
-      let updatedData: Partial<WorkflowProperties> = {
-        lastUpdatedBy: authenticatedUser,
-        updated_at: now.toISOString(),
-      };
+      let shouldUpdateScheduler = false;
 
-      let shouldUpdateScheduler =
-        workflow.enabled !== undefined && workflow.enabled !== existingSource.enabled;
+      const zodSchema = workflow.yaml
+        ? await this.deps.validationService.getWorkflowZodSchema({ loose: false }, spaceId, request)
+        : undefined;
+      const triggerDefinitions = workflow.yaml
+        ? this.deps.workflowsExtensions?.getAllTriggerDefinitions() ?? []
+        : undefined;
 
-      if (workflow.yaml) {
-        const zodSchema = await this.deps.validationService.getWorkflowZodSchema(
-          { loose: false },
-          spaceId,
-          request
-        );
-        const triggerDefinitions = this.deps.workflowsExtensions?.getAllTriggerDefinitions() ?? [];
-        const yamlResult = applyYamlUpdate({
-          workflowYaml: workflow.yaml,
-          zodSchema,
-          triggerDefinitions,
-        });
-        updatedData = { ...updatedData, yaml: workflow.yaml, ...yamlResult.updatedDataPatch };
-        validationErrors.push(...yamlResult.validationErrors);
-        shouldUpdateScheduler = shouldUpdateScheduler || yamlResult.shouldUpdateScheduler;
-
-        if (
-          yamlResult.validationErrors.length === 0 &&
-          yamlResult.updatedDataPatch.valid &&
-          updatedData.definition &&
-          !workflowYamlDeclaresTopLevelEnabled(workflow.yaml)
-        ) {
-          const resolvedEnabled =
-            workflow.enabled !== undefined ? workflow.enabled : existingSource.enabled;
-          updatedData.enabled = resolvedEnabled;
-          const currentDefinition = updatedData.definition;
-          if (currentDefinition) {
-            updatedData.definition = { ...currentDefinition, enabled: resolvedEnabled };
+      const finalData = await this.writeWorkflowDocument(id, spaceId, {
+        mutate: (existingSource) => {
+          if (!existingSource) {
+            throw new Error(`Workflow with id ${id} not found in space ${spaceId}`);
           }
-        }
-      } else {
-        const fieldResult = applyFieldUpdates(workflow, existingSource);
-        updatedData = { ...updatedData, ...fieldResult.patch };
-        validationErrors.push(...fieldResult.validationErrors);
-      }
 
-      const finalData: WorkflowProperties = { ...existingSource, ...updatedData };
-      if (finalData.triggerTypes === undefined) {
-        finalData.triggerTypes = getTriggerTypesFromDefinition(finalData.definition) ?? [];
-      }
+          let updatedData: Partial<WorkflowProperties> = {
+            lastUpdatedBy: authenticatedUser,
+            updated_at: now.toISOString(),
+          };
 
-      await this.indexWorkflowDocument(id, finalData);
+          shouldUpdateScheduler =
+            workflow.enabled !== undefined && workflow.enabled !== existingSource.enabled;
+
+          if (workflow.yaml && zodSchema && triggerDefinitions) {
+            const yamlResult = applyYamlUpdate({
+              workflowYaml: workflow.yaml,
+              zodSchema,
+              triggerDefinitions,
+            });
+            updatedData = { ...updatedData, yaml: workflow.yaml, ...yamlResult.updatedDataPatch };
+            validationErrors.length = 0;
+            validationErrors.push(...yamlResult.validationErrors);
+            shouldUpdateScheduler = shouldUpdateScheduler || yamlResult.shouldUpdateScheduler;
+
+            if (
+              yamlResult.validationErrors.length === 0 &&
+              yamlResult.updatedDataPatch.valid &&
+              updatedData.definition &&
+              !workflowYamlDeclaresTopLevelEnabled(workflow.yaml)
+            ) {
+              const resolvedEnabled =
+                workflow.enabled !== undefined ? workflow.enabled : existingSource.enabled;
+              updatedData.enabled = resolvedEnabled;
+              const currentDefinition = updatedData.definition;
+              if (currentDefinition) {
+                updatedData.definition = { ...currentDefinition, enabled: resolvedEnabled };
+              }
+            }
+          } else if (!workflow.yaml) {
+            const fieldResult = applyFieldUpdates(workflow, existingSource);
+            updatedData = { ...updatedData, ...fieldResult.patch };
+            validationErrors.length = 0;
+            validationErrors.push(...fieldResult.validationErrors);
+          }
+
+          const merged: WorkflowProperties = { ...existingSource, ...updatedData };
+          if (merged.triggerTypes === undefined) {
+            merged.triggerTypes = getTriggerTypesFromDefinition(merged.definition) ?? [];
+          }
+          return merged;
+        },
+      });
 
       const taskScheduler = this.deps.getTaskScheduler();
       if (shouldUpdateScheduler && taskScheduler) {
@@ -694,20 +744,6 @@ export class WorkflowCrudService {
       createdAt: new Date(source.created_at),
       lastUpdatedAt: new Date(source.updated_at),
     };
-  }
-
-  private async getExistingWorkflowDocument(
-    id: string,
-    spaceId: string
-  ): Promise<{ source: WorkflowProperties }> {
-    const source = await this.getWorkflowDocumentSource(id, spaceId, {
-      includeDeleted: true,
-      includeGlobal: true,
-    });
-    if (!source) {
-      throw new Error(`Workflow with id ${id} not found in space ${spaceId}`);
-    }
-    return { source };
   }
 
   private async resolveAndDeduplicateBulkIds(

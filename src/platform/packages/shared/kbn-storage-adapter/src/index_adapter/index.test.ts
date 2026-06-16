@@ -155,6 +155,33 @@ describe('StorageIndexAdapter - transport options forwarding', () => {
     );
   });
 
+  it('forwards if_seq_no and if_primary_term for bulk index operations', async () => {
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+    const client = adapter.getClient();
+
+    await client.bulk({
+      operations: [
+        {
+          index: {
+            _id: 'doc1',
+            if_seq_no: 7,
+            if_primary_term: 2,
+            document: { foo: 'bar' },
+          },
+        },
+      ],
+    });
+
+    expect(esClient.bulk).toHaveBeenCalledWith(
+      expect.objectContaining({
+        operations: [
+          { index: { _id: 'doc1', if_seq_no: 7, if_primary_term: 2 } },
+          { foo: 'bar' },
+        ],
+      })
+    );
+  });
+
   it('forwards transport options to esClient.delete', async () => {
     const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
     const client = adapter.getClient();

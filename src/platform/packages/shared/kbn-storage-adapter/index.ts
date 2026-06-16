@@ -63,7 +63,12 @@ export type StorageClientSearchResponse<
 
 export type StorageClientBulkOperation<TDocument extends { _id?: string }> =
   | {
-      index: { document: Omit<TDocument, '_id'>; _id?: string };
+      index: {
+        document: Omit<TDocument, '_id'>;
+        _id?: string;
+        if_seq_no?: number;
+        if_primary_term?: number;
+      };
     }
   | {
       /**

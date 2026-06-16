@@ -529,6 +529,12 @@ export class StorageIndexAdapter<
           {
             index: {
               _id: operation.index._id,
+              ...(operation.index.if_seq_no != null
+                ? { if_seq_no: operation.index.if_seq_no }
+                : {}),
+              ...(operation.index.if_primary_term != null
+                ? { if_primary_term: operation.index.if_primary_term }
+                : {}),
             },
           },
           operation.index.document as {},

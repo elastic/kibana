@@ -13,8 +13,10 @@ import { disableAllWorkflows } from './workflow_disable_all';
 
 const logger = loggerMock.create();
 
-const makeHit = (id: string, enabled = true) => ({
+const makeHit = (id: string, enabled = true, seqNo = 1) => ({
   _id: id,
+  _seq_no: seqNo,
+  _primary_term: 1,
   _source: {
     name: `Workflow ${id}`,
     description: '',
@@ -39,8 +41,20 @@ const makeStorageClient = (pages: Array<Array<ReturnType<typeof makeHit>>>) => {
   pages.forEach((hits) => {
     searchMock.mockResolvedValueOnce({ hits: { hits } });
   });
-  // Empty page to terminate pagination
   searchMock.mockResolvedValue({ hits: { hits: [] } });
+
+  const getMock = jest.fn().mockImplementation(({ id }: { id: string }) => {
+    const hit = pages.flat().find((pageHit) => pageHit._id === id);
+    if (!hit) {
+      return Promise.reject(new Error('not found'));
+    }
+    return Promise.resolve({
+      _id: hit._id,
+      _source: hit._source,
+      _seq_no: hit._seq_no + 1,
+      _primary_term: hit._primary_term,
+    });
+  });
 
   const bulkMock = jest.fn().mockImplementation(({ operations }) => {
     const items = operations
@@ -51,7 +65,7 @@ const makeStorageClient = (pages: Array<Array<ReturnType<typeof makeHit>>>) => {
     return Promise.resolve({ items });
   });
 
-  const mockClient = { search: searchMock, bulk: bulkMock };
+  const mockClient = { search: searchMock, bulk: bulkMock, get: getMock };
   return {
     client: mockClient,
     storage: { getClient: () => mockClient } as any,
@@ -88,6 +102,31 @@ describe('disableAllWorkflows', () => {
     expect(client.bulk).toHaveBeenCalledTimes(1);
   });
 
+  it('requests seq_no_primary_term when searching', async () => {
+    const { storage, client } = makeStorageClient([[makeHit('wf-1')]]);
+
+    await disableAllWorkflows({ storage, taskScheduler: null, logger });
+
+    expect(client.search).toHaveBeenCalledWith(
+      expect.objectContaining({ seq_no_primary_term: true })
+    );
+  });
+
+  it('bulk indexes with if_seq_no and if_primary_term', async () => {
+    const { storage, client } = makeStorageClient([[makeHit('wf-1', true, 5)]]);
+
+    await disableAllWorkflows({ storage, taskScheduler: null, logger });
+
+    const bulkOps = client.bulk.mock.calls[0][0].operations;
+    expect(bulkOps[0].index).toEqual(
+      expect.objectContaining({
+        _id: 'wf-1',
+        if_seq_no: 5,
+        if_primary_term: 1,
+      })
+    );
+  });
+
   it('patches YAML to set enabled: false', async () => {
     const { storage, client } = makeStorageClient([[makeHit('wf-1')]]);
 
@@ -97,6 +136,27 @@ describe('disableAllWorkflows', () => {
     const doc = bulkOps[0].index.document;
     expect(doc.enabled).toBe(false);
     expect(doc.yaml).toContain('enabled: false');
+  });
+
+  it('retries bulk conflicts after refreshing OCC metadata', async () => {
+    const { storage, client } = makeStorageClient([[makeHit('wf-1')]]);
+    client.bulk
+      .mockResolvedValueOnce({
+        items: [{ index: { _id: 'wf-1', status: 409, error: { reason: 'conflict' } } }],
+      })
+      .mockResolvedValueOnce({
+        items: [{ index: { _id: 'wf-1', status: 200 } }],
+      });
+
+    const result = await disableAllWorkflows({ storage, taskScheduler: null, logger });
+
+    expect(result.disabled).toBe(1);
+    expect(result.failures).toEqual([]);
+    expect(client.get).toHaveBeenCalledWith({ id: 'wf-1', seq_no_primary_term: true });
+    expect(client.bulk).toHaveBeenCalledTimes(2);
+    expect(client.bulk.mock.calls[1][0].operations[0].index).toEqual(
+      expect.objectContaining({ if_seq_no: 2, if_primary_term: 1 })
+    );
   });
 
   it('collects failures from partial bulk errors', async () => {

@@ -37,7 +37,7 @@ const makeSource = (overrides?: Partial<WorkflowProperties>): WorkflowProperties
 
 const makeStorageClient = () => ({
   search: jest.fn(),
-  index: jest.fn().mockResolvedValue({ result: 'created' }),
+  index: jest.fn().mockResolvedValue({ result: 'created', _seq_no: 1, _primary_term: 1 }),
   bulk: jest.fn(),
 });
 
@@ -575,7 +575,7 @@ describe('WorkflowCrudService', () => {
       });
       client.index
         .mockRejectedValueOnce(conflict) // first attempt loses the race
-        .mockResolvedValueOnce({ result: 'created' }); // retry succeeds
+        .mockResolvedValueOnce({ result: 'created', _seq_no: 1, _primary_term: 1 }); // retry succeeds
 
       const service = new WorkflowCrudService(deps);
       const result = await service.createWorkflow({ yaml: validYaml }, 'default', request);
@@ -1085,6 +1085,8 @@ describe('WorkflowCrudService', () => {
             {
               _id: 'wf-1',
               _source: makeSource({ name: 'Before', enabled: true, tags: ['t1'] }),
+              _seq_no: 5,
+              _primary_term: 1,
             },
           ],
         },
@@ -1103,6 +1105,8 @@ describe('WorkflowCrudService', () => {
         expect.objectContaining({
           id: 'wf-1',
           refresh: true,
+          if_seq_no: 5,
+          if_primary_term: 1,
           document: expect.objectContaining({
             tags: ['t1', 't2'],
             lastUpdatedBy: 'alice',
@@ -1119,6 +1123,8 @@ describe('WorkflowCrudService', () => {
             {
               _id: 'wf-1',
               _source: makeSource({ lastUpdatedBy: 'someone-else' }),
+              _seq_no: 2,
+              _primary_term: 1,
             },
           ],
         },
