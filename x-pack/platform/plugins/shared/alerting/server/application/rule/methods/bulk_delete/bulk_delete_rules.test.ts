@@ -869,20 +869,26 @@ describe('bulkDelete', () => {
             objectId: enabledRuleForBulkOpsWithActions1.id,
             objectType: RULE_SAVED_OBJECT_TYPE,
             module: 'stack',
-            snapshot: {
-              attributes: enabledRuleForBulkOpsWithActions1.attributes,
-              references: enabledRuleForBulkOpsWithActions1.references,
-            },
+            snapshot: expect.objectContaining({
+              id: enabledRuleForBulkOpsWithActions1.id,
+              name: enabledRuleForBulkOpsWithActions1.attributes.name,
+              alertTypeId: enabledRuleForBulkOpsWithActions1.attributes.alertTypeId,
+              createdAt: enabledRuleForBulkOpsWithActions1.attributes.createdAt,
+              updatedAt: enabledRuleForBulkOpsWithActions1.attributes.updatedAt,
+            }),
           },
           {
             timestamp: '2019-02-12T21:01:22.479Z',
             objectId: enabledRuleForBulkOpsWithActions2.id,
             objectType: RULE_SAVED_OBJECT_TYPE,
             module: 'stack',
-            snapshot: {
-              attributes: enabledRuleForBulkOpsWithActions2.attributes,
-              references: enabledRuleForBulkOpsWithActions2.references,
-            },
+            snapshot: expect.objectContaining({
+              id: enabledRuleForBulkOpsWithActions2.id,
+              name: enabledRuleForBulkOpsWithActions2.attributes.name,
+              alertTypeId: enabledRuleForBulkOpsWithActions2.attributes.alertTypeId,
+              createdAt: enabledRuleForBulkOpsWithActions2.attributes.createdAt,
+              updatedAt: enabledRuleForBulkOpsWithActions2.attributes.updatedAt,
+            }),
           },
         ],
         expect.any(Object)

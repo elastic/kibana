@@ -261,10 +261,14 @@ describe('unsnoozeRule change tracking', () => {
           objectId: 'rule-1',
           objectType: RULE_SAVED_OBJECT_TYPE,
           module: 'stack',
-          snapshot: {
-            attributes: updatedRuleSO.attributes,
-            references: updatedRuleSO.references,
-          },
+          snapshot: expect.objectContaining({
+            id: 'rule-1',
+            name: 'rule one',
+            alertTypeId: 'myType',
+            consumer: 'myApp',
+            createdAt: '2019-02-12T21:01:22.479Z',
+            updatedAt: '2019-02-12T21:01:22.479Z',
+          }),
         },
       ],
       expect.any(Object)

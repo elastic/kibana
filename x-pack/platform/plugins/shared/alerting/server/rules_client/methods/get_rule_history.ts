@@ -12,12 +12,9 @@ import { AlertingAuthorizationEntity, ReadOperations } from '../../authorization
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import type { RulesClientContext } from '../types';
-import type { RawRule } from '../../types';
-import {
-  transformRuleAttributesToRuleDomain,
-  transformRuleDomainToRule,
-} from '../../application/rule/transforms';
-import type { Rule, RuleParams } from '../../application/rule/types';
+import { transformRuleDomainToRule } from '../../application/rule/transforms';
+import type { Rule, RuleDomain, RuleParams } from '../../application/rule/types';
+import type { RuleChangeHistorySnapshot } from '../lib/change_tracking';
 import { getRuleSo } from '../../data/rule';
 
 /**
@@ -115,7 +112,7 @@ export async function getRuleHistory(
   const itemsRule: RuleChangeHistoryDocument[] = [];
 
   for (const item of result.items) {
-    const ruleSnapshot = hydrateRuleSnapshot(item.object, context);
+    const ruleSnapshot = hydrateRuleSnapshot(item.object, context.logger);
 
     if (ruleSnapshot) {
       itemsRule.push({ ...item, rule: ruleSnapshot });
@@ -130,53 +127,77 @@ export async function getRuleHistory(
 
 /**
  * Reconstructs the `SanitizedRule` for a single history entry from its
- * `object.snapshot` (a `RuleSnapshot` of `{ attributes: RawRule, references }`).
- * In particular it leads to transforming date strings to Date.
- *
- * If the snapshot is malformed or the rule type is no longer registered,
- * we fall back to the raw item — the caller may still surface it without a
- * fully-typed rule.
+ * `object.snapshot` (a serialized `RuleChangeHistorySnapshot` with ISO date strings).
  */
 function hydrateRuleSnapshot(
   obj: ChangeHistoryDocument['object'],
-  context: RulesClientContext
+  logger: RulesClientContext['logger']
 ): Rule | undefined {
   const snapshot = obj.snapshot;
-  const rawRule = snapshot?.attributes;
 
-  if (typeof rawRule !== 'object' || rawRule === null) {
-    return;
-  }
-
-  const ruleTypeId =
-    'alertTypeId' in rawRule && typeof rawRule.alertTypeId === 'string'
-      ? rawRule.alertTypeId
-      : undefined;
-
-  if (!ruleTypeId) {
+  if (!isRuleDomainSnapshot(snapshot)) {
     return;
   }
 
   try {
-    const ruleType = context.ruleTypeRegistry.get(ruleTypeId);
-    const ruleDomain = transformRuleAttributesToRuleDomain(
-      rawRule as RawRule,
-      {
-        id: obj.id,
-        logger: context.logger,
-        ruleType,
-        references:
-          snapshot?.references && Array.isArray(snapshot.references) ? snapshot.references : [],
-      },
-      context.isSystemAction
-    );
+    const ruleDomain = {
+      ...snapshot,
+      ...hydrateDateFields(snapshot),
+    };
 
-    // `transformRuleDomainToRule` returns a `Rule` shape that omits the
-    // raw `apiKey` field, so the result is effectively a `SanitizedRule`.
-    return transformRuleDomainToRule(ruleDomain);
+    return transformRuleDomainToRule(ruleDomain as RuleDomain);
   } catch (error) {
-    context.logger.warn(`Unable to hydrate rule snapshot for [${obj.id}]: ${error}`);
-
+    logger.warn(`Unable to hydrate rule snapshot for [${obj.id}]: ${error}`);
     return;
   }
+}
+
+function hydrateDateField(value: unknown): Date | null {
+  if (value instanceof Date) {
+    return value;
+  }
+
+  if (typeof value === 'string' || typeof value === 'number') {
+    return new Date(value);
+  }
+
+  return null;
+}
+
+function hydrateDateFields(snapshot: RuleChangeHistorySnapshot): {
+  createdAt: Date | null;
+  updatedAt: Date | null;
+} {
+  return {
+    createdAt: hydrateDateField(snapshot.createdAt),
+    updatedAt: hydrateDateField(snapshot.updatedAt),
+  };
+}
+
+/**
+ * Checks that a deserialized snapshot object has the shape of a {@link RuleChangeHistorySnapshot}.
+ */
+function isRuleDomainSnapshot(
+  maybeRuleDomain: unknown
+): maybeRuleDomain is RuleChangeHistorySnapshot {
+  if (typeof maybeRuleDomain !== 'object' || maybeRuleDomain === null) {
+    return false;
+  }
+  const v = maybeRuleDomain as Record<string, unknown>;
+
+  return (
+    typeof v.id === 'string' &&
+    typeof v.name === 'string' &&
+    typeof v.enabled === 'boolean' &&
+    typeof v.alertTypeId === 'string' &&
+    typeof v.consumer === 'string' &&
+    typeof v.schedule === 'object' &&
+    v.schedule !== null &&
+    typeof v.revision === 'number' &&
+    typeof v.muteAll === 'boolean' &&
+    Array.isArray(v.actions) &&
+    Array.isArray(v.tags) &&
+    typeof v.params === 'object' &&
+    v.params !== null
+  );
 }

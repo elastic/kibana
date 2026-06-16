@@ -574,6 +574,7 @@ describe('updateRuleApiKey()', () => {
         apiKeyCreatedByUser: false,
         revision: 0,
         updatedBy: 'elastic',
+        createdAt: '2019-02-12T21:01:22.479Z',
         updatedAt: '2019-02-12T21:01:22.479Z',
         actions: [],
       },
@@ -654,10 +655,15 @@ describe('updateRuleApiKey()', () => {
             objectId: '1',
             objectType: RULE_SAVED_OBJECT_TYPE,
             module: 'stack',
-            snapshot: {
-              attributes: updatedRuleSO.attributes,
-              references: updatedRuleSO.references,
-            },
+            snapshot: expect.objectContaining({
+              id: '1',
+              name: ruleName,
+              alertTypeId: 'myType',
+              consumer: 'myApp',
+              apiKey: Buffer.from('234:abc').toString('base64'),
+              createdAt: '2019-02-12T21:01:22.479Z',
+              updatedAt: '2019-02-12T21:01:22.479Z',
+            }),
           },
         ],
         expect.any(Object)

@@ -1255,10 +1255,14 @@ describe('bulkEnableRules', () => {
             objectId: enabledRuleForBulkOps1.id,
             objectType: RULE_SAVED_OBJECT_TYPE,
             module: 'stack',
-            snapshot: {
-              attributes: enabledRuleForBulkOps1.attributes,
-              references: enabledRuleForBulkOps1.references ?? [],
-            },
+            snapshot: expect.objectContaining({
+              id: enabledRuleForBulkOps1.id,
+              name: enabledRuleForBulkOps1.attributes.name,
+              enabled: true,
+              alertTypeId: enabledRuleForBulkOps1.attributes.alertTypeId,
+              createdAt: enabledRuleForBulkOps1.attributes.createdAt,
+              updatedAt: enabledRuleForBulkOps1.attributes.updatedAt,
+            }),
           },
         ],
         expect.any(Object)

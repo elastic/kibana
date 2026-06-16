@@ -46,14 +46,14 @@ describe('logBulkRuleChanges', () => {
         objectId: 'rule-1',
         objectType: RULE_SAVED_OBJECT_TYPE,
         module: 'stack',
-        snapshot: { attributes: expect.objectContaining({ name: 'rule rule-1' }), references: [] },
+        snapshot: expect.objectContaining({ id: 'rule-1', name: 'rule rule-1' }),
       },
       {
         timestamp: REFERENCE_TIMESTAMP_ISO,
         objectId: 'rule-2',
         objectType: RULE_SAVED_OBJECT_TYPE,
         module: 'stack',
-        snapshot: { attributes: expect.objectContaining({ name: 'rule rule-2' }), references: [] },
+        snapshot: expect.objectContaining({ id: 'rule-2', name: 'rule rule-2' }),
       },
     ]);
     expect(opts).toEqual({
@@ -199,7 +199,7 @@ describe('logBulkRuleChanges', () => {
     expect(changeTrackingService.logBulk).not.toHaveBeenCalled();
   });
 
-  it('falls back to an empty references array when a saved object omits references', async () => {
+  it('succeeds when a saved object omits references (treats them as empty)', async () => {
     const context = buildContext({ changeTrackingService });
     const ruleSOWithoutRefs = buildRuleSO('rule-1');
     delete (ruleSOWithoutRefs as Partial<SavedObject<RawRule>>).references;
@@ -214,7 +214,7 @@ describe('logBulkRuleChanges', () => {
     });
 
     const [changes] = changeTrackingService.logBulk.mock.calls[0];
-    expect(changes[0].snapshot.references).toEqual([]);
+    expect(changes[0].snapshot).toEqual(expect.objectContaining({ id: 'rule-1', actions: [] }));
   });
 
   it('swallows registry errors', async () => {
@@ -380,7 +380,12 @@ const buildRuleSO = (
 ): SavedObject<RawRule> => ({
   id,
   type: RULE_SAVED_OBJECT_TYPE,
-  attributes: { alertTypeId, name: `rule ${id}` } as RawRule,
+  attributes: {
+    alertTypeId,
+    name: `rule ${id}`,
+    createdAt: '2019-01-01T00:00:00.000Z',
+    updatedAt: '2019-01-01T00:00:00.000Z',
+  } as RawRule,
   references: [],
   ...overrides,
 });
@@ -428,6 +433,7 @@ const buildContext = (
     logger: loggingSystemMock.createLogger(),
     spaceId: 'default',
     ruleTypeRegistry,
+    isSystemAction: jest.fn().mockReturnValue(false),
     ...overrides,
   } as unknown as RulesClientContext;
 };

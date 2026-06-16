@@ -3522,10 +3522,14 @@ describe('bulkEdit()', () => {
             objectId: '1',
             objectType: RULE_SAVED_OBJECT_TYPE,
             module: 'stack',
-            snapshot: {
-              attributes: updated.attributes,
-              references: updated.references,
-            },
+            snapshot: expect.objectContaining({
+              id: updated.id,
+              name: updated.attributes.name,
+              tags: updated.attributes.tags,
+              alertTypeId: updated.attributes.alertTypeId,
+              createdAt: updated.attributes.createdAt,
+              updatedAt: updated.attributes.updatedAt,
+            }),
           },
         ],
         expect.any(Object)
