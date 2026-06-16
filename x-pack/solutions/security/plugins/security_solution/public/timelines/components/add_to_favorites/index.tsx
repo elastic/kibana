@@ -7,7 +7,7 @@
 
 import React, { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux-v7';
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { State } from '../../../common/store';
 import { selectTimelineById } from '../../store/selectors';
@@ -59,18 +59,17 @@ export const AddToFavoritesButton = React.memo<AddToFavoritesButtonProps>(({ tim
   );
 
   return (
-    <EuiToolTip content={label} disableScreenReaderOutput>
-      <EuiButtonIcon
-        iconType={isFavorite ? 'starFill' : 'star'}
-        isSelected={isFavorite}
-        disabled={isDisabled}
-        aria-label={label}
-        data-test-subj={`timeline-favorite-${isFavorite ? 'filled' : 'empty'}-star`}
-        onClick={handleClick}
-      >
-        {label}
-      </EuiButtonIcon>
-    </EuiToolTip>
+    <EuiButtonIcon
+      iconType={isFavorite ? 'starFill' : 'star'}
+      isSelected={isFavorite}
+      disabled={isDisabled}
+      aria-label={label}
+      title={label}
+      data-test-subj={`timeline-favorite-${isFavorite ? 'filled' : 'empty'}-star`}
+      onClick={handleClick}
+    >
+      {label}
+    </EuiButtonIcon>
   );
 });
 

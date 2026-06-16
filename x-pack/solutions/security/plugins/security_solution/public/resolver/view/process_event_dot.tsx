@@ -508,6 +508,7 @@ const UnstyledProcessEventDot = React.memo(
                 maxHeight: `${Math.min(26 + xScale * 3, 32)}px`,
                 maxWidth: `${isShowingEventActions ? 400 : 210 * xScale}px`,
               }}
+              tabIndex={-1}
               title={processName}
               data-test-subj="resolver:node:primary-button"
               data-test-resolver-node-id={nodeID}

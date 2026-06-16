@@ -15,7 +15,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
-  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -144,18 +143,16 @@ export const Notes = memo(({ documentId, onShowNotes, disabled = false }: NotesP
 
   const addNoteButtonIcon = useMemo(
     () => (
-      <EuiToolTip content={ADD_NOTE_BUTTON} disableScreenReaderOutput>
-        <EuiButtonIcon
-          onClick={onShowNotes}
-          iconType="plusInCircle"
-          disabled={cannotAddNotes}
-          css={css`
-            margin-left: ${euiTheme.size.xs};
-          `}
-          aria-label={ADD_NOTE_BUTTON}
-          data-test-subj={NOTES_ADD_NOTE_ICON_BUTTON_TEST_ID}
-        />
-      </EuiToolTip>
+      <EuiButtonIcon
+        onClick={onShowNotes}
+        iconType="plusInCircle"
+        disabled={cannotAddNotes}
+        css={css`
+          margin-left: ${euiTheme.size.xs};
+        `}
+        aria-label={ADD_NOTE_BUTTON}
+        data-test-subj={NOTES_ADD_NOTE_ICON_BUTTON_TEST_ID}
+      />
     ),
     [euiTheme.size.xs, cannotAddNotes, onShowNotes]
   );
