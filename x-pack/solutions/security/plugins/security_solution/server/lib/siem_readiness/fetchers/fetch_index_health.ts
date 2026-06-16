@@ -21,6 +21,20 @@ export interface IndexHealthEntry {
   volumeDropPct: number | null;
 }
 
+interface DataStreamsStatsResponseShape {
+  data_streams?: Array<{ data_stream: string; maximum_timestamp?: number | null }>;
+}
+
+interface DataStreamMetaResponseShape {
+  data_streams?: Array<{ name: string; creation_date?: number }>;
+}
+
+interface VolumeAggregationShape {
+  by_index?: {
+    buckets: Array<{ key: string; daily?: { buckets: Array<{ doc_count: number }> } }>;
+  };
+}
+
 /**
  * Convert a backing index name to its data stream name.
  * e.g. `.ds-logs-endpoint.events-default-2024.01.15-000001` → `logs-endpoint.events-default`
@@ -86,39 +100,42 @@ export const fetchIndexHealth = async ({
 
   // Build creation date map: dataStreamName → creationDateMs
   const creationDateByStream = new Map<string, number>();
-  for (const ds of (dataStreamResponse as any).data_streams ?? []) {
-    creationDateByStream.set(ds.name, ds.creation_date as number);
+  for (const ds of (dataStreamResponse as unknown as DataStreamMetaResponseShape).data_streams ??
+    []) {
+    if (ds.creation_date != null) {
+      creationDateByStream.set(ds.name, ds.creation_date);
+    }
   }
 
   // Build lastEventMs map: dataStreamName → epoch ms (from pre-computed maximum_timestamp)
   const lastEventByStream = new Map<string, number | null>();
-  for (const ds of (statsResponse as any).data_streams ?? []) {
-    const ts: number | null = ds.maximum_timestamp ?? null;
-    lastEventByStream.set(ds.data_stream as string, ts);
+  for (const ds of (statsResponse as unknown as DataStreamsStatsResponseShape).data_streams ?? []) {
+    lastEventByStream.set(ds.data_stream, ds.maximum_timestamp ?? null);
   }
 
   // Aggregate volume buckets by data stream name
   const volumeByStream = new Map<string, { last24hDocs: number; baseline7dAvg: number }>();
-  const histBuckets: Array<{ key: string; daily?: { buckets: Array<{ doc_count: number }> } }> =
-    (volumeResponse.aggregations?.by_index as any)?.buckets ?? [];
+  const histBuckets =
+    (volumeResponse.aggregations as unknown as VolumeAggregationShape | undefined)?.by_index
+      ?.buckets ?? [];
 
   for (const bucket of histBuckets) {
     const streamName = toDataStreamName(bucket.key) ?? bucket.key;
     const dailyBuckets = bucket.daily?.buckets ?? [];
-    if (dailyBuckets.length < 2) continue;
+    if (dailyBuckets.length >= 2) {
+      const last24hDocs = dailyBuckets[dailyBuckets.length - 1].doc_count;
+      const priorDays = dailyBuckets.slice(0, -1).map((b) => b.doc_count);
+      const baseline7dAvg = priorDays.reduce((sum, n) => sum + n, 0) / priorDays.length;
 
-    const last24hDocs = dailyBuckets[dailyBuckets.length - 1].doc_count;
-    const priorDays = dailyBuckets.slice(0, -1).map((b) => b.doc_count);
-    const baseline7dAvg = priorDays.reduce((sum, n) => sum + n, 0) / priorDays.length;
-
-    const existing = volumeByStream.get(streamName);
-    if (existing) {
-      volumeByStream.set(streamName, {
-        last24hDocs: existing.last24hDocs + last24hDocs,
-        baseline7dAvg: existing.baseline7dAvg + baseline7dAvg,
-      });
-    } else {
-      volumeByStream.set(streamName, { last24hDocs, baseline7dAvg });
+      const existing = volumeByStream.get(streamName);
+      if (existing) {
+        volumeByStream.set(streamName, {
+          last24hDocs: existing.last24hDocs + last24hDocs,
+          baseline7dAvg: existing.baseline7dAvg + baseline7dAvg,
+        });
+      } else {
+        volumeByStream.set(streamName, { last24hDocs, baseline7dAvg });
+      }
     }
   }
 

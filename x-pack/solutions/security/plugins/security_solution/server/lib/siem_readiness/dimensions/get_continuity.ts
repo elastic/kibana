@@ -43,17 +43,17 @@ export const getContinuity = async ({
   // silence and volume-drop findings — merged when both apply to the same pipeline
   pipelines.forEach((p) => {
     const hasSilence = p.isSilent;
-    const hasVolumeDrop = p.volumeDropPct !== null && p.volumeDropPct !== undefined;
-    const isVolumeCritical = hasVolumeDrop && p.volumeDropPct! >= VOLUME_DROP_CRITICAL_PCT;
+    const volumeDropPct = p.volumeDropPct ?? null;
+    const isVolumeCritical = volumeDropPct !== null && volumeDropPct >= VOLUME_DROP_CRITICAL_PCT;
     const isVolumeWarning =
-      hasVolumeDrop && !isVolumeCritical && p.volumeDropPct! >= VOLUME_DROP_WARNING_PCT;
+      volumeDropPct !== null && !isVolumeCritical && volumeDropPct >= VOLUME_DROP_WARNING_PCT;
 
     if (hasSilence) {
       // Silence is the primary signal. Include volume context when a baseline exists
       // so the operator sees both facts in one finding rather than two separate bullets.
       const volumeContext =
-        hasVolumeDrop && p.baseline7dAvg != null
-          ? ` (${p.volumeDropPct}% volume drop vs ~${Math.round(p.baseline7dAvg)} docs/day baseline)`
+        volumeDropPct !== null && p.baseline7dAvg != null
+          ? ` (${volumeDropPct}% volume drop vs ~${Math.round(p.baseline7dAvg)} docs/day baseline)`
           : '';
       actionableFindings.push({
         severity: 'CRITICAL' as const,
@@ -62,17 +62,25 @@ export const getContinuity = async ({
         resource: p.name,
       });
     } else if (isVolumeCritical) {
+      const baseline =
+        p.baseline7dAvg != null
+          ? `~${Math.round(p.baseline7dAvg)} docs/day baseline`
+          : 'unknown baseline';
       actionableFindings.push({
         severity: 'CRITICAL' as const,
         type: 'volume_drop_critical' as const,
-        message: `Pipeline ${p.name} volume dropped ${p.volumeDropPct}% vs 7-day baseline (~${Math.round(p.baseline7dAvg!)} docs/day)`,
+        message: `Pipeline ${p.name} volume dropped ${volumeDropPct}% vs 7-day (${baseline})`,
         resource: p.name,
       });
     } else if (isVolumeWarning) {
+      const baseline =
+        p.baseline7dAvg != null
+          ? `~${Math.round(p.baseline7dAvg)} docs/day baseline`
+          : 'unknown baseline';
       actionableFindings.push({
         severity: 'WARNING' as const,
         type: 'volume_drop_warning' as const,
-        message: `Pipeline ${p.name} volume dropped ${p.volumeDropPct}% vs 7-day baseline (~${Math.round(p.baseline7dAvg!)} docs/day)`,
+        message: `Pipeline ${p.name} volume dropped ${volumeDropPct}% vs 7-day (${baseline})`,
         resource: p.name,
       });
     }
