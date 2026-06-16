@@ -14,5 +14,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./entity_store_sync'));
     loadTestFile(require.resolve('./manual_assignment'));
     loadTestFile(require.resolve('./lifecycle'));
+    loadTestFile(require.resolve('./csv_upload'));
   });
 }

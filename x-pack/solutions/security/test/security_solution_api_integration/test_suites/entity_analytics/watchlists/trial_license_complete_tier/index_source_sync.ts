@@ -106,6 +106,41 @@ export default ({ getService }: FtrProviderContext) => {
       expect(await utils.queryWatchlistIndex(watchlistId)).toHaveLength(0);
     });
 
+    it('should not update timestamps when re-syncing the same entity from the same source', async () => {
+      await utils.createSourceIndex(sourceIndexName);
+      const { watchlistId } = await utils.createWatchlistAndEntitySource(
+        'sync-idempotency',
+        sourceIndexName
+      );
+
+      await entityStore.createEntity('user', {
+        user: { name: 'alice' },
+        entity: { id: userEuid('alice'), type: 'user' },
+      });
+
+      await utils.addUsersToSourceIndex(['alice'], sourceIndexName);
+      await utils.syncWatchlist(watchlistId);
+
+      const docsAfterFirstSync = await utils.queryWatchlistIndex(watchlistId);
+      const docAfterFirstSync = utils.findEntity(docsAfterFirstSync, userEuid('alice'));
+      const timestampAfterFirstSync = (docAfterFirstSync as Record<string, unknown>)['@timestamp'];
+      const ingestedAfterFirstSync = (
+        (docAfterFirstSync as Record<string, unknown>)?.event as Record<string, unknown>
+      )?.ingested;
+
+      await utils.syncWatchlist(watchlistId);
+
+      const docsAfterSecondSync = await utils.queryWatchlistIndex(watchlistId);
+      const docAfterSecondSync = utils.findEntity(docsAfterSecondSync, userEuid('alice'));
+      expect((docAfterSecondSync as Record<string, unknown>)['@timestamp']).toEqual(
+        timestampAfterFirstSync
+      );
+      expect(
+        ((docAfterSecondSync as Record<string, unknown>)?.event as Record<string, unknown>)
+          ?.ingested
+      ).toEqual(ingestedAfterFirstSync);
+    });
+
     it('should only sync documents matching the KQL filter on the entity source', async () => {
       await utils.createSourceIndex(sourceIndexName);
       const { watchlistId } = await utils.createWatchlistAndEntitySource(
