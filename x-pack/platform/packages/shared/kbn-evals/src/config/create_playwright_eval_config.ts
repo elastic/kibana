@@ -88,10 +88,19 @@ export function createPlaywrightEvalsConfig({
       (project) => project.name === 'setup-local' || project.name === 'teardown-local'
     ) ?? [];
 
+  // When EVAL_AGENT_CONNECTOR_ID is set, create only the project for that connector.
+  // This lets callers pin to a single agent model (e.g. haiku-only baseline run)
+  // without editing kibana.dev.yml or the playwright config.
+  const agentConnectorIdFilter = process.env.EVAL_AGENT_CONNECTOR_ID;
+
   // get just the 'local' project (for now)
   // When singleProject is true, create one project instead of one per connector.
   // Used by specs whose task ignores the project connector (e.g. workflow specs).
-  const projectConnectors = singleProject ? [evaluationConnector] : connectors;
+  const projectConnectors = singleProject
+    ? [evaluationConnector]
+    : agentConnectorIdFilter
+      ? connectors.filter((c) => c.id === agentConnectorIdFilter)
+      : connectors;
   const nextProjects = projectConnectors.flatMap((connector) => {
     return (
       projects

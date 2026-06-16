@@ -82,7 +82,7 @@ evaluate.describe(
               'benchmark, using locally extracted CSV data. Each example is one injected fault; ' +
               'the agent must identify the root cause service and failure mode.',
             examples: loadedScenarios.map(({ handle }) =>
-              buildExample(handle.scenario, handle.logsIndex, handle.tracesIndex)
+              buildExample(handle.scenario, handle.logsIndex, handle.tracesIndex, handle.metricsIndex)
             ),
           },
         });
@@ -97,13 +97,14 @@ evaluate.describe(
   }
 );
 
-function buildExample(scenario: RcaScenario, logsIndex: string, tracesIndex: string) {
+function buildExample(scenario: RcaScenario, logsIndex: string, tracesIndex: string, metricsIndex: string) {
   return {
     input: {
       question:
         'A microservice system is experiencing degradation or an outage. ' +
         'Investigate the root cause and identify the responsible service. ' +
-        `Telemetry is in: "${logsIndex}" (logs) and "${tracesIndex}" (traces). ` +
+        `Telemetry is in: "${logsIndex}" (logs), "${tracesIndex}" (traces), ` +
+        `and "${metricsIndex}" (infrastructure metrics: CPU, memory, network, latency). ` +
         'Use available tools to inspect these data streams. ' +
         'State: (1) the root cause component, (2) the failure mode, and (3) supporting evidence.',
       attachments: [
