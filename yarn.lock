@@ -31169,10 +31169,10 @@ re-reselect@^4.0.1:
   resolved "https://registry.yarnpkg.com/re-reselect/-/re-reselect-4.0.1.tgz#21a2306d11bbf377ac78687aa46e1a8848974194"
   integrity sha512-xVTNGQy/dAxOolunBLmVMGZ49VUUR1s8jZUiJQb+g1sI63GAv9+a5Jas9yHvdxeUgiZkU9r3gDExDorxHzOgRA==
 
-re2js@0.4.3:
-  version "0.4.3"
-  resolved "https://registry.yarnpkg.com/re2js/-/re2js-0.4.3.tgz#1318cd0c12aa6ed3ba56d5e012311ffbfb2aef35"
-  integrity sha512-EuNmh7jurhHEE8Ge/lBo9JuMLb3qf866Xjjfyovw3wPc7+hlqDkZq4LwhrCQMEI+ARWfrKrHozEndzlpNT0WDg==
+re2js@2.8.3:
+  version "2.8.3"
+  resolved "https://registry.yarnpkg.com/re2js/-/re2js-2.8.3.tgz#37d185b949b5da4ce7eb00c5c16e620db2f7e5c3"
+  integrity sha512-lUKeXVwMqU302DM/WaOm33XF2hhzjGUZ8CbLg4zSAMpW2PPkJ2+is25AROevNiw+DytFmKU5gsQ92cB1Kxy+fA==
 
 react-clientside-effect@^1.2.6:
   version "1.2.6"
