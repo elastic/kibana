@@ -14,7 +14,15 @@ import type { ValidateTransform } from './types';
 import { getChartSchema } from './schema';
 import { getChartNormalizer } from './normalizers';
 
-const strictChartTypes = new Set(['heatmap', 'data_table', 'pie', 'mosaic', 'treemap', 'waffle']);
+const strictChartTypes = new Set([
+  'heatmap',
+  'data_table',
+  'pie',
+  'mosaic',
+  'treemap',
+  'waffle',
+  'region_map',
+]);
 
 /**
  * Test harness to validate LensConfigBuilder conversions

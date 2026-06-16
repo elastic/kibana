@@ -12,6 +12,7 @@ import type { AttributesNormalizer } from './normalize';
 import { normalizeHeatmap } from './heatmap';
 import { normalizeDatatable } from './datatable';
 import { normalizePartition } from './partition';
+import { normalizeRegionMap } from './region_map';
 
 const chartNormalizers = {
   heatmap: normalizeHeatmap,
@@ -20,6 +21,7 @@ const chartNormalizers = {
   treemap: normalizePartition,
   mosaic: normalizePartition,
   waffle: normalizePartition,
+  region_map: normalizeRegionMap,
 } satisfies Record<string, AttributesNormalizer<any>>;
 
 export function getChartNormalizer(
