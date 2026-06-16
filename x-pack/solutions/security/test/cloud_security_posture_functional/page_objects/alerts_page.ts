@@ -58,7 +58,6 @@ export class AlertsPageObject extends FtrService {
    */
   async clickRefresh(): Promise<void> {
     await this.ensureOnAlertsPage();
-    await this.testSubjects.existOrFail('queryInput', { timeout: 30000 });
     await this.queryBar.submitQuery();
 
     // wait for refresh to complete
@@ -77,6 +76,12 @@ export class AlertsPageObject extends FtrService {
   }
 
   async waitForListToHaveAlerts(timeoutMs?: number): Promise<void> {
+    // Wait for the table container to be ready before checking for rows, so we
+    // don't enter the refresh loop while the initial data fetch is still in flight.
+    await this.testSubjects.existOrFail('alertsTableIsLoaded', {
+      timeout: timeoutMs ?? this.defaultTimeoutMs,
+    });
+
     const allEventRows = await this.testSubjects.findService.allByCssSelector(
       ALERT_TABLE_ROW_CSS_SELECTOR
     );
