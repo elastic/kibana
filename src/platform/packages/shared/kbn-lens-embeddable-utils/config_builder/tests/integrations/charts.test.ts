@@ -68,20 +68,16 @@ describe('Integration panels', () => {
             );
           }
 
-          if (skipped.length > 0) {
-            it.skip.each(skipped.map(({ panel_title: title, attributes }) => [title, attributes]))(
-              'should convert the panel - %s',
-              () => {}
-            );
-          }
+          skipped.forEach(({ panel_title: title }) => {
+            it.todo(`should convert the panel - ${title}`);
+          });
         });
       });
     } else {
       describe(`Type ${chartType}`, () => {
-        it.skip.each(panelsOfType.map(({ panel_title: title, attributes }) => [title, attributes]))(
-          'should convert the panel - %s',
-          () => {}
-        );
+        panelsOfType.forEach(({ panel_title: title }) => {
+          it.todo(`should convert the panel - ${title}`);
+        });
       });
     }
   }

@@ -81,8 +81,8 @@ import {
   createContinuousKiOnboardingWorkflowService,
   type ContinuousKiOnboardingWorkflowService,
 } from './lib/workflows/continuous_onboarding_workflow';
+import { createWorkflowClients } from './lib/workflows/create_workflow_clients';
 import { installMemoryWorkflows } from './lib/memory/install_managed_workflows';
-import { StreamsKIsOnboardingClient } from './lib/workflows/onboarding_workflow_client';
 import { STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG } from '../common/feature_flags';
 
 const STREAMS_MANAGED_WORKFLOW_OWNER = 'streams';
@@ -311,9 +311,10 @@ export class StreamsPlugin
 
     const telemetryClient = this.ebtTelemetryService.getClient();
 
-    const streamsKIsOnboardingClient = plugins.workflowsManagement
-      ? new StreamsKIsOnboardingClient({ managementApi: plugins.workflowsManagement.management })
-      : undefined;
+    // Build workflow clients once and reuse the shared onboarding client instance
+    // everywhere, rather than constructing a second one from the same management API.
+    const workflowClients = createWorkflowClients(plugins.workflowsManagement?.management);
+    const streamsKIsOnboardingClient = workflowClients.streamsKIsOnboardingClient;
 
     if (plugins.agentBuilder) {
       registerStreamsAgentBuilder({
@@ -416,7 +417,11 @@ export class StreamsPlugin
         patternExtractionService: this.patternExtractionService,
         getScopedClients: this.streamsGetScopedClients,
         continuousKiOnboardingWorkflowService,
-        streamsKIsOnboardingClient,
+        workflowClients,
+        getSpaceId: async (request: KibanaRequest) => {
+          const [, pluginsStart] = await core.getStartServices();
+          return pluginsStart.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+        },
       },
       core,
       logger: this.logger,
