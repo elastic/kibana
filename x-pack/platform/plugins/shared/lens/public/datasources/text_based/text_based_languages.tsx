@@ -398,15 +398,43 @@ export function getTextBasedDatasource({
         const sourceCol = fromLayer.columns.find((c) => c.columnId === link.from.columnId);
         if (!sourceCol) continue;
 
-        // Check if the target column already exists
-        const existingCol = toLayer.columns.find((c) => c.columnId === link.to.columnId);
-        if (existingCol) continue;
-
-        // Copy the source column with the target's columnId
         const newCol: TextBasedLayerColumn = {
           ...sourceCol,
           columnId: link.to.columnId,
         };
+
+        const existingCol = toLayer.columns.find((c) => c.columnId === link.to.columnId);
+
+        // Update columns: add if missing, update if field changed
+        let updatedColumns = toLayer.columns;
+        if (!existingCol) {
+          updatedColumns = [...toLayer.columns, newCol];
+        } else if (existingCol.fieldName !== sourceCol.fieldName) {
+          updatedColumns = toLayer.columns.map((c) =>
+            c.columnId === link.to.columnId ? newCol : c
+          );
+        }
+
+        // Sync the trendline layer's query from the source layer.
+        // The trendline query is derived from the main query with an appended
+        // BUCKET() clause. When the main query changes we must regenerate it.
+        let updatedQuery = toLayer.query;
+        if (fromLayer.query && isOfAggregateQueryType(fromLayer.query) && toLayer.timeField) {
+          const newTrendlineQuery = appendTimeBucketToEsqlQuery(
+            fromLayer.query.esql,
+            toLayer.timeField
+          );
+          if (
+            !updatedQuery ||
+            !isOfAggregateQueryType(updatedQuery) ||
+            updatedQuery.esql !== newTrendlineQuery
+          ) {
+            updatedQuery = { esql: newTrendlineQuery };
+          }
+        }
+
+        // Skip if nothing changed
+        if (updatedColumns === toLayer.columns && updatedQuery === toLayer.query) continue;
 
         newState = {
           ...newState,
@@ -414,7 +442,8 @@ export function getTextBasedDatasource({
             ...newState.layers,
             [link.to.layerId]: {
               ...toLayer,
-              columns: [...toLayer.columns, newCol],
+              columns: updatedColumns,
+              query: updatedQuery,
             },
           },
         };
