@@ -75,7 +75,7 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    loadTestFile(require.resolve('./inspector')); // 1m 19s
+    loadTestFile(require.resolve('./inspector_other_bucket')); // 1m 19s
     loadTestFile(require.resolve('./error_handling')); // 1m 8s
     loadTestFile(require.resolve('./lens_tagging')); // 1m 9s
     loadTestFile(require.resolve('./workspace_size'));

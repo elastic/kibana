@@ -132,14 +132,18 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     const execution = await executionClient.get(executionId);
 
     if (!execution) {
-      throw new Error(`Execution ${executionId} not found`);
+      this.logger.warn(`Ignoring abort for unknown execution ${executionId}`);
+      return;
     }
 
     if (
       execution.status !== ExecutionStatus.scheduled &&
       execution.status !== ExecutionStatus.running
     ) {
-      throw new Error(`Cannot abort execution ${executionId} with status ${execution.status}`);
+      this.logger.debug(
+        `Ignoring abort for execution ${executionId} with terminal status ${execution.status}`
+      );
+      return;
     }
 
     await executionClient.updateStatus(executionId, ExecutionStatus.aborted);

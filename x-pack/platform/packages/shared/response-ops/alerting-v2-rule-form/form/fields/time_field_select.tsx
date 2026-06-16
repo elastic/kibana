@@ -32,7 +32,7 @@ export const TimeFieldSelect = () => {
   const { http, dataViews } = useRuleFormServices();
   const { layout } = useRuleFormMeta();
   const { control, setValue, getValues } = useFormContext<FormValues>();
-  const query = useWatch({ name: 'evaluation.query.base', control });
+  const query = useWatch({ name: 'query.breach', control });
 
   const handleAutoSelect = useCallback(
     (fields: DataViewFieldMap) => {

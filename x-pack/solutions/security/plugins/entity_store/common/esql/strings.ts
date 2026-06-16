@@ -12,6 +12,17 @@ export function esqlIsNotNullOrEmpty(field: string) {
   return `${ref} IS NOT NULL AND ${ref} != ""`;
 }
 
+/**
+ * Returns the precomputed column name for a field's boolean presence alias.
+ * Used by the optimized entity-id pipeline to hoist `IS NOT NULL AND != ""`
+ * checks out of per-row CASE arms into a single upstream EVAL stage.
+ *
+ * Example: `entity.namespace` → `entity_namespace_present`
+ */
+export function esqlPresentColumnName(field: string): string {
+  return `${field.replace(/\./g, '_')}_present`;
+}
+
 export function esqlIsNullOrEmpty(field: string) {
   const ref = castField(field);
   return `(${ref} IS NULL OR ${ref} == "")`;

@@ -8307,7 +8307,6 @@
     "sharedUXPackages.dateRangePicker.calendar.todayButton": "今日",
     "sharedUXPackages.dateRangePicker.calendarPanel.applyButton": "適用",
     "sharedUXPackages.dateRangePicker.calendarPanel.saveAsPreset": "プリセットとして保存",
-    "sharedUXPackages.dateRangePicker.calendarPanel.selectEndDateTooltip": "適用する終了日を選択してください",
     "sharedUXPackages.dateRangePicker.customTimeRangePanel.absoluteDateAriaLabel": "{label}絶対日付",
     "sharedUXPackages.dateRangePicker.customTimeRangePanel.absoluteTab": "絶対",
     "sharedUXPackages.dateRangePicker.customTimeRangePanel.applyButton": "適用",

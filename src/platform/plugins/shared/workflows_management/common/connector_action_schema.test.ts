@@ -111,4 +111,16 @@ describe('staticConnectors', () => {
     const result = esReq.paramsSchema.safeParse({ method: 'GET', path: '/_cat/health' });
     expect(result.success).toBe(true);
   });
+
+  it('kibana.request paramsSchema validates correct input', () => {
+    const kibanaReq = staticConnectors.find((c) => c.type === 'kibana.request')!;
+    const result = kibanaReq.paramsSchema.safeParse({ method: 'POST', path: '/api/status' });
+    expect(result.success).toBe(true);
+  });
+
+  it('kibana.request paramsSchema rejects invalid method', () => {
+    const kibanaReq = staticConnectors.find((c) => c.type === 'kibana.request')!;
+    const result = kibanaReq.paramsSchema.safeParse({ method: 'POSTs', path: '/api/status' });
+    expect(result.success).toBe(false);
+  });
 });

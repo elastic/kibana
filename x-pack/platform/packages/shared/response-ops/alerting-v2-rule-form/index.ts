@@ -21,6 +21,10 @@ export type { BuilderState } from './flyout/compose_discover/rule_builder';
 export { QuerySandboxFlyout } from './flyout/compose_discover';
 export type { QuerySandboxFlyoutProps, QueryTab } from './flyout/compose_discover';
 
+// Embeddable query sandbox — self-contained ES|QL editor + data fetching + results
+export { QuerySandbox } from './flyout/compose_discover';
+export type { QuerySandboxProps } from './flyout/compose_discover';
+
 // Lazy components (without Suspense wrapper) - for consumers who need full control
 export { LazyDynamicRuleFormFlyout, LazyRuleFormFlyout } from './flyout';
 

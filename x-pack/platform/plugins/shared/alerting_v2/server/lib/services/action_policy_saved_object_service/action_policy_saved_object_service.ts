@@ -235,8 +235,13 @@ export class ActionPolicySavedObjectService implements ActionPolicySavedObjectSe
       type: ACTION_POLICY_SAVED_OBJECT_TYPE,
       page,
       perPage,
-      search,
-      searchFields: search ? ['name', 'description', 'destinations.id'] : undefined,
+      ...(search
+        ? {
+            search,
+            searchFields: ['name', 'description'],
+            defaultSearchOperator: 'AND' as const,
+          }
+        : {}),
       filter,
       sortField,
       sortOrder,

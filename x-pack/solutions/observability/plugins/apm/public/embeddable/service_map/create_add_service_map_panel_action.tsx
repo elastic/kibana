@@ -15,7 +15,7 @@ import {
   IncompatibleActionError,
   type UiActionsActionDefinition,
 } from '@kbn/ui-actions-plugin/public';
-import type { ServiceMapEmbeddableState } from '../../../server/lib/embeddables/service_map_embeddable_schema';
+import type { ServiceMapEmbeddableState } from '../../../common/embeddable/service_map_embeddable_schema';
 import { ADD_APM_SERVICE_MAP_PANEL_ACTION_ID, APM_SERVICE_MAP_EMBEDDABLE } from './constants';
 import { ServiceMapEditorFlyout } from './service_map_editor_flyout';
 import type { EmbeddableDeps } from '../types';

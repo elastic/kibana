@@ -11,7 +11,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { SLODefinitionRepository } from '../slo_definition_repository';
 import type { SummaryClient } from '../summary_client';
 import type { CompositeSLORepository } from './composite_slo_repository';
-import { persistCompositeSummaryDoc } from './composite_summary_writer';
+import { computeAndPersistCompositeSummaryDoc } from './composite_summary_writer';
 
 export interface CreateCompositeSloParams extends CreateCompositeSLOInput {
   spaceId: string;
@@ -46,7 +46,7 @@ export async function createCompositeSlo(
 
   const created = await compositeRepository.create(compositeSlo);
 
-  await persistCompositeSummaryDoc(created, {
+  await computeAndPersistCompositeSummaryDoc(created, {
     esClient,
     summaryClient,
     repository,

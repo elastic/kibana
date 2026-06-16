@@ -104,6 +104,11 @@ export function useBrowseIntegrationHook({
       cards = cards.filter((card) => signalFilters.some((s) => card.signalTypes?.includes(s)));
     }
 
+    // Hide content packs by default; only show when the user has explicitly enabled the filter
+    if (!urlFilters.showContent) {
+      cards = cards.filter((card) => card.type !== 'content');
+    }
+
     return cards;
   }, [
     localSearch,
@@ -112,6 +117,7 @@ export function useBrowseIntegrationHook({
     urlFilters.status,
     urlFilters.setupMethod,
     urlFilters.signal,
+    urlFilters.showContent,
   ]);
 
   // Apply category filter on top of non-category filters

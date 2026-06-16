@@ -48,7 +48,8 @@ jest.mock('@kbn/core-di-browser', () => ({
       token === 'dataViews' ||
       token === 'lens' ||
       token === 'uiActions' ||
-      token === 'dashboard'
+      token === 'dashboard' ||
+      token === 'cps'
     ) {
       return {};
     }
@@ -122,7 +123,7 @@ const mockRules = [
     enabled: true,
     metadata: { name: 'Rule One', description: 'Monitors log errors', tags: ['prod'] },
     schedule: { every: '1m' },
-    evaluation: { query: { base: 'FROM logs-* | LIMIT 1' } },
+    query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
   },
   {
     id: 'rule-2',
@@ -130,7 +131,7 @@ const mockRules = [
     enabled: false,
     metadata: { name: 'Rule Two', tags: [] },
     schedule: { every: '5m' },
-    evaluation: { query: { base: 'FROM metrics-*' } },
+    query: { format: 'standalone', breach: { query: 'FROM metrics-*' } },
   },
 ];
 

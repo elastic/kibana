@@ -159,7 +159,11 @@ export function generateOtelcolConfig({
         };
 
         let otelConfig: OTelCollectorConfig = {
-          ...addSuffixToOtelcolComponentsConfig('extensions', suffix, stream?.extensions),
+          ...addSuffixToOtelcolComponentsConfig(
+            'extensions',
+            suffix,
+            rewriteExtRefs(stream?.extensions)
+          ),
           ...addSuffixToOtelcolComponentsConfig(
             'receivers',
             suffix,
@@ -499,38 +503,34 @@ function alignPipelineSignalType(
   return { [newKey]: pipeline };
 }
 
-// Recursively walks a component config body and rewrites auth.authenticator
-// references whose bare ID appears in originalToSuffixedExtensionIds.
-// This covers the OTel configauth convention where receivers/exporters/etc.
-// reference extensions via `auth: { authenticator: <extension-id> }`.
+// Recursively walks a component config body and rewrites any string value that
+// exactly matches a declared extension ID to its suffixed form. This is
+// intentionally value-based rather than field-name-based: OTel contrib uses
+// many different field names to reference extensions (auth.authenticator,
+// credentials_provider, storage, sending_queue.storage, …) with no uniform
+// convention, so a field-name allow-list would need constant maintenance.
+// Exact whole-string matching keeps false-positive risk negligible — the
+// package author controls both the extension IDs and the component configs
+// within a stream, so an accidental collision is very rare.
 function rewriteOtelcolExtensionReferences(
   value: unknown,
   originalToSuffixedExtensionIds: Record<string, string>
 ): unknown {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) {
-    return value;
+  if (typeof value === 'string') {
+    return originalToSuffixedExtensionIds[value] ?? value;
   }
-  const obj = value as Record<string, unknown>;
-  const result: Record<string, unknown> = {};
-  for (const [key, val] of Object.entries(obj)) {
-    if (
-      key === 'auth' &&
-      val !== null &&
-      typeof val === 'object' &&
-      !Array.isArray(val) &&
-      typeof (val as Record<string, unknown>).authenticator === 'string'
-    ) {
-      const authObj = val as Record<string, unknown>;
-      const authenticator = authObj.authenticator as string;
-      result[key] = {
-        ...authObj,
-        authenticator: originalToSuffixedExtensionIds[authenticator] ?? authenticator,
-      };
-    } else {
-      result[key] = rewriteOtelcolExtensionReferences(val, originalToSuffixedExtensionIds);
-    }
+  if (Array.isArray(value)) {
+    return value.map((v) => rewriteOtelcolExtensionReferences(v, originalToSuffixedExtensionIds));
   }
-  return result;
+  if (value !== null && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>).map(([k, v]) => [
+        k,
+        rewriteOtelcolExtensionReferences(v, originalToSuffixedExtensionIds),
+      ])
+    );
+  }
+  return value;
 }
 
 function addSuffixToOtelcolPipelinesComponents(

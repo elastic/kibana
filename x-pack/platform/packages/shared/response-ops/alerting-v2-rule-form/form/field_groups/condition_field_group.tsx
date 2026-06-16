@@ -11,7 +11,7 @@ import { EuiSpacer, EuiFormRow, EuiCodeBlock } from '@elastic/eui';
 import { useFormContext, useWatch } from 'react-hook-form';
 import type { FormValues } from '../types';
 import { FieldGroup } from './field_group';
-import { EvaluationQueryField } from '../fields/evaluation_query_field';
+import { BreachQueryField } from '../fields/breach_query_field';
 import { GroupFieldSelect } from '../fields/group_field_select';
 import { TimeFieldSelect } from '../fields/time_field_select';
 
@@ -37,18 +37,18 @@ export const ConditionFieldGroup = ({ includeBase = false }: ConditionFieldGroup
   const { control } = useFormContext<FormValues>();
 
   // Read the base query from form state (initialized via useFormDefaults)
-  const baseQuery = useWatch({ control, name: 'evaluation.query.base' });
+  const baseQuery = useWatch({ control, name: 'query.breach' });
 
   return (
     <FieldGroup
       title={i18n.translate('xpack.alertingV2.ruleForm.condition', {
-        defaultMessage: 'Rule evaluation',
+        defaultMessage: 'Alert condition',
       })}
     >
       {includeBase ? (
         // Editable base query
         <>
-          <EvaluationQueryField />
+          <BreachQueryField />
           <EuiSpacer size="m" />
         </>
       ) : (

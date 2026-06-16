@@ -8304,7 +8304,6 @@
     "sharedUXPackages.dateRangePicker.calendar.todayButton": "今日",
     "sharedUXPackages.dateRangePicker.calendarPanel.applyButton": "应用",
     "sharedUXPackages.dateRangePicker.calendarPanel.saveAsPreset": "保存为预设",
-    "sharedUXPackages.dateRangePicker.calendarPanel.selectEndDateTooltip": "选择要应用的结束日期",
     "sharedUXPackages.dateRangePicker.customTimeRangePanel.absoluteDateAriaLabel": "{label} 绝对日期",
     "sharedUXPackages.dateRangePicker.customTimeRangePanel.absoluteTab": "绝对",
     "sharedUXPackages.dateRangePicker.customTimeRangePanel.applyButton": "应用",

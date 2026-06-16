@@ -9,6 +9,7 @@ import type { IKibanaResponse } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { schema } from '@kbn/config-schema';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { enterpriseLicenseMiddleware } from '@kbn/entity-store/server';
 import {
   ENTITY_RESOLUTION_CSV_UPLOAD_URL,
   RESOLUTION_CSV_MAX_SIZE_BYTES,
@@ -57,13 +58,13 @@ export const entityResolutionCsvUploadRoute = ({
         const siemResponse = buildSiemResponse(response);
 
         try {
-          const { license } = await context.licensing;
-          if (!license.hasAtLeast('enterprise')) {
-            return response.forbidden({
-              body: {
-                message: 'Entity Resolution requires an Enterprise license',
-              },
-            });
+          const denied = await enterpriseLicenseMiddleware(
+            context as unknown as Parameters<typeof enterpriseLicenseMiddleware>[0],
+            request,
+            response
+          );
+          if (denied) {
+            return denied;
           }
 
           const [, startPlugins] = await getStartServices();

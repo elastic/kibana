@@ -370,7 +370,6 @@ export const agentRouteService = {
   postGenerateAgentsReport: () => AGENT_API_ROUTES.GENERATE_REPORT_PATTERN,
   getAgentEffectiveConfig: (agentId: string) =>
     AGENT_API_ROUTES.EFFECTIVE_CONFIG_PATTERN.replace('{agentId}', agentId),
-  getCollectorGroupsPath: () => AGENT_API_ROUTES.COLLECTOR_GROUPS_PATTERN,
 };
 
 export const outputRoutesService = {

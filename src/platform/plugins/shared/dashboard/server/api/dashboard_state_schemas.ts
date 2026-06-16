@@ -21,8 +21,10 @@ import {
   DEFAULT_PANEL_WIDTH,
   DEFAULT_DASHBOARD_OPTIONS,
 } from '../../common/constants';
+import { isDashboardSection } from '../../common';
+import type { DashboardPanel, DashboardSection } from './types';
 
-const MAX_PANELS = 100;
+const MAX_PANELS = 1000;
 
 export const panelGridSchema = schema.object(
   {
@@ -293,6 +295,27 @@ export function getDashboardStateSchema(
       meta: {
         id: isDashboardAppRequest ? 'kbn-dashboard-app-data' : 'kbn-dashboard-data',
       },
+      validate: (dashboardState) => {
+        if (isDashboardAppRequest) return;
+        const panelCount = countPanels(dashboardState.panels);
+        const allPanelCount = panelCount + (dashboardState.pinned_panels?.length ?? 0);
+        return allPanelCount > MAX_PANELS
+          ? `Dashboard contains ${allPanelCount} panels, pinned panels, and sections, which exceeds the maximum of ${MAX_PANELS}.`
+          : undefined;
+      },
     }
   );
+}
+
+function countPanels(panels: Array<DashboardPanel | DashboardSection>): number {
+  let count = 0;
+  for (const panel of panels) {
+    if (isDashboardSection(panel)) {
+      count++; // count the section itself as a panel
+      count += countPanels(panel.panels);
+    } else {
+      count++;
+    }
+  }
+  return count;
 }

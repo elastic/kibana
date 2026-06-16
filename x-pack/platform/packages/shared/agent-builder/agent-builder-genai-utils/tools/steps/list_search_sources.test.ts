@@ -270,6 +270,8 @@ describe('listSearchSources', () => {
         indexItem('regular-index-1'),
         indexItem('.kibana_8.0.0_001'),
         indexItem('.fleet-actions'),
+        indexItem('.fleet-agents-000001'),
+        indexItem('.metrics-endpoint.metadata_united_default'),
         indexItem('.siem-signals-default'),
         indexItem('regular-index-2'),
       ],
@@ -284,6 +286,8 @@ describe('listSearchSources', () => {
 
     expect(results.indices.map((item) => item.name)).toEqual([
       'regular-index-1',
+      '.fleet-agents-000001',
+      '.metrics-endpoint.metadata_united_default',
       '.siem-signals-default',
       'regular-index-2',
     ]);

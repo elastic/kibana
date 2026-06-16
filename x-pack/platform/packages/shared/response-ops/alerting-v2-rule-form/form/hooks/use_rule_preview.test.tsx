@@ -35,10 +35,8 @@ const mockESQLResponse = {
 const defaultFormValues = {
   timeField: '@timestamp',
   schedule: { every: '5m', lookback: '1m' },
-  evaluation: {
-    query: {
-      base: 'FROM logs-* | LIMIT 100',
-    },
+  query: {
+    breach: 'FROM logs-* | LIMIT 100',
   },
 };
 
@@ -106,7 +104,7 @@ describe('useRulePreview', () => {
   it('does not execute when query is empty', async () => {
     const wrapper = createFormWrapper({
       ...defaultFormValues,
-      evaluation: { query: { base: '' } },
+      query: { breach: '' },
     });
 
     const { result } = renderHook(() => useRulePreview(), { wrapper });

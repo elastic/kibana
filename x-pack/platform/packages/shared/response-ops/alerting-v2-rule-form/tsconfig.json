@@ -41,6 +41,8 @@
     "@kbn/core-di",
     "@kbn/announcement-banner",
     "@kbn/kibana-react-plugin",
-    "@kbn/dashboard-plugin"
+    "@kbn/dashboard-plugin",
+    "@kbn/cps-utils",
+    "@kbn/cps"
   ]
 }

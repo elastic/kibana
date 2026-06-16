@@ -15,13 +15,13 @@ export type { PreviewResult as RulePreviewResult, PreviewColumn } from './use_pr
 /**
  * Rule preview hook.
  *
- * Watches the evaluation base query and delegates to the generic `usePreview`
+ * Watches the rule's breach query and delegates to the generic `usePreview`
  * hook for ES|QL execution, debouncing, and result mapping.
  */
 export const useRulePreview = () => {
   const { control } = useFormContext<FormValues>();
 
-  const baseQuery = useWatch({ control, name: 'evaluation.query.base' });
+  const baseQuery = useWatch({ control, name: 'query.breach' });
   const timeField = useWatch({ control, name: 'timeField' });
   const lookback = useWatch({ control, name: 'schedule.lookback' });
   const groupingFields = useWatch({ control, name: 'grouping.fields' }) ?? [];

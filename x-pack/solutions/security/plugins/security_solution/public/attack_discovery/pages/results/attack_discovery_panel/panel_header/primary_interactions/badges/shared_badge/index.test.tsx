@@ -66,6 +66,7 @@ jest.mock('../../../../../../utils/is_attack_discovery_alert', () => ({
 
 describe('SharedBadge', () => {
   const defaultProps = { attackDiscovery: mockAttackDiscoveryAlert };
+  const user = userEvent.setup({ pointerEventsCheck: 0 });
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -82,7 +83,7 @@ describe('SharedBadge', () => {
       </TestProviders>
     );
 
-    await userEvent.click(screen.getByTestId('sharedBadgeButton'));
+    await user.click(screen.getByTestId('sharedBadgeButton'));
 
     expect(screen.getByTestId('sharedBadge')).toBeInTheDocument();
   });
@@ -94,7 +95,7 @@ describe('SharedBadge', () => {
       </TestProviders>
     );
 
-    await userEvent.click(screen.getByTestId('sharedBadgeButton'));
+    await user.click(screen.getByTestId('sharedBadgeButton'));
 
     expect(screen.getByTestId('shared')).toHaveAttribute('aria-disabled', 'true');
   });
@@ -106,7 +107,7 @@ describe('SharedBadge', () => {
       </TestProviders>
     );
 
-    await userEvent.click(screen.getByTestId('sharedBadgeButton'));
+    await user.click(screen.getByTestId('sharedBadgeButton'));
 
     expect(screen.getByTestId('notShared')).toHaveAttribute('aria-disabled', 'true');
   });
@@ -120,8 +121,8 @@ describe('SharedBadge', () => {
       </TestProviders>
     );
 
-    await userEvent.click(screen.getByTestId('sharedBadgeButton'));
-    await userEvent.click(screen.getByTestId('shared'));
+    await user.click(screen.getByTestId('sharedBadgeButton'));
+    await user.click(screen.getByTestId('shared'));
 
     expect(mockMutateAsync).toHaveBeenCalled();
   });
@@ -157,11 +158,11 @@ describe('SharedBadge', () => {
       </TestProviders>
     );
 
-    await userEvent.click(screen.getByTestId('sharedBadgeButton'));
+    await user.click(screen.getByTestId('sharedBadgeButton'));
     // Click the enabled shared option
-    await userEvent.click(screen.getByTestId('shared'));
+    await user.click(screen.getByTestId('shared'));
     // Re-open the popover to check the disabled state
-    await userEvent.click(screen.getByTestId('sharedBadgeButton'));
+    await user.click(screen.getByTestId('sharedBadgeButton'));
     // Assert the shared option is disabled
     const sharedOption = await screen.findByTestId('shared');
 
@@ -177,11 +178,11 @@ describe('SharedBadge', () => {
       </TestProviders>
     );
 
-    await userEvent.click(screen.getByTestId('sharedBadgeButton'));
+    await user.click(screen.getByTestId('sharedBadgeButton'));
     // Click the enabled shared option
-    await userEvent.click(screen.getByTestId('shared'));
+    await user.click(screen.getByTestId('shared'));
     // Re-open the popover to check the disabled state
-    await userEvent.click(screen.getByTestId('sharedBadgeButton'));
+    await user.click(screen.getByTestId('sharedBadgeButton'));
     // Assert the notShared option is disabled
     const notSharedOption = await screen.findByTestId('notShared');
     expect(notSharedOption).toHaveAttribute('aria-disabled', 'true');
@@ -196,8 +197,8 @@ describe('SharedBadge', () => {
       </TestProviders>
     );
 
-    await userEvent.click(screen.getByTestId('sharedBadgeButton'));
-    await userEvent.hover(screen.getByTestId('sharedBadgeButton'));
+    await user.click(screen.getByTestId('sharedBadgeButton'));
+    await user.hover(screen.getByTestId('sharedBadgeButton'));
     const tooltip = await screen.findByText((content, element) =>
       content.includes('The visibility of shared')
     );
@@ -222,11 +223,11 @@ describe('SharedBadge', () => {
       </TestProviders>
     );
 
-    await userEvent.click(screen.getByTestId('sharedBadgeButton'));
+    await user.click(screen.getByTestId('sharedBadgeButton'));
     // The popover should be open
     expect(screen.getByTestId('sharedBadge')).toBeInTheDocument();
     // Click the badge button again to close the popover
-    await userEvent.click(screen.getByTestId('sharedBadgeButton'));
+    await user.click(screen.getByTestId('sharedBadgeButton'));
     // Wait for the popover to close
     await waitFor(() => {
       expect(screen.queryByTestId('sharedBadge')).not.toBeInTheDocument();

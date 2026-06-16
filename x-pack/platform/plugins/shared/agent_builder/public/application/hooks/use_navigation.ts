@@ -16,6 +16,7 @@ import { useKibana } from './use_kibana';
 export interface LocationState {
   shouldStickToBottom?: boolean;
   initialMessage?: string;
+  autoSendInitialMessage?: boolean;
   mcpClientCreated?: CreateOAuthClientResponse;
   entryPointSource?: FullscreenEntryPointSource;
 }

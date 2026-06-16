@@ -8280,7 +8280,6 @@
     "sharedUXPackages.dateRangePicker.calendar.todayButton": "Aujourd'hui",
     "sharedUXPackages.dateRangePicker.calendarPanel.applyButton": "Appliquer",
     "sharedUXPackages.dateRangePicker.calendarPanel.saveAsPreset": "Enregistrer en tant que préréglage",
-    "sharedUXPackages.dateRangePicker.calendarPanel.selectEndDateTooltip": "Sélectionnez une date de fin à appliquer",
     "sharedUXPackages.dateRangePicker.customTimeRangePanel.absoluteDateAriaLabel": "{label} date absolue",
     "sharedUXPackages.dateRangePicker.customTimeRangePanel.absoluteTab": "Absolue",
     "sharedUXPackages.dateRangePicker.customTimeRangePanel.applyButton": "Appliquer",

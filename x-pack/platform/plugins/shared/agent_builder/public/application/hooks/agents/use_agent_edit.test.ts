@@ -1,0 +1,135 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { act, renderHook } from '@testing-library/react';
+import { AgentAclRole, AgentVisibility } from '@kbn/agent-builder-common';
+import { useAgentEdit, type AgentEditState } from './use_agent_edit';
+
+const mockCreate = jest.fn();
+const mockUpdate = jest.fn();
+const mockUpdateAcl = jest.fn();
+
+jest.mock('@kbn/react-query', () => ({
+  // Run the mutationFn directly so the payload passed to the service is observable.
+  useMutation: (options: { mutationFn: (data: unknown) => Promise<unknown> }) => ({
+    mutateAsync: options.mutationFn,
+    isLoading: false,
+  }),
+  useQueryClient: () => ({ invalidateQueries: jest.fn() }),
+}));
+
+jest.mock('react-router-dom-v5-compat', () => ({
+  useSearchParams: () => [new URLSearchParams(), jest.fn()],
+}));
+
+jest.mock('../use_agent_builder_service', () => ({
+  useAgentBuilderServices: () => ({
+    agentService: { create: mockCreate, update: mockUpdate, updateAcl: mockUpdateAcl },
+  }),
+}));
+
+jest.mock('./use_agent_by_id', () => ({
+  useAgentBuilderAgentById: () => ({ agent: undefined, isLoading: false, error: undefined }),
+}));
+
+jest.mock('../tools/use_tools', () => ({
+  useToolsService: () => ({ tools: [], isLoading: false, error: undefined }),
+}));
+
+jest.mock('../skills/use_skills', () => ({
+  useSkillsService: () => ({ skills: [], isLoading: false, error: undefined }),
+}));
+
+jest.mock('../plugins/use_plugins', () => ({
+  usePluginsService: () => ({ plugins: [], isLoading: false, error: undefined }),
+}));
+
+jest.mock('../use_experimental_features', () => ({
+  useExperimentalFeatures: () => false,
+}));
+
+const baseConfiguration: AgentEditState['configuration'] = {
+  instructions: '',
+  tools: [{ tool_ids: ['*'] }],
+  enable_elastic_capabilities: false,
+  workflow_ids: [],
+  plugin_ids: [],
+};
+
+describe('useAgentEdit submit (create/clone branch)', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockCreate.mockResolvedValue({ id: 'cloned-agent' });
+  });
+
+  it('strips acl, created_by and avatar_icon from the create payload when cloning', async () => {
+    const cloneData: AgentEditState = {
+      id: 'cloned-agent',
+      name: 'Cloned Agent',
+      description: 'A clone of an existing agent',
+      visibility: AgentVisibility.Public,
+      labels: ['support'],
+      avatar_color: '#FFFFFF',
+      avatar_symbol: 'CA',
+      avatar_icon: 'logoElastic',
+      acl: { entries: [{ type: 'user', name: 'alice', role: AgentAclRole.Editor }] },
+      created_by: { id: 'u1', username: 'bob' },
+      configuration: baseConfiguration,
+    };
+
+    const { result } = renderHook(() =>
+      useAgentEdit({ onSaveSuccess: jest.fn(), onSaveError: jest.fn() })
+    );
+
+    await act(async () => {
+      await result.current.submit(cloneData);
+    });
+
+    expect(mockCreate).toHaveBeenCalledTimes(1);
+    const payload = mockCreate.mock.calls[0][0];
+    expect(payload).not.toHaveProperty('acl');
+    expect(payload).not.toHaveProperty('created_by');
+    expect(payload).not.toHaveProperty('avatar_icon');
+    expect(payload).toMatchObject({
+      id: 'cloned-agent',
+      name: 'Cloned Agent',
+      description: 'A clone of an existing agent',
+      visibility: AgentVisibility.Public,
+      labels: ['support'],
+      avatar_color: '#FFFFFF',
+      avatar_symbol: 'CA',
+    });
+  });
+
+  it('preserves the standard create fields for a brand-new agent', async () => {
+    const newData: AgentEditState = {
+      id: 'new-agent',
+      name: 'New Agent',
+      description: 'A new agent',
+      visibility: AgentVisibility.Private,
+      labels: [],
+      avatar_color: '',
+      avatar_symbol: '',
+      configuration: baseConfiguration,
+    };
+
+    const { result } = renderHook(() =>
+      useAgentEdit({ onSaveSuccess: jest.fn(), onSaveError: jest.fn() })
+    );
+
+    await act(async () => {
+      await result.current.submit(newData);
+    });
+
+    expect(mockCreate).toHaveBeenCalledTimes(1);
+    expect(mockCreate.mock.calls[0][0]).toMatchObject({
+      id: 'new-agent',
+      name: 'New Agent',
+      visibility: AgentVisibility.Private,
+    });
+  });
+});

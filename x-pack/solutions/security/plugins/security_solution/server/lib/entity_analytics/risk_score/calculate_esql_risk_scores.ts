@@ -534,10 +534,12 @@ export const getBaseScoreESQL = (
   pageSize: number,
   index: string
 ): string => {
-  const euidEval = euid.esql.getEuidEvaluation(entityType, { withTypeId: true });
   const containsIdFilter = euid.esql.getEuidDocumentsContainsIdFilter(entityType);
   const fieldEvals = euid.esql.getFieldEvaluations(entityType);
   const fieldEvalsClause = fieldEvals ? `| EVAL ${fieldEvals}` : '';
+  const euidEvalClause = `| EVAL ${euid.esql.getEuidEvaluation(entityType, 'entity_id', {
+    withTypeId: true,
+  })}`;
 
   if (!bounds.lower && !bounds.upper) {
     throw new Error('Either lower or upper bound must be provided for EUID pagination');
@@ -567,7 +569,7 @@ export const getBaseScoreESQL = (
   FROM ${index} METADATA _index
     | WHERE kibana.alert.risk_score IS NOT NULL AND (${containsIdFilter})
     ${fieldEvalsClause}
-    | EVAL entity_id = ${euidEval}
+    ${euidEvalClause}
     | WHERE ${rangeClause}
     | RENAME kibana.alert.risk_score as risk_score,
              kibana.alert.rule.name as rule_name,
@@ -633,10 +635,12 @@ export const getResolutionScoreESQLByIds = (
   alertsIndex: string,
   lookupIndex: string
 ): string => {
-  const euidEval = euid.esql.getEuidEvaluation(entityType, { withTypeId: true });
   const containsIdFilter = euid.esql.getEuidDocumentsContainsIdFilter(entityType);
   const fieldEvals = euid.esql.getFieldEvaluations(entityType);
   const fieldEvalsClause = fieldEvals ? `| EVAL ${fieldEvals}` : '';
+  const euidEvalClause = `| EVAL ${euid.esql.getEuidEvaluation(entityType, 'entity_id', {
+    withTypeId: true,
+  })}`;
 
   if (resolutionTargetIds.length === 0) {
     throw new Error('At least one resolution target ID must be provided for resolution scoring');
@@ -655,7 +659,7 @@ export const getResolutionScoreESQLByIds = (
   FROM ${alertsIndex} METADATA _index
     | WHERE kibana.alert.risk_score IS NOT NULL AND (${containsIdFilter})
     ${fieldEvalsClause}
-    | EVAL entity_id = ${euidEval}
+    ${euidEvalClause}
     | LOOKUP JOIN ${lookupIndex} ON entity_id
     | EVAL resolution_target_id = COALESCE(resolution_target_id, entity_id),
            relationship_type = COALESCE(relationship_type, "self")

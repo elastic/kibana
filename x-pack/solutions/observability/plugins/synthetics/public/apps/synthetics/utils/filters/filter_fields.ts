@@ -28,7 +28,15 @@ export interface SyntheticsMonitorFilterItem {
 }
 
 export function getMonitorFilterFields(): SyntheticsMonitorFilterField[] {
-  return ['tags', 'locations', 'monitorTypes', 'projects', 'schedules', 'useLogicalAndFor'];
+  return [
+    'tags',
+    'locations',
+    'monitorTypes',
+    'projects',
+    'schedules',
+    'remoteNames',
+    'useLogicalAndFor',
+  ];
 }
 
 export type SyntheticsMonitorFilterChangeHandler = (

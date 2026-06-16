@@ -8279,7 +8279,6 @@
     "sharedUXPackages.dateRangePicker.calendar.todayButton": "Heute",
     "sharedUXPackages.dateRangePicker.calendarPanel.applyButton": "Anwenden",
     "sharedUXPackages.dateRangePicker.calendarPanel.saveAsPreset": "Als Voreinstellung speichern",
-    "sharedUXPackages.dateRangePicker.calendarPanel.selectEndDateTooltip": "Wählen Sie ein anzuwendendes Enddatum aus",
     "sharedUXPackages.dateRangePicker.customTimeRangePanel.absoluteDateAriaLabel": "{label} absolutes Datum",
     "sharedUXPackages.dateRangePicker.customTimeRangePanel.absoluteTab": "Absolut",
     "sharedUXPackages.dateRangePicker.customTimeRangePanel.applyButton": "Anwenden",

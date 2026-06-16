@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonIcon, EuiIcon, EuiPopover } from '@elastic/eui';
+import { EuiButtonIcon, EuiIcon, EuiPopover, EuiToolTip } from '@elastic/eui';
 import { WaterfallMarkerTrend } from './waterfall_marker_trend';
 
 export function WaterfallMarkerIcon({ field, label }: { field: string; label: string }) {
@@ -33,16 +33,26 @@ export function WaterfallMarkerIcon({ field, label }: { field: string; label: st
       panelStyle={{ paddingBottom: 0, paddingLeft: 4 }}
       zIndex={100}
       button={
-        <EuiButtonIcon
-          data-test-subj="observabilitySolutionWaterfallMarkerIconButton"
-          aria-label={i18n.translate('xpack.uptime.synthetics.markers.openEmbeddableButton.label', {
+        <EuiToolTip
+          content={i18n.translate('xpack.uptime.synthetics.markers.openEmbeddableButton.label', {
             defaultMessage: 'Use this icon button to show metrics for this annotation marker.',
           })}
-          iconType="dot"
-          iconSize="l"
-          color="text"
-          onClick={() => setIsOpen((prevState) => !prevState)}
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            data-test-subj="observabilitySolutionWaterfallMarkerIconButton"
+            aria-label={i18n.translate(
+              'xpack.uptime.synthetics.markers.openEmbeddableButton.label',
+              {
+                defaultMessage: 'Use this icon button to show metrics for this annotation marker.',
+              }
+            )}
+            iconType="dot"
+            iconSize="l"
+            color="text"
+            onClick={() => setIsOpen((prevState) => !prevState)}
+          />
+        </EuiToolTip>
       }
     >
       <WaterfallMarkerTrend title={label} field={field} />
