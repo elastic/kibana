@@ -27,9 +27,9 @@ import {
 import { max, min } from 'lodash';
 import type { ESQLColumn } from '@kbn/es-types';
 import { isNumericType } from '@kbn/esql-language';
+import { EMPTY_LABEL } from '@kbn/field-formats-common';
 import { ChooseColumnPopover } from './choose_column_popover';
 import { DataControlEditorStrings } from '../data_control_constants';
-import { EMPTY_LABEL } from '@kbn/field-formats-common';
 
 export const ESQLValuesPreview: React.FC<{
   previewOptions: string[] | number[];
