@@ -2070,6 +2070,149 @@ describe('Alerts Client', () => {
         });
       });
 
+      describe('clearSnoozedStatusForAlerts()', () => {
+        const snoozedInstanceId = '1';
+        const snoozedRuleData = {
+          ...alertRuleData,
+          snoozedInstances: [
+            {
+              instanceId: snoozedInstanceId,
+              snoozedAt: '2024-01-01T00:00:00.000Z',
+              snoozedBy: 'test_user',
+            },
+          ],
+        };
+
+        const setupAndPersist = async (ruleData = snoozedRuleData) => {
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>({
+            ...alertsClientParams,
+            rule: ruleData,
+          });
+          await alertsClient.initializeExecution(defaultExecutionOpts);
+          const alertExecutorService = alertsClient.factory();
+          alertExecutorService.create(snoozedInstanceId).scheduleActions('default');
+          alertExecutorService.create('2').scheduleActions('default');
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
+          alertsClient.logAlerts(logAlertsOpts);
+          await alertsClient.persistAlerts();
+          return alertsClient;
+        };
+
+        test('calls updateByQuery to set kibana.alert.snoozed=false for condition-expired instances', async () => {
+          clusterClient.updateByQuery.mockResolvedValueOnce({
+            failures: [],
+            updated: 1,
+            total: 1,
+          });
+          const alertsClient = await setupAndPersist();
+
+          const doc = alertsClient.getBuiltActiveAlertDataByInstanceId(snoozedInstanceId);
+          expect(doc).toBeDefined();
+          expect(doc![ALERT_SNOOZED]).toBe(true);
+
+          const uuid = doc![ALERT_UUID] as string;
+          await alertsClient.clearSnoozedStatusForAlerts([snoozedInstanceId]);
+
+          expect(clusterClient.updateByQuery).toHaveBeenCalledWith({
+            conflicts: 'proceed',
+            index: '.alerts-test.alerts-default',
+            query: { terms: { _id: [uuid] } },
+            refresh: true,
+            script: {
+              lang: 'painless',
+              source: `ctx._source['${ALERT_SNOOZED}'] = false;`,
+            },
+          });
+        });
+
+        test('updates the in-memory cache to reflect the cleared snooze status', async () => {
+          clusterClient.updateByQuery.mockResolvedValueOnce({
+            failures: [],
+            updated: 1,
+            total: 1,
+          });
+          const alertsClient = await setupAndPersist();
+
+          expect(
+            alertsClient.getBuiltActiveAlertDataByInstanceId(snoozedInstanceId)![ALERT_SNOOZED]
+          ).toBe(true);
+
+          await alertsClient.clearSnoozedStatusForAlerts([snoozedInstanceId]);
+
+          expect(
+            alertsClient.getBuiltActiveAlertDataByInstanceId(snoozedInstanceId)![ALERT_SNOOZED]
+          ).toBe(false);
+        });
+
+        test('does nothing when conditionExpiredInstanceIds is empty', async () => {
+          const alertsClient = await setupAndPersist();
+
+          await alertsClient.clearSnoozedStatusForAlerts([]);
+
+          expect(clusterClient.updateByQuery).not.toHaveBeenCalled();
+        });
+
+        test('does nothing when ruleType.alerts.shouldWrite is false', async () => {
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>({
+            ...alertsClientParams,
+            rule: snoozedRuleData,
+            ruleType: { ...ruleType, alerts: { ...ruleType.alerts!, shouldWrite: false } },
+          });
+          await alertsClient.initializeExecution(defaultExecutionOpts);
+          const alertExecutorService = alertsClient.factory();
+          alertExecutorService.create(snoozedInstanceId).scheduleActions('default');
+          await alertsClient.processAlerts();
+          // persistAlerts() short-circuits when shouldWrite is false, so cache is empty
+          await alertsClient.persistAlerts();
+
+          await alertsClient.clearSnoozedStatusForAlerts([snoozedInstanceId]);
+
+          expect(clusterClient.updateByQuery).not.toHaveBeenCalled();
+        });
+
+        test('skips instance IDs not present in the built alert cache', async () => {
+          clusterClient.updateByQuery.mockResolvedValueOnce({
+            failures: [],
+            updated: 1,
+            total: 1,
+          });
+          const alertsClient = await setupAndPersist();
+
+          // 'unknown-id' was never built, 'snoozedInstanceId' was
+          await alertsClient.clearSnoozedStatusForAlerts(['unknown-id', snoozedInstanceId]);
+
+          const callArgs = clusterClient.updateByQuery.mock.calls[0][0] as unknown as {
+            query: { terms: { _id: string[] } };
+          };
+          // Only the known instance's UUID should be in the query
+          expect(callArgs.query.terms._id).toHaveLength(1);
+        });
+
+        test('does nothing when no cached instance matches any of the provided IDs', async () => {
+          const alertsClient = await setupAndPersist();
+
+          await alertsClient.clearSnoozedStatusForAlerts(['unknown-id-1', 'unknown-id-2']);
+
+          expect(clusterClient.updateByQuery).not.toHaveBeenCalled();
+        });
+
+        test('logs error and rethrows when updateByQuery fails', async () => {
+          clusterClient.updateByQuery.mockRejectedValueOnce(new Error('ES unavailable'));
+          const alertsClient = await setupAndPersist();
+
+          await expect(
+            alertsClient.clearSnoozedStatusForAlerts([snoozedInstanceId])
+          ).rejects.toThrow('ES unavailable');
+
+          expect(logger.error).toHaveBeenCalledWith(
+            expect.stringContaining('Error clearing snoozed status for condition-expired alerts'),
+            logTags
+          );
+        });
+      });
+
       describe('updatePersistedAlerts', () => {
         test('should update the persistent alerts successfully', async () => {
           clusterClient.updateByQuery.mockResponseOnce({

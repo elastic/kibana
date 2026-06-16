@@ -110,6 +110,7 @@ export interface IAlertsClient<
     type: 'recovered' | 'trackedRecoveredAlerts'
   ): Record<string, LegacyAlert<State, Context, RecoveryActionGroupId>> | {};
   persistAlerts(): Promise<void>;
+  clearSnoozedStatusForAlerts(conditionExpiredInstanceIds: string[]): Promise<void>;
   getAlertsToUpdateWithMaintenanceWindows(): Promise<AlertsToUpdateWithMaintenanceWindows>;
   getAlertsToUpdateWithLastScheduledActions(): AlertsToUpdateWithLastScheduledActions;
   updatePersistedAlerts({
