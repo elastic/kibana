@@ -15,6 +15,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useFormData, useFormContext } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
   getDiscriminatorFieldValue,
@@ -49,7 +50,8 @@ import { SingleOptionUnionWidget } from './single_option_union_widget';
 const getDefaultOption = (
   options: DiscriminatedUnionWidgetProps['options'],
   discriminatorKey: string,
-  fieldConfig: DiscriminatedUnionWidgetProps['fieldConfig']
+  fieldConfig: DiscriminatedUnionWidgetProps['fieldConfig'],
+  getMeta: DiscriminatedUnionWidgetProps['meta']['getMeta']
 ) => {
   if (fieldConfig.defaultValue && typeof fieldConfig.defaultValue === 'object') {
     const defaultValue = fieldConfig.defaultValue as Record<string, any>;
@@ -61,7 +63,12 @@ const getDefaultOption = (
       return defaultOption;
     }
   }
-  return options[0];
+  // Skip hidden options (legacy backwards-compat entries) so they are never
+  // auto-selected as the default when creating a new connector.
+  return (
+    options.find((option) => !Boolean((getMeta(option) as Record<string, unknown>).hidden)) ??
+    options[0]
+  );
 };
 
 /*
@@ -90,7 +97,7 @@ export const MultiOptionUnionWidget: React.FC<DiscriminatedUnionWidgetProps> = (
 }) => {
   const { getMeta, setMeta } = meta;
   const [selectedOption, setSelectedOption] = useState(() => {
-    const defaultOption = getDefaultOption(options, discriminatorKey, fieldConfig);
+    const defaultOption = getDefaultOption(options, discriminatorKey, fieldConfig, getMeta);
     return getDiscriminatorFieldValue(defaultOption, discriminatorKey);
   });
 
@@ -151,7 +158,12 @@ export const MultiOptionUnionWidget: React.FC<DiscriminatedUnionWidgetProps> = (
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>{label as string}</EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiBadge color="warning">Not recommended</EuiBadge>
+              <EuiBadge color="warning">
+                {i18n.translate(
+                  'responseOps.formGenerator.multiOptionUnionWidget.notRecommendedLabel',
+                  { defaultMessage: 'Not recommended' }
+                )}
+              </EuiBadge>
             </EuiFlexItem>
           </EuiFlexGroup>
         ) : (
