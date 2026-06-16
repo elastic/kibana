@@ -104,7 +104,7 @@ timeout-minutes: 90
 
 # Flaky Test Fixer
 
-Open one draft PR with the smallest test-side fix for this flaky-test issue. Don't open the PR if you find an open PR with an identical or similar fix, or you didn't find a credible fix.
+Open a single draft PR with the smallest possible test-side fix for this flaky-test issue. Do not open a PR if either of the following is true: you find an existing open PR with an identical or similar fix (search PRs for ones that reference this issue number in their body, or check the issue timeline for PRs that reference it), or you cannot identify a credible fix.
 
 ## Steps
 
