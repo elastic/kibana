@@ -10,7 +10,13 @@
 import type { ActionContext } from '../../connector_spec';
 import { getConnectorSpec } from '../../..';
 import { Slack } from './slack';
-import { SlackListChannelsInputSchema, SlackResolveChannelIdInputSchema } from './types';
+import {
+  SlackGetConversationHistoryInputSchema,
+  SlackListChannelsInputSchema,
+  SlackListUserConversationsInputSchema,
+  SlackListUsersInputSchema,
+  SlackResolveChannelIdInputSchema,
+} from './types';
 
 describe('Slack', () => {
   const mockClient = {
@@ -563,6 +569,366 @@ describe('Slack', () => {
           users: 'U01PWE77HD2',
         })
       ).rejects.toThrow('Slack inviteToConversation error: channel_not_found');
+    });
+  });
+
+  describe('getConversationHistory action', () => {
+    it('should fetch history with defaults', async () => {
+      const mockResponse = {
+        data: {
+          ok: true,
+          messages: [
+            { type: 'message', user: 'U1', text: 'hi', ts: '1.1' },
+            { type: 'message', user: 'U2', text: 'bye', ts: '2.2' },
+          ],
+          has_more: false,
+          response_metadata: { next_cursor: '' },
+        },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await Slack.actions.getConversationHistory.handler(
+        mockContext,
+        SlackGetConversationHistoryInputSchema.parse({ channel: 'C123' })
+      );
+
+      expect(mockClient.get).toHaveBeenCalledWith('https://slack.com/api/conversations.history', {
+        params: { channel: 'C123', limit: 100 },
+      });
+      expect(result).toEqual({
+        ok: true,
+        channel: 'C123',
+        messages: [
+          {
+            ts: '1.1',
+            type: 'message',
+            subtype: undefined,
+            user: 'U1',
+            bot_id: undefined,
+            text: 'hi',
+            thread_ts: undefined,
+            reply_count: undefined,
+          },
+          {
+            ts: '2.2',
+            type: 'message',
+            subtype: undefined,
+            user: 'U2',
+            bot_id: undefined,
+            text: 'bye',
+            thread_ts: undefined,
+            reply_count: undefined,
+          },
+        ],
+        nextCursor: undefined,
+        hasMore: false,
+      });
+    });
+
+    it('should pass oldest, latest, inclusive, cursor', async () => {
+      mockClient.get.mockResolvedValue({
+        data: { ok: true, messages: [], has_more: true, response_metadata: { next_cursor: 'n1' } },
+      });
+
+      await Slack.actions.getConversationHistory.handler(
+        mockContext,
+        SlackGetConversationHistoryInputSchema.parse({
+          channel: 'C123',
+          oldest: '1000.0',
+          latest: '2000.0',
+          inclusive: true,
+          cursor: 'prev',
+          limit: 50,
+        })
+      );
+
+      expect(mockClient.get).toHaveBeenCalledWith('https://slack.com/api/conversations.history', {
+        params: {
+          channel: 'C123',
+          limit: 50,
+          oldest: '1000.0',
+          latest: '2000.0',
+          inclusive: true,
+          cursor: 'prev',
+        },
+      });
+    });
+
+    it('should set hasMore true and surface nextCursor', async () => {
+      mockClient.get.mockResolvedValue({
+        data: {
+          ok: true,
+          messages: [{ type: 'message', text: 'a', ts: '1.0' }],
+          has_more: true,
+          response_metadata: { next_cursor: 'next-page' },
+        },
+      });
+
+      const result = await Slack.actions.getConversationHistory.handler(
+        mockContext,
+        SlackGetConversationHistoryInputSchema.parse({ channel: 'C1' })
+      );
+
+      expect(result.hasMore).toBe(true);
+      expect(result.nextCursor).toBe('next-page');
+    });
+
+    it('should return raw response when raw=true', async () => {
+      const mockResponse = { data: { ok: true, messages: [{ ts: '1.0' }] } };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await Slack.actions.getConversationHistory.handler(
+        mockContext,
+        SlackGetConversationHistoryInputSchema.parse({ channel: 'C1', raw: true })
+      );
+
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should throw when Slack API returns error', async () => {
+      mockClient.get.mockResolvedValue({ data: { ok: false, error: 'channel_not_found' } });
+
+      await expect(
+        Slack.actions.getConversationHistory.handler(
+          mockContext,
+          SlackGetConversationHistoryInputSchema.parse({ channel: 'BAD' })
+        )
+      ).rejects.toThrow('Slack getConversationHistory error: channel_not_found');
+    });
+  });
+
+  describe('getConversationInfo action', () => {
+    it('should fetch info for a channel', async () => {
+      const mockResponse = {
+        data: { ok: true, channel: { id: 'C1', name: 'general', is_private: false } },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await Slack.actions.getConversationInfo.handler(mockContext, {
+        channel: 'C1',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith('https://slack.com/api/conversations.info', {
+        params: { channel: 'C1' },
+      });
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should forward include_num_members and include_locale', async () => {
+      mockClient.get.mockResolvedValue({ data: { ok: true, channel: { id: 'C1' } } });
+
+      await Slack.actions.getConversationInfo.handler(mockContext, {
+        channel: 'C1',
+        includeNumMembers: true,
+        includeLocale: true,
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith('https://slack.com/api/conversations.info', {
+        params: { channel: 'C1', include_num_members: true, include_locale: true },
+      });
+    });
+
+    it('should throw when Slack API returns error', async () => {
+      mockClient.get.mockResolvedValue({ data: { ok: false, error: 'channel_not_found' } });
+
+      await expect(
+        Slack.actions.getConversationInfo.handler(mockContext, { channel: 'BAD' })
+      ).rejects.toThrow('Slack getConversationInfo error: channel_not_found');
+    });
+  });
+
+  describe('lookupUserByEmail action', () => {
+    it('should look up a user by email', async () => {
+      const mockResponse = {
+        data: {
+          ok: true,
+          user: { id: 'U1', name: 'kir', profile: { email: 'kir@elastic.co' } },
+        },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await Slack.actions.lookupUserByEmail.handler(mockContext, {
+        email: 'kir@elastic.co',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith('https://slack.com/api/users.lookupByEmail', {
+        params: { email: 'kir@elastic.co' },
+      });
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should throw when no user has that email', async () => {
+      mockClient.get.mockResolvedValue({ data: { ok: false, error: 'users_not_found' } });
+
+      await expect(
+        Slack.actions.lookupUserByEmail.handler(mockContext, { email: 'nope@elastic.co' })
+      ).rejects.toThrow('Slack lookupUserByEmail error: users_not_found');
+    });
+  });
+
+  describe('listUsers action', () => {
+    it('should list users with defaults', async () => {
+      const mockResponse = {
+        data: {
+          ok: true,
+          members: [
+            { id: 'U1', name: 'a' },
+            { id: 'U2', name: 'b' },
+          ],
+          response_metadata: { next_cursor: 'next' },
+        },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await Slack.actions.listUsers.handler(
+        mockContext,
+        SlackListUsersInputSchema.parse({})
+      );
+
+      expect(mockClient.get).toHaveBeenCalledWith('https://slack.com/api/users.list', {
+        params: { limit: 200 },
+      });
+      expect(result).toEqual({
+        ok: true,
+        members: [
+          { id: 'U1', name: 'a' },
+          { id: 'U2', name: 'b' },
+        ],
+        nextCursor: 'next',
+        hasMore: true,
+      });
+    });
+
+    it('should pass cursor, limit, includeLocale', async () => {
+      mockClient.get.mockResolvedValue({
+        data: { ok: true, members: [], response_metadata: { next_cursor: '' } },
+      });
+
+      await Slack.actions.listUsers.handler(
+        mockContext,
+        SlackListUsersInputSchema.parse({
+          cursor: 'prev',
+          limit: 50,
+          includeLocale: true,
+        })
+      );
+
+      expect(mockClient.get).toHaveBeenCalledWith('https://slack.com/api/users.list', {
+        params: { limit: 50, cursor: 'prev', include_locale: true },
+      });
+    });
+
+    it('should return raw response when raw=true', async () => {
+      const mockResponse = { data: { ok: true, members: [{ id: 'U1' }] } };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await Slack.actions.listUsers.handler(
+        mockContext,
+        SlackListUsersInputSchema.parse({ raw: true })
+      );
+
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should throw when Slack API returns error', async () => {
+      mockClient.get.mockResolvedValue({ data: { ok: false, error: 'missing_scope' } });
+
+      await expect(
+        Slack.actions.listUsers.handler(mockContext, SlackListUsersInputSchema.parse({}))
+      ).rejects.toThrow('Slack listUsers error: missing_scope');
+    });
+  });
+
+  describe('listUserConversations action', () => {
+    it('should list conversations for a user with defaults', async () => {
+      const mockResponse = {
+        data: {
+          ok: true,
+          channels: [
+            { id: 'C1', name: 'general', is_private: false, is_archived: false, is_member: true },
+          ],
+          response_metadata: { next_cursor: '' },
+        },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await Slack.actions.listUserConversations.handler(
+        mockContext,
+        SlackListUserConversationsInputSchema.parse({ user: 'U123' })
+      );
+
+      expect(mockClient.get).toHaveBeenCalledWith('https://slack.com/api/users.conversations', {
+        params: {
+          types: 'public_channel',
+          exclude_archived: true,
+          limit: 1000,
+          user: 'U123',
+        },
+      });
+      expect(result).toEqual({
+        ok: true,
+        source: 'users.conversations',
+        channels: [
+          { id: 'C1', name: 'general', is_private: false, is_archived: false, is_member: true },
+        ],
+        nextCursor: undefined,
+        hasMore: false,
+      });
+    });
+
+    it('should omit user when not provided (lists for authenticated user)', async () => {
+      mockClient.get.mockResolvedValue({
+        data: { ok: true, channels: [], response_metadata: { next_cursor: '' } },
+      });
+
+      await Slack.actions.listUserConversations.handler(
+        mockContext,
+        SlackListUserConversationsInputSchema.parse({})
+      );
+
+      expect(mockClient.get).toHaveBeenCalledWith('https://slack.com/api/users.conversations', {
+        params: { types: 'public_channel', exclude_archived: true, limit: 1000 },
+      });
+    });
+
+    it('should pass cursor, types, excludeArchived', async () => {
+      mockClient.get.mockResolvedValue({
+        data: { ok: true, channels: [], response_metadata: { next_cursor: 'n' } },
+      });
+
+      const result = await Slack.actions.listUserConversations.handler(
+        mockContext,
+        SlackListUserConversationsInputSchema.parse({
+          user: 'U1',
+          cursor: 'prev',
+          types: ['private_channel', 'im'],
+          excludeArchived: false,
+          limit: 100,
+        })
+      );
+
+      expect(mockClient.get).toHaveBeenCalledWith('https://slack.com/api/users.conversations', {
+        params: {
+          types: 'private_channel,im',
+          exclude_archived: false,
+          limit: 100,
+          user: 'U1',
+          cursor: 'prev',
+        },
+      });
+      expect(result.hasMore).toBe(true);
+      expect(result.nextCursor).toBe('n');
+    });
+
+    it('should throw when Slack API returns error', async () => {
+      mockClient.get.mockResolvedValue({ data: { ok: false, error: 'user_not_found' } });
+
+      await expect(
+        Slack.actions.listUserConversations.handler(
+          mockContext,
+          SlackListUserConversationsInputSchema.parse({ user: 'UNKNOWN' })
+        )
+      ).rejects.toThrow('Slack listUserConversations error: user_not_found');
     });
   });
 

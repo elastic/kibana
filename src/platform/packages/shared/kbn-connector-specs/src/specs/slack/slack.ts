@@ -13,19 +13,30 @@ import type { AxiosError, AxiosResponse } from 'axios';
 import type { ConnectorSpec, ActionContext } from '../../connector_spec';
 import {
   SlackCreateConversationInputSchema,
+  SlackGetConversationHistoryInputSchema,
+  SlackGetConversationInfoInputSchema,
   SlackInviteToConversationInputSchema,
   SlackListChannelsInputSchema,
+  SlackListUserConversationsInputSchema,
+  SlackListUsersInputSchema,
+  SlackLookupUserByEmailInputSchema,
   SlackResolveChannelIdInputSchema,
   SlackSearchMessagesInputSchema,
   SlackSendMessageInputSchema,
   SLACK_SEARCH_DEFAULT_COUNT,
   type SlackAssistantSearchContextResponse,
+  type SlackConversationsHistoryResponse,
   type SlackConversationsListParams,
   type SlackConversationsListResponse,
   type SlackCreateConversationInput,
   type SlackErrorFields,
+  type SlackGetConversationHistoryInput,
+  type SlackGetConversationInfoInput,
   type SlackInviteToConversationInput,
   type SlackListChannelsInput,
+  type SlackListUserConversationsInput,
+  type SlackListUsersInput,
+  type SlackLookupUserByEmailInput,
   type SlackResolveChannelIdInput,
   type SlackSearchMessagesInput,
   type SlackSendMessageInput,
@@ -439,6 +450,254 @@ export const Slack: ConnectorSpec = {
           source: 'conversations.list',
           pagesFetched,
           nextCursor: cursor,
+        };
+      },
+    },
+
+    // https://api.slack.com/methods/conversations.history
+    getConversationHistory: {
+      isTool: false,
+      description:
+        'Fetch a page of recent messages from a Slack channel or DM. Returns messages newest-first. Pass nextCursor from the response to fetch older pages.',
+      input: SlackGetConversationHistoryInputSchema,
+      handler: async (ctx, input) => {
+        const typedInput: SlackGetConversationHistoryInput =
+          SlackGetConversationHistoryInputSchema.parse(input);
+
+        const params: Record<string, string | number | boolean> = {
+          channel: typedInput.channel,
+          limit: typedInput.limit,
+        };
+        if (typedInput.oldest) params.oldest = typedInput.oldest;
+        if (typedInput.latest) params.latest = typedInput.latest;
+        if (typedInput.inclusive !== undefined) params.inclusive = typedInput.inclusive;
+        if (typedInput.cursor) params.cursor = typedInput.cursor;
+
+        const response = await slackRequestWithRateLimitRetry<SlackConversationsHistoryResponse>({
+          ctx,
+          action: 'getConversationHistory',
+          maxRetries: SLACK_MAX_RETRIES,
+          request: () => ctx.client.get(`${SLACK_API_BASE}/conversations.history`, { params }),
+        });
+
+        if (!response.data.ok) {
+          throw new Error(
+            formatSlackApiErrorMessage({
+              action: 'getConversationHistory',
+              responseData: response.data,
+              responseHeaders: response.headers,
+            })
+          );
+        }
+
+        if (typedInput.raw) {
+          return response.data;
+        }
+
+        const messages = response.data.messages ?? [];
+        const nextCursor = response.data.response_metadata?.next_cursor;
+        const hasMore = Boolean(response.data.has_more) || Boolean(nextCursor);
+
+        return {
+          ok: true as const,
+          channel: typedInput.channel,
+          messages: messages.map((m) => ({
+            ts: m.ts,
+            type: m.type,
+            subtype: m.subtype,
+            user: m.user,
+            bot_id: m.bot_id,
+            text: m.text,
+            thread_ts: m.thread_ts,
+            reply_count: m.reply_count,
+          })),
+          nextCursor: nextCursor && nextCursor.length > 0 ? nextCursor : undefined,
+          hasMore,
+        };
+      },
+    },
+
+    // https://api.slack.com/methods/conversations.info
+    getConversationInfo: {
+      isTool: false,
+      description:
+        'Look up metadata for a single Slack channel or DM by ID. Returns the channel object (name, privacy, membership, topic, purpose).',
+      input: SlackGetConversationInfoInputSchema,
+      handler: async (ctx, input) => {
+        const typedInput: SlackGetConversationInfoInput =
+          SlackGetConversationInfoInputSchema.parse(input);
+
+        const params: Record<string, string | number | boolean> = {
+          channel: typedInput.channel,
+        };
+        if (typedInput.includeNumMembers !== undefined) {
+          params.include_num_members = typedInput.includeNumMembers;
+        }
+        if (typedInput.includeLocale !== undefined) {
+          params.include_locale = typedInput.includeLocale;
+        }
+
+        const response = await slackRequestWithRateLimitRetry({
+          ctx,
+          action: 'getConversationInfo',
+          maxRetries: SLACK_MAX_RETRIES,
+          request: () => ctx.client.get(`${SLACK_API_BASE}/conversations.info`, { params }),
+        });
+
+        if (!response.data.ok) {
+          throw new Error(
+            formatSlackApiErrorMessage({
+              action: 'getConversationInfo',
+              responseData: response.data,
+              responseHeaders: response.headers,
+            })
+          );
+        }
+
+        return response.data;
+      },
+    },
+
+    // https://api.slack.com/methods/users.lookupByEmail
+    lookupUserByEmail: {
+      isTool: false,
+      description:
+        'Find a Slack user by email address. Returns the matching user object including id, name, and profile. Throws if no user has that email.',
+      input: SlackLookupUserByEmailInputSchema,
+      handler: async (ctx, input) => {
+        const typedInput: SlackLookupUserByEmailInput =
+          SlackLookupUserByEmailInputSchema.parse(input);
+
+        const response = await slackRequestWithRateLimitRetry({
+          ctx,
+          action: 'lookupUserByEmail',
+          maxRetries: SLACK_MAX_RETRIES,
+          request: () =>
+            ctx.client.get(`${SLACK_API_BASE}/users.lookupByEmail`, {
+              params: { email: typedInput.email },
+            }),
+        });
+
+        if (!response.data.ok) {
+          throw new Error(
+            formatSlackApiErrorMessage({
+              action: 'lookupUserByEmail',
+              responseData: response.data,
+              responseHeaders: response.headers,
+            })
+          );
+        }
+
+        return response.data;
+      },
+    },
+
+    // https://api.slack.com/methods/users.list
+    listUsers: {
+      isTool: false,
+      description:
+        'List Slack workspace users (one page per call). Pass nextCursor from the previous response to fetch the next page.',
+      input: SlackListUsersInputSchema,
+      handler: async (ctx, input) => {
+        const typedInput: SlackListUsersInput = SlackListUsersInputSchema.parse(input);
+
+        const params: Record<string, string | number | boolean> = {
+          limit: typedInput.limit,
+        };
+        if (typedInput.cursor) params.cursor = typedInput.cursor;
+        if (typedInput.includeLocale !== undefined) {
+          params.include_locale = typedInput.includeLocale;
+        }
+
+        const response = await slackRequestWithRateLimitRetry({
+          ctx,
+          action: 'listUsers',
+          maxRetries: SLACK_MAX_RETRIES,
+          request: () => ctx.client.get(`${SLACK_API_BASE}/users.list`, { params }),
+        });
+
+        if (!response.data.ok) {
+          throw new Error(
+            formatSlackApiErrorMessage({
+              action: 'listUsers',
+              responseData: response.data,
+              responseHeaders: response.headers,
+            })
+          );
+        }
+
+        if (typedInput.raw) {
+          return response.data;
+        }
+
+        const members = Array.isArray(response.data.members) ? response.data.members : [];
+        const nextCursor = response.data.response_metadata?.next_cursor;
+        const hasMore = Boolean(nextCursor && nextCursor.length > 0);
+
+        return {
+          ok: true as const,
+          members,
+          nextCursor: hasMore ? nextCursor : undefined,
+          hasMore,
+        };
+      },
+    },
+
+    // https://api.slack.com/methods/users.conversations
+    listUserConversations: {
+      isTool: false,
+      description:
+        'List the channels/conversations a Slack user is a member of (one page per call). Omit user to list for the authenticated user. Pass nextCursor to fetch the next page.',
+      input: SlackListUserConversationsInputSchema,
+      handler: async (ctx, input) => {
+        const typedInput: SlackListUserConversationsInput =
+          SlackListUserConversationsInputSchema.parse(input);
+
+        const params: Record<string, string | number | boolean> = {
+          types: typedInput.types.join(','),
+          exclude_archived: typedInput.excludeArchived,
+          limit: typedInput.limit,
+        };
+        if (typedInput.user) params.user = typedInput.user;
+        if (typedInput.cursor) params.cursor = typedInput.cursor;
+
+        const response = await slackRequestWithRateLimitRetry<SlackConversationsListResponse>({
+          ctx,
+          action: 'listUserConversations',
+          maxRetries: SLACK_MAX_RETRIES,
+          request: () => ctx.client.get(`${SLACK_API_BASE}/users.conversations`, { params }),
+        });
+
+        if (!response.data.ok) {
+          throw new Error(
+            formatSlackApiErrorMessage({
+              action: 'listUserConversations',
+              responseData: response.data,
+              responseHeaders: response.headers,
+            })
+          );
+        }
+
+        if (typedInput.raw) {
+          return response.data;
+        }
+
+        const channels = response.data.channels ?? [];
+        const nextCursor = response.data.response_metadata?.next_cursor;
+        const hasMore = Boolean(nextCursor && nextCursor.length > 0);
+
+        return {
+          ok: true as const,
+          source: 'users.conversations' as const,
+          channels: channels.map((c) => ({
+            id: c.id,
+            name: c.name,
+            is_private: c.is_private,
+            is_archived: c.is_archived,
+            is_member: c.is_member,
+          })),
+          nextCursor: hasMore ? nextCursor : undefined,
+          hasMore,
         };
       },
     },
