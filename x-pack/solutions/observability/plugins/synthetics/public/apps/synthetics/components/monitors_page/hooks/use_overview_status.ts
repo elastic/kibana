@@ -45,42 +45,54 @@ export function useOverviewStatus({ scopeStatusByLocation }: { scopeStatusByLoca
   const isInitialMount = useRef(true);
 
   const { lastRefresh } = useSyntheticsRefreshContext();
-  const { statusFilter } = useGetUrlParams();
+  // Normalize the empty-string default to `undefined` so "no filter" is omitted
+  // from the fetch payload (matching the API contract) rather than sent as "".
+  const { statusFilter: statusFilterParam } = useGetUrlParams();
+  const statusFilter = statusFilterParam || undefined;
 
   const dispatch = useDispatch();
 
-  const paramsRef = useRef({ pageState, scopeStatusByLocation, loaded });
-  paramsRef.current = { pageState, scopeStatusByLocation, loaded };
+  const paramsRef = useRef({ pageState, scopeStatusByLocation, loaded, statusFilter });
+  paramsRef.current = { pageState, scopeStatusByLocation, loaded, statusFilter };
 
-  // When the status filter changes, reset to page 1.
+  // Tracks the last status filter the fetch effect reconciled, so it can detect
+  // a filter change and reset pagination in the same pass (avoiding a cross-effect race).
   const prevStatusFilterRef = useRef(statusFilter);
-  useEffect(() => {
-    if (prevStatusFilterRef.current !== statusFilter) {
-      prevStatusFilterRef.current = statusFilter;
-      dispatch(setOverviewPageStateAction({ page: 1 }));
-    }
-  }, [dispatch, statusFilter]);
 
   const { query: urlQuery } = useGetUrlParams();
   const hasUnsyncedUrlQuery = Boolean(urlQuery) && urlQuery !== (pageState.query || '');
 
+  // Auto-refresh path: quietly re-fetch the current page when the refresh timer
+  // ticks. Params are read from the ref (not deps) so this never re-runs on
+  // filter/pageState changes — which would otherwise fetch with a stale page.
   useEffect(() => {
     if (!isInitialMount.current) {
-      const { pageState: ps, scopeStatusByLocation: scope } = paramsRef.current;
+      const { pageState: ps, scopeStatusByLocation: scope, statusFilter: sf } = paramsRef.current;
       dispatch(
         quietFetchOverviewStatusAction.get({
           pageState: ps,
           scopeStatusByLocation: scope,
-          statusFilter,
+          statusFilter: sf,
         })
       );
     }
-  }, [dispatch, lastRefresh, statusFilter]);
+  }, [dispatch, lastRefresh]);
 
   useEffect(() => {
     if (isInitialMount.current) {
       isInitialMount.current = false;
+      prevStatusFilterRef.current = statusFilter;
       if (hasUnsyncedUrlQuery) {
+        return;
+      }
+    } else if (prevStatusFilterRef.current !== statusFilter) {
+      prevStatusFilterRef.current = statusFilter;
+      // When not already on page 1, reset it and let the resulting pageState
+      // change re-run this effect to fetch the correct page — skipping the
+      // stale-page fetch. When already on page 1 the reset is a Redux no-op, so
+      // fall through and fetch with the new filter immediately.
+      if (pageState.page !== 1) {
+        dispatch(setOverviewPageStateAction({ page: 1 }));
         return;
       }
     }
