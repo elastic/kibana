@@ -13,9 +13,8 @@
  *  - per-tab app/global state (query, filter, breakdown and time range).
  */
 
-import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { setupDiscoverDefaults, teardownDiscoverDefaults, testData } from '../../fixtures/common';
+import { spaceTest, tags, testData } from '../../fixtures/common';
 
 const INITIAL_SIDEBAR_FIELD_COUNT = 48;
 const FILTERED_SIDEBAR_FIELD_COUNT = 4;
@@ -30,7 +29,7 @@ spaceTest.describe('Discover tabs - tab duplication', { tag: tags.stateful.all }
   spaceTest.use({ viewport: { width: 1920, height: 1080 } });
 
   spaceTest.beforeAll(async ({ scoutSpace }) => {
-    await setupDiscoverDefaults(scoutSpace);
+    await scoutSpace.setupDiscoverDefaults();
   });
 
   spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
@@ -40,7 +39,7 @@ spaceTest.describe('Discover tabs - tab duplication', { tag: tags.stateful.all }
   });
 
   spaceTest.afterAll(async ({ scoutSpace }) => {
-    await teardownDiscoverDefaults(scoutSpace);
+    await scoutSpace.teardownDiscoverDefaults();
   });
 
   spaceTest('should restore the previous ui state', async ({ pageObjects }) => {

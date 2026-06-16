@@ -12,15 +12,14 @@
  * and stability when many tabs are opened quickly.
  */
 
-import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { setupDiscoverDefaults, teardownDiscoverDefaults } from '../../fixtures/common';
+import { spaceTest, tags } from '../../fixtures/common';
 
 spaceTest.describe('Discover tabs - opening a new tab', { tag: tags.stateful.all }, () => {
   spaceTest.use({ viewport: { width: 1920, height: 1080 } });
 
   spaceTest.beforeAll(async ({ scoutSpace }) => {
-    await setupDiscoverDefaults(scoutSpace);
+    await scoutSpace.setupDiscoverDefaults();
   });
 
   spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
@@ -30,7 +29,7 @@ spaceTest.describe('Discover tabs - opening a new tab', { tag: tags.stateful.all
   });
 
   spaceTest.afterAll(async ({ scoutSpace }) => {
-    await teardownDiscoverDefaults(scoutSpace);
+    await scoutSpace.teardownDiscoverDefaults();
   });
 
   spaceTest('should create a new tab in classic mode', async ({ pageObjects }) => {
