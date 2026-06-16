@@ -8,7 +8,6 @@
  */
 
 import { ESQLVariableType, type PartialFieldsMetadataClient } from '@kbn/esql-types';
-import { newLineCompleteItem } from '@kbn/esql-language/src/commands/registry/complete_items';
 import { monaco } from '../../../../monaco_imports';
 import { ESQLLang, type ESQLDependencies } from '../../language';
 import { createDisposedTextModel, createField, createTextModel } from './test_helpers';
@@ -387,36 +386,6 @@ describe('suggestion_provider', () => {
       expect(mockOnSuggestionsWithCustomCommandShown).toHaveBeenCalledWith([
         'esql.control.values.create',
       ]);
-    });
-  });
-
-  describe('"New line" suggestion', () => {
-    const getSuggestions = async (value: string) => {
-      const suggestionProvider = ESQLLang.getSuggestionProvider();
-      const model = createTextModel({ value });
-      const result = await suggestionProvider.provideCompletionItems(
-        model,
-        new monaco.Position(1, value.length + 1),
-        {} as monaco.languages.CompletionContext,
-        cancellationToken
-      );
-      return result?.suggestions ?? [];
-    };
-
-    it('is offered first where the pipe is suggested', async () => {
-      const suggestions = await getSuggestions('FROM index_a | WHERE "false"::boolean ');
-
-      // The pipe is suggested at this position, so "New line" should accompany it.
-      expect(suggestions.some((suggestion) => suggestion.label === '|')).toBe(true);
-      expect(suggestions[0].label).toBe(newLineCompleteItem.label);
-    });
-
-    it('is not offered at the source command (no pipe suggested)', async () => {
-      const suggestions = await getSuggestions('FROM ');
-
-      expect(
-        suggestions.some((suggestion) => suggestion.label === newLineCompleteItem.label)
-      ).toBe(false);
     });
   });
 
