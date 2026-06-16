@@ -40,6 +40,12 @@ export interface StreamsTestApiService {
   enable: () => Promise<void>;
   disable: () => Promise<void>;
   isEnabled: () => Promise<boolean>;
+  runSignificantEventsDiscovery: () => Promise<{ executionId: string }>;
+  cancelSignificantEventsDiscovery: () => Promise<{ executionId: string | null }>;
+  getSignificantEventsDiscoveryStatus: () => Promise<{
+    status: string;
+    executionId: string | null;
+  }>;
   listStreams: () => Promise<{ streams: Streams.all.Definition[] }>;
   getStream: (streamName: string) => Promise<IngestStream.all.GetResponse>;
   createStream: (streamName: string, body: Streams.all.UpsertRequest) => Promise<void>;
@@ -445,6 +451,50 @@ export function getStreamsTestApiService({
           }
         }
       });
+    },
+
+    async runSignificantEventsDiscovery() {
+      return measurePerformanceAsync(
+        log,
+        'streamsTestApi.runSignificantEventsDiscovery',
+        async () => {
+          const response = await kbnClient.request({
+            method: 'POST',
+            path: '/internal/streams/significant_events/discovery/_execute',
+            body: { action: 'trigger' },
+          });
+          return response.data as { executionId: string };
+        }
+      );
+    },
+
+    async cancelSignificantEventsDiscovery() {
+      return measurePerformanceAsync(
+        log,
+        'streamsTestApi.cancelSignificantEventsDiscovery',
+        async () => {
+          const response = await kbnClient.request({
+            method: 'POST',
+            path: '/internal/streams/significant_events/discovery/_execute',
+            body: { action: 'cancel' },
+          });
+          return response.data as { executionId: string | null };
+        }
+      );
+    },
+
+    async getSignificantEventsDiscoveryStatus() {
+      return measurePerformanceAsync(
+        log,
+        'streamsTestApi.getSignificantEventsDiscoveryStatus',
+        async () => {
+          const response = await kbnClient.request({
+            method: 'GET',
+            path: '/internal/streams/significant_events/discovery/_status',
+          });
+          return response.data as { status: string; executionId: string | null };
+        }
+      );
     },
 
     // Insights API methods
