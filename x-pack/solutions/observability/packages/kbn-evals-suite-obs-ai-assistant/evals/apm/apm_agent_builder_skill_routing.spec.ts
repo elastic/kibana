@@ -85,8 +85,26 @@ evaluate.describe(
         log.error(`Failed to create or fire custom threshold rule: ${e}`);
       }
 
-      // Allow rule runs and index refresh to settle
-      await new Promise((resolve) => setTimeout(resolve, 2500));
+      // Wait (bounded) for each rule to actually execute, rather than a blind fixed sleep.
+      // Poll the rule's execution status until it leaves the initial `pending` state.
+      const POLL_ATTEMPTS = 20;
+      const POLL_INTERVAL_MS = 1000;
+      for (const ruleId of ruleIds) {
+        for (let attempt = 0; attempt < POLL_ATTEMPTS; attempt++) {
+          try {
+            const { data: rule } = await kbnClient.request<RuleResponse>({
+              method: 'GET',
+              path: `/api/alerting/rule/${ruleId}`,
+            });
+            if (rule.execution_status && rule.execution_status.status !== 'pending') {
+              break;
+            }
+          } catch (e) {
+            log.debug(`Polling status for rule ${ruleId} failed: ${e}`);
+          }
+          await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
+        }
+      }
     });
 
     // ─── APM alert → investigate-apm-alert skill selected ───────────────────
@@ -108,7 +126,9 @@ evaluate.describe(
                 output: {
                   criteria: [
                     'Identifies an active APM alert for eval-payment with rule type apm.transaction_error_rate',
-                    'Loads the investigate-apm-alert skill (explicitly references it or follows its structured output contract)',
+                    // The judge cannot reliably observe skill selection from the response text, so this
+                    // is phrased around the observable output contract rather than the skill name.
+                    'Follows the investigate-apm-alert output contract (metrics card, trend chart, and service map rendered before the prose analysis)',
                     'Produces an observability.apm-metrics attachment for eval-payment',
                     'Produces an observability.apm-timeseries attachment showing error rate or latency over time for eval-payment',
                     'Produces an observability.service-map attachment showing service topology for eval-payment',
