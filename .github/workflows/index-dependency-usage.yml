@@ -6,6 +6,7 @@ on:
   push:
     branches:
       - 'on-week-deps'
+
   workflow_dispatch:
     inputs:
       setup_template:
