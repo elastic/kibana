@@ -30,7 +30,7 @@ steps:
         The data is in these specific Elasticsearch indices:
         - Logs:    {{ inputs.stream_names[0] }}
         - Traces:  {{ inputs.stream_names[1] }}
-        - Metrics: {{ inputs.stream_names[2] }} (infrastructure signals: CPU, memory, network, latency)
+        - Metrics: {{ inputs.stream_names[2] }}
 
         Use get_index_info to discover available fields in any index before querying.
 
@@ -42,8 +42,8 @@ steps:
         - Record every attempt including failed lookups and access blockers.
         - 0 rows means the condition is not currently firing — move on rather than retrying
           with the same parameters.
-        - For infrastructure hypotheses (CPU stress, memory pressure, socket/network saturation),
-          query the metrics index first — these faults produce minimal APM trace signal.
+        - Don't assume the fault type. Depending on the hypothesis, the strongest signal may be
+          in metrics, logs, or traces — query whichever stream the hypothesis implicates first.
 
         Key investigation principle: a service showing errors or latency is often a
         downstream victim of a failing dependency, not the source of the problem.

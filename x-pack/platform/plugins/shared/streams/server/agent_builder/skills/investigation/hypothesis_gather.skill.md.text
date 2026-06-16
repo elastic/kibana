@@ -25,7 +25,7 @@ CRITICAL — every ES|QL query MUST follow these rules to avoid hitting token li
 - For error rates, use `STATS count(*) WHERE level == "error" BY service.name | LIMIT 10`.
 - Never fetch full log messages unless you specifically need the message content.
 
-Good example: `FROM logs-* | WHERE @timestamp >= NOW() - 1h AND service.name == "currencyservice" | STATS error_count = COUNT(*) WHERE log.level == "error", total = COUNT(*) BY DATE_TRUNC(5m, @timestamp) | SORT @timestamp | LIMIT 12`
+Good example: `FROM logs-* | WHERE @timestamp >= NOW() - 1h AND service.name == "<service-name>" | STATS error_count = COUNT(*) WHERE log.level == "error", total = COUNT(*) BY DATE_TRUNC(5m, @timestamp) | SORT @timestamp | LIMIT 12`
 
 Bad example: `FROM logs-* | LIMIT 1000` (too many rows, fetches all fields)
 </esql_rules>

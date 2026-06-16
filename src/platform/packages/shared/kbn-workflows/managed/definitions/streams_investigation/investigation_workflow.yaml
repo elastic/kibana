@@ -37,20 +37,20 @@ steps:
         Data streams (use get_index_info to discover available fields in each):
         - Logs:    {{ inputs.stream_names[0] }}
         - Traces:  {{ inputs.stream_names[1] }}
-        - Metrics: {{ inputs.stream_names[2] }} (infrastructure signals: CPU, memory, network, latency)
+        - Metrics: {{ inputs.stream_names[2] }}
         Event metadata: {{ inputs | json }}
 
         Before generating hypotheses, run exploratory queries across all three streams.
-        The metrics stream is especially valuable for resource-level faults (CPU stress,
-        memory pressure, socket exhaustion) that leave minimal signal in APM trace data.
+        Check every stream — depending on the fault, the strongest signal may be in metrics,
+        logs, or traces. Don't assume a particular kind of fault up front.
 
         Key principles from observability investigation:
 
         - Many problems originate in one service but surface as errors or latency spikes
           in its callers. Check dependencies early: a service with high error rates may
           be a downstream victim of a failing dependency, not the root cause itself.
-        - Infrastructure faults often produce degraded latency rather than hard errors —
-          always check the metrics stream for the suspected service before concluding "no signal".
+        - A fault may surface as degraded latency rather than hard errors, and in any stream —
+          check logs, traces, and metrics for the suspected service before concluding "no signal".
         - A service having errors is a symptom, not a root cause. Investigate WHY it has
           errors — which of its dependencies are healthy vs unhealthy?
         - Match claims to evidence depth. Evidence from a caller's perspective does not
