@@ -18,7 +18,7 @@ export const TruncatedCallout = ({ data, searchParam }: Props) => {
     const searchMatches = data?.searchMatches ?? null;
     const truncatedTypes: TruncatedType[] =
         searchMatches !== null
-            ? (['policies', 'rules'] as const).filter((t) => searchMatches[t] > -1)
+            ? (['policies', 'rules'] as const).filter((t) => searchMatches[t] > searchMatches.cap)
             : [];
     const showSearchTruncatedCallout = searchParam !== undefined && truncatedTypes.length > 0 && searchMatches !== null;
 
