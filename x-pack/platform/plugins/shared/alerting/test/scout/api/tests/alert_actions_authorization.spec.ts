@@ -43,7 +43,7 @@ apiTest.describe(
 
       // does not include alert actions privilege
       restrictedCreds = await requestAuth.getApiKeyForCustomRole({
-        kibana: [{ base: [], feature: { logs: ['all'] }, spaces: ['*'] }],
+        kibana: [{ base: [], feature: { stackAlerts: ['all'] }, spaces: ['*'] }],
         elasticsearch: { cluster: [], indices: [{ names: ['.alerts-*'], privileges: ['read'] }] },
       });
 
@@ -79,7 +79,7 @@ apiTest.describe(
         body: {
           name: 'Scout mute-instance-authz test rule',
           rule_type_id: '.es-query',
-          consumer: 'logs',
+          consumer: 'alerts',
           schedule: { interval: '1m' },
           enabled: true,
           params: ES_QUERY_PARAMS,
@@ -245,7 +245,7 @@ apiTest.describe(
         };
 
         const { cookieHeader } = await samlAuth.asInteractiveUser({
-          kibana: [{ base: [], feature: { logs: ['all'] }, spaces: ['*'] }],
+          kibana: [{ base: [], feature: { stackAlerts: ['all'] }, spaces: ['*'] }],
           elasticsearch: {
             cluster: [],
             indices: [{ names: ['.alerts-*'], privileges: ['read'] }],
