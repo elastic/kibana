@@ -79,6 +79,8 @@ export {
   type ConfirmationPromptResponseState,
   type AuthorizationPromptResponseState,
   type PromptResponseState,
+  AUTHORIZATION_METHODS,
+  isAuthorizationMethod,
   ConfirmationStatus,
   AuthorizationStatus,
   AgentPromptType,

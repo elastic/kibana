@@ -6,7 +6,7 @@
  */
 
 import type { UserIdAndName } from '../base/users';
-import type { ToolOrigin } from '../tools/definition';
+import type { ToolOrigin, ToolType } from '../tools/definition';
 import type { ToolResult } from '../tools/tool_result';
 import type { ExecutionStatus, SerializedExecutionError } from '../agents/execution_status';
 import type {
@@ -137,6 +137,7 @@ export interface ToolCallWithResult {
    */
   tool_call_group_id?: string;
   tool_origin?: ToolOrigin;
+  tool_type?: ToolType;
 }
 
 export type ToolCallStep = ConversationRoundStepMixin<

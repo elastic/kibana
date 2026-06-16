@@ -60,7 +60,12 @@ export interface ConfirmPromptDefinition {
   color?: ConfirmPromptColor;
 }
 
-export type AuthorizationMethod = 'oauth_authorization_code';
+export const AUTHORIZATION_METHODS = ['oauth_authorization_code', 'ears'] as const;
+
+export type AuthorizationMethod = (typeof AUTHORIZATION_METHODS)[number];
+
+export const isAuthorizationMethod = (value: unknown): value is AuthorizationMethod =>
+  typeof value === 'string' && (AUTHORIZATION_METHODS as readonly string[]).includes(value);
 
 export interface AuthorizationPromptDefinition {
   id: string;

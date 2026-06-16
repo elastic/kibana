@@ -22,7 +22,7 @@ const event: SigEvent = {
   created_at: '2026-01-01T00:00:00.000Z',
   event_id: 'event-1',
   discovery_slug: 'payment-outage',
-  verdict: 'promoted',
+  status: 'promoted',
   stream_names: ['logs.payment'],
   title: 'Payment outage',
   summary: 'Payments are failing.',
@@ -103,7 +103,10 @@ describe('createSignificantEventSmlType', () => {
         expect.objectContaining({
           type: SIGNIFICANT_EVENT_SML_TYPE,
           title: 'Payment outage',
-          permissions: ['api:read_stream'],
+          permissions: {
+            kibana: { privileges: [{ name: 'api:read_stream' }] },
+            elasticsearch: { indices: [] },
+          },
         }),
       ],
     });
@@ -123,11 +126,15 @@ describe('createSignificantEventSmlType', () => {
           type: SIGNIFICANT_EVENT_SML_TYPE,
           title: 'Payment outage',
           origin_id: 'payment-outage',
+          origin: { uri: `${SIGNIFICANT_EVENT_SML_TYPE}://payment-outage` },
           content: 'Payment outage',
           created_at: '2026-01-01T00:00:00.000Z',
           updated_at: '2026-01-01T00:00:00.000Z',
           spaces: ['default'],
-          permissions: ['api:read_stream'],
+          permissions: {
+            kibana: { privileges: [{ name: 'api:read_stream' }] },
+            elasticsearch: { indices: [] },
+          },
           ingestion_method: 'manual',
         },
         {

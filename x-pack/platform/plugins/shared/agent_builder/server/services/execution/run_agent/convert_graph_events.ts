@@ -159,13 +159,15 @@ export const convertGraphEvents = ({
                   // ask_user_question intentionally does NOT produce a generic
                   // toolCallEvent — it has its own dedicated step lifecycle event
                   // (askUserQuestionPendingStepEvent) emitted at executeTool.on_chain_end.
+                  const { origin: toolOrigin, type: toolType } = toolManager.getToolMeta(toolId);
                   events.push(
                     createToolCallEvent({
                       toolId,
                       toolCallId,
                       params: toolCallArgs,
                       toolCallGroupId,
-                      toolOrigin: toolManager.getToolOrigin(toolId),
+                      toolOrigin,
+                      toolType,
                     })
                   );
                 }
