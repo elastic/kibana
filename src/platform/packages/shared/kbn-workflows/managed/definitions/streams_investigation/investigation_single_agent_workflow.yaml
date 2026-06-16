@@ -20,6 +20,11 @@ tags:
 
 triggers:
   - type: manual
+    inputs:
+      properties:
+        connector_id:
+          type: string
+          default: ".anthropic-claude-4.5-haiku-chat_completion"
 
 steps:
 
@@ -27,7 +32,7 @@ steps:
   - name: investigate
     type: ai.agent
     agent-id: elastic-ai-agent
-    connector-id: ".anthropic-claude-4.5-haiku-chat_completion"
+    connector-id: '{{ inputs.connector_id }}'
     create-conversation: true
     with:
       timeout: 1800s

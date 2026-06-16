@@ -57,6 +57,7 @@ export interface SimpleWorkflowInput {
   scenarioTitle: string;
   service: string;
   faultType: string;
+  connectorId?: string;
 }
 
 function formatSingleAgentResult(output: SingleAgentOutput): string {
@@ -95,7 +96,7 @@ export class SimpleWorkflowClient {
   ) {}
 
   async run(input: SimpleWorkflowInput): Promise<ConverseResponse> {
-    const { streamNames, scenarioId, service, faultType } = input;
+    const { streamNames, scenarioId, service, faultType, connectorId } = input;
     const opaqueId = randomUUID();
     const discoveryId = `eval-simple-${opaqueId}`;
 
@@ -124,6 +125,7 @@ export class SimpleWorkflowClient {
             stream_names: streamNames,
             cause_kis: [],
             evidences: [],
+            ...(connectorId ? { connector_id: connectorId } : {}),
           },
         }),
       }
