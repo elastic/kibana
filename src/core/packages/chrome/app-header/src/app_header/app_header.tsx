@@ -17,6 +17,7 @@ import type {
   AppHeaderMetadataItems,
   AppHeaderPadding,
   AppHeaderTab,
+  AppHeaderTitle,
 } from '../types';
 import { useHasLegacyActionMenu } from './hooks/chrome';
 import { AppHeaderShell } from './app_header_shell';
@@ -29,7 +30,7 @@ import { AppHeaderMetadata } from './app_header_metadata';
 import { useResolvedBadges, useShareAction } from './hooks';
 
 export interface AppHeaderViewProps {
-  title?: string;
+  title?: AppHeaderTitle;
   back?: AppHeaderBack | AppHeaderBack[];
   tabs?: AppHeaderTab[];
   badges?: AppHeaderBadge[];
@@ -59,6 +60,12 @@ export const AppHeaderView = React.memo<AppHeaderViewProps>(
     const hasLegacyActionMenu = useHasLegacyActionMenu();
     const shareAction = useShareAction(menu);
     const resolvedBadges = useResolvedBadges(badges);
+
+    // A second row (tabs or metadata) makes a taller, multi-line header where an `xs` title looks
+    // too small, so bump the title to `s` there; single-row headers stay `xs`.
+    const isMultiRow = !!tabs?.length || !!metadata?.length;
+    const titleSize = isMultiRow ? 's' : 'xs';
+
     const show =
       title !== undefined ||
       back !== undefined ||
@@ -78,7 +85,7 @@ export const AppHeaderView = React.memo<AppHeaderViewProps>(
 
     return (
       <AppHeaderShell
-        title={<TitleArea title={title} back={back} />}
+        title={<TitleArea title={title} back={back} size={titleSize} />}
         badges={<AppBadges badges={resolvedBadges} />}
         titleActions={<TitleActions shareAction={shareAction} favorite={favorite} />}
         trailing={
@@ -96,7 +103,7 @@ export const AppHeaderView = React.memo<AppHeaderViewProps>(
 AppHeaderView.displayName = 'AppHeaderView';
 
 export interface AppHeaderProps extends AppHeaderViewProps {
-  title: string;
+  title: AppHeaderTitle;
 }
 
 export const AppHeader = React.memo<AppHeaderProps>((props) => {

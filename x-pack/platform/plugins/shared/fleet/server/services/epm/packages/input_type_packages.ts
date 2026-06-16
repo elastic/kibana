@@ -44,6 +44,78 @@ import { cleanupAssets } from './remove';
 export const getDatasetName = (packagePolicyInput: NewPackagePolicyInput[]): string =>
   packagePolicyInput[0].streams[0]?.vars?.[DATASET_VAR_NAME]?.value;
 
+interface CustomDatasetStream {
+  datasetName: string;
+  dataStreamType: string;
+  inputType: string;
+  resolvedDataStream?: RegistryDataStream;
+  originDataset?: string;
+}
+
+export const getCustomDatasetStreams = (
+  packagePolicy: NewPackagePolicy | PackagePolicy,
+  pkgInfo: PackageInfo
+): CustomDatasetStream[] => {
+  if (pkgInfo.type === 'input') {
+    const datasetName = getDatasetName(packagePolicy.inputs);
+    if (!datasetName) return [];
+
+    const isDynamicSignalTypes = hasDynamicSignalTypes(pkgInfo);
+    const signalTypes: string[] = isDynamicSignalTypes
+      ? ['logs', 'metrics', 'traces']
+      : [
+          packagePolicy.inputs[0].streams[0].vars?.[DATA_STREAM_TYPE_VAR_NAME]?.value ||
+            packagePolicy.inputs[0].streams[0].data_stream?.type ||
+            'logs',
+        ];
+
+    return signalTypes.map((type) => ({
+      datasetName,
+      dataStreamType: type,
+      inputType: packagePolicy.inputs[0].type,
+    }));
+  }
+
+  const defaultDatasets = new Set((pkgInfo.data_streams || []).map((ds) => ds.dataset));
+  const seen = new Set<string>();
+  const results: CustomDatasetStream[] = [];
+
+  for (const input of packagePolicy.inputs || []) {
+    if (input.enabled === false) continue;
+    for (const stream of input.streams || []) {
+      if (stream.enabled === false) continue;
+
+      const datasetVarValue = stream.vars?.[DATASET_VAR_NAME]?.value;
+      if (
+        !datasetVarValue ||
+        typeof datasetVarValue !== 'string' ||
+        defaultDatasets.has(datasetVarValue)
+      ) {
+        continue;
+      }
+
+      const dataStreamType = stream.data_stream.type || 'logs';
+      const dedupeKey = `${datasetVarValue}:${dataStreamType}`;
+      if (seen.has(dedupeKey)) continue;
+      seen.add(dedupeKey);
+
+      const templateDs = (pkgInfo.data_streams || []).find(
+        (ds) => ds.dataset === stream.data_stream.dataset && ds.type === dataStreamType
+      );
+
+      results.push({
+        datasetName: datasetVarValue,
+        dataStreamType,
+        inputType: input.type,
+        resolvedDataStream: templateDs ? { ...templateDs, dataset: datasetVarValue } : undefined,
+        originDataset: templateDs ? stream.data_stream.dataset : undefined,
+      });
+    }
+  }
+
+  return results;
+};
+
 export const findDataStreamsFromDifferentPackages = async (
   datasetName: string,
   pkgInfo: PackageInfo,
@@ -73,25 +145,23 @@ export const checkExistingDataStreamsAreFromDifferentPackage = (
 export const isInputPackageDatasetUsedByMultiplePolicies = (
   packagePolicies: PackagePolicy[],
   datasetName: string,
-  pkgName: string
+  pkgName: string,
+  excludePolicyId?: string
 ) => {
-  const allStreams = packagePolicies
-    .filter(
-      (packagePolicy) =>
-        packagePolicy?.package?.name === pkgName || packagePolicy?.package?.type === 'input'
-    )
-    .flatMap((packagePolicy) => {
-      return packagePolicy?.inputs[0]?.streams ?? [];
-    });
-  const filtered = allStreams.filter(
-    (stream) => stream.vars?.[DATASET_VAR_NAME]?.value === datasetName
-  );
+  const matchingPolicies = packagePolicies.filter((packagePolicy) => {
+    if (packagePolicy?.package?.name !== pkgName) return false;
+    if (excludePolicyId && packagePolicy.id === excludePolicyId) return false;
+    return (packagePolicy?.inputs ?? []).some((input) =>
+      (input?.streams ?? []).some(
+        (stream) => stream.vars?.[DATASET_VAR_NAME]?.value === datasetName
+      )
+    );
+  });
 
-  return filtered.length > 1;
+  return matchingPolicies.length > 0;
 };
 
-// install the assets needed for inputs type packages
-export async function installAssetsForInputPackagePolicy(opts: {
+export async function installAssetsForCustomDatasetPolicy(opts: {
   pkgInfo: PackageInfo;
   logger: Logger;
   packagePolicy: NewPackagePolicy;
@@ -101,33 +171,40 @@ export async function installAssetsForInputPackagePolicy(opts: {
 }) {
   const { pkgInfo, logger, packagePolicy, esClient, soClient, force } = opts;
 
-  if (pkgInfo.type !== 'input') return;
+  const customStreams = getCustomDatasetStreams(packagePolicy, pkgInfo);
+  if (customStreams.length === 0) return;
 
-  const datasetName = getDatasetName(packagePolicy.inputs);
-
-  // For OTel packages with dynamic_signal_types, we need to create index templates for all signal types
-  const isDynamicSignalTypes = hasDynamicSignalTypes(pkgInfo);
-  const signalTypes: string[] = isDynamicSignalTypes
-    ? ['logs', 'metrics', 'traces']
-    : [
-        packagePolicy.inputs[0].streams[0].vars?.[DATA_STREAM_TYPE_VAR_NAME]?.value ||
-          packagePolicy.inputs[0].streams[0].data_stream?.type ||
-          'logs',
-      ];
-
-  // Check each signal type and install templates as needed
-  for (const dataStreamType of signalTypes) {
+  for (const {
+    datasetName,
+    dataStreamType,
+    inputType,
+    resolvedDataStream,
+    originDataset,
+  } of customStreams) {
     await installAssetsForDataStreamType({
       pkgInfo,
       logger,
       datasetName,
       dataStreamType,
-      inputType: packagePolicy.inputs[0].type,
+      inputType,
       esClient,
       soClient,
       force,
+      resolvedDataStream,
+      originDataset,
     });
   }
+}
+
+export async function installAssetsForInputPackagePolicy(opts: {
+  pkgInfo: PackageInfo;
+  logger: Logger;
+  packagePolicy: NewPackagePolicy;
+  esClient: ElasticsearchClient;
+  soClient: SavedObjectsClientContract;
+  force: boolean;
+}) {
+  return installAssetsForCustomDatasetPolicy(opts);
 }
 
 async function installAssetsForDataStreamType(opts: {
@@ -139,24 +216,52 @@ async function installAssetsForDataStreamType(opts: {
   esClient: ElasticsearchClient;
   soClient: SavedObjectsClientContract;
   force: boolean;
+  resolvedDataStream?: RegistryDataStream;
+  originDataset?: string;
 }) {
-  const { pkgInfo, logger, datasetName, dataStreamType, inputType, esClient, soClient, force } =
-    opts;
-
-  const { dataStream, existingDataStreams } = await findDataStreamsFromDifferentPackages(
-    datasetName,
+  const {
     pkgInfo,
-    esClient,
-    dataStreamType
-  );
-
-  applyTimeSeriesIndexMode({
-    dataStream,
-    inputType,
-    dataStreamType,
-    pkgName: pkgInfo.name,
     logger,
-  });
+    datasetName,
+    dataStreamType,
+    inputType,
+    esClient,
+    soClient,
+    force,
+    resolvedDataStream,
+    originDataset,
+  } = opts;
+
+  let dataStream: RegistryDataStream;
+  let existingDataStreams: IndicesDataStream[];
+
+  if (resolvedDataStream) {
+    dataStream = resolvedDataStream;
+    if (!dataStream.type) {
+      throw new FleetError(`Expected data_stream.type to be defined for dataset "${datasetName}"`);
+    }
+    existingDataStreams = await dataStreamService.getMatchingDataStreams(esClient, {
+      type: dataStream.type,
+      dataset: datasetName,
+    });
+  } else {
+    ({ dataStream, existingDataStreams } = await findDataStreamsFromDifferentPackages(
+      datasetName,
+      pkgInfo,
+      esClient,
+      dataStreamType
+    ));
+  }
+
+  if (pkgInfo.type === 'input') {
+    applyTimeSeriesIndexMode({
+      dataStream,
+      inputType,
+      dataStreamType,
+      pkgName: pkgInfo.name,
+      logger,
+    });
+  }
 
   if (existingDataStreams.length) {
     const existingDataStreamsAreFromDifferentPackage =
@@ -260,14 +365,16 @@ async function installAssetsForDataStreamType(opts: {
       esClient,
       logger,
       onlyForDataStreams: [dataStream],
+      customDataStreamOriginDataset: resolvedDataStream ? originDataset : undefined,
+      customDataStreamOriginType: resolvedDataStream ? dataStreamType : undefined,
     });
 
-    // Update ES index patterns
+    // Update ES index patterns — use datasetName as the map key
     await optimisticallyAddEsAssetReferences(
       soClient,
       installedPkgWithAssets.installation.name,
       [],
-      generateESIndexPatterns([dataStream])
+      generateESIndexPatterns([{ ...dataStream, path: datasetName }])
     );
   } catch (error) {
     logger.warn(`installAssetsForInputPackagePolicy error: ${error}`);
@@ -284,8 +391,8 @@ export async function removeAssetsForInputPackagePolicy(opts: {
 }) {
   const { logger, packageInfo, esClient, savedObjectsClient, datasetName } = opts;
 
-  if (packageInfo.type === 'input' && packageInfo.status === 'installed') {
-    logger.info(`Removing assets for input package ${packageInfo.name}:${packageInfo.version}`);
+  if (packageInfo.status === 'installed') {
+    logger.info(`Removing assets for package ${packageInfo.name}:${packageInfo.version}`);
     try {
       const installation = await getInstallation({
         savedObjectsClient,
@@ -328,7 +435,7 @@ export async function removeAssetsForInputPackagePolicy(opts: {
       );
     } catch (error) {
       logger.error(
-        `Failed to remove assets for input package ${packageInfo.name}:${packageInfo.version}: ${error.message}`
+        `Failed to remove assets for package ${packageInfo.name}:${packageInfo.version}: ${error.message}`
       );
     }
   }

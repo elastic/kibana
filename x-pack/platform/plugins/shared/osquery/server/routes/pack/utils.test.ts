@@ -113,13 +113,13 @@ describe('Pack utils', () => {
       );
     });
 
-    test('injects space_id at the pack level (not per-query) via default_space_id', () => {
+    test('injects space_id per-query (osquerybeat reads it) and default_space_id at the pack level', () => {
       const output = convertSOQueriesToPackConfig(getTestQueries(), {
         spaceId: 'my-space',
         isRruleFeatureEnabled: true,
       });
       expect(output.default_space_id).toBe('my-space');
-      expect(output.queries).toStrictEqual(getOneLiner({}));
+      expect(output.queries).toStrictEqual(getOneLiner({ space_id: 'my-space' }));
     });
   });
 
