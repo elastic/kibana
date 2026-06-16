@@ -202,6 +202,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
   }, [featureId, effectiveRecommendedEndpoints, onEndpointsChange]);
 
   const showAddModelPopover = canManage && (!hasOverflow || isExpanded) && canAddMore;
+  const showCopyToButton = canManage && (!hasOverflow || isExpanded) && hasOtherSubFeatures;
 
   return (
     <>
@@ -476,7 +477,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                       />
                     </EuiFlexItem>
                   )}
-                  {canManage && (!hasOverflow || isExpanded) && hasOtherSubFeatures && (
+                  {showCopyToButton && (
                     <EuiFlexItem grow={false}>
                       <EuiButtonEmpty
                         iconType="copy"

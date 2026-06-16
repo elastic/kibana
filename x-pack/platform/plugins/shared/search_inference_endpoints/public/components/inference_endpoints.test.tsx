@@ -271,7 +271,7 @@ describe('InferenceEndpoints', () => {
       expect(screen.getByTestId('externalInferenceHeader')).toBeInTheDocument();
     });
 
-    it('hides the Add endpoint CTA in the empty prompt', () => {
+    it('hides the Add endpoint button in the empty prompt', () => {
       useQueryInferenceEndpoints.mockReturnValue({
         data: onlyElasticEndpoints,
         isLoading: false,

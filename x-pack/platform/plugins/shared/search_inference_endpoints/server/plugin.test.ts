@@ -82,7 +82,7 @@ describe('SearchInferenceEndpointsPlugin', () => {
       });
     });
 
-    it('registers feature with read privilege enabled for browsing', () => {
+    it('registers feature with read privilege enabled', () => {
       plugin.setup(coreSetup, { features });
 
       const feature = features.registerKibanaFeature.mock.calls[0][0];
