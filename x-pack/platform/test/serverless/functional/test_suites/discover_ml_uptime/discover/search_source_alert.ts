@@ -230,11 +230,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const openDiscoverAlertFlyout = async () => {
     await testSubjects.click('app-menu-overflow-button');
     await testSubjects.click('discoverAlertsButton');
-    // Different create rule buttons in serverless
     if (await testSubjects.exists('discoverCreateAlertButton')) {
       await testSubjects.click('discoverCreateAlertButton');
+    } else if (await testSubjects.exists('discoverLegacySearchThresholdRule')) {
+      await testSubjects.click('discoverLegacySearchThresholdRule');
     } else {
-      await testSubjects.click('discoverAppMenuCustomThresholdRule');
+      throw new Error('No discover alert rule option found in the app menu');
     }
   };
 

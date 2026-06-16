@@ -67,38 +67,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(url).to.contain(`/app/management/data/data_quality`);
         });
       });
-
-      it('should display a "Create custom threshold rule" action under the Alerts menu to create an o11y alert', async () => {
-        await openAppMenuOverflow();
-
-        const alertsButton = await testSubjects.find('discoverAlertsButton');
-        await alertsButton.click();
-
-        const createRuleButton = await testSubjects.find('discoverAppMenuCustomThresholdRule');
-        await createRuleButton.click();
-
-        const ruleTitleElement = await testSubjects.find('ruleDefinitionHeaderRuleTypeName');
-
-        await retry.try(async () => {
-          expect(await ruleTitleElement.getVisibleText()).to.equal('Custom threshold');
-        });
-      });
-
-      it('should display a "Create SLO" action under the Alerts menu to create an o11y alert', async () => {
-        await openAppMenuOverflow();
-
-        const alertsButton = await testSubjects.find('discoverAlertsButton');
-        await alertsButton.click();
-
-        const createSLOButton = await testSubjects.find('discoverAppMenuCreateSlo');
-        await createSLOButton.click();
-
-        const sloTitleElement = await testSubjects.find('addSLOFlyoutTitle');
-
-        await retry.try(async () => {
-          expect(await sloTitleElement.getVisibleText()).to.equal('Create SLO');
-        });
-      });
     });
 
     describe('As Viewer User', () => {

@@ -32,7 +32,6 @@ export class RuleFormPage {
   public readonly flyoutValidationCallout: Locator;
   public readonly form: Locator;
   public readonly esqlModeButton: Locator;
-  public readonly discoverQuerySubmitButton: Locator;
 
   private readonly codeEditor: KibanaCodeEditorWrapper;
 
@@ -46,16 +45,15 @@ export class RuleFormPage {
     // flyout tests the Next button doubles as the "proceed / save" gate.
     this.flyoutSaveButton = this.page.testSubj.locator('composeDiscoverNext');
     this.cancelButton = this.page.testSubj.locator('composeDiscoverCancel');
-    // Inline name validation error rendered by EUI inside the name field's form row.
-    this.nameFieldError = this.page
-      .locator('#ruleV2FormNameField')
-      .getByText('Name is required', { exact: false });
     // The ComposeDiscoverFlyout title ID.
     this.flyout = this.page.locator('[aria-labelledby="composeDiscoverFlyoutTitle"]');
+    // Inline name validation error on the Details step (EuiFormRow invalid state).
+    this.nameFieldError = this.flyout
+      .locator('.euiFormRow-isInvalid')
+      .getByText(/Name is required/);
     this.flyoutValidationCallout = this.page.testSubj.locator('ruleV2FlyoutValidationErrors');
     this.form = this.page.locator(`#${RULE_FORM_ID}`);
     this.esqlModeButton = this.page.testSubj.locator('select-text-based-language-btn');
-    this.discoverQuerySubmitButton = this.page.testSubj.locator('querySubmitButton');
   }
 
   async gotoCreate() {
@@ -98,6 +96,7 @@ export class RuleFormPage {
   }
 
   async clickFlyoutSave() {
+    await this.waitForNextButtonEnabled();
     await this.flyoutSaveButton.click();
   }
 
@@ -108,12 +107,25 @@ export class RuleFormPage {
    * is enabled from the very first step.
    */
   async navigateToDetailsStep() {
-    const nextButton = this.page.testSubj.locator('composeDiscoverNext');
-    // alertCondition → recoveryCondition
-    await nextButton.click();
-    // recoveryCondition → details
-    await nextButton.click();
+    await this.clickNextWhenEnabled();
+    await this.clickNextWhenEnabled();
     await this.nameInput.waitFor({ state: 'visible' });
+  }
+
+  private async waitForNextButtonEnabled() {
+    await this.discoverAppMenu.dismissQuerySandboxIfOpen();
+    await this.flyoutSaveButton.waitFor({ state: 'visible' });
+    await this.page.waitForFunction(() => {
+      const button = document.querySelector(
+        '[data-test-subj="composeDiscoverNext"]'
+      ) as HTMLButtonElement | null;
+      return Boolean(button && !button.disabled);
+    });
+  }
+
+  private async clickNextWhenEnabled() {
+    await this.waitForNextButtonEnabled();
+    await this.flyoutSaveButton.click();
   }
 
   async switchToEsqlMode() {
@@ -133,8 +145,15 @@ export class RuleFormPage {
     await this.codeEditor.setCodeEditorValue(query, 0);
   }
 
+  /**
+   * Submits the Discover ES|QL query while the compose flyout is open.
+   * The flyout overlay intercepts pointer events on the submit button, so we
+   * trigger the click programmatically instead.
+   */
   async submitDiscoverQuery() {
-    await this.discoverQuerySubmitButton.click();
+    await this.page.evaluate(() => {
+      document.querySelector<HTMLButtonElement>('[data-test-subj="querySubmitButton"]')?.click();
+    });
   }
 
   /** Scroll the rule form to the bottom (used to assert error callout in viewport). */

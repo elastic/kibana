@@ -78,5 +78,30 @@ export class DiscoverAppMenu {
     await this.openAlertsMenu(options);
     await this.selectorFlyout.waitFor({ state: 'visible' });
     await this.createEsqlRuleCard.click();
+    await this.waitForComposeDiscoverFlyout();
+  }
+
+  /**
+   * In create mode ComposeDiscoverFlyout opens the query sandbox by default
+   * (`childOpen: true`), which disables Next until the user applies.
+   */
+  async dismissQuerySandboxIfOpen() {
+    const applyButton = this.page.testSubj.locator('querySandboxApply');
+    try {
+      await applyButton.waitFor({ state: 'visible', timeout: 5_000 });
+      await applyButton.click();
+      await applyButton.waitFor({ state: 'hidden' });
+    } catch {
+      // Sandbox not shown — already dismissed or not in create mode.
+    }
+  }
+
+  /** Waits until ComposeDiscoverFlyout is open and the sandbox gate is cleared. */
+  async waitForComposeDiscoverFlyout() {
+    await this.page.locator('[aria-labelledby="composeDiscoverFlyoutTitle"]').waitFor({
+      state: 'visible',
+    });
+    await this.page.testSubj.locator('composeDiscoverNext').waitFor({ state: 'visible' });
+    await this.dismissQuerySandboxIfOpen();
   }
 }

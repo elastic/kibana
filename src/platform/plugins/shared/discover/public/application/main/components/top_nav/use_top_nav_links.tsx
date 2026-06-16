@@ -148,6 +148,16 @@ export const useTopNavLinks = ({
   const canCreateESQLRule = !!services.alertingVTwo;
   const showCreateRuleV2 = isEsqlMode && canCreateESQLRule;
 
+  const getAppMenuAccessor = useProfileAccessor('getAppMenu');
+
+  const profileAppMenuExtension = useMemo(() => {
+    const getAppMenu = getAppMenuAccessor(() => ({
+      appMenuRegistry: (registry) => registry,
+    }));
+
+    return getAppMenu(discoverParams);
+  }, [getAppMenuAccessor, discoverParams]);
+
   const appMenuItems: DiscoverAppMenuItemType[] = useMemo(() => {
     const items: DiscoverAppMenuItemType[] = [];
 
@@ -299,8 +309,6 @@ export const useTopNavLinks = ({
     switchLanguageMode,
   ]);
 
-  const getAppMenuAccessor = useProfileAccessor('getAppMenu');
-
   const appMenuRegistry = useMemo(() => {
     const newAppMenuRegistry = new AppMenuRegistry();
 
@@ -402,16 +410,11 @@ export const useTopNavLinks = ({
     }
 
     // Allow profile accessors to add additional items/popover items
-    const getAppMenu = getAppMenuAccessor(() => ({
-      appMenuRegistry: () => newAppMenuRegistry,
-    }));
-
-    const registry = getAppMenu(discoverParams).appMenuRegistry(newAppMenuRegistry);
+    const registry = profileAppMenuExtension.appMenuRegistry(newAppMenuRegistry);
 
     return registry;
   }, [
-    getAppMenuAccessor,
-    discoverParams,
+    profileAppMenuExtension,
     appMenuItems,
     services,
     dispatch,
