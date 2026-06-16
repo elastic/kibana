@@ -217,7 +217,13 @@ export class DatePicker {
     if (await this.isNewDateRangePicker()) {
       await this.page.testSubj.locator('dateRangePickerControlButton').click();
       await this.page.testSubj.locator('dateRangePickerMainPanel').waitFor();
-      const presetItem = this.page.testSubj.locator(`dateRangePickerPresetItem-${option}`);
+      // The new picker's `toTestSubj` replaces every whitespace run with an
+      // underscore, whereas EUI's legacy quick-menu only replaces the first
+      // space. Callers pass the legacy form (e.g. "Last_15 minutes"), so
+      // normalise the remaining whitespace here for the new picker.
+      const presetItem = this.page.testSubj.locator(
+        `dateRangePickerPresetItem-${option.replace(/\s+/g, '_')}`
+      );
       await expect(presetItem).toBeVisible();
       await presetItem.click();
     } else {
@@ -302,6 +308,41 @@ export class DatePicker {
     const start = await this.page.testSubj.innerText('superDatePickerstartDatePopoverButton');
     const end = await this.page.testSubj.innerText('superDatePickerendDatePopoverButton');
     return { start, end };
+  }
+
+  /**
+   * Returns the human-readable time range label shown by whichever picker is
+   * active.
+   *
+   * - New DateRangePicker: the value-display node renders the full label
+   *   (e.g. "Last 24 hours", "30 days ago → 10 days ago").
+   * - Legacy EuiSuperDatePicker: joins the start/end popover button labels when
+   *   an explicit start/end range is shown, otherwise returns the quick-range
+   *   "show dates" label.
+   */
+  async getTimeRangeText(containerLocator?: Locator): Promise<string> {
+    if (await this.isNewDateRangePicker(containerLocator)) {
+      const valueDisplay = this.getTestSubjLocator('dateRangePickerValueDisplay', containerLocator);
+      return (await valueDisplay.innerText()).trim();
+    }
+
+    const startButton = this.getTestSubjLocator(
+      'superDatePickerstartDatePopoverButton',
+      containerLocator
+    );
+    if (await startButton.isVisible()) {
+      const start = (await startButton.innerText()).trim();
+      const end = (
+        await this.getTestSubjLocator(
+          'superDatePickerendDatePopoverButton',
+          containerLocator
+        ).innerText()
+      ).trim();
+      return `${start} - ${end}`;
+    }
+    return (
+      await this.getTestSubjLocator('superDatePickerShowDatesButton', containerLocator).innerText()
+    ).trim();
   }
 
   async startAutoRefresh(interval: number, dateUnit: DateUnitSelector = DateUnitSelector.Seconds) {
