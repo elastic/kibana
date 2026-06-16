@@ -43,6 +43,7 @@ spaceTest.describe(
       'navigates to context view from a saved-search dashboard panel',
       async ({ page, pageObjects, scoutSpace }) => {
         const searchName = `context search ${scoutSpace.id}`;
+        const dashboardName = `context dashboard ${scoutSpace.id}`;
 
         await pageObjects.filterBar.addFilter({
           field: 'extension.raw',
@@ -56,10 +57,9 @@ spaceTest.describe(
         await pageObjects.dashboard.addSavedSearch(searchName);
         await pageObjects.discover.waitUntilSearchingHasFinished();
         await pageObjects.discover.waitForDocTableRendered();
+        await pageObjects.dashboard.saveDashboard(dashboardName);
 
-        page.once('dialog', (dialog) => dialog.accept());
         await pageObjects.discover.openSurroundingDocuments(0);
-        await page.testSubj.locator('confirmModalConfirmButton').click();
 
         await expect(page).toHaveURL(/#\/context/);
         await pageObjects.discover.waitForDocTableRendered();
