@@ -9,7 +9,11 @@
 
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
-import type { DataViewsPublicPluginStart, MatchedItem } from '@kbn/data-views-plugin/public';
+import type {
+  DataViewsPublicPluginStart,
+  IndexKind,
+  MatchedItem,
+} from '@kbn/data-views-plugin/public';
 import {
   ExternalServicesProvider,
   type ExternalServices,
@@ -35,7 +39,7 @@ const mockedUseMetricsExperienceState = useMetricsExperienceState as jest.Mock;
 const mockedUseReportChartSectionError = useReportChartSectionError as jest.Mock;
 const TEST_PROFILE_ID = 'metrics-data-source-profile';
 
-const matchedItem = (name: string, key: 'data_stream' | 'index'): MatchedItem =>
+const matchedItem = (name: string, key: IndexKind): MatchedItem =>
   ({
     name,
     tags: [{ key, name: key, color: 'default' }],

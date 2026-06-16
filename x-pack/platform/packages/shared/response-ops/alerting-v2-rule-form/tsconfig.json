@@ -2,20 +2,10 @@
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": [
-      "jest",
-      "node",
-      "react",
-      "@testing-library/jest-dom"
-    ]
+    "types": ["jest", "node", "react", "@testing-library/jest-dom", "@kbn/ambient-ui-types"]
   },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx"
-  ],
-  "exclude": [
-    "target/**/*"
-  ],
+  "include": ["**/*.ts", "**/*.tsx", ".storybook/**/*.ts", ".storybook/**/*.tsx"],
+  "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/i18n",
     "@kbn/i18n-react",
@@ -40,7 +30,17 @@
     "@kbn/visualization-utils",
     "@kbn/expressions-plugin",
     "@kbn/code-editor",
-    "@kbn/esql-language"
+    "@kbn/esql-language",
+    "@kbn/core-http-browser",
+    "@kbn/ui-actions-plugin",
+    "@kbn/workflows",
+    "@kbn/workflows-ui",
+    "@kbn/workflows-yaml",
+    "@kbn/triggers-actions-ui-plugin",
+    "@kbn/core-di-browser",
+    "@kbn/core-di",
+    "@kbn/announcement-banner",
+    "@kbn/kibana-react-plugin",
+    "@kbn/dashboard-plugin"
   ]
 }
-

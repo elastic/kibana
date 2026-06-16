@@ -9,8 +9,13 @@
 
 import { z } from '@kbn/zod/v4';
 import { getTriggerHoverContent, getTriggerTypeAtPath } from './get_trigger_hover_content';
+import { setMockStabilityBadgeThemeForTests } from '../stability/set_mock_stability_badge_theme_for_tests';
 
 describe('getTriggerHoverContent', () => {
+  beforeEach(() => {
+    setMockStabilityBadgeThemeForTests();
+  });
+
   it('returns null for built-in trigger: manual', () => {
     const result = getTriggerHoverContent('manual');
     expect(result).toBeNull();
@@ -43,8 +48,9 @@ describe('getTriggerHoverContent', () => {
 
     const result = getTriggerHoverContent('cases.updated', getTriggerDefinition('cases.updated'));
     expect(result).not.toBeNull();
-    expect(result!.value).toContain('Tech Preview');
-    expect(result!.value).toContain(
+    expect(result!.value).toContain('Tech preview');
+    expect(result!.value).toContain('<img src="data:image/svg+xml,');
+    expect(result!.value).not.toContain(
       'This functionality is experimental and not supported. It may change or be removed at any time.'
     );
     expect(result!.value).toContain('Case updated');

@@ -13,7 +13,7 @@ import { useCallback } from 'react';
 import { useExternalServices } from '../../../context/external_services';
 import { ERROR_TYPE } from '../../../utils/error_labels';
 import { toLoggable } from '../../../utils/logger_utils';
-import { EsqlResponseError } from '../utils/esql_response_error';
+import { EsqlResponseError } from '../../../common/errors/esql_response_error';
 import { isSuppressedFetchError } from '../utils/is_suppressed_fetch_error';
 
 /** APM label identifying which chart-section call site produced an error. */

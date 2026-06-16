@@ -16,6 +16,7 @@ export enum WorkflowsManagementApiActions {
   'create' = `${WORKFLOWS_MANAGEMENT_FEATURE_ID}:create`,
   'read' = `${WORKFLOWS_MANAGEMENT_FEATURE_ID}:read`,
   'update' = `${WORKFLOWS_MANAGEMENT_FEATURE_ID}:update`,
+  'updateManaged' = `${WORKFLOWS_MANAGEMENT_FEATURE_ID}:managed:update`,
   'delete' = `${WORKFLOWS_MANAGEMENT_FEATURE_ID}:delete`,
   'execute' = `${WORKFLOWS_MANAGEMENT_FEATURE_ID}:execute`,
   'readExecution' = `${WORKFLOWS_MANAGEMENT_FEATURE_ID}:readExecution`,
