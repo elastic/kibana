@@ -254,7 +254,7 @@ export const getTimesliderControlFactory = (): EmbeddablePublicDefinition<
       const relatedPanelsApi = initializeRelatedPanels({
         uuid,
         parentApi,
-        // Timeslider always applies global fitlers, so only compare if the sibling uses global filters
+        // Timeslider always applies global filters, so only compare if the sibling uses global filters
         isRelated: (sibling) => {
           return apiHasUseGlobalFiltersSetting(sibling)
             ? Boolean(sibling.useGlobalFilters$.getValue())
