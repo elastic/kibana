@@ -35,6 +35,7 @@ export {
   isIntegrationPolicyTemplate,
   getNormalizedInputs,
   getNormalizedDataStreams,
+  getPolicyTemplateDataStreamPaths,
   filterPolicyTemplatesTiles,
 } from './policy_template';
 export { doesPackageHaveIntegrations } from './packages_with_integrations';
