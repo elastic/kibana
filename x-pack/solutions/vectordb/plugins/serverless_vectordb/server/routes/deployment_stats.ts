@@ -7,6 +7,7 @@
 
 import type { IRouter, Logger } from '@kbn/core/server';
 import { AuthzDisabled } from '@kbn/core-security-server';
+import { DEPLOYMENT_STATS_PATH } from '../../common/constants';
 
 interface MappingProperty {
   type?: string;
@@ -36,7 +37,7 @@ export const containsVectorField = (properties?: Record<string, MappingProperty>
 export const registerDeploymentStatsRoute = (router: IRouter, logger: Logger) => {
   router.get(
     {
-      path: '/internal/serverless_vectordb/deployment_stats',
+      path: DEPLOYMENT_STATS_PATH,
       validate: false,
       security: {
         authz: AuthzDisabled.delegateToESClient,

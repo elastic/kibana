@@ -27,6 +27,7 @@ import type {
   NetworkDirectionProcessor,
   JsonExtractProcessor,
   EnrichProcessor,
+  UserAgentProcessor,
   RegisteredDomainProcessor,
 } from '@kbn/streamlang';
 import type { EnrichmentDataSource } from '../../../../../common/url_schema';
@@ -84,6 +85,7 @@ export type NetworkDirectionFormState = Omit<
   internal_networks_field?: string;
 };
 export type EnrichFormState = EnrichProcessor;
+export type UserAgentFormState = UserAgentProcessor;
 export type RegisteredDomainFormState = RegisteredDomainProcessor;
 
 export type SpecialisedFormState =
@@ -107,6 +109,7 @@ export type SpecialisedFormState =
   | JsonExtractFormState
   | NetworkDirectionFormState
   | EnrichFormState
+  | UserAgentFormState
   | RegisteredDomainFormState;
 
 export type ProcessorFormState = SpecialisedFormState | ConfigDrivenProcessorFormState;

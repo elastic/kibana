@@ -2151,6 +2151,151 @@ describe('getFullAgentPolicy', () => {
         hosts: ['https://remote-es.example.com:9200'],
       });
     });
+
+    it('should pass packageOutputs with override entry when package policy has output_id', async () => {
+      const overrideOutputId = 'override-output-id';
+      mockedFetchRelatedSavedObjects.mockResolvedValue({
+        outputs: [
+          {
+            id: 'test-id',
+            is_default: true,
+            is_default_monitoring: true,
+            name: 'default',
+            type: 'elasticsearch',
+            hosts: ['http://127.0.0.1:9201'],
+          },
+          {
+            id: overrideOutputId,
+            is_default: false,
+            is_default_monitoring: false,
+            name: 'override',
+            type: 'elasticsearch',
+            hosts: ['http://override-es:9201'],
+          },
+        ],
+        proxies: [],
+        dataOutput: {
+          id: 'test-id',
+          is_default: true,
+          is_default_monitoring: true,
+          name: 'default',
+          type: 'elasticsearch',
+          hosts: ['http://127.0.0.1:9201'],
+        },
+        monitoringOutput: {
+          id: 'test-id',
+          is_default: true,
+          is_default_monitoring: true,
+          name: 'default',
+          type: 'elasticsearch',
+          hosts: ['http://127.0.0.1:9201'],
+        },
+        downloadSource: {
+          id: 'default-download-source-id',
+          is_default: true,
+          name: 'Default host',
+          host: 'http://default-registry.co',
+        },
+        downloadSourceProxy: undefined,
+        fleetServerHost: {
+          name: 'default Fleet Server',
+          id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
+          is_default: true,
+          host_urls: ['http://fleetserver:8220'],
+          is_preconfigured: false,
+        },
+      });
+
+      mockAgentPolicy({
+        package_policies: [
+          {
+            id: 'pkg-policy-1',
+            name: 'otel-policy',
+            namespace: 'default',
+            enabled: true,
+            output_id: overrideOutputId,
+            package: { name: 'otelpackage', version: '1.0.0', title: 'OTel Package' },
+            inputs: [{ type: 'otelcol', enabled: true, streams: [] }],
+            created_at: '',
+            updated_at: '',
+            created_by: '',
+            updated_by: '',
+            revision: 1,
+            policy_id: '',
+            policy_ids: [''],
+          },
+        ],
+      });
+
+      await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
+
+      expect(mockedGenerateOtelcolConfig).toHaveBeenCalled();
+      const callArgs = mockedGenerateOtelcolConfig.mock.calls[0][0];
+      expect(callArgs.packageOutputs).toBeInstanceOf(Map);
+      const packageOutputs = callArgs.packageOutputs as Map<string, Output>;
+      expect(packageOutputs.size).toBe(1);
+      expect(packageOutputs.get('pkg-policy-1')).toBeDefined();
+      expect(packageOutputs.get('pkg-policy-1')!.id).toBe(overrideOutputId);
+    });
+
+    it('should pass empty packageOutputs when no package policies have output_id', async () => {
+      mockAgentPolicy({
+        package_policies: [
+          {
+            id: 'pkg-policy-1',
+            name: 'otel-policy',
+            namespace: 'default',
+            enabled: true,
+            package: { name: 'otelpackage', version: '1.0.0', title: 'OTel Package' },
+            inputs: [{ type: 'otelcol', enabled: true, streams: [] }],
+            created_at: '',
+            updated_at: '',
+            created_by: '',
+            updated_by: '',
+            revision: 1,
+            policy_id: '',
+            policy_ids: [''],
+          },
+        ],
+      });
+
+      await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
+
+      expect(mockedGenerateOtelcolConfig).toHaveBeenCalled();
+      const callArgs = mockedGenerateOtelcolConfig.mock.calls[0][0];
+      expect(callArgs.packageOutputs).toBeInstanceOf(Map);
+      expect((callArgs.packageOutputs as Map<string, Output>).size).toBe(0);
+    });
+
+    it('should omit a packageOutputs entry when the output_id references a non-existent output', async () => {
+      mockAgentPolicy({
+        package_policies: [
+          {
+            id: 'pkg-policy-1',
+            name: 'otel-policy',
+            namespace: 'default',
+            enabled: true,
+            output_id: 'nonexistent-output-id',
+            package: { name: 'otelpackage', version: '1.0.0', title: 'OTel Package' },
+            inputs: [{ type: 'otelcol', enabled: true, streams: [] }],
+            created_at: '',
+            updated_at: '',
+            created_by: '',
+            updated_by: '',
+            revision: 1,
+            policy_id: '',
+            policy_ids: [''],
+          },
+        ],
+      });
+
+      await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
+
+      expect(mockedGenerateOtelcolConfig).toHaveBeenCalled();
+      const callArgs = mockedGenerateOtelcolConfig.mock.calls[0][0];
+      expect(callArgs.packageOutputs).toBeInstanceOf(Map);
+      expect((callArgs.packageOutputs as Map<string, Output>).size).toBe(0);
+    });
   });
 });
 
