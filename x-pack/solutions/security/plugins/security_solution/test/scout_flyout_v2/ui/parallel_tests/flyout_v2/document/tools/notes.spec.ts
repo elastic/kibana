@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  spaceTest,
-  tags,
-  CUSTOM_QUERY_RULE,
-  NOTES_TOOL_CONTENT_TEST_SUBJ,
-} from '@kbn/scout-security';
+import { spaceTest, tags, CUSTOM_QUERY_RULE } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
 
 spaceTest.describe(
@@ -34,21 +29,88 @@ spaceTest.describe(
     });
 
     spaceTest(
-      'opens notes tool overlay via the header notes button',
-      async ({ pageObjects, page }) => {
+      'shows the no-notes empty state and a header that opens the child document flyout',
+      async ({ pageObjects }) => {
         await pageObjects.alertsTablePage.navigate();
         await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
         await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
         await pageObjects.documentFlyoutV2.waitForAlertFlyout();
 
-        // Fresh alerts render the full add button; documents with existing notes render the icon.
-        await expect(pageObjects.documentFlyoutV2.notesAddButton).toBeVisible();
-        await expect(pageObjects.documentFlyoutV2.notesAddButtonIcon).toBeHidden();
         await pageObjects.documentFlyoutV2.openNotes();
+        await expect(pageObjects.notesTool.content).toBeVisible({ timeout: 10_000 });
 
-        await expect(page.getByTestId(NOTES_TOOL_CONTENT_TEST_SUBJ)).toBeVisible({
-          timeout: 10_000,
-        });
+        // Fetch resolves to no notes, so the empty-state message is shown and no comments render.
+        await expect(pageObjects.notesTool.noNotesMessage).toBeVisible({ timeout: 10_000 });
+        await expect(pageObjects.notesTool.noteComments).toHaveCount(0);
+
+        // Header shows the rule name and the alert (warning) icon
+        await expect(pageObjects.notesTool.toolsFlyoutTitle).toContainText(ruleName);
+        await expect(pageObjects.notesTool.toolsFlyoutTitleAlertIcon).toBeVisible();
+
+        // Clicking the header opens a child document flyout for the same alert
+        await pageObjects.notesTool.toolsFlyoutTitle.click();
+        await pageObjects.documentFlyoutV2.waitForChildDocumentFlyout();
+        await expect(pageObjects.documentFlyoutV2.childDocumentAlertTitle).toContainText(ruleName);
+      }
+    );
+
+    spaceTest(
+      'adds a note which appears in the list and updates the header notes count',
+      async ({ pageObjects }) => {
+        const noteText = `Scout note ${Date.now()}`;
+
+        await pageObjects.alertsTablePage.navigate();
+        await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
+        await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
+        await pageObjects.documentFlyoutV2.waitForAlertFlyout();
+
+        await pageObjects.documentFlyoutV2.openNotes();
+        await expect(pageObjects.notesTool.content).toBeVisible({ timeout: 10_000 });
+        await expect(pageObjects.notesTool.noNotesMessage).toBeVisible({ timeout: 10_000 });
+
+        await pageObjects.notesTool.addNote(noteText);
+
+        // The created note renders as a single comment containing the text.
+        await expect(pageObjects.notesTool.noteComments).toHaveCount(1, { timeout: 15_000 });
+        await expect(pageObjects.notesTool.noteComment(0)).toContainText(noteText);
+        await expect(pageObjects.notesTool.noNotesMessage).toBeHidden();
+
+        // The header notes count badge reflects the newly added note.
+        await expect(pageObjects.documentFlyoutV2.notesCount).toHaveText('1', { timeout: 15_000 });
+      }
+    );
+
+    spaceTest(
+      'deletes a note and the original flyout header reflects the remaining count',
+      async ({ pageObjects }) => {
+        const now = Date.now();
+
+        await pageObjects.alertsTablePage.navigate();
+        await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
+        await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
+        await pageObjects.documentFlyoutV2.waitForAlertFlyout();
+
+        await pageObjects.documentFlyoutV2.openNotes();
+        await expect(pageObjects.notesTool.content).toBeVisible({ timeout: 10_000 });
+
+        // Seed two notes so a single deletion leaves a verifiable count behind.
+        await pageObjects.notesTool.addNote(`Scout note A ${now}`);
+        await expect(pageObjects.notesTool.noteComments).toHaveCount(1, { timeout: 15_000 });
+        await pageObjects.notesTool.addNote(`Scout note B ${now}`);
+        await expect(pageObjects.notesTool.noteComments).toHaveCount(2, { timeout: 15_000 });
+
+        // Deleting prompts a confirmation modal before the note is removed.
+        await pageObjects.notesTool.deleteNoteButton(0).click();
+        await expect(pageObjects.notesTool.deleteConfirmModal).toBeVisible();
+        await pageObjects.notesTool.deleteConfirmButton.click();
+        await expect(pageObjects.notesTool.noteComments).toHaveCount(1, { timeout: 15_000 });
+
+        // Navigate back to the original document flyout; its header notes count shows the
+        // remaining note.
+        await pageObjects.notesTool.backButton.click();
+        await pageObjects.documentFlyoutV2.waitForAlertFlyout();
+        await expect(pageObjects.documentFlyoutV2.notesCount).toHaveText('1', { timeout: 15_000 });
+        await expect(pageObjects.documentFlyoutV2.notesAddButton).toBeHidden();
       }
     );
   }
