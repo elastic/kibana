@@ -219,9 +219,6 @@ export function getActionsConfigurationUtilities(
       ...getSSLSettingsFromConfig(config.ssl?.verificationMode),
       cert: config.ssl?.certificate ? readFileSync(config.ssl.certificate) : undefined,
       key: config.ssl?.key ? readFileSync(config.ssl.key) : undefined,
-      ca: config.ssl?.certificateAuthorities
-        ? readFileSync(config.ssl.certificateAuthorities)
-        : undefined,
     }),
     ensureUriAllowed(uri: string) {
       if (!isUriAllowed(uri)) {

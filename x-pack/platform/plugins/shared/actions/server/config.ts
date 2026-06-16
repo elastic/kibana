@@ -118,7 +118,6 @@ export const configSchema = schema.object({
         ),
         certificate: schema.maybe(schema.string()),
         key: schema.maybe(schema.string()),
-        certificateAuthorities: schema.maybe(schema.string()),
       },
       {
         validate: (rawConfig) => {
