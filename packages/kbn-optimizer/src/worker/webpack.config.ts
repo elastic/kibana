@@ -81,42 +81,10 @@ export function getWebpackConfig(
       },
     },
 
-    externals: [
-      function (
-        { context, request }: { context?: string; request?: string },
-        callback: (err?: null | Error, result?: string) => void
-      ) {
-        // Let redux-toolkit-v1 resolve its own nested copies of redux-related
-        // deps (immer v9, redux v4, etc.) instead of the shared externals
-        // (immer v10 / RTK v2). RTK v1 calls immer's enableES5() which was
-        // removed in immer v10.
-        if (
-          context &&
-          request &&
-          /node_modules[\\/]redux-toolkit-v1/.test(context) &&
-          ['immer', '@reduxjs/toolkit', 'redux', 'react-redux', 'reselect'].includes(request)
-        ) {
-          return callback();
-        }
-
-        // Let kea resolve react-redux normally (not as shared external) so the
-        // NormalModuleReplacementPlugin below can redirect it to react-redux-v7.
-        if (context && request === 'react-redux' && /node_modules[\\/]kea/.test(context)) {
-          return callback();
-        }
-
-        const sharedExternals: Record<string, string> = {
-          'node:crypto': 'commonjs crypto',
-          ...UiSharedDepsSrc.externals,
-        };
-
-        if (request && request in sharedExternals) {
-          return callback(null, sharedExternals[request]);
-        }
-
-        return callback();
-      },
-    ],
+    externals: {
+      'node:crypto': 'commonjs crypto',
+      ...UiSharedDepsSrc.externals,
+    },
 
     plugins: [
       // Redirect kea's react-redux import to react-redux-v7 so it shares the
