@@ -11,6 +11,7 @@ import { getIndexFromPromQLParams } from '@kbn/esql-language';
 import type { ESQLSource, ESQLCommand, ESQLAstPromqlCommand } from '@elastic/esql/types';
 
 const INDEX_SOURCE_COMMANDS = new Set(['FROM', 'TS']);
+const SOURCE_SELECTOR_SEPARATOR = '::';
 
 export interface ESQLIndexPatterns {
   indexPattern: string;
@@ -44,11 +45,15 @@ function getIndexSources(commands: ESQLCommand[]): ESQLSource[] {
     return [];
   }
 
+  const directSources = (sourceCommand.args as ESQLSource[]).filter(
+    (arg): arg is ESQLSource => arg.sourceType === 'index'
+  );
+
   const subquerySources = sourceCommand.args
     .filter(isSubQuery)
     .flatMap((subquery) => getDirectIndexSources(subquery.child.commands));
 
-  return [...getDirectIndexSources(commands), ...subquerySources];
+  return [...directSources, ...subquerySources];
 }
 
 function getSourceNameWithoutRemoteClusterPrefix(source: ESQLSource): string {
@@ -56,7 +61,9 @@ function getSourceNameWithoutRemoteClusterPrefix(source: ESQLSource): string {
     return source.name;
   }
 
-  return source.text.slice(source.index.location.min - source.location.min);
+  const selector = source.selector ? `${SOURCE_SELECTOR_SEPARATOR}${source.selector.value}` : '';
+
+  return `${source.index.value}${selector}`;
 }
 
 export function getIndexPatternsFromESQLQuery(esql?: string): ESQLIndexPatterns {
