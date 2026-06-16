@@ -10,9 +10,16 @@ import { EuiButton, EuiPopover, EuiContextMenuPanel } from '@elastic/eui';
 import { RunTestManuallyContextItem } from './run_test_manually';
 import { EditMonitorContextItem } from './monitor_summary/edit_monitor_link';
 import { RefreshContextItem } from '../common/components/refresh_button';
+import { useGetUrlParams } from '../../hooks';
 
 export function Actions() {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  // Remote (CCS) monitors have no local saved object, so mutating actions
+  // (edit, run test manually) cannot operate on them. We detect remoteness
+  // from the URL — the same source `useSelectedMonitor` / `useRemoteMonitor`
+  // use to decide whether the monitor is remote.
+  const { remoteName } = useGetUrlParams();
+  const isRemote = Boolean(remoteName);
   const handleActionsClick = () => setIsPopoverOpen((value) => !value);
   const closePopover = () => setIsPopoverOpen(false);
   return (
@@ -38,9 +45,9 @@ export function Actions() {
     >
       <EuiContextMenuPanel
         items={[
-          <EditMonitorContextItem key="edit-monitor" />,
+          <EditMonitorContextItem key="edit-monitor" isRemote={isRemote} />,
           <RefreshContextItem key="refresh-monitor" />,
-          <RunTestManuallyContextItem key="run-test-manually" />,
+          <RunTestManuallyContextItem key="run-test-manually" isRemote={isRemote} />,
         ]}
       />
     </EuiPopover>
