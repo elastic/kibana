@@ -1871,10 +1871,18 @@ describe('current status route', () => {
       const queryFilter = filters.find((f: any) => f.simple_query_string);
       expect(queryFilter).toBeDefined();
       expect(queryFilter.simple_query_string.query).toBe('"Observability UI"');
+      // Must stay aligned with the saved-object search fields (MONITOR_SEARCH_FIELDS)
+      // so a monitor matched by the list query keeps its ping/status data.
       expect(queryFilter.simple_query_string.fields).toEqual([
         'monitor.name',
+        'monitor.name.text',
         'tags',
+        'observer.name',
+        'observer.geo.name',
+        'urls',
+        'hosts',
         'url.full',
+        'url.domain',
         'monitor.project.id',
       ]);
     });

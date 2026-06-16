@@ -88,6 +88,30 @@ export const MONITOR_SEARCH_FIELDS = [
   'project_id.text',
 ];
 
+/**
+ * Ping-document equivalents of `MONITOR_SEARCH_FIELDS`, used to scope the
+ * overview status aggregation by the search box query.
+ *
+ * These MUST stay aligned with the saved-object search fields above: the
+ * overview lists monitors via the saved-object search but derives each
+ * monitor's status from ping data matched by these fields. A field that lists a
+ * monitor (e.g. by location or host) but is not matched here would strip that
+ * monitor's status data, misclassifying it — e.g. a `stale` monitor would read
+ * as `pending`.
+ */
+export const MONITOR_STATUS_PING_SEARCH_FIELDS = [
+  'monitor.name',
+  'monitor.name.text',
+  'tags',
+  'observer.name',
+  'observer.geo.name',
+  'urls',
+  'hosts',
+  'url.full',
+  'url.domain',
+  'monitor.project.id',
+];
+
 interface Filters {
   filter?: string;
   tags?: string | string[];

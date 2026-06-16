@@ -14,7 +14,7 @@ import { withApmSpan } from '@kbn/apm-data-access-plugin/server/utils/with_apm_s
 import { ALL_SPACES_ID } from '@kbn/security-plugin/common/constants';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import type { OverviewStatusQuery } from '../common';
-import { getMonitorFilters } from '../common';
+import { getMonitorFilters, MONITOR_STATUS_PING_SEARCH_FIELDS } from '../common';
 import { ConfigKey, MONITOR_STATUS_ENUM } from '../../../common/constants/monitor_management';
 import { processMonitors } from '../../saved_objects/synthetics_monitor/process_monitors';
 import type { RouteContext } from '../types';
@@ -205,7 +205,12 @@ export class OverviewStatusService {
       filters.push({
         simple_query_string: {
           query,
-          fields: ['monitor.name', 'tags', 'url.full', 'monitor.project.id'],
+          // Mirror the saved-object search fields so a monitor matched by the
+          // list query keeps its ping data here. A narrower field set would
+          // list a monitor (e.g. by location or host) while excluding its
+          // pings, stripping its status — a `stale` monitor would read as
+          // `pending` and change color once a search filter is applied.
+          fields: MONITOR_STATUS_PING_SEARCH_FIELDS,
           default_operator: 'OR',
         },
       });
