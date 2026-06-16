@@ -18,7 +18,7 @@ import {
   EuiButton,
   EuiText,
 } from '@elastic/eui';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FormProvider } from 'react-hook-form';
@@ -34,10 +34,12 @@ import {
 } from '../../form';
 import { ScheduleSection } from '../../components/schedule_section';
 import { ToggleableRow } from '../../components/schedule_section/toggleable_row';
+import { validateScheduleFormData } from '../../components/schedule_section/validation';
 import {
   QUERY_OVERRIDE_SCHEDULE_TOGGLE_DESCRIPTION,
   QUERY_OVERRIDE_SCHEDULE_TOGGLE_LABEL,
   QUERY_USING_PACK_SCHEDULE_LABEL,
+  TIMEOUT_RRULE_INHERIT_HELP,
 } from '../../components/schedule_section/translations';
 import { CodeEditorField } from '../../saved_queries/form/code_editor_field';
 import { PlatformCheckBoxGroupField } from './platform_checkbox_group_field';
@@ -88,6 +90,14 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
   const overridePackSchedule = watch('override_pack_schedule');
   const schedule = watch('schedule');
 
+  const isTimeoutInherited =
+    isRruleSchedulingEnabled && !overridePackSchedule && packSchedule?.schedule_type === 'rrule';
+  const timeoutFieldProps = useMemo(
+    () =>
+      isTimeoutInherited ? { isDisabled: true, title: TIMEOUT_RRULE_INHERIT_HELP } : undefined,
+    [isTimeoutInherited]
+  );
+
   const handleToggleOverride = useCallback(
     (next: boolean) => {
       setValue('override_pack_schedule', next, { shouldDirty: true });
@@ -102,6 +112,13 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
     [setValue]
   );
   const onSubmit = async (payload: PackQueryFormData) => {
+    if (payload.override_pack_schedule && payload.schedule) {
+      const scheduleErrors = validateScheduleFormData(payload.schedule);
+      if (scheduleErrors.length > 0) {
+        return;
+      }
+    }
+
     const serializedData: PackSOQueryFormData = serializer(payload);
     await onSave(serializedData);
     onClose();
@@ -227,7 +244,7 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
                   <PlatformCheckBoxGroupField />
                 </EuiFlexItem>
                 <EuiFlexItem grow={0}>
-                  <TimeoutField />
+                  <TimeoutField euiFieldProps={timeoutFieldProps} />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>

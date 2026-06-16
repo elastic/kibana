@@ -235,4 +235,48 @@ describe('schedule_serializer', () => {
       expect(restored.recurrence.frequency).toBe('daily');
     });
   });
+
+  // 11.2.2/11.2.3: recognized-but-unrenderable parts fold into `_unknown` so a
+  // no-op deserialize → serialize round-trip preserves the original RRULE.
+  describe('_unknown fold round-trip (review #1)', () => {
+    const roundTripRrule = (rrule: string): string => {
+      const restored = deserializeSchedule({
+        schedule_type: 'rrule',
+        rrule_schedule: { rrule, start_date: '2026-01-01T00:00:00.000Z' },
+      });
+
+      return serializeSchedule(restored).rrule_schedule!.rrule;
+    };
+
+    it('preserves INTERVAL on a DAILY freq (previously dropped)', () => {
+      // The daily branch renders no interval control; folding into `_unknown`
+      // keeps the round-trip lossless.
+      expect(roundTripRrule('FREQ=DAILY;INTERVAL=2')).toBe('FREQ=DAILY;INTERVAL=2');
+    });
+
+    it('preserves BYMONTHDAY on a MONTHLY freq', () => {
+      // MONTHLY is not renderable — FREQ + BYMONTHDAY both survive verbatim.
+      expect(roundTripRrule('FREQ=MONTHLY;BYMONTHDAY=15')).toBe('FREQ=MONTHLY;BYMONTHDAY=15');
+    });
+
+    it('surfaces a non-empty _unknown so the D22 advisory can render', () => {
+      const restored = deserializeSchedule({
+        schedule_type: 'rrule',
+        rrule_schedule: {
+          rrule: 'FREQ=MONTHLY;BYMONTHDAY=15',
+          start_date: '2026-01-01T00:00:00.000Z',
+        },
+      });
+
+      expect(restored.recurrence._unknown).toBeDefined();
+      expect(Object.keys(restored.recurrence._unknown ?? {}).length).toBeGreaterThan(0);
+    });
+
+    it('does not double-emit a part present as both a typed field and _unknown', () => {
+      // A no-op round-trip of a WEEKLY+INTERVAL rule keeps INTERVAL exactly once
+      // — the serializer dedup (11.2.1) prefers the typed field.
+      const out = roundTripRrule('FREQ=WEEKLY;INTERVAL=2;BYDAY=MO,WE');
+      expect(out.match(/INTERVAL=/g)?.length ?? 0).toBe(1);
+    });
+  });
 });

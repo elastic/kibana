@@ -429,4 +429,170 @@ describe('PackForm', () => {
       expect(savedObjectId).toBe('saved-object-id-b5');
     });
   });
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Phase 11: submit-boundary validation gate (11.1.4) + flag-off leak (11.2.5)
+  // ─────────────────────────────────────────────────────────────────────────
+  describe('schedule submit gate (review #4)', () => {
+    beforeEach(() => {
+      mockCreateAsync = jest.fn().mockResolvedValue({ data: { name: 'Test Pack' } });
+      mockUpdateAsync = jest.fn().mockResolvedValue({ data: { name: 'Test Pack' } });
+      ExperimentalFeaturesService.init({
+        experimentalFeatures: { ...allowedExperimentalValues, rruleScheduling: true },
+      });
+    });
+
+    afterEach(() => {
+      ExperimentalFeaturesService.init({
+        experimentalFeatures: { ...allowedExperimentalValues, rruleScheduling: false },
+      });
+    });
+
+    it('blocks submit when the rrule schedule has an over-cap splay', async () => {
+      // An SO with a 13h splay deserializes into an invalid schedule; the submit
+      // gate must abort so the API never receives it.
+      const defaultValue = {
+        id: 'pack-gate-splay',
+        saved_object_id: 'saved-gate-splay',
+        name: 'over-splay-pack',
+        description: '',
+        enabled: true,
+        queries: {},
+        created_at: '2024-01-01',
+        created_by: 'test-user',
+        updated_at: '2024-01-01',
+        updated_by: 'test-user',
+        policy_ids: [],
+        references: [],
+        schedule_type: 'rrule' as const,
+        rrule_schedule: {
+          rrule: 'FREQ=DAILY',
+          start_date: '2024-01-01T00:00:00.000Z',
+          splay: '13h',
+        },
+      };
+
+      const { getByTestId } = renderWithContext(
+        <PackForm editMode={true} defaultValue={defaultValue} packId="pack-gate-splay" />
+      );
+
+      fireEvent.click(getByTestId('update-pack-button'));
+
+      // Give the async submit a chance to fire; it must not call the API.
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(mockUpdateAsync).not.toHaveBeenCalled();
+    });
+
+    it('blocks submit when the rrule stop date is before the start date', async () => {
+      const defaultValue = {
+        id: 'pack-gate-stop',
+        saved_object_id: 'saved-gate-stop',
+        name: 'bad-stop-pack',
+        description: '',
+        enabled: true,
+        queries: {},
+        created_at: '2024-01-01',
+        created_by: 'test-user',
+        updated_at: '2024-01-01',
+        updated_by: 'test-user',
+        policy_ids: [],
+        references: [],
+        schedule_type: 'rrule' as const,
+        rrule_schedule: {
+          rrule: 'FREQ=DAILY',
+          start_date: '2024-06-01T00:00:00.000Z',
+          end_date: '2024-01-01T00:00:00.000Z', // before start
+        },
+      };
+
+      const { getByTestId } = renderWithContext(
+        <PackForm editMode={true} defaultValue={defaultValue} packId="pack-gate-stop" />
+      );
+
+      fireEvent.click(getByTestId('update-pack-button'));
+
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(mockUpdateAsync).not.toHaveBeenCalled();
+    });
+
+    it('allows submit for a valid rrule schedule', async () => {
+      const defaultValue = {
+        id: 'pack-gate-ok',
+        saved_object_id: 'saved-gate-ok',
+        name: 'valid-rrule-pack',
+        description: '',
+        enabled: true,
+        queries: {},
+        created_at: '2024-01-01',
+        created_by: 'test-user',
+        updated_at: '2024-01-01',
+        updated_by: 'test-user',
+        policy_ids: [],
+        references: [],
+        schedule_type: 'rrule' as const,
+        rrule_schedule: {
+          rrule: 'FREQ=DAILY',
+          start_date: '2024-01-01T00:00:00.000Z',
+          splay: '5m',
+        },
+      };
+
+      const { getByTestId } = renderWithContext(
+        <PackForm editMode={true} defaultValue={defaultValue} packId="pack-gate-ok" />
+      );
+
+      fireEvent.click(getByTestId('update-pack-button'));
+
+      await waitFor(() => expect(mockUpdateAsync).toHaveBeenCalled());
+    });
+  });
+
+  // 11.2.5: rollback-style flag-off leak. Mount in edit mode with an RRULE SO
+  // and the flag OFF; the submit payload must be byte-identical to the legacy
+  // shape (no schedule_type / interval / rrule_schedule).
+  describe('flag-off leak (review #3)', () => {
+    beforeEach(() => {
+      mockCreateAsync = jest.fn().mockResolvedValue({ data: { name: 'Test Pack' } });
+      mockUpdateAsync = jest.fn().mockResolvedValue({ data: { name: 'Test Pack' } });
+      ExperimentalFeaturesService.init({
+        experimentalFeatures: { ...allowedExperimentalValues, rruleScheduling: false },
+      });
+    });
+
+    it('does not emit schedule_type / interval / rrule_schedule on a flag-off submit of an RRULE SO', async () => {
+      const defaultValue = {
+        id: 'pack-leak',
+        saved_object_id: 'saved-leak',
+        name: 'rrule-so-flag-off',
+        description: '',
+        enabled: true,
+        queries: {},
+        created_at: '2024-01-01',
+        created_by: 'test-user',
+        updated_at: '2024-01-01',
+        updated_by: 'test-user',
+        policy_ids: [],
+        references: [],
+        schedule_type: 'rrule' as const,
+        interval: 3600,
+        rrule_schedule: {
+          rrule: 'FREQ=DAILY',
+          start_date: '2024-01-01T00:00:00.000Z',
+        },
+      };
+
+      const { getByTestId } = renderWithContext(
+        <PackForm editMode={true} defaultValue={defaultValue} packId="pack-leak" />
+      );
+
+      fireEvent.click(getByTestId('update-pack-button'));
+
+      await waitFor(() => expect(mockUpdateAsync).toHaveBeenCalled());
+
+      const submitted = mockUpdateAsync.mock.calls[0][0];
+      expect(submitted).not.toHaveProperty('schedule_type');
+      expect(submitted).not.toHaveProperty('interval');
+      expect(submitted).not.toHaveProperty('rrule_schedule');
+    });
+  });
 });

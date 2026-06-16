@@ -123,33 +123,36 @@ const serializer = (
   // and drops `override_pack_schedule` / `schedule`.
   const { override_pack_schedule: overridePackSchedule, schedule, ...rest } = payload;
 
-  const base = produce<any>(rest, (draft: Draft<PackSOQueryFormData>) => {
-    if (isArray(draft.platform)) {
-      if (draft.platform.length) {
-        draft.platform.join(',');
-      } else {
-        delete draft.platform;
+  const base = produce(
+    rest as unknown as PackSOQueryFormData,
+    (draft: Draft<PackSOQueryFormData>) => {
+      if (isArray(draft.platform)) {
+        if (draft.platform.length) {
+          draft.platform.join(',');
+        } else {
+          delete draft.platform;
+        }
       }
-    }
 
-    if (isArray(draft.version)) {
-      if (!draft.version.length) {
-        delete draft.version;
-      } else {
-        draft.version = draft.version[0];
+      if (isArray(draft.version)) {
+        if (!draft.version.length) {
+          delete draft.version;
+        } else {
+          draft.version = draft.version[0];
+        }
       }
-    }
 
-    if (draft.interval) {
-      draft.interval = draft.interval + '';
-    }
+      if (draft.interval) {
+        draft.interval = draft.interval + '';
+      }
 
-    if (isEmpty(draft.ecs_mapping)) {
-      delete draft.ecs_mapping;
-    }
+      if (isEmpty(draft.ecs_mapping)) {
+        delete draft.ecs_mapping;
+      }
 
-    return draft;
-  }) as PackSOQueryFormData;
+      return draft;
+    }
+  );
 
   // When the pack drives the schedule (either mode) and the query is NOT
   // overriding, the query SHALL emit no schedule fields. This prevents

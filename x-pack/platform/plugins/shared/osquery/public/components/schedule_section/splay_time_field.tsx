@@ -9,7 +9,11 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiCallOut, EuiFieldNumber, EuiFormRow, EuiSelect, EuiSpacer } from '@elastic/eui';
 import type { EuiSelectOption } from '@elastic/eui';
 import { MAX_SPLAY_SECONDS } from '../../../common/schedule';
-import { isSplayWithinMax, type SplayUnit } from '../../../common/utils/splay_utils';
+import {
+  isSplayWithinMax,
+  sumCompoundSeconds,
+  type SplayUnit,
+} from '../../../common/utils/splay_utils';
 import { ToggleableRow } from './toggleable_row';
 import {
   SPLAY_DESCRIPTION,
@@ -84,7 +88,9 @@ export const SplayTimeField = ({
 
   const isInvalid = useMemo(() => {
     if (!value.enabled) return false;
-    if (value.rawCompound) return false; // round-trip preserved, see D16
+    if (value.rawCompound) {
+      return sumCompoundSeconds(value.rawCompound) > MAX_SPLAY_SECONDS;
+    }
 
     return !isSplayWithinMax({ value: value.value, unit: value.unit });
   }, [value.enabled, value.rawCompound, value.unit, value.value]);

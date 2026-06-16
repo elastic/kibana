@@ -299,5 +299,59 @@ describe('QueryFlyout', () => {
       expect(saved).not.toHaveProperty('rrule_schedule');
       expect(saved).not.toHaveProperty('interval');
     });
+
+    // E5 ────────────────────────────────────────────────────────────────────
+    it('E5: blocks save when an override schedule is invalid (over-cap splay, review #5)', async () => {
+      const onSave = jest.fn().mockResolvedValue(undefined);
+      const onClose = jest.fn();
+
+      // Pack schedule carries an over-cap (13h) splay. Turning the override on
+      // copies it into the query's override schedule, which is then invalid.
+      renderFlyout({
+        onSave,
+        onClose,
+        packSchedule: {
+          schedule_type: 'rrule',
+          rrule_schedule: {
+            rrule: 'FREQ=DAILY',
+            start_date: '2024-01-01T00:00:00.000Z',
+            splay: '13h',
+          },
+        },
+      });
+
+      // Turn the override on so the gate applies to the (invalid) schedule.
+      const overrideSwitch = screen.getByTestId('osquery-query-override-pack-schedule');
+      act(() => {
+        fireEvent.click(overrideSwitch);
+      });
+
+      const idInput = screen.getByRole('textbox', { name: /ID/i });
+      fireEvent.change(idInput, { target: { value: 'bad-override-query' } });
+
+      fireEvent.click(screen.getByTestId('query-flyout-save-button'));
+
+      // The submit gate must abort — onSave is never called.
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(onSave).not.toHaveBeenCalled();
+      expect(onClose).not.toHaveBeenCalled();
+    });
+
+    // E6 ────────────────────────────────────────────────────────────────────
+    it('E6: disables the TimeoutField when inheriting an rrule pack schedule (review #6)', () => {
+      renderFlyout({
+        packSchedule: {
+          schedule_type: 'rrule',
+          rrule_schedule: {
+            rrule: 'FREQ=DAILY',
+            start_date: '2024-01-01T00:00:00.000Z',
+          },
+        },
+      });
+
+      // Override is off by default → timeout is inherited from the rrule pack
+      // schedule and the field must be disabled.
+      expect(screen.getByTestId('timeout-input')).toBeDisabled();
+    });
   });
 });

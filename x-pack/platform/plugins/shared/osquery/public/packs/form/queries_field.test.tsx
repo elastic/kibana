@@ -25,11 +25,10 @@ import React from 'react';
 import { render, act } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { EuiProvider } from '@elastic/eui';
-import { FormProvider, useForm } from 'react-hook-form';
+import { FormProvider, useForm, useWatch } from 'react-hook-form';
 
 import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
 import { allowedExperimentalValues } from '../../../common/experimental_features';
-import { QUERY_TIMEOUT } from '../../../common/constants';
 
 // ---------------------------------------------------------------------------
 // Stubs for heavy child components
@@ -101,6 +100,23 @@ beforeAll(() => {
   });
 });
 
+// Probe that surfaces the live `queries` form-array state out of the provider
+// so the test can assert what the uploader actually wrote into RHF — not the
+// input literal it was handed (review #8).
+interface UploadedQueryState {
+  id?: string;
+  interval?: string | number;
+  timeout?: number;
+  query?: string;
+}
+let capturedQueriesState: UploadedQueryState[] = [];
+const FormStateProbe: React.FC = () => {
+  const queries = useWatch({ name: 'queries' }) as UploadedQueryState[] | undefined;
+  capturedQueriesState = queries ?? [];
+
+  return null;
+};
+
 // Wrapper that provides FormProvider with a fresh useForm instance matching
 // the shape QueriesField reads via useWatch().
 const FormWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -114,7 +130,12 @@ const FormWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     },
   });
 
-  return <FormProvider {...methods}>{children}</FormProvider>;
+  return (
+    <FormProvider {...methods}>
+      {children}
+      <FormStateProbe />
+    </FormProvider>
+  );
 };
 
 const renderQueriesField = () =>
@@ -135,75 +156,55 @@ const renderQueriesField = () =>
 describe('QueriesField', () => {
   beforeEach(() => {
     capturedUploaderOnChange = null;
+    capturedQueriesState = [];
     jest.clearAllMocks();
   });
 
   // D1 ──────────────────────────────────────────────────────────────────────
   describe('pack uploader', () => {
-    it('D1: should inject interval field for every uploaded query (serializer is the downstream defense)', () => {
-      // CURRENT BEHAVIOR: the uploader callback (handlePackUpload in
-      // queries_field.tsx line ~160-183) maps:
-      //   `newQuery.interval ?? parsedContent.interval ?? '3600'`
-      // onto each query's `interval` field.
+    it('D1: should inject interval onto each uploaded query in RHF form state (serializer is the downstream defense)', () => {
+      // The uploader callback (handlePackUpload in queries_field.tsx) maps
+      //   `interval: newQuery.interval ?? parsedContent.interval ?? '3600'`
+      // onto each query and writes the result into the `queries` form array.
+      // The serializer in use_pack_query_form.tsx is the downstream defense
+      // that strips `interval` when a query inherits an rrule pack schedule.
       //
-      // This means that after uploading a pack JSON, every query in the form
-      // carries an `interval` string/number — even when the pack's own schedule
-      // is rrule-based. The serializer in use_pack_query_form.tsx is the
-      // downstream defense that strips `interval` when emitting queries that
-      // inherit an rrule pack schedule.
-      //
-      // This test pins the current behavior so we detect a regression if the
-      // uploader is ever changed to omit interval.
+      // This asserts the RESULTING RHF state after upload (not the input
+      // literal), so it fails if the uploader stops injecting interval.
       renderQueriesField();
 
-      // After rendering, the uploader onChange callback should be captured.
       expect(capturedUploaderOnChange).not.toBeNull();
 
-      // Simulate uploading a pack JSON that has per-query intervals.
-      // The uploader calls onChange(parsedContent, packName).
-      const uploadedContentWithIntervals = {
-        queries: {
-          'uptime-check': { query: 'select * from uptime;', interval: 60 },
-          'process-scan': { query: 'select * from processes;', interval: 300 },
-        },
-      };
-
+      // Upload a pack JSON with a string interval (survives the uploader's
+      // `pickBy(!isEmpty)` filter) and one query with NO interval (must get the
+      // hardcoded '3600' fallback). Assert the RHF form array the uploader wrote.
       act(() => {
-        capturedUploaderOnChange!(uploadedContentWithIntervals, 'test-pack');
+        capturedUploaderOnChange!(
+          {
+            queries: {
+              'uptime-check': { query: 'select * from uptime;', interval: '120' },
+              'fallback-query': { query: 'select 1;' },
+            },
+          },
+          'test-pack'
+        );
       });
 
-      // The queries in the uploaded content carry interval. The uploader maps
-      // them using `newQuery.interval ?? parsedContent.interval ?? '3600'`,
-      // so the interval values (60 and 300) would be injected into the form.
-      // We verify the source data has the expected shape — this pinning test
-      // documents what the uploader ingests, not what RHF stores (which
-      // would require reading form state from inside the provider).
-      expect(uploadedContentWithIntervals.queries['uptime-check'].interval).toBe(60);
-      expect(uploadedContentWithIntervals.queries['process-scan'].interval).toBe(300);
+      const byId = Object.fromEntries(capturedQueriesState.map((q) => [q.id, q]));
+      expect(capturedQueriesState).toHaveLength(2);
 
-      // Simulate uploading a pack JSON with NO per-query intervals and no
-      // top-level interval — the hardcoded fallback '3600' kicks in.
-      const uploadedContentWithoutIntervals = {
-        queries: {
-          'fallback-query': { query: 'select 1;' },
-        },
-        // No top-level interval field
-      };
+      // Explicit interval is carried through to form state verbatim.
+      expect(byId['uptime-check'].interval).toBe('120');
 
-      act(() => {
-        capturedUploaderOnChange!(uploadedContentWithoutIntervals, 'fallback-pack');
-      });
+      // No per-query / pack-level interval → the uploader's '3600' fallback is
+      // injected. This is the assertion that fails if the uploader stops
+      // injecting interval (the regression we're guarding).
+      expect(byId['fallback-query'].interval).toBe('3600');
 
-      // Document the hardcoded fallback constant used by the uploader.
-      // When neither per-query nor pack-level interval is present, the uploader
-      // inserts '3600' (string). The serializer converts it to a number.
-      // See queries_field.tsx line ~167: `interval: newQuery.interval ?? parsedContent.interval ?? '3600'`
-      const UPLOADER_DEFAULT_INTERVAL = '3600';
-      expect(UPLOADER_DEFAULT_INTERVAL).toBe('3600');
-
-      // Document that QUERY_TIMEOUT.DEFAULT is a number (the uploader also
-      // injects timeout via the same pattern).
-      expect(typeof QUERY_TIMEOUT.DEFAULT).toBe('number');
+      // Both uploaded queries preserved their SQL — confirms the array was
+      // populated from the uploaded content, not left empty.
+      expect(byId['uptime-check'].query).toBe('select * from uptime;');
+      expect(byId['fallback-query'].query).toBe('select 1;');
     });
   });
 });

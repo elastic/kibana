@@ -36,6 +36,7 @@ import { parseRRule } from '../../../common/utils/rrule_parser';
 import {
   parseSplayPermissive,
   isSplayWithinHalfRecurrence,
+  sumCompoundSeconds,
 } from '../../../common/utils/splay_utils';
 import { safeDerivePeriodSeconds } from '../../../common/utils/rrule_period';
 
@@ -429,43 +430,6 @@ export const convertSOQueriesToPackConfig = (
 };
 
 /**
- * Best-effort seconds extractor for compound Go duration strings (e.g. `"1h30m"`).
- * Used by the splay 12h-cap check on compound values that `parseSplayPermissive`
- * accepts but does not decompose. Mirrors beats's `time.ParseDuration` so a value
- * Kibana accepts is one beats will also accept.
- */
-const GO_DURATION_SEGMENT = /(\d+(?:\.\d+)?)(ms|us|µs|ns|h|m|s)/g;
-const goDurationToSeconds = (raw: string): number => {
-  let total = 0;
-  for (const match of raw.matchAll(GO_DURATION_SEGMENT)) {
-    const value = Number(match[1]);
-    switch (match[2]) {
-      case 'h':
-        total += value * 3600;
-        break;
-      case 'm':
-        total += value * 60;
-        break;
-      case 's':
-        total += value;
-        break;
-      case 'ms':
-        total += value / 1_000;
-        break;
-      case 'us':
-      case 'µs':
-        total += value / 1_000_000;
-        break;
-      case 'ns':
-        total += value / 1_000_000_000;
-        break;
-    }
-  }
-
-  return total;
-};
-
-/**
  * Format a duration in seconds as a Go-style duration string (e.g. `"1h0m0s"`,
  * `"5m0s"`, `"30s"`). Mirrors the beats log format for the splay error message
  * so the Kibana `400` message is directly searchable alongside agent logs.
@@ -580,7 +544,7 @@ export const validateRruleConfig = (
     const seconds =
       parsedSplay.kind === 'simple'
         ? parsedSplay.value * ({ seconds: 1, minutes: 60, hours: 3600 }[parsedSplay.unit] as number)
-        : goDurationToSeconds(parsedSplay.raw);
+        : sumCompoundSeconds(parsedSplay.raw);
     if (seconds > MAX_SPLAY_SECONDS) {
       return `rrule_schedule.splay must not exceed ${MAX_SPLAY_SECONDS} seconds (12 hours)`;
     }

@@ -214,3 +214,11 @@ export const QUERY_USING_PACK_SCHEDULE_LABEL = i18n.translate(
   'xpack.osquery.scheduleSection.queryUsingPackScheduleLabel',
   { defaultMessage: 'Using pack schedule' }
 );
+
+export const TIMEOUT_RRULE_INHERIT_HELP = i18n.translate(
+  'xpack.osquery.scheduleSection.timeoutRruleInheritHelp',
+  {
+    defaultMessage:
+      'Timeout applies only when overriding the pack schedule. Queries inheriting a recurrence-scheduled pack use the pack schedule timeout.',
+  }
+);

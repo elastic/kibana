@@ -145,10 +145,27 @@ describe('SplayTimeField', () => {
       expect(screen.queryByText(SPLAY_MAX_ERROR)).not.toBeInTheDocument();
     });
 
-    it('does not show the max-splay error when rawCompound is present (D16 passthrough)', () => {
-      // A compound value preserved verbatim short-circuits the cap check —
-      // beats receives the original Go-duration string. The check resumes the
-      // first time the user touches the splay field (rawCompound is cleared).
+    it('does not show the max-splay error for a within-cap compound rawCompound (D16 passthrough)', () => {
+      // A compound value preserved verbatim is still round-tripped to beats —
+      // but only while within the 12h cap (review #2). `1h30m` is well under.
+      renderWithProviders(
+        <SplayTimeField
+          value={baseSplay({
+            enabled: true,
+            value: 1,
+            unit: 'hours',
+            rawCompound: '1h30m',
+          })}
+          onChange={jest.fn()}
+        />
+      );
+
+      expect(screen.queryByText(SPLAY_MAX_ERROR)).not.toBeInTheDocument();
+    });
+
+    it('shows the max-splay error for an over-cap compound rawCompound (review #2)', () => {
+      // The compound-splay cap bypass is closed: `13h0m` sums to > 12h and must
+      // surface the error rather than short-circuit to valid.
       renderWithProviders(
         <SplayTimeField
           value={baseSplay({
@@ -161,7 +178,7 @@ describe('SplayTimeField', () => {
         />
       );
 
-      expect(screen.queryByText(SPLAY_MAX_ERROR)).not.toBeInTheDocument();
+      expect(screen.getByText(SPLAY_MAX_ERROR)).toBeInTheDocument();
     });
   });
 

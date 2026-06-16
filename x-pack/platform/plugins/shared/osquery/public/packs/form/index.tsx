@@ -35,6 +35,7 @@ import { useUpdatePack } from '../use_update_pack';
 import { convertPackQueriesToSO, convertSOQueriesToPack } from './utils';
 import { deserializeSchedule, serializeSchedule } from './schedule_serializer';
 import { ScheduleSection } from '../../components/schedule_section';
+import { validateScheduleFormData } from '../../components/schedule_section/validation';
 import type { ScheduleFormData } from '../../components/schedule_section/types';
 import type { PackItem } from '../types';
 import { NameField } from './name_field';
@@ -100,16 +101,27 @@ const PackFormComponent: React.FC<PackFormProps> = ({
       (policyId) => payload.shards?.[policyId] == null
     );
 
+    // Flag-off leak fix (review #3): strip the rrule-era schedule fields off the
+    // spread so a flag-off form never carries `schedule_type` / pack-level
+    // `interval` / `rrule_schedule` into state — and therefore never re-emits
+    // them on submit. Flag-off is byte-identical to the pre-rrule contract.
+    const {
+      schedule_type: payloadScheduleType,
+      interval: payloadInterval,
+      rrule_schedule: payloadRruleSchedule,
+      ...legacyPayload
+    } = payload;
+
     return {
-      ...payload,
+      ...(isRruleSchedulingEnabled ? payload : legacyPayload),
       policy_ids: defaultPolicyIds ?? [],
       queries: convertPackQueriesToSO(payload.queries),
       shards: omit(payload.shards, '*') ?? {},
       schedule: isRruleSchedulingEnabled
         ? deserializeSchedule({
-            schedule_type: payload.schedule_type,
-            interval: payload.interval,
-            rrule_schedule: payload.rrule_schedule,
+            schedule_type: payloadScheduleType,
+            interval: payloadInterval,
+            rrule_schedule: payloadRruleSchedule,
           })
         : undefined,
     };
@@ -200,12 +212,30 @@ const PackFormComponent: React.FC<PackFormProps> = ({
 
   const onSubmit = useCallback(
     async (values: PackFormData) => {
+      // Submit-boundary gate (review #4): a controlled ScheduleSection object
+      // doesn't `register` cleanly with RHF, so the inline field errors are not
+      // enough to block submit. Re-validate the whole schedule here and abort
+      // when it fails — the inline errors already do the visual work.
+      if (isRruleSchedulingEnabled && values.schedule) {
+        const scheduleErrors = validateScheduleFormData(values.schedule);
+        if (scheduleErrors.length > 0) {
+          return;
+        }
+      }
+
       const serializer = ({
         shards: _,
         pack_type: __,
         schedule: scheduleFormState,
         policy_ids: payloadAgentPolicyIds,
         queries,
+        // Flag-off leak fix (review #3): peel the rrule-era schedule fields off
+        // `restPayload` so a flag-off submit never spreads `schedule_type` /
+        // pack-level `interval` / `rrule_schedule`. When the flag is on,
+        // `scheduleFields` below re-adds the correct values from the form state.
+        schedule_type: _scheduleType,
+        interval: _interval,
+        rrule_schedule: _rruleSchedule,
         ...restPayload
       }: PackFormData) => {
         const mappedShards = !isEmpty(shards)

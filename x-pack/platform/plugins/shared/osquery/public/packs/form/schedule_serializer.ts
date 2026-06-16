@@ -10,9 +10,11 @@ import type { RRuleScheduleConfig, ScheduleType } from '../../../common/schedule
 import type { RRuleFields } from '../../../common/utils/rrule_serializer';
 import { parseRRule } from '../../../common/utils/rrule_parser';
 import { serializeRRule } from '../../../common/utils/rrule_serializer';
+import { MAX_SPLAY_SECONDS } from '../../../common/schedule';
 import {
   parseSplayPermissive,
   serializeSplay,
+  sumCompoundSeconds,
   type SplayFormState,
 } from '../../../common/utils/splay_utils';
 import {
@@ -45,6 +47,24 @@ const TOKEN_TO_WEEKDAY: Record<WeekdayStr, Weekday> = {
   FR: Weekday.FR,
   SA: Weekday.SA,
   SU: Weekday.SU,
+};
+
+const FREQUENCY_TO_STRING: Partial<Record<Frequency, string>> = {
+  [Frequency.YEARLY]: 'YEARLY',
+  [Frequency.MONTHLY]: 'MONTHLY',
+  [Frequency.WEEKLY]: 'WEEKLY',
+  [Frequency.DAILY]: 'DAILY',
+  [Frequency.HOURLY]: 'HOURLY',
+  [Frequency.MINUTELY]: 'MINUTELY',
+};
+
+const STRING_TO_FREQUENCY: Record<string, Frequency> = {
+  YEARLY: Frequency.YEARLY,
+  MONTHLY: Frequency.MONTHLY,
+  WEEKLY: Frequency.WEEKLY,
+  DAILY: Frequency.DAILY,
+  HOURLY: Frequency.HOURLY,
+  MINUTELY: Frequency.MINUTELY,
 };
 
 const isValidDate = (date: unknown): date is Date =>
@@ -98,7 +118,16 @@ const recurrenceToRRuleFields = (recurrence: RecurrenceFormState): RRuleFields =
   })();
 
   if (recurrence._unknown && Object.keys(recurrence._unknown).length > 0) {
-    fields._unknown = recurrence._unknown;
+    const { FREQ: unknownFreq, ...restUnknown } = recurrence._unknown;
+    const liftedFreq = unknownFreq ? STRING_TO_FREQUENCY[unknownFreq.toUpperCase()] : undefined;
+    if (liftedFreq !== undefined) {
+      fields.freq = liftedFreq;
+    }
+
+    const remainingUnknown = liftedFreq !== undefined ? restUnknown : recurrence._unknown;
+    if (Object.keys(remainingUnknown).length > 0) {
+      fields._unknown = remainingUnknown;
+    }
   }
 
   return fields;
@@ -114,6 +143,8 @@ const rruleFieldsToRecurrence = (fields: RRuleFields): RecurrenceFormState => {
   let byweekday: WeekdayStr[] = base.byweekday;
   let interval = base.interval;
 
+  const foldedUnknown: Record<string, string> = {};
+
   if (fields.freq === Frequency.WEEKLY) {
     frequency = 'custom';
     if (fields.byweekday && fields.byweekday.length > 0) {
@@ -125,24 +156,77 @@ const rruleFieldsToRecurrence = (fields: RRuleFields): RecurrenceFormState => {
     if (fields.interval && fields.interval > 0) {
       interval = fields.interval;
     }
+
+    // WEEKLY does not render BYMONTHDAY / BYMONTH — preserve them.
+    if (fields.bymonthday && fields.bymonthday.length > 0) {
+      foldedUnknown.BYMONTHDAY = fields.bymonthday.join(',');
+    }
+
+    if (fields.bymonth && fields.bymonth.length > 0) {
+      foldedUnknown.BYMONTH = fields.bymonth.join(',');
+    }
   } else if (fields.freq === Frequency.DAILY) {
     frequency = 'daily';
+
+    // The daily branch renders no sub-fields, so INTERVAL / BYDAY / BYMONTHDAY /
+    // BYMONTH would otherwise be silently dropped. Preserve them in `_unknown`.
+    if (fields.interval && fields.interval > 1) {
+      foldedUnknown.INTERVAL = String(fields.interval);
+    }
+
+    if (fields.byweekday && fields.byweekday.length > 0) {
+      foldedUnknown.BYDAY = fields.byweekday
+        .map((day) => WEEKDAY_TO_TOKEN[day])
+        .filter((token): token is WeekdayStr => token !== undefined)
+        .join(',');
+    }
+
+    if (fields.bymonthday && fields.bymonthday.length > 0) {
+      foldedUnknown.BYMONTHDAY = fields.bymonthday.join(',');
+    }
+
+    if (fields.bymonth && fields.bymonth.length > 0) {
+      foldedUnknown.BYMONTH = fields.bymonth.join(',');
+    }
   } else {
     // Future-proofing: any other supported frequency (MINUTELY/HOURLY/MONTHLY/
     // YEARLY) is not yet rendered in the form. Land on 'daily' as the safest
-    // editable default and preserve the original parts in `_unknown` so the
-    // user is warned and the round-trip stays lossless if they don't touch the
-    // frequency selector.
+    // editable default and preserve the distinguishing parts in `_unknown` so
+    // the user is warned and the round-trip stays lossless if they don't
+    // touch the frequency selector.
     frequency = 'daily';
+    const freqLabel = FREQUENCY_TO_STRING[fields.freq];
+    if (freqLabel) {
+      foldedUnknown.FREQ = freqLabel;
+    }
+
+    if (fields.interval && fields.interval > 1) {
+      foldedUnknown.INTERVAL = String(fields.interval);
+    }
+
+    if (fields.byweekday && fields.byweekday.length > 0) {
+      foldedUnknown.BYDAY = fields.byweekday
+        .map((day) => WEEKDAY_TO_TOKEN[day])
+        .filter((token): token is WeekdayStr => token !== undefined)
+        .join(',');
+    }
+
+    if (fields.bymonthday && fields.bymonthday.length > 0) {
+      foldedUnknown.BYMONTHDAY = fields.bymonthday.join(',');
+    }
+
+    if (fields.bymonth && fields.bymonth.length > 0) {
+      foldedUnknown.BYMONTH = fields.bymonth.join(',');
+    }
   }
+
+  const mergedUnknown: Record<string, string> = { ...foldedUnknown, ...(fields._unknown ?? {}) };
 
   return {
     frequency,
     interval,
     byweekday,
-    ...(fields._unknown && Object.keys(fields._unknown).length > 0
-      ? { _unknown: fields._unknown }
-      : {}),
+    ...(Object.keys(mergedUnknown).length > 0 ? { _unknown: mergedUnknown } : {}),
   };
 };
 
@@ -183,7 +267,14 @@ const deserializeSplay = (raw: string | undefined): SplayFormStateUI => {
  */
 const serializeSplayState = (splay: SplayFormStateUI): string | undefined => {
   if (!splay.enabled) return undefined;
-  if (splay.rawCompound) return splay.rawCompound;
+  if (splay.rawCompound) {
+    // Preserve the loaded compound string verbatim (D16) — but never emit one
+    // that breaches the 12h cap (review #2). An over-limit compound is dropped
+    // so the wire payload can't carry an invalid splay.
+    return sumCompoundSeconds(splay.rawCompound) > MAX_SPLAY_SECONDS
+      ? undefined
+      : splay.rawCompound;
+  }
 
   const state: SplayFormState = { value: splay.value, unit: splay.unit };
   try {
