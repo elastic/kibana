@@ -14,6 +14,7 @@ import {
   ALERT_SCHEDULED_ACTION_GROUP,
   ALERT_SCHEDULED_ACTION_DATE,
   ALERT_SCHEDULED_ACTION_THROTTLING,
+  ALERT_SNOOZED,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
 } from '@kbn/rule-data-utils';
@@ -477,6 +478,60 @@ export class AlertsClient<
         );
         throw err;
       }
+    }
+  }
+
+  /**
+   * After per-alert snooze condition evaluation, some instances may have their
+   * snooze lifted mid-execution. Their alert documents were already persisted
+   * with `kibana.alert.snoozed: true` (because evaluation happens after persist),
+   * so we need a follow-up update to correct the field for those documents.
+   */
+  public async clearSnoozedStatusForAlerts(conditionExpiredInstanceIds: string[]): Promise<void> {
+    if (!this.ruleType.alerts?.shouldWrite || conditionExpiredInstanceIds.length === 0) {
+      return;
+    }
+
+    const uuidsToUpdate: string[] = [];
+    for (const instanceId of conditionExpiredInstanceIds) {
+      const alertData = this.activeAlertsDataCache.get(instanceId);
+      if (alertData) {
+        const uuid = get(alertData, ALERT_UUID) as string | undefined;
+        if (uuid) {
+          uuidsToUpdate.push(uuid);
+          // Keep the in-memory cache consistent with what will be in ES
+          alertData[ALERT_SNOOZED] = false;
+        }
+      }
+    }
+
+    if (uuidsToUpdate.length === 0) {
+      return;
+    }
+
+    try {
+      const esClient = await this.options.elasticsearchClientPromise;
+      await retryTransientEsErrors(
+        () =>
+          esClient.updateByQuery({
+            query: { terms: { _id: uuidsToUpdate } },
+            conflicts: 'proceed',
+            index: this.indexTemplateAndPattern.alias,
+            refresh: true,
+            script: {
+              source: `ctx._source['${ALERT_SNOOZED}'] = false;`,
+              lang: 'painless',
+            },
+          }),
+        { logger: this.options.logger }
+      );
+    } catch (err) {
+      // Swallow the error — clearing kibana.alert.snoozed is best-effort.
+      // A failure here must not interrupt rule execution or the SO update.
+      this.options.logger.error(
+        `Error clearing snoozed status for condition-expired alerts ${this.ruleInfoMessage}: ${err}`,
+        this.logTags
+      );
     }
   }
 

@@ -253,9 +253,7 @@ describe('atomicRemoveSnoozedInstancesWithEs', () => {
       refresh: 'wait_for',
     });
 
-    expect(esClient.update).toHaveBeenCalledWith(
-      expect.objectContaining({ refresh: 'wait_for' })
-    );
+    expect(esClient.update).toHaveBeenCalledWith(expect.objectContaining({ refresh: 'wait_for' }));
   });
 
   test('should not include refresh when the option is not set', async () => {
