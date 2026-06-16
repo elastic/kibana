@@ -28,7 +28,6 @@ interface InvestigateRuleSkillDeps {
   logger: Logger;
 }
 
-// Matches the content of brain_definition.md; edit that file first and keep them in sync.
 const SKILL_CONTENT = `# investigate-rule Skill
 
 ## When to Use This Skill
