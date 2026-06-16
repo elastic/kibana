@@ -8,7 +8,7 @@
  */
 
 import { ESQLVariableType, type PartialFieldsMetadataClient } from '@kbn/esql-types';
-import { ESQL_NEW_LINE_COMMAND } from '@kbn/esql-language';
+import { newLineCompleteItem } from '@kbn/esql-language/src/commands/registry/complete_items';
 import { monaco } from '../../../../monaco_imports';
 import { ESQLLang, type ESQLDependencies } from '../../language';
 import { createDisposedTextModel, createField, createTextModel } from './test_helpers';
@@ -408,14 +408,14 @@ describe('suggestion_provider', () => {
 
       // The pipe is suggested at this position, so "New line" should accompany it.
       expect(suggestions.some((suggestion) => suggestion.label === '|')).toBe(true);
-      expect(suggestions[0].command?.id).toBe(ESQL_NEW_LINE_COMMAND);
+      expect(suggestions[0].label).toBe(newLineCompleteItem.label);
     });
 
     it('is not offered at the source command (no pipe suggested)', async () => {
       const suggestions = await getSuggestions('FROM ');
 
       expect(
-        suggestions.some((suggestion) => suggestion.command?.id === ESQL_NEW_LINE_COMMAND)
+        suggestions.some((suggestion) => suggestion.label === newLineCompleteItem.label)
       ).toBe(false);
     });
   });

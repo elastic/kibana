@@ -9,7 +9,7 @@
 
 import { getIndexSourcesFromQuery, suggest } from '@kbn/esql-language';
 import {
-  getNewLineSuggestion,
+  newLineCompleteItem,
   pipeCompleteItem,
 } from '@kbn/esql-language/src/commands/registry/complete_items';
 import { monaco } from '../../../../monaco_imports';
@@ -75,11 +75,11 @@ export function getSuggestionProvider(
             );
           }
 
-          // Offer "New line" only where the pipe is suggested.
+          // Offer "New line" only where the pipe is suggested and not already present.
           const isPipeSuggested = suggestions.some(({ label }) => label === pipeCompleteItem.label);
-          const suggestionsWithNewLine = isPipeSuggested
-            ? [getNewLineSuggestion(), ...suggestions]
-            : suggestions;
+          const hasNewLine = suggestions.some(({ label }) => label === newLineCompleteItem.label);
+          const suggestionsWithNewLine =
+            isPipeSuggested && !hasNewLine ? [newLineCompleteItem, ...suggestions] : suggestions;
 
           const result = wrapAsMonacoSuggestions(suggestionsWithNewLine, fullText);
           const computeEnd = performance.now();
