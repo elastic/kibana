@@ -23,12 +23,10 @@ describe('CustomizeNavigationModal', () => {
 
   const defaultProps = {
     items,
-    isCalloutDismissed: true,
     onSave: jest.fn(),
     onReset: jest.fn(() => Promise.resolve(items)),
     onChange: jest.fn(),
     onClose: jest.fn(),
-    onDismissCallout: jest.fn(),
   };
 
   afterEach(() => {

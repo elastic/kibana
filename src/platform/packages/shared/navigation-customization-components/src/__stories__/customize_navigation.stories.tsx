@@ -63,7 +63,7 @@ export default {
   parameters: { layout: 'centered' },
 } satisfies Meta;
 
-export const ModalWithCallout: StoryObj = {
-  name: 'with space callout',
+export const Default: StoryObj = {
+  name: 'default',
   render: () => <ControlledModal items={BASE_ITEMS} />,
 };

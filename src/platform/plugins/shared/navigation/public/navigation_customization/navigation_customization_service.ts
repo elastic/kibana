@@ -18,10 +18,7 @@ import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { getNavigationNodeIcon } from '@kbn/core-chrome-browser-navigation-utils';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import {
-  NAV_CUSTOMIZATION_STORAGE_KEY,
-  NAV_CALLOUT_DISMISSED_STORAGE_KEY,
-} from '../../common/constants';
+import { NAV_CUSTOMIZATION_STORAGE_KEY } from '../../common/constants';
 
 /**
  * Upper bound for waiting on the first navigation snapshot when the modal is opened.
@@ -133,10 +130,6 @@ export class NavigationCustomizationService {
       const savedCustomization = core.userStorage.get<NavigationCustomization>(
         NAV_CUSTOMIZATION_STORAGE_KEY
       );
-      const isCalloutDismissed = core.userStorage.get<boolean>(
-        NAV_CALLOUT_DISMISSED_STORAGE_KEY,
-        false
-      );
 
       // Captured after mountModal is called synchronously by openCustomizeNavigationModal.
       let closeModal: () => void = () => {};
@@ -144,8 +137,6 @@ export class NavigationCustomizationService {
       openCustomizeNavigationModal({
         items,
         defaultItemIds,
-        isCalloutDismissed,
-        savedCustomization,
         computeMoves,
         onChange: (c) => chrome.project.setNavigationCustomization(c),
         onSave: (c) => {
@@ -178,9 +169,6 @@ export class NavigationCustomizationService {
         onClose: () => {
           chrome.project.setNavigationCustomization(savedCustomization);
           closeModal();
-        },
-        onDismissCallout: () => {
-          core.userStorage.set(NAV_CALLOUT_DISMISSED_STORAGE_KEY, true);
         },
         // toMountPoint is a regular function (no JSX) — safe to import in .ts.
         mountModal: (element) => {

@@ -15,8 +15,6 @@ import type { NavigationItemInfo } from './types';
 export interface OpenCustomizeNavigationModalDeps {
   items: NavigationItemInfo[];
   defaultItemIds: string[];
-  isCalloutDismissed: boolean;
-  savedCustomization: NavigationCustomization | undefined;
   /**
    * Injected by the caller (navigation plugin) to avoid importing
    * `@kbn/core-chrome-navigation-customization` from this shared package — the
@@ -30,7 +28,6 @@ export interface OpenCustomizeNavigationModalDeps {
   onSave: (customization: NavigationCustomization) => void;
   onReset: () => Promise<NavigationItemInfo[]>;
   onClose: () => void;
-  onDismissCallout: () => void;
   /**
    * Caller-supplied mount function that handles `toMountPoint`,
    * `core.rendering.addContext`, and `core.overlays.openModal`.
