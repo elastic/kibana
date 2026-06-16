@@ -6627,6 +6627,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/domain-events@link:src/platform/packages/shared/kbn-domain-events":
+  version "0.0.0"
+  uid ""
+
 "@kbn/dot-text-loader@link:src/platform/packages/private/kbn-dot-text-loader":
   version "0.0.0"
   uid ""

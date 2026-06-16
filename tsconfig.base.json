@@ -1088,6 +1088,8 @@
       "@kbn/docs-utils/*": ["packages/kbn-docs-utils/*"],
       "@kbn/dom-drag-drop": ["src/platform/packages/shared/kbn-dom-drag-drop"],
       "@kbn/dom-drag-drop/*": ["src/platform/packages/shared/kbn-dom-drag-drop/*"],
+      "@kbn/domain-events": ["src/platform/packages/shared/kbn-domain-events"],
+      "@kbn/domain-events/*": ["src/platform/packages/shared/kbn-domain-events/*"],
       "@kbn/dot-text": ["src/platform/packages/private/kbn-dot-text"],
       "@kbn/dot-text/*": ["src/platform/packages/private/kbn-dot-text/*"],
       "@kbn/dot-text-loader": ["src/platform/packages/private/kbn-dot-text-loader"],
