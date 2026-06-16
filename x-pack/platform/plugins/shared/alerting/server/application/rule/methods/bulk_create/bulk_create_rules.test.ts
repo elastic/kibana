@@ -538,6 +538,91 @@ describe('bulkCreateRules', () => {
     expect(actions.filter((a) => a === RuleAuditAction.ENABLE)).toHaveLength(0);
   });
 
+  test('Phase B1 validateActions failure: rule with invalid actions excluded, other rules persist', async () => {
+    actionsClient.getBulk.mockRejectedValueOnce(new Error('connector lookup failed'));
+    unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue(
+      buildBulkResponse([{ id: 'mock-id-2' }])
+    );
+
+    const result = await rulesClient.bulkCreateRules({
+      rules: [
+        {
+          data: baseRule({
+            name: 'bad-actions',
+            actions: [{ group: 'default', id: '1', params: {} }],
+          }),
+        },
+        { data: baseRule({ name: 'ok' }) },
+      ],
+    });
+
+    expect(result.errors).toHaveLength(1);
+    expect(result.errors[0].rule.name).toBe('bad-actions');
+    expect(result.errors[0].message).toContain('connector lookup failed');
+    expect(result.successfulIds).toEqual(['mock-id-2']);
+  });
+
+  test('uiamApiKey flows through to SO attributes when createAPIKey returns uiamResult', async () => {
+    rulesClientParams.createAPIKey.mockResolvedValueOnce({
+      apiKeysEnabled: true,
+      result: { id: 'key-id', name: 'key', api_key: 'key-value' },
+      uiamResult: { id: 'uiam-id', name: 'uiam-key', api_key: 'uiam-value' },
+    } as never);
+    unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue(
+      buildBulkResponse([{ id: 'mock-id-1' }])
+    );
+
+    const result = await rulesClient.bulkCreateRules({
+      rules: [{ data: baseRule({ name: 'with-uiam', enabled: true }) }],
+    });
+
+    expect(result.successfulIds).toEqual(['mock-id-1']);
+    const soAttrs = (
+      unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0] as Array<{
+        attributes: { uiamApiKey?: string; apiKey?: string };
+      }>
+    )[0].attributes;
+    expect(soAttrs.apiKey).toBe(Buffer.from('key-id:key-value').toString('base64'));
+    expect(soAttrs.uiamApiKey).toBe(Buffer.from('uiam-id:uiam-value').toString('base64'));
+  });
+
+  test('Phase B4 TM cleanup failure: logs error when bulkRemove throws after SO bulkCreate failure, does not rethrow', async () => {
+    taskManager.bulkRemove.mockRejectedValueOnce(new Error('TM cleanup error'));
+    unsecuredSavedObjectsClient.bulkCreate.mockRejectedValueOnce(new Error('SO down'));
+
+    const result = await rulesClient.bulkCreateRules({
+      rules: [
+        { data: baseRule({ name: 'a', enabled: true }) },
+        { data: baseRule({ name: 'b', enabled: true }) },
+      ],
+    });
+
+    expect(taskManager.bulkRemove).toHaveBeenCalled();
+    expect((rulesClientParams.logger.error as jest.Mock).mock.calls).toEqual(
+      expect.arrayContaining([
+        expect.arrayContaining([expect.stringContaining('TM cleanup error')]),
+      ])
+    );
+    expect(result.successfulIds).toEqual([]);
+    expect(result.errors).toHaveLength(2);
+    expect(result.errors.every((e) => e.message.includes('SO down'))).toBe(true);
+  });
+
+  test('bulkMarkApiKeysForInvalidation failure: error propagates when key invalidation rejects', async () => {
+    (bulkMarkApiKeysForInvalidation as jest.Mock).mockRejectedValueOnce(
+      new Error('invalidation write failed')
+    );
+    unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue(
+      buildBulkResponse([{ id: 'mock-id-1', error: { message: 'conflict', statusCode: 409 } }])
+    );
+
+    await expect(
+      rulesClient.bulkCreateRules({
+        rules: [{ data: baseRule({ name: 'enabled', enabled: true }) }],
+      })
+    ).rejects.toThrow('invalidation write failed');
+  });
+
   describe('preValidate', () => {
     test('per-rule isolation: one registry-throw, two valid → one error, two survive to runBatch', async () => {
       let calls = 0;
