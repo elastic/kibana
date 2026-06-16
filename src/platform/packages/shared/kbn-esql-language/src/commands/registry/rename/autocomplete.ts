@@ -10,6 +10,7 @@ import type { ESQLAstAllCommands } from '@elastic/esql/types';
 import type { ICommandCallbacks } from '../types';
 import { type ISuggestionItem, type ICommandContext } from '../types';
 import {
+  newLineCompleteItem,
   pipeCompleteItem,
   asCompletionItem,
   assignCompletionItem,
@@ -43,7 +44,7 @@ export async function autocomplete(
   }
 
   if (/rename(?:\s+\S+\s+(as|=)\s+\S+\s*,)*\s+\S+\s+(as|=)\s+[^\s,]+\s+$/i.test(innerText)) {
-    return [pipeCompleteItem, { ...commaCompleteItem, text: ', ' }];
+    return [newLineCompleteItem, pipeCompleteItem, { ...commaCompleteItem, text: ', ' }];
   }
 
   if (/as\s+$/i.test(innerText)) {

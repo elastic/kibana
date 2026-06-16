@@ -9,7 +9,7 @@
 import type { ESQLAstAllCommands, ESQLCommand } from '@elastic/esql/types';
 import { isColumn } from '@elastic/esql';
 import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
-import { pipeCompleteItem, commaCompleteItem } from '../complete_items';
+import { newLineCompleteItem, pipeCompleteItem, commaCompleteItem } from '../complete_items';
 import { getLastNonWhitespaceChar } from '../../definitions/utils/autocomplete/helpers';
 import type { ICommandCallbacks } from '../types';
 import { type ISuggestionItem, type ICommandContext } from '../types';
@@ -28,7 +28,7 @@ export async function autocomplete(
     getLastNonWhitespaceChar(innerText) !== ',' &&
     !/drop\s+\S*$/i.test(innerText)
   ) {
-    return [pipeCompleteItem, commaCompleteItem];
+    return [newLineCompleteItem, pipeCompleteItem, commaCompleteItem];
   }
 
   const alreadyDeclaredFields = (command as ESQLCommand).args
@@ -36,6 +36,7 @@ export async function autocomplete(
     .map((arg) => arg.name);
   const fieldSuggestions = (await callbacks?.getByType?.('any', alreadyDeclaredFields)) ?? [];
   const completionSuggestions: ISuggestionItem[] = [
+    newLineCompleteItem,
     {
       ...pipeCompleteItem,
       text: ' | ',

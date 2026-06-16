@@ -15,12 +15,12 @@ import { detectCategory } from './utils/category_rules';
 
 const CATEGORY_PRIORITIES: Record<SuggestionCategory, number> = {
   [SuggestionCategory.CUSTOM_ACTION]: 0,
-  [SuggestionCategory.NEW_LINE]: 1,
   [SuggestionCategory.PROMQL_METRIC_QUALIFIER]: 50,
   [SuggestionCategory.LANGUAGE_KEYWORD]: 50, // BY, WHERE, ON, WITH
 
   [SuggestionCategory.TIME_PARAM]: 100,
 
+  [SuggestionCategory.NEW_LINE]: 199,
   [SuggestionCategory.PIPE]: 200,
   [SuggestionCategory.COMMA]: 201,
   [SuggestionCategory.VALUE]: 202,
