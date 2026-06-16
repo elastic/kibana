@@ -13,7 +13,7 @@ import {
   createInferenceToolsFromAgentBuilder,
   type BridgePrepareOutcome,
   type BridgedToolSpec,
-} from './agent_builder_tool_bridge';
+} from '../agent_builder/inference_tool_bridge';
 
 /**
  * Agent Builder tool IDs installed by Semantic Code Search (SCS) via
@@ -25,6 +25,11 @@ import {
 export const SCS_SEMANTIC_SEARCH_TOOL_ID = 'scs.semantic_search';
 export const SCS_READ_FILE_TOOL_ID = 'scs.read_file_from_chunks';
 export const SCS_SYMBOL_ANALYSIS_TOOL_ID = 'scs.symbol_analysis';
+// `scs.list_repos` is the repository-addressed discovery tool (https://github.com/elastic/semantic-code-search/issues/103);
+// `scs.list_indices` is the legacy index-addressed tool kept as a fallback for
+// SCS builds that predate the repository surface. Whichever is installed is
+// exposed; the other is skipped by the bridge.
+export const SCS_LIST_REPOS_TOOL_ID = 'scs.list_repos';
 export const SCS_LIST_INDICES_TOOL_ID = 'scs.list_indices';
 export const SCS_FILE_HISTORY_TOOL_ID = 'scs.get_file_history';
 export const SCS_GET_COMMIT_TOOL_ID = 'scs.get_commit';
@@ -40,7 +45,7 @@ export interface SemanticCodeSearchTools {
 }
 
 const NO_ACTIVE_INDEX_ERROR =
-  'No code index is selected. Call list_code_indices to see the available indices, then select_code_index with the one whose repository produces this stream before using this tool.';
+  'No code index is selected. Call list_code_repos (or list_code_indices) to see what is available, then select_code_index with the repository (or index) that produces this stream before using this tool.';
 
 /**
  * Semantic Code Search (SCS) tools for significant events query generation
@@ -88,25 +93,30 @@ export const createSemanticCodeSearchTools = async ({
     return repository;
   };
 
-  // Code tools require an active index; inject it as the `index` param.
-  const requireActiveIndex = (): BridgePrepareOutcome =>
-    activeIndex
-      ? { params: { index: activeIndex } }
+  // Code tools require an active selection. We offer both `index` and
+  // `repository`; the bridge forwards only the one the installed SCS tool
+  // actually declares (repository surface vs legacy index surface).
+  const requireActiveTarget = (): BridgePrepareOutcome =>
+    activeIndex || activeRepository
+      ? { params: { index: activeIndex, repository: activeRepository } }
       : { error: { results: [], count: 0, error: NO_ACTIVE_INDEX_ERROR } };
 
-  // Git-history tools require the active index to resolve to a repository;
+  // Git-history tools require the active selection to resolve to a repository;
   // inject it as the `repository` param.
   const requireActiveRepository = async (): Promise<BridgePrepareOutcome> => {
-    if (!activeIndex) {
+    if (!activeIndex && !activeRepository) {
       return { error: { results: [], count: 0, error: NO_ACTIVE_INDEX_ERROR } };
     }
-    const repository = activeRepository ?? (await resolveRepository(activeIndex));
+    const repository =
+      activeRepository ?? (activeIndex ? await resolveRepository(activeIndex) : undefined);
     if (!repository) {
       return {
         error: {
           results: [],
           count: 0,
-          error: `No git history is available for the selected index "${activeIndex}".`,
+          error: `No git history is available for the current selection ("${
+            activeIndex ?? activeRepository
+          }").`,
         },
       };
     }
@@ -115,34 +125,40 @@ export const createSemanticCodeSearchTools = async ({
 
   const specs: BridgedToolSpec[] = [
     {
+      sourceToolId: SCS_LIST_REPOS_TOOL_ID,
+      name: 'list_code_repos',
+      description:
+        'List the Semantic Code Search repositories available in this cluster, with per-repo stats (files, symbols, languages, content types). Use it to discover which codebase to ground this stream against, then select it with select_code_index.',
+    },
+    {
       sourceToolId: SCS_LIST_INDICES_TOOL_ID,
       name: 'list_code_indices',
       description:
-        'List the Semantic Code Search indices available in this cluster, with per-index stats (files, symbols, languages, content types). Use it to discover which codebase to ground this stream against.',
+        'List the Semantic Code Search indices available in this cluster, with per-index stats (files, symbols, languages, content types). Use it (or list_code_repos) to discover which codebase to ground this stream against.',
     },
     {
       sourceToolId: SCS_SEMANTIC_SEARCH_TOOL_ID,
       name: 'code_search',
       description:
-        'Semantic search over the source code of the selected index. Use it to find the exact log/error message strings, error types, and dependency calls emitted by the code before writing ES|QL. Returns code snippets with file paths and line numbers.',
-      hiddenParams: ['index'],
-      prepare: requireActiveIndex,
+        'Semantic search over the source code of the selected repository/index. Use it to find the exact log/error message strings, error types, and dependency calls emitted by the code before writing ES|QL. Returns code snippets with file paths and line numbers.',
+      hiddenParams: ['index', 'repository'],
+      prepare: requireActiveTarget,
     },
     {
       sourceToolId: SCS_READ_FILE_TOOL_ID,
       name: 'read_code_file',
       description:
-        'Reconstruct one or more full source files from the selected index, to inspect the surrounding implementation of a snippet found via code_search.',
-      hiddenParams: ['index'],
-      prepare: requireActiveIndex,
+        'Reconstruct one or more full source files from the selected repository/index, to inspect the surrounding implementation of a snippet found via code_search.',
+      hiddenParams: ['index', 'repository'],
+      prepare: requireActiveTarget,
     },
     {
       sourceToolId: SCS_SYMBOL_ANALYSIS_TOOL_ID,
       name: 'analyze_symbol',
       description:
         'Resolve a specific code symbol (an exact name found via code_search, e.g. an error/exception class, a logger wrapper, or a constant holding a message template) to its definitions, usages, and documentation. Use it to confirm the precise wording or error types behind a log site — not for open-ended code exploration.',
-      hiddenParams: ['index'],
-      prepare: requireActiveIndex,
+      hiddenParams: ['index', 'repository'],
+      prepare: requireActiveTarget,
     },
     {
       sourceToolId: SCS_SEARCH_COMMIT_MESSAGES_TOOL_ID,
@@ -211,30 +227,43 @@ export const createSemanticCodeSearchTools = async ({
   // resolves its repository, so it stays hand-written.
   const selectCodeIndexTool: ToolDefinition = {
     description:
-      "Select the code index to ground subsequent code_search / read_code_file / analyze_symbol calls against. Choose the index whose repository produces this stream's logs, using the stream name, description, and dataset_analysis (service names, languages, dependency calls) to decide. Resolves the index's git repository so the git_* history tools become usable. If no index clearly matches the stream, do not select one and proceed without code grounding.",
+      'Select the codebase to ground subsequent code_search / read_code_file / analyze_symbol calls against. Pass `repository` (preferred, e.g. "acme/checkout" from list_code_repos) or `index` (e.g. "code-acme_checkout" from list_code_indices) — whichever produces this stream\'s logs, using the stream name, description, and dataset_analysis (service names, languages, dependency calls) to decide. Selecting by index resolves its git repository so the git_* history tools become usable. If nothing clearly matches the stream, do not select anything and proceed without code grounding.',
     schema: {
       type: 'object',
       properties: {
+        repository: {
+          type: 'string',
+          description:
+            'Repository identifier to activate, as returned by list_code_repos (e.g. "acme/checkout").',
+        },
         index: {
           type: 'string',
           description:
             'Exact code index name to activate, as returned by list_code_indices (e.g. "code-acme_checkout").',
         },
       },
-      required: ['index'],
     },
   };
 
   const selectCodeIndexCallback: ToolCallback = async (toolCall) => {
-    const { index } = toolCall.function.arguments as { index?: string };
-    if (!index) {
-      return { response: { results: [], count: 0, error: '"index" is required.' } };
+    const { index, repository } = toolCall.function.arguments as {
+      index?: string;
+      repository?: string;
+    };
+    if (!index && !repository) {
+      return {
+        response: { results: [], count: 0, error: 'Either "repository" or "index" is required.' },
+      };
     }
+
     activeIndex = index;
-    activeRepository = await resolveRepository(index);
+    // Prefer an explicitly provided repository; otherwise resolve it from the
+    // index so the git_* history tools can be used.
+    activeRepository = repository ?? (index ? await resolveRepository(index) : undefined);
+
     return {
       response: {
-        selected_index: index,
+        ...(activeIndex ? { selected_index: activeIndex } : {}),
         git_history_available: Boolean(activeRepository),
         ...(activeRepository ? { repository: activeRepository } : {}),
       },
@@ -251,9 +280,11 @@ export const createSemanticCodeSearchTools = async ({
   };
 
   const promptSnippet = `
-You can also consult the source code that produces this stream's logs to *verify* hypotheses — never as a starting point. To ground queries in source code, first call list_code_indices to see the available indices, then call select_code_index with the one whose repository produces this stream — use the stream name, description, and dataset_analysis (service names, languages, dependency calls) to choose. If none clearly matches, do not select one and proceed without code grounding.
+If a \`code_analysis\` feature is present, it is your primary source of code-grounded evidence — its strings are already verified to appear in both the code and the logs, so prefer it. Use the on-demand code tools below only for follow-up that \`code_analysis\` does not cover (a specific hypothesis, a symbol, or git history), and always to *verify* hypotheses — never as a starting point.
 
-Once a code index is selected:
+To use the on-demand tools, first call list_code_repos (or list_code_indices) to see what is available, then call select_code_index with the repository (or index) whose code produces this stream — use the stream name, description, and dataset_analysis (service names, languages, dependency calls) to choose. If nothing clearly matches, do not select anything and proceed without code grounding.
+
+Once a codebase is selected:
 - **code_search** — semantically search the code for the exact log/error strings, error types, and dependency calls it emits.
 - **read_code_file** — read full files to inspect surrounding implementation.
 - **analyze_symbol** — resolve a specific symbol you already found via code_search (e.g. an exception class or a logging helper) to confirm its message wording or the error types it covers. Do not use it to explore unfamiliar code.

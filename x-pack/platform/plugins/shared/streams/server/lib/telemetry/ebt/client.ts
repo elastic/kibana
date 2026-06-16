@@ -18,6 +18,7 @@ import type {
   StreamsAgentToolKiIdentificationStartedProps,
   StreamsAgentToolEventCreateProps,
   StreamsAgentToolEventStatusUpdateProps,
+  StreamsCodeAnalysisGroundingProps,
 } from './types';
 import {
   STREAMS_ENDPOINT_LATENCY_EVENT,
@@ -31,6 +32,7 @@ import {
   STREAMS_AGENT_TOOL_KI_IDENTIFICATION_STARTED_EVENT_TYPE,
   STREAMS_AGENT_TOOL_EVENT_CREATE_EVENT_TYPE,
   STREAMS_AGENT_TOOL_EVENT_STATUS_UPDATE_EVENT_TYPE,
+  STREAMS_CODE_ANALYSIS_GROUNDING_EVENT_TYPE,
 } from './constants';
 
 const LATENCY_TRACKING_ENDPOINT_ALLOW_LIST = [
@@ -120,5 +122,9 @@ export class EbtTelemetryClient {
 
   public trackAgentToolEventStatusUpdate(params: StreamsAgentToolEventStatusUpdateProps) {
     this.analytics.reportEvent(STREAMS_AGENT_TOOL_EVENT_STATUS_UPDATE_EVENT_TYPE, params);
+  }
+
+  public trackCodeAnalysisGrounding(params: StreamsCodeAnalysisGroundingProps) {
+    this.analytics.reportEvent(STREAMS_CODE_ANALYSIS_GROUNDING_EVENT_TYPE, params);
   }
 }

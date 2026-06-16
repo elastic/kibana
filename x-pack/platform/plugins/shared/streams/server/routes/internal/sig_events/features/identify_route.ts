@@ -25,6 +25,7 @@ import {
   identifyComputedFeatures,
 } from '../../../../lib/sig_events/features';
 import { shouldIdentifyFeatures } from '../../../../lib/sig_events/features/should_identify_features';
+import { isSignificantEventsSemanticCodeSearchGroundingEnabled } from '../../../../lib/semantic_code_search_grounding/is_significant_events_semantic_code_search_grounding_enabled';
 
 // ---------------------------------------------------------------------------
 // Route 1: Identify inferred features (one iteration: sample + infer + reconcile)
@@ -204,7 +205,7 @@ const identifyComputedFeaturesRoute = createServerRoute({
       .nullable()
       .optional(),
   }),
-  handler: async ({ params, request, getScopedClients, server, logger }) => {
+  handler: async ({ params, request, getScopedClients, server, logger, telemetry }) => {
     const {
       scopedClusterClient,
       getFeatureClient,
@@ -231,6 +232,13 @@ const identifyComputedFeaturesRoute = createServerRoute({
       streamsClient.getStream(streamName),
     ]);
 
+    // Enable code_analysis grounding only when the feature flag is on and Agent
+    // Builder is available; otherwise the provider is omitted and the computed
+    // feature is skipped.
+    const codeGroundingEnabled =
+      Boolean(server.agentBuilder?.tools) &&
+      (await isSignificantEventsSemanticCodeSearchGroundingEnabled(server.core.featureFlags));
+
     try {
       const computedFeatures = await identifyComputedFeatures({
         stream,
@@ -242,6 +250,9 @@ const identifyComputedFeaturesRoute = createServerRoute({
         logger: routeLogger,
         featureTtlDays,
         runId,
+        ...(codeGroundingEnabled
+          ? { agentBuilderTools: server.agentBuilder?.tools, request, telemetry }
+          : {}),
       });
 
       return {

@@ -5,6 +5,14 @@
  * 2.0.
  */
 
+/**
+ * Generic bridge that exposes registered Agent Builder tools to an inference
+ * reasoning agent without re-declaring their schemas. It is intentionally free
+ * of any feature-specific concepts (no Streams / Semantic Code Search
+ * knowledge) so it can be reused by other features (and, eventually, lifted
+ * into a shared package).
+ */
+
 import { z } from '@kbn/zod/v4';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { ToolsStart } from '@kbn/agent-builder-server';
@@ -12,8 +20,8 @@ import type { ToolCallback, ToolDefinition } from '@kbn/inference-common';
 import { ToolResultType, type ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
 
 /**
- * Flat, LLM-friendly payload returned by every bridged tool callback. Mirrors
- * the shape the significant-events reasoning agent already consumes.
+ * Flat, LLM-friendly payload returned by every bridged tool callback by default.
+ * Consumers that need a different shape can pass `formatResults`.
  */
 export interface BridgedToolResponse {
   results: Array<{ type: string; data: unknown }>;
@@ -27,7 +35,10 @@ export interface BridgedToolResponse {
 /**
  * Maps Agent Builder tool results into a plain, LLM-friendly payload.
  * Error results are surfaced under `error`; everything else is passed through
- * as `{ type, data }` so the reasoning agent can read the workflow output.
+ * as `{ type, data }` so the reasoning agent can read the tool output.
+ *
+ * This is the default `formatResults` implementation; pass a custom one to
+ * `createInferenceToolsFromAgentBuilder` to produce a different shape.
  */
 export const formatToolResults = (results: ToolResult[] | undefined): BridgedToolResponse => {
   const list = results ?? [];
@@ -45,6 +56,9 @@ export const formatToolResults = (results: ToolResult[] | undefined): BridgedToo
     ...(errors.length > 0 ? { error: errors.join('; ') } : {}),
   };
 };
+
+/** Builds the response returned when a bridged call fails or is short-circuited. */
+const errorResponse = (error: string): BridgedToolResponse => ({ results: [], count: 0, error });
 
 /**
  * Outcome of a tool's `prepare` hook: either extra params to merge into the
@@ -84,10 +98,6 @@ export interface BridgedToolSpec {
   prepare?: (args: Record<string, unknown>) => Promise<BridgePrepareOutcome> | BridgePrepareOutcome;
 }
 
-const missingArgResponse = (name: string): { response: BridgedToolResponse } => ({
-  response: { results: [], count: 0, error: `"${name}" is required.` },
-});
-
 const isMissing = (value: unknown): boolean =>
   value === undefined || value === null || value === '';
 
@@ -99,26 +109,32 @@ const isMissing = (value: unknown): boolean =>
  * are stripped, required args are validated generically, and the callback
  * delegates to `tools.execute`.
  *
- * Tools that can't be resolved (e.g. the backing workflow isn't installed) are
- * skipped so grounding degrades gracefully rather than failing construction.
+ * Tools that can't be resolved (e.g. the backing tool isn't installed) are
+ * skipped so the caller degrades gracefully rather than failing construction.
  */
 export const createInferenceToolsFromAgentBuilder = async ({
   tools,
   request,
   specs,
   logger,
+  formatResults = formatToolResults,
 }: {
   tools: ToolsStart;
   request: KibanaRequest;
   specs: BridgedToolSpec[];
   logger: Logger;
+  /**
+   * Maps the raw Agent Builder `ToolResult[]` of a successful call into the
+   * response surfaced to the reasoning agent. Defaults to {@link formatToolResults}.
+   */
+  formatResults?: (results: ToolResult[] | undefined) => BridgedToolResponse;
 }): Promise<{ tools: Record<string, ToolDefinition>; callbacks: Record<string, ToolCallback> }> => {
   let registry: Awaited<ReturnType<ToolsStart['getRegistry']>>;
   try {
     registry = await tools.getRegistry({ request });
   } catch (error) {
     // The registry is unavailable (e.g. Agent Builder is in a bad state). Treat
-    // grounding as unavailable rather than failing the caller.
+    // the bridge as unavailable rather than failing the caller.
     const message = error instanceof Error ? error.message : String(error);
     logger.warn(
       `Unable to access the Agent Builder tool registry; skipping bridged tools: ${message}`
@@ -135,22 +151,19 @@ export const createInferenceToolsFromAgentBuilder = async ({
       const { results, prompt } = await tools.execute({ toolId, toolParams, request });
       if (!results && prompt) {
         return {
-          response: {
-            results: [],
-            count: 0,
-            error:
-              'This tool requires confirmation and cannot be used during automated generation.',
-          },
+          response: errorResponse(
+            'This tool requires confirmation and cannot be used during automated generation.'
+          ),
         };
       }
       logger.debug(`Agent Builder tool "${toolId}" completed in ${Date.now() - startTime}ms`);
-      return { response: formatToolResults(results) };
+      return { response: formatResults(results) };
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       logger.warn(
         `Agent Builder tool "${toolId}" failed after ${Date.now() - startTime}ms: ${message}`
       );
-      return { response: { results: [], count: 0, error: message } };
+      return { response: errorResponse(message) };
     }
   };
 
@@ -162,6 +175,8 @@ export const createInferenceToolsFromAgentBuilder = async ({
     let properties: Record<string, unknown>;
     let required: string[];
 
+    let schemaPropertyKeys: Set<string>;
+
     try {
       const tool = await registry.get(spec.sourceToolId);
       const zodSchema = await tool.getSchema();
@@ -169,6 +184,12 @@ export const createInferenceToolsFromAgentBuilder = async ({
         unrepresentable: 'any',
         io: 'input',
       }) as { $schema?: string; properties?: Record<string, unknown>; required?: string[] };
+
+      // All params the installed tool actually declares (before hiding). Used to
+      // filter injected params so we never forward an arg the tool doesn't
+      // accept — this is what lets a spec inject both `index` and `repository`
+      // and have only the one the installed SCS surface declares reach execute().
+      schemaPropertyKeys = new Set(Object.keys(jsonSchema.properties ?? {}));
 
       const hidden = new Set(spec.hiddenParams ?? []);
       properties = Object.fromEntries(
@@ -198,7 +219,7 @@ export const createInferenceToolsFromAgentBuilder = async ({
 
       for (const name of required) {
         if (isMissing(args[name])) {
-          return missingArgResponse(name);
+          return { response: errorResponse(`"${name}" is required.`) };
         }
       }
 
@@ -208,7 +229,14 @@ export const createInferenceToolsFromAgentBuilder = async ({
         if ('error' in outcome) {
           return { response: outcome.error };
         }
-        injected = outcome.params ?? {};
+        // Only forward injected params the installed tool actually declares, so a
+        // spec can offer both `index` and `repository` and let the resolved
+        // schema decide which surface is in use.
+        injected = Object.fromEntries(
+          Object.entries(outcome.params ?? {}).filter(
+            ([name, value]) => value !== undefined && schemaPropertyKeys.has(name)
+          )
+        );
       }
 
       return runTool(spec.sourceToolId, { ...args, ...injected });

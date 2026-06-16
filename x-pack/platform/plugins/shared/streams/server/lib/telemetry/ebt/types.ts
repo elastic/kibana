@@ -102,6 +102,21 @@ interface StreamsAgentToolEventStatusUpdateProps {
   error_message?: string;
 }
 
+interface StreamsCodeAnalysisGroundingProps {
+  stream_name: string;
+  stream_type: string;
+  /**
+   * Outcome of the code_analysis computed feature: `feature` (a repository was
+   * selected and a feature emitted), `no_match` (candidates existed but none
+   * verified enough strings), `no_candidates`, `no_strings`, or `unavailable`
+   * (SCS / Agent Builder not installed).
+   */
+  status: string;
+  repository?: string;
+  candidate_count: number;
+  verified_count: number;
+}
+
 export {
   type StreamEndpointLatencyProps,
   type StreamsStateErrorProps,
@@ -114,4 +129,5 @@ export {
   type StreamsAgentToolKiIdentificationStartedProps,
   type StreamsAgentToolEventCreateProps,
   type StreamsAgentToolEventStatusUpdateProps,
+  type StreamsCodeAnalysisGroundingProps,
 };

@@ -15,6 +15,7 @@ import {
   createSemanticCodeSearchTools,
   SCS_FIND_INTRODUCING_COMMIT_TOOL_ID,
   SCS_LIST_INDICES_TOOL_ID,
+  SCS_LIST_REPOS_TOOL_ID,
   SCS_READ_FILE_TOOL_ID,
   SCS_SEARCH_COMMIT_MESSAGES_TOOL_ID,
   SCS_SEMANTIC_SEARCH_TOOL_ID,
@@ -40,6 +41,7 @@ const ALL_TOOL_NAMES = [
   'git_search_commits',
   'git_show_commit',
   'list_code_indices',
+  'list_code_repos',
   'read_code_file',
   'select_code_index',
 ];
@@ -48,6 +50,7 @@ const ALL_TOOL_NAMES = [
 // from the Agent Builder registry (`index` / `repository` are required there
 // and hidden/injected by the factory).
 const SCHEMA_MAP: Record<string, z.ZodType> = {
+  [SCS_LIST_REPOS_TOOL_ID]: z.object({}),
   [SCS_LIST_INDICES_TOOL_ID]: z.object({}),
   [SCS_SEMANTIC_SEARCH_TOOL_ID]: z.object({
     query: z.string().optional(),
@@ -189,6 +192,7 @@ describe('createSemanticCodeSearchTools', () => {
       'analyze_symbol',
       'code_search',
       'list_code_indices',
+      'list_code_repos',
       'read_code_file',
       'select_code_index',
     ]);
@@ -247,11 +251,49 @@ describe('createSemanticCodeSearchTools', () => {
     });
   });
 
-  it('select_code_index returns an error when index is missing', async () => {
+  it('select_code_index returns an error when neither repository nor index is provided', async () => {
     const { callbacks } = (await build())!;
     const result = await callbacks.select_code_index(makeToolCall('select_code_index', {}));
     expect(esClient.search).not.toHaveBeenCalled();
-    expect(result.response).toEqual({ results: [], count: 0, error: '"index" is required.' });
+    expect(result.response).toEqual({
+      results: [],
+      count: 0,
+      error: 'Either "repository" or "index" is required.',
+    });
+  });
+
+  it('select_code_index accepts a repository directly without resolving from an index', async () => {
+    const { callbacks } = (await build())!;
+
+    const result = await callbacks.select_code_index(
+      makeToolCall('select_code_index', { repository })
+    );
+
+    // No index → no Elasticsearch lookup needed to resolve the repository.
+    expect(esClient.search).not.toHaveBeenCalled();
+    expect(result.response).toEqual({ git_history_available: true, repository });
+
+    // git_* tools become usable with the directly-selected repository.
+    execute.mockResolvedValue({ results: [] });
+    await callbacks.git_search_commits(makeToolCall('git_search_commits', { query: 'x' }));
+    expect(execute).toHaveBeenCalledWith({
+      toolId: SCS_SEARCH_COMMIT_MESSAGES_TOOL_ID,
+      toolParams: { query: 'x', repository },
+      request,
+    });
+  });
+
+  it('list_code_repos executes the SCS list-repos tool with no params', async () => {
+    execute.mockResolvedValue({ results: [] });
+    const { callbacks } = (await build())!;
+
+    await callbacks.list_code_repos(makeToolCall('list_code_repos', {}));
+
+    expect(execute).toHaveBeenCalledWith({
+      toolId: SCS_LIST_REPOS_TOOL_ID,
+      toolParams: {},
+      request,
+    });
   });
 
   it('code_search uses the selected index', async () => {
