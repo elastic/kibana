@@ -23,7 +23,7 @@ describe('registerGetStepDefinitionsRoute', () => {
   });
 
   it('registers a GET route at the expected path with internal access and authz disabled', () => {
-    registerGetStepDefinitionsRoute(router, registry);
+    registerGetStepDefinitionsRoute(router, registry, logger);
 
     expect(router.get).toHaveBeenCalledTimes(1);
     const [routeConfig] = router.get.mock.calls[0];
@@ -41,7 +41,7 @@ describe('registerGetStepDefinitionsRoute', () => {
     stepRegistry.register({ id: 'm.step', handler: sharedHandler } as any);
 
     const testRouter = httpServiceMock.createRouter();
-    registerGetStepDefinitionsRoute(testRouter, stepRegistry);
+    registerGetStepDefinitionsRoute(testRouter, stepRegistry, logger);
 
     const [, handler] = testRouter.get.mock.calls[0];
     const response = httpServerMock.createResponseFactory();
@@ -62,7 +62,7 @@ describe('registerGetStepDefinitionsRoute', () => {
   it('returns empty steps array when registry is empty', async () => {
     const emptyRegistry = new ServerStepRegistry(logger);
     const testRouter = httpServiceMock.createRouter();
-    registerGetStepDefinitionsRoute(testRouter, emptyRegistry);
+    registerGetStepDefinitionsRoute(testRouter, emptyRegistry, logger);
 
     const [, handler] = testRouter.get.mock.calls[0];
     const response = httpServerMock.createResponseFactory();
@@ -78,7 +78,7 @@ describe('registerGetStepDefinitionsRoute', () => {
     stepRegistry.register({ id: 'b.step', handler: async () => ({ output: 'b' }) } as any);
 
     const testRouter = httpServiceMock.createRouter();
-    registerGetStepDefinitionsRoute(testRouter, stepRegistry);
+    registerGetStepDefinitionsRoute(testRouter, stepRegistry, logger);
 
     const [, handler] = testRouter.get.mock.calls[0];
     const response = httpServerMock.createResponseFactory();
@@ -104,7 +104,7 @@ describe('registerGetStepDefinitionsRoute', () => {
     } as any);
 
     const testRouter = httpServiceMock.createRouter();
-    registerGetStepDefinitionsRoute(testRouter, stepRegistry);
+    registerGetStepDefinitionsRoute(testRouter, stepRegistry, logger);
 
     const [, handler] = testRouter.get.mock.calls[0];
     const response = httpServerMock.createResponseFactory();
@@ -113,5 +113,14 @@ describe('registerGetStepDefinitionsRoute', () => {
     const { body } = response.ok.mock.calls[0][0]!;
     const { steps } = body as { steps: Array<{ id: string; definitionHash: string }> };
     expect(steps[0].definitionHash).not.toBe(steps[1].definitionHash);
+  });
+
+  it('logs an error when failed to compute definition hash', async () => {
+    const stepRegistry = new ServerStepRegistry(logger);
+    stepRegistry.register({ id: 'a.step', handler: async () => ({ output: 'a' }) } as any);
+    stepRegistry.register({ id: 'b.step', handler: async () => ({ output: 'b' }) } as any);
+
+    const testRouter = httpServiceMock.createRouter();
+    registerGetStepDefinitionsRoute(testRouter, stepRegistry, logger);
   });
 });

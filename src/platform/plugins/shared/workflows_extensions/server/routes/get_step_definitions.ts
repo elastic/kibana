@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IRouter } from '@kbn/core/server';
+import type { IRouter, Logger } from '@kbn/core/server';
 import { createSHA256Hash } from '@kbn/crypto';
 import { stableStringify } from '@kbn/std';
 import { z } from '@kbn/zod/v4';
@@ -25,11 +25,7 @@ function schemaToJson(schema?: z.ZodType): unknown {
   if (!schema) {
     return undefined;
   }
-  try {
-    return z.toJSONSchema(schema);
-  } catch {
-    return { __unconvertible: String(schema) };
-  }
+  return z.toJSONSchema(schema);
 }
 
 /**
@@ -37,7 +33,7 @@ function schemaToJson(schema?: z.ZodType): unknown {
  * (inputSchema/outputSchema/configSchema), handler/onCancel implementations, or
  * metadata are all detected. `id` is excluded since it's the lookup key.
  */
-function computeDefinitionHash(definition: ServerStepDefinition): string {
+function computeDefinitionHash(definition: ServerStepDefinition, logger: Logger): string {
   const {
     label,
     description,
@@ -52,21 +48,25 @@ function computeDefinitionHash(definition: ServerStepDefinition): string {
     onCancel,
   } = definition;
 
-  const canonical = {
-    label,
-    description,
-    category,
-    stability,
-    deprecation,
-    documentation,
-    inputSchema: schemaToJson(inputSchema),
-    outputSchema: schemaToJson(outputSchema),
-    configSchema: schemaToJson(configSchema),
-    handler: handler?.toString(),
-    onCancel: onCancel?.toString(),
-  };
-
-  return createSHA256Hash(stableStringify(canonical));
+  try {
+    const canonical = {
+      label,
+      description,
+      category,
+      stability,
+      deprecation,
+      documentation,
+      inputSchema: schemaToJson(inputSchema),
+      outputSchema: schemaToJson(outputSchema),
+      configSchema: schemaToJson(configSchema),
+      handler: handler?.toString(),
+      onCancel: onCancel?.toString(),
+    };
+    return createSHA256Hash(stableStringify(canonical));
+  } catch (error) {
+    logger.error(`Failed to compute definition hash for step ${definition.id}`, { error });
+    return 'definition-hashing-error';
+  }
 }
 
 /**
@@ -76,7 +76,8 @@ function computeDefinitionHash(definition: ServerStepDefinition): string {
  */
 export function registerGetStepDefinitionsRoute(
   router: IRouter,
-  registry: ServerStepRegistry
+  registry: ServerStepRegistry,
+  logger: Logger
 ): void {
   router.get(
     {
@@ -98,7 +99,7 @@ export function registerGetStepDefinitionsRoute(
         // create a hash of the full definition to detect changes in schemas or implementation
         .map((definition) => ({
           id: definition.id,
-          definitionHash: computeDefinitionHash(definition),
+          definitionHash: computeDefinitionHash(definition, logger),
         }))
         .sort((a, b) => a.id.localeCompare(b.id));
 
