@@ -237,6 +237,7 @@ export function LayerTabs({
       css={css`
         pointer-events: auto;
         background-color: ${euiTheme.colors.emptyShade};
+        border-bottom: ${euiTheme.border.thin};
       `}
     >
       {managedItems.length > 1 ? (
