@@ -90,23 +90,21 @@ export function AttachmentsTable({
   );
 
   const columns = useMemo((): Array<EuiBasicTableColumn<Attachment>> => {
+    const viewDetailsLabel = i18n.translate(
+      'xpack.streams.attachmentTable.detailsButtonAriaLabel',
+      { defaultMessage: 'View details' }
+    );
+
     const detailsColumn: EuiBasicTableColumn<Attachment> = {
       field: 'details',
       name: '',
       width: '40px',
       render: (_, attachment) => (
-        <EuiToolTip
-          content={i18n.translate('xpack.streams.attachmentTable.detailsButtonAriaLabel', {
-            defaultMessage: 'View details',
-          })}
-          disableScreenReaderOutput
-        >
+        <EuiToolTip content={viewDetailsLabel} disableScreenReaderOutput>
           <EuiButtonIcon
             data-test-subj="streamsAppAttachmentDetailsButton"
             iconType="maximize"
-            aria-label={i18n.translate('xpack.streams.attachmentTable.detailsButtonAriaLabel', {
-              defaultMessage: 'View details',
-            })}
+            aria-label={viewDetailsLabel}
             onClick={() => onViewDetails?.(attachment)}
           />
         </EuiToolTip>
