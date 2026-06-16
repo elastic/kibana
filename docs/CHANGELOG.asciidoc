@@ -10,6 +10,8 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.19.16>>
+* <<release-notes-8.19.15>>
 * <<release-notes-8.19.14>>
 * <<release-notes-8.19.13>>
 * <<release-notes-8.19.12>>
@@ -121,6 +123,27 @@ Review important information about the {kib} 8.x releases.
 
 include::upgrade-notes.asciidoc[]
 
+[[release-notes-8.19.16]]
+== {kib} 8.19.16
+
+The 8.19.16 release includes the following fixes.
+
+IMPORTANT: The 8.19.16 release contains fixes for potential security vulnerabilities. Check our link:https://discuss.elastic.co/c/announcements/security-announcements/31[security advisory] for more details.
+
+[float]
+[[fixes-v8.19.16]]
+=== Fixes
+Alerting::
+* Fixes alert index template updates failing when auto-increasing `total_fields.limit` due to system-managed read-only fields ({kibana-pull}262534[#262534]).
+Data ingestion and Fleet::
+* Fixes integration package `elasticsearch` settings (`index_mode`, `source_mode`, `dynamic_namespace`, and `dynamic_dataset`) changing unexpectedly on package upgrade or reinstall ({kibana-pull}269080[#269080]).
+* Fixes Fleet background tasks failing when paginating agent policies sorted on the non-existent `created_at` field ({kibana-pull}267285[#267285]).
+* Fixes the **IP Location** processor in **Ingest pipelines** selecting the wrong database when a local `.mmdb` filename matches a managed database display name ({kibana-pull}265740[#265740]).
+Elastic Security solution::
+For the Elastic Security 8.19.16 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Elasticsearch solution::
+* Fixes behavioral analytics APIs to reject collection names longer than 1024 characters ({kibana-pull}266225[#266225]).
+
 [[release-notes-8.19.15]]
 == {kib} 8.19.15
 
@@ -137,6 +160,9 @@ Kibana platform::
 [float]
 [[fixes-v8.19.15]]
 === Fixes
+Alerting::
+* Fixes an issue where Stack and Observability alerts sent recovery notifications but remained `active` in {kib} instead of transitioning to `recovered` ({kibana-pull}261012[#261012]).
+
 Data ingestion and Fleet::
 * Fixes YAML file downloads being truncated at the first `#` character by properly URL-encoding the content ({kibana-pull}264083[#264083]).
 * Fixes Fleet Server diagnostic bundles failing to download when `elasticsearch.compression` is enabled ({kibana-pull}262394[#262394]).
@@ -164,7 +190,13 @@ Machine Learning::
 [[release-notes-8.19.14]]
 == {kib} 8.19.14
 
-The 8.19.14 release includes the following fixes.
+The 8.19.14 release includes the following known issues and fixes.
+
+[float]
+[[known-issues-8.19.14]]
+=== Known issues
+
+include::CHANGELOG.asciidoc[tag=known-issue-1168]
 
 [float]
 [[fixes-v8.19.14]]
@@ -188,9 +220,29 @@ Machine Learning::
 [[release-notes-8.19.13]]
 == {kib} 8.19.13
 
-The 8.19.13 release includes the following fixes.
+The 8.19.13 release includes the following known issues and fixes.
 
 IMPORTANT: This release contains fixes for potential security vulnerabilities. Check our link:https://discuss.elastic.co/c/announcements/security-announcements/31[security advisory] for more details.
+
+[float]
+[[known-issues-8.19.13]]
+=== Known issues
+
+// tag::known-issue-1168[]
+.Stack and Observability alerts remain active instead of transitioning to recovered.
+[%collapsible]
+====
+*Details* +
+
+Some Stack and Observability alerts send recovery notifications (for example, Slack, email, or webhook) but remain `active` in {kib} instead of transitioning to `recovered`.
+
+*Workaround* +
+Manually untrack stale alerts or upgrade to 8.19.15, 9.3.4, or 9.4.0.
+
+*Resolved* + 
+This issue is resolved in 8.19.15, 9.3.4, and 9.4.0.
+====
+// end::known-issue-1168[]
 
 [float]
 [[fixes-v8.19.13]]

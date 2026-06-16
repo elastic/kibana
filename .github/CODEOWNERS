@@ -1656,6 +1656,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /.buildkite/scripts/steps/esql_generate_function_metadata.sh @elastic/kibana-esql
 /.buildkite/pipelines/esql_grammar_sync.yml @elastic/kibana-esql
 /.buildkite/scripts/steps/code_generation/security_solution_codegen.sh @elastic/security-detection-rule-management
+/.buildkite/pipeline-utils/scout/ @elastic/appex-qa
 /.buildkite/scripts/steps/test/scout/ @elastic/appex-qa @elastic/kibana-operations
 /kbn_pm/ @elastic/kibana-operations
 /x-pack/dev-tools @elastic/kibana-operations
@@ -2771,6 +2772,10 @@ x-pack/platform/plugins/shared/fleet/server/saved_objects/index.ts @elastic/flee
 /.agents/skills/scout-create-scaffold/** @elastic/appex-qa
 /.agents/skills/scout-migrate-from-ftr/** @elastic/appex-qa
 /.agents/skills/scout-ui-testing/** @elastic/appex-qa
+
+# FTR config manifests have no single owner — touched by all solutions.
+# Leaving this unowned avoids routing every edit through Kibana Operations.
+/.buildkite/ftr-manifests/
 
 ####
 ## These rules are always last so they take ultimate priority over everything else

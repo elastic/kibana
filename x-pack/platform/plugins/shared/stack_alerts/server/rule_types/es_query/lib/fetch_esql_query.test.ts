@@ -49,6 +49,7 @@ jest.mock('../../../../common', () => {
 
 const logger = loggingSystemMock.create().get();
 const mockRuleResultService = publicRuleResultServiceMock.create();
+const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
 
 describe('fetchEsqlQuery', () => {
   afterAll(() => {
@@ -64,9 +65,7 @@ describe('fetchEsqlQuery', () => {
 
   describe('fetch', () => {
     it('should throw a user error when the error is a verification_exception error', async () => {
-      const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-
-      scopedClusterClient.asCurrentUser.transport.request.mockRejectedValueOnce(
+      scopedClusterClient.asCurrentUser.esql.query.mockRejectedValueOnce(
         new Error(
           'verification_exception: Found 1 problem line 1:23: Unknown column [user_agent.original]'
         )
@@ -185,8 +184,7 @@ describe('fetchEsqlQuery', () => {
   });
 
   it('should bubble up warnings if there are duplicate alerts', async () => {
-    const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-    scopedClusterClient.asCurrentUser.transport.request.mockResolvedValueOnce({
+    scopedClusterClient.asCurrentUser.esql.query.mockResolvedValueOnce({
       columns: [],
       values: [],
     });

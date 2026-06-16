@@ -72,6 +72,7 @@ export const UsageMetricsRequestSchema = schema.object({
   to: DateSchema,
   metricTypes: schema.arrayOf(schema.string(), {
     minSize: 1,
+    maxSize: 1000,
     validate: (values) => {
       const trimmedValues = values.map((v) => v.trim());
       if (trimmedValues.some((v) => !v.length)) {
@@ -82,6 +83,7 @@ export const UsageMetricsRequestSchema = schema.object({
     },
   }),
   dataStreams: schema.arrayOf(schema.string(), {
+    maxSize: 1000,
     validate: (values) => {
       if (values.map((v) => v.trim()).some((v) => !v.length)) {
         return 'list cannot contain empty values';
@@ -104,9 +106,11 @@ export const UsageMetricsResponseSchema = {
             schema.object({
               x: schema.number(),
               y: schema.number(),
-            })
+            }),
+            { maxSize: 1000 }
           ),
-        })
+        }),
+        { maxSize: 1000 }
       )
     ),
 };

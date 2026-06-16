@@ -12,7 +12,7 @@ import axios from 'axios';
 import type { ExecSyncOptions } from 'child_process';
 import { execFileSync, execSync } from 'child_process';
 
-import { dump } from 'js-yaml';
+import { stringify } from 'yaml';
 
 import { parseLinkHeader } from './parse_link_header';
 import { Artifact } from './types/artifact';
@@ -29,12 +29,8 @@ export interface BuildkiteClientConfig {
   exec?: ExecType;
 }
 
-export interface BuildkiteGroup {
-  group: string;
-  steps: BuildkiteStep[];
-}
-
 export type BuildkiteStep =
+  | BuildkiteGroupStep
   | BuildkiteCommandStep
   | BuildkiteInputStep
   | BuildkiteTriggerStep
@@ -52,6 +48,20 @@ export interface BuildkiteAgentTargetingRule {
   minCpuPlatform?: string;
   preemptible?: boolean;
   diskSizeGb?: number;
+}
+
+export interface BuildkiteGroupStep {
+  group: string;
+  steps: BuildkiteStep[];
+  key?: string;
+  depends_on?: string | string[];
+  retry?: {
+    automatic: Array<{
+      exit_status: string;
+      limit: number;
+    }>;
+  };
+  env?: { [key: string]: string | number };
 }
 
 export interface BuildkiteCommandStep {
@@ -431,9 +441,9 @@ export class BuildkiteClient {
     });
   };
 
-  uploadSteps = (steps: Array<BuildkiteStep | BuildkiteGroup>) => {
+  uploadSteps = (steps: Array<BuildkiteStep>) => {
     this.exec(`buildkite-agent pipeline upload`, {
-      input: dump({ steps }),
+      input: stringify({ steps }),
       stdio: ['pipe', 'inherit', 'inherit'],
     });
   };

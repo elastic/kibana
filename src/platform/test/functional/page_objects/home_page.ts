@@ -70,12 +70,15 @@ export class HomePageObject extends FtrService {
     // hence we setup a delay so the interstitial has enough time to fade in
     const animSpeedExtraSlow = 500;
     await new Promise((resolve) => setTimeout(resolve, animSpeedExtraSlow));
-    return this.retry.try(async () => {
-      return await this.testSubjects.isDisplayed(
-        'homeWelcomeInterstitial',
-        animSpeedExtraSlow * 16
-      );
-    });
+    // Use waitForWithTimeout (retries on false) rather than retry.try (only retries on thrown errors).
+    // In slower environments (e.g. FIPS builds) isDisplayed can return false before the interstitial
+    // finishes fading in, and retry.try would return that false result immediately without retrying.
+    await this.retry.waitForWithTimeout(
+      'homeWelcomeInterstitial to be displayed',
+      animSpeedExtraSlow * 30, // 15s — generous for slow FIPS builds
+      async () => await this.testSubjects.isDisplayed('homeWelcomeInterstitial', animSpeedExtraSlow)
+    );
+    return true;
   }
 
   async isGuidedOnboardingLandingDisplayed() {

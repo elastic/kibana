@@ -348,6 +348,17 @@ describe('Package policy service', () => {
         /Reusable integration policies cannot be used with agent policies belonging to multiple spaces./
       );
     });
+
+    it('should throw FleetError when given an invalid id', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const soClient = savedObjectsClientMock.create();
+
+      await expect(
+        packagePolicyService.create(soClient, esClient, { name: 'test', inputs: [] } as any, {
+          id: '../bad-id',
+        })
+      ).rejects.toThrow('id is not valid');
+    });
   });
 
   describe('inspect', () => {

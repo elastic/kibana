@@ -10,7 +10,7 @@
 import React from 'react';
 import * as t from 'io-ts';
 import { toNumberRt } from '@kbn/io-ts-utils';
-import { createRouter } from './create_router';
+import { createRouter, MAX_PATH_LENGTH, toReactRouterPath } from './create_router';
 import { InvalidRouteParamsException } from './errors/invalid_route_params_exception';
 import { createMemoryHistory } from 'history';
 import { last } from 'lodash';
@@ -664,5 +664,52 @@ describe('createRouter', () => {
         query: { filter: null },
       });
     });
+  });
+});
+
+describe('toReactRouterPath', () => {
+  it('converts {param} placeholders to :param format', () => {
+    expect(toReactRouterPath('/services/{serviceName}')).toBe('/services/:serviceName');
+  });
+
+  it('converts multiple placeholders', () => {
+    expect(toReactRouterPath('/services/{serviceName}/errors/{groupId}')).toBe(
+      '/services/:serviceName/errors/:groupId'
+    );
+  });
+
+  it('returns paths without placeholders unchanged', () => {
+    expect(toReactRouterPath('/services')).toBe('/services');
+    expect(toReactRouterPath('/')).toBe('/');
+    expect(toReactRouterPath('/a/b/c')).toBe('/a/b/c');
+  });
+
+  it('does not match unbalanced or nested braces', () => {
+    expect(toReactRouterPath('/services/{a{b}}')).toBe('/services/{a:b}');
+    expect(toReactRouterPath('/services/{{name}}')).toBe('/services/{:name}');
+  });
+
+  it('handles empty braces as a no-op', () => {
+    expect(toReactRouterPath('/services/{}')).toBe('/services/{}');
+  });
+
+  it('does not catastrophically backtrack on crafted input (ReDoS) and does not throw an error', () => {
+    const malicious = '/app/apm/services/' + '{{.'.repeat(MAX_PATH_LENGTH / 4);
+    const start = performance.now();
+    toReactRouterPath(malicious);
+    const elapsed = performance.now() - start;
+
+    expect(elapsed).toBeLessThan(100);
+
+    expect(() => {
+      toReactRouterPath(malicious);
+    }).not.toThrowError();
+  });
+
+  it('throws an error if the path is too long', () => {
+    const malicious = '/app/apm/services/' + '{{.'.repeat(MAX_PATH_LENGTH + 1);
+    expect(() => {
+      toReactRouterPath(malicious);
+    }).toThrowError('Path is too long to process');
   });
 });

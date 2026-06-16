@@ -10,7 +10,7 @@
 import { groups } from './groups.json';
 import { TestSuiteType } from './constants';
 import type { BuildkiteStep } from '#pipeline-utils';
-import { expandAgentQueue, collectEnvFromLabels } from '#pipeline-utils';
+import { expandAgentQueue, collectEnvFromLabels, getTrackedBranch } from '#pipeline-utils';
 
 const configJson = process.env.KIBANA_FLAKY_TEST_RUNNER_CONFIG;
 if (!configJson) {
@@ -34,6 +34,10 @@ if (Number.isNaN(concurrency)) {
 
 const BASE_JOBS = 1;
 const MAX_JOBS = 500;
+
+// Scout discovery target for the flaky-setup step. We read the branch name
+// from `package.json` (set when forking a release branch).
+const scoutDiscoveryTarget = getTrackedBranch() === 'main' ? 'local' : 'local-stateful-only';
 
 function getTestSuitesFromJson(json: string) {
   const fail = (errorMsg: string) => {
@@ -155,6 +159,9 @@ if (hasScoutSuites) {
     agents: expandAgentQueue('n2-4-spot'),
     key: 'scout_playwright_configs',
     timeout_in_minutes: 30,
+    env: {
+      SCOUT_DISCOVERY_TARGET: scoutDiscoveryTarget,
+    },
     retry: {
       automatic: [{ exit_status: '-1', limit: 3 }],
     },

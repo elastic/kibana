@@ -38,6 +38,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     testConfigCategory: ScoutTestRunConfigCategory.UI_TEST,
     testFiles: [resolve(__dirname, './tests/login_selector')],
+    security: {
+      disableTestUser: true,
+      cookieLogin: false, // test login selector
+    },
 
     services,
     pageObjects,

@@ -456,6 +456,20 @@ describe('Agent policy', () => {
       );
     });
 
+    it('should throw FleetError when given an invalid id', async () => {
+      const soClient = getAgentPolicyCreateMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      await expect(
+        agentPolicyService.create(
+          soClient,
+          esClient,
+          { name: 'test', namespace: 'default' },
+          { id: '../bad-id' }
+        )
+      ).rejects.toThrow('id is not valid');
+    });
+
     it('should throw error when attempting to create policy with supports_agentless true on serverless environment that does not support the agentless feature', async () => {
       jest
         .spyOn(appContextService, 'getExperimentalFeatures')
@@ -479,6 +493,48 @@ describe('Agent policy', () => {
           'supports_agentless is only allowed in serverless and cloud environments that support the agentless feature'
         )
       );
+    });
+
+    it('should not generate uninstall token for agentless policies', async () => {
+      jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+        agentless: { enabled: true },
+      } as any);
+      jest
+        .spyOn(appContextService, 'getCloud')
+        .mockReturnValue({ isServerlessEnabled: false, isCloudEnabled: true } as any);
+
+      const generateTokenForPolicyId = jest.fn().mockResolvedValue(undefined);
+      mockedAppContextService.getUninstallTokenService.mockReturnValueOnce({
+        scoped: jest.fn().mockReturnValue({ generateTokenForPolicyId }),
+      } as unknown as UninstallTokenServiceInterface);
+
+      const soClient = getAgentPolicyCreateMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      await agentPolicyService.create(soClient, esClient, {
+        name: 'test agentless policy',
+        namespace: 'default',
+        supports_agentless: true,
+      });
+
+      expect(generateTokenForPolicyId).not.toHaveBeenCalled();
+    });
+
+    it('should generate uninstall token for non-agentless policies', async () => {
+      const generateTokenForPolicyId = jest.fn().mockResolvedValue(undefined);
+      mockedAppContextService.getUninstallTokenService.mockReturnValueOnce({
+        scoped: jest.fn().mockReturnValue({ generateTokenForPolicyId }),
+      } as unknown as UninstallTokenServiceInterface);
+
+      const soClient = getAgentPolicyCreateMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      await agentPolicyService.create(soClient, esClient, {
+        name: 'test regular policy',
+        namespace: 'default',
+      });
+
+      expect(generateTokenForPolicyId).toHaveBeenCalled();
     });
   });
 

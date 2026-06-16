@@ -25,7 +25,7 @@ import {
 import { delay } from './test_utils';
 import { baselineTypes, getBaselineDocuments } from './kibana_migrator_test_kit.fixtures';
 
-export const BASELINE_ELASTICSEARCH_VERSION = '8.19.16';
+export const BASELINE_ELASTICSEARCH_VERSION = '8.19.17';
 export const BASELINE_DOCUMENTS_PER_TYPE_1K = 200;
 export const BASELINE_DOCUMENTS_PER_TYPE_500K = 100_000;
 // we discard the second half with exclude on upgrade (firstHalf !== true)
@@ -104,7 +104,11 @@ export const createBaselineArchive = async ({
 };
 
 const compressBaselineArchive = async (esFolder: string, archiveFile: string) => {
-  const dataFolder = join(esFolder, 'es-test-cluster', 'data');
-  const cmd = `ditto -c -k --sequesterRsrc --keepParent ${dataFolder}  ${archiveFile}`;
-  await execPromise(cmd);
+  const baseName = 'data';
+  const dataFolder = join(esFolder, 'es-test-cluster', baseName);
+  const parentDir = join(dataFolder, '..');
+  const cmd = `zip -rq "${archiveFile}" "${baseName}"`;
+  await execPromise(cmd, {
+    cwd: parentDir,
+  });
 };

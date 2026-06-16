@@ -147,28 +147,29 @@ export class RenderingService {
     const { serverBasePath, publicBaseUrl } = http.basePath;
 
     // Grouping all async HTTP requests to run them concurrently for performance reasons.
+    // Anonymous pages skip user-scoped values and async default values (the latter typically
+    // call ES via `asCurrentUser`, which would 401 on an unauthenticated request).
     const [
       defaultSettings,
       settingsUserValues = {},
       globalSettingsUserValues = {},
       userSettingDarkMode,
-    ] = await Promise.all([
-      // All sites
-      withAsyncDefaultValues(request, uiSettings.client?.getRegistered()),
-      // Only non-anonymous pages
-      ...(!isAnonymousPage
-        ? ([
+    ] = await Promise.all(
+      isAnonymousPage
+        ? [uiSettings.client?.getRegistered() ?? {}]
+        : ([
+            withAsyncDefaultValues(request, uiSettings.client?.getRegistered()),
             uiSettings.client?.getUserProvided(),
             uiSettings.globalClient?.getUserProvided(),
             // dark mode
             userSettings?.getUserSettingDarkMode(request),
           ] as [
+            ReturnType<typeof withAsyncDefaultValues>,
             Promise<Record<string, UserProvidedValues>>,
             Promise<Record<string, UserProvidedValues>>,
             Promise<DarkModeValue> | undefined
           ])
-        : []),
-    ]);
+    );
 
     const settings = {
       defaults: defaultSettings,

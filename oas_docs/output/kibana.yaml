@@ -11087,7 +11087,7 @@ paths:
                               eventAction: trigger
                               severity: critical
                               summary: The message body
-                              timestamp: '2023-10-31T00:00:00.000Z'
+                              timestamp: '2023-10-31T00:00:00Z'
                   ids:
                     - 9e946bfc-3118-4c77-bb25-67d781191921
               example27:

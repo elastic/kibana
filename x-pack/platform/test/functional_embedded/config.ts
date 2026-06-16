@@ -44,6 +44,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       reportName: 'Kibana Embedded in iframe with X-Pack Security',
     },
 
+    security: {
+      cookieLogin: false, // HTTPS with self-signed cert — native fetch() rejects it
+    },
+
     esTestCluster: kibanaFunctionalConfig.get('esTestCluster'),
     apps: {
       ...kibanaFunctionalConfig.get('apps'),

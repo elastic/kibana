@@ -113,6 +113,31 @@ describe('utils', () => {
         exclude: panelObj.exclude,
       });
     });
+
+    it('should omit the title key for untitled panels so rison round-trips do not cause false diffs', () => {
+      // Simulates a user-added control with no title (title is absent from localStorage state)
+      const untitledInputData = {
+        initialChildControlState: {
+          '0': {
+            ...initialInputData.initialChildControlState['0'],
+            title: undefined,
+          },
+        },
+      } as unknown as typeof initialInputData;
+
+      const [item] = getFilterItemObjListFromControlState(untitledInputData);
+
+      // Must NOT have a `title` key at all — not even `title: undefined`
+      expect(Object.prototype.hasOwnProperty.call(item, 'title')).toBe(false);
+
+      // Simulates what rison decodes back from the URL (no `title` key)
+      const urlDecoded: FilterControlConfig[] = [{ fieldName: item.fieldName }];
+      const fromStorage: FilterControlConfig[] = [item];
+
+      // The comparator used by FilterGroup to decide whether to show the "controls changed" banner
+      const comparator = getFilterControlsComparator('fieldName', 'title');
+      expect(isEqualWith(fromStorage, urlDecoded, comparator)).toBe(true);
+    });
   });
 
   describe('mergeControls', () => {

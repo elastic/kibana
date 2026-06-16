@@ -24,7 +24,15 @@ import { services as svlServices } from './services';
 
 export default async () => {
   const packageRegistryConfig = path.join(__dirname, './common/package_registry_config.yml');
-  const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/config.yml`];
+  // EPR_REQUIRE_PACKAGE_SIGNATURES=false: the `:lite` distribution ships some
+  // packages without `.sig` files, so opt out of upstream signature enforcement
+  // (added in elastic/package-registry#1646).
+  const dockerArgs: string[] = [
+    '-v',
+    `${packageRegistryConfig}:/package-registry/config.yml`,
+    '-e',
+    'EPR_REQUIRE_PACKAGE_SIGNATURES=false',
+  ];
 
   /**
    * This is used by CI to set the docker registry port
@@ -180,7 +188,10 @@ export default async () => {
       ],
     },
 
-    security: { disableTestUser: true },
+    security: {
+      disableTestUser: true,
+      cookieLogin: false, // serverless uses SAML-based auth, not basic-auth cookie login
+    },
 
     // Used by FTR to recognize serverless project and change its behavior accordingly
     serverless: true,
