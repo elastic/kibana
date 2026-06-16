@@ -820,15 +820,11 @@ describe('bulkCreateRules', () => {
 
       test('per-row error on caller-supplied id NOT in newlyScheduledTaskIds: NO TM cleanup', async () => {
         unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue(
-          buildBulkResponse([
-            { id: 'caller-id', error: { message: 'conflict', statusCode: 409 } },
-          ])
+          buildBulkResponse([{ id: 'caller-id', error: { message: 'conflict', statusCode: 409 } }])
         );
 
         await rulesClient.bulkCreateRules({
-          rules: [
-            { data: baseRule({ name: 'disabled-collision' }), options: { id: 'caller-id' } },
-          ],
+          rules: [{ data: baseRule({ name: 'disabled-collision' }), options: { id: 'caller-id' } }],
         });
 
         expect(taskManager.removeIfExists).not.toHaveBeenCalled();
@@ -883,9 +879,7 @@ describe('bulkCreateRules', () => {
           new Error('invalidation write failed')
         );
         unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue(
-          buildBulkResponse([
-            { id: 'mock-id-1', error: { message: 'conflict', statusCode: 409 } },
-          ])
+          buildBulkResponse([{ id: 'mock-id-1', error: { message: 'conflict', statusCode: 409 } }])
         );
 
         await expect(
