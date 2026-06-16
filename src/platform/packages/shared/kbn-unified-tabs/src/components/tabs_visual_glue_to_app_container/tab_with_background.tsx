@@ -51,25 +51,20 @@ export const TabWithBackground = React.forwardRef<HTMLDivElement, TabWithBackgro
             : 'transparent'};
           transition: background ${euiTheme.animation.fast};
           margin: ${euiTheme.size.xs};
-          margin-bottom: 0;
+          // overlap the container's bottom border so the active tab connects to the content below
+          margin-bottom: -${euiTheme.border.width.thin};
           padding-bottom: ${isDragging ? '0' : euiTheme.size.xs};
 
           ${isSelected
             ? `
               position: relative;
-              // overlap the container's bottom border so the active tab connects to the content below
-              margin-bottom: -${euiTheme.size.xxs};
-              border-top: ${euiTheme.border.width.thick} solid ${euiTheme.colors.primary};
+              border-top-color: ${
+                isLoading ? euiTheme.colors.borderBaseSubdued : euiTheme.colors.primary
+              };
               border-left-color: ${euiTheme.colors.borderBaseSubdued};
               border-right-color: ${euiTheme.colors.borderBaseSubdued};
               border-bottom-left-radius: 0;
               border-bottom-right-radius: 0;
-            `
-            : ''}
-
-          ${isLoading
-            ? `
-              border-top: ${euiTheme.border.width.thick} solid ${euiTheme.colors.borderBaseSubdued};
             `
             : ''}
 
