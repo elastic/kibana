@@ -28,7 +28,7 @@ export interface OpenCustomizeNavigationModalDeps {
   ) => NavigationCustomization['moves'];
   onChange: (customization: NavigationCustomization) => void;
   onSave: (customization: NavigationCustomization) => void;
-  onReset: () => NavigationItemInfo[];
+  onReset: () => Promise<NavigationItemInfo[]>;
   onClose: () => void;
   onDismissCallout: () => void;
   /**

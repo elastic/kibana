@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ReplaySubject, takeUntil } from 'rxjs';
+import { ReplaySubject, firstValueFrom, of, take, takeUntil, timeout } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
 import type {
@@ -22,6 +22,12 @@ import {
   NAV_CUSTOMIZATION_STORAGE_KEY,
   NAV_CALLOUT_DISMISSED_STORAGE_KEY,
 } from '../../common/constants';
+
+/**
+ * Upper bound for waiting on the first navigation snapshot when the modal is opened.
+ * Falls back to empty lists instead of hanging the modal open if nav initialization triggers.
+ */
+const NAV_SNAPSHOT_TIMEOUT_MS = 5_000;
 
 export interface NavigationCustomizationServiceStartDeps {
   core: CoreStart;
@@ -122,7 +128,7 @@ export class NavigationCustomizationService {
         import('@kbn/core-chrome-navigation-customization'),
       ]);
 
-      const { items, defaultItemIds } = this.getNavigationItems(chrome);
+      const { items, defaultItemIds } = await this.getNavigationItems(chrome);
 
       const savedCustomization = core.userStorage.get<NavigationCustomization>(
         NAV_CUSTOMIZATION_STORAGE_KEY
@@ -167,7 +173,7 @@ export class NavigationCustomizationService {
         onReset: () => {
           chrome.project.setNavigationCustomization(undefined);
           core.userStorage.remove(NAV_CUSTOMIZATION_STORAGE_KEY);
-          return this.getNavigationItems(chrome).items;
+          return this.getNavigationItems(chrome).then((nav) => nav.items);
         },
         onClose: () => {
           chrome.project.setNavigationCustomization(savedCustomization);
@@ -189,36 +195,28 @@ export class NavigationCustomizationService {
     run();
   }
 
-  private getNavigationItems(chrome: InternalChromeStart): {
+  private async getNavigationItems(chrome: InternalChromeStart): Promise<{
     items: Array<{ id: string; title: string; hidden: boolean; icon?: string }>;
     defaultItemIds: string[];
-  } {
-    let renderableNodes: ChromeProjectNavigationNode[] = [];
-    let overflowItemIds: string[] = [];
-    // The true default order, captured by the service from the raw nav definition
-    // before any customization moves are applied. Deriving the default order from
-    // renderableNodes here would be wrong: those nodes are already in the user's
-    // customized order, so the modal would diff the customized order against itself
-    // and silently wipe the saved customization on the first onChange.
-    let defaultItemIds: string[] = [];
+  }> {
+    const nav = await firstValueFrom(
+      chrome.project
+        .getNavigation$()
+        .pipe(take(1), timeout({ first: NAV_SNAPSHOT_TIMEOUT_MS, with: () => of(undefined) }))
+    );
 
-    chrome.project
-      .getNavigation$()
-      .subscribe((nav) => {
-        renderableNodes = nav.renderableNodes;
-        overflowItemIds = nav.overflowItemIds;
-        defaultItemIds = nav.defaultItemIds;
-      })
-      .unsubscribe();
+    if (!nav) {
+      return { items: [], defaultItemIds: [] };
+    }
 
-    const overflowSet = new Set(overflowItemIds);
-    const items = renderableNodes.map((node) => ({
+    const overflowSet = new Set(nav.overflowItemIds);
+    const items = nav.renderableNodes.map((node: ChromeProjectNavigationNode) => ({
       id: node.id,
       title: (node.title ?? node.id) as string,
       hidden: overflowSet.has(node.id),
       icon: getNavigationNodeIcon(node),
     }));
 
-    return { items, defaultItemIds };
+    return { items, defaultItemIds: nav.defaultItemIds };
   }
 }

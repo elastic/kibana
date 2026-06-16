@@ -53,7 +53,7 @@ const modalBodyCss = (euiTheme: EuiThemeComputed) => css`
 interface Props {
   items: NavigationItemInfo[];
   onSave: (order: string[], hiddenIds: string[]) => void;
-  onReset: () => NavigationItemInfo[];
+  onReset: () => Promise<NavigationItemInfo[]>;
   onChange: (order: string[], hiddenIds: string[]) => void;
   onClose: () => void;
 }
@@ -99,8 +99,8 @@ export const CustomizeNavigationModal = ({
     setIsSaving(false);
   }, [items, onSave]);
 
-  const handleReset = useCallback(() => {
-    setItems(onReset());
+  const handleReset = useCallback(async () => {
+    setItems(await onReset());
   }, [onReset, setItems]);
 
   return (
@@ -204,7 +204,9 @@ export const CustomizeNavigationModal = ({
             <EuiButtonEmpty
               iconType="undo"
               color="danger"
-              onClick={handleReset}
+              onClick={() => {
+                void handleReset();
+              }}
               disabled={isSaving}
             >
               <FormattedMessage

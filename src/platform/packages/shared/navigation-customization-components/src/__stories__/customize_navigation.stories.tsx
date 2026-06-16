@@ -48,7 +48,7 @@ const ControlledModal = ({ items: initialItems }: Pick<ModalProps, 'items'>) => 
       items={items}
       onChange={(order, hiddenIds) => action('onChange')({ order, hiddenIds })}
       onSave={(order, hiddenIds) => action('onSave')({ order, hiddenIds })}
-      onReset={() => {
+      onReset={async () => {
         action('onReset')();
         setItems(BASE_ITEMS);
         return BASE_ITEMS;
