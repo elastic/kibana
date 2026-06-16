@@ -176,10 +176,10 @@ export function CascadeRowHeaderPrimitive<G extends GroupNode, L extends LeafNod
                 aria-label={
                   rowIsExpanded
                     ? i18n.translate('sharedUXPackages.dataCascade.collapseRowButtonLabel', {
-                        defaultMessage: 'collapse row',
+                        defaultMessage: 'Collapse row',
                       })
                     : i18n.translate('sharedUXPackages.dataCascade.expandRowButtonLabel', {
-                        defaultMessage: 'expand row',
+                        defaultMessage: 'Expand row',
                       })
                 }
                 data-test-subj={`toggle-row-${rowId}-button`}
@@ -195,7 +195,7 @@ export function CascadeRowHeaderPrimitive<G extends GroupNode, L extends LeafNod
                     aria-label={i18n.translate(
                       'sharedUXPackages.dataCascade.expandRowButtonLabel',
                       {
-                        defaultMessage: 'expand row',
+                        defaultMessage: 'Expand row',
                       }
                     )}
                     data-test-subj={`expand-row-${rowId}-button`}
