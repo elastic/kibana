@@ -50,7 +50,6 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
-  const kibanaServer = getService('kibanaServer');
   const security = getService('security');
   const retry = getService('retry');
 
@@ -64,15 +63,38 @@ export default function (providerContext: FtrProviderContext) {
   describe('GET /internal/cloud_security_posture/status', () => {
     let agentPolicyId: string;
 
+    // Robust setup that survives the flaky-runner's cold/contended boots.
+    //
     // This is the first file loaded by the CSP API config, so it absorbs the
-    // cold start. `fleet/setup` is idempotent but heavy; on a cold Kibana/ES it
-    // can exceed the 120s socket timeout or hit a transient connection drop,
-    // surfacing as `socket hang up`. Retry it so the warmer next attempt wins.
-    // The CSP package is preconfigured in config.ts, so its archive is cached
-    // at startup and no case pays a cold registry download.
-    const setupFleetAndAgentPolicy = async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
+    // cold start. The previous approach ran `cleanStandardList()` + `fleet/setup`
+    // in every `beforeEach`: the clean deletes the preconfigured CSP package's
+    // saved objects, which forced `fleet/setup` to do a full cold package
+    // reinstall on every test. On a contended CI box that reinstall blows past
+    // Kibana's 120s socket timeout and surfaces as `socket hang up` — and
+    // retrying it only burns the retry budget on the same stuck call.
+    //
+    // Instead we lean on the package being preconfigured in config.ts (installed
+    // and archive-cached at startup): wait once for that install to finish, set
+    // up Fleet once, and never wipe saved objects. Each test gets an isolated
+    // agent policy that is torn down in `afterEach` (deleting an agent policy
+    // cascades to its package policies), so state stays clean without ever
+    // reinstalling the package. Mirrors the stable cloud_security_posture_api
+    // suite.
+    before(async () => {
+      // Wait for the preconfigured CSP package install (kicked off at startup)
+      // to finish before any test touches Fleet. This is a lightweight status
+      // poll — it neither holds the Fleet setup lock nor reinstalls anything, so
+      // it cannot hang past the socket timeout the way `fleet/setup` can.
+      await retry.try(async () => {
+        const { body } = await supertest
+          .get(`/internal/cloud_security_posture/status?check=init`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .expect(200);
+        expect(body).to.eql({ isPluginInitialized: true });
+      });
 
+      // Idempotent and fast here: the package is already installed and we never
+      // wiped it, so this verifies Fleet setup rather than reinstalling.
       await retry.try(async () => {
         await supertest
           .post(`/api/fleet/setup`)
@@ -80,17 +102,30 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
       });
+    });
 
+    const createAgentPolicy = async () => {
       const { body: agentPolicyResponse } = await supertest
         .post(`/api/fleet/agent_policies`)
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set('kbn-xsrf', 'xxxx')
         .send({
-          name: 'Test policy',
+          name: `Test policy ${Date.now()}`,
           namespace: 'default',
         });
 
       return agentPolicyResponse.item.id;
+    };
+
+    const deleteAgentPolicy = async (policyId: string) => {
+      if (!policyId) {
+        return;
+      }
+      await supertest
+        .post(`/api/fleet/agent_policies/delete`)
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set('kbn-xsrf', 'xxxx')
+        .send({ agentPolicyId: policyId });
     };
 
     describe('STATUS = UNPRIVILEGED TEST', () => {
@@ -111,11 +146,11 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       beforeEach(async () => {
-        agentPolicyId = await setupFleetAndAgentPolicy();
+        agentPolicyId = await createAgentPolicy();
       });
 
       afterEach(async () => {
-        await kibanaServer.savedObjects.cleanStandardList();
+        await deleteAgentPolicy(agentPolicyId);
       });
 
       it(`Return unprivileged for cspm, kspm, vuln_mgmt when users don't have enough for permission for the role they are assigned`, async () => {
@@ -182,16 +217,6 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     describe('status = unprivileged test indices', () => {
-      beforeEach(async () => {
-        agentPolicyId = await setupFleetAndAgentPolicy();
-      });
-
-      afterEach(async () => {
-        await deleteUser(security, UNPRIVILEGED_USERNAME);
-        await deleteRole(security, UNPRIVILEGED_ROLE);
-        await kibanaServer.savedObjects.cleanStandardList();
-      });
-
       before(async () => {
         await esArchiver.loadIfNeeded(
           'x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server'
@@ -202,6 +227,16 @@ export default function (providerContext: FtrProviderContext) {
         await esArchiver.unload(
           'x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server'
         );
+      });
+
+      beforeEach(async () => {
+        agentPolicyId = await createAgentPolicy();
+      });
+
+      afterEach(async () => {
+        await deleteUser(security, UNPRIVILEGED_USERNAME);
+        await deleteRole(security, UNPRIVILEGED_ROLE);
+        await deleteAgentPolicy(agentPolicyId);
       });
 
       it(`Return unprivileged when missing access to findings_latest index`, async () => {
