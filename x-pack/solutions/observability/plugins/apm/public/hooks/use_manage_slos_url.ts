@@ -12,6 +12,7 @@ import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { SloListLocatorParams } from '@kbn/deeplinks-observability';
 import { sloListLocatorID } from '@kbn/deeplinks-observability';
 import { ALL_VALUE } from '@kbn/slo-schema';
+import { SERVICE_ENVIRONMENT } from '../../common/es_fields/apm';
 import { APM_SLO_INDICATOR_TYPES } from '../../common/slo_indicator_types';
 import { ENVIRONMENT_ALL } from '../../common/environment_filter_values';
 import { useApmPluginContext } from '../context/apm_plugin/use_apm_plugin_context';
@@ -76,11 +77,11 @@ export function getManageSlosUrl(
     filters.push({
       meta: {
         alias: i18n.translate('xpack.apm.manageSlosUrl.environmentFilterLabel', {
-          defaultMessage: 'service.environment: {environment} or all environments',
-          values: { environment: params.environment },
+          defaultMessage: '{field}: {environment} or all environments',
+          values: { field: SERVICE_ENVIRONMENT, environment: params.environment },
         }),
         disabled: false,
-        key: 'service.environment',
+        key: SERVICE_ENVIRONMENT,
         negate: false,
         type: 'custom',
       },
@@ -88,9 +89,9 @@ export function getManageSlosUrl(
         bool: {
           minimum_should_match: 1,
           should: [
-            { match_phrase: { 'service.environment': params.environment } },
-            { match_phrase: { 'service.environment': ALL_VALUE } },
-            { bool: { must_not: { exists: { field: 'service.environment' } } } },
+            { match_phrase: { [SERVICE_ENVIRONMENT]: params.environment } },
+            { match_phrase: { [SERVICE_ENVIRONMENT]: ALL_VALUE } },
+            { bool: { must_not: { exists: { field: SERVICE_ENVIRONMENT } } } },
           ],
         },
       },
