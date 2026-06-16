@@ -85,10 +85,6 @@ const applyTextReplacement = (
   editor.setPosition(model.getPositionAt(boundedStart + payload.replacementText.length));
 };
 
-const insertNewLine = (editor: monaco.editor.IStandaloneCodeEditor) => {
-  editor.trigger('keyboard', 'type', { text: '\n' });
-};
-
 const triggerControl = async (
   queryString: string,
   variableType: ESQLVariableType,
@@ -331,7 +327,7 @@ export const addEditorKeyBindings = (
   editor.addCommand(
     // eslint-disable-next-line no-bitwise
     monaco.KeyMod.Shift | monaco.KeyCode.Enter,
-    () => insertNewLine(editor)
+    () => editor.trigger('keyboard', 'type', { text: '\n' })
   );
 
   editor.addCommand(
