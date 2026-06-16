@@ -8,7 +8,7 @@
 import { expect } from '@kbn/scout-oblt/ui';
 import { tags } from '@kbn/scout-oblt';
 import { test, testData } from '../../fixtures';
-import { SERVICE_OPBEANS_JAVA } from '../../fixtures/constants';
+import { EXTENDED_TIMEOUT, SERVICE_OPBEANS_JAVA } from '../../fixtures/constants';
 
 test.describe(
   'Service map - accessibility',
@@ -46,10 +46,18 @@ test.describe(
       pageObjects: { serviceMapPage },
     }) => {
       await test.step('nodes have visible focus indicators when focused', async () => {
+        await serviceMapPage.settleServiceMapLayout();
         await serviceMapPage.waitForServiceNodeToLoad(SERVICE_OPBEANS_JAVA);
-        const node = serviceMapPage.getServiceNode(SERVICE_OPBEANS_JAVA);
-        await node.focus();
-        await expect(node).toBeFocused();
+        await expect
+          .poll(
+            async () => {
+              const node = serviceMapPage.getServiceNode(SERVICE_OPBEANS_JAVA);
+              await node.focus();
+              return node.evaluate((element) => element === document.activeElement);
+            },
+            { timeout: EXTENDED_TIMEOUT }
+          )
+          .toBe(true);
       });
 
       await test.step('find-in-page: highlight frame while focused, Enter centers match', async () => {

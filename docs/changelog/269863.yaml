@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/269863
+issues:
+- https://github.com/elastic/kibana/issues/269805
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-06-01
+areas:
+- Discover and ES|QL
+title: Show time field column in the ES|QL data grid for non-transformational queries

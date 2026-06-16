@@ -18,6 +18,7 @@ import { DetectionsAttackDiscoveryPage } from './detections_attack_discovery';
 import { ThreatMatchRuleCreatePage } from './threat_match_rule_create_page';
 import { AttackDetailsRightPanelPage } from './attack_details_right_panel';
 import { ServerlessProjectChromePage } from './serverless_project_chrome_page';
+import { GraphFlyoutPage } from './graph_flyout_page';
 import { DocumentFlyoutV2 } from './document_flyout_v2';
 import { ThreatIntelligenceToolPage } from './threat_intelligence_tool';
 import { CorrelationsToolPage } from './correlations_tool';
@@ -41,6 +42,8 @@ export interface SecurityPageObjects extends PageObjects {
   threatMatchRuleCreatePage: ThreatMatchRuleCreatePage;
   attackDetailsRightPanelPage: AttackDetailsRightPanelPage;
   serverlessProjectChromePage: ServerlessProjectChromePage;
+  /** Graph Visualization tab inside the alert/event details left panel. */
+  graphFlyoutPage: GraphFlyoutPage;
   /** v2 document flyout (alert / event) — requires `newFlyoutSystemEnabled` experimental feature. */
   documentFlyoutV2: DocumentFlyoutV2;
   /** Threat intelligence tool overlay inside the flyout v2 document flyout. */
@@ -79,6 +82,7 @@ export function extendPageObjects(
     threatMatchRuleCreatePage: createLazyPageObject(ThreatMatchRuleCreatePage, page),
     attackDetailsRightPanelPage: createLazyPageObject(AttackDetailsRightPanelPage, page),
     serverlessProjectChromePage: createLazyPageObject(ServerlessProjectChromePage, page),
+    graphFlyoutPage: createLazyPageObject(GraphFlyoutPage, page),
     documentFlyoutV2: createLazyPageObject(DocumentFlyoutV2, page),
     threatIntelligenceTool: createLazyPageObject(ThreatIntelligenceToolPage, page),
     correlationsTool: createLazyPageObject(CorrelationsToolPage, page),
