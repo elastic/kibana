@@ -810,6 +810,7 @@ export const WorkflowYAMLEditor = ({
               editorRef={editorRef}
               validationErrors={validationErrors}
               scrollContainerRef={minimapContainerRef}
+              isEditorMounted={isEditorMounted}
             />
           </div>
         )}

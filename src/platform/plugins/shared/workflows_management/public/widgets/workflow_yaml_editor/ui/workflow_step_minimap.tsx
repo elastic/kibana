@@ -180,12 +180,17 @@ interface WorkflowStepMinimapProps {
   validationErrors: YamlValidationResult[];
   /** The scrollable container div that wraps this minimap (owned by the parent). */
   scrollContainerRef: React.MutableRefObject<HTMLDivElement | null>;
+  /** Becomes true once the Monaco editor has finished mounting. Used to ensure
+   *  the viewport tracking effect re-runs after Monaco is ready even when steps
+   *  are already available in Redux from a previous session. */
+  isEditorMounted: boolean;
 }
 
 export const WorkflowStepMinimap = ({
   editorRef,
   validationErrors,
   scrollContainerRef,
+  isEditorMounted,
 }: WorkflowStepMinimapProps) => {
   const { euiTheme } = useEuiTheme();
   const workflowLookup = useSelector(selectEditorWorkflowLookup);
@@ -250,9 +255,11 @@ export const WorkflowStepMinimap = ({
       d2.dispose();
       d3.dispose();
     };
-    // Re-subscribe when steps first appear (editor is guaranteed mounted by then)
+    // Re-run when Monaco finishes mounting (isEditorMounted) or when steps first
+    // appear. Without isEditorMounted, cached Redux state can cause the effect to
+    // fire before editorRef.current is set, leaving no listeners attached.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [editorRef, stepEntries.length]);
+  }, [editorRef, stepEntries.length, isEditorMounted]);
 
   // First and last index of steps currently in the visible viewport
   const viewportSteps = useMemo(() => {
