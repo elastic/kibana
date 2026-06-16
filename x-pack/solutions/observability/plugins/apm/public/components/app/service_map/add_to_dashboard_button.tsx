@@ -169,7 +169,7 @@ export function AddToDashboardButton({
       const failWithToast = () => {
         toasts?.addDanger(
           i18n.translate('xpack.apm.serviceMap.copyToDashboard.saveErrorToast', {
-            defaultMessage: 'Unable to open the dashboard with the service map panel.',
+            defaultMessage: 'Unable to save the service map panel to the dashboard.',
           })
         );
       };
