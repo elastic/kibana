@@ -1649,10 +1649,9 @@ export const labels = {
       'xpack.agentBuilder.agentConnectors.detail.notUsedByOtherAgents',
       { defaultMessage: 'Not used by other agents' }
     ),
-    usedByLoadError: i18n.translate(
-      'xpack.agentBuilder.agentConnectors.detail.usedByLoadError',
-      { defaultMessage: 'Failed to load agents' }
-    ),
+    usedByLoadError: i18n.translate('xpack.agentBuilder.agentConnectors.detail.usedByLoadError', {
+      defaultMessage: 'Failed to load agents',
+    }),
   },
   agentTools: {
     pageDescription: i18n.translate('xpack.agentBuilder.agentTools.pageDescription', {
