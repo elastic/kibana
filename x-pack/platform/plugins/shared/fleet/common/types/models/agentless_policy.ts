@@ -23,7 +23,7 @@ export interface AgentlessPackage {
 }
 
 export interface NewAgentlessPolicy {
-  id?: string | number;
+  id?: string;
   name: string;
   namespace?: string;
   vars?: SimplifiedVars;
