@@ -31,8 +31,11 @@ export const EDITOR_PADDING_TOP_PX = 24;
 /** Width of the step minimap panel (label area + track column). */
 export const MINIMAP_WIDTH_PX = 176;
 
-/** Right padding inside the minimap container (space between the SVG track and the panel edge). */
+/** Horizontal padding inside the minimap container on each side.
+ *  Gives the viewport indicator border room so it doesn't clip the severity dots (left)
+ *  or the SVG track circles (right). */
+export const MINIMAP_PADDING_LEFT_PX = 16;
 export const MINIMAP_PADDING_RIGHT_PX = 16;
 
-/** Total right-side reserve: minimap + right padding + gap. Scrollbar is hidden so no scrollbar width needed. */
-export const MINIMAP_RESERVE_PX = MINIMAP_WIDTH_PX + MINIMAP_PADDING_RIGHT_PX + 8;
+/** Total right-side reserve: minimap + both side paddings + gap. Scrollbar is hidden. */
+export const MINIMAP_RESERVE_PX = MINIMAP_WIDTH_PX + MINIMAP_PADDING_LEFT_PX + MINIMAP_PADDING_RIGHT_PX + 8;

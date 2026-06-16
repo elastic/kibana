@@ -18,7 +18,7 @@ import {
   selectEditorFocusedStepInfo,
   selectEditorWorkflowLookup,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
-import { EDITOR_PADDING_TOP_PX, MINIMAP_PADDING_RIGHT_PX, MINIMAP_WIDTH_PX } from '../styles/constants';
+import { EDITOR_PADDING_TOP_PX, MINIMAP_PADDING_LEFT_PX, MINIMAP_PADDING_RIGHT_PX, MINIMAP_WIDTH_PX } from '../styles/constants';
 
 const ITEM_HEIGHT = 32;
 const DOT_R = 4;
@@ -265,10 +265,28 @@ export const WorkflowStepMinimap = ({
   const viewportSteps = useMemo(() => {
     if (!visibleLineRange || stepEntries.length === 0) return null;
 
+    // For parent steps, lineEnd spans their entire subtree. Trim each step's
+    // effective end to just before its first direct child so that a parent
+    // whose name is off-screen is not falsely included in the viewport band.
+    // stepEntries is sorted by lineStart, so the first child encountered per
+    // parent has the smallest lineStart (i.e. Math.min is a no-op after the first).
+    const effectiveLineEnd = new Map<string, number>(
+      stepEntries.map(([id, step]) => [id, step.lineEnd])
+    );
+    for (const [, step] of stepEntries) {
+      if (step.parentStepId && effectiveLineEnd.has(step.parentStepId)) {
+        effectiveLineEnd.set(
+          step.parentStepId,
+          Math.min(effectiveLineEnd.get(step.parentStepId)!, step.lineStart - 1)
+        );
+      }
+    }
+
     let first = -1;
     let last = -1;
-    stepEntries.forEach(([, step], index) => {
-      if (step.lineEnd >= visibleLineRange.start && step.lineStart <= visibleLineRange.end) {
+    stepEntries.forEach(([id, step], index) => {
+      const end = effectiveLineEnd.get(id) ?? step.lineEnd;
+      if (end >= visibleLineRange.start && step.lineStart <= visibleLineRange.end) {
         if (first === -1) first = index;
         last = index;
       }
@@ -329,20 +347,21 @@ const inactiveText = euiTheme.colors.primaryText;
   const activeText = euiTheme.colors.plainLight;
 
   return (
-    <div css={css({ paddingTop: EDITOR_PADDING_TOP_PX, paddingRight: MINIMAP_PADDING_RIGHT_PX })}>
+    <div css={css({ paddingTop: EDITOR_PADDING_TOP_PX, paddingLeft: MINIMAP_PADDING_LEFT_PX, paddingRight: MINIMAP_PADDING_RIGHT_PX })}>
     <div css={css({ position: 'relative', width: MAX_LABEL_W + TRACK_W, height: totalHeight })}>
-      {/* Viewport indicator — shows which steps are currently visible in the editor */}
+      {/* Viewport indicator — shows which steps are currently visible in the editor.
+          Negative left/right offsets extend the border into the outer padding zones so
+          severity dots (left) and SVG track circles (right) sit inside the border. */}
       {viewportSteps && (
         <div
           aria-hidden="true"
           css={css({
             position: 'absolute',
             top: viewportSteps.first * ITEM_HEIGHT,
-            left: 0,
-            right: 0,
+            left: -MINIMAP_PADDING_LEFT_PX,
+            right: -(OUTER_TRACK_X + DOT_R - TRACK_W + 8),
             height: (viewportSteps.last - viewportSteps.first + 1) * ITEM_HEIGHT,
-            backgroundColor: transparentize(euiTheme.colors.primary, 0.14),
-            border: `1px solid ${transparentize(euiTheme.colors.primary, 0.4)}`,
+            border: `1px solid ${transparentize(euiTheme.colors.primary, 0.65)}`,
             borderRadius: 6,
             pointerEvents: 'none',
             zIndex: 0,
@@ -411,26 +430,29 @@ const inactiveText = euiTheme.colors.primaryText;
             />
           ))}
 
-        {/* Branch connectors — one per (parent, branchKey) pair */}
+        {/* Branch connectors — one per parent, connecting only to the first (nearest) child.
+            Skipping later-branch connectors avoids long arcs that jump over intermediate steps. */}
         {hasNesting &&
-          parentGroups.flatMap(({ parentIndex, branches }) => {
+          parentGroups.flatMap(({ parentIndex, branches, firstChildIndex }) => {
             const parentCy = parentIndex * ITEM_HEIGHT + ITEM_HEIGHT / 2;
-            return branches.map(({ branchKey, firstIndex }) => {
-              const childCy = firstIndex * ITEM_HEIGHT + ITEM_HEIGHT / 2;
-              const startY = parentCy + DOT_R + 2;
-              const midY = (startY + childCy) / 2;
-              const d = `M ${OUTER_TRACK_X} ${startY} C ${OUTER_TRACK_X} ${midY} ${INNER_TRACK_X} ${midY} ${INNER_TRACK_X} ${childCy}`;
-              return (
-                <path
-                  key={`connector-${parentIndex}-${branchKey}`}
-                  d={d}
-                  fill="none"
-                  stroke={railColor}
-                  strokeWidth={1.5}
-                  strokeLinecap="round"
-                />
-              );
-            });
+            return branches
+              .filter(({ firstIndex }) => firstIndex === firstChildIndex)
+              .map(({ branchKey, firstIndex }) => {
+                const childCy = firstIndex * ITEM_HEIGHT + ITEM_HEIGHT / 2;
+                const startY = parentCy + DOT_R + 2;
+                const midY = (startY + childCy) / 2;
+                const d = `M ${OUTER_TRACK_X} ${startY} C ${OUTER_TRACK_X} ${midY} ${INNER_TRACK_X} ${midY} ${INNER_TRACK_X} ${childCy}`;
+                return (
+                  <path
+                    key={`connector-${parentIndex}-${branchKey}`}
+                    d={d}
+                    fill="none"
+                    stroke={railColor}
+                    strokeWidth={1.5}
+                    strokeLinecap="round"
+                  />
+                );
+              });
           })}
 
         {/* Dots — outer track for top-level, inner for nested */}
@@ -458,13 +480,9 @@ const inactiveText = euiTheme.colors.primaryText;
       {/* ── Step pill buttons ── */}
       {stepEntries.map(([stepId, step], index) => {
         const isFocused = stepId === focusedStepInfo?.stepId;
-        const isVisible =
-          viewportSteps !== null && index >= viewportSteps.first && index <= viewportSteps.last;
         const severity = getStepSeverity(step, validationErrors);
         const isNested = hasNesting && (depths.get(stepId) ?? 0) > 0;
         const pillMaxW = isNested ? MAX_LABEL_W - NESTED_PILL_INDENT : MAX_LABEL_W;
-        // Dim steps that are scrolled out of the editor viewport
-        const buttonOpacity = isFocused || isVisible || viewportSteps === null ? 1 : 0.35;
 
         return (
           <button
@@ -490,8 +508,6 @@ const inactiveText = euiTheme.colors.primaryText;
               padding: 0,
               zIndex: 1,
               cursor: 'pointer',
-              opacity: buttonOpacity,
-              transition: 'opacity 0.15s ease',
               '&:hover .minimap-pill': {
                 background: isFocused ? activeBgHover : inactiveBgHover,
               },
