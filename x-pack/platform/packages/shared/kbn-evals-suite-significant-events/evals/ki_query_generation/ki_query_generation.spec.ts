@@ -105,7 +105,6 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                 .catch(() => {});
             }
 
-            await deleteTemporaryReplayIndices(esClient, log);
             await ensureStreamsEnabled({ esClient, apiServices, log });
 
             const extractionScenario = dataset.kiFeatureExtraction.find(
@@ -265,7 +264,6 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                         .delete({ index: name, ignore_unavailable: true })
                         .catch(() => {});
                     }
-                    await deleteTemporaryReplayIndices(esClient, log);
                     await ensureStreamsEnabled({ esClient, apiServices, log });
 
                     const stats = await replayIntoManagedStream(
