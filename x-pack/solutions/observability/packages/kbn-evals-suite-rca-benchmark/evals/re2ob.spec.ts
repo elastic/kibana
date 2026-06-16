@@ -90,9 +90,9 @@ evaluate.describe('RE2-OB RCA Benchmark', { tag: tags.serverless.observability.c
 
 function buildRcaCriteria(scenario: RcaScenario): string[] {
   return [
-    `Identifies "${scenario.service}" (or a recognizable variant of the name) as the root cause component`,
-    `Does NOT attribute the root cause solely to a frontend or gateway service unless that is the actual fault location`,
+    `The final conclusion identifies "${scenario.service}" (or a recognizable variant of the name) as the PRIMARY root cause component — FAIL if the service appears only as a downstream victim of another service, only in a hypothesis that is explicitly refuted or ranked below another conclusion, or if the output concludes that no fault was detected`,
+    `Does NOT name a frontend or gateway service (e.g. "frontend", "ingress", "API gateway") as the primary root cause — mentions of such services purely as downstream victims of a cascading failure do NOT violate this criterion`,
     `Cites at least one concrete piece of evidence (error log, anomalous trace latency, error rate spike, or specific tool output)`,
-    `Describes the failure mode consistent with: ${scenario.faultDescription}`,
+    `The failure mechanism described in the final conclusion is specifically consistent with "${scenario.faultDescription}" — a conclusion of "no fault detected" automatically FAILS; a description of an unrelated resource class (e.g. CPU/memory pressure when the fault is socket exhaustion, or resource exhaustion when the fault is packet loss) also FAILS`,
   ];
 }
