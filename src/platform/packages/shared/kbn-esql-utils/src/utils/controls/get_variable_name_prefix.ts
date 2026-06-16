@@ -7,7 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { ControlsRenderer } from './src/controls_renderer';
-export { ControlLabelTooltip } from './src/components/control_label_tooltip';
-export type { ControlsRendererParentApi, ControlsLayout } from './src/types';
-export { useIndicateRelatedPanelsSelector } from './src/hooks';
+import { ESQLVariableType, VariableNamePrefix } from '@kbn/esql-types';
+
+export const getVariableNamePrefix = (type: ESQLVariableType) => {
+  switch (type) {
+    case ESQLVariableType.FIELDS:
+    case ESQLVariableType.FUNCTIONS:
+      return VariableNamePrefix.IDENTIFIER;
+    case ESQLVariableType.VALUES:
+    case ESQLVariableType.TIME_LITERAL:
+    case ESQLVariableType.MULTI_VALUES:
+    default:
+      return VariableNamePrefix.VALUE;
+  }
+};
