@@ -291,7 +291,7 @@ export const Navigation = ({
                         {({ panelNavigationInstructionsId, panelEnterSubmenuInstructionsId }) => (
                           <>
                             <SideNav.NestedSecondaryMenu.Section>
-                              {overflowMenuItems.map((item, index) => {
+                              {allOverflowItems.map((item, index) => {
                                 const hasSubmenu = getHasSubmenu(item);
                                 const { sections, ...itemProps } = item;
                                 const isFirstItem = index === 0;
@@ -306,28 +306,6 @@ export const Navigation = ({
                                   <SideNav.NestedSecondaryMenu.PrimaryMenuItem
                                     key={item.id}
                                     aria-describedby={ariaDescribedBy}
-                                    isHighlighted={item.id === visuallyActivePageId}
-                                    isNew={getIsNewPrimary(item.id)}
-                                    hasSubmenu={hasSubmenu}
-                                    onClick={() => {
-                                      onItemClick?.(item);
-                                      if (!hasSubmenu) {
-                                        closePopover();
-                                        focusMainContent();
-                                      }
-                                    }}
-                                    {...itemProps}
-                                  >
-                                    {item.label}
-                                  </SideNav.NestedSecondaryMenu.PrimaryMenuItem>
-                                );
-                              })}
-                              {(items.overflowItems ?? []).map((item) => {
-                                const hasSubmenu = getHasSubmenu(item);
-                                const { sections, ...itemProps } = item;
-                                return (
-                                  <SideNav.NestedSecondaryMenu.PrimaryMenuItem
-                                    key={item.id}
                                     isHighlighted={item.id === visuallyActivePageId}
                                     isNew={getIsNewPrimary(item.id)}
                                     hasSubmenu={hasSubmenu}
