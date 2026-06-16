@@ -48,7 +48,8 @@ jest.mock('@kbn/core-di-browser', () => ({
       token === 'dataViews' ||
       token === 'lens' ||
       token === 'uiActions' ||
-      token === 'dashboard'
+      token === 'dashboard' ||
+      token === 'cps'
     ) {
       return {};
     }
