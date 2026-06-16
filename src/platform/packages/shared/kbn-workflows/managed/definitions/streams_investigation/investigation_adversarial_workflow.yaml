@@ -20,6 +20,11 @@ tags:
 
 triggers:
   - type: manual
+    inputs:
+      properties:
+        connector_id:
+          type: string
+          default: ".anthropic-claude-4.5-haiku-chat_completion"
 
 steps:
 
@@ -28,7 +33,7 @@ steps:
   - name: investigate_r1
     type: ai.agent
     agent-id: elastic-ai-agent
-    connector-id: ".anthropic-claude-4.5-haiku-chat_completion"
+    connector-id: '{{ inputs.connector_id }}'
     create-conversation: true
     with:
       timeout: 1800s
@@ -87,7 +92,7 @@ steps:
   - name: critique_r1
     type: ai.agent
     agent-id: elastic-ai-agent
-    connector-id: ".anthropic-claude-4.5-haiku-chat_completion"
+    connector-id: '{{ inputs.connector_id }}'
     with:
       timeout: 300s
       message: |
@@ -140,7 +145,7 @@ steps:
   - name: investigate_r2
     type: ai.agent
     agent-id: elastic-ai-agent
-    connector-id: ".anthropic-claude-4.5-haiku-chat_completion"
+    connector-id: '{{ inputs.connector_id }}'
     if: "${{ steps.check_done_r1.output.done == false }}"
     with:
       timeout: 1800s
@@ -199,7 +204,7 @@ steps:
   - name: critique_r2
     type: ai.agent
     agent-id: elastic-ai-agent
-    connector-id: ".anthropic-claude-4.5-haiku-chat_completion"
+    connector-id: '{{ inputs.connector_id }}'
     if: "${{ steps.check_done_r1.output.done == false }}"
     with:
       timeout: 300s
@@ -246,7 +251,7 @@ steps:
   - name: investigate_r3
     type: ai.agent
     agent-id: elastic-ai-agent
-    connector-id: ".anthropic-claude-4.5-haiku-chat_completion"
+    connector-id: '{{ inputs.connector_id }}'
     if: "${{ steps.check_done_r2.output.done == false }}"
     with:
       timeout: 1800s
