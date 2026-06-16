@@ -146,12 +146,8 @@ function renderParameterTemplates(
     for (const [key, entry] of Object.entries(params.form_data)) {
       renderedFormData[key] = {
         content: renderMustacheString(logger, entry.content, variables, 'json'),
-        filename: entry.filename
-          ? renderMustacheString(logger, entry.filename, variables, 'json')
-          : undefined,
-        content_type: entry.content_type
-          ? renderMustacheString(logger, entry.content_type, variables, 'json')
-          : undefined,
+        filename: renderMustacheString(logger, entry.filename, variables, 'json'),
+        content_type: renderMustacheString(logger, entry.content_type, variables, 'json'),
       };
     }
     renderedParams.form_data = renderedFormData;
