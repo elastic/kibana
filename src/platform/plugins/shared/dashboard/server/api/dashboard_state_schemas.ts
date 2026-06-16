@@ -299,10 +299,9 @@ export function getDashboardStateSchema(
         if (isDashboardAppRequest) return;
         const panelCount = countPanels(dashboardState.panels);
         const allPanelCount = panelCount + (dashboardState.pinned_panels?.length ?? 0);
-        if (allPanelCount > MAX_PANELS) {
-          return `Dashboard contains ${allPanelCount} panels, pinned panels, and sections, which exceeds the maximum of ${MAX_PANELS}.`;
-        }
-        return;
+        return allPanelCount > MAX_PANELS
+          ? `Dashboard contains ${allPanelCount} panels, pinned panels, and sections, which exceeds the maximum of ${MAX_PANELS}.`
+          : undefined;
       },
     }
   );
