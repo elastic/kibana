@@ -11,7 +11,7 @@ import { renderWithHostPageProviders } from '../../../pages/host/__tests__/test_
 import { OtelKubernetesAddRepositoryStep } from './add_repository_step';
 
 describe('OtelKubernetesAddRepositoryStep', () => {
-  it('renders the V2 heading and inline copy affordance when requested', () => {
+  it('renders the heading and inline copy affordance when requested', () => {
     renderWithHostPageProviders(
       <OtelKubernetesAddRepositoryStep
         addRepoCommand="helm repo add open-telemetry https://example.com"

@@ -88,10 +88,10 @@ export function ObservabilityOnboardingFlow() {
 
   const kubernetesRoutes = isAddDataPageV2Enabled
     ? [
-        <Route key="kubernetes-v2-otel" exact path="/kubernetes">
+        <Route key="kubernetes-otel" exact path="/kubernetes">
           <KubernetesOtelPage />
         </Route>,
-        <Route key="otel-kubernetes-v2-redirect" exact path="/otel-kubernetes">
+        <Route key="otel-kubernetes-redirect" exact path="/otel-kubernetes">
           <Redirect to={`/kubernetes${kubernetesRedirectSearch}`} />
         </Route>,
       ]

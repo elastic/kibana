@@ -50,7 +50,6 @@ jest.mock('../otel_instrumentation_step', () => ({
 }));
 
 jest.mock('../../../quickstart_flows/otel_kubernetes/steps', () => ({
-  OtelKubernetesInstrumentStep: () => <div data-test-subj="otelK8sInstrumentStep" />,
   OtelKubernetesVisualizeStep: () => <div data-test-subj="otelK8sVisualizeStep" />,
 }));
 
@@ -104,16 +103,10 @@ jest.mock('../../../quickstart_flows/shared/use_pricing_feature', () => ({
   usePricingFeature: (...args: unknown[]) => mockUsePricingFeature(...args),
 }));
 
-jest.mock('../../../quickstart_flows/shared/use_pre_existing_data_check', () => ({
-  usePreExistingDataCheck: jest.fn().mockReturnValue(false),
-}));
 jest.mock('../../../quickstart_flows/shared/use_window_blur_data_monitoring_trigger', () => ({
   useWindowBlurDataMonitoringTrigger: jest.fn().mockReturnValue(false),
 }));
 
-const { usePreExistingDataCheck: usePreExistingDataCheckMock } = jest.requireMock(
-  '../../../quickstart_flows/shared/use_pre_existing_data_check'
-);
 const { useWindowBlurDataMonitoringTrigger: useWindowBlurDataMonitoringTriggerMock } =
   jest.requireMock('../../../quickstart_flows/shared/use_window_blur_data_monitoring_trigger');
 
@@ -139,7 +132,6 @@ describe('KubernetesOtelPage', () => {
       error: undefined,
       refetch: jest.fn(),
     });
-    usePreExistingDataCheckMock.mockReturnValue(false);
     useWindowBlurDataMonitoringTriggerMock.mockReturnValue(false);
   });
 
@@ -157,7 +149,6 @@ describe('KubernetesOtelPage', () => {
     renderPage(['/kubernetes?ingestion=wired']);
 
     expect(screen.getByTestId('selectedCollectorMethod')).toHaveTextContent('edot');
-    expect(usePreExistingDataCheckMock).not.toHaveBeenCalled();
   });
 
   it('passes managed OTLP availability into the collector setup step', () => {
@@ -203,14 +194,12 @@ describe('KubernetesOtelPage', () => {
   it('renders the instrumentation step when metrics onboarding is enabled', () => {
     renderPage();
     expect(screen.getByTestId('otelInstrumentationStep')).toBeInTheDocument();
-    expect(screen.queryByTestId('otelK8sInstrumentStep')).toBeNull();
   });
 
   it('omits the instrumentation step when metrics onboarding is disabled', () => {
     mockUsePricingFeature.mockReturnValue(false);
     renderPage();
     expect(screen.queryByTestId('otelInstrumentationStep')).toBeNull();
-    expect(screen.queryByTestId('otelK8sInstrumentStep')).toBeNull();
   });
 
   it('renders an inline EmptyPrompt and drops later OTel steps when setup errors', () => {

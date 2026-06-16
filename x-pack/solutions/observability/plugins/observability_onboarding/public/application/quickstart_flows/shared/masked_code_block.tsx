@@ -111,20 +111,18 @@ export const MaskedCodeBlock: React.FC<MaskedCodeBlockProps> = ({
         </div>
       ) : null}
       <div
-        css={
-          maxHeight
-            ? css`
+        css={css`
+          ${maxHeight
+            ? `
                 max-height: ${maxHeight};
                 overflow: auto;
-
-                .euiCodeBlock__pre {
-                  ${hasSecrets
-                    ? `padding-right: calc(${euiTheme.size.xxl} + ${euiTheme.size.s});`
-                    : ''}
-                }
               `
-            : undefined
-        }
+            : ''}
+
+          .euiCodeBlock__pre {
+            ${hasSecrets ? `padding-right: calc(${euiTheme.size.xxl} + ${euiTheme.size.s});` : ''}
+          }
+        `}
       >
         <EuiCodeBlock
           paddingSize={paddingSize}
