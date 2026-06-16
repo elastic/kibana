@@ -240,9 +240,13 @@ async function suggestAdditionalSources(
   }
 
   if (isTypingIndexName) {
-    // preserveTypedPrefix makes Monaco use the source name as the filter word and prepend
-    // it to the inserted text, so the source name isn't erased on acceptance.
-    suggestions.unshift({ ...newLineCompleteItem, filterText: undefined, preserveTypedPrefix: true });
+    const indexNameStart = innerText.length - lastIndex.name.length;
+    suggestions.unshift({
+      ...newLineCompleteItem,
+      text: lastIndex.name + '\n',
+      filterText: lastIndex.name,
+      rangeToReplace: { start: indexNameStart, end: innerText.length },
+    });
   }
 
   return suggestions;
