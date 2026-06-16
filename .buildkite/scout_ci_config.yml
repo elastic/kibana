@@ -6,14 +6,18 @@ plugins:
     - data_views
     - console
     - dashboard
+    - data_view_management
     - discover_enhanced
     - exploratory_view
+    - graph
+    - home
     - index_management
     - infra
     - lens
     - logstash
     - maps
     - ml
+    - monitoring
     - observability
     - observability_onboarding
     - painless_lab
