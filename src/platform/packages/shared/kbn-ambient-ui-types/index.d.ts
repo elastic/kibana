@@ -68,3 +68,5 @@ declare module '*?raw' {
   // eslint-disable-next-line import/no-default-export
   export default string;
 }
+
+declare module '*.css' {}
