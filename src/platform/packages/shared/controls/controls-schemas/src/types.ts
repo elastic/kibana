@@ -9,6 +9,7 @@
 
 import type React from 'react';
 
+import type { ControlValuesSource } from '@kbn/controls-constants';
 import type { TypeOf } from '@kbn/config-schema';
 import type { controlTitleSchema, dataControlSchema } from './control_schema';
 import type {
@@ -27,22 +28,6 @@ import type {
 import type { rangeSliderControlSchema, rangeValueSchema } from './range_slider_schema';
 import type { timeSliderControlSchema } from './time_slider_schema';
 
-/**
- * Collect every key from each branch of a discriminated union, then build a
- * single object type where each key is optional and typed as the union of its
- * non-`never` types across the variants.
- */
-type AllKeysOfUnion<T> = T extends unknown ? keyof T : never;
-type LooseUnion<T> = {
-  [K in AllKeysOfUnion<T>]?: T extends unknown
-    ? K extends keyof T
-      ? [T[K]] extends [never]
-        ? never
-        : T[K]
-      : never
-    : never;
-};
-
 export type ControlsGroupState = TypeOf<ReturnType<typeof getControlsGroupSchema>>;
 export type PinnedControlState = ControlsGroupState[number];
 export type PinnedControlLayoutState = TypeOf<typeof pinnedControlSchema> & {
@@ -54,19 +39,53 @@ export type ControlWidth = TypeOf<typeof controlWidthSchema>;
 export type ControlState = TypeOf<typeof controlTitleSchema>;
 
 export type StrictDataControlState = TypeOf<typeof dataControlSchema>;
-export type DataControlState = LooseUnion<StrictDataControlState>;
+
+/**
+ * Flat in-memory shape used by state managers and editors. Keys from both
+ * `values_source` branches may coexist (for example, an ES|QL-source
+ * control derives `data_view_id` and `field_name` from its query).
+ */
+export interface DataControlRuntimeState {
+  title?: string;
+  use_global_filters?: boolean;
+  ignore_validations?: boolean;
+  values_source?: ControlValuesSource;
+  data_view_id?: string;
+  field_name?: string;
+  esql_query?: string;
+}
 
 export type OptionsListDisplaySettings = TypeOf<typeof optionsListDisplaySettingsSchema>;
 
-export type OptionsListDSLControlState = LooseUnion<TypeOf<typeof optionsListDSLControlSchema>>;
+export type StrictOptionsListDSLControlState = TypeOf<typeof optionsListDSLControlSchema>;
+
+export type OptionsListDSLControlRuntimeState = DataControlRuntimeState & {
+  display_settings?: OptionsListDisplaySettings;
+  exclude?: boolean;
+  exists_selected?: boolean;
+  run_past_timeout?: boolean;
+  search_technique?: OptionsListSearchTechnique;
+  selected_options?: OptionsListSelection[];
+  single_select?: boolean;
+  sort?: OptionsListSortingType;
+};
+
 export type OptionsListESQLControlState = TypeOf<typeof optionsListESQLControlSchema>;
-export type OptionsListControlState = OptionsListDSLControlState | OptionsListESQLControlState;
+export type OptionsListControlState =
+  | OptionsListDSLControlRuntimeState
+  | OptionsListESQLControlState;
 
 export type OptionsListSearchTechnique = TypeOf<typeof optionsListSearchTechniqueSchema>;
 export type OptionsListSelection = TypeOf<typeof optionsListSelectionSchema>;
 export type OptionsListSortingType = TypeOf<typeof optionsListSortSchema>;
 
-export type RangeSliderControlState = LooseUnion<TypeOf<typeof rangeSliderControlSchema>>;
+export type StrictRangeSliderControlState = TypeOf<typeof rangeSliderControlSchema>;
+
+export type RangeSliderControlRuntimeState = DataControlRuntimeState & {
+  value?: RangeSliderValue;
+  step?: number;
+};
+
 export type RangeSliderValue = TypeOf<typeof rangeValueSchema>;
 
 export type TimeSlice = [number, number];

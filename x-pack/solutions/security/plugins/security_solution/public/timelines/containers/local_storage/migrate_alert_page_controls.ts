@@ -7,7 +7,7 @@
 
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { ControlGroupRuntimeState, ControlPanelState } from '@kbn/control-group-renderer';
-import type { OptionsListDSLControlState } from '@kbn/controls-schemas';
+import type { OptionsListDSLControlRuntimeState } from '@kbn/controls-schemas';
 import {
   DEFAULT_DSL_OPTIONS_LIST_STATE,
   DEFAULT_PINNED_CONTROL_STATE,
@@ -84,7 +84,7 @@ interface OldFormat {
   };
 }
 
-export type NewFormatExplicitInput = OptionsListDSLControlState & {
+export type NewFormatExplicitInput = OptionsListDSLControlRuntimeState & {
   persist: boolean;
 };
 

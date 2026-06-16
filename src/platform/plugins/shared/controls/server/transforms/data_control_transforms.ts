@@ -8,19 +8,16 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import type { LegacyStoredDataControlState, StrictDataControlState } from '@kbn/controls-schemas';
+import type {
+  EsqlDataControlState,
+  FieldDataControlState,
+  LegacyStoredDataControlState,
+  StrictDataControlState,
+} from '@kbn/controls-schemas';
+import { isEsqlDataControl, isFieldDataControl } from '@kbn/controls-schemas';
 import { ControlValuesSource, DEFAULT_DATA_CONTROL_STATE } from '@kbn/controls-constants';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import { convertCamelCasedKeysToSnakeCase } from '@kbn/presentation-publishing';
-
-type FieldDataControlState = Extract<
-  StrictDataControlState,
-  { values_source: ControlValuesSource.FIELD }
->;
-type EsqlDataControlState = Extract<
-  StrictDataControlState,
-  { values_source: ControlValuesSource.ESQL }
->;
 
 type StoredFieldDataControlState = Omit<FieldDataControlState, 'data_view_id'> & {
   dataViewRefName: string;
@@ -33,7 +30,7 @@ export function transformDataControlIn(
   state: StoredFieldDataControlState | EsqlDataControlState;
   references?: Reference[];
 } {
-  if (state.values_source === ControlValuesSource.ESQL) {
+  if (isEsqlDataControl(state)) {
     const { data_view_id, field_name, ...rest } = state;
     return {
       state: rest as EsqlDataControlState,
@@ -124,17 +121,19 @@ function getLegacyReferenceName(controlId: string, refName: string) {
 }
 
 const ensureRequiredFields = (state: StrictDataControlState) => {
-  if (state.values_source === ControlValuesSource.ESQL) {
+  if (isEsqlDataControl(state)) {
     if (!state.esql_query.length) {
       throw new Error('Must include a non-empty ES|QL query');
     }
     return;
   }
 
-  if (!state.data_view_id.length) {
-    throw new Error('Must include a non-empty data view ID');
-  }
-  if (!state.field_name.length) {
-    throw new Error('Must include a non-empty field name');
+  if (isFieldDataControl(state)) {
+    if (!state.data_view_id.length) {
+      throw new Error('Must include a non-empty data view ID');
+    }
+    if (!state.field_name.length) {
+      throw new Error('Must include a non-empty field name');
+    }
   }
 };

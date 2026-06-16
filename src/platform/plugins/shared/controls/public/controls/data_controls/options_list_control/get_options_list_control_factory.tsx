@@ -26,7 +26,10 @@ import {
   OPTIONS_LIST_CONTROL,
   DEFAULT_DSL_OPTIONS_LIST_STATE,
 } from '@kbn/controls-constants';
-import type { OptionsListSelection, OptionsListDSLControlState } from '@kbn/controls-schemas';
+import type {
+  OptionsListSelection,
+  OptionsListDSLControlRuntimeState,
+} from '@kbn/controls-schemas';
 import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import {
   apiHasPinnedPanels,
@@ -67,8 +70,8 @@ import { getPlacementHints, LAYOUT_CONSTRAINTS } from '../../constants';
 
 // TODO Remove when we're able to get accurate document counts for ES|QL-source controls and can reenable doc-count sorting on them
 const normalizeEsqlSort = (
-  controlState: OptionsListDSLControlState
-): OptionsListDSLControlState => {
+  controlState: OptionsListDSLControlRuntimeState
+): OptionsListDSLControlRuntimeState => {
   if (
     controlState.values_source !== ControlValuesSource.ESQL ||
     (controlState.sort?.by ?? DEFAULT_DSL_OPTIONS_LIST_STATE.sort.by) !== '_count'
@@ -86,7 +89,7 @@ const normalizeEsqlSort = (
 };
 
 export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
-  OptionsListDSLControlState,
+  OptionsListDSLControlRuntimeState,
   OptionsListControlApi
 > => {
   return {
@@ -259,10 +262,10 @@ export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
           }
         );
 
-      const stateApi = initializeStateApi<OptionsListDSLControlState>({
+      const stateApi = initializeStateApi<OptionsListDSLControlRuntimeState>({
         uuid,
         parentApi,
-        serializeState: (): OptionsListDSLControlState => ({
+        serializeState: (): OptionsListDSLControlRuntimeState => ({
           ...dataControlManager.getLatestState(),
           ...selectionsManager.getLatestState(),
           ...editorStateManager.getLatestState(),

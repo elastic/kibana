@@ -9,10 +9,10 @@
 
 import { BehaviorSubject } from 'rxjs';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
-import type { RangeSliderControlState, RangeSliderValue } from '@kbn/controls-schemas';
+import type { RangeSliderControlRuntimeState, RangeSliderValue } from '@kbn/controls-schemas';
 
 export function initializeRangeControlSelections(
-  initialState: RangeSliderControlState,
+  initialState: RangeSliderControlRuntimeState,
   onSelectionChange: () => void
 ) {
   const value$ = new BehaviorSubject<RangeSliderValue | undefined>(initialState.value);

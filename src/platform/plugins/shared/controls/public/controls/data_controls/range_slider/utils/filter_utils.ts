@@ -8,13 +8,13 @@
  */
 
 import { type Filter, type RangeFilterParams, buildRangeFilter } from '@kbn/es-query';
-import type { RangeSliderControlState } from '@kbn/controls-schemas';
+import type { RangeSliderControlRuntimeState } from '@kbn/controls-schemas';
 import type { DataView } from '@kbn/data-views-plugin/common';
 
 export const buildFilter = (
   dataView: DataView,
   controlId: string,
-  filterState: Pick<RangeSliderControlState, 'field_name' | 'value'> & { sectionId?: string }
+  filterState: Pick<RangeSliderControlRuntimeState, 'field_name' | 'value'> & { sectionId?: string }
 ) => {
   let rangeFilter: Filter | undefined;
   const fieldName =

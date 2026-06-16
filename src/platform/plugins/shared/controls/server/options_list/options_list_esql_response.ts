@@ -8,7 +8,7 @@
  */
 
 import { DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
-import type { OptionsListDSLControlState, OptionsListSelection } from '@kbn/controls-schemas';
+import type { OptionsListDSLControlRuntimeState, OptionsListSelection } from '@kbn/controls-schemas';
 
 import type { GetESQLSingleColumnValuesSuccess } from '../../common/options_list/get_esql_single_column_values';
 import type { OptionsListSuccessResponse } from '../../common/options_list/types';
@@ -16,7 +16,7 @@ import type { OptionsListSuccessResponse } from '../../common/options_list/types
 export const clientSideSearch = (
   value: string | number,
   requestSearchString?: string | undefined,
-  searchTechnique?: OptionsListDSLControlState['search_technique']
+  searchTechnique?: OptionsListDSLControlRuntimeState['search_technique']
 ) => {
   if (!requestSearchString || !searchTechnique) return true;
   const searchString = requestSearchString.toLowerCase();
@@ -41,10 +41,10 @@ export function esqlColumnValuesToOptionsListResponse(
     sort,
   }: {
     searchString?: string;
-    searchTechnique?: OptionsListDSLControlState['search_technique'];
-    selectedOptions?: OptionsListDSLControlState['selected_options'];
+    searchTechnique?: OptionsListDSLControlRuntimeState['search_technique'];
+    selectedOptions?: OptionsListDSLControlRuntimeState['selected_options'];
     ignoreValidations?: boolean;
-    sort?: OptionsListDSLControlState['sort'];
+    sort?: OptionsListDSLControlRuntimeState['sort'];
   }
 ): OptionsListSuccessResponse {
   const uniqueValues = Array.from(new Set(result.values as ReadonlyArray<string | number>));

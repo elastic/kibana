@@ -12,11 +12,11 @@ import type { SerializedTitles } from '@kbn/presentation-publishing';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import React from 'react';
 import deepEqual from 'react-fast-compare';
-import type { DataControlState } from '@kbn/controls-schemas';
+import type { DataControlRuntimeState } from '@kbn/controls-schemas';
 
 import { coreServices } from '../../services/kibana_services';
 
-export interface OpenDataControlEditorParams<State extends DataControlState = DataControlState> {
+export interface OpenDataControlEditorParams<State extends DataControlRuntimeState = DataControlRuntimeState> {
   initialState: Partial<State>;
   parentApi: unknown;
   setLastUsedDataViewId?: (dataViewId: string) => void;
@@ -28,14 +28,14 @@ export interface OpenDataControlEditorParams<State extends DataControlState = Da
 }
 
 export interface ReopenDataControlEditorOverrides<
-  State extends DataControlState = DataControlState
+  State extends DataControlRuntimeState = DataControlRuntimeState
 > {
   initialState?: Partial<State>;
   controlType?: string;
   initialDefaultPanelTitle?: string;
 }
 
-export const openDataControlEditor = <State extends DataControlState = DataControlState>(
+export const openDataControlEditor = <State extends DataControlRuntimeState = DataControlRuntimeState>(
   params: OpenDataControlEditorParams<State>
 ) => {
   const {

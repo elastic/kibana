@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataControlState } from '@kbn/controls-schemas';
+import type { DataControlRuntimeState } from '@kbn/controls-schemas';
 import type { SerializedTitles } from '@kbn/presentation-publishing-schemas';
 
-export type DataControlEditorState = DataControlState & SerializedTitles;
+export type DataControlEditorState = DataControlRuntimeState & SerializedTitles;

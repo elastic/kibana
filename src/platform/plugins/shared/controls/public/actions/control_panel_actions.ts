@@ -10,15 +10,15 @@
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { Action } from '@kbn/ui-actions-plugin/public/actions';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
-import type { DataControlState } from '@kbn/controls-schemas';
+import type { DataControlRuntimeState } from '@kbn/controls-schemas';
 import type { CustomOptionsComponentProps } from '../controls/data_controls/types';
 
-export type CreateControlTypeContext<State extends DataControlState> = EmbeddableApiContext & {
+export type CreateControlTypeContext<State extends DataControlRuntimeState> = EmbeddableApiContext & {
   state: Partial<State>;
   controlId?: string;
 };
 
-export type CreateControlTypeAction<State extends DataControlState = DataControlState> = Action<
+export type CreateControlTypeAction<State extends DataControlRuntimeState = DataControlRuntimeState> = Action<
   CreateControlTypeContext<State>,
   {
     CustomOptionsComponent?: React.FC<CustomOptionsComponentProps<State>>;

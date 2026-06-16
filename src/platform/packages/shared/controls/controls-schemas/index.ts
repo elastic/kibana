@@ -13,23 +13,43 @@ export type {
   ControlsGroupState,
   ControlState,
   ControlWidth,
-  DataControlState,
+  DataControlRuntimeState,
   HasCustomPrepend,
   OptionsListControlState,
   OptionsListDisplaySettings,
-  OptionsListDSLControlState,
+  OptionsListDSLControlRuntimeState,
   OptionsListESQLControlState,
   OptionsListSearchTechnique,
   OptionsListSelection,
   OptionsListSortingType,
   PinnedControlLayoutState,
   PinnedControlState,
-  RangeSliderControlState,
+  RangeSliderControlRuntimeState,
   RangeSliderValue,
   StrictDataControlState,
+  StrictOptionsListDSLControlState,
+  StrictRangeSliderControlState,
   TimeSlice,
   TimeSliderControlState,
 } from './src/types';
+
+export type {
+  EsqlDataControlState,
+  EsqlOptionsListDSLControlState,
+  EsqlRangeSliderControlState,
+  FieldDataControlState,
+  FieldOptionsListDSLControlState,
+  FieldRangeSliderControlState,
+} from './src/type_guards';
+
+export {
+  isEsqlDataControl,
+  isEsqlOptionsListDSLControl,
+  isEsqlRangeSliderControl,
+  isFieldDataControl,
+  isFieldOptionsListDSLControl,
+  isFieldRangeSliderControl,
+} from './src/type_guards';
 
 export type {
   LegacyIgnoreParentSettings,

@@ -8,14 +8,14 @@
  */
 
 import type { ControlGroupRendererApi } from '@kbn/control-group-renderer';
-import type { OptionsListDSLControlState } from '@kbn/controls-schemas';
+import type { OptionsListDSLControlRuntimeState } from '@kbn/controls-schemas';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 
 export type FilterUrlFormat = Record<
   string,
   Pick<
-    OptionsListDSLControlState,
+    OptionsListDSLControlRuntimeState,
     'selected_options' | 'title' | 'field_name' | 'exists_selected' | 'exclude'
   >
 >;
@@ -25,8 +25,8 @@ export interface FilterContextType {
   addControl: (controls: FilterControlConfig) => void;
 }
 
-export type FilterControlConfig = Required<Pick<OptionsListDSLControlState, 'field_name'>> &
-  Partial<Omit<OptionsListDSLControlState, 'data_view_id'>> & {
+export type FilterControlConfig = Required<Pick<OptionsListDSLControlRuntimeState, 'field_name'>> &
+  Partial<Omit<OptionsListDSLControlRuntimeState, 'data_view_id'>> & {
     /*
      * Determines the presence and order of a control
      * */

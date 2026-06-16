@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { OptionsListDSLControlState, OptionsListSelection } from '@kbn/controls-schemas';
+import type { OptionsListDSLControlRuntimeState, OptionsListSelection } from '@kbn/controls-schemas';
 import type { FieldSpec, RuntimeFieldSpec } from '@kbn/data-views-plugin/common';
 import type { BoolQuery, TimeRange } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';
@@ -64,11 +64,11 @@ export interface OptionsListESQLFetchBody {
   timeRange?: TimeRange;
   /** Pre-built ES DSL bool used as `params.filter` on the ES|QL `_query` endpoint to pre-filter the pipeline. */
   filter?: { bool: BoolQuery };
-  sort?: OptionsListDSLControlState['sort'];
+  sort?: OptionsListDSLControlRuntimeState['sort'];
   esqlVariables?: ESQLControlVariable[];
   searchString?: string;
-  searchTechnique?: OptionsListDSLControlState['search_technique'];
-  selectedOptions?: OptionsListDSLControlState['selected_options'];
+  searchTechnique?: OptionsListDSLControlRuntimeState['search_technique'];
+  selectedOptions?: OptionsListDSLControlRuntimeState['selected_options'];
   ignoreValidations?: boolean;
   isReload?: boolean;
 }
@@ -81,9 +81,9 @@ export type OptionsListUnifiedFetchBody = OptionsListDSLFetchBody | OptionsListE
 export interface OptionsListRequestBody {
   /** Always required for DSL aggregation requests (distinct from loose editor state typing). */
   fieldName: string;
-  searchTechnique?: OptionsListDSLControlState['search_technique'];
-  sort?: OptionsListDSLControlState['sort'];
-  selectedOptions?: OptionsListDSLControlState['selected_options'];
+  searchTechnique?: OptionsListDSLControlRuntimeState['search_technique'];
+  sort?: OptionsListDSLControlRuntimeState['sort'];
+  selectedOptions?: OptionsListDSLControlRuntimeState['selected_options'];
 
   runtimeFieldMap?: Record<string, RuntimeFieldSpec>;
   ignoreValidations?: boolean;

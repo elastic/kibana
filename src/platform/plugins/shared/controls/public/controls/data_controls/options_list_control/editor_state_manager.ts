@@ -8,12 +8,12 @@
  */
 
 import { DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
-import type { OptionsListDSLControlState } from '@kbn/controls-schemas';
+import type { OptionsListDSLControlRuntimeState } from '@kbn/controls-schemas';
 import type { StateComparators } from '@kbn/presentation-publishing/state_manager';
 import { initializeStateManager } from '@kbn/presentation-publishing/state_manager';
 
 export type EditorState = Pick<
-  OptionsListDSLControlState,
+  OptionsListDSLControlRuntimeState,
   'search_technique' | 'single_select' | 'run_past_timeout'
 >;
 

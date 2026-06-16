@@ -13,8 +13,9 @@ import {
   optionsListDSLControlSchema,
   type LegacyStoredDataControlState,
   type LegacyStoredOptionsListExplicitInput,
-  type OptionsListDSLControlState,
+  type OptionsListDSLControlRuntimeState,
   type StrictDataControlState,
+  type StrictOptionsListDSLControlState,
 } from '@kbn/controls-schemas';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { convertCamelCasedKeysToSnakeCase } from '@kbn/presentation-publishing';
@@ -32,9 +33,9 @@ export const registerOptionsListControlTransforms = (embeddable: EmbeddableSetup
     title: 'Options list control',
     getSchema: () => optionsListDSLControlSchema,
     getTransforms: () => ({
-      transformIn: (state: OptionsListDSLControlState) => {
+      transformIn: (state: StrictOptionsListDSLControlState) => {
         const { state: dataControlState, references } = transformDataControlIn(
-          state as StrictDataControlState,
+          state,
           OPTIONS_LIST_REF_NAME
         );
         return {
@@ -44,14 +45,14 @@ export const registerOptionsListControlTransforms = (embeddable: EmbeddableSetup
       },
       transformOut: <
         StoredStateType extends Partial<
-          LegacyStoredOptionsListExplicitInput & OptionsListDSLControlState
+          LegacyStoredOptionsListExplicitInput & OptionsListDSLControlRuntimeState
         >
       >(
         state: StoredStateType,
         panelReferences: Reference[] | undefined,
         containerReferences: Reference[] | undefined,
         id: string | undefined
-      ): Partial<OptionsListDSLControlState> => {
+      ): Partial<OptionsListDSLControlRuntimeState> => {
         const dataControlState = transformDataControlOut(
           id,
           state as Partial<LegacyStoredDataControlState & StrictDataControlState>,
@@ -81,12 +82,12 @@ export const registerOptionsListControlTransforms = (embeddable: EmbeddableSetup
         return {
           ...dataControlState,
           ...(typeof exclude === 'boolean' && { exclude }),
-          ...(sort && { sort: sort as OptionsListDSLControlState['sort'] }),
+          ...(sort && { sort: sort as OptionsListDSLControlRuntimeState['sort'] }),
           ...(typeof exists_selected === 'boolean' && { exists_selected }),
           ...(display_settings && { display_settings }),
           ...(typeof run_past_timeout === 'boolean' && { run_past_timeout }),
           ...(search_technique && {
-            search_technique: search_technique as OptionsListDSLControlState['search_technique'],
+            search_technique: search_technique as OptionsListDSLControlRuntimeState['search_technique'],
           }),
           ...(selected_options && { selected_options }),
           ...(typeof single_select === 'boolean' && { single_select }),

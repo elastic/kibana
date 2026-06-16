@@ -19,7 +19,7 @@ import { DEFAULT_RANGE_SLIDER_STATE } from '@kbn/controls-constants';
 import { dataService, dataViewsService } from '../../../services/kibana_services';
 import { getMockedFinalizeApi } from '../../mocks/control_mocks';
 import { getRangesliderControlFactory } from './get_range_slider_control_factory';
-import { rangeSliderControlSchema, type RangeSliderControlState } from '@kbn/controls-schemas';
+import { rangeSliderControlSchema, type RangeSliderControlRuntimeState } from '@kbn/controls-schemas';
 import { ControlValuesSource } from '@kbn/controls-constants';
 import type { Filter, AggregateQuery, TimeRange } from '@kbn/es-query';
 import type { RangeSliderControlApi } from './types';
@@ -112,7 +112,7 @@ describe('RangeSliderControlApi', () => {
           ...DEFAULT_RANGE_SLIDER_STATE,
           data_view_id: 'myDataViewId',
           field_name: 'myFieldName',
-        } as RangeSliderControlState,
+        } as RangeSliderControlRuntimeState,
         finalizeApi,
         uuid,
         parentApi,
@@ -128,7 +128,7 @@ describe('RangeSliderControlApi', () => {
           data_view_id: 'myDataViewId',
           field_name: 'myFieldName',
           value: ['5', '10'],
-        } as RangeSliderControlState,
+        } as RangeSliderControlRuntimeState,
         finalizeApi,
         uuid,
         parentApi,
@@ -168,7 +168,7 @@ describe('RangeSliderControlApi', () => {
           data_view_id: 'notGonnaFindMeDataView',
           field_name: 'myFieldName',
           value: ['5', '10'],
-        } as RangeSliderControlState,
+        } as RangeSliderControlRuntimeState,
         finalizeApi,
         uuid,
         parentApi,
@@ -192,7 +192,7 @@ describe('RangeSliderControlApi', () => {
           data_view_id: 'myDataViewId',
           field_name: 'myFieldName',
           value: ['5', '10'],
-        } as RangeSliderControlState,
+        } as RangeSliderControlRuntimeState,
         finalizeApi,
         uuid,
         parentApi,
@@ -212,7 +212,7 @@ describe('RangeSliderControlApi', () => {
           ...DEFAULT_RANGE_SLIDER_STATE,
           data_view_id: 'myDataViewId',
           field_name: 'myFieldName',
-        } as RangeSliderControlState,
+        } as RangeSliderControlRuntimeState,
         finalizeApi,
         uuid,
         parentApi,
@@ -240,7 +240,7 @@ describe('RangeSliderControlApi', () => {
           ...DEFAULT_RANGE_SLIDER_STATE,
           values_source: ControlValuesSource.ESQL,
           esql_query: 'FROM bytes-* | KEEP bytes',
-        } as RangeSliderControlState,
+        } as RangeSliderControlRuntimeState,
         finalizeApi,
         uuid,
         parentApi,
@@ -267,12 +267,12 @@ describe('RangeSliderControlApi', () => {
           ...DEFAULT_RANGE_SLIDER_STATE,
           data_view_id: 'myDataViewId',
           field_name: 'myFieldName',
-        } as RangeSliderControlState,
+        } as RangeSliderControlRuntimeState,
         finalizeApi,
         uuid,
         parentApi,
       });
-      const serializedState = api.serializeState() as RangeSliderControlState;
+      const serializedState = api.serializeState() as RangeSliderControlRuntimeState;
       expect(serializedState.step).toBe(1);
     });
 
@@ -284,12 +284,12 @@ describe('RangeSliderControlApi', () => {
           data_view_id: 'myDataViewId',
           field_name: 'myFieldName',
           step: 1024,
-        } as RangeSliderControlState,
+        } as RangeSliderControlRuntimeState,
         finalizeApi,
         uuid,
         parentApi,
       });
-      const serializedState = api.serializeState() as RangeSliderControlState;
+      const serializedState = api.serializeState() as RangeSliderControlRuntimeState;
       expect(serializedState.step).toBe(1024);
     });
   });
@@ -305,7 +305,7 @@ describe('RangeSliderControlApi', () => {
         ...lastSavedState,
         values_source: ControlValuesSource.FIELD,
         data_view_id: 'newDataViewId',
-      } as RangeSliderControlState;
+      } as RangeSliderControlRuntimeState;
       const embeddable = await factory.buildEmbeddable({
         initializeDrilldownsManager: jest.fn(),
         initialState,

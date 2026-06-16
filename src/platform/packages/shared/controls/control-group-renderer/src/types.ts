@@ -12,7 +12,7 @@ import type { Observable } from 'rxjs';
 import type { ControlsRendererParentApi } from '@kbn/controls-renderer';
 import type { ControlsLayout } from '@kbn/controls-renderer';
 import type {
-  DataControlState,
+  DataControlRuntimeState,
   LegacyIgnoreParentSettings,
   PinnedControlLayoutState,
   PinnedControlState,
@@ -79,7 +79,7 @@ export interface ControlGroupEditorConfig {
   controlStateTransform?: ControlStateTransform;
 }
 
-export type ControlStateTransform<State extends DataControlState = DataControlState> = (
+export type ControlStateTransform<State extends DataControlRuntimeState = DataControlRuntimeState> = (
   newState: Partial<State>,
   controlType: string
 ) => Partial<State>;

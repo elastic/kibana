@@ -23,7 +23,7 @@ import {
   DEFAULT_CONTROL_VALUES_SOURCE,
   DEFAULT_DATA_CONTROL_STATE,
 } from '@kbn/controls-constants';
-import type { DataControlState } from '@kbn/controls-schemas';
+import type { DataControlRuntimeState } from '@kbn/controls-schemas';
 
 import { type DataView, type DataViewField } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
@@ -41,7 +41,7 @@ import { initializeLabelManager, defaultControlLabelComparators } from '../contr
 import { getESQLSingleColumnValues } from '../utils';
 import { getDataViewIdFromESQLQuery } from '../utils/get_data_view_id_from_esql_query';
 
-export const defaultDataControlComparators: StateComparators<DataControlState> = {
+export const defaultDataControlComparators: StateComparators<DataControlRuntimeState> = {
   ...defaultControlLabelComparators,
   data_view_id: 'referenceEquality',
   field_name: 'referenceEquality',
@@ -55,7 +55,7 @@ export const defaultDataControlComparators: StateComparators<DataControlState> =
     (b ?? DEFAULT_DATA_CONTROL_STATE.ignore_validations),
 };
 
-export const defaultDataControlState: WithAllKeys<Omit<DataControlState, 'title'>> = {
+export const defaultDataControlState: WithAllKeys<Omit<DataControlRuntimeState, 'title'>> = {
   ...DEFAULT_DATA_CONTROL_STATE,
   data_view_id: '',
   field_name: '',
@@ -63,7 +63,7 @@ export const defaultDataControlState: WithAllKeys<Omit<DataControlState, 'title'
   esql_query: undefined,
 };
 
-export type DataControlStateManager = Omit<StateManager<DataControlState>, 'api'> & {
+export type DataControlStateManager = Omit<StateManager<DataControlRuntimeState>, 'api'> & {
   api: DataControlApi;
   cleanup: () => void;
   internalApi: {
@@ -85,13 +85,13 @@ export const initializeDataControlManager = async <EditorState extends object = 
   controlId: string;
   controlType: string;
   typeDisplayName: string;
-  state: DataControlState;
+  state: DataControlRuntimeState;
   parentApi: unknown;
   editorStateManager: ReturnType<typeof initializeStateManager<EditorState>>;
   willHaveInitialFilter?: boolean;
   getInitialFilter?: (dataView: DataView) => Filter | undefined;
 }): Promise<DataControlStateManager> => {
-  const dataControlStateManager = initializeStateManager<Omit<DataControlState, 'title'>>(
+  const dataControlStateManager = initializeStateManager<Omit<DataControlRuntimeState, 'title'>>(
     omit(state, 'title'), // this is handled via the label manager
     defaultDataControlState,
     defaultDataControlComparators
@@ -214,7 +214,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
 
   const onEdit = async () => {
     // open the editor to get the new state
-    openDataControlEditor<DataControlState & EditorState>({
+    openDataControlEditor<DataControlRuntimeState & EditorState>({
       initialState: {
         ...labelManager.getLatestState(),
         ...dataControlStateManager.getLatestState(),
@@ -354,7 +354,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
       return {
         ...labelManager.getLatestState(),
         ...dataControlState,
-      } as WithAllKeys<DataControlState>;
+      } as WithAllKeys<DataControlRuntimeState>;
     },
     reinitializeState: (newState) => {
       dataControlStateManager.reinitializeState(newState);
