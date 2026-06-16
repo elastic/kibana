@@ -23,6 +23,7 @@ import {
   getCorrelationsApiService,
   getPrevalenceApiService,
   getAnalyzerApiService,
+  getResponseActionsApiService,
 } from './worker';
 import { extendPageObjects, securityBrowserAuthFixture } from './test';
 
@@ -112,6 +113,11 @@ export const spaceTest = securityParallelFixtures.extend<
       extendedApiServices.analyzer = getAnalyzerApiService({
         esClient,
         log,
+      });
+      extendedApiServices.responseActions = getResponseActionsApiService({
+        esClient,
+        log,
+        scoutSpace,
       });
 
       await use(extendedApiServices);

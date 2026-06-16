@@ -33,3 +33,6 @@ export type { PrevalenceApiService } from './prevalence';
 
 export { getAnalyzerApiService } from './analyzer';
 export type { AnalyzerApiService } from './analyzer';
+
+export { getResponseActionsApiService } from './response_actions';
+export type { ResponseActionsApiService } from './response_actions';

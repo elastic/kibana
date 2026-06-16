@@ -24,6 +24,7 @@ import { CorrelationsToolPage } from './correlations_tool';
 import { PrevalenceToolPage } from './prevalence_tool';
 import { AnalyzerToolPage } from './analyzer_tool';
 import { NotesToolPage } from './notes_tool';
+import { ResponseToolPage } from './response_tool';
 
 export type { ThreatMatchRuleCreatePage } from './threat_match_rule_create_page';
 
@@ -52,6 +53,8 @@ export interface SecurityPageObjects extends PageObjects {
   analyzerTool: AnalyzerToolPage;
   /** Notes tool overlay inside the flyout v2 document flyout. */
   notesTool: NotesToolPage;
+  /** Response tool overlay (automated response actions) inside the flyout v2 document flyout. */
+  responseTool: ResponseToolPage;
 }
 
 export function extendPageObjects(
@@ -82,5 +85,6 @@ export function extendPageObjects(
     prevalenceTool: createLazyPageObject(PrevalenceToolPage, page),
     analyzerTool: createLazyPageObject(AnalyzerToolPage, page),
     notesTool: createLazyPageObject(NotesToolPage, page),
+    responseTool: createLazyPageObject(ResponseToolPage, page),
   };
 }

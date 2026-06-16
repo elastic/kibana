@@ -19,6 +19,7 @@ export {
   getCorrelationsApiService,
   getPrevalenceApiService,
   getAnalyzerApiService,
+  getResponseActionsApiService,
 } from './apis';
 export type {
   DetectionRuleApiService,
@@ -31,4 +32,5 @@ export type {
   CorrelationsApiService,
   PrevalenceApiService,
   AnalyzerApiService,
+  ResponseActionsApiService,
 } from './apis';
