@@ -38,6 +38,7 @@ describe('ES Config Route', () => {
     routeDeps = {
       router: mockRouter,
       log: coreMock.createPluginInitializerContext().logger.get(),
+      getStartServices: coreMock.createSetup().getStartServices,
       proxy: {
         readLegacyESConfig: mockReadLegacyESConfig,
       },

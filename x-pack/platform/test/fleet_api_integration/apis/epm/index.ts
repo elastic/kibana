@@ -62,5 +62,6 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
     loadTestFile(require.resolve('./rollback_composable'));
     loadTestFile(require.resolve('./knowledge_base'));
     loadTestFile(require.resolve('./review_upgrade'));
+    loadTestFile(require.resolve('./install_custom_dataset_templates'));
   });
 }

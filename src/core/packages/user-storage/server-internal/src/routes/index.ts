@@ -8,48 +8,27 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { Logger } from '@kbn/logging';
-import type { IRouter } from '@kbn/core-http-server';
+import type { IRouter, KibanaRequest } from '@kbn/core-http-server';
 import { AuthzDisabled } from '@kbn/core-security-server';
-import type {
-  CoreRequestHandlerContext,
-  RequestHandlerContext,
-} from '@kbn/core-http-request-handler-context-server';
-import type { UserStorageDefinition } from '@kbn/core-user-storage-common';
-import { USER_STORAGE_SO_TYPE, USER_STORAGE_GLOBAL_SO_TYPE } from '../saved_objects';
-import { UserStorageClient } from '../user_storage_client';
+import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
+import type { IUserStorageClient } from '@kbn/core-user-storage-common';
 
 const FORBIDDEN_MESSAGE = 'User profile not available';
 
 const isUnregisteredKeyError = (err: unknown): err is Error =>
   err instanceof Error && err.message.includes('is not registered');
 
-interface RegisterRoutesParams {
+export interface RegisterRoutesParams {
   router: IRouter<RequestHandlerContext>;
-  definitions: ReadonlyMap<string, UserStorageDefinition>;
-  logger: Logger;
+  /**
+   * Returns a scoped client for the given request, or `null` when the request
+   * has no user profile (e.g. API-key auth). Supplied by the service at start
+   * time so that namespace resolution is handled in one place.
+   */
+  getClient: (request: KibanaRequest) => IUserStorageClient | null;
 }
 
-const getSoClient = (coreCtx: CoreRequestHandlerContext) =>
-  coreCtx.savedObjects.getClient({
-    includedHiddenTypes: [USER_STORAGE_SO_TYPE, USER_STORAGE_GLOBAL_SO_TYPE],
-  });
-
-const createClientOrNull = (
-  coreCtx: CoreRequestHandlerContext,
-  params: { definitions: ReadonlyMap<string, UserStorageDefinition>; logger: Logger }
-): UserStorageClient | null => {
-  const profileUid = coreCtx.security.authc.getCurrentUser()?.profile_uid;
-  if (!profileUid) return null;
-  return new UserStorageClient({
-    savedObjectsClient: getSoClient(coreCtx),
-    profileUid,
-    definitions: params.definitions,
-    logger: params.logger,
-  });
-};
-
-export const registerRoutes = ({ router, definitions, logger }: RegisterRoutesParams) => {
+export const registerRoutes = ({ router, getClient }: RegisterRoutesParams) => {
   router.get(
     {
       path: '/internal/user_storage/{key}',
@@ -60,9 +39,8 @@ export const registerRoutes = ({ router, definitions, logger }: RegisterRoutesPa
         authz: AuthzDisabled.delegateToSOClient,
       },
     },
-    async (requestHandlerContext, request, response) => {
-      const coreCtx = await requestHandlerContext.core;
-      const client = createClientOrNull(coreCtx, { definitions, logger });
+    async (_requestHandlerContext, request, response) => {
+      const client = getClient(request);
       if (!client) return response.forbidden({ body: { message: FORBIDDEN_MESSAGE } });
 
       const { key } = request.params;
@@ -90,9 +68,8 @@ export const registerRoutes = ({ router, definitions, logger }: RegisterRoutesPa
         authz: AuthzDisabled.delegateToSOClient,
       },
     },
-    async (requestHandlerContext, request, response) => {
-      const coreCtx = await requestHandlerContext.core;
-      const client = createClientOrNull(coreCtx, { definitions, logger });
+    async (_requestHandlerContext, request, response) => {
+      const client = getClient(request);
       if (!client) return response.forbidden({ body: { message: FORBIDDEN_MESSAGE } });
 
       const { key } = request.params;
@@ -125,9 +102,8 @@ export const registerRoutes = ({ router, definitions, logger }: RegisterRoutesPa
         authz: AuthzDisabled.delegateToSOClient,
       },
     },
-    async (requestHandlerContext, request, response) => {
-      const coreCtx = await requestHandlerContext.core;
-      const client = createClientOrNull(coreCtx, { definitions, logger });
+    async (_requestHandlerContext, request, response) => {
+      const client = getClient(request);
       if (!client) return response.forbidden({ body: { message: FORBIDDEN_MESSAGE } });
 
       const { key } = request.params;

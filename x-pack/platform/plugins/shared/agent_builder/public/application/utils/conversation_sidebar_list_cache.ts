@@ -77,32 +77,29 @@ export const removeSidebarConversationListRow = ({
   });
 };
 
-/**
- * Patch the title of a single sidebar list row.
- *
- * Called by `onConversationCreated` when the chat stream emits the
- * `conversation_created` event and we receive the server-generated title that replaces
- * the placeholder "New conversation" set by `insertSidebarConversationListRow`.
- */
-export const patchSidebarConversationListTitle = ({
+export const patchConversationList = ({
   queryClient,
   agentId,
   conversationId,
-  title,
+  values,
 }: {
   queryClient: QueryClient;
   agentId: string;
   conversationId: string;
-  title: string;
+  values: Partial<ConversationWithoutRounds>;
 }) => {
   const key = agentConversationListKey(agentId);
   queryClient.setQueryData<ConversationWithoutRounds[] | undefined>(key, (prev) => {
     if (!prev?.length) return prev;
     let changed = false;
     const next = prev.map((c) => {
-      if (c.id !== conversationId || c.title === title) return c;
+      if (c.id !== conversationId) return c;
+      const hasChanges = (Object.keys(values) as Array<keyof ConversationWithoutRounds>).some(
+        (k) => values[k] !== c[k]
+      );
+      if (!hasChanges) return c;
       changed = true;
-      return { ...c, title };
+      return { ...c, ...values };
     });
     return changed ? next : prev;
   });
