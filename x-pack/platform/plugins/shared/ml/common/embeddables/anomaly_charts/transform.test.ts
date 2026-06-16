@@ -152,5 +152,17 @@ describe('anomaly charts embeddable transforms', () => {
         'Invalid anomaly charts embeddable state: missing job_ids'
       );
     });
+
+    it('re-buckets a legacy single-number severityThreshold into canonical ranges', () => {
+      const legacyStoredState = {
+        jobIds: ['job-1'],
+        severityThreshold: ML_ANOMALY_THRESHOLD.MAJOR,
+      } as unknown as AnomalyChartsEmbeddableState;
+
+      expect(transformOut(legacyStoredState).severity_threshold).toEqual([
+        { min: ML_ANOMALY_THRESHOLD.MAJOR, max: ML_ANOMALY_THRESHOLD.CRITICAL },
+        { min: ML_ANOMALY_THRESHOLD.CRITICAL },
+      ]);
+    });
   });
 });

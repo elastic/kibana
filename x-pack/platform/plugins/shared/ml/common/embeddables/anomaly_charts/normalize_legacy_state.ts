@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { AnomalyChartsEmbeddableState } from '@kbn/ml-server-schemas/embeddables/anomaly_charts';
+import type {
+  AnomalyChartsEmbeddableState,
+  SeverityThreshold,
+} from '@kbn/ml-server-schemas/embeddables/anomaly_charts';
+import { resolveSeverityFormat } from '../../util/severity_threshold';
 
 // Pre 9.5 stored state used camelCase for these fields; older state may also
 // carry selectedEntities/id/query/filters/refreshConfig, which are not part of
@@ -13,7 +17,8 @@ import type { AnomalyChartsEmbeddableState } from '@kbn/ml-server-schemas/embedd
 export interface LegacyAnomalyChartsFields {
   jobIds?: AnomalyChartsEmbeddableState['job_ids'];
   maxSeriesToPlot?: AnomalyChartsEmbeddableState['max_series_to_plot'];
-  severityThreshold?: AnomalyChartsEmbeddableState['severity_threshold'];
+  // Historically we stored severityThreshold as standalone number.
+  severityThreshold?: SeverityThreshold[] | number;
   selectedEntities?: unknown;
   id?: unknown;
   query?: unknown;
@@ -32,7 +37,10 @@ export const normalizeAnomalyChartsLegacyFields = (
 ): NormalizedAnomalyChartsFields => {
   const jobIds = state.job_ids ?? state.jobIds;
   const maxSeriesToPlot = state.max_series_to_plot ?? state.maxSeriesToPlot;
-  const severityThreshold = state.severity_threshold ?? state.severityThreshold;
+  const rawSeverityThreshold = state.severity_threshold ?? state.severityThreshold;
+  // Coerce legacy single-number / non-canonical severity into the canonical bucket array
+  const severityThreshold =
+    rawSeverityThreshold !== undefined ? resolveSeverityFormat(rawSeverityThreshold) : undefined;
 
   if (!jobIds || jobIds.length === 0) {
     throw new Error('Invalid anomaly charts embeddable state: missing job_ids');

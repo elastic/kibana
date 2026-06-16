@@ -20,7 +20,10 @@ import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils';
 import type { SeverityThreshold } from '@kbn/ml-server-schemas/embeddables/anomaly_charts';
 import { MultiSuperSelect } from '../../multi_super_select/multi_super_select';
 import { useSeverityOptions } from '../../../explorer/hooks/use_severity_options';
-import { resolveSeverityFormat } from './severity_format_resolver';
+import {
+  getSeverityThresholdMax,
+  resolveSeverityFormat,
+} from '../../../../../common/util/severity_threshold';
 
 export interface TableSeverityPageUrlState {
   pageKey: 'mlSelectSeverity';
@@ -91,9 +94,6 @@ export const getSeverityRangeDisplay = (val: number): string => {
       return val.toString();
   }
 };
-
-const getSeverityThresholdMax = (threshold: SeverityThreshold) =>
-  'max' in threshold ? threshold.max : undefined;
 
 const useFormattedSeverityOptions = (selectedSeverities: TableSeverity[] = []) => {
   const severityOptions = useSeverityOptions();

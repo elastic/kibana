@@ -8,9 +8,7 @@
 import { useCallback } from 'react';
 import type { SeverityThreshold } from '@kbn/ml-server-schemas/embeddables/anomaly_charts';
 import { useSeverityOptions } from './use_severity_options';
-
-const getSeverityThresholdMax = (threshold: SeverityThreshold) =>
-  'max' in threshold ? threshold.max : undefined;
+import { getSeverityThresholdMax } from '../../../../common/util/severity_threshold';
 
 /**
  * React hook that returns a function to find severity options by threshold values

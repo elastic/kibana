@@ -21,8 +21,10 @@ import {
   type RawAnomalyChartsState,
 } from '../../../common/embeddables/anomaly_charts/normalize_legacy_state';
 
-type AnomalyChartsControlState = Pick<AnomalyChartsEmbeddableState, 'job_ids'> &
-  Pick<Partial<AnomalyChartsEmbeddableState>, 'max_series_to_plot' | 'severity_threshold'>;
+type AnomalyChartsControlState = Pick<
+  AnomalyChartsEmbeddableState,
+  'job_ids' | 'max_series_to_plot' | 'severity_threshold'
+>;
 
 export const anomalyChartsComparators: StateComparators<AnomalyChartsControlState> = {
   job_ids: 'deepEquality',

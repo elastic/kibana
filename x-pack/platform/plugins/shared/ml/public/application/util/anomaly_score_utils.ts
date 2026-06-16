@@ -6,9 +6,7 @@
  */
 
 import type { SeverityThreshold } from '@kbn/ml-server-schemas/embeddables/anomaly_charts';
-
-const getSeverityThresholdMax = (threshold: SeverityThreshold) =>
-  'max' in threshold ? threshold.max : undefined;
+import { getSeverityThresholdMax } from '../../../common/util/severity_threshold';
 
 /**
  * Determines if a point should be included based on its score and selected severity thresholds

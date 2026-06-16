@@ -45,6 +45,7 @@ import type {
 } from '@kbn/ml-common-types/results';
 import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
 import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import { getSeverityThresholdMax } from '../../../common/util/severity_threshold';
 
 import {
   isMappableJob,
@@ -958,7 +959,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
 
     const filteredRecords = anomalyRecords.filter((record) => {
       return severity.some((threshold) => {
-        const thresholdMax = 'max' in threshold ? threshold.max : undefined;
+        const thresholdMax = getSeverityThresholdMax(threshold);
 
         return (
           Number(record.record_score) >= threshold.min &&
@@ -1952,7 +1953,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
     }
 
     const thresholdCriteria = threshold.map((t) => {
-      const thresholdMax = 'max' in t ? t.max : undefined;
+      const thresholdMax = getSeverityThresholdMax(t);
 
       return {
         range: {

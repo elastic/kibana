@@ -7,7 +7,7 @@
 
 import type { SeverityThreshold } from '@kbn/ml-server-schemas/embeddables/anomaly_charts';
 import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils';
-import { resolveSeverityFormat } from '../../components/controls/select_severity/severity_format_resolver';
+import { resolveSeverityFormat } from '../../../../common/util/severity_threshold';
 
 /**
  * Normalizes `tableSeverity` from SMV page vs embeddable vs dashboard into `SeverityThreshold[]`
