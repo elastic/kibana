@@ -42,12 +42,15 @@ import {
   type StateComparators,
 } from '@kbn/presentation-publishing';
 
-import type { OptionsListSuggestions } from '../../../common/options_list';
+import {
+  getESQLSingleColumnValues,
+  type OptionsListSuggestions,
+} from '../../../common/options_list';
 import { dataService } from '../../services/kibana_services';
 import { initializeTemporayStateManager } from '../data_controls/options_list_control/temporay_state_manager';
 import type { ESQLOptionsListRuntimeState } from './types';
 import { castESQLValue } from './utils/esql_type_utils';
-import { getESQLSingleColumnValues } from '../utils';
+import { getControlsTimezone } from '../utils';
 
 function selectedOptionsComparatorFunction(a?: OptionsListSelection[], b?: OptionsListSelection[]) {
   return deepEqual(a ?? [], b ?? []);
@@ -209,6 +212,7 @@ export function initializeESQLControlManager(
                 signal,
                 timeRange,
                 esqlVariables: variablesInParent,
+                timezone: getControlsTimezone(),
               })
             );
           })

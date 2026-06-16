@@ -19,7 +19,8 @@ import type { ESQLControlVariable } from '@kbn/esql-types';
 import { apiCanAddNewPanel, apiCanPinPanels } from '@kbn/presentation-publishing';
 import { DEFAULT_ESQL_OPTIONS_LIST_STATE, ESQL_CONTROL } from '@kbn/controls-constants';
 import { dataService } from '../../../services/kibana_services';
-import { getESQLSingleColumnValues } from '../../utils';
+import { getESQLSingleColumnValues } from '../../../../common/options_list';
+import { getControlsTimezone } from '../../utils';
 import { ESQLValuesPreview } from './esql_values_preview';
 import type { DataControlEditorState } from './types';
 import { getDataViewIdFromESQLQuery } from '../../utils/get_data_view_id_from_esql_query';
@@ -69,6 +70,7 @@ export const ConfigureValuesQuery = ({
         search: dataService.search.search,
         esqlVariables,
         timeRange: dataService.query.timefilter.timefilter.getTime(),
+        timezone: getControlsTimezone(),
       });
 
       setIsPreviewQueryRunning(false);

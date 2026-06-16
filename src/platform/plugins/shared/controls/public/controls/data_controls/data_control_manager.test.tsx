@@ -18,7 +18,7 @@ import { ControlValuesSource, DEFAULT_DATA_CONTROL_STATE } from '@kbn/controls-c
 import type { DataControlRuntimeState } from '@kbn/controls-schemas';
 
 const mockGetESQLSingleColumnValues = jest.fn();
-jest.mock('../utils/get_esql_single_column_values', () => {
+jest.mock('../../../common/options_list/get_esql_single_column_values', () => {
   const fn = (...args: unknown[]) => mockGetESQLSingleColumnValues(...args);
   fn.isSuccess = (result: unknown) => !!result && 'column' in (result as Record<string, unknown>);
   fn.isMultiColumnError = (result: unknown) =>

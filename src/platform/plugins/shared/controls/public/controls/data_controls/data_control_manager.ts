@@ -38,7 +38,8 @@ import { dataService, dataViewsService } from '../../services/kibana_services';
 import { openDataControlEditor } from './open_data_control_editor';
 import type { DataControlApi, DataControlFieldFormatter } from './types';
 import { initializeLabelManager, defaultControlLabelComparators } from '../control_labels';
-import { getESQLSingleColumnValues } from '../utils';
+import { getESQLSingleColumnValues } from '../../../common/options_list';
+import { getControlsTimezone } from '../utils';
 import { getDataViewIdFromESQLQuery } from '../utils/get_data_view_id_from_esql_query';
 
 export const defaultDataControlComparators: StateComparators<DataControlRuntimeState> = {
@@ -274,6 +275,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
         search: dataService.search.search,
         esqlVariables,
         timeRange: dataService.query.timefilter.timefilter.getTime(),
+        timezone: getControlsTimezone(),
       });
       if (!getESQLSingleColumnValues.isSuccess(result)) {
         throw result.errors[0];

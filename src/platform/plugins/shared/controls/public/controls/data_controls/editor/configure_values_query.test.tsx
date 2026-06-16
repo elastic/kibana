@@ -32,9 +32,8 @@ jest.mock('@kbn/esql/public', () => ({
 }));
 
 const mockGetESQLSingleColumnValues = jest.fn();
-jest.mock('../../utils', () => {
+jest.mock('../../../../common/options_list/get_esql_single_column_values', () => {
   const fn = (...args: unknown[]) => mockGetESQLSingleColumnValues(...args);
-  // Match the shape of the real export — a callable with attached helpers.
   fn.isSuccess = (result: unknown) => !!result && 'values' in (result as Record<string, unknown>);
   fn.isMultiColumnError = (result: unknown) =>
     !!result && 'columns' in (result as Record<string, unknown>);
@@ -43,6 +42,10 @@ jest.mock('../../utils', () => {
   fn.isNumericResult = () => false;
   return { getESQLSingleColumnValues: fn };
 });
+
+jest.mock('../../utils/get_controls_timezone', () => ({
+  getControlsTimezone: () => 'UTC',
+}));
 
 const baseProps = {
   selectedDataView: undefined,
