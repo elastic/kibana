@@ -8,15 +8,13 @@
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type {
-  CompositeSLOMemberWithSummary,
   CompositeSLOWithSummaryResponse,
-  FindCompositeSLODefinitionsParams,
+  FindCompositeSLOParams,
   Paginated,
 } from '@kbn/slo-schema';
 import { COMPOSITE_SUMMARY_INDEX_NAME } from '../../../common/constants';
-import { NO_DATA } from '../../domain/services';
 import type { CompositeSLODefinition } from '../../domain/models';
-import { buildNoDataSummary } from './compute_composite_summary';
+import { buildNoDataSummary, toMemberWithSummary } from './compute_composite_summary';
 import type { CompositeSLORepository } from './composite_slo_repository';
 import {
   fetchCompositeSloSummariesFromIndex,
@@ -27,18 +25,6 @@ interface Dependencies {
   spaceId: string;
   compositeRepository: CompositeSLORepository;
   esClient: ElasticsearchClient;
-}
-
-function toMemberWithSummary(
-  member: CompositeSLODefinition['members'][number]
-): CompositeSLOMemberWithSummary {
-  return {
-    ...member,
-    name: member.sloId,
-    normalisedWeight: NO_DATA,
-    sliValue: NO_DATA,
-    status: 'NO_DATA',
-  };
 }
 
 function toWithSummaryResponse(
@@ -61,7 +47,7 @@ export async function findCompositeSlo(
     sortDirection = 'desc',
     page = 1,
     perPage = 25,
-  }: FindCompositeSLODefinitionsParams,
+  }: FindCompositeSLOParams,
   { spaceId, compositeRepository, esClient }: Dependencies
 ): Promise<Paginated<CompositeSLOWithSummaryResponse>> {
   const filters: QueryDslQueryContainer[] = [{ term: { spaceId } }];

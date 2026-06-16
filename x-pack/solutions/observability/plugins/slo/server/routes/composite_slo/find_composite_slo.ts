@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { findCompositeSLODefinitionsParamsSchema } from '@kbn/slo-schema';
-import { findCompositeSlo } from '../../services/composites/find_composite_slo_definitions';
+import { findCompositeSLOParamsSchema } from '@kbn/slo-schema';
+import { findCompositeSlo } from '../../services/composites/find_composite_slo';
 import { createCompositeSloServerRoute } from './create_composite_slo_server_route';
 
 export const findCompositeSLORoute = createCompositeSloServerRoute({
@@ -17,7 +17,7 @@ export const findCompositeSLORoute = createCompositeSloServerRoute({
       requiredPrivileges: ['slo_read'],
     },
   },
-  params: findCompositeSLODefinitionsParamsSchema,
+  params: findCompositeSLOParamsSchema,
   handler: async ({ params, logger, request, getScopedClients }) => {
     const { scopedClusterClient, compositeRepository, spaceId } = await getScopedClients({
       request,
