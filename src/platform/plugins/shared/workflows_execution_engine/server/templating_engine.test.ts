@@ -11,6 +11,8 @@ import { WorkflowTemplatingEngine } from './templating_engine';
 
 describe('WorkflowTemplatingEngine', () => {
   let templatingEngine: WorkflowTemplatingEngine;
+  const liquidLimitErrorMessage =
+    'Liquid template rendering exceeded a workflow limit. Reduce the template size, simplify loops or filters, or reduce the rendered output size and try again.';
 
   beforeEach(() => {
     templatingEngine = new WorkflowTemplatingEngine();
@@ -833,13 +835,13 @@ describe('WorkflowTemplatingEngine', () => {
       it('should reject templates exceeding parse limit', () => {
         expect(() => {
           templatingEngine.render('x'.repeat(200_000), {});
-        }).toThrow('parse length limit exceeded');
+        }).toThrow(liquidLimitErrorMessage);
       });
 
       it('should reject templates that allocate too much memory', () => {
         expect(() => {
           templatingEngine.render('{% for i in (1..20000000) %}{{ i }}{% endfor %}', {});
-        }).toThrow('memory alloc limit exceeded');
+        }).toThrow(liquidLimitErrorMessage);
       });
     });
 

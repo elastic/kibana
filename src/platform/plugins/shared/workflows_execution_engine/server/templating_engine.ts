@@ -8,6 +8,7 @@
  */
 
 import type { Template } from 'liquidjs';
+import { i18n } from '@kbn/i18n';
 import { createWorkflowLiquidEngine } from '@kbn/workflows';
 
 type TemplateVariableSegment = string | number;
@@ -21,6 +22,18 @@ export class WorkflowTemplatingEngine {
   private static readonly TEMPLATE_SYNTAX_PATTERN = /\{\{|\{%/;
   private static readonly PARSED_TEMPLATE_CACHE_SIZE = 64;
   private static readonly VARIABLE_SEGMENTS_CACHE_SIZE = 64;
+  private static readonly LIQUID_LIMIT_ERRORS = new Set([
+    'memory alloc limit exceeded',
+    'parse length limit exceeded',
+    'render limit exceeded',
+  ]);
+  private static readonly LIQUID_LIMIT_ERROR_MESSAGE = i18n.translate(
+    'workflowsExecutionEngine.templatingEngine.liquidLimitExceededErrorMessage',
+    {
+      defaultMessage:
+        'Liquid template rendering exceeded a workflow limit. Reduce the template size, simplify loops or filters, or reduce the rendered output size and try again.',
+    }
+  );
 
   private readonly engine;
   private readonly parsedTemplateCache = new Map<string, Template[]>();
@@ -136,7 +149,11 @@ export class WorkflowTemplatingEngine {
       const errorMessage = error instanceof Error ? error.message : String(error);
       // customer-facing error message without the default line number and column number
       const customerFacingErrorMessage = errorMessage.replace(/, line:\d+, col:\d+/g, '');
-      throw new Error(customerFacingErrorMessage);
+      throw new Error(
+        WorkflowTemplatingEngine.LIQUID_LIMIT_ERRORS.has(customerFacingErrorMessage)
+          ? WorkflowTemplatingEngine.LIQUID_LIMIT_ERROR_MESSAGE
+          : customerFacingErrorMessage
+      );
     }
   }
 
