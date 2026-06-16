@@ -1,5 +1,5 @@
 {
-  "sha1": "af42bbdbc6039a8675e92d46fe7de370d6463b54",
+  "sha1": "3ae144fc107fe96fd2299b4ff86b5e0aa109301b",
   "tests": [
     {
       "id": "4402bb6f4421c38-1054e603e578b92",
@@ -322,7 +322,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/investigations/bulk_add_alerts_to_chat.spec.ts",
-        "line": 50,
+        "line": 60,
         "column": 14
       }
     },
@@ -336,7 +336,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/investigations/bulk_add_alerts_to_chat.spec.ts",
-        "line": 79,
+        "line": 89,
         "column": 14
       }
     },
