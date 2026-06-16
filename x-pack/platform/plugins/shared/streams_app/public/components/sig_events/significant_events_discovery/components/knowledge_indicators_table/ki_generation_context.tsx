@@ -8,9 +8,9 @@
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
 import {
   StreamsKIsOnboardingStep,
-  StreamsKIsOnboardingStatus,
+  SigEventsWorkflowStatus,
   STREAMS_KIS_ONBOARDING_IN_PROGRESS_STATUSES,
-  type StreamsKIsOnboardingStatusResult,
+  type SigEventsWorkflowStatusResult,
   STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
   STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
 } from '@kbn/streams-schema';
@@ -42,7 +42,7 @@ interface KiGenerationContextValue {
   generatingStreamNames: string[];
   isGenerating: boolean;
   isScheduling: boolean;
-  streamStatusMap: Record<string, StreamsKIsOnboardingStatusResult>;
+  streamStatusMap: Record<string, SigEventsWorkflowStatusResult>;
   onboardingConfig: OnboardingConfig;
   setOnboardingConfig: (config: OnboardingConfig) => void;
   featuresConnectors: ConnectorState;
@@ -72,7 +72,7 @@ export function KiGenerationProvider({
 }: KiGenerationProviderProps) {
   const [generatingStreams, setGeneratingStreams] = useState<Set<string>>(new Set());
   const [streamStatusMap, setStreamStatusMap] = useState<
-    Record<string, StreamsKIsOnboardingStatusResult>
+    Record<string, SigEventsWorkflowStatusResult>
   >({});
   const initialStatusFetchDoneRef = useRef(false);
   // Dedup guard: filteredStreams gets a new array reference on every render
@@ -123,7 +123,7 @@ export function KiGenerationProvider({
   // forwarding is gated on the initial-fetch flag so initial-load updates
   // don't trigger consumer side effects (like error toasts).
   const onStreamStatusUpdate = useCallback(
-    (streamName: string, statusResult: StreamsKIsOnboardingStatusResult) => {
+    (streamName: string, statusResult: SigEventsWorkflowStatusResult) => {
       setStreamStatusMap((current) => ({ ...current, [streamName]: statusResult }));
 
       const isInProgress = STREAMS_KIS_ONBOARDING_IN_PROGRESS_STATUSES.has(statusResult.status);
@@ -141,10 +141,10 @@ export function KiGenerationProvider({
       });
 
       if (initialStatusFetchDoneRef.current) {
-        if (statusResult.status === StreamsKIsOnboardingStatus.Failed) {
+        if (statusResult.status === SigEventsWorkflowStatus.Failed) {
           onFailed?.(statusResult.error ?? 'Unknown error');
         }
-        if (statusResult.status === StreamsKIsOnboardingStatus.Completed) {
+        if (statusResult.status === SigEventsWorkflowStatus.Completed) {
           onCompleted?.();
         }
       }
