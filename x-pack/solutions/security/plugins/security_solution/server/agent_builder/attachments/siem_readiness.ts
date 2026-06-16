@@ -50,6 +50,7 @@ const actionableFindingSchema = z.object({
   affectedTactics: z.array(affectedTacticSchema).optional(),
   affectedPlatform: z.string().max(200).optional(),
   recommendedActions: z.array(recommendedActionSchema).optional(),
+  blastRadiusStatus: z.enum(['healthy', 'partial', 'unavailable']).optional(),
 });
 
 // ---- Coverage ----
@@ -153,27 +154,37 @@ const formatFindingWithBlastRadius = (f: z.infer<typeof actionableFindingSchema>
   const lines: string[] = [];
   lines.push(`  [${f.severity}] ${f.message}`);
 
-  if (f.affectedRules && f.affectedRules.length > 0) {
-    lines.push(`    Affected Rules (${f.affectedRules.length}):`);
-    f.affectedRules.slice(0, 5).forEach((rule) => {
-      lines.push(`      - ${rule.name}`);
-    });
-    if (f.affectedRules.length > 5) {
-      lines.push(`      ... and ${f.affectedRules.length - 5} more`);
+  if (f.blastRadiusStatus === 'unavailable') {
+    // A required reverse-map lookup failed; these fields cannot be trusted — surface the gap
+    // explicitly rather than showing empty values that look like "no impact found".
+    lines.push('    Affected Rules: unavailable (lookup failed)');
+    lines.push('    Affected Tactics: unavailable (lookup failed)');
+    lines.push('    Platform: unavailable (lookup failed)');
+  } else {
+    const partialSuffix = f.blastRadiusStatus === 'partial' ? ' (may be incomplete)' : '';
+
+    if (f.affectedRules && f.affectedRules.length > 0) {
+      lines.push(`    Affected Rules (${f.affectedRules.length})${partialSuffix}:`);
+      f.affectedRules.slice(0, 5).forEach((rule) => {
+        lines.push(`      - ${rule.name}`);
+      });
+      if (f.affectedRules.length > 5) {
+        lines.push(`      ... and ${f.affectedRules.length - 5} more`);
+      }
     }
-  }
 
-  if (f.affectedTactics && f.affectedTactics.length > 0) {
-    lines.push(`    Affected MITRE Tactics:`);
-    f.affectedTactics.forEach((tactic) => {
-      lines.push(
-        `      - ${tactic.name} (${tactic.affectedRulesCount}/${tactic.totalRules} rules)`
-      );
-    });
-  }
+    if (f.affectedTactics && f.affectedTactics.length > 0) {
+      lines.push(`    Affected MITRE Tactics${partialSuffix}:`);
+      f.affectedTactics.forEach((tactic) => {
+        lines.push(
+          `      - ${tactic.name} (${tactic.affectedRulesCount}/${tactic.totalRules} rules)`
+        );
+      });
+    }
 
-  if (f.affectedPlatform) {
-    lines.push(`    Platform: ${f.affectedPlatform}`);
+    if (f.affectedPlatform) {
+      lines.push(`    Platform: ${f.affectedPlatform}`);
+    }
   }
 
   if (f.recommendedActions && f.recommendedActions.length > 0) {
@@ -315,6 +326,10 @@ Continuity pipeline items include silence and volume health fields:
 - last24hDocs: document count in the most recent 24 h window (null if stream < 7 days old)
 - baseline7dAvg: average daily doc count over the prior 6 days (null if stream < 7 days old)
 - volumeDropPct: percentage drop vs baseline clamped to [0, ∞); null when baseline unavailable
+- blastRadiusStatus (optional): reliability of the blast radius fields
+  - 'unavailable': a required lookup failed; affectedRules/Tactics/Platform are omitted and MUST be shown as "unavailable (lookup failed)" — never as "none"
+  - 'partial': at least one rule's index resolution failed; the fields shown may be undercounted — append "(may be incomplete)" when presenting them
+  - omitted/undefined: blast radius is complete and trustworthy
 
 Field mapping (tool output camelCase → attachment snake_case):
 - pipeline name: name → pipeline_name

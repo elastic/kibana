@@ -103,6 +103,10 @@ Every \`actionableFinding\` includes pre-computed blast radius fields. These MUS
 - \`affectedPlatform\`: the platform derived from ECS fields in the actual data (e.g. "AWS account 123456789012", "Windows Endpoints", "Okta (Identity)"). Show as **Affected Platform**.
 - \`affectedRules\`: array of \`{ id, name }\` — the detection rules that monitor this index. Show as **Affected Rules** (list rule names).
 - \`affectedTactics\`: array of \`{ id, name, totalRules, affectedRulesCount }\` — MITRE ATT&CK tactics exposed. Show as **Affected Tactics** (list tactic names with rule counts).
+- \`blastRadiusStatus\`: reliability signal for the blast radius fields:
+  - \`'healthy'\`: blast radius is complete and trustworthy.
+  - \`'unavailable'\`: a required data lookup failed. The \`affectedRules\`, \`affectedTactics\`, and \`affectedPlatform\` fields are intentionally absent. You MUST show "unavailable (lookup failed)" for all three — NEVER show "none", which would imply there genuinely are no affected rules.
+  - \`'partial'\`: at least one rule's index resolution failed, so the lists may be undercounted. Show the lists but append "(may be incomplete)" after the label.
 
 Required format per finding:
 
@@ -117,8 +121,10 @@ Rules:
 - Always show all three blast radius fields for every finding, even if some are empty ("—" or "none").
 - Do NOT merge the blast radius into prose — keep it as explicit labeled sub-bullets.
 - If \`affectedPlatform\` is undefined in the data, show "—".
+- If \`blastRadiusStatus === 'unavailable'\`, show "unavailable (lookup failed)" for all three fields — never "none".
+- If \`blastRadiusStatus === 'partial'\`, append "(may be incomplete)" to Affected Rules and Affected Tactics labels.
 
-Full example:
+Full example (complete blast radius):
 
 \`\`\`
 ### Coverage
@@ -142,6 +148,26 @@ Full example:
   - **Affected Platform**: Palo Alto (Network)
   - **Affected Rules**: Test Rule - Network Events, Blast Test - Threat Match Rule
   - **Affected Tactics**: Command and Control (1/1), Reconnaissance (1/1), Initial Access (1/2)
+\`\`\`
+
+Example when \`blastRadiusStatus === 'unavailable'\` (pipeline map failed — continuity finding):
+
+\`\`\`
+### Continuity
+- **Network**: pipeline \`logs-network@custom\` — 4.2% failure rate
+  - **Affected Platform**: unavailable (lookup failed)
+  - **Affected Rules**: unavailable (lookup failed)
+  - **Affected Tactics**: unavailable (lookup failed)
+\`\`\`
+
+Example when \`blastRadiusStatus === 'partial'\` (some rules' index resolution failed):
+
+\`\`\`
+### Quality
+- **Cloud**: \`logs-aws.cloudtrail-default\` — 1 incompatible ECS field
+  - **Affected Platform**: AWS account 123456789012
+  - **Affected Rules (may be incomplete)**: AWS CloudTrail Suspicious Activity
+  - **Affected Tactics (may be incomplete)**: Initial Access (1 of 2 rules affected)
 \`\`\`
 
 ---

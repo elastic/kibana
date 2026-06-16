@@ -20,13 +20,14 @@ import { i18n } from '@kbn/i18n';
 import type { EventLifecycleResponse } from '@kbn/streams-schema';
 import { formatTimestamp } from '../../../../../util/formatters';
 
-type EntityType = 'detection' | 'discovery' | 'verdict' | 'event';
+type EntityType = 'detection' | 'discovery' | 'clearance' | 'event';
 
 interface TimelineEntry {
   type: EntityType;
   timestamp: string;
   title: string;
   description: string;
+  detail?: string;
 }
 
 interface LifecycleTimelineProps {
@@ -36,14 +37,14 @@ interface LifecycleTimelineProps {
 const ENTITY_ICONS: Record<EntityType, string> = {
   detection: 'bell',
   discovery: 'inspect',
-  verdict: 'check',
+  clearance: 'check',
   event: 'documentEdit',
 };
 
 const ENTITY_COLORS: Record<EntityType, string> = {
   detection: 'warning',
   discovery: 'primary',
-  verdict: 'success',
+  clearance: 'success',
   event: 'accent',
 };
 
@@ -54,8 +55,8 @@ const ENTITY_LABELS: Record<EntityType, string> = {
   discovery: i18n.translate('xpack.streams.lifecycle.discovery', {
     defaultMessage: 'Discovery',
   }),
-  verdict: i18n.translate('xpack.streams.lifecycle.verdict', {
-    defaultMessage: 'Verdict',
+  clearance: i18n.translate('xpack.streams.lifecycle.clearance', {
+    defaultMessage: 'Cleared',
   }),
   event: i18n.translate('xpack.streams.lifecycle.event', {
     defaultMessage: 'Event',
@@ -72,28 +73,40 @@ const EVENT_UPDATED_LABEL = i18n.translate('xpack.streams.lifecycle.eventUpdated
 
 const buildDiscoveryDescription = (
   discovery: EventLifecycleResponse['discoveries'][number]
-): string =>
-  i18n.translate('xpack.streams.lifecycle.discoveryDesc', {
-    defaultMessage: '{kind} · criticality {criticality}',
-    values: { kind: discovery.kind, criticality: discovery.criticality || '-' },
-  });
+): string => {
+  if (discovery.kind === 'clearance') {
+    return i18n.translate('xpack.streams.lifecycle.discoveryCleared', {
+      defaultMessage: 'All detection signals resolved',
+    });
+  }
+  const occurrence = discovery.change_point_occurrence;
+  const parts: string[] = [];
+  if (occurrence) parts.push(occurrence);
+  parts.push(
+    i18n.translate('xpack.streams.lifecycle.discoveryCriticality', {
+      defaultMessage: 'criticality {criticality}',
+      values: { criticality: discovery.criticality ?? '-' },
+    })
+  );
+  return parts.join(' · ');
+};
 
 const buildEventDescription = ({
   event,
-  isFirst,
 }: {
   event: EventLifecycleResponse['events'][number];
-  isFirst: boolean;
-}) =>
-  isFirst
-    ? event.title
-    : i18n.translate('xpack.streams.lifecycle.eventUpdatedDesc', {
-        defaultMessage: 'Verdict: {verdict}, Criticality: {criticality}',
-        values: {
-          verdict: event.verdict,
-          criticality: event.criticality ? String(event.criticality) : '-',
-        },
-      });
+}): { description: string; detail?: string } => {
+  const description = i18n.translate('xpack.streams.lifecycle.eventDesc', {
+    defaultMessage: 'Status: {status}, Criticality: {criticality}',
+    values: {
+      status: event.status ?? '-',
+      criticality: event.criticality != null ? String(event.criticality) : '-',
+    },
+  });
+  const detail =
+    [event.analysis_summary, event.assessment_note].filter(Boolean).join(' — ') || undefined;
+  return { description, detail };
+};
 
 function buildTimelineEntries(data: EventLifecycleResponse): TimelineEntry[] {
   const detections: TimelineEntry[] = data.detections.map((detection) => ({
@@ -104,30 +117,27 @@ function buildTimelineEntries(data: EventLifecycleResponse): TimelineEntry[] {
   }));
 
   const discoveries: TimelineEntry[] = data.discoveries.map((discovery) => ({
-    type: 'discovery' as const,
+    type: (discovery.kind === 'clearance' ? 'clearance' : 'discovery') as EntityType,
     timestamp: discovery['@timestamp'],
     title: discovery.title,
     description: buildDiscoveryDescription(discovery),
   }));
 
-  const verdicts: TimelineEntry[] = data.verdicts.map((verdict) => ({
-    type: 'verdict' as const,
-    timestamp: verdict['@timestamp'],
-    title: verdict.verdict,
-    description: verdict.verdict_summary,
-  }));
-
   const sortedEvents = [...data.events].sort(
     (a, b) => (Date.parse(a['@timestamp']) || 0) - (Date.parse(b['@timestamp']) || 0)
   );
-  const events: TimelineEntry[] = sortedEvents.map((event, idx) => ({
-    type: 'event' as const,
-    timestamp: event['@timestamp'],
-    title: idx === 0 ? EVENT_CREATED_LABEL : EVENT_UPDATED_LABEL,
-    description: buildEventDescription({ event, isFirst: idx === 0 }),
-  }));
+  const events: TimelineEntry[] = sortedEvents.map((event, idx) => {
+    const { description, detail } = buildEventDescription({ event });
+    return {
+      type: 'event' as const,
+      timestamp: event['@timestamp'],
+      title: idx === 0 ? EVENT_CREATED_LABEL : EVENT_UPDATED_LABEL,
+      description: idx === 0 ? event.title : description,
+      detail: idx === 0 ? description : detail,
+    };
+  });
 
-  return [...detections, ...discoveries, ...verdicts, ...events].sort(
+  return [...detections, ...discoveries, ...events].sort(
     (a, b) => (Date.parse(a.timestamp) || 0) - (Date.parse(b.timestamp) || 0)
   );
 }
@@ -183,6 +193,14 @@ export const LifecycleTimeline = ({ data }: LifecycleTimelineProps) => {
                 <EuiSpacer size="xs" />
                 <EuiText size="xs" color="subdued">
                   {entry.description}
+                </EuiText>
+              </>
+            )}
+            {entry.detail && (
+              <>
+                <EuiSpacer size="xs" />
+                <EuiText size="xs" color="subdued">
+                  {entry.detail}
                 </EuiText>
               </>
             )}

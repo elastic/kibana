@@ -7,11 +7,11 @@
 
 import type { ActionableFinding, RecommendedAction } from './types';
 
-type RegistryKey = `${string}:${string}`;
+type FindingType = `${string}:${string}`;
 
 type ActionBuilder = (finding: ActionableFinding) => RecommendedAction[];
 
-export const recommendedActionsRegistry = new Map<RegistryKey, ActionBuilder>();
+export const recommendedActionsRegistry = new Map<FindingType, ActionBuilder>();
 
 const createResourceSlug = (resource: string): string => {
   return resource
@@ -86,17 +86,18 @@ export const buildRecommendedActions = (
   finding: ActionableFinding,
   dimension: string
 ): RecommendedAction[] => {
-  // Built-in continuity sub-type playbooks take precedence over the registry
   if (dimension === 'continuity') {
     if (finding.type === 'silence') return getSilenceActions(finding);
     if (finding.type === 'volume_drop_warning' || finding.type === 'volume_drop_critical') {
       return getVolumeDropActions(finding);
     }
   }
+  const findingType: FindingType = `${dimension}:${finding.category ?? 'general'}`;
+  const customBuilder = recommendedActionsRegistry.get(findingType);
 
-  const key: RegistryKey = `${dimension}:${finding.category ?? 'general'}`;
-  const customBuilder = recommendedActionsRegistry.get(key);
-  if (customBuilder) return customBuilder(finding);
+  if (customBuilder) {
+    return customBuilder(finding);
+  }
 
   return [...getDefaultActions(finding, dimension), ...getDimensionActions(dimension)];
 };

@@ -112,7 +112,7 @@ export const fetchIndexPlatforms = async ({
     const response = await esClient.search({
       index: ['logs-*', 'metrics-*'],
       size: 0,
-      query: { range: { '@timestamp': { gte: 'now-24h' } } },
+      query: { range: { '@timestamp': { gte: 'now-7d' } } },
       aggs: {
         by_index: {
           terms: { field: '_index', size: 1000, order: { _count: 'desc' } },
