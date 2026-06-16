@@ -23,6 +23,7 @@ import type {
   ThreatIntelligenceApiService,
   CorrelationsApiService,
   PrevalenceApiService,
+  AnalyzerApiService,
 } from './worker';
 
 export interface SecurityApiServicesFixture extends ApiServicesFixture {
@@ -35,6 +36,7 @@ export interface SecurityApiServicesFixture extends ApiServicesFixture {
   threatIntelligence: ThreatIntelligenceApiService;
   correlations: CorrelationsApiService;
   prevalence: PrevalenceApiService;
+  analyzer: AnalyzerApiService;
 }
 
 export interface SecurityTestFixtures extends ScoutTestFixtures {

@@ -22,6 +22,7 @@ import { DocumentFlyoutV2 } from './document_flyout_v2';
 import { ThreatIntelligenceToolPage } from './threat_intelligence_tool';
 import { CorrelationsToolPage } from './correlations_tool';
 import { PrevalenceToolPage } from './prevalence_tool';
+import { AnalyzerToolPage } from './analyzer_tool';
 
 export type { ThreatMatchRuleCreatePage } from './threat_match_rule_create_page';
 
@@ -46,6 +47,8 @@ export interface SecurityPageObjects extends PageObjects {
   correlationsTool: CorrelationsToolPage;
   /** Prevalence tool overlay inside the flyout v2 document flyout. */
   prevalenceTool: PrevalenceToolPage;
+  /** Analyzer tool overlay (resolver process-tree graph) inside the flyout v2 document flyout. */
+  analyzerTool: AnalyzerToolPage;
 }
 
 export function extendPageObjects(
@@ -74,5 +77,6 @@ export function extendPageObjects(
     threatIntelligenceTool: createLazyPageObject(ThreatIntelligenceToolPage, page),
     correlationsTool: createLazyPageObject(CorrelationsToolPage, page),
     prevalenceTool: createLazyPageObject(PrevalenceToolPage, page),
+    analyzerTool: createLazyPageObject(AnalyzerToolPage, page),
   };
 }
