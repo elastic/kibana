@@ -248,6 +248,23 @@ describe('SyntheticsEsClient', () => {
       );
     });
 
+    it('does not modify msearch requests when no tiers are excluded', async () => {
+      esClient.msearch.mockResolvedValueOnce({
+        body: { responses: [{}] },
+      } as unknown as MsearchResponse);
+      const { client, uiSettings } = createClientWithExcludedTiers([]);
+
+      await client.msearch([{ query: matchAll }]);
+
+      expect(uiSettings.get).toHaveBeenCalledWith('observability:searchExcludedDataTiers');
+      expect(esClient.msearch).toHaveBeenCalledWith(
+        {
+          searches: [{ index: 'synthetics-*', ignore_unavailable: true }, { query: matchAll }],
+        },
+        { meta: true }
+      );
+    });
+
     it('wraps the count query with a tier exclusion filter when configured', async () => {
       const { client } = createClientWithExcludedTiers(frozen);
 
@@ -259,6 +276,18 @@ describe('SyntheticsEsClient', () => {
           ignore_unavailable: true,
           query: { bool: { filter: [matchAll, expectedFrozenFilter] } },
         },
+        { meta: true, context: { loggingOptions: { loggerName: 'synthetics' } } }
+      );
+    });
+
+    it('does not modify the count query when no tiers are excluded', async () => {
+      const { client, uiSettings } = createClientWithExcludedTiers([]);
+
+      await client.count({ query: matchAll });
+
+      expect(uiSettings.get).toHaveBeenCalledWith('observability:searchExcludedDataTiers');
+      expect(esClient.count).toHaveBeenCalledWith(
+        { index: 'synthetics-*', ignore_unavailable: true, query: matchAll },
         { meta: true, context: { loggingOptions: { loggerName: 'synthetics' } } }
       );
     });
