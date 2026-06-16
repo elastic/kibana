@@ -18,52 +18,6 @@ const QUALITATIVE_EVALUATOR_NAME = 'Groundedness Analysis';
 const QUANTITATIVE_EVALUATOR_NAME = 'Groundedness';
 
 /**
- * Kibana's `server.maxPayload` in CI is ~1.6 MB. The groundedness evaluator
- * sends the full tool-call history as part of the `/internal/inference/prompt`
- * request body. For suites with large tool results (e.g. alerts-rag where
- * ES query results contain hundreds of alert documents), the serialized
- * history can exceed this limit, causing a 413 Payload Too Large.
- *
- * This helper truncates individual tool-call `results` entries that exceed
- * a per-result byte budget while preserving the structure the LLM needs
- * for groundedness verification. The overall serialized output is capped
- * at `maxTotalBytes` to stay safely under the payload limit.
- */
-const MAX_TOTAL_BYTES = 800_000; // ~800 KB leaves room for system prompt, user query, agent response
-const MAX_PER_RESULT_BYTES = 100_000; // 100 KB per individual tool result
-
-const truncateToolCallHistory = (steps: unknown[]): string => {
-  const truncated = steps.map((step: any) => {
-    if (!step?.results || !Array.isArray(step.results)) {
-      return step;
-    }
-
-    return {
-      ...step,
-      results: step.results.map((result: unknown) => {
-        const serialized = JSON.stringify(result);
-        if (serialized.length <= MAX_PER_RESULT_BYTES) {
-          return result;
-        }
-        return `[truncated: ${serialized.length} chars] ${serialized.slice(
-          0,
-          MAX_PER_RESULT_BYTES
-        )}`;
-      }),
-    };
-  });
-
-  let serialized = JSON.stringify(truncated);
-  if (serialized.length > MAX_TOTAL_BYTES) {
-    serialized = `${serialized.slice(
-      0,
-      MAX_TOTAL_BYTES
-    )}\n... [truncated at ${MAX_TOTAL_BYTES} chars]`;
-  }
-  return serialized;
-};
-
-/**
  * Avoiding cost and lantecy by running qualitative analysis only when either qualitative or quantitative evaluator for groundedness is selected,
  */
 function shouldRunGroundednessAnalysis() {
@@ -101,7 +55,7 @@ export function createGroundednessAnalysisEvaluator({
           input: {
             user_query: `${userQuery}`,
             agent_response: `${latestMessage}`,
-            tool_call_history: truncateToolCallHistory(steps),
+            tool_call_history: JSON.stringify(steps),
           },
           // toolChoice must be specified in the API call, as `createPrompt` currently discards it from the prompt definition
           toolChoice: {

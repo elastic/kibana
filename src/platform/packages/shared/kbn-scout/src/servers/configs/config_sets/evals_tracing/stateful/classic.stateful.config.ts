@@ -130,7 +130,18 @@ export const servers: ScoutServerConfig = {
         : {}),
     },
     serverArgs: [
-      ...defaultConfig.kbnTestServer.serverArgs,
+      // The groundedness / criteria LLM-as-judge evaluators POST the full
+      // tool-call history (the agent's retrieved evidence) to
+      // `/internal/inference/prompt` so the judge can verify the response
+      // against what was actually retrieved. RAG suites (e.g. alerts-rag,
+      // ~285 alert documents) produce histories far larger than the default
+      // scout `--server.maxPayload` (~1.6 MB), causing a 413 that aborts the
+      // eval. Raise the test-server ceiling well above any realistic history;
+      // the judge model's own context window is the effective upper bound.
+      ...defaultConfig.kbnTestServer.serverArgs.filter(
+        (arg) => !arg.startsWith('--server.maxPayload=')
+      ),
+      `--server.maxPayload=26214400`,
       ...(preconfiguredEisConnectorsArg ? [preconfiguredEisConnectorsArg] : []),
       ...(shouldEnableTracing
         ? [
