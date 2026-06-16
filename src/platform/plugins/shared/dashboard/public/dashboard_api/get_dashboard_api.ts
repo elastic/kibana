@@ -89,12 +89,9 @@ export function getDashboardApi({
   const childrenSubject$: BehaviorSubject<Observable<DashboardChildren>> = new BehaviorSubject(
     of({})
   );
-  const trackPanel = initializeTrackPanel(
-    async (id: string) => {
-      await layoutManager.api.getChildApi(id);
-    },
-    childrenSubject$.pipe(concatMap((children) => children))
-  );
+  const trackPanel = initializeTrackPanel(async (id: string) => {
+    await layoutManager.api.getChildApi(id);
+  }, childrenSubject$.pipe(concatMap((children) => children)));
 
   const layoutManager = initializeLayoutManager(
     viewModeManager,
