@@ -45,12 +45,14 @@ describe('getJobConfig', () => {
     expect(mockJobsFn).not.toHaveBeenCalled();
   });
 
-  it('calls the ML API with all jobIds joined', async () => {
-    mockJobsFn.mockResolvedValueOnce({ jobs: [] });
+  it('calls the ML API once per job ID', async () => {
+    mockJobsFn.mockResolvedValue({ jobs: [] });
 
     await getJobConfig({ jobIds: ['job-a', 'job-b'], logger, ml: mockMl, soClient });
 
-    expect(mockJobsFn).toHaveBeenCalledWith('job-a,job-b');
+    expect(mockJobsFn).toHaveBeenCalledTimes(2);
+    expect(mockJobsFn).toHaveBeenCalledWith('job-a');
+    expect(mockJobsFn).toHaveBeenCalledWith('job-b');
   });
 
   it('extracts baseline fields: sourceIndex, datafeedQuery, detectors, bucketSpanMs', async () => {
@@ -152,10 +154,10 @@ describe('getJobConfig', () => {
     expect(result.get('test-job')?.threatTechniques).toEqual(['UNKNOWN_TECHNIQUE']);
   });
 
-  it('returns entries for multiple jobs in a single call', async () => {
-    mockJobsFn.mockResolvedValueOnce({
-      jobs: [makeJob({ job_id: 'job-a' }), makeJob({ job_id: 'job-b' })],
-    });
+  it('returns entries for multiple jobs', async () => {
+    mockJobsFn
+      .mockResolvedValueOnce({ jobs: [makeJob({ job_id: 'job-a' })] })
+      .mockResolvedValueOnce({ jobs: [makeJob({ job_id: 'job-b' })] });
 
     const result = await getJobConfig({
       jobIds: ['job-a', 'job-b'],
@@ -167,15 +169,25 @@ describe('getJobConfig', () => {
     expect(result.size).toBe(2);
     expect(result.has('job-a')).toBe(true);
     expect(result.has('job-b')).toBe(true);
-    expect(mockJobsFn).toHaveBeenCalledTimes(1);
   });
 
-  it('logs an error and returns empty map when the ML call throws', async () => {
-    mockJobsFn.mockRejectedValueOnce(new Error('cluster unavailable'));
+  it('skips jobs that fail and returns the rest', async () => {
+    mockJobsFn
+      .mockResolvedValueOnce({ jobs: [makeJob({ job_id: 'job-a' })] })
+      .mockRejectedValueOnce(new Error('MLJobNotFound'));
+
+    const result = await getJobConfig({ jobIds: ['job-a', 'job-b'], logger, ml: mockMl, soClient });
+
+    expect(result.size).toBe(1);
+    expect(result.has('job-a')).toBe(true);
+  });
+
+  it('logs a debug message and returns empty map when all jobs fail', async () => {
+    mockJobsFn.mockRejectedValue(new Error('cluster unavailable'));
 
     const result = await getJobConfig({ jobIds: ['job-1'], logger, ml: mockMl, soClient });
 
     expect(result.size).toBe(0);
-    expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('cluster unavailable'));
+    expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('cluster unavailable'));
   });
 });

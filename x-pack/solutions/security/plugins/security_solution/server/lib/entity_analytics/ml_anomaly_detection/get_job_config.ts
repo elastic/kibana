@@ -53,11 +53,26 @@ export const getJobConfig = async ({
   if (!jobIds.length) return result;
 
   try {
-    const resp = await ml
-      .anomalyDetectorsProvider({} as KibanaRequest, soClient)
-      .jobs(jobIds.join(','));
+    const jobsSettled = await Promise.allSettled(
+      jobIds.map((jobId) =>
+        ml
+          .anomalyDetectorsProvider({} as KibanaRequest, soClient)
+          .jobs(jobId)
+          .then((resp) => resp.jobs ?? [])
+      )
+    );
 
-    const jobs = resp.jobs ?? [];
+    const jobs = jobsSettled.flatMap((r) => {
+      if (r.status === 'rejected') {
+        logger.debug(
+          `Failed to fetch job config: ${
+            r.reason instanceof Error ? r.reason.message : String(r.reason)
+          }`
+        );
+        return [];
+      }
+      return r.value;
+    });
 
     for (const job of jobs) {
       const bucketSpanStr = job.analysis_config?.bucket_span;
@@ -87,11 +102,7 @@ export const getJobConfig = async ({
       });
     }
   } catch (err) {
-    logger.error(
-      `Failed to get job info for jobs [${jobIds.join(', ')}]: ${
-        err instanceof Error ? err.message : String(err)
-      }`
-    );
+    logger.error(`Error fetching job configs: ${err instanceof Error ? err.message : String(err)}`);
   }
 
   return result;
