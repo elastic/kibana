@@ -5,16 +5,6 @@
  * 2.0.
  */
 
-export { MaxPrimaryShardSizeField } from './max_primary_shard_size_field';
-
-export { MaxPrimaryShardDocsField } from './max_primary_shard_docs_field';
-
-export { MaxAgeField } from './max_age_field';
-
-export { MaxDocumentCountField } from './max_document_count_field';
-
-export { MaxIndexSizeField } from './max_index_size_field';
-
 export {
   RolloverFields,
   RolloverRestrictionFields,
