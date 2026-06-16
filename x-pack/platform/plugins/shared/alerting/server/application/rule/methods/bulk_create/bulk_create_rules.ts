@@ -368,7 +368,7 @@ async function runBatch<Params extends RuleParams>({
     );
   }
 
-  // Phase B4: bulk SO create (no overwrite — id collisions surface as per-row 409).
+  // Phase B3: bulk SO create (no overwrite — id collisions surface as per-row 409).
   const bulkObjects: Array<SavedObjectsBulkCreateObject<RawRule>> = [...preparedRules.values()].map(
     (prepared) => ({
       type: RULE_SAVED_OBJECT_TYPE,
@@ -409,7 +409,7 @@ async function runBatch<Params extends RuleParams>({
     return { successfulIds: [], errors };
   }
 
-  // Phase B4 per-row outcomes.
+  // Phase B3 per-row outcomes.
   const createTime = Date.now();
   const batchSuccessfulIds: string[] = [];
   const taskIdsToCleanUp: string[] = [];
