@@ -33,10 +33,7 @@ describe('useConnectorUsedByAgents', () => {
   };
 
   it('excludes the current agent from results', () => {
-    const { result } = setup('c1', 'agent-1', [
-      agent('agent-1', ['c1']),
-      agent('agent-2', ['c1']),
-    ]);
+    const { result } = setup('c1', 'agent-1', [agent('agent-1', ['c1']), agent('agent-2', ['c1'])]);
     expect(result.current.usedByAgents.map((a) => a.id)).toEqual(['agent-2']);
   });
 
@@ -49,10 +46,7 @@ describe('useConnectorUsedByAgents', () => {
   });
 
   it('includes agents with connector_ids === null (means all connectors)', () => {
-    const { result } = setup('c1', 'agent-1', [
-      agent('agent-1', ['c1']),
-      agent('agent-2', null),
-    ]);
+    const { result } = setup('c1', 'agent-1', [agent('agent-1', ['c1']), agent('agent-2', null)]);
     expect(result.current.usedByAgents.map((a) => a.id)).toEqual(['agent-2']);
   });
 
