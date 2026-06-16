@@ -20,7 +20,7 @@ import type { PresentationUtilPluginSetup } from '@kbn/presentation-util-plugin/
 import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { UiActionsPublicSetup } from '@kbn/ui-actions-plugin/public/plugin';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
+import type { VisualizationClient, VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 
 import type { LinksEmbeddableState } from '../common';
 import { APP_ICON, APP_NAME, LINKS_EMBEDDABLE_TYPE, LINKS_LIBRARY_TYPE } from '../common';
@@ -78,52 +78,74 @@ export class LinksPlugin
       return transformOut;
     });
 
-    import('./links_client').then(({ getLinksClient }) =>
-      plugins.visualizations.registerAlias({
-        disableCreate: true, // do not allow creation through visualization listing page
-        name: LINKS_LIBRARY_TYPE,
-        title: APP_NAME,
-        icon: APP_ICON,
-        description: i18n.translate('links.description', {
-          defaultMessage: 'Use links to navigate to commonly used dashboards and websites.',
-        }),
-        stage: 'production',
-        appExtensions: {
-          visualizations: {
-            docTypes: [LINKS_LIBRARY_TYPE],
-            searchFields: ['title^3'],
-            client: getLinksClient,
-            toListItem(
-              linkItem: Omit<SOWithMetadata<LinksState>, 'attributes'> & {
-                attributes: { title: string; description?: string };
-              }
-            ) {
-              const { id, type, updatedAt, attributes } = linkItem;
-              const { title, description } = attributes;
+    plugins.visualizations.registerAlias({
+      disableCreate: true, // do not allow creation through visualization listing page
+      name: LINKS_LIBRARY_TYPE,
+      title: APP_NAME,
+      icon: APP_ICON,
+      description: i18n.translate('links.description', {
+        defaultMessage: 'Use links to navigate to commonly used dashboards and websites.',
+      }),
+      stage: 'production',
+      appExtensions: {
+        visualizations: {
+          docTypes: [LINKS_LIBRARY_TYPE],
+          searchFields: ['title^3'],
+          client: () =>
+            /**
+             * Avoid async importing in the plugin by creating wrappers for each
+             * function in the client
+             */
+            ({
+              get: async (id) => {
+                const { getLinksClient } = await import('./links_client');
+                return getLinksClient().get(id);
+              },
+              create: async (request) => {
+                const { getLinksClient } = await import('./links_client');
+                return await getLinksClient().create(request);
+              },
+              update: async (request) => {
+                const { getLinksClient } = await import('./links_client');
+                return await getLinksClient().update(request);
+              },
+              delete: async (request) => {
+                const { getLinksClient } = await import('./links_client');
+                return await getLinksClient().delete(request);
+              },
+              search: async (request) => {
+                const { getLinksClient } = await import('./links_client');
+                return await getLinksClient().search(request);
+              },
+            } as VisualizationClient<typeof LINKS_LIBRARY_TYPE, LinksState>),
+          toListItem(
+            linkItem: Omit<SOWithMetadata<LinksState>, 'attributes'> & {
+              attributes: { title: string; description?: string };
+            }
+          ) {
+            const { id, type, updatedAt, attributes } = linkItem;
+            const { title, description } = attributes;
 
-              return {
-                id,
-                title,
-                editor: {
-                  onEdit: async (refId: string) => {
-                    const { onVisualizationsEdit } = await import(
-                      './editor/on_visualizations_edit'
-                    );
-                    onVisualizationsEdit(refId);
-                  },
+            return {
+              id,
+              title,
+              editor: {
+                onEdit: async (refId: string) => {
+                  const { onVisualizationsEdit } = await import('./editor/on_visualizations_edit');
+                  onVisualizationsEdit(refId);
                 },
-                description,
-                updatedAt,
-                icon: APP_ICON,
-                typeTitle: APP_NAME,
-                stage: 'production',
-                savedObjectType: type,
-              };
-            },
+              },
+              description,
+              updatedAt,
+              icon: APP_ICON,
+              typeTitle: APP_NAME,
+              stage: 'production',
+              savedObjectType: type,
+            };
           },
         },
-      })
-    );
+      },
+    });
 
     plugins.uiActions.addTriggerActionAsync(
       ADD_PANEL_TRIGGER,
