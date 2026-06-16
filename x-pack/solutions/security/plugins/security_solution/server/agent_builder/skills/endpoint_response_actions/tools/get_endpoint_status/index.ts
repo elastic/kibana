@@ -61,7 +61,7 @@ export const getEndpointStatusTool = (
         const agentClient = fleetServices.agent;
         const agents = await agentClient.listAgents({
           showInactive: true,
-          kuery: `host.name: ${hostName}`,
+          kuery: `local_metadata.host.name: ${hostName}`,
           page: 1,
           perPage: 1,
         });
