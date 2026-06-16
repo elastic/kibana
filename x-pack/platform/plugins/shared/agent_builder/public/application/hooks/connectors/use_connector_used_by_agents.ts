@@ -22,6 +22,8 @@ export const useConnectorUsedByAgents = ({
       agents.filter(
         (agent) =>
           agent.id !== currentAgentId &&
+          // connector_ids === undefined means "all connectors" (backward-compat default):
+          // the agent has access to every connector, so this connector is included.
           (agent.configuration?.connector_ids === undefined ||
             agent.configuration?.connector_ids === null ||
             agent.configuration.connector_ids.includes(connectorId))

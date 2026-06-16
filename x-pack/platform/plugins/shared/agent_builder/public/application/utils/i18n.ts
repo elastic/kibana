@@ -1609,12 +1609,6 @@ export const labels = {
         defaultMessage: 'Sub-actions ({count} available)',
         values: { count },
       }),
-    noSubActionsMessage: i18n.translate(
-      'xpack.agentBuilder.agentConnectors.detail.noSubActionsMessage',
-      {
-        defaultMessage: 'No sub-actions available for this connector.',
-      }
-    ),
     connectionSectionTitle: i18n.translate(
       'xpack.agentBuilder.agentConnectors.detail.connectionSectionTitle',
       { defaultMessage: 'Connection' }
@@ -1654,6 +1648,10 @@ export const labels = {
     notUsedByOtherAgents: i18n.translate(
       'xpack.agentBuilder.agentConnectors.detail.notUsedByOtherAgents',
       { defaultMessage: 'Not used by other agents' }
+    ),
+    usedByLoadError: i18n.translate(
+      'xpack.agentBuilder.agentConnectors.detail.usedByLoadError',
+      { defaultMessage: 'Failed to load agents' }
     ),
   },
   agentTools: {

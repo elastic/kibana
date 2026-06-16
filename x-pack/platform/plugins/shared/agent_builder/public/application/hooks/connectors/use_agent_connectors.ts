@@ -73,7 +73,7 @@ export const useAgentConnectors = ({ agentId }: { agentId: string }) => {
   });
 
   const assign = useCallback(
-    (connector: ConnectorItem) => {
+    (connector: Pick<ConnectorItem, 'id' | 'name'>) => {
       const currentIds = getCurrentConnectorIds();
       if (currentIds.includes(connector.id)) return;
       updateConnectorsMutation.mutate([...currentIds, connector.id], {

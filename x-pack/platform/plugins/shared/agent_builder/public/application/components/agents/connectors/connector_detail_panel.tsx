@@ -11,6 +11,7 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHealth,
   EuiLink,
   EuiLoadingSpinner,
   EuiSpacer,
@@ -40,39 +41,39 @@ interface ConnectorDetailPanelProps {
 
 const SubActionsSection: React.FC<{ connector: ConnectorItem }> = ({ connector }) => {
   const { euiTheme } = useEuiTheme();
-  const tools = connector.tools ?? [];
+  const { subActions } = connector;
+
+  if (subActions.length === 0) {
+    throw new Error(
+      `Connector ${connector.actionTypeId} has no sub-actions — connectors must have at least one isTool action to appear here`
+    );
+  }
 
   return (
     <div>
       <EuiTitle size="xxs">
-        <h3>{labels.agentConnectors.subActionsSectionTitle(tools.length)}</h3>
+        <h3>{labels.agentConnectors.subActionsSectionTitle(subActions.length)}</h3>
       </EuiTitle>
       <EuiSpacer size="s" />
-      {tools.length === 0 ? (
-        <EuiText size="s" color="subdued">
-          {labels.agentConnectors.noSubActionsMessage}
-        </EuiText>
-      ) : (
-        <ul
-          css={css`
-            margin: 0;
-            padding-left: ${euiTheme.size.m};
-          `}
-        >
-          {tools.map((tool) => (
-            <li key={tool.name}>
-              <EuiText size="s">
-                <strong>{tool.name}</strong>
+      <ul
+        css={css`
+          margin: 0;
+          padding-left: ${euiTheme.size.m};
+        `}
+      >
+        {subActions.map((subAction) => (
+          <li key={subAction.name}>
+            <EuiText size="s">
+              <strong>{subAction.name}</strong>
+            </EuiText>
+            {subAction.description && (
+              <EuiText size="xs" color="subdued">
+                {subAction.description}
               </EuiText>
-              {tool.description && (
-                <EuiText size="xs" color="subdued">
-                  {tool.description}
-                </EuiText>
-              )}
-            </li>
-          ))}
-        </ul>
-      )}
+            )}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 };
@@ -107,7 +108,7 @@ const ConnectionSection: React.FC<{ connector: ConnectorItem }> = ({ connector }
   const isOAuthConnected = isOAuth && connector.oauthStatus === OAUTH_STATUS.AUTHORIZED;
   const isOAuthDisconnected = isOAuth && connector.oauthStatus === OAUTH_STATUS.DISCONNECTED;
 
-  let statusColor: 'success' | 'warning' | 'danger' = 'success';
+  let statusColor: 'success' | 'warning' | 'danger';
   let statusText: string;
 
   if (connector.isMissingSecrets) {
@@ -120,6 +121,8 @@ const ConnectionSection: React.FC<{ connector: ConnectorItem }> = ({ connector }
     statusColor = 'success';
     statusText = labels.agentConnectors.oauthConnectedStatus;
   } else {
+    // authMode === 'shared' or undefined (e.g. API key auth) — credentials are shared
+    // across all Kibana users of this connector, as opposed to per-user OAuth tokens.
     statusColor = 'success';
     statusText = labels.agentConnectors.sharedCredentialsStatus;
   }
@@ -133,13 +136,7 @@ const ConnectionSection: React.FC<{ connector: ConnectorItem }> = ({ connector }
         <h3>{labels.agentConnectors.connectionSectionTitle}</h3>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiText size="s" color={statusColor}>
-            <strong>● {statusText}</strong>
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiHealth color={statusColor}>{statusText}</EuiHealth>
       {accountEmail && (
         <EuiText size="xs" color="subdued">
           {accountEmail}
@@ -148,7 +145,7 @@ const ConnectionSection: React.FC<{ connector: ConnectorItem }> = ({ connector }
       {isOAuth && (
         <>
           <EuiSpacer size="s" />
-          <EuiButton size="s" onClick={() => reauthenticate()}>
+          <EuiButton size="s" onClick={reauthenticate}>
             {isOAuthConnected
               ? labels.agentConnectors.reauthenticateLink
               : labels.agentConnectors.authenticateLink}
@@ -177,7 +174,11 @@ const UsedBySection: React.FC<{ connector: ConnectorItem; agentId: string }> = (
       <EuiSpacer size="s" />
       {isLoading ? (
         <EuiLoadingSpinner size="s" />
-      ) : error ? null : usedByAgents.length === 0 ? (
+      ) : error ? (
+        <EuiText size="s" color="subdued">
+          {labels.agentConnectors.usedByLoadError}
+        </EuiText>
+      ) : usedByAgents.length === 0 ? (
         <EuiText size="s" color="subdued">
           {labels.agentConnectors.notUsedByOtherAgents}
         </EuiText>
