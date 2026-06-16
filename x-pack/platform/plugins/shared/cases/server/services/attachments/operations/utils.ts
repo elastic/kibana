@@ -40,13 +40,11 @@ export function transformAttributesForMode({
   const attachmentType = getAttachmentTypeFromAttributes(attributes);
   const owner = attributes?.owner ?? '';
   const transformer = getAttachmentTypeTransformers(attachmentType, owner);
+  // Unified-only attachment types (no legacy counterpart, e.g. entity/timeline)
+  // cannot be represented in the legacy schema and must stay in unified mode.
+  const isUnifiedOnly = isUnifiedOnlyAttachmentType(attachmentType, owner);
 
-  // Unified-only attachment types (no legacy counterpart, e.g. `security.entity`)
-  // cannot be represented in the legacy schema. Always keep them unified so the
-  // legacy decode path doesn't reject them.
-  const unifiedOnly = isUnifiedOnlyAttachmentType(attachmentType, owner);
-
-  if ((mode === 'unified' || unifiedOnly) && isMigratedAttachmentType(attachmentType, owner)) {
+  if ((mode === 'unified' || isUnifiedOnly) && isMigratedAttachmentType(attachmentType, owner)) {
     const unifiedAttrs = transformer.toUnifiedSchema(attributes);
     const validatedAttributes = decodeOrThrow(UnifiedAttachmentAttributesRt)(unifiedAttrs);
     return { isUnified: true, attributes: validatedAttributes };

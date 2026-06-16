@@ -12,6 +12,7 @@ import { getEndpointAttachmentType } from './endpoint';
 import { getEventAttachmentType } from './event';
 import { getIndicatorAttachmentType } from './indicator';
 import { getEntityAttachmentType } from './entity';
+import { getTimelineAttachmentType } from './timeline';
 
 export const registerCaseAttachments = (
   attachmentFramework: CasesServerSetup['attachmentFramework'],
@@ -20,8 +21,8 @@ export const registerCaseAttachments = (
   attachmentFramework.registerUnified(getEndpointAttachmentType());
   attachmentFramework.registerUnified(getEventAttachmentType());
   attachmentFramework.registerUnified(getIndicatorAttachmentType());
-
   if (experimentalFeatures.entityAttachmentsEnabled) {
     attachmentFramework.registerUnified(getEntityAttachmentType());
   }
+  attachmentFramework.registerUnified(getTimelineAttachmentType());
 };

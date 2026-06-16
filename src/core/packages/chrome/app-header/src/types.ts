@@ -12,7 +12,15 @@ import type {
   AppHeaderBadge as CoreAppHeaderBadge,
   AppHeaderBadgeItem as CoreAppHeaderBadgeItem,
   AppHeaderConfig as CoreAppHeaderConfig,
+  AppHeaderEditableTitle as CoreAppHeaderEditableTitle,
+  AppHeaderMetadataButtonItem as CoreAppHeaderMetadataButtonItem,
+  AppHeaderMetadataHealthItem as CoreAppHeaderMetadataHealthItem,
+  AppHeaderMetadataItem as CoreAppHeaderMetadataItem,
+  AppHeaderMetadataItems as CoreAppHeaderMetadataItems,
+  AppHeaderMetadataTextItem as CoreAppHeaderMetadataTextItem,
   AppHeaderTab as CoreAppHeaderTab,
+  AppHeaderTitle as CoreAppHeaderTitle,
+  AppHeaderTitleSaveResult as CoreAppHeaderTitleSaveResult,
 } from '@kbn/core-chrome-browser';
 
 export type AppHeaderMenu = AppMenuConfig;
@@ -20,7 +28,15 @@ export type AppHeaderBack = CoreAppHeaderBack;
 export type AppHeaderBadge = CoreAppHeaderBadge;
 export type AppHeaderBadgeItem = CoreAppHeaderBadgeItem;
 export type AppHeaderConfig = CoreAppHeaderConfig;
+export type AppHeaderEditableTitle = CoreAppHeaderEditableTitle;
+export type AppHeaderMetadataButtonItem = CoreAppHeaderMetadataButtonItem;
+export type AppHeaderMetadataHealthItem = CoreAppHeaderMetadataHealthItem;
+export type AppHeaderMetadataItem = CoreAppHeaderMetadataItem;
+export type AppHeaderMetadataItems = CoreAppHeaderMetadataItems;
+export type AppHeaderMetadataTextItem = CoreAppHeaderMetadataTextItem;
 export type AppHeaderTab = CoreAppHeaderTab;
+export type AppHeaderTitle = CoreAppHeaderTitle;
+export type AppHeaderTitleSaveResult = CoreAppHeaderTitleSaveResult;
 
 export type AppHeaderPadding =
   | 'none'

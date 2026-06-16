@@ -29,8 +29,8 @@ export const isMigratedAttachmentType = (type: string, owner: string): boolean =
  * counterpart). These attachments can only be persisted/read in the unified
  * shape and must not be coerced through the legacy decode path.
  */
-export const isUnifiedOnlyAttachmentType = (type: string, owner: string): boolean => {
-  const unifiedType = toUnifiedAttachmentType(type, owner);
+export const isUnifiedOnlyAttachmentType = (type: string, owner?: string): boolean => {
+  const unifiedType = toUnifiedAttachmentType(type, owner ?? '');
   if (!MIGRATED_ATTACHMENT_TYPES.has(unifiedType)) {
     return false;
   }

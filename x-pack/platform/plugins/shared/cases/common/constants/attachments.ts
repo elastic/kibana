@@ -24,6 +24,7 @@ export const INDICATOR_ATTACHMENT_TYPE = 'security.indicator';
 // POC (entityAttachmentsEnabled): Entity Analytics -> Cases bridge. New unified-only
 // type with no legacy v1 equivalent, so it is intentionally absent from the legacy maps.
 export const SECURITY_ENTITY_ATTACHMENT_TYPE = 'security.entity';
+export const SECURITY_TIMELINE_ATTACHMENT_TYPE = 'security.timeline';
 
 export const ML_ANOMALY_SWIMLANE_ATTACHMENT_TYPE = 'ml.anomaly_swimlane';
 export const ML_ANOMALY_CHARTS_ATTACHMENT_TYPE = 'ml.anomaly_charts';
@@ -82,6 +83,7 @@ export const UNIFIED_ATTACHMENT_TYPES = new Set([
   OSQUERY_ATTACHMENT_TYPE,
   INDICATOR_ATTACHMENT_TYPE,
   SECURITY_ENTITY_ATTACHMENT_TYPE,
+  SECURITY_TIMELINE_ATTACHMENT_TYPE,
 ]);
 
 export const PERSISTABLE_STATE_LEGACY_TO_UNIFIED_MAP: Record<string, string> = {
@@ -112,6 +114,8 @@ export const PERSISTABLE_ATTACHMENT_TYPES = new Set<string>(
  */
 export const LEGACY_TO_UNIFIED_MAP: Record<string, string> = {
   [LEGACY_USER_TYPE]: COMMENT_ATTACHMENT_TYPE,
+  // Note: `actions` is folded into `security.endpoint`
+  [LEGACY_ACTIONS_TYPE]: SECURITY_ENDPOINT_ATTACHMENT_TYPE,
 } as const;
 
 /**
@@ -153,6 +157,7 @@ export const MIGRATED_ATTACHMENT_TYPES = new Set<string>([
   OSQUERY_ATTACHMENT_TYPE,
   INDICATOR_ATTACHMENT_TYPE,
   SECURITY_ENTITY_ATTACHMENT_TYPE,
+  SECURITY_TIMELINE_ATTACHMENT_TYPE,
   ...PERSISTABLE_ATTACHMENT_TYPES,
 ]);
 

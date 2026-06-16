@@ -1,7 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`buildLogPaginationCursorProbeEsql sorts ASC, limits, then aggregates MAX(timestamp) and COUNT(*) 1`] = `
-"FROM logs-*
+"SET unmapped_fields=\\"nullify\\";
+FROM logs-*
   | WHERE
       @timestamp >= TO_DATETIME(\\"2024-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2024-01-02T00:00:00.000Z\\")
