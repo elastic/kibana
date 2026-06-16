@@ -12,14 +12,16 @@ import { omit } from 'lodash';
 import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '@kbn/dashboard-navigation-options-common';
 import { DEFAULT_EXTERNAL_LINK_OPTIONS, LINKS_API_PATH } from '../../common/constants';
 import type { LinksCreateRequestBody, LinksCreateResponseBody } from './create';
-import { LINKS_CREATE_DESCRIPTION } from './create/register_create_route';
-import { LINKS_DELETE_DESCRIPTION } from './delete/register_delete_route';
 import type { LinksReadResponseBody } from './read';
-import { LINKS_READ_DESCRIPTION } from './read/register_read_route';
 import type { LinksSearchResponseBody } from './search';
-import { LINKS_SEARCH_DESCRIPTION } from './search/register_search_route';
 import type { LinksUpdateRequestBody, LinksUpdateResponseBody } from './update';
-import { LINKS_UPDATE_DESCRIPTION } from './update/register_update_route';
+import {
+  LINKS_CREATE_DESCRIPTION,
+  LINKS_DELETE_DESCRIPTION,
+  LINKS_READ_DESCRIPTION,
+  LINKS_SEARCH_DESCRIPTION,
+  LINKS_UPDATE_DESCRIPTION,
+} from './constants';
 
 // ---------------------------------------------------------------------------
 // Create route

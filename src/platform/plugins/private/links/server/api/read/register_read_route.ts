@@ -12,13 +12,10 @@ import { schema } from '@kbn/config-schema';
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { LINKS_API_PATH, PUBLIC_API_VERSION } from '../../../common/constants';
-import { commonRouteConfig, LINKS_ID_DESCRIPTION } from '../constants';
+import { commonRouteConfig, LINKS_ID_DESCRIPTION, LINKS_READ_DESCRIPTION } from '../constants';
 import { readLinksOASOperationObject } from '../oas_examples';
 import { read } from './read';
 import { readResponseBodySchema } from './schemas';
-
-export const LINKS_READ_DESCRIPTION =
-  'Returns the complete state of a links library item by ID.' as const;
 
 export function registerReadRoute(router: VersionedRouter<RequestHandlerContext>) {
   const readRoute = router.get({

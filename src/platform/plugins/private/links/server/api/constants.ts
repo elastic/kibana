@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { LINKS_API_PATH } from '../../common/constants';
+
 export const commonRouteConfig = {
   access: 'public',
   enableQueryVersion: true,
@@ -29,3 +31,21 @@ export const commonRouteConfig = {
 
 export const LINKS_ID_DESCRIPTION =
   'The unique ID of the links library item, as returned by the create or search endpoints.' as const;
+
+export const LINKS_CREATE_DESCRIPTION =
+  'Creates a new links library item and returns its ID, full state, and metadata.' as const;
+
+export const LINKS_DELETE_DESCRIPTION = 'Permanently deletes a links library item by ID.' as const;
+
+export const LINKS_READ_DESCRIPTION =
+  'Returns the complete state of a links library item by ID.' as const;
+
+export const LINKS_SEARCH_DESCRIPTION =
+  `Returns a paginated list of links library items. Each result includes title, description, and metadata, but not the content. ` +
+  `Use \`GET ${LINKS_API_PATH}/{id}\` to retrieve the complete state.`;
+
+export const LINKS_UPDATE_DESCRIPTION =
+  `Replaces the full state of a links library item. Partial updates are not supported.
+To make incremental changes, retrieve the item first, modify the fields you need, then send the complete object back.
+
+If no item exists with the specified ID, a new one is created.` as const;

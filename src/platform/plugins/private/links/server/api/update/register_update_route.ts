@@ -13,16 +13,10 @@ import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
 
 import { LINKS_API_PATH, PUBLIC_API_VERSION } from '../../../common/constants';
-import { commonRouteConfig } from '../constants';
+import { commonRouteConfig, LINKS_UPDATE_DESCRIPTION } from '../constants';
 import { updateRequestBodySchema, updateResponseBodySchema } from './schemas';
 import { update } from './update';
 import { updateLinksOASOperationObject } from '../oas_examples';
-
-export const LINKS_UPDATE_DESCRIPTION =
-  `Replaces the full state of a links library item. Partial updates are not supported.
-To make incremental changes, retrieve the item first, modify the fields you need, then send the complete object back.
-
-If no item exists with the specified ID, a new one is created.` as const;
 
 export function registerUpdateRoute(router: VersionedRouter<RequestHandlerContext>) {
   const updateRoute = router.put({

@@ -11,13 +11,10 @@ import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
 
 import { LINKS_API_PATH, PUBLIC_API_VERSION } from '../../../common/constants';
-import { commonRouteConfig } from '../constants';
+import { commonRouteConfig, LINKS_CREATE_DESCRIPTION } from '../constants';
 import { createLinksOASOperationObject } from '../oas_examples';
 import { create } from './create';
 import { createRequestBodySchema, createResponseBodySchema } from './schemas';
-
-export const LINKS_CREATE_DESCRIPTION =
-  'Creates a new links library item and returns its ID, full state, and metadata.' as const;
 
 export function registerCreateRoute(router: VersionedRouter<RequestHandlerContext>) {
   const createRoute = router.post({
