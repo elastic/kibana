@@ -3795,6 +3795,92 @@ describe('Task Runner', () => {
     );
   });
 
+  test('should call clearSnoozedStatusForAlerts for condition-expired instances', async () => {
+    const conditionSnooze = {
+      instanceId: 'alert-1',
+      snoozedAt: '1969-12-01T00:00:00.000Z',
+      snoozedBy: 'user',
+      conditions: [{ type: 'field_change' as const, field: 'kibana.alert.severity' }],
+      snoozeSnapshot: { 'kibana.alert.severity': 'critical' },
+    };
+    const rawRuleSOWithSnooze: SavedObject<RawRule> = {
+      ...mockedRawRuleSO,
+      attributes: {
+        ...mockedRawRuleSO.attributes,
+        enabled: true,
+        snoozedInstances: [conditionSnooze],
+      },
+    };
+
+    // Current severity ('high') differs from snapshot ('critical') → condition met
+    alertsClient.getBuiltActiveAlertDataByInstanceId.mockImplementation((instanceId: string) =>
+      instanceId === 'alert-1' ? { 'kibana.alert.severity': 'high' } : undefined
+    );
+    alertsClient.getRawAlertInstancesForState.mockReturnValue({
+      rawActiveAlerts: {},
+      rawRecoveredAlerts: {},
+    });
+    alertsService.createAlertsClient.mockImplementation(() => alertsClient);
+
+    const taskRunner = new TaskRunner({
+      ruleType,
+      taskInstance: mockedTaskInstance,
+      context: taskRunnerFactoryInitializerParams,
+      inMemoryMetrics,
+      internalSavedObjectsRepository,
+    });
+
+    mockGetRuleFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(rawRuleSOWithSnooze);
+
+    await taskRunner.run();
+
+    expect(alertsClient.clearSnoozedStatusForAlerts).toHaveBeenCalledWith(['alert-1']);
+  });
+
+  test('should NOT call clearSnoozedStatusForAlerts when field_change condition is not met', async () => {
+    const conditionSnooze = {
+      instanceId: 'alert-1',
+      snoozedAt: '1969-12-01T00:00:00.000Z',
+      snoozedBy: 'user',
+      conditions: [{ type: 'field_change' as const, field: 'kibana.alert.severity' }],
+      snoozeSnapshot: { 'kibana.alert.severity': 'critical' },
+    };
+    const rawRuleSOWithSnooze: SavedObject<RawRule> = {
+      ...mockedRawRuleSO,
+      attributes: {
+        ...mockedRawRuleSO.attributes,
+        enabled: true,
+        snoozedInstances: [conditionSnooze],
+      },
+    };
+
+    // Current severity matches snapshot → condition NOT met
+    alertsClient.getBuiltActiveAlertDataByInstanceId.mockImplementation((instanceId: string) =>
+      instanceId === 'alert-1' ? { 'kibana.alert.severity': 'critical' } : undefined
+    );
+    alertsClient.getRawAlertInstancesForState.mockReturnValue({
+      rawActiveAlerts: {},
+      rawRecoveredAlerts: {},
+    });
+    alertsService.createAlertsClient.mockImplementation(() => alertsClient);
+
+    const taskRunner = new TaskRunner({
+      ruleType,
+      taskInstance: mockedTaskInstance,
+      context: taskRunnerFactoryInitializerParams,
+      inMemoryMetrics,
+      internalSavedObjectsRepository,
+    });
+
+    mockGetRuleFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(rawRuleSOWithSnooze);
+
+    await taskRunner.run();
+
+    expect(alertsClient.clearSnoozedStatusForAlerts).not.toHaveBeenCalled();
+  });
+
   test('should NOT call the atomic remove script when field_change condition is not met', async () => {
     const conditionSnooze = {
       instanceId: 'alert-1',
