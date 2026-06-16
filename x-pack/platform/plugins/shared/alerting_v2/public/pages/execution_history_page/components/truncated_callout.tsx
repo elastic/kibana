@@ -1,6 +1,6 @@
 import React from "react";
 import { EuiCallOut, EuiSpacer } from "@elastic/eui";
-import { SearchMatchCounts } from "@kbn/alerting-v2-schemas";
+import type { SearchMatchCounts } from "@kbn/alerting-v2-schemas";
 import { i18n } from "@kbn/i18n";
 
 type TruncatedType = 'policies' | 'rules';
