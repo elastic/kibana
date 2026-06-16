@@ -97,7 +97,7 @@ export const OtelInstrumentationStep: React.FC = () => {
       <EuiSwitch
         label={i18n.translate(
           'xpack.observability_onboarding.kubernetes.otelInstrumentation.switchLabel',
-          { defaultMessage: 'Instrument my application' }
+          { defaultMessage: 'Instrument application (Optional)' }
         )}
         checked={isInstrumentationEnabled}
         onChange={(event) => setIsInstrumentationEnabled(event.target.checked)}
@@ -159,14 +159,13 @@ export const OtelInstrumentationStep: React.FC = () => {
           </EuiFlexGroup>
           <EuiSpacer />
           {annotationMode === 'pods' ? (
-            <>
-              <EuiCodeBlock
-                paddingSize="m"
-                language="yaml"
-                isCopyable={true}
-                data-test-subj="observabilityOnboardingKubernetesOtelInstrumentationPodsSnippet"
-              >
-                {`apiVersion: apps/v1
+            <EuiCodeBlock
+              paddingSize="m"
+              language="yaml"
+              isCopyable={true}
+              data-test-subj="observabilityOnboardingKubernetesOtelInstrumentationPodsSnippet"
+            >
+              {`apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: myapp
@@ -182,34 +181,41 @@ spec:
       - image: myapplication-image
         name: app
       ...`}
-              </EuiCodeBlock>
-              <EuiSpacer />
-              <EuiCodeBlock
-                paddingSize="m"
-                language="bash"
-                isCopyable={true}
-                data-test-subj="observabilityOnboardingKubernetesOtelInstrumentationRestartCommand"
-              >
-                {`kubectl rollout restart deployment myapp -n my-namespace
-
-kubectl describe pod <myapp-pod-name> -n my-namespace`}
-              </EuiCodeBlock>
-            </>
+            </EuiCodeBlock>
           ) : (
             <EuiCodeBlock
               paddingSize="m"
-              language="yaml"
+              language="bash"
               isCopyable={true}
               data-test-subj="observabilityOnboardingKubernetesOtelInstrumentationNamespaceSnippet"
             >
-              {`apiVersion: v1
-kind: Namespace
-metadata:
-  name: my-namespace
-  annotations:
-    instrumentation.opentelemetry.io/inject-${languageId}: "${OTEL_STACK_NAMESPACE}/elastic-instrumentation"`}
+              {`kubectl annotate namespace my-namespace instrumentation.opentelemetry.io/inject-${languageId}="${OTEL_STACK_NAMESPACE}/elastic-instrumentation"`}
             </EuiCodeBlock>
           )}
+          <EuiSpacer />
+          <EuiText size="s">
+            <p>
+              <strong>
+                {i18n.translate(
+                  'xpack.observability_onboarding.kubernetes.otelInstrumentation.applyManifestAndRestartLabel',
+                  {
+                    defaultMessage: 'Apply your updated manifest and restart the deployment:',
+                  }
+                )}
+              </strong>
+            </p>
+          </EuiText>
+          <EuiSpacer size="s" />
+          <EuiCodeBlock
+            paddingSize="m"
+            language="bash"
+            isCopyable={true}
+            data-test-subj="observabilityOnboardingKubernetesOtelInstrumentationRestartCommand"
+          >
+            {`kubectl rollout restart deployment myapp -n my-namespace
+
+kubectl describe pod <myapp-pod-name> -n my-namespace`}
+          </EuiCodeBlock>
         </>
       ) : null}
     </>

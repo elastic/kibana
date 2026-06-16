@@ -109,20 +109,19 @@ const ManagedExistingCollectorContent: React.FC<{
         <p>
           <FormattedMessage
             id="xpack.observability_onboarding.kubernetes.collectorSetup.managedExistingCollectorDescription"
-            defaultMessage="Add the following OTLP exporter to your collector config. Ensure your receivers include {k8sCluster}, {kubeletstats}, {hostmetrics}, {fileLog}, {prometheus}, and OTLP where applicable for full Kubernetes observability."
+            defaultMessage="Add the following OTLP exporter and resource processor to your collector config. Ensure your receivers include {k8sCluster}, {kubeletstats}, {hostmetrics}, {fileLog}, and OTLP where applicable for full Kubernetes observability."
             values={{
               k8sCluster: <EuiCode>k8s_cluster</EuiCode>,
               kubeletstats: <EuiCode>kubeletstats</EuiCode>,
               hostmetrics: <EuiCode>hostmetrics</EuiCode>,
               fileLog: <EuiCode>file_log</EuiCode>,
-              prometheus: <EuiCode>prometheus</EuiCode>,
             }}
           />
         </p>
         <p>
           <FormattedMessage
             id="xpack.observability_onboarding.kubernetes.collectorSetup.managedExistingCollectorOnboardingIdDescription"
-            defaultMessage="The {processor} processor sets {onboardingId} so Kibana can confirm data from this onboarding flow."
+            defaultMessage="Add the processor to each active logs, metrics, and traces pipeline. The {processor} processor sets {onboardingId} so Kibana can confirm data from this onboarding flow."
             values={{
               processor: <EuiCode>resource/onboarding_id</EuiCode>,
               onboardingId: <EuiCode>onboarding.id</EuiCode>,
@@ -174,7 +173,7 @@ const NonManagedExistingCollectorContent: React.FC = () => (
       <p>
         <FormattedMessage
           id="xpack.observability_onboarding.kubernetes.collectorSetup.nonManagedExistingCollectorOnboardingIdDescription"
-          defaultMessage="If you adapt those configurations and want the loading indicator to confirm new data, add the same {onboardingId} resource attribute on logs and metrics for this flow."
+          defaultMessage="Kibana can only confirm data from this onboarding flow when telemetry includes the {onboardingId} resource attribute on logs and metrics."
           values={{ onboardingId: <EuiCode>onboarding.id</EuiCode> }}
         />
       </p>

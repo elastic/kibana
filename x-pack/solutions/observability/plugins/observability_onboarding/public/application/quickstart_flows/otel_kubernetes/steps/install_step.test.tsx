@@ -69,4 +69,14 @@ describe('OtelKubernetesInstallStep', () => {
       screen.queryByTestId('observabilityOnboardingOtelKubernetesPanelInstallStackCopyToClipboard')
     ).not.toBeInTheDocument();
   });
+
+  it('does not render the values-file download button without a values file URL', () => {
+    renderWithHostPageProviders(
+      <OtelKubernetesInstallStep installStackCommand="helm upgrade --install opentelemetry-kube-stack" />
+    );
+
+    expect(
+      screen.queryByTestId('observabilityOnboardingOtelKubernetesPanelDownloadValuesFileButton')
+    ).not.toBeInTheDocument();
+  });
 });

@@ -149,10 +149,12 @@ describe('OtelCollectorSetupStep', () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        /Add the following OTLP exporter to your collector config\. Ensure your receivers include/
+        /Add the following OTLP exporter and resource processor to your collector config/
       )
     ).toBeInTheDocument();
-    expect(screen.getByText(/for full Kubernetes observability/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Add the processor to each active logs, metrics, and traces pipeline/)
+    ).toBeInTheDocument();
     expect(screen.getByText(/processor sets/)).toBeInTheDocument();
     expect(
       screen.getByText(/so Kibana can confirm data from this onboarding flow/)
@@ -163,7 +165,7 @@ describe('OtelCollectorSetupStep', () => {
     expect(screen.getByText(/kubeletstats/)).toBeInTheDocument();
     expect(screen.getByText(/hostmetrics/)).toBeInTheDocument();
     expect(screen.getByText(/file_log/)).toBeInTheDocument();
-    expect(screen.getByText(/prometheus/)).toBeInTheDocument();
+    expect(screen.queryByText(/prometheus/)).not.toBeInTheDocument();
 
     const managedSnippet = screen.getByTestId(
       'observabilityOnboardingKubernetesExistingCollectorManagedSnippet'
@@ -232,10 +234,13 @@ describe('OtelCollectorSetupStep', () => {
       ).toBeInTheDocument();
       expect(
         screen.getByText(
-          /Add the following OTLP exporter to your collector config\. Ensure your receivers include/
+          /Add the following OTLP exporter and resource processor to your collector config/
         )
       ).toBeInTheDocument();
-      expect(screen.getByText(/prometheus/)).toBeInTheDocument();
+      expect(
+        screen.getByText(/Add the processor to each active logs, metrics, and traces pipeline/)
+      ).toBeInTheDocument();
+      expect(screen.queryByText(/prometheus/)).not.toBeInTheDocument();
       expect(screen.getByText(/processor sets/)).toBeInTheDocument();
       expect(
         screen.getByText(/so Kibana can confirm data from this onboarding flow/)

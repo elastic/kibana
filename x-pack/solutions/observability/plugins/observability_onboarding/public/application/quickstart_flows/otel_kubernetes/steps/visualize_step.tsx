@@ -6,6 +6,8 @@
  */
 
 import React from 'react';
+import { EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { DataIngestStatus, type ActionLink } from '../../kubernetes/data_ingest_status';
 
 export interface OtelKubernetesVisualizeStepProps {
@@ -24,7 +26,19 @@ export const OtelKubernetesVisualizeStep: React.FC<OtelKubernetesVisualizeStepPr
   respectPreExistingData = false,
 }) => {
   if (!isMonitoringStepActive || !data) {
-    return null;
+    return (
+      <EuiText color="subdued" size="s">
+        <p>
+          {i18n.translate(
+            'xpack.observability_onboarding.otelKubernetesPanel.visualizeStepInactiveDescription',
+            {
+              defaultMessage:
+                'Run the collector setup command, then return here to confirm data arrives.',
+            }
+          )}
+        </p>
+      </EuiText>
+    );
   }
 
   return (

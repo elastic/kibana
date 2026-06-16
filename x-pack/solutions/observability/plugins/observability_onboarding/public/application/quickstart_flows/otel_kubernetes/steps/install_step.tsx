@@ -105,23 +105,27 @@ export const OtelKubernetesInstallStep: React.FC<OtelKubernetesInstallStepProps>
         overflowHeight={useInlineCopyOnly ? 300 : undefined}
         dataTestSubj="observabilityOnboardingOtelKubernetesInstallStackSnippet"
       />
-      <EuiSpacer />
-      <EuiButtonEmpty
-        iconType="download"
-        href={valuesFileUrl}
-        flush="left"
-        target="_blank" // The `download` attribute does not work cross-origin so it's better to open the file in a new tab
-        data-test-subj="observabilityOnboardingOtelKubernetesPanelDownloadValuesFileButton"
-        aria-label={i18n.translate(
-          'xpack.observability_onboarding.otelKubernetesPanel.downloadValuesFileAriaLabel',
-          { defaultMessage: 'Download the values file for OpenTelemetry setup' }
-        )}
-      >
-        {i18n.translate(
-          'xpack.observability_onboarding.otelKubernetesPanel.downloadValuesFileButtonEmptyLabel',
-          { defaultMessage: 'Download values file' }
-        )}
-      </EuiButtonEmpty>
+      {valuesFileUrl ? (
+        <>
+          <EuiSpacer />
+          <EuiButtonEmpty
+            iconType="download"
+            href={valuesFileUrl}
+            flush="left"
+            target="_blank" // The `download` attribute does not work cross-origin so it's better to open the file in a new tab
+            data-test-subj="observabilityOnboardingOtelKubernetesPanelDownloadValuesFileButton"
+            aria-label={i18n.translate(
+              'xpack.observability_onboarding.otelKubernetesPanel.downloadValuesFileAriaLabel',
+              { defaultMessage: 'Download the values file for OpenTelemetry setup' }
+            )}
+          >
+            {i18n.translate(
+              'xpack.observability_onboarding.otelKubernetesPanel.downloadValuesFileButtonEmptyLabel',
+              { defaultMessage: 'Download values file' }
+            )}
+          </EuiButtonEmpty>
+        </>
+      ) : null}
     </>
   );
 };

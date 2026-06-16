@@ -18,6 +18,7 @@ describe('OtelInstrumentationStep', () => {
     expect(
       screen.getByTestId('observabilityOnboardingKubernetesOtelInstrumentationSwitch')
     ).not.toBeChecked();
+    expect(screen.getByText('Instrument application (Optional)')).toBeInTheDocument();
     expect(
       screen.queryByTestId('observabilityOnboardingKubernetesOtelInstrumentationLanguageSelector')
     ).not.toBeInTheDocument();
@@ -61,6 +62,9 @@ describe('OtelInstrumentationStep', () => {
       screen.queryByTestId('observabilityOnboardingKubernetesOtelInstrumentationNamespaceSnippet')
     ).not.toBeInTheDocument();
     expect(
+      screen.getByText('Apply your updated manifest and restart the deployment:')
+    ).toBeInTheDocument();
+    expect(
       screen.getByTestId('observabilityOnboardingKubernetesOtelInstrumentationRestartCommand')
     ).toHaveTextContent('kubectl rollout restart deployment myapp -n my-namespace');
     expect(
@@ -72,7 +76,7 @@ describe('OtelInstrumentationStep', () => {
     expect(screen.getByText('Other languages documentation')).toBeInTheDocument();
   });
 
-  it('shows only the namespace annotation manifest when namespace mode is selected', async () => {
+  it('shows namespace annotation followed by restart and verify commands', async () => {
     renderWithHostPageProviders(<OtelInstrumentationStep />);
 
     await userEvent.click(
@@ -91,16 +95,30 @@ describe('OtelInstrumentationStep', () => {
     ).not.toBeInTheDocument();
     expect(
       screen.getByTestId('observabilityOnboardingKubernetesOtelInstrumentationNamespaceSnippet')
-    ).toHaveTextContent('apiVersion: v1');
+    ).toHaveTextContent(
+      'kubectl annotate namespace my-namespace instrumentation.opentelemetry.io/inject-nodejs="opentelemetry-operator-system/elastic-instrumentation"'
+    );
     expect(
       screen.getByTestId('observabilityOnboardingKubernetesOtelInstrumentationNamespaceSnippet')
-    ).toHaveTextContent('kind: Namespace');
+    ).not.toHaveTextContent('kubectl rollout restart deployment myapp -n my-namespace');
     expect(
       screen.getByTestId('observabilityOnboardingKubernetesOtelInstrumentationNamespaceSnippet')
-    ).not.toHaveTextContent('kubectl annotate namespace my-namespace');
+    ).not.toHaveTextContent('kubectl describe pod <myapp-pod-name> -n my-namespace');
     expect(
-      screen.queryByTestId('observabilityOnboardingKubernetesOtelInstrumentationRestartCommand')
-    ).not.toBeInTheDocument();
+      screen.getByTestId('observabilityOnboardingKubernetesOtelInstrumentationNamespaceSnippet')
+    ).not.toHaveTextContent('kind: Namespace');
+    expect(
+      screen.getByTestId('observabilityOnboardingKubernetesOtelInstrumentationNamespaceSnippet')
+    ).not.toHaveTextContent('apiVersion: v1');
+    expect(
+      screen.getByText('Apply your updated manifest and restart the deployment:')
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId('observabilityOnboardingKubernetesOtelInstrumentationRestartCommand')
+    ).toHaveTextContent('kubectl rollout restart deployment myapp -n my-namespace');
+    expect(
+      screen.getByTestId('observabilityOnboardingKubernetesOtelInstrumentationRestartCommand')
+    ).toHaveTextContent('kubectl describe pod <myapp-pod-name> -n my-namespace');
     expect(
       screen.getByTestId('observabilityOnboardingKubernetesOtelInstrumentationDocsLink')
     ).toBeInTheDocument();

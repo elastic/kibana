@@ -1,5 +1,5 @@
 {
-  "sha1": "a19ae6d7fa00476c5193331baf632e58492f5ac5",
+  "sha1": "070c10d70ff47e763c24dcb61f2ad3a16fcbf95f",
   "tests": [
     {
       "id": "fbc74590a1185af-3e73699777c3b59",
@@ -142,6 +142,70 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/host_flow.spec.ts",
         "line": 167,
+        "column": 9
+      }
+    },
+    {
+      "id": "ac68e3762339a89-12ae1a235b2c6f4",
+      "title": "Kubernetes Onboarding Kubernetes tile navigates to the OTel Kubernetes flow",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/kubernetes_flow.spec.ts",
+        "line": 34,
+        "column": 9
+      }
+    },
+    {
+      "id": "ac68e3762339a89-a2c7ce3359b6f7b",
+      "title": "Kubernetes Onboarding navigating to /otel-kubernetes redirects to /kubernetes without deprecated ingestion param",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/kubernetes_flow.spec.ts",
+        "line": 43,
+        "column": 9
+      }
+    },
+    {
+      "id": "ac68e3762339a89-86879ebe1541a2a",
+      "title": "Kubernetes Onboarding Kubernetes step controls expose expected branch UI",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/kubernetes_flow.spec.ts",
+        "line": 53,
+        "column": 9
+      }
+    },
+    {
+      "id": "ac68e3762339a89-41c48861e2508e0",
+      "title": "Kubernetes Onboarding navigating to /kubernetes renders the V1 experience when V2 is disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/kubernetes_flow.spec.ts",
+        "line": 81,
         "column": 9
       }
     },

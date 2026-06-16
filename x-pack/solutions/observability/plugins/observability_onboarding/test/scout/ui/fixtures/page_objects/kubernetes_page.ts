@@ -60,7 +60,7 @@ export class KubernetesPage {
 
   existingCollectorDescription() {
     return this.page.getByText(
-      /already gathers the Kubernetes logs, metrics, and traces|Managed OTLP is not available for this deployment/
+      /Add the following OTLP exporter and resource processor|Managed OTLP is not available for this deployment/
     );
   }
 
