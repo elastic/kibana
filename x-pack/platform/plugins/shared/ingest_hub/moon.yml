@@ -28,6 +28,7 @@ dependsOn:
   - '@kbn/kibana-react-plugin'
   - '@kbn/react-query'
   - '@kbn/fleet-plugin'
+  - '@kbn/i18n-react'
 tags:
   - plugin
   - prod
