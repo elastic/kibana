@@ -136,7 +136,7 @@ export const NavLinkShouldUseSentenceCase: Rule.RuleModule = {
   },
 
   create(context) {
-    // Only activate in files that import navigation tree types from the core chrome package.
+    // Only activate in files that import from @kbn/core-chrome-browser.
     // This avoids relying on fragile file-path globs in .eslintrc.js.
     let isNavFile = false;
 
@@ -217,7 +217,7 @@ export const NavLinkShouldUseSentenceCase: Rule.RuleModule = {
         checkString(valueNode.value, valueNode as unknown as Rule.Node);
       },
 
-      // Raw label: 'string' properties (used in navigation mocks and direct nav data)
+      // Raw label/title string properties in direct nav data
       Property(node) {
         if (!isNavFile) return;
 
@@ -225,7 +225,7 @@ export const NavLinkShouldUseSentenceCase: Rule.RuleModule = {
 
         if (
           prop.key.type !== AST_NODE_TYPES.Identifier ||
-          (prop.key as TSESTree.Identifier).name !== 'label'
+          !(['label', 'title'] as string[]).includes((prop.key as TSESTree.Identifier).name)
         ) {
           return;
         }

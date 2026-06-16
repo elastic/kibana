@@ -1214,7 +1214,7 @@
         {
           "id": "node-model-management",
           "path": "stack_management.node-model-management",
-          "title": "Model Management",
+          "title": "Model management",
           "children": [
             {
               "id": "management:elastic_inference_service",
