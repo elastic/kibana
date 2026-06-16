@@ -88,6 +88,7 @@ export function ServiceNodeMetrics({ serviceNodeName }: Props) {
     kuery,
     type: ApmDocumentType.ServiceTransactionMetric,
     numBuckets: 100,
+    intent: 'graph',
   });
 
   const { data: { host, containerId } = INITIAL_DATA, status } = useFetcher(

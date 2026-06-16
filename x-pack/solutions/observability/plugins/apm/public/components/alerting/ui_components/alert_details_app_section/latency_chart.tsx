@@ -100,6 +100,7 @@ export function LatencyChart({
     type: transactionName
       ? ApmDocumentType.TransactionMetric
       : ApmDocumentType.ServiceTransactionMetric,
+    intent: 'graph',
   });
 
   const latencyAggregationType =

@@ -385,6 +385,7 @@ function useTableData({
     kuery,
     numBuckets: 20,
     type: ApmDocumentType.TransactionMetric,
+    intent: 'table',
   });
 
   const shouldUseDurationSummary =

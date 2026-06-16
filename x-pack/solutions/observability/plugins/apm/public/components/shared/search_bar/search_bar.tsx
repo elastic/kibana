@@ -10,7 +10,6 @@ import React from 'react';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { ApmEnvironmentFilter } from '../environment_filter';
-import { QueryQualitySlider } from '../query_quality_slider';
 import { TimeComparison } from '../time_comparison';
 import { TransactionTypeSelect } from '../transaction_type_select';
 import { UnifiedSearchBar } from '../unified_search_bar';
@@ -68,7 +67,7 @@ export function SearchBar({
       )}
       {showUnifiedSearchBar && hasSecondaryFilters && <EuiSpacer size="s" />}
       {showUnifiedSearchBar && hasSecondaryFilters && (
-        <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" responsive={false}>
+        <EuiFlexGroup gutterSize="none" justifyContent="flexStart" responsive={false}>
           <EuiFlexItem grow={false} style={secondaryFiltersWidthStyle}>
             <EuiFlexGrid
               columns={!isMedium ? 3 : 1}
@@ -97,40 +96,30 @@ export function SearchBar({
               )}
             </EuiFlexGrid>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <QueryQualitySlider />
-          </EuiFlexItem>
         </EuiFlexGroup>
       )}
       {!showUnifiedSearchBar && (
         <>
           <EuiSpacer size="s" />
-          <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
-            <EuiFlexItem>
-              <EuiFlexGrid columns={!isMedium ? 3 : 1} gutterSize="s">
-                {showTransactionTypeSelector && (
-                  <EuiFlexItem>
-                    <TransactionTypeSelect compressed fullWidth />
-                  </EuiFlexItem>
-                )}
+          <EuiFlexGrid columns={!isMedium ? 3 : 1} gutterSize="s">
+            {showTransactionTypeSelector && (
+              <EuiFlexItem>
+                <TransactionTypeSelect compressed fullWidth />
+              </EuiFlexItem>
+            )}
 
-                {showEnvironmentFilter && (
-                  <EuiFlexItem>
-                    <ApmEnvironmentFilter compressed fullWidth />
-                  </EuiFlexItem>
-                )}
+            {showEnvironmentFilter && (
+              <EuiFlexItem>
+                <ApmEnvironmentFilter compressed fullWidth />
+              </EuiFlexItem>
+            )}
 
-                {showTimeComparison && (
-                  <EuiFlexItem>
-                    <TimeComparison compressed fullWidth />
-                  </EuiFlexItem>
-                )}
-              </EuiFlexGrid>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <QueryQualitySlider />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+            {showTimeComparison && (
+              <EuiFlexItem>
+                <TimeComparison compressed fullWidth />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGrid>
         </>
       )}
     </div>

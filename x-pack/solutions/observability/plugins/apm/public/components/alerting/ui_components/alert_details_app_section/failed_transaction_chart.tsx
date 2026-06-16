@@ -106,6 +106,7 @@ export function FailedTransactionChart({
     type: transactionName
       ? ApmDocumentType.TransactionMetric
       : ApmDocumentType.ServiceTransactionMetric,
+    intent: 'graph',
   });
 
   const { data: dataErrorRate = INITIAL_STATE_ERROR_RATE, status } = useFetcher(

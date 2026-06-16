@@ -64,6 +64,7 @@ function useServicesMainStatisticsFetcher(searchQuery: string | undefined) {
     kuery,
     type: ApmDocumentType.ServiceTransactionMetric,
     numBuckets: 20,
+    intent: 'table',
   });
 
   const shouldUseDurationSummary = !!preferred?.source?.hasDurationSummaryField;
@@ -131,6 +132,7 @@ function useServicesDetailedStatisticsFetcher({
     kuery,
     type: ApmDocumentType.ServiceTransactionMetric,
     numBuckets: 20,
+    intent: 'table',
   });
   const itemsToFetch = useMemo(
     () => renderedItems.map(({ serviceName }) => serviceName),

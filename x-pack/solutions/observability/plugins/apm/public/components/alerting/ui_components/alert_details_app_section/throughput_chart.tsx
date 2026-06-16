@@ -92,6 +92,7 @@ export function ThroughputChart({
     type: transactionName
       ? ApmDocumentType.TransactionMetric
       : ApmDocumentType.ServiceTransactionMetric,
+    intent: 'graph',
   });
 
   const { data: dataThroughput = INITIAL_STATE, status: statusThroughput } = useFetcher(

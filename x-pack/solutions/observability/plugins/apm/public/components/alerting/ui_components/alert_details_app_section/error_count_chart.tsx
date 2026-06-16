@@ -84,6 +84,7 @@ export function ErrorCountChart({
     type: transactionName
       ? ApmDocumentType.TransactionMetric
       : ApmDocumentType.ServiceTransactionMetric,
+    intent: 'graph',
   });
 
   const { data = INITIAL_STATE, status } = useFetcher(

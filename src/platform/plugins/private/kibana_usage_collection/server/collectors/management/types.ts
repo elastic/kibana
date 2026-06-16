@@ -160,6 +160,8 @@ export interface UsageStats {
   'observability:syntheticsThrottlingEnabled': boolean;
   'observability:enableLegacyUptimeApp': boolean;
   'observability:apmProgressiveLoading': string;
+  'observability:apmQueryQualityGraphs': string;
+  'observability:apmQueryQualityTables': string;
   'observability:apmServiceGroupMaxNumberOfServices': number;
   'observability:profilingShowErrorFrames': boolean;
   'securitySolution:enableGroupedNav': boolean;

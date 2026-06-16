@@ -80,6 +80,7 @@ export function FailedTransactionRateChart({ height, showAnnotations = true, kue
     type: transactionName
       ? ApmDocumentType.TransactionMetric
       : ApmDocumentType.ServiceTransactionMetric,
+    intent: 'graph',
   });
 
   const { environment } = useEnvironmentsContext();

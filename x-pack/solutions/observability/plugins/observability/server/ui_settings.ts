@@ -8,13 +8,15 @@
 import { schema } from '@kbn/config-schema';
 import type { UiSettingsParams } from '@kbn/core/types';
 import { i18n } from '@kbn/i18n';
-import { observabilityFeatureId, ProgressiveLoadingQuality } from '../common';
+import { observabilityFeatureId, ProgressiveLoadingQuality, QueryQualityLevel } from '../common';
 import {
   enableComparisonByDefault,
   enableInspectEsQueries,
   maxSuggestions,
   defaultApmServiceEnvironment,
   apmProgressiveLoading,
+  apmQueryQualityGraphs,
+  apmQueryQualityTables,
   apmServiceGroupMaxNumberOfServices,
   apmEnableTableSearchBar,
   apmAWSLambdaPriceFactor,
@@ -35,6 +37,43 @@ import {
   searchExcludedDataTiers,
   enableDiagnosticMode,
 } from '../common/ui_settings_keys';
+
+const queryQualityOptions = [
+  QueryQualityLevel.fastest,
+  QueryQualityLevel.fast,
+  QueryQualityLevel.default,
+  QueryQualityLevel.accurate,
+  QueryQualityLevel.mostAccurate,
+];
+
+const queryQualitySchema = schema.oneOf([
+  schema.literal(QueryQualityLevel.fastest),
+  schema.literal(QueryQualityLevel.fast),
+  schema.literal(QueryQualityLevel.default),
+  schema.literal(QueryQualityLevel.accurate),
+  schema.literal(QueryQualityLevel.mostAccurate),
+]);
+
+const queryQualityOptionLabels = {
+  [QueryQualityLevel.fastest]: i18n.translate('xpack.observability.apmQueryQualityFastest', {
+    defaultMessage: 'Fastest (least detailed)',
+  }),
+  [QueryQualityLevel.fast]: i18n.translate('xpack.observability.apmQueryQualityFast', {
+    defaultMessage: 'Fast',
+  }),
+  [QueryQualityLevel.default]: i18n.translate('xpack.observability.apmQueryQualityDefault', {
+    defaultMessage: 'Default',
+  }),
+  [QueryQualityLevel.accurate]: i18n.translate('xpack.observability.apmQueryQualityAccurate', {
+    defaultMessage: 'Accurate',
+  }),
+  [QueryQualityLevel.mostAccurate]: i18n.translate(
+    'xpack.observability.apmQueryQualityMostAccurate',
+    {
+      defaultMessage: 'Most accurate (slowest)',
+    }
+  ),
+};
 
 /**
  * uiSettings definitions for Observability.
@@ -142,6 +181,40 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
         }
       ),
     },
+    solutionViews: ['classic', 'oblt'],
+  },
+  [apmQueryQualityGraphs]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.apmQueryQualityGraphs', {
+      defaultMessage: 'Graph query quality',
+    }),
+    description: i18n.translate('xpack.observability.apmQueryQualityGraphsDescription', {
+      defaultMessage:
+        'Controls the granularity of time-series data in APM charts and SparkPlots. Lower values request fewer data points for faster, coarser charts; higher values request more data points for finer, slower charts.',
+    }),
+    value: QueryQualityLevel.default,
+    schema: queryQualitySchema,
+    requiresPageReload: false,
+    type: 'select',
+    options: queryQualityOptions,
+    optionLabels: queryQualityOptionLabels,
+    solutionViews: ['classic', 'oblt'],
+  },
+  [apmQueryQualityTables]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.apmQueryQualityTables', {
+      defaultMessage: 'Table query quality',
+    }),
+    description: i18n.translate('xpack.observability.apmQueryQualityTablesDescription', {
+      defaultMessage:
+        'Controls the source resolution behind APM table numbers (latency, throughput, error rate). Lower values prefer coarser, rolled-up metrics for faster but less accurate numbers; higher values prefer finer-grained data for more accurate but slower numbers.',
+    }),
+    value: QueryQualityLevel.default,
+    schema: queryQualitySchema,
+    requiresPageReload: false,
+    type: 'select',
+    options: queryQualityOptions,
+    optionLabels: queryQualityOptionLabels,
     solutionViews: ['classic', 'oblt'],
   },
   [apmServiceGroupMaxNumberOfServices]: {

@@ -74,6 +74,7 @@ export function ApmServiceContextProvider({ children }: { children: ReactNode })
     kuery,
     type: ApmDocumentType.TransactionMetric,
     numBuckets: 100,
+    intent: 'graph',
   });
 
   const { transactionTypes, status: transactionTypeStatus } = useServiceTransactionTypesFetcher({

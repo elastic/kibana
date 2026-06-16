@@ -376,6 +376,24 @@ Generates data designed to trigger ML anomaly detection.
 node scripts/synthtrace apm_ml_anomalies --live
 ```
 
+#### `apm_query_quality_rollup_repro`
+
+Combined repro for two rollup / source-resolution symptoms relevant to the APM "Query Quality" advanced settings PoC. Both parts anchor their data to the end of the range, so the scenario works with synthtrace's default `1m` window (it always backfills ~24h).
+
+- **Part A - Transaction-group rollup timestamp mismatch:** one service (`synth-rollup-mismatch-compensation-eco-sync`) with a transaction group whose 60m metric is shifted ~8h back, so it is missing in "Last 24 hours" but appears in "Last 48 hours" even though a trace sample exists within the last 24 hours.
+- **Part B - Table query quality source visibility:** three steady services where `synth-quality-accurate-only` has its 60m `service_transaction` metrics dropped, so it is hidden from the Service Inventory at `default` quality and visible at `accurate`. Toggle Stack Management → Advanced Settings → "Table query quality" (`observability:apmQueryQualityTables`) with the Kibana time picker set to "Last 24 hours".
+
+**Options:**
+
+- `suffix` (string): Appended to service names and the `service.environment` so a run can be isolated for validation.
+
+**Usage:**
+
+```sh
+node scripts/synthtrace apm_query_quality_rollup_repro
+node scripts/synthtrace apm_query_quality_rollup_repro --from=now-7d --to=now
+```
+
 ### Log Scenarios
 
 #### `simple_logs`

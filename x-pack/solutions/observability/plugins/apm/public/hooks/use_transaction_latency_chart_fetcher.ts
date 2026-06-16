@@ -43,6 +43,7 @@ export function useTransactionLatencyChartsFetcher({
     type: transactionName
       ? ApmDocumentType.TransactionMetric
       : ApmDocumentType.ServiceTransactionMetric,
+    intent: 'graph',
   });
 
   const shouldUseDurationSummary =

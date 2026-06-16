@@ -37,6 +37,7 @@ export function ServerlessMetricsCharts({ serverlessId }: Props) {
     kuery,
     numBuckets: 100,
     type: ApmDocumentType.TransactionMetric,
+    intent: 'graph',
   });
 
   const { data = INITIAL_STATE, status } = useFetcher(

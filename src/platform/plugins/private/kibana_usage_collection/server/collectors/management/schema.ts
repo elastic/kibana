@@ -622,6 +622,14 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'keyword',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'observability:apmQueryQualityGraphs': {
+    type: 'keyword',
+    _meta: { description: 'Query quality level selected for APM charts and graphs.' },
+  },
+  'observability:apmQueryQualityTables': {
+    type: 'keyword',
+    _meta: { description: 'Query quality level selected for APM tables.' },
+  },
   'observability:apmServiceGroupMaxNumberOfServices': {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },

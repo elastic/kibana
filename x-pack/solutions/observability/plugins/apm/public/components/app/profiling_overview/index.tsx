@@ -39,6 +39,7 @@ export function ProfilingOverview() {
     kuery,
     type: ApmDocumentType.TransactionMetric,
     numBuckets: 20,
+    intent: 'graph',
   });
 
   const { agentName, transactionType } = useApmServiceContext();

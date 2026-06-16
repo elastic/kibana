@@ -19,6 +19,8 @@ import {
   apmEnableTransactionProfiling,
   apmEnableServiceInventoryTableSearchBar,
   apmProgressiveLoading,
+  apmQueryQualityGraphs,
+  apmQueryQualityTables,
 } from '@kbn/observability-plugin/common';
 import { isEmpty } from 'lodash';
 import React from 'react';
@@ -43,6 +45,8 @@ const SETTINGS_KEYS = [
   apmServiceGroupMaxNumberOfServices,
   enableInspectEsQueries,
   apmProgressiveLoading,
+  apmQueryQualityGraphs,
+  apmQueryQualityTables,
   apmAWSLambdaPriceFactor,
   apmAWSLambdaRequestCostPerMillion,
   apmEnableTableSearchBar,

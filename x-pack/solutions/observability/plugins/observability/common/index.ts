@@ -27,6 +27,8 @@ export {
   enableComparisonByDefault,
   defaultApmServiceEnvironment,
   apmProgressiveLoading,
+  apmQueryQualityGraphs,
+  apmQueryQualityTables,
   apmServiceGroupMaxNumberOfServices,
   enableInfrastructureAssetCustomDashboards,
   apmEnableTableSearchBar,
@@ -50,6 +52,8 @@ export {
   ProgressiveLoadingQuality,
   getProbabilityFromProgressiveLoadingQuality,
 } from './progressive_loading';
+
+export { QueryQualityLevel, getNumBucketsMultiplier, getAdjustedNumBuckets } from './query_quality';
 
 /** @deprecated deprecated in 8.17. Please use casesFeatureIdV2 instead */
 export const casesFeatureId = 'observabilityCases';

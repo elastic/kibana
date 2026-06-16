@@ -45,6 +45,7 @@ export function useAlertingProps({
     kuery,
     type: ApmDocumentType.TransactionMetric,
     numBuckets: 100,
+    intent: 'graph',
   });
   const { transactionTypes } = useServiceTransactionTypesFetcher({
     serviceName,

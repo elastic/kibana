@@ -16,7 +16,6 @@ import type { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observ
 import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
 import { useDefaultAiAssistantStarterPromptsForAPM } from '../../../../hooks/use_default_ai_assistant_starter_prompts_for_apm';
 import { EnvironmentsContextProvider } from '../../../../context/environments_context/environments_context';
-import { QueryQualityProvider } from '../../../../context/query_quality/query_quality_context';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import type { ApmPluginStartDeps } from '../../../../plugin';
 import { ServiceGroupSaveButton } from '../../../app/service_groups';
@@ -160,24 +159,22 @@ export function ApmMainTemplate({
   );
 
   return (
-    <QueryQualityProvider>
-      <EnvironmentsContextProvider>
-        <ObservabilityPageTemplate
-          noDataConfig={shouldBypassNoDataScreen ? undefined : noDataConfig}
-          isPageDataLoaded={isLoading === false}
-          pageHeader={{
-            ...pageHeader,
-            color: 'subdued' as unknown as EuiPageHeaderProps['color'],
-            tabs: undefined,
-            rightSideItems: [],
-            pageTitle: titleWithActions,
-            children: headerChildren,
-          }}
-          {...pageTemplateProps}
-        >
-          {children}
-        </ObservabilityPageTemplate>
-      </EnvironmentsContextProvider>
-    </QueryQualityProvider>
+    <EnvironmentsContextProvider>
+      <ObservabilityPageTemplate
+        noDataConfig={shouldBypassNoDataScreen ? undefined : noDataConfig}
+        isPageDataLoaded={isLoading === false}
+        pageHeader={{
+          ...pageHeader,
+          color: 'subdued' as unknown as EuiPageHeaderProps['color'],
+          tabs: undefined,
+          rightSideItems: [],
+          pageTitle: titleWithActions,
+          children: headerChildren,
+        }}
+        {...pageTemplateProps}
+      >
+        {children}
+      </ObservabilityPageTemplate>
+    </EnvironmentsContextProvider>
   );
 }

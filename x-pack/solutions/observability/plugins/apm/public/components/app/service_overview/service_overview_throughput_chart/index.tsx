@@ -66,6 +66,7 @@ export function ServiceOverviewThroughputChart({
     type: transactionName
       ? ApmDocumentType.TransactionMetric
       : ApmDocumentType.ServiceTransactionMetric,
+    intent: 'graph',
   });
 
   const { transactionType, serviceName, transactionTypeStatus } = useApmServiceContext();
