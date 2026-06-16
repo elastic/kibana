@@ -33,7 +33,6 @@ import {
   SavedObjectsSerializer,
   type SavedObjectsTypeMappingDefinitions,
 } from '@kbn/core-saved-objects-base-server-internal';
-import { createCummulativeLogger } from './create_cummulative_logger';
 import { buildActiveMappings, buildTypesMappings } from './core';
 import { DocumentMigrator } from './document_migrator';
 import { runZeroDowntimeMigration } from './zdt';
@@ -172,58 +171,41 @@ export class KibanaMigrator implements IKibanaMigrator {
   private async runMigrationsInternal({
     skipVersionCheck = false,
   }: { skipVersionCheck?: boolean } = {}): Promise<MigrationResult[]> {
-    let logger: Logger & { dump?: () => void; clear?: () => void } = this.log;
-
-    if (this.soMigrationsConfig.useCumulativeLogger) {
-      logger = createCummulativeLogger(this.log);
+    const migrationAlgorithm = this.soMigrationsConfig.algorithm;
+    if (migrationAlgorithm === 'zdt') {
+      return runZeroDowntimeMigration({
+        kibanaVersion: this.kibanaVersion,
+        kibanaIndexPrefix: this.kibanaIndex,
+        typeRegistry: this.typeRegistry,
+        logger: this.log,
+        documentMigrator: this.documentMigrator,
+        migrationConfig: this.soMigrationsConfig,
+        docLinks: this.docLinks,
+        serializer: this.serializer,
+        elasticsearchClient: this.client,
+        nodeRoles: this.nodeRoles,
+        esCapabilities: this.esCapabilities,
+        meter: this.soMigrationMeter,
+      });
     }
 
-    const dumpLogs = () => logger.dump?.();
-    process.on('uncaughtExceptionMonitor', dumpLogs);
-
-    try {
-      const migrationAlgorithm = this.soMigrationsConfig.algorithm;
-      if (migrationAlgorithm === 'zdt') {
-        return await runZeroDowntimeMigration({
-          kibanaVersion: this.kibanaVersion,
-          kibanaIndexPrefix: this.kibanaIndex,
-          typeRegistry: this.typeRegistry,
-          logger,
-          documentMigrator: this.documentMigrator,
-          migrationConfig: this.soMigrationsConfig,
-          docLinks: this.docLinks,
-          serializer: this.serializer,
-          elasticsearchClient: this.client,
-          nodeRoles: this.nodeRoles,
-          esCapabilities: this.esCapabilities,
-          meter: this.soMigrationMeter,
-        });
-      } else {
-        return await runV2Migration({
-          kibanaVersion: this.kibanaVersion,
-          kibanaIndexPrefix: this.kibanaIndex,
-          typeRegistry: this.typeRegistry,
-          hashToVersionMap: this.hashToVersionMap,
-          logger,
-          documentMigrator: this.documentMigrator,
-          migrationConfig: this.soMigrationsConfig,
-          docLinks: this.docLinks,
-          serializer: this.serializer,
-          elasticsearchClient: this.client,
-          mappingProperties: this.mappingProperties,
-          waitForMigrationCompletion: this.waitForMigrationCompletion,
-          esCapabilities: this.esCapabilities,
-          kibanaVersionCheck: skipVersionCheck ? undefined : this.kibanaVersionCheck,
-          meter: this.soMigrationMeter,
-        });
-      }
-    } catch (error) {
-      dumpLogs();
-      throw error;
-    } finally {
-      process.removeListener('uncaughtExceptionMonitor', dumpLogs);
-      logger.clear?.();
-    }
+    return runV2Migration({
+      kibanaVersion: this.kibanaVersion,
+      kibanaIndexPrefix: this.kibanaIndex,
+      typeRegistry: this.typeRegistry,
+      hashToVersionMap: this.hashToVersionMap,
+      logger: this.log,
+      documentMigrator: this.documentMigrator,
+      migrationConfig: this.soMigrationsConfig,
+      docLinks: this.docLinks,
+      serializer: this.serializer,
+      elasticsearchClient: this.client,
+      mappingProperties: this.mappingProperties,
+      waitForMigrationCompletion: this.waitForMigrationCompletion,
+      esCapabilities: this.esCapabilities,
+      kibanaVersionCheck: skipVersionCheck ? undefined : this.kibanaVersionCheck,
+      meter: this.soMigrationMeter,
+    });
   }
 
   public getActiveMappings(): IndexMapping {

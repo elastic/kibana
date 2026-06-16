@@ -848,16 +848,6 @@ groups:
           ech: unavailable
           self: ga
 
-      - setting: migrations.useCumulativeLogger
-        description: |
-          Skip logging migration progress unless there are any errors. Set to `false` when troubleshooting migration issues and not automatically shown.
-        datatype: bool
-        default: true
-        applies_to:
-          - "stack: ga 9.2"
-          - "ech: unavailable"
-          - "self: ga"
-
   - group: Saved Objects settings
     id: saved-objects-settings
     settings:

@@ -60,10 +60,6 @@ const migrationSchema = schema.object({
     runOnRoles: schema.arrayOf(schema.string(), { defaultValue: ['migrator'] }),
   }),
   /**
-   * Skip logging migration progress unless there are any errors.
-   */
-  useCumulativeLogger: schema.boolean({ defaultValue: true }),
-  /**
    * List of WIP (work-in-progress) saved object type names that Kibana is explicitly allowed to
    * start with. Kibana will refuse to start if any type listed in `wip_types.json` is registered
    * but absent from this list. Intended for development environments only; do not use in production.

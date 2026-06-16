@@ -248,7 +248,6 @@ const mockOptions = (kibanaVersion = '8.2.3'): RunV2MigrationOpts => {
         metaPickupSyncDelaySec: 120,
         runOnRoles: ['migrator'],
       },
-      useCumulativeLogger: false,
     },
     elasticsearchClient: mockedClient,
     docLinks: docLinksServiceMock.createSetupContract(),
