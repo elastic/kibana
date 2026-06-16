@@ -117,6 +117,11 @@ interface StreamsCodeAnalysisGroundingProps {
   verified_count: number;
 }
 
+interface StreamsSignificantEventsDiscoveryTriggeredProps {
+  execution_id: string;
+  space_id: string;
+}
+
 export {
   type StreamEndpointLatencyProps,
   type StreamsStateErrorProps,
@@ -130,4 +135,5 @@ export {
   type StreamsAgentToolEventCreateProps,
   type StreamsAgentToolEventStatusUpdateProps,
   type StreamsCodeAnalysisGroundingProps,
+  type StreamsSignificantEventsDiscoveryTriggeredProps,
 };

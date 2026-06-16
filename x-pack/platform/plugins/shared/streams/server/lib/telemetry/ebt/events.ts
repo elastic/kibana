@@ -18,6 +18,7 @@ import {
   STREAMS_AGENT_TOOL_EVENT_CREATE_EVENT_TYPE,
   STREAMS_AGENT_TOOL_EVENT_STATUS_UPDATE_EVENT_TYPE,
   STREAMS_CODE_ANALYSIS_GROUNDING_EVENT_TYPE,
+  STREAMS_SIGNIFICANT_EVENTS_DISCOVERY_TRIGGERED_EVENT_TYPE,
 } from './constants';
 import {
   streamsEndpointLatencySchema,
@@ -32,6 +33,7 @@ import {
   streamsAgentToolEventCreateSchema,
   streamsAgentToolEventStatusUpdateSchema,
   streamsCodeAnalysisGroundingSchema,
+  streamsSignificantEventsDiscoveryTriggeredSchema,
 } from './schemas';
 
 const streamsEndpointLatencyEventType = {
@@ -92,6 +94,11 @@ const streamsCodeAnalysisGroundingEventType = {
   schema: streamsCodeAnalysisGroundingSchema,
 };
 
+const streamsSignificantEventsDiscoveryTriggeredEventType = {
+  eventType: STREAMS_SIGNIFICANT_EVENTS_DISCOVERY_TRIGGERED_EVENT_TYPE,
+  schema: streamsSignificantEventsDiscoveryTriggeredSchema,
+};
+
 export {
   streamsEndpointLatencyEventType,
   streamsStateErrorEventType,
@@ -105,4 +112,5 @@ export {
   streamsAgentToolEventCreateEventType,
   streamsAgentToolEventStatusUpdateEventType,
   streamsCodeAnalysisGroundingEventType,
+  streamsSignificantEventsDiscoveryTriggeredEventType,
 };
