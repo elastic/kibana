@@ -122,14 +122,16 @@ export const PrincipalRow: React.FC<PrincipalRowProps> = ({
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                iconType="trash"
-                color="danger"
-                aria-label={accessFlyoutRemoveAriaLabel}
-                onClick={onRemove}
-                isDisabled={isDisabled}
-                data-test-subj={`agentBuilderAclRemove-${entry.type}-${entry.name}`}
-              />
+              <EuiToolTip content={accessFlyoutRemoveAriaLabel} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  iconType="trash"
+                  color="danger"
+                  aria-label={accessFlyoutRemoveAriaLabel}
+                  onClick={onRemove}
+                  isDisabled={isDisabled}
+                  data-test-subj={`agentBuilderAclRemove-${entry.type}-${entry.name}`}
+                />
+              </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
