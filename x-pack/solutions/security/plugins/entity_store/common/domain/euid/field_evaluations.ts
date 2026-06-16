@@ -177,22 +177,31 @@ export function applyFieldEvaluations(
 }
 
 /**
- * Returns all field evaluations for an entity definition: shared (top-level) evaluations
- * such as `entity.source`, plus identity-specific ones such as `entity.namespace` for user.
+ * Returns the top-level (shared) field evaluations for an entity definition —
+ * e.g. `entity.source`, which applies to all entity types regardless of identity.
+ * These are NOT identity-specific: they do not feed directly into the EUID expression.
  *
- * Use this for in-memory pipeline simulations (memory.ts, dsl.ts, kql.ts, tests).
- * The ES|QL extraction pipeline splits these: shared evals are emitted by
- * {@link getFieldEvaluationsEsqlFromDefinition} and identity-specific evals are co-located
- * with the EUID expression inside {@link getEuidEsqlEvaluation}.
+ * For identity-specific evaluations (e.g. `entity.namespace` for user), use
+ * {@link getIdentityFieldEvaluationsFromDefinition}.
  */
 export function getFieldEvaluationsFromDefinition(
   entityDefinition: Pick<EntityDefinitionWithoutId, 'fieldEvaluations' | 'identityField'>
 ): FieldEvaluation[] {
-  const sharedEvaluations = entityDefinition.fieldEvaluations ?? [];
+  return entityDefinition.fieldEvaluations ?? [];
+}
+
+/**
+ * Returns the identity-specific field evaluations from `identityField.fieldEvaluations` —
+ * e.g. `entity.namespace` for user, which is a direct prerequisite of the EUID expression.
+ * Returns an empty array for single-field identities (generic, service, host).
+ */
+export function getIdentityFieldEvaluationsFromDefinition(
+  entityDefinition: Pick<EntityDefinitionWithoutId, 'identityField'>
+): FieldEvaluation[] {
   if (isSingleFieldIdentity(entityDefinition.identityField)) {
-    return sharedEvaluations;
+    return [];
   }
-  return [...sharedEvaluations, ...(entityDefinition.identityField.fieldEvaluations ?? [])];
+  return entityDefinition.identityField.fieldEvaluations ?? [];
 }
 
 function isNotEmpty(value: string): boolean {
