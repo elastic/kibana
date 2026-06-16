@@ -28,8 +28,8 @@ const BREAKDOWN_NONE_LABEL = 'No breakdown';
 spaceTest.describe('Discover tabs - tab duplication', { tag: tags.stateful.all }, () => {
   spaceTest.use({ viewport: { width: 1920, height: 1080 } });
 
-  spaceTest.beforeAll(async ({ scoutSpace }) => {
-    await scoutSpace.setupDiscoverDefaults();
+  spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
+    await discoverScoutSpace.setupDiscoverDefaults();
   });
 
   spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
@@ -38,8 +38,8 @@ spaceTest.describe('Discover tabs - tab duplication', { tag: tags.stateful.all }
     await pageObjects.discover.waitUntilTabIsLoaded();
   });
 
-  spaceTest.afterAll(async ({ scoutSpace }) => {
-    await scoutSpace.teardownDiscoverDefaults();
+  spaceTest.afterAll(async ({ discoverScoutSpace }) => {
+    await discoverScoutSpace.teardownDiscoverDefaults();
   });
 
   spaceTest('should restore the previous ui state', async ({ pageObjects }) => {

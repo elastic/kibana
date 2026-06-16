@@ -18,8 +18,8 @@ import { spaceTest, tags } from '../../fixtures/common';
 spaceTest.describe('Discover tabs - opening a new tab', { tag: tags.stateful.all }, () => {
   spaceTest.use({ viewport: { width: 1920, height: 1080 } });
 
-  spaceTest.beforeAll(async ({ scoutSpace }) => {
-    await scoutSpace.setupDiscoverDefaults();
+  spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
+    await discoverScoutSpace.setupDiscoverDefaults();
   });
 
   spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
@@ -28,8 +28,8 @@ spaceTest.describe('Discover tabs - opening a new tab', { tag: tags.stateful.all
     await pageObjects.discover.waitUntilTabIsLoaded();
   });
 
-  spaceTest.afterAll(async ({ scoutSpace }) => {
-    await scoutSpace.teardownDiscoverDefaults();
+  spaceTest.afterAll(async ({ discoverScoutSpace }) => {
+    await discoverScoutSpace.teardownDiscoverDefaults();
   });
 
   spaceTest('should create a new tab in classic mode', async ({ pageObjects }) => {

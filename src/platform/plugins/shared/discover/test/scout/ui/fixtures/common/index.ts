@@ -21,11 +21,11 @@ export interface DiscoverScoutSpace extends ScoutSpaceParallelFixture {
 }
 
 export type DiscoverWorkerFixtures = ScoutParallelWorkerFixtures & {
-  scoutSpace: DiscoverScoutSpace;
+  discoverScoutSpace: DiscoverScoutSpace;
 };
 
 export const spaceTest = spaceBaseTest.extend<ScoutParallelTestFixtures, DiscoverWorkerFixtures>({
-  scoutSpace: [
+  discoverScoutSpace: [
     async ({ scoutSpace }, use) => {
       const discoverScoutSpace: DiscoverScoutSpace = {
         ...scoutSpace,
