@@ -114,7 +114,7 @@ const triageLlmGroupSchema = z.object({
 
 export const triageLlmOutputSchema = z.object({
   groups: z.array(triageLlmGroupSchema),
-  total_selected: z.number().int().optional(),
+  total_selected: z.number().int().nullish(),
 });
 
 type TriageLlmOutput = z.infer<typeof triageLlmOutputSchema>;
@@ -476,7 +476,7 @@ export const triageDiamondCandidates = async ({
   const rawPicks: TriagePick[] = [];
   const groups: TriageGroup[] = [];
 
-  for (const group of llmOutput.groups) {
+  for (const group of llmOutput.groups ?? []) {
     const mappedGroup: TriageGroup = { hypothesis: group.hypothesis, candidates: [] };
 
     for (const entry of group.candidates) {

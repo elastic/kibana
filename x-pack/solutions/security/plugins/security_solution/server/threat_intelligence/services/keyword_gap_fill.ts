@@ -155,7 +155,7 @@ export const keywordGapFill = async ({
       metadata: result.raw.response_metadata ?? {},
       wallMs,
     });
-    uncovered = result.parsed.uncovered_keywords
+    uncovered = (result.parsed.uncovered_keywords ?? [])
       .map((k) => k.trim())
       .filter((k) => k.length >= MIN_KEYWORD_LEN)
       .slice(0, MAX_GAP_FILL_KEYWORDS);
