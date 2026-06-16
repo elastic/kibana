@@ -33,7 +33,6 @@ import {
   type NewPackagePolicy,
   type NewAgentPolicy,
   type CreatePackagePolicyRequest,
-  type PackagePolicy,
   type PackageInfo,
   SetupTechnology,
 } from '../../../../../types';
@@ -51,9 +50,7 @@ import {
   packageToPackagePolicy,
   ExperimentalFeaturesService,
 } from '../../../../../services';
-import type { CreatePackagePolicyResponse, AgentlessPolicy } from '../../../../../../../../common';
 import {
-  isAgentlessPolicyResponse,
   FLEET_ELASTIC_AGENT_PACKAGE,
   FLEET_SYSTEM_PACKAGE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
@@ -69,7 +66,7 @@ import {
   isInputVisibleForVarGroupSelections,
 } from '../../services';
 import type { PackagePolicyValidationResults } from '../../services';
-import type { PackagePolicyFormState } from '../../types';
+import type { PackagePolicyFormState, SavedPolicyResult } from '../../types';
 import type { RegistryVarGroup } from '../../../../../types';
 import { SelectedPolicyTab } from '../../components';
 import { useOnSaveNavigate } from '../../hooks';
@@ -157,7 +154,7 @@ export const createAgentPolicyIfNeeded = async ({
 async function savePackagePolicy(
   pkgPolicy: CreatePackagePolicyRequest['body'],
   varGroups?: RegistryVarGroup[]
-): Promise<CreatePackagePolicyResponse | { item: AgentlessPolicy }> {
+): Promise<SavedPolicyResult> {
   const { policy, forceCreateNeeded } = await prepareInputPackagePolicyDataset(pkgPolicy);
 
   // If agentless use agentless policies API
@@ -211,15 +208,16 @@ async function savePackagePolicy(
       }),
     };
 
-    return await sendCreateAgentlessPolicy(agentlessRequestBody);
+    const { item } = await sendCreateAgentlessPolicy(agentlessRequestBody);
+    return { type: 'agentless', policy: item };
   }
 
-  const result = await sendCreatePackagePolicyForRq({
+  const { item } = await sendCreatePackagePolicyForRq({
     ...policy,
     ...(forceCreateNeeded && { force: true }),
   });
 
-  return result;
+  return { type: 'packagePolicy', policy: item };
 }
 
 // Update the agentless policy with cloud connector info in the new agent policy when the package policy input `aws.support_cloud_connectors is updated
@@ -327,8 +325,8 @@ export function useOnSubmit({
   const varGroups =
     enableVarGroups && packageInfo?.var_groups ? packageInfo?.var_groups : undefined;
 
-  // only used to store the resulting package policy once saved
-  const [savedPackagePolicy, setSavedPackagePolicy] = useState<PackagePolicy | AgentlessPolicy>();
+  // only used to store the resulting policy (package or agentless) once saved
+  const [savedPackagePolicy, setSavedPackagePolicy] = useState<SavedPolicyResult>();
   // Create dataset templates toggle (checked/recommended by default)
   const [createDatasetTemplates, setCreateDatasetTemplates] = useState<boolean>(true);
   // Form state
@@ -614,10 +612,10 @@ export function useOnSubmit({
     queryParamsPolicyId,
   });
 
-  const navigateAddAgent = (policy: PackagePolicy | AgentlessPolicy) =>
+  const navigateAddAgent = (policy: SavedPolicyResult) =>
     onSaveNavigate(policy, ['openEnrollmentFlyout']);
 
-  const navigateAddAgentHelp = (policy: PackagePolicy | AgentlessPolicy) =>
+  const navigateAddAgentHelp = (policy: SavedPolicyResult) =>
     onSaveNavigate(policy, ['showAddAgentHelp']);
 
   const onSubmit = useCallback(
@@ -750,7 +748,7 @@ export function useOnSubmit({
       setFormState('LOADING');
       try {
         // passing pkgPolicy with policy_id here as setPackagePolicy doesn't propagate immediately
-        const data = await savePackagePolicy(
+        const savedPolicyResult = await savePackagePolicy(
           {
             ...packagePolicy,
             policy_ids: agentPolicyIdToSave,
@@ -760,31 +758,32 @@ export function useOnSubmit({
           varGroups
         );
 
-        if (data?.item.package) {
+        if (savedPolicyResult.policy.package) {
           await ensurePackageKibanaAssetsInstalled({
             currentSpaceId: spaceId ?? DEFAULT_SPACE_ID,
-            pkgName: data.item.package.name,
-            pkgVersion: data.item.package.version,
+            pkgName: savedPolicyResult.policy.package.name,
+            pkgVersion: savedPolicyResult.policy.package.version,
             toasts: notifications.toasts,
           });
         }
-        const savedItem = data!.item;
         const isAgentlessConfigured = createdPolicy
           ? isAgentlessAgentPolicy(createdPolicy)
-          : isAgentlessPolicyResponse(savedItem);
+          : savedPolicyResult.type === 'agentless';
 
-        // Cloud template helpers expect PackagePolicy with array-based inputs;
-        // they are irrelevant for agentless policies where inputs are simplified.
+        // Cloud template helpers expect a PackagePolicy with array-based inputs;
+        // agentless policies use simplified inputs and never carry these templates.
         let hasAzureArmTemplate = false;
         let hasCloudFormation = false;
         let hasGoogleCloudShell = false;
 
-        if (!isAgentlessConfigured && !isAgentlessPolicyResponse(savedItem)) {
-          hasAzureArmTemplate = Boolean(getAzureArmPropsFromPackagePolicy(savedItem).templateUrl);
-          hasCloudFormation = Boolean(
-            getCloudFormationPropsFromPackagePolicy(savedItem).templateUrl
+        if (!isAgentlessConfigured && savedPolicyResult.type === 'packagePolicy') {
+          hasAzureArmTemplate = Boolean(
+            getAzureArmPropsFromPackagePolicy(savedPolicyResult.policy).templateUrl
           );
-          hasGoogleCloudShell = Boolean(getCloudShellUrlFromPackagePolicy(savedItem));
+          hasCloudFormation = Boolean(
+            getCloudFormationPropsFromPackagePolicy(savedPolicyResult.policy).templateUrl
+          );
+          hasGoogleCloudShell = Boolean(getCloudShellUrlFromPackagePolicy(savedPolicyResult.policy));
         }
 
         if (hasFleetAddAgentsPrivileges && !isAgentlessConfigured && !skipConfirmModal) {
@@ -800,7 +799,7 @@ export function useOnSubmit({
             setFormState('SUBMITTED_NO_AGENTS');
           }
         }
-        setSavedPackagePolicy(savedItem);
+        setSavedPackagePolicy(savedPolicyResult);
 
         const promptForAgentEnrollment =
           (createdPolicy || (agentPolicies.length > 0 && !agentCount)) &&
@@ -826,9 +825,9 @@ export function useOnSubmit({
           }
 
           if (isAgentlessConfigured) {
-            onSaveNavigate(savedItem, ['openEnrollmentFlyout']);
+            onSaveNavigate(savedPolicyResult, ['openEnrollmentFlyout']);
           } else {
-            onSaveNavigate(savedItem);
+            onSaveNavigate(savedPolicyResult);
           }
         }
 

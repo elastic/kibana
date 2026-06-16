@@ -11,7 +11,7 @@ import type {
   SimplifiedVars,
 } from '../../services/simplified_package_policy_helper';
 
-export interface CloudConnector {
+export interface AgentlessCloudConnector {
   enabled: boolean;
   cloud_connector_id: string;
 }
@@ -29,7 +29,7 @@ export interface NewAgentlessPolicy {
   namespace?: string;
   vars?: SimplifiedVars;
   global_data_tags?: GlobalDataTag[];
-  cloud_connector?: CloudConnector | null;
+  cloud_connector?: AgentlessCloudConnector | null;
   package?: AgentlessPackage;
   inputs?: SimplifiedInputs;
 }
@@ -42,11 +42,3 @@ export interface AgentlessPolicy extends NewAgentlessPolicy {
   updated_at: string;
   updated_by: string;
 }
-
-/**
- * Type guard distinguishing an AgentlessPolicy response (simplified inputs,
- * no policy_ids) from a PackagePolicy response.
- */
-export const isAgentlessPolicyResponse = (
-  item: { policy_ids?: string[] } | AgentlessPolicy
-): item is AgentlessPolicy => !('policy_ids' in item);

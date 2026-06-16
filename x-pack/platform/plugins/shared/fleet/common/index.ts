@@ -250,7 +250,7 @@ export type {
   DisplayedAssetTypes,
 } from './types';
 
-export { ElasticsearchAssetType, isAgentlessPolicyResponse } from './types';
+export { ElasticsearchAssetType } from './types';
 
 export { FleetError } from './errors';
 

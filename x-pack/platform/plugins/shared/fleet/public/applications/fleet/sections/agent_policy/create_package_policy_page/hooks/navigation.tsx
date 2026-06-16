@@ -12,13 +12,8 @@ import { splitPkgKey } from '../../../../../../../common/services';
 import { PLUGIN_ID, INTEGRATIONS_PLUGIN_ID } from '../../../../constants';
 import { pkgKeyFromPackageInfo } from '../../../../services';
 import { useStartServices, useLink, useIntraAppState } from '../../../../hooks';
-import type {
-  CreatePackagePolicyRouteState,
-  PackagePolicy,
-  OnSaveQueryParamKeys,
-} from '../../../../types';
-import type { AgentlessPolicy } from '../../../../../../../common';
-import type { EditPackagePolicyFrom } from '../types';
+import type { CreatePackagePolicyRouteState, OnSaveQueryParamKeys } from '../../../../types';
+import type { EditPackagePolicyFrom, SavedPolicyResult } from '../types';
 
 import { appendOnSaveQueryParamsToPath } from '../utils';
 
@@ -87,12 +82,12 @@ export const useOnSaveNavigate = (params: UseOnSaveNavigateParams) => {
   }, []);
 
   const onSaveNavigate = useCallback(
-    (policy: PackagePolicy | AgentlessPolicy, paramsToApply: OnSaveQueryParamKeys[] = []) => {
+    (savedPolicyResult: SavedPolicyResult, paramsToApply: OnSaveQueryParamKeys[] = []) => {
       if (!doOnSaveNavigation.current) {
         return;
       }
-      const isAgentless = !('policy_ids' in policy);
-      const policyIds = isAgentless ? [] : policy.policy_ids;
+      const isAgentless = savedPolicyResult.type === 'agentless';
+      const policyIds = isAgentless ? [] : savedPolicyResult.policy.policy_ids;
       const hasNoAgentPolicies = policyIds.length === 0;
       let onSaveNavigateTo: Parameters<ApplicationStart['navigateToApp']>;
       let onSaveQueryParams: CreatePackagePolicyRouteState['onSaveQueryParams'];
@@ -107,7 +102,7 @@ export const useOnSaveNavigate = (params: UseOnSaveNavigateParams) => {
             INTEGRATIONS_PLUGIN_ID,
             {
               path: getPath('integration_details_policies', {
-                pkgkey: pkgKeyFromPackageInfo(policy.package!),
+                pkgkey: pkgKeyFromPackageInfo(savedPolicyResult.policy.package!),
               }),
             },
           ];
@@ -144,7 +139,7 @@ export const useOnSaveNavigate = (params: UseOnSaveNavigateParams) => {
       if (options?.path) {
         const pathWithQueryString = appendOnSaveQueryParamsToPath({
           path: options.path,
-          policy,
+          savedPolicyResult,
           mappingOptions: onSaveQueryParams,
           paramsToApply,
         });
