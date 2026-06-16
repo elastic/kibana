@@ -32,10 +32,12 @@ export const indicatorsLinks: LinkItem = {
     {
       ...getSecuritySolutionLink<SecurityPageName>('intelligenceHub'),
       capabilities: [`${SECURITY_FEATURE_ID}.threat-intelligence`],
-    },
-    {
-      ...getSecuritySolutionLink<SecurityPageName>('correlationReport'),
-      capabilities: [`${SECURITY_FEATURE_ID}.threat-intelligence`],
+      links: [
+        {
+          ...getSecuritySolutionLink<SecurityPageName>('correlationReport'),
+          capabilities: [`${SECURITY_FEATURE_ID}.threat-intelligence`],
+        },
+      ],
     },
   ],
 };

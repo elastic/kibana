@@ -51,6 +51,8 @@ export interface TriagePick {
   candidate_id: string; // report_id
   confidence: number;
   justification: string;
+  vertex_scores: DiamondVertexScore;
+  overlap: number;
 }
 
 /** A hypothesis group from the triage LLM (debug/diagnostic only). */
@@ -65,6 +67,8 @@ export interface TriagedOutCandidate {
   /** LLM confidence if scored below the confidence floor; retrieval headline score otherwise. */
   score: number;
   reason: 'below_floor' | 'not_selected';
+  vertex_scores: DiamondVertexScore;
+  overlap: number;
 }
 
 export interface TriageDiamondCandidatesParams {
@@ -397,6 +401,11 @@ export const triageDiamondCandidates = async ({
     return { picks: [], groups: [], fallback_used: false, candidates_fed: 0, triaged_out: [] };
   }
 
+  const candidateMap = new Map<string, TriageCandidateInput>();
+  for (const c of capped) {
+    candidateMap.set(c.report_id, c);
+  }
+
   // 2. Assign short prompt labels (c01, c02, …) to avoid UUID echo errors.
   const labelWidth = String(capped.length).length;
   const labelMap = new Map<string, string>(); // label → report_id
@@ -472,10 +481,13 @@ export const triageDiamondCandidates = async ({
       const reportId = labelMap.get(entry.candidate_id);
       if (reportId && !seen.has(reportId)) {
         seen.add(reportId);
+        const src = candidateMap.get(reportId);
         const pick: TriagePick = {
           candidate_id: reportId,
           confidence: entry.confidence,
           justification: entry.justification,
+          vertex_scores: src?.vertex_scores ?? {},
+          overlap: src?.overlap ?? 0,
         };
         rawPicks.push(pick);
         mappedGroup.candidates.push({ ...pick });
@@ -495,7 +507,13 @@ export const triageDiamondCandidates = async ({
     logger.warn(`[ti:triage] no picks above floor=${confidenceFloor} — using top-10 rank fallback`);
     fallbackUsed = true;
     for (const c of capped.slice(0, 10)) {
-      picks.push({ candidate_id: c.report_id, confidence: 0.5, justification: '' });
+      picks.push({
+        candidate_id: c.report_id,
+        confidence: 0.5,
+        justification: '',
+        vertex_scores: c.vertex_scores,
+        overlap: c.overlap,
+      });
     }
   }
 
@@ -515,6 +533,8 @@ export const triageDiamondCandidates = async ({
         reason: (llmConf !== undefined
           ? 'below_floor'
           : 'not_selected') as TriagedOutCandidate['reason'],
+        vertex_scores: c.vertex_scores,
+        overlap: c.overlap,
       };
     });
 

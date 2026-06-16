@@ -11,7 +11,6 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedRelative } from '@kbn/i18n-react';
 import {
-  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonGroup,
@@ -23,9 +22,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiHorizontalRule,
   EuiIcon,
-  EuiLink,
   EuiLoadingSpinner,
   EuiModal,
   EuiModalBody,
@@ -35,15 +32,13 @@ import {
   useGeneratedHtmlId,
   EuiPageTemplate,
   EuiPanel,
-  EuiProgress,
   EuiSelect,
   EuiSpacer,
-  EuiStat,
   EuiText,
-  EuiTitle,
   EuiToolTip,
-  useEuiTheme,
 } from '@elastic/eui';
+import { SecurityPageName } from '@kbn/deeplinks-security';
+import { SecuritySolutionLinkButton } from '../../../../common/components/links';
 import {
   DASHBOARD_OVERVIEW_API_PATH,
   SYNTHESIZE_ADVISORY_API_PATH,
@@ -83,10 +78,9 @@ const emptyFilters: IntelligenceHubChipFilters = {
 const timeRangePresetLabel = (preset: TimeRangePresetId): string => {
   switch (preset) {
     case '24h':
-      return i18n.translate(
-        'xpack.securitySolution.threatIntelligence.app.timeRange24h',
-        { defaultMessage: 'Last 24 hours' }
-      );
+      return i18n.translate('xpack.securitySolution.threatIntelligence.app.timeRange24h', {
+        defaultMessage: 'Last 24 hours',
+      });
     case '7d':
       return i18n.translate('xpack.securitySolution.threatIntelligence.app.timeRange7d', {
         defaultMessage: 'Last 7 days',
@@ -232,10 +226,9 @@ export const IntelligenceHubPage: FC = () => {
         );
       } else {
         notifications.toasts.addSuccess(
-          i18n.translate(
-            'xpack.securitySolution.threatIntelligence.app.generateAdvisorySuccess',
-            { defaultMessage: 'Executive summary updated.' }
-          )
+          i18n.translate('xpack.securitySolution.threatIntelligence.app.generateAdvisorySuccess', {
+            defaultMessage: 'Executive summary updated.',
+          })
         );
         await fetchOverview();
       }
@@ -455,11 +448,24 @@ export const IntelligenceHubPage: FC = () => {
         pageTitle={i18n.translate('xpack.securitySolution.threatIntelligence.app.pageTitle', {
           defaultMessage: 'Intelligence Hub',
         })}
-        description={i18n.translate('xpack.securitySolution.threatIntelligence.app.pageDescription', {
-          defaultMessage: 'Threat reports from {timeRange}.',
-          values: { timeRange: timeRangePresetLabel(timeRangePreset) },
-        })}
+        description={i18n.translate(
+          'xpack.securitySolution.threatIntelligence.app.pageDescription',
+          {
+            defaultMessage: 'Threat reports from {timeRange}.',
+            values: { timeRange: timeRangePresetLabel(timeRangePreset) },
+          }
+        )}
         rightSideItems={[
+          <SecuritySolutionLinkButton
+            key="correlation"
+            deepLinkId={SecurityPageName.threatIntelligenceCorrelation}
+            iconType="inspect"
+            data-test-subj="intelligenceHubCorrelationBtn"
+          >
+            {i18n.translate('xpack.securitySolution.threatIntelligence.app.correlationReportBtn', {
+              defaultMessage: 'Correlation Report',
+            })}
+          </SecuritySolutionLinkButton>,
           <EuiFlexGroup
             key="refresh"
             gutterSize="s"
@@ -470,10 +476,9 @@ export const IntelligenceHubPage: FC = () => {
             <EuiFlexItem grow={false}>
               <EuiText size="xs" color="subdued" data-test-subj="threatIntelLastUpdated">
                 {isRefreshing ? (
-                  i18n.translate(
-                    'xpack.securitySolution.threatIntelligence.app.refreshingLabel',
-                    { defaultMessage: 'Refreshing…' }
-                  )
+                  i18n.translate('xpack.securitySolution.threatIntelligence.app.refreshingLabel', {
+                    defaultMessage: 'Refreshing…',
+                  })
                 ) : lastUpdatedAt ? (
                   <>
                     {i18n.translate(
@@ -1172,4 +1177,3 @@ const ScheduleDeliverModal: React.FC<{
     </EuiModal>
   );
 };
-

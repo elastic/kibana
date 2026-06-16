@@ -155,6 +155,30 @@ const toVertexSignal = (
 });
 
 // ---------------------------------------------------------------------------
+// ColMustardPawnIcon — brand mark; decorative (aria-hidden)
+// Inline SVG: sphere head atop a flared rounded base, fixed mustard yellow
+// so it reads as a brand colour in both light and dark themes.
+// ---------------------------------------------------------------------------
+
+const ColMustardPawnIcon: FC = () => (
+  <svg
+    width="26"
+    height="29"
+    viewBox="0 0 24 27"
+    aria-hidden="true"
+    focusable="false"
+    style={{ display: 'inline-block', verticalAlign: 'middle', marginLeft: '8px' }}
+  >
+    <circle cx="12" cy="5.2" r="3.9" fill="#D8A200" />
+    <path
+      d="M10.6 8.8 C10.4 11 10.1 12.6 9.6 14.4 C9 16.6 8 18.2 6.4 19.6 C5.4 20.4 4.4 20.9 4.4 21.8 C4.4 23.4 5.6 24 8 24 L16 24 C18.4 24 19.6 23.4 19.6 21.8 C19.6 20.9 18.6 20.4 17.6 19.6 C16 18.2 15 16.6 14.4 14.4 C13.9 12.6 13.6 11 13.4 8.8 Z"
+      fill="#D8A200"
+    />
+    <ellipse cx="12" cy="24" rx="8" ry="1.5" fill="#B5870A" />
+  </svg>
+);
+
+// ---------------------------------------------------------------------------
 // ExtractResultView
 // ---------------------------------------------------------------------------
 
@@ -191,6 +215,32 @@ const ExtractResultView: FC<{ result: ExtractDepthResult }> = ({ result }) => {
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
+  );
+};
+
+// ---------------------------------------------------------------------------
+// VertexScoresBadges — shared between KnnResultView and TriageResultView
+// ---------------------------------------------------------------------------
+
+const VertexScoresBadges: FC<{ vertexScores: Record<string, number> | undefined }> = ({
+  vertexScores,
+}) => {
+  const entries = Object.entries(vertexScores ?? {});
+  if (entries.length === 0) {
+    return (
+      <EuiText size="xs" color="subdued">
+        {i18nText.knnAnchorOnly()}
+      </EuiText>
+    );
+  }
+  return (
+    <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+      {entries.map(([k, v]) => (
+        <EuiFlexItem key={k} grow={false}>
+          <EuiBadge color="hollow">{`${k.slice(0, 3).toUpperCase()}: ${v.toFixed(2)}`}</EuiBadge>
+        </EuiFlexItem>
+      ))}
+    </EuiFlexGroup>
   );
 };
 
@@ -243,27 +293,7 @@ const KnnResultView: FC<{ result: KnnDepthResult }> = ({ result }) => {
       },
       {
         name: i18nText.knnColVertexScores(),
-        render: (item: MergedCandidate) => {
-          const entries = Object.entries(item.vertex_scores ?? {});
-          if (entries.length === 0) {
-            return (
-              <EuiText size="xs" color="subdued">
-                {i18nText.knnAnchorOnly()}
-              </EuiText>
-            );
-          }
-          return (
-            <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-              {entries.map(([k, v]) => (
-                <EuiFlexItem key={k} grow={false}>
-                  <EuiBadge color="hollow">
-                    {`${k.slice(0, 3).toUpperCase()}: ${v.toFixed(2)}`}
-                  </EuiBadge>
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
-          );
-        },
+        render: (item: MergedCandidate) => <VertexScoresBadges vertexScores={item.vertex_scores} />,
       },
     ],
     [candidate_meta]
@@ -373,6 +403,10 @@ const TriageResultView: FC<{ result: TriageDepthResult }> = ({ result }) => {
         render: (value: TriagePick['confidence']) => value.toFixed(2),
       },
       {
+        name: i18nText.knnColVertexScores(),
+        render: (item: TriagePick) => <VertexScoresBadges vertexScores={item.vertex_scores} />,
+      },
+      {
         field: 'justification',
         name: i18nText.triageColJustification(),
       },
@@ -392,6 +426,10 @@ const TriageResultView: FC<{ result: TriageDepthResult }> = ({ result }) => {
         name: i18nText.triageColScore(),
         width: '80px',
         render: (value: number) => (value > 0 ? value.toFixed(2) : '—'),
+      },
+      {
+        name: i18nText.knnColVertexScores(),
+        render: (item: TriagedOut) => <VertexScoresBadges vertexScores={item.vertex_scores} />,
       },
       {
         field: 'reason',
@@ -833,10 +871,15 @@ export const CorrelationReportPage: FC = () => {
     return (
       <EuiPageTemplate restrictWidth={false} grow>
         <EuiPageTemplate.Header
-          pageTitle={i18n.translate(
-            'xpack.securitySolution.threatIntelligence.correlationReport.pageTitle',
-            { defaultMessage: 'Correlation Report' }
-          )}
+          pageTitle={
+            <>
+              {i18n.translate(
+                'xpack.securitySolution.threatIntelligence.correlationReport.pageTitle',
+                { defaultMessage: 'Col Mustard — Threat Correlation' }
+              )}
+              <ColMustardPawnIcon />
+            </>
+          }
         />
         <EuiPageTemplate.Section>
           <EuiCallOut
@@ -866,10 +909,15 @@ export const CorrelationReportPage: FC = () => {
   return (
     <EuiPageTemplate restrictWidth={false} grow>
       <EuiPageTemplate.Header
-        pageTitle={i18n.translate(
-          'xpack.securitySolution.threatIntelligence.correlationReport.pageTitle',
-          { defaultMessage: 'Correlation Report' }
-        )}
+        pageTitle={
+          <>
+            {i18n.translate(
+              'xpack.securitySolution.threatIntelligence.correlationReport.pageTitle',
+              { defaultMessage: 'Col Mustard — Threat Correlation' }
+            )}
+            <ColMustardPawnIcon />
+          </>
+        }
         description={i18n.translate(
           'xpack.securitySolution.threatIntelligence.correlationReport.pageDescription',
           {
