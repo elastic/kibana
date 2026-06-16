@@ -45,10 +45,8 @@ describe('useCreateRule', () => {
     },
     timeField: '@timestamp',
     schedule: { every: '5m', lookback: '1m' },
-    evaluation: {
-      query: {
-        base: 'FROM logs | LIMIT 10',
-      },
+    query: {
+      breach: 'FROM logs | LIMIT 10',
     },
     grouping: { fields: ['host.name'] },
     stateTransitionAlertDelayMode: 'immediate',
@@ -65,10 +63,9 @@ describe('useCreateRule', () => {
     },
     time_field: '@timestamp',
     schedule: { every: '5m', lookback: '1m' },
-    evaluation: {
-      query: {
-        base: 'FROM logs | LIMIT 10',
-      },
+    query: {
+      format: 'standalone',
+      breach: { query: 'FROM logs | LIMIT 10' },
     },
     grouping: { fields: ['host.name'] },
   };
@@ -195,10 +192,8 @@ describe('useCreateRule', () => {
       },
       timeField: '@timestamp',
       schedule: { every: '5m', lookback: '1m' },
-      evaluation: {
-        query: {
-          base: 'FROM logs | LIMIT 10',
-        },
+      query: {
+        breach: 'FROM logs | LIMIT 10',
       },
       stateTransitionAlertDelayMode: 'duration',
       stateTransitionRecoveryDelayMode: 'immediate',
@@ -235,10 +230,8 @@ describe('useCreateRule', () => {
       },
       timeField: '@timestamp',
       schedule: { every: '5m', lookback: '1m' },
-      evaluation: {
-        query: {
-          base: 'FROM logs | LIMIT 10',
-        },
+      query: {
+        breach: 'FROM logs | LIMIT 10',
       },
       stateTransitionAlertDelayMode: 'immediate',
       stateTransitionRecoveryDelayMode: 'immediate',
@@ -270,10 +263,8 @@ describe('useCreateRule', () => {
       },
       timeField: '@timestamp',
       schedule: { every: '5m', lookback: '1m' },
-      evaluation: {
-        query: {
-          base: 'FROM logs | LIMIT 10',
-        },
+      query: {
+        breach: 'FROM logs | LIMIT 10',
       },
       stateTransitionAlertDelayMode: 'immediate',
       stateTransitionRecoveryDelayMode: 'immediate',
@@ -303,10 +294,8 @@ describe('useCreateRule', () => {
       },
       timeField: '@timestamp',
       schedule: { every: '5m', lookback: '1m' },
-      evaluation: {
-        query: {
-          base: 'FROM logs | LIMIT 10',
-        },
+      query: {
+        breach: 'FROM logs | LIMIT 10',
       },
       stateTransitionAlertDelayMode: 'breaches',
       stateTransitionRecoveryDelayMode: 'immediate',
@@ -350,10 +339,8 @@ describe('useCreateRule', () => {
       },
       timeField: 'event.timestamp',
       schedule: { every: '1m', lookback: '1m' },
-      evaluation: {
-        query: {
-          base: 'FROM metrics | WHERE cpu > 90',
-        },
+      query: {
+        breach: 'FROM metrics | WHERE cpu > 90',
       },
       grouping: { fields: ['host.name', 'service.name'] },
       stateTransitionAlertDelayMode: 'immediate',
@@ -370,10 +357,9 @@ describe('useCreateRule', () => {
       },
       time_field: 'event.timestamp',
       schedule: { every: '1m', lookback: '1m' },
-      evaluation: {
-        query: {
-          base: 'FROM metrics | WHERE cpu > 90',
-        },
+      query: {
+        format: 'standalone',
+        breach: { query: 'FROM metrics | WHERE cpu > 90' },
       },
       grouping: { fields: ['host.name', 'service.name'] },
     };
@@ -386,89 +372,6 @@ describe('useCreateRule', () => {
       expect(http.post).toHaveBeenCalledWith(ALERTING_V2_RULE_API_PATH, {
         body: JSON.stringify(expectedPayload),
       });
-    });
-  });
-
-  it('maps recovery_policy with base query', async () => {
-    const http = httpServiceMock.createStartContract();
-    const notifications = notificationServiceMock.createStartContract();
-
-    http.post.mockResolvedValue({ id: 'rule-790', metadata: { name: 'Full Recovery Rule' } });
-
-    const { result } = renderHook(() => useCreateRule({ http, notifications }), {
-      wrapper: createQueryClientWrapper(),
-    });
-
-    const formData: FormValues = {
-      kind: 'alert',
-      metadata: { name: 'Full Recovery Rule', enabled: true },
-      timeField: '@timestamp',
-      schedule: { every: '5m', lookback: '1m' },
-      evaluation: {
-        query: {
-          base: 'FROM logs | STATS count() BY host',
-        },
-      },
-      recoveryPolicy: {
-        type: 'query',
-        query: {
-          base: 'FROM logs | STATS count() BY host | WHERE count <= 10',
-        },
-      },
-      stateTransitionAlertDelayMode: 'immediate',
-      stateTransitionRecoveryDelayMode: 'immediate',
-    };
-
-    await act(async () => {
-      result.current.createRule(formData);
-    });
-
-    await waitFor(() => {
-      const payload = JSON.parse(
-        (http.post.mock.calls[0] as unknown as [string, { body: string }])[1].body
-      );
-      expect(payload.recovery_policy).toEqual({
-        type: 'query',
-        query: {
-          base: 'FROM logs | STATS count() BY host | WHERE count <= 10',
-        },
-      });
-    });
-  });
-
-  it('omits recovery_policy query when type is no_breach', async () => {
-    const http = httpServiceMock.createStartContract();
-    const notifications = notificationServiceMock.createStartContract();
-
-    http.post.mockResolvedValue({ id: 'rule-791', metadata: { name: 'No Breach Rule' } });
-
-    const { result } = renderHook(() => useCreateRule({ http, notifications }), {
-      wrapper: createQueryClientWrapper(),
-    });
-
-    const formData: FormValues = {
-      kind: 'alert',
-      metadata: { name: 'No Breach Rule', enabled: true },
-      timeField: '@timestamp',
-      schedule: { every: '5m', lookback: '1m' },
-      evaluation: {
-        query: { base: 'FROM logs | STATS count() BY host' },
-      },
-      recoveryPolicy: { type: 'no_breach' },
-      stateTransitionAlertDelayMode: 'immediate',
-      stateTransitionRecoveryDelayMode: 'immediate',
-    };
-
-    await act(async () => {
-      result.current.createRule(formData);
-    });
-
-    await waitFor(() => {
-      const payload = JSON.parse(
-        (http.post.mock.calls[0] as unknown as [string, { body: string }])[1].body
-      );
-      expect(payload.recovery_policy).toEqual({ type: 'no_breach' });
-      expect(payload.recovery_policy.query).toBeUndefined();
     });
   });
 });
