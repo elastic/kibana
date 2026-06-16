@@ -20,13 +20,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const listingTable = getService('listingTable');
   const kibanaServer = getService('kibanaServer');
-  const find = getService('find');
-
-  const hasFocus = async (testSubject: string) => {
-    const targetElement = await testSubjects.find(testSubject);
-    const activeElement = await find.activeElement();
-    return (await targetElement._webElement.getId()) === (await activeElement._webElement.getId());
-  };
 
   describe('Lens Accessibility', () => {
     const lensChartName = 'MyLensChart';
@@ -195,18 +188,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visualize.clickVisType('lens');
         await timePicker.ensureHiddenNoDataPopover();
         await lens.createLayer();
-        expect(await hasFocus('lns-layerPanel-1')).to.be(true);
+        expect(await testSubjects.hasFocus('lns-layerPanel-1')).to.be(true);
       });
       it('should focus the remaining layer when the first is removed', async () => {
         await lens.removeLayer(0);
-        expect(await hasFocus('lns-layerPanel-0')).to.be(true);
+        expect(await testSubjects.hasFocus('lns-layerPanel-0')).to.be(true);
         await lens.createLayer();
         await lens.removeLayer(1);
-        expect(await hasFocus('lns-layerPanel-0')).to.be(true);
+        expect(await testSubjects.hasFocus('lns-layerPanel-0')).to.be(true);
       });
       it('should focus the only layer when resetting the layer', async () => {
         await lens.removeLayer();
-        expect(await hasFocus('lns-layerPanel-0')).to.be(true);
+        expect(await testSubjects.hasFocus('lns-layerPanel-0')).to.be(true);
       });
     });
   });
