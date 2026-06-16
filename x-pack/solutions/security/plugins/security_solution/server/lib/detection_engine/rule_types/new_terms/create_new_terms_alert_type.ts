@@ -15,7 +15,7 @@ import { SERVER_APP_ID } from '../../../../../common/constants';
 import { NewTermsRuleParams } from '../../rule_schema';
 import type { SecurityAlertType } from '../types';
 import { validateIndexPatterns } from '../utils';
-import { validateHistoryWindowStart } from './utils';
+import { hasCrossClusterIndices, validateHistoryWindowStart } from './utils';
 import { executeNewTermsAggregationApproach } from './execute_new_terms_aggregation_approach';
 import { executeNewTermsEsqlApproach } from './execute_new_terms_esql_approach';
 
@@ -71,14 +71,17 @@ export const createNewTermsAlertType = (): SecurityAlertType<
     producer: SERVER_APP_ID,
     solution: 'security',
     async executor(execOptions) {
-      const { licensing } = execOptions.sharedParams;
+      const { licensing, inputIndex } = execOptions.sharedParams;
 
-      // Platinum (and above) tier runs the new ES|QL + _msearch based implementation, which is
-      // significantly faster. All other tiers run the current aggregation based implementation.
+      // The ES|QL + _msearch based implementation is significantly faster, so we prefer it.
+      // The only licensing constraint is that ES|QL cross-cluster search requires an Enterprise
+      // license. So we run the ES|QL approach when the rule queries only local indices (safe on
+      // any tier), or when an Enterprise license is present (required for cross-cluster indices).
+      // Otherwise we fall back to the aggregation based implementation.
       const license = await firstValueFrom(licensing.license$);
-      const hasPlatinumLicense = license.hasAtLeast('platinum');
+      const hasEnterpriseLicense = license.hasAtLeast('enterprise');
 
-      if (hasPlatinumLicense) {
+      if (hasEnterpriseLicense || !hasCrossClusterIndices(inputIndex)) {
         return executeNewTermsEsqlApproach(execOptions);
       }
 

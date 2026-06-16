@@ -27,6 +27,15 @@ export const parseDateString = ({
   return parsedDate;
 };
 
+/**
+ * Returns true if any of the provided index patterns targets a remote cluster.
+ *
+ * Cross-cluster search (CCS) targets use the `<cluster>:<index>` syntax, so any
+ * entry containing a colon is treated as cross-cluster (e.g. `remote:logs-*`).
+ */
+export const hasCrossClusterIndices = (indices: string[] = []): boolean =>
+  indices.some((index) => index.includes(':'));
+
 export const validateHistoryWindowStart = ({
   historyWindowStart,
   from,
