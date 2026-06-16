@@ -90,7 +90,7 @@ result. If analysts have closed alerts from this rule with
 \`benign_positive\`, that is direct evidence of a confirmed FP pattern:
 
 - **>= 30% of alerts carry FP/benign-positive dispositions**: strong
-  confirmation; proceed directly to a \`tune-rule\` recommendation without
+  confirmation; proceed directly to a remediation suggestion without
   waiting for further evidence.
 - **Some FP dispositions mixed with open alerts**: treat as supporting evidence;
   combine with entity analysis below.
@@ -114,56 +114,43 @@ positive**, not a rule defect.
 
 **Classify root cause:**
 
-| Pattern observed | Root cause | Recommended action |
+| Pattern observed | Root cause | Suggested remediation (user action in the UI) |
 |---|---|---|
-| Many alerts closed with \`false_positive\` or \`benign_positive\` workflow_reason | Confirmed FP by analyst disposition | Add exceptions for top entities or narrow the query via \`tune-rule\` |
-| One or two entities generating >= 70% of alerts | Benign activity from known entities | Add an exception for those entities via \`tune-rule\` |
-| Alerts spread across many entities, query very broad | Overly broad query or missing index filter | Propose query refinement via \`tune-rule\` |
-| Alert volume spikes during business hours only | Noisy but legitimate behavior | Add alert suppression rule via \`tune-rule\` |
-| Threshold is too low for the environment baseline | Threshold misconfiguration | Propose threshold increase via \`tune-rule\` |
+| Many alerts closed with \`false_positive\` or \`benign_positive\` workflow_reason | Confirmed FP by analyst disposition | Suggest adding an exception for the top entities, or narrowing the rule query, in the Detection Rules UI |
+| One or two entities generating >= 70% of alerts | Benign activity from known entities | Suggest adding an exception for those entities in the Detection Rules UI |
+| Alerts spread across many entities, query very broad | Overly broad query or missing index filter | Suggest narrowing the query or adding an index filter in the Detection Rules UI |
+| Alert volume spikes during business hours only | Noisy but legitimate behavior | Suggest configuring alert suppression in the Detection Rules UI |
+| Threshold is too low for the environment baseline | Threshold misconfiguration | Suggest raising the threshold in the Detection Rules UI |
 | No clear pattern | Insufficient data | Request a wider time window or manual review |
 
 ### Step 4: Produce Output
 
-All output is either **informational** (diagnosis + explanation) or
-**actionable** (a \`proposed_changes\` payload for \`tune-rule\`). Never apply
-mutations directly. All write operations belong to \`tune-rule\`.
+This skill is **read-only and diagnostic**. It explains the noise and suggests
+remediations the user can perform in the Detection Rules UI. It never applies,
+offers to apply, or emits a structured proposal for a rule change, and it does
+not hand off to a rule-mutation skill.
 
 - Alert volume summary: total count, trend over the window, top entities.
 - Root cause statement and classification (FP vs. benign TP vs. rule defect).
-- \`proposed_changes\` payload for \`tune-rule\`.
-- Include the estimated alert volume reduction where calculable.
+- Suggested remediation as plain text, phrased as a user action in the Detection
+  Rules UI (e.g., "In the Detection Rules UI you can add an exception for host
+  \`build-agent-03\` to stop these alerts.").
+- Where the top-entity concentration supports it, note the approximate share of
+  alerts the suggested remediation would remove (e.g., one host accounting for
+  70% of alerts).
 
 ---
 
-## Referral Conditions
+## Remediation Guidance
 
-### Refer to \`tune-rule\`
+This skill does not change rules and has no in-chat rule-mutation capability.
+When you have identified a fix:
 
-Emit a \`proposed_changes\` payload when:
-
-- A concrete, actionable fix has been identified (exception, threshold change,
-  schedule change, or index pattern correction).
-- The user has confirmed they want to proceed with the proposed change.
-
-If the identified fix requires a full query rewrite rather than a field-level
-patch, refer to \`detection-rule-edit\` instead of emitting a \`proposed_changes\`
-payload.
-
-Never call mutation tools directly. The payload format is:
-
-\`\`\`json
-{
-  "rule_id": "<id from attachment>",
-  "proposed_changes": { "<field>": "<new value>" },
-  "rationale": "<one sentence explaining why>",
-  "estimated_impact": "<e.g., estimated 80% alert reduction>"
-}
-\`\`\`
-
-### Refer to \`detection-rule-edit\`
-
-Refer when the fix requires a substantive query rewrite, not a field-level patch.
+- Describe it in plain text and tell the user how to perform it themselves in the
+  Detection Rules UI (e.g., add an exception, narrow the query, adjust the
+  threshold, or configure alert suppression).
+- Do **not** offer to make the change, claim you can change the rule, hand off to
+  a mutation skill, or emit a structured change proposal.
 
 ---
 
@@ -172,7 +159,8 @@ Refer when the fix requires a substantive query rewrite, not a field-level patch
 1. **Summary** (1-3 sentences): what the rule is doing and what the noise problem is.
 2. **Evidence** (bulleted): specific signals from the alert data that support the diagnosis.
 3. **Root cause**: one clear statement.
-4. **Recommended action**: next step, with \`proposed_changes\` payload if needed.
+4. **Suggested remediation**: a plain-text suggestion the user can carry out in
+   the Detection Rules UI. Never applied or offered as an in-chat change.
 
 ---
 
@@ -181,7 +169,7 @@ Refer when the fix requires a substantive query rewrite, not a field-level patch
 If the alert data is insufficient for a confident diagnosis:
 1. Surface raw evidence: alert count, top entities, rule query and index patterns (from the attachment).
 2. Provide a manual investigation checklist appropriate to the observed symptoms.
-3. Do not emit a \`proposed_changes\` payload. State clearly: "I wasn't able to
+3. Do not suggest a specific remediation. State clearly: "I wasn't able to
    determine the root cause from available data. Here is the evidence for manual review."
 `;
 
