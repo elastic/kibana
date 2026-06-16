@@ -10,129 +10,105 @@ import React from 'react';
 import { EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { AlertStatus } from '@kbn/rule-data-utils';
+import type { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import {
-  ALERT_STATUS_ACTIVE,
-  ALERT_STATUS_DELAYED,
-  ALERT_STATUS_RECOVERED,
-  ALERT_STATUS_UNTRACKED,
-} from '@kbn/rule-data-utils';
-import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
+  ALERT_STATUS_VALUES,
+  ANOMALY_SEVERITY_VALUES,
+  CONNECTION_VALUES,
+  SLO_STATUS_VALUES,
+  type AlertStatusValue,
+  type AnomalySeverityValue,
+  type ConnectionValue,
+  type SloStatusValue,
+} from '../../../../common/embeddable/service_map_embeddable_schema';
 import type { SloStatus } from '../../../../common/service_inventory';
 import type { ConnectionFilter } from './apply_service_map_visibility';
 import type { ServiceMapFilterOptionCounts } from './service_map_filter_option_counts';
 
+// The allowed values are single-sourced in `common/` (runtime schema validation) and consumed
+// below to build the UI options, so a value can't pass the UI but fail dashboard-save validation,
+// or vice versa (review #14). The `Record<XxxValue, string>` label maps below also force every
+// shared value to have a label (a missing one is a compile error).
+
 /**
- * Static option lists for the four view-filter comboboxes. Lifted out of
- * `service_map_options_panel.tsx` so the embeddable edit flyout can reuse them
- * without dragging the panel UI into a circular import.
+ * Static option lists for the four view-filter comboboxes, driven by the shared value arrays in
+ * `common/`. Lifted out of `service_map_options_panel.tsx` so the embeddable edit flyout can reuse
+ * them without dragging the panel UI into a circular import.
  */
-export const CONNECTION_FILTER_OPTIONS: Array<{ value: ConnectionFilter; label: string }> = [
-  {
-    value: 'orphaned',
-    label: i18n.translate('xpack.apm.serviceMap.controls.connectionOrphaned', {
-      defaultMessage: 'No dependencies',
-    }),
-  },
-  {
-    value: 'connected',
-    label: i18n.translate('xpack.apm.serviceMap.controls.connectionConnected', {
-      defaultMessage: 'With dependencies',
-    }),
-  },
-];
+const CONNECTION_LABELS: Record<ConnectionValue, string> = {
+  orphaned: i18n.translate('xpack.apm.serviceMap.controls.connectionOrphaned', {
+    defaultMessage: 'No dependencies',
+  }),
+  connected: i18n.translate('xpack.apm.serviceMap.controls.connectionConnected', {
+    defaultMessage: 'With dependencies',
+  }),
+};
+export const CONNECTION_FILTER_OPTIONS: Array<{ value: ConnectionFilter; label: string }> =
+  CONNECTION_VALUES.map((value) => ({ value, label: CONNECTION_LABELS[value] }));
 
-export const ALERT_STATUS_OPTIONS: Array<{ value: AlertStatus; label: string }> = [
-  {
-    value: ALERT_STATUS_ACTIVE,
-    label: i18n.translate('xpack.apm.serviceMap.controls.alertStatusActive', {
-      defaultMessage: 'Active',
-    }),
-  },
-  {
-    value: ALERT_STATUS_RECOVERED,
-    label: i18n.translate('xpack.apm.serviceMap.controls.alertStatusRecovered', {
-      defaultMessage: 'Recovered',
-    }),
-  },
-  {
-    value: ALERT_STATUS_UNTRACKED,
-    label: i18n.translate('xpack.apm.serviceMap.controls.alertStatusUntracked', {
-      defaultMessage: 'Untracked',
-    }),
-  },
-  {
-    value: ALERT_STATUS_DELAYED,
-    label: i18n.translate('xpack.apm.serviceMap.controls.alertStatusDelayed', {
-      defaultMessage: 'Delayed',
-    }),
-  },
-];
+const ALERT_STATUS_LABELS: Record<AlertStatusValue, string> = {
+  active: i18n.translate('xpack.apm.serviceMap.controls.alertStatusActive', {
+    defaultMessage: 'Active',
+  }),
+  recovered: i18n.translate('xpack.apm.serviceMap.controls.alertStatusRecovered', {
+    defaultMessage: 'Recovered',
+  }),
+  untracked: i18n.translate('xpack.apm.serviceMap.controls.alertStatusUntracked', {
+    defaultMessage: 'Untracked',
+  }),
+  delayed: i18n.translate('xpack.apm.serviceMap.controls.alertStatusDelayed', {
+    defaultMessage: 'Delayed',
+  }),
+};
+export const ALERT_STATUS_OPTIONS: Array<{ value: AlertStatus; label: string }> =
+  ALERT_STATUS_VALUES.map((value) => ({
+    value: value as AlertStatus,
+    label: ALERT_STATUS_LABELS[value],
+  }));
 
-export const SLO_STATUS_OPTIONS: Array<{ value: SloStatus; label: string }> = [
-  {
-    value: 'healthy',
-    label: i18n.translate('xpack.apm.serviceMap.controls.sloHealthy', {
-      defaultMessage: 'Healthy',
-    }),
-  },
-  {
-    value: 'degrading',
-    label: i18n.translate('xpack.apm.serviceMap.controls.sloDegrading', {
-      defaultMessage: 'Degrading',
-    }),
-  },
-  {
-    value: 'violated',
-    label: i18n.translate('xpack.apm.serviceMap.controls.sloViolated', {
-      defaultMessage: 'Violated',
-    }),
-  },
-  {
-    value: 'noData',
-    label: i18n.translate('xpack.apm.serviceMap.controls.sloNoData', {
-      defaultMessage: 'No data',
-    }),
-  },
-];
+const SLO_STATUS_LABELS: Record<SloStatusValue, string> = {
+  healthy: i18n.translate('xpack.apm.serviceMap.controls.sloHealthy', {
+    defaultMessage: 'Healthy',
+  }),
+  degrading: i18n.translate('xpack.apm.serviceMap.controls.sloDegrading', {
+    defaultMessage: 'Degrading',
+  }),
+  violated: i18n.translate('xpack.apm.serviceMap.controls.sloViolated', {
+    defaultMessage: 'Violated',
+  }),
+  noData: i18n.translate('xpack.apm.serviceMap.controls.sloNoData', {
+    defaultMessage: 'No data',
+  }),
+};
+export const SLO_STATUS_OPTIONS: Array<{ value: SloStatus; label: string }> = SLO_STATUS_VALUES.map(
+  (value) => ({ value, label: SLO_STATUS_LABELS[value] })
+);
 
-export const ANOMALY_SEVERITY_OPTIONS: Array<{ value: ML_ANOMALY_SEVERITY; label: string }> = [
-  {
-    value: ML_ANOMALY_SEVERITY.CRITICAL,
-    label: i18n.translate('xpack.apm.serviceMap.controls.anomalySeverityCritical', {
-      defaultMessage: 'Critical',
-    }),
-  },
-  {
-    value: ML_ANOMALY_SEVERITY.MAJOR,
-    label: i18n.translate('xpack.apm.serviceMap.controls.anomalySeverityMajor', {
-      defaultMessage: 'Major',
-    }),
-  },
-  {
-    value: ML_ANOMALY_SEVERITY.MINOR,
-    label: i18n.translate('xpack.apm.serviceMap.controls.anomalySeverityMinor', {
-      defaultMessage: 'Minor',
-    }),
-  },
-  {
-    value: ML_ANOMALY_SEVERITY.WARNING,
-    label: i18n.translate('xpack.apm.serviceMap.controls.anomalySeverityWarning', {
-      defaultMessage: 'Warning',
-    }),
-  },
-  {
-    value: ML_ANOMALY_SEVERITY.LOW,
-    label: i18n.translate('xpack.apm.serviceMap.controls.anomalySeverityLow', {
-      defaultMessage: 'Low',
-    }),
-  },
-  {
-    value: ML_ANOMALY_SEVERITY.UNKNOWN,
-    label: i18n.translate('xpack.apm.serviceMap.controls.anomalySeverityUnknown', {
-      defaultMessage: 'Unknown',
-    }),
-  },
-];
+const ANOMALY_SEVERITY_LABELS: Record<AnomalySeverityValue, string> = {
+  critical: i18n.translate('xpack.apm.serviceMap.controls.anomalySeverityCritical', {
+    defaultMessage: 'Critical',
+  }),
+  major: i18n.translate('xpack.apm.serviceMap.controls.anomalySeverityMajor', {
+    defaultMessage: 'Major',
+  }),
+  minor: i18n.translate('xpack.apm.serviceMap.controls.anomalySeverityMinor', {
+    defaultMessage: 'Minor',
+  }),
+  warning: i18n.translate('xpack.apm.serviceMap.controls.anomalySeverityWarning', {
+    defaultMessage: 'Warning',
+  }),
+  low: i18n.translate('xpack.apm.serviceMap.controls.anomalySeverityLow', {
+    defaultMessage: 'Low',
+  }),
+  unknown: i18n.translate('xpack.apm.serviceMap.controls.anomalySeverityUnknown', {
+    defaultMessage: 'Unknown',
+  }),
+};
+export const ANOMALY_SEVERITY_OPTIONS: Array<{ value: ML_ANOMALY_SEVERITY; label: string }> =
+  ANOMALY_SEVERITY_VALUES.map((value) => ({
+    value: value as ML_ANOMALY_SEVERITY,
+    label: ANOMALY_SEVERITY_LABELS[value],
+  }));
 
 interface DecoratedOption<V extends string> {
   label: string;
