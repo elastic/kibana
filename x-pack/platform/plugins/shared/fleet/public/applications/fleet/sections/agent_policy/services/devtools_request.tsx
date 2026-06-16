@@ -12,11 +12,13 @@ import {
   formatInputs,
   formatVars,
 } from '../../../../../../common/services/simplified_package_policy_helper';
+import { detectTargetCsp } from '../../../../../../common/services/cloud_connectors';
 import type {
   NewAgentPolicy,
   NewPackagePolicy,
   UpdatePackagePolicy,
   UpdateAgentPolicyRequest,
+  RegistryVarGroup,
 } from '../../../types';
 import { canUseMultipleAgentPolicies } from '../../../hooks';
 import { agentlessPolicyRouteService } from '../../../../../../common/services';
@@ -68,8 +70,14 @@ export function generateCreatePackagePolicyDevToolsRequest(
 // TODO: Replace this omit-based approach with a pick-based toNewAgentlessPolicy()
 // mapper shared with form.tsx.
 export function generateCreateAgentlessPolicyDevToolsRequest(
-  packagePolicy: NewPackagePolicy & { force?: boolean; create_dataset_templates?: boolean }
+  packagePolicy: NewPackagePolicy & { force?: boolean; create_dataset_templates?: boolean },
+  varGroups?: RegistryVarGroup[]
 ) {
+  // Mirror the form submission path: detect the target cloud provider from
+  // var_groups or inputs so the generated request matches the actual UI request
+  // (target_csp is required for var_groups-based cloud connector creation).
+  const targetCsp = detectTargetCsp(packagePolicy, varGroups);
+
   return generateKibanaDevToolsRequest('POST', agentlessPolicyRouteService.getCreatePath(), {
     package: formatPackage(packagePolicy.package),
     ...omit(
@@ -95,6 +103,7 @@ export function generateCreateAgentlessPolicyDevToolsRequest(
     ...(packagePolicy.supports_cloud_connector && {
       cloud_connector: {
         enabled: true,
+        ...(targetCsp && { target_csp: targetCsp }),
         ...(packagePolicy.cloud_connector_id && {
           cloud_connector_id: packagePolicy.cloud_connector_id,
         }),
