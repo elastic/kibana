@@ -56,7 +56,7 @@ export const ExecutionHistorySearchBar = ({
   );
 
   return (
-    <EuiFlexGroup gutterSize="s" direction="row" responsive={false}>
+    <EuiFlexGroup gutterSize="s" direction="row" responsive={false} css={{ flexGrow: 0 }}>
       <EuiFlexItem grow>
         <EuiFieldSearch
           compressed
