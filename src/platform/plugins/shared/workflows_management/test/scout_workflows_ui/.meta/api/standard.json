@@ -1,5 +1,5 @@
 {
-  "sha1": "797ab49d6973f4763ff89ca86eda20c939416632",
+  "sha1": "ca38290d83a3b2985c21aa9effa97adab2cc7587",
   "tests": [
     {
       "id": "b2eaaaa0cf33c26-d5cddc6b883a994",
@@ -191,7 +191,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_execution/concurrency_control.spec.ts",
-        "line": 110,
+        "line": 111,
         "column": 14
       }
     },
@@ -217,7 +217,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_execution/concurrency_control.spec.ts",
-        "line": 142,
+        "line": 143,
         "column": 14
       }
     },
@@ -244,6 +244,110 @@
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_execution/hard_delete_race_condition.spec.ts",
         "line": 95,
+        "column": 12
+      }
+    },
+    {
+      "id": "5056b49ce700453-775280f60f1f363",
+      "title": "kibana.request step execution invokes an internal API with a body successfully",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_execution/kibana_request_step.spec.ts",
+        "line": 146,
+        "column": 12
+      }
+    },
+    {
+      "id": "5056b49ce700453-112969a4aa2e06f",
+      "title": "kibana.request step execution invokes a public API without a body successfully",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_execution/kibana_request_step.spec.ts",
+        "line": 168,
+        "column": 12
+      }
+    },
+    {
+      "id": "5056b49ce700453-d7f3506e77fa66a",
+      "title": "kibana.request step execution fails when missing required body",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_execution/kibana_request_step.spec.ts",
+        "line": 193,
+        "column": 12
+      }
+    },
+    {
+      "id": "5056b49ce700453-0dce0a0a9aa4653",
+      "title": "kibana.request step execution fails when sending an invalid body payload",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_execution/kibana_request_step.spec.ts",
+        "line": 207,
         "column": 12
       }
     },
@@ -347,7 +451,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_execution/workflow_composition.spec.ts",
-        "line": 165,
+        "line": 162,
         "column": 12
       }
     },
@@ -373,7 +477,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_execution/workflow_composition.spec.ts",
-        "line": 193,
+        "line": 190,
         "column": 12
       }
     },
@@ -399,14 +503,14 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_execution/workflow_composition.spec.ts",
-        "line": 208,
+        "line": 205,
         "column": 12
       }
     },
     {
       "id": "5c91fe961842041-6824e65248ebe46",
       "title": "Workflow error trigger (workflows.failed) when a workflow fails, a workflow subscribed to workflows.failed runs and receives the event",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -425,14 +529,14 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_execution/workflow_error_trigger.spec.ts",
-        "line": 145,
+        "line": 181,
         "column": 14
       }
     },
     {
       "id": "5c91fe961842041-71ac8908c1a2400",
       "title": "Workflow error trigger (workflows.failed) filter by workflow name: handler runs when name matches condition",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -451,14 +555,14 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_execution/workflow_error_trigger.spec.ts",
-        "line": 177,
+        "line": 213,
         "column": 14
       }
     },
     {
       "id": "5c91fe961842041-0bf21c42a062476",
       "title": "Workflow error trigger (workflows.failed) filter by workflow name: handler does not run when name does not match",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -477,14 +581,14 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_execution/workflow_error_trigger.spec.ts",
-        "line": 195,
+        "line": 231,
         "column": 14
       }
     },
     {
       "id": "5c91fe961842041-73f60649b75b068",
       "title": "Workflow error trigger (workflows.failed) filter by failed step: handler runs when event.error.stepId matches condition",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -503,7 +607,33 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_execution/workflow_error_trigger.spec.ts",
-        "line": 227,
+        "line": 263,
+        "column": 14
+      }
+    },
+    {
+      "id": "5c91fe961842041-059edfdbb3b7651",
+      "title": "Workflow error trigger (workflows.failed) async: parent completes immediately while async child fails and emits workflows.failed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_execution/workflow_error_trigger.spec.ts",
+        "line": 291,
         "column": 14
       }
     },
@@ -529,7 +659,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_management/get_aggs.spec.ts",
-        "line": 73,
+        "line": 74,
         "column": 12
       }
     },
@@ -555,7 +685,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_management/get_aggs.spec.ts",
-        "line": 92,
+        "line": 93,
         "column": 12
       }
     },
@@ -581,7 +711,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_management/get_aggs.spec.ts",
-        "line": 105,
+        "line": 106,
         "column": 12
       }
     },
@@ -607,7 +737,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_management/get_aggs.spec.ts",
-        "line": 115,
+        "line": 116,
         "column": 12
       }
     },
@@ -633,7 +763,33 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_management/get_aggs.spec.ts",
-        "line": 121,
+        "line": 122,
+        "column": 12
+      }
+    },
+    {
+      "id": "7dde3dbc6d34e64-c6c6d2f4fff9686",
+      "title": "GET /api/workflows/aggs rejects an empty field value",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_management/get_aggs.spec.ts",
+        "line": 130,
         "column": 12
       }
     },

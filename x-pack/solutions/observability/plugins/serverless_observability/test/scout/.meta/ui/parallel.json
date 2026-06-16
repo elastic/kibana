@@ -1,5 +1,5 @@
 {
-  "sha1": "102deb71133b638aeacc6f6e616252063ebc92fb",
+  "sha1": "c13dfe1deb55cc5c20ecd446e09afffe691e2608",
   "tests": [
     {
       "id": "08c621ad2871856-3596071962e357d",
@@ -39,7 +39,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_complete.spec.ts",
-        "line": 121,
+        "line": 145,
         "column": 9
       }
     },
@@ -53,7 +53,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_complete.spec.ts",
-        "line": 169,
+        "line": 209,
         "column": 9
       }
     },
@@ -67,7 +67,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_complete.spec.ts",
-        "line": 176,
+        "line": 218,
         "column": 9
       }
     },
@@ -134,6 +134,20 @@
       }
     },
     {
+      "id": "dd531796bab2f79-add5444a9a692b8",
+      "title": "Serverless Observability Navigation - Logs Essentials tier body does not show ML or AI related project settings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_logs_essentials.spec.ts",
+        "line": 53,
+        "column": 9
+      }
+    },
+    {
       "id": "dd531796bab2f79-47b47f35c7839e9",
       "title": "Serverless Observability Navigation - Logs Essentials tier body clicking body nav items sets the active link and navigates",
       "expectedStatus": "passed",
@@ -143,7 +157,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_logs_essentials.spec.ts",
-        "line": 53,
+        "line": 87,
         "column": 9
       }
     },
@@ -157,7 +171,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_logs_essentials.spec.ts",
-        "line": 83,
+        "line": 117,
         "column": 9
       }
     }

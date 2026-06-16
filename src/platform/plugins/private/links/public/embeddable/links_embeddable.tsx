@@ -9,12 +9,12 @@
 
 import React, { createContext, useMemo } from 'react';
 import { isUndefined, omitBy } from 'lodash';
-import { BehaviorSubject, map, merge } from 'rxjs';
+import { BehaviorSubject, map, merge, skip } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiListGroup, EuiPanel } from '@elastic/eui';
 
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { PanelIncompatibleError } from '@kbn/embeddable-plugin/public';
 import type { SerializedTitles } from '@kbn/presentation-publishing';
 import {
@@ -22,7 +22,7 @@ import {
   useBatchedPublishingSubjects,
   titleComparators,
   apiIsPresentationContainer,
-  initializeUnsavedChanges,
+  initializeStateApi,
 } from '@kbn/presentation-publishing';
 import { css } from '@emotion/react';
 import { openLazyFlyout } from '@kbn/presentation-util';
@@ -43,12 +43,14 @@ import { resolveLinks, serializeResolvedLinks } from '../lib/resolve_links';
 import { isParentApiCompatible } from '../actions/add_links_panel_action';
 import { coreServices } from '../services/kibana_services';
 import { loadFromLibrary } from '../content_management/load_from_library';
+import { getPlacementHints } from './get_placement_hints';
 
 export const LinksContext = createContext<LinksApi | null>(null);
 
 export const getLinksEmbeddableFactory = () => {
-  const linksEmbeddableFactory: EmbeddableFactory<LinksEmbeddableState, LinksApi> = {
+  const linksEmbeddableFactory: EmbeddablePublicDefinition<LinksEmbeddableState, LinksApi> = {
     type: LINKS_EMBEDDABLE_TYPE,
+    getPlacementHints,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const refId = (initialState as LinksByReferenceState).ref_id;
       const intialLinksState = refId ? await loadFromLibrary(refId) : (initialState as LinksState);
@@ -84,17 +86,20 @@ export const getLinksEmbeddableFactory = () => {
         };
       }
 
-      const serializeState = () =>
-        isByReference ? serializeByReference(refId) : serializeByValue();
-
-      const unsavedChangesApi = initializeUnsavedChanges<LinksEmbeddableState>({
+      const stateApi = initializeStateApi<LinksEmbeddableState>({
         uuid,
         parentApi,
-        serializeState,
+        serializeState: () => (isByReference ? serializeByReference(refId) : serializeByValue()),
         anyStateChange$: merge(
           titleManager.anyStateChange$,
-          layout$.pipe(map(() => undefined)),
-          resolvedLinks$.pipe(map(() => undefined))
+          layout$.pipe(
+            skip(1),
+            map(() => undefined)
+          ),
+          resolvedLinks$.pipe(
+            skip(1),
+            map(() => undefined)
+          )
         ),
         getComparators: () => {
           return {
@@ -119,24 +124,23 @@ export const getLinksEmbeddableFactory = () => {
             ref_id: 'skip',
           };
         },
-        onReset: async (lastSaved) => {
-          titleManager.reinitializeState(lastSaved);
+        applySerializedState: async (nextState) => {
+          titleManager.reinitializeState(nextState);
           if (!refId) {
-            layout$.next((lastSaved as LinksByValueState)?.layout);
-            resolvedLinks$.next(await resolveLinks((lastSaved as LinksByValueState)?.links ?? []));
+            layout$.next((nextState as LinksByValueState).layout);
+            resolvedLinks$.next(await resolveLinks((nextState as LinksByValueState).links ?? []));
           }
         },
       });
 
       const api = finalizeApi({
         ...titleManager.api,
-        ...unsavedChangesApi,
+        ...stateApi,
         blockingError$,
         defaultTitle$,
         defaultDescription$,
         isEditingEnabled: () => Boolean(blockingError$.value === undefined),
         getTypeDisplayName: () => DISPLAY_NAME,
-        serializeState,
         saveToLibrary: async (newTitle: string) => {
           defaultTitle$.next(newTitle);
           const {
@@ -277,12 +281,19 @@ const styles = ({ euiTheme }: UseEuiTheme) =>
     },
     '&.verticalLayoutWrapper': {
       gap: euiTheme.size.xs,
+      paddingBlock: euiTheme.size.xs,
     },
     '&.horizontalLayoutWrapper': {
-      height: '100%',
+      inlineSize: 'max-content',
+      blockSize: '100%',
       display: 'flex',
       flexWrap: 'nowrap',
       alignItems: 'center',
       flexDirection: 'row',
+    },
+    // The internal list item wrapper has `width: 100%` which needs to be overridden
+    // for the horizontal layout to look as expected
+    '&.horizontalLayoutWrapper .euiListItemLayout__wrapper': {
+      inlineSize: 'auto',
     },
   });

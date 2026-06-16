@@ -43,6 +43,7 @@ interface Props {
   children: React.ReactChild;
   selectedTabKey: Tab['key'];
   searchBarOptions?: React.ComponentProps<typeof MobileSearchBar>;
+  customSearchBar?: React.ReactNode;
   bottomHeaderContent?: React.ComponentType;
   contentWrapper?: React.ComponentType<{ children: React.ReactNode }>;
 }
@@ -62,6 +63,7 @@ function TemplateWithContext({
   children,
   selectedTabKey,
   searchBarOptions,
+  customSearchBar,
   bottomHeaderContent: BottomHeaderContent,
   contentWrapper: ContentWrapper = React.Fragment,
 }: Props) {
@@ -118,7 +120,7 @@ function TemplateWithContext({
         searchBar={
           <>
             {BottomHeaderContent && <BottomHeaderContent />}
-            <MobileSearchBar {...searchBarOptions} />
+            {customSearchBar ?? <MobileSearchBar {...searchBarOptions} />}
           </>
         }
         pageHeader={{

@@ -20,7 +20,7 @@ const createAttachment = (overrides: { origin?: string; enabled?: boolean } = {}
     metadata: { name: 'My Rule', tags: ['tag1', 'tag2'], description: 'A test rule' },
     schedule: { every: '5m' },
     time_field: '@timestamp',
-    evaluation: { query: { kql: 'host.name: *' } },
+    query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
     state_transition: null,
     enabled: overrides.enabled,
   } as any,
@@ -41,11 +41,11 @@ describe('RuleInlineContent', () => {
     expect(getByText('signal')).toBeDefined();
   });
 
-  it('shows proposed status when no origin', () => {
+  it('shows draft status when no origin', () => {
     const { getByText } = render(
       <RuleInlineContent attachment={createAttachment()} isSidebar={false} />
     );
-    expect(getByText('proposed')).toBeDefined();
+    expect(getByText('draft')).toBeDefined();
   });
 
   it('shows enabled status when origin is set and enabled is undefined (server default)', () => {

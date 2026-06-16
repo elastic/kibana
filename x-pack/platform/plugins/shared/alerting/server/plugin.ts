@@ -21,7 +21,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type {
   KibanaRequest,
@@ -57,6 +57,7 @@ import { ApiKeyType } from './task_runner/types';
 import { RuleTypeRegistry } from './rule_type_registry';
 import { TaskRunnerFactory } from './task_runner';
 import { RulesClientFactory } from './rules_client_factory';
+import { ruleQueryInspectorRoute } from './routes/rule/apis/rule_query_inspector/rule_query_inspector_route';
 import type { RulesClientCreateOptions } from './rules_client_factory';
 import {
   RulesSettingsClientFactory,
@@ -483,6 +484,14 @@ export class AlertingPlugin {
       core,
     });
 
+    ruleQueryInspectorRoute(
+      router,
+      this.licenseState,
+      this.ruleTypeRegistry!,
+      createGetAlertIndicesAliasFn(this.ruleTypeRegistry!),
+      core
+    );
+
     return {
       registerConnectorAdapter: <
         RuleActionParams extends ConnectorAdapterParams = ConnectorAdapterParams,
@@ -578,6 +587,7 @@ export class AlertingPlugin {
           if (this.changeTrackingService) {
             const { scope } = this.config.ruleChangeTracking;
             if (scope.includes('all') || scope.includes(ruleType.solution)) {
+              ruleType.trackChanges = true;
               this.changeTrackingService.register(ruleType.solution);
             }
           }
@@ -597,7 +607,12 @@ export class AlertingPlugin {
       },
       getConfig: () => {
         return {
-          ...pick(this.config.rules, ['minimumScheduleInterval', 'maxScheduledPerMinute', 'run']),
+          ...pick(this.config.rules, [
+            'minimumScheduleInterval',
+            'maxScheduledPerMinute',
+            'run',
+            'apiKeyType',
+          ]),
           isUsingSecurity: this.licenseState ? !!this.licenseState.getIsSecurityEnabled() : false,
         };
       },
@@ -753,7 +768,6 @@ export class AlertingPlugin {
       actionsPlugin: plugins.actions,
       alertsService: this.alertsService,
       backfillClient: this.backfillClient!,
-      basePathService: core.http.basePath,
       cancelAlertsOnRuleTimeout: this.config.cancelAlertsOnRuleTimeout,
       connectorAdapterRegistry: this.connectorAdapterRegistry,
       data: plugins.data,

@@ -5,25 +5,28 @@
  * 2.0.
  */
 
-import { TaskStatus } from '@kbn/streams-schema';
+import { SigEventsWorkflowStatus } from '@kbn/streams-schema';
+import { StreamsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
 import { getKiIdentificationStatusToolHandler } from './handler';
 
 describe('getKiIdentificationStatusToolHandler', () => {
-  it('returns task status payload with stream and task identifiers', async () => {
-    const taskClient = {
-      getStatus: jest.fn().mockResolvedValue({ status: TaskStatus.Completed }),
-    };
+  it('returns stream_name alongside the onboarding status', async () => {
+    const streamsKIsOnboardingClient = new StreamsKIsOnboardingClient({
+      managementApi: {
+        getWorkflowExecutions: jest.fn().mockResolvedValue({ results: [] }),
+        getWorkflowExecution: jest.fn().mockResolvedValue(null),
+      } as never,
+    });
 
     const result = await getKiIdentificationStatusToolHandler({
       streamName: 'logs.nginx',
-      taskClient: taskClient as never,
+      streamsKIsOnboardingClient,
     });
 
-    expect(taskClient.getStatus).toHaveBeenCalledWith('streams_onboarding_logs.nginx');
     expect(result).toEqual({
       stream_name: 'logs.nginx',
-      task_id: 'streams_onboarding_logs.nginx',
-      status: TaskStatus.Completed,
+      execution_id: null,
+      status: SigEventsWorkflowStatus.NotStarted,
     });
   });
 });

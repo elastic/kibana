@@ -16,7 +16,7 @@ describe('accumulateMetricsRowTelemetry', () => {
     const telemetry = createInitialMetricsTelemetry();
 
     accumulateMetricsRowTelemetry(telemetry, {
-      dataStreams: [],
+      indexNames: [],
       units: [],
       metricTypes: [],
       fieldTypes: [],
@@ -29,7 +29,7 @@ describe('accumulateMetricsRowTelemetry', () => {
     const telemetry = createInitialMetricsTelemetry();
 
     accumulateMetricsRowTelemetry(telemetry, {
-      dataStreams: ['metrics-system.cpu-default'],
+      indexNames: ['metrics-system.cpu-default'],
       units: ['percent'],
       metricTypes: ['gauge'],
       fieldTypes: [ES_FIELD_TYPES.DOUBLE],
@@ -40,7 +40,7 @@ describe('accumulateMetricsRowTelemetry', () => {
       total_number_of_dimensions: 0,
       metrics_by_type: { gauge: 1 },
       units: { percent: 1 },
-      multi_value_counts: { data_streams: 0, field_types: 0, metric_types: 0 },
+      multi_value_counts: { index_names: 0, field_types: 0, metric_types: 0, units: 0 },
     });
   });
 
@@ -48,7 +48,7 @@ describe('accumulateMetricsRowTelemetry', () => {
     const telemetry = createInitialMetricsTelemetry();
 
     accumulateMetricsRowTelemetry(telemetry, {
-      dataStreams: ['metrics-system.cpu-default'],
+      indexNames: ['metrics-system.cpu-default'],
       units: [null, null, 'percent'],
       metricTypes: ['gauge'],
       fieldTypes: [ES_FIELD_TYPES.DOUBLE],
@@ -59,7 +59,7 @@ describe('accumulateMetricsRowTelemetry', () => {
       total_number_of_dimensions: 0,
       metrics_by_type: { gauge: 1 },
       units: { none: 2, percent: 1 },
-      multi_value_counts: { data_streams: 0, field_types: 0, metric_types: 0 },
+      multi_value_counts: { index_names: 0, field_types: 0, metric_types: 0, units: 1 },
     });
   });
 
@@ -67,14 +67,14 @@ describe('accumulateMetricsRowTelemetry', () => {
     const telemetry = createInitialMetricsTelemetry();
 
     accumulateMetricsRowTelemetry(telemetry, {
-      dataStreams: ['metrics-system.cpu-default', 'metrics-system.cpu-prod'],
+      indexNames: ['metrics-system.cpu-default', 'metrics-system.cpu-prod'],
       units: ['percent'],
       metricTypes: ['gauge'],
       fieldTypes: [ES_FIELD_TYPES.DOUBLE],
     });
 
     accumulateMetricsRowTelemetry(telemetry, {
-      dataStreams: ['metrics-system.memory-default'],
+      indexNames: ['metrics-system.memory-default'],
       units: ['bytes', 'percent'],
       metricTypes: ['gauge', 'counter', 'summary'],
       fieldTypes: [ES_FIELD_TYPES.LONG, ES_FIELD_TYPES.DOUBLE],
@@ -85,7 +85,7 @@ describe('accumulateMetricsRowTelemetry', () => {
       total_number_of_dimensions: 0,
       metrics_by_type: { gauge: 2, counter: 1, summary: 1 },
       units: { percent: 2, bytes: 1 },
-      multi_value_counts: { data_streams: 1, field_types: 1, metric_types: 1 },
+      multi_value_counts: { index_names: 1, field_types: 1, metric_types: 1, units: 1 },
     });
   });
 });

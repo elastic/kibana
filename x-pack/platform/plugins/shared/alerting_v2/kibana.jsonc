@@ -29,10 +29,12 @@
       "management",
       "kibanaUtils",
       "share",
+      "unifiedDocViewer",
+      "maintenanceWindows",
       "eventLog",
-      "unifiedDocViewer"
+      "triggersActionsUi"
     ],
-    "optionalPlugins": ["usageCollection", "agentBuilder", "agentContextLayer"],
+    "optionalPlugins": ["usageCollection", "agentBuilder", "agentContextLayer", "dashboard", "cps"],
     "requiredBundles": ["alerting", "kibanaReact"],
     "extraPublicDirs": []
   }

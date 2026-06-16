@@ -8,7 +8,7 @@
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { toElasticsearchQuery } from '@kbn/es-query';
 import { fromKueryExpression } from '@kbn/es-query';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type {
   AggregationsTermsAggregateBase,
   AggregationsTermsBucketBase,
@@ -229,7 +229,7 @@ export async function getIncomingDataByAgentsId({
                 },
                 {
                   range: {
-                    '@timestamp': {
+                    'event.ingested': {
                       gte: 'now-5m',
                       lte: 'now',
                     },

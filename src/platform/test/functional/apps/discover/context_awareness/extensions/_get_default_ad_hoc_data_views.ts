@@ -85,6 +85,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await esArchiver.load(
           'src/platform/test/functional/fixtures/es_archiver/discover/context_awareness'
         );
+        // `logstash_functional` is loaded once at the suite level (see `../index.ts`),
+        // so reload it here after the "no data page" test unloaded it.
+        await esArchiver.loadIfNeeded(
+          'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+        );
         await kibanaServer.importExport.load(
           'src/platform/test/functional/fixtures/kbn_archiver/discover/context_awareness'
         );
@@ -112,6 +117,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should show the no data page when no ES data is available', async () => {
         await esArchiver.unload(
           'src/platform/test/functional/fixtures/es_archiver/discover/context_awareness'
+        );
+        // Also unload the suite-level archive so Discover truly sees no ES data.
+        await esArchiver.unload(
+          'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
         );
         await common.navigateToActualUrl('discover', undefined, {
           ensureCurrentUrl: false,

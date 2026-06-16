@@ -233,6 +233,12 @@ export interface HttpServiceSetup<
    * (from the first registered to the last). See {@link OnPreRoutingHandler}.
    *
    * @param handler {@link OnPreRoutingHandler} - function to call.
+   *
+   * @deprecated No remaining consumers in Kibana plugins. The Spaces plugin was the
+   * main user (URL rewriting for `/s/<spaceId>/...`) and that logic now lives in Core's
+   * `onRequest` handler. Use {@link HttpServiceSetup.registerOnPreAuth} for similar
+   * interception needs that don't require URL rewriting before routing. This API may
+   * be removed in a future release.
    */
   registerOnPreRouting: (handler: OnPreRoutingHandler) => void;
 

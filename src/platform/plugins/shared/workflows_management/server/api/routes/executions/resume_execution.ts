@@ -53,9 +53,17 @@ export function registerResumeExecutionRoute(deps: RouteDependencies) {
           const { input } = request.body;
           const spaceId = spaces.getSpaceId(request);
 
-          await api.resumeWorkflowExecution(executionId, spaceId, input, request);
+          const { resumedBy } = await api.resumeWorkflowExecution(
+            executionId,
+            spaceId,
+            input,
+            request
+          );
 
-          audit.logExecutionResumed(request, { executionId });
+          audit.logExecutionResumed(request, {
+            executionId,
+            resumedBy,
+          });
 
           return response.ok({
             body: {

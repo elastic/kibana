@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { createSecureContext } from 'tls';
+import { isNil } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
+import type { Ecs } from '@elastic/ecs';
 import type { OTLPLogExporter as OTLPLogExporterHTTP } from '@opentelemetry/exporter-logs-otlp-http';
 import type { OTLPLogExporter as OTLPLogExporterGRPC } from '@opentelemetry/exporter-logs-otlp-grpc';
 import type { OTLPLogExporter as OTLPLogExporterPROTO } from '@opentelemetry/exporter-logs-otlp-proto';
@@ -28,6 +32,13 @@ import type { OtelAppenderConfig, LayoutConfigType } from '@kbn/core-logging-ser
 import { buildOtelResources } from '@kbn/telemetry';
 import { getFlattenedObject } from '@kbn/std';
 import { Layouts } from '../../layouts/layouts';
+import { JsonLayout } from '../../layouts/json_layout';
+import {
+  buildGrpcVerifyOptions,
+  buildHttpsAgentTlsOptions,
+  resolveTlsMaterial,
+  toGrpcRootCerts,
+} from './otel_tls';
 
 const DISPOSE_TIMEOUT_MS = 5_000;
 
@@ -72,22 +83,6 @@ const toTraceContext = (record: LogRecord): Context | undefined => {
     traceFlags: TraceFlags.NONE,
   });
 };
-
-/**
- * Builds a sanitised copy of a `LogRecord` for use as `body.structured`.
- *
- * The raw record is stripped of:
- * - `level`: a Kibana-internal `LogLevel` object that is redundant given the
- *   top-level `severity_number` / `severity_text` OTLP fields.
- * - Fields with `null` or `undefined` values (e.g. `spanId`/`traceId` when no
- *   trace context is present) to avoid noisy empty entries in Elasticsearch.
- */
-const toStructuredBody = (record: LogRecord): AnyValueMap =>
-  Object.fromEntries(
-    Object.entries(record as unknown as Record<string, unknown>).filter(
-      ([key, v]) => key !== 'level' && v != null
-    )
-  ) as AnyValueMap;
 
 /**
  * Resolves the effective layout config for the OTel appender.
@@ -161,15 +156,15 @@ const toAttributes = (record: LogRecord, includeLogMeta: boolean): Attributes =>
     if (id !== undefined) attrs['service.id'] = id;
     // Flatten anything that we don't know about into the service object (ideally, nothing).
     Object.entries(getFlattenedObject(serviceRest)).forEach(([key, value]) => {
-      attrs[key] = value;
+      attrs[`service.${key}`] = value;
     });
 
-    // Flatten non-service meta into individual OTel attributes prefixed with
-    // kibana.log.meta. so they are discoverable as flat fields in backends.
+    // Flatten non-service meta into individual OTel attributes so they are
+    // discoverable as flat fields in backends.
     // Only included for pattern layout: with JSON layout the meta is part of
     // the structured body and repeating it here would be redundant.
     Object.entries(getFlattenedObject(metaRest)).forEach(([key, value]) => {
-      attrs[`kibana.log.meta.${key}`] = value as AttributeValue;
+      attrs[key] = value as AttributeValue;
     });
   }
 
@@ -199,6 +194,39 @@ export class OtelAppender implements DisposableAppender {
     layout: schema.maybe(Layouts.configSchema),
     // Optional: user-provided attributes override the service attributes derived from APM config.
     attributes: schema.maybe(schema.recordOf(schema.string(), schema.string())),
+    ssl: schema.maybe(
+      schema.object(
+        {
+          certificateAuthorities: schema.maybe(
+            schema.oneOf([
+              schema.string(),
+              schema.arrayOf(schema.string(), { minSize: 1, maxSize: 100 }),
+            ])
+          ),
+          certificate: schema.maybe(schema.string()),
+          key: schema.maybe(schema.string()),
+          keyPassphrase: schema.maybe(schema.string()),
+          verificationMode: schema.oneOf(
+            [schema.literal('none'), schema.literal('certificate'), schema.literal('full')],
+            { defaultValue: 'full' }
+          ),
+          allowPartialTrustChain: schema.boolean({ defaultValue: true }),
+        },
+        {
+          validate: (raw) => {
+            if (raw.certificate && !raw.key) {
+              return 'Must specify [ssl.key] when [ssl.certificate] is set';
+            }
+            if (raw.key && !raw.certificate) {
+              return 'Must specify [ssl.certificate] when [ssl.key] is set';
+            }
+            if (raw.keyPassphrase && !raw.key) {
+              return 'Must specify [ssl.key] when [ssl.keyPassphrase] is set';
+            }
+          },
+        }
+      )
+    ),
   });
 
   private readonly loggerProvider: LoggerProvider;
@@ -239,13 +267,15 @@ export class OtelAppender implements DisposableAppender {
       timestamp: record.timestamp,
       severityNumber,
       severityText: record.level.id.toUpperCase(),
-      // JSON layout: send a sanitised LogRecord as a structured object.
-      // Elastic's OTel ingest indexes this as body.structured. Note that the ECS
-      // `message` field will be empty because it aliases body.text, not body.structured.
+      // JSON layout: send a ECS record as a structured object.
+      // Elastic's OTel ingest indexes this as body.structured.
       //
       // Pattern layout (default): format the record to a human-readable string.
       // Elastic indexes this as body.text, aliased to the ECS `message` field.
-      body: this.useStructuredBody ? toStructuredBody(record) : this.layout.format(record),
+      body:
+        this.layout instanceof JsonLayout
+          ? omitDeepNilValues(JsonLayout.ecsRecord(record))
+          : this.layout.format(record),
       context: toTraceContext(record),
       // log.meta is omitted from attributes when using JSON layout because it
       // is already part of the structured body.
@@ -266,26 +296,44 @@ export class OtelAppender implements DisposableAppender {
   }
 }
 
+const omitDeepNilValues = (obj: Ecs) => {
+  const result: AnyValueMap = {};
+  Object.entries(getFlattenedObject(obj))
+    .filter(([_, value]) => !isNil(value))
+    .forEach(([key, value]) => set(result, key, value));
+  return result;
+};
+
 const createExporter = (
   config: OtelAppenderConfig
 ): OTLPLogExporterHTTP | OTLPLogExporterGRPC | OTLPLogExporterPROTO => {
+  const tls = resolveTlsMaterial(config.ssl);
+
   switch (config.protocol) {
     case 'http': {
       // No need to import the module at the top if not used in the switch statement.
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       const { OTLPLogExporter } = require('@opentelemetry/exporter-logs-otlp-http');
-      return new OTLPLogExporter({ url: config.url, headers: config.headers ?? {} });
+      return new OTLPLogExporter({
+        url: config.url,
+        headers: config.headers ?? {},
+        ...(tls ? { httpAgentOptions: buildHttpsAgentTlsOptions(tls) } : {}),
+      });
     }
     case 'proto': {
       // No need to import the module at the top if not used in the switch statement.
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       const { OTLPLogExporter } = require('@opentelemetry/exporter-logs-otlp-proto');
-      return new OTLPLogExporter({ url: config.url, headers: config.headers ?? {} });
+      return new OTLPLogExporter({
+        url: config.url,
+        headers: config.headers ?? {},
+        ...(tls ? { httpAgentOptions: buildHttpsAgentTlsOptions(tls) } : {}),
+      });
     }
     case 'grpc': {
       // No need to import the module at the top if not used in the switch statement.
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const { Metadata } = require('@grpc/grpc-js');
+      const { Metadata, credentials } = require('@grpc/grpc-js');
       const metadata = new Metadata();
       Object.entries(config.headers ?? {}).forEach(([key, value]) => {
         metadata.add(key, value);
@@ -293,7 +341,24 @@ const createExporter = (
       // No need to import the module at the top if not used in the switch statement.
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       const { OTLPLogExporter } = require('@opentelemetry/exporter-logs-otlp-grpc');
-      return new OTLPLogExporter({ url: config.url, metadata });
+      return new OTLPLogExporter({
+        url: config.url,
+        metadata,
+        ...(tls
+          ? {
+              // Using createFromSecureContext instead of createSsl because createSsl does not support allowPartialTrustChain.
+              credentials: credentials.createFromSecureContext(
+                createSecureContext({
+                  ca: toGrpcRootCerts(tls),
+                  key: tls.key,
+                  cert: tls.cert,
+                  allowPartialTrustChain: tls.allowPartialTrustChain,
+                }),
+                buildGrpcVerifyOptions(tls)
+              ),
+            }
+          : {}),
+      });
     }
   }
 };

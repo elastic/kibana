@@ -111,7 +111,7 @@ describe('Starred and History queries components', () => {
           },
           'data-test-subj': 'status',
           field: 'status',
-          name: '',
+          name: 'Status',
           render: expect.anything(),
           sortable: false,
           width: '40px',
@@ -134,7 +134,7 @@ describe('Starred and History queries components', () => {
         {
           actions: [],
           'data-test-subj': 'actions',
-          name: '',
+          name: 'Actions',
           width: '60px',
         },
       ]);
@@ -149,7 +149,7 @@ describe('Starred and History queries components', () => {
           },
           'data-test-subj': 'status',
           field: 'status',
-          name: '',
+          name: 'Status',
           render: expect.anything(),
           sortable: false,
           width: '40px',
@@ -172,7 +172,7 @@ describe('Starred and History queries components', () => {
         {
           actions: [],
           'data-test-subj': 'actions',
-          name: '',
+          name: 'Actions',
           width: '60px',
         },
       ]);
@@ -188,7 +188,7 @@ describe('Starred and History queries components', () => {
         },
         'data-test-subj': 'status',
         field: 'status',
-        name: '',
+        name: 'Status',
         render: expect.anything(),
         sortable: false,
         width: 'auto',
@@ -203,7 +203,7 @@ describe('Starred and History queries components', () => {
       {
         actions: [],
         'data-test-subj': 'actions',
-        name: '',
+        name: 'Actions',
         width: 'auto',
       },
       {

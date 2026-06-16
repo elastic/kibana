@@ -11,6 +11,7 @@ import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/u
 import { TableId } from '@kbn/securitysolution-data-table';
 import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { EuiSpacer } from '@elastic/eui';
+import { useAssetCriticalityPrivileges } from '../../../entity_analytics/components/asset_criticality/use_asset_criticality';
 import { useUpdateAssetCriticality } from '../../../entity_analytics/api/hooks/use_update_asset_criticality';
 import { buildEuidCspPreviewOptions } from '../../../cloud_security_posture/utils/build_euid_csp_preview_options';
 import { buildUserNamesFilter, type RiskSeverity } from '../../../../common/search_strategy';
@@ -138,6 +139,8 @@ export const UserPanel = memo(function UserPanel({
     [entityIdProp, entityStoreV2Enabled, observedUser.entityRecord?.entity?.id]
   );
 
+  const assetCriticalityPrivileges = useAssetCriticalityPrivileges(entityIdProp ?? userName);
+
   const riskScoreState = useRiskScore({
     riskEntity: EntityType.user,
     filterQuery: userNameFilterQuery,
@@ -230,10 +233,11 @@ export const UserPanel = memo(function UserPanel({
 
   const effectiveRiskScoreState = riskScoreStateFromStore ?? riskScoreState;
 
-  const onCriticalitySave = entityFromStoreResult.entityRecord
-    ? (level: CriticalityLevelWithUnassigned) =>
-        updateAssetCriticalityLevel(level, entityFromStoreResult.entityRecord)
-    : undefined;
+  const onCriticalitySave =
+    !!assetCriticalityPrivileges.data?.has_write_permissions && entityFromStoreResult.entityRecord
+      ? (level: CriticalityLevelWithUnassigned) =>
+          updateAssetCriticalityLevel(level, entityFromStoreResult.entityRecord)
+      : undefined;
 
   const defaultTab = useMemo(() => {
     if (isRiskScoreExist) return EntityDetailsLeftPanelTab.RISK_INPUTS;

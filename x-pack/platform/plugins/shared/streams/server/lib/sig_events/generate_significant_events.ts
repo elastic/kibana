@@ -89,6 +89,7 @@ export async function generateSignificantEventDefinitions(
       severity_score: query.severity_score,
       evidence: query.evidence,
       replaces: query.replaces,
+      features: query.features,
     })),
     tokensUsed,
     toolUsage,

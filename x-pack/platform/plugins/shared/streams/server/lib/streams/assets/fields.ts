@@ -13,6 +13,9 @@ export const ASSET_TYPE = 'asset.type';
 /** Whether a Kibana rule exists for this asset. Stored at document root (does not mention query in the field name). */
 export const RULE_BACKED = 'rule_backed';
 
+export const QUERY_UPDATED_AT = 'updated_at';
+export const QUERY_EXPIRES_AT = 'expires_at';
+
 /** The deterministic ID of the Kibana rule associated with this query. */
 export const RULE_ID = 'rule_id';
 
@@ -23,6 +26,7 @@ export const QUERY_SEVERITY_SCORE = 'query.severity_score';
 export const QUERY_DESCRIPTION = 'query.description';
 export const QUERY_TYPE = 'query.type';
 export const QUERY_SEARCH_EMBEDDING = 'query.search_embedding';
+export const QUERY_FEATURES = 'query.features';
 
 // Initially features were called systems, for backward compatibility we need to keep the same field names
 export const QUERY_FEATURE_NAME = 'experimental.query.system.name';

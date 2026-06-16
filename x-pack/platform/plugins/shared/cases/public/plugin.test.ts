@@ -152,6 +152,8 @@ describe('Cases Ui Plugin', () => {
         },
         config: {
           templatesEnabled: false,
+          attachmentsEnabled: false,
+          casesRedesign: { list: false, details: false, settings: false },
         },
         helpers: {
           canUseCases: expect.any(Function),

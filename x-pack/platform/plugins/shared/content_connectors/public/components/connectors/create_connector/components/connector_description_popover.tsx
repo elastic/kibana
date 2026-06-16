@@ -19,6 +19,7 @@ import {
   EuiPopover,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useAppContext } from '../../../../app_context';
@@ -29,7 +30,7 @@ const nativePopoverPanels = [
       'xpack.contentConnectors.connectorDescriptionPopover.connectorDescriptionBadge.native.chooseADataSourceLabel',
       { defaultMessage: 'Choose a data source you would like to sync' }
     ),
-    icons: [<EuiIcon size="l" type="documents" />],
+    icons: [<EuiIcon size="l" type="documents" aria-hidden={true} />],
     id: 'native-choose-source',
   },
   {
@@ -37,7 +38,10 @@ const nativePopoverPanels = [
       'xpack.contentConnectors.connectorDescriptionPopover.connectorDescriptionBadge.native.configureConnectorLabel',
       { defaultMessage: 'Configure your connector using our Kibana UI' }
     ),
-    icons: [<EuiIcon size="l" type="plugs" />, <EuiIcon size="l" type="logoElastic" />],
+    icons: [
+      <EuiIcon size="l" type="plugs" aria-hidden={true} />,
+      <EuiIcon size="l" type="logoElastic" aria-hidden={true} />,
+    ],
     id: 'native-configure-connector',
   },
 ];
@@ -48,7 +52,7 @@ const connectorClientPopoverPanels = [
       'xpack.contentConnectors.connectorDescriptionPopover.connectorDescriptionBadge.client.chooseADataSourceLabel',
       { defaultMessage: 'Choose a data source you would like to sync' }
     ),
-    icons: [<EuiIcon size="l" type="documents" />],
+    icons: [<EuiIcon size="l" type="documents" aria-hidden={true} />],
     id: 'client-choose-source',
   },
   {
@@ -60,9 +64,9 @@ const connectorClientPopoverPanels = [
       }
     ),
     icons: [
-      <EuiIcon size="l" type="plugs" />,
-      <EuiIcon size="l" type="sortRight" />,
-      <EuiIcon size="l" type="rocket" />,
+      <EuiIcon size="l" type="plugs" aria-hidden={true} />,
+      <EuiIcon size="l" type="sortRight" aria-hidden={true} />,
+      <EuiIcon size="l" type="rocket" aria-hidden={true} />,
     ],
     id: 'client-deploy',
   },
@@ -74,11 +78,11 @@ const connectorClientPopoverPanels = [
       }
     ),
     icons: [
-      <EuiIcon size="l" type="documents" />,
-      <EuiIcon size="l" type="sortRight" />,
-      <EuiIcon size="l" type="plugs" />,
-      <EuiIcon size="l" type="sortRight" />,
-      <EuiIcon size="l" type="logoElastic" />,
+      <EuiIcon size="l" type="documents" aria-hidden={true} />,
+      <EuiIcon size="l" type="sortRight" aria-hidden={true} />,
+      <EuiIcon size="l" type="plugs" aria-hidden={true} />,
+      <EuiIcon size="l" type="sortRight" aria-hidden={true} />,
+      <EuiIcon size="l" type="logoElastic" aria-hidden={true} />,
     ],
     id: 'client-configure-connector',
   },
@@ -101,16 +105,26 @@ export const ConnectorDescriptionPopover: React.FC<ConnectorDescriptionPopoverPr
 
   return (
     <EuiPopover
+      aria-label={i18n.translate('xpack.contentConnectors.createConnector.infoPopover.ariaLabel', {
+        defaultMessage: 'Connector description',
+      })}
       anchorPosition="upCenter"
       button={
-        <EuiButtonIcon
-          aria-label={i18n.translate('xpack.contentConnectors.createConnector.info', {
+        <EuiToolTip
+          content={i18n.translate('xpack.contentConnectors.createConnector.info', {
             defaultMessage: 'More information',
           })}
-          data-test-subj="enterpriseSearchConnectorDescriptionPopoverButton"
-          iconType="info"
-          onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            aria-label={i18n.translate('xpack.contentConnectors.createConnector.info', {
+              defaultMessage: 'More information',
+            })}
+            data-test-subj="enterpriseSearchConnectorDescriptionPopoverButton"
+            iconType="info"
+            onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+          />
+        </EuiToolTip>
       }
       isOpen={isPopoverOpen}
       closePopover={() => {

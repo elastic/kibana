@@ -10,18 +10,28 @@ import {
   DEFAULT_ARTIFACT_VALUE_LIMIT,
   ARTIFACT_VALUE_LIMITS,
   MAX_ARTIFACT_VALUE_LIMIT,
-  MAX_TAG_LENGTH,
 } from '@kbn/alerting-v2-constants';
-import { validateEsqlQuery, validateMinDuration } from './validation';
-import { durationSchema } from './common';
-import { MAX_CONSECUTIVE_BREACHES, MIN_SCHEDULE_INTERVAL } from './constants';
+import { validateEsqlQuery, validateMinDuration, composeEsqlQuery } from './validation';
+import { durationSchema, tagsSchema } from './common';
+import {
+  MAX_CONSECUTIVE_BREACHES,
+  MAX_DESCRIPTION_LENGTH,
+  MAX_ESQL_QUERY_LENGTH,
+  MAX_FIELD_NAME_LENGTH,
+  MAX_GROUPING_FIELDS,
+  MAX_NAME_LENGTH,
+  MIN_SCHEDULE_INTERVAL,
+  MAX_BULK_ITEMS,
+  ID_MAX_LENGTH,
+  VERSION_MAX_LENGTH,
+} from './constants';
 
 /** Primitives */
 
 export const esqlQuerySchema = z
   .string()
   .min(1)
-  .max(10000)
+  .max(MAX_ESQL_QUERY_LENGTH)
   .superRefine((value, ctx) => {
     const error = validateEsqlQuery(value);
     if (error) {
@@ -43,18 +53,28 @@ export type RuleKind = z.infer<typeof ruleKindSchema>;
 
 export const metadataSchema = z
   .object({
-    name: z.string().min(1).max(256).describe('Rule name (must be unique within the space).'),
+    name: z
+      .string()
+      .min(1)
+      .max(MAX_NAME_LENGTH)
+      .describe('Rule name (must be unique within the space).'),
     description: z
       .string()
-      .max(1024)
+      .max(MAX_DESCRIPTION_LENGTH)
       .optional()
       .describe('Human-readable description of the rule.'),
     owner: z.string().max(256).optional().describe('Owner of the rule.'),
-    tags: z
-      .array(z.string().max(MAX_TAG_LENGTH))
-      .max(100)
+    tags: tagsSchema
+      .min(1)
       .optional()
       .describe('Tags for categorization, e.g. ["production", "infra"].'),
+    builder_type: z
+      .string()
+      .max(64)
+      .optional()
+      .describe(
+        'Identifies the rule builder that authored this rule (e.g. "threshold"). Absent for rules authored directly in ES|QL.'
+      ),
   })
   .strict()
   .describe('Rule metadata.');
@@ -79,44 +99,179 @@ export const scheduleSchema = z
   .strict()
   .describe('Execution schedule configuration.');
 
-/** Evaluation (required) */
+/** Query (required) */
 
-export const evaluationQuerySchema = z
+export const queryFormatSchema = z.enum(['composed', 'standalone']);
+export const queryFormat = queryFormatSchema.enum;
+export type QueryFormat = z.infer<typeof queryFormatSchema>;
+
+/** Recovery strategy. */
+export const recoveryStrategySchema = z.enum(['no_breach', 'query', 'none']);
+export const recoveryStrategy = recoveryStrategySchema.enum;
+export type RecoveryStrategy = z.infer<typeof recoveryStrategySchema>;
+
+/** No-data strategy. */
+export const noDataStrategySchema = z.enum(['last_known_status', 'emit', 'recover', 'none']);
+export const noDataStrategy = noDataStrategySchema.enum;
+export type NoDataStrategy = z.infer<typeof noDataStrategySchema>;
+
+/**
+ * Appendable ES|QL segment (e.g. `WHERE …`). Conceptually a bare command,
+ * but a leading `|` is also tolerated — `composeEsqlQuery` strips it before
+ * splicing the segment onto `base`. We only enforce structural bounds here
+ * (length, non-empty). Full parser validation only runs when the segment is
+ * composed with its `base` via `composeEsqlQuery`.
+ */
+export const esqlQuerySegmentSchema = z
+  .string()
+  .min(1)
+  .max(MAX_ESQL_QUERY_LENGTH)
+  .refine((s) => s.trim().length > 0, { message: 'Segment must not be whitespace-only' });
+
+/** Composed wrappers (segment-based, appended to `base`). */
+
+const composedBreachSchema = z
   .object({
-    base: esqlQuerySchema.describe(
-      'Base ES|QL query. Time filters are applied automatically via the lookback window.'
+    segment: esqlQuerySegmentSchema.describe(
+      'Appendable ES|QL segment for breach detection (required).'
     ),
   })
   .strict();
 
-const evaluationSchema = z
+const composedRecoverySchema = z
   .object({
-    query: evaluationQuerySchema,
+    segment: esqlQuerySegmentSchema.describe('Appendable ES|QL segment for recovery detection.'),
   })
   .strict()
+  .describe('Recovery query segment. Present only when recovery_strategy is "query".');
+
+/** Standalone wrappers (full queries). */
+
+const standaloneBreachSchema = z
+  .object({
+    query: esqlQuerySchema.describe('Full ES|QL query for breach detection (required).'),
+  })
+  .strict();
+
+const standaloneRecoverySchema = z
+  .object({
+    query: esqlQuerySchema.describe('Full ES|QL query for recovery detection.'),
+  })
+  .strict()
+  .describe('Recovery query. Present only when recovery_strategy is "query".');
+
+const standaloneNoDataSchema = z
+  .object({
+    query: esqlQuerySchema.describe('Full ES|QL query that detects presence of data.'),
+  })
+  .strict()
+  .describe('No-data detection query. Present only when no_data_strategy is not "none".');
+
+export const composedQuerySchema = z
+  .object({
+    format: z.literal(queryFormat.composed),
+    base: esqlQuerySchema.describe(
+      'Base ES|QL query. Time filters are applied automatically via the lookback window.'
+    ),
+    breach: composedBreachSchema.describe('Breach detection configuration (required).'),
+    recovery: composedRecoverySchema
+      .optional()
+      .describe('Recovery query segment. Required when recovery_strategy is "query".'),
+  })
+  .strict()
+  .check((ctx) => {
+    const breachError = validateEsqlQuery(
+      composeEsqlQuery(ctx.value.base, ctx.value.breach.segment)
+    );
+    if (breachError) {
+      ctx.issues.push({
+        code: 'custom',
+        path: ['breach', 'segment'],
+        message: breachError,
+        input: ctx.value.breach.segment,
+      });
+    }
+    if (ctx.value.recovery) {
+      const recoveryError = validateEsqlQuery(
+        composeEsqlQuery(ctx.value.base, ctx.value.recovery.segment)
+      );
+      if (recoveryError) {
+        ctx.issues.push({
+          code: 'custom',
+          path: ['recovery', 'segment'],
+          message: recoveryError,
+          input: ctx.value.recovery.segment,
+        });
+      }
+    }
+  })
+  .describe('Composed query: a shared base with appendable breach and recovery segments.');
+
+export const standaloneQuerySchema = z
+  .object({
+    format: z.literal(queryFormat.standalone),
+    breach: standaloneBreachSchema.describe('Breach detection configuration (required).'),
+    recovery: standaloneRecoverySchema
+      .optional()
+      .describe('Recovery query. Required when recovery_strategy is "query".'),
+    no_data: standaloneNoDataSchema
+      .optional()
+      .describe('No-data detection query. Required when no_data_strategy is not "none".'),
+  })
+  .strict()
+  .describe('Standalone queries: independent full queries for breach, recovery, and no_data.');
+
+export const querySchema = z
+  .discriminatedUnion('format', [composedQuerySchema, standaloneQuerySchema])
   .describe('Detection query configuration.');
 
-/** Recovery policy (optional) */
+export type Query = z.infer<typeof querySchema>;
 
-export const recoveryPolicyTypeSchema = z.enum(['query', 'no_breach']);
-export const recoveryPolicyType = recoveryPolicyTypeSchema.enum;
-export type RecoveryPolicyType = z.infer<typeof recoveryPolicyTypeSchema>;
+/**
+ * Returns the effective breach ES|QL query — what the executor actually runs
+ * to detect breaches. For composed queries this is `base` concatenated with
+ * `breach.segment`; for standalone it's `breach.query` verbatim.
+ */
+export const getBreachEsqlQuery = (query: Query): string =>
+  query.format === 'composed'
+    ? composeEsqlQuery(query.base, query.breach.segment)
+    : query.breach.query;
 
-export const recoveryPolicySchema = z
-  .object({
-    type: recoveryPolicyTypeSchema.describe('Recovery detection type: "query" or "no_breach".'),
-    query: z
-      .object({
-        base: esqlQuerySchema
-          .optional()
-          .describe('Recovery ES|QL query. Required when type is "query".'),
-      })
-      .strict()
-      .optional()
-      .describe('Recovery query configuration; required when type is "query".'),
-  })
-  .strict()
-  .describe('Recovery detection configuration.');
+/**
+ * Returns the recovery ES|QL query when `recoveryStrategy` is `'query'`,
+ * otherwise `undefined`. For composed queries this is `base` +
+ * `recovery.segment`; for standalone it's `recovery.query` verbatim.
+ */
+export const getRecoverEsqlQuery = (
+  query: Query,
+  strategy?: RecoveryStrategy
+): string | undefined => {
+  if (strategy !== recoveryStrategy.query || !query.recovery) return undefined;
+  if (query.format === 'composed') {
+    return composeEsqlQuery(query.base, query.recovery.segment);
+  }
+  return query.recovery.query;
+};
+
+/**
+ * Returns the has-data ES|QL query when `noDataStrategy` is not `'none'`,
+ * otherwise `undefined`. Only standalone queries support a `no_data` block.
+ */
+export const getNoDataEsqlQuery = (query: Query, strategy?: NoDataStrategy): string | undefined => {
+  if (strategy == null || strategy === noDataStrategy.none) return undefined;
+  if (query.format === 'standalone' && query.no_data) {
+    return query.no_data.query;
+  }
+  return undefined;
+};
+
+/**
+ * Returns the "root" ES|QL query — the one containing the `FROM` clause and
+ * therefore usable for index-pattern extraction. `base` for composed,
+ * `breach.query` for standalone.
+ */
+export const getRootEsqlQuery = (query: Query): string =>
+  query.format === 'composed' ? query.base : query.breach.query;
 
 /** State transition (optional, alert-only) */
 
@@ -161,29 +316,14 @@ export const stateTransitionSchema = z
 export const groupingSchema = z
   .object({
     fields: z
-      .array(z.string().max(256))
-      .max(16)
+      .array(z.string().min(1).max(MAX_FIELD_NAME_LENGTH))
+      .max(MAX_GROUPING_FIELDS)
       .describe(
         'Fields to group alerts by, e.g. ["host.name", "service.name"]. Should match ES|QL GROUP BY fields.'
       ),
   })
   .strict()
   .describe('Grouping configuration.');
-
-/** No data (optional) */
-
-const noDataSchema = z
-  .object({
-    behavior: z
-      .enum(['no_data', 'last_status', 'recover'])
-      .optional()
-      .describe('Behavior when no data is detected.'),
-    timeframe: durationSchema
-      .optional()
-      .describe('Time window after which no data is detected, e.g. 10m, 1h.'),
-  })
-  .strict()
-  .describe('No data handling configuration.');
 
 /** Artifacts (optional) */
 
@@ -209,10 +349,11 @@ const artifactSchema = z
 /** Create rule API schema */
 
 /**
- * Base schema without refinements - used for extending in response schema.
+ * Base schema without refinements - used for extending in response schema and
+ * for introspection by the immutability classification meta-tests.
  * @internal
  */
-const createRuleDataBaseSchema = z
+export const createRuleDataBaseSchema = z
   .object({
     kind: ruleKindSchema,
     metadata: metadataSchema,
@@ -223,12 +364,20 @@ const createRuleDataBaseSchema = z
       .default('@timestamp')
       .describe('Time field used for the lookback window range filter.'),
     schedule: scheduleSchema,
-    evaluation: evaluationSchema,
-    recovery_policy: recoveryPolicySchema.optional(),
+    query: querySchema,
+    recovery_strategy: recoveryStrategySchema
+      .optional()
+      .describe(
+        'How recovery is detected. "no_breach" recovers groups that stop breaching; "query" uses a custom recovery query; "none" disables recovery.'
+      ),
+    no_data_strategy: noDataStrategySchema
+      .optional()
+      .describe(
+        'How to handle no-data situations. "emit" emits a no-data event; "last_known_status" holds the last known status; "recover" forces recovery; "none" disables no-data detection.'
+      ),
     state_transition: stateTransitionSchema,
     grouping: groupingSchema.optional(),
-    no_data: noDataSchema.optional(),
-    artifacts: z.array(artifactSchema).optional(),
+    artifacts: z.array(artifactSchema).max(100).optional(),
   })
   .strip();
 
@@ -239,52 +388,116 @@ export const isStateTransitionAllowed = (data: {
   state_transition?: unknown;
 }): boolean => data.kind === 'alert' || data.state_transition == null;
 
-export const isRecoveryPolicyQueryProvided = (data: {
-  recovery_policy?: { type?: string; query?: { base?: string } };
-}): boolean =>
-  data.recovery_policy?.type !== 'query' ||
-  (data.recovery_policy.query?.base != null && data.recovery_policy.query.base.length > 0);
+export const isSignalUsingStandaloneFormat = (data: {
+  kind?: string;
+  query?: { format?: string };
+}): boolean => data.kind !== 'signal' || data.query?.format === queryFormat.standalone;
+
+/** Signal rules only run a breach query — no recovery or no-data behaviour. */
+export const isSignalQueryBreachOnly = (data: {
+  kind?: string;
+  recovery_strategy?: RecoveryStrategy | null;
+  no_data_strategy?: NoDataStrategy | null;
+}): boolean => {
+  if (data.kind !== 'signal') return true;
+  const recoveryOk = data.recovery_strategy == null || data.recovery_strategy === 'none';
+  const noDataOk = data.no_data_strategy == null || data.no_data_strategy === 'none';
+  return recoveryOk && noDataOk;
+};
+
+/** query.recovery is only meaningful when recovery_strategy is "query". */
+export const isRecoveryQueryConsistentWithStrategy = (data: {
+  recovery_strategy?: RecoveryStrategy | null;
+  query?: { recovery?: unknown };
+}): boolean => {
+  if (data.query?.recovery == null) return true;
+  return data.recovery_strategy === recoveryStrategy.query;
+};
+
+/** recovery_strategy "query" requires a recovery query block. */
+export const isRecoveryQueryProvidedForStrategy = (data: {
+  recovery_strategy?: RecoveryStrategy | null;
+  query?: { recovery?: unknown };
+}): boolean => data.recovery_strategy !== recoveryStrategy.query || data.query?.recovery != null;
 
 export const createRuleDataSchema = createRuleDataBaseSchema
   .refine(isStateTransitionAllowed, {
     message: 'state_transition is only allowed when kind is "alert".',
     path: ['state_transition'],
   })
-  .refine(isRecoveryPolicyQueryProvided, {
-    message: 'recovery_policy.query.base is required when recovery_policy.type is "query".',
-    path: ['recovery_policy', 'query', 'base'],
+  .refine(isSignalUsingStandaloneFormat, {
+    message: 'kind "signal" requires query.format "standalone".',
+    path: ['query', 'format'],
+  })
+  .refine(isSignalQueryBreachOnly, {
+    message: 'Signal rules cannot set recovery_strategy or no_data_strategy.',
+    path: ['recovery_strategy'],
+  })
+  .refine(isRecoveryQueryConsistentWithStrategy, {
+    message: 'query.recovery is only allowed when recovery_strategy is "query".',
+    path: ['query', 'recovery'],
+  })
+  .refine(isRecoveryQueryProvidedForStrategy, {
+    message: 'query.recovery is required when recovery_strategy is "query".',
+    path: ['query', 'recovery'],
   });
 
 export type CreateRuleData = z.infer<typeof createRuleDataSchema>;
+
+/**
+ * Top-level fields of the create-rule schema that cannot be changed after the
+ * rule has been created. Every other field of {@link createRuleDataBaseSchema}
+ * is implicitly mutable.
+ *
+ * Consumers that implement PUT-style upsert must reject requests that try to
+ * mutate one of these. Consumers that implement PATCH-style update must
+ * preserve them from storage regardless of the body.
+ *
+ * Whenever a top-level field is added to {@link createRuleDataBaseSchema}, the
+ * snapshot test in `rule_data_schema.test.ts` will fail. Updating the
+ * snapshot surfaces the new field in the PR diff so reviewers can confirm
+ * whether it should be classified as immutable here instead of being silently
+ * mutable.
+ */
+export const IMMUTABLE_RULE_FIELDS = ['kind'] as const satisfies ReadonlyArray<
+  keyof CreateRuleData
+>;
+
+export type ImmutableRuleField = (typeof IMMUTABLE_RULE_FIELDS)[number];
 
 /** Update rule API schema — all fields optional for partial updates */
 
 export const updateRuleDataSchema = z
   .object({
-    metadata: metadataSchema.partial().optional(),
+    metadata: metadataSchema
+      .partial()
+      .extend({ builder_type: z.string().max(64).optional().nullable() })
+      .optional(),
     time_field: z.string().min(1).max(128).optional(),
     schedule: scheduleSchema.partial().optional().nullable(),
-    evaluation: z
-      .object({
-        query: z
-          .object({
-            base: esqlQuerySchema.optional(),
-          })
-          .strict()
-          .optional(),
-      })
-      .strict()
-      .optional(),
-    recovery_policy: recoveryPolicySchema.optional().nullable(),
+    query: querySchema.optional(),
+    recovery_strategy: recoveryStrategySchema.optional().nullable(),
+    no_data_strategy: noDataStrategySchema.optional().nullable(),
     state_transition: stateTransitionSchema.nullable(),
     grouping: groupingSchema.optional().nullable(),
-    no_data: noDataSchema.optional().nullable(),
-    artifacts: z.array(artifactSchema).optional().nullable(),
+    artifacts: z.array(artifactSchema).max(100).optional().nullable(),
     enabled: z.boolean().optional().describe('Whether the rule is enabled.'),
   })
   .strip();
 
 export type UpdateRuleData = z.infer<typeof updateRuleDataSchema>;
+
+/** Update rule API body schema — adds OCC version on top of update data. */
+export const updateRuleBodySchema = updateRuleDataSchema.extend({
+  version: z
+    .string()
+    .min(1)
+    .max(VERSION_MAX_LENGTH)
+    .optional()
+    .describe('The current version of the rule, used for optimistic concurrency control.'),
+});
+
+export type UpdateRuleBody = z.infer<typeof updateRuleBodySchema>;
 
 /**
  * Schema for rule response data returned from the API.
@@ -297,6 +510,10 @@ export const ruleResponseSchema = createRuleDataBaseSchema.extend({
   createdAt: z.string().describe('ISO timestamp when the rule was created.'),
   updatedBy: z.string().nullable().describe('User who last updated the rule.'),
   updatedAt: z.string().describe('ISO timestamp when the rule was last updated.'),
+  version: z
+    .string()
+    .optional()
+    .describe('The version of the rule, used for optimistic concurrency control'),
 });
 
 export type RuleResponse = z.infer<typeof ruleResponseSchema>;
@@ -307,13 +524,13 @@ export type FindRulesSortField = z.infer<typeof findRulesSortFieldSchema>;
 
 /** Query parameters for the find rules (list) API. */
 export const findRulesParamsSchema = z.object({
-  page: z.coerce.number().min(1).optional().describe('The page number to return.'),
+  page: z.coerce.number().min(1).optional().describe('The page number to return. Defaults to 1.'),
   perPage: z.coerce
     .number()
     .min(1)
     .max(1000)
     .optional()
-    .describe('The number of rules to return per page.'),
+    .describe('The number of rules to return per page. Defaults to 20.'),
   filter: z.string().optional().describe('The filter to apply to the rules.'),
   sortField: findRulesSortFieldSchema.optional().describe('The field to sort rules by.'),
   sortOrder: z.enum(['asc', 'desc']).optional().describe('The direction to sort rules.'),
@@ -338,6 +555,17 @@ export const findRulesResponseSchema = z
   .describe('Paginated list of rules.');
 
 export type FindRulesResponse = z.infer<typeof findRulesResponseSchema>;
+
+/** Query parameters for the rule tags API. */
+export const ruleTagsParamsSchema = z.object({
+  filter: z
+    .string()
+    .max(1024)
+    .optional()
+    .describe('The filter to apply when aggregating rule tags.'),
+});
+
+export type RuleTagsParams = z.infer<typeof ruleTagsParamsSchema>;
 
 /** Rule tags response schema. */
 export const ruleTagsResponseSchema = z
@@ -375,3 +603,36 @@ export const bulkOperationResponseSchema = z
   .describe('Result of a bulk rule operation.');
 
 export type BulkOperationResponse = z.infer<typeof bulkOperationResponseSchema>;
+
+export const ruleIdSchema = z
+  .string()
+  .trim()
+  .min(1)
+  .max(ID_MAX_LENGTH)
+  .describe('A rule identifier.');
+
+/**
+ * Request body schema for `POST /api/alerting/v2/rules/_bulk_get`.
+ */
+export const bulkGetRulesParamsSchema = z
+  .object({
+    ids: z
+      .array(ruleIdSchema)
+      .min(1)
+      .max(MAX_BULK_ITEMS)
+      .describe('Rule identifiers to retrieve. The response preserved this order.'),
+  })
+  .strict();
+
+export type BulkGetRulesParams = z.infer<typeof bulkGetRulesParamsSchema>;
+
+/**
+ * Response schema for `POST /api/alerting/v2/rules/_bulk_get`.
+ */
+export const bulkGetRulesResponseSchema = z.object({
+  rules: z
+    .array(ruleResponseSchema)
+    .describe('The requested rules, in the same order as the requested ids.'),
+});
+
+export type BulkGetRulesResponse = z.infer<typeof bulkGetRulesResponseSchema>;

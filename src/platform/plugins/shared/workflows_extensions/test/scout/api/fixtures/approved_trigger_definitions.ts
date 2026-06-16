@@ -28,6 +28,62 @@
  */
 export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: string }> = [
   {
+    id: 'alerting.episodeAcked',
+    schemaHash: 'd280f377a1b17bcbd655e93f00ebb80b1935ef93951115cc1559305a5da01942',
+  },
+  {
+    id: 'alerting.episodeActivated',
+    schemaHash: 'b2d6d720052206559b91d1558e8c2d66376d6eaad15db1f1748cfd59ef894f5f',
+  },
+  {
+    id: 'alerting.episodeAssigned',
+    schemaHash: 'cab4d7b9ed82d802f6dd51f4d29327f7fb84bfabcf958a046c53ceb5d7136b0b',
+  },
+  {
+    id: 'alerting.episodeDeactivated',
+    schemaHash: '69cf494f29d6410e2df10766ccaef4641e6b8718c8dc3b01e5833cb9a1de1238',
+  },
+  {
+    id: 'alerting.episodeSnoozed',
+    schemaHash: 'ca2d9156382a2d132b94e6058488d1f78df92e539445403f1b315ea16a3e6270',
+  },
+  {
+    id: 'alerting.episodeTagged',
+    schemaHash: 'c69b1bf9ecdac0753366584be4240b0ae6423ce0fd9aa537a618b4028926f792',
+  },
+  {
+    id: 'alerting.episodeUnacked',
+    schemaHash: 'd280f377a1b17bcbd655e93f00ebb80b1935ef93951115cc1559305a5da01942',
+  },
+  {
+    id: 'alerting.episodeUnassigned',
+    schemaHash: 'd280f377a1b17bcbd655e93f00ebb80b1935ef93951115cc1559305a5da01942',
+  },
+  {
+    id: 'alerting.episodeUnsnoozed',
+    schemaHash: 'd280f377a1b17bcbd655e93f00ebb80b1935ef93951115cc1559305a5da01942',
+  },
+  {
+    id: 'cases.caseCreated',
+    schemaHash: '5b562db9463664a1e28ff2f3ee7edec229e83912569190cd8a83f53d38da9ed8',
+  },
+  {
+    id: 'cases.caseUpdated',
+    schemaHash: 'bf936f051ec83ba5d4b6b7612879f3aeb7405c911504e157c6607d485ed650c1',
+  },
+  {
+    id: 'cases.caseStatusUpdated',
+    schemaHash: '168673364f93e74cb472da685175d4acccc4b9a5bd851c2f9c62bbb8da15c7df',
+  },
+  {
+    id: 'cases.attachmentsAdded',
+    schemaHash: 'e1d2dc5b465290cb4244976882e258c600c416ae496e1096312515dd174e6336',
+  },
+  {
+    id: 'cases.commentsAdded',
+    schemaHash: '673830c048cad59a5813d0c1a73f90c8ce0cd42eae9fa50a5df70db2fe6bc6de',
+  },
+  {
     id: 'workflows.failed',
     schemaHash: '2ac7a279823d7ca59c4d47de93ea7bd7103b1953ea484cef7f489d12d0c81980',
   },

@@ -19,6 +19,7 @@ jest.mock('@kbn/yaml-rule-editor', () => ({
 
 // Mock the code-editor to avoid monaco editor setup
 jest.mock('@kbn/code-editor', () => ({
+  ...jest.requireActual('@kbn/code-editor'),
   CodeEditor: ({ value, onChange }: { value: string; onChange: (v: string) => void }) => (
     <textarea
       data-test-subj="codeEditorMock"
@@ -26,7 +27,6 @@ jest.mock('@kbn/code-editor', () => ({
       onChange={(e) => onChange(e.target.value)}
     />
   ),
-  ESQL_LANG_ID: 'esql',
 }));
 
 // Mock the ES|QL utils to avoid complex setup
@@ -224,10 +224,8 @@ describe('DynamicRuleForm', () => {
           metadata: expect.objectContaining({
             name: 'Test Rule',
           }),
-          evaluation: expect.objectContaining({
-            query: expect.objectContaining({
-              base: 'FROM logs-* | STATS count = COUNT(*)',
-            }),
+          query: expect.objectContaining({
+            breach: 'FROM logs-* | STATS count = COUNT(*)',
           }),
         }),
         expect.anything()
