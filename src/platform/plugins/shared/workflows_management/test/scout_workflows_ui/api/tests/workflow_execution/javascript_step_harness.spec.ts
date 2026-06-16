@@ -42,7 +42,7 @@ steps:
   - name: func-liquid-const-mutation
     type: ${ScriptsJavaScriptStepTypeId}
     with:
-      script: |
+      code: |
         var array = {{consts.array | json}}
 
         for (var i = 4; i < 7; i++) {
@@ -54,14 +54,14 @@ steps:
   - name: func-async-await
     type: ${ScriptsJavaScriptStepTypeId}
     with:
-      script: |
+      code: |
         const value = await Promise.resolve(42);
         return value;
 
   - name: func-complex-return-value
     type: ${ScriptsJavaScriptStepTypeId}
     with:
-      script: |
+      code: |
         return {
           greeting: '{{consts.greeting}}',
           nested: { ok: true, items: [1, 2, 3] },
@@ -70,7 +70,7 @@ steps:
   - name: func-cpu-baseline
     type: ${ScriptsJavaScriptStepTypeId}
     with:
-      script: |
+      code: |
         let sum = 0;
         for (let i = 0; i < 1000; i++) {
           sum += i;
@@ -80,7 +80,7 @@ steps:
   - name: sec-no-host-or-node-globals
     type: ${ScriptsJavaScriptStepTypeId}
     with:
-      script: |
+      code: |
         return {
           context: typeof context,
           input: typeof input,
@@ -95,7 +95,7 @@ steps:
     on-failure:
       continue: true
     with:
-      script: |
+      code: |
         })(); return { injected: true }; (function () {
 
   - name: sec-empty-script-rejected
@@ -103,7 +103,7 @@ steps:
     on-failure:
       continue: true
     with:
-      script: |
+      code: |
           
 
   - name: perf-infinite-loop-timeout
@@ -111,7 +111,7 @@ steps:
     on-failure:
       continue: true
     with:
-      script: |
+      code: |
         console.log('starting infinite loop');
         while (true) {}
 
@@ -120,7 +120,7 @@ steps:
     on-failure:
       continue: true
     with:
-      script: |
+      code: |
         console.log('allocating object memory');
         const chunks = [];
         for (let i = 0; i < 10000; i++) {
@@ -133,7 +133,7 @@ steps:
     on-failure:
       continue: true
     with:
-      script: |
+      code: |
         console.log('allocating ArrayBuffer');
         new ArrayBuffer(100 * 1024 * 1024);
         return 'should not reach here';
@@ -143,7 +143,7 @@ steps:
     on-failure:
       continue: true
     with:
-      script: |
+      code: |
         for (let i = 0; i < 200; i++) {
           console.log('spam-' + i);
         }
@@ -268,7 +268,7 @@ spaceTest.describe(
         execution as WorkflowExecutionDto,
         'sec-empty-script-rejected'
       );
-      expectStepFailedWithMessage(emptyScript, 'Script is required');
+      expectStepFailedWithMessage(emptyScript, 'Code is required');
 
       const infiniteLoop = getJavaScriptStep(
         execution as WorkflowExecutionDto,

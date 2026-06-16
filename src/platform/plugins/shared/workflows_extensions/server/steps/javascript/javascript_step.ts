@@ -9,11 +9,11 @@
 
 import { executeScriptInIsolate } from './execute_script_in_isolate';
 import {
-  MAX_CONSOLE_LOG_COUNT,
-  SCRIPT_EXECUTION_TIMEOUT_MS,
-  SCRIPT_MAX_LENGTH_CHARS,
-  SCRIPT_MAX_LENGTH_MB,
-  SCRIPT_MEMORY_LIMIT_MB,
+  CODE_EXECUTION_TIMEOUT_MS,
+  CODE_MAX_CONSOLE_LOG_COUNT,
+  CODE_MAX_LENGTH_CHARS,
+  CODE_MAX_LENGTH_MB,
+  CODE_MEMORY_LIMIT_MB,
   scriptsJavaScriptStepCommonDefinition,
 } from '../../../common/steps/javascript';
 import { createServerStepDefinition } from '../../step_registry/types';
@@ -42,17 +42,17 @@ const toExecutionError = (error: unknown, aborted: boolean): Error => {
 export const scriptsJavaScriptStepDefinition = createServerStepDefinition({
   ...scriptsJavaScriptStepCommonDefinition,
   handler: async (context) => {
-    const { script } = context.input;
+    const { code } = context.input;
 
-    if (typeof script !== 'string' || script.trim().length === 0) {
-      return { error: new Error('Script is required') };
+    if (typeof code !== 'string' || code.trim().length === 0) {
+      return { error: new Error('Code is required') };
     }
 
-    if (script.length > SCRIPT_MAX_LENGTH_CHARS) {
+    if (code.length > CODE_MAX_LENGTH_CHARS) {
       return {
         error: new Error(
-          `Script exceeds maximum allowed size of ${SCRIPT_MAX_LENGTH_MB} MB after template rendering. Current size: ${(
-            script.length /
+          `Code exceeds maximum allowed size of ${CODE_MAX_LENGTH_MB} MB after template rendering. Current size: ${(
+            code.length /
             1024 /
             1024
           ).toFixed(2)} MB. Reduce interpolated data or split the workflow.`
@@ -62,12 +62,12 @@ export const scriptsJavaScriptStepDefinition = createServerStepDefinition({
 
     try {
       const output = await executeScriptInIsolate({
-        script,
+        script: code,
         logger: context.logger,
         abortSignal: context.abortSignal,
-        memoryLimitMb: SCRIPT_MEMORY_LIMIT_MB,
-        executionTimeoutMs: SCRIPT_EXECUTION_TIMEOUT_MS,
-        maxConsoleLogCount: MAX_CONSOLE_LOG_COUNT,
+        memoryLimitMb: CODE_MEMORY_LIMIT_MB,
+        executionTimeoutMs: CODE_EXECUTION_TIMEOUT_MS,
+        maxConsoleLogCount: CODE_MAX_CONSOLE_LOG_COUNT,
       });
 
       return { output };

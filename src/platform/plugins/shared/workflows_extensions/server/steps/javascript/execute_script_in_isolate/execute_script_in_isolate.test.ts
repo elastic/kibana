@@ -13,15 +13,15 @@ import {
   createScriptOutOfMemoryMessage,
 } from './normalize_isolate_execution_error';
 import {
-  MAX_CONSOLE_LOG_COUNT,
-  SCRIPT_EXECUTION_TIMEOUT_MS,
-  SCRIPT_MEMORY_LIMIT_MB,
+  CODE_EXECUTION_TIMEOUT_MS,
+  CODE_MAX_CONSOLE_LOG_COUNT,
+  CODE_MEMORY_LIMIT_MB,
 } from '../../../../common/steps/javascript';
 
 const defaultIsolateParams = {
-  memoryLimitMb: SCRIPT_MEMORY_LIMIT_MB,
-  executionTimeoutMs: SCRIPT_EXECUTION_TIMEOUT_MS,
-  maxConsoleLogCount: MAX_CONSOLE_LOG_COUNT,
+  memoryLimitMb: CODE_MEMORY_LIMIT_MB,
+  executionTimeoutMs: CODE_EXECUTION_TIMEOUT_MS,
+  maxConsoleLogCount: CODE_MAX_CONSOLE_LOG_COUNT,
 };
 
 const createLogger = (): ScriptLogger & {
@@ -88,7 +88,7 @@ describe('executeScriptInIsolate', () => {
     });
 
     expect(result).toBe(42);
-    expect(logger.info).toHaveBeenCalledTimes(MAX_CONSOLE_LOG_COUNT);
+    expect(logger.info).toHaveBeenCalledTimes(CODE_MAX_CONSOLE_LOG_COUNT);
   });
 
   it('does not expose host data to user scripts', async () => {
@@ -156,9 +156,9 @@ describe('executeScriptInIsolate', () => {
           abortSignal: new AbortController().signal,
           ...defaultIsolateParams,
         })
-      ).rejects.toThrow(createScriptExecutionTimeoutMessage(SCRIPT_EXECUTION_TIMEOUT_MS));
+      ).rejects.toThrow(createScriptExecutionTimeoutMessage(CODE_EXECUTION_TIMEOUT_MS));
     },
-    SCRIPT_EXECUTION_TIMEOUT_MS + 2_000
+    CODE_EXECUTION_TIMEOUT_MS + 2_000
   );
 
   it('cancels execution when the abort signal fires', async () => {
@@ -186,6 +186,6 @@ describe('executeScriptInIsolate', () => {
         abortSignal: new AbortController().signal,
         ...defaultIsolateParams,
       })
-    ).rejects.toThrow(createScriptOutOfMemoryMessage(SCRIPT_MEMORY_LIMIT_MB));
+    ).rejects.toThrow(createScriptOutOfMemoryMessage(CODE_MEMORY_LIMIT_MB));
   });
 });

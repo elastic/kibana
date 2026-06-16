@@ -12,9 +12,9 @@ import type { ScriptLogger } from './execute_script_in_isolate';
 import { createScriptExecutionTimeoutMessage } from './execute_script_in_isolate/normalize_isolate_execution_error';
 import { scriptsJavaScriptStepDefinition } from './javascript_step';
 import {
-  SCRIPT_EXECUTION_TIMEOUT_MS,
-  SCRIPT_MAX_LENGTH_CHARS,
-  SCRIPT_MEMORY_LIMIT_MB,
+  CODE_EXECUTION_TIMEOUT_MS,
+  CODE_MAX_LENGTH_CHARS,
+  CODE_MEMORY_LIMIT_MB,
   ScriptsJavaScriptStepTypeId,
 } from '../../../common/steps/javascript';
 import type { StepHandlerContext } from '../../step_registry/types';
@@ -32,7 +32,7 @@ const createLogger = (): ScriptLogger & {
 });
 
 const createMockContext = (
-  input: { script: string },
+  input: { code: string },
   options?: {
     abortSignal?: AbortSignal;
   }
@@ -52,24 +52,24 @@ const createMockContext = (
 describe('scriptsJavaScriptStepDefinition', () => {
   it('has a stable handler hash for approval', () => {
     expect(createSHA256Hash(scriptsJavaScriptStepDefinition.handler.toString())).toBe(
-      '499f4cd443f8c27bf9ed365c9399abd4b82d34dacb89775207c34602ae2c396b'
+      'ddf0b743e6ae5614c6006233912d8c8314f02f2d86a8150fb550edd931eb6524'
     );
   });
 
   it('uses an 8 MB memory limit for the isolate', () => {
-    expect(SCRIPT_MEMORY_LIMIT_MB).toBe(8);
+    expect(CODE_MEMORY_LIMIT_MB).toBe(8);
   });
 
-  it('returns an error when script is missing', async () => {
-    const context = createMockContext({ script: '   ' });
+  it('returns an error when code is missing', async () => {
+    const context = createMockContext({ code: '   ' });
     const result = await scriptsJavaScriptStepDefinition.handler(context);
 
-    expect(result.error?.message).toBe('Script is required');
+    expect(result.error?.message).toBe('Code is required');
   });
 
-  it('returns an error when script exceeds the maximum size after template rendering', async () => {
+  it('returns an error when code exceeds the maximum size after template rendering', async () => {
     const context = createMockContext({
-      script: 'x'.repeat(SCRIPT_MAX_LENGTH_CHARS + 1),
+      code: 'x'.repeat(CODE_MAX_LENGTH_CHARS + 1),
     });
 
     const result = await scriptsJavaScriptStepDefinition.handler(context);
@@ -78,9 +78,9 @@ describe('scriptsJavaScriptStepDefinition', () => {
     expect(result.error?.message).toContain('Reduce interpolated data or split the workflow');
   });
 
-  it('returns script output without passing host data into the sandbox', async () => {
+  it('returns code output without passing host data into the sandbox', async () => {
     const context = createMockContext({
-      script: "return { greeting: 'Hello, World' };",
+      code: "return { greeting: 'Hello, World' };",
     });
 
     const result = await scriptsJavaScriptStepDefinition.handler(context);
@@ -92,21 +92,21 @@ describe('scriptsJavaScriptStepDefinition', () => {
   it(
     'returns a timeout error when script execution exceeds 5 seconds',
     async () => {
-      const context = createMockContext({ script: 'while (true) {}' });
+      const context = createMockContext({ code: 'while (true) {}' });
 
       const result = await scriptsJavaScriptStepDefinition.handler(context);
 
       expect(result.error?.message).toBe(
-        createScriptExecutionTimeoutMessage(SCRIPT_EXECUTION_TIMEOUT_MS)
+        createScriptExecutionTimeoutMessage(CODE_EXECUTION_TIMEOUT_MS)
       );
     },
-    SCRIPT_EXECUTION_TIMEOUT_MS + 2_000
+    CODE_EXECUTION_TIMEOUT_MS + 2_000
   );
 
   it('returns a cancellation error when aborted before execution completes', async () => {
     const abortController = new AbortController();
     const context = createMockContext(
-      { script: 'while (true) {}' },
+      { code: 'while (true) {}' },
       { abortSignal: abortController.signal }
     );
 

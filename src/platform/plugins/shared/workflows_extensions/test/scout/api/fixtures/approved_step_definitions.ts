@@ -90,7 +90,7 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
   },
   {
     id: 'code.javascript',
-    handlerHash: '499f4cd443f8c27bf9ed365c9399abd4b82d34dacb89775207c34602ae2c396b',
+    handlerHash: 'ddf0b743e6ae5614c6006233912d8c8314f02f2d86a8150fb550edd931eb6524',
   },
   {
     id: 'security.buildAlertEntityGraph',

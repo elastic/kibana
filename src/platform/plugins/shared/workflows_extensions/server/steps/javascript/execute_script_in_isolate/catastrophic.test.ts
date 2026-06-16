@@ -62,9 +62,9 @@ jest.mock('isolated-vm', () => {
 import { executeScriptInIsolate } from '.';
 import { createScriptOutOfMemoryMessage } from './normalize_isolate_execution_error';
 import {
-  MAX_CONSOLE_LOG_COUNT,
-  SCRIPT_EXECUTION_TIMEOUT_MS,
-  SCRIPT_MEMORY_LIMIT_MB,
+  CODE_EXECUTION_TIMEOUT_MS,
+  CODE_MAX_CONSOLE_LOG_COUNT,
+  CODE_MEMORY_LIMIT_MB,
   ScriptsJavaScriptStepTypeId,
 } from '../../../../common/steps/javascript';
 import type { StepHandlerContext } from '../../../step_registry/types';
@@ -83,9 +83,9 @@ const createLogger = (): ScriptLogger & {
 });
 
 const defaultIsolateParams = {
-  memoryLimitMb: SCRIPT_MEMORY_LIMIT_MB,
-  executionTimeoutMs: SCRIPT_EXECUTION_TIMEOUT_MS,
-  maxConsoleLogCount: MAX_CONSOLE_LOG_COUNT,
+  memoryLimitMb: CODE_MEMORY_LIMIT_MB,
+  executionTimeoutMs: CODE_EXECUTION_TIMEOUT_MS,
+  maxConsoleLogCount: CODE_MAX_CONSOLE_LOG_COUNT,
 };
 
 describe('executeScriptInIsolate catastrophic OOM handling', () => {
@@ -139,7 +139,7 @@ describe('executeScriptInIsolate catastrophic OOM handling', () => {
 
     mockCapturedOnCatastrophicError?.('out of memory');
 
-    await expect(execution).rejects.toThrow(createScriptOutOfMemoryMessage(SCRIPT_MEMORY_LIMIT_MB));
+    await expect(execution).rejects.toThrow(createScriptOutOfMemoryMessage(CODE_MEMORY_LIMIT_MB));
     expect(logger.error).toHaveBeenCalledWith(
       'JavaScript step isolate catastrophic error',
       expect.objectContaining({
@@ -171,8 +171,8 @@ describe('scriptsJavaScriptStepDefinition catastrophic OOM handling', () => {
   it('returns a step error when the isolate reports a catastrophic failure', async () => {
     const context: StepHandlerContext<any, any> = {
       config: {},
-      input: { script: 'return 1;' },
-      rawInput: { script: 'return 1;' },
+      input: { code: 'return 1;' },
+      rawInput: { code: 'return 1;' },
       contextManager: { getContext: jest.fn() } as any,
       logger: createLogger(),
       abortSignal: new AbortController().signal,
