@@ -10,19 +10,17 @@ import { i18n } from '@kbn/i18n';
 import { validateEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { EsqlEditorField, EDITOR_HEIGHT_INLINE } from './esql_editor_field';
 
-const DATA_TEST_SUBJ = 'ruleV2FormEvaluationQueryField';
+const DATA_TEST_SUBJ = 'ruleV2FormBreachQueryField';
 
-interface EvaluationQueryFieldProps {
+interface BreachQueryFieldProps {
   /** Height of the editor (default: 140 for flyouts) */
   height?: string | number;
 }
 
-export const EvaluationQueryField = ({
-  height = EDITOR_HEIGHT_INLINE,
-}: EvaluationQueryFieldProps) => {
+export const BreachQueryField = ({ height = EDITOR_HEIGHT_INLINE }: BreachQueryFieldProps) => {
   return (
     <EsqlEditorField
-      name="evaluation.query.base"
+      name="query.breach"
       height={height}
       dataTestSubj={DATA_TEST_SUBJ}
       rules={{
