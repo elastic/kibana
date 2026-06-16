@@ -134,7 +134,7 @@ export function AboutPanel() {
   }, [isEditing]);
 
   return (
-    <EuiFocusTrap onClickOutside={() => setIsEditing(false)}>
+    <EuiFocusTrap disabled={!isEditing} onClickOutside={() => setIsEditing(false)}>
       <EuiPanel
         hasBorder
         hasShadow={false}
@@ -146,9 +146,6 @@ export function AboutPanel() {
           &:focus {
             box-shadow: none;
             transform: translateY(0);
-          }
-          &:is(:hover, :active, :focus, :focus-within) .aboutPanel__editButton {
-            opacity: 1;
           }
         `}
       >
@@ -164,22 +161,23 @@ export function AboutPanel() {
           </EuiFlexItem>
 
           {canEditDescription && !isEditing && (
-            <EuiFlexItem
-              grow={false}
-              className="aboutPanel__editButton"
-              css={css`
-                opacity: 0;
-                transition: opacity 150ms;
-              `}
-            >
-              <EuiButtonIcon
-                iconType="pencil"
-                aria-label={i18n.translate(
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                content={i18n.translate(
                   'xpack.streams.streamOverview.aboutPanel.editDescriptionAriaLabel',
                   { defaultMessage: 'Edit description' }
                 )}
-                onClick={handleClick}
-              />
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  iconType="pencil"
+                  aria-label={i18n.translate(
+                    'xpack.streams.streamOverview.aboutPanel.editDescriptionAriaLabel',
+                    { defaultMessage: 'Edit description' }
+                  )}
+                  onClick={handleClick}
+                />
+              </EuiToolTip>
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
