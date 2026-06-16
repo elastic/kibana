@@ -189,7 +189,8 @@ export const searchLinksOASOperationObject = {
 const linksReadResponseExamples = {
   getLinksResponse: {
     summary: 'Get links library item response',
-    description: 'The full links library item state including `links`, `layout`, `title`, `description`, and metadata.',
+    description:
+      'The full links library item state including `links`, `layout`, `title`, `description`, and metadata.',
     value: {
       id: '0ee9d0ea-06a0-4a30-bf4e-be4d3ca85bf3',
       data: linksCreateBody,
