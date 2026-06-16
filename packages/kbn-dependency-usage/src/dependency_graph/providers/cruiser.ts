@@ -40,7 +40,6 @@ export const NODE_MODULES_COLLAPSE_REGEX = '^node_modules/(@[^/]+/[^/]+|[^/]+)';
 export async function cruiseExternalDeps(paths: PathsToAnalyze) {
   return cruise(paths, {
     ruleSet: {
-      // @ts-expect-error
       forbidden: [
         {
           name: 'external-deps',

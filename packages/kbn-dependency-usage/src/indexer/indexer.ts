@@ -12,7 +12,6 @@ import nodePath from 'path';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { parse as parseJsonc } from 'jsonc-parser';
 
-// @ts-expect-error
 import { REPO_ROOT } from '@kbn/repo-info';
 
 import { getCodeOwnersForFile, getPathsWithOwnersReversed } from '../lib/code_owners.ts';

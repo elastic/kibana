@@ -14,7 +14,6 @@ import nodePath from 'path';
 import yargs from 'yargs';
 import chalk from 'chalk';
 
-// @ts-expect-error
 import { REPO_ROOT } from '@kbn/repo-info';
 
 import {
