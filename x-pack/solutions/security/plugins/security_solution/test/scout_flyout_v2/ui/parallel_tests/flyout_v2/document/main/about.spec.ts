@@ -28,55 +28,53 @@ spaceTest.describe(
       await apiServices.detectionAlerts.deleteAll();
     });
 
-    spaceTest('rule description renders in the About section', async ({ pageObjects, page }) => {
-      await pageObjects.alertsTablePage.navigate();
-      await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
-      await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-      await pageObjects.documentFlyoutV2.waitForAlertFlyout();
-
-      await expect(
-        page.getByTestId('securitySolutionFlyoutAlertDescriptionTitle')
-      ).toBeVisible();
-      await expect(
-        page.getByTestId('securitySolutionFlyoutAlertDescriptionDetails')
-      ).toContainText(CUSTOM_QUERY_RULE.description);
-    });
-
-    spaceTest('alert reason renders with preview button', async ({ pageObjects, page }) => {
-      await pageObjects.alertsTablePage.navigate();
-      await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
-      await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-      await pageObjects.documentFlyoutV2.waitForAlertFlyout();
-
-      await expect(page.getByTestId('securitySolutionFlyoutReasonTitle')).toBeVisible();
-      await expect(page.getByTestId('securitySolutionFlyoutReasonDetails')).toBeVisible();
-
-      // "Show full reason" preview button opens a popover with event details
-      const previewButton = page.getByTestId('securitySolutionFlyoutReasonDetailsPreviewButton');
-      await previewButton.waitFor({ state: 'visible' });
-      await previewButton.click();
-      await expect(page.getByTestId('securitySolutionFlyoutReasonPopover')).toBeVisible({
-        timeout: 5_000,
-      });
-    });
-
     spaceTest(
-      'MITRE ATT&CK panel renders when rule has threat data',
-      async ({ pageObjects, page, log }) => {
+      'rule description: "Show rule summary" opens the rule summary as a child flyout',
+      async ({ pageObjects }) => {
         await pageObjects.alertsTablePage.navigate();
         await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
         await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
         await pageObjects.documentFlyoutV2.waitForAlertFlyout();
 
-        // CUSTOM_QUERY_RULE has no MITRE threat data; skip gracefully if the panel is absent.
-        const mitreTitle = page.getByTestId('securitySolutionFlyoutMitreAttackTitle');
-        const isVisible = await mitreTitle.isVisible().catch(() => false);
-        if (!isVisible) {
-          log.info('MITRE ATT&CK panel not visible — rule has no threat data');
-          spaceTest.skip(true, 'Rule created without MITRE ATT&CK threat data');
-        }
+        // The About section and its "Show rule summary" button render for a readable rule.
+        await expect(pageObjects.documentFlyoutV2.aboutSection).toBeVisible();
+        await expect(pageObjects.documentFlyoutV2.ruleSummaryButton).toBeVisible();
+        await expect(pageObjects.documentFlyoutV2.ruleSummaryButton).toBeEnabled();
 
-        await expect(page.getByTestId('securitySolutionFlyoutMitreAttackDetails')).toBeVisible();
+        await pageObjects.documentFlyoutV2.openRuleSummary();
+
+        // The rule summary opens as a child flyout titled with the rule name.
+        await expect(pageObjects.documentFlyoutV2.ruleDetailsTitle).toContainText(ruleName);
+      }
+    );
+
+    spaceTest(
+      'alert reason: "Show full reason" popover key-value pairs expose working cell actions on hover',
+      async ({ pageObjects }) => {
+        await pageObjects.alertsTablePage.navigate();
+        await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
+        await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
+        await pageObjects.documentFlyoutV2.waitForAlertFlyout();
+
+        await expect(pageObjects.documentFlyoutV2.aboutSection).toBeVisible();
+
+        // "Show full reason" opens a popover that renders the reason as key-value pairs.
+        await pageObjects.documentFlyoutV2.openReasonPopover();
+        await expect(pageObjects.documentFlyoutV2.reasonHostNameValue).toBeVisible({
+          timeout: 10_000,
+        });
+
+        // Hovering a key-value pair reveals its cell-action buttons.
+        await pageObjects.documentFlyoutV2.hoverReasonHostName();
+        await expect(pageObjects.documentFlyoutV2.cellActionsFilterInButton).toBeVisible();
+        await expect(pageObjects.documentFlyoutV2.cellActionsFilterOutButton).toBeVisible();
+        await expect(pageObjects.documentFlyoutV2.cellActionsAddToTimelineButton).toBeVisible();
+
+        // "Filter for" works: clicking it adds a single filter pill to the page search bar.
+        await pageObjects.documentFlyoutV2.cellActionsFilterInButton.click();
+        await expect(pageObjects.documentFlyoutV2.pageFilterBadges).toHaveCount(1, {
+          timeout: 10_000,
+        });
       }
     );
   }

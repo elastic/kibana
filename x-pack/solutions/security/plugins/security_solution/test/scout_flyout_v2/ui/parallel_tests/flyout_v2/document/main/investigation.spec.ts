@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { spaceTest, tags, CUSTOM_QUERY_RULE } from '@kbn/scout-security';
+import { spaceTest, tags, CUSTOM_QUERY_RULE, PREVALENCE_SOURCE_IP } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
 
 spaceTest.describe(
@@ -15,17 +15,25 @@ spaceTest.describe(
     let ruleName: string;
 
     spaceTest.beforeEach(async ({ browserAuth, apiServices, scoutSpace }) => {
+      // Index a source event carrying `source.ip` and surface it as a custom highlighted field,
+      // TODO: Source event, host name, user name, etc.
+      // so the Investigation section renders the special IP field as a child-flyout link.
+      const { sourceIndex } = await apiServices.prevalence.createPrevalenceFixture(scoutSpace.id);
+
       ruleName = `${CUSTOM_QUERY_RULE.name}_${scoutSpace.id}_${Date.now()}`;
       await apiServices.detectionRule.createCustomQueryRule({
         ...CUSTOM_QUERY_RULE,
         name: ruleName,
+        index: [sourceIndex],
+        investigation_fields: { field_names: ['source.ip'] },
       });
       await browserAuth.loginAsPlatformEngineer();
     });
 
-    spaceTest.afterEach(async ({ apiServices }) => {
+    spaceTest.afterEach(async ({ apiServices, scoutSpace }) => {
       await apiServices.detectionRule.deleteAll();
       await apiServices.detectionAlerts.deleteAll();
+      await apiServices.prevalence.cleanupPrevalenceFixture(scoutSpace.id);
     });
 
     spaceTest(
@@ -47,44 +55,33 @@ spaceTest.describe(
       }
     );
 
-    spaceTest('highlighted fields table renders', async ({ pageObjects, page }) => {
-      await pageObjects.alertsTablePage.navigate();
-      await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
-      await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-      await pageObjects.documentFlyoutV2.waitForAlertFlyout();
-
-      await expect(
-        page.getByTestId('securitySolutionFlyoutHighlightedFieldsTitle')
-      ).toBeVisible();
-      await expect(
-        page.getByTestId('securitySolutionFlyoutHighlightedFieldsDetails')
-      ).toBeVisible();
-
-      // At least one field cell should be present
-      const fieldCells = page.locator(
-        '[data-test-subj^="securitySolutionFlyoutHighlightedFieldsCell"]'
-      );
-      await expect(fieldCells.first()).toBeVisible({ timeout: 10_000 });
-    });
-
     spaceTest(
-      'highlighted fields edit button opens the customization modal',
-      async ({ pageObjects, page }) => {
+      'highlighted fields: clicking the source.ip value opens the network details child flyout',
+      async ({ pageObjects }) => {
         await pageObjects.alertsTablePage.navigate();
         await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
         await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
         await pageObjects.documentFlyoutV2.waitForAlertFlyout();
 
-        const editButton = page.getByTestId('securitySolutionFlyoutHighlightedFieldsEditButton');
-        await editButton.waitFor({ state: 'visible' });
-        await editButton.click();
+        await expect(pageObjects.documentFlyoutV2.investigationSection).toBeVisible();
+        await expect(pageObjects.documentFlyoutV2.highlightedFieldsTable).toBeVisible();
 
-        await expect(
-          page.getByTestId('securitySolutionFlyoutHighlightedFieldsModal')
-        ).toBeVisible({ timeout: 5_000 });
-        await expect(
-          page.getByTestId('securitySolutionFlyoutHighlightedFieldsModalTitle')
-        ).toBeVisible();
+        // `source.ip` is a "special" highlighted field: it renders as a link that opens the
+        // network details flyout. Other special fields (e.g. host.name, user.name) will be
+        // added here as their child flyouts become available.
+        const sourceIpLink = pageObjects.documentFlyoutV2.highlightedFieldChildLink('source.ip');
+        await expect(sourceIpLink).toBeVisible();
+        await expect(sourceIpLink).toContainText(PREVALENCE_SOURCE_IP);
+
+        await sourceIpLink.click();
+
+        // The network details flyout opens as a child flyout, titled with the clicked IP.
+        await expect(pageObjects.documentFlyoutV2.networkDetailsFlyoutTitle).toBeVisible({
+          timeout: 10_000,
+        });
+        await expect(pageObjects.documentFlyoutV2.networkDetailsFlyoutTitle).toContainText(
+          PREVALENCE_SOURCE_IP
+        );
       }
     );
   }

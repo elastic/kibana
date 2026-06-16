@@ -36,14 +36,24 @@ export class DocumentFlyoutV2 {
   public readonly notesAddButtonIcon: Locator;
   /** View notes button shown when notes exist but the user cannot add more. */
   public readonly notesViewButton: Locator;
-  /** Reason preview/popover trigger button. */
+  /** Reason preview/popover trigger button ("Show full reason"). */
   public readonly reasonPreviewButton: Locator;
   /** Reason popover content. */
   public readonly reasonPopover: Locator;
+  /** Draggable host.name value rendered inside the reason popover (cell-actions enabled). */
+  public readonly reasonHostNameValue: Locator;
+  /** "Show rule summary" button in the About section (opens the rule details flyout). */
+  public readonly ruleSummaryButton: Locator;
+  /** Rule name title text inside the rule details flyout opened from "Show rule summary". */
+  public readonly ruleDetailsTitle: Locator;
   /** About section header in the overview tab. */
   public readonly aboutSection: Locator;
   /** Investigation section header in the overview tab. */
   public readonly investigationSection: Locator;
+  /** "Highlighted fields" table inside the Investigation section. */
+  public readonly highlightedFieldsTable: Locator;
+  /** Title of the network details flyout opened from an IP highlighted field. */
+  public readonly networkDetailsFlyoutTitle: Locator;
   /** Visualizations section header in the overview tab. */
   public readonly visualizationsSection: Locator;
   /** Insights section header in the overview tab. */
@@ -100,12 +110,16 @@ export class DocumentFlyoutV2 {
   /** "Close alert" submit button inside the "closing reason" sub-panel. */
   public readonly closingReasonSubmitButton: Locator;
 
-  /** Hover-down popover that appears when the cursor is over a cell-actions-enabled field. */
-  public readonly statusCellActionsPopover: Locator;
-  /** "Filter for" cell-action button inside the status badge hover popover. */
-  public readonly statusFilterInButton: Locator;
-  /** "Add to Timeline" cell-action button inside the status badge hover popover. */
-  public readonly statusAddToTimelineButton: Locator;
+  /** Hover-down popover that appears when the cursor is over any cell-actions-enabled value. */
+  public readonly cellActionsHoverPopover: Locator;
+  /** "Filter for" cell-action button inside the cell-actions hover popover. */
+  public readonly cellActionsFilterInButton: Locator;
+  /** "Filter out" cell-action button inside the cell-actions hover popover. */
+  public readonly cellActionsFilterOutButton: Locator;
+  /** "Add to Timeline" cell-action button inside the cell-actions hover popover. */
+  public readonly cellActionsAddToTimelineButton: Locator;
+  /** Filter pills rendered in the page search bar; assert with toHaveCount(). */
+  public readonly pageFilterBadges: Locator;
   /** Main panel wrapper for the assignees popover content. */
   public readonly assigneesApplyPanel: Locator;
   /** User selection list inside the assignees popover. */
@@ -147,10 +161,21 @@ export class DocumentFlyoutV2 {
     );
     this.reasonPreviewButton = page.testSubj.locator('securitySolutionFlyoutReasonPreviewButton');
     this.reasonPopover = page.testSubj.locator('securitySolutionFlyoutReasonPopover');
+    this.reasonHostNameValue = this.reasonPopover.locator(
+      '[data-test-subj="render-content-host.name"]'
+    );
+    this.ruleSummaryButton = page.testSubj.locator('securitySolutionFlyoutRuleSummaryButton');
+    // The rule details flyout renders its title via FlyoutTitle, which suffixes the test
+    // subject with "Text" (the bare RuleDetailsTitle id is only used in the non-link branch).
+    this.ruleDetailsTitle = page.testSubj.locator('securitySolutionFlyoutRuleDetailsTitleText');
     this.aboutSection = page.testSubj.locator('securitySolutionFlyoutAboutSectionHeader');
     this.investigationSection = page.testSubj.locator(
       'securitySolutionFlyoutInvestigationSectionHeader'
     );
+    this.highlightedFieldsTable = page.testSubj.locator(
+      'securitySolutionFlyoutHighlightedFieldsDetails'
+    );
+    this.networkDetailsFlyoutTitle = page.testSubj.locator('network-details-flyout-headerText');
     this.visualizationsSection = page.testSubj.locator(
       'securitySolutionFlyoutVisualizationsHeader'
     );
@@ -192,13 +217,17 @@ export class DocumentFlyoutV2 {
     this.threatIntelligence = page.testSubj.locator(
       'securitySolutionFlyoutInsightsThreatIntelligenceContent'
     );
-    this.statusCellActionsPopover = page.testSubj.locator('hoverActionsPopover');
-    this.statusFilterInButton = page.testSubj.locator(
+    this.cellActionsHoverPopover = page.testSubj.locator('hoverActionsPopover');
+    this.cellActionsFilterInButton = page.testSubj.locator(
       'actionItem-security-default-cellActions-filterIn'
     );
-    this.statusAddToTimelineButton = page.testSubj.locator(
+    this.cellActionsFilterOutButton = page.testSubj.locator(
+      'actionItem-security-default-cellActions-filterOut'
+    );
+    this.cellActionsAddToTimelineButton = page.testSubj.locator(
       'actionItem-security-default-cellActions-addToTimeline'
     );
+    this.pageFilterBadges = page.locator('[id^="popoverFor_filter"]');
     this.childDocumentFlyout = page.testSubj.locator('securitySolutionFlyoutChildDocumentFlyout');
     this.childDocumentAlertTitle = this.childDocumentFlyout.getByTestId(
       'securitySolutionFlyoutAlertTitleText'
@@ -239,16 +268,40 @@ export class DocumentFlyoutV2 {
     await this.notesActionButton.click();
   }
 
-  /** Click the reason preview button and wait for the popover to appear. */
+  /** Click the "Show full reason" button and wait for the reason popover to appear. */
   async openReasonPopover() {
     await this.reasonPreviewButton.click();
     await this.reasonPopover.waitFor({ state: 'visible' });
   }
 
+  /** Hover the host.name value inside the reason popover and wait for the cell-actions popover. */
+  async hoverReasonHostName() {
+    await this.reasonHostNameValue.hover();
+    await this.cellActionsHoverPopover.waitFor({ state: 'visible' });
+  }
+
+  /**
+   * Returns the child-flyout link rendered for a "special" highlighted field, scoped to that
+   * field's row in the Highlighted fields table. These fields (e.g. IP fields) open a related
+   * tool/child flyout on click; today only IP fields (source.ip / destination.ip) are supported.
+   */
+  highlightedFieldChildLink(field: string): Locator {
+    return this.highlightedFieldsTable
+      .locator('tr')
+      .filter({ hasText: field })
+      .locator('[data-test-subj="securitySolutionFlyoutChildLink"]');
+  }
+
+  /** Click the "Show rule summary" button and wait for the rule details flyout to appear. */
+  async openRuleSummary() {
+    await this.ruleSummaryButton.click();
+    await this.ruleDetailsTitle.waitFor({ state: 'visible', timeout: 15_000 });
+  }
+
   /** Hover the status badge and wait for the cell-actions hover popover to appear. */
   async hoverStatusBadge() {
     await this.statusBadge.hover();
-    await this.statusCellActionsPopover.waitFor({ state: 'visible' });
+    await this.cellActionsHoverPopover.waitFor({ state: 'visible' });
   }
 
   /** Click the header status badge and wait for the status-change popover to appear. */

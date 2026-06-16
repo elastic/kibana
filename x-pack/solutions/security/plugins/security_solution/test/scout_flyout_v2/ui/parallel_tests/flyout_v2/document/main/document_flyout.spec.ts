@@ -126,11 +126,11 @@ spaceTest.describe(
 
         // Hover the status badge — both cell-action buttons must be visible
         await pageObjects.documentFlyoutV2.hoverStatusBadge();
-        await expect(pageObjects.documentFlyoutV2.statusFilterInButton).toBeVisible();
-        await expect(pageObjects.documentFlyoutV2.statusAddToTimelineButton).toBeVisible();
+        await expect(pageObjects.documentFlyoutV2.cellActionsFilterInButton).toBeVisible();
+        await expect(pageObjects.documentFlyoutV2.cellActionsAddToTimelineButton).toBeVisible();
 
         // Click "Add to Timeline" — a success toast must confirm the value was added
-        await pageObjects.documentFlyoutV2.statusAddToTimelineButton.click();
+        await pageObjects.documentFlyoutV2.cellActionsAddToTimelineButton.click();
         await pageObjects.toasts.waitFor();
         expect(await pageObjects.toasts.getHeaderText()).toContain(
           addedToTimelineToastText(AlertWorkflowStatus.OPEN)
@@ -140,7 +140,7 @@ spaceTest.describe(
         await pageObjects.documentFlyoutV2.hoverStatusBadge();
 
         // Click "Filter for" — the flyout closes and a workflow-status filter chip appears
-        await pageObjects.documentFlyoutV2.statusFilterInButton.click();
+        await pageObjects.documentFlyoutV2.cellActionsFilterInButton.click();
         await expect(page.testSubj.locator(`~${WORKFLOW_STATUS_FILTER_KEY_TEST_SUBJ}`)).toBeVisible(
           { timeout: 10_000 }
         );
