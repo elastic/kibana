@@ -51,6 +51,24 @@ const EntityTabContentWrapper: ComponentType<CommonAttachmentTabViewProps> = (pr
 const DISPLAY_NAME = i18n.translate('xpack.securitySolution.entityAnalytics.cases.displayName', {
   defaultMessage: 'Entities',
 });
+const ENTITY_AVATAR_ARIA = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.cases.entityAttachment.avatarAriaLabel',
+  {
+    defaultMessage: 'entity',
+  }
+);
+const REMOVED_ENTITY_LABEL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.cases.entityAttachment.removedLabel',
+  {
+    defaultMessage: 'removed entity',
+  }
+);
+const DELETE_ENTITY_SUCCESS_TITLE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.cases.entityAttachment.deleteSuccessTitle',
+  {
+    defaultMessage: 'Deleted entity attachment',
+  }
+);
 
 /**
  * Defines the `security.entity` cases attachment registered with the cases attachment framework.
@@ -62,14 +80,21 @@ export const getEntityAttachment = () =>
     displayName: DISPLAY_NAME,
     schema: EntityAttachmentPayloadSchema,
     getAttachmentViewObject: () => ({
+      eventColor: 'subdued' as const,
       event: (
         <FormattedMessage
           id="xpack.securitySolution.entityAnalytics.cases.eventDescription"
           defaultMessage="added an entity"
         />
       ),
-      timelineAvatar: <EuiAvatar name="entity" color="subdued" iconType="user" />,
+      timelineAvatar: (
+        <EuiAvatar name="entity" color="subdued" iconType="user" aria-label={ENTITY_AVATAR_ARIA} />
+      ),
       children: EntityAttachmentChildrenLazy,
+      deleteSuccessTitle: DELETE_ENTITY_SUCCESS_TITLE,
+    }),
+    getAttachmentRemovalObject: () => ({
+      event: REMOVED_ENTITY_LABEL,
     }),
     getAttachmentTabViewObject: () => ({
       children: EntityTabContentWrapper,

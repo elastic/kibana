@@ -11,6 +11,7 @@ import {
   INDICATOR_ATTACHMENT_TYPE,
   SECURITY_TIMELINE_ATTACHMENT_TYPE,
 } from '@kbn/cases-plugin/common';
+import type { ExperimentalFeatures } from '../../../common/experimental_features';
 
 import { registerCaseAttachments } from './register';
 import { EndpointAttachmentPayloadSchema } from '../../../common/cases/attachments/endpoint';
@@ -27,6 +28,10 @@ const formatZodIssues = (issues: Array<{ path: PropertyKey[]; message: string }>
     .join('; ');
 
 describe('registerCaseAttachments', () => {
+  const experimentalFeatures: ExperimentalFeatures = {
+    entityAttachmentsEnabled: false,
+  } as ExperimentalFeatures;
+
   const buildFramework = () => ({
     registerExternalReference: jest.fn(),
     registerPersistableState: jest.fn(),
@@ -36,7 +41,7 @@ describe('registerCaseAttachments', () => {
   it('registers the unified security.endpoint attachment with the zod payload schema', () => {
     const framework = buildFramework();
 
-    registerCaseAttachments(framework);
+    registerCaseAttachments(framework, experimentalFeatures);
 
     expect(framework.registerUnified).toHaveBeenCalledWith({
       id: SECURITY_ENDPOINT_ATTACHMENT_TYPE,
@@ -47,7 +52,7 @@ describe('registerCaseAttachments', () => {
   it('registers the unified security.event attachment with the zod payload schema', () => {
     const framework = buildFramework();
 
-    registerCaseAttachments(framework);
+    registerCaseAttachments(framework, experimentalFeatures);
 
     expect(framework.registerUnified).toHaveBeenCalledWith({
       id: SECURITY_EVENT_ATTACHMENT_TYPE,
@@ -58,7 +63,7 @@ describe('registerCaseAttachments', () => {
   it('registers the unified security.indicator attachment type with the zod schema', () => {
     const framework = buildFramework();
 
-    registerCaseAttachments(framework);
+    registerCaseAttachments(framework, experimentalFeatures);
 
     expect(framework.registerUnified).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -71,7 +76,7 @@ describe('registerCaseAttachments', () => {
   it('registers the unified security.timeline attachment with the zod payload schema', () => {
     const framework = buildFramework();
 
-    registerCaseAttachments(framework);
+    registerCaseAttachments(framework, experimentalFeatures);
 
     expect(framework.registerUnified).toHaveBeenCalledWith({
       id: SECURITY_TIMELINE_ATTACHMENT_TYPE,
@@ -86,7 +91,7 @@ describe('registerCaseAttachments', () => {
   it('does not register any external-reference attachment types', () => {
     const framework = buildFramework();
 
-    registerCaseAttachments(framework);
+    registerCaseAttachments(framework, experimentalFeatures);
 
     expect(framework.registerExternalReference).not.toHaveBeenCalled();
   });
@@ -94,7 +99,7 @@ describe('registerCaseAttachments', () => {
   it('does not register any persistable-state attachment types', () => {
     const framework = buildFramework();
 
-    registerCaseAttachments(framework);
+    registerCaseAttachments(framework, experimentalFeatures);
 
     expect(framework.registerPersistableState).not.toHaveBeenCalled();
   });
