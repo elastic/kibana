@@ -14,40 +14,40 @@ import {
 import { GCS_BUCKET } from '../../../src/scenarios/constants';
 import { evaluate } from '../evaluate';
 
-const EMAIL_MEMORY_LEAK_GCS = {
+const AD_FAILURE_GCS = {
   bucket: GCS_BUCKET,
-  basePath: 'otel-demo/email-memory-leak-100x',
+  basePath: 'otel-demo/ad-failure',
 };
 
-const SNAPSHOT_NAME = 'email-memory-leak-100x';
+const SNAPSHOT_NAME = 'ad-failure';
 
 evaluate.describe(
-  'Investigation Skill: Email Memory Leak',
+  'Investigation Skill: Ad Service Failure',
   { tag: tags.serverless.observability.complete },
   () => {
     let replayResult: LoadResult;
 
     evaluate.beforeAll(async ({ esClient, log }) => {
-      log.info('Replaying email-memory-leak scenario data');
+      log.info('Replaying ad-failure scenario data');
       replayResult = await replayObservabilityDataStreams(
         esClient,
         log,
         SNAPSHOT_NAME,
-        EMAIL_MEMORY_LEAK_GCS
+        AD_FAILURE_GCS
       );
     });
 
-    evaluate('investigates email memory leak scenario', async ({ evaluateDataset }) => {
+    evaluate('investigates ad service failure scenario', async ({ evaluateDataset }) => {
       await evaluateDataset({
         dataset: {
-          name: 'email-memory-leak investigation',
+          name: 'ad-failure investigation',
           description:
-            'Evaluates whether the agent correctly investigates the otel-demo emailMemoryLeak scenario, where the email service silently accumulates memory without throwing errors.',
+            'Evaluates whether the agent correctly investigates the otel-demo adFailure scenario, where the ad service returns errors on approximately 10% of requests while remaining reachable.',
           examples: [
             {
               input: {
                 question:
-                  'The email service appears to be consuming increasing amounts of memory. Can you investigate what might be causing it?',
+                  'Users are reporting that product pages sometimes load without ads. Can you investigates it?',
                 attachments: [
                   {
                     type: 'screen_context',
@@ -62,14 +62,18 @@ evaluate.describe(
               },
               output: {
                 criteria: [
-                  'Identifies the email service as the affected component',
-                  'Identifies this as a memory or resource accumulation issue, not a service error or availability failure',
-                  'Notes that the email service has no error rate — it is sending emails successfully',
-                  'Links the memory growth to order confirmation email sending — each checkout triggers an email that contributes to the accumulation',
-                  'Does not incorrectly conclude the email service is down or that checkout is failing',
-                  'If process-level memory metrics for the email service are not present in the telemetry, correctly identifies this gap rather than fabricating or misattributing memory data from other sources. If memory metrics are present, this criterion does not apply.',
+                  'Identifies the ad service as the source of the errors, not the frontend or another upstream service',
+                  'Identifies this as an intermittent error rate (~10%) rather than a total outage — the service is reachable and handling the majority of requests successfully',
+                  'Identifies the error type as a service-level failure (gRPC UNAVAILABLE or equivalent application error), not a network, DNS, or connectivity issue — the high success rate on remaining requests is the evidence',
+                  'Frames an internal/service-level cause as the top hypothesis, not an external dependency',
+                  'Recommends investigating ad service internals (logs, code path returning UNAVAILABLE, recent deployments, or configuration changes) as a concrete next step',
+                  'Does not incorrectly conclude the ad service is down, unreachable, or that user purchases are failing',
                 ],
-                expectedTools: ['observability.get_services', 'observability.get_traces'],
+                expectedTools: [
+                  'observability.get_services',
+                  'observability.get_service_topology',
+                  'observability.get_traces',
+                ],
               },
               metadata: {
                 expectedSkill: 'investigation',
