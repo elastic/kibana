@@ -6,7 +6,7 @@
  */
 
 import type { ApplicationStart } from '@kbn/core/public';
-import type { ESQLSourceResult } from '@kbn/esql-types';
+import type { ESQLSourceResult, EsqlView } from '@kbn/esql-types';
 import { SOURCES_TYPES } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
 import { LRUCache } from 'lru-cache';
@@ -30,12 +30,25 @@ interface PendingBatch {
 const ABSENT = Symbol('absent');
 type CacheValue = StreamSummary | typeof ABSENT;
 
+const STREAM_TYPE_MAP: Record<string, string> = {
+  wired: SOURCES_TYPES.WIRED_STREAM,
+  classic: SOURCES_TYPES.CLASSIC_STREAM,
+  query: SOURCES_TYPES.QUERY_STREAM,
+};
+
+interface EnrichmentData {
+  description?: string;
+  links: Array<{ label: string; url: string }>;
+  type: string;
+}
+
 /**
- * Creates a source enricher function that adds Streams metadata to ES|QL source suggestions.
+ * Creates source and view enricher functions that add Streams metadata
+ * to ES|QL autocomplete suggestions.
  *
- * When registered with the ESQL plugin, this enricher fetches metadata only for the streams
- * that match the given sources, using a per-stream LRU cache with TTL. Only managed streams
- * (stored in .kibana_streams) are enriched; unmanaged data streams are left as-is.
+ * Both enrichers share a single LRU cache backed by `_bulk_get_summaries`,
+ * so lookups for the same stream name (whether triggered by a source or a view)
+ * never result in duplicate API calls.
  *
  * Cache hits are served immediately. Cache misses are batched within a single microtask
  * tick and resolved with a single `_bulk_get_summaries` API call. Concurrent requests for
@@ -46,11 +59,14 @@ type CacheValue = StreamSummary | typeof ABSENT;
  * @param perf - Optional performance-like object with a `now()` method; defaults to `performance`.
  *               Injectable for testing to control TTL expiry without global timer mocks.
  */
-export function createStreamsSourceEnricher(
+export function createStreamsEnrichment(
   repositoryClient: StreamsRepositoryClient,
   application: Promise<Pick<ApplicationStart, 'getUrlForApp'>>,
   perf: { now: () => number } = performance
-): (sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]> {
+): {
+  enrichSources: (sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>;
+  enrichViews: (views: EsqlView[]) => Promise<EsqlView[]>;
+} {
   // Microtask-batching: all cache misses within the same microtask tick are
   // collected into a single `pendingBatch` and resolved with one API call.
   // LRUCache deduplicates concurrent fetches for the same key natively, so
@@ -90,46 +106,72 @@ export function createStreamsSourceEnricher(
     },
   });
 
-  return async (sources: ESQLSourceResult[]): Promise<ESQLSourceResult[]> => {
+  /** Resolves a cached summary into enrichment data (description, links, type). */
+  const toEnrichmentData = (
+    summary: CacheValue | undefined,
+    app: Pick<ApplicationStart, 'getUrlForApp'>
+  ): EnrichmentData | undefined => {
+    if (!summary || summary === ABSENT) {
+      return undefined;
+    }
+
+    const streamUrl = app.getUrlForApp('streams', {
+      absolute: true,
+      path: `/${summary.name}/management/overview`,
+    });
+
+    return {
+      description: summary.description || undefined,
+      links: [
+        {
+          label: i18n.translate('xpack.streams.esqlSourceEnricher.viewStreamDetailsLabel', {
+            defaultMessage: 'View {streamName} details',
+            values: { streamName: summary.name },
+          }),
+          url: streamUrl,
+        },
+      ],
+      type: STREAM_TYPE_MAP[summary.type] ?? SOURCES_TYPES.CLASSIC_STREAM,
+    };
+  };
+
+  const enrich = async <T extends ESQLSourceResult | EsqlView>(items: T[]): Promise<T[]> => {
     try {
       const [app, summaries] = await Promise.all([
         application,
-        Promise.all(sources.map(({ name }) => cache.fetch(name))),
+        Promise.all(
+          items.map(({ name }) =>
+            // Strip '$.' prefix from view names to get the underlying stream name for enrichment lookup.
+            // This is needed because ES|QL autocomplete suggestions for views currently include the '$.' prefix, but our API expects raw stream names.
+            // We can remove this once ES|QL stops adding the prefix in autocomplete suggestions.
+            cache.fetch(name.replace('$.', ''))
+          )
+        ),
       ]);
 
-      return sources.map((source, i) => {
-        const summary = summaries[i];
-
-        if (!summary || summary === ABSENT) {
-          return source;
+      return items.map((item, idx) => {
+        const data = toEnrichmentData(summaries[idx], app);
+        if (!data) {
+          return item;
         }
-
-        const isWired = summary.type === 'wired';
-
-        const streamUrl = app.getUrlForApp('streams', {
-          absolute: true,
-          path: `/${summary.name}/management/overview`,
-        });
-
         return {
-          ...source,
-          description: summary.description || undefined,
-          links: [
-            {
-              label: i18n.translate('xpack.streams.esqlSourceEnricher.viewStreamDetailsLabel', {
-                defaultMessage: 'View {streamName} details',
-                values: { streamName: summary.name },
-              }),
-              url: streamUrl,
-            },
-          ],
-          type: isWired ? SOURCES_TYPES.WIRED_STREAM : SOURCES_TYPES.CLASSIC_STREAM,
+          ...item,
+          description: data.description,
+          links: data.links,
+          type: data.type,
         };
       });
     } catch (_error) {
-      // Graceful degradation: if the streams API is unavailable, return sources unchanged
+      // Graceful degradation: if the streams API is unavailable, return sources/view unchanged
       // so the ES|QL editor continues working normally.
-      return sources;
+      return items;
     }
   };
+
+  const enrichSources = async (sources: ESQLSourceResult[]): Promise<ESQLSourceResult[]> =>
+    enrich(sources);
+
+  const enrichViews = async (views: EsqlView[]): Promise<EsqlView[]> => enrich(views);
+
+  return { enrichSources, enrichViews };
 }

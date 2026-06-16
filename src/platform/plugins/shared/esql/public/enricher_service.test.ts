@@ -9,62 +9,64 @@
 
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import type { ESQLSourceResult } from '@kbn/esql-types';
-import { SourceEnricherService } from './source_enricher_service';
+import { EnricherService } from './enricher_service';
 
-const makeSources = (...names: string[]): ESQLSourceResult[] =>
-  names.map((name) => ({ name, hidden: false }));
+interface TestItem {
+  name: string;
+}
 
-describe('SourceEnricherService', () => {
-  let service: SourceEnricherService;
+const makeItems = (...names: string[]): TestItem[] => names.map((name) => ({ name }));
+
+describe('EnricherService', () => {
+  let service: EnricherService<TestItem>;
   let logger: MockedLogger;
 
   beforeEach(() => {
     logger = loggerMock.create();
-    service = new SourceEnricherService(logger);
+    service = new EnricherService<TestItem>(logger, 'TestEnricher');
   });
 
   describe('enrich', () => {
-    it('returns sources unchanged when no enrichers are registered', async () => {
-      const sources = makeSources('my-index');
-      expect(await service.enrich(sources)).toBe(sources);
+    it('returns items unchanged when no enrichers are registered', async () => {
+      const items = makeItems('my-item');
+      expect(await service.enrich(items)).toBe(items);
     });
   });
 
   describe('register', () => {
-    it('applies a single enricher to the sources', async () => {
-      const extra = makeSources('extra-index');
-      service.register(async (sources) => [...sources, ...extra]);
+    it('applies a single enricher to the items', async () => {
+      const extra = makeItems('extra-item');
+      service.register(async (items) => [...items, ...extra]);
 
-      const result = await service.enrich(makeSources('my-index'));
+      const result = await service.enrich(makeItems('my-item'));
 
-      expect(result).toEqual([...makeSources('my-index'), ...extra]);
+      expect(result).toEqual([...makeItems('my-item'), ...extra]);
     });
 
     it('chains multiple enrichers in registration order', async () => {
       const order: number[] = [];
-      service.register(async (sources) => {
+      service.register(async (items) => {
         order.push(1);
-        return [...sources, ...makeSources('from-enricher-1')];
+        return [...items, ...makeItems('from-enricher-1')];
       });
-      service.register(async (sources) => {
+      service.register(async (items) => {
         order.push(2);
-        return [...sources, ...makeSources('from-enricher-2')];
+        return [...items, ...makeItems('from-enricher-2')];
       });
 
-      const result = await service.enrich(makeSources('base'));
+      const result = await service.enrich(makeItems('base'));
 
       expect(order).toEqual([1, 2]);
       expect(result.map((s) => s.name)).toEqual(['base', 'from-enricher-1', 'from-enricher-2']);
     });
 
     it('passes the output of each enricher as input to the next', async () => {
-      service.register(async (sources) => sources.map((s) => ({ ...s, name: `${s.name}-a` })));
-      service.register(async (sources) => sources.map((s) => ({ ...s, name: `${s.name}-b` })));
+      service.register(async (items) => items.map((s) => ({ ...s, name: `${s.name}-a` })));
+      service.register(async (items) => items.map((s) => ({ ...s, name: `${s.name}-b` })));
 
-      const result = await service.enrich(makeSources('index'));
+      const result = await service.enrich(makeItems('item'));
 
-      expect(result.map((s) => s.name)).toEqual(['index-a-b']);
+      expect(result.map((s) => s.name)).toEqual(['item-a-b']);
     });
   });
 
@@ -74,22 +76,22 @@ describe('SourceEnricherService', () => {
       service.register(async () => {
         throw failure;
       });
-      service.register(async (sources) => [...sources, ...makeSources('from-enricher-2')]);
+      service.register(async (items) => [...items, ...makeItems('from-enricher-2')]);
 
-      const result = await service.enrich(makeSources('base'));
+      const result = await service.enrich(makeItems('base'));
 
       expect(result.map((s) => s.name)).toEqual(['base', 'from-enricher-2']);
       expect(logger.error).toHaveBeenCalledWith(failure);
     });
 
     it('uses the last successful output when a middle enricher fails', async () => {
-      service.register(async (sources) => [...sources, ...makeSources('from-enricher-1')]);
+      service.register(async (items) => [...items, ...makeItems('from-enricher-1')]);
       service.register(async () => {
         throw new Error('middle failure');
       });
-      service.register(async (sources) => [...sources, ...makeSources('from-enricher-3')]);
+      service.register(async (items) => [...items, ...makeItems('from-enricher-3')]);
 
-      const result = await service.enrich(makeSources('base'));
+      const result = await service.enrich(makeItems('base'));
 
       expect(result.map((s) => s.name)).toEqual(['base', 'from-enricher-1', 'from-enricher-3']);
       expect(logger.error).toHaveBeenCalledTimes(1);
