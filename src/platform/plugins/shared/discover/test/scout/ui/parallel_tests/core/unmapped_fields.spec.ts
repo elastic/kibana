@@ -47,10 +47,7 @@ spaceTest.describe('Data view with unmapped fields', { tag: tags.stateful.classi
     await pageObjects.discover.waitUntilSearchingHasFinished();
 
     // Verify hit count
-    await expect(async () => {
-      const hitCount = await pageObjects.discover.getHitCountInt();
-      expect(hitCount).toBe(4);
-    }).toPass({ timeout: 10000 });
+    await expect.poll(() => pageObjects.discover.getHitCountInt(), { timeout: 10000 }).toBe(4);
 
     // Check initial field visibility
     let allFields = await pageObjects.unifiedFieldList.getAllFieldNames();
@@ -78,10 +75,7 @@ spaceTest.describe('Data view with unmapped fields', { tag: tags.stateful.classi
     await pageObjects.discover.waitUntilSearchingHasFinished();
 
     // Verify hit count
-    await expect(async () => {
-      const hitCount = await pageObjects.discover.getHitCountInt();
-      expect(hitCount).toBe(4);
-    }).toPass({ timeout: 10000 });
+    await expect.poll(() => pageObjects.discover.getHitCountInt(), { timeout: 10000 }).toBe(4);
 
     // Check initial field visibility
     let allFields = await pageObjects.unifiedFieldList.getAllFieldNames();

@@ -93,14 +93,12 @@ spaceTest.describe('Data view without timefield', { tag: tags.stateful.classic }
       }).toPass();
 
       // Navigate back using browser back button
-      await expect(async () => {
-        await page.goBack();
-        await pageObjects.discover.waitForDocTableRendered();
+      await page.goBack();
+      await pageObjects.discover.waitForDocTableRendered();
 
-        await expect(page.testSubj.locator('discover-dataView-switch-link')).toHaveText(
-          'without-timefield'
-        );
-      }).toPass();
+      await expect(page.testSubj.locator('discover-dataView-switch-link')).toHaveText(
+        'without-timefield'
+      );
 
       // Verify timepicker disappeared again
       await expect(async () => {
