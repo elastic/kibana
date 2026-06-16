@@ -14,6 +14,7 @@ import type { KibanaProductTier, KibanaSolution } from '@kbn/projects-solutions-
 import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
 import { registerCloudDeploymentMetadataAnalyticsContext } from '../common/register_cloud_deployment_id_analytics_context';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
+import { getIsEce } from '../common/get_is_ece';
 import { parseDeploymentIdFromDeploymentUrl } from '../common/parse_deployment_id_from_deployment_url';
 import { ELASTICSEARCH_CONFIG_ROUTE } from '../common/constants';
 import { decodeCloudId, type DecodedCloudId } from '../common/decode_cloud_id';
@@ -32,7 +33,9 @@ export interface CloudConfigType {
   profile_url?: string;
   deployments_url?: string;
   deployment_url?: string;
+  create_deployment_url?: string;
   projects_url?: string;
+  create_project_url?: string;
   billing_url?: string;
   organization_url?: string;
   users_and_roles_url?: string;
@@ -85,6 +88,11 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
     const kibanaUrl = decodedId?.kibanaUrl;
 
     this.cloudUrls.setup(this.config, core, kibanaUrl);
+    const isEce = getIsEce({
+      isCloudEnabled: this.isCloudEnabled,
+      isServerlessEnabled: this.isServerlessEnabled,
+      isSaasContainer: this.config.isSaasContainer,
+    });
 
     return {
       cloudId: id,
@@ -97,7 +105,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       trialEndDate: this.config.trial_end_date ? new Date(this.config.trial_end_date) : undefined,
       isElasticStaffOwned,
       isCloudEnabled: this.isCloudEnabled,
-      isEce: this.config.isSaasContainer != null ? !this.config.isSaasContainer : undefined,
+      isEce,
       managedOtlp: {
         url: this.config.managed_otlp?.url,
       },
