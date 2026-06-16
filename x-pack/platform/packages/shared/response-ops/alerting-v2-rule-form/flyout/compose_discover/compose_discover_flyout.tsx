@@ -21,8 +21,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useDebounceFn } from '@kbn/react-hooks';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FormProvider, useForm, useWatch } from 'react-hook-form';
+import { inlineEsqlVariables } from '../../utils/esql_rule_utils';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
 import { RuleFormProvider } from '../../form/contexts/rule_form_context';
 import { ConfirmRuleClose } from '../confirm_rule_close';
@@ -150,6 +152,10 @@ export interface ComposeDiscoverFlyoutProps {
   isSaving?: boolean;
   builderType?: string;
   initialBuilderState?: BuilderState;
+  /** Pre-populated ES|QL query (e.g. from Discover). Seeds the base query in create mode. */
+  initialQuery?: string;
+  /** ES|QL control variables from Discover — inlined into initialQuery when provided. */
+  esqlVariables?: ESQLControlVariable[];
 }
 
 const FLYOUT_TITLE_ID = 'composeDiscoverFlyoutTitle';
@@ -236,6 +242,8 @@ export function ComposeDiscoverFlyout({
   isSaving = false,
   builderType,
   initialBuilderState,
+  initialQuery,
+  esqlVariables,
 }: ComposeDiscoverFlyoutProps): React.ReactElement | null {
   const isBuilderMode = Boolean(builderType);
   /*
@@ -257,6 +265,7 @@ export function ComposeDiscoverFlyout({
     initialKind,
     initialRecoveryType: hasInitialCustomRecovery ? 'custom' : 'default',
     isBuilderMode,
+    isQueryPrePopulated: !!initialQuery,
   });
 
   // Registered once here so providers persist across Sandbox open/close cycles.
@@ -271,19 +280,28 @@ export function ComposeDiscoverFlyout({
 
   // ── Form values (submitted to the API) ──
   const defaultValues = useMemo<ComposeFormValues>(() => {
-    if (!rule) return EMPTY_FORM_VALUES;
-    const mapped = mapRuleToComposeFormValues(rule);
-    if (mode === 'clone') {
+    if (rule) {
+      const mapped = mapRuleToComposeFormValues(rule);
+      if (mode === 'clone') {
+        return {
+          ...mapped,
+          metadata: {
+            ...mapped.metadata,
+            name: `${mapped.metadata.name} (clone)`,
+          },
+        };
+      }
+      return mapped;
+    }
+    if (initialQuery) {
+      const { query: inlinedQuery } = inlineEsqlVariables(initialQuery, esqlVariables);
       return {
-        ...mapped,
-        metadata: {
-          ...mapped.metadata,
-          name: `${mapped.metadata.name} (clone)`,
-        },
+        ...EMPTY_FORM_VALUES,
+        query: { format: 'composed', base: inlinedQuery, blocks: { breach: '' } },
       };
     }
-    return mapped;
-  }, [rule, mode]);
+    return EMPTY_FORM_VALUES;
+  }, [rule, mode, initialQuery, esqlVariables]);
 
   const methods = useForm<ComposeFormValues>({ mode: 'onBlur', defaultValues });
   const [isConfirmCloseVisible, setIsConfirmCloseVisible] = useState(false);

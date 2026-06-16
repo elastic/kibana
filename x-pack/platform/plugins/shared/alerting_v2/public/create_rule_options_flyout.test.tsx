@@ -46,13 +46,8 @@ jest.mock('./components/rule_create_options/rule_create_options_flyout', () => (
   },
 }));
 
-let capturedEsqlProps: Record<string, unknown> = {};
 let capturedComposeProps: Record<string, unknown> = {};
 jest.mock('@kbn/alerting-v2-rule-form', () => ({
-  DynamicRuleFormFlyout: (props: Record<string, unknown>) => {
-    capturedEsqlProps = props;
-    return <div data-test-subj="mockDynamicRuleFormFlyout" />;
-  },
   ComposeDiscoverFlyout: (props: Record<string, unknown>) => {
     capturedComposeProps = props;
     return <div data-test-subj="mockComposeDiscoverFlyout" />;
@@ -89,7 +84,6 @@ describe('CreateRuleOptionsFlyout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     capturedSelectorProps = {};
-    capturedEsqlProps = {};
     capturedComposeProps = {};
     mockServices = createMockServices();
   });
@@ -114,7 +108,7 @@ describe('CreateRuleOptionsFlyout', () => {
   });
 
   describe('selector → esql transition', () => {
-    it('renders DynamicRuleFormFlyout when the ES|QL option is clicked', async () => {
+    it('renders ComposeDiscoverFlyout when the ES|QL option is clicked', async () => {
       const onClose = jest.fn();
       renderFlyout({ onClose, initialQuery: 'FROM logs-*' });
       resolveServices(mockServices);
@@ -126,13 +120,15 @@ describe('CreateRuleOptionsFlyout', () => {
       fireEvent.click(screen.getByTestId('esqlBtn'));
 
       await waitFor(() => {
-        expect(screen.getByTestId('mockDynamicRuleFormFlyout')).toBeInTheDocument();
+        expect(screen.getByTestId('mockComposeDiscoverFlyout')).toBeInTheDocument();
       });
-      expect(capturedEsqlProps.query).toBe('FROM logs-*');
-      expect(capturedEsqlProps.onClose).toBe(onClose);
+      expect(capturedComposeProps.initialQuery).toBe('FROM logs-*');
+      expect(capturedComposeProps.mode).toBe('create');
+      expect(capturedComposeProps.onClose).toBe(onClose);
+      expect(capturedComposeProps.onCreateRule).toBeDefined();
     });
 
-    it('passes empty string as query when initialQuery is undefined', async () => {
+    it('passes undefined initialQuery when initialQuery is not provided', async () => {
       renderFlyout();
       resolveServices(mockServices);
 
@@ -143,9 +139,9 @@ describe('CreateRuleOptionsFlyout', () => {
       fireEvent.click(screen.getByTestId('esqlBtn'));
 
       await waitFor(() => {
-        expect(screen.getByTestId('mockDynamicRuleFormFlyout')).toBeInTheDocument();
+        expect(screen.getByTestId('mockComposeDiscoverFlyout')).toBeInTheDocument();
       });
-      expect(capturedEsqlProps.query).toBe('');
+      expect(capturedComposeProps.initialQuery).toBeUndefined();
     });
   });
 

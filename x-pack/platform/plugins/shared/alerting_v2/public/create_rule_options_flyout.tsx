@@ -13,10 +13,7 @@ import { i18n } from '@kbn/i18n';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { CreateRuleData } from '@kbn/alerting-v2-schemas';
 import { AGENT_BUILDER_APP_ID } from '@kbn/deeplinks-agent-builder';
-import type {
-  ComposeDiscoverFlyoutProps,
-  DynamicRuleFormFlyoutProps,
-} from '@kbn/alerting-v2-rule-form';
+import type { ComposeDiscoverFlyoutProps } from '@kbn/alerting-v2-rule-form';
 import { untilPluginStartServicesReady, type AlertingV2KibanaServices } from './kibana_services';
 import { RuleCreateOptionsFlyout } from './components/rule_create_options/rule_create_options_flyout';
 import { RulesApi } from './services/rules_api';
@@ -52,7 +49,6 @@ type Step =
 
 interface LoadedModules {
   services: AlertingV2KibanaServices;
-  DynamicRuleFormFlyout: React.ComponentType<DynamicRuleFormFlyoutProps>;
   ComposeDiscoverFlyout: React.ComponentType<ComposeDiscoverFlyoutProps>;
 }
 
@@ -89,7 +85,6 @@ const CreateRuleOptionsFlyoutInner = ({
     ]);
     return {
       services,
-      DynamicRuleFormFlyout: mod.DynamicRuleFormFlyout,
       ComposeDiscoverFlyout: mod.ComposeDiscoverFlyout,
     };
   }, []);
@@ -163,14 +158,18 @@ const CreateRuleOptionsFlyoutInner = ({
     );
   }
 
-  const { services, DynamicRuleFormFlyout, ComposeDiscoverFlyout } = value;
+  const { services, ComposeDiscoverFlyout } = value;
 
   if (step.type === 'esql') {
     return (
-      <DynamicRuleFormFlyout
-        query={query ?? ''}
+      <ComposeDiscoverFlyout
+        historyKey={historyKey}
+        mode="create"
         onClose={onClose}
         services={services}
+        onCreateRule={handleCreateRule}
+        isSaving={isSaving}
+        initialQuery={query}
         esqlVariables={esqlVariables}
       />
     );
