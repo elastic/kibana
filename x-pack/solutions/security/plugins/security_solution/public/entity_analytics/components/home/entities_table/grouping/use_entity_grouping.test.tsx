@@ -5,9 +5,75 @@
  * 2.0.
  */
 
+import React from 'react';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { renderHook } from '@testing-library/react';
+import { useGrouping } from '@kbn/grouping';
 import type { ESBoolQuery } from '../../../../../../common/typed_json';
+import { useHasEntityResolutionLicense } from '../../../../../common/hooks/use_has_entity_resolution_license';
+import { useGlobalFilterQuery } from '../../../../../common/hooks/use_global_filter_query';
+import { DataViewContext } from '..';
 import { ENTITY_FIELDS, ENTITY_GROUPING_OPTIONS } from '../constants';
-import { buildResolutionGroupingQuery, getAggregationsByGroupField } from './use_entity_grouping';
+import type { EntityURLStateResult } from '../hooks/use_entity_url_state';
+import {
+  buildResolutionGroupingQuery,
+  getAggregationsByGroupField,
+  useEntityGrouping,
+} from './use_entity_grouping';
+
+jest.mock('@kbn/grouping', () => ({
+  ...jest.requireActual('@kbn/grouping'),
+  useGrouping: jest.fn(() => ({
+    selectedGroups: [],
+    setSelectedGroups: jest.fn(),
+    groupsUnit: jest.fn(),
+    options: [],
+  })),
+}));
+
+jest.mock('../../../../../common/hooks/use_has_entity_resolution_license', () => ({
+  useHasEntityResolutionLicense: jest.fn(() => false),
+}));
+
+jest.mock('../../../../../common/hooks/use_global_filter_query', () => ({
+  useGlobalFilterQuery: jest.fn(() => ({ filterQuery: undefined })),
+}));
+
+jest.mock('./use_fetch_grouped_data', () => ({
+  useFetchGroupedData: jest.fn(() => ({ data: undefined, isFetching: false })),
+  useFetchTargetMetadata: jest.fn(() => ({})),
+}));
+
+const mockDataView = { fields: [] } as unknown as DataView;
+
+const wrapper = ({ children }: { children: React.ReactNode }) => (
+  <DataViewContext.Provider value={{ dataView: mockDataView, dataViewIsLoading: false }}>
+    {children}
+  </DataViewContext.Provider>
+);
+
+const createMockState = (overrides: Partial<EntityURLStateResult> = {}): EntityURLStateResult =>
+  ({
+    sort: [['@timestamp', 'desc']],
+    query: undefined,
+    queryError: undefined,
+    pageSize: 25,
+    pageIndex: 0,
+    setUrlQuery: jest.fn(),
+    filters: [],
+    getRowsFromPages: jest.fn(() => []),
+    onChangeItemsPerPage: jest.fn(),
+    onResetFilters: jest.fn(),
+    onSort: jest.fn(),
+    pageFilters: [],
+    urlQuery: {},
+    setTableOptions: jest.fn(),
+    handleUpdateQuery: jest.fn(),
+    setPageSize: jest.fn(),
+    onChangePage: jest.fn(),
+    columnsLocalStorageKey: 'entityAnalytics:columns',
+    ...overrides,
+  } as EntityURLStateResult);
 
 describe('buildResolutionGroupingQuery', () => {
   const defaultParams = {
@@ -134,5 +200,39 @@ describe('getAggregationsByGroupField', () => {
         cardinality: { field: 'some.unknown.field' },
       },
     });
+  });
+});
+
+describe('useEntityGrouping — license gating', () => {
+  const mockUseGrouping = useGrouping as jest.Mock;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useHasEntityResolutionLicense as jest.Mock).mockReturnValue(false);
+    (useGlobalFilterQuery as jest.Mock).mockReturnValue({ filterQuery: undefined });
+    mockUseGrouping.mockReturnValue({
+      selectedGroups: [],
+      setSelectedGroups: jest.fn(),
+      groupsUnit: jest.fn(),
+      options: [],
+    });
+  });
+
+  it('excludes Resolution from grouping options when license is inactive', () => {
+    (useHasEntityResolutionLicense as jest.Mock).mockReturnValue(false);
+    renderHook(() => useEntityGrouping({ state: createMockState() }), { wrapper });
+    const { defaultGroupingOptions } = mockUseGrouping.mock.calls[0][0];
+    expect(defaultGroupingOptions.map((o: { key: string }) => o.key)).not.toContain(
+      ENTITY_GROUPING_OPTIONS.RESOLUTION
+    );
+  });
+
+  it('includes Resolution in grouping options when license is active', () => {
+    (useHasEntityResolutionLicense as jest.Mock).mockReturnValue(true);
+    renderHook(() => useEntityGrouping({ state: createMockState() }), { wrapper });
+    const { defaultGroupingOptions } = mockUseGrouping.mock.calls[0][0];
+    expect(defaultGroupingOptions.map((o: { key: string }) => o.key)).toContain(
+      ENTITY_GROUPING_OPTIONS.RESOLUTION
+    );
   });
 });
