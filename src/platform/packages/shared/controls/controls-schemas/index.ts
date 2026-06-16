@@ -14,6 +14,12 @@ export type {
   ControlState,
   ControlWidth,
   DataControlRuntimeState,
+  EsqlDataControlState,
+  EsqlOptionsListDSLControlState,
+  EsqlRangeSliderControlState,
+  FieldDataControlState,
+  FieldOptionsListDSLControlState,
+  FieldRangeSliderControlState,
   HasCustomPrepend,
   OptionsListControlState,
   OptionsListDisplaySettings,
@@ -32,15 +38,6 @@ export type {
   TimeSlice,
   TimeSliderControlState,
 } from './src/types';
-
-export type {
-  EsqlDataControlState,
-  EsqlOptionsListDSLControlState,
-  EsqlRangeSliderControlState,
-  FieldDataControlState,
-  FieldOptionsListDSLControlState,
-  FieldRangeSliderControlState,
-} from './src/type_guards';
 
 export {
   isEsqlDataControl,

@@ -21,7 +21,6 @@ import { getESQLSingleColumnValues } from '../../common/options_list/get_esql_si
 import type {
   OptionsListDSLFetchBody,
   OptionsListESQLFetchBody,
-  OptionsListRequestBody,
   OptionsListResponse,
 } from '../../common/options_list/types';
 import { esqlColumnValuesToOptionsListResponse } from './options_list_esql_response';
@@ -146,8 +145,7 @@ const getOptionsListDslSuggestions = async ({
   const abortController = new AbortController();
   abortedEvent$.subscribe(() => abortController.abort());
 
-  const { kind: _kind, index, ...rest } = request;
-  const suggestionRequest = rest as OptionsListRequestBody;
+  const { kind: _kind, index, ...suggestionRequest } = request;
   /**
    * Build ES Query
    */

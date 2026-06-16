@@ -69,6 +69,7 @@ export const dataControlEsqlVariantProps = {
   field_name: schema.never(),
   esql_query: schema.string({
     meta: { description: 'The ES|QL query that provides field options for this control' },
+    minLength: 1,
   }),
 };
 

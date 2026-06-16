@@ -10,40 +10,25 @@
 import { ControlValuesSource } from '@kbn/controls-constants';
 
 import type {
+  EsqlDataControlState,
+  EsqlOptionsListDSLControlState,
+  EsqlRangeSliderControlState,
+  FieldDataControlState,
+  FieldOptionsListDSLControlState,
+  FieldRangeSliderControlState,
   StrictDataControlState,
   StrictOptionsListDSLControlState,
   StrictRangeSliderControlState,
 } from './types';
 
-export type FieldDataControlState = Extract<
-  StrictDataControlState,
-  { values_source: ControlValuesSource.FIELD }
->;
-
-export type EsqlDataControlState = Extract<
-  StrictDataControlState,
-  { values_source: ControlValuesSource.ESQL }
->;
-
-export type FieldOptionsListDSLControlState = Extract<
-  StrictOptionsListDSLControlState,
-  { values_source: ControlValuesSource.FIELD }
->;
-
-export type EsqlOptionsListDSLControlState = Extract<
-  StrictOptionsListDSLControlState,
-  { values_source: ControlValuesSource.ESQL }
->;
-
-export type FieldRangeSliderControlState = Extract<
-  StrictRangeSliderControlState,
-  { values_source: ControlValuesSource.FIELD }
->;
-
-export type EsqlRangeSliderControlState = Extract<
-  StrictRangeSliderControlState,
-  { values_source: ControlValuesSource.ESQL }
->;
+export type {
+  EsqlDataControlState,
+  EsqlOptionsListDSLControlState,
+  EsqlRangeSliderControlState,
+  FieldDataControlState,
+  FieldOptionsListDSLControlState,
+  FieldRangeSliderControlState,
+} from './types';
 
 interface ValuesSourceDiscriminant {
   values_source?: ControlValuesSource;

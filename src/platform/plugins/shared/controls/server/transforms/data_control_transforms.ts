@@ -37,12 +37,17 @@ export function transformDataControlIn(
     };
   }
 
+  if (!isFieldDataControl(state)) {
+    throw new Error('Invalid data control state');
+  }
+
   const { data_view_id, esql_query, ...rest } = state;
   return {
     state: {
       ...rest,
+      values_source: ControlValuesSource.FIELD,
       dataViewRefName: referenceName,
-    } as StoredFieldDataControlState,
+    },
     references: [
       {
         name: referenceName,
@@ -64,16 +69,15 @@ export function transformDataControlOut<
 ): StrictDataControlState {
   if (state.values_source === ControlValuesSource.ESQL) {
     const { title, esql_query, use_global_filters, ignore_validations } = state;
-    const convertedState = {
+    const convertedState: EsqlDataControlState = {
       ...DEFAULT_DATA_CONTROL_STATE,
       values_source: ControlValuesSource.ESQL,
       title,
       esql_query: esql_query ?? '',
       ...(typeof use_global_filters === 'boolean' && { use_global_filters }),
       ...(typeof ignore_validations === 'boolean' && { ignore_validations }),
-    } as EsqlDataControlState;
+    };
 
-    ensureRequiredFields(convertedState);
     return convertedState;
   }
 
@@ -102,7 +106,7 @@ export function transformDataControlOut<
     );
 
   const dataViewId = dataViewRef?.id ?? data_view_id ?? '';
-  const convertedState = {
+  const convertedState: FieldDataControlState = {
     ...DEFAULT_DATA_CONTROL_STATE,
     values_source: ControlValuesSource.FIELD,
     data_view_id: dataViewId,
@@ -110,30 +114,11 @@ export function transformDataControlOut<
     field_name: field_name ?? '',
     ...(typeof use_global_filters === 'boolean' && { use_global_filters }),
     ...(typeof ignore_validations === 'boolean' && { ignore_validations }),
-  } as FieldDataControlState;
+  };
 
-  ensureRequiredFields(convertedState);
   return convertedState;
 }
 
 function getLegacyReferenceName(controlId: string, refName: string) {
   return `controlGroup_${controlId}:${refName}`;
 }
-
-const ensureRequiredFields = (state: StrictDataControlState) => {
-  if (isEsqlDataControl(state)) {
-    if (!state.esql_query.length) {
-      throw new Error('Must include a non-empty ES|QL query');
-    }
-    return;
-  }
-
-  if (isFieldDataControl(state)) {
-    if (!state.data_view_id.length) {
-      throw new Error('Must include a non-empty data view ID');
-    }
-    if (!state.field_name.length) {
-      throw new Error('Must include a non-empty field name');
-    }
-  }
-};
