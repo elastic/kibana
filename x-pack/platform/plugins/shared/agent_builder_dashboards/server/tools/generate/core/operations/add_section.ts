@@ -13,14 +13,14 @@ import { z } from '@kbn/zod/v4';
 import { getResolvedVisualizationCreationRequests } from './visualization_creation';
 import { defineOperation } from './types';
 import {
-  attachmentPanelInputSchema,
   markdownPanelInputSchema,
+  panelConfigPanelInputSchema,
   visualizationPanelInputSchema,
 } from './panel_kinds';
 
 const addSectionPanelItemSchema = z.discriminatedUnion('kind', [
   markdownPanelInputSchema,
-  attachmentPanelInputSchema,
+  panelConfigPanelInputSchema,
   visualizationPanelInputSchema,
 ]);
 
@@ -34,7 +34,7 @@ export const addSectionOperation = defineOperation({
       .min(1)
       .optional()
       .describe(
-        'Optional inline panels (markdown, attachment, or visualization) to create inside the new section. Panel grids are section-relative.'
+        'Optional inline panels (markdown, panelConfig, or visualization) to create inside the new section. Panel grids are section-relative.'
       ),
   }),
   handler: ({ dashboardData, operation, operationIndex, context }) => {
@@ -66,14 +66,14 @@ export const addSectionOperation = defineOperation({
               grid: item.grid,
             });
             break;
-          case 'attachment': {
-            const result = context.resolvePanelsFromAttachments([
-              { attachmentId: item.attachmentId, grid: item.grid },
-            ]);
-            sectionPanels.push(...result.panels);
-            context.failures.push(...result.failures);
+          case 'panelConfig':
+            sectionPanels.push({
+              id: uuidv4(),
+              type: item.type,
+              config: item.config,
+              grid: item.grid,
+            });
             break;
-          }
           case 'visualization': {
             const resolvedRequest = resolvedRequestsByInputIndex.get(panelInputIndex);
             if (!resolvedRequest) {

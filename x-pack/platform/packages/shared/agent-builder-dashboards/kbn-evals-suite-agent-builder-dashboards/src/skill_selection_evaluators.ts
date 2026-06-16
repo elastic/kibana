@@ -8,7 +8,7 @@
 import type { EvaluationResult, Evaluator } from '@kbn/evals';
 import type { DashboardAgentTaskOutput, DashboardDatasetExample } from './evaluate_dataset';
 
-const DASHBOARD_MANAGEMENT_TOOL_ID = 'platform.dashboard.manage_dashboard';
+const DASHBOARD_MANAGEMENT_TOOL_ID = 'platform.dashboard.generate_dashboard';
 
 const getLowerCaseSkillPaths = (output: DashboardAgentTaskOutput): string[] =>
   getSkillReadPaths(output).map((path) => path.toLowerCase());

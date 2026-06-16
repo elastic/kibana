@@ -9,7 +9,7 @@ import { buildVisualizationConfig } from '@kbn/agent-builder-tools-base';
 import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
-import { createVisualizationResolver } from './inline_visualization';
+import { createVisualizationResolver } from './visualization_resolver';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 
 jest.mock('@kbn/agent-builder-tools-base', () => ({

@@ -5,57 +5,23 @@
  * 2.0.
  */
 
-import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import { buildVisualizationConfig, type VisualizationConfig } from '@kbn/agent-builder-tools-base';
 import { type ModelProvider, type ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
-import { type AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
-import type { VisualizationFailure } from './utils';
-import { getErrorMessage } from './utils';
-
-export type VisualizationAttempt =
-  | {
-      type: 'success';
-      visContent: Pick<AttachmentPanel, 'type' | 'config'>;
-    }
-  | {
-      type: 'failure';
-      failure: VisualizationFailure;
-    };
-
-export type InlineVisualizationOperationType = 'add_section' | 'add_panels' | 'edit_panels';
-
-interface ResolveVisualizationConfigParams {
-  operationType: InlineVisualizationOperationType;
-  identifier: string;
-  nlQuery: string;
-  index?: string;
-  chartType?: SupportedChartType;
-  esql?: string;
-  existingPanel?: AttachmentPanel;
-}
-
-export type ResolveVisualizationConfig = (
-  params: ResolveVisualizationConfigParams
-) => Promise<VisualizationAttempt>;
-
-export const createVisualizationFailureResult = (
-  type: VisualizationFailure['type'],
-  identifier: string,
-  error: string
-): Extract<VisualizationAttempt, { type: 'failure' }> => ({
-  type: 'failure',
-  failure: {
-    type,
-    identifier,
-    error,
-  },
-});
+import {
+  getErrorMessage,
+  createVisualizationFailureResult,
+  type ResolveVisualizationConfig,
+} from './core';
 
 /**
- * Builds inline Lens panel content from natural language.
+ * Kibana implementation of the core's {@link ResolveVisualizationConfig} contract.
+ *
+ * Builds inline Lens panel content from natural language / ES|QL using Kibana
+ * plumbing (`modelProvider`, `esClient`, the visualization builder). The generate
+ * core consumes the resulting function purely through the contract type.
  */
 export const createVisualizationResolver = ({
   logger,

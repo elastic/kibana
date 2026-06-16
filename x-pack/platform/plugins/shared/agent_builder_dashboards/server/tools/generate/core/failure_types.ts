@@ -6,7 +6,6 @@
  */
 
 export const DASHBOARD_OPERATION_FAILURE_TYPES = {
-  attachmentPanels: 'attachment_panels',
   addSection: 'add_section',
   addPanels: 'add_panels',
   editPanels: 'edit_panels',

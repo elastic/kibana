@@ -44,7 +44,6 @@ interface PrepareOperationExecutionParams {
   operations: DashboardOperation[];
   logger: OperationExecutionContext['logger'];
   failures: OperationExecutionContext['failures'];
-  resolvePanelsFromAttachments: OperationExecutionContext['resolvePanelsFromAttachments'];
   resolveVisualizationConfig?: OperationExecutionContext['resolveVisualizationConfig'];
 }
 
@@ -52,7 +51,6 @@ export const prepareOperationExecution = async ({
   operations,
   logger,
   failures,
-  resolvePanelsFromAttachments,
   resolveVisualizationConfig,
 }: PrepareOperationExecutionParams): Promise<OperationExecutionContext> => {
   const resolvedVisualizationCreationRequests = await resolveVisualizationCreationRequests({
@@ -64,7 +62,6 @@ export const prepareOperationExecution = async ({
     logger,
     failures,
     resolvedVisualizationCreationRequests,
-    resolvePanelsFromAttachments,
     resolveVisualizationConfig,
   };
 };

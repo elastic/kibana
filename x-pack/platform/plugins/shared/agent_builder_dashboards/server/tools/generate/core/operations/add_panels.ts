@@ -11,8 +11,8 @@ import { z } from '@kbn/zod/v4';
 import { appendPanelsToDashboard } from '../dashboard_state';
 import { defineOperation } from './types';
 import {
-  attachmentPanelInputSchema,
   markdownPanelInputSchema,
+  panelConfigPanelInputSchema,
   visualizationPanelInputSchema,
 } from './panel_kinds';
 import { getResolvedVisualizationCreationRequests } from './visualization_creation';
@@ -26,7 +26,7 @@ const sectionIdField = z
 
 const addPanelsItemSchema = z.discriminatedUnion('kind', [
   markdownPanelInputSchema.extend({ sectionId: sectionIdField }),
-  attachmentPanelInputSchema.extend({ sectionId: sectionIdField }),
+  panelConfigPanelInputSchema.extend({ sectionId: sectionIdField }),
   visualizationPanelInputSchema.extend({ sectionId: sectionIdField }),
 ]);
 
@@ -62,20 +62,20 @@ export const addPanelsOperation = defineOperation({
             sectionId: item.sectionId,
           });
           break;
-        case 'attachment': {
-          const result = context.resolvePanelsFromAttachments([
-            { attachmentId: item.attachmentId, grid: item.grid },
-          ]);
-          if (result.panels.length > 0) {
-            nextDashboardData = appendPanelsToDashboard({
-              dashboardData: nextDashboardData,
-              panelsToAdd: result.panels,
-              sectionId: item.sectionId,
-            });
-          }
-          context.failures.push(...result.failures);
+        case 'panelConfig':
+          nextDashboardData = appendPanelsToDashboard({
+            dashboardData: nextDashboardData,
+            panelsToAdd: [
+              {
+                id: uuidv4(),
+                type: item.type,
+                config: item.config,
+                grid: item.grid,
+              },
+            ],
+            sectionId: item.sectionId,
+          });
           break;
-        }
         case 'visualization': {
           const resolvedRequest = resolvedRequestsByInputIndex.get(panelInputIndex);
           if (!resolvedRequest) {

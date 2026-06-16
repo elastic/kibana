@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { generateDashboardTool } from './generate';
+export { dashboardGenerationGuidance } from './generation_guidance';

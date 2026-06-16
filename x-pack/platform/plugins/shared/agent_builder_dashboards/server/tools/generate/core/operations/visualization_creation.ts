@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ResolveVisualizationConfig } from '../inline_visualization';
+import type { ResolveVisualizationConfig } from '../resolve_visualization';
 import type { DashboardOperation } from './registry';
 import type { AddPanelsItemInput } from './add_panels';
 import type { VisualizationPanelInput } from './panel_kinds';

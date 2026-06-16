@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { dashboardCompositionPrompt } from './dashboard_composition_prompt';
-import { gridLayoutPrompt } from './grid_layout_prompt';
+import { dashboardCompositionPrompt } from './composition';
+import { gridLayoutPrompt } from './grid_layout';
 
 export const dashboardDesignGuidancePrompt = `${dashboardCompositionPrompt}
 

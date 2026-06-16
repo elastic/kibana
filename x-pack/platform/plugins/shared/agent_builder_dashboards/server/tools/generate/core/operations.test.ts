@@ -13,7 +13,7 @@ import type {
 } from '@kbn/agent-builder-dashboards-common';
 import { isSection } from '@kbn/agent-builder-dashboards-common';
 import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/server';
-import type { ResolveVisualizationConfig, VisualizationAttempt } from './inline_visualization';
+import type { ResolveVisualizationConfig, VisualizationAttempt } from './resolve_visualization';
 import { executeDashboardOperations, type DashboardOperation } from './operations';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { DASHBOARD_OPERATION_FAILURE_TYPES } from './failure_types';
@@ -105,17 +105,18 @@ describe('executeDashboardOperations', () => {
       ],
     };
 
-    const attachmentPanel: AttachmentPanel = {
-      ...createLensPanel('from-attachment-panel'),
-    };
-
     const operations: DashboardOperation[] = [
       { operation: 'set_metadata', title: 'Updated title' },
       { operation: 'remove_panels', panelIds: ['existing-panel'] },
       {
         operation: 'add_panels',
         panels: [
-          { kind: 'attachment', attachmentId: 'viz-1', grid: { x: 0, y: 0, w: 24, h: 9 } },
+          {
+            kind: 'panelConfig',
+            type: LENS_EMBEDDABLE_TYPE,
+            config: { type: 'metric' },
+            grid: { x: 0, y: 0, w: 24, h: 9 },
+          },
           {
             kind: 'markdown',
             markdownContent: '### Updated summary',
@@ -129,13 +130,13 @@ describe('executeDashboardOperations', () => {
       dashboardData: baseDashboardData,
       operations,
       logger,
-      resolvePanelsFromAttachments: () => ({ panels: [attachmentPanel], failures: [] }),
     });
 
     expect(result.dashboardData.title).toBe('Updated title');
     expect(result.dashboardData.panels).toEqual([
       expect.objectContaining({
-        id: 'from-attachment-panel',
+        type: LENS_EMBEDDABLE_TYPE,
+        config: { type: 'metric' },
         grid: { x: 0, y: 0, w: 24, h: 9 },
       }),
       expect.objectContaining({
@@ -145,11 +146,7 @@ describe('executeDashboardOperations', () => {
     ]);
   });
 
-  it('aggregates failures for attachment-based adds', async () => {
-    const attachmentPanel: AttachmentPanel = {
-      ...createLensPanel('from-attachment'),
-    };
-
+  it('adds panelConfig panels successfully', async () => {
     const result = await executeDashboardOperations({
       dashboardData: {
         title: 'Test dashboard',
@@ -160,10 +157,16 @@ describe('executeDashboardOperations', () => {
         {
           operation: 'add_panels',
           panels: [
-            { kind: 'attachment', attachmentId: 'viz-1', grid: { x: 0, y: 0, w: 24, h: 9 } },
             {
-              kind: 'attachment',
-              attachmentId: 'missing-viz-1',
+              kind: 'panelConfig',
+              type: LENS_EMBEDDABLE_TYPE,
+              config: { type: 'metric' },
+              grid: { x: 0, y: 0, w: 24, h: 9 },
+            },
+            {
+              kind: 'panelConfig',
+              type: LENS_EMBEDDABLE_TYPE,
+              config: { type: 'metric' },
               grid: { x: 24, y: 0, w: 24, h: 9 },
             },
           ],
@@ -172,41 +175,35 @@ describe('executeDashboardOperations', () => {
           operation: 'add_panels',
           panels: [
             {
-              kind: 'attachment',
-              attachmentId: 'missing-viz-2',
+              kind: 'panelConfig',
+              type: LENS_EMBEDDABLE_TYPE,
+              config: { type: 'metric' },
               grid: { x: 0, y: 9, w: 12, h: 5 },
             },
           ],
         },
       ],
       logger,
-      resolvePanelsFromAttachments: (attachmentInputs) => {
-        const attachmentIds = attachmentInputs.map(({ attachmentId }) => attachmentId);
-        const panels = attachmentIds.includes('viz-1') ? [attachmentPanel] : [];
-        const failures = attachmentIds
-          .filter((attachmentId) => attachmentId.startsWith('missing-viz'))
-          .map((missingAttachmentId) => ({
-            type: DASHBOARD_OPERATION_FAILURE_TYPES.attachmentPanels,
-            identifier: missingAttachmentId,
-            error: 'Attachment not found',
-          }));
-        return { panels, failures };
-      },
     });
 
     expect(result.dashboardData.panels).toEqual([
-      expect.objectContaining({ id: 'from-attachment' }),
-    ]);
-    expect(result.failures).toEqual([
       expect.objectContaining({
-        type: 'attachment_panels',
-        identifier: 'missing-viz-1',
+        type: LENS_EMBEDDABLE_TYPE,
+        config: { type: 'metric' },
+        grid: { x: 0, y: 0, w: 24, h: 9 },
       }),
       expect.objectContaining({
-        type: 'attachment_panels',
-        identifier: 'missing-viz-2',
+        type: LENS_EMBEDDABLE_TYPE,
+        config: { type: 'metric' },
+        grid: { x: 24, y: 0, w: 24, h: 9 },
+      }),
+      expect.objectContaining({
+        type: LENS_EMBEDDABLE_TYPE,
+        config: { type: 'metric' },
+        grid: { x: 0, y: 9, w: 12, h: 5 },
       }),
     ]);
+    expect(result.failures).toEqual([]);
   });
 
   it('adds mixed panel kinds in input order across top-level and section targets', async () => {
@@ -226,8 +223,9 @@ describe('executeDashboardOperations', () => {
               grid: { x: 0, y: 0, w: 24, h: 4 },
             },
             {
-              kind: 'attachment',
-              attachmentId: 'viz-1',
+              kind: 'panelConfig',
+              type: LENS_EMBEDDABLE_TYPE,
+              config: { type: 'metric' },
               sectionId: 'section-a',
               grid: { x: 0, y: 0, w: 24, h: 9 },
             },
@@ -237,8 +235,9 @@ describe('executeDashboardOperations', () => {
               grid: { x: 24, y: 0, w: 24, h: 9 },
             },
             {
-              kind: 'attachment',
-              attachmentId: 'missing-viz',
+              kind: 'panelConfig',
+              type: LENS_EMBEDDABLE_TYPE,
+              config: { type: 'metric' },
               grid: { x: 0, y: 9, w: 24, h: 9 },
             },
             {
@@ -251,23 +250,6 @@ describe('executeDashboardOperations', () => {
         },
       ],
       logger,
-      resolvePanelsFromAttachments: (attachmentInputs) => {
-        const [{ attachmentId, grid }] = attachmentInputs;
-        if (attachmentId === 'missing-viz') {
-          return {
-            panels: [],
-            failures: [
-              {
-                type: DASHBOARD_OPERATION_FAILURE_TYPES.attachmentPanels,
-                identifier: attachmentId,
-                error: 'Attachment not found',
-              },
-            ],
-          };
-        }
-
-        return { panels: [{ ...createLensPanel('from-attachment'), grid }], failures: [] };
-      },
       resolveVisualizationConfig: createResolveVisualizationConfig({
         'show total requests': createResolvedVisualization({
           type: LENS_EMBEDDABLE_TYPE,
@@ -292,17 +274,22 @@ describe('executeDashboardOperations', () => {
       expect.objectContaining({
         type: LENS_EMBEDDABLE_TYPE,
         config: { type: 'metric' },
+        grid: { x: 24, y: 0, w: 24, h: 9 },
+      }),
+      expect.objectContaining({
+        type: LENS_EMBEDDABLE_TYPE,
+        config: { type: 'metric' },
+        grid: { x: 0, y: 9, w: 24, h: 9 },
       }),
     ]);
     expect(getSections(result.dashboardData.panels)[0].panels).toEqual([
-      expect.objectContaining({ id: 'from-attachment' }),
+      expect.objectContaining({
+        type: LENS_EMBEDDABLE_TYPE,
+        config: { type: 'metric' },
+        grid: { x: 0, y: 0, w: 24, h: 9 },
+      }),
     ]);
     expect(result.failures).toEqual([
-      {
-        type: 'attachment_panels',
-        identifier: 'missing-viz',
-        error: 'Attachment not found',
-      },
       {
         type: 'add_panels',
         identifier: 'show p95 latency',
@@ -322,19 +309,16 @@ describe('executeDashboardOperations', () => {
         {
           operation: 'add_panels',
           panels: [
-            { kind: 'attachment', attachmentId: 'viz-1', grid: { x: 0, y: 0, w: 12, h: 5 } },
+            {
+              kind: 'panelConfig',
+              type: LENS_EMBEDDABLE_TYPE,
+              config: { type: 'metric' },
+              grid: { x: 0, y: 0, w: 12, h: 5 },
+            },
           ],
         },
       ],
       logger,
-      resolvePanelsFromAttachments: () => ({
-        panels: [
-          {
-            ...createLensPanel('from-attachment-1'),
-          },
-        ],
-        failures: [],
-      }),
     });
 
     const sections = getSections(result.dashboardData.panels);
@@ -365,10 +349,6 @@ describe('executeDashboardOperations', () => {
         },
       ],
       logger,
-      resolvePanelsFromAttachments: () => ({
-        panels: [createLensPanel('section-panel-1')],
-        failures: [],
-      }),
     });
 
     const sections = getSections(result.dashboardData.panels);
@@ -409,7 +389,6 @@ describe('executeDashboardOperations', () => {
         },
       ],
       logger,
-      resolvePanelsFromAttachments: () => ({ panels: [], failures: [] }),
       resolveVisualizationConfig: createResolveVisualizationConfig({
         'show total requests': createResolvedVisualization({
           type: LENS_EMBEDDABLE_TYPE,
@@ -474,7 +453,6 @@ describe('executeDashboardOperations', () => {
         },
       ],
       logger,
-      resolvePanelsFromAttachments: () => ({ panels: [], failures: [] }),
       resolveVisualizationConfig: createResolveVisualizationConfig({
         'show total requests': createResolvedVisualization({
           type: LENS_EMBEDDABLE_TYPE,
@@ -534,18 +512,15 @@ describe('executeDashboardOperations', () => {
               grid: { x: 0, y: 0, w: 24, h: 4 },
             },
             {
-              kind: 'attachment',
-              attachmentId: 'viz-1',
+              kind: 'panelConfig',
+              type: LENS_EMBEDDABLE_TYPE,
+              config: { type: 'metric' },
               grid: { x: 24, y: 0, w: 24, h: 9 },
             },
           ],
         },
       ],
       logger,
-      resolvePanelsFromAttachments: (attachmentInputs) => ({
-        panels: [{ ...createLensPanel('section-attachment'), grid: attachmentInputs[0].grid }],
-        failures: [],
-      }),
       resolveVisualizationConfig,
     });
 
@@ -556,7 +531,8 @@ describe('executeDashboardOperations', () => {
         config: { content: '### Section Summary' },
       }),
       expect.objectContaining({
-        id: 'section-attachment',
+        type: LENS_EMBEDDABLE_TYPE,
+        config: { type: 'metric' },
         grid: { x: 24, y: 0, w: 24, h: 9 },
       }),
     ]);
@@ -609,7 +585,6 @@ describe('executeDashboardOperations', () => {
         },
       ],
       logger,
-      resolvePanelsFromAttachments: () => ({ panels: [], failures: [] }),
       resolveVisualizationConfig,
     });
 
@@ -703,7 +678,6 @@ describe('executeDashboardOperations', () => {
         },
       ],
       logger,
-      resolvePanelsFromAttachments: () => ({ panels: [], failures: [] }),
       resolveVisualizationConfig,
     });
 
@@ -784,14 +758,13 @@ describe('executeDashboardOperations', () => {
           },
         ],
         logger,
-        resolvePanelsFromAttachments: () => ({ panels: [], failures: [] }),
       })
     ).rejects.toThrow(
       'Inline visualization resolver is required for visualization creation operations.'
     );
   });
 
-  it('adds attachment panels into a target section when sectionId is provided', async () => {
+  it('adds panelConfig panels into a target section when sectionId is provided', async () => {
     const result = await executeDashboardOperations({
       dashboardData: {
         title: 'Test dashboard',
@@ -803,8 +776,9 @@ describe('executeDashboardOperations', () => {
           operation: 'add_panels',
           panels: [
             {
-              kind: 'attachment',
-              attachmentId: 'viz-1',
+              kind: 'panelConfig',
+              type: LENS_EMBEDDABLE_TYPE,
+              config: { type: 'metric' },
               sectionId: 'section-a',
               grid: { x: 12, y: 0, w: 12, h: 5 },
             },
@@ -812,15 +786,6 @@ describe('executeDashboardOperations', () => {
         },
       ],
       logger,
-      resolvePanelsFromAttachments: (attachmentInputs) => ({
-        panels: [
-          {
-            ...createLensPanel('section-routed-panel'),
-            grid: attachmentInputs[0].grid,
-          },
-        ],
-        failures: [],
-      }),
     });
 
     const panelsOnly = getPanelsOnly(result.dashboardData.panels);
@@ -828,7 +793,8 @@ describe('executeDashboardOperations', () => {
     expect(panelsOnly).toEqual([]);
     expect(sections[0].panels).toEqual([
       expect.objectContaining({
-        id: 'section-routed-panel',
+        type: LENS_EMBEDDABLE_TYPE,
+        config: { type: 'metric' },
         grid: { x: 12, y: 0, w: 12, h: 5 },
       }),
     ]);
@@ -849,7 +815,6 @@ describe('executeDashboardOperations', () => {
       },
       operations: [{ operation: 'remove_section', id: 'section-a', panelAction: 'promote' }],
       logger,
-      resolvePanelsFromAttachments: () => ({ panels: [], failures: [] }),
     });
     const sections = getSections(result.dashboardData.panels);
     expect(sections).toHaveLength(0);
@@ -872,7 +837,6 @@ describe('executeDashboardOperations', () => {
       },
       operations: [{ operation: 'remove_section', id: 'section-a', panelAction: 'delete' }],
       logger,
-      resolvePanelsFromAttachments: () => ({ panels: [], failures: [] }),
     });
 
     const sections = getSections(result.dashboardData.panels);
@@ -895,7 +859,6 @@ describe('executeDashboardOperations', () => {
       },
       operations: [{ operation: 'remove_panels', panelIds: ['section-a-1', 'top-1'] }],
       logger,
-      resolvePanelsFromAttachments: () => ({ panels: [], failures: [] }),
     });
 
     const panelsOnly = getPanelsOnly(result.dashboardData.panels);
@@ -933,7 +896,6 @@ describe('executeDashboardOperations', () => {
         },
       ],
       logger,
-      resolvePanelsFromAttachments: () => ({ panels: [], failures: [] }),
     });
 
     const panelsOnly = getPanelsOnly(result.dashboardData.panels);
@@ -970,7 +932,6 @@ describe('executeDashboardOperations', () => {
           },
         ],
         logger,
-        resolvePanelsFromAttachments: () => ({ panels: [], failures: [] }),
       });
 
       const sections = getSections(result.dashboardData.panels);
@@ -1003,7 +964,6 @@ describe('executeDashboardOperations', () => {
           },
         ],
         logger,
-        resolvePanelsFromAttachments: () => ({ panels: [], failures: [] }),
       });
 
       const panelsOnly = getPanelsOnly(result.dashboardData.panels);
@@ -1041,7 +1001,6 @@ describe('executeDashboardOperations', () => {
           },
         ],
         logger,
-        resolvePanelsFromAttachments: () => ({ panels: [], failures: [] }),
       });
 
       const panelsOnly = getPanelsOnly(result.dashboardData.panels);
@@ -1071,7 +1030,6 @@ describe('executeDashboardOperations', () => {
           },
         ],
         logger,
-        resolvePanelsFromAttachments: () => ({ panels: [], failures: [] }),
       });
 
       expect(result.failures).toEqual([
@@ -1111,7 +1069,6 @@ describe('executeDashboardOperations', () => {
           },
         ],
         logger,
-        resolvePanelsFromAttachments: () => ({ panels: [], failures: [] }),
         resolveVisualizationConfig: createResolveVisualizationConfig({
           'show total requests': createResolvedVisualization({
             type: LENS_EMBEDDABLE_TYPE,
@@ -1167,7 +1124,6 @@ describe('executeDashboardOperations', () => {
           },
         ],
         logger,
-        resolvePanelsFromAttachments: () => ({ panels: [], failures: [] }),
         resolveVisualizationConfig: createResolveVisualizationConfig({
           'panel-1': createResolvedVisualization({
             type: LENS_EMBEDDABLE_TYPE,
@@ -1221,7 +1177,6 @@ describe('executeDashboardOperations', () => {
           },
         ],
         logger,
-        resolvePanelsFromAttachments: () => ({ panels: [], failures: [] }),
         resolveVisualizationConfig: async (params) => {
           const { nlQuery } = params;
           const config = params.existingPanel?.config as
@@ -1279,7 +1234,6 @@ describe('executeDashboardOperations', () => {
           },
         ],
         logger,
-        resolvePanelsFromAttachments: () => ({ panels: [], failures: [] }),
         resolveVisualizationConfig,
       });
 
@@ -1319,7 +1273,6 @@ describe('executeDashboardOperations', () => {
           },
         ],
         logger,
-        resolvePanelsFromAttachments: () => ({ panels: [], failures: [] }),
         resolveVisualizationConfig: createResolveVisualizationConfig({
           'show total requests': createResolvedVisualization({
             type: LENS_EMBEDDABLE_TYPE,
@@ -1367,7 +1320,6 @@ describe('executeDashboardOperations', () => {
           },
         ],
         logger,
-        resolvePanelsFromAttachments: () => ({ panels: [], failures: [] }),
         resolveVisualizationConfig: createResolveVisualizationConfig({
           'panel-1': {
             type: 'failure',
@@ -1435,7 +1387,6 @@ describe('executeDashboardOperations', () => {
           },
         ],
         logger,
-        resolvePanelsFromAttachments: () => ({ panels: [], failures: [] }),
         resolveVisualizationConfig,
       });
 
@@ -1495,7 +1446,6 @@ describe('executeDashboardOperations', () => {
           },
         ],
         logger,
-        resolvePanelsFromAttachments: () => ({ panels: [], failures: [] }),
         resolveVisualizationConfig,
       });
 
@@ -1552,7 +1502,6 @@ describe('executeDashboardOperations', () => {
           },
         ],
         logger,
-        resolvePanelsFromAttachments: () => ({ panels: [], failures: [] }),
         resolveVisualizationConfig,
       });
 
@@ -1589,7 +1538,6 @@ describe('executeDashboardOperations', () => {
           },
         ],
         logger,
-        resolvePanelsFromAttachments: () => ({ panels: [], failures: [] }),
         resolveVisualizationConfig,
       });
 
@@ -1635,7 +1583,6 @@ describe('executeDashboardOperations', () => {
           },
         ],
         logger,
-        resolvePanelsFromAttachments: () => ({ panels: [], failures: [] }),
         resolveVisualizationConfig,
       });
 
@@ -1689,7 +1636,6 @@ describe('executeDashboardOperations', () => {
           },
         ],
         logger,
-        resolvePanelsFromAttachments: () => ({ panels: [], failures: [] }),
       })
     ).rejects.toThrow('Section "nonexistent-section" not found.');
   });

@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import type {
-  AttachmentPanel,
-  DashboardAttachmentData,
-} from '@kbn/agent-builder-dashboards-common';
+import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
 import type { Logger } from '@kbn/core/server';
-import type { ResolveVisualizationConfig } from './inline_visualization';
+import type { ResolveVisualizationConfig } from './resolve_visualization';
 import type { VisualizationFailure } from './utils';
 import {
   dashboardOperationSchema,
@@ -26,9 +23,6 @@ interface ExecuteDashboardOperationsParams {
   dashboardData?: DashboardAttachmentData;
   operations: DashboardOperation[];
   logger: Logger;
-  resolvePanelsFromAttachments: (
-    attachmentInputs: Array<{ attachmentId: string; grid: AttachmentPanel['grid'] }>
-  ) => { panels: AttachmentPanel[]; failures: VisualizationFailure[] };
   resolveVisualizationConfig?: ResolveVisualizationConfig;
 }
 
@@ -42,7 +36,6 @@ export const executeDashboardOperations = async ({
   dashboardData,
   operations,
   logger,
-  resolvePanelsFromAttachments,
   resolveVisualizationConfig,
 }: ExecuteDashboardOperationsParams): Promise<{
   dashboardData: DashboardAttachmentData;
@@ -54,7 +47,6 @@ export const executeDashboardOperations = async ({
   const context = await prepareOperationExecution({
     operations,
     logger,
-    resolvePanelsFromAttachments,
     resolveVisualizationConfig,
     failures,
   });

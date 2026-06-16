@@ -15,11 +15,20 @@ export const markdownPanelInputSchema = z.object({
   grid: panelGridSchema,
 });
 
-export const attachmentPanelInputSchema = z.object({
-  kind: z.literal('attachment'),
-  attachmentId: z.string().describe('Visualization attachment ID to add as a dashboard panel.'),
+export const panelConfigPanelInputSchema = z.object({
+  kind: z.literal('panelConfig'),
+  type: z
+    .string()
+    .describe('Embeddable type for the panel (e.g. the Lens embeddable type for a visualization).'),
+  config: z
+    .record(z.string(), z.unknown())
+    .describe(
+      'Already-resolved panel configuration. Supply the config of an existing visualization (e.g. read from a visualization attachment) rather than an attachment ID. The generation tool does not read any attachment store.'
+    ),
   grid: panelGridSchema,
 });
+
+export type PanelConfigPanelInput = z.infer<typeof panelConfigPanelInputSchema>;
 
 export const visualizationPanelBaseInputSchema = z.object({
   query: z.string().describe('A natural language query describing the desired visualization.'),

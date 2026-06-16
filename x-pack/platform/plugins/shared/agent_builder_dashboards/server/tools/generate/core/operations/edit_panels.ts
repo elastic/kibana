@@ -11,7 +11,7 @@ import { z } from '@kbn/zod/v4';
 import {
   createVisualizationFailureResult,
   type VisualizationAttempt,
-} from '../inline_visualization';
+} from '../resolve_visualization';
 import { indexPanelsById, updatePanelInDashboard } from '../dashboard_state';
 import { DASHBOARD_OPERATION_FAILURE_TYPES } from '../failure_types';
 import { visualizationPanelBaseInputSchema } from './panel_kinds';
