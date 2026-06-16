@@ -6,7 +6,7 @@
  */
 
 import { renderHook, waitFor } from '@testing-library/react';
-import { of, throwError, from } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { useEntityEuidFromAlerts } from './use_entity_euid_from_alerts';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
