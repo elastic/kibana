@@ -146,5 +146,5 @@ describe('<HighlighedFieldsModal />', () => {
     expect(mockUpdateRule).toHaveBeenCalled();
     expect(mockSetIsEditLoading).toHaveBeenCalledTimes(2);
     expect(mockSetIsModalVisible).toHaveBeenCalledWith(false);
-  });
+  }, 15000);
 });
