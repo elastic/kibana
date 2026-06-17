@@ -22,14 +22,6 @@ import {
   ACTION_POLICY_EVENT_ACTIONS,
   ACTION_POLICY_EVENT_PROVIDER,
 } from '../lib/dispatcher/steps/constants';
-import { registerFeaturePrivileges } from '../lib/security/privileges';
-import { EventLoggerToken } from '../lib/services/event_log_service/tokens';
-import { registerAlertingV2UsageCollector } from '../lib/usage/usage_collector';
-import { registerStepDefinitions } from '../lib/workflow_extensions/register_step_definitions';
-import { registerTriggerDefinitions } from '../lib/workflow_extensions/register_trigger_definitions';
-import { registerSavedObjects } from '../saved_objects';
-import type { AlertingServerSetupDependencies, AlertingServerStartDependencies } from '../types';
-import { alertingV2UiSettings } from '../ui_settings/advanced_settings';
 
 /**
  * Core platform setup-phase registrations (feature privileges, saved objects,
@@ -43,9 +35,6 @@ import { alertingV2UiSettings } from '../ui_settings/advanced_settings';
 export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
   bind(OnSetup).toConstantValue((container) => {
     const logger = container.get(Logger);
-    const config = container
-      .get<PluginInitializerContext<PluginConfig>['config']>(PluginInitializer('config'))
-      .get<PluginConfig>();
 
     registerFeaturePrivileges(container.get(PluginSetup('features')));
 
