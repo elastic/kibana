@@ -40,11 +40,7 @@ import {
   type SourceMatchSpec,
 } from './field_evaluations';
 
-/**
- * Collects the set of unique identity fields across all branches of an euidRanking.
- * Single-field branches (ranking.length === 1, single EuidField) are skipped because
- * they short-circuit before the CASE and do not need `_present` aliases.
- */
+/** Collects unique identity fields across all ranking branches that need `_present` columns. */
 function collectRankingFields(branches: EuidRankingBranch[]): Set<string> {
   const fields = new Set<string>();
   for (const { ranking } of branches) {
@@ -142,19 +138,11 @@ function sourceToEsqlExpression(source: FieldEvaluation['sources'][number]): str
 }
 
 /**
- * Builds the optimised COALESCE(CONCAT) entity-id expression where each ranking arm
- * references pre-computed `<field>_present_or_null` columns:
+ * Returns the entity-id expression for a ranking definition, referencing
+ * pre-computed `<field>_present_or_null` columns.
  *
- * - Single-field arm → bare `<field>_present_or_null` reference.
- * - Composed (multi-field) arm → `CONCAT(<f1>_present_or_null, "sep", <f2>_present_or_null, …)`.
- *   CONCAT propagates NULL, so the arm evaluates to NULL when any component is absent —
- *   equivalent to the old all-`_present` boolean guard, without a per-row CASE condition.
- * - Multiple arms → `COALESCE(arm1, arm2, …)`, preserving ranking order.
- *
- * Single-arm short-circuit (only one ranking entry with one field): returns a bare
- * `_present_or_null` ref (no COALESCE wrapper needed for a single arm).
- *
- * @param presentOrNullAliases - Map from field name to its `_present_or_null` column name.
+ * Output shape: a bare column ref (single field), `CONCAT(...)` (composed field),
+ * or `COALESCE(arm1, arm2, …)` (multiple ranked arms).
  */
 function buildRankingCaseEsql(
   ranking: EuidAttribute[][],
@@ -189,8 +177,7 @@ function buildRankingCaseEsql(
       return presentOrNullAliases.get(f.field) ?? `TO_STRING(${f.field})`;
     }
 
-    // Composed arm: CONCAT over _present_or_null refs and literal separators.
-    // CONCAT propagates NULL — if any component is absent the whole arm is NULL.
+    // Composed arm: CONCAT over _present_or_null refs — NULL when any component is absent.
     const parts = composedField
       .map((attr) =>
         isEuidField(attr)
@@ -204,11 +191,7 @@ function buildRankingCaseEsql(
   return arms.length === 1 ? arms[0] : `COALESCE(${arms.join(', ')})`;
 }
 
-/**
- * Builds a COALESCE of single-arm CASE expressions to pick the first non-null/non-empty
- * source variable. Each CASE(src IS NOT NULL AND src != "", src) is a CaseEagerEvaluator
- * (vectorised), unlike the multi-arm CASE it replaces (CaseLazyEvaluator, per-row).
- */
+/** Returns a COALESCE expression that picks the first non-null/non-empty source variable. */
 function buildSourcePickerEsql(sourceVariablesBaseName: string, count: number): string {
   const arms = Array.from({ length: count }, (_, i) => {
     const v = `${sourceVariablesBaseName}${i}`;
@@ -218,16 +201,11 @@ function buildSourcePickerEsql(sourceVariablesBaseName: string, count: number): 
 }
 
 /**
- * Builds the destination field expression as a COALESCE of single-arm CASEs so every CASE
- * evaluates via CaseEagerEvaluator (vectorised):
+ * Returns the destination field assignment expression and any boolean precompute columns it needs.
  *
- * - `sourceMatchesAny` arms: `CASE(COALESCE(src IN ("a","b"), FALSE), "mapped")`.
- * - Condition arms: `CASE(COALESCE(precomputed_bool_col, FALSE), "mapped")` — the caller must
- *   have already emitted `precomputed_bool_col = (condition)` as a preceding assignment.
- * - Fallback: `CASE(src IS NULL OR src == "", fallback)`.
- * - Pass-through: bare `src` as final COALESCE arm.
- *
- * Returns the expression string and any condition-column precomputes needed.
+ * Without `whenClauses`: a simple fallback/pass-through CASE.
+ * With `whenClauses`: a COALESCE of mapped arms (sourceMatchesAny or condition-based),
+ * a fallback arm, and a bare pass-through.
  */
 function buildDestinationFieldEsql(
   effectiveSourceName: string,
@@ -266,14 +244,9 @@ function buildDestinationFieldEsql(
 }
 
 /**
- * Builds EVAL assignments for a single field evaluation (e.g. entity.namespace from event.module).
- *
- * Replaces all multi-arm CASE expressions with COALESCE of single-arm CASEs so every CASE
- * operand is a plain Attribute — enabling CaseEagerEvaluator (vectorised) instead of
- * CaseLazyEvaluator (per-row). See {@link buildSourcePickerEsql} and
- * {@link buildDestinationFieldEsql} for the transformation details.
- *
- * Returns a comma-separated list of EVAL assignments (may include condition-precompute columns).
+ * Returns comma-separated EVAL assignments for a single field evaluation
+ * (e.g. `entity.namespace` derived from `event.module`).
+ * May include intermediate source-picker and condition columns.
  */
 function buildOneFieldEvaluationEsql(evaluation: FieldEvaluation): string {
   const { destination, sources, fallbackValue, whenClauses } = evaluation;
@@ -390,14 +363,12 @@ export function getEuidEsqlDocumentsContainsIdFilter(entityType: EntityType) {
 }
 
 /**
- * Returns a comma-separated ES|QL EVAL assignments fragment that computes the entity id for
- * the given entity type and assigns it to `outputColumn`.
+ * Returns a comma-separated ES|QL EVAL assignments fragment that computes the entity id
+ * for the given entity type and assigns it to `outputColumn`.
  *
- * For multi-field identities the fragment also pre-computes `<field>_present` boolean columns
- * as sequential assignments in the same `| EVAL` stage.  Because ES|QL materialises sequential
- * EVAL assignments in order, those columns are plain `Attribute` references by the time the
- * CASE expression is evaluated — enabling `CaseEagerEvaluator` (vectorised) instead of
- * `CaseLazyEvaluator`.
+ * For multi-field identities the fragment also emits intermediate columns (`_present`,
+ * `_present_or_null`, field-evaluation columns) as sequential assignments in the same
+ * `| EVAL` stage so later assignments can reference them by name.
  *
  * Wrap the returned string with `| EVAL`:
  * ```ts
@@ -430,18 +401,15 @@ export function getEuidEsqlEvaluation(
   );
   const assignments: string[] = [];
 
-  // Prepend identity-specific field evaluations (e.g. entity.namespace for user).
-  // These are prerequisites of the EUID expression and must precede the _present
-  // booleans that may reference their output columns.
+  // Identity-specific field evaluations (e.g. entity.namespace for user) must precede
+  // the _present columns that may reference their output.
   for (const evaluation of identityField.fieldEvaluations ?? []) {
     assignments.push(buildOneFieldEvaluationEsql(evaluation));
   }
-  // 1. Boolean presence flags (plain Attribute[boolean] refs → CaseEagerEvaluator)
   for (const f of presentFields) {
     assignments.push(`${esqlPresentColumnName(f)} = ${esqlIsNotNullOrEmpty(f)}`);
   }
-  // 2. Nullable value aliases: value when present, NULL otherwise.
-  //    CONCAT over these propagates NULL → no per-arm guards needed.
+  // Nullable aliases: field value when present, NULL otherwise.
   for (const f of presentFields) {
     assignments.push(
       `${esqlPresentOrNullColumnName(f)} = CASE(${esqlPresentColumnName(f)}, TO_STRING(${f}))`
@@ -453,14 +421,9 @@ export function getEuidEsqlEvaluation(
   if (!hasConditionalBranch && branches.length === 1) {
     idLogic = buildRankingCaseEsql(branches[0].ranking, presentOrNullAliases);
   } else {
-    // Pre-compute each branch's condition (when present) and ranking formula as named columns
-    // so the final CASE operands are plain Attributes → CaseEagerEvaluator (vectorised).
-    // Without pre-computing the formula, CASE(Attribute[bool], CONCAT(...)) still triggers
-    // CaseLazyEvaluator because the value expression is complex (not a simple Attribute).
-    //
-    // Composition uses a single multi-arm CASE rather than COALESCE(branch_0, branch_1, …)
-    // to preserve first-matched-branch-wins semantics: when a matched branch's formula is NULL
-    // we should NOT fall through to the next branch (matching memory.ts / dsl.ts / kql.ts).
+    // Pre-compute each branch's condition and formula as named columns, then combine
+    // with a single multi-arm CASE (not COALESCE) so a matched branch that evaluates
+    // to NULL does not fall through to the next branch.
     const caseParts: string[] = [];
     for (const [i, branch] of branches.entries()) {
       const formulaVar = `_euid_branch_${i}_formula`;

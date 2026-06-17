@@ -223,12 +223,8 @@ export interface BuildSetFieldsByConditionPostStatsContext {
 }
 
 /**
- * Builds ESQL EVAL CASE fragments for when-condition field overrides (pre-STATS by default).
- * Pass `postStats` for after-STATS rows in logs extraction (main vs CCS differs by `useRecentDataPrefix`).
- */
-/**
  * Returns the raw EVAL assignment strings for a set-fields-by-condition entry (no `| EVAL` prefix).
- * Use this when merging multiple entries into a single `| EVAL` stage.
+ * Pass `postStats` for after-STATS rows; omit for pre-STATS.
  */
 export function buildSetFieldsByConditionAssignments(
   setFieldsByCondition: SetFieldsByCondition,

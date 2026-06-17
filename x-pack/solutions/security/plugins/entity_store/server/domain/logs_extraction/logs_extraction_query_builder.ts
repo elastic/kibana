@@ -127,8 +127,7 @@ export function buildLogsExtractionEsqlQuery({
     }
   }
 
-  // Merge shared field evals (entity.source) and EUID computation into one | EVAL stage.
-  // Sequential EVAL assignments allow later entries to reference columns from earlier ones.
+  // Single | EVAL stage: later assignments can reference columns from earlier ones.
   {
     const fieldEvalsEsql = getFieldEvaluationsEsqlFromDefinition(entityDefinition);
     const euidEsql = getEuidEsqlEvaluation(type, recentData(ENGINE_METADATA_UNTYPED_ID_FIELD), {
@@ -190,7 +189,7 @@ export function buildLogsExtractionEsqlQuery({
   }
 
   if (entityDefinition.whenConditionTrueSetFieldsAfterStats?.length) {
-    // Merge all post-STATS set-fields into one | EVAL stage.
+    // Merge all post-STATS overrides into a single | EVAL stage.
     const postStatsAssignments = entityDefinition.whenConditionTrueSetFieldsAfterStats.map(
       (entry) =>
         buildSetFieldsByConditionAssignments(entry, {
