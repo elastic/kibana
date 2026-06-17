@@ -73,16 +73,6 @@ const SECTION_CONFIG: Array<{
       { defaultMessage: 'Matching this rule' }
     ),
   },
-  {
-    category: 'direct',
-    title: i18n.translate('xpack.responseOps.alertingV2RuleForm.linkedActionPolicies.directTitle', {
-      defaultMessage: 'Linked policies',
-    }),
-    description: i18n.translate(
-      'xpack.responseOps.alertingV2RuleForm.linkedActionPolicies.directDescription',
-      { defaultMessage: 'Matching this rule only' }
-    ),
-  },
 ];
 
 interface Props {
