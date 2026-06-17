@@ -6,14 +6,15 @@
  */
 
 import {
-  EuiSplitPanel,
-  EuiResizableContainer,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonIcon,
   EuiLink,
   EuiPopover,
+  EuiResizableContainer,
+  EuiSplitPanel,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -374,15 +375,17 @@ export function StreamDetailEnrichmentContentImpl() {
                           <RunSimulationButton />
                         </EuiFlexItem>
                       )}
-                      {evals && (
+                      {evals?.canAddToDataset && (
                         <EuiFlexItem grow={false}>
-                          <EuiButtonIcon
-                            aria-label={ADD_TO_DATASET_ARIA_LABEL}
-                            iconType="beaker"
-                            color="text"
-                            onClick={onAddToDataset}
-                            data-test-subj="streamsEnrichmentAddToDatasetButton"
-                          />
+                          <EuiToolTip content={ADD_TO_DATASET_ARIA_LABEL} disableScreenReaderOutput>
+                            <EuiButtonIcon
+                              aria-label={ADD_TO_DATASET_ARIA_LABEL}
+                              iconType="beaker"
+                              color="text"
+                              onClick={onAddToDataset}
+                              data-test-subj="streamsEnrichmentAddToDatasetButton"
+                            />
+                          </EuiToolTip>
                         </EuiFlexItem>
                       )}
                     </EuiFlexGroup>
@@ -449,14 +452,16 @@ const DraftSimulationInfoPopover = () => {
   return (
     <EuiPopover
       button={
-        <EuiButtonIcon
-          iconType="info"
-          color="text"
-          size="xs"
-          aria-label={DRAFT_SIMULATION_INFO_LABEL}
-          onClick={() => setIsOpen((prev) => !prev)}
-          data-test-subj="streamsAppProcessingDraftSimulationInfoButton"
-        />
+        <EuiToolTip content={DRAFT_SIMULATION_INFO_LABEL} disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="info"
+            color="text"
+            size="xs"
+            aria-label={DRAFT_SIMULATION_INFO_LABEL}
+            onClick={() => setIsOpen((prev) => !prev)}
+            data-test-subj="streamsAppProcessingDraftSimulationInfoButton"
+          />
+        </EuiToolTip>
       }
       isOpen={isOpen}
       closePopover={() => setIsOpen(false)}

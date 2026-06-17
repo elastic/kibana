@@ -21,6 +21,11 @@
  * @module @kbn/evals
  */
 
+// Register the `.text` require hook before any evaluator module (which import `*.text`
+// templates) is loaded. Under Playwright >=1.61 on Node >=23.5 the default loader would
+// otherwise Babel-parse the raw templates and throw "Missing semicolon". Keep this first.
+import './src/setup_dot_text';
+
 // CLI tools
 export * as cli from './src/cli';
 
@@ -34,10 +39,12 @@ export type {
   ExperimentTask,
   Evaluator,
   EvaluationResult,
-  RanExperiment,
+  DatasetRunResult,
   EvalsExecutorClient,
   EvaluationCompleteEvent,
   OnEvaluationComplete,
+  ExperimentStartEvent,
+  OnExperimentStart,
 } from './src/types';
 export { KibanaEvalsClient } from './src/kibana_evals_executor/client';
 export { createQuantitativeCorrectnessEvaluators } from './src/evaluators/correctness';
@@ -72,18 +79,14 @@ export type {
 } from './src/utils/reporting/report_table';
 export { createTable } from './src/utils/reporting/report_table';
 export {
-  EvaluationScoreRepository,
-  computeScoreDocumentId,
-  type EvaluationScoreDocument,
+  EvalsClient,
   type EvaluatorStats,
-  type RunStats,
-} from './src/utils/score_repository';
-export {
-  mapToEvaluationScoreDocuments,
-  exportEvaluations,
-  buildSingleScoreDocument,
-  type BuildSingleScoreDocumentParams,
-} from './src/utils/report_model_score';
+  type ExperimentStats,
+  type UpsertDatasetInput,
+  type DatasetWithId,
+} from './src/utils/evals_client';
+export { getBuildkiteCiMetadataFromEnv, type BuildkiteCiMetadata } from './src/utils/ci_metadata';
+export { buildIngestRequest } from './src/utils/build_ingest_request';
 
 export { parseSelectedEvaluators, selectEvaluators } from './src/evaluators/filter';
 /**

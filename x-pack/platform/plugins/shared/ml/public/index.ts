@@ -29,7 +29,6 @@ export type { MlPluginSetup, MlPluginStart };
 
 export type { AnomalySwimLaneEmbeddableApi } from './embeddables';
 
-export { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from './embeddables/constants';
 export { CONTROLLED_BY_SWIM_LANE_FILTER } from './ui_actions/constants';
 
 export type { MlLocator } from './locator';

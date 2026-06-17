@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiFilterGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useSelector } from 'react-redux';
 import { useGetUrlParams } from '../../../../hooks';
 import { selectServiceLocationsState } from '../../../../state';
+import { selectOverviewStatus } from '../../../../state/overview_status';
 
 import type {
   SyntheticsMonitorFilterItem,
@@ -46,16 +47,47 @@ const mixUrlValues = (
 
 export const FilterGroup = ({
   handleFilterChange,
+  excludeFields,
+  showRemoteClusterFilter = false,
 }: {
   handleFilterChange: SyntheticsMonitorFilterChangeHandler;
+  /**
+   * Fields to omit from the filter group. Useful on views (e.g. the global
+   * Errors tab) where some monitor-config filters (like `schedules`) don't
+   * apply because the data being filtered isn't backed by monitor configs.
+   */
+  excludeFields?: ReadonlyArray<SyntheticsMonitorFilterItem['field']>;
+  /**
+   * Whether to render the "Remote cluster" filter. Only meaningful on the
+   * overview page (`MonitorListContainer` renders `FilterGroup` too via
+   * `ListFilters`, but management cannot filter on `_index`). Hidden by
+   * default and additionally gated on the presence of remote monitors.
+   */
+  showRemoteClusterFilter?: boolean;
 }) => {
   const data = useFilters();
 
   const { locations } = useSelector(selectServiceLocationsState);
+  const { allConfigs } = useSelector(selectOverviewStatus);
 
   const urlParams = useGetUrlParams();
 
-  const filters: SyntheticsMonitorFilterItem[] = [
+  // Derive remote-cluster filter values from the overview status payload
+  // (same source the grouping toggle uses). The filters endpoint only knows
+  // about local saved objects, so it cannot enumerate remote clusters.
+  const remoteClusterValues = useMemo<LabelWithCountValue[]>(() => {
+    const counts = new Map<string, number>();
+    for (const config of allConfigs ?? []) {
+      const remoteName = config.remote?.remoteName;
+      if (!remoteName) continue;
+      counts.set(remoteName, (counts.get(remoteName) ?? 0) + 1);
+    }
+    return Array.from(counts, ([label, count]) => ({ label, count }));
+  }, [allConfigs]);
+
+  const hasRemoteMonitors = remoteClusterValues.length > 0;
+
+  const allFilters: SyntheticsMonitorFilterItem[] = [
     {
       label: TYPE_LABEL,
       field: 'monitorTypes',
@@ -106,7 +138,7 @@ export const FilterGroup = ({
   ];
 
   if ((data?.projects?.length || 0) > 0) {
-    filters.push({
+    allFilters.push({
       label: PROJECT_LABEL,
       field: 'projects',
       values: getSyntheticsFilterDisplayValues(
@@ -116,6 +148,21 @@ export const FilterGroup = ({
       ),
     });
   }
+
+  if (showRemoteClusterFilter && hasRemoteMonitors) {
+    allFilters.push({
+      label: REMOTE_CLUSTER_LABEL,
+      field: 'remoteNames',
+      values: getSyntheticsFilterDisplayValues(
+        mixUrlValues(remoteClusterValues, urlParams.remoteNames),
+        'remoteNames',
+        locations
+      ),
+    });
+  }
+
+  const excluded = new Set(excludeFields ?? []);
+  const filters = allFilters.filter((f) => !excluded.has(f.field));
 
   return (
     <EuiFilterGroup>
@@ -150,3 +197,10 @@ const TAGS_LABEL = i18n.translate('xpack.synthetics.monitorManagement.filter.tag
 const SCHEDULE_LABEL = i18n.translate('xpack.synthetics.monitorManagement.filter.frequencyLabel', {
   defaultMessage: `Frequency`,
 });
+
+const REMOTE_CLUSTER_LABEL = i18n.translate(
+  'xpack.synthetics.monitorManagement.filter.remoteClusterLabel',
+  {
+    defaultMessage: `Remote cluster`,
+  }
+);

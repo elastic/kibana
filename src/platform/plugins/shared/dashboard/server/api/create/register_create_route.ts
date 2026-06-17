@@ -7,21 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { VersionedRouter } from '@kbn/core-http-server';
-import type { RequestHandlerContext } from '@kbn/core/server';
-import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { once } from 'lodash';
+
 import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
-import { getRouteConfig } from '../get_route_config';
-import { getCreateRequestBodySchema, getCreateResponseBodySchema } from './schemas';
-import { create } from './create';
+import type { VersionedRouter } from '@kbn/core-http-server';
+import type { Logger, RequestHandlerContext } from '@kbn/core/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+
+import { trackCreateDashboardAction } from '../../user_activity';
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
+import { getRouteConfig } from '../get_route_config';
 import { writeErrorHandler } from '../write_error_handler';
+import { create } from './create';
+import { getCreateResponseBodySchema } from './schemas';
 
 export function registerCreateRoute(
   router: VersionedRouter<RequestHandlerContext>,
   usageCounter: UsageCounter | undefined,
-  isDashboardAppRequest: boolean
+  isDashboardAppRequest: boolean,
+  logger: Logger
 ) {
   const { basePath, routeConfig, routeVersion } = getRouteConfig(isDashboardAppRequest);
   const createRoute = router.post({
@@ -35,7 +39,7 @@ export function registerCreateRoute(
   // Route is registered during setup and before all plugins have registered embeddable schemas.
   // Instead, use once to only call getDashboardStateSchema the first time a route handler is executed.
   const getCachedDashboardStateSchema = once(() => {
-    return getDashboardStateSchema(isDashboardAppRequest);
+    return getDashboardStateSchema(false);
   });
 
   createRoute.addVersion(
@@ -43,7 +47,7 @@ export function registerCreateRoute(
       version: routeVersion,
       validate: () => ({
         request: {
-          body: getCreateRequestBodySchema(isDashboardAppRequest),
+          body: getDashboardStateSchema(isDashboardAppRequest),
         },
         response: {
           201: {
@@ -69,9 +73,14 @@ export function registerCreateRoute(
             req.serverTiming,
             isDashboardAppRequest
           );
+          try {
+            await trackCreateDashboardAction(result, req);
+          } catch (e) {
+            // if tracking throws, just swallow the error; no need to surface it
+          }
           return res.created({ body: result });
         } catch (e) {
-          return writeErrorHandler(e, res);
+          return writeErrorHandler(e, res, logger, req);
         }
       })
   );

@@ -27,6 +27,8 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { PluginDefinition } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { Controller } from 'react-hook-form';
 import type { Control } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
@@ -274,7 +276,7 @@ const ActivePluginsStatus: React.FC<{ activePluginsCount: number; totalPlugins: 
             <EuiFlexItem>
               <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <EuiIcon type={iconType} color={statusColor} size="m" />
+                  <EuiIcon type={iconType} color={statusColor} size="m" aria-hidden={true} />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiText size="m" color={statusColor}>
@@ -296,7 +298,14 @@ const ActivePluginsStatus: React.FC<{ activePluginsCount: number; totalPlugins: 
                   defaultMessage="{pluginsLink} extend agents with additional skills and capabilities."
                   values={{
                     pluginsLink: (
-                      <EuiLink href={createAgentBuilderUrl(appPaths.plugins.list)}>
+                      <EuiLink
+                        href={createAgentBuilderUrl(appPaths.plugins.list)}
+                        {...getEbtProps({
+                          element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                          action: AGENT_BUILDER_UI_EBT.action.agentEdit.MANAGE_ALL,
+                          detail: AGENT_BUILDER_UI_EBT.entity.PLUGIN,
+                        })}
+                      >
                         {labels.plugins.title}
                       </EuiLink>
                     ),

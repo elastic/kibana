@@ -26,7 +26,11 @@ export async function createFixtureFile({
   const modelVersions =
     typeof type.modelVersions === 'function' ? type.modelVersions() : type.modelVersions!;
   const lastModelVersion = modelVersions[current.split('.')[1] as ModelVersionIdentifier];
-  const typeTemplate = createFixtureTemplate(lastModelVersion!);
+  // createFixtureTemplate requires a 'create' schema to introspect field paths.
+  // When the schema is absent (itself a separate validation error), fall back to
+  // an empty object so the file is still generated with the instructional hints.
+  const typeTemplate =
+    lastModelVersion?.schemas?.create != null ? createFixtureTemplate(lastModelVersion) : {};
 
   await jsonToFile(path, {
     [previous]: [

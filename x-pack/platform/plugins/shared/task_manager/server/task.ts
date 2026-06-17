@@ -27,6 +27,7 @@ export enum TaskPriority {
 export enum TaskCost {
   Tiny = 1,
   Normal = 2,
+  Large = 4,
   ExtraLarge = 10,
 }
 
@@ -37,13 +38,15 @@ export enum TaskCost {
 export enum InstanceTaskCost {
   Tiny = 'tiny',
   Normal = 'normal',
+  Large = 'large',
   ExtraLarge = 'extralarge',
 }
 
 /** Maps schema cost strings to their integer values for capacity calculations. */
-export const INSTANCE_TASK_COST_TO_INT: Record<InstanceTaskCost, TaskCost> = {
+const INSTANCE_TASK_COST_TO_INT: Record<InstanceTaskCost, TaskCost> = {
   [InstanceTaskCost.Tiny]: TaskCost.Tiny,
   [InstanceTaskCost.Normal]: TaskCost.Normal,
+  [InstanceTaskCost.Large]: TaskCost.Large,
   [InstanceTaskCost.ExtraLarge]: TaskCost.ExtraLarge,
 };
 
@@ -568,6 +571,12 @@ export type PartialSerializedConcreteTaskInstance = Partial<SerializedConcreteTa
 export interface ApiKeyOptions {
   request?: KibanaRequest;
   regenerateApiKey?: boolean;
+  /**
+   * When true with a request, grant only the Elasticsearch API key (skip UIAM). Intended for
+   * tests and narrow internal flows (e.g. exercising UIAM provisioning on tasks that have ES
+   * credentials only).
+   */
+  onEsKey?: boolean;
 }
 
 export type ScheduleOptions = Record<string, unknown> & ApiKeyOptions;

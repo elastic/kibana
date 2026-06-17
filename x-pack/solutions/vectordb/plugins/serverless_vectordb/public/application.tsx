@@ -7,18 +7,42 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { EuiEmptyPrompt, EuiPageTemplate } from '@elastic/eui';
-import type { AppMountParameters } from '@kbn/core/public';
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
+import { I18nProvider } from '@kbn/i18n-react';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { Router } from '@kbn/shared-ux-router';
+import { OnboardingApiPathsProvider } from '@kbn/vectordb-onboarding';
+import { AppRoutes } from './routes';
+import type { ServerlessVectordbServices } from './types';
 
-const VectordbHome: React.FC = () => (
-  <EuiPageTemplate restrictWidth={false}>
-    <EuiPageTemplate.EmptyPrompt>
-      <EuiEmptyPrompt iconType="logoElasticsearch" title={<h1>Welcome to Vector DB</h1>} />
-    </EuiPageTemplate.EmptyPrompt>
-  </EuiPageTemplate>
-);
+const queryClient = new QueryClient();
 
-export function renderApp({ element }: AppMountParameters) {
-  ReactDOM.render(<VectordbHome />, element);
+const ONBOARDING_API_PATHS = {
+  apiKey: '/internal/serverless_vectordb/api_key',
+  deploymentStats: '/internal/serverless_vectordb/deployment_stats',
+};
+
+export const renderApp = (
+  core: CoreStart,
+  services: ServerlessVectordbServices,
+  { element, history }: AppMountParameters
+) => {
+  ReactDOM.render(
+    core.rendering.addContext(
+      <KibanaContextProvider services={services}>
+        <QueryClientProvider client={queryClient}>
+          <I18nProvider>
+            <OnboardingApiPathsProvider paths={ONBOARDING_API_PATHS}>
+              <Router history={history}>
+                <AppRoutes />
+              </Router>
+            </OnboardingApiPathsProvider>
+          </I18nProvider>
+        </QueryClientProvider>
+      </KibanaContextProvider>
+    ),
+    element
+  );
   return () => ReactDOM.unmountComponentAtNode(element);
-}
+};

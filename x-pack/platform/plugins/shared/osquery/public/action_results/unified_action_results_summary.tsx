@@ -201,8 +201,10 @@ const UnifiedActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> 
     [getFleetAppUrl]
   );
 
-  // Pagination
-  const totalItemCount = agentIds?.length ?? 0;
+  // Pagination — `data.total` covers both Live (agentIds.length) and Scheduled
+  // (server hits.total). Scheduled queries have no `agentIds`, so deriving the
+  // count from `agentIds.length` would yield pageCount=0 and leave Next enabled.
+  const totalItemCount = data.total;
   const totalPages = Math.ceil(totalItemCount / pageSize);
 
   const handlePageChange = useCallback((newPageIndex: number) => {

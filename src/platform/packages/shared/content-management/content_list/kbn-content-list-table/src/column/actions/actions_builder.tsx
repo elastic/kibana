@@ -33,8 +33,8 @@ const DEFAULT_ACTIONS_COLUMN_TITLE = i18n.translate(
  * `xl * N + xs * (N - 1) + s * 2`, which works out to `36N + 12` at the default
  * theme scale.
  *
- * `N` is the number of action parts the consumer declared (e.g. Inspect + Edit
- * + Delete = 3). When EUI's auto-collapse kicks in (>2 actions, see
+ * `N` is the number of action parts the consumer declared (e.g. ContentEditor
+ * + Edit + Delete = 3). When EUI's auto-collapse kicks in (>2 actions, see
  * `renderItemActionsCell` in `@elastic/eui`) the visible footprint is "primary
  * icons (max 2) + the 3-dot overflow trigger" — which still fits inside `36N`
  * because the 3-dot trigger replaces one of the inline icons rather than
@@ -43,7 +43,10 @@ const DEFAULT_ACTIONS_COLUMN_TITLE = i18n.translate(
  * EUI's action cells ship `flex-wrap: wrap` on desktop, which without
  * intervention would let the icons stack vertically when the column squeezes.
  * `cssActionsCellNoWrap` (in `content_list_table.tsx`) pins the cell's flex
- * container to `flex-wrap: nowrap` so the column's `min-width: 'max-content'`
+ * container to `flex-wrap: nowrap` — keyed on EUI's
+ * `td.euiTableRowCell--hasActions` so the rule actually matches body cells,
+ * not just the header (which is the only `<td>`/`<th>` that receives the
+ * column's `data-test-subj`) — so the column's `min-width: 'max-content'`
  * floor resolves to the full icon-row width and the auto table-layout
  * algorithm can't shrink the column past that point.
  *
@@ -84,31 +87,29 @@ export interface ActionsColumnProps
    *
    * When provided, only the specified actions are rendered in the given order.
    * When omitted, actions are determined automatically from the provider config
-   * (e.g., edit is shown if `getEditUrl` or `onEdit` is configured, delete is
-   * shown if `onDelete` is configured).
+   * (e.g., edit is shown if `actions.edit.onItemAction` is configured, delete
+   * is shown if `actions.delete.onBulkAction` is configured, content editor is
+   * shown if `features.contentEditor.open` is configured).
    */
   children?: ReactNode;
 }
 
 /**
- * Build default action parts based on the current context.
+ * Build default action parts when `Column.Actions` has no children.
  *
- * When `Column.Actions` has no children, this function determines which actions
- * to show based on the provider configuration. For example, edit is included
- * when `getEditUrl` or `onEdit` is configured, and delete is included when
- * `onDelete` is configured.
+ * Each configured `actions[id]` handler contributes its preset; the content
+ * editor (view details) preset is sourced from `features.contentEditor.open`
+ * instead, and is always shown when an editor is wired regardless of
+ * read-only state — matching the existing TableListView behavior.
  */
 const getDefaultActionParts = (context: ColumnBuilderContext): ParsedPart[] => {
   const parts: ParsedPart[] = [];
-  const { itemConfig, isReadOnly } = context;
+  const { itemConfig, isReadOnly, features } = context;
+  const itemActions = itemConfig?.actions;
 
-  // Edit and delete actions are suppressed in read-only mode, but inspect
-  // (view details) is always available when the content editor is enabled —
-  // matching the existing TableListView behavior where "View details" is
-  // shown regardless of read-only state.
   if (!isReadOnly) {
-    const hasEdit = itemConfig?.getEditUrl || itemConfig?.onEdit;
-    const hasDelete = itemConfig?.onDelete;
+    const hasEdit = itemActions?.edit?.onItemAction || itemActions?.edit?.getItemActionHref;
+    const hasDelete = itemActions?.delete?.onBulkAction;
 
     if (hasEdit) {
       parts.push({
@@ -131,12 +132,12 @@ const getDefaultActionParts = (context: ColumnBuilderContext): ParsedPart[] => {
     }
   }
 
-  if (itemConfig?.onInspect) {
+  if (features?.contentEditor?.open) {
     parts.push({
       type: 'part',
       part: 'action',
-      preset: 'inspect',
-      instanceId: 'inspect',
+      preset: 'contentEditor',
+      instanceId: 'contentEditor',
       attributes: {},
     });
   }
@@ -148,8 +149,7 @@ const getDefaultActionParts = (context: ColumnBuilderContext): ParsedPart[] => {
  * Build an `EuiBasicTableColumn` (actions column) from `Column.Actions` declarative attributes.
  *
  * Parses action children to determine which row actions to render. When no children
- * are provided, defaults are inferred from the provider configuration. Returns
- * `undefined` when no actions are available (e.g., read-only mode, no handlers configured).
+ * are provided, defaults are inferred from the provider configuration.
  *
  * @param attributes - The declarative attributes from the parsed `Column.Actions` element.
  * @param context - Builder context with provider configuration.
@@ -257,8 +257,8 @@ const buildActionsColumnSkeleton = (
 
   // Hard-coded fallback when no explicit children were provided. The real
   // resolver may ultimately produce 0 (none configured), 2 (edit + delete),
-  // or 3 (edit, delete, inspect) depending on provider configuration — 2 is
-  // the most common shape and close enough that the swap is not jarring.
+  // or 3 (edit, delete, content editor) depending on provider configuration
+  // — 2 is the most common shape and close enough that the swap is not jarring.
   const count = actionParts.length > 0 ? actionParts.length : 2;
 
   // Match the rendered footprint of an `EuiButtonIcon size="s"` icon glyph

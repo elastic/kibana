@@ -41,6 +41,7 @@ import { isEqual } from 'lodash';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
+import { reportEsqlError } from '@kbn/esql-editor';
 import { ESQLLangEditor } from '../../../create_editor';
 import type { ServiceDeps } from '../../../kibana_services';
 import { ChooseColumnPopover } from './choose_column_popover';
@@ -236,8 +237,7 @@ export function ValueControlForm({
     const response = (await core.http
       ?.post(TIMEFIELD_ROUTE, { body: JSON.stringify({ query: `FROM ${indexPattern}` }) })
       .catch((error) => {
-        // eslint-disable-next-line no-console
-        console.error('Failed to fetch the timefield', error);
+        reportEsqlError(error, { errorType: 'ControlFlyoutTimefieldFetch' });
         return undefined;
       })) as { timeField?: string } | undefined;
 

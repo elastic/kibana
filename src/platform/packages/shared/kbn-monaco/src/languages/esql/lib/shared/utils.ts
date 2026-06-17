@@ -10,7 +10,7 @@
 import { isArray } from 'lodash';
 import type { ISuggestionItem } from '@kbn/esql-language/src/commands/registry/types';
 import { monaco } from '../../../../monaco_imports';
-import type { MonacoMessage } from '../../language';
+import type { MonacoMessage } from '../providers/types';
 
 // From Monaco position to linear offset
 export function monacoPositionToOffset(expression: string, position: monaco.Position): number {

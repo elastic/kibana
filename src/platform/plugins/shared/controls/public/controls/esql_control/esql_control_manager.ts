@@ -26,7 +26,7 @@ import type {
   OptionsListSearchTechnique,
   OptionsListSelection,
 } from '@kbn/controls-schemas';
-import type { TimeRange } from '@kbn/es-query';
+import type { AggregateQuery, TimeRange } from '@kbn/es-query';
 import type { ESQLControlVariable, QueryESQLControl } from '@kbn/esql-types';
 import {
   EsqlControlType,
@@ -299,26 +299,53 @@ export function initializeESQLControlManager(
         esqlVariable$.next(getEsqlVariable(sectionId));
     });
 
+  const query$ = new BehaviorSubject<AggregateQuery>({
+    esql: isEsqlQueryControl ? initialState.esql_query ?? '' : '',
+  });
+  const publishQuerySubscription = esqlQuery$.subscribe((esql) => {
+    query$.next({ esql });
+  });
+
   return {
     cleanup: () => {
       fetchAbortController.abort();
       variableSubscriptions.unsubscribe();
       fetchSubscription?.unsubscribe();
       availableOptionsSearchSubscription.unsubscribe();
+      publishQuerySubscription.unsubscribe();
     },
     api: {
       hasSelections$: hasSelections$ as PublishingSubject<boolean | undefined>,
       esqlVariable$: esqlVariable$ as PublishingSubject<ESQLControlVariable>,
       singleSelect$: singleSelect$ as PublishingSubject<boolean>,
+      query$,
     },
     anyStateChange$: merge(
-      selectedOptions$,
-      availableOptions$,
-      variableName$,
-      singleSelect$,
-      variableType$,
-      esqlQuery$
-    ).pipe(map(() => undefined)),
+      selectedOptions$.pipe(
+        skip(1),
+        map(() => undefined)
+      ),
+      availableOptions$.pipe(
+        skip(1),
+        map(() => undefined)
+      ),
+      variableName$.pipe(
+        skip(1),
+        map(() => undefined)
+      ),
+      singleSelect$.pipe(
+        skip(1),
+        map(() => undefined)
+      ),
+      variableType$.pipe(
+        skip(1),
+        map(() => undefined)
+      ),
+      esqlQuery$.pipe(
+        skip(1),
+        map(() => undefined)
+      )
+    ),
     reinitializeState: (lastSaved?: ESQLOptionsListRuntimeState) => {
       setSelectedOptions(lastSaved?.selected_options ?? []);
       variableName$.next(lastSaved?.variable_name ?? '');

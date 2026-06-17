@@ -36,6 +36,8 @@ import { MobileErrorCrashesOverview } from '../../app/mobile/errors_and_crashes_
 import { ServiceDependencies } from '../../app/service_dependencies';
 import { ServiceDashboards } from '../../app/service_dashboards';
 import type { MobileSearchBar } from '../../app/mobile/search_bar';
+import { ServiceMapSearchBar } from '../../app/service_map/service_map_search_bar';
+import { ServiceMapSearchProvider } from '../../app/service_map/service_map_search_context';
 
 const ServiceLogs = dynamic(() =>
   import('../../app/service_logs').then((mod) => ({ default: mod.ServiceLogs }))
@@ -46,30 +48,36 @@ export function page({
   tabKey,
   element,
   searchBarOptions,
+  customSearchBar,
   bottomHeaderContent,
   contentWrapper,
+  contextWrapper: ContextWrapper,
 }: {
   title: string;
   tabKey: React.ComponentProps<typeof MobileServiceTemplate>['selectedTabKey'];
   element: React.ReactElement<any, any>;
   searchBarOptions?: React.ComponentProps<typeof MobileSearchBar>;
+  customSearchBar?: React.ReactNode;
   bottomHeaderContent?: React.ComponentType;
   contentWrapper?: React.ComponentType<{ children: React.ReactNode }>;
+  contextWrapper?: React.ComponentType<{ children: React.ReactNode }>;
 }): {
   element: React.ReactElement<any, any>;
 } {
+  const template = (
+    <MobileServiceTemplate
+      title={title}
+      selectedTabKey={tabKey}
+      searchBarOptions={searchBarOptions}
+      customSearchBar={customSearchBar}
+      bottomHeaderContent={bottomHeaderContent}
+      contentWrapper={contentWrapper}
+    >
+      {element}
+    </MobileServiceTemplate>
+  );
   return {
-    element: (
-      <MobileServiceTemplate
-        title={title}
-        selectedTabKey={tabKey}
-        searchBarOptions={searchBarOptions}
-        bottomHeaderContent={bottomHeaderContent}
-        contentWrapper={contentWrapper}
-      >
-        {element}
-      </MobileServiceTemplate>
-    ),
+    element: ContextWrapper ? <ContextWrapper>{template}</ContextWrapper> : template,
   };
 }
 
@@ -265,8 +273,11 @@ export const mobileServiceDetailRoute = {
           defaultMessage: 'Service map',
         }),
         element: <ServiceMapServiceDetail />,
+        customSearchBar: <ServiceMapSearchBar />,
+        contextWrapper: ServiceMapSearchProvider,
         searchBarOptions: {
           showTimeComparison: true,
+          showFilterBar: true,
         },
       }),
       '/mobile-services/{serviceName}/logs': page({

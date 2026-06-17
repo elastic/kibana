@@ -78,7 +78,7 @@ sh jest.sh public/applications/shared/flash_messages/flash_messages_logic.test.t
 
 #### Kibana FTR tests
 
-FTR configs for stateful search solution are listed in `.buildkite/ftr_search_stateful_configs.yml`, the main set of functional tests for this plugin are in the [x-pack/solutions/search/test/functional_search](../../../../test/functional_search/) suite of tests.
+FTR configs for stateful search solution are listed in `.buildkite/ftr-manifests/ftr_search_stateful_configs.yml`, the main set of functional tests for this plugin are in the [x-pack/solutions/search/test/functional_search](../../../../test/functional_search/) suite of tests.
 
 These can be run from the root of the Kibana folder with the following command:
 

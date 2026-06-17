@@ -6,7 +6,14 @@
  */
 
 import React, { useMemo, useCallback, useState } from 'react';
-import { EuiPopover, EuiContextMenu, EuiButtonIcon, EuiButton, EuiIcon } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonIcon,
+  EuiContextMenu,
+  EuiIcon,
+  EuiPopover,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { EuiContextMenuPanelDescriptor, IconType, EuiIconProps } from '@elastic/eui';
 
@@ -116,7 +123,7 @@ export const HierarchicalActionsMenu: React.FC<HierarchicalActionsMenuProps> = (
           return {
             name: item.name,
             icon: item.icon ? (
-              <EuiIcon type={item.icon} size="m" color={item.iconColor} />
+              <EuiIcon type={item.icon} size="m" color={item.iconColor} aria-hidden={true} />
             ) : undefined,
             disabled: item.disabled,
             panel: itemPath,
@@ -127,7 +134,7 @@ export const HierarchicalActionsMenu: React.FC<HierarchicalActionsMenuProps> = (
         return {
           name: item.name,
           icon: item.icon ? (
-            <EuiIcon type={item.icon} size="m" color={item.iconColor} />
+            <EuiIcon type={item.icon} size="m" color={item.iconColor} aria-hidden={true} />
           ) : undefined,
           disabled: item.disabled,
           onClick: (event: React.MouseEvent) => {
@@ -186,14 +193,21 @@ export const HierarchicalActionsMenu: React.FC<HierarchicalActionsMenuProps> = (
       {button.children}
     </EuiButton>
   ) : (
-    <EuiButtonIcon
-      iconType="boxesVertical"
-      onClick={toggleMenu}
-      aria-label={i18n.translate('xpack.fleet.hierarchicalMenu.openMenuAriaLabel', {
+    <EuiToolTip
+      content={i18n.translate('xpack.fleet.hierarchicalMenu.openMenuAriaLabel', {
         defaultMessage: 'Open menu',
       })}
-      data-test-subj={dataTestSubj || 'hierarchicalMenuButton'}
-    />
+      disableScreenReaderOutput
+    >
+      <EuiButtonIcon
+        iconType="boxesVertical"
+        onClick={toggleMenu}
+        aria-label={i18n.translate('xpack.fleet.hierarchicalMenu.openMenuAriaLabel', {
+          defaultMessage: 'Open menu',
+        })}
+        data-test-subj={dataTestSubj || 'hierarchicalMenuButton'}
+      />
+    </EuiToolTip>
   );
 
   return (

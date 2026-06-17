@@ -6,9 +6,9 @@
  */
 
 import path from 'node:path';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { z } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
+import { buildStrictRouteValidationWithZod } from '../utils/build_strict_route_validation';
 import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../../common';
 import { RESOLUTION_ENTITY_STORE_PERMISSIONS } from '../../constants';
 import type { EntityStorePluginRouter } from '../../../types';
@@ -39,7 +39,9 @@ export function registerResolutionLink(router: EntityStorePluginRouter) {
       access: 'public',
       summary: 'Link entities',
       description:
-        'Link one or more entities to a target entity, creating a resolution group. Requires an enterprise license.',
+        'Link one or more entities to a target entity, creating a resolution group. ' +
+        'Changes become visible on subsequent reads after the next index refresh ' +
+        '(typically <1s). Requires an enterprise license.',
       options: {
         tags: ['oas-tag:Security entity store'],
       },
@@ -53,7 +55,7 @@ export function registerResolutionLink(router: EntityStorePluginRouter) {
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            body: buildRouteValidationWithZod(bodySchema),
+            body: buildStrictRouteValidationWithZod(bodySchema),
           },
         },
         options: {
@@ -69,7 +71,8 @@ export function registerResolutionLink(router: EntityStorePluginRouter) {
           try {
             const result = await resolutionClient.linkEntities(
               req.body.target_id,
-              req.body.entity_ids
+              req.body.entity_ids,
+              { awaitVisibility: true }
             );
 
             return res.ok({ body: result });

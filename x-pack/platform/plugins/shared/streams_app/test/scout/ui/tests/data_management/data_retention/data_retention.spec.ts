@@ -262,7 +262,10 @@ test.describe(
         await page.getByTestId('downsamplingPhase-1h-label').click();
         await page.getByTestId('downsamplingPopover-step1-removeButton').click();
 
-        await expect(page.getByTestId('downsamplingBar-label')).toHaveCount(0);
+        await expect(page.getByTestId('downsamplingBar-emptyLabel')).toBeVisible();
+        await expect(page.getByTestId('downsamplingBar-emptyLabel')).toContainText(
+          'No downsampling'
+        );
       } finally {
         await cleanupTsdbResources({ esClient, templateName, streamName });
       }

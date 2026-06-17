@@ -1,6 +1,118 @@
 {
-  "sha1": "64003e2957c03f8d61d1908399ddf7038fdb30c9",
+  "sha1": "dd314c748e3fce5aa782de0bca383531025b046e",
   "tests": [
+    {
+      "id": "23fa02f46a56f43-4512d1a251a937e",
+      "title": "Agent Builder — agents ACL API non-owner gets 404 on a Private agent until granted",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_acl_api.spec.ts",
+        "line": 223,
+        "column": 10
+      }
+    },
+    {
+      "id": "23fa02f46a56f43-b539fc98b2a96fa",
+      "title": "Agent Builder — agents ACL API GET /agents/{id} redacts acl.entries for non-managers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_acl_api.spec.ts",
+        "line": 264,
+        "column": 10
+      }
+    },
+    {
+      "id": "23fa02f46a56f43-45fb1940d294f6d",
+      "title": "Agent Builder — agents ACL API GET /agents/{id}/acl returns can_manage and redacts entries for non-managers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_acl_api.spec.ts",
+        "line": 292,
+        "column": 10
+      }
+    },
+    {
+      "id": "23fa02f46a56f43-b20de015f475d9a",
+      "title": "Agent Builder — agents ACL API PUT /agents/{id}/acl gates on write access (User → 404, Editor → 200)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_acl_api.spec.ts",
+        "line": 322,
+        "column": 10
+      }
+    },
+    {
+      "id": "23fa02f46a56f43-d9a1b949866e89a",
+      "title": "Agent Builder — agents ACL API PUT /agents/{id}/acl rejects callers without manageAgents (403)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_acl_api.spec.ts",
+        "line": 344,
+        "column": 10
+      }
+    },
+    {
+      "id": "23fa02f46a56f43-d2168f01973b14c",
+      "title": "Agent Builder — agents ACL API PUT /acl on the default agent returns 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_acl_api.spec.ts",
+        "line": 357,
+        "column": 10
+      }
+    },
+    {
+      "id": "23fa02f46a56f43-d31f223e0dbf85c",
+      "title": "Agent Builder — agents ACL API cluster admin can read a Private agent they are not in the ACL of",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_acl_api.spec.ts",
+        "line": 371,
+        "column": 10
+      }
+    },
+    {
+      "id": "23fa02f46a56f43-d310e0b65173d25",
+      "title": "Agent Builder — agents ACL API /_suggest_user_profiles requires manageAgents (reader gets 403)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_acl_api.spec.ts",
+        "line": 386,
+        "column": 10
+      }
+    },
     {
       "id": "bff1cb9c45e581b-d652b9eb526a6ea",
       "title": "Agent Builder — agents API POST /api/agent_builder/agents creates agent",
@@ -1267,13 +1379,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/sml_api.spec.ts",
-        "line": 89,
+        "line": 90,
         "column": 10
       }
     },
     {
-      "id": "1b65711126013c6-97dacc2fc7b0e11",
-      "title": "Agent Builder — SML internal API POST /internal/agent_builder/sml/_search wildcard returns expected item fields",
+      "id": "1b65711126013c6-db0d1ab812dd7f2",
+      "title": "Agent Builder — SML internal API POST /internal/agent_builder/sml/_search wildcard returns item fields",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -1282,20 +1394,6 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/sml_api.spec.ts",
         "line": 105,
-        "column": 10
-      }
-    },
-    {
-      "id": "1b65711126013c6-730fa95c6745993",
-      "title": "Agent Builder — SML internal API POST /internal/agent_builder/sml/_search omits content when skip_content is true",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/sml_api.spec.ts",
-        "line": 128,
         "column": 10
       }
     },
@@ -1309,7 +1407,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/sml_api.spec.ts",
-        "line": 145,
+        "line": 125,
         "column": 10
       }
     },
@@ -1323,7 +1421,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/sml_api.spec.ts",
-        "line": 154,
+        "line": 134,
         "column": 10
       }
     },
@@ -1337,7 +1435,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/sml_api.spec.ts",
-        "line": 174,
+        "line": 154,
         "column": 10
       }
     },

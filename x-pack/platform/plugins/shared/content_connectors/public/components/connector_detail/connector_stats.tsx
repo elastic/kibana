@@ -22,6 +22,7 @@ import {
   EuiSplitPanel,
   EuiText,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -183,7 +184,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
             >
               {connectorDefinition && connectorDefinition.iconPath && (
                 <EuiFlexItem grow={false}>
-                  <EuiIcon type={connectorDefinition.iconPath} size="xl" />
+                  <EuiIcon type={connectorDefinition.iconPath} size="xl" aria-hidden={true} />
                 </EuiFlexItem>
               )}
               <EuiFlexItem>
@@ -216,18 +217,28 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
                   <EuiFlexItem grow={false}>
                     <EuiCopy textToCopy={connector.id}>
                       {(copy) => (
-                        <EuiButtonIcon
-                          onClick={copy}
-                          color="text"
-                          iconType="copy"
-                          aria-label={i18n.translate(
+                        <EuiToolTip
+                          content={i18n.translate(
                             'xpack.contentConnectors.connectorStats.copyConnectorIdButton',
                             {
                               defaultMessage: 'Copy Connector ID',
                             }
                           )}
-                          data-test-subj="copyConnectorIdButton"
-                        />
+                          disableScreenReaderOutput
+                        >
+                          <EuiButtonIcon
+                            onClick={copy}
+                            color="text"
+                            iconType="copy"
+                            aria-label={i18n.translate(
+                              'xpack.contentConnectors.connectorStats.copyConnectorIdButton',
+                              {
+                                defaultMessage: 'Copy Connector ID',
+                              }
+                            )}
+                            data-test-subj="copyConnectorIdButton"
+                          />
+                        </EuiToolTip>
                       )}
                     </EuiCopy>
                   </EuiFlexItem>
@@ -309,7 +320,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
               <EuiFlexItem>
                 <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
                   <EuiFlexItem grow={false}>
-                    <EuiIcon type="documents" />
+                    <EuiIcon type="documents" aria-hidden={true} />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiText size="s">

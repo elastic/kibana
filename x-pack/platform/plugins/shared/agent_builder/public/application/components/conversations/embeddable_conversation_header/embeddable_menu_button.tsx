@@ -8,6 +8,8 @@
 import React, { useState } from 'react';
 import { EuiButtonIcon, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { ConversationsPopoverView } from './conversations_popover_view';
 import { AgentsPopoverView } from './agents_popover_view';
 
@@ -35,6 +37,11 @@ export const EmbeddableMenuButton: React.FC = () => {
       size="m"
       onClick={() => setIsPopoverOpen((v) => !v)}
       data-test-subj="agentBuilderEmbeddableMenuButton"
+      {...getEbtProps({
+        element: AGENT_BUILDER_UI_EBT.element.pageContent,
+        action: AGENT_BUILDER_UI_EBT.action.conversation.OPEN_EMBEDDABLE_MENU,
+        detail: 'conversation',
+      })}
     />
   );
 
