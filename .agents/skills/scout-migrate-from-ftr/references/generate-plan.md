@@ -81,7 +81,7 @@ For each archive, data fixture, or setup pattern found:
 3. **Classify setup timing**: can data be loaded once (shared across all tests) or does each test need fresh data?
 4. **Flag fresh-server tests**: tests that require a completely clean ES/Kibana state (candidates for a dedicated server config)
 5. **Catalog UI settings mutations**: list every `kibanaServer.uiSettings.replace`, `uiSettings.update`, `uiSettings.delete` call, which tests use them, and whether they use replace-all semantics (wipes all settings) vs selective set
-6. **Catalog repeated magic values**: archive paths, index names, time ranges, saved object IDs that appear in multiple files. These are candidates for a shared constants file.
+6. **Catalog repeated magic values**: archive paths, index names, time ranges, saved object IDs that appear in multiple files. These are candidates for a shared constants file. Never propose constants for deployment tags; they are always used inline.
 
 ### 6. Auth and roles
 

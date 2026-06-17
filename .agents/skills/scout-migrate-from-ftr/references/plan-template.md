@@ -107,7 +107,7 @@ Files that test multiple roles or unrelated flows and should become separate spe
 | `kibanaServer.uiSettings.replace({...})` | Wipes all settings, then sets new values | `index.ts:15` |
 | `kibanaServer.uiSettings.update({timepicker: ...})` | Merges into existing settings | `time_filter.ts:8` |
 
-### Shared constants to extract
+### Shared constants to extract (omit if empty)
 
 Values that appear in ≥2 files and should live in a shared constants file:
 
