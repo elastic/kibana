@@ -1053,6 +1053,7 @@
     "@kbn/security-api-key-management": "link:x-pack/platform/packages/shared/security/api_key_management",
     "@kbn/security-authorization-core": "link:x-pack/platform/packages/private/security/authorization_core",
     "@kbn/security-authorization-core-common": "link:x-pack/platform/packages/private/security/authorization_core_common",
+    "@kbn/security-evals-rule-data-snapshot": "link:x-pack/solutions/security/packages/kbn-security-evals-rule-data-snapshot",
     "@kbn/security-form-components": "link:x-pack/platform/packages/shared/security/form_components",
     "@kbn/security-hardening": "link:src/platform/packages/shared/kbn-security-hardening",
     "@kbn/security-plugin": "link:x-pack/platform/plugins/shared/security",
