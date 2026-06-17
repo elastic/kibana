@@ -27,7 +27,7 @@ export const ROLE_DESCRIPTION: Record<AgentAccessControlRole, string> = {
   [AgentAccessControlRole.Editor]: i18n.translate(
     'xpack.agentBuilder.acl.role.editor.description',
     {
-      defaultMessage: 'User + edit configuration.',
+      defaultMessage: 'User + edit configuration and direct access to people.',
     }
   ),
   [AgentAccessControlRole.Manager]: i18n.translate(
