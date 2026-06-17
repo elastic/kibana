@@ -243,7 +243,9 @@ export const Snowflake: ConnectorSpec = {
       },
       {
         type: 'bearer',
-        label: 'Programmatic access token (PAT)',
+        label: i18n.translate('core.kibanaConnectorSpecs.snowflake.auth.bearer.label', {
+          defaultMessage: 'Programmatic access token (PAT)',
+        }),
         defaults: {},
         overrides: {
           meta: {

@@ -72,7 +72,9 @@ export const JiraConnector: ConnectorSpec = {
       },
       {
         type: 'basic',
-        label: 'Shared API key',
+        label: i18n.translate('core.kibanaConnectorSpecs.jira.auth.basic.label', {
+          defaultMessage: 'Shared API key',
+        }),
         warn: true,
         defaults: {},
         overrides: {
