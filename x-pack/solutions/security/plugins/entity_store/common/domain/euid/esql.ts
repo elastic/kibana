@@ -40,10 +40,6 @@ import {
   type SourceMatchSpec,
 } from './field_evaluations';
 
-// ---------------------------------------------------------------------------
-// Helpers for the optimized pipeline (getEuidEsqlEvaluationParts)
-// ---------------------------------------------------------------------------
-
 /**
  * Collects the set of unique identity fields across all branches of an euidRanking.
  * Single-field branches (ranking.length === 1, single EuidField) are skipped because
@@ -209,13 +205,75 @@ function buildRankingCaseEsql(
 }
 
 /**
- * Builds the ESQL EVAL expression for a single field evaluation (e.g. mapping event.module / data_stream.dataset to entity.namespace).
+ * Builds a COALESCE of single-arm CASE expressions to pick the first non-null/non-empty
+ * source variable. Each CASE(src IS NOT NULL AND src != "", src) is a CaseEagerEvaluator
+ * (vectorised), unlike the multi-arm CASE it replaces (CaseLazyEvaluator, per-row).
+ */
+function buildSourcePickerEsql(sourceVariablesBaseName: string, count: number): string {
+  const arms = Array.from({ length: count }, (_, i) => {
+    const v = `${sourceVariablesBaseName}${i}`;
+    return `CASE(${v} IS NOT NULL AND ${v} != "", ${v})`;
+  });
+  return `COALESCE(${arms.join(', ')})`;
+}
+
+/**
+ * Builds the destination field expression as a COALESCE of single-arm CASEs so every CASE
+ * evaluates via CaseEagerEvaluator (vectorised):
  *
- * - Source values: each source is read with MV_FIRST so multi-value fields are supported; firstChunkOfField sources use SPLIT then MV_FIRST.
- * - Multiple sources: each is assigned to a variable (_src_<dest>0, _src_<dest>1, ...), then an effective source is the first non-null, non-empty variable (CASE).
- * - Destination: one CASE over `whenClauses` in order (sourceMatch arms, then condition arms), then null/empty → fallbackValue, else effective source.
+ * - `sourceMatchesAny` arms: `CASE(COALESCE(src IN ("a","b"), FALSE), "mapped")`.
+ * - Condition arms: `CASE(COALESCE(precomputed_bool_col, FALSE), "mapped")` — the caller must
+ *   have already emitted `precomputed_bool_col = (condition)` as a preceding assignment.
+ * - Fallback: `CASE(src IS NULL OR src == "", fallback)`.
+ * - Pass-through: bare `src` as final COALESCE arm.
  *
- * Returns a comma-separated list of EVAL assignments (one or more lines).
+ * Returns the expression string and any condition-column precomputes needed.
+ */
+function buildDestinationFieldEsql(
+  effectiveSourceName: string,
+  destBase: string,
+  fallbackExpression: string,
+  whenClauses: FieldEvaluation['whenClauses']
+): { expression: string; conditionPrecomputes: Array<{ colName: string; esql: string }> } {
+  const conditionPrecomputes: Array<{ colName: string; esql: string }> = [];
+
+  if (whenClauses.length === 0) {
+    return {
+      expression: `CASE(${effectiveSourceName} IS NULL OR ${effectiveSourceName} == "", ${fallbackExpression}, ${effectiveSourceName})`,
+      conditionPrecomputes,
+    };
+  }
+
+  const coalesceArms: string[] = [];
+  for (const [i, clause] of whenClauses.entries()) {
+    let condition: string;
+    if ('sourceMatchesAny' in clause) {
+      const inList = clause.sourceMatchesAny.map((v) => `"${escapeEsqlString(v)}"`).join(', ');
+      condition = `COALESCE(${effectiveSourceName} IN (${inList}), FALSE)`;
+    } else {
+      const colName = `${destBase}_arm${i}`;
+      conditionPrecomputes.push({ colName, esql: conditionToESQL(clause.condition) });
+      condition = `COALESCE(${colName}, FALSE)`;
+    }
+    coalesceArms.push(`CASE(${condition}, "${escapeEsqlString(clause.then)}")`);
+  }
+  coalesceArms.push(
+    `CASE(${effectiveSourceName} IS NULL OR ${effectiveSourceName} == "", ${fallbackExpression})`
+  );
+  coalesceArms.push(effectiveSourceName);
+
+  return { expression: `COALESCE(${coalesceArms.join(', ')})`, conditionPrecomputes };
+}
+
+/**
+ * Builds EVAL assignments for a single field evaluation (e.g. entity.namespace from event.module).
+ *
+ * Replaces all multi-arm CASE expressions with COALESCE of single-arm CASEs so every CASE
+ * operand is a plain Attribute — enabling CaseEagerEvaluator (vectorised) instead of
+ * CaseLazyEvaluator (per-row). See {@link buildSourcePickerEsql} and
+ * {@link buildDestinationFieldEsql} for the transformation details.
+ *
+ * Returns a comma-separated list of EVAL assignments (may include condition-precompute columns).
  */
 function buildOneFieldEvaluationEsql(evaluation: FieldEvaluation): string {
   const { destination, sources, fallbackValue, whenClauses } = evaluation;
@@ -224,26 +282,7 @@ function buildOneFieldEvaluationEsql(evaluation: FieldEvaluation): string {
   const effectiveSourceName = sourceVariablesBaseName;
   const fallbackExpression =
     fallbackValue === null ? 'NULL' : `"${escapeEsqlString(fallbackValue)}"`;
-
-  const destinationCaseParts: string[] = [];
-  for (const clause of whenClauses) {
-    if ('sourceMatchesAny' in clause) {
-      const conditions = clause.sourceMatchesAny
-        .map((v) => `${effectiveSourceName} == "${escapeEsqlString(v)}"`)
-        .join(' OR ');
-      destinationCaseParts.push(`(${conditions}), "${escapeEsqlString(clause.then)}"`);
-    } else {
-      destinationCaseParts.push(
-        `(${conditionToESQL(clause.condition)}), "${escapeEsqlString(clause.then)}"`
-      );
-    }
-  }
-  destinationCaseParts.push(
-    `(${effectiveSourceName} IS NULL OR ${effectiveSourceName} == ""), ${fallbackExpression}`
-  );
-  destinationCaseParts.push(effectiveSourceName);
-
-  const destinationCaseExpr = `CASE(${destinationCaseParts.join(', ')})`;
+  const destBase = `_eval_${destination.replace(/\./g, '_')}`;
 
   const assignments: string[] = [];
 
@@ -253,15 +292,24 @@ function buildOneFieldEvaluationEsql(evaluation: FieldEvaluation): string {
     for (let i = 0; i < sourceExpressions.length; i++) {
       assignments.push(`${sourceVariablesBaseName}${i} = ${sourceExpressions[i]}`);
     }
-    const sourceVarCaseParts = sourceExpressions.flatMap((_, i) => {
-      const v = `${sourceVariablesBaseName}${i}`;
-      return [`(${v} IS NOT NULL AND ${v} != "")`, v];
-    });
-    sourceVarCaseParts.push('NULL');
-    assignments.push(`${effectiveSourceName} = CASE(${sourceVarCaseParts.join(', ')})`);
+    assignments.push(
+      `${effectiveSourceName} = ${buildSourcePickerEsql(
+        sourceVariablesBaseName,
+        sourceExpressions.length
+      )}`
+    );
   }
 
-  assignments.push(`${destination} = ${destinationCaseExpr}`);
+  const { expression: destinationExpr, conditionPrecomputes } = buildDestinationFieldEsql(
+    effectiveSourceName,
+    destBase,
+    fallbackExpression,
+    whenClauses
+  );
+  for (const { colName, esql } of conditionPrecomputes) {
+    assignments.push(`${colName} = (${esql})`);
+  }
+  assignments.push(`${destination} = ${destinationExpr}`);
 
   return assignments.join(',\n ');
 }
@@ -405,14 +453,29 @@ export function getEuidEsqlEvaluation(
   if (!hasConditionalBranch && branches.length === 1) {
     idLogic = buildRankingCaseEsql(branches[0].ranking, presentOrNullAliases);
   } else {
-    const branchCaseParts: string[] = [];
-    for (const branch of branches) {
-      const rankingCase = buildRankingCaseEsql(branch.ranking, presentOrNullAliases);
-      branchCaseParts.push(
-        branch.when ? `(${conditionToESQL(branch.when)}), ${rankingCase}` : `true, ${rankingCase}`
+    // Pre-compute each branch's condition (when present) and ranking formula as named columns
+    // so the final CASE operands are plain Attributes → CaseEagerEvaluator (vectorised).
+    // Without pre-computing the formula, CASE(Attribute[bool], CONCAT(...)) still triggers
+    // CaseLazyEvaluator because the value expression is complex (not a simple Attribute).
+    //
+    // Composition uses a single multi-arm CASE rather than COALESCE(branch_0, branch_1, …)
+    // to preserve first-matched-branch-wins semantics: when a matched branch's formula is NULL
+    // we should NOT fall through to the next branch (matching memory.ts / dsl.ts / kql.ts).
+    const caseParts: string[] = [];
+    for (const [i, branch] of branches.entries()) {
+      const formulaVar = `_euid_branch_${i}_formula`;
+      assignments.push(
+        `${formulaVar} = ${buildRankingCaseEsql(branch.ranking, presentOrNullAliases)}`
       );
+      if (branch.when) {
+        const condVar = `_euid_branch_${i}_cond`;
+        assignments.push(`${condVar} = (${conditionToESQL(branch.when)})`);
+        caseParts.push(`${condVar}, ${formulaVar}`);
+      } else {
+        caseParts.push(`TRUE, ${formulaVar}`);
+      }
     }
-    idLogic = branchCaseParts.length > 0 ? `CASE(${branchCaseParts.join(',\n')}, NULL)` : 'NULL';
+    idLogic = `CASE(${caseParts.join(',\n')}, NULL)`;
   }
 
   assignments.push(

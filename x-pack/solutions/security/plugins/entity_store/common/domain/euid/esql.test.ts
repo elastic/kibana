@@ -229,9 +229,11 @@ describe('getFieldEvaluationsEsql', () => {
       expect(result).toContain('_src_entity_source0 = MV_FIRST(TO_STRING(event.module))');
       expect(result).toContain('_src_entity_source1 = MV_FIRST(TO_STRING(event.dataset))');
       expect(result).toContain('_src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset))');
-      expect(result).toContain('_src_entity_source = CASE(');
+      // Multi-source picker uses COALESCE of single-arm CaseEagerEvaluators
+      expect(result).toContain('_src_entity_source = COALESCE(');
+      // entity.source has no whenClauses → 2-arm CASE (already CaseEagerEvaluator)
       expect(result).toContain('entity.source = CASE(');
-      expect(result).toContain('NULL, _src_entity_source)');
+      expect(result).toContain('_src_entity_source)');
     }
   );
 
@@ -239,6 +241,7 @@ describe('getFieldEvaluationsEsql', () => {
     const result = getFieldEvaluationsEsqlFromDefinition(getEntityDefinition('user', 'default'));
 
     expect(result).toBeDefined();
+    // entity.source has no whenClauses → 2-arm CASE (already CaseEagerEvaluator)
     expect(result).toContain('entity.source = CASE(');
     // entity.namespace is now emitted by getEuidEsqlEvaluation, not here
     expect(result).not.toContain('entity.namespace');
@@ -248,7 +251,8 @@ describe('getFieldEvaluationsEsql', () => {
   it('getEuidEsqlEvaluation includes entity.namespace for user', () => {
     const result = getEuidEsqlEvaluation('user', 'entity.id');
 
-    expect(result).toContain('entity.namespace = CASE(');
+    // Destination now uses COALESCE of single-arm CaseEagerEvaluators
+    expect(result).toContain('entity.namespace = COALESCE(');
     expect(result).toContain('_src_entity_namespace');
     expect(result).toContain('"local"');
     expect(result).toContain('"unknown"');
