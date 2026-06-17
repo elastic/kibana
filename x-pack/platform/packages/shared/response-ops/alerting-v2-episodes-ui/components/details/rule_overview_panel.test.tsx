@@ -16,7 +16,7 @@ const mockRule = {
   enabled: true,
   kind: 'signal',
   metadata: { name: 'My rule' },
-  evaluation: { query: { base: 'FROM logs-* | WHERE foo=1' } },
+  query: { format: 'standalone', breach: { query: 'FROM logs-* | WHERE foo=1' } },
 } as unknown as RuleResponse;
 
 const alertRule = { ...mockRule, kind: 'alert' } as unknown as RuleResponse;

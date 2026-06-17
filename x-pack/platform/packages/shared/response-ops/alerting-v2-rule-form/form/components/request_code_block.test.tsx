@@ -16,7 +16,7 @@ describe('RequestCodeBlock', () => {
   const formValues = {
     ...defaultTestFormValues,
     metadata: { name: 'Test rule', enabled: true },
-    evaluation: { query: { base: 'FROM logs-* | STATS count = COUNT(*)' } },
+    query: { breach: 'FROM logs-* | STATS count = COUNT(*)' },
   };
 
   it('renders create request with POST method and correct path', () => {
@@ -47,7 +47,7 @@ describe('RequestCodeBlock', () => {
     expect(content).toContain('"kind"');
     expect(content).toContain('"metadata"');
     expect(content).toContain('"schedule"');
-    expect(content).toContain('"evaluation"');
+    expect(content).toContain('"query"');
   });
 
   it('renders update body without kind field', () => {
