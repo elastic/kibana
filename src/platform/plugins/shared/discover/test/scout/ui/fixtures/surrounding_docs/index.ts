@@ -46,7 +46,6 @@ export {
   addFilters,
   addPinnedFilter,
   everyFieldMatches,
-  expectFiltersToExist,
   loginAndGoToDiscover,
   navigateToFirstDocContext,
   resolveDataViewId,
