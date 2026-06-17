@@ -35,6 +35,7 @@ import type {
   WorkflowsPublicPluginStartDependencies,
   WorkflowsServices,
 } from './types';
+import { registerWorkflowManagementSteps } from './workflows';
 import { getWorkflowsAppDeepLinks } from './workflows_app_deep_links';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { stepSchemas } from '../common/step_schemas';
@@ -71,6 +72,8 @@ export class WorkflowsPlugin
     core: CoreSetup<WorkflowsPublicPluginStartDependencies, WorkflowsPublicPluginStart>,
     plugins: WorkflowsPublicPluginSetupDependencies
   ): WorkflowsPublicPluginSetup {
+    registerWorkflowManagementSteps(plugins.workflowsExtensions);
+
     // Initialize telemetry service
     this.telemetryService.setup({ analytics: core.analytics });
 

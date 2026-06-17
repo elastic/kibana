@@ -201,6 +201,12 @@ export const WaitForInputStepInputSchema = z
     schema: JsonModelSchema.optional().describe(
       'JSON Schema describing the expected input payload. Used for validation, autocomplete, and default values in the resume UI'
     ),
+    externalResumeApiKeyId: z
+      .string()
+      .optional()
+      .describe(
+        'API key id from a workflows.publicApiAccess step output. Binds external resume requests to this waitForInput pause.'
+      ),
   })
   .optional();
 export const WaitForInputStepSchema = BaseStepSchema.extend({

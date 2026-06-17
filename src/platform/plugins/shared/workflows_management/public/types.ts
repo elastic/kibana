@@ -25,7 +25,10 @@ import type {
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { WorkflowsExtensionsPublicPluginStart } from '@kbn/workflows-extensions/public';
+import type {
+  WorkflowsExtensionsPublicPluginSetup,
+  WorkflowsExtensionsPublicPluginStart,
+} from '@kbn/workflows-extensions/public';
 import type {
   AvailabilityService,
   ServerlessTierRequiredProducts,
@@ -38,6 +41,7 @@ export interface WorkflowsPublicPluginSetup {}
 
 export interface WorkflowsPublicPluginSetupDependencies {
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
+  workflowsExtensions: WorkflowsExtensionsPublicPluginSetup;
 }
 
 export interface WorkflowsPublicPluginStart {

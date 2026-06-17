@@ -1,0 +1,47 @@
+name: External HITL approval demo
+description: Mint an external resume URL, notify via Slack, then pause on waitForInput.
+enabled: true
+tags: [demo, external-hitl]
+
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        slackChannel:
+          type: string
+          default: '#one-workflows-playground'
+
+steps:
+  - name: mint-public-access
+    type: workflows.publicApiAccess
+    with:
+      ttl: 1h
+
+  - name: notify-slack
+    type: slack
+    connector-id: slack
+    with:
+      message: |
+        Workflow approval required.
+        <{{ steps.mint-public-access.output.resumeUrl }}&approved=true&comment=Approved|Approve>
+        <{{ steps.mint-public-access.output.resumeUrl }}&approved=false&comment=Declined|Decline>
+ 
+  - name: request-approval
+    type: waitForInput
+    with:
+      message: Approve this workflow run from an external link.
+      externalResumeApiKeyId: '{{ steps.mint-public-access.output.apiKeyId }}'
+      schema:
+        properties:
+          approved:
+            type: boolean
+          comment:
+            type: string
+        required:
+          - approved
+
+  - name: record-response
+    type: data.set
+    with:
+      approved: '{{ steps.request-approval.output.approved }}'
+      comment: '{{ steps.request-approval.output.comment }}'

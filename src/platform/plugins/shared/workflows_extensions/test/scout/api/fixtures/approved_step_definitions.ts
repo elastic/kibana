@@ -193,6 +193,10 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; definitionHash: stri
     definitionHash: '6773f5c609999c0e8da36397dc1243aa94c2392a1f00ca2f084fd4d1fd2235e2',
   },
   {
+    id: 'workflows.publicApiAccess',
+    definitionHash: 'f50346b6b4f1fa5e087456baf0360b34304e33198b23980c4214496ff6834b54',
+  },
+  {
     id: 'search.rerank',
     definitionHash: '9e032776f7f7342dd252eee237e17a89adf5185f515d4fa890560bb8a42d4601',
   },

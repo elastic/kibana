@@ -42,6 +42,11 @@ export interface ResumeWorkflowExecutionResponse {
   resumedBy: string;
 }
 
+export interface ResumeWorkflowExecutionOptions {
+  resumedBy?: string;
+  resumedAt?: string;
+}
+
 export interface WorkflowsExecutionEnginePluginSetup {
   // No setup contract exposed yet. Extend this interface when other plugins need to configure the engine during setup.
   [key: string]: unknown;
@@ -114,7 +119,8 @@ export type ResumeWorkflowExecution = (
   executionId: string,
   spaceId: string,
   input: Record<string, unknown>,
-  request: KibanaRequest
+  request: KibanaRequest,
+  options?: ResumeWorkflowExecutionOptions
 ) => Promise<ResumeWorkflowExecutionResponse>;
 
 export type InternalResumeWorkflowExecution = (

@@ -38,6 +38,7 @@ import type {
   WorkflowsServerPluginStartDeps,
 } from './types';
 import { registerUISettings } from './ui_settings';
+import { registerWorkflowManagementSteps } from './workflows';
 import { stepSchemas } from '../common/step_schemas';
 
 export class WorkflowsPlugin
@@ -92,6 +93,7 @@ export class WorkflowsPlugin
     plugins.workflowsExtensions.registerManagedWorkflowsSystemApiProvider(
       createManagedWorkflowsSystemApiProvider(workflowsService, this.config, this.logger)
     );
+    registerWorkflowManagementSteps(plugins.workflowsExtensions);
 
     const spaces = plugins.spaces.spacesService;
 
