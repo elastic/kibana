@@ -12,6 +12,7 @@ import { EuiResizeObserver } from '@elastic/eui';
 import { UnifiedTabs, type UnifiedTabsProps } from '@kbn/unified-tabs';
 import { i18n } from '@kbn/i18n';
 import { AppMenuComponent } from '@kbn/core-chrome-app-menu-components';
+import { AppHeader } from '@kbn/app-header';
 import { MAX_DISCOVER_SESSION_TABS } from '@kbn/saved-search-plugin/common';
 import { ChromeAppHeader, useIsChromeNextProjectHeader } from '../chrome_app_header';
 import { SingleTabView, type SingleTabViewProps } from '../single_tab_view';

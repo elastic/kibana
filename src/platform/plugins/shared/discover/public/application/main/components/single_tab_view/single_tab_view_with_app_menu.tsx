@@ -14,6 +14,10 @@ import { SingleTabView, type SingleTabViewProps } from '.';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useTopNavMenuItems } from '../top_nav/use_top_nav_menu_items';
 
+export interface SingleTabViewWithAppMenuProps extends SingleTabViewProps {
+  headerTitle: string;
+}
+
 export const SingleTabViewWithAppMenu = (props: SingleTabViewProps) => {
   const { chrome } = useDiscoverServices();
   const topNavMenuItems = useTopNavMenuItems();
