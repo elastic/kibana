@@ -1997,7 +1997,6 @@ x-pack/platform/plugins/shared/streams/common/sig_events_tuning_config.ts @elast
 /src/platform/plugins/shared/discover/test/scout/ui/fixtures/traces_experience/ @elastic/obs-exploration-team
 /src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/ @elastic/obs-exploration-team
 /src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/ @elastic/obs-exploration-team
-/src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/global.setup.ts @elastic/obs-exploration-team
 /x-pack/performance/journeys_e2e/metrics_* @elastic/obs-exploration-team
 /x-pack/performance/utils/metrics_experience_setup.ts @elastic/obs-exploration-team
  # obs-onboarding-team
