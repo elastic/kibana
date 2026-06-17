@@ -72,6 +72,13 @@ describe('mapRuleHistoryItem', () => {
     expect(item.metadata).toEqual({ reason: 'ui edit', extra: { key: 1 } });
   });
 
+  it('normalizes metadata bulkCount to bulk_count', () => {
+    const item = mapRuleHistoryItem(
+      buildHistoryDoc({}, { metadata: { bulkCount: 3, reason: 'bulk op' } })
+    );
+    expect(item.metadata).toEqual({ bulk_count: 3, reason: 'bulk op' });
+  });
+
   const buildRule = (overrides: Partial<Rule<RuleParams>> = {}): Rule<RuleParams> => ({
     id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
     name: 'Rule',

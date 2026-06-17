@@ -41,7 +41,7 @@ export function useInfiniteChangeHistory({ ruleId }: UseInfiniteChangeHistoryArg
     {
       staleTime: ONE_MINUTE,
       getNextPageParam: (lastPage) => {
-        const totalLoaded = lastPage.page * lastPage.perPage;
+        const totalLoaded = lastPage.page * lastPage.per_page;
         return totalLoaded < lastPage.total ? lastPage.page + 1 : undefined;
       },
       onError: (error) => {

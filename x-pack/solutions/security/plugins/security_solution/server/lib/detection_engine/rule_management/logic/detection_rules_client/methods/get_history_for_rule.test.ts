@@ -97,7 +97,7 @@ describe('getHistoryForRule', () => {
       perPage: 2,
     });
 
-    expect(result).toMatchObject({ page: 3, perPage: 2, total: 3 });
+    expect(result).toMatchObject({ page: 3, per_page: 2, total: 3 });
     expect(result.items).toHaveLength(2);
   });
 

@@ -49,13 +49,13 @@ paths:
                 type: object
                 required:
                   - page
-                  - perPage
+                  - per_page
                   - total
                   - items
                 properties:
                   page:
                     type: integer
-                  perPage:
+                  per_page:
                     type: integer
                   total:
                     type: integer

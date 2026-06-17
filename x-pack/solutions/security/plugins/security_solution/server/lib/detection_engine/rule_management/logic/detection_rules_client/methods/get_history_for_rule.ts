@@ -59,7 +59,7 @@ export const getHistoryForRule = async ({
 
   return {
     page,
-    perPage,
+    per_page: perPage,
     total: result.total,
     tracking_started_at: oldestResult.items[0]?.['@timestamp'],
     items: resultItems,
