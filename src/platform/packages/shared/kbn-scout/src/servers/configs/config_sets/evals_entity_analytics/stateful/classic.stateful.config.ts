@@ -25,6 +25,11 @@ export const servers: ScoutServerConfig = {
       '--xpack.actions.responseTimeout=120s',
       '--feature_flags.overrides.aiAssistant.aiAgents.enabled=true',
       `--uiSettings.overrides.agentBuilder:experimentalFeatures=true`,
+      // Entity Store V2 is now enabled by default (since #269976). The v1 evals
+      // use the legacy risk engine APIs (/internal/risk_score/engine/init) which
+      // return 400 when V2 is active. Explicitly disable V2 for these evals.
+      `--uiSettings.overrides.securitySolution:entityStoreEnableV2=false`,
+      `--xpack.securitySolution.enableExperimental=["disable:entityAnalyticsEntityStoreV2"]`,
     ],
   },
 };
