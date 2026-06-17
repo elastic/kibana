@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { createExpandableFlyoutApiMock } from '../../../../../../common/mock/expandable_flyout';
 
 import { AttackDiscoveryTab } from '.';
 import type { Replacements } from '@kbn/elastic-assistant-common';
@@ -17,6 +19,17 @@ import { SECURITY_FEATURE_ID } from '../../../../../../../common';
 import { useKibana } from '../../../../../../common/lib/kibana';
 
 jest.mock('../../../../../../common/lib/kibana');
+jest.mock('@kbn/expandable-flyout');
+
+jest.mock(
+  '../../../attack_discovery_markdown_formatter/field_markdown_renderer/use_entity_euid_from_alerts',
+  () => ({
+    useEntityEuidFromAlerts: jest.fn(() => ({ euid: undefined, isLoading: false })),
+    ENTITY_TYPE_BY_FIELD: jest.requireActual(
+      '../../../attack_discovery_markdown_formatter/field_markdown_renderer/helpers'
+    ).ENTITY_TYPE_BY_FIELD,
+  })
+);
 
 describe('AttackDiscoveryTab', () => {
   const mockReplacements: Replacements = {
@@ -25,6 +38,19 @@ describe('AttackDiscoveryTab', () => {
     'c5ba13c4-2391-4045-962e-ec965fc1eb06': 'SRVWIN07',
     '2da30969-4127-4ddb-ba0c-2d8ac44d15d7': 'Administrator',
   };
+
+  const mockOpenRightPanel = jest.fn();
+  const mockUseExpandableFlyoutApi = useExpandableFlyoutApi as jest.MockedFunction<
+    typeof useExpandableFlyoutApi
+  >;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseExpandableFlyoutApi.mockReturnValue({
+      ...createExpandableFlyoutApiMock(),
+      openRightPanel: mockOpenRightPanel,
+    });
+  });
 
   describe('when showAnonymized is false', () => {
     const showAnonymized = false;
@@ -61,6 +87,12 @@ describe('AttackDiscoveryTab', () => {
       );
       expect(screen.getAllByTestId('entityButton')[0]).toHaveTextContent('foo.hostname');
       expect(screen.getAllByTestId('entityButton')[1]).toHaveTextContent('bar.username');
+    });
+
+    it('opens the right panel when an entity badge is clicked', () => {
+      const entityButton = screen.getAllByTestId('entityButton')[0];
+      fireEvent.click(entityButton);
+      expect(mockOpenRightPanel).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -206,6 +238,11 @@ The user Administrator opened a malicious Microsoft Word document (C:\\Program F
     beforeEach(() => {
       (useKibana as jest.Mock).mockReturnValue({
         services: {
+          data: {
+            search: {
+              search: jest.fn().mockReturnValue({ toPromise: jest.fn().mockResolvedValue({}) }),
+            },
+          },
           application: {
             capabilities: {
               [SECURITY_FEATURE_ID]: {
